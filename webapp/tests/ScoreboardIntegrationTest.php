@@ -13,7 +13,9 @@ use App\Entity\Rejudging;
 use App\Entity\Submission;
 use App\Entity\Team;
 use App\Entity\TeamCategory;
+use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
+use App\Service\EventLogService;
 use App\Service\ScoreboardService;
 use App\Utils\Scoreboard\Scoreboard;
 use App\Utils\Scoreboard\SingleTeamScoreboard;
@@ -21,6 +23,7 @@ use App\Utils\Scoreboard\ScoreboardMatrixItem;
 use App\Utils\Scoreboard\TeamScore;
 use App\Utils\Utils;
 
+use Psr\Log\LoggerInterface;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
@@ -44,6 +47,16 @@ class ScoreboardIntegrationTest extends KernelTestCase
      * @var \Doctrine\ORM\EntityManager
      */
     private $em;
+
+    /**
+     * @var \App\Service\ConfigurationService|MockObject
+     */
+    private $config;
+
+    /**
+     * @var array
+     */
+    private $configValues;
 
     /**
      * @var App\Entity\Contest
@@ -74,17 +87,28 @@ class ScoreboardIntegrationTest extends KernelTestCase
     {
         self::bootKernel();
 
-        $this->dj = self::$container->get(DOMJudgeService::class);
-        $this->ss = self::$container->get(ScoreboardService::class);
-        $this->em = self::$container->get('doctrine')->getManager();
+        // Default configuration values:
+        $this->configValues = [
+            'verification_required' => false,
+            'compile_penalty'       => false,
+            'penalty_time'          => 20,
+            'score_in_seconds'      => false,
+            'data_source'           => 0,
+        ];
 
-        // Reset scoring related config to default.
-        $config = $this->em->getRepository(Configuration::class);
-        $config->findOneBy(['name' => 'verification_required'])->setValue(false);
-        $config->findOneBy(['name' => 'penalty_time'])->setValue(20);
-        $config->findOneBy(['name' => 'compile_penalty'])->setValue(false);
-        $config->findOneBy(['name' => 'score_in_seconds'])->setValue(false);
-        $config->findOneBy(['name' => 'data_source'])->setValue(0);
+        $this->config = $this->createMock(ConfigurationService::class);
+        $this->config->expects($this->any())
+            ->method('get')
+            ->with($this->isType('string'))
+            ->will($this->returnCallback([$this, 'getConfig']));
+
+        $this->dj = self::$container->get(DOMJudgeService::class);
+        $this->em = self::$container->get('doctrine')->getManager();
+        $this->ss = new ScoreboardService(
+            $this->em, $this->dj, $this->config,
+            self::$container->get(LoggerInterface::class),
+            self::$container->get(EventLogService::class)
+        );
 
         // Create a contest, problems and teams for which to test the
         // scoreboard. These get deleted again in tearDown().
@@ -308,9 +332,7 @@ class ScoreboardIntegrationTest extends KernelTestCase
         $this->createSubmission($lang, $this->problems[0], $team, 53*60+15.054, 'wrong-answer', true);
         $this->createSubmission($lang, $this->problems[1], $team, 59*60+59.999, 'correct');
 
-        // FIXME: use ConfigureService mock once merged.
-        $config = $this->em->getRepository(Configuration::class);
-        $config->findOneBy(['name' => 'verification_required'])->setValue(true);
+        $this->setConfig('verification_required', true);
 
         $this->em->flush();
 
@@ -329,9 +351,6 @@ class ScoreboardIntegrationTest extends KernelTestCase
                 $this->assertFTSMatch($expected_fts, $scoreboard);
             }
         }
-
-        $config->findOneBy(['name' => 'verification_required'])->setValue(false);
-        $this->em->flush();
     }
 
     public function testFTSwithQueuedRejudging()
@@ -480,5 +499,19 @@ class ScoreboardIntegrationTest extends KernelTestCase
         $this->em->flush();
 
         return $submission;
+    }
+
+    function setConfig(string $name, $value)
+    {
+        $this->configValues[$name] = $value;
+    }
+
+    function getConfig(string $name)
+    {
+        if ( !in_array($name, $this->configValues) ) {
+            throw new \Exception("No configuration value set for '$name'");
+        }
+
+        return $this->configValues[$name];
     }
 }
