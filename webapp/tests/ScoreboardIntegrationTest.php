@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Tests\Utils\Scoreboard;
+namespace Tests;
 
 use App\Entity\Configuration;
 use App\Entity\Contest;
