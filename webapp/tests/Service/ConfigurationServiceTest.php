@@ -13,7 +13,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Yaml\Yaml;
 
-class ScoreboardServiceTest extends KernelTestCase
+class ConfigurationServiceTest extends KernelTestCase
 {
     /**
      * @var EntityManagerInterface|MockObject
