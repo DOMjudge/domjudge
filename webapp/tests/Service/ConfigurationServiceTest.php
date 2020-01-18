@@ -3,11 +3,14 @@
 namespace Tests\Service;
 
 use App\Entity\Configuration;
+use App\Entity\Executable;
+use App\Entity\TeamCategory;
 use App\Service\ConfigurationService;
 use Doctrine\Common\Persistence\ObjectRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Generator;
+use PHPUnit\Framework\MockObject\Builder\InvocationMocker;
 use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
@@ -24,6 +27,11 @@ class ConfigurationServiceTest extends KernelTestCase
      * @var ObjectRepository|MockObject
      */
     private $configRepository;
+
+    /**
+     * @var InvocationMocker
+     */
+    private $emGetRepositoryExpects;
 
     /**
      * @var LoggerInterface|MockObject
@@ -47,14 +55,14 @@ class ConfigurationServiceTest extends KernelTestCase
     {
         self::bootKernel();
 
-        $this->em               = $this->createMock(EntityManagerInterface::class);
-        $this->configRepository = $this->createMock(ObjectRepository::class);
-        $this->em->expects($this->any())
+        $this->em                     = $this->createMock(EntityManagerInterface::class);
+        $this->configRepository       = $this->createMock(ObjectRepository::class);
+        $this->emGetRepositoryExpects = $this->em->expects($this->any())
             ->method('getRepository')
             ->with(Configuration::class)
             ->willReturn($this->configRepository);
-        $this->logger = $this->createMock(LoggerInterface::class);
-        $this->config = new ConfigurationService(
+        $this->logger                 = $this->createMock(LoggerInterface::class);
+        $this->config                 = new ConfigurationService(
             $this->em, $this->logger,
             self::$container->get('config_cache_factory'),
             self::$container->getParameter('kernel.debug'),
@@ -316,6 +324,86 @@ class ConfigurationServiceTest extends KernelTestCase
         $all = $this->config->all(true);
         $this->assertArrayNotHasKey('unknown1', $all);
         $this->assertArrayNotHasKey('unknown2', $all);
+    }
+
+    /**
+     * @dataProvider provideAddOptionsExecutables
+     *
+     * @param string $item
+     *
+     * @throws Exception
+     */
+    public function testAddOptionsExecutables(string $item)
+    {
+        $executables = [
+            (new Executable())
+                ->setExecid('exec1')
+                ->setDescription('Descr 1'),
+            (new Executable())
+                ->setExecid('exec2')
+                ->setDescription('Descr 2')
+        ];
+
+        $execRepository = $this->createMock(ObjectRepository::class);
+
+        $this->emGetRepositoryExpects->getMatcher()->setParametersMatcher(null);
+        $this->emGetRepositoryExpects
+            ->with(Executable::class)
+            ->willReturn($execRepository);
+
+        $execRepository->expects($this->once())
+            ->method('findAll')
+            ->willReturn($executables);
+
+        $spec = $this->config->getConfigSpecification()[$item];
+        $this->assertArrayNotHasKey('options', $spec);
+        $spec = $this->config->addOptions($spec);
+
+        $expected = [
+            'exec1' => 'Descr 1',
+            'exec2' => 'Descr 2',
+        ];
+        $this->assertSame($expected, $spec['options']);
+    }
+
+    public function provideAddOptionsExecutables()
+    {
+        yield ['default_compare'];
+        yield ['default_run'];
+    }
+
+    /**
+     * @dataProvider provideAddOptionsResults
+     *
+     * @param string $item
+     *
+     * @throws Exception
+     */
+    public function testAddOptionsResults(string $item)
+    {
+        $verdictOptions = ['' => ''];
+        $verdictsConfig      = self::$container->getParameter('domjudge.etcdir') . '/verdicts.php';
+        $verdicts            = include $verdictsConfig;
+        foreach (array_keys($verdicts) as $verdict) {
+            $verdictOptions[$verdict] = $verdict;
+        }
+
+        $spec = $this->config->getConfigSpecification()[$item];
+        $this->assertArrayNotHasKey('options', $spec);
+        $spec = $this->config->addOptions($spec);
+
+        $this->assertSame($verdictOptions, $spec['key_options']);
+        if ($item === 'results_remap') {
+            $this->assertSame($verdictOptions, $spec['value_options']);
+        } else {
+            $this->assertArrayNotHasKey('value_options', $spec);
+        }
+    }
+
+    public function provideAddOptionsResults()
+    {
+        yield ['results_prio'];
+        yield ['results_remap'];
     }
 
     /**

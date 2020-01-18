@@ -103,6 +103,10 @@ class ConfigController extends AbstractController
     public function indexAction(EventLogService $eventLogService, Request $request)
     {
         $specs = $this->config->getConfigSpecification();
+        foreach ($specs as &$spec) {
+            $spec = $this->config->addOptions($spec);
+        }
+        unset($spec);
         /** @var Configuration[] $options */
         $options = $this->em->createQueryBuilder()
             ->from(Configuration::class, 'c',  'c.name')
@@ -126,10 +130,17 @@ class ConfigController extends AbstractController
                     $optionIsNew = true;
                 }
                 if (!$request->request->has('config_' . $specName)) {
-                    // Special-case bool, since checkboxes don't return a
-                    // value when unset.
-                    if ( $spec['type'] != 'bool' ) continue;
-                    $val = false;
+                    if ($spec['type'] == 'bool') {
+                        // Special-case bool, since checkboxes don't return a
+                        // value when unset.
+                        $val = false;
+                    } elseif ($spec['type'] == 'array_val' && isset($spec['options'])) {
+                        // Special-case array_val with options, since multiselects
+                        // don't return a value when unset.
+                        $val = [];
+                    } else {
+                        continue;
+                    }
                 } else {
                     $val = $request->request->get('config_' . $specName);
                 }
@@ -217,6 +228,9 @@ class ConfigController extends AbstractController
                         $options[$specName]->getValue() :
                         $spec['default_value'],
                     'description' => $spec['description'],
+                    'options' => $spec['options'] ?? null,
+                    'key_options' => $spec['key_options'] ?? null,
+                    'value_options' => $spec['value_options'] ?? null,
                 ];
             }
             $allData[] = [

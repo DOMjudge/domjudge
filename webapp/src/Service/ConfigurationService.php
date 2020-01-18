@@ -4,6 +4,8 @@ namespace App\Service;
 
 use App\Config\Loader\YamlConfigLoader;
 use App\Entity\Configuration;
+use App\Entity\Executable;
+use App\Entity\TeamCategory;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Psr\Log\LoggerInterface;
@@ -128,7 +130,9 @@ class ConfigurationService
                 );
             }
             // $result[$name] exists iff it should be visible.
-            if (isset($result[$name])) $result[$name] = $value;
+            if (isset($result[$name])) {
+                $result[$name] = $value;
+            }
         }
 
         return $result;
@@ -194,5 +198,41 @@ EOF;
         }
 
         return $this->dbConfigCache;
+    }
+
+    /**
+     * Add options to some items
+     *
+     * This method is used to add predefined options that need to be loaded
+     * from the database to certain items.
+     *
+     * @param array $item
+     *
+     * @return array
+     */
+    public function addOptions(array $item): array
+    {
+        switch ($item['name']) {
+            case 'default_compare':
+            case 'default_run':
+                $executables     = $this->em->getRepository(Executable::class)->findAll();
+                $item['options'] = [];
+                foreach ($executables as $executable) {
+                    $item['options'][$executable->getExecid()] = $executable->getDescription();
+                }
+                break;
+            case 'results_prio':
+            case 'results_remap':
+                $verdictsConfig      = $this->etcDir . '/verdicts.php';
+                $verdicts            = include $verdictsConfig;
+                $item['key_options'] = ['' => ''];
+                foreach (array_keys($verdicts) as $verdict) {
+                    $item['key_options'][$verdict] = $verdict;
+                }
+                if ($item['name'] === 'results_remap') {
+                    $item['value_options'] = $item['key_options'];
+                }
+        }
+        return $item;
     }
 }
