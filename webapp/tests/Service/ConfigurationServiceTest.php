@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Service;
+namespace Tests\Service;
 
 use App\Entity\Configuration;
 use App\Service\ConfigurationService;
