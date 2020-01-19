@@ -975,8 +975,8 @@ class Utils
 
         $rescale   = $thumbMaxSize / max($info[0], $info[1]);
         $thumbsize = array(
-            (int)round($info[0] * $rescale),
-            (int)round($info[1] * $rescale)
+            (int)max(round($info[0] * $rescale), 1),
+            (int)max(round($info[1] * $rescale), 1),
         );
 
         $orig  = imagecreatefromstring($image);
