@@ -4,6 +4,8 @@ namespace App\Controller\Jury;
 
 use App\Service\ConfigurationService;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query\Expr\Join;
 use App\Controller\BaseController;
 use App\Entity\ExternalJudgement;
@@ -12,7 +14,9 @@ use App\Entity\Submission;
 use App\Service\DOMJudgeService;
 use App\Service\SubmissionService;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -63,6 +67,11 @@ class ShadowDifferencesController extends BaseController
 
     /**
      * @Route("", name="jury_shadow_differences")
+     * @param Request $request
+     *
+     * @return RedirectResponse|Response
+     * @throws NoResultException
+     * @throws NonUniqueResultException
      */
     public function indexAction(Request $request)
     {
@@ -82,6 +91,10 @@ class ShadowDifferencesController extends BaseController
         $contest        = $this->dj->getCurrentContest();
         $verdictsConfig = $this->dj->getDomjudgeEtcDir() . '/verdicts.php';
         $verdicts       = array_merge(['judging' => 'JU'], include $verdictsConfig);
+
+        if (!$contest) {
+            return $this->render('jury/shadow_differences.html.twig');
+        }
 
         $used         = [];
         $verdictTable = [];
