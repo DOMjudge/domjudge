@@ -1356,7 +1356,7 @@ class ImportEventFeedCommand extends Command
                         return;
                     }
                     file_put_contents($tmpSubmissionFile, $content);
-                    $filesToSubmit[] = new UploadedFile($tmpSubmissionFile, $filename, null, null,
+                    $filesToSubmit[] = new UploadedFile($tmpSubmissionFile, $filename, null,
                                                         null, true);
                 }
 
