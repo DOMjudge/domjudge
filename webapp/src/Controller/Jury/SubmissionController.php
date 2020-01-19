@@ -816,7 +816,7 @@ class SubmissionController extends BaseController
                     throw new ServiceUnavailableHttpException(null, "Could not create temporary file.");
                 }
                 file_put_contents($tmpfname, $submittedData['source' . $file->getRank()]);
-                $filesToSubmit[] = new UploadedFile($tmpfname, $file->getFilename(), null, null, null, true);
+                $filesToSubmit[] = new UploadedFile($tmpfname, $file->getFilename(), null, null, true);
             }
 
             $team = $this->dj->getUser()->getTeam();
