@@ -26,6 +26,7 @@ use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Id\AssignedGenerator;
 use Doctrine\ORM\Mapping\ClassMetadata;
+use Doctrine\ORM\NonUniqueResultException;
 use Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
@@ -33,6 +34,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\HttpClient\Exception\TransportException;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
@@ -202,7 +204,7 @@ class ImportEventFeedCommand extends Command
             ->addArgument(
                 'contest-id',
                 InputArgument::REQUIRED,
-                'Database ID of the contest to import into'
+                'API ID of the contest to import into'
             )
             ->addArgument(
                 'feed-url',
@@ -236,7 +238,14 @@ class ImportEventFeedCommand extends Command
 
     /**
      * @inheritdoc
-     * @throws Exception
+     *
+     * @param InputInterface  $input
+     * @param OutputInterface $output
+     *
+     * @return int
+     *
+     * @throws TransportExceptionInterface
+     * @throws NonUniqueResultException
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
@@ -246,6 +255,10 @@ class ImportEventFeedCommand extends Command
         if (!$this->debug) {
             $this->em->getConnection()->getConfiguration()->setSQLLogger(null);
         }
+
+        // Set the verobosity level to very verbose, to always get info and
+        // notice messages, but never debug ones
+        $output->setVerbosity(OutputInterface::VERBOSITY_VERY_VERBOSE);
 
         pcntl_signal(SIGTERM, [$this, 'stopCommand']);
         pcntl_signal(SIGINT, [$this, 'stopCommand']);
@@ -267,7 +280,9 @@ class ImportEventFeedCommand extends Command
             }
         }
 
-        $contest = $this->em->getRepository(Contest::class)->find($input->getArgument('contest-id'));
+        $contestIdField = $this->eventLogService->externalIdFieldForEntity(Contest::class) ?? 'cid';
+        $contest        = $this->em->getRepository(Contest::class)
+            ->findOneBy([$contestIdField => $input->getArgument('contest-id')]);
         if (!$contest) {
             $this->logger->error(
                 'Contest with ID %s not found, exiting.',
@@ -485,20 +500,27 @@ class ImportEventFeedCommand extends Command
             while (true) {
                 // A timeout of 0.0 means we get chunks immediately and the user
                 // can cancel at any time.
-                foreach ($client->stream($response, 0.0) as $chunk) {
-                    // We first need to check for timeouts, as we can not call
-                    // ->isLast() or ->getContent() on them
-                    if (!$chunk->isTimeout()) {
-                        if ($chunk->isLast()) {
-                            // Last chunk received, exit out of the inner while(true)
-                            break 2;
-                        } else {
-                            $buffer .= $chunk->getContent();
+                try {
+                    foreach ($client->stream($response, 0.0) as $chunk) {
+                        // We first need to check for timeouts, as we can not call
+                        // ->isLast() or ->getContent() on them
+                        if (!$chunk->isTimeout()) {
+                            if ($chunk->isLast()) {
+                                // Last chunk received, exit out of the inner while(true)
+                                break 2;
+                            } else {
+                                $buffer .= $chunk->getContent();
+                            }
+                        }
+                        if (!$processBuffer()) {
+                            return;
                         }
                     }
-                    if (!$processBuffer()) {
-                        return;
-                    }
+                } catch (TransportException $e) {
+                    $this->logger->error(
+                        'Recceived error while reading event feed: %s',
+                        [ $e->getMessage() ]
+                    );
                 }
             }
 
@@ -540,6 +562,9 @@ class ImportEventFeedCommand extends Command
             case 'team-members':
             case 'state':
                 $this->logger->debug("Ignoring event of type %s", [ $event['type'] ]);
+                if (isset($event['data']['end_of_updates'])) {
+                    $this->logger->info('End of updates encountered');
+                }
                 break;
             case 'contests':
                 $this->importContest($event);
@@ -665,9 +690,17 @@ class ImportEventFeedCommand extends Command
         }
 
         // Also update the penalty time
-        /** @var Configuration $penaltyTimeConfig */
-        $penaltyTimeConfig = $this->em->getRepository(Configuration::class)->findOneBy(['name' => 'penalty_time']);
-        $penaltyTimeConfig->setValue((int)$event['data']['penalty_time']);
+        $penaltyTime = (int)$event['data']['penalty_time'];
+        if ($this->config->get('penalty_time') != $penaltyTime) {
+            /** @var Configuration $penaltyTimeConfig */
+            $penaltyTimeConfig = $this->em->getRepository(Configuration::class)->findOneBy(['name' => 'penalty_time']);
+            if (!$penaltyTimeConfig) {
+                $penaltyTimeConfig = new Configuration();
+                $penaltyTimeConfig->setName('penalty_time');
+                $this->em->persist($penaltyTimeConfig);
+            }
+            $penaltyTimeConfig->setValue((int)$event['data']['penalty_time']);
+        }
 
         // Save data and emit event
         $this->em->flush();
@@ -1157,8 +1190,11 @@ class ImportEventFeedCommand extends Command
 
     /**
      * Import the given submission event
+     *
      * @param array $event
+     *
      * @throws Exception
+     * @throws TransportExceptionInterface
      */
     protected function importSubmission(array $event)
     {
@@ -1379,9 +1415,10 @@ class ImportEventFeedCommand extends Command
                         return;
                     }
 
-                    $client = new Client();
+                    $client = HttpClient::create();
                     try {
-                        $response = $client->get($zipUrl, ['sink' => $zipFile]);
+                        $response = $client->request('GET', $zipUrl);
+                        $ziphandler = fopen($zipFile, 'w');
                         if ($response->getStatusCode() !== 200) {
                             // TODO: retry a couple of times
                             $this->logger->error(
@@ -1391,7 +1428,7 @@ class ImportEventFeedCommand extends Command
                             unlink($zipFile);
                             return;
                         }
-                    } catch (RequestException $e) {
+                    } catch (TransportExceptionInterface $e) {
                         $this->logger->error(
                             'Cannot download ZIP for submission %s: %s',
                             [ $submissionId, $e->getMessage() ]
@@ -1399,6 +1436,11 @@ class ImportEventFeedCommand extends Command
                         unlink($zipFile);
                         return;
                     }
+
+                    foreach ($client->stream($response) as $chunk) {
+                        fwrite($ziphandler, $chunk->getContent());
+                    }
+                    fclose($ziphandler);
                 }
 
                 // Open the ZIP file
@@ -1439,8 +1481,15 @@ class ImportEventFeedCommand extends Command
                 $contest    = $this->em->getRepository(Contest::class)->find($this->contestId);
                 $submission = $this->submissionService->submitSolution(
                     $team, $contestProblem, $contest, $language, $filesToSubmit,
-                    null, $entryPoint, $submissionId, $submitTime
+                    null, $entryPoint, $submissionId, $submitTime,
+                    $message
                 );
+                if (!$submission) {
+                    $this->logger->error(
+                        'Can not add submission %d: %s',
+                        [ $submissionId, $message ]
+                    );
+                }
 
                 // Clean up the ZIP
                 $zip->close();
@@ -1636,7 +1685,7 @@ class ImportEventFeedCommand extends Command
             ->select('t')
             ->andWhere('t.problem = :problem')
             ->andWhere('t.rank = :rank')
-            ->setParameter(':problem', $problem)
+            ->setParameter(':problem', $problem->getProblem())
             ->setParameter(':rank', $rank)
             ->getQuery()
             ->getSingleResult();

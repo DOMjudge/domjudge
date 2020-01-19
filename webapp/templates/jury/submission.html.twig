@@ -605,8 +605,6 @@
                     {% set runDone = false %}
                     {% if run is not null and run.firstJudgingRun is not null and run.firstJudgingRun.runresult is not null %}
                         {% set runDone = true %}
-                    {% elseif externalRun is not null and externalRun.firstExternalRun is not null and run.firstExternalRun.result is not null %}
-                        {% set runDone = true %}
                     {% endif %}
                     {% if not runDone %}
                         <p class="nodata">

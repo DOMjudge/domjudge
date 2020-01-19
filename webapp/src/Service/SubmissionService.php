@@ -500,7 +500,7 @@ class SubmissionService
             return null;
         }
 
-        $this->logger->info('input verified');
+        $this->logger->info('Submission input verified');
 
         // First look up any expected results in file, so as to minimize the
         // SQL transaction time below.

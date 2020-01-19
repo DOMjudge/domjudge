@@ -458,6 +458,7 @@ class ScoreboardService
             //   - or already judged to be correct (if it is judged but not correct,
             //     it is not a first to solve)
             // - or the submission is still queued for judgement (judgehost is NULL).
+            $verificationRequiredExtra = $verificationRequired ? 'OR j.verified = 0' : '';
             if ($useExternalJudgements) {
                 $firstToSolve = 0 == $this->em->getConnection()->fetchColumn('
                 SELECT count(*) FROM submission s
@@ -466,12 +467,12 @@ class ScoreboardService
                     LEFT JOIN team t USING(teamid)
                     LEFT JOIN team_category tc USING (categoryid)
                 WHERE s.valid = 1 AND
-                    (ej.result IS NULL OR ej.result = :correctResult %s) AND
+                    (ej.result IS NULL OR ej.result = :correctResult '.
+                    $verificationRequiredExtra.') AND
                     s.cid = :cid AND s.probid = :probid AND
                     tc.sortorder = :teamSortOrder AND
                     round(s.submittime,4) < :submitTime', $params);
             } else {
-                $verificationRequiredExtra = $verificationRequired ? 'OR j.verified = 0' : '';
                 $firstToSolve = 0 == $this->em->getConnection()->fetchColumn('
                 SELECT count(*) FROM submission s
                     LEFT JOIN judging j ON (s.submitid=j.submitid AND j.valid=1)
