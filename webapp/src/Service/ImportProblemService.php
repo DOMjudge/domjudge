@@ -616,7 +616,7 @@ class ImportProblemService
                                 sprintf("Could not write to temporary file '%s'.", $tempFileName)
                             );
                         }
-                        $filesToSubmit[] = new UploadedFile($tempFileName, $files[$k], null, null, null, true);
+                        $filesToSubmit[] = new UploadedFile($tempFileName, $files[$k], null, null, true);
                         $totalSize       += filesize($tempFileName);
                         $tempFiles[]     = $tempFileName;
                     }
