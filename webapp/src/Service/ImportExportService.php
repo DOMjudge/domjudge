@@ -187,27 +187,56 @@ class ImportExportService
 
         $penaltyTime = $data['penalty-time'] ?? $data['penalty'] ?? null;
         if ($penaltyTime !== null) {
-            $penaltyTimeConfiguration = $this->em->getRepository(Configuration::class)->findOneBy(['name' => 'penalty_time']);
-            $penaltyTimeConfiguration->setValue((int)$penaltyTime);
+            $currentPenaltyTime = $this->config->get('penalty_time');
+            if ($penaltyTime != $currentPenaltyTime) {
+                $penaltyTimeConfiguration = $this->em->getRepository(Configuration::class)->findOneBy(['name' => 'penalty_time']);
+                if (!$penaltyTimeConfiguration) {
+                    $penaltyTimeConfiguration = new Configuration();
+                    $penaltyTimeConfiguration->setName('penalty_time');
+                    $this->em->persist($penaltyTimeConfiguration);
+                }
+
+                $penaltyTimeConfiguration->setValue((int)$penaltyTime);
+            }
         }
 
         if (isset($data['default-clars'])) {
-            $clarificationAnswersConfiguration = $this->em->getRepository(Configuration::class)->findOneBy(['name' => 'clar_answers']);
-            $clarificationAnswersConfiguration->setValue($data['default-clars']);
+            $currentClarificationAnswersConfiguration = $this->config->get('clar_answers');
+            if ($currentClarificationAnswersConfiguration != $data['default-clars']) {
+                $clarificationAnswersConfiguration = $this->em->getRepository(Configuration::class)->findOneBy(['name' => 'clar_answers']);
+                if (!$clarificationAnswersConfiguration) {
+                    $clarificationAnswersConfiguration = new Configuration();
+                    $clarificationAnswersConfiguration->setName('clar_answers');
+                    $this->em->persist($clarificationAnswersConfiguration);
+                }
+                $clarificationAnswersConfiguration->setValue($data['default-clars']);
+            }
         }
 
         if (is_array($data['clar-categories'] ?? null)) {
-            $clarificationCategoriesConfiguration = $this->em->getRepository(Configuration::class)->findOneBy(['name' => 'clar_categories']);
-            $categories                           = [];
-            foreach ($data['clar-categories'] as $category) {
-                $categoryKey              = substr(
-                    str_replace([' ', ',', '.'], '-', strtolower($category)),
-                    0,
-                    9
-                );
-                $categories[$categoryKey] = $category;
+            $currentClarificationCategoriesConfiguration = $this->config->get('clar_categories');
+            if ($currentClarificationCategoriesConfiguration != $data['clar-categories']) {
+                $clarificationCategoriesConfiguration = $this->em->getRepository(Configuration::class)->findOneBy(['name' => 'clar_categories']);
+                if (!$clarificationCategoriesConfiguration) {
+                    $clarificationCategoriesConfiguration = new Configuration();
+                    $clarificationCategoriesConfiguration->setName('clar_categories');
+                    $this->em->persist($clarificationCategoriesConfiguration);
+                }
+                $categories                           = [];
+                foreach ($data['clar-categories'] as $category) {
+                    $categoryKey              = substr(
+                        str_replace(
+                            [' ', ',', '.'],
+                            '-',
+                            strtolower($category)
+                        ),
+                        0,
+                        9
+                    );
+                    $categories[$categoryKey] = $category;
+                }
+                $clarificationCategoriesConfiguration->setValue($categories);
             }
-            $clarificationCategoriesConfiguration->setValue($categories);
         }
 
         // We do not import language details, as there's very little to actually import
