@@ -134,7 +134,7 @@ class TeamController extends BaseController
             ->from(Team::class, 't', 't.teamid')
             ->leftJoin('t.users', 'u')
             ->select('t.teamid', 'u.last_ip_address', 'u.first_login')
-            ->groupBy('t.teamid')
+            ->groupBy('t.teamid', 'u.last_ip_address', 'u.first_login')
             ->getQuery()
             ->getResult();
 
