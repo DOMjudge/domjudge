@@ -157,7 +157,7 @@ class RejudgingService
                         ->find($submission['teamid']);
                     $problem = $this->em->getRepository(Problem::class)
                         ->find($submission['probid']);
-                    $scoreboardService->calculateScoreRow($contest, $team, $problem);
+                    $this->scoreboardService->calculateScoreRow($contest, $team, $problem);
                 }
             });
 
