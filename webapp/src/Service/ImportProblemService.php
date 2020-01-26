@@ -123,7 +123,8 @@ class ImportProblemService
         $contestProblemProperties = array_intersect_key($properties, array_flip($iniKeysContestProblem));
 
         // Set timelimit from alternative source:
-        if (!isset($problemProperties['timelimit']) && ($str = $zip->getFromName($tleFile)) !== false) {
+        if (!isset($problemProperties['timelimit']) &&
+            ($str = $zip->getFromName($tleFile)) !== false) {
             $problemProperties['timelimit'] = trim($str);
         }
 
@@ -131,7 +132,7 @@ class ImportProblemService
         // problem:name and contestproblem:shortname if these are not specified.
         $externalId = preg_replace('/[^a-zA-Z0-9-_]/', '', basename($clientName, '.zip'));
         if ((string)$externalId === '') {
-            throw new \InvalidArgumentException(sprintf("Could not extract an identifier from '%s'.", $clientName));
+            throw new InvalidArgumentException("Could not extract an identifier from '$clientName'.");
         }
 
         if (!array_key_exists('externalid', $problemProperties)) {
@@ -192,7 +193,8 @@ class ImportProblemService
                         ->setProblem($problem)
                         ->setContest($contest);
                 } else {
-                    // Don't overwrite the shortname for a contestproblem when it already exists
+                    // Don't overwrite the shortname for a contestproblem when
+                    // it already exists.
                     unset($contestProblemProperties['shortname']);
                 }
             }
@@ -209,7 +211,11 @@ class ImportProblemService
             $hasErrors = true;
             /** @var ConstraintViolationInterface $error */
             foreach ($errors as $error) {
-                $messages[] = sprintf('Error: problem.%s: %s', $error->getPropertyPath(), $error->getMessage());
+                $messages[] = sprintf(
+                    'Error: problem.%s: %s',
+                    $error->getPropertyPath(),
+                    $error->getMessage()
+                );
             }
         }
 
@@ -223,8 +229,11 @@ class ImportProblemService
                 $hasErrors = true;
                 /** @var ConstraintViolationInterface $error */
                 foreach ($errors as $error) {
-                    $messages[] = sprintf('Error: contestproblem.%s: %s', $error->getPropertyPath(),
-                                          $error->getMessage());
+                    $messages[] = sprintf(
+                        'Error: contestproblem.%s: %s',
+                        $error->getPropertyPath(),
+                        $error->getMessage()
+                    );
                 }
             }
         }
@@ -292,7 +301,9 @@ class ImportProblemService
                                                   $this->dj->getDomjudgeTmpDir(),
                                                   $dontcare, $retval);
                             if ($retval != 0) {
-                                throw new ServiceUnavailableHttpException(null, 'failed to create temporary directory');
+                                throw new ServiceUnavailableHttpException(
+                                    null, 'failed to create temporary directory'
+                                );
                             }
                             chmod($tmpzipfiledir, 0700);
                             foreach ($validatorFiles as $validatorFile) {
@@ -309,11 +320,12 @@ class ImportProblemService
                             exec("zip -r -j '$tmpzipfiledir/outputvalidator.zip' '$tmpzipfiledir'",
                                  $dontcare, $retval);
                             if ($retval != 0) {
-                                throw new ServiceUnavailableHttpException(null,
-                                    'failed to create zip file for output validator.');
+                                throw new ServiceUnavailableHttpException(
+                                    null, 'failed to create zip file for output validator.'
+                                );
                             }
 
-                            $outputValidatorZip  = file_get_contents(sprintf('%s/outputvalidator.zip', $tmpzipfiledir));
+                            $outputValidatorZip  = file_get_contents($tmpzipfiledir.'/outputvalidator.zip');
                             $outputValidatorName = substr($externalId, 0, 20) . '_cmp';
                             if ($this->em->getRepository(Executable::class)->find($outputValidatorName)) {
                                 // avoid name clash
@@ -342,7 +354,7 @@ class ImportProblemService
                                 $problem->setCompareExecutable($executable);
                             }
 
-                            $messages[] = sprintf("Added output validator '%s'", $outputValidatorName);
+                            $messages[] = "Added output validator '$outputValidatorName'";
                         }
                     }
                 }
@@ -371,7 +383,7 @@ class ImportProblemService
                     $problem
                         ->setProblemtext($text)
                         ->setProblemtextType($type);
-                    $messages[] = sprintf('Added problem statement from: <tt>%s</tt>', $filename);
+                    $messages[] = "Added problem statement from: <tt>$filename</tt>";
                     break;
                 }
             }
@@ -600,7 +612,7 @@ class ImportProblemService
                 $tmpDir = $this->dj->getDomjudgeTmpDir();
 
                 if (empty($languageToUse)) {
-                    $messages[] = sprintf('Could not add jury solution <tt>%s</tt>: unknown language.', $path);
+                    $messages[] = "Could not add jury solution <tt>$path</tt>: unknown language.";
                 } else {
                     $expectedResult = SubmissionService::normalizeExpectedResult($pathComponents[1]);
                     $results        = null;
@@ -658,7 +670,8 @@ class ImportProblemService
                             [
                                 'problem' => $problem,
                                 'contest' => $contest,
-                            ]);
+                            ]
+                        );
                         $submission     = $this->submissionService->submitSolution(
                             $team, $contestProblem, $contest, $languageToUse, $filesToSubmit,
                             null, $entry_point, null, null, $submissionMessage
@@ -673,10 +686,10 @@ class ImportProblemService
                         // Flush changes to submission
                         $this->em->flush();
 
-                        $messages[] = sprintf('Added jury solution from: <tt>%s</tt></li>', $path);
+                        $messages[] = "Added jury solution from: <tt>$path</tt></li>";
                         $numJurySolutions++;
                     } else {
-                        $messages[] = sprintf('Could not add jury solution <tt>%s</tt>: too large.', $path);
+                        $messages[] = "Could not add jury solution <tt>$path</tt>: too large.";
                     }
 
                     foreach ($tempFiles as $f) {
