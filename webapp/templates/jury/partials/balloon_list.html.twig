@@ -23,7 +23,7 @@
         <tbody>
         {%- for balloon in balloons %}
             <tr class="{% if balloon.data.done %}disabled{% endif %}"
-                data-affiliation-id="{{ balloon.data.affiliation }}"
+                data-affiliation-id="{{ balloon.data.affiliationid }}"
                 data-location-str="{{ balloon.data.location }}">
                 <td>
                 {%- if balloon.data.done -%}
