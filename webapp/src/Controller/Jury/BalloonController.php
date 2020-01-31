@@ -152,6 +152,7 @@ class BalloonController extends AbstractController
             $balloondata['teamid'] = $balloonsData['teamid'];
             $balloondata['location'] = $balloonsData['room'];
             $balloondata['affiliation'] = $balloonsData['affilshort'];
+            $balloondata['affiliationid'] = $balloonsData['affilid'];
             $balloondata['category'] = $balloonsData['catname'];
 
             ksort($TOTAL_BALLOONS[$balloonsData['teamid']]);
