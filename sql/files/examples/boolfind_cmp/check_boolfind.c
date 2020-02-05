@@ -47,8 +47,8 @@ int main(int argc, char **argv)
 		while ( i>=0 && line[i]=='\n' ) line[i--] = 0;
 
 		outputvalid = 1;
-		if ( strncmp(line,"OUTPUT ",7)!=0 ||
-		     strlen(line)<7 || line[7]=='0' ) outputvalid = 0;
+		if ( strncmp(line,"OUTPUT ",7)!=0 || strlen(line)==7 ||
+		     (strlen(line)>=9 && line[7]=='0') ) outputvalid = 0;
 
 		for(i=7; i<strlen(line); i++) {
 			if ( !isdigit(line[i]) ) {
