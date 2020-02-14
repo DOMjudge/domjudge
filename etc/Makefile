@@ -35,7 +35,7 @@ install-domserver:
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_etcdir) \
 		apache.conf nginx-conf nginx-conf-inner domserver-static.php domjudge-fpm.conf import-forwardfeed.yaml
 	$(INSTALL_PROG) -t $(DESTDIR)$(domserver_etcdir) \
-		gendbpasswords genrestapicredentials genadminpassword
+		genadminpassword gendbpasswords genrestapicredentials gensymfonysecret gen_all_secrets
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_etcdir) \
 		domserver-config.php common-config.php verdicts.php
 # Password files are installed from root Makefile.
