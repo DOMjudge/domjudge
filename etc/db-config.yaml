@@ -258,31 +258,6 @@
             options:
                 - ipaddress
                 - xheaders
-        -   name: allow_openid_auth
-            type: bool
-            default_value: false
-            public: true
-            description: Allow users to log in using OpenID.
-        -   name: openid_autocreate_team
-            type: bool
-            default_value: true
-            public: true
-            description: Create a team for each user that logs in with OpenID.
-        -   name: openid_provider
-            type: string
-            default_value: https://accounts.google.com
-            public: true
-            description: OpenID Provider URL.
-        -   name: openid_clientid
-            type: string
-            default_value: ""
-            public: false
-            description: OpenID Connect client id.
-        -   name: openid_clientsecret
-            type: string
-            default_value: ""
-            public: false
-            description: OpenID Connect client secret.
         -   name: ip_autologin
             type: bool
             default_value: false

@@ -192,10 +192,10 @@ class ConfigurationServiceTest extends KernelTestCase
 
         $this->assertSame($expectedValue, $this->config->get($itemName));
         // Also make sure it doesn't change other items by testing a different one
-        $openIdAuthItem = $this->findItem('Authentication', 'openid_provider');
+        $defaultCompareItem = $this->findItem('Judging', 'default_compare');
         $this->assertSame(
-            $openIdAuthItem['default_value'],
-            $this->config->get('openid_provider')
+            $defaultCompareItem['default_value'],
+            $this->config->get('default_compare')
         );
     }
 
@@ -229,9 +229,9 @@ class ConfigurationServiceTest extends KernelTestCase
         $all = $this->config->all();
         $this->assertSame($expectedValue, $all[$itemName]);
         // Also make sure it doesn't change other items by testing a different one
-        $openIdAuthItem = $this->findItem('Authentication', 'openid_provider');
+        $defaultCompareItem = $this->findItem('Judging', 'default_compare');
         $this->assertSame(
-            $openIdAuthItem['default_value'], $all['openid_provider']
+            $defaultCompareItem['default_value'], $all['default_compare']
         );
     }
 

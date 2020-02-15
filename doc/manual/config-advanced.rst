@@ -35,11 +35,15 @@ Authentication and registration
 -------------------------------
 Out of the box users are able to authenticate using username and password.
 
-Two other authentication methods are available:
+Two other native authentication methods are available:
 
 - IP Address - authenticates users based on the IP address they are accessing
   the system from;
 - X-Headers - authenticates users based on some HTTP header values.
+
+Besides this, DOMjudge can be configured with any provider that can set
+the environment variable ``REMOTE_USER`` to an existing username,
+for example LDAP, SAML, CAS or OpenID connect modules for Apache.
 
 There's an option to let teams register themselves in the system.
 
@@ -74,6 +78,32 @@ Squid configuration for this might look like::
   acl autologin url_regex ^http://localhost/domjudge/login
   request_header_add X-DOMjudge-Login "$USERNAME" autologin
   request_header_add X-DOMjudge-Pass "$BASE64_PASSWORD" autologin
+
+Using REMOTE-USER
+`````````````````
+DOMjudge supports generic authentiation by various existing providers that
+can authenticate a user and set the ``REMOTE_USER`` environment variable
+to the authenticated username.
+
+Examples of this are several Apache modules: mod LDAP, Shibboleth or
+Mod Mellon for SAML 2.0, mod Auth CAS, mod OpenID Connect, or mod Kerb for
+Kerberos.
+
+This does not currently allow for auto-provisioning or self-registration,
+the users must already exist in DOMjudge and their DOMjudge username must
+match what is in the ``REMOTE_USER`` variable.
+
+Set up the respective module to authenticate incoming users for the URL
+path of your installation. Then, in ``webapp/config/packages/security.yml``
+change the ``main`` section to look like this::
+
+  main:
+    pattern: ^/
+    remote_user:
+      provider: domjudge_db_provider
+
+You may need to remove the entire ``var/cache/prod/`` directory for the changes
+to take effect.
 
 Self-registration
 `````````````````
