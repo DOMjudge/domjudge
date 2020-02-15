@@ -396,8 +396,8 @@ echo ""
 echo "Run 'make' without arguments to get a list of (build) targets."
 echo ""
 if test "x$BASEURL_UNCONFIGURED" = x1 ; then
-   echo "Warning: base URL is unconfigured; the submit client, generating team"
-   echo "documentation and OpenID support will not work out of the box!"
+   echo "Warning: base URL is unconfigured; the submit client and generating"
+   echo "team documentation will not work out of the box!"
    echo "Rerun configure with option '--with-baseurl=BASEURL' to correct this."
    echo ""
 fi
