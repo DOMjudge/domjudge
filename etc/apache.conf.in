@@ -50,6 +50,8 @@ Alias /domjudge @domserver_webappdir@/public
 
 <Directory @domserver_webappdir@/public>
 Require all granted
+#When Apache <2.4:
+#Require all granted->Allow from all
 
 Options -MultiViews
 RewriteEngine On
