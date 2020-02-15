@@ -2,10 +2,10 @@ Overview
 ========
 
 DOMjudge is a system for running programming contests, like the ICPC
-regional and world championship programming contests.
+regional and world finals programming contests.
 
 This usually means that teams are on-site and have a fixed time period (mostly
-5 hours) and one computer to solve a number of problems (mostly 8-11). Problems
+5 hours) and one computer to solve a number of problems (mostly 8-12). Problems
 are solved by writing a program in one of the allowed languages, that reads
 input according to the problem input specification and writes the correct,
 corresponding output.

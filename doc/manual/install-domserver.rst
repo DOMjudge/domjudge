@@ -1,8 +1,9 @@
 Installation of the DOMserver
 =============================
 
-The DOMjudge server is the central entity that runs the DOMjudge web interface
-and API that teams, jury members and the judgehosts connect to.
+The DOMjudge server (short DOMserver) is the central entity that runs
+the DOMjudge web interface and API that teams, jury members and the
+judgehosts connect to.
 
 .. _domserver_requirements:
 
@@ -78,7 +79,7 @@ administrator access to it. Run::
   dj_setup_database [-u <mysql admin user>] [-p <password>|-r] install
 
 This first creates the DOMjudge database credentials file
-``etc/dbpasswords.secret``.
+``etc/dbpasswords.secret`` if it does not exist already.
 
 Then it creates the database and user and inserts some
 default/example data into the domjudge database. The option
