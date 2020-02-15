@@ -16,7 +16,7 @@ System requirements
   been tested with Debian and Ubuntu, but should work on other environments.
 * It is necessary that you have root access.
 * A TCP/IP network which connects the DOMserver and the judgehosts.
-  The machines only need HTTP(S) access to the DOMserver. 
+  The machines only need HTTP(S) access to the DOMserver.
 
 
 Software requirements
@@ -114,7 +114,7 @@ Linux Control Groups
 DOMjudge uses Linux Control Groups or *cgroups* for process isolation in
 the judgedaemon. Linux cgroups give more accurate measurement of
 actually allocated memory than traditional resource limits (which is
-helpful with interpreters like Java that reserve but not actually use
+helpful with interpreters like Java that reserve but do not actually use
 lots of memory). Also, cgroups are used to restrict network access so
 no separate measures are necessary, and they allow running
 :ref:`multiple judgedaemons <multiple-judgedaemons>`
