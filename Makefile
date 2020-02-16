@@ -250,7 +250,8 @@ maintainer-install: build domserver-create-dirs judgehost-create-dirs webapp/.en
 	@echo "        setfacl -R -m   u:$(DOMJUDGE_USER):rwx  $(CURDIR)/webapp/var"
 	@echo "    - Configure webserver"
 	@echo "        Apache 2:"
-	@echo "           ln -sf $(CURDIR)/etc/apache.conf /etc/apache2/conf-enabled/domjudge.conf"
+	@echo "           ln -sf $(CURDIR)/etc/apache.conf /etc/apache2/conf-available/domjudge.conf"
+	@echo "           a2enconf domjudge"
 	@echo "           a2enmod rewrite headers"
 	@echo "           systemctl restart apache2"
 	@echo "        Nginx + PHP-FPM:"
@@ -272,7 +273,8 @@ maintainer-postinstall-permissions:
 
 maintainer-postinstall-apache: maintainer-postinstall-permissions
 	@if [ ! -d "/etc/apache2/conf-enabled" ]; then echo "Couldn't find directory /etc/apache2/conf-enabled. Is apache installed?"; false; fi
-	ln -sf $(CURDIR)/etc/apache.conf /etc/apache2/conf-enabled/domjudge.conf
+	ln -sf $(CURDIR)/etc/apache.conf /etc/apache2/conf-available/domjudge.conf
+	a2enconf domjudge
 	a2enmod rewrite headers
 	systemctl restart apache2
 
