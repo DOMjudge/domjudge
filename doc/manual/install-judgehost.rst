@@ -30,15 +30,15 @@ For Debian (with some example compilers)::
 
   sudo apt install make sudo debootstrap libcgroup-dev lsof \
         php-cli php-curl php-json php-xml php-zip procps \
-        gcc g++ openjdk-8-jre-headless \
-        openjdk-8-jdk ghc fp-compiler
+        gcc g++ default-jre-headless default-jdk-headless \
+        ghc fp-compiler
 
 For RedHat::
 
   sudo yum install make sudo libcgroup-devel lsof \
         php-cli php-mbstring php-xml php-process procps-ng \
         gcc gcc-c++ glibc-static libstdc++-static \
-        java-1.8.0-openjdk-headless java-1.8.0-openjdk-devel \
+        java-11-openjdk-headless java-11-openjdk-devel \
         ghc-compiler fpc
 
 Building and installing
