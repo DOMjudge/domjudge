@@ -107,8 +107,10 @@ class AuditLogController extends AbstractController
             $data['what']['value'] = $datatype . " " . $dataid . " " .
                             $logline->getAction() . " " .
                             $logline->getExtraInfo();
-            if( !is_null($dataid) ) {
+            if (!is_null($dataid)) {
                 $dataurl = $this->generateDatatypeUrl($datatype, $dataid);
+            } else {
+                $dataurl = null;
             }
             if (isset($dataurl)) {
                 $data['what']['link'] = $dataurl;
