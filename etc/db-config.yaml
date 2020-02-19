@@ -77,7 +77,7 @@
             description: Maximum memory usage (in kB) by compile/compare scripts. This is a safeguard against malicious code and buggy script, so a reasonable but large amount should do.
         -   name: script_filesize_limit
             type: int
-            default_value: 540672
+            default_value: 2621440
             public: false
             description: Maximum filesize (in kB) compile/compare scripts may write. Submission will fail with compiler-error when trying to write more, so this should be greater than any *intermediate or final* result written by compilers.
         -   name: timelimit_overshoot
