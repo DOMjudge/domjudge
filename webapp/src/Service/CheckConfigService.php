@@ -304,7 +304,7 @@ class CheckConfigService
 
     public function checkScriptFilesizevsMemoryLimit()
     {
-        if ($this->config->get('script_filesize_limit') <
+        if ($this->config->get('script_filesize_limit') <=
             $this->config->get('memory_limit')) {
              $result = 'W';
         } else {
@@ -313,7 +313,11 @@ class CheckConfigService
         return ['caption' => 'Compile file size vs. memory limit',
                 'result' => $result,
                 'desc' => 'If the script filesize limit is lower than the memory limit, then ' .
-                    'compilation of sources that statically allocate memory may fail.'];
+                'compilation of sources that statically allocate memory may fail. We ' .
+                'recommend to include a margin to be on the safe side. The current ' .
+                '"script_filesize_limit" = ' . $this->config->get('script_filesize_limit') . ' ' .
+                'while "memory_limit" = ' . $this->config->get('memory_limit') . '.'
+            ];
     }
 
     public function checkDebugDisabled()
