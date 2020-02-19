@@ -11,6 +11,7 @@ use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use Doctrine\Common\Util\Inflector;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Mapping\MappingException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -100,6 +101,22 @@ abstract class BaseController extends AbstractController
                                       $contest->getCid());
             }
         }
+
+        // If we have no ID but we do have a Doctrine entity, automatically
+        // get the primary key if possible
+        if ($id === null) {
+            try {
+                $metadata = $entityManager->getClassMetadata($class);
+                if (count($metadata->getIdentifierColumnNames()) === 1) {
+                    $primaryKey = $metadata->getIdentifierColumnNames()[0];
+                    $accessor   = PropertyAccess::createPropertyAccessor();
+                    $id         = $accessor->getValue($entity, $primaryKey);
+                }
+            } catch (MappingException $e) {
+                // Entity is not actually a Doctrine entity, ignore
+            }
+        }
+
         $DOMJudgeService->auditlog($auditLogType, $id, $isNewEntity ? 'added' : 'updated');
     }
 
