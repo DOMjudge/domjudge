@@ -29,11 +29,11 @@ class UtilsScoreboardTest extends TestCase
         $teamB = new Team();
         $scoreA = new TeamScore($teamA);
         foreach([6, 367, 2, 100] as $time) {
-            $scoreA->addSolvetime($time);
+            $scoreA->solveTimes[] = $time;
         }
         $scoreB = new TeamScore($teamB);
         foreach([100, 6, 2, 367] as $time) {
-            $scoreB->addSolvetime($time);
+            $scoreB->solveTimes[] = $time;
         }
 
         $tie = Scoreboard::scoreTieBreaker($scoreA, $scoreB);
@@ -48,7 +48,7 @@ class UtilsScoreboardTest extends TestCase
         $teamB = new Team();
         $scoreA = new TeamScore($teamA);
         foreach([6, 367, 2, 100] as $time) {
-            $scoreA->addSolvetime($time);
+            $scoreA->solveTimes[] = $time;
         }
         $scoreB = new TeamScore($teamB);
 
@@ -64,11 +64,11 @@ class UtilsScoreboardTest extends TestCase
         $teamB = new Team();
         $scoreA = new TeamScore($teamA);
         foreach([6, 367, 2, 100] as $time) {
-            $scoreA->addSolvetime($time);
+            $scoreA->solveTimes[] = $time;
         }
         $scoreB = new TeamScore($teamB);
         foreach([23, 150, 367] as $time) {
-            $scoreB->addSolvetime($time);
+            $scoreB->solveTimes[] = $time;
         }
 
         $tie = Scoreboard::scoreTieBreaker($scoreA, $scoreB);
@@ -83,11 +83,11 @@ class UtilsScoreboardTest extends TestCase
         $teamB = new Team();
         $scoreA = new TeamScore($teamA);
         foreach([6, 367, 2, 100] as $time) {
-            $scoreA->addSolvetime($time);
+            $scoreA->solveTimes[] = $time;
         }
         $scoreB = new TeamScore($teamB);
         foreach([23, 150, 2] as $time) {
-            $scoreB->addSolvetime($time);
+            $scoreB->solveTimes[] = $time;
         }
 
         $tie = Scoreboard::scoreTieBreaker($scoreA, $scoreB);

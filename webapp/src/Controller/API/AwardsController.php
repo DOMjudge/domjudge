@@ -161,8 +161,8 @@ class AwardsController extends AbstractRestController
         $overall_winners = $medal_winners = [];
         // can we assume this is ordered just walk the first 12+B entries?
         foreach ($scoreboard->getScores() as $teamScore) {
-            $rank = $teamScore->getRank();
-            $teamid = (string)$teamScore->getTeam()->getApiId($this->eventLogService);
+            $rank = $teamScore->rank;
+            $teamid = (string)$teamScore->team->getApiId($this->eventLogService);
             if ($rank === 1) {
                 $overall_winners[] = $teamid;
             }

@@ -259,10 +259,11 @@ class ScoreboardService
                     ->getResult();
 
                 foreach ($tiedScores as $tiedScore) {
-                    $teamScores[$tiedScore->getTeam()->getTeamid()]->addSolveTime(Utils::scoretime(
-                        $tiedScore->getSolveTime($restricted),
-                        (bool)$this->config->get('score_in_seconds')
-                    ));
+                    $teamScores[$tiedScore->getTeam()->getTeamid()]->solveTimes[] =
+                        Utils::scoretime(
+                            $tiedScore->getSolveTime($restricted),
+                            (bool)$this->config->get('score_in_seconds')
+                        );
                 }
 
                 // Now check for each team if it is ranked higher than $teamid.

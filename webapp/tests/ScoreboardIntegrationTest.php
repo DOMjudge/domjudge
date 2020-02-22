@@ -391,9 +391,9 @@ class ScoreboardIntegrationTest extends KernelTestCase
             $score = $scores[$team->getTeamid()];
             $this->assertInstanceOf(TeamScore::class, $score);
 
-            $this->assertEquals($row['rank'],   $score->getRank(), "Rank for '$name'");
-            $this->assertEquals($row['solved'], $score->getNumberOfPoints(), "# solved for '$name'");
-            $this->assertEquals($row['time'],   $score->getTotalTime(), "Total time for '$name'");
+            $this->assertEquals($row['rank'],   $score->rank, "Rank for '$name'");
+            $this->assertEquals($row['solved'], $score->numPoints, "# solved for '$name'");
+            $this->assertEquals($row['time'],   $score->totalTime, "Total time for '$name'");
         }
     }
 
