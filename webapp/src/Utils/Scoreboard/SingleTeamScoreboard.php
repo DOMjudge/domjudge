@@ -80,10 +80,10 @@ class SingleTeamScoreboard extends Scoreboard
     {
         $teamScore = $this->scores[$this->team->getTeamid()];
         if ($this->rankCache !== null) {
-            $teamScore->addNumberOfPoints($this->rankCache->getPointsRestricted());
-            $teamScore->addTotalTime($this->rankCache->getTotaltimeRestricted());
+            $teamScore->numPoints += $this->rankCache->getPointsRestricted();
+            $teamScore->totalTime += $this->rankCache->getTotaltimeRestricted();
         }
-        $teamScore->setRank($this->teamRank);
+        $teamScore->rank = $this->teamRank;
 
         // Loop all info the scoreboard cache and put it in our own datastructure
         $this->matrix = [];

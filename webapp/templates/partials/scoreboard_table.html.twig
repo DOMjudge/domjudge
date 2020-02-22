@@ -219,7 +219,7 @@
             {% if scoreInSeconds %}
                 {% set totalTime = totalTime | printTimeRelative %}
             {% endif %}
-            {% set totalPoints = score.numberOfPoints %}
+            {% set totalPoints = score.numPoints %}
             <td class="scorenc">{{ totalPoints }}</td>
             <td class="scorett">{{ totalTime }}</td>
 

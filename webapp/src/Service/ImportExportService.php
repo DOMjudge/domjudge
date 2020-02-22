@@ -362,8 +362,8 @@ class ImportExportService
             $maxtime = -1;
             $drow    = [];
             /** @var ScoreboardMatrixItem $matrixItem */
-            foreach ($scoreboard->getMatrix()[$teamScore->getTeam()->getTeamid()] as $matrixItem) {
-                $time    = Utils::scoretime($matrixItem->getTime(), $scoreIsInSeconds);
+            foreach ($scoreboard->getMatrix()[$teamScore->team->getTeamid()] as $matrixItem) {
+                $time    = Utils::scoretime($matrixItem->time, $scoreIsInSeconds);
                 $drow[]  = $matrixItem->numSubmissions;
                 $drow[]  = $matrixItem->isCorrect ? $time : -1;
                 $maxtime = max($maxtime, $time);
@@ -371,11 +371,11 @@ class ImportExportService
 
             $data[] = array_merge(
                 [
-                    $teamScore->getTeam()->getAffiliation() ? $teamScore->getTeam()->getAffiliation()->getName() : '',
-                    $teamScore->getTeam()->getIcpcid(),
-                    $teamScore->getRank(),
-                    $teamScore->getNumberOfPoints(),
-                    $teamScore->getTotalTime(),
+                    $teamScore->team->getAffiliation() ? $teamScore->getTeam()->getAffiliation()->getName() : '',
+                    $teamScore->team->getIcpcid(),
+                    $teamScore->rank,
+                    $teamScore->numPoints,
+                    $teamScore->totalTime,
                     $maxtime,
                 ],
                 $drow
@@ -440,7 +440,7 @@ class ImportExportService
         $median = 0;
         foreach ($scoreboard->getScores() as $teamScore) {
             $count++;
-            $median = $teamScore->getNumberOfPoints();
+            $median = $teamScore->numPoints;
             if ($count > $numberOfTeams / 2) {
                 break;
             }
@@ -456,25 +456,25 @@ class ImportExportService
             }
             $maxTime = -1;
             /** @var ScoreboardMatrixItem $matrixItem */
-            foreach ($scoreboard->getMatrix()[$teamScore->getTeam()->getTeamid()] as $matrixItem) {
-                $time    = Utils::scoretime($matrixItem->getTime(), $scoreIsInSeconds);
+            foreach ($scoreboard->getMatrix()[$teamScore->team->getTeamid()] as $matrixItem) {
+                $time    = Utils::scoretime($matrixItem->time, $scoreIsInSeconds);
                 $maxTime = max($maxTime, $time);
             }
 
-            $rank           = $teamScore->getRank();
-            $numberOfPoints = $teamScore->getNumberOfPoints();
+            $rank      = $teamScore->rank;
+            $numPoints = $teamScore->numPoints;
             if ($rank <= 4) {
                 $awardString = 'Gold Medal';
             } elseif ($rank <= 8) {
                 $awardString = 'Silver Medal';
             } elseif ($rank <= 12 + $contest->getB()) {
                 $awardString = 'Bronze Medal';
-            } elseif ($numberOfPoints >= $median) {
+            } elseif ($numPoints >= $median) {
                 // teams with equally solved number of problems get the same rank
-                if (!isset($ranks[$numberOfPoints])) {
-                    $ranks[$numberOfPoints] = $rank;
+                if (!isset($ranks[$numPoints])) {
+                    $ranks[$numPoints] = $rank;
                 }
-                $rank        = $ranks[$numberOfPoints];
+                $rank        = $ranks[$numPoints];
                 $awardString = 'Ranked';
             } else {
                 $awardString = 'Honorable';
@@ -485,15 +485,15 @@ class ImportExportService
             $categoryId  = $teamScore->getTeam()->getCategoryid();
             if (!isset($groupWinners[$categoryId])) {
                 $groupWinners[$categoryId] = true;
-                $groupWinner               = $teamScore->getTeam()->getCategory()->getName();
+                $groupWinner               = $teamScore->team->getCategory()->getName();
             }
 
             $data[] = [
-                $teamScore->getTeam()->getIcpcid() ?? $teamScore->getTeam()->getIcpcid(),
+                $teamScore->team->getIcpcid() ?? $teamScore->team->getIcpcid(),
                 $rank,
                 $awardString,
-                $teamScore->getNumberOfPoints(),
-                $teamScore->getTotalTime(),
+                $teamScore->numbPoints,
+                $teamScore->totalTime,
                 $maxTime,
                 $groupWinner
             ];
