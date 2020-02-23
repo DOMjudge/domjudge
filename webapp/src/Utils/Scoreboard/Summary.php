@@ -110,12 +110,4 @@ class Summary
     {
         return $this->problems[$problemId] ?? null;
     }
-
-    /**
-     * @param ProblemSummary[] $problems
-     */
-    public function setProblems(array $problems)
-    {
-        $this->problems = $problems;
-    }
 }
