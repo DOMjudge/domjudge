@@ -341,7 +341,7 @@ class ImportExportController extends BaseController
 
         $scoreIsInSeconds = (bool)$this->config->get('score_in_seconds');
         $filter           = new Filter();
-        $filter->setCategories($categoryIds);
+        $filter->categories = $categoryIds;
         $scoreboard = $this->scoreboardService->getScoreboard($contest, true, $filter);
         $teams      = $scoreboard->getTeams();
 

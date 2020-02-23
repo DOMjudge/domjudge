@@ -854,10 +854,10 @@ class ScoreboardService
      */
     public function getFilterValues(Contest $contest, bool $jury): array
     {
-        $filters          = [
+        $filters = [
             'affiliations' => [],
-            'countries' => [],
-            'categories' => [],
+            'countries'    => [],
+            'categories'   => [],
         ];
         $showFlags        = $this->config->get('show_flags');
         $showAffiliations = $this->config->get('show_affiliations');
@@ -1006,28 +1006,28 @@ class ScoreboardService
         }
 
         if ($filter) {
-            if ($filter->getAffiliations()) {
+            if ($filter->affiliations) {
                 $queryBuilder
                     ->andWhere('t.affilid IN (:affiliations)')
-                    ->setParameter(':affiliations', $filter->getAffiliations());
+                    ->setParameter(':affiliations', $filter->affiliations);
             }
 
-            if ($filter->getCategories()) {
+            if ($filter->categories) {
                 $queryBuilder
                     ->andWhere('t.categoryid IN (:categories)')
-                    ->setParameter(':categories', $filter->getCategories());
+                    ->setParameter(':categories', $filter->categories);
             }
 
-            if ($filter->getCountries()) {
+            if ($filter->countries) {
                 $queryBuilder
                     ->andWhere('ta.country IN (:countries)')
-                    ->setParameter(':countries', $filter->getCountries());
+                    ->setParameter(':countries', $filter->countries);
             }
 
-            if ($filter->getTeams()) {
+            if ($filter->teams) {
                 $queryBuilder
                     ->andWhere('t.teamid IN (:teams)')
-                    ->setParameter(':teams', $filter->getTeams());
+                    ->setParameter(':teams', $filter->teams);
             }
         }
 

@@ -101,13 +101,13 @@ class ScoreboardController extends AbstractRestController
     {
         $filter = new Filter();
         if ($request->query->has('category')) {
-            $filter->setCategories([$request->query->get('category')]);
+            $filter->categories = [ $request->query->get('category') ];
         }
         if ($request->query->has('country')) {
-            $filter->setCountries([$request->query->get('country')]);
+            $filter->countries = [ $request->query->get('country') ];
         }
         if ($request->query->has('affiliation')) {
-            $filter->setAffiliations([$request->query->get('affiliation')]);
+            $filter->affiliations = [ $request->query->get('affiliation') ];
         }
         $allTeams = $request->query->getBoolean('allteams', false);
         $public   = !$this->dj->checkrole('api_reader');
