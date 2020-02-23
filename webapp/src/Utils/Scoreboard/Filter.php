@@ -7,22 +7,22 @@ class Filter
     /**
      * @var int[]
      */
-    protected $affiliations = [];
+    public $affiliations = [];
 
     /**
      * @var string[]
      */
-    protected $countries = [];
+    public $countries = [];
 
     /**
      * @var int[]
      */
-    protected $categories = [];
+    public $categories = [];
 
     /**
      * @var int[]
      */
-    protected $teams = [];
+    public $teams = [];
 
     /**
      * Filter constructor.
@@ -44,92 +44,16 @@ class Filter
     }
 
     /**
-     * @return int[]
-     */
-    public function getAffiliations(): array
-    {
-        return $this->affiliations;
-    }
-
-    /**
-     * @param int[] $affiliations
-     */
-    public function setAffiliations(array $affiliations)
-    {
-        $this->affiliations = $affiliations;
-    }
-
-    /**
-     * @return string[]
-     */
-    public function getCountries(): array
-    {
-        return $this->countries;
-    }
-
-    /**
-     * @param string[] $countries
-     */
-    public function setCountries(array $countries)
-    {
-        $this->countries = $countries;
-    }
-
-    /**
-     * @return int[]
-     */
-    public function getCategories(): array
-    {
-        return $this->categories;
-    }
-
-    /**
-     * @param int[] $categories
-     */
-    public function setCategories(array $categories)
-    {
-        $this->categories = $categories;
-    }
-
-    /**
-     * @return int[]
-     */
-    public function getTeams(): array
-    {
-        return $this->teams;
-    }
-
-    /**
-     * @param int[] $teams
-     */
-    public function setTeams(array $teams)
-    {
-        $this->teams = $teams;
-    }
-
-    /**
      * Get a string to display on what has been filtered
      * @return string
      */
     public function getFilteredOn(): string
     {
         $filteredOn = [];
-        if ($this->affiliations) {
-            $filteredOn[] = 'affiliations';
-        }
-        if ($this->countries) {
-            $filteredOn[] = 'countries';
-        }
-        if ($this->categories) {
-            $filteredOn[] = 'categories';
-        }
-        if ($this->teams) {
-            $filteredOn[] = 'teams';
-        }
-
-        if (empty($filteredOn)) {
-            return '';
-        }
+        if ($this->affiliations) $filteredOn[] = 'affiliations';
+        if ($this->countries)    $filteredOn[] = 'countries';
+        if ($this->categories)   $filteredOn[] = 'categories';
+        if ($this->teams)        $filteredOn[] = 'teams';
 
         return implode(', ', $filteredOn);
     }

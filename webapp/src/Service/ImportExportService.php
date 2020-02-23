@@ -421,8 +421,8 @@ class ImportExportService
         }
 
         $scoreIsInSeconds = (bool)$this->config->get('score_in_seconds');
-        $filter           = new Filter();
-        $filter->setCategories($categoryIds);
+        $filter = new Filter();
+        $filter->categories = $categoryIds;
         $scoreboard = $this->scoreboardService->getScoreboard($contest, true, $filter);
 
         /** @var Team[] $teams */
