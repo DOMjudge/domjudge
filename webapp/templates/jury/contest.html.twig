@@ -140,19 +140,6 @@
         </div>
     {% endif %}
 
-    <p>
-        {%- if is_granted('ROLE_ADMIN') -%}
-            {{ button(path('jury_contest_edit', {'contestId': contest.cid}), 'Edit', 'primary', 'edit') }}
-            {{ button(path('jury_contest_delete', {'contestId': contest.cid}), 'Delete', 'danger', 'trash-alt', true) }}
-        {% endif %}
-        {% if contest.finalizetime %}
-            {{ button(path('jury_contest_finalize', {'contestId': contest.cid}), 'Update finalization', 'secondary', 'lock') }}
-        {% else %}
-            {{ button(path('jury_contest_finalize', {'contestId': contest.cid}), 'Finalize this contest', 'secondary', 'lock') }}
-        {% endif %}
-        {% include 'jury/partials/rejudge_form.html.twig' with {table: 'contest', id: contest.cid, buttonClass: 'btn-secondary'} %}
-    </p>
-
     {% if allowRemovedIntervals %}
         <h2>Removed intervals</h2>
         {% if not is_granted('ROLE_ADMIN') and contest.removedIntervals is empty %}
@@ -216,6 +203,20 @@
                 {{ form_end(removedIntervalForm) }}
             {% endif %}
         {% endif %}
+
+        <script>
+            $(function () {
+                $('.remove-interval-button').on('click', function () {
+                    if (confirm('Really delete interval?')) {
+                        var $form = $('<form method="post" />');
+                        $form.attr('action', $(this).data('submit-url'));
+                        $form.submit();
+                    }
+                    return false;
+                });
+            });
+        </script>
+
     {% endif %}
 
     <h2 class="mt-2">Problems</h2>
@@ -282,17 +283,17 @@
         </div>
     {% endif %}
 
-    <script>
-        $(function () {
-            $('.remove-interval-button').on('click', function () {
-                if (confirm('Really delete interval?')) {
-                    var $form = $('<form method="post" />');
-                    $form.attr('action', $(this).data('submit-url'));
-                    $form.submit();
-                }
-                return false;
-            });
-        });
-    </script>
+    <p>
+        {%- if is_granted('ROLE_ADMIN') -%}
+            {{ button(path('jury_contest_edit', {'contestId': contest.cid}), 'Edit', 'primary', 'edit') }}
+            {{ button(path('jury_contest_delete', {'contestId': contest.cid}), 'Delete', 'danger', 'trash-alt', true) }}
+        {% endif %}
+        {% if contest.finalizetime %}
+            {{ button(path('jury_contest_finalize', {'contestId': contest.cid}), 'Update finalization', 'secondary', 'lock') }}
+        {% else %}
+            {{ button(path('jury_contest_finalize', {'contestId': contest.cid}), 'Finalize this contest', 'secondary', 'lock') }}
+        {% endif %}
+        {% include 'jury/partials/rejudge_form.html.twig' with {table: 'contest', id: contest.cid, buttonClass: 'btn-secondary'} %}
+    </p>
 
 {% endblock %}
