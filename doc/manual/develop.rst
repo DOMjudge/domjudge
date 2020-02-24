@@ -37,7 +37,7 @@ already listed under
 :ref:`judgehost <judgehost_requirements>` and
 :ref:`submit client <submit_client_requirements>` requirements)::
 
-  sudo apt install autoconf automake \
+  sudo apt install autoconf automake bats \
     python3-sphinx python3-sphinx-rtd-theme \
     texlive-latex-recommended texlive-latex-extra \
     texlive-fonts-recommended texlive-lang-european

@@ -29,6 +29,10 @@ ADMINPASS=$(cat etc/initial_admin_password.secret)
 sudo cp /opt/domjudge/domserver/etc/domjudge-fpm.conf "/etc/php/7.2/fpm/pool.d/domjudge-fpm.conf"
 sudo /usr/sbin/php-fpm7.2
 
+# test submit client
+cd ${DIR}/submit
+make check-full
+
 # configure judgehost
 cd /opt/domjudge/judgehost/
 sudo cp /opt/domjudge/judgehost/etc/sudoers-domjudge /etc/sudoers.d/
