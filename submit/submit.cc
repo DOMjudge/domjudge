@@ -451,7 +451,7 @@ lang_found:
 		printf("  problem:     %s\n",myproblem.label.c_str());
 		printf("  language:    %s\n",mylanguage.name.c_str());
 		if ( entry_point!=NULL ) {
-			printf("  entry_point: %s\n",entry_point);
+			printf("  entry point: %s\n",entry_point);
 		}
 		printf("  url:         %s\n",baseurl.c_str());
 
