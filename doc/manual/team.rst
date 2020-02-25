@@ -13,48 +13,48 @@ DOMjudge team manual
    :alt: DOMjudge logo
    :align: right
 
-This page gives a short summary of the system interface. The summary
+This is the manual for the DOMjudge programming contest control system
+version |version|.
+The summary below outlines the working of the system interface. It
 is meant as a quick introduction, to be able to start using the system.
 It is however strongly advised that your team reads the entire document.
-There are specific details of this contest control system that might become of
-importance when you run into problems. **BE WARNED!**
+There are specific details of this contest control system that might
+become of importance when you run into problems.
 
 .. sidebar:: Summary
 
    DOMjudge works through a web interface that can be found at
    |baseurlteam|. See the two figures on the next page for
    an impression.
-   
+
    Solutions have to read all input from 'standard in' and write all
    output to 'standard out' (also known as console). You will never have
-   to open (other) files. See appendix :ref:`code examples <codeexamples>`
-   for some code examples.
+   to open (other) files. Also see our :ref:`code examples <codeexamples>`.
 
-   You can submit solutions with the command-line program ``submit`` or
-   from the web interface:
-   
+   You can submit solutions in two ways:
+
    Command-line
      Use ``submit <filename>``. If your filename is of the form
      ``<problem>.<extension>`` where ``<problem>`` is the
      label of the problem and ``<extension>`` is a standard extension for
      your language, then these will automatically be detected.
      It will also try to auto-detect the main class (for Java and Kotlin) or the
-     main file (for Python 2 and Python 3). You can override these auto-detections;
+     main file (for Python). You can override these auto-detections;
      for a complete reference of all options and examples, see ``submit --help``.
-   
+
    Web interface
      From your team page, |baseurlteam|, click the green **Submit**
-     button in the menu bar. Select the file(s) you want to submit.
+     button in the menu bar. Select the files you want to submit.
      By default, the problem is selected from the base of the (first)
      filename and the language from the extension. The web interface tries
      to auto-detect the main class (for Java and Kotlin) or the main file (for
-     Python 2 and Python 3) from the file name. Double check that the guess is correct
+     Python) from the file name. Double check that the guess is correct
      before submitting.
-   
+
    Viewing scores, submissions and sending and reading clarification
    requests and replies is done through the web interface at
    |baseurlteam|.
-    
+
 -----------------
 
 .. raw:: pdf
@@ -84,9 +84,7 @@ Submitting solutions
 --------------------
 
 Submitting solutions can be done in two ways: with the command-line
-program ``submit`` or using the web interface. One of the
-interfaces might not be available, depending on the system
-configuration by the jury. A description of both methods follows.
+program ``submit`` (if installed) or using the web interface.
 
 Command-line: ``submit``
 ````````````````````````
@@ -97,14 +95,16 @@ Syntax::
 
 The submit program takes the name (label) of the problem from
 ``filename`` and the programming language from the extension
-``ext``. For Java it uses the filename as a guess for the
-main class; for Kotlin it capitalizes filename and appends
-``Kt`` to compute the guess for the main class name. For Python 2
-and 3, the first filename is used as a guess for the main file.
+``ext``.
 
+For Java it uses the filename as a guess for the
+main class; for Kotlin it capitalizes filename and appends
+``Kt`` to compute the guess for the main class name. For Python,
+the first filename is used as a guess for the main file.
 These guesses can be overruled with the options
 ``-p problemname``, ``-l languageextension`` and
 ``-e entry_point``.
+
 See ``submit --help`` for a complete list of all options,
 extensions and some examples.  Use ``submit --help | more``
 when the help text does not fit on one screen.
@@ -112,7 +112,8 @@ when the help text does not fit on one screen.
 ``submit`` will check your file and warns you for some problems:
 for example when the file has not been modified for a long time or
 when it's larger than the maximum source code size
-(see section runlimits).
+(see :ref:`the section on restrictions <runlimits>`).
+
 Filenames must start with an alphanumerical character and may contain only
 alphanumerical characters and ``+.\_-``. You can specify multiple files
 to be part of this submission (see section
@@ -128,11 +129,11 @@ Web interface
 `````````````
 
 Solutions can be submitted from the web interface at |baseurlteam|.
-Click the green Submit button at the menu bar on every page.
+Click the green *Submit* button at the menu bar on every page.
 Click the file selection button and select one or
 multiple files for submission. DOMjudge will try to determine the
 problem, language and main class (in case of Java and Kotlin) or main file
-(in case of Python 2 and 3) from the base and extension of the first filename.
+(in case of Python) from the base and extension of the first filename.
 Otherwise, select the appropriate values.
 Filenames must start with an alphanumerical character and may contain only
 alphanumerical characters and ``+.\_-``.
@@ -140,7 +141,7 @@ alphanumerical characters and ``+.\_-``.
 After you hit the submit button and confirm the submission, you will
 be redirected back to your submission list page. On this page, a message
 will be displayed that your submission was successful and the
-submission should be present in the list. An error message will be
+submission will be present in the list. An error message will be
 displayed if something went wrong.
 
 Viewing the results of submissions
@@ -160,10 +161,13 @@ penalty time. Each cell in a problem column lists the number of submissions,
 and if the problem was solved, the time of the first correct
 submission in minutes since contest start. This is included in your
 total time together with any penalty time incurred for previous
-incorrect submissions. Optionally the scoreboard can
-be 'frozen' some time before the end of the
+incorrect submissions.
+
+Optionally the scoreboard can be 'frozen' some time before the end of the
 contest. The full scoreboard view will not be updated anymore, but your
-team row will. Your team's rank will be displayed as '?'.
+team row on your overview page will be. Your team's rank will then be
+displayed as '?'.
+
 Finally, via the top menu you can also view the list of problems and
 view/download problem texts and sample data, if provided by the judges.
 
@@ -204,25 +208,26 @@ NO-OUTPUT
 
 OUTPUT-LIMIT
   Your program generated more output than the allowed limit. The solution
-  was truncated and is considered incorrect.
+  is considered incorrect.
 
 WRONG-ANSWER
   The output of your program was incorrect. This can happen simply
   because your solution is not correct, but remember that your output
   must comply exactly with the specifications of the judges. See
-  testing below for more details.
+  :ref:`testing <testing>` below for more details.
 
 TOO-LATE
   Bummer, you submitted after the contest ended! Your submission is
   stored but will not be processed anymore.
 
-Note that the judges may have prepared multiple test files for each
-problem. DOMjudge will report back the first incorrect result as verdict.
+The judges may have prepared multiple test files for each problem.
+DOMjudge will report back the first non-correct result as verdict.
 
 Clarifications
 --------------
 
-All communication with the judges is to be done through clarifications.
+All communication with the judges is to be done through clarification
+messages.
 These can be found in the right column on your team page. Both
 clarification replies from the judges and requests sent by you
 are displayed there.
@@ -259,8 +264,10 @@ Compilation
 Your program will be compiled on an autojudge machine running Linux.
 All submitted source files will be passed to the compiler which
 generates a single program to run. For Java and Kotlin the given
-main class will be checked; for Python 2 and Python 3 we do a
+main class will be checked; for Python we do a
 syntax check using the ``py_compile`` module.
+
+.. _testing:
 
 Testing
 ```````
@@ -304,9 +311,9 @@ source size
 
 memory
   The judges will specify how much memory you have available during
-  execution of your program. Note that this may vary per problem. This is the
+  execution of your program. This may vary per problem. It is the
   total amount of memory (including program code, statically and
-  dynamically defined variables, stack, Java VM, …)!
+  dynamically defined variables, stack, Java/Python VM, …)!
   If your program tries to use more memory, it will most likely abort,
   resulting in a run error.
 
@@ -352,6 +359,9 @@ Sample input and output for this problem:
 
 Note that the number ``3`` on the first line indicates that 3 testcases
 follow.
+
+What follows is a number of possible solutions to this problem
+for different programming languages.
 
 .. literalinclude:: ../examples/example.c
    :language: c
