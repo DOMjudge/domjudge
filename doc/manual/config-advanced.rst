@@ -94,7 +94,7 @@ the users must already exist in DOMjudge and their DOMjudge username must
 match what is in the ``REMOTE_USER`` variable.
 
 Set up the respective module to authenticate incoming users for the URL
-path of your installation. Then, in ``webapp/config/packages/security.yml``
+path of your installation. Then, in ``webapp/config/packages/security.yaml``
 change the ``main`` section of your source tree to look like this::
 
   main:
@@ -104,7 +104,7 @@ change the ``main`` section of your source tree to look like this::
 
 And re-run the "make install" command to deploy this change.
 Or alternatively remove the entire ``var/cache/prod/`` directory when
-editing ``security.yml`` on an already deployed location.
+editing ``security.yaml`` on an already deployed location.
 
 If the thus authenticated user is not found in DOMjudge, the application
 will present the standard username/password login screen as a fallback.
