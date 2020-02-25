@@ -61,10 +61,6 @@ system.
   specific environment and rules.
 
 
-The team manual requires a working LaTeX installation and some packages
-included in the `texlive-latex-extra` package in any modern Linux
-distribution.
-
 When DOMjudge is configured and site-specific
 configuration set, the team manual can be generated with the command
 `genteammanual` found under `docs/team`. The PDF
@@ -72,7 +68,7 @@ document will be placed in the current
 directory or a directory given as argument.
 The following should do it on a Debian-like system::
 
-  sudo apt install make texlive-latex-extra texlive-latex-recommended texlive-lang-european
+  sudo apt install python3-sphinx python3-sphinx-rtd-theme rst2pdf
   cd <INSTALL_PATH>/docs/team
   ./genteammanual [targetdir]
 

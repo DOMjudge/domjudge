@@ -1,0 +1,12 @@
+..
+  @configure_input@
+
+.. |DOMjudge| replace:: @PACKAGE_NAME@
+
+.. |baseurlteam| replace:: @BASEURL@team
+
+.. |submit_enabled| replace:: @SUBMITCLIENT_ENABLED@
+
+.. |SOURCESIZE| replace:: 256
+.. |COMPILETIME| replace:: 30
+.. |PROCLIMIT| replace:: 15

@@ -3,7 +3,7 @@ TOPDIR=../..
 endif
 include $(TOPDIR)/Makefile.global
 
-SUBST_CONFIGS = version.py
+SUBST_CONFIGS = version.py substitutions
 
 $(SUBST_CONFIGS): %: %.in $(TOPDIR)/paths.mk
 	$(substconfigvars)
@@ -15,11 +15,12 @@ docs: config
 # KLUDGE: call make instead of a dependency so that the html target
 # will run after config from inside the doc target.
 docs distdocs:
-	$(MAKE) html
+	$(MAKE) html team
 endif
 
 install-docs: docs
 	$(call install_tree,$(DESTDIR)$(domjudge_docdir)/manual,build/html)
+	$(call install_tree,$(DESTDIR)$(domjudge_docdir)/manual,build/team)
 
 maintainer-install: docs
 	ln -sf build/html
@@ -33,4 +34,7 @@ distclean-l:
 html:
 	sphinx-build -M $@ . build
 
-.PHONY: docs distdocs install-docs maintainer-install html
+team:
+	sphinx-build -b pdf . build/team
+
+.PHONY: docs distdocs install-docs maintainer-install html team

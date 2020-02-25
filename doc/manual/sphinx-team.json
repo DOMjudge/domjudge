@@ -1,0 +1,20 @@
+{
+  "pageSetup" : {
+    "firstTemplate": "domjudgePage"
+  },
+  "pageTemplates" : {
+    "domjudgePage": {
+        "frames": [
+            ["0%", "0%", "100%", "100%"]
+        ],
+        "showHeader" : true,
+        "showFooter" : true
+    }
+  },
+  "styles" : [
+    ["footer" , {
+      "textColor": "#A9A9A9",
+      "fontSize": 10
+    }]
+  ]
+}
