@@ -2,8 +2,9 @@ DOMjudge Programming Contest Judging System
 
 Version 7.2.1 - DEV
 -------------------
- - Various small documentation fixes and improvements.
+ - Various documentation fixes and improvements.
  - Fix filtering balloons by affiliation (Thanks Michael Baer).
+ - Fix audit log entries for newly created entities.
  - Small fix to make API delete events adhere to the specification.
  - Fix some edge-case bugs in the scoreboard calculation.
  - Fix arguments to UploadedFile().
