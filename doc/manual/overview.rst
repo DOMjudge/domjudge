@@ -128,7 +128,7 @@ and Github users mpsijm, sylxjtu.
 Some code has been ported from the ETH Zurich fork by Christoph
 Krautz, Thomas Rast et al.
 
-DOMjudge is Copyright (c) 2004 - 2020 by the DOMjudge developers and contributors.
+DOMjudge is Copyright (c) 2004 - |today| by the DOMjudge developers and contributors.
 
 DOMjudge, including its documentation, is free software; you can redistribute
 it and/or modify it under the terms of the GNU General Public License as

@@ -38,9 +38,7 @@ already listed under
 :ref:`submit client <submit_client_requirements>` requirements)::
 
   sudo apt install autoconf automake bats \
-    python3-sphinx python3-sphinx-rtd-theme \
-    texlive-latex-recommended texlive-latex-extra \
-    texlive-fonts-recommended texlive-lang-european
+    python3-sphinx python3-sphinx-rtd-theme rst2pdf
 
 When this software is present, bootstrapping can be done by running
 ``make dist``, which creates the ``configure`` script,
