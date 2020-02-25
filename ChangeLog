@@ -2,7 +2,11 @@ DOMjudge Programming Contest Judging System
 
 Version 7.1.3 - DEV
 -------------------
-
+ - Fix filtering balloons by affiliation (Thanks Michael Baer).
+ - Fix audit log entries for newly created entities.
+ - Small fix to make API delete events adhere to the specification.
+ - Fix some edge-case bugs in the scoreboard calculation.
+ - Fix arguments to UploadedFile().
 
 Version 7.1.2 - 4 January 2020
 ------------------------------
