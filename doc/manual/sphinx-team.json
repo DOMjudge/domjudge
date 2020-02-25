@@ -14,7 +14,7 @@
   "styles" : [
     ["footer" , {
       "textColor": "#A9A9A9",
-      "fontSize": 10
+      "fontSize": 9
     }]
   ]
 }
