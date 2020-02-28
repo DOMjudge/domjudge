@@ -7,13 +7,13 @@ include:
 
 check syntax:
   stage: test
-  image: domjudge/gitlabci:1.0
+  image: domjudge/gitlabci:1.0.1
   script:
     - ./gitlab/syntax.sh
 
 run unit tests:
   stage: test
-  image: domjudge/gitlabci:1.0
+  image: domjudge/gitlabci:1.0.1
   # Disabled for now as it drastically speeds up running unit tests and we don't use it yet
   # before_script:
   #   - apt-get update -yqq
@@ -40,7 +40,7 @@ integration:
   stage: test
   before_script:
     # Takes about 1 minute to pull
-    - time docker pull domjudge/gitlabci:1.0
+    - time docker pull domjudge/gitlabci:1.0.1
   image: docker:stable
   services:
     - docker:18-dind
@@ -55,7 +55,7 @@ integration:
       -v $CI_PROJECT_DIR:$CI_PROJECT_DIR \
       --net=host \
       -e "TERM=xterm-256color" -e "HOME=$HOME" -e "USER=$USER" -e "MARIADB_PORT_3306_TCP_ADDR=$MARIADB_PORT_3306_TCP_ADDR" -e "MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD" \
-      domjudge/gitlabci:1.0 /bin/bash -eo pipefail -c "umask 0002; cd $CI_PROJECT_DIR; script --return -qfc \"./gitlab/integration.sh\" /dev/null | ts \"[%F %T]\" "
+      domjudge/gitlabci:1.0.1 /bin/bash -eo pipefail -c "umask 0002; cd $CI_PROJECT_DIR; script --return -qfc \"./gitlab/integration.sh\" /dev/null | ts \"[%F %T]\" "
   artifacts:
     when: always
     paths:
