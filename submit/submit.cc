@@ -298,6 +298,8 @@ int main(int argc, char **argv)
 
 	logmsg(LOG_INFO,"set verbosity to %d", verbose);
 
+	if ( show_version ) version(PROGRAM,VERSION);
+
 	/* Make sure that baseurl terminates with a '/' for later concatenation. */
 	if ( !baseurl.empty() && baseurl[baseurl.length()-1]!='/' ) baseurl += '/';
 
@@ -331,7 +333,6 @@ int main(int argc, char **argv)
 	}
 
 	if ( show_help ) usage();
-	if ( show_version ) version(PROGRAM,VERSION);
 
 	if ( mycontest.id.empty() ) usage2(0,"no (valid) contest specified");
 
@@ -450,7 +451,7 @@ lang_found:
 		printf("  problem:     %s\n",myproblem.label.c_str());
 		printf("  language:    %s\n",mylanguage.name.c_str());
 		if ( entry_point!=NULL ) {
-			printf("  entry_point: %s\n",entry_point);
+			printf("  entry point: %s\n",entry_point);
 		}
 		printf("  url:         %s\n",baseurl.c_str());
 
@@ -716,7 +717,9 @@ Json::Value doAPIrequest(const char *funcname)
 	logmsg(LOG_INFO,"connecting to %s",url);
 
 	if ( (res=curl_easy_perform(handle))!=CURLE_OK ) {
-		error(0,"'%s': %s",url,curlerrormsg);
+		warnuser("'%s': %s",url,curlerrormsg);
+		free(url);
+		return Json::Value::null;
 	}
 
 	free(url);
@@ -728,17 +731,20 @@ Json::Value doAPIrequest(const char *funcname)
 			printf("%s\n", decode_HTML_entities(line).c_str());
 		}
 		if ( http_code == 401 ) {
-			error(0, "Authentication failed. Please check your DOMjudge credentials.");
+			warnuser("Authentication failed. Please check your DOMjudge credentials.");
+			return Json::Value::null;
 		} else {
-			error(0, "API request %s failed (code %li)", funcname, http_code);
+			warnuser("API request %s failed (code %li)", funcname, http_code);
+			return Json::Value::null;
 		}
 	}
 
 	logmsg(LOG_DEBUG,"API call '%s' returned:\n%s\n",funcname,curloutput.str().c_str());
 
 	if ( !reader.parse(curloutput, result) ) {
-		error(0,"parsing REST API output: %s",
+		warnuser("parsing REST API output: %s",
 		        reader.getFormattedErrorMessages().c_str());
+		return Json::Value::null;
 	}
 
 	return result;
