@@ -10,6 +10,7 @@ Version 7.2.1 - DEV
  - Fix arguments to UploadedFile().
  - Fix SQL group by leading to errors on newer DB versions (Thanks
    Michael Baer).
+ - Fix submit help to work when baseurl is invalid.
  - Various small fixes to the build/install system.
 
 Version 7.2.0 - 4 January 2020
