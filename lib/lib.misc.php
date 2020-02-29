@@ -750,7 +750,7 @@ function eventlog(string $type, $dataids, string $action, $cid = null, $json = n
         $G_EVENT_LOG->log($type, $dataids, $action, $cid, $json, $ids);
         return;
     }
-    // Fallback to non-Symfony code if we are not in a Symfony context (i.e. in restore_sources2db and simulate_contest)
+    // Fallback to non-Symfony code if we are not in a Symfony context (e.g. in simulate_contest)
 
     global $DB, $API_endpoints;
 
