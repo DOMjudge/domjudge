@@ -182,8 +182,8 @@ Compare scripts/programs should follow the
 <https://www.problemarchive.org/wiki/index.php/Output_validator>`_.
 DOMjudge uses the `default output validator
 <https://www.problemarchive.org/wiki/index.php/Problem_Format#Output_Validators>`_
-specified there as its default, which can be found at
-https://github.com/Kattis/problemtools/blob/master/support/default_validator/.
+specified there as its default, which can be found at the
+`problemtools GitHub <https://github.com/Kattis/problemtools/blob/master/support/default_validator/>`_.
 
 Note that DOMjudge only supports a subset of the functionality
 described there. In particular, the calling syntax is::
@@ -192,16 +192,15 @@ described there. In particular, the calling syntax is::
 
 where ``testdata.in`` ``testdata.ans`` are the jury
 reference input and output files, ``feedbackdir`` the directory
-containing e.g. the judging response file ``judgemessage.txt`` to
-be written to (the only other permitted files there
-are ``teammessage.txt score.txt judgeerror.txt diffposition.txt``,
+containing the judging response files ``judgemessage.txt``
+and ``judgeerror.txt``,
 ``compare_args`` a list of arguments that can set when
 configuring a contest problem, and ``program.out`` the team's
 output. The validator program should not make any assumptions on its
 working directory.
 
 For more details on writing and modifying a compare (or validator)
-scripts, see the ``boolfind_cmp`` example and the comments at the
+script, see the ``boolfind_cmp`` example and the comments at the
 top of the file ``testcase_run.sh``.
 
 Run programs
