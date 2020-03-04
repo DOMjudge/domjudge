@@ -1,11 +1,11 @@
 #!/usr/bin/env bats
 
 # These tests assume presence of a running DOMjudge instance at the
-# compiled in baseurl that has the DOMjudge example data loaded.
+# compiled-in baseurl that has the DOMjudge example data loaded.
 
 setup() {
   export SUBMITCONTEST="demo"
-} 
+}
 
 @test "contest via parameter overrides environment" {
   run ./submit -c bestaatniet
@@ -29,7 +29,7 @@ setup() {
 }
 
 @test "stale file emits warning" {
-  cp -a ../tests/test-hello.c $BATS_TMPDIR
+  touch -d '2000-01-01' $BATS_TMPDIR/test-hello.c
   run ./submit -p hello $BATS_TMPDIR/test-hello.c <<< "n"
   echo $output | grep "test-hello.c' has not been modified for [0-9]* minutes!"
 }

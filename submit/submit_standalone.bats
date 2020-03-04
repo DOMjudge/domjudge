@@ -1,6 +1,6 @@
 #!/usr/bin/env bats
 
-# These tests can be run without a working DOMjudge api endpoint
+# These tests can be run without a working DOMjudge api endpoint.
 
 @test "version output" {
   run ./submit --version
@@ -11,7 +11,7 @@
 
 setup() {
   export SUBMITBASEURL="https://domjudge.example.org/somejudge"
-} 
+}
 
 @test "baseurl set in environment" {
   run ./submit
