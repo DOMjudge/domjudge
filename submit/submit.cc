@@ -40,11 +40,13 @@
 
 
 /* C++ includes for easy string handling */
+#include <algorithm>
+#include <map>
 #include <iostream>
 #include <sstream>
 #include <string>
 #include <vector>
-#include <algorithm>
+
 using namespace std;
 
 /* These defines are needed in 'version' and 'logmsg' */
@@ -106,7 +108,7 @@ bool file_istext(char *filename);
 
 bool doAPIsubmit();
 
-Json::Value doAPIrequest(const char *);
+Json::Value doAPIrequest(const std::string &);
 bool readlanguages();
 bool readproblems();
 bool readcontests();
@@ -130,31 +132,26 @@ std::string stringtolower(std::string str)
 	return str;
 }
 
-const int nHTML_entities = 5;
-const char HTML_entities[nHTML_entities][2][8] = {
+const std::map<std::string,std::string> HTML_entities = {
 	{"&amp;", "&"},
 	{"&quot;", "\""},
 	{"&apos;", "'"},
 	{"&lt;", "<"},
-	{"&gt;", ">"}};
+	{"&gt;", ">"},
+};
 
 std::string decode_HTML_entities(std::string str)
 {
-	string res;
-	unsigned int i, j;
-
-	for(i=0; i<str.length(); i++) {
-		for(j=0; j<nHTML_entities; j++) {
-			if ( str.substr(i,strlen(HTML_entities[j][0]))==HTML_entities[j][0] ) {
-				res += HTML_entities[j][1];
-				i += strlen(HTML_entities[j][0]) - 1;
+	for(size_t i=0; i<str.length(); i++) {
+		for(auto entity : HTML_entities) {
+			if ( str.substr(i,entity.first.length())==entity.first ) {
+				str.replace(i,entity.first.length(),entity.second);
 				break;
 			}
 		}
-		if ( j>=nHTML_entities ) res += str[i];
 	}
 
-	return res;
+	return str;
 }
 
 int nwarnings;
@@ -697,7 +694,7 @@ magicerror:
 /*
  * Make an API call 'funcname'. An error is thrown when the call fails.
  */
-Json::Value doAPIrequest(const char *funcname)
+Json::Value doAPIrequest(const std::string &funcname)
 {
 	CURLcode res;
 	char *url;
@@ -707,7 +704,7 @@ Json::Value doAPIrequest(const char *funcname)
 	long http_code;
 	string line;
 
-	url = strdup((baseurl+"api/"+API_VERSION+string(funcname)).c_str());
+	url = strdup((baseurl+"api/"+API_VERSION+funcname).c_str());
 
 	curlerrormsg[0] = 0;
 
@@ -734,12 +731,12 @@ Json::Value doAPIrequest(const char *funcname)
 			warnuser("Authentication failed. Please check your DOMjudge credentials.");
 			return Json::Value::null;
 		} else {
-			warnuser("API request %s failed (code %li)", funcname, http_code);
+			warnuser("API request %s failed (code %li)", funcname.c_str(), http_code);
 			return Json::Value::null;
 		}
 	}
 
-	logmsg(LOG_DEBUG,"API call '%s' returned:\n%s\n",funcname,curloutput.str().c_str());
+	logmsg(LOG_DEBUG,"API call '%s' returned:\n%s\n",funcname.c_str(),curloutput.str().c_str());
 
 	if ( !reader.parse(curloutput, result) ) {
 		warnuser("parsing REST API output: %s",
@@ -755,7 +752,7 @@ bool readlanguages()
 	Json::Value res, exts;
 
 	string endpoint = "contests/" + mycontest.id + "/languages";
-	res = doAPIrequest(endpoint.c_str());
+	res = doAPIrequest(endpoint);
 
 	if (!res.isArray()) return false;
 
@@ -792,7 +789,7 @@ bool readproblems()
 	Json::Value res;
 
 	string endpoint = "contests/" + mycontest.id + "/problems";
-	res = doAPIrequest(endpoint.c_str());
+	res = doAPIrequest(endpoint);
 
 	if(!res.isArray()) return false;
 
