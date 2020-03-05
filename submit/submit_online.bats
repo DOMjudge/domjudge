@@ -69,6 +69,7 @@ setup() {
 }
 
 @test "detect entry point Java" {
+  skip "Java does not require an entry point in the default installation"
   run ./submit -p hello ../tests/test-hello.java <<< "n"
   [ "${lines[7]}" = "  entry point: test-hello" ]
 }
@@ -83,6 +84,13 @@ setup() {
   skip "Kotlin not enabled in the default installation"
   run ./submit -p hello ../tests/test-hello.kt <<< "n"
   [ "${lines[7]}" = "  entry point: Test_helloKt" ]
+}
+
+@test "options override entry point" {
+  run ./submit -p hello -e Main ../tests/test-hello.java <<< "n"
+  [ "${lines[7]}" = "  entry point: Main" ]
+  run ./submit -p hello --entry_point=mypackage.Main ../tests/test-hello.java <<< "n"
+  [ "${lines[7]}" = "  entry point: mypackage.Main" ]
 }
 
 @test "accept multiple files" {
