@@ -15,21 +15,21 @@ setup() {
 
 @test "baseurl set in environment" {
   run ./submit
-  echo $output | grep "WARNING: 'https://domjudge.example.org/somejudge/api/v4/contests': Could not resolve host"
+  echo $output | grep -E "WARNING: '$SUBMITBASEURL/api(/.*)?/contests': Could not resolve host"
   [ "$status" -eq 1 ]
 }
 
 @test "baseurl via parameter overrides environment" {
   run ./submit --url https://domjudge.example.edu
-  echo $output | grep "WARNING: 'https://domjudge.example.edu/api/v4/contests': Could not resolve host"
+  echo $output | grep -E "WARNING: 'https://domjudge.example.edu/api(/.*)?/contests': Could not resolve host"
   run ./submit -u https://domjudge3.example.edu
-  echo $output | grep "WARNING: 'https://domjudge3.example.edu/api/v4/contests': Could not resolve host"
+  echo $output | grep -E "WARNING: 'https://domjudge3.example.edu/api(/.*)?/contests': Could not resolve host"
   [ "$status" -eq 1 ]
 }
 
 @test "baseurl can end in slash" {
   run ./submit --url https://domjudge.example.edu/domjudge/
-  echo $output | grep "WARNING: 'https://domjudge.example.edu/domjudge/api/v4/contests': Could not resolve host"
+  echo $output | grep -E "WARNING: 'https://domjudge.example.edu/domjudge/api(/.*)?/contests': Could not resolve host"
   [ "$status" -eq 1 ]
 }
 
@@ -42,7 +42,7 @@ setup() {
 
 @test "usage information displays API url" {
   run ./submit --help
-  echo $output | grep "The (pre)configured URL is 'https://domjudge.example.org/somejudge/'."
+  echo $output | grep "The (pre)configured URL is '$SUBMITBASEURL/'."
 }
 
 @test "nonexistent option refers to help" {
