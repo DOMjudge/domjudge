@@ -106,53 +106,16 @@ char readanswer(const char *answers);
 bool file_istext(char *filename);
 #endif
 
-bool doAPIsubmit();
+std::string stringtolower(std::string);
+std::string decode_HTML_entities(std::string);
+std::string kotlin_base_entry_point(std::string);
 
 Json::Value doAPIrequest(const std::string &);
 bool readlanguages();
 bool readproblems();
 bool readcontests();
 
-/* Helper function for using libcurl in doAPIsubmit() and doAPIrequest() */
-size_t writesstream(void *ptr, size_t size, size_t nmemb, void *sptr)
-{
-	stringstream *s = (stringstream *) sptr;
-
-	*s << string((char *)ptr,size*nmemb);
-
-	return size*nmemb;
-}
-
-std::string stringtolower(std::string str)
-{
-	unsigned int i;
-
-	for(i=0; i<str.length(); i++) str[i] = tolower(str[i]);
-
-	return str;
-}
-
-const std::map<std::string,std::string> HTML_entities = {
-	{"&amp;", "&"},
-	{"&quot;", "\""},
-	{"&apos;", "'"},
-	{"&lt;", "<"},
-	{"&gt;", ">"},
-};
-
-std::string decode_HTML_entities(std::string str)
-{
-	for(size_t i=0; i<str.length(); i++) {
-		for(auto entity : HTML_entities) {
-			if ( str.substr(i,entity.first.length())==entity.first ) {
-				str.replace(i,entity.first.length(),entity.second);
-				break;
-			}
-		}
-	}
-
-	return str;
-}
+bool doAPIsubmit();
 
 int nwarnings;
 
@@ -187,20 +150,6 @@ problem myproblem;
 
 CURL *handle;
 char curlerrormsg[CURL_ERROR_SIZE];
-
-string kotlin_base_entry_point(string filebase)
-{
-	if ( filebase.empty() ) return "_";
-	for(size_t i=0; i<filebase.length(); i++) {
-		if ( !isalnum(filebase[i]) ) filebase[i] = '_';
-	}
-	if ( isalpha(filebase[0]) ) {
-		filebase[0] = toupper(filebase[0]);
-	} else {
-		filebase = '_' + filebase;
-	}
-	return filebase;
-}
 
 int main(int argc, char **argv)
 {
@@ -463,6 +412,16 @@ lang_found:
 	return 0;
 }
 
+/* Helper function for using libcurl in doAPIsubmit() and doAPIrequest() */
+size_t writesstream(void *ptr, size_t size, size_t nmemb, void *sptr)
+{
+	stringstream *s = (stringstream *) sptr;
+
+	*s << string((char *)ptr,size*nmemb);
+
+	return size*nmemb;
+}
+
 void curl_setup()
 {
 	handle = curl_easy_init();
@@ -690,6 +649,51 @@ magicerror:
 }
 
 #endif /* HAVE_MAGIC_H */
+
+std::string stringtolower(std::string str)
+{
+	unsigned int i;
+
+	for(i=0; i<str.length(); i++) str[i] = tolower(str[i]);
+
+	return str;
+}
+
+const std::map<std::string,std::string> HTML_entities = {
+	{"&amp;", "&"},
+	{"&quot;", "\""},
+	{"&apos;", "'"},
+	{"&lt;", "<"},
+	{"&gt;", ">"},
+};
+
+std::string decode_HTML_entities(std::string str)
+{
+	for(size_t i=0; i<str.length(); i++) {
+		for(auto entity : HTML_entities) {
+			if ( str.substr(i,entity.first.length())==entity.first ) {
+				str.replace(i,entity.first.length(),entity.second);
+				break;
+			}
+		}
+	}
+
+	return str;
+}
+
+std::string kotlin_base_entry_point(std::string filebase)
+{
+	if ( filebase.empty() ) return "_";
+	for(size_t i=0; i<filebase.length(); i++) {
+		if ( !isalnum(filebase[i]) ) filebase[i] = '_';
+	}
+	if ( isalpha(filebase[0]) ) {
+		filebase[0] = toupper(filebase[0]);
+	} else {
+		filebase = '_' + filebase;
+	}
+	return filebase;
+}
 
 /*
  * Make an API call 'funcname'. An error is thrown when the call fails.
