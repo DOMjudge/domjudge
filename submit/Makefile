@@ -45,10 +45,10 @@ $(SUBMITCLIENT:%=%$(OBJEXT)): %$(OBJEXT): %.cc $(SUBMITHEADERS) $(LIBHEADERS)
 clean-l:
 	-rm -f $(TARGETS) $(TARGETS:%=%$(OBJEXT))
 
-check:
+check: submitclient
 	bats submit_standalone.bats
 
-check-full:
+check-full: submitclient
 	bats submit_standalone.bats submit_online.bats
 
 .PHONY: submitclient check check-full
