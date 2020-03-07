@@ -110,7 +110,7 @@ curl $CURLOPTS -F "sendto=" -F "problem=2-" -F "bodytext=Testing" -F "submit=Sen
 	 "http://localhost/domjudge/jury/clarifications/send" -o /dev/null
 
 # Don't spam the log.
-set +x
+#set +x
 
 while /bin/true; do
 	sleep 30s
