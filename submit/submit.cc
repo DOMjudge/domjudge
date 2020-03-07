@@ -291,7 +291,8 @@ int main(int argc, char **argv)
 	} else {
 		contestid = stringtolower(contestid);
 		for(i=0; i<contests.size(); i++) {
-			if ( stringtolower(contests[i].id) == contestid || stringtolower(contests[i].shortname) == contestid ) {
+			if ( stringtolower(contests[i].id) == contestid ||
+			     stringtolower(contests[i].shortname) == contestid ) {
 				mycontest = contests[i];
 				break;
 			}
@@ -596,6 +597,9 @@ void usage2(int errnum, const char *mesg, ...)
 	exit(1);
 }
 
+/*
+ * Warns about user errors, printf format arguments expected.
+ */
 void warnuser(const char *warning, ...)
 {
 	char *str;
