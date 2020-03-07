@@ -71,14 +71,14 @@ setup() {
 @test "detect entry point Java" {
     skip "Java does not require an entry point in the default installation"
     run ./submit -p hello ../tests/test-hello.java <<< "n"
-    [ "${lines[7]}" = "  entry point: test-hello" ]
+    echo "$output" | grep '  entry point: test-hello'
 }
 
 @test "detect entry point Python" {
     skip "Python not enabled in the default installation"
     touch $BATS_TMPDIR/test-extra.py
     run ./submit -p hello ../tests/test-hello.py $BATS_TMPDIR/test-extra.py <<< "n"
-    [ "${lines[9]}" = "  entry point: test-hello.py" ]
+    echo "$output" | grep '  entry point: test-hello.py'
 }
 
 @test "detect entry point Kotlin" {
@@ -87,14 +87,14 @@ setup() {
         skip "Kotlin not enabled"
     fi
     run ./submit -p hello ../tests/test-hello.kt <<< "n"
-    [ "${lines[7]}" = "  entry point: Test_helloKt" ]
+    echo "$output" | grep '  entry point: Test_helloKt'
 }
 
 @test "options override entry point" {
     run ./submit -p hello -e Main ../tests/test-hello.java <<< "n"
-    [ "${lines[7]}" = "  entry point: Main" ]
+    echo "$output" | grep '  entry point: Main'
     run ./submit -p hello --entry_point=mypackage.Main ../tests/test-hello.java <<< "n"
-    [ "${lines[7]}" = "  entry point: mypackage.Main" ]
+    echo "$output" | grep '  entry point: mypackage.Main'
 }
 
 @test "accept multiple files" {
