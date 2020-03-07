@@ -86,7 +86,7 @@ cd /tmp
 git clone --depth=1 https://github.com/Kattis/problemtools.git
 cd problemtools/examples
 mv hello hello_kattis
-for i in hello_kattis different guess; do
+for i in hello_kattis different ; do
 	(
 		cd "$i"
 		zip -r "../${i}.zip" -- *
