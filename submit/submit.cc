@@ -42,6 +42,7 @@
 /* C++ includes for easy string handling */
 #include <algorithm>
 #include <map>
+#include <exception>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -93,6 +94,32 @@ struct option const long_opts[] = {
 	{"help",        no_argument,       &show_help,    1 },
 	{"version",     no_argument,       &show_version, 1 },
 	{ NULL,         0,                 NULL,          0 }
+};
+
+class exception : public std::exception {
+private:
+	std::string msg;
+
+public:
+	exception(const std::string &_msg): msg(_msg) {}
+	exception(const char *fmt, ...)
+	{
+		va_list ap;
+		char *_msg;
+
+		va_start(ap, fmt);
+		_msg = vallocstr(fmt, ap);
+		va_end(ap);
+
+		msg = string(_msg);
+		free(_msg);
+	}
+
+	const char *what() const noexcept override
+	{
+		return msg.c_str();
+	}
+
 };
 
 void version();
@@ -696,7 +723,7 @@ std::string kotlin_base_entry_point(std::string filebase)
 }
 
 /*
- * Make an API call 'funcname'. An error is thrown when the call fails.
+ * Make an API call 'funcname'. An exception is thrown when the call fails.
  */
 Json::Value doAPIrequest(const std::string &funcname)
 {
@@ -718,9 +745,7 @@ Json::Value doAPIrequest(const std::string &funcname)
 	logmsg(LOG_INFO,"connecting to %s",url);
 
 	if ( (res=curl_easy_perform(handle))!=CURLE_OK ) {
-		warnuser("'%s': %s",url,curlerrormsg);
-		free(url);
-		return Json::Value::null;
+		throw ::exception("'%s': %s", url, curlerrormsg);
 	}
 
 	free(url);
@@ -732,20 +757,16 @@ Json::Value doAPIrequest(const std::string &funcname)
 			printf("%s\n", decode_HTML_entities(line).c_str());
 		}
 		if ( http_code == 401 ) {
-			warnuser("Authentication failed. Please check your DOMjudge credentials.");
-			return Json::Value::null;
+			throw ::exception("authentication failed, please check your DOMjudge credentials.");
 		} else {
-			warnuser("API request %s failed (code %li)", funcname.c_str(), http_code);
-			return Json::Value::null;
+			throw ::exception("API request %s failed (code %li)", funcname.c_str(), http_code);
 		}
 	}
 
 	logmsg(LOG_DEBUG,"API call '%s' returned:\n%s\n",funcname.c_str(),curloutput.str().c_str());
 
 	if ( !reader.parse(curloutput, result) ) {
-		warnuser("parsing REST API output: %s",
-		        reader.getFormattedErrorMessages().c_str());
-		return Json::Value::null;
+		throw ::exception("parsing REST API output: %s", reader.getFormattedErrorMessages().c_str());
 	}
 
 	return result;
@@ -756,9 +777,17 @@ bool readlanguages()
 	Json::Value res, exts;
 
 	string endpoint = "contests/" + mycontest.id + "/languages";
-	res = doAPIrequest(endpoint);
+	try {
+		res = doAPIrequest(endpoint);
+	} catch ( std::exception &e ) {
+		warning(0, "%s", e.what());
+		return false;
+	}
 
-	if (!res.isArray()) return false;
+	if (!res.isArray()) {
+		warning(0, "REST API returned unexpected JSON data for endpoint languages");
+		return false;
+	}
 
 	for(Json::ArrayIndex i=0; i<res.size(); i++) {
 		language lang;
@@ -793,9 +822,17 @@ bool readproblems()
 	Json::Value res;
 
 	string endpoint = "contests/" + mycontest.id + "/problems";
-	res = doAPIrequest(endpoint);
+	try {
+		res = doAPIrequest(endpoint);
+	} catch ( std::exception &e ) {
+		warning(0, "%s", e.what());
+		return false;
+	}
 
-	if(!res.isArray()) return false;
+	if(!res.isArray()) {
+		warning(0, "REST API returned unexpected JSON data for endpoint problems");
+		return false;
+	}
 
 	for(Json::ArrayIndex i=0; i<res.size(); i++) {
 		problem prob;
@@ -820,9 +857,17 @@ bool readcontests()
 {
 	Json::Value res;
 
-	res = doAPIrequest("contests");
+	try {
+		res = doAPIrequest("contests");
+	} catch ( std::exception &e ) {
+		warning(0, "%s", e.what());
+		return false;
+	}
 
-	if(!res.isArray()) return false;
+	if(!res.isArray()) {
+		warning(0, "REST API returned unexpected JSON data for endpoint contests");
+		return false;
+	}
 
 	for(Json::ArrayIndex i=0; i<res.size(); i++) {
 		contest cont;
