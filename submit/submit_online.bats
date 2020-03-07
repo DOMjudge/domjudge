@@ -82,7 +82,10 @@ setup() {
 }
 
 @test "detect entry point Kotlin" {
-  skip "Kotlin not enabled in the default installation"
+  run ./submit --help
+  if ! echo "$output" | grep 'Kotlin:' ; then
+    skip "Kotlin not enabled"
+  fi
   run ./submit -p hello ../tests/test-hello.kt <<< "n"
   [ "${lines[7]}" = "  entry point: Test_helloKt" ]
 }
