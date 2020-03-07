@@ -127,6 +127,8 @@ while /bin/true; do
 	fi
 done
 
+set -x
+
 NUMNOMAGIC=$(curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier" | grep "without magic string" | sed -r 's/^.* ([0-9]+) without magic string.*$/\1/')
 
 # include debug output here
