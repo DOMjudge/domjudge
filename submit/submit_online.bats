@@ -76,8 +76,9 @@ setup() {
 
 @test "detect entry point Python" {
   skip "Python not enabled in the default installation"
-  run ./submit -p hello ../tests/test-hello.py <<< "n"
-  [ "${lines[7]}" = "  entry point: test_hello.py" ]
+  touch $BATS_TMPDIR/test-extra.py
+  run ./submit -p hello ../tests/test-hello.py $BATS_TMPDIR/test-extra.py <<< "n"
+  [ "${lines[9]}" = "  entry point: test-hello.py" ]
 }
 
 @test "detect entry point Kotlin" {
