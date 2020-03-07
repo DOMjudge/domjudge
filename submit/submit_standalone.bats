@@ -15,21 +15,21 @@ setup() {
 
 @test "baseurl set in environment" {
   run ./submit
-  echo $output | grep -E "WARNING: '$SUBMITBASEURL/api(/.*)?/contests': Could not resolve host"
+  echo $output | grep -E "warning: '$SUBMITBASEURL/api(/.*)?/contests': Could not resolve host"
   [ "$status" -eq 1 ]
 }
 
 @test "baseurl via parameter overrides environment" {
   run ./submit --url https://domjudge.example.edu
-  echo $output | grep -E "WARNING: 'https://domjudge.example.edu/api(/.*)?/contests': Could not resolve host"
+  echo $output | grep -E "warning: 'https://domjudge.example.edu/api(/.*)?/contests': Could not resolve host"
   run ./submit -u https://domjudge3.example.edu
-  echo $output | grep -E "WARNING: 'https://domjudge3.example.edu/api(/.*)?/contests': Could not resolve host"
+  echo $output | grep -E "warning: 'https://domjudge3.example.edu/api(/.*)?/contests': Could not resolve host"
   [ "$status" -eq 1 ]
 }
 
 @test "baseurl can end in slash" {
   run ./submit --url https://domjudge.example.edu/domjudge/
-  echo $output | grep -E "WARNING: 'https://domjudge.example.edu/domjudge/api(/.*)?/contests': Could not resolve host"
+  echo $output | grep -E "warning: 'https://domjudge.example.edu/domjudge/api(/.*)?/contests': Could not resolve host"
   [ "$status" -eq 1 ]
 }
 
