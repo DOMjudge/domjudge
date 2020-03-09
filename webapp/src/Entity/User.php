@@ -105,7 +105,7 @@ class User implements UserInterface, \Serializable
      *     options={"comment"="IP Address used to autologin","default"="NULL"},
      *     nullable=true)
      * @Serializer\SerializedName("ip")
-     * @Assert\Ip()
+     * @Assert\Ip(version="all")
      */
     private $ipAddress;
 
