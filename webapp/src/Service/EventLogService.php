@@ -240,7 +240,7 @@ class EventLogService implements ContainerAwareInterface
 
         // Make a combined string to keep track of the data ID's
         $dataidsCombined = json_encode($dataIds);
-        $idsCombined     = $ids === null ? null : is_array($ids) ? json_encode($ids) : $ids;
+        $idsCombined     = $ids === null ? null : (is_array($ids) ? json_encode($ids) : $ids);
 
         $this->logger->debug(
             "EventLogService::log arguments: '%s' '%s' '%s' '%s' '%s' '%s'",
