@@ -78,7 +78,7 @@ class SecurityController extends AbstractController
         $clientIP             = $this->dj->getClientIp();
         $auth_ipaddress_users = [];
         if ($allowIPAuth) {
-            $auth_ipaddress_users = $em->getRepository(User::class)->findBy(['ipAddress' => $clientIP]);
+            $auth_ipaddress_users = $em->getRepository(User::class)->findBy(['ipAddress' => $clientIP, 'enabled' => 1]);
         }
 
         // Add a header so we can detect that this is the login page

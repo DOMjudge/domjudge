@@ -125,7 +125,8 @@ class DOMJudgeIPAuthenticator extends AbstractGuardAuthenticator
     {
         $userRepo = $this->em->getRepository(User::class);
         $filters  = [
-            'ipAddress' => $credentials['ipaddress']
+            'ipAddress' => $credentials['ipaddress'],
+            'enabled' => 1,
         ];
 
         if ($credentials['authbasic_username']) {
