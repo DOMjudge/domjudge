@@ -57,7 +57,9 @@ associated with their account, and subsequent logins will allow them to log
 in without authenticating.
 
 If desired, you can edit or pre-fill the IP address associated with an
-account from the Users page.
+account from the Users page. When using IPv6, ensure that you enter the
+address in the exact repesentation as the webserver reports it (e.g.
+as visible in the webserver logs) - no canonicalization is preformed.
 
 X-Headers
 `````````
