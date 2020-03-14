@@ -23,8 +23,23 @@
 #
 #<VirtualHost *:80>
 #ServerName _default_
-#Redirect permanent / https://domjudge.example.com/
+#Redirect 308 / https://domjudge.example.com/
 #</VirtualHost>
+#
+# Or block all cleartext HTTP requests:
+#
+#<VirtualHost *:80>
+#ServerName _default_
+#Redirect 426 /
+#</VirtualHost>
+#
+#Listen 443
+#
+#<VirtualHost *:80>
+#ServerName _default_
+#Redirect 308 / https://domjudge.example.com/
+#</VirtualHost>
+#
 #
 #<VirtualHost *:443>
 #ServerName _default_
