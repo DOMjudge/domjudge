@@ -26,7 +26,15 @@ server {
 # 	listen   80;
 # 	listen   [::]:80;
 # 	server_name _default_;
-# 	return 301 https://$host$request_uri;  # enforce https
+# 	return 308 https://$host$request_uri;  # enforce https
+# }
+
+# Or block all HTTP requests
+# server {
+# 	listen   80;
+# 	listen   [::]:80;
+# 	server_name _default_;
+# 	return 428;  # do not allow HTTP
 # }
 
 # server {
