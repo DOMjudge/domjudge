@@ -8,6 +8,7 @@ Version 7.1.3 - DEV
  - Fix some edge-case bugs in the scoreboard calculation.
  - Fix arguments to UploadedFile().
  - Fix submit help to work when baseurl is incorrect.
+ - Fix user IP address field to accept IPv6 addresses.
 
 Version 7.1.2 - 4 January 2020
 ------------------------------
