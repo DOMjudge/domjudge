@@ -12,6 +12,7 @@ Version 7.2.1 - DEV
    Michael Baer).
  - Fix submit help to work when baseurl is invalid.
  - Various small fixes to the build/install system.
+ - Fix user IP address field to accept IPv6 addresses.
 
 Version 7.2.0 - 4 January 2020
 ------------------------------
