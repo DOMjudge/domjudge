@@ -829,7 +829,7 @@ class ImportExportService
             $teamData[] = [
                 'team' => [
                     'teamid' => $team['id'],
-                    'externalid' => $team['icpc_id'] ?? null,
+                    'icpcid' => $team['icpc_id'] ?? null,
                     'categoryid' => $team['group_ids'][0] ?? null,
                     'name' => @$team['name'],
                     'display_name' => @$team['display_name'],
