@@ -3,7 +3,6 @@
 namespace App\Controller\Jury;
 
 use App\Entity\Configuration;
-use App\Entity\Judging;
 use App\Service\CheckConfigService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
@@ -71,28 +70,6 @@ class ConfigController extends AbstractController
         $this->config             = $config;
     }
 
-    private function logUnverifiedJudgings(EventLogService $eventLogService)
-    {
-        /** @var Judging[] $judgings */
-        $judgings = $this->em->getRepository(Judging::class)->findBy(
-            [ 'verified' => 0, 'valid' => 1]
-        );
-
-        $judgings_per_contest = [];
-        foreach ($judgings as $judging) {
-            $judgings_per_contest[$judging->getCid()][] = $judging->getJudgingid();
-        }
-
-        // Log to event table; normal cases are handled in:
-        // * API/JudgehostController::addJudgingRunAction
-        // * Jury/SubmissionController::verifyAction
-        foreach ($judgings_per_contest as $cid => $judging_ids) {
-            $eventLogService->log('judging', $judging_ids, 'update', $cid);
-        }
-
-        $this->logger->info("created events for unverified judgings");
-    }
-
     /**
      * @Route("", name="jury_config")
      * @param EventLogService $eventLogService
@@ -117,94 +94,23 @@ class ConfigController extends AbstractController
             $this->addFlash('scoreboard_refresh', 'After changing specific ' .
                             'settings, you might need to refresh the scoreboard.');
 
-            $needsMerge = false;
-            foreach ($specs as $specName => $spec) {
-                $oldValue = $spec['default_value'];
-                if (isset($options[$specName])) {
-                    $optionToSet = $options[$specName];
-                    $oldValue = $optionToSet->getValue();
-                    $optionIsNew = false;
-                } else {
-                    $optionToSet = new Configuration();
-                    $optionToSet->setName($specName);
-                    $optionIsNew = true;
-                }
-                if (!$request->request->has('config_' . $specName)) {
-                    if ($spec['type'] == 'bool') {
-                        // Special-case bool, since checkboxes don't return a
-                        // value when unset.
-                        $val = false;
-                    } elseif ($spec['type'] == 'array_val' && isset($spec['options'])) {
-                        // Special-case array_val with options, since multiselects
-                        // don't return a value when unset.
-                        $val = [];
-                    } else {
-                        continue;
-                    }
-                } else {
-                    $val = $request->request->get('config_' . $specName);
-                }
-                if ($specName == 'verification_required' &&
-                    $oldValue && !$val ) {
-                    // If toggled off, we have to send events for all judgings
-                    // that are complete, but not verified yet. Scoreboard
-                    // cache refresh should take care of the rest. See #645.
-                    $this->logUnverifiedJudgings($eventLogService);
-                    $needsMerge = true;
-                }
-                switch ( $spec['type'] ) {
-                    case 'bool':
-                        $optionToSet->setValue((bool)$val);
-                        break;
-
-                    case 'int':
-                        $optionToSet->setValue((int)$val);
-                        break;
-
-                    case 'string':
-                        $optionToSet->setValue($val);
-                        break;
-
-                    case 'array_val':
-                        $result = array();
-                        foreach ($val as $data) {
-                            if (!empty($data)) {
-                                $result[] = $data;
+            $data = [];
+            foreach ($request->request->all() as $key => $value) {
+                if (strpos($key, 'config_') === 0) {
+                    $valueToUse = $value;
+                    if (is_array($value)) {
+                        $firstItem = reset($value);
+                        if (is_array($firstItem) && isset($firstItem['key'])) {
+                            $valueToUse = [];
+                            foreach ($value as $item) {
+                                $valueToUse[$item['key']] = $item['val'];
                             }
                         }
-                        $optionToSet->setValue($result);
-                        break;
-
-                    case 'array_keyval':
-                        $result = array();
-                        foreach ($val as $data) {
-                            if (!empty($data['key'])) {
-                                $result[$data['key']] = $data['val'];
-                            }
-                        }
-                        $optionToSet->setValue($result);
-                        break;
-
-                    default:
-                        $this->logger->warn(
-                            "configation option '%s' has unknown type '%s'",
-                            [ $specName, $spec['type'] ]
-                        );
-                }
-                if ($optionToSet->getValue() != $oldValue) {
-                    $valJson = $this->dj->jsonEncode($optionToSet->getValue());
-                    $this->dj->auditlog('configuration', $specName, 'updated', $valJson);
-                    if ($optionIsNew) {
-                        $this->em->persist($optionToSet);
                     }
+                    $data[substr($key, strlen('config_'))] = $valueToUse;
                 }
             }
-
-            if ( $needsMerge ) {
-                foreach ($options as $option) $this->em->merge($option);
-            }
-
-            $this->em->flush();
+            $this->config->saveChanges($data, $eventLogService, $this->dj);
             return $this->redirectToRoute('jury_config');
         }
 
