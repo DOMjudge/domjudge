@@ -5,14 +5,16 @@ namespace App\Service;
 use App\Config\Loader\YamlConfigLoader;
 use App\Entity\Configuration;
 use App\Entity\Executable;
-use App\Entity\TeamCategory;
+use App\Entity\Judging;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\NonUniqueResultException;
 use Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Config\ConfigCacheFactoryInterface;
 use Symfony\Component\Config\ConfigCacheInterface;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Config\Resource\FileResource;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Class ConfigurationService
@@ -181,6 +183,150 @@ EOF;
 
         $specification = require $cacheFile;
         return $specification;
+    }
+
+    /**
+     * Save the changes from the given request
+     *
+     * @param array $dataToSet
+     * @param EventLogService $eventLog
+     * @param DOMJudgeService $dj
+     *
+     * @throws NonUniqueResultException
+     */
+    public function saveChanges(
+        array $dataToSet,
+        EventLogService $eventLog,
+        DOMJudgeService $dj
+    ) {
+        $specs = $this->getConfigSpecification();
+        foreach ($specs as &$spec) {
+            $spec = $this->addOptions($spec);
+        }
+        unset($spec);
+
+        /** @var Configuration[] $options */
+        $options = $this->em->createQueryBuilder()
+            ->from(Configuration::class, 'c',  'c.name')
+            ->select('c')
+            ->getQuery()
+            ->getResult();
+
+        $needsMerge = false;
+        foreach ($specs as $specName => $spec) {
+            $oldValue = $spec['default_value'];
+            if (isset($options[$specName])) {
+                $optionToSet = $options[$specName];
+                $oldValue = $optionToSet->getValue();
+                $optionIsNew = false;
+            } else {
+                $optionToSet = new Configuration();
+                $optionToSet->setName($specName);
+                $optionIsNew = true;
+            }
+            if (!array_key_exists($specName, $dataToSet)) {
+                if ($spec['type'] == 'bool') {
+                    // Special-case bool, since checkboxes don't return a
+                    // value when unset.
+                    $val = false;
+                } elseif ($spec['type'] == 'array_val' && isset($spec['options'])) {
+                    // Special-case array_val with options, since multiselects
+                    // don't return a value when unset.
+                    $val = [];
+                } else {
+                    continue;
+                }
+            } else {
+                $val = $dataToSet[$specName];
+            }
+            if ($specName == 'verification_required' &&
+                $oldValue && !$val ) {
+                // If toggled off, we have to send events for all judgings
+                // that are complete, but not verified yet. Scoreboard
+                // cache refresh should take care of the rest. See #645.
+                $this->logUnverifiedJudgings($eventLog);
+                $needsMerge = true;
+            }
+            switch ( $spec['type'] ) {
+                case 'bool':
+                    $optionToSet->setValue((bool)$val);
+                    break;
+
+                case 'int':
+                    $optionToSet->setValue((int)$val);
+                    break;
+
+                case 'string':
+                    $optionToSet->setValue($val);
+                    break;
+
+                case 'array_val':
+                    $result = array();
+                    foreach ($val as $data) {
+                        if (!empty($data)) {
+                            $result[] = $data;
+                        }
+                    }
+                    $optionToSet->setValue($result);
+                    break;
+
+                case 'array_keyval':
+                    $result = array();
+                    foreach ($val as $key => $data) {
+                        if (!empty($data)) {
+                            $result[$key] = $data;
+                        }
+                    }
+                    $optionToSet->setValue($result);
+                    break;
+
+                default:
+                    $this->logger->warn(
+                        "configation option '%s' has unknown type '%s'",
+                        [ $specName, $spec['type'] ]
+                    );
+            }
+            if ($optionToSet->getValue() != $oldValue) {
+                $valJson = $dj->jsonEncode($optionToSet->getValue());
+                $dj->auditlog('configuration', $specName, 'updated', $valJson);
+                if ($optionIsNew) {
+                    $this->em->persist($optionToSet);
+                }
+            }
+        }
+
+        if ( $needsMerge ) {
+            foreach ($options as $option) $this->em->merge($option);
+        }
+
+        $this->em->flush();
+
+        $this->dbConfigCache = [];
+    }
+
+    /**
+     * @throws NonUniqueResultException
+     */
+    private function logUnverifiedJudgings(EventLogService $eventLog)
+    {
+        /** @var Judging[] $judgings */
+        $judgings = $this->em->getRepository(Judging::class)->findBy(
+            [ 'verified' => 0, 'valid' => 1]
+        );
+
+        $judgings_per_contest = [];
+        foreach ($judgings as $judging) {
+            $judgings_per_contest[$judging->getCid()][] = $judging->getJudgingid();
+        }
+
+        // Log to event table; normal cases are handled in:
+        // * API/JudgehostController::addJudgingRunAction
+        // * Jury/SubmissionController::verifyAction
+        foreach ($judgings_per_contest as $cid => $judging_ids) {
+            $eventLog->log('judging', $judging_ids, 'update', $cid);
+        }
+
+        $this->logger->info("created events for unverified judgings");
     }
 
     /**

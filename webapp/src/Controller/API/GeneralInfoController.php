@@ -2,7 +2,9 @@
 
 namespace App\Controller\API;
 
+use App\Entity\Configuration;
 use App\Entity\Contest;
+use App\Entity\Judging;
 use App\Entity\User;
 use App\Service\CheckConfigService;
 use App\Service\ConfigurationService;
@@ -12,6 +14,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
+use Psr\Log\LoggerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Swagger\Annotations as SWG;
 use Symfony\Component\HttpFoundation\Request;
@@ -60,6 +63,11 @@ class GeneralInfoController extends AbstractFOSRestController
     protected $router;
 
     /**
+     * @var LoggerInterface
+     */
+    protected $logger;
+
+    /**
      * GeneralInfoController constructor.
      *
      * @param EntityManagerInterface $em
@@ -68,6 +76,7 @@ class GeneralInfoController extends AbstractFOSRestController
      * @param EventLogService        $eventLogService
      * @param CheckConfigService     $checkConfigService
      * @param RouterInterface        $router
+     * @param LoggerInterface        $logger
      */
     public function __construct(
         EntityManagerInterface $em,
@@ -75,7 +84,8 @@ class GeneralInfoController extends AbstractFOSRestController
         ConfigurationService $config,
         EventLogService $eventLogService,
         CheckConfigService $checkConfigService,
-        RouterInterface $router
+        RouterInterface $router,
+        LoggerInterface $logger
     ) {
         $this->em                 = $em;
         $this->dj                 = $dj;
@@ -83,6 +93,7 @@ class GeneralInfoController extends AbstractFOSRestController
         $this->checkConfigService = $checkConfigService;
         $this->router             = $router;
         $this->config             = $config;
+        $this->logger             = $logger;
     }
 
     /**
@@ -247,13 +258,44 @@ class GeneralInfoController extends AbstractFOSRestController
         $onlypublic = !($this->dj->checkrole('jury') || $this->dj->checkrole('judgehost'));
         $name       = $request->query->get('name');
 
-        $result = $this->config->get($name, $onlypublic);
+        if ($name) {
+            $result = $this->config->get($name, $onlypublic);
+        } else {
+            $result = $this->config->all($onlypublic);
+        }
 
         if ($name !== null) {
             return [$name => $result];
         }
 
         return $result;
+    }
+
+    /**
+     * Update configuration variables
+     * @Rest\Put("/config")
+     * @IsGranted("ROLE_ADMIN")
+     * @SWG\Response(
+     *     response="200",
+     *     description="The full configuration after change",
+     *     @SWG\Schema(type="object")
+     * )
+     * @SWG\Parameter(
+     *     name="body",
+     *     in="body",
+     *     type="object",
+     *     description="The config variables to update. Keys are configuration names, values are configuration values. For scalars, use scalars. For arrays, use arrays with scalars and for key-value arrays use objects.",
+     *     required=true,
+     *     schema={}
+     * )
+     * @param Request $request
+     * @return \App\Entity\Configuration[]|mixed
+     * @throws \Exception
+     */
+    public function updateConfigurationAction(Request $request)
+    {
+        $this->config->saveChanges($request->request->all(), $this->eventLogService, $this->dj);
+        return $this->config->all(false);
     }
 
     /**
