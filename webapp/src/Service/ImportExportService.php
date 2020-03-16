@@ -751,7 +751,7 @@ class ImportExportService
                 $this->eventLogService->log('team_affilation', $teamAffiliation->getAffilid(), $action,
                                             $contest->getCid());
             }
-            $this->dj->auditlog('team_affilation', $teamAffiliation->getCategoryid(), 'replaced',
+            $this->dj->auditlog('team_affilation', $teamAffiliation->getAffilid(), 'replaced',
                                              'imported from tsv / json');
         }
 
