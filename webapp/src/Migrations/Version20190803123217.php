@@ -624,63 +624,6 @@ SQL
 
     protected function loadDefaultData()
     {
-        // Data for table `configuration`
-        $this->addSql(<<<SQL
-INSERT INTO `configuration` (`name`, `value`, `type`, `public`, `category`, `description`) VALUES
-    ('verification_required', '0', 'bool', '0', 'Scoring', 'Is verification of judgings by jury required before publication?'),
-    ('compile_penalty', '1', 'bool', '1', 'Scoring', 'Should submissions with compiler-error incur penalty time (and show on the scoreboard)?'),
-    ('penalty_time', '20', 'int', '1', 'Scoring', 'Penalty time in minutes per wrong submission (if finally solved).'),
-    ('results_prio', '{"memory-limit":99,"output-limit":99,"run-error":99,"timelimit":99,"wrong-answer":30,"no-output":10,"correct":1}', 'array_keyval', '0', 'Scoring', 'Priorities of results for determining final result with multiple testcases. Higher priority is used first as final result. With equal priority, the first occurring result determines the final result.'),
-    ('results_remap', '{}', 'array_keyval', '0', 'Scoring', 'Remap testcase result, e.g. to disable a specific result type such as ''no-output''.'),
-    ('score_in_seconds', '0', 'bool', '1', 'Scoring', 'Should the scoreboard resolution be measured in seconds instead of minutes?'),
-    ('memory_limit', '524288', 'int', '0', 'Judging', 'Maximum memory usage (in kB) by submissions. This includes the shell which starts the compiled solution and also any interpreter like the Java VM, which takes away approx. 300MB! Can be overridden per problem.'),
-    ('output_limit', '4096', 'int', '0', 'Judging', 'Maximum output (in kB) submissions may generate. Any excessive output is truncated, so this should be greater than the maximum testdata output.'),
-    ('process_limit', '64', 'int', '0', 'Judging', 'Maximum number of processes that the submission is allowed to start (including shell and possibly interpreters).'),
-    ('sourcesize_limit', '256', 'int', '1', 'Judging', 'Maximum source code size (in kB) of a submission. This setting should be kept in sync with that in "etc/submit-config.h.in".'),
-    ('sourcefiles_limit', '100', 'int', '1', 'Judging', 'Maximum number of source files in one submission. Set to one to disable multiple file submissions.'),
-    ('script_timelimit', '30', 'int', '0', 'Judging', 'Maximum seconds available for compile/compare scripts. This is a safeguard against malicious code and buggy scripts, so a reasonable but large amount should do.'),
-    ('script_memory_limit', '2097152', 'int', '0', 'Judging', 'Maximum memory usage (in kB) by compile/compare scripts. This is a safeguard against malicious code and buggy script, so a reasonable but large amount should do.'),
-    ('script_filesize_limit', '540672', 'int', '0', 'Judging', 'Maximum filesize (in kB) compile/compare scripts may write. Submission will fail with compiler-error when trying to write more, so this should be greater than any *intermediate or final* result written by compilers.'),
-    ('timelimit_overshoot', '"1s|10%"', 'string', '0', 'Judging', 'Time that submissions are kept running beyond timelimit before being killed. Specify as "Xs" for X seconds, "Y%" as percentage, or a combination of both separated by one of "+|&" for the sum, maximum, or minimum of both.'),
-    ('output_storage_limit', '50000', 'int', '0', 'Judging', 'Maximum size of error/system output stored in the database (in bytes); use "-1" to disable any limits.'),
-    ('output_display_limit', '2000', 'int', '0', 'Judging', 'Maximum size of run/diff/error/system output shown in the jury interface (in bytes); use "-1" to disable any limits.'),
-    ('lazy_eval_results', '1', 'bool', '0', 'Judging', 'Lazy evaluation of results? If enabled, stops judging as soon as a highest priority result is found, otherwise always all testcases will be judged.'),
-    ('judgehost_warning', '30', 'int', '0', 'Judging', 'Time in seconds after a judgehost last checked in before showing its status as "warning".'),
-    ('judgehost_critical', '120', 'int', '0', 'Judging', 'Time in seconds after a judgehost last checked in before showing its status as "critical".'),
-    ('diskspace_error', '1048576', 'int', '0', 'Judging', 'Minimum free disk space (in kB) on judgehosts.'),
-    ('update_judging_seconds', '0', 'int', '0', 'Judging', 'Post updates to a judging every X seconds. Set to 0 to update after each judging_run.'),
-    ('default_compare', '"compare"', 'string', '0', 'Judging', 'The script used to compare outputs if no special compare script specified.'),
-    ('default_run', '"run"', 'string', '0', 'Judging', 'The script used to run submissions if no special run script specified.'),
-    ('clar_categories', '{"general":"General issue","tech":"Technical issue"}', 'array_keyval', '1', 'Clarification', 'List of additional clarification categories'),
-    ('clar_answers', '["No comment","Read the problem statement carefully"]', 'array_val', '0', 'Clarification', 'List of predefined clarification answers'),
-    ('clar_queues', '{}', 'array_keyval', '1', 'Clarification', 'List of clarification queues'),
-    ('clar_default_problem_queue', '""', 'string', '1', 'Clarification', 'Queue to assign to problem clarifications'),
-    ('show_pending', '0', 'bool', '1', 'Display', 'Show pending submissions on the scoreboard?'),
-    ('show_flags', '1', 'bool', '1', 'Display', 'Show country flags in the interfaces?'),
-    ('show_affiliations', '1', 'bool', '1', 'Display', 'Show affiliation names in the interfaces?'),
-    ('show_affiliation_logos', '0', 'bool', '1', 'Display', 'Show affiliation logos on the scoreboard?'),
-    ('show_teams_submissions', '1', 'bool', '1', 'Display', 'Show problem columns with submission information on the public and team scoreboards?'),
-    ('show_compile', '2', 'int', '1', 'Display', 'Show compile output in team webinterface? Choices: 0 = never, 1 = only on compilation error(s), 2 = always.'),
-    ('show_sample_output', '0', 'bool', '1', 'Display', 'Should teams be able to view a diff of their and the reference output to sample testcases?'),
-    ('show_balloons_postfreeze', '0', 'bool', '1', 'Display', 'Give out balloon notifications after the scoreboard has been frozen?'),
-    ('show_relative_time', '0', 'bool', '1', 'Display', 'Print times of contest events relative to contest start (instead of absolute).'),
-    ('time_format', '"%H:%M"', 'string', '0', 'Display', 'The format used to print times. For formatting options see the PHP \'strftime\' function.'),
-    ('thumbnail_size', '128', 'int', '0', 'Display', 'Maximum width/height of a thumbnail for uploaded testcase images.'),
-    ('show_limits_on_team_page', '0', 'bool', '1', 'Display', 'Show time and memory limit on the team problems page'),
-    ('team_column_width', '0', 'int', '0', 'Display', 'Maximum width of team column on scoreboard. Leave 0 for no maximum.'),
-    ('enable_printing', '0', 'bool', '1', 'Misc', 'Enable teams and jury to send source code to a printer via the DOMjudge web interface.'),
-    ('registration_category_name', '""', 'string', '1', 'Misc', 'Team category for users that register themselves with the system. Self-registration is disabled if this field is left empty.'),
-    ('data_source', '0', 'int', '0', 'Misc', 'Source of data. Choices: 0 = all local, 1 = configuration data external, 2 = configuration and live data external'),
-    ('auth_methods', '[]', 'array_val', '0', 'Authentication', 'List of allowed additional authentication methods. Supported values are \'ipaddress\', and \'xheaders\''),
-    ('allow_openid_auth', '0', 'bool', '1', 'Authentication', 'Allow users to log in using OpenID'),
-    ('openid_autocreate_team', '1', 'bool', '1', 'Authentication', 'Create a team for each user that logs in with OpenID'),
-    ('openid_provider', '"https://accounts.google.com"', 'string', '1', 'Authentication', 'OpenID Provider URL'),
-    ('openid_clientid', '""', 'string', '0','Authentication', 'OpenID Connect client id'),
-    ('openid_clientsecret', '""', 'string', '0', 'Authentication', 'OpenID Connect client secret'),
-    ('ip_autologin', '0', 'bool', '0', 'Authentication', 'Enable to skip the login page when using IP authentication.')
-SQL
-        );
-
         // Data for table `executable`
         $this->addSql(<<<SQL
 INSERT INTO `executable` (`execid`, `description`, `type`) VALUES
