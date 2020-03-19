@@ -164,7 +164,7 @@ fi
 set -x
 
 # Check the Contest API:
-$CHECK_API -n -C -e -a 'strict=1' http://admin:$ADMINPASS@localhost/domjudge/api
+PS4='(${BASH_SOURCE}:${LINENO}): - [$?] $ ' /bin/bash -x $CHECK_API -n -C -e -a 'strict=1' http://admin:$ADMINPASS@localhost/domjudge/api
 
 # Validate the eventfeed against the api(currently ignore failures)
 cd ${DIR}/misc-tools
