@@ -297,7 +297,7 @@ class EventLogService implements ContainerAwareInterface
             $ids = [$ids];
         }
 
-        $idsCombined = $ids === null ? null : is_array($ids) ? json_encode($ids) : $ids;
+        $idsCombined = $ids === null ? null : (is_array($ids) ? json_encode($ids) : $ids);
 
         // State is a special case, as it works without an ID
         if ($type !== 'state' && count(array_filter($ids)) !== count($dataIds)) {
