@@ -122,8 +122,9 @@ class PublicController extends BaseController
             $data['hide_menu'] = true;
         }
 
+        $data['current_contest'] = $contest;
+
         if ($request->isXmlHttpRequest()) {
-            $data['current_contest'] = $contest;
             return $this->render('partials/scoreboard.html.twig', $data, $response);
         }
         return $this->render('public/scoreboard.html.twig', $data, $response);
