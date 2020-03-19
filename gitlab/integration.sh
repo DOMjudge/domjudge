@@ -137,7 +137,7 @@ if [ $NUMNOTVERIFIED -ne 2 ] || [ $NUMNOMAGIC -ne 0 ] || [ $NUMSUBS -gt $((NUMVE
 	echo "(expected 2 submissions to be unverified, but all to be processed)"
 	echo "Of these $NUMNOMAGIC do not have the EXPECTED_RESULTS string (should be 0)."
 	curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier?verify_multiple=1"
-	for i in /opt/domjudge/judgehost/judgings/*/*/*/compile.out; do
+	for i in /opt/domjudge/judgehost/judgings/*/*/*/*/*/compile.out; do
 		echo $i;
 		head -n 100 $i;
 		dir=$(dirname $i)
