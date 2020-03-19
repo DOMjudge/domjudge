@@ -21,6 +21,9 @@ cat ~/.my.cnf
 echo "CREATE DATABASE IF NOT EXISTS \`domjudge\` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;" | mysql
 echo "GRANT SELECT, INSERT, UPDATE, DELETE ON \`domjudge\`.* TO 'domjudge'@'%' IDENTIFIED BY 'domjudge';" | mysql
 
+# Increase max_allowed_packet for following connections.
+echo "SET GLOBAL max_allowed_packet = 100*1024*1024;" | mysql
+
 # Generate a dbpasswords file
 echo "dummy:${MARIADB_PORT_3306_TCP_ADDR}:domjudge:domjudge:domjudge" > etc/dbpasswords.secret
 
