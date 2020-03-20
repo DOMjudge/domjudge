@@ -9,6 +9,7 @@ Version 7.1.3 - DEV
  - Fix arguments to UploadedFile().
  - Fix submit help to work when baseurl is incorrect.
  - Fix user IP address field to accept IPv6 addresses.
+ - Fix static scoreboard contest selection feature.
 
 Version 7.1.2 - 4 January 2020
 ------------------------------
