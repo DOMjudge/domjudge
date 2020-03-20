@@ -23,6 +23,18 @@ trap log_on_err ERR
 
 cd /opt/domjudge/domserver
 
+# This needs to be done before we do any submission.
+# 8 hours as a helper so we can adjust contest start/endtime
+TIMEHELP=$((8*60*60))
+# Database changes to make the REST API and event feed match better.
+cat <<EOF | mysql domjudge
+DELETE FROM clarification;
+UPDATE contest SET starttime  = UNIX_TIMESTAMP()-$TIMEHELP WHERE cid = 2;
+UPDATE contest SET freezetime = UNIX_TIMESTAMP()+15        WHERE cid = 2;
+UPDATE contest SET endtime    = UNIX_TIMESTAMP()+$TIMEHELP WHERE cid = 2;
+UPDATE team_category SET visible = 1;
+EOF
+
 ADMINPASS=$(cat etc/initial_admin_password.secret)
 
 # configure and restart php-fpm
@@ -51,17 +63,6 @@ echo -e "\033[0m"
 PATH=${PATH}:${HOME}/vendor/bin
 git clone --depth=1 https://github.com/DOMjudge/domjudge-scripts.git
 CHECK_API=${HOME}/domjudge-scripts/contest-api/check-api.sh
-
-# 8hours as a helper so we can adjust contest start/endtime
-TIMEHELP=$((8*60*60))
-# Database changes to make the REST API and event feed match better.
-cat <<EOF | mysql domjudge
-DELETE FROM clarification;
-UPDATE contest SET starttime  = UNIX_TIMESTAMP()-$TIMEHELP WHERE cid = 2;
-UPDATE contest SET freezetime = UNIX_TIMESTAMP()+15        WHERE cid = 2;
-UPDATE contest SET endtime    = UNIX_TIMESTAMP()+$TIMEHELP WHERE cid = 2;
-UPDATE team_category SET visible = 1;
-EOF
 
 # start judgedaemon
 cd /opt/domjudge/judgehost/
