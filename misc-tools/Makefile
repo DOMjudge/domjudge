@@ -6,7 +6,7 @@ include $(TOPDIR)/Makefile.global
 TARGETS =
 OBJECTS =
 
-SUBST_DOMSERVER = judging_statistics balloons \
+SUBST_DOMSERVER = judging_statistics balloons fix_permissions \
                   simulate_contest create_accounts multi_rejudge
 
 SUBST_JUDGEHOST = create_cgroups dj_make_chroot dj_run_chroot dj_make_chroot_docker

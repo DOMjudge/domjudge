@@ -1,0 +1,23 @@
+#!/bin/sh
+# @configure_input@
+
+# This script fixes permissions on webapp/var/ to make sure the
+# webserver can write there.
+
+WEBAPPDIR="@domserver_webappdir@"
+
+DOMJUDGE_USER="@DOMJUDGE_USER@"
+WEBSERVER_GROUP="@WEBSERVER_GROUP@"
+
+set -e
+
+if [ `id -u` -ne 0 ]; then
+	echo "Error: can only change permissions as root."
+	exit 1
+fi
+
+# DESTDIR may optionally be past through the environment by make.
+chown -R ${DOMJUDGE_USER}:${WEBSERVER_GROUP} ${DESTDIR}${WEBAPPDIR}/var
+chmod -R g+rwxs                              ${DESTDIR}${WEBAPPDIR}/var
+setfacl -R -m d:g::rwX                       ${DESTDIR}${WEBAPPDIR}/var
+setfacl -R -m d:u:${DOMJUDGE_USER}:rwX       ${DESTDIR}${WEBAPPDIR}/var

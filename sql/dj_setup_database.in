@@ -6,6 +6,7 @@
 
 set -e
 
+BINDIR="@domserver_bindir@"
 ETCDIR="@domserver_etcdir@"
 WEBAPPDIR="@domserver_webappdir@"
 
@@ -127,6 +128,11 @@ symfony_console()
 		DATABASE_URL=$DATABASE_URL ${WEBAPPDIR}/bin/console -v $ARG "$@"
 	else
 		${WEBAPPDIR}/bin/console -v $ARG "$@"
+	fi
+
+	# Make sure any generated cache data has the right permissions if we ran as root.
+	if [ `id -u` -eq 0 ]; then
+		${BINDIR}/fix_permissions
 	fi
 }
 
