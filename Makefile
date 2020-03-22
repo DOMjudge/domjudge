@@ -123,6 +123,8 @@ install-domserver-l:
 	-for d in cache log ; do \
 		$(INSTALL_WEBSITE) -m 0775 -d $(DESTDIR)$(domserver_webappdir)/var/$$d ; \
 	done
+# Make sure that domjudge user and webserver group can write to var/{cache,log}:
+	DESTDIR=$(DESTDIR) $(domserver_bindir)/fix_permissions
 # Special case create tmpdir here, only when FHS not enabled:
 ifneq "$(FHS_ENABLED)" "yes"
 	-$(INSTALL_WEBSITE) -m 0770 -d $(DESTDIR)$(domserver_tmpdir)
