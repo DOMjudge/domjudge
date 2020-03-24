@@ -191,6 +191,22 @@ class ScoreboardIntegrationTest extends KernelTestCase
         $this->em = null; // avoid memory leaks
     }
 
+    public function testScoreboardsEmpty()
+    {
+        $this->recalcScoreCaches();
+
+        $expected_scores = [
+            [ 'team' => $this->teams[0], 'rank' => 1, 'solved' => 0, 'time' => 0 ],
+            [ 'team' => $this->teams[1], 'rank' => 1, 'solved' => 0, 'time' => 0 ],
+        ];
+
+        foreach ([ false, true ] as $jury) {
+            $scoreboard = $this->ss->getScoreboard($this->contest, $jury);
+            $this->assertScoresMatch($expected_scores, $scoreboard);
+            $this->assertFTSMatch([], $scoreboard);
+        }
+    }
+
     public function testScoreboardsNoFreeze()
     {
         $this->contest->setFreezetimeString(null);
