@@ -96,6 +96,7 @@ const int soft_timelimit = 1;
 const int hard_timelimit = 2;
 
 const struct timespec killdelay = { 0, 100000000L }; /* 0.1 seconds */
+const struct timespec cg_delete_delay = { 0, 10000000L }; /* 0.01 seconds */
 
 extern int errno;
 
@@ -584,6 +585,7 @@ void cgroup_delete()
 		if ( cgroup_add_controller(cg, "cpuset")==NULL ) error(0,"cgroup_add_controller cpuset");
 	}
 	/* Clean up our cgroup */
+	nanosleep(&cg_delete_delay,NULL);
 	ret = cgroup_delete_cgroup_ext(cg, CGFLAG_DELETE_IGNORE_MIGRATION | CGFLAG_DELETE_RECURSIVE);
 	if ( ret!=0 ) error(ret,"deleting cgroup");
 
