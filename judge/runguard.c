@@ -578,10 +578,10 @@ void cgroup_delete()
 	if (!cg) error(0,"cgroup_new_cgroup");
 
 	if ( cgroup_add_controller(cg, "cpuacct")==NULL ) error(0,"cgroup_add_controller cpuacct");
-	if ( cgroup_add_controller(cg, "memory")==NULL ) error(0,"cgroup_add_controller cpuacct");
+	if ( cgroup_add_controller(cg, "memory")==NULL ) error(0,"cgroup_add_controller memory");
 
 	if ( cpuset!=NULL && strlen(cpuset)>0 ) {
-		if ( cgroup_add_controller(cg, "cpuset")==NULL ) error(0,"cgroup_add_controller cpuacct");
+		if ( cgroup_add_controller(cg, "cpuset")==NULL ) error(0,"cgroup_add_controller cpuset");
 	}
 	/* Clean up our cgroup */
 	ret = cgroup_delete_cgroup_ext(cg, CGFLAG_DELETE_IGNORE_MIGRATION | CGFLAG_DELETE_RECURSIVE);
