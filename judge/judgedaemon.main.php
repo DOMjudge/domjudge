@@ -1140,7 +1140,7 @@ function fetchTestcase(array $row, $workdirpath, $rank): array
     }
     // Only log downloading input and/or output testdata once.
     if (count($fetched) > 0) {
-        logmsg(LOG_INFO, "Fetched new " . implode($fetched, ',') .
+        logmsg(LOG_INFO, "Fetched new " . implode(',', $fetched) .
             " testcase $rank for problem p$row[probid]");
     }
     return $tcfile;
