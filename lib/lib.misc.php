@@ -772,7 +772,7 @@ function eventlog(string $type, $dataids, string $action, $cid = null, $json = n
 
     // Make a combined string to keep track of the data ID's
     $dataidsCombined = json_encode($dataids);
-    $idsCombined = $ids === null ? null : is_array($ids) ? json_encode($ids) : $ids;
+    $idsCombined = $ids === null ? null : (is_array($ids) ? json_encode($ids) : $ids);
 
     logmsg(LOG_DEBUG, "eventlog arguments: '$type' '$dataidsCombined' '$action' '$cid' '$json' '$idsCombined'");
 
@@ -968,7 +968,7 @@ function read_API_credentials()
         error("Cannot read REST API credentials file " . $credfile);
     }
     foreach ($credentials as $credential) {
-        if ($credential{0} == '#') {
+        if ($credential[0] == '#') {
             continue;
         }
         list($endpointID, $resturl, $restuser, $restpass) = preg_split("/\s+/", trim($credential));
