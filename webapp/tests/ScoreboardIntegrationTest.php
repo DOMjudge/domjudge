@@ -280,6 +280,20 @@ class ScoreboardIntegrationTest extends KernelTestCase
         $this->assertFTSMatch($expected_fts, $scoreboard);
     }
 
+    public function testScoreboardReproducible()
+    {
+        $this->createDefaultSubmissions();
+
+        $this->recalcScoreCaches();
+        $first = $this->ss->getScoreboard($this->contest, false);
+
+        $this->recalcScoreCaches();
+        $second = $this->ss->getScoreboard($this->contest, false);
+
+        # Using assertSame would be better, but doesn't work with objects.
+        $this->assertEquals($first, $second, 'Repeated scoreboard is equal');
+    }
+
     public function testTeamScoreboardFreezeFTS()
     {
         $this->contest->setFreezetimeString('+1:10:00');
