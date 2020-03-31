@@ -170,7 +170,8 @@ if [ $exitcode -ne 0 ] && [ ! -s compile.meta ]; then
 	cleanexit ${E_INTERNAL_ERROR:-1}
 fi
 if grep -i '^internal-error: ' compile.tmp >/dev/null 2>&1 ; then
-	grep -i '^internal-error: ' compile.tmp | sed 's/^internal-error:/\1 compile script:/i' >>compile.meta
+	grep -i '^internal-error: ' compile.tmp | \
+		sed 's/^internal-error:/internal-error: compile script:/i' >>compile.meta
 	echo "The compile script threw an internal error. Compilation output:" >compile.out
 	cat compile.tmp >>compile.out
 	cleanexit ${E_INTERNAL_ERROR:-1}
