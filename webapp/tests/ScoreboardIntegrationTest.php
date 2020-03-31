@@ -144,7 +144,7 @@ class ScoreboardIntegrationTest extends KernelTestCase
         for($i=0; $i<self::NUM_TEAMS; $i++) {
             $this->teams[$i] = new Team();
             $this->teams[$i]
-                ->setName('Team '.$i)
+                ->setName(self::CONTEST_NAME.' team '.$i)
                 ->setCategory($category);
             $this->em->persist($this->teams[$i]);
        }
@@ -153,7 +153,7 @@ class ScoreboardIntegrationTest extends KernelTestCase
             $letter = chr(ord('a') + $i);
             $this->problems[$i] = new Problem();
             $this->problems[$i]
-                ->setName('Problem '.$letter)
+                ->setName(self::CONTEST_NAME.' problem '.$letter)
                 ->setTimelimit(5);
 
             $cp = new ContestProblem();
