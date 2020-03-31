@@ -21,13 +21,16 @@ endif
 install-docs: docs
 	$(call install_tree,$(DESTDIR)$(domjudge_docdir)/manual,build/html)
 
+maintainer-install: docs
+	ln -sf build/html
+
 clean-l:
 	rm -rf build
 
 distclean-l:
-	-rm -f $(SUBST_CONFIGS)
+	-rm -f $(SUBST_CONFIGS) html
 
 html:
 	sphinx-build -M $@ . build
 
-.PHONY: docs distdocs install-docs html
+.PHONY: docs distdocs install-docs maintainer-install html
