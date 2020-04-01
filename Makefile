@@ -221,6 +221,7 @@ maintainer-install: build domserver-create-dirs judgehost-create-dirs webapp/.en
 	ln -sf $(CURDIR)/judge/runpipe  $(judgehost_bindir)
 	ln -sf $(CURDIR)/sql/dj_setup_database $(domserver_bindir)
 	$(MAKE) -C misc-tools maintainer-install
+	$(MAKE) -C doc/manual maintainer-install
 # Create tmpdir and make tmpdir, submitdir writable for webserver,
 # because judgehost-create-dirs sets wrong permissions:
 	mkdir -p $(domserver_tmpdir)
