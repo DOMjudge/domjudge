@@ -143,8 +143,9 @@
                             {% if score.team.affiliation.country %}
                                 {% set countryFlag = 'images/countries/' ~ score.team.affiliation.country ~ '.png' %}
                                 {% if countryFlag | assetExists %}
-                                    <img src="{{ asset(countryFlag) }}" alt="{{ alpha3_countries[score.team.affiliation.country] }}"
-                                         title="{{ alpha3_countries[score.team.affiliation.country] }}" class="countryflag"/>
+                                    <img loading="lazy" class="countryflag"
+                                         src="{{ asset(countryFlag) }}" alt="{{ alpha3_countries[score.team.affiliation.country] }}"
+                                         title="{{ alpha3_countries[score.team.affiliation.country] }}">
                                 {% else %}
                                     {{ alpha3_countries[score.team.affiliation.country] }}
                                 {% endif %}
@@ -167,8 +168,9 @@
                             {% endif %}
                             {% set affiliationImage = 'images/affiliations/' ~ affiliationId ~ '.png' %}
                             {% if affiliationImage | assetExists %}
-                                <img src="{{ asset(affiliationImage) }}" alt="{{ score.team.affiliation.name }}"
-                                     title="{{ score.team.affiliation.name }}" class="affiliation-logo">
+                                <img loading="lazy" class="affiliation-logo"
+                                     src="{{ asset(affiliationImage) }}" alt="{{ score.team.affiliation.name }}"
+                                     title="{{ score.team.affiliation.name }}">
                             {% else %}
                                 {{ affiliationId }}
                             {% endif %}

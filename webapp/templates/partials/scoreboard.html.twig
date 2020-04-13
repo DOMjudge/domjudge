@@ -50,8 +50,9 @@
                                     <li class="list-group-item">
                                         {% set affiliationLogo = 'images/affiliations/' ~ affiliation.id ~ '.png' %}
                                         {% if affiliationLogo | assetExists %}
-                                            <img src="{{ asset(affiliationLogo) }}" alt="{{ affiliation.name }}"
-                                                 title="{{ affiliation.name }}" class="affiliation-logo"/>
+                                            <img loading="lazy" class="affiliation-logo"
+                                                 src="{{ asset(affiliationLogo) }}" alt="{{ affiliation.name }}"
+                                                 title="{{ affiliation.name }}">
                                         {% endif %}
                                         {{ affiliation.name }}
                                     </li>
