@@ -1046,7 +1046,7 @@ class ScoreboardService
     {
         $queryBuilder = $this->em->createQueryBuilder()
             ->from(ContestProblem::class, 'cp')
-            ->select('cp, partial p.{probid,externalid,name}')
+            ->select('cp, partial p.{probid,externalid,name,problemtext_type}')
             ->innerJoin('cp.problem', 'p')
             ->andWhere('cp.allowSubmit = 1')
             ->andWhere('cp.contest = :contest')
