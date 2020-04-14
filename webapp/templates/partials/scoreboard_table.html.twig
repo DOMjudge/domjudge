@@ -66,7 +66,7 @@
                 {% if not static %}
                     {% if jury %}
                         {% set link = path('jury_problem', {'probId': problem.probid}) %}
-                    {% elseif problem.problem.hasProblemtext %}
+                    {% elseif problem.problem.problemtextType is not empty %}
                         {% if public %}
                             {% set link = path('public_problem_text', {probId: problem.probid}) %}
                             {% set target = '_blank' %}
