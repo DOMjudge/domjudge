@@ -14,6 +14,9 @@ Version 7.2.1 - DEV
  - Various small fixes to the build/install system.
  - Fix user IP address field to accept IPv6 addresses.
  - Fix and document static scoreboard contest selection feature.
+ - Fix a sed error message on internal compile error. 
+ - Fix link to documentation from the admin index page.
+ - Fix problem text links from scoreboard header.
 
 Version 7.2.0 - 4 January 2020
 ------------------------------
