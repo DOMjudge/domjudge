@@ -7,6 +7,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Swagger\Annotations as SWG;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -37,7 +38,7 @@ class ExecutableController extends AbstractFOSRestController
      * @param string $id
      * @return array|string|null
      * @throws \Doctrine\ORM\NonUniqueResultException
-     * @IsGranted({"ROLE_JURY", "ROLE_JUDGEHOST"})
+     * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST')")
      * @Rest\Get("/{id}")
      * @SWG\Parameter(ref="#/parameters/id")
      * @SWG\Response(

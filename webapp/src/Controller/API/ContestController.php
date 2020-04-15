@@ -17,6 +17,7 @@ use JMS\Serializer\Metadata\PropertyMetadata;
 use Metadata\MetadataFactoryInterface;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Swagger\Annotations as SWG;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -304,7 +305,7 @@ class ContestController extends AbstractRestController
      * Get the event feed for the given contest
      * @Rest\Get("/{cid}/event-feed")
      * @SWG\Get(produces={"application/x-ndjson"})
-     * @IsGranted({"ROLE_JURY", "ROLE_API_READER"})
+     * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_API_READER')")
      * @param Request                  $request
      * @param string                   $cid
      * @param MetadataFactoryInterface $metadataFactory

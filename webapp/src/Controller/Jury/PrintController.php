@@ -9,7 +9,7 @@ use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Utils\Printing;
 use Doctrine\ORM\EntityManagerInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -19,7 +19,7 @@ use Symfony\Component\Routing\Annotation\Route;
  * Class PrintController
  *
  * @Route("/jury/print")
- * @IsGranted({"ROLE_JURY", "ROLE_BALLOON"})
+ * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_BALLOON')")
  *
  * @package App\Controller\Jury
  */

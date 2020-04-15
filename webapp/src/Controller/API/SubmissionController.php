@@ -16,6 +16,7 @@ use Doctrine\ORM\QueryBuilder;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Swagger\Annotations as SWG;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -55,7 +56,7 @@ class SubmissionController extends AbstractRestController
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
      * @Rest\Get("")
-     * @IsGranted({"ROLE_JURY", "ROLE_JUDGEHOST", "ROLE_API_READER"})
+     * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST') or is_granted('ROLE_API_READER')")
      * @SWG\Response(
      *     response="200",
      *     description="Returns all the submissions for this contest",
@@ -91,7 +92,7 @@ class SubmissionController extends AbstractRestController
      * @return \Symfony\Component\HttpFoundation\Response
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @Rest\Get("/{id}")
-     * @IsGranted({"ROLE_JURY", "ROLE_JUDGEHOST", "ROLE_API_READER"})
+     * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST') or is_granted('ROLE_API_READER')")
      * @SWG\Response(
      *     response="200",
      *     description="Returns the given submission for this contest",
@@ -312,7 +313,7 @@ class SubmissionController extends AbstractRestController
     /**
      * Get the source code of all the files for the given submission
      * @Rest\Get("/{id}/source-code")
-     * @IsGranted({"ROLE_JUDGEHOST", "ROLE_JURY"})
+     * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST')")
      * @param Request $request
      * @param string  $id
      * @return array

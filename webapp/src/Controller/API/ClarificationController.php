@@ -7,6 +7,7 @@ use Doctrine\ORM\QueryBuilder;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Swagger\Annotations as SWG;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -26,7 +27,7 @@ class ClarificationController extends AbstractRestController
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
      * @Rest\Get("")
-     * @IsGranted({"ROLE_JURY", "ROLE_JUDGEHOST", "ROLE_API_READER"})
+     * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST') or is_granted('ROLE_API_READER')")
      * @SWG\Response(
      *     response="200",
      *     description="Returns all the clarifications for this contest",
@@ -57,7 +58,7 @@ class ClarificationController extends AbstractRestController
      * @return \Symfony\Component\HttpFoundation\Response
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @Rest\Get("/{id}")
-     * @IsGranted({"ROLE_JURY", "ROLE_JUDGEHOST", "ROLE_API_READER"})
+     * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST') or is_granted('ROLE_API_READER')")
      * @SWG\Response(
      *     response="200",
      *     description="Returns the given clarification for this contest",
