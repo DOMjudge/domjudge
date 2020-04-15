@@ -11,6 +11,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Swagger\Annotations as SWG;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -57,7 +58,7 @@ class AwardsController extends AbstractRestController
      * @param Request $request
      * @return array
      * @Rest\Get("")
-     * @IsGranted({"ROLE_JURY", "ROLE_API_READER"})
+     * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_API_READER')")
      * @SWG\Response(
      *     response="200",
      *     description="Returns the current teams qualifying for each award",

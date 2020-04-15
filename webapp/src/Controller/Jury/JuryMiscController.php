@@ -15,6 +15,7 @@ use App\Service\ScoreboardService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\Expr\Join;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -55,7 +56,7 @@ class JuryMiscController extends BaseController
 
     /**
      * @Route("", name="jury_index")
-     * @IsGranted({"ROLE_JURY", "ROLE_BALLOON"})
+     * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_BALLOON')")
      */
     public function indexAction(Request $request)
     {
@@ -65,7 +66,7 @@ class JuryMiscController extends BaseController
 
     /**
      * @Route("/updates", methods={"GET"}, name="jury_ajax_updates")
-     * @IsGranted({"ROLE_JURY", "ROLE_BALLOON"})
+     * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_BALLOON')")
      */
     public function updatesAction(Request $request)
     {
