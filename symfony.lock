@@ -385,6 +385,9 @@
     "symfony/dotenv": {
         "version": "v4.3.2"
     },
+    "symfony/error-handler": {
+        "version": "v4.4.7"
+    },
     "symfony/event-dispatcher": {
         "version": "v4.3.2"
     },
@@ -567,9 +570,6 @@
         "version": "v1.1.6"
     },
     "symfony/stopwatch": {
-        "version": "v4.3.2"
-    },
-    "symfony/templating": {
         "version": "v4.3.2"
     },
     "symfony/translation-contracts": {
