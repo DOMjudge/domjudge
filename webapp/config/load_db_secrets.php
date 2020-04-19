@@ -14,7 +14,7 @@ function get_db_url()
     }
 
     foreach ($db_credentials as $line) {
-        if ($line{0} == '#') {
+        if ($line[0] == '#') {
             continue;
         }
         list($dummy, $host, $db, $user, $pass) = explode(':', trim($line));

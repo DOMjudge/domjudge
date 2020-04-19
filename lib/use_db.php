@@ -25,7 +25,7 @@ function setup_database_connection()
     }
 
     foreach ($credentials as $credential) {
-        if ($credential{0} == '#') {
+        if ($credential[0] == '#') {
             continue;
         }
         list($priv, $host, $db, $user, $pass) =

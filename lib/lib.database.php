@@ -149,7 +149,7 @@ class db
                 throw new BadMethodCallException("Not enough arguments");
             }
             $val = array_shift($argv);
-            switch ($part{0}) {
+            switch ($part[0]) {
                 case 'A':
                     if (!is_array($val) || !$val) {
                         $backtrace = debug_backtrace();
@@ -165,7 +165,7 @@ class db
                             . "'$key $query')! $callsite"
                         );
                     }
-                    $GLOBALS['MODE'] = $part{1};
+                    $GLOBALS['MODE'] = $part[1];
                     $query .= implode(', ', array_map(array($this, 'val2sql'), $val));
                     unset($GLOBALS['MODE']);
                     $query .= substr($part, 2);
@@ -177,7 +177,7 @@ class db
                     }
                     $separator = ', ';
                     $skip = 1;
-                    if (strlen($part) > 1 && $part{1} == 'S') {
+                    if (strlen($part) > 1 && $part[1] == 'S') {
                         $separator = ' AND ';
                         $skip = 2;
                     }
@@ -191,7 +191,7 @@ class db
                 case 'f':
                 case 'l':
                 case '.':
-                    $query .= $this->val2sql($val, $part{0});
+                    $query .= $this->val2sql($val, $part[0]);
                     $query .= substr($part, 1);
                     break;
                 case '_': // eat one argument
@@ -199,7 +199,7 @@ class db
                     break;
                 default:
                     throw new InvalidArgumentException(
-                        "Unknown %-code: " . $part{0}
+                        "Unknown %-code: " . $part[0]
                     );
             }
         }
