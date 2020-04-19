@@ -722,7 +722,7 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
         $split = explode("\n", $this->getBody());
         $newBody = '';
         foreach ($split as $line) {
-            if (strlen($line) > 0 && $line{0} != '>') {
+            if (strlen($line) > 0 && $line[0] != '>') {
                 $newBody .= $line . ' ';
             }
         }

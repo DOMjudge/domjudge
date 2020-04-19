@@ -29,7 +29,7 @@ function read_credentials()
         error("Cannot read REST API credentials file " . $credfile);
     }
     foreach ($credentials as $credential) {
-        if ($credential{0} == '#') {
+        if ($credential[0] == '#') {
             continue;
         }
         list($endpointID, $resturl, $restuser, $restpass) = preg_split("/\s+/", trim($credential));
