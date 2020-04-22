@@ -1,8 +1,11 @@
 # Guidelines for contributing to DOMjudge
 
 Thanks for reading our guidelines for contributing to the DOMjudge
-project. We welcome questions, suggestions, bug reports and pull
+project. We welcome all questions, suggestions, bug reports and pull
 requests. See below for the preferred ways to report these.
+
+Further below you'll find some hints on where to start for first-time
+contributors.
 
 ## Reporting bugs and feature requests
 
@@ -44,19 +47,26 @@ Also consider making your feature optional using a configuration setting.
 
 ## Starting to contribute
 
-If you are interested in starting to contribute to DOMjudge, then the
-following are some pointers.
+If you are interested in starting to contribute to DOMjudge, you are
+most welcome. The following are some pointers.
 
 First, install and configure the development version of DOMjudge.
-Either directly from the git reposity, see the [developer information](https://www.domjudge.org/docs/admin-manual-11.html)
+Either directly from the git reposity, see the [developer information](https://www.domjudge.org/docs/manual/develop.html)
 section in the admin manual, or via the [contributor docker image](https://github.com/DOMjudge/domjudge-packaging/tree/master/docker-contributor).
 If you follow the admin manual for installation, this is also a great
 way to verify that the documentation is clear and complete, and to
 report anything that is not.
 
-Start hacking on your own preferred feature(s), or check the list of [good first issues](https://github.com/DOMjudge/domjudge/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22).
-We encourage you to leave a comment on the issue or contact us to let us know
-you're working on a feature.
-That way we can suggest good ways to implement it, and whether it would
-be useful for inclusion in the project. See also submitting pull requests
-above.
+What to work on? Of course you can start hacking on your own preferred
+feature. It's also very helpful to perform an installation of DOMjudge
+and see whether our documentation of this can be improved. Or to review
+the open issues on the [issue tracker](https://github.com/DOMjudge/domjudge/issues)
+and find a way to reproduce them or provide ideas for a solution.
+
+The list of [good first issues](https://github.com/DOMjudge/domjudge/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22).
+shows items that are particularly well suites for first-time contributors
+to DOMjudge. But of course feel free to start on other items on the issue
+tracker as well!
+
+We encourage you to leave a comment on the issue or mention it on Slack that
+you're working on something.
