@@ -9,17 +9,24 @@ use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 
 class JuryPrintTest extends WebTestCase
 {
+    private $client;
+
+    protected function setUp()
+    {
+        self::ensureKernelShutdown();
+        $this->client = self::createClient();
+    }
+
     private function loginHelper($username, $password, $redirectPage, $responseCode)
     {
-        $client = self::createClient();
-        $crawler = $client->request('GET', '/login');
+        $crawler = $this->client->request('GET', '/login');
 
         # load login page
-        $response = $client->getResponse();
+        $response = $this->client->getResponse();
         $message = var_export($response, true);
         $this->assertEquals(200, $response->getStatusCode(), $message);
 
-        $csrf_token = $client->getContainer()->get('security.csrf.token_manager')->getToken('authenticate');
+        $csrf_token = $this->client->getContainer()->get('security.csrf.token_manager')->getToken('authenticate');
 
         # submit form
         $button = $crawler->selectButton('Sign in');
@@ -28,46 +35,45 @@ class JuryPrintTest extends WebTestCase
             '_password' => $password,
             '_csrf_token' => $csrf_token,
         ));
-        $client->followRedirects();
-        $crawler = $client->submit($form);
-        $response = $client->getResponse();
-        $client->followRedirects(false);
+        $this->client->followRedirects();
+        $crawler = $this->client->submit($form);
+        $response = $this->client->getResponse();
+        $this->client->followRedirects(false);
 
         # check redirected to $redirectPage
         $message = var_export($response, true);
         $this->assertEquals($responseCode, $response->getStatusCode(), $message);
-        $this->assertEquals($redirectPage, $client->getRequest()->getUri(), $message);
+        $this->assertEquals($redirectPage, $this->client->getRequest()->getUri(), $message);
 
-        return $client;
+        return $this->client;
     }
 
     // This just injects a user object into the session so symfony will think we're logged in
     // It gets around the problem for now of trying to navigate to two legacy pages in a single
     // test(login index + anything else)
-    private function logIn($client)
+    private function logIn()
     {
-        $session = $client->getContainer()->get('session');
+        $session = $this->client->getContainer()->get('session');
 
         $firewallName = 'main';
         $firewallContext = 'main';
 
-        $em = $client->getContainer()->get('doctrine.orm.entity_manager');
+        $em = $this->client->getContainer()->get('doctrine.orm.entity_manager');
         $user = $em->getRepository(User::class)->findOneBy(['username' => 'dummy']);
         $token = new UsernamePasswordToken($user, null, $firewallName, array('ROLE_JURY'));
         $session->set('_security_'.$firewallContext, serialize($token));
         $session->save();
 
         $cookie = new Cookie($session->getName(), $session->getId());
-        $client->getCookieJar()->set($cookie);
+        $this->client->getCookieJar()->set($cookie);
     }
 
     public function testPrintingDisabledJuryIndexPage()
     {
-        $client = self::createClient();
-        $this->logIn($client);
-        $crawler = $client->request('GET', '/jury');
+        $this->logIn();
+        $crawler = $this->client->request('GET', '/jury');
 
-        $response = $client->getResponse();
+        $response = $this->client->getResponse();
         $message = var_export($response, true);
         $this->assertEquals(200, $response->getStatusCode(), $message);
         $this->assertEquals(0, $crawler->filter('a:contains("Print")')->count());
@@ -75,11 +81,10 @@ class JuryPrintTest extends WebTestCase
 
     public function testPrintingDisabledAccessDenied()
     {
-        $client = self::createClient();
-        $this->logIn($client);
-        $crawler = $client->request('GET', '/jury/print');
+        $this->logIn();
+        $crawler = $this->client->request('GET', '/jury/print');
 
-        $response = $client->getResponse();
+        $response = $this->client->getResponse();
         $message = var_export($response, true);
         $this->assertEquals(403, $response->getStatusCode(), $message);
 

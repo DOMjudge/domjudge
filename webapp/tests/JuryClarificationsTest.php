@@ -9,12 +9,19 @@ use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 
 class JuryClarificationsTest extends WebTestCase
 {
+    private $client;
+
+    protected function setUp()
+    {
+        self::ensureKernelShutdown();
+        $this->client = self::createClient();
+    }
+
     public function testJuryRedirectToLogin()
     {
-        $client = self::createClient();
-        $client->request('GET', '/jury');
+        $this->client->request('GET', '/jury');
 
-        $response = $client->getResponse();
+        $response = $this->client->getResponse();
         $message = var_export($response, true);
         $this->assertEquals(302, $response->getStatusCode(), $message);
         $this->assertEquals('http://localhost/login', $response->getTargetUrl(), $message);
@@ -22,15 +29,14 @@ class JuryClarificationsTest extends WebTestCase
 
     private function loginHelper($username, $password, $redirectPage, $responseCode)
     {
-        $client = self::createClient();
-        $crawler = $client->request('GET', '/login');
+        $crawler = $this->client->request('GET', '/login');
 
         # load login page
-        $response = $client->getResponse();
+        $response = $this->client->getResponse();
         $message = var_export($response, true);
         $this->assertEquals(200, $response->getStatusCode(), $message);
 
-        $csrf_token = $client->getContainer()->get('security.csrf.token_manager')->getToken('authenticate');
+        $csrf_token = $this->client->getContainer()->get('security.csrf.token_manager')->getToken('authenticate');
 
         # submit form
         $button = $crawler->selectButton('Sign in');
@@ -39,17 +45,17 @@ class JuryClarificationsTest extends WebTestCase
             '_password' => $password,
             '_csrf_token' => $csrf_token,
         ));
-        $client->followRedirects();
-        $crawler = $client->submit($form);
-        $response = $client->getResponse();
-        $client->followRedirects(false);
+        $this->client->followRedirects();
+        $crawler = $this->client->submit($form);
+        $response = $this->client->getResponse();
+        $this->client->followRedirects(false);
 
         # check redirected to $redirectPage
         $message = var_export($response, true);
         $this->assertEquals($responseCode, $response->getStatusCode(), $message);
-        $this->assertEquals($redirectPage, $client->getRequest()->getUri(), $message);
+        $this->assertEquals($redirectPage, $this->client->getRequest()->getUri(), $message);
 
-        return $client;
+        return $this->client;
     }
 
     public function testLogin()
@@ -62,30 +68,29 @@ class JuryClarificationsTest extends WebTestCase
     // This just injects a user object into the session so symfony will think we're logged in
     // It gets around the problem for now of trying to navigate to two legacy pages in a single
     // test(login index + anything else)
-    private function logIn($client)
+    private function logIn()
     {
-        $session = $client->getContainer()->get('session');
+        $session = $this->client->getContainer()->get('session');
 
         $firewallName = 'main';
         $firewallContext = 'main';
 
-        $em = $client->getContainer()->get('doctrine.orm.entity_manager');
+        $em = $this->client->getContainer()->get('doctrine.orm.entity_manager');
         $user = $em->getRepository(User::class)->findOneBy(['username' => 'dummy']);
         $token = new UsernamePasswordToken($user, null, $firewallName, array('ROLE_JURY'));
         $session->set('_security_'.$firewallContext, serialize($token));
         $session->save();
 
         $cookie = new Cookie($session->getName(), $session->getId());
-        $client->getCookieJar()->set($cookie);
+        $this->client->getCookieJar()->set($cookie);
     }
 
     public function testJuryIndexPage()
     {
-        $client = self::createClient();
-        $this->logIn($client);
-        $crawler = $client->request('GET', '/jury');
+        $this->logIn();
+        $crawler = $this->client->request('GET', '/jury');
 
-        $response = $client->getResponse();
+        $response = $this->client->getResponse();
         $message = var_export($response, true);
         $this->assertEquals(200, $response->getStatusCode(), $message);
 
@@ -94,11 +99,10 @@ class JuryClarificationsTest extends WebTestCase
 
     public function testClarificationRequestIndex()
     {
-        $client = self::createClient();
-        $this->logIn($client);
-        $crawler = $client->request('GET', '/jury');
+        $this->logIn();
+        $crawler = $this->client->request('GET', '/jury');
 
-        $response = $client->getResponse();
+        $response = $this->client->getResponse();
         $message = var_export($response, true);
         $this->assertEquals(200, $response->getStatusCode(), $message);
 
@@ -106,7 +110,7 @@ class JuryClarificationsTest extends WebTestCase
         $message = var_export($link, true);
         $this->assertEquals('http://localhost/jury/clarifications', $link->getUri(), $message);
 
-        $crawler = $client->click($link);
+        $crawler = $this->client->click($link);
 
         $h3s = $crawler->filter('h3')->extract(array('_text'));
         $this->assertEquals('New requests:', $h3s[0]);
@@ -119,11 +123,10 @@ class JuryClarificationsTest extends WebTestCase
 
     public function testClarificationRequestView()
     {
-        $client = self::createClient();
-        $this->logIn($client);
-        $crawler = $client->request('GET', '/jury/clarifications/1');
+        $this->logIn();
+        $crawler = $this->client->request('GET', '/jury/clarifications/1');
 
-        $response = $client->getResponse();
+        $response = $this->client->getResponse();
         $message = var_export($response, true);
         $this->assertEquals(200, $response->getStatusCode(), $message);
 
@@ -138,15 +141,14 @@ class JuryClarificationsTest extends WebTestCase
 
     public function testClarificationRequestComposeForm()
     {
-        $client = self::createClient();
-        $this->logIn($client);
-        $crawler = $client->request('GET', '/jury/clarifications');
+        $this->logIn();
+        $crawler = $this->client->request('GET', '/jury/clarifications');
 
         $link = $crawler->selectLink('Send clarification')->link();
         $message = var_export($link, true);
         $this->assertEquals('http://localhost/jury/clarifications/send', $link->getUri(), $message);
 
-        $crawler = $client->click($link);
+        $crawler = $this->client->click($link);
 
         $h1s = $crawler->filter('h1')->extract(array('_text'));
         $this->assertEquals('Send Clarification', $h1s[0]);
