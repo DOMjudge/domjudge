@@ -1045,8 +1045,8 @@ class ProblemController extends BaseController
             throw new NotFoundHttpException(sprintf('Problem with ID %s not found', $probId));
         }
 
-        return $this->deleteEntity($request, $this->em, $this->dj, $this->kernel, $problem,
-                                   $problem->getName(), $this->generateUrl('jury_problems'));
+        return $this->deleteEntity($request, $this->em, $this->dj, $this->eventLogService, $this->kernel,
+                                   $problem, $problem->getName(), $this->generateUrl('jury_problems'));
     }
 
     /**

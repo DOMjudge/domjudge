@@ -3,6 +3,7 @@ namespace App\Utils;
 
 use App\Entity\SubmissionFile;
 use DateTime;
+use Doctrine\Common\Inflector\Inflector;
 
 /**
  * Generic utility class.
@@ -1025,5 +1026,19 @@ class Utils
             case 'G': case 'g': return (int)$size_str * 1073741824;
             default: return $size_str;
         }
+    }
+
+    /**
+     * Return the table name for the given entity
+     * @param $entity
+     *
+     * @return string
+     */
+    public static function tableForEntity($entity)
+    {
+        $class        = get_class($entity);
+        $parts        = explode('\\', $class);
+        $entityType   = $parts[count($parts) - 1];
+        return Inflector::tableize($entityType);
     }
 }

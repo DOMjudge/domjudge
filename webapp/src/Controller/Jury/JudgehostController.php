@@ -8,6 +8,7 @@ use App\Entity\Judging;
 use App\Form\Type\JudgehostsType;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
+use App\Service\EventLogService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
@@ -42,6 +43,11 @@ class JudgehostController extends BaseController
     protected $config;
 
     /**
+     * @var EventLogService
+     */
+    protected $eventLog;
+
+    /**
      * @var KernelInterface
      */
     protected $kernel;
@@ -52,18 +58,21 @@ class JudgehostController extends BaseController
      * @param EntityManagerInterface $em
      * @param DOMJudgeService        $dj
      * @param ConfigurationService   $config
+     * @param EventLogService        $eventLog
      * @param KernelInterface        $kernel
      */
     public function __construct(
         EntityManagerInterface $em,
         DOMJudgeService $dj,
         ConfigurationService $config,
+        EventLogService $eventLog,
         KernelInterface $kernel
     ) {
-        $this->em     = $em;
-        $this->dj     = $dj;
-        $this->config = $config;
-        $this->kernel = $kernel;
+        $this->em       = $em;
+        $this->dj       = $dj;
+        $this->config   = $config;
+        $this->eventLog = $eventLog;
+        $this->kernel   = $kernel;
     }
 
     /**
@@ -325,7 +334,8 @@ class JudgehostController extends BaseController
             ->getQuery()
             ->getOneOrNullResult();
 
-        return $this->deleteEntity($request, $this->em, $this->dj, $this->kernel, $judgehost, $judgehost->getHostname(), $this->generateUrl('jury_judgehosts'));
+        return $this->deleteEntity($request, $this->em, $this->dj, $this->eventLog, $this->kernel,
+                                   $judgehost, $judgehost->getHostname(), $this->generateUrl('jury_judgehosts'));
     }
 
     /**

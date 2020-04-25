@@ -9,6 +9,7 @@ use App\Entity\Language;
 use App\Entity\Problem;
 use App\Form\Type\JudgehostRestrictionType;
 use App\Service\DOMJudgeService;
+use App\Service\EventLogService;
 use Doctrine\ORM\EntityManagerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpFoundation\Request;
@@ -34,24 +35,33 @@ class JudgehostRestrictionController extends BaseController
     protected $dj;
 
     /**
+     * @var EventLogService
+     */
+    protected $eventLog;
+
+    /**
      * @var KernelInterface
      */
     protected $kernel;
 
     /**
      * JudgehostRestrictionController constructor.
+     *
      * @param EntityManagerInterface $entityManager
      * @param DOMJudgeService        $dj
+     * @param EventLogService        $eventLog
      * @param KernelInterface        $kernel
      */
     public function __construct(
         EntityManagerInterface $entityManager,
         DOMJudgeService $dj,
+        EventLogService $eventLog,
         KernelInterface $kernel
     ) {
-        $this->em = $entityManager;
-        $this->dj = $dj;
-        $this->kernel = $kernel;
+        $this->em       = $entityManager;
+        $this->dj       = $dj;
+        $this->eventLog = $eventLog;
+        $this->kernel   = $kernel;
     }
 
     /**
@@ -227,7 +237,9 @@ class JudgehostRestrictionController extends BaseController
         /** @var JudgehostRestriction $judgehostRestriction */
         $judgehostRestriction = $this->em->getRepository(JudgehostRestriction::class)->find($restrictionId);
 
-        return $this->deleteEntity($request, $this->em, $this->dj, $this->kernel, $judgehostRestriction, $judgehostRestriction->getName(), $this->generateUrl('jury_judgehost_restrictions'));
+        return $this->deleteEntity($request, $this->em, $this->dj, $this->eventLog, $this->kernel,
+                                   $judgehostRestriction, $judgehostRestriction->getName(),
+                                   $this->generateUrl('jury_judgehost_restrictions'));
     }
 
     /**

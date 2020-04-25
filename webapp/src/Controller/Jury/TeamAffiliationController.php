@@ -281,8 +281,8 @@ class TeamAffiliationController extends BaseController
             throw new NotFoundHttpException(sprintf('Team affiliation with ID %s not found', $affilId));
         }
 
-        return $this->deleteEntity($request, $this->em, $this->dj, $this->kernel, $teamAffiliation,
-                                   $teamAffiliation->getName(), $this->generateUrl('jury_team_affiliations'));
+        return $this->deleteEntity($request, $this->em, $this->dj, $this->eventLogService, $this->kernel,
+                                   $teamAffiliation, $teamAffiliation->getName(), $this->generateUrl('jury_team_affiliations'));
     }
 
     /**

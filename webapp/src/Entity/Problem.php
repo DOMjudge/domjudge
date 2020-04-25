@@ -642,7 +642,7 @@ class Problem extends BaseApiEntity
     /**
      * Get contestProblems
      *
-     * @return \Doctrine\Common\Collections\Collection
+     * @return \Doctrine\Common\Collections\Collection|ContestProblem[]
      */
     public function getContestProblems()
     {

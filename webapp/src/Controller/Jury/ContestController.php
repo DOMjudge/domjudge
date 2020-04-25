@@ -6,9 +6,11 @@ use App\Controller\BaseController;
 use App\Entity\Clarification;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
+use App\Entity\Problem;
 use App\Entity\RemovedInterval;
 use App\Entity\Submission;
 use App\Entity\Team;
+use App\Entity\TeamCategory;
 use App\Form\Type\ContestType;
 use App\Form\Type\FinalizeContestType;
 use App\Form\Type\RemovedIntervalType;
@@ -16,7 +18,9 @@ use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Utils\Utils;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\PersistentCollection;
 use Doctrine\ORM\Query\Expr\Join;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpFoundation\Request;
@@ -504,8 +508,63 @@ class ContestController extends BaseController
                 $problem->setContest($contest);
             }
 
+            // Determine the removed teams, team categories and problems.
+            // Note that we do not send out create / update events for
+            // existing / new problems, teams and team categories. This happens
+            // when someone connects to the event feed (or we have a
+            // dependent event) anyway and adding the code here would
+            // overcomplicate this function.
+            // Note that getSnapshot() returns the data as retrieved from the
+            // database
+            $getDeletedEntities = function(Collection $collection, string $idMethod) {
+                /** @var PersistentCollection $collection */
+                $deletedEntities = [];
+                foreach ($collection->getSnapshot() as $oldEntity) {
+                    $oldId = call_user_func([$oldEntity, $idMethod]);
+                    $found = false;
+                    foreach ($collection->toArray() as $newEntity) {
+                        $newId = call_user_func([$newEntity, $idMethod]);
+                        if ($newId === $oldId) {
+                            $found = true;
+                            break;
+                        }
+                    }
+
+                    if (!$found) {
+                        $deletedEntities[] = $oldEntity;
+                    }
+                }
+
+                return $deletedEntities;
+            };
+
+            /** @var Team[] $deletedTeams */
+            $deletedTeams = $getDeletedEntities($contest->getTeams(), 'getTeamid');
+            /** @var TeamCategory[] $deletedTeamCategories */
+            $deletedTeamCategories = $getDeletedEntities($contest->getTeamCategories(), 'getCategoryid');
+            /** @var ContestProblem[] $deletedProblems */
+            $deletedProblems = $getDeletedEntities($contest->getProblems(), 'getProbid');
+
             $this->saveEntity($this->em, $this->eventLogService, $this->dj, $contest,
                               $contest->getCid(), false);
+
+            $teamEndpoint         = $this->eventLogService->endpointForEntity(Team::class);
+            $teamCategoryEndpoint = $this->eventLogService->endpointForEntity(TeamCategory::class);
+            $problemEndpoint      = $this->eventLogService->endpointForEntity(Problem::class);
+
+            // TODO: cascade deletes. Maybe use getDependentEntities()?
+            foreach ($deletedTeams as $team) {
+                $this->eventLogService->log($teamEndpoint, $team->getTeamid(),
+                    EventLogService::ACTION_DELETE, $contest->getCid(), null, null, false);
+            }
+            foreach ($deletedTeamCategories as $category) {
+                $this->eventLogService->log($teamCategoryEndpoint, $category->getCategoryid(),
+                    EventLogService::ACTION_DELETE, $contest->getCid(), null, null, false);
+            }
+            foreach ($deletedProblems as $problem) {
+                $this->eventLogService->log($problemEndpoint, $problem->getProbid(),
+                    EventLogService::ACTION_DELETE, $contest->getCid(), null, null, false);
+            }
             return $this->redirect($this->generateUrl(
                 'jury_contest',
                 ['contestId' => $contest->getcid()]
@@ -536,7 +595,7 @@ class ContestController extends BaseController
             throw new NotFoundHttpException(sprintf('Contest with ID %s not found', $contestId));
         }
 
-        return $this->deleteEntity($request, $this->em, $this->dj, $this->kernel, $contest,
+        return $this->deleteEntity($request, $this->em, $this->dj, $this->eventLogService, $this->kernel, $contest,
                                    $contest->getName(), $this->generateUrl('jury_contests'));
     }
 
@@ -562,7 +621,7 @@ class ContestController extends BaseController
             );
         }
 
-        return $this->deleteEntity($request, $this->em, $this->dj, $this->kernel,
+        return $this->deleteEntity($request, $this->em, $this->dj, $this->eventLogService, $this->kernel,
                                    $contestProblem, $contestProblem->getShortname(),
                                    $this->generateUrl('jury_contest', ['contestId' => $contestId]));
     }
@@ -603,6 +662,11 @@ class ContestController extends BaseController
                 }
                 $this->saveEntity($this->em, $this->eventLogService, $this->dj, $contest,
                                   $contest->getCid(), true);
+                // Note that we do not send out create events for problems,
+                // teams and team categories for this contest. This happens
+                // when someone connects to the event feed (or we have a
+                // dependent event) anyway and adding the code here would
+                // overcomplicate this function
             });
             return $this->redirect($this->generateUrl(
                 'jury_contest',
