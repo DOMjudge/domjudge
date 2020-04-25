@@ -134,11 +134,17 @@ added kernel options. On VM hosting providers such as Google Cloud or
 DigitalOcean, ``GRUB_CMDLINE_LINUX_DEFAULT`` may be overwritten
 by other files in ``/etc/default/grub.d/``.
 
-You have now configured the system to use cgroups, but you need to create
-the actual cgroups that DOMjudge will use. For that, you can use the
-script under ``misc-tools/create_cgroups``. Edit the script to
-match your situation first. This script needs to be re-run after each
-boot (there's a systemd unit provided for this purpose).
+You have now configured the system to use cgroups. To create
+the actual cgroups that DOMjudge will use, run::
+
+  sudo systemctl enable create-cgroups
+  sudo systemctl start  create-cgroups
+
+Note that this service will automatically be started if you use the
+``domjudge-judgehost`` service, see below. Alternatively, you can
+customize the script ``judge/create_cgroups`` as required and run it
+after each boot.
+
 
 REST API credentials
 --------------------
@@ -172,3 +178,8 @@ auto-registered and will be by default enabled. If you wish to
 add a new judgehost but have it initially disabled, you can add it
 manually through the DOMjudge web interface and set it to disabled
 before starting the judgedaemon.
+
+The judgedaemon can also be run as a service by running::
+
+  sudo systemctl enable domjudge-judgehost
+  sudo systemctl start  domjudge-judgehost
