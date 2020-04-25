@@ -56,7 +56,6 @@ class SubmissionController extends AbstractRestController
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
      * @Rest\Get("")
-     * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST') or is_granted('ROLE_API_READER')")
      * @SWG\Response(
      *     response="200",
      *     description="Returns all the submissions for this contest",
@@ -92,7 +91,6 @@ class SubmissionController extends AbstractRestController
      * @return \Symfony\Component\HttpFoundation\Response
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @Rest\Get("/{id}")
-     * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST') or is_granted('ROLE_API_READER')")
      * @SWG\Response(
      *     response="200",
      *     description="Returns the given submission for this contest",
@@ -368,9 +366,11 @@ class SubmissionController extends AbstractRestController
         $queryBuilder = $this->em->createQueryBuilder()
             ->from(Submission::class, 's')
             ->join('s.contest', 'c')
+            ->join('s.team', 't')
             ->select('s')
             ->andWhere('s.valid = 1')
             ->andWhere('s.cid = :cid')
+            ->andWhere('t.enabled = 1')
             ->setParameter(':cid', $cid)
             ->orderBy('s.submitid');
 
@@ -384,6 +384,21 @@ class SubmissionController extends AbstractRestController
         // This allows us to use eventlog on too-late submissions while not exposing them in the API directly
         if (!$request->attributes->has('id') && !$request->query->has('ids')) {
             $queryBuilder->andWhere('s.submittime < c.endtime');
+        }
+
+        if (!$this->dj->checkrole('api_reader') &&
+            !$this->dj->checkrole('judgehost'))
+        {
+            $queryBuilder
+                ->join('t.category', 'cat');
+            if ($this->dj->checkrole('team')) {
+                $queryBuilder
+                    ->andWhere('cat.visible = 1 OR s.team = :team')
+                    ->setParameter('team', $this->dj->getUser()->getTeam());
+            } else {
+                // Hide all submissions made by non public teams
+                $queryBuilder->andWhere('cat.visible = 1');
+            }
         }
 
         return $queryBuilder;
