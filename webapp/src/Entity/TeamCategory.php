@@ -320,4 +320,16 @@ class TeamCategory extends BaseApiEntity
 
         return $this;
     }
+
+    /**
+     * Check if this team category belongs to the given contest
+     *
+     * @param Contest $contest
+     *
+     * @return bool
+     */
+    public function inContest(Contest $contest): bool
+    {
+        return $contest->isOpenToAllTeams() || $this->getContests()->contains($contest);
+    }
 }

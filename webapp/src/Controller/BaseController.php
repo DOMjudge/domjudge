@@ -3,12 +3,15 @@
 namespace App\Controller;
 
 use App\Entity\BaseApiEntity;
+use App\Entity\Contest;
 use App\Entity\Problem;
 use App\Entity\RankCache;
 use App\Entity\ScoreCache;
 use App\Entity\Team;
+use App\Entity\TeamAffiliation;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
+use App\Utils\Utils;
 use Doctrine\Common\Inflector\Inflector;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\MappingException;
@@ -88,19 +91,9 @@ abstract class BaseController extends AbstractController
         $id,
         bool $isNewEntity
     ) {
-        $class        = get_class($entity);
-        $parts        = explode('\\', $class);
-        $entityType   = $parts[count($parts) - 1];
-        $auditLogType = Inflector::tableize($entityType);
+        $auditLogType = Utils::tableForEntity($entity);
 
         $entityManager->flush();
-        if ($endpoint = $eventLogService->endpointForEntity($entity)) {
-            if ($contest = $DOMJudgeService->getCurrentContest()) {
-                $eventLogService->log($endpoint, $id,
-                                      $isNewEntity ? EventLogService::ACTION_CREATE : EventLogService::ACTION_UPDATE,
-                                      $contest->getCid());
-            }
-        }
 
         // If we have no ID but we do have a Doctrine entity, automatically
         // get the primary key if possible
@@ -117,26 +110,38 @@ abstract class BaseController extends AbstractController
             }
         }
 
+        if ($endpoint = $eventLogService->endpointForEntity($entity)) {
+            foreach ($this->contestsForEntity($entity, $DOMJudgeService) as $contest) {
+                $eventLogService->log($endpoint, $id,
+                                      $isNewEntity ? EventLogService::ACTION_CREATE : EventLogService::ACTION_UPDATE,
+                                      $contest->getCid());
+            }
+        }
+
         $DOMJudgeService->auditlog($auditLogType, $id, $isNewEntity ? 'added' : 'updated');
     }
 
     /**
      * Perform the delete for the given entity
+     *
      * @param Request                $request
      * @param EntityManagerInterface $entityManager
      * @param DOMJudgeService        $DOMJudgeService
+     * @param EventLogService        $eventLogService
      * @param KernelInterface        $kernel
      * @param                        $entity
      * @param string                 $description
      * @param string                 $redirectUrl
      * @return \Symfony\Component\HttpFoundation\Response
      * @throws \Doctrine\DBAL\DBALException
+     * @throws \Doctrine\ORM\NoResultException
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
     protected function deleteEntity(
         Request $request,
         EntityManagerInterface $entityManager,
         DOMJudgeService $DOMJudgeService,
+        EventLogService $eventLogService,
         KernelInterface $kernel,
         $entity,
         string $description,
@@ -176,11 +181,8 @@ abstract class BaseController extends AbstractController
         $isError          = false;
         $messages         = [];
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
-        $class            = get_class($entity);
-        $parts            = explode('\\', $class);
-        $entityType       = $parts[count($parts) - 1];
-        $readableType     = str_replace('_', ' ', Inflector::tableize($entityType));
-        $metadata         = $entityManager->getClassMetadata($class);
+        $readableType     = str_replace('_', ' ', Utils::tableForEntity($entity));
+        $metadata         = $entityManager->getClassMetadata(get_class($entity));
         $primaryKeyData   = [];
         foreach ($metadata->getIdentifierColumnNames() as $primaryKeyColumn) {
             $primaryKeyColumnValue = $propertyAccessor->getValue($entity, $primaryKeyColumn);
@@ -255,6 +257,10 @@ abstract class BaseController extends AbstractController
                 $entityId = $entity->getTeamid();
             }
 
+            // Get the contests to trigger the event for. We do this before
+            // deleting the entity, since linked data might have vanished
+            $contestsForEntity = $this->contestsForEntity($entity, $DOMJudgeService);
+
             $entityManager->transactional(function () use ($entityManager, $entity) {
                 if ($entity instanceof Problem) {
                     // Deleting problem is a special case: its dependent tables do not
@@ -278,11 +284,19 @@ abstract class BaseController extends AbstractController
                 $entityManager->remove($entity);
             });
 
-            $class        = get_class($entity);
-            $parts        = explode('\\', $class);
-            $entityType   = $parts[count($parts) - 1];
-            $auditLogType = Inflector::tableize($entityType);
+            // Add an audit log entry
+            $auditLogType = Utils::tableForEntity($entity);
             $DOMJudgeService->auditlog($auditLogType, implode(', ', $primaryKeyData), 'deleted');
+
+            // Trigger the delete event
+            if ($endpoint = $eventLogService->endpointForEntity($entity)) {
+                foreach ($contestsForEntity as $contest) {
+                    // TODO: cascade deletes. Maybe use getDependentEntities()?
+                    $eventLogService->log($endpoint, $primaryKeyData[0],
+                        EventLogService::ACTION_DELETE,
+                        $contest->getCid(), null, null, false);
+                }
+            }
 
             if ($entity instanceof Team) {
                 // No need to do this in a transaction, since the chance of a team
@@ -350,5 +364,48 @@ abstract class BaseController extends AbstractController
         }
 
         return $result;
+    }
+
+    /**
+     * Get the contests that an event for the given entity should be triggered on
+     * @param                 $entity
+     * @param DOMJudgeService $dj
+     *
+     * @return Contest[]
+     */
+    protected function contestsForEntity($entity, DOMJudgeService $dj) {
+        // Determine contests to emit an event for for the given entity:
+        // * If the entity is a Problem entity, use the getContest()
+        //   of every contest problem in getContestProblems()
+        // * If the entity is a Team (category) entity, get all active
+        //   contests and use those that are open to all teams or the
+        //   team (category) belongs to
+        // * If the entity is a contest, use that
+        // * If the entity has a getContest() method, use that
+        // * If the entity has a getContests() method, use that
+        // Otherwise use the currently active contests
+        $contests = [];
+        if ($entity instanceof Team || $entity instanceof TeamAffiliation) {
+            $possibleContests = $dj->getCurrentContests();
+            foreach ($possibleContests as $contest) {
+                if ($entity->inContest($contest)) {
+                    $contests[] = $contest;
+                }
+            }
+        } elseif ($entity instanceof Problem) {
+            foreach ($entity->getContestProblems() as $contestProblem) {
+                $contests[] = $contestProblem->getContest();
+            }
+        } elseif ($entity instanceof Contest) {
+            $contests = [$entity];
+        } elseif (method_exists($entity, 'getContest')) {
+            $contests = [$entity->getContest()];
+        } elseif (method_exists($entity, 'getContests')) {
+            $contests = $entity->getContests();
+        } else {
+            $contests = $dj->getCurrentContests();
+        }
+
+        return $contests;
     }
 }

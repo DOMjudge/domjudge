@@ -249,8 +249,8 @@ class TeamCategoryController extends BaseController
             throw new NotFoundHttpException(sprintf('Team category with ID %s not found', $categoryId));
         }
 
-        return $this->deleteEntity($request, $this->em, $this->dj, $this->kernel, $teamCategory,
-                                   $teamCategory->getName(), $this->generateUrl('jury_team_categories'));
+        return $this->deleteEntity($request, $this->em, $this->dj, $this->eventLogService, $this->kernel,
+                                   $teamCategory, $teamCategory->getName(), $this->generateUrl('jury_team_categories'));
     }
 
     /**

@@ -272,8 +272,8 @@ class UserController extends BaseController
             throw new NotFoundHttpException(sprintf('User with ID %s not found', $userId));
         }
 
-        return $this->deleteEntity($request, $this->em, $this->dj, $this->kernel, $user, $user->getName(),
-                                   $this->generateUrl('jury_users'));
+        return $this->deleteEntity($request, $this->em, $this->dj, $this->eventLogService, $this->kernel,
+                                   $user, $user->getName(), $this->generateUrl('jury_users'));
     }
 
     /**
