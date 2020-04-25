@@ -256,6 +256,10 @@
         {% endif %}
     {% endif %}
 
+    {% if not sameTestcaseIds %}
+        <div class="alert alert-danger">The problem's testcases have changed since this judging has been performed. We recommend rejudging the whole problem.</div>
+    {% endif %}
+
     {% if selectedJudging is not null or externalJudgement is not null %}
 
         {% include 'jury/partials/submission_graph.html.twig' %}
