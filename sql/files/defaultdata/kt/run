@@ -58,12 +58,12 @@ if [ -z "$MAINCLASS" ]; then
 	echo "Info: detected entry_point: $MAINCLASS"
 
 	[ "$EXITCODE" -ne 0 ] && exit $EXITCODE
+else
+	# Check if entry point is valid
+	java -cp "$COMPILESCRIPTDIR" DetectMain "$(pwd)" $MAINCLASS > /dev/null
+	EXITCODE=$?
+	[ "$EXITCODE" -ne 0 ] && exit $EXITCODE
 fi
-
-# Check if entry point is valid
-javap "$MAINCLASS" > /dev/null
-EXITCODE=$?
-[ "$EXITCODE" -ne 0 ] && exit $EXITCODE
 
 # Write executing script:
 # Executes java byte-code interpreter with following options (prefixed

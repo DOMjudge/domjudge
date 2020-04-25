@@ -49,25 +49,12 @@ TMPFILE=$(mktemp --tmpdir domjudge_javac_output.XXXXXX) || exit 1
 javac -encoding UTF-8 -sourcepath . -d . "$@" 2> "$TMPFILE"
 EXITCODE=$?
 
+cat $TMPFILE
+rm -f $TMPFILE
+
+[ "$EXITCODE" -ne 0 ] && exit $EXITCODE
+
 if [ -z "$MAINCLASS" ]; then
-	if [ "$EXITCODE" -ne 0 ]; then
-		# Let's see if should have named the .java differently
-		PUBLICCLASS=$(sed -n -e '/class .* is public, should be declared in a file named /{s/.*file named //;s/\.java.*//;p;q}' "$TMPFILE")
-		if [ -z "$PUBLICCLASS" ]; then
-			cat $TMPFILE
-			rm -f $TMPFILE
-			exit $EXITCODE
-		fi
-		rm -f $TMPFILE
-		echo "Info: renaming main source '$MAINSOURCE' to '$PUBLICCLASS.java'"
-		mv "$MAINSOURCE" "$PUBLICCLASS.java"
-		javac -encoding UTF-8 -d . "$PUBLICCLASS.java"
-		EXITCODE=$?
-		[ "$EXITCODE" -ne 0 ] && exit $EXITCODE
-	fi
-
-	rm -f $TMPFILE
-
 	# Look for class that has the 'main' function:
 	CLASSNAMES="$(find ./* -type f -regex '^.*\.class$' \
 	            | sed -e 's/\.class$//' -e 's/^\.\///' -e 's/\//./g')"
@@ -76,17 +63,14 @@ if [ -z "$MAINCLASS" ]; then
 
 	# Report the entry point, so it can be saved, e.g. for later replay:
 	echo "Info: detected entry_point: $MAINCLASS"
+
+	[ "$EXITCODE" -ne 0 ] && exit $EXITCODE
 else
-	cat $TMPFILE
-	rm -f $TMPFILE
+	# Check if entry point is valid
+	java -cp "$COMPILESCRIPTDIR" DetectMain "$(pwd)" $MAINCLASS > /dev/null
+	EXITCODE=$?
+	[ "$EXITCODE" -ne 0 ] && exit $EXITCODE
 fi
-
-[ "$EXITCODE" -ne 0 ] && exit $EXITCODE
-
-# Check if entry point is valid
-java -cp "$COMPILESCRIPTDIR" DetectMain "$(pwd)" $MAINCLASS > /dev/null
-EXITCODE=$?
-[ "$EXITCODE" -ne 0 ] && exit $EXITCODE
 
 # Write executing script:
 # Executes java byte-code interpreter with following options
