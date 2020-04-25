@@ -118,15 +118,17 @@ class UserRegistrationType extends AbstractType
                         }),
                     ],
                     'mapped' => false,
-                ])
-                ->add('affiliationCountry', ChoiceType::class, [
+                ]);
+            if ($this->config->get('show_flags')) {
+                $builder->add('affiliationCountry', ChoiceType::class, [
                     'label' => false,
                     'required' => false,
                     'mapped' => false,
                     'choices' => $countries,
                     'placeholder' => 'No country',
-                ])
-                ->add('existingAffiliation', EntityType::class, [
+                ]);
+            }
+            $builder->add('existingAffiliation', EntityType::class, [
                     'class' => TeamAffiliation::class,
                     'label' => false,
                     'required' => false,
