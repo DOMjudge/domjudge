@@ -120,7 +120,6 @@ install-domserver-l:
 # Fix permissions for special directories:
 	-$(INSTALL_USER)    -m 0700 -d $(DESTDIR)$(domserver_logdir)
 	-$(INSTALL_USER)    -m 0700 -d $(DESTDIR)$(domserver_rundir)
-	-$(INSTALL_WEBSITE) -m 0770 -d $(DESTDIR)$(domserver_submitdir)
 	-for d in cache log ; do \
 		$(INSTALL_WEBSITE) -m 0775 -d $(DESTDIR)$(domserver_webappdir)/var/$$d ; \
 	done
@@ -193,7 +192,6 @@ maintainer-conf: dist composer-dependencies-dev
 	            --with-domserver_tmpdir=$(CURDIR)/output/tmp \
 	            --with-judgehost_tmpdir=$(CURDIR)/output/tmp \
 	            --with-judgehost_judgedir=$(CURDIR)/output/judgings \
-	            --with-domserver_submitdir=$(CURDIR)/output/submissions \
 	            --with-baseurl='http://localhost/domjudge/' \
 	            CFLAGS='$(MAINT_CXFLAGS) -std=c11' \
 	            CXXFLAGS='$(MAINT_CXFLAGS) -std=c++11' \
@@ -222,10 +220,10 @@ maintainer-install: build domserver-create-dirs judgehost-create-dirs webapp/.en
 	ln -sf $(CURDIR)/sql/dj_setup_database $(domserver_bindir)
 	$(MAKE) -C misc-tools maintainer-install
 	$(MAKE) -C doc/manual maintainer-install
-# Create tmpdir and make tmpdir, submitdir writable for webserver,
+# Create tmpdir and make tmpdir writable for webserver,
 # because judgehost-create-dirs sets wrong permissions:
 	mkdir -p $(domserver_tmpdir)
-	chmod a+rwx $(domserver_tmpdir) $(domserver_submitdir)
+	chmod a+rwx $(domserver_tmpdir)
 # Make sure we're running from a clean state:
 	composer auto-scripts
 	@echo ""

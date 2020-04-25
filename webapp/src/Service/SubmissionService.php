@@ -560,31 +560,6 @@ class SubmissionService
                                            $submission->getSubmitid(), $team->getTeamid(),
                                            $language->getLangid(), $problem->getProblem()->getProbid()));
 
-        if (is_writable($this->dj->getDomjudgeSubmitDir())) {
-            // Copy the submission to the submission directory for safe-keeping
-            foreach ($files as $rank => $file) {
-                $fdata  = [
-                    'cid' => $contest->getCid(),
-                    'submitid' => $submission->getSubmitid(),
-                    'teamid' => $team->getTeamid(),
-                    'langid' => $language->getLangid(),
-                    'probid' => $problem->getProbid(),
-                    'rank' => $rank,
-                    'filename' => $file->getClientOriginalName()
-                ];
-                $toFile = $this->dj->getDomjudgeSubmitDir() . '/' .
-                          $this->getSourceFilename($fdata);
-                if (!@copy($file->getRealPath(), $toFile)) {
-                    $this->logger->warning(
-                        "Could not copy '%s' to '%s'",
-                        [ $file->getRealPath(), $toFile ]
-                    );
-                }
-            }
-        } else {
-            $this->logger->debug('SUBMITDIR not writable, skipping');
-        }
-
         if (Utils::difftime((float)$contest->getEndtime(), $submitTime) <= 0) {
             $this->logger->info(
                 "The contest is closed, submission stored but not processed. [c%d]",

@@ -16,7 +16,6 @@ define('LIBVENDORDIR','@domserver_libvendordir@');
 define('LOGDIR',      '@domserver_logdir@');
 define('RUNDIR',      '@domserver_rundir@');
 define('TMPDIR',      '@domserver_tmpdir@');
-define('SUBMITDIR',   '@domserver_submitdir@');
 
 define('BASEURL',     '@BASEURL@');
 

@@ -97,7 +97,6 @@ class CheckConfigService
             'filesizememlimit' => $this->checkScriptFilesizevsMemoryLimit(),
             'debugdisabled' => $this->checkDebugDisabled(),
             'tmpdirwritable' => $this->checkTmpdirWritable(),
-            'submitdirwritable' => $this->checkSubmitdirWritable(),
         ];
 
         $results['Configuration'] = $config;
@@ -347,22 +346,6 @@ class CheckConfigService
                 'desc' => sprintf('TMPDIR (%s) is not writable by the webserver; ' .
                  'Showing diffs and editing of submissions may not work.',
                  $tmpdir)];
-    }
-
-    public function checkSubmitdirWritable()
-    {
-        $submitdir = $this->dj->getDomjudgeSubmitdir();
-        if (is_writable($submitdir)) {
-            return ['caption' => 'Submitdir writable',
-                    'result' => 'O',
-                    'desc' => sprintf('Submitdir (%s) can be used to save backup ' .
-                         'copies of submissioms.',
-                         $submitdir)];
-        }
-        return ['caption' => 'Submitdir writable',
-                'result' => 'W',
-                'desc' => sprintf('The webserver has no write access to Submitdir (%s), ' .
-                'and thus will not be able to make backup copies of submissions.', $submitdir)];
     }
 
 

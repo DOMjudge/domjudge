@@ -43,7 +43,6 @@ parameters:
     domjudge.logdir: /output/log
     domjudge.rundir: /output/run
     domjudge.tmpdir: /output/tmp
-    domjudge.submitdir: /output/submissions
     domjudge.baseurl: http://localhost/domjudge
     domjudge.submitclient_enabled: yes
 EOF
