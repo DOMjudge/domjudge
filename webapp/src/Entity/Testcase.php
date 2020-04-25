@@ -52,7 +52,7 @@ class Testcase
      * @var int
      * @ORM\Column(type="integer", name="probid", length=4,
      *     options={"comment"="Corresponding problem ID", "unsigned"=true},
-     *     nullable=false)
+     *     nullable=true)
      */
     private $probid;
 
@@ -103,6 +103,16 @@ class Testcase
      * @Serializer\Exclude()
      */
     private $sample = false;
+
+    /**
+     * @var boolean
+     * @ORM\Column(type="boolean", name="deleted",
+     *     options={"comment"="Deleted testcases are kept for referential integrity.",
+     *              "default"="0"},
+     *     nullable=false)
+     * @Serializer\Exclude()
+     */
+    private $deleted = false;
 
     /**
      * @ORM\OneToMany(targetEntity="JudgingRun", mappedBy="testcase")
@@ -343,6 +353,20 @@ class Testcase
     }
 
     /**
+     * Set deleted
+     *
+     * @param boolean $deleted
+     *
+     * @return Testcase
+     */
+    public function setDeleted(bool $deleted)
+    {
+        $this->deleted = $deleted;
+
+        return $this;
+    }
+
+    /**
      * Get sample
      *
      * @return boolean
@@ -350,6 +374,16 @@ class Testcase
     public function getSample()
     {
         return $this->sample;
+    }
+
+    /**
+     * Get deleted
+     *
+     * @return boolean
+     */
+    public function getDeleted()
+    {
+        return $this->deleted;
     }
 
     /**
