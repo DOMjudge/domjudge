@@ -204,3 +204,4 @@ pdf_stylesheets = ['sphinx','kerning','a4','sphinx-team']
 
 pdf_use_coverpage = False
 pdf_use_toc = False
+pdf_invariant = False
