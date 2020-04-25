@@ -17,6 +17,10 @@ Version 7.2.1 - DEV
  - Fix a sed error message on internal compile error. 
  - Fix link to documentation from the admin index page.
  - Fix problem text links from scoreboard header.
+ - Fix that country select fields are hidden when show_flags is off.
+ - Fix editing testcase descriptions.
+ - Fix encoding of multiline testcase descriptions in submit graphs.
+ - Fix hardcoded domjudge username in SystemD service file.
 
 Version 7.2.0 - 4 January 2020
 ------------------------------
