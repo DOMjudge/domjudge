@@ -56,14 +56,15 @@ Judgehosts
  * Add to ``/etc/sudoers.d/`` or append to ``/etc/sudoers`` the
    sudoers configuration as in ``etc/sudoers-domjudge``.
  * Set up cgroup support: enable kernel parameters in
-   ``/etc/default/grub`` and reboot, then use
-   ``misc-tools/create_cgroups`` to create cgroups for DOMjudge.
+   ``/etc/default/grub`` and reboot, then run
+   ``systemctl enable create-cgroups`` and
+   ``systemctl start  create-cgroups`` to create cgroups for DOMjudge.
  * Put the right credentials in the file ``etc/restapi.secret``.
-
 
  * Create the pre-built chroot tree: ``sudo bin/dj_make_chroot``
 
- * Start the judge daemon: ``bin/judgedaemon``
+ * Start the judge daemon: either manually with ``bin/judgedaemon``
+   or as a service with ``systemctl enable domjudge-judgehost``.
 
 Checking if it works
 --------------------
