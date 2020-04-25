@@ -203,5 +203,10 @@ pdf_compressed = True
 pdf_stylesheets = ['sphinx','kerning','a4','sphinx-team']
 
 pdf_use_coverpage = False
-pdf_use_toc = False
+
+# This is of string type, not bool. See: https://github.com/rst2pdf/rst2pdf/pull/846
+pdf_use_toc = ''
+
+# This is needed to avoid a bug in rst2pdf << 0.94 (Debian buster has 0.93)
+# See: https://github.com/rst2pdf/rst2pdf/issues/678
 pdf_invariant = False
