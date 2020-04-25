@@ -23,11 +23,12 @@ use Symfony\Component\HttpFoundation\Request;
 class ClarificationController extends AbstractRestController
 {
     /**
-     * Get all the clarifications for this contest
+     * Get all the clarifications for this contest.
+     *
+     * Note that we restrict the returned clarifications in the query builder.
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
      * @Rest\Get("")
-     * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST') or is_granted('ROLE_API_READER')")
      * @SWG\Response(
      *     response="200",
      *     description="Returns all the clarifications for this contest",
@@ -52,13 +53,14 @@ class ClarificationController extends AbstractRestController
     }
 
     /**
-     * Get the given clarifications for this contest
+     * Get the given clarifications for this contest.
+     *
+     * Note that we restrict the returned clarifications in the query builder.
      * @param Request $request
      * @param string $id
      * @return \Symfony\Component\HttpFoundation\Response
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @Rest\Get("/{id}")
-     * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST') or is_granted('ROLE_API_READER')")
      * @SWG\Response(
      *     response="200",
      *     description="Returns the given clarification for this contest",
@@ -87,6 +89,20 @@ class ClarificationController extends AbstractRestController
             ->select('clar, c, r, reply, p')
             ->andWhere('clar.cid = :cid')
             ->setParameter(':cid', $this->getContestId($request));
+
+        if (!$this->dj->checkrole('api_reader') &&
+            !$this->dj->checkrole('judgehost'))
+        {
+            if ($this->dj->checkrole('team')) {
+                $queryBuilder
+                    ->andWhere('clar.sender = :team OR clar.recipient = :team OR (clar.sender IS NULL AND clar.recipient IS NULL)')
+                    ->setParameter(':team', $this->dj->getUser()->getTeam());
+            } else {
+                $queryBuilder
+                    ->andWhere('clar.sender IS NULL')
+                    ->andWhere('clar.recipient IS NULL');
+            }
+        }
 
         if ($request->query->has('problem')) {
             $queryBuilder
