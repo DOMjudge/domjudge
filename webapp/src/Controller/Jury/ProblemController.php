@@ -685,23 +685,31 @@ class ProblemController extends BaseController
             $maxrank++;
 
             $allOk = true;
+            $inputOrOutputSpecified = false;
             foreach (['input', 'output'] as $type) {
-                if (!$file = $request->files->get('add_' . $type)) {
-                    $messages[] = sprintf(
-                        'Warning: new %s file was not selected, not adding new testcase',
-                        $type
-                    );
-                    $allOk      = false;
-                } elseif (!$file->isValid()) {
-                    $this->addFlash('danger', sprintf(
-                        'File upload error new %s: %s. No changes made.',
-                        $type, $file->getErrorMessage()
-                    ));
-                    return $this->redirectToRoute('jury_problem_testcases', ['probId' => $probId]);
+                if ($file = $request->files->get('add_' . $type)) {
+                    $inputOrOutputSpecified = true;
+                }
+            }
+            if ($inputOrOutputSpecified) {
+                foreach (['input', 'output'] as $type) {
+                    if (!$file = $request->files->get('add_' . $type)) {
+                        $messages[] = sprintf(
+                            'Warning: new %s file was not selected, not adding new testcase',
+                            $type
+                        );
+                        $allOk = false;
+                    } elseif (!$file->isValid()) {
+                        $this->addFlash('danger', sprintf(
+                            'File upload error new %s: %s. No changes made.',
+                            $type, $file->getErrorMessage()
+                        ));
+                        return $this->redirectToRoute('jury_problem_testcases', ['probId' => $probId]);
+                    }
                 }
             }
 
-            if ($allOk) {
+            if ($inputOrOutputSpecified && $allOk) {
                 $newTestcase        = new Testcase();
                 $newTestcaseContent = new TestcaseContent();
                 $newTestcase
