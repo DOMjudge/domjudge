@@ -113,7 +113,7 @@
                         "label": "{{ run.rank }}",
                         "value": {% if run.firstJudgingRun %}{{ run.firstJudgingRun.runtime|default(0) }}{% else %}0{% endif %},
                         "color": "{% if run.firstJudgingRun %}{{ colors[run.firstJudgingRun.runresult]|default('grey') }}{% else %}grey{% endif %}",
-                        "description": "{{ run.description(true)|default(run.rank) }}",
+                        "description": "{{ run.description(true)|default(run.rank)|escape("js") }}",
                     },
                     {% endfor %}
                 ]
