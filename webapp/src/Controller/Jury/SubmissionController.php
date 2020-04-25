@@ -416,6 +416,7 @@ class SubmissionController extends BaseController
 
         $runs       = [];
         $runsOutput = [];
+        $sameTestcaseIds = true;
         if ($selectedJudging || $externalJudgement) {
             $queryBuilder = $this->em->createQueryBuilder()
                 ->from(Testcase::class, 't')
@@ -449,7 +450,25 @@ class SubmissionController extends BaseController
                 ->getQuery()
                 ->getResult();
 
+            $judgingRunTestcaseIdsInOrder = $this->em->createQueryBuilder()
+                ->from(JudgingRun::class, 'jr')
+                ->select('jr.testcaseid')
+                ->andWhere('jr.judging = :judging')
+                ->setParameter(':judging', $selectedJudging)
+                ->orderBy('jr.endtime')
+                ->getQuery()
+                ->getScalarResult();
+
+            $cnt = 0;
             foreach ($runResults as $runResult) {
+                /** @var Testcase $testcase */
+                $testcase = $runResult[0];
+                if (isset($judgingRunTestcaseIdsInOrder[$cnt])) {
+                    if ($testcase->getTestcaseid() != $judgingRunTestcaseIdsInOrder[$cnt]['testcaseid']) {
+                        $sameTestcaseIds = false;
+                    }
+                }
+                $cnt++;
                 $firstJudgingRun = $runResult[0]->getFirstJudgingRun();
                 $runs[] = $runResult[0];
                 unset($runResult[0]);
@@ -528,6 +547,7 @@ class SubmissionController extends BaseController
             'selectedJudging' => $selectedJudging,
             'lastJudging' => $lastJudging,
             'runs' => $runs,
+            'sameTestcaseIds' => $sameTestcaseIds,
             'externalRuns' => $externalRuns,
             'runsOutput' => $runsOutput,
             'lastRuns' => $lastRuns,
