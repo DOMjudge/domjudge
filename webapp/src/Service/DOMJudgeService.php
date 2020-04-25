@@ -620,15 +620,6 @@ class DOMJudgeService
     }
 
     /**
-     * Get the submit directory of this DOMjudge installation
-     * @return string
-     */
-    public function getDomjudgeSubmitDir(): string
-    {
-        return $this->params->get('domjudge.submitdir');
-    }
-
-    /**
      * Get the webapp directory of this DOMjudge installation
      * @return string
      */

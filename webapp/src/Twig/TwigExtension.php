@@ -15,6 +15,7 @@ use App\Service\EventLogService;
 use App\Service\SubmissionService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
+use SebastianBergmann\Diff\Differ;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Twig\Extension\AbstractExtension;
@@ -784,36 +785,8 @@ JS;
      */
     public function showDiff(SubmissionFile $newFile, SubmissionFile $oldFile)
     {
-        $newsourcefile = $this->submissionService->getSourceFilename([
-            'cid' => $newFile->getSubmission()->getCid(),
-            'submitid' => $newFile->getSubmitid(),
-            'teamid' => $newFile->getSubmission()->getTeamid(),
-            'probid' => $newFile->getSubmission()->getProbid(),
-            'langid' => $newFile->getSubmission()->getLangid(),
-            'rank' => $newFile->getRank(),
-            'filename' => $newFile->getFilename()
-        ]);
-        $oldsourcefile = $this->submissionService->getSourceFilename([
-            'cid' => $oldFile->getSubmission()->getCid(),
-            'submitid' => $oldFile->getSubmitid(),
-            'teamid' => $oldFile->getSubmission()->getTeamid(),
-            'probid' => $oldFile->getSubmission()->getProbid(),
-            'langid' => $oldFile->getSubmission()->getLangid(),
-            'rank' => $oldFile->getRank(),
-            'filename' => $oldFile->getFilename()
-        ]);
-
-        require_once $this->dj->getDomjudgeEtcDir() . '/domserver-static.php';
-
-        $difftext = Utils::createDiff(
-            $newFile,
-            SUBMITDIR . '/' . $newsourcefile,
-            $oldFile,
-            SUBMITDIR . '/' . $oldsourcefile,
-            $this->dj->getDomjudgeTmpDir()
-        );
-
-        return $this->parseSourceDiff($difftext);
+        $differ = new Differ;
+        return $this->parseSourceDiff($differ->diff($newFile->getSourcecode(), $oldFile->getSourcecode()));
     }
 
     /**

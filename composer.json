@@ -66,6 +66,7 @@
 		"mbostock/d3": "^3.5",
 		"nelmio/api-doc-bundle": "^3.6",
 		"novus/nvd3": "^1.8",
+		"sebastian/diff": "3.0",
 		"select2/select2": "4.*",
 		"sensio/framework-extra-bundle": "^5.4.0",
 		"symfony/asset": "4.4.*",

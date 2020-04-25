@@ -148,7 +148,6 @@ if test "x$FHS_ENABLED" = xyes ; then
 	AC_SUBST(domserver_logdir,      $localstatedir/log/${PACKAGE_TARNAME})
 	AC_SUBST(domserver_rundir,      $localstatedir/run/${PACKAGE_TARNAME})
 	AC_SUBST(domserver_tmpdir,      /tmp)
-	AC_SUBST(domserver_submitdir,   $localstatedir/lib/${PACKAGE_TARNAME}/submissions)
 
 	AC_SUBST(judgehost_root,        '')
 	AC_SUBST(judgehost_bindir,      $bindir)
@@ -192,7 +191,6 @@ AX_PATH(domserver_libvendordir, [$domserver_root/lib/vendor])
 AX_PATH(domserver_logdir,       [$domserver_root/log])
 AX_PATH(domserver_rundir,       [$domserver_root/run])
 AX_PATH(domserver_tmpdir,       [$domserver_root/tmp])
-AX_PATH(domserver_submitdir,    [$domserver_root/submissions])
 AX_WITH_COMMENT(6,[     ])
 AX_PATH(judgehost_bindir,       [$judgehost_root/bin])
 AX_PATH(judgehost_etcdir,       [$judgehost_root/etc])
@@ -376,7 +374,6 @@ echo "    - libvendor........: $domserver_libvendordir"
 echo "    - log..............: $domserver_logdir"
 echo "    - run..............: $domserver_rundir"
 echo "    - sql..............: $domserver_sqldir"
-echo "    - submit...........: $domserver_submitdir"
 echo "    - tmp..............: $domserver_tmpdir"
 echo "    - webapp...........: $domserver_webappdir"
 echo ""
