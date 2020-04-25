@@ -24,12 +24,13 @@ install-docs: docs
 
 maintainer-install: docs
 	ln -sf build/html
+	ln -sf build/team
 
 clean-l:
 	rm -rf build
 
 distclean-l:
-	-rm -f $(SUBST_CONFIGS) html
+	-rm -f $(SUBST_CONFIGS) html team
 
 html:
 	sphinx-build -M $@ . build
