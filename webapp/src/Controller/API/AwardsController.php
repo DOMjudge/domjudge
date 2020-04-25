@@ -58,7 +58,6 @@ class AwardsController extends AbstractRestController
      * @param Request $request
      * @return array
      * @Rest\Get("")
-     * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_API_READER')")
      * @SWG\Response(
      *     response="200",
      *     description="Returns the current teams qualifying for each award",
@@ -110,13 +109,13 @@ class AwardsController extends AbstractRestController
      */
     protected function getAwardsData(Request $request, string $requestedType = null)
     {
-        $public   = false;
-        if ($this->dj->checkrole('jury') && $request->query->has('public')) {
+        $public = !$this->dj->checkrole('api_reader');
+        if ($this->dj->checkrole('api_reader') && $request->query->has('public')) {
             $public = $request->query->getBoolean('public');
         }
         /** @var Contest $contest */
         $contest       = $this->em->getRepository(Contest::class)->find($this->getContestId($request));
-        $isJury        = $this->isGranted('ROLE_JURY');
+        $isJury        = $this->dj->checkrole('api_reader');
         $accessAllowed = ($isJury && $contest->getEnabled()) || (!$isJury && $contest->isActive());
         if (!$accessAllowed) {
             throw new AccessDeniedHttpException();
