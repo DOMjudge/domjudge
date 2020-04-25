@@ -907,6 +907,11 @@ function judge(array $row)
     $last_sent = now();
     $outstanding_data = 0;
     $update_every_X_seconds = dbconfig_get_rest('update_judging_seconds');
+
+    // There is no guarantee in which order the API returns the data, so let's
+    // order it here by rank.
+    ksort($row['testcases']);
+
     foreach ($row['testcases'] as $tc) {
         // Check whether we have received an exit signal(but not a graceful exit signal)
         if (function_exists('pcntl_signal_dispatch')) {
