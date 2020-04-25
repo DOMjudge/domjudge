@@ -159,8 +159,10 @@ class SecurityController extends AbstractController
                         $affiliation = new TeamAffiliation();
                         $affiliation
                             ->setName($registration_form->get('affiliationName')->getData())
-                            ->setShortname($registration_form->get('affiliationName')->getData())
-                            ->setCountry($registration_form->get('affiliationCountry')->getData());
+                            ->setShortname($registration_form->get('affiliationName')->getData());
+                        if ($registration_form->has('affiliationCountry')) {
+                            $affiliation->setCountry($registration_form->get('affiliationCountry')->getData());
+                        }
                         $team->setAffiliation($affiliation);
                         $em->persist($affiliation);
                         break;
