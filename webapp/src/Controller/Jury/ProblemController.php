@@ -837,6 +837,8 @@ class ProblemController extends BaseController
         /** @var Testcase|null $current */
         $current = null;
 
+        $numTestcases = count($testcases);
+
         foreach ($testcases as $testcaseRank => $testcase) {
             if ($testcaseRank == $rank) {
                 $current = $testcase;
@@ -854,11 +856,11 @@ class ProblemController extends BaseController
 
         if ($current !== null && $other !== null) {
             // (probid, rank) is a unique key, so we must switch via a temporary rank, and use a transaction.
-            $this->em->transactional(function () use ($current, $other) {
+            $this->em->transactional(function () use ($current, $other, $numTestcases) {
                 $otherRank   = $other->getRank();
                 $currentRank = $current->getRank();
-                $other->setRank(-1);
-                $current->setRank(-2);
+                $other->setRank($numTestcases + 1);
+                $current->setRank($numTestcases + 2);
                 $this->em->flush();
                 $current->setRank($otherRank);
                 $other->setRank($currentRank);
