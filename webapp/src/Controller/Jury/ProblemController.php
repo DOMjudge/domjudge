@@ -709,6 +709,7 @@ class ProblemController extends BaseController
                 }
             }
 
+            $haswarnings = false;
             if ($inputOrOutputSpecified && $allOk) {
                 $newTestcase        = new Testcase();
                 $newTestcaseContent = new TestcaseContent();
@@ -768,7 +769,6 @@ class ProblemController extends BaseController
                     $inFile->getClientOriginalName(),  Utils::printsize($inFile->getSize()),
                     $outFile->getClientOriginalName(), Utils::printsize($outFile->getSize())
                 );
-                $haswarnings = false;
 
                 if (strlen($newTestcaseContent->getOutput()) > $outputLimit * 1024) {
                     $message .= sprintf(
