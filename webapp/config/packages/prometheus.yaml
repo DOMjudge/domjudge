@@ -1,0 +1,11 @@
+services:
+    prometheus_storage:
+      public: false
+      class: \Prometheus\Storage\InMemory
+      # class: \Prometheus\Storage\APC
+    Prometheus\CollectorRegistry: '@prometheus_collector_registry_service'
+    prometheus_collector_registry_service:
+        public: true
+        class: \Prometheus\CollectorRegistry
+        arguments:
+            - '@prometheus_storage'
