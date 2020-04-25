@@ -3,6 +3,8 @@
 namespace App\Form\Type;
 
 use App\Entity\TeamAffiliation;
+use App\Service\ConfigurationService;
+use App\Service\EventLogService;
 use App\Utils\Utils;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -12,6 +14,25 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class TeamAffiliationType extends AbstractExternalIdEntityType
 {
+    /**
+     * @var ConfigurationService
+     */
+    protected $configuration;
+
+    /**
+     * TeamAffiliationType constructor.
+     *
+     * @param EventLogService      $eventLogService
+     * @param ConfigurationService $configuration
+     */
+    public function __construct(
+        EventLogService $eventLogService,
+        ConfigurationService $configuration
+    ) {
+        parent::__construct($eventLogService);
+        $this->configuration = $configuration;
+    }
+
     /**
      * @param FormBuilderInterface $builder
      * @param array                $options
@@ -27,11 +48,13 @@ class TeamAffiliationType extends AbstractExternalIdEntityType
         $this->addExternalIdField($builder, TeamAffiliation::class);
         $builder->add('shortname');
         $builder->add('name');
-        $builder->add('country', ChoiceType::class, [
-            'required' => false,
-            'choices'  => $countries,
-            'placeholder' => 'No country',
-        ]);
+        if ($this->configuration->get('show_flags')) {
+            $builder->add('country', ChoiceType::class, [
+                'required' => false,
+                'choices'  => $countries,
+                'placeholder' => 'No country',
+            ]);
+        }
         $builder->add('comments', TextareaType::class, [
             'required' => false,
             'attr' => [
