@@ -465,7 +465,6 @@ class SubmissionController extends BaseController
                 $testcase = $runResult[0];
                 if (isset($judgingRunTestcaseIdsInOrder[$cnt])) {
                     if ($testcase->getTestcaseid() != $judgingRunTestcaseIdsInOrder[$cnt]['testcaseid']) {
-                        dump($judgingRunTestcaseIdsInOrder);
                         $sameTestcaseIds = false;
                     }
                 }
