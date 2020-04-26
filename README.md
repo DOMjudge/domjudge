@@ -14,13 +14,11 @@ Documentation
 -------------
 
 For more information on installation and requirements see the
-documentation under the doc/admin directory. There are HTML and PDF
-versions of the documentation available, prebuilt from SGML sources.
+documentation under the doc/manual directory. There is an HTML
+version of the documentation available, prebuilt from reStructuredText sources.
 
-The doc/ directory also contains documentation for users of DOMjudge,
-namely for jury members (under doc/judge) and teams (under doc/team).
-
-The jury documentation is also available in HTML and PDF format.
+The doc/ directory also contains documentation for teams using DOMjudge
+under doc/team.
 
 The team documentation is available prebuilt in PDF format, but it
 contains default/example settings. To include the correct settings for
@@ -28,7 +26,7 @@ your local environment, DOMjudge has to be properly configured first,
 as parts of the configuration are used in it (e.g. the URL to the team
 interface of DOMjudge). A LaTeX installation including the packages
 `svn` and `expdlist` is required to rebuild the team documentation.
-For more information, see the administrator documentation.
+For more information, see the documentation.
 
 All documentation is also available online at the DOMjudge homepage:
 	https://www.domjudge.org/documentation
@@ -47,8 +45,7 @@ Copyright & Licensing
 DOMjudge is Copyright (c) 2004 - 2020 by the DOMjudge developers and
 all respective contributors. The current DOMjudge developers are Jaap
 Eldering, Nicky Gerritsen, Keith Johnson, Thijs Kinkhorst and Tobias
-Werth; see the administrator's manual for a complete list of
-contributors.
+Werth; see the manual for a complete list of contributors.
 
 DOMjudge, including its documentation, is free software; you can
 redistribute it and/or modify it under the terms of the GNU General
@@ -59,7 +56,7 @@ COPYING.
 Additionally, parts of this system are based on other programs, which
 are covered by other copyrights. This will be noted in the files
 themselves and these copyrights/attributions can also be found in the
-administrator manual.
+DOMjudge manual.
 
 The following JavaScript libraries/snippets are included:
 - jscolor.js: copyright Jan Odvarko, licensed under the GNU LGPL.
