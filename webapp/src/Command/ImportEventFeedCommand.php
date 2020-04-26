@@ -1279,7 +1279,8 @@ class ImportEventFeedCommand extends Command
         $team
             ->setCategory($category)
             ->setAffiliation($affiliation)
-            ->setName($event['data']['name']);
+            ->setName($event['data']['name'])
+            ->setDisplayName($event['data']['display_name'] ?? null);
 
         // Also check if this is a private contest. If so, we need to add the team to the contest
         /** @var Contest $contest */
