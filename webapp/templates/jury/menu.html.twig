@@ -7,9 +7,12 @@
     <div class="collapse navbar-collapse" id="menuDefault" data-update-url="{{ path('jury_ajax_updates') }}">
         <ul class="navbar-nav mr-auto">
 
-            {% if is_granted('ROLE_BALLOON') and not is_granted('ROLE_JURY') and not is_granted('ROLE_ADMIN') %}
+            {% if is_granted('ROLE_BALLOON') %}
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ path('jury_balloons') }}"><i class="fas fa-map-marker-alt"></i> balloons</a>
+                    <a class="nav-link" href="{{ path('jury_balloons') }}">
+                        <i class="fas fa-map-marker-alt"></i> balloons
+                        <span class="badge badge-info" id="num-alerts-balloons"></span>
+                    </a>
                 </li>
             {% endif %}
 
