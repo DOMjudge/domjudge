@@ -833,8 +833,8 @@ class DOMJudgeService
         return $stats;
     }
 
-    public function getTwigDataForProblemsAction(int $userid): array {
-        $contest            = $this->dj->getCurrentContest($userid);
+    public function getTwigDataForProblemsAction(int $teamId): array {
+        $contest            = $this->getCurrentContest($teamId);
         $showLimits         = (bool)$this->config->get('show_limits_on_team_page');
         $defaultMemoryLimit = (int)$this->config->get('memory_limit');
         $timeFactorDiffers  = false;
