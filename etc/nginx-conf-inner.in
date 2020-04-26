@@ -5,8 +5,8 @@
 
 server_name _default_;
 
-# set max upload size. Make sure the PHP values are also high enough
-client_max_body_size 128M;
+# set max upload size to infinite since PHP has a setting for this
+client_max_body_size 0;
 
 # Variables used in the nginx configuration
 set $domjudgeRoot @domserver_webappdir@/public;
