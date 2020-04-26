@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Java compile wrapper-script for 'compile.sh'.
+# Kotlin compile wrapper-script for 'compile.sh'.
 # See that script for syntax and more info.
 #
 # This script byte-compiles with the kotlinc compiler and
@@ -26,7 +26,7 @@ MEMJVM=65536
 
 MEMRESERVED=$((MEMSTACK + MEMJVM))
 
-# Calculate Java program memlimit as MEMLIMIT - max. JVM memory usage:
+# Calculate Kotlin program memlimit as MEMLIMIT - max. JVM memory usage:
 MEMLIMITJAVA=$((MEMLIMIT - MEMRESERVED))
 
 if [ $MEMLIMITJAVA -le 0 ]; then
