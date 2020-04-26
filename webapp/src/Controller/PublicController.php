@@ -181,42 +181,8 @@ class PublicController extends BaseController
      */
     public function problemsAction()
     {
-        $contest            = $this->dj->getCurrentContest(-1);
-        $showLimits         = (bool)$this->config->get('show_limits_on_team_page');
-        $defaultMemoryLimit = (int)$this->config->get('memory_limit');
-        $timeFactorDiffers  = false;
-        if ($showLimits) {
-            $timeFactorDiffers = $this->em->createQueryBuilder()
-                    ->from(Language::class, 'l')
-                    ->select('COUNT(l)')
-                    ->andWhere('l.allowSubmit = true')
-                    ->andWhere('l.timeFactor <> 1')
-                    ->getQuery()
-                    ->getSingleScalarResult() > 0;
-        }
-
-        $problems = [];
-        if ($contest && $contest->getFreezeData()->started()) {
-            $problems = $this->em->createQueryBuilder()
-                ->from(ContestProblem::class, 'cp')
-                ->join('cp.problem', 'p')
-                ->leftJoin('p.testcases', 'tc')
-                ->select('partial p.{probid,name,externalid,problemtext_type,timelimit,memlimit}', 'cp', 'SUM(tc.sample) AS numsamples')
-                ->andWhere('cp.contest = :contest')
-                ->andWhere('cp.allowSubmit = 1')
-                ->setParameter(':contest', $contest)
-                ->addOrderBy('cp.shortname')
-                ->groupBy('cp.problem')
-                ->getQuery()
-                ->getResult();
-        }
-
-        return $this->render('public/problems.html.twig', [
-            'problems' => $problems,
-            'showLimits' => $showLimits,
-            'defaultMemoryLimit' => $defaultMemoryLimit,
-            'timeFactorDiffers' => $timeFactorDiffers,
-        ]);
+        return $this->render('public/problems.html.twig',
+            $this->dj->getTwigDataForProblemsAction(-1));
     }
 
 
