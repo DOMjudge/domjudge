@@ -4,6 +4,7 @@ namespace App\Controller\API;
 
 use App\Entity\Contest;
 use App\Entity\Event;
+use App\Entity\TeamCategory;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
@@ -94,6 +95,12 @@ class ScoreboardController extends AbstractRestController
      *     type="boolean",
      *     description="Show publicly visible scoreboard, even for users with more permissions"
      * )
+     * @SWG\Parameter(
+     *     name="sortorder",
+     *     in="query",
+     *     type="integer",
+     *     description="The sort order to get the scoreboard for. If not given, uses the lowest sortorder"
+     * )
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Exception
      */
@@ -113,6 +120,18 @@ class ScoreboardController extends AbstractRestController
         $public   = !$this->dj->checkrole('api_reader');
         if ($this->dj->checkrole('api_reader') && $request->query->has('public')) {
             $public = $request->query->getBoolean('public');
+        }
+        if ($request->query->has('sortorder')) {
+            $sortorder = $request->query->getInt('sortorder');
+        } else {
+            // Get the lowest available sortorder
+            $queryBuilder = $this->em->createQueryBuilder()
+                ->from(TeamCategory::class, 'c')
+                ->select('MIN(c.sortorder)');
+            if ($public) {
+                $queryBuilder->andWhere('c.visible = 1');
+            }
+            $sortorder = (int)$queryBuilder->getQuery()->getSingleScalarResult();
         }
 
         /** @var Contest $contest */
@@ -151,6 +170,9 @@ class ScoreboardController extends AbstractRestController
         $scoreIsInSeconds = (bool)$this->config->get('score_in_seconds');
 
         foreach ($scoreboard->getScores() as $teamScore) {
+            if ($teamScore->team->getCategory()->getSortorder() !== $sortorder) {
+                continue;
+            }
             $row = [
                 'rank' => $teamScore->rank,
                 'team_id' => (string)$teamScore->team->getApiId($this->eventLogService),
