@@ -318,6 +318,7 @@ class ImportEventFeedCommand extends Command
             ->getOneOrNullResult();
         if (!$user) {
             $this->logger->error('No admin user found. Please create at least one');
+            return 1;
         }
         $token = new UsernamePasswordToken($user, null, 'main', $user->getRoles());
         $this->tokenStorage->setToken($token);
@@ -803,6 +804,7 @@ class ImportEventFeedCommand extends Command
                 'Cannot import group %s: only integer ID\'s are supported',
                 [ $groupId ]
             );
+            return;
         }
 
         if ($event['op'] === EventLogService::ACTION_DELETE) {
@@ -1021,6 +1023,7 @@ class ImportEventFeedCommand extends Command
                     'Cannot import group %s: only integer ID\'s are supported',
                     [ $groupId ]
                 );
+                return;
             } else {
                 /** @var TeamCategory $category */
                 $category = $this->em->getRepository(TeamCategory::class)->find($groupId);
@@ -1570,6 +1573,7 @@ class ImportEventFeedCommand extends Command
                 'Cannot import judgement %s, because judgement type %s does not exist',
                 [ $event['data']['id'], $judgementTypeId ]
             );
+            return;
         }
 
         $judgement
@@ -1673,6 +1677,7 @@ class ImportEventFeedCommand extends Command
                 'Cannot import run %s, because judgement type %s does not exist',
                 [ $event['data']['id'], $judgementTypeId ]
             );
+            return;
         }
 
         $rank    = $event['data']['ordinal'];
@@ -1695,6 +1700,7 @@ class ImportEventFeedCommand extends Command
                 'Cannot import run %s, because the testcase with rank %s does not exist for problem %s',
                 [ $event['data']['id'], $rank, $problem->getShortname() ]
             );
+            return;
         }
 
         $run
