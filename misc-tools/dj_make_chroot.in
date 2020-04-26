@@ -38,8 +38,14 @@ UBUNTU_ARCHLIST="amd64,arm64,armhf,i386,powerpc,ppc64el,s390x"
 if [ "x$(lsb_release -i -s || true)" = 'xDebian' ] || \
    [ "x$(lsb_release -i -s || true)" = 'xUbuntu' ]; then
 	DISTRO="$(lsb_release -i -s)"
-	if [ "x$(lsb_release -c -s)" != "xsid" ]; then
-		RELEASE="$(lsb_release -c -s)"
+	RELEASE="$(lsb_release -c -s)"
+	if [ "x$(lsb_release -i -s)" = 'xDebian' ]; then
+		if [ "x$(lsb_release -c -s)" = "xsid" ]; then
+			RELEASE='unstable'
+		fi
+		if [ "x$(lsb_release -r -s)" = 'xtesting' ]; then
+			RELEASE='testing'
+		fi
 	fi
 	if [ -z "$ARCH" ]; then
 		ARCH="$(dpkg --print-architecture)"
@@ -262,19 +268,16 @@ cp -r /usr/share/ca-certificates/* "$CHROOTDIR/usr/share/ca-certificates" || tru
 cp -r /usr/local/share/ca-certificates/* "$CHROOTDIR/usr/local/share/ca-certificates" || true
 
 if [ "$DISTRO" = 'Debian' ]; then
+	if [ "x$RELEASE" = 'xtesting' -o "x$RELEASE" = 'xunstable' ]; then
+		DISABLE_SECURITY='#'
+	fi
 cat > "$CHROOTDIR/etc/apt/sources.list" <<EOF
-# Different releases (incl. optional security repository):
+# Release as specified or taken from host (incl. optional security repository):
 
-# Stable ($RELEASE)
+# $RELEASE
 deb $DEBMIRROR			$RELEASE		main
-deb http://security.debian.org	$RELEASE/updates	main
+${DISABLE_SECURITY}deb http://security.debian.org	$RELEASE/updates	main
 
-# Testing
-#deb $DEBMIRROR			testing		main
-#deb http://security.debian.org	testing/updates	main
-
-# Unstable
-#deb $DEBMIRROR			unstable	main
 EOF
 fi
 if [ "$DISTRO" = 'Ubuntu' ]; then
