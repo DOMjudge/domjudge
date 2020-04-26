@@ -428,6 +428,7 @@ class DOMJudgeService
             ->leftJoin('p.contest_problems', 'cp', Join::WITH, 'co.cid = cp.contest AND p.probid = cp.problem')
             ->leftJoin('s.team', 't')
             ->andWhere('co.cid = :cid')
+            ->andWhere('b.done = 0')
             ->setParameter(':cid', $contest->getCid())
             ->getQuery()->getResult();
         }
