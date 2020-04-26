@@ -546,39 +546,7 @@ class ContestController extends AbstractRestController
      */
     public function getStatusAction(Request $request, string $cid)
     {
-        $contest = $this->getContestWithId($request, $cid);
-
-        $result                    = [];
-        $result['num_submissions'] = (int)$this->em
-            ->createQuery(
-                'SELECT COUNT(s)
-                FROM App\Entity\Submission s
-                WHERE s.cid = :cid')
-            ->setParameter(':cid', $contest->getCid())
-            ->getSingleScalarResult();
-        $result['num_queued']      = (int)$this->em
-            ->createQuery(
-                'SELECT COUNT(s)
-                FROM App\Entity\Submission s
-                LEFT JOIN App\Entity\Judging j WITH (j.submitid = s.submitid AND j.valid != 0)
-                WHERE s.cid = :cid
-                AND j.result IS NULL
-                AND s.valid = 1')
-            ->setParameter(':cid', $contest->getCid())
-            ->getSingleScalarResult();
-        $result['num_judging']     = (int)$this->em
-            ->createQuery(
-                'SELECT COUNT(s)
-                FROM App\Entity\Submission s
-                LEFT JOIN App\Entity\Judging j WITH (j.submitid = s.submitid)
-                WHERE s.cid = :cid
-                AND j.result IS NULL
-                AND j.valid = 1
-                AND s.valid = 1')
-            ->setParameter(':cid', $contest->getCid())
-            ->getSingleScalarResult();
-
-        return $result;
+        return $this->dj->getContestStats($this->getContestWithId($request, $cid));
     }
 
     /**

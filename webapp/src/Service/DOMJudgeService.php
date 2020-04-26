@@ -792,4 +792,44 @@ class DOMJudgeService
 
         return $tempFilename;
     }
+
+    /**
+     * @param Contest $contest
+     * @return array
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function getContestStats(Contest $contest): array
+    {
+        $stats = [];
+        $stats['num_submissions'] = (int)$this->em
+            ->createQuery(
+                'SELECT COUNT(s)
+                FROM App\Entity\Submission s
+                WHERE s.cid = :cid')
+            ->setParameter(':cid', $contest->getCid())
+            ->getSingleScalarResult();
+        $stats['num_queued'] = (int)$this->em
+            ->createQuery(
+                'SELECT COUNT(s)
+                FROM App\Entity\Submission s
+                LEFT JOIN App\Entity\Judging j WITH (j.submitid = s.submitid AND j.valid != 0)
+                WHERE s.cid = :cid
+                AND j.result IS NULL
+                AND s.valid = 1')
+            ->setParameter(':cid', $contest->getCid())
+            ->getSingleScalarResult();
+        $stats['num_judging'] = (int)$this->em
+            ->createQuery(
+                'SELECT COUNT(s)
+                FROM App\Entity\Submission s
+                LEFT JOIN App\Entity\Judging j WITH (j.submitid = s.submitid)
+                WHERE s.cid = :cid
+                AND j.result IS NULL
+                AND j.valid = 1
+                AND s.valid = 1')
+            ->setParameter(':cid', $contest->getCid())
+            ->getSingleScalarResult();
+        return $stats;
+    }
 }

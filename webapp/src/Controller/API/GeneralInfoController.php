@@ -179,36 +179,9 @@ class GeneralInfoController extends AbstractFOSRestController
 
         $result = [];
         foreach ($contests as $contest) {
-            $resultItem                    = ['cid' => $contest->getCid()];
-            $resultItem['num_submissions'] = (int)$this->em
-                ->createQuery(
-                    'SELECT COUNT(s)
-                FROM App\Entity\Submission s
-                WHERE s.cid = :cid')
-                ->setParameter(':cid', $contest->getCid())
-                ->getSingleScalarResult();
-            $resultItem['num_queued']      = (int)$this->em
-                ->createQuery(
-                    'SELECT COUNT(s)
-                FROM App\Entity\Submission s
-                LEFT JOIN App\Entity\Judging j WITH (j.submitid = s.submitid AND j.valid != 0)
-                WHERE s.cid = :cid
-                AND j.result IS NULL
-                AND s.valid = 1')
-                ->setParameter(':cid', $contest->getCid())
-                ->getSingleScalarResult();
-            $resultItem['num_judging']     = (int)$this->em
-                ->createQuery(
-                    'SELECT COUNT(s)
-                FROM App\Entity\Submission s
-                LEFT JOIN App\Entity\Judging j WITH (j.submitid = s.submitid)
-                WHERE s.cid = :cid
-                AND j.result IS NULL
-                AND j.valid = 1
-                AND s.valid = 1')
-                ->setParameter(':cid', $contest->getCid())
-                ->getSingleScalarResult();
-            $result[]                      = $resultItem;
+            $contestStats = $this->dj->getContestStats($contest);
+            $contestStats['cid'] = $contest->getCid();
+            $result[] = $contestStats;
         }
 
         return $result;
@@ -347,4 +320,5 @@ class GeneralInfoController extends AbstractFOSRestController
             return 'cid';
         }
     }
+
 }
