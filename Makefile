@@ -224,7 +224,7 @@ maintainer-install: build domserver-create-dirs judgehost-create-dirs webapp/.en
 	$(MAKE) -C doc/manual maintainer-install
 # Create tmpdir and make tmpdir writable for webserver,
 # because judgehost-create-dirs sets wrong permissions:
-	mkdir -p $(domserver_tmpdir)
+	$(MKDIR_P) $(domserver_tmpdir)
 	chmod a+rwx $(domserver_tmpdir)
 # Make sure we're running from a clean state:
 	composer auto-scripts
