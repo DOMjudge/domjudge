@@ -64,6 +64,12 @@ PATH=${PATH}:${HOME}/vendor/bin
 git clone --depth=1 https://github.com/DOMjudge/domjudge-scripts.git
 CHECK_API=${HOME}/domjudge-scripts/contest-api/check-api.sh
 
+# Recreate domjudge-run-0 user with random UID to prevent clashes with
+# existing users in the host and other CI jobs, which can lead to
+# unforeseen process limits being hit.
+sudo userdel -f -r domjudge-run-0
+sudo useradd -d /nonexistent -g nogroup -s /bin/false -u $((2000+(RANDOM%1000))) domjudge-run-0
+
 # start judgedaemon
 cd /opt/domjudge/judgehost/
 sudo -u domjudge bin/judgedaemon -n 0 |& tee /tmp/judgedaemon.log &
