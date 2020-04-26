@@ -77,7 +77,7 @@ function sendNotification(title, options = {})
     }
     options['icon'] = domjudge_base_url + '/apple-touch-icon.png';
 
-	var not = new Notification(title, options);
+    var not = new Notification(title, options);
 
     if ( link!==null ) {
         not.onclick = function() { window.open(link); };
@@ -603,7 +603,11 @@ function updateMenuInternalErrors(data)
 function updateMenuBalloons(data)
 {
     var num = data.length;
-    if ( num != 0 ) {
+    if ( num == 0 ) {
+        $("#num-alerts-balloons").hide();
+    } else {
+        $("#num-alerts-balloons").html(num);
+        $("#num-alerts-balloons").show();
         for (var i=0; i<num; i++) {
             var text = (data[i].room !== null) ? data[i].room+': ' : '';
             text += data[i].pname + ' ' + data[i].name;
