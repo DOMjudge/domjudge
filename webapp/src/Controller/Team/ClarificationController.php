@@ -121,40 +121,7 @@ class ClarificationController extends BaseController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $formData = $form->getData();
-            // First part will always be the contest ID, as Symfony will validate this
-            list(, $problemId) = explode('-', $formData['subject']);
-            $problem  = null;
-            $category = null;
-            $queue    = null;
-            if (!ctype_digit($problemId)) {
-                $category = $problemId;
-            } else {
-                $problem = $this->em->getRepository(Problem::class)->find($problemId);
-                $queue   = $this->config->get('clar_default_problem_queue');
-                if ($queue === "") {
-                    $queue = null;
-                }
-            }
-
-            $newClarification = new Clarification();
-            $newClarification
-                ->setContest($contest)
-                ->setSubmittime(Utils::now())
-                ->setSender($team)
-                ->setProblem($problem)
-                ->setCategory($category)
-                ->setQueue($queue)
-                ->setBody($formData['message']);
-
-            $this->em->persist($newClarification);
-            $this->em->flush();
-
-            $this->dj->auditlog('clarification', $newClarification->getClarid(), 'added', null, null,
-                                             $contest->getCid());
-            $this->eventLogService->log('clarification', $newClarification->getClarid(), 'create', $contest->getCid());
-
-            $this->addFlash('success', 'Clarification sent to the jury');
+            $this->newClarificationHelper($form, $contest, $team);
             return $this->redirectToRoute('team_index');
         }
 
@@ -214,40 +181,7 @@ class ClarificationController extends BaseController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $formData = $form->getData();
-            // First part will always be the contest ID, as Symfony will validate this
-            list(, $problemId) = explode('-', $formData['subject']);
-            $problem  = null;
-            $category = null;
-            $queue    = null;
-            if (!ctype_digit($problemId)) {
-                $category = $problemId;
-            } else {
-                $problem = $this->em->getRepository(Problem::class)->find($problemId);
-                $queue   = $this->config->get('clar_default_problem_queue');
-                if ($queue === "") {
-                    $queue = null;
-                }
-            }
-
-            $newClarification = new Clarification();
-            $newClarification
-                ->setContest($contest)
-                ->setSubmittime(Utils::now())
-                ->setSender($team)
-                ->setProblem($problem)
-                ->setCategory($category)
-                ->setQueue($queue)
-                ->setBody($formData['message']);
-
-            $this->em->persist($newClarification);
-            $this->em->flush();
-
-            $this->dj->auditlog('clarification', $newClarification->getClarid(), 'added', null, null,
-                                             $contest->getCid());
-            $this->eventLogService->log('clarification', $newClarification->getClarid(), 'create', $contest->getCid());
-
-            $this->addFlash('success', 'Clarification sent to the jury');
+            $this->newClarificationHelper($form, $contest, $team);
             return $this->redirectToRoute('team_index');
         }
 
@@ -261,5 +195,52 @@ class ClarificationController extends BaseController
         } else {
             return $this->render('team/clarification_add.html.twig', $data);
         }
+    }
+
+    /**
+     * @param \Symfony\Component\Form\FormInterface $form
+     * @param \App\Entity\Contest|null $contest
+     * @param \App\Entity\Team $team
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    private function newClarificationHelper(
+        \Symfony\Component\Form\FormInterface $form,
+        ?\App\Entity\Contest $contest,
+        \App\Entity\Team $team
+    ): void {
+        $formData = $form->getData();
+        // First part will always be the contest ID, as Symfony will validate this
+        list(, $problemId) = explode('-', $formData['subject']);
+        $problem = null;
+        $category = null;
+        $queue = null;
+        if (!ctype_digit($problemId)) {
+            $category = $problemId;
+        } else {
+            $problem = $this->em->getRepository(Problem::class)->find($problemId);
+            $queue = $this->config->get('clar_default_problem_queue');
+            if ($queue === "") {
+                $queue = null;
+            }
+        }
+
+        $newClarification = new Clarification();
+        $newClarification
+            ->setContest($contest)
+            ->setSubmittime(Utils::now())
+            ->setSender($team)
+            ->setProblem($problem)
+            ->setCategory($category)
+            ->setQueue($queue)
+            ->setBody($formData['message']);
+
+        $this->em->persist($newClarification);
+        $this->em->flush();
+
+        $this->dj->auditlog('clarification', $newClarification->getClarid(), 'added', null, null,
+            $contest->getCid());
+        $this->eventLogService->log('clarification', $newClarification->getClarid(), 'create', $contest->getCid());
+
+        $this->addFlash('success', 'Clarification sent to the jury');
     }
 }
