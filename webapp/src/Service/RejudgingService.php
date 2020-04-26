@@ -197,25 +197,7 @@ class RejudgingService
 
         $rejudgingId = $rejudging->getRejudgingid();
 
-        $todo = $this->em->createQueryBuilder()
-            ->from(Submission::class, 's')
-            ->select('COUNT(s)')
-            ->andWhere('s.rejudging = :rejudging')
-            ->setParameter(':rejudging', $rejudging)
-            ->getQuery()
-            ->getSingleScalarResult();
-
-        $done = $this->em->createQueryBuilder()
-            ->from(Judging::class, 'j')
-            ->select('COUNT(j)')
-            ->andWhere('j.rejudging = :rejudging')
-            ->andWhere('j.endtime IS NOT NULL')
-            ->setParameter(':rejudging', $rejudging)
-            ->getQuery()
-            ->getSingleScalarResult();
-
-        $todo -= $done;
-
+        $todo = $this->calculateTodo($rejudging)['todo'];
         if ($action == self::ACTION_APPLY && $todo > 0) {
             $error = sprintf('%d unfinished judgings left, cannot apply rejudging.', $todo);
             if ($progressReporter) {
@@ -356,5 +338,34 @@ class RejudgingService
         $this->dj->auditlog('rejudging', $rejudgingId, $action . 'ing rejudge', '(end)');
 
         return true;
+    }
+
+    /**
+     * @param Rejudging $rejudging
+     * @return array
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function calculateTodo(Rejudging $rejudging)
+    {
+        $todo = $this->em->createQueryBuilder()
+            ->from(Submission::class, 's')
+            ->select('COUNT(s)')
+            ->andWhere('s.rejudging = :rejudging')
+            ->setParameter(':rejudging', $rejudging)
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        $done = $this->em->createQueryBuilder()
+            ->from(Judging::class, 'j')
+            ->select('COUNT(j)')
+            ->andWhere('j.rejudging = :rejudging')
+            ->andWhere('j.endtime IS NOT NULL')
+            ->setParameter(':rejudging', $rejudging)
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        $todo -= $done;
+        return ['todo' => $todo, 'done' => $done];
     }
 }

@@ -55,7 +55,7 @@ class RejudgingController extends BaseController
     /**
      * @var RejudgingService
      */
-    protected $rejudging;
+    protected $rejudgingService;
 
     /**
      * @var RouterInterface
@@ -71,16 +71,16 @@ class RejudgingController extends BaseController
         EntityManagerInterface $em,
         DOMJudgeService $dj,
         ConfigurationService $config,
-        RejudgingService $rejudging,
+        RejudgingService $rejudgingService,
         RouterInterface $router,
         SessionInterface $session
     ) {
-        $this->em        = $em;
-        $this->dj        = $dj;
-        $this->config    = $config;
-        $this->rejudging = $rejudging;
-        $this->router    = $router;
-        $this->session   = $session;
+        $this->em               = $em;
+        $this->dj               = $dj;
+        $this->config           = $config;
+        $this->rejudgingService = $rejudgingService;
+        $this->router           = $router;
+        $this->session          = $session;
     }
 
     /**
@@ -131,24 +131,9 @@ class RejudgingController extends BaseController
                 $rejudgingdata['finishuser']['value'] = $rejudging->getFinishUser()->getName();
             }
 
-            $todo = $this->em->createQueryBuilder()
-                ->from(Submission::class, 's')
-                ->select('COUNT(s)')
-                ->andWhere('s.rejudging = :rejudging')
-                ->setParameter(':rejudging', $rejudging)
-                ->getQuery()
-                ->getSingleScalarResult();
-
-            $done = $this->em->createQueryBuilder()
-                ->from(Judging::class, 'j')
-                ->select('COUNT(j)')
-                ->andWhere('j.rejudging = :rejudging')
-                ->andWhere('j.endtime IS NOT NULL')
-                ->setParameter(':rejudging', $rejudging)
-                ->getQuery()
-                ->getSingleScalarResult();
-
-            $todo -= $done;
+            $todoAndDone = $this->rejudgingService->calculateTodo($rejudging);
+            $todo = $todoAndDone['todo'];
+            $done = $todoAndDone['done'];
 
             if ($rejudging->getEndtime() !== null) {
                 $status = $rejudging->getValid() ? 'applied' : 'canceled';
@@ -193,6 +178,7 @@ class RejudgingController extends BaseController
     /**
      * @Route("/{rejudgingId<\d+>}", name="jury_rejudging")
      * @param Request           $request
+     * @param RejudgingService  $rejudgingService
      * @param SubmissionService $submissionService
      * @param int               $rejudgingId
      * @return Response
@@ -201,6 +187,7 @@ class RejudgingController extends BaseController
      */
     public function viewAction(
         Request $request,
+        RejudgingService $rejudgingService,
         SubmissionService $submissionService,
         int $rejudgingId
     ) {
@@ -221,24 +208,7 @@ class RejudgingController extends BaseController
         if (!$rejudging) {
             throw new NotFoundHttpException(sprintf('Rejudging with ID %s not found', $rejudgingId));
         }
-        $todo = $this->em->createQueryBuilder()
-            ->from(Submission::class, 's')
-            ->select('COUNT(s)')
-            ->andWhere('s.rejudging = :rejudging')
-            ->setParameter(':rejudging', $rejudging)
-            ->getQuery()
-            ->getSingleScalarResult();
-
-        $done = $this->em->createQueryBuilder()
-            ->from(Judging::class, 'j')
-            ->select('COUNT(j)')
-            ->andWhere('j.rejudging = :rejudging')
-            ->andWhere('j.endtime IS NOT NULL')
-            ->setParameter(':rejudging', $rejudging)
-            ->getQuery()
-            ->getSingleScalarResult();
-
-        $todo -= $done;
+        $todo = $rejudgingService->calculateTodo($rejudging)['todo'];
 
         $verdictsConfig = $this->dj->getDomjudgeEtcDir() . '/verdicts.php';
         $verdicts       = include $verdictsConfig;
@@ -559,19 +529,8 @@ class RejudgingController extends BaseController
                 ]);
             }
             $skipped = [];
-            $res = $this->rejudging->createRejudging($reason, $judgings, true, $skipped);
-            foreach($skipped as $judging) {
-                $submission = $judging['submission'];
-                $msg = sprintf(
-                    'Skipping submission <a href="%s">s%d</a> since it is '.
-                    'already part of rejudging <a href="%s">r%d</a>.',
-                    $this->generateUrl('jury_submission', ['submitId' => $submission['submitid']]),
-                    $submission['submitid'],
-                    $this->generateUrl('jury_rejudging', ['rejudgingId' => $submission['rejudgingid']]),
-                    $submission['rejudgingid']
-                );
-                $this->addFlash('danger', $msg);
-            }
+            $res = $this->rejudgingService->createRejudging($reason, $judgings, true, $skipped);
+            $this->generateFlashMessagesForSkippedJudgings($skipped);
 
             if ($res === false) {
                 return $this->redirectToLocalReferrer($this->router, $request,
@@ -672,19 +631,8 @@ class RejudgingController extends BaseController
         }
 
         $skipped = [];
-        $res = $this->rejudging->createRejudging($reason, $judgings, $fullRejudge, $skipped);
-        foreach($skipped as $judging) {
-            $submission = $judging['submission'];
-            $msg = sprintf(
-                'Skipping submission <a href="%s">s%d</a> since it is '.
-                'already part of rejudging <a href="%s">r%d</a>.',
-                $this->generateUrl('jury_submission', ['submitId' => $submission['submitid']]),
-                $submission['submitid'],
-                $this->generateUrl('jury_rejudging', ['rejudgingId' => $submission['rejudgingid']]),
-                $submission['rejudgingid']
-            );
-            $this->addFlash('danger', $msg);
-        }
+        $res = $this->rejudgingService->createRejudging($reason, $judgings, $fullRejudge, $skipped);
+        $this->generateFlashMessagesForSkippedJudgings($skipped);
 
         if ($res === false) {
             return $this->redirectToLocalReferrer($this->router, $request,
@@ -708,6 +656,22 @@ class RejudgingController extends BaseController
                 case 'team':
                     return $this->redirectToRoute('jury_team', ['teamId' => $id]);
             }
+        }
+    }
+
+    private function generateFlashMessagesForSkippedJudgings(array $skipped): void
+    {
+        foreach ($skipped as $judging) {
+            $submission = $judging['submission'];
+            $msg = sprintf(
+                'Skipping submission <a href="%s">s%d</a> since it is ' .
+                'already part of rejudging <a href="%s">r%d</a>.',
+                $this->generateUrl('jury_submission', ['submitId' => $submission['submitid']]),
+                $submission['submitid'],
+                $this->generateUrl('jury_rejudging', ['rejudgingId' => $submission['rejudgingid']]),
+                $submission['rejudgingid']
+            );
+            $this->addFlash('danger', $msg);
         }
     }
 }
