@@ -492,7 +492,6 @@ class CheckConfigService
     public function checkLanguagesValidate()
     {
         $languages = $this->em->getRepository(Language::class)->findAll();
-        $script_filesize_limit = $this->config->get('script_filesize_limit');
 
         $languageerrors = $scripterrors = [];
         $result = 'O';

@@ -321,9 +321,7 @@ class ScoreboardService
         }
 
         // Determine whether we will use external judgements instead of judgings
-        $localSource           = DOMJudgeService::DATA_SOURCE_LOCAL;
-        $shadow                = DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL;
-        $useExternalJudgements = $this->config->get('data_source') == $shadow;
+        $useExternalJudgements = $this->config->get('data_source') == DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL;
 
         // Note the clause 's.submittime < c.endtime': this is used to
         // filter out TOO-LATE submissions from pending, but it also means
