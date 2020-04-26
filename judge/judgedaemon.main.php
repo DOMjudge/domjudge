@@ -180,7 +180,7 @@ function dbconfig_get_rest(string $name)
 function rest_encode_file(string $file, $sizelimit = true) : string
 {
     if ($sizelimit===true) {
-        $maxsize = (int) dbconfig_get_rest('output_storage_limit', 50000);
+        $maxsize = (int) dbconfig_get_rest('output_storage_limit');
     } elseif ($sizelimit===false || $sizelimit==-1) {
         $maxsize = -1;
     } elseif (is_int($sizelimit) && $sizelimit>0) {
@@ -727,7 +727,7 @@ function judge(array $row)
     }
 
     // Query output storage limit (in database once for this judging.
-    $output_storage_limit = (int) dbconfig_get_rest('output_storage_limit', 50000);
+    $output_storage_limit = (int) dbconfig_get_rest('output_storage_limit');
 
     $cpuset_opt = "";
     if (isset($options['daemonid'])) {
