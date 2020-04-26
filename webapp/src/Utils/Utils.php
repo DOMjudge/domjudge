@@ -736,7 +736,7 @@ class Utils
     }
 
     /**
-     * Cut a string at $size chars and append ..., only if neccessary.
+     * Cut a string at $size chars and append ..., only if necessary.
      * @param string $str
      * @param int    $size
      * @return string

@@ -455,7 +455,7 @@ class SubmissionService
                         $problem->getProbid(), $contest->getCid()));
         }
 
-        // Reindex array numerically to make sure we can index it in onder
+        // Reindex array numerically to make sure we can index it in order
         $files = array_values($files);
 
         $totalSize = 0;

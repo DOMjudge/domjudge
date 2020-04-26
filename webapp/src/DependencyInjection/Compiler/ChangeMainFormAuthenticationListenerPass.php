@@ -17,7 +17,7 @@ class ChangeMainFormAuthenticationListenerPass implements CompilerPassInterface
      */
     public function process(ContainerBuilder $container)
     {
-        // Replace defult form authentication listener with our own
+        // Replace default form authentication listener with our own
         $definition = $container->getDefinition('security.authentication.listener.form.main');
         $definition->setClass(UsernamePasswordFormAuthenticationListener::class);
         $container->setDefinition('security.authentication.listener.form.main', $definition);

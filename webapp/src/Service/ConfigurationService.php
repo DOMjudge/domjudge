@@ -282,7 +282,7 @@ EOF;
 
                 default:
                     $this->logger->warn(
-                        "configation option '%s' has unknown type '%s'",
+                        "configuration option '%s' has unknown type '%s'",
                         [ $specName, $spec['type'] ]
                     );
             }

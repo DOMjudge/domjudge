@@ -140,7 +140,7 @@ class JudgehostRestriction
     }
 
     /**
-     * Get restrction problems
+     * Get restriction problems
      * @return int[]
      */
     public function getProblems()

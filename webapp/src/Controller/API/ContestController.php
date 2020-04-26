@@ -410,7 +410,7 @@ class ContestController extends AbstractRestController
                     }
                 }
 
-                // Change some specifc endpoints that do not map to our own objects.
+                // Change some specific endpoints that do not map to our own objects.
                 $toCheck['problems'] = ContestProblem::class;
                 $toCheck['groups'] = $toCheck['teamcategories'];
                 $toCheck['organizations'] = $toCheck['teamaffiliations'];

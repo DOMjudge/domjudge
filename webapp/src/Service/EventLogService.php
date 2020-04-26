@@ -778,7 +778,7 @@ class EventLogService implements ContainerAwareInterface
                 break;
         }
 
-        // Now check every rerefence to see if we have an event for it
+        // Now check every reference to see if we have an event for it
         foreach ($toCheck as $endpointType => $endpointIds) {
             // Make sure we always use arrays to check, even if we have a single value
             $endpointIds = (array)$endpointIds;

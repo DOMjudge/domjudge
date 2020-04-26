@@ -146,7 +146,7 @@ class InternalErrorController extends BaseController
     {
         /** @var InternalError $internalError */
         $internalError = $this->em->getRepository(InternalError::class)->find($errorId);
-        $status        = $action === 'ignore' ? InternalErrorStatusType::STATUS_IGNROED : InternalErrorStatusType::STATUS_RESOLVED;
+        $status        = $action === 'ignore' ? InternalErrorStatusType::STATUS_IGNORED : InternalErrorStatusType::STATUS_RESOLVED;
         $this->em->transactional(function () use ($internalError, $status) {
             $internalError->setStatus($status);
             if ($status === InternalErrorStatusType::STATUS_RESOLVED) {

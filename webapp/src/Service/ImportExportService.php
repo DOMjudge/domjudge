@@ -748,10 +748,10 @@ class ImportExportService
                 ->setCountry($organizationItem['country']);
             $this->em->flush();
             if ($contest = $this->dj->getCurrentContest()) {
-                $this->eventLogService->log('team_affilation', $teamAffiliation->getAffilid(), $action,
+                $this->eventLogService->log('team_affiliation', $teamAffiliation->getAffilid(), $action,
                                             $contest->getCid());
             }
-            $this->dj->auditlog('team_affilation', $teamAffiliation->getAffilid(), 'replaced',
+            $this->dj->auditlog('team_affiliation', $teamAffiliation->getAffilid(), 'replaced',
                                              'imported from tsv / json');
         }
 

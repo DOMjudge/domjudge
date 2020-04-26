@@ -363,7 +363,7 @@ class RejudgingController extends BaseController
      */
     public function finishAction(Request $request, RejudgingService $rejudgingService, ?Profiler $profiler, int $rejudgingId, string $action)
     {
-        // Note: we use a XMLHttpRequest here as Symfony does not support streaming Twig outpit
+        // Note: we use a XMLHttpRequest here as Symfony does not support streaming Twig output
 
         // Disable the profiler toolbar to avoid OOMs.
         if ($profiler) {
