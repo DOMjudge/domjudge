@@ -251,12 +251,12 @@ class ImportEventFeedCommand extends Command
     {
         // Disable SQL logging if we do not run explicitly in debug mode.
         // This would cause a serious memory leak otherwise since this is a
-        // long runnning process.
+        // long running process.
         if (!$this->debug) {
             $this->em->getConnection()->getConfiguration()->setSQLLogger(null);
         }
 
-        // Set the verobosity level to very verbose, to always get info and
+        // Set the verbosity level to very verbose, to always get info and
         // notice messages, but never debug ones
         $output->setVerbosity(OutputInterface::VERBOSITY_VERY_VERBOSE);
 
@@ -519,7 +519,7 @@ class ImportEventFeedCommand extends Command
                     }
                 } catch (TransportException $e) {
                     $this->logger->error(
-                        'Recceived error while reading event feed: %s',
+                        'Received error while reading event feed: %s',
                         [ $e->getMessage() ]
                     );
                 }

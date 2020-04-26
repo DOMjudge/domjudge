@@ -561,7 +561,7 @@ class ScoreboardService
         }
         $contestProblems = $contestProblemsIndexed;
 
-        // Intialize our data
+        // Initialize our data
         $variants  = ['public' => false, 'restricted' => true];
         $numPoints = [];
         $totalTime = [];

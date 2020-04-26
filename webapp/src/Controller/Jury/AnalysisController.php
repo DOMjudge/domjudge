@@ -163,7 +163,7 @@ class AnalysisController extends AbstractController
           'problem_num_testcases' => $num_testcases,
           'team_num_submissions' => $num_submissions,
 
-          'team_attemped_n_problems' => [],
+          'team_attempted_n_problems' => [],
           'teams_solved_n_problems' => [],
 
           'problem_attempts' => [],
@@ -223,7 +223,7 @@ class AnalysisController extends AbstractController
             }
           }
           $misc['team_stats'][$team->getTeamId()] = $team_stats;
-          AnalysisController::set_or_increment($misc['team_attemped_n_problems'], count($team_stats['problems_submitted']));
+          AnalysisController::set_or_increment($misc['team_attempted_n_problems'], count($team_stats['problems_submitted']));
           AnalysisController::set_or_increment($misc['teams_solved_n_problems'], $team_stats['total_accepted']);
 
           // Calculate how long it has been since their last submission

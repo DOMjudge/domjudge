@@ -218,7 +218,7 @@ class AwardsController extends AbstractRestController
      */
     protected function getIdField(): string
     {
-        // Not used for awaards endpoint
+        // Not used for awards endpoint
         return '';
     }
 }

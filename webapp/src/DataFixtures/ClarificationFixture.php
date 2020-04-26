@@ -27,8 +27,8 @@ class ClarificationFixture extends AbstractExampleDataFixture implements Depende
             ->setBody('Can you tell me how to solve this problem?')
             ->setAnswered(true);
 
-        $juryReponse = new Clarification();
-        $juryReponse
+        $juryResponse = new Clarification();
+        $juryResponse
             ->setContest($this->getReference(ContestFixture::DEMO_REFERENCE))
             ->setInReplyTo($teamClarification)
             ->setSubmittime(1518385677.689197000)
@@ -39,7 +39,7 @@ class ClarificationFixture extends AbstractExampleDataFixture implements Depende
             ->setAnswered(true);
 
         $manager->persist($teamClarification);
-        $manager->persist($juryReponse);
+        $manager->persist($juryResponse);
         $manager->flush();
     }
 

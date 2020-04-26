@@ -110,7 +110,7 @@ class CheckConfigService
 
         $pl = [
             'problems' => $this->checkProblemsValidate(),
-            'languges' => $this->checkLanguagesValidate(),
+            'languages' => $this->checkLanguagesValidate(),
             'judgability' => $this->checkProblemLanguageJudgability(),
         ];
 

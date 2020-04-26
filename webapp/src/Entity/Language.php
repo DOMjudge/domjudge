@@ -474,7 +474,7 @@ class Language extends BaseApiEntity
     }
 
     /**
-     * Get the language for the ACE editor for this langauge
+     * Get the language for the ACE editor for this language
      * @return string
      */
     public function getAceLanguage()

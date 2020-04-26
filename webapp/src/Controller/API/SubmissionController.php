@@ -211,7 +211,7 @@ class SubmissionController extends AbstractRestController
                 sprintf("Language %s not found or or not submittable", $request->request->get('language')));
         }
 
-        // Determine the entry pooint
+        // Determine the entry point
         $entryPoint = null;
         if ($language->getRequireEntryPoint()) {
             if (!$request->request->get('entry_point')) {

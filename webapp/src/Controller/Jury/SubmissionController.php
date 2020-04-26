@@ -665,14 +665,14 @@ class SubmissionController extends BaseController
             ->getQuery()
             ->getResult();
 
-        $originalSubmission = $originallFiles = null;
+        $originalSubmission = $originalFiles = null;
 
         if ($submission->getOrigsubmitid()) {
             /** @var Submission $originalSubmission */
             $originalSubmission = $this->em->getRepository(Submission::class)->find($submission->getOrigsubmitid());
 
             /** @var SubmissionFile[] $files */
-            $originallFiles = $this->em->createQueryBuilder()
+            $originalFiles = $this->em->createQueryBuilder()
                 ->from(SubmissionFile::class, 'file')
                 ->select('file')
                 ->andWhere('file.submission = :submission')
@@ -726,7 +726,7 @@ class SubmissionController extends BaseController
             ->getResult();
 
         $oldFileStats      = $oldFiles !== null ? $this->determineFileChanged($files, $oldFiles) : [];
-        $originalFileStats = $originallFiles !== null ? $this->determineFileChanged($files, $originallFiles) : [];
+        $originalFileStats = $originalFiles !== null ? $this->determineFileChanged($files, $originalFiles) : [];
 
         return $this->render('jury/submission_source.html.twig', [
             'submission' => $submission,
@@ -735,7 +735,7 @@ class SubmissionController extends BaseController
             'oldFiles' => $oldFiles,
             'oldFileStats' => $oldFileStats,
             'originalSubmission' => $originalSubmission,
-            'originalFiles' => $originallFiles,
+            'originalFiles' => $originalFiles,
             'originalFileStats' => $originalFileStats,
         ]);
     }

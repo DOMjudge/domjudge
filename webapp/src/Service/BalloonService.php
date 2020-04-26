@@ -70,7 +70,7 @@ class BalloonService
         // prevent duplicate balloons in case of multiple correct submissions
         $numCorrect = $this->em->createQueryBuilder()
             ->from(Balloon::class, 'b')
-            ->select('COUNT(b.submitid) AS numBallons')
+            ->select('COUNT(b.submitid) AS numBalloons')
             ->join('b.submission', 's')
             ->andWhere('s.valid = 1')
             ->andWhere('s.probid = :probid')

@@ -74,7 +74,7 @@ abstract class BaseController extends AbstractController
     }
 
     /**
-     * Save the given entity, adding an eventlog and audilog entry
+     * Save the given entity, adding an eventlog and auditlog entry
      * @param EntityManagerInterface $entityManager
      * @param EventLogService        $eventLogService
      * @param DOMJudgeService        $DOMJudgeService

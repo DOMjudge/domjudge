@@ -19,7 +19,7 @@ class ParameterRefMergeDescriber implements DescriberInterface
      */
     public function describe(Swagger $api)
     {
-        // This method removes paramaters that also have a ref version as they will be duplicated otherwise.
+        // This method removes parameters that also have a ref version as they will be duplicated otherwise.
         // It can be deleted when https://github.com/nelmio/NelmioApiDocBundle/issues/1407 is fixed
 
         /** @var Path $path */
