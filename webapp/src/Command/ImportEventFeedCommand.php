@@ -1210,16 +1210,7 @@ class ImportEventFeedCommand extends Command
 
             $submission = $this->em->getRepository(Submission::class)->findOneBy(['contest' => $this->contestId, 'externalid' => $submissionId]);
             if ($submission) {
-                $submission->setValid(false);
-                $this->em->flush();
-                $this->eventLogService->log('submissions', $submission->getSubmitid(),
-                                            EventLogService::ACTION_DELETE,
-                                            $this->contestId);
-
-                $contest = $this->em->getRepository(Contest::class)->find($submission->getCid());
-                $team    = $this->em->getRepository(Team::class)->find($submission->getTeamid());
-                $problem = $this->em->getRepository(Problem::class)->find($submission->getProbid());
-                $this->scoreboardService->calculateScoreRow($contest, $team, $problem);
+                $this->markSubmissionAsValidAndRecalcScore($submission, false);
                 return;
             } else {
                 $this->logger->error('Cannot delete nonexistent submission %s', [ $submissionId ]);
@@ -1362,17 +1353,7 @@ class ImportEventFeedCommand extends Command
 
             // If the submission was not valid before, mark it valid now and recalculate the scoreboard
             if (!$submission->getValid()) {
-                $submission->setValid(true);
-
-                $this->em->flush();
-                $this->eventLogService->log('submissions', $submission->getSubmitid(),
-                                            EventLogService::ACTION_CREATE,
-                                            $this->contestId);
-
-                $contest = $this->em->getRepository(Contest::class)->find($submission->getCid());
-                $team    = $this->em->getRepository(Team::class)->find($submission->getTeamid());
-                $problem = $this->em->getRepository(Problem::class)->find($submission->getProbid());
-                $this->scoreboardService->calculateScoreRow($contest, $team, $problem);
+                $this->markSubmissionAsValidAndRecalcScore($submission, true);
             }
         } else {
             // First, check if we actually have the source for this submission in the data
@@ -1767,5 +1748,25 @@ class ImportEventFeedCommand extends Command
         }
 
         $this->pendingEvents[$type][$id][] = $event;
+    }
+
+    /**
+     * @param Submission $submission
+     * @throws NonUniqueResultException
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    private function markSubmissionAsValidAndRecalcScore(Submission $submission, bool $valid): void
+    {
+        $submission->setValid($valid);
+
+        $this->em->flush();
+        $this->eventLogService->log('submissions', $submission->getSubmitid(),
+            $valid ? EventLogService::ACTION_CREATE : EventLogService::ACTION_DELETE,
+            $this->contestId);
+
+        $contest = $this->em->getRepository(Contest::class)->find($submission->getCid());
+        $team = $this->em->getRepository(Team::class)->find($submission->getTeamid());
+        $problem = $this->em->getRepository(Problem::class)->find($submission->getProbid());
+        $this->scoreboardService->calculateScoreRow($contest, $team, $problem);
     }
 }
