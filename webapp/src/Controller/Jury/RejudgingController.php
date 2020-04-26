@@ -178,7 +178,6 @@ class RejudgingController extends BaseController
     /**
      * @Route("/{rejudgingId<\d+>}", name="jury_rejudging")
      * @param Request           $request
-     * @param RejudgingService  $rejudgingService
      * @param SubmissionService $submissionService
      * @param int               $rejudgingId
      * @return Response
@@ -187,7 +186,6 @@ class RejudgingController extends BaseController
      */
     public function viewAction(
         Request $request,
-        RejudgingService $rejudgingService,
         SubmissionService $submissionService,
         int $rejudgingId
     ) {
@@ -208,7 +206,7 @@ class RejudgingController extends BaseController
         if (!$rejudging) {
             throw new NotFoundHttpException(sprintf('Rejudging with ID %s not found', $rejudgingId));
         }
-        $todo = $rejudgingService->calculateTodo($rejudging)['todo'];
+        $todo = $this->rejudgingService->calculateTodo($rejudging)['todo'];
 
         $verdictsConfig = $this->dj->getDomjudgeEtcDir() . '/verdicts.php';
         $verdicts       = include $verdictsConfig;
