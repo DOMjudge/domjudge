@@ -9,8 +9,10 @@
 {% endif %}
 
 {% set rowSpan = 1 %}
+{% set tdExtraClass = '' %}
 {% if showExternalResult and showExternalTestcases %}
     {% set rowSpan = 2 %}
+    {% set tdExtraClass = ' thick-border' %}
 {% endif %}
 
 {% if submissions is empty %}
@@ -19,7 +21,11 @@
     <table class="data-table table table-hover table-striped table-sm submissions-table">
         <thead class="thead-light">
         <tr>
-            <th scope="col">ID</th>
+            {% if showExternalResult and showExternalTestcases %}
+                <th scope="col" colspan="2">ID</th>
+            {% else %}
+                <th scope="col">ID</th>
+            {% endif %}
             {%- if showContest %}
 
                 <th scope="col">contest</th>
@@ -65,36 +71,43 @@
                 data-team-id="{{ submission.teamid }}"
                 data-language-id="{{ submission.langid }}"
                 data-submission-id="{{ submission.submitid }}">
-                <td rowspan="{{ rowSpan }}">
-                    <a href="{{ link }}">s{{ submission.submitid }}</a>
-                </td>
-                {%- if showContest %}
-                    <td><a href="{{ link }}">c{{ submission.cid }}</a></td>
-                {%- endif %}
-
-                <td rowspan="{{ rowSpan }}">
-                    <a href="{{ link }}">{{ submission.submittime | printtime(null, submission.contest) }}</a>
-                </td>
-                <td rowspan="{{ rowSpan }}">
-                    <a href="{{ link }}"
-                       title="t{{ submission.teamid }}">{{ submission.team.name | truncate(30) }}</a>
-                </td>
-                <td class="probid" rowspan="{{ rowSpan }}">
-                    <a href="{{ link }}"
-                       title="{{ submission.problem.name }}">{{ submission.contestProblem.shortname }}</a>
-                </td>
-                <td class="langid" rowspan="{{ rowSpan }}">
-                    <a href="{{ link }}"
-                       title="{{ submission.language.name }}">{{ submission.langid }}</a>
-                </td>
                 {% if showExternalResult and showExternalTestcases %}
-                    <td>
+                    <td class="{{ tdExtraClass }}">
                         <a href="{{ link }}">
                             Local
                         </a>
                     </td>
                 {% endif %}
-                <td>
+                <td class="{{ tdExtraClass }}">
+                    <a href="{{ link }}">s{{ submission.submitid }}</a>
+                </td>
+                {%- if showContest %}
+                    <td class="{{ tdExtraClass }}"><a href="{{ link }}">c{{ submission.cid }}</a></td>
+                {%- endif %}
+
+                <td rowspan="{{ rowSpan }}" class="{{ tdExtraClass }}">
+                    <a href="{{ link }}">{{ submission.submittime | printtime(null, submission.contest) }}</a>
+                </td>
+                <td rowspan="{{ rowSpan }}" class="{{ tdExtraClass }}">
+                    <a href="{{ link }}"
+                       title="t{{ submission.teamid }}">{{ submission.team.name | truncate(30) }}</a>
+                </td>
+                <td class="probid{{ tdExtraClass }}" rowspan="{{ rowSpan }}">
+                    <a href="{{ link }}"
+                       title="{{ submission.problem.name }}">{{ submission.contestProblem.shortname }}</a>
+                </td>
+                <td class="langid{{ tdExtraClass }}" rowspan="{{ rowSpan }}">
+                    <a href="{{ link }}"
+                       title="{{ submission.language.name }}">{{ submission.langid }}</a>
+                </td>
+                {% if showExternalResult and showExternalTestcases %}
+                    <td class="{{ tdExtraClass }}">
+                        <a href="{{ link }}">
+                            Local
+                        </a>
+                    </td>
+                {% endif %}
+                <td class="{{ tdExtraClass }}">
                     <a href="{{ link }}">
                         {%- if submission.submittime > submission.contest.endtime %}
                             {{ 'too-late' | printValidJuryResult }}
@@ -121,7 +134,7 @@
                     {% else %}
                         {% set externalJudgement = submission.externalJudgements.first %}
                     {% endif %}
-                    <td>
+                    <td class="{{ tdExtraClass }}">
                         <a href="{{ link }}">
                             {% if externalJudgement is null or externalJudgement.result is empty %}
                                 {{- 'pending' | printValidJuryResult -}}
@@ -153,9 +166,9 @@
                 {%- else %}
                     {%- set claimArg = {unclaim: 1} %}
                 {%- endif %}
-                <td><a href="{{ link }}">{{ verified }}</a></td>
+                <td class="{{ tdExtraClass }}"><a href="{{ link }}">{{ verified }}</a></td>
                 {% if not showExternalResult or not showExternalTestcases %}
-                    <td>
+                    <td class="{{ tdExtraClass }}">
                         {%- if rejudging is defined %}
                             {%- set claimLink = path('jury_submission', claimArg | merge({submitId: submission.submitid, rejudgingid: rejudging.rejudgingid})) %}
                         {%- else %}
@@ -173,13 +186,13 @@
                 {% endif %}
                 {%- if rejudging is defined %}
 
-                    <td><a href="{{ path('jury_submission', {submitId: submission.submitid}) }}">
+                    <td class="{{ tdExtraClass }}"><a href="{{ path('jury_submission', {submitId: submission.submitid}) }}">
                             {{ submission.oldResult | printValidJuryResult }}
                         </a></td>
                 {%- endif %}
                 {%- if showTestcases is defined and showTestcases %}
 
-                    <td class="testcase-results">
+                    <td class="testcase-results{{ tdExtraClass }}">
                         {{- submission | testcaseResults -}}
                     </td>
                 {%- endif %}
@@ -191,13 +204,28 @@
                 {% else %}
                     {% set externalJudgement = submission.externalJudgements.first %}
                 {% endif %}
+                {% if external_ccs_submission_url is not empty %}
+                    {% set externalSubmissionUrl = submission | externalCcsUrl %}
+                {% else %}
+                    {% set externalSubmissionUrl = null %}
+                {% endif %}
                 <td>
-                    <a href="{{ link }}">
+                    <a {% if externalSubmissionUrl is not null %}href="{{ externalSubmissionUrl }}"{% endif %}>
                         External
                     </a>
                 </td>
                 <td>
-                    <a href="{{ link }}">
+                    <a {% if externalSubmissionUrl is not null %}href="{{ externalSubmissionUrl }}"{% endif %}>
+                        {{ submission.externalid }}
+                    </a>
+                </td>
+                <td>
+                    <a {% if externalSubmissionUrl is not null %}href="{{ externalSubmissionUrl }}"{% endif %}>
+                        External
+                    </a>
+                </td>
+                <td>
+                    <a {% if externalSubmissionUrl is not null %}href="{{ externalSubmissionUrl }}"{% endif %}>
                         {% if externalJudgement is null or externalJudgement.result is empty %}
                             {{- 'pending' | printValidJuryResult -}}
                         {% else %}
