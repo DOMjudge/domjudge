@@ -56,7 +56,7 @@ to be added to the system that acts as judgehost. This user does not
 need a home-directory or password, so the following command would
 suffice to add a user and group ``domjudge-run`` with minimal privileges::
 
-  useradd -d /nonexistent -U -M -s /bin/false domjudge-run
+  sudo useradd -d /nonexistent -U -M -s /bin/false domjudge-run
 
 Sudo permissions
 ----------------
