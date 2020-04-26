@@ -732,8 +732,6 @@ function judge(array $row)
     } else {
         putenv('ENTRY_POINT');
     }
-
-    // Query output storage limit (in database once for this judging.
     $output_storage_limit = (int) dbconfig_get_rest('output_storage_limit');
 
     $cpuset_opt = "";
