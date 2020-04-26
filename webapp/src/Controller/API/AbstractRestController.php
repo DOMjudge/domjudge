@@ -70,36 +70,7 @@ abstract class AbstractRestController extends AbstractFOSRestController
      */
     protected function performListAction(Request $request)
     {
-        // Make sure we clear the entity manager class, for when this method is called multiple times by internal requests
-        $this->em->clear();
-        $queryBuilder = $this->getQueryBuilder($request);
-
-        if ($request->query->has('ids')) {
-            $ids = $request->query->get('ids', []);
-            if (!is_array($ids)) {
-                throw new BadRequestHttpException('\'ids\' should be an array of ID\'s to fetch');
-            }
-
-            $ids = array_unique($ids);
-
-            $queryBuilder
-                ->andWhere(sprintf('%s IN (:ids)', $this->getIdField()))
-                ->setParameter(':ids', $ids);
-        }
-
-        $objects = $queryBuilder
-            ->getQuery()
-            ->getResult();
-
-        if (isset($ids) && count($objects) !== count($ids)) {
-            throw new NotFoundHttpException('One or more objects not found');
-        }
-
-        if ($this instanceof QueryObjectTransformer) {
-            $objects = array_map([$this, 'transformObject'], $objects);
-        }
-
-        return $this->renderData($request, $objects);
+        return $this->renderData($request, $this->listActionHelper($request));
     }
 
     /**
@@ -240,4 +211,42 @@ abstract class AbstractRestController extends AbstractFOSRestController
      * @return string
      */
     abstract protected function getIdField(): string;
+
+    /**
+     * @param Request $request
+     * @return array|int|mixed|string
+     * @throws NonUniqueResultException
+     */
+    protected function listActionHelper(Request $request)
+    {
+        // Make sure we clear the entity manager class, for when this method is called multiple times by internal requests.
+        $this->em->clear();
+        $queryBuilder = $this->getQueryBuilder($request);
+
+        if ($request->query->has('ids')) {
+            $ids = $request->query->get('ids', []);
+            if (!is_array($ids)) {
+                throw new BadRequestHttpException('\'ids\' should be an array of ID\'s to fetch');
+            }
+
+            $ids = array_unique($ids);
+
+            $queryBuilder
+                ->andWhere(sprintf('%s IN (:ids)', $this->getIdField()))
+                ->setParameter(':ids', $ids);
+        }
+
+        $objects = $queryBuilder
+            ->getQuery()
+            ->getResult();
+
+        if (isset($ids) && count($objects) !== count($ids)) {
+            throw new NotFoundHttpException('One or more objects not found');
+        }
+
+        if ($this instanceof QueryObjectTransformer) {
+            $objects = array_map([$this, 'transformObject'], $objects);
+        }
+        return $objects;
+    }
 }
