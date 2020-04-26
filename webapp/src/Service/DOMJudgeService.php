@@ -378,39 +378,48 @@ class DOMJudgeService
         $contest = $this->getCurrentContest();
 
         $clarifications = [];
-        if ($contest) {
-            $clarifications = $this->em->createQueryBuilder()
-                ->select('clar.clarid', 'clar.body')
-                ->from(Clarification::class, 'clar')
-                ->andWhere('clar.contest = :contest')
-                ->andWhere('clar.sender is not null')
-                ->andWhere('clar.answered = 0')
-                ->setParameter('contest', $contest)
+        $judgehosts = [];
+        $rejudgings = [];
+        $internal_errors = [];
+
+        if ($this->checkRole('jury')) {
+            if ($contest) {
+                $clarifications = $this->em->createQueryBuilder()
+                    ->select('clar.clarid', 'clar.body')
+                    ->from(Clarification::class, 'clar')
+                    ->andWhere('clar.contest = :contest')
+                    ->andWhere('clar.sender is not null')
+                    ->andWhere('clar.answered = 0')
+                    ->setParameter('contest', $contest)
+                    ->getQuery()->getResult();
+            }
+
+            $judgehosts = $this->em->createQueryBuilder()
+                ->select('j.hostname', 'j.polltime')
+                ->from(Judgehost::class, 'j')
+                ->andWhere('j.active = 1')
+                ->andWhere('j.polltime < :i')
+                ->setParameter('i', time() - $this->config->get('judgehost_critical'))
+                ->getQuery()->getResult();
+
+            $rejudgings = $this->em->createQueryBuilder()
+                ->select('r.rejudgingid, r.starttime, r.endtime')
+                ->from(Rejudging::class, 'r')
+                ->andWhere('r.endtime is null')
                 ->getQuery()->getResult();
         }
 
-        $judgehosts = $this->em->createQueryBuilder()
-            ->select('j.hostname', 'j.polltime')
-            ->from(Judgehost::class, 'j')
-            ->andWhere('j.active = 1')
-            ->andWhere('j.polltime < :i')
-            ->setParameter('i', time() - $this->config->get('judgehost_critical'))
-            ->getQuery()->getResult();
+        if ($this->checkrole('admin')) {
+            $internal_error = $this->em->createQueryBuilder()
+                ->select('ie.errorid', 'ie.description')
+                ->from(InternalError::class, 'ie')
+                ->andWhere('ie.status = :status')
+                ->setParameter('status', 'open')
+                ->getQuery()->getResult();
+        }
 
-        $rejudgings = $this->em->createQueryBuilder()
-            ->select('r.rejudgingid, r.starttime, r.endtime')
-            ->from(Rejudging::class, 'r')
-            ->andWhere('r.endtime is null')
-            ->getQuery()->getResult();
-
-        $internal_error = $this->em->createQueryBuilder()
-            ->select('ie.errorid', 'ie.description')
-            ->from(InternalError::class, 'ie')
-            ->andWhere('ie.status = :status')
-            ->setParameter('status', 'open')
-            ->getQuery()->getResult();
-
-        $balloons = $this->em->createQueryBuilder()
+        if ($this->checkrole('balloon')) {
+            $balloons = $this->em->createQueryBuilder()
             ->select('b.balloonid', 't.name', 't.room', 'p.name AS pname')
             ->from(Balloon::class, 'b')
             ->leftJoin('b.submission', 's')
@@ -421,12 +430,13 @@ class DOMJudgeService
             ->andWhere('co.cid = :cid')
             ->setParameter(':cid', $contest->getCid())
             ->getQuery()->getResult();
+        }
 
         return [
             'clarifications' => $clarifications,
             'judgehosts' => $judgehosts,
             'rejudgings' => $rejudgings,
-            'internal_error' => $internal_error,
+            'internal_errors' => $internal_errors,
             'balloons' => $balloons
         ];
     }
