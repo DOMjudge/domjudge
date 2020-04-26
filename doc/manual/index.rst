@@ -22,3 +22,4 @@ Appendices
 .. toctree::
    quick-install
    problem-format
+   shadow
