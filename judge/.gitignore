@@ -1,6 +1,8 @@
 /chroot-startstop.sh
+/create_cgroups
 /judgedaemon
 /runguard
 /runpipe
 /evict
+/create-cgroups.service
 /domjudge-judgehost.service
