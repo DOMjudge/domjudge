@@ -52,7 +52,7 @@ Judgehosts
    ``./configure --with-baseurl=<url> && make judgehost``.
  * Run ``sudo make install-judgehost`` to install the system.
 
- * ``useradd -d /nonexistent -U -M -s /bin/false domjudge-run``
+ * ``sudo useradd -d /nonexistent -U -M -s /bin/false domjudge-run``
  * Add to ``/etc/sudoers.d/`` or append to ``/etc/sudoers`` the
    sudoers configuration as in ``etc/sudoers-domjudge``.
  * Set up cgroup support: enable kernel parameters in
