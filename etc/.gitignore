@@ -13,3 +13,4 @@
 /symfony_app.secret
 /initial_admin_password.secret
 /sudoers-domjudge
+/shadowing.yaml
