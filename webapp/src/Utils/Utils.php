@@ -4,6 +4,7 @@ namespace App\Utils;
 use App\Entity\SubmissionFile;
 use DateTime;
 use Doctrine\Common\Inflector\Inflector;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
  * Generic utility class.
@@ -1040,5 +1041,25 @@ class Utils
         $parts        = explode('\\', $class);
         $entityType   = $parts[count($parts) - 1];
         return Inflector::tableize($entityType);
+    }
+
+    /**
+     * @param string $content
+     * @param string $filename
+     * @return StreamedResponse
+     */
+    public static function streamAsBinaryFile(string $content, string $filename): StreamedResponse
+    {
+        $response = new StreamedResponse();
+        $response->setCallback(function () use ($content) {
+            echo $content;
+        });
+        $response->headers->set('Content-Type', 'application/octet-stream');
+        $response->headers->set('Content-Disposition', 'attachment; filename="' . $filename . '"');
+        $response->headers->set('Content-Length', strlen($content));
+        $response->headers->set('Content-Transfer-Encoding', 'binary');
+        $response->headers->set('Connection', 'Keep-Alive');
+        $response->headers->set('Accept-Ranges', 'bytes');
+        return $response;
     }
 }

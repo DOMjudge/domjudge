@@ -314,19 +314,7 @@ class ExecutableController extends BaseController
         }
 
         $content = $zip->getFromIndex($index);
-
-        $response = new StreamedResponse();
-        $response->setCallback(function () use ($content) {
-            echo $content;
-        });
-        $response->headers->set('Content-Type', 'application/octet-stream');
-        $response->headers->set('Content-Disposition', 'attachment; filename="' . $filename . '"');
-        $response->headers->set('Content-Length', strlen($content));
-        $response->headers->set('Content-Transfer-Encoding', 'binary');
-        $response->headers->set('Connection', 'Keep-Alive');
-        $response->headers->set('Accept-Ranges', 'bytes');
-
-        return $response;
+        return Utils::streamAsBinaryFile($content, $filename);
     }
 
     /**
