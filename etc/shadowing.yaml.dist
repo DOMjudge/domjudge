@@ -33,6 +33,13 @@ exampleB:
     feed-file: /home/user/sample-feed/event-feed.ndjson
     # The base path to use for relative URL's from the feed. Currently only used
     # for submission files with relative URL's. This field is required if
-    # `feed-file` is set. For a relative url `x` and a base-path `y` the file
-    # that will be used is `x/y`.
+    # `feed-file` is set. For example with a submission files JSON like:
+    # "files": [
+    #     {
+    #         "href": "submissions/1234.zip",
+    #         "mime": "application/zip"
+    #     }
+    # ],
+    # the path where the file will be fetched from is
+    # /home/user/sample-feed/files/submissions/1234.zip.
     base-path: /home/user/sample-feed/files/
