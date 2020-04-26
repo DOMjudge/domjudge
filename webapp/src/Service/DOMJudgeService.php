@@ -410,7 +410,7 @@ class DOMJudgeService
         }
 
         if ($this->checkrole('admin')) {
-            $internal_error = $this->em->createQueryBuilder()
+            $internal_errors = $this->em->createQueryBuilder()
                 ->select('ie.errorid', 'ie.description')
                 ->from(InternalError::class, 'ie')
                 ->andWhere('ie.status = :status')

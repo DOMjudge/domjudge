@@ -70,7 +70,6 @@ class BalloonController extends AbstractController
      */
     public function indexAction(Request $request, Packages $assetPackage, KernelInterface $kernel)
     {
-        $timeFormat = (string)$this->config->get('time_format');
         $showPostFreeze = (bool)$this->config->get('show_balloons_postfreeze');
 
         $em = $this->em;
@@ -195,7 +194,7 @@ class BalloonController extends AbstractController
             $balloons_table[] = [
                 'data' => $balloondata,
                 'actions' => $balloonactions,
-                'cssclass' => $balloon->getDone() ? 'disabled' : null,
+                'cssclass' => $cssclass,
             ];
         }
 

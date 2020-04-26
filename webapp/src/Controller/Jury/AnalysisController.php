@@ -109,7 +109,6 @@ class AnalysisController extends AbstractController
         }
 
         // Next select information about the teams
-        $teams = [];
         if ($contest->isOpenToAllTeams()) {
             $teams = $this->applyFilter($em->createQueryBuilder()
                                             ->select('t', 'ts', 'j', 'lang', 'a')
