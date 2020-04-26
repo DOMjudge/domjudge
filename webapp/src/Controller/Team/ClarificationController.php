@@ -106,7 +106,7 @@ class ClarificationController extends BaseController
             }
 
             $message = '';
-            $text    = explode("\n", Utils::wrap_unquoted($clarification->getBody()), 75);
+            $text    = explode("\n", Utils::wrapUnquoted($clarification->getBody()), 75);
             foreach ($text as $line) {
                 $message .= "> $line\n";
             }

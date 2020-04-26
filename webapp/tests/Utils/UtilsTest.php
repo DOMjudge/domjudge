@@ -180,7 +180,7 @@ class UtilsTest extends TestCase
     public function testWrapUnquotedSingleLineUnquoted()
     {
         $text = "This is an example text.";
-        $this->assertEquals($text, Utils::wrap_unquoted($text));
+        $this->assertEquals($text, Utils::wrapUnquoted($text));
     }
 
     public function testWrapUnquotedLongLineUnquoted()
@@ -189,7 +189,7 @@ class UtilsTest extends TestCase
         $result = "This is an
 example
 text.";
-        $this->assertEquals($result, Utils::wrap_unquoted($text, 10));
+        $this->assertEquals($result, Utils::wrapUnquoted($text, 10));
     }
 
     public function testWrapUnquotedLongLineWithQuoted()
@@ -222,7 +222,7 @@ way, pi >
 3.
 Just so
 you know";
-        $this->assertEquals($result, Utils::wrap_unquoted($text, 10));
+        $this->assertEquals($result, Utils::wrapUnquoted($text, 10));
     }
 
     public function testWrapUnquotedLongLineWithQuotedCustomQuoteCharacter()
@@ -240,7 +240,7 @@ you know";
 the
 unquoted
 part.";
-        $this->assertEquals($result, Utils::wrap_unquoted($text, 10, '#'));
+        $this->assertEquals($result, Utils::wrapUnquoted($text, 10, '#'));
     }
 
     public function testStartsWith()

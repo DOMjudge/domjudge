@@ -224,7 +224,7 @@ class ClarificationController extends AbstractController
 
             $data['answered'] = $clar->getAnswered();
 
-            $data['body'] = Utils::wrap_unquoted($clar->getBody(), 78);
+            $data['body'] = Utils::wrapUnquoted($clar->getBody(), 78);
             $clardata['list'][] = $data;
         }
 
@@ -235,7 +235,7 @@ class ClarificationController extends AbstractController
             $clardata['clarform']['onsubject'] = $concernssubject;
         }
 
-        $clardata['clarform']['quotedtext'] = "> " . str_replace("\n", "\n> ", Utils::wrap_unquoted($data['body'])) . "\n\n";
+        $clardata['clarform']['quotedtext'] = "> " . str_replace("\n", "\n> ", Utils::wrapUnquoted($data['body'])) . "\n\n";
         $clardata['clarform']['queues'] = $queues;
         $clardata['clarform']['answers'] = $clar_answers;
 
