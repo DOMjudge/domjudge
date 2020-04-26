@@ -63,12 +63,14 @@ system.
 
 When DOMjudge is configured and site-specific
 configuration set, the team manual can be generated with the command
-`genteammanual` found under `docs/team`. The PDF
+``genteammanual`` found under ``docs/team``. The PDF
 document will be placed in the current
 directory or a directory given as argument.
 The following should do it on a Debian-like system::
 
-  sudo apt install python3-sphinx python3-sphinx-rtd-theme rst2pdf
+  sudo apt install python-sphinx python-sphinx-rtd-theme rst2pdf
   cd <INSTALL_PATH>/docs/team
   ./genteammanual [targetdir]
 
+On Debian 11 and above, install
+``python3-sphinx python3-sphinx-rtd-theme rst2pdf`` instead.
