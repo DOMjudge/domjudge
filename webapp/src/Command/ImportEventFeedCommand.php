@@ -1492,6 +1492,15 @@ class ImportEventFeedCommand extends Command
                         'Can not add submission %d: %s',
                         [ $submissionId, $message ]
                     );
+                    // Clean up the temporary submission files
+                    foreach ($filesToSubmit as $file) {
+                        unlink($file->getRealPath());
+                    }
+                    $zip->close();
+                    if ($shouldUnlink) {
+                        unlink($zipFile);
+                    }
+                    return;
                 }
 
                 // Clean up the ZIP
