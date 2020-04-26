@@ -234,35 +234,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
      */
     public function singleAction(Request $request, string $id)
     {
-        // Make sure we clear the entity manager class, for when this method is called multiple times by internal requests
-        $this->em->clear();
-        // This method is overwritten, because we need to add ordinal values
-        $queryBuilder = $this->getQueryBuilder($request);
-
-        if ($request->query->has('ids')) {
-            $ids = $request->query->get('ids', []);
-            if (!is_array($ids)) {
-                throw new BadRequestHttpException('\'ids\' should be an array of ID\'s to fetch');
-            }
-
-            $ids = array_unique($ids);
-
-            $queryBuilder
-                ->andWhere(sprintf('%s IN (:ids)', $this->getIdField()))
-                ->setParameter(':ids', $ids);
-        }
-
-        $objects = $queryBuilder
-            ->getQuery()
-            ->getResult();
-
-        if (isset($ids) && count($objects) !== count($ids)) {
-            throw new NotFoundHttpException('One or more objects not found');
-        }
-
-        $objects = array_map([$this, 'transformObject'], $objects);
-
-        $ordinalArray = new OrdinalArray($objects);
+        $ordinalArray = new OrdinalArray($this->listActionHelper($request));
 
         $object = null;
         foreach ($ordinalArray->getItems() as $item) {
