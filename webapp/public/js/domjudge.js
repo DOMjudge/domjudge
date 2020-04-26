@@ -68,6 +68,7 @@ function sendNotification(title, options = {})
     } else {
         senttags = senttags.split(',');
     }
+
     if ( options.tag!==null && senttags.indexOf(options.tag)>=0 ) { return; }
 
     var link = null;
@@ -75,8 +76,9 @@ function sendNotification(title, options = {})
         link = options.link;
         delete options.link;
     }
-    options['icon'] = domjudge_base_url + '/apple-touch-icon.png';
 
+    options['icon'] = domjudge_base_url + '/apple-touch-icon.png';
+    
     var not = new Notification(title, options);
 
     if ( link!==null ) {
@@ -520,6 +522,7 @@ function updateMenuAlerts()
             updateMenuRejudgings(json.rejudgings);
             updateMenuJudgehosts(json.judgehosts);
             updateMenuInternalErrors(json.internal_error);
+            updateMenuBalloons(json.balloons);
         }
     });
 }
@@ -539,7 +542,7 @@ function updateMenuClarifications(data)
                  {'tag': 'clar_' + data[i].clarid,
                   'link': domjudge_base_url + '/jury/clarifications/'+data[i].clarid,
                   'body': data[i].body });
-	}
+        }
     }
 }
 
@@ -595,6 +598,21 @@ function updateMenuInternalErrors(data)
                 {'tag': 'ie_'+data[i].errorid,
                  'link': domjudge_base_url + '/internal-errors/' + data[i].errorid,
                  'body': data[i].description});
+        }
+    }
+}
+
+function updateMenuBalloons(data)
+{
+    var num = data.length;
+    if ( num != 0 ) {
+        for (var i=0; i<num; i++) {
+            var text = (data[i].room !== null) ? data[i].room+': ' : '';
+            text += data[i].pname + ' ' + data[i].name;
+			sendNotification('New balloon:',
+                 {'tag': 'ball_' + data[i].baloonid,
+                  'link': domjudge_base_url + '/jury/balloons',
+                  'body':  text});
         }
     }
 }
