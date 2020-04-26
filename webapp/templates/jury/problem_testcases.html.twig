@@ -28,6 +28,9 @@
         <table class="table table-sm table-striped table-hover testcases">
             <thead>
             <tr>
+                {% if is_granted('ROLE_ADMIN') %}
+                    <th/>
+                {% endif %}
                 <th class="testrank">#</th>
                 <th class="testsample">sample</th>
                 <th>download</th>
@@ -42,6 +45,15 @@
             <tbody>
             {% for rank, testcase in testcases %}
                 <tr>
+                    {% if is_granted('ROLE_ADMIN') %}
+                        <td rowspan="2">
+                            <a href="{{  path('jury_testcase_delete', {'testcaseId': testcase.testcaseid}) }}"
+                               title="delete testcase {{ testcase.testcaseid }}"
+                               onclick="confirm('Proceed with the deletion of testcase {{ testcase.testcaseid }}?');">
+                                <i class="fas fa-trash-alt"></i>
+                            </a>
+                        </td>
+                    {% endif %}
                     <td rowspan="2" class="testrank">
                         <a href="{{ path('jury_problem_testcase_move', {'probId': problem.probid, 'rank': testcase.rank, 'direction': 'up'}) }}"
                            title="Move testcase up"><i class="fas fa-arrow-up"></i></a><br>

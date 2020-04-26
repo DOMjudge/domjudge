@@ -1050,6 +1050,39 @@ class ProblemController extends BaseController
     }
 
     /**
+     * @Route("/{testcaseId<\d+>}/delete_testcase", name="jury_testcase_delete")
+     * @IsGranted("ROLE_ADMIN")
+     * @param Request $request
+     * @param int     $probId
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     * @throws Exception
+     */
+    public function deleteTestcaseAction(Request $request, int $testcaseId)
+    {
+        /** @var Testcase $testcase */
+        $testcase = $this->em->getRepository(Testcase::class)->find($testcaseId);
+        if (!$testcase) {
+            throw new NotFoundHttpException(sprintf('Testcase with ID %s not found', $testcaseId));
+        }
+        $testcase->setDeleted(true);
+        $probId = $testcase->getProbid();
+        $testcase->setProbid(null);
+        $oldRank = $testcase->getRank();
+
+        /** @var Testcase[] $testcases */
+        $testcases = $this->em->getRepository(Testcase::class)
+            ->findBy(['probid' => $probId], ['rank' => 'ASC']);
+        foreach ($testcases as $testcase) {
+            if ($testcase->getRank() > $oldRank) {
+                $testcase->setRank($testcase->getRank() - 1);
+            }
+        }
+        $this->em->flush();
+        $this->addFlash('danger', sprintf('Testcase %d removed from problem %s. Consider rejudging the problem.', $testcaseId, $probId));
+        return $this->redirectToRoute('jury_problem_testcases', ['probId' => $probId]);
+    }
+
+    /**
      * @Route("/add", name="jury_problem_add")
      * @IsGranted("ROLE_ADMIN")
      * @param Request $request
