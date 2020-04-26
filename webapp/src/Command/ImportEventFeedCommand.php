@@ -39,7 +39,10 @@ use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
+use Symfony\Component\Yaml\Exception\ParseException;
+use Symfony\Component\Yaml\Yaml;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /**
  * Class ImportEventFeedCommand
@@ -47,6 +50,9 @@ use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
  */
 class ImportEventFeedCommand extends Command
 {
+    const STATUS_OK = 0;
+    const STATUS_ERROR = 1;
+
     /**
      * @var EntityManagerInterface
      */
@@ -97,11 +103,29 @@ class ImportEventFeedCommand extends Command
      */
     protected $logger;
 
+    /** @var HttpClientInterface|null */
+    protected $client;
+
+    /** @var string */
+    protected $configKey;
+
     /** @var int */
     protected $contestId;
 
-    /** @var string */
-    protected $baseurl;
+    /** @var string|null */
+    protected $feedUrl;
+
+    /** @var string|null */
+    protected $feedFile;
+
+    /** @var string|null */
+    protected $basePath;
+
+    /** @var bool */
+    protected $allowImportAsPrimary;
+
+    /** @var bool */
+    protected $allowExternalIdMismatch;
 
     /** @var string|null */
     protected $sinceEventId = null;
@@ -202,37 +226,16 @@ class ImportEventFeedCommand extends Command
                 '- State will not be imported.'
             )
             ->addArgument(
-                'contest-id',
+                'contest',
                 InputArgument::REQUIRED,
-                'API ID of the contest to import into'
-            )
-            ->addArgument(
-                'feed-url',
-                InputArgument::REQUIRED,
-                'URL or file location of the feed to import;' . PHP_EOL .
-                'if a URL requires authentication, use' . PHP_EOL .
-                'username:password@ in front of the hostname'
+                'The root key from etc/shadowing.yaml to use for importing'
             )
             ->addOption(
-                'basepath',
-                'b',
-                InputOption::VALUE_REQUIRED,
-                'If `feed-url` is a local file, pass the path that will' . PHP_EOL .
-                'be used as the base directory for relative URL\'s'
-            )
-            ->addOption(
-                'since-event',
+                'from-start',
                 's',
-                InputOption::VALUE_REQUIRED,
-                'Only process events strictly after this event'
-            )
-            ->addOption(
-                'force',
-                'f',
                 InputOption::VALUE_NONE,
-                sprintf('Also import the event feed when the data_source%s' .
-                        'config option is not set to %d',
-                        PHP_EOL, DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL)
+                'Restart importing events from the beginning. ' .
+                'If this option is not given, importing will resume where it left off.'
             );
     }
 
@@ -256,39 +259,42 @@ class ImportEventFeedCommand extends Command
             $this->em->getConnection()->getConfiguration()->setSQLLogger(null);
         }
 
-        // Set the verobosity level to very verbose, to always get info and
+        // Set the verbosity level to very verbose, to always get info and
         // notice messages, but never debug ones
         $output->setVerbosity(OutputInterface::VERBOSITY_VERY_VERBOSE);
 
         pcntl_signal(SIGTERM, [$this, 'stopCommand']);
         pcntl_signal(SIGINT, [$this, 'stopCommand']);
 
+        if (!$this->readConfig($input->getArgument('contest'))) {
+            return static::STATUS_ERROR;
+        }
+
         $dataSource = (int)$this->config->get('data_source');
         $importDataSource = DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL;
         if ($dataSource !== $importDataSource) {
-            if ($input->getOption('force')) {
+            $dataSourceOptions = $this->config->getConfigSpecification()['data_source']['options'];
+            if ($this->allowImportAsPrimary) {
                 $this->logger->warning(
-                    'data_source configuration setting is set to %d; --force given so continuing...',
-                    [ $dataSource ]
+                    "data_source configuration setting is set to '%s'; 'allow-import-as-primary' set so continuing...",
+                    [ $dataSourceOptions[$dataSource] ]
                 );
             } else {
                 $this->logger->error(
-                    'data_source configuration setting is set to %d but should be %d. Use --force to continue.',
-                    [ $dataSource, $importDataSource ]
+                    "data_source configuration setting is set to '%s' but should be '%s'. Set 'allow-import-as-primary' in YAML to continue.",
+                    [ $dataSourceOptions[$dataSource], $dataSourceOptions[$importDataSource] ]
                 );
-                return 1;
+                return static::STATUS_ERROR;
             }
         }
 
-        $contestIdField = $this->eventLogService->externalIdFieldForEntity(Contest::class) ?? 'cid';
-        $contest        = $this->em->getRepository(Contest::class)
-            ->findOneBy([$contestIdField => $input->getArgument('contest-id')]);
+        $contest        = $this->em->getRepository(Contest::class)->find($this->contestId);
         if (!$contest) {
             $this->logger->error(
                 'Contest with ID %s not found, exiting.',
-                [ $input->getArgument('contest-id') ]
+                [ $this->contestId ]
             );
-            return 1;
+            return static::STATUS_ERROR;
         } else {
             $this->logger->notice(
                 'Starting event feed import into contest with ID %d [DOMjudge/%s]',
@@ -318,40 +324,23 @@ class ImportEventFeedCommand extends Command
             ->getOneOrNullResult();
         if (!$user) {
             $this->logger->error('No admin user found. Please create at least one');
-            return 1;
+            return static::STATUS_ERROR;
         }
         $token = new UsernamePasswordToken($user, null, 'main', $user->getRoles());
         $this->tokenStorage->setToken($token);
-
-        $this->contestId    = $contest->getCid();
-        $this->sinceEventId = $input->getOption('since-event');
 
         // We need the verdicts to validate judgement-types
         $verdictsConfig = $this->dj->getDomjudgeEtcDir() . '/verdicts.php';
         $this->verdicts = include $verdictsConfig;
 
-        $feed = $input->getArgument('feed-url');
-        if (file_exists($feed)) {
-            if (!$input->getOption('basepath')) {
-                $this->logger->error('For local files the --basepath option is required');
-                return 1;
+        if ($this->client === null) {
+            if (!$this->importFromFile($input->getOption('from-start'))) {
+                return static::STATUS_ERROR;
             }
-
-            $this->baseurl = $input->getOption('basepath');
-            if (substr($this->baseurl, -1, 1) !== '/') {
-                $this->baseurl .= '/';
-            }
-
-            $this->importFromFile($feed);
         } else {
-            if (preg_match('/^(.*\/)contests\/.*\/event-feed$/', $feed, $matches) === 0) {
-                $this->logger->error('Cannot determine base URL. Did you pass an event-feed URL?');
-                return 1;
+            if (!$this->importFromUrl($input->getOption('from-start'))) {
+                return static::STATUS_ERROR;
             }
-
-            $this->baseurl = $matches[1];
-
-            $this->importFromUrl($feed);
         }
 
         if (!empty(array_filter($this->pendingEvents))) {
@@ -370,7 +359,7 @@ class ImportEventFeedCommand extends Command
             }
         }
 
-        return 0;
+        return static::STATUS_OK;
     }
 
     /**
@@ -382,66 +371,209 @@ class ImportEventFeedCommand extends Command
     }
 
     /**
+     * Read the shadowing.yaml file and process it for the given key
+     *
+     * @param string $key
+     *
+     * @return bool False if the import should stop, true otherwise.
+     */
+    protected function readConfig(string $key): bool
+    {
+        $file = $this->dj->getDomjudgeEtcDir() . '/shadowing.yaml';
+        if (!file_exists($file)) {
+            $this->logger->error("Shadowing YAML file '%s' does not exist",
+                [$file]);
+
+            return false;
+        }
+
+        try {
+            $contents = Yaml::parseFile($file);
+        } catch (ParseException $e) {
+            $this->logger->error('Can not parse shadowing.yaml file: %s',
+                [$e->getMessage()]);
+            return false;
+        }
+
+        if (!isset($contents[$key])) {
+            $this->logger->error(
+                "shadowing.yaml does not contain root key '%s', available key(s): %s",
+                [$key, implode(', ', array_keys($contents))]
+            );
+            return false;
+        }
+
+        $this->configKey = $key;
+
+        // Config key exists, check if we have the required fields
+        $config = $contents[$key];
+
+        if (!is_numeric($config['id'] ?? null)) {
+            $this->logger->error('Config does not contain id');
+            return false;
+        }
+
+        $this->contestId = $config['id'];
+
+        if (!is_string($config['feed-url'] ?? null) && !is_string($config['feed-file'] ?? null)) {
+            $this->logger->error("Config does not contain 'feed-url' or 'feed-file'");
+            return false;
+        } elseif (is_string($config['feed-url'] ?? null) && is_string($config['feed-file'] ?? null)) {
+            $this->logger->error("Config contains both 'feed-url' or 'feed-file', only one allowed");
+            return false;
+        } elseif (is_string($config['feed-url'] ?? null)) {
+            // Parse URL options
+            if (preg_match('/^(.*\/)contests\/.*\/event-feed$/',
+                    $config['feed-url'], $matches) === 0) {
+                $this->logger->error('Cannot determine base URL. Did you pass an event-feed URL?');
+                return false;
+            }
+
+            $httpClientOptions = [
+                'base_uri' => $matches[1],
+                'headers' => [
+                    'User-Agent' => 'DOMjudge/' . DOMJUDGE_VERSION,
+                ],
+            ];
+
+            if (is_string($config['username'] ?? null)) {
+                $auth = [$config['username']];
+                if (is_string($config['password'] ?? null)) {
+                    $auth[] = $config['password'];
+                }
+                $httpClientOptions['auth_basic'] = $auth;
+            }
+
+            if ($config['allow-insecure-ssl'] ?? false) {
+                $httpClientOptions['verify_peer'] = false;
+                $httpClientOptions['verify_host'] = false;
+            }
+
+            $this->feedUrl = $config['feed-url'];
+            $this->client  = HttpClient::create($httpClientOptions);
+        } else {
+            // Parse path options
+            if (!is_file($config['feed-file'])) {
+                $this->logger->error("Feed file '%s' does not exist",
+                    [$config['feed-file']]);
+                return false;
+            }
+
+            if (!is_string($config['base-path'] ?? null)) {
+                $this->logger->error("Config options 'base-path' is requird when 'feed-file' is set");
+                return false;
+            }
+
+            if (!is_dir($config['base-path'])) {
+                $this->logger->error("Base path '%s' does not exist", [ $config['base-path'] ]);
+                return false;
+            }
+
+            $this->feedFile = $config['feed-file'];
+            $this->basePath = $config['base-path'];
+        }
+
+        $this->allowImportAsPrimary    = $config['allow-import-as-primary'] ?? false;
+        $this->allowExternalIdMismatch = $config['allow-external-id-mismatch'] ?? false;
+
+        return true;
+    }
+
+    /**
      * Import events from the given local file
-     * @param string $path
-     * @return void
+     *
+     * @param bool $fromStart
+     *
+     * @return bool False if the import should stop, true otherwise.
      * @throws Exception
      */
-    protected function importFromFile(string $path)
+    protected function importFromFile(bool $fromStart)
     {
-        $this->logger->info('Importing from local file %s', [ $path ]);
+        $this->logger->info('Importing from local file %s', [ $this->feedFile ]);
 
-        $file = fopen($path, 'r');
+        // First, check if the external ID of the contest in DOMjudge matches
+        // the ID of the external contest.
+        $file = fopen($this->feedFile, 'r');
+        $contestData = null;
+        $this->readEventsfromFile($file,
+            function(array $event, string $line, &$shouldStop) use ($file, &$contestData) {
+            if ($event['type'] === 'contests') {
+                $contestData = $event['data'];
+                $shouldStop = true;
+            }
+        });
+
+        if (!$this->compareContestId($contestData)) {
+            fclose($file);
+            return false;
+        }
+
+        fclose($file);
+
+        if (!$fromStart) {
+            $this->determineSinceEventId();
+        }
+
+        $cacheFilePath = sprintf('%s/shadow-%s.ndjson.cache',
+            $this->dj->getDomjudgeTmpDir(), $this->configKey);
+        $cacheFile     = fopen($cacheFilePath, $fromStart ? 'w' : 'a');
+
+        $file = fopen($this->feedFile, 'r');
 
         // If we have a 'since event ID', ignore everything up to and including it
         $sinceEventIdFound = $this->sinceEventId === null;
 
-        $buffer = '';
-        while (!feof($file) || !empty($buffer)) {
-            // Read the file until we find a newline or the end of the stream
-            while (!feof($file) && ($newlinePos = strpos($buffer, "\n")) === false) {
-                $buffer .= fread($file, 1024);
-            }
-            $newlinePos = strpos($buffer, "\n");
-            if ($newlinePos === false) {
-                $line   = $buffer;
-                $buffer = '';
-            } else {
-                $line   = substr($buffer, 0, $newlinePos);
-                $buffer = substr($buffer, $newlinePos + 1);
-            }
-            $event = $this->dj->jsonDecode($line);
-
+        $this->readEventsfromFile($file,
+            function(array $event, string $line, &$shouldStop) use ($cacheFile, $file, &$sinceEventIdFound) {
             if ($sinceEventIdFound) {
                 $this->importEvent($event);
                 $this->lastEventId = $event['id'];
+                fwrite($cacheFile, $line . "\n");
             } elseif ($event['id'] === $this->sinceEventId) {
                 $sinceEventIdFound = true;
             }
 
             if ($this->shouldStop) {
-                return;
+                $shouldStop = true;
             }
-        }
+        });
 
         fclose($file);
+        fclose($cacheFile);
+
+        return true;
     }
 
     /**
      * Import events from the given URL
-     * @param string $url
-     * @return void
+     *
+     * @param bool $fromStart
+     *
+     * @return bool False if the import should stop, true otherwise.
      * @throws TransportExceptionInterface
-     * @throws Exception
      */
-    protected function importFromUrl(string $url)
+    protected function importFromUrl(bool $fromStart)
     {
         $this->logger->info(
             'Importing from URL %s. Press ^C to quit (might take a bit to be detected).',
-            [ $url ]
+            [ $this->feedUrl ]
         );
 
-        $client = HttpClient::create();
+        // First, check if the external ID of the contest in DOMjudge matches
+        // the ID of the external contest.
+        $contestUrl = preg_replace('/\/event-feed$/', '', $this->feedUrl);
+        $contestData = $this->client->request('GET', $contestUrl)->toArray();
+        if (!$this->compareContestId($contestData)) {
+            return false;
+        }
+
+        if (!$fromStart) {
+            $this->determineSinceEventId();
+        }
+
+        $cacheFilePath = sprintf('%s/shadow-%s.ndjson.cache',
+            $this->dj->getDomjudgeTmpDir(), $this->configKey);
+        $cacheFile     = fopen($cacheFilePath, $fromStart ? 'w' : 'a');
 
         while (true) {
             // Check whether we have received an exit signal
@@ -450,16 +582,17 @@ class ImportEventFeedCommand extends Command
             }
             if ($this->shouldStop) {
                 $this->logger->notice('Received signal, exiting.');
-                return;
+                fclose($cacheFile);
+                return true;
             }
 
-            $fullUrl = $url;
+            $fullUrl = $this->feedUrl;
             if ($this->lastEventId !== null) {
                 $fullUrl .= '?since_id=' . $this->lastEventId;
             } elseif ($this->sinceEventId !== null) {
                 $fullUrl .= '?since_id=' . $this->sinceEventId;
             }
-            $response = $client->request('GET', $fullUrl, ['buffer' => false]);
+            $response = $this->client->request('GET', $fullUrl, ['buffer' => false]);
             if ($response->getStatusCode() !== 200) {
                 $this->logger->warning(
                     'Received non-200 response code %d, waiting for five seconds '.
@@ -472,7 +605,7 @@ class ImportEventFeedCommand extends Command
 
             $buffer = '';
 
-            $processBuffer = function() use (&$buffer) {
+            $processBuffer = function() use ($cacheFile, &$buffer) {
                 while (($newlinePos = strpos($buffer, "\n")) !== false) {
                     $line   = substr($buffer, 0, $newlinePos);
                     $buffer = substr($buffer, $newlinePos + 1);
@@ -482,6 +615,7 @@ class ImportEventFeedCommand extends Command
                         $this->importEvent($event);
 
                         $this->lastEventId = $event['id'];
+                        fwrite($cacheFile, $line . "\n");
                     }
 
                     if (function_exists('pcntl_signal_dispatch')) {
@@ -502,7 +636,7 @@ class ImportEventFeedCommand extends Command
                 // A timeout of 0.0 means we get chunks immediately and the user
                 // can cancel at any time.
                 try {
-                    foreach ($client->stream($response, 0.0) as $chunk) {
+                    foreach ($this->client->stream($response, 0.0) as $chunk) {
                         // We first need to check for timeouts, as we can not call
                         // ->isLast() or ->getContent() on them
                         if (!$chunk->isTimeout()) {
@@ -514,7 +648,8 @@ class ImportEventFeedCommand extends Command
                             }
                         }
                         if (!$processBuffer()) {
-                            return;
+                            fclose($cacheFile);
+                            return true;
                         }
                     }
                 } catch (TransportException $e) {
@@ -527,7 +662,8 @@ class ImportEventFeedCommand extends Command
 
             // We still need to finish everything that is still in the buffer
             if (!$processBuffer()) {
-                return;
+                fclose($cacheFile);
+                return true;
             }
 
             $this->logger->info(
@@ -537,6 +673,101 @@ class ImportEventFeedCommand extends Command
             );
             sleep(5);
         }
+
+        fclose($cacheFile);
+        return true;
+    }
+
+    /**
+     * Determine the event ID to use to pass as since_id
+     */
+    protected function determineSinceEventId()
+    {
+        $cacheFilePath = sprintf('%s/shadow-%s.ndjson.cache',
+            $this->dj->getDomjudgeTmpDir(), $this->configKey);
+
+        // If the file doesn't exist, we always start from the beginning
+        if (!file_exists($cacheFilePath)) {
+            return;
+        }
+
+        $cacheFile = fopen($cacheFilePath, 'r');
+
+        $this->readEventsfromFile($cacheFile, function(array $event) {
+            $this->sinceEventId = $event['id'];
+        });
+
+        fclose($cacheFile);
+
+        $this->logger->info('Starting event import after event with ID %d', [ $this->sinceEventId ]);
+    }
+
+    /**
+     * Read events from the given file.
+     *
+     * The callback will be called for every found event and will receive three
+     * arguments:
+     * - The event to process
+     * - The line the event was on
+     * - A boolean that can be set to true (pass-by-reference) to stop processing
+     *
+     * @param resource $filePointer
+     * @param callable $callback
+     */
+    protected function readEventsfromFile($filePointer, callable $callback)
+    {
+        $buffer = '';
+        while (!feof($filePointer) || !empty($buffer)) {
+            // Read the file until we find a newline or the end of the stream
+            while (!feof($filePointer) && ($newlinePos = strpos($buffer,
+                    "\n")) === false) {
+                $buffer .= fread($filePointer, 1024);
+            }
+            $newlinePos = strpos($buffer, "\n");
+            if ($newlinePos === false) {
+                $line   = $buffer;
+                $buffer = '';
+            } else {
+                $line   = substr($buffer, 0, $newlinePos);
+                $buffer = substr($buffer, $newlinePos + 1);
+            }
+
+            $event      = $this->dj->jsonDecode($line);
+            $shouldStop = false;
+            $callback($event, $line, $shouldStop);
+            if ($shouldStop) {
+                return;
+            }
+        }
+    }
+
+    /**
+     * Compare the external contest ID of the configured contest to the given data.
+     *
+     * @param array $externalContestData
+     *
+     * @return bool False if the import should stop, true otherwise.
+     */
+    protected function compareContestId(array $externalContestData): bool
+    {
+        /** @var Contest $contest */
+        $contest = $this->em->getRepository(Contest::class)->find($this->contestId);
+        if ($contest->getExternalid() !== $externalContestData['id']) {
+            if ($this->allowExternalIdMismatch) {
+                $this->logger->warning(
+                    "Contest ID in external system (%s) does not match external ID in DOMjudge (%s); 'allow-external-id-mismatch' set so continuing...",
+                    [ $externalContestData['id'], $contest->getExternalid() ]
+                );
+            } else {
+                $this->logger->error(
+                    "Contest ID in external system (%s) does not match external ID in DOMjudge (%s). Set 'allow-external-id-mismatch' in YAML to continue.",
+                    [ $externalContestData['id'], $contest->getExternalid() ]
+                );
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
@@ -1397,7 +1628,7 @@ class ImportEventFeedCommand extends Command
                     }
 
                     // Now prepend the base URL
-                    $zipUrl = $this->baseurl . $zipUrl;
+                    $zipUrl = ($this->basePath ?? '') . $zipUrl;
                 }
 
                 $tmpdir = $this->dj->getDomjudgeTmpDir();
@@ -1418,9 +1649,8 @@ class ImportEventFeedCommand extends Command
                         return;
                     }
 
-                    $client = HttpClient::create();
                     try {
-                        $response = $client->request('GET', $zipUrl);
+                        $response = $this->client->request('GET', $zipUrl);
                         $ziphandler = fopen($zipFile, 'w');
                         if ($response->getStatusCode() !== 200) {
                             // TODO: retry a couple of times
@@ -1440,7 +1670,7 @@ class ImportEventFeedCommand extends Command
                         return;
                     }
 
-                    foreach ($client->stream($response) as $chunk) {
+                    foreach ($this->client->stream($response) as $chunk) {
                         fwrite($ziphandler, $chunk->getContent());
                     }
                     fclose($ziphandler);
