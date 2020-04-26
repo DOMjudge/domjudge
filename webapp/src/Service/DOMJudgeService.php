@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Entity\AuditLog;
+use App\Entity\Balloon;
 use App\Entity\Clarification;
 use App\Entity\Configuration;
 use App\Entity\Contest;
@@ -409,11 +410,24 @@ class DOMJudgeService
             ->setParameter('status', 'open')
             ->getQuery()->getResult();
 
+        $balloons = $this->em->createQueryBuilder()
+            ->select('b.balloonid', 't.name', 't.room', 'p.name AS pname')
+            ->from(Balloon::class, 'b')
+            ->leftJoin('b.submission', 's')
+            ->leftJoin('s.problem', 'p')
+            ->leftJoin('s.contest', 'co')
+            ->leftJoin('p.contest_problems', 'cp', Join::WITH, 'co.cid = cp.contest AND p.probid = cp.problem')
+            ->leftJoin('s.team', 't')
+            ->andWhere('co.cid = :cid')
+            ->setParameter(':cid', $contest->getCid())
+            ->getQuery()->getResult();
+
         return [
             'clarifications' => $clarifications,
             'judgehosts' => $judgehosts,
             'rejudgings' => $rejudgings,
             'internal_error' => $internal_error,
+            'balloons' => $balloons
         ];
     }
 
