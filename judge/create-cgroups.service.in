@@ -5,3 +5,6 @@ Description=Make sure cgroups exist for DOMjudge judgedaemon
 Type=oneshot
 ExecStart=@judgehost_bindir@/create_cgroups
 RemainAfterExit=true
+
+[Install]
+WantedBy=multi-user.target
