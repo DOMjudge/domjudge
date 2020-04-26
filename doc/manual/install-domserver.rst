@@ -34,15 +34,14 @@ For your convenience, the following command will install the necessary
 software on the DOMjudge server as mentioned above when using Debian
 GNU/Linux, or one of its derivative distributions like Ubuntu::
 
-  sudo apt install zip unzip mariadb-server apache2 \
-        php php-fpm php-cli \
-        php-gd php-curl php-mysql php-json php-xml php-intl php-mbstring \
-        php-zip composer ntp
+  sudo apt install acl zip unzip mariadb-server apache2 \
+        php php-fpm php-gd php-cli php-intl php-mbstring php-mysql \
+        php-curl php-json php-xml php-zip composer ntp
 
 The following command can be used on RedHat Enterprise Linux, and related
 distributions like CentOS and Fedora::
 
-  sudo yum install zip unzip mariadb-server httpd \
+  sudo yum install acl zip unzip mariadb-server httpd \
         php-gd php-cli php-intl php-mbstring php-mysqlnd \
         php-xml php-zip composer ntp
 

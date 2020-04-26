@@ -57,7 +57,6 @@ code.
 This method requires some special steps which can most easily
 be run via makefile rules as follows::
 
-  sudo apt install acl
   make maintainer-conf [CONFIGURE_FLAGS=<extra options for ./configure>]
   make maintainer-install
 
