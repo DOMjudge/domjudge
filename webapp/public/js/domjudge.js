@@ -519,7 +519,7 @@ function updateMenuAlerts()
             updateMenuClarifications(json.clarifications);
             updateMenuRejudgings(json.rejudgings);
             updateMenuJudgehosts(json.judgehosts);
-            updateMenuInternalErrors(json.internal_error);
+            updateMenuInternalErrors(json.internal_errors);
             updateMenuBalloons(json.balloons);
         }
     });
