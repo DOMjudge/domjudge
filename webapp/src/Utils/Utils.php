@@ -966,8 +966,12 @@ class Utils
 
     /**
      * Word wrap only unquoted text.
+     * @param string $text
+     * @param int    $width
+     * @param string $quote
+     * @return string
      */
-    public static function wrap_unquoted(string $text, int $width = 75, string $quote = '>') : string
+    public static function wrapUnquoted(string $text, int $width = 75, string $quote = '>') : string
     {
         $lines = explode("\n", $text);
 
