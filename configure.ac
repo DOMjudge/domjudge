@@ -195,7 +195,6 @@ AX_WITH_COMMENT(6,[     ])
 AX_PATH(judgehost_bindir,       [$judgehost_root/bin])
 AX_PATH(judgehost_etcdir,       [$judgehost_root/etc])
 AX_PATH(judgehost_libdir,       [$judgehost_root/lib])
-AX_PATH(judgehost_libvendordir, [$judgehost_root/lib/vendor])
 AX_PATH(judgehost_libjudgedir,  [$judgehost_root/lib/judge])
 AX_PATH(judgehost_logdir,       [$judgehost_root/log])
 AX_PATH(judgehost_rundir,       [$judgehost_root/run])
@@ -381,7 +380,6 @@ echo " * judgehost...........: $judgehost_root"
 echo "    - bin..............: $judgehost_bindir"
 echo "    - etc..............: $judgehost_etcdir"
 echo "    - lib..............: $judgehost_libdir"
-echo "    - libvendor........: $judgehost_libvendordir"
 echo "    - libjudge.........: $judgehost_libjudgedir"
 echo "    - log..............: $judgehost_logdir"
 echo "    - run..............: $judgehost_rundir"

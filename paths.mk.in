@@ -150,7 +150,6 @@ define substconfigvars
 	-e 's,@judgehost_bindir[@],@judgehost_bindir@,g' \
 	-e 's,@judgehost_etcdir[@],@judgehost_etcdir@,g' \
 	-e 's,@judgehost_libdir[@],@judgehost_libdir@,g' \
-	-e 's,@judgehost_libvendordir[@],@judgehost_libvendordir@,g' \
 	-e 's,@judgehost_libjudgedir[@],@judgehost_libjudgedir@,g' \
 	-e 's,@judgehost_logdir[@],@judgehost_logdir@,g' \
 	-e 's,@judgehost_rundir[@],@judgehost_rundir@,g' \
