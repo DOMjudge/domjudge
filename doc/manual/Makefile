@@ -27,6 +27,9 @@ maintainer-install: docs
 	ln -sf build/team
 
 clean-l:
+	rm -rf build/doctrees
+
+maintainer-clean-l:
 	rm -rf build
 
 distclean-l:
