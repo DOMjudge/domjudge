@@ -15,18 +15,15 @@ Documentation
 
 For more information on installation and requirements see the
 documentation under the doc/manual directory. There is an HTML
-version of the documentation available, prebuilt from reStructuredText sources.
+version of the documentation available, prebuilt from reStructuredText
+sources.
 
-The doc/ directory also contains documentation for teams using DOMjudge
-under doc/team.
-
-The team documentation is available prebuilt in PDF format, but it
-contains default/example settings. To include the correct settings for
-your local environment, DOMjudge has to be properly configured first,
-as parts of the configuration are used in it (e.g. the URL to the team
-interface of DOMjudge). A LaTeX installation including the packages
-`svn` and `expdlist` is required to rebuild the team documentation.
-For more information, see the documentation.
+There's also team documentation available, prebuilt in PDF format from
+reStructuredText sources, but it contains default/example settings.
+To include the correct settings for your local environment, DOMjudge
+has to be properly configured first, as parts of the configuration are
+used in it (e.g. the URL to the team interface of DOMjudge). For more
+information, see the documentation.
 
 All documentation is also available online at the DOMjudge homepage:
 	https://www.domjudge.org/documentation
