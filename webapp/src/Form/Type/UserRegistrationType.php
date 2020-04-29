@@ -119,7 +119,7 @@ class UserRegistrationType extends AbstractType
                     ],
                     'mapped' => false,
                 ]);
-            if ($this->config->get('show_flags')) {
+            if ($this->dj->dbconfig_get('show_flags')) {
                 $builder->add('affiliationCountry', ChoiceType::class, [
                     'label' => false,
                     'required' => false,
