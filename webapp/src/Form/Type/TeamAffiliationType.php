@@ -3,7 +3,7 @@
 namespace App\Form\Type;
 
 use App\Entity\TeamAffiliation;
-use App\Service\ConfigurationService;
+use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Utils\Utils;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -15,22 +15,22 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 class TeamAffiliationType extends AbstractExternalIdEntityType
 {
     /**
-     * @var ConfigurationService
+     * @var DOMJudgeService
      */
-    protected $configuration;
+    protected $dj;
 
     /**
      * TeamAffiliationType constructor.
      *
      * @param EventLogService      $eventLogService
-     * @param ConfigurationService $configuration
+     * @param DOMJudgeService      $dj
      */
     public function __construct(
         EventLogService $eventLogService,
-        ConfigurationService $configuration
+        DOMJudgeService $dj
     ) {
         parent::__construct($eventLogService);
-        $this->configuration = $configuration;
+        $this->dj = $dj;
     }
 
     /**
@@ -48,7 +48,7 @@ class TeamAffiliationType extends AbstractExternalIdEntityType
         $this->addExternalIdField($builder, TeamAffiliation::class);
         $builder->add('shortname');
         $builder->add('name');
-        if ($this->configuration->get('show_flags')) {
+        if ($this->dj->dbconfig_get('show_flags')) {
             $builder->add('country', ChoiceType::class, [
                 'required' => false,
                 'choices'  => $countries,
