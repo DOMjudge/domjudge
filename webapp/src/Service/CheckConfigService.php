@@ -77,7 +77,6 @@ class CheckConfigService
             'php_version' => $this->checkPhpVersion(),
             'php_extensions' => $this->checkPhpExtensions(),
             'php_settings' => $this->checkPhpSettings(),
-            'mysql_version' => $this->checkMysqlVersion(),
             'mysql_settings' => $this->checkMysqlSettings(),
         ];
 
@@ -199,17 +198,6 @@ class CheckConfigService
         return ['caption' => 'PHP settings',
                 'result' => $result,
                 'desc' => $desc];
-    }
-
-    public function checkMysqlVersion()
-    {
-        $r = $this->em->getConnection()->fetchAll('SHOW VARIABLES WHERE variable_name = "version"');
-        $my = $r[0]['Value'];
-        $req = '5.5.3';
-        $result = version_compare($my, $req, '>=');
-        return ['caption' => 'MySQL version',
-                'result' => ($result ? 'O' : 'E'),
-                'desc' => sprintf('You have MySQL version %s. The minimum required is %s', $my, $req)];
     }
 
     public function checkMysqlSettings()
