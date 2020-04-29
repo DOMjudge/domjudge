@@ -21,6 +21,7 @@ Version 7.2.1 - DEV
  - Fix editing testcase descriptions.
  - Fix encoding of multiline testcase descriptions in submit graphs.
  - Fix hardcoded domjudge username in SystemD service file.
+ - Fix compatibilty with PHP 7.4.
 
 Version 7.2.0 - 4 January 2020
 ------------------------------
