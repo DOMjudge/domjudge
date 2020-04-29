@@ -211,7 +211,7 @@ Special run programs can be used, for example, to create an interactive
 problem, where the contestants' program exchanges information with a
 jury program and receives data depending on its own output. The
 problem ``boolfind`` is included as an example interactive
-problem, see ``docs/examples/boolfind.pdf`` for the description.
+problem, see ``doc/examples/boolfind.pdf`` for the description.
 
 Usage is similar to compare programs: you can either create a program
 ``run`` yourself, or use the provided wrapper script, which
