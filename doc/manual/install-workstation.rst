@@ -47,9 +47,9 @@ to inspect its configuration and options.
 Rebuilding team documentation
 -----------------------------
 
-The team manual is only available in PDF format and must be built from
-the LaTeX sources in `doc/team` *after* configuration of the
-system.
+The team manual can incorporate specific settings of your environment,
+most notably the URL of the DOMjudge installation. To achieve this,
+rebuild the team manual *after* configuration of the system.
 
 .. note::
 
@@ -61,16 +61,15 @@ system.
   specific environment and rules.
 
 
-When DOMjudge is configured and site-specific
-configuration set, the team manual can be generated with the command
-``genteammanual`` found under ``docs/team``. The PDF
-document will be placed in the current
-directory or a directory given as argument.
+When DOMjudge is configured and site-specific configuration set,
+the team manual can be generated with the command ``make docs``.
 The following should do it on a Debian-like system::
 
   sudo apt install python-sphinx python-sphinx-rtd-theme rst2pdf
-  cd <INSTALL_PATH>/docs/team
-  ./genteammanual [targetdir]
+  cd <INSTALL_PATH>/docs/
+  make docs
 
 On Debian 11 and above, install
 ``python3-sphinx python3-sphinx-rtd-theme rst2pdf`` instead.
+
+The resulting manual will then be found in the ``team/`` subdirectory.

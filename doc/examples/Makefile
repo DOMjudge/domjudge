@@ -50,6 +50,6 @@ clean-l:
 	-rm -f $(PROBLEMS:=.aux) $(PROBLEMS:=.log)
 
 maintainer-clean-l:
-	-rm -f $(INI) $(PDF) $(ZIP) .pdf-generated
+	-rm -f $(INI) $(ZIP) .pdf-generated
 
 .PHONY: docs distdocs install-docs
