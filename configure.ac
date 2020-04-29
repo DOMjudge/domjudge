@@ -291,10 +291,9 @@ else
 fi
 
 # Check option to build documentation. This option is provided to
-# allow disabling it when a LaTeX installation is not present.
+# allow disabling it.
 AC_ARG_ENABLE(doc-build,AS_HELP_STRING([--enable-doc-build],
-[enable building documentation; requires a working LaTeX installation
- for 'make dist' (default: yes).]))
+[enable building documentation (default: yes).]))
 
 if test "x$enable_doc_build" = "xno"; then
 	AC_SUBST(DOC_BUILD_ENABLED,[no])
