@@ -39,7 +39,7 @@
 		}
 	],
 	"require": {
-		"php": "^7.1.3",
+		"php": "^7.2.5",
 		"ext-ctype": "*",
 		"ext-curl": "*",
 		"ext-gd": "*",
@@ -107,6 +107,9 @@
 			"*": "dist"
 		},
 		"sort-packages": true,
+		"platform": {
+			"php": "7.2.5"
+		},
 		"vendor-dir": "lib/vendor",
 		"component-dir": "lib/vendor/components"
 	},
