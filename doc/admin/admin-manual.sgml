@@ -148,14 +148,14 @@ The following software is required for running DOMjudge.
 
 <item> nginx web server with PHP FPM or Apache web server with mod_rewrite.
 
-<item> PHP &gt;= 7.1.3, either using FPM or Apache's mod_php.
+<item> PHP &gt;= 7.2.5, either using FPM or Apache's mod_php.
        The the mysqli, GD, curl, json, mbstring, intl, zip and XML extensions
        for PHP should be enabled. We also recommend the posix extension for
        extra debugging information.
 
-<item> MySQL or MariaDB &gt;= 5.5.3 database and client software.
+<item> MySQL or MariaDB database and client software.
 
-<item> PHP &gt;= 7.1.3 command line interface and the curl and json
+<item> PHP &gt;= 7.2.5 command line interface and the curl and json
        extensions.
 
 <item> A POSIX compliant shell in <tt>/bin/sh</tt> (e.g. bash or ash).
