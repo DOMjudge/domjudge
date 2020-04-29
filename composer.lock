@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "35832a6056ada63898a6af7b1ce96f9d",
+    "content-hash": "6fba989bc2fcc09289a99bec53b041fc",
     "packages": [
         {
             "name": "angel-vladov/select2-bootstrap-theme",
@@ -8983,8 +8983,8 @@
         "ext-zip": "*"
     },
     "platform-dev": [],
-    "plugin-api-version": "1.1.0",
     "platform-overrides": {
         "php": "7.2.5"
-    }
+    },
+    "plugin-api-version": "1.1.0"
 }
