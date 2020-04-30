@@ -1,0 +1,29 @@
+{% extends 'base.html.twig' %}
+
+{% block menu %}
+    {% include 'public/menu.html.twig' %}
+{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="error-template">
+                <h1>
+                    {{ status_code }} {{ status_text }}</h1>
+                <div class="error-details">
+                    Sorry, an error has occured: {{ status_text }}.
+                </div>
+                {% if exception.message is defined %}
+                <div class="error-details m-4">
+                    <code>{{ exception.message }}</code>
+                </div>
+                {% endif %}
+                <div class="error-details">
+                    Please contact a staff member for assistance.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
