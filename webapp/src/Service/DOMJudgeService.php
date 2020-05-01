@@ -377,10 +377,11 @@ class DOMJudgeService
     {
         $contest = $this->getCurrentContest();
 
-        $clarifications = [];
-        $judgehosts = [];
-        $rejudgings = [];
+        $clarifications  = [];
+        $judgehosts      = [];
+        $rejudgings      = [];
         $internal_errors = [];
+        $balloons        = [];
 
         if ($this->checkRole('jury')) {
             if ($contest) {
