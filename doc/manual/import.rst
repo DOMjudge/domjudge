@@ -16,7 +16,7 @@ Importing team categories
 -------------------------
 
 Prepare a file called ``groups.tsv`` which contains the team categories.
-The first line should contain ``File_Version 1``.
+The first line should contain ``File_Version 1`` (tab-separated).
 Each of the following lines must contain the following elements separated by tabs:
 
 - the category ID
@@ -37,7 +37,7 @@ Importing teams
 ---------------
 
 Prepare a file called ``teams2.tsv`` which contains the teams.
-The first line should contain ``File_Version	2``.
+The first line should contain ``File_Version	2`` (tab-separated).
 Each of the following lines must contain the following elements separated by tabs:
 
 - the team ID
@@ -64,7 +64,7 @@ Importing accounts
 ------------------
 
 Prepare a file called ``accounts.tsv`` which contains the team credentials.
-The first line should contain ``accounts  1``.
+The first line should contain ``accounts  1`` (tab-separated).
 Each of the following lines must contain the following elements separated by tabs:
 
 - the user type, one of ``team`` or ``judge``
