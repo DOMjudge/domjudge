@@ -110,6 +110,15 @@ class Rejudging
     private $submissions;
 
     /**
+     * @var boolean
+     * @ORM\Column(type="boolean", name="auto_apply",
+     *     options={"comment"="If set, judgings are accepted automatically.",
+     *              "default"="0"},
+     *     nullable=false)
+     */
+    private $autoApply = true;
+
+    /**
      * Constructor
      */
     public function __construct()
@@ -386,5 +395,29 @@ class Rejudging
     public function getSubmissions()
     {
         return $this->submissions;
+    }
+
+    /**
+     * Set auto_apply
+     *
+     * @param boolean $autoApply
+     *
+     * @return Rejudging
+     */
+    public function setAutoApply(bool $autoApply)
+    {
+        $this->autoApply = $autoApply;
+
+        return $this;
+    }
+
+    /**
+     * Get auto_apply
+     *
+     * @return boolean
+     */
+    public function getAutoApply()
+    {
+        return $this->autoApply;
     }
 }

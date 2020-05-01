@@ -127,8 +127,9 @@ class RejudgingController extends BaseController
             if ($rejudging->getStartUser()) {
                 $rejudgingdata['startuser']['value'] = $rejudging->getStartUser()->getName();
             }
-            if ($rejudging->getFinishUser()) {
-                $rejudgingdata['finishuser']['value'] = $rejudging->getFinishUser()->getName();
+            if ($rejudging->getEndtime() !== null) {
+                $rejudgingdata['finishuser']['value'] = $rejudging->getFinishUser() !== null
+                    ? $rejudging->getFinishUser()->getName() : "automatically applied";
             }
 
             $todoAndDone = $this->rejudgingService->calculateTodo($rejudging);
@@ -527,10 +528,10 @@ class RejudgingController extends BaseController
                 ]);
             }
             $skipped = [];
-            $res = $this->rejudgingService->createRejudging($reason, $judgings, true, $skipped);
+            $res = $this->rejudgingService->createRejudging($reason, $judgings, false, $skipped);
             $this->generateFlashMessagesForSkippedJudgings($skipped);
 
-            if ($res === false) {
+            if ($res === null) {
                 return $this->redirectToLocalReferrer($this->router, $request,
                                                       $this->generateUrl('jury_index'));
             }
@@ -548,11 +549,11 @@ class RejudgingController extends BaseController
      */
     public function createAction(Request $request)
     {
-        $table       = $request->request->get('table');
-        $id          = $request->request->get('id');
-        $reason      = $request->request->get('reason') ?: sprintf('%s: %s', $table, $id);
-        $includeAll  = (bool)$request->request->get('include_all');
-        $fullRejudge = (bool)$request->request->get('full_rejudge');
+        $table      = $request->request->get('table');
+        $id         = $request->request->get('id');
+        $reason     = $request->request->get('reason') ?: sprintf('%s: %s', $table, $id);
+        $includeAll = (bool)$request->request->get('include_all');
+        $autoApply  = (bool)$request->request->get('auto_apply');
 
         if (empty($table) || empty($id)) {
             throw new BadRequestHttpException('No table or id passed for selection in rejudging');
@@ -570,9 +571,9 @@ class RejudgingController extends BaseController
             if ($rejudging === null) {
                 throw new NotFoundHttpException(sprintf('Rejudging with ID %s not found', $id));
             }
-            $includeAll  = true;
-            $fullRejudge = true;
-            $reason      = $rejudging->getReason();
+            $includeAll = true;
+            $autoApply  = false;
+            $reason     = $rejudging->getReason();
         }
 
         /* These are the tables that we can deal with. */
@@ -607,7 +608,7 @@ class RejudgingController extends BaseController
             $queryBuilder->join('s.judgings', 'j2');
         }
 
-        if ($includeAll && $fullRejudge) {
+        if ($includeAll && !$autoApply) {
             $queryBuilder
                 ->andWhere('j.result IS NOT NULL')
                 ->andWhere('j.valid = 1');
@@ -629,10 +630,10 @@ class RejudgingController extends BaseController
         }
 
         $skipped = [];
-        $res = $this->rejudgingService->createRejudging($reason, $judgings, $fullRejudge, $skipped);
+        $res = $this->rejudgingService->createRejudging($reason, $judgings, $autoApply, $skipped);
         $this->generateFlashMessagesForSkippedJudgings($skipped);
 
-        if ($res === false) {
+        if ($res === null) {
             return $this->redirectToLocalReferrer($this->router, $request,
                                                   $this->generateUrl('jury_index'));
         }
