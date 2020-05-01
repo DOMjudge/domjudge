@@ -15,6 +15,7 @@
 {% block extrafooter %}
     <script>
         initFavouriteTeams();
+        pinScoreheader();
 
         var scoreboardUrl = '{{ refresh.url ?? null }}';
 
@@ -28,6 +29,7 @@
                 }
 
                 initFavouriteTeams();
+                pinScoreheader();
             };
         });
     </script>

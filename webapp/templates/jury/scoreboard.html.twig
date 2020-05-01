@@ -10,8 +10,14 @@
 
 {% block content %}
 
-    <div data-ajax-refresh-target>
+    <div data-ajax-refresh-target data-ajax-refresh-after="pinScoreheader">
         {% include 'partials/scoreboard.html.twig' with {jury: true} %}
     </div>
 
+{% endblock %}
+
+{% block extrafooter %}
+    <script>
+        pinScoreheader();
+    </script>
 {% endblock %}
