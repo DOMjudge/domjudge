@@ -659,3 +659,16 @@ function initializeAjaxModals()
 		});
 	});
 }
+
+function pinScoreheader()
+{
+	var static_in_url = new URL(window.location.toString().toLowerCase()).searchParams.get("static")
+	var static_scoreboard = static_in_url==="true" || static_in_url==='1';
+	if(!static_scoreboard){
+		$('.scoreheader th').css('top', $('.fixed-top').css('height'));
+        var resizeObserver = new ResizeObserver(() => {
+            $('.scoreheader th').css('top', $('.fixed-top').css('height'));
+        });
+        resizeObserver.observe($('.fixed-top')[0]);
+	}
+}

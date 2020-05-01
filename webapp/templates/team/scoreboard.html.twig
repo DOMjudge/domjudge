@@ -9,6 +9,7 @@
 
 {% block extrafooter %}
     <script>
+        pinScoreheader();
         $(function () {
             window.initializeScoreboard = function () {
                 var $newProgress = $('[data-ajax-refresh-target] > [data-progress-bar]');
@@ -17,6 +18,7 @@
                     $oldProgress.html($newProgress.children());
                     $newProgress.parent().remove();
                 }
+                pinScoreheader();
             };
         });
     </script>

@@ -1,6 +1,8 @@
 body {
+    /** Specify the BG color in one place. **/
+    --background-color: white;
     color: black;
-    background-color: white;
+    background-color: var(--background-color);
     font-family: Roboto, sans-serif;
     padding-bottom: 4em;
 }
@@ -203,6 +205,13 @@ img.affiliation-logo {
 }
 .scoreheader th {
     text-align: center;
+    box-shadow: -1px 0px 0px 0px silver inset,
+                0px 2px 0px 0px black;
+    border: none;
+    background: var(--background-color);
+    position: sticky;
+    top: 0px;
+    z-index: 1;
 }
 
 .problempoints {
