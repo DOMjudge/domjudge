@@ -11,6 +11,7 @@ DOMjudge Manual
    install-workstation
    upgrading
    config-basic
+   import
    config-advanced
    running
    judging
