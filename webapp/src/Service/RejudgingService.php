@@ -66,64 +66,44 @@ class RejudgingService
     }
 
     /**
-     * Create a new rejudging (either a full Rejudging or a direct rejudge)
+     * Create a new rejudging.
      * @param string        $reason           Reason for this rejudging
      * @param array         $judgings         List of judgings to rejudging
-     * @param bool          $fullRejudge      Whether a Rejudging should be created
-     * @param array        &$skipped          Returns list of judgings not included
-     * @return Rejudging|bool
+     * @param bool          $autoApply        Whether the judgings should be automatically applied.
+     * @param array        &$skipped          Returns list of judgings not included.
+     * @return Rejudging|null
      */
     public function createRejudging(
         string $reason,
         array $judgings,
-        bool $fullRejudge,
+        bool $autoApply,
         array &$skipped
     ) {
-        /** @var Rejudging|null $rejudging */
-        $rejudging = null;
-        if ($fullRejudge) {
-            $rejudging = new Rejudging();
-            $rejudging
-                ->setStartUser($this->dj->getUser())
-                ->setStarttime(Utils::now())
-                ->setReason($reason);
-            $this->em->persist($rejudging);
-            $this->em->flush();
-        }
+        /** @var Rejudging $rejudging */
+        $rejudging = new Rejudging();
+        $rejudging
+            ->setStartUser($this->dj->getUser())
+            ->setStarttime(Utils::now())
+            ->setReason($reason)
+            ->setAutoApply($autoApply);
+        $this->em->persist($rejudging);
+        $this->em->flush();
 
         $singleJudging = count($judgings) == 1;
         foreach ($judgings as $judging) {
             $submission = $judging['submission'];
             if ($submission['rejudgingid'] !== null) {
+                // The submission is already part of another rejudging, record and skip it.
                 $skipped[] = $judging;
-
-                if ($singleJudging) {
-                    // Clean up already associated rejudging before throwing an error.
-                    if ($rejudging) {
-                        $this->em->remove($rejudging);
-                        $this->em->flush();
-                    }
-                    return false;
-                } else {
-                    // just skip that submission
-                    continue;
-                }
+                continue;
             }
 
             $this->em->transactional(function () use (
                 $singleJudging,
-                $fullRejudge,
                 $judging,
                 $submission,
                 $rejudging
             ) {
-                if (!$fullRejudge) {
-                    $this->em->getConnection()->executeUpdate(
-                        'UPDATE judging SET valid = false WHERE judgingid = :judgingid',
-                        [ ':judgingid' => $judging['judgingid'] ]
-                    );
-                }
-
                 $this->em->getConnection()->executeUpdate(
                     'UPDATE submission SET judgehost = null WHERE submitid = :submitid AND rejudgingid IS NULL',
                     [ ':submitid' => $submission['submitid'] ]
@@ -147,27 +127,18 @@ class RejudgingService
                         );
                     }
                 }
-
-                if (!$fullRejudge) {
-                    // Clear entity manager to get fresh data
-                    $this->em->clear();
-                    $contest = $this->em->getRepository(Contest::class)
-                        ->find($submission['cid']);
-                    $team    = $this->em->getRepository(Team::class)
-                        ->find($submission['teamid']);
-                    $problem = $this->em->getRepository(Problem::class)
-                        ->find($submission['probid']);
-                    $this->scoreboardService->calculateScoreRow($contest, $team, $problem);
-                }
             });
+       }
 
-            if (!$fullRejudge) {
-                $this->dj->auditlog('judging', $judging['judgingid'], 'mark invalid', '(rejudge)');
-            }
+        if (count($skipped) == count($judgings)) {
+            // We skipped all judgings, this is a hard error. Let's clean up the rejudging and report it.
+            // The most common case of this is that a single submissions was requested and already is part of another
+            // rejudging.
+            $this->em->remove($rejudging);
+            $this->em->flush();
+            return null;
         }
-
-        if ($rejudging) return $rejudging;
-        return true;
+        return $rejudging;
     }
 
     /**
@@ -361,11 +332,22 @@ class RejudgingService
             ->select('COUNT(j)')
             ->andWhere('j.rejudging = :rejudging')
             ->andWhere('j.endtime IS NOT NULL')
+            // This is necessary for rejudgings which apply automatically.
+            // We remove the association of the submission with the rejudging,
+            // but not the one of the judging with the rejudging for accounting reasons.
+            ->andWhere('j.valid = 0')
             ->setParameter(':rejudging', $rejudging)
             ->getQuery()
             ->getSingleScalarResult();
 
         $todo -= $done;
+
+        // As a side effect, mark this rejudging as finished if auto_apply is set.
+        if ($todo == 0 && $rejudging->getAutoApply() && $rejudging->getEndtime() === null) {
+            $rejudging->setEndtime(Utils::now());
+            $rejudging->setFinishUser(null);
+            $this->em->flush();
+        }
         return ['todo' => $todo, 'done' => $done];
     }
 }

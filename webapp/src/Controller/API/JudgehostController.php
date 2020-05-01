@@ -614,8 +614,10 @@ class JudgehostController extends AbstractFOSRestController
                     $this->dj->auditlog('judging', $judgingId, 'judged',
                                         'compiler-error', $hostname, $contestId);
 
+                    $this->maybeUpdateActiveJudging($judging);
+                    $this->em->flush();
                     if (!$this->config->get('verification_required') &&
-                        $judging->getRejudgingid() === null) {
+                        $judging->getValid()) {
                         $this->eventLogService->log('judging', $judgingId,
                                                     EventLogService::ACTION_UPDATE, $contestId);
                     }
@@ -1044,10 +1046,11 @@ class JudgehostController extends AbstractFOSRestController
                 ->setOutputSystem(base64_decode($outputSystem))
                 ->setMetadata(base64_decode($metadata));
 
+            $this->maybeUpdateActiveJudging($judging);
             $this->em->persist($judgingRun);
             $this->em->flush();
 
-            if ($judging->getRejudgingid() === null) {
+            if ($judging->getValid()) {
                 $this->eventLogService->log('judging_run', $judgingRun->getRunid(),
                                             EventLogService::ACTION_CREATE, $judging->getCid());
             }
@@ -1056,6 +1059,7 @@ class JudgehostController extends AbstractFOSRestController
         // Reload the testcase and judging, as EventLogService::log will clear the entity manager.
         // For the judging, also load in the submission and some of it's relations
         $testCase = $this->em->getRepository(Testcase::class)->find($testCaseId);
+        /** @var Judging $judging */
         $judging  = $this->em->createQueryBuilder()
             ->from(Judging::class, 'j')
             ->join('j.submission', 's')
@@ -1108,6 +1112,7 @@ class JudgehostController extends AbstractFOSRestController
                 // NOTE: setting endtime here determines in testcases_GET
                 // whether a next testcase will be handed out.
                 $judging->setEndtime(Utils::now());
+                $this->maybeUpdateActiveJudging($judging);
             }
             $this->em->flush();
 
@@ -1136,7 +1141,7 @@ class JudgehostController extends AbstractFOSRestController
                 // (case of verification required is handled in
                 // jury/SubmissionController::verifyAction)
                 if (!$this->config->get('verification_required')) {
-                    if ($judging->getRejudgingid() === null) {
+                    if ($judging->getValid()) {
                         $this->eventLogService->log('judging', $judging->getJudgingid(),
                                                     EventLogService::ACTION_UPDATE,
                                                     $judging->getCid());
@@ -1152,9 +1157,20 @@ class JudgehostController extends AbstractFOSRestController
         }
 
         // Send an event for an endtime update if not done yet.
-        if ($judging->getRejudgingid() === null && count($runs) == $numTestCases && empty($justFinished)) {
+        if ($judging->getValid() && count($runs) == $numTestCases && empty($justFinished)) {
             $this->eventLogService->log('judging', $judging->getJudgingid(),
                                         EventLogService::ACTION_UPDATE, $judging->getCid());
+        }
+    }
+
+    private function maybeUpdateActiveJudging(Judging $judging): void
+    {
+        if ($judging->getRejudgingid() !== null && $judging->getRejudging()->getAutoApply()) {
+            $judging->getSubmission()->setRejudging(null);
+            foreach ($judging->getSubmission()->getJudgings() as $j) {
+                $j->setValid(false);
+            }
+            $judging->setValid(true);
         }
     }
 }

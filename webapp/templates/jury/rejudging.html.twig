@@ -36,13 +36,17 @@
                         </td>
                     </tr>
                 {% endif %}
-                {% if rejudging.finishUser %}
+                {% if rejudging.endtime %}
                     <tr>
                         <th>{% if rejudging.valid %}Accepted{% else %}Canceled{% endif %} by</th>
                         <td>
-                            <a href="{{ path('jury_user', {'userId': rejudging.finishUser.userid}) }}">
-                                {{ rejudging.finishUser.name }}
-                            </a>
+                            {% if rejudging.autoapply %}
+                                automatically applied
+                            {% else %}
+                                <a href="{{ path('jury_user', {'userId': rejudging.finishUser.userid}) }}">
+                                    {{ rejudging.finishUser.name }}
+                                </a>
+                            {% endif %}
                         </td>
                     </tr>
                 {% endif %}
@@ -81,6 +85,11 @@
     <div data-rejudging-buttons>
         {% include 'jury/partials/rejudging_buttons.html.twig' %}
     </div>
+
+    {% if rejudging.autoapply and not rejudging.endtime %}
+         <br/>
+         <div class="alert alert-warning">Judgings in this rejudging will be applied automatically.</div>
+    {% endif %}
 
     <div data-rejudging-matrix>
         {% include 'jury/partials/rejudging_matrix.html.twig' %}
