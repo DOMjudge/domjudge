@@ -16,8 +16,10 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\Expr\Join;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 
 /**
  * Class SubmissionService
@@ -638,5 +640,49 @@ class SubmissionService
             $fileData['rank'],
             $fileData['filename']
         ]);
+    }
+
+    /**
+     * Get a response object containing the given submission as a ZIP
+     *
+     * @param Submission $submission
+     *
+     * @return StreamedResponse
+     * @throws ServiceUnavailableHttpException
+     */
+    public function getSubmissionZipResponse(Submission $submission): StreamedResponse
+    {
+        /** @var SubmissionFile[] $files */
+        $files = $submission->getFiles();
+        $zip   = new \ZipArchive;
+        if (!($tmpfname = tempnam($this->dj->getDomjudgeTmpDir(), "submission_file-"))) {
+            throw new ServiceUnavailableHttpException(null, 'Could not create temporary file.');
+        }
+
+        $res = $zip->open($tmpfname, \ZipArchive::OVERWRITE);
+        if ($res !== true) {
+            throw new ServiceUnavailableHttpException(null, "Could not create temporary zip file.");
+        }
+        foreach ($files as $file) {
+            $zip->addFromString($file->getFilename(), $file->getSourcecode());
+        }
+        $zip->close();
+
+        $filename = 's' . $submission->getSubmitid() . '.zip';
+
+        $response = new StreamedResponse();
+        $response->setCallback(function () use ($tmpfname) {
+            $fp = fopen($tmpfname, 'rb');
+            fpassthru($fp);
+            unlink($tmpfname);
+        });
+        $response->headers->set('Content-Type', 'application/zip');
+        $response->headers->set('Content-Disposition', 'attachment; filename="' . $filename . '"');
+        $response->headers->set('Content-Length', filesize($tmpfname));
+        $response->headers->set('Content-Transfer-Encoding', 'binary');
+        $response->headers->set('Connection', 'Keep-Alive');
+        $response->headers->set('Accept-Ranges', 'bytes');
+
+        return $response;
     }
 }

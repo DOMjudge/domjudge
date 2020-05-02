@@ -5,18 +5,22 @@ namespace App\Controller\Team;
 use App\Controller\BaseController;
 use App\Entity\Judging;
 use App\Entity\Problem;
+use App\Entity\Submission;
 use App\Entity\Testcase;
 use App\Form\Type\SubmitProblemType;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\SubmissionService;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\Query\Expr\Join;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Constraints\Language;
 
@@ -72,7 +76,7 @@ class SubmissionController extends BaseController
     /**
      * @Route("/submit", name="team_submit")
      * @param Request $request
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      * @throws \Exception
      */
     public function createAction(Request $request)
@@ -135,14 +139,15 @@ class SubmissionController extends BaseController
      * @Route("/submission/{submitId<\d+>}", name="team_submission")
      * @param Request $request
      * @param int     $submitId
-     * @return \Symfony\Component\HttpFoundation\Response
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @return Response
+     * @throws NonUniqueResultException
      */
     public function viewAction(Request $request, int $submitId)
     {
         $verificationRequired = (bool)$this->config->get('verification_required');;
         $showCompile      = $this->config->get('show_compile');
         $showSampleOutput = $this->config->get('show_sample_output');
+        $allowDownload    = (bool)$this->config->get('allow_team_submission_download');
         $user             = $this->dj->getUser();
         $team             = $user->getTeam();
         $contest          = $this->dj->getCurrentContest($team->getTeamid());
@@ -191,6 +196,7 @@ class SubmissionController extends BaseController
             'judging' => $judging,
             'verificationRequired' => $verificationRequired,
             'showCompile' => $showCompile,
+            'allowDownload' => $allowDownload,
             'showSampleOutput' => $showSampleOutput,
             'runs' => $runs,
         ];
@@ -200,5 +206,41 @@ class SubmissionController extends BaseController
         } else {
             return $this->render('team/submission.html.twig', $data);
         }
+    }
+
+    /**
+     * @Route("/submission/{submitId<\d+>}/download", name="team_submission_download")
+     * @param int $submitId
+     *
+     * @return Response
+     * @throws NonUniqueResultException
+     */
+    public function downloadAction($submitId)
+    {
+        $allowDownload = (bool)$this->config->get('allow_team_submission_download');
+        if (!$allowDownload) {
+            throw new NotFoundHttpException('Submission download not allowed');
+        }
+
+        $user = $this->dj->getUser();
+        $team = $user->getTeam();
+        /** @var Submission $submission */
+        $submission = $this->em->createQueryBuilder()
+            ->from(Submission::class, 's')
+            ->join('s.files', 'f')
+            ->select('s, f')
+            ->andWhere('s.submitid = :submitId')
+            ->andWhere('s.team = :team')
+            ->setParameter(':submitId', $submitId)
+            ->setParameter(':team', $team)
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        if ($submission === null) {
+            throw new NotFoundHttpException(sprintf('Submission with ID \'%s\' not found',
+                $submitId));
+        }
+
+        return $this->submissionService->getSubmissionZipResponse($submission);
     }
 }

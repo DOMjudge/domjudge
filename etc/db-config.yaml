@@ -222,6 +222,11 @@
             default_value: true
             public: true
             description: Show time and memory limit on the team problems page.
+        -   name: allow_team_submission_download
+            type: bool
+            default_value: false
+            public: true
+            description: Allow teams to download their own submission code
         -   name: team_column_width
             type: int
             default_value: 0

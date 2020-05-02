@@ -43,6 +43,16 @@
             </div>
         {% endif %}
 
+        {% if allowDownload %}
+            <div class="d-flex flex-row">
+                <div class="p-2">
+                    <a class="btn btn-primary" href="{{ path('team_submission_download', {'submitId': judging.submitid}) }}">
+                        <i class="fa fa-download"></i> Download submission
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+
         {% if showCompile == 2 or (showCompile == 1 and judging.result == 'compiler-error') %}
             <hr/>
             <h4 class="text-center">Compilation output</h4>
