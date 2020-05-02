@@ -1,0 +1,4 @@
+accounts	1
+{% for row in data %}
+{{ row.type|tsvField }}	{{ row.fullname|tsvField }}	{{ row.username|tsvField }}	{{ row.password|tsvField }}
+{% endfor %}

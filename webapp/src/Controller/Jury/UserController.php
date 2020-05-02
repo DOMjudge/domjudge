@@ -324,6 +324,7 @@ class UserController extends BaseController
         if ($form->isSubmitted() && $form->isValid()) {
             $groups = $form->get('group')->getData();
 
+            /** @var User[] $users */
             $users = $this->em->getRepository(User::class)->findAll();
 
             $changes = [];
@@ -356,7 +357,6 @@ class UserController extends BaseController
                     $this->dj->auditlog('user', $user->getUserid(), 'set password');
                     $changes[] = [
                             'type' => $role,
-                            'id' => $user->getUserid(),
                             'fullname' => $user->getName(),
                             'username' => $user->getUsername(),
                             'password' => $newpass,
@@ -364,12 +364,12 @@ class UserController extends BaseController
                 }
             }
             $this->em->flush();
-            $response = $this->render('jury/tsv/userdata.tsv.twig', [
+            $response = $this->render('jury/tsv/accounts.tsv.twig', [
                 'data' => $changes,
             ]);
             $disposition = $response->headers->makeDisposition(
                 ResponseHeaderBag::DISPOSITION_ATTACHMENT,
-                'userdata.tsv');
+                'accounts.tsv');
             $response->headers->set('Content-Disposition', $disposition);
             $response->headers->set('Content-Type', 'text/plain');
             return $response;
