@@ -99,7 +99,7 @@ abstract class BaseController extends AbstractController
         // get the primary key if possible
         if ($id === null) {
             try {
-                $metadata = $entityManager->getClassMetadata($class);
+                $metadata = $entityManager->getClassMetadata(get_class($entity));
                 if (count($metadata->getIdentifierColumnNames()) === 1) {
                     $primaryKey = $metadata->getIdentifierColumnNames()[0];
                     $accessor   = PropertyAccess::createPropertyAccessor();
