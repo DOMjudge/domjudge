@@ -126,6 +126,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             new TwigFilter('descriptionExpand', [$this, 'descriptionExpand'], ['is_safe' => ['html']]),
             new TwigFilter('wrapUnquoted', [$this, 'wrapUnquoted']),
             new TwigFilter('hexColorToRGBA', [$this, 'hexColorToRGBA']),
+            new TwigFilter('tsvField', [$this, 'toTsvField']),
         ];
     }
 
@@ -964,5 +965,21 @@ EOF;
         }
 
         return $text;
+    }
+
+    /**
+     * Convert the given string to a field that is safe to use in a TSV file
+     *
+     * @param string $field
+     *
+     * @return string
+     */
+    public function toTsvField(string $field)
+    {
+        return str_replace(
+            ["\\",   "\t",  "\n",  "\r"],
+            ["\\\\", "\\t", "\\n", "\\r"],
+            $field
+        );
     }
 }
