@@ -274,38 +274,7 @@ class SubmissionController extends AbstractRestController
 
         $submission = reset($submissions);
 
-        /** @var SubmissionFile[] $files */
-        $files = $submission->getFiles();
-        $zip   = new \ZipArchive;
-        if (!($tmpfname = tempnam($this->dj->getDomjudgeTmpDir(), "submission_file-"))) {
-            return new Response("Could not create temporary file.", Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
-
-        $res = $zip->open($tmpfname, \ZipArchive::OVERWRITE);
-        if ($res !== true) {
-            return new Response("Could not create temporary zip file.", Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
-        foreach ($files as $file) {
-            $zip->addFromString($file->getFilename(), $file->getSourcecode());
-        }
-        $zip->close();
-
-        $filename = 's' . $submission->getSubmitid() . '.zip';
-
-        $response = new StreamedResponse();
-        $response->setCallback(function () use ($tmpfname) {
-            $fp = fopen($tmpfname, 'rb');
-            fpassthru($fp);
-            unlink($tmpfname);
-        });
-        $response->headers->set('Content-Type', 'application/zip');
-        $response->headers->set('Content-Disposition', 'attachment; filename="' . $filename . '"');
-        $response->headers->set('Content-Length', filesize($tmpfname));
-        $response->headers->set('Content-Transfer-Encoding', 'binary');
-        $response->headers->set('Connection', 'Keep-Alive');
-        $response->headers->set('Accept-Ranges', 'bytes');
-
-        return $response;
+        return $this->submissionService->getSubmissionZipResponse($submission);
     }
 
     /**
