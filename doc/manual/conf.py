@@ -115,6 +115,7 @@ html_static_path = ['_static']
 #
 # html_sidebars = {}
 
+html_js_files = ['js/versionswitcher.js']
 
 # -- Options for HTMLHelp output ---------------------------------------------
 
