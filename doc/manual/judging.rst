@@ -144,7 +144,7 @@ Judgehost restrictions
 ----------------------
 It is possible to dedicate certain judgehosts only for certain languages,
 problems or contests; or a combination thereof. To set this up, configure
-the desired restiction pattern under *Judgehost restrictions* from the
+the desired restriction pattern under *Judgehost restrictions* from the
 main menu. For example, you select contest 1 and language Java.
 Then, you can edit all judgehosts and apply the newly created restriction
 to any of them. The judgehosts with this restriction will only pick up
@@ -199,7 +199,7 @@ processes for garbage collection).
 
 'runguard: root privileges not dropped'
 ```````````````````````````````````````
-When this error occurs on submititng any source::
+When this error occurs on submitting any source::
 
   Compiling failed with exitcode 255, compiler output:
   /home/domjudge/system/bin/runguard: root privileges not dropped

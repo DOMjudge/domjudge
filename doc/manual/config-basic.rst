@@ -23,7 +23,7 @@ people accessing your system. There are several roles possible:
   balloons as delivered.
 - Team member: can view its own team interface and submit solutions
   (see below).
-- Several system roles: they are for :ref:`API` access. The most imporant
+- Several system roles: they are for :ref:`API` access. The most important
   one is *judgehost* which means the account credentials can be used by a
   judgedaemon.
 

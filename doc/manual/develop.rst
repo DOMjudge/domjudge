@@ -63,7 +63,7 @@ be run via makefile rules as follows::
 
 Note that these targets have to be executed *separately* and
 they replace the steps described in the chapters on installing
-the DOMserver or Judghost.
+the DOMserver or Judgehost.
 
 While working on DOMjudge, it is useful to run the Symfony webapp in
 development mode to have access to the profiling and debugging

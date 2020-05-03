@@ -102,7 +102,7 @@ you wish to do something special with these cases.
 
 Normally balloon distribution stops when the scoreboard is frozen.
 This will be indicated in the interface and no new entries will
-show for submissions after the freeze. It is possibe that new
+show for submissions after the freeze. It is possible that new
 entries appear for some times after the freeze, if the result of
 a submission before the freeze is only known after (this can also
 happen in case of a :ref:`rejudging`).

@@ -14,7 +14,7 @@ follows:
   `public/images/countries/XXX.png` with *XXX* being the country code.
   You can replace them if you want different flags.
 - *Affiliation logos*: these will be shown with the teams that are
-  part of the affilation, if the ``show_affiliation_logos`` configuration
+  part of the affiliation, if the ``show_affiliation_logos`` configuration
   option is enabled. They can be placed in
   `public/images/affiliations/1234.png` where *1234* is the numeric ID
   of the affiliation as shown in the DOMjudge interface. There is a
@@ -58,7 +58,7 @@ in without authenticating.
 
 If desired, you can edit or pre-fill the IP address associated with an
 account from the Users page. When using IPv6, ensure that you enter the
-address in the exact repesentation as the webserver reports it (e.g.
+address in the exact representation as the webserver reports it (e.g.
 as visible in the webserver logs) - no canonicalization is performed.
 
 X-Headers
@@ -83,7 +83,7 @@ Squid configuration for this might look like::
 
 Using REMOTE-USER
 `````````````````
-DOMjudge supports generic authentiation by various existing providers that
+DOMjudge supports generic authentication by various existing providers that
 can authenticate a user and set the ``REMOTE_USER`` environment variable
 to the authenticated username.
 
