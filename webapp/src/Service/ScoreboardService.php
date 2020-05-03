@@ -935,7 +935,7 @@ class ScoreboardService
             'refresh' => [
                 'after' => 30,
                 'url' => $refreshUrl,
-                'ajax' => true,
+                'ajax' => !$static,
              ],
              'static' => $static,
         ];
