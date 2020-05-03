@@ -1,0 +1,106 @@
+#!/bin/sh
+# @configure_input@
+#
+# This script can perform various cleanup tasks on a judgehost.
+
+# Abort when a single command fails:
+set -e
+
+JUDGINGDIR=$(readlink -fn @judgehost_judgedir@)
+PROGNAME=$(basename $0)
+
+usage()
+{
+	cat <<EOF
+Usage: $PROGNAME <command>
+Perform various cleanup tasks on a judgehost.
+
+Make sure that no judgings are in process while running this script.
+It is best to temporarily disable the judgehost in the web interface
+or stop the service and wait until all judgings are finished.
+
+This will operate on data under $JUDGINGDIR
+
+Commands:
+
+  mounts    Unmount stale bind mounts to the chroot. These can appear
+              when then judgedaemon crashes in the middle of a judging.
+  cache     Delete cached test cases and executables.
+  judgings  Delete detailed logs and compiled programs of judgings.
+              Note that the most important data is stored in the database.
+              The additional data on disk is mostly useful for debugging.
+  help      Display this usage information.
+
+EOF
+}
+
+if [ `id -u` -ne 0 ]; then
+	echo "This program must be run as root."
+	echo
+	usage
+	exit 1
+fi
+
+case $1 in
+	mount*)
+		echo "Cleaning up stale mounts..."
+		for i in $(cat /proc/mounts | cut -d ' ' -f 2 | grep -E "^$JUDGINGDIR/") ; do
+			umount $i
+			echo "Unmounted $i"
+			sleep 0.1
+		done
+		echo "Done."
+		;;
+
+	cache)
+		echo "Cleaning up cached data..."
+		cd "$JUDGINGDIR"
+		for d in */*; do
+			[ -d "$d" ] || continue
+			cd "$d"
+			echo "  in $d:"
+			for i in testcase executable; do
+				if [ -d "$i/" ]; then
+					echo "    removing $i cache"
+					rm -rf "$i/"
+				fi
+			done
+			cd - >/dev/null
+		done
+		echo "Done."
+		;;
+
+	judging*)
+		if cat /proc/mounts | cut -d ' ' -f 2 | grep -E "^$JUDGINGDIR/" >/dev/null 2>&1 ; then
+			echo "There are (stale) bind mounts under $JUDGINGDIR/."
+			echo "Make sure that all judgedaemons on this host are stopped, and then"
+			echo "run '$PROGNAME mount' to clean up any stale bind mounts."
+			exit 1
+		fi
+		echo "Cleaning up judging data..."
+		cd "$JUDGINGDIR"
+		for d in */*; do
+			[ -d "$d" ] || continue
+			cd "$d"
+			echo "  in $d:"
+			for i in $(ls -d * 2>/dev/null | grep -E '^[0-9]+$' || true); do
+				[ -d "$i" ] || continue
+				echo "    removing judging data for contest $i"
+				rm -rf "$i/"
+			done
+			cd - >/dev/null
+		done
+		echo "Done."
+		;;
+
+	help|--help)
+		usage
+		;;
+
+	*)
+		echo "Unknown command '$1'."
+		echo
+		usage
+		exit 1
+		;;
+esac
