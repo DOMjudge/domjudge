@@ -16,12 +16,13 @@ use Swagger\Annotations as SWG;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Intl\Exception\NotImplementedException;
 
 /**
  * @Rest\Route("/api/v4/contests/{cid}/awards", defaults={ "_format" = "json" })
  * @Rest\Prefix("/api/contests/{cid}/awards")
- * @Rest\NamePrefix("scoreboard_")
- * @SWG\Tag(name="Scoreboard")
+ * @Rest\NamePrefix("awards_")
+ * @SWG\Tag(name="Awards")
  * @SWG\Parameter(ref="#/parameters/cid")
  * @SWG\Response(response="404", ref="#/definitions/NotFound")
  * @SWG\Response(response="401", ref="#/definitions/Unauthorized")
@@ -208,8 +209,7 @@ class AwardsController extends AbstractRestController
      */
     protected function getQueryBuilder(Request $request): QueryBuilder
     {
-        // Not used for awards endpoint
-        return null;
+        throw new NotImplementedException();
     }
 
     /**
@@ -217,7 +217,6 @@ class AwardsController extends AbstractRestController
      */
     protected function getIdField(): string
     {
-        // Not used for awards endpoint
-        return '';
+        throw new NotImplementedException();
     }
 }

@@ -18,6 +18,7 @@ use FOS\RestBundle\Controller\Annotations as Rest;
 use Swagger\Annotations as SWG;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\Intl\Exception\NotImplementedException;
 
 /**
  * @Rest\Route("/api/v4/contests/{cid}/scoreboard", defaults={ "_format" = "json" })
@@ -224,8 +225,7 @@ class ScoreboardController extends AbstractRestController
      */
     protected function getQueryBuilder(Request $request): QueryBuilder
     {
-        // Not used for scoreboard endpoint
-        return null;
+        throw new NotImplementedException();
     }
 
     /**
@@ -233,7 +233,6 @@ class ScoreboardController extends AbstractRestController
      */
     protected function getIdField(): string
     {
-        // Not used for scoreboard endpoint
-        return '';
+        throw new NotImplementedException();
     }
 }

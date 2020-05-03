@@ -8,6 +8,7 @@ use Swagger\Annotations as SWG;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Intl\Exception\NotImplementedException;
 
 /**
  * @Rest\Route("/api/v4/contests/{cid}/judgement-types", defaults={ "_format" = "json" })
@@ -126,7 +127,7 @@ class JudgementTypeController extends AbstractRestController
      */
     protected function getQueryBuilder(Request $request): QueryBuilder
     {
-        return null;
+        throw new NotImplementedException();
     }
 
     /**
@@ -134,7 +135,6 @@ class JudgementTypeController extends AbstractRestController
      */
     protected function getIdField(): string
     {
-        // Nothing, as we do not use a query
-        return '';
+        throw new NotImplementedException();
     }
 }
