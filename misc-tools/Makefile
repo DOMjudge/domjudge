@@ -9,7 +9,8 @@ OBJECTS =
 SUBST_DOMSERVER = judging_statistics balloons fix_permissions \
                   simulate_contest multi_rejudge
 
-SUBST_JUDGEHOST = dj_make_chroot dj_run_chroot dj_make_chroot_docker
+SUBST_JUDGEHOST = dj_make_chroot dj_run_chroot dj_make_chroot_docker \
+                  dj_judgehost_cleanup
 
 SUBST_FILES = $(SUBST_DOMSERVER) $(SUBST_JUDGEHOST)
 
