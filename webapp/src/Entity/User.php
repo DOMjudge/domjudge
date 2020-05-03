@@ -168,18 +168,20 @@ class User implements UserInterface, EquatableInterface, \Serializable
 
     public function serialize()
     {
-        return serialize(array(
+        return serialize([
             $this->userid,
             $this->username,
             $this->password,
-        ));
+            $this->user_roles,
+        ]);
     }
     public function unserialize($serialized)
     {
         list(
             $this->userid,
             $this->username,
-            $this->password
+            $this->password,
+            $this->user_roles,
         ) = unserialize($serialized);
     }
 
@@ -596,21 +598,18 @@ class User implements UserInterface, EquatableInterface, \Serializable
     /**
      * {@inheritdoc}
      */
-    public function isEqualTo(UserInterface $user)
+    public function isEqualTo(UserInterface $user): bool
     {
         if (!$user instanceof self) {
             return false;
         }
 
-        if ($this->getPassword() !== $user->getPassword()) {
-            return false;
-        }
-
-        if ($this->getUsername() !== $user->getUsername()) {
-            return false;
-        }
-
-        if ($this->getEnabled() !== $user->getEnabled()) {
+        if (
+            $this->getPassword() !== $user->getPassword() ||
+            $this->getUsername() !== $user->getUsername() ||
+            $this->getRoles() !== $user->getRoles() ||
+            $this->getEnabled() !== $user->getEnabled()
+        ) {
             return false;
         }
 
