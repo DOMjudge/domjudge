@@ -184,6 +184,47 @@ $(function() {
       </div>
     </div>
   </div>
+  <div class="row">
+      <div class="col-md-6 mt-3 mb-3">
+          <div class="card">
+              <div class="card-header">
+                  Delayed Judgings (by more than {{ delayed_judgings.delay }}s)
+              </div>
+              <div class="card-body tablecard">
+                  {% if delayed_judgings.data|length > 0 %}
+                      <table class="table table-sm table-striped table-hover">
+                          <thead>
+                          <tr>
+                              <th scope="col">submit ID</th>
+                              <th scope="col">judging ID</th>
+                              <th scope="col">submit time</th>
+                              <th scope="col">num judgings</th>
+                              <th scope="col">time to<br/>first judging</th>
+                          </tr>
+                          </thead>
+                          <tbody>
+                          {% for j in delayed_judgings.data %}
+                              {% set id=j.submitid %}
+                              <tr class='clickable-row' data-href="{{path('jury_submission', {'submitId': id}) }}">
+                                  <th scope="row">{{ id }}</th>
+                                  <td scope="row">{{ j.judgingid }}</td>
+                                  <td scope="row">{{ j.submittime | printtime }}</td>
+                                  <td scope="row">{{ j.num_judgings }}</td>
+                                  <td scope="row">{{ j.timediff | number_format(2) }}s</td>
+                              </tr>
+                          {% endfor %}
+                          </tbody>
+                      </table>
+                      {% if delayed_judgings.overflow > 0 %}
+                          <div class="alert alert-warning">There are {{ delayed_judgings.overflow }} more delayed judgings which are not shown.</div>
+                      {% endif %}
+                  {% else %}
+                      <div class="alert alert-warning">There are no judgings delayed so far.</div>
+                  {% endif %}
+              </div>
+          </div>
+      </div>
+  </div>
 </div>
 
 

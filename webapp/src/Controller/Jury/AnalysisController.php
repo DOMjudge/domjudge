@@ -9,6 +9,7 @@ use App\Entity\Problem;
 use App\Entity\Submission;
 use App\Entity\Team;
 use App\Service\DOMJudgeService;
+use Doctrine\ORM\Query\Expr;
 use Doctrine\ORM\QueryBuilder;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -248,12 +249,30 @@ class AnalysisController extends AbstractController
           return ($a->getSubmitTime() < $b->getSubmitTime()) ? -1: 1;
         });
 
+        $maxDelayedJudgings = 10;
+        $delayedTimeDiff = 5;
+        $delayedJudgings = $em->createQueryBuilder()
+            ->from(Submission::class, 's')
+            ->innerJoin(Judging::class, 'j', Expr\Join::WITH, 's.submitid = j.submitid')
+            ->select('s.submitid, MIN(j.judgingid) AS judgingid, s.submittime, MIN(j.starttime) - s.submittime AS timediff, COUNT(j.judgingid) AS num_judgings')
+            ->andWhere('s.contest = :contest')
+            ->setParameter('contest', $contest)
+            ->groupBy('s.submitid')
+            ->andHaving('timediff > :timediff')
+            ->setParameter('timediff', $delayedTimeDiff)
+            ->orderBy('timediff', 'DESC')
+            ->getQuery()->getResult();
 
         return $this->render('jury/analysis/contest_overview.html.twig', [
             'contest' => $contest,
             'problems' => $problems,
             'teams' => $teams,
             'submissions' => $submissions,
+            'delayed_judgings' => [
+                'data' => array_slice($delayedJudgings, 0, $maxDelayedJudgings),
+                'overflow' => count($delayedJudgings) - $maxDelayedJudgings,
+                'delay' => $delayedTimeDiff,
+            ],
             'misc' => $misc,
             'filters' => self::FILTERS,
             'view' => $view,
