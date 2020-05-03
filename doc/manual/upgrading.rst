@@ -27,5 +27,5 @@ and above. This means that if you run an older DOMjudge version,
 you first need to complete an upgrade to 7.0 before upgrading to
 a newer version. See https://github.com/DOMjudge/domjudge/tree/7.0/sql/upgrade
 for instructions for upgrading to 7.0. When you have successfully
-upgraded to 7.0, you can run the prodedure above to reach the
+upgraded to 7.0, you can run the procedure above to reach the
 current version.
