@@ -101,7 +101,7 @@ class UserType extends AbstractType
             $form->add('plainPassword', PasswordType::class, [
                 'required' => false,
                 'label' => 'Password',
-                'help' => sprintf('Currently %s - fill to change', $set),
+                'help' => sprintf('Currently %s - fill to change. Any current login session of the user will be terminated.', $set),
             ]);
         });
     }
