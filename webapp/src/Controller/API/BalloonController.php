@@ -33,7 +33,7 @@ class BalloonController extends AbstractRestController
      * @Rest\Get("")
      * @SWG\Response(
      *     response="200",
-     *     description="Returns the ballons for this contest.",
+     *     description="Returns the balloons for this contest.",
      * )
      * @SWG\Parameter(ref="#/parameters/strict")
      * @throws \Exception
