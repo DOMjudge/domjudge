@@ -1,5 +1,6 @@
 # Configuration settings that can be overriden using the `configuration` database table
 -   category: Scoring
+    description: Options related to how scoring is handled.
     items:
         -   name: verification_required
             type: bool
@@ -39,6 +40,7 @@
             public: true
             description: Should the scoreboard resolution be measured in seconds instead of minutes?
 -   category: Judging
+    description: Options related to how judging is performed.
     items:
         -   name: memory_limit
             type: int
@@ -131,6 +133,7 @@
             public: false
             description: The script used to run submissions if no special run script specified.
 -   category: Clarification
+    description: Options related to clarifications.
     items:
         -   name: clar_categories
             type: array_keyval
@@ -157,6 +160,7 @@
             public: true
             description: Queue to assign to problem clarifications.
 -   category: Display
+    description: Options related to the DOMjudge user interface.
     items:
         -   name: show_pending
             type: bool
@@ -226,40 +230,50 @@
             type: bool
             default_value: false
             public: true
-            description: Allow teams to download their own submission code
+            description: Allow teams to download their own submission code.
+            docdescription: |
+                Note that enabling this option means that if someone gets access to the account of a team, they can download
+                the source code of all submissions from that team. When this option is disabled, getting access to the account
+                of a team only allows someone to submit as that team, which can then easily be ignored by the jury later.
         -   name: team_column_width
             type: int
             default_value: 0
             public: false
             description: Maximum width of team column on scoreboard. Leave 0 for no maximum.
 -   category: Misc
+    description: Miscellaneous configuration options.
     items:
         -   name: print_command
             type: string
             default_value: ""
             public: true
-            description: If not empty, enable teams and jury to send source code to this command. See admin manual for allowed arguments.
+            description: If set, enable teams and jury to send source code to this command. See admin manual for allowed arguments.
+            docdescription: See :ref:`printing` for more information.
         -   name: data_source
             type: int
             default_value: 0
             public: false
-            description: "Source of data: used to indicate whether internal or external IDs are exposed in the API. 'configuration data external' is typically used when loading configuration data from the ICPC CMS, and 'configuration and live data external when running DOMjudge as \"shadow system\""
+            description: "Source of data: used to indicate whether internal or external IDs are exposed in the API. 'configuration data external' is typically used when loading configuration data from the ICPC CMS, and 'configuration and live data external' when running DOMjudge as \"shadow system\"."
             options:
                 0: all local
                 1: configuration data external
                 2: configuration and live data external
+            docdescription: See :doc:`the chapter on running DOMjudge as a shadow system<shadow>` for more information.
         -   name: external_ccs_submission_url
             type: string
             default_value: ""
             public: false
             description: URL of a submission detail page on the external CCS. Placeholder [id] will be replaced by submission ID and [contest] by the contest ID. Leave empty to not display links to external CCS.
+            docdescription: See :doc:`the chapter on running DOMjudge as a shadow system<shadow>` for more information.
 -   category: Authentication
+    description: Options related to authentication.
     items:
         -   name: auth_methods
             type: array_val
             default_value: []
             public: false
             description: List of allowed additional authentication methods.
+            docdescription: See :ref:`authentication` for more information.
             options:
                 - ipaddress
                 - xheaders

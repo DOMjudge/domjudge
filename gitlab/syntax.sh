@@ -9,4 +9,5 @@ make clean
 
 cd doc/manual/
 make version.py
-sphinx-build -W -b html . build
+./gen_conf_ref.py
+sphinx-build -b html . build

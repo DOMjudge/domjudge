@@ -27,7 +27,7 @@ maintainer-install: docs
 	ln -sf build/team
 
 clean-l:
-	rm -rf build/doctrees
+	rm -rf build/doctrees conf_ref.rst
 
 maintainer-clean-l:
 	rm -rf build
@@ -35,7 +35,10 @@ maintainer-clean-l:
 distclean-l:
 	-rm -f $(SUBST_CONFIGS) html team
 
-html:
+conf_ref.rst: gen_conf_ref.py
+	./gen_conf_ref.py
+
+html: conf_ref.rst
 	sphinx-build -M $@ . build $(subst 1,-Q,$(QUIET))
 
 team:

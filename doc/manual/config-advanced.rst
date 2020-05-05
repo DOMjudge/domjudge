@@ -31,6 +31,8 @@ follows:
   The IDs for affiliations and teams need to be the *external ID*
   if the ``data_source`` setting of DOMjudge is set to external.
 
+.. _authentication:
+
 Authentication and registration
 -------------------------------
 Out of the box users are able to authenticate using username and password.
@@ -236,6 +238,7 @@ must probably also be created, so the exact data written to
 correctness of the contestants' program can be deduced from the
 contents by the compare program.
 
+.. _printing:
 
 Printing
 --------
