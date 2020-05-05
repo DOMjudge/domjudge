@@ -25,3 +25,4 @@ Appendices
    team
    problem-format
    shadow
+   configuration-reference
