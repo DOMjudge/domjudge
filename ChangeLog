@@ -1,7 +1,7 @@
 DOMjudge Programming Contest Judging System
 
-Version 7.2.1 - DEV
--------------------
+Version 7.2.1 - 6 May 2020
+--------------------------
  - Various documentation fixes and improvements.
  - Fix filtering balloons by affiliation (Thanks Michael Baer).
  - Fix audit log entries for newly created entities.
