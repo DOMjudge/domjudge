@@ -11,6 +11,30 @@ Version 7.3.0 - DEV
  - Minimum PHP version is now 7.2.5.
  - Add script dj_judgehost_cleanup for maintenance on judgehosts.
 
+Version 7.2.1 - 6 May 2020
+--------------------------
+ - Various documentation fixes and improvements.
+ - Fix filtering balloons by affiliation (Thanks Michael Baer).
+ - Fix audit log entries for newly created entities.
+ - Small fix to make API delete events adhere to the specification.
+ - Fix some edge-case bugs in the scoreboard calculation.
+ - Fix arguments to UploadedFile().
+ - Fix SQL group by leading to errors on newer DB versions (Thanks
+   Michael Baer).
+ - Fix submit help to work when baseurl is invalid.
+ - Various small fixes to the build/install system.
+ - Fix user IP address field to accept IPv6 addresses.
+ - Fix and document static scoreboard contest selection feature.
+ - Fix a sed error message on internal compile error. 
+ - Fix link to documentation from the admin index page.
+ - Fix problem text links from scoreboard header.
+ - Fix that country select fields are hidden when show_flags is off.
+ - Fix editing testcase descriptions.
+ - Fix encoding of multiline testcase descriptions in submit graphs.
+ - Fix hardcoded domjudge username in SystemD service file.
+ - Fix compatibilty with PHP 7.4.
+ - Document that minimum PHP version is now 7.2.5.
+
 Version 7.2.0 - 4 January 2020
 ------------------------------
  - Rewrote documentation into a completely new DOMjudge Manual.
