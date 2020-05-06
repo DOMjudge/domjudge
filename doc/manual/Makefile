@@ -36,9 +36,9 @@ distclean-l:
 	-rm -f $(SUBST_CONFIGS) html team
 
 html:
-	sphinx-build -M $@ . build
+	sphinx-build -M $@ . build $(subst 1,-Q,$(QUIET))
 
 team:
-	sphinx-build -b pdf . build/team
+	sphinx-build -b pdf . build/team $(subst 1,-Q,$(QUIET))
 
 .PHONY: docs distdocs install-docs maintainer-install html team
