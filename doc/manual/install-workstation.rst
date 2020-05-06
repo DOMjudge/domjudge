@@ -47,7 +47,7 @@ to inspect its configuration and options.
 Rebuilding team documentation
 -----------------------------
 
-The source of the team manual can be found in ``doc/manual/team.rst```.
+The source of the team manual can be found in ``doc/manual/team.rst``.
 The team manual can incorporate specific settings of your environment,
 most notably the URL of the DOMjudge installation. To achieve this,
 rebuild the team manual *after* configuration of the system.
