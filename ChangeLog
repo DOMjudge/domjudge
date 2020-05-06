@@ -8,8 +8,21 @@ Version 7.3.0 - DEV
    the sense the other ones are.
  - Add team display name support.
  - Add support for importing teams, organizations and groups using JSON.
- - Minimum PHP version is now 7.2.5.
  - Add script dj_judgehost_cleanup for maintenance on judgehosts.
+ - Team manual source is now RestructeredText.
+ - Log out an active user whose password is changed, and updates to the
+   roles of a logged in user are effective immediately.
+ - Allow to "delete" testcases even with associated judgings.
+ - Fix permissions on webapp/var/* by using group setsid bit.
+ - Allow public and team to view submissions, awards and clarifications
+   using the API.
+ - Drop smart renaming for Java public classes.
+ - Show browser notifications also for new balloons to be handed out.
+ - Add option to allow teams to download their own submission.
+ - Change shadow import to read data from a configuration file and store
+   a copy of the feed.
+ - Many code cleanups, improvements and tests.
+ - Upgrade Symfony to 4.4 LTS and upgrade other library dependencies.
 
 Version 7.2.1 - 6 May 2020
 --------------------------
