@@ -77,7 +77,6 @@ class UserRegistrationType extends AbstractType
                     new Callback(function ($teamName, ExecutionContext $context) {
                         if ($this->em->getRepository(Team::class)->findOneBy(['name' => $teamName])) {
                             $context->buildViolation('This team name is already in use.')
-                                ->atPath('teamName')
                                 ->addViolation();
                         }
                     }),
@@ -107,15 +106,6 @@ class UserRegistrationType extends AbstractType
                     'required' => false,
                     'attr' => [
                         'placeholder' => 'Affiliation name',
-                    ],
-                    'constraints' => [
-                        new Callback(function ($affiliationName, ExecutionContext $context) {
-                            if ($this->em->getRepository(TeamAffiliation::class)->findOneBy(['name' => $affiliationName])) {
-                                $context->buildViolation('This affiliation name is already in use.')
-                                    ->atPath('team_name')
-                                    ->addViolation();
-                            }
-                        }),
                     ],
                     'mapped' => false,
                 ]);
@@ -181,8 +171,14 @@ class UserRegistrationType extends AbstractType
                 $form = $context->getRoot();
                 switch ($form->get('affiliation')->getData()) {
                     case 'new':
-                        if (empty($form->get('affiliationName')->getData())) {
+                        $affiliationName = $form->get('affiliationName')->getData();
+                        if (empty($affiliationName)) {
                             $context->buildViolation('This value should not be blank.')
+                                ->atPath('affiliationName')
+                                ->addViolation();
+                        }
+                        if ($this->em->getRepository(TeamAffiliation::class)->findOneBy(['name' => $affiliationName])) {
+                            $context->buildViolation('This affiliation name is already in use.')
                                 ->atPath('affiliationName')
                                 ->addViolation();
                         }
