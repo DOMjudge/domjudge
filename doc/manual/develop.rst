@@ -38,10 +38,10 @@ already listed under
 :ref:`submit client <submit_client_requirements>` requirements)::
 
   sudo apt install autoconf automake bats \
-    python-sphinx python-sphinx-rtd-theme rst2pdf python-yaml
+    python-sphinx python-sphinx-rtd-theme rst2pdf python3-yaml
 
 On Debian 11 and above, install
-``python3-sphinx python3-sphinx-rtd-theme python3-yaml rst2pdf`` instead.
+``python3-sphinx python3-sphinx-rtd-theme rst2pdf python3-yaml`` instead.
 
 When this software is present, bootstrapping can be done by running
 ``make dist``, which creates the ``configure`` script,
