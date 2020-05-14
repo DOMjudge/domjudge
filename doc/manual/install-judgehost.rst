@@ -137,8 +137,7 @@ by other files in ``/etc/default/grub.d/``.
 You have now configured the system to use cgroups. To create
 the actual cgroups that DOMjudge will use, run::
 
-  sudo systemctl enable create-cgroups
-  sudo systemctl start  create-cgroups
+  sudo systemctl enable create-cgroups --now
 
 Note that this service will automatically be started if you use the
 ``domjudge-judgehost`` service, see below. Alternatively, you can
