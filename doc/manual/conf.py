@@ -25,10 +25,16 @@ copyright = '2004-' + time.strftime('%Y') + ' by the DOMjudge developers and con
 author = 'DOMjudge Team'
 
 import os
+
 if os.path.isfile("version.py"):
     exec(open("version.py").read())
 else:
     exec(open("version.dist.py").read())
+
+if os.path.isfile("substitutions.py"):
+    exec(open("substitutions.py").read())
+else:
+    exec(open("substitutions.dist.py").read())
 
 # -- General configuration ---------------------------------------------------
 

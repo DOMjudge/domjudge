@@ -3,7 +3,7 @@ TOPDIR=../..
 endif
 include $(TOPDIR)/Makefile.global
 
-SUBST_CONFIGS = version.py substitutions
+SUBST_CONFIGS = version.py substitutions.py
 
 $(SUBST_CONFIGS): %: %.in $(TOPDIR)/paths.mk
 	$(substconfigvars)

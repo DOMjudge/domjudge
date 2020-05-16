@@ -1,6 +1,6 @@
-..
-  @configure_input@
+# @configure_input@
 
+rst_prolog = """
 .. |DOMjudge| replace:: @PACKAGE_NAME@
 
 .. |baseurlteam| replace:: @BASEURL@team
@@ -8,3 +8,5 @@
 .. |SOURCESIZE| replace:: 256
 .. |COMPILETIME| replace:: 30
 .. |PROCLIMIT| replace:: 15
+
+"""
