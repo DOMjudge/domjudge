@@ -19,7 +19,7 @@ It is however strongly advised that your team reads the entire document.
 There are specific details of this contest control system that might
 become of importance when you run into problems.
 
-.. sidebar:: Summary
+.. admonition:: Summary
 
    DOMjudge works through a web interface that can be found at
    |baseurlteam|. See the two figures on the next page for
