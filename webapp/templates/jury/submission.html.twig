@@ -163,7 +163,7 @@
         </div>
     {% endif %}
 
-    {% if externalJudgement is not null and externalJudgement.result is not empty and selectedJudging is not null and selectedJudging.result and externalJudgement.result != selectedJudging.result %}
+    {% if externalJudgement is not null and externalJudgement.result is not empty and selectedJudging is not null and selectedJudging.result is not empty and externalJudgement.result != selectedJudging.result %}
         <div class="alert alert-danger">
             <strong>Results differ!</strong>
             <hr>
