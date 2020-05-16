@@ -32,9 +32,19 @@
                 </label>
             {%- endfor %}
         </div>
+        <div class="btn-group btn-group-toggle btn-group-sm mb-3" data-toggle="buttons">
+            {%- for idx, type in verificationViewTypes %}
+
+                <label class="btn btn-secondary {% if idx == verificationView %}active{% endif %}">
+                    <input type="radio" name="verificationviewtype" autocomplete="off" value="{{ type }}"
+                           {% if idx == verificationView %}checked{% endif %}> {{ type }}
+                </label>
+            {%- endfor %}
+        </div>
 
         <form action="{{ path('jury_shadow_differences') }}" method="get">
             <input type="hidden" name="view" value="{{ viewTypes[view] }}"/>
+            <input type="hidden" name="verificationview" value="{{ verificationViewTypes[verificationView] }}"/>
             <div class="form-row">
                 <div class="form-group col-md-4">
                     <label for="oldverdict">External verdict</label>
@@ -68,7 +78,7 @@
                 </div>
                 <div class="form-group col-md-2">
                     <label>&nbsp;</label>
-                    <a href="{{ path('jury_shadow_differences', {view: viewTypes[view]}) }}"
+                    <a href="{{ path('jury_shadow_differences', {view: viewTypes[view], verificationview: verificationViewTypes[verificationView]}) }}"
                        class="btn btn-secondary form-control">Clear</a>
                 </div>
             </div>
@@ -86,7 +96,10 @@
         <script>
             $(function () {
                 $('input[name=viewtype]').on('change', function () {
-                    window.location = '{{ path('jury_shadow_differences', {view: 'REPLACE_ME', external: external, local: local}) }}'.replace('REPLACE_ME', $(this).val());
+                    window.location = '{{ path('jury_shadow_differences', {view: 'REPLACE_ME', verificationview: verificationViewTypes[verificationView], external: external, local: local}) | escape('js') }}'.replace('REPLACE_ME', $(this).val());
+                });
+                $('input[name=verificationviewtype]').on('change', function () {
+                    window.location = '{{ path('jury_shadow_differences', {view: viewTypes[view], verificationview: 'REPLACE_ME', external: external, local: local}) | escape('js') }}'.replace('REPLACE_ME', $(this).val());
                 });
 
                 $('.select2').select2();

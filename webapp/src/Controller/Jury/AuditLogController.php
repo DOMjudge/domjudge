@@ -171,6 +171,8 @@ class AuditLogController extends AbstractController
                 return $this->generateUrl('jury_judgehost_restriction', ['restrictionId' => $id]);
             case 'judging':
                 return $this->generateUrl('jury_submission_by_judging', ['jid' => $id]);
+            case 'external_judgement':
+                return $this->generateUrl('jury_submission_by_external_judgement', ['externalJudgement' => $id]);
             case 'language':
                 return $this->generateUrl('jury_language', ['langId' => $id]);
             case 'problem':

@@ -1,0 +1,30 @@
+<form action="{{ form_action }}" method="post">
+    <input type="hidden" name="verified" value="{% if judging.verified %}0{% else %}1{% endif %}"/>
+
+    {# Display verification data: verified, by whom, and comment #}
+    <p>
+        {{ label }}: <strong>{% if judging.verified %}yes{% else %}no{% endif %}</strong>
+        {%- if judging.verified and judging.juryMember is not empty -%}
+            , by {{ judging.juryMember }}
+            {%- if judging.verifyComment is not empty %}
+                with comment "{{ judging.verifyComment }}"
+            {%- endif -%}
+        {%- endif -%}
+        {% if show_form %}
+            <input type="submit" value="{% if judging.verified %}un{% endif %}mark verified"
+                   class="btn btn-outline-secondary btn-sm"/>
+
+            {% if not judging.verified %}
+                with comment
+                <input type="text" name="comment" size="25" class="form-control" id="comment"
+                       style="display: inline; width: auto;"/>
+            {% endif %}
+
+            {% if show_icat and icat_url is not null and submission.contestProblem %}
+                <button class="btn btn-outline-secondary btn-sm" id="post-to-icat">
+                    post to iCAT
+                </button>
+            {% endif %}
+        {% endif %}
+    </p>
+</form>

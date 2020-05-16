@@ -174,6 +174,15 @@ class ShadowDifferencesController extends BaseController
             }
         }
 
+        $verificationViewTypes = [0 => 'all', 1 => 'unverified', 2 => 'verified'];
+        $verificationView      = 0;
+        if ($request->query->has('verificationview')) {
+            $index = array_search($request->query->get('verificationview'), $verificationViewTypes);
+            if ($index !== false) {
+                $verificationView = $index;
+            }
+        }
+
         $restrictions = [];
         if ($viewTypes[$view] == 'unjudged local') {
             $restrictions['judged'] = 0;
@@ -183,6 +192,12 @@ class ShadowDifferencesController extends BaseController
         }
         if ($viewTypes[$view] == 'diff') {
             $restrictions['external_diff'] = 1;
+        }
+        if ($verificationViewTypes[$verificationView] == 'unverified') {
+            $restrictions['externally_verified'] = 0;
+        }
+        if ($verificationViewTypes[$verificationView] == 'verified') {
+            $restrictions['externally_verified'] = 1;
         }
         if ($request->query->get('external', 'all') !== 'all') {
             $restrictions['external_result'] = $request->query->get('external');
@@ -204,6 +219,8 @@ class ShadowDifferencesController extends BaseController
             'verdictTable' => $verdictTable,
             'viewTypes' => $viewTypes,
             'view' => $view,
+            'verificationViewTypes' => $verificationViewTypes,
+            'verificationView' => $verificationView,
             'submissions' => $submissions,
             'submissionCounts' => $submissionCounts,
             'external' => $request->query->get('external', 'all'),

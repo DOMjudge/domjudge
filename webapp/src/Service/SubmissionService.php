@@ -182,6 +182,14 @@ class SubmissionService
             }
         }
 
+        if (isset($restrictions['externally_verified'])) {
+            if ($restrictions['externally_verified']) {
+                $queryBuilder->andWhere('ej.verified = true');
+            } else {
+                $queryBuilder->andWhere('ej.verified = false');
+            }
+        }
+
         if (isset($restrictions['external_diff'])) {
             if ($restrictions['external_diff']) {
                 $queryBuilder->andWhere('j.result != ej.result');

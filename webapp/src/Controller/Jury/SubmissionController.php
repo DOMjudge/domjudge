@@ -4,6 +4,7 @@ namespace App\Controller\Jury;
 
 use App\Controller\BaseController;
 use App\Entity\Contest;
+use App\Entity\ExternalJudgement;
 use App\Entity\Judgehost;
 use App\Entity\Judging;
 use App\Entity\JudgingRun;
@@ -29,6 +30,7 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -293,32 +295,15 @@ class SubmissionController extends BaseController
         $claimWarning = null;
 
         if ($request->get('claim') || $request->get('unclaim')) {
-            $user   = $this->dj->getUser();
-            $action = $request->get('claim') ? 'claim' : 'unclaim';
+            if ($response = $this->processClaim($selectedJudging, $request, $claimWarning)) {
+                return $response;
+            }
+        }
 
-            if ($selectedJudging === null) {
-                $claimWarning = sprintf('Cannot %s this submission: no valid judging found.', $action);
-            } elseif ($selectedJudging->getVerified()) {
-                $claimWarning = sprintf('Cannot %s this submission: judging already verified.', $action);
-            } elseif (!$user && $action === 'claim') {
-                $claimWarning = 'Cannot claim this submission: no jury member specified.';
-            } else {
-                if (!empty($selectedJudging->getJuryMember()) && $action === 'claim' &&
-                    $user->getUsername() !== $selectedJudging->getJuryMember() &&
-                    !$request->request->has('forceclaim')) {
-                    $claimWarning = sprintf('Submission has been claimed by %s. Claim again on this page to force an update.',
-                                            $selectedJudging->getJuryMember());
-                } else {
-                    $selectedJudging->setJuryMember($action === 'claim' ? $user->getUsername() : null);
-                    $this->em->flush();
-                    $this->dj->auditlog('judging', $selectedJudging->getJudgingid(), $action . 'ed');
-
-                    if ($action === 'claim') {
-                        return $this->redirectToRoute('jury_submission', ['submitId' => $submission->getSubmitid()]);
-                    } else {
-                        return $this->redirectToRoute('jury_submissions');
-                    }
-                }
+        if ($request->get('claimdiff') || $request->get('unclaimdiff')) {
+            $externalJudgement = $submission->getExternalJudgements()->first();
+            if ($response = $this->processClaim($externalJudgement, $request, $claimWarning)) {
+                return $response;
             }
         }
 
@@ -580,6 +565,16 @@ class SubmissionController extends BaseController
     }
 
     /**
+     * @Route("/by-external-judgement-id/{externalJudgement}", name="jury_submission_by_external_judgement")
+     */
+    public function viewForExternalJudgementAction(ExternalJudgement $externalJudgement)
+    {
+        return $this->redirectToRoute('jury_submission', [
+            'submitId' => $externalJudgement->getSubmitid(),
+        ]);
+    }
+
+    /**
      * @Route("/by-external-id/{externalId}", name="jury_submission_by_external_id")
      */
     public function viewForExternalIdAction(string $externalId)
@@ -744,7 +739,7 @@ class SubmissionController extends BaseController
      * @Route("/{submission}/edit-source", name="jury_submission_edit_source")
      * @param Request    $request
      * @param Submission $submission
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse|Response
+     * @return RedirectResponse|Response
      * @throws \Exception
      */
     public function editSourceAction(Request $request, Submission $submission)
@@ -874,7 +869,7 @@ class SubmissionController extends BaseController
      * @param ScoreboardService $scoreboardService
      * @param Request           $request
      * @param int               $submitId
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     * @return RedirectResponse
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Exception
      */
@@ -910,7 +905,7 @@ class SubmissionController extends BaseController
      * @param BalloonService    $balloonService
      * @param Request           $request
      * @param int               $judgingId
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     * @return RedirectResponse
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\NoResultException
      * @throws \Doctrine\ORM\NonUniqueResultException
@@ -979,6 +974,45 @@ class SubmissionController extends BaseController
         return $this->redirect($redirect);
     }
 
+
+    /**
+     * @Route("/shadow-difference/{extjudgementid<\d+>}/verify", name="jury_shadow_difference_verify", methods={"POST"})
+     * @param EventLogService $eventLogService
+     * @param Request         $request
+     * @param int             $extjudgementid
+     *
+     * @return RedirectResponse
+     */
+    public function verifyShadowDifferenceAction(
+        EventLogService $eventLogService,
+        Request $request,
+        int $extjudgementid
+    ) {
+        /** @var ExternalJudgement $judgement */
+        $judgement  = $this->em->getRepository(ExternalJudgement::class)->find($extjudgementid);
+        $this->em->transactional(function () use ($eventLogService, $request, $judgement) {
+            $verified = $request->request->getBoolean('verified');
+            $comment  = $request->request->get('comment');
+            $judgement
+                ->setVerified($verified)
+                ->setJuryMember($verified ? $this->dj->getUser()->getUsername() : null)
+                ->setVerifyComment($comment);
+
+            $this->em->flush();
+            $this->dj->auditlog('external_judgement', $judgement->getExtjudgementid(),
+                $verified ? 'set verified' : 'set unverified');
+        });
+
+        // Redirect to referrer page after verification or back to submission page when unverifying.
+        if ($request->request->getBoolean('verified')) {
+            $redirect = $request->request->get('redirect', $this->generateUrl('jury_shadow_differences'));
+        } else {
+            $redirect = $this->generateUrl('jury_submission_by_external_judgement', ['externalJudgement' => $extjudgementid]);
+        }
+
+        return $this->redirect($redirect);
+    }
+
     /**
      * @param SubmissionFile[] $files
      * @param SubmissionFile[] $oldFiles
@@ -1024,5 +1058,54 @@ class SubmissionController extends BaseController
         }
 
         return $result;
+    }
+
+    /**
+     * @param Judging|ExternalJudgement|null $judging
+     * @param Request                        $request
+     * @param string                         $claimWarning
+     *
+     * @return RedirectResponse|null
+     */
+    protected function processClaim($judging, Request $request, ?string &$claimWarning)
+    {
+        $user   = $this->dj->getUser();
+        $action = ($request->get('claim') || $request->get('claimdiff')) ? 'claim' : 'unclaim';
+
+        $type = ($judging instanceof ExternalJudgement) ?'shadow difference' : 'submission';
+
+        if ($judging === null) {
+            $claimWarning = sprintf('Cannot %s this %s: no valid judging found.', $type, $action);
+        } elseif ($judging->getVerified()) {
+            $claimWarning = sprintf('Cannot %s this %s: judging already verified.', $type, $action);
+        } elseif (!$user && $action === 'claim') {
+            $claimWarning = sprintf('Cannot claim this %s: no jury member specified.', $type);
+        } else {
+            if (!empty($judging->getJuryMember()) && $action === 'claim' &&
+                $user->getUsername() !== $judging->getJuryMember() &&
+                !$request->request->has('forceclaim')) {
+                $claimWarning = sprintf('%s has been claimed by %s. Claim again on this page to force an update.',
+                    ucfirst($type), $judging->getJuryMember());
+            } else {
+                $judging->setJuryMember($action === 'claim' ? $user->getUsername() : null);
+                $this->em->flush();
+                if ($judging instanceof ExternalJudgement) {
+                    $auditLogType = 'external_judgement';
+                    $auditLogId = $judging->getExtjudgementid();
+                } else {
+                    $auditLogType = 'judging';
+                    $auditLogId = $judging->getJudgingid();
+                }
+                $this->dj->auditlog($auditLogType, $auditLogId, $action . 'ed');
+
+                if ($action === 'claim') {
+                    return $this->redirectToRoute('jury_submission', ['submitId' => $judging->getSubmitid()]);
+                } else {
+                    return $this->redirectToRoute('jury_submissions');
+                }
+            }
+        }
+
+        return null;
     }
 }

@@ -43,7 +43,13 @@
             {% if showExternalResult and not showExternalTestcases %}
                 <th scope="col">external result</th>
             {% endif %}
-            <th scope="col">verified</th>
+            <th scope="col">
+                {% if showExternalResult and showExternalTestcases %}
+                    shadow diff verified
+                {% else %}
+                    verified
+                {% endif %}
+            </th>
             {% if not showExternalResult or not showExternalTestcases %}
                 <th scope="col">by</th>
             {% endif %}
@@ -145,27 +151,54 @@
                     </td>
                 {% endif %}
                 {%- set claim = false %}
-                {%- if submission.judgings.first is empty or submission.judgings.first.result is empty -%}
-                    {%- set verified = '' %}
-                    {%- set juryMember = '' %}
-                {%- else %}
-                    {%- set juryMember = submission.judgings.first.juryMember %}
-                    {%- if submission.judgings.first.verified %}
-                        {%- set verified = 'yes' %}
+                {% if showExternalResult and showExternalTestcases %}
+                    {%- if submission.externalJudgements.first is empty or submission.externalJudgements.first.result is empty or submission.judgings.first is empty or submission.judgings.first.result is empty or submission.judgings.first.result == submission.externalJudgements.first.result -%}
+                        {%- set verified = '-' %}
+                        {%- set juryMember = '-' %}
                     {%- else %}
-                        {%- set verified = 'no' %}
-                        {%- if submission.judgings.first.juryMember is empty %}
-                            {%- set claim = true %}
+                        {%- set juryMember = submission.externalJudgements.first.juryMember %}
+                        {%- if submission.externalJudgements.first.verified %}
+                            {%- set verified = 'yes' %}
+                            {%- if submission.externalJudgements.first.verifyComment %}
+                                {%- set verified = verified ~ ': ' ~ submission.externalJudgements.first.verifyComment %}
+                            {% endif %}
                         {%- else %}
-                            {%- set verified = 'claimed' %}
+                            {%- set verified = 'no' %}
+                            {%- if submission.externalJudgements.first.juryMember is empty %}
+                                {%- set claim = true %}
+                            {%- else %}
+                                {%- set verified = 'claimed' %}
+                            {%- endif %}
                         {%- endif %}
                     {%- endif %}
-                {%- endif %}
-                {%- if claim %}
-                    {%- set claimArg = {claim: 1} %}
-                {%- else %}
-                    {%- set claimArg = {unclaim: 1} %}
-                {%- endif %}
+                    {%- if claim %}
+                        {%- set claimArg = {claimdiff: 1} %}
+                    {%- else %}
+                        {%- set claimArg = {unclaimdiff: 1} %}
+                    {%- endif %}
+                {% else %}
+                    {%- if submission.judgings.first is empty or submission.judgings.first.result is empty -%}
+                        {%- set verified = '' %}
+                        {%- set juryMember = '' %}
+                    {%- else %}
+                        {%- set juryMember = submission.judgings.first.juryMember %}
+                        {%- if submission.judgings.first.verified %}
+                            {%- set verified = 'yes' %}
+                        {%- else %}
+                            {%- set verified = 'no' %}
+                            {%- if submission.judgings.first.juryMember is empty %}
+                                {%- set claim = true %}
+                            {%- else %}
+                                {%- set verified = 'claimed' %}
+                            {%- endif %}
+                        {%- endif %}
+                    {%- endif %}
+                    {%- if claim %}
+                        {%- set claimArg = {claim: 1} %}
+                    {%- else %}
+                        {%- set claimArg = {unclaim: 1} %}
+                    {%- endif %}
+                {% endif %}
                 <td class="{{ tdExtraClass }}"><a href="{{ link }}">{{ verified }}</a></td>
                 {% if not showExternalResult or not showExternalTestcases %}
                     <td class="{{ tdExtraClass }}">
@@ -234,14 +267,10 @@
                     </a>
                 </td>
                 <td>
-                    {%- if rejudging is defined %}
-                        {%- set claimLink = path('jury_submission', claimArg | merge({submitId: submission.submitid, rejudgingid: rejudging.rejudgingid})) %}
-                    {%- else %}
-                        {%- set claimLink = path('jury_submission', claimArg | merge({submitId: submission.submitid})) %}
-                    {%- endif %}
+                    {%- set claimLink = path('jury_submission', claimArg | merge({submitId: submission.submitid})) %}
                     {%- if claim -%}
                         <a class="btn btn-outline-secondary btn-sm" href="{{ claimLink }}">claim</a>
-                    {%- elseif (not submission.judgings.first or not submission.judgings.first.verified) and juryMember == app.user.username -%}
+                    {%- elseif (not submission.externalJudgements.first or not submission.externalJudgements.first.verified) and juryMember == app.user.username -%}
                         <a class="btn btn-info btn-sm" href="{{ claimLink }}">unclaim</a>
                     {%- else -%}
                         <a href="{{ link }}">{{ juryMember }}</a>
