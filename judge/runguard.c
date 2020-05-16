@@ -110,6 +110,7 @@ char  *progname;
 char  *cmdname;
 char **cmdargs;
 char  *rootdir;
+char  *rootchdir;
 char  *stdoutfilename;
 char  *stderrfilename;
 char  *metafilename;
@@ -170,6 +171,7 @@ struct option const long_opts[] = {
 	{"root",       required_argument, NULL,         'r'},
 	{"user",       required_argument, NULL,         'u'},
 	{"group",      required_argument, NULL,         'g'},
+	{"chdir",      required_argument, NULL,         'd'},
 	{"walltime",   required_argument, NULL,         't'},
 	{"cputime",    required_argument, NULL,         'C'},
 	{"memsize",    required_argument, NULL,         'm'},
@@ -349,6 +351,7 @@ Run COMMAND with restrictions.\n\
   -r, --root=ROOT        run COMMAND with root directory set to ROOT\n\
   -u, --user=USER        run COMMAND as user with username or ID USER\n\
   -g, --group=GROUP      run COMMAND under group with name or ID GROUP\n\
+  -d, --chdir=DIR        change to directory DIR after setting root directory\n\
   -t, --walltime=TIME    kill COMMAND after TIME wallclock seconds\n\
   -C, --cputime=TIME     set maximum CPU time to TIME seconds\n\
   -m, --memsize=SIZE     set total memory limit to SIZE kB\n\
@@ -828,8 +831,10 @@ void setrestrictions()
 		free(path);
 
 		if ( chroot(".")!=0 ) error(errno,"cannot change root to `%s'",cwd);
-		/* Just to make sure and satisfy Coverity scan: */
 		if ( chdir("/")!=0 ) error(errno,"cannot chdir to `/' in chroot");
+		if ( rootchdir!=NULL ) {
+			if ( chdir(rootchdir)!=0 ) error(errno,"cannot chdir to `%s' in chroot", rootchdir);
+		}
 		verbose("using root-directory `%s'",cwd);
 	}
 
@@ -971,7 +976,7 @@ int main(int argc, char **argv)
 	be_verbose = be_quiet = 0;
 	show_help = show_version = 0;
 	opterr = 0;
-	while ( (opt = getopt_long(argc,argv,"+r:u:g:t:C:m:f:p:P:co:e:s:EV:M:vq",long_opts,(int *) 0))!=-1 ) {
+	while ( (opt = getopt_long(argc,argv,"+r:u:g:d:t:C:m:f:p:P:co:e:s:EV:M:vq",long_opts,(int *) 0))!=-1 ) {
 		switch ( opt ) {
 		case 0:   /* long-only option */
 			break;
@@ -1002,6 +1007,11 @@ int main(int argc, char **argv)
 			rungroup = strdup(optarg);
 			if ( errno || *ptr!='\0' ) rungid = groupid(optarg);
 			if ( rungid<0 ) error(0,"invalid groupname or ID specified: `%s'",optarg);
+			break;
+		case 'd': /* chdir option */
+			rootchdir = (char *) malloc(strlen(optarg)+2);
+			if ( rootchdir==NULL ) error(errno,"allocating memory");
+			strcpy(rootchdir,optarg);
 			break;
 		case 't': /* wallclock time option */
 			use_walltime = 1;
