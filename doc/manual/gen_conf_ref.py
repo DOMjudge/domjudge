@@ -81,7 +81,7 @@ def _get_item_description(item):
 if __name__ == "__main__":
     try:
         with open('../../etc/db-config.yaml') as db_config_file:
-            db_config = yaml.load(db_config_file)
+            db_config = yaml.load(db_config_file, Loader=yaml.SafeLoader)
     except IOError as e:
         print('Failed to read config values: %s' % e.strerror)
         sys.exit(-1)
