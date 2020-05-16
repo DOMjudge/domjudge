@@ -5,6 +5,7 @@ namespace App\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation as Serializer;
 
 /**
  * Judgement in external system
@@ -14,6 +15,7 @@ use Doctrine\ORM\Mapping as ORM;
  *     indexes={
  *         @ORM\Index(name="submitid", columns={"submitid"}),
  *         @ORM\Index(name="cid", columns={"cid"}),
+ *         @ORM\Index(name="verified", columns={"verified"}),
  *     },
  *     uniqueConstraints={
  *         @ORM\UniqueConstraint(name="externalid", columns={"cid", "externalid"}, options={"lengths": {null, "190"}}),
@@ -51,6 +53,36 @@ class ExternalJudgement
      *     nullable=true)
      */
     private $result = null;
+
+    /**
+     * @var boolean
+     * @ORM\Column(type="boolean", name="verified",
+     *     options={"comment"="Result / difference verified?",
+     *              "default"=0},
+     *     nullable=false)
+     * @Serializer\Exclude()
+     */
+    private $verified = false;
+
+    /**
+     * @var string
+     * @ORM\Column(type="string", name="jury_member", length=255,
+     *     options={"comment"="Name of user who verified the result / diference",
+     *              "default"=NULL},
+     *     nullable=true)
+     * @Serializer\Exclude()
+     */
+    private $jury_member;
+
+    /**
+     * @var string
+     * @ORM\Column(type="string", name="verify_comment", length=255,
+     *     options={"comment"="Optional additional information provided by the verifier",
+     *              "default"=NULL},
+     *     nullable=true)
+     * @Serializer\Exclude()
+     */
+    private $verify_comment;
 
     /**
      * @var double
@@ -184,6 +216,78 @@ class ExternalJudgement
     public function getResult()
     {
         return $this->result;
+    }
+
+    /**
+     * Set verified status of the result / difference
+     *
+     * @param boolean $verified
+     *
+     * @return ExternalJudgement
+     */
+    public function setVerified($verified)
+    {
+        $this->verified = $verified;
+
+        return $this;
+    }
+
+    /**
+     * Get verified status of the result / difference
+     *
+     * @return boolean
+     */
+    public function getVerified()
+    {
+        return $this->verified;
+    }
+
+    /**
+     * Set jury member who verified this judgement
+     *
+     * @param string $juryMember
+     *
+     * @return ExternalJudgement
+     */
+    public function setJuryMember($juryMember)
+    {
+        $this->jury_member = $juryMember;
+
+        return $this;
+    }
+
+    /**
+     * Get jury member who verified this judgement
+     *
+     * @return string
+     */
+    public function getJuryMember()
+    {
+        return $this->jury_member;
+    }
+
+    /**
+     * Set verify comment
+     *
+     * @param string $verifyComment
+     *
+     * @return ExternalJudgement
+     */
+    public function setVerifyComment($verifyComment)
+    {
+        $this->verify_comment = $verifyComment;
+
+        return $this;
+    }
+
+    /**
+     * Get verifyComment
+     *
+     * @return string
+     */
+    public function getVerifyComment()
+    {
+        return $this->verify_comment;
     }
 
     /**

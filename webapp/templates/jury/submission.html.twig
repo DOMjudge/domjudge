@@ -180,6 +180,13 @@
                 by DOMjudge.
             </p>
         </div>
+
+        {% include 'jury/partials/verify_form.html.twig' with {
+            label: 'Shadow difference verified',
+            judging: externalJudgement,
+            form_action: path('jury_shadow_difference_verify', {extjudgementid: externalJudgement.extjudgementid}),
+            show_form: true,
+            show_icat: false} %}
     {% endif %}
 
     {% if not sameTestcaseIds and selectedJudging is not null and selectedJudging.result is not empty %}
@@ -415,36 +422,12 @@
 
         {# Show verify info, but only when a result is known #}
         {% if selectedJudging is not null and selectedJudging.result is not empty %}
-            <form action="{{ path('jury_judging_verify', {judgingId: selectedJudging.judgingid}) }}" method="post">
-                <input type="hidden" name="verified" value="{% if selectedJudging.verified %}0{% else %}1{% endif %}"/>
-
-                {# Display verification data: verified, by whom, and comment #}
-                <p>
-                    Verified: <strong>{% if selectedJudging.verified %}yes{% else %}no{% endif %}</strong>
-                    {%- if selectedJudging.verified and selectedJudging.juryMember is not empty -%}
-                        , by {{ selectedJudging.juryMember }}
-                        {%- if selectedJudging.verifyComment is not empty %}
-                            with comment "{{ selectedJudging.verifyComment }}"
-                        {%- endif -%}
-                    {%- endif -%}
-                    {% if not (verificationRequired and selectedJudging.verified and selectedJudging.valid) %}
-                        <input type="submit" value="{% if selectedJudging.verified %}un{% endif %}mark verified"
-                               class="btn btn-outline-secondary btn-sm"/>
-
-                        {% if not selectedJudging.verified %}
-                            with comment
-                            <input type="text" name="comment" size="25" class="form-control" id="comment"
-                                   style="display: inline; width: auto;"/>
-                        {% endif %}
-
-                        {% if icat_url is not null and submission.contestProblem %}
-                            <button class="btn btn-outline-secondary btn-sm" id="post-to-icat">
-                                post to iCAT
-                            </button>
-                        {% endif %}
-                    {% endif %}
-                </p>
-            </form>
+            {% include 'jury/partials/verify_form.html.twig' with {
+                label: 'Verified',
+                judging: selectedJudging,
+                form_action: path('jury_judging_verify', {judgingId: selectedJudging.judgingid}),
+                show_form: not (verificationRequired and selectedJudging.verified and selectedJudging.valid),
+                show_icat: true} %}
             {% if submission.contestProblem %}
                 <script>
                     $(function () {
