@@ -1,8 +1,6 @@
 DOMjudge team manual
 ====================
 
-.. include:: substitutions
-
 .. footer::
 
    |DOMjudge| team manual version |version| - page ###Page### / ###Total###
