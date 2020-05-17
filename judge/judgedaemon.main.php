@@ -13,6 +13,7 @@ if (isset($_SERVER['REMOTE_ADDR'])) {
 require(ETCDIR . '/judgehost-config.php');
 
 $endpoints = [];
+$domjudge_config = [];
 
 function judging_directory(string $workdirpath, array $judging)
 {
@@ -161,13 +162,28 @@ function request(string $url, string $verb = 'GET', string $data = '', bool $fai
 }
 
 /**
- * Retrieve a value from the configuration through the REST API.
+ * Retrieve the configuration through the REST API.
  */
-function dbconfig_get_rest(string $name)
+function djconfig_refresh() : void
 {
-    $res = request('config', 'GET', 'name=' . urlencode($name));
+    global $domjudge_config;
+
+    $res = request('config', 'GET');
     $res = dj_json_decode($res);
-    return $res[$name];
+    $domjudge_config = $res;
+}
+
+
+/**
+ * Retrieve a value from the DOMjudge configuration.
+ */
+function djconfig_get_value(string $name)
+{
+    global $domjudge_config;
+    if (empty($domjudge_config)) {
+        error("DOMjudge config not initialised before call to djconfig_get_value()");
+    }
+    return $domjudge_config[$name];
 }
 
 /**
@@ -182,7 +198,7 @@ function dbconfig_get_rest(string $name)
 function rest_encode_file(string $file, $sizelimit = true) : string
 {
     if ($sizelimit===true) {
-        $maxsize = (int) dbconfig_get_rest('output_storage_limit');
+        $maxsize = (int) djconfig_get_value('output_storage_limit');
     } elseif ($sizelimit===false || $sizelimit==-1) {
         $maxsize = -1;
     } elseif (is_int($sizelimit) && $sizelimit>0) {
@@ -520,6 +536,9 @@ foreach ($endpoints as $id=>$endpoint) {
     registerJudgehost($myhost);
 }
 
+// Populate the DOMjudge configuration initially
+djconfig_refresh();
+
 // Constantly check API for unjudged submissions
 $endpointIDs = array_keys($endpoints);
 $currentEndpoint = 0;
@@ -564,7 +583,7 @@ while (true) {
     if ($endpoints[$endpointID]['waiting'] === false) {
         // Check for available disk space
         $free_space = disk_free_space(JUDGEDIR);
-        $allowed_free_space  = dbconfig_get_rest('diskspace_error'); // in kB
+        $allowed_free_space  = djconfig_get_value('diskspace_error'); // in kB
         if ($free_space < 1024*$allowed_free_space) {
             $free_abs = sprintf("%01.2fGB", $free_space / (1024*1024*1024));
             logmsg(LOG_ERR, "Low on disk space: $free_abs free, clean up or " .
@@ -612,7 +631,7 @@ while (true) {
 
     judge($row);
 
-    // Check if we were interrupted while judging, if so, exit(to avoid sleeping)
+    // Check if we were interrupted while judging, if so, exit (to avoid sleeping)
     if ($exitsignalled) {
         logmsg(LOG_NOTICE, "Received signal, exiting.");
         close_curl_handles();
@@ -622,7 +641,8 @@ while (true) {
     // restart the judging loop
 }
 
-function registerJudgehost($myhost) {
+function registerJudgehost($myhost)
+{
     global $endpoints, $endpointID;
     $endpoint = &$endpoints[$endpointID];
 
@@ -719,20 +739,23 @@ function judge(array $row)
 {
     global $EXITCODES, $myhost, $options, $workdirpath, $exitsignalled, $gracefulexitsignalled;
 
+    // refresh config at start of judge run
+    djconfig_refresh();
+
     // Set configuration variables for called programs
     putenv('CREATE_WRITABLE_TEMP_DIR=' . (CREATE_WRITABLE_TEMP_DIR ? '1' : ''));
-    putenv('SCRIPTTIMELIMIT='          . dbconfig_get_rest('script_timelimit'));
-    putenv('SCRIPTMEMLIMIT='           . dbconfig_get_rest('script_memory_limit'));
-    putenv('SCRIPTFILELIMIT='          . dbconfig_get_rest('script_filesize_limit'));
+    putenv('SCRIPTTIMELIMIT='          . djconfig_get_value('script_timelimit'));
+    putenv('SCRIPTMEMLIMIT='           . djconfig_get_value('script_memory_limit'));
+    putenv('SCRIPTFILELIMIT='          . djconfig_get_value('script_filesize_limit'));
     putenv('MEMLIMIT='                 . $row['memlimit']);
     putenv('FILELIMIT='                . $row['outputlimit']);
-    putenv('PROCLIMIT='                . dbconfig_get_rest('process_limit'));
+    putenv('PROCLIMIT='                . djconfig_get_value('process_limit'));
     if ($row['entry_point'] !== null) {
         putenv('ENTRY_POINT=' . $row['entry_point']);
     } else {
         putenv('ENTRY_POINT');
     }
-    $output_storage_limit = (int) dbconfig_get_rest('output_storage_limit');
+    $output_storage_limit = (int) djconfig_get_value('output_storage_limit');
 
     $cpuset_opt = "";
     if (isset($options['daemonid'])) {
@@ -903,15 +926,14 @@ function judge(array $row)
         error("chroot script exited with exitcode $retval");
     }
 
-    // Query timelimit overshoot here once for all testcases
-    $overshoot = dbconfig_get_rest('timelimit_overshoot');
+    $overshoot = djconfig_get_value('timelimit_overshoot');
 
     $totalcases = 0;
     $lastcase_correct = true;
     $unsent_judging_runs = array();
     $last_sent = now();
     $outstanding_data = 0;
-    $update_every_X_seconds = dbconfig_get_rest('update_judging_seconds');
+    $update_every_X_seconds = djconfig_get_value('update_judging_seconds');
 
     // There is no guarantee in which order the API returns the data, so let's
     // order it here by rank.
