@@ -122,7 +122,6 @@ fi
 
 # Location of scripts/programs:
 SCRIPTDIR="$DJ_LIBJUDGEDIR"
-STATICSHELL="$DJ_LIBJUDGEDIR/sh-static"
 GAINROOT="sudo -n"
 RUNGUARD="$DJ_BINDIR/runguard"
 RUNPIPE="$DJ_BINDIR/runpipe"
@@ -178,12 +177,7 @@ cp "$TESTIN" "$WORKDIR/testdata.in"
 
 # shellcheck disable=SC2174
 mkdir -p -m 0711 ../bin ../dj-bin ../dev
-# Copy a statically compiled shell:
-if [ ! -x ../bin/sh ]; then
-	cp -pL "$STATICSHELL" ../bin/sh || true
-	chmod a+rx            ../bin/sh || true
-fi
-# ... and a support program for interactive problems:
+# copy a support program for interactive problems:
 cp -pL "$RUNPIPE" ../dj-bin/runpipe
 chmod a+rx        ../dj-bin/runpipe
 

@@ -17,12 +17,7 @@
 # EXITCODES in etc/judgehost-static.php), or 'internal-error' if
 # defined, else 1.
 #
-# This script supports languages by calling separate compile scripts.
-# These compile scripts should compile the source(s) to a statically linked,
-# standalone executable, or create a chroot environment that has
-# interpreter/dynamic library support.
-#
-# Syntax for these compile scripts is:
+# Syntax for the compile scripts is:
 #
 #   <compile_script> <dest> <memlimit> <source file>...
 #

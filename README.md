@@ -65,12 +65,6 @@ included, licensed under the MIT licence, see COPYING.MIT.
 The M4 autoconf macros are licensed under all-permissive and GPL3+
 licences; see the respective files under m4/ for details.
 
-Furthermore, a binary version of the dash shell (statically compiled)
-is distributed with DOMjudge. This program is copyright by various
-people under the BSD licence and a part under the GNU GPL version 2,
-see doc/dash.copyright for more details.
-Sources can be downloaded from: https://www.domjudge.org/sources/
-
 The DOMjudge tarball ships external library dependencies in the
 lib/vendor directory. These are covered by their individual licenses
 as specified in the file composer.lock.
