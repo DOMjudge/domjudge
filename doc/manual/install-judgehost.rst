@@ -100,14 +100,6 @@ and adapt it to work with your local system. In case you changed the
 default pre-built chroot directory, make sure to also update the sudo
 rules and the ``CHROOTORIGINAL`` variable in ``chroot-startstop.sh``.
 
-When using the default ``chroot-start-stop.sh`` script, a static
-POSIX shell has to be available for copying it into the chroot
-environment. For Linux i386, a static Dash shell is included, which
-works out of the box, also for the Linux Intel/AMD 64 architecture.
-For other architectures or operating systems, a shell has to be added
-manually. Then simply point the ``lib/sh-static`` symlink to this
-file.
-
 Linux Control Groups
 --------------------
 
