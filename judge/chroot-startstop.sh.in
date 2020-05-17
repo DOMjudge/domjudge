@@ -2,18 +2,15 @@
 
 # @configure_input@
 
-# Script to setup chroot environment extras needed for non-statically
-# compiled languages, such as Java, Python and other interpreted languages.
+# Script to setup chroot environment extras needed to perform a juding run.
 #
-# The basic chroot environment contains nothing but a POSIX shell.
 # This script will (bind) mount a minimal set of subdirectories from a
 # pre-built chroot tree into the actual chroot environment that is
 # created for each judging (as well as the proc FS and a few device
 # files). Afterwards it is also called to cleanup.
 #
 # You can adapt this script to your environment, e.g. if you need to make
-# more/other subdirectories available in the chroot environment. Or
-# make it a no-op if you only want the very basic chroot.
+# more/other subdirectories available in the chroot environment.
 #
 # See bin/dj_make_chroot.sh for a script to generate the
 # chroot environment. Note that if you modify paths
