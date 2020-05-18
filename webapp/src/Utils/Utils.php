@@ -1062,4 +1062,20 @@ class Utils
         $response->headers->set('Accept-Ranges', 'bytes');
         return $response;
     }
+
+    /**
+     * Convert the given string to a field that is safe to use in a TSV file
+     *
+     * @param string $field
+     *
+     * @return string
+     */
+    public static function toTsvField(string $field)
+    {
+        return str_replace(
+            ["\\",   "\t",  "\n",  "\r"],
+            ["\\\\", "\\t", "\\n", "\\r"],
+            $field
+        );
+    }
 }

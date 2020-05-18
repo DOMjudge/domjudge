@@ -976,10 +976,6 @@ EOF;
      */
     public function toTsvField(string $field)
     {
-        return str_replace(
-            ["\\",   "\t",  "\n",  "\r"],
-            ["\\\\", "\\t", "\\n", "\\r"],
-            $field
-        );
+        return Utils::toTsvField($field);
     }
 }
