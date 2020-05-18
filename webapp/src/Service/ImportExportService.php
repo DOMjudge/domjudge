@@ -371,7 +371,7 @@ class ImportExportService
 
             $data[] = array_merge(
                 [
-                    $teamScore->team->getAffiliation() ? $teamScore->getTeam()->getAffiliation()->getName() : '',
+                    $teamScore->team->getAffiliation() ? $teamScore->team->getAffiliation()->getName() : '',
                     $teamScore->team->getIcpcid(),
                     $teamScore->rank,
                     $teamScore->numPoints,
@@ -451,7 +451,7 @@ class ImportExportService
         $data         = [];
 
         foreach ($scoreboard->getScores() as $teamScore) {
-            if ($teamScore->getTeam()->getCategory()->getSortorder() !== $sortOrder) {
+            if ($teamScore->team->getCategory()->getSortorder() !== $sortOrder) {
                 continue;
             }
             $maxTime = -1;
@@ -482,7 +482,7 @@ class ImportExportService
             }
 
             $groupWinner = "";
-            $categoryId  = $teamScore->getTeam()->getCategoryid();
+            $categoryId  = $teamScore->team->getCategoryid();
             if (!isset($groupWinners[$categoryId])) {
                 $groupWinners[$categoryId] = true;
                 $groupWinner               = $teamScore->team->getCategory()->getName();
