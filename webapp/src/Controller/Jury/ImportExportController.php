@@ -280,7 +280,9 @@ class ImportExportController extends BaseController
             echo sprintf("%s\t%s\n", $type, $version);
             // output the rows, filtering out any tab characters in the data
             foreach ($data as $row) {
-                echo implode("\t", str_replace("\t", " ", $row)) . "\n";
+                echo implode("\t", array_map(function ($field) {
+                    return Utils::toTsvField((string)$field);
+                }, $row)) . "\n";
             }
         });
         $filename = sprintf('%s.tsv', $type);
