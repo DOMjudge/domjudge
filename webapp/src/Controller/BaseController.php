@@ -8,7 +8,7 @@ use App\Entity\Problem;
 use App\Entity\RankCache;
 use App\Entity\ScoreCache;
 use App\Entity\Team;
-use App\Entity\TeamAffiliation;
+use App\Entity\TeamCategory;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Utils\Utils;
@@ -385,7 +385,7 @@ abstract class BaseController extends AbstractController
         // * If the entity has a getContests() method, use that
         // Otherwise use the currently active contests
         $contests = [];
-        if ($entity instanceof Team || $entity instanceof TeamAffiliation) {
+        if ($entity instanceof Team || $entity instanceof TeamCategory) {
             $possibleContests = $dj->getCurrentContests();
             foreach ($possibleContests as $contest) {
                 if ($entity->inContest($contest)) {
