@@ -339,8 +339,8 @@ class ImportExportService
     public function getScoreboardData(): array
     {
         // We'll here assume that the requested file will be of the current contest,
-        // as all our scoreboard interfaces do. Row format explanation:
-        // Row	Description	Example content	Type
+        // as all our scoreboard interfaces do. Column format explanation:
+        // Col	Description	Example content	Type
         // 1	Institution name	University of Virginia	string
         // 2	External ID	24314	integer
         // 3	Position in contest	1	integer
