@@ -7,7 +7,8 @@ DOMjudge team manual
 
 
 .. image:: ../logos/DOMjudgelogo.*
-   :width: 10%
+   :width: 60pt
+   :height: 132pt
    :alt: DOMjudge logo
    :align: right
 
