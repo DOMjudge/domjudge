@@ -35,7 +35,6 @@
  *               variations  variations of results and runtime between
  *                           multiple judgings for the same submission
  *                           and of runtimes on all judgehosts.
- *               misc        miscellaneous statistics.
  *
  * Part of the DOMjudge Programming Contest Jury System and licensed
  * under the GNU GPL. See README and COPYING for details.
@@ -396,42 +395,6 @@ if (in_array('variations', $reports)) {
         );
     }
     echo "\n";
-}
-
-// Report misc. statistics
-if (in_array('misc', $reports)) {
-    echo "Miscellaneous statistics:\n";
-    echo "=========================\n\n";
-
-    $rows = $DB->q('SELECT submitid, MIN(judgingid), submittime,
-                    MIN(starttime) - submittime AS timediff, COUNT(judgingid)
-                    FROM submission s
-                    INNER JOIN judging USING (submitid)
-                    WHERE submitid IN (%As)
-                    GROUP BY submitid HAVING timediff > 5
-                    ORDER BY timediff DESC', array_keys($submissions));
-
-    if ($rows->count()==0) {
-        printf("No submissions with judgings delayed by 5+ seconds.\n\n");
-    } else {
-        printf(
-            "Found %d submissions with judging delayed by 5+ seconds, top %d:\n",
-            $rows->count(),
-            min(MAX_LIST_LEN, $rows->count())
-        );
-        for ($i=0; $i<MAX_LIST_LEN; $i++) {
-            if (!($row = $rows->next())) {
-                break;
-            }
-            printf(
-                " %5s: submitted %s, first judged %.2fs later\n",
-                's'.$row['submitid'],
-                strftime('%F %T', $row['submittime']),
-                $row['timediff']
-            );
-        }
-        echo "\n";
-    }
 }
 
 echo "Done.\n";
