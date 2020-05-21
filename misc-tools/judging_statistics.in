@@ -6,7 +6,6 @@
  * Generates statistics for a configurable set of judgings.
  *
  * This can be used for various purposes:
- * - To determine timelimits based on the timings of jury solutions.
  * - To check that various judgehosts give the same results and
  *   timings are within close agreement.
  * - ...
@@ -30,8 +29,6 @@
  * Secondly there are options for which statistics to report:
  *  -R LIST    Report issues specified in the comma separated list.
  *             Possible report keywords:
- *               problems    min,max,avg runtimes for correct
- *                           submissions, including variability.
  *               variations  variations of results and runtime between
  *                           multiple judgings for the same submission
  *                           and of runtimes on all judgehosts.
@@ -182,81 +179,6 @@ if (empty($opts['R'])) {
 }
 
 $reports = explode(',', strtolower($opts['R']));
-
-// Report per problem
-if (in_array('problems', $reports)) {
-    $problegend = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY, name, timelimit
-                          FROM problem WHERE probid IN (%Ai)', array_keys($problems));
-
-    echo "Per problem statistics:\n";
-    echo "=======================\n\n";
-
-    foreach ($problems as $probid => $probjids) {
-        $minjid = $maxjid = null;
-        $njud = 0;
-        foreach ($probjids as $jid) {
-            if ($judgings[$jid]['result']!='correct') {
-                continue;
-            }
-            if (is_null($minjid) ||
-                $judgings[$jid]['runtime_max']<$judgings[$minjid]['runtime_max']) {
-                $minjid = $jid;
-            }
-            if (is_null($maxjid) ||
-                $judgings[$jid]['runtime_max']>$judgings[$maxjid]['runtime_max']) {
-                $maxjid = $jid;
-            }
-            $njud++;
-        }
-
-        printf("Problem %d: \"%s\":\n", $probid, $problegend[$probid]['name']);
-        if ($njud==0) {
-            echo "  *** No correct judgings for this problem. ***\n";
-            continue;
-        }
-
-        $bestspread  = -1.0;
-        foreach ($submissions[$judgings[$minjid]['submitid']] as $jid) {
-            $spread = $judgings[$jid]['runtime_max'] - $judgings[$minjid]['runtime_max'];
-            if ($spread>$bestspread) {
-                $bestspread = $spread;
-            }
-        }
-        $worstspread = -1.0;
-        foreach ($submissions[$judgings[$maxjid]['submitid']] as $jid) {
-            $spread = $judgings[$jid]['runtime_max'] - $judgings[$maxjid]['runtime_max'];
-            if ($spread>$worstspread) {
-                $worstspread = $spread;
-            }
-        }
-
-        printf(
-            "  timelimit = %ds, runtimes in ( %.3f , %.3f ) sec for %d judgings\n",
-            $problegend[$probid]['timelimit'],
-            $judgings[$minjid]['runtime_max'],
-            $judgings[$maxjid]['runtime_max'],
-            $njud
-        );
-        printf(
-            "  best  runtime: %.3fs for s%d (j%d), language %s, spread in runtime %.3fs\n",
-            $judgings[$minjid]['runtime_max'],
-            $judgings[$minjid]['submitid'],
-            $minjid,
-            $judgings[$minjid]['langid'],
-            $bestspread
-        );
-        printf(
-            "  worst runtime: %.3fs for s%d (j%d), language %s, spread in runtime %.3fs\n",
-            $judgings[$maxjid]['runtime_max'],
-            $judgings[$maxjid]['submitid'],
-            $maxjid,
-            $judgings[$maxjid]['langid'],
-            $worstspread
-        );
-    }
-
-    echo "\n";
-}
 
 // Report variations between judgings for same submissions
 if (in_array('variations', $reports)) {
