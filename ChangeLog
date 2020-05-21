@@ -21,6 +21,7 @@ Version 7.3.0 - DEV
  - Add option to allow teams to download their own submission.
  - Change shadow import to read data from a configuration file and store
    a copy of the feed.
+ - Pin scoreboard header to top when scrolling page.
  - Many code cleanups, improvements and tests.
  - Upgrade Symfony to 4.4 LTS and upgrade other library dependencies.
 
