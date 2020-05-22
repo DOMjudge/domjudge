@@ -2,20 +2,9 @@
 
 namespace Tests;
 
-use App\Entity\User;
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
-use Symfony\Component\BrowserKit\Cookie;
-use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
-
-class JuryClarificationsTest extends WebTestCase
+class JuryClarificationsTest extends BaseTest
 {
-    private $client;
-
-    protected function setUp()
-    {
-        self::ensureKernelShutdown();
-        $this->client = self::createClient();
-    }
+    protected static $roles = ['jury'];
 
     public function testJuryRedirectToLogin()
     {
@@ -27,62 +16,14 @@ class JuryClarificationsTest extends WebTestCase
         $this->assertEquals('http://localhost/login', $response->getTargetUrl(), $message);
     }
 
-    private function loginHelper($username, $password, $redirectPage, $responseCode)
-    {
-        $crawler = $this->client->request('GET', '/login');
-
-        # load login page
-        $response = $this->client->getResponse();
-        $message = var_export($response, true);
-        $this->assertEquals(200, $response->getStatusCode(), $message);
-
-        $csrf_token = $this->client->getContainer()->get('security.csrf.token_manager')->getToken('authenticate');
-
-        # submit form
-        $button = $crawler->selectButton('Sign in');
-        $form = $button->form(array(
-            '_username' => $username,
-            '_password' => $password,
-            '_csrf_token' => $csrf_token,
-        ));
-        $this->client->followRedirects();
-        $crawler = $this->client->submit($form);
-        $response = $this->client->getResponse();
-        $this->client->followRedirects(false);
-
-        # check redirected to $redirectPage
-        $message = var_export($response, true);
-        $this->assertEquals($responseCode, $response->getStatusCode(), $message);
-        $this->assertEquals($redirectPage, $this->client->getRequest()->getUri(), $message);
-
-        return $this->client;
-    }
-
     public function testLogin()
     {
-        # test incorrect and correct password
+        // Make sure the suer has the correct permissions
+        $this->setupUser();
+
+        // test incorrect and correct password
         $this->loginHelper('dummy', 'foo', 'http://localhost/login', 200);
         $this->loginHelper('dummy', 'dummy', 'http://localhost/jury', 200);
-    }
-
-    // This just injects a user object into the session so symfony will think we're logged in
-    // It gets around the problem for now of trying to navigate to two legacy pages in a single
-    // test(login index + anything else)
-    private function logIn()
-    {
-        $session = $this->client->getContainer()->get('session');
-
-        $firewallName = 'main';
-        $firewallContext = 'main';
-
-        $em = $this->client->getContainer()->get('doctrine.orm.entity_manager');
-        $user = $em->getRepository(User::class)->findOneBy(['username' => 'dummy']);
-        $token = new UsernamePasswordToken($user, null, $firewallName, array('ROLE_JURY'));
-        $session->set('_security_'.$firewallContext, serialize($token));
-        $session->save();
-
-        $cookie = new Cookie($session->getName(), $session->getId());
-        $this->client->getCookieJar()->set($cookie);
     }
 
     public function testJuryIndexPage()
