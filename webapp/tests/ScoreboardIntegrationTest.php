@@ -20,6 +20,8 @@ use App\Utils\Scoreboard\ScoreboardMatrixItem;
 use App\Utils\Scoreboard\SingleTeamScoreboard;
 use App\Utils\Scoreboard\TeamScore;
 use App\Utils\Utils;
+use Doctrine\ORM\EntityManager;
+use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
@@ -30,22 +32,22 @@ class ScoreboardIntegrationTest extends KernelTestCase
     public const NUM_TEAMS = 3;
 
     /**
-     * @var \App\Service\DOMJudgeService
+     * @var DOMJudgeService
      */
     private $dj;
 
     /**
-     * @var \App\Service\ScoreboardService
+     * @var ScoreboardService
      */
     private $ss;
 
     /**
-     * @var \Doctrine\ORM\EntityManager
+     * @var EntityManager
      */
     private $em;
 
     /**
-     * @var \App\Service\ConfigurationService|MockObject
+     * @var ConfigurationService|MockObject
      */
     private $config;
 
@@ -55,27 +57,27 @@ class ScoreboardIntegrationTest extends KernelTestCase
     private $configValues;
 
     /**
-     * @var App\Entity\Contest
+     * @var Contest
      */
     private $contest;
 
     /**
-     * @var App\Entity\Judgehost
+     * @var Judgehost
      */
     private $judgehost;
 
     /**
-     * @var App\Entity\Rejudging
+     * @var Rejudging
      */
     private $rejudging;
 
     /**
-     * @var App\Entity\Problem[]
+     * @var Problem[]
      */
     private $problems;
 
     /**
-     * @var App\Entity\Team[]
+     * @var Team[]
      */
     private $teams;
 
