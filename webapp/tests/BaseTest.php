@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Tests;
+namespace App\Tests;
 
 use App\Entity\Role;
 use App\Entity\User;
@@ -14,7 +14,7 @@ use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
  *
  * This abstract class can be used to have default functionality to test cases
  *
- * @package Tests
+ * @package App\Tests
  */
 abstract class BaseTest extends WebTestCase
 {

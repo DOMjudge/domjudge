@@ -102,7 +102,11 @@
 			"App\\": "webapp/src/"
 		}
 	},
-	"autoload-dev": {},
+	"autoload-dev": {
+		"psr-4": {
+			"App\\Tests\\": "webapp/tests/"
+		}
+	},
 	"config": {
 		"preferred-install": {
 			"*": "dist"

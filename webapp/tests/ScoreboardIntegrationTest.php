@@ -1,8 +1,7 @@
 <?php declare(strict_types=1);
 
-namespace Tests;
+namespace App\Tests;
 
-use App\Entity\Configuration;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\Judgehost;
@@ -17,14 +16,11 @@ use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\ScoreboardService;
-use App\Utils\Scoreboard\Scoreboard;
-use App\Utils\Scoreboard\SingleTeamScoreboard;
 use App\Utils\Scoreboard\ScoreboardMatrixItem;
+use App\Utils\Scoreboard\SingleTeamScoreboard;
 use App\Utils\Scoreboard\TeamScore;
 use App\Utils\Utils;
-
 use Psr\Log\LoggerInterface;
-use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 class ScoreboardIntegrationTest extends KernelTestCase
