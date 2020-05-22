@@ -1127,7 +1127,7 @@ class JudgehostController extends AbstractFOSRestController
         }
     }
 
-    private function getSubmissionsToJudge(Judgehost $judgehost, boolean $restrictJudgingOnSameJudgehost)
+    private function getSubmissionsToJudge(Judgehost $judgehost, $restrictJudgingOnSameJudgehost)
     {
         // Get all active contests
         $contests   = $this->dj->getCurrentContests();
