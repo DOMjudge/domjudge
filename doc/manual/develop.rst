@@ -97,8 +97,8 @@ run the ``*clean`` targets: otherwise e.g. ``paths.mk`` will
 be deleted before subdirectory ``*clean`` targets are called that
 depend on information in it.
 
-Appendix: Running the test suite
---------------------------------
+Running the test suite
+----------------------
 
 The DOMjudge sources ship with a comprehensive test-suite that contains
 unit, integration and functional tests to make sure the system works.
@@ -111,7 +111,7 @@ To run them, follow the following steps:
 * Make sure your database contains only the sample data. This can be done by
   first dropping any existing database and then running
   ``bin/dj_setup_database -u root -r install``.
-* Run the following SQL command to create a dummy user that is assigned linked
+* Run the following SQL command to create a dummy user that is linked
   to the example team:
 
   .. code-block:: sql
@@ -140,7 +140,7 @@ Or to run only one test in that class, you can run::
   lib/vendor/bin/phpunit -c webapp/phpunit.xml.dist --filter \
     'App\\Tests\\Controller\\Jury\\PrintControllerTest::testPrintingDisabledJuryIndexPage
 
-Note that most IDE's have support for running tests inside of them, so you don't
+Note that most IDEs have support for running tests inside of them, so you don't
 have to type these filters manually. If you use such an IDE, just make sure to
 specify the `webapp/phpunit.xml.dist` file as a PHPUnit configuration file and
 it should work.
