@@ -1389,7 +1389,7 @@ class ImportEventFeedCommand extends Command
 
         $contest = $this->em->getRepository(Contest::class)->find($this->contestId);
 
-        $submitTime = Utils::to_epoch_float($event['data']['time']);
+        $submitTime = Utils::toEpochFloat($event['data']['time']);
 
         $clarification
             ->setInReplyTo($inReplyTo)
@@ -1496,7 +1496,7 @@ class ImportEventFeedCommand extends Command
             return;
         }
 
-        $submitTime = Utils::to_epoch_float($event['data']['time']);
+        $submitTime = Utils::toEpochFloat($event['data']['time']);
 
         $entryPoint = $event['data']['entry_point'] ?? null;
         if (empty($entryPoint)) {
@@ -1780,10 +1780,10 @@ class ImportEventFeedCommand extends Command
         }
 
 
-        $startTime = Utils::to_epoch_float($event['data']['start_time']);
+        $startTime = Utils::toEpochFloat($event['data']['start_time']);
         $endTime   = null;
         if (isset($event['data']['end_time'])) {
-            $endTime = Utils::to_epoch_float($event['data']['end_time']);
+            $endTime = Utils::toEpochFloat($event['data']['end_time']);
         }
 
         $judgementTypeId = $event['data']['judgement_type_id'] ?? null;
@@ -1887,7 +1887,7 @@ class ImportEventFeedCommand extends Command
         }
 
 
-        $time    = Utils::to_epoch_float($event['data']['time']);
+        $time    = Utils::toEpochFloat($event['data']['time']);
         $runTime = $event['data']['run_time'] ?? null;
 
         $judgementTypeId = $event['data']['judgement_type_id'] ?? null;

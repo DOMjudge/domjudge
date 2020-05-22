@@ -117,32 +117,32 @@ class UtilsTest extends TestCase
     }
 
     /**
-     * Test that the to_epoch_float function works with a leap day
+     * Test that the toEpochFloat function works with a leap day
      */
-    public function test_to_epoch_float_leapday()
+    public function testToEpochFloatLeapday()
     {
         $tz = date_default_timezone_get();
         date_default_timezone_set('Europe/Amsterdam');
-        $this->assertEquals(1583017140.000123, Utils::to_epoch_float('2020-02-29T23:59:00.000123+01:00'));
+        $this->assertEquals(1583017140.000123, Utils::toEpochFloat('2020-02-29T23:59:00.000123+01:00'));
         date_default_timezone_set($tz);
     }
 
     /**
-     * Test that the to_epoch_float function works on a DST change
+     * Test that the toEpochFloat function works on a DST change
      */
-    public function test_to_epoch_float_dst_change()
+    public function testToEpochFloatDstChange()
     {
         $tz = date_default_timezone_get();
         date_default_timezone_set('Europe/Amsterdam');
-        $this->assertEquals(1572140520.010203, Utils::to_epoch_float('2019-10-27T02:42:00.010203+01:00'));
-        $this->assertEquals(1572136920.010203, Utils::to_epoch_float('2019-10-27T02:42:00.010203+02:00'));
+        $this->assertEquals(1572140520.010203, Utils::toEpochFloat('2019-10-27T02:42:00.010203+01:00'));
+        $this->assertEquals(1572136920.010203, Utils::toEpochFloat('2019-10-27T02:42:00.010203+02:00'));
         date_default_timezone_set($tz);
     }
 
     /**
-     * Test that the to_epoch_function works with random data
+     * Test that the toEpochFloat works with random data
      */
-    public function test_absTime_to_epoch_float_random()
+    public function testAbsTimeToEpochFloatRandom()
     {
         $tz_orig = date_default_timezone_get();
 
@@ -161,7 +161,7 @@ class UtilsTest extends TestCase
             $year = 365*24*3600;
             for ($i=0; $i<10000; $i++) {
                 $t = (float)sprintf('%d.%03d', $now - $year + rand(0,2*$year), rand(0,999));
-                $t2 = Utils::to_epoch_float(Utils::absTime($t));
+                $t2 = Utils::toEpochFloat(Utils::absTime($t));
                 $this->assertEquals($t, $t2, "comparing random times in TZ=$tz", 0.0000001);
             }
         }
