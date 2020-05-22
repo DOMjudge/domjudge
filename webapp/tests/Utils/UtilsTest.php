@@ -7,6 +7,9 @@ use PHPUnit\Framework\TestCase;
 
 class UtilsTest extends TestCase
 {
+    /**
+     * Test that the absTime function returns the correct data
+     */
     public function testAbsTime()
     {
         $tz = date_default_timezone_get();
@@ -15,6 +18,10 @@ class UtilsTest extends TestCase
         date_default_timezone_set($tz);
     }
 
+    /**
+     * Test that the absTime function returns the correct data when using a
+     * time with millisecond precision
+     */
     public function testAbsTimeWithMillis()
     {
         $tz = date_default_timezone_get();
@@ -23,6 +30,10 @@ class UtilsTest extends TestCase
         date_default_timezone_set($tz);
     }
 
+    /**
+     * Test that the absTime function returns the correct data when using a
+     * time with millisecond precision when flooring the result
+     */
     public function testAbsTimeWithMillisFloored()
     {
         $tz = date_default_timezone_get();
@@ -31,6 +42,10 @@ class UtilsTest extends TestCase
         date_default_timezone_set($tz);
     }
 
+    /**
+     * Test that the absTime function returns the correct data when using a
+     * time with 0000 milliseconds
+     */
     public function testAbsTimeWithMillis9999()
     {
         $tz = date_default_timezone_get();
@@ -39,41 +54,71 @@ class UtilsTest extends TestCase
         date_default_timezone_set($tz);
     }
 
+    /**
+     * Test that the relTime function returns the correct data
+     */
     public function testRelTime()
     {
         $this->assertEquals('1:18:31.000', Utils::relTime(4711));
     }
 
+    /**
+     * Test that the relTime function returns the correct data when using a
+     * time with millisecond precision
+     */
     public function testRelTimeWithMillis()
     {
         $this->assertEquals('1:18:31.081', Utils::relTime(4711.0815));
     }
 
-    public function testRelTimeWithMillis9999()
-    {
-        $this->assertEquals('1:18:31.999', Utils::relTime(4711.9999));
-    }
-
+    /**
+     * Test that the relTime function returns the correct data when using a
+     * time with millisecond precision when flooring the result
+     */
     public function testRelTimeWithMillisFloored()
     {
         $this->assertEquals('1:18:31', Utils::relTime(4711.0815, true));
     }
 
+    /**
+     * Test that the relTIme function returns the correct data when using a
+     * time with 0000 milliseconds
+     */
+    public function testRelTimeWithMillis9999()
+    {
+        $this->assertEquals('1:18:31.999', Utils::relTime(4711.9999));
+    }
+
+    /**
+     * Test that the relTime function returns the correct data when using a
+     * negative value
+     */
     public function testNegativeRelTime()
     {
         $this->assertEquals('-3:25:45.000', Utils::relTime(-12345));
     }
 
+    /**
+     * Test that the relTime function returns the correct data when using a
+     * negative value and a time with millisecond precision
+     */
     public function testNegativeRelTimeWithMillis()
     {
         $this->assertEquals('-3:25:45.678', Utils::relTime(-12345.6789));
     }
 
+    /**
+     * Test that the relTime function returns the correct data when using a
+     * negative value and a time with millisecond precision when flooring the result
+     */
     public function testNegativeRelTimeWithMillisFloored()
     {
         $this->assertEquals('-3:25:45', Utils::relTime(-12345.6789, true));
     }
 
+    /**
+     * Test that the to_epoch_float function works with a leap day
+     */
     public function test_to_epoch_float_leapday()
     {
         $tz = date_default_timezone_get();
@@ -82,6 +127,9 @@ class UtilsTest extends TestCase
         date_default_timezone_set($tz);
     }
 
+    /**
+     * Test that the to_epoch_float function works on a DST change
+     */
     public function test_to_epoch_float_dst_change()
     {
         $tz = date_default_timezone_get();
@@ -91,6 +139,9 @@ class UtilsTest extends TestCase
         date_default_timezone_set($tz);
     }
 
+    /**
+     * Test that the to_epoch_function works with random data
+     */
     public function test_absTime_to_epoch_float_random()
     {
         $tz_orig = date_default_timezone_get();
@@ -118,11 +169,17 @@ class UtilsTest extends TestCase
         date_default_timezone_set($tz_orig);
     }
 
+    /**
+     * Test that printtime returns an empty string when no date is passed
+     */
     public function testPrinttimeNotime()
     {
         $this->assertEquals('', Utils::printTime(null, "%H:%M"));
     }
 
+    /**
+     * Test that the printtime function returns the correct result
+     */
     public function testPrinttime()
     {
         $tz = date_default_timezone_get();
@@ -133,6 +190,9 @@ class UtilsTest extends TestCase
         date_default_timezone_set($tz);
     }
 
+    /**
+     * Test that the printtimediff function returns the correct result
+     */
     public function testPrinttimediff()
     {
         $start = $end = 1544964581.3604;
@@ -161,6 +221,9 @@ class UtilsTest extends TestCase
         $this->assertEquals("368d 0:20:03", Utils::printtimediff($start, $end));
     }
 
+    /**
+     * Test that the specialchars function returns the correct result
+     */
     public function testSpecialchars()
     {
         $plain = "Example string to test";
@@ -178,12 +241,19 @@ class UtilsTest extends TestCase
         $this->assertEquals($replacedutf, Utils::specialchars($invalidutf));
     }
 
+    /**
+     * Test that the wrapUnquoted function returns the correct result
+     */
     public function testWrapUnquotedSingleLineUnquoted()
     {
         $text = "This is an example text.";
         $this->assertEquals($text, Utils::wrapUnquoted($text));
     }
 
+    /**
+     * Test that the specialchars function returns the correct result with a
+     * long line
+     */
     public function testWrapUnquotedLongLineUnquoted()
     {
         $text = "This is an example text.";
@@ -193,6 +263,10 @@ text.";
         $this->assertEquals($result, Utils::wrapUnquoted($text, 10));
     }
 
+    /**
+     * Test that the specialchars function returns the correct result with a
+     * long quoted line
+     */
     public function testWrapUnquotedLongLineWithQuoted()
     {
         $text = "> > This is an example text.
@@ -226,6 +300,10 @@ you know";
         $this->assertEquals($result, Utils::wrapUnquoted($text, 10));
     }
 
+    /**
+     * Test that the specialchars function returns the correct result with a
+     * long quoted line with a custom quote character
+     */
     public function testWrapUnquotedLongLineWithQuotedCustomQuoteCharacter()
     {
         $text = "# This is an example text.
@@ -244,6 +322,9 @@ part.";
         $this->assertEquals($result, Utils::wrapUnquoted($text, 10, '#'));
     }
 
+    /**
+     * Test that the startsWith function returns the correct result
+     */
     public function testStartsWith()
     {
         $text = "The quick brown fox jumped over the lazy dog.";
@@ -253,6 +334,9 @@ part.";
         $this->assertFalse(Utils::startsWith($start, $text));
     }
 
+    /**
+     * Test that the endsWith function returns the correct result
+     */
     public function testEndsWith()
     {
         $text = "The quick brown fox jumped over the lazy dog.";
@@ -262,6 +346,9 @@ part.";
         $this->assertFalse(Utils::endsWith($end, $text));
     }
 
+    /**
+     * Test that the generatePassword function generates a valid password
+     */
     public function testGeneratePassword()
     {
         $passes = [];

@@ -9,7 +9,10 @@ use PHPUnit\Framework\TestCase;
 
 class ScoreboardTest extends TestCase
 {
-
+    /**
+     * Test that the scoreboard tie breaker works with two teams without
+     * any scores
+     */
     public function testScoreTiebreakerEmptyTeams()
     {
         $teamA = new Team();
@@ -24,6 +27,9 @@ class ScoreboardTest extends TestCase
         $this->assertEquals(0, $tie);
     }
 
+    /**
+     * Test that the scoreboard tie breaker works with two teams with equal scores
+     */
     public function testScoreTiebreakerEqualTeams()
     {
         $teamA = new Team();
@@ -43,6 +49,9 @@ class ScoreboardTest extends TestCase
         $this->assertEquals(0, $tie);
     }
 
+    /**
+     * Test that the scoreboard tie breaker works if only one team has scores
+     */
     public function testScoreTiebreakerOneTeamEmpty()
     {
         $teamA = new Team();
@@ -59,6 +68,11 @@ class ScoreboardTest extends TestCase
         $this->assertEquals(-1, $tie);
     }
 
+
+    /**
+     * Test that the scoreboard tie breaker works if both teams have the same
+     * highest score
+     */
     public function testScoreTiebreakerHighestEqual()
     {
         $teamA = new Team();
@@ -78,6 +92,9 @@ class ScoreboardTest extends TestCase
         $this->assertEquals(0, $tie);
     }
 
+    /**
+     * Test that the scoreboard tie breaker works if scores are different
+     */
     public function testScoreTiebreakerUnequal()
     {
         $teamA = new Team();
