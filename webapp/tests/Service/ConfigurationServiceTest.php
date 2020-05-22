@@ -1,10 +1,9 @@
 <?php declare(strict_types=1);
 
-namespace Tests\Service;
+namespace App\Tests\Service;
 
 use App\Entity\Configuration;
 use App\Entity\Executable;
-use App\Entity\TeamCategory;
 use App\Service\ConfigurationService;
 use Doctrine\Common\Persistence\ObjectRepository;
 use Doctrine\ORM\EntityManagerInterface;

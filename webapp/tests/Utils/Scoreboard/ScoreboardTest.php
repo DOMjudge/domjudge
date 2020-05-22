@@ -1,12 +1,13 @@
 <?php declare(strict_types=1);
-namespace Tests\Utils\Scoreboard;
+
+namespace App\Tests\Utils\Scoreboard;
 
 use App\Entity\Team;
 use App\Utils\Scoreboard\Scoreboard;
 use App\Utils\Scoreboard\TeamScore;
 use PHPUnit\Framework\TestCase;
 
-class UtilsScoreboardTest extends TestCase
+class ScoreboardTest extends TestCase
 {
 
     public function testScoreTiebreakerEmptyTeams()
