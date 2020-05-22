@@ -17,12 +17,13 @@ class ClarificationControllerTest extends BaseTest
         $crawler = $this->client->request('GET', '/jury');
 
         $response = $this->client->getResponse();
-        $message = var_export($response, true);
+        $message  = var_export($response, true);
         $this->assertEquals(200, $response->getStatusCode(), $message);
 
-        $link = $crawler->selectLink('Clarifications')->link();
+        $link    = $crawler->selectLink('Clarifications')->link();
         $message = var_export($link, true);
-        $this->assertEquals('http://localhost/jury/clarifications', $link->getUri(), $message);
+        $this->assertEquals('http://localhost/jury/clarifications',
+            $link->getUri(), $message);
 
         $crawler = $this->client->click($link);
 
@@ -44,29 +45,33 @@ class ClarificationControllerTest extends BaseTest
         $crawler = $this->client->request('GET', '/jury/clarifications/1');
 
         $response = $this->client->getResponse();
-        $message = var_export($response, true);
+        $message  = var_export($response, true);
         $this->assertEquals(200, $response->getStatusCode(), $message);
 
         $pres = $crawler->filter('pre')->extract(array('_text'));
-        $this->assertEquals('Can you tell me how to solve this problem?', $pres[0]);
-        $this->assertEquals("> Can you tell me how to solve this problem?\r\n\r\nNo, read the problem statement.", $pres[1]);
+        $this->assertEquals('Can you tell me how to solve this problem?',
+            $pres[0]);
+        $this->assertEquals("> Can you tell me how to solve this problem?\r\n\r\nNo, read the problem statement.",
+            $pres[1]);
 
-        $link = $crawler->selectLink('Example teamname (t2)')->link();
+        $link    = $crawler->selectLink('Example teamname (t2)')->link();
         $message = var_export($link, true);
-        $this->assertEquals('http://localhost/jury/teams/2', $link->getUri(), $message);
+        $this->assertEquals('http://localhost/jury/teams/2', $link->getUri(),
+            $message);
     }
 
     /**
-     * Test that the jury can send a clarification
+     * Test that the jury can send a clarification to everyone
      */
     public function testClarificationRequestComposeForm()
     {
         $this->logIn();
         $crawler = $this->client->request('GET', '/jury/clarifications');
 
-        $link = $crawler->selectLink('Send clarification')->link();
+        $link    = $crawler->selectLink('Send clarification')->link();
         $message = var_export($link, true);
-        $this->assertEquals('http://localhost/jury/clarifications/send', $link->getUri(), $message);
+        $this->assertEquals('http://localhost/jury/clarifications/send',
+            $link->getUri(), $message);
 
         $crawler = $this->client->click($link);
 
@@ -82,5 +87,17 @@ class ClarificationControllerTest extends BaseTest
         $this->assertEquals('Send to:', $labels[0]);
         $this->assertEquals('Subject:', $labels[1]);
         $this->assertEquals('Message:', $labels[2]);
+
+        $this->client->submitForm('Send', [
+            'sendto' => '',
+            'problem' => '2-tech',
+            'bodytext' => 'This is a clarification',
+        ]);
+
+        $this->client->followRedirect();
+
+        $this->assertSelectorTextContains('div.col-sm strong', 'All');
+        $this->assertSelectorTextContains('span.clarification-subject', 'demo - Technical issue');
+        $this->assertSelectorTextContains('pre.output-text', 'This is a clarification');
     }
 }

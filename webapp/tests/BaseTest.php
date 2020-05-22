@@ -2,8 +2,13 @@
 
 namespace App\Tests;
 
+use App\Entity\Configuration;
 use App\Entity\Role;
 use App\Entity\User;
+use App\Service\ConfigurationService;
+use App\Service\DOMJudgeService;
+use App\Service\EventLogService;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\BrowserKit\Cookie;
@@ -34,6 +39,28 @@ abstract class BaseTest extends WebTestCase
 
         // Create a client to communicate with the application
         $this->client = self::createClient();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function tearDown()
+    {
+        // Clear all configuration options still stored in the database
+        $em          = self::$container->get(EntityManagerInterface::class);
+        $configItems = $em->getRepository(Configuration::class)->findAll();
+        foreach ($configItems as $configItem) {
+            $em->remove($configItem);
+        }
+        $em->flush();
+
+        $config = self::$container->get(ConfigurationService::class);
+
+        // Also call ConfigurationService::saveChanges with an empty array to
+        // clear any cached configuration
+        $eventLog = self::$container->get(EventLogService::class);
+        $dj       = self::$container->get(DOMJudgeService::class);
+        $config->saveChanges([], $eventLog, $dj);
     }
 
     /**
@@ -129,5 +156,40 @@ abstract class BaseTest extends WebTestCase
         $em->flush();
 
         return $user;
+    }
+
+    /**
+     * Run the given callback while temporarily changing the given configuration setting
+     *
+     * @param string   $configKey
+     * @param mixed    $configValue
+     * @param callable $callback
+     */
+    protected function withChangedConfiguration(
+        string $configKey,
+        $configValue,
+        callable $callback
+    ) {
+        $config   = self::$container->get(ConfigurationService::class);
+        $eventLog = self::$container->get(EventLogService::class);
+        $dj       = self::$container->get(DOMJudgeService::class);
+
+        // Build up the data to set
+        $dataToSet = [$configKey => $configValue];
+
+        // Save the changes
+        $config->saveChanges($dataToSet, $eventLog, $dj);
+
+        // Call the callback
+        call_user_func($callback);
+
+        // Reset the changes by removing it from the database
+        $em         = self::$container->get(EntityManagerInterface::class);
+        $configItem = $em->getRepository(Configuration::class)->findOneBy(['name' => $configKey]);
+        $em->remove($configItem);
+        $em->flush();
+
+        // Call saveChanges with an empty array to clear any pending config
+        $config->saveChanges([], $eventLog, $dj);
     }
 }

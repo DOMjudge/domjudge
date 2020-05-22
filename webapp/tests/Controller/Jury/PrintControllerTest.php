@@ -3,10 +3,13 @@
 namespace App\Tests\Controller\Jury;
 
 use App\Tests\BaseTest;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class PrintControllerTest extends BaseTest
 {
     protected static $roles = ['jury'];
+
+    const PRINT_COMMAND = 'echo [language] && /bin/cat [file]';
 
     /**
      * Test that by default printing is disabled
@@ -17,7 +20,7 @@ class PrintControllerTest extends BaseTest
         $this->client->request('GET', '/jury');
 
         $response = $this->client->getResponse();
-        $message = var_export($response, true);
+        $message  = var_export($response, true);
         $this->assertEquals(200, $response->getStatusCode(), $message);
         $this->assertSelectorNotExists('a:contains("Print")');
     }
@@ -29,16 +32,55 @@ class PrintControllerTest extends BaseTest
     public function testPrintingDisabledAccessDenied()
     {
         $this->logIn();
-        $crawler = $this->client->request('GET', '/jury/print');
+        $this->client->request('GET', '/jury/print');
 
         $response = $this->client->getResponse();
-        $message = var_export($response, true);
+        $message  = var_export($response, true);
         $this->assertEquals(403, $response->getStatusCode(), $message);
-
     }
 
-    /* In travis printing is currently not enabled, so tests are very
-     * limited now. When more things moved to Symfony, we should vary
-     * the configuration setting so we can also test the real thing.
+    /**
+     * Test that when printing is enabled the link is shown
      */
+    public function testPrintingEnabledJuryIndexPage()
+    {
+        $this->withChangedConfiguration('print_command', static::PRINT_COMMAND,
+            function () {
+                $this->logIn();
+                $this->client->request('GET', '/jury');
+
+                $response = $this->client->getResponse();
+                $message  = var_export($response, true);
+                $this->assertEquals(200, $response->getStatusCode(), $message);
+                $this->assertSelectorExists('a:contains("Print")');
+            });
+    }
+
+    /**
+     * Test that if printing is enabled, we can actually print something
+     */
+    public function testPrintingEnabledSubmitForm()
+    {
+        $this->withChangedConfiguration('print_command', static::PRINT_COMMAND,
+            function () {
+                $this->logIn();
+                $this->client->request('GET', '/jury/print');
+
+                $testFile = __DIR__ . '/PrintControllerTest.php';
+                $code     = new UploadedFile($testFile, 'test.cs');
+
+                $crawler = $this->client->submitForm('Print code', [
+                    'print[code]' => $code,
+                    'print[langid]' => 'csharp',
+                ]);
+
+                $this->assertSelectorTextContains('div.alert.alert-success',
+                    'File has been printed');
+
+                $text = trim($crawler->filter('pre')->text(null, false));
+                $this->assertStringStartsWith('csharp', $text);
+                $this->assertStringEndsWith(
+                    trim(file_get_contents($testFile)), $text);
+            });
+    }
 }

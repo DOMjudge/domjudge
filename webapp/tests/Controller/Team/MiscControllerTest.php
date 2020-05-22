@@ -3,10 +3,13 @@
 namespace App\Tests\Controller\Team;
 
 use App\Tests\BaseTest;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class MiscControllerTest extends BaseTest
 {
     protected static $roles = ['team'];
+
+    const PRINT_COMMAND = 'echo [language] && /bin/cat [file]';
 
     /**
      * Test that if no user is logged in the user gets redirected to the login page
@@ -16,9 +19,10 @@ class MiscControllerTest extends BaseTest
         $this->client->request('GET', '/team');
 
         $response = $this->client->getResponse();
-        $message = var_export($response, true);
+        $message  = var_export($response, true);
         $this->assertEquals(302, $response->getStatusCode(), $message);
-        $this->assertEquals('http://localhost/login', $response->getTargetUrl(), $message);
+        $this->assertEquals('http://localhost/login', $response->getTargetUrl(),
+            $message);
     }
 
     /**
@@ -43,7 +47,7 @@ class MiscControllerTest extends BaseTest
         $crawler = $this->client->request('GET', '/team');
 
         $response = $this->client->getResponse();
-        $message = var_export($response, true);
+        $message  = var_export($response, true);
         $this->assertEquals(200, $response->getStatusCode(), $message);
 
         $this->assertSelectorExists('html:contains("Example teamname")');
@@ -55,23 +59,75 @@ class MiscControllerTest extends BaseTest
     }
 
     /**
-     * Test that it is possible to create a clorification as a team
+     * Test that by default printing is disabled
      */
-    public function testClarificationRequest()
+    public function testPrintingDisabledTeamMenu()
     {
         $this->logIn();
-        $crawler = $this->client->request('GET', '/team');
+        $this->client->request('GET', '/team');
 
         $response = $this->client->getResponse();
-        $message = var_export($response, true);
+        $message  = var_export($response, true);
         $this->assertEquals(200, $response->getStatusCode(), $message);
+        $this->assertSelectorNotExists('a:contains("Print")');
+    }
 
-        $link = $crawler->selectLink('request clarification')->link();
-        $message = var_export($link, true);
-        $this->assertEquals('http://localhost/team/clarifications/add', $link->getUri(), $message);
+    /**
+     * Test that if printing is disabled, we get an access denied exception
+     * when visiting the print page
+     */
+    public function testPrintingDisabledAccessDenied()
+    {
+        $this->logIn();
+        $this->client->request('GET', '/team/print');
 
-        // Note that we would like to click the link here but we cannot do
-        // that since we have too much global state, e.g. define IS_JURY
-        // constants.
+        $response = $this->client->getResponse();
+        $message  = var_export($response, true);
+        $this->assertEquals(403, $response->getStatusCode(), $message);
+    }
+
+    /**
+     * Test that when printing is enabled the link is shown
+     */
+    public function testPrintingEnabledTeamMenu()
+    {
+        $this->withChangedConfiguration('print_command', static::PRINT_COMMAND,
+            function () {
+                $this->logIn();
+                $this->client->request('GET', '/team');
+
+                $response = $this->client->getResponse();
+                $message  = var_export($response, true);
+                $this->assertEquals(200, $response->getStatusCode(), $message);
+                $this->assertSelectorExists('a:contains("Print")');
+            });
+    }
+
+    /**
+     * Test that if printing is enabled, we can actually print something
+     */
+    public function testPrintingEnabledSubmitForm()
+    {
+        $this->withChangedConfiguration('print_command', static::PRINT_COMMAND,
+            function () {
+                $this->logIn();
+                $this->client->request('GET', '/team/print');
+
+                $testFile = __DIR__ . '/MiscControllerTest.php';
+                $code     = new UploadedFile($testFile, 'test.kt');
+
+                $crawler = $this->client->submitForm('Print code', [
+                    'print[code]' => $code,
+                    'print[langid]' => 'kt',
+                ]);
+
+                $this->assertSelectorTextContains('div.alert.alert-success',
+                    'File has been printed');
+
+                $text = trim($crawler->filter('pre')->text(null, false));
+                $this->assertStringStartsWith('kt', $text);
+                $this->assertStringEndsWith(
+                    trim(file_get_contents($testFile)), $text);
+            });
     }
 }
