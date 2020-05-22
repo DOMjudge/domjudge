@@ -43,7 +43,7 @@ integration:
     - time docker pull domjudge/gitlabci:1.0
   image: docker:stable
   services:
-    - docker:18-dind
+    - docker:19-dind
     - mariadb
   variables:
     MYSQL_ROOT_PASSWORD: password
