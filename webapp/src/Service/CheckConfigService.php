@@ -186,7 +186,7 @@ class CheckConfigService
         $postmaxvars = ['post_max_size', 'memory_limit', 'upload_max_filesize'];
         foreach ($postmaxvars as $var) {
             /* skip 0 or empty values, and -1 which means 'unlimited' */
-            if ($size = Utils::phpini_to_bytes(ini_get($var))) {
+            if ($size = Utils::phpiniToBytes(ini_get($var))) {
                 if ($size != '-1') {
                     $sizes[$var] = $size;
                 }

@@ -425,7 +425,7 @@ class Utils
 
     // prints the absolute time as yyyy-mm-ddThh:mm:ss(.uuu)?[+-]zz(:mm)?
     // (with millis if $floored is false)
-    public static function absTime($epoch, bool $floored = false) : string
+    public static function absTime($epoch, bool $floored = false) : ?string
     {
         if ($epoch===null) {
             return null;
@@ -454,7 +454,7 @@ class Utils
     // optional fractional part). The original time string should be in one of
     // the formats understood by DateTime (e.g. an ISO 8601 date and time with
     // fractional seconds). Throws an exception if $time cannot be parsed.
-    public static function to_epoch_float(string $time) : float
+    public static function toEpochFloat(string $time) : float
     {
         $dt = new DateTime($time);
         return (float)sprintf('%d.%06d', $dt->getTimestamp(), $dt->format('u'));
@@ -1019,7 +1019,7 @@ class Utils
     /**
      * Convert size value as returned by ini_get to bytes.
      */
-    public static function phpini_to_bytes(string $size_str)
+    public static function phpiniToBytes(string $size_str)
     {
         switch (substr($size_str, -1)) {
             case 'M': case 'm': return (int)$size_str * 1048576;
