@@ -1,3 +1,6 @@
+variables:
+  SAST_DEFAULT_ANALYZERS: "flawfinder, phpcs-security-audit, eslint, secrets"
+
 stages:
   - test
 
