@@ -2,7 +2,6 @@
 
 namespace App\Tests\Controller\Jury;
 
-use App\Controller\Jury\JuryMiscController;
 use App\Tests\BaseTest;
 
 class JuryMiscControllerTest extends BaseTest
@@ -41,12 +40,12 @@ class JuryMiscControllerTest extends BaseTest
     public function testJuryIndexPage()
     {
         $this->logIn();
-        $crawler = $this->client->request('GET', '/jury');
+        $this->client->request('GET', '/jury');
 
         $response = $this->client->getResponse();
         $message = var_export($response, true);
         $this->assertEquals(200, $response->getStatusCode(), $message);
 
-        $this->assertEquals(1, $crawler->filter('html:contains("DOMjudge Jury interface")')->count());
+        $this->assertSelectorExists('html:contains("DOMjudge Jury interface")');
     }
 }

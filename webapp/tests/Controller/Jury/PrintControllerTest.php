@@ -2,7 +2,6 @@
 
 namespace App\Tests\Controller\Jury;
 
-use App\Controller\Jury\PrintController;
 use App\Tests\BaseTest;
 
 class PrintControllerTest extends BaseTest
@@ -15,12 +14,12 @@ class PrintControllerTest extends BaseTest
     public function testPrintingDisabledJuryIndexPage()
     {
         $this->logIn();
-        $crawler = $this->client->request('GET', '/jury');
+        $this->client->request('GET', '/jury');
 
         $response = $this->client->getResponse();
         $message = var_export($response, true);
         $this->assertEquals(200, $response->getStatusCode(), $message);
-        $this->assertEquals(0, $crawler->filter('a:contains("Print")')->count());
+        $this->assertSelectorNotExists('a:contains("Print")');
     }
 
     /**
