@@ -297,8 +297,20 @@ class JudgehostController extends AbstractFOSRestController
             return '';
         }
 
+        $restrictJudgingOnSameJudgehost = false;
+        if ($judgehost->getRestriction()) {
+            $restrictions = $judgehost->getRestriction()->getRestrictions();
+            if (isset($restrictions['rejudge_own']) && (bool)$restrictions['rejudge_own'] == false) {
+                $restrictJudgingOnSameJudgehost = true;
+            }
+        }
+
         /** @var Submission[] $submissions */
-        $submissions = $this->getSubmissionsToJudge($judgehost);
+        $submissions = $this->getSubmissionsToJudge($judgehost, $restrictJudgingOnSameJudgehost);
+        if (empty($submissions)) {
+            // Relax the restriction to judge on a different judgehost to not block judging.
+            $submissions = $this->getSubmissionsToJudge($judgehost, false);
+        }
         $numUpdated = 0;
 
         // Pick first submission
@@ -1115,7 +1127,7 @@ class JudgehostController extends AbstractFOSRestController
         }
     }
 
-    private function getSubmissionsToJudge(Judgehost $judgehost)
+    private function getSubmissionsToJudge(Judgehost $judgehost, boolean $restrictJudgingOnSameJudgehost)
     {
         // Get all active contests
         $contests   = $this->dj->getCurrentContests();
@@ -1166,13 +1178,12 @@ class JudgehostController extends AbstractFOSRestController
                     ->andWhere('s.langid IN (:restrictionLanguageIds)')
                     ->setParameter(':restrictionLanguageIds', $restrictions['language']);
             }
-
-            if (isset($restrictions['rejudge_own']) && (bool)$restrictions['rejudge_own'] == false) {
-                $queryBuilder
-                    ->leftJoin('s.judgings', 'j', Join::WITH, 'j.judgehost = :judgehost')
-                    ->andWhere('j.judgehost IS NULL')
-                    ->setParameter(':judgehost', $judgehost->getHostname());
-            }
+        }
+        if ($restrictJudgingOnSameJudgehost) {
+            $queryBuilder
+                ->leftJoin('s.judgings', 'j', Join::WITH, 'j.judgehost = :judgehost')
+                ->andWhere('j.judgehost IS NULL')
+                ->setParameter(':judgehost', $judgehost->getHostname());
         }
 
         /** @var Submission[] $submissions */

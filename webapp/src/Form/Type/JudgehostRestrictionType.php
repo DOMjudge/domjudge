@@ -69,8 +69,8 @@ class JudgehostRestrictionType extends AbstractType
         ]);
         $builder->add('rejudge_own', ChoiceType::class, [
             'expanded' => true,
-            'choices' => ['Yes' => true, 'No' => false],
-            'label' => 'Allow rejudge on same judgehost',
+            'choices' => ['Yes' => true, 'Prefer a different judgehost (if possible)' => false],
+            'label' => 'Allow rejudging on any judgehost',
         ]);
         $builder->add('save', SubmitType::class);
     }
