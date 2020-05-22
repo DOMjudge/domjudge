@@ -856,6 +856,13 @@ function judge(array $row)
         return;
     }
 
+    // create chroot environment
+    logmsg(LOG_INFO, "executing chroot script: '".CHROOT_SCRIPT." start'");
+    system(LIBJUDGEDIR.'/'.CHROOT_SCRIPT.' start', $retval);
+    if ($retval!=0) {
+        error("chroot script exited with exitcode $retval");
+    }
+
     // Compile the program.
     system(LIBJUDGEDIR . "/compile.sh $cpuset_opt '$execrunpath' '$workdir' " .
            implode(' ', $files), $retval);
@@ -917,13 +924,6 @@ function judge(array $row)
         chmod($workdir, 0700);
         logmsg(LOG_NOTICE, "Judging s$row[submitid]/j$row[judgingid]: compile error");
         return;
-    }
-
-    // create chroot environment
-    logmsg(LOG_INFO, "executing chroot script: '".CHROOT_SCRIPT." start'");
-    system(LIBJUDGEDIR.'/'.CHROOT_SCRIPT.' start', $retval);
-    if ($retval!=0) {
-        error("chroot script exited with exitcode $retval");
     }
 
     $overshoot = djconfig_get_value('timelimit_overshoot');
