@@ -1,43 +1,17 @@
 <?php declare(strict_types=1);
 
-namespace App\Tests;
+namespace App\Tests\Controller\Jury;
 
-class JuryClarificationsTest extends BaseTest
+use App\Controller\Jury\ClarificationController;
+use App\Tests\BaseTest;
+
+class ClarificationControllerTest extends BaseTest
 {
     protected static $roles = ['jury'];
 
-    public function testJuryRedirectToLogin()
-    {
-        $this->client->request('GET', '/jury');
-
-        $response = $this->client->getResponse();
-        $message = var_export($response, true);
-        $this->assertEquals(302, $response->getStatusCode(), $message);
-        $this->assertEquals('http://localhost/login', $response->getTargetUrl(), $message);
-    }
-
-    public function testLogin()
-    {
-        // Make sure the suer has the correct permissions
-        $this->setupUser();
-
-        // test incorrect and correct password
-        $this->loginHelper('dummy', 'foo', 'http://localhost/login', 200);
-        $this->loginHelper('dummy', 'dummy', 'http://localhost/jury', 200);
-    }
-
-    public function testJuryIndexPage()
-    {
-        $this->logIn();
-        $crawler = $this->client->request('GET', '/jury');
-
-        $response = $this->client->getResponse();
-        $message = var_export($response, true);
-        $this->assertEquals(200, $response->getStatusCode(), $message);
-
-        $this->assertEquals(1, $crawler->filter('html:contains("DOMjudge Jury interface")')->count());
-    }
-
+    /**
+     * Test that the jury clarifications page contains the correct information
+     */
     public function testClarificationRequestIndex()
     {
         $this->logIn();
@@ -62,6 +36,9 @@ class JuryClarificationsTest extends BaseTest
         $this->assertEquals(1, $crawler->filter('html:contains("21:47")')->count());
     }
 
+    /**
+     * Test that the jury can view a clarification
+     */
     public function testClarificationRequestView()
     {
         $this->logIn();
@@ -80,6 +57,9 @@ class JuryClarificationsTest extends BaseTest
         $this->assertEquals('http://localhost/jury/teams/2', $link->getUri(), $message);
     }
 
+    /**
+     * Test that the jury can send a clarification
+     */
     public function testClarificationRequestComposeForm()
     {
         $this->logIn();

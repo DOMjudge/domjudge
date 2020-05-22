@@ -1,11 +1,17 @@
 <?php declare(strict_types=1);
 
-namespace App\Tests;
+namespace App\Tests\Controller\Jury;
 
-class JuryPrintTest extends BaseTest
+use App\Controller\Jury\PrintController;
+use App\Tests\BaseTest;
+
+class PrintControllerTest extends BaseTest
 {
     protected static $roles = ['jury'];
 
+    /**
+     * Test that by default printing is disabled
+     */
     public function testPrintingDisabledJuryIndexPage()
     {
         $this->logIn();
@@ -17,6 +23,10 @@ class JuryPrintTest extends BaseTest
         $this->assertEquals(0, $crawler->filter('a:contains("Print")')->count());
     }
 
+    /**
+     * Test that if printing is disabled, we get an access denied exception
+     * when visiting the print page
+     */
     public function testPrintingDisabledAccessDenied()
     {
         $this->logIn();
