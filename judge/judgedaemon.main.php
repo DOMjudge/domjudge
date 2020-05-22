@@ -240,12 +240,13 @@ function read_judgehostlog(int $n = 20) : string
 function fetch_executable(
     string $workdirpath, string $execid, string $md5sum, bool $combined_run_compare = false) : array
 {
-    $execpath = "$workdirpath/executable/" . $execid;
+    $execpath = "$workdirpath/executable/download/" . $execid;
     $execmd5path = $execpath . "/md5sum";
-    $execdeploypath = $execpath . "/.deployed";
-    $execbuildpath = $execpath . "/build";
-    $execrunpath = $execpath . "/run";
     $execzippath = $execpath . "/executable.zip";
+    $execdeploypath = $execpath . "/.deployed";
+    $execbuilddir = "$workdirpath/executable/build/" . $execid;
+    $execbuildpath = $execbuilddir . "/build";
+    $execrunpath = $execbuilddir . "/run";
     if (empty($md5sum)) {
         return array(null, "unknown executable '" . $execid . "' specified");
     }
@@ -271,14 +272,20 @@ function fetch_executable(
             error("Could not write md5sum to file.");
         }
 
+        system("rm -rf $execbuilddir");
+        system("mkdir -p '$execbuilddir'", $retval);
+        if ($retval!=0) {
+            error("Could not create directory '$execbuilddir'");
+        }
+
         logmsg(LOG_DEBUG, "Unzipping");
         system("unzip -Z $execzippath | grep -q ^l", $retval);
         if ($retval===0) {
             error("Zipfile $execzippath contains symlinks");
         }
-        system("unzip -j -q -d $execpath $execzippath", $retval);
+        system("unzip -j -q -d $execbuilddir $execzippath", $retval);
         if ($retval!=0) {
-            error("Could not unzip zipfile in $execpath");
+            error("Could not unzip zipfile $execzippath in $execbuilddir");
         }
 
         $do_compile = true;
@@ -289,18 +296,18 @@ function fetch_executable(
                 $do_compile = false;
             } else {
                 // detect lang and write build file
-                $langexts = array(
-                        'c' => array('c'),
-                        'cpp' => array('cpp', 'C', 'cc'),
-                        'java' => array('java'),
-                        'py' => array('py', 'py2', 'py3')
-                );
+                $langexts = [
+                        'c' => ['c'],
+                        'cpp' => ['cpp', 'C', 'cc'],
+                        'java' => ['java'],
+                        'py' => ['py', 'py2', 'py3'],
+                ];
                 $buildscript = "#!/bin/sh\n\n";
                 $execlang = false;
                 $source = "";
                 foreach ($langexts as $lang => $langext) {
-                    if (($handle = opendir($execpath)) === false) {
-                        error("Could not open $execpath");
+                    if (($handle = opendir($execbuilddir)) === false) {
+                        error("Could not open $execbuilddir");
                     }
                     while (($file = readdir($handle)) !== false) {
                         $ext = pathinfo($file, PATHINFO_EXTENSION);
@@ -316,21 +323,21 @@ function fetch_executable(
                     }
                 }
                 if ($execlang === false) {
-                    return array(null, "executable must either provide an executable file named 'build' or a C/C++/Java or Python file.");
+                    return [null, "executable must either provide an executable file named 'build' or a C/C++/Java or Python file."];
                 }
                 switch ($execlang) {
                 case 'c':
-                    $buildscript .= "gcc -Wall -O2 -std=gnu11 '$source' -o $execrunpath -lm\n";
+                    $buildscript .= "gcc -Wall -O2 -std=gnu11 '$source' -o run -lm\n";
                     break;
                 case 'cpp':
-                    $buildscript .= "g++ -Wall -O2 -std=gnu++17 '$source' -o $execrunpath\n";
+                    $buildscript .= "g++ -Wall -O2 -std=gnu++17 '$source' -o run\n";
                     break;
                 case 'java':
                     $source = basename($source, ".java");
-                    $buildscript .= "javac -cp $execpath -d $execpath '$source'.java\n";
+                    $buildscript .= "javac -cp ./ -d ./ '$source'.java\n";
                     $buildscript .= "echo '#!/bin/sh' > run\n";
                     // no main class detection here
-                    $buildscript .= "echo 'java -cp $execpath '$source' >> run\n";
+                    $buildscript .= "echo 'java -cp ./ '$source' >> run\n";
                     break;
                 case 'py':
                     $buildscript .= "echo '#!/bin/sh' > run\n";
@@ -388,7 +395,7 @@ chmod +x run
 EOT;
                 }
                 if (file_put_contents($execbuildpath, $buildscript) === false) {
-                    error("Could not write file 'build' in $execpath");
+                    error("Could not write file 'build' in $execbuilddir");
                 }
                 chmod($execbuildpath, 0755);
             }
@@ -397,23 +404,20 @@ EOT;
         }
 
         if ($do_compile) {
-            logmsg(LOG_DEBUG, "Compiling");
-            $olddir = getcwd();
-            chdir($execpath);
-            system("./build >> " . LOGFILE . " 2>&1", $retval);
+            logmsg(LOG_DEBUG, "Building executable in %s", $execbuilddir);
+            system(LIBJUDGEDIR . "/build_executable.sh '$execbuilddir'", $retval);
             if ($retval!=0) {
-                return array(null, "Could not run ./build in $execpath.");
+                return [null, "Failed to build executable in $execbuilddir."];
             }
-            chdir($olddir);
         }
         if (!file_exists($execrunpath) || !is_executable($execrunpath)) {
-            return array(null, "Invalid build file, must produce an executable file 'run'.");
+            return [null, "Invalid build file, must produce an executable file 'run'."];
         }
     }
     // Create file to mark executable successfully deployed.
     touch($execdeploypath);
 
-    return array($execrunpath, null);
+    return [$execrunpath, null];
 }
 
 $options = getopt("dv:n:hV");

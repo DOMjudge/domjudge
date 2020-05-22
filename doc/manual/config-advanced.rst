@@ -130,9 +130,11 @@ format) for configuration of languages, special run and compare
 programs. The archive must contain an executable file named
 ``build`` or ``run``. When deploying a new (or changed)
 executable to a judgehost ``build`` is executed *once* if
-present. Afterwards an executable file ``run`` must exist (it may
-have existed before), that is called to execute the compile, compare,
-or run script. The specific formats are detailed below.
+present (inside the chroot environment that is also used for
+compiling and running submissions). Afterwards an executable
+file ``run`` must exist (it may have existed before), that is
+called to execute the compile, compare, or run script. The
+specific formats are detailed below.
 
 Executables may be changed via the web interface in an online editor
 or by uploading a replacement zip file. Changes apply immediately to
