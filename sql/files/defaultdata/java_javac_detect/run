@@ -43,7 +43,7 @@ else
 	MAINCLASS="$ENTRY_POINT"
 fi
 
-TMPFILE=$(mktemp --tmpdir domjudge_javac_output.XXXXXX) || exit 1
+TMPFILE=$(mktemp domjudge_javac_output.XXXXXX) || exit 1
 
 # Byte-compile:
 javac -encoding UTF-8 -sourcepath . -d . "$@" 2> "$TMPFILE"
@@ -56,9 +56,9 @@ rm -f $TMPFILE
 
 if [ -z "$MAINCLASS" ]; then
 	# Look for class that has the 'main' function:
-	CLASSNAMES="$(find ./* -type f -regex '^.*\.class$' \
+	CLASSNAMES="$(find ./* -type f -regex '^.*\.class$' ! -name DetectMain.class \
 	            | sed -e 's/\.class$//' -e 's/^\.\///' -e 's/\//./g')"
-	MAINCLASS=$(java -cp "$COMPILESCRIPTDIR" DetectMain "$(pwd)" $CLASSNAMES)
+	MAINCLASS=$(java -cp "$(pwd)" DetectMain "$(pwd)" $CLASSNAMES)
 	EXITCODE=$?
 
 	# Report the entry point, so it can be saved, e.g. for later replay:
@@ -67,7 +67,7 @@ if [ -z "$MAINCLASS" ]; then
 	[ "$EXITCODE" -ne 0 ] && exit $EXITCODE
 else
 	# Check if entry point is valid
-	java -cp "$COMPILESCRIPTDIR" DetectMain "$(pwd)" $MAINCLASS > /dev/null
+	java -cp "$(pwd)" DetectMain "$(pwd)" $MAINCLASS > /dev/null
 	EXITCODE=$?
 	[ "$EXITCODE" -ne 0 ] && exit $EXITCODE
 fi
