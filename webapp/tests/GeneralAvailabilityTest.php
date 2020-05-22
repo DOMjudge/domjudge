@@ -4,17 +4,19 @@ namespace Tests;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
-class GeneralAvailabilityTest extends WebTestCase
+class GeneralAvailabilityTest extends BaseTest
 {
     /**
      * @dataProvider urlProvider
+     *
+     * @param string $url
+     * @param int    $code
      */
-    public function testPageIsSuccessful($url, $code)
+    public function testPageIsSuccessful(string $url, int $code)
     {
-        $client = self::createClient();
-        $client->request('GET', $url);
+        $this->client->request('GET', $url);
 
-        $response = $client->getResponse();
+        $response = $this->client->getResponse();
         $actual = $response->getStatusCode();
         $this->assertEquals($code, $actual, var_export($response, true));
     }
