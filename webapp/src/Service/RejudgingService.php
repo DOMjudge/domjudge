@@ -342,12 +342,6 @@ class RejudgingService
 
         $todo -= $done;
 
-        // As a side effect, mark this rejudging as finished if auto_apply is set.
-        if ($todo == 0 && $rejudging->getAutoApply() && $rejudging->getEndtime() === null) {
-            $rejudging->setEndtime(Utils::now());
-            $rejudging->setFinishUser(null);
-            $this->em->flush();
-        }
         return ['todo' => $todo, 'done' => $done];
     }
 }
