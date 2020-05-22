@@ -2,7 +2,6 @@
 
 namespace App\Tests\Controller\Jury;
 
-use App\Controller\Jury\ClarificationController;
 use App\Tests\BaseTest;
 
 class ClarificationControllerTest extends BaseTest
@@ -32,8 +31,8 @@ class ClarificationControllerTest extends BaseTest
         $this->assertEquals('Old requests:', $h3s[1]);
         $this->assertEquals('General clarifications:', $h3s[2]);
 
-        $this->assertEquals(1, $crawler->filter('html:contains("Can you tell me how")')->count());
-        $this->assertEquals(1, $crawler->filter('html:contains("21:47")')->count());
+        $this->assertSelectorExists('html:contains("Can you tell me how")');
+        $this->assertSelectorExists('html:contains("21:47")');
     }
 
     /**
