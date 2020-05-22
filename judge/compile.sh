@@ -139,13 +139,16 @@ if [ -n "$DEBUG" ]; then
 	ENVIRONMENT_VARS="$ENVIRONMENT_VARS -V DEBUG=$DEBUG"
 fi
 
+cp -a $(dirname $COMPILE_SCRIPT)/* $PWD
+
 # First compile to 'source' then rename to 'program' to avoid problems with
 # the compiler writing to different filenames and deleting intermediate files.
 exitcode=0
 $GAINROOT "$RUNGUARD" ${DEBUG:+-v} $CPUSET_OPT -u "$RUNUSER" -g "$RUNGROUP" \
+	-r "$PWD/.." -d "/compile" \
 	-m $SCRIPTMEMLIMIT -t $SCRIPTTIMELIMIT -c -f $SCRIPTFILELIMIT -s $SCRIPTFILELIMIT \
 	-M "$WORKDIR/compile.meta" $ENVIRONMENT_VARS -- \
-	"$COMPILE_SCRIPT" program "$MEMLIMIT" "$@" >"$WORKDIR/compile.tmp" 2>&1 || \
+	"./$(basename $COMPILE_SCRIPT)" program "$MEMLIMIT" "$@" >"$WORKDIR/compile.tmp" 2>&1 || \
 	exitcode=$?
 
 # Make sure that all files are owned by the current user/group, so
