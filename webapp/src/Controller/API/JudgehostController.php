@@ -297,67 +297,8 @@ class JudgehostController extends AbstractFOSRestController
             return '';
         }
 
-        // Get all active contests
-        $contests   = $this->dj->getCurrentContests();
-        $contestIds = array_map(function (Contest $contest) {
-            return $contest->getCid();
-        }, $contests);
-
-        // If there are no active contests, there is nothing to do
-        if (empty($contestIds)) {
-            return '';
-        }
-
-        // Determine all viable submissions
-        $queryBuilder = $this->em->createQueryBuilder()
-            ->from(Submission::class, 's')
-            ->join('s.team', 't')
-            ->join('s.language', 'l')
-            ->join('s.contest_problem', 'cp')
-            ->select('s')
-            ->andWhere('s.judgehost IS NULL')
-            ->andWhere('s.cid IN (:contestIds)')
-            ->setParameter(':contestIds', $contestIds)
-            ->andWhere('l.allowJudge= 1')
-            ->andWhere('cp.allowJudge = 1')
-            ->andWhere('s.valid = 1')
-            ->orderBy('t.judging_last_started', 'ASC')
-            ->addOrderBy('s.submittime', 'ASC')
-            ->addOrderBy('s.submitid', 'ASC');
-
-        // Apply restrictions
-        if ($judgehost->getRestriction()) {
-            $restrictions = $judgehost->getRestriction()->getRestrictions();
-
-            if (isset($restrictions['contest'])) {
-                $queryBuilder
-                    ->andWhere('s.cid IN (:restrictionContestIds)')
-                    ->setParameter(':restrictionContestIds', $restrictions['contest']);
-            }
-
-            if (isset($restrictions['problem'])) {
-                $queryBuilder
-                    ->andWhere('s.probid IN (:restrictionProblemIds)')
-                    ->setParameter(':restrictionProblemIds', $restrictions['problem']);
-            }
-
-            if (isset($restrictions['language'])) {
-                $queryBuilder
-                    ->andWhere('s.langid IN (:restrictionLanguageIds)')
-                    ->setParameter(':restrictionLanguageIds', $restrictions['language']);
-            }
-
-            if (isset($restrictions['rejudge_own']) && (bool)$restrictions['rejudge_own'] == false) {
-                $queryBuilder
-                    ->leftJoin('s.judgings', 'j', Join::WITH, 'j.judgehost = :judgehost')
-                    ->andWhere('j.judgehost IS NULL')
-                    ->setParameter(':judgehost', $judgehost->getHostname());
-            }
-        }
-
         /** @var Submission[] $submissions */
-        $submissions = $queryBuilder->getQuery()->getResult();
-
+        $submissions = $this->getSubmissionsToJudge($judgehost);
         $numUpdated = 0;
 
         // Pick first submission
@@ -1172,5 +1113,70 @@ class JudgehostController extends AbstractFOSRestController
             }
             $judging->setValid(true);
         }
+    }
+
+    private function getSubmissionsToJudge(Judgehost $judgehost)
+    {
+        // Get all active contests
+        $contests   = $this->dj->getCurrentContests();
+        $contestIds = array_map(function (Contest $contest) {
+            return $contest->getCid();
+        }, $contests);
+
+        // If there are no active contests, there is nothing to do
+        if (empty($contestIds)) {
+            return [];
+        }
+
+        // Determine all viable submissions
+        $queryBuilder = $this->em->createQueryBuilder()
+            ->from(Submission::class, 's')
+            ->join('s.team', 't')
+            ->join('s.language', 'l')
+            ->join('s.contest_problem', 'cp')
+            ->select('s')
+            ->andWhere('s.judgehost IS NULL')
+            ->andWhere('s.cid IN (:contestIds)')
+            ->setParameter(':contestIds', $contestIds)
+            ->andWhere('l.allowJudge= 1')
+            ->andWhere('cp.allowJudge = 1')
+            ->andWhere('s.valid = 1')
+            ->orderBy('t.judging_last_started', 'ASC')
+            ->addOrderBy('s.submittime', 'ASC')
+            ->addOrderBy('s.submitid', 'ASC');
+
+        // Apply restrictions
+        if ($judgehost->getRestriction()) {
+            $restrictions = $judgehost->getRestriction()->getRestrictions();
+
+            if (isset($restrictions['contest'])) {
+                $queryBuilder
+                    ->andWhere('s.cid IN (:restrictionContestIds)')
+                    ->setParameter(':restrictionContestIds', $restrictions['contest']);
+            }
+
+            if (isset($restrictions['problem'])) {
+                $queryBuilder
+                    ->andWhere('s.probid IN (:restrictionProblemIds)')
+                    ->setParameter(':restrictionProblemIds', $restrictions['problem']);
+            }
+
+            if (isset($restrictions['language'])) {
+                $queryBuilder
+                    ->andWhere('s.langid IN (:restrictionLanguageIds)')
+                    ->setParameter(':restrictionLanguageIds', $restrictions['language']);
+            }
+
+            if (isset($restrictions['rejudge_own']) && (bool)$restrictions['rejudge_own'] == false) {
+                $queryBuilder
+                    ->leftJoin('s.judgings', 'j', Join::WITH, 'j.judgehost = :judgehost')
+                    ->andWhere('j.judgehost IS NULL')
+                    ->setParameter(':judgehost', $judgehost->getHostname());
+            }
+        }
+
+        /** @var Submission[] $submissions */
+        $submissions = $queryBuilder->getQuery()->getResult();
+        return $submissions;
     }
 }
