@@ -16,6 +16,7 @@ use App\Service\BalloonService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
+use App\Service\RejudgingService;
 use App\Service\ScoreboardService;
 use App\Service\SubmissionService;
 use App\Utils\Utils;
@@ -74,6 +75,11 @@ class JudgehostController extends AbstractFOSRestController
     protected $balloonService;
 
     /**
+     * @var RejudgingService
+     */
+    protected $rejudgingService;
+
+    /**
      * @var LoggerInterface
      */
     protected $logger;
@@ -98,6 +104,7 @@ class JudgehostController extends AbstractFOSRestController
         ScoreboardService $scoreboardService,
         SubmissionService $submissionService,
         BalloonService $balloonService,
+        RejudgingService $rejudgingService,
         LoggerInterface $logger
     ) {
         $this->em                = $em;
@@ -107,6 +114,7 @@ class JudgehostController extends AbstractFOSRestController
         $this->scoreboardService = $scoreboardService;
         $this->submissionService = $submissionService;
         $this->balloonService    = $balloonService;
+        $this->rejudgingService  = $rejudgingService;
         $this->logger            = $logger;
     }
 
@@ -1124,6 +1132,15 @@ class JudgehostController extends AbstractFOSRestController
                 $j->setValid(false);
             }
             $judging->setValid(true);
+
+            // Check whether we are completely done with this rejudging.
+            $rejudging = $judging->getRejudging();
+            $todo = $this->rejudgingService->calculateTodo($rejudging)['todo'];
+            if ($todo == 0 && $rejudging->getEndtime() === null) {
+                $rejudging->setEndtime(Utils::now());
+                $rejudging->setFinishUser(null);
+                $this->em->flush();
+            }
         }
     }
 
