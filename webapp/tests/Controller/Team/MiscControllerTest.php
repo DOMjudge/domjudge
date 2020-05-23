@@ -2,7 +2,9 @@
 
 namespace App\Tests\Controller\Team;
 
+use App\Entity\Contest;
 use App\Tests\BaseTest;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class MiscControllerTest extends BaseTest
@@ -39,12 +41,21 @@ class MiscControllerTest extends BaseTest
     }
 
     /**
-     * Test that the team overview page contains the correct data
+     * Test that the team overview page contains the correct data for normal
+     * and AJAX requests
+     *
+     * @dataProvider ajaxProvider
+     *
+     * @param bool $ajax
      */
-    public function testTeamOverviewPage()
+    public function testTeamOverviewPage(bool $ajax)
     {
         $this->logIn();
-        $crawler = $this->client->request('GET', '/team');
+        if ($ajax) {
+            $crawler = $this->client->xmlHttpRequest('GET', '/team');
+        } else {
+            $crawler = $this->client->request('GET', '/team');
+        }
 
         $response = $this->client->getResponse();
         $message  = var_export($response, true);
@@ -56,6 +67,12 @@ class MiscControllerTest extends BaseTest
         $this->assertEquals('Submissions', $h3s[0]);
         $this->assertEquals('Clarifications', $h3s[1]);
         $this->assertEquals('Clarification Requests', $h3s[2]);
+    }
+
+    public function ajaxProvider()
+    {
+        yield [false];
+        yield [true];
     }
 
     /**
@@ -129,5 +146,80 @@ class MiscControllerTest extends BaseTest
                 $this->assertStringEndsWith(
                     trim(file_get_contents($testFile)), $text);
             });
+    }
+
+    /**
+     * Test that it is possible to change contests
+     *
+     * @param bool $withReferrer
+     *
+     * @dataProvider withReferrerProvider
+     */
+    public function testChangeContest(bool $withReferrer)
+    {
+        $start       = (int)floor(microtime(true) - 1800);
+        $startString = strftime('%Y-%m-%d %H:%M:%S ',
+                $start) . date_default_timezone_get();
+
+        // Create a second contest
+        $contest = new Contest();
+        $contest
+            ->setName('Test contest for switching')
+            ->setShortname('switch')
+            ->setStarttimeString($startString)
+            ->setStarttime($start)
+            ->setActivatetimeString('-01:00')
+            ->setEndtimeString('+05:00')
+            ->setFreezetimeString('+04:00');
+
+        $em = self::$container->get(EntityManagerInterface::class);
+        $em->persist($contest);
+        $em->flush();
+
+        $this->logIn();
+
+        $crawler = $this->client->request('GET', '/team/scoreboard');
+
+        // Verify we are on the demo contest
+        $this->assertSelectorTextContains('.card-header span', 'Demo contest');
+
+        if ($withReferrer) {
+            // Now click the change contest menu item
+            $link = $crawler->filter('a.dropdown-item:contains("switch")')->link();
+
+            $this->client->click($link);
+        } else {
+            // Make sure to clar the history so we do not have a referrer
+            $this->client->getHistory()->clear();;
+            $this->client->request('GET', '/team/change-contest/' . $contest->getCid());
+        }
+
+        $this->client->followRedirect();
+
+        // Check that we are still on the scoreboard
+        if ($withReferrer) {
+            $this->assertEquals('http://localhost/team/scoreboard',
+                $this->client->getRequest()->getUri());
+        } else {
+            $this->assertEquals('http://localhost/team',
+                $this->client->getRequest()->getUri());
+
+            // Go to the scoreboard again
+            $this->client->request('GET', '/team/scoreboard');
+        }
+
+        // And check that the contest has changed
+        $this->assertSelectorTextContains('.card-header span', 'Test contest for switching');
+
+        // Remove the contest again
+        $contest = $em->getRepository(Contest::class)->findOneBy(['shortname' => 'switch']);
+        $em->remove($contest);
+        $em->flush();
+    }
+
+    public function withReferrerProvider()
+    {
+        yield [true];
+        yield [false];
     }
 }
