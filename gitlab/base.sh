@@ -55,9 +55,9 @@ echo -e "\033[0m"
 
 # configure, make and install (but skip documentation)
 make configure
-./configure --disable-doc-build --with-baseurl='http://localhost/domjudge/' --with-domjudge-user=domjudge --with-judgehost_chrootdir=${DIR}/chroot/domjudge
-make build-scripts domserver judgehost
-sudo make install-domserver install-judgehost
+./configure --with-baseurl='http://localhost/domjudge/' --with-domjudge-user=domjudge --with-judgehost_chrootdir=${DIR}/chroot/domjudge
+make build-scripts domserver judgehost docs
+sudo make install-domserver install-judgehost install-docs
 
 # setup database and add special user
 cd /opt/domjudge/domserver
