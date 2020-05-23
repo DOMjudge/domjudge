@@ -9,10 +9,6 @@ GITSHA=$(git rev-parse HEAD || true)
 # Set up
 "$( dirname "${BASH_SOURCE[0]}" )"/base.sh
 
-# Add roles to dummy user
-echo "INSERT INTO userrole (userid, roleid) VALUES (3, 2);" | mysql domjudge
-echo "INSERT INTO userrole (userid, roleid) VALUES (3, 3);" | mysql domjudge
-
 # Add netrc file for dummy user login
 echo "machine localhost login dummy password dummy" > ~/.netrc
 
