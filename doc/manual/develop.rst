@@ -111,14 +111,6 @@ To run them, follow the following steps:
 * Make sure your database contains only the sample data. This can be done by
   first dropping any existing database and then running
   ``bin/dj_setup_database -u root -r install``.
-* Run the following SQL command to create a dummy user that is linked
-  to the example team:
-
-  .. code-block:: sql
-
-        INSERT INTO user (userid, username, name, password, teamid)
-        VALUES (3, 'dummy', 'dummy user for example team',
-            '\$2y\$10\$0d0sPmeAYTJ/Ya7rvA.kk.zvHu758ScyuHAjps0A6n9nm3eFmxW2K', 2);
 
 Note that you don't have to drop and recreate the database everytime you run the
 tests; the tests are written in such a way that they keep working, even if you
