@@ -26,9 +26,7 @@ cleanup ()
 {
 	# Remove some copied files to save disk space
 	if [ "$WORKDIR" ]; then
-		# This assumes that if bin is bind-mounted from the chroot,
-		# then it is read-only so the removal of bin/sh will fail.
-		rm -f "$WORKDIR/../dev/null" "$WORKDIR/../bin/sh" "$WORKDIR/../dj-bin/runpipe" 2> /dev/null || true
+		rm -f "$WORKDIR/../dj-bin/runpipe" 2> /dev/null || true
 
 		# Replace testdata by symlinks to reduce disk usage
 		if [ -f "$WORKDIR/testdata.in" ]; then
@@ -187,12 +185,6 @@ if [ "$CREATE_WRITABLE_TEMP_DIR" ]; then
 	# shellcheck disable=SC2174
 	mkdir -m 777 -p "$WORKDIR/write_tmp"
 fi
-
-# We copy /dev/null: mknod (and the major/minor device numbers) are
-# not portable, while a fifo link has the problem that a cat program
-# must be run and killed.
-logmsg $LOG_DEBUG "creating /dev/null character-special device"
-$GAINROOT cp -pR /dev/null ../dev/null
 
 # Run the solution program (within a restricted environment):
 logmsg $LOG_INFO "running program"

@@ -7,7 +7,6 @@
 # in or add its content to the end of /etc/sudoers)
 
 @DOMJUDGE_USER@ ALL=(root) NOPASSWD: @judgehost_bindir@/runguard *
-@DOMJUDGE_USER@ ALL=(root) NOPASSWD: /bin/cp -pR /dev/null ../dev/null
 @DOMJUDGE_USER@ ALL=(root) NOPASSWD: /bin/chown -R @DOMJUDGE_USER@\: @judgehost_judgedir@/*
 
 # The chroot path below must match the path in chroot-startstop.sh.
@@ -17,7 +16,6 @@
 @DOMJUDGE_USER@ ALL=(root) NOPASSWD: /bin/mount -o remount\,ro\,bind @judgehost_judgedir@/*
 @DOMJUDGE_USER@ ALL=(root) NOPASSWD: /bin/umount @judgehost_judgedir@/*
 @DOMJUDGE_USER@ ALL=(root) NOPASSWD: /bin/umount -f -vvv @judgehost_judgedir@/*
-@DOMJUDGE_USER@ ALL=(root) NOPASSWD: /bin/cp -pR /dev/random dev
-@DOMJUDGE_USER@ ALL=(root) NOPASSWD: /bin/cp -pR /dev/urandom dev
+@DOMJUDGE_USER@ ALL=(root) NOPASSWD: /bin/cp -pR /dev/random /dev/urandom /dev/null dev
 @DOMJUDGE_USER@ ALL=(root) NOPASSWD: /bin/chmod o-w dev/random dev/urandom
 

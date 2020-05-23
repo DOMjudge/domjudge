@@ -91,8 +91,7 @@ case "$1" in
 
 		# copy dev/random and /dev/urandom as a random source
 		mkdir -p dev
-		sudo -n cp -pR /dev/random  dev < /dev/null
-		sudo -n cp -pR /dev/urandom dev < /dev/null
+		sudo -n cp -pR /dev/random /dev/urandom /dev/null dev < /dev/null
 		sudo -n chmod o-w dev/random dev/urandom < /dev/null
 		;;
 
@@ -100,8 +99,7 @@ case "$1" in
 
 		dj_umount "$PWD/proc"
 
-		rm -f dev/urandom
-		rm -f dev/random
+		rm -f dev/urandom dev/random dev/null
 		rmdir dev || true
 
 		for i in $SUBDIRMOUNTS ; do
