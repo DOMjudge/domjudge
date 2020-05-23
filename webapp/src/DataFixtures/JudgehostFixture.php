@@ -3,7 +3,7 @@
 namespace App\DataFixtures;
 
 use App\Entity\Judgehost;
-use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\Persistence\ObjectManager;
 
 /**
  * Class JudgehostFixture

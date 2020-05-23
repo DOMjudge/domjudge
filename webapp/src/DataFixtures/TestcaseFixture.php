@@ -5,7 +5,7 @@ namespace App\DataFixtures;
 use App\Entity\Testcase;
 use App\Entity\TestcaseContent;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
-use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\Persistence\ObjectManager;
 
 /**
  * Class TestcaseFixture

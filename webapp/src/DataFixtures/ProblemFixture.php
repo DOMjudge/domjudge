@@ -5,7 +5,7 @@ namespace App\DataFixtures;
 use App\Entity\Executable;
 use App\Entity\Problem;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
-use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\Persistence\ObjectManager;
 
 /**
  * Class ProblemFixture

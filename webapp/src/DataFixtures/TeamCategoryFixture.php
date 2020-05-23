@@ -3,7 +3,7 @@
 namespace App\DataFixtures;
 
 use App\Entity\TeamCategory;
-use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\Persistence\ObjectManager;
 
 class TeamCategoryFixture extends AbstractExampleDataFixture
 {

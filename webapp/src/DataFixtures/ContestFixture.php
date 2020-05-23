@@ -4,7 +4,7 @@ namespace App\DataFixtures;
 
 use App\Entity\Contest;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
-use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\Persistence\ObjectManager;
 use Exception;
 
 /**
