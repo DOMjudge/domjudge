@@ -30,12 +30,17 @@ class ProblemControllerTest extends BaseTest
             'Float special compare test',
             'Hello World',
         ];
-        $problemTexts = [];
-        foreach ($problems as $i => $problemName) {
-            $em = self::$container->get(EntityManagerInterface::class);
-            /** @var Problem $problem */
-            $problem          = $em->getRepository(Problem::class)->findOneBy(['externalid' => $problemName]);
-            $problemTexts[$i] = stream_get_contents($problem->getProblemtext());
+        /** @var EntityManagerInterface $em */
+        $em               = self::$container->get(EntityManagerInterface::class);
+        $problemTextsData = $em->createQueryBuilder()
+            ->from('App:Problem', 'p')
+            ->select('p.externalid, p.problemtext')
+            ->getQuery()
+            ->getResult();
+        $problemTexts     = [];
+        foreach ($problemTextsData as $data) {
+            $problemTexts[array_search($data['externalid'], $problems)] =
+                stream_get_contents($data['problemtext']);
         }
 
         $this->withChangedConfiguration('show_limits_on_team_page', $withLimits,
