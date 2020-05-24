@@ -71,6 +71,10 @@
                         <input type="checkbox" class="custom-control-input" id="auto_apply" name="auto_apply">
                         <label class="custom-control-label" for="auto_apply">Automatically apply judging(s) when ready</label>
                     </div>
+                    <div id="rejudge-repeat" class="form-group">
+                        <label for="repeat">Number of times to repeat this rejudging</label>
+                        <input type="number" class="form-control" name="repeat" id="repeat" value="1" min="1" max="999" step="1"/>
+                    </div>
                     <div id="rejudge-reason" class="form-group">
                         <label for="reason">Reason</label>
                         <input type="text" class="form-control" name="reason" id="reason" maxlength="255"/>
