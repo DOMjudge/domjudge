@@ -129,7 +129,8 @@ class RejudgingController extends BaseController
             }
             if ($rejudging->getEndtime() !== null) {
                 $rejudgingdata['finishuser']['value'] = $rejudging->getFinishUser() !== null
-                    ? $rejudging->getFinishUser()->getName() : "automatically applied";
+                    ? $rejudging->getFinishUser()->getName() : (
+                        $rejudging->getRepeat() > 1 ? "part of repeated rejudging" : "automatically applied");
             }
 
             $todoAndDone = $this->rejudgingService->calculateTodo($rejudging);
@@ -321,6 +322,17 @@ class RejudgingController extends BaseController
             $restrictions
         );
 
+        $repetitions = $this->em->createQueryBuilder()
+            ->from(Rejudging::class, 'r')
+            ->select('r.rejudgingid')
+            ->andWhere('r.repeat_rejudgingid = :repeat_rejudgingid')
+            ->andWhere('r.rejudgingid != :rejudgingid')
+            ->setParameter(':repeat_rejudgingid', $rejudging->getRepeatRejudgingId())
+            ->setParameter(':rejudgingid', $rejudging->getRejudgingid())
+            ->orderBy('r.rejudgingid')
+            ->getQuery()
+            ->getScalarResult();
+
         $data = [
             'rejudging' => $rejudging,
             'todo' => $todo,
@@ -333,6 +345,7 @@ class RejudgingController extends BaseController
             'submissionCounts' => $submissionCounts,
             'oldverdict' => $request->query->get('oldverdict', 'all'),
             'newverdict' => $request->query->get('newverdict', 'all'),
+            'repetitions' => array_column($repetitions, 'rejudgingid'),
             'showExternalResult' => $this->config->get('data_source') ==
                 DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL,
             'refresh' => [
@@ -528,7 +541,7 @@ class RejudgingController extends BaseController
                 ]);
             }
             $skipped = [];
-            $res = $this->rejudgingService->createRejudging($reason, $judgings, false, $skipped);
+            $res = $this->rejudgingService->createRejudging($reason, $judgings, false, 1, null, $skipped);
             $this->generateFlashMessagesForSkippedJudgings($skipped);
 
             if ($res === null) {
@@ -554,6 +567,7 @@ class RejudgingController extends BaseController
         $reason     = $request->request->get('reason') ?: sprintf('%s: %s', $table, $id);
         $includeAll = (bool)$request->request->get('include_all');
         $autoApply  = (bool)$request->request->get('auto_apply');
+        $repeat     = (int)$request->request->get('repeat');
 
         if (empty($table) || empty($id)) {
             throw new BadRequestHttpException('No table or id passed for selection in rejudging');
@@ -630,7 +644,7 @@ class RejudgingController extends BaseController
         }
 
         $skipped = [];
-        $res = $this->rejudgingService->createRejudging($reason, $judgings, $autoApply, $skipped);
+        $res = $this->rejudgingService->createRejudging($reason, $judgings, $autoApply, $repeat, null, $skipped);
         $this->generateFlashMessagesForSkippedJudgings($skipped);
 
         if ($res === null) {

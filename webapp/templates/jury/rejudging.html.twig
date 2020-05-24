@@ -42,6 +42,8 @@
                         <td>
                             {% if rejudging.autoapply %}
                                 automatically applied
+                            {% elseif rejudging.repeat %}
+                                part of a repeated judging
                             {% else %}
                                 <a href="{{ path('jury_user', {'userId': rejudging.finishUser.userid}) }}">
                                     {{ rejudging.finishUser.name }}
@@ -78,6 +80,18 @@
                     <th>Queued</th>
                     <td><span data-todo>{{ todo }}</span> unfinished judgings</td>
                 </tr>
+                {% if repetitions %}
+                    <tr>
+                        <th>Repetitions</th>
+                        <td>
+                            {% for rep in repetitions %}
+                                <a href="{{ path('jury_rejudging', {rejudgingId: rep}) }}">
+                                    r{{ rep }}<br/>
+                                </a>
+                            {% endfor %}
+                        </td>
+                    </tr>
+                {% endif %}
             </table>
         </div>
     </div>

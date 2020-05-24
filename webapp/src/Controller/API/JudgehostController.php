@@ -9,6 +9,7 @@ use App\Entity\Judgehost;
 use App\Entity\Judging;
 use App\Entity\JudgingRun;
 use App\Entity\JudgingRunOutput;
+use App\Entity\Rejudging;
 use App\Entity\Submission;
 use App\Entity\Testcase;
 use App\Entity\User;
@@ -21,6 +22,7 @@ use App\Service\ScoreboardService;
 use App\Service\SubmissionService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Query;
 use Doctrine\ORM\Query\Expr\Join;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
@@ -1126,20 +1128,61 @@ class JudgehostController extends AbstractFOSRestController
 
     private function maybeUpdateActiveJudging(Judging $judging): void
     {
-        if ($judging->getRejudgingid() !== null && $judging->getRejudging()->getAutoApply()) {
-            $judging->getSubmission()->setRejudging(null);
-            foreach ($judging->getSubmission()->getJudgings() as $j) {
-                $j->setValid(false);
-            }
-            $judging->setValid(true);
-
-            // Check whether we are completely done with this rejudging.
+        if ($judging->getRejudgingid() !== null) {
             $rejudging = $judging->getRejudging();
-            $todo = $this->rejudgingService->calculateTodo($rejudging)['todo'];
-            if ($todo == 0 && $rejudging->getEndtime() === null) {
-                $rejudging->setEndtime(Utils::now());
-                $rejudging->setFinishUser(null);
-                $this->em->flush();
+            if ($rejudging->getAutoApply()) {
+                $judging->getSubmission()->setRejudging(null);
+                foreach ($judging->getSubmission()->getJudgings() as $j) {
+                    $j->setValid(false);
+                }
+                $judging->setValid(true);
+
+                // Check whether we are completely done with this rejudging.
+                if ($rejudging->getEndtime() === null && $this->rejudgingService->calculateTodo($rejudging)['todo'] == 0) {
+                    $rejudging->setEndtime(Utils::now());
+                    $rejudging->setFinishUser(null);
+                    $this->em->flush();
+                }
+            }
+
+            if ($rejudging->getRepeat() > 1 && $rejudging->getEndtime() === null
+                    && $this->rejudgingService->calculateTodo($rejudging)['todo'] == 0) {
+                $numberOfRepetitions = $this->em->createQueryBuilder()
+                    ->from(Rejudging::class, 'r')
+                    ->select('COUNT(r.rejudgingid) AS cnt')
+                    ->andWhere('r.repeat_rejudgingid = :repeat_rejudgingid')
+                    ->setParameter('repeat_rejudgingid', $rejudging->getRepeatRejudgingId())
+                    ->getQuery()
+                    ->getSingleScalarResult();
+                // Only "cancel" the rejudging if it's not the last.
+                if ($numberOfRepetitions < $rejudging->getRepeat()) {
+                    $rejudging
+                        ->setEndtime(Utils::now())
+                        ->setFinishUser(null)
+                        ->setValid(false);
+                    $this->em->flush();
+
+                    // Reset association before creating the new rejudging.
+                    $this->em->getConnection()->executeQuery(
+                        'UPDATE submission
+                            SET rejudgingid = NULL
+                            WHERE rejudgingid = :rejudgingid',
+                        [':rejudgingid' => $rejudging->getRejudgingid()]);
+                    $this->em->flush();
+
+                    $skipped = [];
+                    /** @var array[] $judgings */
+                    $judgings = $this->em->createQueryBuilder()
+                        ->from(Judging::class, 'j')
+                        ->leftJoin('j.submission', 's')
+                        ->select('j', 's')
+                        ->andWhere('j.rejudgingid = :rejudgingid')
+                        ->setParameter('rejudgingid', $rejudging->getRejudgingid())
+                        ->getQuery()
+                        ->getResult(Query::HYDRATE_ARRAY);
+                    $this->rejudgingService->createRejudging($rejudging->getReason(), $judgings,
+                        false, $rejudging->getRepeat(), $rejudging->getRepeatRejudgingId(), $skipped);
+                }
             }
         }
     }

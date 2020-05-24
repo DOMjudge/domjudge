@@ -12,6 +12,7 @@ use App\Entity\Team;
 use App\Entity\User;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Query;
 
 class RejudgingService
 {
@@ -77,6 +78,8 @@ class RejudgingService
         string $reason,
         array $judgings,
         bool $autoApply,
+        int $repeat,
+        $repeat_rejudgingid,
         array &$skipped
     ) {
         /** @var Rejudging $rejudging */
@@ -88,6 +91,15 @@ class RejudgingService
             ->setAutoApply($autoApply);
         $this->em->persist($rejudging);
         $this->em->flush();
+        if (isset($repeat) && $repeat > 1) {
+            if ($repeat_rejudgingid === null) {
+                $repeat_rejudgingid = $rejudging->getRejudgingid();
+            }
+            $rejudging
+                ->setRepeat($repeat)
+                ->setRepeatRejudgingId($repeat_rejudgingid);
+            $this->em->flush();
+        }
 
         $singleJudging = count($judgings) == 1;
         foreach ($judgings as $judging) {
@@ -341,7 +353,6 @@ class RejudgingService
             ->getSingleScalarResult();
 
         $todo -= $done;
-
         return ['todo' => $todo, 'done' => $done];
     }
 }
