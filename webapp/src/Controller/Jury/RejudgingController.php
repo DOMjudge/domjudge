@@ -291,7 +291,7 @@ class RejudgingController extends BaseController
         }
 
         $viewTypes = [0 => 'newest', 1 => 'unverified', 2 => 'unjudged', 3 => 'diff', 4 => 'all'];
-        $view      = 3;
+        $view      = array_search('diff', $viewTypes);
         if ($request->query->has('view')) {
             $index = array_search($request->query->get('view'), $viewTypes);
             if ($index !== false) {
