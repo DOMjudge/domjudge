@@ -843,7 +843,7 @@ part.";
         $this->assertEquals('team\\nname',  Utils::toTsvField("team\nname"));
         $this->assertEquals('team\\tname\\nexample\\t', Utils::toTsvField("team\tname\nexample\t"));
         $this->assertEquals('team\\r\\nname', Utils::toTsvField("team\r\nname"));
-        $this->assertEquals('tea\\\mname',  Utils::toTsvField("tea\mname"));
+        $this->assertEquals('tea\\\\mname', Utils::toTsvField("tea\\mname"));
         $this->assertEquals('team nåme…',   Utils::toTsvField("team nåme…"));
         $this->assertEquals('team🎈name',   Utils::toTsvField("team🎈name"));
     }
