@@ -278,7 +278,7 @@ class ImportExportController extends BaseController
         $response = new StreamedResponse();
         $response->setCallback(function () use ($type, $version, $data) {
             echo sprintf("%s\t%s\n", $type, $version);
-            // output the rows, filtering out any tab characters in the data
+            // output the rows, escaping any reserved characters in the data
             foreach ($data as $row) {
                 echo implode("\t", array_map(function ($field) {
                     return Utils::toTsvField((string)$field);
