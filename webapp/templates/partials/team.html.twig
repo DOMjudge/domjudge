@@ -18,7 +18,7 @@
                 {% if team.members is not empty %}
                     <tr>
                         <th>Members</th>
-                        <td>{{ team.members }}</td>
+                        <td>{{ team.members | nl2br }}</td>
                     </tr>
                 {% endif %}
                 {% if showAffiliations and team.affiliation is not empty %}
