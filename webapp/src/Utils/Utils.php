@@ -1084,4 +1084,16 @@ class Utils
             $field
         );
     }
+
+    /**
+     * Split a line from a Tab Separated Values file into fields
+     *
+     * @param string $line
+     *
+     * @return array
+     */
+    public static function parseTsvLine(string $line) : array
+    {
+        return array_map('stripcslashes', explode("\t", rtrim($line, "\r\n")));
+    }
 }

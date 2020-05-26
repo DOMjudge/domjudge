@@ -847,4 +847,24 @@ part.";
         $this->assertEquals('team nåme…',   Utils::toTsvField("team nåme…"));
         $this->assertEquals('team🎈name',   Utils::toTsvField("team🎈name"));
     }
+
+    /**
+     * Test Tab Separated Value parsing
+     */
+    public function testParseTsvLine()
+    {
+        $bs  = "\\";
+        $tab = "\t";
+        $this->assertEquals(["team name", "rank"],    Utils::parseTsvLine("team name".$tab."rank"));
+        $this->assertEquals(["team\tname\t", "rank"], Utils::parseTsvLine("team".$bs."t"."name".$bs."t".$tab."rank"));
+        $this->assertEquals(["team\nname\r", "rank"], Utils::parseTsvLine("team".$bs."n"."name".$bs."r".$tab."rank"));
+        $this->assertEquals(["team\\name\\", "rank"], Utils::parseTsvLine("team".$bs.$bs."name".$bs.$bs.$tab."rank"));
+        $this->assertEquals([$bs],                    Utils::parseTsvLine($bs.$bs));
+        $this->assertEquals([$bs."t"],                Utils::parseTsvLine($bs.$bs."t"));
+        $this->assertEquals(["Team,,, name"],         Utils::parseTsvLine("Team,,, name\n"));
+        $this->assertEquals(["Team", "", "", " nm "], Utils::parseTsvLine("Team".$tab.$tab.$tab." nm \r\n"));
+        $this->assertEquals(["tea\\mname", "rank"],   Utils::parseTsvLine("tea".$bs.$bs."mname".$tab."rank"));
+        $this->assertEquals(["team nåme…", "rank"],   Utils::parseTsvLine("team nåme…".$tab."rank"));
+        $this->assertEquals(["team🎈name", "rank"],   Utils::parseTsvLine("team🎈name".$tab."rank"));
+    }
 }
