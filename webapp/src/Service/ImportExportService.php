@@ -615,7 +615,7 @@ class ImportExportService
         $l         = 1;
         foreach ($content as $line) {
             $l++;
-            $line = explode("\t", trim($line));
+            $line = Utils::parseTsvLine(trim($line));
             if (!is_numeric($line[0])) {
                 $message = sprintf('Invalid id format on line %d', $l);
                 return -1;
@@ -771,7 +771,7 @@ class ImportExportService
         $l        = 1;
         foreach ($content as $line) {
             $l++;
-            $line = explode("\t", trim($line));
+            $line = Utils::parseTsvLine(trim($line));
 
             // teams.tsv contains data pertaining both to affiliations and teams.
             // hence return data for both tables.
@@ -995,7 +995,7 @@ class ImportExportService
 
         foreach ($content as $line) {
             $l++;
-            $line = explode("\t", trim($line));
+            $line = Utils::parseTsvLine(trim($line));
 
             $team  = $juryTeam = null;
             $roles = [];
