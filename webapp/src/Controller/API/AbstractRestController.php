@@ -138,10 +138,14 @@ abstract class AbstractRestController extends AbstractFOSRestController
             ->from(Contest::class, 'c')
             ->select('c')
             ->andWhere('c.enabled = 1')
-            ->andWhere('c.activatetime <= :now')
-            ->andWhere('c.deactivatetime IS NULL OR c.deactivatetime > :now')
-            ->setParameter(':now', $now)
             ->orderBy('c.activatetime');
+
+        if (!$this->dj->checkrole('api_reader')) {
+            $qb
+                ->andWhere('c.activatetime <= :now')
+                ->andWhere('c.deactivatetime IS NULL OR c.deactivatetime > :now')
+                ->setParameter(':now', $now);
+        }
 
         // Filter on contests this user has access to
         if (!$this->dj->checkrole('api_reader') && !$this->dj->checkrole('judgehost')) {
