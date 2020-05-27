@@ -611,7 +611,7 @@ function updateMenuBalloons(data)
         for (var i=0; i<num; i++) {
             var text = (data[i].room !== null) ? data[i].room+': ' : '';
             text += data[i].pname + ' ' + data[i].name;
-			sendNotification('New balloon:',
+            sendNotification('New balloon:',
                  {'tag': 'ball_' + data[i].baloonid,
                   'link': domjudge_base_url + '/jury/balloons',
                   'body': text});
@@ -662,13 +662,15 @@ function initializeAjaxModals()
 
 function pinScoreheader()
 {
-	var static_in_url = new URL(window.location.toString().toLowerCase()).searchParams.get("static")
+	var static_in_url = new URL(window.location.toString().toLowerCase()).searchParams.get("static");
 	var static_scoreboard = static_in_url==="true" || static_in_url==='1';
-	if(!static_scoreboard){
+	if (!static_scoreboard) {
 		$('.scoreheader th').css('top', $('.fixed-top').css('height'));
-        var resizeObserver = new ResizeObserver(() => {
-            $('.scoreheader th').css('top', $('.fixed-top').css('height'));
-        });
-        resizeObserver.observe($('.fixed-top')[0]);
+		if ('ResizeObserver' in window) {
+			var resizeObserver = new ResizeObserver(() => {
+				$('.scoreheader th').css('top', $('.fixed-top').css('height'));
+			});
+			resizeObserver.observe($('.fixed-top')[0]);
+		}
 	}
 }
