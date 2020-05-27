@@ -311,7 +311,6 @@ upgrade)
 	read_dbpasswords
 	symfony_console doctrine:migrations:migrate -n
 	verbose "DOMjudge database upgrade completed."
-	rm -f $TMPOUT
 	;;
 
 *)
