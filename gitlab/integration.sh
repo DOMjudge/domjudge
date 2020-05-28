@@ -176,6 +176,9 @@ fi
 # Start logging again
 set -x
 
+# Delete contest so API check does not fail because of empty results
+echo "DELETE FROM contest WHERE cid =1" | mysql domjudge
+
 # Check the Contest API:
 $CHECK_API -n -C -e -a 'strict=1' http://admin:$ADMINPASS@localhost/domjudge/api
 
