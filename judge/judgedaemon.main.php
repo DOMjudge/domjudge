@@ -235,30 +235,32 @@ function read_judgehostlog(int $n = 20) : string
     return trim(ob_get_clean());
 }
 
-// fetches new executable from database if necessary
-// runs build to compile executable
-// returns array with absolute path to run script and possibly error message
+// Fetches new executable from database if necessary, and
+// runs build script to compile executable.
+// Returns an array with absolute path to run script and possibly an error message.
 function fetch_executable(
     string $workdirpath, string $execid, string $md5sum, bool $combined_run_compare = false) : array
 {
-    $execpath = "$workdirpath/executable/download/" . $execid;
-    $execmd5path = $execpath . "/md5sum";
-    $execzippath = $execpath . "/executable.zip";
-    $execdeploypath = $execpath . "/.deployed";
-    $execbuilddir = "$workdirpath/executable/build/" . $execid;
-    $execbuildpath = $execbuilddir . "/build";
-    $execrunpath = $execbuilddir . "/run";
+    $execdir = $workdirpath . '/executable/' . $execid;
+    $execdownloaddir = $execdir . '/download';
+    $execmd5path     = $execdownloaddir . '/md5sum';
+    $execzippath     = $execdownloaddir . '/executable.zip';
+    $execdeploypath  = $execdownloaddir . '/.deployed';
+    $execbuilddir    = $execdir . '/build';
+    $execbuildpath   = $execbuilddir . '/build';
+    $execrunpath     = $execbuilddir . '/run';
     if (empty($md5sum)) {
         return array(null, "unknown executable '" . $execid . "' specified");
     }
-    if (!file_exists($execpath) || !file_exists($execmd5path) ||
+    if (!is_dir($execdir) || !file_exists($execmd5path) ||
         !file_exists($execdeploypath) ||
         dj_file_get_contents($execmd5path) !== $md5sum) {
-        logmsg(LOG_INFO, "Fetching new executable '" . $execid . "'");
-        system("rm -rf $execpath");
-        system("mkdir -p '$execpath'", $retval);
+
+        logmsg(LOG_INFO, "Fetching new executable '$execid'");
+        system("rm -rf $execdir");
+        system("mkdir -p '$execdownloaddir'", $retval);
         if ($retval!=0) {
-            error("Could not create directory '$execpath'");
+            error("Could not create directory '$execdownloaddir'");
         }
         $content = request(sprintf('executables/%s', $execid), 'GET', '');
         $content = base64_decode(dj_json_decode($content));
@@ -405,13 +407,13 @@ EOT;
         }
 
         if ($do_compile) {
-            logmsg(LOG_DEBUG, "Building executable in %s", $execbuilddir);
-            system(LIBJUDGEDIR . "/build_executable.sh '$execbuilddir'", $retval);
+            logmsg(LOG_DEBUG, "Building executable in $execdir, under 'build/'");
+            system(LIBJUDGEDIR . "/build_executable.sh '$execdir'", $retval);
             if ($retval!=0) {
-                return [null, "Failed to build executable in $execbuilddir."];
+                return [null, "Failed to build executable in $execdir."];
             }
         }
-        if (!file_exists($execrunpath) || !is_executable($execrunpath)) {
+        if (!is_file($execrunpath) || !is_executable($execrunpath)) {
             return [null, "Invalid build file, must produce an executable file 'run'."];
         }
     }
