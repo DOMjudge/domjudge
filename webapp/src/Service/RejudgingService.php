@@ -221,9 +221,12 @@ class RejudgingService
 
         // This loop uses direct queries instead of Doctrine classes to speed
         // it up drastically.
+        $firstItem = true;
         foreach ($submissions as $submission) {
             if ($progressReporter) {
-                $progressReporter(sprintf('s%s, ', $submission['submitid']));
+                $progstring = $firstItem ? '' : ', ';
+                $progressReporter($progstring . 's' . $submission['submitid']);
+                $firstItem = false;
             }
 
             if ($action === self::ACTION_APPLY) {

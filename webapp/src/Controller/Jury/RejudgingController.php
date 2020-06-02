@@ -394,8 +394,6 @@ class RejudgingController extends BaseController
             ->getOneOrNullResult();
 
         if ($request->isXmlHttpRequest()) {
-            $response = new StreamedResponse();
-            $response->headers->set('X-Accel-Buffering', 'no');
             $progressReporter = function (string $data, bool $isError = false) {
                 if ($isError) {
                     echo sprintf('<div class="alert alert-danger">%s</div>', $data);
