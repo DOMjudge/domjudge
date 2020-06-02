@@ -22,24 +22,20 @@ System requirements
 Software requirements
 `````````````````````
 
+* Sudo
+* Debootstrap
 * PHP command line interface with the ``curl``, ``json``, ``xml``,
   ``zip`` extensions.
-* Compilers for the languages you want to support.
 
 For Debian (with some example compilers)::
 
   sudo apt install make sudo debootstrap libcgroup-dev lsof \
-        php-cli php-curl php-json php-xml php-zip procps \
-        gcc g++ default-jre-headless default-jdk-headless \
-        ghc fp-compiler
+        php-cli php-curl php-json php-xml php-zip procps
 
-For RedHat::
+For Red Hat::
 
   sudo yum install make sudo libcgroup-devel lsof \
-        php-cli php-mbstring php-xml php-process procps-ng \
-        gcc gcc-c++ glibc-static libstdc++-static \
-        java-11-openjdk-headless java-11-openjdk-devel \
-        ghc-compiler fpc
+        php-cli php-mbstring php-xml php-process procps-ng
 
 Building and installing
 -----------------------
@@ -76,23 +72,23 @@ paths, be sure to update the sudoers rules accordingly.
 Creating a chroot environment
 -----------------------------
 
-The judgedaemon executes submissions inside a chroot environment for
-security reasons. By default it mounts parts of a prebuilt chroot tree
-read-only during this judging process (using the script
-``lib/judge/chroot-startstop.sh``). This is needed to support
-extra languages that require access to interpreters or support
-libraries at runtime, for example Java, C#, and any interpreted
-languages like Python, Perl, Shell script, etc.
+The judgedaemon compiles and executes submissions inside a chroot
+environment for security reasons. By default it mounts parts of a
+prebuilt chroot tree read-only during this judging process (using
+the script ``lib/judge/chroot-startstop.sh``). The chroot needs
+to contain the compilers, interpreters and support libraries that
+are needed at compile- and at runtime for the supported languages.
 
 This chroot tree can be built using the script
 ``bin/dj_make_chroot``. On Debian and Ubuntu the same
 distribution and version as the host system are used, on other Linux
 distributions the latest stable Debian release will be used to build
-the chroot. Any extra packages to support languages can be passed with
-the option ``-i`` or be added to the ``INSTALLDEBS``
-variable in the script. The script ``bin/dj_run_chroot`` runs an
-interactive shell or a command inside the chroot. This can be used for
-example to install new or upgrade existing packages inside the chroot.
+the chroot. Any extra packages to support languages (compilers and
+runtime environments) can be passed with the option ``-i`` or be
+added to the ``INSTALLDEBS`` variable in the script. The script
+``bin/dj_run_chroot`` runs an interactive shell or a command inside
+the chroot. This can be used for example to install new or upgrade
+existing packages inside the chroot.
 Run these scripts with option ``-h`` for more information.
 
 Finally, if necessary edit the script ``lib/judge/chroot-startstop.sh``
