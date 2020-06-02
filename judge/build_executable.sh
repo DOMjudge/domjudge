@@ -1,16 +1,18 @@
 #!/bin/sh
 
-# Script to build executables.
+# Script to build executables such as compile, compare and run scripts.
 #
-# Usage: $0 <workdir>
+# Usage: $0 <chroot_dir>
+#
+# Starts a chroot at <chroot_dir> and runs /build/build inside it with
+# working directory set to /build. This should generate an executable
+# /build/run.
 
 set -e
-trap error EXIT
+trap 'cleanup ; error' EXIT
 
-cleanexit ()
+cleanup ()
 {
-	trap - EXIT
-
 	$DJ_LIBJUDGEDIR/chroot-startstop.sh stop
 
 	# Make sure that all files are owned by the current user/group, so
@@ -19,6 +21,14 @@ cleanexit ()
 	# across multiple judgedaemons, and remove write permissions.
 	$GAINROOT chown -R "$(id -un):" $WORKDIR
 	chmod -R go-w $WORKDIR
+}
+
+cleanexit ()
+{
+	set +e
+	trap - EXIT
+
+	cleanup
 
 	logmsg $LOG_DEBUG "exiting, code = '$1'"
 	exit $1
@@ -46,8 +56,10 @@ RUNGUARD="$DJ_BINDIR/runguard"
 logmsg $LOG_INFO "starting '$0', PID = $$"
 
 [ $# -ge 1 ] || error "not enough arguments. See script-code for usage."
-WORKDIR="$1";
-logmsg $LOG_DEBUG "arguments: '$WORKDIR'"
+CHROOTDIR="$1";
+logmsg $LOG_DEBUG "arguments: '$CHROOTDIR'"
+
+WORKDIR="$CHROOTDIR/build"
 
 if [ ! -d "$WORKDIR" ] || [ ! -w "$WORKDIR" ] || [ ! -x "$WORKDIR" ]; then
 	error "Workdir not found or not writable: $WORKDIR"
@@ -55,25 +67,28 @@ fi
 [ -x "$RUNGUARD" ] || error "runguard not found or not executable: $RUNGUARD"
 
 OLDDIR="$PWD"
-cd "$WORKDIR"
+cd "$CHROOTDIR"
 
 $DJ_LIBJUDGEDIR/chroot-startstop.sh start
 
-chmod a+rwx .
+chmod a+rwx "$WORKDIR"
 
-logmsg $LOG_INFO "starting compile"
+logmsg $LOG_INFO "starting build"
 
 exitcode=0
 $GAINROOT "$RUNGUARD" ${DEBUG:+-v} -u "$RUNUSER" -g "$RUNGROUP" \
-	-r "$PWD" -- \
-	"./build" >"build.log" 2>&1 || \
+	-r "$CHROOTDIR" -d '/build' -- \
+	'./build' > 'build.log' 2>&1 || \
 	exitcode=$?
 
-if [ ! -f ./run ] || [ ! -x ./run ]; then
-	echo "Compiling failed: no executable was created; compiler output:" >compile.out
-	cat build.log >>compile.out
-	cleanexit ${E_COMPILER_ERROR:-1}
+if [ $exitcode -ne 0 ]; then
+	echo "building failed with exitcode $exitcode" > 'build.log'
+	cleanexit 1
+fi
+if [ ! -f './build/run' ] || [ ! -x './build/run' ]; then
+	echo "building failed: no executable 'run' was created" > 'build.log'
+	cleanexit 1
 fi
 
-logmsg $LOG_INFO "Compilation successful"
+logmsg $LOG_INFO "building successful"
 cleanexit 0
