@@ -5,12 +5,10 @@
 # Usage: $0 <workdir>
 
 set -e
-trap error EXIT
+trap 'cleanup ; error' EXIT
 
-cleanexit ()
+cleanup ()
 {
-	trap - EXIT
-
 	$DJ_LIBJUDGEDIR/chroot-startstop.sh stop
 
 	# Make sure that all files are owned by the current user/group, so
@@ -19,6 +17,17 @@ cleanexit ()
 	# across multiple judgedaemons, and remove write permissions.
 	$GAINROOT chown -R "$(id -un):" $WORKDIR
 	chmod -R go-w $WORKDIR
+#	for i in bin etc lib lib64 proc usr; do
+#		rm -rf $i
+#	done
+}
+
+cleanexit ()
+{
+	set +e
+	trap - EXIT
+
+	cleanup
 
 	logmsg $LOG_DEBUG "exiting, code = '$1'"
 	exit $1
