@@ -171,7 +171,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
      * @param float|null $end
      * @return string
      */
-    public function printtimediff(float $start, $end = null): string
+    public function printtimediff(float $start, float $end = null): string
     {
         return Utils::printtimediff($start, $end);
     }
