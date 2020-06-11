@@ -209,10 +209,7 @@ remove_db_users()
 {
 	(
 	echo "DROP DATABASE IF EXISTS \`$DBNAME\`;"
-# Also drop "@%" users, since those may have been created by pre-4.0 versions
-# of DOMjudge.
-	echo "DROP USER IF EXISTS
-		'$domjudge_DBUSER'@'%', '$domjudge_DBUSER'@'localhost';"
+	echo "DROP USER IF EXISTS '$domjudge_DBUSER'@'localhost';"
 	echo "FLUSH PRIVILEGES;"
 	) | mysql -f
 	verbose "DOMjudge database and user(s) removed."
