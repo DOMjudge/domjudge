@@ -489,7 +489,7 @@ class ImportExportService
             }
 
             $data[] = [
-                $teamScore->team->getIcpcid() ?? $teamScore->team->getIcpcid(),
+                $teamScore->team->getIcpcid() ?? $teamScore->team->getTeamid(),
                 $rank,
                 $awardString,
                 $teamScore->numbPoints,
