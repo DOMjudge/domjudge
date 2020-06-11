@@ -492,7 +492,7 @@ class ImportExportService
                 $teamScore->team->getIcpcid() ?? $teamScore->team->getTeamid(),
                 $rank,
                 $awardString,
-                $teamScore->numbPoints,
+                $teamScore->numPoints,
                 $teamScore->totalTime,
                 $maxTime,
                 $groupWinner
