@@ -15,9 +15,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Intl\Exception\NotImplementedException;
 
 /**
- * @Rest\Route("/api/v4/contests/{cid}/balloons", defaults={ "_format" = "json" })
- * @Rest\Prefix("/api/contests/{cid}/balloons")
- * @Rest\NamePrefix("balloons_")
+ * @Rest\Route("/contests/{cid}/balloons")
  * @SWG\Tag(name="Balloons")
  * @SWG\Parameter(ref="#/parameters/cid")
  * @SWG\Response(response="404", ref="#/definitions/NotFound")

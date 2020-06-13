@@ -23,9 +23,6 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Routing\RouterInterface;
 
 /**
- * @Rest\Route("/api/v4", defaults={ "_format" = "json" })
- * @Rest\Prefix("/api")
- * @Rest\NamePrefix("general_")
  * @SWG\Tag(name="General")
  */
 class GeneralInfoController extends AbstractFOSRestController

@@ -22,9 +22,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
- * @Rest\Route("/api/v4/users", defaults={"_format" = "json"})
- * @Rest\Prefix("/api/users")
- * @Rest\NamePrefix("user_")
+ * @Rest\Route("/users", defaults={"_format" = "json"})
  * @SWG\Tag(name="Users")
  * @SWG\Response(response="404", ref="#/definitions/NotFound")
  * @SWG\Response(response="401", ref="#/definitions/Unauthorized")

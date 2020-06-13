@@ -34,9 +34,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
- * @Rest\Route("/api/v4/judgehosts", defaults={ "_format" = "json" })
- * @Rest\Prefix("/api/judgehosts")
- * @Rest\NamePrefix("judgehost_")
+ * @Rest\Route("/judgehosts")
  * @SWG\Tag(name="Judgehosts")
  */
 class JudgehostController extends AbstractFOSRestController

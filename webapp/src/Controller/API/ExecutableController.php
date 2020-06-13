@@ -12,9 +12,7 @@ use Swagger\Annotations as SWG;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
- * @Rest\Route("/api/v4/executables", defaults={ "_format" = "json" })
- * @Rest\Prefix("/api/executables")
- * @Rest\NamePrefix("executable_")
+ * @Rest\Route("/executables")
  * @SWG\Tag(name="Executables")
  */
 class ExecutableController extends AbstractFOSRestController

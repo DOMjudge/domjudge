@@ -17,9 +17,7 @@ use Swagger\Annotations as SWG;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
- * @Rest\Route("/api/v4/contests/{cid}/judgements", defaults={ "_format" = "json" })
- * @Rest\Prefix("/api/contests/{cid}/judgements")
- * @Rest\NamePrefix("judgement_")
+ * @Rest\Route("/contests/{cid}/judgements")
  * @SWG\Tag(name="Judgements")
  * @SWG\Parameter(ref="#/parameters/cid")
  * @SWG\Response(response="404", ref="#/definitions/NotFound")

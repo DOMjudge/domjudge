@@ -1,3 +1,4 @@
 controllers:
-    resource: ../../src/Controller/
+    resource: ../../src/Controller/**/*
+    exclude: ../../src/Controller/API
     type: annotation

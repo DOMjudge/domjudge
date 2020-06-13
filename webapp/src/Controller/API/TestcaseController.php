@@ -17,9 +17,7 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
- * @Rest\Route("/api/v4/testcases", defaults={ "_format" = "json" })
- * @Rest\Prefix("/api/testcases")
- * @Rest\NamePrefix("testcase_")
+ * @Rest\Route("/testcases")
  * @SWG\Tag(name="Testcases")
  */
 class TestcaseController extends AbstractFOSRestController

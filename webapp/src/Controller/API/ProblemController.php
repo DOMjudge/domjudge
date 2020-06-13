@@ -22,9 +22,7 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
- * @Rest\Route("/api/v4/contests/{cid}/problems", defaults={ "_format" = "json" })
- * @Rest\Prefix("/api/contests/{cid}/problems")
- * @Rest\NamePrefix("problems_")
+ * @Rest\Route("/contests/{cid}/problems")
  * @SWG\Tag(name="Problems")
  * @SWG\Parameter(ref="#/parameters/cid")
  * @SWG\Response(response="404", ref="#/definitions/NotFound")

@@ -19,9 +19,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Intl\Exception\NotImplementedException;
 
 /**
- * @Rest\Route("/api/v4/contests/{cid}/awards", defaults={ "_format" = "json" })
- * @Rest\Prefix("/api/contests/{cid}/awards")
- * @Rest\NamePrefix("awards_")
+ * @Rest\Route("/contests/{cid}/awards")
  * @SWG\Tag(name="Awards")
  * @SWG\Parameter(ref="#/parameters/cid")
  * @SWG\Response(response="404", ref="#/definitions/NotFound")
