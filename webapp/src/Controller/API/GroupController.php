@@ -10,9 +10,7 @@ use Swagger\Annotations as SWG;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
- * @Rest\Route("/api/v4/contests/{cid}/groups", defaults={ "_format" = "json" })
- * @Rest\Prefix("/api/contests/{cid}/groups")
- * @Rest\NamePrefix("group_")
+ * @Rest\Route("/contests/{cid}/groups")
  * @SWG\Tag(name="Groups")
  * @SWG\Parameter(ref="#/parameters/cid")
  * @SWG\Response(response="404", ref="#/definitions/NotFound")

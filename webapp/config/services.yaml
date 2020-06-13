@@ -23,7 +23,7 @@ services:
     # this creates a service per class whose id is the fully-qualified class name
     App\:
         resource: '../src/*'
-        exclude: '../src/{DependencyInjection,Entity,Migrations,Kernel.php}'
+        exclude: '../src/{DependencyInjection,Entity,Migrations,FosRestBundle,Kernel.php}'
 
     # controllers are imported separately to make sure services can be injected
     # as action arguments even if you don't extend any base controller class
@@ -46,11 +46,10 @@ services:
         tags:
             - { name: monolog.processor }
 
-    fos_rest.exception.controller:
+    fos_rest.serializer.flatten_exception_handler:
         public: true
-        class: App\FosRestBundle\ExceptionController
+        class: App\FosRestBundle\FlattenExceptionHandler
         arguments:
-            - '@fos_rest.view_handler'
             - '@fos_rest.exception.codes_map'
             - '%kernel.debug%'
 

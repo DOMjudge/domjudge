@@ -11,9 +11,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Intl\Exception\NotImplementedException;
 
 /**
- * @Rest\Route("/api/v4/contests/{cid}/judgement-types", defaults={ "_format" = "json" })
- * @Rest\Prefix("/api/contests/{cid}/judgement-types")
- * @Rest\NamePrefix("judgement_type_")
+ * @Rest\Route("/contests/{cid}/judgement-types")
  * @SWG\Tag(name="Judgement types")
  */
 class JudgementTypeController extends AbstractRestController

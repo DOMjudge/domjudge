@@ -21,9 +21,7 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Intl\Exception\NotImplementedException;
 
 /**
- * @Rest\Route("/api/v4/contests/{cid}/scoreboard", defaults={ "_format" = "json" })
- * @Rest\Prefix("/api/contests/{cid}/scoreboard")
- * @Rest\NamePrefix("scoreboard_")
+ * @Rest\Route("/contests/{cid}/scoreboard")
  * @SWG\Tag(name="Scoreboard")
  * @SWG\Parameter(ref="#/parameters/cid")
  * @SWG\Response(response="404", ref="#/definitions/NotFound")

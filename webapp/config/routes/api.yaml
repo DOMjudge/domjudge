@@ -1,0 +1,14 @@
+# Add the API controllers twice, both with the /api/v4 as well as the /api prefix
+domjudge_api_v4:
+    type: annotation
+    resource: ../../src/Controller/API/
+    prefix: /api/v4
+    name_prefix: v4_
+    defaults: { _format: "json" }
+
+domjudge_api_current:
+    type: annotation
+    resource: ../../src/Controller/API/
+    prefix: /api
+    name_prefix: current_
+    defaults: { _format: "json" }

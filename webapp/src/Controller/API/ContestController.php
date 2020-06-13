@@ -32,9 +32,7 @@ use Symfony\Component\Inflector\Inflector;
 use Symfony\Component\Yaml\Yaml;
 
 /**
- * @Rest\Route("/api/v4/contests", defaults={ "_format" = "json" })
- * @Rest\Prefix("/api/contests")
- * @Rest\NamePrefix("contest_")
+ * @Rest\Route("/contests")
  * @SWG\Tag(name="Contests")
  * @SWG\Response(response="404", ref="#/definitions/NotFound")
  * @SWG\Response(response="401", ref="#/definitions/Unauthorized")
