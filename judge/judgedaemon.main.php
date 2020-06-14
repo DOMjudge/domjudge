@@ -736,6 +736,26 @@ function send_unsent_judging_runs($unsent_judging_runs, $judgingid)
     );
 }
 
+function cleanup_judging(string $workdir) : void
+{
+    // revoke readablity for domjudge-run user to this workdir
+    chmod($workdir, 0700);
+
+    // destroy chroot environment
+    logmsg(LOG_INFO, "executing chroot script: '".CHROOT_SCRIPT." stop'");
+    system(LIBJUDGEDIR.'/'.CHROOT_SCRIPT.' stop', $retval);
+    if ($retval!=0) {
+        error("chroot script exited with exitcode $retval");
+    }
+
+    // Evict all contents of the workdir from the kernel fs cache
+    system(LIBJUDGEDIR . "/evict $workdir", $retval);
+    if ($retval!=0) {
+        warning("evict script exited with exitcode $retval");
+    }
+
+}
+
 function judge(array $row)
 {
     global $EXITCODES, $myhost, $options, $workdirpath, $exitsignalled, $gracefulexitsignalled;
@@ -892,8 +912,8 @@ function judge(array $row)
             disable('judgehost', 'hostname', $myhost, $description, $row['judgingid'], (string)$row['cid'], $compile_output);
         }
         logmsg(LOG_ERR, $description);
-        // revoke readablity for domjudge-run user to this workdir
-        chmod($workdir, 0700);
+
+        cleanup_judging($workdir);
         return;
     }
 
@@ -903,8 +923,8 @@ function judge(array $row)
         logmsg(LOG_ERR, "Unknown exitcode from compile.sh for s$row[submitid]: $retval");
         $description = "compile script '" . $row['compile_script'] . "' returned exit code " . $retval;
         disable('language', 'langid', $row['langid'], $description, $row['judgingid'], (string)$row['cid'], $compile_output);
-        // revoke readablity for domjudge-run user to this workdir
-        chmod($workdir, 0700);
+
+        cleanup_judging($workdir);
         return;
     }
     $compile_success = ($EXITCODES[$retval]==='correct');
@@ -921,8 +941,7 @@ function judge(array $row)
 
     // compile error: our job here is done
     if (! $compile_success) {
-        // revoke readablity for domjudge-run user to this workdir
-        chmod($workdir, 0700);
+        cleanup_judging($workdir);
         logmsg(LOG_NOTICE, "Judging s$row[submitid]/j$row[judgingid]: compile error");
         return;
     }
@@ -1100,26 +1119,12 @@ function judge(array $row)
         }
     }
 
-    // revoke readablity for domjudge-run user to this workdir
-    chmod($workdir, 0700);
-
-    // destroy chroot environment
-    logmsg(LOG_INFO, "executing chroot script: '".CHROOT_SCRIPT." stop'");
-    system(LIBJUDGEDIR.'/'.CHROOT_SCRIPT.' stop', $retval);
-    if ($retval!=0) {
-        error("chroot script exited with exitcode $retval");
-    }
-
-    // Evict all contents of the workdir from the kernel fs cache
-    system(LIBJUDGEDIR . "/evict $workdir", $retval);
-    if ($retval!=0) {
-        warning("evict script exited with exitcode $retval");
-    }
-
     // Sanity check: need to have had at least one testcase
     if ($totalcases == 0) {
         logmsg(LOG_WARNING, "No testcases judged for s$row[submitid]/j$row[judgingid]!");
     }
+
+    cleanup_judging($workdir);
 
     // done!
     logmsg(LOG_NOTICE, "Judging s$row[submitid]/j$row[judgingid] finished");
