@@ -30,10 +30,10 @@ CDS_PRESENTATION_PASS="presentation"
 CDS_MYICPC_PASS="myicpc"
 CDS_LIVE_PASS="live"
 
-CDS_VERSION="2.1.1992"
-UTILS_VERSION="2.1.1992"
-CDS_URL="https://pc2.ecs.csus.edu/pc2projects/build/CDS/dist/wlp.CDS-${CDS_VERSION}.zip"
-UTILS_URL="https://pc2.ecs.csus.edu/pc2projects/build/ContestUtil/dist/contestUtil-$UTILS_VERSION.zip"
+CDS_VERSION="2.2.386"
+UTILS_VERSION="2.2.386"
+CDS_URL="https://github.com/icpctools/builds/releases/download/v${CDS_VERSION}/wlp.CDS-${CDS_VERSION}.zip"
+UTILS_URL="https://github.com/icpctools/builds/releases/download/v${UTILS_VERSION}/contestUtil-${UTILS_VERSION}.zip"
 
 wait_for_quiet() {
   FILE_TO_WATCH="$1"
@@ -89,8 +89,8 @@ if [ ! -d "$CONTESTUTIL_DIR" ]; then
 
   echo "    Extracting contest utils..."
   TMPDIR="$(mktemp -d)"
-  unzip -d $TMPDIR $SOURCE_ARCHIVE >/dev/null 2>&1
-  mv $TMPDIR/contestUtil-2.1 $CONTESTUTIL_DIR
+  unzip -d $TMPDIR/contestUtil $SOURCE_ARCHIVE >/dev/null 2>&1
+  mv $TMPDIR/contestUtil $CONTESTUTIL_DIR
   rm -r "$TMPDIR"
 fi
 echo "Contest utils present"
