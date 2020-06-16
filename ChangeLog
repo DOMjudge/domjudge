@@ -16,6 +16,7 @@ Version 7.3.0 - DEV
  - Fix permissions on webapp/var/* by using group setsid bit.
  - Allow public and team to view submissions, awards and clarifications
    using the API.
+ - Allow users with API_READER role to fetch inactive contests
  - Drop smart renaming for Java public classes.
  - Show browser notifications also for new balloons to be handed out.
  - Add option to allow teams to download their own submission.
