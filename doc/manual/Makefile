@@ -27,7 +27,7 @@ maintainer-install: docs
 	ln -sf build/team
 
 clean-l:
-	rm -rf build/doctrees conf_ref.rst
+	rm -rf build/doctrees build/team/.doctrees conf_ref.rst
 
 maintainer-clean-l:
 	rm -rf build
