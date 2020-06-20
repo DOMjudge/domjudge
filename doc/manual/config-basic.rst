@@ -40,6 +40,17 @@ A jury or administrative user can also be associated with a team. This
 will enable that user to submit solutions to the system, or resubmit
 edited team solutions.
 
+Resetting the password for a user
+---------------------------------
+
+If you do not have access anymore to any admin user, you can use the following
+command to reset the password of a user to a random value::
+
+  webapp/bin/console domjudge:reset-user-password admin
+
+Replace ``admin`` with the username of the user you want to reset the password for.
+The password will be displayed.
+
 Adding a contest
 ----------------
 You configure a new contest by adding it under the Contests link
