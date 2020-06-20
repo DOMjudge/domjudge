@@ -762,15 +762,36 @@ part.";
     }
 
     /**
-     * Test that the generatePassword function generates a valid password
+     * Test that the generatePassword function generates a valid password (when
+     * using more entropy)
      */
-    public function testGeneratePassword()
+    public function testGeneratePasswordMoreEntropy()
+    {
+        $passes = [];
+        $onlyCorrectChars = true;
+        for ($i=0; $i < 100; ++$i) {
+            $pass = Utils::generatePassword();
+            $onlyCorrectChars = $onlyCorrectChars && preg_match('/^[a-zA-Z0-9_-]+$/', $pass);
+            $passes[] = $pass;
+        }
+
+        $this->assertEquals(1, max(array_count_values($passes)));
+        $this->assertEquals(16, min(array_map('strlen', $passes)));
+        $this->assertEquals(16, max(array_map('strlen', $passes)));
+        $this->assertTrue($onlyCorrectChars);
+    }
+
+    /**
+     * Test that the generatePassword function generates a valid password when
+     * using less entropy
+     */
+    public function testGeneratePasswordWithLessEntropy()
     {
         $passes = [];
         $onlyalnum = true;
         $containsforbidden = false;
         for ($i=0; $i < 100; ++$i) {
-            $pass = Utils::generatePassword();
+            $pass = Utils::generatePassword(false);
             $onlyalnum = $onlyalnum && ctype_alnum($pass);
             $containsforbidden = $containsforbidden || preg_match('/o01l[A-Z]/', $pass);
             $passes[] = $pass;
