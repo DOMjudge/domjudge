@@ -40,6 +40,23 @@ A jury or administrative user can also be associated with a team. This
 will enable that user to submit solutions to the system, or resubmit
 edited team solutions.
 
+Resetting the password for a user
+---------------------------------
+
+If you lose access to the ``admin`` user, you can reset the password using the
+following commands::
+
+  cd webapp
+  php -a  # starts PHP in interactive mode
+  require 'config/bootstrap.php';
+  $kernel = new App\Kernel('prod', true);
+  $kernel->boot();
+  $conn = $kernel->getContainer()->get('database_connection');
+  $sql = "UPDATE user SET password = :pass WHERE username = 'admin'";
+  $conn->executeUpdate($sql, [':pass' => password_hash(readline('New password: '), PASSWORD_BCRYPT)]);
+
+Then enter the new password.
+
 Adding a contest
 ----------------
 You configure a new contest by adding it under the Contests link
