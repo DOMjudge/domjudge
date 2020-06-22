@@ -51,7 +51,7 @@ If you are interested in starting to contribute to DOMjudge, you are
 most welcome. The following are some pointers.
 
 First, install and configure the development version of DOMjudge.
-Either directly from the git reposity, see the [developer information](https://www.domjudge.org/docs/manual/develop.html)
+Either directly from the git reposity, see the [developer information](https://www.domjudge.org/docs/manual/master/develop.html)
 section in the admin manual, or via the [contributor docker image](https://github.com/DOMjudge/domjudge-packaging/tree/master/docker-contributor).
 If you follow the admin manual for installation, this is also a great
 way to verify that the documentation is clear and complete, and to
