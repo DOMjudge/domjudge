@@ -149,9 +149,9 @@ On each judgehost, copy from the domserver (or create) a file
 ``etc/restapi.secret`` containing the id, URL,
 username and password whitespace-separated on one line, for example::
 
-  default http://example.edu/domjudge/api/  judgehosts  MzfJYWF5agSlUfmiGEy5mgkfqU
+  default http://example.edu/domjudge/api/  judgehost  MzfJYWF5agSlUfmiGEy5mgkfqU
 
-The password here must be identical to that of the ``judgehosts`` user
+The password here must be identical to that of the ``judgehost`` user
 in the admin web interface. Multiple lines may be specified to allow a
 judgedaemon to work for multiple domservers. The id in the first column
 is used to differentiate between multiple domservers, and should be
