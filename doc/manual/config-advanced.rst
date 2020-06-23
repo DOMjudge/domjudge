@@ -97,12 +97,19 @@ match what is in the ``REMOTE_USER`` variable.
 
 Set up the respective module to authenticate incoming users for the URL
 path of your installation. Then, in ``webapp/config/packages/security.yaml``
-change the ``main`` section of your source tree to look like this::
+change the ``main`` section of your source tree to add a ``remote_user``
+key after ``form_login`` that looks like this::
 
-  main:
-    pattern: ^/
-    remote_user:
-      provider: domjudge_db_provider
+         main:
+             pattern: ^/
+             …
+             form_login:
+                 login_path: login
+                 check_path: login
+                 csrf_token_generator: security.csrf.token_manager
+                 use_referer: true
+             remote_user:
+                 provider: domjudge_db_provider
 
 And re-run the "make install" command to deploy this change.
 Or alternatively remove the entire ``var/cache/prod/`` directory when
