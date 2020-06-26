@@ -1,7 +1,7 @@
 DOMjudge Programming Contest Judging System
 
-Version 7.3.0 - DEV
--------------------
+Version 7.3.0 - 26 June 2020
+----------------------------
  - Move specification of database configuration out of database and into
    a YAML file. Also show select boxes when appropriate.
  - Rename team.externalid to team.icpcid, since it is not an external ID in
