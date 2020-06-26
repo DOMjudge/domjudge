@@ -63,7 +63,7 @@ and see whether our documentation of this can be improved. Or to review
 the open issues on the [issue tracker](https://github.com/DOMjudge/domjudge/issues)
 and find a way to reproduce them or provide ideas for a solution.
 
-The list of [good first issues](https://github.com/DOMjudge/domjudge/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22).
+The list of [good first issues](https://github.com/DOMjudge/domjudge/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22)
 shows items that are particularly well suites for first-time contributors
 to DOMjudge. But of course feel free to start on other items on the issue
 tracker as well!
