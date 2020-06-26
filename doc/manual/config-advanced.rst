@@ -128,7 +128,7 @@ allow, self-registration is disabled. When one category is set to allow,
 self-registration is enabled and newly registered teams will be placed in this
 category. When multiple categories are set to allow, teams can choose one of
 them during registration. Teams can also specify their affiliation during
-registration.
+registration, if the global configuration option 'show affiliations' is enabled.
 
 Executables
 -----------
