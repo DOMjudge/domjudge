@@ -10,12 +10,11 @@ import java.io.*;
 
 class Main {
     public static void main(String[] args) throws Exception {
-		int i;
 		int[][] ar = new int[10240][];
 
-		for(i=0; 1==1; i++) {
-			ar[i] = new int[1024*1024/4];
-			System.out.print("allocated " + (i+1) + " MB of memory\n");
+		for(int i=0; true; i++) {
+			ar[i] = new int[256*1024*1024];
+			System.out.print("allocated " + 256*(i+1) + " MB of memory\n");
 		}
     }
 }
