@@ -1,6 +1,17 @@
 #!/bin/bash
 
 set -euxo pipefail
+
+function section_start() {
+	echo -e "section_start:`date +%s`:$1\r\e[0K$2"
+}
+
+function section_end() {
+	echo -e "section_end:`date +%s`:$1\r\e[0K"
+}
+
+section_start setup "Setup and install"
+
 export PS4='(${BASH_SOURCE}:${LINENO}): - [$?] $ '
 
 DIR=$(pwd)
@@ -47,11 +58,14 @@ ADMINPASS=$(cat etc/initial_admin_password.secret)
 sudo cp /opt/domjudge/domserver/etc/domjudge-fpm.conf "/etc/php/7.2/fpm/pool.d/domjudge-fpm.conf"
 sudo /usr/sbin/php-fpm7.2
 
-# test submit client
+section_end setup
+
+section_start submit_client "Test submit client"
 cd ${DIR}/submit
 make check-full
+section_end submit_client
 
-# configure judgehost
+section_start judgehost "Configure judgehost"
 cd /opt/domjudge/judgehost/
 sudo cp /opt/domjudge/judgehost/etc/sudoers-domjudge /etc/sudoers.d/
 sudo chmod 400 /etc/sudoers.d/sudoers-domjudge
@@ -61,7 +75,9 @@ if [ ! -d ${DIR}/chroot/domjudge/ ]; then
 	cd ${DIR}/misc-tools
 	time sudo ./dj_make_chroot -a amd64
 fi
+section_end judgehost
 
+section_start more_setup "Remaining setup (e.g. starting judgedaemon)"
 # download domjudge-scripts for API check
 cd $HOME
 composer -n require justinrainbow/json-schema
@@ -88,8 +104,9 @@ cat /var/log/nginx/domjudge.log
 if sudo test -f "$LOGFILE" ; then
   sudo cat "$LOGFILE"
 fi
+section_end more_setup
 
-# submit test programs
+section_start submitting "Submitting test sources (including Kattis example)"
 cd ${DIR}/tests
 make check test-stress
 
@@ -106,7 +123,9 @@ for i in hello_kattis different guess; do
 	)
 	curl --fail -X POST -n -N -F zip[]=@${i}.zip http://localhost/domjudge/api/contests/2/problems
 done
+section_end submitting
 
+section_start judging "Waiting until all submissions are judged"
 # wait for and check results
 NUMSUBS=$(curl --fail http://admin:$ADMINPASS@localhost/domjudge/api/contests/2/submissions | python -mjson.tool | grep -c '"id":')
 export COOKIEJAR
@@ -141,15 +160,20 @@ while /bin/true; do
 done
 
 NUMNOMAGIC=$(curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier" | grep "without magic string" | sed -r 's/^.* ([0-9]+) without magic string.*$/\1/')
+section_end judging
 
 # include debug output here
 if [ $NUMNOTVERIFIED -ne 2 ] || [ $NUMNOMAGIC -ne 0 ] || [ $NUMSUBS -gt $((NUMVERIFIED+NUMNOTVERIFIED)) ]; then
+	section_start error "Short error description"
 	# We error out below anyway, so no need to fail earlier than that.
 	set +e
 	echo "verified subs: $NUMVERIFIED, unverified subs: $NUMNOTVERIFIED, total subs: $NUMSUBS"
 	echo "(expected 2 submissions to be unverified, but all to be processed)"
 	echo "Of these $NUMNOMAGIC do not have the EXPECTED_RESULTS string (should be 0)."
 	curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier?verify_multiple=1"
+	section_end error
+
+	section_start logfiles "All the more or less useful logfiles"
 	for i in /opt/domjudge/judgehost/judgings/*/*/*/*/*/compile.out; do
 		echo $i;
 		head -n 100 $i;
@@ -170,9 +194,11 @@ if [ $NUMNOTVERIFIED -ne 2 ] || [ $NUMNOMAGIC -ne 0 ] || [ $NUMSUBS -gt $((NUMVE
 	cat /var/log/nginx/domjudge.log
 	echo -e "\nSymfony log:"
 	cat "$LOGFILE"
+	section_end logfiles
 	exit -1;
 fi
 
+section_start api_check "Performing API checks"
 # Start logging again
 set -x
 
@@ -181,7 +207,9 @@ echo "DELETE FROM contest WHERE cid =1" | mysql domjudge
 
 # Check the Contest API:
 $CHECK_API -n -C -e -a 'strict=1' http://admin:$ADMINPASS@localhost/domjudge/api
+section_end api_check
 
-# Validate the eventfeed against the api(currently ignore failures)
+section_start validate_feed "Validate the eventfeed against API (ignoring failures)"
 cd ${DIR}/misc-tools
 ./compare-cds.sh http://localhost/domjudge 2 || true
+section_end validate_feed
