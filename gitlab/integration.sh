@@ -1,14 +1,23 @@
 #!/bin/bash
 
-set -euxo pipefail
+shopt -s expand_aliases
+alias trace_on='set -x'
+alias trace_off='{ set +x; } 2>/dev/null'
 
-function section_start() {
+function section_start_internal() {
 	echo -e "section_start:`date +%s`:$1\r\e[0K$2"
+	trace_on
 }
 
-function section_end() {
+function section_end_internal() {
 	echo -e "section_end:`date +%s`:$1\r\e[0K"
+	trace_on
 }
+
+alias section_start='trace_off ; section_start_internal '
+alias section_end='trace_off ; section_end_internal '
+
+set -euxo pipefail
 
 section_start setup "Setup and install"
 
