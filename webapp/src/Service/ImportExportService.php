@@ -708,12 +708,12 @@ class ImportExportService
     protected function importOrganizationsJson(array $data, string &$message = null): int
     {
         $organizationData = [];
-        foreach ($data as $idx => $group) {
+        foreach ($data as $idx => $organization) {
             $organizationData[] = [
-                'externalid' => @$group['id'],
-                'shortname' => @$group['name'],
-                'name' => @$group['formal_name'],
-                'country' => @$group['country'],
+                'externalid' => @$organization['id'],
+                'shortname' => @$organization['name'],
+                'name' => @$organization['formal_name'],
+                'country' => @$organization['country'],
             ];
         }
 
