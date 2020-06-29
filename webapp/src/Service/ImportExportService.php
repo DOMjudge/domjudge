@@ -733,7 +733,10 @@ class ImportExportService
     {
         foreach ($organizationData as $organizationItem) {
             $externalId      = $organizationItem['externalid'];
-            $teamAffiliation = $this->em->getRepository(TeamAffiliation::class)->findOneBy(['externalid' => $externalId]);
+            $teamAffiliation = null;
+            if ($externalId !== null) {
+                $teamAffiliation = $this->em->getRepository(TeamAffiliation::class)->findOneBy(['externalid' => $externalId]);
+            }
             if (!$teamAffiliation) {
                 $teamAffiliation = new TeamAffiliation();
                 $teamAffiliation->setExternalid($externalId);
