@@ -512,11 +512,16 @@ class SubmissionService
 
         $this->logger->info('Submission input verified');
 
-        // First look up any expected results in file, so as to minimize the
+        // First look up any expected results in all submission files, so as to minimize the
         // SQL transaction time below.
         if ($this->dj->checkrole('jury')) {
-            $results = self::getExpectedResults(file_get_contents($files[0]->getRealPath()),
-                $this->config->get('results_remap'));
+            foreach ($files as $rank => $file) {
+                $results = self::getExpectedResults(file_get_contents($file->getRealPath()),
+                    $this->config->get('results_remap'));
+                if ($results !== null){
+                    break;
+                }
+            }
         }
 
         $submission = new Submission();
