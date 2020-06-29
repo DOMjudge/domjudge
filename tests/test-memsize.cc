@@ -2,8 +2,9 @@
  * This should fail with RUN-ERROR due to running out of memory, which
  * is restricted.
  *
- * Note: This may try to create a coredump on exit and time out. This
- * can be prevented with `ulimit -c 0`.
+ * Note: If running this locally, first restrict memory by running
+ * e.g. `ulimit -v 2000000` for 2GB, and make sure coredumps are
+ * disabled by running `ulimit -c 0` to make it faster.
  *
  * @EXPECTED_RESULTS@: RUN-ERROR
  */
