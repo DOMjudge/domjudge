@@ -21,6 +21,15 @@
 
 {% macro jscolor_extrahead() %}
     <script src="{{ asset('js/jscolor.js') }}"></script>
+    <script>
+        jscolor.presets.default = {
+            required:     false,
+            refine:       false,
+            hash:         true,
+            uppercase:    false,
+            alphaChannel: false,
+        };
+    </script>
 {% endmacro %}
 
 {% macro table_extrahead() %}

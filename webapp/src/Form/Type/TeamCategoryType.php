@@ -20,7 +20,7 @@ class TeamCategoryType extends AbstractType
         $builder->add('color', TextType::class, [
             'required' => false,
             'attr' => [
-                'class' => 'color {required:false,adjust:false,hash:true,caps:false}',
+                'data-jscolor' => '',
             ],
             'help' => '<a target="_blank" href="https://en.wikipedia.org/wiki/Web_colors"><i class="fas fa-question-circle"></i></a>',
             'help_html' => true,

@@ -56,7 +56,7 @@ themselves and these copyrights/attributions can also be found in the
 DOMjudge manual.
 
 The following JavaScript libraries/snippets are included:
-- jscolor.js: copyright Jan Odvarko, licensed under the GNU LGPL.
+- jscolor.js: copyright Jan Odvarko, licensed under the GNU GPL v3.
 - Ace editor: licensed under the BSD licence, see COPYING.BSD.
 
 The default validator from the Kattis problemtools package is
