@@ -45,6 +45,7 @@
 #ServerName _default_
 #DocumentRoot @domserver_webappdir@/public
 #
+# See https://ssl-config.mozilla.org/ to generate good TLS settings for your server
 #SSLEngine on
 #SSLCertificateFile    /path/to/your/SSL-certificate.crt
 #SSLCertificateKeyFile /path/to/your/SSL-key.key
