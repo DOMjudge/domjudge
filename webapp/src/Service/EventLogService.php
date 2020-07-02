@@ -14,6 +14,7 @@ use Doctrine\Common\Inflector\Inflector;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\MappingException;
 use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\Query\Expr\Join;
 use Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
@@ -585,6 +586,97 @@ class EventLogService implements ContainerAwareInterface
     }
 
     /**
+     * Insert the given events, if it doesn't exist yet.
+     *
+     * This method will make sure that the events are all only inserted once,
+     * even if called simultaneously from different processes.
+     *
+     * @param Contest $contest
+     * @param string  $endpointType
+     * @param array   $endpointIds
+     * @param array   $contents
+     *
+     * @throws NonUniqueResultException
+     * @throws Exception
+     */
+    protected function insertEvents(
+        Contest $contest,
+        string $endpointType,
+        array $endpointIds,
+        $contents
+    ) {
+        if (empty($endpointIds)) {
+            return;
+        }
+
+        $events = [];
+        $firstEndpointId = null;
+        $firstEvent = null;
+        foreach ($endpointIds as $index => $endpointId) {
+            $event = new Event();
+            $event
+                ->setEventtime(Utils::now())
+                ->setContest($contest)
+                ->setEndpointtype($endpointType)
+                ->setEndpointid($endpointId)
+                ->setContent($contents[$index]);
+            $events[] = $event;
+            if ($firstEndpointId === null) {
+                $firstEndpointId = $endpointId;
+                $firstEvent = $event;
+            }
+        }
+
+        // Now we can insert the event. However, before doing so,
+        // get an advisory lock to make sure no one else is doing the same
+        $lockString = sprintf('domjudge.eventlog.%d.%s.%s',
+            $firstEvent->getContest()->getCid(),
+            $endpointType,
+            $firstEndpointId
+        );
+        if ($this->em->getConnection()->fetchColumn('SELECT GET_LOCK(:lock, 1)',
+                [':lock' => $lockString]) != 1) {
+            throw new Exception('EventLogService::insertEvent failed to obtain lock');
+        }
+
+        // Note that for events without an ID (i.e. state), the endpointid
+        // is set to ''. This means this call will also work for these
+        // kinds of events
+        $existingEvents = $this->getExistingEvents($events);
+
+        foreach ($events as $event) {
+            // If we have no event or the data is different, add it
+            $existingEvent = $existingEvents[$event->getEndpointid()] ?? null;
+            $existingData = $existingEvent === null ?
+                null :
+                $this->dj->jsonEncode($existingEvent->getContent());
+            $data = $this->dj->jsonEncode($event->getContent());
+            if ($existingEvent === null || $existingData !== $data) {
+                // Special case for state: this is always an update event
+                if ($endpointType === 'state') {
+                    $event->setAction(self::ACTION_UPDATE);
+                } else {
+                    // Set the action based on whether there was already an event
+                    // for the same endpoint and ID
+                    $event->setAction(
+                        $existingEvent === null ?
+                            self::ACTION_CREATE :
+                            self::ACTION_UPDATE
+                    );
+                }
+                $this->em->persist($event);
+            }
+        }
+        $this->em->flush();
+
+        // Make sure to release the lock again
+        if ($this->em->getConnection()->fetchColumn('SELECT RELEASE_LOCK(:lock)',
+                [':lock' => $lockString]) != 1) {
+            throw new Exception('EventLogService::insertEvent failed to release lock');
+        }
+    }
+
+    /**
      * Insert the given event, if it doesn't exist yet.
      *
      * This method will make sure that the event is only inserted once,
@@ -603,58 +695,7 @@ class EventLogService implements ContainerAwareInterface
         string $endpointId,
         $content
     ) {
-        $event = new Event();
-        $event
-            ->setEventtime(Utils::now())
-            ->setContest($contest)
-            ->setEndpointtype($endpointType)
-            ->setEndpointid($endpointId)
-            ->setContent($content);
-
-        // Now we can insert the event. However, before doing so,
-        // get an advisory lock to make sure no one else is doing the same
-        $lockString = sprintf('domjudge.eventlog.%d.%s.%s',
-            $event->getContest()->getCid(),
-            $endpointType,
-            $endpointId
-        );
-        if ($this->em->getConnection()->fetchColumn('SELECT GET_LOCK(:lock, 1)',
-                [':lock' => $lockString]) != 1) {
-            throw new Exception('EventLogService::insertEvent failed to obtain lock');
-        }
-
-        // Note that for events without an ID (i.e. state), the endpointid
-        // is set to ''. This means this call will also work for these
-        // kinds of events
-        $existingEvent = $this->getExistingEvent($event);
-
-        // If we have no event or the data is different, add it
-        $existingData = $existingEvent === null ?
-            null :
-            $this->dj->jsonEncode($existingEvent->getContent());
-        $data         = $this->dj->jsonEncode($event->getContent());
-        if ($existingEvent === null || $existingData !== $data) {
-            // Special case for state: this is always an update event
-            if ($endpointType === 'state') {
-                $event->setAction(self::ACTION_UPDATE);
-            } else {
-                // Set the action based on whether there was already an event
-                // for the same endpoint and ID
-                $event->setAction(
-                    $existingEvent === null ?
-                        self::ACTION_CREATE :
-                        self::ACTION_UPDATE
-                );
-            }
-            $this->em->persist($event);
-            $this->em->flush();
-        }
-
-        // Make sure to release the lock again
-        if ($this->em->getConnection()->fetchColumn('SELECT RELEASE_LOCK(:lock)',
-                [':lock' => $lockString]) != 1) {
-            throw new Exception('EventLogService::insertEvent failed to release lock');
-        }
+        $this->insertEvents($contest, $endpointType, [$endpointId], [$content]);
     }
 
     /**
@@ -729,9 +770,10 @@ class EventLogService implements ContainerAwareInterface
                 });
 
                 // Insert the events
-                foreach ($data as $i => $row) {
-                    $this->insertEvent($contest, $endpoint, $row['id'], $row);
-                }
+                $ids = array_map(function(array $row) {
+                    return $row['id'];
+                }, $data);
+                $this->insertEvents($contest, $endpoint, $ids, $data);
             }
         }
     }
@@ -811,33 +853,39 @@ class EventLogService implements ContainerAwareInterface
     }
 
     /**
-     * Get the existing event with the same API data as this event
-     * @param Event $event
-     * @return Event|null
-     * @throws NonUniqueResultException
+     * Get the existing events with the same API data as these events,
+     * indexed by event endpoint ID. Note that this function expects at least
+     * one event and all events should have the same contest and endpoint.
+     *
+     * @param Event[] $events
+     * @return Event[]
      */
-    protected function getExistingEvent(Event $event)
+    protected function getExistingEvents(array $events)
     {
-        /** @var Event $existingEvent */
-        $existingEvent = $this->em->createQueryBuilder()
-            ->from(Event::class, 'e')
+        $endpointIds = array_map(function(Event $event) {
+            return $event->getEndpointid();
+        }, $events);
+        /** @var Event[] $events */
+        $events = $this->em->createQueryBuilder()
+            ->from(Event::class, 'e', 'e.endpointid')
+            ->leftJoin(Event::class, 'e2', Join::WITH,
+                'e2.contest = e.contest AND e2.endpointtype = e.endpointtype AND e2.endpointid = e.endpointid AND e2.eventid > e.eventid'
+            )
             ->select('e')
             ->andWhere('e.contest = :contest')
             ->andWhere('e.endpointtype = :endpoint')
-            ->andWhere('e.endpointid = :endpointid')
-            ->setParameter(':contest', $event->getContest())
-            ->setParameter(':endpoint', $event->getEndpointtype())
-            ->setParameter(':endpointid', $event->getEndpointid())
-            ->setMaxResults(1)
+            ->andWhere('e.endpointid IN (:endpointids)')
+            ->andWhere('e2.eventid IS NULL')
+            ->setParameter(':contest', $events[0]->getContest())
+            ->setParameter(':endpoint', $events[0]->getEndpointtype())
+            ->setParameter(':endpointids', $endpointIds)
             ->orderBy('e.eventid', 'DESC')
             ->getQuery()
-            ->getOneOrNullResult();
+            ->getResult();
 
-        if (!$existingEvent || $existingEvent->getAction() === self::ACTION_DELETE) {
-            return null;
-        }
-
-        return $existingEvent;
+        return array_filter($events, function(Event $event) {
+            return $event->getAction() !== self::ACTION_DELETE;
+        });
     }
 
     /**
