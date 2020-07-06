@@ -87,6 +87,12 @@ DOMjudge supports running :ref:`multiple judgedaemons <multiple-judgedaemons>`
 in parallel on a single judgehost machine. This might be useful on multi-core
 machines.
 
+.. warning::
+
+  The judgehost requires Linux cgroup support for memory and swap accounting.
+  Platforms that do not provide this support (some virtualization environments,
+  for example WSL 1 / 2) will not work with the judgehost.
+
 Copyright and licencing
 -----------------------
 
@@ -167,7 +173,7 @@ We have a low volume `mailing list for announcements
 of new releases.
 The authors can be reached through the development mailing list.
 You need to be subscribed before you can post. See the
-`development list information page 
+`development list information page
 <https://www.domjudge.org/mailman/listinfo/domjudge-devel>`_
 for subscription and more details.
 
