@@ -3,10 +3,10 @@
 rst_prolog = """
 .. |DOMjudge| replace:: @PACKAGE_NAME@
 
-.. |baseurlteam| replace:: @BASEURL@team
+.. |baseurlteam| replace:: @BASEURL@%steam
 
 .. |SOURCESIZE| replace:: 256
 .. |COMPILETIME| replace:: 30
 .. |PROCLIMIT| replace:: 15
 
-"""
+""" % ('/' if '@BASEURL@'[-1]!='/' else '')
