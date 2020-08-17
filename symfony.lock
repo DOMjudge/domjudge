@@ -1,5 +1,5 @@
 {
-    "angel-vladov/select2-bootstrap-theme": {
+    "angel-vladov/select2-theme-bootstrap4": {
         "version": "0.2.0-beta.3"
     },
     "components/jquery": {
