@@ -30,10 +30,11 @@ function read_credentials()
         error("Cannot read REST API credentials file " . $credfile);
     }
     foreach ($credentials as $credential) {
-        if ($credential[0] == '#') {
+        $credential = trim($credential);
+        if ($credential === '' || $credential[0] === '#') {
             continue;
         }
-        list($endpointID, $resturl, $restuser, $restpass) = preg_split("/\s+/", trim($credential));
+        list($endpointID, $resturl, $restuser, $restpass) = preg_split("/\s+/", $credential);
         if (array_key_exists($endpointID, $endpoints)) {
             error("Error parsing REST API credentials. Duplicate endpoint ID '$endpointID'.");
         }
