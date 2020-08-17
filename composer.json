@@ -18,10 +18,10 @@
 		{
 			"type": "package",
 			"package": {
-				"name": "angel-vladov/select2-bootstrap-theme",
+				"name": "angel-vladov/select2-theme-bootstrap4",
 				"version": "0.2.0-beta.3",
 				"dist": {
-					"url": "https://github.com/angel-vladov/select2-bootstrap-theme/archive/0.2.0-beta.3.zip",
+					"url": "https://github.com/angel-vladov/select2-theme-bootstrap4/archive/0.2.0-beta.3.zip",
 					"type": "zip"
 				}
 			}
@@ -50,7 +50,7 @@
 		"ext-mysqli": "*",
 		"ext-pcntl": "*",
 		"ext-zip": "*",
-		"angel-vladov/select2-bootstrap-theme": "0.2.0-beta.3",
+		"angel-vladov/select2-theme-bootstrap4": "0.2.0-beta.3",
 		"components/jquery": "^3.3",
 		"datatables/datatables": "^1.10",
 		"doctrine/doctrine-bundle": "^1.11",

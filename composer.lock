@@ -4,14 +4,14 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6fba989bc2fcc09289a99bec53b041fc",
+    "content-hash": "adf5869d7a09669fcfe9af36b35850bd",
     "packages": [
         {
-            "name": "angel-vladov/select2-bootstrap-theme",
+            "name": "angel-vladov/select2-theme-bootstrap4",
             "version": "0.2.0-beta.3",
             "dist": {
                 "type": "zip",
-                "url": "https://github.com/angel-vladov/select2-bootstrap-theme/archive/0.2.0-beta.3.zip"
+                "url": "https://github.com/angel-vladov/select2-theme-bootstrap4/archive/0.2.0-beta.3.zip"
             },
             "type": "library"
         },
@@ -8965,7 +8965,7 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
-        "angel-vladov/select2-bootstrap-theme": 10
+        "angel-vladov/select2-theme-bootstrap4": 10
     },
     "prefer-stable": false,
     "prefer-lowest": false,
