@@ -674,3 +674,21 @@ function pinScoreheader()
 		}
 	}
 }
+
+function removeMultipleUpdater(baseRoute)
+{
+    /* Generate a multiple removal URL based on entityIDs, in case of empty
+     * redirect to the normal page
+     */
+    var toRemove = [];
+    var newUrl = "";
+
+    $('.selectorMultipleRemove:checked').each(function() {
+        toRemove.push(this.value);
+    });
+
+    if (toRemove.length>0){
+        newUrl = baseRoute.replace('0', toRemove.join(','));
+    }
+    $('#deleteMultiple').attr('href',newUrl);
+}
