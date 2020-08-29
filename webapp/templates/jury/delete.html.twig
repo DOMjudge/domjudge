@@ -1,11 +1,20 @@
 {% extends "jury/base.html.twig" %}
 
-{% block title %}Delete {{ type }} {{ primaryKey }} - "{{ description }}" - {{ parent() }}{% endblock %}
-
+{% block title %}
+    {% if primaryKey|length==1 %}
+        Delete {{ type }} {{ primaryKey }} - "{{ description }}" - {{ parent() }}
+    {% else %}
+        Delete {{primaryKey|length}} {{ type }}s  - {{ parent() }}
+    {% endif %}
+{% endblock %}
 
 {% block content %}
 
-    <h1>Delete {{ type }} {{ primaryKey }} - "{{ description }}"</h1>
+    {% if primaryKey|length==1 %}
+        <h1>Delete {{ type }} {{ primaryKey }} - "{{ description }}"</h1>
+    {% else %}
+        <h1>Delete {{primaryKey|length}} {{ type }}s</h1>
+    {% endif %}
 
     {% if isError %}
         <div class="alert alert-danger">
@@ -14,7 +23,18 @@
     {% else %}
         <div class="alert alert-warning">
             <form method="post">
-                <p>You're about to delete {{ type }} {{ primaryKey }} "{{ description }}".</p>
+                {% if primaryKey|length==1 %}
+                    <p>You're about to delete {{ type }} {{ primaryKey }} "{{ description }}".</p>
+                {% else %}
+                    <p>
+                        You're about to delete {{ type }}s:
+                        <ul>
+                            {% for singlePrimaryKey in primaryKey %}
+                                <li>{{ singlePrimaryKey }} "{{ description[loop.index0] }}".</li>
+                            {% endfor %}
+                        </ul>
+                    </p>
+                {% endif %}
 
                 {% if messages is not empty %}
                     <p>

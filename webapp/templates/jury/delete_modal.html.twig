@@ -1,6 +1,12 @@
 {% extends "partials/modal.html.twig" %}
 
-{% block title %}Delete {{ type }} {{ primaryKey }} - "{{ description }}"{% endblock %}
+{% block title %}
+    {% if primaryKey|length==1 %}
+        Delete {{ type }} {{ primaryKey }} - "{{ description }}"
+    {% else %}
+        Delete {{primaryKey|length}} {{ type }}s
+    {% endif %}
+{% endblock %}
 
 {% block content %}
 
@@ -9,7 +15,18 @@
             <strong>Error: {{ messages.0 }}</strong>
         </div>
     {% else %}
-        <p>You're about to delete {{ type }} {{ primaryKey }} "{{ description }}".</p>
+        {% if primaryKey|length==1 %}
+            <p>You're about to delete {{ type }} {{ primaryKey }} "{{ description }}".</p>
+        {% else %}
+            <p>
+                You're about to delete {{ type }}s:
+                <ul>
+                    {% for singlePrimaryKey in primaryKey %}
+                        <li>{{ singlePrimaryKey }} "{{ description[loop.index0] }}".</li>
+                    {% endfor %}
+                </ul>
+            </p>
+        {% endif %}
 
         {% if messages is not empty %}
             <p>
