@@ -267,8 +267,17 @@ class ContestController extends BaseController
                 array_slice($table_fields, 1, null, true);
         }
 
-        $propertyAccessor = PropertyAccess::createPropertyAccessor();
-        $contests_table   = [];
+        $propertyAccessor   = PropertyAccess::createPropertyAccessor();
+        $contests_table     = [];
+        $contestcolactions  = [];
+        if ($this->isGranted('ROLE_ADMIN')) {
+            $contestcolactions[] = [
+                'icon' => 'trash-alt',
+                'title' => 'delete selected contests',
+                'ajaxModal' => true,
+                'DOMid' => 'deleteMultiple',
+            ];
+        }
         foreach ($contests as $contest) {
             $contestdata    = [];
             $contestactions = [];
@@ -360,6 +369,7 @@ class ContestController extends BaseController
                 'actions' => $contestactions,
                 'link' => $this->generateUrl('jury_contest', ['contestId' => $contest->getCid()]),
                 'cssclass' => implode(' ', $styles),
+                'multiAction' => $contest->getCid(),
             ];
         }
 
@@ -380,6 +390,7 @@ class ContestController extends BaseController
             'contests_table' => $contests_table,
             'table_fields' => $table_fields,
             'num_actions' => $this->isGranted('ROLE_ADMIN') ? 2 : 0,
+            'col_actions' => $contestcolactions,
         ]);
     }
 

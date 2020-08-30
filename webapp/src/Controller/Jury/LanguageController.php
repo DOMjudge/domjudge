@@ -102,8 +102,17 @@ class LanguageController extends BaseController
                 array_slice($table_fields, 1, null, true);
         }
 
-        $propertyAccessor = PropertyAccess::createPropertyAccessor();
-        $languages_table  = [];
+        $propertyAccessor       = PropertyAccess::createPropertyAccessor();
+        $languages_table        = [];
+        $languagescolactions    = [];
+        if ($this->isGranted('ROLE_ADMIN')) {
+            $languagescolactions[] = [
+                'icon' => 'trash-alt',
+                'title' => 'delete selected languages',
+                'ajaxModal' => true,
+                'DOMid' => 'deleteMultiple',
+            ];
+        }
         foreach ($languages as $lang) {
             $langdata    = [];
             $langactions = [];
@@ -145,12 +154,14 @@ class LanguageController extends BaseController
                 'actions' => $langactions,
                 'link' => $this->generateUrl('jury_language', ['langId' => $lang->getLangid()]),
                 'cssclass' => $lang->getAllowSubmit() ? '' : 'disabled',
+                'multiAction' => $lang->getLangid(),
             ];
         }
         return $this->render('jury/languages.html.twig', [
             'languages' => $languages_table,
             'table_fields' => $table_fields,
             'num_actions' => $this->isGranted('ROLE_ADMIN') ? 2 : 0,
+            'col_actions' => $languagescolactions,
         ]);
     }
 

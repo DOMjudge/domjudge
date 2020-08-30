@@ -111,8 +111,17 @@ class UserController extends BaseController
         ];
 
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
-        $users_table      = [];
         $timeFormat  = (string)$this->config->get('time_format');
+        $users_table      = [];
+        $userscolactions  = [];
+        if ($this->isGranted('ROLE_ADMIN')) {
+            $userscolactions[] = [
+                'icon' => 'trash-alt',
+                'title' => 'delete selected users',
+                'ajaxModal' => true,
+                'DOMid' => 'deleteMultiple',
+            ];
+        }
         foreach ($users as $u) {
             $userdata    = [];
             $useractions = [];
@@ -180,6 +189,7 @@ class UserController extends BaseController
                 'actions' => $useractions,
                 'link' => $this->generateUrl('jury_user', ['userId' => $u->getUserid()]),
                 'cssclass' => $u->getEnabled() ? '' : 'disabled',
+                'multiAction' => $u->getUserid(),
             ];
         }
 
@@ -187,6 +197,7 @@ class UserController extends BaseController
             'users' => $users_table,
             'table_fields' => $table_fields,
             'num_actions' => $this->isGranted('ROLE_ADMIN') ? 2 : 0,
+            'col_actions' => $userscolactions,
         ]);
     }
 

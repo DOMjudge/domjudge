@@ -110,8 +110,17 @@ class TeamAffiliationController extends BaseController
 
         $webDir = realpath(sprintf('%s/public', $projectDir));
 
-        $propertyAccessor        = PropertyAccess::createPropertyAccessor();
-        $team_affiliations_table = [];
+        $propertyAccessor               = PropertyAccess::createPropertyAccessor();
+        $team_affiliations_table        = [];
+        $team_affiliationscolactions    = [];
+        if ($this->isGranted('ROLE_ADMIN')) {
+            $team_affiliationscolactions[] = [
+                'icon' => 'trash-alt',
+                'title' => 'delete selected team affiliations',
+                'ajaxModal' => true,
+                'DOMid' => 'deleteMultiple',
+            ];
+        }
         foreach ($teamAffiliations as $teamAffiliationData) {
             /** @var TeamAffiliation $teamAffiliation */
             $teamAffiliation    = $teamAffiliationData[0];
@@ -174,6 +183,7 @@ class TeamAffiliationController extends BaseController
                 'data' => $affiliationdata,
                 'actions' => $affiliationactions,
                 'link' => $this->generateUrl('jury_team_affiliation', ['affilId' => $teamAffiliation->getAffilid()]),
+                'multiAction' => $teamAffiliation->getAffilid(),
             ];
         }
 
@@ -181,6 +191,7 @@ class TeamAffiliationController extends BaseController
             'team_affiliations' => $team_affiliations_table,
             'table_fields' => $table_fields,
             'num_actions' => $this->isGranted('ROLE_ADMIN') ? 2 : 0,
+            'col_actions' => $team_affiliationscolactions,
         ]);
     }
 

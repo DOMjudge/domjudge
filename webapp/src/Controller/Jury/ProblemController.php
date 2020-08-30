@@ -221,8 +221,17 @@ class ProblemController extends BaseController
             $contestCounts[$problemCount['probid']] = $problemCount['count'];
         }
 
-        $propertyAccessor = PropertyAccess::createPropertyAccessor();
-        $problems_table   = [];
+        $propertyAccessor   = PropertyAccess::createPropertyAccessor();
+        $problems_table     = [];
+        $problemcolactions  = [];
+        if ($this->isGranted('ROLE_ADMIN')) {
+            $problemcolactions[] = [
+                'icon' => 'trash-alt',
+                'title' => 'delete selected problems',
+                'ajaxModal' => true,
+                'DOMid' => 'deleteMultiple',
+            ];
+        }
         foreach ($problems as $row) {
             /** @var Problem $p */
             $p              = $row[0];
@@ -300,12 +309,14 @@ class ProblemController extends BaseController
                 'data' => $problemdata,
                 'actions' => $problemactions,
                 'link' => $this->generateUrl('jury_problem', ['probId' => $p->getProbid()]),
+                'multiAction' => $p->getProbid(),
             ];
         }
         $data = [
             'problems' => $problems_table,
             'table_fields' => $table_fields,
             'num_actions' => $this->isGranted('ROLE_ADMIN') ? 4 : 1,
+            'col_actions' => $problemcolactions,
             'form' => $form->createView(),
         ];
 

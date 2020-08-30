@@ -85,8 +85,18 @@ class JudgehostRestrictionController extends BaseController
             'numlinkedjudgehosts' => ['title' => '# linked judgehosts', 'sort' => true],
         ];
 
-        $propertyAccessor             = PropertyAccess::createPropertyAccessor();
-        $judgehost_restrictions_table = [];
+        $propertyAccessor                   = PropertyAccess::createPropertyAccessor();
+        $judgehost_restrictions_table       = [];
+        $judgehost_restrictioncolactions    = [];
+        if ($this->isGranted('ROLE_ADMIN')) {
+            $judgehost_restrictioncolactions[] = [
+                'icon' => 'trash-alt',
+                'title' => 'delete selected judgehost restrictions',
+                'ajaxModal' => true,
+                'DOMid' => 'deleteMultiple',
+            ];
+        }
+
         foreach ($judgehostRestrictions as $judgehostRestriction) {
             $judgehostrestrictiondata    = [];
             $judgehostrestrictionactions = [];
@@ -129,6 +139,7 @@ class JudgehostRestrictionController extends BaseController
                 'actions' => $judgehostrestrictionactions,
                 'link' => $this->generateUrl('jury_judgehost_restriction',
                                              ['restrictionId' => $judgehostRestriction->getRestrictionid()]),
+                'multiAction' => $judgehostRestriction->getRestrictionid(),
             ];
         }
 
@@ -137,6 +148,7 @@ class JudgehostRestrictionController extends BaseController
             'judgehost_restrictions' => $judgehost_restrictions_table,
             'table_fields' => $table_fields,
             'num_actions' => $this->isGranted('ROLE_ADMIN') ? 2 : 0,
+            'col_actions' => $judgehost_restrictioncolactions,
         ]);
     }
 

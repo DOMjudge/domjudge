@@ -103,8 +103,17 @@ class TeamCategoryController extends BaseController
                 array_slice($table_fields, 1, null, true);
         }
 
-        $propertyAccessor      = PropertyAccess::createPropertyAccessor();
-        $team_categories_table = [];
+        $propertyAccessor           = PropertyAccess::createPropertyAccessor();
+        $team_categories_table      = [];
+        $team_categoriescolactions  = [];
+        if ($this->isGranted('ROLE_ADMIN')) {
+            $team_categoriescolactions[] = [
+                'icon' => 'trash-alt',
+                'title' => 'delete selected team categories',
+                'ajaxModal' => true,
+                'DOMid' => 'deleteMultiple',
+            ];
+        }
         foreach ($teamCategories as $teamCategoryData) {
             /** @var TeamCategory $teamCategory */
             $teamCategory    = $teamCategoryData[0];
@@ -144,12 +153,14 @@ class TeamCategoryController extends BaseController
                 'actions' => $categoryactions,
                 'link' => $this->generateUrl('jury_team_category', ['categoryId' => $teamCategory->getCategoryid()]),
                 'style' => $teamCategory->getColor() ? sprintf('background-color: %s;', $teamCategory->getColor()) : '',
+                'multiAction' => $teamCategory->getCategoryid(),
             ];
         }
         return $this->render('jury/team_categories.html.twig', [
             'team_categories' => $team_categories_table,
             'table_fields' => $table_fields,
             'num_actions' => $this->isGranted('ROLE_ADMIN') ? 2 : 0,
+            'col_actions' => $team_categoriescolactions,
         ]);
     }
 

@@ -151,6 +151,15 @@ class TeamController extends BaseController
 
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         $teams_table      = [];
+        $teamscolactions  = [];
+        if ($this->isGranted('ROLE_ADMIN')) {
+            $teamscolactions[] = [
+                'icon' => 'trash-alt',
+                'title' => 'delete selected teams',
+                'ajaxModal' => true,
+                'DOMid' => 'deleteMultiple',
+            ];
+        }
         foreach ($teams as $t) {
             $teamdata    = [];
             $teamactions = [];
@@ -253,12 +262,14 @@ class TeamController extends BaseController
                 'link' => $this->generateUrl('jury_team', ['teamId' => $t->getTeamId()]),
                 'cssclass' => "category" . $t->getCategory()->getCategoryId() .
                     ($t->getEnabled() ? '' : ' disabled'),
+                'multiAction' => $t->getTeamId(),
             ];
         }
         return $this->render('jury/teams.html.twig', [
             'teams' => $teams_table,
             'table_fields' => $table_fields,
             'num_actions' => $this->isGranted('ROLE_ADMIN') ? 3 : 1,
+            'col_actions' => $teamscolactions,
         ]);
     }
 

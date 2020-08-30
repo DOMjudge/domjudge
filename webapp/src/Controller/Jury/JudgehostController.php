@@ -124,10 +124,19 @@ class JudgehostController extends BaseController
         $work10min   = $map($work10min);
         $workcontest = $map($workcontest);
 
-        $propertyAccessor = PropertyAccess::createPropertyAccessor();
-        $time_warn = $this->config->get('judgehost_warning');
-        $time_crit = $this->config->get('judgehost_critical');
-        $judgehosts_table = [];
+        $propertyAccessor       = PropertyAccess::createPropertyAccessor();
+        $time_warn              = $this->config->get('judgehost_warning');
+        $time_crit              = $this->config->get('judgehost_critical');
+        $judgehosts_table       = [];
+        $judgehostscolactions   = [];
+        if ($this->isGranted('ROLE_ADMIN')) {
+            $judgehostscolactions[] = [
+                'icon' => 'trash-alt',
+                'title' => 'delete selected judgehosts',
+                'ajaxModal' => true,
+                'DOMid' => 'deleteMultiple',
+            ];
+        }
         foreach ($judgehosts as $judgehost) {
             $judgehostdata    = [];
             $judgehostactions = [];
@@ -226,6 +235,7 @@ class JudgehostController extends BaseController
                 'actions' => $judgehostactions,
                 'link' => $this->generateUrl('jury_judgehost', ['hostname' => $judgehost->getHostname()]),
                 'cssclass' => $judgehost->getActive() ? '' : 'disabled',
+                'multiAction' => $judgehost->getHostname(),
             ];
         }
 
@@ -233,6 +243,7 @@ class JudgehostController extends BaseController
             'judgehosts' => $judgehosts_table,
             'table_fields' => $table_fields,
             'num_actions' => $this->isGranted('ROLE_ADMIN') ? 2 : 0,
+            'col_actions' => $judgehostscolactions,
             'refresh' => [
                 'after' => 5,
                 'url' => $this->generateUrl('jury_judgehosts'),

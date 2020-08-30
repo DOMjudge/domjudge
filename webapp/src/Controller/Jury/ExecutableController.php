@@ -158,8 +158,17 @@ class ExecutableController extends BaseController
             'size' => ['title' => 'size', 'sort' => true,],
         ];
 
-        $propertyAccessor  = PropertyAccess::createPropertyAccessor();
-        $executables_table = [];
+        $propertyAccessor       = PropertyAccess::createPropertyAccessor();
+        $executables_table      = [];
+        $executablecolactions   = [];
+        if ($this->isGranted('ROLE_ADMIN')) {
+            $executablecolactions[] = [
+                'icon' => 'trash-alt',
+                'title' => 'delete selected executables',
+                'ajaxModal' => true,
+                'DOMid' => 'deleteMultiple',
+            ];
+        }
         foreach ($executables as $e) {
             $execdata    = [];
             $execactions = [];
@@ -202,12 +211,14 @@ class ExecutableController extends BaseController
                 'data' => $execdata,
                 'actions' => $execactions,
                 'link' => $this->generateUrl('jury_executable', ['execId' => $e->getExecid()]),
+                'multiAction' => $e->getExecid(),
             ];
         }
         return $this->render('jury/executables.html.twig', [
             'executables' => $executables_table,
             'table_fields' => $table_fields,
             'num_actions' => $this->isGranted('ROLE_ADMIN') ? 3 : 0,
+            'col_actions' => $executablecolactions,
             'form' => $form->createView(),
         ]);
     }
