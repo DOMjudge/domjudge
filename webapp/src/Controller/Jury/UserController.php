@@ -269,6 +269,31 @@ class UserController extends BaseController
     }
 
     /**
+     * @Route("/{userId<[\d,]*\d+>}/delete", name="jury_user_delete")
+     * @IsGranted("ROLE_ADMIN")
+     * @param Request $request
+     * @param string $userId
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     * @throws \Exception
+     */
+    public function deleteActions(Request $request, string $userIds)
+    {
+        /** @var User[] $users */
+        $usernames = [];
+        foreach (explode(',', $userIds) as $userId) {
+            $user = $this->em->getRepository(User::class)->find($userId);
+            if (!$user) {
+                throw new NotFoundHttpException(sprintf('User with ID %s not found', $userId));
+            }
+            $users[] = $user;
+            $usernames[] = $user->getName();
+        }
+
+        return $this->deleteEntities($request, $this->em, $this->dj, $this->eventLogService, $this->kernel,
+                                   $users, $user->getName(), $this->generateUrl('jury_users'));
+    }
+
+    /**
      * @Route("/{userId<\d+>}/delete", name="jury_user_delete")
      * @IsGranted("ROLE_ADMIN")
      * @param Request $request
@@ -276,17 +301,17 @@ class UserController extends BaseController
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
      * @throws \Exception
      */
-    public function deleteAction(Request $request, int $userId)
+    /*public function deleteAction(Request $request, int $userId)
     {
         /** @var User $user */
-        $user = $this->em->getRepository(User::class)->find($userId);
-        if (!$user) {
-            throw new NotFoundHttpException(sprintf('User with ID %s not found', $userId));
-        }
-
-        return $this->deleteEntity($request, $this->em, $this->dj, $this->eventLogService, $this->kernel,
-                                   $user, $user->getName(), $this->generateUrl('jury_users'));
+    /*$user = $this->em->getRepository(User::class)->find($userId);
+    if (!$user) {
+        throw new NotFoundHttpException(sprintf('User with ID %s not found', $userId));
     }
+
+    return $this->deleteEntity($request, $this->em, $this->dj, $this->eventLogService, $this->kernel,
+                               $user, $user->getName(), $this->generateUrl('jury_users'));
+}   */
 
     /**
      * @Route("/add", name="jury_user_add")
