@@ -134,9 +134,7 @@
                     {%- endfor %}
                     {% for col_action in col_actions %}
                         <td>
-                            <input type='checkbox' />
-                            {# onclick='removeMultipleUpdater(this,{{ row.multiActionUrl }})'
-                                    value="{{row.multiAction}}" #}
+                            <input type='checkbox' class='selectorMultipleRemove' onclick='removeMultipleUpdater("{{ row.multiActionUrl }}")' value='{{row.multiAction}}'>
                         </td>
                     {% endfor %}
 
