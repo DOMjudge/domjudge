@@ -137,7 +137,7 @@ abstract class BaseController extends AbstractController
      * @throws \Doctrine\ORM\NoResultException
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
-    protected function deleteEntity(
+    /*protected function deleteEntity(
         Request $request,
         EntityManagerInterface $entityManager,
         DOMJudgeService $DOMJudgeService,
@@ -336,7 +336,7 @@ abstract class BaseController extends AbstractController
                 return $this->render('jury/delete.html.twig', $data);
             }
         }
-    }
+    }*/
 
     /**
      * Perform the delete for the given entities
@@ -368,7 +368,7 @@ abstract class BaseController extends AbstractController
         $dir       = realpath(sprintf('%s/src/Entity', $kernel->getProjectDir()));
         $files     = glob($dir . '/*.php');
         $relations = [];
-        foreach ($files as $file) {
+        /*foreach ($files as $file) {
             $parts      = explode('/', $file);
             $shortClass = str_replace('.php', '', $parts[count($parts) - 1]);
             $class      = sprintf('App\\Entity\\%s', $shortClass);
@@ -393,7 +393,7 @@ abstract class BaseController extends AbstractController
 
                 $relations[$class] = $tableRelations;
             }
-        }
+        }*/
 
         $isError          = false;
         $messages         = [];
@@ -402,7 +402,7 @@ abstract class BaseController extends AbstractController
         // TODO: Hard assumption that we only have a single type to delete
         $metadata         = $entityManager->getClassMetadata(get_class($entities[0]));
         $finalPrimaryKeyData = [];
-        foreach ($entities as $entity) {
+        /*foreach ($entities as $entity) {
             $primaryKeyData   = [];
             foreach ($metadata->getIdentifierColumnNames() as $primaryKeyColumn) {
                 $primaryKeyColumnValue = $propertyAccessor->getValue($entity, $primaryKeyColumn);
@@ -466,14 +466,14 @@ abstract class BaseController extends AbstractController
                 }
                 $finalPrimaryKeyData[] = implode(', ', $primaryKeyData);
             }
-        }
+        }*/
 
         if ($request->isMethod('POST')) {
             if ($isError) {
                 throw new BadRequestHttpException(reset($messages));
             }
 
-            foreach($entities as $index=>$entity) {
+            /*foreach($entities as $index=>$entity) {
                 $entityId = null;
                 if ($entity instanceof Team) {
                     $entityId = $entity->getTeamid();
@@ -536,7 +536,7 @@ abstract class BaseController extends AbstractController
                 $msg = sprintf('Successfully deleted %s %s "%s"',
                     $readableType, implode(', ', $primaryKeyData), $descriptions[$index]);
                 $this->addFlash('success', $msg);
-            }
+            }*/
             if ($request->isXmlHttpRequest()) {
                 return new JsonResponse(['url' => $redirectUrl]);
             } else {
