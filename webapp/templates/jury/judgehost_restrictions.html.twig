@@ -12,7 +12,7 @@
 
     <h1>Judgehost restrictions</h1>
 
-    {{ macros.table(judgehost_restrictions, table_fields, num_actions) }}
+    {{ macros.table(judgehost_restrictions, table_fields, num_actions, col_actions) }}
 
     {%- if is_granted('ROLE_ADMIN') %}
         <p>

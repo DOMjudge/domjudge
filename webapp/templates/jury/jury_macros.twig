@@ -64,7 +64,7 @@
     </style>
 {% endmacro %}
 
-{% macro table(data, fields, num_actions, options) %}
+{% macro table(data, fields, num_actions, col_actions, options) %}
 
     <div class="table-wrapper">
         <table class="data-table table table-sm table-striped" style="width:auto">
@@ -92,6 +92,9 @@
                         <th scope="col"></th>
                     {%- endfor %}
                 {%- endif %}
+                {%- for col_action in col_actions %}
+                    <th scope="col"><a id={{ col_action.DOMid }} href="" style="color: #000000;"><i class="fas fa-{{ col_action.icon }}"></i></a></th>
+                {%- endfor %}
 
             </tr>
             </thead>
@@ -129,6 +132,13 @@
 
                         </td>
                     {%- endfor %}
+                    {% for col_action in col_actions %}
+                        <td>
+                            <input type='checkbox' />
+                            {# onclick='removeMultipleUpdater(this,{{ row.multiActionUrl }})'
+                                    value="{{row.multiAction}}" #}
+                        </td>
+                    {% endfor %}
 
                 </tr>
             {%- endfor %}
