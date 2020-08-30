@@ -140,6 +140,7 @@ class JudgehostRestrictionController extends BaseController
                 'link' => $this->generateUrl('jury_judgehost_restriction',
                                              ['restrictionId' => $judgehostRestriction->getRestrictionid()]),
                 'multiAction' => $judgehostRestriction->getRestrictionid(),
+                'multiActionUrl' => $this->generateUrl('jury_judgehost_restriction_delete', ['restrictionId' => 0]),
             ];
         }
 

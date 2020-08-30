@@ -190,6 +190,7 @@ class UserController extends BaseController
                 'link' => $this->generateUrl('jury_user', ['userId' => $u->getUserid()]),
                 'cssclass' => $u->getEnabled() ? '' : 'disabled',
                 'multiAction' => $u->getUserid(),
+                'multiActionUrl' => $this->generateUrl('jury_user_delete', ['userId' => 0]),
             ];
         }
 

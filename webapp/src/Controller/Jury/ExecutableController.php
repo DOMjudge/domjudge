@@ -212,6 +212,7 @@ class ExecutableController extends BaseController
                 'actions' => $execactions,
                 'link' => $this->generateUrl('jury_executable', ['execId' => $e->getExecid()]),
                 'multiAction' => $e->getExecid(),
+                'multiActionUrl' => $this->generateUrl('jury_executable_delete', ['execId' => 0]),
             ];
         }
         return $this->render('jury/executables.html.twig', [

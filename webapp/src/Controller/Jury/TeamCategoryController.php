@@ -154,6 +154,7 @@ class TeamCategoryController extends BaseController
                 'link' => $this->generateUrl('jury_team_category', ['categoryId' => $teamCategory->getCategoryid()]),
                 'style' => $teamCategory->getColor() ? sprintf('background-color: %s;', $teamCategory->getColor()) : '',
                 'multiAction' => $teamCategory->getCategoryid(),
+                'multiActionUrl' => $this->generateUrl('jury_team_category_delete', ['categoryId' => 0]),
             ];
         }
         return $this->render('jury/team_categories.html.twig', [

@@ -155,6 +155,7 @@ class LanguageController extends BaseController
                 'link' => $this->generateUrl('jury_language', ['langId' => $lang->getLangid()]),
                 'cssclass' => $lang->getAllowSubmit() ? '' : 'disabled',
                 'multiAction' => $lang->getLangid(),
+                'multiActionUrl' => $this->generateUrl('jury_language_delete', ['langId' => 0]),
             ];
         }
         return $this->render('jury/languages.html.twig', [

@@ -370,6 +370,7 @@ class ContestController extends BaseController
                 'link' => $this->generateUrl('jury_contest', ['contestId' => $contest->getCid()]),
                 'cssclass' => implode(' ', $styles),
                 'multiAction' => $contest->getCid(),
+                'multiActionUrl' => $this->generateUrl('jury_contest_delete', ['contestId' => 0]),
             ];
         }
 

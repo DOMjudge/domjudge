@@ -310,6 +310,7 @@ class ProblemController extends BaseController
                 'actions' => $problemactions,
                 'link' => $this->generateUrl('jury_problem', ['probId' => $p->getProbid()]),
                 'multiAction' => $p->getProbid(),
+                'multiActionUrl' => $this->generateUrl('jury_problem_delete', ['probId' => 0]),
             ];
         }
         $data = [

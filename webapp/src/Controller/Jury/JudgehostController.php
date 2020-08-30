@@ -236,6 +236,7 @@ class JudgehostController extends BaseController
                 'link' => $this->generateUrl('jury_judgehost', ['hostname' => $judgehost->getHostname()]),
                 'cssclass' => $judgehost->getActive() ? '' : 'disabled',
                 'multiAction' => $judgehost->getHostname(),
+                'multiActionUrl' => $this->generateUrl('jury_judgehost_delete', ['hostname' => 0]),
             ];
         }
 

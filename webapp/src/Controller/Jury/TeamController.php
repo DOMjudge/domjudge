@@ -263,6 +263,7 @@ class TeamController extends BaseController
                 'cssclass' => "category" . $t->getCategory()->getCategoryId() .
                     ($t->getEnabled() ? '' : ' disabled'),
                 'multiAction' => $t->getTeamId(),
+                'multiActionUrl' => $this->generateUrl('jury_team_delete', ['teamId' => 0]),
             ];
         }
         return $this->render('jury/teams.html.twig', [

@@ -184,6 +184,7 @@ class TeamAffiliationController extends BaseController
                 'actions' => $affiliationactions,
                 'link' => $this->generateUrl('jury_team_affiliation', ['affilId' => $teamAffiliation->getAffilid()]),
                 'multiAction' => $teamAffiliation->getAffilid(),
+                'multiActionUrl' => $this->generateUrl('jury_team_affiliation_delete', ['affilId' => 0]),
             ];
         }
 
