@@ -368,7 +368,7 @@ abstract class BaseController extends AbstractController
         $dir       = realpath(sprintf('%s/src/Entity', $kernel->getProjectDir()));
         $files     = glob($dir . '/*.php');
         $relations = [];
-        /*foreach ($files as $file) {
+        foreach ($files as $file) {
             $parts      = explode('/', $file);
             $shortClass = str_replace('.php', '', $parts[count($parts) - 1]);
             $class      = sprintf('App\\Entity\\%s', $shortClass);
@@ -393,16 +393,15 @@ abstract class BaseController extends AbstractController
 
                 $relations[$class] = $tableRelations;
             }
-        }*/
+        }
 
         $isError          = false;
         $messages         = [];
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         $readableType     = str_replace('_', ' ', Utils::tableForEntity($entities[0]));
-        // TODO: Hard assumption that we only have a single type to delete
         $metadata         = $entityManager->getClassMetadata(get_class($entities[0]));
         $finalPrimaryKeyData = [];
-        /*foreach ($entities as $entity) {
+        foreach ($entities as $entity) {
             $primaryKeyData   = [];
             foreach ($metadata->getIdentifierColumnNames() as $primaryKeyColumn) {
                 $primaryKeyColumnValue = $propertyAccessor->getValue($entity, $primaryKeyColumn);
@@ -466,7 +465,7 @@ abstract class BaseController extends AbstractController
                 }
                 $finalPrimaryKeyData[] = implode(', ', $primaryKeyData);
             }
-        }*/
+        }
 
         if ($request->isMethod('POST')) {
             if ($isError) {
