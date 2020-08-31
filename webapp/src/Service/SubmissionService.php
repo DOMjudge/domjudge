@@ -607,7 +607,9 @@ class SubmissionService
         foreach (self::PROBLEM_RESULT_MATCHSTRING as $currentMatch) {
             $currentPos = mb_stripos($source, $currentMatch);
             if ($currentPos !== false) {
-                if ($pos !== false) {
+                // Check if we find another match after the first one, since
+                // that is not allowed
+                if (mb_stripos($source, $currentMatch, $currentPos) !== false) {
                     return false;
                 }
                 $pos = $currentPos;
