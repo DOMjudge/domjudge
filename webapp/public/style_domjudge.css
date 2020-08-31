@@ -436,3 +436,136 @@ h3.teamoverview {
     padding: 40px 15px;
     text-align: center;
 }
+
+.problem-stats {
+    padding-top: 10px;
+}
+
+.problem-stats .problem-stats-item {
+    display: inline-block;
+    margin-right: 3px;
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    box-shadow: inset 0 0 0 1px rgba(27, 31, 35, .04);
+}
+
+.problem-stats-item.correct-0 {
+    background-color: #eeeeee;
+}
+
+.problem-stats-item.correct-1 {
+    background-color: #dcffe4;
+}
+
+.problem-stats-item.correct-2 {
+    background-color: #bef5cb;
+}
+
+.problem-stats-item.correct-3 {
+    background-color: #85e89d;
+}
+
+.problem-stats-item.correct-4 {
+    background-color: #34d058;
+}
+
+.problem-stats-item.correct-5 {
+    background-color: #28a745;
+}
+
+.problem-stats-item.correct-6 {
+    background-color: #22863a;
+}
+
+.problem-stats-item.correct-7 {
+    background-color: #176f2c;
+}
+
+.problem-stats-item.correct-8 {
+    background-color: #165c26;
+}
+
+.problem-stats-item.correct-9 {
+    background-color: #144620;
+}
+
+.problem-stats-item.incorrect-0 {
+    background-color: #eeeeee;
+}
+
+.problem-stats-item.incorrect-1 {
+    background-color: #ffdce0;
+}
+
+.problem-stats-item.incorrect-2 {
+    background-color: #fdaeb7;
+}
+
+.problem-stats-item.incorrect-3 {
+    background-color: #f97583;
+}
+
+.problem-stats-item.incorrect-4 {
+    background-color: #ea4a5a;
+}
+
+.problem-stats-item.incorrect-5 {
+    background-color: #d73a49;
+}
+
+.problem-stats-item.incorrect-6 {
+    background-color: #cb2431;
+}
+
+.problem-stats-item.incorrect-7 {
+    background-color: #b31d28;
+}
+
+.problem-stats-item.incorrect-8 {
+    background-color: #9e1c23;
+}
+
+.problem-stats-item.incorrect-9 {
+    background-color: #86181d;
+}
+
+.problem-stats-item.frozen-0 {
+    background-color: #eeeeee;
+}
+
+.problem-stats-item.frozen-1 {
+    background-color: #dbedff;
+}
+
+.problem-stats-item.frozen-2 {
+    background-color: #c8e1ff;
+}
+
+.problem-stats-item.frozen-3 {
+    background-color: #79b8ff;
+}
+
+.problem-stats-item.frozen-4 {
+    background-color: #2188ff;
+}
+
+.problem-stats-item.frozen-5 {
+    background-color: #0366d6;
+}
+
+.problem-stats-item.frozen-6 {
+    background-color: #005cc5;
+}
+
+.problem-stats-item.frozen-7 {
+    background-color: #044289;
+}
+
+.problem-stats-item.frozen-8 {
+    background-color: #032f62;
+}
+
+.problem-stats-item.frozen-9 {
+    background-color: #05264c;
+}

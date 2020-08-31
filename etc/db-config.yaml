@@ -240,6 +240,11 @@
             default_value: 0
             public: false
             description: Maximum width of team column on scoreboard. Leave 0 for no maximum.
+        -   name: show_public_stats
+            type: bool
+            default_value: true
+            public: true
+            description: Show submission and problem statistics on the team and public pages.
 -   category: Misc
     description: Miscellaneous configuration options.
     items:

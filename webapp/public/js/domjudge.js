@@ -674,3 +674,7 @@ function pinScoreheader()
 		}
 	}
 }
+
+$(function () {
+    $('[data-toggle="tooltip"]').tooltip();
+});

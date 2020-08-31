@@ -3,12 +3,16 @@
 namespace App\Controller;
 
 use App\Entity\ContestProblem;
+use App\Entity\Judging;
 use App\Entity\Language;
+use App\Entity\Submission;
 use App\Entity\Team;
 use App\Entity\Testcase;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\ScoreboardService;
+use App\Service\StatisticsService;
+use App\Utils\FreezeData;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\Expr\Join;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -44,6 +48,11 @@ class PublicController extends BaseController
     protected $scoreboardService;
 
     /**
+     * @var StatisticsService
+     */
+    protected $stats;
+
+    /**
      * @var EntityManagerInterface
      */
     protected $em;
@@ -52,11 +61,13 @@ class PublicController extends BaseController
         DOMJudgeService $dj,
         ConfigurationService $config,
         ScoreboardService $scoreboardService,
+        StatisticsService $stats,
         EntityManagerInterface $em
     ) {
         $this->dj                = $dj;
         $this->config            = $config;
         $this->scoreboardService = $scoreboardService;
+        $this->stats             = $stats;
         $this->em                = $em;
     }
 
@@ -182,7 +193,7 @@ class PublicController extends BaseController
     public function problemsAction()
     {
         return $this->render('public/problems.html.twig',
-            $this->dj->getTwigDataForProblemsAction(-1));
+            $this->dj->getTwigDataForProblemsAction(-1, $this->stats));
     }
 
 
