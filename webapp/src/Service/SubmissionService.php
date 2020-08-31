@@ -610,12 +610,15 @@ class SubmissionService
                 // Check if we find another match after the first one, since
                 // that is not allowed
                 if (mb_stripos($source, $currentMatch, $currentPos) !== false) {
+                     return false;
+                }
+                if ($pos !== false) {
                     return false;
                 }
                 $pos = $currentPos;
                 $matchstring = $currentMatch;
             }
-        }
+        }-                if ($pos !== false) {
 
         if ($pos === false) {
             return null;
