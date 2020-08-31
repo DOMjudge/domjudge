@@ -42,10 +42,10 @@ BAD_SUBMIT = \
 		rm -rf "$$tmp" ; \
 	else \
 		if $(SUBMITCMD) $(SUBMITOPTS) "$$i" ; then \
-			echo $(SUBMITCMD) $(SUBMITOPTS) "$$tmp/": Succeeded but expected failure. ; \
+			echo $(SUBMITCMD) $(SUBMITOPTS) "$$tmp/*": Succeeded but expected failure. ; \
 			exit 1 ; \
 		else \
-			echo $(SUBMITCMD) $(SUBMITOPTS) "$$tmp/": Failed as expected ; \
+			echo $(SUBMITCMD) $(SUBMITOPTS) "$$tmp/*": Failed as expected ; \
 		fi ; \
 	fi ; \
 	echo
