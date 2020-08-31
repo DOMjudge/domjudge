@@ -47,7 +47,7 @@ $(SUBST_FILES): %: %.in $(TOPDIR)/paths.mk
 check-syntax:
 	$(TOPDIR)/tests/syntax
 
-check: test-normal test-fltcmp test-boolfind
+check: test-normal test-fltcmp test-boolfind test-bad-expected-results
 
 PROBLEM=hello
 test-fltcmp: PROBLEM=fltcmp
@@ -82,4 +82,4 @@ clean-l:
 distclean-l:
 	-rm -f $(SUBST_FILES)
 
-.PHONY: check check-syntax test-normal test-fltcmp test-stress
+.PHONY: check check-syntax test-normal test-fltcmp test-stress test-bad-expected-results
