@@ -159,7 +159,7 @@ fi
 if [ "$DISTRO" = 'Ubuntu' ]; then
 
 # Packages to include during bootstrap process (comma separated):
-INCLUDEDEBS="software-properties-common"
+INCLUDEDEBS=""
 
 # Packages to install after upgrade (space separated):
 INSTALLDEBS="gcc g++ default-jdk-headless default-jre-headless pypy python3 locales"
