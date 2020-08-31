@@ -93,7 +93,7 @@
                     {%- endfor %}
                 {%- endif %}
                 {%- for col_action in col_actions %}
-                    <th scope="col"><a id={{ col_action.DOMid }} href="" style="color: #000000;"><i class="fas fa-{{ col_action.icon }}"></i></a></th>
+                    <th scope="col"><a id={{ col_action.DOMid }} href="" style="color: #000000;" {% if col_action.ajaxModal is defined and col_action.ajaxModal %}data-ajax-modal{% endif %}><i class="fas fa-{{ col_action.icon }}"></i></a></th>
                 {%- endfor %}
 
             </tr>
