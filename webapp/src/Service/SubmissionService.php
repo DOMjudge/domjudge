@@ -605,7 +605,7 @@ class SubmissionService
         $matchstring = null;
         $pos         = false;
         foreach (self::PROBLEM_RESULT_MATCHSTRING as $currentMatch) {
-            $currentPos = mb_stripos($source, $currentMatch))
+            $currentPos = mb_stripos($source, $currentMatch);
             if ($currentPos !== false) {
                 if ($pos !== false) {
                     return false;
