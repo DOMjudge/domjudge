@@ -4,14 +4,14 @@ endif
 include $(TOPDIR)/Makefile.global
 
 SUBMITCMD = $(TOPDIR)/submit/submit
-SUBMITOPTS = $(subst 1,-q,$(QUIET)) -y -c demo -p $(PROBLEM)
+SUBMITOPTS = -y -c demo -p $(PROBLEM)
 
 SUBMIT = \
 	echo -n "Submitting '$$i' " ; \
 	if [ "$${i%.zip}" != "$$i" ]; then \
 		tmp=`mktemp -d --tmpdir` ; \
 		unzip -jnq -d "$$tmp" "$$i" ; \
-		main=`grep -l -m 1 '@EXPECTED_RESULTS@' "$$tmp/"*` ; \
+		main=`grep -l '@EXPECTED_RESULTS@' "$$tmp/"*` ; \
 		$(SUBMITCMD) $(SUBMITOPTS) "$$main" "$$tmp/"* ; \
 		rm -rf "$$tmp" ; \
 	else \
@@ -21,12 +21,14 @@ SUBMIT = \
 
 # Copy of SUBMIT, but checks that the submit command fails.
 BAD_SUBMIT = \
-	echo -n "Submitting '$$i' " ; \
+	echo "Submitting '$$i' " ; \
 	if [ "$${i%.zip}" != "$$i" ]; then \
 		tmp=`mktemp -d --tmpdir` ; \
 		unzip -jnq -d "$$tmp" "$$i" ; \
-		main=`grep -l -m 1 '@EXPECTED_RESULTS@' "$$tmp/"*` ; \
+		main=`grep -l '@EXPECTED_RESULTS@' "$$tmp/"* | head -1` ; \
+		echo $$main ; \
 		if $(SUBMITCMD) $(SUBMITOPTS) "$$main" "$$tmp/"* ; then \
+			echo $(SUBMITCMD) $(SUBMITOPTS) "$$main" "$$tmp/": Succeeded but expected failure.
 			exit 1 ; \
 		fi ; \
 		rm -rf "$$tmp" ; \
@@ -69,8 +71,8 @@ test-stress: filename-tests.tar.gz $(SUBMITCMD)
 	tar xzf $<
 	@echo "Submitting stress test sources..." ; \
 	
-test-bad-expected-results: $(SUBMITCMD)
-	@echo "Submitting bad expected result sources..." ; \
+test-bad-expected-results: 
+	echo "Submitting bad expected result sources..." ; \
 	for i in bad-expected-result-* ; do $(BAD_SUBMIT) ; done
 
 $(SUBMITCMD):
