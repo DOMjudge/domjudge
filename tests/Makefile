@@ -81,8 +81,8 @@ test-boolfind: $(SUBMITCMD)
 test-stress: filename-tests.tar.gz $(SUBMITCMD)
 	tar xzf $<
 	@echo "Submitting stress test sources..." ; \
-	
-test-bad-expected-results: 
+
+test-bad-expected-results:
 	echo "Submitting bad expected result sources..." ; \
 	for i in bad-expected-result-* ; do $(BAD_SUBMIT) ; done
 
