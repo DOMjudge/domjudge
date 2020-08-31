@@ -4,7 +4,7 @@ endif
 include $(TOPDIR)/Makefile.global
 
 SUBMITCMD = $(TOPDIR)/submit/submit
-SUBMITOPTS = -y -c demo -p $(PROBLEM)
+SUBMITOPTS = $(subst 1,-q,$(QUIET)) -y -c demo -p $(PROBLEM)
 
 SUBMIT = \
 	echo -n "Submitting '$$i' " ; \
@@ -75,6 +75,7 @@ test-bad-expected-results: $(SUBMITCMD)
 test-stress: filename-tests.tar.gz $(SUBMITCMD)
 	tar xzf $<
 	@echo "Submitting stress test sources..." ; \
+	for i in stress-test-* ; do $(SUBMIT) ;	done
 
 $(SUBMITCMD):
 	$(MAKE) -C $(TOPDIR)/submit submit

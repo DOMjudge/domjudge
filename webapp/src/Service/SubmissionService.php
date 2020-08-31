@@ -519,7 +519,7 @@ class SubmissionService
             foreach ($files as $rank => $file) {
                 $fileResult = self::getExpectedResults(file_get_contents($file->getRealPath()),
                     $this->config->get('results_remap'));
-                if ($fileResult === false) {
+                if ($fileResult === false) 
                         $message = "Found more than one @EXPECTED_RESULTS@ in file.";
                         return null;
                 }
@@ -604,19 +604,20 @@ class SubmissionService
     {
         $matchstring = null;
         $pos         = false;
-        foreach (self::PROBLEM_RESULT_MATCHSTRING as $currentMatch) {
-            $currentPos = mb_stripos($source, $currentMatch);
+        foreach (self::PROBLEM_RESULT_MATCHSTRING as $pattern) {
+            $currentPos = mb_stripos($source, $pattern);
             if ($currentPos !== false) {
                 // Check if we find another match after the first one, since
-                // that is not allowed
-                if (mb_stripos($source, $currentMatch, $currentPos+1) !== false) {
+                // that is not allowed.
+                if (mb_stripos($source, $pattern, $currentPos+1) !== false) {
                     return false;
                 }
+                // Check that another pattern did not give a match already.
                 if ($pos !== false) {
                     return false;
                 }
                 $pos = $currentPos;
-                $matchstring = $currentMatch;
+                $matchstring = $pattern;
             }
         }
 
