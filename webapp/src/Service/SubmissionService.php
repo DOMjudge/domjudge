@@ -521,12 +521,12 @@ class SubmissionService
                     $this->config->get('results_remap'));
                 if ($fileResult === false) {
                         $message = "Found more than one @EXPECTED_RESULTS@ in file.";
-                        return null
+                        return null;
                 }
                 if ($fileResult !== null) {
-                    if($results !== null) {
+                    if ($results !== null) {
                         $message = "Found more than one file with @EXPECTED_RESULTS@.";
-                        return null
+                        return null;
                     }
                     $results = $fileResult;
                 }
