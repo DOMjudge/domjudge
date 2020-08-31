@@ -8,6 +8,7 @@ use App\Entity\Language;
 use App\Entity\Testcase;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
+use App\Service\StatisticsService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\Expr\Join;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
@@ -39,6 +40,11 @@ class ProblemController extends BaseController
     protected $config;
 
     /**
+     * @var StatisticsService
+     */
+    protected $stats;
+
+    /**
      * @var EntityManagerInterface
      */
     protected $em;
@@ -48,15 +54,18 @@ class ProblemController extends BaseController
      *
      * @param DOMJudgeService        $dj
      * @param ConfigurationService   $config
+     * @param StatisticsService      $stats
      * @param EntityManagerInterface $em
      */
     public function __construct(
         DOMJudgeService $dj,
         ConfigurationService $config,
+        StatisticsService $stats,
         EntityManagerInterface $em
     ) {
         $this->dj     = $dj;
         $this->config = $config;
+        $this->stats  = $stats;
         $this->em     = $em;
     }
 
@@ -69,7 +78,7 @@ class ProblemController extends BaseController
     public function problemsAction()
     {
         return $this->render('team/problems.html.twig',
-            $this->dj->getTwigDataForProblemsAction($this->dj->getUser()->getTeamid()));
+            $this->dj->getTwigDataForProblemsAction($this->dj->getUser()->getTeamid(), $this->stats));
     }
 
 

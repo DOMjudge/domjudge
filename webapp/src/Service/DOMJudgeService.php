@@ -15,6 +15,7 @@ use App\Entity\Rejudging;
 use App\Entity\Team;
 use App\Entity\Testcase;
 use App\Entity\User;
+use App\Utils\FreezeData;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\Expr\Join;
@@ -787,7 +788,7 @@ class DOMJudgeService
         return $stats;
     }
 
-    public function getTwigDataForProblemsAction(int $teamId): array {
+    public function getTwigDataForProblemsAction(int $teamId, StatisticsService $statistics): array {
         $contest            = $this->getCurrentContest($teamId);
         $showLimits         = (bool)$this->config->get('show_limits_on_team_page');
         $defaultMemoryLimit = (int)$this->config->get('memory_limit');
@@ -818,11 +819,25 @@ class DOMJudgeService
                 ->getResult();
         }
 
-        return [
+        $data = [
             'problems' => $problems,
             'showLimits' => $showLimits,
             'defaultMemoryLimit' => $defaultMemoryLimit,
             'timeFactorDiffers' => $timeFactorDiffers,
         ];
+
+        if ($this->config->get('show_public_stats')) {
+            $freezeData = new FreezeData($contest);
+            $data['stats'] = $statistics->getGroupedProblemsStats(
+                $contest,
+                array_map(function (ContestProblem $problem) {
+                    return $problem->getProblem();
+                }, array_column($problems, 0)),
+                $freezeData->showFinal(false),
+                (bool)$this->config->get('verification_required')
+            );
+        }
+
+        return $data;
     }
 }
