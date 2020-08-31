@@ -28,7 +28,7 @@ BAD_SUBMIT = \
 		main=`grep -l '@EXPECTED_RESULTS@' "$$tmp/"* | head -1` ; \
 		echo $$main ; \
 		if $(SUBMITCMD) $(SUBMITOPTS) "$$main" "$$tmp/"* ; then \
-			echo $(SUBMITCMD) $(SUBMITOPTS) "$$main" "$$tmp/": Succeeded but expected failure.
+			echo $(SUBMITCMD) $(SUBMITOPTS) "$$main" "$$tmp/": Succeeded but expected failure. ; \
 			exit 1 ; \
 		fi ; \
 		rm -rf "$$tmp" ; \
