@@ -515,11 +515,20 @@ class SubmissionService
         // First look up any expected results in all submission files, so as to minimize the
         // SQL transaction time below.
         if ($this->dj->checkrole('jury')) {
+            $results = null;
             foreach ($files as $rank => $file) {
-                $results = self::getExpectedResults(file_get_contents($file->getRealPath()),
+                $fileResult = self::getExpectedResults(file_get_contents($file->getRealPath()),
                     $this->config->get('results_remap'));
-                if ($results !== null){
-                    break;
+                if ($fileResult === false) {
+                        $message = "Found more than one @EXPECTED_RESULTS@ in file.";
+                        return null
+                }
+                if ($fileResult !== null) {
+                    if($results !== null) {
+                        $message = "Found more than one file with @EXPECTED_RESULTS@.";
+                        return null
+                    }
+                    $results = $fileResult;
                 }
             }
         }
@@ -589,15 +598,20 @@ class SubmissionService
      * Checks given source file for expected results string
      * @param string $source
      * @param array  $resultsRemap
-     * @return array|null Array of expected results if found or null otherwise
+     * @return array|false|null Array of expected results if found, false when multiple matches are found, or null otherwise.
      */
     public static function getExpectedResults(string $source, array $resultsRemap)
     {
         $matchstring = null;
         $pos         = false;
-        foreach (self::PROBLEM_RESULT_MATCHSTRING as $matchstring) {
-            if (($pos = mb_stripos($source, $matchstring)) !== false) {
-                break;
+        foreach (self::PROBLEM_RESULT_MATCHSTRING as $currentMatch) {
+            $currentPos = mb_stripos($source, $currentMatch))
+            if ($currentPos !== false) {
+                if ($pos !== false) {
+                    return false;
+                }
+                $pos = $currentPos;
+                $matchstring = $currentMatch;
             }
         }
 

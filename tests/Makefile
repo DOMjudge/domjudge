@@ -11,11 +11,29 @@ SUBMIT = \
 	if [ "$${i%.zip}" != "$$i" ]; then \
 		tmp=`mktemp -d --tmpdir` ; \
 		unzip -jnq -d "$$tmp" "$$i" ; \
-		main=`grep -l '@EXPECTED_RESULTS@' "$$tmp/"*` ; \
+		main=`grep -l -m 1 '@EXPECTED_RESULTS@' "$$tmp/"*` ; \
 		$(SUBMITCMD) $(SUBMITOPTS) "$$main" "$$tmp/"* ; \
 		rm -rf "$$tmp" ; \
 	else \
 		$(SUBMITCMD) $(SUBMITOPTS) "$$i" ; \
+	fi ; \
+	echo
+
+# Copy of SUBMIT, but checks that the submit command fails.
+BAD_SUBMIT = \
+	echo -n "Submitting '$$i' " ; \
+	if [ "$${i%.zip}" != "$$i" ]; then \
+		tmp=`mktemp -d --tmpdir` ; \
+		unzip -jnq -d "$$tmp" "$$i" ; \
+		main=`grep -l -m 1 '@EXPECTED_RESULTS@' "$$tmp/"*` ; \
+		if $(SUBMITCMD) $(SUBMITOPTS) "$$main" "$$tmp/"* ; then \
+			exit 1 ; \
+		fi ; \
+		rm -rf "$$tmp" ; \
+	else \
+		if $(SUBMITCMD) $(SUBMITOPTS) "$$i" ; then \
+			exit 1; \
+		fi ; \
 	fi ; \
 	echo
 
@@ -50,7 +68,10 @@ test-boolfind: $(SUBMITCMD)
 test-stress: filename-tests.tar.gz $(SUBMITCMD)
 	tar xzf $<
 	@echo "Submitting stress test sources..." ; \
-	for i in stress-test-* ; do $(SUBMIT) ;	done
+	
+test-bad-expected-results: $(SUBMITCMD)
+	@echo "Submitting bad expected result sources..." ; \
+	for i in bad-expected-result-* ; do $(BAD_SUBMIT) ; done
 
 $(SUBMITCMD):
 	$(MAKE) -C $(TOPDIR)/submit submit
