@@ -33,20 +33,19 @@ BAD_SUBMIT = \
 	if [ "$${i%.zip}" != "$$i" ]; then \
 		tmp=`mktemp -d --tmpdir` ; \
 		unzip -jnq -d "$$tmp" "$$i" ; \
-		main=`grep -l '@EXPECTED_RESULTS@' "$$tmp/"* | head -1` ; \
-		echo $$main ; \
-		if $(SUBMITCMD) $(SUBMITOPTS) "$$main" "$$tmp/"* ; then \
-			echo $(SUBMITCMD) $(SUBMITOPTS) "$$main" "$$tmp/": Succeeded but expected failure. ; \
-		else \
-			echo $(SUBMITCMD) $(SUBMITOPTS) "$$main" "$$tmp/": Failed as expected ; \
+		if $(SUBMITCMD) $(SUBMITOPTS) "$$tmp/"* ; then \
+			echo $(SUBMITCMD) $(SUBMITOPTS) "$$tmp/": Succeeded but expected failure. ; \
 			exit 1 ; \
+		else \
+			echo $(SUBMITCMD) $(SUBMITOPTS) "$$tmp/": Failed as expected ; \
 		fi ; \
 		rm -rf "$$tmp" ; \
 	else \
 		if $(SUBMITCMD) $(SUBMITOPTS) "$$i" ; then \
+			echo $(SUBMITCMD) $(SUBMITOPTS) "$$tmp/": Succeeded but expected failure. ; \
 			exit 1 ; \
 		else \
-			echo $(SUBMITCMD) $(SUBMITOPTS) "$$main" "$$tmp/": Failed as expected ; \
+			echo $(SUBMITCMD) $(SUBMITOPTS) "$$tmp/": Failed as expected ; \
 		fi ; \
 	fi ; \
 	echo
