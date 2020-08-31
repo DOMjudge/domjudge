@@ -12,40 +12,30 @@ SUBMIT = \
 		tmp=`mktemp -d --tmpdir` ; \
 		unzip -jnq -d "$$tmp" "$$i" ; \
 		main=`grep -l '@EXPECTED_RESULTS@' "$$tmp/"*` ; \
-		if $(SUBMITCMD) $(SUBMITOPTS) "$$main" "$$tmp/"* ; then \
-			echo $(SUBMITCMD) $(SUBMITOPTS) "$$main" "$$tmp/": Succeeded as expected ; \
-		else \
-			echo $(SUBMITCMD) $(SUBMITOPTS) "$$main" "$$tmp/": Failed ; \
-		fi ; \
+		$(SUBMITCMD) $(SUBMITOPTS) "$$main" "$$tmp/"* ; \
 		rm -rf "$$tmp" ; \
 	else \
-		if $(SUBMITCMD) $(SUBMITOPTS) "$$i" ; then \
-			echo $(SUBMITCMD) $(SUBMITOPTS) "$$main" "$$tmp/": Succeeded as expected ; \
-		else \
-			echo $(SUBMITCMD) $(SUBMITOPTS) "$$main" "$$tmp/": Failed ; \
-		fi ; \
+		$(SUBMITCMD) $(SUBMITOPTS) "$$i" ; \
 	fi ; \
 	echo
 
 # Copy of SUBMIT, but checks that the submit command fails.
+# Does not do main file detection since there may be multiple matches.
+# Always uses the lexicographically first file.
 BAD_SUBMIT = \
 	echo "Submitting '$$i' " ; \
 	if [ "$${i%.zip}" != "$$i" ]; then \
 		tmp=`mktemp -d --tmpdir` ; \
 		unzip -jnq -d "$$tmp" "$$i" ; \
 		if $(SUBMITCMD) $(SUBMITOPTS) "$$tmp/"* ; then \
-			echo $(SUBMITCMD) $(SUBMITOPTS) "$$tmp/": Succeeded but expected failure. ; \
+			echo $(SUBMITCMD) $(SUBMITOPTS) "$$tmp/*": Succeeded but expected failure. ; \
 			exit 1 ; \
-		else \
-			echo $(SUBMITCMD) $(SUBMITOPTS) "$$tmp/": Failed as expected ; \
 		fi ; \
 		rm -rf "$$tmp" ; \
 	else \
 		if $(SUBMITCMD) $(SUBMITOPTS) "$$i" ; then \
 			echo $(SUBMITCMD) $(SUBMITOPTS) "$$tmp/*": Succeeded but expected failure. ; \
 			exit 1 ; \
-		else \
-			echo $(SUBMITCMD) $(SUBMITOPTS) "$$tmp/*": Failed as expected ; \
 		fi ; \
 	fi ; \
 	echo
@@ -78,13 +68,13 @@ test-boolfind: $(SUBMITCMD)
 	@echo "Submitting boolfind test sources..." ; \
 	for i in boolfind-test-* ; do $(SUBMIT) ; done
 
+test-bad-expected-results: $(SUBMITCMD)
+	echo "Submitting bad expected result sources..." ; \
+	for i in bad-expected-result-* ; do $(BAD_SUBMIT) ; done
+
 test-stress: filename-tests.tar.gz $(SUBMITCMD)
 	tar xzf $<
 	@echo "Submitting stress test sources..." ; \
-
-test-bad-expected-results:
-	echo "Submitting bad expected result sources..." ; \
-	for i in bad-expected-result-* ; do $(BAD_SUBMIT) ; done
 
 $(SUBMITCMD):
 	$(MAKE) -C $(TOPDIR)/submit submit
