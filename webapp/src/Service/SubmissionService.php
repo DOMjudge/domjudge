@@ -609,8 +609,8 @@ class SubmissionService
             if ($currentPos !== false) {
                 // Check if we find another match after the first one, since
                 // that is not allowed
-                if (mb_stripos($source, $currentMatch, $currentPos) !== false) {
-                     return false;
+                if (mb_stripos($source, $currentMatch, $currentPos+1) !== false) {
+                    return false;
                 }
                 if ($pos !== false) {
                     return false;
