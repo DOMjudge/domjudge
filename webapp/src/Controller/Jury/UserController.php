@@ -272,7 +272,7 @@ class UserController extends BaseController
      * @Route("/{userId<[\d,]*\d+>}/delete", name="jury_user_delete")
      * @IsGranted("ROLE_ADMIN")
      * @param Request $request
-     * @param string $userId
+     * @param string $userIds
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
      * @throws \Exception
      */
@@ -290,28 +290,8 @@ class UserController extends BaseController
         }
 
         return $this->deleteEntities($request, $this->em, $this->dj, $this->eventLogService, $this->kernel,
-                                   $users, $user->getName(), $this->generateUrl('jury_users'));
+                                   $users, $usernames, $this->generateUrl('jury_users'));
     }
-
-    /**
-     * @Route("/{userId<\d+>}/delete", name="jury_user_delete")
-     * @IsGranted("ROLE_ADMIN")
-     * @param Request $request
-     * @param int     $userId
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
-     * @throws \Exception
-     */
-    /*public function deleteAction(Request $request, int $userId)
-    {
-        /** @var User $user */
-    /*$user = $this->em->getRepository(User::class)->find($userId);
-    if (!$user) {
-        throw new NotFoundHttpException(sprintf('User with ID %s not found', $userId));
-    }
-
-    return $this->deleteEntity($request, $this->em, $this->dj, $this->eventLogService, $this->kernel,
-                               $user, $user->getName(), $this->generateUrl('jury_users'));
-}   */
 
     /**
      * @Route("/add", name="jury_user_add")

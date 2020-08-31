@@ -276,7 +276,7 @@ class ProblemController extends BaseController
                     'icon' => 'trash-alt',
                     'title' => 'delete this problem',
                     'link' => $this->generateUrl('jury_problem_delete', [
-                        'probId' => $p->getProbid(),
+                        'probIds' => $p->getProbid(),
                     ]),
                     'ajaxModal' => true,
                 ];
@@ -310,7 +310,7 @@ class ProblemController extends BaseController
                 'actions' => $problemactions,
                 'link' => $this->generateUrl('jury_problem', ['probId' => $p->getProbid()]),
                 'multiAction' => $p->getProbid(),
-                'multiActionUrl' => $this->generateUrl('jury_problem_delete', ['probId' => 0]),
+                'multiActionUrl' => $this->generateUrl('jury_problem_delete', ['probIds' => 0]),
             ];
         }
         $data = [
@@ -1082,6 +1082,7 @@ class ProblemController extends BaseController
             $problems[] = $problem;
             $problemNames[] = $problem->getName();
         }
+
         return $this->deleteEntities($request, $this->em, $this->dj, $this->eventLogService, $this->kernel,
             $problems, $problemNames, $this->generateUrl('jury_problems'));
     }

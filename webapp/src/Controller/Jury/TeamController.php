@@ -409,23 +409,28 @@ class TeamController extends BaseController
     }
 
     /**
-     * @Route("/{teamId<\d+>}/delete", name="jury_team_delete")
+     * @Route("/{teamIds<[\d,]*\d+>}/delete", name="jury_team_delete")
      * @IsGranted("ROLE_ADMIN")
      * @param Request $request
-     * @param int     $teamId
+     * @param string $teamIds
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
      * @throws \Exception
      */
-    public function deleteAction(Request $request, int $teamId)
+    public function deleteActions(Request $request, string $teamIds)
     {
-        /** @var Team $team */
-        $team = $this->em->getRepository(Team::class)->find($teamId);
-        if (!$team) {
-            throw new NotFoundHttpException(sprintf('Team with ID %s not found', $teamId));
+        /** @var Team[] $teams */
+        $teamNames = [];
+        foreach (explode(',', $teamIds) as $teamId) {
+            $team = $this->em->getRepository(Team::class)->find($teamId);
+            if (!$team) {
+                throw new NotFoundHttpException(sprintf('Team with ID %s not found', $teamId));
+            }
+            $teams[] = $team;
+            $teamNames[] = $team->getEffectiveName();
         }
 
-        return $this->deleteEntity($request, $this->em, $this->dj, $this->eventLogService, $this->kernel,
-                                   $team, $team->getEffectiveName(), $this->generateUrl('jury_teams'));
+        return $this->deleteEntities($request, $this->em, $this->dj, $this->eventLogService, $this->kernel,
+                                   $team, $teamNames, $this->generateUrl('jury_teams'));
     }
 
     /**
