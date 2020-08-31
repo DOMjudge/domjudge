@@ -618,7 +618,7 @@ class SubmissionService
                 $pos = $currentPos;
                 $matchstring = $currentMatch;
             }
-        }-                if ($pos !== false) {
+        }
 
         if ($pos === false) {
             return null;
