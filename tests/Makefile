@@ -12,10 +12,18 @@ SUBMIT = \
 		tmp=`mktemp -d --tmpdir` ; \
 		unzip -jnq -d "$$tmp" "$$i" ; \
 		main=`grep -l '@EXPECTED_RESULTS@' "$$tmp/"*` ; \
-		$(SUBMITCMD) $(SUBMITOPTS) "$$main" "$$tmp/"* ; \
+		if $(SUBMITCMD) $(SUBMITOPTS) "$$main" "$$tmp/"* ; then \
+			echo $(SUBMITCMD) $(SUBMITOPTS) "$$main" "$$tmp/": Succeeded as expected ; \
+		else ; \
+			echo $(SUBMITCMD) $(SUBMITOPTS) "$$main" "$$tmp/": Failed ; \
+		fi ; \
 		rm -rf "$$tmp" ; \
 	else \
-		$(SUBMITCMD) $(SUBMITOPTS) "$$i" ; \
+		if $(SUBMITCMD) $(SUBMITOPTS) "$$i" ; then \
+			echo $(SUBMITCMD) $(SUBMITOPTS) "$$main" "$$tmp/": Succeeded as expected ; \
+		else ; \
+			echo $(SUBMITCMD) $(SUBMITOPTS) "$$main" "$$tmp/": Failed ; \
+		fi ; \
 	fi ; \
 	echo
 
@@ -30,11 +38,15 @@ BAD_SUBMIT = \
 		if $(SUBMITCMD) $(SUBMITOPTS) "$$main" "$$tmp/"* ; then \
 			echo $(SUBMITCMD) $(SUBMITOPTS) "$$main" "$$tmp/": Succeeded but expected failure. ; \
 			exit 1 ; \
+		else ; \
+			echo $(SUBMITCMD) $(SUBMITOPTS) "$$main" "$$tmp/": Failed as expected ; \
 		fi ; \
 		rm -rf "$$tmp" ; \
 	else \
 		if $(SUBMITCMD) $(SUBMITOPTS) "$$i" ; then \
 			exit 1; \
+		else ; \
+			echo $(SUBMITCMD) $(SUBMITOPTS) "$$main" "$$tmp/": Failed as expected ; \
 		fi ; \
 	fi ; \
 	echo
