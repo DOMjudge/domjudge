@@ -14,14 +14,14 @@ SUBMIT = \
 		main=`grep -l '@EXPECTED_RESULTS@' "$$tmp/"*` ; \
 		if $(SUBMITCMD) $(SUBMITOPTS) "$$main" "$$tmp/"* ; then \
 			echo $(SUBMITCMD) $(SUBMITOPTS) "$$main" "$$tmp/": Succeeded as expected ; \
-		else ; \
+		else \
 			echo $(SUBMITCMD) $(SUBMITOPTS) "$$main" "$$tmp/": Failed ; \
 		fi ; \
 		rm -rf "$$tmp" ; \
 	else \
 		if $(SUBMITCMD) $(SUBMITOPTS) "$$i" ; then \
 			echo $(SUBMITCMD) $(SUBMITOPTS) "$$main" "$$tmp/": Succeeded as expected ; \
-		else ; \
+		else \
 			echo $(SUBMITCMD) $(SUBMITOPTS) "$$main" "$$tmp/": Failed ; \
 		fi ; \
 	fi ; \
@@ -37,15 +37,15 @@ BAD_SUBMIT = \
 		echo $$main ; \
 		if $(SUBMITCMD) $(SUBMITOPTS) "$$main" "$$tmp/"* ; then \
 			echo $(SUBMITCMD) $(SUBMITOPTS) "$$main" "$$tmp/": Succeeded but expected failure. ; \
-			exit 1 ; \
-		else ; \
+		else \
 			echo $(SUBMITCMD) $(SUBMITOPTS) "$$main" "$$tmp/": Failed as expected ; \
+			exit 1 ; \
 		fi ; \
 		rm -rf "$$tmp" ; \
 	else \
 		if $(SUBMITCMD) $(SUBMITOPTS) "$$i" ; then \
-			exit 1; \
-		else ; \
+			exit 1 ; \
+		else \
 			echo $(SUBMITCMD) $(SUBMITOPTS) "$$main" "$$tmp/": Failed as expected ; \
 		fi ; \
 	fi ; \
