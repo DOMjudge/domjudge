@@ -35,6 +35,9 @@ generating the configure script and documentation. This can be done
 by running 'make dist', see the online documentation, section
 "Developer information" for more details.
 
+There is a wiki which collects other pieces of information about
+specific configurations or integrations:
+https://github.com/DOMjudge/domjudge/wiki
 
 Copyright & Licensing
 ---------------------

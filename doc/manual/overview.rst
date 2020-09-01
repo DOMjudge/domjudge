@@ -177,6 +177,10 @@ You need to be subscribed before you can post. See the
 <https://www.domjudge.org/mailman/listinfo/domjudge-devel>`_
 for subscription and more details.
 
+There is a wiki which collects other pieces of information about
+specific configurations or integrations:
+https://github.com/DOMjudge/domjudge/wiki
+
 DOMjudge has a `Slack workspace <https://www.domjudge.org/chat>`_
 where a number of developers and users of
 DOMjudge linger. Feel free to drop by with your questions and comments,
