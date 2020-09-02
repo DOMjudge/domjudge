@@ -66,6 +66,11 @@ body {
     white-space: pre;
 }
 
+kbd {
+    background-color: #FAFAFA;
+    color: black;
+}
+
 .teamid { font-family: monospace; }
 .filename, .hostname { font-family: monospace; }
 

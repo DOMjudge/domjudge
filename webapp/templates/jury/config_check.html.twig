@@ -21,6 +21,21 @@
 
 <h1>Configuration check</h1>
 
+<div class="card m-3 bg-light">
+  <div class="card-body">
+  <h5 class="card-title">Installation locations</h5>
+  <table>
+  <tr><td>Base url (use in submit client):</td><td><kbd>{{ url('root') }}</kbd></td></tr>
+  <tr><td>API url (use in <tt>restapi.secret</tt>):</td><td><kbd>{{ url('current_api_root') | trim('/', 'right') }}</kbd></td></tr>
+  <tr><td colspan="2">&nbsp;</td></tr>
+  <tr><td>DOMserver installation path:</td><td><kbd>{{ projectdir }}</kbd></td></tr>
+  <tr><td>Logos/images are under:</td><td><kbd>{{ projectdir }}/webapp/public/images/</kbd></td></tr>
+  </table>
+  </div>
+</div>
+
+<h2>Checks</h2>
+
 {% for resultgroup,groupresults in results %}
 <h3 class="mt-3 ml-3">{{ resultgroup }}</h3>
 
