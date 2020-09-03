@@ -28,7 +28,8 @@ Or on RedHat/CentOS/Fedora::
 
   sudo yum install libcurl-devel jsoncpp-devel file-devel
 
-Then run (adapt the URL to your environment)::
+Then run (adapt the URL to your environment; look at the Config check
+in the admin web interface if unsure)::
 
   ./configure --enable-static-linking --with-baseurl="https://yourhost.example.edu/domjudge"
   make submitclient
