@@ -1055,7 +1055,19 @@ class ScoreboardService
         $contestProblems = $queryBuilder->getQuery()->getResult();
         $contestProblemsIndexed = [];
         foreach ($contestProblems as $cp) {
-            $contestProblemsIndexed[$cp->getProblem()->getProbid()] = $cp;
+            $p = $cp->getProblem();
+            // Doctrine has a bug with eagerly loaded second level hydration
+            // when the object is already loaded. In that case it might happen
+            // that the problem of a contest problem is its ID instead of the
+            // whole object. If this happes, load the whole problem. This
+            // should not do any additional database queries, since the problem
+            // has already been loaded.
+            // See https://github.com/doctrine/orm/pull/7145 for the Doctrine issue.
+            if (is_numeric($p)) {
+                $p = $this->em->getRepository(Problem::class)->find($p);
+                $cp->setProblem($p);
+            }
+            $contestProblemsIndexed[$p->getProbid()] = $cp;
         }
         $contestProblems = $contestProblemsIndexed;
 
