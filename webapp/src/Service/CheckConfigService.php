@@ -14,6 +14,7 @@ use App\Entity\Testcase;
 use App\Entity\User;
 use App\Utils\Utils;
 use Doctrine\Common\Inflector\Inflector;
+use Doctrine\Inflector\InflectorFactory;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -723,12 +724,14 @@ class CheckConfigService
             ->getQuery()
             ->getResult();
 
+        $inflector = InflectorFactory::create()->build();
+
         if (!empty($rowsWithoutExternalId)) {
             $result      = 'E';
             $description = '';
             $metadata    = $this->em->getClassMetadata($class);
             foreach ($rowsWithoutExternalId as $entity) {
-                $route       = sprintf('jury_%s', Inflector::tableize($entityType));
+                $route       = sprintf('jury_%s', $inflector->tableize($entityType));
                 $routeParams = [];
                 foreach ($metadata->getIdentifierColumnNames() as $column) {
                     // By default the ID param is the same as the column but then with Id instead of id
@@ -745,7 +748,7 @@ class CheckConfigService
                 }
                 $description .= sprintf("<a href=\"%s\">%s %s</a> does not have an external ID\n",
                                         $this->router->generate($route, $routeParams),
-                                        ucfirst(str_replace('_', ' ', Inflector::tableize($entityType))),
+                                        ucfirst(str_replace('_', ' ', $inflector->tableize($entityType))),
                                         implode(', ', $metadata->getIdentifierValues($entity))
                 );
             }
@@ -754,7 +757,7 @@ class CheckConfigService
         }
 
         return [
-            'caption' => ucfirst(Inflector::pluralize(str_replace('_', ' ', Inflector::tableize($entityType)))),
+            'caption' => ucfirst($inflector->pluralize(str_replace('_', ' ', $inflector->tableize($entityType)))),
             'result' => $result,
             'desc' => $description,
             'escape' => false,

@@ -10,6 +10,7 @@ use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\ImportExportService;
 use App\Utils\Utils;
+use Doctrine\Inflector\InflectorFactory;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
 use FOS\RestBundle\Controller\Annotations as Rest;
@@ -28,7 +29,6 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\KernelInterface;
-use Symfony\Component\Inflector\Inflector;
 use Symfony\Component\Yaml\Yaml;
 
 /**
@@ -403,7 +403,8 @@ class ContestController extends AbstractRestController
                     $shortClass = str_replace('.php', '', $parts[count($parts) - 1]);
                     $class      = sprintf('App\\Entity\\%s', $shortClass);
                     if (class_exists($class)) {
-                        $plural = strtolower(Inflector::pluralize($shortClass));
+                        $inflector = InflectorFactory::create()->build();
+                        $plural = strtolower($inflector->pluralize($shortClass));
                         $toCheck[$plural] = $class;
                     }
                 }

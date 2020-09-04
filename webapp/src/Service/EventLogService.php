@@ -11,6 +11,7 @@ use App\Entity\TeamAffiliation;
 use App\Entity\TeamCategory;
 use App\Utils\Utils;
 use Doctrine\Common\Inflector\Inflector;
+use Doctrine\Inflector\InflectorFactory;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\MappingException;
 use Doctrine\ORM\NonUniqueResultException;
@@ -168,8 +169,9 @@ class EventLogService implements ContainerAwareInterface
             }
             if (!array_key_exists(self::KEY_ENTITY, $data)) {
                 // Determine default controller
-                $singular  = Inflector::singularize($endpoint);
-                $entity    = Inflector::classify($singular);
+                $inflector = InflectorFactory::create()->build();
+                $singular  = $inflector->singularize($endpoint);
+                $entity    = $inflector->classify($singular);
                 $fullClass = sprintf('App\Entity\%s', $entity);
                 if (!class_exists($fullClass)) {
                     throw new \BadMethodCallException(

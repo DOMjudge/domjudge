@@ -12,7 +12,7 @@ use App\Entity\TeamCategory;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Utils\Utils;
-use Doctrine\Common\Inflector\Inflector;
+use Doctrine\Inflector\InflectorFactory;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\MappingException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -181,6 +181,7 @@ abstract class BaseController extends AbstractController
         $isError          = false;
         $messages         = [];
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
+        $inflector        = InflectorFactory::create()->build();
         $readableType     = str_replace('_', ' ', Utils::tableForEntity($entity));
         $metadata         = $entityManager->getClassMetadata(get_class($entity));
         $primaryKeyData   = [];
@@ -205,7 +206,7 @@ abstract class BaseController extends AbstractController
                             $targetEntityType   = $parts[count($parts) - 1];
                             $targetReadableType = str_replace(
                                 '_', ' ',
-                                Inflector::tableize(Inflector::pluralize($targetEntityType))
+                                $inflector->tableize($inflector->pluralize($targetEntityType))
                             );
 
                             switch ($constraint['type']) {
@@ -219,7 +220,7 @@ abstract class BaseController extends AbstractController
                                             $dependentEntityType         = $parts[count($parts) - 1];
                                             $dependentEntitiesReadable[] = str_replace(
                                                 '_', ' ',
-                                                Inflector::tableize(Inflector::pluralize($dependentEntityType))
+                                                $inflector->tableize($inflector->pluralize($dependentEntityType))
                                             );
                                         }
                                         $message .= sprintf(

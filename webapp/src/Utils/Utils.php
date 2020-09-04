@@ -4,6 +4,7 @@ namespace App\Utils;
 use App\Entity\SubmissionFile;
 use DateTime;
 use Doctrine\Common\Inflector\Inflector;
+use Doctrine\Inflector\InflectorFactory;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
@@ -1064,7 +1065,8 @@ class Utils
         $class        = get_class($entity);
         $parts        = explode('\\', $class);
         $entityType   = $parts[count($parts) - 1];
-        return Inflector::tableize($entityType);
+        $inflector    = InflectorFactory::create()->build();
+        return $inflector->tableize($entityType);
     }
 
     /**
