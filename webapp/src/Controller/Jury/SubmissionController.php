@@ -510,7 +510,7 @@ class SubmissionController extends BaseController
 
             if ($lastJudging !== null) {
                 // Clear the testcases, otherwise Doctrine will use the previous data
-                $this->em->clear(Testcase::class);
+                $this->em->clear();
                 $lastRuns = $this->em->createQueryBuilder()
                     ->from(Testcase::class, 't')
                     ->leftJoin('t.judging_runs', 'jr', Join::WITH, 'jr.judging = :judging')
