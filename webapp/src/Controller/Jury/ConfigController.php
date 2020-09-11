@@ -152,14 +152,15 @@ class ConfigController extends AbstractController
     /**
      * @Route("/check", name="jury_config_check")
      */
-    public function checkAction(Request $request)
+    public function checkAction(Request $request, string $projectDir, string $logsDir)
     {
-        $projectdir = $this->getParameter('kernel.project_dir');
-
         $results = $this->checkConfigService->runAll();
         return $this->render('jury/config_check.html.twig', [
             'results' => $results,
-            'projectdir' => dirname($projectdir),
+            'dir' => [
+                    'project' => dirname($projectDir),
+                    'log' => $logsDir,
+                ],
         ]);
     }
 

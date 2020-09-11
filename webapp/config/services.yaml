@@ -16,6 +16,7 @@ services:
             $domjudgeVersion: '%domjudge.version%'
             $projectDir: '%kernel.project_dir%'
             $cacheDir: '%kernel.cache_dir%'
+            $logsDir: '%kernel.logs_dir%'
             $sqlDir: '%domjudge.sqldir%'
             $etcDir: '%domjudge.etcdir%'
 

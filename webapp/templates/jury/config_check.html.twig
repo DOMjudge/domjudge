@@ -28,8 +28,9 @@
   <tr><td>Base url (use in submit client):</td><td><kbd>{{ url('root') }}</kbd></td></tr>
   <tr><td>API url (use in <tt>restapi.secret</tt>):</td><td><kbd>{{ url('current_api_root') | trim('/', 'right') }}</kbd></td></tr>
   <tr><td colspan="2">&nbsp;</td></tr>
-  <tr><td>DOMserver installation path:</td><td><kbd>{{ projectdir }}</kbd></td></tr>
-  <tr><td>Logos/images are under:</td><td><kbd>{{ projectdir }}/webapp/public/images/</kbd></td></tr>
+  <tr><td>DOMserver installation path:</td><td><kbd>{{ dir.project }}</kbd></td></tr>
+  <tr><td>Logos/images are under:</td><td><kbd>{{ dir.project }}/webapp/public/images/</kbd></td></tr>
+  <tr><td>Log directory:</td><td><kbd>{{ dir.log }}</kbd></td></tr>
   </table>
   </div>
 </div>
