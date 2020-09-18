@@ -17,7 +17,7 @@ use Prometheus\RenderTextFormat;
 
 /**
  * @Route("/prometheus/metrics")
- * @IsGranted("ROLE_ADMIN")
+ * @IsGranted("ROLE_API_READER")
  */
 class MetricsController extends AbstractController
 {
