@@ -2,6 +2,9 @@ DOMjudge Programming Contest Judging System
 
 Version 7.4.0 - DEV
 -------------------
+ - Compilation of submissions now happens inside the chroot.
+ - Improve performance with large amounts of affiliations.
+ - Upgrade bundled libraries.
 
 Version 7.3.0 - 26 June 2020
 ----------------------------
