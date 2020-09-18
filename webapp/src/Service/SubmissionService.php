@@ -519,7 +519,7 @@ class SubmissionService
             foreach ($files as $rank => $file) {
                 $fileResult = self::getExpectedResults(file_get_contents($file->getRealPath()),
                     $this->config->get('results_remap'));
-                if ($fileResult === false) 
+                if ($fileResult === false) {
                         $message = "Found more than one @EXPECTED_RESULTS@ in file.";
                         return null;
                 }
