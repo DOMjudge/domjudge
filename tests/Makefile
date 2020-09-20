@@ -19,6 +19,27 @@ SUBMIT = \
 	fi ; \
 	echo
 
+# Copy of SUBMIT, but checks that the submit command fails.
+# Does not do main file detection since there may be multiple matches.
+# Always uses the lexicographically first file.
+BAD_SUBMIT = \
+	echo "Submitting '$$i' " ; \
+	if [ "$${i%.zip}" != "$$i" ]; then \
+		tmp=`mktemp -d --tmpdir` ; \
+		unzip -jnq -d "$$tmp" "$$i" ; \
+		if $(SUBMITCMD) $(SUBMITOPTS) "$$tmp/"* ; then \
+			echo $(SUBMITCMD) $(SUBMITOPTS) "$$tmp/*": Succeeded but expected failure. ; \
+			exit 1 ; \
+		fi ; \
+		rm -rf "$$tmp" ; \
+	else \
+		if $(SUBMITCMD) $(SUBMITOPTS) "$$i" ; then \
+			echo $(SUBMITCMD) $(SUBMITOPTS) "$$tmp/*": Succeeded but expected failure. ; \
+			exit 1 ; \
+		fi ; \
+	fi ; \
+	echo
+
 SUBST_FILES = scripted_submit
 
 build: $(SUBST_FILES)
@@ -29,7 +50,7 @@ $(SUBST_FILES): %: %.in $(TOPDIR)/paths.mk
 check-syntax:
 	$(TOPDIR)/tests/syntax
 
-check: test-normal test-fltcmp test-boolfind
+check: test-normal test-fltcmp test-boolfind test-bad-expected-results
 
 PROBLEM=hello
 test-fltcmp: PROBLEM=fltcmp
@@ -47,6 +68,10 @@ test-boolfind: $(SUBMITCMD)
 	@echo "Submitting boolfind test sources..." ; \
 	for i in boolfind-test-* ; do $(SUBMIT) ; done
 
+test-bad-expected-results: $(SUBMITCMD)
+	echo "Submitting bad expected result sources..." ; \
+	for i in bad-expected-result-* ; do $(BAD_SUBMIT) ; done
+
 test-stress: filename-tests.tar.gz $(SUBMITCMD)
 	tar xzf $<
 	@echo "Submitting stress test sources..." ; \
@@ -61,4 +86,4 @@ clean-l:
 distclean-l:
 	-rm -f $(SUBST_FILES)
 
-.PHONY: check check-syntax test-normal test-fltcmp test-stress
+.PHONY: check check-syntax test-normal test-fltcmp test-stress test-bad-expected-results
