@@ -73,6 +73,13 @@ class UserRegistrationType extends AbstractType
                     'placeholder' => 'Username',
                 ],
             ])
+            ->add('name', TextType::class, [
+                'label' => false,
+                'required' => false,
+                'attr' => [
+                    'placeholder' => 'Full name (optional)',
+                ],
+            ])
             ->add('email', EmailType::class, [
                 'label' => false,
                 'required' => false,
