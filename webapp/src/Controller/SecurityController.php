@@ -128,23 +128,30 @@ class SecurityController extends AbstractController
                 $user->setName($user->getUsername());
             }
 
-            $teamName = $registration_form->get('teamName')->getData();
-
             if ($selfRegistrationCategoriesCount === 1) {
                 $teamCategory = $em->getRepository(TeamCategory::class)->findOneBy(['allow_self_registration' => 1]);
             } else {
                 // $selfRegistrationCategoriesCount > 1, 'teamCategory' field exists
                 $teamCategory = $registration_form->get('teamCategory')->getData();
             }
-
-            // Create a team to go with the user, then set some team attributes
-            $team = new Team();
+            
+            switch ($registration_form->get('team')->getData()) {
+                case 'new':
+                    // Create a team to go with the user, then set some team attributes
+                    $teamName = $registration_form->get('teamName')->getData();
+                    $team = new Team();
+                    $team                        
+                        ->setName($teamName)
+                        ->setCategory($teamCategory)
+                        ->setComments('Registered by ' . $this->dj->getClientIp() . ' on ' . date('r')
+                    );
+                    break;
+                case 'existing':
+                    $team = $registration_form->get('existingTeam')->getData();
+                    break;
+            }
+            $team->addUser($user);                 
             $user->setTeam($team);
-            $team
-                ->addUser($user)
-                ->setName($teamName)
-                ->setCategory($teamCategory)
-                ->setComments('Registered by ' . $this->dj->getClientIp() . ' on ' . date('r'));
 
             if ($this->config->get('show_affiliations')) {
                 switch ($registration_form->get('affiliation')->getData()) {

@@ -96,19 +96,38 @@ class UserRegistrationType extends AbstractType
                 ],
                 'constraints' => new Email(),
             ])
+            ->add('team', ChoiceType::class, [
+                'choices' => [                    
+                    'Join existing team' => 'existing',
+                    'Create new team' => 'new',
+                ],
+                'expanded' => true,
+                'mapped' => false,
+                'label' => false,
+            ])
+            ->add('existingTeam', EntityType::class, [
+                'class' => Team::class,
+                'label' => false,
+                'required' => false,
+                'mapped' => false,
+                'choice_label' => 'name',
+                'placeholder' => '-- Select team --',
+                'query_builder' => function (EntityRepository $er) {
+                    return $er
+                        ->createQueryBuilder('t')
+                        ->join('t.category', 'c')
+                        ->where('c.allow_self_registration = 1')
+                        ->orderBy('t.name');
+                },
+                'attr' => [
+                    'placeholder' => 'Team',
+                ],
+            ])
             ->add('teamName', TextType::class, [
                 'label' => false,
+                'required' => false,                
                 'attr' => [
                     'placeholder' => 'Team name',
-                ],
-                'constraints' => [
-                    new NotBlank(),
-                    new Callback(function ($teamName, ExecutionContext $context) {
-                        if ($this->em->getRepository(Team::class)->findOneBy(['name' => $teamName])) {
-                            $context->buildViolation('This team name is already in use.')
-                                ->addViolation();
-                        }
-                    }),
                 ],
                 'mapped' => false,
             ]);
@@ -119,9 +138,10 @@ class UserRegistrationType extends AbstractType
                 ->add('teamCategory', EntityType::class, [
                     'class' => TeamCategory::class,
                     'label' => false,
+                    'required' => false,
                     'mapped' => false,
                     'choice_label' => 'name',
-                    'placeholder' => '-- Select category --',
+                    'placeholder' => '-- Select team category --',
                     'query_builder' => function (EntityRepository $er) {
                         return $er
                             ->createQueryBuilder('c')
@@ -130,9 +150,6 @@ class UserRegistrationType extends AbstractType
                     },
                     'attr' => [
                         'placeholder' => 'Category',
-                    ],
-                    'constraints' => [
-                        new NotBlank(),
                     ],
                 ]);
         }
@@ -234,6 +251,39 @@ class UserRegistrationType extends AbstractType
      */
     public function configureOptions(OptionsResolver $resolver)
     {
+        $validateTeam = function ($data, ExecutionContext $context) {
+            /** @var Form $form */
+            $form = $context->getRoot();
+            switch ($form->get('team')->getData()) {
+                case 'new':
+                    $teamName = $form->get('teamName')->getData();
+                    if (empty($teamName)) {
+                        $context->buildViolation('This value should not be blank.')
+                            ->atPath('teamName')
+                            ->addViolation();
+                    }
+                    if ($this->em->getRepository(Team::class)->findOneBy(['name' => $teamName])) {
+                        $context->buildViolation('This team name is already in use.')
+                            ->atPath('teamName')
+                            ->addViolation();
+                    }                    
+                    if ($this->em->getRepository(TeamCategory::class)->count(['allow_self_registration' => 1]) > 1 
+                        && empty($form->get('teamCategory')->getData())) {
+                            $context->buildViolation('This value should not be blank.')
+                            ->atPath('teamCategory')
+                            ->addViolation();
+                    }
+                    break;
+                case 'existing':
+                    if (empty($form->get('existingTeam')->getData())) {
+                        $context->buildViolation('This value should not be blank.')
+                            ->atPath('existingTeam')
+                            ->addViolation();
+                    }                    
+                    break;
+            }
+        };
+
         $validateAffiliation = function ($data, ExecutionContext $context) {
             if ($this->config->get('show_affiliations')) {
                 /** @var Form $form */
@@ -264,8 +314,11 @@ class UserRegistrationType extends AbstractType
         };
         $resolver->setDefaults(
             [
-                'data_class' => User::class,
-                'constraints' => new Callback($validateAffiliation)
+                'data_class' => User::class,                
+                'constraints' => [
+                    new Callback($validateTeam),
+                    new Callback($validateAffiliation),
+                ],
             ]
         );
     }

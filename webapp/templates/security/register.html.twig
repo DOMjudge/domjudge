@@ -27,6 +27,41 @@
         $(function () {
             $('#user_registration_existingAffiliation').select2();
 
+            var $teamRadios = $('[name="user_registration[team]"]');
+
+            if ($teamRadios.length) {
+                $teamRadios.on('change', function () {
+                    var $teamNameGroup = $('#user_registration_teamName').closest('.form-group');
+                    var $existingTeamGroup = $('#user_registration_existingTeam').closest('.form-group');
+                    var $teamCategory = $('#user_registration_teamCategory').closest('.form-group');
+                    var value = $teamRadios.filter(':checked').val();
+
+                    switch (value) {
+                        case 'new':
+                            $teamNameGroup.show();
+                            $existingTeamGroup.hide();
+                            if ($teamCategory) {
+                                $teamCategory.show();
+                            }
+                            break;
+                        case 'existing':
+                            $teamNameGroup.hide();
+                            $existingTeamGroup.show();
+                            if ($teamCategory) {
+                                $teamCategory.hide();
+                            }
+                            break;
+                    }
+                });  
+
+                var $checkedRadio = $teamRadios.filter(':checked');
+                if ($checkedRadio.length === 0) {
+                    $teamRadios.first().prop('checked', true);
+                }
+
+                $teamRadios.change();  
+            }    
+
             var $affiliationRadios = $('[name="user_registration[affiliation]"]');
 
             if ($affiliationRadios.length) {
