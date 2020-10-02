@@ -71,6 +71,7 @@ class UserRegistrationType extends AbstractType
                 'label' => false,
                 'attr' => [
                     'placeholder' => 'Username',
+                    'autocomplete' => 'username',
                 ],
             ])
             ->add('name', TextType::class, [
@@ -78,6 +79,7 @@ class UserRegistrationType extends AbstractType
                 'required' => false,
                 'attr' => [
                     'placeholder' => 'Full name (optional)',
+                    'autocomplete' => 'name',
                 ],
             ])
             ->add('email', EmailType::class, [
@@ -85,6 +87,7 @@ class UserRegistrationType extends AbstractType
                 'required' => false,
                 'attr' => [
                     'placeholder' => 'Email address (optional)',
+                    'autocomplete' => 'email',
                 ],
                 'constraints' => new Email(),
             ])
