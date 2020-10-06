@@ -42,7 +42,8 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface
     /**
      * @var string
      * @ORM\Column(type="string", name="icpcid", length=255, options={"comment"="Team ID in the ICPC system",
-     *                            "collation"="utf8mb4_bin"}, nullable=true)
+     *                            "collation"="utf8mb4_bin","default"="NULL"}, nullable=true)
+     * @Assert\Regex("/^[a-zA-Z0-9_-]+$/i", message="Only letters, numbers, dashes and underscores are allowed")
      * @Serializer\SerializedName("icpc_id")
      */
     protected $icpcid;

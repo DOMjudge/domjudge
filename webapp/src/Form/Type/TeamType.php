@@ -59,15 +59,7 @@ class TeamType extends AbstractType
         $builder->add('icpcid', TextType::class, [
             'label' => 'ICPC ID',
             'required' => false,
-            'help' => 'Optional ID of the team in the ICPC CMS.',
-            'constraints' => [
-                new Regex(
-                    [
-                        'pattern' => '/^[a-zA-Z0-9_-]+$/i',
-                        'message' => 'Only letters, numbers, dashes and underscores are allowed.',
-                    ]
-                )
-            ]
+            'help' => 'ID of the team in the ICPC CMS',
         ]);
         $builder->add('category', EntityType::class, [
             'class' => TeamCategory::class,
