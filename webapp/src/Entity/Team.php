@@ -120,6 +120,12 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface
     private $addUserForTeam = false;
 
     /**
+     * @var User
+     * @Serializer\Exclude()
+     */
+    private $initialUser;
+
+    /**
      * @ORM\ManyToOne(targetEntity="TeamAffiliation", inversedBy="teams")
      * @ORM\JoinColumn(name="affilid", referencedColumnName="affilid", onDelete="SET NULL")
      * @Serializer\Exclude()
@@ -300,6 +306,21 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface
         $this->addUserForTeam = $addUserForTeam;
     }
 
+    /**
+     * Set the initial user name to for this team.
+     *
+     * @param \App\Entity\User $initialUser
+     */
+    public function setInitialUser(\App\Entity\User $initialUser)
+    {
+        $this->initialUser = $initialUser;
+    }
+
+    /**
+     * Get penalty
+     *
+     * @return integer
+     */
     public function getPenalty(): int
     {
         return $this->penalty;
@@ -310,6 +331,23 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface
         return $this->addUserForTeam;
     }
 
+    /**
+     * Get the initial user for this team.
+     *
+     * @return User
+     */
+    public function getInitialUser(): User
+    {
+        return $this->initialUser;
+    }
+
+    /**
+     * Set affiliation
+     *
+     * @param \App\Entity\TeamAffiliation $affiliation
+     *
+     * @return Team
+     */
     public function setAffiliation(TeamAffiliation $affiliation = null): Team
     {
         $this->affiliation = $affiliation;
@@ -350,6 +388,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface
         $this->sent_clarifications     = new ArrayCollection();
         $this->received_clarifications = new ArrayCollection();
         $this->unread_clarifications   = new ArrayCollection();
+        $this->initialUser             = new User();
     }
 
     public function addContest(Contest $contest): Team
@@ -380,6 +419,10 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface
     public function removeUser(User $user)
     {
         $this->users->removeElement($user);
+
+        $user->setTeam(null);
+
+        return $this;
     }
 
     public function getUsers(): Collection
@@ -503,17 +546,12 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface
     public function validate(ExecutionContextInterface $context)
     {
         if ($this->getAddUserForTeam()) {
-            if (empty($this->getUsers()->first()->getUsername())) {
+            if (empty($this->getInitialUser()->getUsername())) {
                 $context
                     ->buildViolation('Required when adding a user')
-                    ->atPath('users[0].username')
+                    ->atPath('initialUser.username')
                     ->addViolation();
-            } elseif (!preg_match('/^[a-zA-Z0-9_-]+$/', $this->getUsers()->first()->getUsername())) {
-                $context
-                    ->buildViolation('May only contain [a-zA-Z0-9_-].')
-                    ->atPath('users[0].username')
-                    ->addViolation();
-            }
+            } 
         }
     }
 

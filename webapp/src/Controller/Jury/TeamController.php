@@ -366,7 +366,10 @@ class TeamController extends BaseController
             throw new NotFoundHttpException(sprintf('Team with ID %s not found', $teamId));
         }
 
-        $form = $this->createForm(TeamType::class, $team);
+        $form = $this->createForm(TeamType::class, $team, [
+            // include the current team users in the form
+            'team_id' => $team->getTeamid(),
+        ]);
 
         $form->handleRequest($request);
 
@@ -414,19 +417,26 @@ class TeamController extends BaseController
     {
         $team = new Team();
         $team->setAddUserForTeam(true);
-        $team->addUser(new User());
         $form = $this->createForm(TeamType::class, $team);
 
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            /** @var User $user */
-            $user = $team->getUsers()->first();
-            if (!$team->getAddUserForTeam()) {
-                // If we do not want to add a user, remove it again
-                $team->removeUser($user);
-            } else {
-                // Otherwise, set the user's name to the team name
+        if ($form->isSubmitted() && $form->isValid()) {            
+            if ($team->getAddUserForTeam()) {
+                // Add the team role to initial user
+                /** @var User $user */
+                $user = $team->getInitialUser();
+                /** @var Role $role */
+                $role = $this->em->createQueryBuilder()
+                    ->from(Role::class, 'r')
+                    ->select('r')
+                    ->andWhere('r.dj_role = :team')
+                    ->setParameter(':team', 'team')
+                    ->getQuery()
+                    ->getOneOrNullResult();
+                $user->addUserRole($role);
+                $user->setTeam($team);
+                // Also set the user's name to the team name
                 $user->setName($team->getEffectiveName());
             }
             $this->em->persist($team);

@@ -6,16 +6,17 @@
         {{ form_row(form.icpcid) }}
         {{ form_row(form.category) }}
         {{ form_row(form.members) }}
+        {{ form_row(form.users) }}
         {{ form_row(form.affiliation) }}
         {{ form_row(form.penalty) }}
         {{ form_row(form.room) }}
         {{ form_row(form.comments) }}
         {{ form_row(form.contests) }}
         {{ form_row(form.enabled) }}
-        {% if form.offsetExists('users') %}
+        {% if form.offsetExists('initialUser') %}
             {{ form_row(form.addUserForTeam) }}
             <div data-user-field>
-                {{ form_row(form.users) }}
+                {{ form_row(form.initialUser) }}
             </div>
         {% endif %}
         {{ form_end(form) }}
