@@ -1,12 +1,16 @@
 <?php declare(strict_types=1);
 
-namespace App\Controller;
+namespace App\Controller\API;
 
 use App\Service\DOMJudgeService;
 use App\Service\SubmissionService;
 use App\Entity\Team;
 use Doctrine\ORM\EntityManagerInterface;
+use FOS\RestBundle\Controller\AbstractFOSRestController;
+use FOS\RestBundle\Controller\Annotations as Rest;
+use Nelmio\ApiDocBundle\Annotation\Model;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Swagger\Annotations as SWG;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -16,10 +20,11 @@ use Prometheus\CollectorRegistry;
 use Prometheus\RenderTextFormat;
 
 /**
- * @Route("/prometheus/metrics")
+ * @Route("/metrics")
  * @IsGranted("ROLE_API_READER")
+ * @SWG\Tag(name="Metrics")
  */
-class MetricsController extends AbstractController
+class MetricsController extends AbstractFOSRestController
 {
     /**
      * @var EntityManagerInterface
@@ -58,9 +63,13 @@ class MetricsController extends AbstractController
     }
 
     /**
-     * @Route("", name="prometheus_metrics")
+     * @Rest\Get("/prometheus")
+     * @SWG\Response(
+     *     response="200",
+     *     description="Metrics of this installation for use by Prometheus"
+     * )
      */
-    public function indexAction(Request $request)
+    public function prometheusAction(Request $request)
     {
         $registry = $this->registry;
         $em = $this->em;
