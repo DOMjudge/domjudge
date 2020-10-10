@@ -61,8 +61,10 @@ suffice to add a user and group ``domjudge-run`` with minimal privileges::
 Sudo permissions
 ----------------
 
-``Runguard`` needs to be able to become root for certain operations
-like changing to the runuser and performing a chroot. Also, the default
+The judgedaemon uses a wrapper to isolate programs when compiling
+or running the submissions called ``runguard``. This wrapper needs
+to be able to become root for certain operations like changing to the
+runuser and performing a chroot. Also, the default
 ``chroot-startstop.sh`` script uses sudo to gain privileges for
 certain operations. There's a pregenerated snippet
 in ``etc/sudoers-domjudge`` that contains all required rules. You can
