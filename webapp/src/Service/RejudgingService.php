@@ -334,6 +334,10 @@ class RejudgingService
      */
     public function calculateTodo(Rejudging $rejudging)
     {
+        // Make sure we have the most recent data. This is necessary to
+        // guarantee that repeated rejugdings are scheduled correctly.
+        $this->em->flush();
+
         $todo = $this->em->createQueryBuilder()
             ->from(Submission::class, 's')
             ->select('COUNT(s)')
