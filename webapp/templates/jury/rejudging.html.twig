@@ -130,7 +130,7 @@
         {% endif %}
         {% if stats.judgehost_stats | length > 1 %}
             <h4>Judgehost stats</h4>
-            <table>
+            <table class="table table-sm table-striped">
                 <tr><th>Judgehost</th><th>#judgings</th><th>avg. runtime</th><th>std.dev.</th><th>avg. duration</th></tr>
                 {% for judgehost in stats.judgehost_stats %}
                     <tr>

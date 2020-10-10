@@ -219,7 +219,7 @@ class RejudgingController extends BaseController
         // pre-fill $verdictTable to get a consistent ordering
         foreach ($verdicts as $verdict => $abbrev) {
             foreach ($verdicts as $verdict2 => $abbrev2) {
-                $verdictTable[$verdict][$verdict2] = array();
+                $verdictTable[$verdict][$verdict2] = [];
             }
         }
 
@@ -711,23 +711,21 @@ class RejudgingController extends BaseController
             ->getQuery()
             ->getResult();
 
-        $submissions = array();
-        $judgehosts = array();
+        $submissions = [];
+        $judgehosts = [];
         foreach ($judgings as $judging) {
             $submissions[$judging['submitid']][] = $judging;
             $judgehosts[$judging['judgehost_name']][] = $judging;
         }
         ksort($submissions);
 
-        $judging_runs_differ = array();
-        $runtime_spread = array();
-        $submissions_to_result = array();
+        $judging_runs_differ = [];
+        $runtime_spread = [];
+        $submissions_to_result = [];
         foreach ($submissions as $submitid => $curJudgings) {
-            $results = array();
-
             // Check for different results:
-            $results = array();
-            $runresults = array();
+            $results = [];
+            $runresults = [];
             foreach ($curJudgings as $judging) {
                 if (!in_array($judging['result'], $results)) {
                     $results[] = $judging['result'];
@@ -788,7 +786,7 @@ class RejudgingController extends BaseController
         );
 
         $max_list_len = 10;
-        $runtime_spread_list = array();
+        $runtime_spread_list = [];
         $i = 0;
         foreach ($runtime_spread as $value) {
             if ($i >= $max_list_len) {
@@ -809,14 +807,13 @@ class RejudgingController extends BaseController
                 );
         }
 
-        $judgehost_stats = array();
+        $judgehost_stats = [];
         foreach ($judgehosts as $judgehost => $judgings) {
             $totaltime = 0.0; // Actual time begin--end of judging
-            $totalrun  = 0.0; // Time spend judging runs
+            $totalrun  = 0.0; // Time spent judging runs
             $sumsquare = 0.0;
             $njudged = 0;
             foreach ($judgings as $judging) {
-                dump($judging);
                 $runtime = $judging['runtime_avg']*$judging['ntestcases'];
                 $totaltime += $judging['duration'];
                 $totalrun  += $runtime;
