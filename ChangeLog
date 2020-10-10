@@ -1,5 +1,12 @@
 DOMjudge Programming Contest Judging System
 
+Version 7.3.1 - DEV
+-------------------
+ - Fix chroot install on Ubuntu 20.04.
+ - Fix results.hml and results.tsv output.
+ - Fix race condition in scoreboard related to a Doctrine bug.
+ - Fix having frexh data for scheduling repeated rejudgings.
+
 Version 7.3.0 - 26 June 2020
 ----------------------------
  - Move specification of database configuration out of database and into
