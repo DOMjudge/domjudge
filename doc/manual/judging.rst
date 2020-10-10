@@ -90,10 +90,12 @@ overshoot` is then used to calculate a 'hard timelimit'.
 This overshoot can be specified in terms of an absolute and relative
 margin.
 
-The `soft:hard` timelimit pair is passed to `runguard` as both
-wall clock and CPU limit. This is used by `runguard` when reporting
-whether the soft, actual timelimit has been surpassed. The submitted
-program gets killed when either the hard wall clock or CPU time has passed.
+The `soft:hard` timelimit pair is passed to `runguard`, the wrapper
+program that applies restrictions to submissions when they are being
+run, as both wall clock and CPU limit. This is used by `runguard` when
+reporting whether the soft, actual timelimit has been surpassed. The
+submitted program gets killed when either the hard wall clock or CPU
+time has passed.
 
 .. _judging-consistency:
 
