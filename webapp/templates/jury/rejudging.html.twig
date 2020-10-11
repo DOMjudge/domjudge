@@ -117,9 +117,9 @@
 		{% for spread in stats.runtime_spread %}
 		    <tr>
                         <td>s{{ spread.submitid }}/tc{{ spread.rank }}</td>
-                        <td>{{ spread.spread }}</td>
+                        <td>{{ spread.spread | number_format(3) }}s</td>
                         <td>{{ spread.count }}</td>
-                        <td>{{ spread.verdict }}</td>
+                        <td>{{ spread.verdict | printResult }}</td>
 		    </tr>
 		{% endfor %}
 	    </table>
@@ -142,9 +142,9 @@
                     <tr>
                         <td>{{ judgehost.judgehost }}</td>
                         <td>{{ judgehost.njudged }}</td>
-                        <td>{{ judgehost.avgrun | number_format(3) }}</td>
+                        <td>{{ judgehost.avgrun | number_format(3) }}s</td>
                         <td>{{ judgehost.stddev | number_format(3) }}</td>
-                        <td>{{ judgehost.avgduration | number_format(3) }}</td>
+                        <td>{{ judgehost.avgduration | number_format(3) }}s</td>
                     </tr>
                 {% endfor %}
             </table>
