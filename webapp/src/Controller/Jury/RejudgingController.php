@@ -694,7 +694,7 @@ class RejudgingController extends BaseController
         }
     }
 
-    private function getStats(Rejudging $rejudging)
+    private function getStats(Rejudging $rejudging): array
     {
         $judgings = $this->em->createQueryBuilder()
             ->from(Judging::class, 'j')
@@ -765,17 +765,20 @@ class RejudgingController extends BaseController
                 ->groupBy('jr.testcaseid')
                 ->getQuery()
                 ->getArrayResult();
-            $runtime_spread[$submitid] = array(
+            $current_spread = [
                 'spread' => -1,
                 'rank' => -1
-            );
+            ];
             foreach ($runtimes as $runtime) {
                 $spread = (float) $runtime['spread'];
-                if ($spread > $runtime_spread[$submitid]['spread']) {
-                    $runtime_spread[$submitid]['spread'] = $spread;
-                    $runtime_spread[$submitid]['rank'] = $runtime['rank'];
-                    $runtime_spread[$submitid]['submitid'] = $submitid;
+                if ($spread > $current_spread['spread']) {
+                    $current_spread['spread'] = $spread;
+                    $current_spread['rank'] = $runtime['rank'];
+                    $current_spread['submitid'] = $submitid;
                 }
+            }
+            if (isset($current_spread['submitid'])) {
+                $runtime_spread[$submitid] = $current_spread;
             }
         }
         sort($judging_runs_differ);
@@ -825,20 +828,20 @@ class RejudgingController extends BaseController
             // FIXME: variance over all judgings from different problems
             // doesn't make sense.
             $variance = $sumsquare / $njudged - $avgrun*$avgrun;
-            $judgehost_stats[$judgehost] = array(
+            $judgehost_stats[$judgehost] = [
                 'judgehost' => $judgehost,
                 'njudged' => $njudged,
                 'avgrun' => $avgrun,
                 'stddev' => sqrt($variance),
                 'avgduration' => $avgtime
-            );
+            ];
         }
 
-        return array(
+        return [
             'judging_runs_differ' => array_slice($judging_runs_differ, 0, $max_list_len),
             'judging_runs_differ_overflow' => count($judging_runs_differ) - $max_list_len,
             'runtime_spread' => $runtime_spread_list,
             'judgehost_stats' => $judgehost_stats
-        );
+        ];
     }
 }
