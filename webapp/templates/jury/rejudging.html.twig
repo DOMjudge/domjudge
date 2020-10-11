@@ -112,11 +112,17 @@
     {% if stats %}
         <h2>Statistics over repeated rejudgings</h2>
         <h4>Runtime spread</h4>
-        <ul>
-        {% for spread in stats.runtime_spread %}
-            <li>{{ spread }}</li>
-        {% endfor %}
-        </ul>
+            <table class="table table-sm table-striped">
+                <tr><th>submission/testcase</th><th>spread</th><th>#judgings</th><th>result</th></tr>
+		{% for spread in stats.runtime_spread %}
+		    <tr>
+                        <td>s{{ spread.submitid }}/tc{{ spread.rank }}</td>
+                        <td>{{ spread.spread }}</td>
+                        <td>{{ spread.count }}</td>
+                        <td>{{ spread.verdict }}</td>
+		    </tr>
+		{% endfor %}
+	    </table>
         {% if stats.judging_runs_differ %}
             <h4>Judging Run Differences</h4>
             <ul>

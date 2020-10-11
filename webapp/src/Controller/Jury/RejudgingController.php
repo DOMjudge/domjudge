@@ -797,17 +797,14 @@ class RejudgingController extends BaseController
             }
             $i++;
             $submitid = $value['submitid'];
-            # TODO: pass through the values to twig instead of using sprintf here.
-            $runtime_spread_list[] =
-                sprintf(
-                    " s%s/tc%s: %.3fs over %d judgings with result: %s\n",
-                    $submitid,
-                    $value['rank'],
-                    $value['spread'],
-                    count($submissions[$submitid]),
-                    (!array_key_exists($submitid, $submissions_to_result) ? '*multiple*' :
-                        $submissions_to_result[$submitid])
-                );
+            $runtime_spread_list[] = [
+                'submitid' => $submitid,
+                'rank' => $value['rank'],
+                'spread' => $value['spread'],
+                'count' => count($submissions[$submitid]),
+                'verdict' => (!array_key_exists($submitid, $submissions_to_result) ? '*multiple*' :
+                $submissions_to_result[$submitid])
+            ];
         }
 
         $judgehost_stats = [];
