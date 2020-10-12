@@ -842,11 +842,6 @@ class Utils
         return [true, $diff];
     }
 
-    public static function balloonSym(string $color) : string
-    {
-        return sprintf('<i style="color: %s" class="fas fa-golf-ball"></i>', self::specialchars($color));
-    }
-
     /**
      * Determine the image type for this image
      * @param string $image

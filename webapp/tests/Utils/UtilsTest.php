@@ -805,16 +805,6 @@ part.";
     }
 
     /**
-     * Test balloon symbol is returned with specified colour.
-     */
-    public function testBalloonSym()
-    {
-        $color = 'GREEN&BLUE';
-        $sym = Utils::balloonSym($color);
-        $this->assertEquals('<i style="color: GREEN&amp;BLUE" class="fas fa-golf-ball"></i>', $sym);
-    }
-
-    /**
      * Test that PHP ini values for bytes are converted correctly.
      */
     public function testPhpiniToBytes()

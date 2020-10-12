@@ -170,7 +170,6 @@ class BalloonService
             $balloondata = [];
             $balloondata['balloonid'] = $balloonId;
             $balloondata['time'] = $stime;
-            $balloondata['solved'] = Utils::balloonSym($color) . " " . $balloonsData['probshortname'];
             $balloondata['color'] = $color;
             $balloondata['problem'] = $balloonsData['probshortname'];
             $balloondata['team'] = "t" . $balloonsData['teamid'] . ": " . $balloonsData['teamname'];
