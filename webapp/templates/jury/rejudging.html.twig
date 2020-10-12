@@ -109,6 +109,48 @@
         {% include 'jury/partials/rejudging_matrix.html.twig' %}
     </div>
 
+    {% if stats %}
+        <h2>Statistics over repeated rejudgings</h2>
+        <h4>Runtime spread</h4>
+            <table class="table table-sm table-striped">
+                <tr><th>submission/testcase</th><th>spread</th><th>#judgings</th><th>result</th></tr>
+		{% for spread in stats.runtime_spread %}
+		    <tr>
+                        <td>s{{ spread.submitid }}/tc{{ spread.rank }}</td>
+                        <td>{{ spread.spread | number_format(3) }}s</td>
+                        <td>{{ spread.count }}</td>
+                        <td>{{ spread.verdict | printResult }}</td>
+		    </tr>
+		{% endfor %}
+	    </table>
+        {% if stats.judging_runs_differ %}
+            <h4>Judging Run Differences</h4>
+            <ul>
+                {% for diff in stats.judging_runs_differ %}
+                    <li>s{{ diff }}</li>
+                {% endfor %}
+            </ul>
+            {% if stats.judging_runs_differ_overflow > 0 %}
+                <em>Left out {{ stats.judging_runs_differ_overflow }} submissions with different judging results.</em>
+            {% endif %}
+        {% endif %}
+        {% if stats.judgehost_stats | length > 1 %}
+            <h4>Judgehost stats</h4>
+            <table class="table table-sm table-striped">
+                <tr><th>Judgehost</th><th>#judgings</th><th>avg. runtime</th><th>std.dev.</th><th>avg. duration</th></tr>
+                {% for judgehost in stats.judgehost_stats %}
+                    <tr>
+                        <td>{{ judgehost.judgehost }}</td>
+                        <td>{{ judgehost.njudged }}</td>
+                        <td>{{ judgehost.avgrun | number_format(3) }}s</td>
+                        <td>{{ judgehost.stddev | number_format(3) }}</td>
+                        <td>{{ judgehost.avgduration | number_format(3) }}s</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% endif %}
+    {% endif %}
+
     <h2 class="mt-4">Details</h2>
 
     Show submissions:

@@ -5,6 +5,7 @@ namespace App\Controller\Jury;
 use App\Controller\BaseController;
 use App\Entity\Contest;
 use App\Entity\Judging;
+use App\Entity\JudgingRun;
 use App\Entity\Problem;
 use App\Entity\Rejudging;
 use App\Entity\Submission;
@@ -218,7 +219,7 @@ class RejudgingController extends BaseController
         // pre-fill $verdictTable to get a consistent ordering
         foreach ($verdicts as $verdict => $abbrev) {
             foreach ($verdicts as $verdict2 => $abbrev2) {
-                $verdictTable[$verdict][$verdict2] = array();
+                $verdictTable[$verdict][$verdict2] = [];
             }
         }
 
@@ -333,6 +334,12 @@ class RejudgingController extends BaseController
             ->getQuery()
             ->getScalarResult();
 
+        if (count($repetitions) > 0) {
+            $stats = $this->getStats($rejudging);
+        } else {
+            $stats = null;
+        }
+
         $data = [
             'rejudging' => $rejudging,
             'todo' => $todo,
@@ -348,6 +355,7 @@ class RejudgingController extends BaseController
             'repetitions' => array_column($repetitions, 'rejudgingid'),
             'showExternalResult' => $this->config->get('data_source') ==
                 DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL,
+            'stats' => $stats,
             'refresh' => [
                 'after' => 15,
                 'url' => $request->getRequestUri(),
@@ -684,5 +692,153 @@ class RejudgingController extends BaseController
             );
             $this->addFlash('danger', $msg);
         }
+    }
+
+    private function getStats(Rejudging $rejudging): array
+    {
+        $judgings = $this->em->createQueryBuilder()
+            ->from(Judging::class, 'j')
+            ->leftJoin('j.runs', 'jr', 'j.judgingid = jr.judgingid')
+            ->leftJoin('j.rejudging', 'r', 'rejudging.rejudgingid = j.rejudgingid')
+            ->select('j.judgingid', 'j.submitid', 'j.judgehost_name', 'j.result',
+                'AVG(jr.runtime) AS runtime_avg', 'COUNT(jr.runtime) AS ntestcases',
+                '(j.endtime - j.starttime) AS duration'
+            )
+            ->andWhere('r.repeat_rejudgingid = :repeat_rejudgingid')
+            ->setParameter(':repeat_rejudgingid', $rejudging->getRepeatRejudgingId())
+            ->groupBy('j.judgingid')
+            ->orderBy('j.judgingid')
+            ->getQuery()
+            ->getResult();
+
+        $submissions = [];
+        $judgehosts = [];
+        foreach ($judgings as $judging) {
+            $submissions[$judging['submitid']][] = $judging;
+            $judgehosts[$judging['judgehost_name']][] = $judging;
+        }
+        ksort($submissions);
+
+        $judging_runs_differ = [];
+        $runtime_spread = [];
+        $submissions_to_result = [];
+        foreach ($submissions as $submitid => $curJudgings) {
+            // Check for different results:
+            $results = [];
+            $runresults = [];
+            foreach ($curJudgings as $judging) {
+                if (!in_array($judging['result'], $results)) {
+                    $results[] = $judging['result'];
+                }
+                $judging_runs = $this->em->createQueryBuilder()
+                    ->from(JudgingRun::class, 'jr')
+                    ->select('t.rank', 'jr.runresult')
+                    ->leftJoin('jr.testcase', 't')
+                    ->andWhere('jr.judgingid = :judgingid')
+                    ->setParameter(':judgingid', $judging['judgingid'])
+                    ->orderBy('t.rank')
+                    ->getQuery()
+                    ->getArrayResult();
+                if (!in_array($judging_runs, $runresults)) {
+                    $runresults[] = $judging_runs;
+                }
+                $judging_results[$judging['judgingid']] = $judging['result'];
+            }
+            // If there are diffs on the judging level, then they will show up in the matrix anyway.
+            if (count($results) == 1) {
+                $submissions_to_result[$submitid] = $results[0];
+                if (count($runresults)!=1) {
+                    // Only report differences in judging runs if the final
+                    // results were the same.
+                    $judging_runs_differ[] = $submitid;
+                }
+            }
+
+            // Check for variations in runtimes across judgings
+            $runtimes = $this->em->createQueryBuilder()
+                ->from(JudgingRun::class, 'jr')
+                ->select('t.rank', 'MAX(jr.runtime) - MIN(jr.runtime) AS spread')
+                ->leftJoin('jr.judging', 'j')
+                ->leftJoin('jr.testcase', 't')
+                ->andWhere('j.submitid = :submitid')
+                ->setParameter(':submitid', $submitid)
+                ->groupBy('jr.testcaseid')
+                ->getQuery()
+                ->getArrayResult();
+            $current_spread = [
+                'spread' => -1,
+                'rank' => -1
+            ];
+            foreach ($runtimes as $runtime) {
+                $spread = (float) $runtime['spread'];
+                if ($spread > $current_spread['spread']) {
+                    $current_spread['spread'] = $spread;
+                    $current_spread['rank'] = $runtime['rank'];
+                    $current_spread['submitid'] = $submitid;
+                }
+            }
+            if (isset($current_spread['submitid'])) {
+                $runtime_spread[$submitid] = $current_spread;
+            }
+        }
+        sort($judging_runs_differ);
+        usort($runtime_spread,
+            function ($a, $b) {
+                return $b['spread'] <=> $a['spread'];
+            }
+        );
+
+        $max_list_len = 10;
+        $runtime_spread_list = [];
+        $i = 0;
+        foreach ($runtime_spread as $value) {
+            if ($i >= $max_list_len) {
+                break;
+            }
+            $i++;
+            $submitid = $value['submitid'];
+            $runtime_spread_list[] = [
+                'submitid' => $submitid,
+                'rank' => $value['rank'],
+                'spread' => $value['spread'],
+                'count' => count($submissions[$submitid]),
+                'verdict' => (!array_key_exists($submitid, $submissions_to_result) ? '*multiple*' :
+                $submissions_to_result[$submitid])
+            ];
+        }
+
+        $judgehost_stats = [];
+        foreach ($judgehosts as $judgehost => $judgings) {
+            $totaltime = 0.0; // Actual time begin--end of judging
+            $totalrun  = 0.0; // Time spent judging runs
+            $sumsquare = 0.0;
+            $njudged = 0;
+            foreach ($judgings as $judging) {
+                $runtime = $judging['runtime_avg']*$judging['ntestcases'];
+                $totaltime += $judging['duration'];
+                $totalrun  += $runtime;
+                $sumsquare += $runtime*$runtime;
+                $njudged++;
+            }
+            $avgtime = $totaltime / $njudged;
+            $avgrun  = $totalrun  / $njudged;
+            // FIXME: variance over all judgings from different problems
+            // doesn't make sense.
+            $variance = $sumsquare / $njudged - $avgrun*$avgrun;
+            $judgehost_stats[$judgehost] = [
+                'judgehost' => $judgehost,
+                'njudged' => $njudged,
+                'avgrun' => $avgrun,
+                'stddev' => sqrt($variance),
+                'avgduration' => $avgtime
+            ];
+        }
+
+        return [
+            'judging_runs_differ' => array_slice($judging_runs_differ, 0, $max_list_len),
+            'judging_runs_differ_overflow' => count($judging_runs_differ) - $max_list_len,
+            'runtime_spread' => $runtime_spread_list,
+            'judgehost_stats' => $judgehost_stats
+        ];
     }
 }
