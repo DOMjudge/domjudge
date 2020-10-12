@@ -1,8 +1,5 @@
 /balloons
 /simulate_contest
-/create_accounts
-/judging_statistics
-/multi_rejudge
 /fix_permissions
 /dj_make_chroot
 /dj_make_chroot_docker
