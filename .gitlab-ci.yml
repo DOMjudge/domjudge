@@ -15,6 +15,17 @@ check syntax:
   script:
     - ./gitlab/syntax.sh
 
+check_w3c_css:
+  stage: test
+  image: 
+    name: cyb3rjak3/html5validator
+    entrypoint: [""]
+  script:
+    - JAR=`find /usr/local/lib -name vnu.jar|tail -n1`
+    - java -jar $JAR --format json --skip-non-css webapp 2>result; RES=$?
+    - python3 -m json.tool < result
+    - exit $RES
+
 run unit tests:
   stage: test
   image: domjudge/gitlabci:1.0
