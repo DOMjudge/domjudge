@@ -10,6 +10,7 @@ use App\Entity\Submission;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\Expr\Join;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class BalloonService
 {
@@ -53,7 +54,8 @@ class BalloonService
         Contest $contest,
         Submission $submission,
         Judging $judging = null
-    ) {
+    ) : void
+    {
         // Balloon processing disabled for contest
         if (!$contest->getProcessBalloons()) {
             return;
@@ -94,7 +96,7 @@ class BalloonService
         }
     }
 
-    public function collectBalloonTable(Contest $contest): array
+    public function collectBalloonTable(Contest $contest, bool $todo = false): array
     {
         $em = $this->em;
         $showPostFreeze = (bool)$this->config->get('show_balloons_postfreeze');
@@ -158,6 +160,11 @@ class BalloonService
                 continue;
             }
             $balloon = $balloonsData[0];
+            $done = $balloon->getDone();
+
+            if ($todo && $done) {
+                continue;
+            }
 
             $balloonId = $balloon->getBalloonId();
 
@@ -191,12 +198,25 @@ class BalloonService
             }
 
             $balloondata['awards'] = implode('; ', $comments);
-            $balloondata['done'] = $balloon->getDone();
+            $balloondata['done'] = $done;
 
             $balloons_table[] = [
                 'data' => $balloondata,
             ];
         }
         return $balloons_table;
+    }
+
+    public function setDone(int $balloonId) : void
+    {
+        $em = $this->em;
+        $balloon = $em->getRepository(Balloon::class)->find($balloonId);
+        if (!$balloon) {
+            throw new NotFoundHttpException('balloon not found');
+        }
+        $balloon->setDone(true);
+        $em->flush();
+
+        return;
     }
 }

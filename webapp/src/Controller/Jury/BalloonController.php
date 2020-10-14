@@ -127,15 +127,9 @@ class BalloonController extends AbstractController
     /**
      * @Route("/{balloonId}/done", name="jury_balloons_setdone")
      */
-    public function setDoneAction(Request $request, int $balloonId)
+    public function setDoneAction(Request $request, int $balloonId, BalloonService $balloonService)
     {
-        $em = $this->em;
-        $balloon = $em->getRepository(Balloon::class)->find($balloonId);
-        if (!$balloon) {
-            throw new NotFoundHttpException('balloon not found');
-        }
-        $balloon->setDone(true);
-        $em->flush();
+        $balloonService->setDone($balloonId);
 
         return $this->redirectToRoute("jury_balloons");
     }
