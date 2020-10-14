@@ -19,7 +19,7 @@
         {{ extrahead|default('') }}
     {% endblock %}
 </head>
-<body style="padding-top: 4.5rem;">
+<body{% if static %} class="static"{% endif%}>
 {% block menu %}{% endblock %}
 {% block body %}
     <div class="container-fluid">

@@ -8,6 +8,7 @@ Version 7.4.0 - DEV
    to validate test submissions.
  - Allow users to specify their full name in self-registration.
  - Add metrics API endpoint for use with Prometheus.
+ - Always show banner.png, if present, on the public scoreboard.
  - Upgrade bundled libraries.
 
 Version 7.3.0 - 26 June 2020

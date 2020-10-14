@@ -24,8 +24,8 @@ path of your installation) as follows:
 - *Team pictures*: a photo of the team will be shown in the team details
   page if `public/images/teams/456.jpg` exists, where *456* is the
   team's numeric ID as shown in the DOMjudge interface.
-- *Banner*: a page-wide banner can be shown on all pages of the public
-  interface, if that image is placed in `public/images/banner.png`.
+- *Banner*: a page-wide banner can be shown on the public scoreboard
+  if that image is placed in `public/images/banner.png`.
 
 .. note::
 
