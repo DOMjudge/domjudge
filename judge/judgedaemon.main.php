@@ -66,9 +66,9 @@ function close_curl_handles()
 {
     global $endpoints;
     foreach($endpoints as $id => $endpoint) {
-        if ( ! empty($endpoint['curl']) ) {
-            curl_close($endpoint['curl']);
-            unset($endpoints[$id]['curl']);
+        if ( ! empty($endpoint['ch']) ) {
+            curl_close($endpoint['ch']);
+            unset($endpoints[$id]['ch']);
         }
     }
 }
