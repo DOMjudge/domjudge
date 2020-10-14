@@ -74,7 +74,7 @@ class AwardsController extends AbstractRestController
     }
 
     /**
-     * Get the given clarifications for this contest
+     * Get the specific award for this contest
      * @param Request $request
      * @param string  $id
      * @return array
