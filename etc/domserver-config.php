@@ -6,12 +6,6 @@ require_once("common-config.php");
 // hashes and decrease for speed.
 define('PASSWORD_HASH_COST', 10);
 
-// Set this to a notification command, which receives the notification
-// text on stdin. Examples below for notification by mail or prints.
-//define('BALLOON_CMD', 'mail -s Balloon_notification domjudge@localhost');
-//define('BALLOON_CMD', 'lpr');
-define('BALLOON_CMD', '');
-
 // Internal and output character set used, don't change (unless you
 // know what you're doing).
 define('DJ_CHARACTER_SET', 'utf-8');
