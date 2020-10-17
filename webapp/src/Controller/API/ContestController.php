@@ -95,13 +95,13 @@ class ContestController extends AbstractRestController
     }
 
     /**
-     * Get all the active contests
+     * Get all the contests
      * @param Request $request
      * @return Response
      * @Rest\Get("")
      * @SWG\Response(
      *     response="200",
-     *     description="Returns all the active contests",
+     *     description="Returns all contests visible to the user (all contests for privileged users, active contests otherwise)",
      *     @SWG\Schema(
      *         type="array",
      *         @SWG\Items(ref=@Model(type=Contest::class))
@@ -109,6 +109,13 @@ class ContestController extends AbstractRestController
      * )
      * @SWG\Parameter(ref="#/parameters/idlist")
      * @SWG\Parameter(ref="#/parameters/strict")
+     * @SWG\Parameter(
+     *     name="onlyActive",
+     *     in="query",
+     *     type="boolean",
+     *     description="Whether to only return data pertaining to contests that are active",
+     *     default="false"
+     * )
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
     public function listAction(Request $request)
@@ -553,7 +560,7 @@ class ContestController extends AbstractRestController
      */
     protected function getQueryBuilder(Request $request): QueryBuilder
     {
-        return $this->getContestQueryBuilder();
+        return $this->getContestQueryBuilder($request->query->getBoolean('onlyActive', false));
     }
 
     /**

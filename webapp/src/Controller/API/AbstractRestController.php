@@ -128,9 +128,10 @@ abstract class AbstractRestController extends AbstractFOSRestController
 
     /**
      * Get the query builder used for getting contests
+     * @param bool $onlyActive return only contests that are active
      * @return QueryBuilder
      */
-    protected function getContestQueryBuilder(): QueryBuilder
+    protected function getContestQueryBuilder(bool $onlyActive = false): QueryBuilder
     {
         $now = Utils::now();
         $qb  = $this->em->createQueryBuilder();
@@ -140,7 +141,7 @@ abstract class AbstractRestController extends AbstractFOSRestController
             ->andWhere('c.enabled = 1')
             ->orderBy('c.activatetime');
 
-        if (!$this->dj->checkrole('api_reader')) {
+        if ($onlyActive || !$this->dj->checkrole('api_reader')) {
             $qb
                 ->andWhere('c.activatetime <= :now')
                 ->andWhere('c.deactivatetime IS NULL OR c.deactivatetime > :now')
@@ -174,7 +175,7 @@ abstract class AbstractRestController extends AbstractFOSRestController
             throw new BadRequestHttpException('cid parameter missing');
         }
 
-        $qb = $this->getContestQueryBuilder();
+        $qb = $this->getContestQueryBuilder($request->query->getBoolean('onlyActive', false));
         $qb
             ->andWhere(sprintf('c.%s = :cid', $this->getContestIdField()))
             ->setParameter(':cid', $request->attributes->get('cid'));
