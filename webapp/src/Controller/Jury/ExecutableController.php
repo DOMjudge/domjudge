@@ -422,7 +422,7 @@ class ExecutableController extends BaseController
         }
 
         $formBuilder = $this->createFormBuilder($data)
-            ->add('submit', SubmitType::class);
+            ->add('submit', SubmitType::class, ['label' => 'Save files']);
 
         foreach ($editorData['files'] as $idx => $content) {
             $formBuilder->add('source' . $idx, TextareaType::class);
