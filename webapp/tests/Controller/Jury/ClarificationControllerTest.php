@@ -28,9 +28,9 @@ class ClarificationControllerTest extends BaseTest
         $crawler = $this->client->click($link);
 
         $h3s = $crawler->filter('h3')->extract(array('_text'));
-        $this->assertEquals('New requests:', $h3s[0]);
-        $this->assertEquals('Old requests:', $h3s[1]);
-        $this->assertEquals('General clarifications:', $h3s[2]);
+        $this->assertEquals('New requests', $h3s[0]);
+        $this->assertEquals('Handled requests', $h3s[1]);
+        $this->assertEquals('General clarifications', $h3s[2]);
 
         $this->assertSelectorExists('html:contains("Can you tell me how")');
         $this->assertSelectorExists('html:contains("21:47")');
