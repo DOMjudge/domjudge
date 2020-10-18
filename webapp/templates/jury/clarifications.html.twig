@@ -14,17 +14,19 @@
 
     {%- if current_contests is empty %}
 
-        <div class="alert alert-danger">No active contest(s)</div>
+        <div class="alert alert-danger">No active contests</div>
     {%- else %}
 
+        <div class="float-right">
         <a href="{{ path('jury_clarification_new') }}" class="btn btn-primary btn-sm">
                 <i class="fas fa-envelope"></i> Send clarification
         </a>
-        <br />
-        <br />
+        </div>
 
-        Filter:
         <div class="btn-group btn-group-toggle btn-group-sm mb-3" data-toggle="buttons">
+            <div class="input-group-prepend">
+                <div class="input-group-text listtoggles">Filter:</div>
+            </div>
             <label class="btn btn-secondary {% if currentFilter is null %}active{% endif %}">
                 <input type="radio" name="filter" autocomplete="off" value="all"
                        {% if currentFilter is null %}checked{% endif %}> All
@@ -35,7 +37,7 @@
             </label>
             <label class="btn btn-secondary {% if currentFilter == 'old' %}active{% endif %}">
                 <input type="radio" name="filter" autocomplete="off" value="old"
-                       {% if currentFilter == 'old' %}checked{% endif %}> Old
+                       {% if currentFilter == 'old' %}checked{% endif %}> Handled
             </label>
             <label class="btn btn-secondary {% if currentFilter == 'general' %}active{% endif %}">
                 <input type="radio" name="filter" autocomplete="off" value="general"
@@ -44,8 +46,10 @@
         </div>
 
         {% if queues | length > 0 %}
-            Queue:
             <div class="btn-group btn-group-toggle btn-group-sm mb-3" data-toggle="buttons">
+                <div class="input-group-prepend">
+                    <div class="input-group-text listtoggles">Queue:</div>
+                </div>
                 <label class="btn btn-secondary {% if currentQueue is null %}active{% endif %}">
                     <input type="radio" name="queue" autocomplete="off" value="all"
                            {% if currentQueue is null %}checked{% endif %}> All
@@ -64,7 +68,7 @@
         {% endif %}
 
         {% if currentFilter is null or currentFilter == 'new' %}
-            <h3 id="newrequests">New requests:</h3>
+            <h3 id="newrequests">New requests</h3>
             {%- if newClarifications | length == 0 %}
                 <p class="nodata">No new clarification requests.</p>
             {%- else %}
@@ -73,7 +77,7 @@
         {% endif %}
 
         {% if currentFilter is null or currentFilter == 'old' %}
-            <h3 id="oldrequests">Old requests:</h3>
+            <h3 id="oldrequests">Handled requests</h3>
             {%- if oldClarifications | length == 0 %}
                 <p class="nodata">No old clarification requests.</p>
             {%- else %}
@@ -82,7 +86,7 @@
         {% endif %}
 
         {% if currentFilter is null or currentFilter == 'general' %}
-            <h3 id="clarifications">General clarifications:</h3>
+            <h3 id="clarifications">General clarifications</h3>
             {%- if generalClarifications | length == 0 %}
                 <p class="nodata">No general clarifications.</p>
             {%- else %}

@@ -13,8 +13,10 @@
 
     <h1>Submissions</h1>
 
-    Show submissions:
     <div class="btn-group btn-group-toggle btn-group-sm mb-3" data-toggle="buttons">
+        <div class="input-group-prepend">
+            <div class="input-group-text listtoggles">Show:</div>
+        </div>
         {%- for idx, type in viewTypes %}
 
             <label class="btn btn-secondary {% if idx == view %}active{% endif %}">
