@@ -5,7 +5,8 @@ Version 7.3.1 - DEV
  - Fix chroot install on Ubuntu 20.04.
  - Fix results.hml and results.tsv output.
  - Fix race condition in scoreboard related to a Doctrine bug.
- - Fix having frexh data for scheduling repeated rejudgings.
+ - Fix having fresh data for scheduling repeated rejudgings.
+ - Fix clarification filter buttons when not using queues.
 
 Version 7.3.0 - 26 June 2020
 ----------------------------
