@@ -3,6 +3,10 @@ DOMjudge Programming Contest Judging System
 Version 7.4.0 - DEV
 -------------------
  - Compilation of submissions now happens inside the chroot.
+   NOTE when upgrading: you need to install compilers and other
+   dependencies for the compile phase inside the DOMjudge chroot.
+   Also you need to remove the '--tmpdir' switch from the mktemp
+   call in the java_javac_detect compile script (when using this).
  - Improve performance with large amounts of affiliations.
  - Search for @EXPECTED_RESULTS@ marker in all submitted files
    to validate test submissions.
