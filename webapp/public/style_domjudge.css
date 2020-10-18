@@ -298,6 +298,10 @@ td.scorenc { border-color: silver; border-right: 0; }
 
 table.rejudgetable td {
     text-align: center;
+    padding: .5rem;
+}
+table.rejudgetable td,th {
+    padding: .5rem;
 }
 table.rejudgetable td.changed {
     background-color: #fdd;
@@ -307,7 +311,7 @@ table.rejudgetable td.identical {
     background-color: #dfd;
 }
 table.rejudgetable td.zero {
-    background-color: #F0F8FF;
+    background-color: #f0f8ff;
 }
 
 tr.ignore td, td.ignore, span.ignore {
