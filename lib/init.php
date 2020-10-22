@@ -5,8 +5,6 @@ if (!defined('LIBDIR')) {
 
 require_once(LIBDIR . '/lib.error.php');
 require_once(LIBDIR . '/lib.misc.php');
-require_once(LIBDIR . '/lib.dbconfig.php');
-require_once(LIBDIR . '/use_db.php');
 
 // Raise floating point print precision (default is 14) to be able to
 // use microsecond resolution timestamps. Note that since PHP uses the
