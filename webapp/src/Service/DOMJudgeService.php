@@ -5,7 +5,6 @@ namespace App\Service;
 use App\Entity\AuditLog;
 use App\Entity\Balloon;
 use App\Entity\Clarification;
-use App\Entity\Configuration;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\InternalError;
@@ -37,8 +36,6 @@ class DOMJudgeService
 {
     protected $em;
     protected $logger;
-    /** @var Configuration[] */
-    protected $configCache = [];
 
     /**
      * @var RequestStack
@@ -114,50 +111,6 @@ class DOMJudgeService
     public function getEntityManager()
     {
         return $this->em;
-    }
-
-    /**
-     * Query configuration variable, with optional default value in case
-     * the variable does not exist and boolean to indicate if cached
-     * values can be used.
-     *
-     * When $name is null, then all variables will be returned.
-     * @param string|null $name
-     * @param mixed       $default
-     * @param bool        $onlyIfPublic
-     * @return Configuration[]|mixed
-     * @throws \Exception
-     */
-    public function dbconfig_get($name, $default = null, bool $onlyIfPublic = false)
-    {
-        if (empty($this->configCache)) {
-            $configs           = $this->em->getRepository(Configuration::class)->findAll();
-            $this->configCache = [];
-            foreach ($configs as $config) {
-                $this->configCache[$config->getName()] = $config;
-            }
-        }
-
-        if (is_null($name)) {
-            $ret = [];
-            foreach ($this->configCache as $config) {
-                if (!$onlyIfPublic || $config->getPublic()) {
-                    $ret[$config->getName()] = $config->getValue();
-                }
-            }
-            return $ret;
-        }
-
-        if (!empty($this->configCache[$name]) &&
-            (!$onlyIfPublic || $this->configCache[$name]->getPublic())) {
-            return $this->configCache[$name]->getValue();
-        }
-
-        if ($default === null) {
-            throw new \Exception("Configuration variable '$name' not found.");
-        }
-        $this->logger->warning("Configuration variable '$name' not found, using default.");
-        return $default;
     }
 
     /**
