@@ -34,7 +34,8 @@ require(ETCDIR . '/domserver-config.php');
 define('SCRIPT_ID', 'balloons');
 define('LOGFILE', LOGDIR.'/balloons.log');
 
-require(LIBDIR . '/init.php');
+require(LIBDIR . '/lib.error.php');
+require(LIBDIR . '/lib.misc.php');
 
 $verbose = LOG_INFO;
 
