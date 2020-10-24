@@ -26,6 +26,34 @@ check_w3c_css:
     - python3 -m json.tool < result
     - exit $RES
 
+check_w3c_html:
+  stage: test
+  before_script:
+    # Takes about 1 minute to pull
+    - echo -e "section_start:`date +%s`:docker\r\e[0Kdocker pull"
+    - time docker pull domjudge/gitlabci:1.0
+    - echo -e "section_end:`date +%s`:docker\r\e[0K"
+  image: docker:stable
+  services:
+    - docker:19-dind
+    - mariadb
+  variables:
+    MYSQL_ROOT_PASSWORD: password
+    DOCKER_HOST: tcp://docker:2375/
+    DOCKER_DRIVER: overlay2
+  script:
+  - |
+    docker run --privileged \
+      -v $CI_PROJECT_DIR:$CI_PROJECT_DIR \
+      --net=host \
+      -e "TERM=xterm-256color" -e "HOME=$HOME" -e "USER=$USER" -e "MARIADB_PORT_3306_TCP_ADDR=$MARIADB_PORT_3306_TCP_ADDR" -e "MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD" \
+      domjudge/gitlabci:1.0 /bin/bash -eo pipefail -c "umask 0002; cd $CI_PROJECT_DIR; script --return -qfc \"./gitlab/html.sh\" /dev/null | ts \"[%F %T]\" "
+  artifacts:
+    when: always
+    paths:
+      - public
+      - w3cHtmlpublic.json
+
 run unit tests:
   stage: test
   image: domjudge/gitlabci:1.0
