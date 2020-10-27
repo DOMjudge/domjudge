@@ -191,13 +191,9 @@ tedious, standard part. See the boolfind example for details.
 
 Compare programs
 ----------------
-Compare scripts/programs should follow the
-`problemarchive.org output validator format
-<https://www.problemarchive.org/wiki/index.php/Output_validator>`_.
-DOMjudge uses the `default output validator
-<https://www.problemarchive.org/wiki/index.php/Problem_Format#Output_Validators>`_
-specified there as its default, which can be found at the
-`problemtools GitHub <https://github.com/Kattis/problemtools/blob/master/support/default_validator/>`_.
+Compare scripts/programs should follow the `Output Validators format`_
+DOMjudge uses the `default output validator`_ from the problem package
+format as its default.
 
 Note that DOMjudge only supports a subset of the functionality
 described there. In particular, the calling syntax is::
@@ -356,3 +352,6 @@ contest ID to use, and the IDs of the team categories you want to include
      https://judge.example1.edu/api/v4/contests/3/ 3 \
      https://chipcie.example2.org/api/v4/contests/2/ 2,3  \
      https://domjudge.aapp.example.nl/api/v4/contests/6/ 3
+
+.. _Output Validators format: https://icpc.io/problem-package-format/spec/output_validators
+.. _default output validator: https://icpc.io/problem-package-format/spec/problem_package_format#default-output-validator-specification

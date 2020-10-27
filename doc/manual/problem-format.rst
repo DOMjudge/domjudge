@@ -4,8 +4,7 @@ Appendix: Problem format specification
 DOMjudge supports the import and export of problems in a zip-bundle
 format.
 
-The base of the format is the `ICPC problem format`_ (which itself is
-a subset of the `problemarchive.org format`_).
+The base of the format is the `ICPC problem package specification`_.
 
 On top, DOMjudge defines a few extensions:
  * ``domjudge-problem.ini`` (optional): metadata file, see below.
@@ -13,8 +12,6 @@ On top, DOMjudge defines a few extensions:
    distributed to participants. The file extension determines any of
    three supported formats. If multiple files matching this pattern are
    available, any one of those will be used.
- * The ``custom interactive`` option for ``validation`` from the
-   `problemarchive.org format`_ is supported.
 
 The file ``domjudge-problem.ini`` contains key-value pairs, one
 pair per line, of the form ``key = value``. The ``=`` can
@@ -42,5 +39,4 @@ problem by uploading a zip file that contains only testcase files. Any jury
 solutions present will be automatically submitted when ``allow_submit`` is
 ``1`` and there's a team associated with the uploading user.
 
-.. _ICPC problem format: https://clics.ecs.baylor.edu/index.php?title=Problem_format
-.. _problemarchive.org format: https://www.problemarchive.org/wiki/index.php/Problem_Format
+.. _ICPC problem package specification: https://icpc.io/problem-package-format/spec/problem_package_format
