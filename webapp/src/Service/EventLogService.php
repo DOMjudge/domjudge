@@ -703,7 +703,7 @@ class EventLogService implements ContainerAwareInterface
     /**
      * Add all static events that are still missing. Static events are events for endpoints that
      * are marked as 'Configuration' on
-     * https://clics.ecs.baylor.edu/index.php?title=Contest_API#Types_of_endpoints
+     * https://ccs-specs.icpc.io/contest_api#types-of-endpoints
      *
      * @param Contest $contest
      * @throws NonUniqueResultException

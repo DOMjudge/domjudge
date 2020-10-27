@@ -1,8 +1,8 @@
 <?php declare(strict_types=1);
 
-// Mapping of DOMjudge verdict strings to those defined in the CLICS
+// Mapping of DOMjudge verdict strings to those defined in the
 // CCS specification (and a few more common ones) at:
-// https://clics.ecs.baylor.edu/index.php/Contest_Control_System#Judge_Responses
+// https://ccs-specs.icpc.io/ccs_system_requirements#judge-responses
 return [
     'compiler-error'     => 'CE',
     'memory-limit'       => 'MLE',

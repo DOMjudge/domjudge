@@ -6,15 +6,12 @@ Development
 API
 ---
 DOMjudge comes with a fully featured REST API. It is based on the
-`CCS Contest API specification
-<https://clics.ecs.baylor.edu/index.php?title=Contest_API>`_
+`CCS Contest API specification`_
 to which some DOMjudge-specific API endpoints have been added. Full documentation
 on the available API endpoints can be found at
 `http(s)://yourhost.example.edu/domjudge/api/doc`.
 
-DOMjudge also offers an
-`OpenAPI Specification ver. 2
-<https://swagger.io/docs/specification/2-0/basic-structure/>`_
+DOMjudge also offers an `OpenAPI Specification ver. 2`_
 compatible JSON file, which can be found at
 `http(s)://yourhost.example.edu/domjudge/api/doc.json`.
 
@@ -136,3 +133,6 @@ Note that most IDEs have support for running tests inside of them, so you don't
 have to type these filters manually. If you use such an IDE, just make sure to
 specify the `webapp/phpunit.xml.dist` file as a PHPUnit configuration file and
 it should work.
+
+.. _CCS Contest API specification: https://ccs-specs.icpc.io/contest_api
+.. _OpenAPI Specification ver. 2: https://swagger.io/docs/specification/2-0/basic-structure/
