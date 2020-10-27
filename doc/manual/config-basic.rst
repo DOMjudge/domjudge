@@ -32,9 +32,7 @@ You then have the option to automatically create a corresponding user
 account that is associated with the team.
 
 It is also possible to use the *Import / Export* page to import
-`ICPC-compatible tsv files
-<https://clics.ecs.baylor.edu/index.php?title=Contest_Control_System_Requirements#teams.tsv>`_
-with teams.
+`ICPC-compatible teams.tsv files`_ with teams.
 
 A jury or administrative user can also be associated with a team. This
 will enable that user to submit solutions to the system, or resubmit
@@ -143,3 +141,4 @@ gave the expected answer in the Judging Verifier, available from
 the jury index page.
 
 .. _ICPC problem format: https://clics.ecs.baylor.edu/index.php?title=Problem_format
+.. _ICPC-compatible teams.tsv files: https://ccs-specs.icpc.io/ccs_system_requirements#teamstsv

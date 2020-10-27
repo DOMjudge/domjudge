@@ -1015,7 +1015,7 @@ class ImportExportService
                     $roles[] = $teamRole;
                     // For now we assume we can find the teamid by parsing
                     // the username and taking the largest suffix number.
-                    // Note that https://clics.ecs.baylor.edu/index.php/Contest_Control_System_Requirements#accounts.tsv
+                    // Note that https://ccs-specs.icpc.io/ccs_system_requirements#accountstsv
                     // assumes team accounts of the form "team-nnn" where
                     // nnn is a zero-padded team number.
                     $teamId = preg_replace('/^[^0-9]*0*([0-9]+)$/', '\1', $line[2]);

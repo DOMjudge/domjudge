@@ -9,13 +9,10 @@ the results of an external system match DOMjudge, for example to verify both
 systems give the same judging results. This has been used at the ICPC World
 Finals for the last few years.
 
-DOMjudge can shadow any system that follows the
-`Contest API specification
-<https://clics.ecs.baylor.edu/index.php?title=Contest_API>`_. It has been tested
-with recent versions of the `ICPC Tools CDS <https://tools.icpc.global/cds>`_
+DOMjudge can shadow any system that follows the `Contest API specification`_.
+It has been tested with recent versions of the `ICPC Tools CDS`_
 and with DOMjudge itself. Other known systems that implement the specification
-and that should work are `Kattis <https://www.kattis.com>`_ and
-`PC-Squared <http://pc2.ecs.csus.edu>`_.
+and that should work are `Kattis`_ and `PC-Squared`_.
 
 Configuring DOMjudge
 --------------------
@@ -42,8 +39,7 @@ The contest needs to exist in DOMjudge *and* have all problems loaded. It is
 best to not have any other data for the contest like teams, team categories,
 team affiliations, submissions and clarifications. The easiest way to create the
 contest is to import it. For this you need a ``contest.yaml`` and a
-``problemset.yaml`` as described in the `ICPC CCS requirements page
-<https://clics.ecs.baylor.edu/index.php?title=Contest_Control_System_Requirements>`_.
+``problemset.yaml`` as described in the `CCS requirements specification`_.
 Furthermore you need problem directories as described on the
 :doc:`problem format <problem-format>` page. Place the two YAML files and all
 directories together in one directory and use the
@@ -121,3 +117,9 @@ differences:
   with detailed information.
 * If the primary system has a different verdict than DOMjudge, a warning will be
   displayed.
+
+.. _Contest API specification: https://ccs-specs.icpc.io/contest_api
+.. _ICPC Tools CDS: https://tools.icpc.global/cds
+.. _Kattis: https://www.kattis.com
+.. _PC-Squared: http://pc2.ecs.csus.edu
+.. _CCS requirements specification: https://ccs-specs.icpc.io/ccs_system_requirements

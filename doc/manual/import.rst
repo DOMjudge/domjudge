@@ -2,14 +2,10 @@ Adding contest data programmatically
 ====================================
 
 DOMjudge offers API endpoints to add or update contest data programmatically.
-In general, we try to follow the `CLICS CCS specification
-<https://clics.ecs.baylor.edu/index.php?title=Contest_Control_System_Requirements>`_
-for all file formats involved.
+In general, we follow the `CCS specification`_ for all file formats involved.
 
 All of the following examples require you to set up admin credentials in your
-``.netrc`` file (for format see under
-`submit client <submit_client_requirements>`_).
-You need to install `httpie <https://httpie.org/>`_ and replace the
+`.netrc`_ file. You need to install `httpie`_ and replace the
 ``<API_URL>`` in the examples below with the API URL of your local DOMjudge
 installation.
 
@@ -142,3 +138,6 @@ Call it from your contest folder like this::
 
     misc-tools/import-contest.sh <API_URL>
 
+.. _CCS specification: https://ccs-specs.icpc.io/ccs_system_requirements#appendix-file-formats
+.. _.netrc: https://www.gnu.org/software/inetutils/manual/html_node/The-_002enetrc-file.html
+.. _httpie: https://httpie.org/
