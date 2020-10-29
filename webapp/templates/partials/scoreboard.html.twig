@@ -14,7 +14,7 @@
     <div class="card">
         <div class="card-header" style="font-family: Roboto, sans-serif; display: flex;">
             <span style="font-weight: bold;">{{ current_contest.name }}</span>
-            <span style="color: DimGray; margin-left: auto;">
+            <span id="contesttimer" style="color: DimGray; margin-left: auto;">
                 {% if scoreboard is null %}
                     {{ current_contest | printContestStart }}
                 {% elseif scoreboard.freezeData.showFinal(jury) %}
