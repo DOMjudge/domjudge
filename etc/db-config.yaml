@@ -171,7 +171,7 @@
             type: bool
             default_value: true
             public: true
-            description: Show country flags in the interfaces?
+            description: Show country information in the interfaces?
         -   name: show_affiliations
             type: bool
             default_value: true
