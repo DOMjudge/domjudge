@@ -246,7 +246,7 @@ td.scorenc { border-color: silver; border-right: 0; }
 .scoreprob { width: 3.0em; vertical-align: middle; }
 .scoreaffil { text-align: center; }
 
-#scoresummary {
+.scoresummary {
     border-top: 2px solid black;
     border-bottom: none;
     font-variant: small-caps;
