@@ -99,33 +99,44 @@
 
             <div class="dropdown-menu" aria-labelledby="filter-toggle">
                 <form method="get">
-                    <div class="m-2 p-2 form-inline">
+                    <div class="filterbox">
+                       <div class="form-row">
                         {% if filterValues.affiliations | length > 1 %}
-                            <select class="form-control mr-2" multiple size="8" name="affiliations[]">
+                            <div class="form-group">
+                            <label for="scoreboard-filter-affil">Affiliations</label>
+                            <select id="scoreboard-filter-affil" class="form-control mr-2" multiple size="8" name="affiliations[]">
                                 {% for affiliationId, affiliation in filterValues.affiliations %}
                                     <option {% if affiliationId in scoreFilter.affiliations %}selected{% endif %}
                                             value="{{ affiliationId }}">{{ affiliation }}</option>
                                 {% endfor %}
                             </select>
+                            </div>
                         {% endif %}
                         {% if filterValues.countries | length > 1 %}
-                            <select class="form-control mr-2" multiple size="8" name="countries[]">
+                            <div class="form-group">
+                            <label for="scoreboard-filter-country">Countries</label>
+                            <select id="scoreboard-filter-country" class="form-control mr-2" multiple size="8" name="countries[]">
                                 {% for country in filterValues.countries %}
                                     <option {% if country in scoreFilter.countries %}selected{% endif %}
                                             value="{{ country }}">{{ alpha3_countries[country] }}</option>
                                 {% endfor %}
                             </select>
+                            </div>
                         {% endif %}
                         {% if filterValues.categories | length > 1 %}
-                            <select class="form-control mr-2" multiple size="8" name="categories[]">
+                            <div class="form-group">
+                            <label for="scoreboard-filter-category">Categories</label>
+                            <select id="scoreboard-filter-category" class="form-control mr-2" multiple size="8" name="categories[]">
                                 {% for categoryId, category in filterValues.categories %}
                                     <option {% if categoryId in scoreFilter.categories %}selected{% endif %}
                                             value="{{ categoryId }}">{{ category }}</option>
                                 {% endfor %}
                             </select>
+                            </div>
                         {% endif %}
-                    <input type="submit" class="btn btn-primary btn-sm align-top" name="filter" value="filter"/>
-                    <input type="submit" class="btn btn-secondary btn-sm align-top" name="clear" value="clear"/>
+                            </div>
+                        <input type="submit" class="btn btn-primary btn-sm align-top" name="filter" value="filter"/>
+                        <input type="submit" class="btn btn-secondary btn-sm align-top" name="clear" value="clear"/>
                     </div>
                 </form>
             </div>

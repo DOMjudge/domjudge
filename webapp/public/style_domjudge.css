@@ -270,6 +270,19 @@ td.scorenc { border-color: silver; border-right: 0; }
 /* between different sortorder-categories, print a thick line */
 .sortorderswitch { border-top: 2px solid black; }
 
+.filterbox {
+    margin-left: 1rem;
+    margin-right: 1rem;
+}
+.filterbox label {
+    font-size: smaller;
+    color: gray;
+    margin: 0 0 0 1rem;
+}
+.filterbox .form-control {
+    width: auto;
+}
+
 .circle {
     width: 14px;
     height: 14px;
