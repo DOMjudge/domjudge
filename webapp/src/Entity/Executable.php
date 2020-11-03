@@ -12,7 +12,9 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Entity()
  * @ORM\Table(
  *     name="executable",
- *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Compile, compare, and run script executable bundles"})
+ *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4",
+ *              "comment"="Compile, compare, and run script executable bundles"}
+ *     )
  */
 class Executable
 {
@@ -85,72 +87,35 @@ class Executable
         $this->problems_run = new ArrayCollection();
     }
 
-    /**
-     * Set execid
-     *
-     * @param string $execid
-     *
-     * @return Executable
-     */
-    public function setExecid($execid)
+    public function setExecid(string $execid): Executable
     {
         $this->execid = $execid;
-
         return $this;
     }
 
-    /**
-     * Get execid
-     *
-     * @return string
-     */
-    public function getExecid()
+    public function getExecid(): string
     {
         return $this->execid;
     }
 
-    /**
-     * Set md5sum
-     *
-     * @param string $md5sum
-     *
-     * @return Executable
-     */
-    public function setMd5sum($md5sum)
+    public function setMd5sum(string $md5sum): Executable
     {
         $this->md5sum = $md5sum;
-
         return $this;
     }
 
-    /**
-     * Get md5sum
-     *
-     * @return string
-     */
-    public function getMd5sum()
+    public function getMd5sum(): string
     {
         return $this->md5sum;
     }
 
-    /**
-     * Set zipfile
-     *
-     * @param resource|string $zipfile
-     *
-     * @return Executable
-     */
-    public function setZipfile($zipfile)
+    public function setZipfile(string $zipfile): Executable
     {
         $this->zipfile = $zipfile;
-
         return $this;
     }
 
     /**
-     * Get zipfile
-     *
-     * @param bool $asString
      * @return resource|string
      */
     public function getZipfile(bool $asString = false)
@@ -164,161 +129,72 @@ class Executable
         return $this->zipfile;
     }
 
-    /**
-     * Get the length of the zipfile
-     * @return int
-     */
-    public function getZipFileSize()
-    {
-        return strlen(stream_get_contents($this->getZipfile()));
-    }
-
-    /**
-     * Set description
-     *
-     * @param string $description
-     *
-     * @return Executable
-     */
-    public function setDescription($description)
+    public function setDescription(string $description): Executable
     {
         $this->description = $description;
-
         return $this;
     }
 
-    /**
-     * Get description
-     *
-     * @return string
-     */
-    public function getDescription()
+    public function getDescription(): string
     {
         return $this->description;
     }
 
-    /**
-     * Set type
-     *
-     * @param string $type
-     *
-     * @return Executable
-     */
-    public function setType($type)
+    public function setType(string $type): Executable
     {
         $this->type = $type;
-
         return $this;
     }
 
-    /**
-     * Get type
-     *
-     * @return string
-     */
-    public function getType()
+    public function getType(): string
     {
         return $this->type;
     }
 
-    /**
-     * Add language
-     *
-     * @param \App\Entity\Language $language
-     *
-     * @return Executable
-     */
-    public function addLanguage(\App\Entity\Language $language)
+    public function addLanguage(Language $language): Executable
     {
         $this->languages[] = $language;
-
         return $this;
     }
 
-    /**
-     * Remove language
-     *
-     * @param \App\Entity\Language $language
-     */
-    public function removeLanguage(\App\Entity\Language $language)
+    public function removeLanguage(Language $language)
     {
         $this->languages->removeElement($language);
     }
 
-    /**
-     * Get languages
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getLanguages()
+    public function getLanguages(): Collection
     {
         return $this->languages;
     }
 
-    /**
-     * Add problemsCompare
-     *
-     * @param \App\Entity\Problem $problemsCompare
-     *
-     * @return Executable
-     */
-    public function addProblemsCompare(\App\Entity\Problem $problemsCompare)
+    public function addProblemsCompare(Problem $problemsCompare): Executable
     {
         $this->problems_compare[] = $problemsCompare;
-
         return $this;
     }
 
-    /**
-     * Remove problemsCompare
-     *
-     * @param \App\Entity\Problem $problemsCompare
-     */
-    public function removeProblemsCompare(\App\Entity\Problem $problemsCompare)
+    public function removeProblemsCompare(Problem $problemsCompare)
     {
         $this->problems_compare->removeElement($problemsCompare);
     }
 
-    /**
-     * Get problemsCompare
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getProblemsCompare()
+    public function getProblemsCompare(): Collection
     {
         return $this->problems_compare;
     }
 
-    /**
-     * Add problemsRun
-     *
-     * @param \App\Entity\Problem $problemsRun
-     *
-     * @return Executable
-     */
-    public function addProblemsRun(\App\Entity\Problem $problemsRun)
+    public function addProblemsRun(Problem $problemsRun): Executable
     {
         $this->problems_run[] = $problemsRun;
-
         return $this;
     }
 
-    /**
-     * Remove problemsRun
-     *
-     * @param \App\Entity\Problem $problemsRun
-     */
-    public function removeProblemsRun(\App\Entity\Problem $problemsRun)
+    public function removeProblemsRun(Problem $problemsRun)
     {
         $this->problems_run->removeElement($problemsRun);
     }
 
-    /**
-     * Get problemsRun
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getProblemsRun()
+    public function getProblemsRun(): Collection
     {
         return $this->problems_run;
     }
