@@ -129,6 +129,11 @@ class Executable
         return $this->zipfile;
     }
 
+    public function getZipFileSize(): int
+    {
+        return strlen(stream_get_contents($this->getZipfile()));
+    }
+
     public function setDescription(string $description): Executable
     {
         $this->description = $description;
