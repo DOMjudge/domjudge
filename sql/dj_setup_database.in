@@ -198,7 +198,7 @@ create_db_users()
 	# in etc/domserver-config.php updated after installation.
 	echo "CREATE DATABASE IF NOT EXISTS \`$DBNAME\` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 
-	echo "CREATE USER '$domjudge_DBUSER'@'localhost' IDENTIFIED BY '$domjudge_PASSWD';"
+	echo "CREATE USER IF NOT EXISTS '$domjudge_DBUSER'@'localhost' IDENTIFIED BY '$domjudge_PASSWD';"
 	echo "GRANT SELECT, INSERT, UPDATE, DELETE ON \`$DBNAME\`.* TO '$domjudge_DBUSER'@'localhost';"
 
 	echo "FLUSH PRIVILEGES;"
