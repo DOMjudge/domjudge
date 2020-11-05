@@ -1,3 +1,19 @@
+:root {
+    /** WCAG fixes begin **/
+    --btn-primary-bg: #0072ed;
+    /** WCAG fixes end **/
+}
+
+/** WCAG fixes start **/
+.btn-primary {
+    background: var(--btn-primary-bg);
+}
+
+.text-muted {
+    color: #616870 !important;
+}
+/** WCAG fixes end **/
+
 html,
 body {
   height: 100%;
