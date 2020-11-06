@@ -11,6 +11,15 @@
 .btn-info {
     background: var(--btn-info-bg);
 }
+.btn-primary {
+    background-color: #0072ed;
+}
+.btn-success {
+    background: #0a8927;
+}
+.card-body > ul > li > a {
+    color: #0072ed;
+}
 /** WCAG fixes end **/
 
 body {
@@ -94,7 +103,7 @@ kbd {
 .filename, .hostname { font-family: monospace; }
 
 .nodata {
-    color: gray;
+    color: #767676;
     font-style: italic;
 }
 
