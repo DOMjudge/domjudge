@@ -1,16 +1,12 @@
 {% if is_granted('IS_AUTHENTICATED_FULLY') %}
-    <a class="nav-link justify-content-center" href="{{ path('logout') }}"
+    <a class="btn btn-outline-info btn-sm justify-content-center" href="{{ path('logout') }}"
     {% if confirmLogout is defined %}
         onclick="return confirmLogout();"
     {% endif %}>
-        <button type="button" class="btn btn-outline-info btn-sm">
-            <i class="fas fa-sign-out-alt"></i> Logout
-        </button>
+        <i class="fas fa-sign-out-alt"></i> Logout
     </a>
 {% else %}
-    <a class="nav-link justify-content-center" href="{{ path('login') }}">
-        <button type="button" class="btn btn-info btn-sm">
-            <i class="fas fa-sign-in-alt"></i> Login
-        </button>
+    <a class="btn btn-info btn-sm justify-content-center" href="{{ path('login') }}">
+        <i class="fas fa-sign-in-alt"></i> Login
     </a>
 {% endif %}

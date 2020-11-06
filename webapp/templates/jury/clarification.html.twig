@@ -91,7 +91,7 @@ Jury
 
 <div class="col-sm">Queue: <span class="clarification-queue">{{ clar.queue }}
 <button class="btn btn-sm btn-link clarification-queue-change-button"><i class="far fa-edit" title="Change queue"></i></button></span>
-<span class="clarification-queue-form" data-current-selected-queue="{{ clar.queueid }}" data-clarification-id="{{clar.clarid}}">
+<div style="display: inline" class="clarification-queue-form" data-current-selected-queue="{{ clar.queueid }}" data-clarification-id="{{clar.clarid}}">
 <form action="{{ path('jury_clarification_change_queue', {'clarId': clar.clarid }) }}" method="post" class="form-inline">
 <select name="queue" id="queue" class="custom-select custom-select-sm">
 <option value="">Unassigned issues</option>
@@ -103,7 +103,7 @@ Jury
   <span aria-hidden="true">&times;</span>
 </button>
 </form>
-</span>
+</div>
 
 </div>
 
