@@ -9,6 +9,12 @@ include:
   - template: SAST.gitlab-ci.yml
   - template: License-Scanning.gitlab-ci.yml
 
+remove_me:
+  stage: test
+  image: domjudge/gitlabci:1.0
+  script:
+    - printenv
+  
 check syntax:
   stage: test
   image: domjudge/gitlabci:1.0
