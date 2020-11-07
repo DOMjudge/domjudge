@@ -45,6 +45,11 @@ setup() {
     echo $output | grep "The (pre)configured URL is '$SUBMITBASEURL/'."
 }
 
+@test "netrc is mentioned in usage documentation" {
+    run ./submit --help
+    echo $output | grep "~/\\.netrc"
+}
+
 @test "nonexistent option refers to help" {
     run ./submit --doesnotexist
     [ "${lines[1]}" = "Type './submit --help' to get help." ]
