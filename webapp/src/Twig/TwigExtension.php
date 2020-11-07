@@ -135,8 +135,6 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         $refresh_cookie = $this->dj->getCookie("domjudge_refresh");
         $refresh_flag   = ($refresh_cookie == null || (bool)$refresh_cookie);
 
-        require_once $this->dj->getDomjudgeEtcDir() . '/domserver-config.php';
-
         $user = $this->dj->getUser();
         $team = $user ? $user->getTeam() : null;
 
@@ -505,8 +503,6 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
      */
     public function externalCcsUrl(Submission $submission)
     {
-        require_once $this->dj->getDomjudgeEtcDir() . '/domserver-config.php';
-
         $extCcsUrl = $this->config->get('external_ccs_submission_url');
         if (!empty($extCcsUrl)) {
             $dataSource = $this->config->get('data_source');

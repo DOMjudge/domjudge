@@ -225,9 +225,6 @@ class ContestController extends BaseController
 
         $timeFormat = (string)$this->config->get('time_format');
 
-        $etcDir = $this->dj->getDomjudgeEtcDir();
-        require_once $etcDir . '/domserver-config.php';
-
         if ($this->getParameter('removed_intervals')) {
             $table_fields['num_removed_intervals'] = ['title' => '# removed<br/>intervals', 'sort' => true];
             $removedIntervals                      = $em->createQueryBuilder()
@@ -396,9 +393,6 @@ class ContestController extends BaseController
         if (!$contest) {
             throw new NotFoundHttpException(sprintf('Contest with ID %s not found', $contestId));
         }
-
-        $etcDir = $this->dj->getDomjudgeEtcDir();
-        require_once $etcDir . '/domserver-config.php';
 
         $newRemovedInterval = new RemovedInterval();
         $newRemovedInterval->setContest($contest);
