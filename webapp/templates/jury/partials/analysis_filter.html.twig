@@ -1,5 +1,7 @@
-Filter:
 <div class="btn-group btn-group-toggle btn-group-sm mb-3" data-toggle="buttons">
+    <div class="input-group-prepend">
+        <div class="input-group-text listtoggles">Filter:</div>
+    </div>
     {%- for key, label in filters %}
 
         <label class="btn btn-secondary {% if key == view %}active{% endif %}">

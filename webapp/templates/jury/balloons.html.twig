@@ -34,7 +34,7 @@
                 <div class="form-row">
                     <div class="form-group col-sm-6">
                         <label for="affiliation-filter">Filter on affiliation(s)</label>
-                        <select class="select2 form-control" multiple data-filter-field="affiliation-id"
+                        <select id="affiliation-filter" class="select2 form-control" multiple data-filter-field="affiliation-id"
                                 data-ajax-url="{{ path('jury_ajax_data', {datatype: 'affiliations', select2: true}) }}">
                             {%- for affiliation in filteredAffiliations %}
                                 <option value="{{ affiliation.affilid }}" selected>
