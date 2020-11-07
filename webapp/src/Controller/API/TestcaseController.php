@@ -12,13 +12,13 @@ use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Swagger\Annotations as SWG;
+use OpenApi\Annotations as OA;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * @Rest\Route("/testcases")
- * @SWG\Tag(name="Testcases")
+ * @OA\Tag(name="Testcases")
  */
 class TestcaseController extends AbstractFOSRestController
 {
@@ -43,11 +43,11 @@ class TestcaseController extends AbstractFOSRestController
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST')")
      * @Rest\Get("/next-to-judge/{id}")
-     * @SWG\Parameter(ref="#/parameters/id")
-     * @SWG\Response(
+     * @OA\Parameter(ref="#/components/parameters/id")
+     * @OA\Response(
      *     response="200",
      *     description="Information about the next testcase to run",
-     *     @SWG\Schema(ref=@Model(type=Testcase::class))
+     *     @OA\Schema(ref=@Model(type=Testcase::class))
      * )
      */
     public function getNextToJudgeAction(string $id)
@@ -112,19 +112,18 @@ class TestcaseController extends AbstractFOSRestController
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST')")
      * @Rest\Get("/{id}/file/{type}")
-     * @SWG\Parameter(ref="#/parameters/id")
-     * @SWG\Parameter(
+     * @OA\Parameter(ref="#/components/parameters/id")
+     * @OA\Parameter(
      *     name="type",
-     *     type="string",
      *     in="path",
-     *     enum={"input", "output"},
      *     description="Type of file to get",
-     *     required=true
+     *     required=true,
+     *     @OA\Schema(type="string", enum={"input", "output"})
      * )
-     * @SWG\Response(
+     * @OA\Response(
      *     response="200",
      *     description="Information about the file of the given testcase",
-     *     @SWG\Schema(type="string", description="Base64-encoded file contents")
+     *     @OA\Schema(type="string", description="Base64-encoded file contents")
      * )
      */
     public function getFileAction(string $id, string $type)

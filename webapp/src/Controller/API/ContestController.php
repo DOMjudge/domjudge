@@ -19,7 +19,7 @@ use Metadata\MetadataFactoryInterface;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Swagger\Annotations as SWG;
+use OpenApi\Annotations as OA;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -33,9 +33,9 @@ use Symfony\Component\Yaml\Yaml;
 
 /**
  * @Rest\Route("/contests")
- * @SWG\Tag(name="Contests")
- * @SWG\Response(response="404", ref="#/definitions/NotFound")
- * @SWG\Response(response="401", ref="#/definitions/Unauthorized")
+ * @OA\Tag(name="Contests")
+ * @OA\Response(response="404", ref="#/components/schemas/NotFound")
+ * @OA\Response(response="401", ref="#/components/schemas/Unauthorized")
  */
 class ContestController extends AbstractRestController
 {
@@ -68,15 +68,23 @@ class ContestController extends AbstractRestController
      * @return string
      * @Rest\Post("")
      * @IsGranted("ROLE_ADMIN")
-     * @SWG\Post(consumes={"multipart/form-data"})
-     * @SWG\Parameter(
-     *     name="yaml",
-     *     in="formData",
-     *     type="file",
+     * @OA\Post()
+     * @OA\RequestBody(
      *     required=true,
-     *     description="The contest.yaml files to import."
+     *     @OA\MediaType(
+     *         mediaType="multipart/form-data",
+     *         @OA\Schema(
+     *             required={"yaml"},
+     *             @OA\Property(
+     *                 property="yaml",
+     *                 type="string",
+     *                 format="binary",
+     *                 description="The contest.yaml files to import."
+     *             )
+     *         )
+     *     )
      * )
-     * @SWG\Response(
+     * @OA\Response(
      *     response="200",
      *     description="Returns a (currently meaningless) status message.",
      * )
@@ -99,22 +107,21 @@ class ContestController extends AbstractRestController
      * @param Request $request
      * @return Response
      * @Rest\Get("")
-     * @SWG\Response(
+     * @OA\Response(
      *     response="200",
      *     description="Returns all contests visible to the user (all contests for privileged users, active contests otherwise)",
-     *     @SWG\Schema(
+     *     @OA\Schema(
      *         type="array",
-     *         @SWG\Items(ref=@Model(type=Contest::class))
+     *         @OA\Items(ref=@Model(type=Contest::class))
      *     )
      * )
-     * @SWG\Parameter(ref="#/parameters/idlist")
-     * @SWG\Parameter(ref="#/parameters/strict")
-     * @SWG\Parameter(
+     * @OA\Parameter(ref="#/components/parameters/idlist")
+     * @OA\Parameter(ref="#/components/parameters/strict")
+     * @OA\Parameter(
      *     name="onlyActive",
      *     in="query",
-     *     type="boolean",
      *     description="Whether to only return data pertaining to contests that are active",
-     *     default="false"
+     *     @OA\Schema(type="boolean", default="false")
      * )
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
@@ -130,13 +137,13 @@ class ContestController extends AbstractRestController
      * @return Response
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @Rest\Get("/{cid}")
-     * @SWG\Response(
+     * @OA\Response(
      *     response="200",
      *     description="Returns the given contest",
      *     @Model(type=Contest::class)
      * )
-     * @SWG\Parameter(ref="#/parameters/cid")
-     * @SWG\Parameter(ref="#/parameters/strict")
+     * @OA\Parameter(ref="#/components/parameters/cid")
+     * @OA\Parameter(ref="#/components/parameters/strict")
      */
     public function singleAction(Request $request, string $cid)
     {
@@ -152,37 +159,40 @@ class ContestController extends AbstractRestController
      * @return Response
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Exception
-     * @SWG\Parameter(
+     * @OA\Parameter(
      *     name="cid",
      *     in="path",
-     *     type="string",
-     *     description="The ID of the contest to change the start time for"
-     * )
-     * @SWG\Parameter(
-     *     name="id",
-     *     in="formData",
-     *     type="string",
      *     description="The ID of the contest to change the start time for",
-     *     required=true
+     *     @OA\Schema(type="string")
      * )
-     * @SWG\Parameter(
-     *     name="start_time",
-     *     in="formData",
-     *     type="string",
-     *     format="date-time",
-     *     description="The new start time of the contest",
-     *     required=false,
-     *     allowEmptyValue=true
+     * @OA\RequestBody(
+     *     required=true,
+     *     @OA\MediaType(
+     *         mediaType="application/x-www-form-urlencoded",
+     *         @OA\Schema(
+     *             required={"id"},
+     *             @OA\Property(
+     *                 property="id",
+     *                 description="The ID of the contest to change the start time for",
+     *                 @OA\Schema(type="string")
+     *             ),
+     *             @OA\Property(
+     *                 property="start_time",
+     *                 description="The new start time of the contest",
+     *                 @OA\Schema(type="string", format="date-time")
+     *             )
+     *         )
+     *     )
      * )
-     * @SWG\Response(
+     * @OA\Response(
      *     response="200",
      *     description="Contest start time changed successfully",
      * )
-     * @SWG\Response(
+     * @OA\Response(
      *     response="400",
      *     description="Invalid input data"
      * )
-     * @SWG\Response(
+     * @OA\Response(
      *     response="403",
      *     description="Changing start time not allowed"
      * )
@@ -244,16 +254,16 @@ class ContestController extends AbstractRestController
     /**
      * Get the contest in YAML format
      * @Rest\Get("/{cid}/contest-yaml")
-     * @SWG\Get(produces={"application/x-yaml"})
      * @param Request $request
      * @param string  $cid
      * @return StreamedResponse
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Exception
-     * @SWG\Parameter(ref="#/parameters/cid")
-     * @SWG\Response(
+     * @OA\Parameter(ref="#/components/parameters/cid")
+     * @OA\Response(
      *     response="200",
-     *     description="The contest in YAML format"
+     *     description="The contest in YAML format",
+     *     @OA\MediaType(mediaType="application/x-yaml")
      * )
      */
     public function getContestYamlAction(Request $request, string $cid)
@@ -288,11 +298,11 @@ class ContestController extends AbstractRestController
      * @param string  $cid
      * @return array|null
      * @throws \Doctrine\ORM\NonUniqueResultException
-     * @SWG\Parameter(ref="#/parameters/cid")
-     * @SWG\Response(
+     * @OA\Parameter(ref="#/components/parameters/cid")
+     * @OA\Response(
      *     response="200",
      *     description="The contest state",
-     *     @SWG\Schema(ref="#/definitions/ContestState")
+     *     @OA\Schema(ref="#/components/schemas/ContestState")
      * )
      */
     public function getContestStateAction(Request $request, string $cid)
@@ -309,7 +319,7 @@ class ContestController extends AbstractRestController
     /**
      * Get the event feed for the given contest
      * @Rest\Get("/{cid}/event-feed")
-     * @SWG\Get(produces={"application/x-ndjson"})
+     * @OA\Get()
      * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_API_READER')")
      * @param Request                  $request
      * @param string                   $cid
@@ -317,48 +327,46 @@ class ContestController extends AbstractRestController
      * @param KernelInterface          $kernel
      * @return Response|StreamedResponse
      * @throws \Doctrine\ORM\NonUniqueResultException
-     * @SWG\Parameter(ref="#/parameters/cid")
-     * @SWG\Parameter(
+     * @OA\Parameter(ref="#/components/parameters/cid")
+     * @OA\Parameter(
      *     name="since_id",
      *     in="query",
-     *     type="string",
-     *     description="Only get events after this event"
+     *     description="Only get events after this event",
+     *     @OA\Schema(type="string")
      * )
-     * @SWG\Parameter(
+     * @OA\Parameter(
      *     name="types",
      *     in="query",
-     *     type="array",
      *     description="Types to filter the event feed on",
-     *     @SWG\Items(type="string", description="A single type")
+     *     @OA\Schema(type="array", @OA\Items(type="string", description="A single type"))
      * )
-     * @SWG\Parameter(
+     * @OA\Parameter(
      *     name="strict",
      *     in="query",
-     *     type="boolean",
      *     description="Whether to only include CCS compliant properties in the response",
-     *     default="false"
+     *     @OA\Schema(type="boolean", default="false")
      * )
-     * @SWG\Parameter(
+     * @OA\Parameter(
      *     name="stream",
      *     in="query",
-     *     type="boolean",
      *     description="Whether to stream the output or stop immediately",
-     *     default="true"
+     *     @OA\Schema(type="boolean", default="true")
      * )
-     * @SWG\Response(
+     * @OA\Response(
      *     response="200",
      *     description="The events",
-     *     @SWG\Schema(
+     *     @OA\Schema(
      *         type="array",
-     *         @SWG\Items(
+     *         @OA\Items(
      *             type="object",
-     *             @SWG\Property(property="id", type="string"),
-     *             @SWG\Property(property="type", type="string"),
-     *             @SWG\Property(property="op", type="string"),
-     *             @SWG\Property(property="data", type="object"),
-     *             @SWG\Property(property="time", type="string", format="date-time"),
+     *             @OA\Property(property="id", type="string"),
+     *             @OA\Property(property="type", type="string"),
+     *             @OA\Property(property="op", type="string"),
+     *             @OA\Property(property="data", type="object"),
+     *             @OA\Property(property="time", type="string", format="date-time"),
      *         )
-     *     )
+     *     ),
+     *     @OA\MediaType(mediaType="application/x-ndjson")
      * )
      */
     public function getEventFeedAction(
@@ -533,15 +541,15 @@ class ContestController extends AbstractRestController
      * Get general status information
      * @Rest\Get("/{cid}/status")
      * @IsGranted("ROLE_API_READER")
-     * @SWG\Parameter(ref="#/parameters/cid")
-     * @SWG\Response(
+     * @OA\Parameter(ref="#/components/parameters/cid")
+     * @OA\Response(
      *     response="200",
      *     description="General status information for the given contest",
-     *     @SWG\Schema(
+     *     @OA\Schema(
      *         type="object",
-     *         @SWG\Property(property="num_submissions", type="integer"),
-     *         @SWG\Property(property="num_queued", type="integer"),
-     *         @SWG\Property(property="num_judging", type="integer")
+     *         @OA\Property(property="num_submissions", type="integer"),
+     *         @OA\Property(property="num_queued", type="integer"),
+     *         @OA\Property(property="num_judging", type="integer")
      *     )
      * )
      * @param Request $request

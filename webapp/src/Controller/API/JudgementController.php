@@ -13,15 +13,15 @@ use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Swagger\Annotations as SWG;
+use OpenApi\Annotations as OA;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
  * @Rest\Route("/contests/{cid}/judgements")
- * @SWG\Tag(name="Judgements")
- * @SWG\Parameter(ref="#/parameters/cid")
- * @SWG\Response(response="404", ref="#/definitions/NotFound")
- * @SWG\Response(response="401", ref="#/definitions/Unauthorized")
+ * @OA\Tag(name="Judgements")
+ * @OA\Parameter(ref="#/components/parameters/cid")
+ * @OA\Response(response="404", ref="#/components/schemas/NotFound")
+ * @OA\Response(response="401", ref="#/components/schemas/Unauthorized")
  */
 class JudgementController extends AbstractRestController implements QueryObjectTransformer
 {
@@ -48,32 +48,32 @@ class JudgementController extends AbstractRestController implements QueryObjectT
      * @return \Symfony\Component\HttpFoundation\Response
      * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_TEAM') or is_granted('ROLE_JUDGEHOST') or is_granted('ROLE_API_READER')")
      * @Rest\Get("")
-     * @SWG\Response(
+     * @OA\Response(
      *     response="200",
      *     description="Returns all the judgements for this contest",
-     *     @SWG\Schema(
+     *     @OA\Schema(
      *         type="array",
-     *         @SWG\Items(
+     *         @OA\Items(
      *             allOf={
-     *                 @SWG\Schema(ref=@Model(type=Judging::class)),
-     *                 @SWG\Schema(ref="#/definitions/JudgementExtraFields")
+     *                 @OA\Schema(ref=@Model(type=Judging::class)),
+     *                 @OA\Schema(ref="#/components/schemas/JudgementExtraFields")
      *             }
      *         )
      *     )
      * )
-     * @SWG\Parameter(ref="#/parameters/idlist")
-     * @SWG\Parameter(ref="#/parameters/strict")
-     * @SWG\Parameter(
+     * @OA\Parameter(ref="#/components/parameters/idlist")
+     * @OA\Parameter(ref="#/components/parameters/strict")
+     * @OA\Parameter(
      *     name="result",
      *     in="query",
-     *     type="string",
-     *     description="Only show judgements with the given result"
+     *     description="Only show judgements with the given result",
+     *     @OA\Schema(type="string")
      * )
-     * @SWG\Parameter(
+     * @OA\Parameter(
      *     name="submission_id",
      *     in="query",
-     *     type="string",
-     *     description="Only show judgements for the given submission"
+     *     description="Only show judgements for the given submission",
+     *     @OA\Schema(type="string")
      * )
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
@@ -90,18 +90,18 @@ class JudgementController extends AbstractRestController implements QueryObjectT
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_TEAM') or is_granted('ROLE_JUDGEHOST') or is_granted('ROLE_API_READER')")
      * @Rest\Get("/{id}")
-     * @SWG\Response(
+     * @OA\Response(
      *     response="200",
      *     description="Returns the given judgement for this contest",
-     *     @SWG\Schema(
+     *     @OA\Schema(
      *         allOf={
-     *             @SWG\Schema(ref=@Model(type=Judging::class)),
-     *             @SWG\Schema(ref="#/definitions/JudgementExtraFields")
+     *             @OA\Schema(ref=@Model(type=Judging::class)),
+     *             @OA\Schema(ref="#/components/schemas/JudgementExtraFields")
      *         }
      *     )
      * )
-     * @SWG\Parameter(ref="#/parameters/id")
-     * @SWG\Parameter(ref="#/parameters/strict")
+     * @OA\Parameter(ref="#/components/parameters/id")
+     * @OA\Parameter(ref="#/components/parameters/strict")
      */
     public function singleAction(Request $request, string $id)
     {

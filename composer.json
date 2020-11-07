@@ -65,7 +65,7 @@
 		"ircmaxell/password-compat": "*",
 		"jms/serializer-bundle": "^3.4",
 		"mbostock/d3": "^3.5",
-		"nelmio/api-doc-bundle": "^3.6",
+		"nelmio/api-doc-bundle": "^4.0",
 		"novus/nvd3": "^1.8",
 		"sebastian/diff": "3.0",
 		"select2/select2": "4.*",

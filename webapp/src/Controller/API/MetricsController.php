@@ -10,7 +10,7 @@ use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Swagger\Annotations as SWG;
+use OpenApi\Annotations as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -22,7 +22,7 @@ use Prometheus\RenderTextFormat;
 /**
  * @Route("/metrics")
  * @IsGranted("ROLE_API_READER")
- * @SWG\Tag(name="Metrics")
+ * @OA\Tag(name="Metrics")
  */
 class MetricsController extends AbstractFOSRestController
 {
@@ -64,7 +64,7 @@ class MetricsController extends AbstractFOSRestController
 
     /**
      * @Rest\Get("/prometheus")
-     * @SWG\Response(
+     * @OA\Response(
      *     response="200",
      *     description="Metrics of this installation for use by Prometheus"
      * )
@@ -138,7 +138,7 @@ class MetricsController extends AbstractFOSRestController
                     ->getResult();
             }
             reset($teams);
-            
+
             // Total number of teams in the contest
             $total_teams = sizeof($teams);
             $m['teams']->set($total_teams, $labels);

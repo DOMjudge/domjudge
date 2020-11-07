@@ -15,17 +15,17 @@ use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
 use FOS\RestBundle\Controller\Annotations as Rest;
-use Swagger\Annotations as SWG;
+use OpenApi\Annotations as OA;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Intl\Exception\NotImplementedException;
 
 /**
  * @Rest\Route("/contests/{cid}/scoreboard")
- * @SWG\Tag(name="Scoreboard")
- * @SWG\Parameter(ref="#/parameters/cid")
- * @SWG\Response(response="404", ref="#/definitions/NotFound")
- * @SWG\Response(response="401", ref="#/definitions/Unauthorized")
+ * @OA\Tag(name="Scoreboard")
+ * @OA\Parameter(ref="#/components/parameters/cid")
+ * @OA\Response(response="404", ref="#/components/schemas/NotFound")
+ * @OA\Response(response="401", ref="#/components/schemas/Unauthorized")
  */
 class ScoreboardController extends AbstractRestController
 {
@@ -59,46 +59,46 @@ class ScoreboardController extends AbstractRestController
      * @param Request $request
      * @return array
      * @Rest\Get("")
-     * @SWG\Response(
+     * @OA\Response(
      *     response="200",
      *     description="Returns the scoreboard",
-     *     @SWG\Schema(ref="#/definitions/Scoreboard")
+     *     @OA\Schema(ref="#/components/schemas/Scoreboard")
      * )
-     * @SWG\Parameter(
+     * @OA\Parameter(
      *     name="allteams",
      *     in="query",
-     *     type="boolean",
-     *     description="Also show invisble teams. Requires jury privileges"
+     *     description="Also show invisble teams. Requires jury privileges",
+     *     @OA\Schema(type="boolean")
      * )
-     * @SWG\Parameter(
+     * @OA\Parameter(
      *     name="category",
      *     in="query",
-     *     type="integer",
-     *     description="Get the scoreboard for only this category"
+     *     description="Get the scoreboard for only this category",
+     *     @OA\Schema(type="integer")
      * )
-     * @SWG\Parameter(
+     * @OA\Parameter(
      *     name="country",
      *     in="query",
-     *     type="string",
-     *     description="Get the scoreboard for only this country (in ISO 3166-1 alpha-3 format)"
+     *     description="Get the scoreboard for only this country (in ISO 3166-1 alpha-3 format)",
+     *     @OA\Schema(type="string")
      * )
-     * @SWG\Parameter(
+     * @OA\Parameter(
      *     name="affiliation",
      *     in="query",
-     *     type="integer",
-     *     description="Get the scoreboard for only this affiliation"
+     *     description="Get the scoreboard for only this affiliation",
+     *     @OA\Schema(type="integer")
      * )
-     * @SWG\Parameter(
+     * @OA\Parameter(
      *     name="public",
      *     in="query",
-     *     type="boolean",
-     *     description="Show publicly visible scoreboard, even for users with more permissions"
+     *     description="Show publicly visible scoreboard, even for users with more permissions",
+     *     @OA\Schema(type="boolean")
      * )
-     * @SWG\Parameter(
+     * @OA\Parameter(
      *     name="sortorder",
      *     in="query",
-     *     type="integer",
-     *     description="The sort order to get the scoreboard for. If not given, uses the lowest sortorder"
+     *     description="The sort order to get the scoreboard for. If not given, uses the lowest sortorder",
+     *     @OA\Schema(type="integer")
      * )
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Exception

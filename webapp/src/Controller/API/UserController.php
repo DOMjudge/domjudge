@@ -15,7 +15,7 @@ use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Swagger\Annotations as SWG;
+use OpenApi\Annotations as OA;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -23,9 +23,9 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
  * @Rest\Route("/users", defaults={"_format" = "json"})
- * @SWG\Tag(name="Users")
- * @SWG\Response(response="404", ref="#/definitions/NotFound")
- * @SWG\Response(response="401", ref="#/definitions/Unauthorized")
+ * @OA\Tag(name="Users")
+ * @OA\Response(response="404", ref="#/components/schemas/NotFound")
+ * @OA\Response(response="401", ref="#/components/schemas/Unauthorized")
  */
 class UserController extends AbstractRestController
 {
@@ -58,22 +58,28 @@ class UserController extends AbstractRestController
      * @return string
      * @Rest\Post("/groups")
      * @IsGranted("ROLE_ADMIN")
-     * @SWG\Post(consumes={"multipart/form-data"})
-     * @SWG\Parameter(
-     *     name="tsv",
-     *     in="formData",
-     *     type="file",
-     *     required=false,
-     *     description="The groups.tsv files to import."
+     * @OA\Post()
+     * @OA\RequestBody(
+     *     required=true,
+     *     @OA\MediaType(
+     *         mediaType="multipart/form-data",
+     *         @OA\Schema(
+     *             @OA\Property(
+     *                 property="tsv",
+     *                 type="string",
+     *                 format="binary",
+     *                 description="The groups.tsv files to import."
+     *             ),
+     *             @OA\Property(
+     *                 property="json",
+     *                 type="string",
+     *                 format="binary",
+     *                 description="The groups.json files to import."
+     *             )
+     *         )
+     *     )
      * )
-     * @SWG\Parameter(
-     *     name="json",
-     *     in="formData",
-     *     type="file",
-     *     required=false,
-     *     description="The groups.json files to import."
-     * )
-     * @SWG\Response(
+     * @OA\Response(
      *     response="200",
      *     description="Returns a (currently meaningless) status message.",
      * )
@@ -108,15 +114,23 @@ class UserController extends AbstractRestController
      * @return string
      * @Rest\Post("/organizations")
      * @IsGranted("ROLE_ADMIN")
-     * @SWG\Post(consumes={"multipart/form-data"})
-     * @SWG\Parameter(
-     *     name="json",
-     *     in="formData",
-     *     type="file",
+     * @OA\Post()
+     * @OA\RequestBody(
      *     required=true,
-     *     description="The organizations.json files to import."
+     *     @OA\MediaType(
+     *         mediaType="multipart/form-data",
+     *         @OA\Schema(
+     *             required={"json"},
+     *             @OA\Property(
+     *                 property="json",
+     *                 type="string",
+     *                 format="binary",
+     *                 description="The organizations.json files to import."
+     *             )
+     *         )
+     *     )
      * )
-     * @SWG\Response(
+     * @OA\Response(
      *     response="200",
      *     description="Returns a (currently meaningless) status message.",
      * )
@@ -141,22 +155,28 @@ class UserController extends AbstractRestController
      * @return string
      * @Rest\Post("/teams")
      * @IsGranted("ROLE_ADMIN")
-     * @SWG\Post(consumes={"multipart/form-data"})
-     * @SWG\Parameter(
-     *     name="tsv",
-     *     in="formData",
-     *     type="file",
-     *     required=false,
-     *     description="The teams.tsv files to import."
+     * @OA\Post()
+     * @OA\RequestBody(
+     *     required=true,
+     *     @OA\MediaType(
+     *         mediaType="multipart/form-data",
+     *         @OA\Schema(
+     *             @OA\Property(
+     *                 property="tsv",
+     *                 type="string",
+     *                 format="binary",
+     *                 description="The teams.tsv files to import."
+     *             ),
+     *             @OA\Property(
+     *                 property="json",
+     *                 type="string",
+     *                 format="binary",
+     *                 description="The teams.json files to import."
+     *             )
+     *         )
+     *     )
      * )
-     * @SWG\Parameter(
-     *     name="json",
-     *     in="formData",
-     *     type="file",
-     *     required=false,
-     *     description="The teams.json files to import."
-     * )
-     * @SWG\Response(
+     * @OA\Response(
      *     response="200",
      *     description="Returns a (currently meaningless) status message.",
      * )
@@ -189,15 +209,23 @@ class UserController extends AbstractRestController
      * @return string
      * @Rest\Post("/accounts")
      * @IsGranted("ROLE_ADMIN")
-     * @SWG\Post(consumes={"multipart/form-data"})
-     * @SWG\Parameter(
-     *     name="tsv",
-     *     in="formData",
-     *     type="file",
+     * @OA\Post()
+     * @OA\RequestBody(
      *     required=true,
-     *     description="The accounts.tsv files to import."
+     *     @OA\MediaType(
+     *         mediaType="multipart/form-data",
+     *         @OA\Schema(
+     *             required={"tsv"},
+     *             @OA\Property(
+     *                 property="tsv",
+     *                 type="string",
+     *                 format="binary",
+     *                 description="The accounts.tsv files to import."
+     *             )
+     *         )
+     *     )
      * )
-     * @SWG\Response(
+     * @OA\Response(
      *     response="200",
      *     description="Returns a (currently meaningless) status message.",
      * )
@@ -222,20 +250,20 @@ class UserController extends AbstractRestController
      * @return Response
      * @Rest\Get("")
      * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_API_READER')")
-     * @SWG\Response(
+     * @OA\Response(
      *     response="200",
      *     description="Returns all the users for this contest",
-     *     @SWG\Schema(
+     *     @OA\Schema(
      *         type="array",
-     *         @SWG\Items(ref=@Model(type=User::class))
+     *         @OA\Items(ref=@Model(type=User::class))
      *     )
      * )
-     * @SWG\Parameter(ref="#/parameters/idlist")
-     * @SWG\Parameter(
+     * @OA\Parameter(ref="#/components/parameters/idlist")
+     * @OA\Parameter(
      *     name="team_id",
      *     in="query",
-     *     type="string",
-     *     description="Only show users for the given team"
+     *     description="Only show users for the given team",
+     *     @OA\Schema(type="string")
      * )
      * @throws NonUniqueResultException
      */
@@ -252,12 +280,12 @@ class UserController extends AbstractRestController
      * @throws NonUniqueResultException
      * @Rest\Get("/{id}")
      * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_API_READER')")
-     * @SWG\Response(
+     * @OA\Response(
      *     response="200",
      *     description="Returns the given user",
      *     @Model(type=User::class)
      * )
-     * @SWG\Parameter(ref="#/parameters/id")
+     * @OA\Parameter(ref="#/components/parameters/id")
      */
     public function singleAction(Request $request, string $id)
     {
