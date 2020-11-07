@@ -17,11 +17,11 @@ function get_db_url()
         if ($line[0] == '#') {
             continue;
         }
-        list($dummy, $host, $db, $user, $pass) = explode(':', trim($line));
+        list($dummy, $host, $db, $user, $pass, $port) = explode(':', trim($line));
         break;
     }
 
-    return sprintf('mysql://%s:%s@%s:3306/%s', $user, $pass, $host, $db);
+    return sprintf('mysql://%s:%s@%s:%d/%s', $user, $pass, $host, $port ?? 3306, $db);
 }
 
 function get_app_secret()
