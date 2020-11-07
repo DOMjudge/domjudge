@@ -11,7 +11,7 @@ to which some DOMjudge-specific API endpoints have been added. Full documentatio
 on the available API endpoints can be found at
 `http(s)://yourhost.example.edu/domjudge/api/doc`.
 
-DOMjudge also offers an `OpenAPI Specification ver. 2`_
+DOMjudge also offers an `OpenAPI Specification ver. 3`_
 compatible JSON file, which can be found at
 `http(s)://yourhost.example.edu/domjudge/api/doc.json`.
 
@@ -135,4 +135,4 @@ specify the `webapp/phpunit.xml.dist` file as a PHPUnit configuration file and
 it should work.
 
 .. _CCS Contest API specification: https://ccs-specs.icpc.io/contest_api
-.. _OpenAPI Specification ver. 2: https://swagger.io/docs/specification/2-0/basic-structure/
+.. _OpenAPI Specification ver. 3: https://swagger.io/specification/
