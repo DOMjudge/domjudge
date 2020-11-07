@@ -28,7 +28,12 @@
                         {% for option in category.data %}
                             <li class="list-group-item" style="padding:0;padding-top:10px;">
                                 <div class="form-group">
-                                    {{ option.name }}
+                                    <label
+                                    {% if option.type in ['int','string','bool'] or option.type == 'array_val' and option.options is not null %}
+                                        for="config_{{ option.name }}"
+                                        {% if option.type =='bool' %} onclick="$('#config_{{ option.name }}').bootstrapToggle('toggle')"{% endif %}
+                                    {% endif %}
+                                    >{{ option.name | replace({'_': ' '}) | capitalize }}:</label>
                                     {% if option.type == 'bool' %}
                                         <input type="checkbox" data-toggle="toggle" data-size="mini" data-on="Yes"
                                                data-off="No"
