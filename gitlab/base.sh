@@ -25,7 +25,7 @@ echo "GRANT SELECT, INSERT, UPDATE, DELETE ON \`domjudge\`.* TO 'domjudge'@'%' I
 echo "SET GLOBAL max_allowed_packet = 100*1024*1024;" | mysql
 
 # Generate a dbpasswords file
-echo "dummy:${MARIADB_PORT_3306_TCP_ADDR}:domjudge:domjudge:domjudge" > etc/dbpasswords.secret
+echo "dummy:${MARIADB_PORT_3306_TCP_ADDR}:domjudge:domjudge:domjudge:3306" > etc/dbpasswords.secret
 
 # Generate APP_SECRET for symfony
 ( cd etc ; ./gensymfonysecret > symfony_app.secret )

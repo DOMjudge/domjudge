@@ -62,9 +62,9 @@ mysql()
 		[ -n "$DBA_PASSWD" ]    && pass="-p$DBA_PASSWD"
 	fi
 	if [ -n "$pass" ]; then
-		command mysql $user "$pass" -h "$DBHOST" --silent --skip-column-names "$@"
+		command mysql $user "$pass" -h "$DBHOST" -P "$DBPORT" --silent --skip-column-names "$@"
 	else
-		command mysql $user -h "$DBHOST" --silent --skip-column-names "$@"
+		command mysql $user -h "$DBHOST" -P "$DBPORT" --silent --skip-column-names "$@"
 	fi
 }
 
@@ -117,9 +117,9 @@ symfony_console()
 
 		if [ -n "$DBA_USER" ]; then
 			if [ -n "$DBA_PASSWD" ]; then
-				DATABASE_URL=mysql://${DBA_USER}:${DBA_PASSWD}@${domjudge_DBHOST}:3306/${domjudge_DBNAME}
+				DATABASE_URL=mysql://${DBA_USER}:${DBA_PASSWD}@${domjudge_DBHOST}:${domjudge_DBPORT}/${domjudge_DBNAME}
 			else
-				DATABASE_URL=mysql://${DBA_USER}@${domjudge_DBHOST}:3306/${domjudge_DBNAME}
+				DATABASE_URL=mysql://${DBA_USER}@${domjudge_DBHOST}:${domjudge_DBPORT}/${domjudge_DBNAME}
 			fi
 		fi
 	fi
@@ -147,17 +147,25 @@ read_dbpasswords()
 	IFS=":"
 	# Don't pipe $PASSWDFILE into this while loop as that spawns a
 	# subshell and then variables are not retained in the original shell.
-	while read -r role host db user passwd; do
+	while read -r role host db user passwd port; do
 		# Skip lines beginning with a '#'
 		[ "x$role" != "x${role###}" ] && continue
 		domjudge_DBHOST=$host
+		domjudge_DBPORT=$port
 		domjudge_DBNAME=$db
 		domjudge_DBUSER=$user
 		domjudge_PASSWD=$passwd
 		DBHOST=$host
 		DBNAME=$db
+		DBPORT=$port
 	done < "$PASSWDFILE"
 	IFS="$OLDIFS"
+	if [ -z "$domjudge_DBPORT" ]; then
+		domjudge_DBPORT=3306
+	fi
+	if [ -z "$DBPORT" ]; then
+		DBPORT=3306
+	fi
 	if [ -z "$domjudge_PASSWD" ]; then
 		echo "Error: no login info found."
 		return 1
