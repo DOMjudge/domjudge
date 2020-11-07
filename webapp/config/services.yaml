@@ -5,6 +5,9 @@
 # https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
 parameters:
     locale: en
+    # Enable this to support removing time intervals from the contest.
+    # This code is rarely tested and we discourage using it.
+    removed_intervals: false
 
 services:
     # default configuration for services in *this* file
