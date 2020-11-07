@@ -3,6 +3,7 @@
 {% block title %}Analysis - Team {{ team.effectiveName }}{% endblock %}
 
 {% block extrahead %}
+{{ parent() }}
 <link rel="stylesheet" href="{{asset('css/nv.d3.min.css')}}">
 <script src="{{asset('js/d3.min.js')}}"></script>
 <script src="{{asset('js/nv.d3.min.js')}}"></script>
@@ -23,10 +24,7 @@
 </style>
 {% endblock %}
 
-{% block body %}
-<div class="container-fluid">
-  <div class="row equal mt-3">
-    <div class="col-12">
+{% block content %}
       <h1>Team {{ team.teamid }}: {{ team.effectiveName }}</h1>
     </div>
     <div class="col-lg-3 col-sm-6 mt-3">
@@ -79,10 +77,9 @@
         </div>
       </div>
   {% endfor %}
-  </div>
-</div>
+{% endblock %}
 
-
+{% block extrafooter %}
 <script>
 {%
 set colors = {

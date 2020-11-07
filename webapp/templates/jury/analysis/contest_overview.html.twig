@@ -3,6 +3,7 @@
 {% block title %}Analysis - Contest{% endblock %}
 
 {% block extrahead %}
+{{ parent() }}
 <link rel="stylesheet" href="{{asset('css/nv.d3.min.css')}}">
 <script src="{{asset('js/d3.min.js')}}"></script>
 <script src="{{asset('js/nv.d3.min.js')}}"></script>
@@ -35,10 +36,7 @@ $(function() {
 </script>
 {% endblock %}
 
-{% block body %}
-<div class="container-fluid">
-  <div class="row">
-    <div class="col-12 mt-3">
+{% block content %}
       <h1>{{ current_contest.name }}</h1>
       {% include 'jury/partials/analysis_filter.html.twig' %}
     </div>
@@ -223,11 +221,9 @@ $(function() {
                   {% endif %}
               </div>
           </div>
-      </div>
-  </div>
-</div>
+{% endblock %}
 
-
+{% block extrafooter %}
 <script>
 {%
 set colors = {
