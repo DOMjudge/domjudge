@@ -228,7 +228,7 @@ class ContestController extends BaseController
         $etcDir = $this->dj->getDomjudgeEtcDir();
         require_once $etcDir . '/domserver-config.php';
 
-        if (ALLOW_REMOVED_INTERVALS) {
+        if ($this->getParameter('removed_intervals')) {
             $table_fields['num_removed_intervals'] = ['title' => '# removed<br/>intervals', 'sort' => true];
             $removedIntervals                      = $em->createQueryBuilder()
                 ->from(RemovedInterval::class, 'i', 'i.cid')
@@ -318,7 +318,7 @@ class ContestController extends BaseController
                 $contestdata['num_teams'] = ['value' => $teamCount];
             }
 
-            if (ALLOW_REMOVED_INTERVALS) {
+            if ($this->getParameter('removed_intervals')) {
                 $contestdata['num_removed_intervals'] = [
                     'value' => $removedIntervals[$contest->getCid()]['num_removed_intervals'] ?? 0
                 ];
@@ -436,7 +436,7 @@ class ContestController extends BaseController
         return $this->render('jury/contest.html.twig', [
             'contest' => $contest,
             'isActive' => isset($this->dj->getCurrentContests()[$contest->getCid()]),
-            'allowRemovedIntervals' => ALLOW_REMOVED_INTERVALS,
+            'allowRemovedIntervals' => $this->getParameter('removed_intervals'),
             'removedIntervalForm' => $form->createView(),
             'removedIntervals' => $removedIntervals,
             'problems' => $problems,
