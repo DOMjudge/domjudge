@@ -140,6 +140,7 @@
         $().ready(function () {
             $('.data-table').DataTable({
                 "paging": false,
+                "retrieve": true,
                 "searching": {{ options.searching | default('true') }},
                 "ordering": {{ options.ordering | default('true') }},
                 "order": [[ {{ default_sort }}, '{{ default_sort_order }}']],
