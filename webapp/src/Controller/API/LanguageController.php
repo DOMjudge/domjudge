@@ -6,15 +6,15 @@ use App\Entity\Language;
 use Doctrine\ORM\QueryBuilder;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
-use Swagger\Annotations as SWG;
+use OpenApi\Annotations as OA;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
  * @Rest\Route("/contests/{cid}/languages")
- * @SWG\Tag(name="Languages")
- * @SWG\Parameter(ref="#/parameters/cid")
- * @SWG\Response(response="404", ref="#/definitions/NotFound")
- * @SWG\Response(response="401", ref="#/definitions/Unauthorized")
+ * @OA\Tag(name="Languages")
+ * @OA\Parameter(ref="#/components/parameters/cid")
+ * @OA\Response(response="404", ref="#/components/schemas/NotFound")
+ * @OA\Response(response="401", ref="#/components/schemas/Unauthorized")
  */
 class LanguageController extends AbstractRestController
 {
@@ -23,16 +23,16 @@ class LanguageController extends AbstractRestController
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
      * @Rest\Get("")
-     * @SWG\Response(
+     * @OA\Response(
      *     response="200",
      *     description="Returns all the languages for this contest",
-     *     @SWG\Schema(
+     *     @OA\Schema(
      *         type="array",
-     *         @SWG\Items(ref=@Model(type=Language::class))
+     *         @OA\Items(ref=@Model(type=Language::class))
      *     )
      * )
-     * @SWG\Parameter(ref="#/parameters/idlist")
-     * @SWG\Parameter(ref="#/parameters/strict")
+     * @OA\Parameter(ref="#/components/parameters/idlist")
+     * @OA\Parameter(ref="#/components/parameters/strict")
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
     public function listAction(Request $request)
@@ -47,13 +47,13 @@ class LanguageController extends AbstractRestController
      * @return \Symfony\Component\HttpFoundation\Response
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @Rest\Get("/{id}")
-     * @SWG\Response(
+     * @OA\Response(
      *     response="200",
      *     description="Returns the given language for this contest",
      *     @Model(type=Language::class)
      * )
-     * @SWG\Parameter(ref="#/parameters/id")
-     * @SWG\Parameter(ref="#/parameters/strict")
+     * @OA\Parameter(ref="#/components/parameters/id")
+     * @OA\Parameter(ref="#/components/parameters/strict")
      */
     public function singleAction(Request $request, string $id)
     {

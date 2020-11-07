@@ -4,7 +4,7 @@ namespace App\Controller\API;
 
 use Doctrine\ORM\QueryBuilder;
 use FOS\RestBundle\Controller\Annotations as Rest;
-use Swagger\Annotations as SWG;
+use OpenApi\Annotations as OA;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -12,7 +12,7 @@ use Symfony\Component\Intl\Exception\NotImplementedException;
 
 /**
  * @Rest\Route("/contests/{cid}/judgement-types")
- * @SWG\Tag(name="Judgement types")
+ * @OA\Tag(name="Judgement types")
  */
 class JudgementTypeController extends AbstractRestController
 {
@@ -22,16 +22,16 @@ class JudgementTypeController extends AbstractRestController
      * @return array
      * @throws \Exception
      * @Rest\Get("")
-     * @SWG\Response(
+     * @OA\Response(
      *     response="200",
      *     description="Returns all the judgement types for this contest",
-     *     @SWG\Schema(
+     *     @OA\Schema(
      *         type="array",
-     *         @SWG\Items(ref="#/definitions/JudgementType")
+     *         @OA\Items(ref="#/components/schemas/JudgementType")
      *     )
      * )
-     * @SWG\Parameter(ref="#/parameters/idlist")
-     * @SWG\Parameter(ref="#/parameters/strict")
+     * @OA\Parameter(ref="#/components/parameters/idlist")
+     * @OA\Parameter(ref="#/components/parameters/strict")
      */
     public function listAction(Request $request)
     {
@@ -64,13 +64,13 @@ class JudgementTypeController extends AbstractRestController
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Exception
      * @Rest\Get("/{id}")
-     * @SWG\Response(
+     * @OA\Response(
      *     response="200",
      *     description="Returns the given judgement type for this contest",
-     *     @SWG\Schema(ref="#/definitions/JudgementType")
+     *     @OA\Schema(ref="#/components/schemas/JudgementType")
      * )
-     * @SWG\Parameter(ref="#/parameters/id")
-     * @SWG\Parameter(ref="#/parameters/strict")
+     * @OA\Parameter(ref="#/components/parameters/id")
+     * @OA\Parameter(ref="#/components/parameters/strict")
      */
     public function singleAction(Request $request, string $id)
     {

@@ -29,13 +29,13 @@ use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use Psr\Log\LoggerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Swagger\Annotations as SWG;
+use OpenApi\Annotations as OA;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
  * @Rest\Route("/judgehosts")
- * @SWG\Tag(name="Judgehosts")
+ * @OA\Tag(name="Judgehosts")
  */
 class JudgehostController extends AbstractFOSRestController
 {
@@ -122,16 +122,16 @@ class JudgehostController extends AbstractFOSRestController
      * Get judgehosts
      * @Rest\Get("")
      * @IsGranted("ROLE_JURY")
-     * @SWG\Response(
+     * @OA\Response(
      *     response="200",
      *     description="The judgehosts",
-     *     @SWG\Schema(type="array", @SWG\Items(ref=@Model(type=Judgehost::class)))
+     *     @OA\Schema(type="array", @OA\Items(ref=@Model(type=Judgehost::class)))
      * )
-     * @SWG\Parameter(
+     * @OA\Parameter(
      *     name="hostname",
      *     in="query",
-     *     type="string",
-     *     description="Only show the judgehost with the given hostname"
+     *     description="Only show the judgehost with the given hostname",
+     *     @OA\Schema(type="string")
      * )
      * @param Request $request
      * @return array
@@ -156,17 +156,17 @@ class JudgehostController extends AbstractFOSRestController
      * Also restarts (and returns) unfinished judgings.
      * @Rest\Post("")
      * @IsGranted("ROLE_JUDGEHOST")
-     * @SWG\Response(
+     * @OA\Response(
      *     response="200",
      *     description="The returned unfinished judgings",
-     *     @SWG\Schema(
+     *     @OA\Schema(
      *         type="array",
-     *         @SWG\Items(
+     *         @OA\Items(
      *             type="object",
      *             properties={
-     *                 @SWG\Property(property="judgingid", type="integer"),
-     *                 @SWG\Property(property="submitid", type="integer"),
-     *                 @SWG\Property(property="cid", type="integer")
+     *                 @OA\Property(property="judgingid", type="integer"),
+     *                 @OA\Property(property="submitid", type="integer"),
+     *                 @OA\Property(property="cid", type="integer")
      *             }
      *         )
      *     )
@@ -232,22 +232,29 @@ class JudgehostController extends AbstractFOSRestController
      * Update the configuration of the given judgehost
      * @Rest\Put("/{hostname}")
      * @IsGranted("ROLE_JUDGEHOST")
-     * @SWG\Response(
+     * @OA\Response(
      *     response="200",
      *     description="The modified judgehost",
-     *     @SWG\Schema(type="array", @SWG\Items(ref=@Model(type=Judgehost::class)))
+     *     @OA\Schema(type="array", @OA\Items(ref=@Model(type=Judgehost::class)))
      * )
-     * @SWG\Parameter(
+     * @OA\Parameter(
      *     name="hostname",
      *     in="path",
-     *     type="string",
-     *     description="The hostname of the judgehost to update"
+     *     description="The hostname of the judgehost to update",
+     *     @OA\Schema(type="string")
      * )
-     * @SWG\Parameter(
-     *     name="active",
-     *     in="formData",
-     *     type="boolean",
-     *     description="The new active state of the judgehost"
+     * @OA\RequestBody(
+     *     required=true,
+     *     @OA\MediaType(
+     *         mediaType="application/x-www-form-urlencoded",
+     *         @OA\Schema(
+     *             @OA\Property(
+     *                 property="active",
+     *                 description="The new active state of the judgehost",
+     *                 @OA\Schema(type="boolean")
+     *             )
+     *         )
+     *     )
      * )
      * @param Request $request
      * @param string  $hostname
@@ -272,16 +279,16 @@ class JudgehostController extends AbstractFOSRestController
      * Get the next judging for the given judgehost
      * @Rest\Post("/next-judging/{hostname}")
      * @IsGranted("ROLE_JUDGEHOST")
-     * @SWG\Response(
+     * @OA\Response(
      *     response="200",
      *     description="The next judging to judge",
-     *     @SWG\Schema(ref="#/definitions/NextJudging")
+     *     @OA\Schema(ref="#/components/schemas/NextJudging")
      * )
-     * @SWG\Parameter(
+     * @OA\Parameter(
      *     name="hostname",
      *     in="path",
-     *     type="string",
-     *     description="The hostname of the judgehost to get the next judging for"
+     *     description="The hostname of the judgehost to get the next judging for",
+     *     @OA\Schema(type="string")
      * )
      * @param string $hostname
      * @return array|string
@@ -486,21 +493,21 @@ class JudgehostController extends AbstractFOSRestController
      * Update the given judging for the given judgehost
      * @Rest\Put("/update-judging/{hostname}/{judgingId<\d+>}")
      * @IsGranted("ROLE_JUDGEHOST")
-     * @SWG\Response(
+     * @OA\Response(
      *     response="200",
      *     description="When the judging has been updated"
      * )
-     * @SWG\Parameter(
+     * @OA\Parameter(
      *     name="hostname",
      *     in="path",
-     *     type="string",
-     *     description="The hostname of the judgehost that wants to update the judging"
+     *     description="The hostname of the judgehost that wants to update the judging",
+     *     @OA\Schema(type="string")
      * )
-     * @SWG\Parameter(
+     * @OA\Parameter(
      *     name="judgingId",
      *     in="path",
-     *     type="integer",
-     *     description="The ID of the judging to update"
+     *     description="The ID of the judging to update",
+     *     @OA\Schema(type="integer")
      * )
      * @param Request $request
      * @param string  $hostname
@@ -604,70 +611,69 @@ class JudgehostController extends AbstractFOSRestController
      * Add an array of JudgingRuns. When relevant, finalize the judging.
      * @Rest\Post("/add-judging-run/{hostname}/{judgingId<\d+>}")
      * @IsGranted("ROLE_JUDGEHOST")
-     * @SWG\Response(
+     * @OA\Response(
      *     response="200",
      *     description="When the judging run has been added"
      * )
-     * @SWG\Parameter(
+     * @OA\Parameter(
      *     name="hostname",
      *     in="path",
-     *     type="string",
-     *     description="The hostname of the judgehost that wants to add the judging run"
+     *     description="The hostname of the judgehost that wants to add the judging run",
+     *     @OA\Schema(type="string")
      * )
-     * @SWG\Parameter(
+     * @OA\Parameter(
      *     name="judgingId",
      *     in="path",
-     *     type="integer",
-     *     description="The ID of the judging to add a run to"
+     *     description="The ID of the judging to add a run to",
+     *     @OA\Schema(type="integer")
      * )
-     * @SWG\Parameter(
-     *     name="testcaseid",
-     *     in="formData",
-     *     type="integer",
-     *     description="The ID of the testcase of the run to add"
-     * )
-     * @SWG\Parameter(
-     *     name="runresult",
-     *     in="formData",
-     *     type="string",
-     *     description="The result of the run"
-     * )
-     * @SWG\Parameter(
-     *     name="runtime",
-     *     in="formData",
-     *     type="number",
-     *     format="float",
-     *     description="The runtime of the run"
-     * )
-     * @SWG\Parameter(
-     *     name="output_run",
-     *     in="formData",
-     *     type="string",
-     *     description="The (base64-encoded) output of the run"
-     * )
-     * @SWG\Parameter(
-     *     name="output_diff",
-     *     in="formData",
-     *     type="string",
-     *     description="The (base64-encoded) output diff of the run"
-     * )
-     * @SWG\Parameter(
-     *     name="output_error",
-     *     in="formData",
-     *     type="string",
-     *     description="The (base64-encoded) error output of the run"
-     * )
-     * @SWG\Parameter(
-     *     name="output_system",
-     *     in="formData",
-     *     type="string",
-     *     description="The (base64-encoded) system output of the run"
-     * )
-     * @SWG\Parameter(
-     *     name="metadata",
-     *     in="formData",
-     *     type="string",
-     *     description="The (base64-encoded) metadata"
+     * @OA\RequestBody(
+     *     required=true,
+     *     @OA\MediaType(
+     *         mediaType="application/x-www-form-urlencoded",
+     *         @OA\Schema(
+     *             @OA\Property(
+     *                 property="testcaseid",
+     *                 description="The ID of the testcase of the run to add",
+     *                 @OA\Schema(type="integer")
+     *             ),
+     *             @OA\Property(
+     *                 property="runresult",
+     *                 description="The result of the run",
+     *                 @OA\Schema(type="string")
+     *             ),
+     *             @OA\Property(
+     *                 property="runtime",
+     *                 description="The runtime of the run",
+     *                 @OA\Schema(type="number", format="float")
+     *             ),
+     *             @OA\Property(
+     *                 property="output_run",
+     *                 description="The (base64-encoded) output of the run",
+     *                 @OA\Schema(type="string")
+     *             ),
+     *             @OA\Property(
+     *                 property="output_diff",
+     *                 description="The (base64-encoded) output diff of the run",
+     *                 @OA\Schema(type="string")
+     *             ),
+     *             @OA\Property(
+     *                 property="output_error",
+     *                 description="The (base64-encoded) error output of the run",
+     *                 @OA\Schema(type="string")
+     *             ),
+     *             @OA\Property(
+     *                 property="output_system",
+     *                 description="The (base64-encoded) system output of the run",
+     *                 @OA\Schema(type="string")
+     *             ),
+     *             @OA\Property(
+     *                 property="metadata",
+     *                 description="The (base64-encoded) metadata",
+     *                 @OA\Schema(type="string")
+     *             )
+     *         )
+     *     )
      * )
      * @param Request $request
      * @param string  $hostname
@@ -796,45 +802,44 @@ class JudgehostController extends AbstractFOSRestController
      *
      * @Rest\Post("/internal-error")
      * @IsGranted("ROLE_JUDGEHOST")
-     * @SWG\Response(
+     * @OA\Response(
      *     response="200",
      *     description="The ID of the created internal error",
-     *     @SWG\Schema(type="integer")
+     *     @OA\Schema(type="integer")
      * )
-     * @SWG\Parameter(
-     *     name="description",
-     *     in="formData",
-     *     type="string",
-     *     description="The description of the internal error",
-     *     required=true
-     * )
-     * @SWG\Parameter(
-     *     name="judgehostlog",
-     *     in="formData",
-     *     type="string",
-     *     description="The log of the judgehost",
-     *     required=true
-     * )
-     * @SWG\Parameter(
-     *     name="disabled",
-     *     in="formData",
-     *     type="string",
-     *     description="The object to disable in JSON format",
-     *     required=true
-     * )
-     * @SWG\Parameter(
-     *     name="cid",
-     *     in="formData",
-     *     type="integer",
-     *     description="The contest ID associated with this internal error",
-     *     required=false
-     * )
-     * @SWG\Parameter(
-     *     name="judgingid",
-     *     in="formData",
-     *     type="integer",
-     *     description="The ID of the judging that was being worked on",
-     *     required=false
+     * @OA\RequestBody(
+     *     required=true,
+     *     @OA\MediaType(
+     *         mediaType="application/x-www-form-urlencoded",
+     *         @OA\Schema(
+     *             required={"description","judgehostlog","disabled"},
+     *             @OA\Property(
+     *                 property="description",
+     *                 description="The description of the internal error",
+     *                 @OA\Schema(type="string")
+     *             ),
+     *             @OA\Property(
+     *                 property="judgehostlog",
+     *                 description="The log of the judgehost",
+     *                 @OA\Schema(type="string")
+     *             ),
+     *             @OA\Property(
+     *                 property="disabled",
+     *                 description="The object to disable in JSON format",
+     *                 @OA\Schema(type="string")
+     *             ),
+     *             @OA\Property(
+     *                 property="cid",
+     *                 description="The contest ID associated with this internal error",
+     *                 @OA\Schema(type="integer")
+     *             ),
+     *             @OA\Property(
+     *                 property="judgingid",
+     *                 description="The ID of the judging that was being worked on",
+     *                 @OA\Schema(type="integer")
+     *             )
+     *         )
+     *     )
      * )
      * @param Request $request
      * @return int|string

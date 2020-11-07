@@ -17,7 +17,7 @@ use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Swagger\Annotations as SWG;
+use OpenApi\Annotations as OA;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -26,10 +26,10 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * @Rest\Route("/contests/{cid}/submissions")
- * @SWG\Tag(name="Submissions")
- * @SWG\Parameter(ref="#/parameters/cid")
- * @SWG\Response(response="404", ref="#/definitions/NotFound")
- * @SWG\Response(response="401", ref="#/definitions/Unauthorized")
+ * @OA\Tag(name="Submissions")
+ * @OA\Parameter(ref="#/components/parameters/cid")
+ * @OA\Response(response="404", ref="#/components/schemas/NotFound")
+ * @OA\Response(response="401", ref="#/components/schemas/Unauthorized")
  */
 class SubmissionController extends AbstractRestController
 {
@@ -54,26 +54,26 @@ class SubmissionController extends AbstractRestController
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
      * @Rest\Get("")
-     * @SWG\Response(
+     * @OA\Response(
      *     response="200",
      *     description="Returns all the submissions for this contest",
-     *     @SWG\Schema(
+     *     @OA\Schema(
      *         type="array",
-     *         @SWG\Items(
+     *         @OA\Items(
      *             allOf={
-     *                 @SWG\Schema(ref=@Model(type=Submission::class)),
-     *                 @SWG\Schema(ref="#/definitions/Files")
+     *                 @OA\Schema(ref=@Model(type=Submission::class)),
+     *                 @OA\Schema(ref="#/components/schemas/Files")
      *             }
      *         )
      *     )
      * )
-     * @SWG\Parameter(ref="#/parameters/idlist")
-     * @SWG\Parameter(ref="#/parameters/strict")
-     * @SWG\Parameter(
+     * @OA\Parameter(ref="#/components/parameters/idlist")
+     * @OA\Parameter(ref="#/components/parameters/strict")
+     * @OA\Parameter(
      *     name="language_id",
      *     in="query",
-     *     type="string",
-     *     description="Only show submissions for the given language"
+     *     description="Only show submissions for the given language",
+     *     @OA\Schema(type="string")
      * )
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
@@ -89,18 +89,18 @@ class SubmissionController extends AbstractRestController
      * @return \Symfony\Component\HttpFoundation\Response
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @Rest\Get("/{id}")
-     * @SWG\Response(
+     * @OA\Response(
      *     response="200",
      *     description="Returns the given submission for this contest",
-     *     @SWG\Schema(
+     *     @OA\Schema(
      *         allOf={
-     *             @SWG\Schema(ref=@Model(type=Submission::class)),
-     *             @SWG\Schema(ref="#/definitions/Files")
+     *             @OA\Schema(ref=@Model(type=Submission::class)),
+     *             @OA\Schema(ref="#/components/schemas/Files")
      *         }
      *     )
      * )
-     * @SWG\Parameter(ref="#/parameters/id")
-     * @SWG\Parameter(ref="#/parameters/strict")
+     * @OA\Parameter(ref="#/components/parameters/id")
+     * @OA\Parameter(ref="#/components/parameters/strict")
      */
     public function singleAction(Request $request, string $id)
     {
@@ -112,41 +112,43 @@ class SubmissionController extends AbstractRestController
      * @param Request $request
      * @return int
      * @Rest\Post("")
-     * @SWG\Post(consumes={"multipart/form-data"})
+     * @OA\Post()
      * @IsGranted("ROLE_TEAM")
-     * @SWG\Parameter(
-     *     name="problem",
-     *     in="formData",
-     *     type="string",
-     *     required=true,
-     *     description="The problem to submit a solution for"
-     * )
-     * @SWG\Parameter(
-     *     name="language",
-     *     in="formData",
-     *     type="string",
-     *     required=true,
-     *     description="The language to submit a solution in"
-     * )
      * Uploading an array of files in swagger is not supported, see
-     * https://github.com/OAI/OpenAPI-Specification/issues/254
-     * @SWG\Parameter(
-     *     name="code[]",
-     *     in="formData",
-     *     type="file",
+     * @OA\RequestBody(
      *     required=true,
-     *     description="The file to submit"
+     *     @OA\MediaType(
+     *         mediaType="multipart/form-data",
+     *         @OA\Schema(
+     *             required={"problem","language","code"},
+     *             @OA\Property(
+     *                 property="problem",
+     *                 description="The problem to submit a solution for",
+     *                 type="string"
+     *             ),
+     *             @OA\Property(
+     *                 property="language",
+     *                 description="The language to submit a solution in",
+     *                 type="string"
+     *             ),
+     *             @OA\Property(
+     *                 property="code",
+     *                 type="array",
+     *                 description="The file(s) to submit",
+     *                 @OA\Items(type="string", format="binary")
+     *             ),
+     *             @OA\Property(
+     *                 property="entry_point",
+     *                 type="string",
+     *                 description="The entry point for the submission. Required for languages requiring an entry point",
+     *             )
+     *         )
+     *     )
      * )
-     * @SWG\Parameter(
-     *     name="entry_point",
-     *     in="formData",
-     *     type="string",
-     *     description="The entry point for the submission. Required for languages requiring an entry point"
-     * )
-     * @SWG\Response(
+     * @OA\Response(
      *     response="200",
      *     description="When submitting was successful",
-     *     @SWG\Schema(type="integer", description="The ID of the submitted solution")
+     *     @OA\Schema(type="integer", description="The ID of the submitted solution")
      * )
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Exception
@@ -239,21 +241,21 @@ class SubmissionController extends AbstractRestController
     /**
      * Get the files for the given submission as a ZIP archive
      * @Rest\Get("/{id}/files", name="submission_files")
-     * @SWG\Get(produces={"application/zip"})
      * @IsGranted("ROLE_API_SOURCE_READER")
      * @param Request $request
      * @param string  $id
      * @return Response|StreamedResponse
      * @throws \Doctrine\ORM\NonUniqueResultException
-     * @SWG\Response(
+     * @OA\Response(
      *     response="200",
-     *     description="The files for the submission as a ZIP archive"
+     *     description="The files for the submission as a ZIP archive",
+     *     @OA\MediaType(mediaType="application/zip")
      * )
-     * @SWG\Response(
+     * @OA\Response(
      *     response="500",
      *     description="An error occurred while creating the ZIP file"
      * )
-     * @SWG\Parameter(ref="#/parameters/id")
+     * @OA\Parameter(ref="#/components/parameters/id")
      */
     public function getSubmissionFilesAction(Request $request, string $id)
     {
@@ -283,12 +285,12 @@ class SubmissionController extends AbstractRestController
      * @param string  $id
      * @return array
      * @throws \Doctrine\ORM\NonUniqueResultException
-     * @SWG\Response(
+     * @OA\Response(
      *     response="200",
      *     description="The files for the submission",
-     *     @SWG\Schema(ref="#/definitions/SourceCodeList")
+     *     @OA\Schema(ref="#/components/schemas/SourceCodeList")
      * )
-     * @SWG\Parameter(ref="#/parameters/id")
+     * @OA\Parameter(ref="#/components/parameters/id")
      */
     public function getSubmissionSourceCodeAction(Request $request, string $id)
     {

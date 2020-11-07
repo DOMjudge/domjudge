@@ -16,14 +16,14 @@ use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use Psr\Log\LoggerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Swagger\Annotations as SWG;
+use OpenApi\Annotations as OA;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Routing\RouterInterface;
 
 /**
- * @SWG\Tag(name="General")
+ * @OA\Tag(name="General")
  */
 class GeneralInfoController extends AbstractFOSRestController
 {
@@ -96,12 +96,12 @@ class GeneralInfoController extends AbstractFOSRestController
     /**
      * Get the current API version
      * @Rest\Get("/version")
-     * @SWG\Response(
+     * @OA\Response(
      *     response="200",
      *     description="The current API version information",
-     *     @SWG\Schema(
+     *     @OA\Schema(
      *         type="object",
-     *         @SWG\Property(property="api_version", type="integer")
+     *         @OA\Property(property="api_version", type="integer")
      *     )
      * )
      */
@@ -115,15 +115,15 @@ class GeneralInfoController extends AbstractFOSRestController
      * Get information about the API and DOMjudge
      * @Rest\Get("/info")
      * @Rest\Get("", name="api_root")
-     * @SWG\Response(
+     * @OA\Response(
      *     response="200",
      *     description="Information about the API and DOMjudge",
-     *     @SWG\Schema(
+     *     @OA\Schema(
      *         type="object",
-     *         @SWG\Property(property="api_version", type="integer"),
-     *         @SWG\Property(property="domjudge_version", type="string"),
-     *         @SWG\Property(property="environment", type="string"),
-     *         @SWG\Property(property="doc_url", type="string")
+     *         @OA\Property(property="api_version", type="integer"),
+     *         @OA\Property(property="domjudge_version", type="string"),
+     *         @OA\Property(property="environment", type="string"),
+     *         @OA\Property(property="doc_url", type="string")
      *     )
      * )
      */
@@ -142,17 +142,17 @@ class GeneralInfoController extends AbstractFOSRestController
      * Get general status information
      * @Rest\Get("/status")
      * @IsGranted("ROLE_API_READER")
-     * @SWG\Response(
+     * @OA\Response(
      *     response="200",
      *     description="General status information for the currently active contests",
-     *     @SWG\Schema(
+     *     @OA\Schema(
      *         type="array",
-     *         @SWG\Items(
+     *         @OA\Items(
      *             type="object",
-     *             @SWG\Property(property="cid", type="integer"),
-     *             @SWG\Property(property="num_submissions", type="integer"),
-     *             @SWG\Property(property="num_queued", type="integer"),
-     *             @SWG\Property(property="num_judging", type="integer")
+     *             @OA\Property(property="cid", type="integer"),
+     *             @OA\Property(property="num_submissions", type="integer"),
+     *             @OA\Property(property="num_queued", type="integer"),
+     *             @OA\Property(property="num_judging", type="integer")
      *         )
      *     )
      * )
@@ -187,7 +187,7 @@ class GeneralInfoController extends AbstractFOSRestController
     /**
      * Get information about the currently logged in user
      * @Rest\Get("/user")
-     * @SWG\Response(
+     * @OA\Response(
      *     response="200",
      *     description="Information about the logged in user",
      *     @Model(type=User::class)
@@ -207,17 +207,17 @@ class GeneralInfoController extends AbstractFOSRestController
     /**
      * Get configuration variables
      * @Rest\Get("/config")
-     * @SWG\Response(
+     * @OA\Response(
      *     response="200",
      *     description="The configuration variables",
-     *     @SWG\Schema(type="object")
+     *     @OA\Schema(type="object")
      * )
-     * @SWG\Parameter(
+     * @OA\Parameter(
      *     name="name",
      *     in="query",
-     *     type="string",
      *     description="Get only this configuration variable",
-     *     required=false
+     *     required=false,
+     *     @OA\Schema(type="string")
      * )
      * @param Request $request
      * @return \App\Entity\Configuration[]|mixed
@@ -245,18 +245,15 @@ class GeneralInfoController extends AbstractFOSRestController
      * Update configuration variables
      * @Rest\Put("/config")
      * @IsGranted("ROLE_ADMIN")
-     * @SWG\Response(
+     * @OA\Response(
      *     response="200",
      *     description="The full configuration after change",
-     *     @SWG\Schema(type="object")
+     *     @OA\Schema(type="object")
      * )
-     * @SWG\Parameter(
-     *     name="body",
-     *     in="body",
-     *     type="object",
-     *     description="The config variables to update. Keys are configuration names, values are configuration values. For scalars, use scalars. For arrays, use arrays with scalars and for key-value arrays use objects.",
+     * @OA\RequestBody(
      *     required=true,
-     *     schema={}
+     *     @OA\MediaType(mediaType="application/x-www-form-urlencoded"),
+     *     @OA\MediaType(mediaType="application/json")
      * )
      * @param Request $request
      * @return \App\Entity\Configuration[]|mixed
@@ -272,10 +269,10 @@ class GeneralInfoController extends AbstractFOSRestController
      * Check the DOMjudge configuration
      * @Rest\Get("/config/check")
      * @IsGranted("ROLE_ADMIN")
-     * @SWG\Response(
+     * @OA\Response(
      *     response="200",
      *     description="Result of the various checks performed",
-     *     @SWG\Schema(type="object")
+     *     @OA\Schema(type="object")
      * )
      * @return \Symfony\Component\HttpFoundation\JsonResponse
      */

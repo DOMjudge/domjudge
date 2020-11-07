@@ -6,15 +6,15 @@ use App\Entity\TeamCategory;
 use Doctrine\ORM\QueryBuilder;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
-use Swagger\Annotations as SWG;
+use OpenApi\Annotations as OA;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
  * @Rest\Route("/contests/{cid}/groups")
- * @SWG\Tag(name="Groups")
- * @SWG\Parameter(ref="#/parameters/cid")
- * @SWG\Response(response="404", ref="#/definitions/NotFound")
- * @SWG\Response(response="401", ref="#/definitions/Unauthorized")
+ * @OA\Tag(name="Groups")
+ * @OA\Parameter(ref="#/components/parameters/cid")
+ * @OA\Response(response="404", ref="#/components/schemas/NotFound")
+ * @OA\Response(response="401", ref="#/components/schemas/Unauthorized")
  */
 class GroupController extends AbstractRestController
 {
@@ -23,20 +23,20 @@ class GroupController extends AbstractRestController
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
      * @Rest\Get("")
-     * @SWG\Parameter(ref="#/parameters/idlist")
-     * @SWG\Parameter(ref="#/parameters/strict")
-     * @SWG\Parameter(
+     * @OA\Parameter(ref="#/components/parameters/idlist")
+     * @OA\Parameter(ref="#/components/parameters/strict")
+     * @OA\Parameter(
      *     name="public",
      *     in="query",
-     *     type="boolean",
-     *     description="Only show public groups, even for users with more permissions"
+     *     description="Only show public groups, even for users with more permissions",
+     *     @OA\Schema(type="boolean")
      * )
-     * @SWG\Response(
+     * @OA\Response(
      *     response="200",
      *     description="Returns all the groups for this contest",
-     *     @SWG\Schema(
+     *     @OA\Schema(
      *         type="array",
-     *         @SWG\Items(ref=@Model(type=TeamCategory::class))
+     *         @OA\Items(ref=@Model(type=TeamCategory::class))
      *     )
      * )
      * @throws \Doctrine\ORM\NonUniqueResultException
@@ -53,13 +53,13 @@ class GroupController extends AbstractRestController
      * @return \Symfony\Component\HttpFoundation\Response
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @Rest\Get("/{id}")
-     * @SWG\Response(
+     * @OA\Response(
      *     response="200",
      *     description="Returns the given group for this contest",
      *     @Model(type=TeamCategory::class)
      * )
-     * @SWG\Parameter(ref="#/parameters/id")
-     * @SWG\Parameter(ref="#/parameters/strict")
+     * @OA\Parameter(ref="#/components/parameters/id")
+     * @OA\Parameter(ref="#/components/parameters/strict")
      */
     public function singleAction(Request $request, string $id)
     {

@@ -15,7 +15,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Swagger\Annotations as SWG;
+use OpenApi\Annotations as OA;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -23,10 +23,10 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * @Rest\Route("/contests/{cid}/problems")
- * @SWG\Tag(name="Problems")
- * @SWG\Parameter(ref="#/parameters/cid")
- * @SWG\Response(response="404", ref="#/definitions/NotFound")
- * @SWG\Response(response="401", ref="#/definitions/Unauthorized")
+ * @OA\Tag(name="Problems")
+ * @OA\Parameter(ref="#/components/parameters/cid")
+ * @OA\Response(response="404", ref="#/components/schemas/NotFound")
+ * @OA\Response(response="401", ref="#/components/schemas/Unauthorized")
  */
 class ProblemController extends AbstractRestController implements QueryObjectTransformer
 {
@@ -51,16 +51,16 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
      * @Rest\Get("")
-     * @SWG\Response(
+     * @OA\Response(
      *     response="200",
      *     description="Returns all the problems for this contest",
-     *     @SWG\Schema(
+     *     @OA\Schema(
      *         type="array",
-     *         @SWG\Items(ref="#/definitions/ContestProblem")
+     *         @OA\Items(ref="#/components/schemas/ContestProblem")
      *     )
      * )
-     * @SWG\Parameter(ref="#/parameters/idlist")
-     * @SWG\Parameter(ref="#/parameters/strict")
+     * @OA\Parameter(ref="#/components/parameters/idlist")
+     * @OA\Parameter(ref="#/components/parameters/strict")
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Exception
      */
@@ -121,30 +121,37 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
      * @return array
      * @Rest\Post("")
      * @IsGranted("ROLE_ADMIN")
-     * @SWG\Post(consumes={"multipart/form-data"})
-     * @SWG\Parameter(
-     *     name="zip[]",
-     *     in="formData",
-     *     type="file",
+     * @OA\Post()
+     * @OA\RequestBody(
      *     required=true,
-     *     description="The problem archives to import"
+     *     @OA\MediaType(
+     *         mediaType="multipart/form-data",
+     *         @OA\Schema(
+     *             required={"zip"},
+     *             @OA\Property(
+     *                 property="zip",
+     *                 type="array",
+     *                 description="The problem archive(s) to import",
+     *                 @OA\Items(type="string", format="binary")
+     *             ),
+     *             @OA\Property(
+     *                 property="problem",
+     *                 description="Optional: problem id to update.",
+     *                 @OA\Schema(type="string")
+     *             )
+     *         )
+     *     )
      * )
-     * @SWG\Parameter(
-     *     name="problem",
-     *     in="formData",
-     *     type="string",
-     *     description="Optional: problem id to update."
-     * )
-     * @SWG\Response(
+     * @OA\Response(
      *     response="200",
      *     description="Returns the IDs of the imported problems and any messages produced",
-     *     @SWG\Schema(
+     *     @OA\Schema(
      *         type="object",
-     *         @SWG\Property(property="problem_ids", type="array",
-     *             @SWG\Items(type="integer", description="The IDs of the imported problems")
+     *         @OA\Property(property="problem_ids", type="array",
+     *             @OA\Items(type="integer", description="The IDs of the imported problems")
      *         ),
-     *         @SWG\Property(property="messages", type="array",
-     *             @SWG\Items(type="string", description="Messages produced while adding problems")
+     *         @OA\Property(property="messages", type="array",
+     *             @OA\Items(type="string", description="Messages produced while adding problems")
      *         )
      *     )
      * )
@@ -222,13 +229,13 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Exception
      * @Rest\Get("/{id}")
-     * @SWG\Response(
+     * @OA\Response(
      *     response="200",
      *     description="Returns the given problem for this contest",
-     *     ref="#/definitions/ContestProblem"
+     *     ref="#/components/schemas/ContestProblem"
      * )
-     * @SWG\Parameter(ref="#/parameters/id")
-     * @SWG\Parameter(ref="#/parameters/strict")
+     * @OA\Parameter(ref="#/components/parameters/id")
+     * @OA\Parameter(ref="#/components/parameters/strict")
      */
     public function singleAction(Request $request, string $id)
     {

@@ -13,15 +13,15 @@ use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Swagger\Annotations as SWG;
+use OpenApi\Annotations as OA;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
  * @Rest\Route("/contests/{cid}/runs")
- * @SWG\Tag(name="Runs")
- * @SWG\Parameter(ref="#/parameters/cid")
- * @SWG\Response(response="404", ref="#/definitions/NotFound")
- * @SWG\Response(response="401", ref="#/definitions/Unauthorized")
+ * @OA\Tag(name="Runs")
+ * @OA\Parameter(ref="#/components/parameters/cid")
+ * @OA\Response(response="404", ref="#/components/schemas/NotFound")
+ * @OA\Response(response="401", ref="#/components/schemas/Unauthorized")
  */
 class RunController extends AbstractRestController implements QueryObjectTransformer
 {
@@ -49,44 +49,44 @@ class RunController extends AbstractRestController implements QueryObjectTransfo
      * @return \Symfony\Component\HttpFoundation\Response
      * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST') or is_granted('ROLE_API_READER')")
      * @Rest\Get("")
-     * @SWG\Response(
+     * @OA\Response(
      *     response="200",
      *     description="Returns all the runs for this contest",
-     *     @SWG\Schema(
+     *     @OA\Schema(
      *         type="array",
-     *         @SWG\Items(
+     *         @OA\Items(
      *             allOf={
-     *                 @SWG\Schema(ref=@Model(type=JudgingRun::class)),
-     *                 @SWG\Schema(ref="#/definitions/RunExtraFields")
+     *                 @OA\Schema(ref=@Model(type=JudgingRun::class)),
+     *                 @OA\Schema(ref="#/components/schemas/RunExtraFields")
      *             }
      *         )
      *     )
      * )
-     * @SWG\Parameter(ref="#/parameters/idlist")
-     * @SWG\Parameter(ref="#/parameters/strict")
-     * @SWG\Parameter(
+     * @OA\Parameter(ref="#/components/parameters/idlist")
+     * @OA\Parameter(ref="#/components/parameters/strict")
+     * @OA\Parameter(
      *     name="first_id",
      *     in="query",
-     *     type="string",
-     *     description="Only show runs starting from this ID"
+     *     description="Only show runs starting from this ID",
+     *     @OA\Schema(type="string")
      * )
-     * @SWG\Parameter(
+     * @OA\Parameter(
      *     name="last_id",
      *     in="query",
-     *     type="string",
-     *     description="Only show runs until this ID"
+     *     description="Only show runs until this ID",
+     *     @OA\Schema(type="string")
      * )
-     * @SWG\Parameter(
+     * @OA\Parameter(
      *     name="judging_id",
      *     in="query",
-     *     type="string",
-     *     description="Only show runs for this judgement"
+     *     description="Only show runs for this judgement",
+     *     @OA\Schema(type="string")
      * )
-     * @SWG\Parameter(
+     * @OA\Parameter(
      *     name="limit",
      *     in="query",
-     *     type="integer",
-     *     description="Limit the number of returned runs to this amount"
+     *     description="Limit the number of returned runs to this amount",
+     *     @OA\Schema(type="integer")
      * )
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
@@ -103,18 +103,18 @@ class RunController extends AbstractRestController implements QueryObjectTransfo
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST') or is_granted('ROLE_API_READER')")
      * @Rest\Get("/{id}")
-     * @SWG\Response(
+     * @OA\Response(
      *     response="200",
      *     description="Returns the given run for this contest",
-     *     @SWG\Schema(
+     *     @OA\Schema(
      *         allOf={
-     *             @SWG\Schema(ref=@Model(type=JudgingRun::class)),
-     *             @SWG\Schema(ref="#/definitions/RunExtraFields")
+     *             @OA\Schema(ref=@Model(type=JudgingRun::class)),
+     *             @OA\Schema(ref="#/components/schemas/RunExtraFields")
      *         }
      *     )
      * )
-     * @SWG\Parameter(ref="#/parameters/id")
-     * @SWG\Parameter(ref="#/parameters/strict")
+     * @OA\Parameter(ref="#/components/parameters/id")
+     * @OA\Parameter(ref="#/components/parameters/strict")
      */
     public function singleAction(Request $request, string $id)
     {

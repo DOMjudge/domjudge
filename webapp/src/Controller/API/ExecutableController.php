@@ -8,12 +8,12 @@ use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Swagger\Annotations as SWG;
+use OpenApi\Annotations as OA;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * @Rest\Route("/executables")
- * @SWG\Tag(name="Executables")
+ * @OA\Tag(name="Executables")
  */
 class ExecutableController extends AbstractFOSRestController
 {
@@ -38,11 +38,11 @@ class ExecutableController extends AbstractFOSRestController
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST')")
      * @Rest\Get("/{id}")
-     * @SWG\Parameter(ref="#/parameters/id")
-     * @SWG\Response(
+     * @OA\Parameter(ref="#/components/parameters/id")
+     * @OA\Response(
      *     response="200",
      *     description="Information about the requested executable",
-     *     @SWG\Schema(type="string", description="Base64-encoded executable contents")
+     *     @OA\Schema(type="string", description="Base64-encoded executable contents")
      * )
      */
     public function singleAction(string $id)

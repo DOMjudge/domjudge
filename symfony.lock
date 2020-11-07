@@ -105,9 +105,6 @@
     "eligrey/filesaver": {
         "version": "2.0.2"
     },
-    "exsyst/swagger": {
-        "version": "v0.4.1"
-    },
     "fortawesome/font-awesome": {
         "version": "5.9.0"
     },

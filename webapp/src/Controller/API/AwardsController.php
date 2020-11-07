@@ -12,7 +12,7 @@ use Doctrine\ORM\QueryBuilder;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Swagger\Annotations as SWG;
+use OpenApi\Annotations as OA;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -20,10 +20,10 @@ use Symfony\Component\Intl\Exception\NotImplementedException;
 
 /**
  * @Rest\Route("/contests/{cid}/awards")
- * @SWG\Tag(name="Awards")
- * @SWG\Parameter(ref="#/parameters/cid")
- * @SWG\Response(response="404", ref="#/definitions/NotFound")
- * @SWG\Response(response="401", ref="#/definitions/Unauthorized")
+ * @OA\Tag(name="Awards")
+ * @OA\Parameter(ref="#/components/parameters/cid")
+ * @OA\Response(response="404", ref="#/components/schemas/NotFound")
+ * @OA\Response(response="401", ref="#/components/schemas/Unauthorized")
  */
 class AwardsController extends AbstractRestController
 {
@@ -57,15 +57,15 @@ class AwardsController extends AbstractRestController
      * @param Request $request
      * @return array
      * @Rest\Get("")
-     * @SWG\Response(
+     * @OA\Response(
      *     response="200",
      *     description="Returns the current teams qualifying for each award",
-     *     @SWG\Schema(
+     *     @OA\Schema(
      *         type="array",
-     *         @SWG\Items(ref="#/definitions/Award")
+     *         @OA\Items(ref="#/components/schemas/Award")
      *     )
      * )
-     * @SWG\Parameter(ref="#/parameters/strict")
+     * @OA\Parameter(ref="#/components/parameters/strict")
      * @throws \Exception
      */
     public function listAction(Request $request)
@@ -79,13 +79,13 @@ class AwardsController extends AbstractRestController
      * @param string  $id
      * @return array
      * @Rest\Get("/{id}")
-     * @SWG\Response(
+     * @OA\Response(
      *     response="200",
      *     description="Returns the award for this contest",
-     *     @SWG\Schema(ref="#/definitions/Award")
+     *     @OA\Schema(ref="#/components/schemas/Award")
      * )
-     * @SWG\Parameter(ref="#/parameters/id")
-     * @SWG\Parameter(ref="#/parameters/strict")
+     * @OA\Parameter(ref="#/components/parameters/id")
+     * @OA\Parameter(ref="#/components/parameters/strict")
      * @throws \Exception
      */
     public function singleAction(Request $request, string $id)
