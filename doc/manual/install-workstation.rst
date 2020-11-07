@@ -42,7 +42,7 @@ content::
 
   machine yourhost.example.edu login user0123 password Fba^2bHzz
 
-See the netrc(4) manual page for more details. You can run ``./submit --help``
+See the `netrc manual page`_ for more details. You can run ``./submit --help``
 to inspect its configuration and options.
 
 Rebuilding team documentation
@@ -75,3 +75,5 @@ On Debian 11 and above, install
 ``python3-sphinx python3-sphinx-rtd-theme rst2pdf fontconfig python3-yaml`` instead.
 
 The resulting manual will then be found in the ``team/`` subdirectory.
+
+.. _netrc manual page: https://ec.haxx.se/usingcurl/usingcurl-netrc

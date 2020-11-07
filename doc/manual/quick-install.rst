@@ -65,10 +65,19 @@ Judgehosts
  * Start the judge daemon: either manually with ``bin/judgedaemon``
    or as a service with ``systemctl enable domjudge-judgehost``.
 
+Submit client
+-------------
+ * Build the client:
+   ``./configure --with-baseurl=<url> && make submitclient``.
+ * Install it in your path and on the team machines.
+ * Add a ``.netrc`` file with valid team credentials.
+ * Run ``submit --help`` to see if it can connect successfully.
+
 Checking if it works
 --------------------
 It should be done by now. As a check that (almost) everything works,
-the set of test sources can be submitted on the DOMserver::
+the set of test sources can be submitted on the DOMserver, on
+a system that has a working submit client installed::
 
   cd tests
   make check
