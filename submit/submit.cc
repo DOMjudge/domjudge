@@ -565,6 +565,7 @@ void usage()
 	if ( !baseurl.empty() ) {
 		printf("The (pre)configured URL is '%s'.\n",baseurl.c_str());
 	}
+	printf("Credentials are read from ~/.netrc (see netrc(4) for details).\n");
 	printf(
 "\n"
 "Examples:\n"
