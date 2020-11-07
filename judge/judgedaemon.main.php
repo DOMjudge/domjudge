@@ -234,7 +234,7 @@ function usage()
 {
     echo "Usage: " . SCRIPT_ID . " [OPTION]...\n" .
         "Start the judgedaemon.\n\n" .
-        "  -n <id>           daemon number\n" .
+        "  -n <id>           bind to CPU <id> and user " . RUNUSER . "-<id>\n" .
         "  --diskspace-error send internal error on low diskspace\n" .
         "  -v                set verbosity to LEVEL (syslog levels)\n" .
         "  -h                display this help and exit\n" .
