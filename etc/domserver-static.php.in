@@ -18,5 +18,3 @@ define('RUNDIR',      '@domserver_rundir@');
 define('TMPDIR',      '@domserver_tmpdir@');
 
 define('BASEURL',     '@BASEURL@');
-
-define('SUBMITCLIENT_ENABLED', '@SUBMITCLIENT_ENABLED@');

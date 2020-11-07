@@ -1,6 +1,5 @@
 <?php declare(strict_types=1);
-/* These configuration settings are common to all parts of the
- * DOMjudge system and included by the specific configuration files.
+/* These logging and debugging settings primarily influence the Judgedaemon.
  */
 
 /** Loglevels and debugging */
@@ -12,7 +11,6 @@ define('SYSLOG', LOG_LOCAL0);
 // Of course never to be used on live systems!
 
 define('DEBUG_PHP_NOTICE', 1); // Display PHP notice level warnings
-define('DEBUG_SQL', 4); // Display SQL queries on webpages
 define('DEBUG_JUDGE', 8); // Display judging scripts debug info
 
 define('DEBUG', 1);

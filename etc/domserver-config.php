@@ -2,26 +2,6 @@
 
 require_once("common-config.php");
 
-// Cost for the password hashing function. Increase for more secure
-// hashes and decrease for speed.
-define('PASSWORD_HASH_COST', 10);
-
-// Internal and output character set used, don't change (unless you
-// know what you're doing).
-define('DJ_CHARACTER_SET', 'utf-8');
-define('DJ_CHARACTER_SET_MYSQL', 'utf8mb4');
-// MySQL default collation setting associated to character set above.
-// Note that the DB team.name field has binary collation to be able to
-// distinguish/index on team names that differ in capitalization only.
-define('DJ_MYSQL_COLLATION', 'utf8mb4_unicode_ci');
-// MySQL connection flags.
-define('DJ_MYSQL_CONNECT_FLAGS', null);
-// To enable SSL/TLS encryption of MySQL connections, use the following.
-// Not enabled by default because the server isn't configured to
-// accept SSL by default. Not normally necessary if you run the DOMserver
-// and database on the same machine.
-// define('DJ_MYSQL_CONNECT_FLAGS', MYSQLI_CLIENT_SSL);
-
 // Enable this to support removing time intervals from the contest.
 // Although we use this feature at the ICPC World Finals, we strongly
 // discourage using it, and we don't guarantee the code is completely
