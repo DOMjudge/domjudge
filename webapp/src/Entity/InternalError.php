@@ -30,7 +30,7 @@ class InternalError
     /**
      * @var int
      * @ORM\Column(type="integer", name="judgingid",
-     *     options={"comment"="Judging ID","unsigned"=true,"default"="NULL"},
+     *     options={"comment"="Judging ID","unsigned"=true},
      *     nullable=true)
      */
     private $judgingid;
@@ -38,7 +38,7 @@ class InternalError
     /**
      * @var int
      * @ORM\Column(type="integer", name="cid",
-     *     options={"comment"="Contest ID","unsigned"=true,"default"="NULL"},
+     *     options={"comment"="Contest ID","unsigned"=true},
      *     nullable=true)
      */
     private $cid;
@@ -78,7 +78,7 @@ class InternalError
     /**
      * @var string
      * @ORM\Column(type="internal_error_status", name="status",
-     *     options={"comment"="Status of internal error","default"="'open'"},
+     *     options={"comment"="Status of internal error","default"="open"},
      *     nullable=false)
      */
     private $status = InternalErrorStatusType::STATUS_OPEN;

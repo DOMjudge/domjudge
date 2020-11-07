@@ -39,7 +39,7 @@ class Judgehost
      * @var double
      * @ORM\Column(type="decimal", precision=32, scale=9, name="polltime",
      *     options={"comment"="Time of last poll by autojudger",
-     *              "unsigned"=true,"default"="NULL"},
+     *              "unsigned"=true},
      *     nullable=true)
      */
     private $polltime;
@@ -48,7 +48,7 @@ class Judgehost
      * @var int
      * @ORM\Column(type="integer", name="restrictionid",
      *     options={"comment"="Optional set of restrictions for this judgehost",
-     *              "unsigned"=true,"default"="NULL"},
+     *              "unsigned"=true},
      *     nullable=true)
      * @Serializer\Exclude()
      */

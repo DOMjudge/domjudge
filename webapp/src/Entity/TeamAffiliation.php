@@ -16,7 +16,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  *     name="team_affiliation",
  *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Affilitations for teams (e.g.: university, company)"},
  *     uniqueConstraints={
- *         @ORM\UniqueConstraint(name="externalid", columns={"externalid"}, options={"lengths": {"190"}}),
+ *         @ORM\UniqueConstraint(name="externalid", columns={"externalid"}, options={"lengths": {190}}),
  *     })
  * @Serializer\VirtualProperty(
  *     "icpcId",
@@ -48,7 +48,7 @@ class TeamAffiliation extends BaseApiEntity
      * @var string
      * @ORM\Column(type="string", name="externalid", length=255,
      *     options={"comment"="Team affiliation ID in an external system",
-     *              "collation"="utf8mb4_bin","default"="NULL"},
+     *              "collation"="utf8mb4_bin"},
      *     nullable=true)
      * @Serializer\Exclude()
      */
@@ -73,8 +73,7 @@ class TeamAffiliation extends BaseApiEntity
     /**
      * @var string
      * @ORM\Column(type="string", length=3, name="country",
-     *     options={"comment"="ISO 3166-1 alpha-3 country code","default"="NULL",
-     *              "fixed"=true},
+     *     options={"comment"="ISO 3166-1 alpha-3 country code","fixed"=true},
      *     nullable=true)
      * @Serializer\Expose(if="context.getAttribute('config_service').get('show_flags')")
      * @Country()
@@ -84,7 +83,7 @@ class TeamAffiliation extends BaseApiEntity
     /**
      * @var string
      * @ORM\Column(type="text", length=4294967295, name="comments",
-     *     options={"comment"="Comments","default"="NULL"},
+     *     options={"comment"="Comments"},
      *     nullable=true)
      * @Serializer\Exclude()
      */

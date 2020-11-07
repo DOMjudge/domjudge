@@ -23,7 +23,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  *         @ORM\Index(name="recipient", columns={"recipient"})
  *     },
  *     uniqueConstraints={
- *         @ORM\UniqueConstraint(name="externalid", columns={"cid", "externalid"}, options={"lengths": {null, "190"}})
+ *         @ORM\UniqueConstraint(name="externalid", columns={"cid", "externalid"}, options={"lengths": {null, 190}})
  *     })
  * @UniqueEntity("externalid")
  */
@@ -45,7 +45,7 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
      * @var string
      * @ORM\Column(type="string", name="externalid", length=255,
      *     options={"comment"="Clarification ID in an external system, should be unique inside a single contest",
-     *              "collation"="utf8mb4_bin","default"="NULL"},
+     *              "collation"="utf8mb4_bin"},
      *     nullable=true)
      */
     protected $externalid;
@@ -62,7 +62,7 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
     /**
      * @var int
      * @ORM\Column(type="integer", name="respid",
-     *     options={"comment"="In reply to clarification ID","unsigned"=true,"default"="NULL"},
+     *     options={"comment"="In reply to clarification ID","unsigned"=true},
      *     nullable=true)
      * @Serializer\SerializedName("reply_to_id")
      * @Serializer\Type("string")
@@ -79,7 +79,7 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
     /**
      * @var int
      * @ORM\Column(type="integer", name="sender",
-     *     options={"comment"="Team ID, null means jury","unsigned"=true,"default"="NULL"},
+     *     options={"comment"="Team ID, null means jury","unsigned"=true},
      *     nullable=true)
      * @Serializer\SerializedName("from_team_id")
      * @Serializer\Type("string")
@@ -89,7 +89,7 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
     /**
      * @var int
      * @ORM\Column(type="integer", name="recipient",
-     *     options={"comment"="Team ID, null means to jury or to all","unsigned"=true,"default"="NULL"},
+     *     options={"comment"="Team ID, null means to jury or to all","unsigned"=true},
      *     nullable=true)
      * @Serializer\SerializedName("to_team_id")
      * @Serializer\Type("string")
@@ -99,7 +99,7 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
     /**
      * @var string
      * @ORM\Column(type="string", name="jury_member", length=255,
-     *     options={"comment"="Name of jury member who answered this","default"="NULL"},
+     *     options={"comment"="Name of jury member who answered this"},
      *     nullable=true)
      * @Serializer\Exclude()
      */
@@ -109,7 +109,7 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
      * @var int
      *
      * @ORM\Column(type="integer", name="probid",
-     *     options={"comment"="Problem associated to this clarification","unsigned"=true,"default"="NULL"},
+     *     options={"comment"="Problem associated to this clarification","unsigned"=true},
      *     nullable=true)
      * @Serializer\SerializedName("problem_id")
      * @Serializer\Type("string")
@@ -119,8 +119,7 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
     /**
      * @var string
      * @ORM\Column(type="string", name="category", length=255,
-     *     options={"comment"="Category associated to this clarification; only set for non problem clars",
-     *              "default"="NULL"},
+     *     options={"comment"="Category associated to this clarification; only set for non problem clars"},
      *     nullable=true)
      * @Serializer\Exclude()
      */
@@ -129,7 +128,7 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
     /**
      * @var string
      * @ORM\Column(type="string", name="queue", length=255,
-     *     options={"comment"="Queue associated to this clarification","default"="NULL"},
+     *     options={"comment"="Queue associated to this clarification"},
      *     nullable=true)
      * @Serializer\Exclude()
      */

@@ -20,7 +20,7 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
  *         @ORM\Index(name="categoryid", columns={"categoryid"})
  *     },
  *     uniqueConstraints={
- *         @ORM\UniqueConstraint(name="icpcid", columns={"icpcid"}, options={"lengths": {"190"}}),
+ *         @ORM\UniqueConstraint(name="icpcid", columns={"icpcid"}, options={"lengths": {190}}),
  *     })
  * @UniqueEntity("icpcid")
  */
@@ -40,7 +40,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface
     /**
      * @var string
      * @ORM\Column(type="string", name="icpcid", length=255, options={"comment"="Team ID in the ICPC system",
-     *                            "collation"="utf8mb4_bin","default"="NULL"}, nullable=true)
+     *                            "collation"="utf8mb4_bin"}, nullable=true)
      * @Serializer\SerializedName("icpc_id")
      */
     protected $icpcid;
@@ -68,7 +68,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface
 
     /**
      * @var int
-     * @ORM\Column(type="integer", name="affilid", options={"comment"="Team affiliation ID","unsigned"="true","default"="NULL"}, nullable=true)
+     * @ORM\Column(type="integer", name="affilid", options={"comment"="Team affiliation ID","unsigned"="true"}, nullable=true)
      * @Serializer\SerializedName("organization_id")
      * @Serializer\Type("string")
      */
@@ -86,7 +86,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface
 
     /**
      * @var string
-     * @ORM\Column(type="text", length=4294967295, name="members", options={"comment"="Team member names (freeform)","default"="NULL"},
+     * @ORM\Column(type="text", length=4294967295, name="members", options={"comment"="Team member names (freeform)"},
      *                          nullable=true)
      * @Serializer\Groups({"Nonstrict"})
      */
@@ -94,7 +94,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface
 
     /**
      * @var string
-     * @ORM\Column(type="string", length=255, name="room", options={"comment"="Physical location of team","default"="NULL"},
+     * @ORM\Column(type="string", length=255, name="room", options={"comment"="Physical location of team"},
      *                            nullable=true)
      * @Serializer\Exclude()
      */
@@ -102,7 +102,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface
 
     /**
      * @var string
-     * @ORM\Column(type="text", length=4294967295, name="comments", options={"comment"="Comments about this team","default"="NULL"},
+     * @ORM\Column(type="text", length=4294967295, name="comments", options={"comment"="Comments about this team"},
      *                          nullable=true)
      * @Serializer\Exclude()
      */
@@ -112,7 +112,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface
      * @var double
      * @ORM\Column(type="decimal", precision=32, scale=9, name="judging_last_started",
      *     options={"comment"="Start time of last judging for priorization",
-     *              "unsigned"=true,"default"="NULL"}, nullable=true)
+     *              "unsigned"=true}, nullable=true)
      * @Serializer\Exclude()
      */
     private $judging_last_started;

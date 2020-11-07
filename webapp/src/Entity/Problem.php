@@ -18,7 +18,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *     name="problem",
  *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4","comment"="Problems the teams can submit solutions for"},
  *     indexes={
- *         @ORM\Index(name="externalid", columns={"externalid"}, options={"lengths": {"190"}}),
+ *         @ORM\Index(name="externalid", columns={"externalid"}, options={"lengths": {190}}),
  *         @ORM\Index(name="special_run", columns={"special_run"}),
  *         @ORM\Index(name="special_compare", columns={"special_compare"})
  *     })
@@ -42,7 +42,7 @@ class Problem extends BaseApiEntity
      * @var string
      * @ORM\Column(type="string", name="externalid", length=255,
      *     options={"comment"="Problem ID in an external system, should be unique inside a single contest",
-     *              "collation"="utf8mb4_bin","default":"NULL"},
+     *              "collation"="utf8mb4_bin"},
      *     nullable=true)
      */
     protected $externalid;
@@ -68,7 +68,7 @@ class Problem extends BaseApiEntity
      * @var int
      * @ORM\Column(type="integer", name="memlimit",
      *     options={"comment"="Maximum memory available (in kB) for this problem",
-     *              "unsigned"=true,"default":"NULL"},
+     *              "unsigned"=true},
      *     nullable=true)
      * @Serializer\Exclude()
      * @Assert\GreaterThan(0)
@@ -79,7 +79,7 @@ class Problem extends BaseApiEntity
      * @var int
      * @ORM\Column(type="integer", name="outputlimit",
      *     options={"comment"="Maximum output size (in kB) for this problem",
-     *              "unsigned"=true,"default":"NULL"},
+     *              "unsigned"=true},
      *     nullable=true)
      * @Serializer\Exclude()
      * @Assert\GreaterThan(0)
@@ -89,14 +89,14 @@ class Problem extends BaseApiEntity
 
     /**
      * @var string
-     * @ORM\Column(type="string", name="special_run", length=32, options={"comment"="Script to run submissions for this problem","default"="NULL"}, nullable=true)
+     * @ORM\Column(type="string", name="special_run", length=32, options={"comment"="Script to run submissions for this problem"}, nullable=true)
      * @Serializer\Exclude()
      */
     private $special_run;
 
     /**
      * @var string
-     * @ORM\Column(type="string", name="special_compare", length=32, options={"comment"="Script to compare problem and jury output for this problem","default"="NULL"}, nullable=true)
+     * @ORM\Column(type="string", name="special_compare", length=32, options={"comment"="Script to compare problem and jury output for this problem"}, nullable=true)
      * @Serializer\Exclude()
      */
     private $special_compare;
@@ -104,7 +104,7 @@ class Problem extends BaseApiEntity
     /**
      * @var string
      * @ORM\Column(type="string", name="special_compare_args", length=255,
-     *     options={"comment"="Optional arguments to special_compare script","default"="NULL"},
+     *     options={"comment"="Optional arguments to special_compare script"},
      *     nullable=true)
      * @Serializer\Exclude()
      */
@@ -123,7 +123,7 @@ class Problem extends BaseApiEntity
     /**
      * @var resource
      * @ORM\Column(type="blob", name="problemtext",
-     *     options={"comment"="Problem text in HTML/PDF/ASCII","default":"NULL"},
+     *     options={"comment"="Problem text in HTML/PDF/ASCII"},
      *     nullable=true)
      * @Serializer\Exclude()
      */
@@ -145,7 +145,7 @@ class Problem extends BaseApiEntity
     /**
      * @var string
      * @ORM\Column(type="string", length=4, name="problemtext_type",
-     *     options={"comment"="File type of problem text","default"="NULL"},
+     *     options={"comment"="File type of problem text"},
      *     nullable=true)
      * @Serializer\Exclude()
      */

@@ -30,7 +30,7 @@ class JudgingRunOutput
     /**
      * @var string
      * @ORM\Column(type="blobtext", length=4294967295, name="output_run",
-     *     options={"comment"="Output of running the program", "default"="NULL"},
+     *     options={"comment"="Output of running the program"},
      *     nullable=true)
      */
     private $output_run;
@@ -38,8 +38,7 @@ class JudgingRunOutput
     /**
      * @var string
      * @ORM\Column(type="blobtext", length=4294967295, name="output_diff",
-     *     options={"comment"="Diffing the program output and testcase output",
-     *              "default"="NULL"},
+     *     options={"comment"="Diffing the program output and testcase output"},
      *     nullable=true)
      */
     private $output_diff;
@@ -47,7 +46,7 @@ class JudgingRunOutput
     /**
      * @var string
      * @ORM\Column(type="blobtext", length=4294967295, name="output_error",
-     *     options={"comment"="Standard error output of the program", "default"="NULL"},
+     *     options={"comment"="Standard error output of the program"},
      *     nullable=true)
      */
     private $output_error;
@@ -55,7 +54,7 @@ class JudgingRunOutput
     /**
      * @var string
      * @ORM\Column(type="blobtext", length=4294967295, name="output_system",
-     *     options={"comment"="Judging system output", "default"="NULL"},
+     *     options={"comment"="Judging system output"},
      *     nullable=true)
      */
     private $output_system;
@@ -63,7 +62,7 @@ class JudgingRunOutput
     /**
      * @var string
      * @ORM\Column(type="blobtext", length=4294967295, name="metadata",
-     *     options={"comment"="Judging metadata", "default"="NULL"},
+     *     options={"comment"="Judging metadata"},
      *     nullable=true)
      */
     private $metadata;

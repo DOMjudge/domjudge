@@ -18,7 +18,7 @@ use JMS\Serializer\Annotation as Serializer;
  *         @ORM\Index(name="verified", columns={"verified"}),
  *     },
  *     uniqueConstraints={
- *         @ORM\UniqueConstraint(name="externalid", columns={"cid", "externalid"}, options={"lengths": {null, "190"}}),
+ *         @ORM\UniqueConstraint(name="externalid", columns={"cid", "externalid"}, options={"lengths": {null, 190}}),
  *     })
  * @ORM\Entity
  */
@@ -39,7 +39,7 @@ class ExternalJudgement
      * @var string
      * @ORM\Column(type="string", name="externalid", length=255,
      *     options={"comment"="Judgement ID in external system, should be unique inside a single contest",
-     *              "collation"="utf8mb4_bin","default"="NULL"},
+     *              "collation"="utf8mb4_bin"},
      *     nullable=true)
      */
     protected $externalid;
@@ -48,8 +48,7 @@ class ExternalJudgement
      * @var string|null
      *
      * @ORM\Column(name="result", type="string", length=32,
-     *     options={"comment"="Result string as obtained from external system. null if not finished yet",
-     *              "default"="NULL"},
+     *     options={"comment"="Result string as obtained from external system. null if not finished yet"},
      *     nullable=true)
      */
     private $result = null;
@@ -98,7 +97,7 @@ class ExternalJudgement
      *
      * @ORM\Column(type="decimal", precision=32, scale=9, name="endtime",
      *     options={"comment"="Time judging ended, null = still busy",
-     *              "unsigned"=true,"default"="NULL"},
+     *              "unsigned"=true},
      *     nullable=true)
      */
     private $endtime = null;

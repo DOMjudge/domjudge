@@ -58,8 +58,7 @@ class JudgingRun extends BaseApiEntity
     /**
      * @var string
      * @ORM\Column(type="string", name="runresult", length=32,
-     *     options={"comment"="Result of this run, NULL if not finished yet",
-     *              "default"="NULL"},
+     *     options={"comment"="Result of this run, NULL if not finished yet"},
      *     nullable=true)
      * @Serializer\Exclude()
      */
@@ -68,8 +67,7 @@ class JudgingRun extends BaseApiEntity
     /**
      * @var double
      * @ORM\Column(type="float", name="runtime",
-     *     options={"comment"="Submission running time on this testcase",
-     *              "default"="NULL"},
+     *     options={"comment"="Submission running time on this testcase"},
      *     nullable=true)
      * @Serializer\Exclude()
      */

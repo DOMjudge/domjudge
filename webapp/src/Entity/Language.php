@@ -17,7 +17,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Programming languages in which teams can submit solutions"},
  *     indexes={@ORM\Index(name="compile_script", columns={"compile_script"})},
  *     uniqueConstraints={
- *         @ORM\UniqueConstraint(name="externalid", columns={"externalid"}, options={"lengths": {"190"}}),
+ *         @ORM\UniqueConstraint(name="externalid", columns={"externalid"}, options={"lengths": {190}}),
  *     })
  * @UniqueEntity("langid")
  * @UniqueEntity("externalid")
@@ -39,7 +39,7 @@ class Language extends BaseApiEntity
     /**
      * @var string
      * @ORM\Column(type="string", name="externalid", length=255, nullable=true,
-     *     options={"default"="NULL","comment"="Language ID to expose in the REST API"})
+     *     options={"comment"="Language ID to expose in the REST API"})
      * @Serializer\SerializedName("id")
      * @Serializer\Groups({"Default", "Nonstrict"})
      */
@@ -56,7 +56,7 @@ class Language extends BaseApiEntity
     /**
      * @var string[]
      * @ORM\Column(type="json", length=4294967295, name="extensions",
-     *     options={"comment"="List of recognized extensions (JSON encoded)","default":"NULL"},
+     *     options={"comment"="List of recognized extensions (JSON encoded)"},
      *     nullable=true)
      * @Serializer\Groups({"Nonstrict"})
      * @Serializer\Type("array<string>")
@@ -107,7 +107,7 @@ class Language extends BaseApiEntity
     /**
      * @var string
      * @ORM\Column(type="string", name="compile_script", length=32,
-     *     options={"comment"="Script to compile source code for this language","default"="NULL"},
+     *     options={"comment"="Script to compile source code for this language"},
      *     nullable=true)
      * @Serializer\Exclude()
      */
@@ -125,7 +125,7 @@ class Language extends BaseApiEntity
     /**
      * @var string
      * @ORM\Column(type="string", name="entry_point_description",
-     *     options={"comment"="The description used in the UI for the entry point field.","default"="NULL"},
+     *     options={"comment"="The description used in the UI for the entry point field."},
      *     nullable=true)
      * @Serializer\Groups({"Nonstrict"})
      */

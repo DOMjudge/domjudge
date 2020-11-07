@@ -73,7 +73,7 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
      * @var double
      * @ORM\Column(type="decimal", precision=32, scale=9, name="endtime",
      *     options={"comment"="Time judging ended, null = still busy",
-     *              "unsigned"=true,"default"="NULL"},
+     *              "unsigned"=true},
      *     nullable=true)
      * @Serializer\Exclude()
      */
@@ -82,8 +82,7 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
     /**
      * @var string
      * @ORM\Column(type="string", name="result", length=32,
-     *     options={"comment"="Result string as defined in config.php",
-     *              "default"="NULL"},
+     *     options={"comment"="Result string as defined in config.php"},
      *     nullable=true)
      * @Serializer\Exclude()
      */
@@ -102,8 +101,7 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
     /**
      * @var string
      * @ORM\Column(type="string", name="jury_member", length=255,
-     *     options={"comment"="Name of jury member who verified this",
-     *              "default"="NULL"},
+     *     options={"comment"="Name of jury member who verified this"},
      *     nullable=true)
      * @Serializer\Exclude()
      */
@@ -112,8 +110,7 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
     /**
      * @var string
      * @ORM\Column(type="string", name="verify_comment", length=255,
-     *     options={"comment"="Optional additional information provided by the verifier",
-     *              "default"="NULL"},
+     *     options={"comment"="Optional additional information provided by the verifier"},
      *     nullable=true)
      * @Serializer\Exclude()
      */
@@ -131,8 +128,7 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
     /**
      * @var resource
      * @ORM\Column(type="blob", name="output_compile",
-     *     options={"comment"="Output of the compiling the program",
-     *              "default"="NULL"},
+     *     options={"comment"="Output of the compiling the program"},
      *     nullable=true)
      * @Serializer\Exclude()
      */
@@ -157,8 +153,7 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
      * @var int
      *
      * @ORM\Column(type="integer", name="rejudgingid", length=4,
-     *     options={"comment"="Rejudging ID (if rejudge)","unsigned"=true,
-     *              "default"="NULL"},
+     *     options={"comment"="Rejudging ID (if rejudge)","unsigned"=true},
      *     nullable=true)
      * @Serializer\Exclude()
      */
@@ -168,8 +163,7 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
      * @var int
      *
      * @ORM\Column(type="integer", name="prevjudgingid",
-     *     options={"comment"="Previous valid judging (if rejudge)",
-     *              "unsigned"=true,"default"="NULL"},
+     *     options={"comment"="Previous valid judging (if rejudge)","unsigned"=true},
      *     nullable=true)
      * @Serializer\Exclude()
      */

@@ -27,7 +27,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  *         @ORM\Index(name="probid_2", columns={"cid","probid"})
  *     },
  *     uniqueConstraints={
- *         @ORM\UniqueConstraint(name="externalid", columns={"cid", "externalid"}, options={"lengths": {null, "190"}}),
+ *         @ORM\UniqueConstraint(name="externalid", columns={"cid", "externalid"}, options={"lengths": {null, 190}}),
  *     })
  * @UniqueEntity("externalid")
  */
@@ -50,7 +50,7 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
      * @var string
      * @ORM\Column(type="string", name="externalid", length=255,
      *     options={"comment"="Specifies ID of submission if imported from external CCS, e.g. Kattis",
-     *              "collation"="utf8mb4_bin", "default"="NULL"},
+     *              "collation"="utf8mb4_bin"},
      *     nullable=true)
      */
     protected $externalid;
@@ -60,7 +60,7 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
      *
      * @ORM\Column(type="integer", name="origsubmitid",
      *     options={"comment"="If set, specifies original submission in case of edit/resubmit",
-     *              "default"="NULL","unsigned"=true},
+     *              "unsigned"=true},
      *     nullable=true)
      * @Serializer\Exclude()
      */
@@ -126,7 +126,7 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
      * @var int
      *
      * @ORM\Column(type="integer", name="rejudgingid",
-     *     options={"comment"="Rejudging ID (if rejudge)","unsigned"=true,"default"="NULL"},
+     *     options={"comment"="Rejudging ID (if rejudge)","unsigned"=true},
      *     nullable=true)
      * @Serializer\Exclude()
      */
@@ -135,8 +135,7 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
     /**
      * @var array
      * @ORM\Column(type="json", name="expected_results", length=255,
-     *     options={"comment"="JSON encoded list of expected results - used to validate jury submissions",
-     *              "default":"NULL"},
+     *     options={"comment"="JSON encoded list of expected results - used to validate jury submissions"},
      *     nullable=true)
      * @Serializer\Exclude()
      */
@@ -145,8 +144,7 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
     /**
      * @var string
      * @ORM\Column(type="string", name="entry_point", length=255,
-     *     options={"comment"="Optional entry point. Can be used e.g. for java main class.",
-     *              "default"="NULL"},
+     *     options={"comment"="Optional entry point. Can be used e.g. for java main class."},
      *     nullable=true)
      * @Serializer\Expose(if="context.getAttribute('domjudge_service').checkrole('jury')")
      */
@@ -156,8 +154,7 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
      * @var string|null
      *
      * @ORM\Column(type="string", name="judgehost", length=64,
-     *     options={"comment"="Current/last judgehost judging this submission",
-     *              "default":"NULL"}, nullable=true)
+     *     options={"comment"="Current/last judgehost judging this submission"}, nullable=true)
      * @Serializer\Exclude()
      */
     private $judgehost_as_string;

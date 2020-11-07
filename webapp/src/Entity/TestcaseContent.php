@@ -29,21 +29,21 @@ class TestcaseContent
     /**
      * @var string
      * @ORM\Column(type="blobtext", length=4294967295, name="input",
-     *     options={"comment"="Input data","default"="NULL"}, nullable=true)
+     *     options={"comment"="Input data"}, nullable=true)
      */
     private $input;
 
     /**
      * @var string
      * @ORM\Column(type="blobtext", length=4294967295, name="output",
-     *     options={"comment"="Output data","default"="NULL"}, nullable=true)
+     *     options={"comment"="Output data"}, nullable=true)
      */
     private $output;
 
     /**
      * @var string
      * @ORM\Column(type="blobtext", length=4294967295, name="image",
-     *     options={"comment"="A graphical representation of the testcase","default"="NULL"},
+     *     options={"comment"="A graphical representation of the testcase"},
      *     nullable=true)
      */
     private $image;
@@ -51,7 +51,7 @@ class TestcaseContent
     /**
      * @var string
      * @ORM\Column(type="blobtext", length=4294967295, name="image_thumb",
-     *     options={"comment"="Automatically created thumbnail of the image","default"="NULL"},
+     *     options={"comment"="Automatically created thumbnail of the image"},
      *     nullable=true)
      */
     private $image_thumb;

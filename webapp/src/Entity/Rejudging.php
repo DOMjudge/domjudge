@@ -35,7 +35,7 @@ class Rejudging
      *
      * @ORM\Column(type="integer", name="userid_start", length=4,
      *     options={"comment"="User ID of user who started the rejudge",
-     *              "unsigned"=true,"default"="NULL"},
+     *              "unsigned"=true},
      *     nullable=true)
      */
     private $userid_start;
@@ -45,7 +45,7 @@ class Rejudging
      *
      * @ORM\Column(type="integer", name="userid_finish",
      *     options={"comment"="User ID of user who accepted or canceled the rejudge",
-     *              "unsigned"=true,"default"="NULL"},
+     *              "unsigned"=true},
      *     nullable=true)
      */
     private $userid_finish;
@@ -63,7 +63,7 @@ class Rejudging
      * @var double
      * @ORM\Column(type="decimal", precision=32, scale=9, name="endtime",
      *     options={"comment"="Time rejudging ended, null = still busy",
-     *              "unsigned"=true,"default"="NULL"},
+     *              "unsigned"=true},
      *     nullable=true)
      */
     private $endtime;
@@ -124,7 +124,7 @@ class Rejudging
      *
      * @ORM\Column(type="integer", name="`repeat`",
      *     options={"comment"="Number of times this rejudging will be repeated.",
-     *              "unsigned"=true,"default"="NULL"},
+     *              "unsigned"=true},
      *     nullable=true)
      */
     private $repeat;
@@ -134,7 +134,7 @@ class Rejudging
      *
      * @ORM\Column(type="integer", name="repeat_rejudgingid",
      *     options={"comment"="In case repeat is set, this will mark the first rejudgingid.",
-     *              "unsigned"=true,"default"="NULL"},
+     *              "unsigned"=true},
      *     nullable=true)
      */
     private $repeat_rejudgingid;

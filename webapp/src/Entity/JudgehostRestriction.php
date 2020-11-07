@@ -32,7 +32,7 @@ class JudgehostRestriction
     /**
      * @var array
      * @ORM\Column(type="json", name="restrictions",
-     *     options={"comment"="JSON-encoded restrictions","default"="NULL"},
+     *     options={"comment"="JSON-encoded restrictions"},
      *     nullable=true)
      */
     private $restrictions;

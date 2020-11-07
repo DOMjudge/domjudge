@@ -60,8 +60,7 @@ class TeamCategory extends BaseApiEntity
     /**
      * @var string
      * @ORM\Column(type="string", length=32, name="color",
-     *     options={"comment"="Background colour on the scoreboard",
-     *              "default"="NULL"},
+     *     options={"comment"="Background colour on the scoreboard"},
      *     nullable=true)
      * @Serializer\Groups({"Nonstrict"})
      */
