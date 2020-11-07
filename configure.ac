@@ -14,15 +14,14 @@ AC_DEFUN([AX_WITH_COMMENT], [
 AC_SUBST(FHS_ENABLED,no)
 AC_ARG_ENABLE(fhs,AS_HELP_STRING([--enable-fhs],
 [use FHS directories (default: no), see below under "Optional
- Packages" for path configuration when FHS is disabled.]),
+ Packages" for path configuration when FHS is disabled.
+ When enabled the default prefix is set to /usr/local.]),
 [if test "x$enableval" != xno ; then AC_SUBST(FHS_ENABLED,yes) fi])
 
+AC_PREFIX_DEFAULT(/opt/domjudge)
+AS_IF([test "x$FHS_ENABLED" = xyes],AC_PREFIX_DEFAULT(/usr/local))
 if test "x$prefix" = xNONE; then
-	if test "x$FHS_ENABLED" = xyes ; then
-		prefix=$ac_default_prefix
-	else
-		prefix="/opt/domjudge"
-	fi
+	prefix=$ac_default_prefix
 fi
 
 if test -z "$PACKAGE_VERSION"; then
@@ -334,6 +333,10 @@ AC_CONFIG_FILES([paths.mk])
 AC_OUTPUT
 
 # summary {{{
+
+# Let's assume that triple expansion is enough...
+AC_DEFUN([AX_VAR_EXPAND], [$(eval echo $(eval echo $(eval echo $1)))])
+
 if test "x$QUIET" = x ; then
 echo ""
 echo "Summary:"
@@ -357,35 +360,35 @@ else
    echo " * submitclient........: disabled"
 fi
 echo ""
-echo -n " * documentation.......: $domjudge_docdir"
+echo -n " * documentation.......: AX_VAR_EXPAND($domjudge_docdir)"
 if test "x$DOC_BUILD_ENABLED" != xyes ; then
    echo " (disabled)"
 else
    echo ""
 fi
 echo ""
-echo " * domserver...........: $domserver_root"
-echo "    - bin..............: $domserver_bindir"
-echo "    - etc..............: $domserver_etcdir"
-echo "    - lib..............: $domserver_libdir"
-echo "    - libvendor........: $domserver_libvendordir"
-echo "    - log..............: $domserver_logdir"
-echo "    - run..............: $domserver_rundir"
-echo "    - sql..............: $domserver_sqldir"
-echo "    - tmp..............: $domserver_tmpdir"
-echo "    - webapp...........: $domserver_webappdir"
+echo " * domserver...........: AX_VAR_EXPAND($domserver_root)"
+echo "    - bin..............: AX_VAR_EXPAND($domserver_bindir)"
+echo "    - etc..............: AX_VAR_EXPAND($domserver_etcdir)"
+echo "    - lib..............: AX_VAR_EXPAND($domserver_libdir)"
+echo "    - libvendor........: AX_VAR_EXPAND($domserver_libvendordir)"
+echo "    - log..............: AX_VAR_EXPAND($domserver_logdir)"
+echo "    - run..............: AX_VAR_EXPAND($domserver_rundir)"
+echo "    - sql..............: AX_VAR_EXPAND($domserver_sqldir)"
+echo "    - tmp..............: AX_VAR_EXPAND($domserver_tmpdir)"
+echo "    - webapp...........: AX_VAR_EXPAND($domserver_webappdir)"
 echo ""
-echo " * judgehost...........: $judgehost_root"
-echo "    - bin..............: $judgehost_bindir"
-echo "    - etc..............: $judgehost_etcdir"
-echo "    - lib..............: $judgehost_libdir"
-echo "    - libjudge.........: $judgehost_libjudgedir"
-echo "    - log..............: $judgehost_logdir"
-echo "    - run..............: $judgehost_rundir"
-echo "    - tmp..............: $judgehost_tmpdir"
-echo "    - judge............: $judgehost_judgedir"
-echo "    - chroot...........: $judgehost_chrootdir"
-echo "    - cgroup...........: $judgehost_cgroupdir"
+echo " * judgehost...........: AX_VAR_EXPAND($judgehost_root)"
+echo "    - bin..............: AX_VAR_EXPAND($judgehost_bindir)"
+echo "    - etc..............: AX_VAR_EXPAND($judgehost_etcdir)"
+echo "    - lib..............: AX_VAR_EXPAND($judgehost_libdir)"
+echo "    - libjudge.........: AX_VAR_EXPAND($judgehost_libjudgedir)"
+echo "    - log..............: AX_VAR_EXPAND($judgehost_logdir)"
+echo "    - run..............: AX_VAR_EXPAND($judgehost_rundir)"
+echo "    - tmp..............: AX_VAR_EXPAND($judgehost_tmpdir)"
+echo "    - judge............: AX_VAR_EXPAND($judgehost_judgedir)"
+echo "    - chroot...........: AX_VAR_EXPAND($judgehost_chrootdir)"
+echo "    - cgroup...........: AX_VAR_EXPAND($judgehost_cgroupdir)"
 echo ""
 echo "Run 'make' without arguments to get a list of (build) targets."
 echo ""
