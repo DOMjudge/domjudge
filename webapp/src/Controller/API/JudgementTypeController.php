@@ -25,7 +25,7 @@ class JudgementTypeController extends AbstractRestController
      * @OA\Response(
      *     response="200",
      *     description="Returns all the judgement types for this contest",
-     *     @OA\Schema(
+     *     @OA\JsonContent(
      *         type="array",
      *         @OA\Items(ref="#/components/schemas/JudgementType")
      *     )
@@ -67,7 +67,7 @@ class JudgementTypeController extends AbstractRestController
      * @OA\Response(
      *     response="200",
      *     description="Returns the given judgement type for this contest",
-     *     @OA\Schema(ref="#/components/schemas/JudgementType")
+     *     @OA\JsonContent(ref="#/components/schemas/JudgementType")
      * )
      * @OA\Parameter(ref="#/components/parameters/id")
      * @OA\Parameter(ref="#/components/parameters/strict")

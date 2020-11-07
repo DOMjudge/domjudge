@@ -26,7 +26,7 @@ class OrganizationController extends AbstractRestController
      * @OA\Response(
      *     response="200",
      *     description="Returns all the organizations for this contest",
-     *     @OA\Schema(
+     *     @OA\JsonContent(
      *         type="array",
      *         @OA\Items(ref=@Model(type=TeamAffiliation::class))
      *     )

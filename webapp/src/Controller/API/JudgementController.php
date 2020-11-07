@@ -51,7 +51,7 @@ class JudgementController extends AbstractRestController implements QueryObjectT
      * @OA\Response(
      *     response="200",
      *     description="Returns all the judgements for this contest",
-     *     @OA\Schema(
+     *     @OA\JsonContent(
      *         type="array",
      *         @OA\Items(
      *             allOf={
@@ -93,7 +93,7 @@ class JudgementController extends AbstractRestController implements QueryObjectT
      * @OA\Response(
      *     response="200",
      *     description="Returns the given judgement for this contest",
-     *     @OA\Schema(
+     *     @OA\JsonContent(
      *         allOf={
      *             @OA\Schema(ref=@Model(type=Judging::class)),
      *             @OA\Schema(ref="#/components/schemas/JudgementExtraFields")

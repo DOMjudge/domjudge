@@ -57,7 +57,7 @@ class SubmissionController extends AbstractRestController
      * @OA\Response(
      *     response="200",
      *     description="Returns all the submissions for this contest",
-     *     @OA\Schema(
+     *     @OA\JsonContent(
      *         type="array",
      *         @OA\Items(
      *             allOf={
@@ -92,7 +92,7 @@ class SubmissionController extends AbstractRestController
      * @OA\Response(
      *     response="200",
      *     description="Returns the given submission for this contest",
-     *     @OA\Schema(
+     *     @OA\JsonContent(
      *         allOf={
      *             @OA\Schema(ref=@Model(type=Submission::class)),
      *             @OA\Schema(ref="#/components/schemas/Files")
@@ -148,7 +148,7 @@ class SubmissionController extends AbstractRestController
      * @OA\Response(
      *     response="200",
      *     description="When submitting was successful",
-     *     @OA\Schema(type="integer", description="The ID of the submitted solution")
+     *     @OA\JsonContent(type="integer", description="The ID of the submitted solution")
      * )
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Exception
@@ -288,7 +288,7 @@ class SubmissionController extends AbstractRestController
      * @OA\Response(
      *     response="200",
      *     description="The files for the submission",
-     *     @OA\Schema(ref="#/components/schemas/SourceCodeList")
+     *     @OA\JsonContent(ref="#/components/schemas/SourceCodeList")
      * )
      * @OA\Parameter(ref="#/components/parameters/id")
      */

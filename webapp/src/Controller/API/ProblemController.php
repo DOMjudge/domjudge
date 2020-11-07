@@ -54,7 +54,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
      * @OA\Response(
      *     response="200",
      *     description="Returns all the problems for this contest",
-     *     @OA\Schema(
+     *     @OA\JsonContent(
      *         type="array",
      *         @OA\Items(ref="#/components/schemas/ContestProblem")
      *     )
@@ -145,7 +145,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
      * @OA\Response(
      *     response="200",
      *     description="Returns the IDs of the imported problems and any messages produced",
-     *     @OA\Schema(
+     *     @OA\JsonContent(
      *         type="object",
      *         @OA\Property(property="problem_ids", type="array",
      *             @OA\Items(type="integer", description="The IDs of the imported problems")
@@ -232,7 +232,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
      * @OA\Response(
      *     response="200",
      *     description="Returns the given problem for this contest",
-     *     ref="#/components/schemas/ContestProblem"
+     *     @OA\JsonContent(ref="#/components/schemas/ContestProblem")
      * )
      * @OA\Parameter(ref="#/components/parameters/id")
      * @OA\Parameter(ref="#/components/parameters/strict")

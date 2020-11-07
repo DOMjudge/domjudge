@@ -110,7 +110,7 @@ class ContestController extends AbstractRestController
      * @OA\Response(
      *     response="200",
      *     description="Returns all contests visible to the user (all contests for privileged users, active contests otherwise)",
-     *     @OA\Schema(
+     *     @OA\JsonContent(
      *         type="array",
      *         @OA\Items(ref=@Model(type=Contest::class))
      *     )
@@ -302,7 +302,7 @@ class ContestController extends AbstractRestController
      * @OA\Response(
      *     response="200",
      *     description="The contest state",
-     *     @OA\Schema(ref="#/components/schemas/ContestState")
+     *     @OA\JsonContent(ref="#/components/schemas/ContestState")
      * )
      */
     public function getContestStateAction(Request $request, string $cid)
@@ -355,18 +355,20 @@ class ContestController extends AbstractRestController
      * @OA\Response(
      *     response="200",
      *     description="The events",
-     *     @OA\Schema(
-     *         type="array",
-     *         @OA\Items(
-     *             type="object",
-     *             @OA\Property(property="id", type="string"),
-     *             @OA\Property(property="type", type="string"),
-     *             @OA\Property(property="op", type="string"),
-     *             @OA\Property(property="data", type="object"),
-     *             @OA\Property(property="time", type="string", format="date-time"),
+     *     @OA\MediaType(
+     *         mediaType="application/x-ndjson",
+     *         @OA\Schema(
+     *             type="array",
+     *             @OA\Items(
+     *                 type="object",
+     *                 @OA\Property(property="id", type="string"),
+     *                 @OA\Property(property="type", type="string"),
+     *                 @OA\Property(property="op", type="string"),
+     *                 @OA\Property(property="data", type="object"),
+     *                 @OA\Property(property="time", type="string", format="date-time"),
+     *             )
      *         )
-     *     ),
-     *     @OA\MediaType(mediaType="application/x-ndjson")
+     *     )
      * )
      */
     public function getEventFeedAction(
@@ -545,7 +547,7 @@ class ContestController extends AbstractRestController
      * @OA\Response(
      *     response="200",
      *     description="General status information for the given contest",
-     *     @OA\Schema(
+     *     @OA\JsonContent(
      *         type="object",
      *         @OA\Property(property="num_submissions", type="integer"),
      *         @OA\Property(property="num_queued", type="integer"),

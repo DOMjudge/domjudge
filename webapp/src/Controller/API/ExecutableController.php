@@ -42,7 +42,7 @@ class ExecutableController extends AbstractFOSRestController
      * @OA\Response(
      *     response="200",
      *     description="Information about the requested executable",
-     *     @OA\Schema(type="string", description="Base64-encoded executable contents")
+     *     @OA\JsonContent(type="string", description="Base64-encoded executable contents")
      * )
      */
     public function singleAction(string $id)

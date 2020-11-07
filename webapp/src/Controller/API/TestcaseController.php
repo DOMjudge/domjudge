@@ -47,7 +47,7 @@ class TestcaseController extends AbstractFOSRestController
      * @OA\Response(
      *     response="200",
      *     description="Information about the next testcase to run",
-     *     @OA\Schema(ref=@Model(type=Testcase::class))
+     *     @OA\JsonContent(ref=@Model(type=Testcase::class))
      * )
      */
     public function getNextToJudgeAction(string $id)
@@ -123,7 +123,7 @@ class TestcaseController extends AbstractFOSRestController
      * @OA\Response(
      *     response="200",
      *     description="Information about the file of the given testcase",
-     *     @OA\Schema(type="string", description="Base64-encoded file contents")
+     *     @OA\JsonContent(type="string", description="Base64-encoded file contents")
      * )
      */
     public function getFileAction(string $id, string $type)

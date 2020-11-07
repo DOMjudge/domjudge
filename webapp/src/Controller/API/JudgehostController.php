@@ -125,7 +125,7 @@ class JudgehostController extends AbstractFOSRestController
      * @OA\Response(
      *     response="200",
      *     description="The judgehosts",
-     *     @OA\Schema(type="array", @OA\Items(ref=@Model(type=Judgehost::class)))
+     *     @OA\JsonContent(type="array", @OA\Items(ref=@Model(type=Judgehost::class)))
      * )
      * @OA\Parameter(
      *     name="hostname",
@@ -159,7 +159,7 @@ class JudgehostController extends AbstractFOSRestController
      * @OA\Response(
      *     response="200",
      *     description="The returned unfinished judgings",
-     *     @OA\Schema(
+     *     @OA\JsonContent(
      *         type="array",
      *         @OA\Items(
      *             type="object",
@@ -235,7 +235,7 @@ class JudgehostController extends AbstractFOSRestController
      * @OA\Response(
      *     response="200",
      *     description="The modified judgehost",
-     *     @OA\Schema(type="array", @OA\Items(ref=@Model(type=Judgehost::class)))
+     *     @OA\JsonContent(type="array", @OA\Items(ref=@Model(type=Judgehost::class)))
      * )
      * @OA\Parameter(
      *     name="hostname",
@@ -282,7 +282,7 @@ class JudgehostController extends AbstractFOSRestController
      * @OA\Response(
      *     response="200",
      *     description="The next judging to judge",
-     *     @OA\Schema(ref="#/components/schemas/NextJudging")
+     *     @OA\JsonContent(ref="#/components/schemas/NextJudging")
      * )
      * @OA\Parameter(
      *     name="hostname",
@@ -805,7 +805,7 @@ class JudgehostController extends AbstractFOSRestController
      * @OA\Response(
      *     response="200",
      *     description="The ID of the created internal error",
-     *     @OA\Schema(type="integer")
+     *     @OA\JsonContent(type="integer")
      * )
      * @OA\RequestBody(
      *     required=true,
