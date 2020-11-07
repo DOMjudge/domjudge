@@ -11,6 +11,7 @@ if (isset($_SERVER['REMOTE_ADDR'])) {
 }
 
 require(ETCDIR . '/judgehost-config.php');
+require(LIBDIR . '/lib.misc.php');
 
 $endpoints = [];
 $domjudge_config = [];
@@ -502,7 +503,6 @@ if (isset($options['daemonid'])) {
 
 define('LOGFILE', LOGDIR.'/judge.'.$myhost.'.log');
 require(LIBDIR . '/lib.error.php');
-require(LIBDIR . '/lib.misc.php');
 
 $verbose = LOG_INFO;
 if (isset($options['verbose'])) {
