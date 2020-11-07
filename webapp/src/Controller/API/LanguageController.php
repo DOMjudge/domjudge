@@ -26,7 +26,7 @@ class LanguageController extends AbstractRestController
      * @OA\Response(
      *     response="200",
      *     description="Returns all the languages for this contest",
-     *     @OA\Schema(
+     *     @OA\JsonContent(
      *         type="array",
      *         @OA\Items(ref=@Model(type=Language::class))
      *     )

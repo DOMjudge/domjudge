@@ -62,7 +62,7 @@ class ScoreboardController extends AbstractRestController
      * @OA\Response(
      *     response="200",
      *     description="Returns the scoreboard",
-     *     @OA\Schema(ref="#/components/schemas/Scoreboard")
+     *     @OA\JsonContent(ref="#/components/schemas/Scoreboard")
      * )
      * @OA\Parameter(
      *     name="allteams",

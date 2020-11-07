@@ -52,7 +52,7 @@ class RunController extends AbstractRestController implements QueryObjectTransfo
      * @OA\Response(
      *     response="200",
      *     description="Returns all the runs for this contest",
-     *     @OA\Schema(
+     *     @OA\JsonContent(
      *         type="array",
      *         @OA\Items(
      *             allOf={
@@ -106,7 +106,7 @@ class RunController extends AbstractRestController implements QueryObjectTransfo
      * @OA\Response(
      *     response="200",
      *     description="Returns the given run for this contest",
-     *     @OA\Schema(
+     *     @OA\JsonContent(
      *         allOf={
      *             @OA\Schema(ref=@Model(type=JudgingRun::class)),
      *             @OA\Schema(ref="#/components/schemas/RunExtraFields")

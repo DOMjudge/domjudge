@@ -99,7 +99,7 @@ class GeneralInfoController extends AbstractFOSRestController
      * @OA\Response(
      *     response="200",
      *     description="The current API version information",
-     *     @OA\Schema(
+     *     @OA\JsonContent(
      *         type="object",
      *         @OA\Property(property="api_version", type="integer")
      *     )
@@ -118,7 +118,7 @@ class GeneralInfoController extends AbstractFOSRestController
      * @OA\Response(
      *     response="200",
      *     description="Information about the API and DOMjudge",
-     *     @OA\Schema(
+     *     @OA\JsonContent(
      *         type="object",
      *         @OA\Property(property="api_version", type="integer"),
      *         @OA\Property(property="domjudge_version", type="string"),
@@ -145,7 +145,7 @@ class GeneralInfoController extends AbstractFOSRestController
      * @OA\Response(
      *     response="200",
      *     description="General status information for the currently active contests",
-     *     @OA\Schema(
+     *     @OA\JsonContent(
      *         type="array",
      *         @OA\Items(
      *             type="object",
@@ -210,7 +210,7 @@ class GeneralInfoController extends AbstractFOSRestController
      * @OA\Response(
      *     response="200",
      *     description="The configuration variables",
-     *     @OA\Schema(type="object")
+     *     @OA\JsonContent(type="object")
      * )
      * @OA\Parameter(
      *     name="name",
@@ -248,7 +248,7 @@ class GeneralInfoController extends AbstractFOSRestController
      * @OA\Response(
      *     response="200",
      *     description="The full configuration after change",
-     *     @OA\Schema(type="object")
+     *     @OA\JsonContent(type="object")
      * )
      * @OA\RequestBody(
      *     required=true,
@@ -272,7 +272,7 @@ class GeneralInfoController extends AbstractFOSRestController
      * @OA\Response(
      *     response="200",
      *     description="Result of the various checks performed",
-     *     @OA\Schema(type="object")
+     *     @OA\JsonContent(type="object")
      * )
      * @return \Symfony\Component\HttpFoundation\JsonResponse
      */

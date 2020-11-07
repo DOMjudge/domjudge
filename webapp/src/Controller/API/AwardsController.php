@@ -60,7 +60,7 @@ class AwardsController extends AbstractRestController
      * @OA\Response(
      *     response="200",
      *     description="Returns the current teams qualifying for each award",
-     *     @OA\Schema(
+     *     @OA\JsonContent(
      *         type="array",
      *         @OA\Items(ref="#/components/schemas/Award")
      *     )
@@ -82,7 +82,7 @@ class AwardsController extends AbstractRestController
      * @OA\Response(
      *     response="200",
      *     description="Returns the award for this contest",
-     *     @OA\Schema(ref="#/components/schemas/Award")
+     *     @OA\JsonContent(ref="#/components/schemas/Award")
      * )
      * @OA\Parameter(ref="#/components/parameters/id")
      * @OA\Parameter(ref="#/components/parameters/strict")

@@ -30,7 +30,7 @@ class ClarificationController extends AbstractRestController
      * @OA\Response(
      *     response="200",
      *     description="Returns all the clarifications for this contest",
-     *     @OA\Schema(
+     *     @OA\JsonContent(
      *         type="array",
      *         @OA\Items(ref=@Model(type=Clarification::class))
      *     )
