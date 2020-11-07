@@ -428,7 +428,7 @@
                 form_action: path('jury_judging_verify', {judgingId: selectedJudging.judgingid}),
                 show_form: not (verificationRequired and selectedJudging.verified and selectedJudging.valid),
                 show_icat: true} %}
-            {% if submission.contestProblem %}
+            {% if submission.contestProblem and icat_url %}
                 <script>
                     $(function () {
                         $('#post-to-icat').on('click', function () {
