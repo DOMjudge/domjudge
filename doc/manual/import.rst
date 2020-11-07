@@ -7,7 +7,8 @@ In general, we try to follow the `CLICS CCS specification
 for all file formats involved.
 
 All of the following examples require you to set up admin credentials in your
-`.netrc <https://www.gnu.org/software/inetutils/manual/html_node/The-_002enetrc-file.html>`_ file.
+``.netrc`` file (for format see under
+`submit client <submit_client_requirements>`_).
 You need to install `httpie <https://httpie.org/>`_ and replace the
 ``<API_URL>`` in the examples below with the API URL of your local DOMjudge
 installation.
