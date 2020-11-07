@@ -7,7 +7,9 @@ Version 7.3.1 - DEV
  - Fix race condition in scoreboard related to a Doctrine bug.
  - Fix having fresh data for scheduling repeated rejudgings.
  - Fix clarification filter buttons when not using queues.
- - Fix database user creation for MySQL >=- 8.0.
+ - Fix database user creation for MySQL >= 8.0.
+ - Fix warning about DataTables initialization on judgehosts page.
+ - Documentation improvements.
 
 Version 7.3.0 - 26 June 2020
 ----------------------------
