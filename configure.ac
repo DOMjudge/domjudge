@@ -205,6 +205,25 @@ AX_WITH_COMMENT(7,[      ])
 
 # }}}
 
+# {{{ Directory for systemd unit files
+
+PKG_PROG_PKG_CONFIG
+AC_ARG_WITH([systemdsystemunitdir],
+     [AS_HELP_STRING([--with-systemdsystemunitdir=DIR], [Directory for systemd service files])],,
+     [with_systemdsystemunitdir=auto])
+AS_IF([test "x$with_systemdsystemunitdir" = "xyes" -o "x$with_systemdsystemunitdir" = "xauto"], [
+     def_systemdsystemunitdir=$($PKG_CONFIG --variable=systemdsystemunitdir systemd)
+
+     AS_IF([test "x$def_systemdsystemunitdir" = "x"],
+   [AS_IF([test "x$with_systemdsystemunitdir" = "xyes"],
+    [AC_MSG_ERROR([systemd support requested but pkg-config unable to query systemd package])])
+    with_systemdsystemunitdir=no],
+   [with_systemdsystemunitdir="$def_systemdsystemunitdir"])])
+AS_IF([test "x$with_systemdsystemunitdir" != "xno"],
+      [AC_SUBST([systemd_unitdir], [$with_systemdsystemunitdir])])
+
+# }}}
+
 AC_MSG_CHECKING([baseurl])
 AC_ARG_WITH([baseurl], [AS_HELP_STRING([--with-baseurl=URL],
 [Base URL of the DOMjudge web interfaces. Example default:
@@ -389,6 +408,8 @@ echo "    - tmp..............: AX_VAR_EXPAND($judgehost_tmpdir)"
 echo "    - judge............: AX_VAR_EXPAND($judgehost_judgedir)"
 echo "    - chroot...........: AX_VAR_EXPAND($judgehost_chrootdir)"
 echo "    - cgroup...........: AX_VAR_EXPAND($judgehost_cgroupdir)"
+echo ""
+echo " * systemd unit files..: AX_VAR_EXPAND($systemd_unitdir)"
 echo ""
 echo "Run 'make' without arguments to get a list of (build) targets."
 echo ""
