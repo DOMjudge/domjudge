@@ -31,7 +31,7 @@ class Executable
     /**
      * @var string
      * @ORM\Column(type="string", name="md5sum", length=32,
-     *     options={"comment"="Md5sum of zip file","default"="NULL","fixed"=true},
+     *     options={"comment"="Md5sum of zip file","fixed"=true},
      *     nullable=true)
      */
     private $md5sum;
@@ -39,7 +39,7 @@ class Executable
     /**
      * @var resource|string
      * @ORM\Column(type="blob", name="zipfile",
-     *     options={"comment"="Zip file","default"="NULL"}, nullable=true)
+     *     options={"comment"="Zip file"}, nullable=true)
      */
     private $zipfile;
 
@@ -48,7 +48,7 @@ class Executable
     /**
      * @var string
      * @ORM\Column(type="string", name="description", length=255,
-     *     options={"comment"="Description of this executable","default"="NULL"},
+     *     options={"comment"="Description of this executable"},
      *     nullable=true)
      * @Assert\NotBlank()
      */

@@ -35,7 +35,7 @@ class Testcase
     /**
      * @var string
      * @ORM\Column(type="string", name="md5sum_input", length=32,
-     *     options={"comment"="Checksum of input data","default"="NULL","fixed"=true},
+     *     options={"comment"="Checksum of input data","fixed"=true},
      *     nullable=true)
      */
     private $md5sum_input;
@@ -43,7 +43,7 @@ class Testcase
     /**
      * @var string
      * @ORM\Column(type="string", name="md5sum_output", length=32,
-     *     options={"comment"="Checksum of output data","default"="NULL","fixed"=true},
+     *     options={"comment"="Checksum of output data","fixed"=true},
      *     nullable=true)
      */
     private $md5sum_output;
@@ -68,7 +68,7 @@ class Testcase
     /**
      * @var resource
      * @ORM\Column(type="blob", length=4294967295, name="description",
-     *     options={"comment"="Description of this testcase","default"="NULL"},
+     *     options={"comment"="Description of this testcase"},
      *     nullable=true)
      * @Serializer\Exclude()
      */
@@ -88,7 +88,7 @@ class Testcase
     /**
      * @var string
      * @ORM\Column(type="string", name="image_type", length=4,
-     *     options={"comment"="File type of the image and thumbnail","default"="NULL"},
+     *     options={"comment"="File type of the image and thumbnail"},
      *     nullable=true)
      * @Serializer\Exclude()
      */

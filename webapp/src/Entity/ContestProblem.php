@@ -21,7 +21,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *         @ORM\Index(name="probid", columns={"probid"})
  *     },
  *     uniqueConstraints={
- *         @ORM\UniqueConstraint(name="shortname", columns={"cid", "shortname"}, options={"lengths"={NULL,"190"}})
+ *         @ORM\UniqueConstraint(name="shortname", columns={"cid", "shortname"}, options={"lengths"={NULL,190}})
  *     })
  * @Serializer\VirtualProperty(
  *     "id",
@@ -80,8 +80,7 @@ class ContestProblem
     /**
      * @var string
      * @ORM\Column(type="string", name="color", length=32,
-     *     options={"comment"="Balloon colour to display on the scoreboard",
-     *              "default"="NULL"},
+     *     options={"comment"="Balloon colour to display on the scoreboard"},
      *     nullable=true)
      * @Serializer\Exclude()
      */
@@ -91,7 +90,7 @@ class ContestProblem
      * @var boolean|null
      * @ORM\Column(type="boolean", name="lazy_eval_results",
      *     options={"comment"="Whether to do lazy evaluation for this problem; if set this overrides the global configuration setting",
-     *              "unsigned"="true", "default"="NULL"},
+     *              "unsigned"="true"},
      *     nullable=true)
      * @Serializer\Exclude()
      */

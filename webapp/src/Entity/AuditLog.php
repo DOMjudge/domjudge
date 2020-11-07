@@ -33,7 +33,7 @@ class AuditLog
      * @var int
      * @ORM\Column(type="integer", name="cid", length=4,
      *     options={"comment"="Contest ID associated to this entry",
-     *              "unsigned"=true,"default"="NULL"},
+     *              "unsigned"=true},
      *     nullable=true)
      */
     private $cid;
@@ -41,7 +41,7 @@ class AuditLog
     /**
      * @var string
      * @ORM\Column(type="string", name="user", length=255,
-     *     options={"comment"="User who performed this action","default"="NULL"},
+     *     options={"comment"="User who performed this action"},
      *     nullable=true)
      */
     private $user;
@@ -49,8 +49,7 @@ class AuditLog
     /**
      * @var string
      * @ORM\Column(type="string", name="datatype", length=32,
-     *     options={"comment"="Reference to DB table associated to this entry",
-     *              "default"="NULL"},
+     *     options={"comment"="Reference to DB table associated to this entry"},
      *     nullable=true)
      */
     private $datatype;
@@ -58,7 +57,7 @@ class AuditLog
     /**
      * @var string
      * @ORM\Column(type="string", name="dataid", length=64,
-     *     options={"comment"="Identifier in reference table","default"="NULL"},
+     *     options={"comment"="Identifier in reference table"},
      *     nullable=true)
      */
     private $dataid;
@@ -66,7 +65,7 @@ class AuditLog
     /**
      * @var string
      * @ORM\Column(type="string", name="action", length=64,
-     *     options={"comment"="Description of action performed","default"="NULL"},
+     *     options={"comment"="Description of action performed"},
      *     nullable=true)
      */
     private $action;
@@ -74,8 +73,7 @@ class AuditLog
     /**
      * @var string
      * @ORM\Column(type="string", name="extrainfo", length=255,
-     *     options={"comment"="Optional additional description of the entry",
-     *              "default"="NULL"},
+     *     options={"comment"="Optional additional description of the entry"},
      *     nullable=true)
      */
     private $extrainfo;

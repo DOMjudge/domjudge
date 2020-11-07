@@ -22,8 +22,8 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
  *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Contests that will be run with this install"},
  *     indexes={@ORM\Index(name="cid", columns={"cid", "enabled"})},
  *     uniqueConstraints={
- *         @ORM\UniqueConstraint(name="externalid", columns={"externalid"}, options={"lengths": {"190"}}),
- *         @ORM\UniqueConstraint(name="shortname", columns={"shortname"}, options={"lengths": {"190"}})
+ *         @ORM\UniqueConstraint(name="externalid", columns={"externalid"}, options={"lengths": {190}}),
+ *         @ORM\UniqueConstraint(name="shortname", columns={"shortname"}, options={"lengths": {190}})
  *     }
  * )
  * @Serializer\VirtualProperty(
@@ -58,7 +58,7 @@ class Contest extends BaseApiEntity
     /**
      * @var string
      * @ORM\Column(type="string", name="externalid", length=255, options={"comment"="Contest ID in an external system",
-     *                            "collation"="utf8mb4_bin", "default"="NULL"}, nullable=true)
+     *                            "collation"="utf8mb4_bin"}, nullable=true)
      * @Serializer\Groups({"Nonstrict"})
      * @Serializer\SerializedName("external_id")
      */
@@ -113,7 +113,7 @@ class Contest extends BaseApiEntity
     /**
      * @var double
      * @ORM\Column(type="decimal", precision=32, scale=9, name="freezetime",
-     *     options={"comment"="Time scoreboard is frozen","unsigned"=true,"default"="NULL"},
+     *     options={"comment"="Time scoreboard is frozen","unsigned"=true},
      *     nullable=true)
      * @Serializer\Exclude()
      */
@@ -133,7 +133,7 @@ class Contest extends BaseApiEntity
      * @var double
      * @ORM\Column(type="decimal", precision=32, scale=9, name="unfreezetime",
      *     options={"comment"="Unfreeze a frozen scoreboard at this time",
-     *              "unsigned"=true,"default"="NULL"},
+     *              "unsigned"=true},
      *     nullable=true)
      * @Serializer\Exclude()
      */
@@ -143,7 +143,7 @@ class Contest extends BaseApiEntity
      * @var double
      * @ORM\Column(type="decimal", precision=32, scale=9, name="finalizetime",
      *     options={"comment"="Time when contest was finalized, null if not yet",
-     *              "unsigned"=true,"default"="NULL"},
+     *              "unsigned"=true},
      *     nullable=true)
      * @Serializer\Exclude()
      */
@@ -152,7 +152,7 @@ class Contest extends BaseApiEntity
     /**
      * @var string|null
      * @ORM\Column(type="text", name="finalizecomment",
-     *     options={"comment"="Comments by the finalizer","default"="NULL"},
+     *     options={"comment"="Comments by the finalizer"},
      *     nullable=true)
      * @Serializer\Exclude()
      */
@@ -171,7 +171,7 @@ class Contest extends BaseApiEntity
      * @var double
      * @ORM\Column(type="decimal", precision=32, scale=9, name="deactivatetime",
      *     options={"comment"="Time contest becomes invisible in team/public views",
-     *              "unsigned"=true,"default"="NULL"},
+     *              "unsigned"=true},
      *     nullable=true)
      * @Serializer\Exclude()
      */
@@ -200,8 +200,7 @@ class Contest extends BaseApiEntity
     /**
      * @var string
      * @ORM\Column(type="string", length=64, name="freezetime_string",
-     *     options={"comment"="Authoritative absolute or relative string representation of freezetime",
-     *              "default"="NULL"},
+     *     options={"comment"="Authoritative absolute or relative string representation of freezetime"},
      *     nullable=true)
      * @Serializer\Exclude()
      * @TimeString()
@@ -221,8 +220,7 @@ class Contest extends BaseApiEntity
     /**
      * @var string
      * @ORM\Column(type="string", length=64, name="unfreezetime_string",
-     *     options={"comment"="Authoritative absolute or relative string representation of unfreezetime",
-     *              "default"="NULL"},
+     *     options={"comment"="Authoritative absolute or relative string representation of unfreezetime"},
      *     nullable=true)
      * @Serializer\Exclude()
      * @TimeString()
@@ -232,8 +230,7 @@ class Contest extends BaseApiEntity
     /**
      * @var string
      * @ORM\Column(type="string", length=64, name="deactivatetime_string",
-     *     options={"comment"="Authoritative absolute or relative string representation of deactivatetime",
-     *              "default"="NULL"},
+     *     options={"comment"="Authoritative absolute or relative string representation of deactivatetime"},
      *     nullable=true)
      * @Serializer\Exclude()
      * @TimeString()

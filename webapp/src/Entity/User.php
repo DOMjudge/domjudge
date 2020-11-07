@@ -20,7 +20,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *     name="user",
  *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Users that have access to DOMjudge"},
  *     indexes={@ORM\Index(name="teamid", columns={"teamid"})},
- *     uniqueConstraints={@ORM\UniqueConstraint(name="username", columns={"username"}, options={"lengths":{"190"}})})
+ *     uniqueConstraints={@ORM\UniqueConstraint(name="username", columns={"username"}, options={"lengths":{190}})})
  * @UniqueEntity("username", message="This username is already in use.")
  */
 class User implements UserInterface, EquatableInterface, \Serializable
@@ -55,7 +55,7 @@ class User implements UserInterface, EquatableInterface, \Serializable
     /**
      * @var string
      * @ORM\Column(type="string", name="email", length=255,
-     *     options={"comment"="Email address","default"="NULL"}, nullable=true)
+     *     options={"comment"="Email address"}, nullable=true)
      * @Assert\Email()
      */
     private $email;
@@ -63,8 +63,7 @@ class User implements UserInterface, EquatableInterface, \Serializable
     /**
      * @var double
      * @ORM\Column(type="decimal", precision=32, scale=9, name="last_login",
-     *     options={"comment"="Time of last successful login", "unsigned"=true,
-     *              "default"="NULL"},
+     *     options={"comment"="Time of last successful login", "unsigned"=true},
      *     nullable=true)
      * @Serializer\Exclude()
      */
@@ -73,8 +72,7 @@ class User implements UserInterface, EquatableInterface, \Serializable
     /**
      * @var double
      * @ORM\Column(type="decimal", precision=32, scale=9, name="first_login",
-     *     options={"comment"="Time of first login", "unsigned"=true,
-     *              "default"="NULL"},
+     *     options={"comment"="Time of first login", "unsigned"=true},
      *     nullable=true)
      * @Serializer\Exclude()
      */
@@ -83,8 +81,7 @@ class User implements UserInterface, EquatableInterface, \Serializable
     /**
      * @var string
      * @ORM\Column(type="string", name="last_ip_address", length=255,
-     *     options={"comment"="Last IP address of successful login",
-     *              "default"="NULL"},
+     *     options={"comment"="Last IP address of successful login"},
      *     nullable=true)
      * @Serializer\SerializedName("last_ip")
      */
@@ -93,7 +90,7 @@ class User implements UserInterface, EquatableInterface, \Serializable
     /**
      * @var string
      * @ORM\Column(type="string", name="password", length=255,
-     *     options={"comment"="Password hash","default"="NULL"}, nullable=true)
+     *     options={"comment"="Password hash"}, nullable=true)
      * @Serializer\Exclude()
      */
     private $password;
@@ -107,7 +104,7 @@ class User implements UserInterface, EquatableInterface, \Serializable
     /**
      * @var string
      * @ORM\Column(type="string", name="ip_address", length=255,
-     *     options={"comment"="IP Address used to autologin","default"="NULL"},
+     *     options={"comment"="IP Address used to autologin"},
      *     nullable=true)
      * @Serializer\SerializedName("ip")
      * @Assert\Ip(version="all")
@@ -127,8 +124,7 @@ class User implements UserInterface, EquatableInterface, \Serializable
      * @var int
      *
      * @ORM\Column(type="integer", name="teamid", length=4,
-     *     options={"comment"="Team associated with", "unsigned"=true,
-     *              "default"="NULL"},
+     *     options={"comment"="Team associated with this user", "unsigned"=true},
      *     nullable=true)
      * @Serializer\SerializedName("team_id")
      * @Serializer\Type("string")

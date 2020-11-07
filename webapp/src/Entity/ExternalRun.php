@@ -14,7 +14,7 @@ use Doctrine\ORM\Mapping as ORM;
  *         @ORM\Index(name="testcaseid", columns={"testcaseid"})
  *     },
  *     uniqueConstraints={
- *         @ORM\UniqueConstraint(name="externalid", columns={"cid", "externalid"}, options={"lengths": {null, "190"}}),
+ *         @ORM\UniqueConstraint(name="externalid", columns={"cid", "externalid"}, options={"lengths": {null, 190}}),
  *     })
  * @ORM\Entity
  */
@@ -34,7 +34,7 @@ class ExternalRun
      * @var string
      * @ORM\Column(type="string", name="externalid", length=255,
      *     options={"comment"="Run ID in external system, should be unique inside a single contest",
-     *              "collation"="utf8mb4_bin","default"="NULL"},
+     *              "collation"="utf8mb4_bin"},
      *     nullable=true)
      */
     protected $externalid;

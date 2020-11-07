@@ -13,7 +13,7 @@ use Doctrine\ORM\Mapping as ORM;
  *     indexes={@ORM\Index(name="submitid", columns={"submitid"})},
  *     uniqueConstraints={
  *         @ORM\UniqueConstraint(name="rank", columns={"submitid", "rank"}),
- *         @ORM\UniqueConstraint(name="filename", columns={"submitid", "filename"}, options={"lengths": {NULL, "190"}})
+ *         @ORM\UniqueConstraint(name="filename", columns={"submitid", "filename"}, options={"lengths": {NULL, 190}})
  *     })
  */
 class SubmissionFile
