@@ -81,11 +81,6 @@ curl $CURLOPTS -c $COOKIEJAR -F "_csrf_token=$CSRFTOKEN" -F "_username=admin" -F
 
 cd $DIR
 
-apt update
-apt install -y npm
-apt -y install libx11-xcb-dev libxtst-dev libnss3-dev libxss-dev libasound2-dev libatk-bridge2.0-dev libgtk-3-dev
-npm install -g pa11y
-
 cp $COOKIEJAR cookies.txt
 sed -i 's/#HttpOnly_//g' cookies.txt
 sed -i 's/\t0\t/\t1999999999\t/g' cookies.txt
