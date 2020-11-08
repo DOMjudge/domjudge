@@ -57,4 +57,9 @@ class ExecutableFixture extends AbstractExampleDataFixture
         $zip->open($filename, ZipArchive::CHECKCONS);
         return $this->dj->createImmutableExecutable($zip);
     }
+
+    public static function getGroups(): array
+    {
+        return ['example', 'gatling'];
+    }
 }

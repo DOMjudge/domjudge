@@ -19,6 +19,14 @@ class ProblemFixture extends AbstractExampleDataFixture implements DependentFixt
     protected $projectDir;
 
     /**
+     * @inheritDoc
+     */
+    public static function getGroups(): array
+    {
+        return ['example', 'gatling'];
+    }
+
+    /**
      * ProblemFixture constructor.
      * @param string $projectDir
      */

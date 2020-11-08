@@ -66,6 +66,14 @@ class ExecutableFixture extends AbstractDefaultDataFixture
         $manager->flush();
     }
 
+    /**
+     * @inheritDoc
+     */
+    public static function getGroups(): array
+    {
+        return ['example', 'gatling'];
+    }
+
     private function createImmutableExecutable(string $filename): ImmutableExecutable
     {
         $zip = new ZipArchive();
