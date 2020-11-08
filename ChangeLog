@@ -1,6 +1,6 @@
 DOMjudge Programming Contest Judging System
 
-Version 7.4.0 - DEV
+Version 8.0.0 - DEV
 -------------------
  - Compilation of submissions now happens inside the chroot.
    NOTE when upgrading: you need to install compilers and other
