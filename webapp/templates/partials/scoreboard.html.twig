@@ -48,8 +48,8 @@
                             <ul class="list-group list-group-flush">
                                 {% for affiliation in affiliations %}
                                     <li class="list-group-item">
-                                        {% set affiliationLogo = 'images/affiliations/' ~ affiliation.id ~ '.png' %}
-                                        {% if affiliationLogo | assetExists %}
+                                        {% set affiliationLogo = affiliation.id | assetPath('affiliation') %}
+                                        {% if affiliationLogo %}
                                             <img loading="lazy" class="affiliation-logo"
                                                  src="{{ asset(affiliationLogo) }}" alt="{{ affiliation.name }}"
                                                  title="{{ affiliation.name }}">

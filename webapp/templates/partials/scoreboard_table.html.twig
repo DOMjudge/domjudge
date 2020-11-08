@@ -141,14 +141,9 @@
                         {% endif %}
                         <a {% if link %}href="{{ link }}"{% endif %}>
                             {% if score.team.affiliation.country %}
-                                {% set countryFlag = 'images/countries/' ~ score.team.affiliation.country ~ '.png' %}
-                                {% if countryFlag | assetExists %}
-                                    <img loading="lazy" class="countryflag"
-                                         src="{{ asset(countryFlag) }}" alt="{{ alpha3_countries[score.team.affiliation.country] }}"
-                                         title="{{ alpha3_countries[score.team.affiliation.country] }}">
-                                {% else %}
-                                    {{ alpha3_countries[score.team.affiliation.country] }}
-                                {% endif %}
+                                <img loading="lazy" class="countryflag"
+                                     src="{{ asset('images/countries/' ~ score.team.affiliation.country ~ '.png') }}" alt="{{ alpha3_countries[score.team.affiliation.country] }}"
+                                     title="{{ alpha3_countries[score.team.affiliation.country] }}">
                             {% endif %}
                         </a>
                     {% endif %}
@@ -166,8 +161,8 @@
                             {% if showExternalId(score.team.affiliation) %}
                                 {% set affiliationId = score.team.affiliation.externalid %}
                             {% endif %}
-                            {% set affiliationImage = 'images/affiliations/' ~ affiliationId ~ '.png' %}
-                            {% if affiliationImage | assetExists %}
+                            {% set affiliationImage = affiliationId | assetPath('affiliation') %}
+                            {% if affiliationImage %}
                                 <img loading="lazy" class="affiliation-logo"
                                      src="{{ asset(affiliationImage) }}" alt="{{ score.team.affiliation.name }}"
                                      title="{{ score.team.affiliation.name }}">

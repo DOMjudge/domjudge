@@ -40,8 +40,8 @@
                         {% if showExternalId(teamAffiliation) %}
                             {% set affiliationId = teamAffiliation.externalid %}
                         {% endif %}
-                        {% set affiliationLogo = 'images/affiliations/' ~ affiliationId ~ '.png' %}
-                        {% if affiliationLogo | assetExists %}
+                        {% set affiliationLogo = affiliationId | assetPath('affiliation') %}
+                        {% if affiliationLogo %}
                             <img src="{{ asset(affiliationLogo) }}" alt="{{ teamAffiliation.shortname }}"
                                  title="{{ teamAffiliation.shortname }}" class="affiliation-logo"/>
                         {% else %}
@@ -54,11 +54,8 @@
                         <th>Country</th>
                         <td>
                             {% if teamAffiliation.country is not empty %}
-                                {% set countryFlag = 'images/countries/' ~ teamAffiliation.country ~ '.png' %}
-                                {% if countryFlag | assetExists %}
-                                    <img src="{{ asset(countryFlag) }}" alt="{{ alpha3_countries[teamAffiliation.country] }}"
-                                         title="{{ alpha3_countries[teamAffiliation.country] }}" class="countryflag"/>
-                                {% endif %}
+                                <img src="{{ asset('images/countries/' ~ team.affiliation.country ~ '.png') }}" alt="{{ alpha3_countries[teamAffiliation.country] }}"
+                                     title="{{ alpha3_countries[teamAffiliation.country] }}" class="countryflag"/>
                             {% endif %}
                             {{ alpha3_countries[teamAffiliation.country] }}
                         </td>

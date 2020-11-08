@@ -14,7 +14,7 @@
 
     <script src="{{ asset("js/domjudge.js") }}"></script>
     {% for file in customAssetFiles('js') %}
-        <script src="{{ asset(file) }}"></script>
+        <script src="{{ asset('js/custom/' ~ file) }}"></script>
     {% endfor %}
     {% block extrahead %}
         <link rel="stylesheet" href="{{ asset('style_domjudge.css') }}">
@@ -22,7 +22,7 @@
         {{ extrahead|default('') }}
 
         {% for file in customAssetFiles('css') %}
-            <link rel="stylesheet" href="{{ asset(file) }}">
+            <link rel="stylesheet" href="{{ asset('css/custom/' ~ file) }}">
         {% endfor %}
     {% endblock %}
 </head>

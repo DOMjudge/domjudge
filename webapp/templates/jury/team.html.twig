@@ -108,8 +108,8 @@
                             {% if showExternalId(team.affiliation) %}
                                 {% set affiliationId = team.affiliation.externalid %}
                             {% endif %}
-                            {% set affiliationLogo = 'images/affiliations/' ~ affiliationId ~ '.png' %}
-                            {% if affiliationLogo | assetExists %}
+                            {% set affiliationLogo = affiliationId | assetPath('affilation') %}
+                            {% if affiliationLogo %}
                                 <img src="{{ asset(affiliationLogo) }}" alt="{{ team.affiliation.shortname }}"
                                      title="{{ team.affiliation.shortname }}" class="affiliation-logo"/>
                             {% endif %}
@@ -123,11 +123,8 @@
                     <tr>
                         <th>Country</th>
                         <td>
-                            {% set countryFlag = 'images/countries/' ~ team.affiliation.country ~ '.png' %}
-                            {% if countryFlag | assetExists %}
-                                <img src="{{ asset(countryFlag) }}" alt="{{ alpha3_countries[team.affiliation.country] }}"
-                                     title="{{ alpha3_countries[team.affiliation.country] }}" class="countryflag"/>
-                            {% endif %}
+                            <img src="{{ asset('images/countries/' ~ team.affiliation.country ~ '.png') }}" alt="{{ alpha3_countries[team.affiliation.country] }}"
+                                 title="{{ alpha3_countries[team.affiliation.country] }}" class="countryflag"/>
                             {{ alpha3_countries[team.affiliation.country] }}
                         </td>
                     </tr>
@@ -158,8 +155,8 @@
                 {% endif %}
             </table>
         </div>
-    {% set teamImage = 'images/teams/' ~ team.teamId ~ '.jpg' %}
-    {% if teamImage | assetExists %}
+    {% set teamImage = team.teamId | assetPath('team') %}
+    {% if teamImage %}
         <div class="col">
         <img id="teampicture" src="{{ asset(teamImage) }}" alt="Picture of team {{ team.name }}"
              title="Picture of team {{ team.effectiveName }}">

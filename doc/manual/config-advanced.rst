@@ -43,7 +43,7 @@ is recommended to only place a few files there.
 
 .. note::
 
-  If you add or remove CSS and/or JavaScript files, you need to
+  If you add or remove any of the above files, you need to
   :ref:`clear the cache <clear-cache>` for changes to be detected.
 
 .. _authentication:
@@ -381,3 +381,4 @@ full filesystem path of your installation) binary with the `cache:clear` subcomm
 
   webapp/bin/console cache:clear
 
+Note that this is different than clearing the scoreboard cache.

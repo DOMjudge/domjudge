@@ -1,13 +1,8 @@
 <script>
     var template = function(element) {
-        var imgBase = '';
-        {% set countryFlag = 'images/countries/NLD.png' %}
-        {% if countryFlag | assetExists %}
-        // Use a country flag we know exists to automatically determine base path and asset version
-        imgBase = "{{ asset(countryFlag) }}";
-        {% endif %}
+        var imgBase = "{{ asset('images/countries/NLD.png') }}";
 
-        var img = element.id == undefined || element.id == "" || imgBase == ""
+        var img = element.id == undefined || element.id == ""
             ? ''
             : '<img src="' + imgBase.replace("NLD.png", element.id + ".png", 1) + '" class="countryflag">&nbsp;';
 
