@@ -1,8 +1,8 @@
 Advanced configuration topics
 =============================
 
-Adding graphics
----------------
+Adding graphics, custom styling and custom JavaScript
+-----------------------------------------------------
 DOMjudge can optionally present country flags, affiliation logos,
 team pictures and a page-wide banner on the public interface.
 
@@ -31,6 +31,20 @@ path of your installation) as follows:
 
   The IDs for affiliations and teams need to be the *external ID*
   if the ``data_source`` setting of DOMjudge is set to external.
+
+It is also possible to load custom CSS and/or JavaScript files. To do so, place
+files ending in `.css` under `public/css/custom/` and/or files ending in `.js`
+under `public/js/custom/`. See the Config checker in the admin interfae for the
+full filesystem path of your installation). Note that there is no guaranteed
+order in which the files will be loaded, but they will all be loaded after the
+main DOMjudge CSS and JavaScript files. If you have a lot of custom CSS/JavaScript
+files in these directories, the response time of DOMjudge might decrease, so it
+is recommended to only place a few files there.
+
+.. note::
+
+  If you add or remove CSS and/or JavaScript files, you need to
+  :ref:`clear the cache <clear-cache>` for changes to be detected.
 
 .. _authentication:
 
@@ -355,3 +369,15 @@ contest ID to use, and the IDs of the team categories you want to include
 
 .. _Output Validators format: https://icpc.io/problem-package-format/spec/output_validators
 .. _default output validator: https://icpc.io/problem-package-format/spec/problem_package_format#default-output-validator-specification
+
+.. _clear-cache:
+
+Clearing the DOMjudge cache
+---------------------------
+
+Some operations require you to clear the DOMjudge cache. To do this, execute
+the `webapp/bin/console` (see the Config checker in the admin interfae for the
+full filesystem path of your installation) binary with the `cache:clear` subcommand::
+
+  webapp/bin/console cache:clear
+

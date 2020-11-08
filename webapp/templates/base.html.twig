@@ -13,10 +13,17 @@
     <script src="{{ asset("js/bootstrap.bundle.min.js") }}"></script>
 
     <script src="{{ asset("js/domjudge.js") }}"></script>
+    {% for file in customAssetFiles('js') %}
+        <script src="{{ asset(file) }}"></script>
+    {% endfor %}
     {% block extrahead %}
         <link rel="stylesheet" href="{{ asset('style_domjudge.css') }}">
 
         {{ extrahead|default('') }}
+
+        {% for file in customAssetFiles('css') %}
+            <link rel="stylesheet" href="{{ asset(file) }}">
+        {% endfor %}
     {% endblock %}
 </head>
 <body{% if static is defined and static %} class="static"{% endif%}>

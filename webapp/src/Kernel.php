@@ -3,6 +3,7 @@
 namespace App;
 
 use App\DependencyInjection\Compiler\ChangeMainFormAuthenticationListenerPass;
+use App\DependencyInjection\Compiler\SetCustomCssAndJsFilesPass;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\Config\Resource\FileResource;
@@ -56,5 +57,6 @@ class Kernel extends BaseKernel
     protected function build(ContainerBuilder $container)
     {
         $container->addCompilerPass(new ChangeMainFormAuthenticationListenerPass());
+        $container->addCompilerPass(new SetCustomCssAndJsFilesPass());
     }
 }

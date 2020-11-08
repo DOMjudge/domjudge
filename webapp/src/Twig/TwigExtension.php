@@ -65,6 +65,16 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
      */
     protected $projectDir;
 
+    /**
+     * @var array
+     */
+    protected $customCssFiles;
+
+    /**
+     * @var array
+     */
+    protected $customJsFiles;
+
     public function __construct(
         DOMJudgeService $dj,
         ConfigurationService $config,
@@ -73,7 +83,9 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         EventLogService $eventLogService,
         TokenStorageInterface $tokenStorage,
         AuthorizationCheckerInterface $authorizationChecker,
-        string $projectDir
+        string $projectDir,
+        array $customCssFiles,
+        array $customJsFiles
     ) {
         $this->dj                   = $dj;
         $this->config               = $config;
@@ -83,6 +95,8 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         $this->tokenStorage         = $tokenStorage;
         $this->authorizationChecker = $authorizationChecker;
         $this->projectDir           = $projectDir;
+        $this->customCssFiles       = $customCssFiles;
+        $this->customJsFiles        = $customJsFiles;
     }
 
     public function getFunctions()
@@ -91,6 +105,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             new TwigFunction('button', [$this, 'button'], ['is_safe' => ['html']]),
             new TwigFunction('calculatePenaltyTime', [$this, 'calculatePenaltyTime']),
             new TwigFunction('showExternalId', [$this, 'showExternalId']),
+            new TwigFunction('customAssetFiles', [$this, 'customAssetFiles']),
         ];
     }
 
@@ -817,6 +832,23 @@ JS;
     {
         $webDir = realpath(sprintf('%s/public', $this->projectDir));
         return is_readable($webDir . '/' . $asset);
+    }
+
+    /**
+     * Get custom assets of the given type
+     * @param string $type
+     *
+     * @return array
+     */
+    public function customAssetFiles(string $type): array
+    {
+        if ($type === 'css') {
+            return $this->customCssFiles;
+        } elseif ($type === 'js') {
+            return $this->customJsFiles;
+        }
+
+        return [];
     }
 
     /**
