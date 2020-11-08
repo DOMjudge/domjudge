@@ -29,12 +29,12 @@ Software requirements
 
 For Debian (with some example compilers)::
 
-  sudo apt install make sudo debootstrap libcgroup-dev lsof \
-        php-cli php-curl php-json php-xml php-zip procps
+  sudo apt install make pkg-config sudo debootstrap libcgroup-dev \
+        php-cli php-curl php-json php-xml php-zip lsof procps
 
 For Red Hat::
 
-  sudo yum install make sudo libcgroup-devel lsof \
+  sudo yum install make pkgconfig sudo libcgroup-devel lsof \
         php-cli php-mbstring php-xml php-process procps-ng
 
 Building and installing
