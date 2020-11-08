@@ -3,7 +3,7 @@
 {% block title %}Scoreboard - {{ parent() }}{% endblock %}
 {% block content %}
     {% set banner = 'images/banner.png' %}
-    {% if banner | assetExists %}
+    {% if bannerExists() %}
         <img class="banner" src="{{ asset('images/banner.png') }}" alt="Banner">
     {% endif %}
 

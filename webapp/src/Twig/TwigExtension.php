@@ -75,6 +75,38 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
      */
     protected $customJsFiles;
 
+    /**
+     * @var array
+     */
+    protected $affiliationLogos;
+
+    /**
+     * @var array
+     */
+    protected $teamImages;
+
+    /**
+     * @var bool
+     */
+    protected $bannerExists;
+
+    /**
+     * TwigExtension constructor.
+     *
+     * @param DOMJudgeService               $dj
+     * @param ConfigurationService          $config
+     * @param EntityManagerInterface        $em
+     * @param SubmissionService             $submissionService
+     * @param EventLogService               $eventLogService
+     * @param TokenStorageInterface         $tokenStorage
+     * @param AuthorizationCheckerInterface $authorizationChecker
+     * @param string                        $projectDir
+     * @param array                         $customCssFiles
+     * @param array                         $customJsFiles
+     * @param array                         $affiliationLogos
+     * @param array                         $teamImages
+     * @param bool                          $bannerExists
+     */
     public function __construct(
         DOMJudgeService $dj,
         ConfigurationService $config,
@@ -85,7 +117,10 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         AuthorizationCheckerInterface $authorizationChecker,
         string $projectDir,
         array $customCssFiles,
-        array $customJsFiles
+        array $customJsFiles,
+        array $affiliationLogos,
+        array $teamImages,
+        bool $bannerExists
     ) {
         $this->dj                   = $dj;
         $this->config               = $config;
@@ -97,6 +132,9 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         $this->projectDir           = $projectDir;
         $this->customCssFiles       = $customCssFiles;
         $this->customJsFiles        = $customJsFiles;
+        $this->affiliationLogos     = $affiliationLogos;
+        $this->teamImages           = $teamImages;
+        $this->bannerExists         = $bannerExists;
     }
 
     public function getFunctions()
@@ -106,6 +144,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             new TwigFunction('calculatePenaltyTime', [$this, 'calculatePenaltyTime']),
             new TwigFunction('showExternalId', [$this, 'showExternalId']),
             new TwigFunction('customAssetFiles', [$this, 'customAssetFiles']),
+            new TwigFunction('bannerExists', [$this, 'bannerExists']),
         ];
     }
 
@@ -133,7 +172,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             new TwigFilter('codeEditor', [$this, 'codeEditor'], ['is_safe' => ['html']]),
             new TwigFilter('showDiff', [$this, 'showDiff'], ['is_safe' => ['html']]),
             new TwigFilter('printContestStart', [$this, 'printContestStart']),
-            new TwigFilter('assetExists', [$this, 'assetExists']),
+            new TwigFilter('assetPath', [$this, 'assetPath']),
             new TwigFilter('printTimeRelative', [$this, 'printTimeRelative']),
             new TwigFilter('scoreTime', [$this, 'scoreTime']),
             new TwigFilter('statusClass', [$this, 'statusClass']),
@@ -824,14 +863,44 @@ JS;
     }
 
     /**
-     * Determine whether the given asset exists
-     * @param string $asset
+     * Get the path of an asset if it exists
+     *
+     * @param string $name
+     * @param string $type
+     *
+     * @return string|null
+     */
+    public function assetPath(string $name, string $type): ?string
+    {
+        switch ($type) {
+            case 'affiliation':
+                $extension = 'png';
+                $var = $this->affiliationLogos;
+                $dir = 'images/affiliations';
+                break;
+            case 'team':
+                $extension = 'jpg';
+                $var = $this->teamImages;
+                $dir = 'images/teams';
+                break;
+        }
+
+        if (isset($extension)) {
+            if (in_array($name . '.' . $extension, $var)) {
+                return sprintf('%s/%s.%s', $dir, $name, $extension);
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Determine whether the banner exists
      * @return bool
      */
-    public function assetExists(string $asset): bool
+    public function bannerExists(): bool
     {
-        $webDir = realpath(sprintf('%s/public', $this->projectDir));
-        return is_readable($webDir . '/' . $asset);
+        return $this->bannerExists;
     }
 
     /**
