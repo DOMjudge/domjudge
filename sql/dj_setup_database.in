@@ -31,6 +31,7 @@ Commands:
   bare-install     create database, setup defaults if not existing
   uninstall        remove database users and database, INCLUDING ALL DATA!
   install-examples install examples only
+  install-loadtest configure for load testing. WARNING: CREATES A LOT OF EXTRA ITEMS!
   upgrade          upgrade MySQL database schema to current version
 
 Options:
@@ -284,6 +285,16 @@ uninstall)
 install-examples)
 	read_dbpasswords
 	DBUSER=$domjudge_DBUSER PASSWD=$domjudge_PASSWD symfony_console domjudge:load-example-data
+	;;
+
+install-loadtest)
+	read_dbpasswords
+	create_db_users
+	export DB_FIRST_INSTALL=1
+	symfony_console doctrine:migrations:migrate -n
+	unset DB_FIRST_INSTALL
+	DBUSER=$domjudge_DBUSER PASSWD=$domjudge_PASSWD symfony_console domjudge:load-default-data
+    DBUSER=$domjudge_DBUSER PASSWD=$domjudge_PASSWD symfony_console domjudge:load-gatling-data
 	;;
 
 create-db-users)
