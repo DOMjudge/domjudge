@@ -17,7 +17,7 @@ function get_db_url()
         if ($line[0] == '#') {
             continue;
         }
-        list($dummy, $host, $db, $user, $pass, $port) = explode(':', trim($line));
+        list($dummy, $host, $db, $user, $pass, $port) = array_pad(explode(':', trim($line)), 6, null);
         break;
     }
 
