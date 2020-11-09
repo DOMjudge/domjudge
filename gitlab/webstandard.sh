@@ -81,18 +81,51 @@ fi
 section_end scrape
 
 if [ "$TEST" = "w3cval" ]; then
+    section_start_collap upstream_problems "Remove files from upstream with problems"
+    rm -rf localhost/domjudge/doc
+    rm -rf localhost/domjudge/bundles/nelmioapidoc*
+    rm -f localhost/domjudge/css/bootstrap.min.css*
+    rm -f localhost/domjudge/css/select2-bootstrap.min.css*
+    section_end upstream_problems
+
     section_start_collap test_suite "Install testsuite"
     cd $DIR
     wget https://github.com/validator/validator/releases/latest/download/vnu.linux.zip
     unzip -q vnu.linux.zip
     section_end test_suite
+    FLTR='--filterpattern .*form.*|.*style.*|.*autocomplete.*|.*scope.*'
     for typ in html css svg
     do
-        $DIR/vnu-runtime-image/bin/vnu --errors-only --exit-zero-always --skip-non-$typ --format json $url 2> result.json
-        NEWFOUNDERRORS=`$DIR/vnu-runtime-image/bin/vnu --errors-only --exit-zero-always --skip-non-$typ --format gnu $url 2>&1 | wc -l`
+	$DIR/vnu-runtime-image/bin/vnu --errors-only --exit-zero-always --skip-non-$typ --format json $FLTR $url 2> result.json
+        NEWFOUNDERRORS=`$DIR/vnu-runtime-image/bin/vnu --errors-only --exit-zero-always --skip-non-$typ --format gnu $FLTR $url 2>&1 | wc -l`
         FOUNDERR=$((NEWFOUNDERRORS+FOUNDERR))
         python3 -m "json.tool" < result.json > w3c$typ$url.json
         trace_off; python3 gitlab/jsontogitlab.py w3c$typ$url.json; trace_on
+    done
+else
+    section_start_collap upstream_problems "Remove files from upstream with problems"
+    rm -rf localhost/domjudge/{doc,api}
+    section_end upstream_problems
+
+    section_start_collap test_suite "Install testsuite"
+    section_end test_suite
+    if [ $TEST == "axe" ]; then
+	    STAN="-e $TEST"
+	    FLTR=""
+    else
+	    STAN="-s $TEST"
+	    FLTR="-E '#DataTables_Table_0 > tbody > tr > td > a','#menuDefault > a','#filter-card > div > div > div > span > span:nth-child(1) > span > ul > li > input'"
+    fi
+    cd $DIR
+    ACCEPTEDERR=5
+    for file in `find $url -name *.html`
+    do
+        section_start ${file//\//} $file
+        # T is reasonable amount of errors to allow to not break
+        su domjudge -c "/node_modules/.bin/pa11y $STAN -T $ACCEPTEDERR $FLTR --reporter json ./$file" | python3 -m json.tool
+        ERR=`su domjudge -c "/node_modules/.bin/pa11y $STAN -T $ACCEPTEDERR $FLTR --reporter csv ./$file" | wc -l`
+        FOUNDERR=$((ERR+FOUNDERR-1)) # Remove header row
+        section_end $file
     done
 fi
 done
