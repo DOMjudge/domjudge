@@ -14,6 +14,11 @@ Version 8.0.0 - DEV
  - Add metrics API endpoint for use with Prometheus.
  - Always show banner.png, if present, on the public scoreboard.
  - Upgrade bundled libraries.
+ - Add problem statistics to team/public problem pages.
+ - Add support for specifying database port.
+ - Update API documentation to OpenAPI 3.
+ - Add support for loading custom CSS and JavaScript.
+ - Speed up loading team pictures and affiliation logos.
 
 Version 7.3.0 - 26 June 2020
 ----------------------------
@@ -56,7 +61,7 @@ Version 7.2.1 - 6 May 2020
  - Various small fixes to the build/install system.
  - Fix user IP address field to accept IPv6 addresses.
  - Fix and document static scoreboard contest selection feature.
- - Fix a sed error message on internal compile error. 
+ - Fix a sed error message on internal compile error.
  - Fix link to documentation from the admin index page.
  - Fix problem text links from scoreboard header.
  - Fix that country select fields are hidden when show_flags is off.
