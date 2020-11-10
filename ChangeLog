@@ -1,7 +1,7 @@
 DOMjudge Programming Contest Judging System
 
-Version 7.3.1 - DEV
--------------------
+Version 7.3.1 - 10 November 2020
+--------------------------------
  - Fix chroot install on Ubuntu 20.04.
  - Fix results.hml and results.tsv output.
  - Fix race condition in scoreboard related to a Doctrine bug.
