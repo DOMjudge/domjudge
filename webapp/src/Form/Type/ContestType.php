@@ -25,7 +25,9 @@ class ContestType extends AbstractExternalIdEntityType
     {
         $this->addExternalIdField($builder, Contest::class);
         $builder->add('shortname', TextType::class);
-        $builder->add('name', TextType::class);
+        $builder->add('name', TextType::class, [
+            'help' => 'Contest name as shown in the top right.'
+        ]);
         $builder->add('activatetimeString', TextType::class, [
             'label' => 'Activate time',
             'help' => 'Time when the contest becomes visible for teams to join. Must be in the past to enable judging of jury submissions.',
@@ -41,7 +43,7 @@ class ContestType extends AbstractExternalIdEntityType
                 'Yes' => true,
                 'No' => false,
             ],
-            'help' => 'Only John knows',
+            'help' => 'Disable to delay the contest start and stop the countdown. Enable again after setting a new start time.',
         ]);
         $builder->add('freezetimeString', TextType::class, [
             'label' => 'Scoreboard freeze time',
@@ -50,12 +52,12 @@ class ContestType extends AbstractExternalIdEntityType
         ]);
         $builder->add('endtimeString', TextType::class, [
             'label' => 'End time',
-            'help' => 'Time when the contest ends.',
+            'help' => 'Time when the contest ends. Submissions made after this time will be accepted but shown as \'too-late\' and not counted towards the score.',
         ]);
         $builder->add('unfreezetimeString', TextType::class, [
             'label' => 'Scoreboard unfreeze time',
             'required' => false,
-            'help' => 'Time when the final scoreboard is revealed. Usually a few hours after the contest ends, and the award ceremony is over.',
+            'help' => 'Time when the final scoreboard is revealed. Usually this is a few hours after the contest ends and the award ceremony is over.',
         ]);
         $builder->add('deactivatetimeString', TextType::class, [
             'label' => 'Deactivate time',
@@ -68,7 +70,7 @@ class ContestType extends AbstractExternalIdEntityType
                 'Yes' => true,
                 'No' => false,
             ],
-            'help' => 'Enables the balloons page. (What is the advantage of disabling it?)',
+            'help' => 'Disable this to stop recording balloons. Usually you can just leave this to true.',
         ]);
         $builder->add('public', ChoiceType::class, [
             'expanded' => true,
