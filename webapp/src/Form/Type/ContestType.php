@@ -88,7 +88,7 @@ class ContestType extends AbstractExternalIdEntityType
                 'Yes' => true,
                 'No' => false,
             ],
-            'help' => 'When true, any logged in team can join this contest, and the teams/categories listed below are added by default. When false, only the teams/categories listed below will participate.',
+            'help' => 'When true, any logged in team is part of the contest. When false, only the teams/categories listed below are part of the contest.',
         ]);
         $builder->add('teams', EntityType::class, [
             'required' => false,
