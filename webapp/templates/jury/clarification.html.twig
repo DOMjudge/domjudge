@@ -61,7 +61,7 @@ Jury
     </span>
 <span class="clarification-subject-form" data-current-selected-subject="{{ clar.categoryid }}" data-clarification-id="{{clar.clarid}}">
 <form action="{{ path('jury_clarification_change_subject', {'clarId': clar.clarid }) }}" method="post" class="form-inline">
-<select name="subject" id="subject" class="custom-select custom-select-sm">
+<select name="subject" class="subject custom-select custom-select-sm">
 {% for contest,subject in clarform.subjects %}
 <optgroup label="{{ contest }}">
 {% for id,descr in subject %}
@@ -93,7 +93,7 @@ Jury
 <button class="btn btn-sm btn-link clarification-queue-change-button"><i class="far fa-edit" title="Change queue"></i></button></span>
 <div style="display: inline" class="clarification-queue-form" data-current-selected-queue="{{ clar.queueid }}" data-clarification-id="{{clar.clarid}}">
 <form action="{{ path('jury_clarification_change_queue', {'clarId': clar.clarid }) }}" method="post" class="form-inline">
-<select name="queue" id="queue" class="custom-select custom-select-sm">
+<select name="queue" class="queue custom-select custom-select-sm">
 <option value="">Unassigned issues</option>
 {% for qid,queue in clarform.queues %}
 <option value="{{qid}}"{% if clar.queueid == qid %} selected{% endif %}>{{queue}}</option>
