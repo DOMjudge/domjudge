@@ -30,7 +30,7 @@ class ContestType extends AbstractExternalIdEntityType
         ]);
         $builder->add('activatetimeString', TextType::class, [
             'label' => 'Activate time',
-            'help' => 'Time when the contest becomes visible for teams to join. Must be in the past to enable judging of jury submissions.',
+            'help' => 'Time when the contest becomes visible for teams to join. Must be in the past to enable submission of jury submissions.',
         ]);
         $builder->add('starttimeString', TextType::class, [
             'label' => 'Start time',
