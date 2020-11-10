@@ -210,6 +210,9 @@
                     if (confirm('Really delete interval?')) {
                         var $form = $('<form method="post" />');
                         $form.attr('action', $(this).data('submit-url'));
+                        // Some browsers require the form to be present in the DOM,
+                        // so append it to the body
+                        $(document.body).append($form);
                         $form.submit();
                     }
                     return false;
