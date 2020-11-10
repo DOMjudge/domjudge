@@ -65,7 +65,11 @@
                                                             {% endif %}
                                                             {% set stat = stats.problems[problem.problem.probid][index][bucket] %}
                                                             {% set count = stat.count %}
-                                                            {% set bucket = (count / maxBucketSize * 9) | round(0, 'ceil') %}
+                                                            {% if maxBucketSize == 0 %}
+                                                                {% set bucket = 0 %}
+                                                            {% else %}
+                                                                {% set bucket = (count / maxBucketSize * 9) | round(0, 'ceil') %}
+                                                            {% endif %}
                                                             {% if count == 1 %}
                                                                 {% set submissionText = 'submission' %}
                                                             {% else %}
