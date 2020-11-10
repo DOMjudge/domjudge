@@ -699,7 +699,7 @@ INSERT INTO `language` (`langid`, `externalid`, `name`, `extensions`, `require_e
     ('pl', 'pl', 'Perl', '["pl"]', 0, "Main file", 0, 1, 1, 'pl'),
     ('plg', 'prolog', 'Prolog', '["plg"]', 0, "Main file", 0, 1, 1, 'plg'),
     ('py2', 'python2', 'Python 2', '["py2","py"]', 0, "Main file", 0, 1, 1, 'py2'),
-    ('py3', 'python3', 'Python 3', '["py3"]', 0, "Main file", 0, 1, 1, 'py3'),
+    ('py3', 'python3', 'Python 3', '["py3"]', 0, "Main file", 1, 1, 1, 'py3'),
     ('r', 'r', 'R', '["R"]', 0, "Main file", 0, 1, 1, 'r'),
     ('rb', 'ruby', 'Ruby', '["rb"]', 0, "Main file", 0, 1, 1, 'rb'),
     ('scala', 'scala', 'Scala', '["scala"]', 0, NULL, 0, 1, 1, 'scala'),

@@ -133,7 +133,7 @@ if [ "$DISTRO" = 'Debian' ]; then
 INCLUDEDEBS="ca-certificates"
 
 # Packages to install after upgrade (space separated):
-INSTALLDEBS="gcc g++ default-jdk-headless default-jre-headless pypy python3 locales"
+INSTALLDEBS="gcc g++ default-jdk-headless default-jre-headless pypy pypy3 python3 locales"
 # For C# support add: mono-runtime libmono-system2.0-cil
 # However running mono within chroot still gives errors...
 
@@ -162,7 +162,7 @@ if [ "$DISTRO" = 'Ubuntu' ]; then
 INCLUDEDEBS=""
 
 # Packages to install after upgrade (space separated):
-INSTALLDEBS="gcc g++ default-jdk-headless default-jre-headless pypy python3 locales"
+INSTALLDEBS="gcc g++ default-jdk-headless default-jre-headless pypy pypy3 python3 locales"
 # For C# support add: mono-mcs mono-devel
 # However running mono within chroot still gives errors...
 
