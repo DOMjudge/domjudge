@@ -137,7 +137,7 @@
                     {% if score.team.affiliation %}
                         {% set link = null %}
                         {% if jury %}
-                            {% set link = path('jury_team_affiliation', {'affilId': score.team.affilid}) %}
+                            {% set link = path('jury_team_affiliation', {'affilId': score.team.affiliation.affilid}) %}
                         {% endif %}
                         <a {% if link %}href="{{ link }}"{% endif %}>
                             {% if score.team.affiliation.country %}
@@ -154,7 +154,7 @@
                     {% if score.team.affiliation %}
                         {% set link = null %}
                         {% if jury %}
-                            {% set link = path('jury_team_affiliation', {'affilId': score.team.affilid}) %}
+                            {% set link = path('jury_team_affiliation', {'affilId': score.team.affiliation.affilid}) %}
                         {% endif %}
                         <a {% if link %}href="{{ link }}"{% endif %}>
                             {% set affiliationId = score.team.affiliation.affilid %}

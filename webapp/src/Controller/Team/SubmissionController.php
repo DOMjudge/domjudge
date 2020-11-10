@@ -83,7 +83,7 @@ class SubmissionController extends BaseController
     {
         $user    = $this->dj->getUser();
         $team    = $user->getTeam();
-        $contest = $this->dj->getCurrentContest($user->getTeamid());
+        $contest = $this->dj->getCurrentContest($user->getTeam()->getTeamid());
         $form    = $this->formFactory
             ->createBuilder(SubmitProblemType::class)
             ->setAction($this->generateUrl('team_submit'))
@@ -159,7 +159,7 @@ class SubmissionController extends BaseController
             ->join('cp.problem', 'p')
             ->join('s.language', 'l')
             ->select('j', 's', 'cp', 'p', 'l')
-            ->andWhere('j.submitid = :submitId')
+            ->andWhere('j.submission = :submitId')
             ->andWhere('j.valid = 1')
             ->andWhere('s.team = :team')
             ->setParameter(':submitId', $submitId)

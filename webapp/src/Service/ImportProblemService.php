@@ -647,7 +647,7 @@ class ImportProblemService
                     } elseif (!empty($expectedResult)) {
                         $results = [$expectedResult];
                     }
-                    $jury_team_id = $this->dj->getUser()->getTeamid();
+                    $jury_team_id = $this->dj->getUser()->getTeam() ? $this->dj->getUser()->getTeam()->getTeamid() : null;
                     if (isset($submission_details[$path]['team'])) {
                         $json_team = $this->em->getRepository(Team::class)
                             ->findOneBy(['name' => $submission_details[$path]['team']]);

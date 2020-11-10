@@ -195,15 +195,15 @@ class StatisticsService
                 $misc['total_submissions']++;
                 $teamStats['total_submitted']++;
                 static::setOrIncrement($misc['problem_attempts'],
-                    $s->getProbId());
+                    $s->getProblem()->getProbId());
                 static::setOrIncrement($teamStats['problems_submitted'],
-                    $s->getProbId());
-                $misc['problem_stats']['teams_attempted'][$s->getProbId()][$team->getTeamId()] = $team->getTeamId();
+                    $s->getProblem()->getProbId());
+                $misc['problem_stats']['teams_attempted'][$s->getProblem()->getProbId()][$team->getTeamId()] = $team->getTeamId();
 
 
                 static::setOrIncrement($misc['language_stats']['total_submissions'],
-                    $s->getLangid());
-                $misc['language_stats']['teams_attempted'][$s->getLangid()][$team->getTeamId()] = $team->getTeamId();
+                    $s->getLanguage()->getLangid());
+                $misc['language_stats']['teams_attempted'][$s->getLanguage()->getLangid()][$team->getTeamId()] = $team->getTeamId();
 
                 if ($s->getResult() != 'correct') {
                     continue;
@@ -211,14 +211,14 @@ class StatisticsService
                 $misc['total_accepted']++;
                 $teamStats['total_accepted']++;
                 static::setOrIncrement($teamStats['problems_accepted'],
-                    $s->getProbId());
+                    $s->getProblem()->getProbId());
                 static::setOrIncrement($misc['problem_solutions'],
-                    $s->getProbId());
-                $misc['problem_stats']['teams_solved'][$s->getProbId()][$team->getTeamId()] = $team->getTeamId();
+                    $s->getProblem()->getProbId());
+                $misc['problem_stats']['teams_solved'][$s->getProblem()->getProbId()][$team->getTeamId()] = $team->getTeamId();
 
-                $misc['language_stats']['teams_solved'][$s->getLangid()][$team->getTeamId()] = $team->getTeamId();
+                $misc['language_stats']['teams_solved'][$s->getLanguage()->getLangid()][$team->getTeamId()] = $team->getTeamId();
                 static::setOrIncrement($misc['language_stats']['total_solutions'],
-                    $s->getLangid());
+                    $s->getLanguage()->getLangid());
 
                 if ($lastSubmission == null || $s->getSubmitTime() > $lastSubmission->getSubmitTime()) {
                     $lastSubmission = $s;
@@ -368,6 +368,7 @@ class StatisticsService
         //   - The judging submission is part of the selected contest
         //   - The judging submission matches the problem we're analyzing
         //   - The submission was made by a team in a visible category
+        /** @var Judging[] $judgings */
         $judgings = $this->applyFilter($this->em->createQueryBuilder()
             ->select('j, jr', 's', 'team', 'sj')
             ->from(Judging::class, 'j')
@@ -417,9 +418,9 @@ class StatisticsService
         $teamsAttempted = [];
         foreach ($judgings as $judging) {
             $s = $judging->getSubmission();
-            $teamsAttempted[$s->getTeamID()] = $s->getTeamID();
+            $teamsAttempted[$s->getTeam()->getTeamid()] = $s->getTeam()->getTeamid();
             if ($judging->getResult() == 'correct') {
-                $teamsCorrect[$s->getTeamID()] = $s->getTeamID();
+                $teamsCorrect[$s->getTeam()->getTeamid()] = $s->getTeam()->getTeamid();
             }
         }
         $misc['num_teams_attempted'] = count($teamsAttempted);
@@ -634,12 +635,12 @@ class StatisticsService
     {
         // Figure out how many submissions each team has
         $results = $this->applyFilter($this->em->createQueryBuilder()
-            ->select('s.teamid as teamid, count(s.teamid) as num_submissions')
+            ->select('t.teamid as teamid, count(t.teamid) as num_submissions')
             ->from(Submission::class, 's')
             ->join('s.team', 't')
             ->join('t.category', 'tc')
             ->andWhere('s.contest = :contest'), $filter)
-            ->groupBy('s.teamid')
+            ->groupBy('t.teamid')
             ->setParameter('contest', $contest)
             ->getQuery()->getResult();
         $numSubmissions = [];

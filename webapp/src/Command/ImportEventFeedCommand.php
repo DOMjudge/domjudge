@@ -1828,11 +1828,15 @@ class ImportEventFeedCommand extends Command
 
         $this->em->flush();
 
+        $contestId = $submission->getContest()->getCid();
+        $teamId = $submission->getTeam()->getTeamid();
+        $problemId = $submission->getProblem()->getProbid();
+
         // Now we need to update the scoreboard cache for this cell to get this judgement result in
         $this->em->clear();
-        $contest = $this->em->getRepository(Contest::class)->find($submission->getCid());
-        $team    = $this->em->getRepository(Team::class)->find($submission->getTeamid());
-        $problem = $this->em->getRepository(Problem::class)->find($submission->getProbid());
+        $contest = $this->em->getRepository(Contest::class)->find($contestId);
+        $team    = $this->em->getRepository(Team::class)->find($teamId);
+        $problem = $this->em->getRepository(Problem::class)->find($problemId);
         $this->scoreboardService->calculateScoreRow($contest, $team, $problem);
 
         $this->processPendingEvents('judgement', $judgement->getExternalid());
@@ -1990,14 +1994,18 @@ class ImportEventFeedCommand extends Command
     {
         $submission->setValid($valid);
 
+        $contestId = $submission->getContest()->getCid();
+        $teamId = $submission->getTeam()->getTeamid();
+        $problemId = $submission->getProblem()->getProbid();
+
         $this->em->flush();
         $this->eventLogService->log('submissions', $submission->getSubmitid(),
             $valid ? EventLogService::ACTION_CREATE : EventLogService::ACTION_DELETE,
             $this->contestId);
 
-        $contest = $this->em->getRepository(Contest::class)->find($submission->getCid());
-        $team = $this->em->getRepository(Team::class)->find($submission->getTeamid());
-        $problem = $this->em->getRepository(Problem::class)->find($submission->getProbid());
+        $contest = $this->em->getRepository(Contest::class)->find($contestId);
+        $team = $this->em->getRepository(Team::class)->find($teamId);
+        $problem = $this->em->getRepository(Problem::class)->find($problemId);
         $this->scoreboardService->calculateScoreRow($contest, $team, $problem);
     }
 }

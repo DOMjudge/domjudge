@@ -409,8 +409,8 @@ class CheckConfigService
             $problemerrors[$probid] = $errors;
 
             $moreproblemerrors[$probid] = '';
-            if ($special_compare = $problem->getSpecialCompare()) {
-                $exec = $this->em->getRepository(Executable::class)->findOneBy(['execid' => $special_compare]);
+            if ($special_compare = $problem->getCompareExecutable()) {
+                $exec = $this->em->getRepository(Executable::class)->findOneBy(['execid' => $special_compare->getExecid()]);
                 if (!$exec) {
                     $result = 'E';
                     $moreproblemerrors[$probid] .= sprintf("Special compare script %s not found for p%s\n", $special_compare, $probid);
@@ -419,8 +419,8 @@ class CheckConfigService
                     $moreproblemerrors[$probid] .= sprintf("Special compare script %s exists but is of wrong type (%s instead of compare) for p%s\n", $special_compare, $exec->getType(), $probid);
                 }
             }
-            if ($special_run = $problem->getSpecialRun()) {
-                $exec = $this->em->getRepository(Executable::class)->findOneBy(['execid' => $special_run]);
+            if ($special_run = $problem->getRunExecutable()) {
+                $exec = $this->em->getRepository(Executable::class)->findOneBy(['execid' => $special_run->getExecid()]);
                 if (!$exec) {
                     $result = 'E';
                     $moreproblemerrors[$probid] .= sprintf("Special run script %s not found for p%s\n", $special_run, $probid);
@@ -440,7 +440,7 @@ class CheckConfigService
                 ->select('tc.testcaseid', 'tc.rank', 'length(tcc.output) as output_size' )
                 ->from(Testcase::class, 'tc')
                 ->join('tc.content', 'tcc')
-                ->andWhere('tc.probid = :probid')
+                ->andWhere('tc.problem = :probid')
                 ->setParameter(':probid', $probid)
                 ->getQuery()
                 ->getResult();
@@ -493,7 +493,7 @@ class CheckConfigService
             $languageerrors[$langid] = $errors;
 
             $morelanguageerrors[$langid] = '';
-            if ($compile = $language->getCompileScript()) {
+            if ($compile = $language->getCompileExecutable()->getExecid()) {
                $exec = $this->em->getRepository(Executable::class)->findOneBy(['execid' => $compile]);
                if (!$exec) {
                    $result = 'E';
@@ -527,7 +527,7 @@ class CheckConfigService
         $judgehosts = $this->em->getRepository(Judgehost::class)->findBy(['active' => 1]);
 
         foreach ($judgehosts as $judgehost) {
-            if ($judgehost->getRestrictionid() === null) {
+            if ($judgehost->getRestriction() === null) {
                 return ['caption' => 'Problem, language and contest judgability',
                     'result' => 'O',
                     'desc' => sprintf("At least one judgehost (%s) is active and unrestricted.", $judgehost->getHostname())];

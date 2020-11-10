@@ -347,8 +347,8 @@ class ProblemController extends BaseController
         // Build up INI
         $iniData = [
             'timelimit' => $problem->getTimelimit(),
-            'special_run' => $problem->getSpecialRun(),
-            'special_compare' => $problem->getSpecialCompare(),
+            'special_run' => $problem->getRunExecutable() ? $problem->getRunExecutable()->getExecid() : null,
+            'special_compare' => $problem->getCompareExecutable() ? $problem->getCompareExecutable()->getExecid() : null,
             'color' => $contestProblem ? $contestProblem->getColor() : null,
         ];
 
@@ -361,7 +361,7 @@ class ProblemController extends BaseController
 
         // Build up YAML
         $yaml = ['name' => $problem->getName()];
-        if (!empty($problem->getSpecialCompare())) {
+        if (!empty($problem->getCompareExecutable()->getExecid())) {
             $yaml['validation'] = 'custom';
         }
         if (!empty($problem->getSpecialCompareArgs())) {
@@ -899,7 +899,7 @@ class ProblemController extends BaseController
             ->from(Testcase::class, 'tc')
             ->join('tc.content', 'tcc')
             ->select('tc', 'tcc')
-            ->andWhere('tc.probid = :problem')
+            ->andWhere('tc.problem = :problem')
             ->andWhere('tc.rank = :rank')
             ->setParameter(':problem', $probId)
             ->setParameter(':rank', $rank)
@@ -1053,7 +1053,7 @@ class ProblemController extends BaseController
      * @Route("/{testcaseId<\d+>}/delete_testcase", name="jury_testcase_delete")
      * @IsGranted("ROLE_ADMIN")
      * @param Request $request
-     * @param int     $probId
+     * @param int     $testcaseId
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
      * @throws Exception
      */
@@ -1065,20 +1065,20 @@ class ProblemController extends BaseController
             throw new NotFoundHttpException(sprintf('Testcase with ID %s not found', $testcaseId));
         }
         $testcase->setDeleted(true);
-        $probId = $testcase->getProbid();
-        $testcase->setProbid(null);
+        $problem = $testcase->getProblem();
+        $testcase->setProblem(null);
         $oldRank = $testcase->getRank();
 
         /** @var Testcase[] $testcases */
         $testcases = $this->em->getRepository(Testcase::class)
-            ->findBy(['probid' => $probId], ['rank' => 'ASC']);
+            ->findBy(['problem' => $problem], ['rank' => 'ASC']);
         foreach ($testcases as $testcase) {
             if ($testcase->getRank() > $oldRank) {
                 $testcase->setRank($testcase->getRank() - 1);
             }
         }
         $this->em->flush();
-        $this->addFlash('danger', sprintf('Testcase %d removed from problem %s. Consider rejudging the problem.', $testcaseId, $probId));
+        $this->addFlash('danger', sprintf('Testcase %d removed from problem %s. Consider rejudging the problem.', $testcaseId, $problem->getProbid()));
         return $this->redirectToRoute('jury_problem_testcases', ['probId' => $probId]);
     }
 

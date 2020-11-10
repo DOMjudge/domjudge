@@ -85,7 +85,7 @@ class ClarificationController extends AbstractRestController
             ->leftJoin('clar.recipient', 'r')
             ->leftJoin('clar.problem', 'p')
             ->select('clar, c, r, reply, p')
-            ->andWhere('clar.cid = :cid')
+            ->andWhere('clar.contest = :cid')
             ->setParameter(':cid', $this->getContestId($request));
 
         if (!$this->dj->checkrole('api_reader') &&

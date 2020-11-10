@@ -112,31 +112,12 @@ class ExternalJudgement
     private $valid = true;
 
     /**
-     * @var int
-     *
-     * @ORM\Column(type="integer", name="cid",
-     *     options={"comment"="Contest ID", "unsigned"=true},
-     *     nullable=false, length=4)
-     */
-    private $cid;
-
-    /**
      * @var Contest
      *
      * @ORM\ManyToOne(targetEntity="App\Entity\Contest")
      * @ORM\JoinColumn(name="cid", referencedColumnName="cid", onDelete="CASCADE")
      */
     private $contest;
-
-    /**
-     * @var int
-     *
-     * @ORM\Column(type="integer", length=4, name="submitid",
-     *     options={"comment"="Submission ID being judged by external system",
-     *              "unsigned"=true},
-     *     nullable=false)
-     */
-    private $submitid;
 
     /**
      * @var Submission
@@ -362,30 +343,6 @@ class ExternalJudgement
     }
 
     /**
-     * Set cid
-     *
-     * @param int $cid
-     *
-     * @return ExternalJudgement
-     */
-    public function setCid(int $cid)
-    {
-        $this->cid = $cid;
-
-        return $this;
-    }
-
-    /**
-     * Get cid
-     *
-     * @return int
-     */
-    public function getCid()
-    {
-        return $this->cid;
-    }
-
-    /**
      * Set contest
      *
      * @param Contest $contest
@@ -407,30 +364,6 @@ class ExternalJudgement
     public function getContest()
     {
         return $this->contest;
-    }
-
-    /**
-     * Set submitid
-     *
-     * @param int $submitid
-     *
-     * @return ExternalJudgement
-     */
-    public function setSubmitid(int $submitid)
-    {
-        $this->submitid = $submitid;
-
-        return $this;
-    }
-
-    /**
-     * Get submitid
-     *
-     * @return int
-     */
-    public function getSubmitid()
-    {
-        return $this->submitid;
     }
 
     /**

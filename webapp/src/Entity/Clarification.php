@@ -51,50 +51,11 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
     protected $externalid;
 
     /**
-     * @var int
-     * @ORM\Column(type="integer", name="cid",
-     *     options={"comment"="Contest ID","unsigned"=true},
-     *     nullable=false)
-     * @Serializer\Exclude()
-     */
-    private $cid;
-
-    /**
-     * @var int
-     * @ORM\Column(type="integer", name="respid",
-     *     options={"comment"="In reply to clarification ID","unsigned"=true},
-     *     nullable=true)
-     * @Serializer\SerializedName("reply_to_id")
-     * @Serializer\Type("string")
-     */
-    private $respid;
-
-    /**
      * @var double
      * @ORM\Column(type="decimal", precision=32, scale=9, name="submittime", options={"comment"="Time sent", "unsigned"=true}, nullable=false)
      * @Serializer\Exclude()
      */
     private $submittime;
-
-    /**
-     * @var int
-     * @ORM\Column(type="integer", name="sender",
-     *     options={"comment"="Team ID, null means jury","unsigned"=true},
-     *     nullable=true)
-     * @Serializer\SerializedName("from_team_id")
-     * @Serializer\Type("string")
-     */
-    private $sender_id;
-
-    /**
-     * @var int
-     * @ORM\Column(type="integer", name="recipient",
-     *     options={"comment"="Team ID, null means to jury or to all","unsigned"=true},
-     *     nullable=true)
-     * @Serializer\SerializedName("to_team_id")
-     * @Serializer\Type("string")
-     */
-    private $recipient_id;
 
     /**
      * @var string
@@ -104,17 +65,6 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
      * @Serializer\Exclude()
      */
     private $jury_member;
-
-    /**
-     * @var int
-     *
-     * @ORM\Column(type="integer", name="probid",
-     *     options={"comment"="Problem associated to this clarification","unsigned"=true},
-     *     nullable=true)
-     * @Serializer\SerializedName("problem_id")
-     * @Serializer\Type("string")
-     */
-    private $probid;
 
     /**
      * @var string
@@ -275,30 +225,6 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
     }
 
     /**
-     * Set respid
-     *
-     * @param integer $respid
-     *
-     * @return Clarification
-     */
-    public function setRespid($respid)
-    {
-        $this->respid = $respid;
-
-        return $this;
-    }
-
-    /**
-     * Get respid
-     *
-     * @return integer
-     */
-    public function getRespid()
-    {
-        return $this->respid;
-    }
-
-    /**
      * Set submittime
      *
      * @param double $submittime
@@ -349,54 +275,6 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
     }
 
     /**
-     * Set senderId
-     *
-     * @param integer $senderId
-     *
-     * @return Clarification
-     */
-    public function setSenderId($senderId)
-    {
-        $this->sender_id = $senderId;
-
-        return $this;
-    }
-
-    /**
-     * Get senderId
-     *
-     * @return integer
-     */
-    public function getSenderId()
-    {
-        return $this->sender_id;
-    }
-
-    /**
-     * Set recipientId
-     *
-     * @param integer $recipientId
-     *
-     * @return Clarification
-     */
-    public function setRecipientId($recipientId)
-    {
-        $this->recipient_id = $recipientId;
-
-        return $this;
-    }
-
-    /**
-     * Get recipientId
-     *
-     * @return integer
-     */
-    public function getRecipientId()
-    {
-        return $this->recipient_id;
-    }
-
-    /**
      * Set juryMember
      *
      * @param string $juryMember
@@ -418,30 +296,6 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
     public function getJuryMember()
     {
         return $this->jury_member;
-    }
-
-    /**
-     * Set probid
-     *
-     * @param integer $probid
-     *
-     * @return Clarification
-     */
-    public function setProbid($probid)
-    {
-        $this->probid = $probid;
-
-        return $this;
-    }
-
-    /**
-     * Get probid
-     *
-     * @return integer
-     */
-    public function getProbid()
-    {
-        return $this->probid;
     }
 
     /**
@@ -565,6 +419,17 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
     }
 
     /**
+     * @return int|null
+     * @Serializer\VirtualProperty()
+     * @Serializer\SerializedName("problem_id")
+     * @Serializer\Type("string")
+     */
+    public function getProblemId(): ?int
+    {
+        return $this->getProblem() ? $this->getProblem()->getProbid() : null;
+    }
+
+    /**
      * Set contest
      *
      * @param \App\Entity\Contest $contest
@@ -610,6 +475,17 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
     public function getInReplyTo()
     {
         return $this->in_reply_to;
+    }
+
+    /**
+     * @return int|null
+     * @Serializer\VirtualProperty()
+     * @Serializer\SerializedName("reply_to_id")
+     * @Serializer\Type("string")
+     */
+    public function getInReployToId(): ?int
+    {
+        return $this->getInReplyTo() ? $this->getInReplyTo()->getClarid() : null;
     }
 
     /**
@@ -671,6 +547,17 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
     }
 
     /**
+     * @return int|null
+     * @Serializer\VirtualProperty()
+     * @Serializer\SerializedName("from_team_id")
+     * @Serializer\Type("string")
+     */
+    public function getSenderId(): ?int
+    {
+        return $this->getSender() ? $this->getSender()->getTeamid() : null;
+    }
+
+    /**
      * Set recipient
      *
      * @param \App\Entity\Team $recipient
@@ -692,6 +579,17 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
     public function getRecipient()
     {
         return $this->recipient;
+    }
+
+    /**
+     * @return int|null
+     * @Serializer\VirtualProperty()
+     * @Serializer\SerializedName("to_team_id")
+     * @Serializer\Type("string")
+     */
+    public function getRecipientId(): ?int
+    {
+        return $this->getRecipient() ? $this->getRecipient()->getTeamid() : null;
     }
 
     /**

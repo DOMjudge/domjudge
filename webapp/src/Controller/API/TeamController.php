@@ -94,13 +94,13 @@ class TeamController extends AbstractRestController
 
         if ($request->query->has('category')) {
             $queryBuilder
-                ->andWhere('t.categoryid = :category')
+                ->andWhere('t.category = :category')
                 ->setParameter(':category', $request->query->get('category'));
         }
 
         if ($request->query->has('affiliation')) {
             $queryBuilder
-                ->andWhere('t.affilid = :affiliation')
+                ->andWhere('t.affiliation = :affiliation')
                 ->setParameter(':affiliation', $request->query->get('affiliation'));
         }
 

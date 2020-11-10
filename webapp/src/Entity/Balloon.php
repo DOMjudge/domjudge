@@ -25,14 +25,6 @@ class Balloon
     private $balloonid;
 
     /**
-     * @var int
-     * @ORM\Column(type="integer", name="submitid",
-     *     options={"comment"="Submission for which balloon was earned","unsigned"=true},
-     *     nullable=false)
-     */
-    private $submitid;
-
-    /**
      * @var boolean
      * @ORM\Column(type="boolean", name="done",
      *     options={"comment"="Has been handed out yet?","default"="0"},
@@ -55,30 +47,6 @@ class Balloon
     public function getBalloonid()
     {
         return $this->balloonid;
-    }
-
-    /**
-     * Set submitid
-     *
-     * @param integer $submitid
-     *
-     * @return Balloon
-     */
-    public function setSubmitid($submitid)
-    {
-        $this->submitid = $submitid;
-
-        return $this;
-    }
-
-    /**
-     * Get submitid
-     *
-     * @return integer
-     */
-    public function getSubmitid()
-    {
-        return $this->submitid;
     }
 
     /**

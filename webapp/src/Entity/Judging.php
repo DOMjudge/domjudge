@@ -40,27 +40,6 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
     protected $judgingid;
 
     /**
-     * @var int
-     *
-     * @ORM\Column(type="integer", name="cid", length=4,
-     *     options={"comment"="Contest ID","unsigned"=true,"default"="0"},
-     *     nullable=false)
-     * @Serializer\Exclude()
-     */
-    private $cid;
-
-    /**
-     * @var int
-     *
-     * @ORM\Column(type="integer", name="submitid", length=4,
-     *     options={"comment"="Submission ID being judged","unsigned"=true},
-     *     nullable=false)
-     * @Serializer\SerializedName("submission_id")
-     * @Serializer\Type("string")
-     */
-    private $submitid;
-
-    /**
      * @var double
      * @ORM\Column(type="decimal", precision=32, scale=9, name="starttime",
      *     options={"comment"="Time judging started", "unsigned"=true},
@@ -150,36 +129,6 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
     private $seen = false;
 
     /**
-     * @var int
-     *
-     * @ORM\Column(type="integer", name="rejudgingid", length=4,
-     *     options={"comment"="Rejudging ID (if rejudge)","unsigned"=true},
-     *     nullable=true)
-     * @Serializer\Exclude()
-     */
-    private $rejudgingid;
-
-    /**
-     * @var int
-     *
-     * @ORM\Column(type="integer", name="prevjudgingid",
-     *     options={"comment"="Previous valid judging (if rejudge)","unsigned"=true},
-     *     nullable=true)
-     * @Serializer\Exclude()
-     */
-    private $prevjudgingid;
-
-    /**
-     * @var string
-     * @ORM\Column(type="string", name="judgehost", length=64,
-     *     options={"comment"="Judgehost that performed the judging"},
-     *     nullable=false)
-     * @Serializer\Expose(if="context.getAttribute('domjudge_service').checkrole('jury')")
-     * @Serializer\SerializedName("judgehost")
-     */
-    private $judgehost_name;
-
-    /**
      * @ORM\ManyToOne(targetEntity="Contest")
      * @ORM\JoinColumn(name="cid", referencedColumnName="cid", onDelete="CASCADE")
      * @Serializer\Exclude()
@@ -256,54 +205,6 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
     public function getJudgingid()
     {
         return $this->judgingid;
-    }
-
-    /**
-     * Set cid
-     *
-     * @param integer $cid
-     *
-     * @return Judging
-     */
-    public function setCid($cid)
-    {
-        $this->cid = $cid;
-
-        return $this;
-    }
-
-    /**
-     * Get cid
-     *
-     * @return integer
-     */
-    public function getCid()
-    {
-        return $this->cid;
-    }
-
-    /**
-     * Set submitid
-     *
-     * @param integer $submitid
-     *
-     * @return Judging
-     */
-    public function setSubmitid($submitid)
-    {
-        $this->submitid = $submitid;
-
-        return $this;
-    }
-
-    /**
-     * Get submitid
-     *
-     * @return integer
-     */
-    public function getSubmitid()
-    {
-        return $this->submitid;
     }
 
     /**
@@ -581,78 +482,6 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
     }
 
     /**
-     * Set rejudgingid
-     *
-     * @param integer $rejudgingid
-     *
-     * @return Judging
-     */
-    public function setRejudgingid($rejudgingid)
-    {
-        $this->rejudgingid = $rejudgingid;
-
-        return $this;
-    }
-
-    /**
-     * Get rejudgingid
-     *
-     * @return integer
-     */
-    public function getRejudgingid()
-    {
-        return $this->rejudgingid;
-    }
-
-    /**
-     * Set prevjudgingid
-     *
-     * @param integer $prevjudgingid
-     *
-     * @return Judging
-     */
-    public function setPrevjudgingid($prevjudgingid)
-    {
-        $this->prevjudgingid = $prevjudgingid;
-
-        return $this;
-    }
-
-    /**
-     * Get prevjudgingid
-     *
-     * @return integer
-     */
-    public function getPrevjudgingid()
-    {
-        return $this->prevjudgingid;
-    }
-
-    /**
-     * Get judgehost name
-     *
-     * @param string $judgehost_name
-     *
-     * @return Judging
-     */
-    public function setJudgehostName(string $judgehost_name)
-    {
-        $this->judgehost_name = $judgehost_name;
-
-        return $this;
-    }
-
-    /**
-     * Set judgehost name
-     *
-     * @return string
-     */
-    public function getJudgehostName(): string
-    {
-        return $this->judgehost_name;
-    }
-
-    /**
      * Set submission
      *
      * @param \App\Entity\Submission $submission
@@ -674,6 +503,17 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
     public function getSubmission()
     {
         return $this->submission;
+    }
+
+    /**
+     * @return int
+     * @Serializer\VirtualProperty
+     * @Serializer\SerializedName("submission_id")
+     * @Serializer\Type("string")
+     */
+    public function getSubmissionId()
+    {
+        return $this->getSubmission()->getSubmitid();
     }
 
     /**
@@ -771,6 +611,20 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
     {
         return $this->judgehost;
     }
+
+    /**
+     * Get judgehost name
+     *
+     * @return string|null
+     * @Serializer\VirtualProperty()
+     * @Serializer\Expose(if="context.getAttribute('domjudge_service').checkrole('jury')")
+     * @Serializer\SerializedName("judgehost")
+     */
+    public function getJudgehostName(): ?string
+    {
+        return $this->getJudgehost() ? $this->getJudgehost()->getHostname() : null;
+    }
+
     /**
      * Constructor
      */

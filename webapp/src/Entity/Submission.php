@@ -56,55 +56,6 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
     protected $externalid;
 
     /**
-     * @var int
-     *
-     * @ORM\Column(type="integer", name="origsubmitid",
-     *     options={"comment"="If set, specifies original submission in case of edit/resubmit",
-     *              "unsigned"=true},
-     *     nullable=true)
-     * @Serializer\Exclude()
-     */
-    private $origsubmitid;
-
-    /**
-     * @var int
-     *
-     * @ORM\Column(type="integer", name="cid",
-     *     options={"comment"="Contest ID","unsigned"=true}, nullable=false)
-     * @Serializer\Exclude()
-     */
-    private $cid;
-
-    /**
-     * @var int
-     *
-     * @ORM\Column(type="integer", name="teamid",
-     *     options={"comment"="Team ID","unsigned"=true}, nullable=false)
-     * @Serializer\SerializedName("team_id")
-     * @Serializer\Type("string")
-     */
-    private $teamid;
-
-    /**
-     * @var int
-     *
-     * @ORM\Column(type="integer", name="probid",
-     *     options={"comment"="Problem ID","unsigned"=true}, nullable=false)
-     * @Serializer\SerializedName("problem_id")
-     * @Serializer\Type("string")
-     */
-    private $probid;
-
-    /**
-     * @var int
-     *
-     * @ORM\Column(type="string", length=32, name="langid",
-     *     options={"comment"="Language ID"}, nullable=false)
-     * @Serializer\Exclude()
-     */
-    private $langid;
-
-    /**
      * @var double
      * @ORM\Column(type="decimal", precision=32, scale=9, name="submittime", options={"comment"="Time submitted",
      *                             "unsigned"=true}, nullable=false)
@@ -123,16 +74,6 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
     private $valid = true;
 
     /**
-     * @var int
-     *
-     * @ORM\Column(type="integer", name="rejudgingid",
-     *     options={"comment"="Rejudging ID (if rejudge)","unsigned"=true},
-     *     nullable=true)
-     * @Serializer\Exclude()
-     */
-    private $rejudgingid;
-
-    /**
      * @var array
      * @ORM\Column(type="json", name="expected_results", length=255,
      *     options={"comment"="JSON encoded list of expected results - used to validate jury submissions"},
@@ -149,15 +90,6 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
      * @Serializer\Expose(if="context.getAttribute('domjudge_service').checkrole('jury')")
      */
     private $entry_point;
-
-    /**
-     * @var string|null
-     *
-     * @ORM\Column(type="string", name="judgehost", length=64,
-     *     options={"comment"="Current/last judgehost judging this submission"}, nullable=true)
-     * @Serializer\Exclude()
-     */
-    private $judgehost_as_string;
 
     /**
      * @var Judgehost|null
@@ -305,126 +237,6 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
     }
 
     /**
-     * Set origsubmitid
-     *
-     * @param integer $origsubmitid
-     *
-     * @return Submission
-     */
-    public function setOrigsubmitid($origsubmitid)
-    {
-        $this->origsubmitid = $origsubmitid;
-
-        return $this;
-    }
-
-    /**
-     * Get origsubmitid
-     *
-     * @return integer
-     */
-    public function getOrigsubmitid()
-    {
-        return $this->origsubmitid;
-    }
-
-    /**
-     * Set cid
-     *
-     * @param integer $cid
-     *
-     * @return Submission
-     */
-    public function setCid($cid)
-    {
-        $this->cid = $cid;
-
-        return $this;
-    }
-
-    /**
-     * Get cid
-     *
-     * @return integer
-     */
-    public function getCid()
-    {
-        return $this->cid;
-    }
-
-    /**
-     * Set teamid
-     *
-     * @param integer $teamid
-     *
-     * @return Submission
-     */
-    public function setTeamid($teamid)
-    {
-        $this->teamid = $teamid;
-
-        return $this;
-    }
-
-    /**
-     * Get teamid
-     *
-     * @return integer
-     */
-    public function getTeamid()
-    {
-        return $this->teamid;
-    }
-
-    /**
-     * Set probid
-     *
-     * @param integer $probid
-     *
-     * @return Submission
-     */
-    public function setProbid($probid)
-    {
-        $this->probid = $probid;
-
-        return $this;
-    }
-
-    /**
-     * Get probid
-     *
-     * @return integer
-     */
-    public function getProbid()
-    {
-        return $this->probid;
-    }
-
-    /**
-     * Set langid
-     *
-     * @param string $langid
-     *
-     * @return Submission
-     */
-    public function setLangid($langid)
-    {
-        $this->langid = $langid;
-
-        return $this;
-    }
-
-    /**
-     * Get langid
-     *
-     * @return string
-     */
-    public function getLangid()
-    {
-        return $this->langid;
-    }
-
-    /**
      * Get the language ID
      * @return string
      * @Serializer\VirtualProperty()
@@ -487,30 +299,6 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
     }
 
     /**
-     * Set judgehost as string
-     *
-     * @param string|null $judgehost
-     *
-     * @return Submission
-     */
-    public function setJudgehostAsString(?string $judgehost)
-    {
-        $this->judgehost_as_string = $judgehost;
-
-        return $this;
-    }
-
-    /**
-     * Get judgehost as string
-     *
-     * @return string|null
-     */
-    public function getJudgehostAsString(): ?string
-    {
-        return $this->judgehost_as_string;
-    }
-
-    /**
      * Set judgehost
      *
      * @param Judgehost|null $judgehost
@@ -556,30 +344,6 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
     public function getValid()
     {
         return $this->valid;
-    }
-
-    /**
-     * Set rejudgingid
-     *
-     * @param integer $rejudgingid
-     *
-     * @return Submission
-     */
-    public function setRejudgingid($rejudgingid)
-    {
-        $this->rejudgingid = $rejudgingid;
-
-        return $this;
-    }
-
-    /**
-     * Get rejudgingid
-     *
-     * @return integer
-     */
-    public function getRejudgingid()
-    {
-        return $this->rejudgingid;
     }
 
     /**
@@ -652,6 +416,18 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
     public function getTeam()
     {
         return $this->team;
+    }
+
+    /**
+     * Get the team ID
+     * @return string
+     * @Serializer\VirtualProperty()
+     * @Serializer\SerializedName("team_id")
+     * @Serializer\Type("string")
+     */
+    public function getTeamId()
+    {
+        return $this->getTeam()->getTeamid();
     }
 
     /**
@@ -838,6 +614,18 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
     public function getProblem()
     {
         return $this->problem;
+    }
+
+    /**
+     * Get the problem ID
+     * @return string
+     * @Serializer\VirtualProperty()
+     * @Serializer\SerializedName("problem_id")
+     * @Serializer\Type("string")
+     */
+    public function getProblemId()
+    {
+        return $this->getProblem()->getProbid();
     }
 
     /**

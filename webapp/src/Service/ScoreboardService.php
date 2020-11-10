@@ -332,14 +332,14 @@ class ScoreboardService
             ->from(Submission::class, 's')
             ->select('s, c')
             ->leftJoin('s.contest', 'c')
-            ->andWhere('s.teamid = :teamid')
-            ->andWhere('s.probid = :probid')
-            ->andWhere('s.cid = :cid')
+            ->andWhere('s.team = :teamid')
+            ->andWhere('s.problem = :probid')
+            ->andWhere('s.contest = :cid')
             ->andWhere('s.valid = 1')
             ->andWhere('s.submittime < c.endtime')
-            ->setParameter(':teamid', $team->getTeamid())
-            ->setParameter(':probid', $problem->getProbid())
-            ->setParameter(':cid', $contest->getCid())
+            ->setParameter(':teamid', $team)
+            ->setParameter(':probid', $problem)
+            ->setParameter(':cid', $contest)
             ->orderBy('s.submittime');
 
         if ($useExternalJudgements) {
@@ -1006,13 +1006,13 @@ class ScoreboardService
         if ($filter) {
             if ($filter->affiliations) {
                 $queryBuilder
-                    ->andWhere('t.affilid IN (:affiliations)')
+                    ->andWhere('t.affiliation IN (:affiliations)')
                     ->setParameter(':affiliations', $filter->affiliations);
             }
 
             if ($filter->categories) {
                 $queryBuilder
-                    ->andWhere('t.categoryid IN (:categories)')
+                    ->andWhere('t.category IN (:categories)')
                     ->setParameter(':categories', $filter->categories);
             }
 

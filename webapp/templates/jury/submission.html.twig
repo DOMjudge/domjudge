@@ -88,21 +88,21 @@
     <div class="submission-summary mb-2">
         <span>
             <i class="fas fa-users" title="Team:"></i>
-            <a href="{{ path('jury_team', {teamId: submission.teamid, cid: submission.cid}) }}">
-                {{ submission.team.effectiveName }} (t{{ submission.teamid }})
+            <a href="{{ path('jury_team', {teamId: submission.team.teamid, cid: submission.contest.cid}) }}">
+                {{ submission.team.effectiveName }} (t{{ submission.team.teamid }})
             </a>
         </span>
 
         <span>
             <i class="fas fa-trophy" title="Contest:"></i>
-            <a href="{{ path('jury_contest', {'contestId': submission.cid}) }}">
+            <a href="{{ path('jury_contest', {'contestId': submission.contest.cid}) }}">
                 {{ submission.contest.shortname }}
             </a>
         </span>
 
         <span>
             <i class="fas fa-book-open" title="Problem:"></i>
-            <a href="{{ path('jury_problem', {'probId': submission.probid}) }}">
+            <a href="{{ path('jury_problem', {'probId': submission.problem.probid}) }}">
                 {% if submission.contestProblem %}
                     {{ submission.contestProblem.shortname }}: {{ submission.problem.name }}
                 {% else %}
@@ -113,7 +113,7 @@
 
         <span>
             <i class="fas fa-comments" title="Language:"></i>
-            <a href="{{ path('jury_language', {'langId': submission.langid}) }}">
+            <a href="{{ path('jury_language', {'langId': submission.language.langid}) }}">
                 {{ submission.language.name }}
             </a>
         </span>
@@ -435,7 +435,7 @@
                             postVerifyCommentToICAT(
                                 '{{ icat_url }}/insert_entry.php',
                                 '{{ app.user.username }}',
-                                '{{ submission.teamid }}',
+                                '{{ submission.team.teamid }}',
                                 '{{ submission.contestProblem.shortname }}',
                                 '{{ submission.externalid }}'
                             );
@@ -528,20 +528,20 @@
                             {% endif %}
                         {% endif %}
                         <span style="float: right;">
-                            <a href="{{ path('jury_problem_testcase_fetch', {'probId': submission.probid, 'rank': run.rank, 'type': 'input'}) }}">
+                            <a href="{{ path('jury_problem_testcase_fetch', {'probId': submission.problem.probid, 'rank': run.rank, 'type': 'input'}) }}">
                                 <button class="btn btn-sm btn-outline-secondary" >
                                     <i class="fas fa-download"></i>
                                     Input
                                 </button>
                             </a>
-                            <a href="{{ path('jury_problem_testcase_fetch', {'probId': submission.probid, 'rank': run.rank, 'type': 'output'}) }}">
+                            <a href="{{ path('jury_problem_testcase_fetch', {'probId': submission.problem.probid, 'rank': run.rank, 'type': 'output'}) }}">
                                 <button class="btn btn-sm btn-outline-secondary" >
                                     <i class="fas fa-download"></i>
                                     Reference Output
                                 </button>
                             </a>
                             {% if run.firstJudgingRun is not null %}
-                                <a href="{{ path('jury_submission_team_output', {'submission': submission.submitid, 'run': run.firstJudgingRun.runid, 'contest': submission.cid}) }}">
+                                <a href="{{ path('jury_submission_team_output', {'submission': submission.submitid, 'run': run.firstJudgingRun.runid, 'contest': submission.contest.cid}) }}">
                                     <button class="btn btn-sm btn-outline-secondary" >
                                         <i class="fas fa-download"></i>
                                         Team Output
@@ -582,7 +582,7 @@
                     {% endif %}
                     {% if runsOutput[runIdx].image_thumb %}
                         <span style="float:right; border: 3px solid #438ec3; margin: 5px; padding: 5px;">
-                            {% set imgUrl = path('jury_problem_testcase_fetch', {'probId': submission.probid, 'rank': run.rank, 'type': 'image'}) %}
+                            {% set imgUrl = path('jury_problem_testcase_fetch', {'probId': submission.problem.probid, 'rank': run.rank, 'type': 'image'}) %}
                             <a href="{{ imgUrl }}">
                                 <img src="data:image/{{ run.imageType }};base64,{{ runsOutput[runIdx].image_thumb | base64 }}"/>
                             </a>

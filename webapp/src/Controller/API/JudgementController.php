@@ -121,7 +121,7 @@ class JudgementController extends AbstractRestController implements QueryObjectT
             ->leftJoin('j.submission', 's')
             ->leftJoin('j.rejudging', 'r')
             ->leftJoin('j.runs', 'jr')
-            ->andWhere('j.cid = :cid')
+            ->andWhere('j.contest = :cid')
             ->setParameter(':cid', $this->getContestId($request))
             ->groupBy('j.judgingid')
             ->orderBy('j.judgingid');
@@ -138,13 +138,13 @@ class JudgementController extends AbstractRestController implements QueryObjectT
 
         if (!$roleAllowsVisibility) {
             $queryBuilder
-                ->andWhere('s.teamid = :team')
-                ->setParameter(':team', $this->dj->getUser()->getTeamid());
+                ->andWhere('s.team = :team')
+                ->setParameter(':team', $this->dj->getUser()->getTeam());
         }
 
         if ($request->query->has('submission_id')) {
             $queryBuilder
-                ->andWhere('j.submitid = :submission')
+                ->andWhere('j.submission = :submission')
                 ->setParameter(':submission', $request->query->get('submission_id'));
         }
 

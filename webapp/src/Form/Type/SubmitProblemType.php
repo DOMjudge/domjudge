@@ -48,7 +48,7 @@ class SubmitProblemType extends AbstractType
     {
         $allowMultipleFiles = $this->config->get('sourcefiles_limit') > 1;
         $user               = $this->dj->getUser();
-        $contest            = $this->dj->getCurrentContest($user->getTeamid());
+        $contest            = $this->dj->getCurrentContest($user->getTeam()->getTeamid());
 
         $builder->add('code', BootstrapFileType::class, [
             'label' => 'Source file' . ($allowMultipleFiles ? 's' : ''),

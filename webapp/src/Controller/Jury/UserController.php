@@ -132,10 +132,10 @@ class UserController extends BaseController
 
             if ($u->getTeam()) {
                 $userdata['team'] = [
-                    'value' => $u->getTeamid(),
-                    'sortvalue' => $u->getTeamid(),
+                    'value' => $u->getTeam()->getTeamid(),
+                    'sortvalue' => $u->getTeam()->getTeamid(),
                     'link' => $this->generateUrl('jury_team', [
-                        'teamId' => $u->getTeamid(),
+                        'teamId' => $u->getTeam()->getTeamid(),
                     ]),
                     'title' => $u->getTeam()->getEffectiveName(),
                 ];
@@ -336,7 +336,7 @@ class UserController extends BaseController
                  $isadmin = in_array('admin', $roles);
 
                  if ( in_array('team', $groups) || in_array('team_nopass', $groups) ) {
-                     if ( $user->getTeamid() && ! $isjury && ! $isadmin ) {
+                     if ( $user->getTeam() && ! $isjury && ! $isadmin ) {
                          if ( in_array('team', $groups) || empty($user->getPassword()) ) {
                              $doit = true;
                              $role = 'team';

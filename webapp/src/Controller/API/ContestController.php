@@ -384,7 +384,7 @@ class ContestController extends AbstractRestController
             $since_id = $request->query->getInt('since_id');
             $event    = $this->em->getRepository(Event::class)->findOneBy([
                 'eventid' => $since_id,
-                'cid' => $contest->getCid(),
+                'contest' => $contest,
             ]);
             if ($event === null) {
                 return new Response('Invalid parameter "since_id" requested.', Response::HTTP_BAD_REQUEST);
@@ -460,7 +460,7 @@ class ContestController extends AbstractRestController
                     ->select('e')
                     ->andWhere('e.eventid > :lastIdSent')
                     ->setParameter('lastIdSent', $lastIdSent)
-                    ->andWhere('e.cid = :cid')
+                    ->andWhere('e.contest = :cid')
                     ->setParameter('cid', $contest->getCid())
                     ->orderBy('e.eventid', 'ASC');
 

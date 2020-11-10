@@ -6,15 +6,12 @@ use App\Controller\BaseController;
 use App\Entity\Contest;
 use App\Entity\Judging;
 use App\Entity\JudgingRun;
-use App\Entity\Problem;
 use App\Entity\Rejudging;
 use App\Entity\Submission;
-use App\Entity\Team;
 use App\Form\Type\RejudgingType;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\RejudgingService;
-use App\Service\ScoreboardService;
 use App\Service\SubmissionService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
@@ -231,13 +228,15 @@ class RejudgingController extends BaseController
         $this->em->transactional(function () use ($rejudging, &$originalVerdicts, &$newVerdicts) {
             $expr             = $this->em->getExpressionBuilder();
             $originalVerdicts = $this->em->createQueryBuilder()
-                ->from(Judging::class, 'j', 'j.submitid')
-                ->select('j')
+                ->from(Judging::class, 'j')
+                ->join('j.submission', 's')
+                ->select('j, s')
                 ->where(
                     $expr->in('j.judgingid',
                               $this->em->createQueryBuilder()
                                   ->from(Judging::class, 'j2')
-                                  ->select('j2.prevjudgingid')
+                                  ->join('j2.original_judging', 'jo')
+                                  ->select('jo.judgingid')
                                   ->andWhere('j2.rejudging = :rejudging')
                                   ->andWhere('j2.endtime IS NOT NULL')
                                   ->getDQL()
@@ -248,13 +247,20 @@ class RejudgingController extends BaseController
                 ->getResult();
 
             $newVerdicts = $this->em->createQueryBuilder()
-                ->from(Judging::class, 'j', 'j.submitid')
-                ->select('j')
+                ->from(Judging::class, 'j')
+                ->join('j.submission', 's')
+                ->select('j, s')
                 ->andWhere('j.rejudging = :rejudging')
                 ->andWhere('j.endtime IS NOT NULL')
                 ->setParameter(':rejudging', $rejudging)
                 ->getQuery()
                 ->getResult();
+
+            $getSubmissionId = function (Judging $judging) {
+                return $judging->getSubmission()->getSubmitid();
+            };
+            $originalVerdicts = Utils::reindex($originalVerdicts, $getSubmissionId);
+            $newVerdicts = Utils::reindex($newVerdicts, $getSubmissionId);
         });
 
         // Helper function to add verdicts
@@ -326,9 +332,9 @@ class RejudgingController extends BaseController
         $repetitions = $this->em->createQueryBuilder()
             ->from(Rejudging::class, 'r')
             ->select('r.rejudgingid')
-            ->andWhere('r.repeat_rejudgingid = :repeat_rejudgingid')
+            ->andWhere('r.repeatedRejudging = :repeat_rejudgingid')
             ->andWhere('r.rejudgingid != :rejudgingid')
-            ->setParameter(':repeat_rejudgingid', $rejudging->getRepeatRejudgingId())
+            ->setParameter(':repeat_rejudgingid', $rejudging->getRepeatedRejudging())
             ->setParameter(':rejudgingid', $rejudging->getRejudgingid())
             ->orderBy('r.rejudgingid')
             ->getQuery()
@@ -598,13 +604,13 @@ class RejudgingController extends BaseController
 
         /* These are the tables that we can deal with. */
         $tablemap = [
-            'contest' => 's.cid',
+            'contest' => 's.contest',
             'judgehost' => 'j.judgehost',
-            'language' => 's.langid',
-            'problem' => 's.probid',
+            'language' => 's.language',
+            'problem' => 's.problem',
             'submission' => 's.submitid',
-            'team' => 's.teamid',
-            'rejudging' => 'j2.rejudgingid',
+            'team' => 's.team',
+            'rejudging' => 'j2.rejudging',
         ];
 
         if (!isset($tablemap[$table])) {
@@ -698,14 +704,16 @@ class RejudgingController extends BaseController
     {
         $judgings = $this->em->createQueryBuilder()
             ->from(Judging::class, 'j')
-            ->leftJoin('j.runs', 'jr', 'j.judgingid = jr.judgingid')
-            ->leftJoin('j.rejudging', 'r', 'rejudging.rejudgingid = j.rejudgingid')
-            ->select('j.judgingid', 'j.submitid', 'j.judgehost_name', 'j.result',
+            ->leftJoin('j.runs', 'jr')
+            ->leftJoin('j.rejudging', 'r')
+            ->leftJoin('j.submission', 's')
+            ->leftJoin('j.judgehost', 'jh')
+            ->select('j.judgingid', 's.submitid', 'jh.hostname', 'j.result',
                 'AVG(jr.runtime) AS runtime_avg', 'COUNT(jr.runtime) AS ntestcases',
                 '(j.endtime - j.starttime) AS duration'
             )
-            ->andWhere('r.repeat_rejudgingid = :repeat_rejudgingid')
-            ->setParameter(':repeat_rejudgingid', $rejudging->getRepeatRejudgingId())
+            ->andWhere('r.repeatedRejudging = :repeat_rejudgingid')
+            ->setParameter(':repeat_rejudgingid', $rejudging->getRepeatedRejudging())
             ->groupBy('j.judgingid')
             ->orderBy('j.judgingid')
             ->getQuery()
@@ -715,7 +723,7 @@ class RejudgingController extends BaseController
         $judgehosts = [];
         foreach ($judgings as $judging) {
             $submissions[$judging['submitid']][] = $judging;
-            $judgehosts[$judging['judgehost_name']][] = $judging;
+            $judgehosts[$judging['hostname']][] = $judging;
         }
         ksort($submissions);
 
@@ -734,7 +742,7 @@ class RejudgingController extends BaseController
                     ->from(JudgingRun::class, 'jr')
                     ->select('t.rank', 'jr.runresult')
                     ->leftJoin('jr.testcase', 't')
-                    ->andWhere('jr.judgingid = :judgingid')
+                    ->andWhere('jr.judging = :judgingid')
                     ->setParameter(':judgingid', $judging['judgingid'])
                     ->orderBy('t.rank')
                     ->getQuery()
@@ -760,9 +768,9 @@ class RejudgingController extends BaseController
                 ->select('t.rank', 'MAX(jr.runtime) - MIN(jr.runtime) AS spread')
                 ->leftJoin('jr.judging', 'j')
                 ->leftJoin('jr.testcase', 't')
-                ->andWhere('j.submitid = :submitid')
+                ->andWhere('j.submission = :submitid')
                 ->setParameter(':submitid', $submitid)
-                ->groupBy('jr.testcaseid')
+                ->groupBy('jr.testcase')
                 ->getQuery()
                 ->getArrayResult();
             $current_spread = [

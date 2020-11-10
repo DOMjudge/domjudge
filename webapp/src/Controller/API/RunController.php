@@ -134,7 +134,7 @@ class RunController extends AbstractRestController implements QueryObjectTransfo
             ->leftJoin('j.submission', 's')
             ->leftJoin('j.contest', 'c')
             ->select('jr, j, tc, c')
-            ->andWhere('j.cid = :cid')
+            ->andWhere('j.contest = :cid')
             ->setParameter(':cid', $this->getContestId($request));
 
         if ($request->query->has('first_id')) {
@@ -151,7 +151,7 @@ class RunController extends AbstractRestController implements QueryObjectTransfo
 
         if ($request->query->has('judging_id')) {
             $queryBuilder
-                ->andWhere('jr.judgingid = :judging_id')
+                ->andWhere('jr.judging = :judging_id')
                 ->setParameter(':judging_id', $request->query->get('judging_id'));
         }
 
@@ -163,7 +163,7 @@ class RunController extends AbstractRestController implements QueryObjectTransfo
         if (!$request->attributes->has('id') && !$request->query->has('ids')) {
             $queryBuilder
                 ->andWhere('s.submittime < c.endtime')
-                ->andWhere('j.rejudgingid IS NULL OR j.valid = 1');
+                ->andWhere('j.rejudging IS NULL OR j.valid = 1');
             if ($this->config->get('verification_required')) {
                 $queryBuilder->andWhere('j.verified = 1');
             }

@@ -30,14 +30,6 @@ class SubmissionFile
     private $submitfileid;
 
     /**
-     * @var int
-     * @ORM\Column(type="integer", name="submitid", length=4,
-     *     options={"comment"="Submission this file belongs to","unsigned"=true},
-     *     nullable=false)
-     */
-    private $submitid;
-
-    /**
      * @var string
      * @ORM\Column(type="string", name="filename", length=255, options={"comment"="Filename as submitted"}, nullable=false)
      */
@@ -72,30 +64,6 @@ class SubmissionFile
     public function getSubmitfileid()
     {
         return $this->submitfileid;
-    }
-
-    /**
-     * Set submitid
-     *
-     * @param integer $submitid
-     *
-     * @return SubmissionFile
-     */
-    public function setSubmitid($submitid)
-    {
-        $this->submitid = $submitid;
-
-        return $this;
-    }
-
-    /**
-     * Get submitid
-     *
-     * @return integer
-     */
-    public function getSubmitid()
-    {
-        return $this->submitid;
     }
 
     /**

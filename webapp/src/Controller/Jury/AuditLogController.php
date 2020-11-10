@@ -195,7 +195,7 @@ class AuditLogController extends AbstractController
             case 'testcase':
                 $testcase = $this->em->getRepository(Testcase::class)->find($id);
                 if ($testcase) {
-                    return $this->generateUrl('jury_problem_testcases', ['probId' => $testcase->getProbid()]);
+                    return $this->generateUrl('jury_problem_testcases', ['probId' => $testcase->getProblem()->getProbid()]);
                 }
                 break;
         }

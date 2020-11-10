@@ -228,11 +228,15 @@ class ContestController extends BaseController
         if ($this->getParameter('removed_intervals')) {
             $table_fields['num_removed_intervals'] = ['title' => '# removed<br/>intervals', 'sort' => true];
             $removedIntervals                      = $em->createQueryBuilder()
-                ->from(RemovedInterval::class, 'i', 'i.cid')
-                ->select('COUNT(i.intervalid) AS num_removed_intervals', 'i.cid')
-                ->groupBy('i.cid')
+                ->from(RemovedInterval::class, 'i')
+                ->join('i.contest', 'c')
+                ->select('COUNT(i.intervalid) AS num_removed_intervals', 'c.cid')
+                ->groupBy('i.contest')
                 ->getQuery()
                 ->getResult();
+            $removedIntervals = Utils::reindex($removedIntervals, function($data) {
+                return $data['cid'];
+            });
         } else {
             $removedIntervals = [];
         }

@@ -281,7 +281,7 @@ class PublicController extends BaseController
             ->join('p.contest_problems', 'cp', Join::WITH, 'cp.contest = :contest')
             ->join('tc.content', 'tcc')
             ->select('tc', 'tcc')
-            ->andWhere('tc.probid = :problem')
+            ->andWhere('tc.problem = :problem')
             ->andWhere('tc.sample = 1')
             ->andWhere('cp.allowSubmit = 1')
             ->setParameter(':problem', $probId)

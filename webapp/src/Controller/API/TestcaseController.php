@@ -76,8 +76,8 @@ class TestcaseController extends AbstractFOSRestController
         $queryBuilder = $this->em->createQueryBuilder()
             ->from(Testcase::class, 't')
             ->select('t')
-            ->andWhere('t.probid = :probid')
-            ->setParameter(':probid', $judging->getSubmission()->getProbid())
+            ->andWhere('t.problem = :probid')
+            ->setParameter(':probid', $judging->getSubmission()->getProblem())
             ->orderBy('t.rank')
             ->setMaxResults(1);
 
@@ -85,7 +85,7 @@ class TestcaseController extends AbstractFOSRestController
             $testcasesToSkip = [];
             /** @var JudgingRun $run */
             foreach ($judging->getRuns() as $run) {
-                $testcasesToSkip[] = $run->getTestcaseid();
+                $testcasesToSkip[] = $run->getTestcase()->getTestcaseid();
             }
 
             $queryBuilder

@@ -2,6 +2,7 @@
 
 namespace App\Controller\API;
 
+use App\Entity\Submission;
 use App\Service\DOMJudgeService;
 use App\Service\SubmissionService;
 use App\Entity\Team;
@@ -101,6 +102,7 @@ class MetricsController extends AbstractFOSRestController
             $labels = [$contest->getShortname()];
 
             // Get submissions stats for the contest
+            /** @var Submission[] $submissions */
             list($submissions, $submissionCounts) = $this->submissionService->getSubmissionList([$contest->getCid() => $contest], [], 0);
             foreach ($submissionCounts as $kind => $count) {
                 $m['submissions_' . $kind]->set($count, $labels);
@@ -111,9 +113,9 @@ class MetricsController extends AbstractFOSRestController
             foreach($submissions as $s) {
                 $result = $s->getResult();
                 if ($s->getResult() == "correct") {
-                    $teamids_correct[$s->getTeamid()] = 1;
+                    $teamids_correct[$s->getTeam()->getTeamid()] = 1;
                 } else {
-                    $teamids_submitted[$s->getTeamid()] = 1;
+                    $teamids_submitted[$s->getTeam()->getTeamid()] = 1;
                 }
             }
             $m['teams_submitted']->set(count($teamids_submitted), $labels);

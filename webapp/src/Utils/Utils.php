@@ -1,9 +1,7 @@
 <?php declare(strict_types=1);
 namespace App\Utils;
 
-use App\Entity\SubmissionFile;
 use DateTime;
-use Doctrine\Common\Inflector\Inflector;
 use Doctrine\Inflector\InflectorFactory;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -1110,5 +1108,21 @@ class Utils
     public static function parseTsvLine(string $line) : array
     {
         return array_map('stripcslashes', explode("\t", rtrim($line, "\r\n")));
+    }
+
+    /**
+     * Reindex the given array by applying the callback to each item
+     * @param array    $array
+     * @param callable $callback
+     *
+     * @return array
+     */
+    public static function reindex(array $array, callable $callback)
+    {
+        $reindexed = [];
+        array_walk($array, function ($item, $key) use (&$reindexed, $callback) {
+            $reindexed[$callback($item, $key)] = $item;
+        });
+        return $reindexed;
     }
 }

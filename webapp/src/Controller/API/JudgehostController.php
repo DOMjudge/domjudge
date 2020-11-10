@@ -222,7 +222,7 @@ class JudgehostController extends AbstractFOSRestController
         return array_map(function (Judging $judging) {
             return [
                 'judgingid' => $judging->getJudgingid(),
-                'submitid' => $judging->getSubmitid(),
+                'submitid' => $judging->getSubmission()->getSubmitid(),
                 'cid' => $judging->getContest()->getApiId($this->eventLogService),
             ];
         }, $judgings);
@@ -359,21 +359,21 @@ class JudgehostController extends AbstractFOSRestController
         $result     = [
             'submitid' => $submission->getSubmitid(),
             'cid' => $submission->getContest()->getApiId($this->eventLogService),
-            'teamid' => $submission->getTeamid(),
-            'probid' => $submission->getProbid(),
-            'langid' => $submission->getLangid(),
+            'teamid' => $submission->getTeam()->getTeamid(),
+            'probid' => $submission->getProblem()->getProbid(),
+            'langid' => $submission->getLanguage()->getLangid(),
             'language_extensions' => $submission->getLanguage()->getExtensions(),
             'filter_compiler_files' => $submission->getLanguage()->getFilterCompilerFiles(),
-            'rejudgingid' => $submission->getRejudgingid(),
+            'rejudgingid' => $submission->getRejudging() ? $submission->getRejudging()->getRejudgingid() : null,
             'entry_point' => $submission->getEntryPoint(),
-            'origsubmitid' => $submission->getOrigsubmitid(),
+            'origsubmitid' => $submission->getOriginalSubmission() ? $submission->getOriginalSubmission()->getSubmitid() : null,
             'maxruntime' => Utils::roundedFloat($maxRunTime, 6),
             'memlimit' => $submission->getProblem()->getMemlimit(),
             'outputlimit' => $submission->getProblem()->getOutputlimit(),
-            'run' => $submission->getProblem()->getSpecialRun(),
-            'compare' => $submission->getProblem()->getSpecialCompare(),
+            'run' => $submission->getProblem()->getRunExecutable() ? $submission->getProblem()->getRunExecutable()->getExecid() : null,
+            'compare' => $submission->getProblem()->getCompareExecutable() ? $submission->getProblem()->getCompareExecutable()->getExecid() : null,
             'compare_args' => $submission->getProblem()->getSpecialCompareArgs(),
-            'compile_script' => $submission->getLanguage()->getCompileScript(),
+            'compile_script' => $submission->getLanguage()->getCompileExecutable()->getExecid(),
             'combined_run_compare' => $submission->getProblem()->getCombinedRunCompare()
         ];
 
@@ -409,7 +409,7 @@ class JudgehostController extends AbstractFOSRestController
             // FIXME: what happens if there is no valid judging?
             $previousJudging = $this->em->getRepository(Judging::class)
                 ->findOneBy([
-                                'submitid' => $submission->getSubmitid(),
+                                'submission' => $submission->getSubmitid(),
                                 'valid' => 1
                             ]);
         }
@@ -548,7 +548,7 @@ class JudgehostController extends AbstractFOSRestController
                     $submission->setEntryPoint($request->request->get('entry_point'));
                     $this->em->flush();
                     $submissionId = $submission->getSubmitid();
-                    $contestId    = $submission->getCid();
+                    $contestId    = $submission->getContest()->getCid();
                     $this->eventLogService->log('submission', $submissionId,
                                                 EventLogService::ACTION_UPDATE, $contestId);
 
@@ -578,7 +578,7 @@ class JudgehostController extends AbstractFOSRestController
                     }
 
                     $judgingId = $judging->getJudgingid();
-                    $contestId = $judging->getSubmission()->getCid();
+                    $contestId = $judging->getSubmission()->getContest()->getCid();
                     $this->dj->auditlog('judging', $judgingId, 'judged',
                                         'compiler-error', $hostname, $contestId);
 
@@ -932,13 +932,13 @@ class JudgehostController extends AbstractFOSRestController
             $this->em->transactional(function () use ($judging) {
                 $judging
                     ->setValid(false)
-                    ->setRejudgingid(null);
+                    ->setRejudging(null);
 
                 $judging->getSubmission()->setJudgehost(null);
             });
 
             $this->dj->auditlog('judging', $judgingId, 'given back', null,
-                                             $judging->getJudgehost()->getHostname(), $judging->getCid());
+                                             $judging->getJudgehost()->getHostname(), $judging->getContest()->getCid());
         }
     }
 
@@ -1018,7 +1018,7 @@ class JudgehostController extends AbstractFOSRestController
 
             if ($judging->getValid()) {
                 $this->eventLogService->log('judging_run', $judgingRun->getRunid(),
-                                            EventLogService::ACTION_CREATE, $judging->getCid());
+                                            EventLogService::ACTION_CREATE, $judging->getContest()->getCid());
             }
         });
 
@@ -1047,7 +1047,7 @@ class JudgehostController extends AbstractFOSRestController
             ->from(JudgingRun::class, 'r')
             ->join('r.testcase', 't')
             ->select('r')
-            ->andWhere('r.judgingid = :judgingid')
+            ->andWhere('r.judging = :judgingid')
             ->orderBy('t.rank')
             ->setParameter(':judgingid', $judgingId)
             ->getQuery()
@@ -1056,8 +1056,8 @@ class JudgehostController extends AbstractFOSRestController
         $numTestCases = $this->em->createQueryBuilder()
             ->from(Testcase::class, 't')
             ->select('COUNT(t.testcaseid)')
-            ->where('t.probid = :probid')
-            ->setParameter(':probid', $testCase->getProbid())
+            ->where('t.problem = :probid')
+            ->setParameter(':probid', $testCase->getProblem())
             ->getQuery()
             ->getSingleScalarResult();
 
@@ -1110,7 +1110,7 @@ class JudgehostController extends AbstractFOSRestController
                     if ($judging->getValid()) {
                         $this->eventLogService->log('judging', $judging->getJudgingid(),
                                                     EventLogService::ACTION_UPDATE,
-                                                    $judging->getCid());
+                                                    $judging->getContest()->getCid());
                         $this->balloonService->updateBalloons($contest, $submission, $judging);
                     }
                 }
@@ -1125,13 +1125,13 @@ class JudgehostController extends AbstractFOSRestController
         // Send an event for an endtime update if not done yet.
         if ($judging->getValid() && count($runs) == $numTestCases && empty($justFinished)) {
             $this->eventLogService->log('judging', $judging->getJudgingid(),
-                                        EventLogService::ACTION_UPDATE, $judging->getCid());
+                                        EventLogService::ACTION_UPDATE, $judging->getContest()->getCid());
         }
     }
 
     private function maybeUpdateActiveJudging(Judging $judging): void
     {
-        if ($judging->getRejudgingid() !== null) {
+        if ($judging->getRejudging() !== null) {
             $rejudging = $judging->getRejudging();
             if ($rejudging->getAutoApply()) {
                 $judging->getSubmission()->setRejudging(null);
@@ -1153,8 +1153,8 @@ class JudgehostController extends AbstractFOSRestController
                 $numberOfRepetitions = $this->em->createQueryBuilder()
                     ->from(Rejudging::class, 'r')
                     ->select('COUNT(r.rejudgingid) AS cnt')
-                    ->andWhere('r.repeat_rejudgingid = :repeat_rejudgingid')
-                    ->setParameter('repeat_rejudgingid', $rejudging->getRepeatRejudgingId())
+                    ->andWhere('r.repeatedRejudging = :repeat_rejudgingid')
+                    ->setParameter('repeat_rejudgingid', $rejudging->getRepeatedRejudging()->getRejudgingid())
                     ->getQuery()
                     ->getSingleScalarResult();
                 // Only "cancel" the rejudging if it's not the last.
@@ -1184,7 +1184,7 @@ class JudgehostController extends AbstractFOSRestController
                         ->getQuery()
                         ->getResult(Query::HYDRATE_ARRAY);
                     $this->rejudgingService->createRejudging($rejudging->getReason(), $judgings,
-                        false, $rejudging->getRepeat(), $rejudging->getRepeatRejudgingId(), $skipped);
+                        false, $rejudging->getRepeat(), $rejudging->getRepeatedRejudging(), $skipped);
                 }
             }
         }
@@ -1211,7 +1211,7 @@ class JudgehostController extends AbstractFOSRestController
             ->join('s.contest_problem', 'cp')
             ->select('s')
             ->andWhere('s.judgehost IS NULL')
-            ->andWhere('s.cid IN (:contestIds)')
+            ->andWhere('s.contest IN (:contestIds)')
             ->setParameter(':contestIds', $contestIds)
             ->andWhere('l.allowJudge= 1')
             ->andWhere('cp.allowJudge = 1')
@@ -1226,19 +1226,19 @@ class JudgehostController extends AbstractFOSRestController
 
             if (isset($restrictions['contest'])) {
                 $queryBuilder
-                    ->andWhere('s.cid IN (:restrictionContestIds)')
+                    ->andWhere('s.contest IN (:restrictionContestIds)')
                     ->setParameter(':restrictionContestIds', $restrictions['contest']);
             }
 
             if (isset($restrictions['problem'])) {
                 $queryBuilder
-                    ->andWhere('s.probid IN (:restrictionProblemIds)')
+                    ->andWhere('s.problem IN (:restrictionProblemIds)')
                     ->setParameter(':restrictionProblemIds', $restrictions['problem']);
             }
 
             if (isset($restrictions['language'])) {
                 $queryBuilder
-                    ->andWhere('s.langid IN (:restrictionLanguageIds)')
+                    ->andWhere('s.language IN (:restrictionLanguageIds)')
                     ->setParameter(':restrictionLanguageIds', $restrictions['language']);
             }
         }

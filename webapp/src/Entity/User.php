@@ -121,17 +121,6 @@ class User implements UserInterface, EquatableInterface, \Serializable
     private $enabled = true;
 
     /**
-     * @var int
-     *
-     * @ORM\Column(type="integer", name="teamid", length=4,
-     *     options={"comment"="Team associated with this user", "unsigned"=true},
-     *     nullable=true)
-     * @Serializer\SerializedName("team_id")
-     * @Serializer\Type("string")
-     */
-    private $teamid;
-
-    /**
      * @ORM\ManyToOne(targetEntity="Team", inversedBy="users")
      * @ORM\JoinColumn(name="teamid", referencedColumnName="teamid", onDelete="SET NULL")
      * @Serializer\Exclude()
@@ -454,30 +443,6 @@ class User implements UserInterface, EquatableInterface, \Serializable
     public function getEnabled()
     {
         return $this->enabled;
-    }
-
-    /**
-     * Set teamid
-     *
-     * @param integer $teamid
-     *
-     * @return User
-     */
-    public function setTeamid($teamid)
-    {
-        $this->teamid = $teamid;
-
-        return $this;
-    }
-
-    /**
-     * Get teamid
-     *
-     * @return integer
-     */
-    public function getTeamid()
-    {
-        return $this->teamid;
     }
 
     /**

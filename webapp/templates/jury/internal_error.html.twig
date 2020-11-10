@@ -33,22 +33,22 @@
                     <th>Status</th>
                     <td>{{ internalError.status | capitalize }}</td>
                 </tr>
-                {% if internalError.judgingid is not null %}
+                {% if internalError.judging is not null %}
                     <tr>
                         <th>Related judging</th>
                         <td>
-                            <a href="{{ path('jury_submission_by_judging', {jid: internalError.judgingid}) }}">
-                                j{{ internalError.judgingid }}
+                            <a href="{{ path('jury_submission_by_judging', {jid: internalError.judging.judgingid}) }}">
+                                j{{ internalError.judging.judgingid }}
                             </a>
                         </td>
                     </tr>
                 {% endif %}
-                {% if internalError.cid is not null %}
+                {% if internalError.contest is not null %}
                     <tr>
                         <th>Related contest</th>
                         <td>
-                            <a href="{{ path('jury_contest', {'contestId': internalError.cid}) }}">
-                                c{{ internalError.cid }}
+                            <a href="{{ path('jury_contest', {'contestId': internalError.contest.cid}) }}">
+                                c{{ internalError.contest.cid }}
                             </a>
                         </td>
                     </tr>
