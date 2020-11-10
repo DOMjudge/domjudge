@@ -39,7 +39,7 @@ class TeamClarificationType extends AbstractType
         $builder->add('recipient', ChoiceType::class, [
             'choices' => ['Jury' => 'dummy'],
             'attr' => [
-                'readonly' => true,
+                'class' => 'select_readonly',
             ],
         ]);
 

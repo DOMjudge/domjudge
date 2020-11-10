@@ -591,3 +591,8 @@ tr.ignore td, td.ignore, span.ignore {
 .problem-stats-item.frozen-9 {
     background-color: #05264c;
 }
+
+.select_readonly {
+    background-color: #e9ecef !important;
+    opacity: 1;
+}
