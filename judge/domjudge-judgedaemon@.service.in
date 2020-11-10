@@ -1,0 +1,26 @@
+# This service can be called e.g. as:
+#   systemctl start domjudge-judgedaemon@0.service
+# to start a judgedaemon bound to CPU core 0.
+#
+# This way, multiple judgedaemon instances can be run on a single
+# machine. Note that each instance will need a separate user
+# @RUNUSER@-0, @RUNUSER@-1, etc. You can start these as a
+# group using the domjudge-judgedaemons.target system unit file.
+
+[Unit]
+Description="DOMjudge judgedaemon bound to CPU #%i"
+PartOf=domjudge-judgehost.target
+
+Requires=create-cgroups.service
+After=create-cgroups.service
+After=network.target
+
+[Service]
+Type=simple
+
+ExecStart=@judgehost_bindir@/judgedaemon -n %i
+User=@DOMJUDGE_USER@
+
+Restart=always
+RestartSec=3
+PrivateTmp=yes

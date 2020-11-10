@@ -52,7 +52,8 @@ Judgehosts
    ``./configure --with-baseurl=<url> && make judgehost``.
  * Run ``sudo make install-judgehost`` to install the system.
 
- * ``sudo useradd -d /nonexistent -U -M -s /bin/false domjudge-run``
+ * Create one or more unprivileged users:
+   ``sudo useradd -d /nonexistent -U -M -s /bin/false domjudge-run-0``.
  * Add to ``/etc/sudoers.d/`` or append to ``/etc/sudoers`` the
    sudoers configuration as in ``etc/sudoers-domjudge``.
  * Set up cgroup support: enable kernel parameters in
@@ -62,7 +63,7 @@ Judgehosts
 
  * Create the pre-built chroot tree: ``sudo bin/dj_make_chroot``
 
- * Start the judge daemon: either manually with ``bin/judgedaemon``
+ * Start the judge daemon: either manually with ``bin/judgedaemon -n 1``
    or as a service with ``systemctl enable domjudge-judgehost``.
 
 Submit client

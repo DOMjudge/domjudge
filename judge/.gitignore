@@ -5,4 +5,4 @@
 /runpipe
 /evict
 /create-cgroups.service
-/domjudge-judgehost.service
+/domjudge-judgedaemon@.service

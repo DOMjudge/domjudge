@@ -322,17 +322,16 @@ machine, dedicating one CPU core to each judgedaemon using Linux
 cgroups.
 
 To that end, add extra unprivileged users to the system, i.e. add users
-``domjudge-run-X`` (where ``X`` runs through
-``0,1,2,3,...``) with ``useradd`` as described in the section
-*installation of a judgehost*.
+``domjudge-run-X`` (where ``X`` runs through ``1,2,3,...``) with
+``useradd`` as described in the section :ref:`installing-judgehost`.
 
 You can then start each of the judgedaemons with::
 
   judgedaemon -n X
 
-to bind it to core ``X`` and user ``domjudge-run-X``. If you use the
-systemd service file, you have to create copies of it and add the
-``-n X`` option in each.
+to bind it to core ``X`` and user ``domjudge-run-X``. If you use
+systemd, then edit the ``domjudge-judgehost.target`` unit file and add
+more judgedaemons there.
 
 Although each judgedaemon process will be bound to one single CPU
 core, shared use of other resources such as disk I/O might

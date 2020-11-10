@@ -1,0 +1,12 @@
+[Unit]
+Description=DOMjudge judgehost running one or more judgedaemons
+
+# You can run multiple judgedaemons per machine by adding more
+# domjudge-judgedaemon@X.service below. These will be bound to CPU
+# core X and require a corresponding unprivileged user (domjudge-run-X
+# by default).
+#Requires=domjudge-judgedaemon@0.service domjudge-judgedaemon@1.service domjudge-judgedaemon@2.service
+Requires=domjudge-judgedaemon@0.service
+
+[Install]
+WantedBy=multi-user.target
