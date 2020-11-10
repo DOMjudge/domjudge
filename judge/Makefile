@@ -6,7 +6,7 @@ include $(TOPDIR)/Makefile.global
 TARGETS = runguard runpipe evict
 
 SUBST_FILES = judgedaemon chroot-startstop.sh create_cgroups \
-              create-cgroups.service domjudge-judgehost.service
+              create-cgroups.service domjudge-judgedaemon@.service
 
 judgehost: $(TARGETS) $(SUBST_FILES)
 
@@ -36,7 +36,7 @@ install-judgehost:
 ifneq ($(systemd_unitdir),)
 	$(INSTALL_DIR)     $(DESTDIR)$(systemd_unitdir)
 	$(INSTALL_DATA) -t $(DESTDIR)$(systemd_unitdir) \
-		create-cgroups.service domjudge-judgehost.service
+		create-cgroups.service domjudge-judgehost.target domjudge-judgedaemon@.service
 endif
 
 clean-l:

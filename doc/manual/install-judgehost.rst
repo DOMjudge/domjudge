@@ -38,6 +38,8 @@ For Red Hat::
   sudo yum install make pkgconfig sudo libcgroup-devel lsof \
         php-cli php-mbstring php-xml php-process procps-ng
 
+.. _installing-judgehost:
+
 Building and installing
 -----------------------
 After installing the software listed above, run configure. In this
@@ -51,12 +53,16 @@ home directory::
 For running solution programs under a non-privileged user, a user and group have
 to be added to the system that acts as judgehost. This user does not
 need a home-directory or password, so the following command would
-suffice to add a user and group ``domjudge-run`` with minimal privileges::
+suffice to add a user and group ``domjudge-run-1`` with minimal privileges::
 
-  sudo useradd -d /nonexistent -U -M -s /bin/false domjudge-run
+  sudo useradd -d /nonexistent -U -M -s /bin/false domjudge-run-0
 
+The ``-0`` suffix corresponds to a judgedaemon bound to CPU core 0
+with the option ``-n 0``, see :ref:`start-judgedaemon`. If you do not
+want to bind the judgedaemon to a core, create a user ``domjudge-run``
+and start the judgedaemon without ``-n`` option.
 See the section :ref:`multiple-judgedaemons` for running multiple
-judgedaemons on a single host and/or binding it to a single CPU core.
+judgedaemons on a single host.
 
 Sudo permissions
 ----------------
@@ -162,12 +168,14 @@ judgedaemon to work for multiple domservers. The id in the first column
 is used to differentiate between multiple domservers, and should be
 unique within the ``restapi.secret`` file.
 
+.. _start-judgedaemon:
+
 Starting the judgedaemon
 ------------------------
 
 Finally start the judgedaemon::
 
-  bin/judgedaemon
+  bin/judgedaemon -n 0
 
 Upon its first connection to the domserver API, the judgehost will be
 auto-registered and will be by default enabled. If you wish to
