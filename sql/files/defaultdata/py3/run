@@ -8,8 +8,10 @@
 # will execute the source with the correct interpreter syntax, thus
 # allowing this interpreted source to be used transparantly as if it
 # was compiled to a standalone binary.
+# Note that from version 8.0.0 the default Python 3 interpreter is
+# pypy 3 instead of CPython 3.
 #
-# This script requires that python3 is installed in the chroot.
+# This script requires that pypy3 is installed in the chroot.
 
 DEST="$1" ; shift
 MEMLIMIT="$1" ; shift
@@ -21,10 +23,11 @@ if [ -z "$ENTRY_POINT" ]; then
 fi
 
 # Check syntax
-python3 -m py_compile "$@"
+pypy3 -m py_compile "$@"
 EXITCODE=$?
 [ "$EXITCODE" -ne 0 ] && exit $EXITCODE
 rm -f -- *.pyc
+rm -rf -- __pycache__
 
 # Check if entry point is valid
 if [ ! -r "$MAINSOURCE" ]; then
@@ -49,7 +52,7 @@ export HOME=/does/not/exist
 # debugging.
 # export ONLINE_JUDGE=1 DOMJUDGE=1
 
-exec python3 "$MAINSOURCE" "\$@"
+exec pypy3 "$MAINSOURCE" "\$@"
 EOF
 
 chmod a+x "$DEST"
