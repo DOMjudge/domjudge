@@ -316,7 +316,7 @@ EOF;
 
         $judgings_per_contest = [];
         foreach ($judgings as $judging) {
-            $judgings_per_contest[$judging->getCid()][] = $judging->getJudgingid();
+            $judgings_per_contest[$judging->getContest()->getCid()][] = $judging->getJudgingid();
         }
 
         // Log to event table; normal cases are handled in:

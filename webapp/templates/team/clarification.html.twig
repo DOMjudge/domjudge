@@ -4,7 +4,7 @@
 
 {% block content %}
     <h1 class="text-center mt-4">Clarification
-    {% if clarification.senderId == team.teamid %}Request{% endif%}</h1>
+    {% if clarification.sender and clarification.sender.teamid == team.teamid %}Request{% endif%}</h1>
 
     {% include 'team/partials/clarification_content.html.twig' %}
 

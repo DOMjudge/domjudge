@@ -88,8 +88,9 @@ class ClarificationController extends BaseController
         $clarification = $this->em->createQueryBuilder()
             ->from(Clarification::class, 'c')
             ->leftJoin('c.problem', 'p')
+            ->leftJoin('c.contest', 'co')
             ->leftJoin('p.contest_problems', 'cp', Join::WITH, 'cp.contest = :contest')
-            ->select('c')
+            ->select('c, p, co')
             ->andWhere('c.contest = :contest')
             ->andWhere('c.clarid = :clarId')
             ->setParameter(':contest', $contest)
@@ -99,10 +100,10 @@ class ClarificationController extends BaseController
 
         $formData = [];
         if ($clarification) {
-            if ($clarification->getProbid()) {
-                $formData['subject'] = sprintf('%d-%d', $clarification->getCid(), $clarification->getProbid());
+            if ($clarification->getProblem()) {
+                $formData['subject'] = sprintf('%d-%d', $clarification->getContest()->getCid(), $clarification->getProblem()->getProbid());
             } else {
-                $formData['subject'] = sprintf('%d-%s', $clarification->getCid(), $clarification->getQueue());
+                $formData['subject'] = sprintf('%d-%s', $clarification->getContest()->getCid(), $clarification->getQueue());
             }
 
             $message = '';

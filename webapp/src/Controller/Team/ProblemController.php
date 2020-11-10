@@ -78,7 +78,7 @@ class ProblemController extends BaseController
     public function problemsAction()
     {
         return $this->render('team/problems.html.twig',
-            $this->dj->getTwigDataForProblemsAction($this->dj->getUser()->getTeamid(), $this->stats));
+            $this->dj->getTwigDataForProblemsAction($this->dj->getUser()->getTeam()->getTeamid(), $this->stats));
     }
 
 
@@ -90,7 +90,7 @@ class ProblemController extends BaseController
     public function problemTextAction(int $probId)
     {
         $user    = $this->dj->getUser();
-        $contest = $this->dj->getCurrentContest($user->getTeamid());
+        $contest = $this->dj->getCurrentContest($user->getTeam()->getTeamid());
         if (!$contest || !$contest->getFreezeData()->started()) {
             throw new NotFoundHttpException(sprintf('Problem p%d not found or not available', $probId));
         }
@@ -148,7 +148,7 @@ class ProblemController extends BaseController
     public function sampleTestcaseAction(int $probId, int $index, string $type)
     {
         $user    = $this->dj->getUser();
-        $contest = $this->dj->getCurrentContest($user->getTeamid());
+        $contest = $this->dj->getCurrentContest($user->getTeam()->getTeamid());
         if (!$contest || !$contest->getFreezeData()->started()) {
             throw new NotFoundHttpException(sprintf('Problem p%d not found or not available', $probId));
         }
@@ -168,7 +168,7 @@ class ProblemController extends BaseController
             ->join('p.contest_problems', 'cp', Join::WITH, 'cp.contest = :contest')
             ->join('tc.content', 'tcc')
             ->select('tc', 'tcc')
-            ->andWhere('tc.probid = :problem')
+            ->andWhere('tc.problem = :problem')
             ->andWhere('tc.sample = 1')
             ->andWhere('cp.allowSubmit = 1')
             ->setParameter(':problem', $probId)
@@ -216,7 +216,7 @@ class ProblemController extends BaseController
     public function sampleZipAction(int $probId)
     {
         $user    = $this->dj->getUser();
-        $contest = $this->dj->getCurrentContest($user->getTeamid());
+        $contest = $this->dj->getCurrentContest($user->getTeam()->getTeamid());
         $notfound_msg = sprintf('Problem p%d not found or not available', $probId);
         if (!$contest || !$contest->getFreezeData()->started()) {
             throw new NotFoundHttpException($notfound_msg);

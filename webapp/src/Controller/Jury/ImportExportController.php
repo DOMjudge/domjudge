@@ -410,7 +410,7 @@ class ImportExportController extends BaseController
                 'time' => null,
             ];
             foreach ($teams as $team) {
-                if (!isset($categories[$team->getCategoryid()]) || $team->getCategory()->getSortorder() !== $sortOrder) {
+                if (!isset($categories[$team->getCategory()->getCategoryid()]) || $team->getCategory()->getSortorder() !== $sortOrder) {
                     continue;
                 }
 
@@ -492,11 +492,12 @@ class ImportExportController extends BaseController
         /** @var Clarification[] $clarifications */
         $clarifications = $this->em->createQueryBuilder()
             ->from(Clarification::class, 'c')
+            ->join('c.problem', 'p')
             ->select('c')
             ->andWhere('c.contest = :contest')
             ->setParameter(':contest', $contest)
             ->addOrderBy('c.category')
-            ->addOrderBy('c.probid')
+            ->addOrderBy('p.probid')
             ->addOrderBy('c.submittime')
             ->addOrderBy('c.clarid')
             ->getQuery()

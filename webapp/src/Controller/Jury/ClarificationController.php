@@ -93,7 +93,7 @@ class ClarificationController extends AbstractController
             ->leftJoin('clar.problem', 'p')
             ->leftJoin('p.contest_problems', 'cp', Join::WITH, 'cp.contest = clar.contest')
             ->select('clar', 'p', 'cp')
-            ->andWhere('clar.cid in (:contestIds)')
+            ->andWhere('clar.contest in (:contestIds)')
             ->setParameter(':contestIds', $contestIds)
             ->orderBy('clar.submittime', 'DESC')
             ->addOrderBy('clar.clarid', 'DESC');
@@ -117,7 +117,7 @@ class ClarificationController extends AbstractController
         $wheres            = [
             'new' => 'clar.sender IS NOT NULL AND clar.answered = 0',
             'old' => 'clar.sender IS NOT NULL AND clar.answered != 0',
-            'general' => 'clar.sender IS NULL AND (clar.respid IS NULL OR clar.recipient IS NULL)',
+            'general' => 'clar.sender IS NULL AND (clar.recipient IS NULL OR clar.recipient IS NULL)',
         ];
         foreach ($wheres as $type => $where) {
             $clarifications = (clone $queryBuilder)
@@ -206,8 +206,8 @@ class ClarificationController extends AbstractController
             $contest = $clar->getContest();
             $data['contest'] = $contest;
             $clarcontest = $contest->getShortname();
-            if ( $clar->getProbId() ) {
-                $concernssubject = $contest->getCid() . "-" . $clar->getProbId();
+            if ( $clar->getProblem() ) {
+                $concernssubject = $contest->getCid() . "-" . $clar->getProblem()->getProbid();
             } elseif ( $clar->getCategory() ) {
                 $concernssubject = $contest->getCid() . "-" . $clar->getCategory();
             } else {
@@ -452,7 +452,6 @@ class ClarificationController extends AbstractController
             $this->addFlash('danger', $message);
             return $this->redirectToRoute('jury_clarification_send');
         } else {
-            $clarification->setRecipientId($sendto);
             $team = $this->em->getReference(Team::class, $sendto);
             $clarification->setRecipient($team);
         }

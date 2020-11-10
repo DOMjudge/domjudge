@@ -105,15 +105,6 @@ class Language extends BaseApiEntity
     private $timeFactor = 1;
 
     /**
-     * @var string
-     * @ORM\Column(type="string", name="compile_script", length=32,
-     *     options={"comment"="Script to compile source code for this language"},
-     *     nullable=true)
-     * @Serializer\Exclude()
-     */
-    private $compile_script;
-
-    /**
      * @var bool
      * @ORM\Column(type="boolean", name="require_entry_point",
      *     options={"comment"="Whether submissions require a code entry point to be specified.","default":"0"},
@@ -334,30 +325,6 @@ class Language extends BaseApiEntity
     public function getTimeFactor()
     {
         return $this->timeFactor;
-    }
-
-    /**
-     * Set compileScript
-     *
-     * @param string $compileScript
-     *
-     * @return Language
-     */
-    public function setCompileScript($compileScript)
-    {
-        $this->compile_script = $compileScript;
-
-        return $this;
-    }
-
-    /**
-     * Get compileScript
-     *
-     * @return string
-     */
-    public function getCompileScript()
-    {
-        return $this->compile_script;
     }
 
     /**

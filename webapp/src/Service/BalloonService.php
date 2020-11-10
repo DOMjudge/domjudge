@@ -75,15 +75,15 @@ class BalloonService
         // prevent duplicate balloons in case of multiple correct submissions
         $numCorrect = $this->em->createQueryBuilder()
             ->from(Balloon::class, 'b')
-            ->select('COUNT(b.submitid) AS numBalloons')
             ->join('b.submission', 's')
+            ->select('COUNT(b.submission) AS numBalloons')
             ->andWhere('s.valid = 1')
-            ->andWhere('s.probid = :probid')
-            ->andWhere('s.teamid = :teamid')
-            ->andWhere('s.cid = :cid')
-            ->setParameter(':probid', $submission->getProbid())
-            ->setParameter(':teamid', $submission->getTeamid())
-            ->setParameter(':cid', $submission->getCid())
+            ->andWhere('s.problem = :probid')
+            ->andWhere('s.team = :teamid')
+            ->andWhere('s.contest = :cid')
+            ->setParameter(':probid', $submission->getProblem())
+            ->setParameter(':teamid', $submission->getTeam())
+            ->setParameter(':cid', $submission->getContest())
             ->getQuery()
             ->getSingleScalarResult();
 
@@ -115,7 +115,7 @@ class BalloonService
             ->select('b', 's.submittime', 'p.probid',
                 't.teamid', 't.name AS teamname', 't.room',
                 'c.name AS catname',
-                's.cid', 'co.shortname',
+                'co.cid', 'co.shortname',
                 'cp.shortname AS probshortname', 'cp.color',
                 'a.affilid AS affilid', 'a.shortname AS affilshort')
             ->from(Balloon::class, 'b')

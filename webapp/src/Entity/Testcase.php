@@ -50,14 +50,6 @@ class Testcase
 
     /**
      * @var int
-     * @ORM\Column(type="integer", name="probid", length=4,
-     *     options={"comment"="Corresponding problem ID", "unsigned"=true},
-     *     nullable=true)
-     */
-    private $probid;
-
-    /**
-     * @var int
      * @ORM\Column(type="integer", name="rank", length=4,
      *     options={"comment"="Determines order of the testcases in judging",
      *              "unsigned"=true},
@@ -210,30 +202,6 @@ class Testcase
     public function getMd5sumOutput()
     {
         return $this->md5sum_output;
-    }
-
-    /**
-     * Set probid
-     *
-     * @param integer $probid
-     *
-     * @return Testcase
-     */
-    public function setProbid($probid)
-    {
-        $this->probid = $probid;
-
-        return $this;
-    }
-
-    /**
-     * Get probid
-     *
-     * @return integer
-     */
-    public function getProbid()
-    {
-        return $this->probid;
     }
 
     /**

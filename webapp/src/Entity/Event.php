@@ -70,14 +70,6 @@ class Event
     private $content;
 
     /**
-     * @var integer
-     *
-     * @ORM\Column(type="integer", name="cid", length=4,
-     *     options={"comment"="Contest ID","unsigned"=true}, nullable=false)
-     */
-    private $cid;
-
-    /**
      * @var Contest
      *
      * @ORM\ManyToOne(targetEntity="Contest", inversedBy="problems")
@@ -131,30 +123,6 @@ class Event
     public function getEventtime()
     {
         return $this->eventtime;
-    }
-
-    /**
-     * Set cid
-     *
-     * @param integer $cid
-     *
-     * @return Event
-     */
-    public function setCid($cid)
-    {
-        $this->cid = $cid;
-
-        return $this;
-    }
-
-    /**
-     * Get cid
-     *
-     * @return integer
-     */
-    public function getCid()
-    {
-        return $this->cid;
     }
 
     /**

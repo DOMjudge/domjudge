@@ -474,14 +474,14 @@ class Scoreboard
                     continue;
                 }
 
-                $categoryId = $score->team->getCategoryid();
+                $categoryId = $score->team->getCategory()->getCategoryid();
                 if (!isset($this->bestInCategoryData[$categoryId])) {
                     $this->bestInCategoryData[$categoryId] = $score->team->getTeamid();
                 }
             }
         }
 
-        $categoryId = $team->getCategoryid();
+        $categoryId = $team->getCategory()->getCategoryid();
         // Only check the scores when the team has points
         if ($this->scores[$team->getTeamid()]->numPoints > 0) {
             // If the rank of this team is equal to the best team for this

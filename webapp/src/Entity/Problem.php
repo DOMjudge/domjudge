@@ -86,21 +86,6 @@ class Problem extends BaseApiEntity
      */
     private $outputlimit;
 
-
-    /**
-     * @var string
-     * @ORM\Column(type="string", name="special_run", length=32, options={"comment"="Script to run submissions for this problem"}, nullable=true)
-     * @Serializer\Exclude()
-     */
-    private $special_run;
-
-    /**
-     * @var string
-     * @ORM\Column(type="string", name="special_compare", length=32, options={"comment"="Script to compare problem and jury output for this problem"}, nullable=true)
-     * @Serializer\Exclude()
-     */
-    private $special_compare;
-
     /**
      * @var string
      * @ORM\Column(type="string", name="special_compare_args", length=255,
@@ -334,54 +319,6 @@ class Problem extends BaseApiEntity
     public function getOutputlimit()
     {
         return $this->outputlimit;
-    }
-
-    /**
-     * Set specialRun
-     *
-     * @param string $specialRun
-     *
-     * @return Problem
-     */
-    public function setSpecialRun($specialRun)
-    {
-        $this->special_run = $specialRun;
-
-        return $this;
-    }
-
-    /**
-     * Get specialRun
-     *
-     * @return string
-     */
-    public function getSpecialRun()
-    {
-        return $this->special_run;
-    }
-
-    /**
-     * Set specialCompare
-     *
-     * @param string $specialCompare
-     *
-     * @return Problem
-     */
-    public function setSpecialCompare($specialCompare)
-    {
-        $this->special_compare = $specialCompare;
-
-        return $this;
-    }
-
-    /**
-     * Get specialCompare
-     *
-     * @return string
-     */
-    public function getSpecialCompare()
-    {
-        return $this->special_compare;
     }
 
     /**

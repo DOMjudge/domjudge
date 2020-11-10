@@ -28,22 +28,6 @@ class InternalError
     private $errorid;
 
     /**
-     * @var int
-     * @ORM\Column(type="integer", name="judgingid",
-     *     options={"comment"="Judging ID","unsigned"=true},
-     *     nullable=true)
-     */
-    private $judgingid;
-
-    /**
-     * @var int
-     * @ORM\Column(type="integer", name="cid",
-     *     options={"comment"="Contest ID","unsigned"=true},
-     *     nullable=true)
-     */
-    private $cid;
-
-    /**
      * @var string
      * @ORM\Column(type="string", length=255, name="description",
      *     options={"comment"="Description of the error"},
@@ -118,54 +102,6 @@ class InternalError
     public function getErrorid()
     {
         return $this->errorid;
-    }
-
-    /**
-     * Set judgingid
-     *
-     * @param integer $judgingid
-     *
-     * @return InternalError
-     */
-    public function setJudgingid($judgingid)
-    {
-        $this->judgingid = $judgingid;
-
-        return $this;
-    }
-
-    /**
-     * Get judgingid
-     *
-     * @return integer
-     */
-    public function getJudgingid()
-    {
-        return $this->judgingid;
-    }
-
-    /**
-     * Set cid
-     *
-     * @param integer $cid
-     *
-     * @return InternalError
-     */
-    public function setCid($cid)
-    {
-        $this->cid = $cid;
-
-        return $this;
-    }
-
-    /**
-     * Get cid
-     *
-     * @return integer
-     */
-    public function getCid()
-    {
-        return $this->cid;
     }
 
     /**

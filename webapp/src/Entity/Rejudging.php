@@ -30,26 +30,6 @@ class Rejudging
      */
     private $rejudgingid;
 
-    /**
-     * @var int
-     *
-     * @ORM\Column(type="integer", name="userid_start", length=4,
-     *     options={"comment"="User ID of user who started the rejudge",
-     *              "unsigned"=true},
-     *     nullable=true)
-     */
-    private $userid_start;
-
-    /**
-     * @var int
-     *
-     * @ORM\Column(type="integer", name="userid_finish",
-     *     options={"comment"="User ID of user who accepted or canceled the rejudge",
-     *              "unsigned"=true},
-     *     nullable=true)
-     */
-    private $userid_finish;
-
 
     /**
      * @var double
@@ -130,16 +110,6 @@ class Rejudging
     private $repeat;
 
     /**
-     * @var int
-     *
-     * @ORM\Column(type="integer", name="repeat_rejudgingid",
-     *     options={"comment"="In case repeat is set, this will mark the first rejudgingid.",
-     *              "unsigned"=true},
-     *     nullable=true)
-     */
-    private $repeat_rejudgingid;
-
-    /**
      * @ORM\ManyToOne(targetEntity="Rejudging")
      * @ORM\JoinColumn(name="repeat_rejudgingid", referencedColumnName="rejudgingid", onDelete="SET NULL")
      * @Serializer\Exclude()
@@ -151,8 +121,8 @@ class Rejudging
      */
     public function __construct()
     {
-        $this->judgings = new \Doctrine\Common\Collections\ArrayCollection();
-        $this->submissions = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->judgings = new ArrayCollection();
+        $this->submissions = new ArrayCollection();
     }
 
     /**
@@ -163,54 +133,6 @@ class Rejudging
     public function getRejudgingid()
     {
         return $this->rejudgingid;
-    }
-
-    /**
-     * Set useridStart
-     *
-     * @param integer $useridStart
-     *
-     * @return Rejudging
-     */
-    public function setUseridStart($useridStart)
-    {
-        $this->userid_start = $useridStart;
-
-        return $this;
-    }
-
-    /**
-     * Get useridStart
-     *
-     * @return integer
-     */
-    public function getUseridStart()
-    {
-        return $this->userid_start;
-    }
-
-    /**
-     * Set useridFinish
-     *
-     * @param integer $useridFinish
-     *
-     * @return Rejudging
-     */
-    public function setUseridFinish($useridFinish)
-    {
-        $this->userid_finish = $useridFinish;
-
-        return $this;
-    }
-
-    /**
-     * Get useridFinish
-     *
-     * @return integer
-     */
-    public function getUseridFinish()
-    {
-        return $this->userid_finish;
     }
 
     /**
@@ -474,26 +396,26 @@ class Rejudging
     }
 
     /**
-     * Set repeat_rejudgingid
+     * Set repeated rejudging
      *
-     * @param int $repeat_rejudgingid
+     * @param Rejudging|null $repeatedRejudging
      *
      * @return Rejudging
      */
-    public function setRepeatRejudgingId(int $repeatRejudgingId)
+    public function setRepeatedRejudging(?Rejudging $repeatedRejudging)
     {
-        $this->repeat_rejudgingid = $repeatRejudgingId;
+        $this->repeatedRejudging = $repeatedRejudging;
 
         return $this;
     }
 
     /**
-     * Get repeat
+     * Get repeated rejudging
      *
-     * @return int
+     * @return Rejudging|null
      */
-    public function getRepeatRejudgingId()
+    public function getRepeatedRejudging()
     {
-        return $this->repeat_rejudgingid;
+        return $this->repeatedRejudging;
     }
 }

@@ -298,7 +298,7 @@ class SubmissionController extends AbstractRestController
             ->from(SubmissionFile::class, 'f')
             ->join('f.submission', 's')
             ->select('f, s')
-            ->andWhere('s.cid = :cid')
+            ->andWhere('s.contest = :cid')
             ->andWhere('s.submitid = :submitid')
             ->setParameter(':cid', $this->getContestId($request))
             ->setParameter(':submitid', $id)
@@ -315,7 +315,7 @@ class SubmissionController extends AbstractRestController
         foreach ($files as $file) {
             $result[]   = [
                 'id' => (string)$file->getSubmitfileid(),
-                'submission_id' => (string)$file->getSubmitid(),
+                'submission_id' => (string)$file->getSubmission()->getSubmitid(),
                 'filename' => $file->getFilename(),
                 'source' => base64_encode($file->getSourcecode()),
             ];
@@ -338,14 +338,14 @@ class SubmissionController extends AbstractRestController
             ->join('s.team', 't')
             ->select('s')
             ->andWhere('s.valid = 1')
-            ->andWhere('s.cid = :cid')
+            ->andWhere('s.contest = :cid')
             ->andWhere('t.enabled = 1')
             ->setParameter(':cid', $cid)
             ->orderBy('s.submitid');
 
         if ($request->query->has('language_id')) {
             $queryBuilder
-                ->andWhere('s.langid = :langid')
+                ->andWhere('s.language = :langid')
                 ->setParameter(':langid', $request->query->get('language_id'));
         }
 

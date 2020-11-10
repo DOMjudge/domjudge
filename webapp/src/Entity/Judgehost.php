@@ -45,16 +45,6 @@ class Judgehost
     private $polltime;
 
     /**
-     * @var int
-     * @ORM\Column(type="integer", name="restrictionid",
-     *     options={"comment"="Optional set of restrictions for this judgehost",
-     *              "unsigned"=true},
-     *     nullable=true)
-     * @Serializer\Exclude()
-     */
-    private $restrictionid;
-
-    /**
      * @ORM\ManyToOne(targetEntity="JudgehostRestriction", inversedBy="judgehosts")
      * @ORM\JoinColumn(name="restrictionid", referencedColumnName="restrictionid", onDelete="SET NULL")
      * @Serializer\Exclude()
@@ -141,38 +131,13 @@ class Judgehost
     }
 
     /**
-     * Set restrictionid
-     *
-     * @param integer $restrictionid
-     *
-     * @return Judgehost
-     */
-    public function setRestrictionid($restrictionid)
-    {
-        $this->restrictionid = $restrictionid;
-
-        return $this;
-    }
-
-    /**
-     * Get restrictionid
-     *
-     * @return integer
-     */
-    public function getRestrictionid()
-    {
-        return $this->restrictionid;
-    }
-
-    /**
      * Set restriction
      *
-     * @param \App\Entity\JudgehostRestriction $restriction
+     * @param JudgehostRestriction|null $restriction
      *
      * @return Judgehost
      */
-    public function setRestriction(
-        \App\Entity\JudgehostRestriction $restriction = null)
+    public function setRestriction(JudgehostRestriction $restriction = null)
     {
         $this->restriction = $restriction;
 
@@ -182,7 +147,7 @@ class Judgehost
     /**
      * Get restriction
      *
-     * @return \App\Entity\JudgehostRestriction
+     * @return JudgehostRestriction
      */
     public function getRestriction()
     {
@@ -193,17 +158,17 @@ class Judgehost
      */
     public function __construct()
     {
-        $this->judgings = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->judgings = new ArrayCollection();
     }
 
     /**
      * Add judging
      *
-     * @param \App\Entity\Judging $judging
+     * @param Judging $judging
      *
      * @return Judgehost
      */
-    public function addJudging(\App\Entity\Judging $judging)
+    public function addJudging(Judging $judging)
     {
         $this->judgings[] = $judging;
 
@@ -213,9 +178,9 @@ class Judgehost
     /**
      * Remove judging
      *
-     * @param \App\Entity\Judging $judging
+     * @param Judging $judging
      */
-    public function removeJudging(\App\Entity\Judging $judging)
+    public function removeJudging(Judging $judging)
     {
         $this->judgings->removeElement($judging);
     }
@@ -223,7 +188,7 @@ class Judgehost
     /**
      * Get judgings
      *
-     * @return \Doctrine\Common\Collections\Collection
+     * @return Collection
      */
     public function getJudgings()
     {

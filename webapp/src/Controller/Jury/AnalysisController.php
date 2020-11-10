@@ -65,8 +65,7 @@ class AnalysisController extends AbstractController
         $delayedTimeDiff = 5;
         $delayedJudgings = $em->createQueryBuilder()
             ->from(Submission::class, 's')
-            ->innerJoin(Judging::class, 'j', Expr\Join::WITH,
-                's.submitid = j.submitid')
+            ->innerJoin(Judging::class, 'j', Expr\Join::WITH, 's.submitid = j.submission')
             ->select('s.submitid, MIN(j.judgingid) AS judgingid, s.submittime, MIN(j.starttime) - s.submittime AS timediff, COUNT(j.judgingid) AS num_judgings')
             ->andWhere('s.contest = :contest')
             ->setParameter('contest', $contest)

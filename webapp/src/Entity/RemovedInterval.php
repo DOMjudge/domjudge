@@ -29,14 +29,6 @@ class RemovedInterval
     private $intervalid;
 
     /**
-     * @var int
-     *
-     * @ORM\Column(type="integer", name="cid", length=4,
-     *     options={"comment"="Contest ID","unsigned"=true}, nullable=false)
-     */
-    private $cid;
-
-    /**
      * @var double
      * @ORM\Column(type="decimal", precision=32, scale=9, name="starttime",
      *     options={"comment"="Initial time of removed interval", "unsigned"=true},
@@ -84,30 +76,6 @@ class RemovedInterval
     public function getIntervalid()
     {
         return $this->intervalid;
-    }
-
-    /**
-     * Set cid
-     *
-     * @param integer $cid
-     *
-     * @return RemovedInterval
-     */
-    public function setCid($cid)
-    {
-        $this->cid = $cid;
-
-        return $this;
-    }
-
-    /**
-     * Get cid
-     *
-     * @return integer
-     */
-    public function getCid()
-    {
-        return $this->cid;
     }
 
     /**

@@ -318,7 +318,7 @@ class ScoreboardIntegrationTest extends KernelTestCase
 
         $team = $this->teams[0];
         $this->createSubmission($lang, $this->problems[0], $team, 53*60+15.053, 'correct', true)
-            ->getJudgings()[0]->setRejudgingid($this->rejudging->getRejudgingid());
+            ->getJudgings()[0]->setRejudging($this->rejudging);
         $this->createSubmission($lang, $this->problems[0], $team, 53*60+57.240, null);
         $this->createSubmission($lang, $this->problems[0], $team, 53*60+59.841, 'wrong-answer');
         $this->createSubmission($lang, $this->problems[1], $team, 61*60+00.000, 'correct', true);
@@ -351,7 +351,7 @@ class ScoreboardIntegrationTest extends KernelTestCase
 
         $team = $this->teams[0];
         $this->createSubmission($lang, $this->problems[0], $team, 53*60+15.053, 'correct', true)
-            ->getJudgings()[0]->setRejudgingid($this->rejudging->getRejudgingid());
+            ->getJudgings()[0]->setRejudging($this->rejudging);
         $this->createSubmission($lang, $this->problems[0], $team, 53*60+57.240, null);
         $this->createSubmission($lang, $this->problems[0], $team, 53*60+59.841, 'wrong-answer');
         $this->createSubmission($lang, $this->problems[1], $team, 61*60+00.000, 'correct', true);
@@ -388,7 +388,7 @@ class ScoreboardIntegrationTest extends KernelTestCase
         $team = $this->teams[0];
         $this->createSubmission($lang, $this->problems[0], $team, 53*60+15.053, 'wrong-answer')
             ->setJudgehost(null)
-            ->setRejudgingid($this->rejudging->getRejudgingid());
+            ->setRejudging($this->rejudging);
 
         $this->createSubmission($lang, $this->problems[0], $team, 55*60+59.841, 'correct');
 

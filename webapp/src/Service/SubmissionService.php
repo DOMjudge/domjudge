@@ -121,7 +121,7 @@ class SubmissionService
             ->select('s', 'j', 'cp')
             ->join('s.team', 't')
             ->join('s.contest_problem', 'cp')
-            ->andWhere('s.cid IN (:contests)')
+            ->andWhere('s.contest IN (:contests)')
             ->setParameter(':contests', array_keys($contests))
             ->orderBy('s.submittime', 'DESC')
             ->addOrderBy('s.submitid', 'DESC');
@@ -132,11 +132,11 @@ class SubmissionService
 
         if (isset($restrictions['rejudgingid'])) {
             $queryBuilder
-                ->leftJoin('s.judgings', 'j', Join::WITH, 'j.rejudgingid = :rejudgingid')
+                ->leftJoin('s.judgings', 'j', Join::WITH, 'j.rejudging = :rejudgingid')
                 ->leftJoin(Judging::class, 'jold', Join::WITH,
-                           'j.prevjudgingid IS NULL AND s.submitid = jold.submitid AND jold.valid = 1 OR j.prevjudgingid = jold.judgingid')
+                           'j.original_judging IS NULL AND s.submitid = jold.submission AND jold.valid = 1 OR j.original_judging = jold.judgingid')
                 ->addSelect('jold.result AS oldresult')
-                ->andWhere('s.rejudgingid = :rejudgingid OR j.rejudgingid = :rejudgingid')
+                ->andWhere('s.rejudging = :rejudgingid OR j.rejudging = :rejudgingid')
                 ->setParameter(':rejudgingid', $restrictions['rejudgingid']);
 
             if (isset($restrictions['rejudgingdiff'])) {
@@ -210,25 +210,25 @@ class SubmissionService
 
         if (isset($restrictions['teamid'])) {
             $queryBuilder
-                ->andWhere('s.teamid = :teamid')
+                ->andWhere('s.team = :teamid')
                 ->setParameter(':teamid', $restrictions['teamid']);
         }
 
         if (isset($restrictions['categoryid'])) {
             $queryBuilder
-                ->andWhere('t.categoryid = :categoryid')
+                ->andWhere('t.category = :categoryid')
                 ->setParameter(':categoryid', $restrictions['categoryid']);
         }
 
         if (isset($restrictions['probid'])) {
             $queryBuilder
-                ->andWhere('s.probid = :probid')
+                ->andWhere('s.problem = :probid')
                 ->setParameter(':probid', $restrictions['probid']);
         }
 
         if (isset($restrictions['langid'])) {
             $queryBuilder
-                ->andWhere('s.langid = :langid')
+                ->andWhere('s.language = :langid')
                 ->setParameter(':langid', $restrictions['langid']);
         }
 

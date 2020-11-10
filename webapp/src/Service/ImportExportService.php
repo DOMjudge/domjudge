@@ -319,7 +319,7 @@ class ImportExportService
             $data[] = [
                 $team->getTeamid(),
                 $team->getIcpcid(),
-                $team->getCategoryid(),
+                $team->getCategory()->getCategoryid(),
                 $team->getEffectiveName(),
                 $team->getAffiliation() ? $team->getAffiliation()->getName() : '',
                 $team->getAffiliation() ? $team->getAffiliation()->getShortname() : '',
@@ -482,7 +482,7 @@ class ImportExportService
             }
 
             $groupWinner = "";
-            $categoryId  = $teamScore->team->getCategoryid();
+            $categoryId  = $teamScore->team->getCategory()->getCategoryid();
             if (!isset($groupWinners[$categoryId])) {
                 $groupWinners[$categoryId] = true;
                 $groupWinner               = $teamScore->team->getCategory()->getName();

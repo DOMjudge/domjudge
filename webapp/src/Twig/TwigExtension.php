@@ -202,8 +202,8 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             'refresh_flag' => $refresh_flag,
             'icat_url' => $this->config->get('icat_url'),
             'external_ccs_submission_url' => $this->config->get('external_ccs_submission_url'),
-            'current_team_contest' => $team ? $this->dj->getCurrentContest($user->getTeamid()) : null,
-            'current_team_contests' => $team ? $this->dj->getCurrentContests($user->getTeamid()) : null,
+            'current_team_contest' => $team ? $this->dj->getCurrentContest($team->getTeamid()) : null,
+            'current_team_contests' => $team ? $this->dj->getCurrentContests($team->getTeamid()) : null,
             'submission_languages' => $this->em->createQueryBuilder()
                 ->from(Language::class, 'l')
                 ->select('l')
@@ -387,7 +387,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             /** @var ExternalJudgement|null $externalJudgement */
             $externalJudgement   = $submission->getExternalJudgements()->first();
             $externalJudgementId = $externalJudgement ? $externalJudgement->getExtjudgementid() : null;
-            $probId              = $submission->getProbid();
+            $probId              = $submission->getProblem()->getProbid();
             $testcases           = $this->em->getConnection()->fetchAll(
                 'SELECT er.result as runresult, t.rank, t.description
                   FROM testcase t
@@ -401,7 +401,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             /** @var Judging|null $judging */
             $judging   = $submission->getJudgings()->first();
             $judgingId = $judging ? $judging->getJudgingid() : null;
-            $probId    = $submission->getProbid();
+            $probId    = $submission->getProblem()->getProbid();
             $testcases = $this->em->getConnection()->fetchAll(
                 'SELECT r.runresult, t.rank, t.description
                   FROM testcase t

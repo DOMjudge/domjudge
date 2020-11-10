@@ -2,9 +2,9 @@
 
 namespace App\Tests\Utils;
 
+use App\Entity\TeamAffiliation;
 use App\Utils\Utils;
 use PHPUnit\Framework\TestCase;
-use App\Entity\TeamAffiliation;
 
 class UtilsTest extends TestCase
 {
@@ -877,5 +877,18 @@ part.";
         $this->assertEquals(["tea\\mname", "rank"],   Utils::parseTsvLine("tea".$bs.$bs."mname".$tab."rank"));
         $this->assertEquals(["team nåme…", "rank"],   Utils::parseTsvLine("team nåme…".$tab."rank"));
         $this->assertEquals(["team🎈name", "rank"],   Utils::parseTsvLine("team🎈name".$tab."rank"));
+    }
+
+    /**
+     * Test that reindexing an array works
+     */
+    public function testReindex()
+    {
+        $input = [1, 2, 3];
+        $expectedOutput = [2 => 1, 4 => 2, 6 => 3];
+        $doubled = function ($item) {
+            return $item * 2;
+        };
+        $this->assertEquals($expectedOutput, Utils::reindex($input, $doubled));
     }
 }

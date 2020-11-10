@@ -66,14 +66,6 @@ class ExternalRun
     private $runtime;
 
     /**
-     * @var int
-     * @ORM\Column(type="integer", name="extjudgementid", length=4,
-     *     options={"comment"="Judging ID this run belongs to","unsigned"=true},
-     *     nullable=false)
-     */
-    private $extjudgementid;
-
-    /**
      * @var ExternalJudgement
      *
      * @ORM\ManyToOne(targetEntity="ExternalJudgement", inversedBy="external_runs")
@@ -82,30 +74,12 @@ class ExternalRun
     private $external_judgement;
 
     /**
-     * @var int
-     *
-     * @ORM\Column(type="integer", name="testcaseid", length=4,
-     *     options={"comment"="Testcase ID","unsigned"=true},
-     *     nullable=false)
-     */
-    private $testcaseid;
-
-    /**
      * @var Testcase
      *
      * @ORM\ManyToOne(targetEntity="Testcase", inversedBy="external_runs")
      * @ORM\JoinColumn(name="testcaseid", referencedColumnName="testcaseid", onDelete="CASCADE")
      */
     private $testcase;
-
-    /**
-     * @var int
-     *
-     * @ORM\Column(type="integer", name="cid",
-     *     options={"comment"="Contest ID", "unsigned"=true},
-     *     nullable=false, length=4)
-     */
-    protected $cid;
 
     /**
      * @var Contest
@@ -222,30 +196,6 @@ class ExternalRun
     }
 
     /**
-     * Set externalJudgementId
-     *
-     * @param int $extjudgementid
-     *
-     * @return ExternalRun
-     */
-    public function setExtjudgementid(int $extjudgementid)
-    {
-        $this->extjudgementid = $extjudgementid;
-
-        return $this;
-    }
-
-    /**
-     * Get externalJudgementId
-     *
-     * @return int
-     */
-    public function getExtjudgementid()
-    {
-        return $this->extjudgementid;
-    }
-
-    /**
      * Set externalJudgement
      *
      * @param ExternalJudgement $externalJudgement
@@ -270,30 +220,6 @@ class ExternalRun
     }
 
     /**
-     * Set testcase ID
-     *
-     * @param int $testcaseid
-     *
-     * @return ExternalRun
-     */
-    public function setTestcaseid(int $testcaseid)
-    {
-        $this->testcaseid = $testcaseid;
-
-        return $this;
-    }
-
-    /**
-     * Get testcase ID
-     *
-     * @return int
-     */
-    public function getTestcaseid()
-    {
-        return $this->testcaseid;
-    }
-
-    /**
      * Set testcase
      *
      * @param Testcase $testcase
@@ -315,30 +241,6 @@ class ExternalRun
     public function getTestcase()
     {
         return $this->testcase;
-    }
-
-    /**
-     * Set cid
-     *
-     * @param int $cid
-     *
-     * @return ExternalRun
-     */
-    public function setCid(int $cid)
-    {
-        $this->cid = $cid;
-
-        return $this;
-    }
-
-    /**
-     * Get cid
-     *
-     * @return int
-     */
-    public function getCid()
-    {
-        return $this->cid;
     }
 
     /**

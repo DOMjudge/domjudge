@@ -51,7 +51,7 @@
                     </td>
                     <td>
                         {% if clarification.problem %}
-                            {{ problems[clarification.probid].shortName }}: {{ clarification.problem.name }}
+                            {{ problems[clarification.problem.probid].shortName }}: {{ clarification.problem.name }}
                         {% elseif clarification.category and categories[clarification.category] is defined %}
                             {{ categories[clarification.category] }}
                         {% else %}

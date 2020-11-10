@@ -164,8 +164,8 @@ class GeneralInfoController extends AbstractFOSRestController
     {
         if ($this->dj->checkrole('jury')) {
             $onlyOfTeam = null;
-        } elseif ($this->dj->checkrole('team') && $this->dj->getUser()->getTeamid()) {
-            $onlyOfTeam = $this->dj->getUser()->getTeamid();
+        } elseif ($this->dj->checkrole('team') && $this->dj->getUser()->getTeam()) {
+            $onlyOfTeam = $this->dj->getUser()->getTeam();
         } else {
             $onlyOfTeam = -1;
         }

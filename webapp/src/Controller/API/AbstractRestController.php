@@ -150,12 +150,12 @@ abstract class AbstractRestController extends AbstractFOSRestController
 
         // Filter on contests this user has access to
         if (!$this->dj->checkrole('api_reader') && !$this->dj->checkrole('judgehost')) {
-            if ($this->dj->checkrole('team') && $this->dj->getUser()->getTeamid()) {
+            if ($this->dj->checkrole('team') && $this->dj->getUser()->getTeam()) {
                 $qb->leftJoin('c.teams', 'ct')
                     ->leftJoin('c.team_categories', 'tc')
                     ->leftJoin('tc.teams', 'tct')
                     ->andWhere('ct.teamid = :teamid OR tct.teamid = :teamid OR c.openToAllTeams = 1')
-                    ->setParameter(':teamid', $this->dj->getUser()->getTeamid());
+                    ->setParameter(':teamid', $this->dj->getUser()->getTeam());
             } else {
                 $qb->andWhere('c.public = 1');
             }

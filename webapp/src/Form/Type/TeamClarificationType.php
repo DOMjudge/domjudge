@@ -47,7 +47,7 @@ class TeamClarificationType extends AbstractType
         /** @var string[] $categories */
         $categories = $this->config->get('clar_categories');
         $user       = $this->dj->getUser();
-        $contest    = $this->dj->getCurrentContest($user->getTeamid());
+        $contest    = $this->dj->getCurrentContest($user->getTeam()->getTeamid());
         foreach ($categories as $categoryId => $categoryName) {
             $subjects[$categoryName] = sprintf('%d-%s', $contest->getCid(), $categoryId);
         }

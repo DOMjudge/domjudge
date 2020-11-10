@@ -60,21 +60,6 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface
     private $display_name;
 
     /**
-     * @var int
-     * @ORM\Column(type="integer", name="categoryid", options={"comment"="Team category ID","unsigned"="true","default"=0}, nullable=false)
-     * @Serializer\Exclude()
-     */
-    private $categoryid = 0;
-
-    /**
-     * @var int
-     * @ORM\Column(type="integer", name="affilid", options={"comment"="Team affiliation ID","unsigned"="true"}, nullable=true)
-     * @Serializer\SerializedName("organization_id")
-     * @Serializer\Type("string")
-     */
-    private $affilid;
-
-    /**
      * @var boolean
      * @ORM\Column(type="boolean", name="enabled",
      *     options={"comment"="Whether the team is visible and operational",
@@ -291,54 +276,6 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface
     }
 
     /**
-     * Set categoryid
-     *
-     * @param integer $categoryid
-     *
-     * @return Team
-     */
-    public function setCategoryid($categoryid)
-    {
-        $this->categoryid = $categoryid;
-
-        return $this;
-    }
-
-    /**
-     * Get categoryid
-     *
-     * @return integer
-     */
-    public function getCategoryid()
-    {
-        return $this->categoryid;
-    }
-
-    /**
-     * Set affilid
-     *
-     * @param integer $affilid
-     *
-     * @return Team
-     */
-    public function setAffilid($affilid)
-    {
-        $this->affilid = $affilid;
-
-        return $this;
-    }
-
-    /**
-     * Get affilid
-     *
-     * @return integer
-     */
-    public function getAffilid()
-    {
-        return $this->affilid;
-    }
-
-    /**
      * Set enabled
      *
      * @param boolean $enabled
@@ -524,6 +461,19 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface
     public function getAffiliation()
     {
         return $this->affiliation;
+    }
+
+    /**
+     * Get affiliation ID
+     *
+     * @return int|null
+     * @Serializer\VirtualProperty()
+     * @Serializer\SerializedName("organization_id")
+     * @Serializer\Type("string")
+     */
+    public function getAffiliationId(): ?int
+    {
+        return $this->getAffiliation() ? $this->getAffiliation()->getAffilid() : null;
     }
 
     /**
@@ -785,7 +735,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface
      */
     public function getGroupIds(): array
     {
-        return $this->getCategoryid() ? [$this->getCategoryid()] : [];
+        return $this->getCategory()->getCategoryid() ? [$this->getCategory()->getCategoryid()] : [];
     }
 
     /**
@@ -821,8 +771,8 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface
      */
     public function canViewClarification(Clarification $clarification)
     {
-        return ($clarification->getSenderId() === $this->getTeamid() ||
-            $clarification->getRecipientId() === $this->getTeamid() ||
+        return (($clarification->getSender() && $clarification->getSender()->getTeamid() === $this->getTeamid()) ||
+            ($clarification->getRecipient() && $clarification->getRecipient()->getTeamid() === $this->getTeamid()) ||
             ($clarification->getSender() === null && $clarification->getRecipient() === null));
     }
 

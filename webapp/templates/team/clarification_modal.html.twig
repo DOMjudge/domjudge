@@ -1,7 +1,7 @@
 {% extends "partials/modal.html.twig" %}
 
 {% block title %}
-{% if clarification.senderId == team.teamid %}
+{% if clarification.sender and clarification.sender.teamid == team.teamid %}
 Clarification Request
 {% else %}
 View clarification

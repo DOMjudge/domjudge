@@ -73,9 +73,9 @@
             {%- endif %}
 
             <tr class="{% if not submission.valid %}ignore{% endif %}"
-                data-problem-id="{{ submission.probid }}"
-                data-team-id="{{ submission.teamid }}"
-                data-language-id="{{ submission.langid }}"
+                data-problem-id="{{ submission.problem.probid }}"
+                data-team-id="{{ submission.team.teamid }}"
+                data-language-id="{{ submission.language.langid }}"
                 data-submission-id="{{ submission.submitid }}">
                 {% if showExternalResult and showExternalTestcases %}
                     <td class="{{ tdExtraClass }}">
@@ -88,7 +88,7 @@
                     <a href="{{ link }}">s{{ submission.submitid }}</a>
                 </td>
                 {%- if showContest %}
-                    <td class="{{ tdExtraClass }}"><a href="{{ link }}">c{{ submission.cid }}</a></td>
+                    <td class="{{ tdExtraClass }}"><a href="{{ link }}">c{{ submission.contest.cid }}</a></td>
                 {%- endif %}
 
                 <td rowspan="{{ rowSpan }}" class="{{ tdExtraClass }}">
@@ -96,7 +96,7 @@
                 </td>
                 <td rowspan="{{ rowSpan }}" class="{{ tdExtraClass }}">
                     <a href="{{ link }}"
-                       title="t{{ submission.teamid }}">{{ submission.team.name | truncate(30) }}</a>
+                       title="t{{ submission.team.teamid }}">{{ submission.team.name | truncate(30) }}</a>
                 </td>
                 <td class="probid{{ tdExtraClass }}" rowspan="{{ rowSpan }}">
                     <a href="{{ link }}"
@@ -104,7 +104,7 @@
                 </td>
                 <td class="langid{{ tdExtraClass }}" rowspan="{{ rowSpan }}">
                     <a href="{{ link }}"
-                       title="{{ submission.language.name }}">{{ submission.langid }}</a>
+                       title="{{ submission.language.name }}">{{ submission.language.langid }}</a>
                 </td>
                 {% if showExternalResult and showExternalTestcases %}
                     <td class="{{ tdExtraClass }}">

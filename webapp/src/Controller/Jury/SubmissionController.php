@@ -230,8 +230,8 @@ class SubmissionController extends BaseController
         if (!isset($judgingId) && isset($rejudgingId)) {
             $judging = $this->em->getRepository(Judging::class)
                 ->findOneBy([
-                                'submitid' => $submitId,
-                                'rejudgingid' => $rejudgingId
+                                'submission' => $submitId,
+                                'rejudging' => $rejudgingId
                             ]);
             if ($judging) {
                 $judgingId = $judging->getJudgingid();
@@ -343,7 +343,7 @@ class SubmissionController extends BaseController
                 $restrictions = $judgehost->getRestriction()->getRestrictions();
                 if (isset($restrictions['contest'])) {
                     $queryBuilder
-                        ->andWhere('s.cid IN (:contests)')
+                        ->andWhere('s.contest IN (:contests)')
                         ->setParameter(':contests', $restrictions['contest']);
                 }
                 if (isset($restrictions['problem'])) {
@@ -354,7 +354,7 @@ class SubmissionController extends BaseController
                 }
                 if (isset($restrictions['language'])) {
                     $queryBuilder
-                        ->andWhere('s.langid IN (:languages)')
+                        ->andWhere('s.language IN (:languages)')
                         ->setParameter(':languages', $restrictions['language']);
                 }
 
@@ -437,7 +437,8 @@ class SubmissionController extends BaseController
 
             $judgingRunTestcaseIdsInOrder = $this->em->createQueryBuilder()
                 ->from(JudgingRun::class, 'jr')
-                ->select('jr.testcaseid')
+                ->join('jr.testcase', 'tc')
+                ->select('tc.testcaseid')
                 ->andWhere('jr.judging = :judging')
                 ->setParameter(':judging', $selectedJudging)
                 ->orderBy('jr.endtime')
@@ -473,8 +474,8 @@ class SubmissionController extends BaseController
             }
         }
 
-        if ($submission->getOrigsubmitid()) {
-            $lastSubmission = $this->em->getRepository(Submission::class)->find($submission->getOrigsubmitid());
+        if ($submission->getOriginalSubmission()) {
+            $lastSubmission = $submission->getOriginalSubmission();
         } else {
             /** @var Submission|null $lastSubmission */
             $lastSubmission = $this->em->createQueryBuilder()
@@ -559,7 +560,7 @@ class SubmissionController extends BaseController
     public function viewForJudgingAction(Judging $jid)
     {
         return $this->redirectToRoute('jury_submission', [
-            'submitId' => $jid->getSubmitid(),
+            'submitId' => $jid->getSubmission()->getSubmitid(),
             'jid' => $jid->getJudgingid(),
         ]);
     }
@@ -570,7 +571,7 @@ class SubmissionController extends BaseController
     public function viewForExternalJudgementAction(ExternalJudgement $externalJudgement)
     {
         return $this->redirectToRoute('jury_submission', [
-            'submitId' => $externalJudgement->getSubmitid(),
+            'submitId' => $externalJudgement->getSubmission()->getSubmitid(),
         ]);
     }
 
@@ -606,13 +607,13 @@ class SubmissionController extends BaseController
      */
     public function teamOutputAction(Submission $submission, Contest $contest, JudgingRun $run)
     {
-        if ($run->getJudging()->getSubmitid() !== $submission->getSubmitid() || $submission->getCid() !== $contest->getCid()) {
+        if ($run->getJudging()->getSubmission()->getSubmitid() !== $submission->getSubmitid() || $submission->getContest()->getCid() !== $contest->getCid()) {
             throw new BadRequestHttpException('Problem while fetching team output');
         }
 
-        $filename = sprintf('p%d.t%d.%s.run%d.team%d.out', $submission->getProbid(), $run->getTestcase()->getRank(),
+        $filename = sprintf('p%d.t%d.%s.run%d.team%d.out', $submission->getProblem()->getProbid(), $run->getTestcase()->getRank(),
                             $submission->getContestProblem()->getShortname(), $run->getRunid(),
-                            $submission->getTeamid());
+                            $submission->getTeam()->getTeamid());
 
         $outputRun = $run->getOutput()->getOutputRun();
         return Utils::streamAsBinaryFile($outputRun, $filename);
@@ -662,9 +663,9 @@ class SubmissionController extends BaseController
 
         $originalSubmission = $originalFiles = null;
 
-        if ($submission->getOrigsubmitid()) {
+        if ($submission->getOriginalSubmission()) {
             /** @var Submission $originalSubmission */
-            $originalSubmission = $this->em->getRepository(Submission::class)->find($submission->getOrigsubmitid());
+            $originalSubmission = $this->em->getRepository(Submission::class)->find($submission->getOriginalSubmission()->getSubmitid());
 
             /** @var SubmissionFile[] $files */
             $originalFiles = $this->em->createQueryBuilder()
@@ -680,14 +681,14 @@ class SubmissionController extends BaseController
             $oldSubmission = $this->em->createQueryBuilder()
                 ->from(Submission::class, 's')
                 ->select('s')
-                ->andWhere('s.probid = :probid')
-                ->andWhere('s.langid = :langid')
+                ->andWhere('s.problem = :probid')
+                ->andWhere('s.language = :langid')
                 ->andWhere('s.submittime < :submittime')
-                ->andWhere('s.origsubmitid = :origsubmitid')
-                ->setParameter(':probid', $submission->getProbid())
-                ->setParameter(':langid', $submission->getLangid())
+                ->andWhere('s.originalSubmission = :origsubmitid')
+                ->setParameter(':probid', $submission->getProblem())
+                ->setParameter(':langid', $submission->getLanguage())
                 ->setParameter(':submittime', $submission->getSubmittime())
-                ->setParameter(':origsubmitid', $submission->getOrigsubmitid())
+                ->setParameter(':origsubmitid', $submission->getOriginalSubmission())
                 ->orderBy('s.submittime', 'DESC')
                 ->setMaxResults(1)
                 ->getQuery()
@@ -696,13 +697,13 @@ class SubmissionController extends BaseController
             $oldSubmission = $this->em->createQueryBuilder()
                 ->from(Submission::class, 's')
                 ->select('s')
-                ->andWhere('s.teamid = :teamid')
-                ->andWhere('s.probid = :probid')
-                ->andWhere('s.langid = :langid')
+                ->andWhere('s.team = :teamid')
+                ->andWhere('s.problem = :probid')
+                ->andWhere('s.language = :langid')
                 ->andWhere('s.submittime < :submittime')
-                ->setParameter(':teamid', $submission->getTeamid())
-                ->setParameter(':probid', $submission->getProbid())
-                ->setParameter(':langid', $submission->getLangid())
+                ->setParameter(':teamid', $submission->getTeam())
+                ->setParameter(':probid', $submission->getProblem())
+                ->setParameter(':langid', $submission->getLanguage())
                 ->setParameter(':submittime', $submission->getSubmittime())
                 ->orderBy('s.submittime', 'DESC')
                 ->setMaxResults(1)
@@ -884,15 +885,19 @@ class SubmissionController extends BaseController
         $submission->setValid($valid);
         $this->em->flush();
 
+        $contestId = $submission->getContest()->getCid();
+        $teamId    = $submission->getTeam()->getTeamid();
+        $problemId = $submission->getProblem()->getProbid();
+
         // KLUDGE: We can't log an "undelete", so we re-"create".
         // FIXME: We should also delete/recreate any dependent judging(runs).
         $eventLogService->log('submission', $submission->getSubmitid(), ($valid ? 'create' : 'delete'),
-                              $submission->getCid(), null, null, $valid);
+                              $submission->getContest()->getCid(), null, null, $valid);
         $this->dj->auditlog('submission', $submission->getSubmitid(),
                                          'marked ' . ($valid ? 'valid' : 'invalid'));
-        $contest = $this->em->getRepository(Contest::class)->find($submission->getCid());
-        $team    = $this->em->getRepository(Team::class)->find($submission->getTeamid());
-        $problem = $this->em->getRepository(Problem::class)->find($submission->getProbid());
+        $contest = $this->em->getRepository(Contest::class)->find($contestId);
+        $team    = $this->em->getRepository(Team::class)->find($teamId);
+        $problem = $this->em->getRepository(Problem::class)->find($problemId);
         $scoreboardService->calculateScoreRow($contest, $team, $problem);
 
         return $this->redirectToRoute('jury_submission', ['submitId' => $submission->getSubmitid()]);
@@ -935,7 +940,7 @@ class SubmissionController extends BaseController
             if ((bool)$this->config->get('verification_required')) {
                 // Log to event table (case of no verification required is handled
                 // in the REST API API/JudgehostController::addJudgingRunAction
-                $eventLogService->log('judging', $judging->getJudgingid(), 'update', $judging->getCid());
+                $eventLogService->log('judging', $judging->getJudgingid(), 'update', $judging->getContest()->getCid());
             }
         });
 
@@ -1099,7 +1104,7 @@ class SubmissionController extends BaseController
                 $this->dj->auditlog($auditLogType, $auditLogId, $action . 'ed');
 
                 if ($action === 'claim') {
-                    return $this->redirectToRoute('jury_submission', ['submitId' => $judging->getSubmitid()]);
+                    return $this->redirectToRoute('jury_submission', ['submitId' => $judging->getSubmission()->getSubmitid()]);
                 } else {
                     return $this->redirectToRoute('jury_submissions');
                 }

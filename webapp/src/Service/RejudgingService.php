@@ -12,7 +12,6 @@ use App\Entity\Team;
 use App\Entity\User;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Query;
 
 class RejudgingService
 {
@@ -68,10 +67,14 @@ class RejudgingService
 
     /**
      * Create a new rejudging.
-     * @param string        $reason           Reason for this rejudging
-     * @param array         $judgings         List of judgings to rejudging
-     * @param bool          $autoApply        Whether the judgings should be automatically applied.
-     * @param array        &$skipped          Returns list of judgings not included.
+     *
+     * @param string          $reason    Reason for this rejudging
+     * @param array           $judgings  List of judgings to rejudging
+     * @param bool            $autoApply Whether the judgings should be automatically applied.
+     * @param int             $repeat
+     * @param Rejudging|null  $repeatedRejudging
+     * @param array          &$skipped   Returns list of judgings not included.
+     *
      * @return Rejudging|null
      */
     public function createRejudging(
@@ -79,7 +82,7 @@ class RejudgingService
         array $judgings,
         bool $autoApply,
         int $repeat,
-        $repeat_rejudgingid,
+        ?Rejudging $repeatedRejudging,
         array &$skipped
     ) {
         /** @var Rejudging $rejudging */
@@ -92,12 +95,12 @@ class RejudgingService
         $this->em->persist($rejudging);
         $this->em->flush();
         if (isset($repeat) && $repeat > 1) {
-            if ($repeat_rejudgingid === null) {
-                $repeat_rejudgingid = $rejudging->getRejudgingid();
+            if ($repeatedRejudging === null) {
+                $repeatedRejudging = $rejudging;
             }
             $rejudging
                 ->setRepeat($repeat)
-                ->setRepeatRejudgingId($repeat_rejudgingid);
+                ->setRepeatedRejudging($repeatedRejudging);
             $this->em->flush();
         }
 
@@ -195,7 +198,10 @@ class RejudgingService
         $submissions = $this->em->createQueryBuilder()
             ->from(Submission::class, 's')
             ->leftJoin('s.judgings', 'j', 'WITH', 'j.rejudging = :rejudging')
-            ->select('s.submitid, s.cid, s.teamid, s.probid, j.judgingid')
+            ->join('s.contest', 'c')
+            ->join('s.team', 't')
+            ->join('s.problem', 'p')
+            ->select('s.submitid, c.cid, t.teamid, p.probid, j.judgingid')
             ->andWhere('s.rejudging = :rejudging')
             ->setParameter(':rejudging', $rejudging)
             ->getQuery()
@@ -263,7 +269,7 @@ class RejudgingService
                     $runData = $this->em->createQueryBuilder()
                         ->from(JudgingRun::class, 'r')
                         ->select('r.runid')
-                        ->andWhere('r.judgingid = :judgingid')
+                        ->andWhere('r.judging = :judgingid')
                         ->setParameter(':judgingid', $submission['judgingid'])
                         ->getQuery()
                         ->getResult();
@@ -288,7 +294,7 @@ class RejudgingService
                     ->from(Judging::class, 'j')
                     ->join('j.judgehost', 'jh')
                     ->select('j', 'jh')
-                    ->andWhere('j.submitid = :submitid')
+                    ->andWhere('j.submission = :submitid')
                     ->andWhere('j.valid = 1')
                     ->setParameter(':submitid', $submission['submitid'])
                     ->getQuery()
