@@ -413,7 +413,7 @@ class CheckConfigService
                 $exec = $this->em->getRepository(Executable::class)->findOneBy(['execid' => $special_compare->getExecid()]);
                 if (!$exec) {
                     $result = 'E';
-                    $moreproblemerrors[$probid] .= sprintf("Special compare script %s not found for p%s\n", $special_compare, $probid);
+                    $moreproblemerrors[$probid] .= sprintf("Special compare script %s not found for p%s\n", $special_compare->getExecid(), $probid);
                 } elseif ($exec->getType() !== "compare") {
                     $result = 'E';
                     $moreproblemerrors[$probid] .= sprintf("Special compare script %s exists but is of wrong type (%s instead of compare) for p%s\n", $special_compare, $exec->getType(), $probid);
@@ -423,7 +423,7 @@ class CheckConfigService
                 $exec = $this->em->getRepository(Executable::class)->findOneBy(['execid' => $special_run->getExecid()]);
                 if (!$exec) {
                     $result = 'E';
-                    $moreproblemerrors[$probid] .= sprintf("Special run script %s not found for p%s\n", $special_run, $probid);
+                    $moreproblemerrors[$probid] .= sprintf("Special run script %s not found for p%s\n", $special_run->getExecid(), $probid);
                 } elseif ($exec->getType() !== "run") {
                     $result = 'E';
                     $moreproblemerrors[$probid] .= sprintf("Special run script %s exists but is of wrong type (%s instead of run) for p%s\n", $special_run, $exec->getType(), $probid);

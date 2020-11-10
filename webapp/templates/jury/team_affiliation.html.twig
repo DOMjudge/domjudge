@@ -54,7 +54,7 @@
                         <th>Country</th>
                         <td>
                             {% if teamAffiliation.country is not empty %}
-                                <img src="{{ asset('images/countries/' ~ team.affiliation.country ~ '.png') }}" alt="{{ alpha3_countries[teamAffiliation.country] }}"
+                                <img src="{{ asset('images/countries/' ~ teamAffiliation.country ~ '.png') }}" alt="{{ alpha3_countries[teamAffiliation.country] }}"
                                      title="{{ alpha3_countries[teamAffiliation.country] }}" class="countryflag"/>
                             {% endif %}
                             {{ alpha3_countries[teamAffiliation.country] }}

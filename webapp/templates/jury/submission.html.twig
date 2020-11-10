@@ -247,7 +247,7 @@
                     <td>
                         <a href="{{ link }}">
                             {% if judging.rejudging is not null %}
-                                r{{ judging.rejudgingid }} ({{ judging.rejudging.reason }})
+                                r{{ judging.rejudging.rejudgingid }} ({{ judging.rejudging.reason }})
                             {% endif %}
                         </a>
                     </td>
@@ -279,8 +279,8 @@
                     Judging j{{ selectedJudging.judgingid }}
                     {% if selectedJudging.rejudging %}
                         (rejudging
-                        <a href="{{ path('jury_rejudging', {rejudgingId: selectedJudging.rejudgingid}) }}">
-                            r{{ selectedJudging.rejudgingid }}</a>, reason: {{ selectedJudging.rejudging.reason }})
+                        <a href="{{ path('jury_rejudging', {rejudgingId: selectedJudging.rejudging.rejudgingid}) }}">
+                            r{{ selectedJudging.rejudging.rejudgingid }}</a>, reason: {{ selectedJudging.rejudging.reason }})
                     {% elseif not selectedJudging.valid %}
                         (Invalid)
                     {% endif %}

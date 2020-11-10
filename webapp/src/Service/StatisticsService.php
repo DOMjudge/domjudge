@@ -467,7 +467,7 @@ class StatisticsService
         //   - The judging submission matches the problem we're analyzing
         //   - The submission was made by a team in a visible category
         $judgingsQueryBuilder = $this->em->createQueryBuilder()
-            ->select('COUNT(j) AS count, s.probid')
+            ->select('COUNT(j) AS count, p.probid')
             ->from(Judging::class, 'j')
             ->join('j.submission', 's')
             ->join('s.problem', 'p')
