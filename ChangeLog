@@ -1,5 +1,8 @@
 DOMjudge Programming Contest Judging System
 
+Version 7.3.2 - DEV
+-------------------
+
 Version 7.3.1 - 10 November 2020
 --------------------------------
  - Fix chroot install on Ubuntu 20.04.
