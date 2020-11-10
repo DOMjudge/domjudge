@@ -45,6 +45,7 @@ class InternalErrorController extends BaseController
         /** @var InternalError[] $internalErrors */
         $internalErrors = $this->em->createQueryBuilder()
             ->from(InternalError::class, 'e')
+            ->join('e.judging', 'j')
             ->select('e')
             ->orderBy('e.status')
             ->addOrderBy('e.errorid')
@@ -52,7 +53,7 @@ class InternalErrorController extends BaseController
 
         $table_fields = [
             'errorid' => ['title' => 'ID'],
-            'judgingid' => ['title' => 'jid'],
+            'judging.judgingid' => ['title' => 'jid'],
             'description' => ['title' => 'description'],
             'time' => ['title' => 'time'],
             'status' => ['title' => 'status'],
