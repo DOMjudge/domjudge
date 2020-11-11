@@ -24,13 +24,15 @@ class ContestType extends AbstractExternalIdEntityType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $this->addExternalIdField($builder, Contest::class);
-        $builder->add('shortname', TextType::class);
-        $builder->add('name', TextType::class, [
+        $builder->add('shortname', TextType::class, [
             'help' => 'Contest name as shown in the top right.'
+        ]);
+        $builder->add('name', TextType::class, [
+            'help' => 'Contest name in full as shown on the scoreboard.'
         ]);
         $builder->add('activatetimeString', TextType::class, [
             'label' => 'Activate time',
-            'help' => 'Time when the contest becomes visible for teams to join. Must be in the past to enable submission of jury submissions.',
+            'help' => 'Time when the contest becomes visible for teams. Must be in the past to enable submission of jury submissions.',
         ]);
         $builder->add('starttimeString', TextType::class, [
             'label' => 'Start time',
