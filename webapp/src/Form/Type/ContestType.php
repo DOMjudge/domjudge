@@ -114,7 +114,7 @@ class ContestType extends AbstractExternalIdEntityType
         ]);
         $builder->add('enabled', ChoiceType::class, [
             'expanded' => true,
-            'label' => 'Contest enabled',
+            'label' => 'Enable contest',
             'choices' => [
                 'Yes' => true,
                 'No' => false,
