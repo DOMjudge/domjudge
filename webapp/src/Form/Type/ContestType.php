@@ -46,7 +46,6 @@ class ContestType extends AbstractExternalIdEntityType
                 'No' => false,
             ],
             'help' => 'Disable to delay the contest start and stop the countdown. Enable again after setting a new start time.',
-            # What happens when the countdown is disabled, but the start time is in the past/time 'crosses' the start time?
         ]);
         $builder->add('freezetimeString', TextType::class, [
             'label' => 'Scoreboard freeze time',
@@ -55,7 +54,7 @@ class ContestType extends AbstractExternalIdEntityType
         ]);
         $builder->add('endtimeString', TextType::class, [
             'label' => 'End time',
-            'help' => 'Time when the contest ends. Submissions made after this time will be accepted but shown as \'too-late\' and not counted towards the score.',
+            'help' => 'Time when the contest ends. Submissions made after this time will be accepted and judged but shown (to teams and public) as \'too-late\' and not counted towards the score.',
         ]);
         $builder->add('unfreezetimeString', TextType::class, [
             'label' => 'Scoreboard unfreeze time',
