@@ -26,16 +26,17 @@
         </div>
         {{ form_row(form.enabled) }}
     </div>
-    <div class="col-lg-4">
-        <b>Specification of contest times:</b><br/>
-        Each of the contest times can be specified as absolute time or relative<br/>
-        to the start time (except for start time itself). Use up to 6 subsecond<br/>
+    <div class="col-lg-6">
+        <h5>Specification of contest times</h5>
+        <div>Each of the contest times can be specified as absolute time or relative
+        to the start time (except for start time itself). Use up to 6 subsecond
         decimals and a timezone from the
         <a target="_blank" href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones">
-            time zone database
-        </a>.<br/><br/>
-        Absolute time format: <b><tt>YYYY-MM-DD HH:MM:SS[.uuuuuu] timezone</tt></b><br/>
-        Relative time format: <b><tt>±[HHH]H:MM[:SS[.uuuuuu]]</tt></b><br/>
+            time zone database</a>.</div>
+        <div class="mt-3"><table>
+        <tr><td>Absolute time format:</td><td><kbd>YYYY-MM-DD HH:MM:SS[.uuuuuu] timezone</kbd></td></tr>
+        <tr><td>Relative time format:</td><td><kbd>±[HHH]H:MM[:SS[.uuuuuu]]</kbd></td></tr>
+        </table></div>
     </div>
 </div>
 <table class="table table-sm table-striped">
