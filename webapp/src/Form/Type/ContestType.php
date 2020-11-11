@@ -39,11 +39,11 @@ class ContestType extends AbstractExternalIdEntityType
             'help' => 'Absolute time when the contest starts.',
         ]);
         $builder->add('starttimeEnabled', ChoiceType::class, [
-            'label' => 'Start time countdown',
+            'label' => 'Start time countdown enabled',
             'expanded' => true,
             'choices' => [
-                'Enabled' => true,
-                'Disabled' => false,
+                'Yes' => true,
+                'No' => false,
             ],
             'help' => 'Disable to delay the contest start and stop the countdown. Enable again after setting a new start time.',
             # What happens when the countdown is disabled, but the start time is in the past/time 'crosses' the start time?
@@ -71,8 +71,8 @@ class ContestType extends AbstractExternalIdEntityType
             'expanded' => true,
             'label' => 'Record balloons',
             'choices' => [
-                'Enabled' => true,
-                'Disabled' => false,
+                'Yes' => true,
+                'No' => false,
             ],
             'help' => 'Disable this to stop recording balloons. Usually you can just leave this enabled.',
         ]);
@@ -80,8 +80,8 @@ class ContestType extends AbstractExternalIdEntityType
             'expanded' => true,
             'label' => 'Enable public scoreboard',
             'choices' => [
-                'Enabled' => true,
-                'Disabled' => false,
+                'Yes' => true,
+                'No' => false,
             ],
             'help' => 'When the public scoreboard is enabled, everyone can see it without logging in. When disabled, only logged in users/teams can see the scoreboard.',
         ]);
@@ -89,8 +89,8 @@ class ContestType extends AbstractExternalIdEntityType
             'expanded' => true,
             'label' => 'Open contest to all teams',
             'choices' => [
-                'Enabled' => true,
-                'Disabled' => false,
+                'Yes' => true,
+                'No' => false,
             ],
             'help' => 'When enabled, any logged in team is part of the contest. When disabled, only the teams/categories listed below are part of the contest.',
         ]);
@@ -116,8 +116,8 @@ class ContestType extends AbstractExternalIdEntityType
             'expanded' => true,
             'label' => 'Contest enabled',
             'choices' => [
-                'Enabled' => true,
-                'Disabled' => false,
+                'Yes' => true,
+                'No' => false,
             ],
             'help' => 'When disabled, the contest is hidden from teams (even when active) and judging is disabled. Disabling is a quick way to remove access to it without changing any other settings.',
         ]);
