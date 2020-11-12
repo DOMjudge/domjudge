@@ -4,6 +4,9 @@ set -euxo pipefail
 
 export PS4='(${BASH_SOURCE}:${LINENO}): - [$?] $ '
 
+gitlabartifacts="$(pwd)/gitlabartifacts"
+mkdir -p "$gitlabartifacts"
+
 DIR=$(pwd)
 lsb_release -a
 
@@ -55,9 +58,9 @@ echo -e "\033[0m"
 
 # configure, make and install (but skip documentation)
 make configure
-./configure --with-baseurl='http://localhost/domjudge/' --with-domjudge-user=domjudge --with-judgehost_chrootdir=${DIR}/chroot/domjudge
-make build-scripts domserver judgehost docs
-sudo make install-domserver install-judgehost install-docs
+./configure --with-baseurl='http://localhost/domjudge/' --with-domjudge-user=domjudge --with-judgehost_chrootdir=${DIR}/chroot/domjudge |& tee "$gitlabartifacts/configure.log"
+make build-scripts domserver judgehost docs |& tee "$gitlabartifacts/make.log"
+sudo make install-domserver install-judgehost install-docs |& tee -a "$gitlabartifacts/make.log"
 
 # setup database and add special user
 cd /opt/domjudge/domserver

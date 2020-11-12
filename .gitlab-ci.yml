@@ -110,7 +110,7 @@ integration:
   stage: test
   before_script:
     # Takes about 1 minute to pull
-    - echo -e "section_start:`date +%s`:docker\r\e[0Kdocker pull"
+    - echo -e "section_start:`date +%s`:docker[collapsed=true]\r\e[0Kdocker pull"
     - time docker pull domjudge/gitlabci:1.0
     - echo -e "section_end:`date +%s`:docker\r\e[0K"
   image: docker:stable

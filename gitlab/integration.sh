@@ -1,14 +1,14 @@
 #!/bin/bash
 
+gitlabartifacts="$(pwd)/gitlabartifacts"
+mkdir -p "$gitlabartifacts"
+
 shopt -s expand_aliases
 alias trace_on='set -x'
 alias trace_off='{ set +x; } 2>/dev/null'
 
-gitlabartifacts="$(pwd)/gitlabartifacts"
-mkdir -p "$gitlabartifacts"
-
 function section_start_internal() {
-	echo -e "section_start:`date +%s`:$1\r\e[0K$2"
+	echo -e "section_start:`date +%s`:$1[collapsed=true]\r\e[0K$2"
 	trace_on
 }
 
@@ -21,6 +21,20 @@ alias section_start='trace_off ; section_start_internal '
 alias section_end='trace_off ; section_end_internal '
 
 set -euxo pipefail
+
+function finish() {
+	echo -e "\\n\\n=======================================================\\n"
+	echo "Storing artifacts..."
+	trace_on
+	set +e
+	mysqldump domjudge > "$gitlabartifacts/db.sql"
+	cp /var/log/nginx/domjudge.log "$gitlabartifacts/nginx.log"
+	cp /opt/domjudge/domserver/webapp/var/log/prod.log "$gitlabartifacts/symfony.log"
+	cp /tmp/judgedaemon.log "$gitlabartifacts/judgedaemon.log"
+	cp /proc/cmdline "$gitlabartifacts/cmdline"
+	cp /chroot/domjudge/etc/apt/sources.list "$gitlabartifacts/sources.list"
+}
+trap finish EXIT
 
 section_start setup "Setup and install"
 
@@ -37,23 +51,6 @@ echo "INSERT INTO userrole (userid, roleid) VALUES (3, 2);" | mysql domjudge
 
 # Add netrc file for dummy user login
 echo "machine localhost login dummy password dummy" > ~/.netrc
-
-
-mkdir -p "/opt/domjudge/domserver/webapp/var/log/"
-LOGFILE="/opt/domjudge/domserver/webapp/var/log/prod.log"
-ln -s "$LOGFILE" "$gitlabartifacts/symfony.log"
-echo foo >> $LOGFILE
-exit -1
-
-function log_on_err() {
-	echo -e "\\n\\n=======================================================\\n"
-	echo "Symfony log:"
-	if sudo test -f "$LOGFILE" ; then
-		sudo cat "$LOGFILE"
-	fi
-}
-
-trap log_on_err ERR
 
 cd /opt/domjudge/domserver
 
@@ -114,13 +111,6 @@ cd /opt/domjudge/judgehost/
 sudo -u domjudge bin/judgedaemon -n 0 |& tee /tmp/judgedaemon.log &
 sleep 5
 
-# write out current log to learn why it might be broken
-cat /var/log/nginx/domjudge.log
-
-# Print the symfony log if it exists
-if sudo test -f "$LOGFILE" ; then
-  sudo cat "$LOGFILE"
-fi
 section_end more_setup
 
 section_start submitting "Submitting test sources (including Kattis example)"
@@ -203,15 +193,6 @@ if [ $NUMNOTVERIFIED -ne 2 ] || [ $NUMNOMAGIC -ne 0 ] || [ $NUMSUBS -gt $((NUMVE
 		fi
 		echo;
 	done
-	cat /proc/cmdline
-	cat /chroot/domjudge/etc/apt/sources.list
-	echo -e "\nJudgedaemon log:"
-	cat /tmp/judgedaemon.log
-	echo -e "\nNginx log:"
-	cat /var/log/nginx/domjudge.log
-	echo -e "\nSymfony log:"
-	cat "$LOGFILE"
-	section_end logfiles
 	exit -1;
 fi
 
@@ -224,9 +205,9 @@ echo "DELETE FROM contest WHERE cid =1" | mysql domjudge
 
 # Check the Contest API:
 $CHECK_API -n -C -e -a 'strict=1' http://admin:$ADMINPASS@localhost/domjudge/api
-section_end api_check
+section_end api_check |& tee "$gitlabartifacts/check_api.log"
 
 section_start validate_feed "Validate the eventfeed against API (ignoring failures)"
 cd ${DIR}/misc-tools
-./compare-cds.sh http://localhost/domjudge 2 || true
+./compare-cds.sh http://localhost/domjudge 2 |& tee "$gitlabartifacts/compare_cds.log" || true
 section_end validate_feed
