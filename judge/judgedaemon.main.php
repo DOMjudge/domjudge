@@ -29,14 +29,20 @@ function read_credentials()
     if (!$credentials) {
         error("Cannot read REST API credentials file " . $credfile);
     }
+    $lineno = 0;
     foreach ($credentials as $credential) {
+        ++$lineno;
         $credential = trim($credential);
         if ($credential === '' || $credential[0] === '#') {
             continue;
         }
-        list($endpointID, $resturl, $restuser, $restpass) = preg_split("/\s+/", $credential);
+        $items = preg_split("/\s+/", $credential);
+        if (count($items) !== 4) {
+            error("Error parsing REST API credentials. Invalid format in line $lineno.");
+        }
+        list($endpointID, $resturl, $restuser, $restpass) = $items;
         if (array_key_exists($endpointID, $endpoints)) {
-            error("Error parsing REST API credentials. Duplicate endpoint ID '$endpointID'.");
+            error("Error parsing REST API credentials. Duplicate endpoint ID '$endpointID' in line $lineno.");
         }
         $endpoints[$endpointID] = [
             "url" => $resturl,
@@ -48,7 +54,7 @@ function read_credentials()
         ];
     }
     if (count($endpoints) <= 0) {
-        error("Error parsing REST API credentials.");
+        error("Error parsing REST API credentials: no endpoints found.");
     }
 }
 
