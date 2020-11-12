@@ -6,7 +6,7 @@ DOMjudge team manual
    |DOMjudge| team manual version |version| - page ###Page### / ###Total###
 
 
-.. image:: ../logos/DOMjudgelogo.*
+.. image:: ../logos/DOMjudgelogo.png
    :width: 60pt
    :height: 132pt
    :alt: DOMjudge logo
