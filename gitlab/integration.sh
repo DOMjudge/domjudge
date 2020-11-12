@@ -4,6 +4,9 @@ shopt -s expand_aliases
 alias trace_on='set -x'
 alias trace_off='{ set +x; } 2>/dev/null'
 
+gitlabartifacts="$(pwd)/gitlabartifacts"
+mkdir -p "$gitlabartifacts"
+
 function section_start_internal() {
 	echo -e "section_start:`date +%s`:$1\r\e[0K$2"
 	trace_on
@@ -35,7 +38,12 @@ echo "INSERT INTO userrole (userid, roleid) VALUES (3, 2);" | mysql domjudge
 # Add netrc file for dummy user login
 echo "machine localhost login dummy password dummy" > ~/.netrc
 
+
+mkdir -p "/opt/domjudge/domserver/webapp/var/log/"
 LOGFILE="/opt/domjudge/domserver/webapp/var/log/prod.log"
+ln -s "$LOGFILE" "$gitlabartifacts/symfony.log"
+echo foo >> $LOGFILE
+exit -1
 
 function log_on_err() {
 	echo -e "\\n\\n=======================================================\\n"

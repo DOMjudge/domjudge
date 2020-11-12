@@ -131,10 +131,7 @@ integration:
   artifacts:
     when: always
     paths:
-      - misc-tools/icpctools/dj-events.json
-      - misc-tools/icpctools/dj-scoreboard.json
-      - misc-tools/icpctools/cds-events.json
-      - misc-tools/icpctools/cds-scoreboard.json
+      - gitlabartifacts
 # TODO: Re-enable when gitlab is in better shape...
 #  cache:
 #    key: integration
