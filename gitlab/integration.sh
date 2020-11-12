@@ -21,6 +21,7 @@ alias section_start='trace_off ; section_start_internal '
 alias section_end='trace_off ; section_end_internal '
 
 set -euxo pipefail
+DIR=$(pwd)
 
 function finish() {
 	echo -e "\\n\\n=======================================================\\n"
@@ -33,6 +34,7 @@ function finish() {
 	cp /tmp/judgedaemon.log "$gitlabartifacts/judgedaemon.log"
 	cp /proc/cmdline "$gitlabartifacts/cmdline"
 	cp /chroot/domjudge/etc/apt/sources.list "$gitlabartifacts/sources.list"
+	cp "${DIR}/misc-tools/icpctools/*json "$gitlabartifacts/"
 }
 trap finish EXIT
 
@@ -40,7 +42,6 @@ section_start setup "Setup and install"
 
 export PS4='(${BASH_SOURCE}:${LINENO}): - [$?] $ '
 
-DIR=$(pwd)
 GITSHA=$(git rev-parse HEAD || true)
 
 # Set up
@@ -87,7 +88,7 @@ sudo bin/create_cgroups
 
 if [ ! -d ${DIR}/chroot/domjudge/ ]; then
 	cd ${DIR}/misc-tools
-	time sudo ./dj_make_chroot -a amd64
+	time sudo ./dj_make_chroot -a amd64 |& tee "$gitlabartifacts/dj_make_chroot.log"
 fi
 section_end judgehost
 
