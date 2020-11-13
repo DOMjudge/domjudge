@@ -72,24 +72,24 @@
         </div>
     </div>
 
-    <h3>Import teams / upload standings from / to icpc.baylor.edu</h3>
+    <h3>Import teams from ICPC CMS</h3>
 
     <div class="row">
         <div class="col-md-6">
             <div class="alert alert-info">
                 Create a "Web Services Token" with appropriate rights in the "Export" section for your contest at <a
-                        href="https://icpc.baylor.edu/login" target="_blank">https://icpc.baylor.edu/login</a>.
+                        href="https://icpc.global/login" target="_blank">https://icpc.global/login</a>.
                 You can find the Contest ID (e.g. <code>Southwestern-Europe-2014</code>) in the URL.
             </div>
 
-            {{ form_start(baylor_form) }}
-            {{ form_row(baylor_form.contest_id) }}
-            {{ form_row(baylor_form.access_token) }}
+            {{ form_start(icpccms_form) }}
+            {{ form_row(icpccms_form.contest_id) }}
+            {{ form_row(icpccms_form.access_token) }}
             <div class="form-group">
-                {{ form_widget(baylor_form.fetch_teams) }}
-                {{ form_widget(baylor_form.upload_standings) }}
+                {{ form_widget(icpccms_form.fetch_teams) }}
+                {{ form_widget(icpccms_form.upload_standings, {'disabled': true, attr: {'title': 'Non-functional because of API changes'}}) }}
             </div>
-            {{ form_end(baylor_form) }}
+            {{ form_end(icpccms_form) }}
         </div>
     </div>
 

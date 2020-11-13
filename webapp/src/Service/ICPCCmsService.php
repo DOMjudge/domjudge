@@ -16,9 +16,9 @@ use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
-class BaylorCmsService
+class ICPCCmsService
 {
-    const BASE_URI = 'https://icpc.baylor.edu';
+    const BASE_URI = 'https://icpc.global';
     const WS_TOKEN_URL = '/auth/realms/cm5/protocol/openid-connect/token';
     const WS_CLICS = '/cm5-contest-rest/rest/contest/export/CLICS/CONTEST/';
 
@@ -38,7 +38,7 @@ class BaylorCmsService
     protected $client;
 
     /**
-     * BaylorCmsService constructor.
+     * ICPCCmsService constructor.
      * @param DOMJudgeService        $dj
      * @param EntityManagerInterface $em
      * @param                        $domjudgeVersion
@@ -62,7 +62,7 @@ class BaylorCmsService
     }
 
     /**
-     * Import teams from the Baylor CMS
+     * Import teams from the ICPC CMS
      * @param string      $token
      * @param string      $contest
      * @param string|null $message
@@ -91,8 +91,8 @@ class BaylorCmsService
             return false;
         }
         if ($response->getStatusCode() < 200 || $response->getStatusCode() >= 300) {
-            $message = sprintf('Unknown error while retrieving data from icpc.baylor.edu, status code: %d, %s',
-                               $response->getStatusCode(), $response->getContent(false));
+            $message = sprintf('Unknown error while retrieving data from %s, status code: %d, %s',
+                               BASE_URI, $response->getStatusCode(), $response->getContent(false));
             return false;
         }
 
@@ -178,7 +178,7 @@ class BaylorCmsService
     }
 
     /**
-     * Upload standings to the Baylor CMS
+     * Upload standings to the ICPC CMS
      * @param string      $token
      * @param string      $contest
      * @param string|null $message
@@ -220,8 +220,8 @@ class BaylorCmsService
             return null;
         }
         if ($response->getStatusCode() < 200 || $response->getStatusCode() >= 300) {
-            $message = sprintf('Unknown error while retrieving data from icpc.baylor.edu, status code: %d, %s',
-                               $response->getStatusCode(), $response->getContent(false));
+            $message = sprintf('Unknown error while retrieving data from %s, status code: %d, %s',
+                               BASE_URI, $response->getStatusCode(), $response->getContent(false));
             return null;
         }
 
