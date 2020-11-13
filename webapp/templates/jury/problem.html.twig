@@ -168,6 +168,55 @@
         </div>
     {% endif %}
 
+    <h2>Attachments</h2>
+
+    {% if problem.attachments is empty %}
+        <p class="nodata">No attachments</p>
+    {% else %}
+        <div class="row">
+            <div class="col-md-6">
+                {{ form_start(problemAttachmentForm) }}
+                <table class="table table-sm table-striped table-hover">
+                    <thead class="thead-light">
+                    <tr>
+                        <th>Name</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for attachment in problem.attachments %}
+                        <tr>
+                            <td>{{ attachment.name }}</td>
+                            <td>
+                                <a href="{{ path('jury_attachment_fetch', {'attachmentId': attachment.attachmentid}) }}" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-download"></i>
+                                </a>
+                                {% if is_granted('ROLE_ADMIN') %}
+                                    <a href="{{ path('jury_attachment_delete', {'attachmentId': attachment.attachmentid}) }}" class="btn btn-sm btn-danger" data-ajax-modal>
+                                        <i class="fas fa-trash-alt"></i>
+                                    </a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    {% if is_granted('ROLE_ADMIN') %}
+                        <tr>
+                            <td>
+                                {{ form_errors(problemAttachmentForm.content) }}
+                                {{ form_widget(problemAttachmentForm.content) }}
+                            </td>
+                            <td>
+                                {{ form_widget(problemAttachmentForm.add) }}
+                            </td>
+                        </tr>
+                    {% endif %}
+                    </tbody>
+                </table>
+                {{ form_end(problemAttachmentForm) }}
+            </div>
+        </div>
+    {% endif %}
+
     <h2>Submissions for {{ problem.name }}</h2>
 
     <div data-ajax-refresh-target>

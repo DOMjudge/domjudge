@@ -6,10 +6,13 @@ use App\Controller\BaseController;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\Problem;
+use App\Entity\ProblemAttachment;
+use App\Entity\ProblemAttachmentContent;
 use App\Entity\Submission;
 use App\Entity\SubmissionFile;
 use App\Entity\Testcase;
 use App\Entity\TestcaseContent;
+use App\Form\Type\ProblemAttachmentType;
 use App\Form\Type\ProblemType;
 use App\Form\Type\ProblemUploadMultipleType;
 use App\Form\Type\ProblemUploadType;
@@ -24,7 +27,9 @@ use Doctrine\ORM\Query\Expr\Join;
 use Exception;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -497,6 +502,42 @@ class ProblemController extends BaseController
             throw new NotFoundHttpException(sprintf('Problem with ID %s not found', $probId));
         }
 
+        $problemAttachmentForm = $this->createForm(ProblemAttachmentType::class);
+        $problemAttachmentForm->handleRequest($request);
+        if ($this->isGranted('ROLE_ADMIN') && $problemAttachmentForm->isSubmitted() && $problemAttachmentForm->isValid()) {
+            /** @var UploadedFile $file */
+            $file = $problemAttachmentForm->get('content')->getData();
+
+            if (!$file->isValid()) {
+                $this->addFlash('danger', sprintf('File upload error: %s. No changes made.', $file->getErrorMessage()));
+                return $this->redirectToRoute('jury_problem', ['probId' => $probId]);
+            }
+
+            $name = $file->getClientOriginalName();
+            $fileParts = explode('.', $name);
+            if (count($fileParts) > 0) {
+                $type = $fileParts[count($fileParts) - 1];
+            } else {
+                $type = 'txt';
+            }
+            $content = file_get_contents($file->getRealPath());
+
+            $attachmentContent = new ProblemAttachmentContent();
+            $attachmentContent->setContent($content);
+
+            $attachment = new ProblemAttachment();
+            $attachment
+                ->setProblem($problem)
+                ->setName($name)
+                ->setType($type)
+                ->setContent($attachmentContent);
+
+            $this->em->persist($attachment);
+            $this->em->flush();
+
+            return $this->redirectToRoute('jury_problem', ['probId' => $probId]);
+        }
+
         $restrictions = ['probid' => $problem->getProbid()];
         /** @var Submission[] $submissions */
         list($submissions, $submissionCounts) = $submissionService->getSubmissionList(
@@ -506,6 +547,7 @@ class ProblemController extends BaseController
 
         $data = [
             'problem' => $problem,
+            'problemAttachmentForm' => $problemAttachmentForm->createView(),
             'submissions' => $submissions,
             'submissionCounts' => $submissionCounts,
             'defaultMemoryLimit' => (int)$this->config->get('memory_limit'),
@@ -1050,11 +1092,65 @@ class ProblemController extends BaseController
     }
 
     /**
+     * @Route("/attachments/{attachmentId<\d+>}", name="jury_attachment_fetch")
+     * @param int $attachmentId
+     *
+     * @return Response
+     */
+    public function fetchAttachmentAction(int $attachmentId)
+    {
+        /** @var ProblemAttachment $attachment */
+        $attachment = $this->em->getRepository(ProblemAttachment::class)->find($attachmentId);
+        if (!$attachment) {
+            throw new NotFoundHttpException(sprintf('Attachment with ID %s not found',
+                $attachmentId));
+        }
+
+        $content = $attachment->getContent()->getContent();
+        $filename = $attachment->getName();
+
+        $response = new StreamedResponse();
+        $response->setCallback(function () use ($content) {
+            echo $content;
+        });
+        $response->headers->set('Content-Type', sprintf('application/octet-stream; name="%s', $filename));
+        $response->headers->set('Content-Disposition', sprintf('attachment; filename="%s"', $filename));
+        $response->headers->set('Content-Length', strlen($content));
+
+        return $response;
+    }
+
+    /**
+     * @Route("/attachments/{attachmentId<\d+>}/delete", name="jury_attachment_delete")
+     * @IsGranted("ROLE_ADMIN")
+     * @param Request $request
+     * @param int     $attachmentId
+     *
+     * @return RedirectResponse|Response
+     * @throws Exception
+     */
+    public function deleteAttachmentAction(Request $request, int $attachmentId)
+    {
+        /** @var ProblemAttachment $attachment */
+        $attachment = $this->em->getRepository(ProblemAttachment::class)->find($attachmentId);
+        if (!$attachment) {
+            throw new NotFoundHttpException(sprintf('Attachment with ID %s not found', $attachmentId));
+        }
+
+        $probId = $attachment->getProblem()->getProbid();
+
+        return $this->deleteEntity($request, $this->em, $this->dj, $this->eventLogService, $this->kernel,
+            $attachment, $attachment->getName(),
+            $this->generateUrl('jury_problem', ['probId' => $probId]));
+    }
+
+    /**
      * @Route("/{testcaseId<\d+>}/delete_testcase", name="jury_testcase_delete")
      * @IsGranted("ROLE_ADMIN")
      * @param Request $request
      * @param int     $testcaseId
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     *
+     * @return RedirectResponse|Response
      * @throws Exception
      */
     public function deleteTestcaseAction(Request $request, int $testcaseId)
@@ -1079,7 +1175,7 @@ class ProblemController extends BaseController
         }
         $this->em->flush();
         $this->addFlash('danger', sprintf('Testcase %d removed from problem %s. Consider rejudging the problem.', $testcaseId, $problem->getProbid()));
-        return $this->redirectToRoute('jury_problem_testcases', ['probId' => $probId]);
+        return $this->redirectToRoute('jury_problem_testcases', ['probId' => $problem->getProbid()]);
     }
 
     /**

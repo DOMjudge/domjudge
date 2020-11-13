@@ -182,6 +182,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             new TwigFilter('wrapUnquoted', [$this, 'wrapUnquoted']),
             new TwigFilter('hexColorToRGBA', [$this, 'hexColorToRGBA']),
             new TwigFilter('tsvField', [$this, 'toTsvField']),
+            new TwigFilter('fileTypeIcon', [$this, 'fileTypeIcon']),
         ];
     }
 
@@ -1123,5 +1124,29 @@ EOF;
     public function toTsvField(string $field)
     {
         return Utils::toTsvField($field);
+    }
+
+    /**
+     * Determine the icon name for a given file type
+     *
+     * @param string $type
+     *
+     * @return string
+     */
+    public function fileTypeIcon(string $type)
+    {
+        switch ($type) {
+            case 'pdf':
+                $iconName = 'pdf';
+                break;
+            case 'txt':
+                $iconName = 'alt';
+                break;
+            default:
+                $iconName = 'code';
+                break;
+        }
+
+        return 'fas fa-file-' . $iconName;
     }
 }
