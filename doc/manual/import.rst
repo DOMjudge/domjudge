@@ -22,10 +22,12 @@ Prepare a file called ``groups.json`` which contains the team categories.
 It should be a JSON array with objects, each object should contain the following
 fields:
 
-- ``id``: the category ID
-- ``name``: the name of the team category
-- ``hidden`` (defaults to ``false``): whether the team category is hidden
-- ``sortorder`` (defaults to ``0``): the sort order of the team category
+- ``id``: the (integer) category ID to use. Must be unique
+- ``name``: the name of the team category as shown on the scoreboard
+- ``hidden`` (defaults to ``false``): if ``true``, teams in this category will
+  not be shown on the scoreboard
+- ``sortorder`` (defaults to ``0``): the sort order of the team category to use
+  on the scoreboard. Categories with the same sortorder will be grouped together.
 
 Example ``groups.json``::
 
@@ -35,10 +37,10 @@ Example ``groups.json``::
     "hidden": true
   }, {
     "id": "47",
-    "name": "Netherlands"
+    "name": "Participants"
   }, {
     "id": "23",
-    "name": "United Kingdom"
+    "name": "Spectators"
   }]
 
 To import the file using the jury interface, go to `Import / export`, select
@@ -55,15 +57,15 @@ Prepare a file called ``groups.tsv`` which contains the team categories.
 The first line should contain ``File_Version 1`` (tab-separated).
 Each of the following lines must contain the following elements separated by tabs:
 
-- the category ID
-- the name of the team category
+- the (integer) )category ID. Must be unique
+- the name of the team category as shown on the scoreboard
 
 Example ``groups.tsv``::
 
    File_Version   1
    13337	Companies
-   47	Netherlands
-   23	United Kingdom
+   47	Participants
+   23	Spectators
 
 To import the file using the jury interface, go to `Import / export`, select
 `groups` under `Tab-separated import`, select your file and click `Import`.
@@ -79,13 +81,14 @@ Importing team affiliations
 
     The team TSV import automatically imports team affiliations as well.
 
-Prepare a file called ``organizations.json`` which contains the teams.
+Prepare a file called ``organizations.json`` which contains the affiliations.
 It should be a JSON array with objects, each object should contain the following
 fields:
 
-- ``id``: the external affiliation ID
-- ``name``: the affiliation short name
-- ``formal_name`` (optional): the affiliation name
+- ``id``: the external affiliation ID. Must be unique
+- ``name``: the affiliation short name as used in the jury interface and certain
+  exports
+- ``formal_name``: the affiliation name as used on the scoreboard
 - ``country``: the country code in form of ISO 3166-1 alpha-3
 
 Example ``organizations.json``::
@@ -121,12 +124,13 @@ Prepare a file called ``teams.json`` which contains the teams.
 It should be a JSON array with objects, each object should contain the following
 fields:
 
-- ``id``: the team ID
+- ``id``: the (integer) team ID. Must be unoque
 - ``icpc_id`` (optional): an external ID, e.g. from the ICPC CMS, may be empty
-- ``group_ids``: an array with one element: the category ID
-- ``name``: the team name
-- ``display_name`` (optional): the team display name
-- ``organization_id``: the external ID of the team affiliation
+- ``group_ids``: an array with one element: the category ID this team belomgs to
+- ``name``: the team name as used on the web inteface
+- ``display_name`` (optional): the team display name. If provided, will display
+  this instead of the team name in certain places, like the scoreboard
+- ``organization_id``: the external ID of the team affiliation this team belongs to
 
 Example ``teams.json``::
 
@@ -158,12 +162,12 @@ Prepare a file called ``teams2.tsv`` which contains the teams.
 The first line should contain ``File_Version	2`` (tab-separated).
 Each of the following lines must contain the following elements separated by tabs:
 
-- the team ID
+- the (integer) team ID. Must be unique
 - an external ID, e.g. from the ICPC CMS, may be empty
-- the category ID
-- the team name
-- the institution name
-- the institution short name
+- the category ID this team belomgs to
+- the team name as used on the web inteface
+- the institution name as used on the scoreboard
+- the institution short name as used in the jury interface and certain exports
 - a country code in form of ISO 3166-1 alpha-3
 - an external institution ID, e.g. from the ICPC CMS, may be empty
 
@@ -175,7 +179,7 @@ Example ``teams2.tsv``::
 
 
 To import the file using the jury interface, go to `Import / export`, select
-`groups` under `Tab-separated import`, select your file and click `Import`.
+`teams` under `Tab-separated import`, select your file and click `Import`.
 
 To import the file using the API run the following command::
 
