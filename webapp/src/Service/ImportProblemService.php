@@ -8,6 +8,8 @@ use App\Entity\Executable;
 use App\Entity\ImmutableExecutable;
 use App\Entity\Language;
 use App\Entity\Problem;
+use App\Entity\ProblemAttachment;
+use App\Entity\ProblemAttachmentContent;
 use App\Entity\Submission;
 use App\Entity\Team;
 use App\Entity\Testcase;
@@ -525,6 +527,70 @@ class ImportProblemService
             }
             $messages[] = sprintf("Added %d %s testcase(s).", $numCases, $type);
         }
+
+        $numAttachments = 0;
+        for ($j = 0; $j < $zip->numFiles; $j++) {
+            $filename = $zip->getNameIndex($j);
+            if (!Utils::startsWith($filename, 'attachments/')) {
+                continue;
+            }
+
+            $content = $zip->getFromName($filename);
+            if (empty($content)) {
+                // Empty file or directory, ignore
+                continue;
+            }
+
+            $name = basename($filename);
+
+            $fileParts = explode('.', $name);
+            if (count($fileParts) > 0) {
+                $type = $fileParts[count($fileParts) - 1];
+            } else {
+                $type = 'txt';
+            }
+
+            // Check if an attachment already exists, since then we overwrite it
+            if ($problem->getProbid()) {
+                /** @var ProblemAttachment|null $attachment */
+                $attachment = $this->em
+                    ->createQueryBuilder()
+                    ->from(ProblemAttachment::class, 'a')
+                    ->select('a')
+                    ->andWhere('a.name = :name')
+                    ->andWhere('a.problem = :problem')
+                    ->setParameter(':name', $name)
+                    ->setParameter(':problem', $problem)
+                    ->getQuery()
+                    ->getOneOrNullResult();
+            } else {
+                $attachment = null;
+            }
+
+            if ($attachment) {
+                $attachmentContent = $attachment->getContent();
+                $attachmentContent->setContent($content);
+
+                $messages[] = sprintf('Updated attachment <tt>%s</tt>', $name);
+            } else {
+                $attachment = new ProblemAttachment();
+                $attachmentContent = new ProblemAttachmentContent();
+                $attachment
+                    ->setProblem($problem)
+                    ->setName($name)
+                    ->setType($type)
+                    ->setContent($attachmentContent);
+
+                $attachmentContent->setContent($content);
+
+                $this->em->persist($attachment);
+
+                $messages[] = sprintf('Added attachment <tt>%s</tt>', $name);
+            }
+
+            $numAttachments++;
+        }
+        $messages[] = sprintf("Added/updated %d attachments(s).", $numAttachments);
 
         $this->em->persist($problem);
         $this->em->flush();

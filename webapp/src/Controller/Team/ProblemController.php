@@ -5,6 +5,7 @@ namespace App\Controller\Team;
 use App\Controller\BaseController;
 use App\Entity\ContestProblem;
 use App\Entity\Language;
+use App\Entity\ProblemAttachment;
 use App\Entity\Testcase;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
@@ -130,6 +131,64 @@ class ProblemController extends BaseController
         $response->headers->set('Content-Type', sprintf('%s; name="%s', $mimetype, $filename));
         $response->headers->set('Content-Disposition', sprintf('inline; filename="%s"', $filename));
         $response->headers->set('Content-Length', strlen($problemText));
+
+        return $response;
+    }
+
+    /**
+     * @Route(
+     *     "/{probId<\d+>}/attachment/{attachmentId<\d+>}",
+     *     name="team_problem_attachment"
+     *     )
+     * @param int    $probId
+     * @param int    $attachmentId
+     * @return \Symfony\Component\HttpFoundation\Response
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function attachmentAction(int $probId, int $attachmentId)
+    {
+        $user    = $this->dj->getUser();
+        $contest = $this->dj->getCurrentContest($user->getTeam()->getTeamid());
+        if (!$contest || !$contest->getFreezeData()->started()) {
+            throw new NotFoundHttpException(sprintf('Problem p%d not found or not available', $probId));
+        }
+        /** @var ContestProblem $contestProblem */
+        $contestProblem = $this->em->getRepository(ContestProblem::class)->find([
+            'problem' => $probId,
+            'contest' => $contest,
+        ]);
+        if (!$contestProblem) {
+            throw new NotFoundHttpException(sprintf('Problem p%d not found or not available', $probId));
+        }
+
+        /** @var ProblemAttachment $attachment */
+        $attachment = $this->em->createQueryBuilder()
+            ->from(ProblemAttachment::class, 'a')
+            ->join('a.problem', 'p')
+            ->join('p.contest_problems', 'cp', Join::WITH, 'cp.contest = :contest')
+            ->join('a.content', 'ac')
+            ->select('a', 'ac')
+            ->andWhere('a.problem = :problem')
+            ->andWhere('a.attachmentid = :attachmentid')
+            ->setParameter(':problem', $probId)
+            ->setParameter(':contest', $contest)
+            ->setParameter(':attachmentid', $attachmentId)
+            ->getQuery()
+            ->getOneOrNullResult();
+        if (!$attachment) {
+            throw new NotFoundHttpException(sprintf('Problem p%d not found or not available', $probId));
+        }
+
+        $content = $attachment->getContent()->getContent();
+        $filename = $attachment->getName();
+
+        $response = new StreamedResponse();
+        $response->setCallback(function () use ($content) {
+            echo $content;
+        });
+        $response->headers->set('Content-Type', sprintf('application/octet-stream; name="%s', $filename));
+        $response->headers->set('Content-Disposition', sprintf('attachment; filename="%s"', $filename));
+        $response->headers->set('Content-Length', strlen($content));
 
         return $response;
     }
