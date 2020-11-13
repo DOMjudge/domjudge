@@ -142,7 +142,7 @@ class CheckConfigService
     public function checkPhpExtensions()
     {
         $required = ['json', 'mbstring', 'mysqli', 'zip', 'gd', 'intl'];
-        $optional = ['curl' => 'exporting to/importing from Baylor website'];
+        $optional = [];
 
         $state = 'O'; $remark = '';
         foreach ($optional as $ext => $why) {

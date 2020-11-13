@@ -7,12 +7,12 @@ use App\Entity\Clarification;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\TeamCategory;
-use App\Form\Type\BaylorCmsType;
+use App\Form\Type\ICPCCmsType;
 use App\Form\Type\ContestExportType;
 use App\Form\Type\ContestImportType;
 use App\Form\Type\JsonImportType;
 use App\Form\Type\TsvImportType;
-use App\Service\BaylorCmsService;
+use App\Service\ICPCCmsService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
@@ -39,9 +39,9 @@ use Symfony\Component\Yaml\Yaml;
 class ImportExportController extends BaseController
 {
     /**
-     * @var BaylorCmsService
+     * @var ICPCCmsService
      */
-    protected $baylorCmsService;
+    protected $icpcCmsService;
 
     /**
      * @var ImportExportService
@@ -79,7 +79,7 @@ class ImportExportController extends BaseController
     /**
      * ImportExportController constructor.
      *
-     * @param BaylorCmsService       $baylorCmsService
+     * @param ICPCCmsService         $icpcCmsService
      * @param ImportExportService    $importExportService
      * @param EntityManagerInterface $em
      * @param ScoreboardService      $scoreboardService
@@ -89,7 +89,7 @@ class ImportExportController extends BaseController
      * @param string                 $domjudgeVersion
      */
     public function __construct(
-        BaylorCmsService $baylorCmsService,
+        ICPCCmsService $icpcCmsService,
         ImportExportService $importExportService,
         EntityManagerInterface $em,
         ScoreboardService $scoreboardService,
@@ -98,7 +98,7 @@ class ImportExportController extends BaseController
         EventLogService $eventLogService,
         string $domjudgeVersion
     ) {
-        $this->baylorCmsService    = $baylorCmsService;
+        $this->icpcCmsService      = $icpcCmsService;
         $this->importExportService = $importExportService;
         $this->em                  = $em;
         $this->scoreboardService   = $scoreboardService;
@@ -148,21 +148,21 @@ class ImportExportController extends BaseController
             return $this->redirectToRoute('jury_import_export');
         }
 
-        $baylorForm = $this->createForm(BaylorCmsType::class);
+        $icpcCmsForm = $this->createForm(ICPCCmsType::class);
 
-        $baylorForm->handleRequest($request);
+        $icpcCmsForm->handleRequest($request);
 
-        if ($baylorForm->isSubmitted() && $baylorForm->isValid()) {
-            $contestId   = $baylorForm->get('contest_id')->getData();
-            $accessToken = $baylorForm->get('access_token')->getData();
-            if ($baylorForm->get('fetch_teams')->isClicked()) {
-                if ($this->baylorCmsService->importTeams($accessToken, $contestId, $message)) {
+        if ($icpcCmsForm->isSubmitted() && $icpcCmsForm->isValid()) {
+            $contestId   = $icpcCmsForm->get('contest_id')->getData();
+            $accessToken = $icpcCmsForm->get('access_token')->getData();
+            if ($icpcCmsForm->get('fetch_teams')->isClicked()) {
+                if ($this->icpcCmsService->importTeams($accessToken, $contestId, $message)) {
                     $this->addFlash('success', 'Teams successfully imported');
                 } else {
                     $this->addFlash('danger', $message);
                 }
             } else {
-                if ($this->baylorCmsService->uploadStandings($accessToken, $contestId, $message)) {
+                if ($this->icpcCmsService->uploadStandings($accessToken, $contestId, $message)) {
                     $this->addFlash('success', 'Standings successfully uploaded');
                 } else {
                     $this->addFlash('danger', $message);
@@ -187,7 +187,7 @@ class ImportExportController extends BaseController
         return $this->render('jury/import_export.html.twig', [
             'tsv_form' => $tsvForm->createView(),
             'json_form' => $jsonForm->createView(),
-            'baylor_form' => $baylorForm->createView(),
+            'icpccms_form' => $icpcCmsForm->createView(),
             'sort_orders' => $sortOrders,
         ]);
     }
