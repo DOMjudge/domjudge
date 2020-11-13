@@ -600,7 +600,7 @@ class UtilsTest extends TestCase
      */
     public function testGetImageType()
     {
-        $logo = dirname(__FILE__) . '/../../public/images/DOMjudgelogo.png';
+        $logo = dirname(__FILE__) . '/../../public/images/countries/NLD.png';
         $image = file_get_contents($logo);
         $error = null;
 
@@ -627,7 +627,7 @@ class UtilsTest extends TestCase
      */
     public function testGetImageThumb()
     {
-        $logo = dirname(__file__) . '/../../public/images/DOMjudgelogo.png';
+        $logo = dirname(__file__) . '/../../public/images/countries/NLD.png';
         $image = file_get_contents($logo);
         $error = null;
         $tmp = sys_get_temp_dir();
@@ -637,7 +637,7 @@ class UtilsTest extends TestCase
         $this->assertNull($error);
 
         $data = getimagesizefromstring($thumb);
-        $this->assertEquals($maxsize, $data[1]);  // resized height
+        $this->assertEquals($maxsize, $data[0]);  // resized width
         $this->assertEquals('image/png', $data['mime']);
     }
 
