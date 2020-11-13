@@ -15,10 +15,9 @@ copy-bundle-assets:
 	-rm -rf public/bundles/nelmioapidoc
 	mkdir -p public/bundles/nelmioapidoc
 	cp -R ../lib/vendor/nelmio/api-doc-bundle/Resources/public/* public/bundles/nelmioapidoc/
-	cp ../doc/logos/DOMjudgelogo.svg public/images/
 
 clean-l:
-	-rm -rf public/bundles/nelmioapidoc public/images/DOMjudgelogo.svg
+	-rm -rf public/bundles/nelmioapidoc
 
 install-domserver:
 # This must be done first to install with the rest.
