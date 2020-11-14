@@ -11,7 +11,7 @@ include:
 
 check syntax:
   stage: test
-  image: domjudge/gitlabci:1.0
+  image: domjudge/gitlabci:2.0
   script:
     - ./gitlab/syntax.sh
 
@@ -28,7 +28,7 @@ check_w3c_css:
 
 check_w3c_html:
   stage: test
-  image: domjudge/gitlabci:1.0
+  image: domjudge/gitlabci:2.0
   services:
     - mariadb
   variables:
@@ -45,7 +45,7 @@ check_w3c_html:
 
 check_wcag:
   stage: test
-  image: domjudge/gitlabci:1.0
+  image: domjudge/gitlabci:2.0
   services:
     - mariadb
   variables:
@@ -61,7 +61,7 @@ check_wcag:
 
 run unit tests:
   stage: test
-  image: domjudge/gitlabci:1.0
+  image: domjudge/gitlabci:2.0
   # Disabled for now as it drastically speeds up running unit tests and we don't use it yet
   # before_script:
   #   - apt-get update -yqq
@@ -86,7 +86,7 @@ run unit tests:
 
 integration:
   stage: test
-  image: domjudge/gitlabci:1.0
+  image: domjudge/gitlabci:2.0
   services:
     - mariadb
   variables:

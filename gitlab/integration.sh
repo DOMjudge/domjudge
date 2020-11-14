@@ -34,6 +34,7 @@ function finish() {
 	cp /tmp/judgedaemon.log "$gitlabartifacts/judgedaemon.log"
 	cp /proc/cmdline "$gitlabartifacts/cmdline"
 	cp /chroot/domjudge/etc/apt/sources.list "$gitlabartifacts/sources.list"
+	cp /chroot/domjudge/debootstrap/debootstrap.log "$gitlabartifacts/debootstrap.log"
 	cp "${DIR}/misc-tools/icpctools/*json" "$gitlabartifacts/"
 }
 trap finish EXIT
@@ -70,8 +71,8 @@ EOF
 ADMINPASS=$(cat etc/initial_admin_password.secret)
 
 # configure and restart php-fpm
-sudo cp /opt/domjudge/domserver/etc/domjudge-fpm.conf "/etc/php/7.2/fpm/pool.d/domjudge-fpm.conf"
-sudo /usr/sbin/php-fpm7.2
+sudo cp /opt/domjudge/domserver/etc/domjudge-fpm.conf "/etc/php/7.4/fpm/pool.d/domjudge-fpm.conf"
+sudo /usr/sbin/php-fpm7.4
 
 section_end setup
 
@@ -109,6 +110,7 @@ sudo useradd -d /nonexistent -g nogroup -s /bin/false -u $((2000+(RANDOM%1000)))
 
 # start judgedaemon
 cd /opt/domjudge/judgehost/
+mount -t proc proc /proc
 sudo -u domjudge bin/judgedaemon -n 0 |& tee /tmp/judgedaemon.log &
 sleep 5
 
@@ -135,7 +137,7 @@ section_end submitting
 
 section_start judging "Waiting until all submissions are judged"
 # wait for and check results
-NUMSUBS=$(curl --fail http://admin:$ADMINPASS@localhost/domjudge/api/contests/2/submissions | python -mjson.tool | grep -c '"id":')
+NUMSUBS=$(curl --fail http://admin:$ADMINPASS@localhost/domjudge/api/contests/2/submissions | python3 -mjson.tool | grep -c '"id":')
 export COOKIEJAR
 COOKIEJAR=$(mktemp --tmpdir)
 export CURLOPTS="--fail -sq -m 30 -b $COOKIEJAR"
