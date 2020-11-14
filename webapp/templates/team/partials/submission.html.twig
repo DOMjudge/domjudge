@@ -46,7 +46,7 @@
         {% if allowDownload %}
             <div class="d-flex flex-row">
                 <div class="p-2">
-                    <a class="btn btn-primary" href="{{ path('team_submission_download', {'submitId': judging.submitid}) }}">
+                    <a class="btn btn-primary" href="{{ path('team_submission_download', {'submitId': judging.submission.submitid}) }}">
                         <i class="fa fa-download"></i> Download submission
                     </a>
                 </div>
@@ -71,9 +71,9 @@
                 <p class="nodata">No sample cases available.</p>
             {% else %}
                 {% for run in runs %}
-                    <h5 id="run-{{ run.rank }}" class="text-center mt-4">Run {{ run.rank }}</h5>
+                    <h5 id="run-{{ run.0.rank }}" class="text-center mt-4">Run {{ run.0.rank }}</h5>
 
-                    {% set judgingRun = run.judgingRuns.first %}
+                    {% set judgingRun = run.0.judgingRuns.first %}
                     {% if judgingRun == null or judgingRun.runresult == null %}
                         <p class="nodata">Run not finished yet.</p>
                     {% else %}
@@ -82,7 +82,7 @@
                                 <table class="table table-sm table-striped">
                                     <tr>
                                         <th>Description</th>
-                                        <td>{{ run.description(true) }}</td>
+                                        <td>{{ run.0.description(true) }}</td>
                                     </tr>
                                     <tr>
                                         <th>Runtime</th>
@@ -101,22 +101,22 @@
                         </div>
 
                         <h6 class="text-center">Program output</h6>
-                        {% if judgingRun.output.outputRun is not empty %}
-                            <pre class="output_text">{{ judgingRun.output.outputRun }}</pre>
+                        {% if run.output_run is not empty %}
+                            <pre class="output_text">{{ run.output_run }}</pre>
                         {% else %}
                             <p class="nodata">There was no program output.</p>
                         {% endif %}
 
                         <h6 class="text-center">Diff output</h6>
-                        {% if judgingRun.output.outputDiff is not empty %}
-                            <pre class="output_text">{{ judgingRun.output.outputDiff }}</pre>
+                        {% if run.output_diff is not empty %}
+                            <pre class="output_text">{{ run.output_diff }}</pre>
                         {% else %}
                             <p class="nodata">There was no diff output.</p>
                         {% endif %}
 
                         <h6 class="text-center">Error output (info/debug/errors)</h6>
-                        {% if judgingRun.output.outputError is not empty %}
-                            <pre class="output_text">{{ judgingRun.output.outputError }}</pre>
+                        {% if run.output_error is not empty %}
+                            <pre class="output_text">{{ run.output_error }}</pre>
                         {% else %}
                             <p class="nodata">There was no stderr output.</p>
                         {% endif %}
