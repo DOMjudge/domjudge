@@ -346,7 +346,7 @@ class ConfigurationServiceTest extends KernelTestCase
                     ->setType('compare')
                     ->setDescription('Descr 3'),
             ];
-        } elseif($item == 'default_compare') {
+        } elseif($item == 'default_run') {
             $executables = [
                 (new Executable())
                     ->setExecid('exec2')
