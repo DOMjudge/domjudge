@@ -329,19 +329,35 @@ class ConfigurationServiceTest extends KernelTestCase
      * @dataProvider provideAddOptionsExecutables
      *
      * @param string $item
+     * @param array $item
      *
      * @throws Exception
      */
-    public function testAddOptionsExecutables(string $item)
+    public function testAddOptionsExecutables(string $item, array $expected)
     {
-        $executables = [
-            (new Executable())
-                ->setExecid('exec1')
-                ->setDescription('Descr 1'),
-            (new Executable())
-                ->setExecid('exec2')
-                ->setDescription('Descr 2')
-        ];
+        if($item == 'default_compare') {
+            $executables = [
+                (new Executable())
+                    ->setExecid('exec1')
+                    ->setType('compare')
+                    ->setDescription('Descr 1'),
+                (new Executable())
+                    ->setExecid('exec3')
+                    ->setType('compare')
+                    ->setDescription('Descr 3'),
+            ];
+        } elseif($item == 'default_compare') {
+            $executables = [
+                (new Executable())
+                    ->setExecid('exec2')
+                    ->setType('run')
+                    ->setDescription('Descr 2')
+                (new Executable())
+                    ->setExecid('exec5')
+                    ->setType('run')
+                    ->setDescription('Descr 5')
+            ];
+        }
 
         $execRepository = $this->createMock(ObjectRepository::class);
 
@@ -351,24 +367,26 @@ class ConfigurationServiceTest extends KernelTestCase
             ->willReturn($execRepository);
 
         $execRepository->expects($this->once())
-            ->method('findAll')
+            ->method('findBy')
             ->willReturn($executables);
 
         $spec = $this->config->getConfigSpecification()[$item];
         $this->assertArrayNotHasKey('options', $spec);
         $spec = $this->config->addOptions($spec);
 
-        $expected = [
-            'exec1' => 'Descr 1',
-            'exec2' => 'Descr 2',
-        ];
         $this->assertSame($expected, $spec['options']);
     }
 
     public function provideAddOptionsExecutables()
     {
-        yield ['default_compare'];
-        yield ['default_run'];
+        yield ['default_compare', [
+            'exec1' => 'Descr 1',
+            'exec3' => 'Descr 3',
+        ] ];
+        yield ['default_run', [
+            'exec2' => 'Descr 2',
+            'exec5' => 'Descr 5',
+        ] ];
     }
 
     /**
