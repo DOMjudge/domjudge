@@ -206,8 +206,10 @@ class ClarificationController extends AbstractController
             $contest = $clar->getContest();
             $data['contest'] = $contest;
             $clarcontest = $contest->getShortname();
+            $data['subjectlink'] = null;
             if ( $clar->getProblem() ) {
                 $concernssubject = $contest->getCid() . "-" . $clar->getProblem()->getProbid();
+                $data['subjectlink'] = $this->generateUrl('jury_problem', ['probId' => $clar->getProblem()->getProbid()]);
             } elseif ( $clar->getCategory() ) {
                 $concernssubject = $contest->getCid() . "-" . $clar->getCategory();
             } else {

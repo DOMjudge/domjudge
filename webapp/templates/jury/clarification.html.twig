@@ -48,8 +48,17 @@ Jury
 </div>
 
 <div class="col-sm">
-Subject: <span class="clarification-subject">{{ clar.subject }}
-<button class="btn btn-sm btn-link clarification-subject-change-button"><i class="far fa-edit" title="Change subject"></i></button></span>
+    Subject:
+    <span class="clarification-subject">
+        {% if clar.subjectlink is defined %}
+            <a href="{{ clar.subjectlink }}">{{ clar.subject }}</a>
+        {% else %}
+            {{ clar.subject }}
+        {% endif %}
+        <button class="btn btn-sm btn-link clarification-subject-change-button">
+            <i class="far fa-edit" title="Change subject"></i>
+        </button>
+    </span>
 <span class="clarification-subject-form" data-current-selected-subject="{{ clar.categoryid }}" data-clarification-id="{{clar.clarid}}">
 <form action="{{ path('jury_clarification_change_subject', {'clarId': clar.clarid }) }}" method="post" class="form-inline">
 <select name="subject" id="subject" class="custom-select custom-select-sm">
