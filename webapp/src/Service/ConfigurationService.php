@@ -347,6 +347,23 @@ EOF;
     }
 
     /**
+     * Find list of options for configuration parameters that specify a known executable.
+     *
+     * @param string $type Any of "compare", "compile", "run"
+     *
+     * @return array
+     */
+    private function findExecutableOptions(string $type): array
+    {
+        $executables = $this->em->getRepository(Executable::class)->findBy(['type'=>$type]);
+        $options = [];
+        foreach ($executables as $executable) {
+            $options[$executable->getExecid()] = $executable->getDescription();
+        }
+        return $options;
+    }
+
+    /**
      * Add options to some items
      *
      * This method is used to add predefined options that need to be loaded
@@ -360,12 +377,10 @@ EOF;
     {
         switch ($item['name']) {
             case 'default_compare':
+                $item['options'] = $this->findExecutableOptions('compare');
+                break;
             case 'default_run':
-                $executables     = $this->em->getRepository(Executable::class)->findAll();
-                $item['options'] = [];
-                foreach ($executables as $executable) {
-                    $item['options'][$executable->getExecid()] = $executable->getDescription();
-                }
+                $item['options'] = $this->findExecutableOptions('run');
                 break;
             case 'results_prio':
             case 'results_remap':
