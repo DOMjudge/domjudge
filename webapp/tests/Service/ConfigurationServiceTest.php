@@ -351,11 +351,11 @@ class ConfigurationServiceTest extends KernelTestCase
                 (new Executable())
                     ->setExecid('exec2')
                     ->setType('run')
-                    ->setDescription('Descr 2')
+                    ->setDescription('Descr 2'),
                 (new Executable())
                     ->setExecid('exec5')
                     ->setType('run')
-                    ->setDescription('Descr 5')
+                    ->setDescription('Descr 5'),
             ];
         }
 
