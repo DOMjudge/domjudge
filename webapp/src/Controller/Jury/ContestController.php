@@ -304,9 +304,9 @@ class ContestController extends BaseController
             if ($contest->isOpenToAllTeams()) {
                 $contestdata['num_teams'] = ['value' => '<i>all</i>'];
             } else {
-                $teamCount = $em
+                $teamIds = $em
                     ->createQueryBuilder()
-                    ->select('COUNT(t.teamid) AS cnt')
+                    ->select('DISTINCT t.teamid')
                     ->from(Team::class, 't')
                     ->leftJoin('t.contests', 'c')
                     ->join('t.category', 'cat')
@@ -314,8 +314,8 @@ class ContestController extends BaseController
                     ->andWhere('c.cid = :cid OR cc.cid = :cid')
                     ->setParameter(':cid', $contest->getCid())
                     ->getQuery()
-                    ->getSingleScalarResult();
-                $contestdata['num_teams'] = ['value' => $teamCount];
+                    ->getArrayResult();
+                $contestdata['num_teams'] = ['value' => count($teamIds)];
             }
 
             if (ALLOW_REMOVED_INTERVALS) {
