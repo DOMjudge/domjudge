@@ -4,6 +4,7 @@ Version 7.3.2 - DEV
 -------------------
  - Be more tolerant of empty lines in restapi.secret.
  - Fix team manual build failure with recent rst2pdf versions.
+ - Update URL for imports from ICPC CMS.
 
 Version 7.3.1 - 10 November 2020
 --------------------------------
