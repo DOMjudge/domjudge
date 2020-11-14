@@ -18,7 +18,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class BaylorCmsService
 {
-    const BASE_URI = 'https://icpc.baylor.edu';
+    const BASE_URI = 'https://icpc.global';
     const WS_TOKEN_URL = '/auth/realms/cm5/protocol/openid-connect/token';
     const WS_CLICS = '/cm5-contest-rest/rest/contest/export/CLICS/CONTEST/';
 
@@ -91,7 +91,7 @@ class BaylorCmsService
             return false;
         }
         if ($response->getStatusCode() < 200 || $response->getStatusCode() >= 300) {
-            $message = sprintf('Unknown error while retrieving data from icpc.baylor.edu, status code: %d, %s',
+            $message = sprintf('Unknown error while retrieving data from icpc.global, status code: %d, %s',
                                $response->getStatusCode(), $response->getContent(false));
             return false;
         }
@@ -220,7 +220,7 @@ class BaylorCmsService
             return null;
         }
         if ($response->getStatusCode() < 200 || $response->getStatusCode() >= 300) {
-            $message = sprintf('Unknown error while retrieving data from icpc.baylor.edu, status code: %d, %s',
+            $message = sprintf('Unknown error while retrieving data from icpc.global, status code: %d, %s',
                                $response->getStatusCode(), $response->getContent(false));
             return null;
         }
