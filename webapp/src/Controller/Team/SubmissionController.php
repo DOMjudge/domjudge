@@ -174,20 +174,42 @@ class SubmissionController extends BaseController
             $this->em->flush();
         }
 
-        /** @var Testcase[] $runs */
         $runs = [];
         if ($showSampleOutput && $judging && $judging->getResult() !== 'compiler-error') {
-            $runs = $this->em->createQueryBuilder()
+            $outputDisplayLimit    = (int)$this->config->get('output_display_limit');
+            $outputTruncateMessage = sprintf("\n[output display truncated after %d B]\n", $outputDisplayLimit);
+
+            $queryBuilder = $this->em->createQueryBuilder()
                 ->from(Testcase::class, 't')
                 ->join('t.content', 'tc')
                 ->leftJoin('t.judging_runs', 'jr', Join::WITH, 'jr.judging = :judging')
                 ->leftJoin('jr.output', 'jro')
-                ->select('t', 'jr', 'tc', 'jro')
+                ->select('t', 'jr', 'tc')
                 ->andWhere('t.problem = :problem')
                 ->andWhere('t.sample = 1')
                 ->setParameter(':judging', $judging)
                 ->setParameter(':problem', $judging->getSubmission()->getProblem())
-                ->orderBy('t.rank')
+                ->orderBy('t.rank');
+
+            if ($outputDisplayLimit < 0) {
+                $queryBuilder
+                    ->addSelect('tc.output AS output_reference')
+                    ->addSelect('jro.output_run AS output_run')
+                    ->addSelect('jro.output_diff AS output_diff')
+                    ->addSelect('jro.output_error AS output_error')
+                    ->addSelect('jro.output_system AS output_system');
+            } else {
+                $queryBuilder
+                    ->addSelect('TRUNCATE(tc.output, :outputDisplayLimit, :outputTruncateMessage) AS output_reference')
+                    ->addSelect('TRUNCATE(jro.output_run, :outputDisplayLimit, :outputTruncateMessage) AS output_run')
+                    ->addSelect('TRUNCATE(jro.output_diff, :outputDisplayLimit, :outputTruncateMessage) AS output_diff')
+                    ->addSelect('TRUNCATE(jro.output_error, :outputDisplayLimit, :outputTruncateMessage) AS output_error')
+                    ->addSelect('TRUNCATE(jro.output_system, :outputDisplayLimit, :outputTruncateMessage) AS output_system')
+                    ->setParameter(':outputDisplayLimit', $outputDisplayLimit)
+                    ->setParameter(':outputTruncateMessage', $outputTruncateMessage);
+            }
+
+            $runs = $queryBuilder
                 ->getQuery()
                 ->getResult();
         }
