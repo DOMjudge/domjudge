@@ -87,7 +87,7 @@
             {{ form_row(icpccms_form.access_token) }}
             <div class="form-group">
                 {{ form_widget(icpccms_form.fetch_teams) }}
-                {{ form_widget(icpccms_form.upload_standings, {'disabled': true, attr: {'title': 'Non-functional because of API changes'}}) }}
+                {{ form_widget(icpccms_form.upload_standings, {'disabled': true, attr: {'title': 'Non-functional because of API changes. See results.tsv above, upload this in the ICPC CMS web interface.'}}) }}
             </div>
             {{ form_end(icpccms_form) }}
         </div>
