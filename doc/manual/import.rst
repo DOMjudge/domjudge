@@ -287,6 +287,19 @@ Call it from your contest folder like this::
 
     This script currently only supports the TSV files.
 
+Importing from ICPC CMS API
+---------------------------
+
+DOMjudge also offers a direct import/refresh of teams from the ICPC CMS API from
+within the DOMjudge web interface. You need a valid Web Services Token for your
+contest and a team category named 'Participants' where they will be placed.
+
+Under the `Import / Export` menu, enter the token as specified.
+Based on the 'ICPC ID', teams and their affilations will be added if they do not
+exist or updated when they do. Teams will be set to 'enabled' if their ICPC CMS
+status is 'ACCEPTED', of disabled otherwise. Affilations are not updated or
+deleted even when all teams cancel.
+
 .. _CCS specification: https://ccs-specs.icpc.io/ccs_system_requirements#appendix-file-formats
 .. _.netrc: https://www.gnu.org/software/inetutils/manual/html_node/The-_002enetrc-file.html
 .. _httpie: https://httpie.org/
