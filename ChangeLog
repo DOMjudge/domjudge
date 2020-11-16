@@ -5,6 +5,8 @@ Version 7.3.2 - DEV
  - Be more tolerant of empty lines in restapi.secret.
  - Fix team manual build failure with recent rst2pdf versions.
  - Update URL for imports from ICPC CMS.
+ - Fix team count on jury contest overview screen.
+ - Truncate output for sample runs on team pages.
 
 Version 7.3.1 - 10 November 2020
 --------------------------------
@@ -58,7 +60,7 @@ Version 7.2.1 - 6 May 2020
  - Various small fixes to the build/install system.
  - Fix user IP address field to accept IPv6 addresses.
  - Fix and document static scoreboard contest selection feature.
- - Fix a sed error message on internal compile error. 
+ - Fix a sed error message on internal compile error.
  - Fix link to documentation from the admin index page.
  - Fix problem text links from scoreboard header.
  - Fix that country select fields are hidden when show_flags is off.
