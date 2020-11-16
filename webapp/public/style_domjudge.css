@@ -413,7 +413,7 @@ tr.ignore td, td.ignore, span.ignore {
     font-weight: normal;
 }
 
-h3.teamoverview {
+.teamoverview {
     border-top: solid 1px darkgray;
     border-bottom: solid 1px darkgray;
     background-color: #c4d8ff;
