@@ -18,18 +18,18 @@
                                 {% set numsamples = problemData.numsamples %}
                                 <div class="card">
                                     <div class="card-body">
-                                        <h3 class="card-title">
+                                        <h2 class="card-title">
                                             {% if problem.color %}
                                                 <span class="circle"
                                                      style="background-color: {{ problem.color }};"></span>
                                                 Problem {{ problem.shortName }}
                                             {% endif %}
-                                        </h3>
-                                        <h4 class="card-subtitle mb-2 text-muted">
+                                        </h2>
+                                        <h3 class="card-subtitle mb-2 text-muted">
                                             {{ problem.problem.name }}
-                                        </h4>
+                                        </h3>
                                         {% if showLimits %}
-                                            <h5 class="card-subtitle mb-2 text-muted">
+                                            <h4 class="card-subtitle mb-2 text-muted">
                                                 Limits: {{ problem.problem.timelimit }}
                                                 second
                                                 {%- if problem.problem.timelimit > 1 %}s{% endif %}
@@ -38,7 +38,7 @@
                                                 {% endif %}
                                                 /
                                                 {{ ((problem.problem.memlimit | default(defaultMemoryLimit)) * 1024) | printSize }}
-                                            </h5>
+                                            </h4>
                                         {% endif %}
 
                                         {% if problem.problem.problemtextType is not empty %}
@@ -101,7 +101,7 @@
                                             <div>
                                                 <br/>
                                             </div>
-                                            <h4 class="card-subtitle mb-2">Samples</h4>
+                                            <h3 class="card-subtitle mb-2">Samples</h3>
                                             <ol class="text-center list-group list-group-flush">
                                                 {% for i in 1..numsamples %}
                                                     <li class="list-group-item">

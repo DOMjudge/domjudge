@@ -63,10 +63,10 @@ class MiscControllerTest extends BaseTest
 
         $this->assertSelectorExists('html:contains("Example teamname")');
 
-        $h3s = $crawler->filter('h3')->extract(array('_text'));
-        $this->assertEquals('Submissions', $h3s[0]);
-        $this->assertEquals('Clarifications', $h3s[1]);
-        $this->assertEquals('Clarification Requests', $h3s[2]);
+        $h1s = $crawler->filter('h1')->extract(array('_text'));
+        $this->assertEquals('Submissions', $h1s[0]);
+        $this->assertEquals('Clarifications', $h1s[1]);
+        $this->assertEquals('Clarification Requests', $h1s[2]);
     }
 
     public function ajaxProvider()

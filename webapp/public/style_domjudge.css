@@ -385,19 +385,19 @@ tr.ignore td, td.ignore, span.ignore {
     border: 1px solid black;
 }
 
-.problem-list h3,h4,h5 {
+.problem-list h2,h3,h4 {
     text-align: center;
 }
 
-.problem-list h3 {
+.problem-list h2 {
     font-size: 1.17em;
 }
 
-.problem-list h4 {
+.problem-list h3 {
     font-size: 1.12em
 }
 
-.problem-list h5 {
+.problem-list h4 {
     font-size: .83em;
 }
 

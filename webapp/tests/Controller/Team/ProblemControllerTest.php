@@ -67,16 +67,16 @@ class ProblemControllerTest extends BaseTest
                     $this->assertSame('Problem ' . $problems[$i],
                         $card->filter('.card-title')->text(null, true));
                     $this->assertSame($descriptions[$i],
-                        $card->filter('h4.card-subtitle')->text(null, true));
+                        $card->filter('h3.card-subtitle')->text(null, true));
 
                     if ($withLimits) {
                         $this->assertSame(
                             'Limits: 5 seconds / 2 GB',
-                            $card->filter('h5.card-subtitle')->text(null, true)
+                            $card->filter('h4.card-subtitle')->text(null, true)
                         );
                     } else {
                         $this->assertSame(0,
-                            $card->filter('h5.card-subtitle')->count());
+                            $card->filter('h4.card-subtitle')->count());
                     }
 
                     // Download the problem text and make sure it is correct
