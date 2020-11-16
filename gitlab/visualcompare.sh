@@ -55,7 +55,7 @@ do
         -X POST \
         -H "Authorization: token $GH_BOT_TOKEN_OBSCURED" \
         -H "Accept: application/vnd.github.v3+json" \
-	-d "{\"state\": \"$STATE\", \"target_url\": \"$CI_JOB_URL/artifacts/browse/$FILE\", \"description\":\"UI changes\", \"context\": \"UI diffs ($dir)\"}"
+	-d "{\"state\": \"$STATE\", \"target_url\": \"$CI_JOB_URL/artifacts/file/$FILE\", \"description\":\"UI changes\", \"context\": \"UI diffs ($dir)\"}"
     fi
 done
 
