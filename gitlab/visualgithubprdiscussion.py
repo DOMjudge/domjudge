@@ -21,4 +21,5 @@ for message in toMessage(URL_PR)+toMessage(URL_IS):
             if re.search(line,endpoint) is None:
                 continue
             print("wanted")
+            exit()
 print("none")
