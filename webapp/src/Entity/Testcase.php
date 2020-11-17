@@ -50,7 +50,7 @@ class Testcase
 
     /**
      * @var int
-     * @ORM\Column(type="integer", name="rank", length=4,
+     * @ORM\Column(type="integer", name="`rank`", length=4,
      *     options={"comment"="Determines order of the testcases in judging",
      *              "unsigned"=true},
      *     nullable=false)
