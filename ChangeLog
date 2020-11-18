@@ -7,6 +7,7 @@ Version 7.3.2 - DEV
  - Update URL for imports from ICPC CMS.
  - Fix team count on jury contest overview screen.
  - Truncate output for sample runs on team pages.
+ - Fix compatibility with MySQL 8.x.
 
 Version 7.3.1 - 10 November 2020
 --------------------------------
