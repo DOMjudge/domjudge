@@ -24,12 +24,12 @@ do
         GITHUB_PR=`cut -d '/' -f1 <<< ${CI_COMMIT_BRANCH##pr-}`
         ENDPOINT=${file/$REMOVE}
         WANTED=`python3 gitlab/visualgithubprdiscussion.py $ENDPOINT $GITHUB_PR`
-	if [ $WANTED = "wanted" ]; then
-	    STORDIR=$predictedchanges
-	elif [ $WANTED = "none" ]; then
-	    STORDIR=$failingchanges
-	fi
-	compare $PR $MR -highlight-color blue $STORDIR/$file || true
+        if [ $WANTED = "wanted" ]; then
+            STORDIR=$predictedchanges
+        elif [ $WANTED = "none" ]; then
+            STORDIR=$failingchanges
+        fi
+        compare $PR $MR -highlight-color blue $STORDIR/$file || true
     fi
 done
 
@@ -45,9 +45,9 @@ do
     FILE="$dir"
     if [ $MANY -eq 1 ]; then
         FILE=$dir/`ls $dir`
-	CHANGE=1
+        CHANGE=1
     elif [ $MANY -gt 1 ]; then
-    CHANGE=1
+        CHANGE=1
     fi
     if [ $MANY -gt 0 ]; then
       # Copied from CCS
@@ -55,7 +55,7 @@ do
         -X POST \
         -H "Authorization: token $GH_BOT_TOKEN_OBSCURED" \
         -H "Accept: application/vnd.github.v3+json" \
-	-d "{\"state\": \"$STATE\", \"target_url\": \"$CI_JOB_URL/artifacts/file/$FILE\", \"description\":\"UI changes\", \"context\": \"UI diffs ($dir)\"}"
+        -d "{\"state\": \"$STATE\", \"target_url\": \"$CI_JOB_URL/artifacts/file/$FILE\", \"description\":\"UI changes\", \"context\": \"UI diffs ($dir)\"}"
     fi
 done
 
