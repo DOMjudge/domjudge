@@ -10,13 +10,32 @@ include:
   - template: SAST.gitlab-ci.yml
   - template: License-Scanning.gitlab-ci.yml
 
+.retry_config: &retry_job
+  retry:
+    max: 2
+    when:
+     - always
+
+.retry_time: &tiny_job
+  timeout: 5m
+
+.retry_time: &short_job
+  timeout: 10m
+
+.retry_time: &long_job
+  timeout: 20m
+
 check syntax:
+  <<: *retry_job
+  <<: *tiny_job
   stage: test
   image: domjudge/gitlabci:2.0
   script:
     - ./gitlab/syntax.sh
 
 check_w3c_css:
+  <<: *retry_job
+  <<: *tiny_job
   stage: test
   image: 
     name: cyb3rjak3/html5validator
@@ -28,6 +47,8 @@ check_w3c_css:
     - exit $RES
 
 check_w3c_html:
+  <<: *retry_job
+  <<: *long_job
   stage: test
   image: domjudge/gitlabci:2.0
   services:
@@ -45,6 +66,8 @@ check_w3c_html:
       - w3cHtmlpublic.json
 
 check_wcag:
+  <<: *retry_job
+  <<: *short_job
   stage: test
   image: domjudge/gitlabci:2.0
   services:
@@ -61,6 +84,8 @@ check_wcag:
       - public
 
 run unit tests:
+  <<: *retry_job
+  <<: *short_job
   stage: test
   image: domjudge/gitlabci:2.0
   # Disabled for now as it drastically speeds up running unit tests and we don't use it yet
@@ -86,6 +111,8 @@ run unit tests:
       - lib/vendor/
 
 integration:
+  <<: *retry_job
+  <<: *long_job
   stage: test
   image: domjudge/gitlabci:2.0
   services:
@@ -108,6 +135,8 @@ integration:
 #      - chroot
 
 visual_pr:
+  <<: *retry_job
+  <<: *short_job
   stage: test
   before_script:
     # Takes about 1 minute to pull
@@ -136,6 +165,8 @@ visual_pr:
      - public
 
 visual_master:
+  <<: *retry_job
+  <<: *short_job
   stage: test
   before_script:
     # Takes about 1 minute to pull
@@ -172,6 +203,8 @@ visual_master:
      - public
     
 visual_compare:
+  <<: *retry_job
+  <<: *tiny_job
   stage: compare
   image: domjudge/gitlabci:1.0
   needs:
