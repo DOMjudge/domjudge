@@ -138,26 +138,15 @@ visual_pr:
   <<: *retry_job
   <<: *short_job
   stage: test
-  before_script:
-    # Takes about 1 minute to pull
-    - echo -e "section_start:`date +%s`:docker\r\e[0Kdocker pull"
-    - time docker pull domjudge/gitlabci:1.0
-    - echo -e "section_end:`date +%s`:docker\r\e[0K"
-  image: docker:stable
+  image: domjudge/gitlabci:2.1
   services:
-    - docker:19-dind
     - mariadb
   variables:
     MYSQL_ROOT_PASSWORD: password
     DOCKER_HOST: tcp://docker:2375/
     DOCKER_DRIVER: overlay2
   script:
-  - |
-    docker run --privileged \
-      -v $CI_PROJECT_DIR:$CI_PROJECT_DIR \
-      --net=host \
-      -e "TERM=xterm-256color" -e "HOME=$HOME" -e "USER=$USER" -e "MARIADB_PORT_3306_TCP_ADDR=$MARIADB_PORT_3306_TCP_ADDR" -e "MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD" \
-      domjudge/gitlabci:1.0 /bin/bash -eo pipefail -c "umask 0002; cd $CI_PROJECT_DIR; script --return -qfc \"./gitlab/visualpr.sh pr\" /dev/null | ts \"[%F %T]\" "
+  - ./gitlab/visualpr.sh pr
   artifacts:
     when: always
     paths:
@@ -168,21 +157,14 @@ visual_master:
   <<: *retry_job
   <<: *short_job
   stage: test
-  before_script:
-    # Takes about 1 minute to pull
-    - echo -e "section_start:`date +%s`:docker\r\e[0Kdocker pull"
-    - time docker pull domjudge/gitlabci:1.0
-    - echo -e "section_end:`date +%s`:docker\r\e[0K"
-  image: docker:stable
+  image: domjudge/gitlabci:2.1
   services:
-    - docker:19-dind
     - mariadb
   variables:
     MYSQL_ROOT_PASSWORD: password
     DOCKER_HOST: tcp://docker:2375/
     DOCKER_DRIVER: overlay2
   script:
-   - apk add git
    - git fetch
    - git checkout -B master origin/master
    - git branch --set-upstream-to=origin/master master
@@ -190,12 +172,7 @@ visual_master:
    - git checkout $CI_COMMIT_SHA -- gitlab/visualpr.sh # Always compare with the same tests
    - git checkout $CI_COMMIT_SHA -- gitlab/default-nginx
    - git checkout $CI_COMMIT_SHA -- gitlab/visualreg.css
-   - |
-     docker run --privileged \
-       -v $CI_PROJECT_DIR:$CI_PROJECT_DIR \
-       --net=host \
-       -e "TERM=xterm-256color" -e "HOME=$HOME" -e "USER=$USER" -e "MARIADB_PORT_3306_TCP_ADDR=$MARIADB_PORT_3306_TCP_ADDR" -e "MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD" \
-       domjudge/gitlabci:1.0 /bin/bash -eo pipefail -c "umask 0002; cd $CI_PROJECT_DIR; script --return -qfc \"./gitlab/visualpr.sh master\" /dev/null | ts \"[%F %T]\" "
+   - ./gitlab/visualpr.sh master
   artifacts:
     when: always
     paths:
@@ -206,7 +183,7 @@ visual_compare:
   <<: *retry_job
   <<: *tiny_job
   stage: compare
-  image: domjudge/gitlabci:1.0
+  image: domjudge/gitlabci:2.1
   needs:
    - visual_pr
    - visual_master
