@@ -21,17 +21,26 @@ do
     # screenshots against master for changes
     if [ $RET -ne 0 ]; then
         REMOVE=".html-ff.png"
-        GITHUB_PR=`cut -d '/' -f1 <<< ${CI_COMMIT_BRANCH##pr-}`
-        ENDPOINT=${file/$REMOVE}
-        WANTED=`python3 gitlab/visualgithubprdiscussion.py $ENDPOINT $GITHUB_PR`
-        if [ $WANTED = "wanted" ]; then
-            STORDIR=$predictedchanges
-        elif [ $WANTED = "none" ]; then
-            STORDIR=$failingchanges
-        fi
+        if grep "^pr-" <<< $CI_COMMIT_BRANCH; then
+            GITHUB_PR=`cut -d '/' -f1 <<< ${CI_COMMIT_BRANCH##pr-}`
+            ENDPOINT=${file/$REMOVE}
+            WANTED=`python3 gitlab/visualgithubprdiscussion.py $ENDPOINT $GITHUB_PR`
+            if [ $WANTED = "wanted" ]; then
+                STORDIR=$predictedchanges
+            elif [ $WANTED = "none" ]; then
+                STORDIR=$failingchanges
+            fi
+	else
+	    STORDIR=$predictedchanges
+	fi
         compare $PR $MR -highlight-color blue $STORDIR/$file || true
     fi
 done
+
+if ! grep "^pr-" <<< $CI_COMMIT_BRANCH; then
+    # We're not on a PR, so we dont push results to the GitHub discussion
+    exit 0
+fi
 
 CHANGE=0
 for dir in $failingchanges $predictedchanges
@@ -56,6 +65,7 @@ do
         -H "Authorization: token $GH_BOT_TOKEN_OBSCURED" \
         -H "Accept: application/vnd.github.v3+json" \
         -d "{\"state\": \"$STATE\", \"target_url\": \"$CI_JOB_URL/artifacts/file/$FILE\", \"description\":\"UI changes\", \"context\": \"UI diffs ($dir)\"}"
+      exit 1
     fi
 done
 
