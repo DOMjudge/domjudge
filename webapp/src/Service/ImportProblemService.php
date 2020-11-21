@@ -394,7 +394,7 @@ class ImportProblemService
             // Find the current max rank
             $maxRank = (int)$this->em->createQueryBuilder()
                 ->from(Testcase::class, 't')
-                ->select('MAX(t.rank)')
+                ->select('MAX(t.ranknumber)')
                 ->andWhere('t.problem = :problem')
                 ->setParameter(':problem', $problem)
                 ->getQuery()

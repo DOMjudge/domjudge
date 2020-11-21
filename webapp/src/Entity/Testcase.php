@@ -16,7 +16,7 @@ use JMS\Serializer\Annotation as Serializer;
  *         @ORM\Index(name="probid", columns={"probid"}),
  *         @ORM\Index(name="sample", columns={"sample"})
  *     },
- *     uniqueConstraints={@ORM\UniqueConstraint(name="rank", columns={"probid","rank"})})
+ *     uniqueConstraints={@ORM\UniqueConstraint(name="rankindex", columns={"probid","ranknumber"})})
  */
 class Testcase
 {
@@ -50,12 +50,12 @@ class Testcase
 
     /**
      * @var int
-     * @ORM\Column(type="integer", name="`rank`", length=4,
+     * @ORM\Column(type="integer", name="`ranknumber`", length=4,
      *     options={"comment"="Determines order of the testcases in judging",
      *              "unsigned"=true},
      *     nullable=false)
      */
-    private $rank;
+    private $ranknumber;
 
     /**
      * @var resource
@@ -207,13 +207,13 @@ class Testcase
     /**
      * Set rank
      *
-     * @param integer $rank
+     * @param integer $ranknumber
      *
      * @return Testcase
      */
     public function setRank($rank)
     {
-        $this->rank = $rank;
+        $this->ranknumber = $rank;
 
         return $this;
     }
@@ -225,7 +225,7 @@ class Testcase
      */
     public function getRank()
     {
-        return $this->rank;
+        return $this->ranknumber;
     }
 
     /**

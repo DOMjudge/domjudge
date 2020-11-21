@@ -388,7 +388,7 @@ class SubmissionController extends BaseController
                 ->andWhere('t.problem = :problem')
                 ->setParameter(':judging', $externalJudgement)
                 ->setParameter(':problem', $submission->getProblem())
-                ->orderBy('t.rank');
+                ->orderBy('t.ranknumber');
 
             $externalRunResults = $queryBuilder
                 ->getQuery()
@@ -412,7 +412,7 @@ class SubmissionController extends BaseController
                 ->andWhere('t.problem = :problem')
                 ->setParameter(':judging', $selectedJudging)
                 ->setParameter(':problem', $submission->getProblem())
-                ->orderBy('t.rank');
+                ->orderBy('t.ranknumber');
             if ($outputDisplayLimit < 0) {
                 $queryBuilder
                     ->addSelect('tc.output AS output_reference')
@@ -519,7 +519,7 @@ class SubmissionController extends BaseController
                     ->andWhere('t.problem = :problem')
                     ->setParameter(':judging', $lastJudging)
                     ->setParameter(':problem', $submission->getProblem())
-                    ->orderBy('t.rank')
+                    ->orderBy('t.ranknumber')
                     ->getQuery()
                     ->getResult();
             }
@@ -630,9 +630,9 @@ class SubmissionController extends BaseController
             $file = $this->em->createQueryBuilder()
                 ->from(SubmissionFile::class, 'file')
                 ->select('file')
-                ->andWhere('file.rank = :rank')
+                ->andWhere('file.ranknumber = :ranknumber')
                 ->andWhere('file.submission = :submission')
-                ->setParameter(':rank', $request->query->get('fetch'))
+                ->setParameter(':ranknumber', $request->query->get('fetch'))
                 ->setParameter(':submission', $submission)
                 ->getQuery()
                 ->getOneOrNullResult();
@@ -657,7 +657,7 @@ class SubmissionController extends BaseController
             ->select('file')
             ->andWhere('file.submission = :submission')
             ->setParameter(':submission', $submission)
-            ->orderBy('file.rank')
+            ->orderBy('file.ranknumber')
             ->getQuery()
             ->getResult();
 
@@ -673,7 +673,7 @@ class SubmissionController extends BaseController
                 ->select('file')
                 ->andWhere('file.submission = :submission')
                 ->setParameter(':submission', $originalSubmission)
-                ->orderBy('file.rank')
+                ->orderBy('file.ranknumber')
                 ->getQuery()
                 ->getResult();
 
@@ -717,7 +717,7 @@ class SubmissionController extends BaseController
             ->select('file')
             ->andWhere('file.submission = :submission')
             ->setParameter(':submission', $oldSubmission)
-            ->orderBy('file.rank')
+            ->orderBy('file.ranknumber')
             ->getQuery()
             ->getResult();
 
@@ -759,7 +759,7 @@ class SubmissionController extends BaseController
             ->select('file')
             ->andWhere('file.submission = :submission')
             ->setParameter(':submission', $submission)
-            ->orderBy('file.rank')
+            ->orderBy('file.ranknumber')
             ->getQuery()
             ->getResult();
 
@@ -859,7 +859,7 @@ class SubmissionController extends BaseController
             'submission' => $submission,
             'files' => $files,
             'form' => $form->createView(),
-            'selected' => $request->query->get('rank'),
+            'selected' => $request->query->get('ranknumber'),
         ]);
     }
 

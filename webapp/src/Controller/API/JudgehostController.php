@@ -1048,7 +1048,7 @@ class JudgehostController extends AbstractFOSRestController
             ->join('r.testcase', 't')
             ->select('r')
             ->andWhere('r.judging = :judgingid')
-            ->orderBy('t.rank')
+            ->orderBy('t.ranknumber')
             ->setParameter(':judgingid', $judgingId)
             ->getQuery()
             ->getResult();

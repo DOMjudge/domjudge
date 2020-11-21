@@ -740,11 +740,11 @@ class RejudgingController extends BaseController
                 }
                 $judging_runs = $this->em->createQueryBuilder()
                     ->from(JudgingRun::class, 'jr')
-                    ->select('t.rank', 'jr.runresult')
+                    ->select('t.ranknumber', 'jr.runresult')
                     ->leftJoin('jr.testcase', 't')
                     ->andWhere('jr.judging = :judgingid')
                     ->setParameter(':judgingid', $judging['judgingid'])
-                    ->orderBy('t.rank')
+                    ->orderBy('t.ranknumber')
                     ->getQuery()
                     ->getArrayResult();
                 if (!in_array($judging_runs, $runresults)) {
@@ -765,7 +765,7 @@ class RejudgingController extends BaseController
             // Check for variations in runtimes across judgings
             $runtimes = $this->em->createQueryBuilder()
                 ->from(JudgingRun::class, 'jr')
-                ->select('t.rank', 'MAX(jr.runtime) - MIN(jr.runtime) AS spread')
+                ->select('t.ranknumber', 'MAX(jr.runtime) - MIN(jr.runtime) AS spread')
                 ->leftJoin('jr.judging', 'j')
                 ->leftJoin('jr.testcase', 't')
                 ->andWhere('j.submission = :submitid')

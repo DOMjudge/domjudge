@@ -1914,9 +1914,9 @@ class ImportEventFeedCommand extends Command
             ->from(Testcase::class, 't')
             ->select('t')
             ->andWhere('t.problem = :problem')
-            ->andWhere('t.rank = :rank')
+            ->andWhere('t.ranknumber = :ranknumber')
             ->setParameter(':problem', $problem->getProblem())
-            ->setParameter(':rank', $rank)
+            ->setParameter(':ranknumber', $rank)
             ->getQuery()
             ->getSingleResult();
 

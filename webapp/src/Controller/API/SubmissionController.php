@@ -302,7 +302,7 @@ class SubmissionController extends AbstractRestController
             ->andWhere('s.submitid = :submitid')
             ->setParameter(':cid', $this->getContestId($request))
             ->setParameter(':submitid', $id)
-            ->orderBy('f.rank');
+            ->orderBy('f.ranknumber');
 
         /** @var SubmissionFile[] $files */
         $files = $queryBuilder->getQuery()->getResult();

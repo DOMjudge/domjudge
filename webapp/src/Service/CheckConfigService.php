@@ -437,7 +437,7 @@ class CheckConfigService
             }
 
             $tcs_size = $this->em->createQueryBuilder()
-                ->select('tc.testcaseid', 'tc.rank', 'length(tcc.output) as output_size' )
+                ->select('tc.testcaseid', 'tc.ranknumber', 'length(tcc.output) as output_size' )
                 ->from(Testcase::class, 'tc')
                 ->join('tc.content', 'tcc')
                 ->andWhere('tc.problem = :probid')
