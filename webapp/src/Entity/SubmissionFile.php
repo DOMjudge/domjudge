@@ -12,7 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
  *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Files associated to a submission"},
  *     indexes={@ORM\Index(name="submitid", columns={"submitid"})},
  *     uniqueConstraints={
- *         @ORM\UniqueConstraint(name="rank", columns={"submitid", "rank"}),
+ *         @ORM\UniqueConstraint(name="rankindex", columns={"submitid", "ranknumber"}),
  *         @ORM\UniqueConstraint(name="filename", columns={"submitid", "filename"}, options={"lengths": {NULL, 190}})
  *     })
  */
@@ -37,11 +37,11 @@ class SubmissionFile
 
     /**
      * @var int
-     * @ORM\Column(type="integer", name="rank",
+     * @ORM\Column(type="integer", name="ranknumber",
      *     options={"comment"="Order of the submission files, zero-indexed", "unsigned"=true},
      *     nullable=false)
      */
-    private $rank;
+    private $ranknumber;
 
     /**
      * @ORM\ManyToOne(targetEntity="Submission", inversedBy="files")
@@ -99,7 +99,7 @@ class SubmissionFile
      */
     public function setRank($rank)
     {
-        $this->rank = $rank;
+        $this->ranknumber = $rank;
 
         return $this;
     }

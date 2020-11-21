@@ -189,7 +189,7 @@ class SubmissionController extends BaseController
                 ->andWhere('t.sample = 1')
                 ->setParameter(':judging', $judging)
                 ->setParameter(':problem', $judging->getSubmission()->getProblem())
-                ->orderBy('t.rank');
+                ->orderBy('t.ranknumber');
 
             if ($outputDisplayLimit < 0) {
                 $queryBuilder

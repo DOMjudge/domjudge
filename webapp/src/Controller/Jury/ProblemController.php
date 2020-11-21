@@ -403,7 +403,7 @@ class ProblemController extends BaseController
                 ->andWhere('t.sample = :sample')
                 ->setParameter(':problem', $problem)
                 ->setParameter(':sample', $isSample)
-                ->orderBy('t.rank')
+                ->orderBy('t.ranknumber')
                 ->getQuery()
                 ->getResult();
             $this->addTestcasesToZip($testcases, $zip, $isSample);
@@ -588,13 +588,13 @@ class ProblemController extends BaseController
         }
 
         $testcaseData = $this->em->createQueryBuilder()
-            ->from(Testcase::class, 'tc', 'tc.rank')
+            ->from(Testcase::class, 'tc', 'tc.ranknumber')
             ->join('tc.content', 'content')
             ->select('tc', 'LENGTH(content.input) AS input_size', 'LENGTH(content.output) AS output_size',
                      'LENGTH(content.image) AS image_size', 'tc.image_type')
             ->andWhere('tc.problem = :problem')
             ->setParameter(':problem', $problem)
-            ->orderBy('tc.rank')
+            ->orderBy('tc.ranknumber')
             ->getQuery()
             ->getResult();
 
@@ -829,11 +829,11 @@ class ProblemController extends BaseController
 
         /** @var Testcase[] $testcases */
         $testcases = $this->em->createQueryBuilder()
-            ->from(Testcase::class, 'tc', 'tc.rank')
+            ->from(Testcase::class, 'tc', 'tc.ranknumber')
             ->select('tc')
             ->andWhere('tc.problem = :problem')
             ->setParameter(':problem', $problem)
-            ->orderBy('tc.rank')
+            ->orderBy('tc.ranknumber')
             ->getQuery()
             ->getResult();
 
@@ -900,9 +900,9 @@ class ProblemController extends BaseController
             ->join('tc.content', 'tcc')
             ->select('tc', 'tcc')
             ->andWhere('tc.problem = :problem')
-            ->andWhere('tc.rank = :rank')
+            ->andWhere('tc.rank = :ranknumber')
             ->setParameter(':problem', $probId)
-            ->setParameter(':rank', $rank)
+            ->setParameter(':ranknumber', $rank)
             ->getQuery()
             ->getOneOrNullResult();
         if (!$testcase) {
@@ -1071,7 +1071,7 @@ class ProblemController extends BaseController
 
         /** @var Testcase[] $testcases */
         $testcases = $this->em->getRepository(Testcase::class)
-            ->findBy(['problem' => $problem], ['rank' => 'ASC']);
+            ->findBy(['problem' => $problem], ['ranknumber' => 'ASC']);
         foreach ($testcases as $testcase) {
             if ($testcase->getRank() > $oldRank) {
                 $testcase->setRank($testcase->getRank() - 1);

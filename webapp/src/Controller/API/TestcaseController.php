@@ -78,7 +78,7 @@ class TestcaseController extends AbstractFOSRestController
             ->select('t')
             ->andWhere('t.problem = :probid')
             ->setParameter(':probid', $judging->getSubmission()->getProblem())
-            ->orderBy('t.rank')
+            ->orderBy('t.ranknumber')
             ->setMaxResults(1);
 
         if (!$judging->getRuns()->isEmpty()) {
