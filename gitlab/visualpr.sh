@@ -69,8 +69,8 @@ EOF
 ADMINPASS=$(cat etc/initial_admin_password.secret)
 
 # configure and restart php-fpm
-sudo cp /opt/domjudge/domserver/etc/domjudge-fpm.conf "/etc/php/7.2/fpm/pool.d/domjudge-fpm.conf"
-sudo /usr/sbin/php-fpm7.2
+sudo cp /opt/domjudge/domserver/etc/domjudge-fpm.conf "/etc/php/7.4/fpm/pool.d/domjudge-fpm.conf"
+sudo /usr/sbin/php-fpm7.4
 
 section_end setup
 
