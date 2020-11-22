@@ -286,9 +286,10 @@ class JuryMiscController extends BaseController
                 $numChecked++;
                 $result = mb_strtoupper($judging->getResult());
                 if (!in_array($result, $expectedResults)) {
+                    $submissionFiles = $this->getSubmissionFilesString($submission);
                     $unexpected[] = sprintf(
-                        "<a href='%s'>%s</a> has unexpected result '%s', should be one of: %s",
-                        $submissionLink, $submissionId, $result, implode(', ', $expectedResults)
+                        "<a href='%s'>%s</a> %s has unexpected result '%s', should be one of: %s",
+                        $submissionLink, $submissionId, $submissionFiles, $result, implode(', ', $expectedResults)
                     );
                 } elseif (count($expectedResults) > 1) {
                     if ($verifyMultiple) {
@@ -363,5 +364,25 @@ class JuryMiscController extends BaseController
         }
         return $this->dj->setCookie('domjudge_cid', (string)$contestId, 0, null, '', false, false,
                                                  $response);
+    }
+
+    private function getSubmissionFilesString(Submission $submission): string
+    {
+        $submissionFiles = '(';
+        $cnt = 0;
+        foreach ($submission->getFiles() as $submissionFile) {
+            /** @var SubmissionFile $submissionFile */
+            if ($cnt > 3) {
+                $submissionFiles .= ', ...';
+                break;
+            }
+            if ($cnt > 0) {
+                $submissionFiles .= ', ';
+            }
+            $submissionFiles .= '<code>' . $submissionFile->getFilename() . '</code>';
+            $cnt++;
+        }
+        $submissionFiles .= ')';
+        return $submissionFiles;
     }
 }
