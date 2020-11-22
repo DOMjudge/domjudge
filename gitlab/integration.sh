@@ -110,7 +110,13 @@ sudo useradd -d /nonexistent -g nogroup -s /bin/false -u $((2000+(RANDOM%1000)))
 
 # start judgedaemon
 cd /opt/domjudge/judgehost/
+
+# Since ubuntu20.04 gitlabci image this is sometimes needed
+# It should be safe to remove this when it creates issues
+set +e
 mount -t proc proc /proc
+set -e
+
 sudo -u domjudge bin/judgedaemon -n 0 |& tee /tmp/judgedaemon.log &
 sleep 5
 

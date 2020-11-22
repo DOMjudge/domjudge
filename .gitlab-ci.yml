@@ -186,12 +186,15 @@ visual_compare:
     when: always
     paths:
       - gitlabartifacts
+  cache:
+    key: integration
+    paths:
+      - lib/vendor/
 
 # TODO: Re-enable when gitlab is in better shape...
 #  cache:
 #    key: integration
 #    paths:
-#      - lib/vendor/
 #      - chroot
 
 integration_mysql:
