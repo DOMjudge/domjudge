@@ -180,7 +180,7 @@ if [ $NUMNOTVERIFIED -ne 2 ] || [ $NUMNOMAGIC -ne 0 ] || [ $NUMSUBS -gt $((NUMVE
 	echo "verified subs: $NUMVERIFIED, unverified subs: $NUMNOTVERIFIED, total subs: $NUMSUBS"
 	echo "(expected 2 submissions to be unverified, but all to be processed)"
 	echo "Of these $NUMNOMAGIC do not have the EXPECTED_RESULTS string (should be 0)."
-	curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier?verify_multiple=1"
+	curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier?verify_multiple=1" | w3m -dump -T text/html
 	section_end error
 
 	section_start logfiles "All the more or less useful logfiles"
