@@ -23,7 +23,8 @@ include:
   timeout: 10m
 
 .retry_time: &long_job
-  timeout: 20m
+  timeout: 45m
+# Due to the retry this will be worst case 3*timeout before the job fails
 
 check syntax:
   <<: *retry_job
@@ -180,7 +181,7 @@ visual_compare:
     MYSQL_ROOT_PASSWORD: password
     MARIADB_PORT_3306_TCP_ADDR: sqlserver
   script:
-    - ./gitlab/integration.sh
+    - timeout --signal=15 40m ./gitlab/integration.sh
   artifacts:
     when: always
     paths:
