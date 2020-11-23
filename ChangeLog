@@ -20,6 +20,15 @@ Version 8.0.0 - DEV
  - Add support for loading custom CSS and JavaScript.
  - Speed up loading team pictures and affiliation logos.
 
+Version 7.3.2 - 23 November 2020
+--------------------------------
+ - Be more tolerant of empty lines in restapi.secret.
+ - Fix team manual build failure with recent rst2pdf versions.
+ - Update URL for imports from ICPC CMS.
+ - Fix team count on jury contest overview screen.
+ - Truncate output for sample runs on team pages.
+ - Fix compatibility with MySQL 8.x.
+
 Version 7.3.1 - 10 November 2020
 --------------------------------
  - Fix chroot install on Ubuntu 20.04.
