@@ -29,7 +29,7 @@ check syntax:
   <<: *retry_job
   <<: *tiny_job
   stage: test
-  image: domjudge/gitlabci:2.0
+  image: domjudge/gitlabci:2.1
   script:
     - ./gitlab/syntax.sh
 
@@ -50,7 +50,7 @@ check_w3c_html:
   <<: *retry_job
   <<: *long_job
   stage: test
-  image: domjudge/gitlabci:2.0
+  image: domjudge/gitlabci:2.1
   services:
     - mariadb
   variables:
@@ -69,7 +69,7 @@ check_wcag:
   <<: *retry_job
   <<: *short_job
   stage: test
-  image: domjudge/gitlabci:2.0
+  image: domjudge/gitlabci:2.1
   services:
     - mariadb
   variables:
@@ -87,7 +87,7 @@ run unit tests:
   <<: *retry_job
   <<: *short_job
   stage: test
-  image: domjudge/gitlabci:2.0
+  image: domjudge/gitlabci:2.1
   # Disabled for now as it drastically speeds up running unit tests and we don't use it yet
   # before_script:
   #   - apt-get update -yqq
@@ -114,7 +114,7 @@ integration:
   <<: *retry_job
   <<: *long_job
   stage: test
-  image: domjudge/gitlabci:2.0
+  image: domjudge/gitlabci:2.1
   services:
     - mariadb
   variables:
