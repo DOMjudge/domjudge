@@ -1,5 +1,8 @@
 DOMjudge Programming Contest Judging System
 
+Version 7.3.3 - DEV
+-------------------
+
 Version 7.3.2 - 23 November 2020
 --------------------------------
  - Be more tolerant of empty lines in restapi.secret.
