@@ -1,7 +1,7 @@
 DOMjudge Programming Contest Judging System
 
-Version 7.3.2 - DEV
--------------------
+Version 7.3.2 - 23 November 2020
+--------------------------------
  - Be more tolerant of empty lines in restapi.secret.
  - Fix team manual build failure with recent rst2pdf versions.
  - Update URL for imports from ICPC CMS.
