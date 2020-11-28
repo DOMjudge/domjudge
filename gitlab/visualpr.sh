@@ -67,7 +67,13 @@ UPDATE team_category SET visible = 1;
 EOF
 
 ADMINPASS=$(cat etc/initial_admin_password.secret)
-
+# Add team to admin user
+echo "INSERT INTO userrole (userid, roleid) VALUES (1, 3);" | mysql domjudge
+echo "UPDATE user SET teamid = 1 WHERE userid = 1;" | mysql domjudge
+# Add jury to admin user
+echo "INSERT INTO userrole (userid, roleid) VALUES (1, 2);" | mysql domjudge
+# Add balloon to admin user
+echo "INSERT INTO userrole (userid, roleid) VALUES (1, 4);" | mysql domjudge
 # configure and restart php-fpm
 sudo cp /opt/domjudge/domserver/etc/domjudge-fpm.conf "/etc/php/7.4/fpm/pool.d/domjudge-fpm.conf"
 sudo /usr/sbin/php-fpm7.4
