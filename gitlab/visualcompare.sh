@@ -51,9 +51,9 @@ do
         STATE="success"
     fi
     MANY=`ls $dir|wc -l`
-    FILE="$dir"
+    FILE="browse/$dir"
     if [ $MANY -eq 1 ]; then
-        FILE=$dir/`ls $dir`
+        FILE="file/$dir/"`ls $dir`
         CHANGE=1
     elif [ $MANY -gt 1 ]; then
         CHANGE=1
@@ -64,8 +64,17 @@ do
         -X POST \
         -H "Authorization: token $GH_BOT_TOKEN_OBSCURED" \
         -H "Accept: application/vnd.github.v3+json" \
-        -d "{\"state\": \"$STATE\", \"target_url\": \"$CI_JOB_URL/artifacts/file/$FILE\", \"description\":\"UI changes\", \"context\": \"UI diffs ($dir)\"}"
-      exit 1
+        -d "{\"state\": \"$STATE\", \"target_url\": \"$CI_JOB_URL/artifacts/$FILE\", \"description\":\"UI changes\", \"context\": \"UI diffs ($dir)\"}"
+      if [ $STATE=="failure" ]; then
+        cat <<EOF > $failingchanges/README
+List the changed endpoints in a message on the PR. Regex is allowed.
+
+Changed URLs:
+changed_endpoint(as possible regex)
+another_changed_endpoint(as possible regex)
+EOF
+        exit 1
+      fi
     fi
 done
 
@@ -74,6 +83,6 @@ if [ $CHANGE -eq 0 ]; then
         -X POST \
         -H "Authorization: token $GH_BOT_TOKEN_OBSCURED" \
         -H "Accept: application/vnd.github.v3+json" \
-        -d "{\"state\": \"success\", \"target_url\": \"$CI_JOB_URL/artifacts/browse/$FILE\", \"description\":\"No UI changes\", \"context\": \"UI diffs (None)\"}"
+        -d "{\"state\": \"success\", \"target_url\": \"$CI_JOB_URL/artifacts/browse/\", \"description\":\"No UI changes\", \"context\": \"UI diffs (None)\"}"
 fi
 
