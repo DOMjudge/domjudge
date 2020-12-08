@@ -7,7 +7,10 @@ Version 8.0.0 - DEV
    dependencies for the compile phase inside the DOMjudge chroot.
    Also you need to remove the '--tmpdir' switch from the mktemp
    call in the java_javac_detect compile script (when using this).
+ - Python 3 now uses pypy by default and is default enabled on new
+   installations..
  - Improve performance with large amounts of affiliations.
+ - Judging verifier is now also available to juru users.
  - Search for @EXPECTED_RESULTS@ marker in all submitted files
    to validate test submissions.
  - Allow users to specify their full name in self-registration.
