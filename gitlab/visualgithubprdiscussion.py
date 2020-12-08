@@ -17,7 +17,7 @@ def toMessage(url):
 for message in toMessage(URL_PR)+toMessage(URL_IS):
     index=message.find(BEGIN_RGX)
     if index>-1:
-        for line in message[index:].split('\n')[1:]:
+        for line in message[index:].splitlines()[1:]:
             if re.search(line,endpoint) is None:
                 continue
             print("wanted")
