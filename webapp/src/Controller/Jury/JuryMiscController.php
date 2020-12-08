@@ -241,7 +241,7 @@ class JuryMiscController extends BaseController
 
     /**
      * @Route("/judging-verifier", name="jury_judging_verifier")
-     * @IsGranted("ROLE_ADMIN")
+     * @IsGranted("ROLE_JURY")
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response|StreamedResponse
      */
