@@ -39,12 +39,16 @@
 
         <div id="submitbut">
             {% if is_granted('ROLE_JURY') or current_team_contest.freezeData.started %}
-                <a class="btn btn-success btn-sm justify-content-center" data-ajax-modal data-ajax-modal-after="initSubmitModal" href="{{ path('team_submit') }}">
-                    <i class="fas fa-cloud-upload-alt"></i> Submit
+                <a class="nav-link justify-content-center" data-ajax-modal data-ajax-modal-after="initSubmitModal" href="{{ path('team_submit') }}">
+                    <button type="button" class="btn btn-success btn-sm">
+                        <i class="fas fa-cloud-upload-alt"></i> Submit
+                    </button>
                 </a>
             {% else %}
-                <a class="btn btn-success btn-sm disabled justify-content-center">
-                    <i class="fas fa-cloud-upload-alt"></i> Submit
+                <a class="nav-link justify-content-center">
+                    <button type="button" class="btn btn-success btn-sm disabled" disabled>
+                        <i class="fas fa-cloud-upload-alt"></i> Submit
+                    </button>
                 </a>
             {% endif %}
         </div>
