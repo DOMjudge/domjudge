@@ -238,9 +238,11 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
 
         $object = null;
         foreach ($ordinalArray->getItems() as $item) {
-            /** @var ContestProblemWrapper $contestProblemWrapper */
-            $contestProblemWrapper = $item->getItem();
-            $contestProblem        = $contestProblemWrapper->getContestProblem();
+            /** @var ContestProblemWrapper|ContestProblem $contestProblem */
+            $contestProblem = $item->getItem();
+            if ($contestProblem instanceof ContestProblemWrapper) {
+                $contestProblem = $contestProblem->getContestProblem();
+            }
             $probid                = $this->getIdField() === 'p.probid' ? $contestProblem->getProbid() : $contestProblem->getExternalId();
             if ($probid == $id) {
                 $object = $item;
