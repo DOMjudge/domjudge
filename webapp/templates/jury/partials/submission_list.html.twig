@@ -72,11 +72,27 @@
                 {%- set link = path('jury_submission', {submitId: submission.submitid}) %}
             {%- endif %}
 
+            {% set result = 'queued' %}
+            {% if submission.submittime > submission.contest.endtime %}
+                {% if submission.judgings.first is not empty and submission.judgings.first.result is not empty %}
+                    {% set result = submission.judgings.first.result %}
+                {% endif %}
+            {% elseif submission.judgings.first is empty or submission.judgings.first.result is empty %}
+                {% if submission.judgehost %}
+                    {% set result = 'judging' %}
+                {% else %}
+                    {% set result = 'queued' %}
+                {% endif %}
+            {% else %}
+                {% set result = submission.judgings.first.result %}
+            {% endif %}
+
             <tr class="{% if not submission.valid %}ignore{% endif %}"
                 data-problem-id="{{ submission.problem.probid }}"
                 data-team-id="{{ submission.team.teamid }}"
                 data-language-id="{{ submission.language.langid }}"
-                data-submission-id="{{ submission.submitid }}">
+                data-submission-id="{{ submission.submitid }}"
+                data-result="{{ result }}">
                 {% if showExternalResult and showExternalTestcases %}
                     <td class="{{ tdExtraClass }}">
                         <a href="{{ link }}">

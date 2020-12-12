@@ -84,6 +84,21 @@
                     </div>
                 </div>
 
+                <div class="form-row">
+                    <div class="form-group col-sm-6">
+                        <label for="results-filter">Filter on result(s)</label>
+                        <select id="results-filter" class="select2 form-control" multiple data-filter-field="result">
+                            {%- for result in results %}
+
+                                <option value="{{ result }}" {% if result in filteredResults %}selected{% endif %}>
+                                    {{ result }}
+                                </option>
+                            {%- endfor %}
+
+                        </select>
+                    </div>
+                </div>
+
                 <button class="btn btn-secondary" id="clear-filters"><i class="fas fa-times-circle"></i> Clear all
                     filters
                 </button>
@@ -114,14 +129,18 @@
 
             $('.select2').each(function () {
                 var $elem = $(this);
-                $elem.select2({
-                    minimumInputLength: 1,
-                    ajax: {
-                        url: $elem.data('ajax-url'),
-                        dataType: 'json',
-                        delay: 250
-                    }
-                })
+                if ($elem.data('ajax-url')) {
+                    $elem.select2({
+                        minimumInputLength: 1,
+                        ajax: {
+                            url: $elem.data('ajax-url'),
+                            dataType: 'json',
+                            delay: 250
+                        }
+                    });
+                } else {
+                    $elem.select2();
+                }
             });
 
             $('#clear-filters').on('click', function () {
