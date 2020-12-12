@@ -114,9 +114,8 @@ class MetricsController extends AbstractFOSRestController
                 $result = $s->getResult();
                 if ($s->getResult() == "correct") {
                     $teamids_correct[$s->getTeam()->getTeamid()] = 1;
-                } else {
-                    $teamids_submitted[$s->getTeam()->getTeamid()] = 1;
                 }
+                $teamids_submitted[$s->getTeam()->getTeamid()] = 1;
             }
             $m['teams_submitted']->set(count($teamids_submitted), $labels);
             $m['teams_correct']->set(count($teamids_correct), $labels);
