@@ -145,8 +145,8 @@
         -   name: clar_answers
             type: array_val
             default_value:
-                - No comment
-                - Read the problem statement carefully
+                - No comment.
+                - Read the problem statement carefully.
             public: false
             description: List of predefined clarification answers.
         -   name: clar_queues
