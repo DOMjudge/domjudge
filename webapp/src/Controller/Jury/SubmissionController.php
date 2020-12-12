@@ -34,7 +34,6 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
@@ -143,7 +142,7 @@ class SubmissionController extends BaseController
 
         // Load preselected filters
         $filters          = $this->dj->jsonDecode((string)$this->dj->getCookie('domjudge_submissionsfilter') ?: '[]');
-        $filteredProblems = $filteredLanguages = $filteredTeams = [];
+        $filteredProblems = $filteredLanguages = $filteredTeams = $filteredVerdicts = [];
         if (isset($filters['problem-id'])) {
             /** @var Problem[] $filteredProblems */
             $filteredProblems = $this->em->createQueryBuilder()
@@ -174,6 +173,14 @@ class SubmissionController extends BaseController
                 ->getQuery()
                 ->getResult();
         }
+        if (isset($filters['result'])) {
+            $filteredVerdicts = $filters['result'];
+        }
+
+        $verdictsConfig = $this->dj->getDomjudgeEtcDir() . '/verdicts.php';
+        $results = array_keys(include $verdictsConfig);
+        $results[] = 'judging';
+        $results[] = 'queued';
 
         $data = [
             'refresh' => $refresh,
@@ -183,9 +190,11 @@ class SubmissionController extends BaseController
             'submissionCounts' => $submissionCounts,
             'showContest' => count($contests) > 1,
             'hasFilters' => !empty($filters),
+            'results' => $results,
             'filteredProblems' => $filteredProblems,
             'filteredLanguages' => $filteredLanguages,
             'filteredTeams' => $filteredTeams,
+            'filteredResults' => $filteredVerdicts,
             'showExternalResult' => $this->config->get('data_source') ==
                 DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL,
         ];
