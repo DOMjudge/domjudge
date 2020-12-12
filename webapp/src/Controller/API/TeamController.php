@@ -4,11 +4,16 @@ namespace App\Controller\API;
 
 use App\Entity\Contest;
 use App\Entity\Team;
+use App\Service\ImportExportService;
 use Doctrine\ORM\QueryBuilder;
+use Exception;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Annotations as OA;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
  * @Rest\Route("/contests/{cid}/teams")
@@ -22,7 +27,7 @@ class TeamController extends AbstractRestController
     /**
      * Get all the teams for this contest
      * @param Request $request
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      * @Rest\Get("")
      * @OA\Response(
      *     response="200",
@@ -63,7 +68,7 @@ class TeamController extends AbstractRestController
      * Get the given team for this contest
      * @param Request $request
      * @param string $id
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @Rest\Get("/{id}")
      * @OA\Response(
@@ -77,6 +82,44 @@ class TeamController extends AbstractRestController
     public function singleAction(Request $request, string $id)
     {
         return parent::performSingleAction($request, $id);
+    }
+
+    /**
+     * Add a new team
+     *
+     * @param Request             $request
+     * @param ImportExportService $importExport
+     *
+     * @return Response
+     *
+     * @Rest\Post()
+     * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_API_WRITER')")
+     * @OA\RequestBody(
+     *     required=true,
+     *     @OA\MediaType(
+     *         mediaType="multipart/form-data",
+     *         @OA\Schema(ref="#/components/schemas/Team")
+     *     ),
+     *     @OA\MediaType(
+     *         mediaType="application/json",
+     *         @OA\Schema(ref="#/components/schemas/Team")
+     *     )
+     * )
+     * @OA\Response(
+     *     response="200",
+     *     description="Returns the added team",
+     *     @Model(type=Team::class)
+     * )
+     */
+    public function addAction(Request $request, ImportExportService $importExport): Response
+    {
+        $saved = [];
+        $importExport->importTeamsJson([$request->request->all()], $message, $saved);
+        if (!empty($message)) {
+            throw new BadRequestHttpException("Error while adding team: $message");
+        }
+
+        return $this->renderData($request, $saved[0]);
     }
 
     /**
@@ -120,7 +163,7 @@ class TeamController extends AbstractRestController
 
     /**
      * @inheritdoc
-     * @throws \Exception
+     * @throws Exception
      */
     protected function getIdField(): string
     {
