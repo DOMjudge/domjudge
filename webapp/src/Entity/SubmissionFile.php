@@ -111,7 +111,7 @@ class SubmissionFile
      */
     public function getRank()
     {
-        return $this->rank;
+        return $this->ranknumber;
     }
 
     /**
