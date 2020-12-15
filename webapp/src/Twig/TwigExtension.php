@@ -787,7 +787,7 @@ JS;
     public function showDiff(SubmissionFile $newFile, SubmissionFile $oldFile)
     {
         $differ = new Differ;
-        return $this->parseSourceDiff($differ->diff($newFile->getSourcecode(), $oldFile->getSourcecode()));
+        return $this->parseSourceDiff($differ->diff($oldFile->getSourcecode(), $newFile->getSourcecode()));
     }
 
     /**
