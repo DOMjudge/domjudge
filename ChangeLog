@@ -2,6 +2,8 @@ DOMjudge Programming Contest Judging System
 
 Version 7.3.3 - DEV
 -------------------
+ - Fix single problem API action for non-jury members.
+ - Fix reversed submission diff output.
 
 Version 7.3.2 - 23 November 2020
 --------------------------------
@@ -11,7 +13,6 @@ Version 7.3.2 - 23 November 2020
  - Fix team count on jury contest overview screen.
  - Truncate output for sample runs on team pages.
  - Fix compatibility with MySQL 8.x.
- - Fix single problem API action for non-jury members.
 
 Version 7.3.1 - 10 November 2020
 --------------------------------
