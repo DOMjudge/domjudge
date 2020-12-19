@@ -4,14 +4,18 @@ namespace App\Controller\API;
 
 use App\Entity\Contest;
 use App\Entity\Executable;
+use App\Entity\ExecutableFile;
 use App\Entity\InternalError;
 use App\Entity\Judgehost;
+use App\Entity\JudgeTask;
 use App\Entity\Judging;
 use App\Entity\JudgingRun;
 use App\Entity\JudgingRunOutput;
 use App\Entity\Rejudging;
 use App\Entity\Submission;
+use App\Entity\SubmissionFile;
 use App\Entity\Testcase;
+use App\Entity\TestcaseContent;
 use App\Entity\User;
 use App\Service\BalloonService;
 use App\Service\ConfigurationService;
@@ -21,6 +25,7 @@ use App\Service\RejudgingService;
 use App\Service\ScoreboardService;
 use App\Service\SubmissionService;
 use App\Utils\Utils;
+use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\Query\Expr\Join;
@@ -30,8 +35,10 @@ use Nelmio\ApiDocBundle\Annotation\Model;
 use Psr\Log\LoggerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use OpenApi\Annotations as OA;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * @Rest\Route("/judgehosts")
@@ -491,7 +498,7 @@ class JudgehostController extends AbstractFOSRestController
 
     /**
      * Update the given judging for the given judgehost
-     * @Rest\Put("/update-judging/{hostname}/{judgingId<\d+>}")
+     * @Rest\Put("/update-judging/{hostname}/{judgetaskid}")
      * @IsGranted("ROLE_JUDGEHOST")
      * @OA\Response(
      *     response="200",
@@ -504,40 +511,47 @@ class JudgehostController extends AbstractFOSRestController
      *     @OA\Schema(type="string")
      * )
      * @OA\Parameter(
-     *     name="judgingId",
+     *     name="judgetaskid",
      *     in="path",
-     *     description="The ID of the judging to update",
+     *     description="The ID of the judgetask to update",
      *     @OA\Schema(type="integer")
      * )
-     * @param Request $request
-     * @param string  $hostname
-     * @param int     $judgingId
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
-    public function updateJudgingAction(Request $request, string $hostname, int $judgingId)
+    public function updateJudgingAction(Request $request, string $hostname, int $judgetaskid)
     {
         /** @var Judgehost $judgehost */
         $judgehost = $this->em->getRepository(Judgehost::class)->find($hostname);
         if (!$judgehost) {
+            throw new BadRequestHttpException("Who are you and why are you sending us any data?");
             return;
         }
+
+        /** @var JudgingRun $judgingRun */
+        $judgingRun = $this->em->createQueryBuilder()
+            ->from(JudgingRun::class, 'jr')
+            ->select('jr')
+            ->andWhere('jr.judgetaskid = :judgetaskid')
+            ->setParameter(':judgetaskid', $judgetaskid)
+            ->getQuery()
+            ->getSingleResult();
 
         $query = $this->em->createQueryBuilder()
             ->from(Judging::class, 'j')
             ->join('j.submission', 's')
-            ->join('j.judgehost', 'jh')
             ->join('s.contest', 'c')
             ->join('s.team', 't')
             ->join('s.problem', 'p')
-            ->select('j, s, jh, c, t, p')
-            ->andWhere('j.judgingid = :judgingId')
-            ->setParameter(':judgingId', $judgingId)
+            ->select('j, s, c, t, p')
+            ->andWhere('j.judgingid = :judgingid')
+            ->setParameter(':judgingid', $judgingRun->getJudgingId())
             ->setMaxResults(1)
             ->getQuery();
 
         /** @var Judging $judging */
         $judging = $query->getOneOrNullResult();
         if (!$judging) {
+            throw new BadRequestHttpException("We don't know this judging with judgetaskid ID $judgetaskid.");
             return;
         }
 
@@ -554,33 +568,53 @@ class JudgehostController extends AbstractFOSRestController
 
                     // As EventLogService::log() will clear the entity manager, so the judging has
                     // now become detached. We will have to reload it
+                    /** @var Judging $judging */
                     $judging = $query->getOneOrNullResult();
                 });
             }
 
             if ($request->request->getBoolean('compile_success')) {
-                if ($judging->getJudgehost()->getHostname() === $hostname) {
-                    $judging->setOutputCompile(base64_decode($request->request->get('output_compile')));
+                // Don't overwrite a negative compilation result.
+                if ($judging->getOutputCompile() === null) {
+                    $judging
+                        ->setOutputCompile(base64_decode($request->request->get('output_compile')))
+                        ->setJudgehost($judgehost);
                     $this->em->flush();
+
+                    $this->eventLogService->log('judging', $judging->getJudgingid(),
+                        EventLogService::ACTION_CREATE, $judging->getContest()->getCid());
                 }
+                // TODO: We already got a result, compare and handle this somehow.
             } else {
+                // TODO: Invalidate already created judgetasks.
                 $this->em->transactional(function () use (
                     $request,
-                    $hostname,
-                    $judging
+                    $judgehost,
+                    $judging,
+                    $query
                 ) {
-                    if ($judging->getJudgehost()->getHostname() === $hostname) {
+                    if ($judging->getOutputCompile() === null) {
                         $judging
                             ->setOutputCompile(base64_decode($request->request->get('output_compile')))
                             ->setResult(Judging::RESULT_COMPILER_ERROR)
+                            ->setJudgehost($judgehost)
                             ->setEndtime(Utils::now());
                         $this->em->flush();
+
+                        $this->eventLogService->log('judging', $judging->getJudgingid(),
+                            EventLogService::ACTION_CREATE, $judging->getContest()->getCid());
+
+                        // As EventLogService::log() will clear the entity manager, so the judging has
+                        // now become detached. We will have to reload it
+                        /** @var Judging $judging */
+                        $judging = $query->getOneOrNullResult();
                     }
+                    // TODO: Handle case where we already have a result.
 
                     $judgingId = $judging->getJudgingid();
                     $contestId = $judging->getSubmission()->getContest()->getCid();
                     $this->dj->auditlog('judging', $judgingId, 'judged',
-                                        'compiler-error', $hostname, $contestId);
+                                        'compiler-error', $judgehost->getHostname(), $contestId);
 
                     $this->maybeUpdateActiveJudging($judging);
                     $this->em->flush();
@@ -608,8 +642,8 @@ class JudgehostController extends AbstractFOSRestController
     }
 
     /**
-     * Add an array of JudgingRuns. When relevant, finalize the judging.
-     * @Rest\Post("/add-judging-run/{hostname}/{judgingId<\d+>}")
+     * Add one JudgingRun. When relevant, finalize the judging.
+     * @Rest\Post("/add-judging-run/{hostname}/{judgeTaskId}")
      * @IsGranted("ROLE_JUDGEHOST")
      * @OA\Response(
      *     response="200",
@@ -622,10 +656,34 @@ class JudgehostController extends AbstractFOSRestController
      *     @OA\Schema(type="string")
      * )
      * @OA\Parameter(
-     *     name="judgingId",
-     *     in="path",
-     *     description="The ID of the judging to add a run to",
+     *     name="testcaseid",
+     *     in="formData",
+     *     description="The ID of the testcase of the run to add",
      *     @OA\Schema(type="integer")
+     * )
+     * @OA\Parameter(
+     *     name="runresult",
+     *     in="formData",
+     *     description="The result of the run",
+     *     @OA\Schema(type="string")
+     * )
+     * @OA\Parameter(
+     *     name="runtime",
+     *     in="formData",
+     *     description="The runtime of the run",
+     *     @OA\Schema(type="number", format="float")
+     * )
+     * @OA\Parameter(
+     *     name="output_run",
+     *     in="formData",
+     *     description="The (base64-encoded) output of the run",
+     *     @OA\Schema(type="string")
+     * )
+     * @OA\Parameter(
+     *     name="output_diff",
+     *     in="formData",
+     *     description="The (base64-encoded) output diff of the run",
+     *     @OA\Schema(type="string")
      * )
      * @OA\RequestBody(
      *     required=true,
@@ -675,9 +733,6 @@ class JudgehostController extends AbstractFOSRestController
      *         )
      *     )
      * )
-     * @param Request $request
-     * @param string  $hostname
-     * @param int     $judgingId
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\NoResultException
      * @throws \Doctrine\ORM\NonUniqueResultException
@@ -686,51 +741,44 @@ class JudgehostController extends AbstractFOSRestController
     public function addJudgingRunAction(
         Request $request,
         string $hostname,
-        int $judgingId
+        int $judgeTaskId
     ) {
-        if ($request->request->has('batch')) {
-            $this->addMultipleJudgingRuns($request, $hostname, $judgingId);
-        } else {
-            $required = [
-                'testcaseid',
-                'runresult',
-                'runtime',
-                'output_run',
-                'output_diff',
-                'output_error',
-                'output_system'
-            ];
+        $required = [
+            'runresult',
+            'runtime',
+            'output_run',
+            'output_diff',
+            'output_error',
+            'output_system'
+        ];
 
-            foreach ($required as $argument) {
-                if (!$request->request->has($argument)) {
-                    throw new BadRequestHttpException(
-                        sprintf("Argument '%s' is mandatory", $argument));
-                }
+        foreach ($required as $argument) {
+            if (!$request->request->has($argument)) {
+                throw new BadRequestHttpException(
+                    sprintf("Argument '%s' is mandatory", $argument));
             }
-
-            $testCaseId   = $request->request->get('testcaseid');
-            $runResult    = $request->request->get('runresult');
-            $runTime      = $request->request->get('runtime');
-            $outputRun    = $request->request->get('output_run');
-            $outputDiff   = $request->request->get('output_diff');
-            $outputError  = $request->request->get('output_error');
-            $outputSystem = $request->request->get('output_system');
-            $metadata     = $request->request->get('metadata');
-
-            /** @var Judgehost $judgehost */
-            $judgehost = $this->em->getRepository(Judgehost::class)->find($hostname);
-            if (!$judgehost) {
-                return;
-            }
-
-            /** @var Judging $judging */
-            $judging = $this->em->getRepository(Judging::class)->find($judgingId);
-            $this->addSingleJudgingRun($hostname, $judgingId, (int)$testCaseId, $runResult, $runTime, $judging,
-                                       $outputSystem, $outputError, $outputDiff, $outputRun, $metadata);
-            $judgehost = $this->em->getRepository(Judgehost::class)->find($hostname);
-            $judgehost->setPolltime(Utils::now());
-            $this->em->flush();
         }
+
+        $runResult    = $request->request->get('runresult');
+        $runTime      = $request->request->get('runtime');
+        $outputRun    = $request->request->get('output_run');
+        $outputDiff   = $request->request->get('output_diff');
+        $outputError  = $request->request->get('output_error');
+        $outputSystem = $request->request->get('output_system');
+        $metadata     = $request->request->get('metadata');
+
+        /** @var Judgehost $judgehost */
+        $judgehost = $this->em->getRepository(Judgehost::class)->find($hostname);
+        if (!$judgehost) {
+            throw new BadRequestHttpException("Who are you and why are you sending us any data?");
+            return;
+        }
+
+        $this->addSingleJudgingRun($judgeTaskId, $hostname, $runResult, $runTime,
+                                   $outputSystem, $outputError, $outputDiff, $outputRun, $metadata);
+        $judgehost = $this->em->getRepository(Judgehost::class)->find($hostname);
+        $judgehost->setPolltime(Utils::now());
+        $this->em->flush();
     }
 
     /**
@@ -944,64 +992,50 @@ class JudgehostController extends AbstractFOSRestController
 
     /**
      * Add a single judging to a given judging run
-     * @param string  $hostname
-     * @param int     $judgingId
-     * @param int     $testCaseId
-     * @param string  $runResult
-     * @param string  $runTime
-     * @param Judging $judging
-     * @param string  $outputSystem
-     * @param string  $outputError
-     * @param string  $outputDiff
-     * @param string  $outputRun
-     * @param string  $metadata
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\NoResultException
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\ORMException
      */
     private function addSingleJudgingRun(
+        int $judgeTaskId,
         string $hostname,
-        int $judgingId,
-        int $testCaseId,
         string $runResult,
         string $runTime,
-        Judging $judging,
         string $outputSystem,
         string $outputError,
         string $outputDiff,
         string $outputRun,
         string $metadata
     ) {
-        /** @var Testcase $testCase */
-        $testCase = $this->em->getRepository(Testcase::class)->find($testCaseId);
-
         $resultsRemap = $this->config->get('results_remap');
         $resultsPrio  = $this->config->get('results_prio');
 
         if (array_key_exists($runResult, $resultsRemap)) {
             $this->logger->info('Testcase %d remapping result %s -> %s',
-                                [ $testCaseId, $runResult, $resultsRemap[$runResult] ]);
+                                [ /*TODO*/42, $runResult, $resultsRemap[$runResult] ]);
             $runResult = $resultsRemap[$runResult];
         }
 
         $this->em->transactional(function () use (
+            $judgeTaskId,
             $runTime,
             $runResult,
-            $testCase,
-            $judging,
             $outputSystem,
             $outputError,
             $outputDiff,
             $outputRun,
             $metadata
         ) {
-            $judgingRun = new JudgingRun();
+            /** @var JudgingRun $judgingRun */
+            $judgingRun = $this->em->getRepository(JudgingRun::class)->findOneBy(
+                ['judgetaskid' => $judgeTaskId]);
+            if ($judgingRun === null) {
+                // TODO: What to do now?
+            }
             $judgingRunOutput = new JudgingRunOutput();
             $judgingRun->setOutput($judgingRunOutput);
             $judgingRun
-                ->setJudging($judging)
-                ->setTestcase($testCase)
                 ->setRunresult($runResult)
                 ->setRuntime($runTime)
                 ->setEndtime(Utils::now());
@@ -1012,8 +1046,8 @@ class JudgehostController extends AbstractFOSRestController
                 ->setOutputSystem(base64_decode($outputSystem))
                 ->setMetadata(base64_decode($metadata));
 
+            $judging = $judgingRun->getJudging();
             $this->maybeUpdateActiveJudging($judging);
-            $this->em->persist($judgingRun);
             $this->em->flush();
 
             if ($judging->getValid()) {
@@ -1023,21 +1057,12 @@ class JudgehostController extends AbstractFOSRestController
         });
 
         // Reload the testcase and judging, as EventLogService::log will clear the entity manager.
-        // For the judging, also load in the submission and some of it's relations
-        $testCase = $this->em->getRepository(Testcase::class)->find($testCaseId);
-        /** @var Judging $judging */
-        $judging  = $this->em->createQueryBuilder()
-            ->from(Judging::class, 'j')
-            ->join('j.submission', 's')
-            ->join('s.problem', 'p')
-            ->join('s.team', 't')
-            ->join('s.contest', 'c')
-            ->join('s.contest_problem', 'cp')
-            ->select('j, s, p, t, c')
-            ->where('j.judgingid = :judgingid')
-            ->setParameter(':judgingid', $judgingId)
-            ->getQuery()
-            ->getOneOrNullResult();
+        // For the judging, also load in the submission and some of it's relations.
+        /** @var JudgingRun $judgingRun */
+        $judgingRun = $this->em->getRepository(JudgingRun::class)->findOneBy(
+            ['judgetaskid' => $judgeTaskId]);
+        $testCase = $judgingRun->getTestcase();
+        $judging = $judgingRun->getJudging();
 
         // result of this judging_run has been stored. now check whether
         // we're done or if more testcases need to be judged.
@@ -1049,7 +1074,7 @@ class JudgehostController extends AbstractFOSRestController
             ->select('r')
             ->andWhere('r.judging = :judgingid')
             ->orderBy('t.ranknumber')
-            ->setParameter(':judgingid', $judgingId)
+            ->setParameter(':judgingid', $judging->getJudgingid())
             ->getQuery()
             ->getResult();
 
@@ -1089,6 +1114,16 @@ class JudgehostController extends AbstractFOSRestController
                     throw new \BadMethodCallException('internal bug: the evaluated result changed during judging');
                 }
 
+                // Decrease priority of remaining unassigned judging runs.
+                $this->em->getConnection()->executeUpdate(
+                    'UPDATE judgetask SET priority=10'
+                    . ' WHERE jobid=:jobid'
+                    . ' AND hostname IS NULL',
+                    [
+                        ':jobid' => $judgingRun->getJudgingid(),
+                    ]
+                );
+
                 /** @var Submission $submission */
                 $submission = $judging->getSubmission();
                 $contest    = $submission->getContest();
@@ -1115,8 +1150,7 @@ class JudgehostController extends AbstractFOSRestController
                     }
                 }
 
-                $this->dj->auditlog('judging', $judgingId, 'judged', $result,
-                                                 $hostname);
+                $this->dj->auditlog('judging', $judging->getJudgingid(), 'judged', $result, $hostname);
 
                 $justFinished = true;
             }
@@ -1254,5 +1288,345 @@ class JudgehostController extends AbstractFOSRestController
         /** @var Submission[] $submissions */
         $submissions = $queryBuilder->getQuery()->getResult();
         return $submissions;
+    }
+
+    /**
+     * Get files for a given type and id.
+     * @Rest\Get("/get_files/{type}/{id}")
+     * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST')")
+     * @param Request $request
+     * @param string  $type
+     * @param string  $id
+     * @return array
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @OA\Response(
+     *     response="200",
+     *     description="The files for the submission, testcase or script.",
+     *     @OA\Schema(ref="#/definitions/SourceCodeList")
+     * )
+     * @OA\Parameter(ref="#/parameters/id")
+     */
+    public function getFilesAction(string $type, string $id)
+    {
+        switch($type) {
+            case 'source':
+                return $this->getSourceFiles($id);
+            case 'testcase':
+                return $this->getTestcaseFiles($id);
+            case 'compile':
+            case 'run':
+            case 'compare':
+                return $this->getExecutableFiles($id);
+            default:
+                throw new BadRequestHttpException('Unknown type requested.');
+        }
+    }
+
+    private function getSourceFiles(string $id) {
+        $queryBuilder = $this->em->createQueryBuilder()
+            ->from(SubmissionFile::class, 'f')
+            ->select('f')
+            ->andWhere('f.submission = :submitid')
+            ->setParameter(':submitid', $id)
+            ->orderBy('f.ranknumber');
+
+        /** @var SubmissionFile[] $files */
+        $files = $queryBuilder->getQuery()->getResult();
+
+        if (empty($files)) {
+            throw new NotFoundHttpException(sprintf('Source code for submission with ID \'%s\' not found', $id));
+        }
+
+        $result = [];
+        foreach ($files as $file) {
+            $result[]   = [
+                'filename' => $file->getFilename(),
+                'content' => base64_encode($file->getSourcecode()),
+            ];
+        }
+        return $result;
+    }
+
+    private function getExecutableFiles(string $id) {
+        $queryBuilder = $this->em->createQueryBuilder()
+            ->from(ExecutableFile::class, 'f')
+            ->select('f')
+            ->andWhere('f.immutableExecutable = :immutable_execid')
+            ->setParameter(':immutable_execid', $id)
+            ->orderBy('f.rank');
+
+        /** @var ExecutableFile[] $files */
+        $files = $queryBuilder->getQuery()->getResult();
+
+        if (empty($files)) {
+            throw new NotFoundHttpException(sprintf('Files for immutable executable with ID \'%s\' not found', $id));
+        }
+
+        $result = [];
+        foreach ($files as $file) {
+            $result[]   = [
+                'filename' => $file->getFilename(),
+                'content' => base64_encode($file->getFileContent()),
+                'is_executable' => $file->isExecutable(),
+            ];
+        }
+        return $result;
+    }
+
+    private function getTestcaseFiles(string $id) {
+        $queryBuilder = $this->em->createQueryBuilder()
+            ->from(TestcaseContent::class, 'f')
+            ->select('f.input, f.output')
+            ->andWhere('f.tc_contentid = :tc_contentid')
+            ->setParameter(':tc_contentid', $id);
+
+        /** @var string[] $inout */
+        $inout = $queryBuilder->getQuery()->getOneOrNullResult();
+
+        if (empty($inout)) {
+            throw new NotFoundHttpException(sprintf('Files for testcase_content with ID \'%s\' not found', $id));
+        }
+
+        $result = [];
+        foreach (['input', 'output'] as $k) {
+            $result[] = [
+                'filename' => $k,
+                'content' => base64_encode($inout[$k]),
+            ];
+        }
+        return $result;
+    }
+
+    /**
+     * Fetch work tasks.
+     * @Rest\Post("/fetch_work")
+     * @Security("is_granted('ROLE_JUDGEHOST')")
+     */
+    public function getJudgeTasksAction(Request $request): array
+    {
+        if (!$request->request->has('hostname')) {
+            throw new BadRequestHttpException('Argument \'hostname\' is mandatory');
+        }
+        $hostname = $request->request->get('hostname');
+
+        // TODO: Determine a good max batch size here. We may want to do something more elaborate like looking at
+        // previous judgements of the same testcase and use median runtime as an indicator.
+        $max_batchsize = 5;
+        if ($request->request->has('max_batchsize')) {
+            $max_batchsize = $request->request->get('max_batchsize');
+        }
+
+        /* Our main objective is to work on high priority work first while keeping the additional overhead of splitting
+         * work across judgehosts (e.g. additional compilation) low.
+         *
+         * We follow the following high-level strategy here to assign work:
+         * 1) If there's an unfinished job (e.g. a judging)
+         *    - to which we already contributed, and
+         *    - where the remaining JudgeTasks have a priority <= 0,
+         *    then continue handing out JudgeTasks for this job.
+         * 2) Determine highest priority level of outstanding JudgeTasks, so that we work on one of the most important work
+         *    items.
+         *    a) If there's an already started job to which we already contributed,
+         *       then continue working on this job.
+         *    b) Otherwise, if there's an unstarted job, hand out tasks from that job.
+         *    c) Otherwise, contribute to an already started job even if we didn't contribute yet.
+
+         * Note that there could potentially be races in the selection of work, but adding synchronization mechanisms is
+         * more costly than starting a possible only second most important work item.
+         */
+
+        // This is case 1) from above: continue what we have started (if still important).
+        // TODO: We probably want to introduce a jobid instead of using submitid below in all queries. For judgings it
+        // should default to the judgingid.
+        // TODO: These queries would be much easier and less heavy on the DB with an extra table.
+        $started_judgetaskids = array_column(
+            $this->em
+                ->createQueryBuilder()
+                ->from(JudgeTask::class, 'jt')
+                ->select('jt.submitid')
+                ->andWhere('jt.hostname = :hostname')
+                ->setParameter(':hostname', $hostname)
+                ->groupBy('jt.submitid')
+                ->getQuery()
+                ->getArrayResult(),
+            'submitid');
+        if (!empty($started_judgetaskids)) {
+            $queryBuilder = $this->em->createQueryBuilder();
+            /** @var JudgeTask[] $judgetasks */
+            $judgetasks = $queryBuilder
+                ->from(JudgeTask::class, 'jt')
+                ->select('jt')
+                ->andWhere('jt.hostname IS NULL')
+                ->andWhere('jt.priority <= 0')
+                ->andWhere($queryBuilder->expr()->In('jt.submitid', $started_judgetaskids))
+                ->addOrderBy('jt.priority')
+                ->addOrderBy('jt.judgetaskid')
+                ->setMaxResults($max_batchsize)
+                ->getQuery()
+                ->getResult();
+            if (!empty($judgetasks)) {
+                return $this->serializeJudgeTasks($judgetasks, $hostname);
+            }
+        }
+
+        // Determine highest priority level of outstanding JudgeTasks.
+        $max_priority = $this->em
+            ->createQueryBuilder()
+            ->from(JudgeTask::class, 'jt')
+            ->select('jt.priority')
+            ->andWhere('jt.hostname IS NULL')
+            ->addOrderBy('jt.priority')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        if ($max_priority === null) {
+            return [];
+        }
+        $max_priority = $max_priority['priority'];
+
+        // This is case 2.a) from above: continue what we have started (if same priority as the current most important
+        // judgetask).
+        // TODO: We should merge this with the query above to reduce code duplication.
+        if ($started_judgetaskids) {
+            /** @var JudgeTask[] $judgetasks */
+            $judgetasks = $this->em
+                ->createQueryBuilder()
+                ->from(JudgeTask::class, 'jt')
+                ->select('jt')
+                ->andWhere('jt.hostname IS NULL')
+                ->andWhere('jt.priority = :max_priority')
+                ->setParameter(':max_priority', $max_priority)
+                ->andWhere($queryBuilder->expr()->In('jt.submitid', $started_judgetaskids))
+                ->addOrderBy('jt.judgetaskid')
+                ->setMaxResults($max_batchsize)
+                ->getQuery()
+                ->getResult();
+            if (!empty($judgetasks)) {
+                return $this->serializeJudgeTasks($judgetasks, $hostname);
+            }
+        }
+
+        // This is case 2.b) from above: start something new.
+        // TODO: First, we have to filter for unfinished jobs. This would be easier with a separate table storing the
+        // job state.
+        $started_judgetaskids = array_column(
+            $this->em
+                ->createQueryBuilder()
+                ->from(JudgeTask::class, 'jt')
+                ->select('jt.submitid')
+                ->andWhere('jt.hostname IS NOT NULL')
+                ->groupBy('jt.submitid')
+                ->getQuery()
+                ->getArrayResult(),
+            'submitid');
+        $queryBuilder = $this->em->createQueryBuilder();
+        $queryBuilder
+            ->from(JudgeTask::class, 'jt')
+            ->select('jt')
+            ->andWhere('jt.hostname IS NULL')
+            ->andWhere('jt.priority = :max_priority')
+            ->setParameter(':max_priority', $max_priority);
+        // TODO: Add prioritization by team here.
+        if (!empty($started_judgetaskids)) {
+            $queryBuilder
+            ->andWhere($queryBuilder->expr()->notIn('jt.submitid', $started_judgetaskids));
+        }
+        /** @var JudgeTask[] $judgetasks */
+        $judgetasks =
+            $queryBuilder
+            ->addOrderBy('jt.judgetaskid')
+            ->setMaxResults($max_batchsize)
+            ->getQuery()
+            ->getResult();
+        if (!empty($judgetasks)) {
+            return $this->serializeJudgeTasks($judgetasks, $hostname);
+        }
+
+        // This is case 2.c) from above: contribute to a job someone else has started but we have not contributed yet.
+        // We intentionally lift the restriction on priority in this case to get any high priority work.
+        /** @var JudgeTask[] $judgetasks */
+        $judgetasks = $this->em
+            ->createQueryBuilder()
+            ->from(JudgeTask::class, 'jt')
+            ->select('jt')
+            ->andWhere('jt.hostname IS NULL')
+            ->addOrderBy('jt.priority')
+            ->addOrderBy('jt.judgetaskid')
+            ->setMaxResults($max_batchsize)
+            ->getQuery()
+            ->getResult();
+        if (!empty($judgetasks)) {
+            return $this->serializeJudgeTasks($judgetasks, $hostname);
+        }
+    }
+
+    /** @param JudgeTask[] $judgeTasks */
+    private function serializeJudgeTasks($judgeTasks, string $hostname): array
+    {
+        if (empty($judgeTasks)) {
+            return [];
+        }
+
+        // Filter by submit_id.
+        // TODO: Replace this by job_id later and potentially make it smarter, e.g. looping over the rest.
+        $submit_id = $judgeTasks[0]->getSubmitid();
+        $judgetaskids = [];
+        foreach ($judgeTasks as $judgeTask) {
+           if ($judgeTask->getSubmitid() == $submit_id) {
+               $judgetaskids[] = $judgeTask->getJudgetaskid();
+           }
+        }
+
+        $numUpdated = $this->em->getConnection()->executeUpdate(
+            'UPDATE judgetask SET hostname = :hostname WHERE hostname IS NULL AND judgetaskid IN (:ids)',
+            [
+                ':hostname' => $hostname,
+                ':ids' => $judgetaskids,
+            ],
+            [
+                ':ids' => Connection::PARAM_INT_ARRAY,
+            ]
+        );
+
+        if ($numUpdated == 0) {
+            // Bad luck, some other judgehost beat us to it.
+            return [];
+        }
+
+        // We got at least one, let's update the starttime of the corresponding judging if haven't done so in the past.
+        $this->em->getConnection()->executeUpdate(
+            'UPDATE judging SET starttime = :starttime WHERE judgingid = :jobid AND starttime IS NULL',
+            [
+                ':starttime' => Utils::now(),
+                ':jobid' => $judgeTasks[0]->getJobId(),
+            ]
+        );
+
+        if ($numUpdated == sizeof($judgeTasks)) {
+            // We got everything, let's ship it!
+            return $judgeTasks;
+        }
+
+        // A bit unlucky, we only got partially the assigned work, so query what was assigned to us.
+        $queryBuilder = $this->em->createQueryBuilder();
+        $partialJudgeTaskIds = array_column(
+            $queryBuilder
+                ->from(JudgeTask::class, 'jt')
+                ->select('jt.judgetaskid')
+                ->andWhere('jt.hostname = :hostname')
+                ->setParameter(':hostname', $hostname)
+                ->andWhere($queryBuilder->expr()->In('jt.judgetaskid', $judgetaskids))
+                ->getQuery()
+                ->getArrayResult(),
+            'judgetaskid');
+
+        $partialJudgeTasks = [];
+        foreach ($judgeTasks as $judgeTask) {
+            if (in_array($judgeTask->getJudgetaskid(), $partialJudgeTaskIds)) {
+                $partialJudgeTasks[] = $judgeTask;
+            }
+        }
+        return $partialJudgeTasks;
     }
 }

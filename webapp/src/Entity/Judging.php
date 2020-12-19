@@ -43,7 +43,7 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
      * @var double
      * @ORM\Column(type="decimal", precision=32, scale=9, name="starttime",
      *     options={"comment"="Time judging started", "unsigned"=true},
-     *     nullable=false)
+     *     nullable=true)
      * @Serializer\Exclude()
      */
     private $starttime;
@@ -148,6 +148,7 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
      * @Serializer\Exclude()
      */
     private $judgehost;
+
     /**
      * rejudgings have one parent judging
      * @ORM\ManyToOne(targetEntity="Rejudging", inversedBy="judgings")
@@ -169,7 +170,6 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
      * @Serializer\Exclude()
      */
     private $runs;
-
 
     /**
      * Get the max runtime for this judging

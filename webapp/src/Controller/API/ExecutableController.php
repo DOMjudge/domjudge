@@ -3,6 +3,8 @@
 namespace App\Controller\API;
 
 use App\Entity\Executable;
+use App\Entity\ExecutableFile;
+use App\Service\DOMJudgeService;
 use Doctrine\ORM\EntityManagerInterface;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
@@ -10,6 +12,8 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use OpenApi\Annotations as OA;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
+use ZipArchive;
 
 /**
  * @Rest\Route("/executables")
@@ -23,12 +27,22 @@ class ExecutableController extends AbstractFOSRestController
     protected $em;
 
     /**
+     * @var DOMJudgeService
+     */
+    protected $dj;
+
+    /**
      * ExecutableController constructor.
      * @param EntityManagerInterface $em
+     * @param DOMJudgeService        $dj
      */
-    public function __construct(EntityManagerInterface $em)
+    public function __construct(
+        EntityManagerInterface $em,
+        DOMJudgeService $dj
+    )
     {
         $this->em = $em;
+        $this->dj = $dj;
     }
 
     /**
@@ -61,8 +75,22 @@ class ExecutableController extends AbstractFOSRestController
             throw new NotFoundHttpException(sprintf('Cannot find executable \'%s\'', $id));
         }
 
-        $contents = stream_get_contents($executable->getZipfile());
+        // There's some code duplication with downloadAction in Jury/ExecutableController
+        $zipArchive = new ZipArchive();
+        if (!($tempzipFile = tempnam($this->dj->getDomjudgeTmpDir(), "/executable-"))) {
+            throw new ServiceUnavailableHttpException(null, 'Failed to create temporary file');
+        }
+        $zipArchive->open($tempzipFile);
 
-        return base64_encode($contents);
+        /** @var ExecutableFile[] $files */
+        $files = array_values($executable->getImmutableExecutable()->getFiles()->toArray());
+        usort($files, function($a, $b)  { return $a->getRank() <=> $b->getRank(); });
+        foreach ($files as $file) {
+            $zipArchive->addFromString($file->getFilename(), $file->getFileContent());
+        }
+        $zipArchive->close();
+        $zipFile = file_get_contents($tempzipFile);
+
+        return base64_encode($zipFile);
     }
 }

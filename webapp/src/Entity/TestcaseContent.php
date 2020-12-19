@@ -15,12 +15,22 @@ use Doctrine\ORM\Mapping as ORM;
 class TestcaseContent
 {
     /**
+     * @var int
+     *
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
+     * @ORM\Column(type="integer", name="tc_contentid", length=4,
+     *     options={"comment"="Testcase content ID","unsigned"=true},
+     *     nullable=false)
+     */
+    private $tc_contentid;
+
+    /**
      * We use a ManyToOne instead of a OneToOne here, because otherwise the
      * reverse of this relation will always be loaded. See the commit message of commit
      * 9e421f96691ec67ed62767fe465a6d8751edd884 for a more elaborate explanation
      *
      * @var Testcase
-     * @ORM\Id
      * @ORM\ManyToOne(targetEntity="Testcase", inversedBy="content")
      * @ORM\JoinColumn(name="testcaseid", referencedColumnName="testcaseid", onDelete="CASCADE")
      */
@@ -55,6 +65,17 @@ class TestcaseContent
      *     nullable=true)
      */
     private $image_thumb;
+
+    public function getTestcaseContentId(): int
+    {
+        return $this->tc_contentid;
+    }
+
+    public function setTestcaseContentId(int $tc_contentid): TestcaseContent
+    {
+        $this->tc_contentid = $tc_contentid;
+        return $this;
+    }
 
     /**
      * @param Testcase $testcase

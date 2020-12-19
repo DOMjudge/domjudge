@@ -5,6 +5,7 @@ namespace App\Service;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\Executable;
+use App\Entity\ImmutableExecutable;
 use App\Entity\Language;
 use App\Entity\Problem;
 use App\Entity\Submission;
@@ -338,11 +339,18 @@ class ImportProblemService
                             }
 
                             $combinedRunCompare = $yamlData['validation'] == 'custom interactive';
+
+                            if (!($tempzipFile = tempnam($this->dj->getDomjudgeTmpDir(), "/executable-"))) {
+                                throw new ServiceUnavailableHttpException(null, 'Failed to create temporary file');
+                            }
+                            file_put_contents($tempzipFile, $outputValidatorZip);
+                            $zipArchive = new ZipArchive();
+                            $zipArchive->open($tempzipFile);
+
                             $executable         = new Executable();
                             $executable
                                 ->setExecid($outputValidatorName)
-                                ->setMd5sum(md5($outputValidatorZip))
-                                ->setZipfile($outputValidatorZip)
+                                ->setImmutableExecutable($this->dj->createImmutableExecutable($zipArchive))
                                 ->setDescription(sprintf('output validator for %s', $problem->getName()))
                                 ->setType($combinedRunCompare ? 'run' : 'compare');
                             $this->em->persist($executable);
@@ -524,11 +532,11 @@ class ImportProblemService
             $contestProblem->setProblem($problem);
             $contestProblem->setContest($contest);
             $this->em->persist($contestProblem);
+            $this->em->flush();
         }
 
-        $this->em->flush();
-
         $cid = $contest ? $contest->getCid() : null;
+        $probid = $problem->getProbid();
         $this->eventLogService->log('problem', $problem->getProbid(), $problemIsNew ? 'create' : 'update', $cid);
 
         foreach ($testcases as $testcase) {
@@ -541,6 +549,13 @@ class ImportProblemService
         } elseif (!$this->dj->getUser()->getTeam()) {
             $messages[] = 'No jury solutions added: must associate team with your user first.';
         } elseif ($contestProblem->getAllowSubmit()) {
+            // As EventLogService::log() will clear the entity manager, the problem and the contest became detached. We
+            // need to reload them.
+            // We seem to need to explicitly clear the EntityManager, otherwise we will receive inconsistent data.
+            $this->em->clear();
+            $problem = $this->em->getRepository(Problem::class)->find($probid);
+            $contest = $this->em->getRepository(Contest::class)->find($cid);
+
             // First find all submittable languages:
             /** @var Language[] $allowedLanguages */
             $allowedLanguages = $this->em->createQueryBuilder()
@@ -663,8 +678,7 @@ class ImportProblemService
                         $entry_point = $submission_details[$path]['entry_point'];
                     }
                     if ($totalSize <= $this->config->get('sourcesize_limit') * 1024) {
-                        $contest        = $this->em->getRepository(Contest::class)->find(
-                            $contest->getCid());
+                        $contest        = $this->em->getRepository(Contest::class)->find($contest->getCid());
                         $team           = $this->em->getRepository(Team::class)->find($jury_team_id);
                         $contestProblem = $this->em->getRepository(ContestProblem::class)->find(
                             [

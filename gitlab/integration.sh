@@ -166,10 +166,11 @@ while /bin/true; do
 	curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier?verify_multiple=1" -o /dev/null
 	NUMNOTVERIFIED=$(curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier" | grep "submissions checked" | sed -r 's/^.* ([0-9]+) submissions checked.*$/\1/')
 	NUMVERIFIED=$(curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier" | grep "submissions not checked" | sed -r 's/^.* ([0-9]+) submissions not checked.*$/\1/')
-	# Check whether all submissions have been processed...
-	if [ $NUMSUBS -eq $((NUMVERIFIED+NUMNOTVERIFIED)) ]; then
-		break
-	fi
+	# TODO: We keep judging (lazily) after all submissions got a final verdict. Perhaps we can re-use the status endpoint to fix this properly?
+	# # Check whether all submissions have been processed...
+	# if [ $NUMSUBS -eq $((NUMVERIFIED+NUMNOTVERIFIED)) ]; then
+	# 	break
+	# fi
 	# ... or something has crashed.
 	if tail /tmp/judgedaemon.log | grep -q "No submissions in queue"; then
 		break

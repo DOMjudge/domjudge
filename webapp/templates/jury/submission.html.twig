@@ -327,7 +327,8 @@
                 {%- if externalJudgement is not null %}
                     (external: {{ externalJudgement.result | printValidJuryResult }})
                 {%- endif %}
-                {%- if selectedJudging is not null -%}
+                {# TODO: make this work with multiple hostnames #}
+                {%- if selectedJudging is not null and selectedJudging.judgehost is not null -%}
                     , Judgehost:
                     {% set judgehostLink = path('jury_judgehost', {hostname: selectedJudging.judgehost.hostname}) %}
                     <a href="{{ judgehostLink }}">{{ selectedJudging.judgehost.hostname | printHost }}</a>,
