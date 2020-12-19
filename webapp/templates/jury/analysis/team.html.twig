@@ -1,6 +1,6 @@
 {% extends "jury/base.html.twig" %}
 
-{% block title %}Analysis - Team {{ team.effectiveName }}{% endblock %}
+{% block title %}Analysis - Team {{ team.effectiveName }} {{ current_contest.shortname | default('') }} - {{ parent() }}{% endblock %}
 
 {% block extrahead %}
 {{ parent() }}

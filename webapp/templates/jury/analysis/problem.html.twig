@@ -1,6 +1,6 @@
 {% extends "jury/base.html.twig" %}
 
-{% block title %}Analysis - Problem {{ problem.probid }}{% endblock %}
+{% block title %}Analysis - Problem {{ problem.probid }} {{ current_contest.shortname | default('') }} - {{ parent() }}{% endblock %}
 
 {% block extrahead %}
 {{ parent() }}

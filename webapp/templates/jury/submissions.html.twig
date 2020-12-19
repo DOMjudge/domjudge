@@ -1,7 +1,7 @@
 {% extends "jury/base.html.twig" %}
 {% import "jury/jury_macros.twig" as macros %}
 
-{% block title %}Submissions - {{ parent() }}{% endblock %}
+{% block title %}Submissions {{ current_contest.shortname | default ('') }} - {{ parent() }}{% endblock %}
 
 {% block extrahead %}
     {{ parent() }}
