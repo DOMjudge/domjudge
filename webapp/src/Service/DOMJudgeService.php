@@ -631,7 +631,8 @@ class DOMJudgeService
         } elseif ($res === ZIPARCHIVE::ER_MEMORY) {
             throw new ServiceUnavailableHttpException(null, 'Not enough memory to extract zip archive');
         } elseif ($res !== true) {
-            throw new ServiceUnavailableHttpException(null, 'Unknown error while extracting zip archive');
+            throw new ServiceUnavailableHttpException(null,
+                'Unknown error while extracting zip archive: ' . print_r($res, TRUE));
         }
 
         return $zip;
