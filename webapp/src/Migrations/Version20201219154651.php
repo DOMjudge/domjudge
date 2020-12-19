@@ -33,7 +33,7 @@ final class Version20201219154651 extends AbstractMigration
         $this->addSql('CREATE INDEX IDX_29A6E6E13CBA64F2 ON judging_run (judgetaskid)');
         $this->addSql('ALTER TABLE testcase_content ADD tc_contentid INT UNSIGNED AUTO_INCREMENT NOT NULL COMMENT \'Testcase content ID\', CHANGE testcaseid testcaseid INT UNSIGNED DEFAULT NULL COMMENT \'Testcase ID\', DROP FOREIGN KEY testcase_content_ibfk_1, DROP PRIMARY KEY, ADD PRIMARY KEY (tc_contentid)');
         $this->addSql('CREATE INDEX IDX_50A5CCE2D360BB2B ON testcase_content (testcaseid)');
-        $this->addSql('ALTER TABLE executable ADD immutable_execid INT UNSIGNED DEFAULT NULL COMMENT \'ID\', DROP md5sum, DROP zipfile');
+        $this->addSql('ALTER TABLE executable ADD immutable_execid INT UNSIGNED DEFAULT NULL COMMENT \'ID\', DROP md5sum');
         $this->addSql('ALTER TABLE executable ADD CONSTRAINT FK_D68EDA01979A9F09 FOREIGN KEY (immutable_execid) REFERENCES immutable_executable (immutable_execid)');
         $this->addSql('CREATE UNIQUE INDEX UNIQ_D68EDA01979A9F09 ON executable (immutable_execid)');
     }
@@ -50,7 +50,7 @@ final class Version20201219154651 extends AbstractMigration
         $this->addSql('DROP TABLE executable_file');
         $this->addSql('DROP TABLE immutable_executable');
         $this->addSql('DROP INDEX UNIQ_D68EDA01979A9F09 ON executable');
-        $this->addSql('ALTER TABLE executable ADD md5sum CHAR(32) CHARACTER SET utf8mb4 DEFAULT NULL COLLATE `utf8mb4_unicode_ci` COMMENT \'Md5sum of zip file\', ADD zipfile LONGBLOB DEFAULT NULL COMMENT \'Zip file\', DROP immutable_execid');
+        $this->addSql('ALTER TABLE executable ADD md5sum CHAR(32) CHARACTER SET utf8mb4 DEFAULT NULL COLLATE `utf8mb4_unicode_ci` COMMENT \'Md5sum of zip file\', DROP immutable_execid');
         $this->addSql('ALTER TABLE judging CHANGE starttime starttime NUMERIC(32, 9) UNSIGNED NOT NULL COMMENT \'Time judging started\'');
         $this->addSql('DROP INDEX IDX_29A6E6E13CBA64F2 ON judging_run');
         $this->addSql('ALTER TABLE judging_run DROP judgetaskid, CHANGE endtime endtime NUMERIC(32, 9) UNSIGNED NOT NULL COMMENT \'Time run judging ended\'');
