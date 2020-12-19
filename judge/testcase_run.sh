@@ -148,7 +148,7 @@ if [ -z "$COMPARE_SCRIPT" ]; then
 else
 	export COMBINED_RUN_COMPARE=0
 fi
-[ -x "$WORKDIR/$PROGRAM" ] || error "submission program not found or not executable"
+[ -x "$WORKDIR/$PROGRAM" ] || error "submission program not found or not executable: '$WORKDIR/$PROGRAM'"
 [ -x "$RUN_SCRIPT" ] || error "run script not found or not executable: $RUN_SCRIPT"
 [ -x "$RUNGUARD" ] || error "runguard not found or not executable: $RUNGUARD"
 if [ ! -x "$COMPARE_SCRIPT" ] && [ $COMBINED_RUN_COMPARE -eq 0 ]; then
