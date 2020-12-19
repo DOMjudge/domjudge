@@ -262,7 +262,7 @@ function fetch_executable(
         !file_exists($execdeploypath) ||
         dj_file_get_contents($execmd5path) !== $md5sum) {
 
-        logmsg(LOG_INFO, "Fetching new executable '$execid'");
+        logmsg(LOG_INFO, "  🖫 Fetching new executable '$execid'");
         system("rm -rf $execdir");
         system("mkdir -p '$execdownloaddir'", $retval);
         if ($retval!=0) {
@@ -533,7 +533,7 @@ read_credentials();
 umask(0022);
 
 // Check basic prerequisites for chroot at judgehost startup
-logmsg(LOG_INFO, "executing chroot script: '".CHROOT_SCRIPT." check'");
+logmsg(LOG_INFO, "√ Executing chroot script: '".CHROOT_SCRIPT." check'");
 system(LIBJUDGEDIR.'/'.CHROOT_SCRIPT.' check', $retval);
 if ($retval!=0) {
     error("chroot sanity check exited with exitcode $retval");
@@ -754,7 +754,7 @@ function cleanup_judging(string $workdir) : void
     chmod($workdir, 0700);
 
     // destroy chroot environment
-    logmsg(LOG_INFO, "executing chroot script: '".CHROOT_SCRIPT." stop'");
+    logmsg(LOG_INFO, "  √ Executing chroot script: '".CHROOT_SCRIPT." stop'");
     system(LIBJUDGEDIR.'/'.CHROOT_SCRIPT.' stop', $retval);
     if ($retval!=0) {
         error("chroot script exited with exitcode $retval");
@@ -798,7 +798,7 @@ function judge(array $row)
     // create workdir for judging
     $workdir = judging_directory($workdirpath, $row);
 
-    logmsg(LOG_INFO, "Working directory: $workdir");
+    logmsg(LOG_INFO, "  Working directory: $workdir");
 
     // If a database gets reset without removing the judging
     // directories, we might hit an old directory: rename it.
@@ -890,7 +890,7 @@ function judge(array $row)
     }
 
     // create chroot environment
-    logmsg(LOG_INFO, "executing chroot script: '".CHROOT_SCRIPT." start'");
+    logmsg(LOG_INFO, "  √ Executing chroot script: '".CHROOT_SCRIPT." start'");
     system(LIBJUDGEDIR.'/'.CHROOT_SCRIPT.' start', $retval);
     if ($retval!=0) {
         error("chroot script exited with exitcode $retval");
@@ -1021,7 +1021,7 @@ function judge(array $row)
         }
 
         $totalcases++;
-        logmsg(LOG_DEBUG, "Running testcase $tc[rank]...");
+        logmsg(LOG_INFO, "  🏃 Running testcase $tc[rank]...");
         $testcasedir = $workdir . "/testcase" . sprintf('%03d', $tc['rank']);
         $tcfile = fetchTestcase($row, $workdirpath, $tc['rank']);
         if ($tcfile === NULL) {
@@ -1122,7 +1122,8 @@ function judge(array $row)
            $last_sent = $now;
            $outstanding_data = 0;
         }
-        logmsg(LOG_DEBUG, "Testcase $tc[rank] done, result: " . $result);
+        logmsg(LOG_INFO, '  ' . ($result === 'correct' ? " \033[0;32m✔\033[0m" : " \033[1;31m✗\033[0m")
+            . ' ...done in ' . $runtime . 's, result: ' . $result);
     } // end: for each testcase
     if (!empty($unsent_judging_runs)) {
         if (send_unsent_judging_runs($unsent_judging_runs, $row['judgingid']) === null) {
@@ -1183,7 +1184,7 @@ function fetchTestcase(array $row, $workdirpath, $rank): array
     }
     // Only log downloading input and/or output testdata once.
     if (count($fetched) > 0) {
-        logmsg(LOG_INFO, "Fetched new " . implode(',', $fetched) .
+        logmsg(LOG_INFO, "  🖫 Fetched new " . implode(',', $fetched) .
             " testcase $rank for problem p$row[probid]");
     }
     return $tcfile;
