@@ -1,6 +1,6 @@
 {% extends "team/base.html.twig" %}
 
-{% block title %}Scoreboard - {{ parent() }}{% endblock %}
+{% block title %}Scoreboard {{ contest.shortname | default('') }} - {{ parent() }}{% endblock %}
 {% block content %}
     <div data-ajax-refresh-target data-ajax-refresh-after="initializeScoreboard" class="mt-3">
         {% include 'partials/scoreboard.html.twig' with {jury: false, public: false, current_contest: current_team_contest} %}
