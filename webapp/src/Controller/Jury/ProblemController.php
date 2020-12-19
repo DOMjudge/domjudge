@@ -900,7 +900,7 @@ class ProblemController extends BaseController
             ->join('tc.content', 'tcc')
             ->select('tc', 'tcc')
             ->andWhere('tc.problem = :problem')
-            ->andWhere('tc.ranknumber = :ranknumber')
+            ->andWhere('tc.rank = :ranknumber')
             ->setParameter(':problem', $probId)
             ->setParameter(':ranknumber', $rank)
             ->getQuery()

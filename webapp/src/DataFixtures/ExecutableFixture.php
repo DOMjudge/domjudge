@@ -3,7 +3,10 @@
 namespace App\DataFixtures;
 
 use App\Entity\Executable;
+use App\Entity\ExecutableFile;
+use App\Entity\ImmutableExecutable;
 use Doctrine\Persistence\ObjectManager;
+use ZipArchive;
 
 /**
  * Class ExecutableFixture
@@ -42,8 +45,7 @@ class ExecutableFixture extends AbstractExampleDataFixture
             ->setExecid('boolfind_cmp')
             ->setDescription('boolfind comparator')
             ->setType('compare')
-            ->setMd5sum(md5_file($boolfindCompareFile))
-            ->setZipfile(file_get_contents($boolfindCompareFile));
+            ->setImmutableExecutable($this->createImmutableExecutable($boolfindCompareFile, $manager));
 
         $boolfindRunFile = sprintf(
             '%s/files/examples/boolfind_run.zip',
@@ -54,8 +56,7 @@ class ExecutableFixture extends AbstractExampleDataFixture
             ->setExecid('boolfind_run')
             ->setDescription('boolfind run script')
             ->setType('run')
-            ->setMd5sum(md5_file($boolfindRunFile))
-            ->setZipfile(file_get_contents($boolfindRunFile));
+            ->setImmutableExecutable($this->createImmutableExecutable($boolfindRunFile, $manager));
 
         $manager->persist($boolfindCompare);
         $manager->persist($boolfindRun);
@@ -63,5 +64,33 @@ class ExecutableFixture extends AbstractExampleDataFixture
 
         $this->addReference(self::BOOLFIND_CMP_REFERENCE, $boolfindCompare);
         $this->addReference(self::BOOLFIND_RUN_REFERENCE, $boolfindRun);
+    }
+
+    // TODO: Check whether it's possible to use services in fixture and reduce code duplication.
+    private function createImmutableExecutable(string $filename, ObjectManager $manager): ImmutableExecutable
+    {
+        $zip = new ZipArchive();
+        $zip->open($filename, ZIPARCHIVE::CHECKCONS);
+
+        $propertyFile = 'domjudge-executable.ini';
+        $immutableExecutable = new ImmutableExecutable();
+        $manager->persist($immutableExecutable);
+        $rank = 0;
+        for ($idx = 0; $idx < $zip->numFiles; $idx++) {
+            if ($zip->getNameIndex($idx) === $propertyFile) {
+                continue;
+            }
+            $executableFile = new ExecutableFile();
+            $executableFile
+                ->setRank($rank)
+                ->setFilename($zip->getNameIndex($idx))
+                ->setFileContent($zip->getFromIndex($idx))
+                // TODO: Don't do this all the time.
+                ->setIsExecutable(true)
+                ->setImmutableExecutable($immutableExecutable);
+            $manager->persist($executableFile);
+            $rank++;
+        }
+        return $immutableExecutable;
     }
 }

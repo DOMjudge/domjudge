@@ -7,6 +7,8 @@ use App\Entity\Balloon;
 use App\Entity\Clarification;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
+use App\Entity\ExecutableFile;
+use App\Entity\ImmutableExecutable;
 use App\Entity\InternalError;
 use App\Entity\Judgehost;
 use App\Entity\Language;
@@ -840,5 +842,35 @@ class DOMJudgeService
         }
 
         return $data;
+    }
+
+    // TODO: Is this in the correct service? Move to its own?
+    public function createImmutableExecutable(ZipArchive $zip): ImmutableExecutable
+    {
+        $propertyFile = 'domjudge-executable.ini';
+        $immutableExecutable = new ImmutableExecutable();
+        $this->em->persist($immutableExecutable);
+        $rank = 0;
+        for ($idx = 0; $idx < $zip->numFiles; $idx++) {
+            if ($zip->getNameIndex($idx) === $propertyFile) {
+                continue;
+            }
+            $executableFile = new ExecutableFile();
+            $executableFile
+                ->setRank($rank)
+                ->setFilename($zip->getNameIndex($idx))
+                ->setFileContent($zip->getFromIndex($idx))
+                ->setImmutableExecutable($immutableExecutable);
+            // TOOD: Extract executable info from zip file.
+            if (
+                $zip->getNameIndex($idx) === 'build'
+                || $zip->getNameIndex($idx) === 'run'
+            ) {
+                $executableFile->setIsExecutable(true);
+            }
+            $this->em->persist($executableFile);
+            $rank++;
+        }
+        return $immutableExecutable;
     }
 }

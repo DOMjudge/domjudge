@@ -30,23 +30,6 @@ class Executable
 
     /**
      * @var string
-     * @ORM\Column(type="string", name="md5sum", length=32,
-     *     options={"comment"="Md5sum of zip file","fixed"=true},
-     *     nullable=true)
-     */
-    private $md5sum;
-
-    /**
-     * @var resource|string
-     * @ORM\Column(type="blob", name="zipfile",
-     *     options={"comment"="Zip file"}, nullable=true)
-     */
-    private $zipfile;
-
-    private $zipfile_as_string = null;
-
-    /**
-     * @var string
      * @ORM\Column(type="string", name="description", length=255,
      *     options={"comment"="Description of this executable"},
      *     nullable=true)
@@ -61,6 +44,12 @@ class Executable
      * @Assert\Choice({"compare", "compile", "run"})
      */
     private $type;
+
+    /**
+     * @ORM\OneToOne(targetEntity="ImmutableExecutable")
+     * @ORM\JoinColumn(name="immutable_execid", referencedColumnName="immutable_execid")
+     */
+    private $immutableExecutable;
 
     /**
      * @ORM\OneToMany(targetEntity="Language", mappedBy="compile_executable")
@@ -96,42 +85,6 @@ class Executable
     public function getExecid(): string
     {
         return $this->execid;
-    }
-
-    public function setMd5sum(string $md5sum): Executable
-    {
-        $this->md5sum = $md5sum;
-        return $this;
-    }
-
-    public function getMd5sum(): string
-    {
-        return $this->md5sum;
-    }
-
-    public function setZipfile(string $zipfile): Executable
-    {
-        $this->zipfile = $zipfile;
-        return $this;
-    }
-
-    /**
-     * @return resource|string
-     */
-    public function getZipfile(bool $asString = false)
-    {
-        if ($asString && $this->zipfile !== null) {
-            if ($this->zipfile_as_string === null) {
-                $this->zipfile_as_string = stream_get_contents($this->zipfile);
-            }
-            return $this->zipfile_as_string;
-        }
-        return $this->zipfile;
-    }
-
-    public function getZipFileSize(): int
-    {
-        return strlen(stream_get_contents($this->getZipfile()));
     }
 
     public function setDescription(string $description): Executable
@@ -202,5 +155,16 @@ class Executable
     public function getProblemsRun(): Collection
     {
         return $this->problems_run;
+    }
+
+    public function setImmutableExecutable(ImmutableExecutable $immutableExecutable): Executable
+    {
+        $this->immutableExecutable = $immutableExecutable;
+        return $this;
+    }
+
+    public function getImmutableExecutable(): ImmutableExecutable
+    {
+        return $this->immutableExecutable;
     }
 }

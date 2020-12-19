@@ -4,6 +4,8 @@ namespace App\Controller\Jury;
 
 use App\Controller\BaseController;
 use App\Entity\Executable;
+use App\Entity\ExecutableFile;
+use App\Entity\ImmutableExecutable;
 use App\Form\Type\ExecutableType;
 use App\Form\Type\ExecutableUploadType;
 use App\Service\ConfigurationService;
@@ -25,6 +27,7 @@ use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Annotation\Route;
+use ZipArchive;
 
 /**
  * @Route("/jury/executables")
@@ -119,13 +122,13 @@ class ExecutableController extends BaseController
                     $type        = $ini_array['type'];
                 }
 
+                $immutableExecutable = $this->dj->createImmutableExecutable($zip, $propertyFile);
                 $executable = new Executable();
                 $executable
                     ->setExecid($id)
                     ->setDescription($description)
                     ->setType($type)
-                    ->setMd5sum(md5_file($archive->getRealPath()))
-                    ->setZipfile(file_get_contents($archive->getRealPath()));
+                    ->setImmutableExecutable($immutableExecutable);
                 $this->em->persist($executable);
 
                 $zip->close();
@@ -145,17 +148,15 @@ class ExecutableController extends BaseController
         $em = $this->em;
         /** @var Executable[] $executables */
         $executables      = $em->createQueryBuilder()
-            ->select('e as executable, e.execid as execid, length(e.zipfile) as size')
+            ->select('e as executable, e.execid as execid')
             ->from(Executable::class, 'e')
             ->orderBy('e.execid', 'ASC')
             ->getQuery()->getResult();
-        $executable_sizes = array_column($executables, 'size', 'execid');
         $executables      = array_column($executables, 'executable', 'execid');
         $table_fields     = [
             'execid' => ['title' => 'ID', 'sort' => true,],
             'type' => ['title' => 'type', 'sort' => true,],
             'description' => ['title' => 'description', 'sort' => true, 'default_sort' => true],
-            'size' => ['title' => 'size', 'sort' => true,],
         ];
 
         $propertyAccessor  = PropertyAccess::createPropertyAccessor();
@@ -191,13 +192,6 @@ class ExecutableController extends BaseController
                 'link' => $this->generateUrl('jury_executable_download', ['execId' => $e->getExecid()])
             ];
 
-            $execdata['md5sum']['cssclass'] = 'text-monospace small';
-            $execdata                       = array_merge($execdata, [
-                'size' => [
-                    'value' => Utils::printsize((int)$executable_sizes[$e->getExecid()]),
-                    'sortvalue' => (int)$executable_sizes[$e->getExecid()]
-                ],
-            ]);
             $executables_table[]            = [
                 'data' => $execdata,
                 'actions' => $execactions,
@@ -263,9 +257,22 @@ class ExecutableController extends BaseController
             throw new NotFoundHttpException(sprintf('Executable with ID %s not found', $execId));
         }
 
-        $zipFile     = stream_get_contents($executable->getZipfile());
+        $zipArchive = new ZipArchive();
+        if (!($tempzipFile = tempnam($this->dj->getDomjudgeTmpDir(), "/executable-"))) {
+            throw new ServiceUnavailableHttpException(null, 'Failed to create temporary file');
+        }
+        $zipArchive->open($tempzipFile);
+
+        /** @var ExecutableFile[] $files */
+        $files = array_values($executable->getImmutableExecutable()->getFiles()->toArray());
+        usort($files, function($a, $b)  { return $a->getRank() <=> $b->getRank(); });
+        foreach ($files as $file) {
+            $zipArchive->addFromString($file->getFilename(), $file->getFileContent());
+        }
+        $zipArchive->close();
+        $zipFile = file_get_contents($tempzipFile);
         $zipFileSize = strlen($zipFile);
-        $filename    = sprintf('%s.zip', $executable->getExecid());
+        $filename = sprintf('%s.zip', $executable->getExecid());
 
         $response = new StreamedResponse();
         $response->setCallback(function () use ($zipFile) {
@@ -295,26 +302,13 @@ class ExecutableController extends BaseController
             throw new NotFoundHttpException(sprintf('Executable with ID %s not found', $execId));
         }
 
-        if (!($tempzipFile = tempnam($this->dj->getDomjudgeTmpDir(), "/executable-"))) {
-            throw new ServiceUnavailableHttpException(null, 'Failed to create temporary file');
+        /** @var ExecutableFile[] $files */
+        $files = array_values($executable->getImmutableExecutable()->getFiles()->toArray());
+        foreach ($files as $file) {
+            if ($file->getRank() == $index) {
+                return Utils::streamAsBinaryFile($file->getFileContent(), $file->getFilename());
+            }
         }
-        if (file_put_contents($tempzipFile, stream_get_contents($executable->getZipfile())) === false) {
-            throw new ServiceUnavailableHttpException(null, 'Failed to write zip file to temporary file');
-        }
-
-        $zip = $this->dj->openZipFile($tempzipFile);
-
-        if ($index < 0 || $index >= $zip->numFiles) {
-            throw new BadRequestHttpException(sprintf('File with index %d not found', $index));
-        }
-
-        $filename = basename($zip->getNameIndex($index));
-        if ($filename[strlen($filename) - 1] == "/") {
-            throw new BadRequestHttpException(sprintf('File with index %d is a directory', $index));
-        }
-
-        $content = $zip->getFromIndex($index);
-        return Utils::streamAsBinaryFile($content, $filename);
     }
 
     /**
@@ -364,10 +358,10 @@ class ExecutableController extends BaseController
             $data = $uploadForm->getData();
             /** @var UploadedFile $archive */
             $archive = $data['archive'];
-
-            $executable
-                ->setMd5sum(md5_file($archive->getRealPath()))
-                ->setZipfile(file_get_contents($archive->getRealPath()));
+            $zip = $this->dj->openZipFile($archive->getRealPath());
+            $executable->setImmutableExecutable(
+                $this->dj->createImmutableExecutable($zip)
+            );
             $this->saveEntity($this->em, $this->eventLogService, $this->dj, $executable,
                               $executable->getExecid(), false);
             return $this->redirectToRoute('jury_executable', ['execId' => $executable->getExecid()]);
@@ -435,33 +429,25 @@ class ExecutableController extends BaseController
         if ($form->isSubmitted() && $form->isValid()) {
             $submittedData = $form->getData();
 
-            if (!($tempzipFile = tempnam($this->dj->getDomjudgeTmpDir(), "/executable-"))) {
-                throw new ServiceUnavailableHttpException(null, 'Failed to create temporary file');
-            }
-            if (file_put_contents($tempzipFile, $executable->getZipfile(true)) === false) {
-                throw new ServiceUnavailableHttpException(null, 'Failed to write zip file to temporary file');
-            }
+            /** @var ImmutableExecutable $immutableExecutable */
+            $immutableExecutable = new ImmutableExecutable();
+            $this->em->persist($immutableExecutable);
 
-            $zip = $this->dj->openZipFile($tempzipFile);
             foreach ($editorData['filenames'] as $idx => $filename) {
-                $permission = $opsys = $attr = null;
-                if ($zip->getExternalAttributesName($filename, $opsys, $attr) && $opsys === \ZipArchive::OPSYS_UNIX) {
-                    $permission = $attr;
-                }
+                $newContent = str_replace("\r\n", "\n", $submittedData['source' . $idx]);
 
-                $newContent = $submittedData['source' . $idx];
-                $zip->addFromString($filename, str_replace("\r\n", "\n", $newContent));
-
-                if ($permission !== null) {
-                    $zip->setExternalAttributesName($filename, $opsys, $permission);
-                }
+                /** @var ExecutableFile $executableFile */
+                $executableFile = new ExecutableFile();
+                // TODO: handle permissions correctly
+                $executableFile
+                    ->setRank($idx)
+                    ->setImmutableExecutable($immutableExecutable)
+                    ->setFilename($filename)
+                    ->setFileContent($newContent);
+                $this->em->persist($executableFile);
             }
 
-            $zip->close();
-
-            $executable
-                ->setMd5sum(md5_file($tempzipFile))
-                ->setZipfile(file_get_contents($tempzipFile));
+            $executable->setImmutableExecutable($immutableExecutable);
             $this->em->flush();
             $this->dj->auditlog('executable', $executable->getExecid(), 'updated');
 
@@ -481,32 +467,23 @@ class ExecutableController extends BaseController
      */
     protected function dataForEditor(Executable $executable)
     {
-        if (!($tempzipFile = tempnam($this->dj->getDomjudgeTmpDir(), "/executable-"))) {
-            throw new ServiceUnavailableHttpException(null, 'Failed to create temporary file');
-        }
-        if (file_put_contents($tempzipFile, $executable->getZipfile(true)) === false) {
-            throw new ServiceUnavailableHttpException(null, 'Failed to write zip file to temporary file');
-        }
+        /** @var ImmutableExecutable $immutable_executable */
+        $immutable_executable = $executable->getImmutableExecutable();
 
-        $zip           = $this->dj->openZipFile($tempzipFile);
-        $skippedBinary = [];
         $filenames     = [];
-        $files         = [];
+        $file_contents = [];
         $aceFilenames  = [];
-        for ($idx = 0; $idx < $zip->numFiles; $idx++) {
-            $filename = basename($zip->getNameIndex($idx));
-            if ($filename[strlen($filename) - 1] == "/") {
-                continue;
-            }
-
-            $content = $zip->getFromIndex($idx);
+        $skippedBinary = [];
+        foreach ($immutable_executable->getFiles() as $file) {
+            /** @var ExecutableFile $file */
+            $filename = $file->getFilename();
+            $content = $file->getFileContent();
             if (!mb_check_encoding($content, 'ASCII')) {
                 $skippedBinary[] = $filename;
                 continue; // skip binary files
             }
-
             $filenames[] = $filename;
-            $files[]     = $content;
+            $file_contents[] = $content;
 
             if (strpos($filename, '.') !== false) {
                 $aceFilenames[] = $filename;
@@ -521,14 +498,13 @@ class ExecutableController extends BaseController
             }
         }
 
-        $zip->close();
-
+        // TODO: do we want to display the executable bit?
         return [
             'executable' => $executable,
             'skippedBinary' => $skippedBinary,
             'filenames' => $filenames,
             'aceFilenames' => $aceFilenames,
-            'files' => $files,
+            'files' => $file_contents,
         ];
     }
 }

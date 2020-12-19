@@ -37,6 +37,15 @@ class JudgingRun extends BaseApiEntity
     protected $runid;
 
     /**
+     * @var int
+     * @ORM\Column(type="integer", name="judgetaskid", length=4,
+     *     options={"comment"="JudgeTask ID","unsigned"=true},
+     *     nullable=false)
+     * @Serializer\Exclude()
+     */
+    private $judgetaskid;
+
+    /**
      * @var string
      * @ORM\Column(type="string", name="runresult", length=32,
      *     options={"comment"="Result of this run, NULL if not finished yet"},
@@ -58,7 +67,7 @@ class JudgingRun extends BaseApiEntity
      * @var double
      * @ORM\Column(type="decimal", precision=32, scale=9, name="endtime",
      *     options={"comment"="Time run judging ended", "unsigned"=true},
-     *     nullable=false)
+     *     nullable=true)
      * @Serializer\Exclude()
      */
     private $endtime;
@@ -88,6 +97,13 @@ class JudgingRun extends BaseApiEntity
      */
     private $output;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="JudgeTask")
+     * @ORM\JoinColumn(name="judgetaskid", referencedColumnName="judgetaskid")
+     * @Serializer\Exclude()
+     */
+    private $judgetask;
+
     public function __construct()
     {
         $this->output = new ArrayCollection();
@@ -101,6 +117,23 @@ class JudgingRun extends BaseApiEntity
     public function getRunid()
     {
         return $this->runid;
+    }
+
+    public function setJudgeTaskId(int $judgetaskid): JudgingRun
+    {
+        $this->judgetaskid = $judgetaskid;
+        return $this;
+    }
+
+    public function getJudgeTaskId(): int
+    {
+        return $this->judgetaskid;
+    }
+
+    public function setJudgeTask(JudgeTask $judgeTask): JudgingRun
+    {
+        $this->judgetask = $judgeTask;
+        return $this;
     }
 
     /**

@@ -135,6 +135,9 @@ class RunController extends AbstractRestController implements QueryObjectTransfo
             ->leftJoin('j.contest', 'c')
             ->select('jr, j, tc, c')
             ->andWhere('j.contest = :cid')
+            // With the new judgehost API we pre-create the judging_runs; only expose those who correspond to a real run
+            // on a judgehost.
+            ->andWhere('jr.endtime IS NOT NULL')
             ->setParameter(':cid', $this->getContestId($request));
 
         if ($request->query->has('first_id')) {
