@@ -1,6 +1,6 @@
 {% extends "public/base.html.twig" %}
 
-{% block title %}Scoreboard - {{ parent() }}{% endblock %}
+{% block title %}Scoreboard {{ contest.shortname | default('') }} - {{ parent() }}{% endblock %}
 {% block content %}
     {% set banner = 'images/banner.png' %}
     {% if bannerExists() %}
