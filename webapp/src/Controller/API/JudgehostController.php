@@ -573,6 +573,10 @@ class JudgehostController extends AbstractFOSRestController
                 });
             }
 
+            // Reload judgehost just in case it got cleared above.
+            /** @var Judgehost $judgehost */
+            $judgehost = $this->em->getRepository(Judgehost::class)->find($hostname);
+
             if ($request->request->getBoolean('compile_success')) {
                 // Don't overwrite a negative compilation result.
                 if ($judging->getOutputCompile() === null) {
