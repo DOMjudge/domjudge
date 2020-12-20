@@ -141,6 +141,7 @@ Json::Value doAPIrequest(const std::string &);
 bool readlanguages();
 bool readproblems();
 bool readcontests();
+void verifyteamrole();
 
 bool doAPIsubmit();
 
@@ -275,6 +276,8 @@ int main(int argc, char **argv)
 
 	/* Make sure that baseurl terminates with a '/' for later concatenation. */
 	if ( !baseurl.empty() && baseurl[baseurl.length()-1]!='/' ) baseurl += '/';
+
+	verifyteamrole();
 
 	if ( !readcontests() ) warning(0,"could not obtain active contests");
 
@@ -856,6 +859,42 @@ bool readproblems()
 	logmsg(LOG_INFO,"read %d problems from the API",(int)problems.size());
 
 	return true;
+}
+
+void verifyteamrole()
+{
+	Json::Value res;
+	try {
+		res = doAPIrequest("user");
+	} catch (std::exception &e) {
+		warning(0, "%s", e.what());
+		return;
+	}
+
+	if (!res.isObject()) {
+		warning(0, "REST API returned unexpected JSON data for endpoint user");
+		return;
+	}
+
+	Json::Value team = res["team"];
+	if (team.isNull()) {
+		error(0, "User is not associated with a team, contact contest administrator.");
+		return;
+	}
+
+	Json::Value roles = res["roles"];
+	if (!roles.isArray()) {
+		warning(0, "REST API returned unexpected JSON data for endpoint user");
+		return;
+	}
+
+	for (const auto& role : roles) {
+		if (role.isString() && role.asString() == "team") {
+			return;
+		}
+	}
+
+	error(0, "User doesn't have the team role, contact contest administrator.");
 }
 
 bool readcontests()
