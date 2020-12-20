@@ -171,8 +171,12 @@ while /bin/true; do
 	# if [ $NUMSUBS -eq $((NUMVERIFIED+NUMNOTVERIFIED)) ]; then
 	# 	break
 	# fi
-	# ... or something has crashed.
+	# ... or something got disabled by internal error...
 	if tail /tmp/judgedaemon.log | grep -q "No submissions in queue"; then
+		break
+	fi
+	# ... or something has crashed.
+	if ! pgrep -f judgedaemon; then
 		break
 	fi
 done
