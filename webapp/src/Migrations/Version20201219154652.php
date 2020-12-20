@@ -42,7 +42,7 @@ final class Version20201219154652 extends AbstractMigration implements Container
 
                 $this->connection->exec(
                     'INSERT INTO executable_file '
-                    . '(`immutable_execid`, `filename`, `rank`, `file_content`, `is_executable`) '
+                    . '(`immutable_execid`, `filename`, `ranknumber`, `file_content`, `is_executable`) '
                     . 'VALUES (' . $immutable_execid . ', "' . $filename . '", '
                     . $idx . ', 0x' . strtoupper(bin2hex($content)) . ', '
                     // TODO: how to retrieve executable bit from zip?

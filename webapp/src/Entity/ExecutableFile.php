@@ -12,7 +12,7 @@ use JMS\Serializer\Annotation as Serializer;
  *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Files associated to an executable"},
  *     indexes={@ORM\Index(name="immutable_execid", columns={"immutable_execid"})},
  *     uniqueConstraints={
- *         @ORM\UniqueConstraint(name="rank", columns={"immutable_execid", "rank"}),
+ *         @ORM\UniqueConstraint(name="rankindex", columns={"immutable_execid", "ranknumber"}),
  *         @ORM\UniqueConstraint(name="filename", columns={"immutable_execid", "filename"}, options={"lengths": {NULL, "190"}})
  *     })
  */
@@ -37,7 +37,7 @@ class ExecutableFile
 
     /**
      * @var int
-     * @ORM\Column(type="integer", name="rank",
+     * @ORM\Column(type="integer", name="ranknumber",
      *     options={"comment"="Order of the executable files, zero-indexed", "unsigned"=true},
      *     nullable=false)
      */
