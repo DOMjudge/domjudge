@@ -277,8 +277,6 @@ int main(int argc, char **argv)
 	/* Make sure that baseurl terminates with a '/' for later concatenation. */
 	if ( !baseurl.empty() && baseurl[baseurl.length()-1]!='/' ) baseurl += '/';
 
-	verifyteamrole();
-
 	if ( !readcontests() ) warning(0,"could not obtain active contests");
 
 	if ( contestid.empty() ) {
@@ -318,6 +316,8 @@ int main(int argc, char **argv)
 	if ( !problemsRead ) warning(0,"could not obtain problem data");
 
 	if ( argc<=optind ) usage2(0,"no file(s) specified");
+
+	verifyteamrole();
 
 	/* Process all source files */
 	for(i=0; optind+(int)i<argc; i++) {
