@@ -933,7 +933,7 @@ function compile(array $judgeTask, string $workdir, string $workdirpath, array $
 
         return false;
     }
-    logmsg(LOG_INFO, "  💻 Compilation: '".$EXITCODES[$retval]."'");
+    logmsg(LOG_INFO, "  💻 Compilation: ($files[0]) '".$EXITCODES[$retval]."'");
 
     // What does the exitcode mean?
     if (! isset($EXITCODES[$retval])) {
