@@ -688,6 +688,9 @@ while (true) {
         error("chroot script exited with exitcode $retval");
     }
 
+    // Refresh config at start of each batch.
+    djconfig_refresh();
+
     // Make sure the workdir is accessible for the domjudge-run user.
     // Will be revoked again after this run finished.
     foreach ($row as $judgetask) {
@@ -977,10 +980,6 @@ function judge(array $judgeTask): bool
     $run_config     = dj_json_decode($judgeTask['run_config']);
     $compare_config = dj_json_decode($judgeTask['compare_config']);
 
-    // TODO: We probably can remove this.
-    // refresh config at start of judge run
-    djconfig_refresh();
-
     // Set configuration variables for called programs
     putenv('CREATE_WRITABLE_TEMP_DIR=' . (CREATE_WRITABLE_TEMP_DIR ? '1' : ''));
     // TODO: These three exist both in compile and compare config. Move them out of there or reset them at the right
@@ -1131,13 +1130,13 @@ function judge(array $judgeTask): bool
     if ($result === 'correct') {
         // Post result back asynchronously. PHP is lacking multi-threading, so
         // we just call ourselves again.
-        $judgedaemon = preg_replace('/\.main\.php$/', '', __FILE__);
+        $judgedaemon = BINDIR . '/judgedaemon';
         $cmd = $judgedaemon
             . ' -e ' . $endpointID
             . ' -t ' . $judgeTask['judgetaskid']
             . ' -j ' . base64_encode(json_encode($new_judging_run))
             . ' >> /dev/null & ';
-        $pid = shell_exec($cmd);
+        shell_exec($cmd);
     } else {
         request(
             sprintf('judgehosts/add-judging-run/%s/%s', urlencode($myhost),
