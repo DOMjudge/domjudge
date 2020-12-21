@@ -1128,12 +1128,16 @@ function judge(array $judgeTask): bool
         'hostname' => $myhost,
     );
 
-    // FIXME
-    if ($result === 'correct' && false) {
-        // Post result back asynchronously. PHP is lacking multi-threading, so we just call ourselves again.
+    if ($result === 'correct') {
+        // Post result back asynchronously. PHP is lacking multi-threading, so
+        // we just call ourselves again.
         $judgedaemon = preg_replace('/\.main\.php$/', '', __FILE__);
-        shell_exec($judgedaemon . ' -e ' . $endpointID . ' -t ' . $judgeTask['judgetaskid']
-            . ' -j ' . base64_encode(json_encode($new_judging_run)) . ' 2>&1 >> /dev/null &');
+        $cmd = $judgedaemon
+            . ' -e ' . $endpointID
+            . ' -t ' . $judgeTask['judgetaskid']
+            . ' -j ' . base64_encode(json_encode($new_judging_run))
+            . ' >> /dev/null & ';
+        $pid = shell_exec($cmd);
     } else {
         request(
             sprintf('judgehosts/add-judging-run/%s/%s', urlencode($myhost),
