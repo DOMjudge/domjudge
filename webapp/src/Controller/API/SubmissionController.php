@@ -113,7 +113,7 @@ class SubmissionController extends AbstractRestController
      * @return int
      * @Rest\Post("")
      * @OA\Post()
-     * @IsGranted("ROLE_TEAM")
+     * @IsGranted("ROLE_TEAM", message="You need to have the Team Member role to add a submission")
      * Uploading an array of files in swagger is not supported, see
      * @OA\RequestBody(
      *     required=true,

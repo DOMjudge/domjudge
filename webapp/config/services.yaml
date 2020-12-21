@@ -59,7 +59,7 @@ services:
         public: true
         class: App\FosRestBundle\FlattenExceptionHandler
         arguments:
-            - '@fos_rest.exception.codes_map'
+            - '@fos_rest.exception.messages_map'
             - '%kernel.debug%'
 
     Metadata\MetadataFactoryInterface: '@jms_serializer.metadata_factory'
