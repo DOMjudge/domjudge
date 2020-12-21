@@ -69,6 +69,7 @@ UPDATE team_category SET visible = 1;
 EOF
 
 ADMINPASS=$(cat etc/initial_admin_password.secret)
+cp etc/initial_admin_password.secret "$gitlabartifacts/"
 
 # configure and restart php-fpm
 sudo cp /opt/domjudge/domserver/etc/domjudge-fpm.conf "/etc/php/7.4/fpm/pool.d/domjudge-fpm.conf"
