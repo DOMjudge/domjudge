@@ -612,6 +612,16 @@ class JudgehostController extends AbstractFOSRestController
                         // now become detached. We will have to reload it
                         /** @var Judging $judging */
                         $judging = $query->getOneOrNullResult();
+
+                        // Invalidate judgetasks.
+                        $this->em->getConnection()->executeUpdate(
+                            'UPDATE judgetask SET valid=0'
+                            . ' WHERE jobid=:jobid',
+                            [
+                                ':jobid' => $judging->getJudgingid(),
+                            ]
+                        );
+                        $this->em->flush();
                     }
                     // TODO: Handle case where we already have a result.
 
@@ -1461,6 +1471,7 @@ class JudgehostController extends AbstractFOSRestController
                 ->from(JudgeTask::class, 'jt')
                 ->select('jt')
                 ->andWhere('jt.hostname IS NULL')
+                ->andWhere('jt.valid = 1')
                 ->andWhere('jt.priority <= 0')
                 ->andWhere($queryBuilder->expr()->In('jt.submitid', $started_judgetaskids))
                 ->addOrderBy('jt.priority')
@@ -1479,6 +1490,7 @@ class JudgehostController extends AbstractFOSRestController
             ->from(JudgeTask::class, 'jt')
             ->select('jt.priority')
             ->andWhere('jt.hostname IS NULL')
+            ->andWhere('jt.valid = 1')
             ->addOrderBy('jt.priority')
             ->setMaxResults(1)
             ->getQuery()
@@ -1499,6 +1511,7 @@ class JudgehostController extends AbstractFOSRestController
                 ->from(JudgeTask::class, 'jt')
                 ->select('jt')
                 ->andWhere('jt.hostname IS NULL')
+                ->andWhere('jt.valid = 1')
                 ->andWhere('jt.priority = :max_priority')
                 ->setParameter(':max_priority', $max_priority)
                 ->andWhere($queryBuilder->expr()->In('jt.submitid', $started_judgetaskids))
@@ -1529,6 +1542,7 @@ class JudgehostController extends AbstractFOSRestController
             ->from(JudgeTask::class, 'jt')
             ->select('jt')
             ->andWhere('jt.hostname IS NULL')
+            ->andWhere('jt.valid = 1')
             ->andWhere('jt.priority = :max_priority')
             ->setParameter(':max_priority', $max_priority);
         // TODO: Add prioritization by team here.
@@ -1555,6 +1569,7 @@ class JudgehostController extends AbstractFOSRestController
             ->from(JudgeTask::class, 'jt')
             ->select('jt')
             ->andWhere('jt.hostname IS NULL')
+            ->andWhere('jt.valid = 1')
             ->addOrderBy('jt.priority')
             ->addOrderBy('jt.judgetaskid')
             ->setMaxResults($max_batchsize)

@@ -981,8 +981,6 @@ function compile(array $judgeTask, string $workdir, string $workdirpath, array $
 
     // compile error: our job here is done
     if (! $compile_success) {
-        //logmsg(LOG_NOTICE, "Judging s$row[submitid]/j$row[judgingid]: compile error");
-        // TODO: Signal back so that we don't keep compiling!
         return false;
     }
 
