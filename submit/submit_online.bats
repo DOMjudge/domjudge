@@ -68,6 +68,20 @@ setup() {
     [ "${lines[5]}" = "  language:    C++" ]
 }
 
+@test "non existing problem name emits erorr" {
+    cp ../tests/test-hello.java $BATS_TMPDIR/hello.java
+    run ./submit -p nonexistent -l cpp $BATS_TMPDIR/hello.java <<< "n"
+    echo $output | grep "error: no known problem specified or detected"
+    [ "$status" -eq 1 ]
+}
+
+@test "non existing language name emits erorr" {
+    cp ../tests/test-hello.java $BATS_TMPDIR/hello.java
+    run ./submit -p boolfind -l nonexistent $BATS_TMPDIR/hello.java <<< "n"
+    echo $output | grep "error: no known language specified or detected"
+    [ "$status" -eq 1 ]
+}
+
 @test "detect entry point Java" {
     skip "Java does not require an entry point in the default installation"
     run ./submit -p hello ../tests/test-hello.java <<< "n"
@@ -75,7 +89,6 @@ setup() {
 }
 
 @test "detect entry point Python" {
-    skip "Python not enabled in the default installation"
     touch $BATS_TMPDIR/test-extra.py
     run ./submit -p hello ../tests/test-hello.py $BATS_TMPDIR/test-extra.py <<< "n"
     echo "$output" | grep '  entry point: test-hello.py'
