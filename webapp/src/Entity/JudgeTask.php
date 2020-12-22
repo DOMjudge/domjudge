@@ -146,6 +146,16 @@ class JudgeTask
      */
     protected $compare_config;
 
+    /**
+     * @var boolean
+     * @ORM\Column(type="boolean", name="valid",
+     *     options={"comment"="Only handed out if still valid.",
+     *              "default"="1"},
+     *     nullable=false)
+     * @Serializer\Exclude()
+     */
+    protected $valid = true;
+
     public function getJudgetaskid(): int
     {
         return $this->judgetaskid;
@@ -281,5 +291,16 @@ class JudgeTask
     public function getCompareConfig(): string
     {
         return $this->compare_config;
+    }
+
+    public function setValid(bool $valid): JudgeTask
+    {
+        $this->valid = $valid;
+        return $this;
+    }
+
+    public function getValid(): bool
+    {
+        return $this->valid;
     }
 }
