@@ -556,6 +556,7 @@ djconfig_refresh();
 // Constantly check API for unjudged submissions
 $endpointIDs = array_keys($endpoints);
 $currentEndpoint = 0;
+$lastWorkdir = null;
 while (true) {
 
     // If all endpoints are waiting, sleep for a bit
@@ -630,8 +631,12 @@ while (true) {
     // nothing returned -> no open submissions for us
     if (empty($row)) {
         if (! $endpoints[$endpointID]["waiting"]) {
-            logmsg(LOG_INFO, "No submissions in queue (for endpoint $endpointID), waiting...");
             $endpoints[$endpointID]["waiting"] = true;
+            if ($lastWorkdir !== null) {
+                cleanup_judging($lastWorkdir);
+                $lastWorkdir = null;
+            }
+            logmsg(LOG_INFO, "No submissions in queue (for endpoint $endpointID), waiting...");
         }
         continue;
     }
@@ -640,6 +645,8 @@ while (true) {
     $endpoints[$endpointID]["waiting"] = false;
     logmsg(LOG_INFO,
         "⇝ Received " . sizeof($row) . " '" . $row[0]['type'] . "' judge tasks (endpoint $endpointID)");
+
+    $jobId = $row[0]['jobid'];
 
     // create workdir for judging
     $workdir = judging_directory($workdirpath, $row[0]);
@@ -661,12 +668,22 @@ while (true) {
         }
 
         if ($needs_cleanup) {
+            if ($lastWorkdir !== null) {
+                cleanup_judging($lastWorkdir);
+                $lastWorkdir = null;
+            }
+
             $oldworkdir = $workdir . '-old-' . getmypid() . '-' . strftime('%Y-%m-%d_%H:%M');
             if (!rename($workdir, $oldworkdir)) {
                 error("Could not rename stale working directory to '$oldworkdir'");
             }
             @chmod($oldworkdir, 0700);
             warning("Found stale working directory; renamed to '$oldworkdir'");
+        }
+    } else {
+        if ($lastWorkdir !== null) {
+            cleanup_judging($lastWorkdir);
+            $lastWorkdir = null;
         }
     }
 
@@ -681,15 +698,19 @@ while (true) {
         error("Could not chdir to '$workdir'");
     }
 
-    // create chroot environment
-    logmsg(LOG_INFO, "  √ Executing chroot script: '".CHROOT_SCRIPT." start'");
-    system(LIBJUDGEDIR.'/'.CHROOT_SCRIPT.' start', $retval);
-    if ($retval!=0) {
-        error("chroot script exited with exitcode $retval");
-    }
+    if ($lastWorkdir !== $workdir) {
+        // create chroot environment
+        logmsg(LOG_INFO, "  √ Executing chroot script: '".CHROOT_SCRIPT." start'");
+        system(LIBJUDGEDIR.'/'.CHROOT_SCRIPT.' start', $retval);
+        if ($retval!=0) {
+            error("chroot script exited with exitcode $retval");
+        }
 
-    // Refresh config at start of each batch.
-    djconfig_refresh();
+        // Refresh config at start of each batch.
+        djconfig_refresh();
+
+        $lastWorkdir = $workdir;
+    }
 
     // Make sure the workdir is accessible for the domjudge-run user.
     // Will be revoked again after this run finished.
@@ -699,8 +720,6 @@ while (true) {
         }
     }
 
-    // TODO: Perhaps wait until we are sure this was the last batch with the same jobid.
-    cleanup_judging($workdir);
     file_put_contents($success_file, getmypid());
 
     // Check if we were interrupted while judging, if so, exit (to avoid sleeping)
