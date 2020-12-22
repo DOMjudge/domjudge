@@ -737,7 +737,6 @@ Json::Value doAPIrequest(const std::string &funcname)
 	stringstream curloutput;
 	Json::Reader reader;
 	Json::Value result;
-	Json::Value message;
 	long http_code;
 	string line;
 
@@ -759,15 +758,13 @@ Json::Value doAPIrequest(const std::string &funcname)
 	// The connection worked, but we may have received an HTTP error
 	curl_easy_getinfo(handle, CURLINFO_RESPONSE_CODE, &http_code);
 	if ( http_code >= 300 ) {
+		while ( getline(curloutput,line) ) {
+			printf("%s\n", decode_HTML_entities(line).c_str());
+		}
 		if ( http_code == 401 ) {
 			throw ::exception("authentication failed, please check your DOMjudge credentials.");
 		} else {
-                if (reader.parse(curloutput, message) ) {
-                    if(message.isArray() && message["message"]) {
-			printf("API error %li: %s", message["code"], message["message"]);
-}
-}
-			throw ::exception("API reiiiquest %s failed (code %li)", funcname.c_str(), http_code);
+			throw ::exception("API request %s failed (code %li)", funcname.c_str(), http_code);
 		}
 	}
 
@@ -907,7 +904,6 @@ bool doAPIsubmit()
 	string line;
 	Json::Reader reader;
 	Json::Value root;
-	Json::Value message;
 
 	url = strdup((baseurl + "api/" + API_VERSION + "contests/" + mycontest.id + "/submissions").c_str());
 
@@ -951,14 +947,12 @@ bool doAPIsubmit()
 	curl_easy_getinfo(handle, CURLINFO_RESPONSE_CODE, &http_code);
 	curl_cleanup();
 	if ( http_code >= 300 ) {
+		while ( getline(curloutput,line) ) {
+			printf("%s\n", decode_HTML_entities(line).c_str());
+		}
 		if ( http_code == 401 ) {
 			error(0, "Authentication failed. Please check your DOMjudge credentials.");
 		} else {
-                if (reader.parse(curloutput, message) ) {
-                    if(message.isArray() && message["message"]) {
-			printf("API error %li: %s", message["code"], message["message"]);
-}
-}
 			error(0, "Submission failed (code %li)", http_code);
 		}
 	}
