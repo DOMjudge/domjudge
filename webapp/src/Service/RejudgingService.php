@@ -107,7 +107,7 @@ class RejudgingService
         $singleJudging = count($judgings) == 1;
         foreach ($judgings as $judging) {
             $submission = $judging['submission'];
-            if ($submission['rejudgingid'] !== null) {
+            if ($submission['rejudging'] !== null) {
                 // The submission is already part of another rejudging, record and skip it.
                 $skipped[] = $judging;
                 continue;
@@ -134,7 +134,7 @@ class RejudgingService
                 }
 
                 if ($singleJudging) {
-                    $teamid = $submission['teamid'];
+                    $teamid = $submission['team']['teamid'];
                     if ($teamid) {
                         $this->em->getConnection()->executeUpdate(
                             'UPDATE team SET judging_last_started = null WHERE teamid = :teamid',
