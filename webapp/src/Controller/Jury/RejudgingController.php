@@ -781,7 +781,7 @@ class RejudgingController extends BaseController
                 $spread = (float) $runtime['spread'];
                 if ($spread > $current_spread['spread']) {
                     $current_spread['spread'] = $spread;
-                    $current_spread['rank'] = $runtime['rank'];
+                    $current_spread['rank'] = $runtime['ranknumber'];
                     $current_spread['submitid'] = $submitid;
                 }
             }
