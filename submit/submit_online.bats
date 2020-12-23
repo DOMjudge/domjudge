@@ -89,6 +89,7 @@ setup() {
 }
 
 @test "detect entry point Python" {
+    skip "Python does not require an entry point in the default installation"
     touch $BATS_TMPDIR/test-extra.py
     run ./submit -p hello ../tests/test-hello.py $BATS_TMPDIR/test-extra.py <<< "n"
     echo "$output" | grep '  entry point: test-hello.py'
