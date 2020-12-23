@@ -887,15 +887,20 @@ function compile(array $judgeTask, string $workdir, string $workdirpath, array $
     }
 
     if (empty($files) && $hasFiltered) {
-        // TODO: Fix this code path
-        $message = 'No files with allowed extensions found to pass to compiler. Allowed extensions: ' . implode(', ', $row['language_extensions']);
+        // Note: It may be tempting to assume that this codepath can be never
+        // reached since we prevent these submissions from being submitted both
+        // via command line and the web interface. However, the code path can
+        // be triggered when the filtering is activated between submission and
+        // rejudge.
+        $message = 'No files with allowed extensions found to pass to compiler. Allowed extensions: '
+            . implode(', ', $row['language_extensions']);
         $args = 'compile_success=0' .
             '&output_compile=' . urlencode(base64_encode($message));
 
         $url = sprintf('judgehosts/update-judging/%s/%s', urlencode($myhost), urlencode((string)$row['judgingid']));
         request($url, 'PUT', $args);
 
-        // revoke readablity for domjudge-run user to this workdir
+        // Revoke readablity for domjudge-run user to this workdir.
         chmod($workdir, 0700);
         logmsg(LOG_NOTICE, "Judging s$row[submitid]/j$row[judgingid]: compile error");
         return false;
