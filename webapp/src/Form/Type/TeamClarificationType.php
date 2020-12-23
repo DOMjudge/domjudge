@@ -8,6 +8,7 @@ use App\Service\DOMJudgeService;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 
 class TeamClarificationType extends AbstractType
@@ -36,11 +37,9 @@ class TeamClarificationType extends AbstractType
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->add('recipient', ChoiceType::class, [
-            'choices' => ['Jury' => 'dummy'],
-            'attr' => [
-                'class' => 'select_readonly',
-            ],
+        $builder->add('recipient', TextType::class, [
+	    'data' => 'Jury',
+	    'disabled' => true,
         ]);
 
         $subjects = [];
