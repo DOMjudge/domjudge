@@ -102,21 +102,24 @@
 
                         <h6 class="text-center">Program output</h6>
                         {% if run.output_run is not empty %}
-                            <pre class="output_text">{{ run.output_run }}</pre>
+                            <pre class="output_text">
+{{ run.output_run }}</pre>
                         {% else %}
                             <p class="nodata">There was no program output.</p>
                         {% endif %}
 
                         <h6 class="text-center">Diff output</h6>
                         {% if run.output_diff is not empty %}
-                            <pre class="output_text">{{ run.output_diff }}</pre>
+                            <pre class="output_text">
+{{ run.output_diff }}</pre>
                         {% else %}
                             <p class="nodata">There was no diff output.</p>
                         {% endif %}
 
                         <h6 class="text-center">Error output (info/debug/errors)</h6>
                         {% if run.output_error is not empty %}
-                            <pre class="output_text">{{ run.output_error }}</pre>
+                            <pre class="output_text">
+{{ run.output_error }}</pre>
                         {% else %}
                             <p class="nodata">There was no stderr output.</p>
                         {% endif %}
