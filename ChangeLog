@@ -4,6 +4,7 @@ Version 7.3.3 - DEV
 -------------------
  - Fix single problem API action for non-jury members.
  - Fix reversed submission diff output.
+ - Fix for browser swallowing newlines in output listings.
 
 Version 7.3.2 - 23 November 2020
 --------------------------------
