@@ -13,12 +13,9 @@ class JuryMiscControllerTest extends BaseTest
      */
     public function testJuryRedirectToLogin()
     {
-        $this->client->request('GET', '/jury');
+        $this->logOut();
 
-        $response = $this->client->getResponse();
-        $message = var_export($response, true);
-        $this->assertEquals(302, $response->getStatusCode(), $message);
-        $this->assertEquals('http://localhost/login', $response->getTargetUrl(), $message);
+        $this->verifyPageResponse('GET', '/jury', 302, 'http://localhost/login');
     }
 
     /**
@@ -26,6 +23,8 @@ class JuryMiscControllerTest extends BaseTest
      */
     public function testLogin()
     {
+        $this->logOut();
+
         // Make sure the suer has the correct permissions
         $this->setupUser();
 
@@ -39,13 +38,9 @@ class JuryMiscControllerTest extends BaseTest
      */
     public function testJuryIndexPage()
     {
-        $this->logIn();
         $this->client->request('GET', '/jury');
 
-        $response = $this->client->getResponse();
-        $message = var_export($response, true);
-        $this->assertEquals(200, $response->getStatusCode(), $message);
-
+        $this->verifyPageResponse('GET', '/jury', 200);
         $this->assertSelectorExists('html:contains("DOMjudge Jury interface")');
     }
 }

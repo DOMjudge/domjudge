@@ -16,12 +16,7 @@ class PrintControllerTest extends BaseTest
      */
     public function testPrintingDisabledJuryIndexPage()
     {
-        $this->logIn();
-        $this->client->request('GET', '/jury');
-
-        $response = $this->client->getResponse();
-        $message  = var_export($response, true);
-        $this->assertEquals(200, $response->getStatusCode(), $message);
+        $this->verifyPageResponse('GET', '/jury', 200);
         $this->assertSelectorNotExists('a:contains("Print")');
     }
 
@@ -31,12 +26,7 @@ class PrintControllerTest extends BaseTest
      */
     public function testPrintingDisabledAccessDenied()
     {
-        $this->logIn();
-        $this->client->request('GET', '/jury/print');
-
-        $response = $this->client->getResponse();
-        $message  = var_export($response, true);
-        $this->assertEquals(403, $response->getStatusCode(), $message);
+        $this->verifyPageResponse('GET', '/jury/print', 403);
     }
 
     /**
@@ -46,12 +36,7 @@ class PrintControllerTest extends BaseTest
     {
         $this->withChangedConfiguration('print_command', static::PRINT_COMMAND,
             function () {
-                $this->logIn();
-                $this->client->request('GET', '/jury');
-
-                $response = $this->client->getResponse();
-                $message  = var_export($response, true);
-                $this->assertEquals(200, $response->getStatusCode(), $message);
+                $this->verifyPageResponse('GET', '/jury', 200);
                 $this->assertSelectorExists('a:contains("Print")');
             });
     }
@@ -63,8 +48,7 @@ class PrintControllerTest extends BaseTest
     {
         $this->withChangedConfiguration('print_command', static::PRINT_COMMAND,
             function () {
-                $this->logIn();
-                $this->client->request('GET', '/jury/print');
+                $this->verifyPageResponse('GET', '/jury/print', 200);
 
                 $testFile = __DIR__ . '/PrintControllerTest.php';
                 $code     = new UploadedFile($testFile, 'test.cs');

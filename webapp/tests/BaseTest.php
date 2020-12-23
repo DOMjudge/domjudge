@@ -12,6 +12,8 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\BrowserKit\Cookie;
+use Symfony\Component\DomCrawler\Crawler;
+use Symfony\Component\DomCrawler\Link;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 
 /**
@@ -39,6 +41,11 @@ abstract class BaseTest extends WebTestCase
 
         // Create a client to communicate with the application
         $this->client = self::createClient();
+
+        // Log in if we have any roles
+        if (!empty(static::$roles)) {
+            $this->logIn();
+        }
     }
 
     /**
@@ -136,6 +143,18 @@ abstract class BaseTest extends WebTestCase
     }
 
     /**
+     * Log out a user
+     *
+     * This is needed when you set $roles but have a test that should be used
+     * while being logged out
+     */
+    protected function logOut()
+    {
+        $session = $this->client->getContainer()->get('session');
+        $this->client->getCookieJar()->expire($session->getName());
+    }
+
+    /**
      * Set up the dummy user with the roles given in static::$roles
      *
      * @return User
@@ -191,5 +210,69 @@ abstract class BaseTest extends WebTestCase
 
         // Call saveChanges with an empty array to clear any pending config
         $config->saveChanges([], $eventLog, $dj);
+    }
+
+    /**
+     * Test that the given page returns the correct response code
+     *
+     * @param string      $method
+     * @param string      $uri
+     * @param int         $status
+     * @param string|null $responseUrl
+     * @param bool        $ajax
+     */
+    protected function verifyPageResponse(
+        string $method,
+        string $uri,
+        int $status,
+        ?string $responseUrl = null,
+        bool $ajax = false
+    ): void {
+        if ($ajax) {
+            $this->client->xmlHttpRequest($method, $uri);
+        } else {
+            $this->client->request($method, $uri);
+        }
+        $response = $this->client->getResponse();
+        $message = var_export($response, true);
+        $this->assertEquals($status, $response->getStatusCode(), $message);
+        if ($responseUrl !== null) {
+            $this->assertEquals($responseUrl, $response->getTargetUrl(), $message);
+        }
+    }
+
+    /**
+     * Get the current crawler
+     * @return Crawler
+     */
+    protected function getCurrentCrawler(): Crawler
+    {
+        return $this->client->getCrawler();
+    }
+
+    /**
+     * Verify that the given link points to the given URL
+     * @param string $linkName
+     * @param string $url
+     *
+     * @return Link
+     */
+    protected function verifyLink(string $linkName, string $url): Link
+    {
+        $link = $this->getCurrentCrawler()->selectLink($linkName)->link();
+        $message = var_export($link, true);
+        $this->assertEquals($url, $link->getUri(), $message);
+
+        return $link;
+    }
+
+    /**
+     * Verify that the current redirect links to the given URL
+     * @param string $url
+     */
+    protected function verifyRedirect(string $url): void
+    {
+        $crawler = $this->client->followRedirect();
+        $this->assertEquals($url, $crawler->getUri());
     }
 }
