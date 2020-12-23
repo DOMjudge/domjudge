@@ -1178,8 +1178,10 @@ class JudgehostController extends AbstractFOSRestController
                     $judgings = $this->em->createQueryBuilder()
                         ->from(Judging::class, 'j')
                         ->leftJoin('j.submission', 's')
-                        ->select('j', 's')
-                        ->andWhere('j.rejudgingid = :rejudgingid')
+                        ->leftJoin('s.rejudging', 'r')
+                        ->leftJoin('s.team', 't')
+                        ->select('j', 's', 'r', 't')
+                        ->andWhere('j.rejudging = :rejudgingid')
                         ->setParameter('rejudgingid', $rejudging->getRejudgingid())
                         ->getQuery()
                         ->getResult(Query::HYDRATE_ARRAY);

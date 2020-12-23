@@ -477,7 +477,9 @@ class RejudgingController extends BaseController
             $queryBuilder = $this->em->createQueryBuilder()
                 ->from(Judging::class, 'j')
                 ->leftJoin('j.submission', 's')
-                ->select('j', 's')
+                ->leftJoin('s.rejudging', 'r')
+                ->leftJoin('s.team', 't')
+                ->select('j', 's', 'r', 't')
                 ->andWhere('j.valid = 1');
 
             $contests = $formData['contests'];
@@ -623,7 +625,9 @@ class RejudgingController extends BaseController
         $queryBuilder = $this->em->createQueryBuilder()
             ->from(Judging::class, 'j')
             ->leftJoin('j.submission', 's')
-            ->select('j', 's')
+            ->leftJoin('s.rejudging', 'r')
+            ->leftJoin('s.team', 't')
+            ->select('j', 's', 'r', 't')
             ->andWhere('j.contest IN (:contests)')
             ->andWhere('j.valid = 1')
             ->andWhere(sprintf('%s = :id', $tablemap[$table]))
@@ -693,8 +697,8 @@ class RejudgingController extends BaseController
                 'already part of rejudging <a href="%s">r%d</a>.',
                 $this->generateUrl('jury_submission', ['submitId' => $submission['submitid']]),
                 $submission['submitid'],
-                $this->generateUrl('jury_rejudging', ['rejudgingId' => $submission['rejudgingid']]),
-                $submission['rejudgingid']
+                $this->generateUrl('jury_rejudging', ['rejudgingId' => $submission['rejudging']['rejudgingid']]),
+                $submission['rejudging']['rejudgingid']
             );
             $this->addFlash('danger', $msg);
         }
