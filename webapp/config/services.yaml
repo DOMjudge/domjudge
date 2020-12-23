@@ -51,7 +51,7 @@ services:
         class: App\FosRestBundle\ExceptionController
         arguments:
             - '@fos_rest.view_handler'
-            - '@fos_rest.exception.codes_map'
+            - '@fos_rest.exception.messages_map'
             - '%kernel.debug%'
 
     Metadata\MetadataFactoryInterface: '@jms_serializer.metadata_factory'

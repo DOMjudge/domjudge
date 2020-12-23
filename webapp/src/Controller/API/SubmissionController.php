@@ -115,7 +115,7 @@ class SubmissionController extends AbstractRestController
      * @return int
      * @Rest\Post("")
      * @SWG\Post(consumes={"multipart/form-data"})
-     * @IsGranted("ROLE_TEAM")
+     * @IsGranted("ROLE_TEAM", message="You need to have the Team Member role to add a submission")
      * @SWG\Parameter(
      *     name="problem",
      *     in="formData",
