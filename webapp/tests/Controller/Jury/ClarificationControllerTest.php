@@ -13,18 +13,9 @@ class ClarificationControllerTest extends BaseTest
      */
     public function testClarificationRequestIndex()
     {
-        $this->logIn();
-        $crawler = $this->client->request('GET', '/jury');
-
-        $response = $this->client->getResponse();
-        $message  = var_export($response, true);
-        $this->assertEquals(200, $response->getStatusCode(), $message);
-
-        $link    = $crawler->selectLink('Clarifications')->link();
-        $message = var_export($link, true);
-        $this->assertEquals('http://localhost/jury/clarifications',
-            $link->getUri(), $message);
-
+        $this->verifyPageResponse('GET', '/jury', 200);
+        $link = $this->verifyLink('Clarifications',
+            'http://localhost/jury/clarifications');
         $crawler = $this->client->click($link);
 
         $h3s = $crawler->filter('h3')->extract(array('_text'));
@@ -41,23 +32,16 @@ class ClarificationControllerTest extends BaseTest
      */
     public function testClarificationRequestView()
     {
-        $this->logIn();
-        $crawler = $this->client->request('GET', '/jury/clarifications/1');
+        $this->verifyPageResponse('GET', '/jury/clarifications/1', 200);
 
-        $response = $this->client->getResponse();
-        $message  = var_export($response, true);
-        $this->assertEquals(200, $response->getStatusCode(), $message);
-
-        $pres = $crawler->filter('pre')->extract(array('_text'));
+        $pres = $this->getCurrentCrawler()->filter('pre')->extract(array('_text'));
         $this->assertEquals('Can you tell me how to solve this problem?',
             $pres[0]);
         $this->assertEquals("> Can you tell me how to solve this problem?\r\n\r\nNo, read the problem statement.",
             $pres[1]);
 
-        $link    = $crawler->selectLink('Example teamname (t2)')->link();
-        $message = var_export($link, true);
-        $this->assertEquals('http://localhost/jury/teams/2', $link->getUri(),
-            $message);
+        $this->verifyLink('Example teamname (t2)',
+            'http://localhost/jury/teams/2');
     }
 
     /**
@@ -65,13 +49,9 @@ class ClarificationControllerTest extends BaseTest
      */
     public function testClarificationRequestComposeForm()
     {
-        $this->logIn();
-        $crawler = $this->client->request('GET', '/jury/clarifications');
-
-        $link    = $crawler->selectLink('Send clarification')->link();
-        $message = var_export($link, true);
-        $this->assertEquals('http://localhost/jury/clarifications/send',
-            $link->getUri(), $message);
+        $this->verifyPageResponse('GET', '/jury/clarifications', 200);
+        $link = $this->verifyLink('Send clarification',
+            'http://localhost/jury/clarifications/send');
 
         $crawler = $this->client->click($link);
 
@@ -97,7 +77,9 @@ class ClarificationControllerTest extends BaseTest
         $this->client->followRedirect();
 
         $this->assertSelectorTextContains('div.col-sm strong', 'All');
-        $this->assertSelectorTextContains('span.clarification-subject', 'demo - Technical issue');
-        $this->assertSelectorTextContains('pre.output-text', 'This is a clarification');
+        $this->assertSelectorTextContains('span.clarification-subject',
+            'demo - Technical issue');
+        $this->assertSelectorTextContains('pre.output-text',
+            'This is a clarification');
     }
 }

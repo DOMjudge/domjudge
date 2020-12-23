@@ -50,8 +50,6 @@ class ProblemControllerTest extends BaseTest
                 $problems,
                 $withLimits
             ) {
-                $this->logIn();
-
                 $crawler = $this->client->request('GET', '/team/problems');
 
                 // Check that the correct menu item is selected

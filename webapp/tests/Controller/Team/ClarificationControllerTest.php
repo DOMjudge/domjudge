@@ -14,17 +14,9 @@ class ClarificationControllerTest extends BaseTest
      */
     public function testClarificationRequest()
     {
-        $this->logIn();
-        $crawler = $this->client->request('GET', '/team');
+        $this->verifyPageResponse('GET', '/team', 200);
 
-        $response = $this->client->getResponse();
-        $message = var_export($response, true);
-        $this->assertEquals(200, $response->getStatusCode(), $message);
-
-        $link = $crawler->selectLink('request clarification')->link();
-        $message = var_export($link, true);
-        $this->assertEquals('http://localhost/team/clarifications/add', $link->getUri(), $message);
-
+        $link = $this->verifyLink('request clarification', 'http://localhost/team/clarifications/add');
         $this->client->click($link);
 
         $this->client->submitForm('Send', [
@@ -32,9 +24,7 @@ class ClarificationControllerTest extends BaseTest
             'team_clarification[message]' => "I don't understand this problem",
         ]);
 
-        $crawler = $this->client->followRedirect();
-
-        $this->assertEquals('http://localhost/team', $crawler->getUri());
+        $this->verifyRedirect('http://localhost/team');
 
         // Now check if we actually have this clarification
         $this->assertSelectorExists('html:contains("problem boolfind")');

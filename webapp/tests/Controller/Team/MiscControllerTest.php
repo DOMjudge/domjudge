@@ -18,13 +18,10 @@ class MiscControllerTest extends BaseTest
      */
     public function testTeamRedirectToLogin()
     {
-        $this->client->request('GET', '/team');
+        // Log out, we are testing public functionality
+        $this->logOut();
 
-        $response = $this->client->getResponse();
-        $message  = var_export($response, true);
-        $this->assertEquals(302, $response->getStatusCode(), $message);
-        $this->assertEquals('http://localhost/login', $response->getTargetUrl(),
-            $message);
+        $this->verifyPageResponse('GET', '/team', 302, 'http://localhost/login');
     }
 
     /**
@@ -32,7 +29,10 @@ class MiscControllerTest extends BaseTest
      */
     public function testLogin()
     {
-        // Make sure the suer has the correct permissions
+        // Log out, we are testing log in functionality
+        $this->logOut();
+
+        // Make sure the user has the correct permissions
         $this->setupUser();
 
         // test incorrect and correct password
@@ -50,20 +50,11 @@ class MiscControllerTest extends BaseTest
      */
     public function testTeamOverviewPage(bool $ajax)
     {
-        $this->logIn();
-        if ($ajax) {
-            $crawler = $this->client->xmlHttpRequest('GET', '/team');
-        } else {
-            $crawler = $this->client->request('GET', '/team');
-        }
-
-        $response = $this->client->getResponse();
-        $message  = var_export($response, true);
-        $this->assertEquals(200, $response->getStatusCode(), $message);
+        $this->verifyPageResponse('GET', '/team', 200, null, $ajax);
 
         $this->assertSelectorExists('html:contains("Example teamname")');
 
-        $h1s = $crawler->filter('h1')->extract(array('_text'));
+        $h1s = $this->getCurrentCrawler()->filter('h1')->extract(array('_text'));
         $this->assertEquals('Submissions', $h1s[0]);
         $this->assertEquals('Clarifications', $h1s[1]);
         $this->assertEquals('Clarification Requests', $h1s[2]);
@@ -80,12 +71,7 @@ class MiscControllerTest extends BaseTest
      */
     public function testPrintingDisabledTeamMenu()
     {
-        $this->logIn();
-        $this->client->request('GET', '/team');
-
-        $response = $this->client->getResponse();
-        $message  = var_export($response, true);
-        $this->assertEquals(200, $response->getStatusCode(), $message);
+        $this->verifyPageResponse('GET', '/team', 200);
         $this->assertSelectorNotExists('a:contains("Print")');
     }
 
@@ -95,12 +81,7 @@ class MiscControllerTest extends BaseTest
      */
     public function testPrintingDisabledAccessDenied()
     {
-        $this->logIn();
-        $this->client->request('GET', '/team/print');
-
-        $response = $this->client->getResponse();
-        $message  = var_export($response, true);
-        $this->assertEquals(403, $response->getStatusCode(), $message);
+        $this->verifyPageResponse('GET', '/team/print', 403);
     }
 
     /**
@@ -110,12 +91,7 @@ class MiscControllerTest extends BaseTest
     {
         $this->withChangedConfiguration('print_command', static::PRINT_COMMAND,
             function () {
-                $this->logIn();
-                $this->client->request('GET', '/team');
-
-                $response = $this->client->getResponse();
-                $message  = var_export($response, true);
-                $this->assertEquals(200, $response->getStatusCode(), $message);
+                $this->verifyPageResponse('GET', '/team', 200);
                 $this->assertSelectorExists('a:contains("Print")');
             });
     }
@@ -127,7 +103,6 @@ class MiscControllerTest extends BaseTest
     {
         $this->withChangedConfiguration('print_command', static::PRINT_COMMAND,
             function () {
-                $this->logIn();
                 $this->client->request('GET', '/team/print');
 
                 $testFile = __DIR__ . '/MiscControllerTest.php';
@@ -189,7 +164,7 @@ class MiscControllerTest extends BaseTest
 
             $this->client->click($link);
         } else {
-            // Make sure to clar the history so we do not have a referrer
+            // Make sure to clear the history so we do not have a referrer
             $this->client->getHistory()->clear();;
             $this->client->request('GET', '/team/change-contest/' . $contest->getCid());
         }
