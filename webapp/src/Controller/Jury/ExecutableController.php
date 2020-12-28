@@ -438,10 +438,10 @@ class ExecutableController extends BaseController
 
                 /** @var ExecutableFile $executableFile */
                 $executableFile = new ExecutableFile();
-                // TODO: handle permissions correctly
                 $executableFile
                     ->setRank($idx)
                     ->setImmutableExecutable($immutableExecutable)
+                    ->setIsExecutable($editorData['executableBits'][$idx])
                     ->setFilename($filename)
                     ->setFileContent($newContent);
                 $this->em->persist($executableFile);
@@ -474,6 +474,7 @@ class ExecutableController extends BaseController
         $file_contents = [];
         $aceFilenames  = [];
         $skippedBinary = [];
+        $executableBits = [];
         foreach ($immutable_executable->getFiles() as $file) {
             /** @var ExecutableFile $file */
             $filename = $file->getFilename();
@@ -484,6 +485,7 @@ class ExecutableController extends BaseController
             }
             $filenames[] = $filename;
             $file_contents[] = $content;
+            $executableBits[] = $file->isExecutable();
 
             if (strpos($filename, '.') !== false) {
                 $aceFilenames[] = $filename;
@@ -498,13 +500,13 @@ class ExecutableController extends BaseController
             }
         }
 
-        // TODO: do we want to display the executable bit?
         return [
             'executable' => $executable,
             'skippedBinary' => $skippedBinary,
             'filenames' => $filenames,
             'aceFilenames' => $aceFilenames,
             'files' => $file_contents,
+            'executableBits' => $executableBits,
         ];
     }
 }
