@@ -2,6 +2,7 @@
 
 namespace App\Controller\API;
 
+use App\Doctrine\DBAL\Types\JudgeTaskType;
 use App\Entity\Contest;
 use App\Entity\Executable;
 use App\Entity\ExecutableFile;
@@ -891,13 +892,8 @@ class JudgehostController extends AbstractFOSRestController
      *                 @OA\Schema(type="string")
      *             ),
      *             @OA\Property(
-     *                 property="cid",
-     *                 description="The contest ID associated with this internal error",
-     *                 @OA\Schema(type="integer")
-     *             ),
-     *             @OA\Property(
-     *                 property="judgingid",
-     *                 description="The ID of the judging that was being worked on",
+     *                 property="judgetaskid",
+     *                 description="The ID of the judgeTask that was being worked on",
      *                 @OA\Schema(type="integer")
      *             )
      *         )
@@ -920,12 +916,22 @@ class JudgehostController extends AbstractFOSRestController
         $judgehostlog = $request->request->get('judgehostlog');
         $disabled     = $request->request->get('disabled');
 
-        // Both cid and judgingid are allowed to be NULL.
-        $cid       = $request->request->get('cid');
-        $judgingId = $request->request->get('judgingid');
+        // The judgetaskid is allowed to be NULL.
+        $judgeTaskId = $request->request->get('judgetaskid');
+        $judging = NULL;
+        if ($judgeTaskId) {
+            /** @var JudgeTask $judgeTask */
+            $judgeTask = $this->em->getRepository(JudgeTask::class)->findOneBy(['judgetaskid' => $judgeTaskId]);
+            if ($judgeTask->getType() == JudgeTaskType::JUDGING_RUN) {
+                $judgingId = $judgeTask->getJobId();
+                /** @var Judging $judging */
+                $judging = $this->em->getRepository(Judging::class)->findOneBy(['judgingid' => $judgingId]);
+                $cid = $judging->getContest()->getCid();
+            }
+        }
 
-        // Group together duplicate internal errors
-        // Note that it may be good to be able to ignore fields here, e.g. judgingid with compile errors
+        // Group together duplicate internal errors.
+        // Note that it may be good to be able to ignore fields here, e.g. judgingid with compile errors.
         $queryBuilder = $this->em->createQueryBuilder()
             ->from(InternalError::class, 'e')
             ->select('e')
@@ -954,7 +960,7 @@ class JudgehostController extends AbstractFOSRestController
         $error = $queryBuilder->getQuery()->getOneOrNullResult();
 
         if ($error) {
-            // FIXME: in some cases it makes sense to extend the known information, e.g. the judgehostlog
+            // FIXME: in some cases it makes sense to extend the known information, e.g. the judgehostlog.
             return $error->getErrorid();
         }
 
@@ -975,7 +981,7 @@ class JudgehostController extends AbstractFOSRestController
         $this->dj->setInternalError($disabled, $contest, false);
 
         if (in_array($disabled['kind'], ['problem', 'language', 'judgehost']) && $judgingId) {
-            // give back judging if we have to
+            // Give back judging if we have to.
             $this->giveBackJudging((int)$judgingId);
         }
 
