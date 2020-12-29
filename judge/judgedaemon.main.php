@@ -773,7 +773,7 @@ function registerJudgehost($myhost)
     }
 }
 
-function disable(string $kind, string $idcolumn, $id, string $description, int $judgingid, string $cid, $extra_log = null)
+function disable(string $kind, string $idcolumn, $id, string $description, int $judgeTaskId, $extra_log = null)
 {
     $disabled = dj_json_encode(array(
         'kind' => $kind,
@@ -788,8 +788,7 @@ function disable(string $kind, string $idcolumn, $id, string $description, int $
     $error_id = request(
         'judgehosts/internal-error',
         'POST',
-        'judgingid=' . urlencode((string)$judgingid) .
-        '&cid=' . urlencode($cid) .
+        'judgetaskid=' . urlencode((string)$judgeTaskId) .
         '&description=' . urlencode($description) .
         '&judgehostlog=' . urlencode(base64_encode($judgehostlog)) .
         '&disabled=' . urlencode($disabled)
@@ -910,20 +909,15 @@ function compile(array $judgeTask, string $workdir, string $workdirpath, array $
         error("No submission files could be downloaded.");
     }
 
-    // if (empty($row['compile_script'])) {
-    //     error("No compile script specified for language " . $row['langid'] . ".");
-    // }
-
     list($execrunpath, $error) = fetch_executable(
         $workdirpath,
         'compile',
         $judgeTask['compile_script_id']
     );
     if (isset($error)) {
-        logmsg(LOG_ERR, "fetching executable failed for compile script '" . $judgeTask['compile_script_id'] . "': " . $error);
+        logmsg(LOG_ERR, "Fetching executable failed for compile script '" . $judgeTask['compile_script_id'] . "': " . $error);
         $description = $judgeTask['compile_script_id'] . ': fetch, compile, or deploy of compile script failed.';
-        // TODO: We need to change internal error to "disable the compile script" instead.
-        // disable('language', 'langid', $row['langid'], $description, $row['judgingid'], (string)$row['cid']);
+        disable('compile_script', 'compile_script_id', $judgeTask['compile_script_id'], $description, $judgeTask['judgetaskid']);
         return false;
     }
 

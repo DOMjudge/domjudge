@@ -7,6 +7,7 @@ use App\Entity\Balloon;
 use App\Entity\Clarification;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
+use App\Entity\Executable;
 use App\Entity\ExecutableFile;
 use App\Entity\ImmutableExecutable;
 use App\Entity\InternalError;
@@ -512,7 +513,7 @@ class DOMJudgeService
     }
 
     /**
-     * Dis- or re-enable what caused an internal error
+     * Dis- or re-enable what caused an internal error.
      * @param array        $disabled
      * @param Contest|null $contest
      * @param bool|null    $enabled
@@ -551,6 +552,16 @@ class DOMJudgeService
                     ->setParameter(':langid', $disabled['langid'])
                     ->getQuery()
                     ->execute();
+                break;
+            case 'compile_script':
+                /** @var Executable $executable */
+                $executable = $this->em->getRepository(Executable::class)
+                    ->findOneBy(['immutableExecutable' => $disabled['compile_script_id']]);
+                foreach ($executable->getLanguages() as $language) {
+                    /** @var Language $language */
+                    $language->setAllowJudge($enabled);
+                }
+                $this->em->flush();
                 break;
             default:
                 throw new HttpException(500, sprintf("unknown internal error kind '%s'", $disabled['kind']));
