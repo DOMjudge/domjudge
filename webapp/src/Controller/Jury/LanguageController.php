@@ -3,7 +3,11 @@
 namespace App\Controller\Jury;
 
 use App\Controller\BaseController;
+use App\Entity\ContestProblem;
+use App\Entity\JudgeTask;
+use App\Entity\Judging;
 use App\Entity\Language;
+use App\Entity\Problem;
 use App\Entity\Submission;
 use App\Form\Type\LanguageType;
 use App\Service\ConfigurationService;
@@ -11,6 +15,7 @@ use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\SubmissionService;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Query\Expr\Join;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\Asset\Packages;
 use Symfony\Component\HttpFoundation\Request;
@@ -273,8 +278,13 @@ class LanguageController extends BaseController
             throw new NotFoundHttpException(sprintf('Language with ID %s not found', $langId));
         }
 
-        $language->setAllowJudge($request->request->getBoolean('allow_judge'));
+        $enabled = $request->request->getBoolean('allow_judge');
+        $language->setAllowJudge($enabled);
         $this->em->flush();
+
+        if ($enabled) {
+            $this->dj->unblockJudgeTasks($langId);
+        }
 
         $this->dj->auditlog('language', $langId, 'set allow judge',
                                          $request->request->getBoolean('allow_judge'));
@@ -302,12 +312,15 @@ class LanguageController extends BaseController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Normalize extensions
+            // Normalize extensions.
             if ($language->getExtensions()) {
                 $language->setExtensions(array_values($language->getExtensions()));
             }
             $this->saveEntity($this->em, $this->eventLogService, $this->dj, $language,
                               $language->getLangid(), false);
+            if ($language->getAllowJudge()) {
+                $this->dj->unblockJudgeTasks($langId);
+            }
             return $this->redirect($this->generateUrl(
                 'jury_language',
                 ['langId' => $language->getLangid()]
@@ -341,4 +354,6 @@ class LanguageController extends BaseController
             $language, $language->getName(), $this->generateUrl('jury_languages')
         );
     }
+
+
 }

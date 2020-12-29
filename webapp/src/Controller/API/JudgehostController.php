@@ -964,6 +964,7 @@ class JudgehostController extends AbstractFOSRestController
             return $error->getErrorid();
         }
 
+        // TODO: Potentially disable other judgings.
         $error = new InternalError();
         $error
             ->setJudging($judgingId ? $this->em->getReference(Judging::class, $judgingId) : null)

@@ -579,78 +579,7 @@ class SubmissionService
         // data at once?
         $this->em->flush();
 
-        foreach ($problem->getProblem()->getTestcases() as $testcase) {
-            $memoryLimit = $problem->getProblem()->getMemlimit();
-            $outputLimit = $problem->getProblem()->getOutputlimit();
-            if (empty($memoryLimit)) {
-                $memoryLimit = $this->config->get('memory_limit');
-            }
-            if (empty($outputLimit)) {
-                $outputLimit = $this->config->get('output_limit');
-            }
-            /** @var Testcase $testcase */
-            $judgeTask = new JudgeTask();
-            $judgeTask
-                ->setType(JudgeTaskType::JUDGING_RUN)
-                ->setSubmitid($submission->getSubmitid())
-                // TODO: Use constants for priorities.
-                ->setPriority(0)
-                ->setJobId($judging->getJudgingid())
-                ->setTestcaseId($testcase->getTestcaseid())
-                ->setCompileScriptId(
-                    $submission
-                        ->getLanguage()
-                        ->getCompileExecutable()
-                        ->getImmutableExecutable()
-                        ->getImmutableExecId()
-                )
-                ->setCompareScriptId($this->getImmutableCompareExecutable($problem))
-                ->setRunScriptId($this->getImmutableRunExecutable($problem))
-                // TODO: store this in the database as well instead of recomputing it here over and over again, doing
-                // this will also help to make the whole data immutable.
-                ->setCompileConfig(
-                    json_encode(
-                        [
-                            'script_timelimit' => $this->config->get('script_timelimit'),
-                            'script_memory_limit' => $this->config->get('script_memory_limit'),
-                            'script_filesize_limit' => $this->config->get('script_filesize_limit'),
-                            'language_extensions' => $submission->getLanguage()->getExtensions(),
-                            'filter_compiler_files' => $submission->getLanguage()->getFilterCompilerFiles(),
-                        ]
-                    )
-                )
-                ->setRunConfig(
-                    json_encode(
-                        [
-                            'time_limit' => $problem->getProblem()->getTimelimit(),
-                            'memory_limit' => $memoryLimit,
-                            'output_limit' => $outputLimit,
-                            'process_limit' => $this->config->get('process_limit'),
-                            'entry_point' => $submission->getEntryPoint(),
-                        ]
-                    )
-                )
-                ->setCompareConfig(
-                    json_encode(
-                       [
-                           'script_timelimit' => $this->config->get('script_timelimit'),
-                           'script_memory_limit' => $this->config->get('script_memory_limit'),
-                           'script_filesize_limit' => $this->config->get('script_filesize_limit'),
-                           'compare_args' => $problem->getProblem()->getSpecialCompareArgs(),
-                           'combined_run_compare' => $problem->getProblem()->getCombinedRunCompare(),
-                       ]
-                    )
-                )
-            ;
-            $this->em->persist($judgeTask);
-
-            $judgingRun = new JudgingRun();
-            $judgingRun
-                ->setJudging($judging)
-                ->setTestcase($testcase)
-                ->setJudgeTask($judgeTask);
-            $this->em->persist($judgingRun);
-        }
+        $this->dj->maybeCreateJudgeTasks($judging);
 
         $this->em->transactional(function () use ($contest, $submission) {
             $this->em->flush();
@@ -809,37 +738,5 @@ class SubmissionService
         $response->headers->set('Accept-Ranges', 'bytes');
 
         return $response;
-    }
-
-    private function getImmutableCompareExecutable(ContestProblem $problem): int
-    {
-        /** @var Executable $executable */
-        $executable = $problem
-            ->getProblem()
-            ->getCompareExecutable();
-        if ($executable === null) {
-            $executable = $this->em
-                ->getRepository(Executable::class)
-                ->findOneBy(['execid' => $this->config->get('default_compare')]);
-        }
-        return $executable
-            ->getImmutableExecutable()
-            ->getImmutableExecId();
-    }
-
-    private function getImmutableRunExecutable(ContestProblem $problem): int
-    {
-        /** @var Executable $executable */
-        $executable = $problem
-            ->getProblem()
-            ->getRunExecutable();
-        if ($executable === null) {
-            $executable = $this->em
-                ->getRepository(Executable::class)
-                ->findOneBy(['execid' => $this->config->get('default_run')]);
-        }
-        return $executable
-            ->getImmutableExecutable()
-            ->getImmutableExecId();
     }
 }
