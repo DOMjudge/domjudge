@@ -559,10 +559,10 @@ class DOMJudgeService
                     ->getQuery()
                     ->execute();
                 break;
-            case 'compile_script':
+            case 'executable':
                 /** @var Executable $executable */
                 $executable = $this->em->getRepository(Executable::class)
-                    ->findOneBy(['immutableExecutable' => $disabled['compile_script_id']]);
+                    ->findOneBy(['execid' => $disabled['execid']]);
                 foreach ($executable->getLanguages() as $language) {
                     /** @var Language $language */
                     $language->setAllowJudge($enabled);

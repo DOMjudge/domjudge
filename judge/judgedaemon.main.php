@@ -943,12 +943,13 @@ function compile(array $judgeTask, string $workdir, string $workdirpath, array $
         if (preg_match('/^compile script: /', $internalError)) {
             $internalError = preg_replace('/^compile script: /', '', $internalError);
             $description = "The compile script returned an error: $internalError";
-            // TODO: We need to change internal error to "disable the compile script" instead.
-            // disable('language', 'langid', $row['langid'], $description, $row['judgingid'], (string)$row['cid'], $compile_output);
+            disable('compile_script', 'compile_script_id', $judgeTask['compile_script_id'], $description, $judgeTask['judgetaskid'], $compile_output);
         } else {
             $description = "Running compile.sh caused an error/crash: $internalError";
-            // TODO: We need to change internal error to "disable the compile script" instead.
-            // disable('judgehost', 'hostname', $myhost, $description, $row['judgingid'], (string)$row['cid'], $compile_output);
+            // Note we are disabling the judgehost in this case since it's
+            // likely an error intrinsic to this judgehost's setup, e.g.
+            // missing cgroups.
+            disable('judgehost', 'hostname', $myhost, $description, $judgeTask['judgetaskid'], $compile_output);
         }
         logmsg(LOG_ERR, $description);
 
@@ -960,9 +961,7 @@ function compile(array $judgeTask, string $workdir, string $workdirpath, array $
     if (! isset($EXITCODES[$retval])) {
         alert('error');
         logmsg(LOG_ERR, "Unknown exitcode from compile.sh for s$judgeTask[submitid]: $retval");
-        // $description = "compile script '" . $row['compile_script'] . "' returned exit code " . $retval;
-        // TODO: We need to change internal error to "disable the compile script" instead.
-        // disable('language', 'langid', $row['langid'], $description, $row['judgingid'], (string)$row['cid'], $compile_output);
+        disable('compile_script', 'compile_script_id', $judgeTask['compile_script_id'], $description, $judgeTask['judgetaskid'], $compile_output);
 
         return false;
     }
