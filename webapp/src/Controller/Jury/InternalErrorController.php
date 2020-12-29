@@ -5,6 +5,7 @@ namespace App\Controller\Jury;
 use App\Controller\BaseController;
 use App\Doctrine\DBAL\Types\InternalErrorStatusType;
 use App\Entity\ContestProblem;
+use App\Entity\Executable;
 use App\Entity\InternalError;
 use App\Entity\Problem;
 use App\Service\DOMJudgeService;
@@ -119,6 +120,10 @@ class InternalErrorController extends BaseController
             case 'language':
                 $affectedLink = $this->generateUrl('jury_language', ['langId' => $disabled['langid']]);
                 $affectedText = $disabled['langid'];
+                break;
+            case 'executable':
+                $affectedLink = $this->generateUrl('jury_executable', ['execId' => $disabled['execid']]);
+                $affectedText = $disabled['execid'];
                 break;
         }
 
