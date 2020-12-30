@@ -50,7 +50,7 @@ class ConfigurationServiceTest extends KernelTestCase
     /**
      * @inheritDoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         self::bootKernel();
 
@@ -77,7 +77,7 @@ class ConfigurationServiceTest extends KernelTestCase
     /**
      * @inheritDoc
      */
-    protected function tearDown()
+    protected function tearDown(): void
     {
         $this->em     = null;
         $this->logger = null;

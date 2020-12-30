@@ -81,7 +81,7 @@ class ScoreboardIntegrationTest extends KernelTestCase
      */
     private $teams;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         self::bootKernel();
 
@@ -170,7 +170,7 @@ class ScoreboardIntegrationTest extends KernelTestCase
         $this->em->flush();
     }
 
-    protected function tearDown()
+    protected function tearDown(): void
     {
         // Preserve the data for inspection if a test failed.
         if ( !$this->hasFailed() ) {

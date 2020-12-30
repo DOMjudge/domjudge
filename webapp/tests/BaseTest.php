@@ -34,7 +34,7 @@ abstract class BaseTest extends WebTestCase
     /**
      * @inheritDoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         // Reset the kernel to make sure we have a clean slate
         self::ensureKernelShutdown();
@@ -51,7 +51,7 @@ abstract class BaseTest extends WebTestCase
     /**
      * @inheritDoc
      */
-    protected function tearDown()
+    protected function tearDown(): void
     {
         // Clear all configuration options still stored in the database
         $em          = self::$container->get(EntityManagerInterface::class);
