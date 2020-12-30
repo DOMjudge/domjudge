@@ -124,6 +124,9 @@ do
         urlpath=$(sed "s/$prefix//g"<<<$file)
         # Small risk of collision
         storepath=$(sed "s/\//_s_/g"<<<$urlpath)
+	# Sometimes not all images load, (See https://bugzilla.mozilla.org/show_bug.cgi?id=1412061)
+	# We first run the request to have a local cache of the page by disregarding the output
+	firefox -screenshot /dev/null http://localhost/$url/$urlpath
         firefox -screenshot $STORAGEDIR/$storepath-ff.png http://localhost/$url/$urlpath
     done
 done
