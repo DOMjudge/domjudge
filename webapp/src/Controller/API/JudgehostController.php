@@ -965,18 +965,18 @@ class JudgehostController extends AbstractFOSRestController
         }
 
         $disabled = $this->dj->jsonDecode($disabled);
-        if ($disabled['kind'] == 'compile_script') {
-            // Since that is the immutable executable, we need to map it to the mutable one first to make linking and
+        if (in_array($disabled['kind'], array('compile_script', 'compare_script', 'run_script'))) {
+            // Since these are the immutable executables, we need to map it to the mutable one first to make linking and
             // re-enabling possible.
-            $disabled['kind'] = 'executable';
             /** @var Executable $executable */
             $executable = $this->em->getRepository(Executable::class)
-                ->findOneBy(['immutableExecutable' => $disabled['compile_script_id']]);
+                ->findOneBy(['immutableExecutable' => $disabled[$disabled['kind'] . '_id']]);
             if (!$executable) {
                 // Race condition where the user changed the executable (hopefully for the better). Ignore.
                 return;
             }
             $disabled['execid'] = $executable->getExecid();
+            $disabled['kind'] = 'executable';
         }
 
         // TODO: Potentially disable other judgings.
