@@ -567,11 +567,29 @@ class DOMJudgeService
                     /** @var Language $language */
                     $language->setAllowJudge($enabled);
                 }
+                foreach (
+                    array_merge($executable->getProblemsCompare()->toArray(),
+                        $executable->getProblemsRun()->toArray()) as $problem) {
+                    /** @var Problem $problem */
+                    foreach ($problem->getContestProblems() as $contestProblem) {
+                        /** @var ContestProblem $contestProblem */
+                        $contestProblem->setAllowJudge($enabled);
+                    }
+                    $contestProblem->setAllowJudge($enabled);
+                }
                 $this->em->flush();
-                foreach ($executable->getLanguages() as $language) {
-                    /** @var Language $language */
-                    if ($language->getAllowJudge()) {
-                        $this->unblockJudgeTasks($language->getLangid());
+                if ($enabled) {
+                    foreach ($executable->getLanguages() as $language) {
+                        /** @var Language $language */
+                        if ($language->getAllowJudge()) {
+                            $this->unblockJudgeTasksForLanguage($language->getLangid());
+                        }
+                    }
+                    foreach (
+                        array_merge($executable->getProblemsCompare()->toArray(),
+                            $executable->getProblemsRun()->toArray()) as $problem) {
+                        /** @var Problem $problem */
+                        $this->unblockJudgeTasksForProblem($problem->getProbid());
                     }
                 }
                 break;
@@ -897,7 +915,7 @@ class DOMJudgeService
         return $immutableExecutable;
     }
 
-    public function unblockJudgeTasks(string $langId): void
+    public function unblockJudgeTasksForLanguage(string $langId): void
     {
         // These are all the judgings that don't have associated judgetasks yet. Check whether we unblocked them.
         $judgings = $this->em->createQueryBuilder()
@@ -909,6 +927,25 @@ class DOMJudgeService
             ->where('jt.jobid IS NULL')
             ->andWhere('l.langid = :langid')
             ->setParameter(':langid', $langId)
+            ->getQuery()
+            ->getResult();
+        foreach ($judgings as $judging) {
+            $this->maybeCreateJudgeTasks($judging);
+        }
+    }
+
+    public function unblockJudgeTasksForProblem(int $probId): void
+    {
+        // These are all the judgings that don't have associated judgetasks yet. Check whether we unblocked them.
+        $judgings = $this->em->createQueryBuilder()
+            ->select('j')
+            ->from(Judging::class, 'j')
+            ->leftJoin(JudgeTask::class, 'jt', Join::WITH, 'j.judgingid = jt.jobid')
+            ->join(Submission::class, 's', Join::WITH, 'j.submission = s.submitid')
+            ->join(Problem::class, 'p', Join::WITH, 's.problem = p.probid')
+            ->where('jt.jobid IS NULL')
+            ->andWhere('p.probid = :probid')
+            ->setParameter(':probid', $probId)
             ->getQuery()
             ->getResult();
         foreach ($judgings as $judging) {

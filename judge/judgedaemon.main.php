@@ -1080,9 +1080,8 @@ function judge(array $judgeTask): bool
         $combined_run_compare);
     if (isset($error)) {
         logmsg(LOG_ERR, "fetching executable failed for run script '" . $judgeTask['run_script_id'] . "': " . $error);
-        // TODO
-        // $description = $row['run'] . ': fetch, compile, or deploy of run script failed.';
-        // disable('problem', 'probid', $row['probid'], $description, $row['judgingid'], (string)$row['cid']);
+        $description = $judgeTask['run_script_id'] . ': fetch, compile, or deploy of run script failed.';
+        disable('run_script', 'run_script_id', $judgeTask['run_script_id'], $description, $judgeTask['judgetaskid']);
         return false;
     }
 
@@ -1097,9 +1096,8 @@ function judge(array $judgeTask): bool
             $judgeTask['compare_script_id']);
         if (isset($error)) {
             logmsg(LOG_ERR, "fetching executable failed for compare script '" . $judgeTask['compare_script_id'] . "': " . $error);
-            // TODO
-            // $description = $row['compare'] . ': fetch, compile, or deploy of validation script failed.';
-            // disable('problem', 'probid', $row['probid'], $description, $row['judgingid'], (string)$row['cid']);
+            $description = $row['compare'] . ': fetch, compile, or deploy of validation script failed.';
+            disable('compare_script', 'compare_script_id', $judgeTask['compare_script_id'], $description, $judgeTask['judgetaskid']);
             return false;
         }
     }
@@ -1125,9 +1123,9 @@ function judge(array $judgeTask): bool
     }
 
     if ($result === 'compare-error') {
-        // TODO
-        // logmsg(LOG_ERR, "comparing failed for compare script '" . $row['compare'] . "'");
-        // disable('problem', 'probid', $row['probid'], "compare script '" . $row['compare'] . "' crashed", $row['judgingid'], (string)$row['cid']);
+        logmsg(LOG_ERR, "comparing failed for compare script '" . $judgeTask['compare_script_id'] . "'");
+        $description = 'compare script ' . $judgeTask['compare_script_id'] . ' crashed';
+        disable('compare_script', 'compare_script_id', $judgeTask['compare_script_id'], $description, $judgeTask['judgetaskid']);
         return false;
     }
 
