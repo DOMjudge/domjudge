@@ -567,15 +567,12 @@ class DOMJudgeService
                     /** @var Language $language */
                     $language->setAllowJudge($enabled);
                 }
-                foreach (
-                    array_merge($executable->getProblemsCompare()->toArray(),
-                        $executable->getProblemsRun()->toArray()) as $problem) {
+                foreach ($this->getProblemsForExecutable($executable) as $problem) {
                     /** @var Problem $problem */
                     foreach ($problem->getContestProblems() as $contestProblem) {
                         /** @var ContestProblem $contestProblem */
                         $contestProblem->setAllowJudge($enabled);
                     }
-                    $contestProblem->setAllowJudge($enabled);
                 }
                 $this->em->flush();
                 if ($enabled) {
@@ -585,9 +582,7 @@ class DOMJudgeService
                             $this->unblockJudgeTasksForLanguage($language->getLangid());
                         }
                     }
-                    foreach (
-                        array_merge($executable->getProblemsCompare()->toArray(),
-                            $executable->getProblemsRun()->toArray()) as $problem) {
+                    foreach ($this->getProblemsForExecutable($executable) as $problem) {
                         /** @var Problem $problem */
                         $this->unblockJudgeTasksForProblem($problem->getProbid());
                     }
@@ -1070,5 +1065,19 @@ class DOMJudgeService
         return $executable
             ->getImmutableExecutable()
             ->getImmutableExecId();
+    }
+
+    private function getProblemsForExecutable(Executable $executable) {
+        $ret = array_merge($executable->getProblemsCompare()->toArray(),
+            $executable->getProblemsRun()->toArray());
+
+        foreach (['run', 'compare'] as $type) {
+            if ($executable->getExecid() == $this->config->get('default_' . $type)) {
+                $ret = array_merge($ret, $this->em->getRepository(Problem::class)
+                    ->findBy([$type . '_executable' => null]));
+            }
+        }
+
+        return $ret;
     }
 }
