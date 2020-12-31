@@ -997,8 +997,8 @@ function judge(array $judgeTask): bool
 
     // Set configuration variables for called programs
     putenv('CREATE_WRITABLE_TEMP_DIR=' . (CREATE_WRITABLE_TEMP_DIR ? '1' : ''));
-    // TODO: These three exist both in compile and compare config. Move them out of there or reset them at the right
-    // moment?
+
+    // These are set again below before comparing.
     putenv('SCRIPTTIMELIMIT='          . $compile_config['script_timelimit']);
     putenv('SCRIPTMEMLIMIT='           . $compile_config['script_memory_limit']);
     putenv('SCRIPTFILELIMIT='          . $compile_config['script_filesize_limit']);
@@ -1101,6 +1101,12 @@ function judge(array $judgeTask): bool
             return false;
         }
     }
+
+    // While we already set those above to likely the same values from the
+    // compile config, we do set them again from the compare config here.
+    putenv('SCRIPTTIMELIMIT=' . $compare_config['script_timelimit']);
+    putenv('SCRIPTMEMLIMIT='  . $compare_config['script_memory_limit']);
+    putenv('SCRIPTFILELIMIT=' . $compare_config['script_filesize_limit']);
 
     system(LIBJUDGEDIR . "/testcase_run.sh $cpuset_opt $tcfile[input] $tcfile[output] " .
            "$run_config[time_limit]:$hardtimelimit '$testcasedir' " .
