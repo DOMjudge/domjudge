@@ -17,4 +17,8 @@ cd /opt/domjudge/domserver
 export APP_ENV="test"
 
 # Run phpunit tests.
+apt update
+apt install -y php-pear php-dev
+pecl install pcov
+sed -i 's/;extension=xsl/extension=pcov.so/g' /etc/php/7.4/cli/php.ini
 lib/vendor/bin/phpunit -c webapp/phpunit.xml.dist --log-junit ${CI_PROJECT_DIR}/unit-tests.xml --colors=never
