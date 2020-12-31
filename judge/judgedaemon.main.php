@@ -767,8 +767,8 @@ function registerJudgehost($myhost)
         foreach ($unfinished as $jud) {
             $workdir = judging_directory($workdirpath, $jud);
             @chmod($workdir, 0700);
-            logmsg(LOG_WARNING, "Found unfinished judging j" . $jud['judgingid'] .
-                " in my name; given back");
+            logmsg(LOG_WARNING, "Found unfinished judging with jobid " . $jud['jobid'] .
+                " in my name; given back.");
         }
     }
 }
