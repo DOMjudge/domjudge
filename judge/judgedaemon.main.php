@@ -1048,7 +1048,7 @@ function judge(array $judgeTask): bool
 
     logmsg(LOG_INFO, "  🏃 Running testcase $judgeTask[testcase_id]...");
     $testcasedir = $workdir . "/testcase" . sprintf('%05d', $judgeTask['testcase_id']);
-    $tcfile = fetchTestcase($workdirpath, $judgeTask['testcase_id']);
+    $tcfile = fetchTestcase($workdirpath, $judgeTask['testcase_id'], $judgeTask['judgetaskid']);
     if ($tcfile === NULL) {
         // error while fetching testcase
         return true;
@@ -1173,7 +1173,7 @@ function judge(array $judgeTask): bool
     return true;
 }
 
-function fetchTestcase($workdirpath, $testcase_id): array
+function fetchTestcase($workdirpath, $testcase_id, $judgetaskid): ?array
 {
     // Get both in- and output files, only if we didn't have them already.
     $tcfile = array();
@@ -1195,8 +1195,7 @@ function fetchTestcase($workdirpath, $testcase_id): array
     if ($content === NULL) {
         $error = 'Download of ' . $inout . ' failed for case ' . $testcase_id . ', check your problem integrity.';
         logmsg(LOG_ERR, $error);
-        // TODO
-        // disable('problem', 'probid', $row['probid'], $error, $row['judgingid'], (string)$row['cid']);
+        disable('testcase', 'testcaseid', $testcase_id, $error, $judgetaskid);
         return NULL;
     }
     $files = dj_json_decode($content);

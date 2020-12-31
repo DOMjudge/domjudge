@@ -588,6 +588,21 @@ class DOMJudgeService
                     }
                 }
                 break;
+            case 'testcase':
+                /** @var Testcase $testcase */
+                $testcase = $this->em->getRepository(Testcase::class)
+                    ->findOneBy(['testcaseid' => $disabled['testcaseid']]);
+                /** @var Problem $problem */
+                $problem = $testcase->getProblem();
+                foreach ($problem->getContestProblems() as $contestProblem) {
+                    /** @var ContestProblem $contestProblem */
+                    $contestProblem->setAllowJudge($enabled);
+                }
+                $this->em->flush();
+                if ($enabled) {
+                    $this->unblockJudgeTasksForProblem($problem->getProbid());
+                }
+                break;
             default:
                 throw new HttpException(500, sprintf("unknown internal error kind '%s'", $disabled['kind']));
         }
