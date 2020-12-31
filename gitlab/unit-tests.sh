@@ -21,4 +21,20 @@ apt update
 apt install -y php-pear php-dev
 pecl install pcov
 sed -i 's/;extension=xsl/extension=pcov.so/g' /etc/php/7.4/cli/php.ini
-lib/vendor/bin/phpunit -c webapp/phpunit.xml.dist --log-junit ${CI_PROJECT_DIR}/unit-tests.xml --colors=never
+php -dpcov.enabled=1 -dpcov.directory=webapp/src lib/vendor/bin/simple-phpunit -c webapp/phpunit.xml.dist --log-junit ${CI_PROJECT_DIR}/unit-tests.xml --colors=never --coverage-html=${CI_PROJECT_DIR}/coverage-html 1> phpunit.out
+CNT=$(sed -n '/Generating code coverage report/,$p' phpunit.out | wc -l)
+FILE=deprecation.txt
+sed -n '/Generating code coverage report/,$p' phpunit.out > ${CI_PROJECT_DIR}/$FILE
+if [ $CNT -eq 1 ]; then
+    STATE=success
+else
+    STATE=failure
+fi
+ORIGINAL="gitlab.com/DOMjudge"
+REPLACETO="domjudge.gitlab.io/-"
+# Copied from CCS
+curl https://api.github.com/repos/domjudge/domjudge/statuses/$CI_COMMIT_SHA \
+  -X POST \
+  -H "Authorization: token $GH_BOT_TOKEN_OBSCURED" \
+  -H "Accept: application/vnd.github.v3+json" \
+  -d "{\"state\": \"$STATE\", \"target_url\": \"${CI_JOB_URL/$ORIGINAL/$REPLACETO}/artifacts/$FILE\", \"description\":\"Symfony deprecations\", \"context\": \"Symfony deprecation\"}"
