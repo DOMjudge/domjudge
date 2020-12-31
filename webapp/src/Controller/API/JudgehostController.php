@@ -229,9 +229,8 @@ class JudgehostController extends AbstractFOSRestController
 
         return array_map(function (Judging $judging) {
             return [
-                'judgingid' => $judging->getJudgingid(),
+                'jobid' => $judging->getJudgingid(),
                 'submitid' => $judging->getSubmission()->getSubmitid(),
-                'cid' => $judging->getContest()->getApiId($this->eventLogService),
             ];
         }, $judgings);
     }
