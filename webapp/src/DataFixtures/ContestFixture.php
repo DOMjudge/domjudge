@@ -30,7 +30,7 @@ class ContestFixture extends AbstractExampleDataFixture implements DependentFixt
             ->setStarttimeString(
                 sprintf(
                     '%s-01-01 09:00:00 Europe/Amsterdam',
-                    date('Y')
+                    date('Y') - 1
                 )
             )
             ->setActivatetimeString('-01:00')
@@ -48,7 +48,7 @@ class ContestFixture extends AbstractExampleDataFixture implements DependentFixt
             ->setStarttimeString(
                 sprintf(
                     '%s-01-01 12:00:00 Europe/Amsterdam',
-                    date('Y')
+                    date('Y') -1
                 )
             )
             ->setActivatetimeString('-00:30:00.123')
