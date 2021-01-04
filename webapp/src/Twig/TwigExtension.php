@@ -156,6 +156,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             new TwigFilter('printtimeHover', [$this, 'printtimeHover'], ['is_safe' => ['html']]),
             new TwigFilter('printResult', [$this, 'printResult'], ['is_safe' => ['html']]),
             new TwigFilter('printValidJuryResult', [$this, 'printValidJuryResult'], ['is_safe' => ['html']]),
+            new TwigFilter('printValidJurySubmissionResult', [$this, 'printValidJurySubmissionResult'], ['is_safe' => ['html']]),
             new TwigFilter('printHost', [$this, 'printHost'], ['is_safe' => ['html']]),
             new TwigFilter('printYesNo', [$this, 'printYesNo']),
             new TwigFilter('printSize', [Utils::class, 'printSize'], ['is_safe' => ['html']]),
@@ -553,6 +554,48 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
     public function printValidJuryResult($result): string
     {
         return $this->printResult($result, true, true);
+    }
+
+    /**
+     * Print the given submission for the jury, assuming it is valid
+     */
+    public function printValidJurySubmissionResult(Submission $submission, bool $forDisplay = true): string
+    {
+        /** @var Judging|null $firstJudging */
+        $firstJudging = $submission->getJudgings()->first();
+        $judgingResult = '';
+        if ($firstJudging) {
+            $judgingResult = $forDisplay
+                ? $this->printValidJuryResult($firstJudging->getResult())
+                : $firstJudging->getResult();
+        }
+        $output = $forDisplay ? '' : 'queued';
+        if ($submission->getSubmittime() > $submission->getContest()->getEndtime()) {
+            if ($forDisplay) {
+                $output .= $this->printValidJuryResult('too-late');
+            }
+            if ($firstJudging && $firstJudging->getResult()) {
+                if ($forDisplay) {
+                    $output .= ' (' . $judgingResult . ')';
+                } else {
+                    $output = $judgingResult;
+                }
+            }
+        } elseif (!$firstJudging || !$firstJudging->getResult()) {
+            if ($submission->getJudgehost()) {
+                $output = $forDisplay ? $this->printValidJuryResult('') : 'judging';
+            } else {
+                $output = $forDisplay ? $this->printValidJuryResult('queued') : 'queued';
+            }
+        } else {
+            $output = $judgingResult;
+        }
+
+        if ($forDisplay && $submission->isStillBusy()) {
+            $output .= ' (&hellip;)';
+        }
+
+        return $output;
     }
 
     /**
