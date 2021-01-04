@@ -15,6 +15,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 /**
  * Class AbstractRestController
@@ -105,12 +106,20 @@ abstract class AbstractRestController extends AbstractFOSRestController
 
     /**
      * Render the given data using the correct groups
-     * @param Request $request
-     * @param mixed $data
+     *
+     * @param Request  $request
+     * @param mixed    $data
+     * @param int      $statusCode
+     * @param string[] $headers
+     *
      * @return Response
      */
-    protected function renderData(Request $request, $data): Response
-    {
+    protected function renderData(
+        Request $request,
+        $data,
+        int $statusCode = Response::HTTP_OK,
+        array $headers = []
+    ): Response {
         $view = $this->view($data);
 
         // Set the DOMjudge service on the context, so we can use it for permissions
@@ -123,7 +132,36 @@ abstract class AbstractRestController extends AbstractFOSRestController
         }
         $view->getContext()->setGroups($groups);
 
-        return $this->handleView($view);
+        $response = $this->handleView($view);
+        $response->setStatusCode($statusCode);
+        $response->headers->add($headers);
+        return $response;
+    }
+
+    /**
+     * Render the given create data using the correct groups
+     *
+     * @param Request    $request
+     * @param mixed      $data
+     * @param string     $routeType
+     * @param string|int $id
+     *
+     * @return Response
+     */
+    protected function renderCreateData(
+        Request $request,
+        $data,
+        string $routeType,
+        $id
+    ): Response {
+        $headers = [
+            'Location' => $this->generateUrl("v4_app_api_${routeType}_single", [
+                'cid' => $request->attributes->get('cid'),
+                'id' => $id,
+            ], UrlGeneratorInterface::ABSOLUTE_URL),
+        ];
+        return $this->renderData($request, $data, Response::HTTP_CREATED,
+            $headers);
     }
 
     /**

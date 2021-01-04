@@ -106,7 +106,7 @@ class TeamController extends AbstractRestController
      *     )
      * )
      * @OA\Response(
-     *     response="200",
+     *     response="201",
      *     description="Returns the added team",
      *     @Model(type=Team::class)
      * )
@@ -119,7 +119,12 @@ class TeamController extends AbstractRestController
             throw new BadRequestHttpException("Error while adding team: $message");
         }
 
-        return $this->renderData($request, $saved[0]);
+        $team = $saved[0];
+        $idField = $this->eventLogService->externalIdFieldForEntity(Team::class) ?? 'teamid';
+        $method = sprintf('get%s', ucfirst($idField));
+        $id = call_user_func([$team, $method]);
+
+        return $this->renderCreateData($request, $saved[0], 'team', $id);
     }
 
     /**
