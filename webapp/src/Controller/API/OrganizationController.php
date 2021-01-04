@@ -2,6 +2,7 @@
 
 namespace App\Controller\API;
 
+use App\Entity\Team;
 use App\Entity\TeamAffiliation;
 use App\Service\ImportExportService;
 use Doctrine\ORM\QueryBuilder;
@@ -92,7 +93,7 @@ class OrganizationController extends AbstractRestController
      *     )
      * )
      * @OA\Response(
-     *     response="200",
+     *     response="201",
      *     description="Returns the added organization",
      *     @Model(type=TeamAffiliation::class)
      * )
@@ -105,7 +106,12 @@ class OrganizationController extends AbstractRestController
             throw new BadRequestHttpException("Error while adding organization: $message");
         }
 
-        return $this->renderData($request, $saved[0]);
+        $organization = $saved[0];
+        $idField = $this->eventLogService->externalIdFieldForEntity(TeamAffiliation::class) ?? 'affilid';
+        $method = sprintf('get%s', ucfirst($idField));
+        $id = call_user_func([$organization, $method]);
+
+        return $this->renderCreateData($request, $saved[0], 'organization', $id);
     }
 
     /**

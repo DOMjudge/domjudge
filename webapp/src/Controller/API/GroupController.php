@@ -2,6 +2,7 @@
 
 namespace App\Controller\API;
 
+use App\Entity\TeamAffiliation;
 use App\Entity\TeamCategory;
 use App\Service\ImportExportService;
 use Doctrine\ORM\QueryBuilder;
@@ -92,7 +93,7 @@ class GroupController extends AbstractRestController
      *     )
      * )
      * @OA\Response(
-     *     response="200",
+     *     response="201",
      *     description="Returns the added group",
      *     @Model(type=TeamCategory::class)
      * )
@@ -105,7 +106,10 @@ class GroupController extends AbstractRestController
             throw new BadRequestHttpException("Error while adding group: $message");
         }
 
-        return $this->renderData($request, $saved[0]);
+        $group = $saved[0];
+        $id = $group->getCategoryid();
+
+        return $this->renderCreateData($request, $saved[0], 'group', $id);
     }
 
     /**
