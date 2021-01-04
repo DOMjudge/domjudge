@@ -5,6 +5,9 @@
     "components/jquery": {
         "version": "3.3.1"
     },
+    "composer/package-versions-deprecated": {
+        "version": "1.11.99.1"
+    },
     "datatables/datatables": {
         "version": "1.10.19"
     },
@@ -215,9 +218,6 @@
     },
     "novus/nvd3": {
         "version": "v1.8.6"
-    },
-    "ocramius/package-versions": {
-        "version": "1.4.0"
     },
     "ocramius/proxy-manager": {
         "version": "2.2.2"
