@@ -1016,6 +1016,16 @@ class JudgehostController extends AbstractFOSRestController
                     ->setRejudging(null);
 
                 $judging->getSubmission()->setJudgehost(null);
+
+                // Give back judging, create a new one.
+                $newJudging = new Judging();
+                $newJudging
+                    ->setContest($judging->getContest())
+                    ->setSubmission($judging->getSubmission());
+                $this->em->persist($newJudging);
+                $this->em->flush();
+
+                $this->dj->maybeCreateJudgeTasks($newJudging);
             });
 
             $this->dj->auditlog('judging', $judgingId, 'given back', null,
