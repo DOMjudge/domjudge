@@ -171,7 +171,7 @@ class UtilsTest extends TestCase
             for ($i=0; $i<10000; $i++) {
                 $t = (float)sprintf('%d.%03d', $now - $year + rand(0,2*$year), rand(0,999));
                 $t2 = Utils::toEpochFloat(Utils::absTime($t));
-                $this->assertEquals($t, $t2, "comparing random times in TZ=$tz", 0.0000001);
+                $this->assertEqualsWithDelta($t, $t2, 0.0000001, "comparing random times in TZ=$tz");
             }
         }
 
@@ -504,15 +504,15 @@ class UtilsTest extends TestCase
 
         $diff = Utils::computeLcsDiff($line_a, $line_b);
         $this->assertTrue($diff[0]);
-        $this->assertContains('DOMjudge is a <ins>very</ins> <ins>good</ins> system for running', $diff[1]);
+        $this->assertStringContainsString('DOMjudge is a <ins>very</ins> <ins>good</ins> system for running', $diff[1]);
 
         $diff = Utils::computeLcsDiff($line_b, $line_a);
         $this->assertTrue($diff[0]);
-        $this->assertContains('DOMjudge is a <del>very</del> <del>good</del> system for running', $diff[1]);
+        $this->assertStringContainsString('DOMjudge is a <del>very</del> <del>good</del> system for running', $diff[1]);
 
         $diff = Utils::computeLcsDiff($line_a, $line_c);
         $this->assertTrue($diff[0]);
-        $this->assertContains('DOMjudge is <del>a</del> <del>system</del> for running <ins>some</ins> programming contests', $diff[1]);
+        $this->assertStringContainsString('DOMjudge is <del>a</del> <del>system</del> for running <ins>some</ins> programming contests', $diff[1]);
 
         $diff = Utils::computeLcsDiff($line_a, $line_a);
         $this->assertFalse($diff[0]);
@@ -529,7 +529,7 @@ class UtilsTest extends TestCase
 
         $diff = Utils::computeLcsDiff($line_a, $line_b);
         $this->assertTrue($diff[0]);
-        $this->assertContains('<ins>judging</ins> [cut off rest of line...]', $diff[1]);
+        $this->assertStringContainsString('<ins>judging</ins> [cut off rest of line...]', $diff[1]);
     }
 
     /**
