@@ -141,14 +141,13 @@ class ConfigurationServiceTest extends KernelTestCase
 
     /**
      * @dataProvider provideInvalidItem
-     * @expectedException Exception
-     * @expectedExceptionMessageRegExp /^Configuration variable '.*' not found\.$/
      *
      * @param string $itemName
      * @param bool   $publicOnly
      */
     public function testInvalidItem(string $itemName, bool $publicOnly)
     {
+        $this->expectExceptionMessageRegExp("/^Configuration variable '.*' not found\.$/");
         $this->configRepository->expects($this->never())
             ->method('findAll');
 

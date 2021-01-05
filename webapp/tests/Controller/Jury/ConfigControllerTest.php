@@ -29,8 +29,8 @@ class ConfigControllerTest extends BaseTest
     {
         $this->verifyPageResponse('GET', '/jury/config/check/phpinfo', 200);
         $content = $this->client->getResponse()->getContent();
-        $this->assertContains('This program makes use of the Zend Scripting Language Engine', $content);
-        $this->assertContains('This program is free software', $content);
+        $this->assertStringContainsString('This program makes use of the Zend Scripting Language Engine', $content);
+        $this->assertStringContainsString('This program is free software', $content);
     }
 
     /**
