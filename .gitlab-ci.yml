@@ -132,6 +132,8 @@ run unit tests:
     when: always
     paths:
       - unit-tests.xml
+      - coverage-html
+      - deprecation.txt
     reports:
       junit:
         - unit-tests.xml
