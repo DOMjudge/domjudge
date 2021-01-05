@@ -577,29 +577,39 @@ class JudgehostController extends AbstractFOSRestController
             /** @var Judgehost $judgehost */
             $judgehost = $this->em->getRepository(Judgehost::class)->find($hostname);
 
+            $output_compile = base64_decode($request->request->get('output_compile'));
             if ($request->request->getBoolean('compile_success')) {
-                // Don't overwrite a negative compilation result.
                 if ($judging->getOutputCompile() === null) {
                     $judging
-                        ->setOutputCompile(base64_decode($request->request->get('output_compile')))
+                        ->setOutputCompile($output_compile)
                         ->setJudgehost($judgehost);
                     $this->em->flush();
 
                     $this->eventLogService->log('judging', $judging->getJudgingid(),
                         EventLogService::ACTION_CREATE, $judging->getContest()->getCid());
+                } elseif ($judging->getResult() === Judging::RESULT_COMPILER_ERROR) {
+                    // The new result contradicts a former one, that's not good.
+                    $error = new InternalError();
+                    $error
+                        ->setJudging($judging)
+                        ->setContest($judging->getContest())
+                        ->setDescription('Compilation results are different for j' . $judging->getJudgingid())
+                        ->setJudgehostlog('New compilation output: ' . $output_compile)
+                        ->setTime(Utils::now())
+                        ->setDisabled(null);
+                    $this->em->persist($error);
                 }
-                // TODO: We already got a result, compare and handle this somehow.
             } else {
-                // TODO: Invalidate already created judgetasks.
                 $this->em->transactional(function () use (
                     $request,
                     $judgehost,
                     $judging,
-                    $query
+                    $query,
+                    $output_compile
                 ) {
                     if ($judging->getOutputCompile() === null) {
                         $judging
-                            ->setOutputCompile(base64_decode($request->request->get('output_compile')))
+                            ->setOutputCompile($output_compile)
                             ->setResult(Judging::RESULT_COMPILER_ERROR)
                             ->setJudgehost($judgehost)
                             ->setEndtime(Utils::now());
@@ -622,8 +632,18 @@ class JudgehostController extends AbstractFOSRestController
                             ]
                         );
                         $this->em->flush();
+                    } else if ($judging->getResult() !== Judging::RESULT_COMPILER_ERROR) {
+                        // The new result contradicts a former one, that's not good.
+                        $error = new InternalError();
+                        $error
+                            ->setJudging($judging)
+                            ->setContest($judging->getContest())
+                            ->setDescription('Compilation results are different for j' . $judging->getJudgingid())
+                            ->setJudgehostlog('New compilation output: ' . $output_compile)
+                            ->setTime(Utils::now())
+                            ->setDisabled(null);
+                        $this->em->persist($error);
                     }
-                    // TODO: Handle case where we already have a result.
 
                     $judgingId = $judging->getJudgingid();
                     $contestId = $judging->getSubmission()->getContest()->getCid();
