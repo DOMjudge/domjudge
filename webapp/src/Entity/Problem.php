@@ -170,7 +170,9 @@ class Problem extends BaseApiEntity
 
     /**
      * @ORM\OneToMany(targetEntity="Testcase", mappedBy="problem")
+     * @ORM\OrderBy({"ranknumber" = "ASC"})
      * @Serializer\Exclude()
+     * Note that we order the test cases here by ranknumber to make use of it during judgetask creation.
      */
     private $testcases;
 

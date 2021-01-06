@@ -976,7 +976,7 @@ class DOMJudgeService
             return;
         }
 
-        // TODO: Make sure that we create those in the correct order. We rely later on it.
+        // We rely on the order of the judgetasks; the test cases are ordered in the foreign entity relation.
         foreach ($problem->getProblem()->getTestcases() as $testcase) {
             $memoryLimit = $problem->getProblem()->getMemlimit();
             $outputLimit = $problem->getProblem()->getOutputlimit();
