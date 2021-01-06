@@ -1475,7 +1475,7 @@ class JudgehostController extends AbstractFOSRestController
         /** @var Judgehost $judgehost */
         $judgehost = $this->em->getRepository(Judgehost::class)->find($hostname);
         if (!$judgehost) {
-            return '';
+            throw new BadRequestHttpException('Register yourself first. You are not known to us yet.');
         }
 
         // Update last seen of judgehost
