@@ -976,6 +976,7 @@ class DOMJudgeService
             return;
         }
 
+        // TODO: Make sure that we create those in the correct order. We rely later on it.
         foreach ($problem->getProblem()->getTestcases() as $testcase) {
             $memoryLimit = $problem->getProblem()->getMemlimit();
             $outputLimit = $problem->getProblem()->getOutputlimit();
