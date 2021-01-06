@@ -441,6 +441,7 @@ class SubmissionController extends BaseController
                 ->select('tc.testcaseid')
                 ->andWhere('jr.judging = :judging')
                 ->setParameter(':judging', $selectedJudging)
+                // TODO: haha, endtime is not a good indicator anymore. Fix this.
                 ->orderBy('jr.endtime')
                 ->getQuery()
                 ->getScalarResult();
