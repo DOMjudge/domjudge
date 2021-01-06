@@ -1132,28 +1132,28 @@ class JudgehostController extends AbstractFOSRestController
 
         /** @var JudgingRun[] $runs */
         $runs = $this->em->createQueryBuilder()
-            ->from(JudgingRun::class, 'r')
-            ->join('r.testcase', 't')
-            ->select('r')
-            ->andWhere('r.judging = :judgingid')
-            ->orderBy('t.ranknumber')
+            ->from(JudgeTask::class, 'jt')
+            ->leftJoin(JudgingRun::class, 'jr', Join::WITH, 'jt.testcase_id = jr.testcase AND jr.judging = :judgingid')
+            ->select('jr.runresult')
+            ->andWhere('jt.jobid = :judgingid')
+            ->andWhere('jr.judging = :judgingid')
+            ->andWhere('jt.testcase_id = jr.testcase')
+            ->orderBy('jt.judgetaskid')
             ->setParameter(':judgingid', $judging->getJudgingid())
             ->getQuery()
-            ->getResult();
-
-        $numTestCases = $this->em->createQueryBuilder()
-            ->from(Testcase::class, 't')
-            ->select('COUNT(t.testcaseid)')
-            ->where('t.problem = :probid')
-            ->setParameter(':probid', $testCase->getProblem())
-            ->getQuery()
-            ->getSingleScalarResult();
-
-        $allRuns = array_pad($runs, (int)$numTestCases, null);
+            ->getArrayResult();
+        $runresults = array_column($runs, 'runresult');
+        $hasNullResults = false;
+        foreach ($runresults as $runresult) {
+            if ($runresult === NULL) {
+                $hasNullResults = true;
+                break;
+            }
+        }
 
         $oldResult = $judging->getResult();
 
-        if (($result = $this->submissionService->getFinalResult($allRuns, $resultsPrio)) !== null) {
+        if (($result = $this->submissionService->getFinalResult($runresults, $resultsPrio)) !== null) {
             // Lookup global lazy evaluation of results setting and possible problem specific override.
             $lazyEval    = $this->config->get('lazy_eval_results');
             $problemLazy = $judging->getSubmission()->getContestProblem()->getLazyEvalResults();
@@ -1162,7 +1162,7 @@ class JudgehostController extends AbstractFOSRestController
             }
 
             $judging->setResult($result);
-            if (count($runs) == $numTestCases || $lazyEval) {
+            if (!$hasNullResults || $lazyEval) {
                 // NOTE: setting endtime here determines in testcases_GET
                 // whether a next testcase will be handed out.
                 $judging->setEndtime(Utils::now());
@@ -1232,7 +1232,7 @@ class JudgehostController extends AbstractFOSRestController
         }
 
         // Send an event for an endtime update if not done yet.
-        if ($judging->getValid() && count($runs) == $numTestCases && empty($justFinished)) {
+        if ($judging->getValid() && !$hasNullResults && empty($justFinished)) {
             $this->eventLogService->log('judging', $judging->getJudgingid(),
                                         EventLogService::ACTION_UPDATE, $judging->getContest()->getCid());
         }
