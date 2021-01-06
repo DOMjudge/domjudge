@@ -1177,15 +1177,27 @@ class JudgehostController extends AbstractFOSRestController
                     throw new \BadMethodCallException('internal bug: the evaluated result changed during judging');
                 }
 
-                // Decrease priority of remaining unassigned judging runs.
-                $this->em->getConnection()->executeUpdate(
-                    'UPDATE judgetask SET priority=10'
-                    . ' WHERE jobid=:jobid'
-                    . ' AND hostname IS NULL',
-                    [
-                        ':jobid' => $judgingRun->getJudgingid(),
-                    ]
-                );
+                if ($lazyEval) {
+                    // We don't want to continue on this problem, even if there's spare resources.
+                    $this->em->getConnection()->executeUpdate(
+                        'UPDATE judgetask SET valid=0, priority=10'
+                        . ' WHERE jobid=:jobid'
+                        . ' AND hostname IS NULL',
+                        [
+                            ':jobid' => $judgingRun->getJudgingid(),
+                        ]
+                    );
+                } else {
+                    // Decrease priority of remaining unassigned judging runs.
+                    $this->em->getConnection()->executeUpdate(
+                        'UPDATE judgetask SET priority=10'
+                        . ' WHERE jobid=:jobid'
+                        . ' AND hostname IS NULL',
+                        [
+                            ':jobid' => $judgingRun->getJudgingid(),
+                        ]
+                    );
+                }
 
                 /** @var Submission $submission */
                 $submission = $judging->getSubmission();
