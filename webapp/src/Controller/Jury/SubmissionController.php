@@ -6,6 +6,7 @@ use App\Controller\BaseController;
 use App\Entity\Contest;
 use App\Entity\ExternalJudgement;
 use App\Entity\Judgehost;
+use App\Entity\JudgeTask;
 use App\Entity\Judging;
 use App\Entity\JudgingRun;
 use App\Entity\Language;
@@ -436,13 +437,11 @@ class SubmissionController extends BaseController
                 ->getResult();
 
             $judgingRunTestcaseIdsInOrder = $this->em->createQueryBuilder()
-                ->from(JudgingRun::class, 'jr')
-                ->join('jr.testcase', 'tc')
-                ->select('tc.testcaseid')
-                ->andWhere('jr.judging = :judging')
+                ->from(JudgeTask::class, 'jt')
+                ->select('jt.testcase_id')
+                ->andWhere('jt.jobid = :judging')
                 ->setParameter(':judging', $selectedJudging)
-                // TODO: haha, endtime is not a good indicator anymore. Fix this.
-                ->orderBy('jr.endtime')
+                ->orderBy('jt.judgetaskid')
                 ->getQuery()
                 ->getScalarResult();
 
@@ -451,7 +450,7 @@ class SubmissionController extends BaseController
                 /** @var Testcase $testcase */
                 $testcase = $runResult[0];
                 if (isset($judgingRunTestcaseIdsInOrder[$cnt])) {
-                    if ($testcase->getTestcaseid() != $judgingRunTestcaseIdsInOrder[$cnt]['testcaseid']) {
+                    if ($testcase->getTestcaseid() != $judgingRunTestcaseIdsInOrder[$cnt]['testcase_id']) {
                         $sameTestcaseIds = false;
                     }
                 }
