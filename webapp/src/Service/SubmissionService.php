@@ -569,9 +569,7 @@ class SubmissionService
             ->setContest($contest)
             ->setSubmission($submission);
         $this->em->persist($judging);
-
-        // TODO: This is so that we can use the submitid/judgingid below. Is there another more elegant way to flush all
-        // data at once?
+        // This is so that we can use the submitid/judgingid below.
         $this->em->flush();
 
         $this->dj->maybeCreateJudgeTasks($judging);

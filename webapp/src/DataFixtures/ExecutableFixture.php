@@ -66,7 +66,7 @@ class ExecutableFixture extends AbstractExampleDataFixture
         $this->addReference(self::BOOLFIND_RUN_REFERENCE, $boolfindRun);
     }
 
-    // TODO: Check whether it's possible to use services in fixture and reduce code duplication.
+    // TODO: Check whether it's possible to use services in fixtures and reduce code duplication.
     private function createImmutableExecutable(string $filename, ObjectManager $manager): ImmutableExecutable
     {
         $zip = new ZipArchive();
@@ -77,16 +77,16 @@ class ExecutableFixture extends AbstractExampleDataFixture
         $manager->persist($immutableExecutable);
         $rank = 0;
         for ($idx = 0; $idx < $zip->numFiles; $idx++) {
-            if ($zip->getNameIndex($idx) === $propertyFile) {
+            $filename = $zip->getNameIndex($idx);
+            if ($filename === $propertyFile) {
                 continue;
             }
             $executableFile = new ExecutableFile();
             $executableFile
                 ->setRank($rank)
-                ->setFilename($zip->getNameIndex($idx))
+                ->setFilename($filename)
                 ->setFileContent($zip->getFromIndex($idx))
-                // TODO: Don't do this all the time.
-                ->setIsExecutable(true)
+                ->setIsExecutable(in_array($filename, ['build', 'run']))
                 ->setImmutableExecutable($immutableExecutable);
             $manager->persist($executableFile);
             $rank++;
