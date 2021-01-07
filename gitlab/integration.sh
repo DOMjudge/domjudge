@@ -164,15 +164,8 @@ set +x
 while /bin/true; do
 	sleep 30s
 	curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier?verify_multiple=1" -o /dev/null
-	NUMNOTVERIFIED=$(curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier" | grep "submissions checked" | sed -r 's/^.* ([0-9]+) submissions checked.*$/\1/')
-	NUMVERIFIED=$(curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier" | grep "submissions not checked" | sed -r 's/^.* ([0-9]+) submissions not checked.*$/\1/')
-	# TODO: We keep judging (a little) after all submissions got a final verdict. Perhaps we can re-use the status endpoint to fix this properly?
-	# # Check whether all submissions have been processed...
-	# if [ $NUMSUBS -eq $((NUMVERIFIED+NUMNOTVERIFIED)) ]; then
-	#       break
-	# fi
 
-	# ... or something got disabled by internal error...
+	# Check if we are done, i.e. everything is judged or something got disabled by internal error...
 	if tail /tmp/judgedaemon.log | grep -q "No submissions in queue"; then
 		break
 	fi
@@ -182,10 +175,15 @@ while /bin/true; do
 	fi
 done
 
-NUMNOMAGIC=$(curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier" | grep "without magic string" | sed -r 's/^.* ([0-9]+) without magic string.*$/\1/')
+NUMNOTVERIFIED=$(curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier" | grep "submissions checked"     | sed -r 's/^.* ([0-9]+) submissions checked.*$/\1/')
+NUMVERIFIED=$(   curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier" | grep "submissions not checked" | sed -r 's/^.* ([0-9]+) submissions not checked.*$/\1/')
+NUMNOMAGIC=$(    curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier" | grep "without magic string"    | sed -r 's/^.* ([0-9]+) without magic string.*$/\1/')
 section_end judging
 
-# include debug output here
+# We expect
+# - two submissions with ambiguous outcome,
+# - no submissions without magic string,
+# - and all submissions to be judged.
 if [ $NUMNOTVERIFIED -ne 2 ] || [ $NUMNOMAGIC -ne 0 ] || [ $NUMSUBS -gt $((NUMVERIFIED+NUMNOTVERIFIED)) ]; then
 	section_start error "Short error description"
 	# We error out below anyway, so no need to fail earlier than that.
@@ -216,8 +214,8 @@ section_start api_check "Performing API checks"
 # Start logging again
 set -x
 
-# Delete contest so API check does not fail because of empty results
-echo "DELETE FROM contest WHERE cid =1" | mysql domjudge
+# Delete contest so API check does not fail because of empty results.
+echo "DELETE FROM contest WHERE cid=1" | mysql domjudge
 
 # Check the Contest API:
 $CHECK_API -n -C -e -a 'strict=1' http://admin:$ADMINPASS@localhost/domjudge/api
