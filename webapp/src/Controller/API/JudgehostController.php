@@ -949,40 +949,6 @@ class JudgehostController extends AbstractFOSRestController
             }
         }
 
-        // Group together duplicate internal errors.
-        // Note that it may be good to be able to ignore fields here, e.g. judgingid with compile errors.
-        $queryBuilder = $this->em->createQueryBuilder()
-            ->from(InternalError::class, 'e')
-            ->select('e')
-            ->andWhere('e.description = :description')
-            ->andWhere('e.disabled = :disabled')
-            ->andWhere('e.status = :status')
-            ->setParameter(':description', $description)
-            ->setParameter(':disabled', $disabled)
-            ->setParameter(':status', 'open')
-            ->setMaxResults(1);
-
-        /** @var Contest|null $contest */
-        $contest = null;
-        if ($cid) {
-            $contestIdField = $this->eventLogService->externalIdFieldForEntity(Contest::class) ?? 'cid';
-            $contest        = $this->em->createQueryBuilder()
-                ->from(Contest::class, 'c')
-                ->select('c')
-                ->andWhere(sprintf('c.%s = :cid', $contestIdField))
-                ->setParameter(':cid', $cid)
-                ->getQuery()
-                ->getSingleResult();
-        }
-
-        /** @var InternalError $error */
-        $error = $queryBuilder->getQuery()->getOneOrNullResult();
-
-        if ($error) {
-            // FIXME: in some cases it makes sense to extend the known information, e.g. the judgehostlog.
-            return $error->getErrorid();
-        }
-
         $disabled = $this->dj->jsonDecode($disabled);
         if (in_array($disabled['kind'], array('compile_script', 'compare_script', 'run_script'))) {
             // Since these are the immutable executables, we need to map it to the mutable one first to make linking and
@@ -995,7 +961,42 @@ class JudgehostController extends AbstractFOSRestController
                 return;
             }
             $disabled['execid'] = $executable->getExecid();
+            unset($disabled[$disabled['kind'] . '_id']);
             $disabled['kind'] = 'executable';
+        }
+
+        // Group together duplicate internal errors.
+        // Note that it may be good to be able to ignore fields here, e.g. judgingid with compile errors.
+        $queryBuilder = $this->em->createQueryBuilder()
+            ->from(InternalError::class, 'e')
+            ->select('e')
+            ->andWhere('e.description = :description')
+            ->andWhere('e.disabled = :disabled')
+            ->andWhere('e.status = :status')
+            ->setParameter(':description', $description)
+            ->setParameter(':disabled', $this->dj->jsonEncode($disabled))
+            ->setParameter(':status', 'open')
+            ->setMaxResults(1);
+
+        /** @var InternalError $error */
+        $error = $queryBuilder->getQuery()->getOneOrNullResult();
+
+        if ($error) {
+            // FIXME: in some cases it makes sense to extend the known information, e.g. the judgehostlog.
+            return $error->getErrorid();
+        }
+
+        /** @var Contest|null $contest */
+        $contest = null;
+        if ($cid) {
+            $contestIdField = $this->eventLogService->externalIdFieldForEntity(Contest::class) ?? 'cid';
+            $contest        = $this->em->createQueryBuilder()
+                ->from(Contest::class, 'c')
+                ->select('c')
+                ->andWhere(sprintf('c.%s = :cid', $contestIdField))
+                ->setParameter(':cid', $cid)
+                ->getQuery()
+                ->getSingleResult();
         }
 
         // TODO: Potentially disable other judgings.
