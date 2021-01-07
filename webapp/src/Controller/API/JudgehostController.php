@@ -1521,20 +1521,18 @@ class JudgehostController extends AbstractFOSRestController
          */
 
         // This is case 1) from above: continue what we have started (if still important).
-        // TODO: We probably want to introduce a jobid instead of using submitid below in all queries. For judgings it
-        // should default to the judgingid.
         // TODO: These queries would be much easier and less heavy on the DB with an extra table.
         $started_judgetaskids = array_column(
             $this->em
                 ->createQueryBuilder()
                 ->from(JudgeTask::class, 'jt')
-                ->select('jt.submitid')
+                ->select('jt.jobid')
                 ->andWhere('jt.hostname = :hostname')
                 ->setParameter(':hostname', $hostname)
-                ->groupBy('jt.submitid')
+                ->groupBy('jt.jobid')
                 ->getQuery()
                 ->getArrayResult(),
-            'submitid');
+            'jobid');
         if (!empty($started_judgetaskids)) {
             $queryBuilder = $this->em->createQueryBuilder();
             /** @var JudgeTask[] $judgetasks */
@@ -1544,7 +1542,7 @@ class JudgehostController extends AbstractFOSRestController
                 ->andWhere('jt.hostname IS NULL')
                 ->andWhere('jt.valid = 1')
                 ->andWhere('jt.priority <= 0')
-                ->andWhere($queryBuilder->expr()->In('jt.submitid', $started_judgetaskids))
+                ->andWhere($queryBuilder->expr()->In('jt.jobid', $started_judgetaskids))
                 ->addOrderBy('jt.priority')
                 ->addOrderBy('jt.judgetaskid')
                 ->setMaxResults($max_batchsize)
@@ -1585,7 +1583,7 @@ class JudgehostController extends AbstractFOSRestController
                 ->andWhere('jt.valid = 1')
                 ->andWhere('jt.priority = :max_priority')
                 ->setParameter(':max_priority', $max_priority)
-                ->andWhere($queryBuilder->expr()->In('jt.submitid', $started_judgetaskids))
+                ->andWhere($queryBuilder->expr()->In('jt.jobid', $started_judgetaskids))
                 ->addOrderBy('jt.judgetaskid')
                 ->setMaxResults($max_batchsize)
                 ->getQuery()
@@ -1602,12 +1600,12 @@ class JudgehostController extends AbstractFOSRestController
             $this->em
                 ->createQueryBuilder()
                 ->from(JudgeTask::class, 'jt')
-                ->select('jt.submitid')
+                ->select('jt.jobid')
                 ->andWhere('jt.hostname IS NOT NULL')
-                ->groupBy('jt.submitid')
+                ->groupBy('jt.jobid')
                 ->getQuery()
                 ->getArrayResult(),
-            'submitid');
+            'jobid');
         $queryBuilder = $this->em->createQueryBuilder();
         $queryBuilder
             ->from(JudgeTask::class, 'jt')
@@ -1623,7 +1621,7 @@ class JudgehostController extends AbstractFOSRestController
             ->addOrderBy('s.submitid', 'ASC');
         if (!empty($started_judgetaskids)) {
             $queryBuilder
-            ->andWhere($queryBuilder->expr()->notIn('jt.submitid', $started_judgetaskids));
+            ->andWhere($queryBuilder->expr()->notIn('jt.jobid', $started_judgetaskids));
         }
         /** @var JudgeTask[] $judgetasks */
         $judgetasks =
