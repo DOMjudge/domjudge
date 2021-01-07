@@ -1075,8 +1075,8 @@ class JudgehostController extends AbstractFOSRestController
         $resultsPrio  = $this->config->get('results_prio');
 
         if (array_key_exists($runResult, $resultsRemap)) {
-            $this->logger->info('Testcase %d remapping result %s -> %s',
-                                [ /*TODO*/42, $runResult, $resultsRemap[$runResult] ]);
+            $this->logger->info('JudgeTask %d remapping result %s -> %s',
+                                [ $judgeTaskId, $runResult, $resultsRemap[$runResult] ]);
             $runResult = $resultsRemap[$runResult];
         }
 
@@ -1094,7 +1094,7 @@ class JudgehostController extends AbstractFOSRestController
             $judgingRun = $this->em->getRepository(JudgingRun::class)->findOneBy(
                 ['judgetaskid' => $judgeTaskId]);
             if ($judgingRun === null) {
-                // TODO: What to do now?
+                throw new BadRequestHttpException('Inconsistent data, no judging run known with this judgetaskid.');
             }
             $judgingRunOutput = new JudgingRunOutput();
             $judgingRun->setOutput($judgingRunOutput);
