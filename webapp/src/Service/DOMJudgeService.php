@@ -895,7 +895,6 @@ class DOMJudgeService
         return $data;
     }
 
-    // TODO: Is this in the correct service? Move to its own?
     public function createImmutableExecutable(ZipArchive $zip): ImmutableExecutable
     {
         $propertyFile = 'domjudge-executable.ini';
@@ -903,22 +902,25 @@ class DOMJudgeService
         $this->em->persist($immutableExecutable);
         $rank = 0;
         for ($idx = 0; $idx < $zip->numFiles; $idx++) {
-            if ($zip->getNameIndex($idx) === $propertyFile) {
+            $filename = basename($zip->getNameIndex($idx));
+            if ($filename === $propertyFile) {
                 continue;
+            }
+
+            // In doubt make files executable, but try to read it from the zip file.
+            $executableBit = true;
+            if ($zip->getExternalAttributesIndex($idx, $opsys, $attr)
+                && $opsys==ZipArchive::OPSYS_UNIX
+                && (($attr >> 16) & 0100) === 0) {
+                $executableBit = false;
             }
             $executableFile = new ExecutableFile();
             $executableFile
                 ->setRank($rank)
-                ->setFilename($zip->getNameIndex($idx))
+                ->setFilename($filename)
                 ->setFileContent($zip->getFromIndex($idx))
-                ->setImmutableExecutable($immutableExecutable);
-            // TOOD: Extract executable info from zip file.
-            if (
-                $zip->getNameIndex($idx) === 'build'
-                || $zip->getNameIndex($idx) === 'run'
-            ) {
-                $executableFile->setIsExecutable(true);
-            }
+                ->setImmutableExecutable($immutableExecutable)
+                ->setIsExecutable($executableBit);
             $this->em->persist($executableFile);
             $rank++;
         }
