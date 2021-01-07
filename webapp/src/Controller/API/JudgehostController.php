@@ -1668,7 +1668,7 @@ class JudgehostController extends AbstractFOSRestController
         }
 
         $numUpdated = $this->em->getConnection()->executeUpdate(
-            'UPDATE judgetask SET hostname = :hostname WHERE hostname IS NULL AND judgetaskid IN (:ids)',
+            'UPDATE judgetask SET hostname = :hostname WHERE hostname IS NULL AND valid = 1 AND judgetaskid IN (:ids)',
             [
                 ':hostname' => $hostname,
                 ':ids' => $judgetaskids,
