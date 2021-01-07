@@ -25,7 +25,6 @@ final class Version20201219154652 extends AbstractMigration implements Container
             'column zipfile doesnt exist anymore'
         );
 
-        // TODO: add all kinds of error checking here
         $oldRows = $this->connection->executeQuery('SELECT execid, zipfile FROM executable')->fetchAll();
         foreach ($oldRows as $oldRow) {
             $this->connection->exec('INSERT INTO immutable_executable (`userid`) VALUES (null)');

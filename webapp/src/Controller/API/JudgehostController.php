@@ -1608,7 +1608,7 @@ class JudgehostController extends AbstractFOSRestController
         }
 
         // This is case 2.b) from above: start something new.
-        // TODO: First, we have to filter for unfinished jobs. This would be easier with a separate table storing the
+        // First, we have to filter for unfinished jobs. This would be easier with a separate table storing the
         // job state.
         $started_judgetaskids = array_column(
             $this->em
