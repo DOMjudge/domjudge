@@ -1611,12 +1611,16 @@ class JudgehostController extends AbstractFOSRestController
         $queryBuilder = $this->em->createQueryBuilder();
         $queryBuilder
             ->from(JudgeTask::class, 'jt')
+            ->join(Submission::class, 's', Join::WITH, 'jt.submitid = s.submitid')
+            ->join('s.team', 't')
             ->select('jt')
             ->andWhere('jt.hostname IS NULL')
             ->andWhere('jt.valid = 1')
             ->andWhere('jt.priority = :max_priority')
-            ->setParameter(':max_priority', $max_priority);
-        // TODO: Add prioritization by team here.
+            ->setParameter(':max_priority', $max_priority)
+            ->addOrderBy('t.judging_last_started', 'ASC')
+            ->addOrderBy('s.submittime', 'ASC')
+            ->addOrderBy('s.submitid', 'ASC');
         if (!empty($started_judgetaskids)) {
             $queryBuilder
             ->andWhere($queryBuilder->expr()->notIn('jt.submitid', $started_judgetaskids));
@@ -1659,7 +1663,6 @@ class JudgehostController extends AbstractFOSRestController
         }
 
         // Filter by submit_id.
-        // TODO: Replace this by job_id later and potentially make it smarter, e.g. looping over the rest.
         $submit_id = $judgeTasks[0]->getSubmitid();
         $judgetaskids = [];
         foreach ($judgeTasks as $judgeTask) {
@@ -1684,14 +1687,29 @@ class JudgehostController extends AbstractFOSRestController
             return [];
         }
 
+        $now = Utils::now();
         // We got at least one, let's update the starttime of the corresponding judging if haven't done so in the past.
-        $this->em->getConnection()->executeUpdate(
+        $starttime_set = $this->em->getConnection()->executeUpdate(
             'UPDATE judging SET starttime = :starttime WHERE judgingid = :jobid AND starttime IS NULL',
             [
-                ':starttime' => Utils::now(),
+                ':starttime' => $now,
                 ':jobid' => $judgeTasks[0]->getJobId(),
             ]
         );
+
+        if ($starttime_set) {
+            /** @var Submission $submission */
+            $submission = $this->em->getRepository(Submission::class)->findOneBy(['submitid' => $submit_id]);
+            $teamid = $submission->getTeam()->getTeamid();
+
+            $this->em->getConnection()->executeUpdate(
+                'UPDATE team SET judging_last_started = :starttime WHERE teamid = :teamid',
+                [
+                    ':starttime' => $now,
+                    ':teamid' => $teamid,
+                ]
+            );
+        }
 
         if ($numUpdated == sizeof($judgeTasks)) {
             // We got everything, let's ship it!
