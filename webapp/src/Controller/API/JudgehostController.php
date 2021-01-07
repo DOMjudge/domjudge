@@ -1162,17 +1162,18 @@ class JudgehostController extends AbstractFOSRestController
             }
 
             $judging->setResult($result);
-            if (!$hasNullResults || $lazyEval) {
-                // NOTE: setting endtime here determines in testcases_GET
-                // whether a next testcase will be handed out.
-                $judging->setEndtime(Utils::now());
-                $this->maybeUpdateActiveJudging($judging);
-            }
-            $this->em->flush();
 
             // Only update if the current result is different from what we had before.
             // This should only happen when the old result was NULL.
             if ($oldResult !== $result) {
+                if (!$hasNullResults || $lazyEval) {
+                    // NOTE: setting endtime here determines in testcases_GET
+                    // whether a next testcase will be handed out.
+                    $judging->setEndtime(Utils::now());
+                    $this->maybeUpdateActiveJudging($judging);
+                }
+                $this->em->flush();
+
                 if ($oldResult !== null) {
                     throw new \BadMethodCallException('internal bug: the evaluated result changed during judging');
                 }
