@@ -951,17 +951,28 @@ class JudgehostController extends AbstractFOSRestController
 
         $disabled = $this->dj->jsonDecode($disabled);
         if (in_array($disabled['kind'], array('compile_script', 'compare_script', 'run_script'))) {
+            $field_name = $disabled['kind'] . '_id';
+            // Disable any outstanding judgetasks with the same script that have not been claimed yet.
+            $this->em->getConnection()->executeUpdate(
+                'UPDATE judgetask SET valid=0'
+                . ' WHERE ' . $field_name . ' = :id'
+                . ' AND hostname IS NULL',
+                [
+                    ':id' => $disabled[$field_name],
+                ]
+            );
+
             // Since these are the immutable executables, we need to map it to the mutable one first to make linking and
             // re-enabling possible.
             /** @var Executable $executable */
             $executable = $this->em->getRepository(Executable::class)
-                ->findOneBy(['immutableExecutable' => $disabled[$disabled['kind'] . '_id']]);
+                ->findOneBy(['immutableExecutable' => $disabled[$field_name]]);
             if (!$executable) {
                 // Race condition where the user changed the executable (hopefully for the better). Ignore.
                 return;
             }
             $disabled['execid'] = $executable->getExecid();
-            unset($disabled[$disabled['kind'] . '_id']);
+            unset($disabled[$field_name]);
             $disabled['kind'] = 'executable';
         }
 
@@ -999,7 +1010,6 @@ class JudgehostController extends AbstractFOSRestController
                 ->getSingleResult();
         }
 
-        // TODO: Potentially disable other judgings.
         $error = new InternalError();
         $error
             ->setJudging($judgingId ? $this->em->getReference(Judging::class, $judgingId) : null)
