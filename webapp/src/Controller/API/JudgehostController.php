@@ -1192,20 +1192,22 @@ class JudgehostController extends AbstractFOSRestController
                 if ($lazyEval) {
                     // We don't want to continue on this problem, even if there's spare resources.
                     $this->em->getConnection()->executeUpdate(
-                        'UPDATE judgetask SET valid=0, priority=10'
+                        'UPDATE judgetask SET valid=0, priority=:priority'
                         . ' WHERE jobid=:jobid'
                         . ' AND hostname IS NULL',
                         [
+                            ':priority' => JudgeTask::PRIORITY_LOW,
                             ':jobid' => $judgingRun->getJudgingid(),
                         ]
                     );
                 } else {
                     // Decrease priority of remaining unassigned judging runs.
                     $this->em->getConnection()->executeUpdate(
-                        'UPDATE judgetask SET priority=10'
+                        'UPDATE judgetask SET priority=:priority'
                         . ' WHERE jobid=:jobid'
                         . ' AND hostname IS NULL',
                         [
+                            ':priority' => JudgeTask::PRIORITY_LOW,
                             ':jobid' => $judgingRun->getJudgingid(),
                         ]
                     );
@@ -1552,10 +1554,11 @@ class JudgehostController extends AbstractFOSRestController
                 ->select('jt')
                 ->andWhere('jt.hostname IS NULL')
                 ->andWhere('jt.valid = 1')
-                ->andWhere('jt.priority <= 0')
+                ->andWhere('jt.priority <= :default_priority')
                 ->andWhere($queryBuilder->expr()->In('jt.jobid', $started_judgetaskids))
                 ->addOrderBy('jt.priority')
                 ->addOrderBy('jt.judgetaskid')
+                ->setParameter(':default_priority', JudgeTask::PRIORITY_DEFAULT)
                 ->setMaxResults($max_batchsize)
                 ->getQuery()
                 ->getResult();

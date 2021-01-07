@@ -991,8 +991,7 @@ class DOMJudgeService
             $judgeTask
                 ->setType(JudgeTaskType::JUDGING_RUN)
                 ->setSubmitid($submission->getSubmitid())
-                // TODO: Use constants for priorities.
-                ->setPriority(0)
+                ->setPriority(JudgeTask::PRIORITY_DEFAULT)
                 ->setJobId($judging->getJudgingid())
                 ->setTestcaseId($testcase->getTestcaseid())
                 ->setCompileScriptId(

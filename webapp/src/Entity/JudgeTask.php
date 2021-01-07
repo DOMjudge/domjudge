@@ -56,6 +56,10 @@ class JudgeTask
      */
     private $priority;
 
+    const PRIORITY_HIGH = -10;
+    const PRIORITY_DEFAULT = 0;
+    const PRIORITY_LOW = 10;
+
     /**
      * @var int
      *
