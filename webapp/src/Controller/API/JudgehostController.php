@@ -1307,7 +1307,7 @@ class JudgehostController extends AbstractFOSRestController
                         ->andWhere('j.rejudging = :rejudgingid')
                         ->setParameter('rejudgingid', $rejudging->getRejudgingid())
                         ->getQuery()
-                        ->getResult(Query::HYDRATE_ARRAY);
+                        ->getResult();
                     $this->rejudgingService->createRejudging($rejudging->getReason(), $judgings,
                         false, $rejudging->getRepeat(), $rejudging->getRepeatedRejudging(), $skipped);
                 }
