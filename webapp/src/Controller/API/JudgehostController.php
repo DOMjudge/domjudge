@@ -1481,7 +1481,7 @@ class JudgehostController extends AbstractFOSRestController
 
     /**
      * Fetch work tasks.
-     * @Rest\Post("/fetch_work")
+     * @Rest\Post("/fetch-work")
      * @Security("is_granted('ROLE_JUDGEHOST')")
      */
     public function getJudgeTasksAction(Request $request): array
