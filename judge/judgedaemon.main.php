@@ -516,7 +516,7 @@ if (!empty($options['e'])) {
     $endpointID = $options['e'];
     $endpoint = $endpoints[$endpointID];
     $endpoints[$endpointID]['ch'] = setup_curl_handle($endpoint['user'], $endpoint['pass']);
-    $new_judging_run = (array) json_decode(base64_decode($options['j']));
+    $new_judging_run = (array) json_decode(base64_decode(file_get_contents($options['j'])));
     $judgeTaskId = $options['t'];
 
     request(
@@ -526,6 +526,7 @@ if (!empty($options['e'])) {
         $new_judging_run,
         false
     );
+    unlink($options['j']);
     exit(0);
 }
 
@@ -1149,11 +1150,13 @@ function judge(array $judgeTask): bool
     if ($result === 'correct') {
         // Post result back asynchronously. PHP is lacking multi-threading, so
         // we just call ourselves again.
+        $tmpfile = tempnam(TMPDIR, 'judging_run_');
+        file_put_contents($tmpfile, base64_encode(json_encode($new_judging_run)));
         $judgedaemon = BINDIR . '/judgedaemon';
         $cmd = $judgedaemon
             . ' -e ' . $endpointID
             . ' -t ' . $judgeTask['judgetaskid']
-            . ' -j ' . base64_encode(json_encode($new_judging_run))
+            . ' -j ' . $tmpfile
             . ' >> /dev/null & ';
         shell_exec($cmd);
     } else {
