@@ -1695,7 +1695,7 @@ class ImportEventFeedCommand extends Command
                 // Submit the solution
                 $contest    = $this->em->getRepository(Contest::class)->find($this->contestId);
                 $submission = $this->submissionService->submitSolution(
-                    $team, $contestProblem, $contest, $language, $filesToSubmit,
+                    $team, $contestProblem, $contest, $language, $filesToSubmit, null,
                     null, $entryPoint, $submissionId, $submitTime,
                     $message
                 );
