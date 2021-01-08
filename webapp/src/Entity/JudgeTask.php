@@ -10,11 +10,16 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Individual judge tasks.
- * TODO: Add indices.
  *
  * @ORM\Entity()
  * @ORM\Table(
  *     name="judgetask",
+ *     indexes={
+ *         @ORM\Index(name="priority", columns={"priority"}),
+ *         @ORM\Index(name="jobid", columns={"jobid"}),
+ *         @ORM\Index(name="submitid", columns={"submitid"}),
+ *         @ORM\Index(name="valid", columns={"valid"})
+ *     },
  *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Individual judge tasks."}
  *     )
  */
