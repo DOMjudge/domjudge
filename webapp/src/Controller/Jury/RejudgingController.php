@@ -278,6 +278,7 @@ class RejudgingController extends BaseController
             }
         };
 
+        dump($originalVerdicts);
         // Build up the verdict matrix
         foreach ($newVerdicts as $submitid => $newVerdict) {
             $originalVerdict = $originalVerdicts[$submitid];
@@ -547,7 +548,7 @@ class RejudgingController extends BaseController
             /** @var array[] $judgings */
             $judgings = $queryBuilder
                 ->getQuery()
-                ->getResult(Query::HYDRATE_ARRAY);
+                ->getResult();
             if (empty($judgings)) {
                 $this->addFlash('danger', 'No judgings matched.');
                 return $this->render('jury/rejudging_form.html.twig', [
@@ -651,7 +652,7 @@ class RejudgingController extends BaseController
         /** @var array[] $judgings */
         $judgings = $queryBuilder
             ->getQuery()
-            ->getResult(Query::HYDRATE_ARRAY);
+            ->getResult();
 
         if (empty($judgings)) {
             $this->addFlash('danger', 'No judgings matched.');
@@ -690,15 +691,19 @@ class RejudgingController extends BaseController
 
     private function generateFlashMessagesForSkippedJudgings(array $skipped): void
     {
+        /** @var Judging $judging */
         foreach ($skipped as $judging) {
-            $submission = $judging['submission'];
+            /** @var Submission $submission */
+            $submission = $judging->getSubmission();
+            $submitid = $submission->getSubmitid();
+            $rejudgingid = $submission->getRejudging()->getRejudgingid();
             $msg = sprintf(
                 'Skipping submission <a href="%s">s%d</a> since it is ' .
                 'already part of rejudging <a href="%s">r%d</a>.',
-                $this->generateUrl('jury_submission', ['submitId' => $submission['submitid']]),
-                $submission['submitid'],
-                $this->generateUrl('jury_rejudging', ['rejudgingId' => $submission['rejudging']['rejudgingid']]),
-                $submission['rejudging']['rejudgingid']
+                $this->generateUrl('jury_submission', ['submitId' => $submitid]),
+                $submitid,
+                $this->generateUrl('jury_rejudging', ['rejudgingId' => $rejudgingid]),
+                $rejudgingid
             );
             $this->addFlash('danger', $msg);
         }

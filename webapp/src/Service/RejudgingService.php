@@ -106,8 +106,8 @@ class RejudgingService
 
         $singleJudging = count($judgings) == 1;
         foreach ($judgings as $judging) {
-            $submission = $judging['submission'];
-            if ($submission['rejudging'] !== null) {
+            /** @var Judging $judging */
+            if ($judging->getSubmission()->getRejudging() !== null) {
                 // The submission is already part of another rejudging, record and skip it.
                 $skipped[] = $judging;
                 continue;
@@ -116,25 +116,24 @@ class RejudgingService
             $this->em->transactional(function () use (
                 $singleJudging,
                 $judging,
-                $submission,
                 $rejudging
             ) {
                 $this->em->getConnection()->executeUpdate(
                     'UPDATE submission SET judgehost = null WHERE submitid = :submitid AND rejudgingid IS NULL',
-                    [ ':submitid' => $submission['submitid'] ]
+                    [ ':submitid' => $judging->getSubmissionId() ]
                 );
                 if ($rejudging) {
                     $this->em->getConnection()->executeUpdate(
                         'UPDATE submission SET rejudgingid = :rejudgingid WHERE submitid = :submitid AND rejudgingid IS NULL',
                         [
                             ':rejudgingid' => $rejudging->getRejudgingid(),
-                            ':submitid' => $submission['submitid'],
+                            ':submitid' => $judging->getSubmissionId(),
                         ]
                     );
                 }
 
                 if ($singleJudging) {
-                    $teamid = $submission['team']['teamid'];
+                    $teamid = $judging->getSubmission()->getTeamId();
                     if ($teamid) {
                         $this->em->getConnection()->executeUpdate(
                             'UPDATE team SET judging_last_started = null WHERE teamid = :teamid',
@@ -142,6 +141,19 @@ class RejudgingService
                         );
                     }
                 }
+
+                // Give back judging, create a new one.
+                $newJudging = new Judging();
+                $newJudging
+                    ->setContest($judging->getContest())
+                    ->setValid(false)
+                    ->setSubmission($judging->getSubmission())
+                    ->setOriginalJudging($judging)
+                    ->setRejudging($rejudging);
+                $this->em->persist($newJudging);
+                $this->em->flush();
+
+                $this->dj->maybeCreateJudgeTasks($newJudging);
             });
        }
 
