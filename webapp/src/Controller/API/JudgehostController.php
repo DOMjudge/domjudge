@@ -1289,7 +1289,7 @@ class JudgehostController extends AbstractFOSRestController
                     $this->em->flush();
 
                     // Reset association before creating the new rejudging.
-                    $this->em->getConnection()->executeQuery(
+                    $this->em->getConnection()->executeUpdate(
                         'UPDATE submission
                             SET rejudgingid = NULL
                             WHERE rejudgingid = :rejudgingid',
@@ -1307,6 +1307,7 @@ class JudgehostController extends AbstractFOSRestController
                         ->andWhere('j.rejudging = :rejudgingid')
                         ->setParameter('rejudgingid', $rejudging->getRejudgingid())
                         ->getQuery()
+                        ->setHint(Query::HINT_REFRESH, TRUE)
                         ->getResult();
                     $this->rejudgingService->createRejudging($rejudging->getReason(), $judgings,
                         false, $rejudging->getRepeat(), $rejudging->getRepeatedRejudging(), $skipped);
