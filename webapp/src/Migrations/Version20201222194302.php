@@ -14,7 +14,7 @@ final class Version20201222194302 extends AbstractMigration
 {
     public function getDescription() : string
     {
-        return '';
+        return 'Add valid column to judgetask to have a way to disable them.';
     }
 
     public function up(Schema $schema) : void

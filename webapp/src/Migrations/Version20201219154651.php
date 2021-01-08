@@ -14,7 +14,7 @@ final class Version20201219154651 extends AbstractMigration
 {
     public function getDescription() : string
     {
-        return '';
+        return 'Initial DB structure for new judgehost API.';
     }
 
     public function up(Schema $schema) : void
