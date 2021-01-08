@@ -179,8 +179,7 @@ class JudgementController extends AbstractRestController implements QueryObjectT
     {
         /** @var Judging $judging */
         $judging         = $object[0];
-        // TODO: Need to think more about how to resolve in a clean way, but this makes CI green again for now.
-        $maxRunTime      = null; // $object['maxruntime'] === null ? null : (float)$object['maxruntime'];
+        $maxRunTime      = $object['maxruntime'] === null ? null : (float)$object['maxruntime'];
         $judgementTypeId = $judging->getResult() ? $this->verdicts[$judging->getResult()] : null;
         return new JudgingWrapper($judging, $maxRunTime, $judgementTypeId);
     }
