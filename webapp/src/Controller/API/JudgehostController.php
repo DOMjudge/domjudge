@@ -1154,13 +1154,6 @@ class JudgehostController extends AbstractFOSRestController
             ->getQuery()
             ->getArrayResult();
         $runresults = array_column($runs, 'runresult');
-        $hasNullResults = false;
-        foreach ($runresults as $runresult) {
-            if ($runresult === NULL) {
-                $hasNullResults = true;
-                break;
-            }
-        }
 
         $oldResult = $judging->getResult();
 
@@ -1177,6 +1170,13 @@ class JudgehostController extends AbstractFOSRestController
             // Only update if the current result is different from what we had before.
             // This should only happen when the old result was NULL.
             if ($oldResult !== $result) {
+                $hasNullResults = false;
+                foreach ($runresults as $runresult) {
+                    if ($runresult === NULL) {
+                        $hasNullResults = true;
+                        break;
+                    }
+                }
                 if (!$hasNullResults || $lazyEval) {
                     // NOTE: setting endtime here determines in testcases_GET
                     // whether a next testcase will be handed out.
@@ -1227,28 +1227,20 @@ class JudgehostController extends AbstractFOSRestController
                                $submission->getSubmitid(), $judging->getJudgingid(), $result);
                 $this->dj->alert($result === 'correct' ? 'accept' : 'reject', $msg);
 
-                // Log to event table if no verification required
-                // (case of verification required is handled in
-                // jury/SubmissionController::verifyAction)
-                if (!$this->config->get('verification_required')) {
-                    if ($judging->getValid()) {
-                        $this->eventLogService->log('judging', $judging->getJudgingid(),
-                                                    EventLogService::ACTION_UPDATE,
-                                                    $judging->getContest()->getCid());
-                        $this->balloonService->updateBalloons($contest, $submission, $judging);
-                    }
+                // Potentially send a balloon, i.e. if no verification required (case of verification required is
+                // handled in jury/SubmissionController::verifyAction).
+                if (!$this->config->get('verification_required') && $judging->getValid()) {
+                    $this->balloonService->updateBalloons($contest, $submission, $judging);
                 }
 
                 $this->dj->auditlog('judging', $judging->getJudgingid(), 'judged', $result, $hostname);
-
-                $justFinished = true;
             }
-        }
 
-        // Send an event for an endtime update if not done yet.
-        if ($judging->getValid() && !$hasNullResults && empty($justFinished)) {
-            $this->eventLogService->log('judging', $judging->getJudgingid(),
-                                        EventLogService::ACTION_UPDATE, $judging->getContest()->getCid());
+            // Send an event for an endtime (and max runtime update).
+            if ($judging->getValid()) {
+                $this->eventLogService->log('judging', $judging->getJudgingid(),
+                    EventLogService::ACTION_UPDATE, $judging->getContest()->getCid());
+            }
         }
     }
 
