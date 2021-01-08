@@ -278,7 +278,6 @@ class RejudgingController extends BaseController
             }
         };
 
-        dump($originalVerdicts);
         // Build up the verdict matrix
         foreach ($newVerdicts as $submitid => $newVerdict) {
             $originalVerdict = $originalVerdicts[$submitid];
