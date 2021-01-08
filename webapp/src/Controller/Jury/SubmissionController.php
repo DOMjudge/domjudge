@@ -836,6 +836,7 @@ class SubmissionController extends BaseController
                 $submission->getContest(),
                 $language,
                 $filesToSubmit,
+                $this->getUser()->getUsername(),
                 $submission->getOriginalSubmission() ?? $submission,
                 $entryPoint,
                 null,

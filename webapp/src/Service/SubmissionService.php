@@ -353,6 +353,7 @@ class SubmissionService
      * @param Language|string     $language
      * @param UploadedFile[]      $files
      * @param Submission|int|null $originalSubmission
+     * @param string|null         $juryMember
      * @param string|null         $entryPoint
      * @param string|null         $externalId
      * @param float|null          $submitTime
@@ -366,6 +367,7 @@ class SubmissionService
         $contest,
         $language,
         array $files,
+        $juryMember = null,
         $originalSubmission = null,
         string $entryPoint = null,
         $externalId = null,
@@ -568,6 +570,9 @@ class SubmissionService
         $judging
             ->setContest($contest)
             ->setSubmission($submission);
+        if ($juryMember !== NULL) {
+            $judging->setJuryMember($juryMember);
+        }
         $this->em->persist($judging);
         // This is so that we can use the submitid/judgingid below.
         $this->em->flush();

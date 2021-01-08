@@ -687,7 +687,7 @@ class ImportProblemService
                             ]
                         );
                         $submission     = $this->submissionService->submitSolution(
-                            $team, $contestProblem, $contest, $languageToUse, $filesToSubmit,
+                            $team, $contestProblem, $contest, $languageToUse, $filesToSubmit, null,
                             null, $entry_point, null, null, $submissionMessage
                         );
 

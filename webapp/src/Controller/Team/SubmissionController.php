@@ -108,7 +108,7 @@ class SubmissionController extends BaseController
                 }
                 $entryPoint = $form->get('entry_point')->getData() ?: null;
                 $submission = $this->submissionService->submitSolution(
-                    $team, $problem->getProbid(), $contest, $language, $files,
+                    $team, $problem->getProbid(), $contest, $language, $files, null,
                     null, $entryPoint, null, null, $message
                 );
 
