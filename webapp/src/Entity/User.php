@@ -169,7 +169,7 @@ class User implements UserInterface, EquatableInterface, \Serializable
         ) = unserialize($serialized);
     }
 
-    public function getUserid(): int
+    public function getUserid(): ?int
     {
         return $this->userid;
     }

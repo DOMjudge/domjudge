@@ -130,7 +130,7 @@ class TeamAffiliation extends BaseApiEntity
         return $this;
     }
 
-    public function getShortname(): string
+    public function getShortname(): ?string
     {
         return $this->shortname;
     }
@@ -152,7 +152,7 @@ class TeamAffiliation extends BaseApiEntity
         return $this;
     }
 
-    public function getCountry(): string
+    public function getCountry(): ?string
     {
         return $this->country;
     }

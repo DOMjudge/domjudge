@@ -218,7 +218,7 @@ class ContestProblem
         return $this;
     }
 
-    public function getProblem(): Problem
+    public function getProblem(): ?Problem
     {
         return $this->problem;
     }

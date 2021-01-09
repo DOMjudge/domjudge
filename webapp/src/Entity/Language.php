@@ -141,7 +141,7 @@ class Language extends BaseApiEntity
         return $this;
     }
 
-    public function getLangid(): string
+    public function getLangid(): ?string
     {
         return $this->langid;
     }
@@ -240,7 +240,7 @@ class Language extends BaseApiEntity
         return $this;
     }
 
-    public function getEntryPointDescription(): string
+    public function getEntryPointDescription(): ?string
     {
         return $this->entry_point_description;
     }
