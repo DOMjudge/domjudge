@@ -320,7 +320,7 @@ class Problem extends BaseApiEntity
         return $this;
     }
 
-    public function getProblemtextType(): string
+    public function getProblemtextType(): ?string
     {
         return $this->problemtext_type;
     }
