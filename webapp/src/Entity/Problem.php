@@ -204,7 +204,7 @@ class Problem extends BaseApiEntity
         return $this;
     }
 
-    public function getName(): string
+    public function getName(): ?string
     {
         return $this->name;
     }

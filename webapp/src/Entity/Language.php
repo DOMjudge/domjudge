@@ -152,7 +152,7 @@ class Language extends BaseApiEntity
         return $this;
     }
 
-    public function getExternalid(): string
+    public function getExternalid(): ?string
     {
         return $this->externalid;
     }

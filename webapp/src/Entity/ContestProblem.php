@@ -141,7 +141,7 @@ class ContestProblem
         return $this;
     }
 
-    public function getShortname(): string
+    public function getShortname(): ?string
     {
         return $this->shortname;
     }

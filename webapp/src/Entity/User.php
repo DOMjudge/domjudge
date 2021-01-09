@@ -280,7 +280,7 @@ class User implements UserInterface, EquatableInterface, \Serializable
         return $this;
     }
 
-    public function getPassword(): string
+    public function getPassword(): ?string
     {
         return $this->password;
     }

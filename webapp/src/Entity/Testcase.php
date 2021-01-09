@@ -221,7 +221,7 @@ class Testcase
         return $this;
     }
 
-    public function getImageType(): string
+    public function getImageType(): ?string
     {
         return $this->image_type;
     }
