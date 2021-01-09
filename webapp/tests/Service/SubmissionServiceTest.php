@@ -35,7 +35,7 @@ class SubmissionServiceTest extends KernelTestCase
         $modifiedPrios = $defaultPrios;
         $modifiedPrios['wrong-answer'] = 70;
         yield [['correct', 'wrong-answer', NULL], $modifiedPrios, NULL];
-        yield [['correct', NULL, 'wrong-answer'], $defaultPrios, NULL];
+        yield [['correct', NULL, 'wrong-answer'], $modifiedPrios, NULL];
         yield [['correct', NULL, 'correct'], $modifiedPrios, NULL];
         yield [['correct', 'wrong-answer', 'timelimit'], $modifiedPrios, 'timelimit'];
         yield [['correct', 'output-limit', 'timelimit'], $modifiedPrios, 'output-limit'];
