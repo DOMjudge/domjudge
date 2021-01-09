@@ -314,14 +314,7 @@ class JudgehostController extends AbstractFOSRestController
         }
 
         /** @var JudgingRun $judgingRun */
-        $judgingRun = $this->em->createQueryBuilder()
-            ->from(JudgingRun::class, 'jr')
-            ->select('jr')
-            ->andWhere('jr.judgetaskid = :judgetaskid')
-            ->setParameter(':judgetaskid', $judgetaskid)
-            ->getQuery()
-            ->getSingleResult();
-
+        $judgingRun = $this->em->getRepository(JudgingRun::class)->findOneBy(['judgetaskid' => $judgetaskid]);
         $query = $this->em->createQueryBuilder()
             ->from(Judging::class, 'j')
             ->join('j.submission', 's')
