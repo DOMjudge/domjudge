@@ -936,7 +936,7 @@ class JudgehostController extends AbstractFOSRestController
 
         $oldResult = $judging->getResult();
 
-        if (($result = $this->submissionService->getFinalResult($runresults, $resultsPrio)) !== null) {
+        if (($result = SubmissionService::getFinalResult($runresults, $resultsPrio)) !== null) {
             // Lookup global lazy evaluation of results setting and possible problem specific override.
             $lazyEval    = $this->config->get('lazy_eval_results');
             $problemLazy = $judging->getSubmission()->getContestProblem()->getLazyEvalResults();
