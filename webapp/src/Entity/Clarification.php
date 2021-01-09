@@ -221,7 +221,7 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
         return $this;
     }
 
-    public function getJuryMember(): string
+    public function getJuryMember(): ?string
     {
         return $this->jury_member;
     }
@@ -232,7 +232,7 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
         return $this;
     }
 
-    public function getCategory(): string
+    public function getCategory(): ?string
     {
         return $this->category;
     }
