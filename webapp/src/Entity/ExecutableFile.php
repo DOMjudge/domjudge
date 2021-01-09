@@ -5,7 +5,8 @@ use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
 
 /**
- * Files associated to an executable
+ * Files associated to an executable.
+ *
  * @ORM\Entity()
  * @ORM\Table(
  *     name="executable_file",
@@ -106,7 +107,7 @@ class ExecutableFile
         return $this;
     }
 
-    public function getImmutableExecutable()
+    public function getImmutableExecutable(): ImmutableExecutable
     {
         return $this->immutableExecutable;
     }
@@ -117,7 +118,7 @@ class ExecutableFile
         return $this;
     }
 
-    public function getFileContent()
+    public function getFileContent(): string
     {
         return $this->fileContent;
     }

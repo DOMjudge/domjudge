@@ -9,6 +9,7 @@ use JMS\Serializer\Annotation as Serializer;
 
 /**
  * Immutable wrapper for a collection of files for executable bundles.
+ *
  * @ORM\Entity()
  * @ORM\Table(
  *     name="immutable_executable",

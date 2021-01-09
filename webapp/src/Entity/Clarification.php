@@ -9,7 +9,8 @@ use JMS\Serializer\Annotation as Serializer;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
- * Clarification requests by teams and responses by the jury
+ * Clarification requests by teams and responses by the jury.
+ *
  * @ORM\Entity()
  * @ORM\Table(
  *     name="clarification",
@@ -143,283 +144,144 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
      */
     private $recipient;
 
-
-    /**
-     * Constructor
-     */
     public function __construct()
     {
-        $this->replies = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->replies = new ArrayCollection();
     }
 
-    /**
-     * Set clarid
-     *
-     * @param integer $clarid
-     *
-     * @return Clarification
-     */
-    public function setClarid($clarid)
+    public function setClarid(int $clarid): Clarification
     {
         $this->clarid = $clarid;
-
         return $this;
     }
 
-    /**
-     * Get clarid
-     *
-     * @return integer
-     */
-    public function getClarid()
+    public function getClarid(): int
     {
         return $this->clarid;
     }
 
-    /**
-     * Set externalid
-     *
-     * @param string $externalid
-     *
-     * @return Clarification
-     */
-    public function setExternalid($externalid)
+    public function setExternalid(string $externalid): Clarification
     {
         $this->externalid = $externalid;
-
         return $this;
     }
 
-    /**
-     * Get externalid
-     *
-     * @return string
-     */
-    public function getExternalid()
+    public function getExternalid(): ?string
     {
         return $this->externalid;
     }
 
-    /**
-     * Set cid
-     *
-     * @param integer $cid
-     *
-     * @return Clarification
-     */
-    public function setCid($cid)
+    public function setCid(int $cid): Clarification
     {
         $this->cid = $cid;
-
         return $this;
     }
 
-    /**
-     * Get cid
-     *
-     * @return integer
-     */
-    public function getCid()
+    public function getCid(): int
     {
         return $this->cid;
     }
 
-    /**
-     * Set submittime
-     *
-     * @param double $submittime
-     *
-     * @return Clarification
-     */
-    public function setSubmittime($submittime)
+    /** @param string|float $submittime */
+    public function setSubmittime($submittime): Clarification
     {
         $this->submittime = $submittime;
-
         return $this;
     }
 
-    /**
-     * Get submittime
-     *
-     * @return double
-     */
+    /** @return string|float */
     public function getSubmittime()
     {
         return $this->submittime;
     }
 
     /**
-     * Get the absolute submit time for this clarification
-     *
-     * @return string
      * @Serializer\VirtualProperty()
      * @Serializer\SerializedName("time")
      * @Serializer\Type("string")
      */
-    public function getAbsoluteSubmitTime()
+    public function getAbsoluteSubmitTime(): string
     {
         return Utils::absTime($this->getSubmittime());
     }
 
     /**
-     * Get the relative submit time for this clarification
-     *
-     * @return string
      * @Serializer\VirtualProperty()
      * @Serializer\SerializedName("contest_time")
      * @Serializer\Type("string")
      */
-    public function getRelativeSubmitTime()
+    public function getRelativeSubmitTime(): string
     {
         return Utils::relTime($this->getSubmittime() - $this->getContest()->getStarttime());
     }
 
-    /**
-     * Set juryMember
-     *
-     * @param string $juryMember
-     *
-     * @return Clarification
-     */
-    public function setJuryMember($juryMember)
+    public function setJuryMember(string $juryMember): Clarification
     {
         $this->jury_member = $juryMember;
-
         return $this;
     }
 
-    /**
-     * Get juryMember
-     *
-     * @return string
-     */
-    public function getJuryMember()
+    public function getJuryMember(): ?string
     {
         return $this->jury_member;
     }
 
-    /**
-     * Set category
-     *
-     * @param string $category
-     *
-     * @return Clarification
-     */
-    public function setCategory($category)
+    public function setCategory(?string $category): Clarification
     {
         $this->category = $category;
-
         return $this;
     }
 
-    /**
-     * Get category
-     *
-     * @return string
-     */
-    public function getCategory()
+    public function getCategory(): ?string
     {
         return $this->category;
     }
 
-    /**
-     * Set queue
-     *
-     * @param string $queue
-     *
-     * @return Clarification
-     */
-    public function setQueue($queue)
+    public function setQueue(?string $queue): Clarification
     {
         $this->queue = $queue;
-
         return $this;
     }
 
-    /**
-     * Get queue
-     *
-     * @return string
-     */
-    public function getQueue()
+    public function getQueue(): ?string
     {
         return $this->queue;
     }
 
-    /**
-     * Set body
-     *
-     * @param string $body
-     *
-     * @return Clarification
-     */
-    public function setBody($body)
+    public function setBody(string $body): Clarification
     {
         $this->body = $body;
-
         return $this;
     }
 
-    /**
-     * Get body
-     *
-     * @return string
-     */
-    public function getBody()
+    public function getBody(): string
     {
         return $this->body;
     }
 
-    /**
-     * Set answered
-     *
-     * @param boolean $answered
-     *
-     * @return Clarification
-     */
-    public function setAnswered($answered)
+    public function setAnswered(bool $answered): Clarification
     {
         $this->answered = $answered;
-
         return $this;
     }
 
-    /**
-     * Get answered
-     *
-     * @return boolean
-     */
-    public function getAnswered()
+    public function getAnswered(): bool
     {
         return $this->answered;
     }
 
-    /**
-     * Set problem
-     *
-     * @param \App\Entity\Problem $problem
-     *
-     * @return Clarification
-     */
-    public function setProblem(\App\Entity\Problem $problem = null)
+    public function setProblem(Problem $problem = null): Clarification
     {
         $this->problem = $problem;
-
         return $this;
     }
 
-    /**
-     * Get problem
-     *
-     * @return \App\Entity\Problem
-     */
-    public function getProblem()
+    public function getProblem(): ?Problem
     {
         return $this->problem;
     }
 
     /**
-     * @return int|null
      * @Serializer\VirtualProperty()
      * @Serializer\SerializedName("problem_id")
      * @Serializer\Type("string")
@@ -429,56 +291,29 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
         return $this->getProblem() ? $this->getProblem()->getProbid() : null;
     }
 
-    /**
-     * Set contest
-     *
-     * @param \App\Entity\Contest $contest
-     *
-     * @return Clarification
-     */
-    public function setContest(\App\Entity\Contest $contest = null)
+    public function setContest(Contest $contest = null): Clarification
     {
         $this->contest = $contest;
-
         return $this;
     }
 
-    /**
-     * Get contest
-     *
-     * @return \App\Entity\Contest
-     */
-    public function getContest()
+    public function getContest(): Contest
     {
         return $this->contest;
     }
 
-    /**
-     * Set inReplyTo
-     *
-     * @param \App\Entity\Clarification $inReplyTo
-     *
-     * @return Clarification
-     */
-    public function setInReplyTo(\App\Entity\Clarification $inReplyTo = null)
+    public function setInReplyTo(Clarification $inReplyTo = null): Clarification
     {
         $this->in_reply_to = $inReplyTo;
-
         return $this;
     }
 
-    /**
-     * Get inReplyTo
-     *
-     * @return \App\Entity\Clarification
-     */
-    public function getInReplyTo()
+    public function getInReplyTo(): ?Clarification
     {
         return $this->in_reply_to;
     }
 
     /**
-     * @return int|null
      * @Serializer\VirtualProperty()
      * @Serializer\SerializedName("reply_to_id")
      * @Serializer\Type("string")
@@ -488,66 +323,34 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
         return $this->getInReplyTo() ? $this->getInReplyTo()->getClarid() : null;
     }
 
-    /**
-     * Add reply
-     *
-     * @param \App\Entity\Clarification $reply
-     *
-     * @return Clarification
-     */
-    public function addReply(\App\Entity\Clarification $reply)
+    public function addReply(Clarification $reply): Clarification
     {
         $this->replies[] = $reply;
-
         return $this;
     }
 
-    /**
-     * Remove reply
-     *
-     * @param \App\Entity\Clarification $reply
-     */
-    public function removeReply(\App\Entity\Clarification $reply)
+    public function removeReply(Clarification $reply)
     {
         $this->replies->removeElement($reply);
     }
 
-    /**
-     * Get replies
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getReplies()
+    public function getReplies(): Collection
     {
         return $this->replies;
     }
 
-    /**
-     * Set sender
-     *
-     * @param \App\Entity\Team $sender
-     *
-     * @return Clarification
-     */
-    public function setSender(\App\Entity\Team $sender = null)
+    public function setSender(Team $sender = null): Clarification
     {
         $this->sender = $sender;
-
         return $this;
     }
 
-    /**
-     * Get sender
-     *
-     * @return \App\Entity\Team
-     */
-    public function getSender()
+    public function getSender(): ?Team
     {
         return $this->sender;
     }
 
     /**
-     * @return int|null
      * @Serializer\VirtualProperty()
      * @Serializer\SerializedName("from_team_id")
      * @Serializer\Type("string")
@@ -557,32 +360,18 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
         return $this->getSender() ? $this->getSender()->getTeamid() : null;
     }
 
-    /**
-     * Set recipient
-     *
-     * @param \App\Entity\Team $recipient
-     *
-     * @return Clarification
-     */
-    public function setRecipient(\App\Entity\Team $recipient = null)
+    public function setRecipient(Team $recipient = null): Clarification
     {
         $this->recipient = $recipient;
-
         return $this;
     }
 
-    /**
-     * Get recipient
-     *
-     * @return \App\Entity\Team
-     */
-    public function getRecipient()
+    public function getRecipient(): ?Team
     {
         return $this->recipient;
     }
 
     /**
-     * @return int|null
      * @Serializer\VirtualProperty()
      * @Serializer\SerializedName("to_team_id")
      * @Serializer\Type("string")
@@ -597,25 +386,20 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
      *
      * This method should return an array with as keys the JSON field names and as values the actual entity
      * objects that the SetExternalIdVisitor should check for applicable external ID's
-     * @return array
      */
     public function getExternalRelationships(): array
     {
         return [
             'from_team_id' => $this->getSender(),
-            'to_team_id' => $this->getRecipient(),
-            'problem_id' => $this->getProblem(),
-            'reply_to_id' => $this->getInReplyTo()
+            'to_team_id'   => $this->getRecipient(),
+            'problem_id'   => $this->getProblem(),
+            'reply_to_id'  => $this->getInReplyTo()
         ];
     }
 
-    /**
-     * Get the summary for this clarification
-     * @return string
-     */
     public function getSummary(): string
     {
-        // when making a summary, try to ignore the quoted text, and replace newlines by spaces.
+        // When compiling a summary, try to ignore the quoted text, and replace newlines by spaces.
         $split = explode("\n", $this->getBody());
         $newBody = '';
         foreach ($split as $line) {

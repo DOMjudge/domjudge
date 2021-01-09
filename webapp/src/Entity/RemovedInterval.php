@@ -9,7 +9,8 @@ use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 /**
- * Time intervals removed from the contest for scoring
+ * Time intervals removed from the contest for scoring.
+ *
  * @ORM\Entity()
  * @ORM\Table(
  *     name="removed_interval",
@@ -68,73 +69,41 @@ class RemovedInterval
      */
     private $contest;
 
-    /**
-     * Get intervalid
-     *
-     * @return integer
-     */
-    public function getIntervalid()
+    public function getIntervalid(): int
     {
         return $this->intervalid;
     }
 
-    /**
-     * Set starttime
-     *
-     * @param string $starttime
-     *
-     * @return RemovedInterval
-     */
-    public function setStarttime($starttime)
+    /** @param string|float $starttime */
+    public function setStarttime($starttime): RemovedInterval
     {
         $this->starttime = $starttime;
-
         return $this;
     }
 
-    /**
-     * Get starttime
-     *
-     * @return string
-     */
+    /** @return string|float */
     public function getStarttime()
     {
         return $this->starttime;
     }
 
-    /**
-     * Set endtime
-     *
-     * @param string $endtime
-     *
-     * @return RemovedInterval
-     */
-    public function setEndtime($endtime)
+    /** @param string|float $endtime */
+    public function setEndtime($endtime): RemovedInterval
     {
         $this->endtime = $endtime;
-
         return $this;
     }
 
-    /**
-     * Get endtime
-     *
-     * @return string
-     */
+    /** @return string|float */
     public function getEndtime()
     {
         return $this->endtime;
     }
 
     /**
-     * Set starttimeString
-     *
-     * @param string $starttimeString
-     *
-     * @return RemovedInterval
      * @throws \Exception
      */
-    public function setStarttimeString($starttimeString)
+    public function setStarttimeString(string $starttimeString): RemovedInterval
     {
         $this->starttimeString = $starttimeString;
         $date                  = new \DateTime($starttimeString);
@@ -143,25 +112,15 @@ class RemovedInterval
         return $this;
     }
 
-    /**
-     * Get starttimeString
-     *
-     * @return string
-     */
-    public function getStarttimeString()
+    public function getStarttimeString(): ?string
     {
         return $this->starttimeString;
     }
 
     /**
-     * Set endtimeString
-     *
-     * @param string $endtimeString
-     *
-     * @return RemovedInterval
      * @throws \Exception
      */
-    public function setEndtimeString($endtimeString)
+    public function setEndtimeString(string $endtimeString): RemovedInterval
     {
         $this->endtimeString = $endtimeString;
         $date                = new \DateTime($endtimeString);
@@ -170,42 +129,23 @@ class RemovedInterval
         return $this;
     }
 
-    /**
-     * Get endtimeString
-     *
-     * @return string
-     */
-    public function getEndtimeString()
+    public function getEndtimeString(): ?string
     {
         return $this->endtimeString;
     }
 
-    /**
-     * Set contest
-     *
-     * @param Contest $contest
-     *
-     * @return RemovedInterval
-     */
-    public function setContest(Contest $contest = null)
+    public function setContest(?Contest $contest = null): RemovedInterval
     {
         $this->contest = $contest;
-
         return $this;
     }
 
-    /**
-     * Get contest
-     *
-     * @return Contest
-     */
-    public function getContest()
+    public function getContest(): Contest
     {
         return $this->contest;
     }
 
     /**
-     * @param ExecutionContextInterface $context
      * @Assert\Callback()
      */
     public function validate(ExecutionContextInterface $context)

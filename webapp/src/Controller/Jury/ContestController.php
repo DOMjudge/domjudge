@@ -155,7 +155,7 @@ class ContestController extends BaseController
                 return $this->redirectToRoute('jury_contests');
             }
 
-            $juryTimeData = $contest->getJuryTimeData();
+            $juryTimeData = $contest->getDataForJuryInterface();
             if (!$juryTimeData[$time]['show_button']) {
                 throw new BadRequestHttpException(
                     sprintf('Cannot update %s time at this moment', $time)

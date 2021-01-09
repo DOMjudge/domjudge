@@ -5,7 +5,8 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Files associated to a submission
+ * Files associated to a submission.
+ *
  * @ORM\Entity()
  * @ORM\Table(
  *     name="submission_file",
@@ -56,108 +57,51 @@ class SubmissionFile
      */
     private $sourcecode;
 
-    /**
-     * Get submitfileid
-     *
-     * @return integer
-     */
-    public function getSubmitfileid()
+    public function getSubmitfileid(): int
     {
         return $this->submitfileid;
     }
 
-    /**
-     * Set filename
-     *
-     * @param string $filename
-     *
-     * @return SubmissionFile
-     */
-    public function setFilename($filename)
+    public function setFilename(string $filename): SubmissionFile
     {
         $this->filename = $filename;
-
         return $this;
     }
 
-    /**
-     * Get filename
-     *
-     * @return string
-     */
-    public function getFilename()
+    public function getFilename(): string
     {
         return $this->filename;
     }
 
-    /**
-     * Set rank
-     *
-     * @param integer $rank
-     *
-     * @return SubmissionFile
-     */
-    public function setRank($rank)
+    public function setRank(int $rank): SubmissionFile
     {
         $this->ranknumber = $rank;
-
         return $this;
     }
 
-    /**
-     * Get rank
-     *
-     * @return integer
-     */
-    public function getRank()
+    public function getRank(): int
     {
         return $this->ranknumber;
     }
 
-    /**
-     * Set submission
-     *
-     * @param Submission $submission
-     *
-     * @return SubmissionFile
-     */
-    public function setSubmission(Submission $submission = null)
+    public function setSubmission(?Submission $submission = null): SubmissionFile
     {
         $this->submission = $submission;
-
         return $this;
     }
 
-    /**
-     * Get submission
-     *
-     * @return Submission
-     */
-    public function getSubmission()
+    public function getSubmission(): Submission
     {
         return $this->submission;
     }
 
-    /**
-     * Set sourcecode
-     *
-     * @param string $sourcecode
-     *
-     * @return SubmissionFile
-     */
-    public function setSourcecode($sourcecode)
+    public function setSourcecode(string $sourcecode): SubmissionFile
     {
         $this->sourcecode = $sourcecode;
-
         return $this;
     }
 
-    /**
-     * Get sourcecode
-     *
-     * @return string
-     */
-    public function getSourcecode()
+    public function getSourcecode(): string
     {
         return $this->sourcecode;
     }

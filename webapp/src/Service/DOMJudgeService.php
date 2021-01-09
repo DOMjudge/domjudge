@@ -463,13 +463,17 @@ class DOMJudgeService
             $user = $this->getUser() ? $this->getUser()->getUsername() : null;
         }
 
+        if (gettype($cid) == 'string') {
+            $cid = (int) $cid;
+        }
+
         $auditLog = new AuditLog();
         $auditLog
             ->setLogtime(Utils::now())
             ->setCid($cid)
             ->setUser($user)
             ->setDatatype($datatype)
-            ->setDataid($dataid)
+            ->setDataid((string)$dataid)
             ->setAction($action)
             ->setExtrainfo($extraInfo);
 

@@ -5,7 +5,8 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Log of all actions performed
+ * Log of all actions performed.
+ *
  * @ORM\Entity()
  * @ORM\Table(
  *     name="auditlog",
@@ -78,180 +79,86 @@ class AuditLog
      */
     private $extrainfo;
 
-    /**
-     * Get logid
-     *
-     * @return integer
-     */
-    public function getLogid()
+    public function getLogid(): int
     {
         return $this->logid;
     }
 
-    /**
-     * Set logtime
-     *
-     * @param string $logtime
-     *
-     * @return AuditLog
-     */
-    public function setLogtime($logtime)
+    /** @param string|float $logtime */
+    public function setLogtime($logtime): AuditLog
     {
         $this->logtime = $logtime;
-
         return $this;
     }
 
-    /**
-     * Get logtime
-     *
-     * @return string
-     */
+    /** @return string|float */
     public function getLogtime()
     {
         return $this->logtime;
     }
 
-    /**
-     * Set cid
-     *
-     * @param integer $cid
-     *
-     * @return AuditLog
-     */
-    public function setCid($cid)
+    public function setCid(?int $cid): AuditLog
     {
         $this->cid = $cid;
-
         return $this;
     }
 
-    /**
-     * Get cid
-     *
-     * @return integer
-     */
-    public function getCid()
+    public function getCid(): ?int
     {
         return $this->cid;
     }
 
-    /**
-     * Set user
-     *
-     * @param string $user
-     *
-     * @return AuditLog
-     */
-    public function setUser($user)
+    public function setUser(?string $user): AuditLog
     {
         $this->user = $user;
-
         return $this;
     }
 
-    /**
-     * Get user
-     *
-     * @return string
-     */
-    public function getUser()
+    public function getUser(): ?string
     {
         return $this->user;
     }
 
-    /**
-     * Set datatype
-     *
-     * @param string $datatype
-     *
-     * @return AuditLog
-     */
-    public function setDatatype($datatype)
+    public function setDatatype(string $datatype): AuditLog
     {
         $this->datatype = $datatype;
-
         return $this;
     }
 
-    /**
-     * Get datatype
-     *
-     * @return string
-     */
-    public function getDatatype()
+    public function getDatatype(): string
     {
         return $this->datatype;
     }
 
-    /**
-     * Set dataid
-     *
-     * @param string $dataid
-     *
-     * @return AuditLog
-     */
-    public function setDataid($dataid)
+    public function setDataid(string $dataid): AuditLog
     {
         $this->dataid = $dataid;
-
         return $this;
     }
 
-    /**
-     * Get dataid
-     *
-     * @return string
-     */
-    public function getDataid()
+    public function getDataid(): string
     {
         return $this->dataid;
     }
 
-    /**
-     * Set action
-     *
-     * @param string $action
-     *
-     * @return AuditLog
-     */
-    public function setAction($action)
+    public function setAction(string $action): AuditLog
     {
         $this->action = $action;
-
         return $this;
     }
 
-    /**
-     * Get action
-     *
-     * @return string
-     */
-    public function getAction()
+    public function getAction(): string
     {
         return $this->action;
     }
 
-    /**
-     * Set extrainfo
-     *
-     * @param string $extrainfo
-     *
-     * @return AuditLog
-     */
-    public function setExtrainfo($extrainfo)
+    public function setExtrainfo(?string $extrainfo): AuditLog
     {
         $this->extrainfo = $extrainfo;
-
         return $this;
     }
 
-    /**
-     * Get extrainfo
-     *
-     * @return string
-     */
-    public function getExtrainfo()
+    public function getExtrainfo(): ?string
     {
         return $this->extrainfo;
     }

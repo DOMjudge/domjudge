@@ -31,7 +31,7 @@
                             {% endif %}
                             <table class="table table-hover">
                                 <tbody>
-                                {% for type, data in contest.juryTimeData %}
+                                {% for type, data in contest.dataForJuryInterface %}
                                     <tr>
                                         <td class="{{ data.class|default('') }}">
                                             {% if data.icon is defined %}

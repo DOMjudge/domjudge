@@ -889,7 +889,7 @@ class JudgehostController extends AbstractFOSRestController
             $judgingRun->setOutput($judgingRunOutput);
             $judgingRun
                 ->setRunresult($runResult)
-                ->setRuntime($runTime)
+                ->setRuntime((float)$runTime)
                 ->setEndtime(Utils::now());
             $judgingRunOutput
                 ->setOutputRun(base64_decode($outputRun))

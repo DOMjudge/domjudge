@@ -5,7 +5,7 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Output of a judging run
+ * Output of a judging run.
  *
  * @ORM\Entity
  * @ORM\Table(
@@ -67,125 +67,62 @@ class JudgingRunOutput
      */
     private $metadata;
 
-    /**
-     * @param JudgingRun $run
-     *
-     * @return JudgingRunOutput
-     */
-    public function setRun(JudgingRun $run)
+    public function setRun(JudgingRun $run): JudgingRunOutput
     {
         $this->run = $run;
-
         return $this;
     }
 
-    /**
-     * Get run
-     *
-     * @return JudgingRun
-     */
     public function getRun(): JudgingRun
     {
         return $this->run;
     }
 
-    /**
-     * Set outputRun
-     *
-     * @param string $outputRun
-     *
-     * @return JudgingRunOutput
-     */
-    public function setOutputRun($outputRun)
+    public function setOutputRun($outputRun): JudgingRunOutput
     {
         $this->output_run = $outputRun;
-
         return $this;
     }
 
-    /**
-     * Get outputRun
-     *
-     * @return string
-     */
-    public function getOutputRun()
+    public function getOutputRun(): string
     {
         return $this->output_run;
     }
 
-    /**
-     * Set outputDiff
-     *
-     * @param string $outputDiff
-     *
-     * @return JudgingRunOutput
-     */
-    public function setOutputDiff($outputDiff)
+    public function setOutputDiff(string $outputDiff): JudgingRunOutput
     {
         $this->output_diff = $outputDiff;
-
         return $this;
     }
 
-    /**
-     * Get outputDiff
-     *
-     * @return string
-     */
-    public function getOutputDiff()
+    public function getOutputDiff(): string
     {
         return $this->output_diff;
     }
 
-    /**
-     * Set outputError
-     *
-     * @param string $outputError
-     *
-     * @return JudgingRunOutput
-     */
-    public function setOutputError($outputError)
+    public function setOutputError(string $outputError): JudgingRunOutput
     {
         $this->output_error = $outputError;
-
         return $this;
     }
 
-    /**
-     * Get outputError
-     *
-     * @return string
-     */
-    public function getOutputError()
+    public function getOutputError(): string
     {
         return $this->output_error;
     }
 
-    /**
-     * Set outputSystem
-     *
-     * @param string $outputSystem
-     *
-     * @return JudgingRunOutput
-     */
-    public function setOutputSystem($outputSystem)
+    public function setOutputSystem(string $outputSystem): JudgingRunOutput
     {
         $this->output_system = $outputSystem;
-
         return $this;
     }
 
-    /**
-     * Get outputSystem
-     *
-     * @return string
-     */
-    public function getOutputSystem()
+    public function getOutputSystem(): string
     {
         return $this->output_system;
     }
 
-    public function getMetadata()
+    public function getMetadata(): string
     {
         return $this->metadata;
     }
@@ -193,7 +130,6 @@ class JudgingRunOutput
     public function setMetadata($metadata): self
     {
         $this->metadata = $metadata;
-
         return $this;
     }
 }

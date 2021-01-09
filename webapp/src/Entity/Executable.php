@@ -8,7 +8,8 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * Compile, compare, and run script executable bundles
+ * Compile, compare, and run script executable bundles.
+ *
  * @ORM\Entity()
  * @ORM\Table(
  *     name="executable",
@@ -66,14 +67,11 @@ class Executable
      */
     private $problems_run;
 
-    /**
-     * Constructor
-     */
     public function __construct()
     {
-        $this->languages = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->languages        = new ArrayCollection();
         $this->problems_compare = new ArrayCollection();
-        $this->problems_run = new ArrayCollection();
+        $this->problems_run     = new ArrayCollection();
     }
 
     public function setExecid(string $execid): Executable
