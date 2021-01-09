@@ -10,7 +10,8 @@ use JMS\Serializer\Annotation as Serializer;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
- * All incoming submissions
+ * All incoming submissions.
+ *
  * @ORM\Entity()
  * @ORM\Table(
  *     name="submission",
@@ -187,12 +188,12 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
     private $resubmissions;
 
     /**
-     * @var string Holds the old result in the case this submission is displayed in a rejudging table
+     * @var string Holds the old result in the case this submission is displayed in a rejudging table.
      * @Serializer\Exclude()
      */
     private $old_result;
 
-    public function getResult()
+    public function getResult(): ?string
     {
         foreach ($this->judgings as $j) {
             if ($j->getValid()) {
@@ -202,476 +203,248 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
         return null;
     }
 
-    /**
-     * Get submitid
-     *
-     * @return integer
-     */
-    public function getSubmitid()
+    public function getSubmitid(): int
     {
         return $this->submitid;
     }
 
-    /**
-     * Set externalid
-     *
-     * @param string $externalid
-     *
-     * @return Submission
-     */
-    public function setExternalid($externalid)
+    public function setExternalid(?string $externalid): Submission
     {
         $this->externalid = $externalid;
-
         return $this;
     }
 
-    /**
-     * Get externalid
-     *
-     * @return string
-     */
-    public function getExternalid()
+    public function getExternalid(): ?string
     {
         return $this->externalid;
     }
 
     /**
-     * Get the language ID
-     * @return string
      * @Serializer\VirtualProperty()
      * @Serializer\SerializedName("language_id")
      * @Serializer\Type("string")
      */
-    public function getLanguageId()
+    public function getLanguageId(): string
     {
         return $this->getLanguage()->getExternalid();
     }
 
-    /**
-     * Set submittime
-     *
-     * @param string $submittime
-     *
-     * @return Submission
-     */
-    public function setSubmittime($submittime)
+    /** @param string|float $submittime */
+    public function setSubmittime($submittime): Submission
     {
         $this->submittime = $submittime;
-
         return $this;
     }
 
-    /**
-     * Get submittime
-     *
-     * @return string
-     */
+    /** @return string|float */
     public function getSubmittime()
     {
         return $this->submittime;
     }
 
     /**
-     * Get the absolute submit time for this submission
-     *
-     * @return string
      * @Serializer\VirtualProperty()
      * @Serializer\SerializedName("time")
      * @Serializer\Type("string")
      */
-    public function getAbsoluteSubmitTime()
+    public function getAbsoluteSubmitTime(): string
     {
         return Utils::absTime($this->getSubmittime());
     }
 
     /**
-     * Get the relative submit time for this submission
-     *
-     * @return string
      * @Serializer\VirtualProperty()
      * @Serializer\SerializedName("contest_time")
      * @Serializer\Type("string")
      */
-    public function getRelativeSubmitTime()
+    public function getRelativeSubmitTime(): string
     {
         return Utils::relTime($this->getContest()->getContestTime((float)$this->getSubmittime()));
     }
 
-    /**
-     * Set judgehost
-     *
-     * @param Judgehost|null $judgehost
-     *
-     * @return Submission
-     */
-    public function setJudgehost($judgehost)
+    public function setJudgehost(?Judgehost $judgehost): Submission
     {
         $this->judgehost = $judgehost;
-
         return $this;
     }
 
-    /**
-     * Get judgehost
-     *
-     * @return Judgehost|null
-     */
-    public function getJudgehost()
+    public function getJudgehost(): ?Judgehost
     {
         return $this->judgehost;
     }
 
-    /**
-     * Set valid
-     *
-     * @param boolean $valid
-     *
-     * @return Submission
-     */
-    public function setValid($valid)
+    public function setValid(bool $valid): Submission
     {
         $this->valid = $valid;
-
         return $this;
     }
 
-    /**
-     * Get valid
-     *
-     * @return boolean
-     */
-    public function getValid()
+    public function getValid(): bool
     {
         return $this->valid;
     }
 
-    /**
-     * Set expectedResults
-     *
-     * @param array $expectedResults
-     *
-     * @return Submission
-     */
-    public function setExpectedResults($expectedResults)
+    public function setExpectedResults(array $expectedResults): Submission
     {
         $this->expected_results = $expectedResults;
-
         return $this;
     }
 
-    /**
-     * Get expectedResults
-     *
-     * @return array
-     */
-    public function getExpectedResults()
+    public function getExpectedResults(): array
     {
         return $this->expected_results;
     }
 
-    /**
-     * Set entry_point
-     *
-     * @param string $entryPoint
-     *
-     * @return Submission
-     */
-    public function setEntryPoint($entryPoint)
+    public function setEntryPoint(?string $entryPoint): Submission
     {
         $this->entry_point = $entryPoint;
-
         return $this;
     }
 
-    /**
-     * Get entry_point
-     *
-     * @return string
-     */
-    public function getEntryPoint()
+    public function getEntryPoint(): ?string
     {
         return $this->entry_point;
     }
 
-    /**
-     * Set team
-     *
-     * @param \App\Entity\Team $team
-     *
-     * @return Submission
-     */
-    public function setTeam(\App\Entity\Team $team = null)
+    public function setTeam(?Team $team = null): Submission
     {
         $this->team = $team;
-
         return $this;
     }
 
-    /**
-     * Get team
-     *
-     * @return \App\Entity\Team
-     */
-    public function getTeam()
+    public function getTeam(): Team
     {
         return $this->team;
     }
 
     /**
-     * Get the team ID
-     * @return string
      * @Serializer\VirtualProperty()
      * @Serializer\SerializedName("team_id")
      * @Serializer\Type("string")
      */
-    public function getTeamId()
+    public function getTeamId(): int
     {
         return $this->getTeam()->getTeamid();
     }
 
-    /**
-     * Constructor
-     */
     public function __construct()
     {
         $this->judgings            = new ArrayCollection();
         $this->files               = new ArrayCollection();
         $this->resubmissions       = new ArrayCollection();
         $this->external_judgements = new ArrayCollection();
-        $this->balloons = new ArrayCollection();
+        $this->balloons            = new ArrayCollection();
     }
 
-    /**
-     * Add judging
-     *
-     * @param Judging $judging
-     *
-     * @return Submission
-     */
-    public function addJudging(Judging $judging)
+    public function addJudging(Judging $judging): Submission
     {
         $this->judgings[] = $judging;
-
         return $this;
     }
 
-    /**
-     * Remove judging
-     *
-     * @param Judging $judging
-     */
     public function removeJudging(Judging $judging)
     {
         $this->judgings->removeElement($judging);
     }
 
-    /**
-     * Get judgings
-     *
-     * @return Collection
-     */
-    public function getJudgings()
+    public function getJudgings(): Collection
     {
         return $this->judgings;
     }
 
-    /**
-     * Set language
-     *
-     * @param Language $language
-     *
-     * @return Submission
-     */
-    public function setLanguage(Language $language = null)
+    public function setLanguage(?Language $language = null): Submission
     {
         $this->language = $language;
-
         return $this;
     }
 
-    /**
-     * Get language
-     *
-     * @return Language
-     */
-    public function getLanguage()
+    public function getLanguage(): Language
     {
         return $this->language;
     }
 
-    /**
-     * Add file
-     *
-     * @param SubmissionFile $file
-     *
-     * @return Submission
-     */
-    public function addFile(SubmissionFile $file)
+    public function addFile(SubmissionFile $file): Submission
     {
         $this->files->add($file);
-
         return $this;
     }
 
-    /**
-     * Remove file
-     *
-     * @param SubmissionFile $file
-     */
     public function removeFile(SubmissionFile $file)
     {
         $this->files->removeElement($file);
     }
 
-    /**
-     * Get files
-     *
-     * @return Collection
-     */
-    public function getFiles()
+    public function getFiles(): Collection
     {
         return $this->files;
     }
 
-    /**
-     * Add balloon
-     *
-     * @param Balloon $balloon
-     *
-     * @return Submission
-     */
-    public function addBalloon(Balloon $balloon)
+    public function addBalloon(Balloon $balloon): Submission
     {
         $this->balloons[] = $balloon;
-
         return $this;
     }
 
-    /**
-     * Remove balloon
-     *
-     * @param Balloon $balloon
-     */
     public function removeBalloon(Balloon $balloon)
     {
         $this->balloons->removeElement($balloon);
     }
 
-    /**
-     * Get balloons
-     *
-     * @return Collection
-     */
-    public function getBalloons()
+    public function getBalloons(): Collection
     {
         return $this->balloons;
     }
 
-    /**
-     * Set contest
-     *
-     * @param Contest $contest
-     *
-     * @return Submission
-     */
-    public function setContest(Contest $contest = null)
+    public function setContest(?Contest $contest = null): Submission
     {
         $this->contest = $contest;
-
         return $this;
     }
 
-    /**
-     * Get contest
-     *
-     * @return Contest
-     */
-    public function getContest()
+    public function getContest(): Contest
     {
         return $this->contest;
     }
 
-    /**
-     * Set problem
-     *
-     * @param Problem $problem
-     *
-     * @return Submission
-     */
-    public function setProblem(Problem $problem = null)
+    public function setProblem(?Problem $problem = null): Submission
     {
         $this->problem = $problem;
-
         return $this;
     }
 
-    /**
-     * Get problem
-     *
-     * @return Problem
-     */
-    public function getProblem()
+    public function getProblem(): Problem
     {
         return $this->problem;
     }
 
     /**
-     * Get the problem ID
-     * @return string
      * @Serializer\VirtualProperty()
      * @Serializer\SerializedName("problem_id")
      * @Serializer\Type("string")
      */
-    public function getProblemId()
+    public function getProblemId(): int
     {
         return $this->getProblem()->getProbid();
     }
 
-    /**
-     * Set contest problem
-     *
-     * @param ContestProblem $contestProblem
-     *
-     * @return Submission
-     */
-    public function setContestProblem(ContestProblem $contestProblem = null)
+    public function setContestProblem(?ContestProblem $contestProblem = null): Submission
     {
         $this->contest_problem = $contestProblem;
-
         return $this;
     }
 
-    /**
-     * Get contest problem
-     *
-     * @return ContestProblem
-     */
-    public function getContestProblem()
+    public function getContestProblem(): ContestProblem
     {
         return $this->contest_problem;
     }
 
-    /**
-     * Set rejudging
-     *
-     * @param Rejudging $rejudging
-     *
-     * @return Submission
-     */
-    public function setRejudging(Rejudging $rejudging = null)
+    public function setRejudging(?Rejudging $rejudging = null): Submission
     {
         $this->rejudging = $rejudging;
-
         return $this;
     }
 
-    /**
-     * Get rejudging
-     *
-     * @return Rejudging
-     */
-    public function getRejudging()
+    public function getRejudging(): ?Rejudging
     {
         return $this->rejudging;
     }
@@ -680,94 +453,57 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
      * Get the entities to check for external ID's while serializing.
      *
      * This method should return an array with as keys the JSON field names and as values the actual entity
-     * objects that the SetExternalIdVisitor should check for applicable external ID's
-     * @return array
+     * objects that the SetExternalIdVisitor should check for applicable external ID's.
      */
     public function getExternalRelationships(): array
     {
         return [
             'language_id' => $this->getLanguage(),
-            'problem_id' => $this->getProblem(),
-            'team_id' => $this->getTeam(),
+            'problem_id'  => $this->getProblem(),
+            'team_id'     => $this->getTeam(),
         ];
     }
 
-    /**
-     * Return whether this submission is after the freeze
-     * @return bool
-     */
     public function isAfterFreeze(): bool
     {
         return $this->getContest()->getFreezetime() !== null && (float)$this->getSubmittime() >= (float)$this->getContest()->getFreezetime();
     }
 
-    /**
-     * @return string
-     */
     public function getOldResult(): string
     {
         return $this->old_result;
     }
 
-    /**
-     * @param string $old_result
-     * @return Submission
-     */
     public function setOldResult(string $old_result): Submission
     {
         $this->old_result = $old_result;
         return $this;
     }
 
-    /**
-     * Get original submission
-     * @return Submission|null
-     */
-    public function getOriginalSubmission()
+    public function getOriginalSubmission(): ?Submission
     {
         return $this->originalSubmission;
     }
 
-    /**
-     * Set original submission
-     * @param Submission|null $originalSubmission
-     * @return Submission
-     */
-    public function setOriginalSubmission($originalSubmission): Submission
+    public function setOriginalSubmission(?Submission $originalSubmission): Submission
     {
         $this->originalSubmission = $originalSubmission;
         return $this;
     }
 
-    /**
-     * Add resubmission
-     *
-     * @param Submission $submission
-     * @return Submission
-     */
-    public function addResubmission(Submission $submission)
+    public function addResubmission(Submission $submission): Submission
     {
         $this->resubmissions->add($submission);
-
         return $this;
     }
 
-    /**
-     * Remove resubmission
-     *
-     * @param Submission $submission
-     * @return Submission
-     */
-    public function removeResubmission(Submission $submission)
+    public function removeResubmission(Submission $submission): Submission
     {
         $this->resubmissions->removeElement($submission);
-
         return $this;
     }
 
     /**
-     * Get resubmissions
-     *
      * @return Collection|Submission[]
      */
     public function getResubmissions()
@@ -775,13 +511,9 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
         return $this->resubmissions;
     }
 
-    /**
-     * Check whether this submission is for an aborted judging
-     * @return bool
-     */
-    public function isAborted()
+    public function isAborted(): bool
     {
-        // This logic has been copied from putSubmissions()
+        // This logic has been copied from putSubmissions().
         /** @var Judging|null $judging */
         $judging = $this->getJudgings()->first();
         if (!$judging) {
@@ -795,9 +527,8 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
     /**
      * Check whether this submission is still busy while the final result is already known,
      * e.g. with non-lazy evaluation.
-     * @return bool
      */
-    public function isStillBusy()
+    public function isStillBusy(): bool
     {
         /** @var Judging|null $judging */
         $judging = $this->getJudgings()->first();
@@ -808,36 +539,18 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
         return !empty($judging->getResult()) && empty($judging->getEndtime()) && !$this->isAborted();
     }
 
-    /**
-     * Add externalJudgement
-     *
-     * @param ExternalJudgement $externalJudgement
-     *
-     * @return Submission
-     */
-    public function addExternalJudgement(ExternalJudgement $externalJudgement)
+    public function addExternalJudgement(ExternalJudgement $externalJudgement): Submission
     {
         $this->external_judgements[] = $externalJudgement;
-
         return $this;
     }
 
-    /**
-     * Remove externalJudgement
-     *
-     * @param ExternalJudgement $externalJudgement
-     */
     public function removeExternalJudgement(ExternalJudgement $externalJudgement)
     {
         $this->external_judgements->removeElement($externalJudgement);
     }
 
-    /**
-     * Get externalJudgements
-     *
-     * @return Collection
-     */
-    public function getExternalJudgements()
+    public function getExternalJudgements(): Collection
     {
         return $this->external_judgements;
     }

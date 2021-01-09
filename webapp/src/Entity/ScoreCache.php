@@ -4,7 +4,8 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Scoreboard cache
+ * Scoreboard cache.
+ *
  * @ORM\Entity()
  * @ORM\Table(
  *     name="scorecache",
@@ -127,329 +128,158 @@ class ScoreCache
      */
     private $problem;
 
-    /**
-     * Set submissionsRestricted
-     *
-     * @param integer $submissionsRestricted
-     *
-     * @return ScoreCache
-     */
-    public function setSubmissionsRestricted($submissionsRestricted)
+    public function setSubmissionsRestricted(int $submissionsRestricted): ScoreCache
     {
         $this->submissions_restricted = $submissionsRestricted;
-
         return $this;
     }
 
-    /**
-     * Get submissionsRestricted
-     *
-     * @return integer
-     */
-    public function getSubmissionsRestricted()
+    public function getSubmissionsRestricted(): int
     {
         return $this->submissions_restricted;
     }
 
-    /**
-     * Set pendingRestricted
-     *
-     * @param integer $pendingRestricted
-     *
-     * @return ScoreCache
-     */
-    public function setPendingRestricted($pendingRestricted)
+    public function setPendingRestricted(int $pendingRestricted): ScoreCache
     {
         $this->pending_restricted = $pendingRestricted;
-
         return $this;
     }
 
-    /**
-     * Get pendingRestricted
-     *
-     * @return integer
-     */
-    public function getPendingRestricted()
+    public function getPendingRestricted(): int
     {
         return $this->pending_restricted;
     }
 
-    /**
-     * Set isCorrectRestricted
-     *
-     * @param boolean $isCorrectRestricted
-     *
-     * @return ScoreCache
-     */
-    public function setIsCorrectRestricted($isCorrectRestricted)
+    public function setIsCorrectRestricted(bool $isCorrectRestricted): ScoreCache
     {
         $this->is_correct_restricted = $isCorrectRestricted;
-
         return $this;
     }
 
-    /**
-     * Get isCorrectRestricted
-     *
-     * @return boolean
-     */
-    public function getIsCorrectRestricted()
+    public function getIsCorrectRestricted(): bool
     {
         return $this->is_correct_restricted;
     }
 
-    /**
-     * Set solvetimeRestricted
-     *
-     * @param double $solvetimeRestricted
-     *
-     * @return ScoreCache
-     */
-    public function setSolvetimeRestricted($solvetimeRestricted)
+    /** @param string|float $solvetimeRestricted */
+    public function setSolvetimeRestricted($solvetimeRestricted): ScoreCache
     {
         $this->solvetime_restricted = $solvetimeRestricted;
-
         return $this;
     }
 
-    /**
-     * Get solvetimeRestricted
-     *
-     * @return string
-     */
+    /** @return string|float */
     public function getSolvetimeRestricted()
     {
         return $this->solvetime_restricted;
     }
 
-    /**
-     * Set submissionsPublic
-     *
-     * @param integer $submissionsPublic
-     *
-     * @return ScoreCache
-     */
-    public function setSubmissionsPublic($submissionsPublic)
+    public function setSubmissionsPublic(int $submissionsPublic): ScoreCache
     {
         $this->submissions_public = $submissionsPublic;
-
         return $this;
     }
 
-    /**
-     * Get submissionsPublic
-     *
-     * @return integer
-     */
-    public function getSubmissionsPublic()
+    public function getSubmissionsPublic(): int
     {
         return $this->submissions_public;
     }
 
-    /**
-     * Set pendingPublic
-     *
-     * @param integer $pendingPublic
-     *
-     * @return ScoreCache
-     */
-    public function setPendingPublic($pendingPublic)
+    public function setPendingPublic(int $pendingPublic): ScoreCache
     {
         $this->pending_public = $pendingPublic;
-
         return $this;
     }
 
-    /**
-     * Get pendingPublic
-     *
-     * @return integer
-     */
-    public function getPendingPublic()
+    public function getPendingPublic(): int
     {
         return $this->pending_public;
     }
 
-    /**
-     * Set isCorrectPublic
-     *
-     * @param boolean $isCorrectPublic
-     *
-     * @return ScoreCache
-     */
-    public function setIsCorrectPublic($isCorrectPublic)
+    public function setIsCorrectPublic(bool $isCorrectPublic): ScoreCache
     {
         $this->is_correct_public = $isCorrectPublic;
-
         return $this;
     }
 
-    /**
-     * Get isCorrectPublic
-     *
-     * @return boolean
-     */
-    public function getIsCorrectPublic()
+    public function getIsCorrectPublic(): bool
     {
         return $this->is_correct_public;
     }
 
-    /**
-     * Set solvetimePublic
-     *
-     * @param double $solvetimePublic
-     *
-     * @return ScoreCache
-     */
-    public function setSolvetimePublic($solvetimePublic)
+    /** @param string|float $solvetimePublic */
+    public function setSolvetimePublic($solvetimePublic): ScoreCache
     {
         $this->solvetime_public = $solvetimePublic;
-
         return $this;
     }
 
-    /**
-     * Get solvetimePublic
-     *
-     * @return string
-     */
+    /** @return string|float */
     public function getSolvetimePublic()
     {
         return $this->solvetime_public;
     }
 
-    /**
-     * Set isFirstToSolve
-     *
-     * @param boolean $isFirstToSolve
-     *
-     * @return ScoreCache
-     */
-    public function setIsFirstToSolve(bool $isFirstToSolve)
+    public function setIsFirstToSolve(bool $isFirstToSolve): ScoreCache
     {
         $this->is_first_to_solve = $isFirstToSolve;
-
         return $this;
     }
 
-    /**
-     * Get isFirstToSolve
-     *
-     * @return boolean
-     */
     public function getIsFirstToSolve() : bool
     {
         return $this->is_first_to_solve;
     }
 
-    /**
-     * Set contest
-     *
-     * @param \App\Entity\Contest $contest
-     *
-     * @return ScoreCache
-     */
-    public function setContest(\App\Entity\Contest $contest = null)
+    public function setContest(?Contest $contest = null): ScoreCache
     {
         $this->contest = $contest;
-
         return $this;
     }
 
-    /**
-     * Get contest
-     *
-     * @return \App\Entity\Contest
-     */
-    public function getContest()
+    public function getContest(): ScoreCache
     {
         return $this->contest;
     }
 
-    /**
-     * Set team
-     *
-     * @param \App\Entity\Team $team
-     *
-     * @return ScoreCache
-     */
-    public function setTeam(\App\Entity\Team $team = null)
+    public function setTeam(?Team $team = null): ScoreCache
     {
         $this->team = $team;
-
         return $this;
     }
 
-    /**
-     * Get team
-     *
-     * @return \App\Entity\Team
-     */
-    public function getTeam()
+    public function getTeam(): Team
     {
         return $this->team;
     }
 
-    /**
-     * Set problem
-     *
-     * @param \App\Entity\Problem $problem
-     *
-     * @return ScoreCache
-     */
-    public function setProblem(\App\Entity\Problem $problem = null)
+    public function setProblem(?Problem $problem = null): ScoreCache
     {
         $this->problem = $problem;
-
         return $this;
     }
 
-    /**
-     * Get problem
-     *
-     * @return \App\Entity\Problem
-     */
-    public function getProblem()
+    public function getProblem(): Problem
     {
         return $this->problem;
     }
 
-    /**
-     * Get the number of public or restricted submissions based on the parameter
-     * @param bool $restricted
-     * @return int
-     */
     public function getSubmissions(bool $restricted): int
     {
         return $restricted ? $this->getSubmissionsRestricted() : $this->getSubmissionsPublic();
     }
 
-    /**
-     * Get the number of public or restricted pending submissions based on the parameter
-     * @param bool $restricted
-     * @return int
-     */
     public function getPending(bool $restricted): int
     {
         return $restricted ? $this->getPendingRestricted() : $this->getPendingPublic();
     }
 
-    /**
-     * Get the public or restricted solve time based on the parameter
-     * @param bool $restricted
-     * @return float|string
-     */
+    /** @return string|float */
     public function getSolveTime(bool $restricted)
     {
         return $restricted ? $this->getSolvetimeRestricted() : $this->getSolvetimePublic();
     }
 
-    /**
-     * Get whether the problem is publicly or restrictedly correct based on the parameter
-     * @param bool $restricted
-     * @return bool
-     */
     public function getIsCorrect(bool $restricted): bool
     {
         return $restricted ? $this->getIsCorrectRestricted() : $this->getIsCorrectPublic();

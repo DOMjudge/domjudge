@@ -7,7 +7,8 @@ use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
 
 /**
- * Rejudge group
+ * Rejudge group.
+ *
  * @ORM\Entity()
  * @ORM\Table(
  *     name="rejudging",
@@ -65,27 +66,27 @@ class Rejudging
     private $valid = true;
 
     /**
-     * Who started the rejudging
+     * Who started the rejudging.
      * @ORM\ManyToOne(targetEntity="User")
      * @ORM\JoinColumn(name="userid_start", referencedColumnName="userid", onDelete="SET NULL")
      */
     private $start_user;
 
     /**
-     * Who finished the rejudging
+     * Who finished the rejudging.
      * @ORM\ManyToOne(targetEntity="User")
      * @ORM\JoinColumn(name="userid_finish", referencedColumnName="userid", onDelete="SET NULL")
      */
     private $finish_user;
 
     /**
-     * One rejudging has many judgings
+     * One rejudging has many judgings.
      * @ORM\OneToMany(targetEntity="Judging", mappedBy="rejudging")
      */
     private $judgings;
 
     /**
-     * One rejudging has many submissions
+     * One rejudging has many submissions.
      * @ORM\OneToMany(targetEntity="App\Entity\Submission", mappedBy="rejudging")
      */
     private $submissions;
@@ -116,305 +117,148 @@ class Rejudging
      */
     private $repeatedRejudging;
 
-    /**
-     * Constructor
-     */
     public function __construct()
     {
-        $this->judgings = new ArrayCollection();
+        $this->judgings    = new ArrayCollection();
         $this->submissions = new ArrayCollection();
     }
 
-    /**
-     * Get rejudgingid
-     *
-     * @return integer
-     */
-    public function getRejudgingid()
+    public function getRejudgingid(): int
     {
         return $this->rejudgingid;
     }
 
-    /**
-     * Set starttime
-     *
-     * @param string $starttime
-     *
-     * @return Rejudging
-     */
-    public function setStarttime($starttime)
+    /** @param string|float $starttime */
+    public function setStarttime($starttime): Rejudging
     {
         $this->starttime = $starttime;
-
         return $this;
     }
 
-    /**
-     * Get starttime
-     *
-     * @return string
-     */
+    /** @return string|float */
     public function getStarttime()
     {
         return $this->starttime;
     }
 
-    /**
-     * Set endtime
-     *
-     * @param string $endtime
-     *
-     * @return Rejudging
-     */
-    public function setEndtime($endtime)
+    /** @param string|float $endtime */
+    public function setEndtime($endtime): Rejudging
     {
         $this->endtime = $endtime;
-
         return $this;
     }
 
-    /**
-     * Get endtime
-     *
-     * @return string
-     */
+    /** @return string|float */
     public function getEndtime()
     {
         return $this->endtime;
     }
 
-    /**
-     * Set reason
-     *
-     * @param string $reason
-     *
-     * @return Rejudging
-     */
-    public function setReason($reason)
+    public function setReason(string $reason): Rejudging
     {
         $this->reason = $reason;
-
         return $this;
     }
 
-    /**
-     * Get reason
-     *
-     * @return string
-     */
-    public function getReason()
+    public function getReason(): string
     {
         return $this->reason;
     }
 
-    /**
-     * Set valid
-     *
-     * @param boolean $valid
-     *
-     * @return Rejudging
-     */
-    public function setValid($valid)
+    public function setValid(bool $valid): Rejudging
     {
         $this->valid = $valid;
-
         return $this;
     }
 
-    /**
-     * Get valid
-     *
-     * @return boolean
-     */
-    public function getValid()
+    public function getValid(): bool
     {
         return $this->valid;
     }
 
-    /**
-     * Set startUser
-     *
-     * @param \App\Entity\User $startUser
-     *
-     * @return Rejudging
-     */
-    public function setStartUser(\App\Entity\User $startUser = null)
+    public function setStartUser(?User $startUser = null): Rejudging
     {
         $this->start_user = $startUser;
-
         return $this;
     }
 
-    /**
-     * Get startUser
-     *
-     * @return \App\Entity\User
-     */
-    public function getStartUser()
+    public function getStartUser(): ?User
     {
         return $this->start_user;
     }
 
-    /**
-     * Set finishUser
-     *
-     * @param \App\Entity\User $finishUser
-     *
-     * @return Rejudging
-     */
-    public function setFinishUser(\App\Entity\User $finishUser = null)
+    public function setFinishUser(?User $finishUser = null): Rejudging
     {
         $this->finish_user = $finishUser;
-
         return $this;
     }
 
-    /**
-     * Get finishUser
-     *
-     * @return \App\Entity\User
-     */
-    public function getFinishUser()
+    public function getFinishUser(): ?User
     {
         return $this->finish_user;
     }
 
-    /**
-     * Add judging
-     *
-     * @param \App\Entity\Judging $judging
-     *
-     * @return Rejudging
-     */
-    public function addJudging(\App\Entity\Judging $judging)
+    public function addJudging(Judging $judging): Rejudging
     {
         $this->judgings[] = $judging;
-
         return $this;
     }
 
-    /**
-     * Remove judging
-     *
-     * @param \App\Entity\Judging $judging
-     */
-    public function removeJudging(\App\Entity\Judging $judging)
+    public function removeJudging(Judging $judging)
     {
         $this->judgings->removeElement($judging);
     }
 
-    /**
-     * Get judgings
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getJudgings()
+    public function getJudgings(): Collection
     {
         return $this->judgings;
     }
 
-    /**
-     * Add submission
-     *
-     * @param Submission $submission
-     *
-     * @return Rejudging
-     */
-    public function addSubmission(Submission $submission)
+    public function addSubmission(Submission $submission): Rejudging
     {
         $this->submissions[] = $submission;
-
         return $this;
     }
 
-    /**
-     * Remove submission
-     *
-     * @param Submission $submission
-     */
     public function removeSubmission(Submission $submission)
     {
         $this->submissions->removeElement($submission);
     }
 
-    /**
-     * Get submissions
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getSubmissions()
+    public function getSubmissions(): Collection
     {
         return $this->submissions;
     }
 
-    /**
-     * Set auto_apply
-     *
-     * @param boolean $autoApply
-     *
-     * @return Rejudging
-     */
-    public function setAutoApply(bool $autoApply)
+    public function setAutoApply(bool $autoApply): Rejudging
     {
         $this->autoApply = $autoApply;
-
         return $this;
     }
 
-    /**
-     * Get auto_apply
-     *
-     * @return boolean
-     */
-    public function getAutoApply()
+    public function getAutoApply(): bool
     {
         return $this->autoApply;
     }
 
-    /**
-     * Set repeat
-     *
-     * @param int $repeat
-     *
-     * @return Rejudging
-     */
-    public function setRepeat(int $repeat)
+    public function setRepeat(int $repeat): Rejudging
     {
         $this->repeat = $repeat;
-
         return $this;
     }
 
-    /**
-     * Get repeat
-     *
-     * @return int
-     */
-    public function getRepeat()
+    public function getRepeat(): ?int
     {
         return $this->repeat;
     }
 
-    /**
-     * Set repeated rejudging
-     *
-     * @param Rejudging|null $repeatedRejudging
-     *
-     * @return Rejudging
-     */
-    public function setRepeatedRejudging(?Rejudging $repeatedRejudging)
+    public function setRepeatedRejudging(?Rejudging $repeatedRejudging): Rejudging
     {
         $this->repeatedRejudging = $repeatedRejudging;
-
         return $this;
     }
 
-    /**
-     * Get repeated rejudging
-     *
-     * @return Rejudging|null
-     */
-    public function getRepeatedRejudging()
+    public function getRepeatedRejudging(): ?Rejudging
     {
         return $this->repeatedRejudging;
     }

@@ -455,7 +455,7 @@ class EventLogService implements ContainerAwareInterface
                     ->setEventtime($now)
                     ->setContest($contest)
                     ->setEndpointtype($type)
-                    ->setEndpointid($ids[$idx])
+                    ->setEndpointid((string)$ids[$idx])
                     ->setAction($action)
                     ->setContent($jsonElement);
                 $this->em->persist($event);

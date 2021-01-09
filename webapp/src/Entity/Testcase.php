@@ -7,7 +7,8 @@ use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
 
 /**
- * Stores testcases per problem
+ * Stores testcases per problem.
+ *
  * @ORM\Entity()
  * @ORM\Table(
  *     name="testcase",
@@ -20,7 +21,6 @@ use JMS\Serializer\Annotation as Serializer;
  */
 class Testcase
 {
-
     /**
      * @var int
      *
@@ -136,115 +136,61 @@ class Testcase
      */
     private $problem;
 
-    /**
-     * Constructor
-     */
     public function __construct()
     {
-        $this->judging_runs = new ArrayCollection();
+        $this->judging_runs  = new ArrayCollection();
         $this->external_runs = new ArrayCollection();
-        $this->content = new ArrayCollection();
+        $this->content       = new ArrayCollection();
     }
 
-    /**
-     * Get testcaseid
-     *
-     * @return integer
-     */
-    public function getTestcaseid()
+    public function getTestcaseid(): int
     {
         return $this->testcaseid;
     }
 
-    /**
-     * Set md5sumInput
-     *
-     * @param string $md5sumInput
-     *
-     * @return Testcase
-     */
-    public function setMd5sumInput($md5sumInput)
+    public function setMd5sumInput(string $md5sumInput): Testcase
     {
         $this->md5sum_input = $md5sumInput;
-
         return $this;
     }
 
-    /**
-     * Get md5sumInput
-     *
-     * @return string
-     */
-    public function getMd5sumInput()
+    public function getMd5sumInput(): string
     {
         return $this->md5sum_input;
     }
 
-    /**
-     * Set md5sumOutput
-     *
-     * @param string $md5sumOutput
-     *
-     * @return Testcase
-     */
-    public function setMd5sumOutput($md5sumOutput)
+    public function setMd5sumOutput(string $md5sumOutput): Testcase
     {
         $this->md5sum_output = $md5sumOutput;
-
         return $this;
     }
 
-    /**
-     * Get md5sumOutput
-     *
-     * @return string
-     */
-    public function getMd5sumOutput()
+    public function getMd5sumOutput(): string
     {
         return $this->md5sum_output;
     }
 
-    /**
-     * Set rank
-     *
-     * @param integer $ranknumber
-     *
-     * @return Testcase
-     */
-    public function setRank($rank)
+    public function setRank(int $rank): Testcase
     {
         $this->ranknumber = $rank;
-
         return $this;
     }
 
-    /**
-     * Get rank
-     *
-     * @return integer
-     */
-    public function getRank()
+    public function getRank(): int
     {
         return $this->ranknumber;
     }
 
     /**
-     * Set description
-     *
      * @param resource|string $description
-     *
-     * @return Testcase
      */
-    public function setDescription($description)
+    public function setDescription($description): Testcase
     {
         $this->description = $description;
-
         return $this;
     }
 
     /**
-     * Get description
-     *
      * @return resource|string|null
      */
     public function getDescription(bool $asString = false)
@@ -258,132 +204,62 @@ class Testcase
         return $this->description;
     }
 
-    /**
-     * Set original input filename
-     *
-     * @param string $origInputFilename
-     *
-     * @return Testcase
-     */
-    public function setOrigInputFilename($origInputFilename)
+    public function setOrigInputFilename(string $origInputFilename): Testcase
     {
         $this->orig_input_filename = $origInputFilename;
-
         return $this;
     }
 
-    /**
-     * Get original input filename
-     *
-     * @return string
-     */
-    public function getOrigInputFilename()
+    public function getOrigInputFilename(): ?string
     {
         return $this->orig_input_filename;
     }
 
-    /**
-     * Set imageType
-     *
-     * @param string $imageType
-     *
-     * @return Testcase
-     */
-    public function setImageType($imageType)
+    public function setImageType(string $imageType): Testcase
     {
         $this->image_type = $imageType;
-
         return $this;
     }
 
-    /**
-     * Get imageType
-     *
-     * @return string
-     */
-    public function getImageType()
+    public function getImageType(): string
     {
         return $this->image_type;
     }
 
-    /**
-     * Set sample
-     *
-     * @param boolean $sample
-     *
-     * @return Testcase
-     */
-    public function setSample($sample)
+    public function setSample(bool $sample): Testcase
     {
         $this->sample = $sample;
-
         return $this;
     }
 
-    /**
-     * Set deleted
-     *
-     * @param boolean $deleted
-     *
-     * @return Testcase
-     */
-    public function setDeleted(bool $deleted)
+    public function setDeleted(bool $deleted): Testcase
     {
         $this->deleted = $deleted;
-
         return $this;
     }
 
-    /**
-     * Get sample
-     *
-     * @return boolean
-     */
-    public function getSample()
+    public function getSample(): bool
     {
         return $this->sample;
     }
 
-    /**
-     * Get deleted
-     *
-     * @return boolean
-     */
-    public function getDeleted()
+    public function getDeleted(): bool
     {
         return $this->deleted;
     }
 
-    /**
-     * Add judgingRun
-     *
-     * @param \App\Entity\JudgingRun $judgingRun
-     *
-     * @return Testcase
-     */
-    public function addJudgingRun(\App\Entity\JudgingRun $judgingRun)
+    public function addJudgingRun(JudgingRun $judgingRun): Testcase
     {
         $this->judging_runs[] = $judgingRun;
-
         return $this;
     }
 
-    /**
-     * Remove judgingRun
-     *
-     * @param \App\Entity\JudgingRun $judgingRun
-     */
-    public function removeJudgingRun(\App\Entity\JudgingRun $judgingRun)
+    public function removeJudgingRun(JudgingRun $judgingRun): Testcase
     {
         $this->judging_runs->removeElement($judgingRun);
     }
 
-    /**
-     * Get judgingRuns
-     *
-     * @return Collection
-     */
-    public function getJudgingRuns()
+    public function getJudgingRuns(): Collection
     {
         return $this->judging_runs;
     }
@@ -391,11 +267,9 @@ class Testcase
     /**
      * Gets the first judging run for this testcase.
      *
-     * This is useful when this testcase is joined to a single run to get code completion in Twig templates
-     *
-     * @return JudgingRun|null
+     * This is useful when this testcase is joined to a single run to get code completion in Twig templates.
      */
-    public function getFirstJudgingRun()
+    public function getFirstJudgingRun(): ?JudgingRun
     {
         return $this->judging_runs->first() ?: null;
     }
@@ -403,23 +277,14 @@ class Testcase
     /**
      * Gets the first external run for this testcase.
      *
-     * This is useful when this testcase is joined to a single external run to get code completion in Twig templates
-     *
-     * @return ExternalRun|null
+     * This is useful when this testcase is joined to a single external run to get code completion in Twig templates.
      */
-    public function getFirstExternalRun()
+    public function getFirstExternalRun(): ?ExternalRun
     {
         return $this->external_runs->first() ?: null;
     }
 
-    /**
-     * Set content
-     *
-     * @param TestcaseContent $content
-     *
-     * @return Testcase
-     */
-    public function setContent(?TestcaseContent $content)
+    public function setContent(?TestcaseContent $content): Testcase
     {
         $this->content->clear();
         $this->content->add($content);
@@ -428,70 +293,34 @@ class Testcase
         return $this;
     }
 
-    /**
-     * Get content
-     *
-     * @return TestcaseContent
-     */
     public function getContent(): ?TestcaseContent
     {
         return $this->content->first() ?: null;
     }
 
-    /**
-     * Set problem
-     *
-     * @param \App\Entity\Problem $problem
-     *
-     * @return Testcase
-     */
-    public function setProblem(\App\Entity\Problem $problem = null)
+    public function setProblem(?Problem $problem = null): Testcase
     {
         $this->problem = $problem;
-
         return $this;
     }
 
-    /**
-     * Get problem
-     *
-     * @return \App\Entity\Problem
-     */
-    public function getProblem()
+    public function getProblem(): Problem
     {
         return $this->problem;
     }
 
-    /**
-     * Add externalRun
-     *
-     * @param ExternalRun $externalRun
-     *
-     * @return Testcase
-     */
-    public function addExternalRun(ExternalRun $externalRun)
+    public function addExternalRun(ExternalRun $externalRun): Testcase
     {
         $this->external_runs[] = $externalRun;
-
         return $this;
     }
 
-    /**
-     * Remove externalRun
-     *
-     * @param ExternalRun $externalRun
-     */
     public function removeExternalRun(ExternalRun $externalRun)
     {
         $this->external_runs->removeElement($externalRun);
     }
 
-    /**
-     * Get externalRuns
-     *
-     * @return Collection
-     */
-    public function getExternalRuns()
+    public function getExternalRuns(): Collection
     {
         return $this->external_runs;
     }

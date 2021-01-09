@@ -5,7 +5,7 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Log of all events during a contest
+ * Log of all events during a contest.
  *
  * @ORM\Table(
  *     name="event",
@@ -77,143 +77,73 @@ class Event
      */
     private $contest;
 
-    /**
-     * Set eventid
-     *
-     * @param integer $eventid
-     *
-     * @return Event
-     */
-    public function setEventid($eventid)
+    public function setEventid(int $eventid): Event
     {
         $this->eventid = $eventid;
-
         return $this;
     }
 
-    /**
-     * Get eventid
-     *
-     * @return integer
-     */
-    public function getEventid()
+    public function getEventid(): int
     {
         return $this->eventid;
     }
 
-    /**
-     * Set eventtime
-     *
-     * @param double $eventtime
-     *
-     * @return Event
-     */
-    public function setEventtime($eventtime)
+    /** @param string|float $eventtime */
+    public function setEventtime($eventtime): Event
     {
         $this->eventtime = $eventtime;
-
         return $this;
     }
 
-    /**
-     * Get eventtime
-     *
-     * @return double
-     */
+    /** @return string|float */
     public function getEventtime()
     {
         return $this->eventtime;
     }
 
-    /**
-     * Set endpointtype
-     *
-     * @param string $endpointtype
-     *
-     * @return Event
-     */
-    public function setEndpointtype($endpointtype)
+    public function setEndpointtype(string $endpointtype): Event
     {
         $this->endpointtype = $endpointtype;
-
         return $this;
     }
 
-    /**
-     * Get endpointtype
-     *
-     * @return string
-     */
-    public function getEndpointtype()
+    public function getEndpointtype(): string
     {
         return $this->endpointtype;
     }
 
-    /**
-     * Set endpointid
-     *
-     * @param string $endpointid
-     *
-     * @return Event
-     */
-    public function setEndpointid($endpointid)
+    public function setEndpointid(string $endpointid): Event
     {
         $this->endpointid = $endpointid;
-
         return $this;
     }
 
-    /**
-     * Get endpointid
-     *
-     * @return string
-     */
-    public function getEndpointid()
+    public function getEndpointid(): string
     {
         return $this->endpointid;
     }
 
-    /**
-     * Set action
-     *
-     * @param string $action
-     *
-     * @return Event
-     */
-    public function setAction($action)
+    public function setAction(string $action): Event
     {
         $this->action = $action;
-
         return $this;
     }
 
-    /**
-     * Get action
-     *
-     * @return string
-     */
-    public function getAction()
+    public function getAction(): string
     {
         return $this->action;
     }
 
     /**
-     * Set content
-     *
      * @param mixed $content
-     *
-     * @return Event
      */
-    public function setContent($content)
+    public function setContent($content): Event
     {
         $this->content = $content;
-
         return $this;
     }
 
     /**
-     * Get content
-     *
      * @return mixed
      */
     public function getContent()
@@ -221,24 +151,13 @@ class Event
         return $this->content;
     }
 
-    /**
-     * Set contest
-     *
-     * @param Contest|null $contest
-     * @return Event
-     */
-    public function setContest($contest)
+    public function setContest(?Contest $contest): Event
     {
         $this->contest = $contest;
         return $this;
     }
 
-    /**
-     * Get contest
-     *
-     * @return Contest|null
-     */
-    public function getContest()
+    public function getContest(): ?Contest
     {
         return $this->contest;
     }

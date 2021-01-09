@@ -11,7 +11,8 @@ use JMS\Serializer\Annotation as Serializer;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * Many-to-Many mapping of contests and problems
+ * Many-to-Many mapping of contests and problems.
+ *
  * @ORM\Entity()
  * @ORM\Table(
  *     name="contestproblem",
@@ -124,266 +125,126 @@ class ContestProblem
         $this->submissions = new ArrayCollection();
     }
 
-    /**
-     * Get cid
-     *
-     * @return integer
-     */
-    public function getCid()
+    public function getCid(): int
     {
         return $this->getContest()->getCid();
     }
 
-    /**
-     * Get probid
-     *
-     * @return integer
-     */
-    public function getProbid()
+    public function getProbid(): int
     {
         return $this->getProblem()->getProbid();
     }
 
-    /**
-     * Set shortname
-     *
-     * @param string $shortname
-     *
-     * @return ContestProblem
-     */
-    public function setShortname($shortname)
+    public function setShortname(string $shortname): ContestProblem
     {
         $this->shortname = $shortname;
-
         return $this;
     }
 
-    /**
-     * Get shortname
-     *
-     * @return string
-     */
-    public function getShortname()
+    public function getShortname(): string
     {
         return $this->shortname;
     }
 
-    /**
-     * Set points
-     *
-     * @param integer $points
-     *
-     * @return ContestProblem
-     */
-    public function setPoints($points)
+    public function setPoints(int $points): ContestProblem
     {
         $this->points = $points;
-
         return $this;
     }
 
-    /**
-     * Get points
-     *
-     * @return integer
-     */
-    public function getPoints()
+    public function getPoints(): int
     {
         return $this->points;
     }
 
-    /**
-     * Set allowSubmit
-     *
-     * @param boolean $allowSubmit
-     *
-     * @return ContestProblem
-     */
-    public function setAllowSubmit($allowSubmit)
+    public function setAllowSubmit(bool $allowSubmit): ContestProblem
     {
         $this->allowSubmit = $allowSubmit;
-
         return $this;
     }
 
-    /**
-     * Get allowSubmit
-     *
-     * @return boolean
-     */
-    public function getAllowSubmit()
+    public function getAllowSubmit(): bool
     {
         return $this->allowSubmit;
     }
 
-    /**
-     * Set allowJudge
-     *
-     * @param boolean $allowJudge
-     *
-     * @return ContestProblem
-     */
-    public function setAllowJudge($allowJudge)
+    public function setAllowJudge(bool $allowJudge): ContestProblem
     {
         $this->allowJudge = $allowJudge;
-
         return $this;
     }
 
-    /**
-     * Get allowJudge
-     *
-     * @return boolean
-     */
-    public function getAllowJudge()
+    public function getAllowJudge(): bool
     {
         return $this->allowJudge;
     }
 
-    /**
-     * Set color
-     *
-     * @param string $color
-     *
-     * @return ContestProblem
-     */
-    public function setColor($color)
+    public function setColor(string $color): ContestProblem
     {
         $this->color = $color;
-
         return $this;
     }
 
-    /**
-     * Get color
-     *
-     * @return string
-     */
-    public function getColor()
+    public function getColor(): ?string
     {
         return $this->color;
     }
 
-    /**
-     * Set lazyEvalResults
-     *
-     * @param boolean $lazyEvalResults
-     *
-     * @return ContestProblem
-     */
-    public function setLazyEvalResults($lazyEvalResults)
+    public function setLazyEvalResults(bool $lazyEvalResults): ContestProblem
     {
         $this->lazyEvalResults = $lazyEvalResults;
-
         return $this;
     }
 
-    /**
-     * Get lazyEvalResults
-     *
-     * @return boolean
-     */
-    public function getLazyEvalResults()
+    public function getLazyEvalResults(): ?bool
     {
         return $this->lazyEvalResults;
     }
 
-    /**
-     * Set contest
-     *
-     * @param \App\Entity\Contest $contest
-     *
-     * @return ContestProblem
-     */
-    public function setContest(\App\Entity\Contest $contest = null)
+    public function setContest(?Contest $contest = null): ContestProblem
     {
         $this->contest = $contest;
-
         return $this;
     }
 
-    /**
-     * Get contest
-     *
-     * @return \App\Entity\Contest
-     */
-    public function getContest()
+    public function getContest(): Contest
     {
         return $this->contest;
     }
 
-    /**
-     * Set problem
-     *
-     * @param \App\Entity\Problem $problem
-     *
-     * @return ContestProblem
-     */
-    public function setProblem(\App\Entity\Problem $problem = null)
+    public function setProblem(?Problem $problem = null): ContestProblem
     {
         $this->problem = $problem;
-
         return $this;
     }
 
-    /**
-     * Get problem
-     *
-     * @return \App\Entity\Problem
-     */
-    public function getProblem()
+    public function getProblem(): Problem
     {
         return $this->problem;
     }
 
-    /**
-     * Add submission
-     *
-     * @param Submission $submission
-     *
-     * @return ContestProblem
-     */
-    public function addSubmission(Submission $submission)
+    public function addSubmission(Submission $submission): ContestProblem
     {
         $this->submissions->add($submission);
-
         return $this;
     }
 
-    /**
-     * Remove submission
-     *
-     * @param Submission $submission
-     */
     public function removeSubmission(Submission $submission)
     {
         $this->submissions->removeElement($submission);
     }
 
-    /**
-     * Get submissions
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getSubmissions()
+    public function getSubmissions(): Collection
     {
         return $this->submissions;
     }
 
-    /**
-     * Get externalid
-     *
-     * @return string
-     */
-    public function getExternalId()
+    public function getExternalId(): string
     {
         return $this->getProblem()->getExternalid();
     }
 
     /**
-     * Get the API ID for this entity
-     * @param EventLogService        $eventLogService
-     * @param EntityManagerInterface $entityManager
      * @return mixed
      * @throws Exception
      */

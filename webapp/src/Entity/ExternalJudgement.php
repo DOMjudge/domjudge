@@ -8,7 +8,8 @@ use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
 
 /**
- * Judgement in external system
+ * Judgement in external system.
+ *
  * @ORM\Table(
  *     name="external_judgement",
  *     options={"comment":"Judgement in external system"},
@@ -132,303 +133,147 @@ class ExternalJudgement
      */
     private $external_runs;
 
-    /**
-     * Constructor
-     */
     public function __construct()
     {
         $this->external_runs = new ArrayCollection();
     }
 
-    /**
-     * Get extjudgementid
-     *
-     * @return int
-     */
-    public function getExtjudgementid()
+    public function getExtjudgementid(): int
     {
         return $this->extjudgementid;
     }
 
-    /**
-     * Set externalid
-     *
-     * @param string $externalid
-     *
-     * @return ExternalJudgement
-     */
-    public function setExternalid($externalid)
+    public function setExternalid(string $externalid): ExternalJudgement
     {
         $this->externalid = $externalid;
-
         return $this;
     }
 
-    /**
-     * Get externalid
-     *
-     * @return string
-     */
-    public function getExternalid()
+    public function getExternalid(): string
     {
         return $this->externalid;
     }
 
-    /**
-     * Set result
-     *
-     * @param string|null $result
-     *
-     * @return ExternalJudgement
-     */
-    public function setResult($result)
+    public function setResult(?string $result): ExternalJudgement
     {
         $this->result = $result;
-
         return $this;
     }
 
-    /**
-     * Get result
-     *
-     * @return string|null
-     */
-    public function getResult()
+    public function getResult(): ?string
     {
         return $this->result;
     }
 
-    /**
-     * Set verified status of the result / difference
-     *
-     * @param boolean $verified
-     *
-     * @return ExternalJudgement
-     */
-    public function setVerified($verified)
+    public function setVerified(bool $verified): ExternalJudgement
     {
         $this->verified = $verified;
-
         return $this;
     }
 
-    /**
-     * Get verified status of the result / difference
-     *
-     * @return boolean
-     */
-    public function getVerified()
+    public function getVerified(): bool
     {
         return $this->verified;
     }
 
-    /**
-     * Set jury member who verified this judgement
-     *
-     * @param string $juryMember
-     *
-     * @return ExternalJudgement
-     */
-    public function setJuryMember($juryMember)
+    public function setJuryMember(string $juryMember): ExternalJudgement
     {
         $this->jury_member = $juryMember;
-
         return $this;
     }
 
-    /**
-     * Get jury member who verified this judgement
-     *
-     * @return string
-     */
-    public function getJuryMember()
+    public function getJuryMember(): string
     {
         return $this->jury_member;
     }
 
-    /**
-     * Set verify comment
-     *
-     * @param string $verifyComment
-     *
-     * @return ExternalJudgement
-     */
-    public function setVerifyComment($verifyComment)
+    public function setVerifyComment(string $verifyComment): ExternalJudgement
     {
         $this->verify_comment = $verifyComment;
-
         return $this;
     }
 
-    /**
-     * Get verifyComment
-     *
-     * @return string
-     */
-    public function getVerifyComment()
+    public function getVerifyComment(): string
     {
         return $this->verify_comment;
     }
 
-    /**
-     * Set starttime
-     *
-     * @param double $starttime
-     *
-     * @return ExternalJudgement
-     */
-    public function setStarttime($starttime)
+    /** @param string|float $starttime */
+    public function setStarttime($starttime): ExternalJudgement
     {
         $this->starttime = $starttime;
-
         return $this;
     }
 
-    /**
-     * Get starttime
-     *
-     * @return double
-     */
+    /** @return string|float */
     public function getStarttime()
     {
         return $this->starttime;
     }
 
-    /**
-     * Set endtime
-     *
-     * @param double $endtime
-     *
-     * @return ExternalJudgement
-     */
-    public function setEndtime($endtime)
+    /** @param string|float $endtime */
+    public function setEndtime($endtime): ExternalJudgement
     {
         $this->endtime = $endtime;
-
         return $this;
     }
 
-    /**
-     * Get endtime
-     *
-     * @return double
-     */
+    /** @return string|float */
     public function getEndtime()
     {
         return $this->endtime;
     }
 
-    /**
-     * Set valid
-     *
-     * @param boolean $valid
-     *
-     * @return ExternalJudgement
-     */
-    public function setValid($valid)
+    public function setValid(bool $valid): ExternalJudgement
     {
         $this->valid = $valid;
-
         return $this;
     }
 
-    /**
-     * Get valid
-     *
-     * @return boolean
-     */
-    public function getValid()
+    public function getValid(): bool
     {
         return $this->valid;
     }
 
-    /**
-     * Set contest
-     *
-     * @param Contest $contest
-     *
-     * @return ExternalJudgement
-     */
-    public function setContest(Contest $contest = null)
+    public function setContest(?Contest $contest = null): ExternalJudgement
     {
         $this->contest = $contest;
-
         return $this;
     }
 
-    /**
-     * Get contest
-     *
-     * @return Contest
-     */
-    public function getContest()
+   public function getContest(): Contest
     {
         return $this->contest;
     }
 
-    /**
-     * Set submission
-     *
-     * @param Submission $submission
-     *
-     * @return ExternalJudgement
-     */
-    public function setSubmission(Submission $submission)
+    public function setSubmission(Submission $submission): ExternalJudgement
     {
         $this->submission = $submission;
-
         return $this;
     }
 
-    /**
-     * Get submission
-     *
-     * @return Submission
-     */
-    public function getSubmission()
+    public function getSubmission(): Submission
     {
         return $this->submission;
     }
 
-    /**
-     * Add externalRun
-     *
-     * @param ExternalRun $externalRun
-     *
-     * @return ExternalJudgement
-     */
-    public function addExternalRun(ExternalRun $externalRun)
+    public function addExternalRun(ExternalRun $externalRun): ExternalJudgement
     {
         $this->external_runs[] = $externalRun;
-
         return $this;
     }
 
-    /**
-     * Remove externalRun
-     *
-     * @param ExternalRun $externalRun
-     */
     public function removeExternalRun(ExternalRun $externalRun)
     {
         $this->external_runs->removeElement($externalRun);
     }
 
-    /**
-     * Get externalRuns
-     *
-     * @return Collection
-     */
-    public function getExternalRuns()
+    public function getExternalRuns(): Collection
     {
         return $this->external_runs;
     }
 
-    /**
-     * Get the max runtime for this external judgement
-     * @return float
-     */
-    public function getMaxRuntime()
+    public function getMaxRuntime(): float
     {
         $max = 0;
         foreach ($this->external_runs as $run) {
@@ -437,11 +282,7 @@ class ExternalJudgement
         return $max;
     }
 
-    /**
-     * Get the sum runtime for this external judgement
-     * @return float
-     */
-    public function getSumRuntime()
+    public function getSumRuntime(): float
     {
         $sum = 0;
         foreach ($this->external_runs as $run) {

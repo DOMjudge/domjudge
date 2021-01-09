@@ -8,7 +8,8 @@ use JMS\Serializer\Annotation as Serializer;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * Hostnames of the autojudgers
+ * Hostnames of the autojudgers.
+ *
  * @ORM\Entity()
  * @ORM\Table(
  *     name="judgehost",
@@ -34,7 +35,6 @@ class Judgehost
      */
     private $active = true;
 
-
     /**
      * @var double
      * @ORM\Column(type="decimal", precision=32, scale=9, name="polltime",
@@ -51,146 +51,75 @@ class Judgehost
      */
     private $restriction;
 
-
     /**
      * @ORM\OneToMany(targetEntity="Judging", mappedBy="judgehost")
      * @Serializer\Exclude()
      */
     private $judgings;
 
-    /**
-     * Set hostname
-     *
-     * @param string $hostname
-     *
-     * @return Judgehost
-     */
-    public function setHostname($hostname)
-    {
-        $this->hostname = $hostname;
-
-        return $this;
-    }
-
-    /**
-     * Get hostname
-     *
-     * @return string
-     */
-    public function getHostname()
-    {
-        return $this->hostname;
-    }
-
-    /**
-     * Set active
-     *
-     * @param boolean $active
-     *
-     * @return Judgehost
-     */
-    public function setActive($active)
-    {
-        $this->active = $active;
-
-        return $this;
-    }
-
-    /**
-     * Get active
-     *
-     * @return boolean
-     */
-    public function getActive()
-    {
-        return $this->active;
-    }
-
-    /**
-     * Set polltime
-     *
-     * @param string $polltime
-     *
-     * @return Judgehost
-     */
-    public function setPolltime($polltime)
-    {
-        $this->polltime = $polltime;
-
-        return $this;
-    }
-
-    /**
-     * Get polltime
-     *
-     * @return string
-     */
-    public function getPolltime()
-    {
-        return $this->polltime;
-    }
-
-    /**
-     * Set restriction
-     *
-     * @param JudgehostRestriction|null $restriction
-     *
-     * @return Judgehost
-     */
-    public function setRestriction(JudgehostRestriction $restriction = null)
-    {
-        $this->restriction = $restriction;
-
-        return $this;
-    }
-
-    /**
-     * Get restriction
-     *
-     * @return JudgehostRestriction
-     */
-    public function getRestriction()
-    {
-        return $this->restriction;
-    }
-    /**
-     * Constructor
-     */
     public function __construct()
     {
         $this->judgings = new ArrayCollection();
     }
 
-    /**
-     * Add judging
-     *
-     * @param Judging $judging
-     *
-     * @return Judgehost
-     */
-    public function addJudging(Judging $judging)
+    public function setHostname(string $hostname): Judgehost
     {
-        $this->judgings[] = $judging;
-
+        $this->hostname = $hostname;
         return $this;
     }
 
-    /**
-     * Remove judging
-     *
-     * @param Judging $judging
-     */
+    public function getHostname(): string
+    {
+        return $this->hostname;
+    }
+
+    public function setActive(bool $active): Judgehost
+    {
+        $this->active = $active;
+        return $this;
+    }
+
+    public function getActive(): bool
+    {
+        return $this->active;
+    }
+
+    /** @param string|float $polltime */
+    public function setPolltime($polltime): Judgehost
+    {
+        $this->polltime = $polltime;
+        return $this;
+    }
+
+    /** @return string|float */
+    public function getPolltime()
+    {
+        return $this->polltime;
+    }
+
+    public function setRestriction(?JudgehostRestriction $restriction = null): Judgehost
+    {
+        $this->restriction = $restriction;
+        return $this;
+    }
+
+    public function getRestriction(): JudgehostRestriction
+    {
+        return $this->restriction;
+    }
+
+    public function addJudging(Judging $judging): Judgehost
+    {
+        $this->judgings[] = $judging;
+        return $this;
+    }
+
     public function removeJudging(Judging $judging)
     {
         $this->judgings->removeElement($judging);
     }
 
-    /**
-     * Get judgings
-     *
-     * @return Collection
-     */
-    public function getJudgings()
+    public function getJudgings(): Collection
     {
         return $this->judgings;
     }

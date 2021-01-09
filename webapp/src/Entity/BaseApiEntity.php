@@ -15,19 +15,18 @@ use Exception;
 abstract class BaseApiEntity
 {
     /**
-     * Get the API ID field name for this entity
-     * @param EventLogService $eventLogService
-     * @return string
+     * Get the API ID field name for this entity.
+     *
      * @throws Exception
      */
-    public function getApiIdField(EventLogService $eventLogService)
+    public function getApiIdField(EventLogService $eventLogService): string
     {
         return $eventLogService->apiIdFieldForEntity($this);
     }
 
     /**
-     * Get the API ID for this entity
-     * @param EventLogService $eventLogService
+     * Get the API ID for this entity.
+     *
      * @return mixed
      * @throws Exception
      */

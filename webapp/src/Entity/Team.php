@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
@@ -10,7 +11,8 @@ use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 /**
- * All teams participating in the contest
+ * All teams participating in the contest.
+ *
  * @ORM\Entity()
  * @ORM\Table(
  *     name="team",
@@ -172,301 +174,149 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface
      */
     private $unread_clarifications;
 
-    /**
-     * Set teamid
-     *
-     * @param int $teamid
-     *
-     * @return Team
-     */
-    public function setTeamid($teamid)
+    public function setTeamid(int $teamid): Team
     {
         $this->teamid = $teamid;
-
         return $this;
     }
 
-    /**
-     * Get teamid
-     *
-     * @return integer
-     */
-    public function getTeamid()
+   public function getTeamid(): int
     {
         return $this->teamid;
     }
 
-    /**
-     * Set icpcid
-     *
-     * @param string $icpcid
-     *
-     * @return Team
-     */
-    public function setIcpcid($icpcid)
+    public function setIcpcid(string $icpcid): Team
     {
         $this->icpcid = $icpcid;
 
         return $this;
     }
 
-    /**
-     * Get icpcid
-     *
-     * @return string
-     */
-    public function getIcpcid()
+    public function getIcpcid(): ?string
     {
         return $this->icpcid;
     }
 
-    /**
-     * Set name
-     *
-     * @param string $name
-     *
-     * @return Team
-     */
-    public function setName($name)
+    public function setName(string $name): Team
     {
         $this->name = $name;
-
         return $this;
     }
 
-    /**
-     * Get name
-     *
-     * @return string
-     */
-    public function getName()
+   public function getName(): string
     {
         return $this->name;
     }
 
-    /**
-     * Set display name
-     * @param string|null $display_name
-     *
-     * @return $this
-     */
     public function setDisplayName(?string $display_name): self
     {
         $this->display_name = $display_name;
-
         return $this;
     }
 
-    /**
-     * Get display name
-     * @return string|null
-     */
     public function getDisplayName(): ?string
     {
         return $this->display_name;
     }
 
-    /**
-     * Get the effective name of this team
-     * @return string
-     */
     public function getEffectiveName(): string
     {
         return $this->getDisplayName() ?? $this->getName();
     }
 
-    /**
-     * Set enabled
-     *
-     * @param boolean $enabled
-     *
-     * @return Team
-     */
-    public function setEnabled($enabled)
+    public function setEnabled(bool $enabled): Team
     {
         $this->enabled = $enabled;
-
         return $this;
     }
 
-    /**
-     * Get enabled
-     *
-     * @return boolean
-     */
-    public function getEnabled()
+    public function getEnabled(): bool
     {
         return $this->enabled;
     }
 
-    /**
-     * Set members
-     *
-     * @param string $members
-     *
-     * @return Team
-     */
-    public function setMembers($members)
+    public function setMembers(string $members): Team
     {
         $this->members = $members;
-
         return $this;
     }
 
-    /**
-     * Get members
-     *
-     * @return string
-     */
-    public function getMembers()
+    public function getMembers(): ?string
     {
         return $this->members;
     }
 
-    /**
-     * Set room
-     *
-     * @param string $room
-     *
-     * @return Team
-     */
-    public function setRoom($room)
+    public function setRoom(string $room): Team
     {
         $this->room = $room;
-
         return $this;
     }
 
-    /**
-     * Get room
-     *
-     * @return string
-     */
-    public function getRoom()
+    public function getRoom(): ?string
     {
         return $this->room;
     }
 
-    /**
-     * Set comments
-     *
-     * @param string $comments
-     *
-     * @return Team
-     */
-    public function setComments($comments)
+    public function setComments(string $comments): Team
     {
         $this->comments = $comments;
-
         return $this;
     }
 
-    /**
-     * Get comments
-     *
-     * @return string
-     */
-    public function getComments()
+    public function getComments(): ?string
     {
         return $this->comments;
     }
 
-    /**
-     * Set judgingLastStarted
-     *
-     * @param string $judgingLastStarted
-     *
-     * @return Team
-     */
-    public function setJudgingLastStarted($judgingLastStarted)
+    /** @param string|float $judgingLastStarted */
+    public function setJudgingLastStarted($judgingLastStarted): Team
     {
         $this->judging_last_started = $judgingLastStarted;
-
         return $this;
     }
 
-    /**
-     * Get judgingLastStarted
-     *
-     * @return string
-     */
+    /** @return string|float */
     public function getJudgingLastStarted()
     {
         return $this->judging_last_started;
     }
 
-    /**
-     * Set penalty
-     *
-     * @param integer $penalty
-     *
-     * @return Team
-     */
-    public function setPenalty($penalty)
+    public function setPenalty(int $penalty): Team
     {
         $this->penalty = $penalty;
-
         return $this;
     }
 
     /**
-     * Set whether to add a user for this team. Will not be stored, but is used in validation
-     *
-     * @param bool $addUserForTeam
+     * Set whether to add a user for this team. Will not be stored, but is used in validation.
      */
     public function setAddUserForTeam(bool $addUserForTeam)
     {
         $this->addUserForTeam = $addUserForTeam;
     }
 
-    /**
-     * Get penalty
-     *
-     * @return integer
-     */
-    public function getPenalty()
+    public function getPenalty(): int
     {
         return $this->penalty;
     }
 
-    /**
-     * Whether to add a user for this team. Will not be stored, but is used in validation
-     *
-     * @return bool
-     */
     public function getAddUserForTeam(): bool
     {
         return $this->addUserForTeam;
     }
 
-    /**
-     * Set affiliation
-     *
-     * @param \App\Entity\TeamAffiliation $affiliation
-     *
-     * @return Team
-     */
-    public function setAffiliation(\App\Entity\TeamAffiliation $affiliation = null)
+    public function setAffiliation(TeamAffiliation $affiliation = null): Team
     {
         $this->affiliation = $affiliation;
-
         return $this;
     }
 
-    /**
-     * Get affiliation
-     *
-     * @return \App\Entity\TeamAffiliation
-     */
-    public function getAffiliation()
+    public function getAffiliation(): ?TeamAffiliation
     {
         return $this->affiliation;
     }
 
     /**
-     * Get affiliation ID
-     *
-     * @return int|null
      * @Serializer\VirtualProperty()
      * @Serializer\SerializedName("organization_id")
      * @Serializer\Type("string")
@@ -476,260 +326,126 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface
         return $this->getAffiliation() ? $this->getAffiliation()->getAffilid() : null;
     }
 
-    /**
-     * Set category
-     *
-     * @param \App\Entity\TeamCategory $category
-     *
-     * @return Team
-     */
-    public function setCategory(\App\Entity\TeamCategory $category = null)
+    public function setCategory(?TeamCategory $category = null): Team
     {
         $this->category = $category;
-
         return $this;
     }
 
-    /**
-     * Get category
-     *
-     * @return \App\Entity\TeamCategory
-     */
-    public function getCategory()
+    public function getCategory(): TeamCategory
     {
         return $this->category;
     }
 
-    /**
-     * Constructor
-     */
     public function __construct()
     {
-        $this->contests = new \Doctrine\Common\Collections\ArrayCollection();
-        $this->users = new \Doctrine\Common\Collections\ArrayCollection();
-        $this->submissions = new ArrayCollection();
-        $this->sent_clarifications = new ArrayCollection();
+        $this->contests                = new ArrayCollection();
+        $this->users                   = new ArrayCollection();
+        $this->submissions             = new ArrayCollection();
+        $this->sent_clarifications     = new ArrayCollection();
         $this->received_clarifications = new ArrayCollection();
-        $this->unread_clarifications = new ArrayCollection();
+        $this->unread_clarifications   = new ArrayCollection();
     }
 
-    /**
-     * Add contest
-     *
-     * @param \App\Entity\Contest $contest
-     *
-     * @return Team
-     */
-    public function addContest(\App\Entity\Contest $contest)
+    public function addContest(Contest $contest): Team
     {
         $this->contests[] = $contest;
-
         $contest->addTeam($this);
-
         return $this;
     }
 
-    /**
-     * Remove contest
-     *
-     * @param \App\Entity\Contest $contest
-     */
-    public function removeContest(\App\Entity\Contest $contest)
+    public function removeContest(Contest $contest)
     {
         $this->contests->removeElement($contest);
-
         $contest->removeTeam($this);
     }
 
-    /**
-     * Get contests
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getContests()
+    public function getContests(): Collection
     {
         return $this->contests;
     }
 
-    /**
-     * Add user
-     *
-     * @param \App\Entity\User $user
-     *
-     * @return Team
-     */
-    public function addUser(\App\Entity\User $user)
+    public function addUser(User $user): Team
     {
         $this->users[] = $user;
-
         return $this;
     }
 
-    /**
-     * Remove user
-     *
-     * @param \App\Entity\User $user
-     */
-    public function removeUser(\App\Entity\User $user)
+    public function removeUser(User $user)
     {
         $this->users->removeElement($user);
     }
 
-    /**
-     * Get users
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getUsers()
+    public function getUsers(): Collection
     {
         return $this->users;
     }
 
-    /**
-     * Add submission
-     *
-     * @param \App\Entity\Submission $submission
-     *
-     * @return Team
-     */
-    public function addSubmission(\App\Entity\Submission $submission)
+    public function addSubmission(Submission $submission): Team
     {
         $this->submissions[] = $submission;
-
         return $this;
     }
 
-    /**
-     * Remove submission
-     *
-     * @param \App\Entity\Submission $submission
-     */
-    public function removeSubmission(\App\Entity\Submission $submission)
+    public function removeSubmission(Submission $submission)
     {
         $this->submissions->removeElement($submission);
     }
 
-    /**
-     * Get submissions
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getSubmissions()
+    public function getSubmissions(): Collection
     {
         return $this->submissions;
     }
 
-    /**
-     * Add sentClarification
-     *
-     * @param \App\Entity\Clarification $sentClarification
-     *
-     * @return Team
-     */
-    public function addSentClarification(
-        \App\Entity\Clarification $sentClarification)
+    public function addSentClarification(Clarification $sentClarification): Team
     {
         $this->sent_clarifications[] = $sentClarification;
-
         return $this;
     }
 
-    /**
-     * Remove sentClarification
-     *
-     * @param \App\Entity\Clarification $sentClarification
-     */
-    public function removeSentClarification(
-        \App\Entity\Clarification $sentClarification)
+    public function removeSentClarification(Clarification $sentClarification)
     {
         $this->sent_clarifications->removeElement($sentClarification);
     }
 
-    /**
-     * Get sentClarifications
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getSentClarifications()
+    public function getSentClarifications(): Collection
     {
         return $this->sent_clarifications;
     }
 
-    /**
-     * Add receivedClarification
-     *
-     * @param \App\Entity\Clarification $receivedClarification
-     *
-     * @return Team
-     */
-    public function addReceivedClarification(
-        \App\Entity\Clarification $receivedClarification)
+    public function addReceivedClarification(Clarification $receivedClarification): Team
     {
         $this->received_clarifications[] = $receivedClarification;
-
         return $this;
     }
 
-    /**
-     * Remove receivedClarification
-     *
-     * @param \App\Entity\Clarification $receivedClarification
-     */
-    public function removeReceivedClarification(
-        \App\Entity\Clarification $receivedClarification)
+    public function removeReceivedClarification(Clarification $receivedClarification)
     {
         $this->received_clarifications->removeElement($receivedClarification);
     }
 
-    /**
-     * Get receivedClarifications
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getReceivedClarifications()
+    public function getReceivedClarifications(): Collection
     {
         return $this->received_clarifications;
     }
 
-    /**
-     * Add unreadClarification
-     *
-     * @param \App\Entity\Clarification $unreadClarification
-     *
-     * @return Team
-     */
-    public function addUnreadClarification(
-        \App\Entity\Clarification $unreadClarification)
+    public function addUnreadClarification(Clarification $unreadClarification): Team
     {
         $this->unread_clarifications[] = $unreadClarification;
-
         return $this;
     }
 
-    /**
-     * Remove unreadClarification
-     *
-     * @param \App\Entity\Clarification $unreadClarification
-     */
-    public function removeUnreadClarification(
-        \App\Entity\Clarification $unreadClarification)
+    public function removeUnreadClarification(Clarification $unreadClarification)
     {
         $this->unread_clarifications->removeElement($unreadClarification);
     }
 
-    /**
-     * Get unreadClarifications
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getUnreadClarifications()
+    public function getUnreadClarifications(): Collection
     {
         return $this->unread_clarifications;
     }
 
     /**
-     * Get the group ID's for this team
-     * @return string[]
      * @Serializer\VirtualProperty()
      * @Serializer\Type("array<string>")
      */
@@ -739,37 +455,28 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface
     }
 
     /**
-     * Get the affiliation name of this team
-     * @return string|null
      * @Serializer\VirtualProperty()
      * @Serializer\SerializedName("affiliation")
      * @Serializer\Type("string")
      * @Serializer\Groups({"Nonstrict"})
      */
-    public function getAffiliationName()
+    public function getAffiliationName(): ?string
     {
         return $this->getAffiliation() ? $this->getAffiliation()->getName() : null;
     }
 
     /**
-     * Get the nationality of this team
-     * @return string|null
      * @Serializer\VirtualProperty()
      * @Serializer\Type("string")
      * @Serializer\Groups({"Nonstrict"})
      * @Serializer\Expose(if="context.getAttribute('config_service').get('show_flags')")
      */
-    public function getNationality()
+    public function getNationality() : ?string
     {
         return $this->getAffiliation() ? $this->getAffiliation()->getCountry() : null;
     }
 
-    /**
-     * Return whether this team can view the given clarification
-     * @param Clarification $clarification
-     * @return bool
-     */
-    public function canViewClarification(Clarification $clarification)
+    public function canViewClarification(Clarification $clarification): bool
     {
         return (($clarification->getSender() && $clarification->getSender()->getTeamid() === $this->getTeamid()) ||
             ($clarification->getRecipient() && $clarification->getRecipient()->getTeamid() === $this->getTeamid()) ||
@@ -785,7 +492,6 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface
     }
 
     /**
-     * @param ExecutionContextInterface $context
      * @Assert\Callback()
      */
     public function validate(ExecutionContextInterface $context)
@@ -805,13 +511,6 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface
         }
     }
 
-    /**
-     * Check if this team belongs to the given contest
-     *
-     * @param Contest $contest
-     *
-     * @return bool
-     */
     public function inContest(Contest $contest): bool
     {
         return $contest->isOpenToAllTeams() ||

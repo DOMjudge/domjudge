@@ -5,7 +5,8 @@ use App\Doctrine\DBAL\Types\InternalErrorStatusType;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Log of judgehost internal errors
+ * Log of judgehost internal errors.
+ *
  * @ORM\Entity()
  * @ORM\Table(
  *     name="internal_error",
@@ -79,195 +80,92 @@ class InternalError
      */
     private $judging;
 
-
-    /**
-     * Set errorid
-     *
-     * @param integer $errorid
-     *
-     * @return InternalError
-     */
-    public function setErrorid($errorid)
+    public function setErrorid(int $errorid): InternalError
     {
         $this->errorid = $errorid;
-
         return $this;
     }
 
-    /**
-     * Get errorid
-     *
-     * @return integer
-     */
-    public function getErrorid()
+    public function getErrorid(): int
     {
         return $this->errorid;
     }
 
-    /**
-     * Set description
-     *
-     * @param string $description
-     *
-     * @return InternalError
-     */
-    public function setDescription($description)
+    public function setDescription(string $description): InternalError
     {
         $this->description = $description;
-
         return $this;
     }
 
-    /**
-     * Get description
-     *
-     * @return string
-     */
-    public function getDescription()
+    public function getDescription(): string
     {
         return $this->description;
     }
 
-    /**
-     * Set judgehostlog
-     *
-     * @param string $judgehostlog
-     *
-     * @return InternalError
-     */
-    public function setJudgehostlog($judgehostlog)
+    public function setJudgehostlog(string $judgehostlog): InternalError
     {
         $this->judgehostlog = $judgehostlog;
-
         return $this;
     }
 
-    /**
-     * Get judgehostlog
-     *
-     * @return string
-     */
-    public function getJudgehostlog()
+    public function getJudgehostlog(): string
     {
         return $this->judgehostlog;
     }
 
-    /**
-     * Set time
-     *
-     * @param string $time
-     *
-     * @return InternalError
-     */
-    public function setTime($time)
+    /** @param string|float $time */
+    public function setTime($time): InternalError
     {
         $this->time = $time;
-
         return $this;
     }
 
-    /**
-     * Get time
-     *
-     * @return string
-     */
+    /** @return string|float */
     public function getTime()
     {
         return $this->time;
     }
 
-    /**
-     * Set disabled
-     *
-     * @param array $disabled
-     *
-     * @return InternalError
-     */
-    public function setDisabled($disabled)
+    public function setDisabled(array $disabled): InternalError
     {
         $this->disabled = $disabled;
-
         return $this;
     }
 
-    /**
-     * Get disabled
-     *
-     * @return array
-     */
-    public function getDisabled()
+    public function getDisabled(): array
     {
         return $this->disabled;
     }
 
-    /**
-     * Set status
-     *
-     * @param string $status
-     *
-     * @return InternalError
-     */
-    public function setStatus($status)
+    public function setStatus(string $status): InternalError
     {
         $this->status = $status;
-
         return $this;
     }
 
-    /**
-     * Get status
-     *
-     * @return string
-     */
-    public function getStatus()
+    public function getStatus(): string
     {
         return $this->status;
     }
 
-    /**
-     * Set contest
-     *
-     * @param \App\Entity\Contest $contest
-     *
-     * @return InternalError
-     */
-    public function setContest(\App\Entity\Contest $contest = null)
+    public function setContest(?Contest $contest = null): InternalError
     {
         $this->contest = $contest;
-
         return $this;
     }
 
-    /**
-     * Get contest
-     *
-     * @return \App\Entity\Contest
-     */
-    public function getContest()
+    public function getContest(): Contest
     {
         return $this->contest;
     }
 
-    /**
-     * Set judging
-     *
-     * @param \App\Entity\Judging $judging
-     *
-     * @return InternalError
-     */
-    public function setJudging(\App\Entity\Judging $judging = null)
+    public function setJudging(?Judging $judging = null): InternalError
     {
         $this->judging = $judging;
-
         return $this;
     }
 
-    /**
-     * Get judging
-     *
-     * @return \App\Entity\Judging
-     */
-    public function getJudging()
+    public function getJudging(): Judging
     {
         return $this->judging;
     }

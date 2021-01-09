@@ -14,7 +14,8 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * Users that have access to DOMjudge
+ * Users that have access to DOMjudge.
+ *
  * @ORM\Entity()
  * @ORM\Table(
  *     name="user",
@@ -140,8 +141,7 @@ class User implements UserInterface, EquatableInterface, \Serializable
      */
     private $user_roles;
 
-
-    public function getSalt()
+    public function getSalt(): ?string
     {
         return null;
     }
@@ -159,6 +159,7 @@ class User implements UserInterface, EquatableInterface, \Serializable
             $this->password,
         ));
     }
+
     public function unserialize($serialized)
     {
         list(
@@ -168,365 +169,194 @@ class User implements UserInterface, EquatableInterface, \Serializable
         ) = unserialize($serialized);
     }
 
-    /**
-     * Get userid
-     *
-     * @return integer
-     */
-    public function getUserid()
+    public function getUserid(): int
     {
         return $this->userid;
     }
 
-    /**
-     * Set username
-     *
-     * @param string $username
-     *
-     * @return User
-     */
-    public function setUsername($username)
+    public function setUsername(string $username): User
     {
         $this->username = $username;
-
         return $this;
     }
 
-    /**
-     * Get username
-     *
-     * @return string
-     */
-    public function getUsername()
+    public function getUsername(): string
     {
         return $this->username;
     }
 
-    /**
-     * Set name
-     *
-     * @param string $name
-     *
-     * @return User
-     */
-    public function setName($name)
+    public function setName(string $name): User
     {
         $this->name = $name;
-
         return $this;
     }
 
-    /**
-     * Get name
-     *
-     * @return string
-     */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
 
-    /**
-     * Set email
-     *
-     * @param string $email
-     *
-     * @return User
-     */
-    public function setEmail($email)
+    public function setEmail(string $email): User
     {
         $this->email = $email;
-
         return $this;
     }
 
-    /**
-     * Get email
-     *
-     * @return string
-     */
-    public function getEmail()
+    public function getEmail(): ?string
     {
         return $this->email;
     }
 
-    /**
-     * Set lastLogin
-     *
-     * @param string $lastLogin
-     *
-     * @return User
-     */
-    public function setLastLogin($lastLogin)
+    /** @param string|float $lastLogin */
+    public function setLastLogin($lastLogin): User
     {
         $this->last_login = $lastLogin;
-
         return $this;
     }
 
-    /**
-     * Get lastLogin
-     *
-     * @return string
-     */
+    /** @return string|float */
     public function getLastLogin()
     {
         return $this->last_login;
     }
 
     /**
-     * Get the last login time for this user as a DateTime object
-     *
-     * @return DateTime|null
      * @Serializer\VirtualProperty()
      * @Serializer\SerializedName("last_login_time")
      * @Serializer\Type("DateTime")
      * @throws Exception
      */
-    public function getLastLoginObject()
+    public function getLastLoginAsDateTime(): ?DateTime
     {
         return $this->getLastLogin() ? new DateTime(Utils::absTime($this->getLastLogin())) : null;
     }
 
-    /**
-     * Set firstLogin
-     *
-     * @param $firstLogin
-     * @return User
-     */
-    public function setFirstLogin($firstLogin)
+    /** @param string|float $firstLogin */
+    public function setFirstLogin($firstLogin): User
     {
         $this->first_login = $firstLogin;
-
         return $this;
     }
 
-    /**
-     * Get firstLogin
-     *
-     * @return string
-     */
+    /** @return string|float */
     public function getFirstLogin()
     {
         return $this->first_login;
     }
 
     /**
-     * Get the first login time for this user as a DateTime object
-     *
-     * @return DateTime|null
      * @Serializer\VirtualProperty()
      * @Serializer\SerializedName("first_login_time")
      * @Serializer\Type("DateTime")
      * @throws Exception
      */
-    public function getFirstLoginObject()
+    public function getFirstLoginAsDateTime(): ?DateTime
     {
         return $this->getFirstLogin() ? new DateTime(Utils::absTime($this->getFirstLogin())) : null;
     }
 
-    /**
-     * Set lastIpAddress
-     *
-     * @param string $lastIpAddress
-     *
-     * @return User
-     */
-    public function setLastIpAddress($lastIpAddress)
+    public function setLastIpAddress(string $lastIpAddress): User
     {
         $this->last_ip_address = $lastIpAddress;
-
         return $this;
     }
 
-    /**
-     * Get lastIpAddress
-     *
-     * @return string
-     */
-    public function getLastIpAddress()
+    public function getLastIpAddress(): ?string
     {
         return $this->last_ip_address;
     }
 
-    /**
-     * Set password
-     *
-     * @param string $password
-     *
-     * @return User
-     */
-    public function setPassword($password)
+    public function setPassword(string $password): User
     {
         $this->password = $password;
-
         return $this;
     }
 
-    /**
-     * Set the plain password, used to create the encoded password
-     * @param string|null $plainPassword
-     *
-     * @return User
-     */
-    public function setPlainPassword($plainPassword): User
+    public function setPlainPassword(?string $plainPassword): User
     {
         $this->plainPassword = $plainPassword;
-        // Make sure we let Doctrine know the password changed when we set a plain password by modifying the field
+        // Make sure we let Doctrine know the password changed when we set a plain password by modifying the field.
         $this->password      = $this->password === null ? '' : null;
         return $this;
     }
 
-    /**
-     * Get password
-     *
-     * @return string
-     */
-    public function getPassword()
+    public function getPassword(): string
     {
         return $this->password;
     }
 
-    /**
-     * Get the plain password, used to create the encoded password
-     *
-     * @return string|null
-     */
-    public function getPlainPassword()
+    public function getPlainPassword(): ?string
     {
         return $this->plainPassword;
     }
 
-    /**
-     * Set ipaddress
-     *
-     * @param string $ipAddress
-     *
-     * @return User
-     */
-    public function setIpAddress($ipAddress)
+    public function setIpAddress(string $ipAddress): User
     {
         $this->ipAddress = $ipAddress;
-
         return $this;
     }
 
-    /**
-     * Get ipaddress
-     *
-     * @return string
-     */
-    public function getIpAddress()
+    public function getIpAddress(): ?string
     {
         return $this->ipAddress;
     }
 
-    /**
-     * Set enabled
-     *
-     * @param boolean $enabled
-     *
-     * @return User
-     */
-    public function setEnabled($enabled)
+    public function setEnabled(bool $enabled): User
     {
         $this->enabled = $enabled;
-
         return $this;
     }
 
-    /**
-     * Get enabled
-     *
-     * @return boolean
-     */
-    public function getEnabled()
+    public function getEnabled(): bool
     {
         return $this->enabled;
     }
 
-    /**
-     * Set team
-     *
-     * @param Team $team
-     *
-     * @return User
-     */
-    public function setTeam(Team $team = null)
+    public function setTeam(?Team $team = null): User
     {
         $this->team = $team;
-
         return $this;
     }
 
-    /**
-     * Get team
-     *
-     * @return Team
-     */
-    public function getTeam()
+    public function getTeam(): ?Team
     {
         return $this->team;
     }
 
     /**
-     * Get the team name of this user
-     * @return string|null
      * @Serializer\VirtualProperty()
      * @Serializer\SerializedName("team")
      * @Serializer\Type("string")
      * @Serializer\Groups({"Nonstrict"})
      */
-    public function getTeamName()
+    public function getTeamName(): ?Team
     {
         return $this->getTeam() ? $this->getTeam()->getEffectiveName() : null;
     }
 
-    /**
-     * Constructor
-     */
     public function __construct()
     {
         $this->user_roles = new ArrayCollection();
     }
 
-    /**
-     * Add role
-     *
-     * @param Role $role
-     *
-     * @return User
-     */
-    public function addUserRole(Role $role)
+    public function addUserRole(Role $role): User
     {
         $this->user_roles[] = $role;
-
         return $this;
     }
 
-    /**
-     * Remove role
-     *
-     * @param Role $role
-     */
     public function removeUserRole(Role $role)
     {
         $this->user_roles->removeElement($role);
     }
 
-    /**
-     * Get roles
-     *
-     * @return Role[]
-     */
-    public function getUserRoles()
+    public function getUserRoles(): array
     {
         return $this->user_roles->toArray();
     }
 
     /**
      * Get the roles of this user as an array of strings
-     * @return string[]
      * @Serializer\VirtualProperty()
      * @Serializer\SerializedName("roles")
      * @Serializer\Type("array<string>")
@@ -557,7 +387,7 @@ class User implements UserInterface, EquatableInterface, \Serializable
     /**
      * {@inheritdoc}
      */
-    public function isEqualTo(UserInterface $user)
+    public function isEqualTo(UserInterface $user): bool
     {
         if (!$user instanceof self) {
             return false;

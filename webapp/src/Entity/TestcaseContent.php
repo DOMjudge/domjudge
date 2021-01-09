@@ -5,7 +5,7 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Contents of a testcase
+ * Contents of a testcase.
  *
  * @ORM\Entity
  * @ORM\Table(
@@ -77,120 +77,57 @@ class TestcaseContent
         return $this;
     }
 
-    /**
-     * @param Testcase $testcase
-     *
-     * @return TestcaseContent
-     */
-    public function setTestcase(Testcase $testcase)
+    public function setTestcase(Testcase $testcase): TestcaseContent
     {
         $this->testcase = $testcase;
-
         return $this;
     }
 
-    /**
-     * Get testcase
-     *
-     * @return Testcase
-     */
-    public function getTestcase(): Testcase
+   public function getTestcase(): Testcase
     {
         return $this->testcase;
     }
 
-    /**
-     * Set input
-     *
-     * @param string $input
-     *
-     * @return TestcaseContent
-     */
-    public function setInput($input)
+    public function setInput(string $input): TestcaseContent
     {
         $this->input = $input;
-
         return $this;
     }
 
-    /**
-     * Get input
-     *
-     * @return string
-     */
-    public function getInput()
+    public function getInput(): string
     {
         return $this->input;
     }
 
-    /**
-     * Set output
-     *
-     * @param string $output
-     *
-     * @return TestcaseContent
-     */
-    public function setOutput($output)
+    public function setOutput(string $output): TestcaseContent
     {
         $this->output = $output;
-
         return $this;
     }
 
-    /**
-     * Get output
-     *
-     * @return string
-     */
-    public function getOutput()
+    public function getOutput(): string
     {
         return $this->output;
     }
 
-    /**
-     * Set image
-     *
-     * @param string $image
-     *
-     * @return TestcaseContent
-     */
-    public function setImage($image)
+    public function setImage(string $image): TestcaseContent
     {
         $this->image = $image;
-
         return $this;
     }
 
-    /**
-     * Get image
-     *
-     * @return string
-     */
-    public function getImage()
+    public function getImage(): string
     {
         return $this->image;
     }
 
-    /**
-     * Set imageThumb
-     *
-     * @param string $imageThumb
-     *
-     * @return TestcaseContent
-     */
-    public function setImageThumb($imageThumb)
+    public function setImageThumb(string $imageThumb): TestcaseContent
     {
         $this->image_thumb = $imageThumb;
-
         return $this;
     }
 
-    /**
-     * Get imageThumb
-     *
-     * @return string
-     */
-    public function getImageThumb()
+    public function getImageThumb(): string
     {
         return $this->image_thumb;
     }

@@ -12,7 +12,8 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * Stores testcases per problem
+ * Stores testcases per problem.
+ *
  * @ORM\Entity()
  * @ORM\Table(
  *     name="problem",
@@ -27,7 +28,6 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 class Problem extends BaseApiEntity
 {
-
     /**
      * @var int
      *
@@ -176,233 +176,119 @@ class Problem extends BaseApiEntity
      */
     private $testcases;
 
-    /**
-     * Set probid
-     *
-     * @param integer $probId
-     *
-     * @return Problem
-     */
-    public function setProbid($probid)
+    public function setProbid(int $probid): Problem
     {
         $this->probid = $probid;
-
         return $this;
     }
 
-    /**
-     * Get probid
-     *
-     * @return integer
-     */
-    public function getProbid()
+    public function getProbid(): int
     {
         return $this->probid;
     }
 
-    /**
-     * Set externalid
-     *
-     * @param string $externalid
-     *
-     * @return Problem
-     */
-    public function setExternalid($externalid)
+    public function setExternalid(string $externalid): Problem
     {
         $this->externalid = $externalid;
-
         return $this;
     }
 
-    /**
-     * Get externalid
-     *
-     * @return string
-     */
-    public function getExternalid()
+    public function getExternalid(): string
     {
         return $this->externalid;
     }
 
-    /**
-     * Set name
-     *
-     * @param string $name
-     *
-     * @return Problem
-     */
-    public function setName($name)
+    public function setName(string $name): Problem
     {
         $this->name = $name;
-
         return $this;
     }
 
-    /**
-     * Get name
-     *
-     * @return string
-     */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
 
-    /**
-     * Set timelimit
-     *
-     * @param float $timelimit
-     *
-     * @return Problem
-     */
-    public function setTimelimit($timelimit)
+    public function setTimelimit(float $timelimit): Problem
     {
         $this->timelimit = $timelimit;
-
         return $this;
     }
 
     /**
-     * Get timelimit
-     *
-     * @return float
      * @Serializer\VirtualProperty()
      * @Serializer\SerializedName("time_limit")
      * @Serializer\Type("float")
      */
-    public function getTimelimit()
+    public function getTimelimit(): float
     {
         return Utils::roundedFloat($this->timelimit);
     }
 
-    /**
-     * Set memlimit
-     *
-     * @param integer $memlimit
-     *
-     * @return Problem
-     */
-    public function setMemlimit($memlimit)
+    public function setMemlimit(int $memlimit): Problem
     {
         $this->memlimit = $memlimit;
-
         return $this;
     }
 
-    /**
-     * Get memlimit
-     *
-     * @return integer
-     */
-    public function getMemlimit()
+    public function getMemlimit(): ?int
     {
         return $this->memlimit;
     }
 
-    /**
-     * Set outputlimit
-     *
-     * @param integer $outputlimit
-     *
-     * @return Problem
-     */
-    public function setOutputlimit($outputlimit)
+    public function setOutputlimit(int $outputlimit): Problem
     {
         $this->outputlimit = $outputlimit;
-
         return $this;
     }
 
-    /**
-     * Get outputlimit
-     *
-     * @return integer
-     */
-    public function getOutputlimit()
+    public function getOutputlimit(): ?int
     {
         return $this->outputlimit;
     }
 
-    /**
-     * Set specialCompareArgs
-     *
-     * @param string $specialCompareArgs
-     *
-     * @return Problem
-     */
-    public function setSpecialCompareArgs($specialCompareArgs)
+    public function setSpecialCompareArgs(string $specialCompareArgs): Problem
     {
         $this->special_compare_args = $specialCompareArgs;
-
         return $this;
     }
 
-    /**
-     * Get specialCompareArgs
-     *
-     * @return string
-     */
-    public function getSpecialCompareArgs()
+    public function getSpecialCompareArgs(): ?string
     {
         return $this->special_compare_args;
     }
 
-    /**
-     * Set combinedRunCompare
-     *
-     * @param boolean $combinedRunCompare
-     *
-     * @return Problem
-     */
-    public function setCombinedRunCompare($combinedRunCompare)
+    public function setCombinedRunCompare(bool $combinedRunCompare): Problem
     {
         $this->combined_run_compare = $combinedRunCompare;
-
         return $this;
     }
 
-    /**
-     * Get combinedRunCompare
-     *
-     * @return boolean
-     */
-    public function getCombinedRunCompare()
+    public function getCombinedRunCompare(): bool
     {
         return $this->combined_run_compare;
     }
 
     /**
-     * Set problemtext
-     *
      * @param resource|string $problemtext
-     *
-     * @return Problem
      */
-    public function setProblemtext($problemtext)
+    public function setProblemtext($problemtext): Problem
     {
         $this->problemtext = $problemtext;
-
         return $this;
     }
 
-    /**
-     * @param UploadedFile|null $problemtextFile
-     * @return Problem
-     */
-    public function setProblemtextFile($problemtextFile)
+    public function setProblemtextFile(?UploadedFile $problemtextFile): Problem
     {
         $this->problemtextFile = $problemtextFile;
-        // Clear the problem text to make sure the entity is modified
+
+        // Clear the problem text to make sure the entity is modified.
         $this->problemtext = '';
 
         return $this;
     }
 
-    /**
-     * @param bool $clearProblemtext
-     * @return Problem
-     */
-    public function setClearProblemtext(bool $clearProblemtext)
+    public function setClearProblemtext(bool $clearProblemtext): Problem
     {
         $this->clearProblemtext = $clearProblemtext;
         $this->problemtext = null;
@@ -411,8 +297,6 @@ class Problem extends BaseApiEntity
     }
 
     /**
-     * Get problemtext
-     *
      * @return resource|string
      */
     public function getProblemtext()
@@ -420,167 +304,85 @@ class Problem extends BaseApiEntity
         return $this->problemtext;
     }
 
-    /**
-     * @return UploadedFile|null
-     */
-    public function getProblemtextFile()
+    public function getProblemtextFile(): ?UploadedFile
     {
         return $this->problemtextFile;
     }
 
-    /**
-     * @return bool
-     */
     public function isClearProblemtext(): bool
     {
         return $this->clearProblemtext;
     }
 
-    /**
-     * Set problemtextType
-     *
-     * @param string $problemtextType
-     *
-     * @return Problem
-     */
-    public function setProblemtextType($problemtextType)
+    public function setProblemtextType(?string $problemtextType): Problem
     {
         $this->problemtext_type = $problemtextType;
-
         return $this;
     }
 
-    /**
-     * Get problemtextType
-     *
-     * @return string
-     */
-    public function getProblemtextType()
+    public function getProblemtextType(): string
     {
         return $this->problemtext_type;
     }
 
-    /**
-     * Set compareExecutable
-     *
-     * @param \App\Entity\Executable $compareExecutable
-     *
-     * @return Problem
-     */
-    public function setCompareExecutable(\App\Entity\Executable $compareExecutable = null)
+    public function setCompareExecutable(?Executable $compareExecutable = null): Problem
     {
         $this->compare_executable = $compareExecutable;
-
         return $this;
     }
 
-    /**
-     * Get compareExecutable
-     *
-     * @return \App\Entity\Executable
-     */
-    public function getCompareExecutable()
+    public function getCompareExecutable(): ?Executable
     {
         return $this->compare_executable;
     }
 
-    /**
-     * Set runExecutable
-     *
-     * @param \App\Entity\Executable $runExecutable
-     *
-     * @return Problem
-     */
-    public function setRunExecutable(\App\Entity\Executable $runExecutable = null)
+    public function setRunExecutable(?Executable $runExecutable = null): Problem
     {
         $this->run_executable = $runExecutable;
-
         return $this;
     }
 
-    /**
-     * Get runExecutable
-     *
-     * @return \App\Entity\Executable
-     */
-    public function getRunExecutable()
+    public function getRunExecutable(): ?Executable
     {
         return $this->run_executable;
     }
 
-    /**
-     * Constructor
-     */
     public function __construct()
     {
-        $this->testcases = new \Doctrine\Common\Collections\ArrayCollection();
-        $this->submissions = new ArrayCollection();
-        $this->clarifications = new ArrayCollection();
+        $this->testcases        = new ArrayCollection();
+        $this->submissions      = new ArrayCollection();
+        $this->clarifications   = new ArrayCollection();
         $this->contest_problems = new ArrayCollection();
     }
 
-    /**
-     * Add testcase
-     *
-     * @param \App\Entity\Testcase $testcase
-     *
-     * @return Problem
-     */
-    public function addTestcase(\App\Entity\Testcase $testcase)
+    public function addTestcase(Testcase $testcase): Problem
     {
         $this->testcases[] = $testcase;
-
         return $this;
     }
 
-    /**
-     * Remove testcase
-     *
-     * @param \App\Entity\Testcase $testcase
-     */
-    public function removeTestcase(\App\Entity\Testcase $testcase)
+    public function removeTestcase(Testcase $testcase)
     {
         $this->testcases->removeElement($testcase);
     }
 
-    /**
-     * Get testcases
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getTestcases()
+    public function getTestcases(): Collection
     {
         return $this->testcases;
     }
 
-    /**
-     * Add contestProblem
-     *
-     * @param \App\Entity\ContestProblem $contestProblem
-     *
-     * @return Problem
-     */
-    public function addContestProblem(\App\Entity\ContestProblem $contestProblem)
+    public function addContestProblem(ContestProblem $contestProblem): Problem
     {
         $this->contest_problems[] = $contestProblem;
-
         return $this;
     }
 
-    /**
-     * Remove contestProblem
-     *
-     * @param \App\Entity\ContestProblem $contestProblem
-     */
-    public function removeContestProblem(
-        \App\Entity\ContestProblem $contestProblem)
+    public function removeContestProblem(ContestProblem $contestProblem)
     {
         $this->contest_problems->removeElement($contestProblem);
     }
 
     /**
-     * Get contestProblems
-     *
      * @return \Doctrine\Common\Collections\Collection|ContestProblem[]
      */
     public function getContestProblems()
@@ -588,70 +390,34 @@ class Problem extends BaseApiEntity
         return $this->contest_problems;
     }
 
-    /**
-     * Add submission
-     *
-     * @param \App\Entity\Submission $submission
-     *
-     * @return Problem
-     */
-    public function addSubmission(\App\Entity\Submission $submission)
+    public function addSubmission(Submission $submission): Problem
     {
         $this->submissions[] = $submission;
-
         return $this;
     }
 
-    /**
-     * Remove submission
-     *
-     * @param \App\Entity\Submission $submission
-     */
-    public function removeSubmission(\App\Entity\Submission $submission)
+    public function removeSubmission(Submission $submission)
     {
         $this->submissions->removeElement($submission);
     }
 
-    /**
-     * Get submissions
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getSubmissions()
+    public function getSubmissions(): Collection
     {
         return $this->submissions;
     }
 
-    /**
-     * Add clarification
-     *
-     * @param \App\Entity\Clarification $clarification
-     *
-     * @return Problem
-     */
-    public function addClarification(\App\Entity\Clarification $clarification)
+    public function addClarification(Clarification $clarification): Problem
     {
         $this->clarifications[] = $clarification;
-
         return $this;
     }
 
-    /**
-     * Remove clarification
-     *
-     * @param \App\Entity\Clarification $clarification
-     */
-    public function removeClarification(\App\Entity\Clarification $clarification)
+    public function removeClarification(Clarification $clarification)
     {
         $this->clarifications->removeElement($clarification);
     }
 
-    /**
-     * Get clarifications
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getClarifications()
+    public function getClarifications(): Collection
     {
         return $this->clarifications;
     }

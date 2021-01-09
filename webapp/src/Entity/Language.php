@@ -10,7 +10,8 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * Programming languages in which teams can submit solutions
+ * Programming languages in which teams can submit solutions.
+ *
  * @ORM\Entity()
  * @ORM\Table(
  *     name="language",
@@ -24,7 +25,6 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 class Language extends BaseApiEntity
 {
-
     /**
      * @var string
      * @ORM\Id
@@ -135,316 +135,149 @@ class Language extends BaseApiEntity
      */
     private $submissions;
 
-    /**
-     * Set langid
-     *
-     * @param string $langid
-     *
-     * @return Language
-     */
-    public function setLangid($langid)
+    public function setLangid(string $langid): Language
     {
         $this->langid = $langid;
-
         return $this;
     }
 
-    /**
-     * Get langid
-     *
-     * @return string
-     */
-    public function getLangid()
+    public function getLangid(): string
     {
         return $this->langid;
     }
 
-    /**
-     * Set externalid
-     *
-     * @param string externalid
-     *
-     * @return Language
-     */
-    public function setExternalid(string $externalid)
+    public function setExternalid(string $externalid): Language
     {
         $this->externalid = $externalid;
-
         return $this;
     }
 
-    /**
-     * Get externalid
-     *
-     * @return string
-     */
-    public function getExternalid()
+    public function getExternalid(): string
     {
         return $this->externalid;
     }
 
-    /**
-     * Set name
-     *
-     * @param string $name
-     *
-     * @return Language
-     */
-    public function setName($name)
+    public function setName(string $name): Language
     {
         $this->name = $name;
-
         return $this;
     }
 
-    /**
-     * Get name
-     *
-     * @return string
-     */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
 
-    /**
-     * Set extensions
-     *
-     * @param string[] $extensions
-     *
-     * @return Language
-     */
-    public function setExtensions(array $extensions)
+    public function setExtensions(array $extensions): Language
     {
         $this->extensions = $extensions;
-
         return $this;
     }
 
-    /**
-     * Get extensions
-     *
-     * @return string[]
-     */
-    public function getExtensions()
+    public function getExtensions(): array
     {
         return $this->extensions;
     }
 
-    /**
-     * Set filterCompilerFiles
-     *
-     * @param bool $filterCompilerFiles
-     *
-     * @return Language
-     */
-    public function setFilterCompilerFiles(bool $filterCompilerFiles)
+    public function setFilterCompilerFiles(bool $filterCompilerFiles): Language
     {
         $this->filterCompilerFiles = $filterCompilerFiles;
-
         return $this;
     }
 
-    /**
-     * Get filterCompilerFiles
-     *
-     * @return bool
-     */
-    public function getFilterCompilerFiles()
+    public function getFilterCompilerFiles(): bool
     {
         return $this->filterCompilerFiles;
     }
 
-    /**
-     * Set allowSubmit
-     *
-     * @param boolean $allowSubmit
-     *
-     * @return Language
-     */
-    public function setAllowSubmit($allowSubmit)
+    public function setAllowSubmit(bool $allowSubmit): Language
     {
         $this->allowSubmit = $allowSubmit;
-
         return $this;
     }
 
-    /**
-     * Get allowSubmit
-     *
-     * @return boolean
-     */
-    public function getAllowSubmit()
+    public function getAllowSubmit(): bool
     {
         return $this->allowSubmit;
     }
 
-    /**
-     * Set allowJudge
-     *
-     * @param boolean $allowJudge
-     *
-     * @return Language
-     */
-    public function setAllowJudge($allowJudge)
+    public function setAllowJudge(bool $allowJudge): Language
     {
         $this->allowJudge = $allowJudge;
-
         return $this;
     }
 
-    /**
-     * Get allowJudge
-     *
-     * @return boolean
-     */
-    public function getAllowJudge()
+    public function getAllowJudge(): bool
     {
         return $this->allowJudge;
     }
 
-    /**
-     * Set timeFactor
-     *
-     * @param float $timeFactor
-     *
-     * @return Language
-     */
-    public function setTimeFactor($timeFactor)
+    public function setTimeFactor(float $timeFactor): Language
     {
         $this->timeFactor = $timeFactor;
-
         return $this;
     }
 
-    /**
-     * Get timeFactor
-     *
-     * @return float
-     */
-    public function getTimeFactor()
+    public function getTimeFactor(): float
     {
         return $this->timeFactor;
     }
 
-    /**
-     * Set requireEntryPoint
-     *
-     * @param boolean $requireEntryPoint
-     *
-     * @return Language
-     */
-    public function setRequireEntryPoint($requireEntryPoint)
+    public function setRequireEntryPoint(bool $requireEntryPoint): Language
     {
         $this->require_entry_point = $requireEntryPoint;
-
         return $this;
     }
 
-    /**
-     * Get requireEntryPoint
-     *
-     * @return boolean
-     */
-    public function getRequireEntryPoint()
+    public function getRequireEntryPoint(): bool
     {
         return $this->require_entry_point;
     }
 
-    /**
-     * Set entryPointDescription
-     *
-     * @param string $entryPointDescription
-     *
-     * @return Language
-     */
-    public function setEntryPointDescription($entryPointDescription)
+    public function setEntryPointDescription(string $entryPointDescription): Language
     {
         $this->entry_point_description = $entryPointDescription;
-
         return $this;
     }
 
-    /**
-     * Get entryPointDescription
-     *
-     * @return string
-     */
-    public function getEntryPointDescription()
+    public function getEntryPointDescription(): string
     {
         return $this->entry_point_description;
     }
 
-    /**
-     * Set compileExecutable
-     *
-     * @param \App\Entity\Executable $compileExecutable
-     *
-     * @return Language
-     */
-    public function setCompileExecutable(\App\Entity\Executable $compileExecutable = null)
+    public function setCompileExecutable(?Executable $compileExecutable = null): Language
     {
         $this->compile_executable = $compileExecutable;
-
         return $this;
     }
 
-    /**
-     * Get compileExecutable
-     *
-     * @return \App\Entity\Executable
-     */
-    public function getCompileExecutable()
+    public function getCompileExecutable(): Executable
     {
         return $this->compile_executable;
     }
-    /**
-     * Constructor
-     */
+
     public function __construct()
     {
-        $this->submissions = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->submissions = new ArrayCollection();
     }
 
-    /**
-     * Add submission
-     *
-     * @param \App\Entity\Submission $submission
-     *
-     * @return Language
-     */
-    public function addSubmission(\App\Entity\Submission $submission)
+    public function addSubmission(Submission $submission): Language
     {
         $this->submissions[] = $submission;
-
         return $this;
     }
 
-    /**
-     * Remove submission
-     *
-     * @param \App\Entity\Submission $submission
-     */
-    public function removeSubmission(\App\Entity\Submission $submission)
+    public function removeSubmission(Submission $submission)
     {
         $this->submissions->removeElement($submission);
     }
 
-    /**
-     * Get submissions
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getSubmissions()
+    public function getSubmissions(): Collection
     {
         return $this->submissions;
     }
 
-    /**
-     * Get the language for the ACE editor for this language
-     * @return string
-     */
-    public function getAceLanguage()
+    public function getAceLanguage(): string
     {
         switch ($this->getLangid()) {
             case 'c':

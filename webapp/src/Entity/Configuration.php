@@ -4,7 +4,8 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Compile, compare, and run script executable bundles
+ * Compile, compare, and run script executable bundles.
+ *
  * @ORM\Entity()
  * @ORM\Table(name="configuration",
  *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Global configuration variables"},
@@ -36,48 +37,26 @@ class Configuration
      */
     private $value;
 
-    /**
-     * Get configid
-     *
-     * @return integer
-     */
-    public function getConfigid()
+    public function getConfigid(): int
     {
         return $this->configid;
     }
 
-    /**
-     * Set name
-     *
-     * @param string $name
-     *
-     * @return Configuration
-     */
-    public function setName($name)
+    public function setName(string $name): Configuration
     {
         $this->name = $name;
-
         return $this;
     }
 
-    /**
-     * Get name
-     *
-     * @return string
-     */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
 
     /**
-     * Set value
-     *
      * @param mixed $value
-     *
-     * @return Configuration
      */
-    public function setValue($value)
+    public function setValue($value): Configuration
     {
         // Do not use 'True'/'False' but 1/0 since the former cannot be parsed by the old code.
         if ($value === TRUE) {
@@ -87,13 +66,10 @@ class Configuration
         }
 
         $this->value = $value;
-
         return $this;
     }
 
     /**
-     * Get value
-     *
      * @return mixed
      */
     public function getValue()

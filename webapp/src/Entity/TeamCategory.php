@@ -8,7 +8,8 @@ use JMS\Serializer\Annotation as Serializer;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * Categories for teams (e.g.: participants, observers, ...)
+ * Categories for teams (e.g.: participants, observers, ...).
+ *
  * @ORM\Entity()
  * @ORM\Table(
  *     name="team_category",
@@ -98,196 +99,95 @@ class TeamCategory extends BaseApiEntity
      */
     private $contests;
 
-    /**
-     * Constructor
-     */
     public function __construct()
     {
-        $this->teams = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->teams    = new ArrayCollection();
         $this->contests = new ArrayCollection();
     }
 
-    /**
-    * To String
-    */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->name;
     }
 
-    /**
-     * Set categoryid
-     *
-     * @param int $categoryid
-     *
-     * @return TeamCategory
-     */
-    public function setCategoryid(int $categoryid)
+    public function setCategoryid(int $categoryid): TeamCategory
     {
         $this->categoryid = $categoryid;
         return $this;
     }
 
-    /**
-     * Get categoryid
-     *
-     * @return integer
-     */
-    public function getCategoryid()
+    public function getCategoryid(): int
     {
         return $this->categoryid;
     }
 
-    /**
-     * Set name
-     *
-     * @param string $name
-     *
-     * @return TeamCategory
-     */
-    public function setName($name)
+    public function setName(string $name): TeamCategory
     {
         $this->name = $name;
-
         return $this;
     }
 
-    /**
-     * Get name
-     *
-     * @return string
-     */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
 
-    /**
-     * Set sortorder
-     *
-     * @param integer $sortorder
-     *
-     * @return TeamCategory
-     */
-    public function setSortorder($sortorder)
+    public function setSortorder(int $sortorder): TeamCategory
     {
         $this->sortorder = $sortorder;
-
         return $this;
     }
 
-    /**
-     * Get sortorder
-     *
-     * @return integer
-     */
-    public function getSortorder()
+    public function getSortorder(): int
     {
         return $this->sortorder;
     }
 
-    /**
-     * Set color
-     *
-     * @param string $color
-     *
-     * @return TeamCategory
-     */
-    public function setColor($color)
+    public function setColor(string $color): TeamCategory
     {
         $this->color = $color;
-
         return $this;
     }
 
-    /**
-     * Get color
-     *
-     * @return string
-     */
-    public function getColor()
+    public function getColor(): ?string
     {
         return $this->color;
     }
 
-    /**
-     * Set visible
-     *
-     * @param boolean $visible
-     *
-     * @return TeamCategory
-     */
-    public function setVisible($visible)
+    public function setVisible(bool $visible): TeamCategory
     {
         $this->visible = $visible;
-
         return $this;
     }
 
-    /**
-     * Get visible
-     *
-     * @return boolean
-     */
-    public function getVisible()
+    public function getVisible(): bool
     {
         return $this->visible;
     }
 
-    /**
-     * Set allowSelfRegistration
-     *
-     * @param boolean $allowSelfRegistration
-     *
-     * @return TeamCategory
-     */
-    public function setAllowSelfRegistration($allowSelfRegistration)
+    public function setAllowSelfRegistration(bool $allowSelfRegistration): TeamCategory
     {
         $this->allow_self_registration = $allowSelfRegistration;
-
         return $this;
     }
 
-    /**
-     * Get allowSelfRegistration
-     *
-     * @return boolean
-     */
-    public function getAllowSelfRegistration()
+    public function getAllowSelfRegistration(): bool
     {
         return $this->allow_self_registration;
     }
 
-    /**
-     * Add team
-     *
-     * @param \App\Entity\Team $team
-     *
-     * @return TeamCategory
-     */
-    public function addTeam(\App\Entity\Team $team)
+    public function addTeam(Team $team): TeamCategory
     {
         $this->teams[] = $team;
-
         return $this;
     }
 
-    /**
-     * Remove team
-     *
-     * @param \App\Entity\Team $team
-     */
-    public function removeTeam(\App\Entity\Team $team)
+    public function removeTeam(Team $team)
     {
         $this->teams->removeElement($team);
     }
 
-    /**
-     * Get teams
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getTeams()
+    public function getTeams(): Collection
     {
         return $this->teams;
     }
@@ -320,13 +220,6 @@ class TeamCategory extends BaseApiEntity
         return $this;
     }
 
-    /**
-     * Check if this team category belongs to the given contest
-     *
-     * @param Contest $contest
-     *
-     * @return bool
-     */
     public function inContest(Contest $contest): bool
     {
         return $contest->isOpenToAllTeams() || $this->getContests()->contains($contest);

@@ -10,7 +10,8 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 
 /**
- * Affilitations for teams (e.g.: university, company)
+ * Affilitations for teams (e.g.: university, company).
+ *
  * @ORM\Entity()
  * @ORM\Table(
  *     name="team_affiliation",
@@ -95,189 +96,90 @@ class TeamAffiliation extends BaseApiEntity
      */
     private $teams;
 
-    /**
-     * Constructor
-     */
     public function __construct()
     {
-        $this->teams = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->teams = new ArrayCollection();
     }
 
-    /**
-     * Set affilid
-     *
-     * @param integer affilid
-     *
-     * @return TeamAffiliation
-     */
-    public function setAffilid($affilid)
+    public function setAffilid(int $affilid): TeamAffiliation
     {
         $this->affilid = $affilid;
-
         return $this;
     }
 
 
-    /**
-     * Get affilid
-     *
-     * @return integer
-     */
-    public function getAffilid()
+    public function getAffilid(): int
     {
         return $this->affilid;
     }
 
-    /**
-     * Set externalid
-     *
-     * @param string $externalid
-     *
-     * @return TeamAffiliation
-     */
-    public function setExternalid($externalid)
+    public function setExternalid(string $externalid): TeamAffiliation
     {
         $this->externalid = $externalid;
-
         return $this;
     }
 
-    /**
-     * Get externalid
-     *
-     * @return string
-     */
-    public function getExternalid()
+    public function getExternalid(): string
     {
         return $this->externalid;
     }
 
-    /**
-     * Set shortname
-     *
-     * @param string $shortname
-     *
-     * @return TeamAffiliation
-     */
-    public function setShortname($shortname)
+    public function setShortname(string $shortname): TeamAffiliation
     {
         $this->shortname = $shortname;
-
         return $this;
     }
 
-    /**
-     * Get shortname
-     *
-     * @return string
-     */
-    public function getShortname()
+    public function getShortname(): string
     {
         return $this->shortname;
     }
 
-    /**
-     * Set name
-     *
-     * @param string $name
-     *
-     * @return TeamAffiliation
-     */
-    public function setName($name)
+    public function setName(string $name): TeamAffiliation
     {
         $this->name = $name;
-
         return $this;
     }
 
-    /**
-     * Get name
-     *
-     * @return string
-     */
-    public function getName()
+   public function getName(): string
     {
         return $this->name;
     }
 
-    /**
-     * Set country
-     *
-     * @param string $country
-     *
-     * @return TeamAffiliation
-     */
-    public function setCountry($country)
+    public function setCountry(string $country): TeamAffiliation
     {
         $this->country = $country;
-
         return $this;
     }
 
-    /**
-     * Get country
-     *
-     * @return string
-     */
-    public function getCountry()
+    public function getCountry(): string
     {
         return $this->country;
     }
 
-    /**
-     * Set comments
-     *
-     * @param string $comments
-     *
-     * @return TeamAffiliation
-     */
-    public function setComments($comments)
+    public function setComments(string $comments): TeamAffiliation
     {
         $this->comments = $comments;
-
         return $this;
     }
 
-    /**
-     * Get comments
-     *
-     * @return string
-     */
-    public function getComments()
+    public function getComments(): ?string
     {
         return $this->comments;
     }
 
-    /**
-     * Add team
-     *
-     * @param \App\Entity\Team $team
-     *
-     * @return TeamAffiliation
-     */
-    public function addTeam(\App\Entity\Team $team)
+    public function addTeam(Team $team): TeamAffiliation
     {
         $this->teams[] = $team;
-
         return $this;
     }
 
-    /**
-     * Remove team
-     *
-     * @param \App\Entity\Team $team
-     */
-    public function removeTeam(\App\Entity\Team $team)
+    public function removeTeam(Team $team)
     {
         $this->teams->removeElement($team);
     }
 
-    /**
-     * Get teams
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getTeams()
+    public function getTeams(): Collection
     {
         return $this->teams;
     }

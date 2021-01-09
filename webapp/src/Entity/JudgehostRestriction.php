@@ -6,7 +6,8 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Hostnames of the autojudgers
+ * Restrictions to be applied to judgehosts, e.g. to certain problems or languages.
+ *
  * @ORM\Entity()
  * @ORM\Table(
  *     name="judgehost_restriction",
@@ -42,182 +43,94 @@ class JudgehostRestriction
      */
     private $judgehosts;
 
-    /**
-     * Constructor
-     */
     public function __construct()
     {
-        $this->judgehosts = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->judgehosts = new ArrayCollection();
     }
 
-    /**
-     * Get restrictionid
-     *
-     * @return integer
-     */
-    public function getRestrictionid()
+    public function getRestrictionid(): int
     {
         return $this->restrictionid;
     }
 
-    /**
-     * Set name
-     *
-     * @param string $name
-     *
-     * @return JudgehostRestriction
-     */
-    public function setName($name)
+    public function setName(string $name): JudgehostRestriction
     {
         $this->name = $name;
-
         return $this;
     }
 
-    /**
-     * Get name
-     *
-     * @return string
-     */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
 
-    /**
-     * Set restrictions
-     *
-     * @param array $restrictions
-     *
-     * @return JudgehostRestriction
-     */
-    public function setRestrictions($restrictions)
+    public function setRestrictions(array $restrictions): JudgehostRestriction
     {
         $this->restrictions = $restrictions;
-
         return $this;
     }
 
-    /**
-     * Get restrictions
-     *
-     * @return array
-     */
-    public function getRestrictions()
+    public function getRestrictions(): array
     {
         return $this->restrictions;
     }
 
-    /**
-     * Set restriction contests
-     * @param int[] $contests
-     * @return $this
-     */
-    public function setContests(array $contests)
+    public function setContests(array $contests): JudgehostRestriction
     {
         $this->restrictions['contest'] = $contests;
         return $this;
     }
 
-    /**
-     * Get restriction contests
-     * @return int[]
-     */
-    public function getContests()
+    public function getContests(): array
     {
         return $this->restrictions['contest'] ?? [];
     }
 
-    /**
-     * Set restriction problems
-     * @param int[] $problems
-     * @return $this
-     */
-    public function setProblems(array $problems)
+    public function setProblems(array $problems): JudgehostRestriction
     {
         $this->restrictions['problem'] = $problems;
         return $this;
     }
 
-    /**
-     * Get restriction problems
-     * @return int[]
-     */
-    public function getProblems()
+    public function getProblems(): array
     {
         return $this->restrictions['problem'] ?? [];
     }
 
-    /**
-     * Set restriction languages
-     * @param string[] $languages
-     * @return $this
-     */
-    public function setLanguages(array $languages)
+    public function setLanguages(array $languages): JudgehostRestriction
     {
         $this->restrictions['language'] = $languages;
         return $this;
     }
 
-    /**
-     * Get restriction languages
-     * @return string[]
-     */
-    public function getLanguages()
+    public function getLanguages(): array
     {
         return $this->restrictions['language'] ?? [];
     }
 
-    /**
-     * Set restriction rejudge own
-     * @param bool $rejudgeOwn
-     * @return $this
-     */
-    public function setRejudgeOwn(bool $rejudgeOwn)
+    public function setRejudgeOwn(bool $rejudgeOwn): JudgehostRestriction
     {
         $this->restrictions['rejudge_own'] = $rejudgeOwn;
         return $this;
     }
 
-    /**
-     * Get restriction rejudge own
-     * @return bool
-     */
-    public function getRejudgeOwn()
+    public function getRejudgeOwn(): bool
     {
         return $this->restrictions['rejudge_own'] ?? true;
     }
 
-    /**
-     * Add judgehost
-     *
-     * @param \App\Entity\Judgehost $judgehost
-     *
-     * @return JudgehostRestriction
-     */
-    public function addJudgehost(\App\Entity\Judgehost $judgehost)
+    public function addJudgehost(Judgehost $judgehost): JudgehostRestriction
     {
         $this->judgehosts[] = $judgehost;
-
         return $this;
     }
 
-    /**
-     * Remove judgehost
-     *
-     * @param \App\Entity\Judgehost $judgehost
-     */
-    public function removeJudgehost(\App\Entity\Judgehost $judgehost)
+    public function removeJudgehost(Judgehost $judgehost)
     {
         $this->judgehosts->removeElement($judgehost);
     }
 
-    /**
-     * Get judgehosts
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getJudgehosts()
+    public function getJudgehosts(): Collection
     {
         return $this->judgehosts;
     }
