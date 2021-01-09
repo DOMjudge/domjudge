@@ -103,7 +103,7 @@ class Judgehost
         return $this;
     }
 
-    public function getRestriction(): JudgehostRestriction
+    public function getRestriction(): ?JudgehostRestriction
     {
         return $this->restriction;
     }

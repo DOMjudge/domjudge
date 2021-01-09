@@ -108,13 +108,13 @@ class AuditLog
         return $this->cid;
     }
 
-    public function setUser(string $user): AuditLog
+    public function setUser(?string $user): AuditLog
     {
         $this->user = $user;
         return $this;
     }
 
-    public function getUser(): string
+    public function getUser(): ?string
     {
         return $this->user;
     }

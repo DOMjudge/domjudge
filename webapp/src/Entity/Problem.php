@@ -182,7 +182,7 @@ class Problem extends BaseApiEntity
         return $this;
     }
 
-    public function getProbid(): int
+    public function getProbid(): ?int
     {
         return $this->probid;
     }
@@ -193,7 +193,7 @@ class Problem extends BaseApiEntity
         return $this;
     }
 
-    public function getExternalid(): string
+    public function getExternalid(): ?string
     {
         return $this->externalid;
     }
