@@ -14,7 +14,7 @@ final class Version20201113094653 extends AbstractMigration
 {
     public function getDescription() : string
     {
-        return '';
+        return 'add problem attachment tables';
     }
 
     public function up(Schema $schema) : void
