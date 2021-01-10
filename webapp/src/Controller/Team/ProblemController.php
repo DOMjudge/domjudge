@@ -3,19 +3,20 @@
 namespace App\Controller\Team;
 
 use App\Controller\BaseController;
+use App\Entity\Contest;
 use App\Entity\ContestProblem;
-use App\Entity\Language;
 use App\Entity\ProblemAttachment;
-use App\Entity\Testcase;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\StatisticsService;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\Query\Expr\Join;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -73,7 +74,7 @@ class ProblemController extends BaseController
     /**
      * @Route("/problems", name="team_problems")
      * @return Response
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      * @throws \Exception
      */
     public function problemsAction()
@@ -85,54 +86,23 @@ class ProblemController extends BaseController
 
     /**
      * @Route("/problems/{probId<\d+>}/text", name="team_problem_text")
-     * @param int $probId
-     * @return \Symfony\Component\HttpFoundation\Response
      */
     public function problemTextAction(int $probId)
     {
-        $user    = $this->dj->getUser();
-        $contest = $this->dj->getCurrentContest($user->getTeam()->getTeamid());
-        if (!$contest || !$contest->getFreezeData()->started()) {
-            throw new NotFoundHttpException(sprintf('Problem p%d not found or not available', $probId));
-        }
-        /** @var ContestProblem $contestProblem */
-        $contestProblem = $this->em->getRepository(ContestProblem::class)->find([
-            'problem' => $probId,
-            'contest' => $contest,
-        ]);
-        if (!$contestProblem) {
-            throw new NotFoundHttpException(sprintf('Problem p%d not found or not available', $probId));
-        }
+        return $this->getBinaryFile($probId, function (
+            int $probId,
+            Contest $contest,
+            ContestProblem $contestProblem
+        ) {
+            $problem = $contestProblem->getProblem();
 
-        $problem = $contestProblem->getProblem();
-
-        switch ($problem->getProblemtextType()) {
-            case 'pdf':
-                $mimetype = 'application/pdf';
-                break;
-            case 'html':
-                $mimetype = 'text/html';
-                break;
-            case 'txt':
-                $mimetype = 'text/plain';
-                break;
-            default:
-                $this->addFlash('danger', sprintf('Problem p%d text has unknown type', $probId));
+            try {
+                return $problem->getProblemTextStreamedResponse();
+            } catch (BadRequestHttpException $e) {
+                $this->addFlash('danger', $e->getMessage());
                 return $this->redirectToRoute('team_problems');
-        }
-
-        $filename    = sprintf('prob-%s.%s', $problem->getName(), $problem->getProblemtextType());
-        $problemText = stream_get_contents($problem->getProblemtext());
-
-        $response = new StreamedResponse();
-        $response->setCallback(function () use ($problemText) {
-            echo $problemText;
+            }
         });
-        $response->headers->set('Content-Type', sprintf('%s; name="%s', $mimetype, $filename));
-        $response->headers->set('Content-Disposition', sprintf('inline; filename="%s"', $filename));
-        $response->headers->set('Content-Length', strlen($problemText));
-
-        return $response;
     }
 
     /**
@@ -140,57 +110,18 @@ class ProblemController extends BaseController
      *     "/{probId<\d+>}/attachment/{attachmentId<\d+>}",
      *     name="team_problem_attachment"
      *     )
-     * @param int    $probId
-     * @param int    $attachmentId
-     * @return \Symfony\Component\HttpFoundation\Response
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      */
-    public function attachmentAction(int $probId, int $attachmentId)
+    public function attachmentAction(int $probId, int $attachmentId): StreamedResponse
     {
-        $user    = $this->dj->getUser();
-        $contest = $this->dj->getCurrentContest($user->getTeam()->getTeamid());
-        if (!$contest || !$contest->getFreezeData()->started()) {
-            throw new NotFoundHttpException(sprintf('Problem p%d not found or not available', $probId));
-        }
-        /** @var ContestProblem $contestProblem */
-        $contestProblem = $this->em->getRepository(ContestProblem::class)->find([
-            'problem' => $probId,
-            'contest' => $contest,
-        ]);
-        if (!$contestProblem) {
-            throw new NotFoundHttpException(sprintf('Problem p%d not found or not available', $probId));
-        }
-
-        /** @var ProblemAttachment $attachment */
-        $attachment = $this->em->createQueryBuilder()
-            ->from(ProblemAttachment::class, 'a')
-            ->join('a.problem', 'p')
-            ->join('p.contest_problems', 'cp', Join::WITH, 'cp.contest = :contest')
-            ->join('a.content', 'ac')
-            ->select('a', 'ac')
-            ->andWhere('a.problem = :problem')
-            ->andWhere('a.attachmentid = :attachmentid')
-            ->setParameter(':problem', $probId)
-            ->setParameter(':contest', $contest)
-            ->setParameter(':attachmentid', $attachmentId)
-            ->getQuery()
-            ->getOneOrNullResult();
-        if (!$attachment) {
-            throw new NotFoundHttpException(sprintf('Problem p%d not found or not available', $probId));
-        }
-
-        $content = $attachment->getContent()->getContent();
-        $filename = $attachment->getName();
-
-        $response = new StreamedResponse();
-        $response->setCallback(function () use ($content) {
-            echo $content;
+        return $this->getBinaryFile($probId, function (
+            int $probId,
+            Contest $contest,
+            ContestProblem $contestProblem
+        ) use ($attachmentId) {
+            return $this->dj->getAttachmentStreamedResponse($contestProblem,
+                $attachmentId);
         });
-        $response->headers->set('Content-Type', sprintf('application/octet-stream; name="%s', $filename));
-        $response->headers->set('Content-Disposition', sprintf('attachment; filename="%s"', $filename));
-        $response->headers->set('Content-Length', strlen($content));
-
-        return $response;
     }
 
     /**
@@ -198,87 +129,41 @@ class ProblemController extends BaseController
      *     "/{probId<\d+>}/sample/{index<\d+>}/{type<input|output>}",
      *     name="team_problem_sample_testcase"
      *     )
-     * @param int    $probId
-     * @param int    $index
-     * @param string $type
-     * @return \Symfony\Component\HttpFoundation\Response
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      */
     public function sampleTestcaseAction(int $probId, int $index, string $type)
     {
-        $user    = $this->dj->getUser();
-        $contest = $this->dj->getCurrentContest($user->getTeam()->getTeamid());
-        if (!$contest || !$contest->getFreezeData()->started()) {
-            throw new NotFoundHttpException(sprintf('Problem p%d not found or not available', $probId));
-        }
-        /** @var ContestProblem $contestProblem */
-        $contestProblem = $this->em->getRepository(ContestProblem::class)->find([
-            'problem' => $probId,
-            'contest' => $contest,
-        ]);
-        if (!$contestProblem) {
-            throw new NotFoundHttpException(sprintf('Problem p%d not found or not available', $probId));
-        }
-
-        /** @var Testcase $testcase */
-        $testcase = $this->em->createQueryBuilder()
-            ->from(Testcase::class, 'tc')
-            ->join('tc.problem', 'p')
-            ->join('p.contest_problems', 'cp', Join::WITH, 'cp.contest = :contest')
-            ->join('tc.content', 'tcc')
-            ->select('tc', 'tcc')
-            ->andWhere('tc.problem = :problem')
-            ->andWhere('tc.sample = 1')
-            ->andWhere('cp.allowSubmit = 1')
-            ->setParameter(':problem', $probId)
-            ->setParameter(':contest', $contest)
-            ->orderBy('tc.testcaseid')
-            ->setMaxResults(1)
-            ->setFirstResult($index - 1)
-            ->getQuery()
-            ->getOneOrNullResult();
-        if (!$testcase) {
-            throw new NotFoundHttpException(sprintf('Problem p%d not found or not available', $probId));
-        }
-
-        $extension = substr($type, 0, -3);
-        $mimetype  = 'text/plain';
-
-        $filename = sprintf("sample-%s.%s.%s", $contestProblem->getShortname(), $index, $extension);
-        $content  = null;
-
-        switch ($type) {
-            case 'input':
-                $content = $testcase->getContent()->getInput();
-                break;
-            case 'output':
-                $content = $testcase->getContent()->getOutput();
-                break;
-        }
-
-        $response = new StreamedResponse();
-        $response->setCallback(function () use ($content) {
-            echo $content;
+        return $this->getBinaryFile($probId, function (
+            int $probId,
+            Contest $contest,
+            ContestProblem $contestProblem
+        ) use ($type, $index) {
+            return $this->dj->getSampleTestcaseStreamedResponse($contestProblem,
+                $index, $type);
         });
-        $response->headers->set('Content-Type', sprintf('%s; name="%s', $mimetype, $filename));
-        $response->headers->set('Content-Disposition', sprintf('attachment; filename="%s"', $filename));
-        $response->headers->set('Content-Length', strlen($content));
-
-        return $response;
     }
 
     /**
      * @Route("/{probId<\d+>}/samples.zip", name="team_problem_sample_zip")
-     * @param int $probId
-     * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function sampleZipAction(int $probId)
+    public function sampleZipAction(int $probId): StreamedResponse
+    {
+        return $this->getBinaryFile($probId, function(int $probId, Contest $contest, ContestProblem $contestProblem) {
+            return $this->dj->getSamplesZipStreamedResponse($contestProblem);
+        });
+    }
+
+    /**
+     * Get a binary file for the given problem ID using the given callable.
+     *
+     * Shared code between testcases, problem text and attachments.
+     */
+    protected function getBinaryFile(int $probId, callable $response): StreamedResponse
     {
         $user    = $this->dj->getUser();
         $contest = $this->dj->getCurrentContest($user->getTeam()->getTeamid());
-        $notfound_msg = sprintf('Problem p%d not found or not available', $probId);
         if (!$contest || !$contest->getFreezeData()->started()) {
-            throw new NotFoundHttpException($notfound_msg);
+            throw new NotFoundHttpException(sprintf('Problem p%d not found or not available', $probId));
         }
         /** @var ContestProblem $contestProblem */
         $contestProblem = $this->em->getRepository(ContestProblem::class)->find([
@@ -286,25 +171,9 @@ class ProblemController extends BaseController
             'contest' => $contest,
         ]);
         if (!$contestProblem) {
-            throw new NotFoundHttpException($notfound_msg);
+            throw new NotFoundHttpException(sprintf('Problem p%d not found or not available', $probId));
         }
 
-        $zipFilename    = $this->dj->getSamplesZip($contestProblem);
-        $outputFilename = sprintf('samples-%s.zip', $contestProblem->getShortname());
-
-        $response = new StreamedResponse();
-        $response->setCallback(function () use ($zipFilename) {
-            $fp = fopen($zipFilename, 'rb');
-            fpassthru($fp);
-            unlink($zipFilename);
-        });
-        $response->headers->set('Content-Type', 'application/zip');
-        $response->headers->set('Content-Disposition', 'attachment; filename="' . $outputFilename . '"');
-        $response->headers->set('Content-Length', filesize($zipFilename));
-        $response->headers->set('Content-Transfer-Encoding', 'binary');
-        $response->headers->set('Connection', 'Keep-Alive');
-        $response->headers->set('Accept-Ranges', 'bytes');
-
-        return $response;
+        return $response($probId, $contest, $contestProblem);
     }
 }

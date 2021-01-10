@@ -575,10 +575,8 @@ class ProblemController extends BaseController
 
     /**
      * @Route("/{probId<\d+>}/text", name="jury_problem_text")
-     * @param int $probId
-     * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function viewTextAction(int $probId)
+    public function viewTextAction(int $probId): StreamedResponse
     {
         /** @var Problem $problem */
         $problem = $this->em->getRepository(Problem::class)->find($probId);
@@ -586,32 +584,7 @@ class ProblemController extends BaseController
             throw new NotFoundHttpException(sprintf('Problem with ID %s not found', $probId));
         }
 
-        switch ($problem->getProblemtextType()) {
-            case 'pdf':
-                $mimetype = 'application/pdf';
-                break;
-            case 'html':
-                $mimetype = 'text/html';
-                break;
-            case 'txt':
-                $mimetype = 'text/plain';
-                break;
-            default:
-                throw new BadRequestHttpException(sprintf('Problem p%d text has unknown type', $probId));
-        }
-
-        $filename    = sprintf('prob-%s.%s', $problem->getName(), $problem->getProblemtextType());
-        $problemText = stream_get_contents($problem->getProblemtext());
-
-        $response = new StreamedResponse();
-        $response->setCallback(function () use ($problemText) {
-            echo $problemText;
-        });
-        $response->headers->set('Content-Type', sprintf('%s; name="%s', $mimetype, $filename));
-        $response->headers->set('Content-Disposition', sprintf('inline; filename="%s"', $filename));
-        $response->headers->set('Content-Length', strlen($problemText));
-
-        return $response;
+        return $problem->getProblemTextStreamedResponse();
     }
 
     /**
@@ -1093,11 +1066,8 @@ class ProblemController extends BaseController
 
     /**
      * @Route("/attachments/{attachmentId<\d+>}", name="jury_attachment_fetch")
-     * @param int $attachmentId
-     *
-     * @return Response
      */
-    public function fetchAttachmentAction(int $attachmentId)
+    public function fetchAttachmentAction(int $attachmentId): StreamedResponse
     {
         /** @var ProblemAttachment $attachment */
         $attachment = $this->em->getRepository(ProblemAttachment::class)->find($attachmentId);
@@ -1106,30 +1076,15 @@ class ProblemController extends BaseController
                 $attachmentId));
         }
 
-        $content = $attachment->getContent()->getContent();
-        $filename = $attachment->getName();
-
-        $response = new StreamedResponse();
-        $response->setCallback(function () use ($content) {
-            echo $content;
-        });
-        $response->headers->set('Content-Type', sprintf('application/octet-stream; name="%s', $filename));
-        $response->headers->set('Content-Disposition', sprintf('attachment; filename="%s"', $filename));
-        $response->headers->set('Content-Length', strlen($content));
-
-        return $response;
+        return $attachment->getStreamedResponse();
     }
 
     /**
      * @Route("/attachments/{attachmentId<\d+>}/delete", name="jury_attachment_delete")
      * @IsGranted("ROLE_ADMIN")
-     * @param Request $request
-     * @param int     $attachmentId
-     *
-     * @return RedirectResponse|Response
      * @throws Exception
      */
-    public function deleteAttachmentAction(Request $request, int $attachmentId)
+    public function deleteAttachmentAction(Request $request, int $attachmentId): Response
     {
         /** @var ProblemAttachment $attachment */
         $attachment = $this->em->getRepository(ProblemAttachment::class)->find($attachmentId);
@@ -1147,13 +1102,9 @@ class ProblemController extends BaseController
     /**
      * @Route("/{testcaseId<\d+>}/delete_testcase", name="jury_testcase_delete")
      * @IsGranted("ROLE_ADMIN")
-     * @param Request $request
-     * @param int     $testcaseId
-     *
-     * @return RedirectResponse|Response
      * @throws Exception
      */
-    public function deleteTestcaseAction(Request $request, int $testcaseId)
+    public function deleteTestcaseAction(Request $request, int $testcaseId): Response
     {
         /** @var Testcase $testcase */
         $testcase = $this->em->getRepository(Testcase::class)->find($testcaseId);

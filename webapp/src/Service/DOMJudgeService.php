@@ -18,6 +18,7 @@ use App\Entity\Judging;
 use App\Entity\JudgingRun;
 use App\Entity\Language;
 use App\Entity\Problem;
+use App\Entity\ProblemAttachment;
 use App\Entity\Rejudging;
 use App\Entity\Submission;
 use App\Entity\Team;
@@ -26,6 +27,7 @@ use App\Entity\User;
 use App\Utils\FreezeData;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\Query\Expr\Join;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -33,7 +35,9 @@ use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
@@ -806,11 +810,118 @@ class DOMJudgeService
         return $tempFilename;
     }
 
+    public function getSamplesZipStreamedResponse(ContestProblem $contestProblem): StreamedResponse
+    {
+        $zipFilename    = $this->getSamplesZip($contestProblem);
+        $outputFilename = sprintf('samples-%s.zip', $contestProblem->getShortname());
+
+        $response = new StreamedResponse();
+        $response->setCallback(function () use ($zipFilename) {
+            $fp = fopen($zipFilename, 'rb');
+            fpassthru($fp);
+            unlink($zipFilename);
+        });
+        $response->headers->set('Content-Type', 'application/zip');
+        $response->headers->set('Content-Disposition', 'attachment; filename="' . $outputFilename . '"');
+        $response->headers->set('Content-Length', filesize($zipFilename));
+        $response->headers->set('Content-Transfer-Encoding', 'binary');
+        $response->headers->set('Connection', 'Keep-Alive');
+        $response->headers->set('Accept-Ranges', 'bytes');
+
+        return $response;
+    }
+
+    /**
+     * @throws NonUniqueResultException
+     */
+    public function getSampleTestcaseStreamedResponse(
+        ContestProblem $contestProblem,
+        int $index,
+        string $type
+    ): StreamedResponse {
+        /** @var Testcase $testcase */
+        $testcase = $this->em->createQueryBuilder()
+            ->from(Testcase::class, 'tc')
+            ->join('tc.problem', 'p')
+            ->join('p.contest_problems', 'cp', Join::WITH,
+                'cp.contest = :contest')
+            ->join('tc.content', 'tcc')
+            ->select('tc', 'tcc')
+            ->andWhere('tc.problem = :problem')
+            ->andWhere('tc.sample = 1')
+            ->andWhere('cp.allowSubmit = 1')
+            ->setParameter(':problem', $contestProblem->getProbid())
+            ->setParameter(':contest', $contestProblem->getContest())
+            ->orderBy('tc.testcaseid')
+            ->setMaxResults(1)
+            ->setFirstResult($index - 1)
+            ->getQuery()
+            ->getOneOrNullResult();
+        if (!$testcase) {
+            throw new NotFoundHttpException(sprintf('Problem p%d not found or not available',
+                $contestProblem->getProbid()));
+        }
+
+        $extension = substr($type, 0, -3);
+        $mimetype  = 'text/plain';
+
+        $filename = sprintf("sample-%s.%s.%s", $contestProblem->getShortname(),
+            $index, $extension);
+        $content  = null;
+
+        switch ($type) {
+            case 'input':
+                $content = $testcase->getContent()->getInput();
+                break;
+            case 'output':
+                $content = $testcase->getContent()->getOutput();
+                break;
+        }
+
+        $response = new StreamedResponse();
+        $response->setCallback(function () use ($content) {
+            echo $content;
+        });
+        $response->headers->set('Content-Type',
+            sprintf('%s; name="%s', $mimetype, $filename));
+        $response->headers->set('Content-Disposition',
+            sprintf('attachment; filename="%s"', $filename));
+        $response->headers->set('Content-Length', strlen($content));
+
+        return $response;
+    }
+
+    /**
+     * @throws NonUniqueResultException
+     */
+    public function getAttachmentStreamedResponse(ContestProblem $contestProblem, int $attachmentId): StreamedResponse
+    {
+        /** @var ProblemAttachment $attachment */
+        $attachment = $this->em->createQueryBuilder()
+            ->from(ProblemAttachment::class, 'a')
+            ->join('a.problem', 'p')
+            ->join('p.contest_problems', 'cp', Join::WITH, 'cp.contest = :contest')
+            ->join('a.content', 'ac')
+            ->select('a', 'ac')
+            ->andWhere('a.problem = :problem')
+            ->andWhere('a.attachmentid = :attachmentid')
+            ->setParameter(':problem', $contestProblem->getProbid())
+            ->setParameter(':contest', $contestProblem->getContest())
+            ->setParameter(':attachmentid', $attachmentId)
+            ->getQuery()
+            ->getOneOrNullResult();
+        if (!$attachment) {
+            throw new NotFoundHttpException(sprintf('Problem p%d not found or not available', $contestProblem->getProbid()));
+        }
+
+        return $attachment->getStreamedResponse();
+    }
+
     /**
      * @param Contest $contest
      * @return array
      * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      */
     public function getContestStats(Contest $contest): array
     {

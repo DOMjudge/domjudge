@@ -37,7 +37,8 @@
                         {% else %}
                             {{ problem.testcases.count }}
                         {% endif %}
-                        <a href="{{ path('jury_problem_testcases', {'probId': problem.probid}) }}">details / edit</a>
+                        <a href="{{ path('jury_problem_testcases', {'probId': problem.probid}) }}">details
+                            / edit</a>
                     </td>
                 </tr>
                 <tr>
@@ -86,23 +87,23 @@
                         {% endif %}
                     </td>
                 </tr>
-		{% if problem.combinedRunCompare %}
-                  <tr>
-                     <th>Compare script</th>
-                     <td>Run script combines run and compare script.</td>
-                  </tr>
+                {% if problem.combinedRunCompare %}
+                    <tr>
+                        <th>Compare script</th>
+                        <td>Run script combines run and compare script.</td>
+                    </tr>
                 {% else %}
-                  <tr>
-                      <th>Compare script</th>
-                      <td class="filename">
-                          {% if problem.compareExecutable is not empty %}
-                              <a href="{{ path('jury_executable', {'execId': problem.compareExecutable.execid}) }}">{{ problem.compareExecutable.execid }}</a>
-                          {% else %}
-                              <a href="{{ path('jury_executable', {'execId': defaultCompareExecutable}) }}">{{ defaultCompareExecutable }}</a>
-                              (default)
-                          {% endif %}
-                      </td>
-                  </tr>
+                    <tr>
+                        <th>Compare script</th>
+                        <td class="filename">
+                            {% if problem.compareExecutable is not empty %}
+                                <a href="{{ path('jury_executable', {'execId': problem.compareExecutable.execid}) }}">{{ problem.compareExecutable.execid }}</a>
+                            {% else %}
+                                <a href="{{ path('jury_executable', {'execId': defaultCompareExecutable}) }}">{{ defaultCompareExecutable }}</a>
+                                (default)
+                            {% endif %}
+                        </td>
+                    </tr>
                 {% endif %}
                 {% if problem.specialCompareArgs is not empty %}
                     <tr>
@@ -129,7 +130,8 @@
     {% else %}
         <div class="row">
             <div class="col-md-6">
-                <table class="data-table table table-hover table-striped table-sm">
+                <table
+                    class="data-table table table-hover table-striped table-sm">
                     <thead class="thead-light">
                     <tr>
                         <th>CID</th>
@@ -145,18 +147,31 @@
                     {% for contestProblem in problem.contestProblems %}
                         {% set link = path('jury_contest', {'contestId': contestProblem.cid}) %}
                         <tr>
-                            <td><a href="{{ link }}">c{{ contestProblem.cid }}</a></td>
-                            <td><a href="{{ link }}">{{ contestProblem.contest.shortname }}</a></td>
-                            <td><a href="{{ link }}">{{ contestProblem.contest.name }}</a></td>
-                            <td><a href="{{ link }}">{{ contestProblem.shortname }}</a></td>
-                            <td><a href="{{ link }}">{{ contestProblem.allowSubmit | printYesNo }}</a></td>
-                            <td><a href="{{ link }}">{{ contestProblem.allowJudge | printYesNo }}</a></td>
+                            <td>
+                                <a href="{{ link }}">c{{ contestProblem.cid }}</a>
+                            </td>
+                            <td>
+                                <a href="{{ link }}">{{ contestProblem.contest.shortname }}</a>
+                            </td>
+                            <td>
+                                <a href="{{ link }}">{{ contestProblem.contest.name }}</a>
+                            </td>
+                            <td>
+                                <a href="{{ link }}">{{ contestProblem.shortname }}</a>
+                            </td>
+                            <td>
+                                <a href="{{ link }}">{{ contestProblem.allowSubmit | printYesNo }}</a>
+                            </td>
+                            <td>
+                                <a href="{{ link }}">{{ contestProblem.allowJudge | printYesNo }}</a>
+                            </td>
                             {% if contestProblem.color is empty %}
                                 <td><a href="{{ link }}">&nbsp;</a></td>
                             {% else %}
                                 <td title="{{ contestProblem.color }}">
                                     <a href="{{ link }}">
-                                        <div class="circle" style="background-color: {{ contestProblem.color }}"></div>
+                                        <div class="circle"
+                                             style="background-color: {{ contestProblem.color }}"></div>
                                     </a>
                                 </td>
                             {% endif %}
@@ -170,52 +185,60 @@
 
     <h2>Attachments</h2>
 
-    {% if problem.attachments is empty %}
-        <p class="nodata">No attachments</p>
-    {% else %}
-        <div class="row">
-            <div class="col-md-6">
-                {{ form_start(problemAttachmentForm) }}
-                <table class="table table-sm table-striped table-hover">
-                    <thead class="thead-light">
+    <div class="row">
+        <div class="col-md-6">
+            {{ form_start(problemAttachmentForm) }}
+            <table class="table table-sm table-striped table-hover">
+                <thead class="thead-light">
+                <tr>
+                    <th>Name</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                {% if problem.attachments is empty %}
                     <tr>
-                        <th>Name</th>
-                        <th></th>
+                        <td colspan="2">
+                            <p class="nodata">No attachments</p>
+                        </td>
                     </tr>
-                    </thead>
-                    <tbody>
+                {% else %}
                     {% for attachment in problem.attachments %}
                         <tr>
                             <td>{{ attachment.name }}</td>
                             <td>
-                                <a href="{{ path('jury_attachment_fetch', {'attachmentId': attachment.attachmentid}) }}" class="btn btn-sm btn-primary">
+                                <a href="{{ path('jury_attachment_fetch', {'attachmentId': attachment.attachmentid}) }}"
+                                   class="btn btn-sm btn-primary">
                                     <i class="fas fa-download"></i>
                                 </a>
                                 {% if is_granted('ROLE_ADMIN') %}
-                                    <a href="{{ path('jury_attachment_delete', {'attachmentId': attachment.attachmentid}) }}" class="btn btn-sm btn-danger" data-ajax-modal>
+                                    <a href="{{ path('jury_attachment_delete', {'attachmentId': attachment.attachmentid}) }}"
+                                       class="btn btn-sm btn-danger"
+                                       data-ajax-modal>
                                         <i class="fas fa-trash-alt"></i>
                                     </a>
                                 {% endif %}
                             </td>
                         </tr>
                     {% endfor %}
-                    {% if is_granted('ROLE_ADMIN') %}
-                        <tr>
-                            <td>
-                                {{ form_errors(problemAttachmentForm.content) }}
-                                {{ form_widget(problemAttachmentForm.content) }}
-                            </td>
-                            <td>
-                                {{ form_widget(problemAttachmentForm.add) }}
-                            </td>
-                        </tr>
-                    {% endif %}
-                    </tbody>
-                </table>
-                {{ form_end(problemAttachmentForm) }}
-            </div>
+                {% endif %}
+
+                {% if is_granted('ROLE_ADMIN') %}
+                    <tr>
+                        <td>
+                            {{ form_errors(problemAttachmentForm.content) }}
+                            {{ form_widget(problemAttachmentForm.content) }}
+                        </td>
+                        <td>
+                            {{ form_widget(problemAttachmentForm.add) }}
+                        </td>
+                    </tr>
+                {% endif %}
+                </tbody>
+            </table>
+            {{ form_end(problemAttachmentForm) }}
         </div>
-    {% endif %}
+    </div>
 
     <h2>Submissions for {{ problem.name }}</h2>
 
