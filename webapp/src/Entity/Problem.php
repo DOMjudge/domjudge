@@ -9,6 +9,8 @@ use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -518,5 +520,35 @@ class Problem extends BaseApiEntity
                 ->setProblemtext($content)
                 ->setProblemtextType($problemTextType);
         }
+    }
+
+    public function getProblemTextStreamedResponse(): StreamedResponse
+    {
+        switch ($this->getProblemtextType()) {
+            case 'pdf':
+                $mimetype = 'application/pdf';
+                break;
+            case 'html':
+                $mimetype = 'text/html';
+                break;
+            case 'txt':
+                $mimetype = 'text/plain';
+                break;
+            default:
+                throw new BadRequestHttpException(sprintf('Problem p%d text has unknown type', $this->getProbid()));
+        }
+
+        $filename    = sprintf('prob-%s.%s', $this->getName(), $this->getProblemtextType());
+        $problemText = stream_get_contents($this->getProblemtext());
+
+        $response = new StreamedResponse();
+        $response->setCallback(function () use ($problemText) {
+            echo $problemText;
+        });
+        $response->headers->set('Content-Type', sprintf('%s; name="%s', $mimetype, $filename));
+        $response->headers->set('Content-Disposition', sprintf('inline; filename="%s"', $filename));
+        $response->headers->set('Content-Length', strlen($problemText));
+
+        return $response;
     }
 }
