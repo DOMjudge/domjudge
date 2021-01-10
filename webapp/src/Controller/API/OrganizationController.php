@@ -74,11 +74,6 @@ class OrganizationController extends AbstractRestController
     /**
      * Add a new organization
      *
-     * @param Request             $request
-     * @param ImportExportService $importExport
-     *
-     * @return Response
-     *
      * @Rest\Post()
      * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_API_WRITER')")
      * @OA\RequestBody(

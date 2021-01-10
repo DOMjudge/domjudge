@@ -107,18 +107,14 @@ abstract class AbstractRestController extends AbstractFOSRestController
     /**
      * Render the given data using the correct groups
      *
-     * @param Request  $request
      * @param mixed    $data
-     * @param int      $statusCode
-     * @param string[] $headers
-     *
-     * @return Response
+     * @param string[] $extraheaders
      */
     protected function renderData(
         Request $request,
         $data,
         int $statusCode = Response::HTTP_OK,
-        array $headers = []
+        array $extraheaders = []
     ): Response {
         $view = $this->view($data);
 
@@ -134,19 +130,15 @@ abstract class AbstractRestController extends AbstractFOSRestController
 
         $response = $this->handleView($view);
         $response->setStatusCode($statusCode);
-        $response->headers->add($headers);
+        $response->headers->add($extraheaders);
         return $response;
     }
 
     /**
      * Render the given create data using the correct groups
      *
-     * @param Request    $request
      * @param mixed      $data
-     * @param string     $routeType
      * @param string|int $id
-     *
-     * @return Response
      */
     protected function renderCreateData(
         Request $request,
