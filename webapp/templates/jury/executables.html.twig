@@ -14,14 +14,10 @@
 
     {{ macros.table(executables, table_fields, num_actions) }}
 
-    {%- if is_granted('ROLE_ADMIN') %}
-
-        <h3>Upload new executable</h3>
-        <div class="row">
-            <div class="col-lg-4">
-                {{ form(form) }}
-            </div>
-        </div>
-    {%- endif %}
+    {% if is_granted('ROLE_ADMIN') %}
+        <p>
+            {{ button(path('jury_executable_add'), 'Add new executable', 'primary', 'plus') }}
+        </p>
+    {% endif %}
 
 {% endblock %}
