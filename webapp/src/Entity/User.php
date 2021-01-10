@@ -44,14 +44,14 @@ class User implements UserInterface, EquatableInterface, \Serializable
      *     options={"comment"="User login name"}, nullable=false)
      * @Assert\Regex("/^[a-z0-9@._-]+$/i", message="Only alphanumeric characters and _-@. are allowed")
      */
-    private $username;
+    private $username = '';
 
     /**
      * @var string
      * @ORM\Column(type="string", name="name", length=255,
      *     options={"comment"="Name"}, nullable=false)
      */
-    private $name;
+    private $name = '';
 
     /**
      * @var string
@@ -59,7 +59,7 @@ class User implements UserInterface, EquatableInterface, \Serializable
      *     options={"comment"="Email address"}, nullable=true)
      * @Assert\Email()
      */
-    private $email;
+    private $email = '';
 
     /**
      * @var double
@@ -196,7 +196,7 @@ class User implements UserInterface, EquatableInterface, \Serializable
         return $this->name;
     }
 
-    public function setEmail(string $email): User
+    public function setEmail(?string $email): User
     {
         $this->email = $email;
         return $this;
