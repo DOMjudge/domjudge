@@ -52,14 +52,14 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface
      * @ORM\Column(type="string", name="name", length=255, options={"comment"="Team name", "collation"="utf8mb4_bin"},
      *                            nullable=false)
      */
-    private $name;
+    private $name = '';
 
     /**
      * @var string|null
      * @ORM\Column(type="string", name="display_name", length=255, options={"comment"="Team display name", "collation"="utf8mb4_bin"},
      *                            nullable=true)
      */
-    private $display_name;
+    private $display_name = null;
 
     /**
      * @var boolean
@@ -332,7 +332,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface
         return $this;
     }
 
-    public function getCategory(): TeamCategory
+    public function getCategory(): ?TeamCategory
     {
         return $this->category;
     }
