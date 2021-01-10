@@ -11,6 +11,9 @@
             <th scope="col">problem</th>
             <th scope="col">lang</th>
             <th scope="col">result</th>
+            {% if allowDownload %}
+                <th scope="col"></th>
+            {% endif %}
         </tr>
         </thead>
         <tbody>
@@ -56,6 +59,13 @@
                         {%- endif %}
                     </a>
                 </td>
+        {% if allowDownload %}
+                <td>
+                    <a class="btn btn-light" href="{{ path('team_submission_download', {'submitId': submission.submitid}) }}">
+                        <i class="fa fa-download"></i>
+                    </a>
+                </td>
+        {% endif %}
             </tr>
         {%- endfor %}
         </tbody>
