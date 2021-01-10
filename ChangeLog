@@ -22,6 +22,8 @@ Version 8.0.0 - DEV
  - Update API documentation to OpenAPI 3.
  - Add support for loading custom CSS and JavaScript.
  - Speed up loading team pictures and affiliation logos.
+ - Add filter on result to jury submissions page.
+ - Add API actions to create single team, team affiliation and team category.
 
 Version 7.3.2 - 23 November 2020
 --------------------------------
