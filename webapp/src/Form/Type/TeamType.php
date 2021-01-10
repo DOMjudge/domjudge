@@ -31,25 +31,26 @@ class TeamType extends AbstractType
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->add('icpcid', TextType::class, [
-            'label' => 'ICPC ID',
-            'required' => false,
-            'help' => 'ID of the team in the ICPC CMS',
-            'constraints' => [
-                new Regex(
-                    [
-                        'pattern' => '/^[a-zA-Z0-9_-]+$/i',
-                        'message' => 'Only letters, numbers, dashes and underscores are allowed',
-                    ]
-                )
-            ]
-        ]);
         $builder->add('name', TextType::class, [
             'label' => 'Team name',
         ]);
         $builder->add('displayName', TextType::class, [
             'label' => 'Display name',
             'required' => false,
+            'help' => 'If provided, will display this instead of the team name in certain places, like the scoreboard.',
+        ]);
+        $builder->add('icpcid', TextType::class, [
+            'label' => 'ICPC ID',
+            'required' => false,
+            'help' => 'Optional ID of the team in the ICPC CMS.',
+            'constraints' => [
+                new Regex(
+                    [
+                        'pattern' => '/^[a-zA-Z0-9_-]+$/i',
+                        'message' => 'Only letters, numbers, dashes and underscores are allowed.',
+                    ]
+                )
+            ]
         ]);
         $builder->add('category', EntityType::class, [
             'class' => TeamCategory::class,
@@ -97,7 +98,7 @@ class TeamType extends AbstractType
             ],
         ]);
         $builder->add('addUserForTeam', CheckboxType::class, [
-            'label' => 'Add user for this team',
+            'label' => 'Add new user for this team',
             'required' => false,
         ]);
         $builder->add('users', CollectionType::class, [
