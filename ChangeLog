@@ -24,6 +24,7 @@ Version 8.0.0 - DEV
  - Speed up loading team pictures and affiliation logos.
  - Add filter on result to jury submissions page.
  - Add API actions to create single team, team affiliation and team category.
+ - Add problem attachment support.
 
 Version 7.3.2 - 23 November 2020
 --------------------------------
