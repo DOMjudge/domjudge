@@ -59,7 +59,7 @@ class User implements UserInterface, EquatableInterface, \Serializable
      *     options={"comment"="Email address"}, nullable=true)
      * @Assert\Email()
      */
-    private $email = '';
+    private $email = null;
 
     /**
      * @var double
