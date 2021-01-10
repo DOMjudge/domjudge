@@ -108,7 +108,7 @@ class TeamAffiliation extends BaseApiEntity
     }
 
 
-    public function getAffilid(): int
+    public function getAffilid(): ?int
     {
         return $this->affilid;
     }
