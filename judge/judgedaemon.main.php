@@ -266,7 +266,7 @@ function fetch_executable(
             error("Could not create directory '$execbuilddir'");
         }
 
-        logmsg(LOG_INFO, "  🖫 Fetching new executable '$type/$execid'");
+        logmsg(LOG_INFO, "  💾 Fetching new executable '$type/$execid'");
         $content = request(sprintf('judgehosts/get_files/%s/%s', $type, $execid), 'GET');
         $files = dj_json_decode($content);
         unset($content);
@@ -1209,6 +1209,6 @@ function fetchTestcase($workdirpath, $testcase_id, $judgetaskid): ?array
     }
     unset($files);
 
-    logmsg(LOG_INFO, "  🖫 Fetched new testcase $testcase_id.");
+    logmsg(LOG_INFO, "  💾 Fetched new testcase $testcase_id.");
     return $tcfile;
 }
