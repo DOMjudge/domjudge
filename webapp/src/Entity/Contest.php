@@ -70,7 +70,7 @@ class Contest extends BaseApiEntity
      * @ORM\Column(type="string", name="name", length=255, options={"comment"="Descriptive name"}, nullable=false)
      * @Assert\NotBlank()
      */
-    private $name;
+    private $name = '';
 
     /**
      * @var string
@@ -80,7 +80,7 @@ class Contest extends BaseApiEntity
      * @Identifier()
      * @Assert\NotBlank()
      */
-    private $shortname;
+    private $shortname = '';
 
     /**
      * @var double
@@ -186,7 +186,7 @@ class Contest extends BaseApiEntity
      * @Serializer\Exclude()
      * @TimeString(relativeIsPositive=false)
      */
-    private $activatetimeString;
+    private $activatetimeString = '';
 
     /**
      * @var string
@@ -196,7 +196,7 @@ class Contest extends BaseApiEntity
      * @Serializer\Exclude()
      * @TimeString(allowRelative=false)
      */
-    private $starttimeString;
+    private $starttimeString = '';
 
     /**
      * @var string
@@ -206,7 +206,7 @@ class Contest extends BaseApiEntity
      * @Serializer\Exclude()
      * @TimeString()
      */
-    private $freezetimeString;
+    private $freezetimeString = '';
 
     /**
      * @var string
