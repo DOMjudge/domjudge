@@ -23,6 +23,14 @@ class ExecutableFixture extends AbstractExampleDataFixture
     protected $sqlDir;
 
     /**
+     * @inheritDoc
+     */
+    public static function getGroups(): array
+    {
+        return ['example', 'gatling'];
+    }
+
+    /**
      * ExecutableFixture constructor.
      * @param string $sqlDir
      */
