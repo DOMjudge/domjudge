@@ -1,15 +1,11 @@
 <?php declare(strict_types=1);
 
-namespace App\DataFixtures;
+namespace App\DataFixtures\ExampleData;
 
 use App\Entity\Team;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 
-/**
- * Class TeamFixture
- * @package App\DataFixtures
- */
 class TeamFixture extends AbstractExampleDataFixture implements DependentFixtureInterface
 {
     public const TEAM_REFERENCE = 'team';

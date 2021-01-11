@@ -1,14 +1,10 @@
 <?php declare(strict_types=1);
 
-namespace App\DataFixtures;
+namespace App\DataFixtures\ExampleData;
 
 use App\Entity\TeamAffiliation;
 use Doctrine\Persistence\ObjectManager;
 
-/**
- * Class TeamAffiliationFixture
- * @package App\DataFixtures
- */
 class TeamAffiliationFixture extends AbstractExampleDataFixture
 {
     public const AFFILIATION_REFERENCE = 'affiliation';

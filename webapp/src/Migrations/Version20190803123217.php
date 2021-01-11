@@ -7,10 +7,8 @@ use Doctrine\Migrations\AbstractMigration;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 
-final class Version20190803123217 extends AbstractMigration implements ContainerAwareInterface
+final class Version20190803123217 extends AbstractMigration
 {
-    use ContainerAwareTrait;
-
     public function getDescription(): string
     {
         return 'Migrate database to DOMjudge version 7.0.0';
@@ -26,7 +24,6 @@ final class Version20190803123217 extends AbstractMigration implements Container
         $this->addSql('SET FOREIGN_KEY_CHECKS = 0');
         $this->createTables();
         $this->addSql('SET FOREIGN_KEY_CHECKS = 1');
-        $this->loadDefaultData();
     }
 
     public function down(Schema $schema): void
@@ -618,167 +615,6 @@ CREATE TABLE `userrole` (
     CONSTRAINT `userrole_ibfk_1` FOREIGN KEY (`userid`) REFERENCES `user` (`userid`) ON DELETE CASCADE,
     CONSTRAINT `userrole_ibfk_2` FOREIGN KEY (`roleid`) REFERENCES `role` (`roleid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Many-to-Many mapping of users and roles'
-SQL
-        );
-    }
-
-    protected function loadDefaultData()
-    {
-        // Data for table `executable`
-        $this->addSql(<<<SQL
-INSERT INTO `executable` (`execid`, `description`, `type`) VALUES
-    ('adb', 'adb', 'compile'),
-    ('awk', 'awk', 'compile'),
-    ('bash', 'bash', 'compile'),
-    ('c', 'c', 'compile'),
-    ('compare', 'default compare script', 'compare'),
-    ('cpp', 'cpp', 'compile'),
-    ('csharp', 'csharp', 'compile'),
-    ('f95', 'f95', 'compile'),
-    ('float', 'default compare script for floats with prec 1E-7', 'compare'),
-    ('hs', 'hs', 'compile'),
-    ('kt', 'kt', 'compile'),
-    ('java_javac', 'java_javac', 'compile'),
-    ('java_javac_detect', 'java_javac_detect', 'compile'),
-    ('js', 'js', 'compile'),
-    ('lua', 'lua', 'compile'),
-    ('pas', 'pas', 'compile'),
-    ('pl', 'pl', 'compile'),
-    ('plg', 'plg', 'compile'),
-    ('py2', 'py2', 'compile'),
-    ('py3', 'py3', 'compile'),
-    ('r', 'r', 'compile'),
-    ('rb', 'rb', 'compile'),
-    ('run', 'default run script', 'run'),
-    ('scala', 'scala', 'compile'),
-    ('sh', 'sh', 'compile'),
-    ('swift', 'swift', 'compile')
-SQL
-        );
-
-        // Load executable contents
-        $dir = sprintf(
-            '%s/files/defaultdata/',
-            $this->container->getParameter('domjudge.sqldir')
-        );
-
-        foreach (glob($dir . '*.zip') as $zipFile) {
-            $id     = pathinfo($zipFile)['filename'];
-            $params = [
-                ':execid' => $id,
-                ':md5sum' => md5_file($zipFile),
-            ];
-            // We use sprintf and insert the zip contents directly because otherwise
-            // it would be printed on stdout and that will break terminals
-            $content = strtoupper(bin2hex(file_get_contents($zipFile)));
-            $this->addSql(
-                sprintf(
-                    'UPDATE executable SET zipfile = 0x%s, md5sum = :md5sum WHERE execid = :execid',
-                    $content
-                ),
-                $params
-            );
-        }
-
-        // Data for table `language`
-        $this->addSql(<<<SQL
-INSERT INTO `language` (`langid`, `externalid`, `name`, `extensions`, `require_entry_point`, `entry_point_description`, `allow_submit`, `allow_judge`, `time_factor`, `compile_script`) VALUES
-    ('adb', 'ada', 'Ada', '["adb","ads"]', 0, NULL, 0, 1, 1, 'adb'),
-    ('awk', 'awk', 'AWK', '["awk"]', 0, NULL, 0, 1, 1, 'awk'),
-    ('bash', 'bash', 'Bash shell', '["bash"]', 0, "Main file", 0, 1, 1, 'bash'),
-    ('c', 'c', 'C', '["c"]', 0, NULL, 1, 1, 1, 'c'),
-    ('cpp', 'cpp', 'C++', '["cpp","cc","cxx","c++"]', 0, NULL, 1, 1, 1, 'cpp'),
-    ('csharp', 'csharp', 'C#', '["csharp","cs"]', 0, NULL, 0, 1, 1, 'csharp'),
-    ('f95', 'f95', 'Fortran', '["f95","f90"]', 0, NULL, 0, 1, 1, 'f95'),
-    ('hs', 'haskell', 'Haskell', '["hs","lhs"]', 0, NULL, 0, 1, 1, 'hs'),
-    ('java', 'java', 'Java', '["java"]', 0, "Main class", 1, 1, 1, 'java_javac_detect'),
-    ('js', 'javascript', 'JavaScript', '["js"]', 0, "Main file", 0, 1, 1, 'js'),
-    ('lua', 'lua', 'Lua', '["lua"]', 0, NULL, 0, 1, 1, 'lua'),
-    ('kt', 'kotlin', 'Kotlin', '["kt"]', 1, "Main class", 0, 1, 1, 'kt'),
-    ('pas', 'pascal', 'Pascal', '["pas","p"]', 0, "Main file", 0, 1, 1, 'pas'),
-    ('pl', 'pl', 'Perl', '["pl"]', 0, "Main file", 0, 1, 1, 'pl'),
-    ('plg', 'prolog', 'Prolog', '["plg"]', 0, "Main file", 0, 1, 1, 'plg'),
-    ('py2', 'python2', 'Python 2', '["py2","py"]', 0, "Main file", 0, 1, 1, 'py2'),
-    ('py3', 'python3', 'Python 3', '["py3"]', 0, "Main file", 1, 1, 1, 'py3'),
-    ('r', 'r', 'R', '["R"]', 0, "Main file", 0, 1, 1, 'r'),
-    ('rb', 'ruby', 'Ruby', '["rb"]', 0, "Main file", 0, 1, 1, 'rb'),
-    ('scala', 'scala', 'Scala', '["scala"]', 0, NULL, 0, 1, 1, 'scala'),
-    ('sh', 'sh', 'POSIX shell', '["sh"]', 0, "Main file", 0, 1, 1, 'sh'),
-    ('swift', 'swift', 'Swift', '["swift"]', 0, "Main file", 0, 1, 1, 'swift')
-SQL
-        );
-
-        // Data for table `role`
-        $this->addSql(<<<SQL
-INSERT INTO `role` (`roleid`, `role`, `description`) VALUES
-    (1,  'admin',             'Administrative User'),
-    (2,  'jury',              'Jury User'),
-    (3,  'team',              'Team Member'),
-    (4,  'balloon',           'Balloon runner'),
-    (6,  'judgehost',         '(Internal/System) Judgehost'),
-    (9,  'api_reader',        'API reader'),
-    (10, 'api_writer',        'API writer'),
-    (11, 'api_source_reader', 'Source code reader')
-SQL
-        );
-
-        // Data for table `team_category`
-        $this->addSql(<<<SQL
-INSERT INTO `team_category` (`categoryid`, `name`, `sortorder`, `color`, `visible`) VALUES
-    (1, 'System', 9, '#ff2bea', 0),
-    (2, 'Self-Registered', 8, '#33cc44', 1)
-SQL
-        );
-
-        // Data for table `team`
-        $this->addSql(<<<SQL
-INSERT INTO `team` (`teamid`, `name`, `categoryid`, `affilid`, `room`, `comments`) VALUES
-    (1, 'DOMjudge', 1, NULL, NULL, NULL)
-SQL
-        );
-
-        // Set admin and judgehost credentials to bcrypt and generated values
-        $adminPasswordFile      = sprintf(
-            '%s/%s',
-            $this->container->getParameter('domjudge.etcdir'),
-            'initial_admin_password.secret'
-        );
-        $encryptedAdminPassword = password_hash(
-            trim(file_get_contents($adminPasswordFile)),
-            PASSWORD_BCRYPT);
-
-        $restapiCredentialsFile   = sprintf(
-            '%s/%s',
-            $this->container->getParameter('domjudge.etcdir'),
-            'restapi.secret'
-        );
-        $restapiPassword          = exec(
-            sprintf(
-                'grep -v ^# %s | cut -f4',
-                escapeshellarg($restapiCredentialsFile)
-            )
-        );
-        $encryptedRestapiPassword = password_hash(
-            $restapiPassword, PASSWORD_BCRYPT
-        );
-
-        // Data for table `user`
-        $this->addSql(<<<SQL
-INSERT INTO `user` (`userid`, `username`, `name`, `password`) VALUES
-    (1, 'admin', 'Administrator', :adminpass),
-    (2, 'judgehost', 'User for judgedaemons', :judgehostpass)
-SQL
-            , [
-                  ':adminpass'     => $encryptedAdminPassword,
-                  ':judgehostpass' => $encryptedRestapiPassword
-              ]
-        );
-
-        // Data for table `userrole`
-        $this->addSql(<<<SQL
-INSERT INTO `userrole` (`userid`, `roleid`) VALUES
-    (1, 1),
-    (2, 6)
 SQL
         );
     }
