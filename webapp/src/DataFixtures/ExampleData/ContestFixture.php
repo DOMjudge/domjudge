@@ -1,16 +1,12 @@
 <?php declare(strict_types=1);
 
-namespace App\DataFixtures;
+namespace App\DataFixtures\ExampleData;
 
 use App\Entity\Contest;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 use Exception;
 
-/**
- * Class ContestFixture
- * @package App\DataFixtures
- */
 class ContestFixture extends AbstractExampleDataFixture implements DependentFixtureInterface
 {
     public const PRACTICE_REFERENCE = 'practice';

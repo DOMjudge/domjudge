@@ -120,7 +120,7 @@ class Language extends BaseApiEntity
      *     nullable=true)
      * @Serializer\Groups({"Nonstrict"})
      */
-    private $entry_point_description;
+    private $entry_point_description = null;
 
     /**
      * @ORM\ManyToOne(targetEntity="Executable", inversedBy="languages")
@@ -234,7 +234,7 @@ class Language extends BaseApiEntity
         return $this->require_entry_point;
     }
 
-    public function setEntryPointDescription(string $entryPointDescription): Language
+    public function setEntryPointDescription(?string $entryPointDescription): Language
     {
         $this->entry_point_description = $entryPointDescription;
         return $this;

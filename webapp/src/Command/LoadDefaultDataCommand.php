@@ -8,7 +8,7 @@ use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class LoadExampleDataCommand extends Command
+class LoadDefaultDataCommand extends Command
 {
     /**
      * @inheritDoc
@@ -16,8 +16,8 @@ class LoadExampleDataCommand extends Command
     protected function configure()
     {
         $this
-            ->setName('domjudge:load-example-data')
-            ->setDescription('Load example data to get a sample DOMjudge installation up and running');
+            ->setName('domjudge:load-default-data')
+            ->setDescription('Load the data needed by all DOMjudge installations');
     }
 
     /**
@@ -29,7 +29,7 @@ class LoadExampleDataCommand extends Command
         $command   = $this->getApplication()->find('doctrine:fixtures:load');
         $arguments = [
             'command'  => 'doctrine:fixtures:load',
-            '--group'  => ['example'],
+            '--group'  => ['default'],
             '--append' => null,
         ];
 

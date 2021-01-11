@@ -1,15 +1,11 @@
 <?php declare(strict_types=1);
 
-namespace App\DataFixtures;
+namespace App\DataFixtures\ExampleData;
 
 use App\Entity\ContestProblem;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 
-/**
- * Class ContestProblemFixture
- * @package App\DataFixtures
- */
 class ContestProblemFixture extends AbstractExampleDataFixture implements DependentFixtureInterface
 {
     /**

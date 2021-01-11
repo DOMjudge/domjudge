@@ -1,18 +1,13 @@
 <?php declare(strict_types=1);
 
-namespace App\DataFixtures;
+namespace App\DataFixtures\ExampleData;
 
 use App\Entity\Executable;
-use App\Entity\ExecutableFile;
 use App\Entity\ImmutableExecutable;
 use App\Service\DOMJudgeService;
 use Doctrine\Persistence\ObjectManager;
 use ZipArchive;
 
-/**
- * Class ExecutableFixture
- * @package App\DataFixtures
- */
 class ExecutableFixture extends AbstractExampleDataFixture
 {
     const BOOLFIND_CMP_REFERENCE = 'boolfind-cmp';
@@ -72,7 +67,7 @@ class ExecutableFixture extends AbstractExampleDataFixture
     private function createImmutableExecutable(string $filename): ImmutableExecutable
     {
         $zip = new ZipArchive();
-        $zip->open($filename, ZIPARCHIVE::CHECKCONS);
+        $zip->open($filename, ZipArchive::CHECKCONS);
         return $this->dj->createImmutableExecutable($zip);
     }
 }

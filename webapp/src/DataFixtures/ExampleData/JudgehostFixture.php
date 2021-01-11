@@ -1,14 +1,10 @@
 <?php declare(strict_types=1);
 
-namespace App\DataFixtures;
+namespace App\DataFixtures\ExampleData;
 
 use App\Entity\Judgehost;
 use Doctrine\Persistence\ObjectManager;
 
-/**
- * Class JudgehostFixture
- * @package App\DataFixtures
- */
 class JudgehostFixture extends AbstractExampleDataFixture
 {
     /**

@@ -1,16 +1,12 @@
 <?php declare(strict_types=1);
 
-namespace App\DataFixtures;
+namespace App\DataFixtures\ExampleData;
 
 use App\Entity\Testcase;
 use App\Entity\TestcaseContent;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 
-/**
- * Class TestcaseFixture
- * @package App\DataFixtures
- */
 class TestcaseFixture extends AbstractExampleDataFixture implements DependentFixtureInterface
 {
     /**

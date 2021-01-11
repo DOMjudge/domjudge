@@ -1,16 +1,12 @@
 <?php declare(strict_types=1);
 
-namespace App\DataFixtures;
+namespace App\DataFixtures\ExampleData;
 
 use App\Entity\Executable;
 use App\Entity\Problem;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 
-/**
- * Class ProblemFixture
- * @package App\DataFixtures
- */
 class ProblemFixture extends AbstractExampleDataFixture implements DependentFixtureInterface
 {
     public const HELLO_REFERENCE    = 'hello';

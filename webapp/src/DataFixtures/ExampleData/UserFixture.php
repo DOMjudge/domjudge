@@ -1,16 +1,12 @@
 <?php declare(strict_types=1);
 
-namespace App\DataFixtures;
+namespace App\DataFixtures\ExampleData;
 
 use App\Entity\Role;
 use App\Entity\User;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 
-/**
- * Class UserFixture
- * @package App\DataFixtures
- */
 class UserFixture extends AbstractExampleDataFixture implements DependentFixtureInterface
 {
     /**
