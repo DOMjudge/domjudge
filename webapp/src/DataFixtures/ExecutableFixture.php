@@ -5,6 +5,7 @@ namespace App\DataFixtures;
 use App\Entity\Executable;
 use App\Entity\ExecutableFile;
 use App\Entity\ImmutableExecutable;
+use App\Service\DOMJudgeService;
 use Doctrine\Persistence\ObjectManager;
 use ZipArchive;
 
@@ -23,12 +24,14 @@ class ExecutableFixture extends AbstractExampleDataFixture
     protected $sqlDir;
 
     /**
-     * ExecutableFixture constructor.
-     * @param string $sqlDir
+     * @var DOMJudgeService
      */
-    public function __construct(string $sqlDir)
+    protected $dj;
+
+    public function __construct(string $sqlDir, DOMJudgeService $dj)
     {
         $this->sqlDir = $sqlDir;
+        $this->dj = $dj;
     }
 
     /**
@@ -45,7 +48,7 @@ class ExecutableFixture extends AbstractExampleDataFixture
             ->setExecid('boolfind_cmp')
             ->setDescription('boolfind comparator')
             ->setType('compare')
-            ->setImmutableExecutable($this->createImmutableExecutable($boolfindCompareFile, $manager));
+            ->setImmutableExecutable($this->createImmutableExecutable($boolfindCompareFile));
 
         $boolfindRunFile = sprintf(
             '%s/files/examples/boolfind_run.zip',
@@ -56,7 +59,7 @@ class ExecutableFixture extends AbstractExampleDataFixture
             ->setExecid('boolfind_run')
             ->setDescription('boolfind run script')
             ->setType('run')
-            ->setImmutableExecutable($this->createImmutableExecutable($boolfindRunFile, $manager));
+            ->setImmutableExecutable($this->createImmutableExecutable($boolfindRunFile));
 
         $manager->persist($boolfindCompare);
         $manager->persist($boolfindRun);
@@ -66,31 +69,10 @@ class ExecutableFixture extends AbstractExampleDataFixture
         $this->addReference(self::BOOLFIND_RUN_REFERENCE, $boolfindRun);
     }
 
-    // TODO: Check whether it's possible to use services in fixtures and reduce code duplication.
-    private function createImmutableExecutable(string $filename, ObjectManager $manager): ImmutableExecutable
+    private function createImmutableExecutable(string $filename): ImmutableExecutable
     {
         $zip = new ZipArchive();
         $zip->open($filename, ZIPARCHIVE::CHECKCONS);
-
-        $propertyFile = 'domjudge-executable.ini';
-        $immutableExecutable = new ImmutableExecutable();
-        $manager->persist($immutableExecutable);
-        $rank = 0;
-        for ($idx = 0; $idx < $zip->numFiles; $idx++) {
-            $filename = $zip->getNameIndex($idx);
-            if ($filename === $propertyFile) {
-                continue;
-            }
-            $executableFile = new ExecutableFile();
-            $executableFile
-                ->setRank($rank)
-                ->setFilename($filename)
-                ->setFileContent($zip->getFromIndex($idx))
-                ->setIsExecutable(in_array($filename, ['build', 'run']))
-                ->setImmutableExecutable($immutableExecutable);
-            $manager->persist($executableFile);
-            $rank++;
-        }
-        return $immutableExecutable;
+        return $this->dj->createImmutableExecutable($zip);
     }
 }
