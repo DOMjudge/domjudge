@@ -37,11 +37,6 @@ do
     fi
 done
 
-if ! grep "^pr-" <<< $CI_COMMIT_BRANCH; then
-    # We're not on a PR, so we dont push results to the GitHub discussion
-    exit 0
-fi
-
 CHANGE=0
 for dir in $failingchanges $predictedchanges
 do
