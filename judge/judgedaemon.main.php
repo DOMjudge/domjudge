@@ -219,7 +219,7 @@ function rest_encode_file(string $file, $sizelimit = true) : string
     } else {
         error("Invalid argument sizelimit = '$sizelimit' specified.");
     }
-    return urlencode(base64_encode(dj_file_get_contents($file, $maxsize)));
+    return base64_encode(dj_file_get_contents($file, $maxsize));
 }
 
 $waittime = 5;
@@ -970,7 +970,7 @@ function compile(array $judgeTask, string $workdir, string $workdirpath, array $
 
     // pop the compilation result back into the judging table
     $args = 'compile_success=' . $compile_success .
-        '&output_compile=' . rest_encode_file($workdir . '/compile.out', $output_storage_limit);
+        '&output_compile=' . urlencode(rest_encode_file($workdir . '/compile.out', $output_storage_limit));
     if (isset($metadata['entry_point'])) {
         $args .= '&entry_point=' . urlencode($metadata['entry_point']);
     }

@@ -698,7 +698,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         return $return;
     }
 
-    public function interactiveLog(string $log) {
+    public function interactiveLog(string $log, bool $forTeam = false) {
         $truncated = '/\[output display truncated after \d* B\]$/';
         $matches = array();
         $truncation = "";
@@ -706,7 +706,11 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             $truncation = $matches[0];
             $log = preg_replace($truncated, "", $log);
         }
-        $header = "<table><tr><th>time</th><th>validator</th><th>submission<th></tr>\n";
+        if ($forTeam) {
+            $header = "<table><tr><th>jury</th><th>your submission<th></tr>\n";
+        } else {
+            $header = "<table><tr><th>time</th><th>validator</th><th>submission<th></tr>\n";
+        }
         $body = "";
         $idx = 0;
         while ($idx < strlen($log)) {
@@ -732,7 +736,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             $idx += $len + 4;
             $team = $is_validator ? '<td/>' : $content;
             $validator = $is_validator ? $content : '<td/>';
-            $body .= "<tr><td>$time</td>"
+            $body .= "<tr>" . ($forTeam ? "" : "<td>$time</td>")
                 . $validator
                 . $team
                 . "</tr>\n";
