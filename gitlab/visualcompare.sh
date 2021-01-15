@@ -9,6 +9,13 @@ predictedchanges="predictedchanges"
 
 mkdir -p {$failingchanges,$predictedchanges}
 
+if grep "^pr-" <<< $CI_COMMIT_BRANCH; then
+    GITHUB_PR=`cut -d '/' -f1 <<< ${CI_COMMIT_BRANCH##pr-}`
+else
+    GITHUB_PR=`curl -H "Accept: application/vnd.github.groot-preview+json" https://api.github.com/repos/domjudge/domjudge/commits/$CI_COMMIT_SHA/pulls | awk '/"number": /{print $2}'`
+    GITHUB_PR=${GITHUB_PR%,}
+fi
+
 for file in `ls screenshotspr`
 do
     PR=screenshotspr/$file
@@ -22,7 +29,6 @@ do
     if [ $RET -ne 0 ]; then
         REMOVE=".html-ff.png"
         if grep "^pr-" <<< $CI_COMMIT_BRANCH; then
-            GITHUB_PR=`cut -d '/' -f1 <<< ${CI_COMMIT_BRANCH##pr-}`
             ENDPOINT=${file/$REMOVE}
             WANTED=`python3 gitlab/visualgithubprdiscussion.py $ENDPOINT $GITHUB_PR`
             if [ $WANTED = "wanted" ]; then
