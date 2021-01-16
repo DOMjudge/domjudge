@@ -6,13 +6,16 @@ use App\Controller\BaseController;
 use App\Entity\Clarification;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
+use App\Entity\Problem;
 use App\Entity\TeamCategory;
 use App\Form\Type\ICPCCmsType;
 use App\Form\Type\ContestExportType;
 use App\Form\Type\ContestImportType;
 use App\Form\Type\JsonImportType;
+use App\Form\Type\ProblemUploadMultipleType;
 use App\Form\Type\TsvImportType;
 use App\Service\ICPCCmsService;
+use App\Service\ImportProblemService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
@@ -23,10 +26,12 @@ use App\Utils\Scoreboard\ScoreboardMatrixItem;
 use App\Utils\Utils;
 use Collator;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Routing\Annotation\Route;
@@ -47,6 +52,11 @@ class ImportExportController extends BaseController
      * @var ImportExportService
      */
     protected $importExportService;
+
+    /**
+     * @var ImportProblemService
+     */
+    protected $importProblemService;
 
     /**
      * @var EntityManagerInterface
@@ -84,6 +94,7 @@ class ImportExportController extends BaseController
         DOMJudgeService $dj,
         ConfigurationService $config,
         EventLogService $eventLogService,
+        ImportProblemService $importProblemService,
         string $domjudgeVersion
     ) {
         $this->icpcCmsService      = $icpcCmsService;
@@ -94,6 +105,7 @@ class ImportExportController extends BaseController
         $this->config              = $config;
         $this->eventLogService     = $eventLogService;
         $this->domjudgeVersion     = $domjudgeVersion;
+        $this->importProblemService = $importProblemService;
     }
 
     /**
@@ -157,6 +169,76 @@ class ImportExportController extends BaseController
             return $this->redirectToRoute('jury_import_export');
         }
 
+        $problemFormData = [
+            'contest' => $this->dj->getCurrentContest(),
+        ];
+        $problemForm = $this->createForm(ProblemUploadMultipleType::class, $problemFormData);
+
+        $problemForm->handleRequest($request);
+
+        if ($problemForm->isSubmitted() && $problemForm->isValid()) {
+            $problemFormData = $problemForm->getData();
+
+            /** @var UploadedFile[] $archives */
+            $archives = $problemFormData['archives'];
+            /** @var Problem|null $newProblem */
+            $newProblem = null;
+            /** @var Contest|null $contest */
+            $contest = $problemFormData['contest'] ?? null;
+            if ($contest === null) {
+                $contestId = null;
+            } else {
+                $contestId = $contest->getCid();
+            }
+            $allMessages = [];
+            foreach ($archives as $archive) {
+                try {
+                    $zip = $this->dj->openZipFile($archive->getRealPath());
+                    $clientName = $archive->getClientOriginalName();
+                    $messages = [];
+                    if ($contestId === null) {
+                        $contest = null;
+                    } else {
+                        $contest = $this->em->getRepository(Contest::class)->find($contestId);
+                    }
+                    $newProblem = $this->importProblemService->importZippedProblem(
+                        $zip, $clientName, null, $contest, $messages
+                    );
+                    $allMessages = array_merge($allMessages, $messages);
+                    if ($newProblem) {
+                        $this->dj->auditlog('problem', $newProblem->getProbid(), 'upload zip',
+                            $clientName);
+                    } else {
+                        $message = '<ul>' . implode('', array_map(function (string $message) {
+                                return sprintf('<li>%s</li>', $message);
+                            }, $allMessages)) . '</ul>';
+                        $this->addFlash('danger', $message);
+                        return $this->redirectToRoute('jury_problems');
+                    }
+                } catch (Exception $e) {
+                    $allMessages[] = $e->getMessage();
+                } finally {
+                    if (isset($zip)) {
+                        $zip->close();
+                    }
+                }
+            }
+
+            if (!empty($allMessages)) {
+                $message = '<ul>' . implode('', array_map(function (string $message) {
+                        return sprintf('<li>%s</li>', $message);
+                    }, $allMessages)) . '</ul>';
+
+                $this->addFlash('info', $message);
+            }
+
+            if (count($archives) === 1 && $newProblem !== null) {
+                return $this->redirectToRoute('jury_problem', ['probId' => $newProblem->getProbid()]);
+            } else {
+                return $this->redirectToRoute('jury_problems');
+            }
+        }
+
         /** @var TeamCategory[] $teamCategories */
         $teamCategories = $this->em->createQueryBuilder()
             ->from(TeamCategory::class, 'c', 'c.categoryid')
@@ -174,6 +256,7 @@ class ImportExportController extends BaseController
             'tsv_form' => $tsvForm->createView(),
             'json_form' => $jsonForm->createView(),
             'icpccms_form' => $icpcCmsForm->createView(),
+            'problem_form' => $problemForm->createView(),
             'sort_orders' => $sortOrders,
         ]);
     }

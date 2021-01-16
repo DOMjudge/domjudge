@@ -14,7 +14,6 @@ use App\Entity\Testcase;
 use App\Entity\TestcaseContent;
 use App\Form\Type\ProblemAttachmentType;
 use App\Form\Type\ProblemType;
-use App\Form\Type\ProblemUploadMultipleType;
 use App\Form\Type\ProblemUploadType;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
@@ -102,81 +101,10 @@ class ProblemController extends BaseController
 
     /**
      * @Route("", name="jury_problems")
-     * @param Request $request
-     * @return \Symfony\Component\HttpFoundation\Response
      * @throws Exception
      */
-    public function indexAction(Request $request)
+    public function indexAction(Request $request) : Response
     {
-        $formData = [
-            'contest' => $this->dj->getCurrentContest(),
-        ];
-        $form     = $this->createForm(ProblemUploadMultipleType::class, $formData);
-        $form->handleRequest($request);
-
-        if ($this->isGranted('ROLE_ADMIN') && $form->isSubmitted() && $form->isValid()) {
-            $formData = $form->getData();
-
-            /** @var UploadedFile[] $archives */
-            $archives = $formData['archives'];
-            /** @var Problem|null $newProblem */
-            $newProblem = null;
-            /** @var Contest|null $contest */
-            $contest = $formData['contest'] ?? null;
-            if ($contest === null) {
-                $contestId = null;
-            } else {
-                $contestId = $contest->getCid();
-            }
-            $allMessages = [];
-            foreach ($archives as $archive) {
-                try {
-                    $zip        = $this->dj->openZipFile($archive->getRealPath());
-                    $clientName = $archive->getClientOriginalName();
-                    $messages   = [];
-                    if ($contestId === null) {
-                        $contest = null;
-                    } else {
-                        $contest = $this->em->getRepository(Contest::class)->find($contestId);
-                    }
-                    $newProblem = $this->importProblemService->importZippedProblem(
-                        $zip, $clientName, null, $contest, $messages
-                    );
-                    $allMessages = array_merge($allMessages, $messages);
-                    if ($newProblem) {
-                        $this->dj->auditlog('problem', $newProblem->getProbid(), 'upload zip',
-                                            $clientName);
-                    } else {
-                        $message = '<ul>' . implode('', array_map(function (string $message) {
-                                return sprintf('<li>%s</li>', $message);
-                            }, $allMessages)) . '</ul>';
-                        $this->addFlash('danger', $message);
-                        return $this->redirectToRoute('jury_problems');
-                    }
-                } catch (Exception $e) {
-                    $allMessages[] = $e->getMessage();
-                } finally {
-                    if (isset($zip)) {
-                        $zip->close();
-                    }
-                }
-            }
-
-            if (!empty($allMessages)) {
-                $message = '<ul>' . implode('', array_map(function (string $message) {
-                        return sprintf('<li>%s</li>', $message);
-                    }, $allMessages)) . '</ul>';
-
-                $this->addFlash('info', $message);
-            }
-
-            if (count($archives) === 1 && $newProblem !== null) {
-                return $this->redirectToRoute('jury_problem', ['probId' => $newProblem->getProbid()]);
-            } else {
-                return $this->redirectToRoute('jury_problems');
-            }
-        }
-
         $problems = $this->em->createQueryBuilder()
             ->select('partial p.{probid,externalid,name,timelimit,memlimit,outputlimit}', 'COUNT(tc.testcaseid) AS testdatacount')
             ->from(Problem::class, 'p')
@@ -300,15 +228,7 @@ class ProblemController extends BaseController
             'problems' => $problems_table,
             'table_fields' => $table_fields,
             'num_actions' => $this->isGranted('ROLE_ADMIN') ? 4 : 1,
-            'form' => $form->createView(),
         ];
-
-        if ($this->isGranted('ROLE_ADMIN')) {
-            /** @var Contest[] $contests */
-            $contests                = $this->em->getRepository(Contest::class)->findAll();
-            $data['contests']        = $contests;
-            $data['current_contest'] = $this->dj->getCurrentContest();
-        }
 
         return $this->render('jury/problems.html.twig', $data);
     }

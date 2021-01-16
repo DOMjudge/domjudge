@@ -19,6 +19,6 @@
             {{ button(path('jury_problem_add'), 'Add new problem', 'primary', 'plus') }}
         </p>
 
-        {{ form(form) }}
+        {{ form(form, {'action': path('jury_upload_zip_problem')}) }}
     {% endif %}
 {% endblock %}
