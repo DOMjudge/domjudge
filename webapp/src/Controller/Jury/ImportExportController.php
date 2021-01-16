@@ -76,18 +76,6 @@ class ImportExportController extends BaseController
     /** @var string */
     protected $domjudgeVersion;
 
-    /**
-     * ImportExportController constructor.
-     *
-     * @param ICPCCmsService         $icpcCmsService
-     * @param ImportExportService    $importExportService
-     * @param EntityManagerInterface $em
-     * @param ScoreboardService      $scoreboardService
-     * @param DOMJudgeService        $dj
-     * @param ConfigurationService   $config
-     * @param EventLogService        $eventLogService
-     * @param string                 $domjudgeVersion
-     */
     public function __construct(
         ICPCCmsService $icpcCmsService,
         ImportExportService $importExportService,
@@ -110,11 +98,9 @@ class ImportExportController extends BaseController
 
     /**
      * @Route("", name="jury_import_export")
-     * @param Request $request
-     * @return \Symfony\Component\HttpFoundation\Response
-     * @throws \Exception
+     * @throws Exception
      */
-    public function indexAction(Request $request)
+    public function indexAction(Request $request) : Response
     {
         $tsvForm = $this->createForm(TsvImportType::class);
 
@@ -194,11 +180,9 @@ class ImportExportController extends BaseController
 
     /**
      * @Route("/contest-yaml", name="jury_import_export_yaml")
-     * @param Request $request
-     * @return \Symfony\Component\HttpFoundation\Response
-     * @throws \Exception
+     * @throws Exception
      */
-    public function contestYamlAction(Request $request)
+    public function contestYamlAction(Request $request) : Response
     {
         $exportForm = $this->createForm(ContestExportType::class);
 
@@ -245,10 +229,8 @@ class ImportExportController extends BaseController
 
     /**
      * @Route("/export/{type<groups|teams|scoreboard|results>}.tsv", name="jury_tsv_export")
-     * @param Request $request
-     * @param string  $type
      * @return RedirectResponse|StreamedResponse
-     * @throws \Exception
+     * @throws Exception
      */
     public function exportTsvAction(Request $request, string $type)
     {
@@ -294,12 +276,9 @@ class ImportExportController extends BaseController
 
     /**
      * @Route("/export/{type<results|results-icpc|clarifications>}.html", name="jury_html_export")
-     * @param Request $request
-     * @param string  $type
-     * @return \Symfony\Component\HttpFoundation\Response
-     * @throws \Exception
+     * @throws Exception
      */
-    public function exportHtmlAction(Request $request, string $type)
+    public function exportHtmlAction(Request $request, string $type) : Response
     {
         try {
             switch ($type) {
@@ -316,13 +295,9 @@ class ImportExportController extends BaseController
     }
 
     /**
-     * Get the results HTML
-     * @param Request $request
-     * @param bool    $useIcpcLayout
-     * @return \Symfony\Component\HttpFoundation\Response
-     * @throws \Exception
+     * @throws Exception
      */
-    protected function getResultsHtml(Request $request, bool $useIcpcLayout)
+    protected function getResultsHtml(Request $request, bool $useIcpcLayout) : Response
     {
         /** @var TeamCategory[] $categories */
         $categories  = $this->em->createQueryBuilder()
@@ -465,11 +440,9 @@ class ImportExportController extends BaseController
     }
 
     /**
-     * Get the clarifications HTML
-     * @return \Symfony\Component\HttpFoundation\Response
-     * @throws \Exception
+     * @throws Exception
      */
-    protected function getClarificationsHtml()
+    protected function getClarificationsHtml() : Response
     {
         $contest = $this->dj->getCurrentContest();
         if ($contest === null) {
