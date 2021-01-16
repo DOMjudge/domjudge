@@ -82,17 +82,6 @@ class ProblemController extends BaseController
      */
     protected $importProblemService;
 
-    /**
-     * ProblemController constructor.
-     *
-     * @param EntityManagerInterface $em
-     * @param DOMJudgeService        $dj
-     * @param ConfigurationService   $config
-     * @param KernelInterface        $kernel
-     * @param EventLogService        $eventLogService
-     * @param SubmissionService      $submissionService
-     * @param ImportProblemService   $importProblemService
-     */
     public function __construct(
         EntityManagerInterface $em,
         DOMJudgeService $dj,
@@ -327,11 +316,9 @@ class ProblemController extends BaseController
     /**
      * @Route("/{problemId<\d+>}/export", name="jury_export_problem")
      * @IsGranted("ROLE_ADMIN")
-     * @param int $problemId
-     * @return StreamedResponse
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
-    public function exportAction(int $problemId)
+    public function exportAction(int $problemId) : StreamedResponse
     {
         // This might take a while
         ini_set('max_execution_time', '300');
@@ -438,7 +425,7 @@ class ProblemController extends BaseController
             $problemResult = null;
 
             foreach (SubmissionService::PROBLEM_RESULT_REMAP as $key => $val) {
-                if (trim(mb_strtoupper($result)) == $val) {
+                if (trim(mb_strtoupper($result)) === $val) {
                     $problemResult = mb_strtolower($key);
                 }
             }
@@ -486,15 +473,11 @@ class ProblemController extends BaseController
 
     /**
      * @Route("/{probId<\d+>}", name="jury_problem")
-     * @param Request           $request
-     * @param SubmissionService $submissionService
-     * @param int               $probId
-     * @return \Symfony\Component\HttpFoundation\Response
      * @throws \Doctrine\ORM\NoResultException
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws Exception
      */
-    public function viewAction(Request $request, SubmissionService $submissionService, int $probId)
+    public function viewAction(Request $request, SubmissionService $submissionService, int $probId) : Response
     {
         /** @var Problem $problem */
         $problem = $this->em->getRepository(Problem::class)->find($probId);
@@ -555,7 +538,7 @@ class ProblemController extends BaseController
             'defaultRunExecutable' => (string)$this->config->get('default_run'),
             'defaultCompareExecutable' => (string)$this->config->get('default_compare'),
             'showContest' => count($this->dj->getCurrentContests()) > 1,
-            'showExternalResult' => $this->config->get('data_source') ==
+            'showExternalResult' => $this->config->get('data_source') ===
                 DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL,
             'refresh' => [
                 'after' => 15,
@@ -589,12 +572,9 @@ class ProblemController extends BaseController
 
     /**
      * @Route("/{probId<\d+>}/testcases", name="jury_problem_testcases")
-     * @param Request $request
-     * @param int     $probId
-     * @return \Symfony\Component\HttpFoundation\Response
      * @throws Exception
      */
-    public function testcasesAction(Request $request, int $probId)
+    public function testcasesAction(Request $request, int $probId) : Response
     {
         /** @var Problem $problem */
         $problem = $this->em->getRepository(Problem::class)->find($probId);
@@ -667,7 +647,7 @@ class ProblemController extends BaseController
                             $md5Method     = sprintf('setMd5sum%s', ucfirst($type));
                             $testcase->getContent()->{$contentMethod}($content);
                             $testcase->{$md5Method}(md5($content));
-                            if ($type == 'input') {
+                            if ($type === 'input') {
                                 $testcase->setOrigInputFilename(basename($file->getClientOriginalName(), '.in'));
                             }
                         }
@@ -680,7 +660,7 @@ class ProblemController extends BaseController
                                            $file->getClientOriginalName(),
                                            Utils::printsize($file->getSize()));
 
-                        if ($type == 'output' && $file->getSize() > $outputLimit * 1024) {
+                        if ($type === 'output' && $file->getSize() > $outputLimit * 1024) {
                             $message .= sprintf(
                                 '<br><b>Warning: file size exceeds <code>output_limit</code> ' .
                                 'of %s kB. This will always result in wrong answers!</b>',
@@ -741,7 +721,7 @@ class ProblemController extends BaseController
                     $md5Method     = sprintf('setMd5sum%s', ucfirst($type));
                     $newTestcaseContent->{$contentMethod}($content);
                     $newTestcase->{$md5Method}(md5($content));
-                    if ($type == 'input') {
+                    if ($type === 'input') {
                         $newTestcase->setOrigInputFilename(basename($file->getClientOriginalName(), '.in'));
                     }
                 }
@@ -829,12 +809,8 @@ class ProblemController extends BaseController
      *     "/{probId<\d+>}/testcases/{rank<\d+>}/move/{direction<up|down>}",
      *     name="jury_problem_testcase_move"
      *     )
-     * @param int    $probId
-     * @param int    $rank
-     * @param string $direction
-     * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function moveTestcaseAction(int $probId, int $rank, string $direction)
+    public function moveTestcaseAction(int $probId, int $rank, string $direction) : Response
     {
         /** @var Problem $problem */
         $problem = $this->em->getRepository(Problem::class)->find($probId);
@@ -863,14 +839,14 @@ class ProblemController extends BaseController
         $numTestcases = count($testcases);
 
         foreach ($testcases as $testcaseRank => $testcase) {
-            if ($testcaseRank == $rank) {
+            if ($testcaseRank === $rank) {
                 $current = $testcase;
             }
-            if ($testcaseRank == $rank && $direction == 'up') {
+            if ($testcaseRank === $rank && $direction === 'up') {
                 $other = $last;
                 break;
             }
-            if ($last !== null && $rank == $last->getRank() && $direction == 'down') {
+            if ($last !== null && $rank === $last->getRank() && $direction === 'down') {
                 $other = $testcase;
                 break;
             }
@@ -901,13 +877,9 @@ class ProblemController extends BaseController
      *     "/{probId<\d+>}/testcases/{rank<\d+>}/fetch/{type<input|output|image>}",
      *     name="jury_problem_testcase_fetch"
      *     )
-     * @param int    $probId
-     * @param int    $rank
-     * @param string $type
-     * @return \Symfony\Component\HttpFoundation\Response
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
-    public function fetchTestcaseAction(int $probId, int $rank, string $type)
+    public function fetchTestcaseAction(int $probId, int $rank, string $type) : Response
     {
         /** @var Testcase $testcase */
         $testcase = $this->em->createQueryBuilder()
@@ -961,9 +933,7 @@ class ProblemController extends BaseController
     /**
      * @Route("/{probId<\d+>}/edit", name="jury_problem_edit")
      * @IsGranted("ROLE_ADMIN")
-     * @param Request $request
-     * @param int     $probId
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|Response
      * @throws Exception
      */
     public function editAction(Request $request, int $probId)
@@ -1047,9 +1017,7 @@ class ProblemController extends BaseController
     /**
      * @Route("/{probId<\d+>}/delete", name="jury_problem_delete")
      * @IsGranted("ROLE_ADMIN")
-     * @param Request $request
-     * @param int     $probId
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|Response
      * @throws Exception
      */
     public function deleteAction(Request $request, int $probId)
@@ -1132,11 +1100,9 @@ class ProblemController extends BaseController
     /**
      * @Route("/add", name="jury_problem_add")
      * @IsGranted("ROLE_ADMIN")
-     * @param Request $request
-     * @return \Symfony\Component\HttpFoundation\Response
      * @throws Exception
      */
-    public function addAction(Request $request)
+    public function addAction(Request $request) : Response
     {
         $problem = new Problem();
 
@@ -1159,10 +1125,6 @@ class ProblemController extends BaseController
         ]);
     }
 
-    /**
-     * @param Testcase[] $testcases
-     * @param ZipArchive $zip
-     */
     public function addTestcasesToZip(array $testcases, ZipArchive $zip, bool $isSample)
     {
         $formatString = sprintf('data/%%s/%%0%dd', ceil(log10(count($testcases) + 1)));
