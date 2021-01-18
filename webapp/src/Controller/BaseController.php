@@ -262,6 +262,11 @@ abstract class BaseController extends AbstractController
             // deleting the entity, since linked data might have vanished
             $contestsForEntity = $this->contestsForEntity($entity, $DOMJudgeService);
 
+            $cid = null;
+            // Remember the cid to use it in the EventLog later
+            if ($entity instanceof Contest) {
+                $cid = $entity->getCid();
+            }
             $entityManager->transactional(function () use ($entityManager, $entity) {
                 if ($entity instanceof Problem) {
                     // Deleting problem is a special case: its dependent tables do not
@@ -292,10 +297,15 @@ abstract class BaseController extends AbstractController
             // Trigger the delete event
             if ($endpoint = $eventLogService->endpointForEntity($entity)) {
                 foreach ($contestsForEntity as $contest) {
+                    // When the $entity is a contest it has no id anymore after the EntityManager->remove
+                    // for this reason we either remember it or check all other contests and use their cid
+                    if (!$entity instanceof Contest) {
+                        $cid = $contest->getCid();
+                    }
                     // TODO: cascade deletes. Maybe use getDependentEntities()?
                     $eventLogService->log($endpoint, $primaryKeyData[0],
                         EventLogService::ACTION_DELETE,
-                        $contest->getCid(), null, null, false);
+                        $cid, null, null, false);
                 }
             }
 
