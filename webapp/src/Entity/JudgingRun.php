@@ -142,7 +142,7 @@ class JudgingRun extends BaseApiEntity
         return $this;
     }
 
-    public function getRunresult(): string
+    public function getRunresult(): ?string
     {
         return $this->runresult;
     }
@@ -158,7 +158,7 @@ class JudgingRun extends BaseApiEntity
      * @Serializer\SerializedName("run_time")
      * @Serializer\Type("float")
      */
-    public function getRuntime(): float
+    public function getRuntime(): ?float
     {
         return Utils::roundedFloat($this->runtime);
     }

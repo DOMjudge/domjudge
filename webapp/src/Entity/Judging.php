@@ -171,7 +171,7 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
      */
     private $runs;
 
-    public function getMaxRuntime(): float
+    public function getMaxRuntime(): ?float
     {
         $max = 0;
         foreach ($this->runs as $run) {
