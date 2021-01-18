@@ -107,8 +107,6 @@ else
     rm -rf localhost/domjudge/{doc,api}
     section_end upstream_problems
 
-    section_start_collap test_suite "Install testsuite"
-    section_end test_suite
     if [ $TEST == "axe" ]; then
 	    STAN="-e $TEST"
 	    FLTR=""

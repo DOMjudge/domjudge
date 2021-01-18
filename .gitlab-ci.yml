@@ -63,56 +63,6 @@ check syntax:
   script:
     - ./gitlab/syntax.sh
 
-check_w3c_css:
-  <<: *retry_job
-  <<: *tiny_job
-  stage: test
-  image: 
-    name: cyb3rjak3/html5validator
-    entrypoint: [""]
-  script:
-    - JAR=`find /usr/local/lib -name vnu.jar|tail -n1`
-    - java -jar $JAR --format json --skip-non-css webapp 2>result; RES=$?
-    - python3 -m json.tool < result
-    - exit $RES
-
-check_w3c_html:
-  <<: *retry_job
-  <<: *long_job
-  stage: test
-  image: domjudge/gitlabci:2.1
-  services:
-    - mariadb
-  variables:
-    MYSQL_ROOT_PASSWORD: password
-    DOCKER_HOST: tcp://docker:2375/
-    DOCKER_DRIVER: overlay2
-  script:
-  - ./gitlab/html.sh
-  artifacts:
-    when: always
-    paths:
-      - public
-      - w3cHtmlpublic.json
-
-check_wcag:
-  <<: *retry_job
-  <<: *short_job
-  stage: test
-  image: domjudge/gitlabci:2.1
-  services:
-    - mariadb
-  variables:
-    MYSQL_ROOT_PASSWORD: password
-    DOCKER_HOST: tcp://docker:2375/
-    DOCKER_DRIVER: overlay2
-  script:
-  - ./gitlab/wcag.sh
-  artifacts:
-    when: always
-    paths:
-      - public
-
 run unit tests:
   <<: *retry_job
   <<: *short_job
