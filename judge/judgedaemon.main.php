@@ -813,19 +813,6 @@ function read_metadata(string $filename)
     return $res;
 }
 
-function send_unsent_judging_runs($unsent_judging_runs, $judgingid)
-{
-    global $myhost;
-
-    return request(
-        sprintf('judgehosts/add-judging-run/%s/%s', urlencode($myhost),
-                urlencode((string)$judgingid)),
-        'POST',
-        'batch=' . json_encode($unsent_judging_runs),
-        false
-    );
-}
-
 function cleanup_judging(string $workdir) : void
 {
     // revoke readablity for domjudge-run user to this workdir
@@ -897,12 +884,12 @@ function compile(array $judgeTask, string $workdir, string $workdirpath, array $
         $args = 'compile_success=0' .
             '&output_compile=' . urlencode(base64_encode($message));
 
-        $url = sprintf('judgehosts/update-judging/%s/%s', urlencode($myhost), urlencode((string)$row['judgingid']));
+        $url = sprintf('judgehosts/update-judging/%s/%s', urlencode($myhost), urlencode((string)$row['judgetaskid']));
         request($url, 'PUT', $args);
 
         // Revoke readablity for domjudge-run user to this workdir.
         chmod($workdir, 0700);
-        logmsg(LOG_NOTICE, "Judging s$row[submitid]/j$row[judgingid]: compile error");
+        logmsg(LOG_NOTICE, "Judging s$row[submitid], task $row[judgetaskid]: compile error");
         return false;
     }
 
@@ -1039,7 +1026,7 @@ function judge(array $judgeTask): bool
         $unfinished = request('judgehosts', 'POST', 'hostname=' . urlencode($myhost));
         $unfinished = dj_json_decode($unfinished);
         foreach ($unfinished as $jud) {
-            logmsg(LOG_WARNING, "Aborted judging j" . $jud['judgingid'] .
+            logmsg(LOG_WARNING, "Aborted judging task " . $jud['judgetaskid'] .
                    " due to signal");
         }
 
