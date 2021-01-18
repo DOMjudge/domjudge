@@ -154,7 +154,7 @@ class InternalError
         return $this;
     }
 
-    public function getContest(): Contest
+    public function getContest(): ?Contest
     {
         return $this->contest;
     }
@@ -165,7 +165,7 @@ class InternalError
         return $this;
     }
 
-    public function getJudging(): Judging
+    public function getJudging(): ?Judging
     {
         return $this->judging;
     }

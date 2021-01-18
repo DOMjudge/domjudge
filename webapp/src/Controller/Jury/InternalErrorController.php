@@ -46,7 +46,7 @@ class InternalErrorController extends BaseController
         /** @var InternalError[] $internalErrors */
         $internalErrors = $this->em->createQueryBuilder()
             ->from(InternalError::class, 'e')
-            ->join('e.judging', 'j')
+            ->leftJoin('e.judging', 'j')
             ->select('e')
             ->orderBy('e.status')
             ->addOrderBy('e.errorid')
@@ -68,6 +68,8 @@ class InternalErrorController extends BaseController
             foreach ($table_fields as $k => $v) {
                 if ($propertyAccessor->isReadable($internal, $k)) {
                     $internalerrordata[$k] = ['value' => $propertyAccessor->getValue($internal, $k)];
+                } else {
+                    $internalerrordata[$k] = ['value' => null];
                 }
             }
 
