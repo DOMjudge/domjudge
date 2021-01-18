@@ -409,7 +409,7 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
         return $this;
     }
 
-    public function getJudgehost(): Judgehost
+    public function getJudgehost(): ?Judgehost
     {
         return $this->judgehost;
     }
