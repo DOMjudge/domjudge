@@ -1277,6 +1277,7 @@ class JudgehostController extends AbstractFOSRestController
 
         // Update last seen of judgehost
         $judgehost->setPolltime(Utils::now());
+        $this->em->flush();
 
         // TODO: Determine a good max batch size here. We may want to do something more elaborate like looking at
         // previous judgements of the same testcase and use median runtime as an indicator.
