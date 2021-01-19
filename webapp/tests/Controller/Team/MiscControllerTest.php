@@ -5,18 +5,16 @@ namespace App\Tests\Controller\Team;
 use App\Entity\Contest;
 use App\Tests\BaseTest;
 use Doctrine\ORM\EntityManagerInterface;
+use Generator;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class MiscControllerTest extends BaseTest
 {
     protected static $roles = ['team'];
 
-    const PRINT_COMMAND = 'echo [language] && /bin/cat [file]';
+    private const PRINT_COMMAND = 'echo [language] && /bin/cat [file]';
 
-    /**
-     * Test that if no user is logged in the user gets redirected to the login page
-     */
-    public function testTeamRedirectToLogin()
+    public function testTeamRedirectToLogin() : void
     {
         // Log out, we are testing public functionality
         $this->logOut();
@@ -27,7 +25,7 @@ class MiscControllerTest extends BaseTest
     /**
      * Test the login process for teams
      */
-    public function testLogin()
+    public function testLogin() : void
     {
         // Log out, we are testing log in functionality
         $this->logOut();
@@ -45,41 +43,36 @@ class MiscControllerTest extends BaseTest
      * and AJAX requests
      *
      * @dataProvider ajaxProvider
-     *
-     * @param bool $ajax
      */
-    public function testTeamOverviewPage(bool $ajax)
+    public function testTeamOverviewPage(bool $ajax) : void
     {
         $this->verifyPageResponse('GET', '/team', 200, null, $ajax);
 
-        $this->assertSelectorExists('html:contains("Example teamname")');
+        self::assertSelectorExists('html:contains("Example teamname")');
 
         $h1s = $this->getCurrentCrawler()->filter('h1')->extract(array('_text'));
-        $this->assertEquals('Submissions', $h1s[0]);
-        $this->assertEquals('Clarifications', $h1s[1]);
-        $this->assertEquals('Clarification Requests', $h1s[2]);
+        self::assertEquals('Submissions', $h1s[0]);
+        self::assertEquals('Clarifications', $h1s[1]);
+        self::assertEquals('Clarification Requests', $h1s[2]);
     }
 
-    public function ajaxProvider()
+    public function ajaxProvider() : Generator
     {
         yield [false];
         yield [true];
     }
 
-    /**
-     * Test that by default printing is disabled
-     */
-    public function testPrintingDisabledTeamMenu()
+    public function testPrintingDisabledTeamMenu() : void
     {
         $this->verifyPageResponse('GET', '/team', 200);
-        $this->assertSelectorNotExists('a:contains("Print")');
+        self::assertSelectorNotExists('a:contains("Print")');
     }
 
     /**
      * Test that if printing is disabled, we get an access denied exception
      * when visiting the print page
      */
-    public function testPrintingDisabledAccessDenied()
+    public function testPrintingDisabledAccessDenied() : void
     {
         $this->verifyPageResponse('GET', '/team/print', 403);
     }
@@ -87,7 +80,7 @@ class MiscControllerTest extends BaseTest
     /**
      * Test that when printing is enabled the link is shown
      */
-    public function testPrintingEnabledTeamMenu()
+    public function testPrintingEnabledTeamMenu() : void
     {
         $this->withChangedConfiguration('print_command', static::PRINT_COMMAND,
             function () {
@@ -99,7 +92,7 @@ class MiscControllerTest extends BaseTest
     /**
      * Test that if printing is enabled, we can actually print something
      */
-    public function testPrintingEnabledSubmitForm()
+    public function testPrintingEnabledSubmitForm() : void
     {
         $this->withChangedConfiguration('print_command', static::PRINT_COMMAND,
             function () {
@@ -126,11 +119,9 @@ class MiscControllerTest extends BaseTest
     /**
      * Test that it is possible to change contests
      *
-     * @param bool $withReferrer
-     *
      * @dataProvider withReferrerProvider
      */
-    public function testChangeContest(bool $withReferrer)
+    public function testChangeContest(bool $withReferrer) : void
     {
         $start       = (int)floor(microtime(true) - 1800);
         $startString = strftime('%Y-%m-%d %H:%M:%S ',
@@ -156,7 +147,7 @@ class MiscControllerTest extends BaseTest
         $crawler = $this->client->request('GET', '/team/scoreboard');
 
         // Verify we are on the demo contest
-        $this->assertSelectorTextContains('.card-header span', 'Demo contest');
+        self::assertSelectorTextContains('.card-header span', 'Demo contest');
 
         if ($withReferrer) {
             // Now click the change contest menu item
@@ -165,7 +156,7 @@ class MiscControllerTest extends BaseTest
             $this->client->click($link);
         } else {
             // Make sure to clear the history so we do not have a referrer
-            $this->client->getHistory()->clear();;
+            $this->client->getHistory()->clear();
             $this->client->request('GET', '/team/change-contest/' . $contest->getCid());
         }
 
@@ -173,18 +164,18 @@ class MiscControllerTest extends BaseTest
 
         // Check that we are still on the scoreboard
         if ($withReferrer) {
-            $this->assertEquals('http://localhost/team/scoreboard',
-                $this->client->getRequest()->getUri());
+            self::assertEquals('http://localhost/team/scoreboard',
+                               $this->client->getRequest()->getUri());
         } else {
-            $this->assertEquals('http://localhost/team',
-                $this->client->getRequest()->getUri());
+            self::assertEquals('http://localhost/team',
+                               $this->client->getRequest()->getUri());
 
             // Go to the scoreboard again
             $this->client->request('GET', '/team/scoreboard');
         }
 
         // And check that the contest has changed
-        $this->assertSelectorTextContains('.card-header span', 'Test contest for switching');
+        self::assertSelectorTextContains('.card-header span', 'Test contest for switching');
 
         // Remove the contest again
         $contest = $em->getRepository(Contest::class)->findOneBy(['shortname' => 'switch']);
@@ -192,7 +183,7 @@ class MiscControllerTest extends BaseTest
         $em->flush();
     }
 
-    public function withReferrerProvider()
+    public function withReferrerProvider() : Generator
     {
         yield [true];
         yield [false];

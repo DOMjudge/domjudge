@@ -2,21 +2,17 @@
 
 namespace App\Tests\Controller\Team;
 
-use App\Controller\Team\ClarificationController;
 use App\Tests\BaseTest;
 
 class ClarificationControllerTest extends BaseTest
 {
     protected static $roles = ['team'];
 
-    /**
-     * Test that it is possible to create a clorification as a team
-     */
-    public function testClarificationRequest()
+    public function testClarificationRequest() : void
     {
         $this->verifyPageResponse('GET', '/team', 200);
 
-        $link = $this->verifyLink('request clarification', 'http://localhost/team/clarifications/add');
+        $link = $this->verifyLinkToURL('request clarification', 'http://localhost/team/clarifications/add');
         $this->client->click($link);
 
         $this->client->submitForm('Send', [
@@ -24,10 +20,10 @@ class ClarificationControllerTest extends BaseTest
             'team_clarification[message]' => "I don't understand this problem",
         ]);
 
-        $this->verifyRedirect('http://localhost/team');
+        $this->verifyRedirectToURL('http://localhost/team');
 
         // Now check if we actually have this clarification
-        $this->assertSelectorExists('html:contains("problem boolfind")');
-        $this->assertSelectorExists('html:contains("I don\'t understand this problem")');
+        self::assertSelectorExists('html:contains("problem boolfind")');
+        self::assertSelectorExists('html:contains("I don\'t understand this problem")');
     }
 }

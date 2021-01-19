@@ -47,16 +47,13 @@ class ConfigurationServiceTest extends KernelTestCase
      */
     private $dbConfig;
 
-    /**
-     * @inheritDoc
-     */
     protected function setUp(): void
     {
         self::bootKernel();
 
         $this->em                     = $this->createMock(EntityManagerInterface::class);
         $this->configRepository       = $this->createMock(ObjectRepository::class);
-        $this->emGetRepositoryExpects = $this->em->expects($this->any())
+        $this->emGetRepositoryExpects = $this->em->expects(self::any())
             ->method('getRepository')
             ->with(Configuration::class)
             ->willReturn($this->configRepository);
@@ -87,50 +84,42 @@ class ConfigurationServiceTest extends KernelTestCase
     /**
      * @dataProvider provideConfigDefaults
      *
-     * @param string $categoryName
-     * @param string $itemName
-     *
      * @throws Exception
      */
-    public function testConfigDefaults(string $categoryName, string $itemName)
+    public function testConfigDefaults(string $categoryName, string $itemName) : void
     {
         $foundItem = $this->findItem($categoryName, $itemName);
 
-        $this->configRepository->expects($this->once())
+        $this->configRepository->expects(self::once())
             ->method('findAll')
             ->willReturn([]);
 
         $defaultValue = $foundItem['default_value'];
-        $this->assertSame($defaultValue, $this->config->get($itemName));
+        self::assertSame($defaultValue, $this->config->get($itemName));
     }
 
     /**
      * @dataProvider provideConfigDefaults
-     *
-     * @param string $categoryName
-     * @param string $itemName
      *
      * @throws Exception
      */
     public function testConfigDefaultsAll(
         string $categoryName,
         string $itemName
-    ) {
+    ) : void
+    {
         $foundItem = $this->findItem($categoryName, $itemName);
 
-        $this->configRepository->expects($this->once())
+        $this->configRepository->expects(self::once())
             ->method('findAll')
             ->willReturn([]);
 
         $defaultValue = $foundItem['default_value'];
         $all          = $this->config->all();
-        $this->assertSame($defaultValue, $all[$itemName]);
+        self::assertSame($defaultValue, $all[$itemName]);
     }
 
-    /**
-     * @return Generator
-     */
-    public function provideConfigDefaults()
+    public function provideConfigDefaults() : Generator
     {
         yield ['Scoring', 'compile_penalty'];
         yield ['Scoring', 'results_prio'];
@@ -141,20 +130,17 @@ class ConfigurationServiceTest extends KernelTestCase
 
     /**
      * @dataProvider provideInvalidItem
-     *
-     * @param string $itemName
-     * @param bool   $publicOnly
      */
-    public function testInvalidItem(string $itemName, bool $publicOnly)
+    public function testInvalidItem(string $itemName, bool $publicOnly) : void
     {
         $this->expectExceptionMessageRegExp("/^Configuration variable '.*' not found\.$/");
-        $this->configRepository->expects($this->never())
+        $this->configRepository->expects(self::never())
             ->method('findAll');
 
         $this->config->get($itemName, $publicOnly);
     }
 
-    public function provideInvalidItem()
+    public function provideInvalidItem() : Generator
     {
         yield ['does_not_exist', false]; // This item does not exist
         yield ['does_not_exist', true];
@@ -164,7 +150,6 @@ class ConfigurationServiceTest extends KernelTestCase
     /**
      * @dataProvider provideConfigFromDatabase
      *
-     * @param string $itemName
      * @param mixed  $dbValue
      *
      * @param null   $expectedValue
@@ -175,12 +160,13 @@ class ConfigurationServiceTest extends KernelTestCase
         string $itemName,
         $dbValue,
         $expectedValue = null
-    ) {
+    ) : void
+    {
         $config = new Configuration();
         $config
             ->setName($itemName)
             ->setValue($dbValue);
-        $this->configRepository->expects($this->once())
+        $this->configRepository->expects(self::once())
             ->method('findAll')
             ->willReturn([$config]);
 
@@ -188,10 +174,10 @@ class ConfigurationServiceTest extends KernelTestCase
             $expectedValue = $dbValue;
         }
 
-        $this->assertSame($expectedValue, $this->config->get($itemName));
+        self::assertSame($expectedValue, $this->config->get($itemName));
         // Also make sure it doesn't change other items by testing a different one
         $defaultCompareItem = $this->findItem('Judging', 'default_compare');
-        $this->assertSame(
+        self::assertSame(
             $defaultCompareItem['default_value'],
             $this->config->get('default_compare')
         );
@@ -200,7 +186,6 @@ class ConfigurationServiceTest extends KernelTestCase
     /**
      * @dataProvider provideConfigFromDatabase
      *
-     * @param string $itemName
      * @param mixed  $dbValue
      *
      * @param null   $expectedValue
@@ -211,12 +196,13 @@ class ConfigurationServiceTest extends KernelTestCase
         string $itemName,
         $dbValue,
         $expectedValue = null
-    ) {
+    ) : void
+    {
         $config = new Configuration();
         $config
             ->setName($itemName)
             ->setValue($dbValue);
-        $this->configRepository->expects($this->once())
+        $this->configRepository->expects(self::once())
             ->method('findAll')
             ->willReturn([$config]);
 
@@ -225,18 +211,15 @@ class ConfigurationServiceTest extends KernelTestCase
         }
 
         $all = $this->config->all();
-        $this->assertSame($expectedValue, $all[$itemName]);
+        self::assertSame($expectedValue, $all[$itemName]);
         // Also make sure it doesn't change other items by testing a different one
         $defaultCompareItem = $this->findItem('Judging', 'default_compare');
-        $this->assertSame(
+        self::assertSame(
             $defaultCompareItem['default_value'], $all['default_compare']
         );
     }
 
-    /**
-     * @return Generator
-     */
-    public function provideConfigFromDatabase()
+    public function provideConfigFromDatabase() : Generator
     {
         yield ['compile_penalty', true, 1];
         yield ['results_prio', ['no-output' => 37, 'correct' => 1]];
@@ -248,24 +231,19 @@ class ConfigurationServiceTest extends KernelTestCase
     /**
      * @dataProvider provideAllHidesNonPublic
      *
-     * @param string $itemName
-     *
      * @throws Exception
      */
-    public function testAllHidesNonPublic(string $itemName)
+    public function testAllHidesNonPublic(string $itemName) : void
     {
-        $this->configRepository->expects($this->once())
+        $this->configRepository->expects(self::once())
             ->method('findAll')
             ->willReturn([]);
 
         $all = $this->config->all(true);
-        $this->assertArrayNotHasKey($itemName, $all);
+        self::assertArrayNotHasKey($itemName, $all);
     }
 
-    /**
-     * @return Generator
-     */
-    public function provideAllHidesNonPublic()
+    public function provideAllHidesNonPublic() : Generator
     {
         yield ['verification_required'];
         yield ['script_timelimit'];
@@ -275,7 +253,7 @@ class ConfigurationServiceTest extends KernelTestCase
     /**
      * @throws Exception
      */
-    public function testUnknownConfigsNonPublic()
+    public function testUnknownConfigsNonPublic() : void
     {
         $unknownItems = [
             (new Configuration())
@@ -285,10 +263,10 @@ class ConfigurationServiceTest extends KernelTestCase
                 ->setName('unknown2')
                 ->setValue('barfoo'),
         ];
-        $this->configRepository->expects($this->once())
+        $this->configRepository->expects(self::once())
             ->method('findAll')
             ->willReturn($unknownItems);
-        $this->logger->expects($this->exactly(2))
+        $this->logger->expects(self::exactly(2))
             ->method('warning')
             ->withConsecutive(
                 ['Configuration value %s not defined', ['unknown1']],
@@ -296,14 +274,14 @@ class ConfigurationServiceTest extends KernelTestCase
             );
 
         $all = $this->config->all();
-        $this->assertArrayNotHasKey('unknown1', $all);
-        $this->assertArrayNotHasKey('unknown2', $all);
+        self::assertArrayNotHasKey('unknown1', $all);
+        self::assertArrayNotHasKey('unknown2', $all);
     }
 
     /**
      * @throws Exception
      */
-    public function testUnknownConfigsPublic()
+    public function testUnknownConfigsPublic() : void
     {
         $unknownItems = [
             (new Configuration())
@@ -313,15 +291,15 @@ class ConfigurationServiceTest extends KernelTestCase
                 ->setName('unknown2')
                 ->setValue('barfoo'),
         ];
-        $this->configRepository->expects($this->once())
+        $this->configRepository->expects(self::once())
             ->method('findAll')
             ->willReturn($unknownItems);
-        $this->logger->expects($this->never())
+        $this->logger->expects(self::never())
             ->method('warning');
 
         $all = $this->config->all(true);
-        $this->assertArrayNotHasKey('unknown1', $all);
-        $this->assertArrayNotHasKey('unknown2', $all);
+        self::assertArrayNotHasKey('unknown1', $all);
+        self::assertArrayNotHasKey('unknown2', $all);
     }
 
     /**
@@ -332,9 +310,9 @@ class ConfigurationServiceTest extends KernelTestCase
      *
      * @throws Exception
      */
-    public function testAddOptionsExecutables(string $item, array $expected)
+    public function testAddOptionsExecutables(string $item, array $expected) : void
     {
-        if($item == 'default_compare') {
+        if($item === 'default_compare') {
             $executables = [
                 (new Executable())
                     ->setExecid('exec1')
@@ -345,7 +323,7 @@ class ConfigurationServiceTest extends KernelTestCase
                     ->setType('compare')
                     ->setDescription('Descr 3'),
             ];
-        } elseif($item == 'default_run') {
+        } elseif($item === 'default_run') {
             $executables = [
                 (new Executable())
                     ->setExecid('exec2')
@@ -356,6 +334,8 @@ class ConfigurationServiceTest extends KernelTestCase
                     ->setType('run')
                     ->setDescription('Descr 5'),
             ];
+        } else {
+            throw new Exception("Item value should be default_{compare,run}.");
         }
 
         $execRepository = $this->createMock(ObjectRepository::class);
@@ -365,18 +345,18 @@ class ConfigurationServiceTest extends KernelTestCase
             ->with(Executable::class)
             ->willReturn($execRepository);
 
-        $execRepository->expects($this->once())
+        $execRepository->expects(self::once())
             ->method('findBy')
             ->willReturn($executables);
 
         $spec = $this->config->getConfigSpecification()[$item];
-        $this->assertArrayNotHasKey('options', $spec);
+        self::assertArrayNotHasKey('options', $spec);
         $spec = $this->config->addOptions($spec);
 
-        $this->assertSame($expected, $spec['options']);
+        self::assertSame($expected, $spec['options']);
     }
 
-    public function provideAddOptionsExecutables()
+    public function provideAddOptionsExecutables() : Generator
     {
         yield ['default_compare', [
             'exec1' => 'Descr 1',
@@ -395,7 +375,7 @@ class ConfigurationServiceTest extends KernelTestCase
      *
      * @throws Exception
      */
-    public function testAddOptionsResults(string $item)
+    public function testAddOptionsResults(string $item) : void
     {
         $verdictOptions = ['' => ''];
         $verdictsConfig      = self::$container->getParameter('domjudge.etcdir') . '/verdicts.php';
@@ -405,18 +385,18 @@ class ConfigurationServiceTest extends KernelTestCase
         }
 
         $spec = $this->config->getConfigSpecification()[$item];
-        $this->assertArrayNotHasKey('options', $spec);
+        self::assertArrayNotHasKey('options', $spec);
         $spec = $this->config->addOptions($spec);
 
-        $this->assertSame($verdictOptions, $spec['key_options']);
+        self::assertSame($verdictOptions, $spec['key_options']);
         if ($item === 'results_remap') {
-            $this->assertSame($verdictOptions, $spec['value_options']);
+            self::assertSame($verdictOptions, $spec['value_options']);
         } else {
-            $this->assertArrayNotHasKey('value_options', $spec);
+            self::assertArrayNotHasKey('value_options', $spec);
         }
     }
 
-    public function provideAddOptionsResults()
+    public function provideAddOptionsResults() : Generator
     {
         yield ['results_prio'];
         yield ['results_remap'];
@@ -424,13 +404,8 @@ class ConfigurationServiceTest extends KernelTestCase
 
     /**
      * Find a config item specification
-     *
-     * @param string $categoryName
-     * @param string $itemName
-     *
-     * @return array|null
      */
-    protected function findItem(string $categoryName, string $itemName)
+    protected function findItem(string $categoryName, string $itemName) : ?array
     {
         $foundItem = null;
         foreach ($this->dbConfig as $category) {
@@ -444,7 +419,7 @@ class ConfigurationServiceTest extends KernelTestCase
             }
         }
 
-        $this->assertNotNull(
+        self::assertNotNull(
             $foundItem, 'Config item not found in db-config.yaml'
         );
 

@@ -2,24 +2,23 @@
 
 namespace App\Tests;
 
+use Generator;
+
 class GeneralAvailabilityTest extends BaseTest
 {
     /**
      * @dataProvider urlProvider
-     *
-     * @param string $url
-     * @param int    $code
      */
-    public function testPageIsSuccessful(string $url, int $code)
+    public function testPageIsSuccessful(string $url, int $code) : void
     {
         $this->client->request('GET', $url);
 
         $response = $this->client->getResponse();
         $actual = $response->getStatusCode();
-        $this->assertEquals($code, $actual, var_export($response, true));
+        self::assertEquals($code, $actual, var_export($response, true));
     }
 
-    public function urlProvider()
+    public function urlProvider() : Generator
     {
         yield ['/public/problems', 200];
         yield ['/public', 200];
@@ -38,6 +37,6 @@ class GeneralAvailabilityTest extends BaseTest
         yield ['/jury', 302];
         yield ['/logout', 302];
 
-        yield ['/public/doesnotexist.php', 404];
+        yield ['/public/doesNotExist.php', 404];
     }
 }

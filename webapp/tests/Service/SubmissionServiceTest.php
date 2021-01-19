@@ -3,6 +3,7 @@
 namespace App\Tests\Service;
 
 use App\Service\SubmissionService;
+use Generator;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 
@@ -11,11 +12,12 @@ class SubmissionServiceTest extends KernelTestCase
     /**
      * @dataProvider provideRunResults
      */
-    public function testGetFinalResult(array $runresults, array $resultsPrio, ?string $result) {
-       $this->assertSame($result, SubmissionService::getFinalResult($runresults, $resultsPrio));
+    public function testGetFinalResult(array $runresults, array $resultsPrio, ?string $result) : void
+    {
+       self::assertSame($result, SubmissionService::getFinalResult($runresults, $resultsPrio));
     }
 
-    public function provideRunResults() : \Generator {
+    public function provideRunResults() : Generator {
         $defaultPrios = [
             'memory-limit' => 99,
             'output-limit' => 99,

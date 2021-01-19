@@ -10,13 +10,9 @@ class ExecutableControllerTest extends BaseTest
     protected static $roles = ['admin'];
 
     /**
-     * @param String $role
-     * @param String $url
-     * @param int $statusCode
-     * @param String $HTTPMethod
      * @dataProvider provideRoleAccessData
      */
-    public function testHTTPAccessForRole(string $role, string $url, int $statusCode, string $HTTPMethod)
+    public function testHTTPAccessForRole(string $role, string $url, int $statusCode, string $HTTPMethod) : void
     {
         static::$roles = [$role];
         // Optionally use the setupUser

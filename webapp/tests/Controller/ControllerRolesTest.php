@@ -3,29 +3,24 @@
 namespace App\Tests\Controller;
 
 use App\Tests\BaseTest;
+use Generator;
 
 class ControllerRolesTest extends BaseTest
 {
-    protected static $roles = [];
     protected static $loginURL = "http://localhost/login";
 
-
     /**
-     * //See: https://www.oreilly.com/library/view/php-cookbook/1565926811/ch04s25.html
+     * @See: https://www.oreilly.com/library/view/php-cookbook/1565926811/ch04s25.html
      * Get all combinations of roles with at minimal the starting roles
-     *
-     * @var string[] $start_roles Base roles for each combination
-     * @var string[] $possible_roles Additional roles to add to the combination
-     * @return array All possible combinations with at least the starting roles
      */
-    protected function roleCombinations(array $start_roles, array $possible_roles)
+    protected function roleCombinations(array $start_roles, array $possible_roles) : array
     {
         // initialize by adding the empty set
         $results = array($start_roles);
 
         foreach ($possible_roles as $element) {
             foreach ($results as $combination) {
-                array_push($results, array_merge(array($element), $combination));
+                $results[] = array_merge(array($element), $combination);
             }
         }
         return $results;
@@ -34,21 +29,19 @@ class ControllerRolesTest extends BaseTest
     /**
      * Some URLs are not setup in the testing framework or have a function for the
      * user UX/login process, those are skipped.
-     * @var string $url
-     * @return boolean
      **/
-    protected function urlExcluded(string $url)
+    protected function urlExcluded(string $url) : bool
     {
         return ($url === '' ||                                                 // Empty URL
-            $url[0] == '#' ||                                          // Links to local page
+            $url[0] === '#' ||                                          // Links to local page
             strpos($url, 'http') !== false ||                        // External links
-            substr($url, 0, 4) == '/doc' ||                     // Documentation is not setup
-            substr($url, 0, 4) == '/api' ||                     // API is not functional in framework
+            strpos($url, '/doc') === 0 ||                     // Documentation is not setup
+            strpos($url, '/api') === 0 ||                     // API is not functional in framework
             strpos($url, '/delete') !== false ||                     // Breaks MockData
             strpos($url, '/add') !== false ||                        //TODO: Should be fixable
             strpos($url, '/edit') !== false ||
-            $url == '/logout' ||                                           // Application links
-            $url == '/login' ||
+            $url === '/logout' ||                                           // Application links
+            $url === '/login' ||
             strpos($url, 'activate') !== false ||
             strpos($url, 'deactivate') !== false ||
             strpos($url, '/jury/change-contest/') !== false ||
@@ -63,11 +56,9 @@ class ControllerRolesTest extends BaseTest
 
     /**
      * Crawl the webpage assume this is allowed and return all other links on the page
-     * @var string $url URL to crawl
-     * @var int $statusCode Expected HTTP status code
      * @return string[] Found links on crawled URL
      */
-    protected function crawlPage(string $url, int $statusCode)
+    protected function crawlPageGetLinks(string $url, int $statusCode) : array
     {
         if($this->urlExcluded($url)) {
             return [];
@@ -75,21 +66,18 @@ class ControllerRolesTest extends BaseTest
         $crawler = $this->client->request('GET', $url);
         $response = $this->client->getResponse();
         $message = var_export($response, true);
-        if($response->isRedirection() && $statusCode=='403') {
-            $this->assertEquals($response->headers->get('location'), $this::$loginURL);
+        if($statusCode == '403' && $response->isRedirection()) {
+            self::assertEquals($response->headers->get('location'), $this::$loginURL);
         } else {
-            $this->assertEquals($statusCode, $response->getStatusCode(), $message);
+            self::assertEquals($statusCode, $response->getStatusCode(), $message);
         }
         return array_unique($crawler->filter('a')->extract(['href']));
     }
 
     /**
      * Follow all links on a list of pages while new pages are found
-     *
-     * @param array $urlsToCheck URLs to traverse
-     * @return array Reachable pages from the provided URLs
      */
-    protected function getAllPages(array $urlsToCheck)
+    protected function getAllPages(array $urlsToCheck) : array
     {
         $done = array();
         do {
@@ -99,7 +87,7 @@ class ControllerRolesTest extends BaseTest
                     continue;
                 } else {
                     if (!$this->urlExcluded($url)) {
-                        $urlsToCheck = array_unique(array_merge($urlsToCheck, $this->crawlPage($url, 200)));
+                        $urlsToCheck = array_unique(array_merge($urlsToCheck, $this->crawlPageGetLinks($url, 200)));
                     }
                     $done[] = $url;
                 }
@@ -109,19 +97,18 @@ class ControllerRolesTest extends BaseTest
         return $urlsToCheck;
     }
 
-    /*
+    /**
      * Finds all the pages reachable with $roles on URL $roleBaseURL with optionally traversing all links
      * @var string[] $roleBaseURL The URL of the current Roles
      * @var string[] $roles The tested Roles,
-     * @var boolean $allPages Should all possible pages be visited
      */
-    protected function getPagesRoles(array $roleBaseURL, array $roles, bool $allPages)
+    protected function getPagesRoles(array $roleBaseURL, array $roles, bool $allPages) : array
     {
         static::$roles = $roles;
         $this->logIn();
         $urlsToCheck = [];
         foreach ($roleBaseURL as $baseURL) {
-            $urlsToCheck = array_merge($urlsToCheck, $this->crawlPage($baseURL, 200));
+            $urlsToCheck = array_merge($urlsToCheck, $this->crawlPageGetLinks($baseURL, 200));
         }
 
         // Find all pages, currently this sometimes breaks as some routes have the same logic
@@ -132,19 +119,18 @@ class ControllerRolesTest extends BaseTest
     }
 
     /**
-     * Test that having the role(s) gives access to all visible pages.
-     * This test should detect mistakes where a page is disabled when the user has a
-     * certain role instead of allowing when the correct role is there.
-     * @var string[] $combinations
+     * (Sub)Test that having the role(s) gives access to all visible pages.
+     * This test should detect mistakes where a page is disallowed when the user has a
+     * specific role instead of allowing when the correct role is there.
      * @var string[] $roleURLs
      */
-    protected function verifyAccess(array $combinations, array $roleURLs)
+    protected function verifyAccess(array $combinations, array $roleURLs) : void
     {
         foreach ($combinations as static::$roles) {
             foreach ($roleURLs as $url) {
                 $this->logIn();
                 if(!$this->urlExcluded($url)) {
-                    $this->crawlPage($url, 200);
+                    $this->crawlPageGetLinks($url, 200);
                 }
             }
         }
@@ -154,17 +140,15 @@ class ControllerRolesTest extends BaseTest
      * Test that having the team role for example is enough to view pages of that role.
      * This test should detect mistakes where a page is disabled when the user has a
      * certain role instead of allowing when the correct role is there.
-     * @var string $roleBaseURL The standard endpoint from where the user traverses the website
      * @var string[] $baseRoles The standard role of the user
      * @var string[] $optionalRoles The roles which should not restrict the viewable pages
-     * @var boolean $allPages Should all possible pages be visited
      * @dataProvider provideRoleAccessData
      */
-    public function testRoleAccess(string $roleBaseURL, array $baseRoles, array $optionalRoles, bool $allPages)
+    public function testRoleAccess(string $roleBaseURL, array $baseRoles, array $optionalRoles, bool $allPages) : void
     {
         static::$roles = $baseRoles;
         $this->logIn();
-        $urlsToCheck = $this->crawlPage($roleBaseURL, 200);
+        $urlsToCheck = $this->crawlPageGetLinks($roleBaseURL, 200);
         if ($allPages) {
             $urlsToCheck = $this->getAllPages($urlsToCheck);
         }
@@ -174,25 +158,24 @@ class ControllerRolesTest extends BaseTest
 
     /**
      * Test that having for example the jury role does not allow access to the pages of other roles.
-     * @var string $roleBaseURL The URL of the current Roles
      * @var string[] $roleOthersBaseURL The BaseURLs of the other roles
      * @var string[] $roles The tested Roles,
      * @var string[] $rolesOther The other Roles
-     * @var boolean $allPages Should all possible pages be visited
      * @dataProvider provideRoleAccessOtherRoles
      */
     public function testRoleAccessOtherRoles(
         string $roleBaseURL, array $roleOthersBaseURL,
         array $roles, array $rolesOther,
         bool $allPages
-    ) {
+    ) : void
+    {
         $urlsToCheck        = $this->getPagesRoles([$roleBaseURL], $roles, $allPages);
         $urlsToCheckOther   = $this->getPagesRoles($roleOthersBaseURL, $rolesOther, $allPages);
         static::$roles = $roles;
         $this->logIn();
         foreach (array_diff($urlsToCheckOther, $urlsToCheck) as $url) {
             if (!$this->urlExcluded($url)) {
-                $this->crawlPage($url, 403);
+                $this->crawlPageGetLinks($url, 403);
             }
         }
     }
@@ -204,7 +187,7 @@ class ControllerRolesTest extends BaseTest
      * - additional roles to add to the user
      * - Whether to also recursively visit linked pages
      */
-    public function provideRoleAccessData()
+    public function provideRoleAccessData() : Generator
     {
         yield ['/jury',     ['admin'],  ['jury','team'],            false];
         yield ['/jury',     ['jury'],   ['admin','team'],           false];
@@ -221,7 +204,7 @@ class ControllerRolesTest extends BaseTest
      * - the other excluded roles
      * - Whether to also recursively visit linked pages
      **/
-    public function provideRoleAccessOtherRoles()
+    public function provideRoleAccessOtherRoles() : Generator
     {
         yield ['/jury',     ['/jury','/team'],  ['admin'],  ['jury','team'],            false];
         yield ['/jury',     ['/jury','/team'],  ['jury'],   ['admin','team'],           false];
