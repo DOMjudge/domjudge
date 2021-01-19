@@ -9,22 +9,22 @@ class PrintControllerTest extends BaseTest
 {
     protected static $roles = ['jury'];
 
-    const PRINT_COMMAND = 'echo [language] && /bin/cat [file]';
+    protected const PRINT_COMMAND = 'echo [language] && /bin/cat [file]';
 
     /**
      * Test that by default printing is disabled
      */
-    public function testPrintingDisabledJuryIndexPage()
+    public function testPrintingDisabledJuryIndexPage() : void
     {
         $this->verifyPageResponse('GET', '/jury', 200);
-        $this->assertSelectorNotExists('a:contains("Print")');
+        self::assertSelectorNotExists('a:contains("Print")');
     }
 
     /**
      * Test that if printing is disabled, we get an access denied exception
      * when visiting the print page
      */
-    public function testPrintingDisabledAccessDenied()
+    public function testPrintingDisabledAccessDenied() : void
     {
         $this->verifyPageResponse('GET', '/jury/print', 403);
     }
@@ -32,7 +32,7 @@ class PrintControllerTest extends BaseTest
     /**
      * Test that when printing is enabled the link is shown
      */
-    public function testPrintingEnabledJuryIndexPage()
+    public function testPrintingEnabledJuryIndexPage() : void
     {
         $this->withChangedConfiguration('print_command', static::PRINT_COMMAND,
             function () {
@@ -44,7 +44,7 @@ class PrintControllerTest extends BaseTest
     /**
      * Test that if printing is enabled, we can actually print something
      */
-    public function testPrintingEnabledSubmitForm()
+    public function testPrintingEnabledSubmitForm() : void
     {
         $this->withChangedConfiguration('print_command', static::PRINT_COMMAND,
             function () {

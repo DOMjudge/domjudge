@@ -31,9 +31,6 @@ abstract class BaseTest extends WebTestCase
     /** @var string[] */
     protected static $roles = [];
 
-    /**
-     * @inheritDoc
-     */
     protected function setUp(): void
     {
         // Reset the kernel to make sure we have a clean slate
@@ -48,9 +45,6 @@ abstract class BaseTest extends WebTestCase
         }
     }
 
-    /**
-     * @inheritDoc
-     */
     protected function tearDown(): void
     {
         // Clear all configuration options still stored in the database
@@ -70,28 +64,19 @@ abstract class BaseTest extends WebTestCase
         $config->saveChanges([], $eventLog, $dj);
     }
 
-    /**
-     * Helper method to test login for a user
-     *
-     * @param string $username
-     * @param string $password
-     * @param string $redirectPage
-     * @param int    $responseCode
-     *
-     * @return KernelBrowser
-     */
     protected function loginHelper(
         string $username,
         string $password,
         string $redirectPage,
         int $responseCode
-    ) {
+    ) : KernelBrowser
+    {
         $crawler = $this->client->request('GET', '/login');
 
         # load login page
         $response = $this->client->getResponse();
         $message  = var_export($response, true);
-        $this->assertEquals(200, $response->getStatusCode(), $message);
+        self::assertEquals(200, $response->getStatusCode(), $message);
 
         $csrf_token = $this->client->getContainer()->get('security.csrf.token_manager')->getToken('authenticate');
 
@@ -103,16 +88,16 @@ abstract class BaseTest extends WebTestCase
             '_csrf_token' => $csrf_token,
         ));
         $this->client->followRedirects();
-        $crawler  = $this->client->submit($form);
+        $this->client->submit($form);
         $response = $this->client->getResponse();
         $this->client->followRedirects(false);
 
         # check redirected to $redirectPage
         $message = var_export($response, true);
-        $this->assertEquals($responseCode, $response->getStatusCode(),
-            $message);
-        $this->assertEquals($redirectPage,
-            $this->client->getRequest()->getUri(), $message);
+        self::assertEquals($responseCode, $response->getStatusCode(),
+                           $message);
+        self::assertEquals($redirectPage,
+                           $this->client->getRequest()->getUri(), $message);
 
         return $this->client;
     }
@@ -125,7 +110,7 @@ abstract class BaseTest extends WebTestCase
      *
      * @see https://symfony.com/doc/current/testing/http_authentication.html#creating-the-authentication-token
      */
-    protected function logIn()
+    protected function logIn(): void
     {
         $session = $this->client->getContainer()->get('session');
 
@@ -148,7 +133,7 @@ abstract class BaseTest extends WebTestCase
      * This is needed when you set $roles but have a test that should be used
      * while being logged out
      */
-    protected function logOut()
+    protected function logOut(): void
     {
         $session = $this->client->getContainer()->get('session');
         $this->client->getCookieJar()->expire($session->getName());
@@ -156,10 +141,8 @@ abstract class BaseTest extends WebTestCase
 
     /**
      * Set up the dummy user with the roles given in static::$roles
-     *
-     * @return User
      */
-    protected function setupUser()
+    protected function setupUser() : User
     {
         $em = $this->client->getContainer()->get('doctrine.orm.entity_manager');
         /** @var User $user */
@@ -180,9 +163,7 @@ abstract class BaseTest extends WebTestCase
     /**
      * Run the given callback while temporarily changing the given configuration setting
      *
-     * @param string   $configKey
      * @param mixed    $configValue
-     * @param callable $callback
      */
     protected function withChangedConfiguration(
         string $configKey,
@@ -201,18 +182,9 @@ abstract class BaseTest extends WebTestCase
         $config->saveChanges($dataToSet, $eventLog, $dj);
 
         // Call the callback
-        call_user_func($callback);
+        $callback();
     }
 
-    /**
-     * Test that the given page returns the correct response code
-     *
-     * @param string      $method
-     * @param string      $uri
-     * @param int         $status
-     * @param string|null $responseUrl
-     * @param bool        $ajax
-     */
     protected function verifyPageResponse(
         string $method,
         string $uri,
@@ -227,44 +199,29 @@ abstract class BaseTest extends WebTestCase
         }
         $response = $this->client->getResponse();
         $message = var_export($response, true);
-        $this->assertEquals($status, $response->getStatusCode(), $message);
+        self::assertEquals($status, $response->getStatusCode(), $message);
         if ($responseUrl !== null) {
-            $this->assertEquals($responseUrl, $response->getTargetUrl(), $message);
+            self::assertEquals($responseUrl, $response->getTargetUrl(), $message);
         }
     }
 
-    /**
-     * Get the current crawler
-     * @return Crawler
-     */
     protected function getCurrentCrawler(): Crawler
     {
         return $this->client->getCrawler();
     }
 
-    /**
-     * Verify that the given link points to the given URL
-     * @param string $linkName
-     * @param string $url
-     *
-     * @return Link
-     */
-    protected function verifyLink(string $linkName, string $url): Link
+    protected function verifyLinkToURL(string $linkName, string $url): Link
     {
         $link = $this->getCurrentCrawler()->selectLink($linkName)->link();
         $message = var_export($link, true);
-        $this->assertEquals($url, $link->getUri(), $message);
+        self::assertEquals($url, $link->getUri(), $message);
 
         return $link;
     }
 
-    /**
-     * Verify that the current redirect links to the given URL
-     * @param string $url
-     */
-    protected function verifyRedirect(string $url): void
+    protected function verifyRedirectToURL(string $url): void
     {
         $crawler = $this->client->followRedirect();
-        $this->assertEquals($url, $crawler->getUri());
+        self::assertEquals($url, $crawler->getUri());
     }
 }

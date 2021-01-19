@@ -11,7 +11,7 @@ class JuryMiscControllerTest extends BaseTest
     /**
      * Test that if no user is logged in the user gets redirected to the login page
      */
-    public function testJuryRedirectToLogin()
+    public function testJuryRedirectToLogin() : void
     {
         $this->logOut();
 
@@ -21,7 +21,7 @@ class JuryMiscControllerTest extends BaseTest
     /**
      * Test the login process for a jury member
      */
-    public function testLogin()
+    public function testLogin(): void
     {
         $this->logOut();
 
@@ -34,13 +34,13 @@ class JuryMiscControllerTest extends BaseTest
     }
 
     /**
-     * Test that the jury index poge works
+     * Test that the jury index page works
      */
-    public function testJuryIndexPage()
+    public function testJuryIndexPage(): void
     {
         $this->client->request('GET', '/jury');
 
         $this->verifyPageResponse('GET', '/jury', 200);
-        $this->assertSelectorExists('html:contains("DOMjudge Jury interface")');
+        self::assertSelectorExists('html:contains("DOMjudge Jury interface")');
     }
 }

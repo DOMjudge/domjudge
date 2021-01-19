@@ -11,12 +11,12 @@ class BalloonControllerTest extends BaseTest
     /**
      * Test that jury role can access balloons page.
      */
-    public function testBalloonsAccessForJury()
+    public function testBalloonsAccessForJury() : void
     {
         $this->verifyPageResponse('GET', '/jury/balloons', 200);
-        $this->assertSelectorExists('h1:contains("Balloons - Demo contest")');
+        self::assertSelectorExists('h1:contains("Balloons - Demo contest")');
 
         // Test database does not contain balloon info
-        $this->assertSelectorExists('div.alert:contains("No balloons")');
+        self::assertSelectorExists('div.alert:contains("No balloons")');
     }
 }

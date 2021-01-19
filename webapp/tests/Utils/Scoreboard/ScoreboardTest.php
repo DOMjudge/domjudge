@@ -13,7 +13,7 @@ class ScoreboardTest extends TestCase
      * Test that the scoreboard tie breaker works with two teams without
      * any scores
      */
-    public function testScoreTiebreakerEmptyTeams()
+    public function testScoreTiebreakerEmptyTeams() : void
     {
         $teamA = new Team();
         $teamB = new Team();
@@ -22,15 +22,15 @@ class ScoreboardTest extends TestCase
 
         // Always test in both directions for symmetry
         $tie = Scoreboard::scoreTieBreaker($scoreA, $scoreB);
-        $this->assertEquals(0, $tie);
+        self::assertEquals(0, $tie);
         $tie = Scoreboard::scoreTieBreaker($scoreB, $scoreA);
-        $this->assertEquals(0, $tie);
+        self::assertEquals(0, $tie);
     }
 
     /**
      * Test that the scoreboard tie breaker works with two teams with equal scores
      */
-    public function testScoreTiebreakerEqualTeams()
+    public function testScoreTiebreakerEqualTeams() : void
     {
         $teamA = new Team();
         $teamB = new Team();
@@ -44,15 +44,15 @@ class ScoreboardTest extends TestCase
         }
 
         $tie = Scoreboard::scoreTieBreaker($scoreA, $scoreB);
-        $this->assertEquals(0, $tie);
+        self::assertEquals(0, $tie);
         $tie = Scoreboard::scoreTieBreaker($scoreB, $scoreA);
-        $this->assertEquals(0, $tie);
+        self::assertEquals(0, $tie);
     }
 
     /**
      * Test that the scoreboard tie breaker works if only one team has scores
      */
-    public function testScoreTiebreakerOneTeamEmpty()
+    public function testScoreTiebreakerOneTeamEmpty() : void
     {
         $teamA = new Team();
         $teamB = new Team();
@@ -63,9 +63,9 @@ class ScoreboardTest extends TestCase
         $scoreB = new TeamScore($teamB);
 
         $tie = Scoreboard::scoreTieBreaker($scoreA, $scoreB);
-        $this->assertEquals(1, $tie);
+        self::assertEquals(1, $tie);
         $tie = Scoreboard::scoreTieBreaker($scoreB, $scoreA);
-        $this->assertEquals(-1, $tie);
+        self::assertEquals(-1, $tie);
     }
 
 
@@ -73,7 +73,7 @@ class ScoreboardTest extends TestCase
      * Test that the scoreboard tie breaker works if both teams have the same
      * highest score
      */
-    public function testScoreTiebreakerHighestEqual()
+    public function testScoreTiebreakerHighestEqual() : void
     {
         $teamA = new Team();
         $teamB = new Team();
@@ -87,15 +87,15 @@ class ScoreboardTest extends TestCase
         }
 
         $tie = Scoreboard::scoreTieBreaker($scoreA, $scoreB);
-        $this->assertEquals(0, $tie);
+        self::assertEquals(0, $tie);
         $tie = Scoreboard::scoreTieBreaker($scoreB, $scoreA);
-        $this->assertEquals(0, $tie);
+        self::assertEquals(0, $tie);
     }
 
     /**
      * Test that the scoreboard tie breaker works if scores are different
      */
-    public function testScoreTiebreakerUnequal()
+    public function testScoreTiebreakerUnequal() : void
     {
         $teamA = new Team();
         $teamB = new Team();
@@ -109,8 +109,8 @@ class ScoreboardTest extends TestCase
         }
 
         $tie = Scoreboard::scoreTieBreaker($scoreA, $scoreB);
-        $this->assertEquals(1, $tie);
+        self::assertEquals(1, $tie);
         $tie = Scoreboard::scoreTieBreaker($scoreB, $scoreA);
-        $this->assertEquals(-1, $tie);
+        self::assertEquals(-1, $tie);
     }
 }
