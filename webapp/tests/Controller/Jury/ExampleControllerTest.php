@@ -3,6 +3,7 @@
 namespace App\Tests\Controller\Jury;
 
 use App\Tests\BaseTest;
+use Generator;
 
 class ExampleControllerTest extends BaseTest
 {
@@ -43,7 +44,7 @@ class ExampleControllerTest extends BaseTest
      * - the expected HTTP statuscode
      * - the pre-existing contest
      */
-    public function provideBasePage () : \Generator
+    public function provideBasePage () : Generator
     {
         $all_roles = ['admin','jury'];
         $dis_roles = ['team'];
@@ -151,7 +152,7 @@ class ExampleControllerTest extends BaseTest
      * - the to be created contest
      * - radio button boolean values (Bit string)
      */
-    public function provideAddContest () : \Generator
+    public function provideAddContest () : Generator
     {
         //* - The different times of the contest
         //TODO: Try things like: "admin'--"
