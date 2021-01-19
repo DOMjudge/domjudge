@@ -880,16 +880,16 @@ function compile(array $judgeTask, string $workdir, string $workdirpath, array $
         // be triggered when the filtering is activated between submission and
         // rejudge.
         $message = 'No files with allowed extensions found to pass to compiler. Allowed extensions: '
-            . implode(', ', $row['language_extensions']);
+            . implode(', ', $compile_config['language_extensions']);
         $args = 'compile_success=0' .
             '&output_compile=' . urlencode(base64_encode($message));
 
-        $url = sprintf('judgehosts/update-judging/%s/%s', urlencode($myhost), urlencode((string)$row['judgetaskid']));
+        $url = sprintf('judgehosts/update-judging/%s/%s', urlencode($myhost), urlencode((string)$judgeTask['judgetaskid']));
         request($url, 'PUT', $args);
 
         // Revoke readablity for domjudge-run user to this workdir.
         chmod($workdir, 0700);
-        logmsg(LOG_NOTICE, "Judging s$row[submitid], task $row[judgetaskid]: compile error");
+        logmsg(LOG_NOTICE, "Judging s$judgeTask[submitid], task $judgeTask[judgetaskid]: compile error");
         return false;
     }
 
@@ -1084,7 +1084,7 @@ function judge(array $judgeTask): bool
             $judgeTask['compare_script_id']);
         if (isset($error)) {
             logmsg(LOG_ERR, "fetching executable failed for compare script '" . $judgeTask['compare_script_id'] . "': " . $error);
-            $description = $row['compare'] . ': fetch, compile, or deploy of validation script failed.';
+            $description = $judgeTask['compare_script_id'] . ': fetch, compile, or deploy of validation script failed.';
             disable('compare_script', 'compare_script_id', $judgeTask['compare_script_id'], $description, $judgeTask['judgetaskid']);
             return false;
         }
