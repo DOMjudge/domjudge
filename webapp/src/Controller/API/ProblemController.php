@@ -137,7 +137,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
      *             @OA\Property(
      *                 property="problem",
      *                 description="Optional: problem id to update.",
-     *                 @OA\Schema(type="string")
+     *                 type="string"
      *             )
      *         )
      *     )

@@ -174,12 +174,13 @@ class ContestController extends AbstractRestController
      *             @OA\Property(
      *                 property="id",
      *                 description="The ID of the contest to change the start time for",
-     *                 @OA\Schema(type="string")
+     *                 type="string"
      *             ),
      *             @OA\Property(
      *                 property="start_time",
      *                 description="The new start time of the contest",
-     *                 @OA\Schema(type="string", format="date-time")
+     *                 type="string",
+     *                 format="date-time"
      *             )
      *         )
      *     )

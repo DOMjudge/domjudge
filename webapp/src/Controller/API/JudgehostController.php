@@ -257,7 +257,7 @@ class JudgehostController extends AbstractFOSRestController
      *             @OA\Property(
      *                 property="active",
      *                 description="The new active state of the judgehost",
-     *                 @OA\Schema(type="boolean")
+     *                 type="boolean"
      *             )
      *         )
      *     )
@@ -309,17 +309,17 @@ class JudgehostController extends AbstractFOSRestController
      *             @OA\Property(
      *                 property="compile_success",
      *                 description="Whether compilation was successful",
-     *                 @OA\Schema(type="boolean")
+     *                 type="boolean"
      *             ),
      *             @OA\Property(
      *                 property="output_compile",
      *                 description="The compile output",
-     *                 @OA\Schema(type="string")
+     *                 type="string"
      *             ),
      *             @OA\Property(
      *                 property="entry_point",
      *                 description="The determined entrypoint",
-     *                 @OA\Schema(type="string")
+     *                 type="string"
      *             )
      *         )
      *     )
@@ -504,37 +504,38 @@ class JudgehostController extends AbstractFOSRestController
      *             @OA\Property(
      *                 property="runresult",
      *                 description="The result of the run",
-     *                 @OA\Schema(type="string")
+     *                 type="string"
      *             ),
      *             @OA\Property(
      *                 property="runtime",
      *                 description="The runtime of the run",
-     *                 @OA\Schema(type="number", format="float")
+     *                 type="number",
+     *                 format="float"
      *             ),
      *             @OA\Property(
      *                 property="output_run",
      *                 description="The (base64-encoded) output of the run",
-     *                 @OA\Schema(type="string")
+     *                 type="string"
      *             ),
      *             @OA\Property(
      *                 property="output_diff",
      *                 description="The (base64-encoded) output diff of the run",
-     *                 @OA\Schema(type="string")
+     *                 type="string"
      *             ),
      *             @OA\Property(
      *                 property="output_error",
      *                 description="The (base64-encoded) error output of the run",
-     *                 @OA\Schema(type="string")
+     *                 type="string"
      *             ),
      *             @OA\Property(
      *                 property="output_system",
      *                 description="The (base64-encoded) system output of the run",
-     *                 @OA\Schema(type="string")
+     *                 type="string"
      *             ),
      *             @OA\Property(
      *                 property="metadata",
      *                 description="The (base64-encoded) metadata",
-     *                 @OA\Schema(type="string")
+     *                 type="string"
      *             )
      *         )
      *     )
@@ -670,22 +671,22 @@ class JudgehostController extends AbstractFOSRestController
      *             @OA\Property(
      *                 property="description",
      *                 description="The description of the internal error",
-     *                 @OA\Schema(type="string")
+     *                 type="string"
      *             ),
      *             @OA\Property(
      *                 property="judgehostlog",
      *                 description="The log of the judgehost",
-     *                 @OA\Schema(type="string")
+     *                 type="string"
      *             ),
      *             @OA\Property(
      *                 property="disabled",
      *                 description="The object to disable in JSON format",
-     *                 @OA\Schema(type="string")
+     *                 type="string"
      *             ),
      *             @OA\Property(
      *                 property="judgetaskid",
      *                 description="The ID of the judgeTask that was being worked on",
-     *                 @OA\Schema(type="integer")
+     *                 type="integer"
      *             )
      *         )
      *     )
