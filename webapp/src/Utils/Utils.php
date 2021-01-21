@@ -3,6 +3,7 @@ namespace App\Utils;
 
 use DateTime;
 use Doctrine\Inflector\InflectorFactory;
+use Exception;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
@@ -460,6 +461,8 @@ class Utils
      * optional fractional part). The original time string should be in one of
      * the formats understood by DateTime (e.g. an ISO 8601 date and time with
      * fractional seconds). Throws an exception if $time cannot be parsed.
+     *
+     * @throws Exception
      */
     public static function toEpochFloat(string $time) : float
     {

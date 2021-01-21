@@ -2,28 +2,34 @@
 
 namespace App\Controller\API;
 
+use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\Language;
 use App\Entity\Problem;
 use App\Entity\Submission;
 use App\Entity\SubmissionFile;
+use App\Entity\Team;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\SubmissionService;
+use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
+use Exception;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
+use OpenApi\Annotations as OA;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use OpenApi\Annotations as OA;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 
 /**
  * @Rest\Route("/contests/{cid}/submissions")
@@ -114,8 +120,7 @@ class SubmissionController extends AbstractRestController
      * @return int
      * @Rest\Post("")
      * @OA\Post()
-     * @IsGranted("ROLE_TEAM", message="You need to have the Team Member role to add a submission")
-     * Uploading an array of files in swagger is not supported, see
+     * @Security("is_granted('ROLE_TEAM') or is_granted('ROLE_API_WRITER')", message="You need to have the Team Member role or be an admin to add a submission")
      * @OA\RequestBody(
      *     required=true,
      *     @OA\MediaType(
@@ -144,6 +149,50 @@ class SubmissionController extends AbstractRestController
      *                 description="The entry point for the submission. Required for languages requiring an entry point",
      *             )
      *         )
+     *     ),
+     *     @OA\MediaType(
+     *         mediaType="application/json",
+     *         @OA\Schema(
+     *             required={"problem_id","language_id","files"},
+     *             @OA\Property(
+     *                 property="problem_id",
+     *                 description="The problem ID to submit a solution for",
+     *                 type="string"
+     *             ),
+     *             @OA\Property(
+     *                 property="language_id",
+     *                 description="The language to submit a solution in",
+     *                 type="string"
+     *             ),
+     *             @OA\Property(
+     *                 property="team_id",
+     *                 description="The team to submit a solution for. Only used when adding a submission as admin",
+     *                 type="string"
+     *             ),
+     *             @OA\Property(
+     *                 property="time",
+     *                 description="The time to use for the submission. Only used when adding a submission as admin",
+     *                 type="string",
+     *                 format="date-time"
+     *             ),
+     *             @OA\Property(
+     *                 property="files",
+     *                 type="array",
+     *                 minItems=1,
+     *                 maxItems=1,
+     *                 description="The base64 encoded ZIP file to submit",
+     *                 @OA\Items(
+     *                     type="object",
+     *                     required={"data"},
+     *                     @OA\Property(property="data", type="string", description="The base64 encoded ZIP archive")
+     *                 )
+     *             ),
+     *             @OA\Property(
+     *                 property="entry_point",
+     *                 type="string",
+     *                 description="The entry point for the submission. Required for languages requiring an entry point",
+     *             )
+     *         )
      *     )
      * )
      * @OA\Response(
@@ -152,23 +201,67 @@ class SubmissionController extends AbstractRestController
      *     @OA\JsonContent(type="integer", description="The ID of the submitted solution")
      * )
      * @throws NonUniqueResultException
-     * @throws \Exception
+     * @throws Exception
      */
-    public function addSubmissionAction(Request $request)
+    public function addSubmissionAction(Request $request): int
     {
         $required = [
-            'problem',
-            'language'
+            'problem'  => ['problem', 'problem_id'],
+            'language' => ['language', 'language_id'],
         ];
+        $data = [];
 
-        foreach ($required as $argument) {
-            if (!$request->request->has($argument)) {
+        foreach ($required as $field => $requiredList) {
+            $hasAny = false;
+            foreach ($requiredList as $argument) {
+                if ($request->request->has($argument)) {
+                    $data[$field] = $request->request->get($argument);
+                    $hasAny       = true;
+                }
+            }
+            if (!$hasAny) {
+                $requiredListQuoted = array_map(function ($item) {
+                    return "'$item'";
+                }, $requiredList);
                 throw new BadRequestHttpException(
-                    sprintf("Argument '%s' is mandatory", $argument));
+                    sprintf("One of the arguments %s is mandatory", implode(', ', $requiredListQuoted)));
             }
         }
 
-        if (!$this->dj->getUser()->getTeam()) {
+        // By default, use the team of the user
+        $team = $this->dj->getUser()->getTeam();
+        // If the user is an admin or API writer, allow it to specify the team
+        if ($this->isGranted('ROLE_API_WRITER') &&
+            ($teamId = $request->request->get('team_id'))) {
+            /** @var Contest $contest */
+            $contest = $this->em->getRepository(Contest::class)->find($this->getContestId($request));
+
+            // Load the team
+            $queryBuilder = $this->em->createQueryBuilder()
+                ->from(Team::class, 't')
+                ->select('t')
+                ->leftJoin('t.category', 'tc')
+                ->leftJoin('t.contests', 'c')
+                ->leftJoin('tc.contests', 'cc')
+                ->andWhere(sprintf('t.%s = :team',
+                    $this->eventLogService->externalIdFieldForEntity(Team::class) ?? 'teamid'))
+                ->andWhere('t.enabled = 1')
+                ->setParameter(':team', $teamId);
+
+            if (!$contest->isOpenToAllTeams()) {
+                $queryBuilder
+                    ->andWhere('c.cid = :cid OR cc.cid = :cid')
+                    ->setParameter(':cid', $contest->getCid());
+            }
+
+            /** @var Team $team */
+            $team = $queryBuilder->getQuery()->getOneOrNullResult();
+
+            if (!$team) {
+                throw new BadRequestHttpException(
+                    sprintf("Team %s not found or not enabled", $teamId));
+            }
+        } elseif (!$team) {
             throw new BadRequestHttpException(sprintf('User does not belong to a team'));
         }
 
@@ -183,14 +276,14 @@ class SubmissionController extends AbstractRestController
                                $this->eventLogService->externalIdFieldForEntity(Problem::class) ?? 'probid'))
             ->andWhere('cp.contest = :contest')
             ->andWhere('cp.allowSubmit = 1')
-            ->setParameter(':problem', $request->request->get('problem'))
+            ->setParameter(':problem', $data['problem'])
             ->setParameter(':contest', $this->getContestId($request))
             ->getQuery()
             ->getOneOrNullResult();
 
         if ($problem === null) {
             throw new BadRequestHttpException(
-                sprintf("Problem %s not found or or not submittable", $request->request->get('problem')));
+                sprintf("Problem %s not found or not submittable", $data['problem']));
         }
 
         // Load the language
@@ -201,13 +294,13 @@ class SubmissionController extends AbstractRestController
             ->andWhere(sprintf('lang.%s = :language',
                                $this->eventLogService->externalIdFieldForEntity(Language::class) ?? 'langid'))
             ->andWhere('lang.allowSubmit = 1')
-            ->setParameter(':language', $request->request->get('language'))
+            ->setParameter(':language', $data['language'])
             ->getQuery()
             ->getOneOrNullResult();
 
         if ($language === null) {
             throw new BadRequestHttpException(
-                sprintf("Language %s not found or or not submittable", $request->request->get('language')));
+                sprintf("Language %s not found or not submittable", $data['language']));
         }
 
         // Determine the entry point
@@ -220,18 +313,87 @@ class SubmissionController extends AbstractRestController
             $entryPoint = $request->request->get('entry_point');
         }
 
-        // Get the files we want to submit
-        $files = $request->files->get('code') ?: [];
-        if (!is_array($files)) {
-            $files = [$files];
+        $time = null;
+        if ($this->isGranted('ROLE_API_WRITER') &&
+            ($timeString = $request->request->get('time'))) {
+            try {
+                $time = Utils::toEpochFloat($timeString);
+            } catch (Exception $e) {
+                throw new BadRequestHttpException(sprintf('Can not parse time %s', $timeString));
+            }
+        }
+
+        $tempFiles = [];
+
+        if ($request->request->has('files')) {
+            // CCS spec format, files are a ZIP, get them and transform them into a file object
+            $filesList = $request->request->get('files');
+            if (!is_array($filesList) || count($filesList) !== 1 || !isset($filesList[0]['data'])) {
+                throw new BadRequestHttpException("The 'files' attribute should be an array with a single item, containing an object with a base64 encoded data field");
+            }
+            $data        = $filesList[0]['data'];
+            $decodedData = base64_decode($data);
+            if ($decodedData === false) {
+                throw new BadRequestHttpException("The 'files[0].data' attribute is not base64 encoded");
+            }
+
+            $tmpDir = $this->dj->getDomjudgeTmpDir();
+
+            // Now write the data to a temporary ZIP file
+            if (!($tempZipFile = tempnam($tmpDir, 'submission_zip-'))) {
+                throw new ServiceUnavailableHttpException(null,
+                    sprintf('Could not create temporary file in directory %s', $tmpDir));
+            }
+
+            if (file_put_contents($tempZipFile, $decodedData) === false) {
+                throw new ServiceUnavailableHttpException(
+                    null,
+                    sprintf("Could not write ZIP to temporary file '%s'.", $tempZipFile)
+                );
+            }
+
+            $zip = $this->dj->openZipFile($tempZipFile);
+
+            $files = [];
+            for ($i = 0; $i < $zip->numFiles; $i++) {
+                $name   = $zip->getNameIndex($i);
+                $source = $zip->getFromIndex($i);
+
+                if (!($tempFileName = tempnam($tmpDir, 'submission-'))) {
+                    throw new ServiceUnavailableHttpException(null,
+                        sprintf('Could not create temporary file in directory %s', $tmpDir));
+                }
+                if (file_put_contents($tempFileName, $source) === false) {
+                    throw new ServiceUnavailableHttpException(
+                        null,
+                        sprintf("Could not write to temporary file '%s'.", $tempFileName)
+                    );
+                }
+                $files[]     = new UploadedFile($tempFileName, $name, null, null, true);
+                $tempFiles[] = $tempFileName;
+            }
+
+            $zip->close();
+            unlink($tempZipFile);
+        } else {
+            // Files are uploaded as actual files, get them
+            $files = $request->files->get('code') ?: [];
+            if (!is_array($files)) {
+                $files = [$files];
+            }
         }
 
         // Now submit the solution
-        $team       = $this->dj->getUser()->getTeam();
         $submission = $this->submissionService->submitSolution(
             $team, $problem, $problem->getContest(), $language,
-            $files, null, null, $entryPoint, null, null, $message
+            $files, null, null, $entryPoint, null, $time, $message
         );
+
+        // Clean up temporary if needed
+        foreach ($tempFiles as $tempFile) {
+            unlink($tempFile);
+        }
+
         if (!$submission) {
             throw new BadRequestHttpException($message);
         }
@@ -376,7 +538,7 @@ class SubmissionController extends AbstractRestController
 
     /**
      * @inheritdoc
-     * @throws \Exception
+     * @throws Exception
      */
     protected function getIdField(): string
     {
