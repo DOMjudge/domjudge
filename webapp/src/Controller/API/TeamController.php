@@ -10,6 +10,7 @@ use Exception;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Annotations as OA;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -88,7 +89,7 @@ class TeamController extends AbstractRestController
      * Add a new team
      *
      * @Rest\Post()
-     * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_API_WRITER')")
+     * @IsGranted("ROLE_API_WRITER")
      * @OA\RequestBody(
      *     required=true,
      *     @OA\MediaType(
