@@ -259,6 +259,34 @@ nelmio_api_doc:
                             type: array
                             items:
                                 type: string
+                AddUser:
+                    required:
+                        - username
+                        - name
+                        - password
+                        - roles
+                    type: object
+                    properties:
+                        username:
+                            type: string
+                        name:
+                            type: string
+                        email:
+                            type: string
+                            format: email
+                        ip:
+                            type: string
+                        password:
+                            type: string
+                            format: password
+                        enabled:
+                            type: boolean
+                        team_id:
+                            type: string
+                        roles:
+                            type: array
+                            items:
+                                type: sring
 
     areas:
         path_patterns: [ ^/api/v4 ]
