@@ -2,6 +2,8 @@
 
 namespace App\Controller\API;
 
+use App\Entity\Role;
+use App\Entity\Team;
 use App\Entity\User;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
@@ -13,9 +15,9 @@ use Doctrine\ORM\QueryBuilder;
 use Exception;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
+use OpenApi\Annotations as OA;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use OpenApi\Annotations as OA;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -290,6 +292,90 @@ class UserController extends AbstractRestController
     public function singleAction(Request $request, string $id)
     {
         return parent::performSingleAction($request, $id);
+    }
+
+    /**
+     * Add a new user
+     *
+     * @Rest\Post()
+     * @IsGranted("ROLE_API_WRITER")
+     * @OA\RequestBody(
+     *     required=true,
+     *     @OA\MediaType(
+     *         mediaType="multipart/form-data",
+     *         @OA\Schema(ref="#/components/schemas/AddUser")
+     *     ),
+     *     @OA\MediaType(
+     *         mediaType="application/json",
+     *         @OA\Schema(ref="#/components/schemas/AddUser")
+     *     )
+     * )
+     * @OA\Response(
+     *     response="201",
+     *     description="Returns the added user",
+     *     @Model(type=User::class)
+     * )
+     */
+    public function addAction(Request $request): Response
+    {
+        $required = [
+            'username',
+            'name',
+            'password',
+            'roles',
+        ];
+
+        foreach ($required as $argument) {
+            if (!$request->request->has($argument)) {
+                throw new BadRequestHttpException(
+                    sprintf("Argument '%s' is mandatory", $argument));
+            }
+        }
+
+        if ($this->em->getRepository(User::class)->findOneBy(['username' => $request->request->get('username')])) {
+            throw new BadRequestHttpException(sprintf("User %s already exists", $request->request->get('username')));
+        }
+
+        $user = new User();
+        $user
+            ->setUsername($request->request->get('username'))
+            ->setName($request->request->get('name'))
+            ->setEmail($request->request->get('email'))
+            ->setIpAddress($request->request->get('ip'))
+            ->setPlainPassword($request->request->get('password'))
+            ->setEnabled($request->request->getBoolean('enabled', true));
+
+        if ($request->request->has('team_id')) {
+            /** @var Team $team */
+            $team = $this->em->createQueryBuilder()
+                ->from(Team::class, 't')
+                ->select('t')
+                ->andWhere(sprintf('t.%s = :team',
+                    $this->eventLogService->externalIdFieldForEntity(Team::class) ?? 'teamid'))
+                ->setParameter(':team', $request->request->get('team_id'))
+                ->getQuery()
+                ->getOneOrNullResult();
+
+            if ($team === null) {
+                throw new BadRequestHttpException(sprintf("Team %s not found", $request->request->get('team_id')));
+            }
+            $user->setTeam($team);
+        }
+
+        $roles = (array)$request->request->get('roles');
+        foreach ($roles as $djRole) {
+            $role = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => $djRole]);
+            if ($role === null) {
+                throw new BadRequestHttpException(sprintf("Role %s not found", $djRole));
+            }
+            $user->addUserRole($role);
+        }
+
+        $this->em->persist($user);
+        $this->em->flush();
+        $this->dj->auditlog('user', $user->getUserid(), 'added');
+
+        return $this->renderCreateData($request, $user, 'user', $user->getUserid());
     }
 
     /**

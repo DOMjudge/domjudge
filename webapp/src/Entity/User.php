@@ -290,7 +290,7 @@ class User implements UserInterface, EquatableInterface, \Serializable
         return $this->plainPassword;
     }
 
-    public function setIpAddress(string $ipAddress): User
+    public function setIpAddress(?string $ipAddress): User
     {
         $this->ipAddress = $ipAddress;
         return $this;
@@ -329,7 +329,7 @@ class User implements UserInterface, EquatableInterface, \Serializable
      * @Serializer\Type("string")
      * @Serializer\Groups({"Nonstrict"})
      */
-    public function getTeamName(): ?Team
+    public function getTeamName(): ?string
     {
         return $this->getTeam() ? $this->getTeam()->getEffectiveName() : null;
     }
