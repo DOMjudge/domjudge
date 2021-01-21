@@ -172,9 +172,8 @@ class JudgehostController extends AbstractFOSRestController
      *         @OA\Items(
      *             type="object",
      *             properties={
-     *                 @OA\Property(property="judgingid", type="integer"),
-     *                 @OA\Property(property="submitid", type="integer"),
-     *                 @OA\Property(property="cid", type="integer")
+     *                 @OA\Property(property="jobid", type="integer"),
+     *                 @OA\Property(property="submitid", type="integer")
      *             }
      *         )
      *     )
@@ -301,6 +300,29 @@ class JudgehostController extends AbstractFOSRestController
      *     in="path",
      *     description="The ID of the judgetask to update",
      *     @OA\Schema(type="integer")
+     * )
+     * @OA\RequestBody(
+     *     required=true,
+     *     @OA\MediaType(
+     *         mediaType="application/x-www-form-urlencoded",
+     *         @OA\Schema(
+     *             @OA\Property(
+     *                 property="compile_success",
+     *                 description="Whether compilation was successful",
+     *                 @OA\Schema(type="boolean")
+     *             ),
+     *             @OA\Property(
+     *                 property="output_compile",
+     *                 description="The compile output",
+     *                 @OA\Schema(type="string")
+     *             ),
+     *             @OA\Property(
+     *                 property="entry_point",
+     *                 description="The determined entrypoint",
+     *                 @OA\Schema(type="string")
+     *             )
+     *         )
+     *     )
      * )
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
@@ -468,33 +490,9 @@ class JudgehostController extends AbstractFOSRestController
      *     @OA\Schema(type="string")
      * )
      * @OA\Parameter(
-     *     name="testcaseid",
-     *     in="formData",
-     *     description="The ID of the testcase of the run to add",
-     *     @OA\Schema(type="integer")
-     * )
-     * @OA\Parameter(
-     *     name="runresult",
-     *     in="formData",
-     *     description="The result of the run",
-     *     @OA\Schema(type="string")
-     * )
-     * @OA\Parameter(
-     *     name="runtime",
-     *     in="formData",
-     *     description="The runtime of the run",
-     *     @OA\Schema(type="number", format="float")
-     * )
-     * @OA\Parameter(
-     *     name="output_run",
-     *     in="formData",
-     *     description="The (base64-encoded) output of the run",
-     *     @OA\Schema(type="string")
-     * )
-     * @OA\Parameter(
-     *     name="output_diff",
-     *     in="formData",
-     *     description="The (base64-encoded) output diff of the run",
+     *     name="judgeTaskId",
+     *     in="path",
+     *     description="The ID of the judgetask to add",
      *     @OA\Schema(type="string")
      * )
      * @OA\RequestBody(
@@ -502,11 +500,7 @@ class JudgehostController extends AbstractFOSRestController
      *     @OA\MediaType(
      *         mediaType="application/x-www-form-urlencoded",
      *         @OA\Schema(
-     *             @OA\Property(
-     *                 property="testcaseid",
-     *                 description="The ID of the testcase of the run to add",
-     *                 @OA\Schema(type="integer")
-     *             ),
+     *             required={"runresult","runtime","output_run","output_diff","output_error","output_system"},
      *             @OA\Property(
      *                 property="runresult",
      *                 description="The result of the run",
@@ -1164,7 +1158,13 @@ class JudgehostController extends AbstractFOSRestController
      *     description="The files for the submission, testcase or script.",
      *     @OA\Schema(ref="#/definitions/SourceCodeList")
      * )
-     * @OA\Parameter(ref="#/parameters/id")
+     * @OA\Parameter(
+     *     name="type",
+     *     in="path",
+     *     description="The type to",
+     *     @OA\Schema(type="string")
+     * )
+     * @OA\Parameter(ref="#/components/parameters/id")
      */
     public function getFilesAction(string $type, string $id)
     {
