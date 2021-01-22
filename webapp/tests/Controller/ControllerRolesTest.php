@@ -39,7 +39,8 @@ class ControllerRolesTest extends BaseTest
      **/
     protected function urlExcluded(string $url)
     {
-        return ($url[0] == '#' ||                                          // Links to local page
+        return ($url === '' ||                                                 // Empty URL
+            $url[0] == '#' ||                                          // Links to local page
             strpos($url, 'http') !== false ||                        // External links
             substr($url, 0, 4) == '/doc' ||                     // Documentation is not setup
             substr($url, 0, 4) == '/api' ||                     // API is not functional in framework
