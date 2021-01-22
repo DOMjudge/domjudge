@@ -273,7 +273,7 @@ class ProblemController extends BaseController
 
         // Build up YAML
         $yaml = ['name' => $problem->getName()];
-        if (!empty($problem->getCompareExecutable()->getExecid())) {
+        if (!empty($problem->getCompareExecutable())) {
             $yaml['validation'] = 'custom';
         }
         if (!empty($problem->getSpecialCompareArgs())) {
