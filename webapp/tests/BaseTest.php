@@ -188,7 +188,8 @@ abstract class BaseTest extends WebTestCase
         string $configKey,
         $configValue,
         callable $callback
-    ) {
+    ) : void
+    {
         $config   = self::$container->get(ConfigurationService::class);
         $eventLog = self::$container->get(EventLogService::class);
         $dj       = self::$container->get(DOMJudgeService::class);
@@ -201,15 +202,6 @@ abstract class BaseTest extends WebTestCase
 
         // Call the callback
         call_user_func($callback);
-
-        // Reset the changes by removing it from the database
-        $em         = self::$container->get(EntityManagerInterface::class);
-        $configItem = $em->getRepository(Configuration::class)->findOneBy(['name' => $configKey]);
-        $em->remove($configItem);
-        $em->flush();
-
-        // Call saveChanges with an empty array to clear any pending config
-        $config->saveChanges([], $eventLog, $dj);
     }
 
     /**
