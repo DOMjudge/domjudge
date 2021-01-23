@@ -52,12 +52,32 @@ int  loglevel     = LOG_DEBUG;
 FILE *stdlog      = NULL;
 int  syslog_open  = 0;
 
+char *printf_escape(const char *str)
+{
+	char *escaped;
+	char c;
+	size_t str_pos, esc_pos;
+
+	escaped = (char *)malloc(2*strlen(str)+1);
+	esc_pos = 0;
+
+	for(str_pos=0; str_pos<strlen(str); str_pos++) {
+		c = str[str_pos];
+		escaped[esc_pos++] = c;
+		if ( c=='%' ) escaped[esc_pos++] = c;
+	}
+	escaped[esc_pos] = 0;
+
+	return escaped;
+}
+
 /* Main function that contains logging code */
 void vlogmsg(int msglevel, const char *mesg, va_list ap)
 {
 	struct timeval currtime;
 	struct tm tm_buf;
 	char timestring[128];
+	char *progname_escaped;
 	char *buffer;
 	int bufferlen;
 	va_list aq;
@@ -86,12 +106,17 @@ void vlogmsg(int msglevel, const char *mesg, va_list ap)
 	strftime(timestring, sizeof(timestring), "%b %d %H:%M:%S", &tm_buf);
 	sprintf(timestring+strlen(timestring), ".%03d", (int)(currtime.tv_usec/1000));
 
-	bufferlen = strlen(timestring)+strlen(progname)+strlen(mesg)+20;
+	progname_escaped = printf_escape(progname);
+	if ( progname_escaped==NULL ) abort();
+
+	bufferlen = strlen(timestring)+strlen(progname_escaped)+strlen(mesg)+20;
 	buffer = (char *)malloc(bufferlen);
 	if ( buffer==NULL ) abort();
 
 	snprintf(buffer, bufferlen, "[%s] %s[%d]: %s\n",
-	         timestring, progname, getpid(), mesg);
+	         timestring, progname_escaped, getpid(), mesg);
+
+	free(progname_escaped);
 
 	if ( msglevel<=verbose ) {
 		va_copy(aq, ap);
