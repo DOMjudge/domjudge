@@ -1,0 +1,92 @@
+<?php declare(strict_types=1);
+
+namespace App\Tests\Controller\Jury;
+
+use App\Tests\BaseTest;
+
+/**
+ * Class JuryControllerTest
+ *
+ * This abstract class will have the default functionality tested for Jury pages
+ *
+ * @package App\Tests\Controller\Jury
+ */
+abstract class JuryControllerTest extends BaseTest
+{
+    //protected $roles             = ['admin'];
+    protected static $rolesView         = ['admin','jury'];
+    protected static $rolesDisallowed   = ['team'];
+    protected static $exampleEntries    = ['overwrite_in_class'];
+
+    protected static $DOM_elements;
+
+    /*protected static $baseUrl;
+    protected        $baseUrlLong;
+
+    protected        $addButton;
+    protected static $shortTag;
+
+    function __construct() {
+        //$this->baseUrlLong = 'http://localhost'.static::$baseUrl;
+        //$this->addButton   = ' Add new '.static::$shortTag;
+    }*/
+
+    /**
+     * Test that jury <???> overview page exists
+     * @var string  role            The role of the user
+     * @var int     statusCode      The statusCode the current user should get
+     * @var array   elements        DOM elements which should be on the page
+     * @var string  standardEntry   The standardEntry from the default entries
+     * @dataProvider provideBasePage
+     */
+    public function testPageOverview (
+        string  $role,
+        int     $statusCode,
+        array   $elements,
+        string  $standardEntry) : void
+    {
+        print($role.$statusCode);
+        $this->assertEquals("ye","ye");
+        $this->roles = [$role];
+        // Alternative: $this->setupUser();
+        $this->logOut();
+        $this->logIn();
+        $this->verifyPageResponse('GET', static::$baseUrl, $statusCode);
+        if ($statusCode===200) {
+            $crawler = $this->getCurrentCrawler();
+            foreach($elements as $element=>$values)
+            {
+                $DOM = $crawler->filter($element)->extract(array('_text'));
+                foreach($values as $key=>$value)
+                {
+                    $this->assertEquals($value, $DOM[$key]);
+                }
+            }
+            $this->assertSelectorExists('div:contains('.$standardEntry.')');
+        }
+    }
+
+    /**
+     * Data provider used to test if the starting pages are sane
+     * - the base role of the user
+     * - the expected HTTP statusCode
+     * - the pre-existing entry
+     */
+    public function provideBasePage () : \Generator
+    {
+        foreach (static::$exampleEntries as $exampleEntry) {
+            foreach (static::$rolesView as $role) {
+                $elements = static::$DOM_elements;
+                foreach($elements as $element=>$values) {
+                    if (array_key_exists($role, $values)) {
+                        $elements[$element] = $values[$role];
+                    }
+                }
+                yield [$role, 200, $elements, $exampleEntry];
+            }
+            foreach (static::$rolesDisallowed as $role) {
+                yield [$role, 403, [], $exampleEntry];
+            }
+        }
+    }
+}
