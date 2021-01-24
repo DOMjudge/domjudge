@@ -26,13 +26,11 @@ abstract class JuryControllerTest extends BaseTest
     protected static $edit              = '/edit';
     protected static $delete            = '/delete';
     protected static $shortTag          = '';
-    protected static $baseEntities      = ['New Ent','⛀⛁⛂⛃⛄⛅⛆⛇⛈⛉⛊⛋⛌⛍⛎⛏'];
     protected static $addFormName       = '';
 
     public function __construct($name = null, array $data = [], $dataName = '')
     {
         parent::__construct($name, $data, $dataName);
-        static::$baseEntities[] = str_repeat("A", 255);
         $this->addButton = ' Add new '.static::$shortTag;
     }
 
@@ -200,103 +198,5 @@ abstract class JuryControllerTest extends BaseTest
         } else {
             yield ['nothing','toDelete'];
         }
-    }
-
-    /**
-     * Test that the role can add a new entity
-     * @dataProvider provideAddEntity
-     */
-    public function testCheckAddEntity (
-        array $formValues,
-        string $entity
-    ) : void
-    {
-        if (static::$add === '') {
-            self::assertTrue(True, "Test skipped.");
-            return;
-        }
-        $this->verifyPageResponse(
-            'GET',
-            static::$prefixURL.static::$baseUrl.static::$add,
-            200
-        );
-        /*var_dump(static::$baseUrl);
-        var_dump($this->addButton);
-        var_dump(static::$prefixURL.static::$baseUrl.static::$add);
-        $this->verifyPageResponse('GET', static::$baseUrl, 200);
-        $link = $this->verifyLinkToURL(
-            $this->addButton,
-            static::$prefixURL.static::$baseUrl.static::$add);
-        $crawler = $this->client->click($link);
-
-        $h1s = $crawler->filter('h1')->extract(array('_text'));
-        $this->assertEquals('Add '.static::$shortTag, $h1s[0]);
-        if (!empty($formValues)){
-            $this->client->submitForm('Save', $formValues);
-            foreach(['jury','admin'] as $role) {
-                $this->testPageOverview($role, 200, [], $entity);
-            }
-        }*/
-    }
-
-    /**
-     * Test that the role can add a new entity
-     * @dataProvider provideEditEntity
-     */
-    /*public function testCheckEditEntity (
-        array $formValues,
-        string $entity,
-        string $identifier,
-        string $entityShortName
-    ) : void
-    {
-        static::$roles = ['admin'];
-        $this->logOut();
-        $this->logIn();
-        $this->verifyPageResponse('GET', static::$baseUrl, 200);
-        if (static::$edit !== '') {
-            // Find a CID we can edit
-            $em = self::$container->get('doctrine')->getManager();
-            $ent = $em->getRepository(static::$className)->findOneBy([$identifier => $entityShortName]);
-            $this->assertSelectorExists('i[class*=fa-edit]');
-            $this->assertSelectorExists('body:contains("'.$entityShortName.'")');
-            $this->verifyPageResponse('GET', static::$baseUrl.'/'.$ent->{static::$getIDFunc}().static::$delete, 200);
-            // Basicly do the same as for the 'add'
-            $this->assertSelectorNotExists('body:contains("'.$entityShortName.'")');
-        }
-    }
-        if (static::$edit === '') {
-            self::assertTrue(True, "Test skipped.");
-            return;
-        }
-        $this->verifyPageResponse(
-            'GET',
-            static::$prefixURL.static::$baseUrl.static::$edit,
-            200
-        );
-        $this->verifyPageResponse('GET', static::$baseUrl, 200);
-        $link = $this->verifyLinkToURL(
-            $this->addButton,
-            static::$prefixURL.static::$baseUrl.static::$add);
-        $crawler = $this->client->click($link);
-
-        $h1s = $crawler->filter('h1')->extract(array('_text'));
-        $this->assertEquals('Add '.static::$shortTag, $h1s[0]);
-        if (!empty($formValues)){
-            $this->client->submitForm('Save', $formValues);
-            foreach(['jury','admin'] as $role) {
-                $this->testPageOverview($role, 200, [], $entity);
-            }
-        }
-    }*/
-
-    public function getFormKey(string $name) : string
-    {
-        return static::$addFormName.'['.$name.']';
-    }
-
-    public function provideAddEntity () : Generator
-    {
-        yield [[],''];
     }
 }
