@@ -51,7 +51,7 @@ class Language extends BaseApiEntity
      * @Serializer\Groups({"Default", "Nonstrict"})
      * @Assert\NotBlank()
      */
-    private $name;
+    private $name = '';
 
     /**
      * @var string[]
@@ -62,7 +62,7 @@ class Language extends BaseApiEntity
      * @Serializer\Type("array<string>")
      * @Assert\NotBlank()
      */
-    private $extensions;
+    private $extensions = [];
 
     /**
      * @var bool
@@ -251,7 +251,7 @@ class Language extends BaseApiEntity
         return $this;
     }
 
-    public function getCompileExecutable(): Executable
+    public function getCompileExecutable(): ?Executable
     {
         return $this->compile_executable;
     }
