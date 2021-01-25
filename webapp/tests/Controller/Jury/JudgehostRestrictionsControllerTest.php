@@ -13,5 +13,5 @@ class JudgehostRestrictionsControllerTest extends JuryControllerTest
     protected static $deleteEntities    = array('description' => ['adb']);
     protected static $exampleEntries    = ['No'];
     protected static $DOM_elements      = array('h1' => ['Judgehost restrictions']);
-    protected static $delete            = '';
+    protected static $delete            = ''; //TODO: When insert works this can be reset.
 }

@@ -222,7 +222,7 @@ abstract class JuryControllerTest extends BaseTest
         );
         /*var_dump(static::$baseUrl);
         var_dump($this->addButton);
-        var_dump(static::$prefixURL.static::$baseUrl.static::$add);
+        var_dump(static::$prefixURL.static::$baseUrl.static::$add);*/
         $this->verifyPageResponse('GET', static::$baseUrl, 200);
         $link = $this->verifyLinkToURL(
             $this->addButton,
@@ -232,11 +232,12 @@ abstract class JuryControllerTest extends BaseTest
         $h1s = $crawler->filter('h1')->extract(array('_text'));
         $this->assertEquals('Add '.static::$shortTag, $h1s[0]);
         if (!empty($formValues)){
+            if ($this->Entity)
             $this->client->submitForm('Save', $formValues);
-            foreach(['jury','admin'] as $role) {
+            /*foreach(['jury','admin'] as $role) {
                 $this->testPageOverview($role, 200, [], $entity);
-            }
-        }*/
+            }*/
+        }
     }
 
     /**
