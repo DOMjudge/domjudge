@@ -493,7 +493,11 @@ class CheckConfigService
             $languageerrors[$langid] = $errors;
 
             $morelanguageerrors[$langid] = '';
-            if ($compile = $language->getCompileExecutable()->getExecid()) {
+            $compileExecutable = $language->getCompileExecutable();
+            if (null === $compileExecutable) {
+                $result = 'E';
+                $morelanguageerrors[$langid] .= sprintf("No compile script found for %s\n", $langid);
+            } elseif ($compile = $language->getCompileExecutable()->getExecid()) {
                $exec = $this->em->getRepository(Executable::class)->findOneBy(['execid' => $compile]);
                if (!$exec) {
                    $result = 'E';
