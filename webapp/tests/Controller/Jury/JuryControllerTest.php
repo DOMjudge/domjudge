@@ -31,7 +31,7 @@ abstract class JuryControllerTest extends BaseTest
     public function __construct($name = null, array $data = [], $dataName = '')
     {
         parent::__construct($name, $data, $dataName);
-        $this->addButton = ' Add new '.static::$shortTag;
+        $this->addButton = ' Add new ' . static::$shortTag;
     }
 
     /**
@@ -42,15 +42,15 @@ abstract class JuryControllerTest extends BaseTest
     /**
      * @var EntityManager $em
      */
-    protected        $em;
+    protected $em;
 
     /**
-     * @var BaseApiEntity $className;
+     * @var BaseApiEntity $className ;
      */
     protected static $className;
 
     /**
-     * @var string $getIDFunc;
+     * @var string $getIDFunc ;
      */
     protected static $getIDFunc;
 
@@ -58,35 +58,33 @@ abstract class JuryControllerTest extends BaseTest
      * Test that jury <???> overview page exists
      * @dataProvider provideBasePage
      */
-    public function testPageOverview (
-        string  $role,
-        int     $statusCode,
-        array   $elements,
-        string  $standardEntry) : void
-    {
+    public function testPageOverview(
+        string $role,
+        int $statusCode,
+        array $elements,
+        string $standardEntry
+    ): void {
         static::$roles = [$role];
         // Alternative: $this->setupUser();
         $this->logOut();
         $this->logIn();
         $this->verifyPageResponse('GET', static::$baseUrl, $statusCode);
-        if ($statusCode===200) {
+        if ($statusCode === 200) {
             $crawler = $this->getCurrentCrawler();
-            foreach($elements as $element=>$values)
-            {
+            foreach ($elements as $element => $values) {
                 $DOM = $crawler->filter($element)->extract(['_text']);
-                foreach($values as $key=>$value)
-                {
+                foreach ($values as $key => $value) {
                     self::assertEquals($value, $DOM[$key]);
                 }
             }
-            self::assertSelectorExists('body:contains("'.$standardEntry.'")');
+            self::assertSelectorExists('body:contains("' . $standardEntry . '")');
         }
     }
 
     /**
      * @dataProvider provideRoleAccessData
      */
-    public function testHTTPAccessForRole(string $role, string $url, int $statusCode, string $HTTPMethod) : void
+    public function testHTTPAccessForRole(string $role, string $url, int $statusCode, string $HTTPMethod): void
     {
         static::$roles = [$role];
         // Optionally use the setupUser
@@ -102,7 +100,7 @@ abstract class JuryControllerTest extends BaseTest
      * - expected statusCode for this role
      * - the method to try (GET, POST)
      */
-    public function provideRoleAccessData() : Generator
+    public function provideRoleAccessData(): Generator
     {
         foreach (['GET', 'POST', 'HEAD'] as $HTTP) {
             foreach (['admin', 'jury'] as $role) {
@@ -114,8 +112,7 @@ abstract class JuryControllerTest extends BaseTest
                 }
             }
             yield ['team', static::$baseUrl, 403, $HTTP];
-            if (static::$add !== '')
-            {
+            if (static::$add !== '') {
                 yield ['admin', static::$baseUrl . static::$add, 200, $HTTP];
             }
         }
@@ -127,12 +124,12 @@ abstract class JuryControllerTest extends BaseTest
      * - the expected HTTP statusCode
      * - the pre-existing entry
      */
-    public function provideBasePage () : Generator
+    public function provideBasePage(): Generator
     {
         foreach (static::$exampleEntries as $exampleEntry) {
             foreach (static::$rolesView as $role) {
                 $elements = static::$DOM_elements;
-                foreach ($elements as $element=>$values) {
+                foreach ($elements as $element => $values) {
                     if (array_key_exists($role, $values)) {
                         $elements[$element] = $values[$role];
                     }
@@ -148,7 +145,7 @@ abstract class JuryControllerTest extends BaseTest
     /**
      * Test that jury role can NOT add a new entity for this controller
      */
-    public function testCheckAddEntityJury () : void
+    public function testCheckAddEntityJury(): void
     {
         static::$roles = ['jury'];
         $this->logOut();
@@ -164,7 +161,7 @@ abstract class JuryControllerTest extends BaseTest
      *
      * @dataProvider provideDeleteEntity
      */
-    public function testDeleteEntity (string $identifier, string $entityShortName) : void
+    public function testDeleteEntity(string $identifier, string $entityShortName): void
     {
         static::$roles = ['admin'];
         $this->logOut();
@@ -175,28 +172,30 @@ abstract class JuryControllerTest extends BaseTest
             $em = self::$container->get('doctrine')->getManager();
             $ent = $em->getRepository(static::$className)->findOneBy([$identifier => $entityShortName]);
             self::assertSelectorExists('i[class*=fa-trash-alt]');
-            self::assertSelectorExists('body:contains("'.$entityShortName.'")');
-            $this->verifyPageResponse('GET', static::$baseUrl.'/'.$ent->{static::$getIDFunc}().static::$delete, 200);
+            self::assertSelectorExists('body:contains("' . $entityShortName . '")');
+            $this->verifyPageResponse(
+                'GET',
+                static::$baseUrl . '/' . $ent->{static::$getIDFunc}() . static::$delete,
+                200
+            );
             $this->client->submitForm('Delete', []);
-            self::assertSelectorNotExists('body:contains("'.$entityShortName.'")');
+            self::assertSelectorNotExists('body:contains("' . $entityShortName . '")');
         }
     }
 
     /**
      * - entityShortname to delete
      */
-    public function provideDeleteEntity () : Generator
+    public function provideDeleteEntity(): Generator
     {
         if (static::$delete !== '') {
-            foreach (static::$deleteEntities as $name=>$entityList)
-            {
-                foreach($entityList as $entity)
-                {
-                    yield [$name,$entity];
+            foreach (static::$deleteEntities as $name => $entityList) {
+                foreach ($entityList as $entity) {
+                    yield [$name, $entity];
                 }
             }
         } else {
-            yield ['nothing','toDelete'];
+            yield ['nothing', 'toDelete'];
         }
     }
 }
