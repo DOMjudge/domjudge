@@ -6,11 +6,11 @@ use App\Entity\Executable;
 
 class ExecutableControllerTest extends JuryControllerTest
 {
-    protected static $baseUrl           = '/jury/executables';
-    protected static $shortTag          = 'executable';
-    protected static $getIDFunc         = 'getExecid';
-    protected static $className         = Executable::class;
-    protected static $deleteEntities    = array('description' => ['adb']);
-    protected static $exampleEntries    = ['adb','run','boolfind comparator'];
-    protected static $DOM_elements      = array('h1' => ['Executables']);
+    protected static $baseUrl        = '/jury/executables';
+    protected static $exampleEntries = ['adb','run','boolfind comparator'];
+    protected static $shortTag       = 'executable';
+    protected static $deleteEntities = ['description' => ['adb']];
+    protected static $getIDFunc      = 'getExecid';
+    protected static $className      = Executable::class;
+    protected static $DOM_elements   = ['h1' => ['Executables']];
 }

@@ -6,12 +6,11 @@ use App\Entity\Judgehost;
 
 class JudgehostControllerTest extends JuryControllerTest
 {
-    protected static $baseUrl           = '/jury/judgehosts';
-    protected static $exampleEntries    = ['example-judgehost1'];
-    protected static $getIDFunc         = 'getHostname';
-    protected static $deleteEntities    = array('hostname' => ['example-judgehost1']);
-    protected static $add               = '';
-
-    protected static $DOM_elements      = array('h1' => ['Judgehosts']);
-    protected static $className         = Judgehost::class;
+    protected static $baseUrl        = '/jury/judgehosts';
+    protected static $exampleEntries = ['example-judgehost1'];
+    protected static $deleteEntities = ['hostname' => ['example-judgehost1']];
+    protected static $getIDFunc      = 'getHostname';
+    protected static $className      = Judgehost::class;
+    protected static $DOM_elements   = ['h1' => ['Judgehosts']];
+    protected static $add            = '';
 }

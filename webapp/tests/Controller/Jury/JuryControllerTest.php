@@ -73,13 +73,13 @@ abstract class JuryControllerTest extends BaseTest
             $crawler = $this->getCurrentCrawler();
             foreach($elements as $element=>$values)
             {
-                $DOM = $crawler->filter($element)->extract(array('_text'));
+                $DOM = $crawler->filter($element)->extract(['_text']);
                 foreach($values as $key=>$value)
                 {
-                    $this->assertEquals($value, $DOM[$key]);
+                    self::assertEquals($value, $DOM[$key]);
                 }
             }
-            $this->assertSelectorExists('body:contains("'.$standardEntry.'")');
+            self::assertSelectorExists('body:contains("'.$standardEntry.'")');
         }
     }
 
@@ -155,7 +155,7 @@ abstract class JuryControllerTest extends BaseTest
         $this->logIn();
         $this->verifyPageResponse('GET', static::$baseUrl, 200);
         if (static::$add !== '') {
-            $this->assertSelectorNotExists('a:contains(' . $this->addButton . ')');
+            self::assertSelectorNotExists('a:contains(' . $this->addButton . ')');
         }
     }
 
@@ -174,11 +174,11 @@ abstract class JuryControllerTest extends BaseTest
             // Find a CID we can delete
             $em = self::$container->get('doctrine')->getManager();
             $ent = $em->getRepository(static::$className)->findOneBy([$identifier => $entityShortName]);
-            $this->assertSelectorExists('i[class*=fa-trash-alt]');
-            $this->assertSelectorExists('body:contains("'.$entityShortName.'")');
+            self::assertSelectorExists('i[class*=fa-trash-alt]');
+            self::assertSelectorExists('body:contains("'.$entityShortName.'")');
             $this->verifyPageResponse('GET', static::$baseUrl.'/'.$ent->{static::$getIDFunc}().static::$delete, 200);
             $this->client->submitForm('Delete', []);
-            $this->assertSelectorNotExists('body:contains("'.$entityShortName.'")');
+            self::assertSelectorNotExists('body:contains("'.$entityShortName.'")');
         }
     }
 
