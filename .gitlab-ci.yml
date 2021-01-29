@@ -11,7 +11,7 @@ include:
 
 check syntax:
   stage: test
-  image: domjudge/gitlabci:1.0
+  image: domjudge/gitlabci:2.1
   script:
     - ./gitlab/syntax.sh
 
