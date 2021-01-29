@@ -122,13 +122,16 @@ will present the standard username/password login screen as a fallback.
 
 Self-registration
 `````````````````
-Teams can be allowed to self-register with the system. Each team category can
-be set to allow registration or not. When none of the categories are set to
-allow, self-registration is disabled. When one category is set to allow,
-self-registration is enabled and newly registered teams will be placed in this
-category. When multiple categories are set to allow, teams can choose one of
-them during registration. Teams can also specify their affiliation during
-registration, if the global configuration option 'show affiliations' is enabled.
+Teams can be allowed to self-register with the system. To enable it, go to
+the team category you want the self-registered teams to become part of and
+enable self-registration for that category. The option will be shown on the
+login screen if it has been enabled for at least one category. When multiple
+categories are set to allow, teams can choose one of them during registration.
+You can assign the respective categories to the contest(s) these teams may
+participarte in.
+
+During registration, teams can also specify their affiliation,
+if the global configuration option 'show affiliations' is enabled.
 
 Executables
 -----------
