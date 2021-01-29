@@ -1,11 +1,14 @@
 #!/bin/bash
 
+gitlabartifacts="$(pwd)/gitlabartifacts"
+mkdir -p "$gitlabartifacts"
+
 shopt -s expand_aliases
 alias trace_on='set -x'
 alias trace_off='{ set +x; } 2>/dev/null'
 
 function section_start_internal() {
-	echo -e "section_start:`date +%s`:$1\r\e[0K$2"
+	echo -e "section_start:`date +%s`:$1[collapsed=true]\r\e[0K$2"
 	trace_on
 }
 
@@ -18,12 +21,28 @@ alias section_start='trace_off ; section_start_internal '
 alias section_end='trace_off ; section_end_internal '
 
 set -euxo pipefail
+DIR=$(pwd)
+
+function finish() {
+	echo -e "\\n\\n=======================================================\\n"
+	echo "Storing artifacts..."
+	trace_on
+	set +e
+	mysqldump domjudge > "$gitlabartifacts/db.sql"
+	cp /var/log/nginx/domjudge.log "$gitlabartifacts/nginx.log"
+	cp /opt/domjudge/domserver/webapp/var/log/prod.log "$gitlabartifacts/symfony.log"
+	cp /tmp/judgedaemon.log "$gitlabartifacts/judgedaemon.log"
+	cp /proc/cmdline "$gitlabartifacts/cmdline"
+	cp /chroot/domjudge/etc/apt/sources.list "$gitlabartifacts/sources.list"
+	cp /chroot/domjudge/debootstrap/debootstrap.log "$gitlabartifacts/debootstrap.log"
+	cp "${DIR}/misc-tools/icpctools/*json" "$gitlabartifacts/"
+}
+trap finish EXIT
 
 section_start setup "Setup and install"
 
 export PS4='(${BASH_SOURCE}:${LINENO}): - [$?] $ '
 
-DIR=$(pwd)
 GITSHA=$(git rev-parse HEAD || true)
 
 # Set up
@@ -34,18 +53,6 @@ echo "INSERT INTO userrole (userid, roleid) VALUES (3, 2);" | mysql domjudge
 
 # Add netrc file for dummy user login
 echo "machine localhost login dummy password dummy" > ~/.netrc
-
-LOGFILE="/opt/domjudge/domserver/webapp/var/log/prod.log"
-
-function log_on_err() {
-	echo -e "\\n\\n=======================================================\\n"
-	echo "Symfony log:"
-	if sudo test -f "$LOGFILE" ; then
-		sudo cat "$LOGFILE"
-	fi
-}
-
-trap log_on_err ERR
 
 cd /opt/domjudge/domserver
 
@@ -62,6 +69,7 @@ UPDATE team_category SET visible = 1;
 EOF
 
 ADMINPASS=$(cat etc/initial_admin_password.secret)
+cp etc/initial_admin_password.secret "$gitlabartifacts/"
 
 # configure and restart php-fpm
 sudo cp /opt/domjudge/domserver/etc/domjudge-fpm.conf "/etc/php/7.4/fpm/pool.d/domjudge-fpm.conf"
@@ -82,7 +90,7 @@ sudo bin/create_cgroups
 
 if [ ! -d ${DIR}/chroot/domjudge/ ]; then
 	cd ${DIR}/misc-tools
-	time sudo ./dj_make_chroot -a amd64
+	time sudo ./dj_make_chroot -a amd64 |& tee "$gitlabartifacts/dj_make_chroot.log"
 fi
 section_end judgehost
 
@@ -103,16 +111,16 @@ sudo useradd -d /nonexistent -g nogroup -s /bin/false -u $((2000+(RANDOM%1000)))
 
 # start judgedaemon
 cd /opt/domjudge/judgehost/
+
+# Since ubuntu20.04 gitlabci image this is sometimes needed
+# It should be safe to remove this when it creates issues
+set +e
+mount -t proc proc /proc
+set -e
+
 sudo -u domjudge bin/judgedaemon -n 0 |& tee /tmp/judgedaemon.log &
 sleep 5
 
-# write out current log to learn why it might be broken
-cat /var/log/nginx/domjudge.log
-
-# Print the symfony log if it exists
-if sudo test -f "$LOGFILE" ; then
-  sudo cat "$LOGFILE"
-fi
 section_end more_setup
 
 section_start submitting "Submitting test sources (including Kattis example)"
@@ -156,22 +164,26 @@ set +x
 while /bin/true; do
 	sleep 30s
 	curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier?verify_multiple=1" -o /dev/null
-	NUMNOTVERIFIED=$(curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier" | grep "submissions checked" | sed -r 's/^.* ([0-9]+) submissions checked.*$/\1/')
-	NUMVERIFIED=$(curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier" | grep "submissions not checked" | sed -r 's/^.* ([0-9]+) submissions not checked.*$/\1/')
-	# Check whether all submissions have been processed...
-	if [ $NUMSUBS -eq $((NUMVERIFIED+NUMNOTVERIFIED)) ]; then
+
+	# Check if we are done, i.e. everything is judged or something got disabled by internal error...
+	if tail /tmp/judgedaemon.log | grep -q "No submissions in queue"; then
 		break
 	fi
 	# ... or something has crashed.
-	if tail /tmp/judgedaemon.log | grep -q "No submissions in queue"; then
+	if ! pgrep -f judgedaemon; then
 		break
 	fi
 done
 
-NUMNOMAGIC=$(curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier" | grep "without magic string" | sed -r 's/^.* ([0-9]+) without magic string.*$/\1/')
+NUMNOTVERIFIED=$(curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier" | grep "submissions checked"     | sed -r 's/^.* ([0-9]+) submissions checked.*$/\1/')
+NUMVERIFIED=$(   curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier" | grep "submissions not checked" | sed -r 's/^.* ([0-9]+) submissions not checked.*$/\1/')
+NUMNOMAGIC=$(    curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier" | grep "without magic string"    | sed -r 's/^.* ([0-9]+) without magic string.*$/\1/')
 section_end judging
 
-# include debug output here
+# We expect
+# - two submissions with ambiguous outcome,
+# - no submissions without magic string,
+# - and all submissions to be judged.
 if [ $NUMNOTVERIFIED -ne 2 ] || [ $NUMNOMAGIC -ne 0 ] || [ $NUMSUBS -gt $((NUMVERIFIED+NUMNOTVERIFIED)) ]; then
 	section_start error "Short error description"
 	# We error out below anyway, so no need to fail earlier than that.
@@ -179,7 +191,7 @@ if [ $NUMNOTVERIFIED -ne 2 ] || [ $NUMNOMAGIC -ne 0 ] || [ $NUMSUBS -gt $((NUMVE
 	echo "verified subs: $NUMVERIFIED, unverified subs: $NUMNOTVERIFIED, total subs: $NUMSUBS"
 	echo "(expected 2 submissions to be unverified, but all to be processed)"
 	echo "Of these $NUMNOMAGIC do not have the EXPECTED_RESULTS string (should be 0)."
-	curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier?verify_multiple=1"
+	curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier?verify_multiple=1" | w3m -dump -T text/html
 	section_end error
 
 	section_start logfiles "All the more or less useful logfiles"
@@ -195,15 +207,6 @@ if [ $NUMNOTVERIFIED -ne 2 ] || [ $NUMNOMAGIC -ne 0 ] || [ $NUMSUBS -gt $((NUMVE
 		fi
 		echo;
 	done
-	cat /proc/cmdline
-	cat /chroot/domjudge/etc/apt/sources.list
-	echo -e "\nJudgedaemon log:"
-	cat /tmp/judgedaemon.log
-	echo -e "\nNginx log:"
-	cat /var/log/nginx/domjudge.log
-	echo -e "\nSymfony log:"
-	cat "$LOGFILE"
-	section_end logfiles
 	exit -1;
 fi
 
@@ -211,14 +214,14 @@ section_start api_check "Performing API checks"
 # Start logging again
 set -x
 
-# Delete contest so API check does not fail because of empty results
-echo "DELETE FROM contest WHERE cid =1" | mysql domjudge
+# Delete contest so API check does not fail because of empty results.
+echo "DELETE FROM contest WHERE cid=1" | mysql domjudge
 
 # Check the Contest API:
 $CHECK_API -n -C -e -a 'strict=1' http://admin:$ADMINPASS@localhost/domjudge/api
-section_end api_check
+section_end api_check |& tee "$gitlabartifacts/check_api.log"
 
 section_start validate_feed "Validate the eventfeed against API (ignoring failures)"
 cd ${DIR}/misc-tools
-./compare-cds.sh http://localhost/domjudge 2 || true
+./compare-cds.sh http://localhost/domjudge 2 |& tee "$gitlabartifacts/compare_cds.log" || true
 section_end validate_feed
