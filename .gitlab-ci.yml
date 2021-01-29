@@ -232,3 +232,18 @@ php linter:
       webapp/public
       webapp/config
 
+php-cs-fixer:
+  <<: *tiny_job
+  image:
+    name: cytopia/php-cs-fixer
+    entrypoint: [""]
+  artifacts:
+    when: always
+    reports:
+      codequality: code-quality.json
+    paths:
+      - code_quality_debug.json
+  script:
+    - /usr/bin/php-cs-fixer fix --format=gitlab --dry-run --diff . > code-quality.json || true
+    - cp code-quality.json code_quality_debug.json
+
