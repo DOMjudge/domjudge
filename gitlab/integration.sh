@@ -64,8 +64,8 @@ EOF
 ADMINPASS=$(cat etc/initial_admin_password.secret)
 
 # configure and restart php-fpm
-sudo cp /opt/domjudge/domserver/etc/domjudge-fpm.conf "/etc/php/7.2/fpm/pool.d/domjudge-fpm.conf"
-sudo /usr/sbin/php-fpm7.2
+sudo cp /opt/domjudge/domserver/etc/domjudge-fpm.conf "/etc/php/7.4/fpm/pool.d/domjudge-fpm.conf"
+sudo /usr/sbin/php-fpm7.4
 
 section_end setup
 
@@ -136,7 +136,7 @@ section_end submitting
 
 section_start judging "Waiting until all submissions are judged"
 # wait for and check results
-NUMSUBS=$(curl --fail http://admin:$ADMINPASS@localhost/domjudge/api/contests/2/submissions | python -mjson.tool | grep -c '"id":')
+NUMSUBS=$(curl --fail http://admin:$ADMINPASS@localhost/domjudge/api/contests/2/submissions | python3 -mjson.tool | grep -c '"id":')
 export COOKIEJAR
 COOKIEJAR=$(mktemp --tmpdir)
 export CURLOPTS="--fail -sq -m 30 -b $COOKIEJAR"
