@@ -1,0 +1,22 @@
+name: PHP CodeSniffer
+
+# Controls when the action will run. 
+on: ['pull_request']
+jobs:
+  phpcs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0 # important!
+      - name: Install PHP_CodeSniffer
+        run: |
+          curl -OL https://raw.githubusercontent.com/DOMjudge/action-php-codesniffer/master/staticphar/phpcs.phar
+          php phpcs.phar --version
+      - uses: domjudge/action-php-codesniffer@v1
+        with:
+          files: "**.php" # you may customize glob as needed
+          phpcs_path: php phpcs.phar
+          standard: .gitlab/workflows/phpruleset.xml
+          fail_on_warnings: false
+          fail_on_errors: false
