@@ -66,7 +66,7 @@ class ControllerRolesTest extends BaseTest
         $crawler = $this->client->request('GET', $url);
         $response = $this->client->getResponse();
         $message = var_export($response, true);
-        if($statusCode == '403' && $response->isRedirection()) {
+        if($statusCode === 403 && $response->isRedirection()) {
             self::assertEquals($response->headers->get('location'), $this::$loginURL);
         } else {
             self::assertEquals($statusCode, $response->getStatusCode(), $message);
@@ -85,12 +85,11 @@ class ControllerRolesTest extends BaseTest
             foreach ($toCheck as $url) {
                 if (strpos($url,'/jury/contests') !== false) {
                     continue;
-                } else {
-                    if (!$this->urlExcluded($url)) {
-                        $urlsToCheck = array_unique(array_merge($urlsToCheck, $this->crawlPageGetLinks($url, 200)));
-                    }
-                    $done[] = $url;
                 }
+                if (!$this->urlExcluded($url)) {
+                    $urlsToCheck = array_unique(array_merge($urlsToCheck, $this->crawlPageGetLinks($url, 200)));
+                }
+                $done[] = $url;
             }
         }
         while (array_diff($done,$urlsToCheck));
@@ -106,10 +105,11 @@ class ControllerRolesTest extends BaseTest
     {
         static::$roles = $roles;
         $this->logIn();
-        $urlsToCheck = [];
+        $urlsFoundPerRole = [];
         foreach ($roleBaseURL as $baseURL) {
-            $urlsToCheck = array_merge($urlsToCheck, $this->crawlPageGetLinks($baseURL, 200));
+            $urlsFoundPerRole[] = $this->crawlPageGetLinks($baseURL, 200);
         }
+        $urlsToCheck = array_merge([], ...$urlsFoundPerRole);
 
         // Find all pages, currently this sometimes breaks as some routes have the same logic
         if ($allPages) {
