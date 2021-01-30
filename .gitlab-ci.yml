@@ -241,3 +241,26 @@ integration_mariadb:
     - name: mariadb
       alias: sqlserver
 
+phpcs_compatibility:
+  <<: *tiny_job
+  stage: test
+  image: pipelinecomponents/php-codesniffer:latest
+  before_script:
+    - set -euxo pipefail
+    - export PS4='[$?] $'
+  parallel:
+    matrix:
+      - PHPVERSION: ["7.2","7.3","7.4"]
+  script:
+    - >
+      phpcs -s -p --colors
+      --standard=PHPCompatibility
+      --extensions=php
+      --runtime-set testVersion $PHPVERSION
+      lib/lib.*.php
+      etc
+      judge
+      webapp/src
+      webapp/tests
+      webapp/public
+      webapp/config
