@@ -264,3 +264,21 @@ phpcs_compatibility:
       webapp/tests
       webapp/public
       webapp/config
+
+# This finds different problems from codesniffer
+php linter:
+  <<: *tiny_job
+  stage: test
+  image: pipelinecomponents/php-linter:latest
+  script:
+    - ls
+    - >
+      parallel-lint --colors
+      lib/lib.*.php
+      etc
+      judge
+      webapp/src
+      webapp/tests
+      webapp/public
+      webapp/config
+
