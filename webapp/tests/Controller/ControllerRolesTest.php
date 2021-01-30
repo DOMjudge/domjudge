@@ -126,9 +126,11 @@ class ControllerRolesTest extends BaseTest
      */
     protected function verifyAccess(array $combinations, array $roleURLs) : void
     {
-        foreach ($combinations as static::$roles) {
+        foreach ($combinations as $static_roles) {
+            static::$roles = $static_roles;
+            $this->logOut();
+            $this->logIn();
             foreach ($roleURLs as $url) {
-                $this->logIn();
                 if(!$this->urlExcluded($url)) {
                     $this->crawlPageGetLinks($url, 200);
                 }
