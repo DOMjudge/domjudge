@@ -39,8 +39,8 @@ class JudgingRun extends BaseApiEntity
     /**
      * @var int
      * @ORM\Column(type="integer", name="judgetaskid", length=4,
-     *     options={"comment"="JudgeTask ID","unsigned"=true},
-     *     nullable=false)
+     *     options={"comment"="JudgeTask ID","unsigned"=true,"default"=NULL},
+     *     nullable=true)
      * @Serializer\Exclude()
      */
     private $judgetaskid;

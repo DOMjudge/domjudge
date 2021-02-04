@@ -28,7 +28,7 @@ final class Version20201219154651 extends AbstractMigration
         $this->addSql('ALTER TABLE executable_file ADD CONSTRAINT FK_99FA6255979A9F09 FOREIGN KEY (immutable_execid) REFERENCES immutable_executable (immutable_execid) ON DELETE CASCADE');
         $this->addSql('ALTER TABLE immutable_executable ADD CONSTRAINT FK_676B601AF132696E FOREIGN KEY (userid) REFERENCES user (userid) ON DELETE SET NULL');
         $this->addSql('ALTER TABLE judging CHANGE starttime starttime NUMERIC(32, 9) UNSIGNED DEFAULT NULL COMMENT \'Time judging started\'');
-        $this->addSql('ALTER TABLE judging_run ADD judgetaskid INT UNSIGNED NOT NULL COMMENT \'JudgeTask ID\', CHANGE endtime endtime NUMERIC(32, 9) UNSIGNED DEFAULT NULL COMMENT \'Time run judging ended\'');
+        $this->addSql('ALTER TABLE judging_run ADD judgetaskid INT UNSIGNED DEFAULT NULL COMMENT \'JudgeTask ID\', CHANGE endtime endtime NUMERIC(32, 9) UNSIGNED DEFAULT NULL COMMENT \'Time run judging ended\'');
         $this->addSql('ALTER TABLE judging_run ADD CONSTRAINT FK_29A6E6E13CBA64F2 FOREIGN KEY (judgetaskid) REFERENCES judgetask (judgetaskid)');
         $this->addSql('CREATE INDEX IDX_29A6E6E13CBA64F2 ON judging_run (judgetaskid)');
         $this->addSql('ALTER TABLE testcase_content ADD tc_contentid INT UNSIGNED AUTO_INCREMENT NOT NULL COMMENT \'Testcase content ID\', CHANGE testcaseid testcaseid INT UNSIGNED DEFAULT NULL COMMENT \'Testcase ID\', DROP FOREIGN KEY testcase_content_ibfk_1, DROP PRIMARY KEY, ADD PRIMARY KEY (tc_contentid)');
