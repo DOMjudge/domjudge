@@ -38,6 +38,7 @@ final class Version20201219154652 extends AbstractMigration implements Container
             for ($idx = 0; $idx < $zip->numFiles; $idx++) {
                 $filename = basename($zip->getNameIndex($idx));
                 $content = $zip->getFromIndex($idx);
+                $encodedContent = ($content === '' ? '' : ('0x' . strtoupper(bin2hex($content))));
 
                 // In doubt make files executable, but try to read it from the zip file.
                 $executableBit = '1';
@@ -50,7 +51,7 @@ final class Version20201219154652 extends AbstractMigration implements Container
                     'INSERT INTO executable_file '
                     . '(`immutable_execid`, `filename`, `ranknumber`, `file_content`, `is_executable`) '
                     . 'VALUES (' . $immutable_execid . ', "' . $filename . '", '
-                    . $idx . ', 0x' . strtoupper(bin2hex($content)) . ', '
+                    . $idx . ', ' . $encodedContent . ', '
                     . $executableBit . ')'
                 );
             }
