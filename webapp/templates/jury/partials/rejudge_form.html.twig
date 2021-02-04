@@ -4,6 +4,7 @@
     {% set buttonText = 'Rejudge all for ' ~ table ~ ' ' ~ id %}
     {% set questionText = 'Rejudge all submissions for this ' ~ table ~ '?' %}
     {% set buttonDisabled = false %}
+    {% set isRestart = false %}
     {% if is_granted('ROLE_ADMIN') %}
         {% set includeAllButton = true %}
     {% else %}
@@ -29,6 +30,7 @@
             {% if not validResult %}
                 {% set questionText = 'Restart judging of PENDING submission s' ~ id ~ ', are you sure?' %}
                 {% set buttonText = 'Restart judging' %}
+                {% set isRestart = true %}
             {% elseif validResult == 'correct' %}
                 {% set questionText = 'Rejudge CORRECT submission s' ~ id ~ ', are you sure?' %}
             {% endif %}
@@ -67,22 +69,28 @@
                         </div>
                     {%- endif %}
 
+                    {% if isRestart %}
+                        <input type="hidden" id="auto_apply" name="auto_apply" value="1">
+                        <input type="hidden" name="repeat" id="repeat" value="1">
+                        <input type="hidden" name="reason" id="reason" value="">
+                    {% else %}
                     <div class="custom-control custom-checkbox form-group">
                         <input type="checkbox" class="custom-control-input" id="auto_apply" name="auto_apply">
                         <label class="custom-control-label" for="auto_apply">Automatically apply judging(s) when ready</label>
                     </div>
                     <div id="rejudge-repeat" class="form-group">
                         <label for="repeat">Number of times to repeat this rejudging</label>
-                        <input type="number" class="form-control" name="repeat" id="repeat" value="1" min="1" max="999" step="1"/>
+                        <input type="number" class="form-control" name="repeat" id="repeat" value="1" min="1" max="999" step="1">
                     </div>
                     <div id="rejudge-reason" class="form-group">
                         <label for="reason">Reason</label>
-                        <input type="text" class="form-control" name="reason" id="reason" maxlength="255"/>
+                        <input type="text" class="form-control" name="reason" id="reason" maxlength="255">
                     </div>
+                    {% endif %}
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                    <input type="submit" value="{{ buttonText }}" class="btn btn-primary"/>
+                    <input type="submit" value="{{ buttonText }}" class="btn btn-primary">
                 </div>
             </form>
         </div>
