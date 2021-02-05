@@ -5,6 +5,9 @@ Version 7.3.3 - DEV
  - Fix single problem API action for non-jury members.
  - Fix reversed submission diff output.
  - Fix for browser swallowing newlines in output listings.
+ - Improve feedback when submitting without team member role.
+ - Fix compatibility with composer 2.0.
+ - Fix ability to restart a not yet judged submission.
 
 Version 7.3.2 - 23 November 2020
 --------------------------------
