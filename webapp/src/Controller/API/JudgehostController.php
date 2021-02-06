@@ -1238,8 +1238,8 @@ class JudgehostController extends AbstractFOSRestController
         $queryBuilder = $this->em->createQueryBuilder()
             ->from(TestcaseContent::class, 'f')
             ->select('f.input, f.output')
-            ->andWhere('f.tc_contentid = :tc_contentid')
-            ->setParameter(':tc_contentid', $id);
+            ->andWhere('f.testcase = :testcaseid')
+            ->setParameter(':testcaseid', $id);
 
         /** @var string[] $inout */
         $inout = $queryBuilder->getQuery()->getOneOrNullResult();
