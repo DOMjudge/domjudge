@@ -88,7 +88,7 @@ class SubmissionVisitor implements EventSubscriberInterface
                 'v4_submission_files',
                 [
                     'cid' => $submission->getContest()->getApiId($this->eventLogService),
-                    'id'  => $submission->getApiId($this->eventLogService)
+                    'id'  => $submission->getExternalid() ?? $submission->getSubmitid(),
                 ]
             );
             $apiRootRoute       = $this->router->generate('v4_api_root');

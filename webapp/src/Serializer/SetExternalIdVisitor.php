@@ -3,6 +3,7 @@
 namespace App\Serializer;
 
 use App\Entity\ExternalRelationshipEntityInterface;
+use App\Entity\Submission;
 use App\Service\EventLogService;
 use JMS\Serializer\EventDispatcher\Events;
 use JMS\Serializer\EventDispatcher\EventSubscriberInterface;
@@ -65,6 +66,15 @@ class SetExternalIdVisitor implements EventSubscriberInterface
                     );
                     $visitor->visitProperty($property, $object->{$method}());
                 }
+            } elseif ($object instanceof Submission && $object->getExternalid() !== null) {
+                // Special case for submissions: they can have an external ID even if when running in
+                // full local mode, because one can use the API to upload a submission with an external ID
+                $property = new StaticPropertyMetadata(
+                    get_class($object),
+                    'id',
+                    null
+                );
+                $visitor->visitProperty($property, $object->getExternalid());
             }
         } catch (\BadMethodCallException $e) {
             // Ignore these exceptions, as this means this is not an entity or it is not configured
@@ -83,6 +93,15 @@ class SetExternalIdVisitor implements EventSubscriberInterface
                             );
                             $visitor->visitProperty($property, $entity->{$method}());
                         }
+                    } elseif ($entity && $entity instanceof Submission && $entity->getExternalid() !== null) {
+                        // Special case for submissions: they can have an external ID even if when running in
+                        // full local mode, because one can use the API to upload a submission with an external ID
+                        $property = new StaticPropertyMetadata(
+                            get_class($entity),
+                            $field,
+                            null
+                        );
+                        $visitor->visitProperty($property, $entity->getExternalid());
                     }
                 } catch (\BadMethodCallException $e) {
                     // Ignore these exceptions, as this means this is not an entity or it is not configured

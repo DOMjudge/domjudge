@@ -7,10 +7,10 @@ use App\Entity\ContestProblem;
 use App\Entity\Event;
 use App\Entity\Judging;
 use App\Entity\JudgingRun;
+use App\Entity\Submission;
 use App\Entity\TeamAffiliation;
 use App\Entity\TeamCategory;
 use App\Utils\Utils;
-use Doctrine\Common\Inflector\Inflector;
 use Doctrine\Inflector\InflectorFactory;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\MappingException;
@@ -911,6 +911,20 @@ class EventLogService implements ContainerAwareInterface
         $entity = $endpointData[self::KEY_ENTITY];
         if (!$entity) {
             throw new \BadMethodCallException(sprintf('No entity defined for type \'%s\'', $type));
+        }
+
+        // Special case for submissions: they can have an external ID even if when running in
+        // full local mode, because one can use the API to upload a submission with an external ID
+        if ($entity === Submission::class) {
+            return array_map(function (array $item) {
+                return $item['externalid'] ?? $item['submitid'];
+            }, $this->em->createQueryBuilder()
+                ->from(Submission::class, 's')
+                ->select('s.submitid', 's.externalid')
+                ->andWhere('s.submitid IN (:ids)')
+                ->setParameter(':ids', $ids)
+                ->getQuery()
+                ->getScalarResult());
         }
 
         if (!$this->externalIdFieldForEntity($entity)) {
