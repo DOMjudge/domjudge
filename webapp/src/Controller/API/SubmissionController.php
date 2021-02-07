@@ -116,8 +116,6 @@ class SubmissionController extends AbstractRestController
 
     /**
      * Add a submission to this contest
-     * @param Request $request
-     * @return int
      * @Rest\Post("")
      * @OA\Post()
      * @Security("is_granted('ROLE_TEAM') or is_granted('ROLE_API_WRITER')", message="You need to have the Team Member role or be an admin to add a submission")
@@ -203,7 +201,7 @@ class SubmissionController extends AbstractRestController
      * @throws NonUniqueResultException
      * @throws Exception
      */
-    public function addSubmissionAction(Request $request): int
+    public function addSubmissionAction(Request $request): string
     {
         $required = [
             'problem'  => ['problem', 'problem_id'],
@@ -323,6 +321,24 @@ class SubmissionController extends AbstractRestController
             }
         }
 
+        $submissionId = null;
+        if ($this->isGranted('ROLE_API_WRITER')) {
+            $submissionId = $request->request->get('id');
+            // Check if we already have a submission with this ID
+            $existingSubmission = $this->em->createQueryBuilder()
+                ->from(Submission::class, 's')
+                ->select('s')
+                ->andWhere('(s.externalid IS NULL AND s.submitid = :submitid) OR s.externalid = :submitid')
+                ->andWhere('s.contest = :contest')
+                ->setParameter(':submitid', $submissionId)
+                ->setParameter(':contest', $problem->getContest())
+                ->getQuery()
+                ->getOneOrNullResult();
+            if ($existingSubmission !== null) {
+                throw new BadRequestHttpException(sprintf("Submission with ID %s already exists", $submissionId));
+            }
+        }
+
         $tempFiles = [];
 
         if ($request->request->has('files')) {
@@ -386,7 +402,7 @@ class SubmissionController extends AbstractRestController
         // Now submit the solution
         $submission = $this->submissionService->submitSolution(
             $team, $problem, $problem->getContest(), $language,
-            $files, null, null, $entryPoint, null, $time, $message
+            $files, null, null, $entryPoint, $submissionId, $time, $message
         );
 
         // Clean up temporary if needed
@@ -398,7 +414,7 @@ class SubmissionController extends AbstractRestController
             throw new BadRequestHttpException($message);
         }
 
-        return $submission->getSubmitid();
+        return (string)($submission->getExternalid() ?? $submission->getSubmitid());
     }
 
     /**
@@ -425,8 +441,14 @@ class SubmissionController extends AbstractRestController
         $queryBuilder = $this->getQueryBuilder($request)
             ->join('s.files', 'f')
             ->select('s, f')
-            ->andWhere(sprintf('%s = :id', $this->getIdField()))
             ->setParameter(':id', $id);
+
+        $idField = $this->getIdField();
+        if ($idField === 's.submitid') {
+            $queryBuilder->andWhere('(s.externalid IS NULL AND s.submitid = :id) OR s.externalid = :id');
+        } else {
+            $queryBuilder->andWhere(sprintf('%s = :id', $idField));
+        }
 
         /** @var Submission[] $submissions */
         $submissions = $queryBuilder->getQuery()->getResult();

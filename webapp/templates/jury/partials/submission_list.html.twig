@@ -86,7 +86,12 @@
                     </td>
                 {% endif %}
                 <td class="{{ tdExtraClass }}">
-                    <a href="{{ link }}">s{{ submission.submitid }}</a>
+                    <a href="{{ link }}">
+                        s{{ submission.submitid }}
+                        {% if submission.externalid %}
+                            ({{ submission.externalid }})
+                        {% endif %}
+                    </a>
                 </td>
                 {%- if showContest %}
                     <td class="{{ tdExtraClass }}"><a href="{{ link }}">c{{ submission.contest.cid }}</a></td>

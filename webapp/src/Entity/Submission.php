@@ -53,6 +53,8 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
      *     options={"comment"="Specifies ID of submission if imported from external CCS, e.g. Kattis",
      *              "collation"="utf8mb4_bin"},
      *     nullable=true)
+     * @Serializer\Groups({"Nonstrict"})
+     * @Serializer\SerializedName("external_id")
      */
     protected $externalid;
 

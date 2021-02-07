@@ -85,9 +85,19 @@ abstract class AbstractRestController extends AbstractFOSRestController
     {
         // Make sure we clear the entity manager class, for when this method is called multiple times by internal requests
         $this->em->clear();
-        $queryBuilder = $this->getQueryBuilder($request)
-            ->andWhere(sprintf('%s = :id', $this->getIdField()))
-            ->setParameter(':id', $id);
+
+        // Special case for submissions: they can have an external ID even if when running in
+        // full local mode, because one can use the API to upload a submission with an external ID
+        $idField = $this->getIdField();
+        if ($idField === 's.submitid') {
+            $queryBuilder = $this->getQueryBuilder($request)
+                ->andWhere('(s.externalid IS NULL AND s.submitid = :id) OR s.externalid = :id')
+                ->setParameter(':id', $id);
+        } else {
+            $queryBuilder = $this->getQueryBuilder($request)
+                ->andWhere(sprintf('%s = :id', $idField))
+                ->setParameter(':id', $id);
+        }
 
         $object = $queryBuilder
             ->getQuery()
@@ -269,9 +279,21 @@ abstract class AbstractRestController extends AbstractFOSRestController
 
             $ids = array_unique($ids);
 
-            $queryBuilder
-                ->andWhere(sprintf('%s IN (:ids)', $this->getIdField()))
-                ->setParameter(':ids', $ids);
+            // Special case for submissions: they can have an external ID even if when running in
+            // full local mode, because one can use the API to upload a submission with an external ID
+            $idField = $this->getIdField();
+            if ($idField === 's.submitid') {
+                $or = $queryBuilder->expr()->orX();
+                foreach ($ids as $index => $id) {
+                    $or->add(sprintf('(s.externalid IS NULL AND s.submitid = :id%s) OR s.externalid = :id%s', $index, $index));
+                    $queryBuilder->setParameter(sprintf(':id%s', $index), $id);
+                }
+                $queryBuilder->andWhere($or);
+            } else {
+                $queryBuilder
+                    ->andWhere(sprintf('%s IN (:ids)', $this->getIdField()))
+                    ->setParameter(':ids', $ids);
+            }
         }
 
         $objects = $queryBuilder
