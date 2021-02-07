@@ -964,11 +964,11 @@ bool doAPIsubmit()
 		        reader.getFormattedErrorMessages().c_str());
 	}
 
-	if ( !root.isInt() ) {
+	if ( !root.isString() ) {
 		error(0,"REST API returned unexpected JSON data");
 	}
 
-	logmsg(LOG_NOTICE,"Submission received, id = s%i", root.asInt());
+	logmsg(LOG_NOTICE,"Submission received, id = s%s", root.asCString());
 
 	return true;
 }
