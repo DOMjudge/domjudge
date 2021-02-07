@@ -30,10 +30,10 @@ CDS_PRESENTATION_PASS="presentation"
 CDS_MYICPC_PASS="myicpc"
 CDS_LIVE_PASS="live"
 
-CDS_VERSION="2.2.386"
-UTILS_VERSION="2.2.386"
-CDS_URL="https://github.com/icpctools/builds/releases/download/v${CDS_VERSION}/wlp.CDS-${CDS_VERSION}.zip"
-UTILS_URL="https://github.com/icpctools/builds/releases/download/v${UTILS_VERSION}/contestUtil-${UTILS_VERSION}.zip"
+CDS_VERSION="2.2.432"
+UTILS_VERSION="2.2.432"
+CDS_URL="https://github.com/icpctools/icpctools/releases/download/v${CDS_VERSION}/wlp.CDS-${CDS_VERSION}.zip"
+UTILS_URL="https://github.com/icpctools/icpctools/releases/download/v${UTILS_VERSION}/contestUtil-${UTILS_VERSION}.zip"
 
 wait_for_quiet() {
   FILE_TO_WATCH="$1"
