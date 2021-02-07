@@ -711,6 +711,7 @@ class JudgehostController extends AbstractFOSRestController
         // The judgetaskid is allowed to be NULL.
         $judgeTaskId = $request->request->get('judgetaskid');
         $judging = NULL;
+        $cid = NULL;
         if ($judgeTaskId) {
             /** @var JudgeTask $judgeTask */
             $judgeTask = $this->em->getRepository(JudgeTask::class)->findOneBy(['judgetaskid' => $judgeTaskId]);
@@ -785,7 +786,7 @@ class JudgehostController extends AbstractFOSRestController
 
         $error = new InternalError();
         $error
-            ->setJudging($judgingId ? $this->em->getReference(Judging::class, $judgingId) : null)
+            ->setJudging($judging)
             ->setContest($contest)
             ->setDescription($description)
             ->setJudgehostlog($judgehostlog)
