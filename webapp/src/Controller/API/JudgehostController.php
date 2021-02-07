@@ -389,6 +389,12 @@ class JudgehostController extends AbstractFOSRestController
                         EventLogService::ACTION_CREATE, $judging->getContest()->getCid());
                 } elseif ($judging->getResult() === Judging::RESULT_COMPILER_ERROR) {
                     // The new result contradicts a former one, that's not good.
+                    // Since the other judgehost was not successful, but we were , assume that the other judgehost
+                    // is broken and disable it.
+                    $disabled = [
+                        'kind' => 'judgehost',
+                        'hostname' => $judging->getJudgehost()->getHostname(),
+                    ];
                     $error = new InternalError();
                     $error
                         ->setJudging($judging)
@@ -396,7 +402,7 @@ class JudgehostController extends AbstractFOSRestController
                         ->setDescription('Compilation results are different for j' . $judging->getJudgingid())
                         ->setJudgehostlog('New compilation output: ' . $output_compile)
                         ->setTime(Utils::now())
-                        ->setDisabled(null);
+                        ->setDisabled($disabled);
                     $this->em->persist($error);
                 }
             } else {
@@ -434,6 +440,12 @@ class JudgehostController extends AbstractFOSRestController
                         $this->em->flush();
                     } else if ($judging->getResult() !== Judging::RESULT_COMPILER_ERROR) {
                         // The new result contradicts a former one, that's not good.
+                        // Since the other judgehost was successful, but we were not, assume that the current judgehost
+                        // is broken and disable it.
+                        $disabled = [
+                            'kind' => 'judgehost',
+                            'hostname' => $judgehost->getHostname(),
+                        ];
                         $error = new InternalError();
                         $error
                             ->setJudging($judging)
@@ -441,7 +453,7 @@ class JudgehostController extends AbstractFOSRestController
                             ->setDescription('Compilation results are different for j' . $judging->getJudgingid())
                             ->setJudgehostlog('New compilation output: ' . $output_compile)
                             ->setTime(Utils::now())
-                            ->setDisabled(null);
+                            ->setDisabled($disabled);
                         $this->em->persist($error);
                     }
 
