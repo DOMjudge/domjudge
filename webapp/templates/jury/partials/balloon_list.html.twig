@@ -34,7 +34,7 @@
                 <td>{{ balloon.data.balloonid }}</td>
                 <td>{{ balloon.data.time | printtime }}</td>
                 <td><i style="color: {{ balloon.data.color }}" class="fas fa-golf-ball"></i> {{ balloon.data.problem }}</td>
-                <td>{{ balloon.data.team | truncate(30) }}</td>
+                <td>{{ balloon.data.team | u.truncate(teamname_max_length, '…') }}</td>
                 <td>{{ balloon.data.affiliation }}</td>
                 <td>{{ balloon.data.location }}</td>
                 <td>{{ balloon.data.category }}</td>

@@ -89,7 +89,8 @@
 		"symfony/validator": "4.4.*",
 		"symfony/yaml": "4.4.*",
 		"twbs/bootstrap": "^4.3.0",
-		"twig/extensions": "^1.5",
+		"twig/extra-bundle": "^3.3",
+		"twig/string-extra": "^3.3",
 		"twig/twig": "^2.11"
 	},
 	"require-dev": {

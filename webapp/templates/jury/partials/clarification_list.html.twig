@@ -51,8 +51,8 @@
                 {%- set sender = clarification.sender.effectiveName %}
             {%- endif %}
 
-            <td><a href="{{ link }}" title="{{ sender }}">{{ sender | truncate(30) }}</a></td>
-            <td><a href="{{ link }}" title="{{ recipient }}">{{ recipient | truncate(30) }}</a></td>
+            <td><a href="{{ link }}" title="{{ sender }}">{{ sender | u.truncate(teamname_max_length, '…') }}</a></td>
+            <td><a href="{{ link }}" title="{{ recipient }}">{{ recipient | u.truncate(teamname_max_length, '…') }}</a></td>
             <td><a href="{{ link }}">
                     {%- if clarification.problem -%}
                         problem {{ clarification.problem.contestProblems.first.shortname -}}

@@ -33,12 +33,12 @@
 
                 <td>
                     <a data-ajax-modal data-ajax-modal-after="markSeen" href="{{ link }}" title="{{ sender }}">
-                        {{ sender | truncate(30) }}
+                        {{ sender | u.truncate(teamname_max_length, '…') }}
                     </a>
                 </td>
                 <td>
                     <a data-ajax-modal data-ajax-modal-after="markSeen" href="{{ link }}" title="{{ recipient }}">
-                        {{ recipient | truncate(30) }}
+                        {{ recipient | u.truncate(teamname_max_length, '…') }}
                     </a>
                 </td>
                 <td>

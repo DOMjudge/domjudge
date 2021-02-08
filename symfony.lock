@@ -529,6 +529,9 @@
             "webapp/tests/.gitignore"
         ]
     },
+    "symfony/polyfill-intl-grapheme": {
+        "version": "v1.22.0"
+    },
     "symfony/polyfill-intl-icu": {
         "version": "v1.11.0"
     },
@@ -604,6 +607,9 @@
     "symfony/stopwatch": {
         "version": "v4.3.2"
     },
+    "symfony/string": {
+        "version": "v5.2.3"
+    },
     "symfony/translation-contracts": {
         "version": "v1.1.6"
     },
@@ -666,17 +672,11 @@
     "twbs/bootstrap": {
         "version": "v4.3.1"
     },
-    "twig/extensions": {
-        "version": "1.0",
-        "recipe": {
-            "repo": "github.com/symfony/recipes",
-            "branch": "master",
-            "version": "1.0",
-            "ref": "ddb2e0a77773b7fd75d8d649545f174e664500ab"
-        },
-        "files": [
-            "webapp/config/packages/twig_extensions.yaml"
-        ]
+    "twig/extra-bundle": {
+        "version": "v3.3.0"
+    },
+    "twig/string-extra": {
+        "version": "v3.3.0"
     },
     "twig/twig": {
         "version": "v2.11.3"

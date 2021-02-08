@@ -7,3 +7,4 @@ twig:
     globals:
         DOMJUDGE_VERSION: '%domjudge.version%'
         DJ_CHARACTER_SET: 'utf-8'
+        teamname_max_length: 30
