@@ -1,3 +1,5 @@
+// Note: do not use any 'package' statements
+
 import java.util.*
 
 fun main(args: Array<String>) {
