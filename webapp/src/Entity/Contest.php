@@ -346,13 +346,13 @@ class Contest extends BaseApiEntity
         return $this->cid;
     }
 
-    public function setExternalid(string $externalid): Contest
+    public function setExternalid(?string $externalid): Contest
     {
         $this->externalid = $externalid;
         return $this;
     }
 
-    public function getExternalid(): string
+    public function getExternalid(): ?string
     {
         return $this->externalid;
     }
