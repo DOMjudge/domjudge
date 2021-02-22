@@ -228,36 +228,43 @@ class SubmissionController extends AbstractRestController
 
         // By default, use the team of the user
         $team = $this->dj->getUser()->getTeam();
-        // If the user is an admin or API writer, allow it to specify the team
-        if ($this->isGranted('ROLE_API_WRITER') &&
-            ($teamId = $request->request->get('team_id'))) {
-            /** @var Contest $contest */
-            $contest = $this->em->getRepository(Contest::class)->find($this->getContestId($request));
+        if ($teamId = $request->request->get('team_id')) {
+            $idField = $this->eventLogService->externalIdFieldForEntity(Team::class) ?? 'teamid';
+            $method  = sprintf('get%s', ucfirst($idField));
 
-            // Load the team
-            $queryBuilder = $this->em->createQueryBuilder()
-                ->from(Team::class, 't')
-                ->select('t')
-                ->leftJoin('t.category', 'tc')
-                ->leftJoin('t.contests', 'c')
-                ->leftJoin('tc.contests', 'cc')
-                ->andWhere(sprintf('t.%s = :team',
-                    $this->eventLogService->externalIdFieldForEntity(Team::class) ?? 'teamid'))
-                ->andWhere('t.enabled = 1')
-                ->setParameter(':team', $teamId);
+            // If the user is an admin or API writer, allow it to specify the team
+            if ($this->isGranted('ROLE_API_WRITER')) {
+                /** @var Contest $contest */
+                $contest = $this->em->getRepository(Contest::class)->find($this->getContestId($request));
 
-            if (!$contest->isOpenToAllTeams()) {
-                $queryBuilder
-                    ->andWhere('c.cid = :cid OR cc.cid = :cid')
-                    ->setParameter(':cid', $contest->getCid());
-            }
+                // Load the team
+                $queryBuilder = $this->em->createQueryBuilder()
+                    ->from(Team::class, 't')
+                    ->select('t')
+                    ->leftJoin('t.category', 'tc')
+                    ->leftJoin('t.contests', 'c')
+                    ->leftJoin('tc.contests', 'cc')
+                    ->andWhere(sprintf('t.%s = :team', $idField))
+                    ->andWhere('t.enabled = 1')
+                    ->setParameter(':team', $teamId);
 
-            /** @var Team $team */
-            $team = $queryBuilder->getQuery()->getOneOrNullResult();
+                if (!$contest->isOpenToAllTeams()) {
+                    $queryBuilder
+                        ->andWhere('c.cid = :cid OR cc.cid = :cid')
+                        ->setParameter(':cid', $contest->getCid());
+                }
 
-            if (!$team) {
-                throw new BadRequestHttpException(
-                    sprintf("Team %s not found or not enabled", $teamId));
+                /** @var Team $team */
+                $team = $queryBuilder->getQuery()->getOneOrNullResult();
+
+                if (!$team) {
+                    throw new BadRequestHttpException(
+                        sprintf("Team %s not found or not enabled", $teamId));
+                }
+            } elseif (!$team) {
+                throw new BadRequestHttpException(sprintf('User does not belong to a team'));
+            } elseif (call_user_func([$team, $method]) !== $teamId) {
+                throw new BadRequestHttpException(sprintf('Can not submit for a different team'));
             }
         } elseif (!$team) {
             throw new BadRequestHttpException(sprintf('User does not belong to a team'));
@@ -312,30 +319,35 @@ class SubmissionController extends AbstractRestController
         }
 
         $time = null;
-        if ($this->isGranted('ROLE_API_WRITER') &&
-            ($timeString = $request->request->get('time'))) {
-            try {
-                $time = Utils::toEpochFloat($timeString);
-            } catch (Exception $e) {
-                throw new BadRequestHttpException(sprintf('Can not parse time %s', $timeString));
+        if ($timeString = $request->request->get('time')) {
+            if ($this->isGranted('ROLE_API_WRITER')) {
+                try {
+                    $time = Utils::toEpochFloat($timeString);
+                } catch (Exception $e) {
+                    throw new BadRequestHttpException(sprintf('Can not parse time %s', $timeString));
+                }
+            } else {
+                throw new BadRequestHttpException('A team can not assign time');
             }
         }
 
-        $submissionId = null;
-        if ($this->isGranted('ROLE_API_WRITER')) {
-            $submissionId = $request->request->get('id');
-            // Check if we already have a submission with this ID
-            $existingSubmission = $this->em->createQueryBuilder()
-                ->from(Submission::class, 's')
-                ->select('s')
-                ->andWhere('(s.externalid IS NULL AND s.submitid = :submitid) OR s.externalid = :submitid')
-                ->andWhere('s.contest = :contest')
-                ->setParameter(':submitid', $submissionId)
-                ->setParameter(':contest', $problem->getContest())
-                ->getQuery()
-                ->getOneOrNullResult();
-            if ($existingSubmission !== null) {
-                throw new BadRequestHttpException(sprintf("Submission with ID %s already exists", $submissionId));
+        if ($submissionId = $request->request->get('id')) {
+            if ($this->isGranted('ROLE_API_WRITER')) {
+                // Check if we already have a submission with this ID
+                $existingSubmission = $this->em->createQueryBuilder()
+                    ->from(Submission::class, 's')
+                    ->select('s')
+                    ->andWhere('(s.externalid IS NULL AND s.submitid = :submitid) OR s.externalid = :submitid')
+                    ->andWhere('s.contest = :contest')
+                    ->setParameter(':submitid', $submissionId)
+                    ->setParameter(':contest', $problem->getContest())
+                    ->getQuery()
+                    ->getOneOrNullResult();
+                if ($existingSubmission !== null) {
+                    throw new BadRequestHttpException(sprintf("Submission with ID %s already exists", $submissionId));
+                }
+            } else {
+                throw new BadRequestHttpException('A team can not assign id');
             }
         }
 
