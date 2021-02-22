@@ -9,6 +9,7 @@ include:
   - template: Dependency-Scanning.gitlab-ci.yml
   - template: SAST.gitlab-ci.yml
   - template: License-Scanning.gitlab-ci.yml
+  - remote: https://raw.githubusercontent.com/DOMjudge/domjudge-packaging/main/.DOMjudge-release.yml
 
 .retry_config: &retry_job
   retry:
