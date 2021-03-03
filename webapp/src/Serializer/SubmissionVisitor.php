@@ -91,10 +91,13 @@ class SubmissionVisitor implements EventSubscriberInterface
                     'id'  => $submission->getApiId($this->eventLogService)
                 ]
             );
+
             $apiRootRoute       = $this->router->generate('api_root');
+            $offset             = substr($apiRootRoute, -1) === '/' ? 0 : 1;
+
             $relativeFilesRoute = substr(
                 $filesRoute,
-                strlen($apiRootRoute) + 1 // +1 because api_root does not contain final /
+                strlen($apiRootRoute) + $offset
             );
             $property = new StaticPropertyMetadata(
                 Submission::class,
