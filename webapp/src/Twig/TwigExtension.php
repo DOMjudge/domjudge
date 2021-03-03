@@ -428,9 +428,9 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
                     $text  = '✓';
                     $class = 'success';
                 }
-            } else if (!$testcase['valid']) {
+            } else if (array_key_exists('valid', $testcase) && !$testcase['valid']) {
                 $text = '✕';
-            } else if ($testcase['hostname'] !== null) {
+            } else if (array_key_exists('hostname', $testcase) && $testcase['hostname'] !== null) {
                 $text = '↺';
                 $class = 'info';
             }

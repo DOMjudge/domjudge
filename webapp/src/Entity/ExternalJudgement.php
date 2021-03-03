@@ -65,7 +65,7 @@ class ExternalJudgement
     private $verified = false;
 
     /**
-     * @var string
+     * @var string|null
      * @ORM\Column(type="string", name="jury_member", length=255,
      *     options={"comment"="Name of user who verified the result / diference",
      *              "default"=NULL},
@@ -182,7 +182,7 @@ class ExternalJudgement
         return $this;
     }
 
-    public function getJuryMember(): string
+    public function getJuryMember(): ?string
     {
         return $this->jury_member;
     }
