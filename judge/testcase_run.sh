@@ -14,7 +14,7 @@
 #                   Certainly do not place output-files there!
 # <run>             Absolute path to run script to use.
 # <compare>         Absolute path to compare script to use.
-# <compare-args>    Arguments to path to compare script
+# <compare-args>    Arguments to pass to compare script
 #
 # Default run and compare scripts can be configured in the database.
 #
