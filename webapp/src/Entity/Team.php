@@ -451,7 +451,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface
      */
     public function getGroupIds(): array
     {
-        return $this->getCategory()->getCategoryid() ? [$this->getCategory()->getCategoryid()] : [];
+        return $this->getCategory() ? [$this->getCategory()->getCategoryid()] : [];
     }
 
     /**

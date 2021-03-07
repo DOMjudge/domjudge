@@ -90,7 +90,7 @@ class TeamController extends BaseController
             ->from(Team::class, 't')
             ->leftJoin('t.contests', 'c')
             ->leftJoin('t.affiliation', 'a')
-            ->join('t.category', 'cat')
+            ->leftJoin('t.category', 'cat')
             ->leftJoin('cat.contests', 'cc')
             ->orderBy('cat.sortorder', 'ASC')
             ->addOrderBy('t.name', 'ASC')
@@ -230,8 +230,10 @@ class TeamController extends BaseController
             foreach ($t->getContests() as $c) {
                 $teamContests[$c->getCid()] = true;
             }
-            foreach ($t->getCategory()->getContests() as $c) {
-                $teamContests[$c->getCid()] = true;
+            if ($t->getCategory()) {
+                foreach ($t->getCategory()->getContests() as $c) {
+                    $teamContests[$c->getCid()] = true;
+                }
             }
             // merge in the rest of the data
             $teamdata = array_merge($teamdata, [
@@ -251,7 +253,7 @@ class TeamController extends BaseController
                 'data' => $teamdata,
                 'actions' => $teamactions,
                 'link' => $this->generateUrl('jury_team', ['teamId' => $t->getTeamId()]),
-                'cssclass' => "category" . $t->getCategory()->getCategoryId() .
+                'cssclass' => ($t->getCategory() ? ("category" . $t->getCategory()->getCategoryId()) : '') .
                     ($t->getEnabled() ? '' : ' disabled'),
             ];
         }

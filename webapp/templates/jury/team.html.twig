@@ -95,9 +95,13 @@
                 <tr>
                     <th>Category</th>
                     <td>
-                        <a href="{{ path('jury_team_category', {'categoryId': team.category.categoryid}) }}">
-                            {{ team.category.name }}
-                        </a>
+                        {% if team.category %}
+                            <a href="{{ path('jury_team_category', {'categoryId': team.category.categoryid}) }}">
+                                {{ team.category.name }}
+                            </a>
+                        {% else %}
+                            -
+                        {% endif %}
                     </td>
                 </tr>
                 {% if showAffiliations and team.affiliation %}
