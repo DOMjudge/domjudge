@@ -260,7 +260,7 @@ class LanguageController extends BaseController
         $this->em->flush();
 
         $this->dj->auditlog('language', $langId, 'set allow submit',
-                                         $request->request->getBoolean('allow_submit'));
+                                         $request->request->getBoolean('allow_submit') ? 'yes' : 'no');
         return $this->redirectToRoute('jury_language', ['langId' => $langId]);
     }
 
@@ -287,7 +287,7 @@ class LanguageController extends BaseController
         }
 
         $this->dj->auditlog('language', $langId, 'set allow judge',
-                                         $request->request->getBoolean('allow_judge'));
+                                         $request->request->getBoolean('allow_judge') ? 'yes' : 'no');
         return $this->redirectToRoute('jury_language', ['langId' => $langId]);
     }
 
