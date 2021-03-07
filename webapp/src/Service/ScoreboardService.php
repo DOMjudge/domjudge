@@ -310,6 +310,14 @@ class ScoreboardService
             [ $contest->getCid(), $team->getTeamid(), $problem->getProbid() ]
         );
 
+        if (!$team->getCategory()) {
+            $this->logger->warning(
+                "Team '%d' has no category, skipping",
+                [ $team->getTeamid() ]
+            );
+            return;
+        }
+
         // First acquire an advisory lock to prevent other calls to this
         // method from interfering with our update.
         $lockString = sprintf('domjudge.%d.%d.%d',

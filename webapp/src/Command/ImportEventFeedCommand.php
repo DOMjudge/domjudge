@@ -1038,6 +1038,8 @@ class ImportEventFeedCommand extends Command
             return;
         }
 
+        $groupId = (int)$groupId;
+
         if ($event['op'] === EventLogService::ACTION_DELETE) {
             // We need to delete the category
 
@@ -1210,6 +1212,16 @@ class ImportEventFeedCommand extends Command
         $teamId = $event['data']['id'];
         $icpcId = $event['data']['icpc_id'];
 
+        if (!is_numeric($teamId)) {
+            $this->logger->error(
+                'Cannot import team %s: only integer ID\'s are supported',
+                [ $teamId ]
+            );
+            return;
+        }
+
+        $teamId = (int)$teamId;
+
         if ($event['op'] === EventLogService::ACTION_DELETE) {
             // We need to delete the team
 
@@ -1251,7 +1263,7 @@ class ImportEventFeedCommand extends Command
             $groupId = reset($groupIds);
             if (!is_numeric($groupId)) {
                 $this->logger->error(
-                    'Cannot import group %s: only integer ID\'s are supported',
+                    'Cannot import team with group ID %s: only integer ID\'s are supported',
                     [ $groupId ]
                 );
                 return;
