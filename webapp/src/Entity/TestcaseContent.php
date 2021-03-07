@@ -110,24 +110,24 @@ class TestcaseContent
         return $this->output;
     }
 
-    public function setImage(string $image): TestcaseContent
+    public function setImage(?string $image): TestcaseContent
     {
         $this->image = $image;
         return $this;
     }
 
-    public function getImage(): string
+    public function getImage(): ?string
     {
         return $this->image;
     }
 
-    public function setImageThumb(string $imageThumb): TestcaseContent
+    public function setImageThumb(?string $imageThumb): TestcaseContent
     {
         $this->image_thumb = $imageThumb;
         return $this;
     }
 
-    public function getImageThumb(): string
+    public function getImageThumb(): ?string
     {
         return $this->image_thumb;
     }
