@@ -359,6 +359,11 @@ class SubmissionController extends AbstractRestController
             if (!is_array($filesList) || count($filesList) !== 1 || !isset($filesList[0]['data'])) {
                 throw new BadRequestHttpException("The 'files' attribute should be an array with a single item, containing an object with a base64 encoded data field");
             }
+
+            if (isset($filesList[0]['mime']) && $filesList[0]['mime'] !== 'application/zip') {
+                throw new BadRequestHttpException("The 'files[0].mime' attribute should be application/zip if provided");
+            }
+
             $data        = $filesList[0]['data'];
             $decodedData = base64_decode($data);
             if ($decodedData === false) {
