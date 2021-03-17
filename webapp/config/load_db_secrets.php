@@ -21,7 +21,7 @@ function get_db_url()
         break;
     }
 
-    return sprintf('mysql://%s:%s@%s:%d/%s?serverVersion=5.7.0', $user, $pass, $host, $db);
+    return sprintf('mysql://%s:%s@%s/%s?serverVersion=5.7.0', $user, $pass, $host, $db);
 }
 
 function get_app_secret()
