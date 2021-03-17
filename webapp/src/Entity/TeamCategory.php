@@ -143,7 +143,7 @@ class TeamCategory extends BaseApiEntity
         return $this->sortorder;
     }
 
-    public function setColor(string $color): TeamCategory
+    public function setColor(?string $color): TeamCategory
     {
         $this->color = $color;
         return $this;
