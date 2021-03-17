@@ -38,8 +38,8 @@ server {
 # }
 
 # server {
-# 	listen   443 ssl;
-# 	listen   [::]:443 ssl;
+# 	listen   443 ssl http2;
+# 	listen   [::]:443 ssl http2;
 
     # See https://ssl-config.mozilla.org/ to generate good TLS settings for your server
 # 	ssl_certificate /path/to/your/SSL-certificate-with-chain.crt;
