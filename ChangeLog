@@ -8,6 +8,8 @@ Version 7.3.3 - DEV
  - Improve feedback when submitting without team member role.
  - Fix compatibility with composer 2.0.
  - Fix ability to restart a not yet judged submission.
+ - Fix team pages when there is no active contest.
+ - Set doctrine server version to a safe base.
 
 Version 7.3.2 - 23 November 2020
 --------------------------------
