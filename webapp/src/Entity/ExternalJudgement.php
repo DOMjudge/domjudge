@@ -176,7 +176,7 @@ class ExternalJudgement
         return $this->verified;
     }
 
-    public function setJuryMember(string $juryMember): ExternalJudgement
+    public function setJuryMember(?string $juryMember): ExternalJudgement
     {
         $this->jury_member = $juryMember;
         return $this;
@@ -187,13 +187,13 @@ class ExternalJudgement
         return $this->jury_member;
     }
 
-    public function setVerifyComment(string $verifyComment): ExternalJudgement
+    public function setVerifyComment(?string $verifyComment): ExternalJudgement
     {
         $this->verify_comment = $verifyComment;
         return $this;
     }
 
-    public function getVerifyComment(): string
+    public function getVerifyComment(): ?string
     {
         return $this->verify_comment;
     }
@@ -241,7 +241,7 @@ class ExternalJudgement
         return $this;
     }
 
-   public function getContest(): Contest
+   public function getContest(): ?Contest
     {
         return $this->contest;
     }

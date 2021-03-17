@@ -160,7 +160,7 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
         return $this->clarid;
     }
 
-    public function setExternalid(string $externalid): Clarification
+    public function setExternalid(?string $externalid): Clarification
     {
         $this->externalid = $externalid;
         return $this;
@@ -169,17 +169,6 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
     public function getExternalid(): ?string
     {
         return $this->externalid;
-    }
-
-    public function setCid(int $cid): Clarification
-    {
-        $this->cid = $cid;
-        return $this;
-    }
-
-    public function getCid(): int
-    {
-        return $this->cid;
     }
 
     /** @param string|float $submittime */
@@ -215,7 +204,7 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
         return Utils::relTime($this->getSubmittime() - $this->getContest()->getStarttime());
     }
 
-    public function setJuryMember(string $juryMember): Clarification
+    public function setJuryMember(?string $juryMember): Clarification
     {
         $this->jury_member = $juryMember;
         return $this;
@@ -270,7 +259,7 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
         return $this->answered;
     }
 
-    public function setProblem(Problem $problem = null): Clarification
+    public function setProblem(?Problem $problem = null): Clarification
     {
         $this->problem = $problem;
         return $this;
@@ -291,7 +280,7 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
         return $this->getProblem() ? $this->getProblem()->getProbid() : null;
     }
 
-    public function setContest(Contest $contest = null): Clarification
+    public function setContest(?Contest $contest = null): Clarification
     {
         $this->contest = $contest;
         return $this;
@@ -302,7 +291,7 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
         return $this->contest;
     }
 
-    public function setInReplyTo(Clarification $inReplyTo = null): Clarification
+    public function setInReplyTo(?Clarification $inReplyTo = null): Clarification
     {
         $this->in_reply_to = $inReplyTo;
         return $this;
@@ -339,7 +328,7 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
         return $this->replies;
     }
 
-    public function setSender(Team $sender = null): Clarification
+    public function setSender(?Team $sender = null): Clarification
     {
         $this->sender = $sender;
         return $this;
@@ -360,7 +349,7 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
         return $this->getSender() ? $this->getSender()->getTeamid() : null;
     }
 
-    public function setRecipient(Team $recipient = null): Clarification
+    public function setRecipient(?Team $recipient = null): Clarification
     {
         $this->recipient = $recipient;
         return $this;

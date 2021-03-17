@@ -260,7 +260,7 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
         return $this->getEndtime() ? Utils::relTime($this->getEndtime() - $this->getContest()->getStarttime()) : null;
     }
 
-    public function setResult(string $result): Judging
+    public function setResult(?string $result): Judging
     {
         $this->result = $result;
         return $this;
@@ -282,7 +282,7 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
         return $this->verified;
     }
 
-    public function setJuryMember(string $juryMember): Judging
+    public function setJuryMember(?string $juryMember): Judging
     {
         $this->jury_member = $juryMember;
         return $this;
@@ -293,7 +293,7 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
         return $this->jury_member;
     }
 
-    public function setVerifyComment(string $verifyComment): Judging
+    public function setVerifyComment(?string $verifyComment): Judging
     {
         $this->verify_comment = $verifyComment;
         return $this;
@@ -376,7 +376,7 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
         return $this;
     }
 
-    public function getContest(): Contest
+    public function getContest(): ?Contest
     {
         return $this->contest;
     }
