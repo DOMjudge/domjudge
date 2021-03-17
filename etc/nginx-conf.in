@@ -38,11 +38,10 @@ server {
 # }
 
 # server {
-# 	listen   443;
-# 	listen   [::]:443;
+# 	listen   443 ssl;
+# 	listen   [::]:443 ssl;
 
     # See https://ssl-config.mozilla.org/ to generate good TLS settings for your server
-# 	ssl on;
 # 	ssl_certificate /path/to/your/SSL-certificate-with-chain.crt;
 # 	ssl_certificate_key /path/to/your/SSL-key.key;
 # 	ssl_session_timeout 5m;
