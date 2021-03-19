@@ -655,15 +655,18 @@ while (true) {
     logmsg(LOG_INFO, "  Working directory: $workdir");
 
     $success_file = "$workdir/success";
-    // If a database gets reset without removing the judging
-    // directories, we might hit an old directory: rename it.
-    if (file_exists($workdir)) {
+    if ($lastWorkdir !== null && $lastWorkdir !== $workdir) {
+        cleanup_judging($lastWorkdir);
+        $lastWorkdir = null;
+    } else if (file_exists($workdir)) {
+        // If a database gets reset without removing the judging
+        // directories, we might hit an old directory: rename it.
         $needs_cleanup = false;
         if (file_exists($success_file)) {
             if (file_get_contents($success_file) != getmypid()) {
                 $needs_cleanup = true;
             }
-            unlink("$workdir/success");
+            unlink($success_file);
         } else {
             $needs_cleanup = true;
         }
