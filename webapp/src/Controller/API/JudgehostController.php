@@ -1293,6 +1293,11 @@ class JudgehostController extends AbstractFOSRestController
         $judgehost->setPolltime(Utils::now());
         $this->em->flush();
 
+        // If this judgehost is not active, there's nothing to do.
+        if (!$judgehost->getActive()) {
+            return '';
+        }
+
         // TODO: Determine a good max batch size here. We may want to do something more elaborate like looking at
         // previous judgements of the same testcase and use median runtime as an indicator.
         $max_batchsize = 5;
