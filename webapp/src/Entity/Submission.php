@@ -469,7 +469,7 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
         return $this->getContest()->getFreezetime() !== null && (float)$this->getSubmittime() >= (float)$this->getContest()->getFreezetime();
     }
 
-    public function getOldResult(): string
+    public function getOldResult(): ?string
     {
         return $this->old_result;
     }
