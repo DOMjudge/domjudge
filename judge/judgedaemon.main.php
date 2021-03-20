@@ -519,13 +519,18 @@ if (!empty($options['e'])) {
     $new_judging_run = (array) json_decode(base64_decode(file_get_contents($options['j'])));
     $judgeTaskId = $options['t'];
 
-    request(
-        sprintf('judgehosts/add-judging-run/%s/%s', $new_judging_run['hostname'],
-            urlencode((string)$judgeTaskId)),
-        'POST',
-        $new_judging_run,
-        false
-    );
+    for ($i = 0; $i < 3; $i++) {
+        $response = request(
+            sprintf('judgehosts/add-judging-run/%s/%s', $new_judging_run['hostname'],
+                urlencode((string)$judgeTaskId)),
+            'POST',
+            $new_judging_run,
+            false
+        );
+        if ($response !== NULL) {
+            break;
+        }
+    }
     unlink($options['j']);
     exit(0);
 }
