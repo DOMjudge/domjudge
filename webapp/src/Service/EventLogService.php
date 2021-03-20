@@ -638,7 +638,7 @@ class EventLogService implements ContainerAwareInterface
         );
         if ($this->em->getConnection()->fetchColumn('SELECT GET_LOCK(:lock, 1)',
                 [':lock' => $lockString]) != 1) {
-            throw new Exception('EventLogService::insertEvent failed to obtain lock');
+            throw new Exception('EventLogService::insertEvent failed to obtain lock: ' . $lockString);
         }
 
         // Note that for events without an ID (i.e. state), the endpointid
