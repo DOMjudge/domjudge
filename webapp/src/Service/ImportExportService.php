@@ -895,10 +895,6 @@ class ImportExportService
         $metadata->setIdGeneratorType(ClassMetadata::GENERATOR_TYPE_NONE);
         $metadata->setIdGenerator(new AssignedGenerator());
 
-        $metadata = $this->em->getClassMetaData(Team::class);
-        $metadata->setIdGeneratorType(ClassMetadata::GENERATOR_TYPE_NONE);
-        $metadata->setIdGenerator(new AssignedGenerator());
-
         $createdAffiliations = [];
         $createdTeams        = [];
         $updatedTeams        = [];
@@ -960,18 +956,18 @@ class ImportExportService
             $teamItem['team']['category'] = $teamCategory;
             unset($teamItem['team']['categoryid']);
 
-            $team = $this->em->getRepository(Team::class)->find($teamItem['team']['teamid']);
+            $metadata = $this->em->getClassMetaData(Team::class);
 
-            // // Determine if we need to set the team ID manually or automatically
-            // if (empty($teamItem['team']['teamid'])) {
-            //     $team = null;
-            //     $metadata->setIdGeneratorType(ClassMetadata::GENERATOR_TYPE_IDENTITY);
-            //     $metadata->setIdGenerator(new IdentityGenerator());
-            // } else {
-            //     $team = $this->em->getRepository(Team::class)->find($teamItem['team']['teamid']);
-            //     $metadata->setIdGeneratorType(ClassMetadata::GENERATOR_TYPE_NONE);
-            //     $metadata->setIdGenerator(new AssignedGenerator());
-            // }
+            // Determine if we need to set the team ID manually or automatically
+            if (empty($teamItem['team']['teamid'])) {
+                $team = null;
+                $metadata->setIdGeneratorType(ClassMetadata::GENERATOR_TYPE_IDENTITY);
+                $metadata->setIdGenerator(new IdentityGenerator());
+            } else {
+                $team = $this->em->getRepository(Team::class)->find($teamItem['team']['teamid']);
+                $metadata->setIdGeneratorType(ClassMetadata::GENERATOR_TYPE_NONE);
+                $metadata->setIdGenerator(new AssignedGenerator());
+            }
             if (!$team) {
                 $team  = new Team();
                 $added = true;
