@@ -364,7 +364,7 @@ class ImportProblemService
                                 $problem->setCompareExecutable($executable);
                             }
 
-                            $messages[] = "Added output validator '$outputValidatorName'";
+                            $messages[] = "Added output validator '<code>$outputValidatorName</code>'";
                         }
                     }
                 }
@@ -393,7 +393,7 @@ class ImportProblemService
                     $problem
                         ->setProblemtext($text)
                         ->setProblemtextType($type);
-                    $messages[] = "Added problem statement from: <tt>$filename</tt>";
+                    $messages[] = "Added problem statement from: <code>$filename</code>";
                     break;
                 }
             }
@@ -489,7 +489,7 @@ class ImportProblemService
                         ->getOneOrNullResult();
 
                     if (isset($existingTestcase)) {
-                        $messages[] = sprintf('Skipped %s testcase <tt>%s</tt>: already exists', $type, $dataFile);
+                        $messages[] = sprintf('Skipped %s testcase <code>%s</code>: already exists', $type, $dataFile);
                         continue;
                     }
                 }
@@ -522,10 +522,11 @@ class ImportProblemService
                 $numCases++;
 
                 $testcases[] = $testcase;
-
-                $messages[] = sprintf('Added %s testcase from: <tt>%s.{in,ans}</tt>', $type, $dataFile);
             }
-            $messages[] = sprintf("Added %d %s testcase(s).", $numCases, $type);
+            if ($numCases > 0) {
+                $messages[] = sprintf("Added %d %s testcase(s): <code>{%s}.{in,ans}</code>",
+                    $numCases, $type, join(',', $dataFiles));
+            }
         }
 
         $numAttachments = 0;
@@ -571,7 +572,7 @@ class ImportProblemService
                 $attachmentContent = $attachment->getContent();
                 $attachmentContent->setContent($content);
 
-                $messages[] = sprintf('Updated attachment <tt>%s</tt>', $name);
+                $messages[] = sprintf('Updated attachment <code>%s</code>', $name);
             } else {
                 $attachment = new ProblemAttachment();
                 $attachmentContent = new ProblemAttachmentContent();
@@ -585,7 +586,7 @@ class ImportProblemService
 
                 $this->em->persist($attachment);
 
-                $messages[] = sprintf('Added attachment <tt>%s</tt>', $name);
+                $messages[] = sprintf('Added attachment <code>%s</code>', $name);
             }
 
             $numAttachments++;
@@ -615,6 +616,10 @@ class ImportProblemService
         } elseif (!$this->dj->getUser()->getTeam()) {
             $messages[] = 'No jury solutions added: must associate team with your user first.';
         } elseif ($contestProblem->getAllowSubmit()) {
+            $subs_with_unknown_lang = [];
+            $too_large_subs = [];
+            $successful_subs = [];
+
             // As EventLogService::log() will clear the entity manager, the problem and the contest became detached. We
             // need to reload them.
             // We seem to need to explicitly clear the EntityManager, otherwise we will receive inconsistent data.
@@ -693,7 +698,7 @@ class ImportProblemService
                 $tmpDir = $this->dj->getDomjudgeTmpDir();
 
                 if (empty($languageToUse)) {
-                    $messages[] = "Could not add jury solution <tt>$path</tt>: unknown language.";
+                    $subs_with_unknown_lang[] = '<code>' . $path . '</code>';
                 } else {
                     $expectedResult = SubmissionService::normalizeExpectedResult($pathComponents[1]);
                     $results        = null;
@@ -766,10 +771,10 @@ class ImportProblemService
                         // Flush changes to submission
                         $this->em->flush();
 
-                        $messages[] = "Added jury solution from: <tt>$path</tt></li>";
+                        $successful_subs[] = '<code>' . $path . '</code>';
                         $numJurySolutions++;
                     } else {
-                        $messages[] = "Could not add jury solution <tt>$path</tt>: too large.";
+                        $too_large_subs[] = '<code>' . $path . '</code>';
                     }
 
                     foreach ($tempFiles as $f) {
@@ -778,9 +783,20 @@ class ImportProblemService
                 }
             }
 
-            $messages[] = sprintf('Added %d jury solution(s).', $numJurySolutions);
+            if ($numJurySolutions > 0) {
+                $messages[] = sprintf('Added %d jury solution(s): %s', $numJurySolutions,
+                    join(', ',$successful_subs));
+            }
+            if (!empty($subs_with_unknown_lang)) {
+                $messages[] = sprintf("Could not add jury solution due to unknown language: %s",
+                    join(', ', $subs_with_unknown_lang));
+            }
+            if (!empty($too_large_subs)) {
+                $messages[] = sprintf("Could not add jury solution because they are too large: %s",
+                    join(', ', $too_large_subs));
+            }
         } else {
-            $messages[] = 'No jury solutions added: problem not submittable';
+            $messages[] = 'No jury solutions added: problem not submittable.';
         }
 
         $messages[] = sprintf('Saved problem %d', $problem->getProbid());
