@@ -574,17 +574,17 @@ class EventLogService implements ContainerAwareInterface
         }
 
         // Special case, if both thawed and finalized are non-null or finalized is
-        // non-null but frozen is, we also need to add an end_of_updates event
+        // non-null but frozen, we also need to add an end_of_updates event
         if ($dataToInsert['finalized'] !== null &&
             ($dataToInsert['thawed'] !== null || $dataToInsert['frozen'] === null)) {
             $dataToInsert['end_of_updates'] = max(
                 $dataToInsert['thawed'] ?? Utils::absTime(0),
                 $dataToInsert['finalized']
             );
-        }
 
-        // Insert the end_of_updates event
-        $this->insertEvent($contest, 'state', '', $dataToInsert);
+            // Insert the end_of_updates event
+            $this->insertEvent($contest, 'state', '', $dataToInsert);
+        }
     }
 
     /**
