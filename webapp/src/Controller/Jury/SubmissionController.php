@@ -409,6 +409,18 @@ class SubmissionController extends BaseController
             }
         }
 
+        $hostnames = $this->em->createQueryBuilder()
+            ->from(JudgeTask::class, 'jt')
+            ->select('jt.hostname')
+            ->andWhere('jt.hostname IS NOT NULL')
+            ->andWhere('jt.jobid = :judging')
+            ->setParameter(':judging', $selectedJudging)
+            ->groupBy('jt.hostname')
+            ->orderBy('jt.hostname')
+            ->getQuery()
+            ->getScalarResult();
+        $hostnames = array_column($hostnames, 'hostname');
+
         $runs       = [];
         $runsOutput = [];
         $sameTestcaseIds = true;
@@ -542,6 +554,7 @@ class SubmissionController extends BaseController
             'selectedJudging' => $selectedJudging,
             'lastJudging' => $lastJudging,
             'runs' => $runs,
+            'hostnames' => $hostnames,
             'sameTestcaseIds' => $sameTestcaseIds,
             'externalRuns' => $externalRuns,
             'runsOutput' => $runsOutput,
