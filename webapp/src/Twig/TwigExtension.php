@@ -610,7 +610,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         $extCcsUrl = $this->config->get('external_ccs_submission_url');
         if (!empty($extCcsUrl)) {
             $dataSource = $this->config->get('data_source');
-            if ($dataSource == 2) {
+            if ($dataSource == 2 && $submission->getExternalid()) {
                 return str_replace(['[contest]', '[id]'], [$submission->getContest()->getExternalid(), $submission->getExternalid()], $extCcsUrl);
             } elseif ($dataSource == 1) {
                 return str_replace(['[contest]', '[id]'], [$submission->getContest()->getExternalid(), $submission->getSubmitid()], $extCcsUrl);

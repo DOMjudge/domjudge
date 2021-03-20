@@ -138,12 +138,15 @@
         </span>
 
         {% if external_ccs_submission_url is not empty %}
-            <span>
-                <i class="fas fa-link" title="External link:"></i>
-                <a href="{{ submission | externalCcsUrl }}" target="_blank">
-                    View in external CCS
-                </a>
-            </span>
+            {% set externalSubmissionUrl = submission | externalCcsUrl %}
+            {% if externalSubmissionUrl is not empty %}
+                <span>
+                    <i class="fas fa-link" title="External link:"></i>
+                    <a href="{{ externalSubmissionUrl }}" target="_blank">
+                        View in external CCS
+                    </a>
+                </span>
+            {% endif %}
         {% endif %}
     </div>
 
