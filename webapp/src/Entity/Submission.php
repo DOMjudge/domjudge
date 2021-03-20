@@ -188,7 +188,7 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
     private $resubmissions;
 
     /**
-     * @var string Holds the old result in the case this submission is displayed in a rejudging table.
+     * @var string|null Holds the old result in the case this submission is displayed in a rejudging table.
      * @Serializer\Exclude()
      */
     private $old_result;
@@ -474,7 +474,7 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
         return $this->old_result;
     }
 
-    public function setOldResult(string $old_result): Submission
+    public function setOldResult(?string $old_result): Submission
     {
         $this->old_result = $old_result;
         return $this;
