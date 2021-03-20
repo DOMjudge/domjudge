@@ -126,7 +126,8 @@ class TeamAffiliation extends BaseApiEntity
 
     public function setShortname(string $shortname): TeamAffiliation
     {
-        $this->shortname = $shortname;
+        // Truncate shortname here to make the import more robust. TODO: is this the right place/behavior?
+        $this->shortname = substr($shortname, 0, 32);
         return $this;
     }
 
