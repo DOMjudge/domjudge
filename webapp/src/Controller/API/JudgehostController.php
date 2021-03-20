@@ -917,12 +917,10 @@ class JudgehostController extends AbstractFOSRestController
             }
         });
 
-        // Reload the testcase and judging, as EventLogService::log will clear the entity manager.
+        // Reload the judging, as EventLogService::log will clear the entity manager.
         // For the judging, also load in the submission and some of it's relations.
         /** @var JudgingRun $judgingRun */
-        $judgingRun = $this->em->getRepository(JudgingRun::class)->findOneBy(
-            ['judgetaskid' => $judgeTaskId]);
-        $testCase = $judgingRun->getTestcase();
+        $judgingRun = $this->em->getRepository(JudgingRun::class)->findOneBy(['judgetaskid' => $judgeTaskId]);
         $judging = $judgingRun->getJudging();
 
         // result of this judging_run has been stored. now check whether
@@ -954,24 +952,24 @@ class JudgehostController extends AbstractFOSRestController
 
             $judging->setResult($result);
 
+            $hasNullResults = false;
+            foreach ($runresults as $runresult) {
+                if ($runresult === NULL) {
+                    $hasNullResults = true;
+                    break;
+                }
+            }
+            if (!$hasNullResults || $lazyEval) {
+                // NOTE: setting endtime here determines in testcases_GET
+                // whether a next testcase will be handed out.
+                $judging->setEndtime(Utils::now());
+                $this->maybeUpdateActiveJudging($judging);
+            }
+            $this->em->flush();
+
             // Only update if the current result is different from what we had before.
             // This should only happen when the old result was NULL.
             if ($oldResult !== $result) {
-                $hasNullResults = false;
-                foreach ($runresults as $runresult) {
-                    if ($runresult === NULL) {
-                        $hasNullResults = true;
-                        break;
-                    }
-                }
-                if (!$hasNullResults || $lazyEval) {
-                    // NOTE: setting endtime here determines in testcases_GET
-                    // whether a next testcase will be handed out.
-                    $judging->setEndtime(Utils::now());
-                    $this->maybeUpdateActiveJudging($judging);
-                }
-                $this->em->flush();
-
                 if ($oldResult !== null) {
                     throw new \BadMethodCallException('internal bug: the evaluated result changed during judging');
                 }
