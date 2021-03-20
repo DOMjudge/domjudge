@@ -9,6 +9,15 @@
     <div class="row">
         <div class="col-md-6">
             <div class="jumbotron">
+                <h3>Import problems to contest</h3>
+                {{ form(problem_form) }}
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="jumbotron">
                 <h3>Import / export via file down/upload</h3>
 
                 <ul>
@@ -99,15 +108,6 @@
                     {{ form_widget(icpccms_form.upload_standings, {'disabled': true, attr: {'title': 'Non-functional because of API changes. See results.tsv above, upload this in the ICPC CMS web interface.'}}) }}
                 </div>
                 {{ form_end(icpccms_form) }}
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-6">
-            <div class="jumbotron">
-                <h3>Import problems to contest</h3>
-                {{ form(problem_form) }}
             </div>
         </div>
     </div>
