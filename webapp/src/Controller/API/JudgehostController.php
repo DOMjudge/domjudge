@@ -891,7 +891,8 @@ class JudgehostController extends AbstractFOSRestController
             $judgingRun = $this->em->getRepository(JudgingRun::class)->findOneBy(
                 ['judgetaskid' => $judgeTaskId]);
             if ($judgingRun === null) {
-                throw new BadRequestHttpException('Inconsistent data, no judging run known with this judgetaskid.');
+                throw new BadRequestHttpException(
+                    'Inconsistent data, no judging run known with judgetaskid = ' . $judgeTaskId . '.');
             }
             $judgingRunOutput = new JudgingRunOutput();
             $judgingRun->setOutput($judgingRunOutput);
