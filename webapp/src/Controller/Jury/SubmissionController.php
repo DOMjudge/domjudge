@@ -476,6 +476,7 @@ class SubmissionController extends BaseController
                     }
                 }
                 $cnt++;
+                /** @var JudgingRun $firstJudgingRun */
                 $firstJudgingRun = $runResult[0]->getFirstJudgingRun();
                 $runs[] = $runResult[0];
                 unset($runResult[0]);
@@ -491,7 +492,8 @@ class SubmissionController extends BaseController
                 }
                 $runResult['terminated'] = preg_match('/timelimit exceeded.*hard (wall|cpu) time/',
                                                       (string)$runResult['output_system']);
-                $runsOutput[]            = $runResult;
+                $runResult['hostname'] = $firstJudgingRun->getJudgeTask()->getHostname();
+                $runsOutput[] = $runResult;
             }
         }
 

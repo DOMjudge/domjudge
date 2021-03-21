@@ -512,16 +512,30 @@
                         {% endif %}
                         {% if run.firstJudgingRun is not null %}
                             |
-                            <span class="sol {% if run.firstJudgingRun.runresult == 'correct' %}sol_correct{% else %}sol_incorrect{% endif %}">
-                                {{ run.firstJudgingRun.runresult }}
-                            </span>
-                            {% if run.firstJudgingRun.runresult == 'timelimit' %}
-                                {% if runsOutput[runIdx].terminated %}
-                                    <b>(terminated)</b>
-                                {% else %}
-                                    <b>(finished late)</b>
+                            {% if run.firstJudgingRun.runresult is not null %}
+                                <span class="sol {% if run.firstJudgingRun.runresult == 'correct' %}sol_correct{% else %}sol_incorrect{% endif %}">
+                                    {{ run.firstJudgingRun.runresult }}
+                                </span>
+                                {% if run.firstJudgingRun.runresult == 'timelimit' %}
+                                    {% if runsOutput[runIdx].terminated %}
+                                        <b>(terminated)</b>
+                                    {% else %}
+                                        <b>(finished late)</b>
+                                    {% endif %}
                                 {% endif %}
+                            {% else %}
+                                <span class="sol sol_queued">
+                                   {% if runsOutput[runIdx].hostname is null %}
+                                       queued
+                                   {% else %}
+                                       judging
+                                   {% endif %}
+                                </span>
                             {% endif %}
+                        {% endif %}
+                        {% if runsOutput[runIdx].hostname is not null %}
+                            {% set judgehostLink = path('jury_judgehost', {hostname: runsOutput[runIdx].hostname}) %}
+                            | <a href="{{ judgehostLink }}">{{ runsOutput[runIdx].hostname | printHost }}</a>
                         {% endif %}
                         {% if externalRun is not null and externalRun.firstExternalRun is not null %}
                             {% if externalRun.firstExternalRun is not null %}

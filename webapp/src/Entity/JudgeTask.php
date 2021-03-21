@@ -176,7 +176,7 @@ class JudgeTask
         return $this;
     }
 
-    public function getHostname(): string
+    public function getHostname(): ?string
     {
         return $this->hostname;
     }

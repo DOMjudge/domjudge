@@ -130,6 +130,11 @@ class JudgingRun extends BaseApiEntity
         return $this->judgetaskid;
     }
 
+    public function getJudgeTask(): JudgeTask
+    {
+        return $this->judgetask;
+    }
+
     public function setJudgeTask(JudgeTask $judgeTask): JudgingRun
     {
         $this->judgetask = $judgeTask;
