@@ -619,7 +619,8 @@ while (true) {
                 'POST',
                 'description=' . urlencode("low on disk space on $myhost") .
                 '&judgehostlog=' . urlencode(base64_encode($judgehostlog)) .
-                '&disabled=' . urlencode($disabled),
+                '&disabled=' . urlencode($disabled) .
+                '&hostname= ' . urlencode($myhost),
                 false
             );
             logmsg(LOG_ERR, "=> internal error " . $error_id);
@@ -777,13 +778,14 @@ function registerJudgehost($myhost)
             $workdir = judging_directory($workdirpath, $jud);
             @chmod($workdir, 0700);
             logmsg(LOG_WARNING, "Found unfinished judging with jobid " . $jud['jobid'] .
-                " in my name; given back.");
+                " in my name; given back unfinished runs from me.");
         }
     }
 }
 
 function disable(string $kind, string $idcolumn, $id, string $description, int $judgeTaskId, $extra_log = null)
 {
+    global $myhost;
     $disabled = dj_json_encode(array(
         'kind' => $kind,
         $idcolumn => $id));
@@ -800,7 +802,8 @@ function disable(string $kind, string $idcolumn, $id, string $description, int $
         'judgetaskid=' . urlencode((string)$judgeTaskId) .
         '&description=' . urlencode($description) .
         '&judgehostlog=' . urlencode(base64_encode($judgehostlog)) .
-        '&disabled=' . urlencode($disabled)
+        '&disabled=' . urlencode($disabled) .
+        '&hostname= ' . urlencode($myhost)
     );
 }
 

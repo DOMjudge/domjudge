@@ -170,7 +170,7 @@ class JudgeTask
         return $this->judgetaskid;
     }
 
-    public function setHostname(string $hostname): JudgeTask
+    public function setHostname(?string $hostname): JudgeTask
     {
         $this->hostname = $hostname;
         return $this;
