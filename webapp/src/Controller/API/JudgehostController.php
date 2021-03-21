@@ -15,9 +15,7 @@ use App\Entity\JudgingRunOutput;
 use App\Entity\Rejudging;
 use App\Entity\Submission;
 use App\Entity\SubmissionFile;
-use App\Entity\Testcase;
 use App\Entity\TestcaseContent;
-use App\Entity\User;
 use App\Service\BalloonService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
@@ -223,7 +221,7 @@ class JudgehostController extends AbstractFOSRestController
             ->getResult();
 
         foreach ($judgings as $judging) {
-            $this->giveBackJudging($judging->getJudgingid());
+            $this->giveBackJudging($judging->getJudgingid(), $judgehost);
         }
 
         return array_map(function (Judging $judging) {
@@ -883,40 +881,42 @@ class JudgehostController extends AbstractFOSRestController
 
         if (in_array($disabled['kind'], ['problem', 'language', 'judgehost']) && $judgingId) {
             // Give back judging if we have to.
-            $this->giveBackJudging((int)$judgingId);
+            $hostname = $request->request->get('hostname');
+            $judgehost = $this->em->getRepository(Judgehost::class)->findOneBy(['hostname' => $hostname]);
+            $this->giveBackJudging((int)$judgingId, $judgehost);
         }
 
         return $error->getErrorid();
     }
 
     /**
-     * Give back the judging with the given judging ID
-     * @param int $judgingId
+     * Give back the unjudged runs from the judging with the given judging ID
+     * @param int       $judgingId
+     * @param Judgehost $judgehost
      */
-    protected function giveBackJudging(int $judgingId)
+    protected function giveBackJudging(int $judgingId, Judgehost $judgehost)
     {
         /** @var Judging $judging */
         $judging = $this->em->getRepository(Judging::class)->find($judgingId);
         if ($judging) {
-            $this->em->transactional(function () use ($judging) {
-                $judging
-                    ->setValid(false)
-                    ->setRejudging(null);
+            $this->em->transactional(function () use ($judging, $judgehost) {
+                /** @var JudgingRun $run */
+                foreach ($judging->getRuns() as $run) {
+                    // We do not have to touch any finished runs
+                    if ($run->getRunresult() !== null) {
+                        continue;
+                    }
 
-                $judging->getSubmission()->setJudgehost(null);
+                    // For the other runs, we need to reset the judge task if it belongs to the current judgehost
+                    if ($run->getJudgetask()->getHostname() === $judgehost->getHostname()) {
+                        $run->getJudgetask()->setHostname(null);
+                    }
+                }
 
-                // Give back judging, create a new one.
-                $newJudging = new Judging();
-                $newJudging
-                    ->setContest($judging->getContest())
-                    ->setSubmission($judging->getSubmission());
-                $this->em->persist($newJudging);
                 $this->em->flush();
-
-                $this->dj->maybeCreateJudgeTasks($newJudging);
             });
 
-            $this->dj->auditlog('judging', $judgingId, 'given back', null,
+            $this->dj->auditlog('judging', $judgingId, 'given back for judgehost ' . $judgehost->getHostname(), null,
                                              $judging->getJudgehost()->getHostname(), $judging->getContest()->getCid());
         }
     }
