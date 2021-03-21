@@ -288,7 +288,10 @@ class ImportEventFeedCommand extends Command
             }
         }
 
-        $contest        = $this->em->getRepository(Contest::class)->find($this->contestId);
+        $contestRepository = $this->em->getRepository(Contest::class);
+        /** @var Contest $contest */
+        $contest           = $contestRepository->findOneBy(['externalid' => $this->contestId]) ??
+            $contestRepository->find($this->contestId);
         if (!$contest) {
             $this->logger->error(
                 'Contest with ID %s not found, exiting.',
@@ -297,8 +300,8 @@ class ImportEventFeedCommand extends Command
             return static::STATUS_ERROR;
         } else {
             $this->logger->notice(
-                'Starting event feed import into contest with ID %d [DOMjudge/%s]',
-                [ $contest->getCid(), $this->domjudgeVersion ]
+                'Starting event feed import into contest with ID %d (external ID %s) [DOMjudge/%s]',
+                [ $contest->getCid(), $contest->getExternalid() ,$this->domjudgeVersion ]
             );
         }
 

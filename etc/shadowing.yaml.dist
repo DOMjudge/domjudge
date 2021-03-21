@@ -6,7 +6,9 @@
 # The root keys are identifiers used to pass to `import/import-event-feed`, e.g.
 # use `import/import-event-feed exampleA` to import the first contest.
 exampleA:
-    # DOMjudge's **numeric** ID of the contest to import into.
+    # DOMjudge's ID of the contest to import into.
+    # Can either be the numeric ID or the external ID.
+    # If it matches both a numeric and external ID, the external ID has precedence.
     id: 2
     # Normally DOMjudge only allows importing when the `data_source`
     # configuration option is set to 'configuration and live data external'.
