@@ -743,7 +743,7 @@ class RejudgingController extends BaseController
             $results = [];
             $runresults = [];
             foreach ($curJudgings as $judging) {
-                if (!in_array($judging['result'], $results)) {
+                if (!in_array($judging['result'], $results) && $judging['result'] != NULL) {
                     $results[] = $judging['result'];
                 }
                 $judging_runs = $this->em->createQueryBuilder()
@@ -818,8 +818,11 @@ class RejudgingController extends BaseController
                 'rank' => $value['rank'],
                 'spread' => $value['spread'],
                 'count' => count($submissions[$submitid]),
-                'verdict' => (!array_key_exists($submitid, $submissions_to_result) ? '*multiple*' :
-                $submissions_to_result[$submitid])
+                'verdict' => (
+                    !array_key_exists($submitid, $submissions_to_result)
+                        ? '<span title="' . join(', ', $results) . '">*multiple*</span>'
+                        : $submissions_to_result[$submitid]
+                )
             ];
         }
 
