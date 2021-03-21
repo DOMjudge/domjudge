@@ -5,6 +5,7 @@ namespace App\Twig;
 use App\Entity\Contest;
 use App\Entity\ExternalJudgement;
 use App\Entity\Judging;
+use App\Entity\JudgingRun;
 use App\Entity\Language;
 use App\Entity\Submission;
 use App\Entity\SubmissionFile;
@@ -472,6 +473,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             $class     = $submissionDone ? 'secondary' : 'primary';
             $text      = '?';
             $isCorrect = false;
+            /** @var JudgingRun $run */
             $run       = $isExternal ? $testcase->getFirstExternalRun() : $testcase->getFirstJudgingRun();
             if ($isExternal) {
                 $runResult = $run ? $run->getResult() : null;
@@ -479,13 +481,18 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
                 $runResult = $run ? $run->getRunresult() : null;
             }
 
-            if ($run && $runResult !== null) {
-                $text  = substr($runResult, 0, 1);
-                $class = 'danger';
-                if ($runResult === Judging::RESULT_CORRECT) {
-                    $isCorrect = true;
-                    $text      = '✓';
-                    $class     = 'success';
+            if ($run) {
+                if ($runResult !== null) {
+                    $text = substr($runResult, 0, 1);
+                    $class = 'danger';
+                    if ($runResult === Judging::RESULT_CORRECT) {
+                        $isCorrect = true;
+                        $text = '✓';
+                        $class = 'success';
+                    }
+                } else if ($run->getJudgeTask()->getHostname() !== null) {
+                    $text = '↺';
+                    $class = 'info';
                 }
             }
 
