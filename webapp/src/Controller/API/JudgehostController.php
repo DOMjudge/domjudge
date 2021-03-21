@@ -488,6 +488,77 @@ class JudgehostController extends AbstractFOSRestController
     }
 
     /**
+     * Add back debug info.
+     * @Rest\Post("/add-debug-info/{hostname}/{judgeTaskId}")
+     * @IsGranted("ROLE_JUDGEHOST")
+     * @OA\Response(
+     *     response="200",
+     *     description="When the debug info has been added"
+     * )
+     * @OA\Parameter(
+     *     name="hostname",
+     *     in="path",
+     *     description="The hostname of the judgehost that wants to add the debug info",
+     *     @OA\Schema(type="string")
+     * )
+     * @OA\Parameter(
+     *     name="judgeTaskId",
+     *     in="path",
+     *     description="The ID of the judgetask to add",
+     *     @OA\Schema(type="string")
+     * )
+     */
+    public function addDebugInfo(
+        Request $request,
+        string $hostname,
+        int $judgeTaskId
+    )
+    {
+        $required = [
+            'output_run',
+        ];
+
+        foreach ($required as $argument) {
+            if (!$request->request->has($argument)) {
+                throw new BadRequestHttpException(
+                    sprintf("Argument '%s' is mandatory", $argument));
+            }
+        }
+
+        /** @var Judgehost $judgehost */
+        $judgehost = $this->em->getRepository(Judgehost::class)->find($hostname);
+        if (!$judgehost) {
+            throw new BadRequestHttpException("Who are you and why are you sending us any data?");
+        }
+
+        /** @var JudgeTask $judgeTask */
+        $judgeTask = $this->em->getRepository(JudgeTask::class)->find($judgeTaskId);
+        if ($judgeTask === null) {
+            throw new BadRequestHttpException(
+                'Inconsistent data, no judgetask known with judgetaskid = ' . $judgeTaskId . '.');
+        }
+
+        /** @var JudgingRun $judgingRun */
+        $judgingRun = $this->em->getRepository(JudgingRun::class)->findOneBy(
+            [
+                'judging' => $judgeTask->getJobId(),
+                'testcase' => $judgeTask->getTestcaseId(),
+            ]
+        );
+        if ($judgingRun === null) {
+            throw new BadRequestHttpException(
+                'Inconsistent data, no judging run known with jid = ' . $judgeTask->getJobId() . '.');
+        }
+
+        $outputRun = base64_decode($request->request->get('output_run'));
+
+        /** @var JudgingRunOutput $judgingRunOutput */
+        $judgingRunOutput = $judgingRun->getOutput();
+        $judgingRunOutput->setOutputRun($outputRun);
+        $this->em->flush();
+    }
+
+    /**
      * Add one JudgingRun. When relevant, finalize the judging.
      * @Rest\Post("/add-judging-run/{hostname}/{judgeTaskId}")
      * @IsGranted("ROLE_JUDGEHOST")
@@ -1304,6 +1375,27 @@ class JudgehostController extends AbstractFOSRestController
             $max_batchsize = $request->request->get('max_batchsize');
         }
 
+        // First try to get any debug info tasks that are assigned to this host.
+        /** @var JudgeTask[] $judgetasks */
+        $judgetasks = $this->em
+            ->createQueryBuilder()
+            ->from(JudgeTask::class, 'jt')
+            ->select('jt')
+            ->andWhere('jt.hostname = :hostname')
+            ->andWhere('jt.starttime IS NULL')
+            ->andWhere('jt.valid = 1')
+            ->andWhere('jt.type = :type')
+            ->setParameter(':hostname', $hostname)
+            ->setParameter(':type', JudgeTaskType::DEBUG_INFO)
+            ->addOrderBy('jt.priority')
+            ->addOrderBy('jt.judgetaskid')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getResult();
+        if (!empty($judgetasks)) {
+            return $this->serializeJudgeTasks($judgetasks, $hostname);
+        }
+
         /* Our main objective is to work on high priority work first while keeping the additional overhead of splitting
          * work across judgehosts (e.g. additional compilation) low.
          *
@@ -1473,10 +1565,12 @@ class JudgehostController extends AbstractFOSRestController
            }
         }
 
+        $now = Utils::now();
         $numUpdated = $this->em->getConnection()->executeUpdate(
-            'UPDATE judgetask SET hostname = :hostname WHERE hostname IS NULL AND valid = 1 AND judgetaskid IN (:ids)',
+            'UPDATE judgetask SET hostname = :hostname, starttime = :starttime WHERE starttime IS NULL AND valid = 1 AND judgetaskid IN (:ids)',
             [
                 ':hostname' => $hostname,
+                ':starttime' => $now,
                 ':ids' => $judgetaskids,
             ],
             [
@@ -1489,7 +1583,6 @@ class JudgehostController extends AbstractFOSRestController
             return [];
         }
 
-        $now = Utils::now();
         // We got at least one, let's update the starttime of the corresponding judging if haven't done so in the past.
         $starttime_set = $this->em->getConnection()->executeUpdate(
             'UPDATE judging SET starttime = :starttime WHERE judgingid = :jobid AND starttime IS NULL',
@@ -1499,7 +1592,7 @@ class JudgehostController extends AbstractFOSRestController
             ]
         );
 
-        if ($starttime_set) {
+        if ($starttime_set && $judgeTasks[0]->getType() == JudgeTaskType::JUDGING_RUN) {
             /** @var Submission $submission */
             $submission = $this->em->getRepository(Submission::class)->findOneBy(['submitid' => $submit_id]);
             $teamid = $submission->getTeam()->getTeamid();

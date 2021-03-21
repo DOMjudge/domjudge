@@ -3,6 +3,7 @@
 namespace App\Controller\Jury;
 
 use App\Controller\BaseController;
+use App\Doctrine\DBAL\Types\JudgeTaskType;
 use App\Entity\Contest;
 use App\Entity\ExternalJudgement;
 use App\Entity\Judgehost;
@@ -446,6 +447,7 @@ class SubmissionController extends BaseController
                 $queryBuilder
                     ->addSelect('TRUNCATE(tc.output, :outputDisplayLimit, :outputTruncateMessage) AS output_reference')
                     ->addSelect('TRUNCATE(jro.output_run, :outputDisplayLimit, :outputTruncateMessage) AS output_run')
+                    ->addSelect('RIGHT(jro.output_run, 50) AS output_run_last_bytes')
                     ->addSelect('TRUNCATE(jro.output_diff, :outputDisplayLimit, :outputTruncateMessage) AS output_diff')
                     ->addSelect('TRUNCATE(jro.output_error, :outputDisplayLimit, :outputTruncateMessage) AS output_error')
                     ->addSelect('TRUNCATE(jro.output_system, :outputDisplayLimit, :outputTruncateMessage) AS output_system')
@@ -493,6 +495,10 @@ class SubmissionController extends BaseController
                 $runResult['terminated'] = preg_match('/timelimit exceeded.*hard (wall|cpu) time/',
                                                       (string)$runResult['output_system']);
                 $runResult['hostname'] = $firstJudgingRun->getJudgeTask()->getHostname();
+                $runResult['is_output_run_truncated'] = preg_match(
+                    '/\[output storage truncated after \d* B\]/',
+                    (string)$runResult['output_run_last_bytes']
+                );
                 $runsOutput[] = $runResult;
             }
         }
@@ -576,6 +582,31 @@ class SubmissionController extends BaseController
         }
 
         return $this->render('jury/submission.html.twig', $twigData);
+    }
+
+    /**
+     * @Route("/request-output/{jid}/{jrid}", name="request_output")
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Exception
+     */
+    public function requestOutput(Judging $jid, JudgingRun $jrid)
+    {
+        $submission = $jid->getSubmission();
+        $hostname = $jrid->getJudgeTask()->getHostname();
+        $judgeTask = new JudgeTask();
+        $judgeTask
+            ->setType(JudgeTaskType::DEBUG_INFO)
+            ->setHostname($hostname)
+            ->setSubmitid($submission->getSubmitid())
+            ->setPriority(JudgeTask::PRIORITY_HIGH)
+            ->setJobId($jid->getJudgingid())
+            ->setTestcaseId($jrid->getTestcase()->getTestcaseid());
+        $this->em->persist($judgeTask);
+        $this->em->flush();
+        return $this->redirectToRoute('jury_submission', [
+            'submitId' => $jid->getSubmission()->getSubmitid(),
+            'jid' => $jid->getJudgingid(),
+        ]);
     }
 
     /**

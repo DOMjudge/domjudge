@@ -165,6 +165,15 @@ class JudgeTask
      */
     protected $valid = true;
 
+    /**
+     * @var double
+     * @ORM\Column(type="decimal", precision=32, scale=9, name="starttime",
+     *     options={"comment"="Time the judgetask was started", "unsigned"=true},
+     *     nullable=true)
+     * @Serializer\Exclude()
+     */
+    private $starttime;
+
     public function getJudgetaskid(): int
     {
         return $this->judgetaskid;
@@ -311,5 +320,18 @@ class JudgeTask
     public function getValid(): bool
     {
         return $this->valid;
+    }
+
+    /** @param string|float $starttime */
+    public function setStarttime($starttime): Judging
+    {
+        $this->starttime = $starttime;
+        return $this;
+    }
+
+    /** @return string|float|null */
+    public function getStarttime()
+    {
+        return $this->starttime;
     }
 }

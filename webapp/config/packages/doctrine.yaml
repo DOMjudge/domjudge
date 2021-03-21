@@ -32,3 +32,4 @@ doctrine:
         dql:
             string_functions:
                 truncate: App\Doctrine\ORM\Query\AST\Functions\TruncateFunction
+                right: App\Doctrine\ORM\Query\AST\Functions\RightFunction

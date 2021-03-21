@@ -647,17 +647,37 @@ while (true) {
         continue;
     }
 
-    // we have gotten a submission for judging
+    // We have gotten a work packet.
     $endpoints[$endpointID]["waiting"] = false;
+    // All tasks are guaranteed to be of the same type.
+    $type = $row[0]['type'];
     logmsg(LOG_INFO,
-        "⇝ Received " . sizeof($row) . " '" . $row[0]['type'] . "' judge tasks (endpoint $endpointID)");
+        "⇝ Received " . sizeof($row) . " '" . $type . "' judge tasks (endpoint $endpointID)");
 
     $jobId = $row[0]['jobid'];
 
     // create workdir for judging
     $workdir = judging_directory($workdirpath, $row[0]);
-
     logmsg(LOG_INFO, "  Working directory: $workdir");
+
+    // Retrieve full test case contents for now. Later this can be expanded to collect other debug info (e.g. a full
+    // judging package as well).
+    if ($type == 'debug_info') {
+        if ($lastWorkdir !== null) {
+            cleanup_judging($lastWorkdir);
+            $lastWorkdir = null;
+        }
+        foreach ($row as $judgeTask) {
+            $testcasedir = $workdir . "/testcase" . sprintf('%05d', $judgeTask['testcase_id']);
+            request(
+                sprintf('judgehosts/add-debug-info/%s/%s', urlencode($myhost), urlencode((string)$judgeTask['judgetaskid'])),
+                'POST',
+                ['output_run' => rest_encode_file($testcasedir . '/program.out', false)],
+                false
+            );
+        }
+        continue;
+    }
 
     $success_file = "$workdir/success";
     if ($lastWorkdir !== null && $lastWorkdir !== $workdir) {
@@ -1134,10 +1154,10 @@ function judge(array $judgeTask): bool
     $new_judging_run = array(
         'runresult' => urlencode($result),
         'runtime' => urlencode((string)$runtime),
-        'output_run'   => rest_encode_file($testcasedir . '/program.out', false),
+        'output_run'   => rest_encode_file($testcasedir . '/program.out', $output_storage_limit),
         'output_error' => rest_encode_file($testcasedir . '/program.err', $output_storage_limit),
         'output_system' => rest_encode_file($testcasedir . '/system.out', $output_storage_limit),
-        'metadata' => rest_encode_file($testcasedir . '/program.meta', $output_storage_limit),
+        'metadata' => rest_encode_file($testcasedir . '/program.meta', false),
         'output_diff'  => rest_encode_file($testcasedir . '/feedback/judgemessage.txt', $output_storage_limit),
         'hostname' => $myhost,
     );
