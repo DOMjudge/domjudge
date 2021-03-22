@@ -768,7 +768,7 @@ class Contest extends BaseApiEntity
 
     /**
      * @param $time_string
-     * @return float|int|string|null
+     * @return float|int|null
      * @throws \Exception
      */
     public function getAbsoluteTime($time_string)
@@ -776,16 +776,16 @@ class Contest extends BaseApiEntity
         if ($time_string === null) {
             return null;
         } elseif (preg_match('/^[+-][0-9]+:[0-9]{2}(:[0-9]{2}(\.[0-9]{0,6})?)?$/', $time_string)) {
-            // FIXME: dedup code with non symfony code
             $sign           = ($time_string[0] == '-' ? -1 : +1);
             $time_string[0] = 0;
             $times          = explode(':', $time_string, 3);
+            $hours          = (int)$times[0];
+            $minutes        = (int)$times[1];
             if (count($times) == 2) {
-                $times[2] = '00';
+                $seconds = 0;
+            } else {
+                $seconds = (float)$times[2];
             }
-            $hours        = $times[0];
-            $minutes      = $times[1];
-            $seconds      = $times[2];
             $seconds      = $seconds + 60 * ($minutes + 60 * $hours);
             $seconds      *= $sign;
             $absoluteTime = $this->starttime + $seconds;
