@@ -132,7 +132,7 @@ class ContestController extends BaseController
             // Special case delay/resume start (only sets/unsets starttime_undefined).
             $maxSeconds = Contest::STARTTIME_UPDATE_MIN_SECONDS_BEFORE;
             if (in_array($time, $start_actions, true)) {
-                $enabled = $time === 'delay_start' ? 0 : 1;
+                $enabled = $time !== 'delay_start';
                 if (Utils::difftime((float)$contest->getStarttime(false), $now) <= $maxSeconds) {
                     $this->addFlash(
                         'error',
