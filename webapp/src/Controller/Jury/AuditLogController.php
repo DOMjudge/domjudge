@@ -82,9 +82,7 @@ class AuditLogController extends AbstractController
                     ->orderBy('a.logid', 'DESC');
 
         $paginator = new Paginator($query);
-        if ($showAll) {
-            $paginator->getQuery();
-        } else {
+        if (!$showAll) {
             $paginator->getQuery()
                       ->setFirstResult($limit * ($page - 1))
                       ->setMaxResults($limit);
