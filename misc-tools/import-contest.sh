@@ -1,4 +1,7 @@
 #!/bin/bash
+# Convenience script to import a contest (including metadata, teams and
+# problems) via the command line. Requires httpie to be installed and .netrc to
+# be set up. See also https://www.domjudge.org/docs/manual/master/import.html
 
 set -euo pipefail
 
@@ -8,6 +11,9 @@ if [ $# -eq 0 ]; then
 fi
 api_url="$1"
 
+# Add --verify=no here if you want to drop SSL verification during upload.
+httpie_options=""
+
 read -r -p "Import groups? [y/N] " response
 response=${response,,}
 if [[ $response =~ ^(yes|y| ) ]]; then
@@ -15,7 +21,7 @@ if [[ $response =~ ^(yes|y| ) ]]; then
     echo "'groups.tsv' not found."
   else
     echo "Importing groups."
-    http --check-status -b -f POST "$api_url/users/groups" tsv@groups.tsv
+    http $httpie_options --check-status -b -f POST "$api_url/users/groups" tsv@groups.tsv
   fi
 else
   echo "Skipping group import."
@@ -28,7 +34,7 @@ if [[ $response =~ ^(yes|y| ) ]]; then
     echo "'teams2.tsv' not found."
   else
     echo "Importing teams."
-    http --check-status -b -f POST "$api_url/users/teams" tsv@teams2.tsv
+    http $httpie_options --check-status -b -f POST "$api_url/users/teams" tsv@teams2.tsv
   fi
 else
   echo "Skipping teams import."
@@ -41,7 +47,7 @@ if [[ $response =~ ^(yes|y| ) ]] || [[ -z $response ]]; then
     echo "'accounts.tsv' not found."
   else
     echo "Importing accounts."
-    http --check-status -b -f POST "$api_url/users/accounts" tsv@accounts.tsv
+    http $httpie_options --check-status -b -f POST "$api_url/users/accounts" tsv@accounts.tsv
   fi
 else
   echo "Skipping accounts import."
@@ -55,7 +61,7 @@ if [[ $response =~ ^(yes|y| ) ]] || [[ -z $response ]]; then
   else
     echo "Importing contest."
     cat contest.yaml problemset.yaml > combined.yaml
-    cid=$(http --check-status -b -f POST "$api_url/contests" yaml@combined.yaml | sed -e 's|^"||' -e 's|"$||')
+    cid=$(http $httpie_options --check-status -b -f POST "$api_url/contests" yaml@combined.yaml | sed -e 's|^"||' -e 's|"$||')
     echo "  -> cid=$cid"
     rm combined.yaml
   fi
@@ -67,7 +73,7 @@ read -r -p "Import problems? [Y/n] " response
 response=${response,,}
 if [[ $response =~ ^(yes|y| ) ]] || [[ -z $response ]]; then
   set +e
-  http --check-status --pretty=format "$api_url/user" | grep -q "\"team_id\": null"
+  http $httpie_options --check-status --pretty=format "$api_url/user" | grep -q "\"team_id\": null"
   if [ $? -eq 0 ]; then
     read -r -p "No team associated with your account. Jury submissions won't be imported. Really continue? [y/N] " response
     response=${response,,}
@@ -97,11 +103,11 @@ if [[ $response =~ ^(yes|y| ) ]] || [[ -z $response ]]; then
         cd "$prob"
         zip -r "../$prob" -- .timelimit *
       )
-      probid=$(http --check-status --pretty=format "$api_url/contests/$cid/problems" | grep -A1 "\"externalid\": \"$prob\"" | grep "\"id\": " | sed -e 's|.*"id": "||' -e 's|",$||')
+      probid=$(http $httpie_options --check-status --pretty=format "$api_url/contests/$cid/problems" | grep -A1 "\"externalid\": \"$prob\"" | grep "\"id\": " | sed -e 's|.*"id": "||' -e 's|",$||')
       read -r -p "Ready to import problem '$prob' to probid=$probid. Continue? [Y/n] " response
       response=${response,,}
       if [[ $response =~ ^(yes|y| ) ]] || [[ -z $response ]]; then
-        http --check-status -f POST "$api_url/contests/$cid/problems" zip[]@"${prob}.zip" problem="$probid"
+        http $httpie_options --check-status -f POST "$api_url/contests/$cid/problems" zip[]@"${prob}.zip" problem="$probid"
       fi
     done
   fi
