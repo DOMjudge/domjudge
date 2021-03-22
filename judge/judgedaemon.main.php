@@ -979,7 +979,8 @@ function compile(array $judgeTask, string $workdir, string $workdirpath, array $
     // What does the exitcode mean?
     if (! isset($EXITCODES[$retval])) {
         alert('error');
-        logmsg(LOG_ERR, "Unknown exitcode from compile.sh for s$judgeTask[submitid]: $retval");
+        $description = "Unknown exitcode from compile.sh for s$judgeTask[submitid]: $retval";
+        logmsg(LOG_ERR, $description);
         disable('compile_script', 'compile_script_id', $judgeTask['compile_script_id'], $description, $judgeTask['judgetaskid'], $compile_output);
 
         return false;
