@@ -22,7 +22,7 @@ become of importance when you run into problems.
 
 .. admonition:: Summary
 
-   DOMjudge works through a web interface that can be found at
+   The web interface of DOMjudge can be found at
    |baseurlteam|. See the two figures on the next page for
    an impression.
 
