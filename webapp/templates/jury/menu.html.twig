@@ -34,12 +34,13 @@
                 </li>
             {% endif %}
 
-            {% if is_granted('ROLE_JURY') %}
+            {% if is_granted('ROLE_CLARIFICATION_RW') %}
                 <li class="nav-item">
                     <a class="nav-link" href="{{ path('jury_clarifications') }}" id="menu_clarifications"><i class="fas fa-comments"></i> clarifications <span class="badge badge-info" id="num-alerts-clarifications"></span></a>
                 </li>
+            {% endif %}
 
-
+            {% if is_granted('ROLE_JURY') %}
                 <li class="nav-item">
                     <a class="nav-link" href="{{ path('jury_submissions') }}"><i class="fas fa-file-code"></i> submissions</a>
                 </li>

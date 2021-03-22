@@ -22,7 +22,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * @Route("/jury/clarifications")
- * @IsGranted("ROLE_JURY")
+ * @IsGranted("ROLE_CLARIFICATION_RW")
  */
 class ClarificationController extends AbstractController
 {
