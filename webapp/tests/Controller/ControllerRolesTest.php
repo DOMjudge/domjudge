@@ -104,6 +104,7 @@ class ControllerRolesTest extends BaseTest
     protected function getPagesRoles(array $roleBaseURL, array $roles, bool $allPages) : array
     {
         static::$roles = $roles;
+        $this->logOut();
         $this->logIn();
         $urlsFoundPerRole = [];
         foreach ($roleBaseURL as $baseURL) {
@@ -149,6 +150,7 @@ class ControllerRolesTest extends BaseTest
     public function testRoleAccess(string $roleBaseURL, array $baseRoles, array $optionalRoles, bool $allPages) : void
     {
         static::$roles = $baseRoles;
+        $this->logOut();
         $this->logIn();
         $urlsToCheck = $this->crawlPageGetLinks($roleBaseURL, 200);
         if ($allPages) {
@@ -174,6 +176,7 @@ class ControllerRolesTest extends BaseTest
         $urlsToCheck        = $this->getPagesRoles([$roleBaseURL], $roles, $allPages);
         $urlsToCheckOther   = $this->getPagesRoles($roleOthersBaseURL, $rolesOther, $allPages);
         static::$roles = $roles;
+        $this->logOut();
         $this->logIn();
         foreach (array_diff($urlsToCheckOther, $urlsToCheck) as $url) {
             if (!$this->urlExcluded($url)) {
@@ -191,10 +194,12 @@ class ControllerRolesTest extends BaseTest
      */
     public function provideRoleAccessData() : Generator
     {
-        yield ['/jury',     ['admin'],  ['jury','team'],            false];
-        yield ['/jury',     ['jury'],   ['admin','team'],           false];
-        yield ['/team',     ['team'],   ['admin','jury'],           true];
-        yield ['/public',   [],         ['team','admin','jury'],    true];
+        yield ['/jury',     ['admin'],              ['jury','team','balloon','clarification_rw'],           false];
+        yield ['/jury',     ['jury'],               ['admin','team','balloon','clarification_rw'],          false];
+        yield ['/jury',     ['balloon'],            ['admin','team','clarification_rw'],                    true];
+        yield ['/jury',     ['clarification_rw'],   ['admin','team','balloon'],                             true];
+        yield ['/team',     ['team'],               ['admin','jury','balloon','clarification_rw'],          true];
+        yield ['/public',   [],                     ['team','admin','jury','balloon','clarification_rw'],   true];
     }
 
     /**
@@ -208,9 +213,11 @@ class ControllerRolesTest extends BaseTest
      **/
     public function provideRoleAccessOtherRoles() : Generator
     {
-        yield ['/jury',     ['/jury','/team'],  ['admin'],  ['jury','team'],            false];
-        yield ['/jury',     ['/jury','/team'],  ['jury'],   ['admin','team'],           false];
-        yield ['/team',     ['/jury'],          ['team'],   ['admin','jury'],           true];
-        yield ['/public',   ['/jury','/team'],  [],         ['admin','jury','team'],    true];
+        yield ['/jury',     ['/jury','/team'],  ['admin'],              ['jury','team'],                                        false];
+        yield ['/jury',     ['/jury','/team'],  ['jury'],               ['admin','team'],                                       false];
+        yield ['/jury',     ['/jury','/team'],  ['balloon'],            ['admin','team','clarification_rw'],                    false];
+        yield ['/jury',     ['/jury','/team'],  ['clarification_rw'],   ['admin','team','balloon'],                             false];
+        yield ['/team',     ['/jury'],          ['team'],               ['admin','jury','balloon','clarification_rw'],          true];
+        yield ['/public',   ['/jury','/team'],  [],                     ['admin','jury','team','balloon','clarification_rw'],   true];
     }
 }
