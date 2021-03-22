@@ -56,7 +56,7 @@ class JuryMiscController extends BaseController
 
     /**
      * @Route("", name="jury_index")
-     * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_BALLOON')")
+     * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_BALLOON') or is_granted('ROLE_CLARIFICATION_RW')")
      */
     public function indexAction(Request $request)
     {
