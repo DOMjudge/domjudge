@@ -75,6 +75,6 @@ class ExecutableController extends AbstractFOSRestController
             throw new NotFoundHttpException(sprintf('Cannot find executable \'%s\'', $id));
         }
 
-        return base64_encode($executable->getZipFileContent());
+        return base64_encode($executable->getZipfileContent());
     }
 }

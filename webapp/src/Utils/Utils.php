@@ -1067,13 +1067,13 @@ class Utils
      * @param string $filename
      * @return StreamedResponse
      */
-    public static function streamAsBinaryFile(string $content, string $filename): StreamedResponse
+    public static function streamAsBinaryFile(string $content, string $filename, string $type='octet-stream'): StreamedResponse
     {
         $response = new StreamedResponse();
         $response->setCallback(function () use ($content) {
             echo $content;
         });
-        $response->headers->set('Content-Type', 'application/octet-stream');
+        $response->headers->set('Content-Type', 'application/' . $type);
         $response->headers->set('Content-Disposition', 'attachment; filename="' . $filename . '"');
         $response->headers->set('Content-Length', strlen($content));
         $response->headers->set('Content-Transfer-Encoding', 'binary');

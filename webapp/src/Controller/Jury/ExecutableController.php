@@ -257,21 +257,9 @@ class ExecutableController extends BaseController
         }
 
         $zipFileContent = $executable->getZipfileContent();
-        $zipFileSize = strlen($zipFileContent);
         $filename = sprintf('%s.zip', $executable->getExecid());
 
-        $response = new StreamedResponse();
-        $response->setCallback(function () use ($zipFileContent) {
-            echo $zipFileContent;
-        });
-        $response->headers->set('Content-Type', 'application/zip');
-        $response->headers->set('Content-Disposition', 'attachment; filename="' . $filename . '"');
-        $response->headers->set('Content-Length', $zipFileSize);
-        $response->headers->set('Content-Transfer-Encoding', 'binary');
-        $response->headers->set('Connection', 'Keep-Alive');
-        $response->headers->set('Accept-Ranges', 'bytes');
-
-        return $response;
+        return Utils::streamAsBinaryFile($zipFileContent, $filename, 'zip');
     }
 
     /**
