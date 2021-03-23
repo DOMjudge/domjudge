@@ -210,7 +210,7 @@ class PublicController extends BaseController
                 return $problem->getProblemTextStreamedResponse();
             } catch (BadRequestHttpException $e) {
                 $this->addFlash('danger', $e->getMessage());
-                return $this->redirectToRoute('team_problems');
+                return $this->redirectToRoute('public_problems');
             }
         });
     }
