@@ -13,7 +13,7 @@ use App\Entity\TeamCategory;
 use App\Entity\Testcase;
 use App\Entity\User;
 use App\Utils\Utils;
-use Doctrine\Common\Inflector\Inflector;
+use BadMethodCallException;
 use Doctrine\Inflector\InflectorFactory;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\RouterInterface;
@@ -138,7 +138,7 @@ class CheckConfigService
         return $results;
     }
 
-    public function checkPhpVersion()
+    public function checkPhpVersion() : array
     {
         $my = PHP_VERSION;
         $req = '7.2.5';
@@ -148,7 +148,7 @@ class CheckConfigService
                 'desc' => sprintf('You have PHP version %s. The minimum required is %s', $my, $req)];
     }
 
-    public function checkPhpExtensions()
+    public function checkPhpExtensions() : array
     {
         $required = ['json', 'mbstring', 'mysqli', 'zip', 'gd', 'intl'];
         $optional = [];
@@ -174,7 +174,7 @@ class CheckConfigService
                 'desc' => $remark];
     }
 
-    public function checkPhpSettings()
+    public function checkPhpSettings() : array
     {
         $sourcefiles_limit = $this->config->get('sourcefiles_limit');
         $max_files = ini_get('max_file_uploads');
@@ -218,7 +218,7 @@ class CheckConfigService
                 'desc' => $desc];
     }
 
-    public function checkMysqlSettings()
+    public function checkMysqlSettings() : array
     {
         $r = $this->em->getConnection()->fetchAll('SHOW variables WHERE Variable_name IN
                         ("innodb_log_file_size", "max_connections", "max_allowed_packet", "tx_isolation")');
@@ -261,7 +261,7 @@ class CheckConfigService
                 'desc' => $desc ?: 'MySQL settings are all ok'];
     }
 
-    public function checkAdminPass()
+    public function checkAdminPass() : array
     {
         $res = 'O';
         $desc = 'Password for "admin" has been changed from the default.';
@@ -278,7 +278,7 @@ class CheckConfigService
                 'desc' => $desc];
     }
 
-    public function checkDefaultCompareRunExist()
+    public function checkDefaultCompareRunExist() : array
     {
         $res = 'O';
         $desc = '';
@@ -299,7 +299,7 @@ class CheckConfigService
                 'desc' => $desc];
     }
 
-    public function checkScriptFilesizevsMemoryLimit()
+    public function checkScriptFilesizevsMemoryLimit() : array
     {
         if ($this->config->get('script_filesize_limit') <=
             $this->config->get('memory_limit')) {
@@ -317,7 +317,7 @@ class CheckConfigService
             ];
     }
 
-    public function checkDebugDisabled()
+    public function checkDebugDisabled() : array
     {
         if ($this->debug) {
             return ['caption' => 'Debugging',
@@ -329,7 +329,7 @@ class CheckConfigService
                 'desc' => 'Debugging disabled.'];
     }
 
-    public function checkTmpdirWritable()
+    public function checkTmpdirWritable() : array
     {
         $tmpdir = $this->dj->getDomjudgeTmpDir();
         if (is_writable($tmpdir)) {
@@ -352,12 +352,12 @@ class CheckConfigService
         $charactersLength = strlen($characters);
         $randomString = '';
         for ($i = 0; $i < $length; $i++) {
-            $randomString .= $characters[rand(0, $charactersLength - 1)];
+            $randomString .= $characters[random_int(0, $charactersLength - 1)];
         }
         return $randomString;
     }
 
-    public function checkHashTime()
+    public function checkHashTime() : array
     {
         $tmp_user = new User();
         $counter = 0;
@@ -385,7 +385,7 @@ class CheckConfigService
             'desc' => sprintf('Hashing cost is reasonable (Did %d hashes).', $counter)];
     }
 
-    public function checkContestActive()
+    public function checkContestActive() : array
     {
         $contests = $this->dj->getCurrentContests();
         if (empty($contests)) {
@@ -402,7 +402,7 @@ class CheckConfigService
     }
 
 
-    public function checkContestsValidate()
+    public function checkContestsValidate() : array
     {
         // Fetch all active and future contests
         $contests = $this->dj->getCurrentContests(null, true);
@@ -420,7 +420,7 @@ class CheckConfigService
             $cperrors[$cid] = '';
             foreach ($contest->getProblems() as $cp) {
                 if (empty($cp->getColor())) {
-                    $result = ($result == 'E' ? 'E' : 'W');
+                    $result = ($result === 'E' ? 'E' : 'W');
                     $cperrors[$cid] .= "No color for problem " . $cp->getShortname() . " in contest c" . $cid . "\n";
                 }
             }
@@ -439,7 +439,7 @@ class CheckConfigService
     }
 
 
-    public function checkProblemsValidate()
+    public function checkProblemsValidate() : array
     {
         $problems = $this->em->getRepository(Problem::class)->findAll();
         $script_filesize_limit = $this->config->get('script_filesize_limit');
@@ -525,7 +525,7 @@ class CheckConfigService
                     ($desc ?: 'No problems with problems found.')];
     }
 
-    public function checkLanguagesValidate()
+    public function checkLanguagesValidate() : array
     {
         $languages = $this->em->getRepository(Language::class)->findAll();
 
@@ -573,7 +573,7 @@ class CheckConfigService
                     ($desc ?: 'No languages with problems found.')];
     }
 
-    public function checkProblemLanguageJudgability()
+    public function checkProblemLanguageJudgability() : array
     {
         $judgehosts = $this->em->getRepository(Judgehost::class)->findBy(['active' => 1]);
 
@@ -624,7 +624,7 @@ class CheckConfigService
             'desc' => $desc];
     }
 
-    public function checkAffiliations()
+    public function checkAffiliations() : array
     {
         $show_logos = $this->config->get('show_affiliation_logos');
         $show_flags = $this->config->get('show_flags');
@@ -680,7 +680,7 @@ class CheckConfigService
             'desc' => $desc];
     }
 
-    public function checkTeamDuplicateNames()
+    public function checkTeamDuplicateNames() : array
     {
         $teams = $this->em->getRepository(Team::class)->findAll();
 
@@ -704,7 +704,7 @@ class CheckConfigService
             'desc' => $desc];
     }
 
-    public function checkSelfRegistration()
+    public function checkSelfRegistration() : array
     {
         $result = 'O';
         $desc = '';
@@ -733,7 +733,7 @@ class CheckConfigService
             'desc' => $desc];
     }
 
-    public function checkAllExternalIdentifiers()
+    public function checkAllExternalIdentifiers() : array
     {
         // Get all entity classes
         $dir   = realpath(sprintf('%s/src/Entity', $this->dj->getDomjudgeWebappDir()));
@@ -753,7 +753,7 @@ class CheckConfigService
 
                     $result[$shortClass] = $this->checkExternalIdentifiers($class, $externalIdField);
                 }
-            } catch (\BadMethodCallException $e) {
+            } catch (BadMethodCallException $e) {
                 // Ignore, this entity does not have an API endpoint
             }
         }
@@ -761,7 +761,7 @@ class CheckConfigService
         return $result;
     }
 
-    protected function checkExternalIdentifiers($class, $externalIdField)
+    protected function checkExternalIdentifiers($class, $externalIdField) : array
     {
         $parts      = explode('\\', $class);
         $entityType = $parts[count($parts) - 1];
