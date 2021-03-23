@@ -256,26 +256,13 @@ class ExecutableController extends BaseController
             throw new NotFoundHttpException(sprintf('Executable with ID %s not found', $execId));
         }
 
-        $zipArchive = new ZipArchive();
-        if (!($tempzipFile = tempnam($this->dj->getDomjudgeTmpDir(), "/executable-"))) {
-            throw new ServiceUnavailableHttpException(null, 'Failed to create temporary file');
-        }
-        $zipArchive->open($tempzipFile);
-
-        /** @var ExecutableFile[] $files */
-        $files = array_values($executable->getImmutableExecutable()->getFiles()->toArray());
-        usort($files, function($a, $b)  { return $a->getRank() <=> $b->getRank(); });
-        foreach ($files as $file) {
-            $zipArchive->addFromString($file->getFilename(), $file->getFileContent());
-        }
-        $zipArchive->close();
-        $zipFile = file_get_contents($tempzipFile);
-        $zipFileSize = strlen($zipFile);
+        $zipFileContent = $executable->getZipfileContent();
+        $zipFileSize = strlen($zipFileContent);
         $filename = sprintf('%s.zip', $executable->getExecid());
 
         $response = new StreamedResponse();
-        $response->setCallback(function () use ($zipFile) {
-            echo $zipFile;
+        $response->setCallback(function () use ($zipFileContent) {
+            echo $zipFileContent;
         });
         $response->headers->set('Content-Type', 'application/zip');
         $response->headers->set('Content-Disposition', 'attachment; filename="' . $filename . '"');

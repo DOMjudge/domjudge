@@ -75,22 +75,6 @@ class ExecutableController extends AbstractFOSRestController
             throw new NotFoundHttpException(sprintf('Cannot find executable \'%s\'', $id));
         }
 
-        // There's some code duplication with downloadAction in Jury/ExecutableController
-        $zipArchive = new ZipArchive();
-        if (!($tempzipFile = tempnam($this->dj->getDomjudgeTmpDir(), "/executable-"))) {
-            throw new ServiceUnavailableHttpException(null, 'Failed to create temporary file');
-        }
-        $zipArchive->open($tempzipFile);
-
-        /** @var ExecutableFile[] $files */
-        $files = array_values($executable->getImmutableExecutable()->getFiles()->toArray());
-        usort($files, function($a, $b)  { return $a->getRank() <=> $b->getRank(); });
-        foreach ($files as $file) {
-            $zipArchive->addFromString($file->getFilename(), $file->getFileContent());
-        }
-        $zipArchive->close();
-        $zipFile = file_get_contents($tempzipFile);
-
-        return base64_encode($zipFile);
+        return base64_encode($executable->getZipFileContent());
     }
 }

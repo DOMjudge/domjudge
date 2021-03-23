@@ -5,6 +5,7 @@ use App\Validator\Constraints\Identifier;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -164,5 +165,27 @@ class Executable
     public function getImmutableExecutable(): ImmutableExecutable
     {
         return $this->immutableExecutable;
+    }
+
+    public function getZipfileContent(): string
+    {
+        $zipArchive = new ZipArchive();
+        if (!($tempzipFile = tempnam($this->dj->getDomjudgeTmpDir(), "/executable-"))) {
+            throw new ServiceUnavailableHttpException(null, 'Failed to create temporary file');
+        }
+        $zipArchive->open($tempzipFile);
+
+        /** @var ExecutableFile[] $files */
+        $files = array_values($this->getImmutableExecutable()->getFiles()->toArray());
+        usort($files, function ($a, $b) {
+            return $a->getRank() <=> $b->getRank();
+        });
+        foreach ($files as $file) {
+            $zipArchive->addFromString($file->getFilename(), $file->getFileContent());
+        }
+        $zipArchive->close();
+        $zipFileContents = file_get_contents($tempzipFile);
+        unlink($tempzipFile);
+        return $zipFileContents;
     }
 }
