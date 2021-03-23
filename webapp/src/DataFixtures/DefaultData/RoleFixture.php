@@ -25,6 +25,7 @@ class RoleFixture extends AbstractDefaultDataFixture
             'api_reader'        => 'API reader',
             'api_writer'        => 'API writer',
             'api_source_reader' => 'Source code reader',
+            'clarification_rw'  => 'Clarification handler',
         ];
         foreach ($roles as $roleName => $description) {
             if (!($role = $manager->getRepository(Role::class)->findOneBy(['dj_role' => $roleName]))) {
