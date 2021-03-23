@@ -10,7 +10,7 @@ security:
     encoders:
         App\Entity\User:
             algorithm: 'bcrypt'
-            cost: 7
+            cost: '%hashCost%'
     providers:
         domjudge_db_provider:
             entity:
