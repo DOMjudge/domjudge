@@ -15,7 +15,7 @@ require(ETCDIR . '/judgehost-config.php');
 $endpoints = [];
 $domjudge_config = [];
 
-function judging_directory(string $workdirpath, array $judgeTask)
+function judging_directory(string $workdirpath, array $judgeTask) : string
 {
     return $workdirpath . '/'
         . $judgeTask['submitid'] . '/'
@@ -59,7 +59,6 @@ function read_credentials()
         error("Error parsing REST API credentials: no endpoints found.");
     }
 }
-
 
 function setup_curl_handle(string $restuser, string $restpass)
 {
@@ -186,7 +185,6 @@ function djconfig_refresh() : void
     $domjudge_config = $res;
 }
 
-
 /**
  * Retrieve a value from the DOMjudge configuration.
  */
@@ -253,16 +251,17 @@ function read_judgehostlog(int $n = 20) : string
 function fetch_executable(
     string $workdirpath, string $type, string $execid, bool $combined_run_compare = false) : array
 {
-    $execdir = $workdirpath . '/executable/' . $type . '/' . $execid;
+    $execdir         = $workdirpath . '/executable/' . $type . '/' . $execid;
     $execdeploypath  = $execdir . '/.deployed';
     $execbuilddir    = $execdir . '/build';
     $execbuildpath   = $execbuilddir . '/build';
     $execrunpath     = $execbuilddir . '/run';
     if (!is_dir($execdir) || !file_exists($execdeploypath)) {
-        system("rm -rf $execdir");
-        system("rm -rf $execbuilddir");
-        system("mkdir -p '$execbuilddir'", $retval);
-        if ($retval!=0) {
+        $rm_exec_dir_builddir = escapeshellcmd("rm -rf '$execdir' '$execbuilddir'");
+        system($rm_exec_dir_builddir);
+        $mk_builddir = escapeshellcmd("mkdir -p '$execbuilddir'");
+        system($mk_builddir, $retval);
+        if ($retval!==0) {
             error("Could not create directory '$execbuilddir'");
         }
 
@@ -396,8 +395,9 @@ EOT;
 
         if ($do_compile) {
             logmsg(LOG_DEBUG, "Building executable in $execdir, under 'build/'");
-            system(LIBJUDGEDIR . "/build_executable.sh '$execdir'", $retval);
-            if ($retval!=0) {
+            $cmd_build_executable = escapeshellcmd(LIBJUDGEDIR . "/build_executable.sh '$execdir'");
+            system($cmd_build_executable, $retval);
+            if ($retval!==0) {
                 return [null, "Failed to build executable in $execdir."];
             }
         }
@@ -500,7 +500,7 @@ if (empty($options['e'])) {
     }
     $output = array();
     exec("ps -u '$runuser' -o pid= -o comm=", $output, $retval);
-    if (count($output) != 0) {
+    if (count($output) !== 0) {
         error("found processes still running as '$runuser', check manually:\n" .
             implode("\n", $output));
     }
@@ -542,7 +542,7 @@ umask(0022);
 // Check basic prerequisites for chroot at judgehost startup
 logmsg(LOG_INFO, "√ Executing chroot script: '".CHROOT_SCRIPT." check'");
 system(LIBJUDGEDIR.'/'.CHROOT_SCRIPT.' check', $retval);
-if ($retval!=0) {
+if ($retval!==0) {
     error("chroot sanity check exited with exitcode $retval");
 }
 
@@ -689,7 +689,7 @@ while (true) {
         // directories, we might hit an old directory: rename it.
         $needs_cleanup = false;
         if (file_exists($success_file)) {
-            if (file_get_contents($success_file) != getmypid()) {
+            if (file_get_contents($success_file) !== getmypid()) {
                 $needs_cleanup = true;
             }
             unlink($success_file);
@@ -717,8 +717,9 @@ while (true) {
         }
     }
 
-    system("mkdir -p '$workdir/compile'", $retval);
-    if ($retval != 0) {
+    $mkdir_command = escapeshellcmd("mkdir -p '$workdir/compile'");
+    system($mkdir_command, $retval);
+    if ($retval !== 0) {
         error("Could not create '$workdir/compile'");
     }
 
@@ -732,7 +733,7 @@ while (true) {
         // create chroot environment
         logmsg(LOG_INFO, "  √ Executing chroot script: '".CHROOT_SCRIPT." start'");
         system(LIBJUDGEDIR.'/'.CHROOT_SCRIPT.' start', $retval);
-        if ($retval!=0) {
+        if ($retval!==0) {
             error("chroot script exited with exitcode $retval");
         }
 
@@ -780,8 +781,9 @@ function registerJudgehost($myhost)
 
     // Create directory where to test submissions
     $workdirpath = JUDGEDIR . "/$myhost/endpoint-$endpointID";
-    system("mkdir -p $workdirpath/testcase", $retval);
-    if ($retval != 0) {
+    $mkdir_command = escapeshellcmd("mkdir -p '$workdirpath/testcase'");
+    system($mkdir_command, $retval);
+    if ($retval !== 0) {
         error("Could not create $workdirpath");
     }
     chmod("$workdirpath/testcase", 0700);
@@ -853,13 +855,14 @@ function cleanup_judging(string $workdir) : void
     // destroy chroot environment
     logmsg(LOG_INFO, "  √ Executing chroot script: '".CHROOT_SCRIPT." stop'");
     system(LIBJUDGEDIR.'/'.CHROOT_SCRIPT.' stop', $retval);
-    if ($retval!=0) {
+    if ($retval!==0) {
         error("chroot script exited with exitcode $retval");
     }
 
     // Evict all contents of the workdir from the kernel fs cache
-    system(LIBJUDGEDIR . "/evict $workdir", $retval);
-    if ($retval!=0) {
+    $evict_cmd = escapeshellcmd(LIBJUDGEDIR . "/evict '$workdir'");
+    system($evict_cmd, $retval);
+    if ($retval!==0) {
         warning("evict script exited with exitcode $retval");
     }
 
@@ -942,8 +945,14 @@ function compile(array $judgeTask, string $workdir, string $workdirpath, array $
     }
 
     // Compile the program.
-    system(LIBJUDGEDIR . "/compile.sh $cpuset_opt '$execrunpath' '$workdir' " .
-        implode(' ', $files), $retval);
+    $compile_cmd = escapeshellcmd(LIBJUDGEDIR . "/compile.sh $cpuset_opt '$execrunpath' '$workdir' " .
+                                  implode(' ', $files));
+    logmsg(LOG_NOTICE, $compile_cmd);
+    logmsg(LOG_NOTICE, implode(' ', $files));
+    system($compile_cmd, $retval);
+    if ($retval!==0) {
+        warning("compile script exited with exitcode $retval");
+    }
 
     if (is_readable($workdir . '/compile.out')) {
         $compile_output = dj_file_get_contents($workdir . '/compile.out', 50000);
@@ -1078,13 +1087,16 @@ function judge(array $judgeTask): bool
     // Copy program with all possible additional files to testcase
     // dir. Use hardlinks to preserve space with big executables.
     $programdir = $testcasedir . '/execdir';
-    system("mkdir -p '$programdir'", $retval);
-    if ($retval!=0) {
+    $mkdir_cmd = escapeshellcmd("mkdir -p '$programdir'");
+    system($mkdir_cmd, $retval);
+    if ($retval!==0) {
         error("Could not create directory '$programdir'");
     }
 
-    system("cp -PRl '$workdir'/compile/* '$programdir'", $retval);
-    if ($retval!=0) {
+    // Cannot escape as we glob.
+    $cp_cmd = "cp -PRl '$workdir'/compile/* '$programdir'";
+    system($cp_cmd, $retval);
+    if ($retval!==0) {
         error("Could not copy program to '$programdir'");
     }
 
@@ -1129,9 +1141,10 @@ function judge(array $judgeTask): bool
     putenv('SCRIPTMEMLIMIT='  . $compare_config['script_memory_limit']);
     putenv('SCRIPTFILELIMIT=' . $compare_config['script_filesize_limit']);
 
-    system(LIBJUDGEDIR . "/testcase_run.sh $cpuset_opt $tcfile[input] $tcfile[output] " .
-           "$run_config[time_limit]:$hardtimelimit '$testcasedir' " .
-           "'$run_runpath' '$compare_runpath' '$compare_config[compare_args]'", $retval);
+    $test_run_cmd = escapeshellcmd(LIBJUDGEDIR . "/testcase_run.sh $cpuset_opt '$tcfile[input]' '$tcfile[output]' " .
+                                   "$run_config[time_limit]:$hardtimelimit '$testcasedir' " .
+                                   "'$run_runpath' '$compare_runpath' '$compare_config[compare_args]'");
+    system($test_run_cmd, $retval);
 
     // what does the exitcode mean?
     if (! isset($EXITCODES[$retval])) {
