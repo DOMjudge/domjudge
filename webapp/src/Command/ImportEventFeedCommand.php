@@ -468,7 +468,7 @@ class ImportEventFeedCommand extends Command
             }
 
             if (!is_string($config['base-path'] ?? null)) {
-                $this->logger->error("Config options 'base-path' is requird when 'feed-file' is set");
+                $this->logger->error("Config options 'base-path' is required when 'feed-file' is set");
                 return false;
             }
 
@@ -503,7 +503,7 @@ class ImportEventFeedCommand extends Command
         // the ID of the external contest.
         $file = fopen($this->feedFile, 'r');
         $contestData = null;
-        $this->readEventsfromFile($file,
+        $this->readEventsFromFile($file,
             function(array $event, string $line, &$shouldStop) use ($file, &$contestData) {
             if ($event['type'] === 'contests') {
                 $contestData = $event['data'];
@@ -531,7 +531,7 @@ class ImportEventFeedCommand extends Command
         // If we have a 'since event ID', ignore everything up to and including it
         $sinceEventIdFound = $this->sinceEventId === null;
 
-        $this->readEventsfromFile($file,
+        $this->readEventsFromFile($file,
             function(array $event, string $line, &$shouldStop) use ($cacheFile, $file, &$sinceEventIdFound) {
             if ($sinceEventIdFound) {
                 $this->importEvent($event);
@@ -701,7 +701,7 @@ class ImportEventFeedCommand extends Command
 
         $cacheFile = fopen($cacheFilePath, 'r');
 
-        $this->readEventsfromFile($cacheFile, function(array $event) {
+        $this->readEventsFromFile($cacheFile, function(array $event) {
             $this->sinceEventId = $event['id'];
         });
 
@@ -722,7 +722,7 @@ class ImportEventFeedCommand extends Command
      * @param resource $filePointer
      * @param callable $callback
      */
-    protected function readEventsfromFile($filePointer, callable $callback)
+    protected function readEventsFromFile($filePointer, callable $callback)
     {
         $buffer = '';
         while (!feof($filePointer) || !empty($buffer)) {
