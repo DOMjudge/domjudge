@@ -9,8 +9,8 @@ security:
 
     encoders:
         App\Entity\User:
-            algorithm: auto
-            cost: 10
+            algorithm: 'bcrypt'
+            cost: 7
     providers:
         domjudge_db_provider:
             entity:
