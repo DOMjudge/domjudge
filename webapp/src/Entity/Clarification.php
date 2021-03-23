@@ -307,7 +307,7 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
      * @Serializer\SerializedName("reply_to_id")
      * @Serializer\Type("string")
      */
-    public function getInReployToId(): ?int
+    public function getInReplyToId(): ?int
     {
         return $this->getInReplyTo() ? $this->getInReplyTo()->getClarid() : null;
     }
