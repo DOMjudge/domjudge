@@ -37,6 +37,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
@@ -687,7 +688,7 @@ class DOMJudgeService
         $zip = new ZipArchive();
         $res = $zip->open($filename, ZIPARCHIVE::CHECKCONS);
         if ($res === ZIPARCHIVE::ER_NOZIP || $res === ZIPARCHIVE::ER_INCONS) {
-            throw new ServiceUnavailableHttpException(null, 'No valid zip archive given');
+            throw new BadRequestHttpException('No valid zip archive given');
         } elseif ($res === ZIPARCHIVE::ER_MEMORY) {
             throw new ServiceUnavailableHttpException(null, 'Not enough memory to extract zip archive');
         } elseif ($res !== true) {
