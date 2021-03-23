@@ -109,6 +109,9 @@ class ImportEventFeedCommand extends Command
     /** @var string */
     protected $configKey;
 
+    /** @var int|string */
+    protected $contestIdFromConfig;
+
     /** @var int */
     protected $contestId;
 
@@ -290,12 +293,12 @@ class ImportEventFeedCommand extends Command
 
         $contestRepository = $this->em->getRepository(Contest::class);
         /** @var Contest $contest */
-        $contest           = $contestRepository->findOneBy(['externalid' => $this->contestId]) ??
-            $contestRepository->find($this->contestId);
+        $contest           = $contestRepository->findOneBy(['externalid' => $this->contestIdFromConfig]) ??
+            $contestRepository->find($this->contestIdFromConfig);
         if (!$contest) {
             $this->logger->error(
                 'Contest with ID %s not found, exiting.',
-                [ $this->contestId ]
+                [ $this->contestIdFromConfig ]
             );
             return static::STATUS_ERROR;
         } else {
@@ -304,6 +307,8 @@ class ImportEventFeedCommand extends Command
                 [ $contest->getCid(), $contest->getExternalid() ,$this->domjudgeVersion ]
             );
         }
+
+        $this->contestId = $contest->getCid();
 
         // For teams and team categories we want to overwrite the ID so change the ID generator
         $metadata = $this->em->getClassMetaData(TeamCategory::class);
@@ -416,7 +421,7 @@ class ImportEventFeedCommand extends Command
             return false;
         }
 
-        $this->contestId = $config['id'];
+        $this->contestIdFromConfig = $config['id'];
 
         if (!is_string($config['feed-url'] ?? null) && !is_string($config['feed-file'] ?? null)) {
             $this->logger->error("Config does not contain 'feed-url' or 'feed-file'");
