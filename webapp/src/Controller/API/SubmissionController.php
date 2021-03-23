@@ -118,7 +118,7 @@ class SubmissionController extends AbstractRestController
      * Add a submission to this contest
      * @Rest\Post("")
      * @OA\Post()
-     * @Security("is_granted('ROLE_TEAM') or is_granted('ROLE_API_WRITER')", message="You need to have the Team Member role or be an admin to add a submission")
+     * @Security("is_granted('ROLE_TEAM') or is_granted('ROLE_API_WRITER')", message="You need to have the Team Member role to add a submission")
      * @OA\RequestBody(
      *     required=true,
      *     @OA\MediaType(
@@ -357,15 +357,15 @@ class SubmissionController extends AbstractRestController
             // CCS spec format, files are a ZIP, get them and transform them into a file object
             $filesList = $request->request->get('files');
             if (!is_array($filesList) || count($filesList) !== 1 || !isset($filesList[0]['data'])) {
-                throw new BadRequestHttpException("The 'files' attribute should be an array with a single item, containing an object with a base64 encoded data field");
+                throw new BadRequestHttpException("The 'files' attribute must be an array with a single item, containing an object with a base64 encoded data field");
             }
 
             if (isset($filesList[0]['mime']) && $filesList[0]['mime'] !== 'application/zip') {
-                throw new BadRequestHttpException("The 'files[0].mime' attribute should be application/zip if provided");
+                throw new BadRequestHttpException("The 'files[0].mime' attribute must be application/zip if provided");
             }
 
             $data        = $filesList[0]['data'];
-            $decodedData = base64_decode($data);
+            $decodedData = base64_decode($data, true);
             if ($decodedData === false) {
                 throw new BadRequestHttpException("The 'files[0].data' attribute is not base64 encoded");
             }
