@@ -754,9 +754,9 @@ class DOMJudgeService
      * Get a ZIP with sample data
      *
      * @param ContestProblem $contestProblem
-     * @return string Filename of the location of the temporary ZIP file. Make sure to remove it after use
+     * @return string Content of samples zip file.
      */
-    public function getSamplesZip(ContestProblem $contestProblem)
+    public function getSamplesZipContent(ContestProblem $contestProblem)
     {
         /** @var Testcase[] $testcases */
         $testcases = $this->em->createQueryBuilder()
@@ -806,29 +806,16 @@ class DOMJudgeService
         }
 
         $zip->close();
-
-        return $tempFilename;
+        $zipFileContents = file_get_contents($tempFilename);
+        unlink($tempFilename);
+        return $zipFileContents;
     }
 
     public function getSamplesZipStreamedResponse(ContestProblem $contestProblem): StreamedResponse
     {
-        $zipFilename    = $this->getSamplesZip($contestProblem);
+        $zipFileContent = $this->getSamplesZipContent($contestProblem);
         $outputFilename = sprintf('samples-%s.zip', $contestProblem->getShortname());
-
-        $response = new StreamedResponse();
-        $response->setCallback(function () use ($zipFilename) {
-            $fp = fopen($zipFilename, 'rb');
-            fpassthru($fp);
-            unlink($zipFilename);
-        });
-        $response->headers->set('Content-Type', 'application/zip');
-        $response->headers->set('Content-Disposition', 'attachment; filename="' . $outputFilename . '"');
-        $response->headers->set('Content-Length', filesize($zipFilename));
-        $response->headers->set('Content-Transfer-Encoding', 'binary');
-        $response->headers->set('Connection', 'Keep-Alive');
-        $response->headers->set('Accept-Ranges', 'bytes');
-
-        return $response;
+        return Utils::streamAsBinaryFile($zipFileContent, $outputFilename, 'zip');
     }
 
     /**
