@@ -17,6 +17,7 @@ use Doctrine\Common\Inflector\Inflector;
 use Doctrine\Inflector\InflectorFactory;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
@@ -60,6 +61,11 @@ class CheckConfigService
      */
     protected $debug;
 
+    /**
+     * @var UserPasswordEncoderInterface
+     */
+    protected $passwordEncoder;
+
     public function __construct(
         bool $debug,
         EntityManagerInterface $em,
@@ -67,7 +73,8 @@ class CheckConfigService
         DOMJudgeService $dj,
         EventLogService $eventLogService,
         RouterInterface $router,
-        ValidatorInterface $validator
+        ValidatorInterface $validator,
+        UserPasswordEncoderInterface $passwordEncoder
     ) {
         $this->debug           = $debug;
         $this->em              = $em;
@@ -76,9 +83,10 @@ class CheckConfigService
         $this->eventLogService = $eventLogService;
         $this->router          = $router;
         $this->validator       = $validator;
+        $this->passwordEncoder = $passwordEncoder;
     }
 
-    public function runAll()
+    public function runAll() : array
     {
         $results = [];
 
@@ -97,6 +105,7 @@ class CheckConfigService
             'filesizememlimit' => $this->checkScriptFilesizevsMemoryLimit(),
             'debugdisabled' => $this->checkDebugDisabled(),
             'tmpdirwritable' => $this->checkTmpdirWritable(),
+            'hashtime' => $this->checkHashTime(),
         ];
 
         $results['Configuration'] = $config;
@@ -337,6 +346,44 @@ class CheckConfigService
                  $tmpdir)];
     }
 
+    private function randomString(int $length) : string
+    {
+        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $charactersLength = strlen($characters);
+        $randomString = '';
+        for ($i = 0; $i < $length; $i++) {
+            $randomString .= $characters[rand(0, $charactersLength - 1)];
+        }
+        return $randomString;
+    }
+
+    public function checkHashTime()
+    {
+        $tmp_user = new User();
+        $counter = 0;
+        $time_duration_sample = 2;
+        $time_start = microtime(true);
+        do {
+            $plainPassword = $this->randomString(12);
+            $this->passwordEncoder->encodePassword($tmp_user, $plainPassword);
+            $time_end = microtime(true);
+            $counter++;
+        } while ( ($time_end - $time_start) < $time_duration_sample);
+
+        if ($counter>300) {
+            return ['caption' => 'User password hashing',
+                'result' => 'W',
+                'desc' => sprintf('Hashing is too simple for small sized contests (Did %d hashes).', $counter)];
+        }
+        if ($counter<100) {
+            return ['caption' => 'User password hashing',
+                'result' => 'W',
+                'desc' => sprintf('Hashing is too expensive for medium sized contests (%d done).', $counter)];
+        }
+        return ['caption' => 'User password hashing',
+            'result' => 'O',
+            'desc' => sprintf('Hashing cost is reasonable (Did %d hashes).', $counter)];
+    }
 
     public function checkContestActive()
     {
