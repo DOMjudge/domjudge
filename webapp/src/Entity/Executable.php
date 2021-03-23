@@ -169,7 +169,7 @@ class Executable
 
     public function getZipfileContent(): string
     {
-        $zipArchive = new ZipArchive();
+        $zipArchive = new \ZipArchive();
         if (!($tempzipFile = tempnam($this->dj->getDomjudgeTmpDir(), "/executable-"))) {
             throw new ServiceUnavailableHttpException(null, 'Failed to create temporary file');
         }

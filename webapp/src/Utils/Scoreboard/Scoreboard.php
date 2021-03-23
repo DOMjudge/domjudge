@@ -9,6 +9,7 @@ use App\Entity\Team;
 use App\Entity\TeamCategory;
 use App\Utils\FreezeData;
 use App\Utils\Utils;
+use Exception;
 
 /**
  * Class Scoreboard
