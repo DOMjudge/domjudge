@@ -42,7 +42,7 @@ webstandard_check_role:
   stage: test
   image: domjudge/gitlabci:2.1
   services:
-    - mariadb
+    - ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/mariadb:latest
   variables:
     MYSQL_ROOT_PASSWORD: password
   script:
@@ -73,7 +73,7 @@ run unit tests:
   #   - apt-get update -yqq
   #   - apt-get install php-xdebug -yqq
   services:
-    - mariadb
+    - ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/mariadb:latest
   variables:
     MYSQL_ROOT_PASSWORD: password
   script:
@@ -98,7 +98,7 @@ visual_pr:
   stage: test
   image: domjudge/gitlabci:2.1
   services:
-    - mariadb
+    - ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/mariadb:latest
   variables:
     MYSQL_ROOT_PASSWORD: password
     DOCKER_HOST: tcp://docker:2375/
@@ -117,7 +117,7 @@ visual_master:
   stage: test
   image: domjudge/gitlabci:2.1
   services:
-    - mariadb
+    - ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/mariadb:latest
   variables:
     MYSQL_ROOT_PASSWORD: password
     DOCKER_HOST: tcp://docker:2375/
@@ -136,7 +136,7 @@ visual_master:
     paths:
      - screenshotsmaster
      - public
-    
+
 visual_compare:
   <<: *retry_job
   <<: *tiny_job
@@ -181,14 +181,14 @@ visual_compare:
 integration_mysql:
   <<: *job_integration
   services:
-    - name: mysql
+    - name: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/mysql:latest
       command: ["--default-authentication-plugin=mysql_native_password"]
       alias: sqlserver
 
 integration_mariadb:
   <<: *job_integration
   services:
-    - name: mariadb
+    - name: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/mariadb:latest
       alias: sqlserver
 
 phpcs_compatibility:
