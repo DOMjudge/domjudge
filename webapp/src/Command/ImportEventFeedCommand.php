@@ -925,9 +925,10 @@ class ImportEventFeedCommand extends Command
         } else {
             // Now set the data
             $contest
-                ->setName($event['data']['name'])
                 ->setStarttimeEnabled(false);
         }
+
+        $contest->setName($event['data']['name']);
 
         // Also update the penalty time
         $penaltyTime = (int)$event['data']['penalty_time'];
