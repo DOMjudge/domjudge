@@ -411,7 +411,7 @@ class ImportEventFeedCommand extends Command
         // Config key exists, check if we have the required fields
         $config = $contents[$key];
 
-        if (!is_numeric($config['id'] ?? null)) {
+        if (!isset($config['id'] ?? null)) {
             $this->logger->error('Config does not contain id');
             return false;
         }
