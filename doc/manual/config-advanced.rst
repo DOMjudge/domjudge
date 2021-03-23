@@ -135,6 +135,21 @@ editing ``security.yaml`` on an already deployed location.
 If the thus authenticated user is not found in DOMjudge, the application
 will present the standard username/password login screen as a fallback.
 
+Changing the User password hashing cost
+```````````````````````````````````````
+The hashing cost can be changed in ``webapp/config/packages/security.yaml``, change the encoder section:
+
+    encoders:
+        App\Entity\User:
+            algorithm: 'bcrypt'
+            cost: 7
+
+For bcrypt (current encoder) each increase in cost will double the time per password.
+
+See the `Symfony docs`_ for more info on this subject.
+
+.. _Symfony docs: https://symfony.com/doc/current/reference/configuration/security.html
+
 Self-registration
 `````````````````
 Teams can be allowed to self-register with the system. To enable it, go to
