@@ -5,10 +5,21 @@ namespace App\DataFixtures\DefaultData;
 use App\Entity\Team;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
+use Psr\Log\LoggerInterface;
 
 class TeamFixture extends AbstractDefaultDataFixture implements DependentFixtureInterface
 {
     public const DOMJUDGE_REFERENCE = 'domjudge';
+
+    /**
+     * @var LoggerInterface
+     */
+    protected $logger;
+
+    public function __construct(LoggerInterface $logger)
+    {
+        $this->logger = $logger;
+    }
 
     /**
      * @inheritDoc
@@ -20,6 +31,8 @@ class TeamFixture extends AbstractDefaultDataFixture implements DependentFixture
                 ->setName('DOMjudge')
                 ->setCategory($this->getReference(TeamCategoryFixture::SYSTEM_REFERENCE));
             $manager->persist($team);
+        } else {
+            $this->logger->info('Team DOMjudge already exists, not created');
         }
         $manager->flush();
 

@@ -4,11 +4,22 @@ namespace App\DataFixtures\DefaultData;
 
 use App\Entity\Role;
 use Doctrine\Persistence\ObjectManager;
+use Psr\Log\LoggerInterface;
 
 class RoleFixture extends AbstractDefaultDataFixture
 {
     public const ADMIN_REFERENCE = 'admin';
     public const JUDGEHOST_REFERENCE = 'judgehost';
+
+    /**
+     * @var LoggerInterface
+     */
+    protected $logger;
+
+    public function __construct(LoggerInterface $logger)
+    {
+        $this->logger = $logger;
+    }
 
     /**
      * @inheritDoc
@@ -34,6 +45,8 @@ class RoleFixture extends AbstractDefaultDataFixture
                     ->setDescription($description);
                 $manager->persist($role);
                 $manager->flush();
+            } else {
+                $this->logger->info('Role %s already exists, not created', [ $roleName ]);
             }
 
             // Make sure we have a reference to the admin and judgehost roles, since we need them to create the default users

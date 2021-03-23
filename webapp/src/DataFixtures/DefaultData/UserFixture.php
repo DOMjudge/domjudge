@@ -59,6 +59,8 @@ class UserFixture extends AbstractDefaultDataFixture implements DependentFixture
                 ->setPassword($this->passwordEncoder->encodePassword($adminuser, trim($adminpasswordContents)))
                 ->addUserRole($this->getReference(RoleFixture::ADMIN_REFERENCE));
             $manager->persist($adminuser);
+        } else {
+            $this->logger->info('User admin already exists, not created');
         }
 
         if (!($judgehostUser = $manager->getRepository(User::class)->findOneBy(['username' => 'judgehost']))) {
@@ -69,6 +71,8 @@ class UserFixture extends AbstractDefaultDataFixture implements DependentFixture
                 ->setPassword($this->passwordEncoder->encodePassword($judgehostUser, $this->getRestapiPassword()))
                 ->addUserRole($this->getReference(RoleFixture::JUDGEHOST_REFERENCE));
             $manager->persist($judgehostUser);
+        } else {
+            $this->logger->info('User judgehost already exists, not created');
         }
 
         $manager->flush();
