@@ -14,6 +14,7 @@ use App\Entity\Testcase;
 use App\Entity\User;
 use App\Utils\Utils;
 use BadMethodCallException;
+use DateInterval;
 use Doctrine\Inflector\InflectorFactory;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\RouterInterface;
@@ -66,6 +67,11 @@ class CheckConfigService
      */
     protected $passwordEncoder;
 
+    /**
+     * @var int
+     */
+    protected $hashCost;
+
     public function __construct(
         bool $debug,
         EntityManagerInterface $em,
@@ -74,7 +80,8 @@ class CheckConfigService
         EventLogService $eventLogService,
         RouterInterface $router,
         ValidatorInterface $validator,
-        UserPasswordEncoderInterface $passwordEncoder
+        UserPasswordEncoderInterface $passwordEncoder,
+        int $hashCost
     ) {
         $this->debug           = $debug;
         $this->em              = $em;
@@ -84,6 +91,7 @@ class CheckConfigService
         $this->router          = $router;
         $this->validator       = $validator;
         $this->passwordEncoder = $passwordEncoder;
+        $this->hashCost        = $hashCost;
     }
 
     public function runAll() : array
@@ -106,6 +114,7 @@ class CheckConfigService
             'debugdisabled' => $this->checkDebugDisabled(),
             'tmpdirwritable' => $this->checkTmpdirWritable(),
             'hashtime' => $this->checkHashTime(),
+            'hashstrength' => $this->checkHashStrength(),
         ];
 
         $results['Configuration'] = $config;
@@ -385,6 +394,22 @@ class CheckConfigService
             'desc' => sprintf('Hashing cost is reasonable (Did %d hashes).', $counter)];
     }
 
+    public function checkHashStrength() : array
+    {
+        $threshold = 7;
+        if ( $this->hashCost>$threshold ) {
+            return ['caption' => 'Hash cost',
+                'result' => 'O',
+                'desc' => "The User password hash cost is reasonable for accounts around 1 week."];
+        }
+        return ['caption' => 'Hash cost',
+            'result' => 'W',
+            'desc' => sprintf("The cost factor is %d or lower, this is appropriate when your user's passwords are in use for a
+                       week or less. If they live longer, please raise the cost factor and consider if the password
+                       length is reasonable safe for these users.", $threshold)];
+
+    }
+
     public function checkContestActive() : array
     {
         $contests = $this->dj->getCurrentContests();
@@ -437,7 +462,6 @@ class CheckConfigService
             'desc' => "Validated all active and future contests:\n\n" .
                     ($desc ?: 'No problems found.')];
     }
-
 
     public function checkProblemsValidate() : array
     {
