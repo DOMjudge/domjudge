@@ -597,8 +597,6 @@ class ImportExportService
                 return $this->importOrganizationsJson($data, $message);
             case 'teams':
                 return $this->importTeamsJson($data, $message);
-            case 'accounts':
-                return $this->importAccountsJson($data, $message);
             default:
                 $message = sprintf('Invalid import type %s', $type);
                 return -1;
