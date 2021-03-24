@@ -164,13 +164,5 @@ class ProblemControllerTest extends BaseTest
         self::assertSame(sprintf('/team/%d/samples.zip',
                                  $problem->getProbid()),
                          $link->attr('href'));
-
-        // Now reset the sample status
-        $em->clear();
-        $problem = $em->getRepository(Problem::class)->findOneBy(['externalid' => 'fltcmp']);
-
-        $problem->getTestcases()->get(0)->setSample(false);
-        $problem->getTestcases()->get(1)->setSample(false);
-        $em->flush();
     }
 }

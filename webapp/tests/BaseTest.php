@@ -45,25 +45,6 @@ abstract class BaseTest extends WebTestCase
         }
     }
 
-    protected function tearDown(): void
-    {
-        // Clear all configuration options still stored in the database
-        $em          = self::$container->get(EntityManagerInterface::class);
-        $configItems = $em->getRepository(Configuration::class)->findAll();
-        foreach ($configItems as $configItem) {
-            $em->remove($configItem);
-        }
-        $em->flush();
-
-        $config = self::$container->get(ConfigurationService::class);
-
-        // Also call ConfigurationService::saveChanges with an empty array to
-        // clear any cached configuration
-        $eventLog = self::$container->get(EventLogService::class);
-        $dj       = self::$container->get(DOMJudgeService::class);
-        $config->saveChanges([], $eventLog, $dj);
-    }
-
     protected function loginHelper(
         string $username,
         string $password,

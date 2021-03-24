@@ -176,11 +176,6 @@ class MiscControllerTest extends BaseTest
 
         // And check that the contest has changed
         self::assertSelectorTextContains('.card-header span', 'Test contest for switching');
-
-        // Remove the contest again
-        $contest = $em->getRepository(Contest::class)->findOneBy(['shortname' => 'switch']);
-        $em->remove($contest);
-        $em->flush();
     }
 
     public function withReferrerProvider() : Generator
