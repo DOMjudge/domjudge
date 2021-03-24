@@ -3,16 +3,21 @@
 namespace App\Controller\API;
 
 use App\Entity\Clarification;
+use App\Entity\Contest;
+use App\Entity\ContestProblem;
+use App\Entity\Problem;
+use App\Entity\Team;
+use App\Utils\Utils;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
 use Exception;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use OpenApi\Annotations as OA;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
  * @Rest\Route("/contests/{cid}/clarifications")
@@ -70,6 +75,249 @@ class ClarificationController extends AbstractRestController
         return parent::performSingleAction($request, $id);
     }
 
+    /**
+     * Add a clarification to this contest
+     * @Rest\Post("")
+     * @OA\Post()
+     * @Security("is_granted('ROLE_TEAM') or is_granted('ROLE_API_WRITER')", message="You need to have the Team Member role to add a clarification")
+     * @OA\RequestBody(
+     *     required=true,
+     *     @OA\MediaType(
+     *         mediaType="multipart/form-data",
+     *         @OA\Schema(ref="#/components/schemas/ClarificationPost")
+     *     ),
+     *     @OA\MediaType(
+     *         mediaType="application/json",
+     *         @OA\Schema(ref="#/components/schemas/ClarificationPost")
+     *     )
+     * )
+     * @OA\Response(
+     *     response="200",
+     *     description="When creating a clarification was successful",
+     *     @OA\JsonContent(type="string", description="The ID of the created clarification")
+     * )
+     * @throws NonUniqueResultException
+     * @throws Exception
+     */
+    public function addAction(Request $request): string
+    {
+        $required = ['text'];
+        foreach ($required as $argument) {
+            if (!$request->request->has($argument)) {
+                throw new BadRequestHttpException(sprintf("Argument '%s' is mandatory", $argument));
+            }
+        }
+
+        $contestId = $this->getContestId($request);
+        $contest   = $this->em->getRepository(Contest::class)->find($contestId);
+
+        $clarification = new Clarification();
+        $clarification
+            ->setContest($contest)
+            ->setBody($request->request->get('text'));
+
+        if ($problemId = $request->request->get('problem_id')) {
+            // Load the problem
+            /** @var ContestProblem $problem */
+            $problem = $this->em->createQueryBuilder()
+                ->from(ContestProblem::class, 'cp')
+                ->join('cp.problem', 'p')
+                ->join('cp.contest', 'c')
+                ->select('cp, c')
+                ->andWhere(sprintf('p.%s = :problem',
+                    $this->eventLogService->externalIdFieldForEntity(Problem::class) ?? 'probid'))
+                ->andWhere('cp.contest = :contest')
+                ->andWhere('cp.allowSubmit = 1')
+                ->setParameter(':problem', $problemId)
+                ->setParameter(':contest', $contestId)
+                ->getQuery()
+                ->getOneOrNullResult();
+
+            if ($problem === null) {
+                throw new BadRequestHttpException(
+                    sprintf("Problem %s not found", $problemId));
+            }
+
+            $clarification->setProblem($problem->getProblem());
+        }
+
+        if ($replyToId = $request->request->get('reply_to_id')) {
+            // Load the clarification
+            /** @var Clarification $replyTo */
+            $replyTo = $this->em->createQueryBuilder()
+                ->from(Clarification::class, 'c')
+                ->select('c')
+                ->andWhere(sprintf('c.%s = :clarification',
+                    $this->eventLogService->externalIdFieldForEntity(Clarification::class) ?? 'clarid'))
+                ->andWhere('c.contest = :contest')
+                ->setParameter(':clarification', $replyToId)
+                ->setParameter(':contest', $contestId)
+                ->getQuery()
+                ->getOneOrNullResult();
+
+            if ($replyTo === null) {
+                throw new BadRequestHttpException(
+                    sprintf("Clarification %s not found", $replyToId));
+            }
+
+            $clarification->setInReplyTo($replyTo);
+        }
+
+        // By default, use the team of the user
+        $fromTeam = $this->isGranted('ROLE_API_WRITER') ? null : $this->dj->getUser()->getTeam();
+        if ($fromTeamId = $request->request->get('from_team_id')) {
+            $idField = $this->eventLogService->externalIdFieldForEntity(Team::class) ?? 'teamid';
+            $method  = sprintf('get%s', ucfirst($idField));
+
+            // If the user is an admin or API writer, allow it to specify the team
+            if ($this->isGranted('ROLE_API_WRITER')) {
+                // Load the team
+                $queryBuilder = $this->em->createQueryBuilder()
+                    ->from(Team::class, 't')
+                    ->select('t')
+                    ->leftJoin('t.category', 'tc')
+                    ->leftJoin('t.contests', 'c')
+                    ->leftJoin('tc.contests', 'cc')
+                    ->andWhere(sprintf('t.%s = :team', $idField))
+                    ->andWhere('t.enabled = 1')
+                    ->setParameter(':team', $fromTeamId);
+
+                if (!$contest->isOpenToAllTeams()) {
+                    $queryBuilder
+                        ->andWhere('c.cid = :cid OR cc.cid = :cid')
+                        ->setParameter(':cid', $contest->getCid());
+                }
+
+                /** @var Team $fromTeam */
+                $fromTeam = $queryBuilder->getQuery()->getOneOrNullResult();
+
+                if (!$fromTeam) {
+                    throw new BadRequestHttpException(
+                        sprintf("Team %s not found or not enabled", $fromTeamId));
+                }
+            } elseif (!$fromTeam) {
+                throw new BadRequestHttpException(sprintf('User does not belong to a team'));
+            } elseif ((string)call_user_func([$fromTeam, $method]) !== (string)$fromTeamId) {
+                throw new BadRequestHttpException(sprintf('Can not create a clarification from a different team'));
+            }
+        } elseif (!$this->isGranted('ROLE_API_WRITER') && !$fromTeam) {
+            throw new BadRequestHttpException(sprintf('User does not belong to a team'));
+        }
+
+        $clarification->setSender($fromTeam);
+
+        // By default, send to jury
+        $toTeam = null;
+        if ($toTeamId = $request->request->get('to_team_id')) {
+            $idField = $this->eventLogService->externalIdFieldForEntity(Team::class) ?? 'teamid';
+
+            // If the user is an admin or API writer, allow it to specify the team
+            if ($this->isGranted('ROLE_API_WRITER')) {
+                // Load the team
+                $queryBuilder = $this->em->createQueryBuilder()
+                    ->from(Team::class, 't')
+                    ->select('t')
+                    ->leftJoin('t.category', 'tc')
+                    ->leftJoin('t.contests', 'c')
+                    ->leftJoin('tc.contests', 'cc')
+                    ->andWhere(sprintf('t.%s = :team', $idField))
+                    ->andWhere('t.enabled = 1')
+                    ->setParameter(':team', $toTeamId);
+
+                if (!$contest->isOpenToAllTeams()) {
+                    $queryBuilder
+                        ->andWhere('c.cid = :cid OR cc.cid = :cid')
+                        ->setParameter(':cid', $contest->getCid());
+                }
+
+                /** @var Team $toTeam */
+                $toTeam = $queryBuilder->getQuery()->getOneOrNullResult();
+
+                if (!$toTeam) {
+                    throw new BadRequestHttpException(
+                        sprintf("Team %s not found or not enabled", $toTeamId));
+                }
+            } else {
+                throw new BadRequestHttpException(sprintf('Can not create a clarification that is sent to a team'));
+            }
+        }
+
+        $clarification->setRecipient($toTeam);
+
+        if ($toTeam && $fromTeam) {
+            throw new BadRequestHttpException(sprintf('Can not send a clarification from and to a team'));
+        }
+
+        $time = Utils::now();
+        if ($timeString = $request->request->get('time')) {
+            if ($this->isGranted('ROLE_API_WRITER')) {
+                try {
+                    $time = Utils::toEpochFloat($timeString);
+                } catch (Exception $e) {
+                    throw new BadRequestHttpException(sprintf('Can not parse time %s', $timeString));
+                }
+            } else {
+                throw new BadRequestHttpException('A team can not assign time');
+            }
+        }
+
+        $clarification->setSubmittime($time);
+
+        if ($clarificationId = $request->request->get('id')) {
+            if ($this->isGranted('ROLE_API_WRITER')) {
+                // Check if we already have a clarification with this ID
+                $existingClarification = $this->em->createQueryBuilder()
+                    ->from(Clarification::class, 'c')
+                    ->select('c')
+                    ->andWhere('(c.externalid IS NULL AND c.clarid = :clarid) OR c.externalid = :clarid')
+                    ->andWhere('c.contest = :contest')
+                    ->setParameter(':clarid', $clarificationId)
+                    ->setParameter(':contest', $contestId)
+                    ->getQuery()
+                    ->getOneOrNullResult();
+                if ($existingClarification !== null) {
+                    throw new BadRequestHttpException(sprintf("Clarification with ID %s already exists", $clarificationId));
+                }
+            } else {
+                throw new BadRequestHttpException('A team can not assign id');
+            }
+        }
+
+        $clarification
+            ->setExternalid($clarificationId)
+            ->setQueue($this->config->get('clar_default_problem_queue'));
+
+        if (!$clarification->getProblem() && $clarificationCategories = $this->config->get('clar_categories')) {
+            $clarificationCategoryNames = array_keys($clarificationCategories);
+            $clarification->setCategory(reset($clarificationCategoryNames));
+        }
+
+        // We are ready to save the clarification
+        $this->em->persist($clarification);
+        $this->em->flush();
+
+        $this->dj->auditlog('clarification', $clarification->getClarid(), 'added', null, null, $contestId);
+        $this->eventLogService->log('clarification', $clarification->getClarid(), 'create', $contestId);
+
+        // Refresh the clarification since the event log service will have unloaded it
+        $clarification = $this->em->getRepository(Clarification::class)->find($clarification->getClarid());
+
+        if ($clarification->getRecipient()) {
+            $clarification->getRecipient()->addUnreadClarification($clarification);
+        } else {
+            $teams = $this->em->getRepository(Team::class)->findAll();
+            foreach ($teams as $team) {
+                $team->addUnreadClarification($clarification);
+            }
+        }
+        $this->em->flush();
+
+        return (string)($clarification->getExternalid() ?? $clarification->getClarid());
+    }
+
+    /**
+     * @inheritdoc
+     */
     protected function getQueryBuilder(Request $request): QueryBuilder
     {
         $queryBuilder = $this->em->createQueryBuilder()

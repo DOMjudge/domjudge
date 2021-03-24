@@ -287,6 +287,32 @@ nelmio_api_doc:
                             type: array
                             items:
                                 type: sring
+                ClarificationPost:
+                    type: object
+                    required: [text]
+                    properties:
+                        text:
+                            type: string
+                            description: The body of the clarification to send
+                        problem_id:
+                            type: string
+                            description: The problem the clarification is for
+                        reply_to_id:
+                            type: string
+                            description: The ID of the clarification this clarification is a reply to
+                        from_team_id:
+                            type: string
+                            description: The team the clarification came from. Only used when adding a clarification as admin
+                        to_team_id:
+                            type: string
+                            description: The team the clarification must be sent to. Only used when adding a clarification as admin
+                        time:
+                            type: string
+                            format: date-time
+                            description: The time to use for the clarification. Only used when adding a clarification as admin
+                        id:
+                            type: string
+                            description: The ID to use for the clarification. Only used when adding a clarification as admin
 
     areas:
         path_patterns: [ ^/api/v4 ]
