@@ -10,6 +10,7 @@ class RoleFixture extends AbstractDefaultDataFixture
 {
     public const ADMIN_REFERENCE = 'admin';
     public const JUDGEHOST_REFERENCE = 'judgehost';
+    public const TEAM_REFERENCE = 'team';
 
     /**
      * @var LoggerInterface
@@ -56,6 +57,8 @@ class RoleFixture extends AbstractDefaultDataFixture
                 $this->addReference(static::ADMIN_REFERENCE, $role);
             } elseif ($roleName === 'judgehost') {
                 $this->addReference(static::JUDGEHOST_REFERENCE, $role);
+            } elseif ($roleName === 'team') {
+                $this->addReference(static::TEAM_REFERENCE, $role);
             }
         }
     }
