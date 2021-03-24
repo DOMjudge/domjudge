@@ -124,13 +124,13 @@ class SubmissionControllerTest extends BaseTest
     }
 
     /**
-     * Test that when submitting as a team without an association team an error is returned
+     * Test that when submitting as a user without an association team an error is returned
      *
      * @dataProvider provideMissingTeam
      */
     public function testMissingTeam(string $username)
     {
-        // First, remove the team from the dummy user
+        // First, remove the team from the user
         /** @var User $user */
         $user = static::$container->get(EntityManagerInterface::class)->getRepository(User::class)->findOneBy(['username' => $username]);
         $user->setTeam();
