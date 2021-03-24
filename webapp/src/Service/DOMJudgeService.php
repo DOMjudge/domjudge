@@ -156,8 +156,7 @@ class DOMJudgeService
             $qb->andWhere('c.activatetime <= :now');
         }
 
-        $contests = $qb->getQuery()->getResult();
-        return $contests;
+        return $qb->getQuery()->getResult();
     }
 
     /**
@@ -235,8 +234,7 @@ class DOMJudgeService
 
     public function getClientIp()
     {
-        $clientIP = $this->requestStack->getMasterRequest()->getClientIp();
-        return $clientIP;
+        return $this->requestStack->getMasterRequest()->getClientIp();
     }
 
     /**

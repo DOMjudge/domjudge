@@ -287,7 +287,7 @@ class StatisticsService
             // ->andWhere('tc.visible = true')
             ->setParameter('team', $team)
             ->setParameter('contest', $contest)
-            ->getQuery()->getResult();;
+            ->getQuery()->getResult();
 
         // Create a summary of the results(how many correct, timelimit, wrong-answer, etc)
         $results = [];

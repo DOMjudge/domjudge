@@ -144,7 +144,7 @@ class SubmissionController extends BaseController
      */
     public function viewAction(Request $request, int $submitId)
     {
-        $verificationRequired = (bool)$this->config->get('verification_required');;
+        $verificationRequired = (bool)$this->config->get('verification_required');
         $showCompile      = $this->config->get('show_compile');
         $showSampleOutput = $this->config->get('show_sample_output');
         $allowDownload    = (bool)$this->config->get('allow_team_submission_download');

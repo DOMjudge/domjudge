@@ -259,7 +259,7 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
         return $this->answered;
     }
 
-    public function setProblem(?Problem $problem = null): Clarification
+    public function setProblem(?Problem $problem): Clarification
     {
         $this->problem = $problem;
         return $this;

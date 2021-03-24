@@ -107,8 +107,7 @@ class GeneralInfoController extends AbstractFOSRestController
      */
     public function getVersionAction()
     {
-        $data = ['api_version' => $this->apiVersion];
-        return $data;
+        return ['api_version' => $this->apiVersion];
     }
 
     /**
@@ -129,13 +128,12 @@ class GeneralInfoController extends AbstractFOSRestController
      */
     public function getInfoAction()
     {
-        $data = [
+        return [
             'api_version' => $this->apiVersion,
             'domjudge_version' => $this->getParameter('domjudge.version'),
             'environment' => $this->getParameter('kernel.environment'),
             'doc_url' => $this->router->generate('app.swagger_ui', [], RouterInterface::ABSOLUTE_URL),
         ];
-        return $data;
     }
 
     /**

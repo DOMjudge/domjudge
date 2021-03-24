@@ -184,7 +184,7 @@ class ExecutableController extends BaseController
                     $type        = $ini_array['type'];
                 }
 
-                $immutableExecutable = $this->dj->createImmutableExecutable($zip, $propertyFile);
+                $immutableExecutable = $this->dj->createImmutableExecutable($zip);
                 $executable = new Executable();
                 $executable
                     ->setExecid($id)

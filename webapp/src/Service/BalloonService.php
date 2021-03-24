@@ -216,7 +216,5 @@ class BalloonService
         }
         $balloon->setDone(true);
         $em->flush();
-
-        return;
     }
 }
