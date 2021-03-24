@@ -487,7 +487,7 @@ class SubmissionController extends BaseController
                 $runs[] = $runResult[0];
                 unset($runResult[0]);
                 if (empty($runResult['metadata'])) {
-                    $runResult['cpu_time'] = $firstJudgingRun === NULL ? 'n/a' : $firstJudgingRun->getRuntime();
+                    $runResult['cpu_time'] = $firstJudgingRun === null ? 'n/a' : $firstJudgingRun->getRuntime();
                 } else {
                     $metadata = $this->parseMetadata($runResult['metadata']);
                     $runResult['cpu_time'] = $metadata['cpu-time'];
@@ -498,7 +498,7 @@ class SubmissionController extends BaseController
                 }
                 $runResult['terminated'] = preg_match('/timelimit exceeded.*hard (wall|cpu) time/',
                                                       (string)$runResult['output_system']);
-                $runResult['hostname'] = $firstJudgingRun->getJudgeTask()->getHostname();
+                $runResult['hostname'] = $firstJudgingRun === null ? null : $firstJudgingRun->getJudgeTask()->getHostname();
                 $runResult['is_output_run_truncated'] = preg_match(
                     '/\[output storage truncated after \d* B\]/',
                     (string)$runResult['output_run_last_bytes']
