@@ -2,6 +2,7 @@
 
 namespace App\DataFixtures\DefaultData;
 
+use App\Entity\Team;
 use App\Entity\User;
 use App\Service\DOMJudgeService;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
@@ -40,7 +41,7 @@ class UserFixture extends AbstractDefaultDataFixture implements DependentFixture
      */
     public function load(ObjectManager $manager)
     {
-        if (!($adminuser = $manager->getRepository(User::class)->findOneBy(['username' => 'admin']))) {
+        if (!($adminUser = $manager->getRepository(User::class)->findOneBy(['username' => 'admin']))) {
             $adminPasswordFile = sprintf(
                 '%s/%s',
                 $this->dj->getDomjudgeEtcDir(),
@@ -52,13 +53,19 @@ class UserFixture extends AbstractDefaultDataFixture implements DependentFixture
                 throw new Exception(sprintf('Can not read admin password from %s', $adminPasswordFile));
             }
 
-            $adminuser = new User();
-            $adminuser
+            $adminUser = new User();
+            $adminUser
                 ->setUsername('admin')
                 ->setName('Administrator')
-                ->setPassword($this->passwordEncoder->encodePassword($adminuser, trim($adminpasswordContents)))
+                ->setPassword($this->passwordEncoder->encodePassword($adminUser, trim($adminpasswordContents)))
                 ->addUserRole($this->getReference(RoleFixture::ADMIN_REFERENCE));
-            $manager->persist($adminuser);
+            if (isset($_ENV['APP_ENV']) && $_ENV['APP_ENV'] == 'dev') {
+                $domjudgeTeam = $this->getReference(TeamFixture::DOMJUDGE_REFERENCE);
+                $adminUser
+                    ->setTeam($domjudgeTeam)
+                    ->addUserRole($this->getReference(RoleFixture::TEAM_REFERENCE));
+            };
+            $manager->persist($adminUser);
         } else {
             $this->logger->info('User admin already exists, not created');
         }
