@@ -460,7 +460,7 @@ class ContestController extends BaseController
 
         /** @var RemovedInterval $removedInterval */
         $removedInterval = $this->em->getRepository(RemovedInterval::class)->find($intervalId);
-        if (!$contest) {
+        if (!$removedInterval) {
             throw new NotFoundHttpException(
                 sprintf('Removed interval with ID %s not found', $intervalId)
             );
