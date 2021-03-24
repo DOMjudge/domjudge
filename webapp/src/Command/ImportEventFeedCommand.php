@@ -23,6 +23,7 @@ use App\Service\ScoreboardService;
 use App\Service\SubmissionService;
 use App\Utils\Utils;
 use DateTime;
+use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Id\AssignedGenerator;
 use Doctrine\ORM\Mapping\ClassMetadata;
@@ -2006,7 +2007,7 @@ class ImportEventFeedCommand extends Command
     /**
      * @param Submission $submission
      * @throws NonUniqueResultException
-     * @throws \Doctrine\DBAL\DBALException
+     * @throws DBALException
      */
     private function markSubmissionAsValidAndRecalcScore(Submission $submission, bool $valid): void
     {

@@ -15,9 +15,12 @@ use App\Service\RejudgingService;
 use App\Service\SubmissionService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\Form\FormFactoryInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
@@ -181,8 +184,8 @@ class RejudgingController extends BaseController
      * @param SubmissionService $submissionService
      * @param int               $rejudgingId
      * @return Response
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NoResultException
+     * @throws NonUniqueResultException
      */
     public function viewAction(
         Request $request,
@@ -387,7 +390,7 @@ class RejudgingController extends BaseController
      * @param int              $rejudgingId
      * @param string           $action
      * @return Response|StreamedResponse
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      */
     public function finishAction(Request $request, RejudgingService $rejudgingService, ?Profiler $profiler, int $rejudgingId, string $action)
     {
@@ -449,7 +452,7 @@ class RejudgingController extends BaseController
      * @Route("/add", name="jury_rejudging_add")
      * @param Request              $request
      * @param FormFactoryInterface $formFactory
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      * @throws \Exception
      */
     public function addAction(Request $request, FormFactoryInterface $formFactory)
@@ -572,7 +575,7 @@ class RejudgingController extends BaseController
     /**
      * @Route("/create", methods={"POST"}, name="jury_create_rejudge")
      * @param Request           $request
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     * @return RedirectResponse
      */
     public function createAction(Request $request)
     {

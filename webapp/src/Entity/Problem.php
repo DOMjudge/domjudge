@@ -400,7 +400,7 @@ class Problem extends BaseApiEntity
     }
 
     /**
-     * @return \Doctrine\Common\Collections\Collection|ContestProblem[]
+     * @return Collection|ContestProblem[]
      */
     public function getContestProblems()
     {

@@ -7,6 +7,7 @@ use App\Entity\JudgingRun;
 use App\Entity\Testcase;
 use App\Entity\TestcaseContent;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\NonUniqueResultException;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
@@ -40,7 +41,7 @@ class TestcaseController extends AbstractFOSRestController
      * Get the next to judge testcase for the given judging ID
      * @param string $id
      * @return array|string|null
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST')")
      * @Rest\Get("/next-to-judge/{id}")
      * @OA\Parameter(ref="#/components/parameters/id")
@@ -109,7 +110,7 @@ class TestcaseController extends AbstractFOSRestController
      * @param string $id
      * @param string $type
      * @return string
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST')")
      * @Rest\Get("/{id}/file/{type}")
      * @OA\Parameter(ref="#/components/parameters/id")

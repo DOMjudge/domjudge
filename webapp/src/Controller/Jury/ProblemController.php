@@ -22,6 +22,8 @@ use App\Service\ImportProblemService;
 use App\Service\SubmissionService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query\Expr\Join;
 use Exception;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
@@ -236,7 +238,7 @@ class ProblemController extends BaseController
     /**
      * @Route("/{problemId<\d+>}/export", name="jury_export_problem")
      * @IsGranted("ROLE_ADMIN")
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      */
     public function exportAction(int $problemId) : StreamedResponse
     {
@@ -393,8 +395,8 @@ class ProblemController extends BaseController
 
     /**
      * @Route("/{probId<\d+>}", name="jury_problem")
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NoResultException
+     * @throws NonUniqueResultException
      * @throws Exception
      */
     public function viewAction(Request $request, SubmissionService $submissionService, int $probId) : Response
@@ -797,7 +799,7 @@ class ProblemController extends BaseController
      *     "/{probId<\d+>}/testcases/{rank<\d+>}/fetch/{type<input|output|image>}",
      *     name="jury_problem_testcase_fetch"
      *     )
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      */
     public function fetchTestcaseAction(int $probId, int $rank, string $type) : Response
     {
@@ -853,7 +855,7 @@ class ProblemController extends BaseController
     /**
      * @Route("/{probId<\d+>}/edit", name="jury_problem_edit")
      * @IsGranted("ROLE_ADMIN")
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse|Response
+     * @return RedirectResponse|Response
      * @throws Exception
      */
     public function editAction(Request $request, int $probId)
@@ -937,7 +939,7 @@ class ProblemController extends BaseController
     /**
      * @Route("/{probId<\d+>}/delete", name="jury_problem_delete")
      * @IsGranted("ROLE_ADMIN")
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse|Response
+     * @return RedirectResponse|Response
      * @throws Exception
      */
     public function deleteAction(Request $request, int $probId)

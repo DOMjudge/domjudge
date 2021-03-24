@@ -15,7 +15,10 @@ use App\Entity\Team;
 use App\Entity\Testcase;
 use App\Entity\TestcaseContent;
 use App\Utils\Utils;
+use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -93,9 +96,9 @@ class ImportProblemService
      * @param Contest|null $contest
      * @param array        $messages
      * @return Problem|null
-     * @throws \Doctrine\DBAL\DBALException
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws DBALException
+     * @throws NoResultException
+     * @throws NonUniqueResultException
      */
     public function importZippedProblem(
         ZipArchive $zip,

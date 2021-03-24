@@ -4,18 +4,23 @@ namespace App\Controller\Team;
 
 use App\Controller\BaseController;
 use App\Entity\Clarification;
+use App\Entity\Contest;
 use App\Entity\Problem;
+use App\Entity\Team;
 use App\Form\Type\TeamClarificationType;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\Query\Expr\Join;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Form\FormFactoryInterface;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
@@ -74,8 +79,8 @@ class ClarificationController extends BaseController
      * @Route("/clarifications/{clarId<\d+>}", name="team_clarification")
      * @param Request $request
      * @param int     $clarId
-     * @return \Symfony\Component\HttpFoundation\Response
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @return Response
+     * @throws NonUniqueResultException
      * @throws \Exception
      */
     public function viewAction(Request $request, int $clarId)
@@ -163,7 +168,7 @@ class ClarificationController extends BaseController
     /**
      * @Route("/clarifications/add", name="team_clarification_add")
      * @param Request $request
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      * @throws \Exception
      */
     public function addAction(Request $request)
@@ -199,15 +204,15 @@ class ClarificationController extends BaseController
     }
 
     /**
-     * @param \Symfony\Component\Form\FormInterface $form
-     * @param \App\Entity\Contest|null $contest
-     * @param \App\Entity\Team $team
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @param FormInterface $form
+     * @param Contest|null $contest
+     * @param Team $team
+     * @throws NonUniqueResultException
      */
     private function newClarificationHelper(
-        \Symfony\Component\Form\FormInterface $form,
-        ?\App\Entity\Contest $contest,
-        \App\Entity\Team $team
+        FormInterface $form,
+        ?Contest $contest,
+        Team $team
     ): void {
         $formData = $form->getData();
         // First part will always be the contest ID, as Symfony will validate this

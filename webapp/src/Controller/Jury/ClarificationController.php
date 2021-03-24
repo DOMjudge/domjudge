@@ -16,7 +16,9 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\Expr\Join;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -325,7 +327,7 @@ class ClarificationController extends AbstractController
      * @Route("/{clarId<\d+>}/claim", name="jury_clarification_claim")
      * @param Request $request
      * @param int     $clarId
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     * @return RedirectResponse|Response
      */
     public function toggleClaimAction(Request $request, int $clarId)
     {
@@ -350,7 +352,7 @@ class ClarificationController extends AbstractController
      * @Route("/{clarId<\d+>}/set-answered", name="jury_clarification_set_answered")
      * @param Request $request
      * @param int     $clarId
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     * @return RedirectResponse|Response
      */
     public function toggleAnsweredAction(Request $request, int $clarId)
     {
@@ -375,7 +377,7 @@ class ClarificationController extends AbstractController
      * @Route("/{clarId<\d+>}/change-subject", name="jury_clarification_change_subject")
      * @param Request $request
      * @param int     $clarId
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     * @return RedirectResponse|Response
      */
     public function changeSubjectAction(Request $request, int $clarId)
     {
@@ -409,7 +411,7 @@ class ClarificationController extends AbstractController
      * @Route("/{clarId<\d+>}/change-queue", name="jury_clarification_change_queue")
      * @param Request $request
      * @param int     $clarId
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     * @return RedirectResponse|Response
      */
     public function changeQueueAction(Request $request, int $clarId)
     {
@@ -435,7 +437,7 @@ class ClarificationController extends AbstractController
     /**
      * @Route("/send", methods={"POST"}, name="jury_clarification_send")
      * @param Request $request
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     * @return RedirectResponse|Response
      */
     public function sendAction(Request $request)
     {

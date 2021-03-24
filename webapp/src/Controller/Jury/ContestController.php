@@ -20,10 +20,13 @@ use App\Service\EventLogService;
 use App\Utils\Utils;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\PersistentCollection;
 use Doctrine\ORM\Query\Expr\Join;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -89,8 +92,8 @@ class ContestController extends BaseController
      * @Route("", name="jury_contests")
      * @param Request         $request
      * @param KernelInterface $kernel
-     * @return \Symfony\Component\HttpFoundation\Response
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @return Response
+     * @throws NonUniqueResultException
      */
     public function indexAction(Request $request, KernelInterface $kernel)
     {
@@ -388,7 +391,7 @@ class ContestController extends BaseController
      * @Route("/{contestId<\d+>}", name="jury_contest")
      * @param Request $request
      * @param int     $contestId
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      */
     public function viewAction(Request $request, int $contestId)
     {
@@ -446,7 +449,7 @@ class ContestController extends BaseController
      *        name="jury_contest_remove_interval", methods={"POST"})
      * @param int $contestId
      * @param int $intervalId
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     * @return RedirectResponse
      */
     public function removeIntervalAction(int $contestId, int $intervalId)
     {
@@ -482,7 +485,7 @@ class ContestController extends BaseController
      * @IsGranted("ROLE_ADMIN")
      * @param Request $request
      * @param int     $contestId
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     * @return RedirectResponse|Response
      * @throws \Exception
      */
     public function editAction(Request $request, int $contestId)
@@ -582,7 +585,7 @@ class ContestController extends BaseController
      * @IsGranted("ROLE_ADMIN")
      * @param Request $request
      * @param int     $contestId
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     * @return RedirectResponse|Response
      * @throws \Exception
      */
     public function deleteAction(Request $request, int $contestId)
@@ -602,7 +605,7 @@ class ContestController extends BaseController
      * @IsGranted("ROLE_ADMIN")
      * @param Request $request
      * @param int     $contestId
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     * @return RedirectResponse|Response
      * @throws \Exception
      */
     public function deleteProblemAction(Request $request, int $contestId, int $probId)
@@ -628,7 +631,7 @@ class ContestController extends BaseController
      * @Route("/add", name="jury_contest_add")
      * @IsGranted("ROLE_ADMIN")
      * @param Request $request
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      */
     public function addAction(Request $request)
     {
@@ -682,7 +685,7 @@ class ContestController extends BaseController
      * @IsGranted("ROLE_ADMIN")
      * @param Request $request
      * @param int     $contestId
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     * @return RedirectResponse|Response
      */
     public function finalizeAction(Request $request, int $contestId)
     {

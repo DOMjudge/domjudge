@@ -2,9 +2,13 @@
 
 namespace App\Doctrine\ORM\Query\AST\Functions;
 
+use Doctrine\ORM\Query\AST\ASTException;
 use Doctrine\ORM\Query\AST\Functions\FunctionNode;
 use Doctrine\ORM\Query\AST\Node;
 use Doctrine\ORM\Query\Lexer;
+use Doctrine\ORM\Query\Parser;
+use Doctrine\ORM\Query\QueryException;
+use Doctrine\ORM\Query\SqlWalker;
 
 /**
  * Class TruncateFunction
@@ -34,9 +38,9 @@ class TruncateFunction extends FunctionNode
 
     /**
      * @inheritdoc
-     * @throws \Doctrine\ORM\Query\AST\ASTException
+     * @throws ASTException
      */
-    public function getSql(\Doctrine\ORM\Query\SqlWalker $sqlWalker)
+    public function getSql(SqlWalker $sqlWalker)
     {
         return sprintf('IF(CHAR_LENGTH(%s) > %s, CONCAT(LEFT(%s, %s), %s), %s)',
                        $this->fieldExpression->dispatch($sqlWalker),
@@ -49,9 +53,9 @@ class TruncateFunction extends FunctionNode
 
     /**
      * @inheritdoc
-     * @throws \Doctrine\ORM\Query\QueryException
+     * @throws QueryException
      */
-    public function parse(\Doctrine\ORM\Query\Parser $parser)
+    public function parse(Parser $parser)
     {
         $parser->match(Lexer::T_IDENTIFIER);
         $parser->match(Lexer::T_OPEN_PARENTHESIS);

@@ -19,6 +19,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -192,7 +193,7 @@ class JuryMiscController extends BaseController
      * @IsGranted("ROLE_ADMIN")
      * @param Request           $request
      * @param ScoreboardService $scoreboardService
-     * @return \Symfony\Component\HttpFoundation\Response|StreamedResponse
+     * @return Response|StreamedResponse
      */
     public function refreshCacheAction(Request $request, ScoreboardService $scoreboardService)
     {
@@ -244,7 +245,7 @@ class JuryMiscController extends BaseController
      * @Route("/judging-verifier", name="jury_judging_verifier")
      * @IsGranted("ROLE_JURY")
      * @param Request $request
-     * @return \Symfony\Component\HttpFoundation\Response|StreamedResponse
+     * @return Response|StreamedResponse
      */
     public function judgingVerifierAction(Request $request)
     {
@@ -354,7 +355,7 @@ class JuryMiscController extends BaseController
      * @param Request         $request
      * @param RouterInterface $router
      * @param int             $contestId
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      */
     public function changeContestAction(Request $request, RouterInterface $router, int $contestId)
     {

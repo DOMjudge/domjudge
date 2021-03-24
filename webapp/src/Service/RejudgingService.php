@@ -11,7 +11,10 @@ use App\Entity\Submission;
 use App\Entity\Team;
 use App\Entity\User;
 use App\Utils\Utils;
+use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 
 class RejudgingService
 {
@@ -174,9 +177,9 @@ class RejudgingService
      * @param string        $action           One of the self::ACTION_* constants
      * @param callable|null $progressReporter If given, use this callable to report progress
      * @return bool True iff the rejudging was finished successfully
-     * @throws \Doctrine\DBAL\DBALException
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws DBALException
+     * @throws NoResultException
+     * @throws NonUniqueResultException
      */
     public function finishRejudging(Rejudging $rejudging, string $action, callable $progressReporter = null)
     {
@@ -347,8 +350,8 @@ class RejudgingService
     /**
      * @param Rejudging $rejudging
      * @return array
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NoResultException
+     * @throws NonUniqueResultException
      */
     public function calculateTodo(Rejudging $rejudging)
     {

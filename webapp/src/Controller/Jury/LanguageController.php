@@ -15,10 +15,14 @@ use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\SubmissionService;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query\Expr\Join;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\Asset\Packages;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
@@ -165,7 +169,7 @@ class LanguageController extends BaseController
      * @Route("/add", name="jury_language_add")
      * @IsGranted("ROLE_ADMIN")
      * @param Request $request
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      * @throws \Exception
      */
     public function addAction(Request $request)
@@ -200,9 +204,9 @@ class LanguageController extends BaseController
      * @param Request           $request
      * @param SubmissionService $submissionService
      * @param string            $langId
-     * @return \Symfony\Component\HttpFoundation\Response
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @return Response
+     * @throws NoResultException
+     * @throws NonUniqueResultException
      */
     public function viewAction(Request $request, SubmissionService $submissionService, string $langId)
     {
@@ -246,7 +250,7 @@ class LanguageController extends BaseController
      * @Route("/{langId}/toggle-submit", name="jury_language_toggle_submit")
      * @param Request $request
      * @param string  $langId
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     * @return RedirectResponse|Response
      */
     public function toggleSubmitAction(Request $request, string $langId)
     {
@@ -268,7 +272,7 @@ class LanguageController extends BaseController
      * @Route("/{langId}/toggle-judge", name="jury_language_toggle_judge")
      * @param Request $request
      * @param string  $langId
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     * @return RedirectResponse|Response
      */
     public function toggleJudgeAction(Request $request, string $langId)
     {
@@ -296,7 +300,7 @@ class LanguageController extends BaseController
      * @IsGranted("ROLE_ADMIN")
      * @param Request $request
      * @param string  $langId
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     * @return RedirectResponse|Response
      * @throws \Exception
      */
     public function editAction(Request $request, string $langId)
@@ -338,7 +342,7 @@ class LanguageController extends BaseController
      * @IsGranted("ROLE_ADMIN")
      * @param Request $request
      * @param string  $langId
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     * @return RedirectResponse|Response
      * @throws \Exception
      */
     public function deleteAction(Request $request, string $langId)

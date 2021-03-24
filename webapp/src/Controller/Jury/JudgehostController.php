@@ -10,9 +10,14 @@ use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Utils\Utils;
+use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
@@ -250,8 +255,8 @@ class JudgehostController extends BaseController
      * @Route("/{hostname}", methods={"GET"}, name="jury_judgehost")
      * @param Request $request
      * @param string  $hostname
-     * @return \Symfony\Component\HttpFoundation\Response
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @return Response
+     * @throws NonUniqueResultException
      */
     public function viewAction(Request $request, string $hostname)
     {
@@ -317,10 +322,10 @@ class JudgehostController extends BaseController
      * @IsGranted("ROLE_ADMIN")
      * @param Request $request
      * @param string  $hostname
-     * @return \Symfony\Component\HttpFoundation\Response
-     * @throws \Doctrine\DBAL\DBALException
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @return Response
+     * @throws DBALException
+     * @throws NoResultException
+     * @throws NonUniqueResultException
      */
     public function deleteAction(Request $request, string $hostname)
     {
@@ -344,7 +349,7 @@ class JudgehostController extends BaseController
      * @param RouterInterface $router
      * @param Request         $request
      * @param string          $hostname
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     * @return RedirectResponse
      */
     public function activateAction(RouterInterface $router, Request $request, string $hostname)
     {
@@ -361,7 +366,7 @@ class JudgehostController extends BaseController
      * @param RouterInterface $router
      * @param Request         $request
      * @param string          $hostname
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     * @return RedirectResponse
      */
     public function deactivateAction(RouterInterface $router, Request $request, string $hostname)
     {
@@ -375,7 +380,7 @@ class JudgehostController extends BaseController
     /**
      * @Route("/activate-all", methods={"POST"}, name="jury_judgehost_activate_all")
      * @IsGranted("ROLE_ADMIN")
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     * @return RedirectResponse
      */
     public function activateAllAction()
     {
@@ -387,7 +392,7 @@ class JudgehostController extends BaseController
     /**
      * @Route("/deactivate-all", methods={"POST"}, name="jury_judgehost_deactivate_all")
      * @IsGranted("ROLE_ADMIN")
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     * @return RedirectResponse
      */
     public function deactivateAllAction()
     {
@@ -400,7 +405,7 @@ class JudgehostController extends BaseController
      * @Route("/add/multiple", name="jury_judgehost_add")
      * @IsGranted("ROLE_ADMIN")
      * @param Request $request
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      */
     public function addMultipleAction(Request $request)
     {
@@ -428,7 +433,7 @@ class JudgehostController extends BaseController
      * @Route("/edit/multiple", name="jury_judgehost_edit")
      * @IsGranted("ROLE_ADMIN")
      * @param Request $request
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      */
     public function editMultipleAction(Request $request)
     {

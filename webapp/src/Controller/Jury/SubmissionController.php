@@ -23,8 +23,12 @@ use App\Service\EventLogService;
 use App\Service\ScoreboardService;
 use App\Service\SubmissionService;
 use App\Utils\Utils;
+use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
+use Doctrine\ORM\ORMException;
 use Doctrine\ORM\Query\Expr\Join;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -225,7 +229,7 @@ class SubmissionController extends BaseController
 
     /**
      * @Route("/{submitId<\d+>}", name="jury_submission")
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      * @throws \Exception
      */
     public function viewAction(Request $request, int $submitId)
@@ -586,7 +590,7 @@ class SubmissionController extends BaseController
 
     /**
      * @Route("/request-output/{jid}/{jrid}", name="request_output")
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      * @throws \Exception
      */
     public function requestOutput(Judging $jid, JudgingRun $jrid)
@@ -676,7 +680,7 @@ class SubmissionController extends BaseController
 
     /**
      * @Route("/{submission}/source", name="jury_submission_source")
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      */
     public function sourceAction(Request $request, Submission $submission)
     {
@@ -927,7 +931,7 @@ class SubmissionController extends BaseController
      * @param Request           $request
      * @param int               $submitId
      * @return RedirectResponse
-     * @throws \Doctrine\DBAL\DBALException
+     * @throws DBALException
      * @throws \Exception
      */
     public function updateStatusAction(
@@ -967,10 +971,10 @@ class SubmissionController extends BaseController
      * @param Request           $request
      * @param int               $judgingId
      * @return RedirectResponse
-     * @throws \Doctrine\DBAL\DBALException
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\ORMException
+     * @throws DBALException
+     * @throws NoResultException
+     * @throws NonUniqueResultException
+     * @throws ORMException
      */
     public function verifyAction(
         EventLogService $eventLogService,

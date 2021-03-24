@@ -11,12 +11,15 @@ use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use Psr\Log\LoggerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use OpenApi\Annotations as OA;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -155,8 +158,8 @@ class GeneralInfoController extends AbstractFOSRestController
      *     )
      * )
      * @return array
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NoResultException
+     * @throws NonUniqueResultException
      */
     public function getStatusAction()
     {
@@ -190,7 +193,7 @@ class GeneralInfoController extends AbstractFOSRestController
      *     description="Information about the logged in user",
      *     @Model(type=User::class)
      * )
-     * @return \App\Entity\User|null
+     * @return User|null
      */
     public function getUserAction()
     {
@@ -218,7 +221,7 @@ class GeneralInfoController extends AbstractFOSRestController
      *     @OA\Schema(type="string")
      * )
      * @param Request $request
-     * @return \App\Entity\Configuration[]|mixed
+     * @return Configuration[]|mixed
      * @throws \Exception
      */
     public function getDatabaseConfigurationAction(Request $request)
@@ -254,7 +257,7 @@ class GeneralInfoController extends AbstractFOSRestController
      *     @OA\MediaType(mediaType="application/json")
      * )
      * @param Request $request
-     * @return \App\Entity\Configuration[]|mixed
+     * @return Configuration[]|mixed
      * @throws \Exception
      */
     public function updateConfigurationAction(Request $request)
@@ -272,7 +275,7 @@ class GeneralInfoController extends AbstractFOSRestController
      *     description="Result of the various checks performed",
      *     @OA\JsonContent(type="object")
      * )
-     * @return \Symfony\Component\HttpFoundation\JsonResponse
+     * @return JsonResponse
      */
     public function getConfigCheckAction()
     {

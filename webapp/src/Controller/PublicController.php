@@ -143,7 +143,7 @@ class PublicController extends BaseController
      * @param Request         $request
      * @param RouterInterface $router
      * @param int             $contestId
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      */
     public function changeContestAction(Request $request, RouterInterface $router, int $contestId)
     {

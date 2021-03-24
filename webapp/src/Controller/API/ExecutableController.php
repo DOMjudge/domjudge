@@ -6,6 +6,7 @@ use App\Entity\Executable;
 use App\Entity\ExecutableFile;
 use App\Service\DOMJudgeService;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\NonUniqueResultException;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
@@ -49,7 +50,7 @@ class ExecutableController extends AbstractFOSRestController
      * Get the executable with the given ID
      * @param string $id
      * @return array|string|null
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST')")
      * @Rest\Get("/{id}")
      * @OA\Parameter(ref="#/components/parameters/id")
