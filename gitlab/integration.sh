@@ -133,6 +133,9 @@ cd /tmp
 git clone --depth=1 https://github.com/Kattis/problemtools.git
 cd problemtools/examples
 mv hello hello_kattis
+# Remove 2 submissions that will not pass validation. The first is because it is
+# a Python 2 submission. The latter has a judgement type we do not understand.
+rm different/submissions/accepted/different_py2.py different/submissions/slow_accepted/different_slow.py
 for i in hello_kattis different guess; do
 	(
 		cd "$i"
