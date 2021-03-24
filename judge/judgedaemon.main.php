@@ -620,7 +620,7 @@ while (true) {
                 'description=' . urlencode("low on disk space on $myhost") .
                 '&judgehostlog=' . urlencode(base64_encode($judgehostlog)) .
                 '&disabled=' . urlencode($disabled) .
-                '&hostname= ' . urlencode($myhost),
+                '&hostname=' . urlencode($myhost),
                 false
             );
             logmsg(LOG_ERR, "=> internal error " . $error_id);
@@ -823,7 +823,7 @@ function disable(string $kind, string $idcolumn, $id, string $description, int $
         '&description=' . urlencode($description) .
         '&judgehostlog=' . urlencode(base64_encode($judgehostlog)) .
         '&disabled=' . urlencode($disabled) .
-        '&hostname= ' . urlencode($myhost)
+        '&hostname=' . urlencode($myhost)
     );
 }
 
