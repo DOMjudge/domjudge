@@ -23,7 +23,7 @@ Version 8.0.0 - DEV
  - Add support for loading custom CSS and JavaScript.
  - Speed up loading team pictures and affiliation logos.
  - Add filter on result to jury submissions page.
- - Add API actions to create single team, team affiliation and team category.
+ - Add API actions to create single team, team affiliation, team category and user.
  - Add problem attachment support.
  - Judge a single submission on multiple judgedaemons in parallel if the
    judging queue is empty.
@@ -32,6 +32,7 @@ Version 8.0.0 - DEV
  - Add new clarification handler role.
  - Reduce cost of the hash function to handle large amounts of accounts when
    generating or storing passwords.
+ - Improve API action to add submission to adhere to the CCS spec.
 
 
 Version 7.3.2 - 23 November 2020
