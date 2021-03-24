@@ -268,7 +268,7 @@ class SubmissionController extends AbstractRestController
                 }
             } elseif (!$team) {
                 throw new BadRequestHttpException(sprintf('User does not belong to a team'));
-            } elseif (call_user_func([$team, $method]) !== $teamId) {
+            } elseif ((string)call_user_func([$team, $method]) !== (string)$teamId) {
                 throw new BadRequestHttpException(sprintf('Can not submit for a different team'));
             }
         } elseif (!$team) {
