@@ -350,7 +350,6 @@ class JudgehostController extends AbstractFOSRestController
         $judging = $query->getOneOrNullResult();
         if (!$judging) {
             throw new BadRequestHttpException("We don't know this judging with judgetaskid ID $judgetaskid.");
-            return;
         }
 
         if ($request->request->has('output_compile')) {
@@ -659,7 +658,6 @@ class JudgehostController extends AbstractFOSRestController
         $judgehost = $this->em->getRepository(Judgehost::class)->find($hostname);
         if (!$judgehost) {
             throw new BadRequestHttpException("Who are you and why are you sending us any data?");
-            return;
         }
 
         $this->addSingleJudgingRun($judgeTaskId, $hostname, $runResult, $runTime,

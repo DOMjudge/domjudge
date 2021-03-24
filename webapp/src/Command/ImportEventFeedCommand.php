@@ -681,9 +681,6 @@ class ImportEventFeedCommand extends Command
             );
             sleep(5);
         }
-
-        fclose($cacheFile);
-        return true;
     }
 
     /**
