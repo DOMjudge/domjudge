@@ -1301,7 +1301,7 @@ class JudgehostController extends AbstractFOSRestController
 
         // If this judgehost is not active, there's nothing to do.
         if (!$judgehost->getActive()) {
-            return '';
+            return [];
         }
 
         // TODO: Determine a good max batch size here. We may want to do something more elaborate like looking at
