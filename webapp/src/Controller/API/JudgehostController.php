@@ -708,12 +708,10 @@ class JudgehostController extends AbstractFOSRestController
      *         )
      *     )
      * )
-     * @param Request $request
-     * @return int|string
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\ORMException
      */
-    public function internalErrorAction(Request $request)
+    public function internalErrorAction(Request $request): ?int
     {
         $required = ['description', 'judgehostlog', 'disabled'];
         foreach ($required as $argument) {
@@ -760,7 +758,7 @@ class JudgehostController extends AbstractFOSRestController
                 ->findOneBy(['immutableExecutable' => $disabled[$field_name]]);
             if (!$executable) {
                 // Race condition where the user changed the executable (hopefully for the better). Ignore.
-                return;
+                return null;
             }
             $disabled['execid'] = $executable->getExecid();
             unset($disabled[$field_name]);
@@ -1483,6 +1481,8 @@ class JudgehostController extends AbstractFOSRestController
         if (!empty($judgetasks)) {
             return $this->serializeJudgeTasks($judgetasks, $hostname);
         }
+
+        return [];
     }
 
     /** @param JudgeTask[] $judgeTasks */

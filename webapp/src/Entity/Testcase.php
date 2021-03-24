@@ -257,6 +257,7 @@ class Testcase
     public function removeJudgingRun(JudgingRun $judgingRun): Testcase
     {
         $this->judging_runs->removeElement($judgingRun);
+        return $this;
     }
 
     public function getJudgingRuns(): Collection

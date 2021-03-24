@@ -280,6 +280,8 @@ class ExecutableController extends BaseController
                 return Utils::streamAsBinaryFile($file->getFileContent(), $file->getFilename());
             }
         }
+
+        throw new NotFoundHttpException(sprintf('No file with index %d found', $index));
     }
 
     /**

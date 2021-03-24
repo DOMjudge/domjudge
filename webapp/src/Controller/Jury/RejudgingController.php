@@ -684,6 +684,9 @@ class RejudgingController extends BaseController
                     return $this->redirectToRoute('jury_submission', ['submitId' => $id]);
                 case 'team':
                     return $this->redirectToRoute('jury_team', ['teamId' => $id]);
+                default:
+                    // This case never happens, since we already check above. Add it here to silence linter warnings.
+                    throw new BadRequestHttpException(sprintf('unknown table %s in rejudging', $table));
             }
         }
     }

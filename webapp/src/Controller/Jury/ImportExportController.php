@@ -370,6 +370,9 @@ class ImportExportController extends BaseController
                     return $this->getResultsHtml($request, $type === 'results-icpc');
                 case 'clarifications':
                     return $this->getClarificationsHtml();
+                default:
+                    $this->addFlash('danger', "Unknown export type '" . $type . "' requested.");
+                    return $this->redirectToRoute('jury_import_export');
             }
         } catch (BadRequestHttpException $e) {
             $this->addFlash('danger', $e->getMessage());
