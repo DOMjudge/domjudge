@@ -12,6 +12,8 @@ use App\Service\ImportExportService;
 use App\Utils\Utils;
 use Doctrine\Inflector\InflectorFactory;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\QueryBuilder;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use JMS\Serializer\Metadata\PropertyMetadata;
@@ -123,7 +125,7 @@ class ContestController extends AbstractRestController
      *     description="Whether to only return data pertaining to contests that are active",
      *     @OA\Schema(type="boolean", default="false")
      * )
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      */
     public function listAction(Request $request)
     {
@@ -135,7 +137,7 @@ class ContestController extends AbstractRestController
      * @param Request $request
      * @param string  $cid
      * @return Response
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      * @Rest\Get("/{cid}")
      * @OA\Response(
      *     response="200",
@@ -157,7 +159,7 @@ class ContestController extends AbstractRestController
      * @param Request $request
      * @param string  $cid
      * @return Response
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      * @throws \Exception
      * @OA\Parameter(
      *     name="cid",
@@ -258,7 +260,7 @@ class ContestController extends AbstractRestController
      * @param Request $request
      * @param string  $cid
      * @return StreamedResponse
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      * @throws \Exception
      * @OA\Parameter(ref="#/components/parameters/cid")
      * @OA\Response(
@@ -298,7 +300,7 @@ class ContestController extends AbstractRestController
      * @param Request $request
      * @param string  $cid
      * @return array|null
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      * @OA\Parameter(ref="#/components/parameters/cid")
      * @OA\Response(
      *     response="200",
@@ -327,7 +329,7 @@ class ContestController extends AbstractRestController
      * @param MetadataFactoryInterface $metadataFactory
      * @param KernelInterface          $kernel
      * @return Response|StreamedResponse
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      * @OA\Parameter(ref="#/components/parameters/cid")
      * @OA\Parameter(
      *     name="since_id",
@@ -558,8 +560,8 @@ class ContestController extends AbstractRestController
      * @param Request $request
      * @param string  $cid
      * @return array
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NoResultException
+     * @throws NonUniqueResultException
      */
     public function getStatusAction(Request $request, string $cid)
     {
@@ -588,7 +590,7 @@ class ContestController extends AbstractRestController
      * @param Request $request
      * @param string  $id
      * @return Contest
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      */
     protected function getContestWithId(Request $request, string $id): Contest
     {

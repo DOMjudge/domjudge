@@ -79,7 +79,7 @@ abstract class AbstractRestController extends AbstractFOSRestController
      * @param Request $request
      * @param string $id
      * @return Response
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      */
     protected function performSingleAction(Request $request, string $id)
     {
@@ -200,7 +200,7 @@ abstract class AbstractRestController extends AbstractFOSRestController
     /**
      * @param Request $request
      * @return int
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      */
     protected function getContestId(Request $request): int
     {

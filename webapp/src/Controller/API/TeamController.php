@@ -5,6 +5,7 @@ namespace App\Controller\API;
 use App\Entity\Contest;
 use App\Entity\Team;
 use App\Service\ImportExportService;
+use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
 use Exception;
 use FOS\RestBundle\Controller\Annotations as Rest;
@@ -58,7 +59,7 @@ class TeamController extends AbstractRestController
      *     description="Only show visible teams, even for users with more permissions",
      *     @OA\Schema(type="boolean")
      * )
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      */
     public function listAction(Request $request)
     {
@@ -70,7 +71,7 @@ class TeamController extends AbstractRestController
      * @param Request $request
      * @param string $id
      * @return Response
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      * @Rest\Get("/{id}")
      * @OA\Response(
      *     response="200",

@@ -12,12 +12,14 @@ use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\ImportProblemService;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use OpenApi\Annotations as OA;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -49,7 +51,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
     /**
      * Get all the problems for this contest
      * @param Request $request
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      * @Rest\Get("")
      * @OA\Response(
      *     response="200",
@@ -61,7 +63,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
      * )
      * @OA\Parameter(ref="#/components/parameters/idlist")
      * @OA\Parameter(ref="#/components/parameters/strict")
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      * @throws \Exception
      */
     public function listAction(Request $request)
@@ -155,7 +157,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
      *         )
      *     )
      * )
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      */
     public function addProblemAction(Request $request)
     {
@@ -225,8 +227,8 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
      * Get the given problem for this contest
      * @param Request $request
      * @param string  $id
-     * @return \Symfony\Component\HttpFoundation\Response
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @return Response
+     * @throws NonUniqueResultException
      * @throws \Exception
      * @Rest\Get("/{id}")
      * @OA\Response(

@@ -25,7 +25,11 @@ use App\Service\ScoreboardService;
 use App\Service\SubmissionService;
 use App\Utils\Utils;
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
+use Doctrine\ORM\ORMException;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\Query\Expr\Join;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
@@ -178,7 +182,7 @@ class JudgehostController extends AbstractFOSRestController
      * )
      * @param Request $request
      * @return array
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      */
     public function createJudgehostAction(Request $request)
     {
@@ -322,7 +326,7 @@ class JudgehostController extends AbstractFOSRestController
      *         )
      *     )
      * )
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      */
     public function updateJudgingAction(Request $request, string $hostname, int $judgetaskid)
     {
@@ -620,10 +624,10 @@ class JudgehostController extends AbstractFOSRestController
      *         )
      *     )
      * )
-     * @throws \Doctrine\DBAL\DBALException
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\ORMException
+     * @throws DBALException
+     * @throws NoResultException
+     * @throws NonUniqueResultException
+     * @throws ORMException
      */
     public function addJudgingRunAction(
         Request $request,
@@ -706,8 +710,8 @@ class JudgehostController extends AbstractFOSRestController
      *         )
      *     )
      * )
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\ORMException
+     * @throws NonUniqueResultException
+     * @throws ORMException
      */
     public function internalErrorAction(Request $request): ?int
     {
@@ -855,10 +859,10 @@ class JudgehostController extends AbstractFOSRestController
 
     /**
      * Add a single judging to a given judging run
-     * @throws \Doctrine\DBAL\DBALException
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\ORMException
+     * @throws DBALException
+     * @throws NoResultException
+     * @throws NonUniqueResultException
+     * @throws ORMException
      */
     private function addSingleJudgingRun(
         int $judgeTaskId,
@@ -1168,7 +1172,7 @@ class JudgehostController extends AbstractFOSRestController
      * @param string  $type
      * @param string  $id
      * @return array
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      * @OA\Response(
      *     response="200",
      *     description="The files for the submission, testcase or script.",

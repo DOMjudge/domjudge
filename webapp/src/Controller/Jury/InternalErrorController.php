@@ -12,6 +12,8 @@ use App\Service\DOMJudgeService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Annotation\Route;
@@ -97,7 +99,7 @@ class InternalErrorController extends BaseController
     /**
      * @Route("/{errorId<\d+>}", methods={"GET"}, name="jury_internal_error")
      * @param int $errorId
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      */
     public function viewAction(int $errorId)
     {
@@ -148,7 +150,7 @@ class InternalErrorController extends BaseController
      * )
      * @param int    $errorId
      * @param string $action
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     * @return RedirectResponse
      */
     public function handleAction(int $errorId, string $action)
     {

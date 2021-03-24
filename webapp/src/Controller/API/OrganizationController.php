@@ -5,6 +5,7 @@ namespace App\Controller\API;
 use App\Entity\Team;
 use App\Entity\TeamAffiliation;
 use App\Service\ImportExportService;
+use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
@@ -27,7 +28,7 @@ class OrganizationController extends AbstractRestController
     /**
      * Get all the organizations for this contest
      * @param Request $request
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      * @Rest\Get("")
      * @OA\Response(
      *     response="200",
@@ -45,7 +46,7 @@ class OrganizationController extends AbstractRestController
      *     description="Only show organizations for the given country",
      *     @OA\Schema(type="string")
      * )
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      */
     public function listAction(Request $request)
     {
@@ -56,8 +57,8 @@ class OrganizationController extends AbstractRestController
      * Get the given organization for this contest
      * @param Request $request
      * @param string $id
-     * @return \Symfony\Component\HttpFoundation\Response
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @return Response
+     * @throws NonUniqueResultException
      * @Rest\Get("/{id}")
      * @OA\Response(
      *     response="200",

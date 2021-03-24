@@ -13,6 +13,7 @@ use App\Utils\Scoreboard\Filter;
 use App\Utils\Scoreboard\ScoreboardMatrixItem;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use OpenApi\Annotations as OA;
@@ -100,7 +101,7 @@ class ScoreboardController extends AbstractRestController
      *     description="The sort order to get the scoreboard for. If not given, uses the lowest sortorder",
      *     @OA\Schema(type="integer")
      * )
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      * @throws \Exception
      */
     public function getScoreboardAction(Request $request)

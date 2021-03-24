@@ -11,9 +11,13 @@ use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\SubmissionService;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\Asset\Packages;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
@@ -158,9 +162,9 @@ class TeamCategoryController extends BaseController
      * @param Request           $request
      * @param SubmissionService $submissionService
      * @param int               $categoryId
-     * @return \Symfony\Component\HttpFoundation\Response
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @return Response
+     * @throws NoResultException
+     * @throws NonUniqueResultException
      */
     public function viewAction(Request $request, SubmissionService $submissionService, int $categoryId)
     {
@@ -205,7 +209,7 @@ class TeamCategoryController extends BaseController
      * @IsGranted("ROLE_ADMIN")
      * @param Request $request
      * @param int     $categoryId
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     * @return RedirectResponse|Response
      * @throws \Exception
      */
     public function editAction(Request $request, int $categoryId)
@@ -238,7 +242,7 @@ class TeamCategoryController extends BaseController
      * @IsGranted("ROLE_ADMIN")
      * @param Request $request
      * @param int     $categoryId
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     * @return RedirectResponse|Response
      * @throws \Exception
      */
     public function deleteAction(Request $request, int $categoryId)
@@ -257,7 +261,7 @@ class TeamCategoryController extends BaseController
      * @Route("/add", name="jury_team_category_add")
      * @IsGranted("ROLE_ADMIN")
      * @param Request $request
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      * @throws \Exception
      */
     public function addAction(Request $request)

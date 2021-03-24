@@ -28,6 +28,7 @@ use App\Utils\FreezeData;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query\Expr\Join;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -905,7 +906,7 @@ class DOMJudgeService
     /**
      * @param Contest $contest
      * @return array
-     * @throws \Doctrine\ORM\NoResultException
+     * @throws NoResultException
      * @throws NonUniqueResultException
      */
     public function getContestStats(Contest $contest): array

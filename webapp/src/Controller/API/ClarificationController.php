@@ -3,6 +3,7 @@
 namespace App\Controller\API;
 
 use App\Entity\Clarification;
+use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
@@ -10,6 +11,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use OpenApi\Annotations as OA;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * @Rest\Route("/contests/{cid}/clarifications")
@@ -25,7 +27,7 @@ class ClarificationController extends AbstractRestController
      *
      * Note that we restrict the returned clarifications in the query builder.
      * @param Request $request
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      * @Rest\Get("")
      * @OA\Response(
      *     response="200",
@@ -43,7 +45,7 @@ class ClarificationController extends AbstractRestController
      *     description="Only show clarifications for the given problem",
      *     @OA\Schema(type="string")
      * )
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      */
     public function listAction(Request $request)
     {
@@ -56,8 +58,8 @@ class ClarificationController extends AbstractRestController
      * Note that we restrict the returned clarifications in the query builder.
      * @param Request $request
      * @param string $id
-     * @return \Symfony\Component\HttpFoundation\Response
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @return Response
+     * @throws NonUniqueResultException
      * @Rest\Get("/{id}")
      * @OA\Response(
      *     response="200",

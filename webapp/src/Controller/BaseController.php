@@ -12,12 +12,17 @@ use App\Entity\TeamCategory;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Utils\Utils;
+use Doctrine\DBAL\DBALException;
 use Doctrine\Inflector\InflectorFactory;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\MappingException;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
@@ -62,7 +67,7 @@ abstract class BaseController extends AbstractController
      * @param RouterInterface $router
      * @param Request         $request
      * @param string          $defaultUrl
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     * @return RedirectResponse
      */
     protected function redirectToLocalReferrer(RouterInterface $router, Request $request, string $defaultUrl)
     {
@@ -132,10 +137,10 @@ abstract class BaseController extends AbstractController
      * @param                        $entity
      * @param string                 $description
      * @param string                 $redirectUrl
-     * @return \Symfony\Component\HttpFoundation\Response
-     * @throws \Doctrine\DBAL\DBALException
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @return Response
+     * @throws DBALException
+     * @throws NoResultException
+     * @throws NonUniqueResultException
      */
     protected function deleteEntity(
         Request $request,

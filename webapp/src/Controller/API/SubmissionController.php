@@ -12,6 +12,7 @@ use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\SubmissionService;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
@@ -52,7 +53,7 @@ class SubmissionController extends AbstractRestController
     /**
      * Get all the submissions for this contest
      * @param Request $request
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      * @Rest\Get("")
      * @OA\Response(
      *     response="200",
@@ -75,7 +76,7 @@ class SubmissionController extends AbstractRestController
      *     description="Only show submissions for the given language",
      *     @OA\Schema(type="string")
      * )
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      */
     public function listAction(Request $request)
     {
@@ -86,8 +87,8 @@ class SubmissionController extends AbstractRestController
      * Get the given submission for this contest
      * @param Request $request
      * @param string  $id
-     * @return \Symfony\Component\HttpFoundation\Response
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @return Response
+     * @throws NonUniqueResultException
      * @Rest\Get("/{id}")
      * @OA\Response(
      *     response="200",
@@ -150,7 +151,7 @@ class SubmissionController extends AbstractRestController
      *     description="When submitting was successful",
      *     @OA\JsonContent(type="integer", description="The ID of the submitted solution")
      * )
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      * @throws \Exception
      */
     public function addSubmissionAction(Request $request)
@@ -245,7 +246,7 @@ class SubmissionController extends AbstractRestController
      * @param Request $request
      * @param string  $id
      * @return Response|StreamedResponse
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      * @OA\Response(
      *     response="200",
      *     description="The files for the submission as a ZIP archive",
@@ -284,7 +285,7 @@ class SubmissionController extends AbstractRestController
      * @param Request $request
      * @param string  $id
      * @return array
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      * @OA\Response(
      *     response="200",
      *     description="The files for the submission",
@@ -327,7 +328,7 @@ class SubmissionController extends AbstractRestController
      * Get the query builder to use for request for this REST endpoint
      * @param Request $request
      * @return QueryBuilder
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      */
     protected function getQueryBuilder(Request $request): QueryBuilder
     {

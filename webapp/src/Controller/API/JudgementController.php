@@ -8,6 +8,7 @@ use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
@@ -15,6 +16,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use OpenApi\Annotations as OA;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * @Rest\Route("/contests/{cid}/judgements")
@@ -45,7 +47,7 @@ class JudgementController extends AbstractRestController implements QueryObjectT
     /**
      * Get all the judgements for this contest
      * @param Request $request
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_TEAM') or is_granted('ROLE_JUDGEHOST') or is_granted('ROLE_API_READER')")
      * @Rest\Get("")
      * @OA\Response(
@@ -75,7 +77,7 @@ class JudgementController extends AbstractRestController implements QueryObjectT
      *     description="Only show judgements for the given submission",
      *     @OA\Schema(type="string")
      * )
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      */
     public function listAction(Request $request)
     {
@@ -86,8 +88,8 @@ class JudgementController extends AbstractRestController implements QueryObjectT
      * Get the given judgement for this contest
      * @param Request $request
      * @param string $id
-     * @return \Symfony\Component\HttpFoundation\Response
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @return Response
+     * @throws NonUniqueResultException
      * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_TEAM') or is_granted('ROLE_JUDGEHOST') or is_granted('ROLE_API_READER')")
      * @Rest\Get("/{id}")
      * @OA\Response(

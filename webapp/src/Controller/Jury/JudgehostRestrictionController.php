@@ -10,9 +10,13 @@ use App\Entity\Problem;
 use App\Form\Type\JudgehostRestrictionType;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
+use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
@@ -143,8 +147,8 @@ class JudgehostRestrictionController extends BaseController
     /**
      * @Route("/{restrictionId<\d+>}", name="jury_judgehost_restriction")
      * @param int $restrictionId
-     * @return \Symfony\Component\HttpFoundation\Response
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @return Response
+     * @throws NonUniqueResultException
      */
     public function viewAction(int $restrictionId)
     {
@@ -195,7 +199,7 @@ class JudgehostRestrictionController extends BaseController
      * @IsGranted("ROLE_ADMIN")
      * @param Request $request
      * @param int     $restrictionId
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      */
     public function editAction(Request $request, int $restrictionId)
     {
@@ -227,10 +231,10 @@ class JudgehostRestrictionController extends BaseController
      * @IsGranted("ROLE_ADMIN")
      * @param Request $request
      * @param int     $restrictionId
-     * @return \Symfony\Component\HttpFoundation\Response
-     * @throws \Doctrine\DBAL\DBALException
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @return Response
+     * @throws DBALException
+     * @throws NoResultException
+     * @throws NonUniqueResultException
      */
     public function deleteAction(Request $request, int $restrictionId)
     {
@@ -246,7 +250,7 @@ class JudgehostRestrictionController extends BaseController
      * @Route("/add", name="jury_judgehost_restriction_add")
      * @IsGranted("ROLE_ADMIN")
      * @param Request $request
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      */
     public function addAction(Request $request)
     {

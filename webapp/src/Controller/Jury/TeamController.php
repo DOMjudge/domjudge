@@ -15,9 +15,12 @@ use App\Service\ScoreboardService;
 use App\Service\SubmissionService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\NonUniqueResultException;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\Asset\Packages;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\KernelInterface;
@@ -269,7 +272,7 @@ class TeamController extends BaseController
      * @param int               $teamId
      * @param ScoreboardService $scoreboardService
      * @param SubmissionService $submissionService
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     * @return RedirectResponse|Response
      * @throws \Exception
      */
     public function viewAction(
@@ -368,7 +371,7 @@ class TeamController extends BaseController
      * @IsGranted("ROLE_ADMIN")
      * @param Request $request
      * @param int     $teamId
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     * @return RedirectResponse|Response
      * @throws \Exception
      */
     public function editAction(Request $request, int $teamId)
@@ -403,7 +406,7 @@ class TeamController extends BaseController
      * @IsGranted("ROLE_ADMIN")
      * @param Request $request
      * @param int     $teamId
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     * @return RedirectResponse|Response
      * @throws \Exception
      */
     public function deleteAction(Request $request, int $teamId)
@@ -422,8 +425,8 @@ class TeamController extends BaseController
      * @Route("/add", name="jury_team_add")
      * @IsGranted("ROLE_ADMIN")
      * @param Request $request
-     * @return \Symfony\Component\HttpFoundation\Response
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @return Response
+     * @throws NonUniqueResultException
      * @throws \Exception
      */
     public function addAction(Request $request)

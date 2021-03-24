@@ -16,7 +16,10 @@ use App\Entity\Team;
 use App\Entity\Testcase;
 use App\Utils\FreezeData;
 use App\Utils\Utils;
+use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query\Expr\Join;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -111,8 +114,8 @@ class SubmissionService
      * @param int   $limit
      * @return array An array with two elements: the first one is the list of
      *               submissions and the second one is an array with counts.
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NoResultException
+     * @throws NonUniqueResultException
      */
     public function getSubmissionList(array $contests, array $restrictions, int $limit = 0)
     {
@@ -359,7 +362,7 @@ class SubmissionService
      * @param float|null          $submitTime
      * @param string|null         $message
      * @return Submission|null
-     * @throws \Doctrine\DBAL\DBALException
+     * @throws DBALException
      */
     public function submitSolution(
         $team,

@@ -20,7 +20,10 @@ use App\Utils\Scoreboard\SingleTeamScoreboard;
 use App\Utils\Scoreboard\TeamScore;
 use App\Utils\Utils;
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query\Expr\Join;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -163,8 +166,8 @@ class ScoreboardService
      * @param FreezeData|null $freezeData
      * @param bool            $jury
      * @return int
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NoResultException
+     * @throws NonUniqueResultException
      */
     public function calculateTeamRank(
         Contest $contest,
@@ -296,7 +299,7 @@ class ScoreboardService
      * @param Team    $team
      * @param Problem $problem
      * @param bool    $updateRankCache If set to false, do not update the rankcache.
-     * @throws \Doctrine\DBAL\DBALException
+     * @throws DBALException
      * @throws \Exception
      */
     public function calculateScoreRow(
@@ -1131,7 +1134,7 @@ class ScoreboardService
      * @param Contest $contest
      * @param Team    $team
      * @return RankCache|null
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      */
     protected function getRankcache(Contest $contest, Team $team)
     {

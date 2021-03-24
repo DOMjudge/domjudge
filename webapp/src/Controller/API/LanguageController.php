@@ -3,11 +3,13 @@
 namespace App\Controller\API;
 
 use App\Entity\Language;
+use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Annotations as OA;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * @Rest\Route("/contests/{cid}/languages")
@@ -21,7 +23,7 @@ class LanguageController extends AbstractRestController
     /**
      * Get all the languages for this contest
      * @param Request $request
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      * @Rest\Get("")
      * @OA\Response(
      *     response="200",
@@ -33,7 +35,7 @@ class LanguageController extends AbstractRestController
      * )
      * @OA\Parameter(ref="#/components/parameters/idlist")
      * @OA\Parameter(ref="#/components/parameters/strict")
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      */
     public function listAction(Request $request)
     {
@@ -44,8 +46,8 @@ class LanguageController extends AbstractRestController
      * Get the given language for this contest
      * @param Request $request
      * @param string $id
-     * @return \Symfony\Component\HttpFoundation\Response
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @return Response
+     * @throws NonUniqueResultException
      * @Rest\Get("/{id}")
      * @OA\Response(
      *     response="200",

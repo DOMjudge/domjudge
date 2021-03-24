@@ -14,7 +14,9 @@ use App\Service\EventLogService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\KernelInterface;
@@ -87,7 +89,7 @@ class UserController extends BaseController
 
     /**
      * @Route("", name="jury_users")
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      * @throws \Exception
      */
     public function indexAction()
@@ -194,7 +196,7 @@ class UserController extends BaseController
      * @Route("/{userId<\d+>}", name="jury_user")
      * @param Request $request
      * @param int     $userId
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     * @return RedirectResponse|Response
      */
     public function viewAction(Request $request, int $userId)
     {
@@ -212,7 +214,7 @@ class UserController extends BaseController
      * @IsGranted("ROLE_ADMIN")
      * @param Request $request
      * @param int     $userId
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     * @return RedirectResponse|Response
      * @throws \Exception
      */
     public function editAction(Request $request, int $userId)
@@ -261,7 +263,7 @@ class UserController extends BaseController
      * @IsGranted("ROLE_ADMIN")
      * @param Request $request
      * @param int     $userId
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     * @return RedirectResponse|Response
      * @throws \Exception
      */
     public function deleteAction(Request $request, int $userId)
@@ -280,7 +282,7 @@ class UserController extends BaseController
      * @Route("/add", name="jury_user_add")
      * @IsGranted("ROLE_ADMIN")
      * @param Request $request
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      * @throws \Exception
      */
     public function addAction(Request $request)
@@ -315,7 +317,7 @@ class UserController extends BaseController
      * @Route("/generate-passwords", name="jury_generate_passwords")
      * @IsGranted("ROLE_ADMIN")
      * @param Request $request
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      */
     public function generatePasswordsAction(Request $request)
     {

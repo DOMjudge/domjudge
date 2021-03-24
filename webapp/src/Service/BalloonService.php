@@ -9,6 +9,9 @@ use App\Entity\ScoreCache;
 use App\Entity\Submission;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
+use Doctrine\ORM\ORMException;
 use Doctrine\ORM\Query\Expr\Join;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -46,9 +49,9 @@ class BalloonService
      * @param Contest      $contest
      * @param Submission   $submission
      * @param Judging|null $judging
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\ORMException
+     * @throws NoResultException
+     * @throws NonUniqueResultException
+     * @throws ORMException
      */
     public function updateBalloons(
         Contest $contest,

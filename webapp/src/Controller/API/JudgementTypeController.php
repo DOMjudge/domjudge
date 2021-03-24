@@ -2,6 +2,7 @@
 
 namespace App\Controller\API;
 
+use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use OpenApi\Annotations as OA;
@@ -61,7 +62,7 @@ class JudgementTypeController extends AbstractRestController
      * @param Request $request
      * @param string $id
      * @return array
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      * @throws \Exception
      * @Rest\Get("/{id}")
      * @OA\Response(
