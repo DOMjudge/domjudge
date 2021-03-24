@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Utils\Utils;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -120,16 +121,6 @@ class ProblemAttachment
         $content  = $this->getContent()->getContent();
         $filename = $this->getName();
 
-        $response = new StreamedResponse();
-        $response->setCallback(function () use ($content) {
-            echo $content;
-        });
-        $response->headers->set('Content-Type',
-            sprintf('application/octet-stream; name="%s', $filename));
-        $response->headers->set('Content-Disposition',
-            sprintf('attachment; filename="%s"', $filename));
-        $response->headers->set('Content-Length', strlen($content));
-
-        return $response;
+        return Utils::streamAsBinaryFile($content, $filename, 'octet-stream');
     }
 }
