@@ -167,10 +167,10 @@ class Executable
         return $this->immutableExecutable;
     }
 
-    public function getZipfileContent(): string
+    public function getZipfileContent(string $tempdir): string
     {
         $zipArchive = new \ZipArchive();
-        if (!($tempzipFile = tempnam($this->dj->getDomjudgeTmpDir(), "/executable-"))) {
+        if (!($tempzipFile = tempnam($tempdir, "/executable-"))) {
             throw new ServiceUnavailableHttpException(null, 'Failed to create temporary file');
         }
         $zipArchive->open($tempzipFile);
