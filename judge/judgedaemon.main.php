@@ -825,6 +825,7 @@ function disable(string $kind, string $idcolumn, $id, string $description, int $
         '&disabled=' . urlencode($disabled) .
         '&hostname=' . urlencode($myhost)
     );
+    logmsg(LOG_ERR, "=> internal error " . $error_id);
 }
 
 function read_metadata(string $filename)
