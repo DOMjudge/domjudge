@@ -25,6 +25,14 @@ Version 8.0.0 - DEV
  - Add filter on result to jury submissions page.
  - Add API actions to create single team, team affiliation and team category.
  - Add problem attachment support.
+ - Judge a single submission on multiple judgedaemons in parallel if the
+   judging queue is empty.
+ - Limit the size of the program output stored by default in the database;
+   with a button in the UI to retrieve the full output.
+ - Add new clarification handler role.
+ - Reduce cost of the hash function to handle large amounts of accounts when
+   generating or storing passwords.
+
 
 Version 7.3.2 - 23 November 2020
 --------------------------------
