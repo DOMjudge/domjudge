@@ -174,6 +174,11 @@ class SubmissionController extends AbstractRestController
      *                 format="date-time"
      *             ),
      *             @OA\Property(
+     *                 property="id",
+     *                 description="The ID to use for the submission. Only used when adding a submission as admin",
+     *                 type="string"
+     *             ),
+     *             @OA\Property(
      *                 property="files",
      *                 type="array",
      *                 minItems=1,
@@ -196,7 +201,7 @@ class SubmissionController extends AbstractRestController
      * @OA\Response(
      *     response="200",
      *     description="When submitting was successful",
-     *     @OA\JsonContent(type="integer", description="The ID of the submitted solution")
+     *     @OA\JsonContent(type="string", description="The ID of the submitted solution")
      * )
      * @throws NonUniqueResultException
      * @throws Exception

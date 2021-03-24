@@ -5,6 +5,7 @@ namespace App\Tests\Controller\API;
 use App\Entity\Language;
 use App\Entity\Submission;
 use App\Entity\SubmissionFile;
+use App\Entity\User;
 use App\Service\DOMJudgeService;
 use Doctrine\ORM\EntityManagerInterface;
 use Generator;
@@ -100,7 +101,6 @@ class SubmissionControllerTest extends BaseTest
             ],
             "The 'files[0].mime' attribute must be application/zip if provided"
         ];
-        yield ['admin', ['problem_id' => 1, 'language' => 'cpp'], "User does not belong to a team"];
         yield ['admin', ['problem_id' => 1, 'language' => 'cpp', 'team_id' => 1], "No files specified."];
         yield ['admin', ['problem_id' => 1, 'language' => 'cpp', 'team_id' => 3], "Team 3 not found or not enabled"];
         yield ['admin', ['problem_id' => 1, 'language' => 'cpp', 'team_id' => 1, 'time' => 'this is not a time'], "Can not parse time this is not a time"];
@@ -121,6 +121,30 @@ class SubmissionControllerTest extends BaseTest
         $data = $this->verifyApiJsonResponse('POST', '/contests/2/submissions', 400, 'dummy', ['problem_id' => 1, 'language' => 'kotlin']);
 
         static::assertEquals('Main class required, but not specified.', $data['message']);
+    }
+
+    /**
+     * Test that when submitting as a team without an association team an error is returned
+     *
+     * @dataProvider provideMissingTeam
+     */
+    public function testMissingTeam(string $username)
+    {
+        // First, remove the team from the dummy user
+        /** @var User $user */
+        $user = static::$container->get(EntityManagerInterface::class)->getRepository(User::class)->findOneBy(['username' => $username]);
+        $user->setTeam();
+        static::$container->get(EntityManagerInterface::class)->flush();
+
+        $data = $this->verifyApiJsonResponse('POST', '/contests/2/submissions', 400, $username, ['problem_id' => 1, 'language' => 'cpp']);
+
+        static::assertEquals('User does not belong to a team', $data['message']);
+    }
+
+    public function provideMissingTeam(): Generator
+    {
+        yield ['dummy'];
+        yield ['admin'];
     }
 
     /**
