@@ -323,7 +323,7 @@ class JudgeTask
     }
 
     /** @param string|float $starttime */
-    public function setStarttime($starttime): Judging
+    public function setStarttime($starttime): JudgeTask
     {
         $this->starttime = $starttime;
         return $this;
