@@ -13,6 +13,7 @@ use App\Service\SubmissionService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
+use Exception;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\Asset\Packages;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -210,7 +211,7 @@ class TeamCategoryController extends BaseController
      * @param Request $request
      * @param int     $categoryId
      * @return RedirectResponse|Response
-     * @throws \Exception
+     * @throws Exception
      */
     public function editAction(Request $request, int $categoryId)
     {
@@ -243,7 +244,7 @@ class TeamCategoryController extends BaseController
      * @param Request $request
      * @param int     $categoryId
      * @return RedirectResponse|Response
-     * @throws \Exception
+     * @throws Exception
      */
     public function deleteAction(Request $request, int $categoryId)
     {
@@ -262,7 +263,7 @@ class TeamCategoryController extends BaseController
      * @IsGranted("ROLE_ADMIN")
      * @param Request $request
      * @return Response
-     * @throws \Exception
+     * @throws Exception
      */
     public function addAction(Request $request)
     {

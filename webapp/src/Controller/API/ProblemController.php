@@ -14,6 +14,7 @@ use App\Service\ImportProblemService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
+use Exception;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use OpenApi\Annotations as OA;
@@ -64,10 +65,9 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
      * @OA\Parameter(ref="#/components/parameters/idlist")
      * @OA\Parameter(ref="#/components/parameters/strict")
      * @throws NonUniqueResultException
-     * @throws \Exception
+     * @throws Exception
      */
-    public function listAction(Request $request)
-    {
+    public function listAction(Request $request) {
         // Make sure we clear the entity manager class, for when this method is called multiple times by internal requests
         $this->em->clear();
         // This method is overwritten, because we need to add ordinal values
@@ -206,7 +206,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
                 } else {
                     $errors = array_merge($errors, $messages);
                 }
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $allMessages[] = $e->getMessage();
             } finally {
                 if ($zip) {
@@ -229,7 +229,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
      * @param string  $id
      * @return Response
      * @throws NonUniqueResultException
-     * @throws \Exception
+     * @throws Exception
      * @Rest\Get("/{id}")
      * @OA\Response(
      *     response="200",
@@ -294,7 +294,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
 
     /**
      * @inheritdoc
-     * @throws \Exception
+     * @throws Exception
      */
     protected function getIdField(): string
     {

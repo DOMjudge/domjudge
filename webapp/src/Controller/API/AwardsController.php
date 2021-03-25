@@ -9,6 +9,7 @@ use App\Service\EventLogService;
 use App\Service\ScoreboardService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
+use Exception;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -66,7 +67,7 @@ class AwardsController extends AbstractRestController
      *     )
      * )
      * @OA\Parameter(ref="#/components/parameters/strict")
-     * @throws \Exception
+     * @throws Exception
      */
     public function listAction(Request $request)
     {
@@ -86,7 +87,7 @@ class AwardsController extends AbstractRestController
      * )
      * @OA\Parameter(ref="#/components/parameters/id")
      * @OA\Parameter(ref="#/components/parameters/strict")
-     * @throws \Exception
+     * @throws Exception
      */
     public function singleAction(Request $request, string $id)
     {
@@ -104,7 +105,7 @@ class AwardsController extends AbstractRestController
      * @param Request     $request
      * @param string|null $requestedType
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     protected function getAwardsData(Request $request, string $requestedType = null)
     {

@@ -5,6 +5,7 @@ namespace App\Controller\API;
 use App\Entity\Clarification;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
+use Exception;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
@@ -115,7 +116,7 @@ class ClarificationController extends AbstractRestController
 
     /**
      * @inheritdoc
-     * @throws \Exception
+     * @throws Exception
      */
     protected function getIdField(): string
     {

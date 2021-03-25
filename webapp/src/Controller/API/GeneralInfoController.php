@@ -13,6 +13,7 @@ use App\Service\EventLogService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
+use Exception;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
@@ -222,7 +223,7 @@ class GeneralInfoController extends AbstractFOSRestController
      * )
      * @param Request $request
      * @return Configuration[]|mixed
-     * @throws \Exception
+     * @throws Exception
      */
     public function getDatabaseConfigurationAction(Request $request)
     {
@@ -258,7 +259,7 @@ class GeneralInfoController extends AbstractFOSRestController
      * )
      * @param Request $request
      * @return Configuration[]|mixed
-     * @throws \Exception
+     * @throws Exception
      */
     public function updateConfigurationAction(Request $request)
     {
@@ -311,7 +312,7 @@ class GeneralInfoController extends AbstractFOSRestController
     {
         try {
             return $this->eventLogService->externalIdFieldForEntity(Contest::class) ?? 'cid';
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return 'cid';
         }
     }

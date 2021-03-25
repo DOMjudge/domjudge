@@ -18,6 +18,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\MappingException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
+use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -86,7 +87,7 @@ abstract class BaseController extends AbstractController
      * @param object                 $entity
      * @param mixed                  $id
      * @param bool                   $isNewEntity
-     * @throws \Exception
+     * @throws Exception
      */
     protected function saveEntity(
         EntityManagerInterface $entityManager,

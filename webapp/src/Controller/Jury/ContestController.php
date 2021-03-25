@@ -23,6 +23,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\PersistentCollection;
 use Doctrine\ORM\Query\Expr\Join;
+use Exception;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -486,7 +487,7 @@ class ContestController extends BaseController
      * @param Request $request
      * @param int     $contestId
      * @return RedirectResponse|Response
-     * @throws \Exception
+     * @throws Exception
      */
     public function editAction(Request $request, int $contestId)
     {
@@ -586,7 +587,7 @@ class ContestController extends BaseController
      * @param Request $request
      * @param int     $contestId
      * @return RedirectResponse|Response
-     * @throws \Exception
+     * @throws Exception
      */
     public function deleteAction(Request $request, int $contestId)
     {
@@ -606,7 +607,7 @@ class ContestController extends BaseController
      * @param Request $request
      * @param int     $contestId
      * @return RedirectResponse|Response
-     * @throws \Exception
+     * @throws Exception
      */
     public function deleteProblemAction(Request $request, int $contestId, int $probId)
     {

@@ -7,6 +7,7 @@ use App\Entity\TeamAffiliation;
 use App\Service\ImportExportService;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
+use Exception;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Annotations as OA;
@@ -134,7 +135,7 @@ class OrganizationController extends AbstractRestController
 
     /**
      * @inheritdoc
-     * @throws \Exception
+     * @throws Exception
      */
     protected function getIdField(): string
     {

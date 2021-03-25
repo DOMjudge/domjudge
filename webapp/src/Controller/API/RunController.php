@@ -10,6 +10,7 @@ use App\Service\EventLogService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
+use Exception;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
@@ -125,7 +126,7 @@ class RunController extends AbstractRestController implements QueryObjectTransfo
 
     /**
      * @inheritdoc
-     * @throws \Exception
+     * @throws Exception
      */
     protected function getQueryBuilder(Request $request): QueryBuilder
     {

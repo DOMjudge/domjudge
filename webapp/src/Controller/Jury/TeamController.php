@@ -16,6 +16,7 @@ use App\Service\SubmissionService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
+use Exception;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\Asset\Packages;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -273,7 +274,7 @@ class TeamController extends BaseController
      * @param ScoreboardService $scoreboardService
      * @param SubmissionService $submissionService
      * @return RedirectResponse|Response
-     * @throws \Exception
+     * @throws Exception
      */
     public function viewAction(
         Request $request,
@@ -372,7 +373,7 @@ class TeamController extends BaseController
      * @param Request $request
      * @param int     $teamId
      * @return RedirectResponse|Response
-     * @throws \Exception
+     * @throws Exception
      */
     public function editAction(Request $request, int $teamId)
     {
@@ -407,7 +408,7 @@ class TeamController extends BaseController
      * @param Request $request
      * @param int     $teamId
      * @return RedirectResponse|Response
-     * @throws \Exception
+     * @throws Exception
      */
     public function deleteAction(Request $request, int $teamId)
     {
@@ -427,7 +428,7 @@ class TeamController extends BaseController
      * @param Request $request
      * @return Response
      * @throws NonUniqueResultException
-     * @throws \Exception
+     * @throws Exception
      */
     public function addAction(Request $request)
     {
