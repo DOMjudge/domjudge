@@ -109,9 +109,6 @@ class GroupController extends AbstractRestController
         return $this->renderCreateData($request, $saved[0], 'group', $id);
     }
 
-    /**
-     * @inheritdoc
-     */
     protected function getQueryBuilder(Request $request): QueryBuilder
     {
         // Call getContestId to make sure we have an active contest
@@ -129,9 +126,6 @@ class GroupController extends AbstractRestController
         return $queryBuilder;
     }
 
-    /**
-     * @inheritdoc
-     */
     protected function getIdField(): string
     {
         return 'c.categoryid';

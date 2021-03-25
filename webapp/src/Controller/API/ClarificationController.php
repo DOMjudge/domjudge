@@ -75,9 +75,6 @@ class ClarificationController extends AbstractRestController
         return parent::performSingleAction($request, $id);
     }
 
-    /**
-     * @inheritdoc
-     */
     protected function getQueryBuilder(Request $request): QueryBuilder
     {
         $queryBuilder = $this->em->createQueryBuilder()
@@ -115,7 +112,6 @@ class ClarificationController extends AbstractRestController
     }
 
     /**
-     * @inheritdoc
      * @throws Exception
      */
     protected function getIdField(): string

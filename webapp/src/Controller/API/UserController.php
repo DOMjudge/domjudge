@@ -378,9 +378,6 @@ class UserController extends AbstractRestController
         return $this->renderCreateData($request, $user, 'user', $user->getUserid());
     }
 
-    /**
-     * @inheritdoc
-     */
     protected function getQueryBuilder(Request $request): QueryBuilder
     {
         $queryBuilder = $this->em->createQueryBuilder()
@@ -397,7 +394,6 @@ class UserController extends AbstractRestController
     }
 
     /**
-     * @inheritdoc
      * @throws Exception
      */
     protected function getIdField(): string

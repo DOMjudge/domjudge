@@ -112,9 +112,6 @@ class OrganizationController extends AbstractRestController
         return $this->renderCreateData($request, $saved[0], 'organization', $id);
     }
 
-    /**
-     * @inheritdoc
-     */
     protected function getQueryBuilder(Request $request): QueryBuilder
     {
         // Call getContestId to make sure we have an active contest
@@ -134,7 +131,6 @@ class OrganizationController extends AbstractRestController
     }
 
     /**
-     * @inheritdoc
      * @throws Exception
      */
     protected function getIdField(): string
