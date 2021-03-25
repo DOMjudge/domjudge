@@ -18,6 +18,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query\Expr\Join;
+use Exception;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\Asset\Packages;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -170,7 +171,7 @@ class LanguageController extends BaseController
      * @IsGranted("ROLE_ADMIN")
      * @param Request $request
      * @return Response
-     * @throws \Exception
+     * @throws Exception
      */
     public function addAction(Request $request)
     {
@@ -301,7 +302,7 @@ class LanguageController extends BaseController
      * @param Request $request
      * @param string  $langId
      * @return RedirectResponse|Response
-     * @throws \Exception
+     * @throws Exception
      */
     public function editAction(Request $request, string $langId)
     {
@@ -343,7 +344,7 @@ class LanguageController extends BaseController
      * @param Request $request
      * @param string  $langId
      * @return RedirectResponse|Response
-     * @throws \Exception
+     * @throws Exception
      */
     public function deleteAction(Request $request, string $langId)
     {

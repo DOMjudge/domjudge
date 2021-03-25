@@ -10,6 +10,7 @@ use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
+use Exception;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -241,7 +242,7 @@ abstract class AbstractRestController extends AbstractFOSRestController
     {
         try {
             return $this->eventLogService->externalIdFieldForEntity(Contest::class) ?? 'cid';
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return 'cid';
         }
     }

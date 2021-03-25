@@ -4,6 +4,7 @@ namespace App\Controller\API;
 
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
+use Exception;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use OpenApi\Annotations as OA;
 use Symfony\Component\HttpFoundation\Request;
@@ -21,7 +22,7 @@ class JudgementTypeController extends AbstractRestController
      * Get all the judgement types for this contest
      * @param Request $request
      * @return array
-     * @throws \Exception
+     * @throws Exception
      * @Rest\Get("")
      * @OA\Response(
      *     response="200",
@@ -63,7 +64,7 @@ class JudgementTypeController extends AbstractRestController
      * @param string $id
      * @return array
      * @throws NonUniqueResultException
-     * @throws \Exception
+     * @throws Exception
      * @Rest\Get("/{id}")
      * @OA\Response(
      *     response="200",
@@ -90,7 +91,7 @@ class JudgementTypeController extends AbstractRestController
      * Get the judgement types, optionally filtered on the given ID's
      * @param string[]|null $filteredOn
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     protected function getJudgementTypes(array $filteredOn = null)
     {

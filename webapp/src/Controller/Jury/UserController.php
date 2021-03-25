@@ -13,6 +13,7 @@ use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -90,7 +91,7 @@ class UserController extends BaseController
     /**
      * @Route("", name="jury_users")
      * @return Response
-     * @throws \Exception
+     * @throws Exception
      */
     public function indexAction()
     {
@@ -215,7 +216,7 @@ class UserController extends BaseController
      * @param Request $request
      * @param int     $userId
      * @return RedirectResponse|Response
-     * @throws \Exception
+     * @throws Exception
      */
     public function editAction(Request $request, int $userId)
     {
@@ -264,7 +265,7 @@ class UserController extends BaseController
      * @param Request $request
      * @param int     $userId
      * @return RedirectResponse|Response
-     * @throws \Exception
+     * @throws Exception
      */
     public function deleteAction(Request $request, int $userId)
     {
@@ -283,7 +284,7 @@ class UserController extends BaseController
      * @IsGranted("ROLE_ADMIN")
      * @param Request $request
      * @return Response
-     * @throws \Exception
+     * @throws Exception
      */
     public function addAction(Request $request)
     {

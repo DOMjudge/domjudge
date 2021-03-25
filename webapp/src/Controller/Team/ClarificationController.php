@@ -15,6 +15,7 @@ use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\Query\Expr\Join;
+use Exception;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Form\FormFactoryInterface;
@@ -81,7 +82,7 @@ class ClarificationController extends BaseController
      * @param int     $clarId
      * @return Response
      * @throws NonUniqueResultException
-     * @throws \Exception
+     * @throws Exception
      */
     public function viewAction(Request $request, int $clarId)
     {
@@ -169,7 +170,7 @@ class ClarificationController extends BaseController
      * @Route("/clarifications/add", name="team_clarification_add")
      * @param Request $request
      * @return Response
-     * @throws \Exception
+     * @throws Exception
      */
     public function addAction(Request $request)
     {

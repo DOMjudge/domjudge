@@ -15,6 +15,7 @@ use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
+use Exception;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use OpenApi\Annotations as OA;
 use Symfony\Component\HttpFoundation\Request;
@@ -102,7 +103,7 @@ class ScoreboardController extends AbstractRestController
      *     @OA\Schema(type="integer")
      * )
      * @throws NonUniqueResultException
-     * @throws \Exception
+     * @throws Exception
      */
     public function getScoreboardAction(Request $request)
     {

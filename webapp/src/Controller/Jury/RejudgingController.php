@@ -18,6 +18,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query;
+use Exception;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -453,7 +454,7 @@ class RejudgingController extends BaseController
      * @param Request              $request
      * @param FormFactoryInterface $formFactory
      * @return Response
-     * @throws \Exception
+     * @throws Exception
      */
     public function addAction(Request $request, FormFactoryInterface $formFactory)
     {

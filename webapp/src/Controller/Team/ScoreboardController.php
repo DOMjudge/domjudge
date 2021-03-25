@@ -8,6 +8,7 @@ use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\ScoreboardService;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Request;
@@ -69,7 +70,7 @@ class ScoreboardController extends BaseController
      * @Route("/scoreboard", name="team_scoreboard")
      * @param Request $request
      * @return Response
-     * @throws \Exception
+     * @throws Exception
      */
     public function scoreboardAction(Request $request)
     {
@@ -94,7 +95,7 @@ class ScoreboardController extends BaseController
      * @param Request $request
      * @param int     $teamId
      * @return Response
-     * @throws \Exception
+     * @throws Exception
      */
     public function teamAction(Request $request, int $teamId)
     {

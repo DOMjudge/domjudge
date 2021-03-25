@@ -4,6 +4,7 @@ namespace App\Controller\Jury;
 
 use App\Service\DOMJudgeService;
 use App\Service\ScoreboardService;
+use Exception;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -43,7 +44,7 @@ class ScoreboardController extends AbstractController
      * @Route("", name="jury_scoreboard")
      * @param Request $request
      * @return Response
-     * @throws \Exception
+     * @throws Exception
      */
     public function scoreboardAction(Request $request)
     {

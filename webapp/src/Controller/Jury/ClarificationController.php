@@ -14,6 +14,7 @@ use App\Service\EventLogService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\Expr\Join;
+use Exception;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -70,7 +71,7 @@ class ClarificationController extends AbstractController
 
     /**
      * @Route("", name="jury_clarifications")
-     * @throws \Exception
+     * @throws Exception
      */
     public function indexAction(Request $request)
     {
@@ -155,7 +156,7 @@ class ClarificationController extends AbstractController
 
     /**
      * @Route("/{id<\d+>}", name="jury_clarification")
-     * @throws \Exception
+     * @throws Exception
      */
     public function viewAction(Request $request, int $id)
     {
@@ -308,7 +309,7 @@ class ClarificationController extends AbstractController
 
     /**
      * @Route("/send", methods={"GET"}, name="jury_clarification_new")
-     * @throws \Exception
+     * @throws Exception
      */
     public function composeClarificationAction(Request $request)
     {

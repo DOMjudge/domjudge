@@ -15,6 +15,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\QueryBuilder;
+use Exception;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use JMS\Serializer\Metadata\PropertyMetadata;
 use Metadata\MetadataFactoryInterface;
@@ -160,7 +161,7 @@ class ContestController extends AbstractRestController
      * @param string  $cid
      * @return Response
      * @throws NonUniqueResultException
-     * @throws \Exception
+     * @throws Exception
      * @OA\Parameter(
      *     name="cid",
      *     in="path",
@@ -261,7 +262,7 @@ class ContestController extends AbstractRestController
      * @param string  $cid
      * @return StreamedResponse
      * @throws NonUniqueResultException
-     * @throws \Exception
+     * @throws Exception
      * @OA\Parameter(ref="#/components/parameters/cid")
      * @OA\Response(
      *     response="200",
@@ -578,7 +579,7 @@ class ContestController extends AbstractRestController
 
     /**
      * @inheritdoc
-     * @throws \Exception
+     * @throws Exception
      */
     protected function getIdField(): string
     {

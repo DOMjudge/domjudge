@@ -30,6 +30,7 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\ORMException;
 use Doctrine\ORM\Query\Expr\Join;
+use Exception;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -231,7 +232,7 @@ class SubmissionController extends BaseController
     /**
      * @Route("/{submitId<\d+>}", name="jury_submission")
      * @throws NonUniqueResultException
-     * @throws \Exception
+     * @throws Exception
      */
     public function viewAction(Request $request, int $submitId)
     {
@@ -592,7 +593,7 @@ class SubmissionController extends BaseController
     /**
      * @Route("/request-output/{jid}/{jrid}", name="request_output")
      * @throws NonUniqueResultException
-     * @throws \Exception
+     * @throws Exception
      */
     public function requestOutput(Judging $jid, JudgingRun $jrid)
     {
@@ -801,7 +802,7 @@ class SubmissionController extends BaseController
      * @param Request    $request
      * @param Submission $submission
      * @return RedirectResponse|Response
-     * @throws \Exception
+     * @throws Exception
      */
     public function editSourceAction(Request $request, Submission $submission)
     {
@@ -933,7 +934,7 @@ class SubmissionController extends BaseController
      * @param int               $submitId
      * @return RedirectResponse
      * @throws DBALException
-     * @throws \Exception
+     * @throws Exception
      */
     public function updateStatusAction(
         EventLogService $eventLogService,

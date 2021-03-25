@@ -10,6 +10,7 @@ use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\ScoreboardService;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\Asset\Packages;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -192,7 +193,7 @@ class TeamAffiliationController extends BaseController
      * @param ScoreboardService $scoreboardService
      * @param int               $affilId
      * @return Response
-     * @throws \Exception
+     * @throws Exception
      */
     public function viewAction(Request $request, ScoreboardService $scoreboardService, int $affilId)
     {
@@ -238,7 +239,7 @@ class TeamAffiliationController extends BaseController
      * @param Request $request
      * @param int     $affilId
      * @return RedirectResponse|Response
-     * @throws \Exception
+     * @throws Exception
      */
     public function editAction(Request $request, int $affilId)
     {
@@ -273,7 +274,7 @@ class TeamAffiliationController extends BaseController
      * @param Request $request
      * @param int     $affilId
      * @return RedirectResponse|Response
-     * @throws \Exception
+     * @throws Exception
      */
     public function deleteAction(Request $request, int $affilId)
     {
@@ -292,7 +293,7 @@ class TeamAffiliationController extends BaseController
      * @IsGranted("ROLE_ADMIN")
      * @param Request $request
      * @return Response
-     * @throws \Exception
+     * @throws Exception
      */
     public function addAction(Request $request)
     {

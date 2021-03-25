@@ -11,6 +11,7 @@ use App\Service\ScoreboardService;
 use App\Service\StatisticsService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
+use Exception;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -72,7 +73,7 @@ class PublicController extends BaseController
      * @Route("", name="public_index")
      * @param Request $request
      * @return Response
-     * @throws \Exception
+     * @throws Exception
      */
     public function scoreboardAction(Request $request)
     {
@@ -161,7 +162,7 @@ class PublicController extends BaseController
      * @param Request $request
      * @param int     $teamId
      * @return Response
-     * @throws \Exception
+     * @throws Exception
      */
     public function teamAction(Request $request, int $teamId)
     {
@@ -185,7 +186,7 @@ class PublicController extends BaseController
      * @Route("/problems", name="public_problems")
      * @return Response
      * @throws NonUniqueResultException
-     * @throws \Exception
+     * @throws Exception
      */
     public function problemsAction()
     {
