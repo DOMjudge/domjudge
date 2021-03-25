@@ -690,10 +690,10 @@ while (true) {
         $needs_cleanup = false;
         if (file_exists($success_file)) {
             $oldpid = file_get_contents($success_file);
-            if ($oldpid !== getmypid()) {
+            if ($oldpid !== (string)getmypid()) {
                 $needs_cleanup = true;
+                unlink($success_file);
             }
-            unlink($success_file);
         } else {
             $oldpid = 'n/a';
             $needs_cleanup = true;
@@ -707,7 +707,7 @@ while (true) {
 
             $oldworkdir = $workdir . '-old-' . getmypid() . '-' . strftime('%Y-%m-%d_%H:%M');
             if (!rename($workdir, $oldworkdir)) {
-                error("Could not rename stale working directory to '$oldworkdir', the old PID was $oldpid");
+                error("Could not rename stale working directory to '$oldworkdir', the old PID was '$oldpid'");
             }
             @chmod($oldworkdir, 0700);
             warning("Found stale working directory; renamed to '$oldworkdir'");
