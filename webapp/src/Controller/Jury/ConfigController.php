@@ -161,8 +161,7 @@ class ConfigController extends AbstractController
     {
         ob_start();
         phpinfo();
-        $phpinfo = ob_get_contents();
-        ob_end_clean();
+        $phpinfo = ob_get_clean();
 
         return new Response($phpinfo);
     }
