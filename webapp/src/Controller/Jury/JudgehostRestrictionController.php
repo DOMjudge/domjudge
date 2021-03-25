@@ -48,14 +48,6 @@ class JudgehostRestrictionController extends BaseController
      */
     protected $kernel;
 
-    /**
-     * JudgehostRestrictionController constructor.
-     *
-     * @param EntityManagerInterface $entityManager
-     * @param DOMJudgeService        $dj
-     * @param EventLogService        $eventLog
-     * @param KernelInterface        $kernel
-     */
     public function __construct(
         EntityManagerInterface $entityManager,
         DOMJudgeService $dj,
@@ -71,7 +63,7 @@ class JudgehostRestrictionController extends BaseController
     /**
      * @Route("", name="jury_judgehost_restrictions")
      */
-    public function indexAction(Request $request)
+    public function indexAction(Request $request): Response
     {
         /** @var JudgehostRestriction[] $judgehostRestrictions */
         $judgehostRestrictions = $this->em->createQueryBuilder()
@@ -146,11 +138,9 @@ class JudgehostRestrictionController extends BaseController
 
     /**
      * @Route("/{restrictionId<\d+>}", name="jury_judgehost_restriction")
-     * @param int $restrictionId
-     * @return Response
      * @throws NonUniqueResultException
      */
-    public function viewAction(int $restrictionId)
+    public function viewAction(int $restrictionId): Response
     {
         /** @var JudgehostRestriction $judgehostRestriction */
         $judgehostRestriction = $this->em->createQueryBuilder()
@@ -197,11 +187,8 @@ class JudgehostRestrictionController extends BaseController
     /**
      * @Route("/{restrictionId<\d+>}/edit", name="jury_judgehost_restriction_edit")
      * @IsGranted("ROLE_ADMIN")
-     * @param Request $request
-     * @param int     $restrictionId
-     * @return Response
      */
-    public function editAction(Request $request, int $restrictionId)
+    public function editAction(Request $request, int $restrictionId): Response
     {
         /** @var JudgehostRestriction $judgehostRestriction */
         $judgehostRestriction = $this->em->getRepository(JudgehostRestriction::class)->find($restrictionId);
@@ -229,14 +216,11 @@ class JudgehostRestrictionController extends BaseController
     /**
      * @Route("/{restrictionId<\d+>}/delete", name="jury_judgehost_restriction_delete")
      * @IsGranted("ROLE_ADMIN")
-     * @param Request $request
-     * @param int     $restrictionId
-     * @return Response
      * @throws DBALException
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
-    public function deleteAction(Request $request, int $restrictionId)
+    public function deleteAction(Request $request, int $restrictionId): Response
     {
         /** @var JudgehostRestriction $judgehostRestriction */
         $judgehostRestriction = $this->em->getRepository(JudgehostRestriction::class)->find($restrictionId);
@@ -249,10 +233,8 @@ class JudgehostRestrictionController extends BaseController
     /**
      * @Route("/add", name="jury_judgehost_restriction_add")
      * @IsGranted("ROLE_ADMIN")
-     * @param Request $request
-     * @return Response
      */
-    public function addAction(Request $request)
+    public function addAction(Request $request): Response
     {
         $judgehostRestriction = new JudgehostRestriction();
 

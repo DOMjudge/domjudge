@@ -44,13 +44,6 @@ class MetricsController extends AbstractFOSRestController
 
     protected $registry;
 
-    /**
-     * MetricsController constructor.
-     * @param EntityManagerInterface $em
-     * @param DOMJudgeService        $dj
-     * @param SubmissionService      $submissionService
-     * @param CollectorRegistry      $registry
-     */
     public function __construct(
         EntityManagerInterface $em,
         DOMJudgeService $dj,
@@ -70,7 +63,7 @@ class MetricsController extends AbstractFOSRestController
      *     description="Metrics of this installation for use by Prometheus"
      * )
      */
-    public function prometheusAction(Request $request)
+    public function prometheusAction(Request $request): Response
     {
         $registry = $this->registry;
         $em = $this->em;

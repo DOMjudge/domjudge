@@ -78,15 +78,6 @@ class SubmissionController extends BaseController
      */
     protected $router;
 
-    /**
-     * SubmissionController constructor.
-     *
-     * @param EntityManagerInterface $em
-     * @param DOMJudgeService        $dj
-     * @param ConfigurationService   $config
-     * @param SubmissionService      $submissionService
-     * @param RouterInterface        $router
-     */
     public function __construct(
         EntityManagerInterface $em,
         DOMJudgeService $dj,
@@ -104,7 +95,7 @@ class SubmissionController extends BaseController
     /**
      * @Route("", name="jury_submissions")
      */
-    public function indexAction(Request $request)
+    public function indexAction(Request $request): Response
     {
         $viewTypes = [0 => 'newest', 1 => 'unverified', 2 => 'unjudged', 3 => 'all'];
         $view      = 0;
@@ -215,7 +206,8 @@ class SubmissionController extends BaseController
         return $this->render('jury/submissions.html.twig', $data, $response);
     }
 
-    private function parseMetadata($raw_metadata) {
+    private function parseMetadata($raw_metadata): array
+    {
         // TODO: reduce duplication with judgedaemon code
         $contents = explode("\n", $raw_metadata);
         $res = [];
@@ -595,7 +587,7 @@ class SubmissionController extends BaseController
      * @throws NonUniqueResultException
      * @throws Exception
      */
-    public function requestOutput(Judging $jid, JudgingRun $jrid)
+    public function requestOutput(Judging $jid, JudgingRun $jrid): RedirectResponse
     {
         $submission = $jid->getSubmission();
         $hostname = $jrid->getJudgeTask()->getHostname();
@@ -618,7 +610,7 @@ class SubmissionController extends BaseController
     /**
      * @Route("/by-judging-id/{jid}", name="jury_submission_by_judging")
      */
-    public function viewForJudgingAction(Judging $jid)
+    public function viewForJudgingAction(Judging $jid): RedirectResponse
     {
         return $this->redirectToRoute('jury_submission', [
             'submitId' => $jid->getSubmission()->getSubmitid(),
@@ -629,7 +621,7 @@ class SubmissionController extends BaseController
     /**
      * @Route("/by-external-judgement-id/{externalJudgement}", name="jury_submission_by_external_judgement")
      */
-    public function viewForExternalJudgementAction(ExternalJudgement $externalJudgement)
+    public function viewForExternalJudgementAction(ExternalJudgement $externalJudgement): RedirectResponse
     {
         return $this->redirectToRoute('jury_submission', [
             'submitId' => $externalJudgement->getSubmission()->getSubmitid(),
@@ -639,7 +631,7 @@ class SubmissionController extends BaseController
     /**
      * @Route("/by-external-id/{externalId}", name="jury_submission_by_external_id")
      */
-    public function viewForExternalIdAction(string $externalId)
+    public function viewForExternalIdAction(string $externalId): RedirectResponse
     {
         if (!$this->dj->getCurrentContest()) {
             throw new BadRequestHttpException("Cannot determine submission from external ID without selecting a contest.");
@@ -662,11 +654,8 @@ class SubmissionController extends BaseController
 
     /**
      * @Route("/{submission}/runs/{contest}/{run}/team-output", name="jury_submission_team_output")
-     * @param Submission $submission
-     * @param Contest    $contest
-     * @param JudgingRun $run
      */
-    public function teamOutputAction(Submission $submission, Contest $contest, JudgingRun $run)
+    public function teamOutputAction(Submission $submission, Contest $contest, JudgingRun $run): StreamedResponse
     {
         if ($run->getJudging()->getSubmission()->getSubmitid() !== $submission->getSubmitid() || $submission->getContest()->getCid() !== $contest->getCid()) {
             throw new BadRequestHttpException('Problem while fetching team output');
@@ -684,7 +673,7 @@ class SubmissionController extends BaseController
      * @Route("/{submission}/source", name="jury_submission_source")
      * @throws NonUniqueResultException
      */
-    public function sourceAction(Request $request, Submission $submission)
+    public function sourceAction(Request $request, Submission $submission): Response
     {
         if ($request->query->has('fetch')) {
             /** @var SubmissionFile $file */
@@ -799,8 +788,6 @@ class SubmissionController extends BaseController
 
     /**
      * @Route("/{submission}/edit-source", name="jury_submission_edit_source")
-     * @param Request    $request
-     * @param Submission $submission
      * @return RedirectResponse|Response
      * @throws Exception
      */
@@ -928,11 +915,6 @@ class SubmissionController extends BaseController
     /**
      * @Route("/{submitId<\d+>}/update-status", name="jury_submission_update_status", methods={"POST"})
      * @IsGranted("ROLE_ADMIN")
-     * @param EventLogService   $eventLogService
-     * @param ScoreboardService $scoreboardService
-     * @param Request           $request
-     * @param int               $submitId
-     * @return RedirectResponse
      * @throws DBALException
      * @throws Exception
      */
@@ -941,7 +923,7 @@ class SubmissionController extends BaseController
         ScoreboardService $scoreboardService,
         Request $request,
         int $submitId
-    ) {
+    ): RedirectResponse {
         $submission = $this->em->getRepository(Submission::class)->find($submitId);
         $valid      = $request->request->getBoolean('valid');
         $submission->setValid($valid);
@@ -967,12 +949,6 @@ class SubmissionController extends BaseController
 
     /**
      * @Route("/{judgingId<\d+>}/verify", name="jury_judging_verify", methods={"POST"})
-     * @param EventLogService   $eventLogService
-     * @param ScoreboardService $scoreboardService
-     * @param BalloonService    $balloonService
-     * @param Request           $request
-     * @param int               $judgingId
-     * @return RedirectResponse
      * @throws DBALException
      * @throws NoResultException
      * @throws NonUniqueResultException
@@ -984,7 +960,7 @@ class SubmissionController extends BaseController
         BalloonService $balloonService,
         Request $request,
         int $judgingId
-    ) {
+    ): RedirectResponse {
         $this->em->transactional(function () use ($eventLogService, $request, $judgingId) {
             /** @var Judging $judging */
             $judging  = $this->em->getRepository(Judging::class)->find($judgingId);
@@ -1044,17 +1020,12 @@ class SubmissionController extends BaseController
 
     /**
      * @Route("/shadow-difference/{extjudgementid<\d+>}/verify", name="jury_shadow_difference_verify", methods={"POST"})
-     * @param EventLogService $eventLogService
-     * @param Request         $request
-     * @param int             $extjudgementid
-     *
-     * @return RedirectResponse
      */
     public function verifyShadowDifferenceAction(
         EventLogService $eventLogService,
         Request $request,
         int $extjudgementid
-    ) {
+    ): RedirectResponse {
         /** @var ExternalJudgement $judgement */
         $judgement  = $this->em->getRepository(ExternalJudgement::class)->find($extjudgementid);
         $this->em->transactional(function () use ($eventLogService, $request, $judgement) {
@@ -1080,12 +1051,7 @@ class SubmissionController extends BaseController
         return $this->redirect($redirect);
     }
 
-    /**
-     * @param SubmissionFile[] $files
-     * @param SubmissionFile[] $oldFiles
-     * @return array
-     */
-    protected function determineFileChanged(array $files, array $oldFiles)
+    protected function determineFileChanged(array $files, array $oldFiles): array
     {
         $result = [
             'added' => [],
@@ -1127,14 +1093,7 @@ class SubmissionController extends BaseController
         return $result;
     }
 
-    /**
-     * @param Judging|ExternalJudgement|null $judging
-     * @param Request                        $request
-     * @param string                         $claimWarning
-     *
-     * @return RedirectResponse|null
-     */
-    protected function processClaim($judging, Request $request, ?string &$claimWarning)
+    protected function processClaim($judging, Request $request, ?string &$claimWarning) : ?RedirectResponse
     {
         $user   = $this->dj->getUser();
         $action = ($request->get('claim') || $request->get('claimdiff')) ? 'claim' : 'unclaim';

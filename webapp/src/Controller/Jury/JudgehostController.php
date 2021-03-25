@@ -57,15 +57,6 @@ class JudgehostController extends BaseController
      */
     protected $kernel;
 
-    /**
-     * JudgehostController constructor.
-     *
-     * @param EntityManagerInterface $em
-     * @param DOMJudgeService        $dj
-     * @param ConfigurationService   $config
-     * @param EventLogService        $eventLog
-     * @param KernelInterface        $kernel
-     */
     public function __construct(
         EntityManagerInterface $em,
         DOMJudgeService $dj,
@@ -83,7 +74,7 @@ class JudgehostController extends BaseController
     /**
      * @Route("", name="jury_judgehosts")
      */
-    public function indexAction(Request $request)
+    public function indexAction(Request $request): Response
     {
         /** @var Judgehost[] $judgehosts */
         $judgehosts = $this->em->createQueryBuilder()
@@ -253,12 +244,9 @@ class JudgehostController extends BaseController
 
     /**
      * @Route("/{hostname}", methods={"GET"}, name="jury_judgehost")
-     * @param Request $request
-     * @param string  $hostname
-     * @return Response
      * @throws NonUniqueResultException
      */
-    public function viewAction(Request $request, string $hostname)
+    public function viewAction(Request $request, string $hostname): Response
     {
         /** @var Judgehost $judgehost */
         $judgehost = $this->em->createQueryBuilder()
@@ -320,14 +308,11 @@ class JudgehostController extends BaseController
     /**
      * @Route("/{hostname}/delete", name="jury_judgehost_delete")
      * @IsGranted("ROLE_ADMIN")
-     * @param Request $request
-     * @param string  $hostname
-     * @return Response
      * @throws DBALException
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
-    public function deleteAction(Request $request, string $hostname)
+    public function deleteAction(Request $request, string $hostname): Response
     {
         /** @var Judgehost $judgehost */
         $judgehost = $this->em->createQueryBuilder()
@@ -346,12 +331,8 @@ class JudgehostController extends BaseController
     /**
      * @Route("/{hostname}/activate", name="jury_judgehost_activate")
      * @IsGranted("ROLE_ADMIN")
-     * @param RouterInterface $router
-     * @param Request         $request
-     * @param string          $hostname
-     * @return RedirectResponse
      */
-    public function activateAction(RouterInterface $router, Request $request, string $hostname)
+    public function activateAction(RouterInterface $router, Request $request, string $hostname): RedirectResponse
     {
         $judgehost = $this->em->getRepository(Judgehost::class)->find($hostname);
         $judgehost->setActive(true);
@@ -363,12 +344,8 @@ class JudgehostController extends BaseController
     /**
      * @Route("/{hostname}/deactivate", name="jury_judgehost_deactivate")
      * @IsGranted("ROLE_ADMIN")
-     * @param RouterInterface $router
-     * @param Request         $request
-     * @param string          $hostname
-     * @return RedirectResponse
      */
-    public function deactivateAction(RouterInterface $router, Request $request, string $hostname)
+    public function deactivateAction(RouterInterface $router, Request $request, string $hostname): RedirectResponse
     {
         $judgehost = $this->em->getRepository(Judgehost::class)->find($hostname);
         $judgehost->setActive(false);
@@ -380,9 +357,8 @@ class JudgehostController extends BaseController
     /**
      * @Route("/activate-all", methods={"POST"}, name="jury_judgehost_activate_all")
      * @IsGranted("ROLE_ADMIN")
-     * @return RedirectResponse
      */
-    public function activateAllAction()
+    public function activateAllAction(): RedirectResponse
     {
         $this->em->createQuery('UPDATE App\Entity\Judgehost j set j.active = true')->execute();
         $this->dj->auditlog('judgehost', null, 'marked all active');
@@ -392,9 +368,8 @@ class JudgehostController extends BaseController
     /**
      * @Route("/deactivate-all", methods={"POST"}, name="jury_judgehost_deactivate_all")
      * @IsGranted("ROLE_ADMIN")
-     * @return RedirectResponse
      */
-    public function deactivateAllAction()
+    public function deactivateAllAction(): RedirectResponse
     {
         $this->em->createQuery('UPDATE App\Entity\Judgehost j set j.active = false')->execute();
         $this->dj->auditlog('judgehost', null, 'marked all inactive');
@@ -404,10 +379,8 @@ class JudgehostController extends BaseController
     /**
      * @Route("/add/multiple", name="jury_judgehost_add")
      * @IsGranted("ROLE_ADMIN")
-     * @param Request $request
-     * @return Response
      */
-    public function addMultipleAction(Request $request)
+    public function addMultipleAction(Request $request): Response
     {
         $judgehosts = ['judgehosts' => [new Judgehost()]];
         $form       = $this->createForm(JudgehostsType::class, $judgehosts);
@@ -432,10 +405,8 @@ class JudgehostController extends BaseController
     /**
      * @Route("/edit/multiple", name="jury_judgehost_edit")
      * @IsGranted("ROLE_ADMIN")
-     * @param Request $request
-     * @return Response
      */
-    public function editMultipleAction(Request $request)
+    public function editMultipleAction(Request $request) : Response
     {
         $querybuilder = $this->em->createQueryBuilder()
             ->from(Judgehost::class, 'j')

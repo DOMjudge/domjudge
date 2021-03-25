@@ -15,7 +15,9 @@ use Doctrine\ORM\Query\Expr\Join;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Asset\Packages;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\Annotation\Route;
@@ -46,14 +48,6 @@ class BalloonController extends AbstractController
      */
     protected $eventLogService;
 
-    /**
-     * BalloonController constructor.
-     *
-     * @param EntityManagerInterface $em
-     * @param DOMJudgeService        $dj
-     * @param ConfigurationService   $config
-     * @param EventLogService        $eventLogService
-     */
     public function __construct(
         EntityManagerInterface $em,
         DOMJudgeService $dj,
@@ -69,7 +63,7 @@ class BalloonController extends AbstractController
     /**
      * @Route("", name="jury_balloons")
      */
-    public function indexAction(Request $request, BalloonService $balloonService)
+    public function indexAction(Request $request, BalloonService $balloonService): Response
     {
 
         $contest = $this->dj->getCurrentContest();
@@ -127,7 +121,7 @@ class BalloonController extends AbstractController
     /**
      * @Route("/{balloonId}/done", name="jury_balloons_setdone")
      */
-    public function setDoneAction(Request $request, int $balloonId, BalloonService $balloonService)
+    public function setDoneAction(Request $request, int $balloonId, BalloonService $balloonService): RedirectResponse
     {
         $balloonService->setDone($balloonId);
 

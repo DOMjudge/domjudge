@@ -60,15 +60,6 @@ class TeamController extends BaseController
      */
     protected $eventLogService;
 
-    /**
-     * TeamController constructor.
-     *
-     * @param EntityManagerInterface $em
-     * @param DOMJudgeService        $dj
-     * @param ConfigurationService   $config
-     * @param KernelInterface        $kernel
-     * @param EventLogService        $eventLogService
-     */
     public function __construct(
         EntityManagerInterface $em,
         DOMJudgeService $dj,
@@ -86,7 +77,7 @@ class TeamController extends BaseController
     /**
      * @Route("", name="jury_teams")
      */
-    public function indexAction(Request $request, Packages $assetPackage)
+    public function indexAction(Request $request, Packages $assetPackage): Response
     {
         /** @var Team[] $teams */
         $teams = $this->em->createQueryBuilder()
@@ -270,9 +261,6 @@ class TeamController extends BaseController
 
     /**
      * @Route("/{teamId<\d+>}", name="jury_team")
-     * @param int               $teamId
-     * @param ScoreboardService $scoreboardService
-     * @param SubmissionService $submissionService
      * @return RedirectResponse|Response
      * @throws Exception
      */
@@ -370,8 +358,6 @@ class TeamController extends BaseController
     /**
      * @Route("/{teamId<\d+>}/edit", name="jury_team_edit")
      * @IsGranted("ROLE_ADMIN")
-     * @param Request $request
-     * @param int     $teamId
      * @return RedirectResponse|Response
      * @throws Exception
      */
@@ -405,8 +391,6 @@ class TeamController extends BaseController
     /**
      * @Route("/{teamId<\d+>}/delete", name="jury_team_delete")
      * @IsGranted("ROLE_ADMIN")
-     * @param Request $request
-     * @param int     $teamId
      * @return RedirectResponse|Response
      * @throws Exception
      */
@@ -425,12 +409,11 @@ class TeamController extends BaseController
     /**
      * @Route("/add", name="jury_team_add")
      * @IsGranted("ROLE_ADMIN")
-     * @param Request $request
      * @return Response
      * @throws NonUniqueResultException
      * @throws Exception
      */
-    public function addAction(Request $request)
+    public function addAction(Request $request): Response
     {
         $team = new Team();
         $team->setAddUserForTeam(true);

@@ -32,11 +32,6 @@ class ExecutableController extends AbstractFOSRestController
      */
     protected $dj;
 
-    /**
-     * ExecutableController constructor.
-     * @param EntityManagerInterface $em
-     * @param DOMJudgeService        $dj
-     */
     public function __construct(
         EntityManagerInterface $em,
         DOMJudgeService $dj
@@ -48,7 +43,6 @@ class ExecutableController extends AbstractFOSRestController
 
     /**
      * Get the executable with the given ID
-     * @param string $id
      * @return array|string|null
      * @throws NonUniqueResultException
      * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST')")

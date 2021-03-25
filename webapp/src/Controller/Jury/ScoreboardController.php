@@ -27,11 +27,6 @@ class ScoreboardController extends AbstractController
      */
     protected $scoreboardService;
 
-    /**
-     * ScoreboardController constructor.
-     * @param DOMJudgeService   $dj
-     * @param ScoreboardService $scoreboardService
-     */
     public function __construct(
         DOMJudgeService $dj,
         ScoreboardService $scoreboardService
@@ -42,11 +37,9 @@ class ScoreboardController extends AbstractController
 
     /**
      * @Route("", name="jury_scoreboard")
-     * @param Request $request
-     * @return Response
      * @throws Exception
      */
-    public function scoreboardAction(Request $request)
+    public function scoreboardAction(Request $request) : Response
     {
         $response   = new Response();
         $refreshUrl = $this->generateUrl('jury_scoreboard');

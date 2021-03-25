@@ -68,17 +68,6 @@ class GeneralInfoController extends AbstractFOSRestController
      */
     protected $logger;
 
-    /**
-     * GeneralInfoController constructor.
-     *
-     * @param EntityManagerInterface $em
-     * @param DOMJudgeService        $dj
-     * @param ConfigurationService   $config
-     * @param EventLogService        $eventLogService
-     * @param CheckConfigService     $checkConfigService
-     * @param RouterInterface        $router
-     * @param LoggerInterface        $logger
-     */
     public function __construct(
         EntityManagerInterface $em,
         DOMJudgeService $dj,
@@ -109,7 +98,7 @@ class GeneralInfoController extends AbstractFOSRestController
      *     )
      * )
      */
-    public function getVersionAction()
+    public function getVersionAction(): array
     {
         return ['api_version' => $this->apiVersion];
     }
@@ -130,7 +119,7 @@ class GeneralInfoController extends AbstractFOSRestController
      *     )
      * )
      */
-    public function getInfoAction()
+    public function getInfoAction(): array
     {
         return [
             'api_version' => $this->apiVersion,
@@ -158,11 +147,10 @@ class GeneralInfoController extends AbstractFOSRestController
      *         )
      *     )
      * )
-     * @return array
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
-    public function getStatusAction()
+    public function getStatusAction(): array
     {
         if ($this->dj->checkrole('jury')) {
             $onlyOfTeam = null;
@@ -194,9 +182,8 @@ class GeneralInfoController extends AbstractFOSRestController
      *     description="Information about the logged in user",
      *     @Model(type=User::class)
      * )
-     * @return User|null
      */
-    public function getUserAction()
+    public function getUserAction() : User
     {
         $user = $this->dj->getUser();
         if ($user === null) {
@@ -221,11 +208,9 @@ class GeneralInfoController extends AbstractFOSRestController
      *     required=false,
      *     @OA\Schema(type="string")
      * )
-     * @param Request $request
-     * @return Configuration[]|mixed
      * @throws Exception
      */
-    public function getDatabaseConfigurationAction(Request $request)
+    public function getDatabaseConfigurationAction(Request $request) : array
     {
         $onlypublic = !($this->dj->checkrole('jury') || $this->dj->checkrole('judgehost'));
         $name       = $request->query->get('name');
@@ -257,11 +242,9 @@ class GeneralInfoController extends AbstractFOSRestController
      *     @OA\MediaType(mediaType="application/x-www-form-urlencoded"),
      *     @OA\MediaType(mediaType="application/json")
      * )
-     * @param Request $request
-     * @return Configuration[]|mixed
      * @throws Exception
      */
-    public function updateConfigurationAction(Request $request)
+    public function updateConfigurationAction(Request $request): array
     {
         $this->config->saveChanges($request->request->all(), $this->eventLogService, $this->dj);
         return $this->config->all(false);
@@ -276,9 +259,8 @@ class GeneralInfoController extends AbstractFOSRestController
      *     description="Result of the various checks performed",
      *     @OA\JsonContent(type="object")
      * )
-     * @return JsonResponse
      */
-    public function getConfigCheckAction()
+    public function getConfigCheckAction(): JsonResponse
     {
         $result = $this->checkConfigService->runAll();
 
@@ -306,7 +288,6 @@ class GeneralInfoController extends AbstractFOSRestController
 
     /**
      * Get the field to use for getting contests by ID
-     * @return string
      */
     protected function getContestIdField(): string
     {

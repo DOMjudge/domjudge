@@ -76,11 +76,9 @@ class SubmissionController extends BaseController
 
     /**
      * @Route("/submit", name="team_submit")
-     * @param Request $request
-     * @return Response
      * @throws Exception
      */
-    public function createAction(Request $request)
+    public function createAction(Request $request): Response
     {
         $user    = $this->dj->getUser();
         $team    = $user->getTeam();
@@ -138,12 +136,9 @@ class SubmissionController extends BaseController
 
     /**
      * @Route("/submission/{submitId<\d+>}", name="team_submission")
-     * @param Request $request
-     * @param int     $submitId
-     * @return Response
      * @throws NonUniqueResultException
      */
-    public function viewAction(Request $request, int $submitId)
+    public function viewAction(Request $request, int $submitId) : Response
     {
         $verificationRequired = (bool)$this->config->get('verification_required');
         $showCompile      = $this->config->get('show_compile');
@@ -233,12 +228,9 @@ class SubmissionController extends BaseController
 
     /**
      * @Route("/submission/{submitId<\d+>}/download", name="team_submission_download")
-     * @param int $submitId
-     *
-     * @return Response
      * @throws NonUniqueResultException
      */
-    public function downloadAction($submitId)
+    public function downloadAction(int $submitId) : Response
     {
         $allowDownload = (bool)$this->config->get('allow_team_submission_download');
         if (!$allowDownload) {

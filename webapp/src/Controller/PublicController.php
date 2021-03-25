@@ -71,11 +71,9 @@ class PublicController extends BaseController
 
     /**
      * @Route("", name="public_index")
-     * @param Request $request
-     * @return Response
      * @throws Exception
      */
-    public function scoreboardAction(Request $request)
+    public function scoreboardAction(Request $request): Response
     {
         $response   = new Response();
         $static     = $request->query->getBoolean('static');
@@ -141,12 +139,8 @@ class PublicController extends BaseController
 
     /**
      * @Route("/change-contest/{contestId<-?\d+>}", name="public_change_contest")
-     * @param Request         $request
-     * @param RouterInterface $router
-     * @param int             $contestId
-     * @return Response
      */
-    public function changeContestAction(Request $request, RouterInterface $router, int $contestId)
+    public function changeContestAction(Request $request, RouterInterface $router, int $contestId): Response
     {
         if ($this->isLocalReferrer($router, $request)) {
             $response = new RedirectResponse($request->headers->get('referer'));
@@ -159,12 +153,9 @@ class PublicController extends BaseController
 
     /**
      * @Route("/team/{teamId<\d+>}", name="public_team")
-     * @param Request $request
-     * @param int     $teamId
-     * @return Response
      * @throws Exception
      */
-    public function teamAction(Request $request, int $teamId)
+    public function teamAction(Request $request, int $teamId): Response
     {
         $team             = $this->em->getRepository(Team::class)->find($teamId);
         $showFlags        = (bool)$this->config->get('show_flags');
@@ -184,11 +175,10 @@ class PublicController extends BaseController
 
     /**
      * @Route("/problems", name="public_problems")
-     * @return Response
      * @throws NonUniqueResultException
      * @throws Exception
      */
-    public function problemsAction()
+    public function problemsAction(): Response
     {
         return $this->render('public/problems.html.twig',
             $this->dj->getTwigDataForProblemsAction(-1, $this->stats));

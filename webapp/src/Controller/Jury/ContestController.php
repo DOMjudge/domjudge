@@ -66,15 +66,6 @@ class ContestController extends BaseController
      */
     protected $eventLogService;
 
-    /**
-     * TeamCategoryController constructor.
-     *
-     * @param EntityManagerInterface $em
-     * @param DOMJudgeService        $dj
-     * @param ConfigurationService   $config
-     * @param KernelInterface        $kernel
-     * @param EventLogService        $eventLogService
-     */
     public function __construct(
         EntityManagerInterface $em,
         DOMJudgeService $dj,
@@ -91,12 +82,9 @@ class ContestController extends BaseController
 
     /**
      * @Route("", name="jury_contests")
-     * @param Request         $request
-     * @param KernelInterface $kernel
-     * @return Response
      * @throws NonUniqueResultException
      */
-    public function indexAction(Request $request, KernelInterface $kernel)
+    public function indexAction(Request $request, KernelInterface $kernel): Response
     {
         $em = $this->em;
 
@@ -390,11 +378,8 @@ class ContestController extends BaseController
 
     /**
      * @Route("/{contestId<\d+>}", name="jury_contest")
-     * @param Request $request
-     * @param int     $contestId
-     * @return Response
      */
-    public function viewAction(Request $request, int $contestId)
+    public function viewAction(Request $request, int $contestId): Response
     {
         /** @var Contest $contest */
         $contest = $this->em->getRepository(Contest::class)->find($contestId);
@@ -448,11 +433,8 @@ class ContestController extends BaseController
     /**
      * @Route("/{contestId<\d+>}/remove-interval/{intervalId}",
      *        name="jury_contest_remove_interval", methods={"POST"})
-     * @param int $contestId
-     * @param int $intervalId
-     * @return RedirectResponse
      */
-    public function removeIntervalAction(int $contestId, int $intervalId)
+    public function removeIntervalAction(int $contestId, int $intervalId): RedirectResponse
     {
         /** @var Contest $contest */
         $contest = $this->em->getRepository(Contest::class)->find($contestId);
@@ -484,8 +466,6 @@ class ContestController extends BaseController
     /**
      * @Route("/{contestId<\d+>}/edit", name="jury_contest_edit")
      * @IsGranted("ROLE_ADMIN")
-     * @param Request $request
-     * @param int     $contestId
      * @return RedirectResponse|Response
      * @throws Exception
      */
@@ -584,8 +564,6 @@ class ContestController extends BaseController
     /**
      * @Route("/{contestId<\d+>}/delete", name="jury_contest_delete")
      * @IsGranted("ROLE_ADMIN")
-     * @param Request $request
-     * @param int     $contestId
      * @return RedirectResponse|Response
      * @throws Exception
      */
@@ -604,8 +582,6 @@ class ContestController extends BaseController
     /**
      * @Route("/{contestId<\d+>}/problems/{probId<\d+>}/delete", name="jury_contest_problem_delete")
      * @IsGranted("ROLE_ADMIN")
-     * @param Request $request
-     * @param int     $contestId
      * @return RedirectResponse|Response
      * @throws Exception
      */
@@ -631,10 +607,8 @@ class ContestController extends BaseController
     /**
      * @Route("/add", name="jury_contest_add")
      * @IsGranted("ROLE_ADMIN")
-     * @param Request $request
-     * @return Response
      */
-    public function addAction(Request $request)
+    public function addAction(Request $request) : Response
     {
         $contest = new Contest();
         // Set default activate time
@@ -684,8 +658,6 @@ class ContestController extends BaseController
     /**
      * @Route("/{contestId<\d+>}/finalize", name="jury_contest_finalize")
      * @IsGranted("ROLE_ADMIN")
-     * @param Request $request
-     * @param int     $contestId
      * @return RedirectResponse|Response
      */
     public function finalizeAction(Request $request, int $contestId)

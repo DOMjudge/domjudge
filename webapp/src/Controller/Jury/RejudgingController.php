@@ -88,7 +88,7 @@ class RejudgingController extends BaseController
     /**
      * @Route("", name="jury_rejudgings")
      */
-    public function indexAction(Request $request)
+    public function indexAction(Request $request): Response
     {
         /** @var Rejudging[] $rejudgings */
         $rejudgings = $this->em->createQueryBuilder()
@@ -181,10 +181,6 @@ class RejudgingController extends BaseController
 
     /**
      * @Route("/{rejudgingId<\d+>}", name="jury_rejudging")
-     * @param Request           $request
-     * @param SubmissionService $submissionService
-     * @param int               $rejudgingId
-     * @return Response
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
@@ -192,7 +188,7 @@ class RejudgingController extends BaseController
         Request $request,
         SubmissionService $submissionService,
         int $rejudgingId
-    ) {
+    ): Response {
         // Close the session, as this might take a while and we don't need the session below
         $this->session->save();
 
@@ -385,11 +381,6 @@ class RejudgingController extends BaseController
      *     "/{rejudgingId<\d+>}/{action<cancel|apply>}",
      *     name="jury_rejudging_finish"
      * )
-     * @param Request          $request
-     * @param RejudgingService $rejudgingService
-     * @param Profiler|null    $profiler
-     * @param int              $rejudgingId
-     * @param string           $action
      * @return Response|StreamedResponse
      * @throws NonUniqueResultException
      */
@@ -451,12 +442,9 @@ class RejudgingController extends BaseController
 
     /**
      * @Route("/add", name="jury_rejudging_add")
-     * @param Request              $request
-     * @param FormFactoryInterface $formFactory
-     * @return Response
      * @throws Exception
      */
-    public function addAction(Request $request, FormFactoryInterface $formFactory)
+    public function addAction(Request $request, FormFactoryInterface $formFactory): Response
     {
         $formBuilder = $formFactory->createBuilder(RejudgingType::class);
         $formData    = [];
@@ -575,10 +563,8 @@ class RejudgingController extends BaseController
 
     /**
      * @Route("/create", methods={"POST"}, name="jury_create_rejudge")
-     * @param Request           $request
-     * @return RedirectResponse
      */
-    public function createAction(Request $request)
+    public function createAction(Request $request): RedirectResponse
     {
         $table      = $request->request->get('table');
         $id         = $request->request->get('id');

@@ -48,8 +48,6 @@ class JuryMiscController extends BaseController
 
     /**
      * GeneralInfoController constructor.
-     * @param EntityManagerInterface $entityManager
-     * @param DOMJudgeService        $dj
      */
     public function __construct(EntityManagerInterface $entityManager, DOMJudgeService $dj)
     {
@@ -61,7 +59,7 @@ class JuryMiscController extends BaseController
      * @Route("", name="jury_index")
      * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_BALLOON') or is_granted('ROLE_CLARIFICATION_RW')")
      */
-    public function indexAction(Request $request)
+    public function indexAction(Request $request): Response
     {
         $errors = [];
         return $this->render('jury/index.html.twig', ['errors' => $errors]);
@@ -71,17 +69,16 @@ class JuryMiscController extends BaseController
      * @Route("/updates", methods={"GET"}, name="jury_ajax_updates")
      * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_BALLOON')")
      */
-    public function updatesAction(Request $request)
+    public function updatesAction(Request $request): JsonResponse
     {
         return $this->json($this->dj->getUpdates());
     }
 
     /**
      * @Route("/ajax/{datatype}", methods={"GET"}, name="jury_ajax_data")
-     * @param string $datatype
      * @IsGranted("ROLE_JURY")
      */
-    public function ajaxDataAction(Request $request, string $datatype)
+    public function ajaxDataAction(Request $request, string $datatype): JsonResponse
     {
         $q  = $request->query->get('q');
         $qb = $this->em->createQueryBuilder();
@@ -192,8 +189,6 @@ class JuryMiscController extends BaseController
     /**
      * @Route("/refresh-cache", name="jury_refresh_cache")
      * @IsGranted("ROLE_ADMIN")
-     * @param Request           $request
-     * @param ScoreboardService $scoreboardService
      * @return Response|StreamedResponse
      */
     public function refreshCacheAction(Request $request, ScoreboardService $scoreboardService)
@@ -245,7 +240,6 @@ class JuryMiscController extends BaseController
     /**
      * @Route("/judging-verifier", name="jury_judging_verifier")
      * @IsGranted("ROLE_JURY")
-     * @param Request $request
      * @return Response|StreamedResponse
      */
     public function judgingVerifierAction(Request $request)
@@ -353,12 +347,8 @@ class JuryMiscController extends BaseController
 
     /**
      * @Route("/change-contest/{contestId<-?\d+>}", name="jury_change_contest")
-     * @param Request         $request
-     * @param RouterInterface $router
-     * @param int             $contestId
-     * @return Response
      */
-    public function changeContestAction(Request $request, RouterInterface $router, int $contestId)
+    public function changeContestAction(Request $request, RouterInterface $router, int $contestId): Response
     {
         if ($this->isLocalReferrer($router, $request)) {
             $response = new RedirectResponse($request->headers->get('referer'));

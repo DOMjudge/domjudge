@@ -48,11 +48,6 @@ class ScoreboardController extends BaseController
 
     /**
      * ScoreboardController constructor.
-     *
-     * @param DOMJudgeService        $dj
-     * @param ConfigurationService   $config
-     * @param ScoreboardService      $scoreboardService
-     * @param EntityManagerInterface $em
      */
     public function __construct(
         DOMJudgeService $dj,
@@ -68,11 +63,9 @@ class ScoreboardController extends BaseController
 
     /**
      * @Route("/scoreboard", name="team_scoreboard")
-     * @param Request $request
-     * @return Response
      * @throws Exception
      */
-    public function scoreboardAction(Request $request)
+    public function scoreboardAction(Request $request) : Response
     {
         $user       = $this->dj->getUser();
         $response   = new Response();
@@ -92,12 +85,9 @@ class ScoreboardController extends BaseController
 
     /**
      * @Route("/team/{teamId<\d+>}", name="team_team")
-     * @param Request $request
-     * @param int     $teamId
-     * @return Response
      * @throws Exception
      */
-    public function teamAction(Request $request, int $teamId)
+    public function teamAction(Request $request, int $teamId) : Response
     {
         $team             = $this->em->getRepository(Team::class)->find($teamId);
         $showFlags        = (bool)$this->config->get('show_flags');

@@ -28,8 +28,6 @@ class OrganizationController extends AbstractRestController
 {
     /**
      * Get all the organizations for this contest
-     * @param Request $request
-     * @return Response
      * @Rest\Get("")
      * @OA\Response(
      *     response="200",
@@ -49,16 +47,13 @@ class OrganizationController extends AbstractRestController
      * )
      * @throws NonUniqueResultException
      */
-    public function listAction(Request $request)
+    public function listAction(Request $request) : Response
     {
         return parent::performListAction($request);
     }
 
     /**
      * Get the given organization for this contest
-     * @param Request $request
-     * @param string $id
-     * @return Response
      * @throws NonUniqueResultException
      * @Rest\Get("/{id}")
      * @OA\Response(
@@ -69,7 +64,7 @@ class OrganizationController extends AbstractRestController
      * @OA\Parameter(ref="#/components/parameters/id")
      * @OA\Parameter(ref="#/components/parameters/strict")
      */
-    public function singleAction(Request $request, string $id)
+    public function singleAction(Request $request, string $id) : Response
     {
         return parent::performSingleAction($request, $id);
     }

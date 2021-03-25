@@ -39,11 +39,8 @@ class AnalysisController extends AbstractController
 
     /**
      * @Route("", name="analysis_index")
-     * @param Request $request
-     *
-     * @return Response
      */
-    public function indexAction(Request $request)
+    public function indexAction(Request $request): Response
     {
         $em = $this->getDoctrine()->getManager();
         $contest = $this->dj->getCurrentContest();
@@ -93,11 +90,8 @@ class AnalysisController extends AbstractController
 
     /**
      * @Route("/team/{teamid}", name="analysis_team")
-     * @param Team $team
-     *
-     * @return Response
      */
-    public function teamAction(Team $team)
+    public function teamAction(Team $team): Response
     {
         $contest = $this->dj->getCurrentContest();
 
@@ -114,12 +108,8 @@ class AnalysisController extends AbstractController
 
     /**
      * @Route("/problem/{probid}", name="analysis_problem")
-     * @param Request $request
-     * @param Problem $problem
-     *
-     * @return Response
      */
-    public function problemAction(Request $request, Problem $problem)
+    public function problemAction(Request $request, Problem $problem): Response
     {
         $contest = $this->dj->getCurrentContest();
 

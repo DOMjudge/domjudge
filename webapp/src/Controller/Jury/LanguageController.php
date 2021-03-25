@@ -60,15 +60,6 @@ class LanguageController extends BaseController
      */
     protected $eventLogService;
 
-    /**
-     * LanguageController constructor.
-     *
-     * @param EntityManagerInterface $em
-     * @param DOMJudgeService        $dj
-     * @param ConfigurationService   $config
-     * @param KernelInterface        $kernel
-     * @param EventLogService        $eventLogService
-     */
     public function __construct(
         EntityManagerInterface $em,
         DOMJudgeService $dj,
@@ -86,7 +77,7 @@ class LanguageController extends BaseController
     /**
      * @Route("", name="jury_languages")
      */
-    public function indexAction(Request $request, Packages $assetPackage)
+    public function indexAction(Request $request, Packages $assetPackage): Response
     {
         $em = $this->em;
         /** @var Language[] $languages */
@@ -169,11 +160,9 @@ class LanguageController extends BaseController
     /**
      * @Route("/add", name="jury_language_add")
      * @IsGranted("ROLE_ADMIN")
-     * @param Request $request
-     * @return Response
      * @throws Exception
      */
-    public function addAction(Request $request)
+    public function addAction(Request $request): Response
     {
         $language = new Language();
 
@@ -202,14 +191,10 @@ class LanguageController extends BaseController
 
     /**
      * @Route("/{langId}", name="jury_language")
-     * @param Request           $request
-     * @param SubmissionService $submissionService
-     * @param string            $langId
-     * @return Response
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
-    public function viewAction(Request $request, SubmissionService $submissionService, string $langId)
+    public function viewAction(Request $request, SubmissionService $submissionService, string $langId) : Response
     {
         /** @var Language $language */
         $language = $this->em->getRepository(Language::class)->find($langId);
@@ -249,8 +234,6 @@ class LanguageController extends BaseController
 
     /**
      * @Route("/{langId}/toggle-submit", name="jury_language_toggle_submit")
-     * @param Request $request
-     * @param string  $langId
      * @return RedirectResponse|Response
      */
     public function toggleSubmitAction(Request $request, string $langId)
@@ -271,8 +254,6 @@ class LanguageController extends BaseController
 
     /**
      * @Route("/{langId}/toggle-judge", name="jury_language_toggle_judge")
-     * @param Request $request
-     * @param string  $langId
      * @return RedirectResponse|Response
      */
     public function toggleJudgeAction(Request $request, string $langId)
@@ -299,8 +280,6 @@ class LanguageController extends BaseController
     /**
      * @Route("/{langId}/edit", name="jury_language_edit")
      * @IsGranted("ROLE_ADMIN")
-     * @param Request $request
-     * @param string  $langId
      * @return RedirectResponse|Response
      * @throws Exception
      */

@@ -100,9 +100,6 @@ class RunController extends AbstractRestController implements QueryObjectTransfo
 
     /**
      * Get the given run for this contest
-     * @param Request $request
-     * @param string $id
-     * @return Response
      * @throws NonUniqueResultException
      * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST') or is_granted('ROLE_API_READER')")
      * @Rest\Get("/{id}")
@@ -119,13 +116,12 @@ class RunController extends AbstractRestController implements QueryObjectTransfo
      * @OA\Parameter(ref="#/components/parameters/id")
      * @OA\Parameter(ref="#/components/parameters/strict")
      */
-    public function singleAction(Request $request, string $id)
+    public function singleAction(Request $request, string $id) : Response
     {
         return parent::performSingleAction($request, $id);
     }
 
     /**
-     * @inheritdoc
      * @throws Exception
      */
     protected function getQueryBuilder(Request $request): QueryBuilder
@@ -183,7 +179,7 @@ class RunController extends AbstractRestController implements QueryObjectTransfo
         return 'jr.runid';
     }
 
-    public function transformObject($object)
+    public function transformObject($object) : JudgingRunWrapper
     {
         /** @var JudgingRun $judgingRun */
         $judgingRun      = $object;

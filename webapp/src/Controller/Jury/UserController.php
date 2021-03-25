@@ -62,16 +62,6 @@ class UserController extends BaseController
      */
     protected $tokenStorage;
 
-    /**
-     * UserController constructor.
-     *
-     * @param EntityManagerInterface $em
-     * @param DOMJudgeService        $dj
-     * @param ConfigurationService   $config
-     * @param KernelInterface        $kernel
-     * @param EventLogService        $eventLogService
-     * @param TokenStorageInterface  $tokenStorage
-     */
     public function __construct(
         EntityManagerInterface $em,
         DOMJudgeService $dj,
@@ -90,10 +80,9 @@ class UserController extends BaseController
 
     /**
      * @Route("", name="jury_users")
-     * @return Response
      * @throws Exception
      */
-    public function indexAction()
+    public function indexAction() : Response
     {
         /** @var User[] $users */
         $users = $this->em->createQueryBuilder()
@@ -195,8 +184,6 @@ class UserController extends BaseController
 
     /**
      * @Route("/{userId<\d+>}", name="jury_user")
-     * @param Request $request
-     * @param int     $userId
      * @return RedirectResponse|Response
      */
     public function viewAction(Request $request, int $userId)
@@ -213,8 +200,6 @@ class UserController extends BaseController
     /**
      * @Route("/{userId<\d+>}/edit", name="jury_user_edit")
      * @IsGranted("ROLE_ADMIN")
-     * @param Request $request
-     * @param int     $userId
      * @return RedirectResponse|Response
      * @throws Exception
      */
@@ -262,8 +247,6 @@ class UserController extends BaseController
     /**
      * @Route("/{userId<\d+>}/delete", name="jury_user_delete")
      * @IsGranted("ROLE_ADMIN")
-     * @param Request $request
-     * @param int     $userId
      * @return RedirectResponse|Response
      * @throws Exception
      */
@@ -282,11 +265,9 @@ class UserController extends BaseController
     /**
      * @Route("/add", name="jury_user_add")
      * @IsGranted("ROLE_ADMIN")
-     * @param Request $request
-     * @return Response
      * @throws Exception
      */
-    public function addAction(Request $request)
+    public function addAction(Request $request) : Response
     {
         $user = new User();
         if ($request->query->has('team')) {
@@ -317,10 +298,8 @@ class UserController extends BaseController
     /**
      * @Route("/generate-passwords", name="jury_generate_passwords")
      * @IsGranted("ROLE_ADMIN")
-     * @param Request $request
-     * @return Response
      */
-    public function generatePasswordsAction(Request $request)
+    public function generatePasswordsAction(Request $request) : Response
     {
         $form = $this->createForm(GeneratePasswordsType::class);
         $form->handleRequest($request);

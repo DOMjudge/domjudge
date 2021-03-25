@@ -41,13 +41,6 @@ class PrintController extends BaseController
      */
     protected $config;
 
-    /**
-     * PrintController constructor.
-     *
-     * @param EntityManagerInterface $em
-     * @param DOMJudgeService        $dj
-     * @param ConfigurationService   $config
-     */
     public function __construct(
         EntityManagerInterface $em,
         DOMJudgeService $dj,
@@ -60,11 +53,9 @@ class PrintController extends BaseController
 
     /**
      * @Route("", name="jury_print")
-     * @param Request $request
-     * @return Response
      * @throws Exception
      */
-    public function showAction(Request $request)
+    public function showAction(Request $request) : Response
     {
         if (!$this->config->get('print_command')) {
             throw new AccessDeniedHttpException("Printing disabled in config");

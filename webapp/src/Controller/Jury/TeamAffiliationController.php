@@ -52,15 +52,6 @@ class TeamAffiliationController extends BaseController
      */
     protected $eventLogService;
 
-    /**
-     * TeamCategoryController constructor.
-     *
-     * @param EntityManagerInterface $em
-     * @param DOMJudgeService        $dj
-     * @param ConfigurationService   $config
-     * @param KernelInterface        $kernel
-     * @param EventLogService        $eventLogService
-     */
     public function __construct(
         EntityManagerInterface $em,
         DOMJudgeService $dj,
@@ -78,7 +69,7 @@ class TeamAffiliationController extends BaseController
     /**
      * @Route("", name="jury_team_affiliations")
      */
-    public function indexAction(Request $request, Packages $assetPackage, string $projectDir)
+    public function indexAction(Request $request, Packages $assetPackage, string $projectDir): Response
     {
         $em               = $this->em;
         $teamAffiliations = $em->createQueryBuilder()
@@ -189,13 +180,9 @@ class TeamAffiliationController extends BaseController
 
     /**
      * @Route("/{affilId<\d+>}", name="jury_team_affiliation")
-     * @param Request           $request
-     * @param ScoreboardService $scoreboardService
-     * @param int               $affilId
-     * @return Response
      * @throws Exception
      */
-    public function viewAction(Request $request, ScoreboardService $scoreboardService, int $affilId)
+    public function viewAction(Request $request, ScoreboardService $scoreboardService, int $affilId) : Response
     {
         /** @var TeamAffiliation $teamAffiliation */
         $teamAffiliation = $this->em->getRepository(TeamAffiliation::class)->find($affilId);
@@ -236,8 +223,6 @@ class TeamAffiliationController extends BaseController
     /**
      * @Route("/{affilId<\d+>}/edit", name="jury_team_affiliation_edit")
      * @IsGranted("ROLE_ADMIN")
-     * @param Request $request
-     * @param int     $affilId
      * @return RedirectResponse|Response
      * @throws Exception
      */
@@ -271,8 +256,6 @@ class TeamAffiliationController extends BaseController
     /**
      * @Route("/{affilId<\d+>}/delete", name="jury_team_affiliation_delete")
      * @IsGranted("ROLE_ADMIN")
-     * @param Request $request
-     * @param int     $affilId
      * @return RedirectResponse|Response
      * @throws Exception
      */
@@ -291,11 +274,10 @@ class TeamAffiliationController extends BaseController
     /**
      * @Route("/add", name="jury_team_affiliation_add")
      * @IsGranted("ROLE_ADMIN")
-     * @param Request $request
      * @return Response
      * @throws Exception
      */
-    public function addAction(Request $request)
+    public function addAction(Request $request) : Response
     {
         $teamAffiliation = new TeamAffiliation();
 
