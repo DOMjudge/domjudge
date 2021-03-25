@@ -215,7 +215,7 @@ class UserController extends AbstractRestController
      *     response="200",
      *     description="Returns a (currently meaningless) status message.",
      * )
-     * @throws Exception
+     * @throws BadRequestHttpException
      */
     public function addAccountsAction(Request $request): string
     {
