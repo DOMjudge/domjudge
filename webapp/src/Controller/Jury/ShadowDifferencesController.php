@@ -208,8 +208,10 @@ class ShadowDifferencesController extends BaseController
         $contests = [$contest->getCid() => $contest];
 
         /** @var Submission[] $submissions */
-        list($submissions, $submissionCounts) = $this->submissions->getSubmissionList(
-            $contests, $restrictions, 0
+        [$submissions, $submissionCounts] = $this->submissions->getSubmissionList(
+            $contests,
+            $restrictions,
+            0
         );
 
         $data = [

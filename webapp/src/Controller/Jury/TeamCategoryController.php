@@ -164,7 +164,7 @@ class TeamCategoryController extends BaseController
 
         $restrictions = ['categoryid' => $teamCategory->getCategoryid()];
         /** @var Submission[] $submissions */
-        list($submissions, $submissionCounts) = $submissionService->getSubmissionList(
+        [$submissions, $submissionCounts] = $submissionService->getSubmissionList(
             $this->dj->getCurrentContests(),
             $restrictions
         );

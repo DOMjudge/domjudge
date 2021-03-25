@@ -135,7 +135,7 @@ class SubmissionController extends BaseController
         $limit = $viewTypes[$view] == 'newest' ? 50 : 0;
 
         /** @var Submission[] $submissions */
-        list($submissions, $submissionCounts) =
+        [$submissions, $submissionCounts] =
             $this->submissionService->getSubmissionList($contests, $restrictions, $limit);
 
         // Load preselected filters
@@ -213,7 +213,7 @@ class SubmissionController extends BaseController
         $res = [];
         foreach($contents as $line) {
             if (strpos($line, ":") !== false) {
-                list($key, $value) = explode(":", $line, 2);
+                [$key, $value] = explode(":", $line, 2);
                 $res[$key] = trim($value);
             }
         }
