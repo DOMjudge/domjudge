@@ -27,8 +27,6 @@ class ClarificationController extends AbstractRestController
      * Get all the clarifications for this contest.
      *
      * Note that we restrict the returned clarifications in the query builder.
-     * @param Request $request
-     * @return Response
      * @Rest\Get("")
      * @OA\Response(
      *     response="200",
@@ -48,7 +46,7 @@ class ClarificationController extends AbstractRestController
      * )
      * @throws NonUniqueResultException
      */
-    public function listAction(Request $request)
+    public function listAction(Request $request): Response
     {
         return parent::performListAction($request);
     }
@@ -57,9 +55,6 @@ class ClarificationController extends AbstractRestController
      * Get the given clarifications for this contest.
      *
      * Note that we restrict the returned clarifications in the query builder.
-     * @param Request $request
-     * @param string $id
-     * @return Response
      * @throws NonUniqueResultException
      * @Rest\Get("/{id}")
      * @OA\Response(
@@ -70,7 +65,7 @@ class ClarificationController extends AbstractRestController
      * @OA\Parameter(ref="#/components/parameters/id")
      * @OA\Parameter(ref="#/components/parameters/strict")
      */
-    public function singleAction(Request $request, string $id)
+    public function singleAction(Request $request, string $id): Response
     {
         return parent::performSingleAction($request, $id);
     }

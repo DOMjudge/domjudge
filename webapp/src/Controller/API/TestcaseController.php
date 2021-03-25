@@ -39,7 +39,6 @@ class TestcaseController extends AbstractFOSRestController
 
     /**
      * Get the next to judge testcase for the given judging ID
-     * @param string $id
      * @return array|string|null
      * @throws NonUniqueResultException
      * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST')")
@@ -107,9 +106,6 @@ class TestcaseController extends AbstractFOSRestController
 
     /**
      * Get the input or output file for the given testcase
-     * @param string $id
-     * @param string $type
-     * @return string
      * @throws NonUniqueResultException
      * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST')")
      * @Rest\Get("/{id}/file/{type}")
@@ -127,7 +123,7 @@ class TestcaseController extends AbstractFOSRestController
      *     @OA\JsonContent(type="string", description="Base64-encoded file contents")
      * )
      */
-    public function getFileAction(string $id, string $type)
+    public function getFileAction(string $id, string $type): string
     {
         if (!in_array($type, ['input', 'output'])) {
             throw new BadRequestHttpException('Only \'input\' or \'output\' file allowed');

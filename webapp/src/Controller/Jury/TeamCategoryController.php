@@ -55,15 +55,6 @@ class TeamCategoryController extends BaseController
      */
     protected $eventLogService;
 
-    /**
-     * TeamCategoryController constructor.
-     *
-     * @param EntityManagerInterface $em
-     * @param DOMJudgeService        $dj
-     * @param ConfigurationService   $config
-     * @param KernelInterface        $kernel
-     * @param EventLogService        $eventLogService
-     */
     public function __construct(
         EntityManagerInterface $em,
         DOMJudgeService $dj,
@@ -81,7 +72,7 @@ class TeamCategoryController extends BaseController
     /**
      * @Route("", name="jury_team_categories")
      */
-    public function indexAction(Request $request, Packages $assetPackage)
+    public function indexAction(Request $request, Packages $assetPackage): Response
     {
         $em             = $this->em;
         $teamCategories = $em->createQueryBuilder()
@@ -160,14 +151,10 @@ class TeamCategoryController extends BaseController
 
     /**
      * @Route("/{categoryId<\d+>}", name="jury_team_category")
-     * @param Request           $request
-     * @param SubmissionService $submissionService
-     * @param int               $categoryId
-     * @return Response
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
-    public function viewAction(Request $request, SubmissionService $submissionService, int $categoryId)
+    public function viewAction(Request $request, SubmissionService $submissionService, int $categoryId) : Response
     {
         /** @var TeamCategory $teamCategory */
         $teamCategory = $this->em->getRepository(TeamCategory::class)->find($categoryId);
@@ -208,8 +195,6 @@ class TeamCategoryController extends BaseController
     /**
      * @Route("/{categoryId<\d+>}/edit", name="jury_team_category_edit")
      * @IsGranted("ROLE_ADMIN")
-     * @param Request $request
-     * @param int     $categoryId
      * @return RedirectResponse|Response
      * @throws Exception
      */
@@ -241,8 +226,6 @@ class TeamCategoryController extends BaseController
     /**
      * @Route("/{categoryId<\d+>}/delete", name="jury_team_category_delete")
      * @IsGranted("ROLE_ADMIN")
-     * @param Request $request
-     * @param int     $categoryId
      * @return RedirectResponse|Response
      * @throws Exception
      */
@@ -261,11 +244,9 @@ class TeamCategoryController extends BaseController
     /**
      * @Route("/add", name="jury_team_category_add")
      * @IsGranted("ROLE_ADMIN")
-     * @param Request $request
-     * @return Response
      * @throws Exception
      */
-    public function addAction(Request $request)
+    public function addAction(Request $request) : Response
     {
         $teamCategory = new TeamCategory();
 

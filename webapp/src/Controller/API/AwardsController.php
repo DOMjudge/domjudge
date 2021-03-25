@@ -35,12 +35,6 @@ class AwardsController extends AbstractRestController
 
     /**
      * ScoreboardController constructor.
-     *
-     * @param EntityManagerInterface $entityManager
-     * @param DOMJudgeService        $DOMJudgeService
-     * @param ConfigurationService   $config
-     * @param EventLogService        $eventLogService
-     * @param ScoreboardService      $scoreboardService
      */
     public function __construct(
         EntityManagerInterface $entityManager,
@@ -55,8 +49,6 @@ class AwardsController extends AbstractRestController
 
     /**
      * Get all the awards standings for this contest
-     * @param Request $request
-     * @return array
      * @Rest\Get("")
      * @OA\Response(
      *     response="200",
@@ -69,16 +61,13 @@ class AwardsController extends AbstractRestController
      * @OA\Parameter(ref="#/components/parameters/strict")
      * @throws Exception
      */
-    public function listAction(Request $request)
+    public function listAction(Request $request): ?array
     {
         return $this->getAwardsData($request);
     }
 
     /**
      * Get the specific award for this contest
-     * @param Request $request
-     * @param string  $id
-     * @return array
      * @Rest\Get("/{id}")
      * @OA\Response(
      *     response="200",
@@ -89,7 +78,7 @@ class AwardsController extends AbstractRestController
      * @OA\Parameter(ref="#/components/parameters/strict")
      * @throws Exception
      */
-    public function singleAction(Request $request, string $id)
+    public function singleAction(Request $request, string $id): array
     {
         $award = $this->getAwardsData($request, $id);
 
@@ -102,12 +91,9 @@ class AwardsController extends AbstractRestController
 
     /**
      * Get the awards data for the given request and optional award ID
-     * @param Request     $request
-     * @param string|null $requestedType
-     * @return array
      * @throws Exception
      */
-    protected function getAwardsData(Request $request, string $requestedType = null)
+    protected function getAwardsData(Request $request, string $requestedType = null): ?array
     {
         $public = !$this->dj->checkrole('api_reader');
         if ($this->dj->checkrole('api_reader') && $request->query->has('public')) {

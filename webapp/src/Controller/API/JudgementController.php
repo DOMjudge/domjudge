@@ -47,8 +47,6 @@ class JudgementController extends AbstractRestController implements QueryObjectT
 
     /**
      * Get all the judgements for this contest
-     * @param Request $request
-     * @return Response
      * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_TEAM') or is_granted('ROLE_JUDGEHOST') or is_granted('ROLE_API_READER')")
      * @Rest\Get("")
      * @OA\Response(
@@ -80,16 +78,13 @@ class JudgementController extends AbstractRestController implements QueryObjectT
      * )
      * @throws NonUniqueResultException
      */
-    public function listAction(Request $request)
+    public function listAction(Request $request) : Response
     {
         return parent::performListAction($request);
     }
 
     /**
      * Get the given judgement for this contest
-     * @param Request $request
-     * @param string $id
-     * @return Response
      * @throws NonUniqueResultException
      * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_TEAM') or is_granted('ROLE_JUDGEHOST') or is_granted('ROLE_API_READER')")
      * @Rest\Get("/{id}")
@@ -106,7 +101,7 @@ class JudgementController extends AbstractRestController implements QueryObjectT
      * @OA\Parameter(ref="#/components/parameters/id")
      * @OA\Parameter(ref="#/components/parameters/strict")
      */
-    public function singleAction(Request $request, string $id)
+    public function singleAction(Request $request, string $id) : Response
     {
         return parent::performSingleAction($request, $id);
     }
@@ -171,7 +166,7 @@ class JudgementController extends AbstractRestController implements QueryObjectT
         return 'j.judgingid';
     }
 
-    public function transformObject($object)
+    public function transformObject($object) : JudgingWrapper
     {
         /** @var Judging $judging */
         $judging         = $object[0];

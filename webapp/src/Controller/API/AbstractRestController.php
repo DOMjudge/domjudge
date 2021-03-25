@@ -46,11 +46,6 @@ abstract class AbstractRestController extends AbstractFOSRestController
 
     /**
      * AbstractRestController constructor.
-     *
-     * @param EntityManagerInterface $entityManager
-     * @param DOMJudgeService        $dj
-     * @param ConfigurationService   $config
-     * @param EventLogService        $eventLogService
      */
     public function __construct(
         EntityManagerInterface $entityManager,
@@ -66,23 +61,18 @@ abstract class AbstractRestController extends AbstractFOSRestController
 
     /**
      * Get all objects for this endpoint
-     * @param Request $request
-     * @return Response
      * @throws NonUniqueResultException
      */
-    protected function performListAction(Request $request)
+    protected function performListAction(Request $request): Response
     {
         return $this->renderData($request, $this->listActionHelper($request));
     }
 
     /**
      * Get a single object for this endpoint
-     * @param Request $request
-     * @param string $id
-     * @return Response
      * @throws NonUniqueResultException
      */
-    protected function performSingleAction(Request $request, string $id)
+    protected function performSingleAction(Request $request, string $id): Response
     {
         // Make sure we clear the entity manager class, for when this method is called multiple times by internal requests
         $this->em->clear();
@@ -173,7 +163,6 @@ abstract class AbstractRestController extends AbstractFOSRestController
     /**
      * Get the query builder used for getting contests
      * @param bool $onlyActive return only contests that are active
-     * @return QueryBuilder
      */
     protected function getContestQueryBuilder(bool $onlyActive = false): QueryBuilder
     {
@@ -209,8 +198,6 @@ abstract class AbstractRestController extends AbstractFOSRestController
     }
 
     /**
-     * @param Request $request
-     * @return int
      * @throws NonUniqueResultException
      */
     protected function getContestId(Request $request): int
@@ -234,10 +221,6 @@ abstract class AbstractRestController extends AbstractFOSRestController
         return $contest->getCid();
     }
 
-    /**
-     * Get the field to use for getting contests by ID
-     * @return string
-     */
     protected function getContestIdField(): string
     {
         try {
@@ -249,20 +232,16 @@ abstract class AbstractRestController extends AbstractFOSRestController
 
     /**
      * Get the query builder to use for request for this REST endpoint
-     * @param Request $request
-     * @return QueryBuilder
      * @throws NonUniqueResultException
      */
     abstract protected function getQueryBuilder(Request $request): QueryBuilder;
 
     /**
      * Return the field used as ID in requests
-     * @return string
      */
     abstract protected function getIdField(): string;
 
     /**
-     * @param Request $request
      * @return array|int|mixed|string
      * @throws NonUniqueResultException
      */

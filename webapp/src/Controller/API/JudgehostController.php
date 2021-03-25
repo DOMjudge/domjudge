@@ -94,18 +94,6 @@ class JudgehostController extends AbstractFOSRestController
      */
     protected $logger;
 
-    /**
-     * JudgehostController constructor.
-     *
-     * @param EntityManagerInterface $em
-     * @param DOMJudgeService        $dj
-     * @param ConfigurationService   $config
-     * @param EventLogService        $eventLogService
-     * @param ScoreboardService      $scoreboardService
-     * @param SubmissionService      $submissionService
-     * @param BalloonService         $balloonService
-     * @param LoggerInterface        $logger
-     */
     public function __construct(
         EntityManagerInterface $em,
         DOMJudgeService $dj,
@@ -143,10 +131,8 @@ class JudgehostController extends AbstractFOSRestController
      *     description="Only show the judgehost with the given hostname",
      *     @OA\Schema(type="string")
      * )
-     * @param Request $request
-     * @return array
      */
-    public function getJudgehostsAction(Request $request)
+    public function getJudgehostsAction(Request $request) : array
     {
         $queryBuilder = $this->em->createQueryBuilder()
             ->from(Judgehost::class, 'j')
@@ -180,11 +166,9 @@ class JudgehostController extends AbstractFOSRestController
      *         )
      *     )
      * )
-     * @param Request $request
-     * @return array
      * @throws NonUniqueResultException
      */
-    public function createJudgehostAction(Request $request)
+    public function createJudgehostAction(Request $request) : array
     {
         if (!$request->request->has('hostname')) {
             throw new BadRequestHttpException('Argument \'hostname\' is mandatory');
@@ -264,11 +248,8 @@ class JudgehostController extends AbstractFOSRestController
      *         )
      *     )
      * )
-     * @param Request $request
-     * @param string  $hostname
-     * @return array
      */
-    public function updateJudgeHostAction(Request $request, string $hostname)
+    public function updateJudgeHostAction(Request $request, string $hostname) : array
     {
         if (!$request->request->has('active')) {
             throw new BadRequestHttpException('Argument \'active\' is mandatory');
@@ -328,7 +309,7 @@ class JudgehostController extends AbstractFOSRestController
      * )
      * @throws NonUniqueResultException
      */
-    public function updateJudgingAction(Request $request, string $hostname, int $judgetaskid)
+    public function updateJudgingAction(Request $request, string $hostname, int $judgetaskid) : void
     {
         /** @var Judgehost $judgehost */
         $judgehost = $this->em->getRepository(Judgehost::class)->find($hostname);
@@ -513,8 +494,7 @@ class JudgehostController extends AbstractFOSRestController
         Request $request,
         string $hostname,
         int $judgeTaskId
-    )
-    {
+    ): void {
         $required = [
             'output_run',
         ];
@@ -633,7 +613,7 @@ class JudgehostController extends AbstractFOSRestController
         Request $request,
         string $hostname,
         int $judgeTaskId
-    ) {
+    ) : void {
         $required = [
             'runresult',
             'runtime',
@@ -834,7 +814,7 @@ class JudgehostController extends AbstractFOSRestController
      * @param int       $judgingId
      * @param Judgehost|null $judgehost If set, only partially returns judgetasks instead of full judging.
      */
-    protected function giveBackJudging(int $judgingId, ?Judgehost $judgehost)
+    protected function giveBackJudging(int $judgingId, ?Judgehost $judgehost): void
     {
         /** @var Judging $judging */
         $judging = $this->em->getRepository(Judging::class)->find($judgingId);
@@ -1196,10 +1176,6 @@ class JudgehostController extends AbstractFOSRestController
      * Get files for a given type and id.
      * @Rest\Get("/get_files/{type}/{id}")
      * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST')")
-     * @param Request $request
-     * @param string  $type
-     * @param string  $id
-     * @return array
      * @throws NonUniqueResultException
      * @OA\Response(
      *     response="200",
@@ -1214,7 +1190,7 @@ class JudgehostController extends AbstractFOSRestController
      * )
      * @OA\Parameter(ref="#/components/parameters/id")
      */
-    public function getFilesAction(string $type, string $id)
+    public function getFilesAction(string $type, string $id) : array
     {
         switch($type) {
             case 'source':
@@ -1230,7 +1206,8 @@ class JudgehostController extends AbstractFOSRestController
         }
     }
 
-    private function getSourceFiles(string $id) {
+    private function getSourceFiles(string $id): array
+    {
         $queryBuilder = $this->em->createQueryBuilder()
             ->from(SubmissionFile::class, 'f')
             ->select('f')
@@ -1255,7 +1232,8 @@ class JudgehostController extends AbstractFOSRestController
         return $result;
     }
 
-    private function getExecutableFiles(string $id) {
+    private function getExecutableFiles(string $id): array
+    {
         $queryBuilder = $this->em->createQueryBuilder()
             ->from(ExecutableFile::class, 'f')
             ->select('f')
@@ -1281,7 +1259,8 @@ class JudgehostController extends AbstractFOSRestController
         return $result;
     }
 
-    private function getTestcaseFiles(string $id) {
+    private function getTestcaseFiles(string $id): array
+    {
         $queryBuilder = $this->em->createQueryBuilder()
             ->from(TestcaseContent::class, 'f')
             ->select('f.input, f.output')

@@ -54,11 +54,6 @@ class ProblemController extends BaseController
 
     /**
      * ProblemController constructor.
-     *
-     * @param DOMJudgeService        $dj
-     * @param ConfigurationService   $config
-     * @param StatisticsService      $stats
-     * @param EntityManagerInterface $em
      */
     public function __construct(
         DOMJudgeService $dj,
@@ -74,11 +69,10 @@ class ProblemController extends BaseController
 
     /**
      * @Route("/problems", name="team_problems")
-     * @return Response
      * @throws NonUniqueResultException
      * @throws Exception
      */
-    public function problemsAction()
+    public function problemsAction() : Response
     {
         return $this->render('team/problems.html.twig',
             $this->dj->getTwigDataForProblemsAction($this->dj->getUser()->getTeam()->getTeamid(), $this->stats));
@@ -88,7 +82,7 @@ class ProblemController extends BaseController
     /**
      * @Route("/problems/{probId<\d+>}/text", name="team_problem_text")
      */
-    public function problemTextAction(int $probId)
+    public function problemTextAction(int $probId): StreamedResponse
     {
         return $this->getBinaryFile($probId, function (
             int $probId,
@@ -132,7 +126,7 @@ class ProblemController extends BaseController
      *     )
      * @throws NonUniqueResultException
      */
-    public function sampleTestcaseAction(int $probId, int $index, string $type)
+    public function sampleTestcaseAction(int $probId, int $index, string $type): StreamedResponse
     {
         return $this->getBinaryFile($probId, function (
             int $probId,

@@ -36,15 +36,6 @@ class ScoreboardController extends AbstractRestController
      */
     protected $scoreboardService;
 
-    /**
-     * ScoreboardController constructor.
-     *
-     * @param EntityManagerInterface $entityManager
-     * @param DOMJudgeService        $DOMJudgeService
-     * @param ConfigurationService   $config
-     * @param EventLogService        $eventLogService
-     * @param ScoreboardService      $scoreboardService
-     */
     public function __construct(
         EntityManagerInterface $entityManager,
         DOMJudgeService $DOMJudgeService,
@@ -58,8 +49,6 @@ class ScoreboardController extends AbstractRestController
 
     /**
      * Get the scoreboard for this contest
-     * @param Request $request
-     * @return array
      * @Rest\Get("")
      * @OA\Response(
      *     response="200",
@@ -105,7 +94,7 @@ class ScoreboardController extends AbstractRestController
      * @throws NonUniqueResultException
      * @throws Exception
      */
-    public function getScoreboardAction(Request $request)
+    public function getScoreboardAction(Request $request) : array
     {
         $filter = new Filter();
         if ($request->query->has('category')) {

@@ -36,13 +36,6 @@ class UserController extends AbstractRestController
      */
     protected $importExportService;
 
-    /**
-     * @param EntityManagerInterface $entityManager
-     * @param DOMJudgeService        $dj
-     * @param ConfigurationService   $config
-     * @param EventLogService        $eventLogService
-     * @param ImportExportService    $importExportService
-     */
     public function __construct(
         EntityManagerInterface $entityManager,
         DOMJudgeService $dj,
@@ -56,8 +49,6 @@ class UserController extends AbstractRestController
 
     /**
      * Add one or more groups.
-     * @param Request $request
-     * @return string
      * @Rest\Post("/groups")
      * @IsGranted("ROLE_ADMIN")
      * @OA\Post()
@@ -87,7 +78,7 @@ class UserController extends AbstractRestController
      * )
      * @throws Exception
      */
-    public function addGroupsAction(Request $request)
+    public function addGroupsAction(Request $request): string
     {
         /** @var UploadedFile $tsvFile */
         $tsvFile = $request->files->get('tsv') ?: [];
@@ -111,9 +102,6 @@ class UserController extends AbstractRestController
     /**
      * Add one or more organizations.
      *
-     * @param Request $request
-     *
-     * @return string
      * @Rest\Post("/organizations")
      * @IsGranted("ROLE_ADMIN")
      * @OA\Post()
@@ -138,7 +126,7 @@ class UserController extends AbstractRestController
      * )
      * @throws Exception
      */
-    public function addOrganizationsAction(Request $request)
+    public function addOrganizationsAction(Request $request) : string
     {
         /** @var UploadedFile $jsonFile */
         $jsonFile = $request->files->get('json') ?: [];
@@ -153,8 +141,6 @@ class UserController extends AbstractRestController
 
     /**
      * Add one or more teams.
-     * @param Request $request
-     * @return string
      * @Rest\Post("/teams")
      * @IsGranted("ROLE_ADMIN")
      * @OA\Post()
@@ -184,7 +170,7 @@ class UserController extends AbstractRestController
      * )
      * @throws Exception
      */
-    public function addTeamsAction(Request $request)
+    public function addTeamsAction(Request $request): string
     {
         /** @var UploadedFile $tsvFile */
         $tsvFile = $request->files->get('tsv') ?: [];
@@ -207,8 +193,6 @@ class UserController extends AbstractRestController
 
     /**
      * Add accounts to teams.
-     * @param Request $request
-     * @return string
      * @Rest\Post("/accounts")
      * @IsGranted("ROLE_ADMIN")
      * @OA\Post()
@@ -233,7 +217,7 @@ class UserController extends AbstractRestController
      * )
      * @throws Exception
      */
-    public function addAccountsAction(Request $request)
+    public function addAccountsAction(Request $request): string
     {
         /** @var UploadedFile $tsvFile */
         $tsvFile = $request->files->get('tsv') ?: [];
@@ -248,8 +232,6 @@ class UserController extends AbstractRestController
 
     /**
      * Get all the users
-     * @param Request $request
-     * @return Response
      * @Rest\Get("")
      * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_API_READER')")
      * @OA\Response(
@@ -269,16 +251,13 @@ class UserController extends AbstractRestController
      * )
      * @throws NonUniqueResultException
      */
-    public function listAction(Request $request)
+    public function listAction(Request $request): Response
     {
         return parent::performListAction($request);
     }
 
     /**
      * Get the given user
-     * @param Request $request
-     * @param string  $id
-     * @return Response
      * @throws NonUniqueResultException
      * @Rest\Get("/{id}")
      * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_API_READER')")
@@ -289,7 +268,7 @@ class UserController extends AbstractRestController
      * )
      * @OA\Parameter(ref="#/components/parameters/id")
      */
-    public function singleAction(Request $request, string $id)
+    public function singleAction(Request $request, string $id): Response
     {
         return parent::performSingleAction($request, $id);
     }

@@ -48,14 +48,6 @@ class ConfigController extends AbstractController
      */
     protected $config;
 
-    /**
-     * TeamCategoryController constructor.
-     * @param EntityManagerInterface $em
-     * @param LoggerInterface        $logger
-     * @param DOMJudgeService        $dj
-     * @param CheckConfigService     $checkConfigService
-     * @param ConfigurationService $config
-     */
     public function __construct(
         EntityManagerInterface $em,
         LoggerInterface $logger,
@@ -72,8 +64,6 @@ class ConfigController extends AbstractController
 
     /**
      * @Route("", name="jury_config")
-     * @param EventLogService $eventLogService
-     * @param Request $request
      * @return RedirectResponse|Response
      * @throws Exception
      */
@@ -152,7 +142,7 @@ class ConfigController extends AbstractController
     /**
      * @Route("/check", name="jury_config_check")
      */
-    public function checkAction(Request $request, string $projectDir, string $logsDir)
+    public function checkAction(Request $request, string $projectDir, string $logsDir): Response
     {
         $results = $this->checkConfigService->runAll();
         return $this->render('jury/config_check.html.twig', [
@@ -167,7 +157,7 @@ class ConfigController extends AbstractController
     /**
      * @Route("/check/phpinfo", name="jury_config_phpinfo")
      */
-    public function phpinfoAction(Request $request)
+    public function phpinfoAction(Request $request): Response
     {
         ob_start();
         phpinfo();

@@ -25,8 +25,6 @@ class BalloonController extends AbstractRestController
 {
     /**
      * Get all the balloons for this contest.
-     * @param Request $request
-     * @return array
      * @Rest\Get("")
      * @OA\Response(
      *     response="200",
@@ -40,7 +38,7 @@ class BalloonController extends AbstractRestController
      * )
      * @throws Exception
      */
-    public function listAction(Request $request, BalloonService $balloonService)
+    public function listAction(Request $request, BalloonService $balloonService): array
     {
         /** @var Contest $contest */
         $contest = $this->em->getRepository(Contest::class)->find($this->getContestId($request));
@@ -49,8 +47,6 @@ class BalloonController extends AbstractRestController
 
     /**
      * Mark a specific balloon as done.
-     * @param Request $request
-     * @param int $balloonId
      * @Rest\Post("/{balloonId}/done")
      * @OA\Response(
      *     response="204",
@@ -65,7 +61,7 @@ class BalloonController extends AbstractRestController
      * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_BALLOON')")
      * @throws Exception
      */
-    public function markDoneAction(Request $request, int $balloonId, BalloonService $balloonService)
+    public function markDoneAction(Request $request, int $balloonId, BalloonService $balloonService) : void
     {
         $balloonService->setDone($balloonId);
     }

@@ -67,8 +67,6 @@ class ShadowDifferencesController extends BaseController
 
     /**
      * @Route("", name="jury_shadow_differences")
-     * @param Request $request
-     *
      * @return RedirectResponse|Response
      * @throws NoResultException
      * @throws NonUniqueResultException

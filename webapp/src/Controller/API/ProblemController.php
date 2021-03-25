@@ -51,8 +51,6 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
 
     /**
      * Get all the problems for this contest
-     * @param Request $request
-     * @return Response
      * @Rest\Get("")
      * @OA\Response(
      *     response="200",
@@ -67,7 +65,8 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
      * @throws NonUniqueResultException
      * @throws Exception
      */
-    public function listAction(Request $request) {
+    public function listAction(Request $request): Response
+    {
         // Make sure we clear the entity manager class, for when this method is called multiple times by internal requests
         $this->em->clear();
         // This method is overwritten, because we need to add ordinal values
@@ -119,8 +118,6 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
 
     /**
      * Add one or more problems to this contest.
-     * @param Request $request
-     * @return array
      * @Rest\Post("")
      * @IsGranted("ROLE_ADMIN")
      * @OA\Post()
@@ -159,7 +156,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
      * )
      * @throws NonUniqueResultException
      */
-    public function addProblemAction(Request $request)
+    public function addProblemAction(Request $request) : array
     {
         $files     = $request->files->get('zip') ?: [];
         $contestId = $this->getContestId($request);
@@ -225,9 +222,6 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
 
     /**
      * Get the given problem for this contest
-     * @param Request $request
-     * @param string  $id
-     * @return Response
      * @throws NonUniqueResultException
      * @throws Exception
      * @Rest\Get("/{id}")
@@ -239,7 +233,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
      * @OA\Parameter(ref="#/components/parameters/id")
      * @OA\Parameter(ref="#/components/parameters/strict")
      */
-    public function singleAction(Request $request, string $id)
+    public function singleAction(Request $request, string $id) : Response
     {
         $ordinalArray = new OrdinalArray($this->listActionHelper($request));
 

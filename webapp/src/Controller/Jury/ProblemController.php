@@ -1047,7 +1047,7 @@ class ProblemController extends BaseController
         ]);
     }
 
-    public function addTestcasesToZip(array $testcases, ZipArchive $zip, bool $isSample)
+    public function addTestcasesToZip(array $testcases, ZipArchive $zip, bool $isSample): void
     {
         $formatString = sprintf('data/%%s/%%0%dd', ceil(log10(count($testcases) + 1)));
         $rankInGroup = 0;

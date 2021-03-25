@@ -15,6 +15,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Asset\Packages;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -44,14 +45,6 @@ class AuditLogController extends AbstractController
      */
     protected $eventLogService;
 
-    /**
-     * AuditLogController constructor.
-     *
-     * @param EntityManagerInterface $em
-     * @param DOMJudgeService        $dj
-     * @param ConfigurationService   $config
-     * @param EventLogService        $eventLogService
-     */
     public function __construct(
         EntityManagerInterface $em,
         DOMJudgeService $dj,
@@ -67,7 +60,7 @@ class AuditLogController extends AbstractController
     /**
      * @Route("", name="jury_auditlog")
      */
-    public function indexAction(Request $request, Packages $assetPackage, KernelInterface $kernel)
+    public function indexAction(Request $request, Packages $assetPackage, KernelInterface $kernel): Response
     {
         $timeFormat = (string)$this->config->get('time_format');
 
@@ -146,7 +139,7 @@ class AuditLogController extends AbstractController
         ]);
     }
 
-    private function generateDatatypeUrl(string $type, $id)
+    private function generateDatatypeUrl(string $type, $id): ?string
     {
         switch ($type) {
             case 'balloon':

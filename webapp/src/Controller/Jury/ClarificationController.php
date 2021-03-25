@@ -49,14 +49,6 @@ class ClarificationController extends AbstractController
      */
     protected $eventLogService;
 
-    /**
-     * ClarificationController constructor.
-     *
-     * @param EntityManagerInterface $em
-     * @param DOMJudgeService        $dj
-     * @param ConfigurationService   $config
-     * @param EventLogService        $eventLogService
-     */
     public function __construct(
         EntityManagerInterface $em,
         DOMJudgeService $dj,
@@ -73,7 +65,7 @@ class ClarificationController extends AbstractController
      * @Route("", name="jury_clarifications")
      * @throws Exception
      */
-    public function indexAction(Request $request)
+    public function indexAction(Request $request): Response
     {
         $contestIds = array_keys($this->dj->getCurrentContests());
         // cid -1 will never happen, but otherwise the array is empty and that is not supported
@@ -158,7 +150,7 @@ class ClarificationController extends AbstractController
      * @Route("/{id<\d+>}", name="jury_clarification")
      * @throws Exception
      */
-    public function viewAction(Request $request, int $id)
+    public function viewAction(Request $request, int $id): Response
     {
         /** @var Clarification $clarification */
         $clarification = $this->em->getRepository(Clarification::class)->find($id);
@@ -249,7 +241,7 @@ class ClarificationController extends AbstractController
         );
     }
 
-    protected function getProblemShortName(int $probid, int $cid) : string
+    protected function getProblemShortName(int $probid, int $cid): string
     {
         $cp = $this->em->getRepository(ContestProblem::class)->findBy(['probid'=>$probid, 'cid' => $cid]);
         if ( isset($cp[0]) ) {
@@ -258,7 +250,7 @@ class ClarificationController extends AbstractController
         return "unknown problem";
     }
 
-    protected function getClarificationFormData(Team $team = null) : array
+    protected function getClarificationFormData(Team $team = null): array
     {
         $em = $this->getDoctrine()->getManager();
         if ($team !== null) {
@@ -311,7 +303,7 @@ class ClarificationController extends AbstractController
      * @Route("/send", methods={"GET"}, name="jury_clarification_new")
      * @throws Exception
      */
-    public function composeClarificationAction(Request $request)
+    public function composeClarificationAction(Request $request): Response
     {
         // TODO: use proper Symfony form for this
 
@@ -326,8 +318,6 @@ class ClarificationController extends AbstractController
 
     /**
      * @Route("/{clarId<\d+>}/claim", name="jury_clarification_claim")
-     * @param Request $request
-     * @param int     $clarId
      * @return RedirectResponse|Response
      */
     public function toggleClaimAction(Request $request, int $clarId)
@@ -351,8 +341,6 @@ class ClarificationController extends AbstractController
 
     /**
      * @Route("/{clarId<\d+>}/set-answered", name="jury_clarification_set_answered")
-     * @param Request $request
-     * @param int     $clarId
      * @return RedirectResponse|Response
      */
     public function toggleAnsweredAction(Request $request, int $clarId)
@@ -376,8 +364,6 @@ class ClarificationController extends AbstractController
 
     /**
      * @Route("/{clarId<\d+>}/change-subject", name="jury_clarification_change_subject")
-     * @param Request $request
-     * @param int     $clarId
      * @return RedirectResponse|Response
      */
     public function changeSubjectAction(Request $request, int $clarId)
@@ -410,8 +396,6 @@ class ClarificationController extends AbstractController
 
     /**
      * @Route("/{clarId<\d+>}/change-queue", name="jury_clarification_change_queue")
-     * @param Request $request
-     * @param int     $clarId
      * @return RedirectResponse|Response
      */
     public function changeQueueAction(Request $request, int $clarId)
@@ -437,7 +421,6 @@ class ClarificationController extends AbstractController
 
     /**
      * @Route("/send", methods={"POST"}, name="jury_clarification_send")
-     * @param Request $request
      * @return RedirectResponse|Response
      */
     public function sendAction(Request $request)

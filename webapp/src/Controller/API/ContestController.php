@@ -47,13 +47,6 @@ class ContestController extends AbstractRestController
      */
     protected $importExportService;
 
-    /**
-     * @param EntityManagerInterface $entityManager
-     * @param DOMJudgeService        $dj
-     * @param ConfigurationService   $config
-     * @param EventLogService        $eventLogService
-     * @param ImportExportService    $importExportService
-     */
     public function __construct(
         EntityManagerInterface $entityManager,
         DOMJudgeService $dj,
@@ -67,8 +60,6 @@ class ContestController extends AbstractRestController
 
     /**
      * Add one or more contests.
-     * @param Request $request
-     * @return string
      * @Rest\Post("")
      * @IsGranted("ROLE_ADMIN")
      * @OA\Post()
@@ -93,7 +84,7 @@ class ContestController extends AbstractRestController
      * )
      * @throws BadRequestHttpException
      */
-    public function addContestAction(Request $request)
+    public function addContestAction(Request $request) : string
     {
         /** @var UploadedFile $yamlFile */
         $yamlFile = $request->files->get('yaml') ?: [];
@@ -107,8 +98,6 @@ class ContestController extends AbstractRestController
 
     /**
      * Get all the contests
-     * @param Request $request
-     * @return Response
      * @Rest\Get("")
      * @OA\Response(
      *     response="200",
@@ -128,16 +117,13 @@ class ContestController extends AbstractRestController
      * )
      * @throws NonUniqueResultException
      */
-    public function listAction(Request $request)
+    public function listAction(Request $request) : Response
     {
         return parent::performListAction($request);
     }
 
     /**
      * Get the given contest
-     * @param Request $request
-     * @param string  $cid
-     * @return Response
      * @throws NonUniqueResultException
      * @Rest\Get("/{cid}")
      * @OA\Response(
@@ -148,7 +134,7 @@ class ContestController extends AbstractRestController
      * @OA\Parameter(ref="#/components/parameters/cid")
      * @OA\Parameter(ref="#/components/parameters/strict")
      */
-    public function singleAction(Request $request, string $cid)
+    public function singleAction(Request $request, string $cid) : Response
     {
         return parent::performSingleAction($request, $cid);
     }
@@ -157,9 +143,6 @@ class ContestController extends AbstractRestController
      * Change the start time of the given contest
      * @Rest\Patch("/{cid}")
      * @IsGranted("ROLE_API_WRITER")
-     * @param Request $request
-     * @param string  $cid
-     * @return Response
      * @throws NonUniqueResultException
      * @throws Exception
      * @OA\Parameter(
@@ -201,7 +184,7 @@ class ContestController extends AbstractRestController
      *     description="Changing start time not allowed"
      * )
      */
-    public function changeStartTimeAction(Request $request, string $cid)
+    public function changeStartTimeAction(Request $request, string $cid) : Response
     {
         $contest  = $this->getContestWithId($request, $cid);
         $response = null;
@@ -258,9 +241,6 @@ class ContestController extends AbstractRestController
     /**
      * Get the contest in YAML format
      * @Rest\Get("/{cid}/contest-yaml")
-     * @param Request $request
-     * @param string  $cid
-     * @return StreamedResponse
      * @throws NonUniqueResultException
      * @throws Exception
      * @OA\Parameter(ref="#/components/parameters/cid")
@@ -270,7 +250,7 @@ class ContestController extends AbstractRestController
      *     @OA\MediaType(mediaType="application/x-yaml")
      * )
      */
-    public function getContestYamlAction(Request $request, string $cid)
+    public function getContestYamlAction(Request $request, string $cid) : StreamedResponse
     {
         $contest      = $this->getContestWithId($request, $cid);
         $penalty_time = $this->config->get('penalty_time');
@@ -298,9 +278,6 @@ class ContestController extends AbstractRestController
     /**
      * Get the current contest state
      * @Rest\Get("/{cid}/state")
-     * @param Request $request
-     * @param string  $cid
-     * @return array|null
      * @throws NonUniqueResultException
      * @OA\Parameter(ref="#/components/parameters/cid")
      * @OA\Response(
@@ -309,7 +286,7 @@ class ContestController extends AbstractRestController
      *     @OA\JsonContent(ref="#/components/schemas/ContestState")
      * )
      */
-    public function getContestStateAction(Request $request, string $cid)
+    public function getContestStateAction(Request $request, string $cid) : ?array
     {
         $contest         = $this->getContestWithId($request, $cid);
         $inactiveAllowed = $this->isGranted('ROLE_API_READER');
@@ -325,10 +302,6 @@ class ContestController extends AbstractRestController
      * @Rest\Get("/{cid}/event-feed")
      * @OA\Get()
      * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_API_READER')")
-     * @param Request                  $request
-     * @param string                   $cid
-     * @param MetadataFactoryInterface $metadataFactory
-     * @param KernelInterface          $kernel
      * @return Response|StreamedResponse
      * @throws NonUniqueResultException
      * @OA\Parameter(ref="#/components/parameters/cid")
@@ -558,13 +531,10 @@ class ContestController extends AbstractRestController
      *         @OA\Property(property="num_judging", type="integer")
      *     )
      * )
-     * @param Request $request
-     * @param string  $cid
-     * @return array
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
-    public function getStatusAction(Request $request, string $cid)
+    public function getStatusAction(Request $request, string $cid) : array
     {
         return $this->dj->getContestStats($this->getContestWithId($request, $cid));
     }
@@ -584,9 +554,6 @@ class ContestController extends AbstractRestController
 
     /**
      * Get the contest with the given ID
-     * @param Request $request
-     * @param string  $id
-     * @return Contest
      * @throws NonUniqueResultException
      */
     protected function getContestWithId(Request $request, string $id): Contest

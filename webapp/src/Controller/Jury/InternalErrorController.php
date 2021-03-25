@@ -43,7 +43,7 @@ class InternalErrorController extends BaseController
     /**
      * @Route("", name="jury_internal_errors")
      */
-    public function indexAction()
+    public function indexAction(): Response
     {
         /** @var InternalError[] $internalErrors */
         $internalErrors = $this->em->createQueryBuilder()
@@ -98,10 +98,8 @@ class InternalErrorController extends BaseController
 
     /**
      * @Route("/{errorId<\d+>}", methods={"GET"}, name="jury_internal_error")
-     * @param int $errorId
-     * @return Response
      */
-    public function viewAction(int $errorId)
+    public function viewAction(int $errorId) : Response
     {
         /** @var InternalError $internalError */
         $internalError = $this->em->getRepository(InternalError::class)->find($errorId);
@@ -148,11 +146,8 @@ class InternalErrorController extends BaseController
      *     name="jury_internal_error_handle",
      *     methods={"POST"}
      * )
-     * @param int    $errorId
-     * @param string $action
-     * @return RedirectResponse
      */
-    public function handleAction(int $errorId, string $action)
+    public function handleAction(int $errorId, string $action): RedirectResponse
     {
         /** @var InternalError $internalError */
         $internalError = $this->em->getRepository(InternalError::class)->find($errorId);

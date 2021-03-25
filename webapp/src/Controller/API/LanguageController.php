@@ -23,8 +23,6 @@ class LanguageController extends AbstractRestController
 {
     /**
      * Get all the languages for this contest
-     * @param Request $request
-     * @return Response
      * @Rest\Get("")
      * @OA\Response(
      *     response="200",
@@ -38,16 +36,13 @@ class LanguageController extends AbstractRestController
      * @OA\Parameter(ref="#/components/parameters/strict")
      * @throws NonUniqueResultException
      */
-    public function listAction(Request $request)
+    public function listAction(Request $request) : Response
     {
         return parent::performListAction($request);
     }
 
     /**
      * Get the given language for this contest
-     * @param Request $request
-     * @param string $id
-     * @return Response
      * @throws NonUniqueResultException
      * @Rest\Get("/{id}")
      * @OA\Response(
@@ -58,7 +53,7 @@ class LanguageController extends AbstractRestController
      * @OA\Parameter(ref="#/components/parameters/id")
      * @OA\Parameter(ref="#/components/parameters/strict")
      */
-    public function singleAction(Request $request, string $id)
+    public function singleAction(Request $request, string $id) : Response
     {
         return parent::performSingleAction($request, $id);
     }

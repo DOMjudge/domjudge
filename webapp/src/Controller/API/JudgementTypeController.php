@@ -20,8 +20,6 @@ class JudgementTypeController extends AbstractRestController
 {
     /**
      * Get all the judgement types for this contest
-     * @param Request $request
-     * @return array
      * @throws Exception
      * @Rest\Get("")
      * @OA\Response(
@@ -35,7 +33,7 @@ class JudgementTypeController extends AbstractRestController
      * @OA\Parameter(ref="#/components/parameters/idlist")
      * @OA\Parameter(ref="#/components/parameters/strict")
      */
-    public function listAction(Request $request)
+    public function listAction(Request $request) : array
     {
         // Call getContestId to make sure we have an active contest
         $this->getContestId($request);
@@ -60,9 +58,6 @@ class JudgementTypeController extends AbstractRestController
 
     /**
      * Get the given judgement type for this contest
-     * @param Request $request
-     * @param string $id
-     * @return array
      * @throws NonUniqueResultException
      * @throws Exception
      * @Rest\Get("/{id}")
@@ -74,7 +69,7 @@ class JudgementTypeController extends AbstractRestController
      * @OA\Parameter(ref="#/components/parameters/id")
      * @OA\Parameter(ref="#/components/parameters/strict")
      */
-    public function singleAction(Request $request, string $id)
+    public function singleAction(Request $request, string $id) : array
     {
         // Call getContestId to make sure we have an active contest
         $this->getContestId($request);
@@ -89,11 +84,9 @@ class JudgementTypeController extends AbstractRestController
 
     /**
      * Get the judgement types, optionally filtered on the given ID's
-     * @param string[]|null $filteredOn
-     * @return array
      * @throws Exception
      */
-    protected function getJudgementTypes(array $filteredOn = null)
+    protected function getJudgementTypes(array $filteredOn = null) : ?array
     {
         $verdictsConfig = $this->dj->getDomjudgeEtcDir() . '/verdicts.php';
         $verdicts       = include $verdictsConfig;

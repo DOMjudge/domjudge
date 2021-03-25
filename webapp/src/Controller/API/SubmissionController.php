@@ -58,8 +58,6 @@ class SubmissionController extends AbstractRestController
 
     /**
      * Get all the submissions for this contest
-     * @param Request $request
-     * @return Response
      * @Rest\Get("")
      * @OA\Response(
      *     response="200",
@@ -84,16 +82,13 @@ class SubmissionController extends AbstractRestController
      * )
      * @throws NonUniqueResultException
      */
-    public function listAction(Request $request)
+    public function listAction(Request $request) : Response
     {
         return parent::performListAction($request);
     }
 
     /**
      * Get the given submission for this contest
-     * @param Request $request
-     * @param string  $id
-     * @return Response
      * @throws NonUniqueResultException
      * @Rest\Get("/{id}")
      * @OA\Response(
@@ -109,7 +104,7 @@ class SubmissionController extends AbstractRestController
      * @OA\Parameter(ref="#/components/parameters/id")
      * @OA\Parameter(ref="#/components/parameters/strict")
      */
-    public function singleAction(Request $request, string $id)
+    public function singleAction(Request $request, string $id) : Response
     {
         return parent::performSingleAction($request, $id);
     }
@@ -443,8 +438,6 @@ class SubmissionController extends AbstractRestController
      * Get the files for the given submission as a ZIP archive
      * @Rest\Get("/{id}/files", name="submission_files")
      * @IsGranted("ROLE_API_SOURCE_READER")
-     * @param Request $request
-     * @param string  $id
      * @return Response|StreamedResponse
      * @throws NonUniqueResultException
      * @OA\Response(
@@ -488,9 +481,6 @@ class SubmissionController extends AbstractRestController
      * Get the source code of all the files for the given submission
      * @Rest\Get("/{id}/source-code")
      * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST')")
-     * @param Request $request
-     * @param string  $id
-     * @return array
      * @throws NonUniqueResultException
      * @OA\Response(
      *     response="200",
@@ -499,7 +489,7 @@ class SubmissionController extends AbstractRestController
      * )
      * @OA\Parameter(ref="#/components/parameters/id")
      */
-    public function getSubmissionSourceCodeAction(Request $request, string $id)
+    public function getSubmissionSourceCodeAction(Request $request, string $id) : array
     {
         $queryBuilder = $this->em->createQueryBuilder()
             ->from(SubmissionFile::class, 'f')
@@ -531,9 +521,6 @@ class SubmissionController extends AbstractRestController
     }
 
     /**
-     * Get the query builder to use for request for this REST endpoint
-     * @param Request $request
-     * @return QueryBuilder
      * @throws NonUniqueResultException
      */
     protected function getQueryBuilder(Request $request): QueryBuilder

@@ -41,11 +41,8 @@ abstract class BaseController extends AbstractController
 {
     /**
      * Check whether the referrer in the request is of the current application
-     * @param RouterInterface $router
-     * @param Request         $request
-     * @return bool
      */
-    protected function isLocalReferrer(RouterInterface $router, Request $request)
+    protected function isLocalReferrer(RouterInterface $router, Request $request): bool
     {
         if ($referrer = $request->headers->get('referer')) {
             $prefix = sprintf('%s%s', $request->getSchemeAndHttpHost(), $request->getBasePath());
@@ -65,12 +62,8 @@ abstract class BaseController extends AbstractController
 
     /**
      * Redirect to the referrer if it is a known (local) route, otherwise redirect to the given URL
-     * @param RouterInterface $router
-     * @param Request         $request
-     * @param string          $defaultUrl
-     * @return RedirectResponse
      */
-    protected function redirectToLocalReferrer(RouterInterface $router, Request $request, string $defaultUrl)
+    protected function redirectToLocalReferrer(RouterInterface $router, Request $request, string $defaultUrl): RedirectResponse
     {
         if ($this->isLocalReferrer($router, $request)) {
             return $this->redirect($request->headers->get('referer'));
@@ -96,7 +89,7 @@ abstract class BaseController extends AbstractController
         $entity,
         $id,
         bool $isNewEntity
-    ) {
+    ): void {
         $auditLogType = Utils::tableForEntity($entity);
 
         $entityManager->flush();
@@ -138,7 +131,6 @@ abstract class BaseController extends AbstractController
      * @param                        $entity
      * @param string                 $description
      * @param string                 $redirectUrl
-     * @return Response
      * @throws DBALException
      * @throws NoResultException
      * @throws NonUniqueResultException
@@ -152,7 +144,7 @@ abstract class BaseController extends AbstractController
         $entity,
         string $description,
         string $redirectUrl
-    ) {
+    ) : Response {
         // Determine all the relationships between all tables using Doctrine cache
         $dir       = realpath(sprintf('%s/src/Entity', $kernel->getProjectDir()));
         $files     = glob($dir . '/*.php');
@@ -355,7 +347,7 @@ abstract class BaseController extends AbstractController
         }
     }
 
-    protected function getDependentEntities(string $entityClass, array $relations)
+    protected function getDependentEntities(string $entityClass, array $relations): array
     {
         $result = [];
         // We do a BFS through the list of tables.
@@ -390,7 +382,8 @@ abstract class BaseController extends AbstractController
      *
      * @return Contest[]
      */
-    protected function contestsForEntity($entity, DOMJudgeService $dj) {
+    protected function contestsForEntity($entity, DOMJudgeService $dj): array
+    {
         // Determine contests to emit an event for for the given entity:
         // * If the entity is a Problem entity, use the getContest()
         //   of every contest problem in getContestProblems()

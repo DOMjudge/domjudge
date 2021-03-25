@@ -43,9 +43,6 @@ class SecurityController extends AbstractController
 
     /**
      * @Route("/login", name="login")
-     * @param Request                       $request
-     * @param AuthorizationCheckerInterface $authorizationChecker
-     * @param AuthenticationUtils           $authUtils
      * @return RedirectResponse|Response
      * @throws Exception
      */
@@ -99,9 +96,6 @@ class SecurityController extends AbstractController
 
     /**
      * @Route("/register", name="register")
-     * @param Request                       $request
-     * @param AuthorizationCheckerInterface $authorizationChecker
-     * @param UserPasswordEncoderInterface  $passwordEncoder
      * @return RedirectResponse|Response
      * @throws Exception
      */

@@ -27,8 +27,6 @@ class GroupController extends AbstractRestController
 {
     /**
      * Get all the groups for this contest
-     * @param Request $request
-     * @return Response
      * @Rest\Get("")
      * @OA\Parameter(ref="#/components/parameters/idlist")
      * @OA\Parameter(ref="#/components/parameters/strict")
@@ -48,16 +46,13 @@ class GroupController extends AbstractRestController
      * )
      * @throws NonUniqueResultException
      */
-    public function listAction(Request $request)
+    public function listAction(Request $request) : Response
     {
         return parent::performListAction($request);
     }
 
     /**
      * Get the given group for this contest
-     * @param Request $request
-     * @param string $id
-     * @return Response
      * @throws NonUniqueResultException
      * @Rest\Get("/{id}")
      * @OA\Response(
@@ -68,7 +63,7 @@ class GroupController extends AbstractRestController
      * @OA\Parameter(ref="#/components/parameters/id")
      * @OA\Parameter(ref="#/components/parameters/strict")
      */
-    public function singleAction(Request $request, string $id)
+    public function singleAction(Request $request, string $id) : Response
     {
         return parent::performSingleAction($request, $id);
     }

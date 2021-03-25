@@ -23,7 +23,6 @@ class RootController extends BaseController
 
     /**
      * RootController constructor.
-     * @param DOMJudgeService        $dj
      */
     public function __construct(DOMJudgeService $dj)
     {
@@ -32,10 +31,9 @@ class RootController extends BaseController
 
     /**
      * @Route("", name="root")
-     * @param AuthorizationCheckerInterface $authorizationChecker
-     * @return RedirectResponse
      */
-    public function redirectAction(AuthorizationCheckerInterface $authorizationChecker) {
+    public function redirectAction(AuthorizationCheckerInterface $authorizationChecker): RedirectResponse
+    {
         if ($authorizationChecker->isGranted('IS_AUTHENTICATED_FULLY')) {
             if ($this->dj->checkrole('jury')) {
                 return $this->redirectToRoute('jury_index');
