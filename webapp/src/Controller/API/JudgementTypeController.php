@@ -122,17 +122,11 @@ class JudgementTypeController extends AbstractRestController
         return $result;
     }
 
-    /**
-     * @inheritdoc
-     */
     protected function getQueryBuilder(Request $request): QueryBuilder
     {
         throw new NotImplementedException();
     }
 
-    /**
-     * @inheritdoc
-     */
     protected function getIdField(): string
     {
         throw new NotImplementedException();

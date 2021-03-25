@@ -264,9 +264,6 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
         return $this->renderData($request, $object);
     }
 
-    /**
-     * @inheritdoc
-     */
     protected function getQueryBuilder(Request $request): QueryBuilder
     {
         $contestId = $this->getContestId($request);
@@ -293,7 +290,6 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
     }
 
     /**
-     * @inheritdoc
      * @throws Exception
      */
     protected function getIdField(): string

@@ -70,17 +70,11 @@ class BalloonController extends AbstractRestController
         $balloonService->setDone($balloonId);
     }
 
-    /**
-     * @inheritDoc
-     */
     protected function getQueryBuilder(Request $request): QueryBuilder
     {
         throw new NotImplementedException();
     }
 
-    /**
-     * @inheritDoc
-     */
     protected function getIdField(): string
     {
         throw new NotImplementedException();

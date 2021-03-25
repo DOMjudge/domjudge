@@ -178,17 +178,11 @@ class RunController extends AbstractRestController implements QueryObjectTransfo
         return $queryBuilder;
     }
 
-    /**
-     * @inheritdoc
-     */
     protected function getIdField(): string
     {
         return 'jr.runid';
     }
 
-    /**
-     * @inheritdoc
-     */
     public function transformObject($object)
     {
         /** @var JudgingRun $judgingRun */

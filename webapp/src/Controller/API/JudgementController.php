@@ -112,7 +112,6 @@ class JudgementController extends AbstractRestController implements QueryObjectT
     }
 
     /**
-     * @inheritdoc
      * @throws Exception
      */
     protected function getQueryBuilder(Request $request): QueryBuilder
@@ -167,17 +166,11 @@ class JudgementController extends AbstractRestController implements QueryObjectT
         return $queryBuilder;
     }
 
-    /**
-     * @inheritdoc
-     */
     protected function getIdField(): string
     {
         return 'j.judgingid';
     }
 
-    /**
-     * @inheritdoc
-     */
     public function transformObject($object)
     {
         /** @var Judging $judging */

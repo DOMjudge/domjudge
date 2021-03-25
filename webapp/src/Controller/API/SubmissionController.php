@@ -581,7 +581,6 @@ class SubmissionController extends AbstractRestController
     }
 
     /**
-     * @inheritdoc
      * @throws Exception
      */
     protected function getIdField(): string

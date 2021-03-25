@@ -63,9 +63,6 @@ class LanguageController extends AbstractRestController
         return parent::performSingleAction($request, $id);
     }
 
-    /**
-     * @inheritdoc
-     */
     protected function getQueryBuilder(Request $request): QueryBuilder
     {
         // Make sure the contest exists by calling getContestId. Most API endpoints use the contest to filter its
@@ -78,7 +75,6 @@ class LanguageController extends AbstractRestController
     }
 
     /**
-     * @inheritdoc
      * @throws Exception
      */
     protected function getIdField(): string

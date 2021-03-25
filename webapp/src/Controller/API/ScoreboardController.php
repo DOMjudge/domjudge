@@ -220,17 +220,11 @@ class ScoreboardController extends AbstractRestController
         return $results;
     }
 
-    /**
-     * @inheritdoc
-     */
     protected function getQueryBuilder(Request $request): QueryBuilder
     {
         throw new NotImplementedException();
     }
 
-    /**
-     * @inheritdoc
-     */
     protected function getIdField(): string
     {
         throw new NotImplementedException();

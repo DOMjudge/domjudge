@@ -569,16 +569,12 @@ class ContestController extends AbstractRestController
         return $this->dj->getContestStats($this->getContestWithId($request, $cid));
     }
 
-    /**
-     * @inheritdoc
-     */
     protected function getQueryBuilder(Request $request): QueryBuilder
     {
         return $this->getContestQueryBuilder($request->query->getBoolean('onlyActive', false));
     }
 
     /**
-     * @inheritdoc
      * @throws Exception
      */
     protected function getIdField(): string

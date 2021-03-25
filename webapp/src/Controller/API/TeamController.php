@@ -124,9 +124,6 @@ class TeamController extends AbstractRestController
         return $this->renderCreateData($request, $saved[0], 'team', $id);
     }
 
-    /**
-     * @inheritdoc
-     */
     protected function getQueryBuilder(Request $request): QueryBuilder
     {
         $queryBuilder = $this->em->createQueryBuilder()
@@ -164,7 +161,6 @@ class TeamController extends AbstractRestController
     }
 
     /**
-     * @inheritdoc
      * @throws Exception
      */
     protected function getIdField(): string
