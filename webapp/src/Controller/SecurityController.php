@@ -121,6 +121,7 @@ class SecurityController extends AbstractController
         $registration_form = $this->createForm(UserRegistrationType::class, $user);
         $registration_form->handleRequest($request);
         if ($registration_form->isSubmitted() && $registration_form->isValid()) {
+            /** @var Role $team_role */
             $team_role = $em->getRepository(Role::class)->findOneBy(['dj_role' => 'team']);
 
             $plainPass = $registration_form->get('plainPassword')->getData();

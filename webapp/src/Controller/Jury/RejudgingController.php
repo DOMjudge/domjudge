@@ -685,7 +685,6 @@ class RejudgingController extends BaseController
     {
         /** @var Judging $judging */
         foreach ($skipped as $judging) {
-            /** @var Submission $submission */
             $submission = $judging->getSubmission();
             $submitid = $submission->getSubmitid();
             $rejudgingid = $submission->getRejudging()->getRejudgingid();
