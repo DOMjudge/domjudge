@@ -705,7 +705,7 @@ class ImportEventFeedCommand extends Command
 
         fclose($cacheFile);
 
-        $this->logger->info('Starting event import after event with ID %d', [ $this->sinceEventId ]);
+        $this->logger->info('Starting event import after event with ID %s', [ $this->sinceEventId ]);
     }
 
     /**
