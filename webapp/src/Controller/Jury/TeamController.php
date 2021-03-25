@@ -290,10 +290,10 @@ class TeamController extends BaseController
         ];
 
         $currentContest = $this->dj->getCurrentContest();
-        if ($request->query->has('cid')) {
-            if (isset($this->dj->getCurrentContests()[$request->query->get('cid')])) {
-                $currentContest = $this->dj->getCurrentContests()[$request->query->get('cid')];
-            }
+        if ($request->query->has('cid')
+            && isset($this->dj->getCurrentContests()[$request->query->get('cid')])
+        ) {
+            $currentContest = $this->dj->getCurrentContests()[$request->query->get('cid')];
         }
 
         if ($currentContest) {

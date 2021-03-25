@@ -100,8 +100,8 @@ class ScoreboardController extends BaseController
 
         if ($request->isXmlHttpRequest()) {
             return $this->render('team/team_modal.html.twig', $data);
-        } else {
-            return $this->render('team/team.html.twig', $data);
         }
+
+        return $this->render('team/team.html.twig', $data);
     }
 }

@@ -432,12 +432,12 @@ class RejudgingController extends BaseController
             });
 
             return $response;
-        } else {
-            return $this->render('jury/rejudging_finish.html.twig', [
-                'action' => $action,
-                'rejudging' => $rejudging,
-            ]);
         }
+
+        return $this->render('jury/rejudging_finish.html.twig', [
+            'action' => $action,
+            'rejudging' => $rejudging,
+        ]);
     }
 
     /**

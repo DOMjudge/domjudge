@@ -325,26 +325,26 @@ abstract class BaseController extends AbstractController
             $this->addFlash('success', $msg);
             if ($request->isXmlHttpRequest()) {
                 return new JsonResponse(['url' => $redirectUrl]);
-            } else {
-                return $this->redirect($redirectUrl);
             }
-        } else {
-            $data = [
-                'type' => $readableType,
-                'primaryKey' => implode(', ', $primaryKeyData),
-                'description' => $description,
-                'messages' => $messages,
-                'isError' => $isError,
-                'showModalSubmit' => !$isError,
-                'modalUrl' => $request->getRequestUri(),
-                'redirectUrl' => $redirectUrl,
-            ];
-            if ($request->isXmlHttpRequest()) {
-                return $this->render('jury/delete_modal.html.twig', $data);
-            } else {
-                return $this->render('jury/delete.html.twig', $data);
-            }
+
+            return $this->redirect($redirectUrl);
         }
+
+        $data = [
+            'type' => $readableType,
+            'primaryKey' => implode(', ', $primaryKeyData),
+            'description' => $description,
+            'messages' => $messages,
+            'isError' => $isError,
+            'showModalSubmit' => !$isError,
+            'modalUrl' => $request->getRequestUri(),
+            'redirectUrl' => $redirectUrl,
+        ];
+        if ($request->isXmlHttpRequest()) {
+            return $this->render('jury/delete_modal.html.twig', $data);
+        }
+
+        return $this->render('jury/delete.html.twig', $data);
     }
 
     protected function getDependentEntities(string $entityClass, array $relations): array

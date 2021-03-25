@@ -168,9 +168,9 @@ class PublicController extends BaseController
 
         if ($request->isXmlHttpRequest()) {
             return $this->render('public/team_modal.html.twig', $data);
-        } else {
-            return $this->render('public/team.html.twig', $data);
         }
+
+        return $this->render('public/team.html.twig', $data);
     }
 
     /**
