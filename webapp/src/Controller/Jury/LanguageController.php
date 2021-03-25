@@ -204,7 +204,7 @@ class LanguageController extends BaseController
 
         $restrictions = ['langid' => $language->getLangid()];
         /** @var Submission[] $submissions */
-        list($submissions, $submissionCounts) = $submissionService->getSubmissionList(
+        [$submissions, $submissionCounts] = $submissionService->getSubmissionList(
             $this->dj->getCurrentContests(),
             $restrictions
         );

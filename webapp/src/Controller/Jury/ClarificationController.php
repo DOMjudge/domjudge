@@ -375,7 +375,7 @@ class ClarificationController extends AbstractController
         }
 
         $subject = $request->request->get('subject');
-        list($cid, $probid) = explode('-', $subject);
+        [$cid, $probid] = explode('-', $subject);
 
         $contest = $this->em->getReference(Contest::class, $cid);
         $clarification->setContest($contest);
@@ -445,7 +445,7 @@ class ClarificationController extends AbstractController
         }
 
         $problem = $request->request->get('problem');
-        list($cid, $probid) = explode('-', $problem);
+        [$cid, $probid] = explode('-', $problem);
 
         $contest = $this->em->getReference(Contest::class, $cid);
         $clarification->setContest($contest);

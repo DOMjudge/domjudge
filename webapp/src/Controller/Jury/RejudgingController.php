@@ -324,7 +324,7 @@ class RejudgingController extends BaseController
         }
 
         /** @var Submission[] $submissions */
-        list($submissions, $submissionCounts) = $submissionService->getSubmissionList(
+        [$submissions, $submissionCounts] = $submissionService->getSubmissionList(
             $this->dj->getCurrentContests(),
             $restrictions
         );

@@ -445,7 +445,7 @@ class ProblemController extends BaseController
 
         $restrictions = ['probid' => $problem->getProbid()];
         /** @var Submission[] $submissions */
-        list($submissions, $submissionCounts) = $submissionService->getSubmissionList(
+        [$submissions, $submissionCounts] = $submissionService->getSubmissionList(
             $this->dj->getCurrentContests(),
             $restrictions
         );

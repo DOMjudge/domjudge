@@ -449,7 +449,7 @@ class ExecutableController extends BaseController
             if (strpos($filename, '.') !== false) {
                 $aceFilenames[] = $filename;
             } else {
-                list($firstLine) = explode("\n", $content, 2);
+                [$firstLine] = explode("\n", $content, 2);
                 // If the file does not contain a dot, see if we have a shebang which we can use as filename
                 if (preg_match('/^#!.*\/([^\/]+)$/', $firstLine, $matches)) {
                     $aceFilenames[] = sprintf('dummy.%s', $matches[1]);
