@@ -191,7 +191,7 @@ abstract class BaseController extends AbstractController
             foreach ($relations as $table => $tableRelations) {
                 foreach ($tableRelations as $column => $constraint) {
                     // If the target class and column match, check if there are any entities with this value
-                    if ($constraint['target'] === get_class($entity) && $constraint['targetColumn'] === $primaryKeyColumn) {
+                    if ($constraint['targetColumn'] === $primaryKeyColumn && $constraint['target'] === get_class($entity)) {
                         $count = (int)$entityManager->createQueryBuilder()
                             ->from($table, 't')
                             ->select(sprintf('COUNT(t.%s) AS cnt', $column))

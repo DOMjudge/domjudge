@@ -60,7 +60,7 @@ class SecurityController extends AbstractController
         }
 
         $ipAutologin = $this->config->get('ip_autologin');
-        if ($authorizationChecker->isGranted('IS_AUTHENTICATED_FULLY') && !$ipAutologin) {
+        if (!$ipAutologin && $authorizationChecker->isGranted('IS_AUTHENTICATED_FULLY')) {
             return $this->redirect($this->generateUrl('root'));
         }
 
