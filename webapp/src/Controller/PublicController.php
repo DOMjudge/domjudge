@@ -104,7 +104,7 @@ class PublicController extends BaseController
                     // Find the contest with the given ID
                     $contest = null;
                     foreach ($this->dj->getCurrentContests(-1) as $possibleContest) {
-                        if ($possibleContest->getCid() == $contestId || $possibleContest->getExternalid() == $contestId) {
+                        if ($possibleContest->getCid() === $contestId || $possibleContest->getExternalid() === $contestId) {
                             $contest = $possibleContest;
                             break;
                         }

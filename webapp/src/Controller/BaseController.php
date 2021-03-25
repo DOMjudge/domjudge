@@ -359,13 +359,13 @@ abstract class BaseController extends AbstractController
             if (in_array($currentEntity, $result)) {
                 continue;
             }
-            if ($currentEntity != $entityClass) {
+            if ($currentEntity !== $entityClass) {
                 $result[] = $currentEntity;
             }
 
             foreach ($relations as $nextEntity => $relatedEntities) {
                 foreach ($relatedEntities as $constraint) {
-                    if ($constraint['target'] == $currentEntity && $constraint['type'] == 'CASCADE') {
+                    if ($constraint['target'] === $currentEntity && $constraint['type'] === 'CASCADE') {
                         $queue[] = $nextEntity;
                     }
                 }
