@@ -4,6 +4,8 @@
         <span class="navbar-toggler-icon"></span>
     </button>
 
+    {% set current_route = app.request.attributes.get('_route') %}
+
     <div class="collapse navbar-collapse" id="menuDefault" data-update-url="{{ path('jury_ajax_updates') }}">
         <ul class="navbar-nav mr-auto">
 
@@ -17,17 +19,17 @@
             {% endif %}
 
             {% if is_granted('ROLE_ADMIN') %}
-                <li class="nav-item dropdown">
+                <li class="nav-item dropdown {% if current_route starts with 'jury_judgehost' or current_route == 'jury_internal_errors' %}active{% endif %}">
                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownJudgehosts" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         <i class="fas fa-gavel"></i> judgehosts
                         <span class="badge badge-warning" id="num-alerts-judgehosts"></span>
                         <span class="badge badge-danger" id="num-alerts-internalerrors"></span>
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <a class="dropdown-item" href="{{ path('jury_judgehosts') }}" id="menu_judgehosts">
+                        <a class="dropdown-item {% if current_route starts with 'jury_judgehost' %}active{% endif %}" href="{{ path('jury_judgehosts') }}" id="menu_judgehosts">
                             <i class="fas fa-server fa-fw"></i> judgehosts <span class="badge badge-warning" id="num-alerts-judgehosts-sub"></span>
                         </a>
-                        <a class="dropdown-item dropdown-disabled" href="{{ path('jury_internal_errors') }}" id="menu_internal_error">
+                        <a class="dropdown-item dropdown-disabled {% if current_route == 'jury_internal_errors' %}active{% endif %}" href="{{ path('jury_internal_errors') }}" id="menu_internal_error">
                             <i class="fas fa-bolt fa-fw"></i> internal error <span class="badge badge-danger" id="num-alerts-internalerrors-sub"></span>
                         </a>
                     </div>
@@ -35,29 +37,29 @@
             {% endif %}
 
             {% if is_granted('ROLE_CLARIFICATION_RW') %}
-                <li class="nav-item">
+                <li class="nav-item {% if current_route starts with 'jury_clarification' %}active{% endif %}">
                     <a class="nav-link" href="{{ path('jury_clarifications') }}" id="menu_clarifications"><i class="fas fa-comments"></i> clarifications <span class="badge badge-info" id="num-alerts-clarifications"></span></a>
                 </li>
             {% endif %}
 
             {% if is_granted('ROLE_JURY') %}
-                <li class="nav-item">
+                <li class="nav-item {% if current_route starts with 'jury_submission' %}active{% endif %}">
                     <a class="nav-link" href="{{ path('jury_submissions') }}"><i class="fas fa-file-code"></i> submissions</a>
                 </li>
 
                 {% if show_shadow_differences %}
-                    <li class="nav-item">
+                    <li class="nav-item {% if current_route == 'jury_shadow_differences' %}active{% endif %}">
                         <a class="nav-link" href="{{ path('jury_shadow_differences') }}"><i class="fas fa-not-equal"></i> shadow differences</a>
                     </li>
                 {% endif %}
 
-                <li class="nav-item">
+                <li class="nav-item {% if current_route == 'jury_rejudgings' %}active{% endif %}">
                     <a class="nav-link" href="{{ path('jury_rejudgings') }}" id="menu_rejudgings"><i class="fas fa-sync"></i> rejudgings <span class="badge badge-info" id="num-alerts-rejudgings"></span></a>
                 </li>
             {% endif %}
 
             {% if is_granted('ROLE_JURY') %}
-                <li class="nav-item">
+                <li class="nav-item {% if current_route == 'jury_scoreboard' %}active{% endif %}">
                     <a class="nav-link" href="{{ path('jury_scoreboard') }}"><i class="fas fa-list-ol"></i> scoreboard</a>
                 </li>
             {% endif %}
