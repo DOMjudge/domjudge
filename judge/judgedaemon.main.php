@@ -947,8 +947,6 @@ function compile(array $judgeTask, string $workdir, string $workdirpath, array $
     // Compile the program.
     $compile_cmd = escapeshellcmd(LIBJUDGEDIR . "/compile.sh $cpuset_opt '$execrunpath' '$workdir' " .
                                   implode(' ', $files));
-    logmsg(LOG_NOTICE, $compile_cmd);
-    logmsg(LOG_NOTICE, implode(' ', $files));
     system($compile_cmd, $retval);
     if ($retval!==0) {
         warning("compile script exited with exitcode $retval");
