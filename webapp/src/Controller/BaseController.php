@@ -86,7 +86,7 @@ abstract class BaseController extends AbstractController
         EntityManagerInterface $entityManager,
         EventLogService $eventLogService,
         DOMJudgeService $DOMJudgeService,
-        $entity,
+        object $entity,
         $id,
         bool $isNewEntity
     ): void {
