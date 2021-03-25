@@ -2,7 +2,6 @@
 
 namespace App\DataFixtures\DefaultData;
 
-use App\Entity\Team;
 use App\Entity\User;
 use App\Service\DOMJudgeService;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
@@ -28,11 +27,17 @@ class UserFixture extends AbstractDefaultDataFixture implements DependentFixture
      */
     protected $passwordEncoder;
 
-    public function __construct(DOMJudgeService $dj, LoggerInterface $logger, UserPasswordEncoderInterface $passwordEncoder)
+    /**
+     * @var bool
+     */
+    protected $debug;
+
+    public function __construct(DOMJudgeService $dj, LoggerInterface $logger, UserPasswordEncoderInterface $passwordEncoder, bool $debug)
     {
         $this->dj              = $dj;
         $this->logger          = $logger;
         $this->passwordEncoder = $passwordEncoder;
+        $this->debug           = $debug;
     }
 
     /**
@@ -59,7 +64,7 @@ class UserFixture extends AbstractDefaultDataFixture implements DependentFixture
                 ->setName('Administrator')
                 ->setPassword($this->passwordEncoder->encodePassword($adminUser, trim($adminpasswordContents)))
                 ->addUserRole($this->getReference(RoleFixture::ADMIN_REFERENCE));
-            if (isset($_ENV['APP_ENV']) && $_ENV['APP_ENV'] == 'dev') {
+            if ($this->debug) {
                 $domjudgeTeam = $this->getReference(TeamFixture::DOMJUDGE_REFERENCE);
                 $adminUser
                     ->setTeam($domjudgeTeam)
