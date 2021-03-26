@@ -40,11 +40,6 @@ services:
         resource: '../src/Controller'
         tags: ['controller.service_arguments']
 
-    App\ApiDescriber\ParameterRefMergeDescriber:
-        tags:
-            -   name: nelmio_api_doc.describer
-                priority: -999
-
     App\Doctrine\HashPasswordSubscriber:
         tags:
             - { name: doctrine.event_subscriber, connection: default }
