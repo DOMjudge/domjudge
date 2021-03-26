@@ -3660,25 +3660,25 @@
         },
         {
             "name": "nelmio/api-doc-bundle",
-            "version": "v4.0.1",
+            "version": "v4.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/nelmio/NelmioApiDocBundle.git",
-                "reference": "2f8416618da57c276e5f6ad800bff48eecdcbdb5"
+                "reference": "883d7b6c89dd43522a79a11fa856a662bcf564c5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/nelmio/NelmioApiDocBundle/zipball/2f8416618da57c276e5f6ad800bff48eecdcbdb5",
-                "reference": "2f8416618da57c276e5f6ad800bff48eecdcbdb5",
+                "url": "https://api.github.com/repos/nelmio/NelmioApiDocBundle/zipball/883d7b6c89dd43522a79a11fa856a662bcf564c5",
+                "reference": "883d7b6c89dd43522a79a11fa856a662bcf564c5",
                 "shasum": ""
             },
             "require": {
                 "ext-json": "*",
-                "php": "^7.1",
-                "phpdocumentor/reflection-docblock": "^3.1|^4.0|^5.0",
-                "symfony/framework-bundle": "^4.0|^5.0",
-                "symfony/options-resolver": "^4.0|^5.0",
-                "symfony/property-info": "^4.0|^5.0",
+                "php": ">=7.1.3",
+                "phpdocumentor/reflection-docblock": "^3.1|^4.4|^5.0",
+                "symfony/framework-bundle": "^4.4|^5.0",
+                "symfony/options-resolver": "^4.4|^5.0",
+                "symfony/property-info": "^4.4|^5.0",
                 "zircote/swagger-php": "^3.0"
             },
             "conflict": {
@@ -3686,26 +3686,26 @@
             },
             "require-dev": {
                 "api-platform/core": "^2.4",
-                "doctrine/annotations": "^1.2",
+                "doctrine/annotations": "^1.11",
                 "doctrine/common": "^2.4",
-                "friendsofsymfony/rest-bundle": "^2.0|^3.0@beta",
+                "friendsofsymfony/rest-bundle": "^2.8|^3.0",
                 "jms/serializer": "^1.14|^3.0",
                 "jms/serializer-bundle": "^2.3|^3.0",
-                "sensio/framework-extra-bundle": "^4.0|^5.0",
-                "symfony/asset": "^4.0|^5.0",
-                "symfony/browser-kit": "^4.0|^5.0",
-                "symfony/cache": "^4.0|^5.0",
-                "symfony/config": "^4.0|^5.0",
-                "symfony/console": "^4.0|^5.0",
-                "symfony/dom-crawler": "^4.0|^5.0",
-                "symfony/form": "^4.0|^5.0",
-                "symfony/phpunit-bridge": "^4.0|^5.0",
-                "symfony/property-access": "^4.0|^5.0",
-                "symfony/routing": "^4.0|^5.0",
-                "symfony/stopwatch": "^4.0|^5.0",
-                "symfony/templating": "^4.0|^5.0",
-                "symfony/twig-bundle": "^4.0|^5.0",
-                "symfony/validator": "^4.0|^5.0",
+                "sensio/framework-extra-bundle": "^4.4|^5.0",
+                "symfony/asset": "^4.4|^5.0",
+                "symfony/browser-kit": "^4.4|^5.0",
+                "symfony/cache": "^4.4|^5.0",
+                "symfony/config": "^4.4|^5.0",
+                "symfony/console": "^4.4|^5.0",
+                "symfony/dom-crawler": "^4.4|^5.0",
+                "symfony/form": "^4.4|^5.0",
+                "symfony/phpunit-bridge": "^5.2",
+                "symfony/property-access": "^4.4|^5.0",
+                "symfony/routing": "^4.4|^5.0",
+                "symfony/stopwatch": "^4.4|^5.0",
+                "symfony/templating": "^4.4|^5.0",
+                "symfony/twig-bundle": "^4.4|^5.0",
+                "symfony/validator": "^4.4|^5.0",
                 "willdurand/hateoas-bundle": "^1.0|^2.0"
             },
             "suggest": {
@@ -3749,9 +3749,9 @@
             ],
             "support": {
                 "issues": "https://github.com/nelmio/NelmioApiDocBundle/issues",
-                "source": "https://github.com/nelmio/NelmioApiDocBundle/tree/v4.0.1"
+                "source": "https://github.com/nelmio/NelmioApiDocBundle/tree/v4.2.0"
             },
-            "time": "2020-09-29T10:31:37+00:00"
+            "time": "2021-02-19T08:41:32+00:00"
         },
         {
             "name": "novus/nvd3",

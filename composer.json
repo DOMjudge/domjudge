@@ -65,7 +65,7 @@
 		"ircmaxell/password-compat": "*",
 		"jms/serializer-bundle": "^3.4",
 		"mbostock/d3": "^3.5",
-		"nelmio/api-doc-bundle": "^4.0",
+		"nelmio/api-doc-bundle": "^4.2",
 		"novus/nvd3": "^1.8",
 		"phpunit/phpunit": "^8",
 		"sebastian/diff": "3.0",
