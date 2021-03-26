@@ -132,7 +132,9 @@
                     {% endif %}
                     <td class="{{ tdExtraClass }}">
                         <a href="{{ link }}">
-                            {% if externalJudgement is null or externalJudgement.result is empty %}
+                            {% if submission.externalid is null %}
+                                {{- 'n / a' | printValidJuryResult -}}
+                            {% elseif externalJudgement is null or externalJudgement.result is empty %}
                                 {{- 'pending' | printValidJuryResult -}}
                             {% else %}
                                 {{- externalJudgement.result | printValidJuryResult -}}

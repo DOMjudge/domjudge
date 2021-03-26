@@ -539,6 +539,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             case 'judging':
             case 'queued':
             case 'pending':
+            case 'n / a':
                 if (!$jury) {
                     $result = 'pending';
                 }
