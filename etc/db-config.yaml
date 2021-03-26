@@ -117,11 +117,6 @@
             default_value: 1048576
             public: false
             description: Minimum free disk space (in kB) on judgehosts.
-        -   name: update_judging_seconds
-            type: int
-            default_value: 5
-            public: false
-            description: Post updates to a judging every X seconds. Set to 0 to update after each judging_run.
         -   name: default_compare
             type: string
             default_value: compare
