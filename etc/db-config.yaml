@@ -132,6 +132,11 @@
             default_value: run
             public: false
             description: The script used to run submissions if no special run script specified.
+        -   name: enable_parallel_judging
+            type: bool
+            default_value: true
+            public: false
+            description: Allows to distribute one judging to multiple judgehosts.
 -   category: Clarification
     description: Options related to clarifications.
     items:

@@ -1473,22 +1473,24 @@ class JudgehostController extends AbstractFOSRestController
             return $this->serializeJudgeTasks($judgetasks, $hostname);
         }
 
-        // This is case 2.c) from above: contribute to a job someone else has started but we have not contributed yet.
-        // We intentionally lift the restriction on priority in this case to get any high priority work.
-        /** @var JudgeTask[] $judgetasks */
-        $judgetasks = $this->em
-            ->createQueryBuilder()
-            ->from(JudgeTask::class, 'jt')
-            ->select('jt')
-            ->andWhere('jt.hostname IS NULL')
-            ->andWhere('jt.valid = 1')
-            ->addOrderBy('jt.priority')
-            ->addOrderBy('jt.judgetaskid')
-            ->setMaxResults($max_batchsize)
-            ->getQuery()
-            ->getResult();
-        if (!empty($judgetasks)) {
-            return $this->serializeJudgeTasks($judgetasks, $hostname);
+        if ($this->config->get('enable_parallel_judging')) {
+            // This is case 2.c) from above: contribute to a job someone else has started but we have not contributed yet.
+            // We intentionally lift the restriction on priority in this case to get any high priority work.
+            /** @var JudgeTask[] $judgetasks */
+            $judgetasks = $this->em
+                ->createQueryBuilder()
+                ->from(JudgeTask::class, 'jt')
+                ->select('jt')
+                ->andWhere('jt.hostname IS NULL')
+                ->andWhere('jt.valid = 1')
+                ->addOrderBy('jt.priority')
+                ->addOrderBy('jt.judgetaskid')
+                ->setMaxResults($max_batchsize)
+                ->getQuery()
+                ->getResult();
+            if (!empty($judgetasks)) {
+                return $this->serializeJudgeTasks($judgetasks, $hostname);
+            }
         }
 
         return [];
