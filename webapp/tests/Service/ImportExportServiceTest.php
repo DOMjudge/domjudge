@@ -70,7 +70,7 @@ class ImportExportServiceTest extends KernelTestCase
     {
         self::assertTrue(static::$container->get(ImportExportService::class)->importContestYaml($data, $message, $cid));
         self::assertNull($message);
-        self::assertNotNull($cid);
+        self::assertIsString($cid);
 
         // Load the contest, but first clear the entity manager to have all data
         static::$container->get(EntityManagerInterface::class)->clear();

@@ -297,7 +297,7 @@ class ImportExportService
             }
         }
 
-        $cid = $contest->getApiId($this->eventLogService);
+        $cid = (string)$contest->getApiId($this->eventLogService);
 
         $this->em->flush();
         return true;
