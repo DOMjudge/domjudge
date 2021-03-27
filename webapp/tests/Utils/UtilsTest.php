@@ -255,6 +255,8 @@ class UtilsTest extends TestCase
         self::assertEquals("00:00:03", Utils::timeStringDiff("16:00:00", "15:59:57"));
         self::assertEquals("00:00:00", Utils::timeStringDiff("16:43:12", "16:43:12"));
         self::assertEquals("00:14:55", Utils::timeStringDiff("01:50:50", "01:35:55"));
+        self::assertEquals("01:14:55", Utils::timeStringDiff("01:50:50", "00:35:55"));
+        self::assertEquals("01:14:55", Utils::timeStringDiff("01:50:50", "35:55"));
     }
 
     /**

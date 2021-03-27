@@ -132,10 +132,23 @@ class ImportExportService
         return $data;
     }
 
-    public function importContestYaml($data, string &$message = null, string &$cid = null): bool
+    public function importContestYaml($data, ?string &$message = null, string &$cid = null): bool
     {
         if (empty($data)) {
             $message = 'Error parsing YAML file.';
+            return false;
+        }
+
+        $requiredFields = ['start-time', 'name', 'short-name', 'duration'];
+        $missingFields  = [];
+        foreach ($requiredFields as $field) {
+            if (!array_key_exists($field, $data)) {
+                $missingFields[] = $field;
+            }
+        }
+
+        if (!empty($missingFields)) {
+            $message = sprintf('Missing fields: %s', implode(', ', $missingFields));
             return false;
         }
 
@@ -143,11 +156,18 @@ class ImportExportService
         $invalid_regex   = '/[^' . substr($identifierChars, 1) . '/';
 
         if (is_string($data['start-time'])) {
-            $starttime = date_create_from_format(DateTime::ISO8601, $data['start-time']);
+            $starttime = date_create_from_format(DateTime::ISO8601, $data['start-time']) ?:
+                // make sure ISO 8601 but with the T replaced with a space also works
+                date_create_from_format('Y-m-d H:i:sO', $data['start-time']);
         } else {
             /** @var DateTime $starttime */
             $starttime = $data['start-time'];
         }
+        if ($starttime === false) {
+            $message = 'Can not parse start time';
+            return false;
+        }
+
         $starttime->setTimezone(new DateTimeZone(date_default_timezone_get()));
         $contest = new Contest();
         $contest
@@ -168,7 +188,12 @@ class ImportExportService
         $freezeStart = $data['scoreboard-freeze'] ?? $data['freeze'] ?? null;
 
         if ($freezeDuration !== null) {
-            $contest->setFreezetimeString(sprintf('+%s', Utils::timeStringDiff($data['duration'], $freezeDuration)));
+            $freezeDurationDiff = Utils::timeStringDiff($data['duration'], $freezeDuration);
+            if (strpos($freezeDurationDiff, '-') === 0) {
+                $message = 'Freeze duration is longer than contest length';
+                return false;
+            }
+            $contest->setFreezetimeString(sprintf('+%s', $freezeDurationDiff));
         } elseif ($freezeStart !== null) {
             $contest->setFreezetimeString(sprintf('+%s', $freezeStart));
         }

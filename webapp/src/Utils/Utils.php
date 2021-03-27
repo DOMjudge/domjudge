@@ -498,6 +498,14 @@ class Utils
      */
     public static function timeStringDiff(string $time1, string $time2) : string
     {
+        // Add 00: to both times if they only contain one :. This might be the case if we have no hours
+        if (count(explode(':', $time1)) == 2) {
+            $time1 = '00:' . $time1;
+        }
+        if (count(explode(':', $time2)) == 2) {
+            $time2 = '00:' . $time2;
+        }
+
         sscanf($time1, '%2d:%2d:%2d', $h1, $m1, $s1);
         sscanf($time2, '%2d:%2d:%2d', $h2, $m2, $s2);
 

@@ -6,9 +6,11 @@ use App\Utils\FreezeData;
 use App\Utils\Utils;
 use App\Validator\Constraints\Identifier;
 use App\Validator\Constraints\TimeString;
+use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Exception;
 use JMS\Serializer\Annotation as Serializer;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -412,9 +414,9 @@ class Contest extends BaseApiEntity
      * @Serializer\SerializedName("start_time")
      * @Serializer\Type("DateTime")
      */
-    public function getStartTimeObject(): ?\DateTime
+    public function getStartTimeObject(): ?DateTime
     {
-        return $this->getStarttime() ? new \DateTime(Utils::absTime($this->getStarttime())) : null;
+        return $this->getStarttime() ? new DateTime(Utils::absTime($this->getStarttime())) : null;
     }
 
     public function setStarttimeEnabled(bool $starttimeEnabled): Contest
@@ -441,15 +443,15 @@ class Contest extends BaseApiEntity
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      * @Serializer\VirtualProperty()
      * @Serializer\SerializedName("end_time")
      * @Serializer\Type("DateTime")
      * @Serializer\Groups({"Nonstrict"})
      */
-    public function getEndTimeObject(): ?\DateTime
+    public function getEndTimeObject(): ?DateTime
     {
-        return $this->getEndtime() ? new \DateTime(Utils::absTime($this->getEndtime())) : null;
+        return $this->getEndtime() ? new DateTime(Utils::absTime($this->getEndtime())) : null;
     }
 
     /** @return string|float */
@@ -769,7 +771,7 @@ class Contest extends BaseApiEntity
     /**
      * @param $time_string
      * @return float|int|null
-     * @throws \Exception
+     * @throws Exception
      */
     public function getAbsoluteTime($time_string)
     {
@@ -805,7 +807,11 @@ class Contest extends BaseApiEntity
 
             return $absoluteTime;
         } else {
-            $date = new \DateTime($time_string);
+            try {
+                $date = new DateTime($time_string);
+            } catch (Exception $e) {
+                return null;
+            }
             return $date->format('U.v');
         }
     }
