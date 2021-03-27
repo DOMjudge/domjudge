@@ -708,7 +708,7 @@ class RejudgingController extends BaseController
             ->leftJoin('j.rejudging', 'r')
             ->leftJoin('j.submission', 's')
             ->leftJoin('j.judgehost', 'jh')
-            ->select('j.judgingid', 's.submitid', 'jh.hostname', 'j.result',
+            ->select('r.rejudgingid, j.judgingid', 's.submitid', 'jh.hostname', 'j.result',
                 'AVG(jr.runtime) AS runtime_avg', 'COUNT(jr.runtime) AS ntestcases',
                 '(j.endtime - j.starttime) AS duration'
             )
@@ -812,19 +812,19 @@ class RejudgingController extends BaseController
                 'count' => count($submissions[$submitid]),
                 'verdict' => (
                     !array_key_exists($submitid, $submissions_to_result)
-                        ? '<span title="' . join(', ', $results) . '">*multiple*</span>'
+                        ? join(', ', $results)
                         : $submissions_to_result[$submitid]
                 )
             ];
         }
 
         $judgehost_stats = [];
-        foreach ($judgehosts as $judgehost => $judgings) {
+        foreach ($judgehosts as $judgehost => $host_judgings) {
             $totaltime = 0.0; // Actual time begin--end of judging
             $totalrun  = 0.0; // Time spent judging runs
             $sumsquare = 0.0;
             $njudged = 0;
-            foreach ($judgings as $judging) {
+            foreach ($host_judgings as $judging) {
                 $runtime = $judging['runtime_avg']*$judging['ntestcases'];
                 $totaltime += $judging['duration'];
                 $totalrun  += $runtime;
@@ -849,7 +849,8 @@ class RejudgingController extends BaseController
             'judging_runs_differ' => array_slice($judging_runs_differ, 0, $max_list_len),
             'judging_runs_differ_overflow' => count($judging_runs_differ) - $max_list_len,
             'runtime_spread' => $runtime_spread_list,
-            'judgehost_stats' => $judgehost_stats
+            'judgehost_stats' => $judgehost_stats,
+            'judgings' => $judgings
         ];
     }
 }
