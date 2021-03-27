@@ -22,7 +22,13 @@ php -dpcov.enabled=1 -dpcov.directory=webapp/src lib/vendor/bin/phpunit -c webap
 CNT=$(sed -n '/Generating code coverage report/,$p' phpunit.out | grep -v DoctrineTestBundle | grep -v ^$ | wc -l)
 FILE=deprecation.txt
 sed -n '/Generating code coverage report/,$p' phpunit.out > ${CI_PROJECT_DIR}/$FILE
-if [ $CNT -lt 5 ]; then
+#if [ $CNT -lt 5 ]; then
+if [ $CNT -eq 3 ]; then
+php -dpcov.enabled=1 -dpcov.directory=webapp/src lib/vendor/bin/phpunit -c webapp/phpunit.xml.dist --log-junit ${CI_PROJECT_DIR}/unit-tests.xml --colors=never --coverage-html=${CI_PROJECT_DIR}/coverage-html > phpunit.out
+CNT=$(sed -n '/Generating code coverage report/,$p' phpunit.out | wc -l)
+FILE=deprecation.txt
+sed -n '/Generating code coverage report/,$p' phpunit.out > ${CI_PROJECT_DIR}/$FILE
+if [ $CNT -eq 1 ]; then
     STATE=success
 else
     STATE=failure
