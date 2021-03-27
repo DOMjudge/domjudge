@@ -148,6 +148,20 @@
                     </tr>
                 {% endfor %}
             </table>
+
+            <h4>Judging verdicts</h4>
+            <table class="table table-sm table-striped">
+                <tr><th>jID</th><th>rID</th><th>Judgehost</th><th>runtime</th><th>verdict</th></tr>
+                {% for judging in stats.judgings %}
+                    <tr>
+                        <td>{{ judging.judgingid }}</td>
+                        <td>{{ judging.rejudgingid }}</td>
+                        <td>{{ judging.hostname }}</td>
+                        <td>{{ judging.duration | number_format(3) }}</td>
+                        <td>{{ judging.result | printResult }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
         {% endif %}
     {% endif %}
 
