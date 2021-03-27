@@ -190,18 +190,14 @@ abstract class BaseController extends AbstractController
                 $relations[$class] = $tableRelations;
             }
    }
-   #foreach ($entities as $entity) {
-   #    assert(get_class($entity) === get_class($entities[0]));
-   #}
-   #}
-	foreach ($entities as $entity) {
-	    assert($entity == $entities[0]) # No strict equal to check if same interface
-	}
+   foreach ($entities as $entity) {
+       assert(get_class($entity) === get_class($entities[0]));
+   }
 
         $isError          = false;
         $messages         = [];
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
-	$inflector        = InflectorFactory::create()->build();
+   $inflector        = InflectorFactory::create()->build();
         $primaryKeyData   = [];
         $metadata         = $entityManager->getClassMetadata(get_class($entities[0]));
         $readableType     = str_replace('_', ' ', Utils::tableForEntity($entities[0]));
@@ -273,7 +269,7 @@ abstract class BaseController extends AbstractController
                 throw new BadRequestHttpException(reset($messages));
             }
 
-	    foreach ($entities as $entity) {
+       foreach ($entities as $entity) {
                 $entityId = null;
                 if ($entity instanceof Team) {
                     $entityId = $entity->getTeamid();
@@ -370,8 +366,8 @@ abstract class BaseController extends AbstractController
 
                 $msg = sprintf('Successfully deleted %s %s "%s"',
                                $readableType, implode(', ', $primaryKeyData), $description);
-		$this->addFlash('success', $msg);
-	    }
+       $this->addFlash('success', $msg);
+       }
             if ($request->isXmlHttpRequest()) {
                 return new JsonResponse(['url' => $redirectUrl]);
             }
