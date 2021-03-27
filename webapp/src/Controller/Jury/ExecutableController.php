@@ -358,7 +358,7 @@ class ExecutableController extends BaseController
         }
 
         return $this->deleteEntity($request, $this->em, $this->dj, $this->eventLogService, $this->kernel, $executable,
-                                   $executable->getShortDescription(), $this->generateUrl('jury_executables'));
+                                   $this->generateUrl('jury_executables'));
     }
 
     /**

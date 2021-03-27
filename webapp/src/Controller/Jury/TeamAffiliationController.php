@@ -268,7 +268,7 @@ class TeamAffiliationController extends BaseController
         }
 
         return $this->deleteEntity($request, $this->em, $this->dj, $this->eventLogService, $this->kernel,
-                                   $teamAffiliation, $teamAffiliation->getShortDescription(), $this->generateUrl('jury_team_affiliations'));
+                                   $teamAffiliation, $this->generateUrl('jury_team_affiliations'));
     }
 
     /**
