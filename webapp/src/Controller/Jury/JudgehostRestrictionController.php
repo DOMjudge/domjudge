@@ -226,8 +226,7 @@ class JudgehostRestrictionController extends BaseController
         $judgehostRestriction = $this->em->getRepository(JudgehostRestriction::class)->find($restrictionId);
 
         return $this->deleteEntity($request, $this->em, $this->dj, $this->eventLog, $this->kernel,
-                                   $judgehostRestriction, $judgehostRestriction->getShortDesc(),
-                                   $this->generateUrl('jury_judgehost_restrictions'));
+                                   $judgehostRestriction, $this->generateUrl('jury_judgehost_restrictions'));
     }
 
     /**
