@@ -292,7 +292,7 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
         return $this;
     }
 
-    public function getExpectedResults(): array
+    public function getExpectedResults(): ?array
     {
         return $this->expected_results;
     }
