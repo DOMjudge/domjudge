@@ -64,6 +64,11 @@ class JudgehostRestriction
         return $this->name;
     }
 
+    public function getShortDesc(): string
+    {
+        return $this->getName();
+    }
+
     public function setRestrictions(array $restrictions): JudgehostRestriction
     {
         $this->restrictions = $restrictions;

@@ -73,6 +73,11 @@ class ProblemAttachment
         return $this;
     }
 
+    public function getShortDesc(): ?string
+    {
+        return $this->getName();
+    }
+
     public function getType(): ?string
     {
         return $this->type;

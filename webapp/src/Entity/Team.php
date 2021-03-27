@@ -224,6 +224,11 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface
         return $this->getDisplayName() ?? $this->getName();
     }
 
+    public function getShortDesc(): string
+    {
+        return $this->getEffectiveName();
+    }
+
     public function setEnabled(bool $enabled): Team
     {
         $this->enabled = $enabled;

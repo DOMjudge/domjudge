@@ -349,7 +349,7 @@ class JudgehostController extends BaseController
             ->getOneOrNullResult();
 
         return $this->deleteEntity($request, $this->em, $this->dj, $this->eventLog, $this->kernel,
-                                   $judgehost, $judgehost->getHostname(), $this->generateUrl('jury_judgehosts'));
+                                   $judgehost, $judgehost->getShortDesc(), $this->generateUrl('jury_judgehosts'));
     }
 
     /**

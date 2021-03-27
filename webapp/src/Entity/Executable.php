@@ -97,6 +97,11 @@ class Executable
         return $this->description;
     }
 
+    public function getShortDesc(): string
+    {
+        return $this->getDescription();
+    }
+
     public function setType(string $type): Executable
     {
         $this->type = $type;

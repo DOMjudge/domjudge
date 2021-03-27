@@ -147,6 +147,11 @@ class TeamAffiliation extends BaseApiEntity
         return $this->name;
     }
 
+    public function getShortDesc() : ?string
+    {
+        return $this->getName();
+    }
+
     public function setCountry(string $country): TeamAffiliation
     {
         $this->country = $country;

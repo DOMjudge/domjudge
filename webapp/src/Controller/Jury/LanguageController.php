@@ -335,7 +335,7 @@ class LanguageController extends BaseController
 
         return $this->deleteEntity(
             $request, $this->em, $this->dj, $this->eventLogService, $this->kernel,
-            $language, $language->getName(), $this->generateUrl('jury_languages')
+            $language, $language->getShortDesc(), $this->generateUrl('jury_languages')
         );
     }
 
