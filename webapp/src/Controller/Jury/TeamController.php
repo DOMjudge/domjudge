@@ -403,7 +403,7 @@ class TeamController extends BaseController
         }
 
         return $this->deleteEntity($request, $this->em, $this->dj, $this->eventLogService, $this->kernel,
-                                   $team, $team->getShortDescription(), $this->generateUrl('jury_teams'));
+                                   $team, $this->generateUrl('jury_teams'));
     }
 
     /**

@@ -580,7 +580,7 @@ class ContestController extends BaseController
         }
 
         return $this->deleteEntity($request, $this->em, $this->dj, $this->eventLogService, $this->kernel, $contest,
-                                   $contest->getShortDescription(), $this->generateUrl('jury_contests'));
+                                   $this->generateUrl('jury_contests'));
     }
 
     /**
@@ -604,8 +604,7 @@ class ContestController extends BaseController
         }
 
         return $this->deleteEntity($request, $this->em, $this->dj, $this->eventLogService, $this->kernel,
-                                   $contestProblem, $contestProblem->getShortDescription(),
-                                   $this->generateUrl('jury_contest', ['contestId' => $contestId]));
+                                   $contestProblem, $this->generateUrl('jury_contest', ['contestId' => $contestId]));
     }
 
     /**

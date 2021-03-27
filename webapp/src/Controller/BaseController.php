@@ -150,13 +150,13 @@ abstract class BaseController extends AbstractController
         EventLogService $eventLogService,
         KernelInterface $kernel,
         $entity,
-        string $description,
         string $redirectUrl
     ) : Response {
         // Determine all the relationships between all tables using Doctrine cache
-        $dir       = realpath(sprintf('%s/src/Entity', $kernel->getProjectDir()));
-        $files     = glob($dir . '/*.php');
-        $relations = [];
+        $dir         = realpath(sprintf('%s/src/Entity', $kernel->getProjectDir()));
+        $files       = glob($dir . '/*.php');
+        $relations   = [];
+        $description = $entity->getShortDescription();
         foreach ($files as $file) {
             $parts      = explode('/', $file);
             $shortClass = str_replace('.php', '', $parts[count($parts) - 1]);
