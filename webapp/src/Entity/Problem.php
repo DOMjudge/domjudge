@@ -225,6 +225,11 @@ class Problem extends BaseApiEntity
         return $this->name;
     }
 
+    public function getShortDescription() : ?string
+    {
+        return $this->getName();
+    }
+
     public function setTimelimit(float $timelimit): Problem
     {
         $this->timelimit = $timelimit;

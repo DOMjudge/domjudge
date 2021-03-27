@@ -196,6 +196,11 @@ class User implements UserInterface, EquatableInterface, \Serializable
         return $this->name;
     }
 
+    public function getShortDescription(): string
+    {
+        return $this->getName();
+    }
+
     public function setEmail(?string $email): User
     {
         $this->email = $email;

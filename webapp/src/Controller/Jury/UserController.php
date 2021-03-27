@@ -259,7 +259,7 @@ class UserController extends BaseController
         }
 
         return $this->deleteEntity($request, $this->em, $this->dj, $this->eventLogService, $this->kernel,
-                                   $user, $user->getName(), $this->generateUrl('jury_users'));
+                                   $user, $user->getShortDescription(), $this->generateUrl('jury_users'));
     }
 
     /**

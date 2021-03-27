@@ -146,6 +146,11 @@ class ContestProblem
         return $this->shortname;
     }
 
+    public function getShortDescription(): ?string
+    {
+        return $this->getShortname();
+    }
+
     public function setPoints(int $points): ContestProblem
     {
         $this->points = $points;

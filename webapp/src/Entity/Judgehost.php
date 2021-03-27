@@ -101,6 +101,11 @@ class Judgehost
         return $this->hostname;
     }
 
+    public function getShortDescription(): string
+    {
+        return $this->getHostname();
+    }
+
     public function setActive(bool $active): Judgehost
     {
         $this->active = $active;
