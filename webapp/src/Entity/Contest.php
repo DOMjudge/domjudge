@@ -381,6 +381,11 @@ class Contest extends BaseApiEntity
         return $this->shortname;
     }
 
+    public function getShortDescription(): string
+    {
+        return $this->getShortname();
+    }
+
     /** @return string|float */
     public function getActivatetime()
     {

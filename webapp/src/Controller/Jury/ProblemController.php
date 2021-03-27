@@ -952,7 +952,7 @@ class ProblemController extends BaseController
         }
 
         return $this->deleteEntity($request, $this->em, $this->dj, $this->eventLogService, $this->kernel,
-                                   $problem, $problem->getName(), $this->generateUrl('jury_problems'));
+                                   $problem, $problem->getShortDescription(), $this->generateUrl('jury_problems'));
     }
 
     /**

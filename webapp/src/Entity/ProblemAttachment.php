@@ -73,6 +73,11 @@ class ProblemAttachment
         return $this;
     }
 
+    public function getShortDescription(): ?string
+    {
+        return $this->getName();
+    }
+
     public function getType(): ?string
     {
         return $this->type;

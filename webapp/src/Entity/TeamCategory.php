@@ -132,6 +132,11 @@ class TeamCategory extends BaseApiEntity
         return $this->name;
     }
 
+    public function getShortDescription(): ?string
+    {
+        return $this->getName();
+    }
+
     public function setSortorder(int $sortorder): TeamCategory
     {
         $this->sortorder = $sortorder;
