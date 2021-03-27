@@ -645,10 +645,12 @@ class ImportEventFeedCommand extends Command
                 // A timeout of 0.0 means we get chunks immediately and the user
                 // can cancel at any time.
                 try {
+                    $receivedData = false;
                     foreach ($this->client->stream($response, 0.0) as $chunk) {
                         // We first need to check for timeouts, as we can not call
                         // ->isLast() or ->getContent() on them
                         if (!$chunk->isTimeout()) {
+                            $receivedData = true;
                             if ($chunk->isLast()) {
                                 // Last chunk received, exit out of the inner while(true)
                                 break 2;
@@ -660,6 +662,10 @@ class ImportEventFeedCommand extends Command
                             fclose($cacheFile);
                             return true;
                         }
+                    }
+                    if (!$receivedData) {
+                        $hundred_ms = 100*1000*1000;
+                        time_nanosleep(0, $hundred_ms);
                     }
                 } catch (TransportException $e) {
                     $this->logger->error(
