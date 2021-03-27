@@ -15,7 +15,6 @@ use App\Entity\InternalError;
 use App\Entity\Judgehost;
 use App\Entity\JudgeTask;
 use App\Entity\Judging;
-use App\Entity\JudgingRun;
 use App\Entity\Language;
 use App\Entity\Problem;
 use App\Entity\ProblemAttachment;
@@ -81,6 +80,16 @@ class DOMJudgeService
      * @var ConfigurationService
      */
     protected $config;
+
+    /**
+     * @var Executable|null
+     */
+    protected $defaultCompareExecutable = null;
+
+    /**
+     * @var Executable|null
+     */
+    protected $defaultRunExecutable = null;
 
     const DATA_SOURCE_LOCAL = 0;
     const DATA_SOURCE_CONFIGURATION_EXTERNAL = 1;
@@ -1070,12 +1079,9 @@ class DOMJudgeService
 
     public function maybeCreateJudgeTasks(Judging $judging): void
     {
-        /** @var Submission $submission */
         $submission = $judging->getSubmission();
-        /** @var ContestProblem $problem */
-        $problem = $submission->getContestProblem();
-        /** @var Language $language */
-        $language = $submission->getLanguage();
+        $problem    = $submission->getContestProblem();
+        $language   = $submission->getLanguage();
 
         if (!$problem->getAllowJudge() || !$language->getAllowJudge()) {
             return;
@@ -1091,68 +1097,55 @@ class DOMJudgeService
             if (empty($outputLimit)) {
                 $outputLimit = $this->config->get('output_limit');
             }
+
+            // We use direct queries here since that is faster than running it through Doctrine and we need the speed for creating judgetasks
             /** @var Testcase $testcase */
-            $judgeTask = new JudgeTask();
-            $judgeTask
-                ->setType(JudgeTaskType::JUDGING_RUN)
-                ->setSubmitid($submission->getSubmitid())
-                ->setPriority(JudgeTask::PRIORITY_DEFAULT)
-                ->setJobId($judging->getJudgingid())
-                ->setTestcaseId($testcase->getTestcaseid())
-                ->setCompileScriptId(
-                    $submission
-                        ->getLanguage()
-                        ->getCompileExecutable()
-                        ->getImmutableExecutable()
-                        ->getImmutableExecId()
-                )
-                ->setCompareScriptId($this->getImmutableCompareExecutable($problem))
-                ->setRunScriptId($this->getImmutableRunExecutable($problem))
+            $this->em->getConnection()->insert('judgetask', [
+                'type'              => JudgeTaskType::JUDGING_RUN,
+                'submitid'          => $submission->getSubmitid(),
+                'priority'          => JudgeTask::PRIORITY_DEFAULT,
+                'jobid'             => $judging->getJudgingid(),
+                'testcase_id'       => $testcase->getTestcaseid(),
+                'compile_script_id' => $submission->getLanguage()->getCompileExecutable()->getImmutableExecutable()->getImmutableExecId(),
+                'compare_script_id' => $this->getImmutableCompareExecutable($problem),
+                'run_script_id'     => $this->getImmutableRunExecutable($problem),
                 // TODO: store this in the database as well instead of recomputing it here over and over again, doing
                 // this will also help to make the whole data immutable.
-                ->setCompileConfig(
-                    json_encode(
-                        [
-                            'script_timelimit' => $this->config->get('script_timelimit'),
-                            'script_memory_limit' => $this->config->get('script_memory_limit'),
-                            'script_filesize_limit' => $this->config->get('script_filesize_limit'),
-                            'language_extensions' => $submission->getLanguage()->getExtensions(),
-                            'filter_compiler_files' => $submission->getLanguage()->getFilterCompilerFiles(),
-                        ]
-                    )
-                )
-                ->setRunConfig(
-                    json_encode(
-                        [
-                            'time_limit' => $problem->getProblem()->getTimelimit(),
-                            'memory_limit' => $memoryLimit,
-                            'output_limit' => $outputLimit,
-                            'process_limit' => $this->config->get('process_limit'),
-                            'entry_point' => $submission->getEntryPoint(),
-                        ]
-                    )
-                )
-                ->setCompareConfig(
-                    json_encode(
-                        [
-                            'script_timelimit' => $this->config->get('script_timelimit'),
-                            'script_memory_limit' => $this->config->get('script_memory_limit'),
-                            'script_filesize_limit' => $this->config->get('script_filesize_limit'),
-                            'compare_args' => $problem->getProblem()->getSpecialCompareArgs(),
-                            'combined_run_compare' => $problem->getProblem()->getCombinedRunCompare(),
-                        ]
-                    )
-                );
-            $this->em->persist($judgeTask);
+                'compile_config'    => json_encode(
+                    [
+                        'script_timelimit'      => $this->config->get('script_timelimit'),
+                        'script_memory_limit'   => $this->config->get('script_memory_limit'),
+                        'script_filesize_limit' => $this->config->get('script_filesize_limit'),
+                        'language_extensions'   => $submission->getLanguage()->getExtensions(),
+                        'filter_compiler_files' => $submission->getLanguage()->getFilterCompilerFiles(),
+                    ]
+                ),
+                'run_config'        => json_encode(
+                    [
+                        'time_limit'    => $problem->getProblem()->getTimelimit(),
+                        'memory_limit'  => $memoryLimit,
+                        'output_limit'  => $outputLimit,
+                        'process_limit' => $this->config->get('process_limit'),
+                        'entry_point'   => $submission->getEntryPoint(),
+                    ]
+                ),
+                'compare_config'    => json_encode(
+                    [
+                        'script_timelimit'      => $this->config->get('script_timelimit'),
+                        'script_memory_limit'   => $this->config->get('script_memory_limit'),
+                        'script_filesize_limit' => $this->config->get('script_filesize_limit'),
+                        'compare_args'          => $problem->getProblem()->getSpecialCompareArgs(),
+                        'combined_run_compare'  => $problem->getProblem()->getCombinedRunCompare(),
+                    ]
+                ),
+            ]);
 
-            $judgingRun = new JudgingRun();
-            $judgingRun
-                ->setJudging($judging)
-                ->setTestcase($testcase)
-                ->setJudgeTask($judgeTask);
-            $this->em->persist($judgingRun);
+            $this->em->getConnection()->insert('judging_run', [
+                'judgingid'   => $judging->getJudgingid(),
+                'testcaseid'  => $testcase->getTestcaseid(),
+                'judgetaskid' => $this->em->getConnection()->lastInsertId(),
+            ]);
         }
-        $this->em->flush();
     }
 
     private function getImmutableCompareExecutable(ContestProblem $problem): int
@@ -1162,9 +1155,12 @@ class DOMJudgeService
             ->getProblem()
             ->getCompareExecutable();
         if ($executable === null) {
-            $executable = $this->em
-                ->getRepository(Executable::class)
-                ->findOneBy(['execid' => $this->config->get('default_compare')]);
+            if ($this->defaultCompareExecutable === null) {
+                $this->defaultCompareExecutable = $this->em
+                    ->getRepository(Executable::class)
+                    ->findOneBy(['execid' => $this->config->get('default_compare')]);
+            }
+            $executable = $this->defaultCompareExecutable;
         }
         return $executable
             ->getImmutableExecutable()
@@ -1178,9 +1174,12 @@ class DOMJudgeService
             ->getProblem()
             ->getRunExecutable();
         if ($executable === null) {
-            $executable = $this->em
-                ->getRepository(Executable::class)
-                ->findOneBy(['execid' => $this->config->get('default_run')]);
+            if ($this->defaultRunExecutable === null) {
+                $this->defaultRunExecutable = $this->em
+                    ->getRepository(Executable::class)
+                    ->findOneBy(['execid' => $this->config->get('default_run')]);
+            }
+            $executable = $this->defaultRunExecutable;
         }
         return $executable
             ->getImmutableExecutable()
