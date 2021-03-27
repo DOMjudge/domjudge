@@ -137,6 +137,10 @@ class SubmissionService
             $queryBuilder->setMaxResults($limit);
         }
 
+        if ($restrictions['with_external_id'] ?? false) {
+            $queryBuilder->andWhere('s.externalid IS NOT NULL');
+        }
+
         if (isset($restrictions['rejudgingid'])) {
             $queryBuilder
                 ->leftJoin('s.judgings', 'j', Join::WITH, 'j.rejudging = :rejudgingid')

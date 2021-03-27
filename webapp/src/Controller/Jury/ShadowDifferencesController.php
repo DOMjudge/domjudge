@@ -182,7 +182,7 @@ class ShadowDifferencesController extends BaseController
             }
         }
 
-        $restrictions = [];
+        $restrictions = ['with_external_id' => true];
         if ($viewTypes[$view] == 'unjudged local') {
             $restrictions['judged'] = 0;
         }
