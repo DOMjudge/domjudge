@@ -156,7 +156,7 @@ abstract class BaseController extends AbstractController
         DOMJudgeService $DOMJudgeService,
         EventLogService $eventLogService,
         KernelInterface $kernel,
-        $entity,
+        $entities,
         string $redirectUrl
     ) : Response {
         // Determine all the relationships between all tables using Doctrine cache
@@ -189,17 +189,20 @@ abstract class BaseController extends AbstractController
 
                 $relations[$class] = $tableRelations;
             }
-        }
+   }
+   foreach ($entities as $entity) {
+       assert(get_class($entity) === get_class($entities[0]));
+   }
 
         $isError          = false;
         $messages         = [];
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
-        $inflector        = InflectorFactory::create()->build();
-        $readableType     = str_replace('_', ' ', Utils::tableForEntity($entity));
-        $metadata         = $entityManager->getClassMetadata(get_class($entity));
+   $inflector        = InflectorFactory::create()->build();
         $primaryKeyData   = [];
+        $metadata         = $entityManager->getClassMetadata(get_class($entities[0]));
+        $readableType     = str_replace('_', ' ', Utils::tableForEntity($entities[0]));
         foreach ($metadata->getIdentifierColumnNames() as $primaryKeyColumn) {
-            $primaryKeyColumnValue = $propertyAccessor->getValue($entity, $primaryKeyColumn);
+            $primaryKeyColumnValue = $propertyAccessor->getValue($entities[0], $primaryKeyColumn);
             $primaryKeyData[]      = $primaryKeyColumnValue;
 
             // Check all relationships
@@ -266,10 +269,52 @@ abstract class BaseController extends AbstractController
                 throw new BadRequestHttpException(reset($messages));
             }
 
-            $entityId = null;
-            if ($entity instanceof Team) {
-                $entityId = $entity->getTeamid();
-            }
+       foreach ($entities as $entity) {
+                $entityId = null;
+                if ($entity instanceof Team) {
+                    $entityId = $entity->getTeamid();
+                }
+
+                // Get the contests to trigger the event for. We do this before
+                // deleting the entity, since linked data might have vanished
+                $contestsForEntity = $this->contestsForEntity($entity, $DOMJudgeService);
+
+                $entityManager->transactional(function () use ($entityManager, $entity) {
+                    if ($entity instanceof Problem) {
+                        // Deleting problem is a special case: its dependent tables do not
+                        // form a tree, and a delete to judging_run can only cascade from
+                        // judging, not from testcase. Since MySQL does not define the
+                        // order of cascading deletes, we need to manually first cascade
+                        // via submission -> judging -> judging_run.
+                        $entityManager->getConnection()->executeQuery(
+                            'DELETE FROM submission WHERE probid = :probid',
+                            [':probid' => $entity->getProbid()]
+                        );
+                        // Also delete internal errors that are "connected" to this problem.
+                        $disabledJson = '{"kind":"problem","probid":' . $entity->getProbid() . '}';
+                        $entityManager->getConnection()->executeQuery(
+                            'DELETE FROM internal_error WHERE disabled = :disabled',
+                            [':disabled' => $disabledJson]
+                        );
+                        $entityManager->clear();
+                        $entity = $entityManager->getRepository(Problem::class)->find($entity->getProbid());
+                    }
+                    $entityManager->remove($entity);
+                });
+
+                // Add an audit log entry
+                $auditLogType = Utils::tableForEntity($entity);
+                $DOMJudgeService->auditlog($auditLogType, implode(', ', $primaryKeyData), 'deleted');
+
+                // Trigger the delete event
+                if ($endpoint = $eventLogService->endpointForEntity($entity)) {
+                    foreach ($contestsForEntity as $contest) {
+                        // TODO: cascade deletes. Maybe use getDependentEntities()?
+                        $eventLogService->log($endpoint, $primaryKeyData[0],
+                            EventLogService::ACTION_DELETE,
+                            $contest->getCid(), null, null, false);
+                    }
+                }
 
             // Get the contests to trigger the event for. We do this before
             // deleting the entity, since linked data might have vanished
@@ -288,14 +333,12 @@ abstract class BaseController extends AbstractController
                     // order of cascading deletes, we need to manually first cascade
                     // via submission -> judging -> judging_run.
                     $entityManager->getConnection()->executeQuery(
-                        'DELETE FROM submission WHERE probid = :probid',
-                        [':probid' => $entity->getProbid()]
+                        'DELETE FROM scorecache WHERE teamid = :teamid',
+                        [':teamid' => $entityId]
                     );
-                    // Also delete internal errors that are "connected" to this problem.
-                    $disabledJson = '{"kind":"problem","probid":' . $entity->getProbid() . '}';
                     $entityManager->getConnection()->executeQuery(
-                        'DELETE FROM internal_error WHERE disabled = :disabled',
-                        [':disabled' => $disabledJson]
+                        'DELETE FROM rankcache WHERE teamid = :teamid',
+                        [':teamid' => $entityId]
                     );
                     $entityManager->clear();
                     $entity = $entityManager->getRepository(Problem::class)->find($entity->getProbid());
@@ -320,24 +363,11 @@ abstract class BaseController extends AbstractController
                         EventLogService::ACTION_DELETE,
                         $cid, null, null, false);
                 }
-            }
 
-            if ($entity instanceof Team) {
-                // No need to do this in a transaction, since the chance of a team
-                // with same ID being created at the same time is negligible.
-                $entityManager->getConnection()->executeQuery(
-                    'DELETE FROM scorecache WHERE teamid = :teamid',
-                    [':teamid' => $entityId]
-                );
-                $entityManager->getConnection()->executeQuery(
-                    'DELETE FROM rankcache WHERE teamid = :teamid',
-                    [':teamid' => $entityId]
-                );
-            }
-
-            $msg = sprintf('Successfully deleted %s %s "%s"',
-                           $readableType, implode(', ', $primaryKeyData), $description);
-            $this->addFlash('success', $msg);
+                $msg = sprintf('Successfully deleted %s %s "%s"',
+                               $readableType, implode(', ', $primaryKeyData), $description);
+       $this->addFlash('success', $msg);
+       }
             if ($request->isXmlHttpRequest()) {
                 return new JsonResponse(['url' => $redirectUrl]);
             }
