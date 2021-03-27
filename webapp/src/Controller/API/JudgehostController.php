@@ -35,9 +35,9 @@ use Doctrine\ORM\Query\Expr\Join;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
+use OpenApi\Annotations as OA;
 use Psr\Log\LoggerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use OpenApi\Annotations as OA;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -771,14 +771,7 @@ class JudgehostController extends AbstractFOSRestController
         /** @var Contest|null $contest */
         $contest = null;
         if ($cid) {
-            $contestIdField = $this->eventLogService->externalIdFieldForEntity(Contest::class) ?? 'cid';
-            $contest        = $this->em->createQueryBuilder()
-                ->from(Contest::class, 'c')
-                ->select('c')
-                ->andWhere(sprintf('c.%s = :cid', $contestIdField))
-                ->setParameter(':cid', $cid)
-                ->getQuery()
-                ->getSingleResult();
+            $contest = $this->em->getRepository(Contest::class)->find($cid);
         }
 
         $error = new InternalError();
