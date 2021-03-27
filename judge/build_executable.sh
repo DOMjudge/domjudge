@@ -82,11 +82,11 @@ $GAINROOT "$RUNGUARD" ${DEBUG:+-v} -u "$RUNUSER" -g "$RUNGROUP" \
 	exitcode=$?
 
 if [ $exitcode -ne 0 ]; then
-	echo "building failed with exitcode $exitcode" > 'build.log'
+	echo "building failed with exitcode $exitcode" >> 'build.log'
 	cleanexit 1
 fi
 if [ ! -f './build/run' ] || [ ! -x './build/run' ]; then
-	echo "building failed: no executable 'run' was created" > 'build.log'
+	echo "building failed: no executable 'run' was created" >> 'build.log'
 	cleanexit 1
 fi
 
