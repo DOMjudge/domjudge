@@ -242,6 +242,7 @@ maintainer-install: build domserver-create-dirs judgehost-create-dirs webapp/.en
 	@echo "Or you can run these commands manually as root"
 	@echo "    - Give the webserver access to things it needs"
 	@echo "        setfacl    -m   u:$(WEBSERVER_GROUP):r    $(CURDIR)/etc/dbpasswords.secret"
+	@echo "        setfacl    -m   u:$(WEBSERVER_GROUP):r    $(CURDIR)/etc/symfony_app.secret"
 	@echo "        setfacl -R -m d:u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/var"
 	@echo "        setfacl -R -m   u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/var"
 	@echo "        setfacl -R -m d:m::rwx          $(CURDIR)/webapp/var"
@@ -265,6 +266,7 @@ maintainer-install: build domserver-create-dirs judgehost-create-dirs webapp/.en
 
 maintainer-postinstall-permissions:
 	setfacl    -m   u:$(WEBSERVER_GROUP):r    $(CURDIR)/etc/dbpasswords.secret
+	setfacl    -m   u:$(WEBSERVER_GROUP):r    $(CURDIR)/etc/symfony_app.secret
 	setfacl -R -m d:u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/var
 	setfacl -R -m   u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/var
 	setfacl -R -m d:u:$(DOMJUDGE_USER):rwx    $(CURDIR)/webapp/var
