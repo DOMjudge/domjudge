@@ -213,9 +213,7 @@ class JuryMiscController extends BaseController
                 ob_flush();
                 flush();
             };
-            $response         = new StreamedResponse();
-            $response->headers->set('X-Accel-Buffering', 'no');
-            $response->setCallback(function () use ($contests, $progressReporter, $scoreboardService) {
+            return $this->streamResponse(function () use ($contests, $progressReporter, $scoreboardService) {
                 $timeStart = microtime(true);
 
                 foreach ($contests as $contest) {
@@ -227,7 +225,6 @@ class JuryMiscController extends BaseController
                 $progressReporter(sprintf('<p>Scoreboard cache refresh completed in %.2lf seconds.</p>',
                                           $timeEnd - $timeStart));
             });
-            return $response;
         }
 
         return $this->render('jury/refresh_cache.html.twig', [
@@ -350,7 +347,7 @@ class JuryMiscController extends BaseController
      */
     public function changeContestAction(Request $request, RouterInterface $router, int $contestId): Response
     {
-        if ($this->isLocalReferrer($router, $request)) {
+        if ($this->isLocalReferer($router, $request)) {
             $response = new RedirectResponse($request->headers->get('referer'));
         } else {
             $response = $this->redirectToRoute('jury_index');

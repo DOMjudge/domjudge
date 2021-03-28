@@ -24,6 +24,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
@@ -42,18 +43,28 @@ abstract class BaseController extends AbstractController
     /**
      * Check whether the referrer in the request is of the current application
      */
-    protected function isLocalReferrer(RouterInterface $router, Request $request): bool
+    protected function isLocalReferer(RouterInterface $router, Request $request): bool
     {
-        if ($referrer = $request->headers->get('referer')) {
+        if ($referer = $request->headers->get('referer')) {
             $prefix = sprintf('%s%s', $request->getSchemeAndHttpHost(), $request->getBasePath());
-            if (strpos($referrer, $prefix) === 0) {
-                $path = substr($referrer, strlen($prefix));
-                try {
-                    $router->match($path);
-                    return true;
-                } catch (ResourceNotFoundException $e) {
-                    return false;
-                }
+            return $this->isLocalRefererUrl($router, $referer, $prefix);
+        }
+
+        return false;
+    }
+
+    /**
+     * Check whether the given referer is local
+     */
+    protected function isLocalRefererUrl(RouterInterface $router, string $referer, string $prefix): bool
+    {
+        if (strpos($referer, $prefix) === 0) {
+            $path = substr($referer, strlen($prefix));
+            try {
+                $router->match($path);
+                return true;
+            } catch (ResourceNotFoundException $e) {
+                return false;
             }
         }
 
@@ -65,7 +76,7 @@ abstract class BaseController extends AbstractController
      */
     protected function redirectToLocalReferrer(RouterInterface $router, Request $request, string $defaultUrl): RedirectResponse
     {
-        if ($this->isLocalReferrer($router, $request)) {
+        if ($this->isLocalReferer($router, $request)) {
             return $this->redirect($request->headers->get('referer'));
         }
 
@@ -417,5 +428,18 @@ abstract class BaseController extends AbstractController
         }
 
         return $contests;
+    }
+
+    /**
+     * Stream a response with the given callback.
+     *
+     * The callback can use ob_flush(); flush(); to flush its output to the browser.
+     */
+    protected function streamResponse(callable $callback): StreamedResponse
+    {
+        $response         = new StreamedResponse();
+        $response->headers->set('X-Accel-Buffering', 'no');
+        $response->setCallback($callback);
+        return $response;
     }
 }

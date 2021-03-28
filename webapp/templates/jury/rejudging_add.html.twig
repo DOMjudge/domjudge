@@ -1,41 +1,40 @@
 {% extends "jury/base.html.twig" %}
 {% import "jury/jury_macros.twig" as macros %}
 
-{% block title %}{{ action | capitalize }} rejudging r{{ rejudging.rejudgingid }} - {{ parent() }}{% endblock %}
-
 {% block extrahead %}
     {{ parent() }}
-    {{ macros.table_extrahead() }}
     {{ macros.select2_extrahead() }}
 {% endblock %}
 
+{% block title %}Creating rejudging - {{ parent() }}{% endblock %}
+
 {% block content %}
 
-    <h1>{{ action | capitalize }} rejudging r{{ rejudging.rejudgingid }}</h1>
+    <h1>Creating rejudging...</h1>
 
-    <div class="alert alert-info">
-        {% if action == "apply" %}
-        <p>Applying rejudge may take some time, please be patient.</p>
-        {% endif %}
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="alert alert-info">
+                Creating rejudging. This might take a while...
 
-        <div class="progress mt-2 mb-2">
-            <div id="finish-progress"
-                 class="progress-bar progress-bar-animated progress-bar-striped" style="width: 0%;">
-                0%
+                <div class="progress mt-2 mb-2">
+                    <div id="rejudge-progress"
+                         class="progress-bar progress-bar-animated progress-bar-striped" style="width: 0%;">
+                        0%
+                    </div>
+                </div>
+                <div id="rejudge-log"></div>
             </div>
         </div>
-        <div id="finish-log"></div>
-        <div class="mt-4" id="finish-message"></div>
     </div>
 
 {% endblock %}
 
 {% block extrafooter %}
     <script>
-        $(function() {
-            var $progress = $('#finish-progress');
-            var $log = $('#finish-log');
-            var $message = $('#finish-message');
+        $(function () {
+            var $progress = $('#rejudge-progress');
+            var $log = $('#rejudge-log');
 
             var consume = function(responseReader) {
                 return responseReader.read().then(function(result) {
@@ -49,8 +48,8 @@
                         .attr('style', 'width: ' + data.progress + '%;')
                         .text(data.progress + '%');
 
-                    if (data.message) {
-                        $message.html(data.message);
+                    if (data.redirect) {
+                        window.location = data.redirect;
                         return;
                     }
 
@@ -59,11 +58,13 @@
                     return consume(responseReader);
                 });
             };
-            fetch('{{ path('jury_rejudging_finish', {rejudgingId: rejudging.rejudgingid, action: action}) }}', {
-                method: 'GET',
+            fetch('{{ url }}', {
+                method: 'POST',
                 headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
                     'X-Requested-With': 'XMLHttpRequest'
-                }
+                },
+                body: '{{ data | raw }}'
             }).then(function(response) {
                 return consume(response.body.getReader());
             });

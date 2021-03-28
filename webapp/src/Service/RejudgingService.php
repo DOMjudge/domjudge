@@ -11,6 +11,7 @@ use App\Entity\Submission;
 use App\Entity\Team;
 use App\Entity\User;
 use App\Utils\Utils;
+use BadMethodCallException;
 use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
@@ -71,12 +72,15 @@ class RejudgingService
     /**
      * Create a new rejudging.
      *
-     * @param string          $reason    Reason for this rejudging
-     * @param array           $judgings  List of judgings to rejudging
-     * @param bool            $autoApply Whether the judgings should be automatically applied.
+     * @param string          $reason           Reason for this rejudging
+     * @param array           $judgings         List of judgings to rejudging
+     * @param bool            $autoApply        Whether the judgings should be automatically applied.
      * @param int             $repeat
      * @param Rejudging|null  $repeatedRejudging
-     * @param array          &$skipped   Returns list of judgings not included.
+     * @param array          &$skipped          Returns list of judgings not included.
+     * @param callable|null   $progressReporter If set, report progress using this callback. Will get two values:
+     *                                          - the progress as an integer
+     *                                          - the log to display
      *
      * @return Rejudging|null
      */
@@ -86,8 +90,12 @@ class RejudgingService
         bool $autoApply,
         int $repeat,
         ?Rejudging $repeatedRejudging,
-        array &$skipped
+        array &$skipped,
+        ?callable $progressReporter = null
     ) {
+        // This might take a while. Make sure we do not timeout
+        set_time_limit(0);
+
         /** @var Rejudging $rejudging */
         $rejudging = new Rejudging();
         $rejudging
@@ -107,8 +115,12 @@ class RejudgingService
             $this->em->flush();
         }
 
+
+        $log           = '';
         $singleJudging = count($judgings) == 1;
+        $index         = 0;
         foreach ($judgings as $judging) {
+            $index++;
             /** @var Judging $judging */
             if ($judging->getSubmission()->getRejudging() !== null) {
                 // The submission is already part of another rejudging, record and skip it.
@@ -154,6 +166,15 @@ class RejudgingService
 
                 $this->dj->maybeCreateJudgeTasks($newJudging);
             });
+
+            if ($index > 1) {
+                $log .= ', ';
+            }
+            $log .= sprintf('s%d', $judging->getSubmissionId());
+            if ($progressReporter !== null) {
+                $progress = (int)round($index / count($judgings) * 100);
+                $progressReporter($progress, $log);
+            }
        }
 
         if (count($skipped) == count($judgings)) {
@@ -183,12 +204,12 @@ class RejudgingService
         ini_set('max_execution_time', '300');
 
         if ($rejudging->getEndtime()) {
-            $error = sprintf('Rejudging already %s.', $rejudging->getValid() ? 'applied' : 'canceled');
+            $error = sprintf('<div class="alert alert-danger">Rejudging already %s.</div>', $rejudging->getValid() ? 'applied' : 'canceled');
             if ($progressReporter) {
-                $progressReporter($error, true);
+                $progressReporter(0, '', $error);
                 return false;
             } else {
-                throw new \BadMethodCallException($error);
+                throw new BadMethodCallException($error);
             }
         }
 
@@ -196,12 +217,12 @@ class RejudgingService
 
         $todo = $this->calculateTodo($rejudging)['todo'];
         if ($action == self::ACTION_APPLY && $todo > 0) {
-            $error = sprintf('%d unfinished judgings left, cannot apply rejudging.', $todo);
+            $error = sprintf('<div class="alert alert-danger">%d unfinished judgings left, cannot apply rejudging.</div>', $todo);
             if ($progressReporter) {
-                $progressReporter($error, true);
+                $progressReporter(0, '', $error);
                 return false;
             } else {
-                throw new \BadMethodCallException($error);
+                throw new BadMethodCallException($error);
             }
         }
 
@@ -239,12 +260,10 @@ class RejudgingService
         // This loop uses direct queries instead of Doctrine classes to speed
         // it up drastically.
         $firstItem = true;
+        $index     = 0;
+        $log       = '';
         foreach ($submissions as $submission) {
-            if ($progressReporter) {
-                $progstring = $firstItem ? '' : ', ';
-                $progressReporter($progstring . 's' . $submission['submitid']);
-                $firstItem = false;
-            }
+            $index++;
 
             if ($action === self::ACTION_APPLY) {
                 $this->em->transactional(function () use ($submission, $rejudgingId) {
@@ -322,7 +341,15 @@ class RejudgingService
                             AND result IS NULL', [':aborted' => 'aborted', ':judgingid' => $submission['judgingid']]);
             } else {
                 $error = "Unknown action '$action' specified.";
-                throw new \BadMethodCallException($error);
+                throw new BadMethodCallException($error);
+            }
+
+            if ($progressReporter) {
+                $log       .= $firstItem ? '' : ', ';
+                $log       .= 's' . $submission['submitid'];
+                $firstItem = false;
+                $progress  = (int)round($index / count($submissions) * 100);
+                $progressReporter($progress, $log);
             }
         }
 

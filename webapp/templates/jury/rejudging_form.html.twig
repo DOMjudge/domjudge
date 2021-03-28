@@ -32,6 +32,7 @@
                 data[$contests.attr('name')] = $contests.val();
                 data[$problems.attr('name')] = $problems.val();
                 data[$teams.attr('name')] = $teams.val();
+                data['refresh_form'] = true;
                 $.ajax({
                     url: $form.attr('action'),
                     type: $form.attr('method'),
