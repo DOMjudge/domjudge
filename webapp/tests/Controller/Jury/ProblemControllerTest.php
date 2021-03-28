@@ -12,5 +12,6 @@ class ProblemControllerTest extends JuryControllerTest
     protected static $deleteEntities = ['name' => ['Hello World']];
     protected static $getIDFunc      = 'getProbid';
     protected static $className      = Problem::class;
-    protected static $DOM_elements   = ['h1' => ['Problems']];
+    protected static $DOM_elements   = ['h1' => ['Problems'],
+                                        'a.btn[title="Import problem"]' => ['admin' => [" Import problem"],'jury'=>[]]];
 }

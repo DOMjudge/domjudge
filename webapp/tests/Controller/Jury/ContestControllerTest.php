@@ -14,5 +14,6 @@ class ContestControllerTest extends JuryControllerTest
     protected static $className      = Contest::class;
     protected static $DOM_elements   = ['h1' => ['Contests'],
                                         'h3' => ['admin' => ['Current contests', 'All available contests'],
-                                                 'jury' => []]];
+                                                 'jury' => []],
+                                        'a.btn[title="Import contest"]' => ['admin' => [" Import contest"],'jury'=>[]]];
 }
