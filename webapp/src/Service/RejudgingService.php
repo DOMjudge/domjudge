@@ -121,10 +121,6 @@ class RejudgingService
                 $judging,
                 $rejudging
             ) {
-                $this->em->getConnection()->executeUpdate(
-                    'UPDATE submission SET judgehost = null WHERE submitid = :submitid AND rejudgingid IS NULL',
-                    [ ':submitid' => $judging->getSubmissionId() ]
-                );
                 if ($rejudging) {
                     $this->em->getConnection()->executeUpdate(
                         'UPDATE submission SET rejudgingid = :rejudgingid WHERE submitid = :submitid AND rejudgingid IS NULL',
