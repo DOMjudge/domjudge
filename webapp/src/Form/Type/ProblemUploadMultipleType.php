@@ -29,6 +29,6 @@ class ProblemUploadMultipleType extends AbstractType
                 'accept' => 'application/zip',
             ],
         ]);
-        $builder->add('upload', SubmitType::class, ['label' => 'Import']);
+        $builder->add('upload', SubmitType::class, ['label' => 'Import', 'icon' => 'fa-upload']);
     }
 }

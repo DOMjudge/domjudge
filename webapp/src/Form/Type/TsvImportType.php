@@ -21,6 +21,6 @@ class TsvImportType extends AbstractType
         $builder->add('file', BootstrapFileType::class, [
             'required' => true,
         ]);
-        $builder->add('import', SubmitType::class);
+        $builder->add('import', SubmitType::class, ['icon' => 'fa-upload']);
     }
 }

@@ -19,7 +19,7 @@ class ICPCCmsType extends AbstractType
             'help_html' => true,
         ]);
         $builder->add('access_token', TextType::class);
-        $builder->add('fetch_teams', SubmitType::class, ['label' => 'Import']);
+        $builder->add('fetch_teams', SubmitType::class, ['label' => 'Import', 'icon' => 'fa-upload']);
         // $builder->add('upload_standings', SubmitType::class);
     }
 }

@@ -62,4 +62,15 @@ class ImportExportControllerTest extends BaseTest
         yield ['0'];
         yield ['1'];
     }
+
+    /**
+     * Test that submit buttons show an icon
+     */
+    public function testIndexButtonsHaveIcons() : void
+    {
+        $this->verifyPageResponse('GET', '/jury/import-export', 200);
+
+        self::assertSelectorExists('button#problem_upload_multiple_upload i.fa.fa-upload');
+        self::assertSelectorExists('button#contest_export_export i.fa.fa-download');
+    }
 }
