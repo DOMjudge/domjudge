@@ -386,8 +386,7 @@ class ScoreboardIntegrationTest extends KernelTestCase
         $lang = $this->em->getRepository(Language::class)->find('c');
 
         $team = $this->teams[0];
-        $this->createSubmission($lang, $this->problems[0], $team, 53*60+15.053, 'wrong-answer')
-            ->setJudgehost(null)
+        $this->createSubmission($lang, $this->problems[0], $team, 53 * 60 + 15.053, 'wrong-answer')
             ->setRejudging($this->rejudging);
 
         $this->createSubmission($lang, $this->problems[0], $team, 55*60+59.841, 'correct');
@@ -519,9 +518,7 @@ class ScoreboardIntegrationTest extends KernelTestCase
             }
             $this->em->persist($judging);
 
-            $submission
-                ->addJudging($judging)
-                ->setJudgehost($this->judgehost);
+            $submission->addJudging($judging);
         }
 
         $this->em->flush();

@@ -310,7 +310,7 @@
             <div>
                 Result:
                 {% if selectedJudging is null or selectedJudging.result is empty %}
-                    {%- if submission.judgehost %}
+                    {%- if selectedJudging and selectedJudging.started %}
                         {{- '' | printValidJuryResult -}}
                     {%- else %}
                         {{- 'queued' | printValidJuryResult -}}
