@@ -18,11 +18,9 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4","comment"="All incoming submissions"},
  *     indexes={
  *         @ORM\Index(name="teamid", columns={"cid","teamid"}),
- *         @ORM\Index(name="judgehost", columns={"cid","judgehost"}),
  *         @ORM\Index(name="teamid_2", columns={"teamid"}),
  *         @ORM\Index(name="probid", columns={"probid"}),
  *         @ORM\Index(name="langid", columns={"langid"}),
- *         @ORM\Index(name="judgehost_2", columns={"judgehost"}),
  *         @ORM\Index(name="origsubmitid", columns={"origsubmitid"}),
  *         @ORM\Index(name="rejudgingid", columns={"rejudgingid"}),
  *         @ORM\Index(name="probid_2", columns={"cid","probid"})
@@ -93,15 +91,6 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
      * @Serializer\Expose(if="context.getAttribute('domjudge_service').checkrole('jury')")
      */
     private $entry_point;
-
-    /**
-     * @var Judgehost|null
-     *
-     * @ORM\ManyToOne(targetEntity="Judgehost")
-     * @ORM\JoinColumn(name="judgehost", referencedColumnName="hostname", onDelete="SET NULL")
-     * @Serializer\Exclude()
-     */
-    private $judgehost;
 
     /**
      * @ORM\ManyToOne(targetEntity="Contest", inversedBy="submissions")
@@ -262,17 +251,6 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
     public function getRelativeSubmitTime(): string
     {
         return Utils::relTime($this->getContest()->getContestTime((float)$this->getSubmittime()));
-    }
-
-    public function setJudgehost(?Judgehost $judgehost): Submission
-    {
-        $this->judgehost = $judgehost;
-        return $this;
-    }
-
-    public function getJudgehost(): ?Judgehost
-    {
-        return $this->judgehost;
     }
 
     public function setValid(bool $valid): Submission
