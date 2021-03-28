@@ -148,7 +148,8 @@
                     </tr>
                 {% endfor %}
             </table>
-
+        {% endif %}
+        {% if stats.judgings %}
             <h4>Judging verdicts</h4>
             <table class="table table-sm table-striped">
                 <tr><th>jID</th><th>rID</th><th>Judgehost</th><th>runtime</th><th>verdict</th></tr>
