@@ -169,10 +169,10 @@ class ImportExportController extends BaseController
             return $this->redirectToRoute('jury_import_export');
         }
 
-        $problemFormData = [
+        $currentContestFormData = [
             'contest' => $this->dj->getCurrentContest(),
         ];
-        $problemForm = $this->createForm(ProblemUploadMultipleType::class, $problemFormData);
+        $problemForm = $this->createForm(ProblemUploadMultipleType::class, $currentContestFormData);
 
         $problemForm->handleRequest($request);
 
@@ -239,7 +239,7 @@ class ImportExportController extends BaseController
             }
         }
 
-        $contestExportForm = $this->createForm(ContestExportType::class);
+        $contestExportForm = $this->createForm(ContestExportType::class, $currentContestFormData);
 
         $contestExportForm->handleRequest($request);
 

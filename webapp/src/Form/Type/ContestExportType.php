@@ -14,7 +14,9 @@ class ContestExportType extends AbstractType
     {
         $builder->add('contest', EntityType::class, [
             'class' => Contest::class,
-            'choice_label' => 'name',
+            'choice_label' => function (Contest $contest) {
+                return sprintf('c%d: %s - %s', $contest->getCid(), $contest->getShortname(), $contest->getName());
+            },
         ]);
         $builder->add('export', SubmitType::class, ['icon' => 'fa-download']);
     }
