@@ -102,18 +102,18 @@ class RejudgingController extends BaseController
             ->getQuery()->getResult();
 
         $table_fields = [
-            'rejudgingid' => [
-                'title' => 'ID',
-                'sort' => true,
-                'default_sort' => true,
-                'default_sort_order' => 'desc'
-            ],
+            'rejudgingid' => ['title' => 'ID', 'sort' => true],
             'reason' => ['title' => 'reason', 'sort' => true],
             'startuser' => ['title' => 'startuser', 'sort' => true],
             'finishuser' => ['title' => 'finishuser', 'sort' => true],
             'starttime' => ['title' => 'starttime', 'sort' => true],
             'endtime' => ['title' => 'finishtime', 'sort' => true],
-            'status' => ['title' => 'status', 'sort' => true],
+            'status' => [
+                'title' => 'status',
+                'sort' => true,
+                'default_sort' => true,
+                'default_sort_order' => 'asc'
+            ],
         ];
 
         $timeFormat       = (string)$this->config->get('time_format');
@@ -143,16 +143,20 @@ class RejudgingController extends BaseController
 
             if ($rejudging->getEndtime() !== null) {
                 $status = $rejudging->getValid() ? 'applied' : 'canceled';
+                $sort_order = 2;
             } elseif ($todo > 0) {
                 $perc   = (int)(100 * ((double)$done / (double)($done + $todo)));
                 $status = sprintf("%d%% done", $perc);
+                $sort_order = 0;
             } else {
                 $status = 'ready';
+                $sort_order = 1;
             }
 
-            $rejudgingdata['starttime']['value'] = Utils::printtime($rejudging->getStarttime(), $timeFormat);
-            $rejudgingdata['endtime']['value']   = Utils::printtime($rejudging->getEndtime(), $timeFormat);
-            $rejudgingdata['status']['value']    = $status;
+            $rejudgingdata['starttime']['value']  = Utils::printtime($rejudging->getStarttime(), $timeFormat);
+            $rejudgingdata['endtime']['value']    = Utils::printtime($rejudging->getEndtime(), $timeFormat);
+            $rejudgingdata['status']['value']     = $status;
+            $rejudgingdata['status']['sortvalue'] = $sort_order;
 
             if ($rejudging->getEndtime() !== null) {
                 $class = 'disabled';
@@ -166,6 +170,7 @@ class RejudgingController extends BaseController
                 'actions' => [],
                 'link' => $this->generateUrl('jury_rejudging', ['rejudgingId' => $rejudging->getRejudgingid()]),
                 'cssclass' => $class,
+                'sort' => $sort_order,
             ];
         }
 
