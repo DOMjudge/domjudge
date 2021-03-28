@@ -14,7 +14,7 @@ use JMS\Serializer\Annotation as Serializer;
  *     indexes={@ORM\Index(name="immutable_execid", columns={"immutable_execid"})},
  *     uniqueConstraints={
  *         @ORM\UniqueConstraint(name="rankindex", columns={"immutable_execid", "ranknumber"}),
- *         @ORM\UniqueConstraint(name="filename", columns={"immutable_execid", "filename"}, options={"lengths": {NULL, "190"}})
+ *         @ORM\UniqueConstraint(name="filename", columns={"immutable_execid", "filename"}, options={"lengths": {NULL, 190}})
  *     })
  */
 class ExecutableFile
