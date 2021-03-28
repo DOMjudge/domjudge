@@ -591,7 +591,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
                 }
             }
         } elseif (!$firstJudging || !$firstJudging->getResult()) {
-            if ($firstJudging->isStarted()) {
+            if ($firstJudging && $firstJudging->isStarted()) {
                 $output = $forDisplay ? $this->printValidJuryResult('') : 'judging';
             } else {
                 $output = $forDisplay ? $this->printValidJuryResult('queued') : 'queued';
