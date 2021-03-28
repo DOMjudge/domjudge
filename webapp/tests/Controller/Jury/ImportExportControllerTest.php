@@ -73,4 +73,146 @@ class ImportExportControllerTest extends BaseTest
         self::assertSelectorExists('button#problem_upload_multiple_upload i.fa.fa-upload');
         self::assertSelectorExists('button#contest_export_export i.fa.fa-download');
     }
+
+    /**
+     * Test export of contest.yaml
+     *
+     * @dataProvider provideContestYamlContents
+     */
+    public function testContestExport(string $cid, string $expectedYaml): void
+    {
+        $this->verifyPageResponse('GET', '/jury/import-export', 200);
+        ob_start();
+        $this->client->submitForm('contest_export_export', ['contest_export[contest]'=>$cid]);
+
+        $content = ob_get_contents();
+        ob_end_clean();
+
+        $this->assertEquals($expectedYaml, $content);
+    }
+
+    public function provideContestYamlContents(): Generator
+    {
+        $yaml =<<<HEREDOC
+name: 'Demo contest'
+short-name: demo
+start-time: '2020-01-01T11:00:00+00:00'
+duration: '26309:00:00.000'
+scoreboard-freeze-duration: '1:00:00'
+penalty-time: 20
+default-clars:
+    - 'No comment.'
+    - 'Read the problem statement carefully.'
+clar-categories:
+    - 'General issue'
+    - 'Technical issue'
+languages:
+    - { name: Ada }
+    - { name: AWK }
+    - { name: 'Bash shell' }
+    - { name: C }
+    - { name: C++ }
+    - { name: 'C#' }
+    - { name: Fortran }
+    - { name: Haskell }
+    - { name: Java }
+    - { name: JavaScript }
+    - { name: Kotlin }
+    - { name: Lua }
+    - { name: Pascal }
+    - { name: Perl }
+    - { name: Prolog }
+    - { name: 'Python 3' }
+    - { name: R }
+    - { name: Ruby }
+    - { name: Scala }
+    - { name: 'POSIX shell' }
+    - { name: Swift }
+problems:
+    - { label: boolfind, name: 'Boolean switch search', color: limegreen, rgb: '#32CD32' }
+    - { label: fltcmp, name: 'Float special compare test', color: yellow, rgb: '#FFFF00' }
+    - { label: hello, name: 'Hello World', color: magenta, rgb: '#FF00FF' }
+
+HEREDOC;
+        yield["2", $yaml];
+    }
+
+    /**
+     * Test export of groups.tsv and teams.tsv
+     *
+     * @dataProvider provideTsvContents
+     */
+    public function testGroupsTeamsTsvExport(string $linkname, string $expectedData): void
+    {
+        $this->verifyPageResponse('GET', '/jury/import-export', 200);
+        $link = $this->getCurrentCrawler()->filter(sprintf('a:contains("%s")', $linkname))->link();
+        ob_start();
+        $this->client->click($link);
+        $content = ob_get_contents();
+        ob_end_clean();
+
+        $this->assertEquals($expectedData, $content);
+    }
+
+    public function provideTsvContents(): Generator
+    {
+        yield['teams.tsv', 'teams	1
+2	exteam	3	Example teamname	Utrecht University	UU	NLD	utrecht
+'];
+        yield['results.tsv for sort order 0', 'results	1
+2	1	Gold Medal	0	0	0	Participants
+'];
+        yield['results.tsv for sort order 1', 'results	1
+'];
+        yield['groups.tsv', 'groups	1
+2	Self-Registered
+3	Participants
+4	Observers
+'];
+        yield['scoreboard.tsv', 'scoreboard	1
+Utrecht University	exteam	1	0	0	0	0	-1	0	-1	0	-1
+		1	0	0	0	0	-1	0	-1	0	-1
+'];
+    }
+
+    /**
+     * Test export of clarifications.html
+     */
+    public function testClarificationsHtmlExport(): void
+    {
+        $this->verifyPageResponse('GET', '/jury/import-export', 200);
+        $link = $this->getCurrentCrawler()->filter('a:contains("clarifications.html")')->link();
+        $this->client->click($link);
+        self::assertSelectorExists('h1:contains("Clarifications for Demo contest")');
+        self::assertSelectorExists('td:contains("Example teamname")');
+        self::assertSelectorExists('td:contains("hello: Hello World")');
+        self::assertSelectorExists('pre:contains("Can you tell me how to solve this problem?")');
+        self::assertSelectorExists('pre:contains("No, read the problem statement.")');
+    }
+
+    /**
+     * Test export of results.html
+     */
+    public function testRsultsHtmlExport(): void
+    {
+        $this->verifyPageResponse('GET', '/jury/import-export', 200);
+        $link = $this->getCurrentCrawler()->filter('a:contains("results.html for sort order 0")')->link();
+        $this->client->click($link);
+        self::assertSelectorExists('h1:contains("Results for Demo contest")');
+        self::assertSelectorExists('th:contains("Example teamname")');
+        self::assertSelectorExists('th:contains("hello: Hello World")');
+    }
+
+    /**
+     * Test export of ICPC results.html
+     */
+    public function testICPCRsultsHtmlExport(): void
+    {
+        $this->verifyPageResponse('GET', '/jury/import-export', 200);
+        $link = $this->getCurrentCrawler()->filter('a:contains("ICPC site results.html for sort order 0")')->link();
+        $this->client->click($link);
+        self::assertSelectorExists('table#medalTable .row1.gold td[class="name"]:contains("Example teamname")');
+        self::assertSelectorExists('table#uniTable th:contains("Honorable mention")');
+        self::assertSelectorExists('table#firstTable td[class="name"]:contains("Hello World")');
+    }
 }
