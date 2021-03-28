@@ -16,6 +16,6 @@ class ContestExportType extends AbstractType
             'class' => Contest::class,
             'choice_label' => 'name',
         ]);
-        $builder->add('export', SubmitType::class);
+        $builder->add('export', SubmitType::class, ['icon' => 'fa-download']);
     }
 }
