@@ -6,109 +6,85 @@
 
     <h1>Import and export</h1>
 
+    <h2 id="problems">Problems</h2>
     <div class="row">
         <div class="col-md-6">
-            <div class="jumbotron">
-                <h3>Import problems to contest</h3>
+                <h3>Import archive</h3>
                 {{ form(problem_form) }}
-            </div>
         </div>
     </div>
 
+    <h2 id="contests">Contests</h2>
     <div class="row">
         <div class="col-md-6">
-            <div class="jumbotron">
-                <h3>Import / export via file down/upload</h3>
-
-                <ul>
-                    <li><a href="{{ path('jury_import_export_yaml') }}">Contest data (<code>contest.yaml</code>)</a></li>
-                    <li>
-                        Tab separated, export:
-                        <ul>
-                            {% for type in ['groups', 'teams', 'scoreboard'] %}
-                                <li>
-                                    <a href="{{ path('jury_tsv_export', {'type': type}) }}"><code>{{ type }}.tsv</code></a>
-                                </li>
-                            {% endfor %}
-                            <li><code>results.tsv</code> for sort order
-                                <ul>
-                                    {% for sort_order in sort_orders %}
-                                        <li>
-                                            <a href="{{ path('jury_tsv_export', {'type': 'results'}) }}?sort_order={{ sort_order }}">{{ sort_order }}</a>
-                                        </li>
-                                    {% endfor %}
-                                </ul>
-                            </li>
-                        </ul>
-                    </li>
-                    <li>
-                        HTML, export:
-                        <ul>
-                            <li><code>results.html</code> for sort order
-                                <ul>
-                                    {% for sort_order in sort_orders %}
-                                        <li>
-                                            <a href="{{ path('jury_html_export', {'type': 'results'}) }}?sort_order={{ sort_order }}">{{ sort_order }}</a>
-                                        </li>
-                                    {% endfor %}
-                                </ul>
-                            </li>
-                            <li><code>results.html</code> for on ICPC site for sort order
-                                <ul>
-                                    {% for sort_order in sort_orders %}
-                                        <li>
-                                            <a href="{{ path('jury_html_export', {'type': 'results-icpc'}) }}?sort_order={{ sort_order }}">{{ sort_order }}</a>
-                                        </li>
-                                    {% endfor %}
-                                </ul>
-                            </li>
-                            <li>
-                                <a href="{{ path('jury_html_export', {'type': 'clarifications'}) }}" target="_blank"><code>clarifications.html</code></a>
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
-            </div>
+                <h3>Import JSON</h3>
+                {{ form(contest_import_form) }}
+        </div>
+        <div class="col-md-6">
+                <h3>Export JSON</h3>
+                {{ form(contest_export_form) }}
         </div>
     </div>
 
+
+    <h2 id="teams">Teams &amp; groups</h2>
     <div class="row">
         <div class="col-md-6">
-            <div class="jumbotron">
-                <h4>Tab-separated import</h4>
+            <h3>Import tab-separated</h3>
                 {{ form(tsv_form) }}
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-6">
-            <div class="jumbotron">
-                <h4>JSON import</h4>
+            <h3>Import JSON</h3>
                 {{ form(json_form) }}
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-6">
-            <div class="jumbotron">
-                <h3>Import teams from ICPC CMS</h3>
-                <div class="alert alert-info">
-                    Create a "Web Services Token" with appropriate rights in the "Export" section for your contest at <a
-                            href="https://icpc.global/login" target="_blank">https://icpc.global/login</a>.
-                    You can find the Contest ID (e.g. <code>Southwestern-Europe-2014</code>) in the URL.
-                </div>
-
+             <h3>Import teams from ICPC CMS</h3>
                 {{ form_start(icpccms_form) }}
                 {{ form_row(icpccms_form.contest_id) }}
                 {{ form_row(icpccms_form.access_token) }}
-                <div class="form-group">
-                    {{ form_widget(icpccms_form.fetch_teams) }}
-                    {{ form_widget(icpccms_form.upload_standings, {'disabled': true, attr: {'title': 'Non-functional because of API changes. See results.tsv above, upload this in the ICPC CMS web interface.'}}) }}
-                </div>
+                {{ form_widget(icpccms_form.fetch_teams) }}
                 {{ form_end(icpccms_form) }}
-            </div>
+        </div>
+        <div class="col-md-6">
+                <h3>Export tab-separated</h3>
+                    <ul>
+                        {% for type in ['groups', 'teams'] %}
+                            <li>
+                                <a href="{{ path('jury_tsv_export', {'type': type}) }}"><code>{{ type }}.tsv</code></a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+        </div>
+    </div>
+
+    <h2 id="results">Results</h2>
+    <div class="row">
+        <div class="col-md-6">
+        </div>
+        <div class="col-md-6">
+                <h3>Export &lt;html&gt;</h3>
+                    <ul>
+                        {% for sort_order in sort_orders %}
+                            <li>
+                                <a href="{{ path('jury_html_export', {'type': 'results'}) }}?sort_order={{ sort_order }}"><code>results.html</code> for sort order {{ sort_order }}</a>
+                            </li>
+                        {% endfor %}
+                        {% for sort_order in sort_orders %}
+                            <li>
+                                <a href="{{ path('jury_html_export', {'type': 'results-icpc'}) }}?sort_order={{ sort_order }}">ICPC site <code>results.html</code> sort order {{ sort_order }}</a>
+                            </li>
+                        {% endfor %}
+                        <li>
+                            <a href="{{ path('jury_html_export', {'type': 'clarifications'}) }}" target="_blank"><code>clarifications.html</code></a>
+                        </li>
+                    </ul>
+                    <h3>Export Tab-separated</h3>
+                        <ul>
+                                <li>
+                                    <a href="{{ path('jury_tsv_export', {'type': 'scoreboard'}) }}"><code>scoreboard.tsv</code></a>
+                                </li>
+                                    {% for sort_order in sort_orders %}
+                                        <li>
+                                            <a href="{{ path('jury_tsv_export', {'type': 'results'}) }}?sort_order={{ sort_order }}"><code>results.tsv</code> for sort order {{ sort_order }}</a>
+                                        </li>
+                                    {% endfor %}
+                        </ul>
         </div>
     </div>
 

@@ -12,6 +12,7 @@ class ContestImportType extends AbstractType
     {
         $builder->add('file', BootstrapFileType::class, [
             'required' => true,
+            'help' => 'Importing a contest may overwrite some settings (e.g. penalty time, clarification categories, clarification answers, etc.). This action can not be undone.',
         ]);
         $builder->add('import', SubmitType::class);
     }

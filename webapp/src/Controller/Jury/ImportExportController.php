@@ -239,6 +239,43 @@ class ImportExportController extends BaseController
             }
         }
 
+        $contestExportForm = $this->createForm(ContestExportType::class);
+
+        $contestExportForm->handleRequest($request);
+
+        if ($contestExportForm->isSubmitted() && $contestExportForm->isValid()) {
+            /** @var Contest $contest */
+            $contest  = $contestExportForm->get('contest')->getData();
+            $response = new StreamedResponse();
+            $response->setCallback(function () use ($contest) {
+                echo Yaml::dump($this->importExportService->getContestYamlData($contest));
+            });
+            $response->headers->set('Content-Type', 'application/x-yaml');
+            $response->headers->set('Content-Disposition', 'attachment; filename="contest.yaml"');
+            $response->headers->set('Content-Transfer-Encoding', 'binary');
+            $response->headers->set('Connection', 'Keep-Alive');
+            $response->headers->set('Accept-Ranges', 'bytes');
+
+            return $response;
+        }
+
+        $contestImportForm = $this->createForm(ContestImportType::class);
+
+        $contestImportForm->handleRequest($request);
+
+        if ($contestImportForm->isSubmitted() && $contestImportForm->isValid()) {
+            /** @var UploadedFile $file */
+            $file = $contestImportForm->get('file')->getData();
+            $data = Yaml::parseFile($file->getRealPath(), Yaml::PARSE_DATETIME);
+            if ($this->importExportService->importContestYaml($data, $message, $cid)) {
+                $this->addFlash('success',
+                                sprintf('The file %s is successfully imported.', $file->getClientOriginalName()));
+            } else {
+                $this->addFlash('danger', $message);
+            }
+            return $this->redirectToRoute('jury_import_export');
+        }
+
         /** @var TeamCategory[] $teamCategories */
         $teamCategories = $this->em->createQueryBuilder()
             ->from(TeamCategory::class, 'c', 'c.categoryid')
@@ -257,56 +294,9 @@ class ImportExportController extends BaseController
             'json_form' => $jsonForm->createView(),
             'icpccms_form' => $icpcCmsForm->createView(),
             'problem_form' => $problemForm->createView(),
+            'contest_export_form' => $contestExportForm->createView(),
+            'contest_import_form' => $contestImportForm->createView(),
             'sort_orders' => $sortOrders,
-        ]);
-    }
-
-    /**
-     * @Route("/contest-yaml", name="jury_import_export_yaml")
-     * @throws Exception
-     */
-    public function contestYamlAction(Request $request) : Response
-    {
-        $exportForm = $this->createForm(ContestExportType::class);
-
-        $exportForm->handleRequest($request);
-
-        if ($exportForm->isSubmitted() && $exportForm->isValid()) {
-            /** @var Contest $contest */
-            $contest  = $exportForm->get('contest')->getData();
-            $response = new StreamedResponse();
-            $response->setCallback(function () use ($contest) {
-                echo Yaml::dump($this->importExportService->getContestYamlData($contest));
-            });
-            $response->headers->set('Content-Type', 'application/x-yaml');
-            $response->headers->set('Content-Disposition', 'attachment; filename="contest.yaml"');
-            $response->headers->set('Content-Transfer-Encoding', 'binary');
-            $response->headers->set('Connection', 'Keep-Alive');
-            $response->headers->set('Accept-Ranges', 'bytes');
-
-            return $response;
-        }
-
-        $importForm = $this->createForm(ContestImportType::class);
-
-        $importForm->handleRequest($request);
-
-        if ($importForm->isSubmitted() && $importForm->isValid()) {
-            /** @var UploadedFile $file */
-            $file = $importForm->get('file')->getData();
-            $data = Yaml::parseFile($file->getRealPath(), Yaml::PARSE_DATETIME);
-            if ($this->importExportService->importContestYaml($data, $message, $cid)) {
-                $this->addFlash('success',
-                                sprintf('The file %s is successfully imported.', $file->getClientOriginalName()));
-            } else {
-                $this->addFlash('danger', $message);
-            }
-            return $this->redirectToRoute('jury_import_export_yaml');
-        }
-
-        return $this->render('jury/import_export_contest_yaml.html.twig', [
-            'export_form' => $exportForm->createView(),
-            'import_form' => $importForm->createView(),
         ]);
     }
 
