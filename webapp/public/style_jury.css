@@ -149,3 +149,16 @@ div.submission-summary > span {
 .table td.thick-border {
     border-top: 1px solid #bbbec1;
 }
+
+.importexport h2 {
+    margin-top: 1rem;
+}
+.importexport div.tile {
+    background-color: aliceblue;
+    padding: 1rem;
+    margin: .5rem;
+    height: 95%;
+}
+.importexport div.tile h3 {
+    font-size: 22px;
+}
