@@ -25,6 +25,7 @@ use App\Entity\Testcase;
 use App\Entity\User;
 use App\Utils\FreezeData;
 use App\Utils\Utils;
+use Doctrine\DBAL\FetchMode;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
@@ -1087,65 +1088,104 @@ class DOMJudgeService
             return;
         }
 
-        // We rely on the order of the judgetasks; the test cases are ordered in the foreign entity relation.
-        foreach ($problem->getProblem()->getTestcases() as $testcase) {
-            $memoryLimit = $problem->getProblem()->getMemlimit();
-            $outputLimit = $problem->getProblem()->getOutputlimit();
-            if (empty($memoryLimit)) {
-                $memoryLimit = $this->config->get('memory_limit');
-            }
-            if (empty($outputLimit)) {
-                $outputLimit = $this->config->get('output_limit');
-            }
-
-            // We use direct queries here since that is faster than running it through Doctrine and we need the speed for creating judgetasks
-            /** @var Testcase $testcase */
-            $this->em->getConnection()->insert('judgetask', [
-                'type'              => JudgeTaskType::JUDGING_RUN,
-                'submitid'          => $submission->getSubmitid(),
-                'priority'          => JudgeTask::PRIORITY_DEFAULT,
-                'jobid'             => $judging->getJudgingid(),
-                'testcase_id'       => $testcase->getTestcaseid(),
-                'compile_script_id' => $submission->getLanguage()->getCompileExecutable()->getImmutableExecutable()->getImmutableExecId(),
-                'compare_script_id' => $this->getImmutableCompareExecutable($problem),
-                'run_script_id'     => $this->getImmutableRunExecutable($problem),
-                // TODO: store this in the database as well instead of recomputing it here over and over again, doing
-                // this will also help to make the whole data immutable.
-                'compile_config'    => json_encode(
-                    [
-                        'script_timelimit'      => $this->config->get('script_timelimit'),
-                        'script_memory_limit'   => $this->config->get('script_memory_limit'),
-                        'script_filesize_limit' => $this->config->get('script_filesize_limit'),
-                        'language_extensions'   => $submission->getLanguage()->getExtensions(),
-                        'filter_compiler_files' => $submission->getLanguage()->getFilterCompilerFiles(),
-                    ]
-                ),
-                'run_config'        => json_encode(
-                    [
-                        'time_limit'    => $problem->getProblem()->getTimelimit(),
-                        'memory_limit'  => $memoryLimit,
-                        'output_limit'  => $outputLimit,
-                        'process_limit' => $this->config->get('process_limit'),
-                        'entry_point'   => $submission->getEntryPoint(),
-                    ]
-                ),
-                'compare_config'    => json_encode(
-                    [
-                        'script_timelimit'      => $this->config->get('script_timelimit'),
-                        'script_memory_limit'   => $this->config->get('script_memory_limit'),
-                        'script_filesize_limit' => $this->config->get('script_filesize_limit'),
-                        'compare_args'          => $problem->getProblem()->getSpecialCompareArgs(),
-                        'combined_run_compare'  => $problem->getProblem()->getCombinedRunCompare(),
-                    ]
-                ),
-            ]);
-
-            $this->em->getConnection()->insert('judging_run', [
-                'judgingid'   => $judging->getJudgingid(),
-                'testcaseid'  => $testcase->getTestcaseid(),
-                'judgetaskid' => $this->em->getConnection()->lastInsertId(),
-            ]);
+        $memoryLimit = $problem->getProblem()->getMemlimit();
+        $outputLimit = $problem->getProblem()->getOutputlimit();
+        if (empty($memoryLimit)) {
+            $memoryLimit = $this->config->get('memory_limit');
         }
+        if (empty($outputLimit)) {
+            $outputLimit = $this->config->get('output_limit');
+        }
+
+        // We use a mass insert query, since that is way faster than doing a separate insert for each testcase
+        // We first insert judgetasks, then select their ID's and finally insert the judging runs
+
+        // Step 1: create the judgetasks
+        $judgetaskInsertParams = [
+            ':type'              => JudgeTaskType::JUDGING_RUN,
+            ':submitid'          => $submission->getSubmitid(),
+            ':priority'          => JudgeTask::PRIORITY_DEFAULT,
+            ':jobid'             => $judging->getJudgingid(),
+            ':compile_script_id' => $submission->getLanguage()->getCompileExecutable()->getImmutableExecutable()->getImmutableExecId(),
+            ':compare_script_id' => $this->getImmutableCompareExecutable($problem),
+            ':run_script_id'     => $this->getImmutableRunExecutable($problem),
+            // TODO: store this in the database as well instead of recomputing it here over and over again, doing
+            // this will also help to make the whole data immutable.
+            ':compile_config'    => json_encode(
+                [
+                    'script_timelimit'      => $this->config->get('script_timelimit'),
+                    'script_memory_limit'   => $this->config->get('script_memory_limit'),
+                    'script_filesize_limit' => $this->config->get('script_filesize_limit'),
+                    'language_extensions'   => $submission->getLanguage()->getExtensions(),
+                    'filter_compiler_files' => $submission->getLanguage()->getFilterCompilerFiles(),
+                ]
+            ),
+            ':run_config'        => json_encode(
+                [
+                    'time_limit'    => $problem->getProblem()->getTimelimit(),
+                    'memory_limit'  => $memoryLimit,
+                    'output_limit'  => $outputLimit,
+                    'process_limit' => $this->config->get('process_limit'),
+                    'entry_point'   => $submission->getEntryPoint(),
+                ]
+            ),
+            ':compare_config'    => json_encode(
+                [
+                    'script_timelimit'      => $this->config->get('script_timelimit'),
+                    'script_memory_limit'   => $this->config->get('script_memory_limit'),
+                    'script_filesize_limit' => $this->config->get('script_filesize_limit'),
+                    'compare_args'          => $problem->getProblem()->getSpecialCompareArgs(),
+                    'combined_run_compare'  => $problem->getProblem()->getCombinedRunCompare(),
+                ]
+            ),
+        ];
+
+        $judgetaskDefaultParamNames = array_keys($judgetaskInsertParams);
+
+        $judgetaskInsertParts = [];
+        /** @var Testcase $testcase */
+        foreach ($problem->getProblem()->getTestcases() as $testcase) {
+            $judgetaskInsertParts[]                                             = sprintf(
+                '(%s, :testcase_id%d)',
+                implode(', ', $judgetaskDefaultParamNames),
+                $testcase->getTestcaseid()
+            );
+            $judgetaskInsertParams[':testcase_id' . $testcase->getTestcaseid()] = $testcase->getTestcaseid();
+        }
+
+        $judgetaskColumns     = array_map(function (string $column) {
+            return substr($column, 1);
+        }, $judgetaskDefaultParamNames);
+        $judgetaskInsertQuery = sprintf(
+            'INSERT INTO judgetask (%s, testcase_id) VALUES %s',
+            implode(', ', $judgetaskColumns),
+            implode(', ', $judgetaskInsertParts)
+        );
+
+        $this->em->getConnection()->executeQuery($judgetaskInsertQuery, $judgetaskInsertParams);
+
+        // Step 2: fetch the judgetasks ID's per testcase
+        $judgetaskData = $this->em->getConnection()->executeQuery('SELECT judgetaskid, testcase_id FROM judgetask WHERE jobid = :jobid ORDER BY judgetaskid', [':jobid' => $judging->getJudgingid()])->fetchAll(FetchMode::ASSOCIATIVE);
+
+        // Step 3: create the judging runs
+        $judgingRunInsertParams = [':judgingid' => $judging->getJudgingid()];
+        $judgingRunInsertParts  = [];
+        foreach ($judgetaskData as $judgetaskItem) {
+            $judgingRunInsertParts[]                                                = sprintf(
+                '(:judgingid, :testcaseid%d, :judgetaskid%d)',
+                $judgetaskItem['judgetaskid'],
+                $judgetaskItem['judgetaskid']
+            );
+            $judgingRunInsertParams[':testcaseid' . $judgetaskItem['judgetaskid']]  = $judgetaskItem['testcase_id'];
+            $judgingRunInsertParams[':judgetaskid' . $judgetaskItem['judgetaskid']] = $judgetaskItem['judgetaskid'];
+        }
+
+        $judgingRunInsertQuery = sprintf(
+            'INSERT INTO judging_run (judgingid, testcaseid, judgetaskid) VALUES %s',
+            implode(', ', $judgingRunInsertParts)
+        );
+
+        $this->em->getConnection()->executeQuery($judgingRunInsertQuery, $judgingRunInsertParams);
     }
 
     private function getImmutableCompareExecutable(ContestProblem $problem): int
