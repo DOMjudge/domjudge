@@ -318,8 +318,7 @@ class RejudgingService
                 ];
                 $this->em->getConnection()->executeQuery(
                     'UPDATE submission
-                            SET rejudgingid = NULL,
-                                judgehost = :judgehost
+                            SET rejudgingid = NULL
                             WHERE rejudgingid = :rejudgingid
                             AND submitid = :submitid', $params);
             } else {
