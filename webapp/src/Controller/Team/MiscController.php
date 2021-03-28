@@ -173,7 +173,7 @@ class MiscController extends BaseController
      */
     public function changeContestAction(Request $request, RouterInterface $router, int $contestId) : Response
     {
-        if ($this->isLocalReferrer($router, $request)) {
+        if ($this->isLocalReferer($router, $request)) {
             $response = new RedirectResponse($request->headers->get('referer'));
         } else {
             $response = $this->redirectToRoute('team_index');
