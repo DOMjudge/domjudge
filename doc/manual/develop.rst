@@ -71,6 +71,24 @@ maintainer-install`` when the file did not exist before.
 For more details see
 `https://symfony.com/doc/current/configuration/dot-env-changes.html`.
 
+The ``webapp/.env.local`` file can also be used to overwrite the database
+version. This is needed to automatically generate migrations based on the
+current database compared to the models. To set the correct version, add a line
+to ``webapp/.env.local`` with the following contents::
+
+  DATABASE_URL=mysql://<user>:<password>@<host>:<port>/<database>?serverVersion=<version>
+
+Replace the following:
+
+* ``<user>`` with the database user.
+* ``<password>`` with the database password.
+* ``<host>`` with the database host.
+* ``<port>`` with the database port, probably 3306.
+* ``<version>`` with the server version. For MySQL use the server version
+  like ``5.7.0``. For MariaDB use something like ``mariadb-10.5.9``.
+
+Everything except ``<version>`` can be found in ``etc/dbpasswords.secret``.
+
 The file ``webapp/.env.test`` (and ``webapp/.env.test.local`` if it
 exists) are loaded when you run the unit tests. You can thus place any
 test-specific settings in there.
