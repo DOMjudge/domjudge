@@ -299,20 +299,9 @@ class RejudgingService
                     $this->balloonService->updateBalloons($contest, $submission);
                 });
             } elseif ($action === self::ACTION_CANCEL) {
-                // Restore old judgehost association
-                /** @var Judging $validJudging */
-                $validJudging = $this->em->createQueryBuilder()
-                    ->from(Judging::class, 'j')
-                    ->join('j.judgehost', 'jh')
-                    ->select('j', 'jh')
-                    ->andWhere('j.submission = :submitid')
-                    ->andWhere('j.valid = 1')
-                    ->setParameter(':submitid', $submission['submitid'])
-                    ->getQuery()
-                    ->getOneOrNullResult();
+                // Reset submission and invalidate judging tasks
 
                 $params = [
-                    ':judgehost' => $validJudging->getJudgehost()->getHostname(),
                     ':rejudgingid' => $rejudgingId,
                     ':submitid' => $submission['submitid'],
                 ];
@@ -321,6 +310,16 @@ class RejudgingService
                             SET rejudgingid = NULL
                             WHERE rejudgingid = :rejudgingid
                             AND submitid = :submitid', $params);
+                $this->em->getConnection()->executeQuery(
+                    'UPDATE judgetask
+                            SET valid = 0
+                            WHERE jobid = :judgingid
+                            AND hostname IS NULL', [':judgingid' => $submission['judgingid']]);
+                $this->em->getConnection()->executeQuery(
+                    'UPDATE judging
+                            SET result = :aborted
+                            WHERE judgingid = :judgingid
+                            AND result IS NULL', [':aborted' => 'aborted', ':judgingid' => $submission['judgingid']]);
             } else {
                 $error = "Unknown action '$action' specified.";
                 throw new \BadMethodCallException($error);
