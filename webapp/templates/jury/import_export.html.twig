@@ -84,16 +84,28 @@
             <div class="tile">
                 <h3>Export &lt;html&gt;</h3>
                     <ul>
-                    {% for sort_order in sort_orders %}
                         <li>
-                            <a href="{{ path('jury_html_export', {'type': 'results'}) }}?sort_order={{ sort_order }}"><code>results.html</code> for sort order {{ sort_order }}</a>
+                            <code>results.html</code>:
+                            <ul>
+                                {% for sort_order, names in sort_orders %}
+                                    <li>
+                                        <a href="{{ path('jury_html_export', {'type': 'results'}) }}?sort_order={{ sort_order }}">for sort order {{ sort_order }}</a>
+                                        ({{ names | join(', ') }})
+                                    </li>
+                                {% endfor %}
+                            </ul>
                         </li>
-                    {% endfor %}
-                    {% for sort_order in sort_orders %}
                         <li>
-                            <a href="{{ path('jury_html_export', {'type': 'results-icpc'}) }}?sort_order={{ sort_order }}">ICPC site <code>results.html</code> for sort order {{ sort_order }}</a>
+                            ICPC site <code>results.html</code>:
+                            <ul>
+                                {% for sort_order, names in sort_orders %}
+                                    <li>
+                                        <a href="{{ path('jury_html_export', {'type': 'results-icpc'}) }}?sort_order={{ sort_order }}">for sort order {{ sort_order }}</a>
+                                        ({{ names | join(', ') }})
+                                    </li>
+                                {% endfor %}
+                            </ul>
                         </li>
-                    {% endfor %}
                     <li>
                         <a href="{{ path('jury_html_export', {'type': 'clarifications'}) }}" target="_blank"><code>clarifications.html</code></a>
                     </li>
@@ -106,16 +118,22 @@
         </div>
         <div class="col-md-6">
             <div class="tile">
-                <h3>Export Tab-separated</h3>
+                <h3>Export tab-separated</h3>
                     <ul>
                         <li>
                             <a href="{{ path('jury_tsv_export', {'type': 'scoreboard'}) }}"><code>scoreboard.tsv</code></a>
                         </li>
-                        {% for sort_order in sort_orders %}
-                            <li>
-                                <a href="{{ path('jury_tsv_export', {'type': 'results'}) }}?sort_order={{ sort_order }}"><code>results.tsv</code> for sort order {{ sort_order }}</a>
-                             </li>
-                        {% endfor %}
+                        <li>
+                            <code>results.tsv</code>:
+                            <ul>
+                            {% for sort_order, names in sort_orders %}
+                                <li>
+                                    <a href="{{ path('jury_tsv_export', {'type': 'results'}) }}?sort_order={{ sort_order }}">for sort order {{ sort_order }}</a>
+                                    ({{ names | join(', ') }})
+                                 </li>
+                            {% endfor %}
+                            </ul>
+                        </li>
                     </ul>
              </div>
         </div>
