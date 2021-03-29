@@ -257,10 +257,8 @@ function fetch_executable(
     $execbuildpath   = $execbuilddir . '/build';
     $execrunpath     = $execbuilddir . '/run';
     if (!is_dir($execdir) || !file_exists($execdeploypath)) {
-        $rm_exec_dir_builddir = escapeshellcmd("rm -rf '$execdir' '$execbuilddir'");
-        system($rm_exec_dir_builddir);
-        $mk_builddir = escapeshellcmd("mkdir -p '$execbuilddir'");
-        system($mk_builddir, $retval);
+        system('rm -rf ' . dj_escapeshellarg($execdir) . ' ' . dj_escapeshellarg($execbuilddir));
+        system('mkdir -p ' . dj_escapeshellarg($execbuilddir), $retval);
         if ($retval!==0) {
             error("Could not create directory '$execbuilddir'");
         }
@@ -395,8 +393,7 @@ EOT;
 
         if ($do_compile) {
             logmsg(LOG_DEBUG, "Building executable in $execdir, under 'build/'");
-            $cmd_build_executable = escapeshellcmd(LIBJUDGEDIR . "/build_executable.sh '$execdir'");
-            system($cmd_build_executable, $retval);
+            system(LIBJUDGEDIR . '/build_executable.sh ' . dj_escapeshellarg($execdir), $retval);
             if ($retval!==0) {
                 return [null, "Failed to build executable in $execdir."];
             }
@@ -719,8 +716,7 @@ while (true) {
         }
     }
 
-    $mkdir_command = escapeshellcmd("mkdir -p '$workdir/compile'");
-    system($mkdir_command, $retval);
+    system('mkdir -p ' . dj_escapeshellarg("$workdir/compile"), $retval);
     if ($retval !== 0) {
         error("Could not create '$workdir/compile'");
     }
@@ -783,8 +779,7 @@ function registerJudgehost($myhost)
 
     // Create directory where to test submissions
     $workdirpath = JUDGEDIR . "/$myhost/endpoint-$endpointID";
-    $mkdir_command = escapeshellcmd("mkdir -p '$workdirpath/testcase'");
-    system($mkdir_command, $retval);
+    system('mkdir -p ' . dj_escapeshellarg("$workdirpath/testcase"), $retval);
     if ($retval !== 0) {
         error("Could not create $workdirpath");
     }
@@ -802,7 +797,7 @@ function registerJudgehost($myhost)
             $workdir = judging_directory($workdirpath, $jud);
             @chmod($workdir, 0700);
             logmsg(LOG_WARNING, "Found unfinished judging with jobid " . $jud['jobid'] .
-                " in my name; given back unfinished runs from me.");
+                   " in my name; given back unfinished runs from me.");
         }
     }
 }
@@ -862,8 +857,7 @@ function cleanup_judging(string $workdir) : void
     }
 
     // Evict all contents of the workdir from the kernel fs cache
-    $evict_cmd = escapeshellcmd(LIBJUDGEDIR . "/evict '$workdir'");
-    system($evict_cmd, $retval);
+    system(LIBJUDGEDIR . '/evict ' . dj_escapeshellarg($workdir), $retval);
     if ($retval!==0) {
         warning("evict script exited with exitcode $retval");
     }
@@ -894,7 +888,7 @@ function compile(array $judgeTask, string $workdir, string $workdirpath, array $
             foreach ($compile_config['language_extensions'] as $extension) {
                 $extensionLength = strlen($extension);
                 if (substr($file, -$extensionLength) === $extension) {
-                    $files[] = "'$file'";
+                    $files[] = $file;
                     $picked = true;
                     break;
                 }
@@ -903,7 +897,7 @@ function compile(array $judgeTask, string $workdir, string $workdirpath, array $
                 $hasFiltered = true;
             }
         } else {
-            $files[] = "'$file'";
+            $files[] = $file;
         }
         if (file_put_contents($srcfile, base64_decode($source['content'])) === false) {
             error("Could not create $srcfile");
@@ -947,8 +941,12 @@ function compile(array $judgeTask, string $workdir, string $workdirpath, array $
     }
 
     // Compile the program.
-    $compile_cmd = escapeshellcmd(LIBJUDGEDIR . "/compile.sh $cpuset_opt '$execrunpath' '$workdir' " .
-                                  implode(' ', $files));
+    $compile_cmd = LIBJUDGEDIR . "/compile.sh $cpuset_opt " .
+        implode(' ', array_map('dj_escapeshellarg', array_merge([
+            $execrunpath,
+            $workdir,
+        ], $files)));
+    logmsg(LOG_DEBUG, "Compile command: ".$compile_cmd);
     system($compile_cmd, $retval);
     if ($retval!==0) {
         warning("compile script exited with exitcode $retval");
@@ -1045,7 +1043,7 @@ function judge(array $judgeTask): bool
 
     $cpuset_opt = "";
     if (isset($options['daemonid'])) {
-        $cpuset_opt = "-n ${options['daemonid']}";
+        $cpuset_opt = '-n ' . dj_escapeshellarg($options['daemonid']);
     }
 
     $workdir = judging_directory($workdirpath, $judgeTask);
@@ -1087,8 +1085,7 @@ function judge(array $judgeTask): bool
     // Copy program with all possible additional files to testcase
     // dir. Use hardlinks to preserve space with big executables.
     $programdir = $testcasedir . '/execdir';
-    $mkdir_cmd = escapeshellcmd("mkdir -p '$programdir'");
-    system($mkdir_cmd, $retval);
+    system('mkdir -p ' . dj_escapeshellarg($programdir), $retval);
     if ($retval!==0) {
         error("Could not create directory '$programdir'");
     }
@@ -1141,9 +1138,16 @@ function judge(array $judgeTask): bool
     putenv('SCRIPTMEMLIMIT='  . $compare_config['script_memory_limit']);
     putenv('SCRIPTFILELIMIT=' . $compare_config['script_filesize_limit']);
 
-    $test_run_cmd = escapeshellcmd(LIBJUDGEDIR . "/testcase_run.sh $cpuset_opt '$tcfile[input]' '$tcfile[output]' " .
-                                   "$run_config[time_limit]:$hardtimelimit '$testcasedir' " .
-                                   "'$run_runpath' '$compare_runpath' '$compare_config[compare_args]'");
+    $test_run_cmd = LIBJUDGEDIR . "/testcase_run.sh $cpuset_opt " .
+        implode(' ', array_map('dj_escapeshellarg', [
+            $tcfile['input'],
+            $tcfile['output'],
+            "$run_config[time_limit]:$hardtimelimit",
+            $testcasedir,
+            $run_runpath,
+            $compare_runpath,
+            $compare_config['compare_args']
+        ]));
     system($test_run_cmd, $retval);
 
     // what does the exitcode mean?
