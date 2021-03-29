@@ -1,8 +1,7 @@
 <?php declare(strict_types=1);
 
-require_once("common-config.php");
-
-// Default config
+// Log to syslog facility; do not define to disable.
+define('SYSLOG', LOG_LOCAL0);
 
 // Normally submissions don't have any directory they can write to,
 // at least when the chroot is enabled. However, some languages might
