@@ -341,7 +341,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
                   FROM testcase t
                   LEFT JOIN external_run er ON (er.testcaseid = t.testcaseid
                                               AND er.extjudgementid = :extjudgementid)
-                  WHERE t.probid = :probid ORDER BY rank',
+                  WHERE t.probid = :probid ORDER BY t.rank',
                 [':extjudgementid' => $externalJudgementId, ':probid' => $probId]);
 
             $submissionDone = $externalJudgement ? !empty($externalJudgement->getEndtime()) : false;
@@ -355,7 +355,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
                   FROM testcase t
                   LEFT JOIN judging_run r ON (r.testcaseid = t.testcaseid
                                               AND r.judgingid = :judgingid)
-                  WHERE t.probid = :probid ORDER BY rank',
+                  WHERE t.probid = :probid ORDER BY t.rank',
                 [':judgingid' => $judgingId, ':probid' => $probId]);
 
             $submissionDone = $judging ? !empty($judging->getEndtime()) : false;
