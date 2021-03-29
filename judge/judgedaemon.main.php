@@ -457,15 +457,14 @@ $verbose = LOG_INFO;
 if (isset($options['verbose'])) {
     if (preg_match('/^\d+$/', $options['verbose'])) {
         $verbose = $options['verbose'];
+        if ($verbose >= LOG_DEBUG) {
+            // Also enable judging scipts debug output
+            putenv('DEBUG=1');
+        }
     } else {
         echo "Invalid value for verbose, must be positive integer\n";
         exit(1);
     }
-}
-
-if (DEBUG & DEBUG_JUDGE) {
-    $verbose = LOG_DEBUG;
-    putenv('DEBUG=1');
 }
 
 $runuser = RUNUSER;

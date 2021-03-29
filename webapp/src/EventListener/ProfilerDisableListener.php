@@ -45,20 +45,16 @@ class ProfilerDisableListener implements EventSubscriberInterface
     /**
      * @inheritDoc
      */
-    public static function getSubscribedEvents()
+    public static function getSubscribedEvents(): array
     {
         return [RequestEvent::class => 'onKernelRequest',];
     }
 
-    public function onKernelRequest()
+    public function onKernelRequest(): void
     {
-        // Disable the profiler for users with the judgehost permission but not the admin one,
-        // unless DEBUG contains DEBUG_JUDGE.
+        // Disable the profiler for users with the judgehost permission but not the admin one
         if ($this->profiler && $this->dj->checkrole('judgehost') && !$this->dj->checkrole('admin')) {
-            require_once $this->dj->getDomjudgeEtcDir() . '/common-config.php';
-            if (!(DEBUG & DEBUG_JUDGE)) {
-                $this->profiler->disable();
-            }
+            $this->profiler->disable();
         }
     }
 }
