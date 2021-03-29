@@ -1097,18 +1097,18 @@ class DOMJudgeService
             $outputLimit = $this->config->get('output_limit');
         }
 
-        // We use a mass insert query, since that is way faster than doing a separate insert for each testcase
-        // We first insert judgetasks, then select their ID's and finally insert the judging runs
+        // We use a mass insert query, since that is way faster than doing a separate insert for each testcase.
+        // We first insert judgetasks, then select their ID's and finally insert the judging runs.
 
-        // Step 1: create the judgetasks
+        // Step 1: Create the template for the judgetasks.
         $judgetaskInsertParams = [
             ':type'              => JudgeTaskType::JUDGING_RUN,
             ':submitid'          => $submission->getSubmitid(),
             ':priority'          => JudgeTask::PRIORITY_DEFAULT,
             ':jobid'             => $judging->getJudgingid(),
             ':compile_script_id' => $submission->getLanguage()->getCompileExecutable()->getImmutableExecutable()->getImmutableExecId(),
-            ':compare_script_id' => $this->getImmutableCompareExecutable($problem),
-            ':run_script_id'     => $this->getImmutableRunExecutable($problem),
+            ':compare_script_id' => $this->getImmutableCompareExecutableId($problem),
+            ':run_script_id'     => $this->getImmutableRunExecutableId($problem),
             // TODO: store this in the database as well instead of recomputing it here over and over again, doing
             // this will also help to make the whole data immutable.
             ':compile_config'    => json_encode(
@@ -1142,6 +1142,7 @@ class DOMJudgeService
 
         $judgetaskDefaultParamNames = array_keys($judgetaskInsertParams);
 
+        // Step 2: Create and insert the judgetasks.
         $judgetaskInsertParts = [];
         /** @var Testcase $testcase */
         foreach ($problem->getProblem()->getTestcases() as $testcase) {
@@ -1152,8 +1153,7 @@ class DOMJudgeService
             );
             $judgetaskInsertParams[':testcase_id' . $testcase->getTestcaseid()] = $testcase->getTestcaseid();
         }
-
-        $judgetaskColumns     = array_map(function (string $column) {
+        $judgetaskColumns = array_map(function (string $column) {
             return substr($column, 1);
         }, $judgetaskDefaultParamNames);
         $judgetaskInsertQuery = sprintf(
@@ -1161,17 +1161,19 @@ class DOMJudgeService
             implode(', ', $judgetaskColumns),
             implode(', ', $judgetaskInsertParts)
         );
-
         $this->em->getConnection()->executeQuery($judgetaskInsertQuery, $judgetaskInsertParams);
 
-        // Step 2: fetch the judgetasks ID's per testcase
-        $judgetaskData = $this->em->getConnection()->executeQuery('SELECT judgetaskid, testcase_id FROM judgetask WHERE jobid = :jobid ORDER BY judgetaskid', [':jobid' => $judging->getJudgingid()])->fetchAll(FetchMode::ASSOCIATIVE);
+        // Step 3: Fetch the judgetasks ID's per testcase.
+        $judgetaskData = $this->em->getConnection()->executeQuery(
+            'SELECT judgetaskid, testcase_id FROM judgetask WHERE jobid = :jobid ORDER BY judgetaskid',
+            [':jobid' => $judging->getJudgingid()]
+        )->fetchAll(FetchMode::ASSOCIATIVE);
 
-        // Step 3: create the judging runs
+        // Step 4: Create and insert the corresponding judging runs.
         $judgingRunInsertParams = [':judgingid' => $judging->getJudgingid()];
         $judgingRunInsertParts  = [];
         foreach ($judgetaskData as $judgetaskItem) {
-            $judgingRunInsertParts[]                                                = sprintf(
+            $judgingRunInsertParts[] = sprintf(
                 '(:judgingid, :testcaseid%d, :judgetaskid%d)',
                 $judgetaskItem['judgetaskid'],
                 $judgetaskItem['judgetaskid']
@@ -1179,7 +1181,6 @@ class DOMJudgeService
             $judgingRunInsertParams[':testcaseid' . $judgetaskItem['judgetaskid']]  = $judgetaskItem['testcase_id'];
             $judgingRunInsertParams[':judgetaskid' . $judgetaskItem['judgetaskid']] = $judgetaskItem['judgetaskid'];
         }
-
         $judgingRunInsertQuery = sprintf(
             'INSERT INTO judging_run (judgingid, testcaseid, judgetaskid) VALUES %s',
             implode(', ', $judgingRunInsertParts)
@@ -1188,7 +1189,7 @@ class DOMJudgeService
         $this->em->getConnection()->executeQuery($judgingRunInsertQuery, $judgingRunInsertParams);
     }
 
-    private function getImmutableCompareExecutable(ContestProblem $problem): int
+    private function getImmutableCompareExecutableId(ContestProblem $problem): int
     {
         /** @var Executable $executable */
         $executable = $problem
@@ -1207,7 +1208,7 @@ class DOMJudgeService
             ->getImmutableExecId();
     }
 
-    private function getImmutableRunExecutable(ContestProblem $problem): int
+    private function getImmutableRunExecutableId(ContestProblem $problem): int
     {
         /** @var Executable $executable */
         $executable = $problem
