@@ -89,7 +89,7 @@
                             <ul>
                                 {% for sort_order, names in sort_orders %}
                                     <li>
-                                        <a href="{{ path('jury_html_export', {'type': 'results'}) }}?sort_order={{ sort_order }}">for sort order {{ sort_order }}</a>
+                                        <a href="{{ path('jury_html_export', {'type': 'results', 'sort_order': sort_order}) }}">for sort order {{ sort_order }}</a>
                                         ({{ names | join(', ') }})
                                     </li>
                                 {% endfor %}
@@ -100,7 +100,7 @@
                             <ul>
                                 {% for sort_order, names in sort_orders %}
                                     <li>
-                                        <a href="{{ path('jury_html_export', {'type': 'results-icpc'}) }}?sort_order={{ sort_order }}">for sort order {{ sort_order }}</a>
+                                        <a href="{{ path('jury_html_export', {'type': 'results-icpc', 'sort_order': sort_order}) }}">for sort order {{ sort_order }}</a>
                                         ({{ names | join(', ') }})
                                     </li>
                                 {% endfor %}
@@ -128,7 +128,7 @@
                             <ul>
                             {% for sort_order, names in sort_orders %}
                                 <li>
-                                    <a href="{{ path('jury_tsv_export', {'type': 'results'}) }}?sort_order={{ sort_order }}">for sort order {{ sort_order }}</a>
+                                    <a href="{{ path('jury_tsv_export', {'type': 'results', 'sort_order': sort_order}) }}">for sort order {{ sort_order }}</a>
                                     ({{ names | join(', ') }})
                                  </li>
                             {% endfor %}

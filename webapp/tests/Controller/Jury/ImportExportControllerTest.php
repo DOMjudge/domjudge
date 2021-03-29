@@ -134,7 +134,7 @@ problems:
     - { label: hello, name: 'Hello World', color: magenta, rgb: '#FF00FF' }
 
 HEREDOC;
-        yield["2", $yaml];
+        yield ["2", $yaml];
     }
 
     /**
@@ -145,7 +145,7 @@ HEREDOC;
     public function testGroupsTeamsTsvExport(string $linkname, string $expectedData): void
     {
         $this->verifyPageResponse('GET', '/jury/import-export', 200);
-        $link = $this->getCurrentCrawler()->filter(sprintf('a:contains("%s")', $linkname))->link();
+        $link = $this->getCurrentCrawler()->filter($linkname)->link();
         ob_start();
         $this->client->click($link);
         $content = ob_get_contents();
@@ -156,20 +156,20 @@ HEREDOC;
 
     public function provideTsvContents(): Generator
     {
-        yield['teams.tsv', 'teams	1
+        yield ['a:contains("teams.tsv")', 'teams	1
 2	exteam	3	Example teamname	Utrecht University	UU	NLD	utrecht
 '];
-        yield['results.tsv for sort order 0', 'results	1
+        yield ['li:contains("results.tsv") a:contains("for sort order 0")', 'results	1
 2	1	Gold Medal	0	0	0	Participants
 '];
-        yield['results.tsv for sort order 1', 'results	1
+        yield ['li:contains("results.tsv") a:contains("for sort order 1")', 'results	1
 '];
-        yield['groups.tsv', 'groups	1
+        yield ['a:contains("groups.tsv")', 'groups	1
 2	Self-Registered
 3	Participants
 4	Observers
 '];
-        yield['scoreboard.tsv', 'scoreboard	1
+        yield ['a:contains("scoreboard.tsv")', 'scoreboard	1
 Utrecht University	exteam	1	0	0	0	0	-1	0	-1	0	-1
 		1	0	0	0	0	-1	0	-1	0	-1
 '];
@@ -196,7 +196,7 @@ Utrecht University	exteam	1	0	0	0	0	-1	0	-1	0	-1
     public function testRsultsHtmlExport(): void
     {
         $this->verifyPageResponse('GET', '/jury/import-export', 200);
-        $link = $this->getCurrentCrawler()->filter('a:contains("results.html for sort order 0")')->link();
+        $link = $this->getCurrentCrawler()->filter('li:contains("results.html") a:contains("for sort order 0")')->link();
         $this->client->click($link);
         self::assertSelectorExists('h1:contains("Results for Demo contest")');
         self::assertSelectorExists('th:contains("Example teamname")');
@@ -209,7 +209,7 @@ Utrecht University	exteam	1	0	0	0	0	-1	0	-1	0	-1
     public function testICPCRsultsHtmlExport(): void
     {
         $this->verifyPageResponse('GET', '/jury/import-export', 200);
-        $link = $this->getCurrentCrawler()->filter('a:contains("ICPC site results.html for sort order 0")')->link();
+        $link = $this->getCurrentCrawler()->filter('li:contains("ICPC site results.html") a:contains("for sort order 0")')->link();
         $this->client->click($link);
         self::assertSelectorExists('table#medalTable .row1.gold td[class="name"]:contains("Example teamname")');
         self::assertSelectorExists('table#uniTable th:contains("Honorable mention")');
