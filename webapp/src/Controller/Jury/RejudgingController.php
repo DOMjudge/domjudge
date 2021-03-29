@@ -471,6 +471,7 @@ class RejudgingController extends BaseController
             $formData = $form->getData();
             $data = [
                 'reason'     => $formData['reason'],
+                'repeat'     => $formData['repeat'],
                 'contests'   => array_map(function (Contest $contest) {
                     return $contest->getCid();
                 }, $formData['contests'] ? $formData['contests']->toArray() : []),
@@ -586,7 +587,8 @@ class RejudgingController extends BaseController
                 }
 
                 $skipped = [];
-                $res     = $this->rejudgingService->createRejudging($reason, $judgings, false, 1, null, $skipped, $progressReporter);
+                $res     = $this->rejudgingService->createRejudging(
+                    $reason, $judgings, false, (int)$data['repeat'] ?? 1, null, $skipped, $progressReporter);
                 $this->generateFlashMessagesForSkippedJudgings($skipped);
 
                 if ($res === null) {

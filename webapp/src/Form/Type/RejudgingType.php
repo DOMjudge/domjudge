@@ -12,6 +12,7 @@ use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -43,6 +44,11 @@ class RejudgingType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder->add('reason', TextType::class);
+        $builder->add('repeat', IntegerType::class, [
+            'label' => 'Number of times to repeat this rejudging',
+            'data' => 1,
+            'attr' => array('min' => 1, 'max' => 99)
+        ]);
         $builder->add('contests', EntityType::class, [
             'label' => 'Contest',
             'class' => Contest::class,
