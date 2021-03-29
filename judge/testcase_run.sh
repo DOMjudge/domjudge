@@ -13,8 +13,8 @@
 #                   environment. For best security leave it as empty as possible.
 #                   Certainly do not place output-files there!
 # <run>             Absolute path to run script to use.
-# <compare>         Absolute path to compare script to use.
-# <compare-args>    Arguments to pass to compare script
+# <compare>         Absolute path to compare script to use, optional.
+# <compare-args>    Arguments to pass to compare script, optional.
 #
 # Default run and compare scripts can be configured in the database.
 #
