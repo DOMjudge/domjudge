@@ -279,15 +279,19 @@ class ImportExportController extends BaseController
         /** @var TeamCategory[] $teamCategories */
         $teamCategories = $this->em->createQueryBuilder()
             ->from(TeamCategory::class, 'c', 'c.categoryid')
-            ->select('c.sortorder')
+            ->select('c.sortorder, c.name')
             ->where('c.visible = 1')
-            ->groupBy('c.sortorder')
             ->orderBy('c.sortorder')
             ->getQuery()
             ->getResult();
-        $sortOrders     = array_map(function ($teamCategory) {
-            return $teamCategory["sortorder"];
-        }, $teamCategories);
+        $sortOrders = [];
+        foreach ($teamCategories as $teamCategory) {
+            $sortOrder = $teamCategory['sortorder'];
+            if (!array_key_exists($sortOrder, $sortOrders)) {
+                $sortOrders[$sortOrder] = [];
+            }
+            $sortOrders[$sortOrder][] = $teamCategory['name'];
+        }
 
         return $this->render('jury/import_export.html.twig', [
             'tsv_form' => $tsvForm->createView(),
