@@ -60,3 +60,13 @@ function dj_file_get_contents(string $filename, int $maxsize = -1) : string
 
     return $res;
 }
+
+/**
+ * Fix broken behaviour of escapeshellarg that it doesn't return '' for an
+ * empty string.
+ */
+function dj_escapeshellarg(?string $arg) : string
+{
+    if ( empty($arg) ) return "''";
+    return escapeshellarg($arg);
+}

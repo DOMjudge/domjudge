@@ -241,7 +241,7 @@ function usage()
 function read_judgehostlog(int $n = 20) : string
 {
     ob_start();
-    passthru("tail -n $n " . escapeshellarg(LOGFILE));
+    passthru("tail -n $n " . dj_escapeshellarg(LOGFILE));
     return trim(ob_get_clean());
 }
 
