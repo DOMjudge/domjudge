@@ -55,6 +55,13 @@
                             .attr('style', 'width: ' + data.progress + '%;')
                             .text(data.progress + '%');
 
+                        if (data.progress == '100') {
+                            $progress
+                                .removeClass('progress-bar-animated')
+                                .removeClass('progress-bar-striped')
+                                .addClass('bg-success');
+                        }
+
                         if (data.message) {
                             $message.html(data.message);
                             return;
