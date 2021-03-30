@@ -58,7 +58,6 @@ class Language extends BaseApiEntity
      * @ORM\Column(type="json", length=4294967295, name="extensions",
      *     options={"comment"="List of recognized extensions (JSON encoded)"},
      *     nullable=true)
-     * @Serializer\Groups({"Nonstrict"})
      * @Serializer\Type("array<string>")
      * @Assert\NotBlank()
      */
@@ -109,7 +108,7 @@ class Language extends BaseApiEntity
      * @ORM\Column(type="boolean", name="require_entry_point",
      *     options={"comment"="Whether submissions require a code entry point to be specified.","default":"0"},
      *     nullable=false)
-     * @Serializer\Groups({"Nonstrict"})
+     * @Serializer\SerializedName("entry_point_required")
      */
     private $require_entry_point = false;
 
@@ -118,7 +117,7 @@ class Language extends BaseApiEntity
      * @ORM\Column(type="string", name="entry_point_description",
      *     options={"comment"="The description used in the UI for the entry point field."},
      *     nullable=true)
-     * @Serializer\Groups({"Nonstrict"})
+     * @Serializer\SerializedName("entry_point_name")
      */
     private $entry_point_description = null;
 
