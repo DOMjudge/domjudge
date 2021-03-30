@@ -45,6 +45,12 @@ class ImmutableExecutable
      */
     private $files;
 
+    /**
+     * @var string
+     * @ORM\Column(type="string", name="hash", length=32, options={"comment"="hash of the files"}, nullable=true)
+     */
+    private $hash;
+
     public function getImmutableExecId(): int
     {
         return $this->immutable_execid;
@@ -67,11 +73,32 @@ class ImmutableExecutable
             $this->files = new ArrayCollection();
         }
         $this->files->add($file);
+        $this->updateHash();
         return $this;
+    }
+
+    public function updateHash()
+    {
+        if ($this->files === null) {
+            $this->hash = null;
+            return;
+        }
+        $this->hash = md5(
+            join(array_map(
+                    function (ExecutableFile $file) {
+                        return $file->getHash();
+                    },
+                    $this->files->toArray())
+            )
+        );
     }
 
     public function getFiles(): Collection
     {
         return $this->files;
+    }
+
+    public function getHash() {
+        return $this->hash;
     }
 }
