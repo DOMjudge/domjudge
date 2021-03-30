@@ -8,7 +8,11 @@ use App\Entity\User;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
+use Doctrine\Common\DataFixtures\Executor\ORMExecutor;
+use Doctrine\Common\DataFixtures\FixtureInterface;
+use Doctrine\Common\DataFixtures\Loader;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\BrowserKit\Cookie;
@@ -31,6 +35,12 @@ abstract class BaseTest extends WebTestCase
     /** @var string[] */
     protected static $roles = [];
 
+    /**
+     * What fixtures to load
+     * @var string[]
+     */
+    protected static $fixtures = [];
+
     protected function setUp(): void
     {
         // Reset the kernel to make sure we have a clean slate
@@ -42,6 +52,19 @@ abstract class BaseTest extends WebTestCase
         // Log in if we have any roles
         if (!empty(static::$roles)) {
             $this->logIn();
+        }
+
+        if (!empty(static::$fixtures)) {
+            $loader = new Loader();
+            foreach (static::$fixtures as $fixture) {
+                if (!is_subclass_of($fixture, FixtureInterface::class)) {
+                    throw new Exception(sprintf('%s is not a fixture', $fixture));
+                }
+                $loader->addFixture(new $fixture());
+            }
+
+            $executor = new ORMExecutor(static::$container->get(EntityManagerInterface::class));
+            $executor->execute($loader->getFixtures(), true);
         }
     }
 
