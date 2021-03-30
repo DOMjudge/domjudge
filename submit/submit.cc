@@ -162,7 +162,7 @@ contest mycontest;
 /* Languages */
 struct language {
 	string id, name;
-	bool require_entry_point;
+	bool entry_point_required;
 	vector<string> extensions;
 };
 vector<language> languages;
@@ -187,7 +187,6 @@ int main(int argc, char **argv)
 	struct stat fstats;
 	string filebase, fileext;
 	time_t fileage;
-	string require_entry_point;
 
 	progname = argv[0];
 	stdlog = NULL;
@@ -387,7 +386,7 @@ lang_found:
 	if ( baseurl.empty()       ) usage2(0,"no url specified");
 
 	/* Guess entry point if not already specified. */
-	if ( entry_point==NULL && mylanguage.require_entry_point ) {
+	if ( entry_point==NULL && mylanguage.entry_point_required ) {
 		if ( mylanguage.name == "Java" ) {
 			entry_point = strdup(filebase.c_str());
 		} else if ( mylanguage.name == "Kotlin" ) {
@@ -399,7 +398,7 @@ lang_found:
 		}
 	}
 
-	if ( entry_point==NULL && mylanguage.require_entry_point ) {
+	if ( entry_point==NULL && mylanguage.entry_point_required ) {
 		error(0, "Entry point required but not specified nor detected.");
 	}
 
@@ -799,7 +798,7 @@ bool readlanguages()
 
 		lang.id   = res[i]["id"].asString();
 		lang.name = res[i]["name"].asString();
-		lang.require_entry_point = res[i]["require_entry_point"].asBool();
+		lang.entry_point_required = res[i]["entry_point_required"].asBool();
 		if ( lang.id=="" ||
 		     !(exts = res[i]["extensions"]) ||
 		     !exts.isArray() || exts.size()==0 ) {
