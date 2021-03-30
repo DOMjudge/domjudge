@@ -1038,6 +1038,8 @@ class DOMJudgeService
             $immutableExecutable->addFile($executableFile);
             $rank++;
         }
+        $immutableExecutable->updateHash();
+        $this->em->flush();
         return $immutableExecutable;
     }
 
@@ -1100,6 +1102,9 @@ class DOMJudgeService
 
         // We use a mass insert query, since that is way faster than doing a separate insert for each testcase.
         // We first insert judgetasks, then select their ID's and finally insert the judging runs.
+        $compileExecutable = $submission->getLanguage()->getCompileExecutable()->getImmutableExecutable();
+        $runExecutable = $this->getImmutableRunExecutable($problem);
+        $compareExecutable = $this->getImmutableCompareExecutable($problem);
 
         // Step 1: Create the template for the judgetasks.
         $judgetaskInsertParams = [
@@ -1107,9 +1112,9 @@ class DOMJudgeService
             ':submitid'          => $submission->getSubmitid(),
             ':priority'          => JudgeTask::PRIORITY_DEFAULT,
             ':jobid'             => $judging->getJudgingid(),
-            ':compile_script_id' => $submission->getLanguage()->getCompileExecutable()->getImmutableExecutable()->getImmutableExecId(),
-            ':compare_script_id' => $this->getImmutableCompareExecutableId($problem),
-            ':run_script_id'     => $this->getImmutableRunExecutableId($problem),
+            ':compile_script_id' => $compileExecutable->getImmutableExecId(),
+            ':compare_script_id' => $compareExecutable->getImmutableExecId(),
+            ':run_script_id'     => $runExecutable->getImmutableExecId(),
             // TODO: store this in the database as well instead of recomputing it here over and over again, doing
             // this will also help to make the whole data immutable.
             ':compile_config'    => json_encode(
@@ -1119,6 +1124,7 @@ class DOMJudgeService
                     'script_filesize_limit' => $this->config->get('script_filesize_limit'),
                     'language_extensions'   => $submission->getLanguage()->getExtensions(),
                     'filter_compiler_files' => $submission->getLanguage()->getFilterCompilerFiles(),
+                    'hash'                  => $compileExecutable->getHash(),
                 ]
             ),
             ':run_config'        => json_encode(
@@ -1128,6 +1134,7 @@ class DOMJudgeService
                     'output_limit'  => $outputLimit,
                     'process_limit' => $this->config->get('process_limit'),
                     'entry_point'   => $submission->getEntryPoint(),
+                    'hash'          => $runExecutable->getHash(),
                 ]
             ),
             ':compare_config'    => json_encode(
@@ -1137,6 +1144,7 @@ class DOMJudgeService
                     'script_filesize_limit' => $this->config->get('script_filesize_limit'),
                     'compare_args'          => $problem->getProblem()->getSpecialCompareArgs(),
                     'combined_run_compare'  => $problem->getProblem()->getCombinedRunCompare(),
+                    'hash'                  => $compareExecutable->getHash(),
                 ]
             ),
         ];
@@ -1190,7 +1198,7 @@ class DOMJudgeService
         $this->em->getConnection()->executeQuery($judgingRunInsertQuery, $judgingRunInsertParams);
     }
 
-    private function getImmutableCompareExecutableId(ContestProblem $problem): int
+    private function getImmutableCompareExecutable(ContestProblem $problem): ImmutableExecutable
     {
         /** @var Executable $executable */
         $executable = $problem
@@ -1204,12 +1212,10 @@ class DOMJudgeService
             }
             $executable = $this->defaultCompareExecutable;
         }
-        return $executable
-            ->getImmutableExecutable()
-            ->getImmutableExecId();
+        return $executable->getImmutableExecutable();
     }
 
-    private function getImmutableRunExecutableId(ContestProblem $problem): int
+    private function getImmutableRunExecutable(ContestProblem $problem): ImmutableExecutable
     {
         /** @var Executable $executable */
         $executable = $problem
@@ -1223,9 +1229,7 @@ class DOMJudgeService
             }
             $executable = $this->defaultRunExecutable;
         }
-        return $executable
-            ->getImmutableExecutable()
-            ->getImmutableExecId();
+        return $executable->getImmutableExecutable();
     }
 
     private function getProblemsForExecutable(Executable $executable) {

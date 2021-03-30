@@ -58,6 +58,12 @@ class ExecutableFile
     private $fileContent;
 
     /**
+     * @var string
+     * @ORM\Column(type="string", name="hash", length=32, options={"comment"="hash of the content"}, nullable=true)
+     */
+    private $hash;
+
+    /**
      * @var boolean
      * @ORM\Column(type="boolean", name="is_executable",
      *     options={"comment"="Whether this file gets an executable bit.",
@@ -115,7 +121,13 @@ class ExecutableFile
     public function setFileContent(string $fileContent): ExecutableFile
     {
         $this->fileContent = $fileContent;
+        $this->hash = md5($fileContent);
         return $this;
+    }
+
+    public function getHash(): string
+    {
+        return $this->hash;
     }
 
     public function getFileContent(): string
