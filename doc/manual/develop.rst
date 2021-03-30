@@ -94,6 +94,24 @@ run the ``*clean`` targets: otherwise e.g. ``paths.mk`` will
 be deleted before subdirectory ``*clean`` targets are called that
 depend on information in it.
 
+Debugging
+---------
+To enable debugging in the web interface, make sure you have set
+``APP_ENV=dev`` in the file ``webapp/.env.local``. This will disable
+caching of files and enable the Symfony profiling bar on each page.
+
+For the judgeadaemon, use the ``-v`` commandline option to increase
+verbosity. It takes a numeric argument corresponding to the syslog
+loglevels. Use ``-v 7`` to enable loglevel debug. This will also show
+detailed debugging information from the scripts invoked by the
+judgedaemon.
+
+A special case is the API user with only the *judgedaemon* role. For
+this user, Symfony profiling is disabled on the API for performance
+reasons even in dev mode. If you should wish to profile these API calls
+specifically, change ``webapp/src/EventListener/ProfilerDisableListener.php``
+to enable it.
+
 Running the test suite
 ----------------------
 
