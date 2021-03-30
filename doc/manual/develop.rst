@@ -62,6 +62,28 @@ Note that these targets have to be executed *separately* and
 they replace the steps described in the chapters on installing
 the DOMserver or Judgehost.
 
+
+Makefile structure
+------------------
+The Makefiles in the source tree use a recursion mechanism to run make
+targets within the relevant subdirectories. The recursion is handled
+by the ``REC_TARGETS`` and ``SUBDIRS`` variables and the
+recursion step is executed in ``Makefile.global``. Any target
+added to the ``REC_TARGETS`` list will be recursively called in
+all directories in ``SUBDIRS``. Moreover, a local variant of the
+target with ``-l`` appended is called after recursing into the
+subdirectories, so recursion is depth-first.
+
+The targets ``dist``, ``clean``, ``distclean``, ``maintainer-clean``
+are recursive by default, which means that these call their local
+``-l`` variants in all directories containing a Makefile. This
+allows for true depth-first traversal, which is necessary to correctly
+run the ``*clean`` targets: otherwise e.g. ``paths.mk`` will
+be deleted before subdirectory ``*clean`` targets are called that
+depend on information in it.
+
+Debugging and developing
+------------------------
 While working on DOMjudge, it is useful to run the Symfony webapp in
 development mode to have access to the profiling and debugging
 interfaces and extended logging. To run in development mode, create
@@ -89,35 +111,6 @@ Replace the following:
 
 Everything except ``<version>`` can be found in ``etc/dbpasswords.secret``.
 
-The file ``webapp/.env.test`` (and ``webapp/.env.test.local`` if it
-exists) are loaded when you run the unit tests. You can thus place any
-test-specific settings in there.
-
-Makefile structure
-------------------
-The Makefiles in the source tree use a recursion mechanism to run make
-targets within the relevant subdirectories. The recursion is handled
-by the ``REC_TARGETS`` and ``SUBDIRS`` variables and the
-recursion step is executed in ``Makefile.global``. Any target
-added to the ``REC_TARGETS`` list will be recursively called in
-all directories in ``SUBDIRS``. Moreover, a local variant of the
-target with ``-l`` appended is called after recursing into the
-subdirectories, so recursion is depth-first.
-
-The targets ``dist``, ``clean``, ``distclean``, ``maintainer-clean``
-are recursive by default, which means that these call their local
-``-l`` variants in all directories containing a Makefile. This
-allows for true depth-first traversal, which is necessary to correctly
-run the ``*clean`` targets: otherwise e.g. ``paths.mk`` will
-be deleted before subdirectory ``*clean`` targets are called that
-depend on information in it.
-
-Debugging
----------
-To enable debugging in the web interface, make sure you have set
-``APP_ENV=dev`` in the file ``webapp/.env.local``. This will disable
-caching of files and enable the Symfony profiling bar on each page.
-
 For the judgeadaemon, use the ``-v`` commandline option to increase
 verbosity. It takes a numeric argument corresponding to the syslog
 loglevels. Use ``-v 7`` to enable loglevel debug. This will also show
@@ -132,7 +125,6 @@ to enable it.
 
 Running the test suite
 ----------------------
-
 The DOMjudge sources ship with a comprehensive test-suite that contains
 unit, integration and functional tests to make sure the system works.
 
@@ -148,6 +140,10 @@ To run them, follow the following steps:
 Note that you don't have to drop and recreate the database everytime you run the
 tests; the tests are written in such a way that they keep working, even if you
 run them multple times.
+
+The file ``webapp/.env.test`` (and ``webapp/.env.test.local`` if it
+exists) are loaded when you run the unit tests. You can thus place any
+test-specific settings in there.
 
 Now to run the tests, execute the command::
 
