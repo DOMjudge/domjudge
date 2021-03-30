@@ -407,6 +407,7 @@ class ExecutableController extends BaseController
                     ->setFilename($filename)
                     ->setFileContent($newContent);
                 $this->em->persist($executableFile);
+                $immutableExecutable->addFile($executableFile);
             }
 
             $executable->setImmutableExecutable($immutableExecutable);
