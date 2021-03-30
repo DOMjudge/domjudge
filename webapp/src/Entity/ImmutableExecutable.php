@@ -63,6 +63,9 @@ class ImmutableExecutable
 
     public function addFile(ExecutableFile $file): ImmutableExecutable
     {
+        if ($this->files === null) {
+            $this->files = new ArrayCollection();
+        }
         $this->files->add($file);
         return $this;
     }

@@ -1035,6 +1035,7 @@ class DOMJudgeService
                 ->setImmutableExecutable($immutableExecutable)
                 ->setIsExecutable($executableBit);
             $this->em->persist($executableFile);
+            $immutableExecutable->addFile($executableFile);
             $rank++;
         }
         return $immutableExecutable;
