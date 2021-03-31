@@ -288,7 +288,7 @@ abstract class BaseTest extends BaseBaseTest
     protected function resolveReference($id)
     {
         // If the object ID contains a :, it is a reference to a fixture item, so get it
-        if (strpos($id, ':') !== false) {
+        if (is_string($id) && strpos($id, ':') !== false) {
             $referenceObject = $this->fixtureExecutor->getReferenceRepository()->getReference($id);
             $metadata = static::$container->get(EntityManagerInterface::class)->getClassMetadata(get_class($referenceObject));
             $propertyAccessor = PropertyAccess::createPropertyAccessor();
