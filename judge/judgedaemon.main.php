@@ -273,14 +273,21 @@ function fetch_executable(
         $content = request(sprintf('judgehosts/get_files/%s/%s', $type, $execid), 'GET');
         $files = dj_json_decode($content);
         unset($content);
+        $concatenatedMd5s = '';
         foreach ($files as $file) {
             $filename = $execbuilddir . '/' . $file['filename'];
-            file_put_contents($filename, base64_decode($file['content']));
+            $content = base64_decode($file['content']);
+            $concatenatedMd5s .= md5($content);
+            file_put_contents($filename, $content);
             if ($file['is_executable']) {
                 chmod($filename, 0755);
             }
         }
         unset($files);
+        $computedHash = md5($concatenatedMd5s);
+        if ($hash !== $computedHash) {
+            return [null, "Unexpected hash ($computedHash), expected hash: $hash"];
+        }
 
         $do_compile = true;
         if (!file_exists($execbuildpath)) {
