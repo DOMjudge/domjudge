@@ -7,6 +7,7 @@ use App\Tests\BaseTest as BaseBaseTest;
 use Doctrine\ORM\EntityManagerInterface;
 use Generator;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
+use Symfony\Component\PropertyAccess\PropertyAccess;
 
 abstract class BaseTest extends BaseBaseTest
 {
@@ -114,6 +115,7 @@ abstract class BaseTest extends BaseBaseTest
 
         static::assertIsArray($objects);
         foreach ($this->expectedObjects as $expectedObjectId => $expectedObject) {
+            $expectedObjectId = $this->resolveReference($expectedObjectId);
             $object = null;
             foreach ($objects as $potentialObject) {
                 if ($potentialObject['id'] == $expectedObjectId) {
@@ -123,6 +125,7 @@ abstract class BaseTest extends BaseBaseTest
             }
 
             static::assertNotNull($object);
+            static::assertEquals($expectedObjectId, $object['id']);
             foreach ($expectedObject as $key => $value) {
                 static::assertEquals($value, $object[$key]);
             }
@@ -150,14 +153,17 @@ abstract class BaseTest extends BaseBaseTest
             static::markTestSkipped('No endpoint defined');
         }
         $contestId = $this->demoContest->getCid();
-        $objects = $this->verifyApiJsonResponse('GET', "/contests/$contestId/$apiEndpoint?" . http_build_query(['ids' => array_keys($this->expectedObjects)]), 200, $this->apiUser);
+        $expectedObjectIds = array_map(function ($id) {
+            return $this->resolveReference($id);
+        }, array_keys($this->expectedObjects));
+        $objects = $this->verifyApiJsonResponse('GET', "/contests/$contestId/$apiEndpoint?" . http_build_query(['ids' => $expectedObjectIds]), 200, $this->apiUser);
 
         // Verify we got exactly enough objects
         static::assertIsArray($objects);
         static::assertCount(count($this->expectedObjects), $objects);
 
         // Verify all objects are present
-        foreach (array_keys($this->expectedObjects) as $expectedObjectId) {
+        foreach ($expectedObjectIds as $expectedObjectId) {
             $object = null;
             foreach ($objects as $potentialObject) {
                 if ($potentialObject['id'] == $expectedObjectId) {
@@ -205,7 +211,11 @@ abstract class BaseTest extends BaseBaseTest
             static::markTestSkipped('No endpoint defined');
         }
         $contestId = $this->demoContest->getCid();
-        $ids = array_merge(array_keys($this->expectedObjects), $this->expectedAbsent);
+
+        $expectedObjectIds = array_map(function ($id) {
+            return $this->resolveReference($id);
+        }, array_keys($this->expectedObjects));
+        $ids = array_merge($expectedObjectIds, $this->expectedAbsent);
         $response = $this->verifyApiJsonResponse('GET', "/contests/$contestId/$apiEndpoint?" . http_build_query(['ids' => $ids]), 404, $this->apiUser);
         static::assertEquals('One or more objects not found', $response['message']);
     }
@@ -217,6 +227,7 @@ abstract class BaseTest extends BaseBaseTest
      */
     public function testSingle($id, array $expectedProperties)
     {
+        $id = $this->resolveReference($id);
         if (($apiEndpoint = $this->apiEndpoint) === null) {
             static::markTestSkipped('No endpoint defined');
         }
@@ -256,6 +267,7 @@ abstract class BaseTest extends BaseBaseTest
      */
     public function testSingleNotFound(string $id)
     {
+        $id = $this->resolveReference($id);
         if (($apiEndpoint = $this->apiEndpoint) === null) {
             static::markTestSkipped('No endpoint defined');
         }
@@ -268,5 +280,21 @@ abstract class BaseTest extends BaseBaseTest
         foreach ($this->expectedAbsent as $id) {
             yield [$id];
         }
+    }
+
+    /**
+     * Resolve any references in the given ID
+     */
+    protected function resolveReference($id)
+    {
+        // If the object ID contains a :, it is a reference to a fixture item, so get it
+        if (strpos($id, ':') !== false) {
+            $referenceObject = $this->fixtureExecutor->getReferenceRepository()->getReference($id);
+            $metadata = static::$container->get(EntityManagerInterface::class)->getClassMetadata(get_class($referenceObject));
+            $propertyAccessor = PropertyAccess::createPropertyAccessor();
+            return $propertyAccessor->getValue($referenceObject, $metadata->getSingleIdentifierColumnName());
+        }
+
+        return $id;
     }
 }

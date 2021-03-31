@@ -2,19 +2,49 @@
 
 namespace App\Tests\Controller\API;
 
+use App\DataFixtures\Test\RemoveTeamFromDummyUserFixture;
 use App\Entity\Clarification;
-use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Generator;
 
 class ClarificationControllerTest extends BaseTest
 {
+    protected $apiEndpoint = 'clarifications';
+
+    protected $apiUser = 'admin';
+
+    // These come from the ExampleData\ClarificationFixture class
+    protected $expectedObjects = [
+        '1' => [
+            "problem_id"   => "1",
+            "from_team_id" => "2",
+            "to_team_id"   => null,
+            "reply_to_id"  => null,
+            "time"         => "2018-02-11T21:47:18.901+00:00",
+            "contest_time" => "-16525:12:41.098",
+            "text"         => "Can you tell me how to solve this problem?",
+        ],
+        '2' => [
+            "problem_id"   => "1",
+            "from_team_id" => null,
+            "to_team_id"   => "2",
+            "reply_to_id"  => "1",
+            "time"         => "2018-02-11T21:47:57.689+00:00",
+            "contest_time" => "-16525:12:02.310",
+            "text"         => "> Can you tell me how to solve this problem?\r\n\r\nNo, read the problem statement.",
+        ],
+    ];
+
+    protected $expectedAbsent = ['4242', 'nonexistent'];
+
     /**
      * Test that a non logged in user can not add a clarification
      */
-    public function testAddSubmissionNoAccess()
+    public function testAddNoAccess()
     {
-        $this->verifyApiJsonResponse('POST', '/contests/2/clarifications', 401);
+        $contestId = $this->demoContest->getCid();
+        $apiEndpoint = $this->apiEndpoint;
+        $this->verifyApiJsonResponse('POST', "/contests/$contestId/$apiEndpoint", 401);
     }
 
     /**
@@ -24,7 +54,9 @@ class ClarificationControllerTest extends BaseTest
      */
     public function testAddMissingData(string $user, array $dataToSend, string $expectedMessage)
     {
-        $data = $this->verifyApiJsonResponse('POST', '/contests/2/clarifications', 400, $user, $dataToSend);
+        $contestId = $this->demoContest->getCid();
+        $apiEndpoint = $this->apiEndpoint;
+        $data = $this->verifyApiJsonResponse('POST', "/contests/$contestId/$apiEndpoint", 400, $user, $dataToSend);
         static::assertEquals($expectedMessage, $data['message']);
     }
 
@@ -49,13 +81,11 @@ class ClarificationControllerTest extends BaseTest
      */
     public function testMissingTeam()
     {
-        // First, remove the team from the dummy user
-        /** @var User $user */
-        $user = static::$container->get(EntityManagerInterface::class)->getRepository(User::class)->findOneBy(['username' => 'dummy']);
-        $user->setTeam();
-        static::$container->get(EntityManagerInterface::class)->flush();
+        $this->loadFixture(RemoveTeamFromDummyUserFixture::class);
 
-        $data = $this->verifyApiJsonResponse('POST', '/contests/2/clarifications', 400, 'dummy', ['text' => 'This is some text']);
+        $contestId = $this->demoContest->getCid();
+        $apiEndpoint = $this->apiEndpoint;
+        $data = $this->verifyApiJsonResponse('POST', "/contests/$contestId/$apiEndpoint", 400, 'dummy', ['text' => 'This is some text']);
 
         static::assertEquals('User does not belong to a team', $data['message']);
     }
@@ -78,7 +108,10 @@ class ClarificationControllerTest extends BaseTest
         ?string $expectedTime // If known
     )
     {
-        $clarificationId = $this->verifyApiJsonResponse('POST', '/contests/2/clarifications', 200, $user, $dataToSend);
+        $contestId = $this->demoContest->getCid();
+        $apiEndpoint = $this->apiEndpoint;
+
+        $clarificationId = $this->verifyApiJsonResponse('POST', "/contests/$contestId/$apiEndpoint", 200, $user, $dataToSend);
         static::assertIsString($clarificationId);
 
         // Now load the clarification
@@ -105,6 +138,14 @@ class ClarificationControllerTest extends BaseTest
         if ($expectedTime) {
             static::assertEquals($expectedTime, $clarification->getAbsoluteSubmitTime());
         }
+
+        // Also load the clarification from the API, to see it now gets returned
+        $clarificationFromApi = $this->verifyApiJsonResponse('GET', "/contests/$contestId/$apiEndpoint/$clarificationId", 200, 'admin');
+        static::assertEquals($expectedBody, $clarificationFromApi['text'], 'Wrong body');
+        static::assertEquals($expectedProblemId, $clarificationFromApi['problem_id'], 'Wrong problem ID');
+        static::assertEquals($expectedSenderId, $clarificationFromApi['from_team_id'], 'Wrong sender ID');
+        static::assertEquals($expectedRecipientId, $clarificationFromApi['to_team_id'], 'Wrong recipient ID');
+        static::assertEquals($expectedInReplyToId, $clarificationFromApi['reply_to_id'], 'Wrong in reply to ID');
     }
 
     public function provideAddSuccess(): Generator

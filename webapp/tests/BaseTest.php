@@ -2,7 +2,6 @@
 
 namespace App\Tests;
 
-use App\Entity\Configuration;
 use App\Entity\Role;
 use App\Entity\User;
 use App\Service\ConfigurationService;
@@ -35,8 +34,12 @@ abstract class BaseTest extends WebTestCase
     /** @var string[] */
     protected static $roles = [];
 
+    /** @var ORMExecutor */
+    protected $fixtureExecutor;
+
     /**
      * What fixtures to load
+     *
      * @var string[]
      */
     protected static $fixtures = [];
@@ -55,17 +58,40 @@ abstract class BaseTest extends WebTestCase
         }
 
         if (!empty(static::$fixtures)) {
-            $loader = new Loader();
-            foreach (static::$fixtures as $fixture) {
-                if (!is_subclass_of($fixture, FixtureInterface::class)) {
-                    throw new Exception(sprintf('%s is not a fixture', $fixture));
-                }
-                $loader->addFixture(new $fixture());
-            }
-
-            $executor = new ORMExecutor(static::$container->get(EntityManagerInterface::class));
-            $executor->execute($loader->getFixtures(), true);
+            $this->loadFixtures(static::$fixtures);
         }
+    }
+
+    /**
+     * Load the given fixturs
+     *
+     * @throws Exception
+     */
+    protected function loadFixtures(array $fixtures)
+    {
+        if ($this->fixtureExecutor === null) {
+            $this->fixtureExecutor = new ORMExecutor(static::$container->get(EntityManagerInterface::class));
+        }
+
+        $loader = new Loader();
+        foreach ($fixtures as $fixture) {
+            if (!is_subclass_of($fixture, FixtureInterface::class)) {
+                throw new Exception(sprintf('%s is not a fixture', $fixture));
+            }
+            $loader->addFixture(new $fixture());
+        }
+
+        $this->fixtureExecutor->execute($loader->getFixtures(), true);
+    }
+
+    /**
+     * Load the given fixture
+     *
+     * @throws Exception
+     */
+    protected function loadFixture(string $fixture)
+    {
+        $this->loadFixtures([$fixture]);
     }
 
     protected function loginHelper(
@@ -73,22 +99,21 @@ abstract class BaseTest extends WebTestCase
         string $password,
         string $redirectPage,
         int $responseCode
-    ) : KernelBrowser
-    {
+    ): KernelBrowser {
         $crawler = $this->client->request('GET', '/login');
 
         # load login page
         $response = $this->client->getResponse();
-        $message  = var_export($response, true);
+        $message = var_export($response, true);
         self::assertEquals(200, $response->getStatusCode(), $message);
 
         $csrf_token = $this->client->getContainer()->get('security.csrf.token_manager')->getToken('authenticate');
 
         # submit form
         $button = $crawler->selectButton('Sign in');
-        $form   = $button->form(array(
-            '_username' => $username,
-            '_password' => $password,
+        $form = $button->form(array(
+            '_username'   => $username,
+            '_password'   => $password,
             '_csrf_token' => $csrf_token,
         ));
         $this->client->followRedirects();
@@ -99,9 +124,9 @@ abstract class BaseTest extends WebTestCase
         # check redirected to $redirectPage
         $message = var_export($response, true);
         self::assertEquals($responseCode, $response->getStatusCode(),
-                           $message);
+            $message);
         self::assertEquals($redirectPage,
-                           $this->client->getRequest()->getUri(), $message);
+            $this->client->getRequest()->getUri(), $message);
 
         return $this->client;
     }
@@ -118,10 +143,10 @@ abstract class BaseTest extends WebTestCase
     {
         $session = $this->client->getContainer()->get('session');
 
-        $firewallName    = 'main';
+        $firewallName = 'main';
         $firewallContext = 'main';
 
-        $user  = $this->setupUser();
+        $user = $this->setupUser();
         $token = new UsernamePasswordToken($user, null, $firewallName,
             $user->getRoles());
         $session->set('_security_' . $firewallContext, serialize($token));
@@ -146,7 +171,7 @@ abstract class BaseTest extends WebTestCase
     /**
      * Set up the dummy user with the roles given in static::$roles
      */
-    protected function setupUser() : User
+    protected function setupUser(): User
     {
         $em = $this->client->getContainer()->get('doctrine.orm.entity_manager');
         /** @var User $user */
@@ -167,17 +192,16 @@ abstract class BaseTest extends WebTestCase
     /**
      * Run the given callback while temporarily changing the given configuration setting
      *
-     * @param mixed    $configValue
+     * @param mixed $configValue
      */
     protected function withChangedConfiguration(
         string $configKey,
         $configValue,
         callable $callback
-    ) : void
-    {
-        $config   = self::$container->get(ConfigurationService::class);
+    ): void {
+        $config = self::$container->get(ConfigurationService::class);
         $eventLog = self::$container->get(EventLogService::class);
-        $dj       = self::$container->get(DOMJudgeService::class);
+        $dj = self::$container->get(DOMJudgeService::class);
 
         // Build up the data to set
         $dataToSet = [$configKey => $configValue];

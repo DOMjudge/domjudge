@@ -2,6 +2,7 @@
 
 namespace App\Serializer;
 
+use App\Entity\Clarification;
 use App\Entity\ExternalRelationshipEntityInterface;
 use App\Entity\Submission;
 use App\Service\EventLogService;
@@ -66,9 +67,9 @@ class SetExternalIdVisitor implements EventSubscriberInterface
                     );
                     $visitor->visitProperty($property, $object->{$method}());
                 }
-            } elseif ($object instanceof Submission && $object->getExternalid() !== null) {
-                // Special case for submissions: they can have an external ID even if when running in
-                // full local mode, because one can use the API to upload a submission with an external ID
+            } elseif (($object instanceof Submission || $object instanceof Clarification) && $object->getExternalid() !== null) {
+                // Special case for submissions and clarifications: they can have an external ID even if when running in
+                // full local mode, because one can use the API to upload one with an external ID
                 $property = new StaticPropertyMetadata(
                     get_class($object),
                     'id',
@@ -93,9 +94,9 @@ class SetExternalIdVisitor implements EventSubscriberInterface
                             );
                             $visitor->visitProperty($property, $entity->{$method}());
                         }
-                    } elseif ($entity && $entity instanceof Submission && $entity->getExternalid() !== null) {
-                        // Special case for submissions: they can have an external ID even if when running in
-                        // full local mode, because one can use the API to upload a submission with an external ID
+                    } elseif ($entity && ($entity instanceof Submission || $entity instanceof Clarification) && $entity->getExternalid() !== null) {
+                        // Special case for submissions and clarifications: they can have an external ID even if when running in
+                        // full local mode, because one can use the API to upload one with an external ID
                         $property = new StaticPropertyMetadata(
                             get_class($entity),
                             $field,

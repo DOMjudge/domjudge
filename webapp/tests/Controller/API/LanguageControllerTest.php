@@ -10,14 +10,12 @@ class LanguageControllerTest extends BaseTest
 
     protected $expectedObjects = [
         'cpp'  => [
-            'id'                   => 'cpp',
             'name'                 => 'C++',
             'entry_point_required' => false,
             'entry_point_name'     => null,
             'extensions'           => ['cpp', 'cc', 'cxx', 'c++'],
         ],
         'java' => [
-            'id'                   => 'java',
             'name'                 => 'Java',
             'entry_point_required' => true,
             'entry_point_name'     => 'Main class',

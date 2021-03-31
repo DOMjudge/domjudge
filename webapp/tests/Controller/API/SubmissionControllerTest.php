@@ -2,10 +2,12 @@
 
 namespace App\Tests\Controller\API;
 
-use App\Entity\Language;
+use App\DataFixtures\Test\EnableKotlinFixture;
+use App\DataFixtures\Test\RemoveTeamFromAdminUserFixture;
+use App\DataFixtures\Test\RemoveTeamFromDummyUserFixture;
+use App\DataFixtures\Test\SampleSubmissionsFixture;
 use App\Entity\Submission;
 use App\Entity\SubmissionFile;
-use App\Entity\User;
 use App\Service\DOMJudgeService;
 use Doctrine\ORM\EntityManagerInterface;
 use Generator;
@@ -14,12 +16,39 @@ use ZipArchive;
 
 class SubmissionControllerTest extends BaseTest
 {
+    protected $apiEndpoint = 'submissions';
+
+    protected $apiUser = 'admin';
+
+    protected $expectedObjects = [
+        SampleSubmissionsFixture::class . ':0' => [
+            'problem_id'  => '1',
+            'language_id' => 'cpp',
+            'team_id'     => '1',
+            'entry_point' => null,
+            'time'        => '2021-01-01T12:34:56.000+00:00',
+        ],
+        SampleSubmissionsFixture::class . ':1' => [
+            'problem_id'  => '3',
+            'language_id' => 'java',
+            'team_id'     => '2',
+            'entry_point' => 'Main',
+            'time'        => '2021-03-04T12:00:00.000+00:00',
+        ],
+    ];
+
+    protected $expectedAbsent = ['4242', 'nonexistent'];
+
+    protected static $fixtures = [SampleSubmissionsFixture::class];
+
     /**
      * Test that a non logged in user can not add a submission
      */
     public function testAddSubmissionNoAccess()
     {
-        $this->verifyApiJsonResponse('POST', '/contests/2/submissions', 401);
+        $contestId = $this->demoContest->getCid();
+        $apiEndpoint = $this->apiEndpoint;
+        $this->verifyApiJsonResponse('POST', "/contests/$contestId/$apiEndpoint", 401);
     }
 
     /**
@@ -29,7 +58,9 @@ class SubmissionControllerTest extends BaseTest
      */
     public function testAddMissingData(string $user, array $dataToSend, string $expectedMessage)
     {
-        $data = $this->verifyApiJsonResponse('POST', '/contests/2/submissions', 400, $user, $dataToSend);
+        $contestId = $this->demoContest->getCid();
+        $apiEndpoint = $this->apiEndpoint;
+        $data = $this->verifyApiJsonResponse('POST', "/contests/$contestId/$apiEndpoint", 400, $user, $dataToSend);
         static::assertEquals($expectedMessage, $data['message']);
     }
 
@@ -111,14 +142,11 @@ class SubmissionControllerTest extends BaseTest
      */
     public function testMissingEntryPoint()
     {
-        // First, enable Kotlin as a language
-        $em = self::$container->get(EntityManagerInterface::class);
-        /** @var Language $kotlin */
-        $kotlin = $em->getRepository(Language::class)->find('kt');
-        $kotlin->setAllowSubmit(true);
-        $em->flush();
+        $this->loadFixture(EnableKotlinFixture::class);
 
-        $data = $this->verifyApiJsonResponse('POST', '/contests/2/submissions', 400, 'dummy', ['problem_id' => 1, 'language' => 'kotlin']);
+        $contestId = $this->demoContest->getCid();
+        $apiEndpoint = $this->apiEndpoint;
+        $data = $this->verifyApiJsonResponse('POST', "/contests/$contestId/$apiEndpoint", 400, 'dummy', ['problem_id' => 1, 'language' => 'kotlin']);
 
         static::assertEquals('Main class required, but not specified.', $data['message']);
     }
@@ -130,13 +158,11 @@ class SubmissionControllerTest extends BaseTest
      */
     public function testMissingTeam(string $username)
     {
-        // First, remove the team from the user
-        /** @var User $user */
-        $user = static::$container->get(EntityManagerInterface::class)->getRepository(User::class)->findOneBy(['username' => $username]);
-        $user->setTeam();
-        static::$container->get(EntityManagerInterface::class)->flush();
+        $this->loadFixtures([RemoveTeamFromDummyUserFixture::class, RemoveTeamFromAdminUserFixture::class]);
 
-        $data = $this->verifyApiJsonResponse('POST', '/contests/2/submissions', 400, $username, ['problem_id' => 1, 'language' => 'cpp']);
+        $contestId = $this->demoContest->getCid();
+        $apiEndpoint = $this->apiEndpoint;
+        $data = $this->verifyApiJsonResponse('POST', "/contests/$contestId/$apiEndpoint", 400, $username, ['problem_id' => 1, 'language' => 'cpp']);
 
         static::assertEquals('User does not belong to a team', $data['message']);
     }
@@ -166,12 +192,10 @@ class SubmissionControllerTest extends BaseTest
         array $expectedFiles,
         ?string $expectedEntryPoint = null
     ) {
-        // First, enable Kotlin as a language as this is the only language with an entrypoint
-        $em = self::$container->get(EntityManagerInterface::class);
-        /** @var Language $kotlin */
-        $kotlin = $em->getRepository(Language::class)->find('kt');
-        $kotlin->setAllowSubmit(true);
-        $em->flush();
+        $this->loadFixture(EnableKotlinFixture::class);
+
+        $contestId = $this->demoContest->getCid();
+        $apiEndpoint = $this->apiEndpoint;
 
         if ($zipFiles !== null) {
             if (!isset($dataToSend['files'])) {
@@ -182,7 +206,7 @@ class SubmissionControllerTest extends BaseTest
             }
             $dataToSend['files'][0]['data'] = $this->base64ZipWithFiles($zipFiles);
         }
-        $submissionId = $this->verifyApiJsonResponse('POST', '/contests/2/submissions', 200, $user, $dataToSend, $filesToSend);
+        $submissionId = $this->verifyApiJsonResponse('POST', "/contests/$contestId/$apiEndpoint", 200, $user, $dataToSend, $filesToSend);
         static::assertIsString($submissionId);
 
         // Now load the submission
@@ -211,6 +235,11 @@ class SubmissionControllerTest extends BaseTest
             $submissionFiles[$file->getFilename()] = $file->getSourcecode();
         }
         static::assertEquals($expectedFiles, $submissionFiles, 'Wrong files');
+
+        // Also load the submission from the API, to see it now gets returned
+        $contestId = $this->demoContest->getCid();
+        $apiEndpoint = $this->apiEndpoint;
+        $submissionFromApi = $this->verifyApiJsonResponse('GET', "/contests/$contestId/$apiEndpoint/$submissionId", 200, 'admin');
     }
 
     public function provideAddSuccess(): Generator
@@ -392,7 +421,7 @@ class SubmissionControllerTest extends BaseTest
      */
     protected function base64ZipWithFiles(array $files): string
     {
-        $zip          = new ZipArchive();
+        $zip = new ZipArchive();
         $tempFilename = tempnam(static::$container->get(DOMJudgeService::class)->getDomjudgeTmpDir(), "api-submissions-test-");
 
         $zip->open($tempFilename, ZipArchive::OVERWRITE);

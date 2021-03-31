@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Entity\Clarification;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\Event;
@@ -913,15 +914,21 @@ class EventLogService implements ContainerAwareInterface
             throw new \BadMethodCallException(sprintf('No entity defined for type \'%s\'', $type));
         }
 
-        // Special case for submissions: they can have an external ID even if when running in
-        // full local mode, because one can use the API to upload a submission with an external ID
-        if ($entity === Submission::class) {
-            return array_map(function (array $item) {
-                return $item['externalid'] ?? $item['submitid'];
+        // Special case for submissions and clarifications: they can have an external ID even if when running in
+        // full local mode, because one can use the API to upload one with an external ID
+        $externalIdAlwaysAllowed = [
+            Submission::class    => 's.submitid',
+            Clarification::class => 'clar.clarid',
+        ];
+        if (isset($externalIdAlwaysAllowed[$entity])) {
+            $fullField = $externalIdAlwaysAllowed[$entity];
+            [$table, $field] = explode('.', $fullField);
+            return array_map(function (array $item) use ($field) {
+                return $item['externalid'] ?? $item[$field];
             }, $this->em->createQueryBuilder()
-                ->from(Submission::class, 's')
-                ->select('s.submitid', 's.externalid')
-                ->andWhere('s.submitid IN (:ids)')
+                ->from($entity, $table)
+                ->select($fullField, sprintf('%s.externalid', $table))
+                ->andWhere(sprintf('%s IN (:ids)', $fullField))
                 ->setParameter(':ids', $ids)
                 ->getQuery()
                 ->getScalarResult());
