@@ -331,11 +331,12 @@ function fetch_executable(
                     $buildscript .= "javac -cp $execpath -d $execpath '$source'.java\n";
                     $buildscript .= "echo '#!/bin/sh' > run\n";
                     // no main class detection here
-                    $buildscript .= "echo 'java -cp $execpath '$source' >> run\n";
+                    $buildscript .= "echo 'java -cp $execpath '$source >> run\n";
                     break;
                 case 'py':
                     $buildscript .= "echo '#!/bin/sh' > run\n";
-                    $buildscript .= "echo 'python '$source' >> run\n";
+                    // TODO: Check if it's 'python' or 'python3'
+                    $buildscript .= "echo 'python '$source >> run\n";
                     break;
                 }
                 if ( $combined_run_compare ) {
@@ -405,6 +406,7 @@ EOT;
             if ($retval!=0) {
                 return array(null, "Could not run ./build in $execpath.");
             }
+            chmod($execrunpath, 0755);
             chdir($olddir);
         }
         if (!file_exists($execrunpath) || !is_executable($execrunpath)) {
