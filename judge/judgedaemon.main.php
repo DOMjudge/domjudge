@@ -338,11 +338,12 @@ function fetch_executable(
                     $buildscript .= "javac -cp ./ -d ./ '$source'.java\n";
                     $buildscript .= "echo '#!/bin/sh' > run\n";
                     // no main class detection here
-                    $buildscript .= "echo 'java -cp ./ '$source' >> run\n";
+                    $buildscript .= "echo 'java -cp ./ '$source >> run\n";
                     break;
                 case 'py':
                     $buildscript .= "echo '#!/bin/sh' > run\n";
-                    $buildscript .= "echo 'python '$source' >> run\n";
+                    // TODO: Check if it's 'python' or 'python3'
+                    $buildscript .= "echo 'python '$source >> run\n";
                     break;
                 }
                 if ( $combined_run_compare ) {
@@ -410,6 +411,7 @@ EOT;
             if ($retval!==0) {
                 return [null, "Failed to build executable in $execdir."];
             }
+            chmod($execrunpath, 0755);
         }
         if (!is_file($execrunpath) || !is_executable($execrunpath)) {
             return [null, "Invalid build file, must produce an executable file 'run'."];
