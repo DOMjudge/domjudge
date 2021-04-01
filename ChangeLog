@@ -7,8 +7,10 @@ Version 7.3.3 - DEV
  - Fix for browser swallowing newlines in output listings.
  - Improve feedback when submitting without team member role.
  - Fix compatibility with composer 2.0.
+ - Fix compatibility with MySQL 8.
  - Fix ability to restart a not yet judged submission.
  - Fix team pages when there is no active contest.
+ - Fix judgedaemon fallback run scripts for Java and Python.
  - Set doctrine server version to a safe base.
  - Decrease our default hash cost for user passwords so importing
    many accounts at once does not take an unreasonable time.
