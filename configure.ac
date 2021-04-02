@@ -106,7 +106,7 @@ fi
 # {{{ runguard
 AC_MSG_CHECKING([runuser])
 AC_ARG_WITH([runuser], [AS_HELP_STRING([--with-runuser=USER],
-[Unprivileged user under which to run submissions (default: domjudge-run).])], [], [])
+[Unprivileged user (prefix) under which to run submissions (default: domjudge-run).])], [], [])
 
 if test "x$with_runuser" = x; then
 	AC_SUBST(RUNUSER,"domjudge-run")

@@ -54,6 +54,9 @@ suffice to add a user and group ``domjudge-run`` with minimal privileges::
 
   sudo useradd -d /nonexistent -U -M -s /bin/false domjudge-run
 
+See the section :ref:`multiple-judgedaemons` for running multiple
+judgedaemons on a single host and/or binding it to a single CPU core.
+
 Sudo permissions
 ----------------
 

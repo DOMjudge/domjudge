@@ -11,6 +11,7 @@ if (isset($_SERVER['REMOTE_ADDR'])) {
 }
 
 require(ETCDIR . '/judgehost-config.php');
+require(LIBDIR . '/lib.misc.php');
 
 $endpoints = [];
 $domjudge_config = [];
@@ -231,7 +232,7 @@ function usage()
     echo "Usage: " . SCRIPT_ID . " [OPTION]...\n" .
         "Start the judgedaemon.\n\n" .
         "  -d       daemonize after startup\n" .
-        "  -n <id>  daemon number\n" .
+        "  -n <id>  bind to CPU <id> and user " . RUNUSER . "-<id>\n" .
         "  -v       set verbosity to LEVEL (syslog levels)\n" .
         "  -h       display this help and exit\n" .
         "  -V       output version information and exit\n\n";
@@ -463,7 +464,6 @@ if (isset($options['daemonid'])) {
 
 define('LOGFILE', LOGDIR.'/judge.'.$myhost.'.log');
 require(LIBDIR . '/lib.error.php');
-require(LIBDIR . '/lib.misc.php');
 
 $verbose = LOG_INFO;
 if (isset($options['verbose'])) {

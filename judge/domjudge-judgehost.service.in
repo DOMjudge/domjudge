@@ -7,8 +7,15 @@ After=network.target
 [Service]
 Type=simple
 
-ExecStart=@judgehost_bindir@/judgedaemon -n 0
+ExecStart=@judgehost_bindir@/judgedaemon
 User=@DOMJUDGE_USER@
+
+# If you want to run multiple judgedaemons per machine, or bind it to
+# a single CPU core, use the following instead, replacing X with the
+# specific core, starting from 0 and create a separate copy of this
+# file for each judgedaemon instance.
+#ExecStart=@judgehost_bindir@/judgedaemon -n X
+#User=@DOMJUDGE_USER@-X
 
 Restart=always
 RestartSec=3
