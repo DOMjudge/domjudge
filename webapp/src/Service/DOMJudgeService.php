@@ -96,6 +96,11 @@ class DOMJudgeService
     const DATA_SOURCE_CONFIGURATION_EXTERNAL = 1;
     const DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL = 2;
 
+    // Regex external identifiers must adhere to. Note that we are not checking whether it
+    // does not start with a dot or dash or ends with a dot. We could but it would make the
+    // regex way more complicated and would also complicate the logic in ImportExportService::importContestYaml
+    const EXTERNAL_IDENTIFIER_REGEX = '/^[a-zA-Z0-9_.-]+$/';
+
     /**
      * DOMJudgeService constructor.
      *

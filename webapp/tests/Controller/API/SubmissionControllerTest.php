@@ -135,6 +135,16 @@ class SubmissionControllerTest extends BaseTest
         yield ['admin', ['problem_id' => 1, 'language' => 'cpp', 'team_id' => 1], "No files specified."];
         yield ['admin', ['problem_id' => 1, 'language' => 'cpp', 'team_id' => 3], "Team 3 not found or not enabled"];
         yield ['admin', ['problem_id' => 1, 'language' => 'cpp', 'team_id' => 1, 'time' => 'this is not a time'], "Can not parse time this is not a time"];
+        yield [
+            'admin',
+            [
+                'problem_id'  => 1,
+                'language_id' => 'cpp',
+                'team_id'     => 1,
+                'id'          => '$this is not valid$',
+            ],
+            'ID $this is not valid$ is not valid',
+        ];
     }
 
     /**

@@ -152,8 +152,7 @@ class ImportExportService
             return false;
         }
 
-        $identifierChars = '[a-zA-Z0-9_-]';
-        $invalid_regex   = '/[^' . substr($identifierChars, 1) . '/';
+        $invalid_regex = str_replace(['/^[', '+$/'], ['/[^', '/'], DOMJudgeService::EXTERNAL_IDENTIFIER_REGEX);
 
         if (is_string($data['start-time'])) {
             $starttime = date_create_from_format(DateTime::ISO8601, $data['start-time']) ?:

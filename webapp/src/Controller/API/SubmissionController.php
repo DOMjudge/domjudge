@@ -333,6 +333,10 @@ class SubmissionController extends AbstractRestController
 
         if ($submissionId = $request->request->get('id')) {
             if ($this->isGranted('ROLE_API_WRITER')) {
+                if (preg_match(DOMJudgeService::EXTERNAL_IDENTIFIER_REGEX, $submissionId) !== 1) {
+                    throw new BadRequestHttpException(sprintf("ID %s is not valid", $submissionId));
+                }
+
                 // Check if we already have a submission with this ID
                 $existingSubmission = $this->em->createQueryBuilder()
                     ->from(Submission::class, 's')
