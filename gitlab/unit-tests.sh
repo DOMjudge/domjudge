@@ -18,10 +18,10 @@ export APP_ENV="test"
 
 # Run phpunit tests.
 php -dpcov.enabled=1 -dpcov.directory=webapp/src lib/vendor/bin/phpunit -c webapp/phpunit.xml.dist --log-junit ${CI_PROJECT_DIR}/unit-tests.xml --colors=never --coverage-html=${CI_PROJECT_DIR}/coverage-html --coverage-clover coverage.xml > phpunit.out
-CNT=$(sed -n '/Generating code coverage report/,$p' phpunit.out | wc -l)
+CNT=$(sed -n '/Generating code coverage report/,$p' phpunit.out | grep -v DoctrineTestBundle | grep -v ^$ | wc -l)
 FILE=deprecation.txt
 sed -n '/Generating code coverage report/,$p' phpunit.out > ${CI_PROJECT_DIR}/$FILE
-if [ $CNT -eq 3 ]; then
+if [ $CNT -lt 5 ]; then
     STATE=success
 else
     STATE=failure
