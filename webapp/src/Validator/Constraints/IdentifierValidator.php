@@ -2,6 +2,7 @@
 
 namespace App\Validator\Constraints;
 
+use App\Service\DOMJudgeService;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
@@ -25,7 +26,7 @@ class IdentifierValidator extends ConstraintValidator
             throw new UnexpectedTypeException($value, 'string');
         }
 
-        if (preg_match('/^[a-z0-9_-]+$/i', $value) !== 1) {
+        if (preg_match(DOMJudgeService::EXTERNAL_IDENTIFIER_REGEX, $value) !== 1) {
             $this->context->buildViolation($constraint->message)->addViolation();
         }
     }
