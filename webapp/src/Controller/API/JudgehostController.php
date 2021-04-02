@@ -788,7 +788,7 @@ class JudgehostController extends AbstractFOSRestController
 
         $this->dj->setInternalError($disabled, $contest, false);
 
-        if (in_array($disabled['kind'], ['problem', 'language', 'judgehost', 'executable']) && $judgingId) {
+        if (in_array($disabled['kind'], ['problem', 'language', 'judgehost', 'executable', 'testcase']) && $judgingId) {
             // Give back judging if we have to.
             if ($disabled['kind'] == 'judgehost') {
                 $hostname = $request->request->get('hostname');

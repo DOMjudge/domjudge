@@ -1094,7 +1094,7 @@ function judge(array $judgeTask): bool
     $tcfile = fetchTestcase($workdirpath, $judgeTask['testcase_id'], $judgeTask['judgetaskid']);
     if ($tcfile === NULL) {
         // error while fetching testcase
-        return true;
+        return false;
     }
 
     // Copy program with all possible additional files to testcase
