@@ -86,6 +86,7 @@ class RejudgingService
      */
     public function createRejudging(
         string $reason,
+        int $priority,
         array $judgings,
         bool $autoApply,
         int $repeat,
@@ -129,6 +130,7 @@ class RejudgingService
             }
 
             $this->em->transactional(function () use (
+                $priority,
                 $singleJudging,
                 $judging,
                 $rejudging
@@ -164,7 +166,7 @@ class RejudgingService
                 $this->em->persist($newJudging);
                 $this->em->flush();
 
-                $this->dj->maybeCreateJudgeTasks($newJudging);
+                $this->dj->maybeCreateJudgeTasks($newJudging, $priority);
             });
 
             if ($index > 1) {

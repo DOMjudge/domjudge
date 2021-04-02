@@ -337,4 +337,16 @@ class JudgeTask
     {
         return $this->starttime;
     }
+
+    public static function parsePriority(string $priorityString): int {
+        switch ($priorityString) {
+            case 'low':
+                return JudgeTask::PRIORITY_LOW;
+            case 'high':
+                return JudgeTask::PRIORITY_HIGH;
+            default:
+                return JudgeTask::PRIORITY_DEFAULT;
+
+        }
+    }
 }

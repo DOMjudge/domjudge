@@ -5,6 +5,7 @@ namespace App\Controller\Jury;
 use App\Controller\BaseController;
 use App\Entity\Contest;
 use App\Entity\Judgehost;
+use App\Entity\JudgeTask;
 use App\Entity\Judging;
 use App\Entity\JudgingRun;
 use App\Entity\Language;
@@ -471,6 +472,7 @@ class RejudgingController extends BaseController
             $formData = $form->getData();
             $data = [
                 'reason'     => $formData['reason'],
+                'priority'   => JudgeTask::parsePriority($formData['priority']),
                 'repeat'     => $formData['repeat'],
                 'contests'   => array_map(function (Contest $contest) {
                     return $contest->getCid();
@@ -588,7 +590,7 @@ class RejudgingController extends BaseController
 
                 $skipped = [];
                 $res     = $this->rejudgingService->createRejudging(
-                    $reason, $judgings, false, (int)$data['repeat'] ?? 1, null, $skipped, $progressReporter);
+                    $reason, $data['priority'], $judgings, false, (int)$data['repeat'] ?? 1, null, $skipped, $progressReporter);
                 $this->generateFlashMessagesForSkippedJudgings($skipped);
 
                 if ($res === null) {
@@ -620,6 +622,7 @@ class RejudgingController extends BaseController
         $includeAll = (bool)$request->request->get('include_all');
         $autoApply  = (bool)$request->request->get('auto_apply');
         $repeat     = (int)$request->request->get('repeat');
+        $priority   = $request->request->get('priority') ?: 'default';
 
         if (empty($table) || empty($id)) {
             throw new BadRequestHttpException('No table or id passed for selection in rejudging');
@@ -672,7 +675,7 @@ class RejudgingController extends BaseController
             flush();
         };
 
-        return $this->streamResponse(function() use ($progressReporter, $repeat, $reason, $request, $autoApply, $includeAll, $id, $table, $tablemap) {
+        return $this->streamResponse(function() use ($priority, $progressReporter, $repeat, $reason, $request, $autoApply, $includeAll, $id, $table, $tablemap) {
             // Only rejudge submissions in active contests.
             $contests = $this->dj->getCurrentContests();
 
@@ -719,7 +722,7 @@ class RejudgingController extends BaseController
             }
 
             $skipped = [];
-            $res     = $this->rejudgingService->createRejudging($reason, $judgings, $autoApply, $repeat, null, $skipped, $progressReporter);
+            $res     = $this->rejudgingService->createRejudging($reason, JudgeTask::parsePriority($priority), $judgings, $autoApply, $repeat, null, $skipped, $progressReporter);
             $this->generateFlashMessagesForSkippedJudgings($skipped);
 
             if ($res === null) {

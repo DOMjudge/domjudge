@@ -86,6 +86,14 @@
                         <label for="reason">Reason</label>
                         <input type="text" class="form-control" name="reason" id="reason" maxlength="255">
                     </div>
+                    <div id="rejudge-priority" class="form-group">
+                        <label for="priority">Priority</label>
+                        <select class="form-control" name="priority" id="priority">
+                            <option value="low">low</option>
+                            <option value="default" selected>default</option>
+                            <option value="high">high</option>
+                        </select>
+                    </div>
                     {% endif %}
                 </div>
                 <div class="modal-footer">

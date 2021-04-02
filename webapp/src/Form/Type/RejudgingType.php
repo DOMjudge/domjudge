@@ -44,6 +44,16 @@ class RejudgingType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder->add('reason', TextType::class);
+        $builder->add('priority', ChoiceType::class,
+            [
+                'choices' => [
+                    'low' => 'low',
+                    'default' => 'default',
+                    'high' => 'high',
+                ],
+                'data' => 'default',
+            ]
+        );
         $builder->add('repeat', IntegerType::class, [
             'label' => 'Number of times to repeat this rejudging',
             'data' => 1,
