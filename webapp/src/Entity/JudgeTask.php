@@ -19,9 +19,9 @@ use Symfony\Component\Validator\Constraints as Assert;
  *         @ORM\Index(name="jobid", columns={"jobid"}),
  *         @ORM\Index(name="submitid", columns={"submitid"}),
  *         @ORM\Index(name="valid", columns={"valid"}),
- *         @ORM\Index(name="hostname_jobid", columns={"hostname", "jobid"}),
- *         @ORM\Index(name="hostname_valid_priority", columns={"hostname", "valid", "priority"}),
- *         @ORM\Index(name="specific_type", columns={"hostname", "starttime", "valid", "type", "priority", "judgetaskid"}),
+ *         @ORM\Index(name="hostname_jobid", columns={"hostname", "jobid"}, options={"lengths": {64, null}}),
+ *         @ORM\Index(name="hostname_valid_priority", columns={"hostname", "valid", "priority"}, options={"lengths": {64, null, null}}),
+ *         @ORM\Index(name="specific_type", columns={"hostname", "starttime", "valid", "type", "priority", "judgetaskid"}, options={"lengths": {64, null, null, null, null, null}}),
  *     },
  *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Individual judge tasks."}
  *     )
