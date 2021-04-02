@@ -1078,7 +1078,7 @@ class DOMJudgeService
         }
     }
 
-    public function maybeCreateJudgeTasks(Judging $judging): void
+    public function maybeCreateJudgeTasks(Judging $judging, int $priority = JudgeTask::PRIORITY_DEFAULT): void
     {
         $submission = $judging->getSubmission();
         $problem    = $submission->getContestProblem();
@@ -1107,7 +1107,7 @@ class DOMJudgeService
         $judgetaskInsertParams = [
             ':type'              => JudgeTaskType::JUDGING_RUN,
             ':submitid'          => $submission->getSubmitid(),
-            ':priority'          => JudgeTask::PRIORITY_DEFAULT,
+            ':priority'          => $priority,
             ':jobid'             => $judging->getJudgingid(),
             ':compile_script_id' => $compileExecutable->getImmutableExecId(),
             ':compare_script_id' => $compareExecutable->getImmutableExecId(),
