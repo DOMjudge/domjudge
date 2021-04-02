@@ -96,8 +96,6 @@ class DOMJudgeService
     const DATA_SOURCE_CONFIGURATION_EXTERNAL = 1;
     const DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL = 2;
 
-    const CONFIGURATION_DEFAULT_PENALTY_TIME = 20;
-
     /**
      * DOMJudgeService constructor.
      *
@@ -109,7 +107,6 @@ class DOMJudgeService
      * @param TokenStorageInterface         $tokenStorage
      * @param HttpKernelInterface           $httpKernel
      * @param ConfigurationService          $config
-     * @param SubmissionService             $submissionService
      */
     public function __construct(
         EntityManagerInterface $em,
