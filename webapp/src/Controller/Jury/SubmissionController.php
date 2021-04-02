@@ -420,6 +420,7 @@ class SubmissionController extends BaseController
             ->getScalarResult();
         $hostnames = array_column($hostnames, 'hostname');
 
+        $runsOutstanding = false;
         $runs       = [];
         $runsOutput = [];
         $sameTestcaseIds = true;
@@ -478,6 +479,9 @@ class SubmissionController extends BaseController
                 $cnt++;
                 /** @var JudgingRun $firstJudgingRun */
                 $firstJudgingRun = $runResult[0]->getFirstJudgingRun();
+                if ($firstJudgingRun->getRunresult() === null) {
+                    $runsOutstanding = true;
+                }
                 $runs[] = $runResult[0];
                 unset($runResult[0]);
                 if (empty($runResult['metadata'])) {
@@ -560,6 +564,7 @@ class SubmissionController extends BaseController
             'selectedJudging' => $selectedJudging,
             'lastJudging' => $lastJudging,
             'runs' => $runs,
+            'runsOutstanding' => $runsOutstanding,
             'hostnames' => $hostnames,
             'sameTestcaseIds' => $sameTestcaseIds,
             'externalRuns' => $externalRuns,
@@ -910,6 +915,43 @@ class SubmissionController extends BaseController
             'form' => $form->createView(),
             'selected' => $request->query->get('ranknumber'),
         ]);
+    }
+
+    /**
+     * @Route("/{judgingId<\d+>}/request-remaining", name="jury_submission_request_remaining", methods={"POST"})
+     * @throws DBALException
+     * @throws Exception
+     */
+    public function requestRemainingRuns(Request $request, int $judgingId): RedirectResponse
+    {
+        /** @var Judging $judging */
+        $judging = $this->em->getRepository(Judging::class)->find($judgingId);
+        if ($judging === null) {
+            throw new BadRequestHttpException("Unknown judging with '$judgingId' requested.");
+        }
+
+        if ($judging->getResult() === null) {
+            $this->addFlash('warning', 'Please be patient, this judging is still in progress.');
+        } else if ($judging->getJudgeCompletely()) {
+            $this->addFlash('warning', 'This judging was already requested to be judged completely.');
+        } else {
+            $numRequested = $this->em->getConnection()->executeUpdate(
+                'UPDATE judgetask SET valid=1'
+                . ' WHERE jobid=:jobid'
+                . ' AND hostname IS NULL',
+                [
+                    ':jobid' => $judgingId,
+                ]
+            );
+            $judging->setJudgeCompletely(true);
+            $this->em->flush();
+            if ($numRequested == 0) {
+                $this->addFlash('warning', 'No more remaining runs to be judged.');
+            } else {
+                $this->addFlash('info', "Requested $numRequested remaining runs to be judged.");
+            }
+        }
+        return $this->redirectToRoute('jury_submission_by_judging', ['jid' => $judgingId]);
     }
 
     /**
