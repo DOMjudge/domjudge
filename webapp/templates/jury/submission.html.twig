@@ -384,6 +384,12 @@
                                 {% set judgingDone = selectedJudging.endtime is not empty %}
                             {% endif %}
                             {{ runs | displayTestcaseResults(judgingDone) }}
+                            {% if selectedJudging is not null and not selectedJudging.judgeCompletely and runsOutstanding %}
+                                <form action="{{ path('jury_submission_request_remaining', {'judgingId': selectedJudging.judgingid}) }}" method="post"
+                                      style="display: inline; ">
+                                    <input type="submit" class="btn btn-outline-secondary btn-sm" value="judge remaining" />
+                                </form>
+                            {% endif %}
                         </td>
                     </tr>
                     {% if lastJudging is not null %}

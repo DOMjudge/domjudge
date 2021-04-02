@@ -129,6 +129,17 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
     private $seen = false;
 
     /**
+     * @var boolean
+     * @ORM\Column(type="boolean", name="judge_completely",
+     *     options={"comment"="Explicitly requested to be judged completely.",
+     *              "default"="0"},
+     *     nullable=false)
+     * @Serializer\Exclude()
+     */
+    private $judgeCompletely = false;
+
+
+    /**
      * @ORM\ManyToOne(targetEntity="Contest")
      * @ORM\JoinColumn(name="cid", referencedColumnName="cid", onDelete="CASCADE")
      * @Serializer\Exclude()
@@ -351,6 +362,17 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
     public function getSeen(): bool
     {
         return $this->seen;
+    }
+
+    public function setJudgeCompletely(bool $judgeCompletely): Judging
+    {
+        $this->judgeCompletely = $judgeCompletely;
+        return $this;
+    }
+
+    public function getJudgeCompletely(): bool
+    {
+        return $this->judgeCompletely;
     }
 
     public function setSubmission(?Submission $submission = null): Judging
