@@ -479,7 +479,7 @@ class SubmissionController extends BaseController
                 $cnt++;
                 /** @var JudgingRun $firstJudgingRun */
                 $firstJudgingRun = $runResult[0]->getFirstJudgingRun();
-                if ($firstJudgingRun->getRunresult() === null) {
+                if ($firstJudgingRun !== null && $firstJudgingRun->getRunresult() === null) {
                     $runsOutstanding = true;
                 }
                 $runs[] = $runResult[0];
