@@ -4,7 +4,8 @@ namespace App\Doctrine;
 
 use App\Entity\User;
 use Doctrine\Common\EventSubscriber;
-use Doctrine\Common\Persistence\Event\LifecycleEventArgs;
+use Doctrine\ORM\Event\LifecycleEventArgs;
+use Doctrine\ORM\Event\PreUpdateEventArgs;
 use Doctrine\ORM\Events;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
@@ -25,9 +26,6 @@ class HashPasswordSubscriber implements EventSubscriber
         return [Events::prePersist, Events::preUpdate];
     }
 
-    /**
-     * @param LifecycleEventArgs $args
-     */
     public function prePersist(LifecycleEventArgs $args)
     {
         $entity = $args->getObject();
@@ -38,10 +36,7 @@ class HashPasswordSubscriber implements EventSubscriber
         $this->encodePassword($entity);
     }
 
-    /**
-     * @param LifecycleEventArgs $args
-     */
-    public function preUpdate(LifecycleEventArgs $args)
+    public function preUpdate(PreUpdateEventArgs $args)
     {
         $entity = $args->getObject();
         if (!$entity instanceof User) {
