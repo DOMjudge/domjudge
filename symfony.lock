@@ -50,6 +50,9 @@
     "doctrine/dbal": {
         "version": "v2.9.2"
     },
+    "doctrine/deprecations": {
+        "version": "v0.5.3"
+    },
     "doctrine/doctrine-bundle": {
         "version": "1.6",
         "recipe": {
@@ -114,11 +117,17 @@
     "doctrine/reflection": {
         "version": "v1.0.0"
     },
+    "doctrine/sql-formatter": {
+        "version": "1.1.1"
+    },
     "eligrey/filesaver": {
         "version": "2.0.2"
     },
     "fortawesome/font-awesome": {
         "version": "5.9.0"
+    },
+    "friendsofphp/proxy-manager-lts": {
+        "version": "v1.0.3"
     },
     "friendsofsymfony/rest-bundle": {
         "version": "2.2",
@@ -197,6 +206,9 @@
             "webapp/config/packages/prod/jms_serializer.yaml"
         ]
     },
+    "laminas/laminas-code": {
+        "version": "3.4.1"
+    },
     "laminas/laminas-eventmanager": {
         "version": "3.2.1"
     },
@@ -254,6 +266,9 @@
     },
     "phpspec/prophecy": {
         "version": "1.12.2"
+    },
+    "phpstan/phpdoc-parser": {
+        "version": "0.4.14"
     },
     "phpunit/php-code-coverage": {
         "version": "7.0.14"
