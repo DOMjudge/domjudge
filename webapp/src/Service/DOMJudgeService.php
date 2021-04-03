@@ -1195,7 +1195,7 @@ class DOMJudgeService
         $this->em->getConnection()->executeQuery($judgingRunInsertQuery, $judgingRunInsertParams);
     }
 
-    private function getImmutableCompareExecutable(ContestProblem $problem): ImmutableExecutable
+    public function getImmutableCompareExecutable(ContestProblem $problem): ImmutableExecutable
     {
         /** @var Executable $executable */
         $executable = $problem
@@ -1212,7 +1212,7 @@ class DOMJudgeService
         return $executable->getImmutableExecutable();
     }
 
-    private function getImmutableRunExecutable(ContestProblem $problem): ImmutableExecutable
+    public function getImmutableRunExecutable(ContestProblem $problem): ImmutableExecutable
     {
         /** @var Executable $executable */
         $executable = $problem
