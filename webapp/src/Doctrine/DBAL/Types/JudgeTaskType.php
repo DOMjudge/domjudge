@@ -12,12 +12,17 @@ use InvalidArgumentException;
 class JudgeTaskType extends Type
 {
     const ENUM_JUDGE_TASK_TYPE = 'judge_task_type';
-    const JUDGING_RUN = 'judging_run';
-    const GENERIC_TASK = 'generic_task';
     const CONFIG_CHECK = 'config_check';
     const DEBUG_INFO = 'debug_info';
+    const GENERIC_TASK = 'generic_task';
+    const JUDGING_RUN = 'judging_run';
+    const PREFETCH = 'prefetch';
     const ALL_TYPES = [
-        self::JUDGING_RUN, self::GENERIC_TASK, self::CONFIG_CHECK, self::DEBUG_INFO
+        self::CONFIG_CHECK,
+        self::DEBUG_INFO,
+        self::GENERIC_TASK,
+        self::JUDGING_RUN,
+        self::PREFETCH,
     ];
 
     /**

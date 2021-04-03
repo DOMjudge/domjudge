@@ -73,7 +73,7 @@ class JudgeTask
      *
      * @ORM\Column(type="integer", name="jobid", length=4,
      *     options={"comment"="All judgetasks with the same jobid belong together.","unsigned"=true},
-     *     nullable=false)
+     *     nullable=true)
      * @Serializer\Type("string")
      */
     private $jobid;
@@ -221,7 +221,7 @@ class JudgeTask
         return $this;
     }
 
-    public function getJobId(): int
+    public function getJobId(): ?int
     {
         return $this->jobid;
     }
@@ -232,7 +232,7 @@ class JudgeTask
         return $this;
     }
 
-    public function getSubmitid(): int
+    public function getSubmitid(): ?int
     {
         return $this->submitid;
     }
