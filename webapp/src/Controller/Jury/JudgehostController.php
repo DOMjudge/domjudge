@@ -3,7 +3,9 @@
 namespace App\Controller\Jury;
 
 use App\Controller\BaseController;
+use App\Doctrine\DBAL\Types\JudgeTaskType;
 use App\Entity\Judgehost;
+use App\Entity\JudgeTask;
 use App\Entity\Judging;
 use App\Form\Type\JudgehostsType;
 use App\Service\ConfigurationService;
@@ -90,6 +92,7 @@ class JudgehostController extends BaseController
             'status' => ['title' => 'status'],
             'restriction' => ['title' => 'restriction'],
             'load' => ['title' => 'load'],
+            'last_judgingid' => ['title' => 'last judging'],
         ];
 
         $now           = Utils::now();
@@ -171,6 +174,21 @@ class JudgehostController extends BaseController
             } else {
                 $load .= 'N/A';
             }
+
+            $lastJobId = $this->em->createQueryBuilder()
+                ->from(JudgeTask::class, 'jt')
+                ->select('jt.jobid')
+                ->andWhere('jt.hostname = :hostname')
+                ->andWhere('jt.type = :type')
+                ->setParameter(':hostname', $judgehost->getHostname())
+                ->setParameter(':type', JudgeTaskType::JUDGING_RUN)
+                ->orderBy('jt.starttime', 'DESC')
+                ->setMaxResults(1)
+                ->getQuery()
+                ->getOneOrNullResult();
+            $judgehostdata['last_judgingid'] = $lastJobId === null ? null : [
+                'value' => 'j' . $lastJobId['jobid'],
+            ];
 
             $judgehostdata = array_merge($judgehostdata, [
                 'status' => [
