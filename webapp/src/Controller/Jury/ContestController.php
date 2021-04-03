@@ -3,14 +3,19 @@
 namespace App\Controller\Jury;
 
 use App\Controller\BaseController;
+use App\Doctrine\DBAL\Types\JudgeTaskType;
 use App\Entity\Clarification;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
+use App\Entity\Judgehost;
+use App\Entity\JudgeTask;
+use App\Entity\Language;
 use App\Entity\Problem;
 use App\Entity\RemovedInterval;
 use App\Entity\Submission;
 use App\Entity\Team;
 use App\Entity\TeamCategory;
+use App\Entity\Testcase;
 use App\Form\Type\ContestType;
 use App\Form\Type\FinalizeContestType;
 use App\Form\Type\RemovedIntervalType;
@@ -653,6 +658,84 @@ class ContestController extends BaseController
         return $this->render('jury/contest_add.html.twig', [
             'form' => $form->createView(),
         ]);
+    }
+
+    /**
+     * @Route("/{contestId<\d+>}/prefetch", name="jury_contest_prefetch")
+     * @return RedirectResponse|Response
+     */
+    public function prefetchAction(Request $request, int $contestId)
+    {
+        /** @var Contest $contest */
+        $contest  = $this->em->getRepository(Contest::class)->find($contestId);
+        if ($contest === null) {
+           throw new BadRequestHttpException("Contest with cid=$contestId not found.");
+        }
+        $judgehosts = $this->em->getRepository(Judgehost::class)->findBy(['active' => true]);
+        $cnt = 0;
+        foreach ($judgehosts as $judgehost) {
+            /** @var Judgehost $judgehost */
+            // TODO: Respect judgehosts restrictions.
+            foreach ($contest->getProblems() as $contestProblem) {
+                /** @var ContestProblem $contestProblem */
+                if (!$contestProblem->getAllowJudge() || !$contestProblem->getAllowSubmit()) {
+                    continue;
+                }
+                /** @var Problem $problem */
+                $problem = $contestProblem->getProblem();
+                foreach ($problem->getTestcases() as $testcase) {
+                    /** @var Testcase $testcase */
+                    $judgeTask = new JudgeTask();
+                    $judgeTask
+                        ->setType(JudgeTaskType::PREFETCH)
+                        ->setHostname($judgehost->getHostname())
+                        ->setPriority(JudgeTask::PRIORITY_DEFAULT)
+                        ->setTestcaseId($testcase->getTestcaseid());
+                    $this->em->persist($judgeTask);
+                    $cnt++;
+                }
+                // TODO: dedup here?
+                $compareExec = $this->dj->getImmutableCompareExecutable($contestProblem);
+                $runExec     = $this->dj->getImmutableRunExecutable($contestProblem);
+                $judgeTask = new JudgeTask();
+                $judgeTask
+                    ->setType(JudgeTaskType::PREFETCH)
+                    ->setHostname($judgehost->getHostname())
+                    ->setPriority(JudgeTask::PRIORITY_DEFAULT)
+                    ->setCompareScriptId($compareExec->getImmutableExecId())
+                    ->setCompareConfig(json_encode(['hash' => $compareExec->getHash()]))
+                    ->setRunScriptId($runExec->getImmutableExecId())
+                    ->setRunConfig(json_encode(['hash' => $runExec->getHash()]));
+                $this->em->persist($judgeTask);
+                $cnt++;
+            }
+            $languages = $this->em->getRepository(Language::class)->findBy(
+                [
+                    'allowJudge' => true,
+                    'allowSubmit' => true,
+                ]
+            );
+            foreach ($languages as $language) {
+                /** @var Language $language */
+                $compileExec = $language->getCompileExecutable()->getImmutableExecutable();
+                $judgeTask = new JudgeTask();
+                $judgeTask
+                    ->setType(JudgeTaskType::PREFETCH)
+                    ->setHostname($judgehost->getHostname())
+                    ->setPriority(JudgeTask::PRIORITY_DEFAULT)
+                    ->setCompileScriptId($compileExec->getImmutableExecId())
+                    ->setCompileConfig(json_encode(['hash' => $compileExec->getHash()]));
+                $this->em->persist($judgeTask);
+                $cnt++;
+            }
+        }
+        $this->em->flush();
+
+        $this->addFlash('success', "Scheduled $cnt judgetasks to preheat judgehosts.");
+        return $this->redirect($this->generateUrl(
+            'jury_contest',
+            ['contestId' => $contestId]
+        ));
     }
 
     /**

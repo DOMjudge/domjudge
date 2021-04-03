@@ -1404,19 +1404,54 @@ class JudgehostController extends AbstractFOSRestController
             ->getQuery()
             ->getOneOrNullResult();
 
-        if ($max_priority === null) {
-            return [];
-        }
-        $max_priority = $max_priority['priority'];
+        if ($max_priority !== null) {
+            $max_priority = $max_priority['priority'];
 
-        // This is case 2.a) from above: continue what we have started (if same priority as the current most important
-        // judgetask).
-        // TODO: We should merge this with the query above to reduce code duplication.
-        if ($started_judgetaskids) {
-            /** @var JudgeTask[] $judgetasks */
-            $judgetasks = $this->em
-                ->createQueryBuilder()
+            // This is case 2.a) from above: continue what we have started (if same priority as the current most important
+            // judgetask).
+            // TODO: We should merge this with the query above to reduce code duplication.
+            if ($started_judgetaskids) {
+                /** @var JudgeTask[] $judgetasks */
+                $judgetasks = $this->em
+                    ->createQueryBuilder()
+                    ->from(JudgeTask::class, 'jt')
+                    ->select('jt')
+                    ->andWhere('jt.hostname IS NULL')
+                    ->andWhere('jt.valid = 1')
+                    ->andWhere('jt.priority = :max_priority')
+                    ->andWhere('jt.type = :type')
+                    ->setParameter(':type', JudgeTaskType::JUDGING_RUN)
+                    ->setParameter(':max_priority', $max_priority)
+                    ->andWhere($queryBuilder->expr()->In('jt.jobid', $started_judgetaskids))
+                    ->addOrderBy('jt.judgetaskid')
+                    ->setMaxResults($max_batchsize)
+                    ->getQuery()
+                    ->getResult();
+                if (!empty($judgetasks)) {
+                    return $this->serializeJudgeTasks($judgetasks, $hostname);
+                }
+            }
+
+            // This is case 2.b) from above: start something new.
+            // First, we have to filter for unfinished jobs. This would be easier with a separate table storing the
+            // job state.
+            $started_judgetaskids = array_column(
+                $this->em
+                    ->createQueryBuilder()
+                    ->from(JudgeTask::class, 'jt')
+                    ->select('jt.jobid')
+                    ->andWhere('jt.hostname IS NOT NULL')
+                    ->andWhere('jt.type = :type')
+                    ->setParameter(':type', JudgeTaskType::JUDGING_RUN)
+                    ->groupBy('jt.jobid')
+                    ->getQuery()
+                    ->getArrayResult(),
+                'jobid');
+            $queryBuilder = $this->em->createQueryBuilder();
+            $queryBuilder
                 ->from(JudgeTask::class, 'jt')
+                ->join(Submission::class, 's', Join::WITH, 'jt.submitid = s.submitid')
+                ->join('s.team', 't')
                 ->select('jt')
                 ->andWhere('jt.hostname IS NULL')
                 ->andWhere('jt.valid = 1')
@@ -1424,81 +1459,68 @@ class JudgehostController extends AbstractFOSRestController
                 ->andWhere('jt.type = :type')
                 ->setParameter(':type', JudgeTaskType::JUDGING_RUN)
                 ->setParameter(':max_priority', $max_priority)
-                ->andWhere($queryBuilder->expr()->In('jt.jobid', $started_judgetaskids))
-                ->addOrderBy('jt.judgetaskid')
-                ->setMaxResults($max_batchsize)
-                ->getQuery()
-                ->getResult();
+                ->addOrderBy('t.judging_last_started', 'ASC')
+                ->addOrderBy('s.submittime', 'ASC')
+                ->addOrderBy('s.submitid', 'ASC');
+            if (!empty($started_judgetaskids)) {
+                $queryBuilder
+                    ->andWhere($queryBuilder->expr()->notIn('jt.jobid', $started_judgetaskids));
+            }
+            /** @var JudgeTask[] $judgetasks */
+            $judgetasks =
+                $queryBuilder
+                    ->addOrderBy('jt.judgetaskid')
+                    ->setMaxResults($max_batchsize)
+                    ->getQuery()
+                    ->getResult();
             if (!empty($judgetasks)) {
                 return $this->serializeJudgeTasks($judgetasks, $hostname);
             }
+
+            if ($this->config->get('enable_parallel_judging')) {
+                // This is case 2.c) from above: contribute to a job someone else has started but we have not contributed yet.
+                // We intentionally lift the restriction on priority in this case to get any high priority work.
+                /** @var JudgeTask[] $judgetasks */
+                $judgetasks = $this->em
+                    ->createQueryBuilder()
+                    ->from(JudgeTask::class, 'jt')
+                    ->select('jt')
+                    ->andWhere('jt.hostname IS NULL')
+                    ->andWhere('jt.valid = 1')
+                    ->andWhere('jt.type = :type')
+                    ->setParameter(':type', JudgeTaskType::JUDGING_RUN)
+                    ->addOrderBy('jt.priority')
+                    ->addOrderBy('jt.judgetaskid')
+                    ->setMaxResults($max_batchsize)
+                    ->getQuery()
+                    ->getResult();
+                if (!empty($judgetasks)) {
+                    return $this->serializeJudgeTasks($judgetasks, $hostname);
+                }
+            }
         }
 
-        // This is case 2.b) from above: start something new.
-        // First, we have to filter for unfinished jobs. This would be easier with a separate table storing the
-        // job state.
-        $started_judgetaskids = array_column(
-            $this->em
-                ->createQueryBuilder()
-                ->from(JudgeTask::class, 'jt')
-                ->select('jt.jobid')
-                ->andWhere('jt.hostname IS NOT NULL')
-                ->andWhere('jt.type = :type')
-                ->setParameter(':type', JudgeTaskType::JUDGING_RUN)
-                ->groupBy('jt.jobid')
-                ->getQuery()
-                ->getArrayResult(),
-            'jobid');
-        $queryBuilder = $this->em->createQueryBuilder();
-        $queryBuilder
-            ->from(JudgeTask::class, 'jt')
-            ->join(Submission::class, 's', Join::WITH, 'jt.submitid = s.submitid')
-            ->join('s.team', 't')
-            ->select('jt')
-            ->andWhere('jt.hostname IS NULL')
-            ->andWhere('jt.valid = 1')
-            ->andWhere('jt.priority = :max_priority')
-            ->andWhere('jt.type = :type')
-            ->setParameter(':type', JudgeTaskType::JUDGING_RUN)
-            ->setParameter(':max_priority', $max_priority)
-            ->addOrderBy('t.judging_last_started', 'ASC')
-            ->addOrderBy('s.submittime', 'ASC')
-            ->addOrderBy('s.submitid', 'ASC');
-        if (!empty($started_judgetaskids)) {
-            $queryBuilder
-            ->andWhere($queryBuilder->expr()->notIn('jt.jobid', $started_judgetaskids));
-        }
+        // TODO: Dedup with the code from above.
+        // If there's no judging work to do, let's check if we need to prefetch things.
         /** @var JudgeTask[] $judgetasks */
-        $judgetasks =
-            $queryBuilder
+        $judgetasks = $this->em
+            ->createQueryBuilder()
+            ->from(JudgeTask::class, 'jt')
+            ->select('jt')
+            ->andWhere('jt.hostname = :hostname')
+            ->andWhere('jt.starttime IS NULL')
+            ->andWhere('jt.valid = 1')
+            ->andWhere('jt.type = :type')
+            ->setParameter(':hostname', $hostname)
+            ->setParameter(':type', JudgeTaskType::PREFETCH)
+            ->addOrderBy('jt.priority')
             ->addOrderBy('jt.judgetaskid')
-            ->setMaxResults($max_batchsize)
+            // TODO: is 50 a good value here?
+            ->setMaxResults(50)
             ->getQuery()
             ->getResult();
         if (!empty($judgetasks)) {
             return $this->serializeJudgeTasks($judgetasks, $hostname);
-        }
-
-        if ($this->config->get('enable_parallel_judging')) {
-            // This is case 2.c) from above: contribute to a job someone else has started but we have not contributed yet.
-            // We intentionally lift the restriction on priority in this case to get any high priority work.
-            /** @var JudgeTask[] $judgetasks */
-            $judgetasks = $this->em
-                ->createQueryBuilder()
-                ->from(JudgeTask::class, 'jt')
-                ->select('jt')
-                ->andWhere('jt.hostname IS NULL')
-                ->andWhere('jt.valid = 1')
-                ->andWhere('jt.type = :type')
-                ->setParameter(':type', JudgeTaskType::JUDGING_RUN)
-                ->addOrderBy('jt.priority')
-                ->addOrderBy('jt.judgetaskid')
-                ->setMaxResults($max_batchsize)
-                ->getQuery()
-                ->getResult();
-            if (!empty($judgetasks)) {
-                return $this->serializeJudgeTasks($judgetasks, $hostname);
-            }
         }
 
         return [];

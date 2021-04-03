@@ -668,13 +668,47 @@ while (true) {
 
     $jobId = $row[0]['jobid'];
 
-    // create workdir for judging
+    if ($type == 'prefetch') {
+        if ($lastWorkdir !== null) {
+            cleanup_judging($lastWorkdir);
+            $lastWorkdir = null;
+        }
+        foreach ($row as $judgeTask) {
+            foreach (['compile', 'run', 'compare'] as $script_type) {
+                if (!empty($judgeTask[$script_type . '_script_id']) && !empty($judgeTask[$script_type . '_config'])) {
+                    $config = dj_json_decode($judgeTask[$script_type . '_config']);
+                    if (!empty($config['hash'])) {
+                        list($execrunpath, $error) = fetch_executable(
+                            $workdirpath,
+                            $script_type,
+                            $judgeTask[$script_type . '_script_id'],
+                            $config['hash']
+                        );
+                        if (isset($error)) {
+                            logmsg(LOG_ERR,
+                                "Fetching executable failed for $script_type script '" . $judgeTask[$script_type . '_script_id'] . "': " . $error);
+                            $description = $judgeTask[$script_type . '_script_id'] . ': fetch, compile, or deploy of ' . $script_type . ' script failed.';
+                            disable($script_type . '_script', $script_type . '_script_id', $judgeTask[$script_type . '_script_id'],
+                                $description, $judgeTask['judgetaskid']);
+                        }
+                    }
+                }
+            }
+            if (!empty($judgeTask['testcase_id'])) {
+                fetchTestcase($workdirpath, $judgeTask['testcase_id'], $judgeTask['judgetaskid']);
+            }
+        }
+        logmsg(LOG_INFO, "  🔥 Pre-heating judgehost completed.");
+        continue;
+    }
+
+    // Create workdir for judging.
     $workdir = judging_directory($workdirpath, $row[0]);
     logmsg(LOG_INFO, "  Working directory: $workdir");
 
-    // Retrieve full test case contents for now. Later this can be expanded to collect other debug info (e.g. a full
-    // judging package as well).
     if ($type == 'debug_info') {
+        // Retrieve full test case contents for now. Later this can be expanded to collect other debug info (e.g. a full
+        // judging package as well).
         if ($lastWorkdir !== null) {
             cleanup_judging($lastWorkdir);
             $lastWorkdir = null;
@@ -682,7 +716,8 @@ while (true) {
         foreach ($row as $judgeTask) {
             $testcasedir = $workdir . "/testcase" . sprintf('%05d', $judgeTask['testcase_id']);
             request(
-                sprintf('judgehosts/add-debug-info/%s/%s', urlencode($myhost), urlencode((string)$judgeTask['judgetaskid'])),
+                sprintf('judgehosts/add-debug-info/%s/%s', urlencode($myhost),
+                    urlencode((string)$judgeTask['judgetaskid'])),
                 'POST',
                 ['output_run' => rest_encode_file($testcasedir . '/program.out', false)],
                 false
