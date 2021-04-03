@@ -48,14 +48,6 @@ if (is_array($env = @include dirname(__DIR__).'/.env.local.php')) {
             $dotenv->load($p);
         }
     }
-
-    // In case we are running in dev mode, allow .env.local to override variables.
-    // This is useful to override the DATABASE_URL from load_db_secrets.php to contain
-    // the proper serverVersion, which is needed for automatically creating migrations.
-    $env = $_SERVER['APP_ENV'] ?? $_ENV['APP_ENV'] ?? null;
-    if ($env === 'dev' && file_exists($p = "$path.local")) {
-        $dotenv->overload($p);
-    }
 }
 
 $_SERVER += $_ENV;

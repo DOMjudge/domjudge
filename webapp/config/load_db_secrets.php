@@ -4,8 +4,21 @@
 // These settings can later be overridden by Symfony files
 // (in order of precedence): .env.local.php .env.local .env.
 
+use Symfony\Component\Dotenv\Dotenv;
+
 function get_db_url()
 {
+    // Allow .env.local to override the DATABASE_URL since it can contain the
+    // proper serverVersion, which is needed for automatically creating migrations.
+    $localEnvFile = WEBAPPDIR . '/.env.local';
+    if (file_exists($localEnvFile)) {
+        $dotenv = new Dotenv(false);
+        $localEnvData = $dotenv->parse(file_get_contents($localEnvFile));
+        if (isset($localEnvData['DATABASE_URL'])) {
+            return $localEnvData['DATABASE_URL'];
+        }
+    }
+
     $dbsecretsfile = ETCDIR . '/dbpasswords.secret';
     $db_credentials = @file($dbsecretsfile);
     if (!$db_credentials) {
