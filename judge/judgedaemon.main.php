@@ -230,11 +230,12 @@ function usage()
 {
     echo "Usage: " . SCRIPT_ID . " [OPTION]...\n" .
         "Start the judgedaemon.\n\n" .
-        "  -d       daemonize after startup\n" .
-        "  -n <id>  daemon number\n" .
-        "  -v       set verbosity to LEVEL (syslog levels)\n" .
-        "  -h       display this help and exit\n" .
-        "  -V       output version information and exit\n\n";
+        "  -d                daemonize after startup\n" .
+        "  -n <id>           daemon number\n" .
+        "  --diskspace_error send internal error on low diskspace\n" .
+        "  -v                set verbosity to LEVEL (syslog levels)\n" .
+        "  -h                display this help and exit\n" .
+        "  -V                output version information and exit\n\n";
     exit;
 }
 
@@ -423,7 +424,7 @@ EOT;
     return [$execrunpath, null];
 }
 
-$options = getopt("dv:n:hVe:j:t:");
+$options = getopt("dv:n:hVe:j:t:", ["diskspace_error"]);
 // FIXME: getopt doesn't return FALSE on parse failure as documented!
 if ($options===false) {
     echo "Error: parsing options failed.\n";
@@ -612,29 +613,63 @@ while (true) {
         continue;
     }
 
+
     if ($endpoints[$endpointID]['waiting'] === false) {
         // Check for available disk space
         $free_space = disk_free_space(JUDGEDIR);
         $allowed_free_space  = djconfig_get_value('diskspace_error'); // in kB
         if ($free_space < 1024*$allowed_free_space) {
-            $free_abs = sprintf("%01.2fGB", $free_space / (1024*1024*1024));
-            logmsg(LOG_ERR, "Low on disk space: $free_abs free, clean up or " .
+            $after = disk_free_space(JUDGEDIR);
+            if (!isset($options['diskspace_error'])) {
+                $candidateDirs = [];
+                foreach (scandir($workdirpath) as $subdir) {
+                    if (is_numeric($subdir) && is_dir(($workdirpath . "/" . $subdir))) {
+                        $candidateDirs[] = $workdirpath . "/" . $subdir;
+                    }
+                }
+                uasort($candidateDirs, function ($a, $b) {
+                    return filemtime($a) <=> filemtime($b);
+                });
+                $after = $before = disk_free_space(JUDGEDIR);
+                logmsg(LOG_INFO,
+                    "🗑 Low on diskspace, cleaning up (" . count($candidateDirs) . " potential candidates).");
+                $cnt = 0;
+                foreach ($candidateDirs as $d) {
+                    $cnt++;
+                    logmsg(LOG_INFO, "  - deleting $d");
+                    system('rm -rf ' . dj_escapeshellarg($d), $retval);
+                    if ($retval !== 0) {
+                        logmsg(LOG_WARNING, "Deleting '$d' was unsuccessful.");
+                    }
+                    $after = disk_free_space(JUDGEDIR);
+                    if ($after >= 1024 * $allowed_free_space) {
+                        break;
+                    }
+                }
+                logmsg(LOG_INFO, "🗑 Cleaned up $cnt old judging directories; reduced disk space by " .
+                    sprintf("%01.2fMB.", ($after - $before) / (1024 * 1024))
+                );
+            }
+            if ($after < 1024*$allowed_free_space) {
+                $free_abs = sprintf("%01.2fGB", $after / (1024*1024*1024));
+                logmsg(LOG_ERR, "Low on disk space: $free_abs free, clean up or " .
                     "change 'diskspace error' value in config before resolving this error.");
 
-            $disabled = dj_json_encode(array(
-                'kind' => 'judgehost',
-                'hostname' => $myhost));
-            $judgehostlog = read_judgehostlog();
-            $error_id = request(
-                'judgehosts/internal-error',
-                'POST',
-                'description=' . urlencode("low on disk space on $myhost") .
-                '&judgehostlog=' . urlencode(base64_encode($judgehostlog)) .
-                '&disabled=' . urlencode($disabled) .
-                '&hostname=' . urlencode($myhost),
-                false
-            );
-            logmsg(LOG_ERR, "=> internal error " . $error_id);
+                $disabled = dj_json_encode(array(
+                    'kind' => 'judgehost',
+                    'hostname' => $myhost));
+                $judgehostlog = read_judgehostlog();
+                $error_id = request(
+                    'judgehosts/internal-error',
+                    'POST',
+                    'description=' . urlencode("low on disk space on $myhost") .
+                    '&judgehostlog=' . urlencode(base64_encode($judgehostlog)) .
+                    '&disabled=' . urlencode($disabled) .
+                    '&hostname=' . urlencode($myhost),
+                    false
+                );
+                logmsg(LOG_ERR, "=> internal error " . $error_id);
+            }
         }
     }
 
