@@ -676,7 +676,6 @@ class ContestController extends BaseController
         foreach ($judgehosts as $judgehost) {
             /** @var Judgehost $judgehost */
             $judgehostRestriction = $judgehost->getRestriction();
-            dump($judgehostRestriction->getLanguages());
             foreach ($contest->getProblems() as $contestProblem) {
                 /** @var ContestProblem $contestProblem */
                 if (!$contestProblem->getAllowJudge() || !$contestProblem->getAllowSubmit()) {
