@@ -369,7 +369,7 @@ chroot "$CHROOTDIR" /bin/sh -c "chmod a-s /usr/bin/wall /usr/bin/newgrp \
 # Disable root account
 sed -i "s/^root::/root:*:/" "$CHROOTDIR/etc/shadow"
 
-# Create a dummy file to test that in the judging environment no
+# Create a file to test that in the judging environment no
 # access to group root readable files is available:
 echo "This file should not be readable inside the judging environment!" \
 	> "$CHROOTDIR/etc/root-permission-test.txt"

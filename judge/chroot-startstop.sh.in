@@ -19,7 +19,7 @@
 #
 # This script will be called from judgedaemon.main.php in the root
 # directory of the chroot environment with one parameter, either:
-# - 'check' to perform some sanity checks;
+# - 'check' to perform some basic validation checks;
 # - 'start' to setup; or
 # - 'stop' to destroy the chroot environment.
 #

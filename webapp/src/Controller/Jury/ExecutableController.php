@@ -453,7 +453,7 @@ class ExecutableController extends BaseController
                 [$firstLine] = explode("\n", $content, 2);
                 // If the file does not contain a dot, see if we have a shebang which we can use as filename
                 if (preg_match('/^#!.*\/([^\/]+)$/', $firstLine, $matches)) {
-                    $aceFilenames[] = sprintf('dummy.%s', $matches[1]);
+                    $aceFilenames[] = sprintf('temp.%s', $matches[1]);
                 } else {
                     $aceFilenames[] = $filename;
                 }
