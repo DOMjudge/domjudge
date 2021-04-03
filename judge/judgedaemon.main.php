@@ -269,7 +269,7 @@ function fetch_executable(
             error("Could not create directory '$execbuilddir'");
         }
 
-        logmsg(LOG_INFO, "  💾 Fetching new executable '$type/$execid' (hash: $hash)");
+        logmsg(LOG_INFO, "  💾 Fetching new executable '$type/$execid' with hash '$hash'.");
         $content = request(sprintf('judgehosts/get_files/%s/%s', $type, $execid), 'GET');
         $files = dj_json_decode($content);
         unset($content);
