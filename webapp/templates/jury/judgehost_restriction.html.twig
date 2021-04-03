@@ -42,7 +42,10 @@
                     {% else %}
                         <td>
                             {% for problem in judgehostRestriction.problems %}
-                                {{ problems[problem].name }} (p{{ problem }})<br/>
+                                <a href="{{ path('jury_problem', {'probId': problem}) }}">
+                                    {{ problems[problem].name }} (p{{ problem }})
+                                </a>
+                                <br/>
                             {% endfor %}
                         </td>
                     {% endif %}
