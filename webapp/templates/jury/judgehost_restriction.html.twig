@@ -30,7 +30,10 @@
                     {% else %}
                         <td>
                             {% for contest in judgehostRestriction.contests %}
-                                {{ contests[contest].name }} ({{ contests[contest].shortname }} - c{{ contest }})<br/>
+                                <a href="{{ path('jury_contest', {'contestId': contest}) }}">
+                                    {{ contests[contest].name }} ({{ contests[contest].shortname }} - c{{ contest }})
+                                </a>
+                                <br/>
                             {% endfor %}
                         </td>
                     {% endif %}
@@ -57,7 +60,10 @@
                     {% else %}
                         <td>
                             {% for language in judgehostRestriction.languages %}
-                                {{ languages[language].name }} ({{ language }})<br/>
+                                <a href="{{ path('jury_language', {'langId': language}) }}">
+                                    {{ languages[language].name }} ({{ language }})
+                                </a>
+                                <br/>
                             {% endfor %}
                         </td>
                     {% endif %}
