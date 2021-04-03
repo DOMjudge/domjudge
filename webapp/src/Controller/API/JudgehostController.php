@@ -708,6 +708,7 @@ class JudgehostController extends AbstractFOSRestController
         // The judgetaskid is allowed to be NULL.
         $judgeTaskId = $request->request->get('judgetaskid');
         $judging = NULL;
+        $judgingId = NULL;
         $cid = NULL;
         if ($judgeTaskId) {
             /** @var JudgeTask $judgeTask */
@@ -788,7 +789,7 @@ class JudgehostController extends AbstractFOSRestController
 
         $this->dj->setInternalError($disabled, $contest, false);
 
-        if (in_array($disabled['kind'], ['problem', 'language', 'judgehost', 'executable', 'testcase']) && $judgingId) {
+        if (in_array($disabled['kind'], ['problem', 'language', 'judgehost', 'executable', 'testcase'])) {
             // Give back judging if we have to.
             if ($disabled['kind'] == 'judgehost') {
                 $hostname = $request->request->get('hostname');
@@ -796,7 +797,9 @@ class JudgehostController extends AbstractFOSRestController
             } else {
                 $judgehost = null;
             }
-            $this->giveBackJudging((int)$judgingId, $judgehost);
+            if (!empty($judgingId)) {
+                $this->giveBackJudging((int)$judgingId, $judgehost);
+            }
         }
 
         return $error->getErrorid();
