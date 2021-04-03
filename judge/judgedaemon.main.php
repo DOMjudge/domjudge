@@ -555,7 +555,7 @@ umask(0022);
 logmsg(LOG_INFO, "√ Executing chroot script: '".CHROOT_SCRIPT." check'");
 system(LIBJUDGEDIR.'/'.CHROOT_SCRIPT.' check', $retval);
 if ($retval!==0) {
-    error("chroot sanity check exited with exitcode $retval");
+    error("chroot validation check exited with exitcode $retval");
 }
 
 // If all startup done, daemonize

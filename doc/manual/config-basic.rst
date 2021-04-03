@@ -119,8 +119,8 @@ statements that require non-standard evaluation.
 Checking your configuration
 ---------------------------
 From the front page the *Config checker* is available. This tool will
-do a basic sanity check of your DOMjudge setup and gives helpful hints
-to improve it. Be sure to run it when you've set up your contest.
+do a basic check of your DOMjudge setup and gives helpful hints to
+improve it. Be sure to run it when you've set up your contest.
 
 
 Testing jury solutions

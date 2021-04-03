@@ -327,11 +327,11 @@ int main(int argc, char **argv)
 			}
 		}
 
-		/* Stat file and do some sanity checks */
+		/* Stat file and do some validation checks */
 		if ( stat(ptr,&fstats)!=0 ) usage2(errno,"cannot find file `%s'",ptr);
 		logmsg(LOG_DEBUG,"submission file %d: `%s'",(int)i+1,ptr);
 
-		/* Do some sanity checks on submission file and warn user */
+		/* Do some checks on submission file and warn user */
 		nwarnings = 0;
 
 		if ( ! (fstats.st_mode & S_IFREG) ) warnuser("`%s' is not a regular file",ptr);
