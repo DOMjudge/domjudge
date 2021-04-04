@@ -169,13 +169,13 @@ abstract class BaseTest extends WebTestCase
     }
 
     /**
-     * Set up the dummy user with the roles given in static::$roles
+     * Set up the demo user with the roles given in static::$roles
      */
     protected function setupUser(): User
     {
         $em = $this->client->getContainer()->get('doctrine.orm.entity_manager');
         /** @var User $user */
-        $user = $em->getRepository(User::class)->findOneBy(['username' => 'dummy']);
+        $user = $em->getRepository(User::class)->findOneBy(['username' => 'demo']);
         // Clear all user roles, so we can set them specifically to what we want
         foreach ($user->getUserRoles() as $role) {
             $user->removeUserRole($role);

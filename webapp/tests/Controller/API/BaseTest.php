@@ -23,7 +23,7 @@ abstract class BaseTest extends BaseBaseTest
 
     /**
      * The username of the user to use for the tests.
-     * Currently only admin and dummy are supported.
+     * Currently only admin and demo are supported.
      * Leave set to null to use no user.
      *
      * @var string|null
@@ -65,7 +65,7 @@ abstract class BaseTest extends BaseBaseTest
      * @param string      $method   The HTTP method to use
      * @param string      $apiUri   The API URL to use. Will be prefixed with /api
      * @param int         $status   The status code to expect
-     * @param string|null $user     The username to use. Currently only admin and dummy are supported
+     * @param string|null $user     The username to use. Currently only admin and demo are supported
      * @param mixed       $jsonData The JSON data to set as a body, if any
      * @param array       $files    The files to upload, if any
      *
@@ -81,7 +81,7 @@ abstract class BaseTest extends BaseBaseTest
     ) {
         $server = ['CONTENT_TYPE' => 'application/json'];
         // The API doesn't use cookie based logins, so we need to set a username/password.
-        // For the admin, we can get it from initial_admin_password.secret and for the dummy user we know it's 'dummy'
+        // For the admin, we can get it from initial_admin_password.secret and for the demo user we know it's 'demo'
         if ($user === 'admin') {
             $adminPasswordFile = sprintf(
                 '%s/%s',
@@ -90,10 +90,10 @@ abstract class BaseTest extends BaseBaseTest
             );
             $server['PHP_AUTH_USER'] = 'admin';
             $server['PHP_AUTH_PW'] = trim(file_get_contents($adminPasswordFile));
-        } elseif ($user === 'dummy') {
+        } elseif ($user === 'demo') {
             // Team user
-            $server['PHP_AUTH_USER'] = 'dummy';
-            $server['PHP_AUTH_PW'] = 'dummy';
+            $server['PHP_AUTH_USER'] = 'demo';
+            $server['PHP_AUTH_PW'] = 'demo';
         }
         $this->client->request($method, '/api' . $apiUri, [], $files, $server, $jsonData ? json_encode($jsonData) : null);
         $response = $this->client->getResponse();

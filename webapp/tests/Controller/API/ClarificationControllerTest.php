@@ -2,7 +2,7 @@
 
 namespace App\Tests\Controller\API;
 
-use App\DataFixtures\Test\RemoveTeamFromDummyUserFixture;
+use App\DataFixtures\Test\RemoveTeamFromDemoUserFixture;
 use App\Entity\Clarification;
 use Doctrine\ORM\EntityManagerInterface;
 use Generator;
@@ -62,13 +62,13 @@ class ClarificationControllerTest extends BaseTest
 
     public function provideAddMissingData(): Generator
     {
-        yield ['dummy', [], "Argument 'text' is mandatory"];
-        yield ['dummy', ['text' => 'This is a clarification', 'from_team_id' => '1'], "Can not create a clarification from a different team"];
-        yield ['dummy', ['text' => 'This is a clarification', 'to_team_id' => '2'], "Can not create a clarification that is sent to a team"];
-        yield ['dummy', ['text' => 'This is a clarification', 'problem_id' => '4'], "Problem 4 not found"];
-        yield ['dummy', ['text' => 'This is a clarification', 'time' => '1234'], "A team can not assign time"];
-        yield ['dummy', ['text' => 'This is a clarification', 'id' => '1234'], "A team can not assign id"];
-        yield ['dummy', ['text' => 'This is a clarification', 'reply_to_id' => 'nonexistent'], "Clarification nonexistent not found"];
+        yield ['demo', [], "Argument 'text' is mandatory"];
+        yield ['demo', ['text' => 'This is a clarification', 'from_team_id' => '1'], "Can not create a clarification from a different team"];
+        yield ['demo', ['text' => 'This is a clarification', 'to_team_id' => '2'], "Can not create a clarification that is sent to a team"];
+        yield ['demo', ['text' => 'This is a clarification', 'problem_id' => '4'], "Problem 4 not found"];
+        yield ['demo', ['text' => 'This is a clarification', 'time' => '1234'], "A team can not assign time"];
+        yield ['demo', ['text' => 'This is a clarification', 'id' => '1234'], "A team can not assign id"];
+        yield ['demo', ['text' => 'This is a clarification', 'reply_to_id' => 'nonexistent'], "Clarification nonexistent not found"];
         yield ['admin', ['text' => 'This is a clarification', 'from_team_id' => '2', 'to_team_id' => '2'], "Can not send a clarification from and to a team"];
         yield ['admin', ['text' => 'This is a clarification', 'from_team_id' => '3'], "Team 3 not found or not enabled"];
         yield ['admin', ['text' => 'This is a clarification', 'to_team_id' => '3'], "Team 3 not found or not enabled"];
@@ -81,11 +81,11 @@ class ClarificationControllerTest extends BaseTest
      */
     public function testMissingTeam()
     {
-        $this->loadFixture(RemoveTeamFromDummyUserFixture::class);
+        $this->loadFixture(RemoveTeamFromDemoUserFixture::class);
 
         $contestId = $this->demoContest->getCid();
         $apiEndpoint = $this->apiEndpoint;
-        $data = $this->verifyApiJsonResponse('POST', "/contests/$contestId/$apiEndpoint", 400, 'dummy', ['text' => 'This is some text']);
+        $data = $this->verifyApiJsonResponse('POST', "/contests/$contestId/$apiEndpoint", 400, 'demo', ['text' => 'This is some text']);
 
         static::assertEquals('User does not belong to a team', $data['message']);
     }
@@ -151,7 +151,7 @@ class ClarificationControllerTest extends BaseTest
     public function provideAddSuccess(): Generator
     {
         yield [
-            'dummy',
+            'demo',
             ['text' => 'This is some text'],
             false,
             'This is some text',
@@ -163,7 +163,7 @@ class ClarificationControllerTest extends BaseTest
             null,
         ];
         yield [
-            'dummy',
+            'demo',
             ['text' => 'This is a question about problem 1 replying to clarification 2', 'problem_id' => '1', 'reply_to_id' => '2'],
             false,
             'This is a question about problem 1 replying to clarification 2',
