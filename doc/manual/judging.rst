@@ -171,19 +171,20 @@ Disk space and cleanup
 The judgehost caches testcase and executable data and stores various
 logs, compiled submissions, etc. on disk. Depending on the amount of
 disk space available and size and length of the contest, you may run
-out of free space. The configuration setting ``diskspace_error`` will
-make a judgehost abort before it actually crashes when running out of
-space.
+out of free space. By default, the judgehost will start cleaning up
+old judging data until there's at least the amount of space free as
+that is indicated in the configuration setting ``diskspace_error``.
 
-When you run out of space, the script ``dj_judgehost_cleanup`` can be
-used to remove some unnecessary files. It allows you to remove cache
-and judging data. The judging data is generated and required during
-judging, but afterwards can be safely removed if you don't need it
-anymore for debugging or auditing.
+Do disable automatic cleanup, start the judgedaemon with the
+``--diskspace-error`` commandline parameter. When that is set, the
+judgehost will send back an internal error and disable itself until
+it has been manually cleaned up. The script ``dj_judgehost_cleanup``
+can be used for this task.
 
-Finally, if a judgedaemon crashes, this can leave stale bind-mounts to
-the chroot environment. Run ``dj_judgehost_cleanup mounts`` to clean
-these up. Run ``dj_judgehost_cleanup help`` for a list of all
+If for some reason a judgedaemon crashes, it can leave stale
+bind-mounts to the chroot environment. Run
+``dj_judgehost_cleanup mounts`` to clean these up. Run
+``dj_judgehost_cleanup help`` for a list of all
 commands.
 
 Solutions to common issues
