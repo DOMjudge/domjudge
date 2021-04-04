@@ -171,15 +171,15 @@ class ProblemController extends BaseController
             } else {
                 $problemactions[] = [];
             }
+            $problemactions[] = [
+                'icon' => 'save',
+                'title' => 'export problem as zip-file',
+                'link' => $this->generateUrl('jury_export_problem', [
+                    'problemId' => $p->getProbid(),
+                ])
+            ];
 
             if ($this->isGranted('ROLE_ADMIN')) {
-                $problemactions[] = [
-                    'icon' => 'save',
-                    'title' => 'export problem as zip-file',
-                    'link' => $this->generateUrl('jury_export_problem', [
-                        'problemId' => $p->getProbid(),
-                    ])
-                ];
                 $problemactions[] = [
                     'icon' => 'edit',
                     'title' => 'edit this problem',
@@ -731,6 +731,7 @@ class ProblemController extends BaseController
      *     "/{probId<\d+>}/testcases/{rank<\d+>}/move/{direction<up|down>}",
      *     name="jury_problem_testcase_move"
      *     )
+     * @IsGranted("ROLE_ADMIN")
      */
     public function moveTestcaseAction(int $probId, int $rank, string $direction) : Response
     {
@@ -1047,7 +1048,7 @@ class ProblemController extends BaseController
         ]);
     }
 
-    public function addTestcasesToZip(array $testcases, ZipArchive $zip, bool $isSample): void
+    private function addTestcasesToZip(array $testcases, ZipArchive $zip, bool $isSample): void
     {
         $formatString = sprintf('data/%%s/%%0%dd', ceil(log10(count($testcases) + 1)));
         $rankInGroup = 0;
