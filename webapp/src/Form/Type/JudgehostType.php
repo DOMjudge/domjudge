@@ -24,6 +24,12 @@ class JudgehostType extends AbstractType
                 'no' => false,
             ],
         ]);
+        $builder->add('hidden', ChoiceType::class, [
+            'choices' => [
+                'yes' => true,
+                'no' => false,
+            ],
+        ]);
         $builder->add('restriction', EntityType::class, [
             'class' => JudgehostRestriction::class,
             'choice_label' => 'name',

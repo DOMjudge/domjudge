@@ -57,6 +57,15 @@ class Judgehost
      */
     private $judgings;
 
+    /**
+     * @var boolean
+     * @ORM\Column(type="boolean", name="hidden",
+     *     options={"comment"="Should this host be hidden in the overview?",
+     *              "default"="0"},
+     *     nullable=false)
+     */
+    private $hidden = false;
+
     public function __construct()
     {
         $this->judgings = new ArrayCollection();
@@ -122,5 +131,16 @@ class Judgehost
     public function getJudgings(): Collection
     {
         return $this->judgings;
+    }
+
+    public function setHidden(bool $hidden): Judgehost
+    {
+        $this->hidden = $hidden;
+        return $this;
+    }
+
+    public function getHidden(): bool
+    {
+        return $this->hidden;
     }
 }

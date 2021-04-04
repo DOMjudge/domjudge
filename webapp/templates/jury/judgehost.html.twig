@@ -12,6 +12,10 @@
 
     <h1>Judgehost {{ judgehost.hostname | printHost }}</h1>
 
+    {% if judgehost.hidden %}
+        <div class="alert alert-warning">This judgehost is currently hidden.</div>
+    {% endif %}
+
     <div class="row">
         <div class="col-lg-4">
             <table class="table table-sm table-striped">

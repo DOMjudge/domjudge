@@ -31,8 +31,17 @@
                     Stop all judgehosts
                 </button>
             </form>
+            {% if not all_checked_in_recently %}
+                <form action="{{ path('jury_judgehost_autohide') }}" method="post" class="d-inline">
+                    <button type="submit" name="cmd-autohide" class="btn btn-warning">
+                        <i class="fas fa-trash"></i>
+                        Auto-hide judgehosts
+                    </button>
+                </form>
+            {% endif %}
             <div class="d-inline">
-                {{ button(path('jury_judgehost_edit'), 'Edit judgehosts', 'secondary', 'edit') }}
+                {{ button(path('jury_judgehost_edit', {'include_hidden': false}), 'Edit visible judgehosts', 'secondary', 'edit') }}
+                {{ button(path('jury_judgehost_edit'), 'Edit all judgehosts', 'secondary', 'edit') }}
             </div>
         </div>
 

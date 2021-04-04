@@ -83,6 +83,7 @@ class JudgehostController extends BaseController
             ->from(Judgehost::class, 'j')
             ->leftJoin('j.restriction', 'r')
             ->select('j', 'r')
+            ->andWhere('j.hidden = 0')
             ->orderBy('j.hostname')
             ->getQuery()->getResult();
 
@@ -127,6 +128,7 @@ class JudgehostController extends BaseController
         $time_warn = $this->config->get('judgehost_warning');
         $time_crit = $this->config->get('judgehost_critical');
         $judgehosts_table = [];
+        $all_checked_in_recently = true;
         foreach ($judgehosts as $judgehost) {
             $judgehostdata    = [];
             $judgehostactions = [];
@@ -147,6 +149,7 @@ class JudgehostController extends BaseController
             if (empty($judgehost->getPolltime())) {
                 $status = 'noconn';
                 $statustitle = "never checked in";
+                $all_checked_in_recently = false;
             } else {
                 $relTime = floor(Utils::difftime($now, (float)$judgehost->getPolltime()));
                 if ($relTime < $time_warn) {
@@ -155,6 +158,7 @@ class JudgehostController extends BaseController
                     $status = 'warn';
                 } else {
                     $status = 'crit';
+                    $all_checked_in_recently = false;
                 }
                 $statustitle = sprintf('last checked in %ss ago',
                                        Utils::printtimediff((float)$judgehost->getPolltime()));
@@ -247,6 +251,7 @@ class JudgehostController extends BaseController
             'judgehosts' => $judgehosts_table,
             'table_fields' => $table_fields,
             'num_actions' => $this->isGranted('ROLE_ADMIN') ? 2 : 0,
+            'all_checked_in_recently' => $all_checked_in_recently,
             'refresh' => [
                 'after' => 5,
                 'url' => $this->generateUrl('jury_judgehosts'),
@@ -395,6 +400,25 @@ class JudgehostController extends BaseController
     }
 
     /**
+     * @Route("/autohide", methods={"POST"}, name="jury_judgehost_autohide")
+     * @IsGranted("ROLE_ADMIN")
+     */
+    public function autohideInactive(): RedirectResponse
+    {
+        $now = Utils::now();
+        $time_crit = $this->config->get('judgehost_critical');
+        $critical_threshold = $now - $time_crit;
+
+        $ret = $this->em->createQuery(
+            'UPDATE App\Entity\Judgehost j set j.active = false, j.hidden = true WHERE j.polltime IS NULL OR j.polltime < :threshold')
+            ->setParameter(':threshold', $critical_threshold)
+            ->execute();
+        dump($ret);
+        $this->dj->auditlog('judgehost', null, 'auto-hiding judgehosts');
+        return $this->redirectToRoute('jury_judgehosts');
+    }
+
+    /**
      * @Route("/add/multiple", name="jury_judgehost_add")
      * @IsGranted("ROLE_ADMIN")
      */
@@ -430,6 +454,10 @@ class JudgehostController extends BaseController
             ->from(Judgehost::class, 'j')
             ->select('j')
             ->orderBy('j.hostname');
+        $includeHidden = $request->get('include_hidden', true);
+        if (!$includeHidden) {
+            $querybuilder->andWhere('j.hidden = 0');
+        }
         $judgehosts   = ['judgehosts' => $querybuilder->getQuery()->getResult()];
         $form         = $this->createForm(JudgehostsType::class, $judgehosts);
         $form->handleRequest($request);

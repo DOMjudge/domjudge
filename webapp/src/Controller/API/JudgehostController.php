@@ -186,12 +186,14 @@ class JudgehostController extends AbstractFOSRestController
             ->getQuery()
             ->getOneOrNullResult();
 
-        if (!$judgehost) {
+        if ($judgehost) {
+            $judgehost->setHidden(false);
+        } else {
             $judgehost = new Judgehost();
             $judgehost->setHostname($hostname);
             $this->em->persist($judgehost);
-            $this->em->flush();
         }
+        $this->em->flush();
 
         // If there are any unfinished judgings in the queue in my name, they will not be finished.
         // Give them back.
