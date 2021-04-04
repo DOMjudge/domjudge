@@ -4,7 +4,7 @@ namespace App\Tests\Controller\API;
 
 use App\DataFixtures\Test\EnableKotlinFixture;
 use App\DataFixtures\Test\RemoveTeamFromAdminUserFixture;
-use App\DataFixtures\Test\RemoveTeamFromDummyUserFixture;
+use App\DataFixtures\Test\RemoveTeamFromDemoUserFixture;
 use App\DataFixtures\Test\SampleSubmissionsFixture;
 use App\Entity\Submission;
 use App\Entity\SubmissionFile;
@@ -66,26 +66,26 @@ class SubmissionControllerTest extends BaseTest
 
     public function provideAddMissingData(): Generator
     {
-        yield ['dummy', [], "One of the arguments 'problem', 'problem_id' is mandatory"];
-        yield ['dummy', ['problem' => 1], "One of the arguments 'language', 'language_id' is mandatory"];
-        yield ['dummy', ['problem_id' => 1], "One of the arguments 'language', 'language_id' is mandatory"];
-        yield ['dummy', ['problem_id' => 4, 'language' => 'cpp'], "Problem 4 not found or not submittable"];
-        yield ['dummy', ['problem_id' => 1, 'language' => 'cpp'], "No files specified."];
-        yield ['dummy', ['problem_id' => 1, 'language_id' => 'cpp'], "No files specified."];
-        yield ['dummy', ['problem_id' => 1, 'language' => 'abc'], "Language abc not found or not submittable"];
-        yield ['dummy', ['problem_id' => 1, 'language_id' => 'abc'], "Language abc not found or not submittable"];
-        yield ['dummy', ['problem_id' => 1, 'language_id' => 'abc'], "Language abc not found or not submittable"];
-        yield ['dummy', ['problem_id' => 1, 'language_id' => 'cpp', 'team_id' => 1], "Can not submit for a different team"];
-        yield ['dummy', ['problem_id' => 1, 'language_id' => 'cpp', 'id' => '123'], "A team can not assign id"];
-        yield ['dummy', ['problem_id' => 1, 'language_id' => 'cpp', 'time' => '2021-01-01T00:00:00'], "A team can not assign time"];
-        yield ['dummy', ['problem_id' => 1, 'language_id' => 'cpp', 'files' => []], "The 'files' attribute must be an array with a single item, containing an object with a base64 encoded data field"];
+        yield ['demo', [], "One of the arguments 'problem', 'problem_id' is mandatory"];
+        yield ['demo', ['problem' => 1], "One of the arguments 'language', 'language_id' is mandatory"];
+        yield ['demo', ['problem_id' => 1], "One of the arguments 'language', 'language_id' is mandatory"];
+        yield ['demo', ['problem_id' => 4, 'language' => 'cpp'], "Problem 4 not found or not submittable"];
+        yield ['demo', ['problem_id' => 1, 'language' => 'cpp'], "No files specified."];
+        yield ['demo', ['problem_id' => 1, 'language_id' => 'cpp'], "No files specified."];
+        yield ['demo', ['problem_id' => 1, 'language' => 'abc'], "Language abc not found or not submittable"];
+        yield ['demo', ['problem_id' => 1, 'language_id' => 'abc'], "Language abc not found or not submittable"];
+        yield ['demo', ['problem_id' => 1, 'language_id' => 'abc'], "Language abc not found or not submittable"];
+        yield ['demo', ['problem_id' => 1, 'language_id' => 'cpp', 'team_id' => 1], "Can not submit for a different team"];
+        yield ['demo', ['problem_id' => 1, 'language_id' => 'cpp', 'id' => '123'], "A team can not assign id"];
+        yield ['demo', ['problem_id' => 1, 'language_id' => 'cpp', 'time' => '2021-01-01T00:00:00'], "A team can not assign time"];
+        yield ['demo', ['problem_id' => 1, 'language_id' => 'cpp', 'files' => []], "The 'files' attribute must be an array with a single item, containing an object with a base64 encoded data field"];
         yield [
-            'dummy',
+            'demo',
             ['problem_id' => 1, 'language_id' => 'cpp', 'files' => 'this is not an array'],
             "The 'files' attribute must be an array with a single item, containing an object with a base64 encoded data field"
         ];
         yield [
-            'dummy',
+            'demo',
             [
                 'problem_id'  => 1,
                 'language_id' => 'cpp',
@@ -98,7 +98,7 @@ class SubmissionControllerTest extends BaseTest
             "The 'files' attribute must be an array with a single item, containing an object with a base64 encoded data field"
         ];
         yield [
-            'dummy',
+            'demo',
             [
                 'problem_id'  => 1,
                 'language_id' => 'cpp',
@@ -110,7 +110,7 @@ class SubmissionControllerTest extends BaseTest
             "The 'files[0].data' attribute is not base64 encoded"
         ];
         yield [
-            'dummy',
+            'demo',
             [
                 'problem_id'  => 1,
                 'language_id' => 'cpp',
@@ -122,7 +122,7 @@ class SubmissionControllerTest extends BaseTest
             "No valid zip archive given"
         ];
         yield [
-            'dummy',
+            'demo',
             [
                 'problem_id'  => 1,
                 'language_id' => 'cpp',
@@ -146,7 +146,7 @@ class SubmissionControllerTest extends BaseTest
 
         $contestId = $this->demoContest->getCid();
         $apiEndpoint = $this->apiEndpoint;
-        $data = $this->verifyApiJsonResponse('POST', "/contests/$contestId/$apiEndpoint", 400, 'dummy', ['problem_id' => 1, 'language' => 'kotlin']);
+        $data = $this->verifyApiJsonResponse('POST', "/contests/$contestId/$apiEndpoint", 400, 'demo', ['problem_id' => 1, 'language' => 'kotlin']);
 
         static::assertEquals('Main class required, but not specified.', $data['message']);
     }
@@ -158,7 +158,7 @@ class SubmissionControllerTest extends BaseTest
      */
     public function testMissingTeam(string $username)
     {
-        $this->loadFixtures([RemoveTeamFromDummyUserFixture::class, RemoveTeamFromAdminUserFixture::class]);
+        $this->loadFixtures([RemoveTeamFromDemoUserFixture::class, RemoveTeamFromAdminUserFixture::class]);
 
         $contestId = $this->demoContest->getCid();
         $apiEndpoint = $this->apiEndpoint;
@@ -169,7 +169,7 @@ class SubmissionControllerTest extends BaseTest
 
     public function provideMissingTeam(): Generator
     {
-        yield ['dummy'];
+        yield ['demo'];
         yield ['admin'];
     }
 
@@ -246,7 +246,7 @@ class SubmissionControllerTest extends BaseTest
     {
         // Submit a single file as a file upload
         yield [
-            'dummy',
+            'demo',
             [
                 'problem'  => 1,
                 'language' => 'cpp',
@@ -263,7 +263,7 @@ class SubmissionControllerTest extends BaseTest
         ];
         // Submit multiple files as a file upload
         yield [
-            'dummy',
+            'demo',
             [
                 'problem'  => 1,
                 'language' => 'cpp',
@@ -288,7 +288,7 @@ class SubmissionControllerTest extends BaseTest
         ];
         // Submit with an entrypoint
         yield [
-            'dummy',
+            'demo',
             [
                 'problem'     => 1,
                 'language'    => 'kotlin',
@@ -311,7 +311,7 @@ class SubmissionControllerTest extends BaseTest
         ];
         // Submit a single file in CLICS format
         yield [
-            'dummy',
+            'demo',
             [
                 'problem_id'  => 1,
                 'language_id' => 'cpp',
@@ -328,7 +328,7 @@ class SubmissionControllerTest extends BaseTest
         ];
         // Submit multiple files in CLICS format, also provide mime
         yield [
-            'dummy',
+            'demo',
             [
                 'problem_id'  => 2,
                 'language_id' => 'java',

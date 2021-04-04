@@ -34,8 +34,8 @@ class MiscControllerTest extends BaseTest
         $this->setupUser();
 
         // test incorrect and correct password
-        $this->loginHelper('dummy', 'foo', 'http://localhost/login', 200);
-        $this->loginHelper('dummy', 'dummy', 'http://localhost/team', 200);
+        $this->loginHelper('demo', 'foo', 'http://localhost/login', 200);
+        $this->loginHelper('demo', 'demo', 'http://localhost/team', 200);
     }
 
     /**

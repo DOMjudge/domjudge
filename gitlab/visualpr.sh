@@ -30,11 +30,11 @@ GITSHA=$(git rev-parse HEAD || true)
 # Set up
 "$( dirname "${BASH_SOURCE[0]}" )"/base.sh
 
-# Add jury to dummy user
+# Add jury to demo user
 echo "INSERT INTO userrole (userid, roleid) VALUES (3, 2);" | mysql domjudge
 
-# Add netrc file for dummy user login
-echo "machine localhost login dummy password dummy" > ~/.netrc
+# Add netrc file for demo user login
+echo "machine localhost login demo password demo" > ~/.netrc
 
 LOGFILE="/opt/domjudge/domserver/webapp/var/log/prod.log"
 
