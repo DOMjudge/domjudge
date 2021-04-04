@@ -232,7 +232,7 @@ function usage()
         "Start the judgedaemon.\n\n" .
         "  -d                daemonize after startup\n" .
         "  -n <id>           daemon number\n" .
-        "  --diskspace_error send internal error on low diskspace\n" .
+        "  --diskspace-error send internal error on low diskspace\n" .
         "  -v                set verbosity to LEVEL (syslog levels)\n" .
         "  -h                display this help and exit\n" .
         "  -V                output version information and exit\n\n";
@@ -424,7 +424,7 @@ EOT;
     return [$execrunpath, null];
 }
 
-$options = getopt("dv:n:hVe:j:t:", ["diskspace_error"]);
+$options = getopt("dv:n:hVe:j:t:", ["diskspace-error"]);
 // FIXME: getopt doesn't return FALSE on parse failure as documented!
 if ($options===false) {
     echo "Error: parsing options failed.\n";
@@ -620,7 +620,7 @@ while (true) {
         $allowed_free_space  = djconfig_get_value('diskspace_error'); // in kB
         if ($free_space < 1024*$allowed_free_space) {
             $after = disk_free_space(JUDGEDIR);
-            if (!isset($options['diskspace_error'])) {
+            if (!isset($options['diskspace-error'])) {
                 $candidateDirs = [];
                 foreach (scandir($workdirpath) as $subdir) {
                     if (is_numeric($subdir) && is_dir(($workdirpath . "/" . $subdir))) {
