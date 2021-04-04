@@ -373,6 +373,7 @@ class DOMJudgeService
                 ->select('j.hostname', 'j.polltime')
                 ->from(Judgehost::class, 'j')
                 ->andWhere('j.active = 1')
+                ->andWhere('j.hidden = 0')
                 ->andWhere('j.polltime < :i')
                 ->setParameter('i', time() - $this->config->get('judgehost_critical'))
                 ->getQuery()->getResult();
