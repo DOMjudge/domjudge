@@ -14,13 +14,27 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Table(
  *     name="judgehost",
  *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Hostnames of the autojudgers"},
- *     indexes={@ORM\Index(name="restrictionid", columns={"restrictionid"})})
+ *     indexes={@ORM\Index(name="restrictionid", columns={"restrictionid"})},
+ *     uniqueConstraints={
+ *         @ORM\UniqueConstraint(name="hostname", columns={"hostname"})
+ *     })
+ * )
  */
 class Judgehost
 {
     /**
-     * @var string
+     * @var int
+     *
      * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
+     * @ORM\Column(type="integer", name="judgehostid", length=4,
+     *     options={"comment"="Judgehost ID","unsigned"=true},
+     *     nullable=false)
+     */
+    private $judgehostid;
+
+    /**
+     * @var string
      * @ORM\Column(type="string", name="hostname", length=64, options={"comment"="Resolvable hostname of judgehost"}, nullable=false)
      * @Assert\Regex("/^[A-Za-z0-9_\-.]*$/", message="Invalid hostname. Only characters in [A-Za-z0-9_\-.] are allowed.")
      */
@@ -69,6 +83,11 @@ class Judgehost
     public function __construct()
     {
         $this->judgings = new ArrayCollection();
+    }
+
+    public function getJudgehostid(): int
+    {
+        return $this->judgehostid;
     }
 
     public function setHostname(string $hostname): Judgehost

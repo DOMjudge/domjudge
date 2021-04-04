@@ -88,6 +88,7 @@ class JudgehostController extends BaseController
             ->getQuery()->getResult();
 
         $table_fields = [
+            'judgehostid' => ['title' => 'ID'],
             'hostname' => ['title' => 'hostname'],
             'active' => ['title' => 'active'],
             'status' => ['title' => 'status'],
@@ -98,10 +99,10 @@ class JudgehostController extends BaseController
 
         $now           = Utils::now();
         $contest       = $this->dj->getCurrentContest();
-        $query         = 'SELECT judgehost, SUM(IF(endtime, endtime, :now) - GREATEST(:from, starttime)) AS `load`
-                          FROM judging
+        $query         = 'SELECT hostname, SUM(IF(endtime, endtime, :now) - GREATEST(:from, starttime)) AS `load`
+                          FROM judging INNER JOIN judgehost on judging.judgehostid = judgehost.judgehostid
                           WHERE endtime > :from OR (endtime IS NULL AND (valid = 1 OR rejudgingid IS NOT NULL))
-                          GROUP BY judgehost';
+                          GROUP BY hostname';
         $params        = [':now' => $now];
 
         $params[':from'] = $now - 2 * 60;
@@ -114,7 +115,7 @@ class JudgehostController extends BaseController
         $map = function ($work) {
             $result = [];
             foreach ($work as $item) {
-                $result[$item['judgehost']] = $item['load'];
+                $result[$item['hostname']] = $item['load'];
             }
 
             return $result;
@@ -182,9 +183,9 @@ class JudgehostController extends BaseController
             $lastJobId = $this->em->createQueryBuilder()
                 ->from(JudgeTask::class, 'jt')
                 ->select('jt.jobid')
-                ->andWhere('jt.hostname = :hostname')
+                ->andWhere('jt.judgehost = :judgehost')
                 ->andWhere('jt.type = :type')
-                ->setParameter(':hostname', $judgehost->getHostname())
+                ->setParameter(':judgehost', $judgehost->getHostname())
                 ->setParameter(':type', JudgeTaskType::JUDGING_RUN)
                 ->orderBy('jt.starttime', 'DESC')
                 ->setMaxResults(1)
@@ -357,7 +358,7 @@ class JudgehostController extends BaseController
      */
     public function activateAction(RouterInterface $router, Request $request, string $hostname): RedirectResponse
     {
-        $judgehost = $this->em->getRepository(Judgehost::class)->find($hostname);
+        $judgehost = $this->em->getRepository(Judgehost::class)->findOneBy(['hostname' => $hostname]);
         $judgehost->setActive(true);
         $this->em->flush();
         $this->dj->auditlog('judgehost', $hostname, 'marked active');
@@ -370,7 +371,7 @@ class JudgehostController extends BaseController
      */
     public function deactivateAction(RouterInterface $router, Request $request, string $hostname): RedirectResponse
     {
-        $judgehost = $this->em->getRepository(Judgehost::class)->find($hostname);
+        $judgehost = $this->em->getRepository(Judgehost::class)->findOneBy(['hostname' => $hostname]);
         $judgehost->setActive(false);
         $this->em->flush();
         $this->dj->auditlog('judgehost', $hostname, 'marked inactive');

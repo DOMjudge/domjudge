@@ -16,7 +16,7 @@ use JMS\Serializer\Annotation as Serializer;
  *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Result of judging a submission"},
  *     indexes={
  *         @ORM\Index(name="submitid", columns={"submitid"}),
- *         @ORM\Index(name="judgehost", columns={"judgehost"}),
+ *         @ORM\Index(name="judgehostid", columns={"judgehostid"}),
  *         @ORM\Index(name="cid", columns={"cid"}),
  *         @ORM\Index(name="rejudgingid", columns={"rejudgingid"}),
  *         @ORM\Index(name="prevjudgingid", columns={"prevjudgingid"})
@@ -155,7 +155,7 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
 
     /**
      * @ORM\ManyToOne(targetEntity="Judgehost", inversedBy="judgings")
-     * @ORM\JoinColumn(name="judgehost", referencedColumnName="hostname")
+     * @ORM\JoinColumn(name="judgehostid", referencedColumnName="judgehostid")
      * @Serializer\Exclude()
      */
     private $judgehost;
