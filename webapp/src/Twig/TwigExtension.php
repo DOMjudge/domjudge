@@ -406,11 +406,12 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             $judgingId = $judging ? $judging->getJudgingid() : null;
             $probId    = $submission->getProblem()->getProbid();
             $testcases = $this->em->getConnection()->fetchAll(
-                'SELECT r.runresult, jt.hostname, jt.valid, t.ranknumber, t.description
+                'SELECT r.runresult, jh.hostname, jt.valid, t.ranknumber, t.description
                   FROM testcase t
                   LEFT JOIN judging_run r ON (r.testcaseid = t.testcaseid
                                               AND r.judgingid = :judgingid)
                   LEFT JOIN judgetask jt ON (r.judgetaskid = jt.judgetaskid)
+                  LEFT JOIN judgehost jh on (jt.judgehostid = jh.judgehostid)
                   WHERE t.probid = :probid ORDER BY ranknumber',
                 [':judgingid' => $judgingId, ':probid' => $probId]);
 
@@ -490,7 +491,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
                         $text = '✓';
                         $class = 'success';
                     }
-                } else if ($run->getJudgeTask()->getHostname() !== null) {
+                } else if ($run->getJudgeTask()->getJudgehost() !== null) {
                     $text = '↺';
                     $class = 'info';
                 }

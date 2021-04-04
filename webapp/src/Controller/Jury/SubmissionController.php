@@ -410,12 +410,13 @@ class SubmissionController extends BaseController
 
         $hostnames = $this->em->createQueryBuilder()
             ->from(JudgeTask::class, 'jt')
-            ->select('jt.hostname')
-            ->andWhere('jt.hostname IS NOT NULL')
+            ->join('jt.judgehost', 'jh')
+            ->select('jh.hostname')
+            ->andWhere('jt.judgehost IS NOT NULL')
             ->andWhere('jt.jobid = :judging')
             ->setParameter(':judging', $selectedJudging)
-            ->groupBy('jt.hostname')
-            ->orderBy('jt.hostname')
+            ->groupBy('jh.hostname')
+            ->orderBy('jh.hostname')
             ->getQuery()
             ->getScalarResult();
         $hostnames = array_column($hostnames, 'hostname');
@@ -496,7 +497,7 @@ class SubmissionController extends BaseController
                 }
                 $runResult['terminated'] = preg_match('/timelimit exceeded.*hard (wall|cpu) time/',
                                                       (string)$runResult['output_system']);
-                $runResult['hostname'] = $firstJudgingRun === null ? null : $firstJudgingRun->getJudgeTask()->getHostname();
+                $runResult['hostname'] = $firstJudgingRun === null ? null : $firstJudgingRun->getJudgeTask()->getJudgehost()->getHostname();
                 $runResult['is_output_run_truncated'] = preg_match(
                     '/\[output storage truncated after \d* B\]/',
                     (string)$runResult['output_run_last_bytes']
@@ -595,11 +596,10 @@ class SubmissionController extends BaseController
     public function requestOutput(Judging $jid, JudgingRun $jrid): RedirectResponse
     {
         $submission = $jid->getSubmission();
-        $hostname = $jrid->getJudgeTask()->getHostname();
         $judgeTask = new JudgeTask();
         $judgeTask
             ->setType(JudgeTaskType::DEBUG_INFO)
-            ->setHostname($hostname)
+            ->setJudgehost($jrid->getJudgeTask()->getJudgehost())
             ->setSubmitid($submission->getSubmitid())
             ->setPriority(JudgeTask::PRIORITY_HIGH)
             ->setJobId($jid->getJudgingid())

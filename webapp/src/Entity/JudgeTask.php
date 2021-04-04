@@ -15,13 +15,14 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Table(
  *     name="judgetask",
  *     indexes={
+ *         @ORM\Index(name="judgehostid", columns={"judgehostid"}),
  *         @ORM\Index(name="priority", columns={"priority"}),
  *         @ORM\Index(name="jobid", columns={"jobid"}),
  *         @ORM\Index(name="submitid", columns={"submitid"}),
  *         @ORM\Index(name="valid", columns={"valid"}),
- *         @ORM\Index(name="hostname_jobid", columns={"hostname", "jobid"}, options={"lengths": {64, null}}),
- *         @ORM\Index(name="hostname_valid_priority", columns={"hostname", "valid", "priority"}, options={"lengths": {64, null, null}}),
- *         @ORM\Index(name="specific_type", columns={"hostname", "starttime", "valid", "type", "priority", "judgetaskid"}, options={"lengths": {64, null, null, null, null, null}}),
+ *         @ORM\Index(name="judgehostid_jobid", columns={"judgehostid", "jobid"}),
+ *         @ORM\Index(name="judgehostid_valid_priority", columns={"judgehostid", "valid", "priority"}),
+ *         @ORM\Index(name="specific_type", columns={"judgehostid", "starttime", "valid", "type", "priority", "judgetaskid"}),
  *     },
  *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Individual judge tasks."}
  *     )
@@ -40,12 +41,11 @@ class JudgeTask
     private $judgetaskid;
 
     /**
-     * @var string
-     * @ORM\Column(type="string", name="hostname",
-     *     options={"comment"="hostname of the judge which executes the task"},
-     *     nullable=true)
+     * @ORM\ManyToOne(targetEntity="Judgehost", inversedBy="judgetasks")
+     * @ORM\JoinColumn(name="judgehostid", referencedColumnName="judgehostid")
+     * @Serializer\Exclude()
      */
-    private $hostname = null;
+    private $judgehost;
 
     /**
      * @var string
@@ -182,15 +182,15 @@ class JudgeTask
         return $this->judgetaskid;
     }
 
-    public function setHostname(?string $hostname): JudgeTask
+    public function setJudgehost(?Judgehost $judgehost = null): JudgeTask
     {
-        $this->hostname = $hostname;
+        $this->judgehost = $judgehost;
         return $this;
     }
 
-    public function getHostname(): ?string
+    public function getJudgehost(): ?Judgehost
     {
-        return $this->hostname;
+        return $this->judgehost;
     }
 
     public function setType(string $type): JudgeTask

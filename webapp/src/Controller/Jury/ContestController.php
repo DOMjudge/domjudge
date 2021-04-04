@@ -696,7 +696,7 @@ class ContestController extends BaseController
                     $judgeTask = new JudgeTask();
                     $judgeTask
                         ->setType(JudgeTaskType::PREFETCH)
-                        ->setHostname($judgehost->getHostname())
+                        ->setJudgehost($judgehost)
                         ->setPriority(JudgeTask::PRIORITY_DEFAULT)
                         ->setTestcaseId($testcase->getTestcaseid());
                     $this->em->persist($judgeTask);
@@ -708,7 +708,7 @@ class ContestController extends BaseController
                 $judgeTask = new JudgeTask();
                 $judgeTask
                     ->setType(JudgeTaskType::PREFETCH)
-                    ->setHostname($judgehost->getHostname())
+                    ->setJudgehost($judgehost)
                     ->setPriority(JudgeTask::PRIORITY_DEFAULT)
                     ->setCompareScriptId($compareExec->getImmutableExecId())
                     ->setCompareConfig(json_encode(['hash' => $compareExec->getHash()]))
@@ -735,7 +735,7 @@ class ContestController extends BaseController
                 $judgeTask = new JudgeTask();
                 $judgeTask
                     ->setType(JudgeTaskType::PREFETCH)
-                    ->setHostname($judgehost->getHostname())
+                    ->setJudgehost($judgehost)
                     ->setPriority(JudgeTask::PRIORITY_DEFAULT)
                     ->setCompileScriptId($compileExec->getImmutableExecId())
                     ->setCompileConfig(json_encode(['hash' => $compileExec->getHash()]));

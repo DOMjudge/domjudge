@@ -257,7 +257,7 @@ class JudgehostController extends AbstractFOSRestController
             throw new BadRequestHttpException('Argument \'active\' is mandatory');
         }
 
-        $judgehost = $this->em->getRepository(Judgehost::class)->find($hostname);
+        $judgehost = $this->em->getRepository(Judgehost::class)->findOneBy(['hostname' => $hostname]);
         if ($judgehost) {
             $judgehost->setActive($request->request->getBoolean('active'));
             $this->em->flush();
@@ -314,7 +314,7 @@ class JudgehostController extends AbstractFOSRestController
     public function updateJudgingAction(Request $request, string $hostname, int $judgetaskid) : void
     {
         /** @var Judgehost $judgehost */
-        $judgehost = $this->em->getRepository(Judgehost::class)->find($hostname);
+        $judgehost = $this->em->getRepository(Judgehost::class)->findOneBy(['hostname' => $hostname]);
         if (!$judgehost) {
             throw new BadRequestHttpException("Who are you and why are you sending us any data?");
         }
@@ -359,7 +359,7 @@ class JudgehostController extends AbstractFOSRestController
 
             // Reload judgehost just in case it got cleared above.
             /** @var Judgehost $judgehost */
-            $judgehost = $this->em->getRepository(Judgehost::class)->find($hostname);
+            $judgehost = $this->em->getRepository(Judgehost::class)->findOneBy(['hostname' => $hostname]);
 
             $output_compile = base64_decode($request->request->get('output_compile'));
             if ($request->request->getBoolean('compile_success')) {
@@ -509,7 +509,7 @@ class JudgehostController extends AbstractFOSRestController
         }
 
         /** @var Judgehost $judgehost */
-        $judgehost = $this->em->getRepository(Judgehost::class)->find($hostname);
+        $judgehost = $this->em->getRepository(Judgehost::class)->findOneBy(['hostname' => $hostname]);
         if (!$judgehost) {
             throw new BadRequestHttpException("Who are you and why are you sending us any data?");
         }
@@ -641,14 +641,14 @@ class JudgehostController extends AbstractFOSRestController
         $metadata     = $request->request->get('metadata');
 
         /** @var Judgehost $judgehost */
-        $judgehost = $this->em->getRepository(Judgehost::class)->find($hostname);
+        $judgehost = $this->em->getRepository(Judgehost::class)->findOneBy(['hostname' => $hostname]);
         if (!$judgehost) {
             throw new BadRequestHttpException("Who are you and why are you sending us any data?");
         }
 
         $this->addSingleJudgingRun($judgeTaskId, $hostname, $runResult, $runTime,
                                    $outputSystem, $outputError, $outputDiff, $outputRun, $metadata);
-        $judgehost = $this->em->getRepository(Judgehost::class)->find($hostname);
+        $judgehost = $this->em->getRepository(Judgehost::class)->findOneBy(['hostname' => $hostname]);
         $judgehost->setPolltime(Utils::now());
         $this->em->flush();
     }
@@ -730,7 +730,7 @@ class JudgehostController extends AbstractFOSRestController
             $this->em->getConnection()->executeUpdate(
                 'UPDATE judgetask SET valid=0'
                 . ' WHERE ' . $field_name . ' = :id'
-                . ' AND hostname IS NULL',
+                . ' AND judgehostid IS NULL',
                 [
                     ':id' => $disabled[$field_name],
                 ]
@@ -833,9 +833,9 @@ class JudgehostController extends AbstractFOSRestController
                     }
 
                     // For the other runs, we need to reset the judge task if it belongs to the current judgehost
-                    if ($run->getJudgetask()->getHostname() === $judgehost->getHostname()) {
+                    if ($run->getJudgetask()->getJudgehost()->getHostname() === $judgehost->getHostname()) {
                         $run->getJudgetask()
-                            ->setHostname(null)
+                            ->setJudgehost(null)
                             ->setStarttime(null);
                     }
                 }
@@ -992,7 +992,7 @@ class JudgehostController extends AbstractFOSRestController
                     $this->em->getConnection()->executeUpdate(
                         'UPDATE judgetask SET valid=0, priority=:priority'
                         . ' WHERE jobid=:jobid'
-                        . ' AND hostname IS NULL',
+                        . ' AND judgehostid IS NULL',
                         [
                             ':priority' => JudgeTask::PRIORITY_LOW,
                             ':jobid' => $judgingRun->getJudgingid(),
@@ -1003,7 +1003,7 @@ class JudgehostController extends AbstractFOSRestController
                     $this->em->getConnection()->executeUpdate(
                         'UPDATE judgetask SET priority=:priority'
                         . ' WHERE jobid=:jobid'
-                        . ' AND hostname IS NULL',
+                        . ' AND judgehostid IS NULL',
                         [
                             ':priority' => JudgeTask::PRIORITY_LOW,
                             ':jobid' => $judgingRun->getJudgingid(),
@@ -1296,7 +1296,7 @@ class JudgehostController extends AbstractFOSRestController
         $hostname = $request->request->get('hostname');
 
         /** @var Judgehost $judgehost */
-        $judgehost = $this->em->getRepository(Judgehost::class)->find($hostname);
+        $judgehost = $this->em->getRepository(Judgehost::class)->findOneBy(['hostname' => $hostname]);
         if (!$judgehost) {
             throw new BadRequestHttpException('Register yourself first. You are not known to us yet.');
         }
@@ -1323,11 +1323,11 @@ class JudgehostController extends AbstractFOSRestController
             ->createQueryBuilder()
             ->from(JudgeTask::class, 'jt')
             ->select('jt')
-            ->andWhere('jt.hostname = :hostname')
+            ->andWhere('jt.judgehost = :judgehost')
             ->andWhere('jt.starttime IS NULL')
             ->andWhere('jt.valid = 1')
             ->andWhere('jt.type = :type')
-            ->setParameter(':hostname', $hostname)
+            ->setParameter(':judgehost', $judgehost)
             ->setParameter(':type', JudgeTaskType::DEBUG_INFO)
             ->addOrderBy('jt.priority')
             ->addOrderBy('jt.judgetaskid')
@@ -1335,7 +1335,7 @@ class JudgehostController extends AbstractFOSRestController
             ->getQuery()
             ->getResult();
         if (!empty($judgetasks)) {
-            return $this->serializeJudgeTasks($judgetasks, $hostname);
+            return $this->serializeJudgeTasks($judgetasks, $judgehost);
         }
 
         /* Our main objective is to work on high priority work first while keeping the additional overhead of splitting
@@ -1364,9 +1364,9 @@ class JudgehostController extends AbstractFOSRestController
                 ->createQueryBuilder()
                 ->from(JudgeTask::class, 'jt')
                 ->select('jt.jobid')
-                ->andWhere('jt.hostname = :hostname')
+                ->andWhere('jt.judgehost = :judgehost')
                 ->andWhere('jt.type = :type')
-                ->setParameter(':hostname', $hostname)
+                ->setParameter(':judgehost', $judgehost)
                 ->setParameter(':type', JudgeTaskType::JUDGING_RUN)
                 ->groupBy('jt.jobid')
                 ->getQuery()
@@ -1378,7 +1378,7 @@ class JudgehostController extends AbstractFOSRestController
             $judgetasks = $queryBuilder
                 ->from(JudgeTask::class, 'jt')
                 ->select('jt')
-                ->andWhere('jt.hostname IS NULL')
+                ->andWhere('jt.judgehost IS NULL')
                 ->andWhere('jt.valid = 1')
                 ->andWhere('jt.priority <= :default_priority')
                 ->andWhere($queryBuilder->expr()->In('jt.jobid', $started_judgetaskids))
@@ -1391,7 +1391,7 @@ class JudgehostController extends AbstractFOSRestController
                 ->getQuery()
                 ->getResult();
             if (!empty($judgetasks)) {
-                return $this->serializeJudgeTasks($judgetasks, $hostname);
+                return $this->serializeJudgeTasks($judgetasks, $judgehost);
             }
         }
 
@@ -1400,7 +1400,7 @@ class JudgehostController extends AbstractFOSRestController
             ->createQueryBuilder()
             ->from(JudgeTask::class, 'jt')
             ->select('jt.priority')
-            ->andWhere('jt.hostname IS NULL')
+            ->andWhere('jt.judgehost IS NULL')
             ->andWhere('jt.valid = 1')
             ->andWhere('jt.type = :type')
             ->setParameter(':type', JudgeTaskType::JUDGING_RUN)
@@ -1421,7 +1421,7 @@ class JudgehostController extends AbstractFOSRestController
                     ->createQueryBuilder()
                     ->from(JudgeTask::class, 'jt')
                     ->select('jt')
-                    ->andWhere('jt.hostname IS NULL')
+                    ->andWhere('jt.judgehost IS NULL')
                     ->andWhere('jt.valid = 1')
                     ->andWhere('jt.priority = :max_priority')
                     ->andWhere('jt.type = :type')
@@ -1433,7 +1433,7 @@ class JudgehostController extends AbstractFOSRestController
                     ->getQuery()
                     ->getResult();
                 if (!empty($judgetasks)) {
-                    return $this->serializeJudgeTasks($judgetasks, $hostname);
+                    return $this->serializeJudgeTasks($judgetasks, $judgehost);
                 }
             }
 
@@ -1445,7 +1445,7 @@ class JudgehostController extends AbstractFOSRestController
                     ->createQueryBuilder()
                     ->from(JudgeTask::class, 'jt')
                     ->select('jt.jobid')
-                    ->andWhere('jt.hostname IS NOT NULL')
+                    ->andWhere('jt.judgehost IS NOT NULL')
                     ->andWhere('jt.type = :type')
                     ->setParameter(':type', JudgeTaskType::JUDGING_RUN)
                     ->groupBy('jt.jobid')
@@ -1458,7 +1458,7 @@ class JudgehostController extends AbstractFOSRestController
                 ->join(Submission::class, 's', Join::WITH, 'jt.submitid = s.submitid')
                 ->join('s.team', 't')
                 ->select('jt')
-                ->andWhere('jt.hostname IS NULL')
+                ->andWhere('jt.judgehost IS NULL')
                 ->andWhere('jt.valid = 1')
                 ->andWhere('jt.priority = :max_priority')
                 ->andWhere('jt.type = :type')
@@ -1479,7 +1479,7 @@ class JudgehostController extends AbstractFOSRestController
                     ->getQuery()
                     ->getResult();
             if (!empty($judgetasks)) {
-                return $this->serializeJudgeTasks($judgetasks, $hostname);
+                return $this->serializeJudgeTasks($judgetasks, $judgehost);
             }
 
             if ($this->config->get('enable_parallel_judging')) {
@@ -1490,7 +1490,7 @@ class JudgehostController extends AbstractFOSRestController
                     ->createQueryBuilder()
                     ->from(JudgeTask::class, 'jt')
                     ->select('jt')
-                    ->andWhere('jt.hostname IS NULL')
+                    ->andWhere('jt.judgehost IS NULL')
                     ->andWhere('jt.valid = 1')
                     ->andWhere('jt.type = :type')
                     ->setParameter(':type', JudgeTaskType::JUDGING_RUN)
@@ -1500,7 +1500,7 @@ class JudgehostController extends AbstractFOSRestController
                     ->getQuery()
                     ->getResult();
                 if (!empty($judgetasks)) {
-                    return $this->serializeJudgeTasks($judgetasks, $hostname);
+                    return $this->serializeJudgeTasks($judgetasks, $judgehost);
                 }
             }
         }
@@ -1512,7 +1512,7 @@ class JudgehostController extends AbstractFOSRestController
             ->createQueryBuilder()
             ->from(JudgeTask::class, 'jt')
             ->select('jt')
-            ->andWhere('jt.hostname = :hostname')
+            ->andWhere('jt.judgehost = :hostname')
             ->andWhere('jt.starttime IS NULL')
             ->andWhere('jt.valid = 1')
             ->andWhere('jt.type = :type')
@@ -1525,14 +1525,14 @@ class JudgehostController extends AbstractFOSRestController
             ->getQuery()
             ->getResult();
         if (!empty($judgetasks)) {
-            return $this->serializeJudgeTasks($judgetasks, $hostname);
+            return $this->serializeJudgeTasks($judgetasks, $judgehost);
         }
 
         return [];
     }
 
     /** @param JudgeTask[] $judgeTasks */
-    private function serializeJudgeTasks($judgeTasks, string $hostname): array
+    private function serializeJudgeTasks($judgeTasks, Judgehost $judgehost): array
     {
         if (empty($judgeTasks)) {
             return [];
@@ -1549,9 +1549,9 @@ class JudgehostController extends AbstractFOSRestController
 
         $now = Utils::now();
         $numUpdated = $this->em->getConnection()->executeUpdate(
-            'UPDATE judgetask SET hostname = :hostname, starttime = :starttime WHERE starttime IS NULL AND valid = 1 AND judgetaskid IN (:ids)',
+            'UPDATE judgetask SET judgehostid = :judgehostid, starttime = :starttime WHERE starttime IS NULL AND valid = 1 AND judgetaskid IN (:ids)',
             [
-                ':hostname' => $hostname,
+                ':judgehostid' => $judgehost->getJudgehostid(),
                 ':starttime' => $now,
                 ':ids' => $judgetaskids,
             ],
@@ -1599,8 +1599,8 @@ class JudgehostController extends AbstractFOSRestController
             $queryBuilder
                 ->from(JudgeTask::class, 'jt')
                 ->select('jt.judgetaskid')
-                ->andWhere('jt.hostname = :hostname')
-                ->setParameter(':hostname', $hostname)
+                ->andWhere('jt.judgehost = :judgehost')
+                ->setParameter(':judgehost', $judgehost)
                 ->andWhere($queryBuilder->expr()->In('jt.judgetaskid', $judgetaskids))
                 ->getQuery()
                 ->getArrayResult(),
