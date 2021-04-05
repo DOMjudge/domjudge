@@ -60,11 +60,16 @@ abstract class BaseController extends AbstractController
     {
         if (strpos($referer, $prefix) === 0) {
             $path = substr($referer, strlen($prefix));
+            $context = $router->getContext();
+            $method = $context->getMethod();
+            $context->setMethod('GET');
             try {
                 $router->match($path);
                 return true;
             } catch (ResourceNotFoundException $e) {
                 return false;
+            } finally {
+                $context->setMethod($method);
             }
         }
 
