@@ -155,7 +155,10 @@ class AuditLogController extends AbstractController
             case 'internal_error':
                 return $this->generateUrl('jury_internal_error', ['errorId' => $id]);
             case 'judgehost':
-                return $this->generateUrl('jury_judgehost', ['hostname' => $id]);
+                if ($id) {
+                    return $this->generateUrl('jury_judgehost', ['judgehostid' => $id]);
+                }
+                return $this->generateUrl('jury_judgehosts');
             case 'judgehosts':
                 return $this->generateUrl('jury_judgehosts');
             case 'judgehost_restriction':

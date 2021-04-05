@@ -65,6 +65,7 @@ final class Version20210404121354 extends AbstractMigration
         // Now fix the data
         $this->addSql('UPDATE judging j INNER JOIN judgehost jh ON j.judgehostid = jh.judgehostid SET j.judgehost = jh.hostname');
         $this->addSql('UPDATE judgetask jt INNER JOIN judgehost jh ON jt.judgehostid = jh.judgehostid SET jt.hostname = jh.hostname');
+        $this->addSql('UPDATE auditlog a INNER JOIN judgehost jh ON jh.hostname = a.dataid AND a.datatype = \'judgehost\' SET a.dataid = jh.judgehostid');
 
         // Finally get rid of the old columns and indices. Also add the old indices
         $this->addSql('ALTER TABLE judgetask DROP FOREIGN KEY judgetask_ibfk_1');

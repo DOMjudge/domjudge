@@ -7,6 +7,7 @@ use App\Doctrine\DBAL\Types\InternalErrorStatusType;
 use App\Entity\ContestProblem;
 use App\Entity\Executable;
 use App\Entity\InternalError;
+use App\Entity\Judgehost;
 use App\Entity\Problem;
 use App\Service\DOMJudgeService;
 use App\Utils\Utils;
@@ -116,7 +117,9 @@ class InternalErrorController extends BaseController
                 $affectedText = $problem->getName();
                 break;
             case 'judgehost':
-                $affectedLink = $this->generateUrl('jury_judgehost', ['hostname' => $disabled['hostname']]);
+                // Judgehosts get disabled by their hostname, so we need to look it up here
+                $judgehost    = $this->em->getRepository(Judgehost::class)->find($disabled['hostname']);
+                $affectedLink = $this->generateUrl('jury_judgehost', ['judgehostid' => $judgehost->getJudgehostid()]);
                 $affectedText = $disabled['hostname'];
                 break;
             case 'language':

@@ -408,10 +408,10 @@ class SubmissionController extends BaseController
             }
         }
 
-        $hostnames = $this->em->createQueryBuilder()
+        $judgehosts = $this->em->createQueryBuilder()
             ->from(JudgeTask::class, 'jt')
             ->join('jt.judgehost', 'jh')
-            ->select('jh.hostname')
+            ->select('jh.judgehostid', 'jh.hostname')
             ->andWhere('jt.judgehost IS NOT NULL')
             ->andWhere('jt.jobid = :judging')
             ->setParameter(':judging', $selectedJudging)
@@ -419,7 +419,10 @@ class SubmissionController extends BaseController
             ->orderBy('jh.hostname')
             ->getQuery()
             ->getScalarResult();
-        $hostnames = array_column($hostnames, 'hostname');
+        $judgehosts = array_combine(
+            array_column($judgehosts, 'judgehostid'),
+            array_column($judgehosts, 'hostname')
+        );
 
         $runsOutstanding = false;
         $runs       = [];
@@ -497,7 +500,12 @@ class SubmissionController extends BaseController
                 }
                 $runResult['terminated'] = preg_match('/timelimit exceeded.*hard (wall|cpu) time/',
                                                       (string)$runResult['output_system']);
-                $runResult['hostname'] = $firstJudgingRun === null ? null : $firstJudgingRun->getJudgeTask()->getJudgehost()->getHostname();
+                $runResult['hostname'] = null;
+                $runResult['judgehostid'] = null;
+                if ($firstJudgingRun && $firstJudgingRun->getJudgeTask()->getJudgehost()) {
+                    $runResult['hostname'] = $firstJudgingRun->getJudgeTask()->getJudgehost()->getHostname();
+                    $runResult['judgehostid'] = $firstJudgingRun->getJudgeTask()->getJudgehost()->getJudgehostid();
+                }
                 $runResult['is_output_run_truncated'] = preg_match(
                     '/\[output storage truncated after \d* B\]/',
                     (string)$runResult['output_run_last_bytes']
@@ -566,7 +574,7 @@ class SubmissionController extends BaseController
             'lastJudging' => $lastJudging,
             'runs' => $runs,
             'runsOutstanding' => $runsOutstanding,
-            'hostnames' => $hostnames,
+            'judgehosts' => $judgehosts,
             'sameTestcaseIds' => $sameTestcaseIds,
             'externalRuns' => $externalRuns,
             'runsOutput' => $runsOutput,

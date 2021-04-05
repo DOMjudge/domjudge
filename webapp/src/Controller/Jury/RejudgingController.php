@@ -740,7 +740,7 @@ class RejudgingController extends BaseController
                         $redirect = $this->generateUrl('jury_contest', ['contestId' => $id]);
                         break;
                     case 'judgehost':
-                        $redirect = $this->generateUrl('jury_judgehost', ['hostname' => $id]);
+                        $redirect = $this->generateUrl('jury_judgehost', ['judgehostid' => $id]);
                         break;
                     case 'language':
                         $redirect = $this->generateUrl('jury_language', ['langId' => $id]);
