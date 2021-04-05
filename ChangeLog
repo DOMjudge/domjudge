@@ -1,5 +1,8 @@
 DOMjudge Programming Contest Judging System
 
+Version 7.3.4 - DEV
+-------------------
+
 Version 7.3.3 - 5 April 2021
 ----------------------------
  - Fix single problem API action for non-jury members.
