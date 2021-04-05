@@ -12,19 +12,19 @@
 
     <h1>Contest {{ contest.name }}</h1>
 
-    {% if isActive %}
+    {% if contest.isActive %}
         <div class="alert alert-success">
-            This is an active contest
+            This contest is currently active.
         </div>
     {% endif %}
     {% if not contest.enabled %}
         <div class="alert alert-danger">
-            This contest is disabled
+            This contest is disabled.
         </div>
     {% endif %}
     {% if contest.finalizetime is not empty %}
         <div class="alert alert-info">
-            This contest is final
+            This contest is final.
         </div>
     {% endif %}
 
@@ -51,13 +51,21 @@
                 </tr>
                 <tr>
                     <th>Activate time</th>
-                    <td>{{ contest.activatetimeString }}</td>
+                    <td>
+                        {{ contest.activatetimeString }}
+                        {% if contest.isActive %}
+                            <i class="fas fa-check"></i>
+                        {% endif %}
+                    </td>
                 </tr>
                 <tr>
                     <th>Start time</th>
                     <td>
                         {% if contest.starttimeEnabled %}
                             {{ contest.starttimeString }}
+                            {% if contest.state.started %}
+                                <i class="fas fa-check"></i>
+                            {% endif %}
                         {% else %}
                             <span class="ignore">{{ contest.starttimeString }}</span> <em>delayed</em>
                         {% endif %}
@@ -65,15 +73,30 @@
                 </tr>
                 <tr>
                     <th>Scoreboard freeze</th>
-                    <td>{{ contest.freezetimeString|default('-') }}</td>
+                    <td>
+                        {{ contest.freezetimeString|default('-') }}
+                        {% if contest.state.frozen %}
+                            <i class="fas fa-check"></i>
+                        {% endif %}
+                    </td>
                 </tr>
                 <tr>
                     <th>End time</th>
-                    <td>{{ contest.endtimeString }}</td>
+                    <td>
+                        {{ contest.endtimeString }}
+                        {% if contest.state.ended %}
+                            <i class="fas fa-check"></i>
+                        {% endif %}
+                    </td>
                 </tr>
                 <tr>
                     <th>Scoreboard unfreeze</th>
-                    <td>{{ contest.unfreezetimeString|default('-') }}</td>
+                    <td>
+                        {{ contest.unfreezetimeString|default('-') }}
+                        {% if contest.state.thawed %}
+                            <i class="fas fa-check"></i>
+                        {% endif %}
+                    </td>
                 </tr>
                 <tr>
                     <th>Deactivate time</th>

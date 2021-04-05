@@ -427,7 +427,6 @@ class ContestController extends BaseController
 
         return $this->render('jury/contest.html.twig', [
             'contest' => $contest,
-            'isActive' => isset($this->dj->getCurrentContests()[$contest->getCid()]),
             'allowRemovedIntervals' => $this->getParameter('removed_intervals'),
             'removedIntervalForm' => $form->createView(),
             'removedIntervals' => $removedIntervals,
