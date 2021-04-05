@@ -330,10 +330,10 @@
                 {%- if externalJudgement is not null %}
                     (external: {{ externalJudgement.result | printValidJuryResult }})
                 {%- endif %}
-                {%- if selectedJudging is not null and hostnames is not empty -%}
+                {%- if selectedJudging is not null and judgehosts is not empty -%}
                     , Judgehost(s):
-                    {% for hostname in hostnames %}
-                        {% set judgehostLink = path('jury_judgehost', {hostname: hostname}) %}
+                    {% for judgehostid, hostname in judgehosts %}
+                        {% set judgehostLink = path('jury_judgehost', {judgehostid: judgehostid}) %}
                         <a href="{{ judgehostLink }}">{{ hostname | printHost }}</a>
                     {% endfor %} -
                     <span class="judgetime">Judging started: {{ selectedJudging.starttime | printtime('%H:%M:%S') }}
@@ -540,7 +540,7 @@
                             {% endif %}
                         {% endif %}
                         {% if runsOutput[runIdx].hostname is not null %}
-                            {% set judgehostLink = path('jury_judgehost', {hostname: runsOutput[runIdx].hostname}) %}
+                            {% set judgehostLink = path('jury_judgehost', {judgehostid: runsOutput[runIdx].judgehostid}) %}
                             | <a href="{{ judgehostLink }}">{{ runsOutput[runIdx].hostname | printHost }}</a>
                         {% endif %}
                         {% if externalRun is not null and externalRun.firstExternalRun is not null %}

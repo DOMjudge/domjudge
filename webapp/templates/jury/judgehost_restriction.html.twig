@@ -100,12 +100,12 @@
                     {% for judgehost in judgehostRestriction.judgehosts %}
                         <tr>
                             <td {% if not judgehost.active %}class="disabled"{% endif %}>
-                                <a href="{{ path('jury_judgehost', {'hostname': judgehost.hostname}) }}">
+                                <a href="{{ path('jury_judgehost', {'judgehostid': judgehost.judgehostid}) }}">
                                     {{ judgehost.hostname }}
                                 </a>
                             </td>
                             <td {% if not judgehost.active %}class="disabled"{% endif %}>
-                                <a href="{{ path('jury_judgehost', {'hostname': judgehost.hostname}) }}">
+                                <a href="{{ path('jury_judgehost', {'judgehostid': judgehost.judgehostid}) }}">
                                     {{ judgehost.active | printYesNo }}
                                 </a>
                             </td>

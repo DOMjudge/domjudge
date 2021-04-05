@@ -60,20 +60,20 @@
     <div class="mb-4">
         {%- if is_granted('ROLE_ADMIN') -%}
             {%- if judgehost.active -%}
-                {% set url = path('jury_judgehost_deactivate', {hostname: judgehost.hostname}) %}
+                {% set url = path('jury_judgehost_deactivate', {judgehostid: judgehost.judgehostid}) %}
                 {% set icon = 'pause' %}
                 {% set action = 'Deactivate' %}
                 {% set class = 'warning' %}
             {%- else -%}
-                {% set url = path('jury_judgehost_activate', {hostname: judgehost.hostname}) %}
+                {% set url = path('jury_judgehost_activate', {judgehostid: judgehost.judgehostid}) %}
                 {% set icon = 'play' %}
                 {% set action = 'Activate' %}
                 {% set class = 'success' %}
             {%- endif -%}
             {{ button(url, action, class, icon) }}
-            {{ button(path('jury_judgehost_delete', {'hostname': judgehost.hostname}), 'Delete judgehost', 'danger', 'trash-alt', true) }}
+            {{ button(path('jury_judgehost_delete', {'judgehostid': judgehost.judgehostid}), 'Delete judgehost', 'danger', 'trash-alt', true) }}
         {% endif %}
-        {% include 'jury/partials/rejudge_form.html.twig' with {table: 'judgehost', id: judgehost.hostname, buttonClass: 'btn-primary'} %}
+        {% include 'jury/partials/rejudge_form.html.twig' with {table: 'judgehost', id: judgehost.judgehostid, buttonClass: 'btn-primary'} %}
     </div>
 
     <h3>Judgings by {{ judgehost.hostname | printHost }}</h3>
