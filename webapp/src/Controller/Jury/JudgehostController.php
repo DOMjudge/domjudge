@@ -344,7 +344,7 @@ class JudgehostController extends BaseController
             ->leftJoin('j.restriction', 'r')
             ->select('j', 'r')
             ->andWhere('j.judgehostid = :judgehostid')
-            ->setParameter(':$judgehostid', $$judgehostid)
+            ->setParameter(':judgehostid', $judgehostid)
             ->getQuery()
             ->getOneOrNullResult();
 
