@@ -6,7 +6,6 @@ namespace DoctrineMigrations;
 
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
-use ZipArchive;
 
 /**
  * Auto-generated Migration: Please modify to your needs!
@@ -62,47 +61,6 @@ final class Version20201219154651 extends AbstractMigration
         $this->addSql('ALTER TABLE judging ADD CONSTRAINT judging_ibfk_3 FOREIGN KEY (judgehostid) REFERENCES judgehost (judgehostid)');
         $this->addSql('UPDATE judging j INNER JOIN judgehost jh ON j.judgehost = jh.hostname SET j.judgehostid = jh.judgehostid');
         $this->addSql('UPDATE auditlog a INNER JOIN judgehost jh ON jh.hostname = a.dataid AND a.datatype = \'judgehost\' SET a.dataid = jh.judgehostid');
-
-        if ($schema->getTable('executable')->hasColumn('zipfile')) {
-            $oldRows = $this->connection->executeQuery('SELECT execid, zipfile FROM executable')->fetchAll();
-            foreach ($oldRows as $oldRow) {
-                $this->connection->exec('INSERT INTO immutable_executable (`userid`) VALUES (null)');
-                $immutable_execid = $this->connection->lastInsertId();
-
-                $tmpzip = tempnam('/tmp', 'zipfile');
-                file_put_contents($tmpzip, $oldRow['zipfile']);
-                $zip = new ZipArchive();
-                $zip->open($tmpzip, ZIPARCHIVE::CHECKCONS);
-
-                for ($idx = 0; $idx < $zip->numFiles; $idx++) {
-                    $filename = basename($zip->getNameIndex($idx));
-                    $content = $zip->getFromIndex($idx);
-                    $encodedContent = ($content === '' ? '' : ('0x' . strtoupper(bin2hex($content))));
-
-                    // In doubt make files executable, but try to read it from the zip file.
-                    $executableBit = '1';
-                    if ($zip->getExternalAttributesIndex($idx, $opsys, $attr)
-                        && $opsys == ZipArchive::OPSYS_UNIX
-                        && (($attr >> 16) & 0100) === 0) {
-                        $executableBit = '0';
-                    }
-                    $this->connection->exec(
-                        'INSERT INTO executable_file '
-                        . '(`immutable_execid`, `filename`, `ranknumber`, `file_content`, `is_executable`) '
-                        . 'VALUES (' . $immutable_execid . ', "' . $filename . '", '
-                        . $idx . ', ' . $encodedContent . ', '
-                        . $executableBit . ')'
-                    );
-                }
-
-                $this->connection->exec(
-                    'UPDATE executable SET immutable_execid = '
-                    . $immutable_execid . ' WHERE execid = "' . $oldRow['execid'] . '"'
-                );
-            }
-
-            $this->addSql('ALTER TABLE `executable` DROP COLUMN `zipfile`');
-        }
     }
 
     public function down(Schema $schema): void
