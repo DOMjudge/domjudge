@@ -130,13 +130,13 @@ class AuditLog
         return $this->datatype;
     }
 
-    public function setDataid(string $dataid): AuditLog
+    public function setDataid(?string $dataid): AuditLog
     {
         $this->dataid = $dataid;
         return $this;
     }
 
-    public function getDataid(): string
+    public function getDataid(): ?string
     {
         return $this->dataid;
     }
