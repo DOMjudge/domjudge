@@ -502,7 +502,7 @@ class SubmissionController extends BaseController
                                                       (string)$runResult['output_system']);
                 $runResult['hostname'] = null;
                 $runResult['judgehostid'] = null;
-                if ($firstJudgingRun && $firstJudgingRun->getJudgeTask()->getJudgehost()) {
+                if ($firstJudgingRun && $firstJudgingRun->getJudgeTask() && $firstJudgingRun->getJudgeTask()->getJudgehost()) {
                     $runResult['hostname'] = $firstJudgingRun->getJudgeTask()->getJudgehost()->getHostname();
                     $runResult['judgehostid'] = $firstJudgingRun->getJudgeTask()->getJudgehost()->getJudgehostid();
                 }

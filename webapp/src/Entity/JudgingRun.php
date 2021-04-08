@@ -125,12 +125,12 @@ class JudgingRun extends BaseApiEntity
         return $this;
     }
 
-    public function getJudgeTaskId(): int
+    public function getJudgeTaskId(): ?int
     {
         return $this->judgetaskid;
     }
 
-    public function getJudgeTask(): JudgeTask
+    public function getJudgeTask(): ?JudgeTask
     {
         return $this->judgetask;
     }
