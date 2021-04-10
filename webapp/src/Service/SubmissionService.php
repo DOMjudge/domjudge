@@ -173,7 +173,7 @@ class SubmissionService
             if ($restrictions['verified']) {
                 $queryBuilder->andWhere('j.verified = 1');
             } else {
-                $queryBuilder->andWhere('j.verified = 0 OR (j.verified IS NULL AND s.judgehost IS NULL)');
+                $queryBuilder->andWhere('j.verified = 0 OR j.verified IS NULL');
             }
         }
 
