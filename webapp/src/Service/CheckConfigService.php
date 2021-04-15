@@ -651,9 +651,8 @@ class CheckConfigService
     public function checkAffiliations() : array
     {
         $show_logos = $this->config->get('show_affiliation_logos');
-        $show_flags = $this->config->get('show_flags');
 
-        if (!$show_logos && !$show_flags) {
+        if (!$show_logos) {
             return ['caption' => 'Team affiliations',
                 'result' => 'O',
                 'desc' => 'Affiliations display disabled, skipping checks'];
@@ -668,18 +667,6 @@ class CheckConfigService
             // don't care about unused affiliations
             if (count($affiliation->getTeams()) === 0) {
                 continue;
-            }
-            if ($show_flags) {
-                if ($countryCode = $affiliation->getCountry()) {
-                    $flagpath = $webDir . sprintf('images/countries/%s.png', $countryCode);
-                    if (!file_exists($flagpath)) {
-                        $result = 'W';
-                        $desc .= sprintf("Flag for %s does not exist (looking for %s)\n", $countryCode, $flagpath);
-                    } elseif (!is_readable($flagpath)) {
-                         $result = 'W';
-                         $desc .= sprintf("Flag for %s not readable (looking for %s)\n", $countryCode, $flagpath);
-                    }
-                }
             }
             if ($show_logos) {
                 if ($aid = $affiliation->getAffilid()) {

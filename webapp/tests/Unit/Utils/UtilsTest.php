@@ -602,12 +602,12 @@ class UtilsTest extends TestCase
      */
     public function testGetImageType() : void
     {
-        $logo = __DIR__ . '/../../../public/images/countries/NLD.png';
+        $logo = __DIR__ . '/../../../public/images/teams/domjudge.jpg';
         $image = file_get_contents($logo);
         $error = null;
 
         $type = Utils::getImageType($image, $error);
-        self::assertEquals('png', $type);
+        self::assertEquals('jpeg', $type);
         self::assertNull($error);
     }
 
@@ -629,7 +629,7 @@ class UtilsTest extends TestCase
      */
     public function testGetImageThumb() : void
     {
-        $logo = dirname(__file__) . '/../../../public/images/countries/NLD.png';
+        $logo = dirname(__file__) . '/../../../public/images/teams/domjudge.jpg';
         $image = file_get_contents($logo);
         $error = null;
         $tmp = sys_get_temp_dir();
@@ -640,7 +640,7 @@ class UtilsTest extends TestCase
 
         $data = getimagesizefromstring($thumb);
         self::assertEquals($maxsize, $data[0]);  // resized width
-        self::assertEquals('image/png', $data['mime']);
+        self::assertEquals('image/jpeg', $data['mime']);
     }
 
     /**
