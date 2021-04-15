@@ -18,6 +18,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\KernelInterface;
+use Symfony\Component\Intl\Countries;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -139,12 +140,9 @@ class TeamAffiliationController extends BaseController
             $affiliationdata['num_teams'] = ['value' => $teamAffiliationData['num_teams']];
             if ($showFlags) {
                 $countryCode     = $teamAffiliation->getCountry();
-                $countryFlag     = $countryCode;
-                $countryFlagPath = sprintf('images/countries/%s.png', $countryCode);
-                if (file_exists($webDir . '/' . $countryFlagPath)) {
-                    $countryFlag = sprintf('<img src="%s" alt="%s" class="countryflag">',
-                                           $assetPackage->getUrl($countryFlagPath), $countryCode);
-                }
+                $countryFlagPath = sprintf('flags/4x3/%s.svg', $teamAffiliation->getCountryAlpha2());
+                $countryFlag     = sprintf('<img src="%s" alt="%s" class="countryflag">',
+                                       $assetPackage->getUrl($countryFlagPath), $teamAffiliation->getCountryName());
                 $affiliationdata['country'] = [
                     'value' => $countryFlag,
                     'sortvalue' => $countryCode,

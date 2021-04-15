@@ -17,6 +17,7 @@ use App\Service\SubmissionService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use SebastianBergmann\Diff\Differ;
+use Symfony\Component\Intl\Countries;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Twig\Extension\AbstractExtension;
@@ -213,7 +214,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
                 ->andWhere('l.allowSubmit = 1')
                 ->getQuery()
                 ->getResult(),
-            'alpha3_countries' => Utils::ALPHA3_COUNTRIES,
+            'alpha3_countries' => Countries::getAlpha3Names(),
             'show_shadow_differences' => $this->tokenStorage->getToken() &&
                                          $this->authorizationChecker->isGranted('ROLE_ADMIN') &&
                                          $this->config->get('data_source') === DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL,

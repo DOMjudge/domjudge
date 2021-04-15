@@ -40,10 +40,6 @@ install-domserver:
 	done
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_webappdir) phpunit.xml.dist .env
 
-install-docs:
-	$(INSTALL_DATA) -T public/images/countries/README    $(DESTDIR)$(domjudge_docdir)/README.country_flags
-	$(INSTALL_DATA) -T public/images/countries/codes.txt $(DESTDIR)$(domjudge_docdir)/country_codes.txt
-
 maintainer-clean-l:
 	-for d in cache log ; do \
 		for t in dev prod ; do \

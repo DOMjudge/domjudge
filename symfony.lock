@@ -2,6 +2,9 @@
     "angel-vladov/select2-theme-bootstrap4": {
         "version": "0.2.0-beta.3"
     },
+    "components/flag-icon-css": {
+        "version": "3.5.0"
+    },
     "components/jquery": {
         "version": "3.3.1"
     },

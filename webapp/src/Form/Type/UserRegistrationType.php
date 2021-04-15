@@ -11,6 +11,7 @@ use App\Service\DOMJudgeService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
+use stdClass;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -21,6 +22,7 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Form;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Intl\Countries;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Callback;
 use Symfony\Component\Validator\Constraints\Email;
@@ -134,8 +136,13 @@ class UserRegistrationType extends AbstractType
 
         if ($this->config->get('show_affiliations')) {
             $countries = [];
-            foreach (Utils::ALPHA3_COUNTRIES as $alpha3 => $country) {
-                $countries["$country ($alpha3)"] = $alpha3;
+            foreach (Countries::getAlpha3Codes() as $alpha3) {
+                $name = Countries::getAlpha3Name($alpha3);
+                // Note: this needs to be a class and not an array, otherwise Symfony will group them
+                $country = new stdClass();
+                $country->alpha3 = $alpha3;
+                $country->alpha2 = strtolower(Countries::getAlpha2Code($alpha3));
+                $countries["$name ($alpha3)"] = $country;
             }
 
             $builder
@@ -163,6 +170,10 @@ class UserRegistrationType extends AbstractType
                     'required' => false,
                     'mapped' => false,
                     'choices' => $countries,
+                    'choice_value' => 'alpha3',
+                    'choice_attr' => function($choice) {
+                        return ['data-alpha2' => $choice->alpha2];
+                    },
                     'placeholder' => 'No country',
                 ]);
             }

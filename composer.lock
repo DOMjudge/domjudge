@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "5c1c450fb4d9a82d048731e0c03ebd7c",
+    "content-hash": "7c24d85c0114a676bc483f51dd726650",
     "packages": [
         {
             "name": "angel-vladov/select2-theme-bootstrap4",
@@ -14,6 +14,48 @@
                 "url": "https://github.com/angel-vladov/select2-theme-bootstrap4/archive/0.2.0-beta.3.zip"
             },
             "type": "library"
+        },
+        {
+            "name": "components/flag-icon-css",
+            "version": "3.5.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/lipis/flag-icon-css.git",
+                "reference": "5141384c57972b0b08fc3bb67bea297321fbd799"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/lipis/flag-icon-css/zipball/5141384c57972b0b08fc3bb67bea297321fbd799",
+                "reference": "5141384c57972b0b08fc3bb67bea297321fbd799",
+                "shasum": ""
+            },
+            "type": "component",
+            "extra": {
+                "component": {
+                    "name": "flag-icon-css",
+                    "files": [
+                        "less/**",
+                        "css/**",
+                        "flags/**"
+                    ]
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Panayiotis Lipiridis (Lipis)",
+                    "email": "lipiridis@gmail.com"
+                }
+            ],
+            "description": "CSS for vector based country flags",
+            "support": {
+                "issues": "https://github.com/lipis/flag-icon-css/issues",
+                "source": "https://github.com/lipis/flag-icon-css/tree/3.5.0"
+            },
+            "time": "2020-06-10T11:53:19+00:00"
         },
         {
             "name": "components/jquery",

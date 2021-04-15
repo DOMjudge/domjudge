@@ -51,6 +51,7 @@
 		"ext-pcntl": "*",
 		"ext-zip": "*",
 		"angel-vladov/select2-theme-bootstrap4": "0.2.0-beta.3",
+		"components/flag-icon-css": "^3.5",
 		"components/jquery": "^3.3",
 		"datatables/datatables": "^1.10",
 		"doctrine/doctrine-bundle": "^2.0",

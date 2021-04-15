@@ -1,10 +1,13 @@
 <script>
     var template = function(element) {
-        var imgBase = "{{ asset('images/countries/NLD.png') }}";
+        var imgBase = "{{ asset('flags/4x3/nl.svg') }}";
 
-        var img = element.id == undefined || element.id == ""
+        var img = element.element == undefined ||
+            element.element.dataset == undefined ||
+            element.element.dataset['alpha2'] == undefined ||
+            element.element.dataset['alpha2'] == ""
             ? ''
-            : '<img src="' + imgBase.replace("NLD.png", element.id + ".png", 1) + '" class="countryflag">&nbsp;';
+            : '<img src="' + imgBase.replace("nl.svg", element.element.dataset['alpha2'] + ".svg", 1) + '" class="countryflag">&nbsp;';
 
         return img + element.text;
     };
