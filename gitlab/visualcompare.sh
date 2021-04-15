@@ -65,8 +65,8 @@ do
         -X POST \
         -H "Authorization: token $GH_BOT_TOKEN_OBSCURED" \
         -H "Accept: application/vnd.github.v3+json" \
-        -d "{\"state\": \"$STATE\", \"target_url\": \"$CI_JOB_URL/artifacts/$FILE\", \"description\":\"UI changes\", \"context\": \"UI diffs ($dir)\"}"
-      if [ $STATE=="failure" ]; then
+        -d "{\"state\": \"$STATE\", \"target_url\": \"$CI_JOB_URL/artifacts/$FILE\", \"description\":\"UI changes ($dir) \", \"context\": \"UI diffs\"}"
+      if [ $STATE == "failure" ]; then
         cat <<EOF > $failingchanges/README
 List the changed endpoints in a message on the PR. Regex is allowed.
 
@@ -84,6 +84,6 @@ if [ $CHANGE -eq 0 ]; then
         -X POST \
         -H "Authorization: token $GH_BOT_TOKEN_OBSCURED" \
         -H "Accept: application/vnd.github.v3+json" \
-        -d "{\"state\": \"success\", \"target_url\": \"$CI_JOB_URL/artifacts/browse/\", \"description\":\"No UI changes\", \"context\": \"UI diffs (None)\"}"
+        -d "{\"state\": \"success\", \"target_url\": \"$CI_JOB_URL/artifacts/browse/\", \"description\":\"No UI changes\", \"context\": \"UI diffs\"}"
 fi
 
