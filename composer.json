@@ -83,7 +83,7 @@
 		"symfony/monolog-bundle": "^3.4.0",
 		"symfony/profiler-pack": "^1.0",
 		"symfony/security-bundle": "4.4.*",
-		"symfony/security-csrf": "4.4.*",
+		"symfony/security-csrf": "5.2.*",
 		"symfony/twig-bundle": "^4.4",
 		"symfony/validator": "4.4.*",
 		"symfony/yaml": "4.4.*",
