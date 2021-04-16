@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "5c1c450fb4d9a82d048731e0c03ebd7c",
+    "content-hash": "ab9d6c5882288f107fb8bef9c9ffc00c",
     "packages": [
         {
             "name": "angel-vladov/select2-theme-bootstrap4",
@@ -9060,50 +9060,50 @@
         },
         {
             "name": "symfony/validator",
-            "version": "v4.4.21",
+            "version": "v5.0.11",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/validator.git",
-                "reference": "c00da06b82b8591548f52b4d6aad0faa0985843e"
+                "reference": "9084a603e998e7abb010c44f8e3a2046b61fa9f6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/validator/zipball/c00da06b82b8591548f52b4d6aad0faa0985843e",
-                "reference": "c00da06b82b8591548f52b4d6aad0faa0985843e",
+                "url": "https://api.github.com/repos/symfony/validator/zipball/9084a603e998e7abb010c44f8e3a2046b61fa9f6",
+                "reference": "9084a603e998e7abb010c44f8e3a2046b61fa9f6",
                 "shasum": ""
             },
             "require": {
-                "php": ">=7.1.3",
+                "php": ">=7.2.5",
                 "symfony/polyfill-ctype": "~1.8",
                 "symfony/polyfill-mbstring": "~1.0",
                 "symfony/translation-contracts": "^1.1|^2"
             },
             "conflict": {
                 "doctrine/lexer": "<1.0.2",
-                "phpunit/phpunit": "<4.8.35|<5.4.3,>=5.0",
-                "symfony/dependency-injection": "<3.4",
+                "phpunit/phpunit": "<5.4.3",
+                "symfony/dependency-injection": "<4.4",
                 "symfony/http-kernel": "<4.4",
-                "symfony/intl": "<4.3",
-                "symfony/translation": ">=5.0",
-                "symfony/yaml": "<3.4"
+                "symfony/intl": "<4.4",
+                "symfony/translation": "<4.4",
+                "symfony/yaml": "<4.4"
             },
             "require-dev": {
-                "doctrine/annotations": "^1.10.4",
+                "doctrine/annotations": "~1.7",
                 "doctrine/cache": "~1.0",
-                "egulias/email-validator": "^2.1.10|^3",
-                "symfony/cache": "^3.4|^4.0|^5.0",
-                "symfony/config": "^3.4|^4.0|^5.0",
-                "symfony/dependency-injection": "^3.4|^4.0|^5.0",
-                "symfony/expression-language": "^3.4|^4.0|^5.0",
-                "symfony/http-client": "^4.3|^5.0",
-                "symfony/http-foundation": "^4.1|^5.0",
-                "symfony/http-kernel": "^4.4",
-                "symfony/intl": "^4.3|^5.0",
+                "egulias/email-validator": "^2.1.10",
+                "symfony/cache": "^4.4|^5.0",
+                "symfony/config": "^4.4|^5.0",
+                "symfony/dependency-injection": "^4.4|^5.0",
+                "symfony/expression-language": "^4.4|^5.0",
+                "symfony/http-client": "^4.4|^5.0",
+                "symfony/http-foundation": "^4.4|^5.0",
+                "symfony/http-kernel": "^4.4|^5.0",
+                "symfony/intl": "^4.4|^5.0",
                 "symfony/mime": "^4.4|^5.0",
-                "symfony/property-access": "^3.4|^4.0|^5.0",
-                "symfony/property-info": "^3.4|^4.0|^5.0",
-                "symfony/translation": "^4.2",
-                "symfony/yaml": "^3.4|^4.0|^5.0"
+                "symfony/property-access": "^4.4|^5.0",
+                "symfony/property-info": "^4.4|^5.0",
+                "symfony/translation": "^4.4|^5.0",
+                "symfony/yaml": "^4.4|^5.0"
             },
             "suggest": {
                 "doctrine/annotations": "For using the annotation mapping. You will also need doctrine/cache.",
@@ -9120,6 +9120,11 @@
                 "symfony/yaml": ""
             },
             "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "5.0-dev"
+                }
+            },
             "autoload": {
                 "psr-4": {
                     "Symfony\\Component\\Validator\\": ""
@@ -9142,10 +9147,10 @@
                     "homepage": "https://symfony.com/contributors"
                 }
             ],
-            "description": "Provides tools to validate values",
+            "description": "Symfony Validator Component",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/validator/tree/v4.4.21"
+                "source": "https://github.com/symfony/validator/tree/5.0"
             },
             "funding": [
                 {
@@ -9161,7 +9166,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2021-03-23T11:25:54+00:00"
+            "time": "2020-06-30T17:40:59+00:00"
         },
         {
             "name": "symfony/var-dumper",
