@@ -4,6 +4,7 @@ namespace App\Controller\Jury;
 
 use App\Controller\BaseController;
 use App\Entity\Contest;
+use App\Entity\ContestProblem;
 use App\Entity\Judgehost;
 use App\Entity\JudgeTask;
 use App\Entity\Judging;
@@ -97,8 +98,6 @@ class RejudgingController extends BaseController
         $rejudgings = $this->em->createQueryBuilder()
             ->select('r')
             ->from(Rejudging::class, 'r')
-            ->leftJoin('r.start_user', 's')
-            ->leftJoin('r.finish_user', 'f')
             ->orderBy('r.rejudgingid', 'DESC')
             ->getQuery()->getResult();
 
