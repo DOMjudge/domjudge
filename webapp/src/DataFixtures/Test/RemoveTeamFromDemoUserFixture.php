@@ -6,7 +6,7 @@ use App\Entity\User;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 
-class RemoveTeamFromDemoUserFixture extends Fixture
+class RemoveTeamFromDemoUserFixture extends AbstractTestDataFixture
 {
     public function load(ObjectManager $manager)
     {
