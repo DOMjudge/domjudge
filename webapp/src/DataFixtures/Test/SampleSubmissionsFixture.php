@@ -12,7 +12,7 @@ use App\Utils\Utils;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 
-class SampleSubmissionsFixture extends Fixture
+class SampleSubmissionsFixture extends AbstractTestDataFixture
 {
     public function load(ObjectManager $manager)
     {
