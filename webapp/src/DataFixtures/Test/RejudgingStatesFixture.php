@@ -3,33 +3,33 @@
 namespace App\DataFixtures\Test;
 
 use App\Entity\Contest;
+use App\Entity\ContestProblem;
+use App\Entity\Judgehost;
 use App\Entity\Judging;
+use App\Entity\Language;
 use App\Entity\Rejudging;
 use App\Entity\Submission;
+use App\Entity\Team;
 use App\Entity\User;
 use App\Utils\Utils;
-use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 
 class RejudgingStatesFixture extends AbstractTestDataFixture
 {
-    public function rejudgingStages(): array
+    public static function rejudgingStages(): array
     {
-        $rejudgingStages = [
-            ['Unit',NULL,0],
-            ['0Percent_1',NULL,1],
-            ['0Percent_2',NULL,2],
-            ['Finished',True,0],
-            ['Canceled',False,0],
-        ];
-
+        $rejudgingStages = [];
+        $rejudgingStages[] = ['MultiContest',NULL,1,0,['demo','demoprac']];
+        $rejudgingStages[] = ['Unit',NULL,0,1,['demo']];
+        $rejudgingStages[] = ['0Percent_1',NULL,1,0,['demo']];
+        $rejudgingStages[] = ['0Percent_2',NULL,2,0,['demo']];
+        $rejudgingStages[] = ['Finished',True,1,0,['demo']];
+        $rejudgingStages[] = ['Canceled',False,2,0,['demo']];
         return $rejudgingStages;
     }
 
-    public function load(ObjectManager $manager)
+    public function load(ObjectManager $manager): void
     {
-        /** @var Contest $contest */
-        $contest = $manager->getRepository(Contest::class)->findOneBy(['shortname' => 'demo']);
         /** @var User $user */
         $user = $manager->getRepository(User::class)->findOneBy(['username' => 'admin']);
         foreach ($this->rejudgingStages() as $index => $rejudgingStage) {
@@ -38,6 +38,7 @@ class RejudgingStatesFixture extends AbstractTestDataFixture
                 ->setStartUser($user)
                 ->setAutoApply(False)
                 ->setReason($rejudgingStage[0]);
+            // Rejudgings can already be finished
             if ($rejudgingStage[1] !== NULL) {
                 $rejudging->setValid($rejudgingStage[1]);
                 $rejudging->setEndtime(Utils::toEpochFloat('2019-01-02 07:07:07'))
@@ -45,18 +46,46 @@ class RejudgingStatesFixture extends AbstractTestDataFixture
             }
             $manager->persist($rejudging);
             $manager->flush();
-            for ($x = 0; $x < $rejudgingStage[2]; $x++) {
-                $submission = (new Submission())
-                    ->setSubmittime(Utils::toEpochFloat('2018-01-02 07:07:07'))
-                    ->setRejudging($rejudging);
-                $judging = (new Judging())
-                    ->setContest($contest)
-                    ->setSubmission($submission)
-                    ->setValid(False)
-                    ->setRejudging($rejudging);
-                $manager->persist($judging);
-                $manager->persist($submission);
-                $manager->flush();
+            // One rejudging can consist of submissions of multiple contests
+            foreach ($rejudgingStage[4] as $contestName) {
+                /** @var Contest $contest */
+                $contest = $manager->getRepository(Contest::class)->findOneBy(['shortname' => $contestName]);
+                /** @var Team $team */
+                $team = $manager->getRepository(Team::class)->findOneBy(['name' => 'demo']);
+                /** @var Language $language */
+                $language = $manager->getRepository(Language::class)->find('java');
+                /** @var Judgehost $judgehost */
+                $judgehost = $manager->getRepository(Judgehost::class)->findOneBy(['hostname' => 'example-judgehost1']);
+                // A rejudging has both judgings todo and finished
+                for ($b = 0; $b<=1; $b++) {
+                    for ($x = 0; $x < $rejudgingStage[2+$b]; $x++) {
+                        $submission = (new Submission())
+                            ->setSubmittime(Utils::toEpochFloat('2018-01-02 07:07:07'))
+                            ->setRejudging($rejudging)
+                            ->setContest($contest)
+                            ->setTeam($team)
+                            ->setLanguage($language);
+                        if ($contest !== null) {
+                            $submission->setContestProblem($contest->getProblems()->first());
+                        }
+                        $manager->persist($submission);
+                        $manager->flush();
+                        $judging = (new Judging())
+                            ->setSubmission($submission)
+                            ->setValid(false)
+                            ->setContest($contest)
+                            ->setRejudging($rejudging);
+                        // Finished judging
+                        if ($b === 1) {
+                            $judging = $judging->setEndtime(Utils::toEpochFloat('2018-01-02 07:07:07'))
+                                ->setResult("wrong-answer")
+                                ->setJudgehost($judgehost)
+                                ->setStarttime(Utils::toEpochFloat('2018-01-02 07:07:07'));
+                        }
+                        $manager->persist($judging);
+                        $manager->flush();
+                    }
+                }
             }
         }
     }

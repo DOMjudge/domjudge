@@ -9,12 +9,11 @@ use App\Entity\Language;
 use App\Entity\Submission;
 use App\Entity\Team;
 use App\Utils\Utils;
-use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 
 class SampleSubmissionsFixture extends AbstractTestDataFixture
 {
-    public function load(ObjectManager $manager)
+    public function load(ObjectManager $manager): void
     {
         $submissionData = [
             // team name,         problem shortname, language, submittime,            entry point, result
