@@ -8,7 +8,7 @@ use Generator;
 
 class SubmissionControllerTest extends BaseTest
 {
-    protected static $roles = ['jury'];
+    protected $roles = ['jury'];
     protected static $baseURL = '/jury/submissions';
 
     /**

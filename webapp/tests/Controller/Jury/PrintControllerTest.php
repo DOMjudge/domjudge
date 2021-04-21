@@ -7,7 +7,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class PrintControllerTest extends BaseTest
 {
-    protected static $roles = ['jury'];
+    protected $roles = ['jury'];
 
     protected const PRINT_COMMAND = 'echo [language] && /bin/cat [file]';
 

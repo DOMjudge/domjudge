@@ -16,7 +16,7 @@ use Generator;
  */
 abstract class JuryControllerTest extends BaseTest
 {
-    protected static $roles             = ['admin'];
+    protected        $roles             = ['admin'];
     protected        $addButton         = '';
     protected static $rolesView         = ['admin','jury'];
     protected static $rolesDisallowed   = ['team'];
@@ -64,7 +64,7 @@ abstract class JuryControllerTest extends BaseTest
         array $elements,
         string $standardEntry
     ): void {
-        static::$roles = [$role];
+        $this->roles = [$role];
         // Alternative: $this->setupUser();
         $this->logOut();
         $this->logIn();
@@ -86,7 +86,7 @@ abstract class JuryControllerTest extends BaseTest
      */
     public function testHTTPAccessForRole(string $role, string $url, int $statusCode, string $HTTPMethod): void
     {
-        static::$roles = [$role];
+        $this->roles = [$role];
         // Optionally use the setupUser
         $this->logOut();
         $this->logIn();
@@ -147,7 +147,7 @@ abstract class JuryControllerTest extends BaseTest
      */
     public function testCheckAddEntityJury(): void
     {
-        static::$roles = ['jury'];
+        $this->roles = ['jury'];
         $this->logOut();
         $this->logIn();
         $this->verifyPageResponse('GET', static::$baseUrl, 200);
@@ -163,7 +163,7 @@ abstract class JuryControllerTest extends BaseTest
      */
     public function testDeleteEntity(string $identifier, string $entityShortName): void
     {
-        static::$roles = ['admin'];
+        $this->roles = ['admin'];
         $this->logOut();
         $this->logIn();
         $this->verifyPageResponse('GET', static::$baseUrl, 200);

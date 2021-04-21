@@ -7,7 +7,7 @@ use Generator;
 
 class ImportExportControllerTest extends BaseTest
 {
-    protected static $roles = ['admin'];
+    protected $roles = ['admin'];
 
     /**
      * Test that the basic building blocks of the index page are there.

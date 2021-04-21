@@ -6,7 +6,7 @@ use App\Tests\BaseTest;
 
 class JuryMiscControllerTest extends BaseTest
 {
-    protected static $roles = ['jury'];
+    protected $roles = ['jury'];
 
     /**
      * Test that if no user is logged in the user gets redirected to the login page
