@@ -4,7 +4,6 @@ namespace App\Controller\Jury;
 
 use App\Controller\BaseController;
 use App\Entity\Contest;
-use App\Entity\ContestProblem;
 use App\Entity\Judgehost;
 use App\Entity\JudgeTask;
 use App\Entity\Judging;
@@ -23,6 +22,7 @@ use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
+use Doctrine\ORM\Query\Expr\Join;
 use Exception;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\Form\FormFactoryInterface;
@@ -94,11 +94,18 @@ class RejudgingController extends BaseController
      */
     public function indexAction(Request $request): Response
     {
+        $curContest = $this->dj->getCurrentContest();
         /** @var Rejudging[] $rejudgings */
         $rejudgings = $this->em->createQueryBuilder()
             ->select('r')
-            ->from(Rejudging::class, 'r')
-            ->orderBy('r.rejudgingid', 'DESC')
+            ->from(Rejudging::class, 'r');
+        if ($curContest !== NULL) {
+            $rejudgings = $rejudgings->join('r.submissions', 's')
+                ->andWhere('s.contest = :contest')
+                ->setParameter(':contest', $curContest->getCid())
+                ->distinct();
+        }
+        $rejudgings = $rejudgings->orderBy('r.rejudgingid', 'DESC')
             ->getQuery()->getResult();
 
         $table_fields = [
