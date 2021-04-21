@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class MiscControllerTest extends BaseTest
 {
-    protected static $roles = ['team'];
+    protected $roles = ['team'];
 
     private const PRINT_COMMAND = 'echo [language] && /bin/cat [file]';
 

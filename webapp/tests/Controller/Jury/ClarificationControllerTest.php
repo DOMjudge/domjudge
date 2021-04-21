@@ -6,7 +6,7 @@ use App\Tests\BaseTest;
 
 class ClarificationControllerTest extends BaseTest
 {
-    protected static $roles = ['jury'];
+    protected $roles = ['jury'];
 
     /**
      * Test that the jury clarifications page contains the correct information

@@ -6,7 +6,7 @@ use App\Tests\BaseTest;
 
 class ConfigControllerTest extends BaseTest
 {
-    protected static $roles = ['admin'];
+    protected $roles = ['admin'];
 
     /**
      * Test that configcheck page completes.

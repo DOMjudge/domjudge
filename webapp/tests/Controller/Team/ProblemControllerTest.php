@@ -10,7 +10,7 @@ use Generator;
 
 class ProblemControllerTest extends BaseTest
 {
-    protected static $roles = ['team'];
+    protected $roles = ['team'];
 
     /**
      * Test that the problem index page shows the correct information

@@ -6,7 +6,7 @@ use App\Tests\BaseTest;
 
 class BalloonControllerTest extends BaseTest
 {
-    protected static $roles = ['jury'];
+    protected $roles = ['jury'];
 
     /**
      * Test that jury role can access balloons page.

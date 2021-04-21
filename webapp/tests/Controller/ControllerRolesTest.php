@@ -103,7 +103,7 @@ class ControllerRolesTest extends BaseTest
      */
     protected function getPagesRoles(array $roleBaseURL, array $roles, bool $allPages) : array
     {
-        static::$roles = $roles;
+        $this->roles = $roles;
         $this->logOut();
         $this->logIn();
         $urlsFoundPerRole = [];
@@ -128,7 +128,7 @@ class ControllerRolesTest extends BaseTest
     protected function verifyAccess(array $combinations, array $roleURLs) : void
     {
         foreach ($combinations as $static_roles) {
-            static::$roles = $static_roles;
+            $this->roles = $static_roles;
             $this->logOut();
             $this->logIn();
             foreach ($roleURLs as $url) {
@@ -149,7 +149,7 @@ class ControllerRolesTest extends BaseTest
      */
     public function testRoleAccess(string $roleBaseURL, array $baseRoles, array $optionalRoles, bool $allPages) : void
     {
-        static::$roles = $baseRoles;
+        $this->roles = $baseRoles;
         $this->logOut();
         $this->logIn();
         $urlsToCheck = $this->crawlPageGetLinks($roleBaseURL, 200);
@@ -175,7 +175,7 @@ class ControllerRolesTest extends BaseTest
     {
         $urlsToCheck        = $this->getPagesRoles([$roleBaseURL], $roles, $allPages);
         $urlsToCheckOther   = $this->getPagesRoles($roleOthersBaseURL, $rolesOther, $allPages);
-        static::$roles = $roles;
+        $this->roles = $roles;
         $this->logOut();
         $this->logIn();
         foreach (array_diff($urlsToCheckOther, $urlsToCheck) as $url) {

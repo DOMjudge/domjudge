@@ -32,7 +32,7 @@ abstract class BaseTest extends WebTestCase
     protected $client;
 
     /** @var string[] */
-    protected static $roles = [];
+    protected $roles = [];
 
     /** @var ORMExecutor */
     protected $fixtureExecutor;
@@ -53,7 +53,7 @@ abstract class BaseTest extends WebTestCase
         $this->client = self::createClient();
 
         // Log in if we have any roles
-        if (!empty(static::$roles)) {
+        if (!empty($this->roles)) {
             $this->logIn();
         }
 
@@ -132,7 +132,7 @@ abstract class BaseTest extends WebTestCase
     }
 
     /**
-     * Log in a user with the roles defined in static::$roles.
+     * Log in a user with the roles defined in $roles.
      *
      * Note that this will change the roles of the user in the database, so if
      * you assume specific roles on a user, make sure to set them using setupUser().
@@ -169,7 +169,7 @@ abstract class BaseTest extends WebTestCase
     }
 
     /**
-     * Set up the demo user with the roles given in static::$roles
+     * Set up the demo user with the roles given in $roles
      */
     protected function setupUser(): User
     {
@@ -181,7 +181,7 @@ abstract class BaseTest extends WebTestCase
             $user->removeUserRole($role);
         }
         // Now add the roles
-        foreach (static::$roles as $role) {
+        foreach ($this->roles as $role) {
             $user->addUserRole($em->getRepository(Role::class)->findOneBy(['dj_role' => $role]));
         }
         $em->flush();

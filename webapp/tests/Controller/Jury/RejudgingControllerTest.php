@@ -8,13 +8,14 @@ use Generator;
 
 class RejudgingControllerTest extends BaseTest
 {
+    protected $roles = ['admin'];
+
     /**
      * @dataProvider provideRoles
      */
     public function testStartPage(array $roles, int $http): void
     {
-        $oldRoles = static::$roles;
-        static::$roles = $roles;
+        $this->roles = $roles;
         $this->logOut();
         $this->logIn();
         $this->verifyPageResponse('GET', '/jury/rejudgings', $http);
@@ -23,8 +24,6 @@ class RejudgingControllerTest extends BaseTest
                 self::assertSelectorExists('body:contains("'.$element.'")');
             }
         }
-        // TODO: static::$roles is not always reset between tests
-        static::$roles = $oldRoles;
     }
 
     /**
@@ -43,8 +42,7 @@ class RejudgingControllerTest extends BaseTest
 
     public function testCorrectSorting() : void
     {
-        $oldRoles = static::$roles;
-        static::$roles = ['admin'];
+        $this->roles = ['admin'];
         $this->logOut();
         $this->logIn();
         $this->loadFixture(RejudgingStatesFixture::class);
@@ -54,7 +52,5 @@ class RejudgingControllerTest extends BaseTest
         {
             self::assertSelectorExists('tr:nth-child('.($index+1).'):contains("'.$reason.'")');
         }
-        // TODO: static::$roles is not always reset between tests
-        static::$roles = $oldRoles;
     }
 }

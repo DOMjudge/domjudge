@@ -6,7 +6,7 @@ use App\Tests\BaseTest;
 
 class ClarificationControllerTest extends BaseTest
 {
-    protected static $roles = ['team'];
+    protected $roles = ['team'];
 
     public function testClarificationRequest() : void
     {
