@@ -55,10 +55,7 @@ class RejudgingControllerTest extends BaseTest
         }
     }
 
-    /**
-     * @dataProvider provideShownRejudgings
-     **/
-    public function testRejudgingCurrentContest(?string $contestName, array $shown, array $hidden): void
+    public function setRejudgingState(?string $contestName): void
     {
         $em = $this->client->getContainer()->get('doctrine.orm.entity_manager');
         if ($contestName === NULL) {
@@ -71,6 +68,18 @@ class RejudgingControllerTest extends BaseTest
         }
         $this->loadFixture(RejudgingStatesFixture::class);
         $this->client->request('GET', '/team/change-contest/' . $cid);
+    }
+
+    /**
+     * @dataProvider provideShownRejudgings
+     **/
+    public function testRejudgingCurrentContest(
+        ?string $contestName,
+        array $shown, array $hidden,
+        int $todo
+    ): void
+    {
+        $this->setRejudgingState($contestName);
         $this->verifyPageResponse('GET', '/jury/rejudgings', 200);
         foreach($shown as $rejudging) {
             self::assertSelectorExists('body:contains("' . $rejudging . '")');
@@ -80,6 +89,28 @@ class RejudgingControllerTest extends BaseTest
         }
     }
 
+    /**
+     * @dataProvider provideShownRejudgings
+     **/
+    public function testRejudgingCounterMenu(
+        ?string $contestName,
+        array $shown, array $hidden,
+        int $todo
+    ): void
+    {
+        $DOMselector = '#menu_rejudgings';
+        $this->setRejudgingState($contestName);
+        $this->verifyPageResponse('GET', '/jury', 200);
+        self::assertSelectorTextContains($DOMselector, 'rejudgings');
+        // We cannot count the amount of rejudghings here.
+
+        // We check the page where the data comes from
+        $this->client->request('GET', '/jury/updates');
+        $response = $this->client->getResponse();
+        $jsonResponse = json_decode($response->getContent(), true);
+        $this->assertEquals($todo, count($jsonResponse['rejudgings']));
+    }
+
     public function provideShownRejudgings(): Generator
     {
         // The case where no contest is active/chosen/current
@@ -87,20 +118,24 @@ class RejudgingControllerTest extends BaseTest
         foreach(RejudgingStatesFixture::rejudgingStages() as $stage){
             $show[] = $stage[0];
         }
-        yield [Null, $show, []];
+        yield [Null, $show, [], 4];
 
         // Rejudging during a contest
         foreach(['demoprac','demo'] as $contestName) {
             $show = [];
             $hidden = [];
+            $todo = 0;
             foreach(RejudgingStatesFixture::rejudgingStages() as $stage){
                 if(in_array($contestName, $stage[4])){
                     $show[] = $stage[0];
+                    if ($stage[1] === NULL) {
+                        $todo++;
+                    }
                 } else {
                     $hidden[] = $stage[0];
                 }
             }
-            yield [$contestName, $show, $hidden];
+            yield [$contestName, $show, $hidden, $todo];
         }
     }
 }

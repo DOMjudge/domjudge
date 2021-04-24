@@ -102,7 +102,8 @@ class RejudgingController extends BaseController
         if ($curContest !== NULL) {
             $rejudgings = $rejudgings->join('r.submissions', 's')
                 ->andWhere('s.contest = :contest')
-                ->setParameter(':contest', $curContest->getCid());
+                ->setParameter(':contest', $curContest->getCid())
+                ->distinct();
         }
         $rejudgings = $rejudgings->orderBy('r.rejudgingid', 'DESC')
             ->getQuery()->getResult();
