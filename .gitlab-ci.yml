@@ -63,6 +63,14 @@ check syntax:
   script:
     - ./gitlab/syntax.sh
 
+check static codecov:
+  <<: *retry_job
+  <<: *tiny_job
+  stage: test
+  script:
+    - curl -s https://codecov.io/bash > newcodecov
+    - cmp newcodecov gitlab/uploadcodecov.sh
+
 run unit tests:
   <<: *retry_job
   <<: *short_job

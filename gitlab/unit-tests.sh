@@ -12,6 +12,7 @@ cp webapp/.env.test /opt/domjudge/domserver/webapp/
 # We also need the composer.json for PHPunit to detect the correct directory.
 cp composer.json /opt/domjudge/domserver/
 
+DIR=$(pwd)
 cd /opt/domjudge/domserver
 
 export APP_ENV="test"
@@ -34,4 +35,6 @@ curl https://api.github.com/repos/domjudge/domjudge/statuses/$CI_COMMIT_SHA \
   -H "Authorization: token $GH_BOT_TOKEN_OBSCURED" \
   -H "Accept: application/vnd.github.v3+json" \
   -d "{\"state\": \"$STATE\", \"target_url\": \"${CI_JOB_URL/$ORIGINAL/$REPLACETO}/artifacts/$FILE\", \"description\":\"Symfony deprecations\", \"context\": \"Symfony deprecation\"}"
-bash <(curl -s https://codecov.io/bash)
+cd $DIR
+set +u # Uses some variables which are not set
+. gitlab/uploadcodecov.sh
