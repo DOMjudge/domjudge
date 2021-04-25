@@ -805,8 +805,8 @@ part.";
         }
 
         self::assertEquals(1, max(array_count_values($passes)));
-        self::assertEquals(16, min(array_map('strlen', $passes)));
-        self::assertEquals(16, max(array_map('strlen', $passes)));
+        self::assertEquals(32, min(array_map('strlen', $passes)));
+        self::assertEquals(32, max(array_map('strlen', $passes)));
         self::assertTrue($onlyCorrectChars);
     }
 
@@ -827,8 +827,8 @@ part.";
         }
 
         self::assertEquals(1, max(array_count_values($passes)));
-        self::assertEquals(6, min(array_map('strlen', $passes)));
-        self::assertEquals(6, max(array_map('strlen', $passes)));
+        self::assertEquals(12, min(array_map('strlen', $passes)));
+        self::assertEquals(12, max(array_map('strlen', $passes)));
         self::assertTrue($onlyalnum);
         self::assertFalse($containsforbidden);
     }

@@ -785,7 +785,7 @@ class Utils
         $max_chars = count($chars) - 1;
 
         $rand_str = '';
-        for ($i = 0; $i < ($moreEntropy ? 16 : 6); ++$i) {
+        for ($i = 0; $i < ($moreEntropy ? 32 : 12); ++$i) {
             $rand_str .= $chars[random_int(0, $max_chars)];
         }
 

@@ -64,6 +64,11 @@ class UserController extends BaseController
      */
     protected $tokenStorage;
 
+    /**
+     * @var int
+     */
+    protected $minPasswordLength = 10;
+
     public function __construct(
         EntityManagerInterface $em,
         DOMJudgeService $dj,
@@ -218,6 +223,17 @@ class UserController extends BaseController
         ]);
     }
 
+    public function checkPasswordLength(User $user, $form) {
+        if ($user->getPlainPassword() && strlen($user->getPlainPassword())<$this->minPasswordLength) {
+            $this->addFlash('danger', "Password should be " . $this->minPasswordLength . "+ chars.");
+            return $this->render('jury/user_edit.html.twig', [
+                'user' => $user,
+                'form' => $form->createView(),
+                'min_password_length' => $this->minPasswordLength,
+            ]);
+        }
+    }
+
     /**
      * @Route("/{userId<\d+>}/edit", name="jury_user_edit")
      * @IsGranted("ROLE_ADMIN")
@@ -237,6 +253,9 @@ class UserController extends BaseController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            if ($errorResult = $this->checkPasswordLength($user, $form)) {
+                return $errorResult;
+            }
             $this->saveEntity($this->em, $this->eventLogService, $this->dj, $user,
                               $user->getUserid(),
                               false);
@@ -260,8 +279,9 @@ class UserController extends BaseController
         }
 
         return $this->render('jury/user_edit.html.twig', [
-            'user' => $user,
-            'form' => $form->createView(),
+            'user'                => $user,
+            'form'                => $form->createView(),
+            'min_password_length' => $this->minPasswordLength,
         ]);
     }
 
@@ -300,6 +320,9 @@ class UserController extends BaseController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            if ($errorResult = $this->checkPasswordLength($user, $form)) {
+                return $errorResult;
+            }
             $this->em->persist($user);
             $this->saveEntity($this->em, $this->eventLogService, $this->dj, $user, null, true);
             return $this->redirect($this->generateUrl(
@@ -311,6 +334,7 @@ class UserController extends BaseController
         return $this->render('jury/user_add.html.twig', [
             'user' => $user,
             'form' => $form->createView(),
+            'min_password_length' => $this->minPasswordLength,
         ]);
     }
 
