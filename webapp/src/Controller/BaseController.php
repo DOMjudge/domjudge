@@ -253,120 +253,129 @@ abstract class BaseController extends AbstractController
     }
 
     protected function buildDeleteTree(
-        $metadata,
-        $entity,
+        array $entities,
         array $relations,
-        $propertyAccessor,
-        $entityManager,
-        $inflector,
-        $eventLogService
-    ): bool
+        EntityManagerInterface $entityManager,
+        EventLogService $eventLogService
+    ): array
     {
-        $isError = False;
-        foreach ($metadata->getIdentifierColumnNames() as $primaryKeyColumn) {
-            $primaryKeyColumnValue = $propertyAccessor->getValue($entity, $primaryKeyColumn);
-            $primaryKeyData[]      = $primaryKeyColumnValue;
+        $isError          = False;
+        $metadata         = $entityManager->getClassMetadata(get_class($entities[0]));
+        $propertyAccessor = PropertyAccess::createPropertyAccessor();
+        $inflector        = InflectorFactory::create()->build();
+        $readableType     = str_replace('_', ' ', Utils::tableForEntity($entities[0]));
+        $metadata         = $entityManager->getClassMetadata(get_class($entities[0]));
+        $primaryKeyData   = [];
+        foreach ($entities as $entity) {
+            foreach ($metadata->getIdentifierColumnNames() as $primaryKeyColumn) {
+                $primaryKeyColumnValue = $propertyAccessor->getValue($entity, $primaryKeyColumn);
+                $primaryKeyData[]      = $primaryKeyColumnValue;
 
-            // Check all relationships
-            foreach ($relations as $table => $tableRelations) {
-                foreach ($tableRelations as $column => $constraint) {
-                    // If the target class and column match, check if there are any entities with this value
-                    if ($constraint['targetColumn'] === $primaryKeyColumn && $constraint['target'] === get_class($entity)) {
-                        $count = (int)$entityManager->createQueryBuilder()
-                            ->from($table, 't')
-                            ->select(sprintf('COUNT(t.%s) AS cnt', $column))
-                            ->andWhere(sprintf('t.%s = :value', $column))
-                            ->setParameter(':value', $primaryKeyColumnValue)
-                            ->getQuery()
-                            ->getSingleScalarResult();
-                        if ($count > 0) {
-                            $parts              = explode('\\', $table);
-                            $targetEntityType   = $parts[count($parts) - 1];
-                            $targetReadableType = str_replace(
-                                '_', ' ',
-                                $inflector->tableize($inflector->pluralize($targetEntityType))
-                            );
+                // Check all relationships
+                foreach ($relations as $table => $tableRelations) {
+                    foreach ($tableRelations as $column => $constraint) {
+                        // If the target class and column match, check if there are any entities with this value
+                        if ($constraint['targetColumn'] === $primaryKeyColumn && $constraint['target'] === get_class($entity)) {
+                            $count = (int)$entityManager->createQueryBuilder()
+                                ->from($table, 't')
+                                ->select(sprintf('COUNT(t.%s) AS cnt', $column))
+                                ->andWhere(sprintf('t.%s = :value', $column))
+                                ->setParameter(':value', $primaryKeyColumnValue)
+                                ->getQuery()
+                                ->getSingleScalarResult();
+                            if ($count > 0) {
+                                $parts              = explode('\\', $table);
+                                $targetEntityType   = $parts[count($parts) - 1];
+                                $targetReadableType = str_replace(
+                                    '_', ' ',
+                                    $inflector->tableize($inflector->pluralize($targetEntityType))
+                                );
 
-                            switch ($constraint['type']) {
-                                case 'CASCADE':
-                                    $message           = sprintf('Cascade to %s', $targetReadableType);
-                                    $dependentEntities = $this->getDependentEntities($table, $relations);
-                                    if (!empty($dependentEntities)) {
-                                        $dependentEntitiesReadable = [];
-                                        foreach ($dependentEntities as $dependentEntity) {
-                                            $parts                       = explode('\\', $dependentEntity);
-                                            $dependentEntityType         = $parts[count($parts) - 1];
-                                            $dependentEntitiesReadable[] = str_replace(
-                                                '_', ' ',
-                                                $inflector->tableize($inflector->pluralize($dependentEntityType))
+                                switch ($constraint['type']) {
+                                    case 'CASCADE':
+                                        $message           = sprintf('Cascade to %s', $targetReadableType);
+                                        $dependentEntities = $this->getDependentEntities($table, $relations);
+                                        if (!empty($dependentEntities)) {
+                                            $dependentEntitiesReadable = [];
+                                            foreach ($dependentEntities as $dependentEntity) {
+                                                $parts                       = explode('\\', $dependentEntity);
+                                                $dependentEntityType         = $parts[count($parts) - 1];
+                                                $dependentEntitiesReadable[] = str_replace(
+                                                    '_', ' ',
+                                                    $inflector->tableize($inflector->pluralize($dependentEntityType))
+                                                );
+                                            }
+                                            $message .= sprintf(
+                                                ', and possibly to dependent entities %s',
+                                                implode(', ', $dependentEntitiesReadable)
                                             );
                                         }
-                                        $message .= sprintf(
-                                            ', and possibly to dependent entities %s',
-                                            implode(', ', $dependentEntitiesReadable)
-                                        );
-                                    }
-                                    $messages[] = $message;
-                                    break;
-                                case 'SET NULL':
-                                    $messages[] = sprintf('Create dangling references in %s', $targetReadableType);
-                                    break;
-                                case null:
-                                    $isError  = true;
-                                    $messages = [
-                                        sprintf('%s with %s "%s" is still referenced in %s, cannot delete.',
-                                                ucfirst($readableType), $primaryKeyColumn, $primaryKeyColumnValue,
-                                                $targetReadableType)
-                                    ];
-                                    break 4;
+                                        $messages[] = $message;
+                                        break;
+                                    case 'SET NULL':
+                                        $messages[] = sprintf('Create dangling references in %s', $targetReadableType);
+                                        break;
+                                    case null:
+                                        $isError  = true;
+                                        $messages = [
+                                            sprintf('%s with %s "%s" is still referenced in %s, cannot delete.',
+                                                    ucfirst($readableType), $primaryKeyColumn, $primaryKeyColumnValue,
+                                                    $targetReadableType)
+                                        ];
+                                        break 4;
+                                }
                             }
                         }
                     }
                 }
             }
         }
-        return $isError;
+        return [$isError, $primaryKeyData];
     }
 
     /**
-     * Perform the delete for the given entity
+     * Perform the delete for the given entities
      *
      * @throws DBALException
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
-    protected function deleteEntity(
+    protected function deleteEntities(
         Request $request,
         EntityManagerInterface $entityManager,
         DOMJudgeService $DOMJudgeService,
         EventLogService $eventLogService,
         KernelInterface $kernel,
-        $entity,
+        array $entities,
         string $redirectUrl
     ) : Response {
+        // Assume that we only delete entities of the same class
+        foreach ($entities as $entity) {
+            assert(get_class($entities[0]) === get_class($entity));
+        }
         // Determine all the relationships between all tables using Doctrine cache
-        $dir              = realpath(sprintf('%s/src/Entity', $kernel->getProjectDir()));
-        $files            = glob($dir . '/*.php');
-        $description      = $entity->getShortDescription();
-        $relations        = $this->getDatabaseRelations($files, $entityManager);
-        $messages         = [];
-        $propertyAccessor = PropertyAccess::createPropertyAccessor();
-        $inflector        = InflectorFactory::create()->build();
-        $readableType     = str_replace('_', ' ', Utils::tableForEntity($entity));
-        $metadata         = $entityManager->getClassMetadata(get_class($entity));
-        $primaryKeyData   = [];
+        $dir          = realpath(sprintf('%s/src/Entity', $kernel->getProjectDir()));
+        $files        = glob($dir . '/*.php');
+        $relations    = $this->getDatabaseRelations($files, $entityManager);
+        $readableType = str_replace('_', ' ', Utils::tableForEntity($entities[0]));
+        $messages     = [];
 
-        $isError = $this->buildDeleteTree($metadata, $entity, $relations, $propertyAccessor, $entityManager, $inflector, $eventLogService);
+        [$isError, $primaryKeyData] = $this->buildDeleteTree($entities, $relations, $entityManager, $eventLogService);
 
         if ($request->isMethod('POST')) {
             if ($isError) {
                 throw new BadRequestHttpException(reset($messages));
             }
 
-            $this->commitDeleteEntity($entity, $DOMJudgeService, $entityManager, $primaryKeyData, $eventLogService);
+            $msgList = [];
+            foreach ($entities as $entity) {
+                $this->commitDeleteEntity($entity, $DOMJudgeService, $entityManager, $primaryKeyData, $eventLogService);
+                $description = $entity->getShortDescription();
+                $msgList[] = sprintf('Successfully deleted %s %s "%s"',
+                                     $readableType, implode(', ', $primaryKeyData), $description);
+            }
 
-            $msg = sprintf('Successfully deleted %s %s "%s"',
-                           $readableType, implode(', ', $primaryKeyData), $description);
+            $msg = implode('\n', $msgList);
             $this->addFlash('success', $msg);
             if ($request->isXmlHttpRequest()) {
                 return new JsonResponse(['url' => $redirectUrl]);
@@ -375,10 +384,15 @@ abstract class BaseController extends AbstractController
             return $this->redirect($redirectUrl);
         }
 
+        $descriptions = [];
+        foreach ($entities as $entity) {
+            $description[] = $entity->getShortDescription();
+        }
+
         $data = [
             'type' => $readableType,
             'primaryKey' => implode(', ', $primaryKeyData),
-            'description' => $description,
+            'description' => implode(',', $descriptions),
             'messages' => $messages,
             'isError' => $isError,
             'showModalSubmit' => !$isError,

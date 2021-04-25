@@ -333,9 +333,8 @@ class LanguageController extends BaseController
             throw new NotFoundHttpException(sprintf('Language with ID %s not found', $langId));
         }
 
-        return $this->deleteEntity(
-            $request, $this->em, $this->dj, $this->eventLogService, $this->kernel,
-            $language, $this->generateUrl('jury_languages')
+        return $this->deleteEntities($request, $this->em, $this->dj, $this->eventLogService, $this->kernel,
+                                     [$language], $this->generateUrl('jury_languages')
         );
     }
 

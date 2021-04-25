@@ -579,8 +579,8 @@ class ContestController extends BaseController
             throw new NotFoundHttpException(sprintf('Contest with ID %s not found', $contestId));
         }
 
-        return $this->deleteEntity($request, $this->em, $this->dj, $this->eventLogService, $this->kernel, $contest,
-                                   $this->generateUrl('jury_contests'));
+        return $this->deleteEntities($request, $this->em, $this->dj, $this->eventLogService, $this->kernel,
+                                     [$contest], $this->generateUrl('jury_contests'));
     }
 
     /**
@@ -603,8 +603,8 @@ class ContestController extends BaseController
             );
         }
 
-        return $this->deleteEntity($request, $this->em, $this->dj, $this->eventLogService, $this->kernel,
-                                   $contestProblem, $this->generateUrl('jury_contest', ['contestId' => $contestId]));
+        return $this->deleteEntities($request, $this->em, $this->dj, $this->eventLogService, $this->kernel,
+                                     [$contestProblem], $this->generateUrl('jury_contest', ['contestId' => $contestId]));
     }
 
     /**
