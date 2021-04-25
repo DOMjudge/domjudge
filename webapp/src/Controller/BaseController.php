@@ -195,7 +195,7 @@ abstract class BaseController extends AbstractController
    #}
    #}
 	foreach ($entities as $entity) {
-	    assert($entity == $entities[0]) # No strict equal to check if same interface
+	    assert(get_class($entity) === get_class($entities[0]));
 	}
 
         $isError          = false;
