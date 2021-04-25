@@ -139,14 +139,6 @@ abstract class BaseController extends AbstractController
     /**
      * Perform the delete for the given entity
      *
-     * @param Request                $request
-     * @param EntityManagerInterface $entityManager
-     * @param DOMJudgeService        $DOMJudgeService
-     * @param EventLogService        $eventLogService
-     * @param KernelInterface        $kernel
-     * @param                        $entity
-     * @param string                 $description
-     * @param string                 $redirectUrl
      * @throws DBALException
      * @throws NoResultException
      * @throws NonUniqueResultException
