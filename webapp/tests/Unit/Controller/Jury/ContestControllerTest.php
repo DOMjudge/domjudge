@@ -16,4 +16,8 @@ class ContestControllerTest extends JuryControllerTest
                                         'h3' => ['admin' => ['Current contests', 'All available contests'],
                                                  'jury' => []],
                                         'a.btn[title="Import contest"]' => ['admin' => [" Import contest"],'jury'=>[]]];
+    protected static $deleteExtra    = ['pageurl'   => '/jury/contests/2',
+                                        'deleteurl' => '/jury/contests/2/problems/3/delete',
+                                        'selector'  => 'Boolean switch search',
+                                        'fixture'   => NULL];
 }

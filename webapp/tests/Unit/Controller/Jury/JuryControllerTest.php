@@ -27,6 +27,7 @@ abstract class JuryControllerTest extends BaseTest
     protected static $delete            = '/delete';
     protected static $shortTag          = '';
     protected static $addFormName       = '';
+    protected static $deleteExtra       = NULL;
 
     public function __construct($name = null, array $data = [], $dataName = '')
     {
@@ -196,6 +197,24 @@ abstract class JuryControllerTest extends BaseTest
             }
         } else {
             yield ['nothing', 'toDelete'];
+        }
+    }
+
+    public function testDeleteExtraEntity(): void
+    {
+        var_dump(static::$deleteExtra);
+        var_dump(static::$baseUrl);
+        if (self::$deleteExtra !== NULL) {
+            if (self::$deleteExtra['fixture'] !== NULL) {
+                $this->loadFixture(self::$deleteExtra['fixture']);
+            }
+            $this->verifyPageResponse('GET', self::$deleteExtra['pageurl'], 200);
+            self::assertSelectorExists('body:contains("' . self::$deleteExtra['selector'] . '")');
+            $this->verifyPageResponse('GET', self::$deleteExtra['deleteurl'], 200);
+            $this->client->submitForm('Delete', []);
+            self::assertSelectorNotExists('body:contains("' . self::$deleteExtra['selector'] . '")');
+        } else {
+            self::assertTrue(True, "Test skipped");
         }
     }
 }
