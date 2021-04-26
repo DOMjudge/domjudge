@@ -5,6 +5,7 @@ namespace App\Controller\API;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\Event;
+use App\Entity\TeamAffiliation;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
@@ -23,6 +24,7 @@ use Nelmio\ApiDocBundle\Annotation\Model;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use OpenApi\Annotations as OA;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -104,7 +106,12 @@ class ContestController extends AbstractRestController
      *     description="Returns all contests visible to the user (all contests for privileged users, active contests otherwise)",
      *     @OA\JsonContent(
      *         type="array",
-     *         @OA\Items(ref=@Model(type=Contest::class))
+     *         @OA\Items(
+     *             allOf={
+     *                 @OA\Schema(ref=@Model(type=Contest::class)),
+     *                 @OA\Schema(ref="#/components/schemas/Banner")
+     *             }
+     *         )
      *     )
      * )
      * @OA\Parameter(ref="#/components/parameters/idlist")
@@ -129,7 +136,12 @@ class ContestController extends AbstractRestController
      * @OA\Response(
      *     response="200",
      *     description="Returns the given contest",
-     *     @Model(type=Contest::class)
+     *     @OA\JsonContent(
+     *         allOf={
+     *             @OA\Schema(ref=@Model(type=Contest::class)),
+     *             @OA\Schema(ref="#/components/schemas/Banner")
+     *         }
+     *     )
      * )
      * @OA\Parameter(ref="#/components/parameters/cid")
      * @OA\Parameter(ref="#/components/parameters/strict")
@@ -137,6 +149,40 @@ class ContestController extends AbstractRestController
     public function singleAction(Request $request, string $cid) : Response
     {
         return parent::performSingleAction($request, $cid);
+    }
+
+    /**
+     * Get the banner for the given contest
+     * @Rest\Get("/{id}/banner.png", name="contest_banner")
+     * @OA\Response(
+     *     response="200",
+     *     description="Returns the given contest banner in PNG format",
+     *     @OA\MediaType(mediaType="image/png")
+     * )
+     * @OA\Parameter(ref="#/components/parameters/id")
+     */
+    public function bannerAction(Request $request, string $id): Response
+    {
+        /** @var Contest $contest */
+        $contest = $this->getQueryBuilder($request)
+            ->andWhere(sprintf('%s = :id', $this->getIdField()))
+            ->setParameter(':id', $id)
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        if ($contest === null) {
+            throw new NotFoundHttpException(sprintf('Object with ID \'%s\' not found', $id));
+        }
+
+        $banner = sprintf('%s/public/images/banner.png', $this->dj->getDomjudgeWebappDir());
+
+        if (!file_exists($banner)) {
+            throw new NotFoundHttpException('contest banner not found');
+        }
+
+        $response = new BinaryFileResponse($banner);
+        $response->headers->set('Content-Type', 'image/png');
+        return $response;
     }
 
     /**
