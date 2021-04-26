@@ -23,7 +23,7 @@ include:
   timeout: 7m
 
 .retry_time: &normal_job
-  timeout: 10m
+  timeout: 15m
 
 .retry_time: &long_job
   timeout: 25m
