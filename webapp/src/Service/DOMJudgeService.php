@@ -42,6 +42,7 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
+use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
@@ -83,6 +84,11 @@ class DOMJudgeService
     protected $config;
 
     /**
+     * @var RouterInterface
+     */
+    protected $router;
+
+    /**
      * @var Executable|null
      */
     protected $defaultCompareExecutable = null;
@@ -112,6 +118,7 @@ class DOMJudgeService
      * @param TokenStorageInterface         $tokenStorage
      * @param HttpKernelInterface           $httpKernel
      * @param ConfigurationService          $config
+     * @param RouterInterface               $router
      */
     public function __construct(
         EntityManagerInterface $em,
@@ -121,7 +128,8 @@ class DOMJudgeService
         AuthorizationCheckerInterface $authorizationChecker,
         TokenStorageInterface $tokenStorage,
         HttpKernelInterface $httpKernel,
-        ConfigurationService $config
+        ConfigurationService $config,
+        RouterInterface $router
     ) {
         $this->em                   = $em;
         $this->logger               = $logger;
@@ -131,6 +139,7 @@ class DOMJudgeService
         $this->tokenStorage         = $tokenStorage;
         $this->httpKernel           = $httpKernel;
         $this->config               = $config;
+        $this->router               = $router;
     }
 
     /**
@@ -1254,5 +1263,16 @@ class DOMJudgeService
         }
 
         return $ret;
+    }
+
+    /**
+     * Get the URL to a route relative to the API root
+     */
+    public function apiRelativeUrl(string $route, array $params = []): string
+    {
+        $route = $this->router->generate($route, $params);
+        $apiRootRoute = $this->router->generate('v4_api_root');
+        $offset = substr($apiRootRoute, -1) === '/' ? 0 : 1;
+        return substr($route, strlen($apiRootRoute) + $offset);
     }
 }
