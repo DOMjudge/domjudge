@@ -177,7 +177,7 @@ class ContestController extends AbstractRestController
         $banner = sprintf('%s/public/images/banner.png', $this->dj->getDomjudgeWebappDir());
 
         if (!file_exists($banner)) {
-            throw new NotFoundHttpException('contest banner not found');
+            throw new NotFoundHttpException('Contest banner not found');
         }
 
         $response = new BinaryFileResponse($banner);
