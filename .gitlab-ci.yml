@@ -12,23 +12,26 @@ include:
 
 .retry_config: &retry_job
   retry:
-    max: 2
+    max: 0 #Max is 2, set when gitlab is flacky
     when:
      - always
 
 .retry_time: &tiny_job
-  timeout: 5m
+  timeout: 1m
 
 .retry_time: &short_job
+  timeout: 7m
+
+.retry_time: &normal_job
   timeout: 10m
 
 .retry_time: &long_job
-  timeout: 45m
+  timeout: 25m
 # Due to the retry this will be worst case 3*timeout before the job fails
 
 webstandard_check_role:
   <<: *retry_job
-  <<: *long_job
+  <<: *short_job
   parallel:
     matrix:
       - ROLE: public
@@ -57,7 +60,7 @@ webstandard_check_role:
 
 check syntax:
   <<: *retry_job
-  <<: *tiny_job
+  <<: *short_job
   stage: test
   image: domjudge/gitlabci:2.1
   script:
@@ -73,7 +76,7 @@ check static codecov:
 
 run unit tests:
   <<: *retry_job
-  <<: *short_job
+  <<: *normal_job
   stage: test
   image: domjudge/gitlabci:2.1
   # Disabled for now as it drastically speeds up running unit tests and we don't use it yet
@@ -102,7 +105,7 @@ run unit tests:
 
 visual_pr:
   <<: *retry_job
-  <<: *short_job
+  <<: *normal_job
   stage: test
   image: domjudge/gitlabci:2.1
   services:
@@ -121,7 +124,7 @@ visual_pr:
 
 visual_master:
   <<: *retry_job
-  <<: *short_job
+  <<: *normal_job
   stage: test
   image: domjudge/gitlabci:2.1
   services:
@@ -147,7 +150,7 @@ visual_master:
     
 visual_compare:
   <<: *retry_job
-  <<: *tiny_job
+  <<: *short_job
   stage: compare
   image: domjudge/gitlabci:2.1
   needs:
