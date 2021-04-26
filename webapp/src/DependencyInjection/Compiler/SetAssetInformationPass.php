@@ -2,6 +2,8 @@
 
 namespace App\DependencyInjection\Compiler;
 
+use Symfony\Component\Config\Resource\DirectoryResource;
+use Symfony\Component\Config\Resource\FileExistenceResource;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
@@ -9,31 +11,64 @@ class SetAssetInformationPass implements CompilerPassInterface
 {
     public function process(ContainerBuilder $container)
     {
-        $projectDir = $container->getParameter('kernel.project_dir');
-
-        $container->setParameter(
+        $this->registerDirectoryAssetParameter(
+            $container,
             'domjudge.custom_css_files',
-            $this->getAssetFiles($projectDir, 'css/custom', 'css')
+            'css/custom',
+            'css'
         );
-        $container->setParameter(
+        $this->registerDirectoryAssetParameter(
+            $container,
             'domjudge.custom_js_files',
-            $this->getAssetFiles($projectDir, 'js/custom', 'js')
+            'js/custom',
+            'js'
         );
-        $container->setParameter(
+        $this->registerDirectoryAssetParameter(
+            $container,
             'domjudge.affiliations_logos',
-            $this->getAssetFiles($projectDir, 'images/affiliations', 'png')
+            'images/affiliations',
+            'png'
         );
-        $container->setParameter(
+        $this->registerDirectoryAssetParameter(
+            $container,
             'domjudge.team_images',
-            $this->getAssetFiles($projectDir, 'images/teams', 'jpg')
+            'images/teams',
+            'jpg'
         );
-        $container->setParameter(
+        $this->registerFileAssetParameter(
+            $container,
             'domjudge.banner_exists',
-            $this->assetExists($projectDir, 'images/banner.png')
+            'images/banner.png'
         );
     }
 
-    protected function getAssetFiles(string $projectDir, string $path, string $extension)
+    /**
+     * Register the directory asset from the given path in the container using the given parameter name
+     */
+    protected function registerDirectoryAssetParameter(ContainerBuilder $container, string $paramName, string $path, string $extension): void
+    {
+        $projectDir = $container->getParameter('kernel.project_dir');
+        $container->setParameter($paramName, $this->getAssetFiles($projectDir, $path, $extension));
+        $container->addResource(new DirectoryResource(sprintf('%s/public/%s', $projectDir, $path), sprintf('/^.*\.%s$/', $extension)));
+    }
+
+    /**
+     * Register the existence of the file asset from the given path in the container using the given parameter name
+     */
+    protected function registerFileAssetParameter(ContainerBuilder $container, string $paramName, string $path): void
+    {
+        $projectDir = $container->getParameter('kernel.project_dir');
+        $container->setParameter(
+            $paramName,
+            $this->assetExists($projectDir, $path)
+        );
+        $container->addResource(new FileExistenceResource(sprintf('%s/public/%s', $projectDir, $path)));
+    }
+
+    /**
+     * Get asset files in the given directory with the given extension
+     */
+    protected function getAssetFiles(string $projectDir, string $path, string $extension): array
     {
         $customDir = sprintf('%s/public/%s', $projectDir, $path);
         if (!is_dir($customDir)) {
@@ -52,8 +87,6 @@ class SetAssetInformationPass implements CompilerPassInterface
 
     /**
      * Determine whether the given asset exists
-     * @param string $asset
-     * @return bool
      */
     protected function assetExists(string $projectDir, string $asset): bool
     {
