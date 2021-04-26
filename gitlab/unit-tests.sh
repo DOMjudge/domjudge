@@ -2,6 +2,8 @@
 
 set -euxo pipefail
 
+. gitlab/dind.profile
+
 # Set up
 "$( dirname "${BASH_SOURCE[0]}" )"/base.sh
 
@@ -35,6 +37,7 @@ curl https://api.github.com/repos/domjudge/domjudge/statuses/$CI_COMMIT_SHA \
   -H "Authorization: token $GH_BOT_TOKEN_OBSCURED" \
   -H "Accept: application/vnd.github.v3+json" \
   -d "{\"state\": \"$STATE\", \"target_url\": \"${CI_JOB_URL/$ORIGINAL/$REPLACETO}/artifacts/$FILE\", \"description\":\"Symfony deprecations\", \"context\": \"Symfony deprecation\"}"
-cd $DIR
+section_start_collap uploadcoverage "Upload code coverage"
 set +u # Uses some variables which are not set
-. gitlab/uploadcodecov.sh
+. $DIR/gitlab/uploadcodecov.sh 1>/dev/zero 2>/dev/zero
+section_end uploadcoverage
