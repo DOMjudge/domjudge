@@ -49,6 +49,31 @@ nelmio_api_doc:
                     description: The specified resource was not found
                 Unauthorized:
                     description: Unauthorized
+                ImageList:
+                    type: array
+                    items:
+                        type: object
+                        properties:
+                            href:
+                                type: string
+                            mime:
+                                type: string
+                            width:
+                                type: integer
+                            height:
+                                type: integer
+                Banner:
+                    properties:
+                        banner:
+                            $ref: "#/components/schemas/ImageList"
+                Logo:
+                    properties:
+                        logo:
+                            $ref: "#/components/schemas/ImageList"
+                Photo:
+                    properties:
+                        photo:
+                            $ref: "#/components/schemas/ImageList"
                 ContestProblem:
                     properties:
                         id:
@@ -80,6 +105,8 @@ nelmio_api_doc:
                         type: object
                         properties:
                             href:
+                                type: string
+                            mime:
                                 type: string
                 SourceCodeList:
                     type: array

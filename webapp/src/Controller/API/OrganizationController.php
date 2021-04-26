@@ -13,9 +13,11 @@ use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Annotations as OA;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * @Rest\Route("/contests/{cid}/organizations")
@@ -34,7 +36,12 @@ class OrganizationController extends AbstractRestController
      *     description="Returns all the organizations for this contest",
      *     @OA\JsonContent(
      *         type="array",
-     *         @OA\Items(ref=@Model(type=TeamAffiliation::class))
+     *         @OA\Items(
+     *             allOf={
+     *                 @OA\Schema(ref=@Model(type=TeamAffiliation::class)),
+     *                 @OA\Schema(ref="#/components/schemas/Logo")
+     *             }
+     *         )
      *     )
      * )
      * @OA\Parameter(ref="#/components/parameters/idlist")
@@ -59,7 +66,12 @@ class OrganizationController extends AbstractRestController
      * @OA\Response(
      *     response="200",
      *     description="Returns the given organization for this contest",
-     *     @Model(type=TeamAffiliation::class)
+     *     @OA\JsonContent(
+     *         allOf={
+     *             @OA\Schema(ref=@Model(type=TeamAffiliation::class)),
+     *             @OA\Schema(ref="#/components/schemas/Logo")
+     *         }
+     *     )
      * )
      * @OA\Parameter(ref="#/components/parameters/id")
      * @OA\Parameter(ref="#/components/parameters/strict")
@@ -67,6 +79,40 @@ class OrganizationController extends AbstractRestController
     public function singleAction(Request $request, string $id) : Response
     {
         return parent::performSingleAction($request, $id);
+    }
+
+    /**
+     * Get the logo for the given organization
+     * @Rest\Get("/{id}/logo.png", name="organization_logo")
+     * @OA\Response(
+     *     response="200",
+     *     description="Returns the given organization logo in PNG format",
+     *     @OA\MediaType(mediaType="image/png")
+     * )
+     * @OA\Parameter(ref="#/components/parameters/id")
+     */
+    public function logoAction(Request $request, string $id): Response
+    {
+        /** @var TeamAffiliation $teamAffiliation */
+        $teamAffiliation = $this->getQueryBuilder($request)
+            ->andWhere(sprintf('%s = :id', $this->getIdField()))
+            ->setParameter(':id', $id)
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        if ($teamAffiliation === null) {
+            throw new NotFoundHttpException(sprintf('Object with ID \'%s\' not found', $id));
+        }
+
+        $affiliationLogo = $this->dj->assetPath($id, 'affiliation', true);
+
+        if (!file_exists($affiliationLogo)) {
+            throw new NotFoundHttpException('affiliation logo not found');
+        }
+
+        $response = new BinaryFileResponse($affiliationLogo);
+        $response->headers->set('Content-Type', 'image/png');
+        return $response;
     }
 
     /**

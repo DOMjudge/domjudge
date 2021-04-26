@@ -98,6 +98,16 @@ class DOMJudgeService
      */
     protected $defaultRunExecutable = null;
 
+    /**
+     * @var array
+     */
+    protected $affiliationLogos;
+
+    /**
+     * @var array
+     */
+    protected $teamImages;
+
     const DATA_SOURCE_LOCAL = 0;
     const DATA_SOURCE_CONFIGURATION_EXTERNAL = 1;
     const DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL = 2;
@@ -119,6 +129,8 @@ class DOMJudgeService
      * @param HttpKernelInterface           $httpKernel
      * @param ConfigurationService          $config
      * @param RouterInterface               $router
+     * @param array                         $affiliationLogos
+     * @param array                         $teamImages
      */
     public function __construct(
         EntityManagerInterface $em,
@@ -129,7 +141,9 @@ class DOMJudgeService
         TokenStorageInterface $tokenStorage,
         HttpKernelInterface $httpKernel,
         ConfigurationService $config,
-        RouterInterface $router
+        RouterInterface $router,
+        array $affiliationLogos,
+        array $teamImages
     ) {
         $this->em                   = $em;
         $this->logger               = $logger;
@@ -140,6 +154,8 @@ class DOMJudgeService
         $this->httpKernel           = $httpKernel;
         $this->config               = $config;
         $this->router               = $router;
+        $this->affiliationLogos     = $affiliationLogos;
+        $this->teamImages           = $teamImages;
     }
 
     /**
@@ -1274,5 +1290,39 @@ class DOMJudgeService
         $apiRootRoute = $this->router->generate('v4_api_root');
         $offset = substr($apiRootRoute, -1) === '/' ? 0 : 1;
         return substr($route, strlen($apiRootRoute) + $offset);
+    }
+
+    /**
+     * Get the path of an asset if it exists
+     *
+     * @param string $name
+     * @param string $type
+     * @param bool $fullPath If true, get the full path. If false, get the webserver relative path
+     *
+     * @return string|null
+     */
+    public function assetPath(string $name, string $type, bool $fullPath = false): ?string
+    {
+        $prefix = $fullPath ? ($this->getDomjudgeWebappDir() . '/public/') : '';
+        switch ($type) {
+            case 'affiliation':
+                $extension = 'png';
+                $var = $this->affiliationLogos;
+                $dir = 'images/affiliations';
+                break;
+            case 'team':
+                $extension = 'jpg';
+                $var = $this->teamImages;
+                $dir = 'images/teams';
+                break;
+        }
+
+        if (isset($extension)) {
+            if (in_array($name . '.' . $extension, $var)) {
+                return sprintf('%s%s/%s.%s', $prefix, $dir, $name, $extension);
+            }
+        }
+
+        return null;
     }
 }
