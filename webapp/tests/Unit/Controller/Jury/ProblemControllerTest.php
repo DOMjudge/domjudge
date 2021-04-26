@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Controller\Jury;
 
+use App\DataFixtures\Test\AddProblemAttachmentFixture;
 use App\Entity\Problem;
 
 class ProblemControllerTest extends JuryControllerTest
@@ -14,4 +15,8 @@ class ProblemControllerTest extends JuryControllerTest
     protected static $className      = Problem::class;
     protected static $DOM_elements   = ['h1' => ['Problems'],
                                         'a.btn[title="Import problem"]' => ['admin' => [" Import problem"],'jury'=>[]]];
+    protected static $deleteExtra    = ['pageurl'   => '/jury/problems/2',
+                                        'deleteurl' => '/jury/problems/attachments/1/delete',
+                                        'selector'  => 'interactor',
+                                        'fixture'   => AddProblemAttachmentFixture::class];
 }
