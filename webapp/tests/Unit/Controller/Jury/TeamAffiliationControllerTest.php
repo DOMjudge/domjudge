@@ -3,7 +3,6 @@
 namespace App\Tests\Unit\Controller\Jury;
 
 use App\Entity\TeamAffiliation;
-use Generator;
 
 class TeamAffiliationControllerTest extends JuryControllerTest
 {
@@ -14,5 +13,4 @@ class TeamAffiliationControllerTest extends JuryControllerTest
     protected static $getIDFunc      = 'getAffilid';
     protected static $className      = TeamAffiliation::class;
     protected static $DOM_elements   = ['h1' => ['Affiliations']];
-    protected static $addFormName    = 'team_affiliation';
 }
