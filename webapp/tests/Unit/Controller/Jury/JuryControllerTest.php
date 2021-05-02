@@ -28,6 +28,7 @@ abstract class JuryControllerTest extends BaseTest
     protected static $shortTag          = '';
     protected static $addFormName       = '';
     protected static $deleteExtra       = NULL;
+    protected static $addEntities       = [];
 
     public function __construct($name = null, array $data = [], $dataName = '')
     {
@@ -154,6 +155,41 @@ abstract class JuryControllerTest extends BaseTest
         $this->verifyPageResponse('GET', static::$baseUrl, 200);
         if (static::$add !== '') {
             self::assertSelectorNotExists('a:contains(' . $this->addButton . ')');
+        }
+    }
+
+    /**
+     * Test that admin can add a new entity for this controller
+     */
+    public function testCheckAddEntityAdmin(): void
+    {
+        $this->roles = ['admin'];
+        $this->logOut();
+        $this->logIn();
+        $this->verifyPageResponse('GET', static::$baseUrl, 200);
+        if (static::$add !== '') {
+            self::assertSelectorExists('a:contains(' . $this->addButton . ')');
+            foreach (static::$addEntities as $element) {
+                $formFields = [];
+                // First fill with default values, the 0th item of the array
+                foreach (static::$addEntities[0] as $id=>$field) {
+                    $formFields[static::$addForm . $id . "]"] = $field;
+                }
+                // Overwrite with data to test with.
+                foreach ($element as $id=>$field) {
+                    $formFields[static::$addForm . $id . "]"] = $field;
+                }
+                $this->verifyPageResponse('GET', static::$baseUrl . static::$add, 200);
+                $this->client->submitForm('Save', $formFields, 'POST');
+                }
+            $this->verifyPageResponse('GET', static::$baseUrl, 200);
+            foreach (static::$addEntities as $element) {
+                foreach ($element as $id=>$value) {
+                    if (in_array($id, static::$addEntitiesShown)) {
+                        self::assertSelectorExists('body:contains("' . $element[$id] . '")');
+                    }
+                }
+            }
         }
     }
 
