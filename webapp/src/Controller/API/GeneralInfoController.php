@@ -311,18 +311,18 @@ class GeneralInfoController extends AbstractFOSRestController
         // - This makes it that we can not return a flag if flags are disabled.
 
         if (!$this->config->get('show_flags')) {
-            throw new NotFoundHttpException('country flag not found');
+            throw new NotFoundHttpException('country flags disabled');
         }
 
         $alpha3code = strtoupper($countryCode);
         if (!Countries::alpha3CodeExists($alpha3code)) {
-            throw new NotFoundHttpException('country flag not found');
+            throw new NotFoundHttpException("country $alpha3code does not exist");
         }
         $alpha2code = strtolower(Countries::getAlpha2Code($alpha3code));
         $flagFile = sprintf('%s/public/flags/%s/%s.svg', $this->dj->getDomjudgeWebappDir(), $size, $alpha2code);
 
         if (!file_exists($flagFile)) {
-            throw new NotFoundHttpException('country flag not found');
+            throw new NotFoundHttpException("country flag for $alpha3code not found");
         }
 
         $response = new BinaryFileResponse($flagFile);
