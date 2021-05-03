@@ -10,6 +10,9 @@ You can place the images under the path `public/images/` (see
 the Config checker in the admin interfae for the full filesystem
 path of your installation) as follows:
 
+- *Country flags* are shown when the ``show_flags`` configuration option
+  is enabled. The `flag-icon-css <https://github.com/lipis/flag-icon-css>`_
+  is used for the flag images.
 - *Affiliation logos*: these will be shown with the teams that are
   part of the affiliation, if the ``show_affiliation_logos`` configuration
   option is enabled. They can be placed in
