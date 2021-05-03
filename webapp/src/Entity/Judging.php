@@ -216,7 +216,7 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
         return $this;
     }
 
-    /** @return string|float */
+    /** @return string|float|null */
     public function getStarttime()
     {
         return $this->starttime;
@@ -227,7 +227,7 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
      * @Serializer\SerializedName("start_time")
      * @Serializer\Type("string")
      */
-    public function getAbsoluteStartTime(): string
+    public function getAbsoluteStartTime(): ?string
     {
         return Utils::absTime($this->getStarttime());
     }
