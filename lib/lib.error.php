@@ -64,7 +64,11 @@ function logmsg(int $msglevel, string $string)
             fflush(STDLOG);
         }
         if (defined('SYSLOG')) {
-            syslog($msglevel, $string . "\n");
+            // Remove the ANSI escape characters,
+            // When logging direct to the terminal the checkmark should be green, this
+            // does not work in log so remove this specific control char.
+            // This removes both the start and the reset of the color.
+            syslog($msglevel, preg_replace('# ?\\x1b\[[0-9];?[0-9]*m#', '', $string) . "\n");
         }
     }
 }
