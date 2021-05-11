@@ -113,7 +113,7 @@ class TeamAffiliation extends BaseApiEntity
         return $this->affilid;
     }
 
-    public function setExternalid(string $externalid): TeamAffiliation
+    public function setExternalid(?string $externalid): TeamAffiliation
     {
         $this->externalid = $externalid;
         return $this;

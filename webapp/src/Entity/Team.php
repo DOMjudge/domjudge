@@ -185,7 +185,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface
         return $this->teamid;
     }
 
-    public function setIcpcid(string $icpcid): Team
+    public function setIcpcid(?string $icpcid): Team
     {
         $this->icpcid = $icpcid;
 
