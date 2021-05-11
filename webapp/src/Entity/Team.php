@@ -235,7 +235,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface
         return $this->enabled;
     }
 
-    public function setMembers(string $members): Team
+    public function setMembers(?string $members): Team
     {
         $this->members = $members;
         return $this;
