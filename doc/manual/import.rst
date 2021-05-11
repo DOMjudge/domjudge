@@ -128,6 +128,7 @@ fields:
 - ``icpc_id`` (optional): an external ID, e.g. from the ICPC CMS, may be empty
 - ``group_ids``: an array with one element: the category ID this team belongs to
 - ``name``: the team name as used in the web inteface
+- ``members`` (optional): Members of the team as one long string
 - ``display_name`` (optional): the team display name. If provided, will display
   this instead of the team name in certain places, like the scoreboard
 - ``organization_id``: the external ID of the team affiliation this team belongs to
