@@ -202,8 +202,6 @@ abstract class JuryControllerTest extends BaseTest
 
     public function testDeleteExtraEntity(): void
     {
-        var_dump(static::$deleteExtra);
-        var_dump(static::$baseUrl);
         if (self::$deleteExtra !== NULL) {
             if (self::$deleteExtra['fixture'] !== NULL) {
                 $this->loadFixture(self::$deleteExtra['fixture']);
