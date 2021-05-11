@@ -280,9 +280,7 @@ class UserController extends BaseController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $this->em->persist($user);
-            $this->saveEntity($this->em, $this->eventLogService, $this->dj, $user,
-                              $user->getUserid(),
-                              true);
+            $this->saveEntity($this->em, $this->eventLogService, $this->dj, $user, null, true);
             return $this->redirect($this->generateUrl(
                 'jury_user',
                 ['userId' => $user->getUserid()]

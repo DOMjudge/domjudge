@@ -640,8 +640,7 @@ class ContestController extends BaseController
                     $problem->setContest($contest);
                     $this->em->persist($problem);
                 }
-                $this->saveEntity($this->em, $this->eventLogService, $this->dj, $contest,
-                                  $contest->getCid(), true);
+                $this->saveEntity($this->em, $this->eventLogService, $this->dj, $contest, null, true);
                 // Note that we do not send out create events for problems,
                 // teams and team categories for this contest. This happens
                 // when someone connects to the event feed (or we have a

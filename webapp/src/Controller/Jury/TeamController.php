@@ -445,8 +445,7 @@ class TeamController extends BaseController
                 $this->em->persist($user);
             }
             $this->em->persist($team);
-            $this->saveEntity($this->em, $this->eventLogService, $this->dj, $team,
-                              $team->getTeamid(), true);
+            $this->saveEntity($this->em, $this->eventLogService, $this->dj, $team, null, true);
             return $this->redirect($this->generateUrl(
                 'jury_team',
                 ['teamId' => $team->getTeamid()]

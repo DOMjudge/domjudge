@@ -256,8 +256,7 @@ class TeamCategoryController extends BaseController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $this->em->persist($teamCategory);
-            $this->saveEntity($this->em, $this->eventLogService, $this->dj, $teamCategory,
-                              $teamCategory->getCategoryid(), true);
+            $this->saveEntity($this->em, $this->eventLogService, $this->dj, $teamCategory, null, true);
             return $this->redirectToRoute('jury_team_category', ['categoryId' => $teamCategory->getCategoryid()]);
         }
 

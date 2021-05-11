@@ -287,8 +287,7 @@ class TeamAffiliationController extends BaseController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $this->em->persist($teamAffiliation);
-            $this->saveEntity($this->em, $this->eventLogService, $this->dj, $teamAffiliation,
-                              $teamAffiliation->getAffilid(), true);
+            $this->saveEntity($this->em, $this->eventLogService, $this->dj, $teamAffiliation, null, true);
             return $this->redirect($this->generateUrl(
                 'jury_team_affiliation',
                 ['affilId' => $teamAffiliation->getAffilid()]
