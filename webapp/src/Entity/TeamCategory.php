@@ -116,7 +116,7 @@ class TeamCategory extends BaseApiEntity
         return $this;
     }
 
-    public function getCategoryid(): int
+    public function getCategoryid(): ?int
     {
         return $this->categoryid;
     }
