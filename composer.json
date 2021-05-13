@@ -90,7 +90,7 @@
 		"twbs/bootstrap": "^4.3.0",
 		"twig/extra-bundle": "^3.3",
 		"twig/string-extra": "^3.3",
-		"twig/twig": "^2.11"
+		"twig/twig": "^3.3"
 	},
 	"require-dev": {
 		"dama/doctrine-test-bundle": "^6.5",
