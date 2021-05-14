@@ -202,15 +202,16 @@ abstract class JuryControllerTest extends BaseTest
 
     public function testDeleteExtraEntity(): void
     {
-        if (self::$deleteExtra !== NULL) {
-            if (self::$deleteExtra['fixture'] !== NULL) {
-                $this->loadFixture(self::$deleteExtra['fixture']);
+        if (static::$deleteExtra !== NULL) {
+            if (static::$deleteExtra['fixture'] !== NULL) {
+                $this->loadFixture(static::$deleteExtra['fixture']);
             }
-            $this->verifyPageResponse('GET', self::$deleteExtra['pageurl'], 200);
-            self::assertSelectorExists('body:contains("' . self::$deleteExtra['selector'] . '")');
-            $this->verifyPageResponse('GET', self::$deleteExtra['deleteurl'], 200);
+            $this->verifyPageResponse('GET', static::$deleteExtra['pageurl'], 200);
+            self::assertSelectorExists('body:contains("' . static::$deleteExtra['selector'] . '")');
+            $this->verifyPageResponse('GET', static::$deleteExtra['deleteurl'], 200);
             $this->client->submitForm('Delete', []);
-            self::assertSelectorNotExists('body:contains("' . self::$deleteExtra['selector'] . '")');
+            self::assertSelectorNotExists('body:contains("' . static::$deleteExtra['selector'] . '")');
+            $this->verifyPageResponse('GET', static::$deleteExtra['deleteurl'], 404);
         } else {
             self::assertTrue(True, "Test skipped");
         }
