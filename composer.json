@@ -79,7 +79,7 @@
 		"symfony/flex": "^1.4",
 		"symfony/form": "4.4.*",
 		"symfony/framework-bundle": "4.4.*",
-		"symfony/http-client": "4.4.*",
+		"symfony/http-client": "5.2.*",
 		"symfony/monolog-bundle": "^3.4.0",
 		"symfony/profiler-pack": "^1.0",
 		"symfony/security-bundle": "4.4.*",
