@@ -137,26 +137,11 @@ abstract class BaseController extends AbstractController
     }
 
     /**
-     * Perform the delete for the given entity
-     *
-     * @throws DBALException
-     * @throws NoResultException
-     * @throws NonUniqueResultException
+     * Helper function to get the database structure for an object.
      */
-    protected function deleteEntity(
-        Request $request,
-        EntityManagerInterface $entityManager,
-        DOMJudgeService $DOMJudgeService,
-        EventLogService $eventLogService,
-        KernelInterface $kernel,
-        $entity,
-        string $redirectUrl
-    ) : Response {
-        // Determine all the relationships between all tables using Doctrine cache
-        $dir         = realpath(sprintf('%s/src/Entity', $kernel->getProjectDir()));
-        $files       = glob($dir . '/*.php');
-        $relations   = [];
-        $description = $entity->getShortDescription();
+    protected function getDatabaseRelations(array $files, EntityManagerInterface $entityManager): array
+    {
+        $relations = [];
         foreach ($files as $file) {
             $parts      = explode('/', $file);
             $shortClass = str_replace('.php', '', $parts[count($parts) - 1]);
@@ -183,14 +168,101 @@ abstract class BaseController extends AbstractController
                 $relations[$class] = $tableRelations;
             }
         }
+        return $relations;
+    }
 
-        $isError          = false;
-        $messages         = [];
-        $propertyAccessor = PropertyAccess::createPropertyAccessor();
-        $inflector        = InflectorFactory::create()->build();
-        $readableType     = str_replace('_', ' ', Utils::tableForEntity($entity));
-        $metadata         = $entityManager->getClassMetadata(get_class($entity));
-        $primaryKeyData   = [];
+    /**
+     * Handle the actual removal of an entity and the dependencies in the database.
+     */
+    protected function commitDeleteEntity(
+        $entity,
+        DOMJudgeService $DOMJudgeService,
+        EntityManagerInterface $entityManager,
+        array $primaryKeyData,
+        $eventLogService
+    ): void
+    {
+        $entityId = null;
+        if ($entity instanceof Team) {
+            $entityId = $entity->getTeamid();
+        }
+
+        // Get the contests to trigger the event for. We do this before
+        // deleting the entity, since linked data might have vanished
+        $contestsForEntity = $this->contestsForEntity($entity, $DOMJudgeService);
+
+        $cid = null;
+        // Remember the cid to use it in the EventLog later
+        if ($entity instanceof Contest) {
+            $cid = $entity->getCid();
+        }
+        $entityManager->transactional(function () use ($entityManager, $entity) {
+            if ($entity instanceof Problem) {
+                // Deleting problem is a special case: its dependent tables do not
+                // form a tree, and a delete to judging_run can only cascade from
+                // judging, not from testcase. Since MySQL does not define the
+                // order of cascading deletes, we need to manually first cascade
+                // via submission -> judging -> judging_run.
+                $entityManager->getConnection()->executeQuery(
+                    'DELETE FROM submission WHERE probid = :probid',
+                    [':probid' => $entity->getProbid()]
+                );
+                // Also delete internal errors that are "connected" to this problem.
+                $disabledJson = '{"kind":"problem","probid":' . $entity->getProbid() . '}';
+                $entityManager->getConnection()->executeQuery(
+                    'DELETE FROM internal_error WHERE disabled = :disabled',
+                    [':disabled' => $disabledJson]
+                );
+                $entityManager->clear();
+                $entity = $entityManager->getRepository(Problem::class)->find($entity->getProbid());
+            }
+            $entityManager->remove($entity);
+        });
+
+        // Add an audit log entry
+        $auditLogType = Utils::tableForEntity($entity);
+        $DOMJudgeService->auditlog($auditLogType, implode(', ', $primaryKeyData), 'deleted');
+
+        // Trigger the delete event
+        if ($endpoint = $eventLogService->endpointForEntity($entity)) {
+            foreach ($contestsForEntity as $contest) {
+                // When the $entity is a contest it has no id anymore after the EntityManager->remove
+                // for this reason we either remember it or check all other contests and use their cid
+                if (!$entity instanceof Contest) {
+                    $cid = $contest->getCid();
+                }
+                // TODO: cascade deletes. Maybe use getDependentEntities()?
+                $eventLogService->log($endpoint, $primaryKeyData[0],
+                    EventLogService::ACTION_DELETE,
+                    $cid, null, null, false);
+            }
+        }
+
+        if ($entity instanceof Team) {
+            // No need to do this in a transaction, since the chance of a team
+            // with same ID being created at the same time is negligible.
+            $entityManager->getConnection()->executeQuery(
+                'DELETE FROM scorecache WHERE teamid = :teamid',
+                [':teamid' => $entityId]
+            );
+            $entityManager->getConnection()->executeQuery(
+                'DELETE FROM rankcache WHERE teamid = :teamid',
+                [':teamid' => $entityId]
+            );
+        }
+    }
+
+    protected function buildDeleteTree(
+        $metadata,
+        $entity,
+        array $relations,
+        $propertyAccessor,
+        $entityManager,
+        $inflector,
+        $eventLogService
+    ): bool
+    {
+        $isError = False;
         foreach ($metadata->getIdentifierColumnNames() as $primaryKeyColumn) {
             $primaryKeyColumnValue = $propertyAccessor->getValue($entity, $primaryKeyColumn);
             $primaryKeyData[]      = $primaryKeyColumnValue;
@@ -253,80 +325,45 @@ abstract class BaseController extends AbstractController
                 }
             }
         }
+        return $isError;
+    }
+
+    /**
+     * Perform the delete for the given entity
+     *
+     * @throws DBALException
+     * @throws NoResultException
+     * @throws NonUniqueResultException
+     */
+    protected function deleteEntity(
+        Request $request,
+        EntityManagerInterface $entityManager,
+        DOMJudgeService $DOMJudgeService,
+        EventLogService $eventLogService,
+        KernelInterface $kernel,
+        $entity,
+        string $redirectUrl
+    ) : Response {
+        // Determine all the relationships between all tables using Doctrine cache
+        $dir              = realpath(sprintf('%s/src/Entity', $kernel->getProjectDir()));
+        $files            = glob($dir . '/*.php');
+        $description      = $entity->getShortDescription();
+        $relations        = $this->getDatabaseRelations($files, $entityManager);
+        $messages         = [];
+        $propertyAccessor = PropertyAccess::createPropertyAccessor();
+        $inflector        = InflectorFactory::create()->build();
+        $readableType     = str_replace('_', ' ', Utils::tableForEntity($entity));
+        $metadata         = $entityManager->getClassMetadata(get_class($entity));
+        $primaryKeyData   = [];
+
+        $isError = $this->buildDeleteTree($metadata, $entity, $relations, $propertyAccessor, $entityManager, $inflector, $eventLogService);
 
         if ($request->isMethod('POST')) {
             if ($isError) {
                 throw new BadRequestHttpException(reset($messages));
             }
 
-            $entityId = null;
-            if ($entity instanceof Team) {
-                $entityId = $entity->getTeamid();
-            }
-
-            // Get the contests to trigger the event for. We do this before
-            // deleting the entity, since linked data might have vanished
-            $contestsForEntity = $this->contestsForEntity($entity, $DOMJudgeService);
-
-            $cid = null;
-            // Remember the cid to use it in the EventLog later
-            if ($entity instanceof Contest) {
-                $cid = $entity->getCid();
-            }
-            $entityManager->transactional(function () use ($entityManager, $entity) {
-                if ($entity instanceof Problem) {
-                    // Deleting problem is a special case: its dependent tables do not
-                    // form a tree, and a delete to judging_run can only cascade from
-                    // judging, not from testcase. Since MySQL does not define the
-                    // order of cascading deletes, we need to manually first cascade
-                    // via submission -> judging -> judging_run.
-                    $entityManager->getConnection()->executeQuery(
-                        'DELETE FROM submission WHERE probid = :probid',
-                        [':probid' => $entity->getProbid()]
-                    );
-                    // Also delete internal errors that are "connected" to this problem.
-                    $disabledJson = '{"kind":"problem","probid":' . $entity->getProbid() . '}';
-                    $entityManager->getConnection()->executeQuery(
-                        'DELETE FROM internal_error WHERE disabled = :disabled',
-                        [':disabled' => $disabledJson]
-                    );
-                    $entityManager->clear();
-                    $entity = $entityManager->getRepository(Problem::class)->find($entity->getProbid());
-                }
-                $entityManager->remove($entity);
-            });
-
-            // Add an audit log entry
-            $auditLogType = Utils::tableForEntity($entity);
-            $DOMJudgeService->auditlog($auditLogType, implode(', ', $primaryKeyData), 'deleted');
-
-            // Trigger the delete event
-            if ($endpoint = $eventLogService->endpointForEntity($entity)) {
-                foreach ($contestsForEntity as $contest) {
-                    // When the $entity is a contest it has no id anymore after the EntityManager->remove
-                    // for this reason we either remember it or check all other contests and use their cid
-                    if (!$entity instanceof Contest) {
-                        $cid = $contest->getCid();
-                    }
-                    // TODO: cascade deletes. Maybe use getDependentEntities()?
-                    $eventLogService->log($endpoint, $primaryKeyData[0],
-                        EventLogService::ACTION_DELETE,
-                        $cid, null, null, false);
-                }
-            }
-
-            if ($entity instanceof Team) {
-                // No need to do this in a transaction, since the chance of a team
-                // with same ID being created at the same time is negligible.
-                $entityManager->getConnection()->executeQuery(
-                    'DELETE FROM scorecache WHERE teamid = :teamid',
-                    [':teamid' => $entityId]
-                );
-                $entityManager->getConnection()->executeQuery(
-                    'DELETE FROM rankcache WHERE teamid = :teamid',
-                    [':teamid' => $entityId]
-                );
-            }
+            $this->commitDeleteEntity($entity, $DOMJudgeService, $entityManager, $primaryKeyData, $eventLogService);
 
             $msg = sprintf('Successfully deleted %s %s "%s"',
                            $readableType, implode(', ', $primaryKeyData), $description);
