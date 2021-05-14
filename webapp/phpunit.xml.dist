@@ -29,6 +29,9 @@
     <filter>
         <whitelist processUncoveredFilesFromWhitelist="true">
             <directory suffix=".php">src</directory>
+            <exclude>
+                <directory suffix=".php">src/Migrations</directory>
+            </exclude>
         </whitelist>
     </filter>
 
