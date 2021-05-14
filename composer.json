@@ -95,7 +95,7 @@
 	"require-dev": {
 		"dama/doctrine-test-bundle": "^6.5",
 		"squizlabs/php_codesniffer": "*",
-		"symfony/debug-bundle": "4.4.*",
+		"symfony/debug-bundle": "5.1.*",
 		"symfony/maker-bundle": "^1.13",
 		"symfony/phpunit-bridge": "^4.4",
 		"symfony/var-dumper": "4.4.*"
