@@ -6408,16 +6408,16 @@
         },
         {
             "name": "symfony/http-client",
-            "version": "v4.4.21",
+            "version": "v4.4.23",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/http-client.git",
-                "reference": "911177e186b82e5b9a9f41c13af53699b6745657"
+                "reference": "7bac9c0c2d1a293a67c5e1d4b9eb7a9044579013"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/http-client/zipball/911177e186b82e5b9a9f41c13af53699b6745657",
-                "reference": "911177e186b82e5b9a9f41c13af53699b6745657",
+                "url": "https://api.github.com/repos/symfony/http-client/zipball/7bac9c0c2d1a293a67c5e1d4b9eb7a9044579013",
+                "reference": "7bac9c0c2d1a293a67c5e1d4b9eb7a9044579013",
                 "shasum": ""
             },
             "require": {
@@ -6468,7 +6468,7 @@
             "description": "Provides powerful methods to fetch HTTP resources synchronously or asynchronously",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/http-client/tree/v4.4.21"
+                "source": "https://github.com/symfony/http-client/tree/v4.4.23"
             },
             "funding": [
                 {
@@ -6484,20 +6484,20 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2021-03-25T17:52:07+00:00"
+            "time": "2021-05-10T14:26:32+00:00"
         },
         {
             "name": "symfony/http-client-contracts",
-            "version": "v2.4.0",
+            "version": "v2.3.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/http-client-contracts.git",
-                "reference": "7e82f6084d7cae521a75ef2cb5c9457bbda785f4"
+                "reference": "41db680a15018f9c1d4b23516059633ce280ca33"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/http-client-contracts/zipball/7e82f6084d7cae521a75ef2cb5c9457bbda785f4",
-                "reference": "7e82f6084d7cae521a75ef2cb5c9457bbda785f4",
+                "url": "https://api.github.com/repos/symfony/http-client-contracts/zipball/41db680a15018f9c1d4b23516059633ce280ca33",
+                "reference": "41db680a15018f9c1d4b23516059633ce280ca33",
                 "shasum": ""
             },
             "require": {
@@ -6508,8 +6508,9 @@
             },
             "type": "library",
             "extra": {
+                "branch-version": "2.3",
                 "branch-alias": {
-                    "dev-main": "2.4-dev"
+                    "dev-main": "2.3-dev"
                 },
                 "thanks": {
                     "name": "symfony/contracts",
@@ -6546,7 +6547,7 @@
                 "standards"
             ],
             "support": {
-                "source": "https://github.com/symfony/http-client-contracts/tree/v2.4.0"
+                "source": "https://github.com/symfony/http-client-contracts/tree/v2.3.1"
             },
             "funding": [
                 {
@@ -6562,7 +6563,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2021-04-11T23:07:08+00:00"
+            "time": "2020-10-14T17:08:19+00:00"
         },
         {
             "name": "symfony/http-foundation",
@@ -8405,16 +8406,16 @@
         },
         {
             "name": "symfony/security-guard",
-            "version": "v4.4.20",
+            "version": "v4.4.23",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/security-guard.git",
-                "reference": "20f522ada1eefb7c2f90cb83dcc76abb160c782f"
+                "reference": "d0326e1c4a833c9df598d08e1496cb6d79a443f3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/security-guard/zipball/20f522ada1eefb7c2f90cb83dcc76abb160c782f",
-                "reference": "20f522ada1eefb7c2f90cb83dcc76abb160c782f",
+                "url": "https://api.github.com/repos/symfony/security-guard/zipball/d0326e1c4a833c9df598d08e1496cb6d79a443f3",
+                "reference": "d0326e1c4a833c9df598d08e1496cb6d79a443f3",
                 "shasum": ""
             },
             "require": {
@@ -8451,7 +8452,7 @@
             "description": "Symfony Security Component - Guard",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/security-guard/tree/v4.4.20"
+                "source": "https://github.com/symfony/security-guard/tree/v4.4.23"
             },
             "funding": [
                 {
@@ -8467,7 +8468,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2021-01-27T09:09:26+00:00"
+            "time": "2021-05-12T12:42:28+00:00"
         },
         {
             "name": "symfony/security-http",
@@ -9806,12 +9807,12 @@
             "version": "1.9.1",
             "source": {
                 "type": "git",
-                "url": "https://github.com/webmozart/assert.git",
+                "url": "https://github.com/webmozarts/assert.git",
                 "reference": "bafc69caeb4d49c39fd0779086c03a3738cbb389"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/webmozart/assert/zipball/bafc69caeb4d49c39fd0779086c03a3738cbb389",
+                "url": "https://api.github.com/repos/webmozarts/assert/zipball/bafc69caeb4d49c39fd0779086c03a3738cbb389",
                 "reference": "bafc69caeb4d49c39fd0779086c03a3738cbb389",
                 "shasum": ""
             },
@@ -9849,8 +9850,8 @@
                 "validate"
             ],
             "support": {
-                "issues": "https://github.com/webmozart/assert/issues",
-                "source": "https://github.com/webmozart/assert/tree/master"
+                "issues": "https://github.com/webmozarts/assert/issues",
+                "source": "https://github.com/webmozarts/assert/tree/1.9.1"
             },
             "time": "2020-07-08T17:02:28+00:00"
         },
@@ -10349,16 +10350,16 @@
         },
         {
             "name": "symfony/maker-bundle",
-            "version": "v1.30.2",
+            "version": "v1.31.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/maker-bundle.git",
-                "reference": "a395a85aa4ded6c1fa3da118d60329b64b6c2acd"
+                "reference": "4f57a44cef0b4555043160b8bf223fcde8a7a59a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/maker-bundle/zipball/a395a85aa4ded6c1fa3da118d60329b64b6c2acd",
-                "reference": "a395a85aa4ded6c1fa3da118d60329b64b6c2acd",
+                "url": "https://api.github.com/repos/symfony/maker-bundle/zipball/4f57a44cef0b4555043160b8bf223fcde8a7a59a",
+                "reference": "4f57a44cef0b4555043160b8bf223fcde8a7a59a",
                 "shasum": ""
             },
             "require": {
@@ -10378,7 +10379,7 @@
                 "composer/semver": "^3.0@dev",
                 "doctrine/doctrine-bundle": "^1.8|^2.0",
                 "doctrine/orm": "^2.3",
-                "friendsofphp/php-cs-fixer": "^2.8",
+                "friendsofphp/php-cs-fixer": "^3.0",
                 "friendsoftwig/twigcs": "^4.1.0|^5.0.0",
                 "symfony/http-client": "^4.3|^5.0",
                 "symfony/phpunit-bridge": "^4.3|^5.0",
@@ -10417,7 +10418,7 @@
             ],
             "support": {
                 "issues": "https://github.com/symfony/maker-bundle/issues",
-                "source": "https://github.com/symfony/maker-bundle/tree/v1.30.2"
+                "source": "https://github.com/symfony/maker-bundle/tree/v1.31.1"
             },
             "funding": [
                 {
@@ -10433,7 +10434,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2021-03-23T13:53:38+00:00"
+            "time": "2021-05-12T14:01:20+00:00"
         },
         {
             "name": "symfony/phpunit-bridge",
