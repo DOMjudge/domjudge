@@ -16,6 +16,12 @@ include:
     when:
      - always
 
+.retry_config: &matrix_retry_job
+  retry:
+    max: 2 #Max is 2, set when gitlab is flacky
+    when:
+     - always
+
 .retry_time: &tiny_job
   timeout: 1m
 
@@ -30,7 +36,7 @@ include:
 # Due to the retry this will be worst case 3*timeout before the job fails
 
 webstandard_check_role:
-  <<: *retry_job
+  <<: *matrix_retry_job
   <<: *short_job
   parallel:
     matrix:
