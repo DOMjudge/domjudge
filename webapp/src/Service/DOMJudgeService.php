@@ -1139,7 +1139,7 @@ class DOMJudgeService
             ),
             ':run_config'        => json_encode(
                 [
-                    'time_limit'    => $problem->getProblem()->getTimelimit(),
+                    'time_limit'    => $problem->getProblem()->getTimelimit() * $submission->getLanguage()->getTimeFactor(),
                     'memory_limit'  => $memoryLimit,
                     'output_limit'  => $outputLimit,
                     'process_limit' => $this->config->get('process_limit'),
