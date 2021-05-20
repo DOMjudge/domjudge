@@ -182,9 +182,10 @@ abstract class BaseController extends AbstractController
         $eventLogService
     ): void
     {
-        $entityId = null;
+        // Used to remove data from the rank and score caches
+        $teamId = null;
         if ($entity instanceof Team) {
-            $entityId = $entity->getTeamid();
+            $teamId = $entity->getTeamid();
         }
 
         // Get the contests to trigger the event for. We do this before
@@ -243,11 +244,11 @@ abstract class BaseController extends AbstractController
             // with same ID being created at the same time is negligible.
             $entityManager->getConnection()->executeQuery(
                 'DELETE FROM scorecache WHERE teamid = :teamid',
-                [':teamid' => $entityId]
+                [':teamid' => $teamId]
             );
             $entityManager->getConnection()->executeQuery(
                 'DELETE FROM rankcache WHERE teamid = :teamid',
-                [':teamid' => $entityId]
+                [':teamid' => $teamId]
             );
         }
     }
