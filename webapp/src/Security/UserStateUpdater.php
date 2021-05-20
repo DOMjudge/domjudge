@@ -7,6 +7,7 @@ use App\Service\DOMJudgeService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Event\AuthenticationSuccessEvent;
 
 class UserStateUpdater implements EventSubscriberInterface
@@ -21,10 +22,16 @@ class UserStateUpdater implements EventSubscriberInterface
      */
     protected $em;
 
-    public function __construct(DOMJudgeService $dj, EntityManagerInterface $em)
+    /**
+     * @var RequestStack
+     */
+    protected $requestStack;
+
+    public function __construct(DOMJudgeService $dj, EntityManagerInterface $em, RequestStack $requestStack)
     {
         $this->dj = $dj;
         $this->em = $em;
+        $this->requestStack = $requestStack;
     }
 
     /**
@@ -46,6 +53,13 @@ class UserStateUpdater implements EventSubscriberInterface
             }
 
             $this->em->flush();
+
+            // Only log IP address on the main firewall.
+            // Otherwise we also log every API call and we do not want that.
+            if (method_exists($event->getAuthenticationToken(), 'getProviderKey') && $event->getAuthenticationToken()->getProviderKey() === 'main') {
+                $ip = $this->requestStack->getMasterRequest()->getClientIp();
+                $this->dj->auditlog('user', $user->getUserid(), 'logged on on ' . $ip);
+            }
         }
     }
 }
