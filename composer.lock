@@ -8472,16 +8472,16 @@
         },
         {
             "name": "symfony/security-http",
-            "version": "v4.4.21",
+            "version": "v4.4.24",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/security-http.git",
-                "reference": "c5546b762376e4d9a806b08bf4495b2633573ff8"
+                "reference": "3d259bd550b2f059ee4666213d779fe9925bbc9b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/security-http/zipball/c5546b762376e4d9a806b08bf4495b2633573ff8",
-                "reference": "c5546b762376e4d9a806b08bf4495b2633573ff8",
+                "url": "https://api.github.com/repos/symfony/security-http/zipball/3d259bd550b2f059ee4666213d779fe9925bbc9b",
+                "reference": "3d259bd550b2f059ee4666213d779fe9925bbc9b",
                 "shasum": ""
             },
             "require": {
@@ -8530,7 +8530,7 @@
             "description": "Symfony Security Component - HTTP Integration",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/security-http/tree/v4.4.21"
+                "source": "https://github.com/symfony/security-http/tree/v4.4.24"
             },
             "funding": [
                 {
@@ -8546,7 +8546,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2021-03-12T01:21:32+00:00"
+            "time": "2021-05-16T09:52:47+00:00"
         },
         {
             "name": "symfony/service-contracts",
