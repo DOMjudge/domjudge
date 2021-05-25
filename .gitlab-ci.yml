@@ -72,7 +72,7 @@ check static codecov:
   stage: test
   script:
     - curl -s https://codecov.io/bash > newcodecov
-    - cmp newcodecov gitlab/uploadcodecov.sh
+    - diff newcodecov gitlab/uploadcodecov.sh
 
 run unit tests:
   <<: *retry_job
