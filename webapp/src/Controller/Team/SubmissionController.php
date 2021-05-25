@@ -75,16 +75,20 @@ class SubmissionController extends BaseController
     }
 
     /**
-     * @Route("/submit", name="team_submit")
+     * @Route("/submit/{problem}", name="team_submit")
      * @throws Exception
      */
-    public function createAction(Request $request): Response
+    public function createAction(Request $request, ?Problem $problem = null): Response
     {
         $user    = $this->dj->getUser();
         $team    = $user->getTeam();
         $contest = $this->dj->getCurrentContest($user->getTeam()->getTeamid());
+        $data = [];
+        if ($problem !== null) {
+            $data['problem'] = $problem;
+        }
         $form    = $this->formFactory
-            ->createBuilder(SubmitProblemType::class)
+            ->createBuilder(SubmitProblemType::class, $data)
             ->setAction($this->generateUrl('team_submit'))
             ->getForm();
 
@@ -125,7 +129,7 @@ class SubmissionController extends BaseController
             }
         }
 
-        $data = ['form' => $form->createView()];
+        $data = ['form' => $form->createView(), 'problem' => $problem];
 
         if ($request->isXmlHttpRequest()) {
             return $this->render('team/submit_modal.html.twig', $data);

@@ -11,9 +11,12 @@ use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Query\Expr\Join;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Form;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Validator\Constraints\Callback;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
@@ -55,7 +58,7 @@ class SubmitProblemType extends AbstractType
             'multiple' => $allowMultipleFiles,
         ]);
 
-        $builder->add('problem', EntityType::class, [
+        $problemConfig = [
             'class' => Problem::class,
             'query_builder' => function (EntityRepository $er) use ($contest) {
                 return $er->createQueryBuilder('p')
@@ -69,7 +72,8 @@ class SubmitProblemType extends AbstractType
                 return sprintf('%s - %s', $problem->getContestProblems()->first()->getShortName(), $problem->getName());
             },
             'placeholder' => 'Select a problem',
-        ]);
+        ];
+        $builder->add('problem', EntityType::class, $problemConfig);
 
         $builder->add('language', EntityType::class, [
             'class' => Language::class,
@@ -102,5 +106,12 @@ class SubmitProblemType extends AbstractType
                 }),
             ]
         ]);
+
+        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($problemConfig) {
+            if (isset($event->getData()['problem'])) {
+                $problemConfig += ['row_attr' => ['class' => 'd-none']];
+                $event->getForm()->add('problem', EntityType::class, $problemConfig);
+            }
+        });
     }
 }

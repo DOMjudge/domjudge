@@ -67,20 +67,6 @@
                 if (parts.length < 2) return;
                 var lcParts = [parts[0].toLowerCase(), parts[1].toLowerCase()];
 
-                // Problem ID
-
-                var problem = document.getElementById('submit_problem_problem');
-                // the "autodetect" option has empty value
-                if (problem.value !== '') {
-                    return;
-                }
-
-                for (var i = 0; i < problem.length; i++) {
-                    if (problem.options[i].text.split(/ - /)[0].toLowerCase() === lcParts[1]) {
-                        problem.selectedIndex = i;
-                    }
-                }
-
                 // language ID
 
                 var language = document.getElementById('submit_problem_language');
@@ -95,6 +81,20 @@
                 }
 
                 maybeShowEntryPoint(filename);
+
+                // Problem ID
+
+                var problem = document.getElementById('submit_problem_problem');
+                // the "autodetect" option has empty value
+                if (problem.value !== '') {
+                    return;
+                }
+
+                for (var i = 0; i < problem.length; i++) {
+                    if (problem.options[i].text.split(/ - /)[0].toLowerCase() === lcParts[1]) {
+                        problem.selectedIndex = i;
+                    }
+                }
             }
         };
 
