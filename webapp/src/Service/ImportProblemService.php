@@ -128,7 +128,8 @@ class ImportProblemService
         // Double check to prevent $properties being null, which may throw at
         // array_key_exists saying parameter 2 "array expected, null given".
         if ($propertiesString !== false && $properties === null) {
-            $properties   = []; 
+            $properties   = [];
+            $messages[]   = "The given <code>domjudge-problem.ini</code> is invalid, ignoring.";
         }
 
         // Only preserve valid keys:
