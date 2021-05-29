@@ -125,6 +125,12 @@ class ImportProblemService
         $propertiesString = $zip->getFromName($propertiesFile);
         $properties       = $propertiesString === false ? [] : parse_ini_string($propertiesString);
 
+        // Double check to prevent $properties being null, which may throw at
+        // array_key_exists saying parameter 2 "array expected, null given".
+        if ($propertiesString !== false && $properties === null) {
+            $properties   = []; 
+        }
+
         // Only preserve valid keys:
         $problemProperties        = array_intersect_key($properties, array_flip($iniKeysProblem));
         $contestProblemProperties = array_intersect_key($properties, array_flip($iniKeysContestProblem));
