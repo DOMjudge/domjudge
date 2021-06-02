@@ -68,7 +68,6 @@ mkdir $url
 cd $url
 cp $DIR/cookies.txt ./
 section_start_collap scrape "Scrape the site with the rebuild admin user"
-#httrack http://localhost/domjudge/$url --assume html=text/html -*doc* -*logout*
 set +e
 wget \                                                                                                       --reject-regex logout \                                                                                 --recursive \                                                                                           --no-clobber \                                                                                          --page-requisites \                                                                                     --html-extension \                                                                                      --convert-links \                                                                                       --restrict-file-names=windows \                                                                         --domains localhost \                                                                                   --no-parent \                                                                                           --load-cookies cookies.txt \                                                                                http://localhost/domjudge/$url
 RET=$?

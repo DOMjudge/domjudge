@@ -111,7 +111,7 @@ run unit tests:
 
 visual_pr:
   <<: *retry_job
-  <<: *normal_job
+  <<: *long_job
   stage: test
   image: domjudge/gitlabci:2.1
   services:
@@ -120,17 +120,24 @@ visual_pr:
     MYSQL_ROOT_PASSWORD: password
     DOCKER_HOST: tcp://docker:2375/
     DOCKER_DRIVER: overlay2
+  parallel:
+    matrix:
+      - URL: team
+        ROLE: [jury,admin,team]
+      - URL: public
+        ROLE: [none,jury,admin,balloon,team]
   script:
     - ./gitlab/visualpr.sh pr
   artifacts:
     when: always
     paths:
       - screenshotspr
-      - public
+      - html
+      - wget.log
 
 visual_master:
   <<: *retry_job
-  <<: *normal_job
+  <<: *long_job
   stage: test
   image: domjudge/gitlabci:2.1
   services:
@@ -139,6 +146,12 @@ visual_master:
     MYSQL_ROOT_PASSWORD: password
     DOCKER_HOST: tcp://docker:2375/
     DOCKER_DRIVER: overlay2
+  parallel:
+    matrix:
+      - URL: team
+        ROLE: [jury,admin,team]
+      - URL: public
+        ROLE: [none,jury,admin,balloon,team]
   script:
     - git fetch
     - git checkout -B master origin/master
@@ -152,11 +165,11 @@ visual_master:
     when: always
     paths:
       - screenshotsmaster
-      - public
+      - html
     
 visual_compare:
   <<: *retry_job
-  <<: *short_job
+  <<: *normal_job
   stage: compare
   image: domjudge/gitlabci:2.1
   needs:
@@ -169,6 +182,7 @@ visual_compare:
     paths:
       - failingchanges
       - predictedchanges
+      - addrem.log
 
 .job_template: &job_integration
   <<: *retry_job
