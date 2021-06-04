@@ -55,11 +55,16 @@
                         </td>
                     {% endif %}
                     <td rowspan="2" class="testrank">
-                        <a href="{{ path('jury_problem_testcase_move', {'probId': problem.probid, 'rank': testcase.rank, 'direction': 'up'}) }}"
-                           title="Move testcase up"><i class="fas fa-arrow-up"></i></a><br>
-                        {{ testcase.rank }}<br>
-                        <a href="{{ path('jury_problem_testcase_move', {'probId': problem.probid, 'rank': testcase.rank, 'direction': 'down'}) }}"
-                           title="Move testcase down"><i class="fas fa-arrow-down"></i></a>
+                        {% if is_granted('ROLE_ADMIN') %}
+                            <a href="{{ path('jury_problem_testcase_move', {'probId': problem.probid, 'rank': testcase.rank, 'direction': 'up'}) }}"
+                               title="Move testcase up"><i class="fas fa-arrow-up"></i></a><br>
+                        {% endif %}
+                        {{ testcase.rank }}
+                        {% if is_granted('ROLE_ADMIN') %}
+                            <br>
+                            <a href="{{ path('jury_problem_testcase_move', {'probId': problem.probid, 'rank': testcase.rank, 'direction': 'down'}) }}"
+                               title="Move testcase down"><i class="fas fa-arrow-down"></i></a>
+                        {% endif %}
                     </td>
                     <td rowspan="2" class="testsample">
                         <input type="checkbox" name="sample[{{ testcase.rank }}]" value="sample"
