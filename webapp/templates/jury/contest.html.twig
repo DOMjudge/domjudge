@@ -313,11 +313,11 @@
         {%- if is_granted('ROLE_ADMIN') -%}
             {{ button(path('jury_contest_edit', {'contestId': contest.cid}), 'Edit', 'primary', 'edit') }}
             {{ button(path('jury_contest_delete', {'contestId': contest.cid}), 'Delete', 'danger', 'trash-alt', true) }}
-        {% endif %}
-        {% if contest.finalizetime %}
-            {{ button(path('jury_contest_finalize', {'contestId': contest.cid}), 'Update finalization', 'secondary', 'lock') }}
-        {% else %}
-            {{ button(path('jury_contest_finalize', {'contestId': contest.cid}), 'Finalize this contest', 'secondary', 'lock') }}
+            {% if contest.finalizetime %}
+                {{ button(path('jury_contest_finalize', {'contestId': contest.cid}), 'Update finalization', 'secondary', 'lock') }}
+            {% else %}
+                {{ button(path('jury_contest_finalize', {'contestId': contest.cid}), 'Finalize this contest', 'secondary', 'lock') }}
+            {% endif %}
         {% endif %}
         {{ button(path('jury_contest_prefetch', {'contestId': contest.cid}), 'Heat up judgehosts with contest data', 'secondary', 'download') }}
         {% include 'jury/partials/rejudge_form.html.twig' with {table: 'contest', id: contest.cid, buttonClass: 'btn-secondary'} %}
