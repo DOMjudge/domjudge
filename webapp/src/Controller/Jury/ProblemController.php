@@ -229,7 +229,7 @@ class ProblemController extends BaseController
         $data = [
             'problems' => $problems_table,
             'table_fields' => $table_fields,
-            'num_actions' => $this->isGranted('ROLE_ADMIN') ? 4 : 1,
+            'num_actions' => $this->isGranted('ROLE_ADMIN') ? 4 : 2,
         ];
 
         return $this->render('jury/problems.html.twig', $data);
@@ -237,7 +237,7 @@ class ProblemController extends BaseController
 
     /**
      * @Route("/{problemId<\d+>}/export", name="jury_export_problem")
-     * @IsGranted("ROLE_ADMIN")
+     * @IsGranted("ROLE_JURY")
      * @throws NonUniqueResultException
      */
     public function exportAction(int $problemId) : StreamedResponse
