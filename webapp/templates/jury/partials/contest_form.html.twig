@@ -18,6 +18,13 @@
         {{ form_row(form.unfreezetimeString) }}
         {{ form_row(form.deactivatetimeString) }}
         {{ form_row(form.processBalloons) }}
+        {{ form_row(form.processAwards) }}
+        <div data-awards-field>
+            {{ form_row(form.awardsCategories) }}
+            {{ form_row(form.goldAwards) }}
+            {{ form_row(form.silverAwards) }}
+            {{ form_row(form.bronzeAwards) }}
+        </div>
         {{ form_row(form.public) }}
         {{ form_row(form.openToAllTeams) }}
         <div data-teams-field>
@@ -132,5 +139,16 @@
 
         $('#contest_openToAllTeams_1, #contest_openToAllTeams_0').on('change', showHideTeams);
         showHideTeams();
+
+        function showHideAwards() {
+            if ($('#contest_processAwards_0').is(':checked')) {
+                $('[data-awards-field]').show();
+            } else {
+                $('[data-awards-field]').hide();
+            }
+        }
+
+        $('#contest_processAwards_1, #contest_processAwards_0').on('change', showHideAwards);
+        showHideAwards();
     })
 </script>

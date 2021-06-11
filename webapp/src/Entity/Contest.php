@@ -171,6 +171,52 @@ class Contest extends BaseApiEntity
     private $b = 0;
 
     /**
+     * @var boolean|null
+     * @ORM\Column(type="boolean", name="process_awards",
+     *     options={"comment"="Are there awards for this contest?","default"=0},
+     *     nullable=false)
+     * @Serializer\Exclude()
+     */
+    private $processAwards = false;
+
+    /**
+     * @ORM\ManyToMany(targetEntity="App\Entity\TeamCategory", inversedBy="contests")
+     * @ORM\JoinTable(name="contestteamcategoryforawards",
+     *                joinColumns={@ORM\JoinColumn(name="cid", referencedColumnName="cid", onDelete="CASCADE")},
+     *                inverseJoinColumns={@ORM\JoinColumn(name="categoryid", referencedColumnName="categoryid", onDelete="CASCADE")}
+     *               )
+     * @Serializer\Exclude()
+     */
+    private $awardsCategories;
+
+    /**
+     * @var int|null
+     * @ORM\Column(type="smallint", length=3, name="gold_awards",
+     *     options={"comment"="Number of gold medals","unsigned"="true","default"=0},
+     *     nullable=false)
+     * @Serializer\Exclude()
+     */
+    private $goldAwards = 0;
+
+    /**
+     * @var int|null
+     * @ORM\Column(type="smallint", length=3, name="silver_awards",
+     *     options={"comment"="Number of silver medals","unsigned"="true","default"=0},
+     *     nullable=false)
+     * @Serializer\Exclude()
+     */
+    private $silverAwards = 0;
+
+    /**
+     * @var int|null
+     * @ORM\Column(type="smallint", length=3, name="bronze_awards",
+     *     options={"comment"="Number of bronze medals","unsigned"="true","default"=0},
+     *     nullable=false)
+     * @Serializer\Exclude()
+     */
+    private $bronzeAwards = 0;
+
+    /**
      * @var double
      * @ORM\Column(type="decimal", precision=32, scale=9, name="deactivatetime",
      *     options={"comment"="Time contest becomes invisible in team/public views",
@@ -341,6 +387,7 @@ class Contest extends BaseApiEntity
         $this->submissions      = new ArrayCollection();
         $this->internal_errors  = new ArrayCollection();
         $this->team_categories  = new ArrayCollection();
+        $this->awardsCategories = new ArrayCollection();
     }
 
     public function getCid(): int
@@ -632,6 +679,128 @@ class Contest extends BaseApiEntity
     public function getProcessBalloons(): bool
     {
         return $this->processBalloons;
+    }
+
+    /**
+     * Set processAwards
+     *
+     * @param boolean $processAwards
+     *
+     * @return Contest
+     */
+    public function setProcessAwards($processAwards)
+    {
+        $this->processAwards = $processAwards;
+
+        return $this;
+    }
+
+    /**
+     * Get processAwards
+     *
+     * @return boolean
+     */
+    public function getProcessAwards()
+    {
+        return $this->processAwards;
+    }
+
+    /**
+     * @return Collection|TeamCategory[]
+     */
+    public function getAwardsCategories(): Collection
+    {
+        return $this->awardsCategories;
+    }
+
+    public function addAwardsCategories(TeamCategory $awardsCategory): self
+    {
+        if (!$this->awardsCategories->contains($awardsCategory)) {
+            $this->awardsCategories[] = $awardsCategory;
+        }
+
+        return $this;
+    }
+
+    public function removeAwardsCategories(TeamCategory $awardsCategory): self
+    {
+        if ($this->awardsCategories->contains($awardsCategory)) {
+            $this->awardsCategories->removeElement($awardsCategory);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Set goldAwards
+     *
+     * @param integer $goldAwards
+     *
+     * @return Contest
+     */
+    public function setGoldAwards($goldAwards)
+    {
+        $this->goldAwards = $goldAwards;
+
+        return $this;
+    }
+
+    /**
+     * Get goldAwards
+     *
+     * @return integer
+     */
+    public function getGoldAwards()
+    {
+        return $this->goldAwards;
+    }
+
+    /**
+     * Set silverAwards
+     *
+     * @param integer $silverAwards
+     *
+     * @return Contest
+     */
+    public function setSilverAwards($silverAwards)
+    {
+        $this->silverAwards = $silverAwards;
+
+        return $this;
+    }
+
+    /**
+     * Get silverAwards
+     *
+     * @return integer
+     */
+    public function getSilverAwards()
+    {
+        return $this->silverAwards;
+    }
+
+    /**
+     * Set bronzeAwards
+     *
+     * @param integer $bronzeAwards
+     *
+     * @return Contest
+     */
+    public function setBronzeAwards($bronzeAwards)
+    {
+        $this->bronzeAwards = $bronzeAwards;
+
+        return $this;
+    }
+
+    /**
+     * Get bronzeAwards
+     *
+     * @return integer
+     */
+    public function getBronzeAwards()
+    {
+        return $this->bronzeAwards;
     }
 
     public function setPublic(bool $public): Contest

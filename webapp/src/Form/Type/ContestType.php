@@ -11,6 +11,7 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -74,6 +75,35 @@ class ContestType extends AbstractExternalIdEntityType
                 'No' => false,
             ],
             'help' => 'Disable this to stop recording balloons. Usually you can just leave this enabled.',
+        ]);
+        $builder->add('processAwards', ChoiceType::class, [
+            'expanded' => true,
+            'choices' => [
+                'Yes' => true,
+                'No' => false,
+            ],
+            'help' => 'Whether to award medals for this contest.',
+        ]);
+        $builder->add('awardsCategories', EntityType::class, [
+            'required' => false,
+            'class' => TeamCategory::class,
+            'multiple' => true,
+            'choice_label' => function (TeamCategory $category) {
+                return $category->getName();
+            },
+            'help' => 'The categories could be awarded for this contest if process awards.',
+        ]);
+        $builder->add('goldAwards', IntegerType::class, [
+            'required' => false,
+            'help' => 'The number of gold medals for this contest.',
+        ]);
+        $builder->add('silverAwards', IntegerType::class, [
+            'required' => false,
+            'help' => 'The number of silver medals for this contest.',
+        ]);
+        $builder->add('bronzeAwards', IntegerType::class, [
+            'required' => false,
+            'help' => 'The number of bronze medals for this contest.',
         ]);
         $builder->add('public', ChoiceType::class, [
             'expanded' => true,
