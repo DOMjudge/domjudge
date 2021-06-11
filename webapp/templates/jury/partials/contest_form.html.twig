@@ -18,6 +18,13 @@
         {{ form_row(form.unfreezetimeString) }}
         {{ form_row(form.deactivatetimeString) }}
         {{ form_row(form.processBalloons) }}
+        {{ form_row(form.processAwards) }}
+        <div data-awards-field>
+            {{ form_row(form.awardsCategories) }}
+            {{ form_row(form.goldAwards) }}
+            {{ form_row(form.silverAwards) }}
+            {{ form_row(form.bronzeAwards) }}
+        </div>
         {{ form_row(form.public) }}
         {{ form_row(form.openToAllTeams) }}
         <div data-teams-field>
@@ -26,17 +33,16 @@
         </div>
         {{ form_row(form.enabled) }}
     </div>
-    <div class="col-lg-6">
-        <h5>Specification of contest times</h5>
-        <div>Each of the contest times can be specified as absolute time or relative
-        to the start time (except for start time itself). Use up to 6 subsecond
+    <div class="col-lg-4">
+        <b>Specification of contest times:</b><br/>
+        Each of the contest times can be specified as absolute time or relative<br/>
+        to the start time (except for start time itself). Use up to 6 subsecond<br/>
         decimals and a timezone from the
         <a target="_blank" href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones">
-            time zone database</a>.</div>
-        <div class="mt-3"><table>
-        <tr><td>Absolute time format:</td><td><kbd>YYYY-MM-DD HH:MM:SS[.uuuuuu] timezone</kbd></td></tr>
-        <tr><td>Relative time format:</td><td><kbd>±[HHH]H:MM[:SS[.uuuuuu]]</kbd></td></tr>
-        </table></div>
+            time zone database
+        </a>.<br/><br/>
+        Absolute time format: <b><tt>YYYY-MM-DD HH:MM:SS[.uuuuuu] timezone</tt></b><br/>
+        Relative time format: <b><tt>±[HHH]H:MM[:SS[.uuuuuu]]</tt></b><br/>
     </div>
 </div>
 <table class="table table-sm table-striped">
@@ -118,7 +124,7 @@
 
 <script>
     function bindColor() {
-        jscolor.install();
+        jscolor.bind();
     }
 
     $(function () {
@@ -132,5 +138,16 @@
 
         $('#contest_openToAllTeams_1, #contest_openToAllTeams_0').on('change', showHideTeams);
         showHideTeams();
+
+        function showHideAwards() {
+            if ($('#contest_processAwards_0').is(':checked')) {
+                $('[data-awards-field]').show();
+            } else {
+                $('[data-awards-field]').hide();
+            }
+        }
+
+        $('#contest_processAwards_1, #contest_processAwards_0').on('change', showHideAwards);
+        showHideAwards();
     })
 </script>

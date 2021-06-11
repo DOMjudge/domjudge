@@ -12,19 +12,19 @@
 
     <h1>Contest {{ contest.name }}</h1>
 
-    {% if contest.isActive %}
+    {% if isActive %}
         <div class="alert alert-success">
-            This contest is currently active.
+            This is an active contest
         </div>
     {% endif %}
     {% if not contest.enabled %}
         <div class="alert alert-danger">
-            This contest is disabled.
+            This contest is disabled
         </div>
     {% endif %}
     {% if contest.finalizetime is not empty %}
         <div class="alert alert-info">
-            This contest is final.
+            This contest is final
         </div>
     {% endif %}
 
@@ -51,21 +51,13 @@
                 </tr>
                 <tr>
                     <th>Activate time</th>
-                    <td>
-                        {{ contest.activatetimeString }}
-                        {% if contest.isActive %}
-                            <i class="fas fa-check"></i>
-                        {% endif %}
-                    </td>
+                    <td>{{ contest.activatetimeString }}</td>
                 </tr>
                 <tr>
                     <th>Start time</th>
                     <td>
                         {% if contest.starttimeEnabled %}
                             {{ contest.starttimeString }}
-                            {% if contest.state.started %}
-                                <i class="fas fa-check"></i>
-                            {% endif %}
                         {% else %}
                             <span class="ignore">{{ contest.starttimeString }}</span> <em>delayed</em>
                         {% endif %}
@@ -73,30 +65,15 @@
                 </tr>
                 <tr>
                     <th>Scoreboard freeze</th>
-                    <td>
-                        {{ contest.freezetimeString|default('-') }}
-                        {% if contest.state.frozen %}
-                            <i class="fas fa-check"></i>
-                        {% endif %}
-                    </td>
+                    <td>{{ contest.freezetimeString|default('-') }}</td>
                 </tr>
                 <tr>
                     <th>End time</th>
-                    <td>
-                        {{ contest.endtimeString }}
-                        {% if contest.state.ended %}
-                            <i class="fas fa-check"></i>
-                        {% endif %}
-                    </td>
+                    <td>{{ contest.endtimeString }}</td>
                 </tr>
                 <tr>
                     <th>Scoreboard unfreeze</th>
-                    <td>
-                        {{ contest.unfreezetimeString|default('-') }}
-                        {% if contest.state.thawed %}
-                            <i class="fas fa-check"></i>
-                        {% endif %}
-                    </td>
+                    <td>{{ contest.unfreezetimeString|default('-') }}</td>
                 </tr>
                 <tr>
                     <th>Deactivate time</th>
@@ -105,6 +82,24 @@
                 <tr>
                     <th>Process balloons</th>
                     <td>{{ contest.processBalloons | printYesNo }}</td>
+                </tr>
+                <tr>
+                    <th>Process awards</th>
+                    <td>{{ contest.processAwards | printYesNo }}</td>
+                </tr>
+                <tr>
+                    <th>Awards</th>
+                    <td>
+                        {% if contest.processAwards %}
+                            <a>{{ contest.goldAwards|default('-') }} Gold Medal</a>
+                            </br>
+                            <a>{{ contest.silverAwards|default('-') }} Silver Medal</a>
+                            </br>
+                            <a>{{ contest.bronzeAwards|default('-') }} Bronze Medal</a>
+                        {% else %}
+                            <em>none</em>
+                        {% endif %}
+                    </td>
                 </tr>
                 <tr>
                     <th>Publicly visible</th>
@@ -233,9 +228,6 @@
                     if (confirm('Really delete interval?')) {
                         var $form = $('<form method="post" />');
                         $form.attr('action', $(this).data('submit-url'));
-                        // Some browsers require the form to be present in the DOM,
-                        // so append it to the body
-                        $(document.body).append($form);
                         $form.submit();
                     }
                     return false;
@@ -313,13 +305,12 @@
         {%- if is_granted('ROLE_ADMIN') -%}
             {{ button(path('jury_contest_edit', {'contestId': contest.cid}), 'Edit', 'primary', 'edit') }}
             {{ button(path('jury_contest_delete', {'contestId': contest.cid}), 'Delete', 'danger', 'trash-alt', true) }}
-            {% if contest.finalizetime %}
-                {{ button(path('jury_contest_finalize', {'contestId': contest.cid}), 'Update finalization', 'secondary', 'lock') }}
-            {% else %}
-                {{ button(path('jury_contest_finalize', {'contestId': contest.cid}), 'Finalize this contest', 'secondary', 'lock') }}
-            {% endif %}
         {% endif %}
-        {{ button(path('jury_contest_prefetch', {'contestId': contest.cid}), 'Heat up judgehosts with contest data', 'secondary', 'download') }}
+        {% if contest.finalizetime %}
+            {{ button(path('jury_contest_finalize', {'contestId': contest.cid}), 'Update finalization', 'secondary', 'lock') }}
+        {% else %}
+            {{ button(path('jury_contest_finalize', {'contestId': contest.cid}), 'Finalize this contest', 'secondary', 'lock') }}
+        {% endif %}
         {% include 'jury/partials/rejudge_form.html.twig' with {table: 'contest', id: contest.cid, buttonClass: 'btn-secondary'} %}
     </p>
 

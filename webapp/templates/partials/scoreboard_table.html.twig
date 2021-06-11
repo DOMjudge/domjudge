@@ -18,6 +18,11 @@
 {% set hasDifferentCategoryColors = scoreboard.categoryColors(limitToTeamIds) %}
 {% set scores = scoreboard.scores | filter(score => limitToTeams is null or score.team.teamid in limitToTeamIds) %}
 {% set problems = scoreboard.problems %}
+{% set processAwards = contest.processAwards %}
+{% set awardsCategories = contest.awardsCategories %}
+{% set goldAwards = contest.goldAwards %}
+{% set silverAwards = contest.silverAwards %}
+{% set bronzeAwards = contest.bronzeAwards %}
 
 {% if maxWidth > 0 %}
     <style>
@@ -114,6 +119,21 @@
             {% set previousTeam = null %}
         {% endif %}
 
+        {# process awards color #}
+        {% set awardColor = '' %}
+        {% if showLegends and processAwards and score.team.category.name in awardsCategories %}
+            {% if goldAwards > 0 %}
+                {% set awardColor = ' gold-medal' %}
+                {% set goldAwards = goldAwards - 1 %}
+            {% elseif silverAwards > 0 %}
+                {% set awardColor = ' silver-medal' %}
+                {% set silverAwards = silverAwards - 1 %}
+            {% elseif bronzeAwards > 0 %}
+                {% set awardColor = ' bronze-medal' %}
+                {% set bronzeAwards = bronzeAwards - 1 %}
+            {% endif %}
+        {% endif %}
+
         {# check whether this is us, otherwise use category colour #}
         {% if myTeamId is defined and myTeamId == score.team.teamid %}
             {% set classes = classes | merge(['scorethisisme']) %}
@@ -122,7 +142,7 @@
             {% set color = score.team.category.color %}
         {% endif %}
         <tr class="{{ classes | join(' ') }}" id="team:{{ score.team.teamid }}">
-            <td class="scorepl">
+            <td class="scorepl{{awardColor}}">
                 {# Only print rank when score is different from the previous team #}
                 {% if not displayRank %}
                     ?
@@ -137,13 +157,18 @@
                     {% if score.team.affiliation %}
                         {% set link = null %}
                         {% if jury %}
-                            {% set link = path('jury_team_affiliation', {'affilId': score.team.affiliation.affilid}) %}
+                            {% set link = path('jury_team_affiliation', {'affilId': score.team.affilid}) %}
                         {% endif %}
                         <a {% if link %}href="{{ link }}"{% endif %}>
                             {% if score.team.affiliation.country %}
-                                <img loading="lazy" class="countryflag"
-                                     src="{{ asset('images/countries/' ~ score.team.affiliation.country ~ '.png') }}" alt="{{ alpha3_countries[score.team.affiliation.country] }}"
-                                     title="{{ alpha3_countries[score.team.affiliation.country] }}">
+                                {% set countryFlag = 'images/countries/' ~ score.team.affiliation.country ~ '.png' %}
+                                {% if countryFlag | assetExists %}
+                                    <img loading="lazy" class="countryflag"
+                                         src="{{ asset(countryFlag) }}" alt="{{ alpha3_countries[score.team.affiliation.country] }}"
+                                         title="{{ alpha3_countries[score.team.affiliation.country] }}">
+                                {% else %}
+                                    {{ alpha3_countries[score.team.affiliation.country] }}
+                                {% endif %}
                             {% endif %}
                         </a>
                     {% endif %}
@@ -154,15 +179,15 @@
                     {% if score.team.affiliation %}
                         {% set link = null %}
                         {% if jury %}
-                            {% set link = path('jury_team_affiliation', {'affilId': score.team.affiliation.affilid}) %}
+                            {% set link = path('jury_team_affiliation', {'affilId': score.team.affilid}) %}
                         {% endif %}
                         <a {% if link %}href="{{ link }}"{% endif %}>
                             {% set affiliationId = score.team.affiliation.affilid %}
                             {% if showExternalId(score.team.affiliation) %}
                                 {% set affiliationId = score.team.affiliation.externalid %}
                             {% endif %}
-                            {% set affiliationImage = affiliationId | assetPath('affiliation') %}
-                            {% if affiliationImage %}
+                            {% set affiliationImage = 'images/affiliations/' ~ affiliationId ~ '.png' %}
+                            {% if affiliationImage | assetExists %}
                                 <img loading="lazy" class="affiliation-logo"
                                      src="{{ asset(affiliationImage) }}" alt="{{ score.team.affiliation.name }}"
                                      title="{{ score.team.affiliation.name }}">
@@ -339,6 +364,27 @@
             </tbody>
         </table>
     {% endif %}
+
+    {% if processAwards %}
+        <table class="scoreboard scorelegend {% if jury %}scoreboard_jury{% endif %}">
+            <thead>
+            <tr>
+                <th scope="col">Awards</th>
+            </tr>
+            </thead>
+            <tbody>
+                <tr class="gold-medal">
+                    <td>Gold Medal</td>
+                </tr>
+                <tr class="silver-medal">
+                    <td>Silver Medal</td>
+                </tr>
+                <tr class="bronze-medal">
+                    <td>Bronze Medal</td>
+                </tr>
+            </tbody>
+        </table>
+    {% endif %}
 {% endif %}
 
 <style>
@@ -358,6 +404,16 @@
                 {{ cMax }} 96%);
         }
     {% endfor %}
+
+    .gold-medal {
+        background-color: #EEC710
+    }
+    .silver-medal {
+        background-color: #AAA
+    }
+    .bronze-medal {
+        background-color: #C08E55
+    }
 </style>
 <script>
     document.querySelectorAll(".forceWidth:not(.toolong)").forEach(el => {
