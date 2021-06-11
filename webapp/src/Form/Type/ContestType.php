@@ -91,7 +91,7 @@ class ContestType extends AbstractExternalIdEntityType
             'choice_label' => function (TeamCategory $category) {
                 return $category->getName();
             },
-            'help' => 'The categories could be awarded for this contest if process awards.',
+            'help' => 'The categories that will receive awards for this contest.',
         ]);
         $builder->add('goldAwards', IntegerType::class, [
             'required' => false,
