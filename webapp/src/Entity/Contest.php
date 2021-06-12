@@ -794,7 +794,7 @@ class Contest extends BaseApiEntity
      *
      * @return integer
      */
-    public function getBronzeAwards()
+    public function getBronzeAwards(): int
     {
         return $this->bronzeAwards;
     }
