@@ -121,15 +121,15 @@
 
         {# process awards color #}
         {% set awardColor = '' %}
-        {% if showLegends and processAwards and score.team.category.name in awardsCategories %}
+        {% if showLegends and processAwards and score.team.category in awardsCategories %}
             {% if goldAwards > 0 %}
-                {% set awardColor = ' gold-medal' %}
+                {% set awardColor = ' gold-award' %}
                 {% set goldAwards = goldAwards - 1 %}
             {% elseif silverAwards > 0 %}
-                {% set awardColor = ' silver-medal' %}
+                {% set awardColor = ' silver-award' %}
                 {% set silverAwards = silverAwards - 1 %}
             {% elseif bronzeAwards > 0 %}
-                {% set awardColor = ' bronze-medal' %}
+                {% set awardColor = ' bronze-award' %}
                 {% set bronzeAwards = bronzeAwards - 1 %}
             {% endif %}
         {% endif %}
@@ -368,14 +368,14 @@
             </tr>
             </thead>
             <tbody>
-                <tr class="gold-medal">
-                    <td>Gold Medal</td>
+                <tr class="gold-award">
+                    <td>Gold Award</td>
                 </tr>
-                <tr class="silver-medal">
-                    <td>Silver Medal</td>
+                <tr class="silver-award">
+                    <td>Silver Award</td>
                 </tr>
-                <tr class="bronze-medal">
-                    <td>Bronze Medal</td>
+                <tr class="bronze-award">
+                    <td>Bronze Award</td>
                 </tr>
             </tbody>
         </table>
@@ -399,16 +399,6 @@
                 {{ cMax }} 96%);
         }
     {% endfor %}
-
-    .gold-medal {
-        background-color: #EEC710
-    }
-    .silver-medal {
-        background-color: #AAA
-    }
-    .bronze-medal {
-        background-color: #C08E55
-    }
 </style>
 <script>
     document.querySelectorAll(".forceWidth:not(.toolong)").forEach(el => {
