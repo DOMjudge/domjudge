@@ -58,12 +58,13 @@ cd /opt/domjudge/domserver
 # This needs to be done before we do any submission.
 # 8 hours as a helper so we can adjust contest start/endtime
 TIMEHELP=$((8*60*60))
-# Database changes to make the REST API and event feed match better.
+# Database changes to make the scrapes look the same.
 cat <<EOF | mysql domjudge
 DELETE FROM clarification;
-UPDATE contest SET starttime  = UNIX_TIMESTAMP()-$TIMEHELP WHERE cid = 2;
-UPDATE contest SET freezetime = UNIX_TIMESTAMP()+15        WHERE cid = 2;
-UPDATE contest SET endtime    = UNIX_TIMESTAMP()+$TIMEHELP WHERE cid = 2;
+UPDATE contest SET activatetime = UNIX_TIMESTAMP(STR_TO_DATE('Dec 24 2008 01:30AM', '%M %d %Y %h:%i%p')) WHERE cid = 2;
+UPDATE contest SET starttime    = UNIX_TIMESTAMP(STR_TO_DATE('Dec 24 2008 01:30AM', '%M %d %Y %h:%i%p')) WHERE cid = 2;
+UPDATE contest SET freezetime   = UNIX_TIMESTAMP(STR_TO_DATE('Dec 24 2008 9:30AM', '%M %d %Y %h:%i%p')) WHERE cid = 2;
+UPDATE contest SET endtime      = UNIX_TIMESTAMP(STR_TO_DATE('Dec 24 2008 5:30PM', '%M %d %Y %h:%i%p')) WHERE cid = 2;
 UPDATE team_category SET visible = 1;
 EOF
 
@@ -131,6 +132,13 @@ sed -i 's/\t0\t/\t1999999999\t/g' cookies.txt
 mkdir -p html/"$URL"/"$ROLE"
 cd html/"$URL"/"$ROLE"
 cp "$DIR"/cookies.txt ./
+
+# Database changes to make the scrapes look the same.
+cat <<EOF | mysql domjudge
+UPDATE auditlog SET logtime = UNIX_TIMESTAMP(STR_TO_DATE('Dec 24 2008 01:30AM', '%M %d %Y %h:%i%p'));
+UPDATE user SET first_login = UNIX_TIMESTAMP(STR_TO_DATE('Dec 24 2008 01:30AM', '%M %d %Y %h:%i%p')) WHERE userid = 1;
+UPDATE user SET last_login  = UNIX_TIMESTAMP(STR_TO_DATE('Dec 24 2008 01:30AM', '%M %d %Y %h:%i%p')) WHERE userid = 1;
+EOF
 
 section_start_collap scrape "Scrape the site with the rebuild admin user"
 if [ "$URL" == "team" ]; then
