@@ -173,7 +173,7 @@ class Contest extends BaseApiEntity
     /**
      * @var boolean|null
      * @ORM\Column(type="boolean", name="process_awards",
-     *     options={"comment"="Are there awards for this contest?","default"=0},
+     *     options={"comment"="Whether to process awards for this contest","default"=0},
      *     nullable=false)
      * @Serializer\Exclude()
      */
@@ -187,12 +187,12 @@ class Contest extends BaseApiEntity
      *               )
      * @Serializer\Exclude()
      */
-    private $awardsCategories;
+    private $awards_categories;
 
     /**
      * @var int|null
      * @ORM\Column(type="smallint", length=3, name="gold_awards",
-     *     options={"comment"="Number of gold medals","unsigned"="true","default"=0},
+     *     options={"comment"="Number of gold awards","unsigned"="true","default"=0},
      *     nullable=false)
      * @Serializer\Exclude()
      */
@@ -201,7 +201,7 @@ class Contest extends BaseApiEntity
     /**
      * @var int|null
      * @ORM\Column(type="smallint", length=3, name="silver_awards",
-     *     options={"comment"="Number of silver medals","unsigned"="true","default"=0},
+     *     options={"comment"="Number of silver awards","unsigned"="true","default"=0},
      *     nullable=false)
      * @Serializer\Exclude()
      */
@@ -210,7 +210,7 @@ class Contest extends BaseApiEntity
     /**
      * @var int|null
      * @ORM\Column(type="smallint", length=3, name="bronze_awards",
-     *     options={"comment"="Number of bronze medals","unsigned"="true","default"=0},
+     *     options={"comment"="Number of bronze awards","unsigned"="true","default"=0},
      *     nullable=false)
      * @Serializer\Exclude()
      */
@@ -387,7 +387,7 @@ class Contest extends BaseApiEntity
         $this->submissions      = new ArrayCollection();
         $this->internal_errors  = new ArrayCollection();
         $this->team_categories  = new ArrayCollection();
-        $this->awardsCategories = new ArrayCollection();
+        $this->awards_categories = new ArrayCollection();
     }
 
     public function getCid(): int
@@ -688,10 +688,9 @@ class Contest extends BaseApiEntity
      *
      * @return Contest
      */
-    public function setProcessAwards($processAwards)
+    public function setProcessAwards(bool $processAwards): Contest
     {
         $this->processAwards = $processAwards;
-
         return $this;
     }
 
@@ -700,7 +699,7 @@ class Contest extends BaseApiEntity
      *
      * @return boolean
      */
-    public function getProcessAwards()
+    public function getProcessAwards(): bool
     {
         return $this->processAwards;
     }
@@ -710,22 +709,22 @@ class Contest extends BaseApiEntity
      */
     public function getAwardsCategories(): Collection
     {
-        return $this->awardsCategories;
+        return $this->awards_categories;
     }
 
-    public function addAwardsCategories(TeamCategory $awardsCategory): self
+    public function addAwardsCategories(TeamCategory $awardsCategory): Contest
     {
-        if (!$this->awardsCategories->contains($awardsCategory)) {
-            $this->awardsCategories[] = $awardsCategory;
+        if (!$this->awards_categories->contains($awardsCategory)) {
+            $this->awards_categories[] = $awardsCategory;
         }
 
         return $this;
     }
 
-    public function removeAwardsCategories(TeamCategory $awardsCategory): self
+    public function removeAwardsCategories(TeamCategory $awardsCategory): Contest
     {
-        if ($this->awardsCategories->contains($awardsCategory)) {
-            $this->awardsCategories->removeElement($awardsCategory);
+        if ($this->awards_categories->contains($awardsCategory)) {
+            $this->awards_categories->removeElement($awardsCategory);
         }
 
         return $this;
@@ -738,10 +737,9 @@ class Contest extends BaseApiEntity
      *
      * @return Contest
      */
-    public function setGoldAwards($goldAwards)
+    public function setGoldAwards(int $goldAwards): Contest
     {
         $this->goldAwards = $goldAwards;
-
         return $this;
     }
 
@@ -750,7 +748,7 @@ class Contest extends BaseApiEntity
      *
      * @return integer
      */
-    public function getGoldAwards()
+    public function getGoldAwards(): int
     {
         return $this->goldAwards;
     }
@@ -762,10 +760,9 @@ class Contest extends BaseApiEntity
      *
      * @return Contest
      */
-    public function setSilverAwards($silverAwards)
+    public function setSilverAwards(int $silverAwards): Contest
     {
         $this->silverAwards = $silverAwards;
-
         return $this;
     }
 
@@ -774,7 +771,7 @@ class Contest extends BaseApiEntity
      *
      * @return integer
      */
-    public function getSilverAwards()
+    public function getSilverAwards(): int
     {
         return $this->silverAwards;
     }
@@ -786,10 +783,9 @@ class Contest extends BaseApiEntity
      *
      * @return Contest
      */
-    public function setBronzeAwards($bronzeAwards)
+    public function setBronzeAwards(int $bronzeAwards): Contest
     {
         $this->bronzeAwards = $bronzeAwards;
-
         return $this;
     }
 

@@ -82,7 +82,7 @@ class ContestType extends AbstractExternalIdEntityType
                 'Yes' => true,
                 'No' => false,
             ],
-            'help' => 'Whether to award medals for this contest.',
+            'help' => 'Whether to process awards for this contest.',
         ]);
         $builder->add('awardsCategories', EntityType::class, [
             'required' => false,
@@ -91,19 +91,19 @@ class ContestType extends AbstractExternalIdEntityType
             'choice_label' => function (TeamCategory $category) {
                 return $category->getName();
             },
-            'help' => 'The categories that will receive awards for this contest.',
+            'help' => 'List of team categories that will receive awards for this contest.',
         ]);
         $builder->add('goldAwards', IntegerType::class, [
             'required' => false,
-            'help' => 'The number of gold medals for this contest.',
+            'help' => 'The number of gold awards for this contest.',
         ]);
         $builder->add('silverAwards', IntegerType::class, [
             'required' => false,
-            'help' => 'The number of silver medals for this contest.',
+            'help' => 'The number of silver awards for this contest.',
         ]);
         $builder->add('bronzeAwards', IntegerType::class, [
             'required' => false,
-            'help' => 'The number of bronze medals for this contest.',
+            'help' => 'The number of bronze awards for this contest.',
         ]);
         $builder->add('public', ChoiceType::class, [
             'expanded' => true,
