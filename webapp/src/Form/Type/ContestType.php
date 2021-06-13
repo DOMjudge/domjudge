@@ -82,7 +82,7 @@ class ContestType extends AbstractExternalIdEntityType
                 'Yes' => true,
                 'No' => false,
             ],
-            'help' => 'Whether to process awards for this contest.',
+            'help' => 'Whether to process medal (gold, silver, bronze) awards for this contest.',
         ]);
         $builder->add('awardsCategories', EntityType::class, [
             'required' => false,
@@ -103,7 +103,7 @@ class ContestType extends AbstractExternalIdEntityType
         ]);
         $builder->add('bronzeAwards', IntegerType::class, [
             'required' => false,
-            'help' => 'The number of bronze awards for this contest.',
+            'help' => 'The number of bronze awards for this contest. Note that `b` will be added to this.',
         ]);
         $builder->add('public', ChoiceType::class, [
             'expanded' => true,
