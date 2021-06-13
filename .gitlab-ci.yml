@@ -23,7 +23,7 @@ include:
      - always
 
 .retry_time: &tiny_job
-  timeout: 1m
+  timeout: 3m
 
 .retry_time: &short_job
   timeout: 7m
