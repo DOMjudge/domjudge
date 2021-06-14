@@ -67,7 +67,7 @@ sudo make install-domserver install-judgehost install-docs |& tee -a "$gitlabart
 cd /opt/domjudge/domserver
 setfacl -m u:www-data:r etc/restapi.secret etc/initial_admin_password.secret \
                         etc/dbpasswords.secret etc/symfony_app.secret
-sudo -u www-data bin/dj_setup_database -uroot -p${MYSQL_ROOT_PASSWORD} -q install
+sudo -u www-data APP_ENV=test bin/dj_setup_database -uroot -p${MYSQL_ROOT_PASSWORD} -q install
 
 # configure and restart nginx
 sudo rm -f /etc/nginx/sites-enabled/*
