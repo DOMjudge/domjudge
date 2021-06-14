@@ -99,10 +99,17 @@ class TeamCategory extends BaseApiEntity
      */
     private $contests;
 
+    /**
+     * @ORM\ManyToMany(targetEntity="Contest", mappedBy="awards_categories")
+     * @Serializer\Exclude()
+     */
+    private $contests_for_awards;
+
     public function __construct()
     {
-        $this->teams    = new ArrayCollection();
-        $this->contests = new ArrayCollection();
+        $this->teams               = new ArrayCollection();
+        $this->contests            = new ArrayCollection();
+        $this->contests_for_awards = new ArrayCollection();
     }
 
     public function __toString(): string
@@ -220,6 +227,34 @@ class TeamCategory extends BaseApiEntity
         if ($this->contests->contains($contest)) {
             $this->contests->removeElement($contest);
             $contest->removeTeamCategory($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Contest[]
+     */
+    public function getContestsForAwards(): Collection
+    {
+        return $this->contests_for_awards;
+    }
+
+    public function addContestForAwards(Contest $contest): self
+    {
+        if (!$this->contests_for_awards->contains($contest)) {
+            $this->contests_for_awards[] = $contest;
+            $contest->addAwardsCategory($this);
+        }
+
+        return $this;
+    }
+
+    public function removeContestForAwards(Contest $contest): self
+    {
+        if ($this->contests_for_awards->contains($contest)) {
+            $this->contests_for_awards->removeElement($contest);
+            $contest->removeAwardsCategories($this);
         }
 
         return $this;

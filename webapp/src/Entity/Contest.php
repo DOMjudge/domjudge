@@ -180,7 +180,7 @@ class Contest extends BaseApiEntity
     private $processAwards = true;
 
     /**
-     * @ORM\ManyToMany(targetEntity="App\Entity\TeamCategory", inversedBy="contests")
+     * @ORM\ManyToMany(targetEntity="App\Entity\TeamCategory", inversedBy="contests_for_awards")
      * @ORM\JoinTable(name="contestteamcategoryforawards",
      *                joinColumns={@ORM\JoinColumn(name="cid", referencedColumnName="cid", onDelete="CASCADE")},
      *                inverseJoinColumns={@ORM\JoinColumn(name="categoryid", referencedColumnName="categoryid", onDelete="CASCADE")}
