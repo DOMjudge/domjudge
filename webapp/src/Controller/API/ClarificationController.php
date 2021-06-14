@@ -78,6 +78,7 @@ class ClarificationController extends AbstractRestController
     /**
      * Add a clarification to this contest
      * @Rest\Post("")
+     * @Rest\Post("/")
      * @Rest\Put("/{id}")
      * @OA\Post()
      * @OA\Put()
