@@ -78,7 +78,9 @@ class ClarificationController extends AbstractRestController
     /**
      * Add a clarification to this contest
      * @Rest\Post("")
+     * @Rest\Put("/{id}")
      * @OA\Post()
+     * @OA\Put()
      * @Security("is_granted('ROLE_TEAM') or is_granted('ROLE_API_WRITER')", message="You need to have the Team Member role to add a clarification")
      * @OA\RequestBody(
      *     required=true,
@@ -94,12 +96,12 @@ class ClarificationController extends AbstractRestController
      * @OA\Response(
      *     response="200",
      *     description="When creating a clarification was successful",
-     *     @OA\JsonContent(type="string", description="The ID of the created clarification")
+     *     @Model(type=Clarification::class)
      * )
      * @throws NonUniqueResultException
      * @throws Exception
      */
-    public function addAction(Request $request): string
+    public function addAction(Request $request, ?string $id): Response
     {
         $required = ['text'];
         foreach ($required as $argument) {
@@ -264,7 +266,11 @@ class ClarificationController extends AbstractRestController
         $clarification->setSubmittime($time);
 
         if ($clarificationId = $request->request->get('id')) {
-            if ($this->isGranted('ROLE_API_WRITER')) {
+            if ($request->isMethod('POST')) {
+                throw new BadRequestHttpException('Passing an ID is not supported for POST');
+            } elseif ($id !== $clarificationId) {
+                throw new BadRequestHttpException('ID does not match URI');
+            } elseif ($this->isGranted('ROLE_API_WRITER')) {
                 // Check if we already have a clarification with this ID
                 $existingClarification = $this->em->createQueryBuilder()
                     ->from(Clarification::class, 'c')
@@ -312,7 +318,7 @@ class ClarificationController extends AbstractRestController
         }
         $this->em->flush();
 
-        return (string)($clarification->getExternalid() ?? $clarification->getClarid());
+        return $this->renderData($request, $clarification);
     }
 
     /**

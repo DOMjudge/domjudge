@@ -112,7 +112,9 @@ class SubmissionController extends AbstractRestController
     /**
      * Add a submission to this contest
      * @Rest\Post("")
+     * @Rest\Put("/{id}")
      * @OA\Post()
+     * @OA\Put()
      * @Security("is_granted('ROLE_TEAM') or is_granted('ROLE_API_WRITER')", message="You need to have the Team Member role to add a submission")
      * @OA\RequestBody(
      *     required=true,
@@ -170,7 +172,7 @@ class SubmissionController extends AbstractRestController
      *             ),
      *             @OA\Property(
      *                 property="id",
-     *                 description="The ID to use for the submission. Only used when adding a submission as admin",
+     *                 description="The ID to use for the submission. Only used when adding a submission as admin and only allowed with PUT",
      *                 type="string"
      *             ),
      *             @OA\Property(
@@ -196,12 +198,17 @@ class SubmissionController extends AbstractRestController
      * @OA\Response(
      *     response="200",
      *     description="When submitting was successful",
-     *     @OA\JsonContent(type="string", description="The ID of the submitted solution")
+     *     @OA\JsonContent(
+     *         allOf={
+     *             @OA\Schema(ref=@Model(type=Submission::class)),
+     *             @OA\Schema(ref="#/components/schemas/Files")
+     *         }
+     *     )
      * )
      * @throws NonUniqueResultException
      * @throws Exception
      */
-    public function addSubmissionAction(Request $request): string
+    public function addSubmissionAction(Request $request, ?string $id): Response
     {
         $required = [
             'problem'  => ['problem', 'problem_id'],
@@ -332,7 +339,11 @@ class SubmissionController extends AbstractRestController
         }
 
         if ($submissionId = $request->request->get('id')) {
-            if ($this->isGranted('ROLE_API_WRITER')) {
+            if ($request->isMethod('POST')) {
+                throw new BadRequestHttpException('Passing an ID is not supported for POST');
+            } elseif ($id !== $submissionId) {
+                throw new BadRequestHttpException('ID does not match URI');
+            } elseif ($this->isGranted('ROLE_API_WRITER')) {
                 if (preg_match(DOMJudgeService::EXTERNAL_IDENTIFIER_REGEX, $submissionId) !== 1) {
                     throw new BadRequestHttpException(sprintf("ID %s is not valid", $submissionId));
                 }
@@ -435,7 +446,7 @@ class SubmissionController extends AbstractRestController
             throw new BadRequestHttpException($message);
         }
 
-        return (string)($submission->getExternalid() ?? $submission->getSubmitid());
+        return $this->renderData($request, $submission);
     }
 
     /**
