@@ -181,6 +181,17 @@ class ImportExportService
             ->setActivatetimeString('-24:00')
             ->setEndtimeString(sprintf('+%s', $data['duration']));
 
+        // Get all visible categories. For now, we assume these are the ones getting awards
+        $visibleCategories = $this->em->getRepository(TeamCategory::class)->findBy(['visible' => true]);
+
+        if (empty($visibleCategories)) {
+            $contest->setProcessAwards(false);
+        } else {
+            foreach ($visibleCategories as $visibleCategory) {
+                $contest->addAwardsCategory($visibleCategory);
+            }
+        }
+
         /** @var string|null $freezeDuration */
         $freezeDuration = $data['scoreboard-freeze-duration'] ?? $data['scoreboard-freeze-length'] ?? null;
         /** @var string|null $freezeStart */

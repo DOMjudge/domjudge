@@ -114,19 +114,22 @@
                     <th>Awards</th>
                     <td>
                         {% if contest.processAwards %}
-                            <a>{{ contest.goldAwards|default('-') }} Gold Medal</a>
+                            <a>{{ contest.goldAwards }} Gold Medal</a>
                             <br>
-                            <a>{{ contest.silverAwards|default('-') }} Silver Medal</a>
+                            <a>{{ contest.silverAwards }} Silver Medal</a>
                             <br>
-                            <a>{{ contest.bronzeAwards|default('-') }} Bronze Medal</a>
+                            <a>{{ contest.bronzeAwards }} Bronze Medal</a>
                             <br>
-                            {% for category in contest.awardsCategories %}
-                                For all teams from
-                                <a href="{{ path('jury_team_category', {'categoryId': category.categoryid}) }}">
-                                    {{ category.name }}
-                                </a>
-                                <br>
-                            {% endfor %}
+                            For all teams from the following categories:
+                            <ul>
+                                {% for category in contest.awardsCategories %}
+                                    <li>
+                                        <a href="{{ path('jury_team_category', {'categoryId': category.categoryid}) }}">
+                                            {{ category.name }}
+                                        </a>
+                                    </li>
+                                {% endfor %}
+                            </ul>
                         {% else %}
                             <em>none</em>
                         {% endif %}
@@ -322,7 +325,8 @@
                             </td>
                             <td>
                                 {% if is_granted('ROLE_ADMIN') %}
-                                    <a href="{{ path('jury_contest_problem_delete', {'contestId': contest.cid, 'probId': problem.probid}) }}" data-ajax-modal>
+                                    <a href="{{ path('jury_contest_problem_delete', {'contestId': contest.cid, 'probId': problem.probid}) }}"
+                                       data-ajax-modal>
                                         <i class="fas fa-trash-alt"></i>
                                     </a>
                                 {% endif %}

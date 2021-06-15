@@ -173,14 +173,14 @@ class Contest extends BaseApiEntity
     /**
      * @var boolean|null
      * @ORM\Column(type="boolean", name="process_awards",
-     *     options={"comment"="Whether to process awards for this contest","default"=0},
+     *     options={"comment"="Whether to process awards for this contest","default"=1},
      *     nullable=false)
      * @Serializer\Exclude()
      */
-    private $processAwards = false;
+    private $processAwards = true;
 
     /**
-     * @ORM\ManyToMany(targetEntity="App\Entity\TeamCategory", inversedBy="contests")
+     * @ORM\ManyToMany(targetEntity="App\Entity\TeamCategory", inversedBy="contests_for_awards")
      * @ORM\JoinTable(name="contestteamcategoryforawards",
      *                joinColumns={@ORM\JoinColumn(name="cid", referencedColumnName="cid", onDelete="CASCADE")},
      *                inverseJoinColumns={@ORM\JoinColumn(name="categoryid", referencedColumnName="categoryid", onDelete="CASCADE")}
@@ -196,7 +196,7 @@ class Contest extends BaseApiEntity
      *     nullable=false)
      * @Serializer\Exclude()
      */
-    private $goldAwards = 0;
+    private $goldAwards = 4;
 
     /**
      * @var int|null
@@ -205,7 +205,7 @@ class Contest extends BaseApiEntity
      *     nullable=false)
      * @Serializer\Exclude()
      */
-    private $silverAwards = 0;
+    private $silverAwards = 4;
 
     /**
      * @var int|null
@@ -214,7 +214,7 @@ class Contest extends BaseApiEntity
      *     nullable=false)
      * @Serializer\Exclude()
      */
-    private $bronzeAwards = 0;
+    private $bronzeAwards = 4;
 
     /**
      * @var double
@@ -712,7 +712,7 @@ class Contest extends BaseApiEntity
         return $this->awards_categories;
     }
 
-    public function addAwardsCategories(TeamCategory $awardsCategory): Contest
+    public function addAwardsCategory(TeamCategory $awardsCategory): Contest
     {
         if (!$this->awards_categories->contains($awardsCategory)) {
             $this->awards_categories[] = $awardsCategory;
@@ -733,11 +733,11 @@ class Contest extends BaseApiEntity
     /**
      * Set goldAwards
      *
-     * @param integer $goldAwards
+     * @param int|null $goldAwards
      *
      * @return Contest
      */
-    public function setGoldAwards(int $goldAwards): Contest
+    public function setGoldAwards(?int $goldAwards): Contest
     {
         $this->goldAwards = $goldAwards;
         return $this;
@@ -746,9 +746,9 @@ class Contest extends BaseApiEntity
     /**
      * Get goldAwards
      *
-     * @return integer
+     * @return int|null
      */
-    public function getGoldAwards(): int
+    public function getGoldAwards(): ?int
     {
         return $this->goldAwards;
     }
@@ -756,11 +756,11 @@ class Contest extends BaseApiEntity
     /**
      * Set silverAwards
      *
-     * @param integer $silverAwards
+     * @param int|null $silverAwards
      *
      * @return Contest
      */
-    public function setSilverAwards(int $silverAwards): Contest
+    public function setSilverAwards(?int $silverAwards): Contest
     {
         $this->silverAwards = $silverAwards;
         return $this;
@@ -769,9 +769,9 @@ class Contest extends BaseApiEntity
     /**
      * Get silverAwards
      *
-     * @return integer
+     * @return int|null
      */
-    public function getSilverAwards(): int
+    public function getSilverAwards(): ?int
     {
         return $this->silverAwards;
     }
@@ -779,11 +779,11 @@ class Contest extends BaseApiEntity
     /**
      * Set bronzeAwards
      *
-     * @param integer $bronzeAwards
+     * @param int|null $bronzeAwards
      *
      * @return Contest
      */
-    public function setBronzeAwards(int $bronzeAwards): Contest
+    public function setBronzeAwards(?int $bronzeAwards): Contest
     {
         $this->bronzeAwards = $bronzeAwards;
         return $this;
@@ -792,7 +792,7 @@ class Contest extends BaseApiEntity
     /**
      * Get bronzeAwards
      *
-     * @return integer
+     * @return int|null
      */
     public function getBronzeAwards(): int
     {
@@ -1206,6 +1206,33 @@ class Contest extends BaseApiEntity
                 $context
                     ->buildViolation('Deactivatetime must be larger than endtime.')
                     ->atPath('deactivatetimeString')
+                    ->addViolation();
+            }
+        }
+
+        if ($this->processAwards) {
+            if ($this->goldAwards === null) {
+                $context
+                    ->buildViolation('This field is required when \'Process awards\' is set.')
+                    ->atPath('goldAwards')
+                    ->addViolation();
+            }
+            if ($this->silverAwards === null) {
+                $context
+                    ->buildViolation('This field is required when \'Process awards\' is set.')
+                    ->atPath('silverAwards')
+                    ->addViolation();
+            }
+            if ($this->bronzeAwards === null) {
+                $context
+                    ->buildViolation('This field is required when \'Process awards\' is set.')
+                    ->atPath('bronzeAwards')
+                    ->addViolation();
+            }
+            if ($this->awards_categories === null || $this->awards_categories->isEmpty()) {
+                $context
+                    ->buildViolation('This field is required when \'Process awards\' is set.')
+                    ->atPath('awardsCategories')
                     ->addViolation();
             }
         }

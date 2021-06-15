@@ -52,19 +52,24 @@ class SubmissionControllerTest extends BaseTest
     }
 
     /**
-     * Test that if not all data is supplied, the correct message is returned
+     * Test that if invalid data is supplied, the correct message is returned
      *
-     * @dataProvider provideAddMissingData
+     * @dataProvider provideAddInvalidData
      */
-    public function testAddMissingData(string $user, array $dataToSend, string $expectedMessage)
+    public function testAddInvalidData(string $user, array $dataToSend, string $expectedMessage)
     {
         $contestId = $this->demoContest->getCid();
         $apiEndpoint = $this->apiEndpoint;
-        $data = $this->verifyApiJsonResponse('POST', "/contests/$contestId/$apiEndpoint", 400, $user, $dataToSend);
+        $method = isset($dataToSend['id']) ? 'PUT' : 'POST';
+        $url = "/contests/$contestId/$apiEndpoint";
+        if ($method === 'PUT') {
+            $url .= '/' . $dataToSend['id'];
+        }
+        $data = $this->verifyApiJsonResponse($method, $url, 400, $user, $dataToSend);
         static::assertEquals($expectedMessage, $data['message']);
     }
 
-    public function provideAddMissingData(): Generator
+    public function provideAddInvalidData(): Generator
     {
         yield ['demo', [], "One of the arguments 'problem', 'problem_id' is mandatory"];
         yield ['demo', ['problem' => 1], "One of the arguments 'language', 'language_id' is mandatory"];
@@ -148,6 +153,28 @@ class SubmissionControllerTest extends BaseTest
     }
 
     /**
+     * Test that passing an ID is not allowed when performing a POST
+     */
+    public function testSupplyIdInPost()
+    {
+        $contestId = $this->demoContest->getCid();
+        $apiEndpoint = $this->apiEndpoint;
+        $data = $this->verifyApiJsonResponse('POST', "/contests/$contestId/$apiEndpoint", 400, 'admin', ['problem_id' => 1, 'language_id' => 'cpp', 'id' => '123']);
+        static::assertEquals('Passing an ID is not supported for POST', $data['message']);
+    }
+
+    /**
+     * Test that passing a wrong ID is not allowed when performing a PUT
+     */
+    public function testSupplyWrongIdInPut()
+    {
+        $contestId = $this->demoContest->getCid();
+        $apiEndpoint = $this->apiEndpoint;
+        $data = $this->verifyApiJsonResponse('PUT', "/contests/$contestId/$apiEndpoint/id1", 400, 'admin', ['problem_id' => 1, 'language_id' => 'cpp', 'id' => '123']);
+        static::assertEquals('ID does not match URI', $data['message']);
+    }
+
+    /**
      * Test that when submitting for a language that requires an entry point but not supplying an error is returned
      */
     public function testMissingEntryPoint()
@@ -206,6 +233,11 @@ class SubmissionControllerTest extends BaseTest
 
         $contestId = $this->demoContest->getCid();
         $apiEndpoint = $this->apiEndpoint;
+        $method = isset($dataToSend['id']) ? 'PUT' : 'POST';
+        $url = "/contests/$contestId/$apiEndpoint";
+        if ($method === 'PUT') {
+            $url .= '/' . $dataToSend['id'];
+        }
 
         if ($zipFiles !== null) {
             if (!isset($dataToSend['files'])) {
@@ -216,8 +248,11 @@ class SubmissionControllerTest extends BaseTest
             }
             $dataToSend['files'][0]['data'] = $this->base64ZipWithFiles($zipFiles);
         }
-        $submissionId = $this->verifyApiJsonResponse('POST', "/contests/$contestId/$apiEndpoint", 200, $user, $dataToSend, $filesToSend);
-        static::assertIsString($submissionId);
+        $submittedSubmission = $this->verifyApiJsonResponse($method, $url, 200, $user, $dataToSend, $filesToSend);
+        static::assertIsArray($submittedSubmission);
+        static::assertArrayHasKey('id', $submittedSubmission);
+
+        $submissionId = $submittedSubmission['id'];
 
         // Now load the submission
         $submissionRepository = static::$container->get(EntityManagerInterface::class)->getRepository(Submission::class);

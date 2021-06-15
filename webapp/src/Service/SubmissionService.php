@@ -549,6 +549,8 @@ class SubmissionService
         $submission = new Submission();
         $submission
             ->setTeam($team)
+            ->setContest($contest)
+            ->setProblem($problem->getProblem())
             ->setContestProblem($problem)
             ->setLanguage($language)
             ->setSubmittime($submitTime)

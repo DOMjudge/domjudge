@@ -95,6 +95,9 @@ class AwardsController extends AbstractRestController
      */
     protected function getAwardsData(Request $request, string $requestedType = null): ?array
     {
+        // TODO: move this to a service so the scoreboard can use its logic
+        // Probably best to do it when we implement https://github.com/DOMjudge/domjudge/issues/1079
+
         $public = !$this->dj->checkrole('api_reader');
         if ($this->dj->checkrole('api_reader') && $request->query->has('public')) {
             $public = $request->query->getBoolean('public');
@@ -152,12 +155,14 @@ class AwardsController extends AbstractRestController
             if ($rank === 1) {
                 $overall_winners[] = $teamid;
             }
-            if ($rank <= 4 ) {
-                $medal_winners['gold'][] = $teamid;
-            } elseif ($rank <= 8 ) {
-                $medal_winners['silver'][] = $teamid;
-            } elseif ($rank <= 12 + $additionalBronzeMedals ) {
-                $medal_winners['bronze'][] = $teamid;
+            if ($contest->getProcessAwards() && $contest->getAwardsCategories()->contains($teamScore->team->getCategory())) {
+                if ($rank <= $contest->getGoldAwards()) {
+                    $medal_winners['gold'][] = $teamid;
+                } elseif ($rank <= $contest->getGoldAwards() + $contest->getSilverAwards()) {
+                    $medal_winners['silver'][] = $teamid;
+                } elseif ($rank <= $contest->getGoldAwards() + $contest->getSilverAwards() + $contest->getBronzeAwards() + $additionalBronzeMedals) {
+                    $medal_winners['bronze'][] = $teamid;
+                }
             }
         }
         if (count($overall_winners) > 0) {

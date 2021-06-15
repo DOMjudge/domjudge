@@ -7,6 +7,10 @@ set -euxo pipefail
 # Set up
 "$( dirname "${BASH_SOURCE[0]}" )"/base.sh
 
+# Add team to admin user
+echo "INSERT INTO userrole (userid, roleid) VALUES (1, 3);" | mysql domjudge
+echo "UPDATE user SET teamid = 1 WHERE userid = 1;" | mysql domjudge
+
 # Copy the .env.test file, as this is normally not done during
 # installation and we need it.
 cp webapp/.env.test /opt/domjudge/domserver/webapp/

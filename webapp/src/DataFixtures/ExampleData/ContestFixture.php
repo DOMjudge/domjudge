@@ -34,7 +34,8 @@ class ContestFixture extends AbstractExampleDataFixture implements DependentFixt
             ->setDeactivatetimeString('+06:00')
             ->setPublic(false)
             ->setOpenToAllTeams(false)
-            ->addTeam($this->getReference(TeamFixture::TEAM_REFERENCE));
+            ->addTeam($this->getReference(TeamFixture::TEAM_REFERENCE))
+            ->addAwardsCategory($this->getReference(TeamCategoryFixture::PARTICIPANTS_REFERENCE));
 
         $demoContest = new Contest();
         $demoContest
@@ -71,7 +72,8 @@ class ContestFixture extends AbstractExampleDataFixture implements DependentFixt
                     '%s-01-01 18:30:00 Europe/Amsterdam',
                     date('Y') + 2
                 )
-            );
+            )
+            ->addAwardsCategory($this->getReference(TeamCategoryFixture::PARTICIPANTS_REFERENCE));
 
         $manager->persist($demoPracticeContest);
         $manager->persist($demoContest);
@@ -86,6 +88,6 @@ class ContestFixture extends AbstractExampleDataFixture implements DependentFixt
      */
     public function getDependencies()
     {
-        return [TeamFixture::class];
+        return [TeamFixture::class, TeamCategoryFixture::class];
     }
 }

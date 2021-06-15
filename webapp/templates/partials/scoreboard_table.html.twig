@@ -20,9 +20,6 @@
 {% set problems = scoreboard.problems %}
 {% set processAwards = contest.processAwards %}
 {% set awardsCategories = contest.awardsCategories %}
-{% set goldAwards = contest.goldAwards %}
-{% set silverAwards = contest.silverAwards %}
-{% set bronzeAwards = contest.bronzeAwards %}
 
 {% if maxWidth > 0 %}
     <style>
@@ -122,15 +119,12 @@
         {# process awards color #}
         {% set awardColor = '' %}
         {% if showLegends and processAwards and score.team.category in awardsCategories %}
-            {% if goldAwards > 0 %}
-                {% set awardColor = ' gold-award' %}
-                {% set goldAwards = goldAwards - 1 %}
-            {% elseif silverAwards > 0 %}
-                {% set awardColor = ' silver-award' %}
-                {% set silverAwards = silverAwards - 1 %}
-            {% elseif bronzeAwards > 0 %}
-                {% set awardColor = ' bronze-award' %}
-                {% set bronzeAwards = bronzeAwards - 1 %}
+            {% if score.rank <= contest.goldAwards %}
+                {% set awardColor = 'gold-award' %}
+            {% elseif score.rank <= contest.goldAwards + contest.silverAwards %}
+                {% set awardColor = 'silver-award' %}
+            {% elseif score.rank <= contest.goldAwards + contest.silverAwards + contest.bronzeAwards + contest.b %}
+                {% set awardColor = 'bronze-award' %}
             {% endif %}
         {% endif %}
 
@@ -142,7 +136,7 @@
             {% set color = score.team.category.color %}
         {% endif %}
         <tr class="{{ classes | join(' ') }}" id="team:{{ score.team.teamid }}">
-            <td class="scorepl{{awardColor}}">
+            <td class="scorepl {{awardColor}}">
                 {# Only print rank when score is different from the previous team #}
                 {% if not displayRank %}
                     ?
@@ -364,7 +358,7 @@
         <table class="scoreboard scorelegend {% if jury %}scoreboard_jury{% endif %}">
             <thead>
             <tr>
-                <th scope="col">Awards</th>
+                <th scope="col">Awards {% if not scoreboard.freezeData.showFinal %}(tentative){% endif %}</th>
             </tr>
             </thead>
             <tbody>
