@@ -14,13 +14,13 @@ include:
   retry:
     max: 0 #Max is 2, set when gitlab is flacky
     when:
-     - always
+      - always
 
 .retry_config: &matrix_retry_job
   retry:
     max: 2 #Max is 2, set when gitlab is flacky
     when:
-     - always
+      - always
 
 .retry_time: &tiny_job
   timeout: 3m
@@ -55,7 +55,7 @@ webstandard_check_role:
   variables:
     MYSQL_ROOT_PASSWORD: password
   script:
-  - ./gitlab/webstandard.sh
+    - ./gitlab/webstandard.sh
   artifacts:
     when: always
     paths:
@@ -111,7 +111,7 @@ run unit tests:
 
 visual_pr:
   <<: *retry_job
-  <<: *normal_job
+  <<: *long_job
   stage: test
   image: domjudge/gitlabci:2.1
   services:
@@ -120,17 +120,24 @@ visual_pr:
     MYSQL_ROOT_PASSWORD: password
     DOCKER_HOST: tcp://docker:2375/
     DOCKER_DRIVER: overlay2
+  parallel:
+    matrix:
+      - URL: team
+        ROLE: [jury,admin,team]
+      - URL: public
+        ROLE: [none,jury,admin,balloon,team]
   script:
-  - ./gitlab/visualpr.sh pr
+    - ./gitlab/visualpr.sh pr
   artifacts:
     when: always
     paths:
-     - screenshotspr
-     - public
+      - screenshotspr
+      - html
+      - wget.log
 
 visual_master:
   <<: *retry_job
-  <<: *normal_job
+  <<: *long_job
   stage: test
   image: domjudge/gitlabci:2.1
   services:
@@ -139,36 +146,43 @@ visual_master:
     MYSQL_ROOT_PASSWORD: password
     DOCKER_HOST: tcp://docker:2375/
     DOCKER_DRIVER: overlay2
+  parallel:
+    matrix:
+      - URL: team
+        ROLE: [jury,admin,team]
+      - URL: public
+        ROLE: [none,jury,admin,balloon,team]
   script:
-   - git fetch
-   - git checkout -B master origin/master
-   - git branch --set-upstream-to=origin/master master
-   - git pull
-   - git checkout $CI_COMMIT_SHA -- gitlab/visualpr.sh # Always compare with the same tests
-   - git checkout $CI_COMMIT_SHA -- gitlab/default-nginx
-   - git checkout $CI_COMMIT_SHA -- gitlab/visualreg.css
-   - ./gitlab/visualpr.sh master
+    - git fetch
+    - git checkout -B master origin/master
+    - git branch --set-upstream-to=origin/master master
+    - git pull
+    - git checkout $CI_COMMIT_SHA -- gitlab/visualpr.sh # Always compare with the same tests
+    - git checkout $CI_COMMIT_SHA -- gitlab/default-nginx
+    - git checkout $CI_COMMIT_SHA -- gitlab/visualreg.css
+    - ./gitlab/visualpr.sh master
   artifacts:
     when: always
     paths:
-     - screenshotsmaster
-     - public
+      - screenshotsmaster
+      - html
     
 visual_compare:
   <<: *retry_job
-  <<: *short_job
+  <<: *normal_job
   stage: compare
   image: domjudge/gitlabci:2.1
   needs:
-   - visual_pr
-   - visual_master
+    - visual_pr
+    - visual_master
   script:
-   - ./gitlab/visualcompare.sh
+    - ./gitlab/visualcompare.sh
   artifacts:
-     when: always
-     paths:
+    when: always
+    paths:
       - failingchanges
       - predictedchanges
+      - addrem.log
 
 .job_template: &job_integration
   <<: *retry_job
