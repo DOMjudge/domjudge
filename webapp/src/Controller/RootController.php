@@ -45,6 +45,10 @@ class RootController extends BaseController
                 return $this->redirectToRoute('jury_balloons');
             }
         }
+        $this->addFlash(
+            'danger',
+            'Your user has no DOMjudge roles, you are deauthenticated.'
+        );
         return $this->redirectToRoute('public_index');
     }
 }
