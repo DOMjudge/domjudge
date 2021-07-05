@@ -1,13 +1,14 @@
 <script>
+    var alpha3_alpha2_country_mapping = {{ alpha3_alpha2_country_mapping | json_encode | raw }};
+
     var template = function(element) {
         var imgBase = "{{ asset('flags/4x3/nl.svg') }}";
 
         var img = element.element == undefined ||
-            element.element.dataset == undefined ||
-            element.element.dataset['alpha2'] == undefined ||
-            element.element.dataset['alpha2'] == ""
+            element.element.value == undefined ||
+            element.element.value == ""
             ? ''
-            : '<img src="' + imgBase.replace("nl.svg", element.element.dataset['alpha2'] + ".svg", 1) + '" class="countryflag">&nbsp;';
+            : '<img src="' + imgBase.replace("nl.svg", alpha3_alpha2_country_mapping[element.element.value].toLowerCase() + ".svg", 1) + '" class="countryflag">&nbsp;';
 
         return img + element.text;
     };

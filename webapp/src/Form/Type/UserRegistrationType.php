@@ -138,11 +138,7 @@ class UserRegistrationType extends AbstractType
             $countries = [];
             foreach (Countries::getAlpha3Codes() as $alpha3) {
                 $name = Countries::getAlpha3Name($alpha3);
-                // Note: this needs to be a class and not an array, otherwise Symfony will group them
-                $country = new stdClass();
-                $country->alpha3 = $alpha3;
-                $country->alpha2 = strtolower(Countries::getAlpha2Code($alpha3));
-                $countries["$name ($alpha3)"] = $country;
+                $countries["$name ($alpha3)"] = $alpha3;
             }
 
             $builder
@@ -170,10 +166,6 @@ class UserRegistrationType extends AbstractType
                     'required' => false,
                     'mapped' => false,
                     'choices' => $countries,
-                    'choice_value' => 'alpha3',
-                    'choice_attr' => function($choice) {
-                        return ['data-alpha2' => $choice->alpha2];
-                    },
                     'placeholder' => 'No country',
                 ]);
             }
