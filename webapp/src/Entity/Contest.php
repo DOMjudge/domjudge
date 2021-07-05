@@ -173,7 +173,7 @@ class Contest extends BaseApiEntity
     /**
      * @var boolean|null
      * @ORM\Column(type="boolean", name="process_awards",
-     *     options={"comment"="Whether to process awards for this contest","default"=1},
+     *     options={"comment"="Are there awards for this contest?","default"=1},
      *     nullable=false)
      * @Serializer\Exclude()
      */
@@ -192,7 +192,7 @@ class Contest extends BaseApiEntity
     /**
      * @var int|null
      * @ORM\Column(type="smallint", length=3, name="gold_awards",
-     *     options={"comment"="Number of gold awards","unsigned"="true","default"=0},
+     *     options={"comment"="Number of gold medals","unsigned"="true","default"=4},
      *     nullable=false)
      * @Serializer\Exclude()
      */
@@ -201,7 +201,7 @@ class Contest extends BaseApiEntity
     /**
      * @var int|null
      * @ORM\Column(type="smallint", length=3, name="silver_awards",
-     *     options={"comment"="Number of silver awards","unsigned"="true","default"=0},
+     *     options={"comment"="Number of silver medals","unsigned"="true","default"=4},
      *     nullable=false)
      * @Serializer\Exclude()
      */
@@ -210,7 +210,7 @@ class Contest extends BaseApiEntity
     /**
      * @var int|null
      * @ORM\Column(type="smallint", length=3, name="bronze_awards",
-     *     options={"comment"="Number of bronze awards","unsigned"="true","default"=0},
+     *     options={"comment"="Number of bronze medals","unsigned"="true","default"=4},
      *     nullable=false)
      * @Serializer\Exclude()
      */
