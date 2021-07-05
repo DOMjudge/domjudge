@@ -135,6 +135,7 @@ class User implements UserInterface, EquatableInterface, \Serializable
      *                inverseJoinColumns={@ORM\JoinColumn(name="roleid", referencedColumnName="roleid", onDelete="CASCADE")}
      *               )
      * @Serializer\Exclude()
+     * @Assert\Count(min="1")
      *
      * Note that this property is called `user_roles` and not `roles` because the
      * UserInterface expects roles/getRoles to return a string list of roles, not objects.
