@@ -107,6 +107,35 @@
                     <td>{{ contest.processBalloons | printYesNo }}</td>
                 </tr>
                 <tr>
+                    <th>Process awards</th>
+                    <td>{{ contest.processAwards | printYesNo }}</td>
+                </tr>
+                <tr>
+                    <th>Awards</th>
+                    <td>
+                        {% if contest.processAwards %}
+                            <a>{{ contest.goldAwards }} Gold Medal</a>
+                            <br>
+                            <a>{{ contest.silverAwards }} Silver Medal</a>
+                            <br>
+                            <a>{{ contest.bronzeAwards }} Bronze Medal</a>
+                            <br>
+                            For all teams from the following categories:
+                            <ul>
+                                {% for category in contest.awardsCategories %}
+                                    <li>
+                                        <a href="{{ path('jury_team_category', {'categoryId': category.categoryid}) }}">
+                                            {{ category.name }}
+                                        </a>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <em>none</em>
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
                     <th>Publicly visible</th>
                     <td>{{ contest.public | printYesNo }}</td>
                 </tr>
@@ -296,7 +325,8 @@
                             </td>
                             <td>
                                 {% if is_granted('ROLE_ADMIN') %}
-                                    <a href="{{ path('jury_contest_problem_delete', {'contestId': contest.cid, 'probId': problem.probid}) }}" data-ajax-modal>
+                                    <a href="{{ path('jury_contest_problem_delete', {'contestId': contest.cid, 'probId': problem.probid}) }}"
+                                       data-ajax-modal>
                                         <i class="fas fa-trash-alt"></i>
                                     </a>
                                 {% endif %}
@@ -313,11 +343,11 @@
         {%- if is_granted('ROLE_ADMIN') -%}
             {{ button(path('jury_contest_edit', {'contestId': contest.cid}), 'Edit', 'primary', 'edit') }}
             {{ button(path('jury_contest_delete', {'contestId': contest.cid}), 'Delete', 'danger', 'trash-alt', true) }}
-        {% endif %}
-        {% if contest.finalizetime %}
-            {{ button(path('jury_contest_finalize', {'contestId': contest.cid}), 'Update finalization', 'secondary', 'lock') }}
-        {% else %}
-            {{ button(path('jury_contest_finalize', {'contestId': contest.cid}), 'Finalize this contest', 'secondary', 'lock') }}
+            {% if contest.finalizetime %}
+                {{ button(path('jury_contest_finalize', {'contestId': contest.cid}), 'Update finalization', 'secondary', 'lock') }}
+            {% else %}
+                {{ button(path('jury_contest_finalize', {'contestId': contest.cid}), 'Finalize this contest', 'secondary', 'lock') }}
+            {% endif %}
         {% endif %}
         {{ button(path('jury_contest_prefetch', {'contestId': contest.cid}), 'Heat up judgehosts with contest data', 'secondary', 'download') }}
         {% include 'jury/partials/rejudge_form.html.twig' with {table: 'contest', id: contest.cid, buttonClass: 'btn-secondary'} %}

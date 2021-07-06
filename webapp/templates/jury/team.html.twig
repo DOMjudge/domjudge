@@ -81,9 +81,11 @@
                         {% for user in team.users %}
                             <a href="{{ path('jury_user', {'userId': user.userid}) }}">{{ user.username }}</a>
                         {% else %}
-                            <a href="{{ path('jury_user_add', {'team': team.teamid}) }}">
-                                <i class="fas fa-user-plus"></i> add user
-                            </a>
+                            {%- if is_granted('ROLE_ADMIN') -%}
+                                <a href="{{ path('jury_user_add', {'team': team.teamid}) }}">
+                                    <i class="fas fa-user-plus"></i> add user
+                                </a>
+                            {% endif %}
                         {% endfor %}
                     </td>
                 </tr>

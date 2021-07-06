@@ -171,6 +171,52 @@ class Contest extends BaseApiEntity
     private $b = 0;
 
     /**
+     * @var boolean|null
+     * @ORM\Column(type="boolean", name="process_awards",
+     *     options={"comment"="Are there awards for this contest?","default"=1},
+     *     nullable=false)
+     * @Serializer\Exclude()
+     */
+    private $processAwards = true;
+
+    /**
+     * @ORM\ManyToMany(targetEntity="App\Entity\TeamCategory", inversedBy="contests_for_awards")
+     * @ORM\JoinTable(name="contestteamcategoryforawards",
+     *                joinColumns={@ORM\JoinColumn(name="cid", referencedColumnName="cid", onDelete="CASCADE")},
+     *                inverseJoinColumns={@ORM\JoinColumn(name="categoryid", referencedColumnName="categoryid", onDelete="CASCADE")}
+     *               )
+     * @Serializer\Exclude()
+     */
+    private $awards_categories;
+
+    /**
+     * @var int|null
+     * @ORM\Column(type="smallint", length=3, name="gold_awards",
+     *     options={"comment"="Number of gold medals","unsigned"="true","default"=4},
+     *     nullable=false)
+     * @Serializer\Exclude()
+     */
+    private $goldAwards = 4;
+
+    /**
+     * @var int|null
+     * @ORM\Column(type="smallint", length=3, name="silver_awards",
+     *     options={"comment"="Number of silver medals","unsigned"="true","default"=4},
+     *     nullable=false)
+     * @Serializer\Exclude()
+     */
+    private $silverAwards = 4;
+
+    /**
+     * @var int|null
+     * @ORM\Column(type="smallint", length=3, name="bronze_awards",
+     *     options={"comment"="Number of bronze medals","unsigned"="true","default"=4},
+     *     nullable=false)
+     * @Serializer\Exclude()
+     */
+    private $bronzeAwards = 4;
+
+    /**
      * @var double
      * @ORM\Column(type="decimal", precision=32, scale=9, name="deactivatetime",
      *     options={"comment"="Time contest becomes invisible in team/public views",
@@ -341,6 +387,7 @@ class Contest extends BaseApiEntity
         $this->submissions      = new ArrayCollection();
         $this->internal_errors  = new ArrayCollection();
         $this->team_categories  = new ArrayCollection();
+        $this->awards_categories = new ArrayCollection();
     }
 
     public function getCid(): int
@@ -632,6 +679,124 @@ class Contest extends BaseApiEntity
     public function getProcessBalloons(): bool
     {
         return $this->processBalloons;
+    }
+
+    /**
+     * Set processAwards
+     *
+     * @param boolean $processAwards
+     *
+     * @return Contest
+     */
+    public function setProcessAwards(bool $processAwards): Contest
+    {
+        $this->processAwards = $processAwards;
+        return $this;
+    }
+
+    /**
+     * Get processAwards
+     *
+     * @return boolean
+     */
+    public function getProcessAwards(): bool
+    {
+        return $this->processAwards;
+    }
+
+    /**
+     * @return Collection|TeamCategory[]
+     */
+    public function getAwardsCategories(): Collection
+    {
+        return $this->awards_categories;
+    }
+
+    public function addAwardsCategory(TeamCategory $awardsCategory): Contest
+    {
+        if (!$this->awards_categories->contains($awardsCategory)) {
+            $this->awards_categories[] = $awardsCategory;
+        }
+
+        return $this;
+    }
+
+    public function removeAwardsCategories(TeamCategory $awardsCategory): Contest
+    {
+        if ($this->awards_categories->contains($awardsCategory)) {
+            $this->awards_categories->removeElement($awardsCategory);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Set goldAwards
+     *
+     * @param int|null $goldAwards
+     *
+     * @return Contest
+     */
+    public function setGoldAwards(?int $goldAwards): Contest
+    {
+        $this->goldAwards = $goldAwards;
+        return $this;
+    }
+
+    /**
+     * Get goldAwards
+     *
+     * @return int|null
+     */
+    public function getGoldAwards(): ?int
+    {
+        return $this->goldAwards;
+    }
+
+    /**
+     * Set silverAwards
+     *
+     * @param int|null $silverAwards
+     *
+     * @return Contest
+     */
+    public function setSilverAwards(?int $silverAwards): Contest
+    {
+        $this->silverAwards = $silverAwards;
+        return $this;
+    }
+
+    /**
+     * Get silverAwards
+     *
+     * @return int|null
+     */
+    public function getSilverAwards(): ?int
+    {
+        return $this->silverAwards;
+    }
+
+    /**
+     * Set bronzeAwards
+     *
+     * @param int|null $bronzeAwards
+     *
+     * @return Contest
+     */
+    public function setBronzeAwards(?int $bronzeAwards): Contest
+    {
+        $this->bronzeAwards = $bronzeAwards;
+        return $this;
+    }
+
+    /**
+     * Get bronzeAwards
+     *
+     * @return int|null
+     */
+    public function getBronzeAwards(): int
+    {
+        return $this->bronzeAwards;
     }
 
     public function setPublic(bool $public): Contest
@@ -1041,6 +1206,33 @@ class Contest extends BaseApiEntity
                 $context
                     ->buildViolation('Deactivatetime must be larger than endtime.')
                     ->atPath('deactivatetimeString')
+                    ->addViolation();
+            }
+        }
+
+        if ($this->processAwards) {
+            if ($this->goldAwards === null) {
+                $context
+                    ->buildViolation('This field is required when \'Process awards\' is set.')
+                    ->atPath('goldAwards')
+                    ->addViolation();
+            }
+            if ($this->silverAwards === null) {
+                $context
+                    ->buildViolation('This field is required when \'Process awards\' is set.')
+                    ->atPath('silverAwards')
+                    ->addViolation();
+            }
+            if ($this->bronzeAwards === null) {
+                $context
+                    ->buildViolation('This field is required when \'Process awards\' is set.')
+                    ->atPath('bronzeAwards')
+                    ->addViolation();
+            }
+            if ($this->awards_categories === null || $this->awards_categories->isEmpty()) {
+                $context
+                    ->buildViolation('This field is required when \'Process awards\' is set.')
+                    ->atPath('awardsCategories')
                     ->addViolation();
             }
         }

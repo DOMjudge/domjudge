@@ -312,7 +312,7 @@ nelmio_api_doc:
                             description: The time to use for the clarification. Only used when adding a clarification as admin
                         id:
                             type: string
-                            description: The ID to use for the clarification. Only used when adding a clarification as admin
+                            description: The ID to use for the clarification. Only used when adding a clarification as admin and only allowed with PUT
 
     areas:
         path_patterns: [ ^/api/v4 ]

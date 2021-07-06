@@ -48,19 +48,24 @@ class ClarificationControllerTest extends BaseTest
     }
 
     /**
-     * Test that if not all data is supplied, the correct message is returned
+     * Test that if invalid data is supplied, the correct message is returned
      *
-     * @dataProvider provideAddMissingData
+     * @dataProvider provideAddInvalidData
      */
-    public function testAddMissingData(string $user, array $dataToSend, string $expectedMessage)
+    public function testAddInvalidData(string $user, array $dataToSend, string $expectedMessage)
     {
         $contestId = $this->demoContest->getCid();
         $apiEndpoint = $this->apiEndpoint;
-        $data = $this->verifyApiJsonResponse('POST', "/contests/$contestId/$apiEndpoint", 400, $user, $dataToSend);
+        $method = isset($dataToSend['id']) ? 'PUT' : 'POST';
+        $url = "/contests/$contestId/$apiEndpoint";
+        if ($method === 'PUT') {
+            $url .= '/' . $dataToSend['id'];
+        }
+        $data = $this->verifyApiJsonResponse($method, $url, 400, $user, $dataToSend);
         static::assertEquals($expectedMessage, $data['message']);
     }
 
-    public function provideAddMissingData(): Generator
+    public function provideAddInvalidData(): Generator
     {
         yield ['demo', [], "Argument 'text' is mandatory"];
         yield ['demo', ['text' => 'This is a clarification', 'from_team_id' => '1'], "Can not create a clarification from a different team"];
@@ -74,6 +79,28 @@ class ClarificationControllerTest extends BaseTest
         yield ['admin', ['text' => 'This is a clarification', 'to_team_id' => '3'], "Team 3 not found or not enabled"];
         yield ['admin', ['text' => 'This is a clarification', 'time' => 'this is not a time'], "Can not parse time this is not a time"];
         yield ['admin', ['text' => 'This is a clarification', 'id' => '1'], "Clarification with ID 1 already exists"];
+    }
+
+    /**
+     * Test that passing an ID is not allowed when performing a POST
+     */
+    public function testSupplyIdInPost()
+    {
+        $contestId = $this->demoContest->getCid();
+        $apiEndpoint = $this->apiEndpoint;
+        $data = $this->verifyApiJsonResponse('POST', "/contests/$contestId/$apiEndpoint", 400, 'admin', ['text' => 'This is a clarification', 'id' => '1234']);
+        static::assertEquals('Passing an ID is not supported for POST', $data['message']);
+    }
+
+    /**
+     * Test that passing a wrong ID is not allowed when performing a PUT
+     */
+    public function testSupplyWrongIdInPut()
+    {
+        $contestId = $this->demoContest->getCid();
+        $apiEndpoint = $this->apiEndpoint;
+        $data = $this->verifyApiJsonResponse('PUT', "/contests/$contestId/$apiEndpoint/id1", 400, 'admin', ['text' => 'This is a clarification', 'id' => 'id2']);
+        static::assertEquals('ID does not match URI', $data['message']);
     }
 
     /**
@@ -110,9 +137,17 @@ class ClarificationControllerTest extends BaseTest
     {
         $contestId = $this->demoContest->getCid();
         $apiEndpoint = $this->apiEndpoint;
+        $method = isset($dataToSend['id']) ? 'PUT' : 'POST';
+        $url = "/contests/$contestId/$apiEndpoint";
+        if ($method === 'PUT') {
+            $url .= '/' . $dataToSend['id'];
+        }
 
-        $clarificationId = $this->verifyApiJsonResponse('POST', "/contests/$contestId/$apiEndpoint", 200, $user, $dataToSend);
-        static::assertIsString($clarificationId);
+        $submittedClarification = $this->verifyApiJsonResponse($method, $url, 200, $user, $dataToSend);
+        static::assertIsArray($submittedClarification);
+        static::assertArrayHasKey('id', $submittedClarification);
+
+        $clarificationId = $submittedClarification['id'];
 
         // Now load the clarification
         $clarificationRepository = static::$container->get(EntityManagerInterface::class)->getRepository(Clarification::class);

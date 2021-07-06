@@ -125,12 +125,8 @@ class ScoreboardController extends AbstractRestController
         }
 
         /** @var Contest $contest */
-        $contest         = $this->em->getRepository(Contest::class)->find($this->getContestId($request));
-        $inactiveAllowed = $this->isGranted('ROLE_API_READER');
-        $accessAllowed   = ($inactiveAllowed && $contest->getEnabled()) || (!$inactiveAllowed && $contest->isActive());
-        if (!$accessAllowed) {
-            throw new AccessDeniedHttpException();
-        }
+        // also checks access of user to the contest via getContestQueryBuilder() from superclass
+        $contest = $this->em->getRepository(Contest::class)->find($this->getContestId($request));
 
         // Get the event for this scoreboard
         // TODO: add support for after_event_id
