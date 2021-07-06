@@ -123,7 +123,16 @@ class ImportProblemService
 
         // Read problem properties
         $propertiesString = $zip->getFromName($propertiesFile);
-        $properties       = $propertiesString === false ? [] : parse_ini_string($propertiesString);
+        $properties = [];
+
+        if ($propertiesString !== false) {
+            $tryParseProperties = parse_ini_string($propertiesString);
+            if (is_array($tryParseProperties)) {
+                $properties = $tryParseProperties;
+            } else {
+                $messages[] = "The given <code>domjudge-problem.ini</code> is invalid, ignoring.";
+            }
+        }
 
         // Only preserve valid keys:
         $problemProperties        = array_intersect_key($properties, array_flip($iniKeysProblem));
