@@ -110,8 +110,13 @@ class OrganizationController extends AbstractRestController
             throw new NotFoundHttpException('Affiliation logo not found');
         }
 
-        $response = new BinaryFileResponse($affiliationLogo);
+        $response = new BinaryFileResponse($affiliationLogo, 200, [], true, null, true);
         $response->headers->set('Content-Type', 'image/png');
+
+        if ($response->isNotModified($request)) {
+            $response->send();
+        }
+
         return $response;
     }
 

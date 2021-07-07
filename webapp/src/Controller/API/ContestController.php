@@ -180,8 +180,13 @@ class ContestController extends AbstractRestController
             throw new NotFoundHttpException('Contest banner not found');
         }
 
-        $response = new BinaryFileResponse($banner);
+        $response = new BinaryFileResponse($banner, 200, [], true, null, true);
         $response->headers->set('Content-Type', 'image/png');
+
+        if ($response->isNotModified($request)) {
+            $response->send();
+        }
+
         return $response;
     }
 
