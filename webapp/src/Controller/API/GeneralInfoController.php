@@ -303,7 +303,7 @@ class GeneralInfoController extends AbstractFOSRestController
      *     @OA\Schema(type="string")
      * )
      */
-    public function countryFlagAction(string $countryCode, string $size): Response
+    public function countryFlagAction(Request $request, string $countryCode, string $size): Response
     {
         // This API action exists for two reasons
         // - Relative URL's are relative to the API root according to the CCS spec. This
@@ -325,8 +325,13 @@ class GeneralInfoController extends AbstractFOSRestController
             throw new NotFoundHttpException("country flag for $alpha3code not found");
         }
 
-        $response = new BinaryFileResponse($flagFile);
+        $response = new BinaryFileResponse($flagFile, 200, [], true, null, true);
         $response->headers->set('Content-Type', 'image/svg+xml');
+
+        if ($response->isNotModified($request)) {
+            $response->send();
+        }
+
         return $response;
     }
 
