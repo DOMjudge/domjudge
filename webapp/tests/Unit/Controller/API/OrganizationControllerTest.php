@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace App\Tests\Controller\API;
+namespace App\Tests\Unit\Controller\API;
 
 use App\DataFixtures\Test\SampleAffilicationsFixture;
 
