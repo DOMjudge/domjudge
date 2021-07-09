@@ -6,10 +6,12 @@ use App\Entity\TeamAffiliation;
 use App\Service\ConfigurationService;
 use App\Service\EventLogService;
 use App\Utils\Utils;
+use stdClass;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Intl\Countries;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class TeamAffiliationType extends AbstractExternalIdEntityType
@@ -41,8 +43,9 @@ class TeamAffiliationType extends AbstractExternalIdEntityType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $countries = [];
-        foreach (Utils::ALPHA3_COUNTRIES as $alpha3 => $country) {
-            $countries["$country ($alpha3)"] = $alpha3;
+        foreach (Countries::getAlpha3Codes() as $alpha3) {
+            $name = Countries::getAlpha3Name($alpha3);
+            $countries["$name ($alpha3)"] = $alpha3;
         }
 
         $this->addExternalIdField($builder, TeamAffiliation::class);

@@ -156,8 +156,8 @@
                         <a {% if link %}href="{{ link }}"{% endif %}>
                             {% if score.team.affiliation.country %}
                                 <img loading="lazy" class="countryflag"
-                                     src="{{ asset('images/countries/' ~ score.team.affiliation.country ~ '.png') }}" alt="{{ alpha3_countries[score.team.affiliation.country] }}"
-                                     title="{{ alpha3_countries[score.team.affiliation.country] }}">
+                                     src="{{ asset('flags/4x3/' ~ score.team.affiliation.countryAlpha2 ~ '.svg') }}" alt="{{ score.team.affiliation.countryName }}"
+                                     title="{{ score.team.affiliation.countryName }}">
                             {% endif %}
                         </a>
                     {% endif %}

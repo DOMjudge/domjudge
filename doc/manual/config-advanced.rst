@@ -11,9 +11,8 @@ the Config checker in the admin interfae for the full filesystem
 path of your installation) as follows:
 
 - *Country flags* are shown when the ``show_flags`` configuration option
-  is enabled. They are shipped with DOMjudge under
-  `public/images/countries/XXX.png` with *XXX* being the country code.
-  You can replace them if you want different flags.
+  is enabled. The `flag-icon-css <https://github.com/lipis/flag-icon-css>`_
+  is used for the flag images.
 - *Affiliation logos*: these will be shown with the teams that are
   part of the affiliation, if the ``show_affiliation_logos`` configuration
   option is enabled. They can be placed in

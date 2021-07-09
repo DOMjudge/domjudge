@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Intl\Countries;
 
 
 /**
@@ -152,7 +153,7 @@ class TeamAffiliation extends BaseApiEntity
         return $this->getName();
     }
 
-    public function setCountry(string $country): TeamAffiliation
+    public function setCountry(?string $country): TeamAffiliation
     {
         $this->country = $country;
         return $this;
@@ -161,6 +162,16 @@ class TeamAffiliation extends BaseApiEntity
     public function getCountry(): ?string
     {
         return $this->country;
+    }
+
+    public function getCountryAlpha2(): ?string
+    {
+        return $this->country ? strtolower(Countries::getAlpha2Code($this->country)) : null;
+    }
+
+    public function getCountryName(): ?string
+    {
+        return $this->country ? Countries::getAlpha3Name($this->country) : null;
     }
 
     public function setComments(string $comments): TeamAffiliation

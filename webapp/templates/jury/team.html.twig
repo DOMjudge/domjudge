@@ -129,9 +129,9 @@
                     <tr>
                         <th>Country</th>
                         <td>
-                            <img src="{{ asset('images/countries/' ~ team.affiliation.country ~ '.png') }}" alt="{{ alpha3_countries[team.affiliation.country] }}"
-                                 title="{{ alpha3_countries[team.affiliation.country] }}" class="countryflag"/>
-                            {{ alpha3_countries[team.affiliation.country] }}
+                            <img src="{{ asset('flags/4x3/' ~ team.affiliation.countryAlpha2 ~ '.svg') }}" alt="{{ team.affiliation.countryName }}"
+                                 title="{{ team.affiliation.countryName }}" class="countryflag"/>
+                            {{ team.affiliation.countryName }}
                         </td>
                     </tr>
                 {% endif %}

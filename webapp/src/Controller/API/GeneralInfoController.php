@@ -2,9 +2,7 @@
 
 namespace App\Controller\API;
 
-use App\Entity\Configuration;
 use App\Entity\Contest;
-use App\Entity\Judging;
 use App\Entity\User;
 use App\Service\CheckConfigService;
 use App\Service\ConfigurationService;
@@ -17,13 +15,17 @@ use Exception;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
+use OpenApi\Annotations as OA;
 use Psr\Log\LoggerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use OpenApi\Annotations as OA;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Intl\Countries;
 use Symfony\Component\Routing\RouterInterface;
 
 /**
@@ -284,6 +286,53 @@ class GeneralInfoController extends AbstractFOSRestController
         unset($cat);
 
         return $this->json($result, $aggregate);
+    }
+
+    /**
+     * Get the flag for the given country
+     * @Rest\Get("/country-flags/{countryCode}/{size}.svg")
+     * @OA\Response(
+     *     response="200",
+     *     description="Returns the given country flag in SVG format",
+     *     @OA\MediaType(mediaType="image/svg+xml")
+     * )
+     * @OA\Parameter(
+     *     name="countryCode",
+     *     in="path",
+     *     description="The ISO 3166-1 alpha-3 code for the country to get the flag for",
+     *     @OA\Schema(type="string")
+     * )
+     */
+    public function countryFlagAction(Request $request, string $countryCode, string $size): Response
+    {
+        // This API action exists for two reasons
+        // - Relative URL's are relative to the API root according to the CCS spec. This
+        //   means that we need to have an API endpoint for files.
+        // - This makes it that we can not return a flag if flags are disabled.
+
+        if (!$this->config->get('show_flags')) {
+            throw new NotFoundHttpException('country flags disabled');
+        }
+
+        $alpha3code = strtoupper($countryCode);
+        if (!Countries::alpha3CodeExists($alpha3code)) {
+            throw new NotFoundHttpException("country $alpha3code does not exist");
+        }
+        $alpha2code = strtolower(Countries::getAlpha2Code($alpha3code));
+        $flagFile = sprintf('%s/public/flags/%s/%s.svg', $this->dj->getDomjudgeWebappDir(), $size, $alpha2code);
+
+        if (!file_exists($flagFile)) {
+            throw new NotFoundHttpException("country flag for $alpha3code not found");
+        }
+
+        $response = new BinaryFileResponse($flagFile, 200, [], true, null, true);
+        $response->headers->set('Content-Type', 'image/svg+xml');
+
+        if ($response->isNotModified($request)) {
+            $response->send();
+        }
+
+        return $response;
     }
 
     /**
