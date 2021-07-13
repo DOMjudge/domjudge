@@ -28,7 +28,7 @@ cd screenshotspr
 for URL in ./*; do
     URL=${URL#.\/}
     SPR="/screenshotspr/$URL"
-    SMR=${SPR/pr/master}
+    SMR=${SPR/pr/main}
     cd "$DIR"/"$SPR"/
     for ROLE in ./*; do
         ROLE=${ROLE#.\/}
@@ -43,7 +43,7 @@ for URL in ./*; do
                 idiff -warn 100 -fail 0.5 "$PR" "$MR" -abs -od -scale 10.0;RET=$?
                 set -e
                 # There is the problem of detecting if a change is wanted or unwanted, currently check all the captured
-                # screenshots against master for changes
+                # screenshots against main for changes
                 if [ $RET -ne 0 ]; then
                     REMOVE=".html-ff.png"
                     ENDPOINT=${FILE/$REMOVE}

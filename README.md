@@ -1,6 +1,6 @@
 DOMjudge
 --------
-[![pipeline status](https://gitlab.com/DOMjudge/domjudge/badges/master/pipeline.svg)](https://gitlab.com/DOMjudge/domjudge/commits/master)
+[![pipeline status](https://gitlab.com/DOMjudge/domjudge/badges/main/pipeline.svg)](https://gitlab.com/DOMjudge/domjudge/commits/main)
 [![Coverity Scan Status](https://img.shields.io/coverity/scan/671.svg)](https://scan.coverity.com/projects/domjudge)
 [![LGTM alerts](https://img.shields.io/lgtm/alerts/g/DOMjudge/domjudge.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/DOMjudge/domjudge/alerts/)
 
