@@ -96,7 +96,7 @@ html_context = {
   'display_github': True,
   'github_user': 'DOMjudge',
   'github_repo': 'domjudge',
-  'github_version': 'master',
+  'github_version': 'main',
   'conf_py_path': '/doc/manual/'
 }
 
