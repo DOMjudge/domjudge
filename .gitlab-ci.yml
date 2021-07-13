@@ -2,21 +2,26 @@ variables:
   SAST_DEFAULT_ANALYZERS: "flawfinder, phpcs-security-audit, eslint, secrets"
 
 stages:
-  - test
+  - visual_pre
   - compare
-
+  - accessibility
+  - test
+  - sast
+ 
 include:
   - template: Dependency-Scanning.gitlab-ci.yml
   - template: SAST.gitlab-ci.yml
   - template: License-Scanning.gitlab-ci.yml
 
 .retry_config: &retry_job
+  needs: []
   retry:
     max: 0 #Max is 2, set when gitlab is flacky
     when:
       - always
 
 .retry_config: &matrix_retry_job
+  needs: []
   retry:
     max: 2 #Max is 2, set when gitlab is flacky
     when:
@@ -48,7 +53,7 @@ webstandard_check_role:
         TEST: [w3cval,WCAG2A,WCAG2AA,Section508]
       - ROLE: jury
         TEST: [w3cval]
-  stage: test
+  stage: accessibility
   image: domjudge/gitlabci:2.1
   services:
     - mariadb
@@ -112,7 +117,7 @@ run unit tests:
 visual_pr:
   <<: *retry_job
   <<: *long_job
-  stage: test
+  stage: visual_pre
   image: domjudge/gitlabci:2.1
   services:
     - mariadb
@@ -138,7 +143,7 @@ visual_pr:
 visual_main:
   <<: *retry_job
   <<: *long_job
-  stage: test
+  stage: visual_pre
   image: domjudge/gitlabci:2.1
   services:
     - mariadb
