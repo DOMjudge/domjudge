@@ -135,7 +135,7 @@ visual_pr:
       - html
       - wget.log
 
-visual_master:
+visual_main:
   <<: *retry_job
   <<: *long_job
   stage: test
@@ -160,11 +160,11 @@ visual_master:
     - git checkout $CI_COMMIT_SHA -- gitlab/visualpr.sh # Always compare with the same tests
     - git checkout $CI_COMMIT_SHA -- gitlab/default-nginx
     - git checkout $CI_COMMIT_SHA -- gitlab/visualreg.css
-    - ./gitlab/visualpr.sh master
+    - ./gitlab/visualpr.sh main
   artifacts:
     when: always
     paths:
-      - screenshotsmaster
+      - screenshotsmain
       - html
     
 visual_compare:
@@ -174,7 +174,7 @@ visual_compare:
   image: domjudge/gitlabci:2.1
   needs:
     - visual_pr
-    - visual_master
+    - visual_main
   script:
     - ./gitlab/visualcompare.sh
   artifacts:
