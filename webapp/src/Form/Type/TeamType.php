@@ -6,12 +6,13 @@ use App\Entity\Contest;
 use App\Entity\Team;
 use App\Entity\TeamAffiliation;
 use App\Entity\TeamCategory;
+use App\Entity\User;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
@@ -20,10 +21,12 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\Valid;
 use Symfony\Component\Validator\Constraints\Regex;
 
 class TeamType extends AbstractType
 {
+
     /**
      * @param FormBuilderInterface $builder
      * @param array                $options
@@ -39,24 +42,35 @@ class TeamType extends AbstractType
             'required' => false,
             'help' => 'If provided, will display this instead of the team name in certain places, like the scoreboard.',
         ]);
+
+        $teamId = $options['team_id'];
+
         $builder->add('icpcid', TextType::class, [
             'label' => 'ICPC ID',
             'required' => false,
-            'help' => 'Optional ID of the team in the ICPC CMS.',
-            'constraints' => [
-                new Regex(
-                    [
-                        'pattern' => '/^[a-zA-Z0-9_-]+$/i',
-                        'message' => 'Only letters, numbers, dashes and underscores are allowed.',
-                    ]
-                )
-            ]
+            'help' => 'ID of the team in the ICPC CMS',
         ]);
         $builder->add('category', EntityType::class, [
             'class' => TeamCategory::class,
         ]);
         $builder->add('members', TextareaType::class, [
             'required' => false,
+        ]);
+        $builder->add('users', EntityType::class, [
+            'class' => User::class,
+            'required' => false,
+            'choice_label' => 'name',
+            'multiple' => true,
+            'by_reference' => false,
+            'query_builder' => function (EntityRepository $er) use ($teamId) {
+                return $er->createQueryBuilder('u')
+                ->join('u.user_roles', 'r')
+                ->andWhere('r.dj_role = :role')
+                ->setParameter(':role', 'team')                
+                ->andWhere('u.team IS NULL OR u.team = :team_id')
+                ->setParameter(':team_id', $teamId)
+                ->orderBy('u.username');
+            },
         ]);
         $builder->add('affiliation', EntityType::class, [
             'class' => TeamAffiliation::class,
@@ -101,11 +115,10 @@ class TeamType extends AbstractType
             'label' => 'Add new user for this team',
             'required' => false,
         ]);
-        $builder->add('users', CollectionType::class, [
-            'entry_type' => MinimalUserType::class,
-            'entry_options' => ['label' => false],
+        $builder->add('initialUser', MinimalUserType::class, [
             'label' => false,
             'required' => false,
+            'constraints' => new Valid(),
         ]);
 
         $builder->add('save', SubmitType::class);
@@ -118,13 +131,16 @@ class TeamType extends AbstractType
 
             if ($team && $team->getTeamid() !== null) {
                 $form->remove('addUserForTeam');
-                $form->remove('users');
+                $form->remove('initialUser');
             }
         });
     }
 
     public function configureOptions(OptionsResolver $resolver)
     {
-        $resolver->setDefaults(['data_class' => Team::class]);
+        $resolver->setDefaults([
+            'data_class' => Team::class,
+            'team_id' => null,
+            ]);
     }
 }
