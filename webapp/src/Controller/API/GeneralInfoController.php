@@ -322,7 +322,7 @@ class GeneralInfoController extends AbstractFOSRestController
         $flagFile = sprintf('%s/public/flags/%s/%s.svg', $this->dj->getDomjudgeWebappDir(), $size, $alpha2code);
 
         if (!file_exists($flagFile)) {
-            throw new NotFoundHttpException("country flag for $alpha3code not found");
+            throw new NotFoundHttpException("country flag for $alpha3code of size $size not found");
         }
 
         $response = new BinaryFileResponse($flagFile, 200, [], true, null, true);

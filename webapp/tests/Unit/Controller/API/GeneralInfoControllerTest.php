@@ -41,9 +41,9 @@ class GeneralInfoControllerTest extends BaseTest
     }
 
     /**
-     * Test that when a country flag does not exist, the correct message is returned
+     * Test that when a country flag of given size does not exist, the correct message is returned
      *
-     * @dataProvider provideCountryFlagNotFound
+     * @dataProvider provideCountryFlagSizeNotFound
      */
     public function testCountryFlagNotFound(string $countryCode, string $size)
     {
@@ -51,19 +51,39 @@ class GeneralInfoControllerTest extends BaseTest
         /** @var BinaryFileResponse $response */
         $response = $this->client->getResponse();
         static::assertEquals(404, $response->getStatusCode());
-        static::assertEquals('country flag not found', json_decode($response->getContent(), true)['message']);
+        static::assertEquals(sprintf('country flag for %s of size %s not found', strtoupper($countryCode), $size), json_decode($response->getContent(), true)['message']);
+    }
+
+    public function provideCountryFlagSizeNotFound(): Generator
+    {
+        yield ['NLD', '2x2'];
+        yield ['nld', '2x2'];
+    }
+
+    /**
+     * Test that when a country does not exist, the correct message is returned
+     *
+     * @dataProvider provideCountryFlagNotFound
+     */
+    public function testCountryNotFound(string $countryCode, string $size)
+    {
+        $this->client->request('GET', "/api/country-flags/$countryCode/$size.svg");
+        /** @var BinaryFileResponse $response */
+        $response = $this->client->getResponse();
+        static::assertEquals(404, $response->getStatusCode());
+        static::assertEquals(sprintf('country %s does not exist', strtoupper($countryCode)), json_decode($response->getContent(), true)['message']);
     }
 
     public function provideCountryFlagNotFound(): Generator
     {
         yield ['ABC', '4x3'];
         yield ['XX', '1x1'];
-        yield ['NLD', '2x2'];
         yield ['this is not a flag', '4x3'];
+        yield ['THIS IS NOT A FLAG', '4x3'];
     }
 
     /**
-     * Test that if flags are disable, no flag is returned
+     * Test that if flags are disabled, no flag is returned
      *
      * @dataProvider provideCountryFlagExists
      */
@@ -74,7 +94,7 @@ class GeneralInfoControllerTest extends BaseTest
             /** @var BinaryFileResponse $response */
             $response = $this->client->getResponse();
             static::assertEquals(404, $response->getStatusCode());
-            static::assertEquals('country flag not found', json_decode($response->getContent(), true)['message']);
+            static::assertEquals('country flags disabled', json_decode($response->getContent(), true)['message']);
         });
     }
 }
