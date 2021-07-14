@@ -11,7 +11,6 @@ use JMS\Serializer\EventDispatcher\EventSubscriberInterface;
 use JMS\Serializer\EventDispatcher\ObjectEvent;
 use JMS\Serializer\JsonSerializationVisitor;
 use JMS\Serializer\Metadata\StaticPropertyMetadata;
-use Symfony\Component\Routing\RouterInterface;
 
 /**
  * Class SubmissionVisitor
@@ -30,11 +29,6 @@ class SubmissionVisitor implements EventSubscriberInterface
     protected $eventLogService;
 
     /**
-     * @var RouterInterface
-     */
-    protected $router;
-
-    /**
      * @var EntityManagerInterface
      */
     protected $em;
@@ -43,18 +37,15 @@ class SubmissionVisitor implements EventSubscriberInterface
      * SubmissionVisitor constructor.
      * @param DOMJudgeService        $dj
      * @param EventLogService        $eventLogService
-     * @param RouterInterface        $router
      * @param EntityManagerInterface $em
      */
     public function __construct(
         DOMJudgeService $dj,
         EventLogService $eventLogService,
-        RouterInterface $router,
         EntityManagerInterface $em
     ) {
         $this->dj              = $dj;
         $this->eventLogService = $eventLogService;
-        $this->router          = $router;
         $this->em              = $em;
     }
 
@@ -83,26 +74,20 @@ class SubmissionVisitor implements EventSubscriberInterface
             /** @var JsonSerializationVisitor $visitor */
             $visitor = $event->getVisitor();
             /** @var Submission $submission */
-            $submission         = $event->getObject();
-            $filesRoute         = $this->router->generate(
+            $submission = $event->getObject();
+            $route = $this->dj->apiRelativeUrl(
                 'v4_submission_files',
                 [
                     'cid' => $submission->getContest()->getApiId($this->eventLogService),
                     'id'  => $submission->getExternalid() ?? $submission->getSubmitid(),
                 ]
             );
-            $apiRootRoute       = $this->router->generate('v4_api_root');
-            $offset             = substr($apiRootRoute, -1) === '/' ? 0 : 1;
-            $relativeFilesRoute = substr(
-                $filesRoute,
-                strlen($apiRootRoute) + $offset
-            );
             $property = new StaticPropertyMetadata(
                 Submission::class,
                 'files',
                 null
             );
-            $visitor->visitProperty($property, [['href' => $relativeFilesRoute, 'mime' => 'application/zip']]);
+            $visitor->visitProperty($property, [['href' => $route, 'mime' => 'application/zip']]);
         }
     }
 }

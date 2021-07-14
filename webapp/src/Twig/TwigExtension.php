@@ -78,16 +78,6 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
     protected $customJsFiles;
 
     /**
-     * @var array
-     */
-    protected $affiliationLogos;
-
-    /**
-     * @var array
-     */
-    protected $teamImages;
-
-    /**
      * @var bool
      */
     protected $bannerExists;
@@ -105,8 +95,6 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
      * @param string                        $projectDir
      * @param array                         $customCssFiles
      * @param array                         $customJsFiles
-     * @param array                         $affiliationLogos
-     * @param array                         $teamImages
      * @param bool                          $bannerExists
      */
     public function __construct(
@@ -120,8 +108,6 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         string $projectDir,
         array $customCssFiles,
         array $customJsFiles,
-        array $affiliationLogos,
-        array $teamImages,
         bool $bannerExists
     ) {
         $this->dj                   = $dj;
@@ -134,8 +120,6 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         $this->projectDir           = $projectDir;
         $this->customCssFiles       = $customCssFiles;
         $this->customJsFiles        = $customJsFiles;
-        $this->affiliationLogos     = $affiliationLogos;
-        $this->teamImages           = $teamImages;
         $this->bannerExists         = $bannerExists;
     }
 
@@ -175,7 +159,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             new TwigFilter('codeEditor', [$this, 'codeEditor'], ['is_safe' => ['html']]),
             new TwigFilter('showDiff', [$this, 'showDiff'], ['is_safe' => ['html']]),
             new TwigFilter('printContestStart', [$this, 'printContestStart']),
-            new TwigFilter('assetPath', [$this, 'assetPath']),
+            new TwigFilter('assetPath', [$this->dj, 'assetPath']),
             new TwigFilter('printTimeRelative', [$this, 'printTimeRelative']),
             new TwigFilter('scoreTime', [$this, 'scoreTime']),
             new TwigFilter('statusClass', [$this, 'statusClass']),
@@ -931,38 +915,6 @@ JS;
             $res .= "on " . $this->printtime($contest->getStarttime(), '%a %d %b %Y %T %Z');
         }
         return $res;
-    }
-
-    /**
-     * Get the path of an asset if it exists
-     *
-     * @param string $name
-     * @param string $type
-     *
-     * @return string|null
-     */
-    public function assetPath(string $name, string $type): ?string
-    {
-        switch ($type) {
-            case 'affiliation':
-                $extension = 'png';
-                $var = $this->affiliationLogos;
-                $dir = 'images/affiliations';
-                break;
-            case 'team':
-                $extension = 'jpg';
-                $var = $this->teamImages;
-                $dir = 'images/teams';
-                break;
-        }
-
-        if (isset($extension)) {
-            if (in_array($name . '.' . $extension, $var)) {
-                return sprintf('%s/%s.%s', $dir, $name, $extension);
-            }
-        }
-
-        return null;
     }
 
     /**
