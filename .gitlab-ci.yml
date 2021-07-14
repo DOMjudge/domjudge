@@ -159,8 +159,8 @@ visual_main:
         ROLE: [none,jury,admin,balloon,team]
   script:
     - git fetch
-    - git checkout -B master origin/master
-    - git branch --set-upstream-to=origin/master master
+    - git checkout -B main origin/main
+    - git branch --set-upstream-to=origin/main main
     - git pull
     - git checkout $CI_COMMIT_SHA -- gitlab/visualpr.sh # Always compare with the same tests
     - git checkout $CI_COMMIT_SHA -- gitlab/default-nginx
