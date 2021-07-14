@@ -5,7 +5,7 @@
 
 set -e +o pipefail
 
-VERSION="1.0.3"
+VERSION="1.0.4"
 
 codecov_flags=( )
 url="https://codecov.io"
@@ -1618,7 +1618,7 @@ then
   # [ or ]
   syntax_list='^[[:space:]]*[][][[:space:]]*(//.*)?$'
   # func ... {
-  syntax_go_func='^[[:space:]]*[func].*[\{][[:space:]]*$'
+  syntax_go_func='^[[:space:]]*func[[:space:]]*[\{][[:space:]]*$'
 
   # shellcheck disable=SC2089
   skip_dirs="-not -path '*/$bower_components/*' \
@@ -1783,7 +1783,7 @@ if [ "$dump" != "0" ];
 then
   # trim whitespace from query
   say "    ${e}->${x} Dumping upload file (no upload)"
-  echo "$url/upload/v4?$(echo "package=$package-$VERSION&token=$token&$query" | tr -d ' ')"
+  echo "$url/upload/v4?$(echo "package=$package-$VERSION&$query" | tr -d ' ')"
   cat "$upload_file"
 else
   if [ "$save_to" != "" ];
@@ -1802,21 +1802,20 @@ else
   say "    ${e}url:${x} $url"
   say "    ${e}query:${x} $query"
 
-  # Full query without token (to display on terminal output)
-  queryNoToken=$(echo "package=$package-$VERSION&token=secret&$query" | tr -d ' ')
-  # now add token to query
-  query=$(echo "package=$package-$VERSION&token=$token&$query" | tr -d ' ')
+  # Full query (to display on terminal output)
+  query=$(echo "package=$package-$VERSION&$query" | tr -d ' ')
 
   if [ "$ft_s3" = "1" ];
   then
     say "${e}->${x}  Pinging Codecov"
-    say "$url/upload/v4?$queryNoToken"
+    say "$url/upload/v4?$query"
     # shellcheck disable=SC2086,2090
     res=$(curl $curl_s -X POST $cacert \
           --retry 5 --retry-delay 2 --connect-timeout 2 \
           -H 'X-Reduced-Redundancy: false' \
           -H 'X-Content-Type: application/x-gzip' \
           -H 'Content-Length: 0' \
+          -H "X-Upload-Token: ${token}" \
           --write-out "\n%{response_code}\n" \
           $curlargs \
           "$url/upload/v4?$query" || true)
@@ -1863,6 +1862,7 @@ else
         -H 'Content-Type: text/plain' \
         -H 'Content-Encoding: gzip' \
         -H 'X-Content-Encoding: gzip' \
+        -H "X-Upload-Token: ${token}" \
         -H 'Accept: text/plain' \
         $curlargs \
         "$url/upload/v2?$query&attempt=$i" || echo 'HTTP 500')
