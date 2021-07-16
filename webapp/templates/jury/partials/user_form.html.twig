@@ -5,10 +5,11 @@
             {{ form_row(form.username) }}
         {% endif %}
         {{ form_row(form.name) }}
-        {{ form_row(form.email, { 'attr': {'autocomplete': 'new-password'} }) }}
+        {{ form_row(form.email, { 'attr': {'autocomplete': 'user-email'} }) }}
         <div class="form-group">
             {{ form_label(form.plainPassword) }}
-            {{ form_widget(form.plainPassword, { 'attr': {'autocomplete': 'new-password'} }) }}
+            {{ form_widget(form.plainPassword,
+                { 'attr': {'autocomplete': 'new-password', 'minlength': (min_password_length) }}) }}
             {{ form_help(form.plainPassword) }}
         </div>
         {{ form_row(form.ipAddress) }}
