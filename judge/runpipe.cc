@@ -226,6 +226,7 @@ void resize_pipe(int fd)
 		if ( fscanf(f, "%d", &max_pipe_size)!=1 ) {
 			max_pipe_size = -2;
 			warning(errno, "could not read from '%s'", PROC_MAX_PIPE_SIZE);
+			if ( fclose(f)!=0 ) warning(errno, "failed to close pipe");
 			return;
 		}
 		if ( fclose(f)!=0 ) {
