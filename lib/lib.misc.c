@@ -231,7 +231,8 @@ void daemonize(const char *_pidfile)
 
 	/* Close all other file descriptors. */
 	maxfd = sysconf(_SC_OPEN_MAX);
-	for(fd=3; fd<maxfd; fd++) close(fd);
+	/* Failure here is expected for some fds */
+	for(fd=3; fd<maxfd; fd++) if ( close(fd)!=0 ) continue;
 
 	/* Start own process group, detached from any tty */
 	if ( setsid()<0 ) error(errno, "cannot set daemon process group");
