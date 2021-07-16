@@ -76,10 +76,6 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
             ->getQuery()
             ->getResult();
 
-        if (isset($ids) && count($objects) !== count($ids)) {
-            throw new NotFoundHttpException('One or more objects not found');
-        }
-
         if (empty($objects)) {
             return $this->renderData($request, []);
         }
