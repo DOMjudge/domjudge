@@ -5,7 +5,7 @@
 
 set -e +o pipefail
 
-VERSION="1.0.4"
+VERSION="1.0.5"
 
 codecov_flags=( )
 url="https://codecov.io"
@@ -1803,12 +1803,13 @@ else
   say "    ${e}query:${x} $query"
 
   # Full query (to display on terminal output)
-  query=$(echo "package=$package-$VERSION&$query" | tr -d ' ')
+  query=$(echo "package=$package-$VERSION&token=$token&$query" | tr -d ' ')
+  queryNoToken=$(echo "package=$package-$VERSION&token=<hidden>&$query" | tr -d ' ')
 
   if [ "$ft_s3" = "1" ];
   then
     say "${e}->${x}  Pinging Codecov"
-    say "$url/upload/v4?$query"
+    say "$url/upload/v4?$queryNoToken"
     # shellcheck disable=SC2086,2090
     res=$(curl $curl_s -X POST $cacert \
           --retry 5 --retry-delay 2 --connect-timeout 2 \
