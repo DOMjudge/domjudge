@@ -6,6 +6,8 @@ use App\Entity\Executable;
 
 class ExecutableControllerTest extends JuryControllerTest
 {
+    protected static $identifingEditAttribute = 'execid';
+    protected static $defaultEditEntityName   = 'adb';
     protected static $baseUrl          = '/jury/executables';
     protected static $exampleEntries   = ['adb','run','boolfind run and compare'];
     protected static $shortTag         = 'executable';

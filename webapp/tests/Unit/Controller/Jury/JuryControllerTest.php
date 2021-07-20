@@ -33,7 +33,10 @@ abstract class JuryControllerTest extends BaseTest
     protected static $deleteExtra       = null;
     protected static $addEntities       = [];
     protected static $addEntitiesCount  = [];
-
+    protected static $defaultEditEntityName  = null;
+    protected static $specialFieldOnlyUpdate = [];
+    protected static $editEntitiesSkipFields = [];
+    
     public function __construct($name = null, array $data = [], $dataName = '')
     {
         parent::__construct($name, $data, $dataName);
@@ -246,6 +249,71 @@ abstract class JuryControllerTest extends BaseTest
                     }
                 }
             }
+        }
+    }
+
+    /**
+     * Test that admin can add edit an entity for this controller
+     * 
+     * @dataProvider provideEditEntities
+     */
+    public function testCheckEditEntityAdmin(string $identifier, array $formDataKeys, array $formDataValues): void
+    {
+        $this->roles = ['admin'];
+        $this->logOut();
+        $this->logIn();
+        $this->loadFixtures(static::$deleteFixtures);
+        $this->verifyPageResponse('GET', static::$baseUrl, 200);
+        if (static::$edit !== '') {
+            $this->client->followRedirects(true);
+            $crawler = $this->getCurrentCrawler();
+            foreach ($crawler->filter('a') as $node) {
+                if (strpos($node->nodeValue, $identifier) !== false) {
+                    $singlePageLink = $node->getAttribute('href');
+                }
+            }
+            $this->verifyPageResponse('GET', $singlePageLink, 200);
+            $crawler = $this->getCurrentCrawler();
+            foreach ($crawler->filter('a') as $node) {
+                 if (strpos($node->nodeValue, 'Edit') !== false) {
+                    $editLink = $node->getAttribute('href');
+                }
+            }
+            $this->verifyPageResponse('GET', $editLink, 200);
+            $crawler = $this->getCurrentCrawler();
+            foreach ($formDataKeys as $id => $key) {
+                $formFields[static::$addForm . $key . "]"] = $formDataValues[$id];
+            }
+            $button = $this->client->getCrawler()->selectButton('Save');
+            $form = $button->form($formFields, 'POST');
+            self::assertNotEquals($this->client->getResponse()->getStatusCode(),500);
+            $this->verifyPageResponse('GET', $singlePageLink, 200);
+            foreach ($formDataValues as $id=>$element) {
+                if (in_array($formDataValues[$id], static::$addEntitiesShown)) {
+                    self::assertSelectorExists('body:contains("' . $element . '")');
+                }
+            }
+        }
+    }
+
+    public function provideEditEntities(): Generator
+    {
+        foreach (static::$addEntities as $row) {
+            $formdataKeys = [];
+            $formdataValues = [];
+            foreach (static::$addEntities[0] as $key=>$value) {
+                if (!in_array($key,static::$editEntitiesSkipFields)) {
+                    // There are some special fields like passwords which we only update when set.
+                    if (in_array($key, static::$specialFieldOnlyUpdate) &&
+                        !array_key_exists($key, $row)
+                    ) {
+                        continue;
+                    }
+                    $formdataKeys[] = $key;
+                    $formdataValues[] = array_key_exists($key,$row) ? $row[$key] : $value;
+                }
+            }
+            yield [static::$defaultEditEntityName, $formdataKeys, $formdataValues];
         }
     }
 
