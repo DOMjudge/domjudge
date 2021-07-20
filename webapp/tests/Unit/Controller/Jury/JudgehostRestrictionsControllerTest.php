@@ -3,6 +3,7 @@
 namespace App\Tests\Unit\Controller\Jury;
 
 use App\DataFixtures\Test\AddJudgehostRestrictionFixture;
+use App\DataFixtures\Test\SampleJudgehostRestrictionFixture;
 use App\Entity\JudgehostRestriction;
 
 class JudgehostRestrictionsControllerTest extends JuryControllerTest
@@ -10,12 +11,13 @@ class JudgehostRestrictionsControllerTest extends JuryControllerTest
     protected static $baseUrl          = '/jury/judgehost-restrictions';
     protected static $exampleEntries   = ['No'];
     protected static $shortTag         = 'judgehost restriction';
-    protected static $deleteEntities   = ['description' => ['adb']];
+    protected static $deleteEntities   = ['name' => ['TestRestriction']];
     protected static $getIDFunc        = 'getRestrictionid';
     protected static $className        = JudgehostRestriction::class;
     protected static $DOM_elements     = ['h1' => ['Judgehost restrictions']];
-    protected static $delete           = ''; //TODO: When insert works this can be reset.
+    protected static $deleteFixtures   = [AddJudgehostRestrictionFixture::class];
     protected static $addForm          = 'judgehost_restriction[';
+    protected static $addEntitiesCount = ['contests','problems','languages'];
     protected static $addEntitiesShown = ['name'];
     protected static $addEntities      = [['name' => 'Restriction',
                                            'contests' => ['0' => '1', '1' => '2'],
@@ -26,15 +28,9 @@ class JudgehostRestrictionsControllerTest extends JuryControllerTest
                                            'contests' => [],
                                            'problems' => [],
                                            'languages' => []],
+                                          ['name' => 'HighCountNumbers',
+                                           'languages' => ['0' => 'adb', '1' => 'awk', '2' => 'swift',
+                                                           '3' => 'r', '4' => 'rb', '5' => 'plg']],
                                           ['name' => 'NoJudgeOwn',
                                            'rejudge_own' => '0']];
-
-    /**
-     * @dataProvider provideDeleteEntity
-     */
-    public function testDeleteEntity(string $identifier, string $entityShortName): void
-    {
-        $this->loadFixture(AddJudgehostRestrictionFixture::class);
-        parent::testDeleteEntity($identifier, $entityShortName);
-    }
 }
