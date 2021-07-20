@@ -15,6 +15,7 @@ class TeamControllerTest extends JuryControllerTest
     protected static $DOM_elements     = ['h1' => ['Teams']];
     protected static $addForm          = 'team[';
     protected static $addEntitiesShown = ['name','icpcid','displayName','room'];
+    protected static $addEntitiesCount = ['contests'];
     protected static $addEntities      = [['name' => 'New Team',
                                            'displayName' => 'New Team Display Name',
                                            'category' => '3',

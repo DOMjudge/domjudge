@@ -13,6 +13,7 @@ class LanguagesControllerTest extends JuryControllerTest
     protected static $getIDFunc        = 'getLangid';
     protected static $className        = Language::class;
     protected static $DOM_elements     = ['h1' => ['Languages']];
+    protected static $addPlus          = 'extensions';
     protected static $addForm          = 'language[';
     protected static $addEntitiesShown = ['langid','externalid','name','timefactor'];
     protected static $addEntities      = [];
