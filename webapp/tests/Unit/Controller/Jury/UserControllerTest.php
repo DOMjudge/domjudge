@@ -6,6 +6,10 @@ use App\Entity\User;
 
 class UserControllerTest extends JuryControllerTest
 {
+    protected static $identifingEditAttribute   = 'username';
+    protected static $defaultEditEntityName     = 'demo';
+    protected static $editEntitiesSkipFields    = ['username'];
+    protected static $specialFieldOnlyUpdate    = ['password'];
     protected static $baseUrl          = '/jury/users';
     protected static $exampleEntries   = ['admin','judgehost','Administrator','team'];
     protected static $shortTag         = 'user';
@@ -28,6 +32,10 @@ class UserControllerTest extends JuryControllerTest
                                            'email' => ''],
                                           ['username' => 'npw', 'name' => 'No password',
                                            'plainPassword' => ''],
+                                          ['username' => 'specialchar', 'name' => 'Special char in password',
+                                           'plainPassword' => '!@主裁判 судья !"#$%&()*+,-./:;<=>?@[\]^_`{|}~'],
+                                          ['username' => 'quoteinpassword', 'name' => 'quote_in_password',
+                                           'plainPassword' => "pass'word"],
                                           ['username' => 'nip', 'name' => 'No IP',
                                            'ipAddress' => ''],
                                           ['username' => 'ipv6-1', 'name' => 'IPv6-1',
