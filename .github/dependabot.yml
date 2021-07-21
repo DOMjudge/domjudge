@@ -6,10 +6,14 @@ updates:
       interval: "daily"
     open-pull-requests-limit: 0
     versioning-strategy: lockfile-only
+    allow:
+        - dependency-type: "all"
   - package-ecosystem: "composer"
     directory: "/"
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 0
     versioning-strategy: lockfile-only
+    allow:
+        - dependency-type: "all"
     target-branch: "7.3"
