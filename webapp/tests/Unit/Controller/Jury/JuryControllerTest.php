@@ -26,7 +26,7 @@ abstract class JuryControllerTest extends BaseTest
     protected static $edit              = '/edit';
     protected static $delete            = '/delete';
     protected static $shortTag          = '';
-    protected static $addFormName       = '';
+    protected static $addForm           = '';
     protected static $deleteExtra       = NULL;
     protected static $addEntities       = [];
 
@@ -173,14 +173,48 @@ abstract class JuryControllerTest extends BaseTest
                 $formFields = [];
                 // First fill with default values, the 0th item of the array
                 foreach (static::$addEntities[0] as $id=>$field) {
-                    $formFields[static::$addForm . $id . "]"] = $field;
+                    // We can not set checkboxes directly, so skip them for now
+                    if (is_bool($field)) {
+                        continue;
+                    }
+                    $formId = str_replace('.', '][', $id);
+                    $formFields[static::$addForm . $formId . "]"] = $field;
                 }
                 // Overwrite with data to test with.
                 foreach ($element as $id=>$field) {
-                    $formFields[static::$addForm . $id . "]"] = $field;
+                    // We can not set checkboxes directly, so skip them for now
+                    if (is_bool($field)) {
+                        continue;
+                    }
+                    $formId = str_replace('.', '][', $id);
+                    $formFields[static::$addForm . $formId . "]"] = $field;
                 }
                 $this->verifyPageResponse('GET', static::$baseUrl . static::$add, 200);
-                $this->client->submitForm('Save', $formFields, 'POST');
+                $button = $this->client->getCrawler()->selectButton('Save');
+                $form = $button->form($formFields, 'POST');
+                $formName = str_replace('[', '', static::$addForm);
+                // Set checkboxes
+                foreach (static::$addEntities[0] as $id=>$field) {
+                    if (!is_bool($field)) {
+                        continue;
+                    }
+                    if ($field) {
+                        $form[$formName][$id]->tick();
+                    } else {
+                        $form[$formName][$id]->untick();
+                    }
+                }
+                foreach ($element as $id=>$field) {
+                    if (!is_bool($field)) {
+                        continue;
+                    }
+                    if ($field) {
+                        $form[$formName][$id]->tick();
+                    } else {
+                        $form[$formName][$id]->untick();
+                    }
+                }
+                $this->client->submit($form);
                 }
             $this->verifyPageResponse('GET', static::$baseUrl, 200);
             foreach (static::$addEntities as $element) {
