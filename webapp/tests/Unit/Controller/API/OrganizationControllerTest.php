@@ -13,6 +13,8 @@ class OrganizationControllerTest extends BaseTest
     protected $expectedObjects = [
         '1'                                      => [
             'icpc_id'      => '1',
+            'shortname'    => 'UU',
+            'id'           => '1',
             'name'         => 'UU',
             'formal_name'  => 'Utrecht University',
             'country'      => 'NLD',
@@ -30,6 +32,14 @@ class OrganizationControllerTest extends BaseTest
                     'height' => 512,
                 ],
             ],
+            'logo'         => [
+                [
+                    'href'   => 'contests/2/organizations/1/logo.png',
+                    'mime'   => 'image/png',
+                    'width'  => 510,
+                    'height' => 1123
+                ]
+            ]
         ],
         SampleAffilicationsFixture::class . ':0' => [
             'name'         => 'FAU',
@@ -90,6 +100,32 @@ class OrganizationControllerTest extends BaseTest
             $expectedProperties['country_flag'] = null;
         }
         parent::testSingle($id, $expectedProperties);
+    }
+
+    /**
+     * @var string
+     */
+    protected $organizationLogo;
+
+    protected function setUp(): void
+    {
+        // Make sure we have an organization logo for organization 1 by copying an existing file
+        $fileToCopy = __DIR__ . '/../../../../public/doc/logos/DOMjudgelogo.png';
+        $organizationLogosDir = __DIR__ . '/../../../../public/images/affiliations/';
+        $this->organizationLogo = $organizationLogosDir . '1.png';
+        copy($fileToCopy, $this->organizationLogo);
+
+        // Make sure we remove the test container, since we need to rebuild it for the images to work
+        $this->removeTestContainer();
+
+        parent::setUp();
+    }
+
+    protected function tearDown(): void
+    {
+        // Remove the image again
+        unlink($this->organizationLogo);
+        $this->removeTestContainer();
     }
 
     /**

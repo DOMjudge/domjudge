@@ -3,6 +3,7 @@
 namespace App\Serializer;
 
 use App\Entity\TeamAffiliation;
+use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use Exception;
@@ -21,6 +22,11 @@ class TeamAffiliationVisitor implements EventSubscriberInterface
     protected $dj;
 
     /**
+     * @var ConfigurationService
+     */
+    protected $config;
+
+    /**
      * @var EventLogService
      */
     protected $eventLogService;
@@ -32,10 +38,12 @@ class TeamAffiliationVisitor implements EventSubscriberInterface
 
     public function __construct(
         DOMJudgeService $dj,
+        ConfigurationService $config,
         EventLogService $eventLogService,
         RequestStack $requestStack
     ) {
         $this->dj = $dj;
+        $this->config = $config;
         $this->eventLogService = $eventLogService;
         $this->requestStack = $requestStack;
     }
@@ -68,7 +76,7 @@ class TeamAffiliationVisitor implements EventSubscriberInterface
         $id = call_user_func([$affiliation, $idField]);
 
         // Country flag
-        if ($affiliation->getCountry()) {
+        if ($this->config->get('show_flags') && $affiliation->getCountry()) {
             $countryFlags = [];
             // Mapping from API URL size to viewbox size of SVG's
             $countryFlagSizes = [

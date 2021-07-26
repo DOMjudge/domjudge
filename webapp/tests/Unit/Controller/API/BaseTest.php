@@ -162,7 +162,7 @@ abstract class BaseTest extends BaseBaseTest
             static::assertEquals($expectedObjectId, $object['id']);
             foreach ($expectedObject as $key => $value) {
                 // null values can also be absent
-                static::assertEquals($value, $object[$key] ?? null);
+                static::assertEquals($value, $object[$key] ?? null, $key . ' has correct value');
             }
         }
 
@@ -308,7 +308,7 @@ abstract class BaseTest extends BaseBaseTest
 
         foreach ($expectedProperties as $key => $value) {
             // null values can also be absent
-            static::assertEquals($value, $object[$key] ?? null);
+            static::assertEquals($value, $object[$key] ?? null, $key . ' has correct value');
         }
     }
 
