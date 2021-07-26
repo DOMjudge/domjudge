@@ -5,7 +5,7 @@
 
 set -e +o pipefail
 
-VERSION="1.0.5"
+VERSION="1.0.6"
 
 codecov_flags=( )
 url="https://codecov.io"
@@ -865,14 +865,17 @@ then
   if [  "$GITHUB_HEAD_REF" != "" ];
   then
     # PR refs are in the format: refs/pull/7/merge
-    pr="${GITHUB_REF#refs/pull/}"
-    pr="${pr%/merge}"
+    if [[ "$GITHUB_REF" =~ ^refs\/pull\/[0-9]+\/merge$ ]];
+    then
+      pr="${GITHUB_REF#refs/pull/}"
+      pr="${pr%/merge}"
+    fi
     branch="${GITHUB_HEAD_REF}"
   fi
   commit="${GITHUB_SHA}"
   slug="${GITHUB_REPOSITORY}"
   build="${GITHUB_RUN_ID}"
-  build_url=$(urlencode "http://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}")
+  build_url=$(urlencode "${GITHUB_SERVER_URL:-https://github.com}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}")
   job="$(urlencode "${GITHUB_WORKFLOW}")"
 
   # actions/checkout runs in detached HEAD
@@ -987,6 +990,7 @@ else
 
 fi
 
+say "    ${e}current dir: ${x} $PWD"
 say "    ${e}project root:${x} $git_root"
 
 # find branch, commit, repo from git command
