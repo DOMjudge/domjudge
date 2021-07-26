@@ -48,5 +48,7 @@ for testcase_number in range(number_of_testcases):
         $problem = $problem->addAttachment($attachment);
         $manager->persist($problem);
         $manager->flush();
+
+        $this->addReference(sprintf('%s:%s', static::class, 'attachment'), $attachment);
     }
 }

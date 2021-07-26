@@ -7,7 +7,6 @@ use App\Tests\Unit\BaseTest as BaseBaseTest;
 use Doctrine\ORM\EntityManagerInterface;
 use Generator;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
-use Symfony\Component\PropertyAccess\PropertyAccess;
 
 abstract class BaseTest extends BaseBaseTest
 {
@@ -282,21 +281,5 @@ abstract class BaseTest extends BaseBaseTest
         foreach ($this->expectedAbsent as $id) {
             yield [$id];
         }
-    }
-
-    /**
-     * Resolve any references in the given ID
-     */
-    protected function resolveReference($id)
-    {
-        // If the object ID contains a :, it is a reference to a fixture item, so get it
-        if (is_string($id) && strpos($id, ':') !== false) {
-            $referenceObject = $this->fixtureExecutor->getReferenceRepository()->getReference($id);
-            $metadata = static::$container->get(EntityManagerInterface::class)->getClassMetadata(get_class($referenceObject));
-            $propertyAccessor = PropertyAccess::createPropertyAccessor();
-            return $propertyAccessor->getValue($referenceObject, $metadata->getSingleIdentifierColumnName());
-        }
-
-        return $id;
     }
 }

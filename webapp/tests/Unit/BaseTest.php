@@ -17,6 +17,7 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\BrowserKit\Cookie;
 use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\DomCrawler\Link;
+use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 
 /**
@@ -92,6 +93,22 @@ abstract class BaseTest extends WebTestCase
     protected function loadFixture(string $fixture)
     {
         $this->loadFixtures([$fixture]);
+    }
+
+    /**
+     * Resolve any references in the given ID
+     */
+    protected function resolveReference($id)
+    {
+        // If the object ID contains a :, it is a reference to a fixture item, so get it
+        if (is_string($id) && strpos($id, ':') !== false) {
+            $referenceObject = $this->fixtureExecutor->getReferenceRepository()->getReference($id);
+            $metadata = static::$container->get(EntityManagerInterface::class)->getClassMetadata(get_class($referenceObject));
+            $propertyAccessor = PropertyAccess::createPropertyAccessor();
+            return $propertyAccessor->getValue($referenceObject, $metadata->getSingleIdentifierColumnName());
+        }
+
+        return $id;
     }
 
     protected function loginHelper(
