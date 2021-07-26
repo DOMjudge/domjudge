@@ -12,8 +12,6 @@ use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Annotations as OA;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -110,14 +108,7 @@ class OrganizationController extends AbstractRestController
             throw new NotFoundHttpException('Affiliation logo not found');
         }
 
-        $response = new BinaryFileResponse($affiliationLogo, 200, [], true, null, true);
-        $response->headers->set('Content-Type', 'image/png');
-
-        if ($response->isNotModified($request)) {
-            $response->send();
-        }
-
-        return $response;
+        return static::sendBinaryFileResponse($request, $affiliationLogo, 'image/png');
     }
 
     /**

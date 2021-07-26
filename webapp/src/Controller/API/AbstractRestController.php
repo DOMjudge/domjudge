@@ -13,6 +13,7 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
 use Exception;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -299,5 +300,26 @@ abstract class AbstractRestController extends AbstractFOSRestController
             $objects = array_map([$this, 'transformObject'], $objects);
         }
         return $objects;
+    }
+
+    /**
+     * Send a binary file response, sending a 304 if it did not modify since last requested
+     */
+    public static function sendBinaryFileResponse(Request $request, string $fileName, string $contentType): BinaryFileResponse
+    {
+        // Note: we set auto-etag to true to automatically send the ETag based on the file contents.
+        // ETags can be used to determine wheter the file changed and if it didn't change, the response will
+        // be a 304 Not Modified
+        $response = new BinaryFileResponse($fileName, 200, [], true, null, true);
+        $response->headers->set('Content-Type', $contentType);
+
+        // Check if we need to send a 304 Not Modified and if so, send it
+        // This is done both on the ETag / If-None-Match as well as the
+        // Last-Modified / If-Modified-Since header pairs
+        if ($response->isNotModified($request)) {
+            $response->send();
+        }
+
+        return $response;
     }
 }

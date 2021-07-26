@@ -121,14 +121,7 @@ class TeamController extends AbstractRestController
             throw new NotFoundHttpException('Team photo not found');
         }
 
-        $response = new BinaryFileResponse($teamPhoto, 200, [], true, null, true);
-        $response->headers->set('Content-Type', 'image/jpeg');
-
-        if ($response->isNotModified($request)) {
-            $response->send();
-        }
-
-        return $response;
+        return static::sendBinaryFileResponse($request, $teamPhoto, 'image/jpeg');
     }
 
     /**

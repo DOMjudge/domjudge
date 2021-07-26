@@ -36,8 +36,8 @@ class OrganizationControllerTest extends BaseTest
                 [
                     'href'   => 'contests/2/organizations/1/logo.png',
                     'mime'   => 'image/png',
-                    'width'  => 510,
-                    'height' => 1123
+                    'width'  => 181,
+                    'height' => 101
                 ]
             ]
         ],
@@ -110,7 +110,7 @@ class OrganizationControllerTest extends BaseTest
     protected function setUp(): void
     {
         // Make sure we have an organization logo for organization 1 by copying an existing file
-        $fileToCopy = __DIR__ . '/../../../../public/doc/logos/DOMjudgelogo.png';
+        $fileToCopy = __DIR__ . '/../../../../public/js/hv.png';
         $organizationLogosDir = __DIR__ . '/../../../../public/images/affiliations/';
         $this->organizationLogo = $organizationLogosDir . '1.png';
         copy($fileToCopy, $this->organizationLogo);
