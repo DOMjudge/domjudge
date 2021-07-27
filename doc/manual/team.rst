@@ -367,7 +367,7 @@ for different programming languages.
 
 .. literalinclude:: ../examples/example.c
    :language: c
-   :caption: **A solution in C**
+   :caption: *A solution in C*
 
 .. literalinclude:: ../examples/example.cc
    :language: cpp
