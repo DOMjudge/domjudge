@@ -31,7 +31,8 @@
             description: Priorities of results for determining final result with multiple testcases. Higher priority is used first as final result. With equal priority, the first occurring result determines the final result.
         -   name: results_remap
             type: array_keyval
-            default_value: []
+            default_value:
+                no-output: wrong-answer
             public: false
             description: Remap testcase result, e.g. to disable a specific result type such as 'no-output'.
         -   name: score_in_seconds
@@ -169,7 +170,7 @@
             description: Show pending submissions on the scoreboard?
         -   name: show_flags
             type: bool
-            default_value: true
+            default_value: false
             public: true
             description: Show country information in the interfaces?
         -   name: show_affiliations
@@ -179,7 +180,7 @@
             description: Show affiliation names in the interfaces?
         -   name: show_affiliation_logos
             type: bool
-            default_value: false
+            default_value: true
             public: true
             description: Show affiliation logos on the scoreboard?
         -   name: show_teams_submissions
@@ -256,7 +257,7 @@
             docdescription: See :ref:`printing` for more information.
         -   name: data_source
             type: int
-            default_value: 0
+            default_value: 1
             public: false
             description: "Source of data: used to indicate whether internal or external IDs are exposed in the API. 'configuration data external' is typically used when loading configuration data from the ICPC CMS, and 'configuration and live data external' when running DOMjudge as \"shadow system\"."
             options:
