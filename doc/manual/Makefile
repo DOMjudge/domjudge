@@ -42,6 +42,7 @@ html: conf_ref.rst
 	sphinx-build -M $@ . build $(subst 1,-Q,$(QUIET))
 
 team:
-	sphinx-build -b pdf . build/team $(subst 1,-Q,$(QUIET))
+	sphinx-build -b latex . build/team $(subst 1,-Q,$(QUIET))
+	make -C build/team team-manual.pdf
 
 .PHONY: docs distdocs install-docs maintainer-install html team

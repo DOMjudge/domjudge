@@ -32,33 +32,36 @@ become of importance when you run into problems.
 
    You can submit solutions in two ways:
 
-   Command-line
-     Use ``submit <filename>``. If your filename is of the form
-     ``<problem>.<extension>`` where ``<problem>`` is the
-     label of the problem and ``<extension>`` is a standard extension for
-     your language, then these will automatically be detected.
-     It will also try to auto-detect the main class (for Java and Kotlin) or the
-     main file (for Python). You can override these auto-detections;
-     for a complete reference of all options and examples, see ``submit --help``.
+     Command-line
+       Use ``submit <filename>``. If your filename is of the form
+       ``<problem>.<extension>`` where ``<problem>`` is the
+       label of the problem and ``<extension>`` is a standard extension for
+       your language, then these will automatically be detected.
+       It will also try to auto-detect the main class (for Java and Kotlin) or the
+       main file (for Python). You can override these auto-detections;
+       for a complete reference of all options and examples, see ``submit --help``.
 
-   Web interface
-     From your team page, |baseurlteam|, click the green **Submit**
-     button in the menu bar. Select the files you want to submit.
-     By default, the problem is selected from the base of the (first)
-     filename and the language from the extension. The web interface tries
-     to auto-detect the main class (for Java and Kotlin) or the main file (for
-     Python) from the file name. Double check that the guess is correct
-     before submitting.
+     Web interface
+       From your team page, |baseurlteam|, click the green **Submit**
+       button in the menu bar. Select the files you want to submit.
+       By default, the problem is selected from the base of the (first)
+       filename and the language from the extension. The web interface tries
+       to auto-detect the main class (for Java and Kotlin) or the main file (for
+       Python) from the file name. Double check that the guess is correct
+       before submitting.
 
    Viewing scores, submissions and sending and reading clarification
    requests and replies is done through the web interface at
    |baseurlteam|.
 
------------------
 
 .. raw:: pdf
 
     PageBreak
+
+.. raw:: latex
+
+    \clearpage
 
 Overview of the interface
 -------------------------
