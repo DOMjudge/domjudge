@@ -204,10 +204,6 @@ RUN-ERROR
   use more memory than the limit, etc.
   Also check that your program exits with exit code 0!
 
-NO-OUTPUT
-  Your program did not generate any output. Check that you write to
-  standard out.
-
 OUTPUT-LIMIT
   Your program generated more output than the allowed limit. The solution
   is considered incorrect.
@@ -377,26 +373,18 @@ for different programming languages.
 
    PageBreak
 
-.. literalinclude:: ../examples/example.java
-   :language: java
-   :caption: *A solution in Java*
-
 .. literalinclude:: ../examples/example.py
    :language: python
    :caption: *A solution in Python*
 
-.. literalinclude:: ../examples/example.cs
-   :language: csharp
-   :caption: *A solution in C#*
+.. literalinclude:: ../examples/example.java
+   :language: java
+   :caption: *A solution in Java*
 
-.. literalinclude:: ../examples/example.pas
-   :language: pas
-   :caption: *A solution in Pascal*
+.. literalinclude:: ../examples/example.kt
+   :language: kotlin
+   :caption: *A solution in Kotlin*
 
 .. raw:: pdf
 
    PageBreak
-
-.. literalinclude:: ../examples/example.hs
-   :language: hs
-   :caption: *A solution in Haskell*
