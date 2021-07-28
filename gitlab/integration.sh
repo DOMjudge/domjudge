@@ -148,13 +148,13 @@ for i in hello_kattis different guess; do
 		cd "$i"
 		zip -r "../${i}.zip" -- *
 	)
-	curl --fail -X POST -n -N -F zip[]=@${i}.zip http://localhost/domjudge/api/contests/2/problems
+	curl --fail -X POST -n -N -F zip[]=@${i}.zip http://localhost/domjudge/api/contests/demo/problems
 done
 section_end submitting
 
 section_start judging "Waiting until all submissions are judged"
 # wait for and check results
-NUMSUBS=$(curl --fail http://admin:$ADMINPASS@localhost/domjudge/api/contests/2/submissions | python3 -mjson.tool | grep -c '"id":')
+NUMSUBS=$(curl --fail http://admin:$ADMINPASS@localhost/domjudge/api/contests/demo/submissions | python3 -mjson.tool | grep -c '"id":')
 export COOKIEJAR
 COOKIEJAR=$(mktemp --tmpdir)
 export CURLOPTS="--fail -sq -m 30 -b $COOKIEJAR"
@@ -233,5 +233,5 @@ section_end api_check |& tee "$gitlabartifacts/check_api.log"
 
 section_start validate_feed "Validate the eventfeed against API (ignoring failures)"
 cd ${DIR}/misc-tools
-./compare-cds.sh http://localhost/domjudge 2 |& tee "$gitlabartifacts/compare_cds.log" || true
+./compare-cds.sh http://localhost/domjudge demo |& tee "$gitlabartifacts/compare_cds.log" || true
 section_end validate_feed
