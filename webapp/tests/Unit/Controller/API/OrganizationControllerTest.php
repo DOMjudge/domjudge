@@ -3,6 +3,8 @@
 namespace App\Tests\Unit\Controller\API;
 
 use App\DataFixtures\Test\SampleAffilicationsFixture;
+use App\Entity\TeamAffiliation;
+use App\Service\ConfigurationService;
 
 class OrganizationControllerTest extends BaseTest
 {
@@ -56,9 +58,39 @@ class OrganizationControllerTest extends BaseTest
         ],
     ];
 
+    protected $objectClassForExternalId = TeamAffiliation::class;
+
     protected $expectedAbsent = ['4242', 'nonexistent'];
 
     protected static $fixtures = [SampleAffilicationsFixture::class];
+
+    public function testList()
+    {
+        // Remove country and country flag if not enabled
+        $showFlags = static::$container->get(ConfigurationService::class)->get('show_flags');
+        if (!$showFlags) {
+            foreach ($this->expectedObjects as &$object) {
+                $object['country'] = null;
+                $object['country_flag'] = null;
+            }
+            unset($object);
+        }
+        parent::testList();
+    }
+
+    /**
+     * @dataProvider provideSingle
+     */
+    public function testSingle($id, array $expectedProperties)
+    {
+        // Remove country and country flag if not enabled
+        $showFlags = static::$container->get(ConfigurationService::class)->get('show_flags');
+        if (!$showFlags) {
+            $expectedProperties['country'] = null;
+            $expectedProperties['country_flag'] = null;
+        }
+        parent::testSingle($id, $expectedProperties);
+    }
 
     /**
      * Test that when we disable showing country flags, the country and flag of an affiliation are not exposed
@@ -67,9 +99,10 @@ class OrganizationControllerTest extends BaseTest
     {
         $this->withChangedConfiguration('show_flags', false, function () {
             $apiEndpoint = $this->apiEndpoint;
-            $contestId = $this->demoContest->getCid();
+            $contestId = $this->getDemoContestId();
             // The hardcoded 1 here is the team affiliation from the TeamAffiliationFixture example data fixture
-            $response = $this->verifyApiJsonResponse('GET', "/contests/$contestId/$apiEndpoint/1", 200);
+            $organizationId = $this->dataSourceIsLocal() ? 1 : 'utrecht';
+            $response = $this->verifyApiJsonResponse('GET', "/contests/$contestId/$apiEndpoint/$organizationId", 200);
 
             static::assertArrayNotHasKey('country', $response);
             static::assertArrayNotHasKey('country_flag', $response);

@@ -37,6 +37,21 @@ abstract class BaseTest extends BaseBaseTest
     protected $expectedObjects = [];
 
     /**
+     * If the class to check uses external ID's in non-local mode, set the class name
+     *
+     * @var string|null
+     */
+    protected $objectClassForExternalId = null;
+
+    /**
+     * When using a non local data source this is used to look up external ID's.
+     * Set it to an array where keys are fields and values are classes
+     *
+     * @var string[]
+     */
+    protected $entityReferences = [];
+
+    /**
      * Fill this array with ID's of object that should not be present
      *
      * @var string[]
@@ -109,12 +124,19 @@ abstract class BaseTest extends BaseBaseTest
         if (($apiEndpoint = $this->apiEndpoint) === null) {
             static::markTestSkipped('No endpoint defined');
         }
-        $contestId = $this->demoContest->getCid();
+        $contestId = $this->getDemoContestId();
         $objects = $this->verifyApiJsonResponse('GET', "/contests/$contestId/$apiEndpoint", 200, $this->apiUser);
 
         static::assertIsArray($objects);
         foreach ($this->expectedObjects as $expectedObjectId => $expectedObject) {
+            foreach ($this->entityReferences as $field => $class) {
+                $expectedObject[$field] = $this->resolveEntityId($class, $expectedObject[$field]);
+            }
+
             $expectedObjectId = $this->resolveReference($expectedObjectId);
+            if ($this->objectClassForExternalId !== null) {
+                $expectedObjectId = $this->resolveEntityId($this->objectClassForExternalId, (string)$expectedObjectId);
+            }
             $object = null;
             foreach ($objects as $potentialObject) {
                 if ($potentialObject['id'] == $expectedObjectId) {
@@ -152,9 +174,13 @@ abstract class BaseTest extends BaseBaseTest
         if (($apiEndpoint = $this->apiEndpoint) === null) {
             static::markTestSkipped('No endpoint defined');
         }
-        $contestId = $this->demoContest->getCid();
+        $contestId = $this->getDemoContestId();
         $expectedObjectIds = array_map(function ($id) {
-            return $this->resolveReference($id);
+            $id = $this->resolveReference($id);
+            if ($this->objectClassForExternalId !== null) {
+                $id = $this->resolveEntityId($this->objectClassForExternalId, (string)$id);
+            }
+            return $id;
         }, array_keys($this->expectedObjects));
         $objects = $this->verifyApiJsonResponse('GET', "/contests/$contestId/$apiEndpoint?" . http_build_query(['ids' => $expectedObjectIds]), 200, $this->apiUser);
 
@@ -197,7 +223,7 @@ abstract class BaseTest extends BaseBaseTest
         if (($apiEndpoint = $this->apiEndpoint) === null) {
             static::markTestSkipped('No endpoint defined');
         }
-        $contestId = $this->demoContest->getCid();
+        $contestId = $this->getDemoContestId();
         $response = $this->verifyApiJsonResponse('GET', "/contests/$contestId/$apiEndpoint?" . http_build_query(['ids' => 2]), 400, $this->apiUser);
         static::assertEquals("'ids' should be an array of ID's to fetch", $response['message']);
     }
@@ -210,7 +236,7 @@ abstract class BaseTest extends BaseBaseTest
         if (($apiEndpoint = $this->apiEndpoint) === null) {
             static::markTestSkipped('No endpoint defined');
         }
-        $contestId = $this->demoContest->getCid();
+        $contestId = $this->getDemoContestId();
 
         $expectedObjectIds = array_map(function ($id) {
             return $this->resolveReference($id);
@@ -227,11 +253,18 @@ abstract class BaseTest extends BaseBaseTest
      */
     public function testSingle($id, array $expectedProperties)
     {
+        foreach ($this->entityReferences as $field => $class) {
+            $expectedProperties[$field] = $this->resolveEntityId($class, $expectedProperties[$field]);
+        }
+
         $id = $this->resolveReference($id);
+        if ($this->objectClassForExternalId !== null) {
+            $id = $this->resolveEntityId($this->objectClassForExternalId, (string)$id);
+        }
         if (($apiEndpoint = $this->apiEndpoint) === null) {
             static::markTestSkipped('No endpoint defined');
         }
-        $contestId = $this->demoContest->getCid();
+        $contestId = $this->getDemoContestId();
         $object = $this->verifyApiJsonResponse('GET', "/contests/$contestId/$apiEndpoint/$id", 200, $this->apiUser);
         static::assertIsArray($object);
 
@@ -272,7 +305,7 @@ abstract class BaseTest extends BaseBaseTest
         if (($apiEndpoint = $this->apiEndpoint) === null) {
             static::markTestSkipped('No endpoint defined');
         }
-        $contestId = $this->demoContest->getCid();
+        $contestId = $this->getDemoContestId();
         $this->verifyApiJsonResponse('GET', "/contests/$contestId/$apiEndpoint/$id", 404, $this->apiUser);
     }
 

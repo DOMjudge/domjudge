@@ -37,6 +37,18 @@ class ProblemControllerTest extends JuryControllerTest
                                           ['name' => 'Args',
                                            'specialCompareArgs' => 'args']];
 
+    public function testCheckAddEntityAdmin(): void
+    {
+        // Add external ID's when needed
+        if (!$this->dataSourceIsLocal()) {
+            foreach (static::$addEntities as &$entity) {
+                $entity['externalid'] = md5(json_encode($entity));
+            }
+            unset($entity);
+        }
+        parent::testCheckAddEntityAdmin();
+    }
+
     public function testDeleteExtraEntity(): void
     {
         $this->loadFixture(AddProblemAttachmentFixture::class);

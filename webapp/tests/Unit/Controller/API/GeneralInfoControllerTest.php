@@ -17,20 +17,22 @@ class GeneralInfoControllerTest extends BaseTest
      */
     public function testCountryFlagExists(string $countryCode, string $size)
     {
-        $this->client->request('GET', "/api/country-flags/$countryCode/$size.svg");
-        /** @var BinaryFileResponse $response */
-        $response = $this->client->getResponse();
-        static::assertEquals(200, $response->getStatusCode());
-        static::assertEquals('image/svg+xml', $response->headers->get('Content-Type'));
+        $this->withChangedConfiguration('show_flags', true, function() use ($countryCode, $size) {
+            $this->client->request('GET', "/api/country-flags/$countryCode/$size.svg");
+            /** @var BinaryFileResponse $response */
+            $response = $this->client->getResponse();
+            static::assertEquals(200, $response->getStatusCode());
+            static::assertEquals('image/svg+xml', $response->headers->get('Content-Type'));
 
-        $svgFile = sprintf(
-            '%s/public/flags/%s/%s.svg',
-            static::$container->get(DOMJudgeService::class)->getDomjudgeWebappDir(),
-            $size, strtolower(Countries::getAlpha2Code(strtoupper($countryCode)))
-        );
+            $svgFile = sprintf(
+                '%s/public/flags/%s/%s.svg',
+                static::$container->get(DOMJudgeService::class)->getDomjudgeWebappDir(),
+                $size, strtolower(Countries::getAlpha2Code(strtoupper($countryCode)))
+            );
 
-        static::assertInstanceOf(BinaryFileResponse::class, $response);
-        static::assertEquals($svgFile, $response->getFile()->getPathname());
+            static::assertInstanceOf(BinaryFileResponse::class, $response);
+            static::assertEquals($svgFile, $response->getFile()->getPathname());
+        });
     }
 
     public function provideCountryFlagExists(): Generator
@@ -47,11 +49,13 @@ class GeneralInfoControllerTest extends BaseTest
      */
     public function testCountryFlagNotFound(string $countryCode, string $size)
     {
-        $this->client->request('GET', "/api/country-flags/$countryCode/$size.svg");
-        /** @var BinaryFileResponse $response */
-        $response = $this->client->getResponse();
-        static::assertEquals(404, $response->getStatusCode());
-        static::assertEquals(sprintf('country flag for %s of size %s not found', strtoupper($countryCode), $size), json_decode($response->getContent(), true)['message']);
+        $this->withChangedConfiguration('show_flags', true, function() use ($countryCode, $size) {
+            $this->client->request('GET', "/api/country-flags/$countryCode/$size.svg");
+            /** @var BinaryFileResponse $response */
+            $response = $this->client->getResponse();
+            static::assertEquals(404, $response->getStatusCode());
+            static::assertEquals(sprintf('country flag for %s of size %s not found', strtoupper($countryCode), $size), json_decode($response->getContent(), true)['message']);
+        });
     }
 
     public function provideCountryFlagSizeNotFound(): Generator
@@ -67,11 +71,13 @@ class GeneralInfoControllerTest extends BaseTest
      */
     public function testCountryNotFound(string $countryCode, string $size)
     {
-        $this->client->request('GET', "/api/country-flags/$countryCode/$size.svg");
-        /** @var BinaryFileResponse $response */
-        $response = $this->client->getResponse();
-        static::assertEquals(404, $response->getStatusCode());
-        static::assertEquals(sprintf('country %s does not exist', strtoupper($countryCode)), json_decode($response->getContent(), true)['message']);
+        $this->withChangedConfiguration('show_flags', true, function() use ($countryCode, $size) {
+            $this->client->request('GET', "/api/country-flags/$countryCode/$size.svg");
+            /** @var BinaryFileResponse $response */
+            $response = $this->client->getResponse();
+            static::assertEquals(404, $response->getStatusCode());
+            static::assertEquals(sprintf('country %s does not exist', strtoupper($countryCode)), json_decode($response->getContent(), true)['message']);
+        });
     }
 
     public function provideCountryFlagNotFound(): Generator

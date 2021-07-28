@@ -82,4 +82,16 @@ class ContestControllerTest extends JuryControllerTest
                                            'activatetimeString' => '1990-07-17 16:00:00 Africa/Douala',
                                            'starttimeString' => '1990-07-17 16:00:00 Etc/GMT+2',
                                            'freezetimeString' => '1990-07-17 16:00:00 America/Paramaribo']];
+
+    public function testCheckAddEntityAdmin(): void
+    {
+        // Add external ID's when needed
+        if (!$this->dataSourceIsLocal()) {
+            foreach (static::$addEntities as &$entity) {
+                $entity['externalid'] = $entity['shortname'];
+            }
+            unset($entity);
+        }
+        parent::testCheckAddEntityAdmin();
+    }
 }

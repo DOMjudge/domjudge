@@ -6,6 +6,7 @@ use App\DataFixtures\Test\EnableKotlinFixture;
 use App\DataFixtures\Test\RemoveTeamFromAdminUserFixture;
 use App\DataFixtures\Test\RemoveTeamFromDemoUserFixture;
 use App\DataFixtures\Test\SampleSubmissionsFixture;
+use App\Entity\Problem;
 use App\Entity\Submission;
 use App\Entity\SubmissionFile;
 use App\Service\DOMJudgeService;
@@ -37,6 +38,10 @@ class SubmissionControllerTest extends BaseTest
         ],
     ];
 
+    protected $entityReferences = [
+        'problem_id' => Problem::class,
+    ];
+
     protected $expectedAbsent = ['4242', 'nonexistent'];
 
     protected static $fixtures = [SampleSubmissionsFixture::class];
@@ -46,7 +51,7 @@ class SubmissionControllerTest extends BaseTest
      */
     public function testAddSubmissionNoAccess()
     {
-        $contestId = $this->demoContest->getCid();
+        $contestId = $this->getDemoContestId();
         $apiEndpoint = $this->apiEndpoint;
         $this->verifyApiJsonResponse('POST', "/contests/$contestId/$apiEndpoint", 401);
     }
@@ -58,7 +63,10 @@ class SubmissionControllerTest extends BaseTest
      */
     public function testAddInvalidData(string $user, array $dataToSend, string $expectedMessage)
     {
-        $contestId = $this->demoContest->getCid();
+        if (isset($dataToSend['problem_id'])) {
+            $dataToSend['problem_id'] = $this->resolveEntityId(Problem::class, (string)$dataToSend['problem_id']);
+        }
+        $contestId = $this->getDemoContestId();
         $apiEndpoint = $this->apiEndpoint;
         $method = isset($dataToSend['id']) ? 'PUT' : 'POST';
         $url = "/contests/$contestId/$apiEndpoint";
@@ -157,9 +165,9 @@ class SubmissionControllerTest extends BaseTest
      */
     public function testSupplyIdInPost()
     {
-        $contestId = $this->demoContest->getCid();
+        $contestId = $this->getDemoContestId();
         $apiEndpoint = $this->apiEndpoint;
-        $data = $this->verifyApiJsonResponse('POST', "/contests/$contestId/$apiEndpoint", 400, 'admin', ['problem_id' => 1, 'language_id' => 'cpp', 'id' => '123']);
+        $data = $this->verifyApiJsonResponse('POST', "/contests/$contestId/$apiEndpoint", 400, 'admin', ['problem_id' => $this->resolveEntityId(Problem::class, '1'), 'language_id' => 'cpp', 'id' => '123']);
         static::assertEquals('Passing an ID is not supported for POST', $data['message']);
     }
 
@@ -168,9 +176,9 @@ class SubmissionControllerTest extends BaseTest
      */
     public function testSupplyWrongIdInPut()
     {
-        $contestId = $this->demoContest->getCid();
+        $contestId = $this->getDemoContestId();
         $apiEndpoint = $this->apiEndpoint;
-        $data = $this->verifyApiJsonResponse('PUT', "/contests/$contestId/$apiEndpoint/id1", 400, 'admin', ['problem_id' => 1, 'language_id' => 'cpp', 'id' => '123']);
+        $data = $this->verifyApiJsonResponse('PUT', "/contests/$contestId/$apiEndpoint/id1", 400, 'admin', ['problem_id' => $this->resolveEntityId(Problem::class, '1'), 'language_id' => 'cpp', 'id' => '123']);
         static::assertEquals('ID does not match URI', $data['message']);
     }
 
@@ -181,9 +189,9 @@ class SubmissionControllerTest extends BaseTest
     {
         $this->loadFixture(EnableKotlinFixture::class);
 
-        $contestId = $this->demoContest->getCid();
+        $contestId = $this->getDemoContestId();
         $apiEndpoint = $this->apiEndpoint;
-        $data = $this->verifyApiJsonResponse('POST', "/contests/$contestId/$apiEndpoint", 400, 'demo', ['problem_id' => 1, 'language' => 'kotlin']);
+        $data = $this->verifyApiJsonResponse('POST', "/contests/$contestId/$apiEndpoint", 400, 'demo', ['problem_id' => $this->resolveEntityId(Problem::class, '1'), 'language' => 'kotlin']);
 
         static::assertEquals('Main class required, but not specified.', $data['message']);
     }
@@ -197,9 +205,9 @@ class SubmissionControllerTest extends BaseTest
     {
         $this->loadFixtures([RemoveTeamFromDemoUserFixture::class, RemoveTeamFromAdminUserFixture::class]);
 
-        $contestId = $this->demoContest->getCid();
+        $contestId = $this->getDemoContestId();
         $apiEndpoint = $this->apiEndpoint;
-        $data = $this->verifyApiJsonResponse('POST', "/contests/$contestId/$apiEndpoint", 400, $username, ['problem_id' => 1, 'language' => 'cpp']);
+        $data = $this->verifyApiJsonResponse('POST', "/contests/$contestId/$apiEndpoint", 400, $username, ['problem_id' => $this->resolveEntityId(Problem::class, '1'), 'language' => 'cpp']);
 
         static::assertEquals('User does not belong to a team', $data['message']);
     }
@@ -231,7 +239,13 @@ class SubmissionControllerTest extends BaseTest
     ) {
         $this->loadFixture(EnableKotlinFixture::class);
 
-        $contestId = $this->demoContest->getCid();
+        if (isset($dataToSend['problem'])) {
+            $dataToSend['problem'] = $this->resolveEntityId(Problem::class, (string)$dataToSend['problem']);
+        }
+        if (isset($dataToSend['problem_id'])) {
+            $dataToSend['problem_id'] = $this->resolveEntityId(Problem::class, (string)$dataToSend['problem_id']);
+        }
+        $contestId = $this->getDemoContestId();
         $apiEndpoint = $this->apiEndpoint;
         $method = isset($dataToSend['id']) ? 'PUT' : 'POST';
         $url = "/contests/$contestId/$apiEndpoint";
@@ -282,7 +296,7 @@ class SubmissionControllerTest extends BaseTest
         static::assertEquals($expectedFiles, $submissionFiles, 'Wrong files');
 
         // Also load the submission from the API, to see it now gets returned
-        $contestId = $this->demoContest->getCid();
+        $contestId = $this->getDemoContestId();
         $apiEndpoint = $this->apiEndpoint;
         $submissionFromApi = $this->verifyApiJsonResponse('GET', "/contests/$contestId/$apiEndpoint/$submissionId", 200, 'admin');
     }
