@@ -174,7 +174,7 @@ visual_main:
     - git checkout $CI_COMMIT_SHA -- gitlab/visualpr.sh # Always compare with the same tests
     - git checkout $CI_COMMIT_SHA -- gitlab/default-nginx
     - git checkout $CI_COMMIT_SHA -- gitlab/visualreg.css
-    - ./gitlab/visualpr.sh main
+    - ./gitlab/visualpr.sh wf2020
   artifacts:
     when: always
     paths:
