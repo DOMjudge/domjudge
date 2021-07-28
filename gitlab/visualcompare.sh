@@ -28,7 +28,7 @@ cd screenshotspr
 for URL in ./*; do
     URL=${URL#.\/}
     SPR="/screenshotspr/$URL"
-    SMR=${SPR/pr/main}
+    SMR=${SPR/pr/wf2020}
     cd "$DIR"/"$SPR"/
     for ROLE in ./*; do
         ROLE=${ROLE#.\/}
@@ -43,7 +43,7 @@ for URL in ./*; do
                 idiff -warn 100 -fail 0.5 "$PR" "$MR" -abs -od -scale 10.0;RET=$?
                 set -e
                 # There is the problem of detecting if a change is wanted or unwanted, currently check all the captured
-                # screenshots against main for changes
+                # screenshots against wf2020 for changes
                 if [ $RET -ne 0 ]; then
                     REMOVE=".html-ff.png"
                     ENDPOINT=${FILE/$REMOVE}
@@ -54,7 +54,7 @@ for URL in ./*; do
                         STORDIR="$DIR"/"$failingchanges"
                     fi
                     compare "$PR" "$MR" -highlight-color blue "$STORDIR"/"${ROLE}"_"${FILE}" || true
-                    cp "$MR" "$STORDIR"/"${ROLE}"_main_"${FILE}"
+                    cp "$MR" "$STORDIR"/"${ROLE}"_wf2020_"${FILE}"
                     cp "$PR" "$STORDIR"/"${ROLE}"_pr_"${FILE}"
                 fi
             else
