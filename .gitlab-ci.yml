@@ -149,7 +149,7 @@ visual_pr:
       - html
       - wget.log
 
-visual_main:
+visual_wf2020:
   <<: *retry_job
   <<: *long_job
   stage: visual_pre
@@ -168,13 +168,13 @@ visual_main:
         ROLE: [none,jury,admin,balloon,team]
   script:
     - git fetch
-    - git checkout -B main origin/main
-    - git branch --set-upstream-to=origin/main main
+    - git checkout -B wf2020 origin/wf2020
+    - git branch --set-upstream-to=origin/wf2020 wf2020
     - git pull
     - git checkout $CI_COMMIT_SHA -- gitlab/visualpr.sh # Always compare with the same tests
     - git checkout $CI_COMMIT_SHA -- gitlab/default-nginx
     - git checkout $CI_COMMIT_SHA -- gitlab/visualreg.css
-    - ./gitlab/visualpr.sh main
+    - ./gitlab/visualpr.sh wf2020
   artifacts:
     when: always
     paths:
@@ -188,7 +188,7 @@ visual_compare:
   image: domjudge/gitlabci:2.1
   needs:
     - visual_pr
-    - visual_main
+    - visual_wf2020
   script:
     - ./gitlab/visualcompare.sh
   artifacts:
