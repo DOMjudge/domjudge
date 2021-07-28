@@ -269,4 +269,45 @@ abstract class BaseTest extends WebTestCase
         $crawler = $this->client->followRedirect();
         self::assertEquals($url, $crawler->getUri());
     }
+
+    /**
+     * Whether the data source is local
+     */
+    protected function dataSourceIsLocal(): bool
+    {
+        $config = self::$container->get(ConfigurationService::class);
+        $dataSource = $config->get('data_source');
+        return $dataSource === DOMJudgeService::DATA_SOURCE_LOCAL;
+    }
+
+    /**
+     * Get the contest ID of the demo contest based on the data source setting
+     *
+     * @return string
+     */
+    protected function getDemoContestId(): string
+    {
+        if ($this->dataSourceIsLocal()) {
+            return (string)$this->demoContest->getCid();
+        }
+
+        return $this->demoContest->getExternalid();
+    }
+
+    /**
+     * Resolve the entity ID for the given class if not running in local mode
+     */
+    protected function resolveEntityId(string $class, string $id): string
+    {
+        if (!$this->dataSourceIsLocal()) {
+            $entity = static::$container->get(EntityManagerInterface::class)->getRepository($class)->find($id);
+            // If we can't find the entity, assume we use an invalid one
+            if ($entity === null) {
+                return $id;
+            }
+            return $entity->getExternalid();
+        }
+
+        return $id;
+    }
 }

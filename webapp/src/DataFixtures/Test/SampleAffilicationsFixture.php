@@ -18,6 +18,7 @@ class SampleAffilicationsFixture extends Fixture
 
         foreach ($affiliationData as $index => $affiliationItem) {
             $affiliation = (new TeamAffiliation())
+                ->setExternalid($affiliationItem[0])
                 ->setShortname($affiliationItem[0])
                 ->setName($affiliationItem[1])
                 ->setCountry($affiliationItem[2]);

@@ -3,6 +3,8 @@
 namespace App\Tests\Unit\Controller\Jury;
 
 use App\Entity\TeamAffiliation;
+use App\Service\ConfigurationService;
+use App\Service\DOMJudgeService;
 
 class TeamAffiliationControllerTest extends JuryControllerTest
 {
@@ -25,4 +27,25 @@ class TeamAffiliationControllerTest extends JuryControllerTest
                                           ['shortname' => 'com',
                                            'name' => 'No comment',
                                            'comments' => '']];
+
+    public function testCheckAddEntityAdmin(): void
+    {
+        $config = static::$container->get(ConfigurationService::class);
+        $showFlags = $config->get('show_flags');
+        // Remove setting country when we don't show it
+        if (!$showFlags) {
+            foreach (static::$addEntities as &$entity) {
+                unset($entity['country']);
+            }
+            unset($entity);
+        }
+        // Add external ID's when needed
+        if (!$this->dataSourceIsLocal()) {
+            foreach (static::$addEntities as &$entity) {
+                $entity['externalid'] = $entity['shortname'];
+            }
+            unset($entity);
+        }
+        parent::testCheckAddEntityAdmin();
+    }
 }

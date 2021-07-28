@@ -4,6 +4,8 @@ namespace App\Tests\Unit\Service;
 
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
+use App\Service\ConfigurationService;
+use App\Service\DOMJudgeService;
 use App\Service\ImportExportService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -74,8 +76,15 @@ class ImportExportServiceTest extends KernelTestCase
 
         // Load the contest, but first clear the entity manager to have all data
         static::$container->get(EntityManagerInterface::class)->clear();
-        /** @var Contest $contest */
-        $contest = static::$container->get(EntityManagerInterface::class)->getRepository(Contest::class)->find($cid);
+        $config = static::$container->get(ConfigurationService::class);
+        $dataSource = $config->get('data_source');
+        if ($dataSource === DOMJudgeService::DATA_SOURCE_LOCAL) {
+            /** @var Contest $contest */
+            $contest = static::$container->get(EntityManagerInterface::class)->getRepository(Contest::class)->find($cid);
+        } else {
+            /** @var Contest $contest */
+            $contest = static::$container->get(EntityManagerInterface::class)->getRepository(Contest::class)->findOneBy(['externalid' => $cid]);
+        }
 
         self::assertEquals($data['name'], $contest->getName());
         self::assertEquals($expectedShortName, $contest->getShortname());

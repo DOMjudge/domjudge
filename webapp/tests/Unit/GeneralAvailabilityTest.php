@@ -11,6 +11,11 @@ class GeneralAvailabilityTest extends BaseTest
      */
     public function testPageIsSuccessful(string $url, int $code) : void
     {
+        if ($url === '/api/contests/2' && !$this->dataSourceIsLocal()) {
+            // Use external ID for contest
+            $url = '/api/contests/demo';
+        }
+
         $this->client->request('GET', $url);
 
         $response = $this->client->getResponse();
