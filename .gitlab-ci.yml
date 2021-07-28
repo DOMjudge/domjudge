@@ -55,11 +55,11 @@ webstandard_check_role:
   parallel:
     matrix:
       - ROLE: public
-        TEST: [w3cval,WCAG2A,WCAG2AA,Section508]
+        TEST: [w3cval,WCAG2A,WCAG2AA]
       - ROLE: team
-        TEST: [w3cval,WCAG2A,WCAG2AA,Section508]
+        TEST: [w3cval,WCAG2A,WCAG2AA]
       - ROLE: balloon
-        TEST: [w3cval,WCAG2A,WCAG2AA,Section508]
+        TEST: [w3cval,WCAG2A,WCAG2AA]
       - ROLE: jury
         TEST: [w3cval]
   stage: accessibility
