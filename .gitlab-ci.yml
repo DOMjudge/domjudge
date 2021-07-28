@@ -178,7 +178,7 @@ visual_main:
   artifacts:
     when: always
     paths:
-      - screenshotsmain
+      - screenshotswf2020
       - html
     
 visual_compare:
