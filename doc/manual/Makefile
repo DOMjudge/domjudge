@@ -43,6 +43,6 @@ html: conf_ref.rst
 
 team:
 	sphinx-build -b latex . build/team $(subst 1,-Q,$(QUIET))
-	make -C build/team team-manual.pdf
+	make -C build/team domjudge-team-manual.pdf
 
 .PHONY: docs distdocs install-docs maintainer-install html team

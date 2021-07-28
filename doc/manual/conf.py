@@ -187,7 +187,7 @@ latex_toplevel_sectioning = 'section'
 latex_documents = [
     (master_doc, 'DOMjudge.tex', 'DOMjudge Documentation',
      'DOMjudge Team', 'manual'),
-    ('team', 'team-manual.tex', 'DOMjudge Team Manual',
+    ('team', 'domjudge-team-manual.tex', 'DOMjudge Team Manual',
      'DOMjudge Team', 'manual'),
 ]
 
