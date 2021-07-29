@@ -135,17 +135,19 @@ class TeamType extends AbstractType
             }
 
             // Make sure the user has the team role to make validation work
-            /** @var User|null $user */
+            /** @var User|false $user */
             $user = $team->getUsers()->first();
-            /** @var Role $role */
-            $role = $this->em->createQueryBuilder()
-                ->from(Role::class, 'r')
-                ->select('r')
-                ->andWhere('r.dj_role = :team')
-                ->setParameter(':team', 'team')
-                ->getQuery()
-                ->getOneOrNullResult();
-            $user->addUserRole($role);
+            if ($user) {
+                /** @var Role $role */
+                $role = $this->em->createQueryBuilder()
+                    ->from(Role::class, 'r')
+                    ->select('r')
+                    ->andWhere('r.dj_role = :team')
+                    ->setParameter(':team', 'team')
+                    ->getQuery()
+                    ->getOneOrNullResult();
+                $user->addUserRole($role);
+            }
         });
     }
 
