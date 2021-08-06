@@ -747,13 +747,18 @@ class ImportProblemService
                         $results = [$expectedResult];
                     }
                     $jury_team_id = $this->dj->getUser()->getTeam() ? $this->dj->getUser()->getTeam()->getTeamid() : null;
+                    $jury_user = $this->dj->getUser();
                     if (isset($submission_details[$path]['team'])) {
+                        /** @var Team|null $json_team */
                         $json_team = $this->em->getRepository(Team::class)
                             ->findOneBy(['name' => $submission_details[$path]['team']]);
                         if (isset($json_team)) {
                             $json_team_id = $json_team->getTeamid();
                             if (isset($json_team_id)) {
                                 $jury_team_id = $json_team_id;
+                                if (!$json_team->getUsers()->isEmpty()) {
+                                    $jury_user = $json_team->getUsers()->first();
+                                }
                             }
                         }
                     }
@@ -771,7 +776,7 @@ class ImportProblemService
                             ]
                         );
                         $submission     = $this->submissionService->submitSolution(
-                            $team, $contestProblem, $contest, $languageToUse, $filesToSubmit, null,
+                            $team, $jury_user, $contestProblem, $contest, $languageToUse, $filesToSubmit, null,
                             null, $entry_point, null, null, $submissionMessage
                         );
 

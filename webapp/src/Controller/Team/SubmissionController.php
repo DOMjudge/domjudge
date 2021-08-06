@@ -4,6 +4,7 @@ namespace App\Controller\Team;
 
 use App\Controller\BaseController;
 use App\Entity\Judging;
+use App\Entity\Language;
 use App\Entity\Problem;
 use App\Entity\Submission;
 use App\Entity\Testcase;
@@ -23,7 +24,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Validator\Constraints\Language;
 
 /**
  * Class SubmissionController
@@ -111,7 +111,7 @@ class SubmissionController extends BaseController
                 }
                 $entryPoint = $form->get('entry_point')->getData() ?: null;
                 $submission = $this->submissionService->submitSolution(
-                    $team, $problem->getProbid(), $contest, $language, $files, null,
+                    $team, $this->dj->getUser(), $problem->getProbid(), $contest, $language, $files, null,
                     null, $entryPoint, null, null, $message
                 );
 

@@ -13,6 +13,7 @@ use App\Entity\Problem;
 use App\Entity\Rejudging;
 use App\Entity\Submission;
 use App\Entity\Team;
+use App\Entity\User;
 use App\Form\Type\RejudgingType;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
@@ -497,6 +498,9 @@ class RejudgingController extends BaseController
                 'teams'      => array_map(function (Team $team) {
                     return $team->getTeamid();
                 }, $formData['teams'] ? $formData['teams']->toArray() : []),
+                'users'      => array_map(function (User $user) {
+                    return $user->getUserid();
+                }, $formData['users'] ? $formData['users']->toArray() : []),
                 'judgehosts' => array_map(function (Judgehost $judgehost) {
                     return $judgehost->getHostname();
                 }, $formData['judgehosts'] ? $formData['judgehosts']->toArray() : []),
@@ -551,6 +555,12 @@ class RejudgingController extends BaseController
                     $queryBuilder
                         ->andWhere('s.team IN (:teams)')
                         ->setParameter(':teams', $teams);
+                }
+                $users = $data['users'] ?? [];
+                if (count($users)) {
+                    $queryBuilder
+                        ->andWhere('s.user IN (:users)')
+                        ->setParameter(':users', $users);
                 }
                 $judgehosts = $data['judgehosts'] ?? [];
                 if (count($judgehosts)) {
@@ -664,6 +674,7 @@ class RejudgingController extends BaseController
             'problem' => 's.problem',
             'submission' => 's.submitid',
             'team' => 's.team',
+            'user' => 's.user',
             'rejudging' => 'j2.rejudging',
         ];
 

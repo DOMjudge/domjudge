@@ -234,8 +234,9 @@ class SubmissionController extends AbstractRestController
             }
         }
 
-        // By default, use the team of the user
-        $team = $this->dj->getUser()->getTeam();
+        // By default, use the user and team of the user
+        $user = $this->dj->getUser();
+        $team = $user->getTeam();
         if ($teamId = $request->request->get('team_id')) {
             $idField = $this->eventLogService->externalIdFieldForEntity(Team::class) ?? 'teamid';
             $method  = sprintf('get%s', ucfirst($idField));
@@ -269,6 +270,8 @@ class SubmissionController extends AbstractRestController
                     throw new BadRequestHttpException(
                         sprintf("Team %s not found or not enabled", $teamId));
                 }
+
+                $user = $team->getUsers()->first() ?: null;
             } elseif (!$team) {
                 throw new BadRequestHttpException(sprintf('User does not belong to a team'));
             } elseif ((string)call_user_func([$team, $method]) !== (string)$teamId) {
@@ -434,7 +437,7 @@ class SubmissionController extends AbstractRestController
 
         // Now submit the solution
         $submission = $this->submissionService->submitSolution(
-            $team, $problem, $problem->getContest(), $language,
+            $team, $user, $problem, $problem->getContest(), $language,
             $files, null, null, $entryPoint, $submissionId, $time, $message
         );
 
