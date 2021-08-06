@@ -19,6 +19,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  *     indexes={
  *         @ORM\Index(name="teamid", columns={"cid","teamid"}),
  *         @ORM\Index(name="teamid_2", columns={"teamid"}),
+ *         @ORM\Index(name="userid", columns={"userid"}),
  *         @ORM\Index(name="probid", columns={"probid"}),
  *         @ORM\Index(name="langid", columns={"langid"}),
  *         @ORM\Index(name="origsubmitid", columns={"origsubmitid"}),
@@ -112,6 +113,13 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
      * @Serializer\Exclude()
      */
     private $team;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="User", inversedBy="submissions")
+     * @ORM\JoinColumn(name="userid", referencedColumnName="userid", onDelete="CASCADE")
+     * @Serializer\Exclude()
+     */
+    private $user;
 
     /**
      * @ORM\ManyToOne(targetEntity="Problem", inversedBy="submissions")
@@ -305,6 +313,17 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
     public function getTeamId(): int
     {
         return $this->getTeam()->getTeamid();
+    }
+
+    public function setUser(?User $user = null): Submission
+    {
+        $this->user = $user;
+        return $this;
+    }
+
+    public function getUser(): User
+    {
+        return $this->user;
     }
 
     public function __construct()

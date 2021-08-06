@@ -231,6 +231,7 @@ class SubmissionControllerTest extends BaseTest
         bool $idIsExternal,
         int $expectedProblemId,
         int $expectedTeamId,
+        string $expectedUsername,
         string $expectedLanguageId,
         ?string $expectedSubmissionExternalId, // If known
         ?string $expectedTime, // If known
@@ -280,6 +281,7 @@ class SubmissionControllerTest extends BaseTest
         static::assertInstanceOf(Submission::class, $submission);
         static::assertEquals($expectedProblemId, $submission->getProblem()->getProbid(), 'Wrong problem ID');
         static::assertEquals($expectedTeamId, $submission->getTeam()->getTeamid(), 'Wrong team ID');
+        static::assertEquals($expectedUsername, $submission->getUser()->getUsername(), 'Wrong user');
         static::assertEquals($expectedLanguageId, $submission->getLanguage()->getLangid(), 'Wrong language ID');
         if ($expectedSubmissionExternalId) {
             static::assertEquals($expectedSubmissionExternalId, $submission->getExternalid(), 'Wrong external submission ID');
@@ -315,6 +317,7 @@ class SubmissionControllerTest extends BaseTest
             false,
             1,
             2,
+            'demo',
             'cpp',
             null,
             null,
@@ -337,6 +340,7 @@ class SubmissionControllerTest extends BaseTest
             false,
             1,
             2,
+            'demo',
             'cpp',
             null,
             null,
@@ -362,6 +366,7 @@ class SubmissionControllerTest extends BaseTest
             false,
             1,
             2,
+            'demo',
             'kt',
             null,
             null,
@@ -380,6 +385,7 @@ class SubmissionControllerTest extends BaseTest
             false,
             1,
             2,
+            'demo',
             'cpp',
             null,
             null,
@@ -403,6 +409,7 @@ class SubmissionControllerTest extends BaseTest
             false,
             2,
             2,
+            'demo',
             'java',
             null,
             null,
@@ -417,13 +424,14 @@ class SubmissionControllerTest extends BaseTest
             [
                 'problem_id'  => 1,
                 'language_id' => 'cpp',
-                'team_id'     => 1,
+                'team_id'     => 2,
             ],
             ['main.cpp' => '// No content'],
             [],
             false,
             1,
-            1,
+            2,
+            'demo',
             'cpp',
             null,
             null,
@@ -443,6 +451,7 @@ class SubmissionControllerTest extends BaseTest
             true,
             1,
             1,
+            'admin',
             'cpp',
             'myextid123',
             null,
@@ -462,6 +471,7 @@ class SubmissionControllerTest extends BaseTest
             false,
             1,
             1,
+            'admin',
             'cpp',
             null,
             '2020-01-01T12:34:56.000+00:00',
