@@ -142,6 +142,12 @@ class User implements UserInterface, EquatableInterface, \Serializable
      */
     private $user_roles;
 
+    /**
+     * @ORM\OneToMany(targetEntity="Submission", mappedBy="user")
+     * @Serializer\Exclude()
+     */
+    private $submissions;
+
     public function getSalt(): ?string
     {
         return null;
@@ -343,6 +349,7 @@ class User implements UserInterface, EquatableInterface, \Serializable
     public function __construct()
     {
         $this->user_roles = new ArrayCollection();
+        $this->submissions = new ArrayCollection();
     }
 
     public function addUserRole(Role $role): User
@@ -388,6 +395,22 @@ class User implements UserInterface, EquatableInterface, \Serializable
         }
 
         return $result;
+    }
+
+    public function addSubmission(Submission $submission): User
+    {
+        $this->submissions[] = $submission;
+        return $this;
+    }
+
+    public function removeSubmission(Submission $submission)
+    {
+        $this->submissions->removeElement($submission);
+    }
+
+    public function getSubmissions(): Collection
+    {
+        return $this->submissions;
     }
 
     /**

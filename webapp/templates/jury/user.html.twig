@@ -124,11 +124,18 @@
         </div>
     </div>
 
-    {%- if is_granted('ROLE_ADMIN') -%}
-        <p>
+    <p>
+        {%- if is_granted('ROLE_ADMIN') -%}
             {{ button(path('jury_user_edit', {'userId': user.userid}), 'Edit', 'primary', 'edit') }}
             {{ button(path('jury_user_delete', {'userId': user.userid}), 'Delete', 'danger', 'trash-alt', true) }}
-        </p>
-    {% endif %}
+        {% endif %}
+        {% include 'jury/partials/rejudge_form.html.twig' with {table: 'user', id: user.userid, buttonClass: 'btn-secondary'} %}
+    </p>
+
+    <h2>Submissions for {{ user.name }}</h2>
+
+    <div data-ajax-refresh-target>
+        {%- include 'jury/partials/submission_list.html.twig' with {showTestcases: false} %}
+    </div>
 
 {% endblock %}

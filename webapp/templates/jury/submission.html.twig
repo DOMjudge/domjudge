@@ -93,6 +93,15 @@
             </a>
         </span>
 
+        {% if submission.user %}
+            <span>
+                <i class="fas fa-user" title="User:"></i>
+                <a href="{{ path('jury_user', {userId: submission.user.userid, cid: submission.contest.cid}) }}">
+                    {{ submission.user.username }}
+                </a>
+            </span>
+        {% endif %}
+
         <span>
             <i class="fas fa-trophy" title="Contest:"></i>
             <a href="{{ path('jury_contest', {'contestId': submission.contest.cid}) }}">

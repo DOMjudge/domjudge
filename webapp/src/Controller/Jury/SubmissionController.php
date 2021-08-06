@@ -893,6 +893,7 @@ class SubmissionController extends BaseController
             }
             $submittedSubmission = $this->submissionService->submitSolution(
                 $team,
+                $this->dj->getUser(),
                 $submittedData['problem'],
                 $submission->getContest(),
                 $language,

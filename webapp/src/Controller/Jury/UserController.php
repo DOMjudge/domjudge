@@ -4,6 +4,7 @@ namespace App\Controller\Jury;
 
 use App\Controller\BaseController;
 use App\Entity\Role;
+use App\Entity\Submission;
 use App\Entity\Team;
 use App\Entity\User;
 use App\Form\Type\GeneratePasswordsType;
@@ -11,6 +12,7 @@ use App\Form\Type\UserType;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
+use App\Service\SubmissionService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -186,7 +188,7 @@ class UserController extends BaseController
      * @Route("/{userId<\d+>}", name="jury_user")
      * @return RedirectResponse|Response
      */
-    public function viewAction(Request $request, int $userId)
+    public function viewAction(Request $request, int $userId, SubmissionService $submissionService)
     {
         /** @var User $user */
         $user = $this->em->getRepository(User::class)->find($userId);
@@ -194,7 +196,26 @@ class UserController extends BaseController
             throw new NotFoundHttpException(sprintf('User with ID %s not found', $userId));
         }
 
-        return $this->render('jury/user.html.twig', ['user' => $user]);
+        $restrictions = ['userid' => $user->getUserid()];
+        /** @var Submission[] $submissions */
+        [$submissions, $submissionCounts] = $submissionService->getSubmissionList(
+            $this->dj->getCurrentContests(),
+            $restrictions
+        );
+
+        return $this->render('jury/user.html.twig', [
+            'user' => $user,
+            'submissions' => $submissions,
+            'submissionCounts' => $submissionCounts,
+            'showContest' => count($this->dj->getCurrentContests()) > 1,
+            'showExternalResult' => $this->config->get('data_source') ===
+                DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL,
+            'refresh' => [
+                'after' => 3,
+                'url' => $this->generateUrl('jury_user', ['userId' => $user->getUserid()]),
+                'ajax' => true,
+            ],
+        ]);
     }
 
     /**
