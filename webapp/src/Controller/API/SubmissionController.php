@@ -9,6 +9,7 @@ use App\Entity\Problem;
 use App\Entity\Submission;
 use App\Entity\SubmissionFile;
 use App\Entity\Team;
+use App\Entity\User;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
@@ -279,6 +280,30 @@ class SubmissionController extends AbstractRestController
             }
         } elseif (!$team) {
             throw new BadRequestHttpException(sprintf('User does not belong to a team'));
+        }
+
+        if ($userId = $request->request->get('user_id')) {
+            // If the current user is an admin or API writer, allow it to specify the user
+            if ($this->isGranted('ROLE_API_WRITER')) {
+                // Load the user
+                /** @var User|null $user */
+                $user = $this->em->getRepository(User::class)->find($userId);
+
+                if (!$user) {
+                    throw new BadRequestHttpException("User not found");
+                }
+                if (!$user->getEnabled()) {
+                    throw new BadRequestHttpException("User not enabled");
+                }
+                if (!$user->getTeam()) {
+                    throw new BadRequestHttpException("User not linked to a team");
+                }
+                if ($user->getTeam()->getTeamid() !== $team->getTeamid()) {
+                    throw new BadRequestHttpException("User not linked to provided team");
+                }
+            } elseif ($user->getUserid() !== (int)$userId) {
+                throw new BadRequestHttpException(sprintf('Can not submit for a different user'));
+            }
         }
 
         // Load the problem
