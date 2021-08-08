@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Controller\API;
 
+use App\DataFixtures\Test\AddMoreDemoUsersFixture;
 use App\DataFixtures\Test\EnableKotlinFixture;
 use App\DataFixtures\Test\RemoveTeamFromAdminUserFixture;
 use App\DataFixtures\Test\RemoveTeamFromDemoUserFixture;
@@ -44,7 +45,10 @@ class SubmissionControllerTest extends BaseTest
 
     protected $expectedAbsent = ['4242', 'nonexistent'];
 
-    protected static $fixtures = [SampleSubmissionsFixture::class];
+    protected static $fixtures = [
+        SampleSubmissionsFixture::class,
+        AddMoreDemoUsersFixture::class,
+    ];
 
     /**
      * Test that a non logged in user can not add a submission
@@ -65,6 +69,9 @@ class SubmissionControllerTest extends BaseTest
     {
         if (isset($dataToSend['problem_id'])) {
             $dataToSend['problem_id'] = $this->resolveEntityId(Problem::class, (string)$dataToSend['problem_id']);
+        }
+        if (isset($dataToSend['user_id'])) {
+            $dataToSend['user_id'] = $this->resolveReference($dataToSend['user_id']);
         }
         $contestId = $this->getDemoContestId();
         $apiEndpoint = $this->apiEndpoint;
@@ -89,6 +96,7 @@ class SubmissionControllerTest extends BaseTest
         yield ['demo', ['problem_id' => 1, 'language_id' => 'abc'], "Language abc not found or not submittable"];
         yield ['demo', ['problem_id' => 1, 'language_id' => 'abc'], "Language abc not found or not submittable"];
         yield ['demo', ['problem_id' => 1, 'language_id' => 'cpp', 'team_id' => 1], "Can not submit for a different team"];
+        yield ['demo', ['problem_id' => 1, 'language_id' => 'cpp', 'user_id' => 1], "Can not submit for a different user"];
         yield ['demo', ['problem_id' => 1, 'language_id' => 'cpp', 'id' => '123'], "A team can not assign id"];
         yield ['demo', ['problem_id' => 1, 'language_id' => 'cpp', 'time' => '2021-01-01T00:00:00'], "A team can not assign time"];
         yield ['demo', ['problem_id' => 1, 'language_id' => 'cpp', 'files' => []], "The 'files' attribute must be an array with a single item, containing an object with a base64 encoded data field"];
@@ -147,6 +155,10 @@ class SubmissionControllerTest extends BaseTest
         ];
         yield ['admin', ['problem_id' => 1, 'language' => 'cpp', 'team_id' => 1], "No files specified."];
         yield ['admin', ['problem_id' => 1, 'language' => 'cpp', 'team_id' => 3], "Team 3 not found or not enabled"];
+        yield ['admin', ['problem_id' => 1, 'language' => 'cpp', 'team_id' => 1, 'user_id' => 'doesnotexist'], "User not found"];
+        yield ['admin', ['problem_id' => 1, 'language' => 'cpp', 'team_id' => 1, 'user_id' => AddMoreDemoUsersFixture::class . ':seconddemo'], "User not linked to provided team"];
+        yield ['admin', ['problem_id' => 1, 'language' => 'cpp', 'team_id' => 1, 'user_id' => AddMoreDemoUsersFixture::class . ':thirddemo'], "User not enabled"];
+        yield ['admin', ['problem_id' => 1, 'language' => 'cpp', 'team_id' => 1, 'user_id' => AddMoreDemoUsersFixture::class . ':fourthdemo'], "User not linked to a team"];
         yield ['admin', ['problem_id' => 1, 'language' => 'cpp', 'team_id' => 1, 'time' => 'this is not a time'], "Can not parse time this is not a time"];
         yield [
             'admin',
@@ -245,6 +257,9 @@ class SubmissionControllerTest extends BaseTest
         }
         if (isset($dataToSend['problem_id'])) {
             $dataToSend['problem_id'] = $this->resolveEntityId(Problem::class, (string)$dataToSend['problem_id']);
+        }
+        if (isset($dataToSend['user_id'])) {
+            $dataToSend['user_id'] = $this->resolveReference($dataToSend['user_id']);
         }
         $contestId = $this->getDemoContestId();
         $apiEndpoint = $this->apiEndpoint;
@@ -432,6 +447,26 @@ class SubmissionControllerTest extends BaseTest
             1,
             2,
             'demo',
+            'cpp',
+            null,
+            null,
+            ['main.cpp' => '// No content'],
+        ];
+        // Submit as admin under a different user ID
+        yield [
+            'admin',
+            [
+                'problem_id'  => 1,
+                'language_id' => 'cpp',
+                'team_id'     => 2,
+                'user_id'     => AddMoreDemoUsersFixture::class . ':seconddemo',
+            ],
+            ['main.cpp' => '// No content'],
+            [],
+            false,
+            1,
+            2,
+            'seconddemo',
             'cpp',
             null,
             null,
