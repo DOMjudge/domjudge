@@ -231,7 +231,7 @@ class SubmissionController extends AbstractRestController
                     return "'$item'";
                 }, $requiredList);
                 throw new BadRequestHttpException(
-                    sprintf("One of the arguments '%s' is mandatory.", implode(', ', $requiredListQuoted)));
+                    sprintf("One of the arguments %s is mandatory.", implode(', ', $requiredListQuoted)));
             }
         }
 
