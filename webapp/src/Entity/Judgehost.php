@@ -72,6 +72,12 @@ class Judgehost
     private $judgings;
 
     /**
+     * @ORM\OneToMany(targetEntity="JudgeTask", mappedBy="judgehost")
+     * @Serializer\Exclude()
+     */
+    private $judgetasks;
+
+    /**
      * @var boolean
      * @ORM\Column(type="boolean", name="hidden",
      *     options={"comment"="Should this host be hidden in the overview?",
@@ -83,6 +89,7 @@ class Judgehost
     public function __construct()
     {
         $this->judgings = new ArrayCollection();
+        $this->judgetasks = new ArrayCollection();
     }
 
     public function getJudgehostid(): int
@@ -155,6 +162,22 @@ class Judgehost
     public function getJudgings(): Collection
     {
         return $this->judgings;
+    }
+
+    public function addJudgeTask(JudgeTask $judgeTask): Judgehost
+    {
+        $this->judgetasks[] = $judgeTask;
+        return $this;
+    }
+
+    public function removeJudgeTask(JudgeTask $judgeTask)
+    {
+        $this->judgetasks->removeElement($judgeTask);
+    }
+
+    public function getJudgeTasks(): Collection
+    {
+        return $this->judgetasks;
     }
 
     public function setHidden(bool $hidden): Judgehost
