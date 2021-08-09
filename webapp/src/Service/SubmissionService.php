@@ -495,6 +495,12 @@ class SubmissionService
                         $problem->getProbid(), $contest->getCid()));
         }
 
+        // If this method is called multiple times, we loose the user from Doctrine because of the internal API call
+        // to add the submission to the event table. To fix this, reload the user if this is the case.
+        if (!$this->em->contains($user)) {
+            $user = $this->em->getRepository(User::class)->find($user->getUserid());
+        }
+
         // Reindex array numerically to make sure we can index it in order
         $files = array_values($files);
 
