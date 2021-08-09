@@ -119,6 +119,8 @@ Edit grub config to add cgroup memory and swap accounting to the boot
 options. Edit ``/etc/default/grub`` and change the default
 commandline to
 ``GRUB_CMDLINE_LINUX_DEFAULT="quiet cgroup_enable=memory swapaccount=1"``
+On modern distros (e.g. Debian bullseye) which have cgroup v2 enabled by
+default, you need to add ``systemd.unified_cgroup_hierarchy=0`` as well.
 Then run ``update-grub`` and reboot.
 After rebooting check that ``/proc/cmdline`` actually contains the
 added kernel options. On VM hosting providers such as Google Cloud or
