@@ -553,4 +553,15 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
     {
         return $this->external_judgements;
     }
+
+    /**
+     * Note: this is a temporary property used during the World Finals in Moscow
+     * @Serializer\VirtualProperty()
+     * @Serializer\SerializedName("team_member_id")
+     * @Serializer\Type("string")
+     */
+    public function getTeamMemberId(): ?string
+    {
+        return $this->getUser() ? $this->getUser()->getUsername() : null;
+    }
 }
