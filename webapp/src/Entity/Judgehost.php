@@ -14,7 +14,6 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Table(
  *     name="judgehost",
  *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Hostnames of the autojudgers"},
- *     indexes={@ORM\Index(name="restrictionid", columns={"restrictionid"})},
  *     uniqueConstraints={
  *         @ORM\UniqueConstraint(name="hostname", columns={"hostname"})
  *     })
@@ -57,13 +56,6 @@ class Judgehost
      *     nullable=true)
      */
     private $polltime;
-
-    /**
-     * @ORM\ManyToOne(targetEntity="JudgehostRestriction", inversedBy="judgehosts")
-     * @ORM\JoinColumn(name="restrictionid", referencedColumnName="restrictionid", onDelete="SET NULL")
-     * @Serializer\Exclude()
-     */
-    private $restriction;
 
     /**
      * @ORM\OneToMany(targetEntity="Judging", mappedBy="judgehost")
@@ -135,17 +127,6 @@ class Judgehost
     public function getPolltime()
     {
         return $this->polltime;
-    }
-
-    public function setRestriction(?JudgehostRestriction $restriction = null): Judgehost
-    {
-        $this->restriction = $restriction;
-        return $this;
-    }
-
-    public function getRestriction(): ?JudgehostRestriction
-    {
-        return $this->restriction;
     }
 
     public function addJudging(Judging $judging): Judgehost

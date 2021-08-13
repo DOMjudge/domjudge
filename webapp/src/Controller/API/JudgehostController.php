@@ -1137,28 +1137,6 @@ class JudgehostController extends AbstractFOSRestController
             ->addOrderBy('s.submittime', 'ASC')
             ->addOrderBy('s.submitid', 'ASC');
 
-        // Apply restrictions
-        if ($judgehost->getRestriction()) {
-            $restrictions = $judgehost->getRestriction()->getRestrictions();
-
-            if (isset($restrictions['contest'])) {
-                $queryBuilder
-                    ->andWhere('s.contest IN (:restrictionContestIds)')
-                    ->setParameter(':restrictionContestIds', $restrictions['contest']);
-            }
-
-            if (isset($restrictions['problem'])) {
-                $queryBuilder
-                    ->andWhere('s.problem IN (:restrictionProblemIds)')
-                    ->setParameter(':restrictionProblemIds', $restrictions['problem']);
-            }
-
-            if (isset($restrictions['language'])) {
-                $queryBuilder
-                    ->andWhere('s.language IN (:restrictionLanguageIds)')
-                    ->setParameter(':restrictionLanguageIds', $restrictions['language']);
-            }
-        }
         if ($restrictJudgingOnSameJudgehost) {
             $queryBuilder
                 ->leftJoin('s.judgings', 'j', Join::WITH, 'j.judgehost = :judgehost')

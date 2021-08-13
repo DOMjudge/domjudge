@@ -81,8 +81,7 @@ class JudgehostController extends BaseController
         /** @var Judgehost[] $judgehosts */
         $judgehosts = $this->em->createQueryBuilder()
             ->from(Judgehost::class, 'j')
-            ->leftJoin('j.restriction', 'r')
-            ->select('j', 'r')
+            ->select('j')
             ->andWhere('j.hidden = 0')
             ->orderBy('j.hostname')
             ->getQuery()->getResult();
@@ -92,7 +91,6 @@ class JudgehostController extends BaseController
             'hostname' => ['title' => 'hostname'],
             'active' => ['title' => 'active'],
             'status' => ['title' => 'status'],
-            'restriction' => ['title' => 'restriction'],
             'load' => ['title' => 'load'],
             'last_judgingid' => ['title' => 'last judging'],
         ];
@@ -207,9 +205,6 @@ class JudgehostController extends BaseController
                 'active' => [
                     'value' => $judgehost->getActive() ? 'yes' : 'no',
                 ],
-                'restriction' => [
-                    'value' => $judgehost->getRestriction() ? $judgehost->getRestriction()->getName() : '<i>none</i>',
-                ],
             ]);
 
             // Create action links
@@ -275,8 +270,7 @@ class JudgehostController extends BaseController
         /** @var Judgehost $judgehost */
         $judgehost = $this->em->createQueryBuilder()
             ->from(Judgehost::class, 'j')
-            ->leftJoin('j.restriction', 'r')
-            ->select('j', 'r')
+            ->select('j')
             ->andWhere('j.judgehostid = :judgehostid')
             ->setParameter(':judgehostid', $judgehostid)
             ->getQuery()
@@ -341,8 +335,7 @@ class JudgehostController extends BaseController
         /** @var Judgehost $judgehost */
         $judgehost = $this->em->createQueryBuilder()
             ->from(Judgehost::class, 'j')
-            ->leftJoin('j.restriction', 'r')
-            ->select('j', 'r')
+            ->select('j')
             ->andWhere('j.judgehostid = :judgehostid')
             ->setParameter(':judgehostid', $judgehostid)
             ->getQuery()

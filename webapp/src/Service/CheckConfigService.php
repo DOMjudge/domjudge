@@ -129,7 +129,6 @@ class CheckConfigService
         $pl = [
             'problems' => $this->checkProblemsValidate(),
             'languages' => $this->checkLanguagesValidate(),
-            'judgability' => $this->checkProblemLanguageJudgability(),
         ];
 
         $results['Problems and languages'] = $pl;
@@ -595,57 +594,6 @@ class CheckConfigService
             'result' => $result,
             'desc' => "Validated all languages:\n\n" .
                     ($desc ?: 'No languages with problems found.')];
-    }
-
-    public function checkProblemLanguageJudgability() : array
-    {
-        $judgehosts = $this->em->getRepository(Judgehost::class)->findBy(['active' => 1]);
-
-        foreach ($judgehosts as $judgehost) {
-            if ($judgehost->getRestriction() === null) {
-                return ['caption' => 'Problem, language and contest judgability',
-                    'result' => 'O',
-                    'desc' => sprintf("At least one judgehost (%s) is active and unrestricted.", $judgehost->getHostname())];
-            }
-        }
-
-        $languages = $this->em->getRepository(Language::class)->findAll();
-        $contests = $this->dj->getCurrentContests(null, true);
-
-        $desc = '';
-        $result = 'O';
-        foreach ($contests as $contest) {
-            foreach ($contest->getProblems() as $cp ) {
-                foreach ($languages as $lang) {
-                    if (!$lang->getAllowSubmit()) {
-                        continue;
-                    }
-                    $found1 = false;
-                    foreach ($judgehosts as $judgehost) {
-                        $rest = $judgehost->getRestriction();
-                        $rest_c = $rest->getContests();
-                        $rest_p = $rest->getProblems();
-                        $rest_l = $rest->getLanguages();
-                        if ((empty($rest_c) || in_array($contest->getCid(), $rest_c)) &&
-                            (empty($rest_p) || in_array($cp->getProbid(), $rest_p)) &&
-                            (empty($rest_l) || in_array($lang->getLangid(), $rest_l))) {
-                            $found1 = true;
-                            continue;
-                        }
-                    }
-                    if (!$found1) {
-                        $result = 'E';
-                        $desc .= sprintf("No active judgehost that allows combination c%s-p%s-%s\n",
-                            $contest->getCid(), $cp->getProbid(), $lang->getLangid());
-                    }
-                }
-            }
-        }
-        $desc = $desc ?: 'Found at least one judgehost for each combination of current/future contest, associated problem, enabled language';
-
-        return ['caption' => 'Problem, language and contest judgability',
-            'result' => $result,
-            'desc' => $desc];
     }
 
     public function checkAffiliations() : array
