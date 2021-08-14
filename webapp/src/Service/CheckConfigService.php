@@ -653,7 +653,7 @@ class CheckConfigService
             if (count($teams) > 1) {
                 $result = 'W';
                 $desc .= sprintf("Team name '%s' in use by multiple teams: %s",
-                         $teamname, implode(',', $teams));
+                         $teamname, implode(',', $teams) . "\n");
             }
         }
         $desc = $desc ?: 'Every team name is unique';
