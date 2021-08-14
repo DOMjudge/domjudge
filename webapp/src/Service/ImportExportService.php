@@ -937,15 +937,8 @@ class ImportExportService
             $teamCategory    = null;
             if (!empty($teamItem['team_affiliation']['shortname'])) {
                 // First look up if the affiliation already exists.
-                /** @var TeamAffiliation $teamAffiliation */
-                $teamAffiliation = $this->em->createQueryBuilder()
-                    ->from(TeamAffiliation::class, 'a')
-                    ->select('a')
-                    ->andWhere('a.externalid = :externalid')
-                    ->setParameter(':externalid', $teamItem['team_affiliation']['externalid'])
-                    ->getQuery()
-                    ->getOneOrNullResult();
-                if ($teamAffiliation === null) {
+                $teamAffiliation = $this->em->getRepository(TeamAffiliation::class)->findOneBy(['shortname' => $teamItem['team_affiliation']['shortname']]);
+                if (!$teamAffiliation) {
                     $teamAffiliation  = new TeamAffiliation();
                     $propertyAccessor = PropertyAccess::createPropertyAccessor();
                     foreach ($teamItem['team_affiliation'] as $field => $value) {
