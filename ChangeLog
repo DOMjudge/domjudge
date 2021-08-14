@@ -35,6 +35,7 @@ Version 8.0.0 - DEV
  - Improve API action to add submission to adhere to the CCS spec.
  - Add API action to create clarification following CCS spec.
  - Add support for showing (pending) awards on the scoreboard. Thanks @shuibinlong!
+ - Remove JudgehostRestriction feature due to new Judgehost API
 
 
 Version 7.3.2 - 23 November 2020

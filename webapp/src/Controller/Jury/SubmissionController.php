@@ -324,18 +324,12 @@ class SubmissionController extends BaseController
             /** @var Judgehost[] $judgehosts */
             $judgehosts  = $this->em->createQueryBuilder()
                 ->from(Judgehost::class, 'j')
-                ->leftJoin('j.restriction', 'r')
-                ->select('j', 'r')
+                ->select('j')
                 ->andWhere('j.active = 1')
                 ->getQuery()
                 ->getResult();
             $canBeJudged = false;
             foreach ($judgehosts as $judgehost) {
-                if (!$judgehost->getRestriction()) {
-                    $canBeJudged = true;
-                    break;
-                }
-
                 $queryBuilder = $this->em->createQueryBuilder()
                     ->from(Submission::class, 's')
                     ->select('s')
@@ -348,24 +342,6 @@ class SubmissionController extends BaseController
                     ->andWhere('s.valid = 1')
                     ->setParameter(':submitid', $submission->getSubmitid())
                     ->setMaxResults(1);
-
-                $restrictions = $judgehost->getRestriction()->getRestrictions();
-                if (isset($restrictions['contest'])) {
-                    $queryBuilder
-                        ->andWhere('s.contest IN (:contests)')
-                        ->setParameter(':contests', $restrictions['contest']);
-                }
-                if (isset($restrictions['problem'])) {
-                    $queryBuilder
-                        ->leftJoin('s.problem', 'p')
-                        ->andWhere('p.probid IN (:problems)')
-                        ->setParameter(':problems', $restrictions['problem']);
-                }
-                if (isset($restrictions['language'])) {
-                    $queryBuilder
-                        ->andWhere('s.language IN (:languages)')
-                        ->setParameter(':languages', $restrictions['language']);
-                }
 
                 if ($queryBuilder->getQuery()->getOneOrNullResult()) {
                     $canBeJudged = true;
