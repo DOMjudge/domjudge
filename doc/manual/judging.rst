@@ -142,11 +142,6 @@ individual testcase results will be the overall submission result:
 the highest priority one. In case of a tie, the first occurring testcase
 result with highest priority is returned.
 
-Judgehost restrictions
-----------------------
-In earlier releases <=7.3.3 it was possible to dedicate certain judgehosts only for certain languages,
-problems or contests; or a combination thereof. This feature has been removed.
-
 Disk space and cleanup
 ----------------------
 The judgehost caches testcase and executable data and stores various
