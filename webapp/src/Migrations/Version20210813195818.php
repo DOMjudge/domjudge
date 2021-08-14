@@ -25,7 +25,7 @@ final class Version20210813195818 extends AbstractMigration
         $this->addSql('ALTER TABLE judgehost DROP FOREIGN KEY judgehost_ibfk_1');
         $this->addSql('DROP TABLE judgehost_restriction');
         $this->addSql('DROP INDEX restrictionid ON judgehost');
-        $this->addSql('ALTER TABLE judgehost DROP restrictionid, CHANGE polltime polltime NUMERIC(32, 9) UNSIGNED DEFAULT NULL COMMENT \'Time of last poll by autojudger\'');
+        $this->addSql('ALTER TABLE judgehost DROP restrictionid');
     }
 
     public function down(Schema $schema) : void
@@ -34,7 +34,7 @@ final class Version20210813195818 extends AbstractMigration
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
 
         $this->addSql('CREATE TABLE judgehost_restriction (restrictionid INT UNSIGNED AUTO_INCREMENT NOT NULL COMMENT \'Judgehost restriction ID\', name VARCHAR(255) CHARACTER SET utf8mb4 NOT NULL COLLATE `utf8mb4_unicode_ci` COMMENT \'Descriptive name\', restrictions LONGTEXT CHARACTER SET utf8mb4 DEFAULT \'NULL\' COLLATE `utf8mb4_unicode_ci` COMMENT \'JSON-encoded restrictions(DC2Type:json)\', PRIMARY KEY(restrictionid)) DEFAULT CHARACTER SET utf8 COLLATE `utf8_unicode_ci` ENGINE = InnoDB COMMENT = \'Restrictions for judgehosts\' ');
-        $this->addSql('ALTER TABLE judgehost ADD restrictionid INT UNSIGNED DEFAULT NULL COMMENT \'Judgehost restriction ID\', CHANGE polltime polltime NUMERIC(32, 9) UNSIGNED DEFAULT \'NULL\' COMMENT \'Time of last poll by autojudger\'');
+        $this->addSql('ALTER TABLE judgehost ADD restrictionid INT UNSIGNED DEFAULT NULL COMMENT \'Judgehost restriction ID\'');
         $this->addSql('ALTER TABLE judgehost ADD CONSTRAINT judgehost_ibfk_1 FOREIGN KEY (restrictionid) REFERENCES judgehost_restriction (restrictionid) ON DELETE SET NULL');
         $this->addSql('CREATE INDEX restrictionid ON judgehost (restrictionid)');
     }
