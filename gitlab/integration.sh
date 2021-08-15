@@ -132,6 +132,7 @@ section_end more_setup
 
 section_start submitting "Submitting test sources (including Kattis example)"
 cd ${DIR}/tests
+export SUBMITBASEURL='http://localhost/domjudge/'
 make check test-stress
 
 # Prepare to load example problems from Kattis/problemtools

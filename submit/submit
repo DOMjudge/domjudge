@@ -1,0 +1,546 @@
+#!/usr/bin/env python3
+
+#
+# submit -- command-line submit program for submissions.
+#
+# Part of the DOMjudge Programming Contest Jury System and licensed
+# under the GNU GPL. See README and COPYING for details.
+#
+
+import argparse
+import json
+import logging
+import os
+import requests
+import stat
+import sys
+import time
+try:
+    import magic
+except ModuleNotFoundError:
+    # Ignore, magic is optional
+    magic = None
+
+# Set the default base URL to submit to (optional). It can be overridden
+# by the SUBMITBASEURL environment variable or the -u/--url argument.
+baseurl = ''
+
+# Use a specific API version, set to empty string for default
+# or set to the version followed by a slash to use that version
+api_version = ''
+
+# Last modified time in minutes after which to warn for submitting
+# an old file.
+warn_mtime_minutes = 5
+
+# End of configurable settings
+num_warnings = 0
+
+def confirm(message: str) -> bool:
+    answer = ''
+    while answer not in ['y', 'n']:
+        answer = input(F'{message} (y/n) ').lower()
+    return answer == 'y'
+
+def warn_user(msg: str):
+    global num_warnings
+    if args.quiet:
+        logging.debug(F'user warning #{num_warnings}: {msg}')
+    else:
+        print(F'WARNING: {msg}!')
+    num_warnings += 1
+
+def usage(msg: str):
+    logging.error(F'error: {msg}')
+
+    print(F"Type '{sys.argv[0]} --help' to get help.")
+
+    exit(1)
+
+def error(msg: str):
+    logging.error(msg)
+    exit(-1)
+
+def read_contests() -> list:
+    '''Read all contests from the API
+    
+    Returns:
+        The contests or None if an error occurred
+    '''
+
+    try:
+        data = do_api_request('contests')
+    except RuntimeError as e:
+        logging.warning(e)
+        return None
+
+    if not isinstance(data, list):
+        logging.warning('REST API returned unexpected JSON data for endpoint contests')
+        return None
+
+    contests = []
+
+    for contest in data:
+        if ('id' not in contest
+            or 'shortname' not in contest
+            or not contest['id']
+            or not contest['shortname']):
+            logging.warning('REST API returned unexpected JSON data for contests')
+            return None
+        contests.append(contest)
+
+    logging.info(F'read {len(contests)} contests from the API')
+
+    return contests
+
+def read_languages() -> list:
+    '''Read all languages for the current contest from the API
+    
+    Returns:
+        The languages or None if an error occurred
+    '''
+
+    try:
+        endpoint = 'contests/' + my_contest['id'] + '/languages'
+        data = do_api_request(endpoint)
+    except RuntimeError as e:
+        logging.warning(e)
+        return None
+
+    if not isinstance(data, list):
+        logging.warning('REST API returned unexpected JSON data for endpoint languages')
+        return None
+
+    languages = []
+
+    for item in data:
+        if ('id' not in item
+            or 'extensions' not in item
+            or not item['id']
+            or not isinstance(item['extensions'], list)
+            or len(item['extensions']) == 0):
+            logging.warning('REST API returned unexpected JSON data for languages')
+            return None
+        language = {
+            'id': item['id'],
+            'name': item['name'],
+            'entry_point_required': item['entry_point_required'] or False,
+            'extensions': {item['id']}
+        }
+        for extension in item['extensions']:
+            language['extensions'].add(extension)
+        languages.append(language)
+
+    logging.info(F'read {len(languages)} languages from the API')
+
+    return languages
+
+def read_problems() -> list:
+    '''Read all problems for the current contest from the API
+    
+    Returns:
+        The problems or None if an error occurred
+    '''
+
+    try:
+        endpoint = 'contests/' + my_contest['id'] + '/problems'
+        data = do_api_request(endpoint)
+    except RuntimeError as e:
+        logging.warning(e)
+        return None
+
+    if not isinstance(data, list):
+        logging.warning('REST API returned unexpected JSON data for endpoint problems')
+        return None
+
+    problems = []
+
+    for problem in data:
+        if ('id' not in problem
+            or 'label' not in problem
+            or not problem['id']
+            or not problem['label']):
+            logging.warning('REST API returned unexpected JSON data for problems')
+            return None
+        problems.append(problem)
+
+    logging.info(F'read {len(problems)} problems from the API')
+
+    return problems
+
+def do_api_request(name: str):
+    '''Perform an API call to the given endpoint and return its data
+    
+    Parameters:
+        name (str): the endpoint to call
+
+    Returns:
+        The endpoint contents
+
+    Raises:
+        RunTimeError when the response is not JSON or the HTTP status code is non 2xx
+    '''
+
+    if not baseurl:
+        raise RuntimeError('No baseurl set')
+
+    url = F'{baseurl}api/{api_version}{name}'
+    
+    logging.info(F'Connecting to {url}')
+
+    try:
+        response = requests.get(url)
+    except requests.exceptions.ConnectionError as e:
+        raise RuntimeError(e)
+
+    if response.status_code >= 300:
+        print(response.text)
+        if response.status_code == 401:
+            raise RuntimeError('authentication failed, please check your DOMjudge credentials in ~/.netrc.')
+        else:
+            raise RuntimeError(F'API request {name} failed (code {response.status_code})')
+
+    logging.debug(F"API call '{name}' returned:\n{response.text}")
+
+    return json.loads(response.text)
+
+def kotlin_base_entry_point(filebase: str) -> str:
+    if filebase == "":
+        return "_"
+    chars = [c for c in filebase]
+    for idx, c in enumerate(chars):
+        if not c.isalnum():
+            chars[idx] = "_"
+
+    if chars[0].isalnum():
+        chars[0] = chars[0].upper()
+        filebase = "".join(chars)
+    else:
+        filebase = "_" + "".join(chars)
+
+    return filebase
+
+def get_epilog():
+    '''Get the epilog for the help text'''
+
+    contests_part_one = None
+    contests_part_two = None
+
+    if not contests or len(contests) <= 1:
+        contests_part_one = '''For CONTEST use the ID or short name as shown in the top-right contest
+selection box in the webinterface.'''
+        if contests and len(contests) == 1:
+            contests_part_two = F"Currently this defaults to the only active contest '{contests[0]['shortname']}'"
+    else:
+        contests_part_one = 'For CONTEST use one of the following:'
+        for contest in contests:
+            contests_part_one += F"\n    {contest['shortname']:<10} - {contest['name']}"
+
+    if not problems or len(problems) == 0:
+        problem_part = 'For PROBLEM use the label as on the scoreboard.'
+    else:
+        problem_part = 'For PROBLEM use one of the following:'
+        for problem in problems:
+            problem_part += F"\n    {problem['label']:<10} - {problem['name']}"
+
+    if not languages or len(languages) == 0:
+        language_part = 'For LANGUAGE use the ID or a common extension in lower- or uppercase.'
+    else:
+        language_part = 'For LANGUAGE use one of the following IDs/extensions in lower- or uppercase:'
+        for language in languages:
+            language_part += F"\n    {language['name'] + ':':<20}  {', '.join(sorted(language['extensions']))}"
+
+    epilog_parts = [
+        "Explanation of submission options:",
+        contests_part_one,
+        contests_part_two,
+        problem_part,
+        '''When not specified, PROBLEM defaults to the first FILENAME excluding the
+extension. For example, 'B.java' will indicate problem 'B'.''',
+        language_part,
+        '''The default for LANGUAGE is the extension of FILENAME. For example,
+'B.java' will indicate a Java solution.''',
+        "Set URL to the base address of the webinterface without the 'api/' suffix.\n" +
+        (F"The (pre)configured URL is '{baseurl}'\n" if baseurl else '') +
+        "Credentials are read from ~/.netrc (see netrc(4) for details).",
+        "Examples:",
+    F'''Submit problem 'b' in Java:
+    {sys.argv[0]} b.java''',
+    F'''Submit problem 'z' in C# for contest 'demo':
+    {sys.argv[0]} --contest=demo z.cs''',
+    F'''Submit problem 'e' in C++:
+    {sys.argv[0]} --problem e --language=cpp ProblemE.cc''',
+    F'''Submit problem 'hello' in C (options override the defaults from FILENAME):
+    {sys.argv[0]} -p hello -l C HelloWorld.cpp''',
+    F'''Submit multiple files (the problem and language are taken from the first):
+    {sys.argv[0]} hello.java message.java''',
+    ]
+
+    return "\n\n".join(part for part in epilog_parts if part != None) 
+
+def do_api_submit():
+    '''Submit to the API with the given data'''
+
+    url = F"{baseurl}api/{api_version}contests/{my_contest['id']}/submissions"
+
+    data = {
+        'problem': my_problem['id'],
+        'language': my_language['id'],
+    }
+    if entry_point:
+        data['entry_point'] = entry_point
+
+    files = [('code[]', open(filename, 'rb')) for filename in filenames]
+
+    logging.info(F'connecting to {url}')
+
+    response = requests.post(url, data=data, files=files)
+
+    logging.debug(F"API call 'submissions' returned:\n{response.text}")
+
+    # The connection worked, but we may have received an HTTP error
+    if response.status_code >= 300:
+        print(response.text)
+        if response.status_code == 401:
+            raise RuntimeError('authentication failed, please check your DOMjudge credentials in ~/.netrc.')
+        else:
+            raise RuntimeError(F'Submission failed (code {response.status_code})')
+
+    # We got a successful HTTP response. It worked.
+    # But check that we indeed received a submission ID.
+
+    try:
+        submission = json.loads(response.text)
+    except json.decoder.JSONDecodeError as e:
+        error(F'parsing REST API output: {e}')
+
+    if (not isinstance(submission, dict)
+        or not 'id' in submission
+        or not isinstance(submission['id'], str)):
+        error('REST API returned unexpected JSON data')
+
+    print(F"Submission received, id = s{submission['id']}")
+
+version_text = '''
+submit -- part of DOMjudge
+Written by the DOMjudge developers
+
+DOMjudge comes with ABSOLUTELY NO WARRANTY.  This is free software, and you
+are welcome to redistribute it under certain conditions.  See the GNU
+General Public Licence for details.
+'''
+
+loglevels = {
+    'DEBUG': logging.DEBUG,
+    'INFO': logging.INFO,
+    'WARNING': logging.WARNING,
+    'ERROR': logging.ERROR,
+    'CRITICAL': logging.CRITICAL,
+}
+
+# Note: we set add_help to false since we can only print the help text after parsing flags, since the help contains data needed from the API
+parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter, description='Submit a solution for a problem.', add_help=False)
+parser.add_argument('--version', action='version', version=version_text, help='output version information and exit')
+parser.add_argument('-h', '--help', help='display this help and exit', action='store_true')
+parser.add_argument('-c', '--contest', help='''submit for contest with ID or short name CONTEST.
+    Defaults to the value of the
+    environment variable 'SUBMITCONTEST'.
+    Mandatory when more than one contest is active.''')
+parser.add_argument('-p', '--problem', help='submit for problem with ID or label PROBLEM')
+parser.add_argument('-l', '--language', help='submit in language with ID LANGUAGE')
+parser.add_argument('-e', '--entry_point', help='set an explicit entry_point, e.g. the java main class')
+parser.add_argument('-v', '--verbose', help='increase verbosity', choices=loglevels.keys(), nargs='?', const='INFO', default='WARNING')
+parser.add_argument('-q', '--quiet', help='suppress warning/info messages', action='store_true')
+parser.add_argument('-y', '--assume-yes', help='suppress user input and assume yes', action='store_true')
+parser.add_argument('-u', '--url', help='''submit to server with base address URL
+    (should not be necessary for normal use)''')
+parser.add_argument('filename', nargs='*', help='filename(s) to submit')
+
+args = parser.parse_args()
+
+verbosity = args.verbose
+if args.quiet:
+    verbosity = 'ERROR'
+
+logging.basicConfig(format=F'[%(asctime)s] {sys.argv[0]}[{os.getpid()}]: %(message)s', datefmt='%b %d %H:%M:%S', level=loglevels[verbosity])
+
+contest_id = ''
+
+if 'SUBMITBASEURL' in os.environ:
+    baseurl = os.environ['SUBMITBASEURL']
+if 'SUBMITCONTEST' in os.environ:
+    contest_id = os.environ['SUBMITCONTEST']
+
+if args.contest:
+    contest_id = args.contest
+problem_id = args.problem or ''
+language_id = args.language or ''
+entry_point = args.entry_point
+if args.url:
+    baseurl = args.url
+
+logging.info(F'set verbosity to {verbosity}')
+
+# Make sure that baseurl terminates with a '/' for later concatenation.
+if baseurl and baseurl[-1:] != '/':
+    baseurl += '/'
+
+contests = read_contests()
+if not contests:
+    logging.warning('could not obtain active contests')
+
+my_contest = None
+my_language = None
+my_problem = None
+
+if not contest_id:
+    if not contests or len(contests) == 0:
+        warn_user('no active contests found (and no contest specified)')
+    elif len(contests) == 1:
+        my_contest = contests[0]
+    else:
+        warn_user('multiple active contests found, please specify one')
+elif contests:
+    contest_id = contest_id.lower()
+    for contest in contests:
+        if contest['id'].lower() == contest_id or contest['shortname'].lower() == contest_id:
+            my_contest = contest
+            break
+
+languages = None
+problems = None
+if my_contest:
+    languages = read_languages()
+    problems = read_problems()
+
+parser.epilog = get_epilog()
+
+if args.help:
+    parser.print_help()
+    exit(0)
+
+if not baseurl:
+    usage('no url specified, pass it as --url or set as SUBMITBASEURL environment variable')
+
+if not my_contest:
+    usage('no (valid) contest specified, pass it as --contest or set as SUBMITCONTEST environment variable')
+
+if not languages:
+    logging.warning('could not obtain language data')
+
+if not problems:
+    logging.warning('could not obtain problem data')
+
+if len(args.filename) == 0:
+    usage('no file(s) specified')
+
+# Process all source files
+filenames = []
+for index, filename in enumerate(args.filename):
+    # Ignore doubly specified files
+    if filename in filenames:
+        logging.debug(F"ignoring doubly specified file `{filename}'")
+        continue
+
+    # Stat file and do some validation checks
+    try:
+        st = os.stat(filename)
+    except FileNotFoundError:
+        usage(F"Can not find file `{filename}'")
+    
+    logging.debug(F"submission file {index + 1}: `{filename}'")
+
+    # Do some checks on submission file and warn user
+    if not stat.S_ISREG(st.st_mode):
+        warn_user(F"`{filename}' is not a regular file")
+    if not st.st_mode & stat.S_IRUSR:
+        warn_user(F"`{filename}' is not readable")
+    if st.st_size == 0:
+        warn_user(F"`{filename}' is empty")
+
+    file_age = (time.time() - st.st_mtime) / 60
+    if file_age > warn_mtime_minutes:
+        warn_user(F"`{filename}' has not been modified for {int(file_age)} minutes")
+
+    if magic:
+        m = magic.from_file(filename, mime=True)
+        if m[:5] != 'text/':
+            warn_user(F"`{filename}' is detected as binary/data")
+
+    filenames.append(filename)
+
+# Try to parse problem and language from first filename
+
+filebase = os.path.basename(filenames[0])
+
+if '.' in filebase:
+    dot = filebase.rfind('.')
+    ext = filebase[dot+1:]
+    filebase = filebase[:dot]
+
+    if not problem_id:
+        problem_id = filebase
+    if not language_id:
+        language_id = ext
+
+# Check for languages matching file extension
+language_id = language_id.lower()
+for language in languages:
+    for extension in language['extensions']:
+        if extension.lower() == language_id:
+            my_language = language
+            break
+    if my_language:
+        break
+
+if not my_language:
+    usage('no known language specified or detected')
+
+# Check for problem matching ID or label
+problem_id = problem_id.lower()
+for problem in problems:
+    if problem['id'].lower() == problem_id or problem['label'].lower() == problem_id:
+        my_problem = problem
+        break
+
+if not my_problem:
+     usage('no known problem specified or detected')
+
+# Guess entry point if not already specified.
+if not entry_point and my_language['entry_point_required']:
+    if my_language['name'] == 'Java':
+        entry_point = filebase
+    elif my_language['name'] == 'Kotlin':
+        entry_point = kotlin_base_entry_point(filebase) + "Kt"
+    elif my_language['name'] == 'Python 3':
+        entry_point = filebase + "." + ext
+
+if not entry_point and my_language['entry_point_required']:
+    error('Entry point required but not specified nor detected.')
+
+logging.debug(F"contest is `{my_contest['shortname']}'")
+logging.debug(F"problem is `{my_problem['label']}'")
+logging.debug(F"language is `{my_language['name']}'")
+logging.debug(F"entry_point is `{entry_point or '<None>'}'")
+logging.debug(F"url is `{baseurl}'")
+
+if not args.assume_yes:
+    print('Submission information:')
+    if len(filenames) == 1:
+        print(F'  filename:    {filenames[0]}')
+    else:
+        print(F'  filenames:   {" ".join(filenames)}')
+    print(F"  contest:     {my_contest['shortname']}")
+    print(F"  problem:     {my_problem['label']}")
+    print(F"  language:    {my_language['name']}")
+    if entry_point:
+        print(F'  entry point: {entry_point}')
+    print(F'  url:         {baseurl}')
+
+    if num_warnings > 0:
+        print('There are warnings for this submission!\a')
+
+    if not confirm('Do you want to continue?'):
+        error('submission aborted by user')
+
+do_api_submit()

@@ -12,4 +12,3 @@ parameters:
     domjudge.rundir: @domserver_rundir@
     domjudge.tmpdir: @domserver_tmpdir@
     domjudge.baseurl: @BASEURL@
-    domjudge.submitclient_enabled: @SUBMITCLIENT_ENABLED@
