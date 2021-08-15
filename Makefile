@@ -18,7 +18,6 @@ default:
 	@echo " - make build       (all except 'docs')"
 	@echo " - make domserver"
 	@echo " - make judgehost"
-	@echo " - make submitclient"
 	@echo " - make docs"
 	@echo or
 	@echo " - make install-domserver"
@@ -39,19 +38,13 @@ install:
 all: build
 build: domserver judgehost
 
-ifeq ($(SUBMITCLIENT_ENABLED),yes)
-build: submitclient
-endif
-
 ifeq ($(BUILD_DOCS),yes)
 all: docs
 dist: distdocs
 endif
 
 # MAIN TARGETS
-domserver judgehost docs submitclient: paths.mk config
-submitclient:
-	$(MAKE) -C submit submitclient
+domserver judgehost docs: paths.mk config
 install-domserver: domserver domserver-create-dirs
 install-judgehost: judgehost judgehost-create-dirs
 install-docs: docs-create-dirs
@@ -327,6 +320,6 @@ clean-autoconf:
 
 .PHONY: $(addsuffix -create-dirs,domserver judgehost docs) check-root \
         clean-autoconf $(addprefix maintainer-,conf install uninstall) \
-        config submitclient distdocs composer-dependencies \
+        config distdocs composer-dependencies \
         composer-dependencies-dev \
         coverity-conf coverity-build

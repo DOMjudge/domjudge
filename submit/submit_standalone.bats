@@ -10,33 +10,37 @@
 }
 
 setup() {
-    export SUBMITBASEURL="https://domjudge.example.org/somejudge"
+    export SUBMITBASEHOST="domjudge.example.org"
+    export SUBMITBASEURL="https://${SUBMITBASEHOST}/somejudge"
 }
 
 @test "baseurl set in environment" {
     run ./submit
-    echo $output | grep -E "warning: '$SUBMITBASEURL/api(/.*)?/contests': Could not resolve host"
+    echo $output | grep -E "$SUBMITBASEHOST.*/api(/.*)?/contests.*: \[Errno -2\] Name or service not known"
     [ "$status" -eq 1 ]
 }
 
 @test "baseurl via parameter overrides environment" {
     run ./submit --url https://domjudge.example.edu
-    echo $output | grep -E "warning: 'https://domjudge.example.edu/api(/.*)?/contests': Could not resolve host"
+    echo $output | grep -E "domjudge.example.edu.*/api(/.*)?/contests.*: \[Errno -2\] Name or service not known"
     run ./submit -u https://domjudge3.example.edu
-    echo $output | grep -E "warning: 'https://domjudge3.example.edu/api(/.*)?/contests': Could not resolve host"
+    echo $output | grep -E "domjudge3.example.edu.*/api(/.*)?/contests.*: \[Errno -2\] Name or service not known"
     [ "$status" -eq 1 ]
 }
 
 @test "baseurl can end in slash" {
     run ./submit --url https://domjudge.example.edu/domjudge/
-    echo $output | grep -E "warning: 'https://domjudge.example.edu/domjudge/api(/.*)?/contests': Could not resolve host"
+    echo $output | grep -E "domjudge.example.edu.*/api(/.*)?/contests.*: \[Errno -2\] Name or service not known"
     [ "$status" -eq 1 ]
 }
 
 @test "display basic usage information" {
     run ./submit --help
-    [ "${lines[3]}" = "Usage: ./submit [OPTION]... FILENAME..." ]
-    [ "${lines[4]}" = "Submit a solution for a problem." ]
+    [ "${lines[3]}" = "usage: submit [--version] [-h] [-c CONTEST] [-p PROBLEM] [-l LANGUAGE]" ]
+    [ "${lines[4]}" = "              [-e ENTRY_POINT] [-v [{DEBUG,INFO,WARNING,ERROR,CRITICAL}]] [-q]" ]
+    [ "${lines[5]}" = "              [-y] [-u URL]" ]
+    [ "${lines[6]}" = "              [filename [filename ...]]" ]
+    [ "${lines[7]}" = "Submit a solution for a problem." ]
     [ "$status" -eq 0 ]
 }
 
@@ -50,13 +54,13 @@ setup() {
     echo $output | grep "~/\\.netrc"
 }
 
-@test "nonexistent option refers to help" {
+@test "nonexistent option shows error" {
     run ./submit --doesnotexist
-    [ "${lines[1]}" = "Type './submit --help' to get help." ]
-    [ "$status" -eq 1 ]
+    [ "${lines[4]}" = "submit: error: unrecognized arguments: --doesnotexist" ]
+    [ "$status" -eq 2 ]
 }
 
-@test "verbosity option defaults to 6" {
+@test "verbosity option defaults to INFO" {
     run ./submit -v
-    echo $output | grep "set verbosity to 6"
+    echo $output | grep "set verbosity to INFO"
 }

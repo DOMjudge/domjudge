@@ -1,10 +1,11 @@
 #!/usr/bin/env bats
 
 # These tests assume presence of a running DOMjudge instance at the
-# compiled-in baseurl that has the DOMjudge example data loaded.
+# baseurl specified in the `paths.mk` file one directory up.
 
 setup() {
     export SUBMITCONTEST="demo"
+    export SUBMITBASEURL="$(grep '^BASEURL' ../paths.mk | tr -s ' ' | cut -d ' ' -f 3)"
 }
 
 @test "contest via parameter overrides environment" {
@@ -24,7 +25,7 @@ setup() {
 @test "languages and extensions are in help output" {
     run ./submit --help
     echo $output | grep "C: *c"
-    echo $output | grep "C++: *cpp, cc, cxx, c++"
+    echo $output | grep "C++: *c++, cc, cpp, cxx"
     echo $output | grep "Java: *java"
 }
 
@@ -41,7 +42,7 @@ setup() {
 }
 
 @test "binary file emits warning" {
-    cp ./submit $BATS_TMPDIR/binary.c
+    cp $(which bash) $BATS_TMPDIR/binary.c
     run ./submit -p hello $BATS_TMPDIR/binary.c <<< "n"
     echo $output | grep "binary.c' is detected as binary/data!"
 }
@@ -55,17 +56,17 @@ setup() {
 @test "detect problem name and language" {
     cp ../tests/test-hello.java $BATS_TMPDIR/hello.java
     run ./submit $BATS_TMPDIR/hello.java <<< "n"
-    [ "${lines[1]}" = "Submission information:" ]
-    [ "${lines[4]}" = "  problem:     hello" ]
-    [ "${lines[5]}" = "  language:    Java" ]
+    [ "${lines[0]}" = "Submission information:" ]
+    [ "${lines[3]}" = "  problem:     hello" ]
+    [ "${lines[4]}" = "  language:    Java" ]
 }
 
 @test "options override detection of problem name and language" {
     cp ../tests/test-hello.java $BATS_TMPDIR/hello.java
     run ./submit -p boolfind -l cpp $BATS_TMPDIR/hello.java <<< "n"
-    [ "${lines[1]}" = "Submission information:" ]
-    [ "${lines[4]}" = "  problem:     boolfind" ]
-    [ "${lines[5]}" = "  language:    C++" ]
+    [ "${lines[0]}" = "Submission information:" ]
+    [ "${lines[3]}" = "  problem:     boolfind" ]
+    [ "${lines[4]}" = "  language:    C++" ]
 }
 
 @test "non existing problem name emits erorr" {
@@ -114,13 +115,13 @@ setup() {
 @test "accept multiple files" {
     cp ../tests/test-hello.java ../tests/test-classname.java ../tests/test-package.java $BATS_TMPDIR/
     run ./submit -p hello $BATS_TMPDIR/test-*.java <<< "n"
-    [ "${lines[2]}" = "  filenames:   $BATS_TMPDIR/test-classname.java $BATS_TMPDIR/test-hello.java $BATS_TMPDIR/test-package.java" ]
+    [ "${lines[1]}" = "  filenames:   $BATS_TMPDIR/test-classname.java $BATS_TMPDIR/test-hello.java $BATS_TMPDIR/test-package.java" ]
 }
 
 @test "deduplicate multiple files" {
     cp ../tests/test-hello.java ../tests/test-package.java $BATS_TMPDIR/
     run ./submit -p hello $BATS_TMPDIR/test-hello.java $BATS_TMPDIR/test-hello.java $BATS_TMPDIR/test-package.java <<< "n"
-    [ "${lines[2]}" = "  filenames:   $BATS_TMPDIR/test-hello.java $BATS_TMPDIR/test-package.java" ]
+    [ "${lines[1]}" = "  filenames:   $BATS_TMPDIR/test-hello.java $BATS_TMPDIR/test-package.java" ]
 }
 
 @test "submit solution" {
