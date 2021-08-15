@@ -2,14 +2,121 @@
 
 namespace App\Tests\Unit\Controller\API;
 
+use App\DataFixtures\Test\SampleSubmissionsFixture;
 use App\Service\DOMJudgeService;
-use App\Tests\Unit\BaseTest;
+use App\Tests\Unit\BaseTest as BaseBaseTest;
 use Generator;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\Intl\Countries;
 
 class GeneralInfoControllerTest extends BaseTest
 {
+    private const API_VERSION = 4;
+
+    public function testVersionReturnsApiVersion()
+    {
+        $response = $this->verifyApiJsonResponse('GET', "/version", 200);
+
+        $expected = ['api_version' => static::API_VERSION];
+
+        static::assertEquals($expected, $response);
+    }
+
+    /**
+     * Test that both the API base as the info endpoint return the same data
+     */
+    public function testInfoReturnsVariables()
+    {
+        $infoEndpoints = ['/', '/info'];
+
+        foreach($infoEndpoints as $endpoint) {
+            $response = $this->verifyApiJsonResponse('GET', $endpoint, 200);
+
+            static::assertIsArray($response);
+            static::assertCount(4, $response);
+            static::assertEquals(static::API_VERSION, $response['api_version']);
+            static::assertRegExp('/^\d+\.\d+\.\d+/', $response['domjudge_version']);
+            static::assertEquals('test', $response['environment']);
+            static::assertStringStartsWith('http', $response['doc_url']);
+        }
+    }
+
+    public function testStatusNoPublicAccess()
+    {
+        $response = $this->verifyApiJsonResponse('GET', "/status", 401);
+    }
+
+    public function testStatusNoTeamAccess()
+    {
+        $response = $this->verifyApiJsonResponse('GET', "/status", 403, 'demo');
+    }
+
+    /**
+     * Test the basic output of the status endpoint without submissions present
+     */
+    public function testStatusAdminBasicOperation()
+    {
+        $response = $this->verifyApiJsonResponse('GET', "/status", 200, 'admin');
+
+        $expected = [[
+            'num_submissions' => 0,
+            'num_queued' => 0,
+            'num_judging' => 0,
+            'cid' => $this->getDemoContestId(),
+        ]];
+
+        static::assertEquals($expected, $response);
+    }
+
+    /**
+     * Test that adding two submissions is reflected in the status endpoint
+     */
+    public function testStatusAdminSubmissionsPresent()
+    {
+        $this->loadFixture(SampleSubmissionsFixture::class);
+        $response = $this->verifyApiJsonResponse('GET', "/status", 200, 'admin');
+
+        $expected = [[
+            'num_submissions' => 2,
+            'num_queued' => 2,
+            'num_judging' => 0,
+            'cid' => $this->getDemoContestId(),
+        ]];
+
+        static::assertEquals($expected, $response);
+    }
+
+    public function testUserEndpointMustBeLoggedIn()
+    {
+        $response = $this->verifyApiJsonResponse('GET', "/status", 401);
+    }
+
+    /**
+     * Test user endpoint with different users
+     * @dataProvider provideUsers
+     */
+    public function testUserEndpoint(string $username, string $fullname, string $teamname, array $roles)
+    {
+        $response = $this->verifyApiJsonResponse('GET', "/user", 200, $username);
+
+        static::assertEquals($username, $response['username']);
+        static::assertEquals($fullname, $response['name']);
+        static::assertEquals($teamname, $response['team']);
+        static::assertEquals($roles, $response['roles']);
+        static::assertTrue($response['enabled']);
+        static::assertGreaterThanOrEqual($response['first_login_time'], $response['last_login_time']);
+        $keysExpected = ['id', 'ip', 'last_ip', 'email'];
+        foreach($keysExpected as $keyExpected) {
+            static::assertArrayHasKey($keyExpected, $response);
+        }
+    }
+
+    public function provideUsers(): Generator
+    {
+        yield ['demo', 'demo user for example team', 'Example teamname', ['team']];
+        yield ['admin', 'Administrator', 'DOMjudge', ['admin','team']];
+    }
+
     /**
      * Test that when a country flag exists, the correct data is returned
      *
