@@ -84,7 +84,7 @@ abstract class BaseTest extends BaseBaseTest
     }
 
     /**
-     * Verify the given API URL produces the given status code and return the body as JSON
+     * Verify the given API URL produces the given status code and return the body
      *
      * @param string      $method   The HTTP method to use
      * @param string      $apiUri   The API URL to use. Will be prefixed with /api
@@ -93,9 +93,9 @@ abstract class BaseTest extends BaseBaseTest
      * @param mixed       $jsonData The JSON data to set as a body, if any
      * @param array       $files    The files to upload, if any
      *
-     * @return mixed The returned JSON data
+     * @return mixed The returned data
      */
-    protected function verifyApiJsonResponse(
+    protected function verifyApiResponse(
         string $method,
         string $apiUri,
         int $status,
@@ -123,7 +123,31 @@ abstract class BaseTest extends BaseBaseTest
         $response = $this->client->getResponse();
         $message = var_export($response, true);
         self::assertEquals($status, $response->getStatusCode(), $message);
-        return json_decode($response->getContent(), true);
+        return $response->getContent();
+    }
+
+    /**
+     * Verify the given API URL produces the given status code and return the body as JSON
+     *
+     * @param string      $method   The HTTP method to use
+     * @param string      $apiUri   The API URL to use. Will be prefixed with /api
+     * @param int         $status   The status code to expect
+     * @param string|null $user     The username to use. Currently only admin and demo are supported
+     * @param mixed       $jsonData The JSON data to set as a body, if any
+     * @param array       $files    The files to upload, if any
+     *
+     * @return mixed The returned JSON data
+     */
+    protected function verifyApiJsonResponse(
+        string $method,
+        string $apiUri,
+        int $status,
+        ?string $user = null,
+        $jsonData = null,
+        array $files = []
+    ) {
+        $response = $this->verifyApiResponse($method, $apiUri, $status, $user, $jsonData, $files);
+        return json_decode($response, true);
     }
 
     public function helperGetEndpointURL(string $apiEndpoint, ?string $id = null): string {
