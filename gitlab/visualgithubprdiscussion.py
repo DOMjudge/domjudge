@@ -15,6 +15,8 @@ def toMessage(url):
         return [r.json()['body']]
 
 for message in toMessage(URL_PR)+toMessage(URL_IS):
+    if message is None:
+        continue
     index=message.find(BEGIN_RGX)
     if index>-1:
         for line in message[index:].splitlines()[1:]:
