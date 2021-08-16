@@ -29,6 +29,8 @@ class Judgehost
      * @ORM\Column(type="integer", name="judgehostid", length=4,
      *     options={"comment"="Judgehost ID","unsigned"=true},
      *     nullable=false)
+     * @Serializer\SerializedName("id")
+     * @Serializer\Type("string")
      */
     private $judgehostid;
 
