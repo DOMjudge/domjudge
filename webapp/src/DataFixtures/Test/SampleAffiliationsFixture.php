@@ -6,7 +6,7 @@ use App\Entity\TeamAffiliation;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 
-class SampleAffilicationsFixture extends Fixture
+class SampleAffiliationsFixture extends Fixture
 {
     public function load(ObjectManager $manager)
     {

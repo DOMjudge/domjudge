@@ -2,7 +2,7 @@
 
 namespace App\Tests\Unit\Controller\API;
 
-use App\DataFixtures\Test\SampleAffilicationsFixture;
+use App\DataFixtures\Test\SampleAffiliationsFixture;
 use App\Entity\TeamAffiliation;
 use App\Service\ConfigurationService;
 
@@ -41,7 +41,7 @@ class OrganizationControllerTest extends BaseTest
                 ]
             ]
         ],
-        SampleAffilicationsFixture::class . ':0' => [
+        SampleAffiliationsFixture::class . ':0' => [
             'name'         => 'FAU',
             'formal_name'  => 'Friedrich-Alexander-Universität Erlangen-Nürnberg',
             'country'      => 'DEU',
@@ -60,7 +60,7 @@ class OrganizationControllerTest extends BaseTest
                 ],
             ],
         ],
-        SampleAffilicationsFixture::class . ':1' => [
+        SampleAffiliationsFixture::class . ':1' => [
             'name'         => 'ABC',
             'formal_name'  => 'Affiliation without country',
             'country'      => null,
@@ -72,7 +72,7 @@ class OrganizationControllerTest extends BaseTest
 
     protected $expectedAbsent = ['4242', 'nonexistent'];
 
-    protected static $fixtures = [SampleAffilicationsFixture::class];
+    protected static $fixtures = [SampleAffiliationsFixture::class];
 
     public function testList()
     {
