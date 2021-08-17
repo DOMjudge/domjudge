@@ -4,7 +4,6 @@ namespace App\Tests\Unit\Controller\API;
 
 use App\DataFixtures\Test\SampleSubmissionsFixture;
 use App\Service\DOMJudgeService;
-use App\Tests\Unit\BaseTest as BaseBaseTest;
 use Generator;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\Intl\Countries;
