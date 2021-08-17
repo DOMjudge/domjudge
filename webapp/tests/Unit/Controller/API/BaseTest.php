@@ -366,7 +366,6 @@ abstract class BaseTest extends BaseBaseTest
             static::markTestSkipped('No endpoint defined');
         }
         $url = $this->helperGetEndpointURL($apiEndpoint,$id);
-        var_dump($url);
         $this->verifyApiJsonResponse('GET', $url, 404, $this->apiUser);
     }
 
