@@ -21,7 +21,7 @@ class MetricsControllerTest extends BaseTest
     /**
      * Test that the Prometheus metrics give the basic expected output format
      */
-    public function testPrometheuMetricss()
+    public function testPrometheusMetrics()
     {
         $expected =<<<EOF
 # HELP domjudge_submissions_correct Number of correct submissions
