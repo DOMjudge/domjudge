@@ -42,10 +42,6 @@ class JudgehostControllerTest extends BaseTest
         }
     }
 
-    public function testSingleContestNotFound(): void {
-        static::markTestSkipped('No API relation between contest and judgehost.');
-    }
-
     /**
      * Test that the endpoint returns an empty list for objects that don't exist
      *
