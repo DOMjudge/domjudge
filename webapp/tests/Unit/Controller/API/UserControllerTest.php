@@ -19,7 +19,6 @@ class UserControllerTest extends BaseTest
             "username" => "admin",
             "name" => "Administrator",
             "email" => null,
-            "last_ip" => "127.0.0.1",
             "ip" => null,
             "enabled" => true
         ],
@@ -32,7 +31,6 @@ class UserControllerTest extends BaseTest
             "username" => "judgehost",
             "name" => "User for judgedaemons",
             "email" => null,
-            "last_ip" => "127.0.0.1",
             "ip" => null,
             "enabled" => true
         ],
@@ -45,7 +43,6 @@ class UserControllerTest extends BaseTest
             "username" => "demo",
             "name" => "demo user for example team",
             "email" => null,
-            "last_ip" => null,
             "ip" => null,
             "enabled" => true
         ],
