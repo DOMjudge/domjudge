@@ -10,7 +10,7 @@ use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 
 abstract class BaseTest extends BaseBaseTest
 {
-    protected static $rootEndpoints = ['contests','judgehosts'];
+    protected static $rootEndpoints = ['contests','judgehosts','users'];
     
     /** @var KernelBrowser */
     protected $client;
@@ -341,6 +341,9 @@ abstract class BaseTest extends BaseBaseTest
     {
         if (($apiEndpoint = $this->apiEndpoint) === null) {
             static::markTestSkipped('No endpoint defined');
+        }
+        if (in_array($apiEndpoint, static::$rootEndpoints)) {
+            static::markTestSkipped('Endpoint does not have contests prefix');
         }
         // Note that the 42 and 123 here is a contest that doesn't exist
         if ($apiEndpoint === 'contests') {
