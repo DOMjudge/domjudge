@@ -1,7 +1,6 @@
 /domserver-static.php
 /judgehost-static.php
 /runguard-config.h
-/submit-config.h
 /apache.conf
 /nginx-conf
 /nginx-conf-inner

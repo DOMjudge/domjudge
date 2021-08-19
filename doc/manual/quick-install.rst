@@ -67,9 +67,7 @@ Judgehosts
 
 Submit client
 -------------
- * Build the client:
-   ``./configure --with-baseurl=<url> && make submitclient``.
- * Install it in your path and on the team machines.
+ * Install the provided ``submit`` in your path and on the team machines.
  * Add a ``.netrc`` file with valid team credentials.
  * Run ``submit --help`` to see if it can connect successfully.
 
