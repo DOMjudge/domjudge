@@ -39,21 +39,21 @@ num_warnings = 0
 def confirm(message: str) -> bool:
     answer = ''
     while answer not in ['y', 'n']:
-        answer = input(F'{message} (y/n) ').lower()
+        answer = input(f'{message} (y/n) ').lower()
     return answer == 'y'
 
 def warn_user(msg: str):
     global num_warnings
     if args.quiet:
-        logging.debug(F'user warning #{num_warnings}: {msg}')
+        logging.debug(f'user warning #{num_warnings}: {msg}')
     else:
-        print(F'WARNING: {msg}!')
+        print(f'WARNING: {msg}!')
     num_warnings += 1
 
 def usage(msg: str):
-    logging.error(F'error: {msg}')
+    logging.error(f'error: {msg}')
 
-    print(F"Type '{sys.argv[0]} --help' to get help.")
+    print(f"Type '{sys.argv[0]} --help' to get help.")
 
     exit(1)
 
@@ -89,7 +89,7 @@ def read_contests() -> list:
             return None
         contests.append(contest)
 
-    logging.info(F'read {len(contests)} contests from the API')
+    logging.info(f'read {len(contests)} contests from the API')
 
     return contests
 
@@ -131,7 +131,7 @@ def read_languages() -> list:
             language['extensions'].add(extension)
         languages.append(language)
 
-    logging.info(F'read {len(languages)} languages from the API')
+    logging.info(f'read {len(languages)} languages from the API')
 
     return languages
 
@@ -164,7 +164,7 @@ def read_problems() -> list:
             return None
         problems.append(problem)
 
-    logging.info(F'read {len(problems)} problems from the API')
+    logging.info(f'read {len(problems)} problems from the API')
 
     return problems
 
@@ -184,9 +184,9 @@ def do_api_request(name: str):
     if not baseurl:
         raise RuntimeError('No baseurl set')
 
-    url = F'{baseurl}api/{api_version}{name}'
+    url = f'{baseurl}api/{api_version}{name}'
     
-    logging.info(F'Connecting to {url}')
+    logging.info(f'Connecting to {url}')
 
     try:
         response = requests.get(url)
@@ -198,9 +198,9 @@ def do_api_request(name: str):
         if response.status_code == 401:
             raise RuntimeError('authentication failed, please check your DOMjudge credentials in ~/.netrc.')
         else:
-            raise RuntimeError(F'API request {name} failed (code {response.status_code})')
+            raise RuntimeError(f'API request {name} failed (code {response.status_code})')
 
-    logging.debug(F"API call '{name}' returned:\n{response.text}")
+    logging.debug(f"API call '{name}' returned:\n{response.text}")
 
     return json.loads(response.text)
 
@@ -230,25 +230,25 @@ def get_epilog():
         contests_part_one = '''For CONTEST use the ID or short name as shown in the top-right contest
 selection box in the webinterface.'''
         if contests and len(contests) == 1:
-            contests_part_two = F"Currently this defaults to the only active contest '{contests[0]['shortname']}'"
+            contests_part_two = f"Currently this defaults to the only active contest '{contests[0]['shortname']}'"
     else:
         contests_part_one = 'For CONTEST use one of the following:'
         for contest in contests:
-            contests_part_one += F"\n    {contest['shortname']:<10} - {contest['name']}"
+            contests_part_one += f"\n    {contest['shortname']:<10} - {contest['name']}"
 
     if not problems or len(problems) == 0:
         problem_part = 'For PROBLEM use the label as on the scoreboard.'
     else:
         problem_part = 'For PROBLEM use one of the following:'
         for problem in problems:
-            problem_part += F"\n    {problem['label']:<10} - {problem['name']}"
+            problem_part += f"\n    {problem['label']:<10} - {problem['name']}"
 
     if not languages or len(languages) == 0:
         language_part = 'For LANGUAGE use the ID or a common extension in lower- or uppercase.'
     else:
         language_part = 'For LANGUAGE use one of the following IDs/extensions in lower- or uppercase:'
         for language in languages:
-            language_part += F"\n    {language['name'] + ':':<20}  {', '.join(sorted(language['extensions']))}"
+            language_part += f"\n    {language['name'] + ':':<20}  {', '.join(sorted(language['extensions']))}"
 
     epilog_parts = [
         "Explanation of submission options:",
@@ -261,18 +261,18 @@ extension. For example, 'B.java' will indicate problem 'B'.''',
         '''The default for LANGUAGE is the extension of FILENAME. For example,
 'B.java' will indicate a Java solution.''',
         "Set URL to the base address of the webinterface without the 'api/' suffix.\n" +
-        (F"The (pre)configured URL is '{baseurl}'\n" if baseurl else '') +
+        (f"The (pre)configured URL is '{baseurl}'\n" if baseurl else '') +
         "Credentials are read from ~/.netrc (see netrc(4) for details).",
         "Examples:",
-    F'''Submit problem 'b' in Java:
+    f'''Submit problem 'b' in Java:
     {sys.argv[0]} b.java''',
-    F'''Submit problem 'z' in C# for contest 'demo':
+    f'''Submit problem 'z' in C# for contest 'demo':
     {sys.argv[0]} --contest=demo z.cs''',
-    F'''Submit problem 'e' in C++:
+    f'''Submit problem 'e' in C++:
     {sys.argv[0]} --problem e --language=cpp ProblemE.cc''',
-    F'''Submit problem 'hello' in C (options override the defaults from FILENAME):
+    f'''Submit problem 'hello' in C (options override the defaults from FILENAME):
     {sys.argv[0]} -p hello -l C HelloWorld.cpp''',
-    F'''Submit multiple files (the problem and language are taken from the first):
+    f'''Submit multiple files (the problem and language are taken from the first):
     {sys.argv[0]} hello.java message.java''',
     ]
 
@@ -281,7 +281,7 @@ extension. For example, 'B.java' will indicate problem 'B'.''',
 def do_api_submit():
     '''Submit to the API with the given data'''
 
-    url = F"{baseurl}api/{api_version}contests/{my_contest['id']}/submissions"
+    url = f"{baseurl}api/{api_version}contests/{my_contest['id']}/submissions"
 
     data = {
         'problem': my_problem['id'],
@@ -292,11 +292,11 @@ def do_api_submit():
 
     files = [('code[]', open(filename, 'rb')) for filename in filenames]
 
-    logging.info(F'connecting to {url}')
+    logging.info(f'connecting to {url}')
 
     response = requests.post(url, data=data, files=files)
 
-    logging.debug(F"API call 'submissions' returned:\n{response.text}")
+    logging.debug(f"API call 'submissions' returned:\n{response.text}")
 
     # The connection worked, but we may have received an HTTP error
     if response.status_code >= 300:
@@ -304,7 +304,7 @@ def do_api_submit():
         if response.status_code == 401:
             raise RuntimeError('authentication failed, please check your DOMjudge credentials in ~/.netrc.')
         else:
-            raise RuntimeError(F'Submission failed (code {response.status_code})')
+            raise RuntimeError(f'Submission failed (code {response.status_code})')
 
     # We got a successful HTTP response. It worked.
     # But check that we indeed received a submission ID.
@@ -312,14 +312,14 @@ def do_api_submit():
     try:
         submission = json.loads(response.text)
     except json.decoder.JSONDecodeError as e:
-        error(F'parsing REST API output: {e}')
+        error(f'parsing REST API output: {e}')
 
     if (not isinstance(submission, dict)
         or not 'id' in submission
         or not isinstance(submission['id'], str)):
         error('REST API returned unexpected JSON data')
 
-    print(F"Submission received, id = s{submission['id']}")
+    print(f"Submission received, id = s{submission['id']}")
 
 version_text = '''
 submit -- part of DOMjudge
@@ -362,7 +362,7 @@ verbosity = args.verbose
 if args.quiet:
     verbosity = 'ERROR'
 
-logging.basicConfig(format=F'[%(asctime)s] {sys.argv[0]}[{os.getpid()}]: %(message)s', datefmt='%b %d %H:%M:%S', level=loglevels[verbosity])
+logging.basicConfig(format=f'[%(asctime)s] {sys.argv[0]}[{os.getpid()}]: %(message)s', datefmt='%b %d %H:%M:%S', level=loglevels[verbosity])
 
 contest_id = ''
 
@@ -379,7 +379,7 @@ entry_point = args.entry_point
 if args.url:
     baseurl = args.url
 
-logging.info(F'set verbosity to {verbosity}')
+logging.info(f'set verbosity to {verbosity}')
 
 # Make sure that baseurl terminates with a '/' for later concatenation.
 if baseurl and baseurl[-1:] != '/':
@@ -439,33 +439,33 @@ filenames = []
 for index, filename in enumerate(args.filename):
     # Ignore doubly specified files
     if filename in filenames:
-        logging.debug(F"ignoring doubly specified file `{filename}'")
+        logging.debug(f"ignoring doubly specified file `{filename}'")
         continue
 
     # Stat file and do some validation checks
     try:
         st = os.stat(filename)
     except FileNotFoundError:
-        usage(F"Can not find file `{filename}'")
+        usage(f"Can not find file `{filename}'")
     
-    logging.debug(F"submission file {index + 1}: `{filename}'")
+    logging.debug(f"submission file {index + 1}: `{filename}'")
 
     # Do some checks on submission file and warn user
     if not stat.S_ISREG(st.st_mode):
-        warn_user(F"`{filename}' is not a regular file")
+        warn_user(f"`{filename}' is not a regular file")
     if not st.st_mode & stat.S_IRUSR:
-        warn_user(F"`{filename}' is not readable")
+        warn_user(f"`{filename}' is not readable")
     if st.st_size == 0:
-        warn_user(F"`{filename}' is empty")
+        warn_user(f"`{filename}' is empty")
 
     file_age = (time.time() - st.st_mtime) / 60
     if file_age > warn_mtime_minutes:
-        warn_user(F"`{filename}' has not been modified for {int(file_age)} minutes")
+        warn_user(f"`{filename}' has not been modified for {int(file_age)} minutes")
 
     if magic:
         m = magic.from_file(filename, mime=True)
         if m[:5] != 'text/':
-            warn_user(F"`{filename}' is detected as binary/data")
+            warn_user(f"`{filename}' is detected as binary/data")
 
     filenames.append(filename)
 
@@ -518,24 +518,24 @@ if not entry_point and my_language['entry_point_required']:
 if not entry_point and my_language['entry_point_required']:
     error('Entry point required but not specified nor detected.')
 
-logging.debug(F"contest is `{my_contest['shortname']}'")
-logging.debug(F"problem is `{my_problem['label']}'")
-logging.debug(F"language is `{my_language['name']}'")
-logging.debug(F"entry_point is `{entry_point or '<None>'}'")
-logging.debug(F"url is `{baseurl}'")
+logging.debug(f"contest is `{my_contest['shortname']}'")
+logging.debug(f"problem is `{my_problem['label']}'")
+logging.debug(f"language is `{my_language['name']}'")
+logging.debug(f"entry_point is `{entry_point or '<None>'}'")
+logging.debug(f"url is `{baseurl}'")
 
 if not args.assume_yes:
     print('Submission information:')
     if len(filenames) == 1:
-        print(F'  filename:    {filenames[0]}')
+        print(f'  filename:    {filenames[0]}')
     else:
-        print(F'  filenames:   {" ".join(filenames)}')
-    print(F"  contest:     {my_contest['shortname']}")
-    print(F"  problem:     {my_problem['label']}")
-    print(F"  language:    {my_language['name']}")
+        print(f'  filenames:   {" ".join(filenames)}')
+    print(f"  contest:     {my_contest['shortname']}")
+    print(f"  problem:     {my_problem['label']}")
+    print(f"  language:    {my_language['name']}")
     if entry_point:
-        print(F'  entry point: {entry_point}')
-    print(F'  url:         {baseurl}')
+        print(f'  entry point: {entry_point}')
+    print(f'  url:         {baseurl}')
 
     if num_warnings > 0:
         print('There are warnings for this submission!\a')
