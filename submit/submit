@@ -385,8 +385,8 @@ logging.info(f'set verbosity to {verbosity}')
 if baseurl and baseurl[-1:] != '/':
     baseurl += '/'
 
-contests = read_contests()
-if not contests:
+contests = read_contests() if baseurl else None
+if not contests and not args.help:
     logging.warning('could not obtain active contests')
 
 my_contest = None
@@ -394,8 +394,9 @@ my_language = None
 my_problem = None
 
 if not contest_id:
-    if not contests or len(contests) == 0:
-        warn_user('no active contests found (and no contest specified)')
+    if not contests:
+        if not args.help:
+            warn_user('no active contests found (and no contest specified)')
     elif len(contests) == 1:
         my_contest = contests[0]
     else:
