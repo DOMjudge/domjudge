@@ -345,16 +345,13 @@ abstract class BaseTest extends BaseBaseTest
         if (in_array($apiEndpoint, static::$rootEndpoints)) {
             static::markTestSkipped('Endpoint does not have contests prefix');
         }
-        // Note that the 42 and 123 here is a contest that doesn't exist
-        if ($apiEndpoint === 'contests') {
-            $url = '/contests/42';
-            $message = 'Object with ID \'42\' not found';
-        } else {
-            $url = "/contests/42/$apiEndpoint/123";
-            $message = 'Contest with ID \'42\' not found';
-        }
-        $respone = $this->verifyApiJsonResponse('GET', $url, 404, $this->apiUser);
-        static::assertEquals($message, $respone['message']);
+
+        // Note that the 42 here is a contest that doesn't exist
+        $url = "/contests/42/$apiEndpoint/123";
+        $message = 'Contest with ID \'42\' not found';
+
+        $response = $this->verifyApiJsonResponse('GET', $url, 404, $this->apiUser);
+        static::assertEquals($message, $response['message']);
     }
 
     /**
