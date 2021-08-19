@@ -417,6 +417,10 @@ if my_contest:
 parser.epilog = get_epilog()
 
 if args.help:
+    if 'BATS_VERSION' in os.environ:
+        # print_help adds line breaks depending on the number of available columns.
+        # To make it deterministic under test, we set it to 100 here if we are testing.
+        os.environ['COLUMNS'] = '100'
     parser.print_help()
     exit(0)
 

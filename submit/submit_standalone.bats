@@ -36,11 +36,10 @@ setup() {
 
 @test "display basic usage information" {
     run ./submit --help
-    [ "${lines[3]}" = "usage: submit [--version] [-h] [-c CONTEST] [-p PROBLEM] [-l LANGUAGE]" ]
-    [ "${lines[4]}" = "              [-e ENTRY_POINT] [-v [{DEBUG,INFO,WARNING,ERROR,CRITICAL}]] [-q]" ]
-    [ "${lines[5]}" = "              [-y] [-u URL]" ]
-    [ "${lines[6]}" = "              [filename [filename ...]]" ]
-    [ "${lines[7]}" = "Submit a solution for a problem." ]
+    [ "${lines[1]}" = "usage: submit [--version] [-h] [-c CONTEST] [-p PROBLEM] [-l LANGUAGE] [-e ENTRY_POINT]" ]
+    [ "${lines[2]}" = "              [-v [{DEBUG,INFO,WARNING,ERROR,CRITICAL}]] [-q] [-y] [-u URL]" ]
+    [ "${lines[3]}" = "              [filename ...]" ]
+    [ "${lines[4]}" = "Submit a solution for a problem." ]
     [ "$status" -eq 0 ]
 }
 
@@ -56,7 +55,8 @@ setup() {
 
 @test "nonexistent option shows error" {
     run ./submit --doesnotexist
-    [ "${lines[4]}" = "submit: error: unrecognized arguments: --doesnotexist" ]
+    # Do not count from the start, but take the last line.
+    [ "${lines[-1]}" = "submit: error: unrecognized arguments: --doesnotexist" ]
     [ "$status" -eq 2 ]
 }
 
