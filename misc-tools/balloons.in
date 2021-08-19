@@ -29,7 +29,6 @@ define('BALLOON_CMD', 'mail -s Balloon_notification domjudge@localhost');
 //define('BALLOON_CMD', 'cat >>/tmp/balloons_debug.log');
 
 require('@domserver_etcdir@/domserver-static.php');
-require(ETCDIR . '/domserver-config.php');
 
 define('SCRIPT_ID', 'balloons');
 define('LOGFILE', LOGDIR.'/balloons.log');
@@ -130,7 +129,7 @@ function request($curl_handle, string $API, string $url, string $verb = 'GET', s
     if ($status < 200 || $status >= 300) {
         if ($status == 401) {
             $errstr = "Authentication failed (error $status) while contacting $url. " .
-                "Check credentials in restapi.secret.";
+                "Check credentials in ~/.netrc.";
         } else {
             $errstr = "Error while executing curl $verb to url " . $url .
                 ": http status code: " . $status .
