@@ -44,17 +44,15 @@ def confirm(message: str) -> bool:
 
 def warn_user(msg: str):
     global num_warnings
+    num_warnings += 1
     if args.quiet:
         logging.debug(f'user warning #{num_warnings}: {msg}')
     else:
         print(f'WARNING: {msg}!')
-    num_warnings += 1
 
 def usage(msg: str):
     logging.error(f'error: {msg}')
-
     print(f"Type '{sys.argv[0]} --help' to get help.")
-
     exit(1)
 
 def error(msg: str):
@@ -79,7 +77,6 @@ def read_contests() -> list:
         return None
 
     contests = []
-
     for contest in data:
         if ('id' not in contest
             or 'shortname' not in contest
@@ -90,7 +87,6 @@ def read_contests() -> list:
         contests.append(contest)
 
     logging.info(f'read {len(contests)} contests from the API')
-
     return contests
 
 def read_languages() -> list:
@@ -127,8 +123,7 @@ def read_languages() -> list:
             'entry_point_required': item['entry_point_required'] or False,
             'extensions': {item['id']}
         }
-        for extension in item['extensions']:
-            language['extensions'].add(extension)
+        language['extensions'] |= set([ext for ext in item['extensions']])
         languages.append(language)
 
     logging.info(f'read {len(languages)} languages from the API')
@@ -207,7 +202,7 @@ def do_api_request(name: str):
 def kotlin_base_entry_point(filebase: str) -> str:
     if filebase == "":
         return "_"
-    chars = [c for c in filebase]
+    chars = list(filebase)
     for idx, c in enumerate(chars):
         if not c.isalnum():
             chars[idx] = "_"
@@ -236,14 +231,14 @@ selection box in the webinterface.'''
         for contest in contests:
             contests_part_one += f"\n    {contest['shortname']:<10} - {contest['name']}"
 
-    if not problems or len(problems) == 0:
+    if not problems:
         problem_part = 'For PROBLEM use the label as on the scoreboard.'
     else:
         problem_part = 'For PROBLEM use one of the following:'
         for problem in problems:
             problem_part += f"\n    {problem['label']:<10} - {problem['name']}"
 
-    if not languages or len(languages) == 0:
+    if not languages:
         language_part = 'For LANGUAGE use the ID or a common extension in lower- or uppercase.'
     else:
         language_part = 'For LANGUAGE use one of the following IDs/extensions in lower- or uppercase:'
@@ -276,12 +271,10 @@ extension. For example, 'B.java' will indicate problem 'B'.''',
     {sys.argv[0]} hello.java message.java''',
     ]
 
-    return "\n\n".join(part for part in epilog_parts if part != None) 
+    return "\n\n".join(part for part in epilog_parts if part)
 
 def do_api_submit():
     '''Submit to the API with the given data'''
-
-    url = f"{baseurl}api/{api_version}contests/{my_contest['id']}/submissions"
 
     data = {
         'problem': my_problem['id'],
@@ -292,6 +285,7 @@ def do_api_submit():
 
     files = [('code[]', open(filename, 'rb')) for filename in filenames]
 
+    url = f"{baseurl}api/{api_version}contests/{my_contest['id']}/submissions"
     logging.info(f'connecting to {url}')
 
     response = requests.post(url, data=data, files=files)
@@ -338,16 +332,20 @@ loglevels = {
     'CRITICAL': logging.CRITICAL,
 }
 
-# Note: we set add_help to false since we can only print the help text after parsing flags, since the help contains data needed from the API
-parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter, description='Submit a solution for a problem.', add_help=False)
+# Note: we set add_help to false since we can only print the help text after
+# parsing flags, since the help contains data needed from the API.
+parser = argparse.ArgumentParser(
+        formatter_class=argparse.RawTextHelpFormatter,
+        description='Submit a solution for a problem.',
+        add_help=False)
 parser.add_argument('--version', action='version', version=version_text, help='output version information and exit')
 parser.add_argument('-h', '--help', help='display this help and exit', action='store_true')
 parser.add_argument('-c', '--contest', help='''submit for contest with ID or short name CONTEST.
     Defaults to the value of the
     environment variable 'SUBMITCONTEST'.
     Mandatory when more than one contest is active.''')
-parser.add_argument('-p', '--problem', help='submit for problem with ID or label PROBLEM')
-parser.add_argument('-l', '--language', help='submit in language with ID LANGUAGE')
+parser.add_argument('-p', '--problem', help='submit for problem with ID or label PROBLEM', default='')
+parser.add_argument('-l', '--language', help='submit in language with ID LANGUAGE', default='')
 parser.add_argument('-e', '--entry_point', help='set an explicit entry_point, e.g. the java main class')
 parser.add_argument('-v', '--verbose', help='increase verbosity', choices=loglevels.keys(), nargs='?', const='INFO', default='WARNING')
 parser.add_argument('-q', '--quiet', help='suppress warning/info messages', action='store_true')
@@ -362,28 +360,29 @@ verbosity = args.verbose
 if args.quiet:
     verbosity = 'ERROR'
 
-logging.basicConfig(format=f'[%(asctime)s] {sys.argv[0]}[{os.getpid()}]: %(message)s', datefmt='%b %d %H:%M:%S', level=loglevels[verbosity])
-
-contest_id = ''
-
-if 'SUBMITBASEURL' in os.environ:
-    baseurl = os.environ['SUBMITBASEURL']
-if 'SUBMITCONTEST' in os.environ:
-    contest_id = os.environ['SUBMITCONTEST']
-
-if args.contest:
-    contest_id = args.contest
-problem_id = args.problem or ''
-language_id = args.language or ''
-entry_point = args.entry_point
-if args.url:
-    baseurl = args.url
-
+logging.basicConfig(
+        format=f'[%(asctime)s] {sys.argv[0]}[{os.getpid()}]: %(message)s',
+        datefmt='%b %d %H:%M:%S', level=loglevels[verbosity])
 logging.info(f'set verbosity to {verbosity}')
 
+problem_id = args.problem
+language_id = args.language
+entry_point = args.entry_point
+
+if args.url:
+    baseurl = args.url
+elif 'SUBMITBASEURL' in os.environ:
+    baseurl = os.environ['SUBMITBASEURL']
 # Make sure that baseurl terminates with a '/' for later concatenation.
 if baseurl and baseurl[-1:] != '/':
     baseurl += '/'
+
+if args.contest:
+    contest_id = args.contest
+elif 'SUBMITCONTEST' in os.environ:
+    contest_id = os.environ['SUBMITCONTEST']
+else:
+    contest_id = ''
 
 contests = read_contests() if baseurl else None
 if not contests and not args.help:
@@ -410,7 +409,7 @@ elif contests:
 
 languages = None
 problems = None
-if my_contest:
+if my_contest and baseurl:
     languages = read_languages()
     problems = read_problems()
 
@@ -441,7 +440,7 @@ if len(args.filename) == 0:
 
 # Process all source files
 filenames = []
-for index, filename in enumerate(args.filename):
+for index, filename in enumerate(args.filename, 1):
     # Ignore doubly specified files
     if filename in filenames:
         logging.debug(f"ignoring doubly specified file `{filename}'")
@@ -453,7 +452,7 @@ for index, filename in enumerate(args.filename):
     except FileNotFoundError:
         usage(f"Can not find file `{filename}'")
     
-    logging.debug(f"submission file {index + 1}: `{filename}'")
+    logging.debug(f"submission file {index}: `{filename}'")
 
     # Do some checks on submission file and warn user
     if not stat.S_ISREG(st.st_mode):
