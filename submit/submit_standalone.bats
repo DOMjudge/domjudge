@@ -38,7 +38,7 @@ setup() {
     run ./submit --help
     [ "${lines[1]}" = "usage: submit [--version] [-h] [-c CONTEST] [-p PROBLEM] [-l LANGUAGE] [-e ENTRY_POINT]" ]
     [ "${lines[2]}" = "              [-v [{DEBUG,INFO,WARNING,ERROR,CRITICAL}]] [-q] [-y] [-u URL]" ]
-    [ "${lines[3]}" = "              [filename ...]" ]
+    [ "${lines[3]}" = "              (filename )?[filename ...]" ]
     [ "${lines[4]}" = "Submit a solution for a problem." ]
     [ "$status" -eq 0 ]
 }
