@@ -49,7 +49,12 @@
 
                 {% if show_shadow_differences %}
                     <li class="nav-item {% if current_route == 'jury_shadow_differences' %}active{% endif %}">
-                        <a class="nav-link" href="{{ path('jury_shadow_differences') }}"><i class="fas fa-not-equal"></i> shadow differences</a>
+                        {% if current_contest is null %}
+                            <a class="nav-link disabled">
+                        {% else %}
+                            <a class="nav-link" href="{{ path('jury_shadow_differences') }}">
+                        {% endif %}
+                        <i class="fas fa-not-equal"></i> shadow differences</a>
                     </li>
                 {% endif %}
 

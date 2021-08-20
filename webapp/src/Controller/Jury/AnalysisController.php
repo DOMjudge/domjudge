@@ -45,7 +45,7 @@ class AnalysisController extends AbstractController
         $em = $this->getDoctrine()->getManager();
         $contest = $this->dj->getCurrentContest();
 
-        if ($contest == null) {
+        if ($contest === null) {
             return $this->render('jury/error.html.twig', [
                 'error' => 'No contest selected',
             ]);
@@ -95,7 +95,7 @@ class AnalysisController extends AbstractController
     {
         $contest = $this->dj->getCurrentContest();
 
-        if ($contest == null) {
+        if ($contest === null) {
             return $this->render('jury/error.html.twig', [
                 'error' => 'No contest selected',
             ]);
@@ -112,6 +112,12 @@ class AnalysisController extends AbstractController
     public function problemAction(Request $request, Problem $problem): Response
     {
         $contest = $this->dj->getCurrentContest();
+
+        if ($contest === null) {
+            return $this->render('jury/error.html.twig', [
+                'error' => 'No contest selected',
+            ]);
+        }
 
         $filterKeys = array_keys(StatisticsService::FILTERS);
         $view = $request->query->get('view') ?: reset($filterKeys);
