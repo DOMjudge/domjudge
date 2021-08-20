@@ -1152,6 +1152,7 @@ class Contest extends BaseApiEntity
     {
         return $this->getEnabled() &&
             $this->getPublic() &&
+            ($this->activatetime <= time()) &&
             ($this->deactivatetime == null || $this->deactivatetime > time());
     }
 
