@@ -58,7 +58,7 @@ class UserStateUpdater implements EventSubscriberInterface
             // Otherwise we also log every API call and we do not want that.
             if (method_exists($event->getAuthenticationToken(), 'getProviderKey') && $event->getAuthenticationToken()->getProviderKey() === 'main') {
                 $ip = $this->requestStack->getMasterRequest()->getClientIp();
-                $this->dj->auditlog('user', $user->getUserid(), 'logged on on ' . $ip);
+                $this->dj->auditlog('user', $user->getUserid(), 'logged on on ' . $ip, null, $user->getUserName());
             }
         }
     }
