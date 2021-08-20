@@ -169,7 +169,7 @@ $(function() {
               {% set id=t.teamid %}
               <tr class="clickable-row" data-href="{{ path('analysis_team', {'teamid':id}) }}">
                 <th scope="row">{{ id }}</th>
-                <td>{{ t.affiliation.name }}</td>
+                <td>{% if t.affiliation %}{{ t.affiliation.name }}{% else %}-{% endif %}</td>
                 <td class="truncate" style="max-width: 200px">{{ t.effectiveName }}</td>
                 <td>{{ misc.team_stats[id].total_submitted }} / {{ misc.team_stats[id].total_accepted }}</td>
                 <td>{{ misc.team_stats[id].problems_submitted|length }} / {{ misc.team_stats[id].problems_accepted|length }}</td>
