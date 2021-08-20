@@ -1036,8 +1036,10 @@ class SubmissionController extends BaseController
 
         // Redirect to referrer page after verification or back to submission page when unverifying.
         if ($request->request->getBoolean('verified')) {
+            $this->addFlash('info', "Verified judging j$judgingId");
             $redirect = $request->request->get('redirect', $this->generateUrl('jury_submissions'));
         } else {
+            $this->addFlash('info', "Unmarked judging j$judgingId as verified");
             $redirect = $this->generateUrl('jury_submission_by_judging', ['jid' => $judgingId]);
         }
 

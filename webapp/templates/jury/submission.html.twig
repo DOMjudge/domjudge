@@ -596,14 +596,14 @@
                         </span>
                     </div>
                     <div class="card-body">
-                    {% if run.firstJudgingRun is not null %}
+                    {% if run.firstJudgingRun is not null and runsOutput[runIdx].cpu_time %}
                     <span style="display:inline; margin-left: 5px;">
 		        <i class="fas fa-stopwatch" title="runtime"></i>
-                        {{ runsOutput[runIdx].cpu_time }}s CPU
-                        {% if runsOutput[runIdx].metadata is not null %}
-                            , {{ runsOutput[runIdx].wall_time }}s wall,
+                        {{ runsOutput[runIdx].cpu_time }}s
+                        CPU{% if runsOutput[runIdx].metadata is not null %},
+                            {{ runsOutput[runIdx].wall_time }}s wall,
 		            <i class="fas fa-memory" title="RAM"></i>
-                            {{ runsOutput[runIdx].memory }}
+                            {{ runsOutput[runIdx].memory }},
 		            <i class="far fa-question-circle" title="exit-code"></i>
                             exit code:
                             {{ runsOutput[runIdx].exitcode }}{% if runsOutput[runIdx].signal > 0 %},
