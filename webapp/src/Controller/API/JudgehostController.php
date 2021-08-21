@@ -384,7 +384,7 @@ class JudgehostController extends AbstractFOSRestController
                         ->setJudging($judging)
                         ->setContest($judging->getContest())
                         ->setDescription('Compilation results are different for j' . $judging->getJudgingid())
-                        ->setJudgehostlog('New compilation output: ' . $output_compile)
+                        ->setJudgehostlog(base64_encode('New compilation output: ' . $output_compile))
                         ->setTime(Utils::now())
                         ->setDisabled($disabled);
                     $this->em->persist($error);
