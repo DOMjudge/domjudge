@@ -1943,7 +1943,7 @@ class ImportEventFeedCommand extends Command
             ->setParameter(':problem', $problem->getProblem())
             ->setParameter(':ranknumber', $rank)
             ->getQuery()
-            ->getSingleResult();
+            ->getOneOrNullResult();
 
         if ($testcase === null) {
             $this->logger->error(
