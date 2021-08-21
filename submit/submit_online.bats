@@ -133,5 +133,5 @@ setup() {
 @test "submit solution" {
     run ./submit -y -p hello ../tests/test-hello.c
     assert_success
-    assert_regex "Submission received, id = s[0-9]*"
+    assert_regex "Submission received: id = s[0-9]*, time = [0-9]{2}:[0-9]{2}:[0-9]{2}"
 }
