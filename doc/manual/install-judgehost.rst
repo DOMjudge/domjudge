@@ -28,7 +28,7 @@ Software requirements
 * PHP command line interface with the ``curl``, ``json``, ``xml``,
   ``zip`` extensions.
 
-For Debian (with some example compilers)::
+For Debian::
 
   sudo apt install make pkg-config sudo debootstrap libcgroup-dev \
         php-cli php-curl php-json php-xml php-zip lsof procps
