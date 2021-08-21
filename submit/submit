@@ -8,6 +8,7 @@
 #
 
 import argparse
+import datetime
 import json
 import logging
 import os
@@ -185,7 +186,7 @@ def do_api_request(name: str):
 
     try:
         response = requests.get(url)
-    except requests.exceptions.ConnectionError as e:
+    except requests.exceptions.RequestException as e:
         raise RuntimeError(e)
 
     if response.status_code >= 300:
@@ -229,7 +230,7 @@ selection box in the webinterface.'''
     else:
         contests_part_one = 'For CONTEST use one of the following:'
         for contest in contests:
-            contests_part_one += f"\n    {contest['shortname']:<10} - {contest['name']}"
+            contests_part_one += f"\n    {contest['shortname']:<15} - {contest['name']}"
 
     if not problems:
         problem_part = 'For PROBLEM use the label as on the scoreboard.'
@@ -255,7 +256,7 @@ extension. For example, 'B.java' will indicate problem 'B'.''',
         language_part,
         '''The default for LANGUAGE is the extension of FILENAME. For example,
 'B.java' will indicate a Java solution.''',
-        "Set URL to the base address of the webinterface without the 'api/' suffix.\n" +
+        "Set URL to the base address of the webinterface without the 'team/' suffix.\n" +
         (f"The (pre)configured URL is '{baseurl}'\n" if baseurl else '') +
         "Credentials are read from ~/.netrc (see netrc(4) for details).",
         "Examples:",
@@ -313,7 +314,8 @@ def do_api_submit():
         or not isinstance(submission['id'], str)):
         error('REST API returned unexpected JSON data')
 
-    print(f"Submission received, id = s{submission['id']}")
+    time = datetime.datetime.fromisoformat(submission['time']).strftime('%H:%M:%S')
+    print(f"Submission received: id = s{submission['id']}, time = {time}")
 
 version_text = '''
 submit -- part of DOMjudge
@@ -360,9 +362,7 @@ verbosity = args.verbose
 if args.quiet:
     verbosity = 'ERROR'
 
-logging.basicConfig(
-        format=f'[%(asctime)s] {sys.argv[0]}[{os.getpid()}]: %(message)s',
-        datefmt='%b %d %H:%M:%S', level=loglevels[verbosity])
+logging.basicConfig(format=f'%(message)s', level=loglevels[verbosity])
 logging.info(f'set verbosity to {verbosity}')
 
 problem_id = args.problem
@@ -399,7 +399,7 @@ if not contest_id:
     elif len(contests) == 1:
         my_contest = contests[0]
     else:
-        warn_user('multiple active contests found, please specify one')
+        warn_user(f"multiple active contests found, please specify one of {', '.join([contest['shortname'] for contest in contests])}")
 elif contests:
     contest_id = contest_id.lower()
     for contest in contests:
