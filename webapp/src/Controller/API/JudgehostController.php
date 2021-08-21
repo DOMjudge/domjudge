@@ -833,7 +833,7 @@ class JudgehostController extends AbstractFOSRestController
                     }
 
                     // For the other runs, we need to reset the judge task if it belongs to the current judgehost
-                    if ($run->getJudgetask()->getJudgehost()->getHostname() === $judgehost->getHostname()) {
+                    if ($run->getJudgetask()->getJudgehost() && $run->getJudgetask()->getJudgehost()->getHostname() === $judgehost->getHostname()) {
                         $run->getJudgetask()
                             ->setJudgehost(null)
                             ->setStarttime(null);
