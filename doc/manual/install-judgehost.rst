@@ -14,7 +14,7 @@ System requirements
 
 * The operating system is a Linux variant. DOMjudge has mostly
   been tested with Debian and Ubuntu, but should work on other environments.
-  Using WSL2 should work but is is not extensively tested.
+  See our `wiki <https://github.com/DOMjudge/domjudge/wiki/Running-DOMjudge-in-WSL>`_ for information about DOMjudge and WSLv2.
 * It is necessary that you have root access.
 * A TCP/IP network which connects the DOMserver and the judgehosts.
   The machines only need HTTP(S) access to the DOMserver.
