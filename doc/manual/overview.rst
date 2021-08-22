@@ -92,6 +92,7 @@ machines.
   The judgehost requires Linux cgroup support for memory and swap accounting.
   Platforms that do not provide this support (some virtualization environments,
   for example WSL 1 / 2) will not work with the judgehost.
+  for example WSL 1) will not work with the judgehost. See our `wiki <https://github.com/DOMjudge/domjudge/wiki/Running-DOMjudge-in-WSL>`_ for information about DOMjudge and WSL.
 
 Copyright and licencing
 -----------------------
