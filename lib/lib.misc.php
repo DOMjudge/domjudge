@@ -58,20 +58,6 @@ function overshoot_parse(float $timelimit, string $token) : float
     }
 }
 
-/* The functions below abstract away the precise time format used
- * internally. We currently use Unix epoch with up to 9 decimals for
- * subsecond precision.
- */
-
-/**
- * Simulate MySQL UNIX_TIMESTAMP() function to create insert queries
- * that do not change when replicated later.
- */
-function now() : float
-{
-    return microtime(true);
-}
-
 /**
  * Call alert plugin program to perform user configurable action on
  * important system events. See default alert script for more details.
