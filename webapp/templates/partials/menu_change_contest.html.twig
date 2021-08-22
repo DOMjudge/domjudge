@@ -6,7 +6,7 @@
     <div class="dropdown-menu scrollable-menu" aria-labelledby="navbarDropdown">
         <a class="dropdown-item disabled" href="#">Change Contest</a>
         {% if show_no_contest and contest is not empty %}
-            <a class="dropdown-item" href="{{ path(change_path, {'contestId': -1}) }}">No contest</a>
+            <a class="dropdown-item" href="{{ path(change_path, {'contestId': -1}) }}">no contest</a>
             <div class="dropdown-divider"></div>
         {% endif %}
         {% for c in contests | filter(c => c != contest) %}
