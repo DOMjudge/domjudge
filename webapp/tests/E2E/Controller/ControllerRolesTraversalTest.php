@@ -5,7 +5,7 @@ namespace App\Tests\E2E\Controller;
 use App\Tests\Unit\BaseTest;
 use Generator;
 
-class ControllerRolesTest extends BaseTest
+class ControllerRolesTraversalTest extends BaseTest
 {
     protected static $loginURL = "http://localhost/login";
 
@@ -50,6 +50,8 @@ class ControllerRolesTest extends BaseTest
             strpos($url, '/output') !== false ||
             strpos($url, '/export') !== false ||
             strpos($url, '/download') !== false ||
+            strpos($url, '/phpinfo') !== false ||
+            strpos($url, 'javascript') !== false ||
             strpos($url, '.zip') !== false
         );
     }
@@ -61,17 +63,24 @@ class ControllerRolesTest extends BaseTest
     protected function crawlPageGetLinks(string $url, int $statusCode) : array
     {
         if($this->urlExcluded($url)) {
-            return [];
+            self::markTestFailed('The URL should already have been filtered away.');
         }
         $crawler = $this->client->request('GET', $url);
         $response = $this->client->getResponse();
         $message = var_export($response, true);
-        if($statusCode === 403 && $response->isRedirection()) {
+        if(($statusCode === 403 || $statusCode === 401) && $response->isRedirection()) {
             self::assertEquals($response->headers->get('location'), $this::$loginURL);
         } else {
             self::assertEquals($statusCode, $response->getStatusCode(), $message);
         }
-        return array_unique($crawler->filter('a')->extract(['href']));
+        $ret = [];
+        $tmp = array_unique($crawler->filter('a')->extract(['href']));
+        foreach($tmp as $possUrl) {
+            if(!$this->urlExcluded($possUrl)) {
+                $ret[] = $possUrl;
+            }
+        }
+        return $ret;
     }
 
     /**
@@ -160,6 +169,17 @@ class ControllerRolesTest extends BaseTest
         $this->verifyAccess($combinations, $urlsToCheck);
     }
 
+    public function visitWithNoContest($url) {
+        // We only care for the outcome, shorten the code by skipping steps.
+        $this->client->followRedirects(true);
+        // Explicit set no active contest.
+        $this->client->request('GET', '/jury/change-contest/-1');
+        $this->client->request('GET', $url);
+        $response = $this->client->getResponse();
+        self::assertNotEquals(500, $response->getStatusCode(), $message=sprintf('Failed at %s',$url));
+        self::assertSelectorExists('a#navbarDropdownContests:contains("no contest")');
+    }
+
     /**
      * Test that having for example the jury role does not allow access to the pages of other roles.
      * @var string[] $roleOthersBaseURL The BaseURLs of the other roles
@@ -182,6 +202,22 @@ class ControllerRolesTest extends BaseTest
             if (!$this->urlExcluded($url)) {
                 $this->crawlPageGetLinks($url, 403);
             }
+        }
+    }
+
+    /**
+     * Test that pages depending on a active contest doesn't crash on the server.
+     * @dataProvider provideNoContestScenario
+     */
+    public function testNoContestAccess(string $roleBaseURL, array $baseRoles) : void
+    {
+        $this->roles = $baseRoles;
+        $this->logOut();
+        $this->logIn();
+        $urlsToCheck = $this->crawlPageGetLinks($roleBaseURL, 200);
+        $urlsToCheck = $this->getAllPages($urlsToCheck);
+        foreach($urlsToCheck as $url) {
+            $this->visitWithNoContest($url);
         }
     }
 
@@ -219,5 +255,13 @@ class ControllerRolesTest extends BaseTest
         yield ['/jury',     ['/jury','/team'],  ['clarification_rw'],   ['admin','team','balloon'],                             false];
         yield ['/team',     ['/jury'],          ['team'],               ['admin','jury','balloon','clarification_rw'],          true];
         yield ['/public',   ['/jury','/team'],  [],                     ['admin','jury','team','balloon','clarification_rw'],   true];
+    }
+
+    public function provideNoContestScenario() : Generator
+    {
+        yield ['/jury',     ['admin']];
+        yield ['/jury',     ['jury']];
+        yield ['/jury',     ['balloon']];
+        yield ['/jury',     ['clarification_rw']];
     }
 }
