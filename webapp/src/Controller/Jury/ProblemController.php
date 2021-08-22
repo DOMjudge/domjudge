@@ -717,6 +717,16 @@ class ProblemController extends BaseController
             return $this->redirectToRoute('jury_problem_testcases', ['probId' => $probId]);
         }
 
+        $known_md5s = [];
+        foreach ($testcases as $rank => $testcase) {
+            $input_md5 = $testcase->getMd5sumInput();
+            if (isset($known_md5s[$input_md5])) {
+                $this->addFlash('warning',
+                    "Testcase #" . $rank . " has identical input to testcase #" . $known_md5s[$input_md5] . '.');
+            }
+            $known_md5s[$input_md5] = $rank;
+        }
+
         $data = [
             'problem' => $problem,
             'testcases' => $testcases,
