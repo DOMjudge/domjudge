@@ -108,58 +108,6 @@ function initsignals()
 }
 
 /**
- * Forks and detaches the current process to run as a daemon. Similar
- * to the daemon() call present in Linux and *BSD.
- *
- * Argument pidfile is an optional filename to check for running
- * instances and write PID to.
- *
- * Either returns successfully or exits with an error.
- */
-function daemonize($pidfile = null)
-{
-    switch ($pid = pcntl_fork()) {
-        case -1: error("cannot fork daemon");
-        case  0: break; // child process: do nothing here.
-        default: exit;  // parent process: exit.
-    }
-
-    if (($pid = posix_getpid())===false) {
-        error("failed to obtain PID");
-    }
-
-    // Check and write PID to file
-    if (!empty($pidfile)) {
-        if (($fd=@fopen($pidfile, 'x+'))===false) {
-            error("cannot create pidfile '$pidfile'");
-        }
-        $str = "$pid\n";
-        if (@fwrite($fd, $str)!=strlen($str)) {
-            error("failed writing PID to file");
-        }
-        register_shutdown_function('unlink', $pidfile);
-    }
-
-    // Notify user with daemon PID before detaching from TTY.
-    logmsg(LOG_NOTICE, "daemonizing with PID = $pid");
-
-    // Close std{in,out,err} file descriptors
-    if (!fclose(STDIN) || !($GLOBALS['STDIN']  = fopen('/dev/null', 'r')) ||
-        !fclose(STDOUT) || !($GLOBALS['STDOUT'] = fopen('/dev/null', 'w')) ||
-        !fclose(STDERR) || !($GLOBALS['STDERR'] = fopen('/dev/null', 'w'))) {
-        error("cannot reopen stdio files to /dev/null");
-    }
-
-    // FIXME: We should really close all other open file descriptors
-    // here, but PHP does not support this.
-
-    // Start own process group, detached from any tty
-    if (posix_setsid()<0) {
-        error("cannot set daemon process group");
-    }
-}
-
-/**
  * Output generic version information and exit.
  */
 function version() : string

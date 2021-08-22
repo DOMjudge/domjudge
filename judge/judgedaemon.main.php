@@ -223,14 +223,12 @@ function rest_encode_file(string $file, $sizelimit = true) : string
 $waittime = 5;
 
 define('SCRIPT_ID', 'judgedaemon');
-define('PIDFILE', RUNDIR.'/judgedaemon.pid');
 define('CHROOT_SCRIPT', 'chroot-startstop.sh');
 
 function usage()
 {
     echo "Usage: " . SCRIPT_ID . " [OPTION]...\n" .
         "Start the judgedaemon.\n\n" .
-        "  -d                daemonize after startup\n" .
         "  -n <id>           daemon number\n" .
         "  --diskspace-error send internal error on low diskspace\n" .
         "  -v                set verbosity to LEVEL (syslog levels)\n" .
@@ -430,9 +428,6 @@ if ($options===false) {
     echo "Error: parsing options failed.\n";
     usage();
 }
-if (isset($options['d'])) {
-    $options['daemon']  = $options['d'];
-}
 if (isset($options['v'])) {
     $options['verbose'] = $options['v'];
 }
@@ -556,11 +551,6 @@ logmsg(LOG_INFO, "√ Executing chroot script: '".CHROOT_SCRIPT." check'");
 system(LIBJUDGEDIR.'/'.CHROOT_SCRIPT.' check', $retval);
 if ($retval!==0) {
     error("chroot validation check exited with exitcode $retval");
-}
-
-// If all startup done, daemonize
-if (isset($options['daemon'])) {
-    daemonize(PIDFILE);
 }
 
 foreach ($endpoints as $id=>$endpoint) {
