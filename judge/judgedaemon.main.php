@@ -1027,6 +1027,7 @@ function compile(array $judgeTask, string $workdir, string $workdirpath, array $
         warning("compile script exited with exitcode $retval");
     }
 
+    $compile_output = '';
     if (is_readable($workdir . '/compile.out')) {
         $compile_output = dj_file_get_contents($workdir . '/compile.out', 50000);
     }
@@ -1057,7 +1058,6 @@ function compile(array $judgeTask, string $workdir, string $workdirpath, array $
 
         return false;
     }
-    logmsg(LOG_INFO, "  💻 Compilation: ($files[0]) '".$EXITCODES[$retval]."'");
 
     // What does the exitcode mean?
     if (! isset($EXITCODES[$retval])) {
@@ -1068,6 +1068,8 @@ function compile(array $judgeTask, string $workdir, string $workdirpath, array $
 
         return false;
     }
+
+    logmsg(LOG_INFO, "  💻 Compilation: ($files[0]) '".$EXITCODES[$retval]."'");
     $compile_success = ($EXITCODES[$retval]==='correct');
 
     // pop the compilation result back into the judging table
