@@ -6,7 +6,14 @@ include $(TOPDIR)/Makefile.global
 TARGETS = runguard runpipe evict
 
 SUBST_FILES = judgedaemon chroot-startstop.sh create_cgroups \
-              create-cgroups.service domjudge-judgehost.service
+              create-cgroups.service domjudge-judgehost.service \
+              balloons
+
+OBJECTS = $(addsuffix $(OBJEXT),lib.error lib.misc)
+
+build: $(OBJECTS)
+
+$(OBJECTS): %$(OBJEXT): %.c %.h
 
 judgehost: $(TARGETS) $(SUBST_FILES)
 
@@ -28,11 +35,11 @@ runpipe: runpipe.cc $(LIBHEADERS) $(LIBSOURCES)
 install-judgehost:
 	$(INSTALL_PROG) -t $(DESTDIR)$(judgehost_libjudgedir) \
 		compile.sh build_executable.sh testcase_run.sh chroot-startstop.sh \
-		check_diff.sh evict
+		check_diff.sh evict alert
 	$(INSTALL_DATA) -t $(DESTDIR)$(judgehost_libjudgedir) \
-		judgedaemon.main.php
+		*.php
 	$(INSTALL_PROG) -t $(DESTDIR)$(judgehost_bindir) \
-		judgedaemon runguard runpipe create_cgroups
+		judgedaemon runguard runpipe create_cgroups balloons
 ifneq ($(systemd_unitdir),)
 	$(INSTALL_DIR)     $(DESTDIR)$(systemd_unitdir)
 	$(INSTALL_DATA) -t $(DESTDIR)$(systemd_unitdir) \
@@ -40,6 +47,7 @@ ifneq ($(systemd_unitdir),)
 endif
 
 clean-l:
+	-rm -f $(OBJECTS)
 	-rm -f $(TARGETS) $(TARGETS:%=%$(OBJEXT))
 
 distclean-l:

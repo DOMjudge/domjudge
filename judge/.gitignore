@@ -1,6 +1,7 @@
 /chroot-startstop.sh
 /create_cgroups
 /judgedaemon
+/balloons
 /runguard
 /runpipe
 /evict

@@ -14,8 +14,8 @@ extern "C" {
 #define FDREDIR_PIPE -2
 
 /* Define wrapper around true function '_alert' to allow passing
- * LIBDIR as defined in calling program. */
-#define alert(msgtype,description) _alert(LIBDIR,msgtype,description)
+ * LIBJUDGEDIR as defined in calling program. */
+#define alert(msgtype,description) _alert(LIBDJUDGEIR,msgtype,description)
 
 void _alert(const char *libdir, const char *msgtype, const char *description)
     __attribute__((nonnull (1, 2)));

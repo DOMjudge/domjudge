@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# This script will be called by different parts of the DOMjudge system
+# This script will be called by the DOMjudge judgedaemon
 # and allows the administrator to flexibly configure a way to get
 # notified of important messages. By default this script calls 'beep'
 # if available.

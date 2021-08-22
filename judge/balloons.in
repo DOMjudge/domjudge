@@ -28,13 +28,13 @@ define('BALLOON_CMD', 'mail -s Balloon_notification domjudge@localhost');
 //define('BALLOON_CMD', 'lpr');
 //define('BALLOON_CMD', 'cat >>/tmp/balloons_debug.log');
 
-require('@domserver_etcdir@/domserver-static.php');
+require('@judgehost_etcdir@/judgehost-static.php');
 
 define('SCRIPT_ID', 'balloons');
 define('LOGFILE', LOGDIR.'/balloons.log');
 
-require(LIBDIR . '/lib.error.php');
-require(LIBDIR . '/lib.misc.php');
+require(LIBJUDGEDIR . '/lib.error.php');
+require(LIBJUDGEDIR . '/lib.misc.php');
 
 $verbose = LOG_INFO;
 

@@ -81,11 +81,11 @@ build-scripts:
 	$(MAKE) -C sql build-scripts
 
 # List of SUBDIRS for recursive targets:
-build:             SUBDIRS=        lib                      import tests misc-tools
+build:             SUBDIRS=                                 import tests misc-tools
 domserver:         SUBDIRS=etc         sql                  import       misc-tools webapp
 install-domserver: SUBDIRS=etc     lib sql                  import       misc-tools webapp
 judgehost:         SUBDIRS=etc                 judge                     misc-tools
-install-judgehost: SUBDIRS=etc     lib         judge                     misc-tools
+install-judgehost: SUBDIRS=etc                 judge                     misc-tools
 docs:              SUBDIRS=    doc
 install-docs:      SUBDIRS=    doc
 dist:              SUBDIRS=        lib sql                               misc-tools

@@ -462,8 +462,8 @@ if (isset($options['daemonid'])) {
 }
 
 define('LOGFILE', LOGDIR.'/judge.'.$myhost.'.log');
-require(LIBDIR . '/lib.error.php');
-require(LIBDIR . '/lib.misc.php');
+require(LIBJUDGEDIR . '/lib.error.php');
+require(LIBJUDGEDIR . '/lib.misc.php');
 
 $verbose = LOG_INFO;
 if (isset($options['verbose'])) {

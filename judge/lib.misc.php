@@ -64,7 +64,7 @@ function overshoot_parse(float $timelimit, string $token) : float
  */
 function alert(string $msgtype, string $description = '')
 {
-    system(LIBDIR . "/alert '$msgtype' '$description' &");
+    system(LIBJUDGEDIR . "/alert '$msgtype' '$description' &");
 }
 
 /**
