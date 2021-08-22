@@ -36,7 +36,7 @@ cleanexit ()
 
 # Error and logging functions
 # shellcheck disable=SC1090
-. "$DJ_LIBDIR/lib.error.sh"
+. "$DJ_LIBJUDGEDIR/lib.error.sh"
 
 LOGLEVEL=$LOG_DEBUG
 PROGNAME="$(basename "$0")"

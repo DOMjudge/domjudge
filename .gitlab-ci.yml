@@ -251,7 +251,6 @@ phpcs_compatibility:
       --standard=PHPCompatibility
       --extensions=php
       --runtime-set testVersion $PHPVERSION
-      lib/lib.*.php
       etc
       judge
       webapp/src
@@ -268,7 +267,6 @@ php linter:
     - ls
     - >
       parallel-lint --colors
-      lib/lib.*.php
       etc
       judge
       webapp/src
