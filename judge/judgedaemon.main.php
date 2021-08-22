@@ -851,7 +851,7 @@ function registerJudgehost($myhost)
     $endpoint = &$endpoints[$endpointID];
 
     // Only try to register every 30s.
-    $now = now();
+    $now = time();
     if ($now - $endpoint['last_attempt'] < 30) {
         $endpoint['waiting'] = true;
         return;
