@@ -60,12 +60,6 @@ class Judgehost
     private $polltime;
 
     /**
-     * @ORM\OneToMany(targetEntity="Judging", mappedBy="judgehost")
-     * @Serializer\Exclude()
-     */
-    private $judgings;
-
-    /**
      * @ORM\OneToMany(targetEntity="JudgeTask", mappedBy="judgehost")
      * @Serializer\Exclude()
      */
@@ -82,7 +76,6 @@ class Judgehost
 
     public function __construct()
     {
-        $this->judgings = new ArrayCollection();
         $this->judgetasks = new ArrayCollection();
     }
 
@@ -129,22 +122,6 @@ class Judgehost
     public function getPolltime()
     {
         return $this->polltime;
-    }
-
-    public function addJudging(Judging $judging): Judgehost
-    {
-        $this->judgings[] = $judging;
-        return $this;
-    }
-
-    public function removeJudging(Judging $judging)
-    {
-        $this->judgings->removeElement($judging);
-    }
-
-    public function getJudgings(): Collection
-    {
-        return $this->judgings;
     }
 
     public function addJudgeTask(JudgeTask $judgeTask): Judgehost

@@ -368,30 +368,41 @@ class JudgehostController extends AbstractFOSRestController
             $output_compile = base64_decode($request->request->get('output_compile'));
             if ($request->request->getBoolean('compile_success')) {
                 if ($judging->getOutputCompile() === null) {
-                    $judging
-                        ->setOutputCompile($output_compile)
-                        ->setJudgehost($judgehost);
+                    $judging->setOutputCompile($output_compile);
                     $this->em->flush();
 
                     $this->eventLogService->log('judging', $judging->getJudgingid(),
                         EventLogService::ACTION_CREATE, $judging->getContest()->getCid());
                 } elseif ($judging->getResult() === Judging::RESULT_COMPILER_ERROR) {
                     // The new result contradicts a former one, that's not good.
-                    // Since the other judgehost was not successful, but we were , assume that the other judgehost
-                    // is broken and disable it.
-                    $disabled = [
-                        'kind' => 'judgehost',
-                        'hostname' => $judging->getJudgehost()->getHostname(),
-                    ];
-                    $error = new InternalError();
-                    $error
-                        ->setJudging($judging)
-                        ->setContest($judging->getContest())
-                        ->setDescription('Compilation results are different for j' . $judging->getJudgingid())
-                        ->setJudgehostlog(base64_encode('New compilation output: ' . $output_compile))
-                        ->setTime(Utils::now())
-                        ->setDisabled($disabled);
-                    $this->em->persist($error);
+                    // Since the other judgehosts were not successful, but we were, assume that the other judgehosts
+                    // are broken and disable it.
+                    $disableHostnames = [];
+                    /** @var JudgingRun $run */
+                    foreach ($judging->getRuns() as $run) {
+                        if ($run->getJudgeTask() &&
+                            $run->getJudgeTask()->getJudgehost() &&
+                            $run->getJudgeTask()->getJudgehost()->getHostname() !== $judgehost->getHostname()) {
+                            $hostname = $run->getJudgeTask()->getJudgehost()->getHostname();
+                            $disableHostnames[$hostname] = $hostname;
+                        }
+                    }
+
+                    foreach ($disableHostnames as $hostname) {
+                        $disabled = [
+                            'kind' => 'judgehost',
+                            'hostname' => $hostname,
+                        ];
+                        $error = new InternalError();
+                        $error
+                            ->setJudging($judging)
+                            ->setContest($judging->getContest())
+                            ->setDescription('Compilation results are different for j' . $judging->getJudgingid())
+                            ->setJudgehostlog(base64_encode('New compilation output: ' . $output_compile))
+                            ->setTime(Utils::now())
+                            ->setDisabled($disabled);
+                        $this->em->persist($error);
+                    }
                 }
             } else {
                 $this->em->transactional(function () use (
@@ -405,7 +416,6 @@ class JudgehostController extends AbstractFOSRestController
                         $judging
                             ->setOutputCompile($output_compile)
                             ->setResult(Judging::RESULT_COMPILER_ERROR)
-                            ->setJudgehost($judgehost)
                             ->setEndtime(Utils::now());
                         $this->em->flush();
 
@@ -428,7 +438,7 @@ class JudgehostController extends AbstractFOSRestController
                         $this->em->flush();
                     } else if ($judging->getResult() !== Judging::RESULT_COMPILER_ERROR) {
                         // The new result contradicts a former one, that's not good.
-                        // Since the other judgehost was successful, but we were not, assume that the current judgehost
+                        // Since at least one other judgehost was successful, but we were not, assume that the current judgehost
                         // is broken and disable it.
                         $disabled = [
                             'kind' => 'judgehost',
