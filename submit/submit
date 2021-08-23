@@ -13,6 +13,7 @@ import json
 import logging
 import os
 import requests
+import requests.utils
 import stat
 import sys
 import time
@@ -36,6 +37,8 @@ warn_mtime_minutes = 5
 
 # End of configurable settings
 num_warnings = 0
+
+headers = {'user-agent': f'domjudge-submit-client ({requests.utils.default_user_agent()})'}
 
 def confirm(message: str) -> bool:
     answer = ''
@@ -185,7 +188,7 @@ def do_api_request(name: str):
     logging.info(f'Connecting to {url}')
 
     try:
-        response = requests.get(url)
+        response = requests.get(url, headers=headers)
     except requests.exceptions.RequestException as e:
         raise RuntimeError(e)
 
@@ -289,7 +292,7 @@ def do_api_submit():
     url = f"{baseurl}api/{api_version}contests/{my_contest['id']}/submissions"
     logging.info(f'connecting to {url}')
 
-    response = requests.post(url, data=data, files=files)
+    response = requests.post(url, data=data, files=files, headers=headers)
 
     logging.debug(f"API call 'submissions' returned:\n{response.text}")
 
