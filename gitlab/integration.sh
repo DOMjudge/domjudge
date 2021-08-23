@@ -77,6 +77,13 @@ sudo /usr/sbin/php-fpm7.4
 
 section_end setup
 
+section_start mount "Show runner mounts"
+mount
+# Currently gitlab has some runners with noexec/nodev,
+# This can be removed if we have more stable runners.
+mount -o remount,exec,dev /builds/DOMjudge/domjudge
+section_end mount
+
 section_start submit_client "Test submit client"
 cd ${DIR}/submit
 make check-full
