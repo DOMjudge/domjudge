@@ -502,7 +502,7 @@ class RejudgingController extends BaseController
                     return $user->getUserid();
                 }, $formData['users'] ? $formData['users']->toArray() : []),
                 'judgehosts' => array_map(function (Judgehost $judgehost) {
-                    return $judgehost->getHostname();
+                    return $judgehost->getJudgehostid();
                 }, $formData['judgehosts'] ? $formData['judgehosts']->toArray() : []),
                 'verdicts'   => array_values($formData['verdicts']),
                 'before'     => $formData['before'],
@@ -565,8 +565,11 @@ class RejudgingController extends BaseController
                 $judgehosts = $data['judgehosts'] ?? [];
                 if (count($judgehosts)) {
                     $queryBuilder
-                        ->andWhere('j.judgehost IN (:judgehosts)')
-                        ->setParameter(':judgehosts', $judgehosts);
+                        ->innerJoin('j.runs', 'jr')
+                        ->innerJoin('jr.judgetask', 'jt')
+                        ->andWhere('jt.judgehost IN (:judgehosts)')
+                        ->setParameter(':judgehosts', $judgehosts)
+                        ->distinct();
                 }
                 $verdicts = $data['verdicts'] ?? [];
                 if (count($verdicts)) {
@@ -669,7 +672,7 @@ class RejudgingController extends BaseController
         /* These are the tables that we can deal with. */
         $tablemap = [
             'contest' => 's.contest',
-            'judgehost' => 'j.judgehost',
+            'judgehost' => 'jt.judgehost',
             'language' => 's.language',
             'problem' => 's.problem',
             'submission' => 's.submitid',
@@ -706,7 +709,10 @@ class RejudgingController extends BaseController
                 ->leftJoin('j.submission', 's')
                 ->leftJoin('s.rejudging', 'r')
                 ->leftJoin('s.team', 't')
+                ->leftJoin('j.runs', 'jr')
+                ->leftJoin('jr.judgetask', 'jt')
                 ->select('j', 's', 'r', 't')
+                ->distinct()
                 ->andWhere('j.contest IN (:contests)')
                 ->andWhere('j.valid = 1')
                 ->andWhere(sprintf('%s = :id', $tablemap[$table]))
@@ -810,9 +816,10 @@ class RejudgingController extends BaseController
         $judgings = $this->em->createQueryBuilder()
             ->from(Judging::class, 'j')
             ->leftJoin('j.runs', 'jr')
+            ->leftJoin('jr.judgetask', 'jt')
             ->leftJoin('j.rejudging', 'r')
             ->leftJoin('j.submission', 's')
-            ->leftJoin('j.judgehost', 'jh')
+            ->leftJoin('jt.judgehost', 'jh')
             ->select('r.rejudgingid, j.judgingid', 's.submitid', 'jh.hostname', 'j.result',
                 'AVG(jr.runtime) AS runtime_avg', 'COUNT(jr.runtime) AS ntestcases',
                 '(j.endtime - j.starttime) AS duration'
