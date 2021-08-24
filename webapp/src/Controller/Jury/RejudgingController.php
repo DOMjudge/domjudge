@@ -101,8 +101,8 @@ class RejudgingController extends BaseController
             ->select('r')
             ->from(Rejudging::class, 'r');
         if ($curContest !== NULL) {
-            $rejudgings = $rejudgings->join('r.submissions', 's')
-                ->andWhere('s.contest = :contest')
+            $rejudgings = $rejudgings->leftJoin(Judging::class, 'j', Join::WITH, 'j.rejudging = r')
+                ->andWhere('j.contest = :contest')
                 ->setParameter(':contest', $curContest->getCid())
                 ->distinct();
         }
