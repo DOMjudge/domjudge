@@ -112,6 +112,7 @@ class RejudgingController extends BaseController
         $table_fields = [
             'rejudgingid' => ['title' => 'ID', 'sort' => true],
             'reason' => ['title' => 'reason', 'sort' => true],
+            'repetitions' => ['title' => 'repetitions', 'sort' => true],
             'startuser' => ['title' => 'startuser', 'sort' => true],
             'finishuser' => ['title' => 'finishuser', 'sort' => true],
             'starttime' => ['title' => 'starttime', 'sort' => true],
@@ -127,14 +128,17 @@ class RejudgingController extends BaseController
         $timeFormat       = (string)$this->config->get('time_format');
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         $rejudgings_table = [];
+        /** @var Rejudging $rejudging */
         foreach ($rejudgings as $rejudging) {
             $rejudgingdata = [];
-            // Get whatever fields we can from the problem object itself
+            // Get whatever fields we can from the problem object itself.
             foreach ($table_fields as $k => $v) {
                 if ($propertyAccessor->isReadable($rejudging, $k)) {
                     $rejudgingdata[$k] = ['value' => $propertyAccessor->getValue($rejudging, $k)];
                 }
             }
+
+            $rejudgingdata['repetitions']['value'] = $rejudging->getRepeat() ?? '-';
 
             if ($rejudging->getStartUser()) {
                 $rejudgingdata['startuser']['value'] = $rejudging->getStartUser()->getName();
@@ -179,11 +183,34 @@ class RejudgingController extends BaseController
                 'link' => $this->generateUrl('jury_rejudging', ['rejudgingId' => $rejudging->getRejudgingid()]),
                 'cssclass' => $class,
                 'sort' => $sort_order,
+                'rejudgingid' => $rejudging->getRejudgingid(),
+                'repeat_rejudgingid' => $rejudging->getRepeatedRejudging() ? $rejudging->getRepeatedRejudging()->getRejudgingid() : null,
             ];
         }
 
+        // Filter the table to include only the rejudgings without repetition and for rejudgings with repetition the one
+        // with the maximal ID since that is the instance that can be cancelled / applied.
+        $maxid_per_repeatid = [];
+        foreach ($rejudgings_table as $row) {
+            if ($row['repeat_rejudgingid'] === null) {
+                continue;
+            }
+            $repeat_rejudgingid = $row['repeat_rejudgingid'];
+            if (isset($maxid_per_repeatid[$repeat_rejudgingid])) {
+                $maxid_per_repeatid[$repeat_rejudgingid] = max($maxid_per_repeatid[$repeat_rejudgingid], $row['rejudgingid']);
+            } else {
+                $maxid_per_repeatid[$repeat_rejudgingid] = $row['rejudgingid'];
+            }
+        }
+        $filtered_table = [];
+        foreach ($rejudgings_table as $row) {
+            if ($row['repeat_rejudgingid'] === null || $maxid_per_repeatid[$row['repeat_rejudgingid']] === $row['rejudgingid']) {
+                $filtered_table[] = $row;
+            }
+        }
+
         $twigData = [
-            'rejudgings' => $rejudgings_table,
+            'rejudgings' => $filtered_table,
             'table_fields' => $table_fields,
             'refresh' => [
                 'after' => 15,
