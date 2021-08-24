@@ -1111,48 +1111,6 @@ class JudgehostController extends AbstractFOSRestController
         }
     }
 
-    private function getSubmissionsToJudge(Judgehost $judgehost, $restrictJudgingOnSameJudgehost)
-    {
-        // Get all active contests
-        $contests   = $this->dj->getCurrentContests();
-        $contestIds = array_map(function (Contest $contest) {
-            return $contest->getCid();
-        }, $contests);
-
-        // If there are no active contests, there is nothing to do
-        if (empty($contestIds)) {
-            return [];
-        }
-
-        // Determine all viable submissions
-        $queryBuilder = $this->em->createQueryBuilder()
-            ->from(Submission::class, 's')
-            ->join('s.team', 't')
-            ->join('s.language', 'l')
-            ->join('s.contest_problem', 'cp')
-            ->select('s')
-            ->andWhere('s.judgehost IS NULL')
-            ->andWhere('s.contest IN (:contestIds)')
-            ->setParameter(':contestIds', $contestIds)
-            ->andWhere('l.allowJudge= 1')
-            ->andWhere('cp.allowJudge = 1')
-            ->andWhere('s.valid = 1')
-            ->orderBy('t.judging_last_started', 'ASC')
-            ->addOrderBy('s.submittime', 'ASC')
-            ->addOrderBy('s.submitid', 'ASC');
-
-        if ($restrictJudgingOnSameJudgehost) {
-            $queryBuilder
-                ->leftJoin('s.judgings', 'j', Join::WITH, 'j.judgehost = :judgehost')
-                ->andWhere('j.judgehost IS NULL')
-                ->setParameter(':judgehost', $judgehost->getHostname());
-        }
-
-        /** @var Submission[] $submissions */
-        $submissions = $queryBuilder->getQuery()->getResult();
-        return $submissions;
-    }
-
     /**
      * Get files for a given type and id.
      * @Rest\Get("/get_files/{type}/{id}")
