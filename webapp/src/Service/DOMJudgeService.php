@@ -1029,7 +1029,7 @@ class DOMJudgeService
             'timeFactorDiffers' => $timeFactorDiffers,
         ];
 
-        if ($this->config->get('show_public_stats')) {
+        if ($contest && $this->config->get('show_public_stats')) {
             $freezeData = new FreezeData($contest);
             $data['stats'] = $statistics->getGroupedProblemsStats(
                 $contest,
