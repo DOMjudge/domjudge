@@ -13,11 +13,11 @@ setup() {
 @test "contest via parameter overrides environment" {
     run ./submit -c bestaatniet
     assert_failure 1
-    assert_partial "error: no (valid) contest specified"
+    assert_partial "error: No (valid) contest specified"
 
     run ./submit --contest=bestaatookniet
     assert_failure 1
-    assert_partial "error: no (valid) contest specified"
+    assert_partial "error: No (valid) contest specified"
 }
 
 @test "hello problem id and name are in help output" {
@@ -29,9 +29,9 @@ setup() {
 @test "languages and extensions are in help output" {
     run ./submit --help
     assert_success
-    assert_regex "C: *c"
-    assert_regex "C\+\+: *c\+\+, cc, cpp, cxx"
-    assert_regex "Java: *java"
+    assert_regex "C *- *c"
+    assert_regex "C\+\+ *- *c\+\+, cc, cpp, cxx"
+    assert_regex "Java *- *java"
 }
 
 @test "stale file emits warning" {
@@ -78,14 +78,14 @@ setup() {
     cp ../tests/test-hello.java $BATS_TMPDIR/hello.java
     run ./submit -p nonexistent -l cpp $BATS_TMPDIR/hello.java <<< "n"
     assert_failure 1
-    assert_partial "error: no known problem specified or detected"
+    assert_partial "error: No known problem specified or detected"
 }
 
 @test "non existing language name emits erorr" {
     cp ../tests/test-hello.java $BATS_TMPDIR/hello.java
     run ./submit -p boolfind -l nonexistent $BATS_TMPDIR/hello.java <<< "n"
     assert_failure 1
-    assert_partial "error: no known language specified or detected"
+    assert_partial "error: No known language specified or detected"
 }
 
 @test "detect entry point Java" {
@@ -134,4 +134,5 @@ setup() {
     run ./submit -y -p hello ../tests/test-hello.c
     assert_success
     assert_regex "Submission received: id = s[0-9]*, time = [0-9]{2}:[0-9]{2}:[0-9]{2}"
+    assert_regex "Check http[^ ]*/[0-9]* for the result."
 }
