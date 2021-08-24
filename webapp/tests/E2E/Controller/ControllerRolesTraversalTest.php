@@ -169,7 +169,7 @@ class ControllerRolesTraversalTest extends BaseTest
         $this->verifyAccess($combinations, $urlsToCheck);
     }
 
-    public function visitWithNoContest($url) {
+    public function visitWithNoContest($url, $dropdown) {
         // We only care for the outcome, shorten the code by skipping steps.
         $this->client->followRedirects(true);
         // Explicit set no active contest.
@@ -177,7 +177,9 @@ class ControllerRolesTraversalTest extends BaseTest
         $this->client->request('GET', $url);
         $response = $this->client->getResponse();
         self::assertNotEquals(500, $response->getStatusCode(), $message=sprintf('Failed at %s',$url));
-        self::assertSelectorExists('a#navbarDropdownContests:contains("no contest")');
+        if ($dropdown) {
+            self::assertSelectorExists('a#navbarDropdownContests:contains("no contest")');
+        }
     }
 
     /**
@@ -217,7 +219,7 @@ class ControllerRolesTraversalTest extends BaseTest
         $urlsToCheck = $this->crawlPageGetLinks($roleBaseURL, 200);
         $urlsToCheck = $this->getAllPages($urlsToCheck);
         foreach($urlsToCheck as $url) {
-            $this->visitWithNoContest($url);
+            $this->visitWithNoContest($url, $roleBaseURL !== '/team');
         }
     }
 
@@ -263,5 +265,6 @@ class ControllerRolesTraversalTest extends BaseTest
         yield ['/jury',     ['jury']];
         yield ['/jury',     ['balloon']];
         yield ['/jury',     ['clarification_rw']];
+        yield ['/team',     ['team']];
     }
 }
