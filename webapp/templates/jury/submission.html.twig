@@ -243,9 +243,9 @@
                     </td>
                     <td>
                         <a href="{{ link }}">
-                            {% if judging.judgehost is not null %}
-                                {{ judging.judgehost.hostname | printHost }}
-                            {% endif %}
+                            {% for hostname in judging.judgehosts %}
+                                {{ hostname | printHost }}
+                            {% endfor %}
                         </a>
                     </td>
                     <td>

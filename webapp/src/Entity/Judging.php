@@ -486,4 +486,19 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
     {
         return !empty($this->getResult()) && empty($this->getEndtime()) && !$this->isAborted();
     }
+
+    public function getJudgehosts(): array
+    {
+        $hostnames = [];
+        /** @var JudgingRun $run */
+        foreach ($this->getRuns() as $run) {
+            if ($run->getJudgeTask()->getJudgehost() === null) {
+                continue;
+            }
+            $hostnames[] = $run->getJudgeTask()->getJudgehost()->getHostname();
+        }
+        $hostnames = array_unique($hostnames);
+        sort($hostnames);
+        return $hostnames;
+    }
 }
