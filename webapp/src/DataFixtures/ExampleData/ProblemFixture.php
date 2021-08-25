@@ -65,8 +65,8 @@ class ProblemFixture extends AbstractExampleDataFixture implements DependentFixt
             ->setExternalid('boolfind')
             ->setName('Boolean switch search')
             ->setTimelimit(5)
-            ->setRunExecutable($this->getReference(ExecutableFixture::BOOLFIND_RUN_REFERENCE))
-            ->setCompareExecutable($this->getReference(ExecutableFixture::BOOLFIND_CMP_REFERENCE));
+            ->setCombinedRunCompare(true)
+            ->setRunExecutable($this->getReference(ExecutableFixture::BOOLFIND_RUN_REFERENCE));
         if (file_exists($examplesDir . 'boolfind.pdf')) {
             $boolfind
                 ->setProblemtextType('pdf')
