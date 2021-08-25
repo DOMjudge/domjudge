@@ -34,33 +34,20 @@ class ExecutableFixture extends AbstractExampleDataFixture
      */
     public function load(ObjectManager $manager)
     {
-        $boolfindCompareFile = sprintf(
-            '%s/files/examples/boolfind_cmp.zip',
-            $this->sqlDir
-        );
-        $boolfindCompare     = new Executable();
-        $boolfindCompare
-            ->setExecid('boolfind_cmp')
-            ->setDescription('boolfind comparator')
-            ->setType('compare')
-            ->setImmutableExecutable($this->createImmutableExecutable($boolfindCompareFile));
-
         $boolfindRunFile = sprintf(
             '%s/files/examples/boolfind_run.zip',
             $this->sqlDir
         );
-        $boolfindRun     = new Executable();
+        $boolfindRun = new Executable();
         $boolfindRun
             ->setExecid('boolfind_run')
-            ->setDescription('boolfind run script')
+            ->setDescription('boolfind run and compare')
             ->setType('run')
             ->setImmutableExecutable($this->createImmutableExecutable($boolfindRunFile));
 
-        $manager->persist($boolfindCompare);
         $manager->persist($boolfindRun);
         $manager->flush();
 
-        $this->addReference(self::BOOLFIND_CMP_REFERENCE, $boolfindCompare);
         $this->addReference(self::BOOLFIND_RUN_REFERENCE, $boolfindRun);
     }
 
