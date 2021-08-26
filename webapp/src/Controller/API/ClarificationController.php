@@ -174,30 +174,7 @@ class ClarificationController extends AbstractRestController
 
             // If the user is an admin or API writer, allow it to specify the team
             if ($this->isGranted('ROLE_API_WRITER')) {
-                // Load the team
-                $queryBuilder = $this->em->createQueryBuilder()
-                    ->from(Team::class, 't')
-                    ->select('t')
-                    ->leftJoin('t.category', 'tc')
-                    ->leftJoin('t.contests', 'c')
-                    ->leftJoin('tc.contests', 'cc')
-                    ->andWhere(sprintf('t.%s = :team', $idField))
-                    ->andWhere('t.enabled = 1')
-                    ->setParameter(':team', $fromTeamId);
-
-                if (!$contest->isOpenToAllTeams()) {
-                    $queryBuilder
-                        ->andWhere('c.cid = :cid OR cc.cid = :cid')
-                        ->setParameter(':cid', $contest->getCid());
-                }
-
-                /** @var Team $fromTeam */
-                $fromTeam = $queryBuilder->getQuery()->getOneOrNullResult();
-
-                if (!$fromTeam) {
-                    throw new BadRequestHttpException(
-                        sprintf("Team '%s' not found or not enabled.", $fromTeamId));
-                }
+                $fromTeam = $this->dj->loadTeam($idField, $fromTeamId, $contest);
             } elseif (!$fromTeam) {
                 throw new BadRequestHttpException('User does not belong to a team.');
             } elseif ((string)call_user_func([$fromTeam, $method]) !== (string)$fromTeamId) {
@@ -216,30 +193,7 @@ class ClarificationController extends AbstractRestController
 
             // If the user is an admin or API writer, allow it to specify the team
             if ($this->isGranted('ROLE_API_WRITER')) {
-                // Load the team
-                $queryBuilder = $this->em->createQueryBuilder()
-                    ->from(Team::class, 't')
-                    ->select('t')
-                    ->leftJoin('t.category', 'tc')
-                    ->leftJoin('t.contests', 'c')
-                    ->leftJoin('tc.contests', 'cc')
-                    ->andWhere(sprintf('t.%s = :team', $idField))
-                    ->andWhere('t.enabled = 1')
-                    ->setParameter(':team', $toTeamId);
-
-                if (!$contest->isOpenToAllTeams()) {
-                    $queryBuilder
-                        ->andWhere('c.cid = :cid OR cc.cid = :cid')
-                        ->setParameter(':cid', $contest->getCid());
-                }
-
-                /** @var Team $toTeam */
-                $toTeam = $queryBuilder->getQuery()->getOneOrNullResult();
-
-                if (!$toTeam) {
-                    throw new BadRequestHttpException(
-                        sprintf("Team '%s' not found or not enabled.", $toTeamId));
-                }
+                $toTeam = $this->dj->loadTeam($idField, $toTeamId, $contest);
             } else {
                 throw new BadRequestHttpException('Can not create a clarification that is sent to a team.');
             }
@@ -368,4 +322,5 @@ class ClarificationController extends AbstractRestController
     {
         return sprintf('clar.%s', $this->eventLogService->externalIdFieldForEntity(Clarification::class) ?? 'clarid');
     }
+
 }
