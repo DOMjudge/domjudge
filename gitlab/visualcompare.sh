@@ -4,10 +4,6 @@
 set -euxo pipefail
 export PS4='(${BASH_SOURCE}:${LINENO}): - [$?] $ '
 
-failingchanges="failingchanges"
-predictedchanges="predictedchanges"
-
-mkdir -p {$failingchanges,$predictedchanges}
 
 if grep "^pr-" <<< "$CI_COMMIT_BRANCH"; then
     GITHUB_PR=$(cut -d '/' -f1 <<< "${CI_COMMIT_BRANCH##pr-}")
@@ -24,6 +20,8 @@ DIR=$(pwd)
 ADDREMLOG="$DIR"/addrem.log
 ADD=0
 DEL=0
+VISUALCHANGES="visualchanges"
+mkdir "$VISUALCHANGES"
 cd screenshotspr
 for URL in ./*; do
     URL=${URL#.\/}
@@ -47,12 +45,7 @@ for URL in ./*; do
                 if [ $RET -ne 0 ]; then
                     REMOVE=".html-ff.png"
                     ENDPOINT=${FILE/$REMOVE}
-                    WANTED=$(python3 "$DIR"/gitlab/visualgithubprdiscussion.py "$ENDPOINT" "$GITHUB_PR")
-                    if [ "$WANTED" = "wanted" ]; then
-                        STORDIR="$DIR"/"$predictedchanges"
-                    elif [ "$WANTED" = "none" ]; then
-                        STORDIR="$DIR"/"$failingchanges"
-                    fi
+                    STORDIR="$DIR"/"$VISUALCHANGES"
                     compare "$PR" "$MR" -highlight-color blue "$STORDIR"/"${ROLE}"_"${FILE}" || true
                     cp "$MR" "$STORDIR"/"${ROLE}"_main_"${FILE}"
                     cp "$PR" "$STORDIR"/"${ROLE}"_pr_"${FILE}"
@@ -77,47 +70,32 @@ done
 
 CHANGE=0
 cd "$DIR"
-for DIRCHANGES in "$predictedchanges" "$failingchanges"; do
-    if [ "$DIRCHANGES" == "$failingchanges" ]; then
-        STATE="failure"
-    else
-        STATE="success"
-    fi
-    MANY=$(ls $DIRCHANGES|wc -l)
-    FILE="browse/$DIRCHANGES"
-    if [ "$MANY" -eq 1 ]; then
-        FILE="file/$DIRCHANGES/"$(ls $DIRCHANGES)
-        CHANGE=1
-    elif [ "$MANY" -gt 1 ]; then
-        CHANGE=1
-    fi
-    if [ "$MANY" -gt 0 ]; then
-        # Copied from CCS
-        curl "https://api.github.com/repos/domjudge/domjudge/statuses/$CI_COMMIT_SHA" \
-            -X POST \
-            -H "Authorization: token $GH_BOT_TOKEN_OBSCURED" \
-            -H "Accept: application/vnd.github.v3+json" \
-            -d "{\"state\": \"$STATE\", \"target_url\": \"$CI_JOB_URL/artifacts/$FILE\", \"description\":\"UI changes ($DIRCHANGES) \", \"context\": \"UI diffs\"}"
-        if [ $STATE == "failure" ]; then
-            cat <<EOF > $failingchanges/README.txt
-List the changed endpoints in a message on the PR. Regex is allowed.
+STATE="success"
+set +e
+MANY=$(ls $VISUALCHANGES|grep -v 'main\|pr'|wc -l)
+set -e
+FILE="browse/$VISUALCHANGES"
+CONTEXT="UI diffs"
+DESCRIPTION="Placeholder for message"
+URL="URL to the results"
 
-Changed URLs:
-changed_endpoint(as possible regex)
-another_changed_endpoint(as possible regex)
-EOF
-            exit 1
-        fi
-    fi
-done
-
-if [ $CHANGE -eq 0 ]; then
-    curl https://api.github.com/repos/domjudge/domjudge/statuses/"$CI_COMMIT_SHA" \
-        -X POST \
-        -H "Authorization: token $GH_BOT_TOKEN_OBSCURED" \
-        -H "Accept: application/vnd.github.v3+json" \
-        -d "{\"state\": \"success\", \"target_url\": \"$CI_JOB_URL/artifacts/browse/\", \"description\":\"No UI changes\", \"context\": \"UI diffs\"}"
+if [ "$MANY" -eq 0 ]; then
+    DESCRIPTION="No UI changes"
+    URL="$CI_JOB_URL"/artifacts/browse/
+elif [ "$MANY" -eq 1 ]; then
+    DESCRIPTION="UI change: $FILE"
+    FILE="file/$VISUALCHANGES/"$(ls $VISUALCHANGES | grep -v 'main\|pr')
+    URL="$CI_JOB_URL"/artifacts/"$FILE"
+else
+    DESCRIPTION="UI changes found, _MAIN_ for original in main, _PR_ for capture in this PR, \$ROLE_\$ENDPOINT for the diff"
+    URL="$CI_JOB_URL"/artifacts/browse/"$VISUALCHANGES"
 fi
+
+curl "https://api.github.com/repos/domjudge/domjudge/statuses/$CI_COMMIT_SHA" \
+    -X POST \
+    -H "Authorization: token $GH_BOT_TOKEN_OBSCURED" \
+    -H "Accept: application/vnd.github.v3+json" \
+    -d "{\"state\": \"$STATE\", \"target_url\": \"$URL\", \"description\":\"$DESCRIPTION\", \"context\": \"$CONTEXT\"}"
 
 curl https://api.github.com/repos/domjudge/domjudge/statuses/"$CI_COMMIT_SHA" \
     -X POST \

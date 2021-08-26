@@ -194,8 +194,7 @@ visual_compare:
   artifacts:
     when: always
     paths:
-      - failingchanges
-      - predictedchanges
+      - visualchanges
       - addrem.log
 
 .job_template: &job_integration
