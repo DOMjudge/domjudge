@@ -80,8 +80,8 @@ class ClarificationControllerTest extends BaseTest
         yield ['demo', ['text' => 'This is a clarification', 'id' => '1234'], "A team can not assign id."];
         yield ['demo', ['text' => 'This is a clarification', 'reply_to_id' => 'nonexistent'], "Clarification 'nonexistent' not found."];
         yield ['admin', ['text' => 'This is a clarification', 'from_team_id' => '2', 'to_team_id' => '2'], "Can not send a clarification from and to a team."];
-        yield ['admin', ['text' => 'This is a clarification', 'from_team_id' => '3'], "Team '3' not found or not enabled."];
-        yield ['admin', ['text' => 'This is a clarification', 'to_team_id' => '3'], "Team '3' not found or not enabled."];
+        yield ['admin', ['text' => 'This is a clarification', 'from_team_id' => '3'], "Team with ID '3' not found in contest or not enabled."];
+        yield ['admin', ['text' => 'This is a clarification', 'to_team_id' => '3'], "Team with ID '3' not found in contest or not enabled."];
         yield ['admin', ['text' => 'This is a clarification', 'time' => 'this is not a time'], "Can not parse time 'this is not a time'."];
         yield ['admin', ['text' => 'This is a clarification', 'id' => '1'], "Clarification with ID '1' already exists."];
     }
