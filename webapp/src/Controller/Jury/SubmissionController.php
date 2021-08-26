@@ -472,7 +472,7 @@ class SubmissionController extends BaseController
                     $runResult['wall_time'] = $metadata['wall-time'];
                     $runResult['memory'] = Utils::printsize((int)$metadata['memory-bytes'], 2);
                     $runResult['exitcode'] = $metadata['exitcode'];
-                    $runResult['signal'] = isset($metadata['signal']) ? $metadata['signal'] : -1;
+                    $runResult['signal'] = $metadata['signal'] ?? -1;
                 }
                 $runResult['terminated'] = preg_match('/timelimit exceeded.*hard (wall|cpu) time/',
                                                       (string)$runResult['output_system']);
