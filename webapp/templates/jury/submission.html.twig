@@ -269,14 +269,10 @@
         </table>
     {% endif %}
 
-    {% if selectedJudging is null %}
-        <div class="alert alert-warning">Not (re)judged yet</div>
-
-        {% if unjudgableReasons is not empty %}
-            {% for reason in unjudgableReasons %}
-                <div class="alert alert-danger">{{ reason }}</div>
-            {% endfor %}
-        {% endif %}
+    {% if unjudgableReasons is not empty %}
+        {% for reason in unjudgableReasons %}
+            <div class="alert alert-danger">{{ reason }}</div>
+        {% endfor %}
     {% endif %}
 
     {% if selectedJudging is not null or externalJudgement is not null %}
