@@ -166,14 +166,13 @@ class ClarificationController extends AbstractController
         $queues     = $this->config->get('clar_queues');
         $clar_answers = $this->config->get('clar_answers');
 
-        if ( $irt = $clarification->getInReplyTo() ) {
-            $clarlist = [$irt];
-            $replies = $irt->getReplies() ?? [];
-            foreach($replies as $clar_reply) { $clarlist[] = $clar_reply; }
-        } else {
-            $clarlist = [$clarification];
-            $replies = $clarification->getReplies() ?? [];
-            foreach($replies as $clar_reply) { $clarlist[] = $clar_reply; }
+        if ($inReplyTo = $clarification->getInReplyTo()) {
+            $clarification = $inReplyTo;
+        }
+        $clarlist = [$clarification];
+        $replies = $clarification->getReplies() ?? [];
+        foreach ($replies as $clar_reply) {
+            $clarlist[] = $clar_reply;
         }
 
         $concernsteam = null;
