@@ -945,7 +945,7 @@ class JudgehostController extends AbstractFOSRestController
         });
 
         // Reload the judging, as EventLogService::log will clear the entity manager.
-        // For the judging, also load in the submission and some of it's relations.
+        // For the judging, also load in the submission and some of its relations.
         /** @var JudgingRun $judgingRun */
         $judgingRun = $this->em->getRepository(JudgingRun::class)->findOneBy(['judgetaskid' => $judgeTaskId]);
         $judging = $judgingRun->getJudging();
@@ -1366,9 +1366,9 @@ class JudgehostController extends AbstractFOSRestController
             // judgetask).
             // TODO: We should merge this with the query above to reduce code duplication.
             if ($started_judgetaskids) {
+                $queryBuilder = $this->em->createQueryBuilder();
                 /** @var JudgeTask[] $judgetasks */
-                $judgetasks = $this->em
-                    ->createQueryBuilder()
+                $judgetasks = $queryBuilder
                     ->from(JudgeTask::class, 'jt')
                     ->select('jt')
                     ->andWhere('jt.judgehost IS NULL')
