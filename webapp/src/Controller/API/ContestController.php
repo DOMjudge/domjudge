@@ -231,7 +231,6 @@ class ContestController extends AbstractRestController
     public function changeStartTimeAction(Request $request, string $cid) : Response
     {
         $contest  = $this->getContestWithId($request, $cid);
-        $response = null;
         $now      = Utils::now();
         $changed  = false;
         if (!$request->request->has('id')) {
