@@ -246,32 +246,8 @@ class SubmissionController extends AbstractRestController
             if ($this->isGranted('ROLE_API_WRITER')) {
                 /** @var Contest $contest */
                 $contest = $this->em->getRepository(Contest::class)->find($this->getContestId($request));
-
-                // Load the team
-                $queryBuilder = $this->em->createQueryBuilder()
-                    ->from(Team::class, 't')
-                    ->select('t')
-                    ->leftJoin('t.category', 'tc')
-                    ->leftJoin('t.contests', 'c')
-                    ->leftJoin('tc.contests', 'cc')
-                    ->andWhere(sprintf('t.%s = :team', $idField))
-                    ->andWhere('t.enabled = 1')
-                    ->setParameter(':team', $teamId);
-
-                if (!$contest->isOpenToAllTeams()) {
-                    $queryBuilder
-                        ->andWhere('c.cid = :cid OR cc.cid = :cid')
-                        ->setParameter(':cid', $contest->getCid());
-                }
-
                 /** @var Team $team */
-                $team = $queryBuilder->getQuery()->getOneOrNullResult();
-
-                if (!$team) {
-                    throw new BadRequestHttpException(
-                        sprintf("Team '%s' not found or not enabled.", $teamId));
-                }
-
+                $team = $this->dj->loadTeam($idField, $teamId, $contest);
                 $user = $team->getUsers()->first() ?: null;
             } elseif (!$team) {
                 throw new BadRequestHttpException('User does not belong to a team.');

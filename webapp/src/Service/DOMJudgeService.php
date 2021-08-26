@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Controller\API\ClarificationController;
 use App\Doctrine\DBAL\Types\JudgeTaskType;
 use App\Entity\AuditLog;
 use App\Entity\Balloon;
@@ -1324,5 +1325,33 @@ class DOMJudgeService
         }
 
         return null;
+    }
+
+    public function loadTeam(string $idField, string $teamId, Contest $contest): Team
+    {
+        $queryBuilder = $this->em->createQueryBuilder()
+            ->from(Team::class, 't')
+            ->select('t')
+            ->leftJoin('t.category', 'tc')
+            ->leftJoin('t.contests', 'c')
+            ->leftJoin('tc.contests', 'cc')
+            ->andWhere(sprintf('t.%s = :team', $idField))
+            ->andWhere('t.enabled = 1')
+            ->setParameter(':team', $teamId);
+
+        if (!$contest->isOpenToAllTeams()) {
+            $queryBuilder
+                ->andWhere('c.cid = :cid OR cc.cid = :cid')
+                ->setParameter(':cid', $contest->getCid());
+        }
+
+        /** @var Team $team */
+        $team = $queryBuilder->getQuery()->getOneOrNullResult();
+
+        if (!$team) {
+            throw new BadRequestHttpException(
+                sprintf("Team with ID '%s' not found in contest or not enabled.", $teamId));
+        }
+        return $team;
     }
 }
