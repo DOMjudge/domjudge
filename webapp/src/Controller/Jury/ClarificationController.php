@@ -176,7 +176,7 @@ class ClarificationController extends AbstractController
         }
 
         $concernsteam = null;
-        foreach($clarlist as $k => $clar) {
+        foreach ($clarlist as $clar) {
             $data = ['clarid' => $clar->getClarid(), 'externalid' => $clar->getExternalid()];
             $data['time'] = $clar->getSubmittime();
 

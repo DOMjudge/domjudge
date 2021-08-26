@@ -340,12 +340,10 @@ class RejudgingController extends BaseController
         }
 
         $viewTypes = [0 => 'newest', 1 => 'unverified', 2 => 'unjudged', 3 => 'diff', 4 => 'all'];
-        $view      = array_search('diff', $viewTypes);
+        $defaultView = 'diff';
         if ($rejudging->getSubmissions()->count() <= 5) {
-            // Only a handful of submissions, display it right away.
+            // Only a handful of submissions, display all of them right away.
             $defaultView = 'all';
-        } else {
-            $defaultView = 'diff';
         }
         $view = array_search($defaultView, $viewTypes);
         if ($request->query->has('view')) {

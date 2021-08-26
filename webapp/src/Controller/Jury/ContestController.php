@@ -332,7 +332,6 @@ class ContestController extends BaseController
                 $time = $contestdata[$timeField . 'time']['value'];
                 if (!$contest->getStarttimeEnabled() && $timeField != 'activate') {
                     $time      = null;
-                    $timeTitle = null;
                 }
                 if ($time === null) {
                     $timeValue = '-';

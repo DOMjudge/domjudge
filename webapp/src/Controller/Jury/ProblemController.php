@@ -554,7 +554,6 @@ class ProblemController extends BaseController
                             $thumb = Utils::getImageThumb($content, $thumbnailSize,
                                                           $this->dj->getDomjudgeTmpDir(), $error);
                             if ($thumb === false) {
-                                $thumb = null;
                                 $this->addFlash('danger', sprintf('image: %s', $error));
                                 return $this->redirectToRoute('jury_problem_testcases', ['probId' => $probId]);
                             }
@@ -603,7 +602,7 @@ class ProblemController extends BaseController
             $allOk = true;
             $inputOrOutputSpecified = false;
             foreach (['input', 'output'] as $type) {
-                if ($file = $request->files->get('add_' . $type)) {
+                if ($request->files->get('add_' . $type)) {
                     $inputOrOutputSpecified = true;
                 }
             }
@@ -664,7 +663,6 @@ class ProblemController extends BaseController
                     $thumb = Utils::getImageThumb($content, $thumbnailSize,
                                                   $this->dj->getDomjudgeTmpDir(), $error);
                     if ($thumb === false) {
-                        $thumb = null;
                         $this->addFlash('danger', sprintf('image: %s', $error));
                         return $this->redirectToRoute('jury_problem_testcases', ['probId' => $probId]);
                     }
