@@ -629,7 +629,7 @@ class JudgehostController extends AbstractFOSRestController
         Request $request,
         string $hostname,
         int $judgeTaskId
-    ) : void {
+    ) : int {
         $required = [
             'runresult',
             'runtime',
@@ -660,11 +660,13 @@ class JudgehostController extends AbstractFOSRestController
             throw new BadRequestHttpException("Who are you and why are you sending us any data?");
         }
 
-        $this->addSingleJudgingRun($judgeTaskId, $hostname, $runResult, $runTime,
-                                   $outputSystem, $outputError, $outputDiff, $outputRun, $metadata);
+        $hasFinalResult = $this->addSingleJudgingRun($judgeTaskId, $hostname, $runResult, $runTime,
+            $outputSystem, $outputError, $outputDiff, $outputRun, $metadata);
         $judgehost = $this->em->getRepository(Judgehost::class)->findOneBy(['hostname' => $hostname]);
         $judgehost->setPolltime(Utils::now());
         $this->em->flush();
+
+        return (int)$hasFinalResult;
     }
 
     /**
@@ -878,11 +880,14 @@ class JudgehostController extends AbstractFOSRestController
     }
 
     /**
-     * Add a single judging to a given judging run
+     * Add a single judging to a given judging run.
+     *
      * @throws DBALException
      * @throws NoResultException
      * @throws NonUniqueResultException
      * @throws ORMException
+     *
+     * Returns true if the judging needs more work.
      */
     private function addSingleJudgingRun(
         int $judgeTaskId,
@@ -1005,8 +1010,7 @@ class JudgehostController extends AbstractFOSRestController
                     // We don't want to continue on this problem, even if there's spare resources.
                     $this->em->getConnection()->executeUpdate(
                         'UPDATE judgetask SET valid=0, priority=:priority'
-                        . ' WHERE jobid=:jobid'
-                        . ' AND judgehostid IS NULL',
+                        . ' WHERE jobid=:jobid',
                         [
                             ':priority' => JudgeTask::PRIORITY_LOW,
                             ':jobid' => $judgingRun->getJudgingid(),
@@ -1054,6 +1058,8 @@ class JudgehostController extends AbstractFOSRestController
                     EventLogService::ACTION_UPDATE, $judging->getContest()->getCid());
             }
         }
+
+        return $judging->getResult() === null || $judging->getJudgeCompletely() || !$lazyEval;
     }
 
     private function maybeUpdateActiveJudging(Judging $judging): void
