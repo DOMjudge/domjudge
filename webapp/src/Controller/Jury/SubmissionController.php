@@ -316,51 +316,6 @@ class SubmissionController extends BaseController
             }
         }
 
-        $unjudgableReasons = [];
-        if ($selectedJudging === null) {
-            // Determine if this submission is unjudgable
-
-            // First, check if there is an active judgehost that can judge this submission.
-            /** @var Judgehost[] $judgehosts */
-            $judgehosts  = $this->em->createQueryBuilder()
-                ->from(Judgehost::class, 'j')
-                ->select('j')
-                ->andWhere('j.active = 1')
-                ->getQuery()
-                ->getResult();
-            $canBeJudged = false;
-            foreach ($judgehosts as $judgehost) {
-                $queryBuilder = $this->em->createQueryBuilder()
-                    ->from(Submission::class, 's')
-                    ->select('s')
-                    ->join('s.language', 'lang')
-                    ->join('s.contest_problem', 'cp')
-                    ->andWhere('s.submitid = :submitid')
-                    ->andWhere('s.judgehost IS NULL')
-                    ->andWhere('lang.allowJudge = 1')
-                    ->andWhere('cp.allowJudge = 1')
-                    ->andWhere('s.valid = 1')
-                    ->setParameter(':submitid', $submission->getSubmitid())
-                    ->setMaxResults(1);
-
-                if ($queryBuilder->getQuery()->getOneOrNullResult()) {
-                    $canBeJudged = true;
-                }
-            }
-
-            if (!$canBeJudged) {
-                $unjudgableReasons[] = 'No active judgehost can judge this submission. Edit judgehost restrictions!';
-            }
-
-            if (!$submission->getLanguage()->getAllowJudge()) {
-                $unjudgableReasons[] = 'Submission language is currently not allowed to be judged!';
-            }
-
-            if (!$submission->getContestProblem()->getAllowJudge()) {
-                $unjudgableReasons[] = 'Problem is currently not allowed to be judged!';
-            }
-        }
-
         $outputDisplayLimit    = (int)$this->config->get('output_display_limit');
         $outputTruncateMessage = sprintf("\n[output display truncated after %d B]\n", $outputDisplayLimit);
 
@@ -538,6 +493,29 @@ class SubmissionController extends BaseController
                     ->orderBy('t.ranknumber')
                     ->getQuery()
                     ->getResult();
+            }
+        }
+
+        $unjudgableReasons = [];
+        if ($runsOutstanding) {
+            // Determine if this submission is unjudgable.
+
+            $numActiveJudgehosts = (int)$this->em->createQueryBuilder()
+                ->from(Judgehost::class, 'j')
+                ->select('count(j.judgehostid)')
+                ->andWhere('j.active = 1')
+                ->getQuery()
+                ->getSingleScalarResult();
+            if ($numActiveJudgehosts == 0) {
+                $unjudgableReasons[] = 'No active judgehost. Add or enable judgehosts!';
+            }
+
+            if (!$submission->getLanguage()->getAllowJudge()) {
+                $unjudgableReasons[] = 'Submission language is currently not allowed to be judged!';
+            }
+
+            if (!$submission->getContestProblem()->getAllowJudge()) {
+                $unjudgableReasons[] = 'Problem is currently not allowed to be judged!';
             }
         }
 
