@@ -819,6 +819,17 @@ while (true) {
     // Will be revoked again after this run finished.
     foreach ($row as $judgetask) {
         if (!judge($judgetask)) {
+            // Potentially return remaining outstanding judgetasks here.
+            $returnedJudgings = request('judgehosts', 'POST', 'hostname=' . urlencode($myhost), false);
+            if ($returnedJudgings !== NULL) {
+                $returnedJudgings = dj_json_decode($returnedJudgings);
+                foreach ($returnedJudgings as $jud) {
+                    $workdir = judging_directory($workdirpath, $jud);
+                    @chmod($workdir, 0700);
+                    logmsg(LOG_WARNING, "  🔙 Returned unfinished judging with jobid " . $jud['jobid'] .
+                        " in my name; given back unfinished runs from me.");
+                }
+            }
             break;
         }
     }
@@ -1264,6 +1275,7 @@ function judge(array $judgeTask): bool
         'hostname' => $myhost,
     );
 
+    $ret = true;
     if ($result === 'correct') {
         // Post result back asynchronously. PHP is lacking multi-threading, so
         // we just call ourselves again.
@@ -1277,20 +1289,23 @@ function judge(array $judgeTask): bool
             . ' >> /dev/null & ';
         shell_exec($cmd);
     } else {
-        request(
+        // This run was incorrect, only continue with the remaining judge tasks
+        // if we are told to do so.
+        $needsMoreWork = request(
             sprintf('judgehosts/add-judging-run/%s/%s', urlencode($myhost),
                 urlencode((string)$judgeTask['judgetaskid'])),
             'POST',
             $new_judging_run,
             false
         );
+        $ret = (bool)$needsMoreWork;
     }
 
     logmsg(LOG_INFO, '  ' . ($result === 'correct' ? " \033[0;32m✔\033[0m" : " \033[1;31m✗\033[0m")
         . ' ...done in ' . $runtime . 's, result: ' . $result);
 
     // done!
-    return true;
+    return $ret;
 }
 
 function fetchTestcase($workdirpath, $testcase_id, $judgetaskid): ?array
