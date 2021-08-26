@@ -22,7 +22,6 @@ use App\Service\EventLogService;
 use App\Service\ImportExportService;
 use App\Service\ScoreboardService;
 use App\Utils\Scoreboard\Filter;
-use App\Utils\Scoreboard\ScoreboardMatrixItem;
 use App\Utils\Utils;
 use Collator;
 use Doctrine\ORM\EntityManagerInterface;

@@ -96,17 +96,17 @@ class RejudgingController extends BaseController
     public function indexAction(Request $request): Response
     {
         $curContest = $this->dj->getCurrentContest();
-        /** @var Rejudging[] $rejudgings */
-        $rejudgings = $this->em->createQueryBuilder()
+        $queryBuilder = $this->em->createQueryBuilder()
             ->select('r')
             ->from(Rejudging::class, 'r');
         if ($curContest !== NULL) {
-            $rejudgings = $rejudgings->leftJoin(Judging::class, 'j', Join::WITH, 'j.rejudging = r')
+            $queryBuilder = $queryBuilder->leftJoin(Judging::class, 'j', Join::WITH, 'j.rejudging = r')
                 ->andWhere('j.contest = :contest')
                 ->setParameter(':contest', $curContest->getCid())
                 ->distinct();
         }
-        $rejudgings = $rejudgings->orderBy('r.rejudgingid', 'DESC')
+        /** @var Rejudging[] $rejudgings */
+        $rejudgings = $queryBuilder->orderBy('r.rejudgingid', 'DESC')
             ->getQuery()->getResult();
 
         $table_fields = [
