@@ -211,6 +211,8 @@ visual_compare:
     when: always
     paths:
       - gitlabartifacts
+    reports:
+      metrics: metrics.txt
   cache:
     key: integration
     paths:

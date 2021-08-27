@@ -9,12 +9,25 @@ alias trace_off='{ set +x; } 2>/dev/null'
 
 function section_start_internal() {
 	echo -e "section_start:`date +%s`:$1[collapsed=true]\r\e[0K$2"
+	start=`date +%s`
 	trace_on
 }
 
 function section_end_internal() {
 	echo -e "section_end:`date +%s`:$1\r\e[0K"
 	trace_on
+	end=`date +%s`
+	runtime=$((end-start))
+	echo "$1_${CI_JOB_NAME} ${runtime}" >> "$DIR"/metrics.txt
+	trace_on
+}
+
+function metric_time () {
+	start=`date +%s`
+	${@:2}
+	end=`date +%s`
+	runtime=$((end-start))
+	echo "$1_${CI_JOB_NAME} ${runtime}" >> "$DIR"/metrics.txt
 }
 
 alias section_start='trace_off ; section_start_internal '
@@ -79,7 +92,7 @@ section_end setup
 
 section_start submit_client "Test submit client"
 cd ${DIR}/submit
-make check-full
+metric_time submissions make check-full
 section_end submit_client
 
 section_start mount "Show runner mounts"
@@ -234,5 +247,9 @@ section_end api_check |& tee "$gitlabartifacts/check_api.log"
 
 section_start validate_feed "Validate the eventfeed against API (ignoring failures)"
 cd ${DIR}/misc-tools
+start=`date +%s`
 ./compare-cds.sh http://localhost/domjudge 2 |& tee "$gitlabartifacts/compare_cds.log" || true
+start=`date +%s`
+runtime=$((end-start))
+echo "cds_time_${CI_JOB_NAME} ${runtime}" >> "$DIR"/metrics.txt
 section_end validate_feed
