@@ -1,0 +1,6 @@
+#!/bin/sh
+
+directory="$1"
+output_file="$2"
+
+tar --one-file-system czf "${output_file}" "${directory}"
