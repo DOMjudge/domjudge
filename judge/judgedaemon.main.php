@@ -747,6 +747,7 @@ while (true) {
                 ['output_run' => rest_encode_file($testcasedir . '/program.out', false)],
                 false
             );
+            logmsg(LOG_INFO, "  ⇡ Uploading full output of testcase $judgeTask[testcase_id].");
         }
         continue;
     }
