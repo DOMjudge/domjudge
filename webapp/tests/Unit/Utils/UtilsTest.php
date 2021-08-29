@@ -204,6 +204,9 @@ class UtilsTest extends TestCase
      */
     public function testPrinttimediff() : void
     {
+        // Test the empty end case, 
+        self::assertEquals("00:00", Utils::printtimediff(microtime(true)));        
+        
         $start = $end = 1544964581.3604;
 
         self::assertEquals("00:00", Utils::printtimediff($start, $end));
@@ -308,6 +311,8 @@ class UtilsTest extends TestCase
         self::assertEquals($color, Utils::convertToColor($color));
         $color = '#12346h';
         self::assertEquals($color, Utils::convertToColor($color));
+        $color = '#1234';
+        self::assertEquals(null, Utils::convertToColor($color));
     }
 
     /**
@@ -612,6 +617,20 @@ class UtilsTest extends TestCase
     }
 
     /**
+     * Test image type with no implemented logic
+     */
+    public function testGetImageTypeNotImplemented() : void
+    {
+        $logo = __DIR__ . '/../../../public/images/DOMjudgelogo.svg';
+        $image = file_get_contents($logo);
+        $error = null;
+
+        $type = Utils::getImageType($image, $error);
+        self::assertFalse($type);
+        self::assertEquals('Could not determine image information.', $error);
+    }
+
+    /**
      * Test image type with invalid image
      */
     public function testGetImageTypeError() : void
@@ -626,10 +645,11 @@ class UtilsTest extends TestCase
 
     /**
      * test image thumbnail creation
+     * @dataProvider provideImagesToThumb
      */
-    public function testGetImageThumb() : void
+    public function testGetImageThumb($imageLocation, $mime) : void
     {
-        $logo = dirname(__file__) . '/../../../public/images/teams/domjudge.jpg';
+        $logo = dirname(__file__) . $imageLocation;
         $image = file_get_contents($logo);
         $error = null;
         $tmp = sys_get_temp_dir();
@@ -640,7 +660,14 @@ class UtilsTest extends TestCase
 
         $data = getimagesizefromstring($thumb);
         self::assertEquals($maxsize, $data[0]);  // resized width
-        self::assertEquals('image/jpeg', $data['mime']);
+        self::assertEquals($mime, $data['mime']);
+    }
+
+    public function provideImagesToThumb() : \Generator
+    {
+        yield ['/../../../public/images/teams/domjudge.jpg', 'image/jpeg'];
+        yield ['/../../../public/js/cross.gif', 'image/gif'];
+        yield ['/../../../public/js/hs.png', 'image/png'];
     }
 
     /**
