@@ -2,12 +2,17 @@
 
 namespace App\Tests\Unit\Utils\Scoreboard;
 
+use App\DataFixtures\Test\ContestTimeFixture;
+use App\Entity\Contest;
 use App\Entity\Team;
+use App\Utils\FreezeData;
 use App\Utils\Scoreboard\Scoreboard;
 use App\Utils\Scoreboard\TeamScore;
-use PHPUnit\Framework\TestCase;
+use App\Tests\Unit\Utils\FreezeDataTest;
+use App\Tests\Unit\BaseTest as BaseBaseTest;
+use Generator;
 
-class ScoreboardTest extends TestCase
+class ScoreboardTest extends BaseBaseTest
 {
     /**
      * Test that the scoreboard tie breaker works with two teams without
@@ -112,5 +117,26 @@ class ScoreboardTest extends TestCase
         self::assertEquals(1, $tie);
         $tie = Scoreboard::scoreTieBreaker($scoreB, $scoreA);
         self::assertEquals(-1, $tie);
+    }
+
+    /**
+     * @dataProvider provideFreezeDataProgress
+     */
+    public function testScoreboardProgress(
+        string $reference, int $progress,
+        bool $_1, bool $_2, bool $_3, bool $_4, bool $_5, bool $_6): void
+    {
+        $this->loadFixture(ContestTimeFixture::class);
+        $em = self::$container->get('doctrine')->getManager();
+        $contest = $em->getRepository(Contest::class)->findOneBy(['name' => $reference]);
+        $freezeData = new FreezeData($contest);
+        $scoreBoard = new Scoreboard($contest, [], [], [], [], $freezeData, false, 0, true);
+        self::assertEquals($scoreBoard->getProgress(), $progress);
+    }
+
+    public function provideFreezeDataProgress(): Generator
+    {
+        $class = new FreezeDataTest();
+        return $class->provideContestProgress();
     }
 }
