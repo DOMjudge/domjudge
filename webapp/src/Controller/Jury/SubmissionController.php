@@ -519,6 +519,21 @@ class SubmissionController extends BaseController
             }
         }
 
+        if (!isset($judging)) {
+            $requestedOutputCount = 0;
+        } else {
+            $requestedOutputCount = (int)$this->em->createQueryBuilder()
+                ->from(JudgeTask::class, 'jt')
+                ->select('count(jt.judgetaskid)')
+                ->andWhere('jt.type = :type')
+                ->andWhere('jt.jobid = :judgingid')
+                ->andWhere('jt.starttime IS NULL')
+                ->setParameter(':type', JudgeTaskType::DEBUG_INFO)
+                ->setParameter(':judgingid', $judging->getJudgingid())
+                ->getQuery()
+                ->getSingleScalarResult();
+        }
+
         $twigData = [
             'submission' => $submission,
             'lastSubmission' => $lastSubmission,
@@ -537,6 +552,7 @@ class SubmissionController extends BaseController
             'verificationRequired' => (bool)$this->config->get('verification_required'),
             'claimWarning' => $claimWarning,
             'combinedRunCompare' => $submission->getProblem()->getCombinedRunCompare(),
+            'requestedOutputCount' => $requestedOutputCount,
         ];
 
         if ($selectedJudging === null) {
