@@ -382,6 +382,9 @@ EOF;
             case 'default_run':
                 $item['options'] = $this->findExecutableOptions('run');
                 break;
+            case 'default_full_debug':
+                $item['options'] = $this->findExecutableOptions('debug');
+                break;
             case 'results_prio':
             case 'results_remap':
                 $verdictsConfig      = $this->etcDir . '/verdicts.php';
