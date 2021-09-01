@@ -5,6 +5,7 @@ namespace App\Controller\Jury;
 use App\Controller\BaseController;
 use App\Doctrine\DBAL\Types\JudgeTaskType;
 use App\Entity\Contest;
+use App\Entity\Executable;
 use App\Entity\ExternalJudgement;
 use App\Entity\Judgehost;
 use App\Entity\JudgeTask;
@@ -564,6 +565,45 @@ class SubmissionController extends BaseController
         }
 
         return $this->render('jury/submission.html.twig', $twigData);
+    }
+
+    /**
+     * @Route("/request-full-debug/{jid}", name="request_full_debug")
+     * @throws NonUniqueResultException
+     * @throws Exception
+     */
+    public function requestFullDebug(Judging $jid): RedirectResponse
+    {
+        $submission = $jid->getSubmission();
+        /** @var Executable $defaultFullDebugExecutable */
+        $defaultFullDebugExecutable = $this->em
+            ->getRepository(Executable::class)
+            ->findOneBy(['execid' => $this->config->get('default_full_debug')]);
+        if ($defaultFullDebugExecutable === null) {
+            $this->addFlash('error', 'No default full_debug executable specified, please configure one.');
+        } else {
+            $executable = $defaultFullDebugExecutable->getImmutableExecutable();
+            foreach ($jid->getJudgehosts() as $hostname) {
+                $judgehost = $this->em
+                    ->getRepository(Judgehost::class)
+                    ->findOneBy(['hostname' => $hostname]);
+                $judgeTask = new JudgeTask();
+                $judgeTask
+                    ->setType(JudgeTaskType::DEBUG_INFO)
+                    ->setJudgehost($judgehost)
+                    ->setSubmitid($submission->getSubmitid())
+                    ->setPriority(JudgeTask::PRIORITY_HIGH)
+                    ->setJobId($jid->getJudgingid())
+                    ->setRunScriptId($executable->getImmutableExecId())
+                    ->setRunConfig(json_encode(['hash' => $executable->getHash()]));
+                $this->em->persist($judgeTask);
+            }
+            $this->em->flush();
+        }
+        return $this->redirectToRoute('jury_submission', [
+            'submitId' => $jid->getSubmission()->getSubmitid(),
+            'jid' => $jid->getJudgingid(),
+        ]);
     }
 
     /**
