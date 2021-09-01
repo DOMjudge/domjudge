@@ -254,7 +254,7 @@ class JudgeTask
         return $this;
     }
 
-    public function getRunScriptId(): int
+    public function getRunScriptId(): ?int
     {
         return $this->run_script_id;
     }

@@ -300,6 +300,13 @@
                     {% endif %}
                 </h2>
                 &nbsp;
+                <a href="{{ path('request_full_debug', {'jid': selectedJudging.judgingid}) }}">
+                    <button class="btn btn-sm btn-outline-secondary" >
+                        <i class="fas fa-upload"></i>
+                        Retrieve Full Debug Package
+                    </button>
+                </a>
+                &nbsp;
                 {% if not selectedJudging.verified %}
                     <form action="{{ path('jury_submission', {submitId: submission.submitid, jid: selectedJudging.judgingid}) }}"
                           method="post" style="display: inline;">
