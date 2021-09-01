@@ -174,6 +174,12 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
      */
     private $runs;
 
+    /**
+     * @ORM\OneToMany(targetEntity="DebugPackage", mappedBy="judging")
+     * @Serializer\Exclude()
+     */
+    private $debug_packages;
+
     public function getMaxRuntime(): ?float
     {
         if ($this->runs->isEmpty()) {

@@ -4,6 +4,7 @@ namespace App\Controller\API;
 
 use App\Doctrine\DBAL\Types\JudgeTaskType;
 use App\Entity\Contest;
+use App\Entity\DebugPackage;
 use App\Entity\Executable;
 use App\Entity\ExecutableFile;
 use App\Entity\InternalError;
@@ -511,9 +512,24 @@ class JudgehostController extends AbstractFOSRestController
         string $hostname,
         int $judgeTaskId
     ): void {
-        $required = [
-            'output_run',
-        ];
+        /** @var JudgeTask $judgeTask */
+        $judgeTask = $this->em->getRepository(JudgeTask::class)->find($judgeTaskId);
+        if ($judgeTask === null) {
+            throw new BadRequestHttpException(
+                'Inconsistent data, no judgetask known with judgetaskid = ' . $judgeTaskId . '.');
+        }
+
+        if ($judgeTask->getRunScriptId() === null) {
+            $full_debug = false;
+            $required = [
+                'output_run',
+            ];
+        } else {
+            $full_debug = true;
+            $required = [
+                'full_debug',
+            ];
+        }
 
         foreach ($required as $argument) {
             if (!$request->request->has($argument)) {
@@ -528,30 +544,42 @@ class JudgehostController extends AbstractFOSRestController
             throw new BadRequestHttpException("Who are you and why are you sending us any data?");
         }
 
-        /** @var JudgeTask $judgeTask */
-        $judgeTask = $this->em->getRepository(JudgeTask::class)->find($judgeTaskId);
-        if ($judgeTask === null) {
-            throw new BadRequestHttpException(
-                'Inconsistent data, no judgetask known with judgetaskid = ' . $judgeTaskId . '.');
+        if ($full_debug) {
+            $judging = $this->em->getRepository(Judging::class)->find($judgeTask->getJobId());
+            if ($judging === null) {
+                throw new BadRequestHttpException(
+                    'Inconsistent data, no judging known with judgingid = ' . $judgeTask->getJobId() . '.');
+            }
+            if ($tempFilename = tempnam($this->dj->getDomjudgeTmpDir(), "full-debug-")) {
+                $debug_package = base64_decode($request->request->get('full_debug'));
+                file_put_contents($tempFilename, $debug_package);
+            }
+            // FIXME: error checking
+            $debug_package = new DebugPackage();
+            $debug_package
+                ->setJudgehost($judgehost)
+                ->setJudging($judging)
+                ->setFilename($tempFilename);
+            $this->em->persist($debug_package);
+        } else {
+            /** @var JudgingRun $judgingRun */
+            $judgingRun = $this->em->getRepository(JudgingRun::class)->findOneBy(
+                [
+                    'judging' => $judgeTask->getJobId(),
+                    'testcase' => $judgeTask->getTestcaseId(),
+                ]
+            );
+            if ($judgingRun === null) {
+                throw new BadRequestHttpException(
+                    'Inconsistent data, no judging run known with jid = ' . $judgeTask->getJobId() . '.');
+            }
+
+            $outputRun = base64_decode($request->request->get('output_run'));
+
+            /** @var JudgingRunOutput $judgingRunOutput */
+            $judgingRunOutput = $judgingRun->getOutput();
+            $judgingRunOutput->setOutputRun($outputRun);
         }
-
-        /** @var JudgingRun $judgingRun */
-        $judgingRun = $this->em->getRepository(JudgingRun::class)->findOneBy(
-            [
-                'judging' => $judgeTask->getJobId(),
-                'testcase' => $judgeTask->getTestcaseId(),
-            ]
-        );
-        if ($judgingRun === null) {
-            throw new BadRequestHttpException(
-                'Inconsistent data, no judging run known with jid = ' . $judgeTask->getJobId() . '.');
-        }
-
-        $outputRun = base64_decode($request->request->get('output_run'));
-
-        /** @var JudgingRunOutput $judgingRunOutput */
-        $judgingRunOutput = $judgingRun->getOutput();
-        $judgingRunOutput->setOutputRun($outputRun);
         $this->em->flush();
     }
 
@@ -1152,9 +1180,10 @@ class JudgehostController extends AbstractFOSRestController
                 return $this->getSourceFiles($id);
             case 'testcase':
                 return $this->getTestcaseFiles($id);
-            case 'compile':
-            case 'run':
             case 'compare':
+            case 'compile':
+            case 'debug':
+            case 'run':
                 return $this->getExecutableFiles($id);
             default:
                 throw new BadRequestHttpException('Unknown type requested.');

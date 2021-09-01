@@ -732,22 +732,53 @@ while (true) {
     logmsg(LOG_INFO, "  Working directory: $workdir");
 
     if ($type == 'debug_info') {
-        // Retrieve full test case contents for now. Later this can be expanded to collect other debug info (e.g. a full
-        // judging package as well).
         if ($lastWorkdir !== null) {
             cleanup_judging($lastWorkdir);
             $lastWorkdir = null;
         }
         foreach ($row as $judgeTask) {
-            $testcasedir = $workdir . "/testcase" . sprintf('%05d', $judgeTask['testcase_id']);
-            request(
-                sprintf('judgehosts/add-debug-info/%s/%s', urlencode($myhost),
-                    urlencode((string)$judgeTask['judgetaskid'])),
-                'POST',
-                ['output_run' => rest_encode_file($testcasedir . '/program.out', false)],
-                false
-            );
-            logmsg(LOG_INFO, "  ⇡ Uploading full output of testcase $judgeTask[testcase_id].");
+            if (isset($judgeTask['run_script_id'])) {
+                // Full debug package requested.
+                $run_config = dj_json_decode($judgeTask['run_config']);
+                $tmpfile = tempnam(TMPDIR, 'full_debug_package_');
+                list($runpath, $error) = fetch_executable(
+                    $workdirpath,
+                    'debug',
+                    $judgeTask['run_script_id'],
+                    $run_config['hash']
+                );
+                if (isset($error)) {
+                    // FIXME
+                    continue;
+                }
+
+                $debug_cmd = implode(' ', array_map('dj_escapeshellarg',
+                    [$runpath, $workdir, $tmpfile]));
+                system($debug_cmd, $retval);
+                // FIXME: check retval
+                
+                request(
+                    sprintf('judgehosts/add-debug-info/%s/%s', urlencode($myhost),
+                        urlencode((string)$judgeTask['judgetaskid'])),
+                    'POST',
+                    ['full_debug' => rest_encode_file($tmpfile, false)],
+                    false
+                );
+                unlink($tmpfile);
+
+                logmsg(LOG_INFO, "  ⇡ Uploading debug package of workdir $workdir.");
+            } else {
+                // Retrieving full team output for a particular testcase.
+                $testcasedir = $workdir . "/testcase" . sprintf('%05d', $judgeTask['testcase_id']);
+                request(
+                    sprintf('judgehosts/add-debug-info/%s/%s', urlencode($myhost),
+                        urlencode((string)$judgeTask['judgetaskid'])),
+                    'POST',
+                    ['output_run' => rest_encode_file($testcasedir . '/program.out', false)],
+                    false
+                );
+                logmsg(LOG_INFO, "  ⇡ Uploading full output of testcase $judgeTask[testcase_id].");
+            }
         }
         continue;
     }
