@@ -127,7 +127,7 @@ fields:
 - ``id``: the (integer) team ID. Must be unique
 - ``icpc_id`` (optional): an external ID, e.g. from the ICPC CMS, may be empty
 - ``group_ids``: an array with one element: the category ID this team belongs to
-- ``name``: the team name as used in the web inteface
+- ``name``: the team name as used in the web interface
 - ``members`` (optional): Members of the team as one long string
 - ``display_name`` (optional): the team display name. If provided, will display
   this instead of the team name in certain places, like the scoreboard
@@ -166,7 +166,7 @@ Each of the following lines must contain the following elements separated by tab
 - the (integer) team ID. Must be unique
 - an external ID, e.g. from the ICPC CMS, may be empty
 - the category ID this team belongs to
-- the team name as used in the web inteface
+- the team name as used in the web interface
 - the institution name as used on the scoreboard
 - the institution short name as used in the jury interface and certain exports
 - a country code in form of ISO 3166-1 alpha-3

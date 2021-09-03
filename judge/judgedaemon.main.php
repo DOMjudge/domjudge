@@ -466,7 +466,7 @@ if (isset($options['verbose'])) {
     if (preg_match('/^\d+$/', $options['verbose'])) {
         $verbose = $options['verbose'];
         if ($verbose >= LOG_DEBUG) {
-            // Also enable judging scipts debug output
+            // Also enable judging scripts debug output
             putenv('DEBUG=1');
         }
     } else {

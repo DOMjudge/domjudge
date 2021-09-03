@@ -30,7 +30,7 @@ const char request[255] = "GET google.com";
 
 int socket_fd; /* filedescriptor of the connection to server socket */
 
-struct addrinfo *server_ais, *server_ai; /* server adress information */
+struct addrinfo *server_ais, *server_ai; /* server address information */
 char server_addr[NI_MAXHOST];            /* server IP address string  */
 
 struct timeval timeout;

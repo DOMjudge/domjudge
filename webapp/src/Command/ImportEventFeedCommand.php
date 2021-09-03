@@ -1979,7 +1979,7 @@ class ImportEventFeedCommand extends Command
             // Get all pending events
             $pending = $this->pendingEvents[$type][$id];
             // Mark them as non-pending. Note that they might depend on more events,
-            // but then they'll be readded automatically in the correct place
+            // but then they'll be re-added automatically in the correct place
             unset($this->pendingEvents[$type][$id]);
             foreach ($pending as $event) {
                 $this->logger->debug(

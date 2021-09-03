@@ -7,7 +7,7 @@ problems part of the default "Demo Contest", see the PDF files under
 doc/examples for the problem descriptions.
 
 These files test various parts of the system: mostly whether the
-judging backend funtions correctly for all languages, but also whether
+judging backend functions correctly for all languages, but also whether
 the submission system can handle some irregular cases.
 
 To test the system, run 'make check'. This will try to submit all

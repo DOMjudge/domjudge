@@ -74,14 +74,14 @@ setup() {
     assert_line "  language:    C++"
 }
 
-@test "non existing problem name emits erorr" {
+@test "non existing problem name emits error" {
     cp ../tests/test-hello.java $BATS_TMPDIR/hello.java
     run ./submit -p nonexistent -l cpp $BATS_TMPDIR/hello.java <<< "n"
     assert_failure 1
     assert_partial "error: No known problem specified or detected"
 }
 
-@test "non existing language name emits erorr" {
+@test "non existing language name emits error" {
     cp ../tests/test-hello.java $BATS_TMPDIR/hello.java
     run ./submit -p boolfind -l nonexistent $BATS_TMPDIR/hello.java <<< "n"
     assert_failure 1

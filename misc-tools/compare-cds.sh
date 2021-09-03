@@ -100,7 +100,7 @@ echo "Checking for CDP directory"
 CDP_DIR="$BASEDIR/icpctools/cdp"
 if [ -d "$CDP_DIR" ]; then
   echo "    cdp directory present, deleting"
-  # For some reason on my system teh first rm fails
+  # For some reason on my system the first rm fails
   rm -rf "$CDP_DIR" 2>/dev/null || true
   sleep 1
   rm -rf "$CDP_DIR"

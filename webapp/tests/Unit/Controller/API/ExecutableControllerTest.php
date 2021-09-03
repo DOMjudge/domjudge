@@ -22,7 +22,7 @@ class ExecutableControllerTest extends BaseTest
     }
 
     /**
-     * Test that a non-existant executable can not be fetched
+     * Test that a non-existent executable can not be fetched
      */
     public function testExecutablesDoesNotExist()
     {

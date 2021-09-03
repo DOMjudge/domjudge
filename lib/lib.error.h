@@ -38,7 +38,7 @@ void  logmsg(int, const char *, ...) __attribute__((format (printf, 2, 3)));
 void vlogmsg(int, const char *, va_list);
 /* Logging functions (vlogmsg uses va_list instead of argument list):
  * Logs a message to stderr and/or logfile, including date and program name,
- * depending on the loglevel treshold values.
+ * depending on the loglevel threshold values.
  *
  * Arguments:
  * int loglevel    syslog loglevel of this log-message

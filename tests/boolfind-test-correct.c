@@ -15,7 +15,7 @@ int ch;
 
 /* Be careful not to read closing newlines as this will trigger the
  * call scanf to hang (trying to gobble up more whitespace?). Also we
- * flush output everytime.
+ * flush output every time.
  */
 int main()
 {

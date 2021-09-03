@@ -173,7 +173,7 @@ class ConfigControllerTest extends BaseTest
     }
 
     /**
-     * Test that a non-existant specific variable cannot be requested
+     * Test that a non-existent specific variable cannot be requested
      */
     public function testConfigRequestNonExistantVariableThrowsError()
     {
