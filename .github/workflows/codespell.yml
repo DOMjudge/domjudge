@@ -1,0 +1,19 @@
+on:
+    pull_request:
+
+name: Spell Check
+ 
+jobs:
+    codespell:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v2
+            - name: Get dirs to skip
+              id: list_to_csv
+              run: echo "::set-output name=SKIP::$(awk '{print $1}' gitlab/codespellignorefiles.txt | paste -s -d, -)"
+            - uses: codespell-project/actions-codespell@master
+              with:
+                  check_filenames: true
+                  only_warn: 1
+                  ignore_words_file: gitlab/codespellignorewords.txt
+                  skip: ${{ steps.list_to_csv.outputs.SKIP }}

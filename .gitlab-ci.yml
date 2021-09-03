@@ -291,3 +291,11 @@ php-cs-fixer:
   script:
     - /usr/bin/php-cs-fixer fix --format=gitlab --dry-run --diff . > code-quality.json || true
     - cp code-quality.json code_quality_debug.json
+
+codespell:
+  <<: *tiny_job
+  stage: style
+  image: domjudge/gitlabci:2.1
+  script:
+    - pip install codespell
+    - python3 gitlab/codespell_gitlab.py
