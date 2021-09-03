@@ -62,7 +62,7 @@ void initsignals();
 
 void daemonize(const char *);
 /* Forks and detaches the current process to run as a daemon. Similar
- * to the daemon() call present in Linux and *BSD, but implented here,
+ * to the daemon() call present in Linux and *BSD, but implemented here,
  * because it is not specified by POSIX, SUSv2 or SVr4.
  *
  * Arguments:

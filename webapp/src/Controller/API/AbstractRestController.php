@@ -308,7 +308,7 @@ abstract class AbstractRestController extends AbstractFOSRestController
     public static function sendBinaryFileResponse(Request $request, string $fileName, string $contentType): BinaryFileResponse
     {
         // Note: we set auto-etag to true to automatically send the ETag based on the file contents.
-        // ETags can be used to determine wheter the file changed and if it didn't change, the response will
+        // ETags can be used to determine whether the file changed and if it didn't change, the response will
         // be a 304 Not Modified
         $response = new BinaryFileResponse($fileName, 200, [], true, null, true);
         $response->headers->set('Content-Type', $contentType);

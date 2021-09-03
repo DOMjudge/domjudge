@@ -252,7 +252,7 @@ nelmio_api_doc:
                         roles:
                             type: array
                             items:
-                                type: sring
+                                type: string
                 ClarificationPost:
                     type: object
                     required: [text]

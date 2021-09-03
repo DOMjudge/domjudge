@@ -11,7 +11,7 @@
    Program specifications:
 
    This program will run two specified commands and connect their
-   stdin/stdout to eachother.
+   stdin/stdout to each other.
 
    When this program is sent a SIGTERM, this signal is passed to both
    programs. This program will return when both programs are finished

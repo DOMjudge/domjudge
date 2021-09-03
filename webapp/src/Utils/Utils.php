@@ -285,7 +285,7 @@ class Utils
     }
 
     /**
-     * Conver the given hex color to the best matching string representation
+     * Convert the given hex color to the best matching string representation
      * @param string $hex
      * @return string|null
      */

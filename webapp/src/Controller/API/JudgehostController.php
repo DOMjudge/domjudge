@@ -1119,7 +1119,7 @@ class JudgehostController extends AbstractFOSRestController
                         ->getQuery()
                         ->setHint(Query::HINT_REFRESH, TRUE)
                         ->getResult();
-                    // TOOD: Pick up priority from previous judgings?
+                    // TODO: Pick up priority from previous judgings?
                     $this->rejudgingService->createRejudging($rejudging->getReason(), JudgeTask::PRIORITY_DEFAULT, $judgings,
                         false, $rejudging->getRepeat(), $rejudging->getRepeatedRejudging(), $skipped);
                 }

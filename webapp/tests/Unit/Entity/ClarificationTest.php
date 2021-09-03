@@ -44,7 +44,7 @@ fourth line,
 fifth line,
 sixth line,
 seventh line,
-eigth line,
+eighth line,
 and so on.';
         $clarification->setBody($text);
         $this->assertEquals('First line, second line, third line, fourth line, fifth line, sixth line, sevent…',

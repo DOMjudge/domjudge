@@ -8,7 +8,7 @@ class JudgehostControllerTest extends BaseTest
     protected $apiEndpoint = 'judgehosts';
     protected $apiUser = 'admin';
 
-    protected static $skipMessageCI = "This is very dependant on the contributor setup, check this in CI.";
+    protected static $skipMessageCI = "This is very dependent on the contributor setup, check this in CI.";
     protected static $skipMessageIDs = "Filtering on IDs not implemented in this endpoint.";
     
     protected $expectedObjects = [];

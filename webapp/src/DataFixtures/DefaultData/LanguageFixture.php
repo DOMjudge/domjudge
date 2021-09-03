@@ -66,7 +66,7 @@ class LanguageFixture extends AbstractDefaultDataFixture
         ];
 
         foreach ($data as $item) {
-            // Note: we only create the langauge if it doesn't exist yet.
+            // Note: we only create the language if it doesn't exist yet.
             // If it does, we will not update the data
             if (!$manager->getRepository(Language::class)->find($item[0])) {
                 $file = sprintf('%s/files/defaultdata/%s.zip',
