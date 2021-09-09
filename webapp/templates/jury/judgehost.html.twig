@@ -32,18 +32,6 @@
                     <td>{{ judgehost.active | printYesNo }}</td>
                 </tr>
                 <tr>
-                    <th>Restriction</th>
-                    <td>
-                        {% if not judgehost.restriction %}
-                            <i>None</i>
-                        {% else %}
-                            <a href="{{ path('jury_judgehost_restriction', {restrictionId: judgehost.restriction.restrictionid}) }}">
-                                {{ judgehost.restriction.name }}
-                            </a>
-                        {% endif %}
-                    </td>
-                </tr>
-                <tr>
                     <th>Status</th>
                     <td>
                         {% if not judgehost.polltime %}

@@ -14,7 +14,7 @@ System requirements
 
 * The operating system is a Linux variant. DOMjudge has mostly
   been tested with Debian and Ubuntu, but should work on other environments.
-  Using WSL2 should work but is is not extensively tested.
+  See our `wiki <https://github.com/DOMjudge/domjudge/wiki/Running-DOMjudge-in-WSL>`_ for information about DOMjudge and WSLv2.
 * It is necessary that you have root access.
 * A TCP/IP network which connects the DOMserver and the judgehosts.
   The machines only need HTTP(S) access to the DOMserver.
@@ -28,7 +28,7 @@ Software requirements
 * PHP command line interface with the ``curl``, ``json``, ``xml``,
   ``zip`` extensions.
 
-For Debian (with some example compilers)::
+For Debian::
 
   sudo apt install make pkg-config sudo debootstrap libcgroup-dev \
         php-cli php-curl php-json php-xml php-zip lsof procps
@@ -119,6 +119,8 @@ Edit grub config to add cgroup memory and swap accounting to the boot
 options. Edit ``/etc/default/grub`` and change the default
 commandline to
 ``GRUB_CMDLINE_LINUX_DEFAULT="quiet cgroup_enable=memory swapaccount=1"``
+On modern distros (e.g. Debian bullseye) which have cgroup v2 enabled by
+default, you need to add ``systemd.unified_cgroup_hierarchy=0`` as well.
 Then run ``update-grub`` and reboot.
 After rebooting check that ``/proc/cmdline`` actually contains the
 added kernel options. On VM hosting providers such as Google Cloud or

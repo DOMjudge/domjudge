@@ -15,6 +15,8 @@ class ProblemControllerTest extends JuryControllerTest
     protected static $className        = Problem::class;
     protected static $DOM_elements     = ['h1' => ['Problems'],
                                         'a.btn[title="Import problem"]' => ['admin' => [" Import problem"],'jury'=>[]]];
+    protected static $identifingEditAttribute = 'name';
+    protected static $defaultEditEntityName   = 'Hello World';
     // Note: we replace the deleteurl in testDeleteExtraEntity below with the actual attachment ID
     // This can change when running the tests multiple times
     protected static $deleteExtra      = ['pageurl'   => '/jury/problems/3',
@@ -28,7 +30,8 @@ class ProblemControllerTest extends JuryControllerTest
                                            'outputlimit' => '1073741824',
                                            'problemtextFile' => '',
                                            'runExecutable' => 'boolfind_run',
-                                           'compareExecutable' => 'boolfind_cmp',
+                                           'compareExecutable' => '',
+                                           'combinedRunCompare' => true,
                                            'specialCompareArgs' => ''],
                                           ['name' => 'Long time',
                                            'timelimit' => '3600'],

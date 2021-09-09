@@ -55,7 +55,7 @@
                             .text(data.progress + '%');
 
                         if (data.redirect) {
-                            window.location = data.redirect;
+                            window.location.replace(data.redirect);
                             return;
                         }
 

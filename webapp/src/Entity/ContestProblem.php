@@ -184,7 +184,7 @@ class ContestProblem
         return $this->allowJudge;
     }
 
-    public function setColor(string $color): ContestProblem
+    public function setColor(?string $color): ContestProblem
     {
         $this->color = $color;
         return $this;

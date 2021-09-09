@@ -11,7 +11,7 @@
    Program specifications:
 
    This program will run two specified commands and connect their
-   stdin/stdout to eachother.
+   stdin/stdout to each other.
 
    When this program is sent a SIGTERM, this signal is passed to both
    programs. This program will return when both programs are finished
@@ -226,6 +226,7 @@ void resize_pipe(int fd)
 		if ( fscanf(f, "%d", &max_pipe_size)!=1 ) {
 			max_pipe_size = -2;
 			warning(errno, "could not read from '%s'", PROC_MAX_PIPE_SIZE);
+			if ( fclose(f)!=0 ) warning(errno, "could not close '%s'", PROC_MAX_PIPE_SIZE);
 			return;
 		}
 		if ( fclose(f)!=0 ) {

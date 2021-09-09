@@ -4,8 +4,6 @@ namespace App\Controller\Jury;
 
 use App\Controller\BaseController;
 use App\Doctrine\DBAL\Types\InternalErrorStatusType;
-use App\Entity\ContestProblem;
-use App\Entity\Executable;
 use App\Entity\InternalError;
 use App\Entity\Judgehost;
 use App\Entity\Problem;

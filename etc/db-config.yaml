@@ -1,4 +1,4 @@
-# Configuration settings that can be overriden using the `configuration` database table
+# Configuration settings that can be overridden using the `configuration` database table
 -   category: Scoring
     description: Options related to how scoring is handled.
     items:

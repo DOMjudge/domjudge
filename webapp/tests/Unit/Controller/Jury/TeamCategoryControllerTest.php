@@ -6,6 +6,8 @@ use App\Entity\TeamCategory;
 
 class TeamCategoryControllerTest extends JuryControllerTest
 {
+    protected static $identifingEditAttribute = 'name';
+    protected static $defaultEditEntityName   = 'System';
     protected static $baseUrl          = '/jury/categories';
     protected static $exampleEntries   = ['Participants','Observers','System','yes','no'];
     protected static $shortTag         = 'category';

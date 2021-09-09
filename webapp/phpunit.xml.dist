@@ -31,6 +31,7 @@
             <directory suffix=".php">src</directory>
             <exclude>
                 <directory suffix=".php">src/Migrations</directory>
+                <directory suffix=".php">src/DataFixtures</directory>
             </exclude>
         </whitelist>
     </filter>

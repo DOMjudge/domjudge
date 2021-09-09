@@ -35,6 +35,12 @@ Version 8.0.0 - DEV
  - Improve API action to add submission to adhere to the CCS spec.
  - Add API action to create clarification following CCS spec.
  - Add support for showing (pending) awards on the scoreboard. Thanks @shuibinlong!
+ - Remove JudgehostRestriction feature due to new Judgehost API.
+ - Replace C++ submit client with (standalone) Python version.
+ - Remove old way to run interactive problems.
+   NOTE when upgrading: if you have an old-style interactive problem, you need
+   to convert it to the new style (see 'boolfind' example) or change it to
+   include the old run_wrapper.
 
 
 Version 7.3.2 - 23 November 2020

@@ -162,6 +162,8 @@ class Utils
         "yellowgreen" => "#9acd32",
     ];
 
+    const GD_MISSING = 'Cannot import image: the PHP GD library is missing.';
+
     /**
      * returns the milliseconds part of a time stamp truncated at three digits
      */
@@ -283,7 +285,7 @@ class Utils
     }
 
     /**
-     * Conver the given hex color to the best matching string representation
+     * Convert the given hex color to the best matching string representation
      * @param string $hex
      * @return string|null
      */
@@ -605,7 +607,7 @@ class Utils
     public static function getImageType(string $image, &$error)
     {
         if (!function_exists('gd_info')) {
-            $error = "Cannot import image: the PHP GD library is missing.";
+            $error = self::GD_MISSING;
             return false;
         }
 
@@ -637,7 +639,7 @@ class Utils
     public static function getImageThumb(string $image, int $thumbMaxSize, string $tmpdir, &$error)
     {
         if (!function_exists('gd_info')) {
-            $error = "Cannot import image: the PHP GD library is missing.";
+            $error = self::GD_MISSING;
             return false;
         }
 

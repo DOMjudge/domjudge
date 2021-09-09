@@ -15,6 +15,8 @@ class TeamAffiliationControllerTest extends JuryControllerTest
     protected static $getIDFunc        = 'getAffilid';
     protected static $className        = TeamAffiliation::class;
     protected static $DOM_elements     = ['h1' => ['Affiliations']];
+    protected static $identifingEditAttribute = 'shortname';
+    protected static $defaultEditEntityName   = 'UU';
     protected static $addForm          = 'team_affiliation[';
     protected static $addEntitiesShown = ['shortname','name'];
     protected static $addEntities      = [['shortname' => 'short',

@@ -103,7 +103,7 @@ class ContestType extends AbstractExternalIdEntityType
         ]);
         $builder->add('bronzeAwards', IntegerType::class, [
             'required' => false,
-            'help' => 'The number of bronze awards for this contest. Note that `b` will be added to this.',
+            'help' => 'The number of bronze awards for this contest. Note that when finalizing a contest, the "Additional Bronze Medals" will be added to this.',
         ]);
         $builder->add('public', ChoiceType::class, [
             'expanded' => true,

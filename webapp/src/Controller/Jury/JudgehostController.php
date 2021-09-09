@@ -81,8 +81,7 @@ class JudgehostController extends BaseController
         /** @var Judgehost[] $judgehosts */
         $judgehosts = $this->em->createQueryBuilder()
             ->from(Judgehost::class, 'j')
-            ->leftJoin('j.restriction', 'r')
-            ->select('j', 'r')
+            ->select('j')
             ->andWhere('j.hidden = 0')
             ->orderBy('j.hostname')
             ->getQuery()->getResult();
@@ -92,16 +91,21 @@ class JudgehostController extends BaseController
             'hostname' => ['title' => 'hostname'],
             'active' => ['title' => 'active'],
             'status' => ['title' => 'status'],
-            'restriction' => ['title' => 'restriction'],
             'load' => ['title' => 'load'],
             'last_judgingid' => ['title' => 'last judging'],
         ];
 
         $now           = Utils::now();
         $contest       = $this->dj->getCurrentContest();
-        $query         = 'SELECT judgehostid, SUM(IF(endtime, endtime, :now) - GREATEST(:from, starttime)) AS `load`
-                          FROM judging
-                          WHERE endtime > :from OR (endtime IS NULL AND (valid = 1 OR rejudgingid IS NOT NULL))
+        // TODO: this is wrong: we now count the whole time from assigning tasks until they are done.
+        // For example if we assign 5 tasks at a time, each of which take 1 second, the load will be
+        // 1+2+3+4+5=15, while you expect it to be 5. We could look at only jr.runtime, but that does
+        // not take into account compile time.
+        $query         = 'SELECT judgehostid, SUM(IF(jr.endtime, jr.endtime, :now) - GREATEST(:from, jt.starttime)) AS `load`
+                          FROM judging j
+                          INNER JOIN judging_run jr ON jr.judgingid = j.judgingid
+                          INNER JOIN judgetask jt ON jr.judgetaskid = jt.judgetaskid
+                          WHERE jr.endtime > :from OR (jr.endtime IS NULL AND (j.valid = 1 OR rejudgingid IS NOT NULL))
                           GROUP BY judgehostid';
         $params        = [':now' => $now];
 
@@ -207,9 +211,6 @@ class JudgehostController extends BaseController
                 'active' => [
                     'value' => $judgehost->getActive() ? 'yes' : 'no',
                 ],
-                'restriction' => [
-                    'value' => $judgehost->getRestriction() ? $judgehost->getRestriction()->getName() : '<i>none</i>',
-                ],
             ]);
 
             // Create action links
@@ -275,8 +276,7 @@ class JudgehostController extends BaseController
         /** @var Judgehost $judgehost */
         $judgehost = $this->em->createQueryBuilder()
             ->from(Judgehost::class, 'j')
-            ->leftJoin('j.restriction', 'r')
-            ->select('j', 'r')
+            ->select('j')
             ->andWhere('j.judgehostid = :judgehostid')
             ->setParameter(':judgehostid', $judgehostid)
             ->getQuery()
@@ -300,10 +300,13 @@ class JudgehostController extends BaseController
         if ($contests = $this->dj->getCurrentContest()) {
             $judgings = $this->em->createQueryBuilder()
                 ->from(Judging::class, 'j')
-                ->select('j', 'r')
+                ->select('j', 'r', 'jr', 'jt')
+                ->distinct()
+                ->innerJoin('j.runs', 'jr')
+                ->innerJoin('jr.judgetask', 'jt')
                 ->leftJoin('j.rejudging', 'r')
                 ->andWhere('j.contest IN (:contests)')
-                ->andWhere('j.judgehost = :judgehost')
+                ->andWhere('jt.judgehost = :judgehost')
                 ->setParameter(':contests', $contests)
                 ->setParameter(':judgehost', $judgehost)
                 ->orderBy('j.starttime', 'DESC')
@@ -341,8 +344,7 @@ class JudgehostController extends BaseController
         /** @var Judgehost $judgehost */
         $judgehost = $this->em->createQueryBuilder()
             ->from(Judgehost::class, 'j')
-            ->leftJoin('j.restriction', 'r')
-            ->select('j', 'r')
+            ->select('j')
             ->andWhere('j.judgehostid = :judgehostid')
             ->setParameter(':judgehostid', $judgehostid)
             ->getQuery()

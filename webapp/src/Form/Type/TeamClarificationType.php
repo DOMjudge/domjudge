@@ -47,16 +47,18 @@ class TeamClarificationType extends AbstractType
         $categories = $this->config->get('clar_categories');
         $user       = $this->dj->getUser();
         $contest    = $this->dj->getCurrentContest($user->getTeam()->getTeamid());
-        foreach ($categories as $categoryId => $categoryName) {
-            $subjects[$categoryName] = sprintf('%d-%s', $contest->getCid(), $categoryId);
-        }
-        if ($contest->getFreezeData()->started()) {
-            /** @var ContestProblem $problem */
-            foreach ($contest->getProblems() as $problem) {
-                if ($problem->getAllowSubmit()) {
-                    $problemName            = sprintf('%s: %s', $problem->getShortname(),
-                                                      $problem->getProblem()->getName());
-                    $subjects[$problemName] = sprintf('%d-%d', $contest->getCid(), $problem->getProbid());
+        if ($contest) {
+            foreach ($categories as $categoryId => $categoryName) {
+                $subjects[$categoryName] = sprintf('%d-%s', $contest->getCid(), $categoryId);
+            }
+            if ($contest->getFreezeData()->started()) {
+                /** @var ContestProblem $problem */
+                foreach ($contest->getProblems() as $problem) {
+                    if ($problem->getAllowSubmit()) {
+                        $problemName            = sprintf('%s: %s', $problem->getShortname(),
+                                                          $problem->getProblem()->getName());
+                        $subjects[$problemName] = sprintf('%d-%d', $contest->getCid(), $problem->getProbid());
+                    }
                 }
             }
         }

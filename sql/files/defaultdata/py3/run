@@ -6,7 +6,7 @@
 # This script does not actually "compile" the source, but writes a
 # shell script that will function as the executable: when called, it
 # will execute the source with the correct interpreter syntax, thus
-# allowing this interpreted source to be used transparantly as if it
+# allowing this interpreted source to be used transparently as if it
 # was compiled to a standalone binary.
 # Note that from version 8.0.0 the default Python 3 interpreter is
 # pypy 3 instead of CPython 3.

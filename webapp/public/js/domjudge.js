@@ -282,7 +282,8 @@ function toggle(id, show)
 
 	$('.loading-indicator').addClass('ajax-loader');
 	$.ajax({
-		url: scoreboardUrl
+		url: scoreboardUrl,
+		cache: false
 	}).done(function(data, status, jqXHR) {
 		processAjaxResponse(jqXHR, data);
 		$('.loading-indicator').removeClass('ajax-loader');
@@ -451,7 +452,8 @@ function enableRefresh($url, $after, usingAjax) {
         if (usingAjax) {
             $('.loading-indicator').addClass('ajax-loader');
             $.ajax({
-                url: $url
+                url: $url,
+                cache: false
             }).done(function(data, status, jqXHR) {
                 processAjaxResponse(jqXHR, data);
                 $('.loading-indicator').removeClass('ajax-loader');
@@ -511,7 +513,8 @@ function toggleRefresh($url, $after, usingAjax) {
 function updateMenuAlerts()
 {
     $.ajax({
-        url: $('#menuDefault').data('update-url')
+        url: $('#menuDefault').data('update-url'),
+        cache: false
     }).done(function(json, status, jqXHR) {
         if (jqXHR.getResponseHeader('X-Login-Page')) {
             window.location = jqXHR.getResponseHeader('X-Login-Page');
@@ -629,7 +632,8 @@ function initializeAjaxModals()
 			return;
 		}
 		$.ajax({
-			url: url
+			url: url,
+			cache: false
 		}).done(function(data, status, jqXHR) {
 			if (jqXHR.getResponseHeader('X-Login-Page')) {
 				window.location = jqXHR.getResponseHeader('X-Login-Page');

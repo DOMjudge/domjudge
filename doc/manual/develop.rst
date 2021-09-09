@@ -37,8 +37,10 @@ already listed under
   sudo apt install autoconf automake bats \
     python-sphinx python-sphinx-rtd-theme rst2pdf fontconfig python3-yaml
 
-On Debian 11 and above, install
-``python3-sphinx python3-sphinx-rtd-theme rst2pdf fontconfig python3-yaml`` instead.
+On Debian 11 (Bullseye) and above, instead install::
+
+  sudo apt install autoconf automake bats \
+    python3-sphinx python3-sphinx-rtd-theme rst2pdf fontconfig python3-yaml latexmk
 
 When this software is present, bootstrapping can be done by running
 ``make dist``, which creates the ``configure`` script,
@@ -137,9 +139,9 @@ To run them, follow the following steps:
   first dropping any existing database and then running
   ``bin/dj_setup_database -u root -r install``.
 
-Note that you don't have to drop and recreate the database everytime you run the
+Note that you don't have to drop and recreate the database every time you run the
 tests; the tests are written in such a way that they keep working, even if you
-run them multple times.
+run them multiple times.
 
 The file ``webapp/.env.test`` (and ``webapp/.env.test.local`` if it
 exists) are loaded when you run the unit tests. You can thus place any

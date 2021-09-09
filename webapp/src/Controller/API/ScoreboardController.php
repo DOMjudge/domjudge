@@ -58,7 +58,7 @@ class ScoreboardController extends AbstractRestController
      * @OA\Parameter(
      *     name="allteams",
      *     in="query",
-     *     description="Also show invisble teams. Requires jury privileges",
+     *     description="Also show invisible teams. Requires jury privileges",
      *     @OA\Schema(type="boolean")
      * )
      * @OA\Parameter(

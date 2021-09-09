@@ -86,24 +86,24 @@ class SubmissionControllerTest extends BaseTest
 
     public function provideAddInvalidData(): Generator
     {
-        yield ['demo', [], "One of the arguments 'problem', 'problem_id' is mandatory"];
-        yield ['demo', ['problem' => 1], "One of the arguments 'language', 'language_id' is mandatory"];
-        yield ['demo', ['problem_id' => 1], "One of the arguments 'language', 'language_id' is mandatory"];
-        yield ['demo', ['problem_id' => 4, 'language' => 'cpp'], "Problem 4 not found or not submittable"];
+        yield ['demo', [], "One of the arguments 'problem', 'problem_id' is mandatory."];
+        yield ['demo', ['problem' => 1], "One of the arguments 'language', 'language_id' is mandatory."];
+        yield ['demo', ['problem_id' => 1], "One of the arguments 'language', 'language_id' is mandatory."];
+        yield ['demo', ['problem_id' => 4, 'language' => 'cpp'], "Problem '4' not found or not submittable."];
         yield ['demo', ['problem_id' => 1, 'language' => 'cpp'], "No files specified."];
         yield ['demo', ['problem_id' => 1, 'language_id' => 'cpp'], "No files specified."];
-        yield ['demo', ['problem_id' => 1, 'language' => 'abc'], "Language abc not found or not submittable"];
-        yield ['demo', ['problem_id' => 1, 'language_id' => 'abc'], "Language abc not found or not submittable"];
-        yield ['demo', ['problem_id' => 1, 'language_id' => 'abc'], "Language abc not found or not submittable"];
-        yield ['demo', ['problem_id' => 1, 'language_id' => 'cpp', 'team_id' => 1], "Can not submit for a different team"];
-        yield ['demo', ['problem_id' => 1, 'language_id' => 'cpp', 'user_id' => 1], "Can not submit for a different user"];
-        yield ['demo', ['problem_id' => 1, 'language_id' => 'cpp', 'id' => '123'], "A team can not assign id"];
-        yield ['demo', ['problem_id' => 1, 'language_id' => 'cpp', 'time' => '2021-01-01T00:00:00'], "A team can not assign time"];
-        yield ['demo', ['problem_id' => 1, 'language_id' => 'cpp', 'files' => []], "The 'files' attribute must be an array with a single item, containing an object with a base64 encoded data field"];
+        yield ['demo', ['problem_id' => 1, 'language' => 'abc'], "Language 'abc' not found or not submittable."];
+        yield ['demo', ['problem_id' => 1, 'language_id' => 'abc'], "Language 'abc' not found or not submittable."];
+        yield ['demo', ['problem_id' => 1, 'language_id' => 'abc'], "Language 'abc' not found or not submittable."];
+        yield ['demo', ['problem_id' => 1, 'language_id' => 'cpp', 'team_id' => '1'], "Can not submit for a different team."];
+        yield ['demo', ['problem_id' => 1, 'language_id' => 'cpp', 'user_id' => 1], "Can not submit for a different user."];
+        yield ['demo', ['problem_id' => 1, 'language_id' => 'cpp', 'id' => '123'], "A team can not assign id."];
+        yield ['demo', ['problem_id' => 1, 'language_id' => 'cpp', 'time' => '2021-01-01T00:00:00'], "A team can not assign time."];
+        yield ['demo', ['problem_id' => 1, 'language_id' => 'cpp', 'files' => []], "The 'files' attribute must be an array with a single item, containing an object with a base64 encoded data field."];
         yield [
             'demo',
             ['problem_id' => 1, 'language_id' => 'cpp', 'files' => 'this is not an array'],
-            "The 'files' attribute must be an array with a single item, containing an object with a base64 encoded data field"
+            "The 'files' attribute must be an array with a single item, containing an object with a base64 encoded data field."
         ];
         yield [
             'demo',
@@ -116,7 +116,7 @@ class SubmissionControllerTest extends BaseTest
                     ['data' => 'aaa'],
                 ],
             ],
-            "The 'files' attribute must be an array with a single item, containing an object with a base64 encoded data field"
+            "The 'files' attribute must be an array with a single item, containing an object with a base64 encoded data field."
         ];
         yield [
             'demo',
@@ -128,7 +128,7 @@ class SubmissionControllerTest extends BaseTest
                     ['data' => '*&(^&*(^(&*(&*^'],
                 ],
             ],
-            "The 'files[0].data' attribute is not base64 encoded"
+            "The 'files[0].data' attribute is not base64 encoded."
         ];
         yield [
             'demo',
@@ -151,24 +151,24 @@ class SubmissionControllerTest extends BaseTest
                     ['data' => 'aaa', 'mime' => 'wrong'],
                 ],
             ],
-            "The 'files[0].mime' attribute must be application/zip if provided"
+            "The 'files[0].mime' attribute must be application/zip if provided."
         ];
-        yield ['admin', ['problem_id' => 1, 'language' => 'cpp', 'team_id' => 1], "No files specified."];
-        yield ['admin', ['problem_id' => 1, 'language' => 'cpp', 'team_id' => 3], "Team 3 not found or not enabled"];
-        yield ['admin', ['problem_id' => 1, 'language' => 'cpp', 'team_id' => 1, 'user_id' => 'doesnotexist'], "User not found"];
-        yield ['admin', ['problem_id' => 1, 'language' => 'cpp', 'team_id' => 1, 'user_id' => AddMoreDemoUsersFixture::class . ':seconddemo'], "User not linked to provided team"];
-        yield ['admin', ['problem_id' => 1, 'language' => 'cpp', 'team_id' => 1, 'user_id' => AddMoreDemoUsersFixture::class . ':thirddemo'], "User not enabled"];
-        yield ['admin', ['problem_id' => 1, 'language' => 'cpp', 'team_id' => 1, 'user_id' => AddMoreDemoUsersFixture::class . ':fourthdemo'], "User not linked to a team"];
-        yield ['admin', ['problem_id' => 1, 'language' => 'cpp', 'team_id' => 1, 'time' => 'this is not a time'], "Can not parse time this is not a time"];
+        yield ['admin', ['problem_id' => 1, 'language' => 'cpp', 'team_id' => '1'], "No files specified."];
+        yield ['admin', ['problem_id' => 1, 'language' => 'cpp', 'team_id' => '3'], "Team with ID '3' not found in contest or not enabled."];
+        yield ['admin', ['problem_id' => 1, 'language' => 'cpp', 'team_id' => '1', 'user_id' => 'doesnotexist'], "User not found."];
+        yield ['admin', ['problem_id' => 1, 'language' => 'cpp', 'team_id' => '1', 'user_id' => AddMoreDemoUsersFixture::class . ':seconddemo'], "User not linked to provided team."];
+        yield ['admin', ['problem_id' => 1, 'language' => 'cpp', 'team_id' => '1', 'user_id' => AddMoreDemoUsersFixture::class . ':thirddemo'], "User not enabled."];
+        yield ['admin', ['problem_id' => 1, 'language' => 'cpp', 'team_id' => '1', 'user_id' => AddMoreDemoUsersFixture::class . ':fourthdemo'], "User not linked to a team."];
+        yield ['admin', ['problem_id' => 1, 'language' => 'cpp', 'team_id' => '1', 'time' => 'this is not a time'], "Can not parse time 'this is not a time'."];
         yield [
             'admin',
             [
                 'problem_id'  => 1,
                 'language_id' => 'cpp',
-                'team_id'     => 1,
+                'team_id'     => '1',
                 'id'          => '$this is not valid$',
             ],
-            'ID $this is not valid$ is not valid',
+            "ID '\$this is not valid$' is not valid.",
         ];
     }
 
@@ -180,7 +180,7 @@ class SubmissionControllerTest extends BaseTest
         $contestId = $this->getDemoContestId();
         $apiEndpoint = $this->apiEndpoint;
         $data = $this->verifyApiJsonResponse('POST', "/contests/$contestId/$apiEndpoint", 400, 'admin', ['problem_id' => $this->resolveEntityId(Problem::class, '1'), 'language_id' => 'cpp', 'id' => '123']);
-        static::assertEquals('Passing an ID is not supported for POST', $data['message']);
+        static::assertEquals('Passing an ID is not supported for POST.', $data['message']);
     }
 
     /**
@@ -191,7 +191,7 @@ class SubmissionControllerTest extends BaseTest
         $contestId = $this->getDemoContestId();
         $apiEndpoint = $this->apiEndpoint;
         $data = $this->verifyApiJsonResponse('PUT', "/contests/$contestId/$apiEndpoint/id1", 400, 'admin', ['problem_id' => $this->resolveEntityId(Problem::class, '1'), 'language_id' => 'cpp', 'id' => '123']);
-        static::assertEquals('ID does not match URI', $data['message']);
+        static::assertEquals('ID does not match URI.', $data['message']);
     }
 
     /**
@@ -221,7 +221,7 @@ class SubmissionControllerTest extends BaseTest
         $apiEndpoint = $this->apiEndpoint;
         $data = $this->verifyApiJsonResponse('POST', "/contests/$contestId/$apiEndpoint", 400, $username, ['problem_id' => $this->resolveEntityId(Problem::class, '1'), 'language' => 'cpp']);
 
-        static::assertEquals('User does not belong to a team', $data['message']);
+        static::assertEquals('User does not belong to a team.', $data['message']);
     }
 
     public function provideMissingTeam(): Generator
@@ -439,7 +439,7 @@ class SubmissionControllerTest extends BaseTest
             [
                 'problem_id'  => 1,
                 'language_id' => 'cpp',
-                'team_id'     => 2,
+                'team_id'     => '2',
             ],
             ['main.cpp' => '// No content'],
             [],
@@ -458,7 +458,7 @@ class SubmissionControllerTest extends BaseTest
             [
                 'problem_id'  => 1,
                 'language_id' => 'cpp',
-                'team_id'     => 2,
+                'team_id'     => '2',
                 'user_id'     => AddMoreDemoUsersFixture::class . ':seconddemo',
             ],
             ['main.cpp' => '// No content'],
@@ -478,7 +478,7 @@ class SubmissionControllerTest extends BaseTest
             [
                 'problem_id'  => 1,
                 'language_id' => 'cpp',
-                'team_id'     => 1,
+                'team_id'     => '1',
                 'id'          => 'myextid123',
             ],
             ['main.cpp' => '// No content'],
@@ -498,7 +498,7 @@ class SubmissionControllerTest extends BaseTest
             [
                 'problem_id'  => 1,
                 'language_id' => 'cpp',
-                'team_id'     => 1,
+                'team_id'     => '1',
                 'time'        => '2020-01-01T12:34:56',
             ],
             ['main.cpp' => '// No content'],

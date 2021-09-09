@@ -32,7 +32,6 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 use Symfony\Component\HttpKernel\KernelInterface;
@@ -555,7 +554,6 @@ class ProblemController extends BaseController
                             $thumb = Utils::getImageThumb($content, $thumbnailSize,
                                                           $this->dj->getDomjudgeTmpDir(), $error);
                             if ($thumb === false) {
-                                $thumb = null;
                                 $this->addFlash('danger', sprintf('image: %s', $error));
                                 return $this->redirectToRoute('jury_problem_testcases', ['probId' => $probId]);
                             }
@@ -604,7 +602,7 @@ class ProblemController extends BaseController
             $allOk = true;
             $inputOrOutputSpecified = false;
             foreach (['input', 'output'] as $type) {
-                if ($file = $request->files->get('add_' . $type)) {
+                if ($request->files->get('add_' . $type)) {
                     $inputOrOutputSpecified = true;
                 }
             }
@@ -665,7 +663,6 @@ class ProblemController extends BaseController
                     $thumb = Utils::getImageThumb($content, $thumbnailSize,
                                                   $this->dj->getDomjudgeTmpDir(), $error);
                     if ($thumb === false) {
-                        $thumb = null;
                         $this->addFlash('danger', sprintf('image: %s', $error));
                         return $this->redirectToRoute('jury_problem_testcases', ['probId' => $probId]);
                     }
@@ -715,6 +712,16 @@ class ProblemController extends BaseController
                 $this->addFlash($haswarnings ? 'warning' : 'info', $message);
             }
             return $this->redirectToRoute('jury_problem_testcases', ['probId' => $probId]);
+        }
+
+        $known_md5s = [];
+        foreach ($testcases as $rank => $testcase) {
+            $input_md5 = $testcase->getMd5sumInput();
+            if (isset($known_md5s[$input_md5])) {
+                $this->addFlash('warning',
+                    "Testcase #" . $rank . " has identical input to testcase #" . $known_md5s[$input_md5] . '.');
+            }
+            $known_md5s[$input_md5] = $rank;
         }
 
         $data = [

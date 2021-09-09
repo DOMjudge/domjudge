@@ -46,7 +46,7 @@ include:
 
 .retry_time: &long_job
   <<: *clean_ordering
-  timeout: 25m
+  timeout: 30m
 # Due to the retry this will be worst case 3*timeout before the job fails
 
 webstandard_check_role:
@@ -194,8 +194,7 @@ visual_compare:
   artifacts:
     when: always
     paths:
-      - failingchanges
-      - predictedchanges
+      - visualchanges
       - addrem.log
 
 .job_template: &job_integration

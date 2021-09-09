@@ -107,7 +107,7 @@ class ClarificationController extends AbstractRestController
         $required = ['text'];
         foreach ($required as $argument) {
             if (!$request->request->has($argument)) {
-                throw new BadRequestHttpException(sprintf("Argument '%s' is mandatory", $argument));
+                throw new BadRequestHttpException(sprintf("Argument '%s' is mandatory.", $argument));
             }
         }
 
@@ -138,7 +138,7 @@ class ClarificationController extends AbstractRestController
 
             if ($problem === null) {
                 throw new BadRequestHttpException(
-                    sprintf("Problem %s not found", $problemId));
+                    sprintf("Problem '%s' not found.", $problemId));
             }
 
             $clarification->setProblem($problem->getProblem());
@@ -160,7 +160,7 @@ class ClarificationController extends AbstractRestController
 
             if ($replyTo === null) {
                 throw new BadRequestHttpException(
-                    sprintf("Clarification %s not found", $replyToId));
+                    sprintf("Clarification '%s' not found.", $replyToId));
             }
 
             $clarification->setInReplyTo($replyTo);
@@ -174,37 +174,14 @@ class ClarificationController extends AbstractRestController
 
             // If the user is an admin or API writer, allow it to specify the team
             if ($this->isGranted('ROLE_API_WRITER')) {
-                // Load the team
-                $queryBuilder = $this->em->createQueryBuilder()
-                    ->from(Team::class, 't')
-                    ->select('t')
-                    ->leftJoin('t.category', 'tc')
-                    ->leftJoin('t.contests', 'c')
-                    ->leftJoin('tc.contests', 'cc')
-                    ->andWhere(sprintf('t.%s = :team', $idField))
-                    ->andWhere('t.enabled = 1')
-                    ->setParameter(':team', $fromTeamId);
-
-                if (!$contest->isOpenToAllTeams()) {
-                    $queryBuilder
-                        ->andWhere('c.cid = :cid OR cc.cid = :cid')
-                        ->setParameter(':cid', $contest->getCid());
-                }
-
-                /** @var Team $fromTeam */
-                $fromTeam = $queryBuilder->getQuery()->getOneOrNullResult();
-
-                if (!$fromTeam) {
-                    throw new BadRequestHttpException(
-                        sprintf("Team %s not found or not enabled", $fromTeamId));
-                }
+                $fromTeam = $this->dj->loadTeam($idField, $fromTeamId, $contest);
             } elseif (!$fromTeam) {
-                throw new BadRequestHttpException(sprintf('User does not belong to a team'));
+                throw new BadRequestHttpException('User does not belong to a team.');
             } elseif ((string)call_user_func([$fromTeam, $method]) !== (string)$fromTeamId) {
-                throw new BadRequestHttpException(sprintf('Can not create a clarification from a different team'));
+                throw new BadRequestHttpException('Can not create a clarification from a different team.');
             }
         } elseif (!$this->isGranted('ROLE_API_WRITER') && !$fromTeam) {
-            throw new BadRequestHttpException(sprintf('User does not belong to a team'));
+            throw new BadRequestHttpException('User does not belong to a team.');
         }
 
         $clarification->setSender($fromTeam);
@@ -216,39 +193,16 @@ class ClarificationController extends AbstractRestController
 
             // If the user is an admin or API writer, allow it to specify the team
             if ($this->isGranted('ROLE_API_WRITER')) {
-                // Load the team
-                $queryBuilder = $this->em->createQueryBuilder()
-                    ->from(Team::class, 't')
-                    ->select('t')
-                    ->leftJoin('t.category', 'tc')
-                    ->leftJoin('t.contests', 'c')
-                    ->leftJoin('tc.contests', 'cc')
-                    ->andWhere(sprintf('t.%s = :team', $idField))
-                    ->andWhere('t.enabled = 1')
-                    ->setParameter(':team', $toTeamId);
-
-                if (!$contest->isOpenToAllTeams()) {
-                    $queryBuilder
-                        ->andWhere('c.cid = :cid OR cc.cid = :cid')
-                        ->setParameter(':cid', $contest->getCid());
-                }
-
-                /** @var Team $toTeam */
-                $toTeam = $queryBuilder->getQuery()->getOneOrNullResult();
-
-                if (!$toTeam) {
-                    throw new BadRequestHttpException(
-                        sprintf("Team %s not found or not enabled", $toTeamId));
-                }
+                $toTeam = $this->dj->loadTeam($idField, $toTeamId, $contest);
             } else {
-                throw new BadRequestHttpException(sprintf('Can not create a clarification that is sent to a team'));
+                throw new BadRequestHttpException('Can not create a clarification that is sent to a team.');
             }
         }
 
         $clarification->setRecipient($toTeam);
 
         if ($toTeam && $fromTeam) {
-            throw new BadRequestHttpException(sprintf('Can not send a clarification from and to a team'));
+            throw new BadRequestHttpException('Can not send a clarification from and to a team.');
         }
 
         $time = Utils::now();
@@ -257,10 +211,10 @@ class ClarificationController extends AbstractRestController
                 try {
                     $time = Utils::toEpochFloat($timeString);
                 } catch (Exception $e) {
-                    throw new BadRequestHttpException(sprintf('Can not parse time %s', $timeString));
+                    throw new BadRequestHttpException(sprintf("Can not parse time '%s'.", $timeString));
                 }
             } else {
-                throw new BadRequestHttpException('A team can not assign time');
+                throw new BadRequestHttpException('A team can not assign time.');
             }
         }
 
@@ -268,9 +222,9 @@ class ClarificationController extends AbstractRestController
 
         if ($clarificationId = $request->request->get('id')) {
             if ($request->isMethod('POST')) {
-                throw new BadRequestHttpException('Passing an ID is not supported for POST');
+                throw new BadRequestHttpException('Passing an ID is not supported for POST.');
             } elseif ($id !== $clarificationId) {
-                throw new BadRequestHttpException('ID does not match URI');
+                throw new BadRequestHttpException('ID does not match URI.');
             } elseif ($this->isGranted('ROLE_API_WRITER')) {
                 // Check if we already have a clarification with this ID
                 $existingClarification = $this->em->createQueryBuilder()
@@ -283,10 +237,10 @@ class ClarificationController extends AbstractRestController
                     ->getQuery()
                     ->getOneOrNullResult();
                 if ($existingClarification !== null) {
-                    throw new BadRequestHttpException(sprintf("Clarification with ID %s already exists", $clarificationId));
+                    throw new BadRequestHttpException(sprintf("Clarification with ID '%s' already exists.", $clarificationId));
                 }
             } else {
-                throw new BadRequestHttpException('A team can not assign id');
+                throw new BadRequestHttpException('A team can not assign id.');
             }
         }
 
@@ -368,4 +322,5 @@ class ClarificationController extends AbstractRestController
     {
         return sprintf('clar.%s', $this->eventLogService->externalIdFieldForEntity(Clarification::class) ?? 'clarid');
     }
+
 }

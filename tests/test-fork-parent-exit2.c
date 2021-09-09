@@ -3,7 +3,7 @@
  * itself after sleeping for a couple of seconds. Runguard should kill all
  * child processes on normal exit, when using Linux cgroups.
  *
- * As the childs are doing some work, this submission should have a
+ * As the children are doing some work, this submission should have a
  * CPU time in the range of seconds if we're accounting properly for
  * forked grandchildren. The expected result will depend on whether
  * the program is bound to a single CPU core or not:

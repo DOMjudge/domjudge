@@ -104,7 +104,6 @@ class MetricsController extends AbstractFOSRestController
             $teamids_correct = [];
             $teamids_submitted = [];
             foreach($submissions as $s) {
-                $result = $s->getResult();
                 if ($s->getResult() == "correct") {
                     $teamids_correct[$s->getTeam()->getTeamid()] = 1;
                 }

@@ -16,7 +16,7 @@ include $(TOPDIR)/Makefile.global
 SECRETS = dbpasswords.secret restapi.secret symfony_app.secret initial_admin_password.secret
 
 SUBST_CONFIGS = apache.conf nginx-conf nginx-conf-inner domjudge-fpm.conf domserver-static.php \
-                judgehost-static.php runguard-config.h submit-config.h \
+                judgehost-static.php runguard-config.h \
                 sudoers-domjudge
 
 $(SUBST_CONFIGS): %: %.in $(TOPDIR)/paths.mk

@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 use Symfony\Component\Validator\Constraints as Assert;
+use ZipArchive;
 
 /**
  * Compile, compare, and run script executable bundles.
@@ -187,6 +188,14 @@ class Executable
         });
         foreach ($files as $file) {
             $zipArchive->addFromString($file->getFilename(), $file->getFileContent());
+            if ($file->isExecutable()) {
+                // 100755 = regular file, executable
+                $zipArchive->setExternalAttributesName(
+                    $file->getFilename(),
+                    ZipArchive::OPSYS_UNIX,
+                    octdec('100755') << 16
+                );
+            }
         }
         $zipArchive->close();
         $zipFileContents = file_get_contents($tempzipFile);

@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Controller\API\ClarificationController;
 use App\Doctrine\DBAL\Types\JudgeTaskType;
 use App\Entity\AuditLog;
 use App\Entity\Balloon;
@@ -42,6 +43,7 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
+use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
@@ -83,6 +85,11 @@ class DOMJudgeService
     protected $config;
 
     /**
+     * @var RouterInterface
+     */
+    protected $router;
+
+    /**
      * @var Executable|null
      */
     protected $defaultCompareExecutable = null;
@@ -91,6 +98,16 @@ class DOMJudgeService
      * @var Executable|null
      */
     protected $defaultRunExecutable = null;
+
+    /**
+     * @var array
+     */
+    protected $affiliationLogos;
+
+    /**
+     * @var array
+     */
+    protected $teamImages;
 
     const DATA_SOURCE_LOCAL = 0;
     const DATA_SOURCE_CONFIGURATION_EXTERNAL = 1;
@@ -112,6 +129,9 @@ class DOMJudgeService
      * @param TokenStorageInterface         $tokenStorage
      * @param HttpKernelInterface           $httpKernel
      * @param ConfigurationService          $config
+     * @param RouterInterface               $router
+     * @param array                         $affiliationLogos
+     * @param array                         $teamImages
      */
     public function __construct(
         EntityManagerInterface $em,
@@ -121,7 +141,10 @@ class DOMJudgeService
         AuthorizationCheckerInterface $authorizationChecker,
         TokenStorageInterface $tokenStorage,
         HttpKernelInterface $httpKernel,
-        ConfigurationService $config
+        ConfigurationService $config,
+        RouterInterface $router,
+        array $affiliationLogos,
+        array $teamImages
     ) {
         $this->em                   = $em;
         $this->logger               = $logger;
@@ -131,6 +154,9 @@ class DOMJudgeService
         $this->tokenStorage         = $tokenStorage;
         $this->httpKernel           = $httpKernel;
         $this->config               = $config;
+        $this->router               = $router;
+        $this->affiliationLogos     = $affiliationLogos;
+        $this->teamImages           = $teamImages;
     }
 
     /**
@@ -1003,7 +1029,7 @@ class DOMJudgeService
             'timeFactorDiffers' => $timeFactorDiffers,
         ];
 
-        if ($this->config->get('show_public_stats')) {
+        if ($contest && $this->config->get('show_public_stats')) {
             $freezeData = new FreezeData($contest);
             $data['stats'] = $statistics->getGroupedProblemsStats(
                 $contest,
@@ -1254,5 +1280,78 @@ class DOMJudgeService
         }
 
         return $ret;
+    }
+
+    /**
+     * Get the URL to a route relative to the API root
+     */
+    public function apiRelativeUrl(string $route, array $params = []): string
+    {
+        $route = $this->router->generate($route, $params);
+        $apiRootRoute = $this->router->generate('v4_api_root');
+        $offset = substr($apiRootRoute, -1) === '/' ? 0 : 1;
+        return substr($route, strlen($apiRootRoute) + $offset);
+    }
+
+    /**
+     * Get the path of an asset if it exists
+     *
+     * @param string $name
+     * @param string $type
+     * @param bool $fullPath If true, get the full path. If false, get the webserver relative path
+     *
+     * @return string|null
+     */
+    public function assetPath(string $name, string $type, bool $fullPath = false): ?string
+    {
+        $prefix = $fullPath ? ($this->getDomjudgeWebappDir() . '/public/') : '';
+        switch ($type) {
+            case 'affiliation':
+                $extension = 'png';
+                $var = $this->affiliationLogos;
+                $dir = 'images/affiliations';
+                break;
+            case 'team':
+                $extension = 'jpg';
+                $var = $this->teamImages;
+                $dir = 'images/teams';
+                break;
+        }
+
+        if (isset($extension)) {
+            if (in_array($name . '.' . $extension, $var)) {
+                return sprintf('%s%s/%s.%s', $prefix, $dir, $name, $extension);
+            }
+        }
+
+        return null;
+    }
+
+    public function loadTeam(string $idField, string $teamId, Contest $contest): Team
+    {
+        $queryBuilder = $this->em->createQueryBuilder()
+            ->from(Team::class, 't')
+            ->select('t')
+            ->leftJoin('t.category', 'tc')
+            ->leftJoin('t.contests', 'c')
+            ->leftJoin('tc.contests', 'cc')
+            ->andWhere(sprintf('t.%s = :team', $idField))
+            ->andWhere('t.enabled = 1')
+            ->setParameter(':team', $teamId);
+
+        if (!$contest->isOpenToAllTeams()) {
+            $queryBuilder
+                ->andWhere('c.cid = :cid OR cc.cid = :cid')
+                ->setParameter(':cid', $contest->getCid());
+        }
+
+        /** @var Team $team */
+        $team = $queryBuilder->getQuery()->getOneOrNullResult();
+
+        if (!$team) {
+            throw new BadRequestHttpException(
+                sprintf("Team with ID '%s' not found in contest or not enabled.", $teamId));
+        }
+        return $team;
     }
 }

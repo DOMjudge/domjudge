@@ -16,7 +16,6 @@ use JMS\Serializer\Annotation as Serializer;
  *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Result of judging a submission"},
  *     indexes={
  *         @ORM\Index(name="submitid", columns={"submitid"}),
- *         @ORM\Index(name="judgehostid", columns={"judgehostid"}),
  *         @ORM\Index(name="cid", columns={"cid"}),
  *         @ORM\Index(name="rejudgingid", columns={"rejudgingid"}),
  *         @ORM\Index(name="prevjudgingid", columns={"prevjudgingid"})
@@ -152,13 +151,6 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
      * @Serializer\Exclude()
      */
     private $submission;
-
-    /**
-     * @ORM\ManyToOne(targetEntity="Judgehost", inversedBy="judgings")
-     * @ORM\JoinColumn(name="judgehostid", referencedColumnName="judgehostid")
-     * @Serializer\Exclude()
-     */
-    private $judgehost;
 
     /**
      * rejudgings have one parent judging
@@ -429,27 +421,6 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
         return $this->original_judging;
     }
 
-    public function setJudgehost(?Judgehost $judgehost = null): Judging
-    {
-        $this->judgehost = $judgehost;
-        return $this;
-    }
-
-    public function getJudgehost(): ?Judgehost
-    {
-        return $this->judgehost;
-    }
-
-    /**
-     * @Serializer\VirtualProperty()
-     * @Serializer\Expose(if="context.getAttribute('domjudge_service').checkrole('jury')")
-     * @Serializer\SerializedName("judgehost")
-     */
-    public function getJudgehostName(): ?string
-    {
-        return $this->getJudgehost() ? $this->getJudgehost()->getHostname() : null;
-    }
-
     public function __construct()
     {
         $this->runs = new ArrayCollection();
@@ -514,5 +485,20 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
     public function isStillBusy(): bool
     {
         return !empty($this->getResult()) && empty($this->getEndtime()) && !$this->isAborted();
+    }
+
+    public function getJudgehosts(): array
+    {
+        $hostnames = [];
+        /** @var JudgingRun $run */
+        foreach ($this->getRuns() as $run) {
+            if ($run->getJudgeTask()->getJudgehost() === null) {
+                continue;
+            }
+            $hostnames[] = $run->getJudgeTask()->getJudgehost()->getHostname();
+        }
+        $hostnames = array_unique($hostnames);
+        sort($hostnames);
+        return $hostnames;
     }
 }

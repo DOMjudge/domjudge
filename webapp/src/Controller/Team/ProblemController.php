@@ -74,8 +74,9 @@ class ProblemController extends BaseController
      */
     public function problemsAction() : Response
     {
+        $teamId = $this->dj->getUser()->getTeam()->getTeamid();
         return $this->render('team/problems.html.twig',
-            $this->dj->getTwigDataForProblemsAction($this->dj->getUser()->getTeam()->getTeamid(), $this->stats));
+            $this->dj->getTwigDataForProblemsAction($teamId, $this->stats));
     }
 
 

@@ -49,6 +49,31 @@ nelmio_api_doc:
                     description: The specified resource was not found
                 Unauthorized:
                     description: Unauthorized
+                ImageList:
+                    type: array
+                    items:
+                        type: object
+                        properties:
+                            href:
+                                type: string
+                            mime:
+                                type: string
+                            width:
+                                type: integer
+                            height:
+                                type: integer
+                Banner:
+                    properties:
+                        banner:
+                            $ref: "#/components/schemas/ImageList"
+                Logo:
+                    properties:
+                        logo:
+                            $ref: "#/components/schemas/ImageList"
+                Photo:
+                    properties:
+                        photo:
+                            $ref: "#/components/schemas/ImageList"
                 ContestProblem:
                     properties:
                         id:
@@ -80,6 +105,8 @@ nelmio_api_doc:
                         type: object
                         properties:
                             href:
+                                type: string
+                            mime:
                                 type: string
                 SourceCodeList:
                     type: array
@@ -166,67 +193,6 @@ nelmio_api_doc:
                                                     type: integer
                                                 first_to_solve:
                                                     type: boolean
-                NextJudging:
-                    type: object
-                    properties:
-                        judgingid:
-                            type: integer
-                        submitid:
-                            type: integer
-                        cid:
-                            type: integer
-                        teamid:
-                            type: integer
-                        probid:
-                            type: integer
-                        langid:
-                            type: string
-                        language_extensions:
-                            type: array
-                            items:
-                                type: string
-                        filter_compiler_files:
-                            type: boolean
-                        rejudgingid:
-                            type: integer
-                        entry_point:
-                            type: string
-                        origsubmitid:
-                            type: integer
-                        maxruntime:
-                            type: number
-                            format: float
-                        memlimit:
-                            type: integer
-                        outputlimit:
-                            type: integer
-                        run:
-                            type: string
-                        compare:
-                            type: string
-                        compare_args:
-                            type: string
-                        compile_script:
-                            type: string
-                        compare_md5sum:
-                            type: string
-                        run_md5sum:
-                            type: string
-                        compile_script_md5sum:
-                            type: string
-                        testcases:
-                            type: array
-                            items:
-                                type: object
-                                properties:
-                                    md5sum_input:
-                                        type: string
-                                    md5sum_output:
-                                        type: string
-                                    testcaseid:
-                                        type: integer
-                                    rank:
-                                        type: integer
                 ContestState:
                     type: object
                     properties:
@@ -286,7 +252,7 @@ nelmio_api_doc:
                         roles:
                             type: array
                             items:
-                                type: sring
+                                type: string
                 ClarificationPost:
                     type: object
                     required: [text]

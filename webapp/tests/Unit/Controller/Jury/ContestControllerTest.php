@@ -6,6 +6,8 @@ use App\Entity\Contest;
 
 class ContestControllerTest extends JuryControllerTest
 {
+    protected static $identifingEditAttribute = 'shortname';
+    protected static $defaultEditEntityName   = 'demoprac';
     protected static $baseUrl        = '/jury/contests';
     protected static $exampleEntries = ['Demo contest','Demo practice session'];
     protected static $shortTag       = 'contest';
@@ -21,6 +23,7 @@ class ContestControllerTest extends JuryControllerTest
                                         'selector'  => 'Boolean switch search',
                                         'fixture'   => NULL];
     protected static $addForm          = 'contest[';
+    protected static $addPlus          = 'problems';
     protected static $addEntitiesShown = ['shortname','name'];
     protected static $addEntities      = [['shortname' => 'nc',
                                            'name' => 'New Contest',
@@ -81,7 +84,38 @@ class ContestControllerTest extends JuryControllerTest
                                            'name' => 'Timezones',
                                            'activatetimeString' => '1990-07-17 16:00:00 Africa/Douala',
                                            'starttimeString' => '1990-07-17 16:00:00 Etc/GMT+2',
-                                           'freezetimeString' => '1990-07-17 16:00:00 America/Paramaribo']];
+                                           'freezetimeString' => '1990-07-17 16:00:00 America/Paramaribo'],
+                                          ['shortname' => 'prob',
+                                           'problems' => ['0' => ['shortname' => 'boolfind',
+                                                                  'points' => '1',
+                                                                  'allowSubmit' => '1',
+                                                                  'allowJudge' => '1',
+                                                                  'color' => '#ffffff',
+                                                                  'lazyEvalResults' => '0',
+                                                                  'problem' => '2']]],
+                                          ['shortname' => 'multprob',
+                                           'name' => 'Contest with problems',
+                                           'problems' => ['0' => ['problem' => '2',
+                                                                  'shortname' => 'fcmp',
+                                                                  'points' => '2',
+                                                                  'allowSubmit' => '1',
+                                                                  'allowJudge' => '1',
+                                                                  'color' => '#000000',
+                                                                  'lazyEvalResults' => '0'],
+                                                          '1' => ['problem' => '1',
+                                                                  'shortname' => 'hw',
+                                                                  'points' => '1',
+                                                                  'allowSubmit' => '0',
+                                                                  'allowJudge' => '1',
+                                                                  'color' => '#000000',
+                                                                  'lazyEvalResults' => '0'],
+                                                          '2' => ['problem' => '3',
+                                                                  'shortname' => 'p3',
+                                                                  'points' => '1',
+                                                                  'allowSubmit' => '1',
+                                                                  'allowJudge' => '0',
+                                                                  'color' => 'yellow',
+                                                                  'lazyEvalResults' => '1']]]];
 
     public function testCheckAddEntityAdmin(): void
     {

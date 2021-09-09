@@ -192,13 +192,13 @@ class User implements UserInterface, EquatableInterface, \Serializable
         return $this->username;
     }
 
-    public function setName(string $name): User
+    public function setName(?string $name): User
     {
         $this->name = $name;
         return $this;
     }
 
-    public function getName(): string
+    public function getName(): ?string
     {
         return $this->name;
     }

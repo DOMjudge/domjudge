@@ -316,75 +316,6 @@ class SubmissionController extends BaseController
             }
         }
 
-        $unjudgableReasons = [];
-        if ($selectedJudging === null) {
-            // Determine if this submission is unjudgable
-
-            // First, check if there is an active judgehost that can judge this submission.
-            /** @var Judgehost[] $judgehosts */
-            $judgehosts  = $this->em->createQueryBuilder()
-                ->from(Judgehost::class, 'j')
-                ->leftJoin('j.restriction', 'r')
-                ->select('j', 'r')
-                ->andWhere('j.active = 1')
-                ->getQuery()
-                ->getResult();
-            $canBeJudged = false;
-            foreach ($judgehosts as $judgehost) {
-                if (!$judgehost->getRestriction()) {
-                    $canBeJudged = true;
-                    break;
-                }
-
-                $queryBuilder = $this->em->createQueryBuilder()
-                    ->from(Submission::class, 's')
-                    ->select('s')
-                    ->join('s.language', 'lang')
-                    ->join('s.contest_problem', 'cp')
-                    ->andWhere('s.submitid = :submitid')
-                    ->andWhere('s.judgehost IS NULL')
-                    ->andWhere('lang.allowJudge = 1')
-                    ->andWhere('cp.allowJudge = 1')
-                    ->andWhere('s.valid = 1')
-                    ->setParameter(':submitid', $submission->getSubmitid())
-                    ->setMaxResults(1);
-
-                $restrictions = $judgehost->getRestriction()->getRestrictions();
-                if (isset($restrictions['contest'])) {
-                    $queryBuilder
-                        ->andWhere('s.contest IN (:contests)')
-                        ->setParameter(':contests', $restrictions['contest']);
-                }
-                if (isset($restrictions['problem'])) {
-                    $queryBuilder
-                        ->leftJoin('s.problem', 'p')
-                        ->andWhere('p.probid IN (:problems)')
-                        ->setParameter(':problems', $restrictions['problem']);
-                }
-                if (isset($restrictions['language'])) {
-                    $queryBuilder
-                        ->andWhere('s.language IN (:languages)')
-                        ->setParameter(':languages', $restrictions['language']);
-                }
-
-                if ($queryBuilder->getQuery()->getOneOrNullResult()) {
-                    $canBeJudged = true;
-                }
-            }
-
-            if (!$canBeJudged) {
-                $unjudgableReasons[] = 'No active judgehost can judge this submission. Edit judgehost restrictions!';
-            }
-
-            if (!$submission->getLanguage()->getAllowJudge()) {
-                $unjudgableReasons[] = 'Submission language is currently not allowed to be judged!';
-            }
-
-            if (!$submission->getContestProblem()->getAllowJudge()) {
-                $unjudgableReasons[] = 'Problem is currently not allowed to be judged!';
-            }
-        }
-
         $outputDisplayLimit    = (int)$this->config->get('output_display_limit');
         $outputTruncateMessage = sprintf("\n[output display truncated after %d B]\n", $outputDisplayLimit);
 
@@ -496,7 +427,7 @@ class SubmissionController extends BaseController
                     $runResult['wall_time'] = $metadata['wall-time'];
                     $runResult['memory'] = Utils::printsize((int)$metadata['memory-bytes'], 2);
                     $runResult['exitcode'] = $metadata['exitcode'];
-                    $runResult['signal'] = isset($metadata['signal']) ? $metadata['signal'] : -1;
+                    $runResult['signal'] = $metadata['signal'] ?? -1;
                 }
                 $runResult['terminated'] = preg_match('/timelimit exceeded.*hard (wall|cpu) time/',
                                                       (string)$runResult['output_system']);
@@ -565,6 +496,44 @@ class SubmissionController extends BaseController
             }
         }
 
+        $unjudgableReasons = [];
+        if ($runsOutstanding) {
+            // Determine if this submission is unjudgable.
+
+            $numActiveJudgehosts = (int)$this->em->createQueryBuilder()
+                ->from(Judgehost::class, 'j')
+                ->select('count(j.judgehostid)')
+                ->andWhere('j.active = 1')
+                ->getQuery()
+                ->getSingleScalarResult();
+            if ($numActiveJudgehosts == 0) {
+                $unjudgableReasons[] = 'No active judgehost. Add or enable judgehosts!';
+            }
+
+            if (!$submission->getLanguage()->getAllowJudge()) {
+                $unjudgableReasons[] = 'Submission language is currently not allowed to be judged!';
+            }
+
+            if (!$submission->getContestProblem()->getAllowJudge()) {
+                $unjudgableReasons[] = 'Problem is currently not allowed to be judged!';
+            }
+        }
+
+        if (!isset($judging)) {
+            $requestedOutputCount = 0;
+        } else {
+            $requestedOutputCount = (int)$this->em->createQueryBuilder()
+                ->from(JudgeTask::class, 'jt')
+                ->select('count(jt.judgetaskid)')
+                ->andWhere('jt.type = :type')
+                ->andWhere('jt.jobid = :judgingid')
+                ->andWhere('jt.starttime IS NULL')
+                ->setParameter(':type', JudgeTaskType::DEBUG_INFO)
+                ->setParameter(':judgingid', $judging->getJudgingid())
+                ->getQuery()
+                ->getSingleScalarResult();
+        }
+
         $twigData = [
             'submission' => $submission,
             'lastSubmission' => $lastSubmission,
@@ -583,6 +552,7 @@ class SubmissionController extends BaseController
             'verificationRequired' => (bool)$this->config->get('verification_required'),
             'claimWarning' => $claimWarning,
             'combinedRunCompare' => $submission->getProblem()->getCombinedRunCompare(),
+            'requestedOutputCount' => $requestedOutputCount,
         ];
 
         if ($selectedJudging === null) {
@@ -947,7 +917,7 @@ class SubmissionController extends BaseController
             $numRequested = $this->em->getConnection()->executeUpdate(
                 'UPDATE judgetask SET valid=1'
                 . ' WHERE jobid=:jobid'
-                . ' AND hostname IS NULL',
+                . ' AND judgehostid IS NULL',
                 [
                     ':jobid' => $judgingId,
                 ]
@@ -1060,8 +1030,10 @@ class SubmissionController extends BaseController
 
         // Redirect to referrer page after verification or back to submission page when unverifying.
         if ($request->request->getBoolean('verified')) {
+            $this->addFlash('info', "Verified judging j$judgingId");
             $redirect = $request->request->get('redirect', $this->generateUrl('jury_submissions'));
         } else {
+            $this->addFlash('info', "Unmarked judging j$judgingId as verified");
             $redirect = $this->generateUrl('jury_submission_by_judging', ['jid' => $judgingId]);
         }
 
