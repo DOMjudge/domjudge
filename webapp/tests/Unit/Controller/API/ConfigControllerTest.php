@@ -56,7 +56,7 @@ class ConfigControllerTest extends BaseTest
         static::assertIsArray($response['clar_answers']);
         static::assertEquals($answers, $response['clar_answers']);
         static::assertEquals("", $response['external_ccs_submission_url']);
-        static::assertEquals(0, $response['data_source']);
+        static::assertEquals(1, $response['data_source']);
     }
 
     /**
@@ -90,7 +90,7 @@ class ConfigControllerTest extends BaseTest
         static::assertIsArray($response);
         static::assertEquals(false, $response['compile_penalty']);
         static::assertEquals(20, $response['penalty_time']);
-        static::assertEquals(0, $response['data_source']);
+        static::assertEquals(1, $response['data_source']);
 
         $proposedChange = ['compile_penalty' => true, 'penalty_time' => 21];
         $response = $this->verifyApiJsonResponse('PUT', $this->endpoint, 200, 'admin', $proposedChange);
@@ -98,7 +98,7 @@ class ConfigControllerTest extends BaseTest
         static::assertIsArray($response);
         static::assertEquals(true, $response['compile_penalty']);
         static::assertEquals(21, $response['penalty_time']);
-        static::assertEquals(0, $response['data_source']);
+        static::assertEquals(1, $response['data_source']);
     }
 
     /**
