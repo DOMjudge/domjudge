@@ -140,22 +140,6 @@ class Judgehost
         return $this->judgetasks;
     }
 
-    public function addJudgeTask(JudgeTask $judgeTask): Judgehost
-    {
-        $this->judgetasks[] = $judgeTask;
-        return $this;
-    }
-
-    public function removeJudgeTask(JudgeTask $judgeTask)
-    {
-        $this->judgetasks->removeElement($judgeTask);
-    }
-
-    public function getJudgeTasks(): Collection
-    {
-        return $this->judgetasks;
-    }
-
     public function setHidden(bool $hidden): Judgehost
     {
         $this->hidden = $hidden;
