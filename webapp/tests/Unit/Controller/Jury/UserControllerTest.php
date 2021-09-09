@@ -35,7 +35,7 @@ class UserControllerTest extends JuryControllerTest
                                           ['username' => 'specialchar', 'name' => 'Special char in password',
                                            'plainPassword' => '!@主裁判 судья !"#$%&()*+,-./:;<=>?@[\]^_`{|}~'],
                                           ['username' => 'quoteinpassword', 'name' => 'quote_in_password',
-                                           'plainPassword' => "pass'word"],
+                                           'plainPassword' => "pass'w'ord"],
                                           ['username' => 'nip', 'name' => 'No IP',
                                            'ipAddress' => ''],
                                           ['username' => 'ipv6-1', 'name' => 'IPv6-1',
