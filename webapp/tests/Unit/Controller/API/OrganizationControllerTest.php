@@ -89,20 +89,6 @@ class OrganizationControllerTest extends BaseTest
     }
 
     /**
-     * @dataProvider provideSingle
-     */
-    public function testSingle($id, array $expectedProperties)
-    {
-        // Remove country and country flag if not enabled
-        $showFlags = static::$container->get(ConfigurationService::class)->get('show_flags');
-        if (!$showFlags) {
-            $expectedProperties['country'] = null;
-            $expectedProperties['country_flag'] = null;
-        }
-        parent::testSingle($id, $expectedProperties);
-    }
-
-    /**
      * @var string
      */
     protected $organizationLogo;
@@ -126,20 +112,6 @@ class OrganizationControllerTest extends BaseTest
         // Remove the image again
         unlink($this->organizationLogo);
         $this->removeTestContainer();
-    }
-
-    public function testList()
-    {
-        // Remove country and country flag if not enabled
-        $showFlags = static::$container->get(ConfigurationService::class)->get('show_flags');
-        if (!$showFlags) {
-            foreach ($this->expectedObjects as &$object) {
-                $object['country'] = null;
-                $object['country_flag'] = null;
-            }
-            unset($object);
-        }
-        parent::testList();
     }
 
     /**
