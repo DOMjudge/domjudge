@@ -66,12 +66,6 @@ class Judgehost
     private $judgetasks;
 
     /**
-     * @ORM\OneToMany(targetEntity="JudgeTask", mappedBy="judgehost")
-     * @Serializer\Exclude()
-     */
-    private $judgetasks;
-
-    /**
      * @var boolean
      * @ORM\Column(type="boolean", name="hidden",
      *     options={"comment"="Should this host be hidden in the overview?",
