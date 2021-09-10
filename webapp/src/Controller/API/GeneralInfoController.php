@@ -168,7 +168,9 @@ class GeneralInfoController extends AbstractFOSRestController
         $result = [];
         foreach ($contests as $contest) {
             $contestStats = $this->dj->getContestStats($contest);
-            $contestStats['cid'] = $contest->getCid();
+            $contestStats['cid'] =
+                $this->config->get('data_source') === DOMJudgeService::DATA_SOURCE_LOCAL
+                    ? $contest->getCid() : $contest->getExternalid();
             $result[] = $contestStats;
         }
 
