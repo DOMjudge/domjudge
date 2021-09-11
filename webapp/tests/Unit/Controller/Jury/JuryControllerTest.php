@@ -276,9 +276,6 @@ abstract class JuryControllerTest extends BaseTest
             foreach ($formDataKeys as $id => $key) {
                 $formFields[static::$addForm . $key . "]"] = $formDataValues[$id];
             }
-            foreach ($formDataKeys as $id => $key) {
-                $formFields[static::$addForm . $key . "]"] = $formDataValues[$id];
-            }
             $button = $this->client->getCrawler()->selectButton('Save');
             $form = $button->form($formFields, 'POST');
             $this->client->submit($form);
