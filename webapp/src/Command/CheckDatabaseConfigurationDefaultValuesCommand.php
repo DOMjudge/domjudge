@@ -64,13 +64,12 @@ class CheckDatabaseConfigurationDefaultValuesCommand extends Command
                     break;
             }
         }
-        if (empty($messages)) {
-            $style->success('All default values have the correct type');
-        } else {
+        if (!empty($messages)) {
             $style->error('Some default values have the wrong type:');
             $style->listing($messages);
+            return Command::FAILURE;
         }
-
+        $style->success('All default values have the correct type');
         return Command::SUCCESS;
     }
 }
