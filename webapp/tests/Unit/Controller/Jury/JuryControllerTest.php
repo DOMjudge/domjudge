@@ -259,6 +259,10 @@ abstract class JuryControllerTest extends BaseTest
      */
     public function testCheckEditEntityAdmin(string $identifier, array $formDataKeys, array $formDataValues): void
     {
+
+        if (!$this->dataSourceIsLocal()) {
+            $this->markTestSkipped('skipping test if data is not local');
+        }
         $this->roles = ['admin'];
         $this->logOut();
         $this->logIn();
