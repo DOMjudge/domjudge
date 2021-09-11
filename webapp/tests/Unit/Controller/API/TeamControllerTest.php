@@ -54,4 +54,12 @@ class TeamControllerTest extends BaseTest
         unlink($this->teamPhoto);
         $this->removeTestContainer();
     }
+
+    public function testList()
+    {
+        if (!$this->dataSourceIsLocal()) {
+            $this->markTestSkipped('skipping test if data is not local');
+        }
+        parent::testList();
+    }
 }

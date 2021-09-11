@@ -76,6 +76,9 @@ class OrganizationControllerTest extends BaseTest
 
     public function testList()
     {
+        if (!$this->dataSourceIsLocal()) {
+            $this->markTestSkipped('skipping test if data is not local');
+        }
         // Remove country and country flag if not enabled
         $showFlags = static::$container->get(ConfigurationService::class)->get('show_flags');
         if (!$showFlags) {
