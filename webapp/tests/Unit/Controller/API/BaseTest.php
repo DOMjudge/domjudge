@@ -11,7 +11,7 @@ use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 abstract class BaseTest extends BaseBaseTest
 {
     protected static $rootEndpoints = ['contests','judgehosts','users'];
-    
+
     /** @var KernelBrowser */
     protected $client;
 
@@ -64,6 +64,29 @@ abstract class BaseTest extends BaseBaseTest
      * @var Contest
      */
     protected $demoContest;
+
+    private function getExpectedObjects(): array
+    {
+        if ($this->dataSourceIsLocal()) {
+            return $this->expectedObjects;
+        }
+        $ret = [];
+        foreach ($this->expectedObjects as $id=>$expectedObject) {
+            $externalid = null;
+            if (isset($expectedObject['externalid'])) {
+                $externalid = $expectedObject['externalid'];
+            } elseif (isset($expectedObject['external_id'])) {
+                $externalid = $expectedObject['external_id'];
+            }
+            if ($externalid === null) {
+                $ret[$id] = $expectedObject;
+            } else {
+                $expectedObject['id'] = $externalid;
+                $ret[$externalid] = $expectedObject;
+            }
+        }
+        return $ret;
+    }
 
     protected function setUp(): void
     {
@@ -175,7 +198,7 @@ abstract class BaseTest extends BaseBaseTest
         $objects = $this->verifyApiJsonResponse('GET', $url, 200, $this->apiUser);
 
         static::assertIsArray($objects);
-        foreach ($this->expectedObjects as $expectedObjectId => $expectedObject) {
+        foreach ($this->getExpectedObjects() as $expectedObjectId => $expectedObject) {
             foreach ($this->entityReferences as $field => $class) {
                 $expectedObject[$field] = $this->resolveEntityId($class, $expectedObject[$field]);
             }
@@ -227,7 +250,7 @@ abstract class BaseTest extends BaseBaseTest
                 $id = $this->resolveEntityId($this->objectClassForExternalId, (string)$id);
             }
             return $id;
-        }, array_keys($this->expectedObjects));
+        }, array_keys($this->getExpectedObjects()));
         $url = $this->helperGetEndpointURL($apiEndpoint);
         $objects = $this->verifyApiJsonResponse('GET', $url . "?" . http_build_query(['ids' => $expectedObjectIds]), 200, $this->apiUser);
 
@@ -291,7 +314,7 @@ abstract class BaseTest extends BaseBaseTest
 
         $expectedObjectIds = array_map(function ($id) {
             return $this->resolveReference($id);
-        }, array_keys($this->expectedObjects));
+        }, array_keys($this->getExpectedObjects()));
         $ids = array_merge($expectedObjectIds, $this->expectedAbsent);
         $url = $this->helperGetEndpointURL($apiEndpoint);
         $response = $this->verifyApiJsonResponse('GET', $url . "?" . http_build_query(['ids' => $ids]), 404, $this->apiUser);
@@ -329,7 +352,7 @@ abstract class BaseTest extends BaseBaseTest
 
     public function provideSingle(): Generator
     {
-        foreach ($this->expectedObjects as $id => $expectedProperties) {
+        foreach ($this->getExpectedObjects() as $id => $expectedProperties) {
             yield [$id, $expectedProperties];
         }
     }
