@@ -32,6 +32,9 @@ class TeamAffiliationControllerTest extends JuryControllerTest
 
     public function testCheckAddEntityAdmin(): void
     {
+        if (!$this->dataSourceIsLocal()) {
+            $this->markTestSkipped('skipping test if data is not local');
+        }
         $config = static::$container->get(ConfigurationService::class);
         $showFlags = $config->get('show_flags');
         // Remove setting country when we don't show it
