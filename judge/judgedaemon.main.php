@@ -547,7 +547,7 @@ if (!empty($options['e'])) {
 umask(0022);
 
 // Check basic prerequisites for chroot at judgehost startup
-logmsg(LOG_INFO, "√ Executing chroot script: '".CHROOT_SCRIPT." check'");
+logmsg(LOG_INFO, "🔏 Executing chroot script: '".CHROOT_SCRIPT." check'");
 system(LIBJUDGEDIR.'/'.CHROOT_SCRIPT.' check', $retval);
 if ($retval!==0) {
     error("chroot validation check exited with exitcode $retval");
@@ -804,7 +804,7 @@ while (true) {
 
     if ($lastWorkdir !== $workdir) {
         // create chroot environment
-        logmsg(LOG_INFO, "  √ Executing chroot script: '".CHROOT_SCRIPT." start'");
+        logmsg(LOG_INFO, "  🔒 Executing chroot script: '".CHROOT_SCRIPT." start'");
         system(LIBJUDGEDIR.'/'.CHROOT_SCRIPT.' start', $retval);
         if ($retval!==0) {
             error("chroot script exited with exitcode $retval");
@@ -936,7 +936,7 @@ function cleanup_judging(string $workdir) : void
     chmod($workdir, 0700);
 
     // destroy chroot environment
-    logmsg(LOG_INFO, "  √ Executing chroot script: '".CHROOT_SCRIPT." stop'");
+    logmsg(LOG_INFO, "  🔓 Executing chroot script: '".CHROOT_SCRIPT." stop'");
     system(LIBJUDGEDIR.'/'.CHROOT_SCRIPT.' stop', $retval);
     if ($retval!==0) {
         error("chroot script exited with exitcode $retval");
