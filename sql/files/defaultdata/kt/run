@@ -42,6 +42,9 @@ else
 	MAINCLASS="$ENTRY_POINT"
 fi
 
+# Put Kotlin on the path where it is in the ICPC image.
+export PATH=$PATH:/usr/lib/kotlinc/bin
+
 # Byte-compile:
 kotlinc -d . "$@"
 EXITCODE=$?
@@ -84,6 +87,9 @@ fi
 
 # Add -J-DONLINE_JUDGE or -J-DDOMJUDGE below if you want it make easier for
 # teams to do local debugging.
+
+# Put Kotlin on the path where it is in the ICPC image.
+export PATH=\$PATH:/usr/lib/kotlinc/bin
 
 exec kotlin -Dfile.encoding=UTF-8 -J-XX:+UseSerialGC -J-Xss${MEMSTACK}k -J-Xms${MEMLIMITJAVA}k -J-Xmx${MEMLIMITJAVA}k '$MAINCLASS' "\$@"
 EOF
