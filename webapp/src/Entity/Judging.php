@@ -176,7 +176,7 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
 
     /**
      * Rejudgings have one parent judging.
-     * @ORM\ManyToOne(targetEntity="InternalError")
+     * @ORM\ManyToOne(targetEntity="InternalError", inversedBy="affectedJudgings")
      * @ORM\JoinColumn(name="errorid", referencedColumnName="errorid", onDelete="SET NULL")
      * @Serializer\Exclude()
      */

@@ -3,6 +3,7 @@ namespace App\Entity;
 
 use App\Doctrine\DBAL\Types\InternalErrorStatusType;
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation as Serializer;
 
 /**
  * Log of judgehost internal errors.
@@ -79,6 +80,12 @@ class InternalError
      * @ORM\JoinColumn(name="judgingid", referencedColumnName="judgingid", onDelete="SET NULL")
      */
     private $judging;
+
+    /**
+     * @ORM\OneToMany(targetEntity="Judging", mappedBy="internalError")
+     * @Serializer\Exclude()
+     */
+    private $affectedJudgings;
 
     public function setErrorid(int $errorid): InternalError
     {
@@ -168,5 +175,11 @@ class InternalError
     public function getJudging(): ?Judging
     {
         return $this->judging;
+    }
+
+    public function getAffectedJudgings()
+    {
+        dump($this->affectedJudgings);
+        return $this->affectedJudgings;
     }
 }
