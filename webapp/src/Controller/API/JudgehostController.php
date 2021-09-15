@@ -27,6 +27,7 @@ use App\Service\SubmissionService;
 use App\Utils\Utils;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DBALException;
+use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
@@ -768,17 +769,18 @@ class JudgehostController extends AbstractFOSRestController
         }
 
         $disabled = $this->dj->jsonDecode($disabled);
+
+        /** @var Contest|null $contest */
+        $contest = null;
+        if ($cid) {
+            $contest = $this->em->getRepository(Contest::class)->find($cid);
+        }
+
+        $field_name = null;
+        $disabled_id = null;
         if (in_array($disabled['kind'], array('compile_script', 'compare_script', 'run_script'))) {
             $field_name = $disabled['kind'] . '_id';
-            // Disable any outstanding judgetasks with the same script that have not been claimed yet.
-            $this->em->getConnection()->executeUpdate(
-                'UPDATE judgetask SET valid=0'
-                . ' WHERE ' . $field_name . ' = :id'
-                . ' AND judgehostid IS NULL',
-                [
-                    ':id' => $disabled[$field_name],
-                ]
-            );
+            $disabled_id = $disabled[$field_name];
 
             // Since these are the immutable executables, we need to map it to the mutable one first to make linking and
             // re-enabling possible.
@@ -815,12 +817,6 @@ class JudgehostController extends AbstractFOSRestController
             return $error->getErrorid();
         }
 
-        /** @var Contest|null $contest */
-        $contest = null;
-        if ($cid) {
-            $contest = $this->em->getRepository(Contest::class)->find($cid);
-        }
-
         $error = new InternalError();
         $error
             ->setJudging($judging)
@@ -832,6 +828,35 @@ class JudgehostController extends AbstractFOSRestController
 
         $this->em->persist($error);
         $this->em->flush();
+
+        if ($field_name !== null) {
+            // Disable any outstanding judgetasks with the same script that have not been claimed yet.
+            $this->em->transactional(function (EntityManager $em) use($field_name, $disabled_id, $error) {
+                $judgingids = $em->getConnection()->executeQuery(
+                    'SELECT DISTINCT jobid'
+                    . ' FROM judgetask'
+                    . ' WHERE ' . $field_name . ' = :id'
+                    . ' AND judgehostid IS NULL',
+                    [
+                        ':id' => $disabled_id,
+                    ]
+                )->fetchFirstColumn();
+                $judgings = $em->getRepository(Judging::class)->findByJudgingid($judgingids);
+                foreach ($judgings as $judging) {
+                    /** @var Judging $judging */
+                    $judging->setInternalError($error);
+                }
+                $em->flush();
+                $em->getConnection()->executeUpdate(
+                    'UPDATE judgetask SET valid=0'
+                    . ' WHERE ' . $field_name . ' = :id'
+                    . ' AND judgehostid IS NULL',
+                    [
+                        ':id' => $disabled_id,
+                    ]
+                );
+            });
+        }
 
         $this->dj->setInternalError($disabled, $contest, false);
 
