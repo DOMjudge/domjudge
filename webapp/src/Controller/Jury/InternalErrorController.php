@@ -161,9 +161,9 @@ class InternalErrorController extends BaseController
                     $internalError->getContest(),
                     true
                 );
-                $this->dj->auditlog('internal_error', $internalError->getErrorid(),
-                                    sprintf('internal error: %s', $status));
             }
+            $this->dj->auditlog('internal_error', $internalError->getErrorid(),
+                sprintf('internal error: %s', $status));
         });
 
         return $this->redirectToRoute('jury_internal_error', ['errorId' => $internalError->getErrorid()]);
