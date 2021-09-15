@@ -220,7 +220,11 @@ function rest_encode_file(string $file, $sizelimit = true) : string
     return base64_encode(dj_file_get_contents($file, $maxsize));
 }
 
-$waittime = 5;
+// Both constants in microseconds
+const M = 1000*1000;
+const INITIAL_WAITTIME_µS =  100*1000;
+const MAXIMAL_WAITTIME_µS = 5000*1000;
+$waittime = INITIAL_WAITTIME_µS;
 
 define('SCRIPT_ID', 'judgedaemon');
 define('CHROOT_SCRIPT', 'chroot-startstop.sh');
@@ -576,12 +580,18 @@ while (true) {
         }
         if (!$endpoint['waiting']) {
             $dosleep = false;
+            $waittime = INITIAL_WAITTIME_µS;
             break;
         }
     }
     // Sleep only if everything is "waiting" and only if we're looking at the first endpoint again
     if ($dosleep && $currentEndpoint==0) {
-        sleep($waittime);
+        if ($waittime>M) {
+            sleep((int)($waittime/M));
+        } else {
+            usleep($waittime);
+        }
+        $waittime = min($waittime*2,MAXIMAL_WAITTIME_µS);
     }
 
     // Increment our currentEndpoint pointer
