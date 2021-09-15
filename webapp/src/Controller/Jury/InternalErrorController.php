@@ -6,8 +6,10 @@ use App\Controller\BaseController;
 use App\Doctrine\DBAL\Types\InternalErrorStatusType;
 use App\Entity\InternalError;
 use App\Entity\Judgehost;
+use App\Entity\JudgeTask;
 use App\Entity\Problem;
 use App\Service\DOMJudgeService;
+use App\Service\RejudgingService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
@@ -33,10 +35,13 @@ class InternalErrorController extends BaseController
      */
     protected $dj;
 
-    public function __construct(EntityManagerInterface $em, DOMJudgeService $dj)
+    protected $rejudgingService;
+
+    public function __construct(EntityManagerInterface $em, DOMJudgeService $dj, RejudgingService $rejudgingService)
     {
         $this->em = $em;
         $this->dj = $dj;
+        $this->rejudgingService = $rejudgingService;
     }
 
     /**
@@ -161,6 +166,18 @@ class InternalErrorController extends BaseController
                     $internalError->getContest(),
                     true
                 );
+                $affectedJudgings = $internalError->getAffectedJudgings();
+                if ($affectedJudgings !== null) {
+                    $skipped = array();
+                    $this->rejudgingService->createRejudging(
+                        'Internal Error ' . $internalError->getErrorid() . ' resolved',
+                        JudgeTask::PRIORITY_DEFAULT,
+                        $affectedJudgings->getValues(),
+                        false,
+                        0,
+                        null,
+                        $skipped);
+                }
             }
             $this->dj->auditlog('internal_error', $internalError->getErrorid(),
                 sprintf('internal error: %s', $status));
