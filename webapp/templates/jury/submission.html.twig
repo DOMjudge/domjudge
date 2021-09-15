@@ -42,6 +42,15 @@
         </div>
     {% endif %}
 
+    {% if selectedJudging is not null and selectedJudging.internalError is not null %}
+        <div class="alert alert-danger">
+            This judging was aborted; for more information check the internal error
+            <a href="{{ path('jury_internal_error', {errorId: selectedJudging.internalError.errorid}) }}">
+                {{ selectedJudging.internalError.errorid }}
+            </a>
+        </div>
+    {% endif %}
+
     <div class="mb-3">
         <h1 style="display: inline;">
             Submission {{ submission.submitid }}
