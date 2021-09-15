@@ -43,6 +43,22 @@
                         </td>
                     </tr>
                 {% endif %}
+                {% if internalError.affectedJudgings is not null %}
+                    <tr>
+                        <th>Additional affected judgings</th>
+                        <td>
+                            <ul>
+                            {%- for judging in internalError.affectedJudgings -%}
+                                <li>
+                                    <a href="{{ path('jury_submission_by_judging', {jid: judging.judgingid}) }}">
+                                        j{{ judging.judgingid }}
+                                    </a>
+                                </li>
+                            {%- endfor -%}
+                            </ul>
+                        </td>
+                    </tr>
+                {% endif %}
                 {% if internalError.contest is not null %}
                     <tr>
                         <th>Related contest</th>
