@@ -13,4 +13,5 @@ return [
     'presentation-error' => 'PE', /* dropped since 5.0 */
     'no-output'          => 'NO',
     'correct'            => 'AC',
+    ''                   => '?',
 ];
