@@ -190,6 +190,14 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
      */
     private $debug_packages;
 
+    /**
+     * Rejudgings have one parent judging.
+     * @ORM\ManyToOne(targetEntity="InternalError", inversedBy="affectedJudgings")
+     * @ORM\JoinColumn(name="errorid", referencedColumnName="errorid", onDelete="SET NULL")
+     * @Serializer\Exclude()
+     */
+    private $internalError;
+
     public function getMaxRuntime(): ?float
     {
         if ($this->runs->isEmpty()) {
