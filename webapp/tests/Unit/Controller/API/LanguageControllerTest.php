@@ -23,8 +23,8 @@ class LanguageControllerTest extends BaseTest
         ],
     ];
 
-    // Kotlin has allow_submit=false by default, so we don't expect it.
-    protected $expectedAbsent = ['kotlin', 'nonexistent'];
+    // Haskell has allow_submit=false by default, so we don't expect it.
+    protected $expectedAbsent = ['haskell', 'nonexistent'];
 
     protected static $fixtures = [
         EnableJavaEntrypointFixture::class,
