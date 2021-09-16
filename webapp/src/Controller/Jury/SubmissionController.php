@@ -5,6 +5,7 @@ namespace App\Controller\Jury;
 use App\Controller\BaseController;
 use App\Doctrine\DBAL\Types\JudgeTaskType;
 use App\Entity\Contest;
+use App\Entity\DebugPackage;
 use App\Entity\Executable;
 use App\Entity\ExternalJudgement;
 use App\Entity\Judgehost;
@@ -604,6 +605,20 @@ class SubmissionController extends BaseController
             'submitId' => $jid->getSubmission()->getSubmitid(),
             'jid' => $jid->getJudgingid(),
         ]);
+    }
+
+    /**
+     * @Route("/download-full-debug/{debug_package_id}", name="download_full_debug")
+     * @throws NonUniqueResultException
+     * @throws Exception
+     */
+    public function downloadFullDebug(DebugPackage $debugPackage): StreamedResponse
+    {
+        $name = 'debug_package.j' . $debugPackage->getJudging()->getJudgingid()
+            . '.db' . $debugPackage->getDebugPackageId()
+            . '.jh' . $debugPackage->getJudgehost()->getJudgehostid()
+            . '.tar.gz';
+        return Utils::streamAsBinaryFile(file_get_contents($debugPackage->getFilename()), $name);
     }
 
     /**
