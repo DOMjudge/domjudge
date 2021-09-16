@@ -507,4 +507,9 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
         sort($hostnames);
         return $hostnames;
     }
+
+    public function getDebugPackages()
+    {
+        return $this->debug_packages;
+    }
 }

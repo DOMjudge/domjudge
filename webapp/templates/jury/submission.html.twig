@@ -38,7 +38,7 @@
 
     {% if requestedOutputCount %}
         <div class="alert alert-warning">
-            Waiting for {{ requestedOutputCount }} team output(s) to be grabbed and uploaded.
+            Waiting for {{ requestedOutputCount }} team output(s) (or full debug package) to be grabbed and uploaded.
         </div>
     {% endif %}
 
@@ -300,12 +300,25 @@
                     {% endif %}
                 </h2>
                 &nbsp;
-                <a href="{{ path('request_full_debug', {'jid': selectedJudging.judgingid}) }}">
-                    <button class="btn btn-sm btn-outline-secondary" >
-                        <i class="fas fa-upload"></i>
-                        Retrieve Full Debug Package
-                    </button>
-                </a>
+                {% if selectedJudging.debugPackages | length > 0 %}
+                   {% for debug_package in selectedJudging.debugPackages %}
+                       <a href="{{ path('download_full_debug', {'debug_package_id': debug_package.debugPackageId }) }}">
+                           <button class="btn btn-sm btn-outline-secondary" >
+                               <i class="fas fa-download"></i>
+                               Debug Package ({{ debug_package.judgehost.hostname }})
+                           </button>
+                       </a>
+                   {% endfor %}
+                {% else %}
+                    {% if not requestedOutputCount %}
+                        <a href="{{ path('request_full_debug', {'jid': selectedJudging.judgingid}) }}">
+                            <button class="btn btn-sm btn-outline-secondary" >
+                                <i class="fas fa-upload"></i>
+                                Retrieve Full Debug Package
+                            </button>
+                        </a>
+                    {% endif %}
+                {% endif %}
                 &nbsp;
                 {% if not selectedJudging.verified %}
                     <form action="{{ path('jury_submission', {submitId: submission.submitid, jid: selectedJudging.judgingid}) }}"
