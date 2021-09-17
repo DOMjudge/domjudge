@@ -219,11 +219,18 @@ class CheckConfigService
 
     public function checkMysqlSettings() : array
     {
-        $r = $this->em->getConnection()->fetchAll('SHOW variables WHERE Variable_name IN
-                        ("innodb_log_file_size", "max_connections", "max_allowed_packet", "tx_isolation")');
+        $r = $this->em->getConnection()->fetchAll(
+            'SHOW variables WHERE Variable_name IN
+                 ("innodb_log_file_size", "max_connections", "max_allowed_packet",
+                  "tx_isolation", "transaction_isolation")'
+        );
         $vars = [];
         foreach ($r as $row) {
             $vars[$row['Variable_name']] = $row['Value'];
+        }
+        # MySQL 8 has "transaction_isolation" instead of "tx_isolation".
+        if ( isset($row['transaction_isolation']) ) {
+            $row['tx_isolation'] = $row['transaction_isolation'];
         }
         $max_inout_r = $this->em->getConnection()->fetchAll('SELECT GREATEST(MAX(LENGTH(input)),MAX(LENGTH(output))) as max FROM testcase_content');
         $max_inout = (int)reset($max_inout_r)['max'];
