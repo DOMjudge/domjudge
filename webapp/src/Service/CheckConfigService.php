@@ -229,8 +229,8 @@ class CheckConfigService
             $vars[$row['Variable_name']] = $row['Value'];
         }
         # MySQL 8 has "transaction_isolation" instead of "tx_isolation".
-        if ( isset($row['transaction_isolation']) ) {
-            $row['tx_isolation'] = $row['transaction_isolation'];
+        if ( isset($vars['transaction_isolation']) ) {
+            $vars['tx_isolation'] = $vars['transaction_isolation'];
         }
         $max_inout_r = $this->em->getConnection()->fetchAll('SELECT GREATEST(MAX(LENGTH(input)),MAX(LENGTH(output))) as max FROM testcase_content');
         $max_inout = (int)reset($max_inout_r)['max'];
