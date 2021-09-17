@@ -175,7 +175,7 @@
             description: Show country information in the interfaces?
         -   name: show_affiliations
             type: bool
-            default_value: true
+            default_value: false
             public: true
             description: Show affiliation names in the interfaces?
         -   name: show_affiliation_logos
