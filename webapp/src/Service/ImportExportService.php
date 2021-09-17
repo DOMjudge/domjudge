@@ -831,6 +831,7 @@ class ImportExportService
      */
     protected function importTeamsTsv(array $content, string &$message = null): int
     {
+        $localSource = $this->config->get('data_source') === DOMJudgeService::DATA_SOURCE_LOCAL;
         $teamData = [];
         $l        = 1;
         foreach ($content as $line) {
@@ -866,7 +867,7 @@ class ImportExportService
                     'teamid' => $teamId,
                     'icpcid' => $teamIcpcId,
                     'categoryid' => @$line[2],
-                    'name' => @$line[3],
+                    'name' => $localSource ? @$line[3] : @$line[4],
                 ],
                 'team_affiliation' => [
                     'shortname' => !empty(@$line[5]) ? @$line[5] : $affiliationExternalid,
