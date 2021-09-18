@@ -472,6 +472,17 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
         return $this->runs;
     }
 
+    public function setInternalError(?InternalError $internalError = null): Judging
+    {
+        $this->internalError = $internalError;
+        return $this;
+    }
+
+    public function getInternalError(): ?InternalError
+    {
+        return $this->internalError;
+    }
+
     /**
      * Get the entities to check for external ID's while serializing.
      *
