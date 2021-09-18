@@ -415,6 +415,7 @@ class SubmissionControllerTest extends BaseTest
                 'files'       => [
                     ['mime' => 'application/zip'],
                 ],
+                'entry_point' => 'Main',
             ],
             [
                 'main.java'    => 'Some java file',
@@ -432,6 +433,7 @@ class SubmissionControllerTest extends BaseTest
                 'main.java'    => 'Some java file',
                 'another.java' => 'A second java file',
             ],
+            'Main',
         ];
         // Submit as admin under a different team ID
         yield [
