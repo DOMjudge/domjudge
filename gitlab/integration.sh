@@ -195,7 +195,7 @@ section_end judging
 # - two submissions with ambiguous outcome,
 # - no submissions without magic string,
 # - and all submissions to be judged.
-if [ $NUMNOTVERIFIED -ne 4 ] || [ $NUMNOMAGIC -ne 0 ] || [ $NUMSUBS -gt $((NUMVERIFIED+NUMNOTVERIFIED)) ]; then
+if [ $NUMNOTVERIFIED -ne 2 ] || [ $NUMNOMAGIC -ne 0 ] || [ $NUMSUBS -gt $((NUMVERIFIED+NUMNOTVERIFIED)) ]; then
 	section_start error "Short error description"
 	# We error out below anyway, so no need to fail earlier than that.
 	set +e
