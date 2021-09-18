@@ -2,6 +2,12 @@
     {% set static = false %}
 {% endif %}
 
+{% if current_contest and testWarning %}
+    <div class="alert alert-danger" role="alert">
+        This is just a test contest with random submissions, no real data.
+    </div>
+{% endif %}
+
 {% if ajax is defined and ajax and not static and public %}
     <div class="d-none">
         {% include 'partials/scoreboard_progress_bar.html.twig' with {contest: current_contest} %}
