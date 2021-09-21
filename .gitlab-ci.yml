@@ -20,6 +20,17 @@ include:
   - template: SAST.gitlab-ci.yml
   - template: License-Scanning.gitlab-ci.yml
 
+.db_config: &mysql_db
+  services:
+    - name: mysql
+      command: ["--default-authentication-plugin=mysql_native_password"]
+      alias: sqlserver
+
+.db_config: &maria_db
+  services:
+    - name: mariadb
+      alias: sqlserver
+
 .retry_config: &retry_job
   retry:
     max: 0 #Max is 2, set when gitlab is flacky
@@ -53,9 +64,36 @@ include:
   timeout: 30m
 # Due to the retry this will be worst case 3*timeout before the job fails
 
+.unit_job_template: &unit_job
+  stage: unit
+  image: domjudge/gitlabci:2.1
+  # Disabled for now as it drastically speeds up running unit tests and we don't use it yet
+  # before_script:
+  #   - apt-get update -yqq
+  #   - apt-get install php-xdebug -yqq
+  variables:
+    MYSQL_ROOT_PASSWORD: password
+    MARIADB_PORT_3306_TCP_ADDR: sqlserver
+  script:
+    - ./gitlab/unit-tests.sh
+  artifacts:
+    when: always
+    paths:
+      - unit-tests.xml
+      - coverage-html
+      - deprecation.txt
+    reports:
+      junit:
+        - unit-tests.xml
+  cache:
+    key: unit-tests
+    paths:
+      - lib/vendor/
+
 webstandard_check_role:
   <<: *matrix_retry_job
   <<: *short_job
+  <<: *maria_db
   parallel:
     matrix:
       - ROLE: public
@@ -68,8 +106,6 @@ webstandard_check_role:
         TEST: [w3cval]
   stage: accessibility
   image: domjudge/gitlabci:2.1
-  services:
-    - mariadb
   variables:
     MYSQL_ROOT_PASSWORD: password
   script:
@@ -101,39 +137,21 @@ check static codecov:
 run unit tests:
   <<: *retry_job
   <<: *normal_job
-  stage: unit
-  image: domjudge/gitlabci:2.1
-  # Disabled for now as it drastically speeds up running unit tests and we don't use it yet
-  # before_script:
-  #   - apt-get update -yqq
-  #   - apt-get install php-xdebug -yqq
-  services:
-    - mariadb
-  variables:
-    MYSQL_ROOT_PASSWORD: password
-  script:
-    - ./gitlab/unit-tests.sh
-  artifacts:
-    when: always
-    paths:
-      - unit-tests.xml
-      - coverage-html
-      - deprecation.txt
-    reports:
-      junit:
-        - unit-tests.xml
-  cache:
-    key: unit-tests
-    paths:
-      - lib/vendor/
+  <<: *maria_db
+  <<: *unit_job
+
+run unit tests (MySQL):
+  <<: *retry_job
+  <<: *normal_job
+  <<: *mysql_db
+  <<: *unit_job
 
 visual_pr:
   <<: *retry_job
   <<: *long_job
+  <<: *maria_db
   stage: visual_pre
   image: domjudge/gitlabci:2.1
-  services:
-    - mariadb
   variables:
     MYSQL_ROOT_PASSWORD: password
     DOCKER_HOST: tcp://docker:2375/
@@ -163,10 +181,9 @@ visual_pr:
 visual_main:
   <<: *retry_job
   <<: *long_job
+  <<: *maria_db
   stage: visual_pre
   image: domjudge/gitlabci:2.1
-  services:
-    - mariadb
   variables:
     MYSQL_ROOT_PASSWORD: password
     DOCKER_HOST: tcp://docker:2375/
@@ -232,23 +249,18 @@ visual_compare:
 
 integration_mysql:
   <<: *job_integration
+  <<: *mysql_db
   variables:
     MYSQL_ROOT_PASSWORD: password
     MARIADB_PORT_3306_TCP_ADDR: sqlserver
     MYSQL_REQUIRE_PRIMARY_KEY: 1
-  services:
-    - name: mysql
-      command: ["--default-authentication-plugin=mysql_native_password"]
-      alias: sqlserver
 
 integration_mariadb:
   <<: *job_integration
+  <<: *maria_db
   variables:
     MYSQL_ROOT_PASSWORD: password
     MARIADB_PORT_3306_TCP_ADDR: sqlserver
-  services:
-    - name: mariadb
-      alias: sqlserver
 
 phpcs_compatibility:
   <<: *tiny_job
