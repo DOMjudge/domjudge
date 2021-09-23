@@ -221,10 +221,10 @@ function rest_encode_file(string $file, $sizelimit = true) : string
 }
 
 // Both constants in microseconds
-const M = 1000*1000;
-const INITIAL_WAITTIME_µS =  100*1000;
-const MAXIMAL_WAITTIME_µS = 5000*1000;
-$waittime = INITIAL_WAITTIME_µS;
+const SECOND_IN_USEC = 1000*1000;
+const INITIAL_WAITTIME_USEC =  100*1000;
+const MAXIMAL_WAITTIME_USEC = 5000*1000;
+$waittime = INITIAL_WAITTIME_USEC;
 
 define('SCRIPT_ID', 'judgedaemon');
 define('CHROOT_SCRIPT', 'chroot-startstop.sh');
@@ -580,18 +580,18 @@ while (true) {
         }
         if (!$endpoint['waiting']) {
             $dosleep = false;
-            $waittime = INITIAL_WAITTIME_µS;
+            $waittime = INITIAL_WAITTIME_USEC;
             break;
         }
     }
     // Sleep only if everything is "waiting" and only if we're looking at the first endpoint again
     if ($dosleep && $currentEndpoint==0) {
-        if ($waittime>M) {
-            sleep((int)($waittime/M));
+        if ($waittime>SECOND_IN_USEC) {
+            sleep((int)($waittime/SECOND_IN_USEC));
         } else {
             usleep($waittime);
         }
-        $waittime = min($waittime*2,MAXIMAL_WAITTIME_µS);
+        $waittime = min($waittime*2,MAXIMAL_WAITTIME_USEC);
     }
 
     // Increment our currentEndpoint pointer
