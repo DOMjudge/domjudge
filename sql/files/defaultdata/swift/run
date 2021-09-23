@@ -53,5 +53,5 @@ fi
 # -O:                 Optimizations (default for speed)
 # -static-executable: Statically link the executable
 # -static-stdlib:     Statically link the Swift standard library
-swiftc -O -static-executable -static-stdlib -o "$DEST" $SOURCES
+swiftc -O -module-cache-path "./" -static-executable -static-stdlib -o "$DEST" $SOURCES
 exit $?
