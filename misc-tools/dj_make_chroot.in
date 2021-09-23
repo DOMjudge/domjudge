@@ -271,12 +271,16 @@ if [ "$DISTRO" = 'Debian' ]; then
 	if [ "x$RELEASE" = 'xtesting' -o "x$RELEASE" = 'xunstable' ]; then
 		DISABLE_SECURITY='#'
 	fi
+	SECURITY_RELEASE="$RELEASE-security"
+	if [ "x$RELEASE" = 'xjessie' -o "x$RELEASE" = 'xstretch' -o "x$RELEASE" = 'xbuster' ]; then
+		SECURITY_RELEASE="$RELEASE/updates"
+	fi
 cat > "$CHROOTDIR/etc/apt/sources.list" <<EOF
 # Release as specified or taken from host (incl. optional security repository):
 
 # $RELEASE
 deb $DEBMIRROR			$RELEASE		main
-${DISABLE_SECURITY}deb http://security.debian.org	$RELEASE/updates	main
+${DISABLE_SECURITY}deb http://security.debian.org	$SECURITY_RELEASE	main
 
 EOF
 fi
