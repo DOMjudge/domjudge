@@ -33,7 +33,7 @@ $(SECRETS):
 
 install-domserver:
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_etcdir) \
-		apache.conf nginx-conf nginx-conf-inner domserver-static.php domjudge-fpm.conf shadowing.yaml.dist
+		apache.conf nginx-conf nginx-conf-inner domserver-static.php domjudge-fpm.conf shadowing.yaml.dist docs.yaml.dist
 	$(INSTALL_PROG) -t $(DESTDIR)$(domserver_etcdir) \
 		genadminpassword gendbpasswords genrestapicredentials gensymfonysecret gen_all_secrets
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_etcdir) \
