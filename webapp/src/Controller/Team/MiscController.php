@@ -229,4 +229,12 @@ class MiscController extends BaseController
             'languages' => $languages,
         ]);
     }
+
+    /**
+     * @Route("/docs", name="team_docs")
+     */
+    public function docsAction(): Response
+    {
+        return $this->render('team/docs.html.twig');
+    }
 }

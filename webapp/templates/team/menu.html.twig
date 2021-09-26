@@ -29,6 +29,11 @@
             <li class="nav-item {% if current_route in ['team_scoreboard', 'team_team'] %}active{% endif %}">
                 <a class="nav-link" href="{{ path('team_scoreboard') }}"><i class="fas fa-list-ol"></i> Scoreboard</a>
             </li>
+            {% if doc_links is not empty %}
+                <li class="nav-item {% if current_route in ['team_docs'] %}active{% endif %}">
+                    <a class="nav-link" href="{{ path('team_docs') }}"><i class="fas fa-file-alt"></i> Docs</a>
+                </li>
+            {% endif %}
 
             {% if is_granted('ROLE_JURY') or is_granted('ROLE_BALLOON') %}
                 <li class="nav-item">

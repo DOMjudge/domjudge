@@ -716,6 +716,15 @@ class DOMJudgeService
     }
 
     /**
+     * Get the documentation links
+     * @return array
+     */
+    public function getDocLinks(): array
+    {
+        return $this->params->get('domjudge.doc_links');
+    }
+
+    /**
      * Get the directory used for storing cache files
      * @return string
      */

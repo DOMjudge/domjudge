@@ -1,0 +1,15 @@
+# This is an example configuration file for displaying documentation links in
+# the team interface.
+
+# This file should contain an array with items to show.
+
+  # Add a link to a local file under webapp/public/docs/
+- name: Team guide
+  link: ../docs/team.pdf
+  # Optional icon. See https://fontawesome.com/v5.15/icons?d=gallery&p=1&m=free
+  # for supported icons. Note: use full icon class, e.g. `fas fa-user`.
+  # Omit for no icon.
+  icon: fas fa-user
+  # Add a link to an external page.
+- name: C++ STL
+  link: https://www.cplusplus.com/reference/stl/
