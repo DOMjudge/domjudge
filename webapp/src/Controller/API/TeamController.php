@@ -12,10 +12,11 @@ use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Annotations as OA;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * @Rest\Route("/contests/{cid}/teams")
@@ -34,7 +35,12 @@ class TeamController extends AbstractRestController
      *     description="Returns all the teams for this contest",
      *     @OA\JsonContent(
      *         type="array",
-     *         @OA\Items(ref=@Model(type=Team::class))
+     *         @OA\Items(
+     *             allOf={
+     *                 @OA\Schema(ref=@Model(type=Team::class)),
+     *                 @OA\Schema(ref="#/components/schemas/Photo")
+     *             }
+     *         )
      *     )
      * )
      * @OA\Parameter(ref="#/components/parameters/idlist")
@@ -71,7 +77,12 @@ class TeamController extends AbstractRestController
      * @OA\Response(
      *     response="200",
      *     description="Returns the given team for this contest",
-     *     @Model(type=Team::class)
+     *     @OA\JsonContent(
+     *         allOf={
+     *             @OA\Schema(ref=@Model(type=Team::class)),
+     *             @OA\Schema(ref="#/components/schemas/Photo")
+     *         }
+     *     )
      * )
      * @OA\Parameter(ref="#/components/parameters/id")
      * @OA\Parameter(ref="#/components/parameters/strict")
@@ -79,6 +90,38 @@ class TeamController extends AbstractRestController
     public function singleAction(Request $request, string $id) : Response
     {
         return parent::performSingleAction($request, $id);
+    }
+
+    /**
+     * Get the photo for the given team
+     * @Rest\Get("/{id}/photo.jpg", name="team_photo")
+     * @OA\Response(
+     *     response="200",
+     *     description="Returns the given team photo in JPG format",
+     *     @OA\MediaType(mediaType="image/jpeg")
+     * )
+     * @OA\Parameter(ref="#/components/parameters/id")
+     */
+    public function photoAction(Request $request, string $id): Response
+    {
+        /** @var Team $team */
+        $team = $this->getQueryBuilder($request)
+            ->andWhere(sprintf('%s = :id', $this->getIdField()))
+            ->setParameter(':id', $id)
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        if ($team === null) {
+            throw new NotFoundHttpException(sprintf('Object with ID \'%s\' not found', $id));
+        }
+
+        $teamPhoto = $this->dj->assetPath($id, 'team', true);
+
+        if (!file_exists($teamPhoto)) {
+            throw new NotFoundHttpException('Team photo not found');
+        }
+
+        return static::sendBinaryFileResponse($request, $teamPhoto, 'image/jpeg');
     }
 
     /**

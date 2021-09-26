@@ -5,6 +5,7 @@ namespace App\Tests\Unit\Controller\API;
 use App\DataFixtures\Test\ExtendDemoPracticeSessionTimeFixture;
 use App\DataFixtures\Test\RemoveTeamFromDemoUserFixture;
 use App\DataFixtures\Test\SampleEventsFixture;
+use App\Entity\Contest;
 use Generator;
 
 class ScoreboardControllerTest extends BaseTest
@@ -21,6 +22,7 @@ class ScoreboardControllerTest extends BaseTest
         if ($removeTeamFromDemoUser) {
             $this->loadFixture(RemoveTeamFromDemoUserFixture::class);
         }
+        $contestId = $this->resolveEntityId(Contest::class, (string)$contestId);
         $url = "/contests/$contestId/scoreboard";
         $scoreboard = $this->verifyApiJsonResponse('GET', $url, $expectedAllowedAccess ? 200 : 404, $user);
         self::assertNotEmpty($scoreboard);

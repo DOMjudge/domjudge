@@ -14,7 +14,6 @@ use App\Entity\Testcase;
 use App\Entity\User;
 use App\Utils\Utils;
 use BadMethodCallException;
-use DateInterval;
 use Doctrine\Inflector\InflectorFactory;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\RouterInterface;
@@ -67,11 +66,6 @@ class CheckConfigService
      */
     protected $passwordEncoder;
 
-    /**
-     * @var int
-     */
-    protected $hashCost;
-
     public function __construct(
         bool $debug,
         EntityManagerInterface $em,
@@ -80,8 +74,7 @@ class CheckConfigService
         EventLogService $eventLogService,
         RouterInterface $router,
         ValidatorInterface $validator,
-        UserPasswordEncoderInterface $passwordEncoder,
-        int $hashCost
+        UserPasswordEncoderInterface $passwordEncoder
     ) {
         $this->debug           = $debug;
         $this->em              = $em;
@@ -91,7 +84,6 @@ class CheckConfigService
         $this->router          = $router;
         $this->validator       = $validator;
         $this->passwordEncoder = $passwordEncoder;
-        $this->hashCost        = $hashCost;
     }
 
     public function runAll() : array
@@ -114,7 +106,6 @@ class CheckConfigService
             'debugdisabled' => $this->checkDebugDisabled(),
             'tmpdirwritable' => $this->checkTmpdirWritable(),
             'hashtime' => $this->checkHashTime(),
-            'hashstrength' => $this->checkHashStrength(),
         ];
 
         $results['Configuration'] = $config;
@@ -129,7 +120,6 @@ class CheckConfigService
         $pl = [
             'problems' => $this->checkProblemsValidate(),
             'languages' => $this->checkLanguagesValidate(),
-            'judgability' => $this->checkProblemLanguageJudgability(),
         ];
 
         $results['Problems and languages'] = $pl;
@@ -229,11 +219,18 @@ class CheckConfigService
 
     public function checkMysqlSettings() : array
     {
-        $r = $this->em->getConnection()->fetchAll('SHOW variables WHERE Variable_name IN
-                        ("innodb_log_file_size", "max_connections", "max_allowed_packet", "tx_isolation")');
+        $r = $this->em->getConnection()->fetchAll(
+            'SHOW variables WHERE Variable_name IN
+                 ("innodb_log_file_size", "max_connections", "max_allowed_packet",
+                  "tx_isolation", "transaction_isolation")'
+        );
         $vars = [];
         foreach ($r as $row) {
             $vars[$row['Variable_name']] = $row['Value'];
+        }
+        # MySQL 8 has "transaction_isolation" instead of "tx_isolation".
+        if ( isset($vars['transaction_isolation']) ) {
+            $vars['tx_isolation'] = $vars['transaction_isolation'];
         }
         $max_inout_r = $this->em->getConnection()->fetchAll('SELECT GREATEST(MAX(LENGTH(input)),MAX(LENGTH(output))) as max FROM testcase_content');
         $max_inout = (int)reset($max_inout_r)['max'];
@@ -394,22 +391,6 @@ class CheckConfigService
             'desc' => sprintf('Hashing cost is reasonable (Did %d hashes).', $counter)];
     }
 
-    public function checkHashStrength() : array
-    {
-        $threshold = 7;
-        if ( $this->hashCost>$threshold ) {
-            return ['caption' => 'Hash cost',
-                'result' => 'O',
-                'desc' => "The User password hash cost is reasonable for accounts around 1 week."];
-        }
-        return ['caption' => 'Hash cost',
-            'result' => 'W',
-            'desc' => sprintf("The cost factor is %d or lower, this is appropriate when your user's passwords are in use for a
-                       week or less. If they live longer, please raise the cost factor and consider if the password
-                       length is reasonable safe for these users.", $threshold)];
-
-    }
-
     public function checkContestActive() : array
     {
         $contests = $this->dj->getCurrentContests();
@@ -425,7 +406,6 @@ class CheckConfigService
                         return 'c'.$contest->getCid() . ' (' . $contest->getShortname() . ')';
                     }, $contests))];
     }
-
 
     public function checkContestsValidate() : array
     {
@@ -597,57 +577,6 @@ class CheckConfigService
                     ($desc ?: 'No languages with problems found.')];
     }
 
-    public function checkProblemLanguageJudgability() : array
-    {
-        $judgehosts = $this->em->getRepository(Judgehost::class)->findBy(['active' => 1]);
-
-        foreach ($judgehosts as $judgehost) {
-            if ($judgehost->getRestriction() === null) {
-                return ['caption' => 'Problem, language and contest judgability',
-                    'result' => 'O',
-                    'desc' => sprintf("At least one judgehost (%s) is active and unrestricted.", $judgehost->getHostname())];
-            }
-        }
-
-        $languages = $this->em->getRepository(Language::class)->findAll();
-        $contests = $this->dj->getCurrentContests(null, true);
-
-        $desc = '';
-        $result = 'O';
-        foreach ($contests as $contest) {
-            foreach ($contest->getProblems() as $cp ) {
-                foreach ($languages as $lang) {
-                    if (!$lang->getAllowSubmit()) {
-                        continue;
-                    }
-                    $found1 = false;
-                    foreach ($judgehosts as $judgehost) {
-                        $rest = $judgehost->getRestriction();
-                        $rest_c = $rest->getContests();
-                        $rest_p = $rest->getProblems();
-                        $rest_l = $rest->getLanguages();
-                        if ((empty($rest_c) || in_array($contest->getCid(), $rest_c)) &&
-                            (empty($rest_p) || in_array($cp->getProbid(), $rest_p)) &&
-                            (empty($rest_l) || in_array($lang->getLangid(), $rest_l))) {
-                            $found1 = true;
-                            continue;
-                        }
-                    }
-                    if (!$found1) {
-                        $result = 'E';
-                        $desc .= sprintf("No active judgehost that allows combination c%s-p%s-%s\n",
-                            $contest->getCid(), $cp->getProbid(), $lang->getLangid());
-                    }
-                }
-            }
-        }
-        $desc = $desc ?: 'Found at least one judgehost for each combination of current/future contest, associated problem, enabled language';
-
-        return ['caption' => 'Problem, language and contest judgability',
-            'result' => $result,
-            'desc' => $desc];
-    }
-
     public function checkAffiliations() : array
     {
         $show_logos = $this->config->get('show_affiliation_logos');
@@ -705,7 +634,7 @@ class CheckConfigService
             if (count($teams) > 1) {
                 $result = 'W';
                 $desc .= sprintf("Team name '%s' in use by multiple teams: %s",
-                         $teamname, implode(',', $teams));
+                         $teamname, implode(',', $teams) . "\n");
             }
         }
         $desc = $desc ?: 'Every team name is unique';

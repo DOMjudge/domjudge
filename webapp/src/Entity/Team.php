@@ -140,7 +140,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface
     private $contests;
 
     /**
-     * @ORM\OneToMany(targetEntity="User", mappedBy="team")
+     * @ORM\OneToMany(targetEntity="User", mappedBy="team", cascade={"persist"})
      * @Serializer\Exclude()
      * @Assert\Valid()
      */
@@ -373,6 +373,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface
     public function addUser(User $user): Team
     {
         $this->users[] = $user;
+        $user->setTeam($this);
         return $this;
     }
 

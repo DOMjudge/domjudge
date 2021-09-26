@@ -2,6 +2,7 @@
 
 namespace App\Form\Type;
 
+use App\Entity\Role;
 use App\Entity\Team;
 use App\Entity\TeamAffiliation;
 use App\Entity\TeamCategory;
@@ -22,6 +23,8 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Form;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Intl\Countries;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Callback;
@@ -208,6 +211,21 @@ class UserRegistrationType extends AbstractType
                     'class' => 'btn btn-lg btn-primary btn-block',
                 ],
             ]);
+
+        // Make sure the user has the team role to make validation work
+        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) {
+            /** @var User $user */
+            $user = $event->getData();
+            /** @var Role $role */
+            $role = $this->em->createQueryBuilder()
+                ->from(Role::class, 'r')
+                ->select('r')
+                ->andWhere('r.dj_role = :team')
+                ->setParameter(':team', 'team')
+                ->getQuery()
+                ->getOneOrNullResult();
+            $user->addUserRole($role);
+        });
 
     }
 

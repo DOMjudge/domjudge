@@ -335,7 +335,7 @@ class RejudgingService
                     'UPDATE judgetask
                             SET valid = 0
                             WHERE jobid = :judgingid
-                            AND hostname IS NULL', [':judgingid' => $submission['judgingid']]);
+                            AND judgehostid IS NULL', [':judgingid' => $submission['judgingid']]);
                 $this->em->getConnection()->executeQuery(
                     'UPDATE judging
                             SET result = :aborted

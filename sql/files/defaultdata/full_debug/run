@@ -1,0 +1,14 @@
+#!/bin/sh
+# This is the default script to retrieve a full debug package. The basic
+# calling convention of these scripts is:
+#   ./script <working_dir> <output_file>
+# We chose to use tar here since it does work well with hardlinks (unlike zip)
+# and does compress large binaries with static arrays well.
+
+directory="$1"
+output_file="$2"
+
+dirname="$(dirname "$directory")"
+basename="$(basename "$directory")"
+
+tar czf "${output_file}" --one-file-system -C "${dirname}" "${basename}"

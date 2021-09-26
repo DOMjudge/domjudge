@@ -83,6 +83,11 @@ class ShadowDifferencesController extends BaseController
             return $this->redirectToRoute('jury_index');
         }
 
+        if (!$this->dj->getCurrentContest()) {
+            $this->addFlash('danger', 'Shadow differences need an active contest.');
+            return $this->redirectToRoute('jury_index');
+        }
+
         // Close the session, as this might take a while and we don't need the session below
         $this->session->save();
 

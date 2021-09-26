@@ -18,7 +18,6 @@ use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Annotations as OA;
 use Psr\Log\LoggerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -169,7 +168,9 @@ class GeneralInfoController extends AbstractFOSRestController
         $result = [];
         foreach ($contests as $contest) {
             $contestStats = $this->dj->getContestStats($contest);
-            $contestStats['cid'] = $contest->getCid();
+            $contestStats['cid'] =
+                $this->config->get('data_source') === DOMJudgeService::DATA_SOURCE_LOCAL
+                    ? $contest->getCid() : $contest->getExternalid();
             $result[] = $contestStats;
         }
 
@@ -322,17 +323,10 @@ class GeneralInfoController extends AbstractFOSRestController
         $flagFile = sprintf('%s/public/flags/%s/%s.svg', $this->dj->getDomjudgeWebappDir(), $size, $alpha2code);
 
         if (!file_exists($flagFile)) {
-            throw new NotFoundHttpException("country flag for $alpha3code not found");
+            throw new NotFoundHttpException("country flag for $alpha3code of size $size not found");
         }
 
-        $response = new BinaryFileResponse($flagFile, 200, [], true, null, true);
-        $response->headers->set('Content-Type', 'image/svg+xml');
-
-        if ($response->isNotModified($request)) {
-            $response->send();
-        }
-
-        return $response;
+        return AbstractRestController::sendBinaryFileResponse($request, $flagFile, 'image/svg+xml');
     }
 
     /**

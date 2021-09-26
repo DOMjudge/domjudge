@@ -1,11 +1,17 @@
 variables:
-  SAST_DEFAULT_ANALYZERS: "flawfinder, phpcs-security-audit, eslint, secrets"
+  SAST_EXCLUDED_ANALYZERS: "brakeman,kubesec,mobsf,nodejs-scan,pmd-apex,security-code-scan,sobelow,spotbugs"
 
 stages:
-  - test
+  - visual_pre
+  - integration
   - compare
-
+  - accessibility
+  - test
+  - unit
+  - style
+ 
 include:
+  - template: Security/Secret-Detection.gitlab-ci.yml
   - template: Dependency-Scanning.gitlab-ci.yml
   - template: SAST.gitlab-ci.yml
   - template: License-Scanning.gitlab-ci.yml
@@ -22,17 +28,25 @@ include:
     when:
       - always
 
+.clean_ordering: &clean_ordering
+  needs: []
+# These seem to be overwritten when a job actually specifies these
+
 .retry_time: &tiny_job
+  <<: *clean_ordering
   timeout: 3m
 
 .retry_time: &short_job
+  <<: *clean_ordering
   timeout: 7m
 
 .retry_time: &normal_job
+  <<: *clean_ordering
   timeout: 15m
 
 .retry_time: &long_job
-  timeout: 25m
+  <<: *clean_ordering
+  timeout: 30m
 # Due to the retry this will be worst case 3*timeout before the job fails
 
 webstandard_check_role:
@@ -41,14 +55,14 @@ webstandard_check_role:
   parallel:
     matrix:
       - ROLE: public
-        TEST: [w3cval,WCAG2A,WCAG2AA,Section508]
+        TEST: [w3cval,WCAG2A,WCAG2AA]
       - ROLE: team
-        TEST: [w3cval,WCAG2A,WCAG2AA,Section508]
+        TEST: [w3cval,WCAG2A,WCAG2AA]
       - ROLE: balloon
-        TEST: [w3cval,WCAG2A,WCAG2AA,Section508]
+        TEST: [w3cval,WCAG2A,WCAG2AA]
       - ROLE: jury
         TEST: [w3cval]
-  stage: test
+  stage: accessibility
   image: domjudge/gitlabci:2.1
   services:
     - mariadb
@@ -67,7 +81,7 @@ webstandard_check_role:
 check syntax:
   <<: *retry_job
   <<: *short_job
-  stage: test
+  stage: style
   image: domjudge/gitlabci:2.1
   script:
     - ./gitlab/syntax.sh
@@ -75,7 +89,7 @@ check syntax:
 check static codecov:
   <<: *retry_job
   <<: *tiny_job
-  stage: test
+  stage: style
   script:
     - curl -s https://codecov.io/bash > newcodecov
     - diff newcodecov gitlab/uploadcodecov.sh
@@ -83,7 +97,7 @@ check static codecov:
 run unit tests:
   <<: *retry_job
   <<: *normal_job
-  stage: test
+  stage: unit
   image: domjudge/gitlabci:2.1
   # Disabled for now as it drastically speeds up running unit tests and we don't use it yet
   # before_script:
@@ -112,7 +126,7 @@ run unit tests:
 visual_pr:
   <<: *retry_job
   <<: *long_job
-  stage: test
+  stage: visual_pre
   image: domjudge/gitlabci:2.1
   services:
     - mariadb
@@ -135,10 +149,10 @@ visual_pr:
       - html
       - wget.log
 
-visual_master:
+visual_main:
   <<: *retry_job
   <<: *long_job
-  stage: test
+  stage: visual_pre
   image: domjudge/gitlabci:2.1
   services:
     - mariadb
@@ -154,17 +168,17 @@ visual_master:
         ROLE: [none,jury,admin,balloon,team]
   script:
     - git fetch
-    - git checkout -B master origin/master
-    - git branch --set-upstream-to=origin/master master
+    - git checkout -B main origin/main
+    - git branch --set-upstream-to=origin/main main
     - git pull
     - git checkout $CI_COMMIT_SHA -- gitlab/visualpr.sh # Always compare with the same tests
     - git checkout $CI_COMMIT_SHA -- gitlab/default-nginx
     - git checkout $CI_COMMIT_SHA -- gitlab/visualreg.css
-    - ./gitlab/visualpr.sh master
+    - ./gitlab/visualpr.sh main
   artifacts:
     when: always
     paths:
-      - screenshotsmaster
+      - screenshotsmain
       - html
     
 visual_compare:
@@ -174,20 +188,19 @@ visual_compare:
   image: domjudge/gitlabci:2.1
   needs:
     - visual_pr
-    - visual_master
+    - visual_main
   script:
     - ./gitlab/visualcompare.sh
   artifacts:
     when: always
     paths:
-      - failingchanges
-      - predictedchanges
+      - visualchanges
       - addrem.log
 
 .job_template: &job_integration
   <<: *retry_job
   <<: *long_job
-  stage: test
+  stage: integration
   image: domjudge/gitlabci:2.1
   variables:
     MYSQL_ROOT_PASSWORD: password
@@ -224,7 +237,7 @@ integration_mariadb:
 
 phpcs_compatibility:
   <<: *tiny_job
-  stage: test
+  stage: style
   image: pipelinecomponents/php-codesniffer:latest
   before_script:
     - set -euxo pipefail
@@ -249,7 +262,7 @@ phpcs_compatibility:
 # This finds different problems from codesniffer
 php linter:
   <<: *tiny_job
-  stage: test
+  stage: style
   image: pipelinecomponents/php-linter:latest
   script:
     - ls
@@ -265,6 +278,7 @@ php linter:
 
 php-cs-fixer:
   <<: *tiny_job
+  stage: style
   image:
     name: cytopia/php-cs-fixer
     entrypoint: [""]
@@ -278,3 +292,10 @@ php-cs-fixer:
     - /usr/bin/php-cs-fixer fix --format=gitlab --dry-run --diff . > code-quality.json || true
     - cp code-quality.json code_quality_debug.json
 
+codespell:
+  <<: *tiny_job
+  stage: style
+  image: domjudge/gitlabci:2.1
+  script:
+    - pip install codespell
+    - python3 gitlab/codespell_gitlab.py

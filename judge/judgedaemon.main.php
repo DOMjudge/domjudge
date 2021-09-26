@@ -220,17 +220,19 @@ function rest_encode_file(string $file, $sizelimit = true) : string
     return base64_encode(dj_file_get_contents($file, $maxsize));
 }
 
-$waittime = 5;
+// Both constants in microseconds
+const SECOND_IN_USEC = 1000*1000;
+const INITIAL_WAITTIME_USEC =  100*1000;
+const MAXIMAL_WAITTIME_USEC = 5000*1000;
+$waittime = INITIAL_WAITTIME_USEC;
 
 define('SCRIPT_ID', 'judgedaemon');
-define('PIDFILE', RUNDIR.'/judgedaemon.pid');
 define('CHROOT_SCRIPT', 'chroot-startstop.sh');
 
 function usage()
 {
     echo "Usage: " . SCRIPT_ID . " [OPTION]...\n" .
         "Start the judgedaemon.\n\n" .
-        "  -d                daemonize after startup\n" .
         "  -n <id>           daemon number\n" .
         "  --diskspace-error send internal error on low diskspace\n" .
         "  -v                set verbosity to LEVEL (syslog levels)\n" .
@@ -430,9 +432,6 @@ if ($options===false) {
     echo "Error: parsing options failed.\n";
     usage();
 }
-if (isset($options['d'])) {
-    $options['daemon']  = $options['d'];
-}
 if (isset($options['v'])) {
     $options['verbose'] = $options['v'];
 }
@@ -471,7 +470,7 @@ if (isset($options['verbose'])) {
     if (preg_match('/^\d+$/', $options['verbose'])) {
         $verbose = $options['verbose'];
         if ($verbose >= LOG_DEBUG) {
-            // Also enable judging scipts debug output
+            // Also enable judging scripts debug output
             putenv('DEBUG=1');
         }
     } else {
@@ -552,15 +551,10 @@ if (!empty($options['e'])) {
 umask(0022);
 
 // Check basic prerequisites for chroot at judgehost startup
-logmsg(LOG_INFO, "√ Executing chroot script: '".CHROOT_SCRIPT." check'");
+logmsg(LOG_INFO, "🔏 Executing chroot script: '".CHROOT_SCRIPT." check'");
 system(LIBJUDGEDIR.'/'.CHROOT_SCRIPT.' check', $retval);
 if ($retval!==0) {
     error("chroot validation check exited with exitcode $retval");
-}
-
-// If all startup done, daemonize
-if (isset($options['daemon'])) {
-    daemonize(PIDFILE);
 }
 
 foreach ($endpoints as $id=>$endpoint) {
@@ -586,12 +580,18 @@ while (true) {
         }
         if (!$endpoint['waiting']) {
             $dosleep = false;
+            $waittime = INITIAL_WAITTIME_USEC;
             break;
         }
     }
     // Sleep only if everything is "waiting" and only if we're looking at the first endpoint again
     if ($dosleep && $currentEndpoint==0) {
-        sleep($waittime);
+        if ($waittime>SECOND_IN_USEC) {
+            sleep((int)($waittime/SECOND_IN_USEC));
+        } else {
+            usleep($waittime);
+        }
+        $waittime = min($waittime*2,MAXIMAL_WAITTIME_USEC);
     }
 
     // Increment our currentEndpoint pointer
@@ -742,21 +742,53 @@ while (true) {
     logmsg(LOG_INFO, "  Working directory: $workdir");
 
     if ($type == 'debug_info') {
-        // Retrieve full test case contents for now. Later this can be expanded to collect other debug info (e.g. a full
-        // judging package as well).
         if ($lastWorkdir !== null) {
             cleanup_judging($lastWorkdir);
             $lastWorkdir = null;
         }
         foreach ($row as $judgeTask) {
-            $testcasedir = $workdir . "/testcase" . sprintf('%05d', $judgeTask['testcase_id']);
-            request(
-                sprintf('judgehosts/add-debug-info/%s/%s', urlencode($myhost),
-                    urlencode((string)$judgeTask['judgetaskid'])),
-                'POST',
-                ['output_run' => rest_encode_file($testcasedir . '/program.out', false)],
-                false
-            );
+            if (isset($judgeTask['run_script_id'])) {
+                // Full debug package requested.
+                $run_config = dj_json_decode($judgeTask['run_config']);
+                $tmpfile = tempnam(TMPDIR, 'full_debug_package_');
+                list($runpath, $error) = fetch_executable(
+                    $workdirpath,
+                    'debug',
+                    $judgeTask['run_script_id'],
+                    $run_config['hash']
+                );
+                if (isset($error)) {
+                    // FIXME
+                    continue;
+                }
+
+                $debug_cmd = implode(' ', array_map('dj_escapeshellarg',
+                    [$runpath, $workdir, $tmpfile]));
+                system($debug_cmd, $retval);
+                // FIXME: check retval
+                
+                request(
+                    sprintf('judgehosts/add-debug-info/%s/%s', urlencode($myhost),
+                        urlencode((string)$judgeTask['judgetaskid'])),
+                    'POST',
+                    ['full_debug' => rest_encode_file($tmpfile, false)],
+                    false
+                );
+                unlink($tmpfile);
+
+                logmsg(LOG_INFO, "  ⇡ Uploading debug package of workdir $workdir.");
+            } else {
+                // Retrieving full team output for a particular testcase.
+                $testcasedir = $workdir . "/testcase" . sprintf('%05d', $judgeTask['testcase_id']);
+                request(
+                    sprintf('judgehosts/add-debug-info/%s/%s', urlencode($myhost),
+                        urlencode((string)$judgeTask['judgetaskid'])),
+                    'POST',
+                    ['output_run' => rest_encode_file($testcasedir . '/program.out', false)],
+                    false
+                );
+                logmsg(LOG_INFO, "  ⇡ Uploading full output of testcase $judgeTask[testcase_id].");
+            }
         }
         continue;
     }
@@ -813,7 +845,7 @@ while (true) {
 
     if ($lastWorkdir !== $workdir) {
         // create chroot environment
-        logmsg(LOG_INFO, "  √ Executing chroot script: '".CHROOT_SCRIPT." start'");
+        logmsg(LOG_INFO, "  🔒 Executing chroot script: '".CHROOT_SCRIPT." start'");
         system(LIBJUDGEDIR.'/'.CHROOT_SCRIPT.' start', $retval);
         if ($retval!==0) {
             error("chroot script exited with exitcode $retval");
@@ -829,6 +861,17 @@ while (true) {
     // Will be revoked again after this run finished.
     foreach ($row as $judgetask) {
         if (!judge($judgetask)) {
+            // Potentially return remaining outstanding judgetasks here.
+            $returnedJudgings = request('judgehosts', 'POST', 'hostname=' . urlencode($myhost), false);
+            if ($returnedJudgings !== NULL) {
+                $returnedJudgings = dj_json_decode($returnedJudgings);
+                foreach ($returnedJudgings as $jud) {
+                    $workdir = judging_directory($workdirpath, $jud);
+                    @chmod($workdir, 0700);
+                    logmsg(LOG_WARNING, "  🔙 Returned unfinished judging with jobid " . $jud['jobid'] .
+                        " in my name; given back unfinished runs from me.");
+                }
+            }
             break;
         }
     }
@@ -851,7 +894,7 @@ function registerJudgehost($myhost)
     $endpoint = &$endpoints[$endpointID];
 
     // Only try to register every 30s.
-    $now = now();
+    $now = time();
     if ($now - $endpoint['last_attempt'] < 30) {
         $endpoint['waiting'] = true;
         return;
@@ -934,7 +977,7 @@ function cleanup_judging(string $workdir) : void
     chmod($workdir, 0700);
 
     // destroy chroot environment
-    logmsg(LOG_INFO, "  √ Executing chroot script: '".CHROOT_SCRIPT." stop'");
+    logmsg(LOG_INFO, "  🔓 Executing chroot script: '".CHROOT_SCRIPT." stop'");
     system(LIBJUDGEDIR.'/'.CHROOT_SCRIPT.' stop', $retval);
     if ($retval!==0) {
         error("chroot script exited with exitcode $retval");
@@ -1037,6 +1080,7 @@ function compile(array $judgeTask, string $workdir, string $workdirpath, array $
         warning("compile script exited with exitcode $retval");
     }
 
+    $compile_output = '';
     if (is_readable($workdir . '/compile.out')) {
         $compile_output = dj_file_get_contents($workdir . '/compile.out', 50000);
     }
@@ -1067,7 +1111,6 @@ function compile(array $judgeTask, string $workdir, string $workdirpath, array $
 
         return false;
     }
-    logmsg(LOG_INFO, "  💻 Compilation: ($files[0]) '".$EXITCODES[$retval]."'");
 
     // What does the exitcode mean?
     if (! isset($EXITCODES[$retval])) {
@@ -1078,6 +1121,8 @@ function compile(array $judgeTask, string $workdir, string $workdirpath, array $
 
         return false;
     }
+
+    logmsg(LOG_INFO, "  💻 Compilation: ($files[0]) '".$EXITCODES[$retval]."'");
     $compile_success = ($EXITCODES[$retval]==='correct');
 
     // pop the compilation result back into the judging table
@@ -1272,6 +1317,7 @@ function judge(array $judgeTask): bool
         'hostname' => $myhost,
     );
 
+    $ret = true;
     if ($result === 'correct') {
         // Post result back asynchronously. PHP is lacking multi-threading, so
         // we just call ourselves again.
@@ -1285,20 +1331,23 @@ function judge(array $judgeTask): bool
             . ' >> /dev/null & ';
         shell_exec($cmd);
     } else {
-        request(
+        // This run was incorrect, only continue with the remaining judge tasks
+        // if we are told to do so.
+        $needsMoreWork = request(
             sprintf('judgehosts/add-judging-run/%s/%s', urlencode($myhost),
                 urlencode((string)$judgeTask['judgetaskid'])),
             'POST',
             $new_judging_run,
             false
         );
+        $ret = (bool)$needsMoreWork;
     }
 
-    logmsg(LOG_INFO, '  ' . ($result === 'correct' ? " \033[0;32m✔\033[0m" : " \033[1;31m✗\033[0m")
-        . ' ...done in ' . $runtime . 's, result: ' . $result);
+    logmsg(LOG_INFO, ' ' . ($result === 'correct' ? " \033[0;32m✔\033[0m" : " \033[1;31m✗\033[0m")
+        . '  ...done in ' . $runtime . 's, result: ' . $result);
 
     // done!
-    return true;
+    return $ret;
 }
 
 function fetchTestcase($workdirpath, $testcase_id, $judgetaskid): ?array

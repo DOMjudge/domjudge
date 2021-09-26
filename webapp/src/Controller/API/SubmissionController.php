@@ -9,6 +9,7 @@ use App\Entity\Problem;
 use App\Entity\Submission;
 use App\Entity\SubmissionFile;
 use App\Entity\Team;
+use App\Entity\User;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
@@ -230,12 +231,13 @@ class SubmissionController extends AbstractRestController
                     return "'$item'";
                 }, $requiredList);
                 throw new BadRequestHttpException(
-                    sprintf("One of the arguments %s is mandatory", implode(', ', $requiredListQuoted)));
+                    sprintf("One of the arguments %s is mandatory.", implode(', ', $requiredListQuoted)));
             }
         }
 
-        // By default, use the team of the user
-        $team = $this->dj->getUser()->getTeam();
+        // By default, use the user and team of the user
+        $user = $this->dj->getUser();
+        $team = $user->getTeam();
         if ($teamId = $request->request->get('team_id')) {
             $idField = $this->eventLogService->externalIdFieldForEntity(Team::class) ?? 'teamid';
             $method  = sprintf('get%s', ucfirst($idField));
@@ -244,38 +246,40 @@ class SubmissionController extends AbstractRestController
             if ($this->isGranted('ROLE_API_WRITER')) {
                 /** @var Contest $contest */
                 $contest = $this->em->getRepository(Contest::class)->find($this->getContestId($request));
-
-                // Load the team
-                $queryBuilder = $this->em->createQueryBuilder()
-                    ->from(Team::class, 't')
-                    ->select('t')
-                    ->leftJoin('t.category', 'tc')
-                    ->leftJoin('t.contests', 'c')
-                    ->leftJoin('tc.contests', 'cc')
-                    ->andWhere(sprintf('t.%s = :team', $idField))
-                    ->andWhere('t.enabled = 1')
-                    ->setParameter(':team', $teamId);
-
-                if (!$contest->isOpenToAllTeams()) {
-                    $queryBuilder
-                        ->andWhere('c.cid = :cid OR cc.cid = :cid')
-                        ->setParameter(':cid', $contest->getCid());
-                }
-
                 /** @var Team $team */
-                $team = $queryBuilder->getQuery()->getOneOrNullResult();
-
-                if (!$team) {
-                    throw new BadRequestHttpException(
-                        sprintf("Team %s not found or not enabled", $teamId));
-                }
+                $team = $this->dj->loadTeam($idField, $teamId, $contest);
+                $user = $team->getUsers()->first() ?: null;
             } elseif (!$team) {
-                throw new BadRequestHttpException(sprintf('User does not belong to a team'));
+                throw new BadRequestHttpException('User does not belong to a team.');
             } elseif ((string)call_user_func([$team, $method]) !== (string)$teamId) {
-                throw new BadRequestHttpException(sprintf('Can not submit for a different team'));
+                throw new BadRequestHttpException('Can not submit for a different team.');
             }
         } elseif (!$team) {
-            throw new BadRequestHttpException(sprintf('User does not belong to a team'));
+            throw new BadRequestHttpException('User does not belong to a team.');
+        }
+
+        if ($userId = $request->request->get('user_id')) {
+            // If the current user is an admin or API writer, allow it to specify the user
+            if ($this->isGranted('ROLE_API_WRITER')) {
+                // Load the user
+                /** @var User|null $user */
+                $user = $this->em->getRepository(User::class)->find($userId);
+
+                if (!$user) {
+                    throw new BadRequestHttpException("User not found.");
+                }
+                if (!$user->getEnabled()) {
+                    throw new BadRequestHttpException("User not enabled.");
+                }
+                if (!$user->getTeam()) {
+                    throw new BadRequestHttpException("User not linked to a team.");
+                }
+                if ($user->getTeam()->getTeamid() !== $team->getTeamid()) {
+                    throw new BadRequestHttpException("User not linked to provided team.");
+                }
+            } elseif ($user->getUserid() !== (int)$userId) {
+                throw new BadRequestHttpException('Can not submit for a different user.');
+            }
         }
 
         // Load the problem
@@ -296,7 +300,7 @@ class SubmissionController extends AbstractRestController
 
         if ($problem === null) {
             throw new BadRequestHttpException(
-                sprintf("Problem %s not found or not submittable", $data['problem']));
+                sprintf("Problem '%s' not found or not submittable.", $data['problem']));
         }
 
         // Load the language
@@ -313,7 +317,7 @@ class SubmissionController extends AbstractRestController
 
         if ($language === null) {
             throw new BadRequestHttpException(
-                sprintf("Language %s not found or not submittable", $data['language']));
+                sprintf("Language '%s' not found or not submittable.", $data['language']));
         }
 
         // Determine the entry point
@@ -332,21 +336,21 @@ class SubmissionController extends AbstractRestController
                 try {
                     $time = Utils::toEpochFloat($timeString);
                 } catch (Exception $e) {
-                    throw new BadRequestHttpException(sprintf('Can not parse time %s', $timeString));
+                    throw new BadRequestHttpException(sprintf("Can not parse time '%s'.", $timeString));
                 }
             } else {
-                throw new BadRequestHttpException('A team can not assign time');
+                throw new BadRequestHttpException('A team can not assign time.');
             }
         }
 
         if ($submissionId = $request->request->get('id')) {
             if ($request->isMethod('POST')) {
-                throw new BadRequestHttpException('Passing an ID is not supported for POST');
+                throw new BadRequestHttpException('Passing an ID is not supported for POST.');
             } elseif ($id !== $submissionId) {
-                throw new BadRequestHttpException('ID does not match URI');
+                throw new BadRequestHttpException('ID does not match URI.');
             } elseif ($this->isGranted('ROLE_API_WRITER')) {
                 if (preg_match(DOMJudgeService::EXTERNAL_IDENTIFIER_REGEX, $submissionId) !== 1) {
-                    throw new BadRequestHttpException(sprintf("ID %s is not valid", $submissionId));
+                    throw new BadRequestHttpException(sprintf("ID '%s' is not valid.", $submissionId));
                 }
 
                 // Check if we already have a submission with this ID
@@ -360,10 +364,10 @@ class SubmissionController extends AbstractRestController
                     ->getQuery()
                     ->getOneOrNullResult();
                 if ($existingSubmission !== null) {
-                    throw new BadRequestHttpException(sprintf("Submission with ID %s already exists", $submissionId));
+                    throw new BadRequestHttpException(sprintf("Submission with ID '%s' already exists.", $submissionId));
                 }
             } else {
-                throw new BadRequestHttpException('A team can not assign id');
+                throw new BadRequestHttpException('A team can not assign id.');
             }
         }
 
@@ -373,17 +377,17 @@ class SubmissionController extends AbstractRestController
             // CCS spec format, files are a ZIP, get them and transform them into a file object
             $filesList = $request->request->get('files');
             if (!is_array($filesList) || count($filesList) !== 1 || !isset($filesList[0]['data'])) {
-                throw new BadRequestHttpException("The 'files' attribute must be an array with a single item, containing an object with a base64 encoded data field");
+                throw new BadRequestHttpException("The 'files' attribute must be an array with a single item, containing an object with a base64 encoded data field.");
             }
 
             if (isset($filesList[0]['mime']) && $filesList[0]['mime'] !== 'application/zip') {
-                throw new BadRequestHttpException("The 'files[0].mime' attribute must be application/zip if provided");
+                throw new BadRequestHttpException("The 'files[0].mime' attribute must be application/zip if provided.");
             }
 
             $data        = $filesList[0]['data'];
             $decodedData = base64_decode($data, true);
             if ($decodedData === false) {
-                throw new BadRequestHttpException("The 'files[0].data' attribute is not base64 encoded");
+                throw new BadRequestHttpException("The 'files[0].data' attribute is not base64 encoded.");
             }
 
             $tmpDir = $this->dj->getDomjudgeTmpDir();
@@ -434,7 +438,7 @@ class SubmissionController extends AbstractRestController
 
         // Now submit the solution
         $submission = $this->submissionService->submitSolution(
-            $team, $problem, $problem->getContest(), $language,
+            $team, $user, $problem, $problem->getContest(), $language,
             $files, null, null, $entryPoint, $submissionId, $time, $message
         );
 

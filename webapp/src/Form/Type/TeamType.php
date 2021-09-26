@@ -3,9 +3,12 @@
 namespace App\Form\Type;
 
 use App\Entity\Contest;
+use App\Entity\Role;
 use App\Entity\Team;
 use App\Entity\TeamAffiliation;
 use App\Entity\TeamCategory;
+use App\Entity\User;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
@@ -24,6 +27,16 @@ use Symfony\Component\Validator\Constraints\Regex;
 
 class TeamType extends AbstractType
 {
+    /**
+     * @var EntityManagerInterface
+     */
+    protected $em;
+
+    public function __construct(EntityManagerInterface $em)
+    {
+        $this->em = $em;
+    }
+
     /**
      * @param FormBuilderInterface $builder
      * @param array                $options
@@ -119,6 +132,21 @@ class TeamType extends AbstractType
             if ($team && $team->getTeamid() !== null) {
                 $form->remove('addUserForTeam');
                 $form->remove('users');
+            }
+
+            // Make sure the user has the team role to make validation work
+            /** @var User|false $user */
+            $user = $team->getUsers()->first();
+            if ($user) {
+                /** @var Role $role */
+                $role = $this->em->createQueryBuilder()
+                    ->from(Role::class, 'r')
+                    ->select('r')
+                    ->andWhere('r.dj_role = :team')
+                    ->setParameter(':team', 'team')
+                    ->getQuery()
+                    ->getOneOrNullResult();
+                $user->addUserRole($role);
             }
         });
     }

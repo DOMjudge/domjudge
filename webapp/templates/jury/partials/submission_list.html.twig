@@ -18,6 +18,23 @@
 {% if submissions is empty %}
     <div class="alert alert-warning">No submissions</div>
 {% else %}
+    <div>
+        <span class="badge badge-info">{{ submissionCounts.total }} submitted</span>
+        <span class="badge badge-success">{{ submissionCounts.correct }} correct</span>
+
+        {% if submissionCounts.unverified > 0 %}
+            <span class="badge badge-warning">{{ submissionCounts.unverified }} unverified</span>
+        {% endif %}
+
+        {% if submissionCounts.ignored > 0 %}
+            <span class="badge badge-dark">{{ submissionCounts.ignored }} ignored</span>
+        {% endif %}
+
+        {% if submissionCounts.queued > 0 %}
+            <span class="badge badge-primary">{{ submissionCounts.queued }} queued</span>
+        {% endif %}
+    </div>
+
     <table class="data-table table table-hover table-striped table-sm submissions-table">
         <thead class="thead-light">
         <tr>
@@ -276,17 +293,4 @@
 
         </tbody>
     </table>
-
-    <p>
-        Total correct: {{ submissionCounts.correct }}, submitted: {{ submissionCounts.total }}
-        {%- if submissionCounts.unverified > 0 -%}
-            , unverified: {{ submissionCounts.unverified }}
-        {%- endif -%}
-        {%- if submissionCounts.ignored > 0 -%}
-            , ignored: {{ submissionCounts.ignored }}
-        {%- endif -%}
-        {%- if submissionCounts.queued > 0 -%}
-            , judgement pending: {{ submissionCounts.queued }}
-        {%- endif -%}
-    </p>
 {% endif %}

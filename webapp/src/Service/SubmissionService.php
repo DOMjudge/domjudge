@@ -14,6 +14,7 @@ use App\Entity\Submission;
 use App\Entity\SubmissionFile;
 use App\Entity\Team;
 use App\Entity\Testcase;
+use App\Entity\User;
 use App\Utils\FreezeData;
 use App\Utils\Utils;
 use Doctrine\DBAL\DBALException;
@@ -225,6 +226,12 @@ class SubmissionService
                 ->setParameter(':teamid', $restrictions['teamid']);
         }
 
+        if (isset($restrictions['userid'])) {
+            $queryBuilder
+                ->andWhere('s.user = :userid')
+                ->setParameter(':userid', $restrictions['userid']);
+        }
+
         if (isset($restrictions['categoryid'])) {
             $queryBuilder
                 ->andWhere('t.category = :categoryid')
@@ -355,6 +362,7 @@ class SubmissionService
      * validates it and puts it into the database. Additionally it
      * moves it to a backup storage.
      * @param Team|int            $team
+     * @param User|int|null       $user
      * @param ContestProblem|int  $problem
      * @param Contest|int         $contest
      * @param Language|string     $language
@@ -370,6 +378,7 @@ class SubmissionService
      */
     public function submitSolution(
         $team,
+        $user,
         $problem,
         $contest,
         $language,
@@ -383,6 +392,9 @@ class SubmissionService
     ) {
         if (!$team instanceof Team) {
             $team = $this->em->getRepository(Team::class)->find($team);
+        }
+        if ($user !== null && !$user instanceof User) {
+            $user = $this->em->getRepository(User::class)->find($user);
         }
         if (!$contest instanceof Contest) {
             $contest = $this->em->getRepository(Contest::class)->find($contest);
@@ -472,10 +484,21 @@ class SubmissionService
                 sprintf("Team '%d' not found in database or not enabled.", $team->getTeamid()));
         }
 
+        if ($user && !$this->dj->checkrole('jury') && !$user->getEnabled()) {
+            throw new BadRequestHttpException(
+                sprintf("User '%d' not found in database or not enabled.", $user->getUserid()));
+        }
+
         if (!$problem->getAllowSubmit()) {
             throw new BadRequestHttpException(
                 sprintf("Problem p%d not submittable [c%d].",
                         $problem->getProbid(), $contest->getCid()));
+        }
+
+        // If this method is called multiple times, we loose the user from Doctrine because of the internal API call
+        // to add the submission to the event table. To fix this, reload the user if this is the case.
+        if ($user && !$this->em->contains($user)) {
+            $user = $this->em->getRepository(User::class)->find($user->getUserid());
         }
 
         // Reindex array numerically to make sure we can index it in order
@@ -549,6 +572,7 @@ class SubmissionService
         $submission = new Submission();
         $submission
             ->setTeam($team)
+            ->setUser($user)
             ->setContest($contest)
             ->setProblem($problem->getProblem())
             ->setContestProblem($problem)

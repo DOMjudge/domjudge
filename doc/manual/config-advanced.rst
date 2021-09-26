@@ -252,28 +252,18 @@ jury program and receives data depending on its own output. The
 problem ``boolfind`` is included as an example interactive
 problem, see ``doc/examples/boolfind.pdf`` for the description.
 
-Usage is similar to compare programs: you can either create a program
-``run`` yourself, or use the provided wrapper script, which
-handles bi-directional communication between a jury program and the
-contestants' program on stdin/stdout (see the ``run``
-file in the ``boolfind_run`` executable).
+The calling syntax is::
 
-For the first case, the calling syntax that the program must accept is
-equal to the calling syntax of ``run_wrapper``, which is
-documented in that file. When using ``run_wrapper``, you should
-copy it to ``run`` in your executable archive.
-The jury must write a program named exactly ``runjury``,
-accepting the calling syntax::
+  /path/to/run_script/run <testdata.in> <testdata.ans> <feedbackdir> <run args> < <program.out>;
 
-  runjury <testdata.in> <program.out>
+Usage is similar to compare programs. DOMjudge wraps the run program to handle
+bi-directional communication between the run program and the contestants'
+program. Anything you write to stdout is forwarded to the contestants' program,
+anything the contestants' program writes is forwarded to your stdin.
 
-where the arguments are files to read input testdata from and write
-program output to, respectively. This program will communicate via
-stdin/stdout with the contestants' program. A special compare program
-must probably also be created, so the exact data written to
-``program.out`` is not important, as long as the
-correctness of the contestants' program can be deduced from the
-contents by the compare program.
+See the ``validate.h`` file in the ``boolfind_run`` executable for some
+convenience functions you might want to use when implementing your own run
+program.
 
 .. _printing:
 

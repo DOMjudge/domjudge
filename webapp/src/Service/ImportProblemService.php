@@ -449,9 +449,9 @@ class ImportProblemService
             asort($dataFiles);
 
             foreach ($dataFiles as $dataFile) {
-                $testIn      = $zip->getFromName(sprintf('data/%s/%s.in', $type, $dataFile));
-                $testOut     = $zip->getFromName(sprintf('data/%s/%s.ans', $type, $dataFile));
-                $imageFile = $imageType = $imageThumb = false;
+                $testInput  = $zip->getFromName(sprintf('data/%s/%s.in', $type, $dataFile));
+                $testOutput = $zip->getFromName(sprintf('data/%s/%s.ans', $type, $dataFile));
+                $imageFile  = $imageType = $imageThumb = false;
                 foreach (['png', 'jpg', 'jpeg', 'gif'] as $imgExtension) {
                     $imageFileName = sprintf('data/%s/%s.%s', $type, $dataFile, $imgExtension);
                     if (($imageFile = $zip->getFromName($imageFileName)) !== false) {
@@ -479,8 +479,8 @@ class ImportProblemService
                     }
                 }
 
-                $md5in  = md5($testIn);
-                $md5out = md5($testOut);
+                $md5in  = md5($testInput);
+                $md5out = md5($testOutput);
 
                 if ($problem->getProbid()) {
                     // Skip testcases that already exist identically
@@ -518,8 +518,8 @@ class ImportProblemService
                     ->setMd5sumOutput($md5out)
                     ->setOrigInputFilename($dataFile);
                 $testcaseContent
-                    ->setInput($testIn)
-                    ->setOutput($testOut);
+                    ->setInput($testInput)
+                    ->setOutput($testOutput);
                 if (($descriptionFile = $zip->getFromName(sprintf('data/%s/%s.desc', $type, $dataFile))) !== false) {
                     $testcase->setDescription($descriptionFile);
                 }
@@ -747,13 +747,18 @@ class ImportProblemService
                         $results = [$expectedResult];
                     }
                     $jury_team_id = $this->dj->getUser()->getTeam() ? $this->dj->getUser()->getTeam()->getTeamid() : null;
+                    $jury_user = $this->dj->getUser();
                     if (isset($submission_details[$path]['team'])) {
+                        /** @var Team|null $json_team */
                         $json_team = $this->em->getRepository(Team::class)
                             ->findOneBy(['name' => $submission_details[$path]['team']]);
                         if (isset($json_team)) {
                             $json_team_id = $json_team->getTeamid();
                             if (isset($json_team_id)) {
                                 $jury_team_id = $json_team_id;
+                                if (!$json_team->getUsers()->isEmpty()) {
+                                    $jury_user = $json_team->getUsers()->first();
+                                }
                             }
                         }
                     }
@@ -771,7 +776,7 @@ class ImportProblemService
                             ]
                         );
                         $submission     = $this->submissionService->submitSolution(
-                            $team, $contestProblem, $contest, $languageToUse, $filesToSubmit, null,
+                            $team, $jury_user, $contestProblem, $contest, $languageToUse, $filesToSubmit, null,
                             null, $entry_point, null, null, $submissionMessage
                         );
 

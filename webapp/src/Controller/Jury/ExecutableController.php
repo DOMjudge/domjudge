@@ -19,17 +19,13 @@ use Symfony\Component\Form\Exception\InvalidArgumentException;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
-use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Annotation\Route;
-use ZipArchive;
 
 /**
  * @Route("/jury/executables")
@@ -228,6 +224,7 @@ class ExecutableController extends BaseController
             'executable' => $executable,
             'default_compare' => (string)$this->config->get('default_compare'),
             'default_run' => (string)$this->config->get('default_run'),
+            'default full debug' => (string)$this->config->get('default_full_debug'),
         ]);
     }
 

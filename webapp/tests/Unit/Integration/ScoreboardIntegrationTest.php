@@ -506,7 +506,6 @@ class ScoreboardIntegrationTest extends KernelTestCase
             $judging
                 ->setSubmission($submission)
                 ->setContest($this->contest)
-                ->setJudgehost($this->judgehost)
                 ->setStarttime($submittime + 5)
                 ->setEndtime($submittime + 10)
                 ->setResult($verdict);

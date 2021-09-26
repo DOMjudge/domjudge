@@ -26,7 +26,7 @@ trap cleanup EXIT
 # Default directory where to build the chroot tree:
 CHROOTDIR="@judgehost_chrootdir@"
 
-# Fallback Debian and release (codename) to bootstrap (note: overriden right below):
+# Fallback Debian and release (codename) to bootstrap (note: overridden right below):
 DISTRO="Debian"
 RELEASE="stretch"
 
@@ -60,7 +60,7 @@ Creates a chroot environment with Java JRE support using the
 Debian or Ubuntu GNU/Linux distribution.
 
 Options:
-  -a <arch>    Machine archicture to use.
+  -a <arch>    Machine architecture to use.
   -d <dir>     Directory where to build the chroot environment.
   -D <distro>  Linux distribution to use: 'Debian' or 'Ubuntu'.
   -R <release> Release for the selected Linux distribution
@@ -133,7 +133,7 @@ if [ "$DISTRO" = 'Debian' ]; then
 INCLUDEDEBS="ca-certificates"
 
 # Packages to install after upgrade (space separated):
-INSTALLDEBS="gcc g++ make default-jdk-headless default-jre-headless pypy3 locales"
+INSTALLDEBS="gcc g++ make default-jdk-headless default-jre-headless pypy3 python3 locales"
 # For C# support add: mono-runtime libmono-system2.0-cil
 # However running mono within chroot still gives errors...
 
@@ -271,12 +271,16 @@ if [ "$DISTRO" = 'Debian' ]; then
 	if [ "x$RELEASE" = 'xtesting' -o "x$RELEASE" = 'xunstable' ]; then
 		DISABLE_SECURITY='#'
 	fi
+	SECURITY_RELEASE="$RELEASE-security"
+	if [ "x$RELEASE" = 'xjessie' -o "x$RELEASE" = 'xstretch' -o "x$RELEASE" = 'xbuster' ]; then
+		SECURITY_RELEASE="$RELEASE/updates"
+	fi
 cat > "$CHROOTDIR/etc/apt/sources.list" <<EOF
 # Release as specified or taken from host (incl. optional security repository):
 
 # $RELEASE
 deb $DEBMIRROR			$RELEASE		main
-${DISABLE_SECURITY}deb http://security.debian.org	$RELEASE/updates	main
+${DISABLE_SECURITY}deb http://security.debian.org	$SECURITY_RELEASE	main
 
 EOF
 fi

@@ -76,10 +76,6 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
             ->getQuery()
             ->getResult();
 
-        if (isset($ids) && count($objects) !== count($ids)) {
-            throw new NotFoundHttpException('One or more objects not found');
-        }
-
         if (empty($objects)) {
             return $this->renderData($request, []);
         }
@@ -99,9 +95,11 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
 
             $objects = [];
             foreach ($ordinalArray->getItems() as $item) {
-                /** @var ContestProblemWrapper $contestProblemWrapper */
-                $contestProblemWrapper = $item->getItem();
-                $contestProblem        = $contestProblemWrapper->getContestProblem();
+                /** @var ContestProblemWrapper|ContestProblem $contestProblem */
+                $contestProblem = $item->getItem();
+                if ($contestProblem instanceof ContestProblemWrapper) {
+                    $contestProblem = $contestProblem->getContestProblem();
+                }
                 $probid                = $this->getIdField() === 'p.probid' ? $contestProblem->getProbid() : $contestProblem->getExternalId();
                 if (in_array($probid, $ids)) {
                     $objects[] = $item;

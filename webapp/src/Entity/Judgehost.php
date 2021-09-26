@@ -14,7 +14,6 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Table(
  *     name="judgehost",
  *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Hostnames of the autojudgers"},
- *     indexes={@ORM\Index(name="restrictionid", columns={"restrictionid"})},
  *     uniqueConstraints={
  *         @ORM\UniqueConstraint(name="hostname", columns={"hostname"})
  *     })
@@ -30,6 +29,8 @@ class Judgehost
      * @ORM\Column(type="integer", name="judgehostid", length=4,
      *     options={"comment"="Judgehost ID","unsigned"=true},
      *     nullable=false)
+     * @Serializer\SerializedName("id")
+     * @Serializer\Type("string")
      */
     private $judgehostid;
 
@@ -59,17 +60,10 @@ class Judgehost
     private $polltime;
 
     /**
-     * @ORM\ManyToOne(targetEntity="JudgehostRestriction", inversedBy="judgehosts")
-     * @ORM\JoinColumn(name="restrictionid", referencedColumnName="restrictionid", onDelete="SET NULL")
+     * @ORM\OneToMany(targetEntity="JudgeTask", mappedBy="judgehost")
      * @Serializer\Exclude()
      */
-    private $restriction;
-
-    /**
-     * @ORM\OneToMany(targetEntity="Judging", mappedBy="judgehost")
-     * @Serializer\Exclude()
-     */
-    private $judgings;
+    private $judgetasks;
 
     /**
      * @var boolean
@@ -82,7 +76,7 @@ class Judgehost
 
     public function __construct()
     {
-        $this->judgings = new ArrayCollection();
+        $this->judgetasks = new ArrayCollection();
     }
 
     public function getJudgehostid(): int
@@ -130,31 +124,20 @@ class Judgehost
         return $this->polltime;
     }
 
-    public function setRestriction(?JudgehostRestriction $restriction = null): Judgehost
+    public function addJudgeTask(JudgeTask $judgeTask): Judgehost
     {
-        $this->restriction = $restriction;
+        $this->judgetasks[] = $judgeTask;
         return $this;
     }
 
-    public function getRestriction(): ?JudgehostRestriction
+    public function removeJudgeTask(JudgeTask $judgeTask)
     {
-        return $this->restriction;
+        $this->judgetasks->removeElement($judgeTask);
     }
 
-    public function addJudging(Judging $judging): Judgehost
+    public function getJudgeTasks(): Collection
     {
-        $this->judgings[] = $judging;
-        return $this;
-    }
-
-    public function removeJudging(Judging $judging)
-    {
-        $this->judgings->removeElement($judging);
-    }
-
-    public function getJudgings(): Collection
-    {
-        return $this->judgings;
+        return $this->judgetasks;
     }
 
     public function setHidden(bool $hidden): Judgehost

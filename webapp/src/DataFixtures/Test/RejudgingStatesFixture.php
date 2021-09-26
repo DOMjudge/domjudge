@@ -54,8 +54,6 @@ class RejudgingStatesFixture extends AbstractTestDataFixture
                 $team = $manager->getRepository(Team::class)->findOneBy(['name' => 'demo']);
                 /** @var Language $language */
                 $language = $manager->getRepository(Language::class)->find('java');
-                /** @var Judgehost $judgehost */
-                $judgehost = $manager->getRepository(Judgehost::class)->findOneBy(['hostname' => 'example-judgehost1']);
                 // A rejudging has both judgings todo and finished
                 for ($b = 0; $b<=1; $b++) {
                     for ($x = 0; $x < $rejudgingStage[2+$b]; $x++) {
@@ -79,7 +77,6 @@ class RejudgingStatesFixture extends AbstractTestDataFixture
                         if ($b === 1) {
                             $judging = $judging->setEndtime(Utils::toEpochFloat('2018-01-02 07:07:07'))
                                 ->setResult("wrong-answer")
-                                ->setJudgehost($judgehost)
                                 ->setStarttime(Utils::toEpochFloat('2018-01-02 07:07:07'));
                         }
                         $manager->persist($judging);

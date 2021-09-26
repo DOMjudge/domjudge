@@ -13,6 +13,7 @@ use App\Entity\Problem;
 use App\Entity\Rejudging;
 use App\Entity\Submission;
 use App\Entity\Team;
+use App\Entity\User;
 use App\Form\Type\RejudgingType;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
@@ -95,22 +96,23 @@ class RejudgingController extends BaseController
     public function indexAction(Request $request): Response
     {
         $curContest = $this->dj->getCurrentContest();
-        /** @var Rejudging[] $rejudgings */
-        $rejudgings = $this->em->createQueryBuilder()
+        $queryBuilder = $this->em->createQueryBuilder()
             ->select('r')
             ->from(Rejudging::class, 'r');
         if ($curContest !== NULL) {
-            $rejudgings = $rejudgings->join('r.submissions', 's')
-                ->andWhere('s.contest = :contest')
+            $queryBuilder = $queryBuilder->leftJoin(Judging::class, 'j', Join::WITH, 'j.rejudging = r')
+                ->andWhere('j.contest = :contest')
                 ->setParameter(':contest', $curContest->getCid())
                 ->distinct();
         }
-        $rejudgings = $rejudgings->orderBy('r.rejudgingid', 'DESC')
+        /** @var Rejudging[] $rejudgings */
+        $rejudgings = $queryBuilder->orderBy('r.rejudgingid', 'DESC')
             ->getQuery()->getResult();
 
         $table_fields = [
             'rejudgingid' => ['title' => 'ID', 'sort' => true],
             'reason' => ['title' => 'reason', 'sort' => true],
+            'repetitions' => ['title' => 'repetitions', 'sort' => true],
             'startuser' => ['title' => 'startuser', 'sort' => true],
             'finishuser' => ['title' => 'finishuser', 'sort' => true],
             'starttime' => ['title' => 'starttime', 'sort' => true],
@@ -126,14 +128,17 @@ class RejudgingController extends BaseController
         $timeFormat       = (string)$this->config->get('time_format');
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         $rejudgings_table = [];
+        /** @var Rejudging $rejudging */
         foreach ($rejudgings as $rejudging) {
             $rejudgingdata = [];
-            // Get whatever fields we can from the problem object itself
+            // Get whatever fields we can from the problem object itself.
             foreach ($table_fields as $k => $v) {
                 if ($propertyAccessor->isReadable($rejudging, $k)) {
                     $rejudgingdata[$k] = ['value' => $propertyAccessor->getValue($rejudging, $k)];
                 }
             }
+
+            $rejudgingdata['repetitions']['value'] = $rejudging->getRepeat() ?? '-';
 
             if ($rejudging->getStartUser()) {
                 $rejudgingdata['startuser']['value'] = $rejudging->getStartUser()->getName();
@@ -178,11 +183,34 @@ class RejudgingController extends BaseController
                 'link' => $this->generateUrl('jury_rejudging', ['rejudgingId' => $rejudging->getRejudgingid()]),
                 'cssclass' => $class,
                 'sort' => $sort_order,
+                'rejudgingid' => $rejudging->getRejudgingid(),
+                'repeat_rejudgingid' => $rejudging->getRepeatedRejudging() ? $rejudging->getRepeatedRejudging()->getRejudgingid() : null,
             ];
         }
 
+        // Filter the table to include only the rejudgings without repetition and for rejudgings with repetition the one
+        // with the maximal ID since that is the instance that can be cancelled / applied.
+        $maxid_per_repeatid = [];
+        foreach ($rejudgings_table as $row) {
+            if ($row['repeat_rejudgingid'] === null) {
+                continue;
+            }
+            $repeat_rejudgingid = $row['repeat_rejudgingid'];
+            if (isset($maxid_per_repeatid[$repeat_rejudgingid])) {
+                $maxid_per_repeatid[$repeat_rejudgingid] = max($maxid_per_repeatid[$repeat_rejudgingid], $row['rejudgingid']);
+            } else {
+                $maxid_per_repeatid[$repeat_rejudgingid] = $row['rejudgingid'];
+            }
+        }
+        $filtered_table = [];
+        foreach ($rejudgings_table as $row) {
+            if ($row['repeat_rejudgingid'] === null || $maxid_per_repeatid[$row['repeat_rejudgingid']] === $row['rejudgingid']) {
+                $filtered_table[] = $row;
+            }
+        }
+
         $twigData = [
-            'rejudgings' => $rejudgings_table,
+            'rejudgings' => $filtered_table,
             'table_fields' => $table_fields,
             'refresh' => [
                 'after' => 15,
@@ -312,12 +340,10 @@ class RejudgingController extends BaseController
         }
 
         $viewTypes = [0 => 'newest', 1 => 'unverified', 2 => 'unjudged', 3 => 'diff', 4 => 'all'];
-        $view      = array_search('diff', $viewTypes);
+        $defaultView = 'diff';
         if ($rejudging->getSubmissions()->count() <= 5) {
-            // Only a handful of submissions, display it right away.
+            // Only a handful of submissions, display all of them right away.
             $defaultView = 'all';
-        } else {
-            $defaultView = 'diff';
         }
         $view = array_search($defaultView, $viewTypes);
         if ($request->query->has('view')) {
@@ -497,8 +523,11 @@ class RejudgingController extends BaseController
                 'teams'      => array_map(function (Team $team) {
                     return $team->getTeamid();
                 }, $formData['teams'] ? $formData['teams']->toArray() : []),
+                'users'      => array_map(function (User $user) {
+                    return $user->getUserid();
+                }, $formData['users'] ? $formData['users']->toArray() : []),
                 'judgehosts' => array_map(function (Judgehost $judgehost) {
-                    return $judgehost->getHostname();
+                    return $judgehost->getJudgehostid();
                 }, $formData['judgehosts'] ? $formData['judgehosts']->toArray() : []),
                 'verdicts'   => array_values($formData['verdicts']),
                 'before'     => $formData['before'],
@@ -552,11 +581,20 @@ class RejudgingController extends BaseController
                         ->andWhere('s.team IN (:teams)')
                         ->setParameter(':teams', $teams);
                 }
+                $users = $data['users'] ?? [];
+                if (count($users)) {
+                    $queryBuilder
+                        ->andWhere('s.user IN (:users)')
+                        ->setParameter(':users', $users);
+                }
                 $judgehosts = $data['judgehosts'] ?? [];
                 if (count($judgehosts)) {
                     $queryBuilder
-                        ->andWhere('j.judgehost IN (:judgehosts)')
-                        ->setParameter(':judgehosts', $judgehosts);
+                        ->innerJoin('j.runs', 'jr')
+                        ->innerJoin('jr.judgetask', 'jt')
+                        ->andWhere('jt.judgehost IN (:judgehosts)')
+                        ->setParameter(':judgehosts', $judgehosts)
+                        ->distinct();
                 }
                 $verdicts = $data['verdicts'] ?? [];
                 if (count($verdicts)) {
@@ -659,11 +697,12 @@ class RejudgingController extends BaseController
         /* These are the tables that we can deal with. */
         $tablemap = [
             'contest' => 's.contest',
-            'judgehost' => 'j.judgehost',
+            'judgehost' => 'jt.judgehost',
             'language' => 's.language',
             'problem' => 's.problem',
             'submission' => 's.submitid',
             'team' => 's.team',
+            'user' => 's.user',
             'rejudging' => 'j2.rejudging',
         ];
 
@@ -695,7 +734,10 @@ class RejudgingController extends BaseController
                 ->leftJoin('j.submission', 's')
                 ->leftJoin('s.rejudging', 'r')
                 ->leftJoin('s.team', 't')
+                ->leftJoin('j.runs', 'jr')
+                ->leftJoin('jr.judgetask', 'jt')
                 ->select('j', 's', 'r', 't')
+                ->distinct()
                 ->andWhere('j.contest IN (:contests)')
                 ->andWhere('j.valid = 1')
                 ->andWhere(sprintf('%s = :id', $tablemap[$table]))
@@ -799,9 +841,10 @@ class RejudgingController extends BaseController
         $judgings = $this->em->createQueryBuilder()
             ->from(Judging::class, 'j')
             ->leftJoin('j.runs', 'jr')
+            ->leftJoin('jr.judgetask', 'jt')
             ->leftJoin('j.rejudging', 'r')
             ->leftJoin('j.submission', 's')
-            ->leftJoin('j.judgehost', 'jh')
+            ->leftJoin('jt.judgehost', 'jh')
             ->select('r.rejudgingid, j.judgingid', 's.submitid', 'jh.hostname', 'j.result',
                 'AVG(jr.runtime) AS runtime_avg', 'COUNT(jr.runtime) AS ntestcases',
                 '(j.endtime - j.starttime) AS duration'

@@ -48,7 +48,6 @@ parameters:
     domjudge.rundir: /output/run
     domjudge.tmpdir: /output/tmp
     domjudge.baseurl: http://localhost/domjudge
-    domjudge.submitclient_enabled: yes
 EOF
 
 # install all php dependencies

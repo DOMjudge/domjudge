@@ -1,7 +1,7 @@
 #!/bin/bash
 # Convenience script to import a contest (including metadata, teams and
 # problems) via the command line. Requires httpie to be installed and .netrc to
-# be set up. See also https://www.domjudge.org/docs/manual/master/import.html
+# be set up. See also https://www.domjudge.org/docs/manual/main/import.html
 
 set -euo pipefail
 

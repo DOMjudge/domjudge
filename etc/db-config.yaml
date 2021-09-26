@@ -1,4 +1,4 @@
-# Configuration settings that can be overriden using the `configuration` database table
+# Configuration settings that can be overridden using the `configuration` database table
 -   category: Scoring
     description: Options related to how scoring is handled.
     items:
@@ -127,6 +127,11 @@
             default_value: run
             public: false
             description: The script used to run submissions if no special run script specified.
+        -   name: default_full_debug
+            type: string
+            default_value: full_debug
+            public: false
+            description: The script used to compile a full debug package.
         -   name: enable_parallel_judging
             type: bool
             default_value: true

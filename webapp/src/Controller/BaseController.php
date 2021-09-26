@@ -256,26 +256,25 @@ abstract class BaseController extends AbstractController
     protected function buildDeleteTree(
         array $entities,
         array $relations,
-        EntityManagerInterface $entityManager,
-        EventLogService $eventLogService
+        EntityManagerInterface $entityManager
     ): array
     {
         $isError          = False;
-        $metadata         = $entityManager->getClassMetadata(get_class($entities[0]));
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         $inflector        = InflectorFactory::create()->build();
         $readableType     = str_replace('_', ' ', Utils::tableForEntity($entities[0]));
         $metadata         = $entityManager->getClassMetadata(get_class($entities[0]));
         $primaryKeyData   = [];
+        $messages         = [];
         foreach ($entities as $entity) {
             foreach ($metadata->getIdentifierColumnNames() as $primaryKeyColumn) {
                 $primaryKeyColumnValue = $propertyAccessor->getValue($entity, $primaryKeyColumn);
                 $primaryKeyData[]      = $primaryKeyColumnValue;
 
-                // Check all relationships
+                // Check all relationships.
                 foreach ($relations as $table => $tableRelations) {
                     foreach ($tableRelations as $column => $constraint) {
-                        // If the target class and column match, check if there are any entities with this value
+                        // If the target class and column match, check if there are any entities with this value.
                         if ($constraint['targetColumn'] === $primaryKeyColumn && $constraint['target'] === get_class($entity)) {
                             $count = (int)$entityManager->createQueryBuilder()
                                 ->from($table, 't')
@@ -331,11 +330,11 @@ abstract class BaseController extends AbstractController
                 }
             }
         }
-        return [$isError, $primaryKeyData];
+        return [$isError, $primaryKeyData, $messages];
     }
 
     /**
-     * Perform the delete for the given entities
+     * Perform delete operation for the given entities.
      *
      * @throws DBALException
      * @throws NoResultException
@@ -350,18 +349,21 @@ abstract class BaseController extends AbstractController
         array $entities,
         string $redirectUrl
     ) : Response {
-        // Assume that we only delete entities of the same class
+        // Assume that we only delete entities of the same class.
         foreach ($entities as $entity) {
             assert(get_class($entities[0]) === get_class($entity));
         }
-        // Determine all the relationships between all tables using Doctrine cache
+        // Determine all the relationships between all tables using Doctrine cache.
         $dir          = realpath(sprintf('%s/src/Entity', $kernel->getProjectDir()));
         $files        = glob($dir . '/*.php');
         $relations    = $this->getDatabaseRelations($files, $entityManager);
         $readableType = str_replace('_', ' ', Utils::tableForEntity($entities[0]));
         $messages     = [];
 
-        [$isError, $primaryKeyData] = $this->buildDeleteTree($entities, $relations, $entityManager, $eventLogService);
+        [$isError, $primaryKeyData, $deleteTreeMessages] = $this->buildDeleteTree($entities, $relations, $entityManager);
+        if (!empty($deleteTreeMessages)) {
+            $messages = $deleteTreeMessages;
+        }
 
         if ($request->isMethod('POST')) {
             if ($isError) {

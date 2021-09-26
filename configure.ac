@@ -248,66 +248,6 @@ AC_PROG_LN_S
 AC_PROG_MAKE_SET
 AC_PROG_MKDIR_P
 
-# Check for including optional libmagic.
-AC_CHECK_LIB(magic,magic_open,AC_SUBST(LIBMAGIC,[-lmagic]))
-
-# {{{ submitclient
-
-AC_ARG_ENABLE(submitclient,AS_HELP_STRING([--disable-submitclient],
-[enable submit client program (default: yes).
- This requires JSONcpp and cURL libraries and optionally
- libmagic for detecting submission of binary files.]))
-
-if test "x$enable_submitclient" != "xno"; then
-	AC_SUBST(SUBMITCLIENT_ENABLED,[yes])
-
-	# Check for libcURL and JSONcpp when submit is enabled.
-	AX_LIB_CURL([7.9.7],[],[
-		AC_MSG_ERROR([libcURL not found (required for submit client)])
-	])
-	save_CPPFLAGS="$CPPFLAGS"
-	CPPFLAGS="$CPPFLAGS $CURL_CFLAGS"
-	AC_CHECK_HEADERS([curl/curl.h],[],[
-		AC_MSG_ERROR([libcURL headers not found (required for submit client)])
-	])
-	CPPFLAGS="$save_CPPFLAGS"
-	# The 'curl-config --static-libs' option is accepted since 7.17.1
-	AC_SUBST(CURL_STATIC,"")
-	if test "x$enable_static_linking" = "xyes"; then
-		AX_COMPARE_VERSION([$curl_version],[ge],[7.17.1],[
-			AC_SUBST(CURL_STATIC,`curl-config --static-libs`)])
-	fi
-
-	# Check for JSONcpp library to decode language/extensions list from
-	# REST API (this also requires libcURL below).
-
-	# Note that under Debian the header files are installed under
-	# PREFIX/jsoncpp/json/json.h and not PREFIX/json/json.h since that
-	# conflicts with the libjson C library, so we check that first.
-	AC_LANG_PUSH([C++])
-	AC_CHECK_HEADERS([jsoncpp/json/json.h json/json.h],[found_jsoncpp_headers=yes; break;],[])
-	AS_IF([test "x$found_jsoncpp_headers" != "xyes"],
-		AC_MSG_ERROR([JSONcpp headers not found (required for submit client)]),
-		AC_SUBST(LIBJSONCPP,[-ljsoncpp]))
-	AC_LANG_POP([C++])
-
-fi
-# }}}
-
-# Check option to link statically against "special" libraries for
-# submit client.
-AC_ARG_ENABLE(static-linking,AS_HELP_STRING([--enable-static-linking],
-[enable static linking against libcurl, libmagic, libjsoncpp for 'submit'
- (default: no).]))
-
-if test "x$enable_static_linking" = "xyes"; then
-	AC_SUBST(STATIC_LINK_START,[-Wl,-Bstatic])
-	AC_SUBST(STATIC_LINK_END,  [-Wl,-Bdynamic])
-else
-	AC_SUBST(STATIC_LINK_START,[''])
-	AC_SUBST(STATIC_LINK_END,  [''])
-fi
-
 # Check option to build documentation. This option is provided to
 # allow disabling it.
 AC_ARG_ENABLE(doc-build,AS_HELP_STRING([--enable-doc-build],
@@ -372,12 +312,6 @@ echo " * runguard group......: $RUNGROUP"
 echo " * webserver group.....: $WEBSERVER_GROUP"
 echo ""
 echo " * website base URL....: $BASEURL"
-echo ""
-if test "x$SUBMITCLIENT_ENABLED" = xyes ; then
-   echo " * submitclient........: enabled, cURL version: $curl_version"
-else
-   echo " * submitclient........: disabled"
-fi
 echo ""
 echo -n " * documentation.......: AX_VAR_EXPAND($domjudge_docdir)"
 if test "x$DOC_BUILD_ENABLED" != xyes ; then

@@ -7,10 +7,11 @@ use App\Tests\Unit\BaseTest as BaseBaseTest;
 use Doctrine\ORM\EntityManagerInterface;
 use Generator;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
-use Symfony\Component\PropertyAccess\PropertyAccess;
 
 abstract class BaseTest extends BaseBaseTest
 {
+    protected static $rootEndpoints = ['contests','judgehosts','users'];
+    
     /** @var KernelBrowser */
     protected $client;
 
@@ -38,6 +39,21 @@ abstract class BaseTest extends BaseBaseTest
     protected $expectedObjects = [];
 
     /**
+     * If the class to check uses external ID's in non-local mode, set the class name
+     *
+     * @var string|null
+     */
+    protected $objectClassForExternalId = null;
+
+    /**
+     * When using a non local data source this is used to look up external ID's.
+     * Set it to an array where keys are fields and values are classes
+     *
+     * @var string[]
+     */
+    protected $entityReferences = [];
+
+    /**
      * Fill this array with ID's of object that should not be present
      *
      * @var string[]
@@ -59,8 +75,16 @@ abstract class BaseTest extends BaseBaseTest
             ->findOneBy(['shortname' => 'demo']);
     }
 
+    protected function removeTestContainer(): void
+    {
+        $container = __DIR__ . '/../../../../var/cache/test/srcApp_KernelTestDebugContainer.php';
+        if (file_exists($container)) {
+            unlink($container);
+        }
+    }
+
     /**
-     * Verify the given API URL produces the given status code and return the body as JSON
+     * Verify the given API URL produces the given status code and return the body
      *
      * @param string      $method   The HTTP method to use
      * @param string      $apiUri   The API URL to use. Will be prefixed with /api
@@ -69,9 +93,9 @@ abstract class BaseTest extends BaseBaseTest
      * @param mixed       $jsonData The JSON data to set as a body, if any
      * @param array       $files    The files to upload, if any
      *
-     * @return mixed The returned JSON data
+     * @return mixed The returned data
      */
-    protected function verifyApiJsonResponse(
+    protected function verifyApiResponse(
         string $method,
         string $apiUri,
         int $status,
@@ -99,7 +123,44 @@ abstract class BaseTest extends BaseBaseTest
         $response = $this->client->getResponse();
         $message = var_export($response, true);
         self::assertEquals($status, $response->getStatusCode(), $message);
-        return json_decode($response->getContent(), true);
+        return $response->getContent();
+    }
+
+    /**
+     * Verify the given API URL produces the given status code and return the body as JSON
+     *
+     * @param string      $method   The HTTP method to use
+     * @param string      $apiUri   The API URL to use. Will be prefixed with /api
+     * @param int         $status   The status code to expect
+     * @param string|null $user     The username to use. Currently only admin and demo are supported
+     * @param mixed       $jsonData The JSON data to set as a body, if any
+     * @param array       $files    The files to upload, if any
+     *
+     * @return mixed The returned JSON data
+     */
+    protected function verifyApiJsonResponse(
+        string $method,
+        string $apiUri,
+        int $status,
+        ?string $user = null,
+        $jsonData = null,
+        array $files = []
+    ) {
+        $response = $this->verifyApiResponse($method, $apiUri, $status, $user, $jsonData, $files);
+        return json_decode($response, true);
+    }
+
+    public function helperGetEndpointURL(string $apiEndpoint, ?string $id = null): string {
+        if (in_array($apiEndpoint, static::$rootEndpoints)) {
+            $url = "/$apiEndpoint";
+        } else {
+            $contestId = $this->getDemoContestId();
+            $url = "/contests/$contestId/$apiEndpoint";
+        }
+        if ($apiEndpoint === 'judgehosts') {
+            return is_null($id) ? $url : "$url?hostname=$id";
+        }
+        return is_null($id) ? $url : "$url/$id";
     }
 
     /**
@@ -110,12 +171,19 @@ abstract class BaseTest extends BaseBaseTest
         if (($apiEndpoint = $this->apiEndpoint) === null) {
             static::markTestSkipped('No endpoint defined');
         }
-        $contestId = $this->demoContest->getCid();
-        $objects = $this->verifyApiJsonResponse('GET', "/contests/$contestId/$apiEndpoint", 200, $this->apiUser);
+        $url = $this->helperGetEndpointURL($apiEndpoint);
+        $objects = $this->verifyApiJsonResponse('GET', $url, 200, $this->apiUser);
 
         static::assertIsArray($objects);
         foreach ($this->expectedObjects as $expectedObjectId => $expectedObject) {
+            foreach ($this->entityReferences as $field => $class) {
+                $expectedObject[$field] = $this->resolveEntityId($class, $expectedObject[$field]);
+            }
+
             $expectedObjectId = $this->resolveReference($expectedObjectId);
+            if ($this->objectClassForExternalId !== null) {
+                $expectedObjectId = $this->resolveEntityId($this->objectClassForExternalId, (string)$expectedObjectId);
+            }
             $object = null;
             foreach ($objects as $potentialObject) {
                 if ($potentialObject['id'] == $expectedObjectId) {
@@ -128,7 +196,7 @@ abstract class BaseTest extends BaseBaseTest
             static::assertEquals($expectedObjectId, $object['id']);
             foreach ($expectedObject as $key => $value) {
                 // null values can also be absent
-                static::assertEquals($value, $object[$key] ?? null);
+                static::assertEquals($value, $object[$key] ?? null, $key . ' has correct value');
             }
         }
 
@@ -153,11 +221,15 @@ abstract class BaseTest extends BaseBaseTest
         if (($apiEndpoint = $this->apiEndpoint) === null) {
             static::markTestSkipped('No endpoint defined');
         }
-        $contestId = $this->demoContest->getCid();
         $expectedObjectIds = array_map(function ($id) {
-            return $this->resolveReference($id);
+            $id = $this->resolveReference($id);
+            if ($this->objectClassForExternalId !== null) {
+                $id = $this->resolveEntityId($this->objectClassForExternalId, (string)$id);
+            }
+            return $id;
         }, array_keys($this->expectedObjects));
-        $objects = $this->verifyApiJsonResponse('GET', "/contests/$contestId/$apiEndpoint?" . http_build_query(['ids' => $expectedObjectIds]), 200, $this->apiUser);
+        $url = $this->helperGetEndpointURL($apiEndpoint);
+        $objects = $this->verifyApiJsonResponse('GET', $url . "?" . http_build_query(['ids' => $expectedObjectIds]), 200, $this->apiUser);
 
         // Verify we got exactly enough objects
         static::assertIsArray($objects);
@@ -185,9 +257,14 @@ abstract class BaseTest extends BaseBaseTest
         if (($apiEndpoint = $this->apiEndpoint) === null) {
             static::markTestSkipped('No endpoint defined');
         }
+        if (in_array($apiEndpoint, static::$rootEndpoints)) {
+            // We can not test this, since e.g. /contests always exists. Assert that true is true to not make the test risky
+            static::assertTrue(true);
+            return;
+        }
         // Note that the 42 here is a contest that doesn't exist
-        $respone = $this->verifyApiJsonResponse('GET', "/contests/42/$apiEndpoint", 404, $this->apiUser);
-        static::assertEquals('Contest with ID \'42\' not found', $respone['message']);
+        $response = $this->verifyApiJsonResponse('GET', "/contests/42/$apiEndpoint", 404, $this->apiUser);
+        static::assertEquals('Contest with ID \'42\' not found', $response['message']);
     }
 
     /**
@@ -198,8 +275,8 @@ abstract class BaseTest extends BaseBaseTest
         if (($apiEndpoint = $this->apiEndpoint) === null) {
             static::markTestSkipped('No endpoint defined');
         }
-        $contestId = $this->demoContest->getCid();
-        $response = $this->verifyApiJsonResponse('GET', "/contests/$contestId/$apiEndpoint?" . http_build_query(['ids' => 2]), 400, $this->apiUser);
+        $url = $this->helperGetEndpointURL($apiEndpoint);
+        $response = $this->verifyApiJsonResponse('GET', $url . "?" . http_build_query(['ids' => 2]), 400, $this->apiUser);
         static::assertEquals("'ids' should be an array of ID's to fetch", $response['message']);
     }
 
@@ -211,13 +288,13 @@ abstract class BaseTest extends BaseBaseTest
         if (($apiEndpoint = $this->apiEndpoint) === null) {
             static::markTestSkipped('No endpoint defined');
         }
-        $contestId = $this->demoContest->getCid();
 
         $expectedObjectIds = array_map(function ($id) {
             return $this->resolveReference($id);
         }, array_keys($this->expectedObjects));
         $ids = array_merge($expectedObjectIds, $this->expectedAbsent);
-        $response = $this->verifyApiJsonResponse('GET', "/contests/$contestId/$apiEndpoint?" . http_build_query(['ids' => $ids]), 404, $this->apiUser);
+        $url = $this->helperGetEndpointURL($apiEndpoint);
+        $response = $this->verifyApiJsonResponse('GET', $url . "?" . http_build_query(['ids' => $ids]), 404, $this->apiUser);
         static::assertEquals('One or more objects not found', $response['message']);
     }
 
@@ -228,17 +305,25 @@ abstract class BaseTest extends BaseBaseTest
      */
     public function testSingle($id, array $expectedProperties)
     {
+        foreach ($this->entityReferences as $field => $class) {
+            $expectedProperties[$field] = $this->resolveEntityId($class, $expectedProperties[$field]);
+        }
+
         $id = $this->resolveReference($id);
+        if ($this->objectClassForExternalId !== null) {
+            $id = $this->resolveEntityId($this->objectClassForExternalId, (string)$id);
+        }
         if (($apiEndpoint = $this->apiEndpoint) === null) {
             static::markTestSkipped('No endpoint defined');
         }
-        $contestId = $this->demoContest->getCid();
-        $object = $this->verifyApiJsonResponse('GET', "/contests/$contestId/$apiEndpoint/$id", 200, $this->apiUser);
+        $url = $this->helperGetEndpointURL($apiEndpoint,(string)$id);
+        $object = $this->verifyApiJsonResponse('GET', $url, 200, $this->apiUser);
         static::assertIsArray($object);
 
+        $object = is_array($object) && count($object)===1 ? $object[0] : $object;
         foreach ($expectedProperties as $key => $value) {
             // null values can also be absent
-            static::assertEquals($value, $object[$key] ?? null);
+            static::assertEquals($value, $object[$key] ?? null, $key . ' has correct value');
         }
     }
 
@@ -257,9 +342,16 @@ abstract class BaseTest extends BaseBaseTest
         if (($apiEndpoint = $this->apiEndpoint) === null) {
             static::markTestSkipped('No endpoint defined');
         }
+        if (in_array($apiEndpoint, static::$rootEndpoints)) {
+            static::markTestSkipped('Endpoint does not have contests prefix');
+        }
+
         // Note that the 42 here is a contest that doesn't exist
-        $respone = $this->verifyApiJsonResponse('GET', "/contests/42/$apiEndpoint/123", 404, $this->apiUser);
-        static::assertEquals('Contest with ID \'42\' not found', $respone['message']);
+        $url = "/contests/42/$apiEndpoint/123";
+        $message = 'Contest with ID \'42\' not found';
+
+        $response = $this->verifyApiJsonResponse('GET', $url, 404, $this->apiUser);
+        static::assertEquals($message, $response['message']);
     }
 
     /**
@@ -273,8 +365,8 @@ abstract class BaseTest extends BaseBaseTest
         if (($apiEndpoint = $this->apiEndpoint) === null) {
             static::markTestSkipped('No endpoint defined');
         }
-        $contestId = $this->demoContest->getCid();
-        $this->verifyApiJsonResponse('GET', "/contests/$contestId/$apiEndpoint/$id", 404, $this->apiUser);
+        $url = $this->helperGetEndpointURL($apiEndpoint,$id);
+        $this->verifyApiJsonResponse('GET', $url, 404, $this->apiUser);
     }
 
     public function provideSingleNotFound(): Generator
@@ -282,21 +374,5 @@ abstract class BaseTest extends BaseBaseTest
         foreach ($this->expectedAbsent as $id) {
             yield [$id];
         }
-    }
-
-    /**
-     * Resolve any references in the given ID
-     */
-    protected function resolveReference($id)
-    {
-        // If the object ID contains a :, it is a reference to a fixture item, so get it
-        if (is_string($id) && strpos($id, ':') !== false) {
-            $referenceObject = $this->fixtureExecutor->getReferenceRepository()->getReference($id);
-            $metadata = static::$container->get(EntityManagerInterface::class)->getClassMetadata(get_class($referenceObject));
-            $propertyAccessor = PropertyAccess::createPropertyAccessor();
-            return $propertyAccessor->getValue($referenceObject, $metadata->getSingleIdentifierColumnName());
-        }
-
-        return $id;
     }
 }

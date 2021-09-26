@@ -40,6 +40,7 @@ class ImmutableExecutable
     /**
      * @var ArrayCollection
      * @ORM\OneToMany(targetEntity="ExecutableFile", mappedBy="immutableExecutable")
+     * @ORM\OrderBy({"filename"="ASC"})
      * @Serializer\Exclude()
      */
     private $files;

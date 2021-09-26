@@ -4,6 +4,7 @@ namespace App\Tests\Unit\Controller\API;
 
 use App\DataFixtures\Test\RemoveTeamFromDemoUserFixture;
 use App\Entity\Clarification;
+use App\Entity\Problem;
 use Doctrine\ORM\EntityManagerInterface;
 use Generator;
 
@@ -35,6 +36,10 @@ class ClarificationControllerTest extends BaseTest
         ],
     ];
 
+    protected $entityReferences = [
+        'problem_id' => Problem::class,
+    ];
+
     protected $expectedAbsent = ['4242', 'nonexistent'];
 
     /**
@@ -42,7 +47,7 @@ class ClarificationControllerTest extends BaseTest
      */
     public function testAddNoAccess()
     {
-        $contestId = $this->demoContest->getCid();
+        $contestId = $this->getDemoContestId();
         $apiEndpoint = $this->apiEndpoint;
         $this->verifyApiJsonResponse('POST', "/contests/$contestId/$apiEndpoint", 401);
     }
@@ -54,7 +59,7 @@ class ClarificationControllerTest extends BaseTest
      */
     public function testAddInvalidData(string $user, array $dataToSend, string $expectedMessage)
     {
-        $contestId = $this->demoContest->getCid();
+        $contestId = $this->getDemoContestId();
         $apiEndpoint = $this->apiEndpoint;
         $method = isset($dataToSend['id']) ? 'PUT' : 'POST';
         $url = "/contests/$contestId/$apiEndpoint";
@@ -67,18 +72,18 @@ class ClarificationControllerTest extends BaseTest
 
     public function provideAddInvalidData(): Generator
     {
-        yield ['demo', [], "Argument 'text' is mandatory"];
-        yield ['demo', ['text' => 'This is a clarification', 'from_team_id' => '1'], "Can not create a clarification from a different team"];
-        yield ['demo', ['text' => 'This is a clarification', 'to_team_id' => '2'], "Can not create a clarification that is sent to a team"];
-        yield ['demo', ['text' => 'This is a clarification', 'problem_id' => '4'], "Problem 4 not found"];
-        yield ['demo', ['text' => 'This is a clarification', 'time' => '1234'], "A team can not assign time"];
-        yield ['demo', ['text' => 'This is a clarification', 'id' => '1234'], "A team can not assign id"];
-        yield ['demo', ['text' => 'This is a clarification', 'reply_to_id' => 'nonexistent'], "Clarification nonexistent not found"];
-        yield ['admin', ['text' => 'This is a clarification', 'from_team_id' => '2', 'to_team_id' => '2'], "Can not send a clarification from and to a team"];
-        yield ['admin', ['text' => 'This is a clarification', 'from_team_id' => '3'], "Team 3 not found or not enabled"];
-        yield ['admin', ['text' => 'This is a clarification', 'to_team_id' => '3'], "Team 3 not found or not enabled"];
-        yield ['admin', ['text' => 'This is a clarification', 'time' => 'this is not a time'], "Can not parse time this is not a time"];
-        yield ['admin', ['text' => 'This is a clarification', 'id' => '1'], "Clarification with ID 1 already exists"];
+        yield ['demo', [], "Argument 'text' is mandatory."];
+        yield ['demo', ['text' => 'This is a clarification', 'from_team_id' => '1'], "Can not create a clarification from a different team."];
+        yield ['demo', ['text' => 'This is a clarification', 'to_team_id' => '2'], "Can not create a clarification that is sent to a team."];
+        yield ['demo', ['text' => 'This is a clarification', 'problem_id' => '4'], "Problem '4' not found."];
+        yield ['demo', ['text' => 'This is a clarification', 'time' => '1234'], "A team can not assign time."];
+        yield ['demo', ['text' => 'This is a clarification', 'id' => '1234'], "A team can not assign id."];
+        yield ['demo', ['text' => 'This is a clarification', 'reply_to_id' => 'nonexistent'], "Clarification 'nonexistent' not found."];
+        yield ['admin', ['text' => 'This is a clarification', 'from_team_id' => '2', 'to_team_id' => '2'], "Can not send a clarification from and to a team."];
+        yield ['admin', ['text' => 'This is a clarification', 'from_team_id' => '3'], "Team with ID '3' not found in contest or not enabled."];
+        yield ['admin', ['text' => 'This is a clarification', 'to_team_id' => '3'], "Team with ID '3' not found in contest or not enabled."];
+        yield ['admin', ['text' => 'This is a clarification', 'time' => 'this is not a time'], "Can not parse time 'this is not a time'."];
+        yield ['admin', ['text' => 'This is a clarification', 'id' => '1'], "Clarification with ID '1' already exists."];
     }
 
     /**
@@ -86,10 +91,10 @@ class ClarificationControllerTest extends BaseTest
      */
     public function testSupplyIdInPost()
     {
-        $contestId = $this->demoContest->getCid();
+        $contestId = $this->getDemoContestId();
         $apiEndpoint = $this->apiEndpoint;
         $data = $this->verifyApiJsonResponse('POST', "/contests/$contestId/$apiEndpoint", 400, 'admin', ['text' => 'This is a clarification', 'id' => '1234']);
-        static::assertEquals('Passing an ID is not supported for POST', $data['message']);
+        static::assertEquals('Passing an ID is not supported for POST.', $data['message']);
     }
 
     /**
@@ -97,10 +102,10 @@ class ClarificationControllerTest extends BaseTest
      */
     public function testSupplyWrongIdInPut()
     {
-        $contestId = $this->demoContest->getCid();
+        $contestId = $this->getDemoContestId();
         $apiEndpoint = $this->apiEndpoint;
         $data = $this->verifyApiJsonResponse('PUT', "/contests/$contestId/$apiEndpoint/id1", 400, 'admin', ['text' => 'This is a clarification', 'id' => 'id2']);
-        static::assertEquals('ID does not match URI', $data['message']);
+        static::assertEquals('ID does not match URI.', $data['message']);
     }
 
     /**
@@ -110,11 +115,11 @@ class ClarificationControllerTest extends BaseTest
     {
         $this->loadFixture(RemoveTeamFromDemoUserFixture::class);
 
-        $contestId = $this->demoContest->getCid();
+        $contestId = $this->getDemoContestId();
         $apiEndpoint = $this->apiEndpoint;
         $data = $this->verifyApiJsonResponse('POST', "/contests/$contestId/$apiEndpoint", 400, 'demo', ['text' => 'This is some text']);
 
-        static::assertEquals('User does not belong to a team', $data['message']);
+        static::assertEquals('User does not belong to a team.', $data['message']);
     }
 
     /**
@@ -135,7 +140,10 @@ class ClarificationControllerTest extends BaseTest
         ?string $expectedTime // If known
     )
     {
-        $contestId = $this->demoContest->getCid();
+        if (isset($dataToSend['problem_id'])) {
+            $dataToSend['problem_id'] = $this->resolveEntityId(Problem::class, $dataToSend['problem_id']);
+        }
+        $contestId = $this->getDemoContestId();
         $apiEndpoint = $this->apiEndpoint;
         $method = isset($dataToSend['id']) ? 'PUT' : 'POST';
         $url = "/contests/$contestId/$apiEndpoint";
@@ -177,6 +185,9 @@ class ClarificationControllerTest extends BaseTest
         // Also load the clarification from the API, to see it now gets returned
         $clarificationFromApi = $this->verifyApiJsonResponse('GET', "/contests/$contestId/$apiEndpoint/$clarificationId", 200, 'admin');
         static::assertEquals($expectedBody, $clarificationFromApi['text'], 'Wrong body');
+        if ($expectedProblemId !== null) {
+            $expectedProblemId = $this->resolveEntityId(Problem::class, (string)$expectedProblemId);
+        }
         static::assertEquals($expectedProblemId, $clarificationFromApi['problem_id'], 'Wrong problem ID');
         static::assertEquals($expectedSenderId, $clarificationFromApi['from_team_id'], 'Wrong sender ID');
         static::assertEquals($expectedRecipientId, $clarificationFromApi['to_team_id'], 'Wrong recipient ID');

@@ -8,7 +8,6 @@ parameters:
     # Enable this to support removing time intervals from the contest.
     # This code is rarely tested and we discourage using it.
     removed_intervals: false
-    hashCost: 7
 
 services:
     # default configuration for services in *this* file
@@ -45,7 +44,6 @@ services:
         tags:
             - { name: doctrine.event_subscriber, connection: default }
 
-
     App\Logger\VarargsLogMessageProcessor:
         autowire: true
         tags:
@@ -60,12 +58,8 @@ services:
 
     Metadata\MetadataFactoryInterface: '@jms_serializer.metadata_factory'
 
-    # We need the configuration serivce to be public to be able to run two of the migrations
+    # We need the configuration service to be public to be able to run two of the migrations
     App\Service\ConfigurationService:
         public: true
         arguments:
             $configCache: '@config_cache_factory'
-
-    App\Service\CheckConfigService:
-        arguments:
-            $hashCost: '%hashCost%'

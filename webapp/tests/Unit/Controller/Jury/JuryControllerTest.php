@@ -25,10 +25,18 @@ abstract class JuryControllerTest extends BaseTest
     protected static $add               = '/add';
     protected static $edit              = '/edit';
     protected static $delete            = '/delete';
+    protected static $deleteEntities    = [];
+    protected static $deleteFixtures    = [];
     protected static $shortTag          = '';
-    protected static $addFormName       = '';
-    protected static $deleteExtra       = NULL;
-
+    protected static $addPlus           = null;
+    protected static $addForm           = '';
+    protected static $deleteExtra       = null;
+    protected static $addEntities       = [];
+    protected static $addEntitiesCount  = [];
+    protected static $defaultEditEntityName  = null;
+    protected static $specialFieldOnlyUpdate = [];
+    protected static $editEntitiesSkipFields = [];
+    
     public function __construct($name = null, array $data = [], $dataName = '')
     {
         parent::__construct($name, $data, $dataName);
@@ -157,6 +165,160 @@ abstract class JuryControllerTest extends BaseTest
         }
     }
 
+    public function helperCheckExistance(string $id, $value, array $element): void {
+        if (in_array($id, static::$addEntitiesShown)) {
+            $tmpValue = $element[$id];
+            if (is_bool($value)) {
+                $tmpValue = $value ? 'yes' : 'no';
+            }
+            self::assertSelectorExists('body:contains("' . $tmpValue . '")');
+        }
+        if (in_array($id, static::$addEntitiesCount)) {
+            self::assertSelectorExists('body:contains("' . count($element[$id]) . '")');
+        }
+    }
+
+    /**
+     * Test that admin can add a new entity for this controller
+     */
+    public function testCheckAddEntityAdmin(): void
+    {
+        $this->roles = ['admin'];
+        $this->logOut();
+        $this->logIn();
+        $this->verifyPageResponse('GET', static::$baseUrl, 200);
+        if (static::$add !== '') {
+            self::assertSelectorExists('a:contains(' . $this->addButton . ')');
+            foreach (static::$addEntities as $element) {
+                $formFields = [];
+                // First fill with default values, the 0th item of the array
+                // Overwrite with data to test with.
+                foreach ([static::$addEntities[0], $element] as $item) {
+                    foreach ($item as $id=>$field) {
+                        // Skip elements which we cannot set yet
+                        // We can not set checkboxes directly
+                        // We can not set the fields set by JS directly
+                        if (is_bool($field) || $id === static::$addPlus) {
+                            continue;
+                        }
+                        $formId = str_replace('.', '][', $id);
+                        $formFields[static::$addForm . $formId . "]"] = $field;
+                    }
+                }
+                $this->verifyPageResponse('GET', static::$baseUrl . static::$add, 200);
+                $button = $this->client->getCrawler()->selectButton('Save');
+                $form = $button->form($formFields, 'POST');
+                $formName = str_replace('[', '', static::$addForm);
+                // Get the underlying object to inject elements not currently in the DOM.
+                $rawValues = $form->getPhpValues();
+                foreach ([static::$addEntities[0], $element] as $item) {
+                    if (key_exists(static::$addPlus, $item)) {
+                        $rawValues[$formName . static::$addPlus . ']'] = $item[static::$addPlus];
+                    }
+                }
+                // Set checkboxes
+                foreach ([static::$addEntities[0], $element] as $item) {
+                    foreach ($item as $id => $field) {
+                        if (!is_bool($field)) {
+                            continue;
+                        }
+                        if ($field) {
+                            $form[$formName][$id]->tick();
+                        } else {
+                            $form[$formName][$id]->untick();
+                        }
+                    }
+                }
+                $this->client->submit($form);
+            }
+            $this->verifyPageResponse('GET', static::$baseUrl, 200);
+            foreach (static::$addEntities as $element) {
+                foreach ($element as $id=>$value) {
+                    if (is_array($value)) {
+                        if (in_array($id, static::$addEntitiesCount)) {
+                            self::assertSelectorExists('body:contains("' . count($element[$id]) . '")');
+                        } else {
+                            foreach ($value as $id2=>$value2) {
+                                if (is_array($value2)) {
+                                    $this->helperCheckExistance((string)$id, $value2, $element);
+                                }
+                            }
+                        }
+                    } else {
+                        $this->helperCheckExistance($id, $value, $element);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Test that admin can add edit an entity for this controller
+     * 
+     * @dataProvider provideEditEntities
+     */
+    public function testCheckEditEntityAdmin(string $identifier, array $formDataKeys, array $formDataValues): void
+    {
+        $this->roles = ['admin'];
+        $this->logOut();
+        $this->logIn();
+        $this->loadFixtures(static::$deleteFixtures);
+        $this->verifyPageResponse('GET', static::$baseUrl, 200);
+        if (static::$edit !== '') {
+            $this->client->followRedirects(true);
+            $crawler = $this->getCurrentCrawler();
+            foreach ($crawler->filter('a') as $node) {
+                if (strpos($node->nodeValue, $identifier) !== false) {
+                    $singlePageLink = $node->getAttribute('href');
+                }
+            }
+            $this->verifyPageResponse('GET', $singlePageLink, 200);
+            $crawler = $this->getCurrentCrawler();
+            foreach ($crawler->filter('a') as $node) {
+                 if (strpos($node->nodeValue, 'Edit') !== false) {
+                    $editLink = $node->getAttribute('href');
+                }
+            }
+            $this->verifyPageResponse('GET', $editLink, 200);
+            $crawler = $this->getCurrentCrawler();
+            foreach ($formDataKeys as $id => $key) {
+                $formFields[static::$addForm . $key . "]"] = $formDataValues[$id];
+            }
+            foreach ($formDataKeys as $id => $key) {
+                $formFields[static::$addForm . $key . "]"] = $formDataValues[$id];
+            }
+            $button = $this->client->getCrawler()->selectButton('Save');
+            $form = $button->form($formFields, 'POST');
+            $this->client->submit($form);
+            self::assertNotEquals($this->client->getResponse()->getStatusCode(),500);
+            $this->verifyPageResponse('GET', $singlePageLink, 200);
+            foreach ($formDataValues as $id=>$element) {
+                if (in_array($formDataKeys[$id], static::$addEntitiesShown)) {
+                    self::assertSelectorExists('body:contains("' . $element . '")');
+                }
+            }
+        }
+    }
+
+    public function provideEditEntities(): Generator
+    {
+        foreach (static::$addEntities as $row) {
+            $formdataKeys = [];
+            $formdataValues = [];
+            foreach (static::$addEntities[0] as $key=>$value) {
+                if (!in_array($key,static::$editEntitiesSkipFields)) {
+                    $formdataKeys[] = $key;
+                    // There are some special fields like passwords which we only update when set.
+                    if (in_array($key, static::$specialFieldOnlyUpdate)) {
+                        $value = '';
+                    }
+                    $formdataValues[] = $row[$key] ?? $value;
+                }
+            }
+            yield [static::$defaultEditEntityName, $formdataKeys, $formdataValues];
+        }
+    }
+
     /**
      * Test that the standard user can delete an entity
      *
@@ -167,21 +329,20 @@ abstract class JuryControllerTest extends BaseTest
         $this->roles = ['admin'];
         $this->logOut();
         $this->logIn();
+        $this->loadFixtures(static::$deleteFixtures);
         $this->verifyPageResponse('GET', static::$baseUrl, 200);
-        if (static::$delete !== '') {
-            // Find a CID we can delete
-            $em = self::$container->get('doctrine')->getManager();
-            $ent = $em->getRepository(static::$className)->findOneBy([$identifier => $entityShortName]);
-            self::assertSelectorExists('i[class*=fa-trash-alt]');
-            self::assertSelectorExists('body:contains("' . $entityShortName . '")');
-            $this->verifyPageResponse(
-                'GET',
-                static::$baseUrl . '/' . $ent->{static::$getIDFunc}() . static::$delete,
-                200
-            );
-            $this->client->submitForm('Delete', []);
-            self::assertSelectorNotExists('body:contains("' . $entityShortName . '")');
-        }
+        // Find a CID we can delete
+        $em = self::$container->get('doctrine')->getManager();
+        $ent = $em->getRepository(static::$className)->findOneBy([$identifier => $entityShortName]);
+        self::assertSelectorExists('i[class*=fa-trash-alt]');
+        self::assertSelectorExists('body:contains("' . $entityShortName . '")');
+        $this->verifyPageResponse(
+            'GET',
+            static::$baseUrl . '/' . $ent->{static::$getIDFunc}() . static::$delete,
+            200
+        );
+        $this->client->submitForm('Delete', []);
+        self::assertSelectorNotExists('body:contains("' . $entityShortName . '")');
     }
 
     /**
@@ -196,14 +357,14 @@ abstract class JuryControllerTest extends BaseTest
                 }
             }
         } else {
-            yield ['nothing', 'toDelete'];
+            self::markTestSkipped("No deletable entity.");
         }
     }
 
     public function testDeleteExtraEntity(): void
     {
         if (static::$deleteExtra !== NULL) {
-            if (static::$deleteExtra['fixture'] !== NULL) {
+            if (isset(static::$deleteExtra['fixture'])) {
                 $this->loadFixture(static::$deleteExtra['fixture']);
             }
             $this->verifyPageResponse('GET', static::$deleteExtra['pageurl'], 200);

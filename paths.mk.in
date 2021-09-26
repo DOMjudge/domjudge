@@ -26,9 +26,6 @@ CXXFLAGS = @CXXFLAGS@
 CPPFLAGS = @CPPFLAGS@
 LDFLAGS  = @LDFLAGS@ @LIBS@
 
-STATIC_LINK_START = @STATIC_LINK_START@
-STATIC_LINK_END   = @STATIC_LINK_END@
-
 EXEEXT = @EXEEXT@
 OBJEXT = .@OBJEXT@
 
@@ -38,25 +35,11 @@ MKDIR_P = @MKDIR_P@
 INSTALL = @INSTALL@
 @SET_MAKE@
 
-# Build submit client?
-SUBMITCLIENT_ENABLED = @SUBMITCLIENT_ENABLED@
-
 # Build documentation?
 DOC_BUILD_ENABLED = @DOC_BUILD_ENABLED@
 
 # libcgroup
 LIBCGROUP = @LIBCGROUP@
-
-# libmagic
-LIBMAGIC = @LIBMAGIC@
-
-# libJSONcpp
-LIBJSONCPP = @LIBJSONCPP@
-
-# libcURL
-CURL_CFLAGS = @CURL_CFLAGS@
-CURL_LIBS   = @CURL_LIBS@
-CURL_STATIC = @CURL_STATIC@
 
 # User:group file ownership of password files
 DOMJUDGE_USER   = @DOMJUDGE_USER@
@@ -167,7 +150,6 @@ define substconfigvars
 	-e 's,@RUNUSER[@],@RUNUSER@,g' \
 	-e 's,@RUNGROUP[@],@RUNGROUP@,g' \
 	-e 's,@BASEURL[@],@BASEURL@,g' \
-	-e 's,@SUBMITCLIENT_ENABLED[@],@SUBMITCLIENT_ENABLED@,g' \
 	> $@
 @chmod --reference=$< $@
 endef

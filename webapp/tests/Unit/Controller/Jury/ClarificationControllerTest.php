@@ -34,11 +34,11 @@ class ClarificationControllerTest extends BaseTest
     {
         $this->verifyPageResponse('GET', '/jury/clarifications/1', 200);
 
-        $pres = $this->getCurrentCrawler()->filter('pre')->extract(array('_text'));
+        $clarificationText = $this->getCurrentCrawler()->filter('pre')->extract(array('_text'));
         self::assertEquals('Can you tell me how to solve this problem?',
-                           $pres[0]);
+                           $clarificationText[0]);
         self::assertEquals("> Can you tell me how to solve this problem?\r\n\r\nNo, read the problem statement.",
-                           $pres[1]);
+                           $clarificationText[1]);
 
         $this->verifyLinkToURL('Example teamname (t2)',
                                'http://localhost/jury/teams/2');

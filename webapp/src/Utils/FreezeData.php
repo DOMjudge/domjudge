@@ -7,8 +7,6 @@ use App\Entity\Contest;
 /**
  * Class FreezeData
  *
- * This class is loosely based on lib/lib.misc.php:calcFreezeData()
- *
  * @package App\Utils
  */
 class FreezeData

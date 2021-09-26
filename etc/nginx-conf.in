@@ -48,7 +48,7 @@ server {
 # 	ssl_prefer_server_ciphers on;
 
 	# Strict-Transport-Security is not set by default since it will break
-	# instalations without a valid TLS certificate. Enable it if your
+	# installations without a valid TLS certificate. Enable it if your
 	# DOMjudge installation only runs with a valid TLS certificate.
 # 	add_header Strict-Transport-Security max-age=31556952;
 

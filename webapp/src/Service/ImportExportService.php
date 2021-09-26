@@ -937,15 +937,8 @@ class ImportExportService
             $teamCategory    = null;
             if (!empty($teamItem['team_affiliation']['shortname'])) {
                 // First look up if the affiliation already exists.
-                /** @var TeamAffiliation $teamAffiliation */
-                $teamAffiliation = $this->em->createQueryBuilder()
-                    ->from(TeamAffiliation::class, 'a')
-                    ->select('a')
-                    ->andWhere('a.externalid = :externalid')
-                    ->setParameter(':externalid', $teamItem['team_affiliation']['externalid'])
-                    ->getQuery()
-                    ->getOneOrNullResult();
-                if ($teamAffiliation === null) {
+                $teamAffiliation = $this->em->getRepository(TeamAffiliation::class)->findOneBy(['shortname' => $teamItem['team_affiliation']['shortname']]);
+                if (!$teamAffiliation) {
                     $teamAffiliation  = new TeamAffiliation();
                     $propertyAccessor = PropertyAccess::createPropertyAccessor();
                     foreach ($teamItem['team_affiliation'] as $field => $value) {
@@ -1090,11 +1083,14 @@ class ImportExportService
                 case 'team':
                     $roles[] = $teamRole;
                     // For now we assume we can find the teamid by parsing
-                    // the username and taking the largest suffix number.
+                    // the username and taking the number in the middle, i.e. we
+                    // allow any username in the form "abc" where a and c are arbitrary
+                    // strings that contain no numbers and b only contains numbers. The teamid
+                    // id is then "b".
                     // Note that https://ccs-specs.icpc.io/ccs_system_requirements#accountstsv
                     // assumes team accounts of the form "team-nnn" where
                     // nnn is a zero-padded team number.
-                    $teamId = preg_replace('/^[^0-9]*0*([0-9]+)$/', '\1', $line[2]);
+                    $teamId = preg_replace('/^[^0-9]*0*([0-9]+)[^0-9]*$/', '\1', $line[2]);
                     if (!preg_match('/^[0-9]+$/', $teamId)) {
                         $message = sprintf('cannot parse team id on line %d from "%s"', $l,
                                            $line[2]);
@@ -1125,6 +1121,7 @@ class ImportExportService
                     'plain_password' => $line[3],
                     'team' => $team,
                     'user_roles' => $roles,
+                    'ip_address' => $line[4] ?? null,
                 ],
                 'team' => $juryTeam,
             ];
@@ -1141,7 +1138,8 @@ class ImportExportService
                     $team = new Team();
                     $team
                         ->setName($accountItem['team']['name'])
-                        ->setCategory($accountItem['team']['category']);
+                        ->setCategory($accountItem['team']['category'])
+                        ->setMembers($accountItem['team']['members'] ?? null);
                     $this->em->persist($team);
                     $action = EventLogService::ACTION_CREATE;
                 } else {

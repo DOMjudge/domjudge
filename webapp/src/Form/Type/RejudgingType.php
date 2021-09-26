@@ -7,6 +7,7 @@ use App\Entity\Judgehost;
 use App\Entity\Language;
 use App\Entity\Problem;
 use App\Entity\Team;
+use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -100,6 +101,19 @@ class RejudgingType extends AbstractType
             'required' => false,
             'choice_label' => 'name',
             'choices' => [],
+        ]);
+        $builder->add('users', EntityType::class, [
+            'label' => 'User',
+            'class' => User::class,
+            'required' => false,
+            'multiple' => true,
+            'choice_label' => 'name',
+            'query_builder' => function (EntityRepository $er) {
+                return $er
+                    ->createQueryBuilder('u')
+                    ->where('u.enabled = 1')
+                    ->orderBy('u.name');
+            },
         ]);
         $builder->add('judgehosts', EntityType::class, [
             'multiple' => true,

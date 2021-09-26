@@ -4,7 +4,6 @@ namespace App\Controller\Jury;
 
 use App\Controller\BaseController;
 use App\Entity\Contest;
-use App\Entity\Role;
 use App\Entity\Team;
 use App\Entity\User;
 use App\Form\Type\TeamType;
@@ -429,20 +428,8 @@ class TeamController extends BaseController
                 // If we do not want to add a user, remove it again
                 $team->removeUser($user);
             } else {
-                // Otherwise, add the team role to it
-                /** @var Role $role */
-                $role = $this->em->createQueryBuilder()
-                    ->from(Role::class, 'r')
-                    ->select('r')
-                    ->andWhere('r.dj_role = :team')
-                    ->setParameter(':team', 'team')
-                    ->getQuery()
-                    ->getOneOrNullResult();
-                $user->addUserRole($role);
-                $user->setTeam($team);
-                // Also set the user's name to the team name
+                // Otherwise, set the user's name to the team name
                 $user->setName($team->getEffectiveName());
-                $this->em->persist($user);
             }
             $this->em->persist($team);
             $this->saveEntity($this->em, $this->eventLogService, $this->dj, $team, null, true);

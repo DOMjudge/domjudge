@@ -2,10 +2,12 @@
 
 namespace App\Tests\Unit\Controller\API;
 
+use App\DataFixtures\Test\AddMoreDemoUsersFixture;
 use App\DataFixtures\Test\EnableKotlinFixture;
 use App\DataFixtures\Test\RemoveTeamFromAdminUserFixture;
 use App\DataFixtures\Test\RemoveTeamFromDemoUserFixture;
 use App\DataFixtures\Test\SampleSubmissionsFixture;
+use App\Entity\Problem;
 use App\Entity\Submission;
 use App\Entity\SubmissionFile;
 use App\Service\DOMJudgeService;
@@ -37,16 +39,23 @@ class SubmissionControllerTest extends BaseTest
         ],
     ];
 
+    protected $entityReferences = [
+        'problem_id' => Problem::class,
+    ];
+
     protected $expectedAbsent = ['4242', 'nonexistent'];
 
-    protected static $fixtures = [SampleSubmissionsFixture::class];
+    protected static $fixtures = [
+        SampleSubmissionsFixture::class,
+        AddMoreDemoUsersFixture::class,
+    ];
 
     /**
      * Test that a non logged in user can not add a submission
      */
     public function testAddSubmissionNoAccess()
     {
-        $contestId = $this->demoContest->getCid();
+        $contestId = $this->getDemoContestId();
         $apiEndpoint = $this->apiEndpoint;
         $this->verifyApiJsonResponse('POST', "/contests/$contestId/$apiEndpoint", 401);
     }
@@ -58,7 +67,13 @@ class SubmissionControllerTest extends BaseTest
      */
     public function testAddInvalidData(string $user, array $dataToSend, string $expectedMessage)
     {
-        $contestId = $this->demoContest->getCid();
+        if (isset($dataToSend['problem_id'])) {
+            $dataToSend['problem_id'] = $this->resolveEntityId(Problem::class, (string)$dataToSend['problem_id']);
+        }
+        if (isset($dataToSend['user_id'])) {
+            $dataToSend['user_id'] = $this->resolveReference($dataToSend['user_id']);
+        }
+        $contestId = $this->getDemoContestId();
         $apiEndpoint = $this->apiEndpoint;
         $method = isset($dataToSend['id']) ? 'PUT' : 'POST';
         $url = "/contests/$contestId/$apiEndpoint";
@@ -71,23 +86,24 @@ class SubmissionControllerTest extends BaseTest
 
     public function provideAddInvalidData(): Generator
     {
-        yield ['demo', [], "One of the arguments 'problem', 'problem_id' is mandatory"];
-        yield ['demo', ['problem' => 1], "One of the arguments 'language', 'language_id' is mandatory"];
-        yield ['demo', ['problem_id' => 1], "One of the arguments 'language', 'language_id' is mandatory"];
-        yield ['demo', ['problem_id' => 4, 'language' => 'cpp'], "Problem 4 not found or not submittable"];
+        yield ['demo', [], "One of the arguments 'problem', 'problem_id' is mandatory."];
+        yield ['demo', ['problem' => 1], "One of the arguments 'language', 'language_id' is mandatory."];
+        yield ['demo', ['problem_id' => 1], "One of the arguments 'language', 'language_id' is mandatory."];
+        yield ['demo', ['problem_id' => 4, 'language' => 'cpp'], "Problem '4' not found or not submittable."];
         yield ['demo', ['problem_id' => 1, 'language' => 'cpp'], "No files specified."];
         yield ['demo', ['problem_id' => 1, 'language_id' => 'cpp'], "No files specified."];
-        yield ['demo', ['problem_id' => 1, 'language' => 'abc'], "Language abc not found or not submittable"];
-        yield ['demo', ['problem_id' => 1, 'language_id' => 'abc'], "Language abc not found or not submittable"];
-        yield ['demo', ['problem_id' => 1, 'language_id' => 'abc'], "Language abc not found or not submittable"];
-        yield ['demo', ['problem_id' => 1, 'language_id' => 'cpp', 'team_id' => 1], "Can not submit for a different team"];
-        yield ['demo', ['problem_id' => 1, 'language_id' => 'cpp', 'id' => '123'], "A team can not assign id"];
-        yield ['demo', ['problem_id' => 1, 'language_id' => 'cpp', 'time' => '2021-01-01T00:00:00'], "A team can not assign time"];
-        yield ['demo', ['problem_id' => 1, 'language_id' => 'cpp', 'files' => []], "The 'files' attribute must be an array with a single item, containing an object with a base64 encoded data field"];
+        yield ['demo', ['problem_id' => 1, 'language' => 'abc'], "Language 'abc' not found or not submittable."];
+        yield ['demo', ['problem_id' => 1, 'language_id' => 'abc'], "Language 'abc' not found or not submittable."];
+        yield ['demo', ['problem_id' => 1, 'language_id' => 'abc'], "Language 'abc' not found or not submittable."];
+        yield ['demo', ['problem_id' => 1, 'language_id' => 'cpp', 'team_id' => '1'], "Can not submit for a different team."];
+        yield ['demo', ['problem_id' => 1, 'language_id' => 'cpp', 'user_id' => 1], "Can not submit for a different user."];
+        yield ['demo', ['problem_id' => 1, 'language_id' => 'cpp', 'id' => '123'], "A team can not assign id."];
+        yield ['demo', ['problem_id' => 1, 'language_id' => 'cpp', 'time' => '2021-01-01T00:00:00'], "A team can not assign time."];
+        yield ['demo', ['problem_id' => 1, 'language_id' => 'cpp', 'files' => []], "The 'files' attribute must be an array with a single item, containing an object with a base64 encoded data field."];
         yield [
             'demo',
             ['problem_id' => 1, 'language_id' => 'cpp', 'files' => 'this is not an array'],
-            "The 'files' attribute must be an array with a single item, containing an object with a base64 encoded data field"
+            "The 'files' attribute must be an array with a single item, containing an object with a base64 encoded data field."
         ];
         yield [
             'demo',
@@ -100,7 +116,7 @@ class SubmissionControllerTest extends BaseTest
                     ['data' => 'aaa'],
                 ],
             ],
-            "The 'files' attribute must be an array with a single item, containing an object with a base64 encoded data field"
+            "The 'files' attribute must be an array with a single item, containing an object with a base64 encoded data field."
         ];
         yield [
             'demo',
@@ -112,7 +128,7 @@ class SubmissionControllerTest extends BaseTest
                     ['data' => '*&(^&*(^(&*(&*^'],
                 ],
             ],
-            "The 'files[0].data' attribute is not base64 encoded"
+            "The 'files[0].data' attribute is not base64 encoded."
         ];
         yield [
             'demo',
@@ -135,20 +151,24 @@ class SubmissionControllerTest extends BaseTest
                     ['data' => 'aaa', 'mime' => 'wrong'],
                 ],
             ],
-            "The 'files[0].mime' attribute must be application/zip if provided"
+            "The 'files[0].mime' attribute must be application/zip if provided."
         ];
-        yield ['admin', ['problem_id' => 1, 'language' => 'cpp', 'team_id' => 1], "No files specified."];
-        yield ['admin', ['problem_id' => 1, 'language' => 'cpp', 'team_id' => 3], "Team 3 not found or not enabled"];
-        yield ['admin', ['problem_id' => 1, 'language' => 'cpp', 'team_id' => 1, 'time' => 'this is not a time'], "Can not parse time this is not a time"];
+        yield ['admin', ['problem_id' => 1, 'language' => 'cpp', 'team_id' => '1'], "No files specified."];
+        yield ['admin', ['problem_id' => 1, 'language' => 'cpp', 'team_id' => '3'], "Team with ID '3' not found in contest or not enabled."];
+        yield ['admin', ['problem_id' => 1, 'language' => 'cpp', 'team_id' => '1', 'user_id' => 'doesnotexist'], "User not found."];
+        yield ['admin', ['problem_id' => 1, 'language' => 'cpp', 'team_id' => '1', 'user_id' => AddMoreDemoUsersFixture::class . ':seconddemo'], "User not linked to provided team."];
+        yield ['admin', ['problem_id' => 1, 'language' => 'cpp', 'team_id' => '1', 'user_id' => AddMoreDemoUsersFixture::class . ':thirddemo'], "User not enabled."];
+        yield ['admin', ['problem_id' => 1, 'language' => 'cpp', 'team_id' => '1', 'user_id' => AddMoreDemoUsersFixture::class . ':fourthdemo'], "User not linked to a team."];
+        yield ['admin', ['problem_id' => 1, 'language' => 'cpp', 'team_id' => '1', 'time' => 'this is not a time'], "Can not parse time 'this is not a time'."];
         yield [
             'admin',
             [
                 'problem_id'  => 1,
                 'language_id' => 'cpp',
-                'team_id'     => 1,
+                'team_id'     => '1',
                 'id'          => '$this is not valid$',
             ],
-            'ID $this is not valid$ is not valid',
+            "ID '\$this is not valid$' is not valid.",
         ];
     }
 
@@ -157,10 +177,10 @@ class SubmissionControllerTest extends BaseTest
      */
     public function testSupplyIdInPost()
     {
-        $contestId = $this->demoContest->getCid();
+        $contestId = $this->getDemoContestId();
         $apiEndpoint = $this->apiEndpoint;
-        $data = $this->verifyApiJsonResponse('POST', "/contests/$contestId/$apiEndpoint", 400, 'admin', ['problem_id' => 1, 'language_id' => 'cpp', 'id' => '123']);
-        static::assertEquals('Passing an ID is not supported for POST', $data['message']);
+        $data = $this->verifyApiJsonResponse('POST', "/contests/$contestId/$apiEndpoint", 400, 'admin', ['problem_id' => $this->resolveEntityId(Problem::class, '1'), 'language_id' => 'cpp', 'id' => '123']);
+        static::assertEquals('Passing an ID is not supported for POST.', $data['message']);
     }
 
     /**
@@ -168,10 +188,10 @@ class SubmissionControllerTest extends BaseTest
      */
     public function testSupplyWrongIdInPut()
     {
-        $contestId = $this->demoContest->getCid();
+        $contestId = $this->getDemoContestId();
         $apiEndpoint = $this->apiEndpoint;
-        $data = $this->verifyApiJsonResponse('PUT', "/contests/$contestId/$apiEndpoint/id1", 400, 'admin', ['problem_id' => 1, 'language_id' => 'cpp', 'id' => '123']);
-        static::assertEquals('ID does not match URI', $data['message']);
+        $data = $this->verifyApiJsonResponse('PUT', "/contests/$contestId/$apiEndpoint/id1", 400, 'admin', ['problem_id' => $this->resolveEntityId(Problem::class, '1'), 'language_id' => 'cpp', 'id' => '123']);
+        static::assertEquals('ID does not match URI.', $data['message']);
     }
 
     /**
@@ -181,9 +201,9 @@ class SubmissionControllerTest extends BaseTest
     {
         $this->loadFixture(EnableKotlinFixture::class);
 
-        $contestId = $this->demoContest->getCid();
+        $contestId = $this->getDemoContestId();
         $apiEndpoint = $this->apiEndpoint;
-        $data = $this->verifyApiJsonResponse('POST', "/contests/$contestId/$apiEndpoint", 400, 'demo', ['problem_id' => 1, 'language' => 'kotlin']);
+        $data = $this->verifyApiJsonResponse('POST', "/contests/$contestId/$apiEndpoint", 400, 'demo', ['problem_id' => $this->resolveEntityId(Problem::class, '1'), 'language' => 'kotlin']);
 
         static::assertEquals('Main class required, but not specified.', $data['message']);
     }
@@ -197,11 +217,11 @@ class SubmissionControllerTest extends BaseTest
     {
         $this->loadFixtures([RemoveTeamFromDemoUserFixture::class, RemoveTeamFromAdminUserFixture::class]);
 
-        $contestId = $this->demoContest->getCid();
+        $contestId = $this->getDemoContestId();
         $apiEndpoint = $this->apiEndpoint;
-        $data = $this->verifyApiJsonResponse('POST', "/contests/$contestId/$apiEndpoint", 400, $username, ['problem_id' => 1, 'language' => 'cpp']);
+        $data = $this->verifyApiJsonResponse('POST', "/contests/$contestId/$apiEndpoint", 400, $username, ['problem_id' => $this->resolveEntityId(Problem::class, '1'), 'language' => 'cpp']);
 
-        static::assertEquals('User does not belong to a team', $data['message']);
+        static::assertEquals('User does not belong to a team.', $data['message']);
     }
 
     public function provideMissingTeam(): Generator
@@ -223,6 +243,7 @@ class SubmissionControllerTest extends BaseTest
         bool $idIsExternal,
         int $expectedProblemId,
         int $expectedTeamId,
+        string $expectedUsername,
         string $expectedLanguageId,
         ?string $expectedSubmissionExternalId, // If known
         ?string $expectedTime, // If known
@@ -231,7 +252,16 @@ class SubmissionControllerTest extends BaseTest
     ) {
         $this->loadFixture(EnableKotlinFixture::class);
 
-        $contestId = $this->demoContest->getCid();
+        if (isset($dataToSend['problem'])) {
+            $dataToSend['problem'] = $this->resolveEntityId(Problem::class, (string)$dataToSend['problem']);
+        }
+        if (isset($dataToSend['problem_id'])) {
+            $dataToSend['problem_id'] = $this->resolveEntityId(Problem::class, (string)$dataToSend['problem_id']);
+        }
+        if (isset($dataToSend['user_id'])) {
+            $dataToSend['user_id'] = $this->resolveReference($dataToSend['user_id']);
+        }
+        $contestId = $this->getDemoContestId();
         $apiEndpoint = $this->apiEndpoint;
         $method = isset($dataToSend['id']) ? 'PUT' : 'POST';
         $url = "/contests/$contestId/$apiEndpoint";
@@ -266,6 +296,7 @@ class SubmissionControllerTest extends BaseTest
         static::assertInstanceOf(Submission::class, $submission);
         static::assertEquals($expectedProblemId, $submission->getProblem()->getProbid(), 'Wrong problem ID');
         static::assertEquals($expectedTeamId, $submission->getTeam()->getTeamid(), 'Wrong team ID');
+        static::assertEquals($expectedUsername, $submission->getUser()->getUsername(), 'Wrong user');
         static::assertEquals($expectedLanguageId, $submission->getLanguage()->getLangid(), 'Wrong language ID');
         if ($expectedSubmissionExternalId) {
             static::assertEquals($expectedSubmissionExternalId, $submission->getExternalid(), 'Wrong external submission ID');
@@ -282,7 +313,7 @@ class SubmissionControllerTest extends BaseTest
         static::assertEquals($expectedFiles, $submissionFiles, 'Wrong files');
 
         // Also load the submission from the API, to see it now gets returned
-        $contestId = $this->demoContest->getCid();
+        $contestId = $this->getDemoContestId();
         $apiEndpoint = $this->apiEndpoint;
         $submissionFromApi = $this->verifyApiJsonResponse('GET', "/contests/$contestId/$apiEndpoint/$submissionId", 200, 'admin');
     }
@@ -301,6 +332,7 @@ class SubmissionControllerTest extends BaseTest
             false,
             1,
             2,
+            'demo',
             'cpp',
             null,
             null,
@@ -323,6 +355,7 @@ class SubmissionControllerTest extends BaseTest
             false,
             1,
             2,
+            'demo',
             'cpp',
             null,
             null,
@@ -348,6 +381,7 @@ class SubmissionControllerTest extends BaseTest
             false,
             1,
             2,
+            'demo',
             'kt',
             null,
             null,
@@ -366,6 +400,7 @@ class SubmissionControllerTest extends BaseTest
             false,
             1,
             2,
+            'demo',
             'cpp',
             null,
             null,
@@ -389,6 +424,7 @@ class SubmissionControllerTest extends BaseTest
             false,
             2,
             2,
+            'demo',
             'java',
             null,
             null,
@@ -403,13 +439,34 @@ class SubmissionControllerTest extends BaseTest
             [
                 'problem_id'  => 1,
                 'language_id' => 'cpp',
-                'team_id'     => 1,
+                'team_id'     => '2',
             ],
             ['main.cpp' => '// No content'],
             [],
             false,
             1,
+            2,
+            'demo',
+            'cpp',
+            null,
+            null,
+            ['main.cpp' => '// No content'],
+        ];
+        // Submit as admin under a different user ID
+        yield [
+            'admin',
+            [
+                'problem_id'  => 1,
+                'language_id' => 'cpp',
+                'team_id'     => '2',
+                'user_id'     => AddMoreDemoUsersFixture::class . ':seconddemo',
+            ],
+            ['main.cpp' => '// No content'],
+            [],
+            false,
             1,
+            2,
+            'seconddemo',
             'cpp',
             null,
             null,
@@ -421,7 +478,7 @@ class SubmissionControllerTest extends BaseTest
             [
                 'problem_id'  => 1,
                 'language_id' => 'cpp',
-                'team_id'     => 1,
+                'team_id'     => '1',
                 'id'          => 'myextid123',
             ],
             ['main.cpp' => '// No content'],
@@ -429,6 +486,7 @@ class SubmissionControllerTest extends BaseTest
             true,
             1,
             1,
+            'admin',
             'cpp',
             'myextid123',
             null,
@@ -440,7 +498,7 @@ class SubmissionControllerTest extends BaseTest
             [
                 'problem_id'  => 1,
                 'language_id' => 'cpp',
-                'team_id'     => 1,
+                'team_id'     => '1',
                 'time'        => '2020-01-01T12:34:56',
             ],
             ['main.cpp' => '// No content'],
@@ -448,6 +506,7 @@ class SubmissionControllerTest extends BaseTest
             false,
             1,
             1,
+            'admin',
             'cpp',
             null,
             '2020-01-01T12:34:56.000+00:00',

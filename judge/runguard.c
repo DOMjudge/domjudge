@@ -364,7 +364,7 @@ Run COMMAND with restrictions.\n\
   -e, --stderr=FILE      redirect COMMAND stderr output to FILE\n\
   -s, --streamsize=SIZE  truncate COMMAND stdout/stderr streams at SIZE kB\n\
   -E, --environment      preserve environment variables (default only PATH)\n\
-  -V, --variable         add additonal environment variables (in form KEY=VALUE;KEY2=VALUE2)\n\
+  -V, --variable         add additional environment variables (in form KEY=VALUE;KEY2=VALUE2)\n\
   -M, --outmeta=FILE     write metadata (runtime, exitcode, etc.) to FILE\n");
 	printf("\
   -v, --verbose          display some extra warnings and information\n\

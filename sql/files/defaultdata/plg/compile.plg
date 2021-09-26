@@ -41,11 +41,11 @@ domjudge_compile([Source,Dest]) :-
     ),
 
     % Create the executable
-    qsave_program(Dest, [ goal((main,halt)), % We should execute main and then exit succesfully
-                          toplevel(halt(1)), % If not, we shoult exit with exit code 1
+    qsave_program(Dest, [ goal((main,halt)), % We should execute main and then exit successfully
+                          toplevel(halt(1)), % If not, we should exit with exit code 1
                           stand_alone(true) ]),
 
-    % Exit succesfully
+    % Exit successfully
     halt.
 
 % If previous case is not matched we apparently got a different number of arguments.

@@ -4,8 +4,6 @@ namespace App\Controller\Jury;
 
 use App\Controller\BaseController;
 use App\Doctrine\DBAL\Types\InternalErrorStatusType;
-use App\Entity\ContestProblem;
-use App\Entity\Executable;
 use App\Entity\InternalError;
 use App\Entity\Judgehost;
 use App\Entity\Problem;
@@ -118,7 +116,7 @@ class InternalErrorController extends BaseController
                 break;
             case 'judgehost':
                 // Judgehosts get disabled by their hostname, so we need to look it up here
-                $judgehost    = $this->em->getRepository(Judgehost::class)->find($disabled['hostname']);
+                $judgehost    = $this->em->getRepository(Judgehost::class)->findOneBy(['hostname' => $disabled['hostname']]);
                 $affectedLink = $this->generateUrl('jury_judgehost', ['judgehostid' => $judgehost->getJudgehostid()]);
                 $affectedText = $disabled['hostname'];
                 break;

@@ -4,6 +4,7 @@ namespace App\Controller\Jury;
 
 use App\Controller\BaseController;
 use App\Entity\Role;
+use App\Entity\Submission;
 use App\Entity\Team;
 use App\Entity\User;
 use App\Form\Type\GeneratePasswordsType;
@@ -11,6 +12,7 @@ use App\Form\Type\UserType;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
+use App\Service\SubmissionService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -61,6 +63,11 @@ class UserController extends BaseController
      * @var TokenStorageInterface
      */
     protected $tokenStorage;
+
+    /**
+     * @var int
+     */
+    protected $minPasswordLength = 10;
 
     public function __construct(
         EntityManagerInterface $em,
@@ -186,7 +193,7 @@ class UserController extends BaseController
      * @Route("/{userId<\d+>}", name="jury_user")
      * @return RedirectResponse|Response
      */
-    public function viewAction(Request $request, int $userId)
+    public function viewAction(Request $request, int $userId, SubmissionService $submissionService)
     {
         /** @var User $user */
         $user = $this->em->getRepository(User::class)->find($userId);
@@ -194,7 +201,37 @@ class UserController extends BaseController
             throw new NotFoundHttpException(sprintf('User with ID %s not found', $userId));
         }
 
-        return $this->render('jury/user.html.twig', ['user' => $user]);
+        $restrictions = ['userid' => $user->getUserid()];
+        /** @var Submission[] $submissions */
+        [$submissions, $submissionCounts] = $submissionService->getSubmissionList(
+            $this->dj->getCurrentContests(),
+            $restrictions
+        );
+
+        return $this->render('jury/user.html.twig', [
+            'user' => $user,
+            'submissions' => $submissions,
+            'submissionCounts' => $submissionCounts,
+            'showContest' => count($this->dj->getCurrentContests()) > 1,
+            'showExternalResult' => $this->config->get('data_source') ===
+                DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL,
+            'refresh' => [
+                'after' => 3,
+                'url' => $this->generateUrl('jury_user', ['userId' => $user->getUserid()]),
+                'ajax' => true,
+            ],
+        ]);
+    }
+
+    public function checkPasswordLength(User $user, $form) {
+        if ($user->getPlainPassword() && strlen($user->getPlainPassword())<$this->minPasswordLength) {
+            $this->addFlash('danger', "Password should be " . $this->minPasswordLength . "+ chars.");
+            return $this->render('jury/user_edit.html.twig', [
+                'user' => $user,
+                'form' => $form->createView(),
+                'min_password_length' => $this->minPasswordLength,
+            ]);
+        }
     }
 
     /**
@@ -216,6 +253,9 @@ class UserController extends BaseController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            if ($errorResult = $this->checkPasswordLength($user, $form)) {
+                return $errorResult;
+            }
             $this->saveEntity($this->em, $this->eventLogService, $this->dj, $user,
                               $user->getUserid(),
                               false);
@@ -239,8 +279,9 @@ class UserController extends BaseController
         }
 
         return $this->render('jury/user_edit.html.twig', [
-            'user' => $user,
-            'form' => $form->createView(),
+            'user'                => $user,
+            'form'                => $form->createView(),
+            'min_password_length' => $this->minPasswordLength,
         ]);
     }
 
@@ -279,6 +320,9 @@ class UserController extends BaseController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            if ($errorResult = $this->checkPasswordLength($user, $form)) {
+                return $errorResult;
+            }
             $this->em->persist($user);
             $this->saveEntity($this->em, $this->eventLogService, $this->dj, $user, null, true);
             return $this->redirect($this->generateUrl(
@@ -290,6 +334,7 @@ class UserController extends BaseController
         return $this->render('jury/user_add.html.twig', [
             'user' => $user,
             'form' => $form->createView(),
+            'min_password_length' => $this->minPasswordLength,
         ]);
     }
 

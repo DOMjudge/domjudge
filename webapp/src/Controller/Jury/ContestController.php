@@ -332,7 +332,6 @@ class ContestController extends BaseController
                 $time = $contestdata[$timeField . 'time']['value'];
                 if (!$contest->getStarttimeEnabled() && $timeField != 'activate') {
                     $time      = null;
-                    $timeTitle = null;
                 }
                 if ($time === null) {
                     $timeValue = '-';
@@ -675,7 +674,6 @@ class ContestController extends BaseController
         $cnt = 0;
         foreach ($judgehosts as $judgehost) {
             /** @var Judgehost $judgehost */
-            $judgehostRestriction = $judgehost->getRestriction();
             foreach ($contest->getProblems() as $contestProblem) {
                 /** @var ContestProblem $contestProblem */
                 if (!$contestProblem->getAllowJudge() || !$contestProblem->getAllowSubmit()) {
@@ -683,12 +681,6 @@ class ContestController extends BaseController
                 }
                 /** @var Problem $problem */
                 $problem = $contestProblem->getProblem();
-                if ($judgehostRestriction !== null) {
-                    $restrictedProblems = $judgehostRestriction->getProblems();
-                    if (!empty($restrictedProblems) && !in_array($problem->getProbid(), $restrictedProblems)) {
-                        continue;
-                    }
-                }
                 foreach ($problem->getTestcases() as $testcase) {
                     /** @var Testcase $testcase */
                     $judgeTask = new JudgeTask();
@@ -723,12 +715,6 @@ class ContestController extends BaseController
             );
             foreach ($languages as $language) {
                 /** @var Language $language */
-                if ($judgehostRestriction !== null) {
-                    $restrictedLangs = $judgehostRestriction->getLanguages();
-                    if (!empty($restrictedLangs) && !in_array($language->getLangid(), $restrictedLangs)) {
-                        continue;
-                    }
-                }
                 $compileExec = $language->getCompileExecutable()->getImmutableExecutable();
                 $judgeTask = new JudgeTask();
                 $judgeTask

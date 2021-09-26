@@ -168,9 +168,7 @@ wget \
     --load-cookies cookies.txt \
     "http://localhost/domjudge/$URL"
 RET=$?
-echo $RET
 set -e
-# ‘--content-on-error’
 #https://www.gnu.org/software/wget/manual/html_node/Exit-Status.html
 # Exit code 4 is network error which we can ignore
 # Exit code 8 is error which should be fixed, but in different PR

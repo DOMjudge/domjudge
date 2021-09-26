@@ -82,6 +82,13 @@ cd ${DIR}/submit
 make check-full
 section_end submit_client
 
+section_start mount "Show runner mounts"
+mount
+# Currently gitlab has some runners with noexec/nodev,
+# This can be removed if we have more stable runners.
+mount -o remount,exec,dev /builds
+section_end mount
+
 section_start judgehost "Configure judgehost"
 cd /opt/domjudge/judgehost/
 sudo cp /opt/domjudge/judgehost/etc/sudoers-domjudge /etc/sudoers.d/
@@ -125,6 +132,7 @@ section_end more_setup
 
 section_start submitting "Submitting test sources (including Kattis example)"
 cd ${DIR}/tests
+export SUBMITBASEURL='http://localhost/domjudge/'
 make check test-stress
 
 # Prepare to load example problems from Kattis/problemtools
