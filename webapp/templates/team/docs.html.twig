@@ -1,0 +1,27 @@
+{% extends 'team/base.html.twig' %}
+
+{% block title %}Documentation - {{ parent() }}{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div>
+                    <h1 class="mt-4">Documentation</h1>
+                </div>
+
+                {% for doc in doc_links %}
+                    <div class="mb-2">
+                        <a href="{{ doc.link }}" class="btn btn-outline-secondary" target="_blank">
+                            {% if doc.icon is defined %}
+                                <i class="{{ doc.icon }}"></i>
+                            {% endif %}
+                            {{ doc.name }}
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+{% endblock %}
+

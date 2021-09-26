@@ -53,7 +53,7 @@ Creating the shadowing config file
 ----------------------------------
 
 On the DOMserver, copy the file ``etc/shadowing.yaml.dist`` to
-``/etc/shadowing.yaml`` and modify its contents. The ``.dist`` file contains
+``etc/shadowing.yaml`` and modify its contents. The ``.dist`` file contains
 comments as to what each field in the file means, but to summarize:
 
 - As the key pick a recognizable identifier, for example the ID of the contest
