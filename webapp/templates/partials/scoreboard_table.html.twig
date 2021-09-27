@@ -252,7 +252,7 @@
                     {% endif %}
 
                     {# If correct, print time scored. The format will vary depending on the scoreboard resolution setting #}
-                    {% set time = '&nbsp;' %}
+                    {% set time = '' %}
                     {% if matrixItem.isCorrect %}
                         {% set time = matrixItem.time %}
                         {% if scoreInSeconds %}
@@ -275,7 +275,7 @@
                         {% if numSubmissions != '0' %}
                             <a {% if link %}href="{{ link }}"{% endif %}>
                                 <div class="{{ scoreCssClass }}">
-                                    {{ time | raw }}
+                                    {% if time %}{{ time }}{% else %}&nbsp;{% endif %}
                                     <span>
                                         {% if numSubmissions is same as(1) %}
                                             1 try

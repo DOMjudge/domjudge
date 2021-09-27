@@ -513,25 +513,18 @@
         {% endif %}
         {% if output is not null %}
             {% if selectedJudging.result == 'compiler-error' %}
-                {% set color = 'red' %}
                 {% set message = 'unsuccessful' %}
             {% else %}
-                {% set color = '#1daa1d' %}
                 {% set message = 'successful' %}
                 {% if output is not empty %}
                     {% set message = message ~ ' (with ' ~ (output | lineCount) ~ ' line(s) of output)' %}
                 {% endif %}
             {% endif %}
         {% endif %}
-        {% set header = 'Compilation <span style="color: ' ~ color ~ ';">' ~ message ~ '</span>' %}
         <h3>
-            {% if output is not empty %}
-                <a class="collapse-link" href="javascript:collapse('#detailcompile')">
-                    {{ header | raw }}
-                </a>
-            {% else %}
-                {{ header | raw }}
-            {% endif %}
+            <a class="collapse-link" href="javascript:collapse('#detailcompile')">
+                Compilation <span class="compile-{{ message }}">{{ message }}</span>
+            </a>
         </h3>
         {% if output is empty %}
             <p class="nodata{% if selectedJudging is null or selectedJudging.result != 'compiler-error' %} d-none{% endif %}"

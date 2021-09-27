@@ -826,11 +826,9 @@ class RejudgingController extends BaseController
             $submitid = $submission->getSubmitid();
             $rejudgingid = $submission->getRejudging()->getRejudgingid();
             $msg = sprintf(
-                'Skipping submission <a href="%s">s%d</a> since it is ' .
-                'already part of rejudging <a href="%s">r%d</a>.',
-                $this->generateUrl('jury_submission', ['submitId' => $submitid]),
+                'Skipping submission s%d since it is ' .
+                'already part of rejudging r%d.',
                 $submitid,
-                $this->generateUrl('jury_rejudging', ['rejudgingId' => $rejudgingid]),
                 $rejudgingid
             );
             $this->addFlash('danger', $msg);

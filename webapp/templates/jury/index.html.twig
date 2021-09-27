@@ -9,10 +9,6 @@
 {% block content %}
 <h1>DOMjudge Jury interface</h1>
 
-{% for error in errors %}
-    {% include 'partials/alert.html.twig' with {type: 'danger', message: error} %}
-{% endfor %}
-
 <a href="https://www.domjudge.org/">
   <img src="{{ asset('images/DOMjudgelogo.svg') }}" id="djlogo" alt="DOMjudge logo" class="float-right d-none d-md-block" title="The DOMjudge logo: free as in beer!">
 </a>

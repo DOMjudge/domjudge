@@ -759,7 +759,7 @@ class CheckConfigService
                 $description .= sprintf("<a href=\"%s\">%s %s</a> does not have an external ID\n",
                                         $this->router->generate($route, $routeParams),
                                         ucfirst(str_replace('_', ' ', $inflector->tableize($entityType))),
-                                        implode(', ', $metadata->getIdentifierValues($entity))
+                                        Utils::specialchars(implode(', ', $metadata->getIdentifierValues($entity)))
                 );
             }
         } else {
