@@ -110,9 +110,11 @@
                             {%- if item.link is defined %}<a href="{{ item.link }}">
                                 {%- elseif row.link is defined %}<a href="{{ row.link }}">{% endif %}
                                     {% if key == "status" %}
-                                    {{- (item.value|default(item.default|default('')))|statusIcon()|raw -}}
+                                    {{- (item.value|default(item.default|default('')))|statusIcon -}}
+                                    {% elseif key == "country" %}
+                                    {{- (item.value|default(item.default|default('')))|countryFlag -}}
                                     {% else %}
-                                    {{- (item.value|default(item.default|default('')))|raw -}}
+                                    {{- (item.value|default(item.default|default(''))) -}}
                                     {% endif %}
                                     {%- if item.link is defined or row.link is defined -%}</a>{% endif %}
                         </td>
