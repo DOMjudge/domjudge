@@ -32,8 +32,27 @@
         {% if results is not empty %}
             <h2><a class="collapse-link" href="javascript:collapse('#detail{{ id }}')">{{ header }}</a></h2>
             <ul id="detail{{ id }}"{% if collapse | default(false) %} class="d-none"{% endif %}>
-                {% for result in results %}
-                    <li>{{ result | raw }}</li>
+                {% for submitId,result in results %}
+                    <li><a href="{{ path('jury_submission', {'submitId': submitId}) }}">s{{ submitId }}</a>
+                    {% if result.files is defined and result.files|length > 0 %}
+                        ({% for file in result.files[:3] %}
+                            <code>{{ file.filename }}</code>
+                        {% endfor %})
+                    {% endif %}
+                    {% if id == 'unexpected' %}
+                        has unexpected result '{{ result.actual }}', should be one of: {{ result.expected|join(', ') }}
+                    {% elseif id == 'multiple' and result.verified %}
+                        verified as {{ result.actual }} out of multiple possible outcomes ({{ result.expected|join(', ') }})
+                    {% elseif id == 'multiple' %}
+                        is judged as {{ result.actual }} but has multiple possible outcomes ({{ result.expected|join(', ') }})
+                    {% elseif id == 'verified' %}
+                        verfied as '{{ result.actual }}'
+                    {% elseif id == 'nomatch' %}
+                        expected results unknown, leaving submission unchecked
+                    {% elseif id == 'earlier' %}
+                        already verified earlier
+                    {% endif %}
+                    </li>
                 {% endfor %}
             </ul>
         {% endif %}
