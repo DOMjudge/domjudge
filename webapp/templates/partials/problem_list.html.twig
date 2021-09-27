@@ -85,35 +85,43 @@
                                                     </div>
                                                 {% endfor %}
                                             </div>
-                                        {% endif %}
-
-                                        {% if problem.problem.problemtextType is not empty %}
-                                            <div class="text-center">
-                                                <a class="btn btn-secondary" role="button"
-                                                   href="{{ path(problem_text_path, {'probId': problem.probid}) }}">
-                                                    <i class="fas fa-file-{{ problem.problem.problemtextType }}"></i>
-                                                    problem text
-                                                </a>
+                                            <div>
+                                                <br/>
                                             </div>
                                         {% endif %}
 
-                                        {% if show_submit_button | default(false) %}
-                                            <div class="text-center">
+                                        <div class="text-center">
+                                            {% if problem.problem.problemtextType is not empty %}
+                                                <a class="btn btn-secondary" role="button"
+                                                   href="{{ path(problem_text_path, {'probId': problem.probid}) }}">
+                                                    <i class="fas fa-file-{{ problem.problem.problemtextType }}"></i>
+                                                    text
+                                                </a>
+                                            {% endif %}
+
+                                            {% if numsamples > 0 %}
+                                                <a class="btn btn-secondary" role="button"
+                                                   href="{{ path(problem_sample_zip_path, {'probId': problem.probid}) }}">
+                                                    <i class="fas fa-file-archive"></i> samples
+                                                </a>
+                                            {% endif %}
+
+                                            {% if show_submit_button | default(false) %}
                                                 {% if is_granted('ROLE_JURY') or (current_team_contest is not null and current_team_contest.freezeData.started) %}
-                                                    <a class="nav-link justify-content-center" data-ajax-modal data-ajax-modal-after="initSubmitModal" href="{{ path('team_submit', {problem: problem.probid}) }}">
+                                                    <a class="justify-content-center" data-ajax-modal data-ajax-modal-after="initSubmitModal" href="{{ path('team_submit', {problem: problem.probid}) }}">
                                                         <button type="button" class="btn btn-success">
                                                             <i class="fas fa-cloud-upload-alt"></i> Submit
                                                         </button>
                                                     </a>
                                                 {% else %}
-                                                    <a class="nav-link justify-content-center">
+                                                    <a class="justify-content-center">
                                                         <button type="button" class="btn btn-success disabled" disabled>
                                                             <i class="fas fa-cloud-upload-alt"></i> Submit
                                                         </button>
                                                     </a>
                                                 {% endif %}
-                                            </div>
-                                        {% endif %}
+                                            {% endif %}
+                                        </div>
 
                                         {% if problem.problem.attachments | length > 0 %}
                                             <ol class="text-center list-group list-group-flush">
@@ -128,20 +136,6 @@
                                             </ol>
                                         {% endif %}
 
-                                        {% if numsamples > 0 %}
-                                            <div>
-                                                <br/>
-                                            </div>
-                                            <h3 class="card-subtitle mb-2">Samples</h3>
-                                            <ol class="text-center list-group list-group-flush">
-                                                <li class="list-group-item">
-                                                    <a class="btn btn-outline-secondary" role="button"
-                                                       href="{{ path(problem_sample_zip_path, {'probId': problem.probid}) }}">
-                                                        zip with all samples
-                                                    </a>
-                                                </li>
-                                            </ol>
-                                        {% endif %}
                                     </div>
                                 </div>
                                 <div class="w-100 d-none d-sm-block d-md-block d-lg-none"><!-- wrap every 2 on sm--></div>
