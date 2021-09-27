@@ -77,7 +77,7 @@ class ProblemControllerTest extends BaseTest
                     }
 
                     // Download the problem text and make sure it is correct
-                    $problemTextLink = $card->selectLink('problem text');
+                    $problemTextLink = $card->selectLink('text');
                     ob_start();
                     $this->client->click($problemTextLink->link());
                     $content = ob_get_clean();
@@ -94,11 +94,11 @@ class ProblemControllerTest extends BaseTest
     }
 
     /**
-     * Test that the problems page shows only sample data
+     * Test that the problems page shows only sample data.
      */
     public function testSamples() : void
     {
-        // First, enable two samples for the fltcmp problem
+        // First, enable two samples for the fltcmp problem.
         $em = self::$container->get(EntityManagerInterface::class);
         /** @var Problem $problem */
         $problem = $em->getRepository(Problem::class)->findOneBy(['externalid' => 'fltcmp']);
@@ -116,51 +116,20 @@ class ProblemControllerTest extends BaseTest
 
         $crawler = $this->client->request('GET', '/team/problems');
 
-        // Get the card bodies
+        // Get the card bodies.
         $cardBodies = $crawler->filter('.card-body');
 
-        // The first and last card should not have any samples
+        // The first and last card should not have any samples.
         self::assertSame(0,
-                         $cardBodies->eq(0)->filter('.list-group .list-group-item')->count());
+                         $cardBodies->eq(0)->filter('.fa-file-archive')->count());
+        self::assertSame(1,
+                         $cardBodies->eq(1)->filter('.fa-file-archive')->count());
         self::assertSame(0,
-                         $cardBodies->eq(2)->filter('.list-group .list-group-item')->count());
+                         $cardBodies->eq(2)->filter('.fa-file-archive')->count());
 
-        // The second card should contain three list items, one for each sample and one to download all samples
-        $listItems = $cardBodies->eq(1)->filter('.list-group .list-group-item');
-        self::assertSame(3, $listItems->count());
-
-        // Check that we have the correct links
-        for ($i = 0; $i < 2; $i++) {
-            $links = $listItems->eq($i)->filter('a');
-            self::assertSame(sprintf('input #%d', $i + 1),
-                             $links->eq(0)->text(null, true));
-            self::assertSame(sprintf('output #%d', $i + 1),
-                             $links->eq(1)->text(null, true));
-            self::assertSame(sprintf('/team/%d/sample/%d/input',
-                                     $problem->getProbid(), $i + 1), $links->eq(0)->attr('href'));
-            self::assertSame(sprintf('/team/%d/sample/%d/output',
-                                     $problem->getProbid(), $i + 1), $links->eq(1)->attr('href'));
-
-            // Download the sample and make sure the contents are correct.
-            // We use ob_ methods since this is a streamed response
-            ob_start();
-            $this->client->click($links->eq(0)->link());
-            $content = ob_get_clean();
-            self::assertSame($samples[$i]->getContent()->getInput(), $content);
-
-            ob_start();
-            $this->client->click($links->eq(1)->link());
-            $content = ob_get_clean();
-            self::assertSame($samples[$i]->getContent()->getOutput(),
-                             $content);
-
-            // TODO: add tests for samples.zip: check that it is a ZIP file
-            // and it contains the correct files.
-        }
-
-        // Check the link to download all samples
-        $link = $listItems->eq(2)->filter('a')->first();
-        self::assertSame('zip with all samples', $link->text(null, true));
+        // Check the link to download all samples.
+        $link = $cardBodies->eq(1)->filter('.fa-file-archive')->parents()->first();
+        self::assertSame('samples', $link->text(null, true));
         self::assertSame(sprintf('/team/%d/samples.zip',
                                  $problem->getProbid()),
                          $link->attr('href'));
