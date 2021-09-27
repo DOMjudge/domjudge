@@ -272,57 +272,38 @@ class JuryMiscController extends BaseController
             /** @var Judging $judging */
             $judging         = $submission->getJudgings()->first();
             $expectedResults = $submission->getExpectedResults();
-            $submissionLink  = $this->generateUrl('jury_submission', ['submitId' => $submission->getSubmitid()]);
-            $submissionId    = sprintf('s%d', $submission->getSubmitid());
+            $submissionId    = $submission->getSubmitid();
 
             if (!empty($expectedResults) && !$judging->getVerified()) {
                 $numChecked++;
                 $result = mb_strtoupper($judging->getResult());
                 if (!in_array($result, $expectedResults)) {
-                    $submissionFiles = $this->getSubmissionFilesString($submission);
-                    $unexpected[] = sprintf(
-                        "<a href='%s'>%s</a> %s has unexpected result '%s', should be one of: %s",
-                        $submissionLink, $submissionId, $submissionFiles, $result, implode(', ', $expectedResults)
-                    );
+                    $submissionFiles = $submission->getFiles();
+                    $unexpected[$submissionId] = ['files' => $submissionFiles, 'actual' => $result, 'expected' => $expectedResults];
                 } elseif (count($expectedResults) > 1) {
                     if ($verifyMultiple) {
                         // Judging result is as expected, set judging to verified
                         $judging
                             ->setVerified(true)
                             ->setJuryMember($verifier);
-                        $multiple[] = sprintf(
-                            "<a href='%s'>%s</a> verified as %s out of multiple possible outcomes (%s)",
-                            $submissionLink, $submissionId, $result, implode(', ', $expectedResults)
-                        );
+                        $multiple[$submissionId] = ['actual' => $result, 'expected' => $expectedResults, 'verified' => true];
                     } else {
-                        $multiple[] = sprintf(
-                            "<a href='%s'>%s</a> is judged as %s but has multiple possible outcomes (%s)",
-                            $submissionLink, $submissionId, $result, implode(', ', $expectedResults)
-                        );
+                        $multiple[$submissionId] = ['actual' => $result, 'expected' => $expectedResults, 'verified' => false];
                     }
                 } else {
                     // Judging result is as expected, set judging to verified
                     $judging
                         ->setVerified(true)
                         ->setJuryMember($verifier);
-                    $verified[] = sprintf(
-                        "<a href='%s'>%s</a> verified as '%s'",
-                        $submissionLink, $submissionId, $result
-                    );
+                    $verified[$submissionId] = ['actual' => $result, 'expected' => $expectedResults, 'verified' => true];
                 }
             } else {
                 $numUnchecked++;
 
                 if (empty($expectedResults)) {
-                    $nomatch[] = sprintf(
-                        "expected results unknown in <a href='%s'>%s</a>, leaving submission unchecked",
-                        $submissionLink, $submissionId
-                    );
+                    $nomatch[$submissionId] = [];
                 } else {
-                    $earlier[] = sprintf(
-                        "<a href='%s'>%s</a> already verified earlier",
-                        $submissionLink, $submissionId
-                    );
+                    $earlier[$submissionId] = [];
                 }
             }
         }
@@ -353,25 +334,5 @@ class JuryMiscController extends BaseController
         }
         return $this->dj->setCookie('domjudge_cid', (string)$contestId, 0, null, '', false, false,
                                                  $response);
-    }
-
-    private function getSubmissionFilesString(Submission $submission): string
-    {
-        $submissionFiles = '(';
-        $cnt = 0;
-        foreach ($submission->getFiles() as $submissionFile) {
-            /** @var SubmissionFile $submissionFile */
-            if ($cnt > 3) {
-                $submissionFiles .= ', ...';
-                break;
-            }
-            if ($cnt > 0) {
-                $submissionFiles .= ', ';
-            }
-            $submissionFiles .= '<code>' . $submissionFile->getFilename() . '</code>';
-            $cnt++;
-        }
-        $submissionFiles .= ')';
-        return $submissionFiles;
     }
 }
