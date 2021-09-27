@@ -215,8 +215,6 @@ class TeamController extends BaseController
                     'value' => $t->getAffiliation()->getShortname(),
                     'title' => $t->getAffiliation()->getName()
                 ];
-            } else {
-                $teamdata['affiliation'] = ['value' => '&nbsp;'];
             }
 
             // render IP address nicely

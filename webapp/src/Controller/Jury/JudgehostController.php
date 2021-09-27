@@ -162,7 +162,7 @@ class JudgehostController extends BaseController
             }
 
             $load = sprintf(
-                '%.2f&nbsp;%.2f&nbsp;',
+                '%.2f %.2f ',
                 ($work2min[$judgehost->getHostname()] ?? 0) / (2 * 60),
                 ($work10min[$judgehost->getHostname()] ?? 0) / (10 * 60)
             );

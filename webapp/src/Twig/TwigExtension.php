@@ -122,7 +122,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             new TwigFilter('printTimeRelative', [$this, 'printTimeRelative']),
             new TwigFilter('scoreTime', [$this, 'scoreTime']),
             new TwigFilter('statusClass', [$this, 'statusClass']),
-            new TwigFilter('statusIcon', [$this, 'statusIcon']),
+            new TwigFilter('statusIcon', [$this, 'statusIcon'], ['is_safe' => ['html']]),
             new TwigFilter('descriptionExpand', [$this, 'descriptionExpand'], ['is_safe' => ['html']]),
             new TwigFilter('wrapUnquoted', [$this, 'wrapUnquoted']),
             new TwigFilter('hexColorToRGBA', [$this, 'hexColorToRGBA']),
@@ -317,7 +317,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
                 $icon = 'check';
                 break;
             default:
-                return $status;
+                return 'unknown';
         }
         return sprintf('<i class="fas fa-%s-circle"></i>', $icon);
     }
