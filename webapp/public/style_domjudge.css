@@ -76,8 +76,8 @@ body.static {
     font-variant: small-caps;
 }
 
-.sol_correct      { color: green;  }
-.sol_incorrect    { color: red;    }
+.sol_correct, .compile-successful     { color: green;  }
+.sol_incorrect, .compile-unsuccessful { color: red;    }
 .sol_queued       { color: gray;   }
 
 .judgetime      { font-size: smaller; font-style: italic; }

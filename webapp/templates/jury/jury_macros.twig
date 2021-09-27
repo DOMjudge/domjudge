@@ -83,7 +83,7 @@
                     <th scope="col" class="
                         {%- if column.sort is defined and column.sort %}sortable{%- endif %}
                         {%- if (column.search is not defined) or column.search %} searchable{%- endif %}">
-                        {{- column.title | raw -}}
+                        {{- column.title -}}
                     </th>
                 {%- endfor %}
                 {%- if num_actions > 0 %}
