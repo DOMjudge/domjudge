@@ -385,7 +385,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
      * @param bool $showFullname Also output the country's full name
      * @return string
      */
-    public function countryFlag(string $countryCode, bool $showFullname = false): string
+    public function countryFlag(?string $countryCode, bool $showFullname = false): string
     {
        if (empty($countryCode)) return '';
 
