@@ -129,9 +129,7 @@
                     <tr>
                         <th>Country</th>
                         <td>
-                            <img src="{{ asset('flags/4x3/' ~ team.affiliation.countryAlpha2 ~ '.svg') }}" alt="{{ team.affiliation.countryName }}"
-                                 title="{{ team.affiliation.countryName }}" class="countryflag"/>
-                            {{ team.affiliation.countryName }}
+                            {{ team.affiliation.country | countryFlag(true) }}
                         </td>
                     </tr>
                 {% endif %}

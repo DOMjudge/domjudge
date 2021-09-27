@@ -8,7 +8,7 @@
             element.element.value == undefined ||
             element.element.value == ""
             ? ''
-            : '<img src="' + imgBase.replace("nl.svg", alpha3_alpha2_country_mapping[element.element.value].toLowerCase() + ".svg", 1) + '" class="countryflag">&nbsp;';
+            : '<img src="' + imgBase.replace("nl.svg", alpha3_alpha2_country_mapping[element.element.value].toLowerCase() + ".svg", 1) + '" class="countryflag" alt="">&nbsp;';
 
         return img + element.text;
     };

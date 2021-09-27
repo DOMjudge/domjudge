@@ -139,13 +139,9 @@ class TeamAffiliationController extends BaseController
             $affiliationdata['num_teams'] = ['value' => $teamAffiliationData['num_teams']];
             if ($showFlags) {
                 $countryCode     = $teamAffiliation->getCountry();
-                $countryFlagPath = sprintf('flags/4x3/%s.svg', $teamAffiliation->getCountryAlpha2());
-                $countryFlag     = sprintf('<img src="%s" alt="%s" class="countryflag">',
-                                       $assetPackage->getUrl($countryFlagPath), $teamAffiliation->getCountryName());
                 $affiliationdata['country'] = [
-                    'value' => $countryFlag,
+                    'value' => $countryCode,
                     'sortvalue' => $countryCode,
-                    'title' => $countryCode,
                 ];
             }
 
