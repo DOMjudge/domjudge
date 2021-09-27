@@ -41,47 +41,6 @@
                                             </h4>
                                         {% endif %}
 
-                                        {% if problem.problem.problemtextType is not empty %}
-                                            <div class="text-center">
-                                                <a class="btn btn-secondary" role="button"
-                                                   href="{{ path(problem_text_path, {'probId': problem.probid}) }}">
-                                                    <i class="fas fa-file-{{ problem.problem.problemtextType }}"></i>
-                                                    problem text
-                                                </a>
-                                            </div>
-                                        {% endif %}
-
-                                        {% if show_submit_button | default(false) %}
-                                            <div class="text-center">
-                                                {% if is_granted('ROLE_JURY') or (current_team_contest is not null and current_team_contest.freezeData.started) %}
-                                                    <a class="nav-link justify-content-center" data-ajax-modal data-ajax-modal-after="initSubmitModal" href="{{ path('team_submit', {problem: problem.probid}) }}">
-                                                        <button type="button" class="btn btn-success">
-                                                            <i class="fas fa-cloud-upload-alt"></i> Submit
-                                                        </button>
-                                                    </a>
-                                                {% else %}
-                                                    <a class="nav-link justify-content-center">
-                                                        <button type="button" class="btn btn-success disabled" disabled>
-                                                            <i class="fas fa-cloud-upload-alt"></i> Submit
-                                                        </button>
-                                                    </a>
-                                                {% endif %}
-                                            </div>
-                                        {% endif %}
-
-                                        {% if problem.problem.attachments | length > 0 %}
-                                            <ol class="text-center list-group list-group-flush">
-                                                {% for attachment in problem.problem.attachments %}
-                                                    <li class="list-group-item">
-                                                        <a class="btn btn-secondary" role="button"
-                                                           href="{{ path(problem_attachment_path, {'probId': problem.probid, 'attachmentId': attachment.attachmentid}) }}">
-                                                            <i class="{{ attachment.type | fileTypeIcon }}"></i> {{ attachment.name }}
-                                                        </a>
-                                                    </li>
-                                                {% endfor %}
-                                            </ol>
-                                        {% endif %}
-
                                         {% if stats is defined %}
                                             <div class="mt-3">
                                                 {% for correct in [true, false] %}
@@ -126,6 +85,47 @@
                                                     </div>
                                                 {% endfor %}
                                             </div>
+                                        {% endif %}
+
+                                        {% if problem.problem.problemtextType is not empty %}
+                                            <div class="text-center">
+                                                <a class="btn btn-secondary" role="button"
+                                                   href="{{ path(problem_text_path, {'probId': problem.probid}) }}">
+                                                    <i class="fas fa-file-{{ problem.problem.problemtextType }}"></i>
+                                                    problem text
+                                                </a>
+                                            </div>
+                                        {% endif %}
+
+                                        {% if show_submit_button | default(false) %}
+                                            <div class="text-center">
+                                                {% if is_granted('ROLE_JURY') or (current_team_contest is not null and current_team_contest.freezeData.started) %}
+                                                    <a class="nav-link justify-content-center" data-ajax-modal data-ajax-modal-after="initSubmitModal" href="{{ path('team_submit', {problem: problem.probid}) }}">
+                                                        <button type="button" class="btn btn-success">
+                                                            <i class="fas fa-cloud-upload-alt"></i> Submit
+                                                        </button>
+                                                    </a>
+                                                {% else %}
+                                                    <a class="nav-link justify-content-center">
+                                                        <button type="button" class="btn btn-success disabled" disabled>
+                                                            <i class="fas fa-cloud-upload-alt"></i> Submit
+                                                        </button>
+                                                    </a>
+                                                {% endif %}
+                                            </div>
+                                        {% endif %}
+
+                                        {% if problem.problem.attachments | length > 0 %}
+                                            <ol class="text-center list-group list-group-flush">
+                                                {% for attachment in problem.problem.attachments %}
+                                                    <li class="list-group-item">
+                                                        <a class="btn btn-secondary" role="button"
+                                                           href="{{ path(problem_attachment_path, {'probId': problem.probid, 'attachmentId': attachment.attachmentid}) }}">
+                                                            <i class="{{ attachment.type | fileTypeIcon }}"></i> {{ attachment.name }}
+                                                        </a>
+                                                    </li>
+                                                {% endfor %}
+                                            </ol>
                                         {% endif %}
 
                                         {% if numsamples > 0 %}
