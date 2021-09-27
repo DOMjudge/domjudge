@@ -10,6 +10,7 @@
             border-bottom: 0;
             width: 52.7em;
             margin-bottom: 2em;
+            white-space: normal;
         }
 
         body {
@@ -208,14 +209,37 @@
         </tbody>
     </table>
 
-    <table cellspacing="0" id="rankTable">
+    <table cellspacing="0" id="highHonorsTable">
         <tbody>
+        <tr>
+            <th colspan="3">High honors</th>
+        </tr>
         <tr>
             <th><strong>Place</strong></th>
             <th><strong>Name</strong></th>
             <th><strong>Solved</strong></th>
         </tr>
-        {% for row in ranked %}
+        {% for row in highHonors %}
+            <tr class="row row">
+                <td class="rank">{{ row.rank }}</td>
+                <td class="name">{{ row.team }}</td>
+                <td class="solved r{{ row.solved }}">{{ row.solved }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <table cellspacing="0" id="honorsTable">
+        <tbody>
+        <tr>
+            <th colspan="3">Honors</th>
+        </tr>
+        <tr>
+            <th><strong>Place</strong></th>
+            <th><strong>Name</strong></th>
+            <th><strong>Solved</strong></th>
+        </tr>
+        {% for row in honors %}
             <tr class="row row">
                 <td class="rank">{{ row.rank }}</td>
                 <td class="name">{{ row.team }}</td>

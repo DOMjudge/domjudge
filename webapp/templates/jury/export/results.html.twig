@@ -27,7 +27,7 @@
         </tbody>
     </table>
 
-    <h2>Other ranked teams</h2>
+    <h2>High honors</h2>
     <table class="table">
         <thead>
         <tr>
@@ -37,7 +37,27 @@
         </tr>
         </thead>
         <tbody>
-        {% for row in ranked %}
+        {% for row in highHonors %}
+            <tr>
+                <th scope="row">{{ row.rank }}</th>
+                <th scope="row">{{ row.team }}</th>
+                <td>{{ row.solved }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <h2>Honors</h2>
+    <table class="table">
+        <thead>
+        <tr>
+            <th scope="col">Rank</th>
+            <th scope="col">Team</th>
+            <th scope="col">Solved problems</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for row in honors %}
             <tr>
                 <th scope="row">{{ row.rank }}</th>
                 <th scope="row">{{ row.team }}</th>

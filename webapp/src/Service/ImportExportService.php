@@ -471,12 +471,16 @@ class ImportExportService
             ->getResult();
 
         $numberOfTeams = count($scoreboard->getScores());
-        // determine number of problems solved by median team
+        // determine number of problems solved by 25th percentile and median team
         $count  = 0;
+        $perc25 = 0;
         $median = 0;
         foreach ($scoreboard->getScores() as $teamScore) {
             $count++;
             $median = $teamScore->numPoints;
+            if ($count <= $numberOfTeams / 4) {
+                $perc25 = $teamScore->numPoints;
+            }
             if ($count > $numberOfTeams / 2) {
                 break;
             }
@@ -511,7 +515,7 @@ class ImportExportService
                     $ranks[$numPoints] = $rank;
                 }
                 $rank        = $ranks[$numPoints];
-                $awardString = 'Ranked';
+                $awardString = $numPoints >= $perc25 ? 'High honors' : 'Honors';
             } else {
                 $awardString = 'Honorable';
                 $rank        = '';

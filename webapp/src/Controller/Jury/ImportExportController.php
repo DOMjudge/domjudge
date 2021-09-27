@@ -407,7 +407,8 @@ class ImportExportController extends BaseController
         }
 
         $awarded       = [];
-        $ranked        = [];
+        $highHonors    = [];
+        $honors        = [];
         $honorable     = [];
         $regionWinners = [];
 
@@ -438,8 +439,10 @@ class ImportExportController extends BaseController
             }
             if ($row['rank'] === '') {
                 $honorable[] = $row['team'];
-            } elseif ($row['award'] === 'Ranked') {
-                $ranked[] = $row;
+            } elseif ($row['award'] === 'High honors') {
+                $highHonors[] = $row;
+            } elseif ($row['award'] === 'Honors') {
+                $honors[] = $row;
             } else {
                 $awarded[] = $row;
             }
@@ -495,7 +498,8 @@ class ImportExportController extends BaseController
 
         $data = [
             'awarded' => $awarded,
-            'ranked' => $ranked,
+            'highHonors' => $highHonors,
+            'honors' => $honors,
             'honorable' => $honorable,
             'regionWinners' => $regionWinners,
             'firstToSolve' => $firstToSolve,
