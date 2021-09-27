@@ -74,7 +74,7 @@
                     <th scope="col" class="
                         {%- if column.sort is defined and column.sort %}sortable{%- endif %}
                         {%- if (column.search is not defined) or column.search %} searchable{%- endif %}">
-                        {{- column.title | raw -}}
+                        {{- column.title -}}
                     </th>
                 {%- endfor %}
                 {%- if num_actions > 0 %}
@@ -101,9 +101,9 @@
                             {%- if item.link is defined %}<a href="{{ item.link }}">
                                 {%- elseif row.link is defined %}<a href="{{ row.link }}">{% endif %}
                                     {% if key == "status" %}
-                                    {{- (item.value|default(item.default|default('')))|statusIcon()|raw -}}
+                                    {{- (item.value|default(item.default|default('')))|statusIcon() -}}
                                     {% else %}
-                                    {{- (item.value|default(item.default|default('')))|raw -}}
+                                    {{- (item.value|default(item.default|default(''))) -}}
                                     {% endif %}
                                     {%- if item.link is defined or row.link is defined -%}</a>{% endif %}
                         </td>

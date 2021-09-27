@@ -675,11 +675,9 @@ class RejudgingController extends BaseController
         foreach ($skipped as $judging) {
             $submission = $judging['submission'];
             $msg = sprintf(
-                'Skipping submission <a href="%s">s%d</a> since it is ' .
-                'already part of rejudging <a href="%s">r%d</a>.',
-                $this->generateUrl('jury_submission', ['submitId' => $submission['submitid']]),
+                'Skipping submission s%d since it is ' .
+                'already part of rejudging r%d.',
                 $submission['submitid'],
-                $this->generateUrl('jury_rejudging', ['rejudgingId' => $submission['rejudgingid']]),
                 $submission['rejudgingid']
             );
             $this->addFlash('danger', $msg);

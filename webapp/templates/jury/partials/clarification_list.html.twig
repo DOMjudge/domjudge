@@ -75,22 +75,17 @@
                     {%- set answered = '<i class="fas fa-user-lock" title="claimed"></i>' %}
                 {%- endif %}
             {%- endif %}
-            {%- if clarification.juryMember is empty %}
-                {%- set juryMember = '&nbsp;' %}
-            {%- else %}
-                {%- set juryMember = clarification.juryMember %}
-            {%- endif %}
 
             <td><a href="{{ link }}">{{ answered | raw }}</a></td>
             <td><form action="{{ path('jury_clarification_claim', {clarId: clarification.clarid}) }}" method="post" class="form-inline">
                 {%- if claim and clarification.sender -%}
                     <button name="claimed" value="1"
                        class="btn btn-outline-success btn-sm">Claim</button>
-                {%- elseif not clarification.answered and app.user.username == juryMember %}
+                {%- elseif not clarification.answered and app.user.username == clarification.juryMember %}
                     <button name="claimed" value="0"
                        class="btn btn-outline-success btn-sm">Unclaim</button>
                 {%- else -%}
-                    <a href="{{ link }}">{{ juryMember | raw }}</a>
+                    <a href="{{ link }}">{{ clarification.juryMember }}</a>
                 {%- endif -%}
 		</form>
             </td>
