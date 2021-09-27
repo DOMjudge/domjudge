@@ -253,6 +253,7 @@ class ContestController extends BaseController
 
         $table_fields = array_merge($table_fields, [
             'process_balloons' => ['title' => 'process<br/>balloons?', 'sort' => true],
+            'process_awards'   => ['title' => 'process<br/>awards?', 'sort' => true],
             'public'           => ['title' => 'public?', 'sort' => true],
             'num_teams'        => ['title' => '# teams', 'sort' => true],
             'num_problems'     => ['title' => '# problems', 'sort' => true],
