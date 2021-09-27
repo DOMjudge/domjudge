@@ -134,18 +134,6 @@
                                             </div>
                                             <h3 class="card-subtitle mb-2">Samples</h3>
                                             <ol class="text-center list-group list-group-flush">
-                                                {% for i in 1..numsamples %}
-                                                    <li class="list-group-item">
-                                                        <a class="btn btn-outline-secondary" role="button"
-                                                           href="{{ path(problem_sample_testcase_path, {'probId': problem.probid, 'type': 'input', 'index': i}) }}">
-                                                            input {% if numsamples > 1 %}#{{ i }}{% endif %}
-                                                        </a>
-                                                        <a class="btn btn-outline-secondary" role="button"
-                                                           href="{{ path(problem_sample_testcase_path, {'probId': problem.probid, 'type': 'output', 'index': i}) }}">
-                                                            output {% if numsamples > 1 %}#{{ i }}{% endif %}
-                                                        </a>
-                                                    </li>
-                                                {% endfor %}
                                                 <li class="list-group-item">
                                                     <a class="btn btn-outline-secondary" role="button"
                                                        href="{{ path(problem_sample_zip_path, {'probId': problem.probid}) }}">
