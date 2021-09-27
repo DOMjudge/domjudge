@@ -876,66 +876,6 @@ class DOMJudgeService
     /**
      * @throws NonUniqueResultException
      */
-    public function getSampleTestcaseStreamedResponse(
-        ContestProblem $contestProblem,
-        int $index,
-        string $type
-    ): StreamedResponse {
-        /** @var Testcase $testcase */
-        $testcase = $this->em->createQueryBuilder()
-            ->from(Testcase::class, 'tc')
-            ->join('tc.problem', 'p')
-            ->join('p.contest_problems', 'cp', Join::WITH,
-                'cp.contest = :contest')
-            ->join('tc.content', 'tcc')
-            ->select('tc', 'tcc')
-            ->andWhere('tc.problem = :problem')
-            ->andWhere('tc.sample = 1')
-            ->andWhere('cp.allowSubmit = 1')
-            ->setParameter(':problem', $contestProblem->getProbid())
-            ->setParameter(':contest', $contestProblem->getContest())
-            ->orderBy('tc.testcaseid')
-            ->setMaxResults(1)
-            ->setFirstResult($index - 1)
-            ->getQuery()
-            ->getOneOrNullResult();
-        if (!$testcase) {
-            throw new NotFoundHttpException(sprintf('Problem p%d not found or not available',
-                $contestProblem->getProbid()));
-        }
-
-        $extension = substr($type, 0, -3);
-        $mimetype  = 'text/plain';
-
-        $filename = sprintf("sample-%s.%s.%s", $contestProblem->getShortname(),
-            $index, $extension);
-        $content  = null;
-
-        switch ($type) {
-            case 'input':
-                $content = $testcase->getContent()->getInput();
-                break;
-            case 'output':
-                $content = $testcase->getContent()->getOutput();
-                break;
-        }
-
-        $response = new StreamedResponse();
-        $response->setCallback(function () use ($content) {
-            echo $content;
-        });
-        $response->headers->set('Content-Type',
-            sprintf('%s; name="%s', $mimetype, $filename));
-        $response->headers->set('Content-Disposition',
-            sprintf('attachment; filename="%s"', $filename));
-        $response->headers->set('Content-Length', strlen($content));
-
-        return $response;
-    }
-
-    /**
-     * @throws NonUniqueResultException
-     */
     public function getAttachmentStreamedResponse(ContestProblem $contestProblem, int $attachmentId): StreamedResponse
     {
         /** @var ProblemAttachment $attachment */
