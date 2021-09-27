@@ -208,6 +208,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             'show_shadow_differences' => $this->tokenStorage->getToken() &&
                                          $this->authorizationChecker->isGranted('ROLE_ADMIN') &&
                                          $this->config->get('data_source') === DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL,
+            'doc_links' => $this->dj->getDocLinks(),
         ];
     }
 

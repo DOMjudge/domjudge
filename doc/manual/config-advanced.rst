@@ -33,8 +33,8 @@ path of your installation) as follows:
 
 It is also possible to load custom CSS and/or JavaScript files. To do so, place
 files ending in `.css` under `public/css/custom/` and/or files ending in `.js`
-under `public/js/custom/`. See the Config checker in the admin interfae for the
-full filesystem path of your installation). Note that there is no guaranteed
+under `public/js/custom/`. See the Config checker in the admin interface for the
+full filesystem path of your installation. Note that there is no guaranteed
 order in which the files will be loaded, but they will all be loaded after the
 main DOMjudge CSS and JavaScript files. If you have a lot of custom CSS/JavaScript
 files in these directories, the response time of DOMjudge might decrease, so it
@@ -44,6 +44,18 @@ is recommended to only place a few files there.
 
   If you add or remove any of the above files, you need to
   :ref:`clear the cache <clear-cache>` for changes to be detected.
+
+Adding links to documentation to the team interface
+---------------------------------------------------
+
+DOMjudge supports adding links to documentation to the team interface.
+First, on the DOMserver, copy the file ``etc/docs.yaml.dist`` to
+``etc/docs.yaml`` and modify its contents. The ``.dist`` file contains
+comments as to what each field in the file means and how to use it. If you
+want to link to files served by the webserver of the DOMserver, place them
+under `/public/docs/`. See the Config checker in the admin interface for
+the full filesystem path of your installation. All links open in a new
+tab / window.
 
 .. _authentication:
 
