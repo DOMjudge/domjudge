@@ -193,6 +193,9 @@ abstract class BaseTest extends WebTestCase
         $em = $this->client->getContainer()->get('doctrine.orm.entity_manager');
         /** @var User $user */
         $user = $em->getRepository(User::class)->findOneBy(['username' => 'demo']);
+        if ($user === null) {
+            throw new Exception("No user 'demo' found, are you using the correct database?");
+        }
         // Clear all user roles, so we can set them specifically to what we want
         foreach ($user->getUserRoles() as $role) {
             $user->removeUserRole($role);
@@ -309,5 +312,26 @@ abstract class BaseTest extends WebTestCase
         }
 
         return $id;
+    }
+
+    /**
+     * Given a zipfile in string format, unzip it and return contents as
+     * a key-value array.
+     */
+    protected function unzipString(string $content): array
+    {
+        $zip = new \ZipArchive();
+        $tempFilename = tempnam(static::$container->get(DOMJudgeService::class)->getDomjudgeTmpDir(), "domjudge-test-");
+        file_put_contents($tempFilename, $content);
+
+        $zip->open($tempFilename);
+        $return = [];
+        for($i = 0; $i < $zip->count(); ++$i) {
+            $return[$zip->getNameIndex($i)] = $zip->getFromIndex($i);
+        }
+        $zip->close();
+
+        unlink($tempFilename);
+        return $return;
     }
 }

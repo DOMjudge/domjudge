@@ -77,7 +77,7 @@ class ProblemControllerTest extends BaseTest
                     }
 
                     // Download the problem text and make sure it is correct
-                    $problemTextLink = $card->selectLink('problem text');
+                    $problemTextLink = $card->selectLink('text');
                     ob_start();
                     $this->client->click($problemTextLink->link());
                     $content = ob_get_clean();
@@ -105,11 +105,11 @@ class ProblemControllerTest extends BaseTest
 
         /** @var Testcase[] $samples */
         $samples = [
-            $problem->getTestcases()->get(0),
-            $problem->getTestcases()->get(2)
+            1 => $problem->getTestcases()->get(0),
+            2 => $problem->getTestcases()->get(2)
         ];
-        $samples[0]->setSample(true);
         $samples[1]->setSample(true);
+        $samples[2]->setSample(true);
         $em->flush();
 
         $this->logIn();
@@ -125,44 +125,25 @@ class ProblemControllerTest extends BaseTest
         self::assertSame(0,
                          $cardBodies->eq(2)->filter('.list-group .list-group-item')->count());
 
-        // The second card should contain three list items, one for each sample and one to download all samples
-        $listItems = $cardBodies->eq(1)->filter('.list-group .list-group-item');
-        self::assertSame(3, $listItems->count());
-
-        // Check that we have the correct links
-        for ($i = 0; $i < 2; $i++) {
-            $links = $listItems->eq($i)->filter('a');
-            self::assertSame(sprintf('input #%d', $i + 1),
-                             $links->eq(0)->text(null, true));
-            self::assertSame(sprintf('output #%d', $i + 1),
-                             $links->eq(1)->text(null, true));
-            self::assertSame(sprintf('/team/%d/sample/%d/input',
-                                     $problem->getProbid(), $i + 1), $links->eq(0)->attr('href'));
-            self::assertSame(sprintf('/team/%d/sample/%d/output',
-                                     $problem->getProbid(), $i + 1), $links->eq(1)->attr('href'));
-
-            // Download the sample and make sure the contents are correct.
-            // We use ob_ methods since this is a streamed response
-            ob_start();
-            $this->client->click($links->eq(0)->link());
-            $content = ob_get_clean();
-            self::assertSame($samples[$i]->getContent()->getInput(), $content);
-
-            ob_start();
-            $this->client->click($links->eq(1)->link());
-            $content = ob_get_clean();
-            self::assertSame($samples[$i]->getContent()->getOutput(),
-                             $content);
-
-            // TODO: add tests for samples.zip: check that it is a ZIP file
-            // and it contains the correct files.
-        }
-
         // Check the link to download all samples
-        $link = $listItems->eq(2)->filter('a')->first();
-        self::assertSame('zip with all samples', $link->text(null, true));
+        $link = $cardBodies->eq(1)->filter('a')->eq(1);
+        self::assertSame('samples', $link->text(null, true));
         self::assertSame(sprintf('/team/%d/samples.zip',
                                  $problem->getProbid()),
                          $link->attr('href'));
+
+        // Download the sample and make sure the contents are correct.
+        // We use ob_ methods since this is a streamed response
+        ob_start();
+        $this->client->click($link->link());
+        $zipfile = ob_get_clean();
+        $content = $this->unzipString($zipfile);
+
+        for ($i = 1; $i <= 2; $i++) {
+            self::assertSame($samples[$i]->getContent()->getInput(), $content["$i.in"]);
+            self::assertSame($samples[$i]->getContent()->getOutput(), $content["$i.out"]);
+        }
+        // Does not contain more than these 4 files
+        self::assertCount(4, $content); 
     }
 }
