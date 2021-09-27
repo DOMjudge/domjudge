@@ -24,6 +24,7 @@ use Twig\Extension\AbstractExtension;
 use Twig\Extension\GlobalsInterface;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
+use Twig_Environment as Environment;
 
 class TwigExtension extends AbstractExtension implements GlobalsInterface
 {
@@ -36,6 +37,11 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
      * @var ConfigurationService
      */
     protected $config;
+
+    /**
+     * @var Environment
+     */
+    protected $twig;
 
     /**
      * @var EntityManagerInterface
@@ -87,6 +93,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
      *
      * @param DOMJudgeService               $dj
      * @param ConfigurationService          $config
+     * @param Environment                   $twig
      * @param EntityManagerInterface        $em
      * @param SubmissionService             $submissionService
      * @param EventLogService               $eventLogService
@@ -100,6 +107,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
     public function __construct(
         DOMJudgeService $dj,
         ConfigurationService $config,
+        Environment $twig,
         EntityManagerInterface $em,
         SubmissionService $submissionService,
         EventLogService $eventLogService,
@@ -112,6 +120,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
     ) {
         $this->dj                   = $dj;
         $this->config               = $config;
+        $this->twig                 = $twig;
         $this->em                   = $em;
         $this->submissionService    = $submissionService;
         $this->eventLogService      = $eventLogService;
@@ -163,7 +172,8 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             new TwigFilter('printTimeRelative', [$this, 'printTimeRelative']),
             new TwigFilter('scoreTime', [$this, 'scoreTime']),
             new TwigFilter('statusClass', [$this, 'statusClass']),
-            new TwigFilter('statusIcon', [$this, 'statusIcon']),
+            new TwigFilter('statusIcon', [$this, 'statusIcon'], ['is_safe' => ['html']]),
+            new TwigFilter('countryFlag', [$this, 'countryFlag'], ['is_safe' => ['html']]),
             new TwigFilter('descriptionExpand', [$this, 'descriptionExpand'], ['is_safe' => ['html']]),
             new TwigFilter('wrapUnquoted', [$this, 'wrapUnquoted']),
             new TwigFilter('hexColorToRGBA', [$this, 'hexColorToRGBA']),
@@ -364,9 +374,33 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
                 $icon = 'check';
                 break;
             default:
-                return $status;
+                return 'unknown';
         }
-        return sprintf('<i class="fas fa-%s-circle"></i>', $icon);
+        return sprintf('<i class="fas fa-%s-circle" aria-hidden="true"></i><span class="sr-only">%s</span>', $icon, $status);
+    }
+
+    /**
+     * Expand countrycode to a flag and optionally full country name  representation
+     * @param string $countryCode The Alpha3 country code to look up
+     * @param bool $showFullname Also output the country's full name
+     * @return string
+     */
+    public function countryFlag(string $countryCode, bool $showFullname = false): string
+    {
+       if (empty($countryCode)) return '';
+
+       $countryAlpha2  = strtolower(Countries::getAlpha2Code($countryCode));
+       $assetFunction  = $this->twig->getFunction('asset')->getCallable();
+       $countryFlagUrl = call_user_func($assetFunction, sprintf('flags/4x3/%s.svg', $countryAlpha2));
+
+       $countryName    = Countries::getAlpha3Name($countryCode);
+
+       if ($showFullname) {
+           return sprintf('<img src="%s" alt="" class="countryflag"> %s',
+               $countryFlagUrl, $countryName);
+       }
+       return sprintf('<img loading="lazy" src="%s" alt="%s" title="%s" class="countryflag">',
+           $countryFlagUrl, $countryCode, $countryName);
     }
 
     /**

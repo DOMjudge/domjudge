@@ -53,11 +53,7 @@
                     <tr>
                         <th>Country</th>
                         <td>
-                            {% if teamAffiliation.country is not empty %}
-                                <img src="{{ asset('flags/4x3/' ~ teamAffiliation.countryAlpha2 ~ '.svg') }}" alt="{{ teamAffiliation.countryName }}"
-                                     title="{{ teamAffiliation.countryName }}" class="countryflag"/>
-                            {% endif %}
-                            {{ teamAffiliation.countryName }}
+                            {{ teamAffiliation.country | countryFlag(true) }}
                         </td>
                     </tr>
                 {% endif %}

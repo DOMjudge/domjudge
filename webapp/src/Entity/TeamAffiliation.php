@@ -164,16 +164,6 @@ class TeamAffiliation extends BaseApiEntity
         return $this->country;
     }
 
-    public function getCountryAlpha2(): ?string
-    {
-        return $this->country ? strtolower(Countries::getAlpha2Code($this->country)) : null;
-    }
-
-    public function getCountryName(): ?string
-    {
-        return $this->country ? Countries::getAlpha3Name($this->country) : null;
-    }
-
     public function setComments(string $comments): TeamAffiliation
     {
         $this->comments = $comments;
