@@ -226,25 +226,6 @@ class PublicController extends BaseController
     }
 
     /**
-     * @Route(
-     *     "/{probId<\d+>}/sample/{index<\d+>}/{type<input|output>}",
-     *     name="public_problem_sample_testcase"
-     *     )
-     * @throws NonUniqueResultException
-     */
-    public function sampleTestcaseAction(int $probId, int $index, string $type): StreamedResponse
-    {
-        return $this->getBinaryFile($probId, function (
-            int $probId,
-            Contest $contest,
-            ContestProblem $contestProblem
-        ) use ($type, $index) {
-            return $this->dj->getSampleTestcaseStreamedResponse($contestProblem,
-                $index, $type);
-        });
-    }
-
-    /**
      * @Route("/{probId<\d+>}/samples.zip", name="public_problem_sample_zip")
      */
     public function sampleZipAction(int $probId): StreamedResponse
