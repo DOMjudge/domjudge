@@ -124,10 +124,11 @@
                                         </div>
 
                                         {% if problem.problem.attachments | length > 0 %}
+                                            <hr/>
                                             <ol class="text-center list-group list-group-flush">
                                                 {% for attachment in problem.problem.attachments %}
                                                     <li class="list-group-item">
-                                                        <a class="btn btn-secondary" role="button"
+                                                        <a class="btn btn-outline-secondary" role="button"
                                                            href="{{ path(problem_attachment_path, {'probId': problem.probid, 'attachmentId': attachment.attachmentid}) }}">
                                                             <i class="{{ attachment.type | fileTypeIcon }}"></i> {{ attachment.name }}
                                                         </a>
