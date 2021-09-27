@@ -16,11 +16,7 @@
         <a href="{{ path('jury_problem', {'probId': problem.probid}) }}">Back to problem p{{ problem.probid }}</a>
     </div>
 
-    {% if is_granted('ROLE_ADMIN') %}
-        {# We use a variable here so indeting doesn't get screwed up #}
-        {% set formStart = '<form method="post" enctype="multipart/form-data">' %}
-        {{ formStart | raw }}
-    {% endif %}
+    <form method="post" enctype="multipart/form-data">
 
     {% if testcases is empty %}
         <p class="nodata">No testcase(s) yet.</p>
@@ -191,11 +187,7 @@
         <input type="submit" class="btn btn-primary" value="Submit all changes">
     {% endif %}
 
-    {% if is_granted('ROLE_ADMIN') %}
-        {# We use a variable here so indeting doesn't get screwed up #}
-        {% set formEnd = '</form>' %}
-        {{ formEnd | raw }}
-    {% endif %}
+    </form>
 
     <script>
         $(function() {
