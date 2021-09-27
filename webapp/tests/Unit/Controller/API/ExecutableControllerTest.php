@@ -47,19 +47,7 @@ class ExecutableControllerTest extends BaseTest
     {
         $decoded = base64_decode($content, true);
 
-        $zip = new \ZipArchive();
-        $tempFilename = tempnam(static::$container->get(DOMJudgeService::class)->getDomjudgeTmpDir(), "api-executables-test-");
-        file_put_contents($tempFilename, $decoded);
-
-        $zip->open($tempFilename);
-        $return = [];
-        for($i = 0; $i < $zip->count(); ++$i) {
-            $return[$zip->getNameIndex($i)] = $zip->getFromIndex($i); 
-        }
-        $zip->close();
-
-        unlink($tempFilename);
-        return $return;
+        return $this->unzipString($decoded);
     }
 
 
