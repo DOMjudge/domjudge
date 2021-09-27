@@ -26,7 +26,7 @@ trap cleanup EXIT
 # Default directory where to build the chroot tree:
 CHROOTDIR="@judgehost_chrootdir@"
 
-# Fallback Debian and release (codename) to bootstrap (note: overriden right below):
+# Fallback Debian and release (codename) to bootstrap (note: overridden right below):
 DISTRO="Debian"
 RELEASE="stretch"
 
@@ -60,7 +60,7 @@ Creates a chroot environment with Java JRE support using the
 Debian or Ubuntu GNU/Linux distribution.
 
 Options:
-  -a <arch>    Machine archicture to use.
+  -a <arch>    Machine architecture to use.
   -d <dir>     Directory where to build the chroot environment.
   -D <distro>  Linux distribution to use: 'Debian' or 'Ubuntu'.
   -R <release> Release for the selected Linux distribution

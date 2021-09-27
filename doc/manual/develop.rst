@@ -114,9 +114,9 @@ To run them, follow the following steps:
   first dropping any existing database and then running
   ``bin/dj_setup_database -u root -r install``.
 
-Note that you don't have to drop and recreate the database everytime you run the
+Note that you don't have to drop and recreate the database every time you run the
 tests; the tests are written in such a way that they keep working, even if you
-run them multple times.
+run them multiple times.
 
 Now to run the tests, execute the command::
 

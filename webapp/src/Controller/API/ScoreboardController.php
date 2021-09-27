@@ -70,7 +70,7 @@ class ScoreboardController extends AbstractRestController
      *     name="allteams",
      *     in="query",
      *     type="boolean",
-     *     description="Also show invisble teams. Requires jury privileges"
+     *     description="Also show invisible teams. Requires jury privileges"
      * )
      * @SWG\Parameter(
      *     name="category",
