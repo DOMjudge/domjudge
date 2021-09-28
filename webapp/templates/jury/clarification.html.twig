@@ -94,7 +94,7 @@ Jury
 <span class="clarification-queue-form" data-current-selected-queue="{{ clar.queueid }}" data-clarification-id="{{clar.clarid}}">
 <form action="{{ path('jury_clarification_change_queue', {'clarId': clar.clarid }) }}" method="post" class="form-inline">
 <select name="queue" class="queue custom-select custom-select-sm">
-<option value="">Unassigned issues</option>
+<option value="unassigned">Unassigned issues</option>
 {% for qid,queue in clarform.queues %}
 <option value="{{qid}}"{% if clar.queueid == qid %} selected{% endif %}>{{queue}}</option>
 {% endfor %}
