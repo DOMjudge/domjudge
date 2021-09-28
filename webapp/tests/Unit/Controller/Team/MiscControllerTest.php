@@ -201,6 +201,8 @@ class MiscControllerTest extends BaseTest
     {
         $docsYaml = static::$container->getParameter('domjudge.etcdir') . '/docs.yaml';
         copy("$docsYaml.dist", $docsYaml);
+        $this->removeTestContainer();
+
         $this->verifyPageResponse('GET', '/team', 200);
 
         self::assertSelectorExists('a:contains("Docs")');
@@ -218,5 +220,6 @@ class MiscControllerTest extends BaseTest
         self::assertStringContainsString('C++ STL', $stl->text('', false));
 
         unlink($docsYaml);
+        $this->removeTestContainer();
     }
 }
