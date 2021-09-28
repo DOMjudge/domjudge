@@ -208,10 +208,7 @@ class ImportExportController extends BaseController
                         $this->dj->auditlog('problem', $newProblem->getProbid(), 'upload zip',
                             $clientName);
                     } else {
-                        $message = '<ul>' . implode('', array_map(function (string $message) {
-                                return sprintf('<li>%s</li>', $message);
-                            }, $allMessages)) . '</ul>';
-                        $this->addFlash('danger', $message);
+                        $this->addFlash('danger', implode("\n", $allMessages));
                         return $this->redirectToRoute('jury_problems');
                     }
                 } catch (Exception $e) {
@@ -224,11 +221,7 @@ class ImportExportController extends BaseController
             }
 
             if (!empty($allMessages)) {
-                $message = '<ul>' . implode('', array_map(function (string $message) {
-                        return sprintf('<li>%s</li>', $message);
-                    }, $allMessages)) . '</ul>';
-
-                $this->addFlash('info', $message);
+                $this->addFlash('info', implode("\n", $allMessages));
             }
 
             if (count($archives) === 1 && $newProblem !== null) {
