@@ -206,7 +206,7 @@ class RejudgingService
         ini_set('max_execution_time', '300');
 
         if ($rejudging->getEndtime()) {
-            $error = sprintf('<div class="alert alert-danger">Rejudging already %s.</div>', $rejudging->getValid() ? 'applied' : 'canceled');
+            $error = sprintf('Error: rejudging already %s.', $rejudging->getValid() ? 'applied' : 'canceled');
             if ($progressReporter) {
                 $progressReporter(0, '', $error);
                 return false;
@@ -219,7 +219,7 @@ class RejudgingService
 
         $todo = $this->calculateTodo($rejudging)['todo'];
         if ($action == self::ACTION_APPLY && $todo > 0) {
-            $error = sprintf('<div class="alert alert-danger">%d unfinished judgings left, cannot apply rejudging.</div>', $todo);
+            $error = sprintf('Error: %d unfinished judgings left, cannot apply rejudging.', $todo);
             if ($progressReporter) {
                 $progressReporter(0, '', $error);
                 return false;
