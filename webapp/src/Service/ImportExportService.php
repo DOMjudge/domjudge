@@ -1053,11 +1053,14 @@ class ImportExportService
      */
     protected function importAccountsTsv(array $content, string &$message = null): int
     {
-        $accountData = [];
-        $l           = 1;
-        $teamRole    = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'team']);
-        $juryRole    = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'jury']);
-        $adminRole   = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'admin']);
+        $accountData         = [];
+        $l                   = 1;
+        $teamRole            = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'team']);
+        $juryRole            = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'jury']);
+        $adminRole           = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'admin']);
+        $apiReaderRole       = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'api_reader']);
+        $apiWriterRole       = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'api_writer']);
+        $apiSourceReaderRole = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'api_source_reader']);
 
         $juryCategory = $this->em->getRepository(TeamCategory::class)->findOneBy(['name' => 'Jury']);
         if (!$juryCategory) {
@@ -1081,9 +1084,22 @@ class ImportExportService
                     $roles[] = $adminRole;
                     break;
                 case 'judge':
-                    $roles[]  = $juryRole;
-                    $roles[]  = $teamRole;
-                    $juryTeam = ['name' => $line[1], 'category' => $juryCategory, 'members' => $line[1]];
+                    switch ($line[2]) {
+                        case 'cds':
+                            $roles[] = $apiReaderRole;
+                            $roles[] = $apiWriterRole;
+                            $roles[] = $apiSourceReaderRole;
+                            break;
+                        case 'kattis':
+                            $roles[] = $apiReaderRole;
+                            $roles[] = $apiSourceReaderRole;
+                            break;
+                        default:
+                            $roles[]  = $juryRole;
+                            $roles[]  = $teamRole;
+                            $juryTeam = ['name' => $line[1], 'category' => $juryCategory, 'members' => $line[1]];
+                            break;
+                    }
                     break;
                 case 'team':
                     $roles[] = $teamRole;
