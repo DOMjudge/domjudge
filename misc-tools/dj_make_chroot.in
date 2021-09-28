@@ -302,6 +302,9 @@ Acquire::Retries "3";
 Acquire::PDiffs "false";
 EOF
 
+mkdir -p $CHROOTDIR/etc/apt/apt/trusted.gpg.d
+cp /etc/apt/trusted.gpg.d/* $CHROOTDIR/etc/apt/trusted.gpg.d
+
 # Add apt proxy settings if desired
 if [ -n "$DEBPROXY" ]; then
     echo "Acquire::http::Proxy \"$DEBPROXY\";" >> "$CHROOTDIR/etc/apt/apt.conf"
