@@ -288,6 +288,8 @@ deb $DEBMIRROR $RELEASE-updates main
 deb $DEBMIRROR $RELEASE-updates universe
 deb $DEBMIRROR $RELEASE-security main
 deb $DEBMIRROR $RELEASE-security universe
+
+deb [arch=amd64] https://packages/pypy/ppa/ubuntu focal main
 EOF
 fi
 
