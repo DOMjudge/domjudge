@@ -337,7 +337,7 @@ abstract class BaseTest extends WebTestCase
 
     protected function removeTestContainer(): void
     {
-        $container = __DIR__ . '/../../../../var/cache/test/srcApp_KernelTestDebugContainer.php';
+        $container = __DIR__ . '/../../var/cache/test/srcApp_KernelTestDebugContainer.php';
         if (file_exists($container)) {
             unlink($container);
         }
