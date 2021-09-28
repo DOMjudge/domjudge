@@ -24,7 +24,10 @@ cd /opt/domjudge/domserver
 export APP_ENV="test"
 
 # Run phpunit tests.
+set +e
 php -dpcov.enabled=1 -dpcov.directory=webapp/src lib/vendor/bin/phpunit -c webapp/phpunit.xml.dist --log-junit ${CI_PROJECT_DIR}/unit-tests.xml --colors=never --coverage-html=${CI_PROJECT_DIR}/coverage-html --coverage-clover coverage.xml > phpunit.out
+UNITSUCCESS=$?
+set -e
 CNT=$(sed -n '/Generating code coverage report/,$p' phpunit.out | grep -v DoctrineTestBundle | grep -v ^$ | wc -l)
 FILE=deprecation.txt
 sed -n '/Generating code coverage report/,$p' phpunit.out > ${CI_PROJECT_DIR}/$FILE
@@ -41,7 +44,22 @@ curl https://api.github.com/repos/domjudge/domjudge/statuses/$CI_COMMIT_SHA \
   -H "Authorization: token $GH_BOT_TOKEN_OBSCURED" \
   -H "Accept: application/vnd.github.v3+json" \
   -d "{\"state\": \"$STATE\", \"target_url\": \"${CI_JOB_URL/$ORIGINAL/$REPLACETO}/artifacts/$FILE\", \"description\":\"Symfony deprecations\", \"context\": \"Symfony deprecation\"}"
+if [ $UNITSUCCESS -eq 0 ]; then
+    STATE=success
+else
+    STATE=failure
+fi
+curl https://api.github.com/repos/domjudge/domjudge/statuses/$CI_COMMIT_SHA \
+    -X POST \
+    -H "Authorization: token $GH_BOT_TOKEN_OBSCURED" \
+    -H "Accept: application/vnd.github.v3+json" \
+    -d "{\"state\": \"$STATE\", \"target_url\": \"${CI_PIPELINE_URL}/test_report\", \"description\":\"Unit tests\", \"context\": \"unit_tests\"}"
+if [ $UNITSUCCESS -ne 0 ]; then
+    exit 1
+fi
+
 section_start_collap uploadcoverage "Upload code coverage"
+# Only upload when we got working unit-tests.
 set +u # Uses some variables which are not set
 . $DIR/gitlab/uploadcodecov.sh 1>/dev/zero 2>/dev/zero
 section_end uploadcoverage
