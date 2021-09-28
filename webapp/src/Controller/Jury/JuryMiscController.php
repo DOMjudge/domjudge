@@ -12,6 +12,7 @@ use App\Entity\Team;
 use App\Entity\TeamAffiliation;
 use App\Service\DOMJudgeService;
 use App\Service\ScoreboardService;
+use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\Expr\Join;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
@@ -211,7 +212,7 @@ class JuryMiscController extends BaseController
 
         if ($request->isXmlHttpRequest() && $request->isMethod('POST')) {
             $progressReporter = function (string $data) {
-                echo $data;
+                echo Utils::specialchars($data);
                 ob_flush();
                 flush();
             };
@@ -226,7 +227,7 @@ class JuryMiscController extends BaseController
 
                 $timeEnd = microtime(true);
 
-                $progressReporter(sprintf('<p>Scoreboard cache refresh completed in %.2lf seconds.</p>',
+                $progressReporter(sprintf('Scoreboard cache refresh completed in %.2lf seconds.',
                                           $timeEnd - $timeStart));
             });
             return $response;

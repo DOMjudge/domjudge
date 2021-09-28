@@ -116,7 +116,16 @@ class ImportProblemService
 
         // Read problem properties
         $propertiesString = $zip->getFromName($propertiesFile);
-        $properties       = $propertiesString === false ? [] : parse_ini_string($propertiesString);
+        $properties = [];
+
+        if ($propertiesString !== false) {
+            $tryParseProperties = parse_ini_string($propertiesString);
+            if (is_array($tryParseProperties)) {
+                $properties = $tryParseProperties;
+            } else {
+                $messages[] = "The given domjudge-problem.ini is invalid, ignoring.";
+            }
+        }
 
         // Only preserve valid keys:
         $problemProperties        = array_intersect_key($properties, array_flip($iniKeysProblem));
@@ -383,7 +392,7 @@ class ImportProblemService
                     $problem
                         ->setProblemtext($text)
                         ->setProblemtextType($type);
-                    $messages[] = "Added problem statement from: <tt>$filename</tt>";
+                    $messages[] = "Added problem statement from: $filename";
                     break;
                 }
             }
@@ -479,7 +488,7 @@ class ImportProblemService
                         ->getOneOrNullResult();
 
                     if (isset($existingTestcase)) {
-                        $messages[] = sprintf('Skipped %s testcase <tt>%s</tt>: already exists', $type, $dataFile);
+                        $messages[] = sprintf('Skipped %s testcase %s: already exists', $type, $dataFile);
                         continue;
                     }
                 }
@@ -513,7 +522,7 @@ class ImportProblemService
 
                 $testcases[] = $testcase;
 
-                $messages[] = sprintf('Added %s testcase from: <tt>%s.{in,ans}</tt>', $type, $dataFile);
+                $messages[] = sprintf('Added %s testcase from: %s.{in,ans}', $type, $dataFile);
             }
             $messages[] = sprintf("Added %d %s testcase(s).", $numCases, $type);
         }
@@ -612,7 +621,7 @@ class ImportProblemService
                 $tmpDir = $this->dj->getDomjudgeTmpDir();
 
                 if (empty($languageToUse)) {
-                    $messages[] = "Could not add jury solution <tt>$path</tt>: unknown language.";
+                    $messages[] = "Could not add jury solution $path: unknown language.";
                 } else {
                     $expectedResult = SubmissionService::normalizeExpectedResult($pathComponents[1]);
                     $results        = null;
@@ -686,10 +695,10 @@ class ImportProblemService
                         // Flush changes to submission
                         $this->em->flush();
 
-                        $messages[] = "Added jury solution from: <tt>$path</tt></li>";
+                        $messages[] = "Added jury solution from: $path";
                         $numJurySolutions++;
                     } else {
-                        $messages[] = "Could not add jury solution <tt>$path</tt>: too large.";
+                        $messages[] = "Could not add jury solution $path: too large.";
                     }
 
                     foreach ($tempFiles as $f) {
