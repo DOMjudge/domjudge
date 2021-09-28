@@ -193,33 +193,4 @@ class MiscControllerTest extends BaseTest
 
         self::assertSelectorNotExists('a:contains("Docs")');
     }
-
-    /**
-     * Test that having docs.yaml does show docs link
-     */
-    public function testDocsPage() : void
-    {
-        $docsYaml = static::$container->getParameter('domjudge.etcdir') . '/docs.yaml';
-        copy("$docsYaml.dist", $docsYaml);
-        $this->removeTestContainer();
-
-        $this->verifyPageResponse('GET', '/team', 200);
-
-        self::assertSelectorExists('a:contains("Docs")');
-
-        $this->verifyPageResponse('GET', '/team/docs', 200);
-
-        $crawler = $this->getCurrentCrawler();
-        $links = $crawler->filter('.list-group a');
-
-        $manual = $links->eq(0);
-        self::assertEquals('../docs/team.pdf', $manual->attr('href'));
-        self::assertStringContainsString('Team guide', $manual->text('', false));
-        $stl = $links->eq(1);
-        self::assertEquals('https://www.cplusplus.com/reference/stl/', $stl->attr('href'));
-        self::assertStringContainsString('C++ STL', $stl->text('', false));
-
-        unlink($docsYaml);
-        $this->removeTestContainer();
-    }
 }
