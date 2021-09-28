@@ -396,7 +396,7 @@ class RejudgingController extends BaseController
         if ($request->isXmlHttpRequest()) {
             $progressReporter = function (string $data, bool $isError = false) {
                 if ($isError) {
-                    echo sprintf('<div class="alert alert-danger">%s</div>', $data);
+                    echo sprintf('Error: %s', $data);
                 } else {
                     echo $data;
                 }
@@ -410,13 +410,9 @@ class RejudgingController extends BaseController
                 if ($rejudgingService->finishRejudging($rejudging, $action, $progressReporter)) {
                     $timeEnd      = microtime(true);
                     $timeDiff     = sprintf('%.2f', $timeEnd - $timeStart);
-                    $rejudgingUrl = $this->generateUrl(
-                        'jury_rejudging',
-                        ['rejudgingId' => $rejudging->getRejudgingid()]
-                    );
                     echo sprintf(
-                        '<br/><br/><p>Rejudging <a href="%s">r%d</a> %s in %s seconds.</p>',
-                        $rejudgingUrl, $rejudging->getRejudgingid(),
+                        'Rejudging r%d %s in %s seconds.',
+                        $rejudging->getRejudgingid(),
                         $action == RejudgingService::ACTION_APPLY ? 'applied' : 'canceled', $timeDiff
                     );
                 }

@@ -18,7 +18,8 @@
         <img class="mb-4" src="{{ asset('images/DOMjudgelogo.png') }}" alt="DOMjudge" width="72">
         {% include 'partials/messages.html.twig' %}
         {% if app.user is not null %}
-            {% set message = 'You are currently automatically logged in as ' ~ app.user.username ~ '. Use the form below to change login.' %}
+            {% set message = 'You are currently automatically logged in as ' ~ app.user.username ~ '.
+Use the form below to change login.' %}
             {% include 'partials/alert.html.twig' with {type: 'success'} %}
         {% endif %}
 
