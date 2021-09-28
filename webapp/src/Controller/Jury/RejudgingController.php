@@ -452,7 +452,7 @@ class RejudgingController extends BaseController
 
         if ($request->isXmlHttpRequest()) {
             $progressReporter = function (int $progress, string $log, ?string $message = null) {
-                echo json_encode(['progress' => $progress, 'log' => $log, 'message' => $message]);
+                echo json_encode(['progress' => $progress, 'log' => Utils::specialchars($log), 'message' => Utils::specialchars($message ?? '')]);
                 ob_flush();
                 flush();
             };
@@ -461,13 +461,9 @@ class RejudgingController extends BaseController
                 if ($rejudgingService->finishRejudging($rejudging, $action, $progressReporter)) {
                     $timeEnd      = microtime(true);
                     $timeDiff     = sprintf('%.2f', $timeEnd - $timeStart);
-                    $rejudgingUrl = $this->generateUrl(
-                        'jury_rejudging',
-                        ['rejudgingId' => $rejudging->getRejudgingid()]
-                    );
                     $message      = sprintf(
-                        '<p>Rejudging <a href="%s">r%d</a> %s in %s seconds.</p>',
-                        $rejudgingUrl, $rejudging->getRejudgingid(),
+                        'Rejudging r%d %s in %s seconds.',
+                        $rejudging->getRejudgingid(),
                         $action == RejudgingService::ACTION_APPLY ? 'applied' : 'canceled', $timeDiff
                     );
                     $progressReporter(100, '', $message);
@@ -542,7 +538,7 @@ class RejudgingController extends BaseController
         }
         if ($isCreateRejudgingAjax) {
             $progressReporter = function (int $progress, string $log, ?string $redirect = null) {
-                echo json_encode(['progress' => $progress, 'log' => $log, 'redirect' => $redirect]);
+                echo json_encode(['progress' => $progress, 'log' => Utils::specialchars($log), 'redirect' => $redirect]);
                 ob_flush();
                 flush();
             };
@@ -721,7 +717,7 @@ class RejudgingController extends BaseController
         }
 
         $progressReporter = function (int $progress, string $log, ?string $redirect = null) {
-            echo json_encode(['progress' => $progress, 'log' => $log, 'redirect' => $redirect]);
+            echo json_encode(['progress' => $progress, 'log' => Utils::specialchars($log), 'redirect' => $redirect]);
             ob_flush();
             flush();
         };
