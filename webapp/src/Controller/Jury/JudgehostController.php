@@ -416,7 +416,6 @@ class JudgehostController extends BaseController
             'UPDATE App\Entity\Judgehost j set j.active = false, j.hidden = true WHERE j.polltime IS NULL OR j.polltime < :threshold')
             ->setParameter(':threshold', $critical_threshold)
             ->execute();
-        dump($ret);
         $this->dj->auditlog('judgehost', null, 'auto-hiding judgehosts');
         return $this->redirectToRoute('jury_judgehosts');
     }

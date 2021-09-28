@@ -179,7 +179,6 @@ class InternalError
 
     public function getAffectedJudgings()
     {
-        dump($this->affectedJudgings);
         return $this->affectedJudgings;
     }
 }
