@@ -8,15 +8,11 @@ class DocsPageControllerTest extends BaseTest
 {
     protected $roles = ['team'];
 
-    /**
-     * @var string
-     */
-    protected $docsYaml;
+    protected const YAML = __DIR__ . '/../../../../../etc/docs.yaml';
 
     protected function setUp(): void
     {
-        $this->docsYaml = static::$container->getParameter('domjudge.etcdir') . '/docs.yaml';
-        copy($this->docsYaml . ".dist", $thia->docsYaml);
+        copy(self::YAML . ".dist", self::YAML);
         $this->removeTestContainer();
 
         parent::setUp();
@@ -52,7 +48,7 @@ class DocsPageControllerTest extends BaseTest
 
     protected function tearDown(): void
     {
-        unlink($this->docsYaml);
+        unlink(self::YAML);
         $this->removeTestContainer();
 
         parent::tearDown();
