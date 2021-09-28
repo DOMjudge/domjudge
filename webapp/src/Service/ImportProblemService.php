@@ -130,7 +130,7 @@ class ImportProblemService
             if (is_array($tryParseProperties)) {
                 $properties = $tryParseProperties;
             } else {
-                $messages[] = "The given <code>domjudge-problem.ini</code> is invalid, ignoring.";
+                $messages[] = "The given domjudge-problem.ini is invalid, ignoring.";
             }
         }
 
@@ -377,7 +377,7 @@ class ImportProblemService
                                 $problem->setCompareExecutable($executable);
                             }
 
-                            $messages[] = "Added output validator '<code>$outputValidatorName</code>'";
+                            $messages[] = "Added output validator '$outputValidatorName'";
                         }
                     }
                 }
@@ -406,7 +406,7 @@ class ImportProblemService
                     $problem
                         ->setProblemtext($text)
                         ->setProblemtextType($type);
-                    $messages[] = "Added problem statement from: <code>$filename</code>";
+                    $messages[] = "Added problem statement from: $filename";
                     break;
                 }
             }
@@ -502,7 +502,7 @@ class ImportProblemService
                         ->getOneOrNullResult();
 
                     if (isset($existingTestcase)) {
-                        $messages[] = sprintf('Skipped %s testcase <code>%s</code>: already exists', $type, $dataFile);
+                        $messages[] = sprintf('Skipped %s testcase %s: already exists', $type, $dataFile);
                         continue;
                     }
                 }
@@ -537,7 +537,7 @@ class ImportProblemService
                 $testcases[] = $testcase;
             }
             if ($numCases > 0) {
-                $messages[] = sprintf("Added %d %s testcase(s): <code>{%s}.{in,ans}</code>",
+                $messages[] = sprintf("Added %d %s testcase(s): {%s}.{in,ans}",
                     $numCases, $type, join(',', $dataFiles));
             }
         }
@@ -585,7 +585,7 @@ class ImportProblemService
                 $attachmentContent = $attachment->getContent();
                 $attachmentContent->setContent($content);
 
-                $messages[] = sprintf('Updated attachment <code>%s</code>', $name);
+                $messages[] = sprintf("Updated attachment '%s'", $name);
             } else {
                 $attachment = new ProblemAttachment();
                 $attachmentContent = new ProblemAttachmentContent();
@@ -599,12 +599,12 @@ class ImportProblemService
 
                 $this->em->persist($attachment);
 
-                $messages[] = sprintf('Added attachment <code>%s</code>', $name);
+                $messages[] = sprintf("Added attachment '%s'", $name);
             }
 
             $numAttachments++;
         }
-        $messages[] = sprintf("Added/updated %d attachments(s).", $numAttachments);
+        $messages[] = sprintf("Added/updated %d attachment(s).", $numAttachments);
 
         $this->em->persist($problem);
         $this->em->flush();
@@ -711,7 +711,7 @@ class ImportProblemService
                 $tmpDir = $this->dj->getDomjudgeTmpDir();
 
                 if (empty($languageToUse)) {
-                    $subs_with_unknown_lang[] = '<code>' . $path . '</code>';
+                    $subs_with_unknown_lang[] = "'" . $path . "'";
                 } else {
                     $expectedResult = SubmissionService::normalizeExpectedResult($pathComponents[1]);
                     $results        = null;
@@ -789,10 +789,10 @@ class ImportProblemService
                         // Flush changes to submission
                         $this->em->flush();
 
-                        $successful_subs[] = '<code>' . $path . '</code>';
+                        $successful_subs[] = "'" . $path . "'";
                         $numJurySolutions++;
                     } else {
-                        $too_large_subs[] = '<code>' . $path . '</code>';
+                        $too_large_subs[] = "'" . $path . "'";
                     }
 
                     foreach ($tempFiles as $f) {

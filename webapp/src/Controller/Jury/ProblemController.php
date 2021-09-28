@@ -582,8 +582,8 @@ class ProblemController extends BaseController
 
                         if ($type === 'output' && $file->getSize() > $outputLimit * 1024) {
                             $message .= sprintf(
-                                '<br><b>Warning: file size exceeds <code>output_limit</code> ' .
-                                'of %s kB. This will always result in wrong answers!</b>',
+                                "\nWarning: file size exceeds output_limit " .
+                                'of %s kB. This will always result in wrong answers!',
                                 $outputLimit
                             );
                         }
@@ -686,8 +686,8 @@ class ProblemController extends BaseController
 
                 if (strlen($newTestcaseContent->getOutput()) > $outputLimit * 1024) {
                     $message .= sprintf(
-                        '<br><b>Warning: file size exceeds <code>output_limit</code> ' .
-                        'of %s kB. This will always result in wrong answers!</b>',
+                        "\nWarning: file size exceeds output_limit " .
+                        'of %s kB. This will always result in wrong answers!',
                         $outputLimit
                     );
                     $haswarnings = true;
@@ -695,7 +695,7 @@ class ProblemController extends BaseController
 
                 if (empty($newTestcaseContent->getInput()) ||
                     empty($newTestcaseContent->getOutput())) {
-                    $message .= '<br /><b>Warning: empty testcase file(s)!</b>';
+                    $message .= "\nWarning: empty testcase file(s)!\n";
                     $haswarnings = true;
                 }
 
@@ -705,11 +705,7 @@ class ProblemController extends BaseController
             $this->em->flush();
 
             if (!empty($messages)) {
-                $message = '<ul>' . implode('', array_map(function (string $message) {
-                        return sprintf('<li>%s</li>', $message);
-                    }, $messages)) . '</ul>';
-
-                $this->addFlash($haswarnings ? 'warning' : 'info', $message);
+                $this->addFlash($haswarnings ? 'warning' : 'info', implode("\n", $messages));
             }
             return $this->redirectToRoute('jury_problem_testcases', ['probId' => $probId]);
         }
@@ -912,10 +908,7 @@ class ProblemController extends BaseController
                 )) {
                     $this->dj->auditlog('problem', $problem->getProbid(), 'upload zip', $clientName);
                 } else {
-                    $message = '<ul>' . implode('', array_map(function (string $message) {
-                            return sprintf('<li>%s</li>', $message);
-                        }, $messages)) . '</ul>';
-                    $this->addFlash('danger', $message);
+                    $this->addFlash('danger', implode("\n", $messages));
                     return $this->redirectToRoute('jury_problem', ['probId' => $problem->getProbid()]);
                 }
             } catch (Exception $e) {
@@ -927,11 +920,7 @@ class ProblemController extends BaseController
             }
 
             if (!empty($messages)) {
-                $message = '<ul>' . implode('', array_map(function (string $message) {
-                        return sprintf('<li>%s</li>', $message);
-                    }, $messages)) . '</ul>';
-
-                $this->addFlash('info', $message);
+                $this->addFlash('info', implode("\n", $messages));
             }
 
             return $this->redirectToRoute('jury_problem', ['probId' => $problem->getProbid()]);

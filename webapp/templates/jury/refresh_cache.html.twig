@@ -13,7 +13,7 @@
     <h1>Refresh cache</h1>
 
     {% if doRefresh %}
-        <div id="refresh-status"></div>
+        <pre id="refresh-status"></pre>
     {% else %}
         <div class="alert alert-warning">
             <h5 class="alert-heading">Significant database impact</h5>
@@ -45,7 +45,7 @@
 {% block extrafooter %}
     <script>
         $(function () {
-            var $status = $('div#refresh-status');
+            var $status = $('pre#refresh-status');
             var xhr = new XMLHttpRequest();
             xhr.open('POST', '{{ (path('jury_refresh_cache')) }}', true);
             xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
