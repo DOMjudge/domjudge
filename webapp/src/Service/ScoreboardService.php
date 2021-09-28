@@ -676,18 +676,17 @@ class ScoreboardService
             ->getQuery()
             ->getResult();
 
-        $message = sprintf('<p>Recalculating all values for the scoreboard ' .
-                           'cache for contest %d (%d teams, %d problems)...</p>',
+        $message = sprintf('Recalculating all values for the scoreboard ' .
+                           'cache for contest %d (%d teams, %d problems)...',
                            $contest->getCid(), count($teams), count($problems));
-        $progressReporter($message);
-        $progressReporter('<pre>');
+        $progressReporter($message . "\n\n");
 
         if (count($teams) == 0) {
-            $progressReporter('No teams defined, doing nothing.</pre>');
+            $progressReporter("No teams defined, doing nothing.\n");
             return;
         }
         if (count($problems) == 0) {
-            $progressReporter('No problems defined, doing nothing.</pre>');
+            $progressReporter("No problems defined, doing nothing.\n");
             return;
         }
 
@@ -705,9 +704,7 @@ class ScoreboardService
             $this->updateRankCache($contest, $team);
         }
 
-        $progressReporter('</pre>');
-
-        $progressReporter('<p>Deleting irrelevant data...</p>');
+        $progressReporter("\nDeleting irrelevant data...");
 
         // Drop all teams and problems that do not exist in the contest
         if (!empty($problems)) {
@@ -753,7 +750,7 @@ class ScoreboardService
             'DELETE FROM rankcache WHERE cid = :cid AND teamid NOT IN (:teamIds)',
             $params, $types);
 
-        $progressReporter('<p>Done.</p>');
+        $progressReporter(" done.\n\n");
     }
 
     /**

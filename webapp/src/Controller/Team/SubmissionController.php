@@ -120,7 +120,7 @@ class SubmissionController extends BaseController
                                         'via teampage', null, $contest->getCid());
                     $this->addFlash(
                         'success',
-                        '<strong>Submission done!</strong> Watch for the verdict in the list below.'
+                        'Submission done! Watch for the verdict in the list below.'
                     );
                 } else {
                     $this->addFlash('danger', $message);
