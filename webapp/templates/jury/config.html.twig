@@ -18,75 +18,114 @@
     <h1>Configuration</h1>
 
     <form method="post">
+        <ul class="nav nav-pills" id="configtab" role="tablist">
+            {% for category in options %}
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link {{ (category.name == 'Scoring') ? 'active' : '' }}" id="{{ category.name }}-tab" data-toggle="tab" href="#{{ category.name }}" role="tab">{{ category.name }} Options</a>
+                </li>
+            {% endfor %}
+        </ul>
+
+        <div class="tab-content" id="configtab">
         {% for category in options %}
-            <div class="card">
-                <div class="card-header">
-                    {{ category.name }} Options
-                </div>
-                <div class="card-body">
-                    <ul class="list-group list-group-flush">
-                        {% for option in category.data %}
-                            <li class="list-group-item" style="padding:0;padding-top:10px;">
-                                <div class="form-group">
-                                    <label
-                                    {% if option.type in ['int','string','bool'] or option.type == 'array_val' and option.options is not null %}
-                                        for="config_{{ option.name }}"
-                                        {% if option.type =='bool' %} onclick="$('#config_{{ option.name }}').bootstrapToggle('toggle')"{% endif %}
-                                    {% endif %}
-                                    >{{ option.name | replace({'_': ' '}) | capitalize }}:</label>
-                                    {% if option.type == 'bool' %}
-                                        <input type="checkbox" data-toggle="toggle" data-size="mini" data-on="Yes"
-                                               data-off="No"
-                                               name="config_{{ option.name }}" id="config_{{ option.name }}"
-                                            {% if option.value == 1 %} checked="checked"{% endif %}>
-                                        <br/>
-                                    {% elseif option.type == 'int' %}
-                                        {% if option.options is not null %}
-                                            <select class="form-control form-control-sm custom-select custom-select-sm"
-                                                   style="margin-left:5px;width:15em;text-align:right;display:inline-block;"
-                                                   name="config_{{ option.name }}" id="config_{{ option.name }}">
-                                                {% for value, label in option.options %}
-                                                    <option {% if option.value == value %}selected{% endif %} value="{{ value }}">{{ label }}</option>
-                                                {% endfor %}
-                                            </select>
-                                        {% else %}
-                                            <input class="form-control form-control-sm"
-                                                   style="margin-left:5px;width:7em;text-align:right;display:inline-block;"
-                                                   type="number"
-                                                   name="config_{{ option.name }}" id="config_{{ option.name }}"
-                                                   value="{{ option.value }}">
+            <div class="tab-pane fade {{ (category.name == 'Scoring') ? 'show active' : '' }}" id="{{ category.name }}" role="tabpanel" aria-labelledby="{{ category.name }}-tab">
+                <div class="card">
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush">
+                            {% for option in category.data %}
+                                <li class="list-group-item" style="padding:0;padding-top:10px;">
+                                    <div class="form-group">
+                                        <label
+                                        {% if option.type in ['int','string','bool'] or option.type == 'array_val' and option.options is not null %}
+                                            for="config_{{ option.name }}"
+                                            {% if option.type =='bool' %} onclick="$('#config_{{ option.name }}').bootstrapToggle('toggle')"{% endif %}
                                         {% endif %}
-                                        <br/>
-                                    {% elseif option.type == 'string' %}
-                                        {% if option.options is not null %}
-                                            <select class="form-control form-control-sm custom-select custom-select-sm"
-                                                    style="width:30em;display: block;"
-                                                    name="config_{{ option.name }}" id="config_{{ option.name }}">
-                                                {% for value, label in option.options %}
-                                                    <option {% if option.value == value %}selected{% endif %} value="{{ value }}">{{ label }}</option>
-                                                {% endfor %}
-                                            </select>
-                                        {% else %}
-                                            <input class="form-control form-control-sm" style="width:30em;" type="text"
+                                        >{{ option.name | replace({'_': ' '}) | capitalize }}:</label>
+                                        {% if option.type == 'bool' %}
+                                            <input type="checkbox" data-toggle="toggle" data-size="mini" data-on="Yes"
+                                                   data-off="No"
                                                    name="config_{{ option.name }}" id="config_{{ option.name }}"
-                                                   value="{{ option.value }}">
-                                        {% endif %}
-                                    {% elseif option.type == 'array_keyval' %}
-                                        <br/>
-                                        {% set counter = 0 %}
-                                        {% for key,val in option.value %}
+                                                {% if option.value == 1 %} checked="checked"{% endif %}>
+                                            <br/>
+                                        {% elseif option.type == 'int' %}
+                                            {% if option.options is not null %}
+                                                <select class="form-control form-control-sm custom-select custom-select-sm"
+                                                       style="margin-left:5px;width:15em;text-align:right;display:inline-block;"
+                                                       name="config_{{ option.name }}" id="config_{{ option.name }}">
+                                                    {% for value, label in option.options %}
+                                                        <option {% if option.value == value %}selected{% endif %} value="{{ value }}">{{ label }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            {% else %}
+                                                <input class="form-control form-control-sm"
+                                                       style="margin-left:5px;width:7em;text-align:right;display:inline-block;"
+                                                       type="number"
+                                                       name="config_{{ option.name }}" id="config_{{ option.name }}"
+                                                       value="{{ option.value }}">
+                                            {% endif %}
+                                            <br/>
+                                        {% elseif option.type == 'string' %}
+                                            {% if option.options is not null %}
+                                                <select class="form-control form-control-sm custom-select custom-select-sm"
+                                                        style="width:30em;display: block;"
+                                                        name="config_{{ option.name }}" id="config_{{ option.name }}">
+                                                    {% for value, label in option.options %}
+                                                        <option {% if option.value == value %}selected{% endif %} value="{{ value }}">{{ label }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            {% else %}
+                                                <input class="form-control form-control-sm" style="width:30em;" type="text"
+                                                       name="config_{{ option.name }}" id="config_{{ option.name }}"
+                                                       value="{{ option.value }}">
+                                            {% endif %}
+                                        {% elseif option.type == 'array_keyval' %}
+                                            <br/>
+                                            {% set counter = 0 %}
+                                            {% for key,val in option.value %}
+                                                {% if option.key_options is not null %}
+                                                    <select class="form-control form-control-sm custom-select custom-select-sm"
+                                                            style="width:10em;text-align:right;display:inline-block;"
+                                                            name="config_{{ option.name }}[{{ counter }}][key]">
+                                                        {% for value, label in option.key_options %}
+                                                            <option {% if key == value %}selected{% endif %} value="{{ value }}">{{ label }}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                {% else %}
+                                                    <input class="form-control form-control-sm"
+                                                           style="width:10em;text-align:right;display:inline-block;" type="text"
+                                                           value="{{ key }}"
+                                                           name="config_{{ option.name }}[{{ counter }}][key]"
+                                                           id="config_{{ option.name }}_{{ counter }}__key_">
+                                                {% endif %}
+                                                {% if option.value_options is not null %}
+                                                    <select class="form-control form-control-sm custom-select custom-select-sm"
+                                                            style="width:30em;display:inline-block;"
+                                                            name="config_{{ option.name }}[{{ counter }}][val]">
+                                                        {% for value, label in option.value_options %}
+                                                            <option {% if val == value %}selected{% endif %} value="{{ value }}">{{ label }}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                {% else %}
+                                                    <input class="form-control form-control-sm"
+                                                           style="width:30em;display:inline-block;" type="text"
+                                                           value="{{ val }}"
+                                                           name="config_{{ option.name }}[{{ counter }}][val]"
+                                                           id="config_{{ option.name }}_{{ counter }}__val">
+                                                    {% endif %}
+                                                <br/>
+                                                {% set counter = counter + 1 %}
+                                            {% endfor %}
                                             {% if option.key_options is not null %}
                                                 <select class="form-control form-control-sm custom-select custom-select-sm"
                                                         style="width:10em;text-align:right;display:inline-block;"
                                                         name="config_{{ option.name }}[{{ counter }}][key]">
                                                     {% for value, label in option.key_options %}
-                                                        <option {% if key == value %}selected{% endif %} value="{{ value }}">{{ label }}</option>
+                                                        <option value="{{ value }}">{{ label }}</option>
                                                     {% endfor %}
                                                 </select>
                                             {% else %}
                                                 <input class="form-control form-control-sm"
                                                        style="width:10em;text-align:right;display:inline-block;" type="text"
-                                                       value="{{ key }}"
                                                        name="config_{{ option.name }}[{{ counter }}][key]"
                                                        id="config_{{ option.name }}_{{ counter }}__key_">
                                             {% endif %}
@@ -95,87 +134,56 @@
                                                         style="width:30em;display:inline-block;"
                                                         name="config_{{ option.name }}[{{ counter }}][val]">
                                                     {% for value, label in option.value_options %}
-                                                        <option {% if val == value %}selected{% endif %} value="{{ value }}">{{ label }}</option>
+                                                        <option value="{{ value }}">{{ label }}</option>
                                                     {% endfor %}
                                                 </select>
                                             {% else %}
                                                 <input class="form-control form-control-sm"
                                                        style="width:30em;display:inline-block;" type="text"
-                                                       value="{{ val }}"
                                                        name="config_{{ option.name }}[{{ counter }}][val]"
                                                        id="config_{{ option.name }}_{{ counter }}__val">
                                                 {% endif %}
                                             <br/>
-                                            {% set counter = counter + 1 %}
-                                        {% endfor %}
-                                        {% if option.key_options is not null %}
-                                            <select class="form-control form-control-sm custom-select custom-select-sm"
-                                                    style="width:10em;text-align:right;display:inline-block;"
-                                                    name="config_{{ option.name }}[{{ counter }}][key]">
-                                                {% for value, label in option.key_options %}
-                                                    <option value="{{ value }}">{{ label }}</option>
+                                        {% elseif option.type == 'array_val' %}
+                                            <br/>
+                                            {% if option.options is not null %}
+                                                <select class="form-control form-control-sm custom-select custom-select-sm"
+                                                        style="width:30em;display:inline-block;"
+                                                        multiple
+                                                        name="config_{{ option.name }}[]"
+                                                        id="config_{{ option.name }}">
+                                                    {% for value in option.options %}
+                                                        <option {% if value in option.value %}selected{% endif %} value="{{ value }}">{{ value }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            {% else %}
+                                                {% set counter = 0 %}
+                                                {% for val in option.value %}
+                                                    <input class="form-control form-control-sm"
+                                                           style="width:30em;display:inline-block;" type="text"
+                                                           value="{{ val }}"
+                                                           name="config_{{ option.name }}[{{ counter }}]"
+                                                           id="config_{{ option.name }}_{{ counter }}_">
+                                                    <br/>
+                                                    {% set counter = counter + 1 %}
                                                 {% endfor %}
-                                            </select>
-                                        {% else %}
-                                            <input class="form-control form-control-sm"
-                                                   style="width:10em;text-align:right;display:inline-block;" type="text"
-                                                   name="config_{{ option.name }}[{{ counter }}][key]"
-                                                   id="config_{{ option.name }}_{{ counter }}__key_">
-                                        {% endif %}
-                                        {% if option.value_options is not null %}
-                                            <select class="form-control form-control-sm custom-select custom-select-sm"
-                                                    style="width:30em;display:inline-block;"
-                                                    name="config_{{ option.name }}[{{ counter }}][val]">
-                                                {% for value, label in option.value_options %}
-                                                    <option value="{{ value }}">{{ label }}</option>
-                                                {% endfor %}
-                                            </select>
-                                        {% else %}
-                                            <input class="form-control form-control-sm"
-                                                   style="width:30em;display:inline-block;" type="text"
-                                                   name="config_{{ option.name }}[{{ counter }}][val]"
-                                                   id="config_{{ option.name }}_{{ counter }}__val">
-                                            {% endif %}
-                                        <br/>
-                                    {% elseif option.type == 'array_val' %}
-                                        <br/>
-                                        {% if option.options is not null %}
-                                            <select class="form-control form-control-sm custom-select custom-select-sm"
-                                                    style="width:30em;display:inline-block;"
-                                                    multiple
-                                                    name="config_{{ option.name }}[]"
-                                                    id="config_{{ option.name }}">
-                                                {% for value in option.options %}
-                                                    <option {% if value in option.value %}selected{% endif %} value="{{ value }}">{{ value }}</option>
-                                                {% endfor %}
-                                            </select>
-                                        {% else %}
-                                            {% set counter = 0 %}
-                                            {% for val in option.value %}
                                                 <input class="form-control form-control-sm"
                                                        style="width:30em;display:inline-block;" type="text"
-                                                       value="{{ val }}"
                                                        name="config_{{ option.name }}[{{ counter }}]"
                                                        id="config_{{ option.name }}_{{ counter }}_">
                                                 <br/>
-                                                {% set counter = counter + 1 %}
-                                            {% endfor %}
-                                            <input class="form-control form-control-sm"
-                                                   style="width:30em;display:inline-block;" type="text"
-                                                   name="config_{{ option.name }}[{{ counter }}]"
-                                                   id="config_{{ option.name }}_{{ counter }}_">
-                                            <br/>
+                                            {% endif %}
                                         {% endif %}
-                                    {% endif %}
-                                    <small class="text-muted">{{ option.description }}</small>
-                                </div>
-                            </li>
-                        {% endfor %}
-                    </ul>
+                                        <small class="text-muted">{{ option.description }}</small>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
                 </div>
             </div>
-            <br/>
         {% endfor %}
+        </div>
         <input class="btn btn-primary" type="submit" value="Submit" id="save" name="save">
     </form>
 {% endblock %}
