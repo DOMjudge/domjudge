@@ -1283,11 +1283,10 @@ function judge(array $judgeTask): bool
         ]));
     system($test_run_cmd, $retval);
 
-    // what does the exitcode mean?
+    // What does the exitcode mean?
     if (! isset($EXITCODES[$retval])) {
         alert('error');
-        error("Unknown exitcode from testcase_run.sh for s$judgeTask[submitid]");
-//              "testcase $tc[rank]: $retval");
+        error("Unknown exitcode ($retval) from testcase_run.sh for s$judgeTask[submitid]");
     }
     $result = $EXITCODES[$retval];
 
