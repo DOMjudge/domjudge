@@ -374,8 +374,10 @@ class JudgehostController extends AbstractFOSRestController
                     $judging->setOutputCompile($output_compile);
                     $this->em->flush();
 
-                    $this->eventLogService->log('judging', $judging->getJudgingid(),
-                        EventLogService::ACTION_CREATE, $judging->getContest()->getCid());
+                    if ($judging->getValid()) {
+                        $this->eventLogService->log('judging', $judging->getJudgingid(),
+                            EventLogService::ACTION_CREATE, $judging->getContest()->getCid());
+                    }
                 } elseif ($judging->getResult() === Judging::RESULT_COMPILER_ERROR) {
                     // The new result contradicts a former one, that's not good.
                     // Since the other judgehosts were not successful, but we were, assume that the other judgehosts
