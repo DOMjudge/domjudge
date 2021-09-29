@@ -183,4 +183,14 @@ class MiscControllerTest extends BaseTest
         yield [true];
         yield [false];
     }
+
+    /**
+     * Test that no docs.yaml does not show docs link
+     */
+    public function testDocsNoDocs() : void
+    {
+        $this->verifyPageResponse('GET', '/team', 200);
+
+        self::assertSelectorNotExists('a:contains("Docs")');
+    }
 }

@@ -98,14 +98,6 @@ abstract class BaseTest extends BaseBaseTest
             ->findOneBy(['shortname' => 'demo']);
     }
 
-    protected function removeTestContainer(): void
-    {
-        $container = __DIR__ . '/../../../../var/cache/test/srcApp_KernelTestDebugContainer.php';
-        if (file_exists($container)) {
-            unlink($container);
-        }
-    }
-
     /**
      * Verify the given API URL produces the given status code and return the body
      *
