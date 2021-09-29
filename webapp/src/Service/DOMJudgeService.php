@@ -1097,6 +1097,7 @@ class DOMJudgeService
             ':submitid'          => $submission->getSubmitid(),
             ':priority'          => $priority,
             ':jobid'             => $judging->getJudgingid(),
+            ':uuid'              => $judging->getUuid(),
             ':compile_script_id' => $compileExecutable->getImmutableExecId(),
             ':compare_script_id' => $compareExecutable->getImmutableExecId(),
             ':run_script_id'     => $runExecutable->getImmutableExecId(),

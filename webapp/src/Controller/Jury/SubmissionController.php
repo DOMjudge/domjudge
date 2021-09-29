@@ -595,6 +595,7 @@ class SubmissionController extends BaseController
                     ->setSubmitid($submission->getSubmitid())
                     ->setPriority(JudgeTask::PRIORITY_HIGH)
                     ->setJobId($jid->getJudgingid())
+                    ->setUuid($jid->getUuid())
                     ->setRunScriptId($executable->getImmutableExecId())
                     ->setRunConfig(json_encode(['hash' => $executable->getHash()]));
                 $this->em->persist($judgeTask);
@@ -636,6 +637,7 @@ class SubmissionController extends BaseController
             ->setSubmitid($submission->getSubmitid())
             ->setPriority(JudgeTask::PRIORITY_HIGH)
             ->setJobId($jid->getJudgingid())
+            ->setUuid($jid->getUuid())
             ->setTestcaseId($jrid->getTestcase()->getTestcaseid());
         $this->em->persist($judgeTask);
         $this->em->flush();

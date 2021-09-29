@@ -68,6 +68,7 @@
 		"nelmio/api-doc-bundle": "^4.2",
 		"novus/nvd3": "^1.8",
 		"phpunit/phpunit": "^8",
+		"ramsey/uuid": "^4.2",
 		"sebastian/diff": "3.0",
 		"select2/select2": "4.*",
 		"sensio/framework-extra-bundle": "^5.4.0",

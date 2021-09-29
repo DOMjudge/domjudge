@@ -6,6 +6,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
+use Ramsey\Uuid\Uuid;
 
 /**
  * Result of judging a submission.
@@ -136,6 +137,15 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
      * @Serializer\Exclude()
      */
     private $judgeCompletely = false;
+
+    /**
+     * @var string
+     * @ORM\Column(type="string", name="uuid",
+     *     options={"comment"="UUID, to make caching of compilation results safe."},
+     *     nullable=false)
+     * @Serializer\Exclude()
+     */
+    private $uuid;
 
 
     /**
@@ -430,6 +440,12 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
     public function __construct()
     {
         $this->runs = new ArrayCollection();
+        $this->uuid = Uuid::uuid4()->toString();
+    }
+
+    public function getUuid(): string
+    {
+        return $this->uuid;
     }
 
     public function addRun(JudgingRun $run): Judging

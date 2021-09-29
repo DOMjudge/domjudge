@@ -766,7 +766,7 @@ while (true) {
                     [$runpath, $workdir, $tmpfile]));
                 system($debug_cmd, $retval);
                 // FIXME: check retval
-                
+
                 request(
                     sprintf('judgehosts/add-debug-info/%s/%s', urlencode($myhost),
                         urlencode((string)$judgeTask['judgetaskid'])),
@@ -793,7 +793,8 @@ while (true) {
         continue;
     }
 
-    $success_file = "$workdir/.pid";
+    $success_file = "$workdir/.uuid_pid";
+    $expected_uuid_pid = $row[0]['uuid'] . '_' . (string)getmypid();
     if ($lastWorkdir !== null && $lastWorkdir !== $workdir) {
         cleanup_judging($lastWorkdir);
         $lastWorkdir = null;
@@ -802,13 +803,13 @@ while (true) {
         // directories, we might hit an old directory: rename it.
         $needs_cleanup = false;
         if (file_exists($success_file)) {
-            $oldpid = file_get_contents($success_file);
-            if ($oldpid !== (string)getmypid()) {
+            $old_uuid_pid = file_get_contents($success_file);
+            if ($old_uuid_pid !== $expected_uuid_pid) {
                 $needs_cleanup = true;
                 unlink($success_file);
             }
         } else {
-            $oldpid = 'n/a';
+            $old_uuid_pid = 'n/a';
             $needs_cleanup = true;
         }
 
@@ -820,7 +821,7 @@ while (true) {
 
             $oldworkdir = $workdir . '-old-' . getmypid() . '-' . strftime('%Y-%m-%d_%H:%M');
             if (!rename($workdir, $oldworkdir)) {
-                error("Could not rename stale working directory to '$oldworkdir', the old PID was '$oldpid'");
+                error("Could not rename stale working directory to '$oldworkdir', the old UUID_PID was '$old_uuid_pid'");
             }
             @chmod($oldworkdir, 0700);
             warning("Found stale working directory; renamed to '$oldworkdir'");
@@ -876,7 +877,7 @@ while (true) {
         }
     }
 
-    file_put_contents($success_file, getmypid());
+    file_put_contents($success_file, $expected_uuid_pid);
 
     // Check if we were interrupted while judging, if so, exit (to avoid sleeping)
     if ($exitsignalled) {
