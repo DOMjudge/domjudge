@@ -22,7 +22,7 @@ final class Version20210929123058 extends AbstractMigration
         // this up() migration is auto-generated, please modify it to your needs
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
 
-        $this->addSql('ALTER TABLE judgetask ADD uuid VARCHAR(255) DEFAULT NULL COMMENT \'Optional UUID, used for caching.\'');
+        $this->addSql('ALTER TABLE judgetask ADD uuid VARCHAR(255) DEFAULT NULL COMMENT \'Optional UUID for the associated judging, used for caching.\'');
         $this->addSql('ALTER TABLE judging ADD uuid VARCHAR(255) NOT NULL COMMENT \'UUID, to make caching of compilation results safe.\'');
     }
 
