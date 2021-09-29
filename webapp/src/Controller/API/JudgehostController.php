@@ -193,6 +193,7 @@ class JudgehostController extends AbstractFOSRestController
         } else {
             $judgehost = new Judgehost();
             $judgehost->setHostname($hostname);
+            $judgehost->setActive((bool)$this->config->get('judgehost_activated_by_default'));
             $this->em->persist($judgehost);
         }
         $this->em->flush();

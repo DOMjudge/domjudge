@@ -138,6 +138,11 @@
             default_value: true
             public: false
             description: Allows to distribute one judging to multiple judgehosts.
+        -   name: judgehost_activated_by_default
+            type: bool
+            default_value: true
+            public: false
+            description: Activate a judgehost by default when a new one registers.
 -   category: Clarification
     description: Options related to clarifications.
     items:
