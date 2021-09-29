@@ -2,6 +2,9 @@
     "angel-vladov/select2-theme-bootstrap4": {
         "version": "0.2.0-beta.3"
     },
+    "brick/math": {
+        "version": "0.9.3"
+    },
     "components/flag-icon-css": {
         "version": "3.5.0"
     },
@@ -310,6 +313,12 @@
     },
     "psr/log": {
         "version": "1.1.0"
+    },
+    "ramsey/collection": {
+        "version": "1.1.4"
+    },
+    "ramsey/uuid": {
+        "version": "4.2.3"
     },
     "sebastian/code-unit-reverse-lookup": {
         "version": "1.0.2"
