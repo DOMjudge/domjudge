@@ -423,8 +423,10 @@ class JudgehostController extends AbstractFOSRestController
                             ->setEndtime(Utils::now());
                         $this->em->flush();
 
-                        $this->eventLogService->log('judging', $judging->getJudgingid(),
-                            EventLogService::ACTION_CREATE, $judging->getContest()->getCid());
+                        if ($judging->getValid()) {
+                            $this->eventLogService->log('judging', $judging->getJudgingid(),
+                                EventLogService::ACTION_CREATE, $judging->getContest()->getCid());
+                        }
 
                         // As EventLogService::log() will clear the entity manager, so the judging has
                         // now become detached. We will have to reload it
