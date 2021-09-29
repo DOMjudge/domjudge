@@ -79,6 +79,14 @@ class JudgeTask
     private $jobid;
 
     /**
+     * @var string
+     * @ORM\Column(type="string", name="uuid",
+     *     options={"comment"="Optional UUID, used for caching."},
+     *     nullable=true)
+     */
+    private $uuid;
+
+    /**
      * @var int
      *
      * @ORM\Column(type="integer", name="submitid", length=4,
@@ -224,6 +232,17 @@ class JudgeTask
     public function getJobId(): ?int
     {
         return $this->jobid;
+    }
+
+    public function setUuid(string $uuid): JudgeTask
+    {
+        $this->uuid = $uuid;
+        return $this;
+    }
+
+    public function getUuid(): ?string
+    {
+        return $this->uuid;
     }
 
     public function setSubmitid(int $submitid): JudgeTask
