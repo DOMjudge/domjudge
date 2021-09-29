@@ -22,7 +22,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Users that have access to DOMjudge"},
  *     indexes={@ORM\Index(name="teamid", columns={"teamid"})},
  *     uniqueConstraints={@ORM\UniqueConstraint(name="username", columns={"username"}, options={"lengths":{190}})})
- * @UniqueEntity("username", message="This username is already in use.")
+ * @UniqueEntity("username", message="The username '{{ value }}' is already in use.")
  */
 class User implements UserInterface, EquatableInterface, \Serializable
 {
