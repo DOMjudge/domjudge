@@ -118,7 +118,7 @@
 
         {# process awards color #}
         {% set awardColor = '' %}
-        {% if showLegends and processAwards and score.team.category in awardsCategories %}
+        {% if showLegends and processAwards and score.team.category in awardsCategories and score.numPoints > 0 %}
             {% if score.rank <= contest.goldAwards %}
                 {% set awardColor = 'gold-award' %}
             {% elseif score.rank <= contest.goldAwards + contest.silverAwards %}
