@@ -3,6 +3,7 @@
 namespace App\Twig;
 
 use App\Entity\Contest;
+use App\Entity\ContestProblem;
 use App\Entity\ExternalJudgement;
 use App\Entity\Judging;
 use App\Entity\JudgingRun;
@@ -179,6 +180,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             new TwigFilter('hexColorToRGBA', [$this, 'hexColorToRGBA']),
             new TwigFilter('tsvField', [$this, 'toTsvField']),
             new TwigFilter('fileTypeIcon', [$this, 'fileTypeIcon']),
+            new TwigFilter('problemBadge', [$this, 'problemBadge'], ['is_safe' => ['html']]),
         ];
     }
 
@@ -1156,5 +1158,28 @@ EOF;
         }
 
         return 'fas fa-file-' . $iconName;
+    }
+
+    public function problemBadge(ContestProblem $problem): string
+    {
+        $rgb = Utils::convertToHex($problem->getColor());
+        $background = Utils::parseHexColor($rgb);
+
+        // Pick a border that's a bit darker
+        $darker = $background;
+        $darker[0] = max($darker[0] - 64, 0);
+        $darker[1] = max($darker[1] - 64, 0);
+        $darker[2] = max($darker[2] - 64, 0);
+        $border = Utils::rgbToHex($darker);
+
+        // Pick the foreground text color based on the background color
+        $foreground = ($background[0] + $background[1] + $background[2] > 450) ? '#000000' : '#ffffff';
+        return sprintf(
+            '<span class="badge problem-badge" style="background-color: %s; min-width: 25px; border: 1px solid %s"><span style="color: %s;">%s</span></span>',
+            $rgb,
+            $border,
+            $foreground,
+            $problem->getShortname()
+        );
     }
 }

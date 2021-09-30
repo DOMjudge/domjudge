@@ -328,6 +328,38 @@ class Utils
     }
 
     /**
+     * Parse a hex color into it's three RGB values
+     */
+    public static function parseHexColor(string $hex): array
+    {
+        // Source: https://stackoverflow.com/a/21966100
+        $length = (strlen($hex) - 1) / 3;
+        $fact = [17, 1, 0.062272][$length - 1];
+        return [
+            (int)round(hexdec(substr($hex, 1, $length)) * $fact),
+            (int)round(hexdec(substr($hex, 1 + $length, $length)) * $fact),
+            (int)round(hexdec(substr($hex, 1 + 2 * $length, $length)) * $fact)
+        ];
+    }
+
+    /**
+     * Comvert an RGB component to its hex value
+     */
+    public static function componentToHex(int $component): string
+    {
+        $hex = dechex($component);
+        return strlen($hex) == 1 ? "0" . $hex : $hex;
+    }
+
+    /**
+     * Convert an RGB triple into a CSS hex color
+     */
+    public static function rgbToHex(array $color): string
+    {
+        return "#" . static::componentToHex($color[0]) . static::componentToHex($color[1]) . static::componentToHex($color[2]);
+    }
+
+    /**
      * Return a rounded float
      * @param float|null $value
      * @param int $decimals
