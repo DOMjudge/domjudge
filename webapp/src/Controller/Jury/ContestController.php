@@ -223,7 +223,7 @@ class ContestController extends BaseController
         $timeFormat = (string)$this->config->get('time_format');
 
         if ($this->getParameter('removed_intervals')) {
-            $table_fields['num_removed_intervals'] = ['title' => '# removed<br/>intervals', 'sort' => true];
+            $table_fields['num_removed_intervals'] = ['title' => "# removed\nintervals", 'sort' => true];
             $removedIntervals                      = $em->createQueryBuilder()
                 ->from(RemovedInterval::class, 'i')
                 ->join('i.contest', 'c')
@@ -262,7 +262,7 @@ class ContestController extends BaseController
         // Insert external ID field when configured to use it
         if ($externalIdField = $this->eventLogService->externalIdFieldForEntity(Contest::class)) {
             $table_fields = array_slice($table_fields, 0, 1, true) +
-                [$externalIdField => ['title' => 'external<br/>ID', 'sort' => true]] +
+                [$externalIdField => ['title' => "external ID", 'sort' => true]] +
                 array_slice($table_fields, 1, null, true);
         }
 
