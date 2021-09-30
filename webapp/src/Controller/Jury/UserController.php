@@ -126,7 +126,7 @@ class UserController extends BaseController
 
             if ($u->getTeam()) {
                 $userdata['team'] = [
-                    'value' => $u->getTeam()->getTeamid(),
+                    'value' => 't' . $u->getTeam()->getTeamid() . ' (' . $u->getTeamName() . ')',
                     'sortvalue' => $u->getTeam()->getTeamid(),
                     'link' => $this->generateUrl('jury_team', [
                         'teamId' => $u->getTeam()->getTeamid(),
