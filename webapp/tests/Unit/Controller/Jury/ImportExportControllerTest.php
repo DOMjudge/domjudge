@@ -129,9 +129,9 @@ languages:
     - { name: 'POSIX shell' }
     - { name: Swift }
 problems:
-    - { label: boolfind, name: 'Boolean switch search', color: limegreen, rgb: '#32CD32' }
-    - { label: fltcmp, name: 'Float special compare test', color: yellow, rgb: '#FFFF00' }
-    - { label: hello, name: 'Hello World', color: magenta, rgb: '#FF00FF' }
+    - { label: boolfind, name: 'Boolean switch search', color: green, rgb: '#008000' }
+    - { label: fltcmp, name: 'Float special compare test', color: indianred, rgb: '#CD5C5C' }
+    - { label: hello, name: 'Hello World', color: skyblue, rgb: '#87CEEB' }
 
 HEREDOC;
         yield ["2", $yaml];

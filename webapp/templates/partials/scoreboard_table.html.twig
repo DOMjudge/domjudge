@@ -85,9 +85,8 @@
                 {% endif %}
                 <th title="problem {{ problem.problem.name }}" scope="col">
                     <a {% if link %}href="{{ link }}"{% endif %} target="{{ target }}">
-                        {{ problem.shortname }}
                         {% if problem.color is not empty %}
-                            <div class="circle" style="background: {{ problem.color }};"></div>
+                            {{  problem | problemBadge }}
                         {% endif %}
                         {% if showPoints %}
                             <span class='problempoints'>

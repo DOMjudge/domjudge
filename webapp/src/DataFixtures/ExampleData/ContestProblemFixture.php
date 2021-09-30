@@ -24,21 +24,21 @@ class ContestProblemFixture extends AbstractExampleDataFixture implements Depend
             ->setShortname('hello')
             ->setContest($this->getReference(ContestFixture::DEMO_REFERENCE))
             ->setProblem($this->getReference(ProblemFixture::HELLO_REFERENCE))
-            ->setColor('magenta');
+            ->setColor('skyblue');
 
         $fltcmpDemo = new ContestProblem();
         $fltcmpDemo
             ->setShortname('fltcmp')
             ->setContest($this->getReference(ContestFixture::DEMO_REFERENCE))
             ->setProblem($this->getReference(ProblemFixture::FLTCMP_REFERENCE))
-            ->setColor('yellow');
+            ->setColor('indianred');
 
         $boolfindDemo = new ContestProblem();
         $boolfindDemo
             ->setShortname('boolfind')
             ->setContest($this->getReference(ContestFixture::DEMO_REFERENCE))
             ->setProblem($this->getReference(ProblemFixture::BOOLFIND_REFERENCE))
-            ->setColor('limegreen');
+            ->setColor('green');
 
         $manager->persist($helloPractice);
         $manager->persist($helloDemo);

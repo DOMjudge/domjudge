@@ -19,8 +19,8 @@ class ProblemControllerTest extends BaseTest
         "time_limit" => 5,
         "externalid" => "boolfind",
         "name" => "Boolean switch search",
-        "rgb" => "#32CD32",
-        "color" => "limegreen",
+        "rgb" => "#008000",
+        "color" => "green",
       ],
       2 => [
         "ordinal" => 1,
@@ -30,8 +30,8 @@ class ProblemControllerTest extends BaseTest
         "time_limit" => 5,
         "externalid" => "fltcmp",
         "name" => "Float special compare test",
-        "rgb" => "#FFFF00",
-        "color" => "yellow",
+        "rgb" => "#CD5C5C",
+        "color" => "indianred",
       ],
       1 => [
         "ordinal" => 2,
@@ -41,8 +41,8 @@ class ProblemControllerTest extends BaseTest
         "time_limit" => 5,
         "externalid" => "hello",
         "name" => "Hello World",
-        "rgb" => "#FF00FF",
-        "color" => "magenta",
+        "rgb" => "#87CEEB",
+        "color" => "skyblue",
       ],
     ];
 
