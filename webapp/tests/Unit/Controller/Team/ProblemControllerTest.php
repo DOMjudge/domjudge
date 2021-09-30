@@ -61,7 +61,7 @@ class ProblemControllerTest extends BaseTest
 
                 for ($i = 0; $i < 3; $i++) {
                     $card = $cardBodies->eq($i);
-                    $this->assertSame('Problem ' . $problems[$i],
+                    $this->assertSame($problems[$i],
                         $card->filter('.card-title')->text(null, true));
                     $this->assertSame($descriptions[$i],
                         $card->filter('h3.card-subtitle')->text(null, true));
@@ -144,6 +144,6 @@ class ProblemControllerTest extends BaseTest
             self::assertSame($samples[$i]->getContent()->getOutput(), $content["$i.out"]);
         }
         // Does not contain more than these 4 files
-        self::assertCount(4, $content); 
+        self::assertCount(4, $content);
     }
 }

@@ -111,7 +111,7 @@ else
 	    FLTR=""
     else
 	    STAN="-s $TEST"
-	    FLTR="-E '#DataTables_Table_0 > tbody > tr > td > a','#menuDefault > a','#filter-card > div > div > div > span > span:nth-child(1) > span > ul > li > input'"
+	    FLTR="-E '#DataTables_Table_0 > tbody > tr > td > a','#menuDefault > a','#filter-card > div > div > div > span > span:nth-child(1) > span > ul > li > input','.problem-badge'"
     fi
     cd $DIR
     ACCEPTEDERR=5

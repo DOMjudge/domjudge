@@ -20,9 +20,7 @@
                                     <div class="card-body">
                                         <h2 class="card-title">
                                             {% if problem.color %}
-                                                <div class="circle"
-                                                     style="background-color: {{ problem.color }};"></div>
-                                                Problem {{ problem.shortName }}
+                                                {{ problem | problemBadge }}
                                             {% endif %}
                                         </h2>
                                         <h3 class="card-subtitle mb-2 text-muted">

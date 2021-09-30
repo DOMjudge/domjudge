@@ -171,8 +171,7 @@
                             {% else %}
                                 <td title="{{ contestProblem.color }}">
                                     <a href="{{ link }}">
-                                        <div class="circle"
-                                             style="background-color: {{ contestProblem.color }}"></div>
+                                        {{ contestProblem | problemBadge }}
                                     </a>
                                 </td>
                             {% endif %}

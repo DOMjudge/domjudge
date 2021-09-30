@@ -204,9 +204,9 @@ class UtilsTest extends TestCase
      */
     public function testPrinttimediff() : void
     {
-        // Test the empty end case, 
-        self::assertEquals("00:00", Utils::printtimediff(microtime(true)));        
-        
+        // Test the empty end case,
+        self::assertEquals("00:00", Utils::printtimediff(microtime(true)));
+
         $start = $end = 1544964581.3604;
 
         self::assertEquals("00:00", Utils::printtimediff($start, $end));
@@ -284,6 +284,30 @@ class UtilsTest extends TestCase
         self::assertEquals('#00BFFF', Utils::convertToHex('deep sky blue'));
         self::assertEquals('#FFD700', Utils::convertToHex('GOLD'));
         self::assertEquals('#B8860B', Utils::convertToHex('darkgoldenrod '));
+    }
+
+    public function testParseHexColor(): void
+    {
+        self::assertEquals([255, 255, 255], Utils::parseHexColor('#ffffff'));
+        self::assertEquals([0, 0, 0], Utils::parseHexColor('#000000'));
+        self::assertEquals([171, 205, 239], Utils::parseHexColor('#abcdef'));
+        self::assertEquals([254, 220, 186], Utils::parseHexColor('#FEDCBA'));
+    }
+
+    public function testComponentToHex(): void
+    {
+        self::assertEquals('00', Utils::componentToHex(0));
+        self::assertEquals('ff', Utils::componentToHex(255));
+        self::assertEquals('ab', Utils::componentToHex(171));
+        self::assertEquals('fe', Utils::componentToHex(254));
+    }
+
+    public function testRgbToHex(): void
+    {
+        self::assertEquals('#ffffff', Utils::rgbToHex([255, 255, 255]));
+        self::assertEquals('#000000', Utils::rgbToHex([0, 0, 0]));
+        self::assertEquals('#abcdef', Utils::rgbToHex([171, 205, 239]));
+        self::assertEquals('#fedcba', Utils::rgbToHex([254, 220, 186]));
     }
 
     /**
