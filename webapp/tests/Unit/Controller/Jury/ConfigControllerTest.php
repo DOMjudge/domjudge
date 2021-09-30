@@ -40,23 +40,13 @@ class ConfigControllerTest extends BaseTest
     {
         $this->verifyPageResponse('GET', '/jury/config', 200);
 
-        self::assertSelectorExists('div.card-header:contains("Scoring Options")');
+        self::assertSelectorExists('a.nav-link:contains("Scoring Options")');
 
         self::assertSelectorExists('label:contains("Penalty time:")');
         self::assertSelectorExists('small:contains("Penalty time in minutes per wrong submission (if finally solved).")');
         $crawler = $this->getCurrentCrawler();
         $minutes = $crawler->filter('input#config_penalty_time')->extract(['value']);
         self::assertEquals("20", $minutes[0]);
-
-        self::assertSelectorExists('div.card-header:contains("Clarification Options")');
-
-        self::assertSelectorExists('label:contains("Clar default problem queue:")');
-
-        self::assertSelectorExists('div.card-header:contains("Misc Options")');
-
-        self::assertSelectorExists('label:contains("Print command:")');
-        $command = $crawler->filter('input#config_print_command')->extract(['value']);
-        self::assertEquals("", $command[0]);
     }
 
     /**
