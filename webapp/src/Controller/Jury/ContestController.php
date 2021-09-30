@@ -229,7 +229,7 @@ class ContestController extends BaseController
         require_once $etcDir . '/domserver-config.php';
 
         if (ALLOW_REMOVED_INTERVALS) {
-            $table_fields['num_removed_intervals'] = ['title' => '# removed<br/>intervals', 'sort' => true];
+            $table_fields['num_removed_intervals'] = ['title' => "# removed\nintervals", 'sort' => true];
             $removedIntervals                      = $em->createQueryBuilder()
                 ->from(RemovedInterval::class, 'i', 'i.cid')
                 ->select('COUNT(i.intervalid) AS num_removed_intervals', 'i.cid')
@@ -263,7 +263,7 @@ class ContestController extends BaseController
         // Insert external ID field when configured to use it
         if ($externalIdField = $this->eventLogService->externalIdFieldForEntity(Contest::class)) {
             $table_fields = array_slice($table_fields, 0, 1, true) +
-                [$externalIdField => ['title' => 'external<br/>ID', 'sort' => true]] +
+                [$externalIdField => ['title' => "external ID", 'sort' => true]] +
                 array_slice($table_fields, 1, null, true);
         }
 
