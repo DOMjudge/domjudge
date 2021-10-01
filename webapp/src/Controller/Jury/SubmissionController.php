@@ -630,6 +630,7 @@ class SubmissionController extends BaseController
     public function requestOutput(Judging $jid, JudgingRun $jrid): RedirectResponse
     {
         $submission = $jid->getSubmission();
+        $testcase = $jrid->getTestcase();
         $judgeTask = new JudgeTask();
         $judgeTask
             ->setType(JudgeTaskType::DEBUG_INFO)
@@ -638,7 +639,8 @@ class SubmissionController extends BaseController
             ->setPriority(JudgeTask::PRIORITY_HIGH)
             ->setJobId($jid->getJudgingid())
             ->setUuid($jid->getUuid())
-            ->setTestcaseId($jrid->getTestcase()->getTestcaseid());
+            ->setTestcaseId($testcase->getTestcaseid())
+            ->setTestcaseHash($testcase->getMd5sumInput() . '_' . $testcase->getMd5sumOutput());
         $this->em->persist($judgeTask);
         $this->em->flush();
         return $this->redirectToRoute('jury_submission', [

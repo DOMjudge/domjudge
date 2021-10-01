@@ -141,6 +141,16 @@ class JudgeTask
 
     /**
      * @var string
+     *
+     * @ORM\Column(type="string", name="testcase_hash", length=100,
+     *     options={"comment"="Testcase Hash","unsigned"=true},
+     *     nullable=true)
+     * @Serializer\Type("string")
+     */
+    private $testcase_hash;
+
+    /**
+     * @var string
      * @ORM\Column(type="text", name="compile_config",
      *     options={"comment"="The compile config as JSON-blob.",
      *              "collation"="utf8mb4_bin", "default"="NULL"},
@@ -298,6 +308,17 @@ class JudgeTask
     public function getTestcaseId(): int
     {
         return $this->testcase_id;
+    }
+
+    public function setTestcaseHash(?string $testcase_hash): JudgeTask
+    {
+        $this->testcase_hash = $testcase_hash;
+        return $this;
+    }
+
+    public function getTestcaseHash(): ?string
+    {
+        return $this->testcase_hash;
     }
 
     public function setCompileConfig(string $compile_config): JudgeTask
