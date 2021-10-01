@@ -91,43 +91,11 @@ class JudgehostController extends BaseController
             'hostname' => ['title' => 'hostname'],
             'active' => ['title' => 'active'],
             'status' => ['title' => 'status'],
-            'load' => ['title' => 'load'],
             'last_judgingid' => ['title' => 'last judging'],
         ];
 
         $now           = Utils::now();
         $contest       = $this->dj->getCurrentContest();
-        // TODO: this is wrong: we now count the whole time from assigning tasks until they are done.
-        // For example if we assign 5 tasks at a time, each of which take 1 second, the load will be
-        // 1+2+3+4+5=15, while you expect it to be 5. We could look at only jr.runtime, but that does
-        // not take into account compile time.
-        $query         = 'SELECT judgehostid, SUM(IF(jr.endtime, jr.endtime, :now) - GREATEST(:from, jt.starttime)) AS `load`
-                          FROM judging j
-                          INNER JOIN judging_run jr ON jr.judgingid = j.judgingid
-                          INNER JOIN judgetask jt ON jr.judgetaskid = jt.judgetaskid
-                          WHERE jr.endtime > :from OR (jr.endtime IS NULL AND (j.valid = 1 OR rejudgingid IS NOT NULL))
-                          GROUP BY judgehostid';
-        $params        = [':now' => $now];
-
-        $params[':from'] = $now - 2 * 60;
-        $work2min        = $this->em->getConnection()->fetchAll($query, $params);
-        $params[':from'] = $now - 10 * 60;
-        $work10min       = $this->em->getConnection()->fetchAll($query, $params);
-        $params[':from'] = $contest ? $contest->getStarttime() : 0;
-        $workcontest     = $this->em->getConnection()->fetchAll($query, $params);
-
-        $map = function ($work) {
-            $result = [];
-            foreach ($work as $item) {
-                $result[$item['judgehostid']] = $item['load'];
-            }
-
-            return $result;
-        };
-
-        $work2min    = $map($work2min);
-        $work10min   = $map($work10min);
-        $workcontest = $map($workcontest);
 
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         $time_warn = $this->config->get('judgehost_warning');
@@ -169,21 +137,6 @@ class JudgehostController extends BaseController
                                        Utils::printtimediff((float)$judgehost->getPolltime()));
             }
 
-            $load = sprintf(
-                '%.2f %.2f ',
-                ($work2min[$judgehost->getJudgehostid()] ?? 0) / (2 * 60),
-                ($work10min[$judgehost->getJudgehostid()] ?? 0) / (10 * 60)
-            );
-            if ( $contest ) {
-                $contestLength = Utils::difftime($now, (float)$contest->getStarttime());
-                $load .= sprintf(
-                    '%.2f',
-                    ($workcontest[$judgehost->getJudgehostid()] ?? 0) / $contestLength
-                );
-            } else {
-                $load .= 'N/A';
-            }
-
             $lastJobId = $this->em->createQueryBuilder()
                 ->from(JudgeTask::class, 'jt')
                 ->select('jt.jobid')
@@ -203,10 +156,6 @@ class JudgehostController extends BaseController
                 'status' => [
                     'value' => $status,
                     'title' => $statustitle,
-                ],
-                'load' => [
-                    'title' => 'load during the last 2 and 10 minutes and the whole contest',
-                    'value' => $load,
                 ],
                 'active' => [
                     'value' => $judgehost->getActive() ? 'yes' : 'no',
