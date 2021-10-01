@@ -1463,19 +1463,8 @@ class JudgehostController extends AbstractFOSRestController
             // job state.
             $started_judgetaskids = array_column(
                 $this->em
-                    ->createQueryBuilder()
-                    ->from(JudgeTask::class, 'jt')
-                    ->join(JudgeTask::class, 'jt2', Join::WITH, 'jt.jobid = jt2.jobid')
-                    ->select('jt.jobid')
-                    ->andWhere('jt.judgetaskid != jt2.judgetaskid')
-                    ->andWhere('jt.judgehost IS NOT NULL')
-                    ->andWhere('jt.type = :type')
-                    ->andWhere('jt2.judgehost IS NULL')
-                    ->andWhere('jt2.valid = 1')
-                    ->andWhere('jt2.type = :type')
+                    ->createQuery('SELECT DISTINCT jt.jobid FROM App\Entity\JudgeTask jt WHERE jt.judgehost IS NULL AND jt.valid = 1 AND jt.type = :type AND jt.jobid IN (SELECT DISTINCT jt2.jobid FROM App\Entity\JudgeTask jt2 WHERE jt2.type = :type AND jt2.judgehost IS NOT NULL)')
                     ->setParameter(':type', JudgeTaskType::JUDGING_RUN)
-                    ->groupBy('jt.jobid')
-                    ->getQuery()
                     ->getArrayResult(),
                 'jobid');
             $queryBuilder = $this->em->createQueryBuilder();
