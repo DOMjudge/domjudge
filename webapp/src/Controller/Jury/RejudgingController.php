@@ -253,6 +253,7 @@ class RejudgingController extends BaseController
         $verdictsConfig = $this->dj->getDomjudgeEtcDir() . '/verdicts.php';
         $verdicts       = include $verdictsConfig;
         $verdicts[''] = 'JE'; /* happens for aborted judgings */
+        $verdicts['aborted'] = 'JE'; /* happens for aborted judgings */
 
         $used         = [];
         $verdictTable = [];
