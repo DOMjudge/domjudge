@@ -730,7 +730,7 @@ while (true) {
                 }
             }
             if (!empty($judgeTask['testcase_id'])) {
-                fetchTestcase($workdirpath, $judgeTask['testcase_id'], $judgeTask['judgetaskid']);
+                fetchTestcase($workdirpath, $judgeTask['testcase_id'], $judgeTask['judgetaskid'], $judgeTask['testcase_hash']);
             }
         }
         logmsg(LOG_INFO, "  🔥 Pre-heating judgehost completed.");
@@ -1207,7 +1207,7 @@ function judge(array $judgeTask): bool
 
     logmsg(LOG_INFO, "  🏃 Running testcase $judgeTask[testcase_id]...");
     $testcasedir = $workdir . "/testcase" . sprintf('%05d', $judgeTask['testcase_id']);
-    $tcfile = fetchTestcase($workdirpath, $judgeTask['testcase_id'], $judgeTask['judgetaskid']);
+    $tcfile = fetchTestcase($workdirpath, $judgeTask['testcase_id'], $judgeTask['judgetaskid'], $judgeTask['testcase_hash']);
     if ($tcfile === NULL) {
         // error while fetching testcase
         return false;
@@ -1350,16 +1350,18 @@ function judge(array $judgeTask): bool
     return $ret;
 }
 
-function fetchTestcase($workdirpath, $testcase_id, $judgetaskid): ?array
+function fetchTestcase($workdirpath, $testcase_id, $judgetaskid, $testcase_hash): ?array
 {
     // Get both in- and output files, only if we didn't have them already.
     $tcfile = array();
     $bothFilesExist = true;
     foreach (['input', 'output'] as $inout) {
-        $tcfile[$inout] =
-            $workdirpath .
-            '/testcase/testcase.' .
-            $testcase_id . '.' .
+        $testcasedir = $workdirpath . '/testcase/' . $testcase_id;
+        if (!is_dir($testcasedir)) {
+            mkdir($testcasedir, 0755, true);
+        }
+        $tcfile[$inout] = $testcasedir . '/' .
+            $testcase_hash . '.' .
             substr($inout, 0, -3);
         if (!file_exists($tcfile[$inout])) {
             $bothFilesExist = false;

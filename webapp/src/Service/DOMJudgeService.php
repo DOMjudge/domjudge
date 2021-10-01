@@ -1160,18 +1160,20 @@ class DOMJudgeService
         $judgetaskInsertParts = [];
         /** @var Testcase $testcase */
         foreach ($problem->getProblem()->getTestcases() as $testcase) {
-            $judgetaskInsertParts[]                                             = sprintf(
-                '(%s, :testcase_id%d)',
+            $judgetaskInsertParts[] = sprintf(
+                '(%s, :testcase_id%d, :testcase_hash%d)',
                 implode(', ', $judgetaskDefaultParamNames),
+                $testcase->getTestcaseid(),
                 $testcase->getTestcaseid()
             );
             $judgetaskInsertParams[':testcase_id' . $testcase->getTestcaseid()] = $testcase->getTestcaseid();
+            $judgetaskInsertParams[':testcase_hash' . $testcase->getTestcaseid()] = $testcase->getMd5sumInput() . '_' . $testcase->getMd5sumOutput();
         }
         $judgetaskColumns = array_map(function (string $column) {
             return substr($column, 1);
         }, $judgetaskDefaultParamNames);
         $judgetaskInsertQuery = sprintf(
-            'INSERT INTO judgetask (%s, testcase_id) VALUES %s',
+            'INSERT INTO judgetask (%s, testcase_id, testcase_hash) VALUES %s',
             implode(', ', $judgetaskColumns),
             implode(', ', $judgetaskInsertParts)
         );
