@@ -20,6 +20,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\FormInterface;
+use Symfony\Component\Validator\Constraints\Regex;
 
 class RejudgingType extends AbstractType
 {
@@ -143,13 +144,23 @@ class RejudgingType extends AbstractType
             'required' => false,
             'choices' => array_combine($verdicts, $verdicts),
         ]);
-        $builder->add('before', TextType::class, [
-            'label' => 'before (in form ±[HHH]H:MM[:SS[.uuuuuu]])',
-            'required' => false,
-        ]);
+        $relativeTimeConstraints = [
+            new Regex([
+                'pattern' => '/^[+-][0-9]+:[0-9]{2}(:[0-9]{2}(\.[0-9]{0,6})?)?$/',
+                'message' => 'Invalid relative time format'
+            ])
+        ];
         $builder->add('after', TextType::class, [
-            'label' => 'after (in form ±[HHH]H:MM[:SS[.uuuuuu]])',
+            'label' => 'after',
             'required' => false,
+            'constraints' => $relativeTimeConstraints,
+            'help' => 'in form ±[HHH]H:MM[:SS[.uuuuuu]], contest relative time',
+        ]);
+        $builder->add('before', TextType::class, [
+            'label' => 'before',
+            'required' => false,
+            'constraints' => $relativeTimeConstraints,
+            'help' => 'in form ±[HHH]H:MM[:SS[.uuuuuu]], contest relative time',
         ]);
 
         $builder->add('save', SubmitType::class);
