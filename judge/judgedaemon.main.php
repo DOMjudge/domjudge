@@ -795,13 +795,15 @@ while (true) {
 
     $success_file = "$workdir/.uuid_pid";
     $expected_uuid_pid = $row[0]['uuid'] . '_' . (string)getmypid();
-    if ($lastWorkdir !== null && $lastWorkdir !== $workdir) {
-        cleanup_judging($lastWorkdir);
-        $lastWorkdir = null;
-    } else if (file_exists($workdir)) {
-        // If a database gets reset without removing the judging
-        // directories, we might hit an old directory: rename it.
-        $needs_cleanup = false;
+
+    $needs_cleanup = false;
+    if ($lastWorkdir !== $workdir) {
+        // Switching between workdirs requires cleanup.
+        $needs_cleanup = true;
+    }
+    if (file_exists($workdir)) {
+        // If the workdir still exists we need to check whether it may be a left-over from a previous database.
+        // If that is the case, we need to rename it and potentially clean up.
         if (file_exists($success_file)) {
             $old_uuid_pid = file_get_contents($success_file);
             if ($old_uuid_pid !== $expected_uuid_pid) {
@@ -813,25 +815,22 @@ while (true) {
             $needs_cleanup = true;
         }
 
-        if ($needs_cleanup) {
-            if ($lastWorkdir !== null) {
-                cleanup_judging($lastWorkdir);
-                $lastWorkdir = null;
-            }
-
+        // Either the file didn't exist or we deleted it above.
+        if (!file_exists($success_file)) {
             $oldworkdir = $workdir . '-old-' . getmypid() . '-' . strftime('%Y-%m-%d_%H:%M');
             if (!rename($workdir, $oldworkdir)) {
-                error("Could not rename stale working directory to '$oldworkdir', the old UUID_PID was '$old_uuid_pid'");
+                error("Could not rename stale working directory to '$oldworkdir'.");
             }
             @chmod($oldworkdir, 0700);
-            warning("Found stale working directory; renamed to '$oldworkdir'");
-        }
-    } else {
-        if ($lastWorkdir !== null) {
-            cleanup_judging($lastWorkdir);
-            $lastWorkdir = null;
+            warning("Found stale working directory; renamed to '$oldworkdir'.");
         }
     }
+
+    if ($needs_cleanup && $lastWorkdir !== null) {
+        cleanup_judging($lastWorkdir);
+        $lastWorkdir = null;
+    }
+
 
     system('mkdir -p ' . dj_escapeshellarg("$workdir/compile"), $retval);
     if ($retval !== 0) {
