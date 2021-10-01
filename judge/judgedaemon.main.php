@@ -804,6 +804,7 @@ while (true) {
         $needs_cleanup = false;
         if (file_exists($success_file)) {
             $old_uuid_pid = file_get_contents($success_file);
+            logmsg(LOG_INFO, "   DEBUG old uuid ($old_uuid_pid) vs expected uuid ($expected_uuid_pid)");
             if ($old_uuid_pid !== $expected_uuid_pid) {
                 $needs_cleanup = true;
                 unlink($success_file);
