@@ -69,7 +69,7 @@ class RemovedInterval
      */
     private $contest;
 
-    public function getIntervalid(): int
+    public function getIntervalid(): ?int
     {
         return $this->intervalid;
     }
