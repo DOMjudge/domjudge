@@ -1444,8 +1444,6 @@ class JudgehostController extends AbstractFOSRestController
                 'jobid');
             $queryBuilder = $this->em->createQueryBuilder();
 
-
-
             $queryBuilder
                 ->from(JudgeTask::class, 'jt')
                 ->join(Submission::class, 's', Join::WITH, 'jt.submitid = s.submitid')
@@ -1464,37 +1462,39 @@ class JudgehostController extends AbstractFOSRestController
             }
 
             $result = array_column($queryBuilder->setMaxResults(950)->getQuery()->getArrayResult(), 'judgetaskid');
-            $queryBuilder = $this->em->createQueryBuilder();
 
-            $queryBuilder
-                ->from(JudgeTask::class, 'jt')
-                ->join(Submission::class, 's', Join::WITH, 'jt.submitid = s.submitid')
-                ->join('s.team', 't')
-                ->select('jt')
+            if (count($result) > 0) {
+                $queryBuilder = $this->em->createQueryBuilder();
+                $queryBuilder
+                    ->from(JudgeTask::class, 'jt')
+                    ->join(Submission::class, 's', Join::WITH, 'jt.submitid = s.submitid')
+                    ->join('s.team', 't')
+                    ->select('jt')
 //                ->andWhere('jt.judgehost IS NULL')
 //                ->andWhere('jt.valid = 1')
 //                ->andWhere('jt.priority = :max_priority')
 //                ->andWhere('jt.type = :type')
-                ->andWhere($queryBuilder->expr()->in('jt.judgetaskid', $result))
+                    ->andWhere($queryBuilder->expr()->in('jt.judgetaskid', $result))
 //                ->setParameter(':type', JudgeTaskType::JUDGING_RUN)
 //                ->setParameter(':max_priority', $max_priority)
-                ->addOrderBy('t.judging_last_started', 'ASC')
-                ->addOrderBy('s.submittime', 'ASC')
-                ->addOrderBy('s.submitid', 'ASC');
+                    ->addOrderBy('t.judging_last_started', 'ASC')
+                    ->addOrderBy('s.submittime', 'ASC')
+                    ->addOrderBy('s.submitid', 'ASC');
 //            if (!empty($started_judgetaskids)) {
 //                $queryBuilder
 //                    ->andWhere($queryBuilder->expr()->notIn('jt.jobid', $started_judgetaskids));
 //            }
 
-            /** @var JudgeTask[] $judgetasks */
-            $judgetasks =
-                $queryBuilder
-                    ->addOrderBy('jt.judgetaskid')
-                    ->setMaxResults($max_batchsize)
-                    ->getQuery()
-                    ->getResult();
-            if (!empty($judgetasks)) {
-                return $this->serializeJudgeTasks($judgetasks, $judgehost);
+                /** @var JudgeTask[] $judgetasks */
+                $judgetasks =
+                    $queryBuilder
+                        ->addOrderBy('jt.judgetaskid')
+                        ->setMaxResults($max_batchsize)
+                        ->getQuery()
+                        ->getResult();
+                if (!empty($judgetasks)) {
+                    return $this->serializeJudgeTasks($judgetasks, $judgehost);
+                }
             }
 
             if ($this->config->get('enable_parallel_judging')) {
