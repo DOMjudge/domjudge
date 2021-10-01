@@ -688,7 +688,8 @@ class ContestController extends BaseController
                         ->setType(JudgeTaskType::PREFETCH)
                         ->setJudgehost($judgehost)
                         ->setPriority(JudgeTask::PRIORITY_DEFAULT)
-                        ->setTestcaseId($testcase->getTestcaseid());
+                        ->setTestcaseId($testcase->getTestcaseid())
+                        ->setTestcaseHash($testcase->getMd5sumInput() . '_' . $testcase->getMd5sumOutput());
                     $this->em->persist($judgeTask);
                     $cnt++;
                 }
