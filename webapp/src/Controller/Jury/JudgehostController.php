@@ -142,7 +142,7 @@ class JudgehostController extends BaseController
                 ->select('jt.jobid')
                 ->andWhere('jt.judgehost = :judgehost')
                 ->andWhere('jt.type = :type')
-                ->setParameter(':judgehost', $judgehost->getHostname())
+                ->setParameter(':judgehost', $judgehost)
                 ->setParameter(':type', JudgeTaskType::JUDGING_RUN)
                 ->orderBy('jt.starttime', 'DESC')
                 ->setMaxResults(1)
