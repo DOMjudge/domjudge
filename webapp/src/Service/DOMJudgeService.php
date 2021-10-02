@@ -19,6 +19,7 @@ use App\Entity\Judging;
 use App\Entity\Language;
 use App\Entity\Problem;
 use App\Entity\ProblemAttachment;
+use App\Entity\QueueTask;
 use App\Entity\Rejudging;
 use App\Entity\Submission;
 use App\Entity\Team;
@@ -1244,6 +1245,17 @@ class DOMJudgeService
         );
 
         $this->em->getConnection()->executeQuery($judgingRunInsertQuery, $judgingRunInsertParams);
+
+        $team = $submission->getTeam();
+        $teamPriority = 0; // TODO
+        $queueTask = new QueueTask();
+        $queueTask->setJobId($judging->getJudgingid())
+            ->setPriority($priority)
+            ->setTeam($team)
+            ->setTeamPriority($teamPriority)
+            ->setStartTime(null);
+        $this->em->persist($queueTask);
+        $this->em->flush();
     }
 
     public function getImmutableCompareExecutable(ContestProblem $problem): ImmutableExecutable
