@@ -1360,23 +1360,17 @@ class JudgehostController extends AbstractFOSRestController
          * work across judgehosts (e.g. additional compilation) low.
          *
          * We follow the following high-level strategy here to assign work:
-         * 1) If there's an unfinished job (e.g. a judging)
-         *    - to which we already contributed, and
-         *    - where the remaining JudgeTasks have a priority <= 0,
-         *    then continue handing out JudgeTasks for this job.
-         * 2) Determine highest priority level of outstanding JudgeTasks, so that we work on one of the most important work
-         *    items.
-         *    a) If there's an already started job to which we already contributed,
-         *       then continue working on this job.
-         *    b) Otherwise, if there's an unstarted job, hand out tasks from that job.
-         *    c) Otherwise, contribute to an already started job even if we didn't contribute yet.
+         * 1) If there's an unfinished job (e.g. a judging) to which we already contributed, and then continue handing
+         *    out JudgeTasks for this job.
+         * 2) Work on something new:
+         *    a) If there's a completely unstarted job, hand out tasks from that job.
+         *    b) Otherwise, contribute to an already started job even if we didn't contribute yet.
 
          * Note that there could potentially be races in the selection of work, but adding synchronization mechanisms is
          * more costly than starting a possible only second most important work item.
          */
 
-        // This is case 1) from above: continue what we have started (if still important).
-        // TODO: These queries would be much easier and less heavy on the DB with an extra table.
+        // This is case 1) from above: continue what we have started.
         $lastJobId = $this->em->createQueryBuilder()
             ->from(JudgeTask::class, 'jt')
             ->select('jt.jobid')
@@ -1394,9 +1388,8 @@ class JudgehostController extends AbstractFOSRestController
             return $judgetasks;
         }
 
-        // This is case 2.b) from above: start something new.
-        // First, we have to filter for unfinished jobs. This would be easier with a separate table storing the
-        // job state.
+        // This is case 2.a) from above: start something new.
+        // This runs transactional to prevent a queue task being picked up twice.
         $judgetasks = null;
         $this->em->transactional(function() use ($judgehost, $max_batchsize, &$judgetasks) {
             $jobid = $this->em->createQueryBuilder()
@@ -1410,6 +1403,7 @@ class JudgehostController extends AbstractFOSRestController
                 ->getOneOrNullResult(AbstractQuery::HYDRATE_SINGLE_SCALAR);
             $judgetasks = $this->getJudgetasks($jobid, $max_batchsize, $judgehost);
             if ($judgetasks !== null) {
+                // Mark it as being worked on.
                 $this->em->createQueryBuilder()
                     ->update(QueueTask::class, 'qt')
                     ->set('qt.startTime', Utils::now())
@@ -1425,8 +1419,7 @@ class JudgehostController extends AbstractFOSRestController
         }
 
         if ($this->config->get('enable_parallel_judging')) {
-            // This is case 2.c) from above: contribute to a job someone else has started but we have not contributed yet.
-            // We intentionally lift the restriction on priority in this case to get any high priority work.
+            // This is case 2.b) from above: contribute to a job someone else has started but we have not contributed yet.
             $jobid = $this->em->createQueryBuilder()
                 ->from(QueueTask::class, 'qt')
                 ->select('qt.jobid')
