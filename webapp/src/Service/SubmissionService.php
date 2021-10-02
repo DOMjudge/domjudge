@@ -304,6 +304,11 @@ class SubmissionService
                 ->getQuery()
                 ->getSingleScalarResult();
         }
+        $counts['perteam'] = (clone $queryBuilder)
+            ->select('COUNT(DISTINCT s.team) AS cnt')
+            ->andWhere($countQueryExtras['queued'])
+            ->getQuery()
+            ->getSingleScalarResult();
 
         return [$submissions, $counts];
     }
