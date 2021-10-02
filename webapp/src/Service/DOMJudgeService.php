@@ -19,6 +19,7 @@ use App\Entity\Judging;
 use App\Entity\Language;
 use App\Entity\Problem;
 use App\Entity\ProblemAttachment;
+use App\Entity\QueueTask;
 use App\Entity\Rejudging;
 use App\Entity\Submission;
 use App\Entity\Team;
@@ -1087,6 +1088,7 @@ class DOMJudgeService
 
     public function maybeCreateJudgeTasks(Judging $judging, int $priority = JudgeTask::PRIORITY_DEFAULT): void
     {
+        /** @var Submission $submission */
         $submission = $judging->getSubmission();
         $problem    = $submission->getContestProblem();
         $language   = $submission->getLanguage();
@@ -1203,6 +1205,35 @@ class DOMJudgeService
         );
 
         $this->em->getConnection()->executeQuery($judgingRunInsertQuery, $judgingRunInsertParams);
+
+        $team = $submission->getTeam();
+        $result = $this->em->createQueryBuilder()
+            ->from(QueueTask::class, 'qt')
+            ->select('MAX(qt.teamPriority) AS max, COUNT(qt.jobid) AS count')
+            ->andWhere('qt.team = :team')
+            ->setParameter(':team', $team)
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        // Teams that submit often, slowing down the queue should not be able to starve other teams of a judgement.
+        // For every pending job in the queue by that team, add a penalty (60s).
+        // To ensure that submissions will be ordered by submission time, use at least the current maximal team priority.
+        // Jobs with a lower priority are judged earlier.
+        // Assume the following situation:
+        // - a team submits three times at time X
+        // - the team priority for the submissions are X, X+60, X+120 respectively
+        // - assume that the first two submissions are judged after 5 seconds, the team submits again
+        // - the new submission would get X+5+60 (since there's only one of their submissions still to be worked on),
+        //   but we want to judge submissions of this team in order, so we take the current max (X+120) and add 1.
+        $teamPriority = (int)(max($result['max']+1, $submission->getSubmittime() + 60*$result['count']));
+        $queueTask = new QueueTask();
+        $queueTask->setJobId($judging->getJudgingid())
+            ->setPriority($priority)
+            ->setTeam($team)
+            ->setTeamPriority($teamPriority)
+            ->setStartTime(null);
+        $this->em->persist($queueTask);
+        $this->em->flush();
     }
 
     public function getImmutableCompareExecutable(ContestProblem $problem): ImmutableExecutable
