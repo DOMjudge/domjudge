@@ -677,8 +677,10 @@ class ScoreboardService
             ->getResult();
 
         $message = sprintf('Recalculating all values for the scoreboard ' .
-                           'cache for contest %d (%d teams, %d problems)...',
-                           $contest->getCid(), count($teams), count($problems));
+            'cache for contest %s (c%d, %d teams, %d problems)...',
+            $contest->getShortname(),
+            $contest->getCid(),
+            count($teams), count($problems));
         $progressReporter($message . "\n\n");
 
         if (count($teams) == 0) {
