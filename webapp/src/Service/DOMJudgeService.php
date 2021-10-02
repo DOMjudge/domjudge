@@ -1129,6 +1129,7 @@ class DOMJudgeService
 
     public function maybeCreateJudgeTasks(Judging $judging, int $priority = JudgeTask::PRIORITY_DEFAULT): void
     {
+        /** @var Submission $submission */
         $submission = $judging->getSubmission();
         $problem    = $submission->getContestProblem();
         $language   = $submission->getLanguage();
@@ -1247,7 +1248,14 @@ class DOMJudgeService
         $this->em->getConnection()->executeQuery($judgingRunInsertQuery, $judgingRunInsertParams);
 
         $team = $submission->getTeam();
-        $teamPriority = 0; // TODO
+        $result = $this->em->createQueryBuilder()
+            ->from(QueueTask::class, 'qt')
+            ->select('MAX(qt.teamPriority) AS max, COUNT(qt.jobid) AS count')
+            ->andWhere('qt.team = :team')
+            ->setParameter(':team', $team)
+            ->getQuery()
+            ->getOneOrNullResult();
+        $teamPriority = (int)(max($result['max'], $submission->getSubmittime() + 60*$result['count']));
         $queueTask = new QueueTask();
         $queueTask->setJobId($judging->getJudgingid())
             ->setPriority($priority)

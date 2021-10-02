@@ -1394,7 +1394,6 @@ class JudgehostController extends AbstractFOSRestController
             return $judgetasks;
         }
 
-
         // This is case 2.b) from above: start something new.
         // First, we have to filter for unfinished jobs. This would be easier with a separate table storing the
         // job state.
