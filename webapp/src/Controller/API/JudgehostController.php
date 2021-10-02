@@ -1397,17 +1397,30 @@ class JudgehostController extends AbstractFOSRestController
         // This is case 2.b) from above: start something new.
         // First, we have to filter for unfinished jobs. This would be easier with a separate table storing the
         // job state.
-        $jobid = $this->em->createQueryBuilder()
-            ->from(QueueTask::class, 'qt')
-            ->select('qt.jobid')
-            ->andWhere('qt.startTime IS NULL')
-            ->addOrderBy('qt.priority')
-            ->addOrderBy('qt.teamPriority')
-            ->setMaxResults(1)
-            ->getQuery()
-            ->getOneOrNullResult(AbstractQuery::HYDRATE_SINGLE_SCALAR);
-        $judgetasks = $this->getJudgetasks($jobid, $max_batchsize, $judgehost);
-        if ($judgetasks !== null) {
+        $judgetasks = null;
+        $this->em->transactional(function() use ($judgehost, $max_batchsize, &$judgetasks) {
+            $jobid = $this->em->createQueryBuilder()
+                ->from(QueueTask::class, 'qt')
+                ->select('qt.jobid')
+                ->andWhere('qt.startTime IS NULL')
+                ->addOrderBy('qt.priority')
+                ->addOrderBy('qt.teamPriority')
+                ->setMaxResults(1)
+                ->getQuery()
+                ->getOneOrNullResult(AbstractQuery::HYDRATE_SINGLE_SCALAR);
+            $judgetasks = $this->getJudgetasks($jobid, $max_batchsize, $judgehost);
+            if ($judgetasks !== null) {
+                $this->em->createQueryBuilder()
+                    ->update(QueueTask::class, 'qt')
+                    ->set('qt.startTime', Utils::now())
+                    ->andWhere('qt.jobid = :jobid')
+                    ->andWhere('qt.startTime IS NULL')
+                    ->setParameter(':jobid', $jobid)
+                    ->getQuery()
+                    ->execute();
+            }
+        });
+        if (!empty($judgetasks)) {
             return $judgetasks;
         }
 
@@ -1465,9 +1478,9 @@ class JudgehostController extends AbstractFOSRestController
         $submit_id = $judgeTasks[0]->getSubmitid();
         $judgetaskids = [];
         foreach ($judgeTasks as $judgeTask) {
-           if ($judgeTask->getSubmitid() == $submit_id) {
-               $judgetaskids[] = $judgeTask->getJudgetaskid();
-           }
+            if ($judgeTask->getSubmitid() == $submit_id) {
+                $judgetaskids[] = $judgeTask->getJudgetaskid();
+            }
         }
 
         $now = Utils::now();
