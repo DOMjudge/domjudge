@@ -74,6 +74,7 @@ class MetricsController extends AbstractFOSRestController
         $m['submissions_ignored']    = $registry->getOrRegisterGauge('domjudge', 'submissions_ignored', "Number of ignored submissions", ['contest']);
         $m['submissions_unverified'] = $registry->getOrRegisterGauge('domjudge', 'submissions_unverified', "Number of unverified submissions", ['contest']);
         $m['submissions_queued']     = $registry->getOrRegisterGauge('domjudge', 'submissions_queued', "Number of queued submissions", ['contest']);
+        $m['submissions_perteam']     = $registry->getOrRegisterGauge('domjudge', 'submissions_perteam', "Number of teams that have a queued submission", ['contest']);
 
         // Get global team login metrics
         $m['teams']           = $registry->getOrRegisterGauge('domjudge', 'teams', "Total number of teams", ['contest']);
