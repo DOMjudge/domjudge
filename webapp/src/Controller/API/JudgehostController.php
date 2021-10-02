@@ -843,7 +843,8 @@ class JudgehostController extends AbstractFOSRestController
                     'SELECT DISTINCT jobid'
                     . ' FROM judgetask'
                     . ' WHERE ' . $field_name . ' = :id'
-                    . ' AND judgehostid IS NULL',
+                    . ' AND judgehostid IS NULL'
+                    . ' AND valid = 1',
                     [
                         ':id' => $disabled_id,
                     ]
