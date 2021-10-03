@@ -146,8 +146,10 @@ class SubmissionService
             $queryBuilder
                 ->leftJoin('s.judgings', 'j', Join::WITH, 'j.rejudging = :rejudgingid')
                 ->leftJoin(Judging::class, 'jold', Join::WITH,
-                           'j.original_judging IS NULL AND s.submitid = jold.submission AND jold.valid = 1 OR j.original_judging = jold.judgingid')
-                ->addSelect('jold.result AS oldresult')
+                    'j.original_judging IS NULL AND s.submitid = jold.submission AND jold.valid = 1')
+                ->leftJoin(Judging::class, 'jold2', Join::WITH,
+                    'j.original_judging = jold2.judgingid')
+                ->addSelect('COALESCE(jold.result, jold2.result) AS oldresult')
                 ->andWhere('s.rejudging = :rejudgingid OR j.rejudging = :rejudgingid')
                 ->setParameter(':rejudgingid', $restrictions['rejudgingid']);
 
