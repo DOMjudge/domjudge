@@ -45,6 +45,8 @@
 
         {{ form_start(form) }}
         {{ form_row(form.b) }}
+        {{ form_row(form.b2) }}
+        {{ form_row(form.b3) }}
         {{ form_row(form.finalizecomment) }}
         {{ form_widget(form.finalize) }}
         {{ button(path('jury_contest', {'contestId': contest.cid}), 'Cancel', 'secondary') }}
