@@ -81,6 +81,9 @@ class SecurityController extends AbstractController
         // Add a header so we can detect that this is the login page
         $response = new Response();
         $response->headers->set('X-Login-Page', $this->generateUrl('login'));
+        if (!empty($error)) {
+            $response->setStatusCode(401);
+        }
 
         $selfRegistrationCategoriesCount = $em->getRepository(TeamCategory::class)->count(['allow_self_registration' => 1]);
 
