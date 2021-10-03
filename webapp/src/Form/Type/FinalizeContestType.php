@@ -14,14 +14,23 @@ class FinalizeContestType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $builder->add('b', IntegerType::class, [
-            'label' => 'Additional Bronze Medals'
-        ]);
-        $builder->add('finalizecomment', TextareaType::class, [
-            'label' => 'Comment',
-            'required' => false,
-        ]);
-        $builder->add('finalize', SubmitType::class);
+        $builder
+            ->add('b', IntegerType::class, [
+                'label' => 'Additional Bronze Medals'
+            ])
+            ->add('b2', IntegerType::class, [
+                'label' => 'High honors',
+                'help' => 'Last rank to receive high honors (leave empty to use 25th percentile).'
+            ])
+            ->add('b3', IntegerType::class, [
+                'label' => 'Honors',
+                'help' => 'Last rank to receive honors (leave empty to use 50th percentile).'
+            ])
+            ->add('finalizecomment', TextareaType::class, [
+                'label' => 'Comment',
+                'required' => false,
+            ])
+            ->add('finalize', SubmitType::class);
     }
 
     public function configureOptions(OptionsResolver $resolver): void

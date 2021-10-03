@@ -366,13 +366,20 @@ class ImportExportService
             ->getResult();
 
         $numberOfTeams = count($scoreboard->getScores());
-        // Determine number of problems solved by median team.
+        // determine number of problems solved by 25th percentile and median team
         $count  = 0;
-        $median = 0;
+
+        $highHonorsPoints = 0;
+        $honorsPoints = 0;
+        $highHonorsCount = empty($contest->getB2()) ? $numberOfTeams / 4 : $contest->getB2();
+        $honorsCount = empty($contest->getB3()) ? $numberOfTeams / 2 : $contest->getB3();
         foreach ($scoreboard->getScores() as $teamScore) {
             $count++;
-            $median = $teamScore->numPoints;
-            if ($count > $numberOfTeams / 2) {
+            $honorsPoints = $teamScore->numPoints;
+            if ($count <= $highHonorsCount) {
+                $highHonorsPoints = $teamScore->numPoints;
+            }
+            if ($count > $honorsCount) {
                 break;
             }
         }
@@ -399,13 +406,13 @@ class ImportExportService
                 $awardString = 'Silver Medal';
             } elseif ($rank <= ($contest->getGoldMedals() ?? 4) + ($contest->getSilverMedals() ?? 4) + ($contest->getBronzeMedals() ?? 4) + $contest->getB()) {
                 $awardString = 'Bronze Medal';
-            } elseif ($numPoints >= $median) {
+            } elseif ($numPoints >= $honorsPoints) {
                 // Teams with equally solved number of problems get the same rank.
                 if (!isset($ranks[$numPoints])) {
                     $ranks[$numPoints] = $rank;
                 }
                 $rank        = $ranks[$numPoints];
-                $awardString = 'Ranked';
+                $awardString = $numPoints >= $highHonorsPoints ? 'High honors' : 'Honors';
             } else {
                 $awardString = 'Honorable';
                 $rank        = '';
