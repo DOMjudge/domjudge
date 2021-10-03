@@ -411,11 +411,12 @@ class RejudgingController extends BaseController
             'showExternalResult' => $this->config->get('data_source') ==
                 DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL,
             'stats' => $stats,
-            'refresh' => [
-                'after' => 15,
-                'url' => $request->getRequestUri(),
-                'ajax' => true,
-            ],
+            // temporary disabled
+            // 'refresh' => [
+            //     'after' => 15,
+            //     'url' => $request->getRequestUri(),
+            //     'ajax' => true,
+            // ],
         ];
         if ($request->isXmlHttpRequest()) {
             $data['ajax'] = true;
