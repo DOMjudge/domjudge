@@ -155,15 +155,15 @@ class SubmissionService
 
             if (isset($restrictions['rejudgingdiff'])) {
                 if ($restrictions['rejudgingdiff']) {
-                    $queryBuilder->andWhere('j.result != jold.result');
+                    $queryBuilder->andWhere('j.result != COALESCE(jold.result, jold2.result)');
                 } else {
-                    $queryBuilder->andWhere('j.result = jold.result');
+                    $queryBuilder->andWhere('j.result = COALESCE(jold.result, jold2.result)');
                 }
             }
 
             if (isset($restrictions['old_result'])) {
                 $queryBuilder
-                    ->andWhere('jold.result = :oldresult')
+                    ->andWhere('COALESCE(jold.result, jold2.result) = :oldresult')
                     ->setParameter(':oldresult', $restrictions['old_result']);
             }
         } else {
