@@ -389,7 +389,9 @@ class RejudgingController extends BaseController
             ->getQuery()
             ->getScalarResult();
 
-        if (count($repetitions) > 0) {
+        // Only load the statistics if desired. The query is quite long and can result in much data, so only have it run when needed.
+        $showStatistics = $request->query->has("show_statistics") && filter_var($request->query->get("show_statistics"), FILTER_VALIDATE_BOOL);
+        if ($showStatistics && count($repetitions) > 0) {
             $stats = $this->getStats($rejudging);
         } else {
             $stats = null;
@@ -408,6 +410,7 @@ class RejudgingController extends BaseController
             'oldverdict' => $request->query->get('oldverdict', 'all'),
             'newverdict' => $request->query->get('newverdict', 'all'),
             'repetitions' => array_column($repetitions, 'rejudgingid'),
+            'showStatistics' => $showStatistics,
             'showExternalResult' => $this->config->get('data_source') ==
                 DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL,
             'stats' => $stats,
