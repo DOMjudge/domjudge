@@ -480,13 +480,13 @@ class ImportExportService
         $honorsCount = empty($contest->getB3()) ? $numberOfTeams / 2 : $contest->getB3();
         foreach ($scoreboard->getScores() as $teamScore) {
             $count++;
-            $honorsPoints = $teamScore->numPoints;
             if ($count <= $highHonorsCount) {
                 $highHonorsPoints = $teamScore->numPoints;
             }
             if ($count > $honorsCount) {
                 break;
             }
+            $honorsPoints = $teamScore->numPoints;
         }
 
         $ranks        = [];
