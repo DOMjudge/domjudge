@@ -497,12 +497,7 @@ class StatisticsService
             foreach ([true, false] as $correct) {
                 $queryBuilder = clone $judgingsQueryBuilder;
                 $queryBuilder->andWhere('s.submittime >= :starttime');
-                if ($bin === static::NUM_GROUPED_BINS - 1) {
-                    // Special case: we need submissions from the last second
-                    $queryBuilder->andWhere('s.submittime <= :endtime');
-                } else {
-                    $queryBuilder->andWhere('s.submittime < :endtime');
-                }
+                $queryBuilder->andWhere('s.submittime < :endtime');
                 if ($showFrozen || $end->getTimestamp() <= $contest->getFreezetime()) {
                     // When we don't want to show frozen correct/incorrect submissions,
                     // get the same data for both correct and incorrect.
