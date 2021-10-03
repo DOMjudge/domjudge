@@ -30,6 +30,9 @@ domjudge_submissions_correct{contest="demo"} 0
 # HELP domjudge_submissions_ignored Number of ignored submissions
 # TYPE domjudge_submissions_ignored gauge
 domjudge_submissions_ignored{contest="demo"} 0
+# HELP domjudge_submissions_perteam Number of teams that have a queued submission
+# TYPE domjudge_submissions_perteam gauge
+domjudge_submissions_perteam{contest="demo"} 2
 # HELP domjudge_submissions_queued Number of queued submissions
 # TYPE domjudge_submissions_queued gauge
 domjudge_submissions_queued{contest="demo"} 2
