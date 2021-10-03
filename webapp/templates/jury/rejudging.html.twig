@@ -168,17 +168,25 @@
 
     <h2 class="mt-4">Details</h2>
 
-    <div class="btn-group btn-group-toggle btn-group-sm mb-3" data-toggle="buttons">
-        <div class="input-group-prepend">
-            <div class="input-group-text listtoggles">Show:</div>
-        </div>
-        {%- for idx, type in viewTypes %}
+    <div class="btn-toolbar mb-3" role="toolbar" aria-label="Toolbar with button groups">
+        <div class="btn-group btn-group-toggle btn-group-sm input-group-sm" data-toggle="buttons">
+            <div class="input-group-prepend">
+                <div class="input-group-text listtoggles">Show:</div>
+            </div>
+            {%- for idx, type in viewTypes %}
 
-            <label class="btn btn-secondary {% if idx == view %}active{% endif %}">
-                <input type="radio" name="viewtype" autocomplete="off" value="{{ type }}"
-                       {% if idx == view %}checked{% endif %}> {{ type }}
+                <label class="btn btn-secondary {% if idx == view %}active{% endif %}">
+                    <input type="radio" name="viewtype" autocomplete="off" value="{{ type }}"
+                           {% if idx == view %}checked{% endif %}> {{ type }}
+                </label>
+            {%- endfor %}
+        </div>&nbsp;
+        <div class="btn-group-toggle btn-group-sm" data-toggle="buttons">
+            <label class="btn btn-outline-secondary {% if showStatistics %}active{% endif %}">
+                <input type="checkbox" id="statistics-toggle" {% if showStatistics %}checked{% endif %} autocomplete="off">
+                <i class="fas fa-list-ol"></i> Statistics
             </label>
-        {%- endfor %}
+        </div>
     </div>
 
     <form action="{{ path('jury_rejudging', {rejudgingId: rejudging.rejudgingid}) }}" method="get">
@@ -230,7 +238,11 @@
     <script>
         $(function () {
             $('input[name=viewtype]').on('change', function () {
-                window.location = '{{ path('jury_rejudging', {rejudgingId: rejudging.rejudgingid, view: 'REPLACE_ME', oldverdict: oldverdict, newverdict: newverdict}) }}'.replace('REPLACE_ME', $(this).val());
+                window.location = '{{ path('jury_rejudging', {rejudgingId: rejudging.rejudgingid, view: 'REPLACE_ME', oldverdict: oldverdict, newverdict: newverdict, show_statistics: showStatistics}) }}'.replace('REPLACE_ME', $(this).val()).replaceAll('&amp;', '&');
+            });
+
+            $('#statistics-toggle').on('change', function () {
+                window.location = '{{ path('jury_rejudging', {rejudgingId: rejudging.rejudgingid, view: viewTypes[view], oldverdict: oldverdict, newverdict: newverdict, show_statistics: 'REPLACE_ME'}) }}'.replace('REPLACE_ME', $(this).is(':checked')).replaceAll('&amp;', '&');
             });
 
             $('.select2').select2();
