@@ -457,13 +457,14 @@ function enableRefresh($url, $after, usingAjax) {
             }).done(function(data, status, jqXHR) {
                 processAjaxResponse(jqXHR, data);
                 $('.loading-indicator').removeClass('ajax-loader');
+                refreshHandler = setTimeout(refresh, $after * 1000);
             });
         } else {
             window.location = $url;
         }
     };
     if (usingAjax) {
-        refreshHandler = setInterval(refresh, $after * 1000);
+        refreshHandler = setTimeout(refresh, $after * 1000);
     } else {
         refreshHandler = setTimeout(refresh, $after * 1000);
     }
