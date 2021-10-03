@@ -67,6 +67,6 @@ function dj_file_get_contents(string $filename, int $maxsize = -1) : string
  */
 function dj_escapeshellarg(?string $arg) : string
 {
-    if ( empty($arg) ) return "''";
+    if ( !isset($arg) || $arg==='' ) return "''";
     return escapeshellarg($arg);
 }
