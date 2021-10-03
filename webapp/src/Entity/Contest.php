@@ -171,6 +171,24 @@ class Contest extends BaseApiEntity
     private $b = 0;
 
     /**
+     * @var int|null
+     * @ORM\Column(type="smallint", length=3, name="b2",
+     *     options={"comment"="Last team receiving high honors","unsigned"="true","default"=0},
+     *     nullable=true)
+     * @Serializer\Exclude()
+     */
+    private $b2 = null;
+
+    /**
+     * @var int|null
+     * @ORM\Column(type="smallint", length=3, name="b3",
+     *     options={"comment"="Last team receiving honors","unsigned"="true","default"=0},
+     *     nullable=true)
+     * @Serializer\Exclude()
+     */
+    private $b3 = null;
+
+    /**
      * @var boolean|null
      * @ORM\Column(type="boolean", name="process_awards",
      *     options={"comment"="Are there awards for this contest?","default"=1},
@@ -543,6 +561,26 @@ class Contest extends BaseApiEntity
     public function setB(?int $b)
     {
         $this->b = $b;
+    }
+
+    public function getB2(): ?int
+    {
+        return $this->b2;
+    }
+
+    public function setB2(?int $b2)
+    {
+        $this->b2 = $b2;
+    }
+
+    public function getB3(): ?int
+    {
+        return $this->b3;
+    }
+
+    public function setB3(?int $b3)
+    {
+        $this->b3 = $b3;
     }
 
     /** @return string|float */
