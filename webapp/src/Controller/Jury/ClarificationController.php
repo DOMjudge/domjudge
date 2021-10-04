@@ -91,10 +91,13 @@ class ClarificationController extends AbstractController
             ->addOrderBy('clar.clarid', 'DESC');
 
         if ($currentQueue === "unassigned") {
-            $queryBuilder->andWhere('clar.queue IS NULL');
+            $queryBuilder->andWhere($queryBuilder->expr()->orX(
+                $queryBuilder->expr()->isNull('clar.queue'),
+                $queryBuilder->expr()->eq('clar.queue', ':queue')
+            ))
+                ->setParameter(':queue', $currentQueue);
         } else if ($currentQueue !== "all") {
-            $queryBuilder
-                ->andWhere('clar.queue = :queue')
+            $queryBuilder->andWhere('clar.queue = :queue')
                 ->setParameter(':queue', $currentQueue);
         }
 
