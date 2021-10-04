@@ -52,11 +52,11 @@
                 </div>
                 <label class="btn btn-secondary {% if currentQueue is null %}active{% endif %}">
                     <input type="radio" name="queue" autocomplete="off" value="all"
-                           {% if currentQueue is null %}checked{% endif %}> All
+                           {% if currentQueue == "all" %}checked{% endif %}> All
                 </label>
                 <label class="btn btn-secondary {% if currentQueue is not null and currentQueue == '' %}active{% endif %}">
                     <input type="radio" name="queue" autocomplete="off" value="unassigned"
-                           {% if currentQueue is not null and currentQueue == 'unassigned' %}checked{% endif %}> Unassigned
+                           {% if currentQueue == "unassigned" %}checked{% endif %}> Unassigned
                 </label>
                 {%- for queue, name in queues %}
                     <label class="btn btn-secondary {% if currentQueue == queue %}active{% endif %}">
