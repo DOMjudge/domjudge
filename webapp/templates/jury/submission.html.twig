@@ -421,7 +421,7 @@
                                 {% elseif selectedJudging.result is not null %}
                                     <form action="{{ path('jury_submission_request_remaining', {'judgingId': selectedJudging.judgingid}) }}" method="post"
                                           style="display: inline; ">
-                                        <input type="submit" class="btn btn-outline-secondary btn-sm" value="judge remaining" />
+                                        <input disabled title="Temporarily blocked, not working!" type="submit" class="btn btn-outline-secondary btn-sm" value="judge remaining" />
                                     </form>
                                 {% endif %}
                             {% endif %}
