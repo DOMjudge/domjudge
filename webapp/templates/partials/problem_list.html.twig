@@ -10,12 +10,11 @@
             {% for row in problems|batch(3, []) %}
                 <div class="col-md-12">
                     <div class="card-deck my-md-3">
-                        {% for problemData in row %}
-                            {% if problemData is empty %}
+                        {% for problem in row %}
+                            {% if problem is empty %}
                                 <div class="card" style="border: none;"></div>
                             {% else %}
-                                {% set problem = problemData.0 %}
-                                {% set numsamples = problemData.numsamples %}
+                                {% set numsamples = samples[problem.probid] %}
                                 <div class="card">
                                     <div class="card-body">
                                         <h2 class="card-title">
