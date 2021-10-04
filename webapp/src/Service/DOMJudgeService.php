@@ -1018,23 +1018,11 @@ class DOMJudgeService
         $problems = [];
         $samples = [];
         if ($contest && $contest->getFreezeData()->started()) {
-            $problemData = $this->em->createQueryBuilder()
+            $problems = $this->em->createQueryBuilder()
                 ->from(ContestProblem::class, 'cp')
                 ->join('cp.problem', 'p')
                 ->leftJoin('p.testcases', 'tc')
                 ->leftJoin('p.attachments', 'a')
-                ->select('partial p.{probid,name,externalid,problemtext_type,timelimit,memlimit}', 'cp', 'a')
-                ->andWhere('cp.contest = :contest')
-                ->andWhere('cp.allowSubmit = 1')
-                ->setParameter(':contest', $contest)
-                ->addOrderBy('cp.shortname')
-                ->getQuery()
-                ->getResult();
-
-            $sampleData = $this->em->createQueryBuilder()
-                ->from(ContestProblem::class, 'cp')
-                ->join('cp.problem', 'p')
-                ->leftJoin('p.testcases', 'tc')
                 ->select('partial p.{probid,name,externalid,problemtext_type,timelimit,memlimit}', 'cp', 'a')
                 ->andWhere('cp.contest = :contest')
                 ->andWhere('cp.allowSubmit = 1')
@@ -1047,7 +1035,6 @@ class DOMJudgeService
                 ->from(ContestProblem::class, 'cp')
                 ->join('cp.problem', 'p')
                 ->leftJoin('p.testcases', 'tc')
-                ->leftJoin('p.attachments', 'a')
                 ->select('p.probid', 'SUM(tc.sample) AS numsamples')
                 ->andWhere('cp.contest = :contest')
                 ->andWhere('cp.allowSubmit = 1')
