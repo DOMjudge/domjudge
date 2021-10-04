@@ -1016,24 +1016,43 @@ class DOMJudgeService
         }
 
         $problems = [];
+        $samples = [];
         if ($contest && $contest->getFreezeData()->started()) {
             $problems = $this->em->createQueryBuilder()
                 ->from(ContestProblem::class, 'cp')
                 ->join('cp.problem', 'p')
                 ->leftJoin('p.testcases', 'tc')
                 ->leftJoin('p.attachments', 'a')
-                ->select('partial p.{probid,name,externalid,problemtext_type,timelimit,memlimit}', 'cp', 'SUM(tc.sample) AS numsamples', 'a')
+                ->select('partial p.{probid,name,externalid,problemtext_type,timelimit,memlimit}', 'cp', 'a')
                 ->andWhere('cp.contest = :contest')
                 ->andWhere('cp.allowSubmit = 1')
                 ->setParameter(':contest', $contest)
                 ->addOrderBy('cp.shortname')
+                ->getQuery()
+                ->getResult();
+
+            $samplesData = $this->em->createQueryBuilder()
+                ->from(ContestProblem::class, 'cp')
+                ->join('cp.problem', 'p')
+                ->leftJoin('p.testcases', 'tc')
+                ->leftJoin('p.attachments', 'a')
+                ->select('p.probid', 'SUM(tc.sample) AS numsamples')
+                ->andWhere('cp.contest = :contest')
+                ->andWhere('cp.allowSubmit = 1')
+                ->setParameter(':contest', $contest)
                 ->groupBy('cp.problem')
                 ->getQuery()
                 ->getResult();
+
+            $samples = [];
+            foreach ($samplesData as $sample) {
+                $samples[$sample['probid']] = $sample['numsamples'];
+            }
         }
 
         $data = [
             'problems' => $problems,
+            'samples' => $samples,
             'showLimits' => $showLimits,
             'defaultMemoryLimit' => $defaultMemoryLimit,
             'timeFactorDiffers' => $timeFactorDiffers,
@@ -1045,7 +1064,7 @@ class DOMJudgeService
                 $contest,
                 array_map(function (ContestProblem $problem) {
                     return $problem->getProblem();
-                }, array_column($problems, 0)),
+                }, $problems),
                 $freezeData->showFinal(false),
                 (bool)$this->config->get('verification_required')
             );
