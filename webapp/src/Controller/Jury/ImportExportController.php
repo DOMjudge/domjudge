@@ -536,7 +536,7 @@ class ImportExportController extends BaseController
         /** @var Clarification[] $clarifications */
         $clarifications = $this->em->createQueryBuilder()
             ->from(Clarification::class, 'c')
-            ->join('c.problem', 'p')
+            ->leftJoin('c.problem', 'p')
             ->select('c')
             ->andWhere('c.contest = :contest')
             ->setParameter(':contest', $contest)
