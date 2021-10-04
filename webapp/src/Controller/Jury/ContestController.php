@@ -697,6 +697,9 @@ class ContestController extends BaseController
                     $this->em->persist($judgeTask);
                     $cnt++;
                 }
+                if ($problem->getCombinedRunCompare()) {
+                    continue;
+                }
                 // TODO: dedup here?
                 $compareExec = $this->dj->getImmutableCompareExecutable($contestProblem);
                 $runExec     = $this->dj->getImmutableRunExecutable($contestProblem);
