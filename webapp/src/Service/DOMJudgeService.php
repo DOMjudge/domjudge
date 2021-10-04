@@ -1017,12 +1017,24 @@ class DOMJudgeService
 
         $problems = [];
         if ($contest && $contest->getFreezeData()->started()) {
-            $problems = $this->em->createQueryBuilder()
+            $problemData = $this->em->createQueryBuilder()
                 ->from(ContestProblem::class, 'cp')
                 ->join('cp.problem', 'p')
                 ->leftJoin('p.testcases', 'tc')
                 ->leftJoin('p.attachments', 'a')
-                ->select('partial p.{probid,name,externalid,problemtext_type,timelimit,memlimit}', 'cp', 'SUM(tc.sample) AS numsamples', 'a')
+                ->select('partial p.{probid,name,externalid,problemtext_type,timelimit,memlimit}', 'cp', 'a')
+                ->andWhere('cp.contest = :contest')
+                ->andWhere('cp.allowSubmit = 1')
+                ->setParameter(':contest', $contest)
+                ->addOrderBy('cp.shortname')
+                ->getQuery()
+                ->getResult();
+
+            $sampleData = $this->em->createQueryBuilder()
+                ->from(ContestProblem::class, 'cp')
+                ->join('cp.problem', 'p')
+                ->leftJoin('p.testcases', 'tc')
+                ->select('SUM(tc.sample) AS numsamples')
                 ->andWhere('cp.contest = :contest')
                 ->andWhere('cp.allowSubmit = 1')
                 ->setParameter(':contest', $contest)
@@ -1030,6 +1042,11 @@ class DOMJudgeService
                 ->groupBy('cp.problem')
                 ->getQuery()
                 ->getResult();
+
+            $problems = [];
+            foreach ($problemData as $index => $problem) {
+                $problems[] = [$problem, 'numsamples' => $sampleData[$index]['numsamples']];
+            }
         }
 
         $data = [
