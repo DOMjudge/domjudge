@@ -78,11 +78,8 @@ class ClarificationController extends AbstractController
             $currentFilter = null;
         }
 
-        $currentQueue = $request->query->get('queue');
-        if ($currentQueue === 'all') {
-            $currentQueue = null;
-        }
-
+        // Load the current queue, default to "all"
+        $currentQueue = $request->query->has('queue') ? $request->query->get('queue') : "all";
         $queryBuilder = $this->em->createQueryBuilder()
             ->from(Clarification::class, 'clar')
             ->leftJoin('clar.problem', 'p')
@@ -93,14 +90,12 @@ class ClarificationController extends AbstractController
             ->orderBy('clar.submittime', 'DESC')
             ->addOrderBy('clar.clarid', 'DESC');
 
-        if ($currentQueue !== null) {
-            if ($currentQueue === '') {
-                $queryBuilder->andWhere('clar.queue IS NULL');
-            } else {
-                $queryBuilder
-                    ->andWhere('clar.queue = :queue')
-                    ->setParameter(':queue', $currentQueue);
-            }
+        if ($currentQueue === "unassigned") {
+            $queryBuilder->andWhere('clar.queue IS NULL');
+        } else if ($currentQueue !== "all") {
+            $queryBuilder
+                ->andWhere('clar.queue = :queue')
+                ->setParameter(':queue', $currentQueue);
         }
 
         /**
