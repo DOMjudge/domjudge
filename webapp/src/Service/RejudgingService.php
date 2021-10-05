@@ -117,9 +117,10 @@ class RejudgingService
         }
 
 
-        $log           = '';
-        $singleJudging = count($judgings) == 1;
-        $index         = 0;
+        $log = '';
+        $singleJudging = (count($judgings) == 1);
+        $index = 0;
+        $first = true;
         foreach ($judgings as $judging) {
             $index++;
             /** @var Judging $judging */
@@ -169,9 +170,10 @@ class RejudgingService
                 $this->dj->maybeCreateJudgeTasks($newJudging, $priority);
             });
 
-            if ($index > 1) {
+            if (!$first) {
                 $log .= ', ';
             }
+            $first = false;
             $log .= sprintf('s%d', $judging->getSubmissionId());
             if ($progressReporter !== null) {
                 $progress = (int)round($index / count($judgings) * 100);
