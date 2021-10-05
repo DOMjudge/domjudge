@@ -11,7 +11,9 @@
 
 {% block content %}
 
-    <h1>{{ action | capitalize }} rejudging r{{ rejudging.rejudgingid }}</h1>
+    <h1>{{ action | capitalize }} rejudging
+        <a href="{{ path('jury_rejudging', {'rejudgingId': rejudging.rejudgingid}) }}">r{{ rejudging.rejudgingid }}</a>
+    </h1>
 
     <div class="alert alert-info">
         {% if action == "apply" %}
