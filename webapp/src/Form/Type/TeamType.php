@@ -137,7 +137,7 @@ class TeamType extends AbstractType
             // Make sure the user has the team role to make validation work
             /** @var User|false $user */
             $user = $team->getUsers()->first();
-            if ($user) {
+            if ($user && !$this->em->contains($team)) {
                 /** @var Role $role */
                 $role = $this->em->createQueryBuilder()
                     ->from(Role::class, 'r')
