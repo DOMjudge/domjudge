@@ -772,7 +772,6 @@ class RejudgingController extends BaseController
 
             $skipped = [];
             $res     = $this->rejudgingService->createRejudging($reason, JudgeTask::parsePriority($priority), $judgings, $autoApply, $repeat, null, $skipped, $progressReporter);
-            $this->generateFlashMessagesForSkippedJudgings($skipped);
 
             if ($res === null) {
                 $prefix = sprintf('%s%s', $request->getSchemeAndHttpHost(), $request->getBasePath());
