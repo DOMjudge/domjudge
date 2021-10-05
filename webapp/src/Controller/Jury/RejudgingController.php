@@ -117,7 +117,7 @@ class RejudgingController extends BaseController
             'finishuser' => ['title' => 'finishuser', 'sort' => true],
             'starttime' => ['title' => 'starttime', 'sort' => true],
             'endtime' => ['title' => 'finishtime', 'sort' => true],
-            'status' => [
+            'rejudging_status' => [
                 'title' => 'status',
                 'sort' => true,
                 'default_sort' => true,
@@ -167,8 +167,8 @@ class RejudgingController extends BaseController
 
             $rejudgingdata['starttime']['value']  = Utils::printtime($rejudging->getStarttime(), $timeFormat);
             $rejudgingdata['endtime']['value']    = Utils::printtime($rejudging->getEndtime(), $timeFormat);
-            $rejudgingdata['status']['value']     = $status;
-            $rejudgingdata['status']['sortvalue'] = $sort_order;
+            $rejudgingdata['rejudging_status']['value']     = $status;
+            $rejudgingdata['rejudging_status']['sortvalue'] = $sort_order;
 
             if ($rejudging->getEndtime() !== null) {
                 $class = 'disabled';
