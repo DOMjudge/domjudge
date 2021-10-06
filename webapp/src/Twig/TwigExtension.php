@@ -675,10 +675,9 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         if (count($files) == 1) {
             return sprintf('<span class="hostname">%s</span>', Utils::specialchars($firstFile));
         }
-        return sprintf('<span class="hostname">%s</span> (and %d more %s)',
+        return sprintf('<span class="filename">%s</span> (and %d more)',
             Utils::specialchars($firstFile),
-            count($files) - 1,
-            (count($files) - 1) == 1 ? 'file' : 'files'
+            count($files) - 1
         );
     }
 
