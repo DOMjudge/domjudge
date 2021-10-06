@@ -536,7 +536,7 @@
                     <div class="card-header">
                         Run #{{ run.rank }}
                         {% if run.origInputFilename is not null %}
-                            | <span style="font-family:monospace;">{{ run.origInputFilename }}.in</span>
+                            | <span class="filename">{{ run.origInputFilename }}.in</span>
                         {% else %}
                             {% if run.description is not null %}
                                 | {{ run.description }}
