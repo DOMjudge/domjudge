@@ -74,7 +74,7 @@
                 values: [
                     {% for judging in judgings | filter(judging => judging.result and judging.result != 'aborted') %}
                     {
-                        "label": "j{{ judging.judgingid }}",
+                        "label": "j{{ judging.judgingid }} ({{ judging.result }})",
                         "value": {{ maxRunTimes[judging.judgingId]|default(0) }},
                         "color": "{{ colors[judging.result] }}",
                     },
