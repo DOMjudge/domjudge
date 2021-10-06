@@ -539,7 +539,7 @@
                             | <span class="filename">{{ run.origInputFilename }}.in</span>
                         {% else %}
                             {% if run.description is not null %}
-                                | {{ run.description }}
+                                | {{ run.description(true) }}
                             {% endif %}
                         {% endif %}
                         {% if run.firstJudgingRun is not null %}
