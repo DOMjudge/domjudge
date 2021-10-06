@@ -1356,4 +1356,20 @@ class DOMJudgeService
         }
         return $team;
     }
+
+    public function parseMetadata($raw_metadata): array
+    {
+        // TODO: reduce duplication with judgedaemon code.
+        $contents = explode("\n", $raw_metadata);
+        $res = [];
+        foreach($contents as $line) {
+            if (strpos($line, ":") !== false) {
+                [$key, $value] = explode(":", $line, 2);
+                $res[$key] = trim($value);
+            }
+        }
+
+        return $res;
+    }
+
 }

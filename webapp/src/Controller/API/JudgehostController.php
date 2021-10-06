@@ -314,6 +314,11 @@ class JudgehostController extends AbstractFOSRestController
      *                 property="entry_point",
      *                 description="The determined entrypoint",
      *                 type="string"
+     *             ),
+     *             @OA\Property(
+     *                 property="compile_metadata",
+     *                 description="The (base64-encoded) metadata of the compilation.",
+     *                 type="string"
      *             )
      *         )
      *     )
@@ -373,7 +378,9 @@ class JudgehostController extends AbstractFOSRestController
             $output_compile = base64_decode($request->request->get('output_compile'));
             if ($request->request->getBoolean('compile_success')) {
                 if ($judging->getOutputCompile() === null) {
-                    $judging->setOutputCompile($output_compile);
+                    $judging
+                        ->setOutputCompile($output_compile)
+                        ->setCompileMetadata(base64_decode($request->request->get('compile_metadata')));
                     $this->em->flush();
 
                     if ($judging->getValid()) {

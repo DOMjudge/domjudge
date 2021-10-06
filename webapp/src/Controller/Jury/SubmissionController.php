@@ -208,21 +208,6 @@ class SubmissionController extends BaseController
         return $this->render('jury/submissions.html.twig', $data, $response);
     }
 
-    private function parseMetadata($raw_metadata): array
-    {
-        // TODO: reduce duplication with judgedaemon code
-        $contents = explode("\n", $raw_metadata);
-        $res = [];
-        foreach($contents as $line) {
-            if (strpos($line, ":") !== false) {
-                [$key, $value] = explode(":", $line, 2);
-                $res[$key] = trim($value);
-            }
-        }
-
-        return $res;
-    }
-
     /**
      * @Route("/{submitId<\d+>}", name="jury_submission")
      * @throws NonUniqueResultException
@@ -424,7 +409,7 @@ class SubmissionController extends BaseController
                 if (empty($runResult['metadata'])) {
                     $runResult['cpu_time'] = $firstJudgingRun === null ? 'n/a' : $firstJudgingRun->getRuntime();
                 } else {
-                    $metadata = $this->parseMetadata($runResult['metadata']);
+                    $metadata = $this->dj->parseMetadata($runResult['metadata']);
                     $runResult['cpu_time'] = $metadata['cpu-time'];
                     $runResult['wall_time'] = $metadata['wall-time'];
                     $runResult['memory'] = Utils::printsize((int)$metadata['memory-bytes'], 2);
