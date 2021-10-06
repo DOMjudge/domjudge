@@ -1125,9 +1125,10 @@ function compile(array $judgeTask, string $workdir, string $workdirpath, array $
     logmsg(LOG_INFO, "  💻 Compilation: ($files[0]) '".$EXITCODES[$retval]."'");
     $compile_success = ($EXITCODES[$retval]==='correct');
 
-    // pop the compilation result back into the judging table
+    // Pop the compilation result back into the judging table.
     $args = 'compile_success=' . $compile_success .
-        '&output_compile=' . urlencode(rest_encode_file($workdir . '/compile.out', $output_storage_limit));
+        '&output_compile=' . urlencode(rest_encode_file($workdir . '/compile.out', $output_storage_limit)) .
+        '&compile_metadata=' . urlencode(rest_encode_file($workdir . '/compile.meta', false));
     if (isset($metadata['entry_point'])) {
         $args .= '&entry_point=' . urlencode($metadata['entry_point']);
     }
