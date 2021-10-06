@@ -154,6 +154,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             new TwigFilter('printValidJuryResult', [$this, 'printValidJuryResult'], ['is_safe' => ['html']]),
             new TwigFilter('printValidJurySubmissionResult', [$this, 'printValidJurySubmissionResult'], ['is_safe' => ['html']]),
             new TwigFilter('printHost', [$this, 'printHost'], ['is_safe' => ['html']]),
+            new TwigFilter('printHosts', [$this, 'printHosts'], ['is_safe' => ['html']]),
             new TwigFilter('printYesNo', [$this, 'printYesNo']),
             new TwigFilter('printSize', [Utils::class, 'printSize'], ['is_safe' => ['html']]),
             new TwigFilter('testcaseResults', [$this, 'testcaseResults'], ['is_safe' => ['html']]),
@@ -674,6 +675,52 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         }
 
         return sprintf('<span class="hostname">%s</span>', Utils::specialchars($hostname));
+    }
+
+    /**
+     * Formats a list of given hostnames, extracting a common prefix.
+     * @param array $hostnames
+     * @return string
+     */
+    public function printHosts(array $hostnames): string
+    {
+        if (empty($hostnames)) return "";
+        if (count($hostnames) == 1) return $this->printHost($hostnames[0]);
+        $hostnames = array_unique($hostnames);
+
+        $local_parts = [];
+        foreach ($hostnames as $hostname) {
+            // Shorten the hostname to first label, but not if it's an IP address.
+            if (!preg_match('/^\d{1,3}(\.\d{1,3}){3}$/', $hostname)) {
+                $expl     = explode('.', $hostname);
+                $hostname = array_shift($expl);
+            }
+            $local_parts[] = $hostname;
+        }
+        $common_prefix = $local_parts[0];
+        foreach ($local_parts as $local_part) {
+            $len = strlen($local_part);
+            while ($len > 0) {
+                if (substr_compare($common_prefix, $local_part, 0, $len) == 0) {
+                    break;
+                }
+                $len--;
+            }
+            if ($len == 0) {
+                $common_prefix = "";
+                break;
+            }
+            $common_prefix = substr($common_prefix, 0, $len);
+        }
+        if (empty($common_prefix)) {
+            return implode(", ", array_map($this->printHost(), $hostname));
+        } else {
+            $len_prefix = strlen($common_prefix);
+            $local_parts = array_map(function ($host) use ($len_prefix) {
+                return substr($host, $len_prefix);
+            }, $local_parts);
+            return $this->printHost($common_prefix . "{" . implode(",", $local_parts) . "}", true);
+        }
     }
 
     /**
