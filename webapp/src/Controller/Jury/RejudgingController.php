@@ -343,7 +343,8 @@ class RejudgingController extends BaseController
 
         $viewTypes = [0 => 'newest', 1 => 'unverified', 2 => 'unjudged', 3 => 'diff', 4 => 'all'];
         $defaultView = 'diff';
-        if ($rejudging->getSubmissions()->count() <= 5) {
+        $onlyAHandfulOfSubmissions = $rejudging->getSubmissions()->count() <= 5;
+        if ($onlyAHandfulOfSubmissions) {
             // Only a handful of submissions, display all of them right away.
             $defaultView = 'all';
         }
@@ -389,8 +390,14 @@ class RejudgingController extends BaseController
             ->getQuery()
             ->getScalarResult();
 
-        // Only load the statistics if desired. The query is quite long and can result in much data, so only have it run when needed.
-        $showStatistics = $request->query->has("show_statistics") && filter_var($request->query->get("show_statistics"), FILTER_VALIDATE_BOOL);
+        // Only load the statistics if desired. The query is quite long and can result in much data, so only have it run
+        // when needed or when we don't have a lot of data to load.
+        $statisticsExplicitlyToggled = $request->query->has("show_statistics");
+        if ($statisticsExplicitlyToggled) {
+            $showStatistics = filter_var($request->query->get("show_statistics"), FILTER_VALIDATE_BOOL);
+        } else {
+            $showStatistics = $onlyAHandfulOfSubmissions;
+        }
         if ($showStatistics && count($repetitions) > 0) {
             $stats = $this->getStats($rejudging);
         } else {
