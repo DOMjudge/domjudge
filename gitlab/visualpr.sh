@@ -114,10 +114,12 @@ export CURLOPTS="--fail -sq -m 30 -b $COOKIEJAR"
 # Make an initial request which will get us a session id, and grab the csrf token from it
 CSRFTOKEN=$(curl $CURLOPTS -c $COOKIEJAR "http://localhost/domjudge/login" 2>/dev/null | sed -n 's/.*_csrf_token.*value="\(.*\)".*/\1/p')
 # Make a second request with our session + csrf token to actually log in
-curl $CURLOPTS -c $COOKIEJAR \
-    -F "_csrf_token=$CSRFTOKEN" \
-    -F "_username=admin" \
-    -F "_password=$ADMINPASS" "http://localhost/domjudge/login"
+if [ "$ROLE" != "none" ]; then
+    curl $CURLOPTS -c $COOKIEJAR \
+        -F "_csrf_token=$CSRFTOKEN" \
+        -F "_username=admin" \
+        -F "_password=$ADMINPASS" "http://localhost/domjudge/login"
+fi
 
 cd "$DIR"
 
@@ -171,6 +173,7 @@ RET=$?
 set -e
 #https://www.gnu.org/software/wget/manual/html_node/Exit-Status.html
 # Exit code 4 is network error which we can ignore
+# Exit code 6 is authentication which we hit in case of the public user
 # Exit code 8 is error which should be fixed, but in different PR
 if [ $RET -ne 4 ] && [ $RET -ne 8 ] && [ $RET -ne 0 ]; then
     exit $RET
