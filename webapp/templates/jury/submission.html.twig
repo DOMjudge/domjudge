@@ -148,7 +148,7 @@
         <span>
             <i class="fas fa-code" title="Source code:"></i>
             <a href="{{ path('jury_submission_source', {submission: submission.submitid}) }}">
-                View source code
+                View {{ submission.files | printFiles }}
             </a>
         </span>
 
