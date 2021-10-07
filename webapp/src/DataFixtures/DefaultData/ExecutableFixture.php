@@ -71,7 +71,7 @@ class ExecutableFixture extends AbstractDefaultDataFixture
      */
     public static function getGroups(): array
     {
-        return ['example', 'gatling'];
+        return ['default', 'gatling'];
     }
 
     private function createImmutableExecutable(string $filename): ImmutableExecutable
