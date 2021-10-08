@@ -183,6 +183,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             new TwigFilter('tsvField', [$this, 'toTsvField']),
             new TwigFilter('fileTypeIcon', [$this, 'fileTypeIcon']),
             new TwigFilter('problemBadge', [$this, 'problemBadge'], ['is_safe' => ['html']]),
+            new TwigFilter('printMetadata', [$this, 'printMetadata'], ['is_safe' => ['html']]),
         ];
     }
 
@@ -1250,5 +1251,24 @@ EOF;
             $foreground,
             $problem->getShortname()
         );
+    }
+
+    public function printMetadata(?string $metadata): string
+    {
+        if ($metadata === null) return '';
+        $metadata = $this->dj->parseMetadata($metadata);
+        dump($metadata);
+        $ret = '<span style="display:inline; margin-left: 5px;">'
+            . '<i class="fas fa-stopwatch" title="runtime"></i>'
+            . $metadata['cpu-time'] . 's'
+            . ' CPU, '
+            . $metadata['wall-time'] . 's'
+            . ' wall time, '
+            . '<i class="fas fa-memory" title="RAM"></i>'
+            . Utils::printsize((int)($metadata['memory-bytes']))
+            . ', '
+            . '<i class="fas fa-exitcode" title="runtime"></i>'
+            . 'exit-code: ' . $metadata['exitcode'];
+        return $ret;
     }
 }

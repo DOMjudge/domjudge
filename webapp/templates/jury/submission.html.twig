@@ -515,6 +515,19 @@
                 Compilation <span class="compile-{{ message }}">{{ message }}</span>
             </a>
         </h3>
+        {% if selectedJudging is not null and selectedJudging.compileMetadata is not null %}
+            {{ selectedJudging.compileMetadata | printMetadata }}
+            <button class="btn btn-sm btn-outline-secondary" data-toggle="collapse"
+                    data-target="#collapseExample-compilemeta"
+                    aria-expanded="false">
+                show complete compilation metadata
+            </button>
+            <div class="collapse" id="collapseExample-compilemeta">
+                <div class="card card-body output_text">{{ selectedJudging.compileMetadata }}</div>
+            </div>
+            <hr/>
+            <br/>
+        {% endif %}
         {% if output is empty %}
             <p class="nodata{% if selectedJudging is null or selectedJudging.result != 'compiler-error' %} d-none{% endif %}"
                 id="detailcompile">There were no compiler errors or warnings.</p>

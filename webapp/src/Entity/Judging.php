@@ -114,6 +114,15 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
     private $output_compile;
 
     /**
+     * @var string
+     * @ORM\Column(type="blobtext", length=4294967295, name="metadata",
+     *     options={"comment"="Compilation metadata"},
+     *     nullable=true)
+     * @Serializer\Exclude()
+     */
+    private $compile_metadata;
+
+    /**
      * @Serializer\Exclude()
      */
     private $output_compile_as_string = null;
@@ -546,5 +555,16 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
     public function getDebugPackages()
     {
         return $this->debug_packages;
+    }
+
+    public function getCompileMetadata(): ?string
+    {
+        return $this->compile_metadata;
+    }
+
+    public function setCompileMetadata($compile_metadata): self
+    {
+        $this->compile_metadata = $compile_metadata;
+        return $this;
     }
 }
