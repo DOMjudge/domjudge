@@ -1257,7 +1257,6 @@ EOF;
     {
         if ($metadata === null) return '';
         $metadata = $this->dj->parseMetadata($metadata);
-        dump($metadata);
         $ret = '<span style="display:inline; margin-left: 5px;">'
             . '<i class="fas fa-stopwatch" title="runtime"></i>'
             . $metadata['cpu-time'] . 's'
