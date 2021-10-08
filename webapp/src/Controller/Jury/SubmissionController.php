@@ -985,9 +985,6 @@ class SubmissionController extends BaseController
             $judging->setJudgeCompletely(true);
             $this->em->flush();
 
-            // TODO: Requesting this does currently affect the team (in the same way a rejudging does) and penalize them.
-            // This needs to change by adding another boolean column to the table whether work was "requested" by a team
-            // or by jury.
             $submission = $judging->getSubmission();
             $queueTask = new QueueTask();
             $queueTask->setJobId($judging->getJudgingid())
