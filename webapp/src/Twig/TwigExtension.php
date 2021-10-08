@@ -155,6 +155,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             new TwigFilter('printValidJurySubmissionResult', [$this, 'printValidJurySubmissionResult'], ['is_safe' => ['html']]),
             new TwigFilter('printHost', [$this, 'printHost'], ['is_safe' => ['html']]),
             new TwigFilter('printHosts', [$this, 'printHosts'], ['is_safe' => ['html']]),
+            new TwigFilter('printFiles', [$this, 'printFiles'], ['is_safe' => ['html']]),
             new TwigFilter('printYesNo', [$this, 'printYesNo']),
             new TwigFilter('printSize', [Utils::class, 'printSize'], ['is_safe' => ['html']]),
             new TwigFilter('testcaseResults', [$this, 'testcaseResults'], ['is_safe' => ['html']]),
@@ -657,6 +658,27 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         }
 
         return null;
+    }
+
+    /**
+     * Prints the first file (and potentially the number of additional files).
+     * @return string
+     */
+    public function printFiles($files): string
+    {
+        $files = $files->toArray();
+        if (empty($files)) {
+            // Should not happen, but better do something reasonable here if it would.
+            return "source code";
+        }
+        $firstFile = $files[0]->getFilename();
+        if (count($files) == 1) {
+            return sprintf('<span class="hostname">%s</span>', Utils::specialchars($firstFile));
+        }
+        return sprintf('<span class="filename">%s</span> (and %d more)',
+            Utils::specialchars($firstFile),
+            count($files) - 1
+        );
     }
 
     /**
