@@ -14,6 +14,7 @@ use App\Entity\Judging;
 use App\Entity\JudgingRun;
 use App\Entity\Language;
 use App\Entity\Problem;
+use App\Entity\QueueTask;
 use App\Entity\Submission;
 use App\Entity\SubmissionFile;
 use App\Entity\Team;
@@ -983,6 +984,16 @@ class SubmissionController extends BaseController
                 ]
             );
             $judging->setJudgeCompletely(true);
+            $this->em->flush();
+
+            $submission = $judging->getSubmission();
+            $queueTask = new QueueTask();
+            $queueTask->setJobId($judging->getJudgingid())
+                ->setPriority(JudgeTask::PRIORITY_LOW)
+                ->setTeam($submission->getTeam())
+                ->setTeamPriority((int)$submission->getSubmittime())
+                ->setStartTime(null);
+            $this->em->persist($queueTask);
             $this->em->flush();
             if ($numRequested == 0) {
                 $this->addFlash('warning', 'No more remaining runs to be judged.');
