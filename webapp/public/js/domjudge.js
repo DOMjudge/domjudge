@@ -680,6 +680,36 @@ function pinScoreheader()
 	}
 }
 
+function humanReadableTimeDiff(seconds) {
+    var intervals = [
+        ['years', 365 * 24 * 60 * 60],
+        ['months', 30 * 24 * 60 * 60],
+        ['days', 24 * 60 * 60],
+        ['hours', 60 * 60],
+        ['minutes', 60],
+    ];
+    for (let [name, length] of intervals) {
+        if (seconds / length >= 2) {
+            return Math.floor(seconds/length) + ' ' + name;
+        }
+    }
+    return Math.floor(seconds) + ' seconds';
+}
+
+function humanReadableBytes(bytes) {
+    var sizes = [
+      ['GB', 1024*1024*1024],
+      ['MB', 1024*1024],
+      ['KB', 1024],
+    ];
+    for (let [name, length] of sizes) {
+        if (bytes / length >= 2) {
+            return Math.floor(bytes/length) + name;
+        }
+    }
+    return Math.floor(bytes) + 'B';
+}
+
 $(function () {
     $('[data-toggle="tooltip"]').tooltip();
 });
