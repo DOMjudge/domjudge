@@ -14,8 +14,14 @@ ifeq ($(BUILD_DOCS),yes)
 docs: config
 # KLUDGE: call make instead of a dependency so that the html target
 # will run after config from inside the doc target.
-docs distdocs:
+docs:
 	$(MAKE) html team
+
+distdocs:
+	$(MAKE) html team
+# Run make clean here to get a cleaner tarball and make sure
+# that make distclean returns to the original tarball state.
+	$(MAKE) clean
 endif
 
 install-docs: docs
@@ -27,10 +33,11 @@ maintainer-install: docs
 	ln -sf build/team
 
 clean-l:
-	rm -rf build/doctrees build/team/.doctrees conf_ref.rst
+	rm -rf build/doctrees build/team/.doctrees
+	$(MAKE) -C build/team clean
 
 maintainer-clean-l:
-	rm -rf build
+	rm -rf build conf_ref.rst
 
 distclean-l:
 	-rm -f $(SUBST_CONFIGS) html team
