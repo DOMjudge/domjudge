@@ -84,7 +84,7 @@ if [[ $response =~ ^(yes|y| ) ]] || [[ -z $response ]]; then
     if [ -z "${cid+x}" ]; then
       read -r -p "Please specify the contest id: " cid
     fi
-    for prob in $(cat problemset.yaml  | grep "short-name: " | sed -e 's|^ *short-name: ||'); do
+    for prob in $(cat problemset.yaml  | grep "short-name: " | sed -e 's|^.*short-name: ||'); do
       echo "Preparing problem '$prob'."
       if [ -r "${prob}.zip" ]; then
         echo "Deleting old zipfile."
