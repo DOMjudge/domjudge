@@ -124,9 +124,9 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
      *     @OA\MediaType(
      *         mediaType="multipart/form-data",
      *         @OA\Schema(
-     *             required={"zip"},
+     *             required={"zip[]"},
      *             @OA\Property(
-     *                 property="zip",
+     *                 property="zip[]",
      *                 type="array",
      *                 description="The problem archive(s) to import",
      *                 @OA\Items(type="string", format="binary")
