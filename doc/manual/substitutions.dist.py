@@ -10,6 +10,6 @@ rst_prolog = """
 
 .. |SOURCESIZE| replace:: 256
 .. |COMPILETIME| replace:: 30
-.. |PROCLIMIT| replace:: 15
+.. |PROCLIMIT| replace:: 64
 
 """
