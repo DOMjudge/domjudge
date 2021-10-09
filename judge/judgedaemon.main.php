@@ -248,14 +248,17 @@ function read_judgehostlog(int $n = 20) : string
     return trim(ob_get_clean());
 }
 
-// Fetches new executable from database if necessary, and
-// runs build script to compile executable.
+// Fetches new executable from database if necessary, and runs build script to compile executable.
 // Returns an array with absolute path to run script and possibly an error message.
 function fetch_executable(
     string $workdirpath, string $type, string $execid, string $hash, int $judgeTaskId, bool $combined_run_compare = false) : array
 {
-    list($execrunpath, $error) = fetch_executable_internal($workdirpath, $type, $execid, $hash, $combined_run_compare);
+    list($execrunpath, $error, $buildlogpath) = fetch_executable_internal($workdirpath, $type, $execid, $hash, $combined_run_compare);
     if (isset($error)) {
+        $extra_log = null;
+        if ($buildlogpath !== null) {
+            $extra_log = dj_file_get_contents($buildlogpath, 4096);
+        }
         logmsg(LOG_ERR,
             "Fetching executable failed for $type script '$execid': " . $error);
         $description = "$execid: fetch, compile, or deploy of $type script failed.";
@@ -264,12 +267,18 @@ function fetch_executable(
             $type . '_script_id',
             $execid,
             $description,
-            $judgeTaskId
+            $judgeTaskId,
+            $extra_log
         );
     }
     return [$execrunpath, $error];
 }
 
+// Internal function to fetch new executable from database if necessary, and run build script to compile executable.
+// Returns an array with
+// - absolute path to run script (null if unsucessful)
+// - an error message (null if successful)
+// - optional extra build log.
 function fetch_executable_internal(
     string $workdirpath, string $type, string $execid, string $hash, bool $combined_run_compare) : array
 {
@@ -308,7 +317,7 @@ function fetch_executable_internal(
         unset($files);
         $computedHash = md5($concatenatedMd5s);
         if ($hash !== $computedHash) {
-            return [null, "Unexpected hash ($computedHash), expected hash: $hash"];
+            return [null, "Unexpected hash ($computedHash), expected hash: $hash", null];
         }
 
         $do_compile = true;
@@ -346,7 +355,7 @@ function fetch_executable_internal(
                     }
                 }
                 if ($execlang === false) {
-                    return [null, "executable must either provide an executable file named 'build' or a C/C++/Java or Python file."];
+                    return [null, "executable must either provide an executable file named 'build' or a C/C++/Java or Python file.", null];
                 }
                 switch ($execlang) {
                 case 'c':
@@ -424,14 +433,14 @@ EOT;
                 chmod($execbuildpath, 0755);
             }
         } elseif (!is_executable($execbuildpath)) {
-            return array(null, "Invalid executable, file 'build' exists but is not executable.");
+            return [null, "Invalid executable, file 'build' exists but is not executable.", null];
         }
 
         if ($do_compile) {
             logmsg(LOG_DEBUG, "Building executable in $execdir, under 'build/'");
             system(LIBJUDGEDIR . '/build_executable.sh ' . dj_escapeshellarg($execdir), $retval);
             if ($retval!==0) {
-                return [null, "Failed to build executable in $execdir."];
+                return [null, "Failed to build executable in $execdir.", "$execdir/build.log"];
             }
             chmod($execrunpath, 0755);
         }
