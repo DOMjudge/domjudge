@@ -268,7 +268,7 @@ class ScoreboardMergeCommand extends Command
             }
 
             $scoreboardData = $this->client
-                ->request('GET', $path . '/scoreboard')
+                ->request('GET', $path . '/scoreboard?public=1')
                 ->toArray();
 
             if ($contest->getStarttimeString() === null) {
@@ -281,8 +281,8 @@ class ScoreboardMergeCommand extends Command
                     ->setFinalizetime($state['ended'])
                     ->setDeactivatetimeString($state['ended'])
                     ->updateTimes();
-                $freezeData = new FreezeData($contest);
             }
+            $freezeData = new FreezeData($contest);
 
             // Add scoreboard data
             foreach ($scoreboardData['rows'] as $row) {
