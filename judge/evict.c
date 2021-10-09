@@ -64,14 +64,12 @@ void evict_directory(char *dirname) {
 			fd = open(entry_path, O_RDONLY, 0);
 			if (fd == -1) {
 				warning(errno, "Unable to open file: %s", entry_path);
-				free(entry_path);
-				continue;
+				goto entry_done;
 			}
 
 			if (fstat(fd, &s) < 0) {
 				if (be_verbose) logerror(errno, "Unable to stat file/directory: %s\n", entry_path);
-				free(entry_path);
-				continue;
+				goto entry_done;
 			}
 			if (S_ISDIR(s.st_mode)) {
 				/* Recurse into subdirectories */
@@ -83,11 +81,13 @@ void evict_directory(char *dirname) {
 				} else {
 					if (be_verbose) logmsg(LOG_DEBUG, "Evicted file: %s", entry_path);
 				}
-				if ( close(fd)!=0 ) {
-					warning(errno, "Unable to close file: %s", entry_path);
-				}
 			}
+		  entry_done:
+
 			free(entry_path);
+			if ( fd!=-1 && close(fd)!=0 ) {
+				warning(errno, "Unable to close file: %s", entry_path);
+			}
 		}
 		if ( closedir(dir)!=0 ) {
 			warning(errno, "Unable to close directory: %s", dirname);
