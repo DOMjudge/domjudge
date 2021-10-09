@@ -731,13 +731,15 @@ while (true) {
             foreach (['compile', 'run', 'compare'] as $script_type) {
                 if (!empty($judgeTask[$script_type . '_script_id']) && !empty($judgeTask[$script_type . '_config'])) {
                     $config = dj_json_decode($judgeTask[$script_type . '_config']);
+                    $combined_run_compare = $script_type == 'run' && $config['combined_run_compare'];
                     if (!empty($config['hash'])) {
                         list($execrunpath, $error) = fetch_executable(
                             $workdirpath,
                             $script_type,
                             $judgeTask[$script_type . '_script_id'],
                             $config['hash'],
-                            $judgeTask['judgetaskid']
+                            $judgeTask['judgetaskid'],
+                            $combined_run_compare
                         );
                     }
                 }
