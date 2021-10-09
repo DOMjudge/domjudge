@@ -697,12 +697,15 @@ class ContestController extends BaseController
                     $this->em->persist($judgeTask);
                     $cnt++;
                 }
-                if ($problem->getCombinedRunCompare()) {
-                    continue;
-                }
                 // TODO: dedup here?
                 $compareExec = $this->dj->getImmutableCompareExecutable($contestProblem);
                 $runExec     = $this->dj->getImmutableRunExecutable($contestProblem);
+                $runConfig = json_encode(
+                    [
+                        'hash' => $runExec->getHash(),
+                        'combined_run_compare' => $problem->getCombinedRunCompare(),
+                    ]
+                );
                 $judgeTask = new JudgeTask();
                 $judgeTask
                     ->setType(JudgeTaskType::PREFETCH)
@@ -711,7 +714,7 @@ class ContestController extends BaseController
                     ->setCompareScriptId($compareExec->getImmutableExecId())
                     ->setCompareConfig(json_encode(['hash' => $compareExec->getHash()]))
                     ->setRunScriptId($runExec->getImmutableExecId())
-                    ->setRunConfig(json_encode(['hash' => $runExec->getHash()]));
+                    ->setRunConfig($runConfig);
                 $this->em->persist($judgeTask);
                 $cnt++;
             }
