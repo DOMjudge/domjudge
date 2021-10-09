@@ -32,7 +32,7 @@ void usage()
 {
 	printf("\
 Usage: %s [OPTION]... DIRECTORY\n\
-Evicts all files in a directory from the kernel filesystem cache\n\
+Evicts all files in a directory tree from the kernel filesystem cache.\n\
 \n\
   -v, --verbose        display some extra warnings and information\n\
       --help           display this help and exit\n\
@@ -61,8 +61,14 @@ void evict_directory(char *dirname) {
 
 			/* Construct the full file path */
 			entry_path = allocstr("%s/%s", dirname, entry->d_name);
+			fd = open(entry_path, O_RDONLY, 0);
+			if (fd == -1) {
+				warning(errno, "Unable to open file: %s", entry_path);
+				free(entry_path);
+				continue;
+			}
 
-			if (stat(entry_path, &s) < 0) {
+			if (fstat(fd, &s) < 0) {
 				if (be_verbose) logerror(errno, "Unable to stat file/directory: %s\n", entry_path);
 				free(entry_path);
 				continue;
@@ -72,17 +78,13 @@ void evict_directory(char *dirname) {
 				evict_directory(entry_path);
 			} else {
 				/* evict this file from the cache */
-				fd = open(entry_path, O_RDONLY, 0);
-				if (fd == -1) {
-					warning(errno, "Unable to open file: %s", entry_path);
+				if (posix_fadvise(fd, 0, 0, POSIX_FADV_DONTNEED)) {
+					warning(errno, "Unable to evict file: %s\n", entry_path);
 				} else {
-					if (posix_fadvise(fd, 0, 0, POSIX_FADV_DONTNEED)) {
-						warning(errno, "Unable to evict file: %s\n", entry_path);
-					}
 					if (be_verbose) logmsg(LOG_DEBUG, "Evicted file: %s", entry_path);
-					if ( close(fd)!=0 ) {
-						warning(errno, "Unable to close file: %s", entry_path);
-					}
+				}
+				if ( close(fd)!=0 ) {
+					warning(errno, "Unable to close file: %s", entry_path);
 				}
 			}
 			free(entry_path);
