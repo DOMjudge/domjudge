@@ -252,7 +252,26 @@ function read_judgehostlog(int $n = 20) : string
 // runs build script to compile executable.
 // Returns an array with absolute path to run script and possibly an error message.
 function fetch_executable(
-    string $workdirpath, string $type, string $execid, string $hash, bool $combined_run_compare = false) : array
+    string $workdirpath, string $type, string $execid, string $hash, int $judgeTaskId, bool $combined_run_compare = false) : array
+{
+    list($execrunpath, $error) = fetch_executable_internal($workdirpath, $type, $execid, $hash, $combined_run_compare);
+    if (isset($error)) {
+        logmsg(LOG_ERR,
+            "Fetching executable failed for $type script '$execid': " . $error);
+        $description = "$execid: fetch, compile, or deploy of $type script failed.";
+        disable(
+            $type . '_script',
+            $type . '_script_id',
+            $execid,
+            $description,
+            $judgeTaskId
+        );
+    }
+    return [$execrunpath, $error];
+}
+
+function fetch_executable_internal(
+    string $workdirpath, string $type, string $execid, string $hash, bool $combined_run_compare) : array
 {
     $execdir         = join('/', [
         $workdirpath,
@@ -717,15 +736,9 @@ while (true) {
                             $workdirpath,
                             $script_type,
                             $judgeTask[$script_type . '_script_id'],
-                            $config['hash']
+                            $config['hash'],
+                            $judgeTask['judgetaskid']
                         );
-                        if (isset($error)) {
-                            logmsg(LOG_ERR,
-                                "Fetching executable failed for $script_type script '" . $judgeTask[$script_type . '_script_id'] . "': " . $error);
-                            $description = $judgeTask[$script_type . '_script_id'] . ': fetch, compile, or deploy of ' . $script_type . ' script failed.';
-                            disable($script_type . '_script', $script_type . '_script_id', $judgeTask[$script_type . '_script_id'],
-                                $description, $judgeTask['judgetaskid']);
-                        }
                     }
                 }
             }
@@ -751,7 +764,7 @@ while (true) {
                 // Full debug package requested.
                 $run_config = dj_json_decode($judgeTask['run_config']);
                 $tmpfile = tempnam(TMPDIR, 'full_debug_package_');
-                list($runpath, $error) = fetch_executable(
+                list($runpath, $error) = fetch_executable_internal(
                     $workdirpath,
                     'debug',
                     $judgeTask['run_script_id'],
@@ -1059,12 +1072,10 @@ function compile(array $judgeTask, string $workdir, string $workdirpath, array $
         $workdirpath,
         'compile',
         $judgeTask['compile_script_id'],
-        $compile_config['hash']
+        $compile_config['hash'],
+        $judgeTask['judgetaskid']
     );
     if (isset($error)) {
-        logmsg(LOG_ERR, "Fetching executable failed for compile script '" . $judgeTask['compile_script_id'] . "': " . $error);
-        $description = $judgeTask['compile_script_id'] . ': fetch, compile, or deploy of compile script failed.';
-        disable('compile_script', 'compile_script_id', $judgeTask['compile_script_id'], $description, $judgeTask['judgetaskid']);
         return false;
     }
 
@@ -1239,11 +1250,9 @@ function judge(array $judgeTask): bool
         'run',
         $judgeTask['run_script_id'],
         $run_config['hash'],
+        $judgeTask['judgetaskid'],
         $combined_run_compare);
     if (isset($error)) {
-        logmsg(LOG_ERR, "fetching executable failed for run script '" . $judgeTask['run_script_id'] . "': " . $error);
-        $description = $judgeTask['run_script_id'] . ': fetch, compile, or deploy of run script failed.';
-        disable('run_script', 'run_script_id', $judgeTask['run_script_id'], $description, $judgeTask['judgetaskid']);
         return false;
     }
 
@@ -1256,12 +1265,10 @@ function judge(array $judgeTask): bool
             $workdirpath,
             'compare',
             $judgeTask['compare_script_id'],
-            $compare_config['hash']
+            $compare_config['hash'],
+            $judgeTask['judgetaskid']
         );
         if (isset($error)) {
-            logmsg(LOG_ERR, "fetching executable failed for compare script '" . $judgeTask['compare_script_id'] . "': " . $error);
-            $description = $judgeTask['compare_script_id'] . ': fetch, compile, or deploy of validation script failed.';
-            disable('compare_script', 'compare_script_id', $judgeTask['compare_script_id'], $description, $judgeTask['judgetaskid']);
             return false;
         }
     }
