@@ -463,11 +463,7 @@ function enableRefresh($url, $after, usingAjax) {
             window.location = $url;
         }
     };
-    if (usingAjax) {
-        refreshHandler = setTimeout(refresh, $after * 1000);
-    } else {
-        refreshHandler = setTimeout(refresh, $after * 1000);
-    }
+    refreshHandler = setTimeout(refresh, $after * 1000);
     refreshEnabled = true;
     setCookie('domjudge_refresh', 1);
 
