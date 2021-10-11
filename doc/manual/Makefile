@@ -26,7 +26,7 @@ endif
 
 install-docs: docs
 	$(call install_tree,$(DESTDIR)$(domjudge_docdir)/manual,build/html)
-	$(call install_tree,$(DESTDIR)$(domjudge_docdir)/manual,build/team)
+	$(INSTALL_DATA) -t $(DESTDIR)$(domjudge_docdir)/manual build/domjudge-team-manual.pdf
 
 maintainer-install: docs
 	ln -sf build/html
@@ -50,6 +50,7 @@ html: conf_ref.rst
 
 team:
 	sphinx-build -b latex . build/team $(subst 1,-Q,$(QUIET))
-	make -C build/team domjudge-team-manual.pdf
+	$(MAKE) -C build/team domjudge-team-manual.pdf
+	cp build/team/domjudge-team-manual.pdf build
 
 .PHONY: docs distdocs install-docs maintainer-install html team
