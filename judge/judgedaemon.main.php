@@ -276,7 +276,7 @@ function fetch_executable(
 
 // Internal function to fetch new executable from database if necessary, and run build script to compile executable.
 // Returns an array with
-// - absolute path to run script (null if unsucessful)
+// - absolute path to run script (null if unsuccessful)
 // - an error message (null if successful)
 // - optional extra build log.
 function fetch_executable_internal(
