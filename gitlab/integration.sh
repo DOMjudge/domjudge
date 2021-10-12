@@ -228,6 +228,11 @@ set -x
 # Delete contest so API check does not fail because of empty results.
 echo "DELETE FROM contest WHERE cid=1" | mysql domjudge
 
+# Finalize contest so that awards appear in the feed.
+curl $CURLOPTS -X POST -d 'contest=2&donow[freeze]=freeze now' http://localhost/domjudge/jury/contests
+curl $CURLOPTS -X POST -d 'contest=2&donow[end]=end now' http://localhost/domjudge/jury/contests
+curl $CURLOPTS -X POST -d 'finalize_contest[b]=0&finalize_contest[finalizecomment]=gitlab&finalize_contest[finalize]=' http://localhost/domjudge/jury/contests/2/finalize
+
 # Check the Contest API:
 $CHECK_API -n -C -e -a 'strict=1' http://admin:$ADMINPASS@localhost/domjudge/api
 section_end api_check |& tee "$gitlabartifacts/check_api.log"
