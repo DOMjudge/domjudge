@@ -120,16 +120,25 @@
                             <br>
                             <a>{{ contest.bronzeAwards }} Bronze Medal</a>
                             <br>
-                            For all teams from the following categories:
-                            <ul>
-                                {% for category in contest.awardsCategories %}
-                                    <li>
-                                        <a href="{{ path('jury_team_category', {'categoryId': category.categoryid}) }}">
-                                            {{ category.name }}
-                                        </a>
-                                    </li>
-                                {% endfor %}
-                            </ul>
+                            <div class="card">
+                                <h6 class="card-header" role="tab" id="categories">
+                                    <a class="collapsed d-block text-dark pt-0 pb-0" data-toggle="collapse" href="#collapsecategories" aria-expanded="true" aria-controls="collapsecategories">
+                                        Show/Hide the included teams' categories
+                                        <i class="fa fa-chevron-down float-right"></i>
+                                    </a>
+                                </h6>
+                                <div id="collapsecategories" class="collapse collapsed" role="tabpanel" aria-labelledby="categories">
+                                    <div class="card-body">
+                                        {% for category in contest.awardsCategories %}
+                                            <li>
+                                                <a href="{{ path('jury_team_category', {'categoryId': category.categoryid}) }}">
+                                                    {{ category.name }}
+                                                </a>
+                                            </li>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
                         {% else %}
                             <em>none</em>
                         {% endif %}
