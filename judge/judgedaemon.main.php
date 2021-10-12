@@ -445,13 +445,13 @@ EOT;
             chmod($execrunpath, 0755);
         }
         if (!is_file($execrunpath) || !is_executable($execrunpath)) {
-            return [null, "Invalid build file, must produce an executable file 'run'."];
+            return [null, "Invalid build file, must produce an executable file 'run'.", null];
         }
     }
     // Create file to mark executable successfully deployed.
     touch($execdeploypath);
 
-    return [$execrunpath, null];
+    return [$execrunpath, null, null];
 }
 
 $options = getopt("dv:n:hVe:j:t:", ["diskspace-error"]);
