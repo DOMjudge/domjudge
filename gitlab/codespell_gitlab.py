@@ -17,4 +17,4 @@ with open("gitlab/codespellignorefiles.txt", "r") as f:
   skip_list = ",".join(line for line in f.read().splitlines())
   command += f" -S {skip_list}"
 
-sys.exit(os.system(command))
+sys.exit(int(bool(os.system(command))))
