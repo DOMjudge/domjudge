@@ -859,7 +859,9 @@ while (true) {
         logmsg(LOG_INFO, "  🔒 Executing chroot script: '".CHROOT_SCRIPT." start'");
         system(LIBJUDGEDIR.'/'.CHROOT_SCRIPT.' start', $retval);
         if ($retval!==0) {
-            error("chroot script exited with exitcode $retval");
+            logmsg(LOG_ERR, "chroot script exited with exitcode $retval");
+            disable('judgehost', 'hostname', $myhost, "chroot script exited with exitcode $retval on $myhost");
+            continue;
         }
 
         // Refresh config at start of each batch.
@@ -992,7 +994,12 @@ function cleanup_judging(string $workdir) : void
     logmsg(LOG_INFO, "  🔓 Executing chroot script: '".CHROOT_SCRIPT." stop'");
     system(LIBJUDGEDIR.'/'.CHROOT_SCRIPT.' stop', $retval);
     if ($retval!==0) {
-        error("chroot script exited with exitcode $retval");
+        logmsg(LOG_ERR, "chroot script exited with exitcode $retval");
+        disable('judgehost', 'hostname', $myhost, "chroot script exited with exitcode $retval on $myhost");
+        // Just continue here: even though we might continue a current
+        // compile/test-run cycle, we don't know whether we're in one here,
+        // and worst case, the chroot script will fail the next time when
+        // starting.
     }
 
     // Evict all contents of the workdir from the kernel fs cache
