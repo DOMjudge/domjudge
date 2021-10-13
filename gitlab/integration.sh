@@ -59,13 +59,23 @@ cd /opt/domjudge/domserver
 # This needs to be done before we do any submission.
 # 8 hours as a helper so we can adjust contest start/endtime
 TIMEHELP=$((8*60*60))
+UNIX_TIMESTAMP=$(date +%s)
+STARTTIME=$((UNIX_TIMESTAMP-TIMEHELP))
+export TZ="Europe/Amsterdam"
+STARTTIME_STRING="$(date  -d @$STARTTIME +'%F %T Europe/Amsterdam')"
+FREEZETIME=$((UNIX_TIMESTAMP+15))
+FREEZETIME_STRING="$(date  -d @$FREEZETIME +'%F %T Europe/Amsterdam')"
+ENDTIME=$((UNIX_TIMESTAMP+TIMEHELP))
+ENDTIME_STRING="$(date  -d @$ENDTIME +'%F %T Europe/Amsterdam')"
 # Database changes to make the REST API and event feed match better.
-# Note that this does NOT change the user visible fields in the web UI.
 cat <<EOF | mysql domjudge
 DELETE FROM clarification;
-UPDATE contest SET starttime  = UNIX_TIMESTAMP()-$TIMEHELP WHERE cid = 2;
-UPDATE contest SET freezetime = UNIX_TIMESTAMP()+15        WHERE cid = 2;
-UPDATE contest SET endtime    = UNIX_TIMESTAMP()+$TIMEHELP WHERE cid = 2;
+UPDATE contest SET starttime  = $STARTTIME  WHERE cid = 2;
+UPDATE contest SET freezetime = $FREEZETIME WHERE cid = 2;
+UPDATE contest SET endtime    = $ENDTIME    WHERE cid = 2;
+UPDATE contest SET starttime_string  = '$STARTTIME_STRING'  WHERE cid = 2;
+UPDATE contest SET freezetime_string = '$FREEZETIME_STRING' WHERE cid = 2;
+UPDATE contest SET endtime_string    = '$ENDTIME_STRING'    WHERE cid = 2;
 UPDATE team_category SET visible = 1;
 EOF
 
