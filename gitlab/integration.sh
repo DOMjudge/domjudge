@@ -84,6 +84,7 @@ cp etc/initial_admin_password.secret "$gitlabartifacts/"
 
 # configure and restart php-fpm
 sudo cp /opt/domjudge/domserver/etc/domjudge-fpm.conf "/etc/php/7.4/fpm/pool.d/domjudge-fpm.conf"
+echo "php_admin_value[date.timezone] = Europe/Amsterdam" | sudo tee -a "/etc/php/7.4/fpm/pool.d/domjudge-fpm.conf"
 sudo /usr/sbin/php-fpm7.4
 
 section_end setup
