@@ -375,8 +375,8 @@ Run COMMAND with restrictions.\n\
 Note that root privileges are needed for the `root' and `user' options.\n\
 If `user' is set, then `group' defaults to the same to prevent security\n\
 issues, since otherwise the process would retain group root permissions.\n\
-Additionally, Linux cgroup support is required for the `memsize' and\n\
-`cputime' options, and to report actual memory usage.\n\
+Additionally, Linux cgroup support is required for the `memsize', `cpuset'\n\
+and `cputime' options, and to report actual memory usage.\n\
 The COMMAND path is relative to the changed ROOT directory if specified.\n\
 TIME may be specified as a float; two floats separated by `:' are treated\n\
 as soft and hard limits. The runtime written to file is that of the last\n\
@@ -1173,9 +1173,11 @@ int main(int argc, char **argv)
 		}
 	}
 	/* Make libcgroup ready for use */
-	ret = cgroup_init();
-	if ( ret!=0 ) {
-		error(0,"libcgroup initialization failed: %s(%d)\n", cgroup_strerror(ret), ret);
+	if ( use_cgroup() ) {
+		ret = cgroup_init();
+		if ( ret!=0 ) {
+			error(0,"libcgroup initialization failed: %s(%d)\n", cgroup_strerror(ret), ret);
+		}
 	}
 	/* Define the cgroup name that we will use and make sure it will
 	 * be unique. Note: group names must have slashes!
@@ -1396,7 +1398,7 @@ int main(int argc, char **argv)
 			exitcode = WEXITSTATUS(status);
 		}
 
-		double cputime;
+		double cputime = -1;
 		output_cgroup_stats(&cputime);
 		cgroup_kill();
 		cgroup_delete();
