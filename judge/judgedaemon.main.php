@@ -683,20 +683,7 @@ while (true) {
                 logmsg(LOG_ERR, "Low on disk space: $free_abs free, clean up or " .
                     "change 'diskspace error' value in config before resolving this error.");
 
-                $disabled = dj_json_encode(array(
-                    'kind' => 'judgehost',
-                    'hostname' => $myhost));
-                $judgehostlog = read_judgehostlog();
-                $error_id = request(
-                    'judgehosts/internal-error',
-                    'POST',
-                    'description=' . urlencode("low on disk space on $myhost") .
-                    '&judgehostlog=' . urlencode(base64_encode($judgehostlog)) .
-                    '&disabled=' . urlencode($disabled) .
-                    '&hostname=' . urlencode($myhost),
-                    false
-                );
-                logmsg(LOG_ERR, "=> internal error " . $error_id);
+                disable('judgehost', 'hostname', $myhost, "low on disk space on $myhost");
             }
         }
     }
@@ -953,7 +940,8 @@ function registerJudgehost($myhost)
     }
 }
 
-function disable(string $kind, string $idcolumn, $id, string $description, int $judgeTaskId, $extra_log = null)
+function disable(string $kind, string $idcolumn, $id, string $description,
+                 $judgeTaskId = null, $extra_log = null)
 {
     global $myhost;
     $disabled = dj_json_encode(array(
@@ -966,15 +954,15 @@ function disable(string $kind, string $idcolumn, $id, string $description, int $
             . "\n\n"
             . $extra_log;
     }
-    $error_id = request(
-        'judgehosts/internal-error',
-        'POST',
-        'judgetaskid=' . urlencode((string)$judgeTaskId) .
-        '&description=' . urlencode($description) .
+    $args = 'description=' . urlencode($description) .
         '&judgehostlog=' . urlencode(base64_encode($judgehostlog)) .
         '&disabled=' . urlencode($disabled) .
-        '&hostname=' . urlencode($myhost)
-    );
+        '&hostname=' . urlencode($myhost);
+    if ( isset($judgeTaskId) ) {
+        $args .= '&judgetaskid=' . urlencode((string)$judgeTaskId);
+    }
+
+    $error_id = request('judgehosts/internal-error', 'POST', $args);
     logmsg(LOG_ERR, "=> internal error " . $error_id);
 }
 
