@@ -59,12 +59,23 @@ cd /opt/domjudge/domserver
 # This needs to be done before we do any submission.
 # 8 hours as a helper so we can adjust contest start/endtime
 TIMEHELP=$((8*60*60))
+UNIX_TIMESTAMP=$(date +%s)
+STARTTIME=$((UNIX_TIMESTAMP-TIMEHELP))
+export TZ="Europe/Amsterdam"
+STARTTIME_STRING="$(date  -d @$STARTTIME +'%F %T Europe/Amsterdam')"
+FREEZETIME=$((UNIX_TIMESTAMP+15))
+FREEZETIME_STRING="$(date  -d @$FREEZETIME +'%F %T Europe/Amsterdam')"
+ENDTIME=$((UNIX_TIMESTAMP+TIMEHELP))
+ENDTIME_STRING="$(date  -d @$ENDTIME +'%F %T Europe/Amsterdam')"
 # Database changes to make the REST API and event feed match better.
 cat <<EOF | mysql domjudge
 DELETE FROM clarification;
-UPDATE contest SET starttime  = UNIX_TIMESTAMP()-$TIMEHELP WHERE cid = 2;
-UPDATE contest SET freezetime = UNIX_TIMESTAMP()+15        WHERE cid = 2;
-UPDATE contest SET endtime    = UNIX_TIMESTAMP()+$TIMEHELP WHERE cid = 2;
+UPDATE contest SET starttime  = $STARTTIME  WHERE cid = 2;
+UPDATE contest SET freezetime = $FREEZETIME WHERE cid = 2;
+UPDATE contest SET endtime    = $ENDTIME    WHERE cid = 2;
+UPDATE contest SET starttime_string  = '$STARTTIME_STRING'  WHERE cid = 2;
+UPDATE contest SET freezetime_string = '$FREEZETIME_STRING' WHERE cid = 2;
+UPDATE contest SET endtime_string    = '$ENDTIME_STRING'    WHERE cid = 2;
 UPDATE team_category SET visible = 1;
 EOF
 
@@ -73,6 +84,7 @@ cp etc/initial_admin_password.secret "$gitlabartifacts/"
 
 # configure and restart php-fpm
 sudo cp /opt/domjudge/domserver/etc/domjudge-fpm.conf "/etc/php/7.4/fpm/pool.d/domjudge-fpm.conf"
+echo "php_admin_value[date.timezone] = Europe/Amsterdam" | sudo tee -a "/etc/php/7.4/fpm/pool.d/domjudge-fpm.conf"
 sudo /usr/sbin/php-fpm7.4
 
 section_end setup
@@ -227,6 +239,13 @@ set -x
 
 # Delete contest so API check does not fail because of empty results.
 echo "DELETE FROM contest WHERE cid=1" | mysql domjudge
+
+# Finalize contest so that awards appear in the feed; first freeze and end the
+# contest if that has not already been done.
+export CURLOPTS="--fail -m 30 -b $COOKIEJAR"
+curl $CURLOPTS -X POST -d 'contest=2&donow[freeze]=freeze now' http://localhost/domjudge/jury/contests || true
+curl $CURLOPTS -X POST -d 'contest=2&donow[end]=end now' http://localhost/domjudge/jury/contests || true
+curl $CURLOPTS -X POST -d 'finalize_contest[b]=0&finalize_contest[finalizecomment]=gitlab&finalize_contest[finalize]=' http://localhost/domjudge/jury/contests/2/finalize
 
 # Check the Contest API:
 $CHECK_API -n -C -e -a 'strict=1' http://admin:$ADMINPASS@localhost/domjudge/api
