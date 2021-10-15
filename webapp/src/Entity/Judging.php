@@ -508,14 +508,7 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
      */
     public function isStarted(): bool
     {
-        /** @var JudgingRun $run */
-        foreach ($this->getRuns() as $run) {
-            if ($run->getJudgeTask()->getStarttime() !== null) {
-                return true;
-            }
-        }
-
-        return false;
+        return $this->getStarttime() !== null;
     }
 
     /**
