@@ -84,14 +84,20 @@ class JuryMiscController extends BaseController
         $qb = $this->em->createQueryBuilder();
 
         if ($datatype === 'problems') {
-            $problems = $qb->from(Problem::class, 'p')
+            $query = $qb->from(Problem::class, 'p')
                 ->select('p.probid', 'p.name')
                 ->where($qb->expr()->like('p.name', '?1'))
                 ->orWhere($qb->expr()->eq('p.probid', '?2'))
-                ->orderBy('p.name', 'ASC')
-                ->getQuery()->setParameter(1, '%' . $q . '%')
-                ->setParameter(2, $q)
-                ->getResult();
+                ->orderBy('p.name', 'ASC');
+
+            if ($contest =  $this->dj->getCurrentContest()) {
+                $query->join('p.contest_problems', 'cp', JOIN::WITH, 'cp.contest = :contest')
+                ->setParameter(':contest', $contest->getCid());
+            }
+
+            $problems = $query->getQuery()->setParameter(1, '%' . $q . '%')
+                              ->setParameter(2, $q)
+                              ->getResult();
 
             $results = array_map(function (array $problem) {
                 $displayname = $problem['name'] . " (p" . $problem['probid'] . ")";
