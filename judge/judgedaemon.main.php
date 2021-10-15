@@ -445,13 +445,13 @@ EOT;
             chmod($execrunpath, 0755);
         }
         if (!is_file($execrunpath) || !is_executable($execrunpath)) {
-            return [null, "Invalid build file, must produce an executable file 'run'."];
+            return [null, "Invalid build file, must produce an executable file 'run'.", null];
         }
     }
     // Create file to mark executable successfully deployed.
     touch($execdeploypath);
 
-    return [$execrunpath, null];
+    return [$execrunpath, null, null];
 }
 
 $options = getopt("dv:n:hVe:j:t:", ["diskspace-error"]);
@@ -683,20 +683,7 @@ while (true) {
                 logmsg(LOG_ERR, "Low on disk space: $free_abs free, clean up or " .
                     "change 'diskspace error' value in config before resolving this error.");
 
-                $disabled = dj_json_encode(array(
-                    'kind' => 'judgehost',
-                    'hostname' => $myhost));
-                $judgehostlog = read_judgehostlog();
-                $error_id = request(
-                    'judgehosts/internal-error',
-                    'POST',
-                    'description=' . urlencode("low on disk space on $myhost") .
-                    '&judgehostlog=' . urlencode(base64_encode($judgehostlog)) .
-                    '&disabled=' . urlencode($disabled) .
-                    '&hostname=' . urlencode($myhost),
-                    false
-                );
-                logmsg(LOG_ERR, "=> internal error " . $error_id);
+                disable('judgehost', 'hostname', $myhost, "low on disk space on $myhost");
             }
         }
     }
@@ -872,7 +859,9 @@ while (true) {
         logmsg(LOG_INFO, "  🔒 Executing chroot script: '".CHROOT_SCRIPT." start'");
         system(LIBJUDGEDIR.'/'.CHROOT_SCRIPT.' start', $retval);
         if ($retval!==0) {
-            error("chroot script exited with exitcode $retval");
+            logmsg(LOG_ERR, "chroot script exited with exitcode $retval");
+            disable('judgehost', 'hostname', $myhost, "chroot script exited with exitcode $retval on $myhost");
+            continue;
         }
 
         // Refresh config at start of each batch.
@@ -953,7 +942,8 @@ function registerJudgehost($myhost)
     }
 }
 
-function disable(string $kind, string $idcolumn, $id, string $description, int $judgeTaskId, $extra_log = null)
+function disable(string $kind, string $idcolumn, $id, string $description,
+                 $judgeTaskId = null, $extra_log = null)
 {
     global $myhost;
     $disabled = dj_json_encode(array(
@@ -966,15 +956,15 @@ function disable(string $kind, string $idcolumn, $id, string $description, int $
             . "\n\n"
             . $extra_log;
     }
-    $error_id = request(
-        'judgehosts/internal-error',
-        'POST',
-        'judgetaskid=' . urlencode((string)$judgeTaskId) .
-        '&description=' . urlencode($description) .
+    $args = 'description=' . urlencode($description) .
         '&judgehostlog=' . urlencode(base64_encode($judgehostlog)) .
         '&disabled=' . urlencode($disabled) .
-        '&hostname=' . urlencode($myhost)
-    );
+        '&hostname=' . urlencode($myhost);
+    if ( isset($judgeTaskId) ) {
+        $args .= '&judgetaskid=' . urlencode((string)$judgeTaskId);
+    }
+
+    $error_id = request('judgehosts/internal-error', 'POST', $args);
     logmsg(LOG_ERR, "=> internal error " . $error_id);
 }
 
@@ -1004,7 +994,12 @@ function cleanup_judging(string $workdir) : void
     logmsg(LOG_INFO, "  🔓 Executing chroot script: '".CHROOT_SCRIPT." stop'");
     system(LIBJUDGEDIR.'/'.CHROOT_SCRIPT.' stop', $retval);
     if ($retval!==0) {
-        error("chroot script exited with exitcode $retval");
+        logmsg(LOG_ERR, "chroot script exited with exitcode $retval");
+        disable('judgehost', 'hostname', $myhost, "chroot script exited with exitcode $retval on $myhost");
+        // Just continue here: even though we might continue a current
+        // compile/test-run cycle, we don't know whether we're in one here,
+        // and worst case, the chroot script will fail the next time when
+        // starting.
     }
 
     // Evict all contents of the workdir from the kernel fs cache
