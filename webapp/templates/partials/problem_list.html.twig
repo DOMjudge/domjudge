@@ -18,9 +18,7 @@
                                 <div class="card">
                                     <div class="card-body">
                                         <h2 class="card-title">
-                                            {% if problem.color %}
-                                                {{ problem | problemBadge }}
-                                            {% endif %}
+                                            {{ problem | problemBadge }}
                                         </h2>
                                         <h3 class="card-subtitle mb-2 text-muted">
                                             {{ problem.problem.name }}

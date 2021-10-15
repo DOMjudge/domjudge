@@ -1232,7 +1232,7 @@ EOF;
 
     public function problemBadge(ContestProblem $problem): string
     {
-        $rgb = Utils::convertToHex($problem->getColor());
+        $rgb = Utils::convertToHex($problem->getColor() ?? '#ffffff');
         $background = Utils::parseHexColor($rgb);
 
         // Pick a border that's a bit darker
