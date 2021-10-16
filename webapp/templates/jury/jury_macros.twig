@@ -19,16 +19,23 @@
 {% endmacro %}
 
 
-{% macro jscolor_extrahead() %}
-    <script src="{{ asset('js/jscolor.js') }}"></script>
+{% macro coloris_extrahead() %}
+    <link rel="stylesheet" href="{{ asset('css/coloris.min.css') }}">
+    <script src="{{ asset('js/coloris.min.js') }}"></script>
+
     <script>
-        jscolor.presets.default = {
-            required:     false,
-            refine:       false,
-            hash:         true,
-            uppercase:    false,
-            alphaChannel: false,
-        };
+        function bindColor() {
+            Coloris({
+                el: '[data-color-picker]',
+                clearButton: {
+                    show: true
+                }
+            });
+        }
+
+        $(function() {
+            bindColor();
+        });
     </script>
 {% endmacro %}
 

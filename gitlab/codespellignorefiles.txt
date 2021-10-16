@@ -19,5 +19,5 @@ FileSaver*
 bootstrap*
 d3.min*
 jquery*
-jscolor*
+coloris*
 nv.d3.min*
