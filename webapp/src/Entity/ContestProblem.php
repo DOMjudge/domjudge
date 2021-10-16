@@ -195,7 +195,7 @@ class ContestProblem
         return $this->color;
     }
 
-    public function setLazyEvalResults(bool $lazyEvalResults): ContestProblem
+    public function setLazyEvalResults(?bool $lazyEvalResults): ContestProblem
     {
         $this->lazyEvalResults = $lazyEvalResults;
         return $this;
