@@ -99,7 +99,9 @@
             {%- for row in data %}
 
                 <tr class="{{ row.cssclass|default('') }}"
-                        {%- if row.style is defined %} style="{{ row.style }}"{% endif %}>
+                        {%- if row.style is defined %} style="{{ row.style }}"{% endif %}
+                        {%- if row.link is defined %} data-link="{{ row.link }}"{% endif %}
+                        >
                     {%- for key,column in fields %}
                         {%- set item = attribute(row.data, key) %}
 
@@ -107,8 +109,7 @@
                            class="{{ item.cssclass|default('') }}{% if key == "status" %} {{ item.value|statusClass() }}{% endif %}"
                                 {%- if item.title is defined %} title="{{ item.title }}"{% endif %}
                                 {%- if item.sortvalue is defined %} data-sort="{{ item.sortvalue }}"{% endif %}>
-                            {%- if item.link is defined %}<a href="{{ item.link }}">
-                                {%- elseif row.link is defined %}<a href="{{ row.link }}">{% endif %}
+                            {%- if item.link is defined %}<a href="{{ item.link }}">{% endif %}
                                     {% if key == "status" %}
                                     {{- (item.value|default(item.default|default('')))|statusIcon -}}
                                     {% elseif key == "country" %}
@@ -116,7 +117,7 @@
                                     {% else %}
                                     {{- (item.value|default(item.default|default(''))) -}}
                                     {% endif %}
-                                    {%- if item.link is defined or row.link is defined -%}</a>{% endif %}
+                                    {%- if item.link is defined -%}</a>{% endif %}
                         </td>
                     {%- endfor %}
                     {%- for action in row.actions %}

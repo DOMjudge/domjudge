@@ -28,17 +28,17 @@
     {%- for clarification in clarifications %}
         {%- set link = path('jury_clarification', {id: clarification.clarid}) %}
 
-        <tr>
-            <td><a href="{{ link }}">{{ clarification.clarid }}</a></td>
+        <tr data-link="{{ link }}">
+            <td>{{ clarification.clarid }}</td>
             {% if showExternalId %}
-                <td><a href="{{ link }}">{{ clarification.externalid }}</a></td>
+                <td>{{ clarification.externalid }}</td>
             {% endif %}
             {%- if current_contests | length > 1 %}
 
-                <td><a href="{{ link }}">{{ clarification.contest.shortname }}</a></td>
+                <td>{{ clarification.contest.shortname }}</td>
             {%- endif %}
 
-            <td><a href="{{ link }}">{{ clarification.submittime | printtime(null, clarification.contest) }}</a></td>
+            <td>{{ clarification.submittime | printtime(null, clarification.contest) }}</td>
             {%- if clarification.sender is null %}
                 {%- set sender = 'Jury' %}
                 {%- if clarification.recipient is null %}
@@ -51,9 +51,9 @@
                 {%- set sender = clarification.sender.effectiveName %}
             {%- endif %}
 
-            <td><a href="{{ link }}" title="{{ sender }}">{{ sender | u.truncate(teamname_max_length, '…') }}</a></td>
-            <td><a href="{{ link }}" title="{{ recipient }}">{{ recipient | u.truncate(teamname_max_length, '…') }}</a></td>
-            <td><a href="{{ link }}">
+            <td>{{ sender | u.truncate(teamname_max_length, '…') }}</td>
+            <td>{{ recipient | u.truncate(teamname_max_length, '…') }}</td>
+            <td>
                     {%- if clarification.problem -%}
                         problem {{ clarification.problem.contestProblems.first.shortname -}}
                     {%- elseif clarification.category -%}
@@ -61,9 +61,9 @@
                     {%- else -%}
                         general
                     {%- endif -%}
-            </a></td>
+            </td>
 
-            <td><a href="{{ link }}">{{ clarification.summary }}</a></td>
+            <td>{{ clarification.summary }}</td>
             {%- set claim = false %}
             {%- if clarification.answered %}
                 {%- set answered = '<i class="fas fa-check" title="is answered"></i>' %}
@@ -76,7 +76,7 @@
                 {%- endif %}
             {%- endif %}
 
-            <td><a href="{{ link }}">{{ answered | raw }}</a></td>
+            <td>{{ answered | raw }}</td>
             <td><form action="{{ path('jury_clarification_claim', {clarId: clarification.clarid}) }}" method="post" class="form-inline">
                 {%- if claim and clarification.sender -%}
                     <button name="claimed" value="1"
@@ -85,7 +85,7 @@
                     <button name="claimed" value="0"
                        class="btn btn-outline-success btn-sm">Unclaim</button>
                 {%- else -%}
-                    <a href="{{ link }}">{{ clarification.juryMember | default('') }}</a>
+                    {{ clarification.juryMember | default('') }}
                 {%- endif -%}
 		</form>
             </td>

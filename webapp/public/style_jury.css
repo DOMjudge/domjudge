@@ -162,3 +162,7 @@ div.submission-summary > span {
 .importexport div.tile h3 {
     font-size: 22px;
 }
+
+tr[data-link] {
+    cursor: pointer;
+}

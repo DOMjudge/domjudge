@@ -228,44 +228,32 @@
             <tbody>
             {% for judging in judgings %}
                 {% set link = path('jury_submission', {submitId: submission.submitid, jid: judging.judgingid}) %}
-                <tr {% if not judging.valid %}class="disabled"{% endif %}>
+                <tr {% if not judging.valid %}class="disabled"{% endif %} data-link="{{ link }}">
                     <td>
-                        <a href="{{ link }}">
                             {% if selectedJudging is not null and selectedJudging.judgingid == judging.judgingid %}
                                 <i class="fas fa-long-arrow-alt-right"></i>
                             {% else %}
                                 &nbsp;
                             {% endif %}
-                        </a>
                     </td>
-                    <td><a href="{{ link }}">j{{ judging.judgingid }}</a></td>
-                    <td><a href="{{ link }}">{{ judging.starttime | printtime(null, submission.contest) }}</a></td>
+                    <td>j{{ judging.judgingid }}</td>
+                    <td>{{ judging.starttime | printtime(null, submission.contest) }}</td>
                     <td>
-                        <a href="{{ link }}">
                             {% if maxRunTimes[judging.judgingId] is not null %}
                                 {{ maxRunTimes[judging.judgingId] }}s
                             {% endif %}
-                        </a>
                     </td>
+                    <td> {{ judging.judgehosts | printHosts }} </td>
                     <td>
-                        <a href="{{ link }}">
-                            {{ judging.judgehosts | printHosts }}
-                        </a>
-                    </td>
-                    <td>
-                        <a href="{{ link }}">
                             {{ judging.result | printResult(judging.valid, true) }}
                             {% if judging.stillBusy %}
                                 (&hellip;)
                             {% endif %}
-                        </a>
                     </td>
                     <td>
-                        <a href="{{ link }}">
                             {% if judging.rejudging is not null %}
                                 r{{ judging.rejudging.rejudgingid }} ({{ judging.rejudging.reason }})
                             {% endif %}
-                        </a>
                     </td>
                 </tr>
             {% endfor %}

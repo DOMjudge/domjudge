@@ -708,4 +708,12 @@ function humanReadableBytes(bytes) {
 
 $(function () {
     $('[data-toggle="tooltip"]').tooltip();
+
+    $('tr[data-link]').on('click', function(){
+        window.location=$(this).data('link');
+    });
+
+    $('div[data-ajax-refresh-target]').on('click', 'tr[data-link]', function(){
+        window.location=$(this).data('link');
+    });
 });

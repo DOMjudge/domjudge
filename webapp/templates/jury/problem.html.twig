@@ -147,32 +147,18 @@
                     <tbody>
                     {% for contestProblem in problem.contestProblems %}
                         {% set link = path('jury_contest', {'contestId': contestProblem.cid}) %}
-                        <tr>
-                            <td>
-                                <a href="{{ link }}">c{{ contestProblem.cid }}</a>
-                            </td>
-                            <td>
-                                <a href="{{ link }}">{{ contestProblem.contest.shortname }}</a>
-                            </td>
-                            <td>
-                                <a href="{{ link }}">{{ contestProblem.contest.name }}</a>
-                            </td>
-                            <td>
-                                <a href="{{ link }}">{{ contestProblem.shortname }}</a>
-                            </td>
-                            <td>
-                                <a href="{{ link }}">{{ contestProblem.allowSubmit | printYesNo }}</a>
-                            </td>
-                            <td>
-                                <a href="{{ link }}">{{ contestProblem.allowJudge | printYesNo }}</a>
-                            </td>
+                        <tr data-link="{{ link }}">
+                            <td> c{{ contestProblem.cid }} </td>
+                            <td> {{ contestProblem.contest.shortname }} </td>
+                            <td> {{ contestProblem.contest.name }} </td>
+                            <td> {{ contestProblem.shortname }} </td>
+                            <td> {{ contestProblem.allowSubmit | printYesNo }} </td>
+                            <td> {{ contestProblem.allowJudge | printYesNo }} </td>
                             {% if contestProblem.color is empty %}
-                                <td><a href="{{ link }}">&nbsp;</a></td>
+                                <td>&nbsp;</td>
                             {% else %}
                                 <td title="{{ contestProblem.color }}">
-                                    <a href="{{ link }}">
                                         {{ contestProblem | problemBadge }}
-                                    </a>
                                 </td>
                             {% endif %}
                         </tr>

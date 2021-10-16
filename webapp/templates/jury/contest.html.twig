@@ -297,31 +297,27 @@
                     </thead>
                     <tbody>
                     {% for problem in problems %}
-                        <tr>
-                            {% set link = path('jury_problem', {'probId': problem.probid}) %}
-                            <td><a href="{{ link }}">p{{ problem.probid }}</a></td>
-                            <td><a href="{{ link }}">{{ problem.problem.name }}</a></td>
-                            <td><a href="{{ link }}">{{ problem.shortname }}</a></td>
-                            <td><a href="{{ link }}">{{ problem.points }}</a></td>
-                            <td><a href="{{ link }}">{{ problem.allowSubmit | printYesNo }}</a></td>
-                            <td><a href="{{ link }}">{{ problem.allowJudge | printYesNo }}</a></td>
+                        {% set link = path('jury_problem', {'probId': problem.probid}) %}
+                        <tr data-link="{{ link }}">
+                            <td>p{{ problem.probid }}</td>
+                            <td>{{ problem.problem.name }}</td>
+                            <td>{{ problem.shortname }}</td>
+                            <td>{{ problem.points }}</td>
+                            <td>{{ problem.allowSubmit | printYesNo }}</td>
+                            <td>{{ problem.allowJudge | printYesNo }}</td>
                             {% if problem.color is empty %}
-                                <td><a href="{{ link }}">&nbsp;</a></td>
+                                <td>&nbsp;</td>
                             {% else %}
                                 <td title="{{ problem.color }}">
-                                    <a href="{{ link }}">
                                         {{ problem | problemBadge }}
-                                    </a>
                                 </td>
                             {% endif %}
                             <td>
-                                <a href="{{ link }}">
                                     {% if problem.lazyEvalResults is not null %}
                                         {{ problem.lazyEvalResults | printYesNo }}
                                     {% else %}
                                         -
                                     {% endif %}
-                                </a>
                             </td>
                             <td>
                                 {% if is_granted('ROLE_ADMIN') %}

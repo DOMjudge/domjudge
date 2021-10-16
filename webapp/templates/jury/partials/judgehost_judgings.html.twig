@@ -15,28 +15,24 @@
         <tbody>
         {% for judging in judgings %}
             {% set link = path('jury_submission_by_judging', {jid: judging.judgingid}) %}
-            <tr class="{% if not judging.valid %}disabled{% endif %}">
-                <td><a href="{{ link }}">{{ judging.judgingid }}</a></td>
-                <td><a href="{{ link }}">{{ judging.starttime | printtime }}</a></td>
+            <tr class="{% if not judging.valid %}disabled{% endif %}" data-link="{{ link }}">
+                <td>{{ judging.judgingid }}</td>
+                <td>{{ judging.starttime | printtime }}</td>
                 <td>
-                    <a href="{{ link }}">
                         {% if judging.aborted %}
                             [aborted]
                         {% else %}
                             {{ judging.starttime | printtimediff(judging.endtime) }}
                         {% endif %}
-                    </a>
                 </td>
                 <td>
-                    <a href="{{ link }}">
                         {{ judging.result | printResult(judging.valid) }}
                         {% if judging.stillBusy %}
                             (&hellip;)
                         {% endif %}
-                    </a>
                 </td>
-                <td><a href="{{ link }}">{{ judging.valid | printYesNo }}</a></td>
-                <td><a href="{{ link }}">{{ judging.verified | printYesNo }}</a></td>
+                <td>{{ judging.valid | printYesNo }}</td>
+                <td>{{ judging.verified | printYesNo }}</td>
             </tr>
         {% endfor %}
         </tbody>
