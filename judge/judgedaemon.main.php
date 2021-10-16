@@ -391,7 +391,7 @@ function fetch_executable_internal(
             logmsg(LOG_DEBUG, "Building executable in $execdir, under 'build/'");
             system(LIBJUDGEDIR . '/build_executable.sh ' . dj_escapeshellarg($execdir), $retval);
             if ($retval!==0) {
-                return [null, "Failed to build executable in $execdir.", "$execdir/build.log", null];
+                return [null, "Failed to build executable in $execdir.", "$execdir/build.log"];
             }
             chmod($execrunpath, 0755);
         }
