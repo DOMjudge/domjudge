@@ -293,6 +293,7 @@ function fetch_executable_internal(
     $execbuilddir    = $execdir . '/build';
     $execbuildpath   = $execbuilddir . '/build';
     $execrunpath     = $execbuilddir . '/run';
+    $execrunjurypath = $execbuilddir . '/runjury';
     if (!is_dir($execdir) || !file_exists($execdeploypath)) {
         system('rm -rf ' . dj_escapeshellarg($execdir) . ' ' . dj_escapeshellarg($execbuilddir));
         system('mkdir -p ' . dj_escapeshellarg($execbuilddir), $retval);
@@ -329,10 +330,10 @@ function fetch_executable_internal(
             } else {
                 // detect lang and write build file
                 $langexts = [
-                        'c' => ['c'],
-                        'cpp' => ['cpp', 'C', 'cc'],
-                        'java' => ['java'],
-                        'py' => ['py', 'py2', 'py3'],
+                    'c' => ['c'],
+                    'cpp' => ['cpp', 'C', 'cc'],
+                    'java' => ['java'],
+                    'py' => ['py', 'py2', 'py3'],
                 ];
                 $buildscript = "#!/bin/sh\n\n";
                 $execlang = false;
@@ -377,11 +378,33 @@ function fetch_executable_internal(
                     $buildscript .= "echo 'python '$source >> run\n";
                     break;
                 }
-                if ( $combined_run_compare ) {
-                    $buildscript .= <<<'EOT'
-mv run runjury
+                if (file_put_contents($execbuildpath, $buildscript) === false) {
+                    error("Could not write file 'build' in $execbuilddir");
+                }
+                chmod($execbuildpath, 0755);
+            }
+        } elseif (!is_executable($execbuildpath)) {
+            return [null, "Invalid executable, file 'build' exists but is not executable.", null];
+        }
 
-cat <<'EOF' > run
+        if ($do_compile) {
+            logmsg(LOG_DEBUG, "Building executable in $execdir, under 'build/'");
+            system(LIBJUDGEDIR . '/build_executable.sh ' . dj_escapeshellarg($execdir), $retval);
+            if ($retval!==0) {
+                return [null, "Failed to build executable in $execdir.", "$execdir/build.log"];
+            }
+            chmod($execrunpath, 0755);
+        }
+        if (!is_file($execrunpath) || !is_executable($execrunpath)) {
+            return [null, "Invalid build file, must produce an executable file 'run'.", null];
+        }
+        if ( $combined_run_compare ) {
+            # For combined run and compare (i.e. for interactive problems), we
+            # need to wrap the jury provided 'run' script with 'runpipe' to
+            # handle the bidirectional communication.  First 'run' is renamed to
+            # 'runjury', and then replaced by the script below, which runs the
+            # team submission and runjury programs and connects their pipes.
+            $runscript = <<<'EOF'
 #!/bin/sh
 
 # Run wrapper-script to be called from 'testcase_run.sh'.
@@ -421,35 +444,23 @@ MYDIR=$(dirname $0)
 # Run the program while redirecting its stdin/stdout to 'runjury' via
 # 'runpipe'. Note that "$@" expands to separate, quoted arguments.
 exec ../dj-bin/runpipe ${DEBUG:+-v} -M "$META" -o "$PROGOUT" "$MYDIR/runjury" "$TESTIN" "$TESTOUT" "$FEEDBACK" = "$@"
-EOF
-
-chmod +x run
-
-EOT;
-                }
-                if (file_put_contents($execbuildpath, $buildscript) === false) {
-                    error("Could not write file 'build' in $execbuilddir");
-                }
-                chmod($execbuildpath, 0755);
+EOF;
+            if (rename($execrunpath, $execrunjurypath) === false) {
+                error("Could not move file 'run' to 'runjury' in $execbuilddir");
             }
-        } elseif (!is_executable($execbuildpath)) {
-            return [null, "Invalid executable, file 'build' exists but is not executable.", null];
-        }
-
-        if ($do_compile) {
-            logmsg(LOG_DEBUG, "Building executable in $execdir, under 'build/'");
-            system(LIBJUDGEDIR . '/build_executable.sh ' . dj_escapeshellarg($execdir), $retval);
-            if ($retval!==0) {
-                return [null, "Failed to build executable in $execdir.", "$execdir/build.log"];
+            if (file_put_contents($execrunpath, $runscript) === false) {
+                error("Could not write file 'run' in $execbuilddir");
             }
             chmod($execrunpath, 0755);
         }
+
         if (!is_file($execrunpath) || !is_executable($execrunpath)) {
             return [null, "Invalid build file, must produce an executable file 'run'.", null];
         }
+
+        // Create file to mark executable successfully deployed.
+        touch($execdeploypath);
     }
-    // Create file to mark executable successfully deployed.
-    touch($execdeploypath);
 
     return [$execrunpath, null, null];
 }
