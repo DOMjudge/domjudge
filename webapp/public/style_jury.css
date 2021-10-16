@@ -162,3 +162,11 @@ div.submission-summary > span {
 .importexport div.tile h3 {
     font-size: 22px;
 }
+
+.clr-field {
+    display: block !important;
+}
+
+.clr-picker .clr-alpha {
+    display: none;
+}

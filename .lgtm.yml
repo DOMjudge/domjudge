@@ -5,7 +5,7 @@ path_classifiers:
     - lib/vendor
     - webapp/public/js/ace
     - "webapp/public/js/bootstrap-toggle.*"
-    - webapp/public/js/jscolor.js
+    - webapp/public/js/coloris.min.js
   docs:
     - doc
 queries:
