@@ -180,11 +180,13 @@ if [ $RET -ne 4 ] && [ $RET -ne 8 ] && [ $RET -ne 0 ]; then
 fi
 section_end scrape
 
+section_start_collap cpstatic "Store scraped files in nginx"
 cd "$DIR"
 mkdir /var/www/html/"$URL"/
 cp -r html/"$URL"/"$ROLE"/localhost/domjudge/* /var/www/html/"$URL"/
 cp "$DIR"/gitlab/default-nginx /etc/nginx/sites-enabled/default
 service nginx restart
+section_end cpstatic
 
 section_start_collap capture "Capture the pages in a static webserver"
 SKIPPED="grep -v '\.eot\|\.ttf\|\.woff*\|\.js@*'"
