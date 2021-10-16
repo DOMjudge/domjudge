@@ -299,3 +299,13 @@ codespell:
   script:
     - pip install codespell
     - python3 gitlab/codespell_gitlab.py
+
+detect dump:
+  <<: *tiny_job
+  stage: style
+  image: domjudge/gitlabci:2.1
+  script:
+    - echo "yes" | wc -l
+    - OUT=$(grep -H -n --exclude-dir=.git -r "dump(" ./ | grep -v "js/ace\|Yaml::dump")
+    - echo $OUT
+    - exit $(($(wc -l <<< $OUT)-1))
