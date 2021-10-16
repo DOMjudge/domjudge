@@ -384,19 +384,19 @@ function fetch_executable_internal(
                 chmod($execbuildpath, 0755);
             }
         } elseif (!is_executable($execbuildpath)) {
-            return array(null, "Invalid executable, file 'build' exists but is not executable.");
+            return [null, "Invalid executable, file 'build' exists but is not executable.", null];
         }
 
         if ($do_compile) {
             logmsg(LOG_DEBUG, "Building executable in $execdir, under 'build/'");
             system(LIBJUDGEDIR . '/build_executable.sh ' . dj_escapeshellarg($execdir), $retval);
             if ($retval!==0) {
-                return [null, "Failed to build executable in $execdir.", "$execdir/build.log"];
+                return [null, "Failed to build executable in $execdir.", "$execdir/build.log", null];
             }
             chmod($execrunpath, 0755);
         }
         if (!is_file($execrunpath) || !is_executable($execrunpath)) {
-            return [null, "Invalid build file, must produce an executable file 'run'."];
+            return [null, "Invalid build file, must produce an executable file 'run'.", null];
         }
         if ( $combined_run_compare ) {
             # For combined run and compare (i.e. for interactive problems), we
