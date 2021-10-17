@@ -29,7 +29,7 @@
     {% endif %}
 
     <div class="row">
-        <div class="col-lg-4">
+        <div class="col-lg-5">
             <table class="table table-sm table-striped">
                 <tr>
                     <th>CID</th>
@@ -114,28 +114,31 @@
                     <th>Awards</th>
                     <td>
                         {% if contest.processAwards %}
-                            <a>{{ contest.goldAwards }} Gold Medal</a>
-                            <br>
-                            <a>{{ contest.silverAwards }} Silver Medal</a>
-                            <br>
-                            <a>{{ contest.bronzeAwards }} Bronze Medal</a>
-                            <br>
                             <div class="card">
                                 <h6 class="card-header" role="tab" id="categories">
-                                    <a class="collapsed d-block text-dark pt-0 pb-0" data-toggle="collapse" href="#collapsecategories" aria-expanded="true" aria-controls="collapsecategories">
-                                        Show/Hide the included teams' categories
+                                    <a class="collapsed d-block text-dark pt-0 pb-0" data-toggle="collapse" href="#collapsecategories" aria-expanded="true" aria-controls="collapsecategories" id="collapseheader">
+                                        Total {{ contest.goldAwards + contest.silverAwards + contest.bronzeAwards }} awards (Show/Hide details)
                                         <i class="fa fa-chevron-down float-right"></i>
                                     </a>
                                 </h6>
                                 <div id="collapsecategories" class="collapse collapsed" role="tabpanel" aria-labelledby="categories">
                                     <div class="card-body">
-                                        {% for category in contest.awardsCategories %}
-                                            <li>
-                                                <a href="{{ path('jury_team_category', {'categoryId': category.categoryid}) }}">
-                                                    {{ category.name }}
-                                                </a>
-                                            </li>
-                                        {% endfor %}
+                                        <a>{{ contest.goldAwards }} Gold Medal</a>
+                                        <br>
+                                        <a>{{ contest.silverAwards }} Silver Medal</a>
+                                        <br>
+                                        <a>{{ contest.bronzeAwards }} Bronze Medal</a>
+                                        <br>
+                                        For all teams from the following categories:
+                                        <ul>
+                                            {% for category in contest.awardsCategories %}
+                                                <li>
+                                                    <a href="{{ path('jury_team_category', {'categoryId': category.categoryid}) }}">
+                                                        {{ category.name }}
+                                                    </a>
+                                                </li>
+                                            {% endfor %}
+                                        </ul>
                                     </div>
                                 </div>
                             </div>
