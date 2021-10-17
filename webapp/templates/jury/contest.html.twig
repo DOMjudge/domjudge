@@ -115,13 +115,13 @@
                     <td>
                         {% if contest.processAwards %}
                             <div class="card">
-                                <h6 class="card-header" role="tab" id="categories">
+                                <h6 class="card-header" id="categories">
                                     <a class="collapsed d-block text-dark pt-0 pb-0" data-toggle="collapse" href="#collapsecategories" aria-expanded="true" aria-controls="collapsecategories" id="collapseheader">
                                         {{ (contest.goldAwards > 0) + (contest.silverAwards > 0) + (contest.bronzeAwards > 0) }} different types of awards (Show/Hide details)
                                         <i class="fa fa-chevron-down float-right"></i>
                                     </a>
                                 </h6>
-                                <div id="collapsecategories" class="collapse collapsed" role="tabpanel" aria-labelledby="categories">
+                                <div id="collapsecategories" class="collapse collapsed" aria-labelledby="categories">
                                     <div class="card-body pb-1">
                                         <a>{{ contest.goldAwards }} Gold Medal</a>
                                         <br>
