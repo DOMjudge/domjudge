@@ -21,7 +21,7 @@ alias section_end='trace_off ; section_end_internal '
 mkdir screenshots"$1"
 set -euxo pipefail
 
-section_start setup "Setup and install"
+section_start_collap setup "Setup and install"
 
 export PS4='(${BASH_SOURCE}:${LINENO}): - [$?] $ '
 
@@ -168,7 +168,7 @@ wget \
     --content-on-error \
     --rejected-log="$WGETLOGFILE" \
     --load-cookies cookies.txt \
-    "http://localhost/domjudge/$URL"
+    "http://localhost/domjudge/$URL" || true
 RET=$?
 set -e
 #https://www.gnu.org/software/wget/manual/html_node/Exit-Status.html
