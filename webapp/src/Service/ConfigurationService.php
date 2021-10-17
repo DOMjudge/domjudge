@@ -56,7 +56,7 @@ class ConfigurationService
     /**
      * @var array
      */
-    protected $dbConfigCache = [];
+    protected $dbConfigCache = null;
 
     /**
      * ConfigurationService constructor.
@@ -301,7 +301,7 @@ EOF;
 
         $this->em->flush();
 
-        $this->dbConfigCache = [];
+        $this->dbConfigCache = null;
     }
 
     /**
@@ -336,7 +336,8 @@ EOF;
      */
     protected function getDbValues(): array
     {
-        if (empty($this->dbConfigCache)) {
+        if ($this->dbConfigCache === null) {
+            $this->dbConfigCache = [];
             $configs = $this->em->getRepository(Configuration::class)->findAll();
             foreach ($configs as $config) {
                 $this->dbConfigCache[$config->getName()] = $config->getValue();
