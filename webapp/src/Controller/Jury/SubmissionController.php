@@ -19,6 +19,7 @@ use App\Entity\Submission;
 use App\Entity\SubmissionFile;
 use App\Entity\Team;
 use App\Entity\Testcase;
+use App\Form\Type\SubmissionsFilterType;
 use App\Service\BalloonService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
@@ -205,6 +206,12 @@ class SubmissionController extends BaseController
             $data['showTestcases'] = true;
             return $this->render('jury/partials/submission_list.html.twig', $data);
         }
+
+        // Build the filter form.
+        $form = $this->createForm(SubmissionsFilterType::class, [
+            "contests" => $contests,
+        ]);
+        $data["form"] = $form->createView();
 
         return $this->render('jury/submissions.html.twig', $data, $response);
     }
