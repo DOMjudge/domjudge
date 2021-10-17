@@ -84,10 +84,10 @@ void evict_directory(char *dirname) {
 			}
 		  entry_done:
 
-			free(entry_path);
 			if ( fd!=-1 && close(fd)!=0 ) {
 				warning(errno, "Unable to close file: %s", entry_path);
 			}
+			free(entry_path);
 		}
 		if ( closedir(dir)!=0 ) {
 			warning(errno, "Unable to close directory: %s", dirname);
