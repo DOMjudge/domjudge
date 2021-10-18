@@ -142,7 +142,7 @@
             default_value: true
             public: false
             description: Activate a judgehost by default when a new one registers.
--   category: Clarification
+-   category: Clarifications
     description: Options related to clarifications.
     items:
         -   name: clar_categories
@@ -255,7 +255,24 @@
             default_value: true
             public: true
             description: Show submission and problem statistics on the team and public pages.
--   category: Misc
+-   category: Authentication
+    description: Options related to authentication.
+    items:
+        -   name: auth_methods
+            type: array_val
+            default_value: []
+            public: false
+            description: List of allowed additional authentication methods.
+            docdescription: See :ref:`authentication` for more information.
+            options:
+                - ipaddress
+                - xheaders
+        -   name: ip_autologin
+            type: bool
+            default_value: false
+            public: false
+            description: Enable to skip the login page when using IP authentication.
+-   category: External systems
     description: Miscellaneous configuration options.
     items:
         -   name: print_command
@@ -286,20 +303,3 @@
             public: false
             description: URL of an ICPC iCAT instance if such is available; will be linked to from the submission verification box.
             docdescription: See https://github.com/icpc-live/autoanalyst
--   category: Authentication
-    description: Options related to authentication.
-    items:
-        -   name: auth_methods
-            type: array_val
-            default_value: []
-            public: false
-            description: List of allowed additional authentication methods.
-            docdescription: See :ref:`authentication` for more information.
-            options:
-                - ipaddress
-                - xheaders
-        -   name: ip_autologin
-            type: bool
-            default_value: false
-            public: false
-            description: Enable to skip the login page when using IP authentication.
