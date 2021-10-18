@@ -41,7 +41,7 @@ class Problem extends BaseApiEntity
     protected $probid;
 
     /**
-     * @var string
+     * @var string|null
      * @ORM\Column(type="string", name="externalid", length=255,
      *     options={"comment"="Problem ID in an external system, should be unique inside a single contest",
      *              "collation"="utf8mb4_bin"},
@@ -203,7 +203,7 @@ class Problem extends BaseApiEntity
         return $this->probid;
     }
 
-    public function setExternalid(string $externalid): Problem
+    public function setExternalid(?string $externalid): Problem
     {
         $this->externalid = $externalid;
         return $this;
