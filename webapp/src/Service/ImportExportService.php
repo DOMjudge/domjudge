@@ -299,7 +299,7 @@ class ImportExportService
                 $contestProblem = new ContestProblem();
                 $contestProblem
                     ->setShortname($problemLabel)
-                    ->setColor($problemData['rgb'] ?? $problemData['color'])
+                    ->setColor($problemData['rgb'] ?? $problemData['color'] ?? null)
                     // We need to set both the entities as well as the ID's because of the composite primary key
                     ->setProblem($problem)
                     ->setContest($contest);
