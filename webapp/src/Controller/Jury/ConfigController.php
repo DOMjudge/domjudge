@@ -104,7 +104,7 @@ class ConfigController extends AbstractController
             return $this->redirectToRoute('jury_config');
         }
 
-        $categories = array();
+        $categories = [];
         foreach ($specs as $spec) {
             if (!in_array($spec['category'], $categories)) {
                 $categories[] = $spec['category'];

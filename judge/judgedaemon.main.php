@@ -548,7 +548,7 @@ if (empty($options['e'])) {
     if (!posix_getpwnam($runuser)) {
         error("runuser $runuser does not exist.");
     }
-    $output = array();
+    $output = [];
     exec("ps -u '$runuser' -o pid= -o comm=", $output, $retval);
     if (count($output) !== 0) {
         error("found processes still running as '$runuser', check manually:\n" .
@@ -1035,7 +1035,7 @@ function compile(array $judgeTask, string $workdir, string $workdirpath, array $
     $url = sprintf('judgehosts/get_files/source/%s', $judgeTask['submitid']);
     $sources = request($url, 'GET');
     $sources = dj_json_decode($sources);
-    $files = array();
+    $files = [];
     $hasFiltered = false;
     foreach ($sources as $source) {
         $srcfile = "$workdir/compile/$source[filename]";
@@ -1330,7 +1330,7 @@ function judge(array $judgeTask): bool
         return false;
     }
 
-    $new_judging_run = array(
+    $new_judging_run = [
         'runresult' => urlencode($result),
         'runtime' => urlencode((string)$runtime),
         'output_run'   => rest_encode_file($testcasedir . '/program.out', $output_storage_limit),
@@ -1339,7 +1339,7 @@ function judge(array $judgeTask): bool
         'metadata' => rest_encode_file($testcasedir . '/program.meta', false),
         'output_diff'  => rest_encode_file($testcasedir . '/feedback/judgemessage.txt', $output_storage_limit),
         'hostname' => $myhost,
-    );
+    ];
 
     $ret = true;
     if ($result === 'correct') {
@@ -1377,7 +1377,7 @@ function judge(array $judgeTask): bool
 function fetchTestcase($workdirpath, $testcase_id, $judgetaskid, $testcase_hash): ?array
 {
     // Get both in- and output files, only if we didn't have them already.
-    $tcfile = array();
+    $tcfile = [];
     $bothFilesExist = true;
     foreach (['input', 'output'] as $inout) {
         $testcasedir = $workdirpath . '/testcase/' . $testcase_id;

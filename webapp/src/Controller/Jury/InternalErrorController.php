@@ -172,7 +172,7 @@ class InternalErrorController extends BaseController
 
                 $affectedJudgings = $internalError->getAffectedJudgings();
                 if ($affectedJudgings !== null) {
-                    $skipped = array();
+                    $skipped = [];
                     $this->rejudgingService->createRejudging(
                         'Internal Error ' . $internalError->getErrorid() . ' resolved',
                         JudgeTask::PRIORITY_DEFAULT,

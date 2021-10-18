@@ -528,7 +528,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
                 }
             }
 
-            $titleElements = array("#" . $testcase->getRank());
+            $titleElements = ["#" . $testcase->getRank()];
             if (!empty($testcase->getOrigInputFilename())) {
                 $titleElements[] = "name: " . $testcase->getOrigInputFilename();
             }
@@ -808,7 +808,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
 
     public function interactiveLog(string $log, bool $forTeam = false) {
         $truncated = '/\[output display truncated after \d* B\]$/';
-        $matches = array();
+        $matches = [];
         $truncation = "";
         if (preg_match($truncated, $log, $matches)) {
             $truncation = $matches[0];
@@ -866,7 +866,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         $lines_team = preg_split('/\n/', trim($runOutput['output_run']));
         $lines_ref  = preg_split('/\n/', trim($runOutput['output_reference']));
 
-        $diffs    = array();
+        $diffs    = [];
         $firstErr = sizeof($lines_team) + 1;
         $lastErr  = -1;
         $n        = min(sizeof($lines_team), sizeof($lines_ref));

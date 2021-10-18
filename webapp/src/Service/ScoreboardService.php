@@ -828,21 +828,21 @@ class ScoreboardService
             /** @var Team $team */
             foreach ($category->getTeams() as $team) {
                 if ($teamaffil = $team->getAffiliation()) {
-                    $affiliations[$teamaffil->getName()] = array(
+                    $affiliations[$teamaffil->getName()] = [
                         'id'   => $this->eventLogService->externalIdFieldForEntity($teamaffil) ?
                             $teamaffil->getExternalid() :
                             $teamaffil->getAffilid(),
                         'name' => $teamaffil->getName(),
-                    );
+                    ];
                 }
             }
 
             if (empty($affiliations)) {
                 /** @var Team $team */
                 foreach ($category->getTeams() as $team) {
-                    $affiliations[$team->getEffectiveName()] = array(
+                    $affiliations[$team->getEffectiveName()] = [
                         'id' => -1,
-                        'name' => $team->getEffectiveName());
+                        'name' => $team->getEffectiveName()];
                 }
             }
             if (!empty($affiliations)) {

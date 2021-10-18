@@ -127,9 +127,7 @@ class DOMJudgeXHeadersAuthenticator extends AbstractGuardAuthenticator
      */
     public function start(Request $request, AuthenticationException $authException = null)
     {
-        $data = array(
-            'message' => 'Authentication Required'
-        );
+        $data = ['message' => 'Authentication Required'];
 
         return new JsonResponse($data, Response::HTTP_UNAUTHORIZED);
     }

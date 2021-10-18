@@ -16,11 +16,11 @@ class ControllerRolesTraversalTest extends BaseTest
     protected function roleCombinations(array $start_roles, array $possible_roles) : array
     {
         // initialize by adding the empty set
-        $results = array($start_roles);
+        $results = [$start_roles];
 
         foreach ($possible_roles as $element) {
             foreach ($results as $combination) {
-                $results[] = array_merge(array($element), $combination);
+                $results[] = array_merge([$element], $combination);
             }
         }
         return $results;
@@ -88,7 +88,7 @@ class ControllerRolesTraversalTest extends BaseTest
      */
     protected function getAllPages(array $urlsToCheck) : array
     {
-        $done = array();
+        $done = [];
         do {
             $toCheck = array_diff($urlsToCheck,$done);
             foreach ($toCheck as $url) {
