@@ -107,31 +107,64 @@ clar-categories:
     - 'General issue'
     - 'Technical issue'
 languages:
-    - { name: Ada }
-    - { name: AWK }
-    - { name: 'Bash shell' }
-    - { name: C }
-    - { name: C++ }
-    - { name: 'C#' }
-    - { name: Fortran }
-    - { name: Haskell }
-    - { name: Java }
-    - { name: JavaScript }
-    - { name: Kotlin }
-    - { name: Lua }
-    - { name: Pascal }
-    - { name: Perl }
-    - { name: Prolog }
-    - { name: 'Python 3' }
-    - { name: R }
-    - { name: Ruby }
-    - { name: Scala }
-    - { name: 'POSIX shell' }
-    - { name: Swift }
+    -
+        name: Ada
+    -
+        name: AWK
+    -
+        name: 'Bash shell'
+    -
+        name: C
+    -
+        name: C++
+    -
+        name: 'C#'
+    -
+        name: Fortran
+    -
+        name: Haskell
+    -
+        name: Java
+    -
+        name: JavaScript
+    -
+        name: Kotlin
+    -
+        name: Lua
+    -
+        name: Pascal
+    -
+        name: Perl
+    -
+        name: Prolog
+    -
+        name: 'Python 3'
+    -
+        name: R
+    -
+        name: Ruby
+    -
+        name: Scala
+    -
+        name: 'POSIX shell'
+    -
+        name: Swift
 problems:
-    - { label: boolfind, name: 'Boolean switch search', color: green, rgb: '#008000' }
-    - { label: fltcmp, name: 'Float special compare test', color: indianred, rgb: '#CD5C5C' }
-    - { label: hello, name: 'Hello World', color: skyblue, rgb: '#87CEEB' }
+    -
+        label: boolfind
+        name: 'Boolean switch search'
+        color: green
+        rgb: '#008000'
+    -
+        label: fltcmp
+        name: 'Float special compare test'
+        color: indianred
+        rgb: '#CD5C5C'
+    -
+        label: hello
+        name: 'Hello World'
+        color: skyblue
+        rgb: '#87CEEB'
 
 HEREDOC;
         yield ["2", $yaml];
