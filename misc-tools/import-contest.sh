@@ -90,11 +90,12 @@ if [[ $response =~ ^(yes|y| ) ]] || [[ -z $response ]]; then
     if [ -z "${cid+x}" ]; then
       read -r -p "Please specify the contest id: " cid
     fi
-    for prob in $(cat problemset.yaml  | grep "short-name: " | sed -e 's|^.*short-name: ||'); do
+    for prob in $(cat problemset.yaml  | grep -oP "(?<=short-name:\s)[',\"]?[[:alnum:]]*[',\"]?(?=,|$)"); do
+      prob="${prob//[,\',\"]/}"
       echo "Preparing problem '$prob'."
       if [ -r "${prob}.zip" ]; then
         echo "Deleting old zipfile."
-	rm "${prob}.zip"
+        rm "${prob}.zip"
       fi
       if [ ! -d "$prob" ] && [ ! -r "$prob/problem.yaml" ]; then
         echo "Problem directory not found or doesn't contain a problem.yaml."
