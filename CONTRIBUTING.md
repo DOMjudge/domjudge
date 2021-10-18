@@ -9,14 +9,14 @@ contributors.
 
 ## Reporting bugs and feature requests
 
-We use the [Github issue tracker](https://github.com/DOMjudge/domjudge/issues)
+We use the [GitHub issue tracker](https://github.com/DOMjudge/domjudge/issues)
 for bug reports, feature requests and anything in between. Try to provide a
 clear story, and fill in as much information as possible in our
-[Github issue template](https://github.com/DOMjudge/domjudge/blob/master/ISSUE_TEMPLATE.md).
+[GitHub issue template](https://github.com/DOMjudge/domjudge/blob/master/ISSUE_TEMPLATE.md).
 Providing accurate and relevant details will typically speed up the
 triaging and debugging process.
 
-Note that Github issues are not a good place to ask questions (see below).
+Note that GitHub issues are not a good place to ask questions (see below).
 
 ## Questions and problems
 
@@ -51,7 +51,7 @@ If you are interested in starting to contribute to DOMjudge, you are
 most welcome. The following are some pointers.
 
 First, install and configure the development version of DOMjudge.
-Either directly from the git reposity, see the [developer information](https://www.domjudge.org/docs/manual/master/develop.html)
+Either directly from the git repository, see the [developer information](https://www.domjudge.org/docs/manual/master/develop.html)
 section in the admin manual, or via the [contributor docker image](https://github.com/DOMjudge/domjudge-packaging/tree/master/docker-contributor).
 If you follow the admin manual for installation, this is also a great
 way to verify that the documentation is clear and complete, and to
