@@ -38,7 +38,7 @@
                 <td><a href="{{ link }}">{{ clarification.contest.shortname }}</a></td>
             {%- endif %}
 
-            <td><a href="{{ link }}">{{ clarification.submittime | printtime(null, clarification.contest) }}</a></td>
+            <td data-order="{{ clarification.submittime }}"><a href="{{ link }}">{{ clarification.submittime | printtime(null, clarification.contest) }}</a></td>
             {%- if clarification.sender is null %}
                 {%- set sender = 'Jury' %}
                 {%- if clarification.recipient is null %}
