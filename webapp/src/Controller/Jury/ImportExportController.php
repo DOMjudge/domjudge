@@ -240,7 +240,7 @@ class ImportExportController extends BaseController
             $contest  = $contestExportForm->get('contest')->getData();
             $response = new StreamedResponse();
             $response->setCallback(function () use ($contest) {
-                echo Yaml::dump($this->importExportService->getContestYamlData($contest));
+                echo Yaml::dump($this->importExportService->getContestYamlData($contest),3);
             });
             $response->headers->set('Content-Type', 'application/x-yaml');
             $response->headers->set('Content-Disposition', 'attachment; filename="contest.yaml"');
