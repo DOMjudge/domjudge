@@ -152,17 +152,23 @@ languages:
 problems:
     -
         label: boolfind
+        letter: boolfind
         name: 'Boolean switch search'
+        short-name: boolfind
         color: green
         rgb: '#008000'
     -
         label: fltcmp
+        letter: fltcmp
         name: 'Float special compare test'
+        short-name: fltcmp
         color: indianred
         rgb: '#CD5C5C'
     -
         label: hello
+        letter: hello
         name: 'Hello World'
+        short-name: hello
         color: skyblue
         rgb: '#87CEEB'
 

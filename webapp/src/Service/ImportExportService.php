@@ -124,8 +124,10 @@ class ImportExportService
             $color              = $contestProblem->getColor() === null ? null : Utils::convertToColor($contestProblem->getColor());
             $data['problems'][] = [
                 'label' => $contestProblem->getShortname(),
+                'letter' => $contestProblem->getShortname(),
                 'name' => $contestProblem->getProblem()->getName(),
-                'color' => $color === null ? $contestProblem->getColor() : $color,
+                'short-name' => $contestProblem->getProblem()->getExternalid(),
+                'color' => $color ?? $contestProblem->getColor(),
                 'rgb' => $contestProblem->getColor() === null ? null : Utils::convertToHex($contestProblem->getColor()),
             ];
         }
