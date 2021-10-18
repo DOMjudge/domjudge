@@ -651,7 +651,7 @@ class ImportProblemService
 
             // Read submission details from optional file.
             $submission_file_string = $zip->getFromName($submission_file);
-            $submission_details = $submission_file_string===FALSE ? array() :
+            $submission_details = $submission_file_string===FALSE ? [] :
                 $this->dj->jsonDecode($submission_file_string);
 
             $numJurySolutions = 0;

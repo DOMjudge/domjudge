@@ -792,7 +792,7 @@ class JudgehostController extends AbstractFOSRestController
 
         $field_name = null;
         $disabled_id = null;
-        if (in_array($disabled['kind'], array('compile_script', 'compare_script', 'run_script'))) {
+        if (in_array($disabled['kind'], ['compile_script', 'compare_script', 'run_script'])) {
             $field_name = $disabled['kind'] . '_id';
             $disabled_id = $disabled[$field_name];
 

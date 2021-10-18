@@ -261,7 +261,7 @@ EOF;
                     break;
 
                 case 'array_val':
-                    $result = array();
+                    $result = [];
                     foreach ($val as $data) {
                         if (!empty($data)) {
                             $result[] = $data;
@@ -271,7 +271,7 @@ EOF;
                     break;
 
                 case 'array_keyval':
-                    $result = array();
+                    $result = [];
                     foreach ($val as $key => $data) {
                         if (!empty($data)) {
                             $result[$key] = $data;

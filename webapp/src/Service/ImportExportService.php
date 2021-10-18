@@ -1146,10 +1146,10 @@ class ImportExportService
                     $action = EventLogService::ACTION_UPDATE;
                 }
                 $this->em->flush();
-                $newTeams[] = array(
+                $newTeams[] = [
                     'team' => $team,
                     'action' => $action,
-                );
+                ];
                 $this->dj->auditlog('team', $team->getTeamid(), 'replaced',
                                     'imported from tsv, autocreated for judge');
                 $accountItem['user']['team'] = $team;

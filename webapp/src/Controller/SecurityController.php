@@ -87,14 +87,14 @@ class SecurityController extends AbstractController
 
         $selfRegistrationCategoriesCount = $em->getRepository(TeamCategory::class)->count(['allow_self_registration' => 1]);
 
-        return $this->render('security/login.html.twig', array(
+        return $this->render('security/login.html.twig', [
             'last_username' => $lastUsername,
             'error' => $error,
             'allow_registration' => $selfRegistrationCategoriesCount !== 0,
             'allowed_authmethods' => $authmethods,
             'auth_xheaders_present' => $request->headers->get('X-DOMjudge-Login'),
             'auth_ipaddress_users' => $auth_ipaddress_users,
-        ), $response);
+        ], $response);
     }
 
     /**
@@ -177,8 +177,6 @@ class SecurityController extends AbstractController
             return $this->redirect($this->generateUrl('login'));
         }
 
-        return $this->render('security/register.html.twig', array(
-            'registration_form' => $registration_form->createView(),
-        ));
+        return $this->render('security/register.html.twig', ['registration_form' => $registration_form->createView()]);
     }
 }

@@ -521,12 +521,12 @@ class ContestController extends AbstractRestController
                             unset($data[$property]);
                         }
                     }
-                    $result = array(
+                    $result = [
                         'id' => (string)$event->getEventid(),
                         'type' => (string)$event->getEndpointtype(),
                         'op' => (string)$event->getAction(),
                         'data' => $data,
-                    );
+                    ];
                     if (!$strict) {
                         $result['time'] = Utils::absTime($event->getEventtime());
                     }

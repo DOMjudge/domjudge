@@ -59,7 +59,7 @@ class RejudgingType extends AbstractType
         $builder->add('repeat', IntegerType::class, [
             'label' => 'Number of times to repeat this rejudging',
             'data' => 1,
-            'attr' => array('min' => 1, 'max' => 99)
+            'attr' => ['min' => 1, 'max' => 99]
         ]);
         $builder->add('contests', EntityType::class, [
             'label' => 'Contest',
