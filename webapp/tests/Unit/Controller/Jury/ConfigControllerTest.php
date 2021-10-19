@@ -40,7 +40,7 @@ class ConfigControllerTest extends BaseTest
     {
         $this->verifyPageResponse('GET', '/jury/config', 200);
 
-        self::assertSelectorExists('a.nav-link:contains("Scoring Options")');
+        self::assertSelectorExists('a.nav-link:contains("Scoring")');
 
         self::assertSelectorExists('label:contains("Penalty time:")');
         self::assertSelectorExists('small:contains("Penalty time in minutes per wrong submission (if finally solved).")');

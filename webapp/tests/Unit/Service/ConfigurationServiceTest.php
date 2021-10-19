@@ -123,7 +123,7 @@ class ConfigurationServiceTest extends KernelTestCase
     {
         yield ['Scoring', 'compile_penalty'];
         yield ['Scoring', 'results_prio'];
-        yield ['Clarification', 'clar_categories'];
+        yield ['Clarifications', 'clar_categories'];
         yield ['Display', 'show_compile'];
         yield ['Display', 'time_format'];
     }
