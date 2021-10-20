@@ -434,7 +434,7 @@ class DOMJudgeService
         }
 
         if ($this->checkrole('balloon')) {
-            $balloons = $this->em->createQueryBuilder()
+            $balloonsQuery = $this->em->createQueryBuilder()
             ->select('b.balloonid', 't.name', 't.room', 'p.name AS pname')
             ->from(Balloon::class, 'b')
             ->leftJoin('b.submission', 's')
@@ -444,8 +444,16 @@ class DOMJudgeService
             ->leftJoin('s.team', 't')
             ->andWhere('co.cid = :cid')
             ->andWhere('b.done = 0')
-            ->setParameter(':cid', $contest->getCid())
-            ->getQuery()->getResult();
+            ->setParameter(':cid', $contest->getCid());
+
+            $freezetime = $contest->getFreezeTime();
+            if ($freezetime !== null && !(bool)$this->config->get('show_balloons_postfreeze')) {
+                $balloonsQuery
+                    ->andWhere('s.submittime < :freeze')
+                    ->setParameter(':freeze', $freezetime);
+            }
+
+            $balloons = $balloonsQuery->getQuery()->getResult();
         }
 
         return [
