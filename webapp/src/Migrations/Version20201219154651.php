@@ -51,8 +51,8 @@ final class Version20201219154651 extends AbstractMigration
         $this->addSql('ALTER TABLE submission DROP judgehost');
         $this->addSql('ALTER TABLE judging ADD judge_completely TINYINT(1) DEFAULT \'0\' NOT NULL COMMENT \'Explicitly requested to be judged completely.\'');
         $this->addSql('CREATE UNIQUE INDEX hostname ON judgehost (hostname)');
-        $this->addSql('ALTER TABLE judgehost DROP PRIMARY KEY');
-        $this->addSql('ALTER TABLE judgehost ADD judgehostid INT UNSIGNED AUTO_INCREMENT NOT NULL COMMENT \'Judgehost ID\' FIRST, ADD hidden TINYINT(1) DEFAULT \'0\' NOT NULL COMMENT \'Should this host be hidden in the overview?\', ADD PRIMARY KEY (judgehostid)');
+        $this->addSql('ALTER TABLE judgehost DROP PRIMARY KEY, ADD judgehostid INT UNSIGNED AUTO_INCREMENT NOT NULL COMMENT \'Judgehost ID\' FIRST, ADD PRIMARY KEY (judgehostid)');
+        $this->addSql('ALTER TABLE judgehost ADD hidden TINYINT(1) DEFAULT \'0\' NOT NULL COMMENT \'Should this host be hidden in the overview?\'');
         $this->addSql('ALTER TABLE judgetask ADD CONSTRAINT judgetask_ibfk_1 FOREIGN KEY (judgehostid) REFERENCES judgehost (judgehostid)');
         $this->addSql('ALTER TABLE judging DROP FOREIGN KEY judging_ibfk_3');
         $this->addSql('DROP INDEX judgehost ON judging');
