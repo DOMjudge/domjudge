@@ -61,7 +61,7 @@ class ContestController extends AbstractRestController
     }
 
     /**
-     * Add one or more contests.
+     * Add a new contest.
      * @Rest\Post("")
      * @IsGranted("ROLE_ADMIN")
      * @OA\Post()
@@ -70,19 +70,24 @@ class ContestController extends AbstractRestController
      *     @OA\MediaType(
      *         mediaType="multipart/form-data",
      *         @OA\Schema(
-     *             required={"yaml"},
      *             @OA\Property(
      *                 property="yaml",
      *                 type="string",
      *                 format="binary",
-     *                 description="The contest.yaml files to import."
+     *                 description="The contest.yaml file to import."
+     *             ),
+     *             @OA\Property(
+     *                 property="json",
+     *                 type="string",
+     *                 format="binary",
+     *                 description="The contest.json file to import."
      *             )
      *         )
      *     )
      * )
      * @OA\Response(
      *     response="200",
-     *     description="Returns a (currently meaningless) status message.",
+     *     description="Returns the API ID of the added contest.",
      * )
      * @throws BadRequestHttpException
      */
@@ -90,12 +95,24 @@ class ContestController extends AbstractRestController
     {
         /** @var UploadedFile $yamlFile */
         $yamlFile = $request->files->get('yaml') ?: [];
-        $data = Yaml::parseFile($yamlFile->getRealPath(), Yaml::PARSE_DATETIME);
-        if ($this->importExportService->importContestYaml($data, $message, $cid)) {
-            return $cid;
-        } else {
-            throw new BadRequestHttpException("Error while adding contest: $message");
+        /** @var UploadedFile $jsonFile */
+        $jsonFile = $request->files->get('json') ?: [];
+        if ((!$yamlFile && !$jsonFile) || ($yamlFile && $jsonFile)) {
+            throw new BadRequestHttpException('Supply exactly one of \'json\' or \'yaml\'');
         }
+        $message = null;
+        if ($yamlFile) {
+            $data = Yaml::parseFile($yamlFile->getRealPath(), Yaml::PARSE_DATETIME);
+            if ($this->importExportService->importContestData($data, $message, $cid)) {
+                return $cid;
+            }
+        } elseif ($jsonFile) {
+            $data = json_decode(file_get_contents($jsonFile->getRealPath()), true);
+            if ($this->importExportService->importContestData($data, $message, $cid)) {
+                return $cid;
+            }
+        }
+        throw new BadRequestHttpException("Error while adding contest: $message");
     }
 
     /**
@@ -464,6 +481,12 @@ class ContestController extends AbstractRestController
                         }
                     }
                 }
+
+                // Special case: do not send external ID for problems in strict mode
+                // This needs to be here since externalid is a property of the Problem
+                // entity, not the ContestProblem entity, so the above loop will not
+                // detect it.
+                $skippedProperties['problems'][] = 'externalid';
             }
 
             // Initialize all static events

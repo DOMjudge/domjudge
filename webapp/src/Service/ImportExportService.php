@@ -29,6 +29,7 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Validator\ConstraintViolationInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\Yaml\Yaml;
 
 class ImportExportService
 {
@@ -132,17 +133,29 @@ class ImportExportService
         return $data;
     }
 
-    public function importContestYaml($data, ?string &$message = null, string &$cid = null): bool
+    public function importContestData($data, ?string &$message = null, string &$cid = null): bool
     {
         if (empty($data)) {
             $message = 'Error parsing YAML file.';
             return false;
         }
 
-        $requiredFields = ['start-time', 'name', 'short-name', 'duration'];
+        $requiredFields = [['start_time', 'start-time'], 'name', ['id', 'short-name'], 'duration'];
         $missingFields  = [];
         foreach ($requiredFields as $field) {
-            if (!array_key_exists($field, $data)) {
+            if (is_array($field)) {
+                $present = false;
+                foreach ($field as $f) {
+                    if (array_key_exists($f, $data)) {
+                        $present = true;
+                        break;
+                    }
+                }
+
+                if (!$present) {
+                    $missingFields[] = sprintf('one of (%s)', implode(', ', $field));
+                }
+            } elseif (!array_key_exists($field, $data)) {
                 $missingFields[] = $field;
             }
         }
@@ -154,13 +167,15 @@ class ImportExportService
 
         $invalid_regex = str_replace(['/^[', '+$/'], ['/[^', '/'], DOMJudgeService::EXTERNAL_IDENTIFIER_REGEX);
 
-        if (is_string($data['start-time'])) {
-            $starttime = date_create_from_format(DateTime::ISO8601, $data['start-time']) ?:
+        $starttimeValue = $data['start-time'] ?? $data['start_time'];
+
+        if (is_string($starttimeValue)) {
+            $starttime = date_create_from_format(DateTime::ISO8601, $starttimeValue) ?:
                 // make sure ISO 8601 but with the T replaced with a space also works
-                date_create_from_format('Y-m-d H:i:sO', $data['start-time']);
+                date_create_from_format('Y-m-d H:i:sO', $starttimeValue);
         } else {
             /** @var DateTime $starttime */
-            $starttime = $data['start-time'];
+            $starttime = $starttimeValue;
         }
         if ($starttime === false) {
             $message = 'Can not parse start time';
@@ -174,7 +189,7 @@ class ImportExportService
             ->setShortname(preg_replace(
                                $invalid_regex,
                                '_',
-                               $data['short-name']
+                               $data['shortname'] ?? $data['short-name'] ?? $data['id']
                            ))
             ->setExternalid($contest->getShortname())
             ->setStarttimeString(date_format($starttime, 'Y-m-d H:i:s e'))
@@ -193,7 +208,7 @@ class ImportExportService
         }
 
         /** @var string|null $freezeDuration */
-        $freezeDuration = $data['scoreboard-freeze-duration'] ?? $data['scoreboard-freeze-length'] ?? null;
+        $freezeDuration = $data['scoreboard_freeze_duration'] ?? $data['scoreboard-freeze-duration'] ?? $data['scoreboard-freeze-length'] ?? null;
         /** @var string|null $freezeStart */
         $freezeStart = $data['scoreboard-freeze'] ?? $data['freeze'] ?? null;
 
@@ -223,7 +238,7 @@ class ImportExportService
         $this->em->persist($contest);
         $this->em->flush();
 
-        $penaltyTime = $data['penalty-time'] ?? $data['penalty'] ?? null;
+        $penaltyTime = $data['penalty_time'] ?? $data['penalty-time'] ?? $data['penalty'] ?? null;
         if ($penaltyTime !== null) {
             $currentPenaltyTime = $this->config->get('penalty_time');
             if ($penaltyTime != $currentPenaltyTime) {
@@ -280,36 +295,46 @@ class ImportExportService
         // We do not import language details, as there's very little to actually import
 
         if (isset($data['problems'])) {
-            foreach ($data['problems'] as $problemData) {
-
-                // Deal with obsolete attribute names:
-                $problemName  = $problemData['name'] ?? $problemData['short-name'] ?? null;
-                $problemLabel = $problemData['label'] ?? $problemData['letter'] ?? null;
-
-                $problem = new Problem();
-                $problem
-                    ->setName($problemName)
-                    ->setTimelimit(10)
-                    ->setExternalid($problemData['short-name'] ?? $problemLabel ?? null);
-                // TODO: ask Fredrik about configuration of timelimit
-
-                $this->em->persist($problem);
-                $this->em->flush();
-
-                $contestProblem = new ContestProblem();
-                $contestProblem
-                    ->setShortname($problemLabel)
-                    ->setColor($problemData['rgb'] ?? $problemData['color'] ?? null)
-                    // We need to set both the entities as well as the ID's because of the composite primary key
-                    ->setProblem($problem)
-                    ->setContest($contest);
-                $this->em->persist($contestProblem);
-            }
+            $this->importProblemsData($contest, $data['problems']);
         }
 
         $cid = (string)$contest->getApiId($this->eventLogService);
 
         $this->em->flush();
+        return true;
+    }
+
+    public function importProblemsData(Contest $contest, $problems, array &$ids = null): bool
+    {
+        foreach ($problems as $problemData) {
+            // Deal with obsolete attribute names:
+            $problemName  = $problemData['name'] ?? $problemData['short-name'] ?? null;
+            $problemLabel = $problemData['label'] ?? $problemData['letter'] ?? null;
+
+            $problem = new Problem();
+            $problem
+                ->setName($problemName)
+                ->setTimelimit($problemData['time_limit'] ?? 10)
+                ->setExternalid($problemData['id'] ?? $problemData['short-name'] ?? $problemLabel ?? null);
+
+            $this->em->persist($problem);
+            $this->em->flush();
+
+            $contestProblem = new ContestProblem();
+            $contestProblem
+                ->setShortname($problemLabel)
+                ->setColor($problemData['rgb'] ?? $problemData['color'] ?? null)
+                // We need to set both the entities as well as the ID's because of the composite primary key
+                ->setProblem($problem)
+                ->setContest($contest);
+            $this->em->persist($contestProblem);
+
+            $ids[] = (string)$problem->getApiId($this->eventLogService);
+        }
+
+        $this->em->flush();
+
+        // For now this method will never fail so always return true
         return true;
     }
 
