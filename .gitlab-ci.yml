@@ -209,9 +209,6 @@ visual_compare:
   <<: *long_job
   stage: integration
   image: domjudge/gitlabci:2.1
-  variables:
-    MYSQL_ROOT_PASSWORD: password
-    MARIADB_PORT_3306_TCP_ADDR: sqlserver
   script:
     - timeout --signal=15 40m ./gitlab/integration.sh
   artifacts:
@@ -231,6 +228,10 @@ visual_compare:
 
 integration_mysql:
   <<: *job_integration
+  variables:
+    MYSQL_ROOT_PASSWORD: password
+    MARIADB_PORT_3306_TCP_ADDR: sqlserver
+    MYSQL_REQUIRE_PRIMARY_KEY: 1
   services:
     - name: mysql
       command: ["--default-authentication-plugin=mysql_native_password"]
@@ -238,6 +239,9 @@ integration_mysql:
 
 integration_mariadb:
   <<: *job_integration
+  variables:
+    MYSQL_ROOT_PASSWORD: password
+    MARIADB_PORT_3306_TCP_ADDR: sqlserver
   services:
     - name: mariadb
       alias: sqlserver

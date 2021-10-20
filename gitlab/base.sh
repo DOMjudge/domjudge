@@ -28,6 +28,11 @@ echo "GRANT SELECT, INSERT, UPDATE, DELETE ON \`domjudge\`.* TO 'domjudge'@'%';"
 # Increase max_allowed_packet for following connections.
 echo "SET GLOBAL max_allowed_packet = 100*1024*1024;" | mysql
 
+# Test that SQL upgrade scripts also work with this setting
+if [ -n "${MYSQL_REQUIRE_PRIMARY_KEY:-}" ]; then
+	echo 'SET GLOBAL sql_require_primary_key = 1;' | mysql
+fi
+
 # Generate a dbpasswords file
 echo "unused:${MARIADB_PORT_3306_TCP_ADDR}:domjudge:domjudge:domjudge:3306" > etc/dbpasswords.secret
 
