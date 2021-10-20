@@ -389,7 +389,7 @@ abstract class BaseController extends AbstractController
 
         $descriptions = [];
         foreach ($entities as $entity) {
-            $description[] = $entity->getShortDescription();
+            $descriptions[] = $entity->getShortDescription();
         }
 
         $data = [
