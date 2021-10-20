@@ -12,6 +12,7 @@ use App\Form\Type\ICPCCmsType;
 use App\Form\Type\ContestExportType;
 use App\Form\Type\ContestImportType;
 use App\Form\Type\JsonImportType;
+use App\Form\Type\ProblemsImportType;
 use App\Form\Type\ProblemUploadMultipleType;
 use App\Form\Type\TsvImportType;
 use App\Service\ICPCCmsService;
@@ -259,11 +260,28 @@ class ImportExportController extends BaseController
             /** @var UploadedFile $file */
             $file = $contestImportForm->get('file')->getData();
             $data = Yaml::parseFile($file->getRealPath(), Yaml::PARSE_DATETIME);
-            if ($this->importExportService->importContestYaml($data, $message, $cid)) {
+            if ($this->importExportService->importContestData($data, $message, $cid)) {
                 $this->addFlash('success',
                                 sprintf('The file %s is successfully imported.', $file->getClientOriginalName()));
             } else {
                 $this->addFlash('danger', $message);
+            }
+            return $this->redirectToRoute('jury_import_export');
+        }
+
+        $problemsImportForm = $this->createForm(ProblemsImportType::class);
+
+        $problemsImportForm->handleRequest($request);
+
+        if ($problemsImportForm->isSubmitted() && $problemsImportForm->isValid()) {
+            /** @var UploadedFile $file */
+            $file = $problemsImportForm->get('file')->getData();
+            $data = Yaml::parseFile($file->getRealPath(), Yaml::PARSE_DATETIME);
+            if ($this->importExportService->importProblemsData($problemsImportForm->get('contest')->getData(), $data)) {
+                $this->addFlash('success',
+                    sprintf('The file %s is successfully imported.', $file->getClientOriginalName()));
+            } else {
+                $this->addFlash('danger', 'Failed importing problems');
             }
             return $this->redirectToRoute('jury_import_export');
         }
@@ -292,6 +310,7 @@ class ImportExportController extends BaseController
             'problem_form' => $problemForm->createView(),
             'contest_export_form' => $contestExportForm->createView(),
             'contest_import_form' => $contestImportForm->createView(),
+            'problems_import_form' => $problemsImportForm->createView(),
             'sort_orders' => $sortOrders,
         ]);
     }

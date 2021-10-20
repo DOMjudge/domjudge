@@ -10,6 +10,7 @@ use App\Helpers\OrdinalArray;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
+use App\Service\ImportExportService;
 use App\Service\ImportProblemService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
@@ -23,6 +24,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Yaml\Yaml;
 
 /**
  * @Rest\Route("/contests/{cid}/problems")
@@ -38,15 +40,67 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
      */
     protected $importProblemService;
 
+    /**
+     * @var ImportExportService
+     */
+    protected $importExportService;
+
     public function __construct(
         EntityManagerInterface $entityManager,
         DOMJudgeService $DOMJudgeService,
         ConfigurationService $config,
         EventLogService $eventLogService,
-        ImportProblemService $importProblemService
+        ImportProblemService $importProblemService,
+        ImportExportService $importExportService
     ) {
         parent::__construct($entityManager, $DOMJudgeService, $config, $eventLogService);
         $this->importProblemService = $importProblemService;
+        $this->importExportService = $importExportService;
+    }
+
+    /**
+     * Add one or more problems.
+     * @Rest\Post("/add-data")
+     * @IsGranted("ROLE_ADMIN")
+     * @OA\Post()
+     * @OA\RequestBody(
+     *     required=true,
+     *     @OA\MediaType(
+     *         mediaType="multipart/form-data",
+     *         @OA\Schema(
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="string",
+     *                 format="binary",
+     *                 description="The problems.yaml or problems.json file to import."
+     *             )
+     *         )
+     *     )
+     * )
+     * @OA\Response(
+     *     response="200",
+     *     description="Returns the API ID's of the added problems.",
+     * )
+     * @throws BadRequestHttpException
+     */
+    public function addProblemsAction(Request $request) : array
+    {
+        // Note we use /add-data as URL here since we already have a route listening
+        // on POST /, which is to add a problem ZIP.
+
+        $contestId = $this->getContestId($request);
+        /** @var Contest $contest */
+        $contest = $this->em->getRepository(Contest::class)->find($contestId);
+
+        /** @var UploadedFile $file */
+        $file = $request->files->get('data') ?: [];
+        // Note: we read the JSON as YAML, since any JSON is also YAML and this allows us
+        // to import files with YAML inside them that match the JSON format
+        $data = Yaml::parseFile($file->getRealPath(), Yaml::PARSE_DATETIME);
+        if ($this->importExportService->importProblemsData($contest, $data, $ids)) {
+            return $ids;
+        }
+        throw new BadRequestHttpException("Error while adding problems");
     }
 
     /**

@@ -46,6 +46,7 @@ class Problem extends BaseApiEntity
      *     options={"comment"="Problem ID in an external system, should be unique inside a single contest",
      *              "collation"="utf8mb4_bin"},
      *     nullable=true)
+     * @Serializer\Groups({"Nonstrict"})
      */
     protected $externalid;
 

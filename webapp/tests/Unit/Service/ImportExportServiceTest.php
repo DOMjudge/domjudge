@@ -23,19 +23,19 @@ class ImportExportServiceTest extends KernelTestCase
     }
 
     /**
-     * @dataProvider provideImportContestYamlErrors
+     * @dataProvider provideImportContestDataErrors
      */
-    public function testImportContestYamlErrors($data, string $expectedMessage)
+    public function testImportContestDataErrors($data, string $expectedMessage)
     {
-        self::assertFalse(static::$container->get(ImportExportService::class)->importContestYaml($data, $message, $cid));
+        self::assertFalse(static::$container->get(ImportExportService::class)->importContestData($data, $message, $cid));
         self::assertEquals($expectedMessage, $message);
         self::assertNull($cid);
     }
 
-    public function provideImportContestYamlErrors(): Generator
+    public function provideImportContestDataErrors(): Generator
     {
         yield [[], 'Error parsing YAML file.'];
-        yield [['name' => 'Some name'], 'Missing fields: start-time, short-name, duration'];
+        yield [['name' => 'Some name'], 'Missing fields: one of (start_time, start-time), one of (id, short-name), duration'];
         yield [['short-name' => 'somename', 'start-time' => '2020-01-01 12:34:56'], 'Missing fields: name, duration'];
         yield [
             [
@@ -48,11 +48,30 @@ class ImportExportServiceTest extends KernelTestCase
         ];
         yield [
             [
+                'name'       => 'Test contest',
+                'id'         => 'test',
+                'duration'   => '5:00:00',
+                'start_time' => 'Invalid start time here',
+            ],
+            'Can not parse start time'
+        ];
+        yield [
+            [
                 'name'                     => 'Test contest',
                 'short-name'               => 'test',
                 'duration'                 => '5:00:00',
                 'start-time'               => '2020-01-01T12:34:56+02:00',
                 'scoreboard-freeze-length' => '6:00:00',
+            ],
+            'Freeze duration is longer than contest length'
+        ];
+        yield [
+            [
+                'name'                       => 'Test contest',
+                'id'                         => 'test',
+                'duration'                   => '5:00:00',
+                'start_time'                 => '2020-01-01T12:34:56+02:00',
+                'scoreboard_freeze_duration' => '6:00:00',
             ],
             'Freeze duration is longer than contest length'
         ];
@@ -69,25 +88,15 @@ class ImportExportServiceTest extends KernelTestCase
     }
 
     /**
-     * @dataProvider provideImportContestYamlSuccess
+     * @dataProvider provideImportContestDataSuccess
      */
-    public function testImportContestYamlSuccess($data, string $expectedShortName, array $expectedProblems = [])
+    public function testImportContestDataSuccess($data, string $expectedShortName, array $expectedProblems = [])
     {
-        self::assertTrue(static::$container->get(ImportExportService::class)->importContestYaml($data, $message, $cid));
+        self::assertTrue(static::$container->get(ImportExportService::class)->importContestData($data, $message, $cid), 'Importing failed: ' . $message);
         self::assertNull($message);
         self::assertIsString($cid);
 
-        // Load the contest, but first clear the entity manager to have all data
-        static::$container->get(EntityManagerInterface::class)->clear();
-        $config = static::$container->get(ConfigurationService::class);
-        $dataSource = $config->get('data_source');
-        if ($dataSource === DOMJudgeService::DATA_SOURCE_LOCAL) {
-            /** @var Contest $contest */
-            $contest = static::$container->get(EntityManagerInterface::class)->getRepository(Contest::class)->find($cid);
-        } else {
-            /** @var Contest $contest */
-            $contest = static::$container->get(EntityManagerInterface::class)->getRepository(Contest::class)->findOneBy(['externalid' => $cid]);
-        }
+        $contest = $this->getContest($cid);
 
         self::assertEquals($data['name'], $contest->getName());
         self::assertEquals($expectedShortName, $contest->getShortname());
@@ -101,8 +110,10 @@ class ImportExportServiceTest extends KernelTestCase
         self::assertEquals($expectedProblems, $problems);
     }
 
-    public function provideImportContestYamlSuccess(): Generator
+    public function provideImportContestDataSuccess(): Generator
     {
+        // YAML format:
+
         // Simple case
         yield [
             [
@@ -159,6 +170,151 @@ class ImportExportServiceTest extends KernelTestCase
             ],
             'practice',
             ['A' => 'anothereruption', 'B' => 'brokengears', 'C' => 'cheating'],
+        ];
+
+        // JSON (API) format:
+        yield [
+            [
+                'name'                       => 'Some test contest',
+                'id'                         => 'test-contest',
+                'duration'                   => '5:00:00',
+                'start_time'                 => '2020-01-01T12:34:56+02:00',
+                'scoreboard_freeze_duration' => '1:00:00',
+            ],
+            'test-contest',
+        ];
+    }
+
+    /**
+     * @dataProvider provideImportProblemsDataSuccess
+     */
+    public function testImportProblemsDataSuccess($data, array $expectedProblems)
+    {
+        // First create a new contest by import it
+        $contestData = [
+            'name'                       => 'Some test contest',
+            'id'                         => 'test-contest',
+            'duration'                   => '5:00:00',
+            'start_time'                 => '2020-01-01T12:34:56+02:00',
+            'scoreboard_freeze_duration' => '1:00:00',
+        ];
+        static::$container->get(ImportExportService::class)->importContestData($contestData, $message, $cid);
+
+        $contest = $this->getContest($cid);
+        self::assertTrue(static::$container->get(ImportExportService::class)->importProblemsData($contest, $data, $ids));
+        self::assertNotNull($ids);
+        self::assertCount(count($expectedProblems), $ids);
+
+        $contest = $this->getContest($cid);
+
+        $problems = [];
+        /** @var ContestProblem $problem */
+        foreach ($contest->getProblems() as $problem) {
+            $problems[$problem->getShortname()] = [
+                'name'       => $problem->getProblem()->getName(),
+                'externalid' => $problem->getProblem()->getExternalid(),
+                'timelimit'  => $problem->getProblem()->getTimelimit(),
+                'color'      => $problem->getColor(),
+            ];
+        }
+
+        self::assertEquals($expectedProblems, $problems);
+    }
+
+    public function provideImportProblemsDataSuccess(): Generator
+    {
+        yield [
+            [
+                [
+                    'color'      => '#FE9DAF',
+                    'letter'     => 'A',
+                    'rgb'        => '#FE9DAF',
+                    'short-name' => 'anothereruption',
+                ],
+                [
+                    'color'      => '#008100',
+                    'letter'     => 'B',
+                    'rgb'        => '#008100',
+                    'short-name' => 'brokengears',
+                ],
+                [
+                    'color'      => '#FF7109',
+                    'letter'     => 'C',
+                    'rgb'        => '#FF7109',
+                    'short-name' => 'cheating',
+                ],
+            ],
+            [
+                'A' => [
+                    'name'       => 'anothereruption',
+                    'externalid' => 'anothereruption',
+                    'timelimit'  => 10,
+                    'color'      => '#FE9DAF',
+                ],
+                'B' => [
+                    'name'       => 'brokengears',
+                    'externalid' => 'brokengears',
+                    'timelimit'  => 10,
+                    'color'      => '#008100',
+                ],
+                'C' => [
+                    'name'       => 'cheating',
+                    'externalid' => 'cheating',
+                    'timelimit'  => 10,
+                    'color'      => '#FF7109',
+                ],
+            ],
+        ];
+        yield [
+            [
+                [
+                    'ordinal'    => 0,
+                    'id'         => 'accesspoints',
+                    'label'      => 'A',
+                    'time_limit' => 2,
+                    'name'       => 'Access Points',
+                    'rgb'        => '#FF0000',
+                    'color'      => 'red'
+                ],
+                [
+                    'ordinal'    => 1,
+                    'id'         => 'brexitnegotiations',
+                    'label'      => 'B',
+                    'time_limit' => 6,
+                    'name'       => 'Brexit Negotiations',
+                    'rgb'        => '#0422D8',
+                    'color'      => 'mediumblue'
+                ],
+                [
+                    'ordinal'    => 2,
+                    'id'         => 'circuitdesign',
+                    'label'      => 'C',
+                    'time_limit' => 6,
+                    'name'       => 'Circuit Board Design',
+                    'rgb'        => '#008100',
+                    'color'      => 'green'
+                ],
+            ],
+            [
+                'A' => [
+                    'name'       => 'Access Points',
+                    'externalid' => 'accesspoints',
+                    'timelimit'  => 2,
+                    'color'      => '#FF0000',
+                ],
+                'B' => [
+                    'name'       => 'Brexit Negotiations',
+                    'externalid' => 'brexitnegotiations',
+                    'timelimit'  => 6,
+                    'color'      => '#0422D8',
+                ],
+                'C' => [
+                    'name'       => 'Circuit Board Design',
+                    'externalid' => 'circuitdesign',
+                    'timelimit'  => 6,
+                    'color'      => '#008100',
+                ],
+            ],
         ];
     }
 
@@ -316,6 +472,19 @@ EOF;
         foreach ($unexpectedUsers as $username) {
             $user = $em->getRepository(User::class)->findOneBy(['username' => $username]);
             self::assertNull($user, "User $username should not exist");
+        }
+    }
+
+    protected function getContest($cid): Contest
+    {
+        // First clear the entity manager to have all data
+        static::$container->get(EntityManagerInterface::class)->clear();
+        $config = static::$container->get(ConfigurationService::class);
+        $dataSource = $config->get('data_source');
+        if ($dataSource === DOMJudgeService::DATA_SOURCE_LOCAL) {
+            return static::$container->get(EntityManagerInterface::class)->getRepository(Contest::class)->find($cid);
+        } else {
+            return static::$container->get(EntityManagerInterface::class)->getRepository(Contest::class)->findOneBy(['externalid' => $cid]);
         }
     }
 }
