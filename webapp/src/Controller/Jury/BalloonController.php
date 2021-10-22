@@ -2,6 +2,7 @@
 
 namespace App\Controller\Jury;
 
+use App\Entity\Team;
 use App\Entity\TeamAffiliation;
 use App\Service\BalloonService;
 use App\Service\ConfigurationService;
@@ -87,6 +88,7 @@ class BalloonController extends AbstractController
         // Load preselected filters
         $filters              = $this->dj->jsonDecode((string)$this->dj->getCookie('domjudge_balloonsfilter') ?: '[]');
         $filteredAffiliations = [];
+        $filteredLocations    = [];
         if (isset($filters['affiliation-id'])) {
             /** @var TeamAffiliation[] $filteredAffiliations */
             $filteredAffiliations = $this->em->createQueryBuilder()
@@ -94,6 +96,16 @@ class BalloonController extends AbstractController
                 ->select('a')
                 ->where('a.affilid IN (:affilIds)')
                 ->setParameter(':affilIds', $filters['affiliation-id'])
+                ->getQuery()
+                ->getResult();
+        }
+        if (isset($filters['location-str'])) {
+            /** @var Team[] $filteredLocations */
+            $filteredLocations = $this->em->createQueryBuilder()
+                ->from(Team::class, 'a')
+                ->select('a')
+                ->where('a.room IN (:rooms)')
+                ->setParameter(':rooms', $filters['location-str'])
                 ->getQuery()
                 ->getResult();
         }
@@ -107,6 +119,7 @@ class BalloonController extends AbstractController
             'isfrozen' => isset($contest->getState()['frozen']),
             'hasFilters' => !empty($filters),
             'filteredAffiliations' => $filteredAffiliations,
+            'filteredLocations' => $filteredLocations,
             'balloons' => $balloons_table
         ]);
     }

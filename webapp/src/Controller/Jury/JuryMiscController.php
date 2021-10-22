@@ -102,6 +102,18 @@ class JuryMiscController extends BaseController
                     'text' => $displayname,
                 ];
             }, $affiliations);
+        } elseif ($datatype === 'locations') {
+            $locations = $qb->from(Team::class, 'a')
+                ->select('DISTINCT a.room')
+                ->where($qb->expr()->like('a.room', '?1'))
+                ->orderBy('a.room', 'ASC')
+                ->getQuery()->setParameter(1, '%' . $q . '%')
+                ->getResult();
+
+            $results = array_map(function (array $location) {
+                return ['id'   => $location['room'],
+                        'text' => $location['room']];
+            }, $locations);
         } elseif (!$this->isGranted('ROLE_JURY')) {
             throw new AccessDeniedHttpException('Permission denied');
         } elseif ($datatype === 'problems') {
