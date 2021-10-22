@@ -114,7 +114,7 @@ class ImportProblemService
         $yamlFile        = 'problem.yaml';
         $tleFile         = '.timelimit';
         $submission_file = 'submissions.json';
-        $problemIsNew   = $problem === null;
+        $problemIsNew    = $problem === null;
 
         $iniKeysProblem        = ['name', 'timelimit', 'special_run', 'special_compare'];
         $iniKeysContestProblem = ['allow_submit', 'allow_judge', 'points', 'color'];

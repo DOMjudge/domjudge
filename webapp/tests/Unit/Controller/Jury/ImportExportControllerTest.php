@@ -35,7 +35,7 @@ class ImportExportControllerTest extends BaseTest
     {
         $this->verifyPageResponse('GET', '/jury/import-export', 200);
 
-        self::assertSelectorExists(sprintf('select#problem_upload_multiple_contest > option:contains("%s")', $contest));
+        self::assertSelectorExists(sprintf('select#problem_upload_contest > option:contains("%s")', $contest));
         self::assertSelectorExists(sprintf('select#contest_export_contest > option:contains("%s")', $contest));
     }
 
@@ -70,7 +70,7 @@ class ImportExportControllerTest extends BaseTest
     {
         $this->verifyPageResponse('GET', '/jury/import-export', 200);
 
-        self::assertSelectorExists('button#problem_upload_multiple_upload i.fa.fa-upload');
+        self::assertSelectorExists('button#problem_upload_upload i.fa.fa-upload');
         self::assertSelectorExists('button#contest_export_export i.fa.fa-download');
     }
 

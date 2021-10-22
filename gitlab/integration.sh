@@ -161,7 +161,7 @@ for i in hello_kattis different guess; do
 		cd "$i"
 		zip -r "../${i}.zip" -- *
 	)
-	curl --fail -X POST -n -N -F zip[]=@${i}.zip http://localhost/domjudge/api/contests/2/problems
+	curl --fail -X POST -n -N -F zip=@${i}.zip http://localhost/domjudge/api/contests/2/problems
 done
 section_end submitting
 
