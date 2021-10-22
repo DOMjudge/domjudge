@@ -76,14 +76,34 @@ class JuryMiscController extends BaseController
 
     /**
      * @Route("/ajax/{datatype}", methods={"GET"}, name="jury_ajax_data")
-     * @IsGranted("ROLE_JURY")
+     * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_BALLOON')")
      */
     public function ajaxDataAction(Request $request, string $datatype): JsonResponse
     {
         $q  = $request->query->get('q');
         $qb = $this->em->createQueryBuilder();
 
-        if ($datatype === 'problems') {
+        if ($datatype === 'affiliations') {
+            $affiliations = $qb->from(TeamAffiliation::class, 'a')
+                ->select('a.affilid', 'a.name', 'a.shortname')
+                ->where($qb->expr()->like('a.name', '?1'))
+                ->orWhere($qb->expr()->like('a.shortname', '?1'))
+                ->orWhere($qb->expr()->eq('a.affilid', '?2'))
+                ->orderBy('a.name', 'ASC')
+                ->getQuery()->setParameter(1, '%' . $q . '%')
+                ->setParameter(2, $q)
+                ->getResult();
+
+            $results = array_map(function (array $affiliation) {
+                $displayname = $affiliation['name'] . " (" . $affiliation['affilid'] . ")";
+                return [
+                    'id' => $affiliation['affilid'],
+                    'text' => $displayname,
+                ];
+            }, $affiliations);
+        } elseif (!$this->isGranted('ROLE_JURY')) {
+            throw new HttpException(401, 'Permission denied');
+        } elseif ($datatype === 'problems') {
             $problems = $qb->from(Problem::class, 'p')
                 ->select('p.probid', 'p.name')
                 ->where($qb->expr()->like('p.name', '?1'))
