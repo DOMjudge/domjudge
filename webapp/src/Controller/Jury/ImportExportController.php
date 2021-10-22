@@ -13,7 +13,7 @@ use App\Form\Type\ContestExportType;
 use App\Form\Type\ContestImportType;
 use App\Form\Type\JsonImportType;
 use App\Form\Type\ProblemsImportType;
-use App\Form\Type\ProblemUploadMultipleType;
+use App\Form\Type\ProblemUploadType;
 use App\Form\Type\TsvImportType;
 use App\Service\ICPCCmsService;
 use App\Service\ImportProblemService;
@@ -172,15 +172,15 @@ class ImportExportController extends BaseController
         $currentContestFormData = [
             'contest' => $this->dj->getCurrentContest(),
         ];
-        $problemForm = $this->createForm(ProblemUploadMultipleType::class, $currentContestFormData);
+        $problemForm = $this->createForm(ProblemUploadType::class, $currentContestFormData);
 
         $problemForm->handleRequest($request);
 
         if ($problemForm->isSubmitted() && $problemForm->isValid()) {
             $problemFormData = $problemForm->getData();
 
-            /** @var UploadedFile[] $archives */
-            $archives = $problemFormData['archives'];
+            /** @var UploadedFile $archive */
+            $archive = $problemFormData['archive'];
             /** @var Problem|null $newProblem */
             $newProblem = null;
             /** @var Contest|null $contest */
@@ -191,33 +191,34 @@ class ImportExportController extends BaseController
                 $contestId = $contest->getCid();
             }
             $allMessages = [];
-            foreach ($archives as $archive) {
-                try {
-                    $zip = $this->dj->openZipFile($archive->getRealPath());
-                    $clientName = $archive->getClientOriginalName();
-                    $messages = [];
-                    if ($contestId === null) {
-                        $contest = null;
-                    } else {
-                        $contest = $this->em->getRepository(Contest::class)->find($contestId);
-                    }
-                    $newProblem = $this->importProblemService->importZippedProblem(
-                        $zip, $clientName, null, $contest, $messages
-                    );
-                    $allMessages = array_merge($allMessages, $messages);
-                    if ($newProblem) {
-                        $this->dj->auditlog('problem', $newProblem->getProbid(), 'upload zip',
-                            $clientName);
-                    } else {
-                        $this->addFlash('danger', implode("\n", $allMessages));
-                        return $this->redirectToRoute('jury_problems');
-                    }
-                } catch (Exception $e) {
-                    $allMessages[] = $e->getMessage();
-                } finally {
-                    if (isset($zip)) {
-                        $zip->close();
-                    }
+            try {
+                $zip = $this->dj->openZipFile($archive->getRealPath());
+                $clientName = $archive->getClientOriginalName();
+                $messages = [];
+                if ($contestId === null) {
+                    $contest = null;
+                } else {
+                    $contest = $this->em->getRepository(Contest::class)->find($contestId);
+                }
+                // Check if the problem exists, since if it does, we need to load it
+                $externalId = preg_replace('/[^a-zA-Z0-9-_]/', '', basename($clientName, '.zip'));
+                $existingProblem = $this->em->getRepository(Problem::class)->findOneBy(['externalid' => $externalId]);
+                $newProblem = $this->importProblemService->importZippedProblem(
+                    $zip, $clientName, $existingProblem, $contest, $messages
+                );
+                $allMessages = array_merge($allMessages, $messages);
+                if ($newProblem) {
+                    $this->dj->auditlog('problem', $newProblem->getProbid(), 'upload zip',
+                        $clientName);
+                } else {
+                    $this->addFlash('danger', implode("\n", $allMessages));
+                    return $this->redirectToRoute('jury_problems');
+                }
+            } catch (Exception $e) {
+                $allMessages[] = $e->getMessage();
+            } finally {
+                if (isset($zip)) {
+                    $zip->close();
                 }
             }
 
@@ -225,7 +226,7 @@ class ImportExportController extends BaseController
                 $this->addFlash('info', implode("\n", $allMessages));
             }
 
-            if (count($archives) === 1 && $newProblem !== null) {
+            if ($newProblem !== null) {
                 return $this->redirectToRoute('jury_problem', ['probId' => $newProblem->getProbid()]);
             } else {
                 return $this->redirectToRoute('jury_problems');

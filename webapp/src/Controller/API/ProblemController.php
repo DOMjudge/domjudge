@@ -169,7 +169,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
     }
 
     /**
-     * Add one or more problems to this contest.
+     * Add a problem to this contest.
      * @Rest\Post("")
      * @IsGranted("ROLE_ADMIN")
      * @OA\Post()
@@ -178,12 +178,12 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
      *     @OA\MediaType(
      *         mediaType="multipart/form-data",
      *         @OA\Schema(
-     *             required={"zip[]"},
+     *             required={"zip"},
      *             @OA\Property(
-     *                 property="zip[]",
-     *                 type="array",
-     *                 description="The problem archive(s) to import",
-     *                 @OA\Items(type="string", format="binary")
+     *                 property="zip",
+     *                 type="string",
+     *                 format="binary",
+     *                 description="The problem archive to import"
      *             ),
      *             @OA\Property(
      *                 property="problem",
@@ -195,12 +195,10 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
      * )
      * @OA\Response(
      *     response="200",
-     *     description="Returns the IDs of the imported problems and any messages produced",
+     *     description="Returns the ID of the imported problem and any messages produced",
      *     @OA\JsonContent(
      *         type="object",
-     *         @OA\Property(property="problem_ids", type="array",
-     *             @OA\Items(type="integer", description="The IDs of the imported problems")
-     *         ),
+     *         @OA\Property(property="problem_id", type="integer", description="The ID of the imported problem"),
      *         @OA\Property(property="messages", type="array",
      *             @OA\Items(type="string", description="Messages produced while adding problems")
      *         )
@@ -210,12 +208,15 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
      */
     public function addProblemAction(Request $request) : array
     {
-        $files     = $request->files->get('zip') ?: [];
+        $file     = $request->files->get('zip');
+        if (empty($file)) {
+            throw new BadRequestHttpException('ZIP file missing');
+        }
+
         $contestId = $this->getContestId($request);
         /** @var Contest $contest */
         $contest     = $this->em->getRepository(Contest::class)->find($contestId);
         $allMessages = [];
-        $probIds     = [];
 
         // Only timeout after 2 minutes, since importing may take a while.
         set_time_limit(120);
@@ -223,9 +224,6 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
         $probId = $request->request->get('problem');
         $problem = null;
         if (!empty($probId)) {
-            if (sizeof($files) != 1) {
-                throw new BadRequestHttpException('Can only take one problem zip if \'problem\' is set.');
-            }
             $problem = $this->em->createQueryBuilder()
                 ->from(Problem::class, 'p')
                 ->select('p')
@@ -238,36 +236,33 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
             }
         }
         $errors = [];
-        /** @var UploadedFile $file */
-        foreach ($files as $file) {
-            $zip = null;
-            try {
-                $zip         = $this->dj->openZipFile($file->getRealPath());
-                $clientName  = $file->getClientOriginalName();
-                $messages    = [];
-                $newProblem  = $this->importProblemService->importZippedProblem(
-                    $zip, $clientName, $problem, $contest, $messages
-                );
-                $allMessages = array_merge($allMessages, $messages);
-                if ($newProblem) {
-                    $this->dj->auditlog('problem', $newProblem->getProbid(), 'upload zip', $clientName);
-                    $probIds[] = $newProblem->getProbid();
-                } else {
-                    $errors = array_merge($errors, $messages);
-                }
-            } catch (Exception $e) {
-                $allMessages[] = $e->getMessage();
-            } finally {
-                if ($zip) {
-                    $zip->close();
-                }
+        $zip = null;
+        try {
+            $zip         = $this->dj->openZipFile($file->getRealPath());
+            $clientName  = $file->getClientOriginalName();
+            $messages    = [];
+            $newProblem  = $this->importProblemService->importZippedProblem(
+                $zip, $clientName, $problem, $contest, $messages
+            );
+            $allMessages = array_merge($allMessages, $messages);
+            if ($newProblem) {
+                $this->dj->auditlog('problem', $newProblem->getProbid(), 'upload zip', $clientName);
+                $probId = $newProblem->getApiId($this->eventLogService);
+            } else {
+                $errors = array_merge($errors, $messages);
+            }
+        } catch (Exception $e) {
+            $allMessages[] = $e->getMessage();
+        } finally {
+            if ($zip) {
+                $zip->close();
             }
         }
         if (!empty($errors)) {
             throw new BadRequestHttpException(json_encode($errors));
         }
         return [
-            'problem_ids' => $probIds,
+            'problem_id' => $probId,
             'messages' => $allMessages,
         ];
     }

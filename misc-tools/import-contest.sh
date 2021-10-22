@@ -181,7 +181,7 @@ if [ -r problems.yaml ] || [ -r problems.json ] || [ -r problemset.yaml ]; then
             read -r -p "Ready to import problem '$prob' to probid=$probid. Continue? [Y/n] " response
             response=${response,,}
             if [[ $response =~ ^(yes|y| ) ]] || [[ -z $response ]]; then
-                http --timeout 3000 $httpie_options --check-status -f POST "$api_url/contests/$cid/problems" zip[]@"${prob}.zip" problem="$probid"
+                http --timeout 3000 $httpie_options --check-status -f POST "$api_url/contests/$cid/problems" zip@"${prob}.zip" problem="$probid"
             fi
         done
     else

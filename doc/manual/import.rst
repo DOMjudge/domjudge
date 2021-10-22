@@ -293,7 +293,7 @@ and click `Upload`.
 
 To import the file using the API run the following command::
 
-    http --check-status -b -f POST "<API_URL>/contests/<CID>/problems" zip[]@problem.zip problem="<PROBID>"
+    http --check-status -b -f POST "<API_URL>/contests/<CID>/problems" zip@problem.zip problem="<PROBID>"
 
 Replace ``<CID>`` with the contest ID that the previous command returns and
 ``<PROBID>`` with the problem ID (you can get that from the web interface or
