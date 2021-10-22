@@ -41,7 +41,15 @@
                                     {{ affiliation.name }} (a{{ affiliation.affilid }})
                                 </option>
                             {%- endfor %}
-
+                        </select>
+                        <label for="location-filter">Filter on locations(s)</label>
+                        <select id="location-filter" class="select2 form-control" multiple data-filter-field="location-str"
+                                data-ajax-url="{{ path('jury_ajax_data', {datatype: 'locations', select2: true}) }}">
+                            {%- for location in filteredLocations %}
+                                <option value="{{ location.room }}" selected>
+                                    {{ location.room }}
+                                </option>
+                            {%- endfor %}
                         </select>
                     </div>
                 </div>
