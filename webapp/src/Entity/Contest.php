@@ -433,10 +433,9 @@ class Contest extends BaseApiEntity
         return $this->getShortname();
     }
 
-    /** @return string|float */
-    public function getActivatetime()
+    public function getActivatetime(): ?float
     {
-        return $this->activatetime;
+        return $this->activatetime === null ? null : (float)$this->activatetime;
     }
 
     /** @param string|float $starttime */
@@ -450,15 +449,14 @@ class Contest extends BaseApiEntity
      * Get starttime, or NULL if disabled.
      *
      * @param bool $nullWhenDisabled If true, return null if the start time is disabled, defaults to true.
-     * @return string|float|null
      */
-    public function getStarttime(bool $nullWhenDisabled = true)
+    public function getStarttime(bool $nullWhenDisabled = true): ?float
     {
         if ($nullWhenDisabled && !$this->getStarttimeEnabled()) {
             return null;
         }
 
-        return $this->starttime;
+        return $this->starttime === null ? null : (float)$this->starttime;
     }
 
     /**
@@ -482,16 +480,14 @@ class Contest extends BaseApiEntity
         return $this->starttimeEnabled;
     }
 
-    /** @return string|float */
-    public function getFreezetime()
+    public function getFreezetime(): ?float
     {
-        return $this->freezetime;
+        return $this->freezetime === null ? null : (float)$this->freezetime;
     }
 
-    /** @return string|float */
-    public function getEndtime()
+    public function getEndtime(): ?float
     {
-        return $this->endtime;
+        return $this->endtime === null ? null : (float)$this->endtime;
     }
 
     /**
@@ -506,16 +502,14 @@ class Contest extends BaseApiEntity
         return $this->getEndtime() ? new DateTime(Utils::absTime($this->getEndtime())) : null;
     }
 
-    /** @return string|float */
-    public function getUnfreezetime()
+    public function getUnfreezetime(): ?float
     {
-        return $this->unfreezetime;
+        return $this->unfreezetime === null ? null : (float)$this->unfreezetime;
     }
 
-    /** @return string|float */
-    public function getFinalizetime()
+    public function getFinalizetime(): ?float
     {
-        return $this->finalizetime;
+        return $this->finalizetime === null ? null : (float)$this->finalizetime;
     }
 
     /** @param string|float $finalizetimeString */
@@ -545,10 +539,9 @@ class Contest extends BaseApiEntity
         $this->b = $b;
     }
 
-    /** @return string|float */
-    public function getDeactivatetime()
+    public function getDeactivatetime(): ?float
     {
-        return $this->deactivatetime;
+        return $this->deactivatetime === null ? null : (float)$this->deactivatetime;
     }
 
     public function setActivatetimeString(?string $activatetimeString): Contest
