@@ -308,7 +308,7 @@ abstract class BaseTest extends BaseBaseTest
         if (($apiEndpoint = $this->apiEndpoint) === null) {
             static::markTestSkipped('No endpoint defined');
         }
-        $url = $this->helperGetEndpointURL($apiEndpoint,(string)$id);
+        $url = $this->helperGetEndpointURL($apiEndpoint, (string)$id);
         $object = $this->verifyApiJsonResponse('GET', $url, 200, $this->apiUser);
         static::assertIsArray($object);
 
@@ -357,7 +357,7 @@ abstract class BaseTest extends BaseBaseTest
         if (($apiEndpoint = $this->apiEndpoint) === null) {
             static::markTestSkipped('No endpoint defined');
         }
-        $url = $this->helperGetEndpointURL($apiEndpoint,$id);
+        $url = $this->helperGetEndpointURL($apiEndpoint, $id);
         $this->verifyApiJsonResponse('GET', $url, 404, $this->apiUser);
     }
 

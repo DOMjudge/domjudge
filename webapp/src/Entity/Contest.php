@@ -1282,7 +1282,7 @@ class Contest extends BaseApiEntity
     public function getCountdownString(): string
     {
         $now = Utils::now();
-        if (Utils::difftime((float)$this->getActivatetime(),$now) <= 0) {
+        if (Utils::difftime((float)$this->getActivatetime(), $now) <= 0) {
             if (!$this->getStarttimeEnabled()) {
                 return 'start delayed';
             }

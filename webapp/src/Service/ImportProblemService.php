@@ -803,7 +803,7 @@ class ImportProblemService
 
             if ($numJurySolutions > 0) {
                 $messages[] = sprintf('Added %d jury solution(s): %s', $numJurySolutions,
-                    join(', ',$successful_subs));
+                    join(', ', $successful_subs));
             }
             if (!empty($subs_with_unknown_lang)) {
                 $messages[] = sprintf("Could not add jury solution due to unknown language: %s",

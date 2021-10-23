@@ -679,7 +679,7 @@ class ProblemController extends BaseController
                 $outFile = $request->files->get('add_output');
                 $message = sprintf(
                     'Added new testcase %d from files %s (%s) and %s (%s)', $maxrank,
-                    $inFile->getClientOriginalName(),  Utils::printsize($inFile->getSize()),
+                    $inFile->getClientOriginalName(), Utils::printsize($inFile->getSize()),
                     $outFile->getClientOriginalName(), Utils::printsize($outFile->getSize())
                 );
 

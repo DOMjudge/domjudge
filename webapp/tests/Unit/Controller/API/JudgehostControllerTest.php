@@ -50,8 +50,8 @@ class JudgehostControllerTest extends BaseTest
      */
     public function testSingleNotFound(string $id): void {
         $id = $this->resolveReference($id);
-        $url = $this->helperGetEndpointURL($this->apiEndpoint,$id);
+        $url = $this->helperGetEndpointURL($this->apiEndpoint, $id);
         $object = $this->verifyApiJsonResponse('GET', $url, 200, $this->apiUser);
-        static::assertEquals($object,[]);
+        static::assertEquals($object, []);
     }
 }
