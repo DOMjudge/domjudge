@@ -275,7 +275,7 @@ abstract class JuryControllerTest extends BaseTest
             $this->verifyPageResponse('GET', $singlePageLink, 200);
             $crawler = $this->getCurrentCrawler();
             foreach ($crawler->filter('a') as $node) {
-                 if (strpos($node->nodeValue, 'Edit') !== false) {
+                if (strpos($node->nodeValue, 'Edit') !== false) {
                     $editLink = $node->getAttribute('href');
                 }
             }

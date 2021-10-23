@@ -27,9 +27,9 @@ function overshoot_time(float $timelimit, string $overshoot_cfg) : float
 
     $val2 = overshoot_parse($timelimit, $tokens[2]);
     switch ($tokens[1]) {
-    case '+': return $val1 + $val2;
-    case '|': return max($val1, $val2);
-    case '&': return min($val1, $val2);
+        case '+': return $val1 + $val2;
+        case '|': return max($val1, $val2);
+        case '&': return min($val1, $val2);
     }
     error("invalid timelimit overshoot string '$overshoot_cfg'");
 }
@@ -52,9 +52,9 @@ function overshoot_parse(float $timelimit, string $token) : float
         error("timelimit overshoot cannot be negative: '$token'");
     }
     switch ($type) {
-    case 's': return $val;
-    case '%': return $timelimit * 0.01*$val;
-    default: error("invalid timelimit overshoot token '$token'");
+        case 's': return $val;
+        case '%': return $timelimit * 0.01*$val;
+        default: error("invalid timelimit overshoot token '$token'");
     }
 }
 

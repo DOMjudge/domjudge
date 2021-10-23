@@ -45,7 +45,7 @@ class DOMJudgeBasicAuthenticator extends AbstractGuardAuthenticator
 
         // No credentials provided, so we can't try to auth anything
         if ($request->headers->get('php-auth-user', null) === null) {
-          return false;
+            return false;
         }
 
         // If it's stateless, we provide auth support every time
@@ -55,7 +55,7 @@ class DOMJudgeBasicAuthenticator extends AbstractGuardAuthenticator
         ];
         $fwcontext = $request->attributes->get('_firewall_context', '');
         if (in_array($fwcontext, $stateless_fw_contexts)) {
-          return true;
+            return true;
         }
 
         return false;
@@ -94,16 +94,16 @@ class DOMJudgeBasicAuthenticator extends AbstractGuardAuthenticator
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception)
     {
-      # We only throw an error if the credentials provided were wrong or the user doesn't exist
-      # Otherwise we pass along to the next authenticator
-      if ($exception instanceof BadCredentialsException || $exception instanceof UsernameNotFoundException) {
-        $resp = new Response('', Response::HTTP_UNAUTHORIZED);
-        $resp->headers->set('WWW-Authenticate', sprintf('Basic realm="%s"', 'Secured Area'));
-        return $resp;
-      }
+        # We only throw an error if the credentials provided were wrong or the user doesn't exist
+        # Otherwise we pass along to the next authenticator
+        if ($exception instanceof BadCredentialsException || $exception instanceof UsernameNotFoundException) {
+            $resp = new Response('', Response::HTTP_UNAUTHORIZED);
+            $resp->headers->set('WWW-Authenticate', sprintf('Basic realm="%s"', 'Secured Area'));
+            return $resp;
+        }
 
-      // Let another guard authenticator handle it
-      return null;
+        // Let another guard authenticator handle it
+        return null;
     }
 
     /**
@@ -111,9 +111,9 @@ class DOMJudgeBasicAuthenticator extends AbstractGuardAuthenticator
      */
     public function start(Request $request, AuthenticationException $authException = null)
     {
-      $resp = new Response('', Response::HTTP_UNAUTHORIZED);
-      $resp->headers->set('WWW-Authenticate', sprintf('Basic realm="%s"', 'Secured Area'));
-      return $resp;
+        $resp = new Response('', Response::HTTP_UNAUTHORIZED);
+        $resp->headers->set('WWW-Authenticate', sprintf('Basic realm="%s"', 'Secured Area'));
+        return $resp;
     }
 
     public function supportsRememberMe()

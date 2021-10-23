@@ -179,7 +179,7 @@ class RejudgingService
                 $progress = (int)round($index / count($judgings) * 100);
                 $progressReporter($progress, $log);
             }
-       }
+        }
 
         if (count($skipped) == count($judgings)) {
             // We skipped all judgings, this is a hard error. Let's clean up the rejudging and report it.

@@ -179,18 +179,18 @@ class ClarificationController extends AbstractController
             $data['time'] = $clar->getSubmittime();
 
             $jurymember = $clar->getJuryMember();
-            if ( !empty($jurymember) ) {
+            if (!empty($jurymember)) {
                 $juryuser = $this->em->getRepository(User::class)->findBy(['username'=>$jurymember]);
                 $data['from_jurymember'] = $juryuser[0]->getName();
                 $data['jurymember_is_me'] = $juryuser[0] == $this->getUser();
             }
 
-            if ( $fromteam = $clar->getSender() ) {
+            if ($fromteam = $clar->getSender()) {
                 $data['from_teamname'] = $fromteam->getEffectiveName();
                 $data['from_teamid'] = $fromteam->getTeamid();
                 $concernsteam = $fromteam->getTeamid();
             }
-            if ( $toteam = $clar->getRecipient() ) {
+            if ($toteam = $clar->getRecipient()) {
                 $data['to_teamname'] = $toteam->getEffectiveName();
                 $data['to_teamid'] = $toteam->getTeamid();
             }
@@ -199,10 +199,10 @@ class ClarificationController extends AbstractController
             $data['contest'] = $contest;
             $clarcontest = $contest->getShortname();
             $data['subjectlink'] = null;
-            if ( $clar->getProblem() ) {
+            if ($clar->getProblem()) {
                 $concernssubject = $contest->getCid() . "-" . $clar->getProblem()->getProbid();
                 $data['subjectlink'] = $this->generateUrl('jury_problem', ['probId' => $clar->getProblem()->getProbid()]);
-            } elseif ( $clar->getCategory() ) {
+            } elseif ($clar->getCategory()) {
                 $concernssubject = $contest->getCid() . "-" . $clar->getCategory();
             } else {
                 $concernssubject = "";
@@ -222,10 +222,10 @@ class ClarificationController extends AbstractController
             $clardata['list'][] = $data;
         }
 
-        if ( $concernsteam ) {
+        if ($concernsteam) {
             $clardata['clarform']['toteam'] = $concernsteam;
         }
-        if ( $concernssubject ) {
+        if ($concernssubject) {
             $clardata['clarform']['onsubject'] = $concernssubject;
         }
 
@@ -241,7 +241,7 @@ class ClarificationController extends AbstractController
     protected function getProblemShortName(int $probid, int $cid): string
     {
         $cp = $this->em->getRepository(ContestProblem::class)->findBy(['probid'=>$probid, 'cid' => $cid]);
-        if ( isset($cp[0]) ) {
+        if (isset($cp[0])) {
             return "problem " . $cp[0]->getShortName();
         }
         return "unknown problem";
@@ -285,7 +285,7 @@ class ClarificationController extends AbstractController
             }
 
             foreach($contestproblems as $cp) {
-                if ( $cp->getCid()!=$cid ) continue;
+                if ($cp->getCid()!=$cid) continue;
                 $subject_options[$cshort]["$cid-" . $cp->getProbid()] =
                     $cshort . ' - ' .$cp->getShortname() . ': ' . $cp->getProblem()->getName();
             }
@@ -306,7 +306,7 @@ class ClarificationController extends AbstractController
 
         $data = $this->getClarificationFormData();
 
-        if ( $toteam = $request->query->get('teamto') ) {
+        if ($toteam = $request->query->get('teamto')) {
             $data['toteam'] = $toteam;
         }
 
@@ -352,7 +352,7 @@ class ClarificationController extends AbstractController
         $clarification->setAnswered($answered);
         $this->em->flush();
 
-        if ( $answered ) {
+        if ($answered) {
             return $this->redirectToRoute('jury_clarifications');
         } else {
             return $this->redirectToRoute('jury_clarification', ['id' => $clarId]);
@@ -404,7 +404,7 @@ class ClarificationController extends AbstractController
         }
 
         $queue = $request->request->get('queue');
-        if ( $queue === "" ) {
+        if ($queue === "") {
             $queue = null;
         }
         $clarification->setQueue($queue);

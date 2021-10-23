@@ -16,32 +16,32 @@ h1 {
 .highlight.rowodd, .highlight.odd { background-color: #ffffaa !important; }
 
 .size {
-	text-align: right;
-	font-family: monospace;
+    text-align: right;
+    font-family: monospace;
 }
 
 .md5 { font-family: monospace; }
 
 .testcases td {
-	vertical-align: middle;
-	padding: 3px;
-	padding-left: 5px;
-	padding-right: 5px;
+    vertical-align: middle;
+    padding: 3px;
+    padding-left: 5px;
+    padding-right: 5px;
 }
 .testcases_prev { font-size: xx-small; }
 tr.summary td { border-top: 1px solid black; }
 
 .testrank {
-	text-align: center;
+    text-align: center;
 }
 
 .testsample {
-	text-align: center;
-	max-width: 200px;
+    text-align: center;
+    max-width: 200px;
 }
 
 .testdesc {
-	max-width: 400px;
+    max-width: 400px;
 }
 
 /* set cell padding to 0 and <a> tag to 3 to make all of cell
@@ -51,8 +51,8 @@ tr.summary td { border-top: 1px solid black; }
 #submission_layout { width: 100%; }
 
 #djlogo {
-	position: absolute; right: 1ex;
-	width: 93px; height: 196px;
+    position: absolute; right: 1ex;
+    width: 93px; height: 196px;
 }
 
 a.collapse { color: black; text-decoration: none; }
@@ -84,66 +84,66 @@ a.collapse { color: black; text-decoration: none; }
 .teamstat { text-align: right; }
 
 div.submissions-filter > p {
-	position: relative;
+    position: relative;
 }
 
 div.submissions-filter > p > span {
-	position: absolute;
-	top: 3px;
+    position: absolute;
+    top: 3px;
 }
 
 div.submissions-filter ul.token-input-list {
-	display: inline-block;
-	position: relative;
-	left: 100px;
+    display: inline-block;
+    position: relative;
+    left: 100px;
 }
 
 .tc_box_small {
-	text-align: center;
-	font-size: 65%;
-	width: 1.0em;
-	display: inline-block;
-	padding: 1px;
-	margin: 1px;
-	color: black;
+    text-align: center;
+    font-size: 65%;
+    width: 1.0em;
+    display: inline-block;
+    padding: 1px;
+    margin: 1px;
+    color: black;
 }
 .tc_list_small {
-	max-width:500px;
+    max-width:500px;
 }
 
 .data-table  td.testcase-results {
-	white-space: normal;
-	word-wrap: break-word;
+    white-space: normal;
+    word-wrap: break-word;
 }
 
 .has_tooltip {
-	text-decoration: dotted underline;
+    text-decoration: dotted underline;
 }
 
 div.submission-summary > span {
-	margin-right: 10px;
+    margin-right: 10px;
 }
 
 /* fixes for bootstrap-toggle and bootstrap4 */
 .toggle-off {
-	box-shadow: inset 0 3px 5px rgba(0, 0, 0, .125);
+    box-shadow: inset 0 3px 5px rgba(0, 0, 0, .125);
 }
 .toggle.off {
-	border-color: rgba(0, 0, 0, .25);
+    border-color: rgba(0, 0, 0, .25);
 }
 .toggle-handle {
-	background-color: white;
-	border: thin rgba(0, 0, 0, .25) solid;
+    background-color: white;
+    border: thin rgba(0, 0, 0, .25) solid;
 }
 .listtoggles {
-	width: 6em;
+    width: 6em;
 }
 .btn-xs,
 .btn-group-xs > .btn {
-	padding: 1px 5px;
-	font-size: 12px;
-	line-height: 1.5;
-	border-radius: 3px;
+    padding: 1px 5px;
+    font-size: 12px;
+    line-height: 1.5;
+    border-radius: 3px;
 }
 
 .table td.thick-border {

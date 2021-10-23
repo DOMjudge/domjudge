@@ -93,266 +93,266 @@ var doReload = true;
 
 function reloadPage()
 {
-	if (doReload) {
-		location.reload();
-	}
+    if (doReload) {
+        location.reload();
+    }
 }
 
 function initReload(refreshtime)
 {
-	// interval is in seconds
-	setTimeout(function() { reloadPage(); }, refreshtime * 1000);
+    // interval is in seconds
+    setTimeout(function() { reloadPage(); }, refreshtime * 1000);
 }
 
 function collapse(x)
 {
-	$(x).toggleClass('d-none');
+    $(x).toggleClass('d-none');
 }
 
 function togglelastruns()
 {
-	var names = {'lastruntime':0, 'lastresult':1, 'lasttcruns':2};
-	for (var name in names) {
-		var cells = document.getElementsByClassName(name);
-		for (var i = 0; i < cells.length; i++) {
-			var style = 'inline';
-			if (name === 'lasttcruns') {
-				style = 'table-row';
-			}
-			cells[i].style.display = (cells[i].style.display === 'none') ? style : 'none';
-		}
-	}
+    var names = {'lastruntime':0, 'lastresult':1, 'lasttcruns':2};
+    for (var name in names) {
+        var cells = document.getElementsByClassName(name);
+        for (var i = 0; i < cells.length; i++) {
+            var style = 'inline';
+            if (name === 'lasttcruns') {
+                style = 'table-row';
+            }
+            cells[i].style.display = (cells[i].style.display === 'none') ? style : 'none';
+        }
+    }
 }
 
 // TODO: We should probably reload the page if the clock hits contest
 // start (and end?).
 function updateClock()
 {
-	var curtime = Math.round((new Date().getTime() - clientOffset) / 1000);
+    var curtime = Math.round((new Date().getTime() - clientOffset) / 1000);
 
-	var fmt = "";
-	if ( timeleftelt.innerHTML=='start delayed' || timeleft.innerHTML == 'no contest' ) { // FIXME
-		var left = 0;
-		var what = timeleftelt.innerHTML;
-	} else if (curtime >= starttime && curtime < endtime ) {
-		var left = endtime - curtime;
-		var what = "";
-	} else if (curtime >= activatetime && curtime < starttime ) {
-		var left = starttime - curtime;
-		var what = "time to start: ";
-	} else {
-		var left = 0;
-		var what = "contest over";
-	}
+    var fmt = "";
+    if ( timeleftelt.innerHTML=='start delayed' || timeleft.innerHTML == 'no contest' ) { // FIXME
+        var left = 0;
+        var what = timeleftelt.innerHTML;
+    } else if (curtime >= starttime && curtime < endtime ) {
+        var left = endtime - curtime;
+        var what = "";
+    } else if (curtime >= activatetime && curtime < starttime ) {
+        var left = starttime - curtime;
+        var what = "time to start: ";
+    } else {
+        var left = 0;
+        var what = "contest over";
+    }
 
-	if ( left ) {
-		if ( left > 24*60*60 ) {
-			var d = Math.floor(left/(24*60*60));
-			fmt += d + "d ";
-			left -= d * 24*60*60;
-		}
-		if ( left > 60*60 ) {
-			var h = Math.floor(left/(60*60));
-			fmt += h + ":";
-			left -= h * 60*60;
-		}
-		var m = Math.floor(left/60);
-		if ( m < 10 ) { fmt += "0"; }
-		fmt += m + ":";
-		left -= m * 60;
-		if ( left < 10 ) { fmt += "0"; }
-		fmt += left;
-	}
+    if ( left ) {
+        if ( left > 24*60*60 ) {
+            var d = Math.floor(left/(24*60*60));
+            fmt += d + "d ";
+            left -= d * 24*60*60;
+        }
+        if ( left > 60*60 ) {
+            var h = Math.floor(left/(60*60));
+            fmt += h + ":";
+            left -= h * 60*60;
+        }
+        var m = Math.floor(left/60);
+        if ( m < 10 ) { fmt += "0"; }
+        fmt += m + ":";
+        left -= m * 60;
+        if ( left < 10 ) { fmt += "0"; }
+        fmt += left;
+    }
 
-	timeleftelt.innerHTML = what + fmt;
+    timeleftelt.innerHTML = what + fmt;
 }
 
 function setCookie(name, value)
 {
-	var expire = new Date();
-	expire.setDate(expire.getDate() + 3); // three days valid
-	document.cookie = name + "=" + escape(value) + "; expires=" + expire.toUTCString();
+    var expire = new Date();
+    expire.setDate(expire.getDate() + 3); // three days valid
+    document.cookie = name + "=" + escape(value) + "; expires=" + expire.toUTCString();
 }
 
 function getCookie(name)
 {
-	var cookies = document.cookie.split(";");
-	for (var i = 0; i < cookies.length; i++) {
-		var idx = cookies[i].indexOf("=");
-		var key = cookies[i].substr(0, idx);
-		var value = cookies[i].substr(idx+1);
-		key = key.replace(/^\s+|\s+$/g,""); // trim
-		if (key === name) {
-			return unescape(value);
-		}
-	}
-	return "";
+    var cookies = document.cookie.split(";");
+    for (var i = 0; i < cookies.length; i++) {
+        var idx = cookies[i].indexOf("=");
+        var key = cookies[i].substr(0, idx);
+        var value = cookies[i].substr(idx+1);
+        key = key.replace(/^\s+|\s+$/g,""); // trim
+        if (key === name) {
+            return unescape(value);
+        }
+    }
+    return "";
 }
 
 function getSelectedTeams()
 {
-	var cookieVal = getCookie("domjudge_teamselection");
-	if (cookieVal === null || cookieVal === "") {
-		return new Array();
-	}
-	return JSON.parse(cookieVal);
+    var cookieVal = getCookie("domjudge_teamselection");
+    if (cookieVal === null || cookieVal === "") {
+        return new Array();
+    }
+    return JSON.parse(cookieVal);
 }
 
 function getScoreboard()
 {
-	var scoreboard = document.getElementsByClassName("scoreboard");
-	if (scoreboard === null || scoreboard[0] === null || scoreboard[0] === undefined) {
-		return null;
-	}
-	return scoreboard[0].rows;
+    var scoreboard = document.getElementsByClassName("scoreboard");
+    if (scoreboard === null || scoreboard[0] === null || scoreboard[0] === undefined) {
+        return null;
+    }
+    return scoreboard[0].rows;
 }
 
 function getRank(row)
 {
-	return row.getElementsByTagName("td")[0];
+    return row.getElementsByTagName("td")[0];
 }
 
 function getHeartCol(row) {
-	var tds = row.getElementsByTagName("td");
-	var td = null;
-	// search for td before the team name
-	for (var i = 1; i < 4; i++) {
-		if (tds[i].className == "scoretn") {
-			td = tds[i - 1];
-			break;
-		}
-	}
-	if (td === null) {
-		td = tds[1];
-	}
-	if (td !== null) {
-		if (td.children.length) {
-			return td.children[0];
-		}
-		return td;
-	}
+    var tds = row.getElementsByTagName("td");
+    var td = null;
+    // search for td before the team name
+    for (var i = 1; i < 4; i++) {
+        if (tds[i].className == "scoretn") {
+            td = tds[i - 1];
+            break;
+        }
+    }
+    if (td === null) {
+        td = tds[1];
+    }
+    if (td !== null) {
+        if (td.children.length) {
+            return td.children[0];
+        }
+        return td;
+    }
 
-	return null;
+    return null;
 }
 
 function getTeamname(row)
 {
-	var res = row.getAttribute("id");
-	if ( res === null ) return res;
-	return res.replace(/^team:/, '');
+    var res = row.getAttribute("id");
+    if ( res === null ) return res;
+    return res.replace(/^team:/, '');
 }
 
 function toggle(id, show)
 {
-	var scoreboard = getScoreboard();
-	if (scoreboard === null) return;
+    var scoreboard = getScoreboard();
+    if (scoreboard === null) return;
 
-	var favTeams = getSelectedTeams();
-	// count visible favourite teams (if filtered)
-	var visCnt = 0;
-	for (var i = 0; i < favTeams.length; i++) {
-		for (var j = 0; j < scoreboard.length; j++) {
-			var scoreTeamname = getTeamname(scoreboard[j]);
-			if (scoreTeamname === null) {
-				continue;
-			}
-			if (scoreTeamname === favTeams[i]) {
-				visCnt++;
-				break;
-			}
-		}
-	}
-	var teamname = getTeamname(scoreboard[id + visCnt]);
-	if (show) {
-		favTeams[favTeams.length] = teamname;
-	} else {
-		// copy all other teams
-		var newFavTeams = new Array();
-		for (var i = 0; i < favTeams.length; i++) {
-			if (favTeams[i] !== teamname) {
-				newFavTeams[newFavTeams.length] = favTeams[i];
-			}
-		}
-		favTeams = newFavTeams;
-	}
+    var favTeams = getSelectedTeams();
+    // count visible favourite teams (if filtered)
+    var visCnt = 0;
+    for (var i = 0; i < favTeams.length; i++) {
+        for (var j = 0; j < scoreboard.length; j++) {
+            var scoreTeamname = getTeamname(scoreboard[j]);
+            if (scoreTeamname === null) {
+                continue;
+            }
+            if (scoreTeamname === favTeams[i]) {
+                visCnt++;
+                break;
+            }
+        }
+    }
+    var teamname = getTeamname(scoreboard[id + visCnt]);
+    if (show) {
+        favTeams[favTeams.length] = teamname;
+    } else {
+        // copy all other teams
+        var newFavTeams = new Array();
+        for (var i = 0; i < favTeams.length; i++) {
+            if (favTeams[i] !== teamname) {
+                newFavTeams[newFavTeams.length] = favTeams[i];
+            }
+        }
+        favTeams = newFavTeams;
+    }
 
-	var cookieVal = JSON.stringify(favTeams);
-	setCookie("domjudge_teamselection", cookieVal);
+    var cookieVal = JSON.stringify(favTeams);
+    setCookie("domjudge_teamselection", cookieVal);
 
 
-	$('.loading-indicator').addClass('ajax-loader');
-	$.ajax({
-		url: scoreboardUrl,
-		cache: false
-	}).done(function(data, status, jqXHR) {
-		processAjaxResponse(jqXHR, data);
-		$('.loading-indicator').removeClass('ajax-loader');
-	});
+    $('.loading-indicator').addClass('ajax-loader');
+    $.ajax({
+        url: scoreboardUrl,
+        cache: false
+    }).done(function(data, status, jqXHR) {
+        processAjaxResponse(jqXHR, data);
+        $('.loading-indicator').removeClass('ajax-loader');
+    });
 }
 
 function addHeart(rank, row, id, isFav)
 {
-	var heartCol = getHeartCol(row);
-	var iconClass = isFav ? "fas fa-heart" : "far fa-heart";
-	return heartCol.innerHTML + "<span class=\"heart " + iconClass + "\" onclick=\"toggle(" + id + "," + (isFav ? "false" : "true") + ")\"></span>";
+    var heartCol = getHeartCol(row);
+    var iconClass = isFav ? "fas fa-heart" : "far fa-heart";
+    return heartCol.innerHTML + "<span class=\"heart " + iconClass + "\" onclick=\"toggle(" + id + "," + (isFav ? "false" : "true") + ")\"></span>";
 }
 
 function initFavouriteTeams()
 {
-	var scoreboard = getScoreboard();
-	if (scoreboard === null) {
-		return;
-	}
+    var scoreboard = getScoreboard();
+    if (scoreboard === null) {
+        return;
+    }
 
-	var favTeams = getSelectedTeams();
-	var toAdd = new Array();
-	var cntFound = 0;
-	var lastRank = 0;
-	for (var j = 0; j < scoreboard.length; j++) {
-		var found = false;
-		var teamname = getTeamname(scoreboard[j]);
-		if (teamname === null) {
-			continue;
-		}
-		var firstCol = getRank(scoreboard[j]);
-		var heartCol = getHeartCol(scoreboard[j]);
-		var rank = firstCol.innerHTML;
-		for (var i = 0; i < favTeams.length; i++) {
-			if (teamname === favTeams[i]) {
-				found = true;
-				heartCol.innerHTML = addHeart(rank, scoreboard[j], j, found);
-				toAdd[cntFound] = scoreboard[j].cloneNode(true);
-				if (rank === "") {
-					// make rank explicit in case of tie
-					getRank(toAdd[cntFound]).innerHTML += lastRank;
-				}
-				scoreboard[j].style.background = "lightyellow";
-				cntFound++;
-				break;
-			}
-		}
-		if (!found) {
-			heartCol.innerHTML = addHeart(rank, scoreboard[j], j, found);
-		}
-		if (rank !== "") {
-			lastRank = rank;
-		}
-	}
+    var favTeams = getSelectedTeams();
+    var toAdd = new Array();
+    var cntFound = 0;
+    var lastRank = 0;
+    for (var j = 0; j < scoreboard.length; j++) {
+        var found = false;
+        var teamname = getTeamname(scoreboard[j]);
+        if (teamname === null) {
+            continue;
+        }
+        var firstCol = getRank(scoreboard[j]);
+        var heartCol = getHeartCol(scoreboard[j]);
+        var rank = firstCol.innerHTML;
+        for (var i = 0; i < favTeams.length; i++) {
+            if (teamname === favTeams[i]) {
+                found = true;
+                heartCol.innerHTML = addHeart(rank, scoreboard[j], j, found);
+                toAdd[cntFound] = scoreboard[j].cloneNode(true);
+                if (rank === "") {
+                    // make rank explicit in case of tie
+                    getRank(toAdd[cntFound]).innerHTML += lastRank;
+                }
+                scoreboard[j].style.background = "lightyellow";
+                cntFound++;
+                break;
+            }
+        }
+        if (!found) {
+            heartCol.innerHTML = addHeart(rank, scoreboard[j], j, found);
+        }
+        if (rank !== "") {
+            lastRank = rank;
+        }
+    }
 
-	// copy favourite teams to the top of the scoreboard
-	for (var i = 0; i < cntFound; i++) {
-		var copy = toAdd[i];
-		var style = "";
-		if (i === 0) {
-			style += "border-top: 2px solid black;";
-		}
-		if (i === cntFound - 1) {
-			style += "border-bottom: thick solid black;";
-		}
-		copy.setAttribute("style", style);
-		var tbody = scoreboard[1].parentNode;
-		tbody.insertBefore(copy, scoreboard[i + 1]);
-	}
+    // copy favourite teams to the top of the scoreboard
+    for (var i = 0; i < cntFound; i++) {
+        var copy = toAdd[i];
+        var style = "";
+        if (i === 0) {
+            style += "border-top: 2px solid black;";
+        }
+        if (i === cntFound - 1) {
+            style += "border-bottom: thick solid black;";
+        }
+        copy.setAttribute("style", style);
+        var tbody = scoreboard[1].parentNode;
+        tbody.insertBefore(copy, scoreboard[i + 1]);
+    }
 }
 
 // This function is a specific addition for using DOMjudge within a
@@ -361,52 +361,52 @@ function initFavouriteTeams()
 // Note that team,prob,submission IDs are as expected by iCAT.
 function postVerifyCommentToICAT(url, user, teamid, probid, submissionid)
 {
-	var msg = document.getElementById("comment");
-	if (msg === null) {
-		return;
-	}
+    var msg = document.getElementById("comment");
+    if (msg === null) {
+        return;
+    }
 
-	var form = document.createElement("form");
-	form.setAttribute("method", "post");
-	form.setAttribute("action", url);
-	form.setAttribute("hidden", true);
+    var form = document.createElement("form");
+    form.setAttribute("method", "post");
+    form.setAttribute("action", url);
+    form.setAttribute("hidden", true);
 
-	// setting form target to a window named 'formresult'
-	form.setAttribute("target", "formresult");
+    // setting form target to a window named 'formresult'
+    form.setAttribute("target", "formresult");
 
-	function addField(name, value) {
-		var field = document.createElement("input");
-		field.setAttribute("name", name);
-		field.setAttribute("id",   name);
-		field.setAttribute("value", value);
-		form.appendChild(field);
-	};
+    function addField(name, value) {
+        var field = document.createElement("input");
+        field.setAttribute("name", name);
+        field.setAttribute("id",   name);
+        field.setAttribute("value", value);
+        form.appendChild(field);
+    };
 
-	addField("user", user);
-	addField("priority", 1);
-	addField("submission", submissionid);
-	addField("text", "Team #t"+teamid+" on problem #p"+probid+": "+msg.value);
+    addField("user", user);
+    addField("priority", 1);
+    addField("submission", submissionid);
+    addField("text", "Team #t"+teamid+" on problem #p"+probid+": "+msg.value);
 
-	document.body.appendChild(form);
+    document.body.appendChild(form);
 
-	// creating the 'formresult' window prior to submitting the form
-	window.open('about:blank', 'formresult');
+    // creating the 'formresult' window prior to submitting the form
+    window.open('about:blank', 'formresult');
 
-	form.submit();
+    form.submit();
 }
 
 function toggleExpand(event)
 {
-	var node = event.target.parentNode.querySelector('[data-expanded]');
-	if (event.target.getAttribute('data-expanded') === '1') {
-		node.innerHTML = node.getAttribute('data-collapsed');
-		event.target.setAttribute('data-expanded', 0);
-		event.target.innerHTML = '[expand]';
-	} else {
-		node.innerHTML = node.getAttribute('data-expanded');
-		event.target.setAttribute('data-expanded', 1);
-		event.target.innerHTML = '[collapse]';
-	}
+    var node = event.target.parentNode.querySelector('[data-expanded]');
+    if (event.target.getAttribute('data-expanded') === '1') {
+        node.innerHTML = node.getAttribute('data-collapsed');
+        event.target.setAttribute('data-expanded', 0);
+        event.target.innerHTML = '[expand]';
+    } else {
+        node.innerHTML = node.getAttribute('data-expanded');
+        event.target.setAttribute('data-expanded', 1);
+        event.target.innerHTML = '[collapse]';
+    }
 }
 
 function clarificationAppendAnswer() {
@@ -418,7 +418,7 @@ function clarificationAppendAnswer() {
 }
 
 function confirmLogout() {
-	return confirm("Really log out?");
+    return confirm("Really log out?");
 }
 
 function processAjaxResponse(jqXHR, data) {
@@ -468,17 +468,17 @@ function enableRefresh($url, $after, usingAjax) {
     setCookie('domjudge_refresh', 1);
 
     if(window.location.href == localStorage.getItem('lastUrl')) {
-	window.scrollTo(0, localStorage.getItem('scrollTop'));
+        window.scrollTo(0, localStorage.getItem('scrollTop'));
     } else {
-	localStorage.setItem('lastUrl', window.location.href);
-	localStorage.setItem('scrollTop', 42);
+        localStorage.setItem('lastUrl', window.location.href);
+        localStorage.setItem('scrollTop', 42);
     }
     var scrollTimeout;
     document.addEventListener('scroll', function() {
-      clearTimeout(scrollTimeout);
-      scrollTimeout = setTimeout(function() {
-        localStorage.setItem('scrollTop', $(window).scrollTop());
-      }, 100)
+        clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(function() {
+            localStorage.setItem('scrollTop', $(window).scrollTop());
+        }, 100)
     });
 }
 
@@ -538,8 +538,8 @@ function updateMenuClarifications(data)
         for (var i=0; i<num; i++) {
             sendNotification('New clarification requested.',
                  {'tag': 'clar_' + data[i].clarid,
-                  'link': domjudge_base_url + '/jury/clarifications/'+data[i].clarid,
-                  'body': data[i].body });
+                        'link': domjudge_base_url + '/jury/clarifications/'+data[i].clarid,
+                        'body': data[i].body });
         }
     }
 }
@@ -572,9 +572,9 @@ function updateMenuJudgehosts(data)
         for(var i=0; i<num; i++) {
             sendNotification('Judgehost down.',
                 {'tag': 'host_'+data[i].hostname+'@'+
-                 Math.floor(data[i].polltime),
-                 'link': domjudge_base_url + '/jury/judgehosts/' + encodeURIComponent(data[i].hostname),
-                 'body': data[i].hostname + ' is down'});
+                    Math.floor(data[i].polltime),
+                    'link': domjudge_base_url + '/jury/judgehosts/' + encodeURIComponent(data[i].hostname),
+                    'body': data[i].hostname + ' is down'});
         }
     }
 }
@@ -594,8 +594,8 @@ function updateMenuInternalErrors(data)
         for(var i=0; i<num; i++) {
             sendNotification('Judgehost internal error occurred.',
                 {'tag': 'ie_'+data[i].errorid,
-                 'link': domjudge_base_url + '/internal-errors/' + data[i].errorid,
-                 'body': data[i].description});
+                    'link': domjudge_base_url + '/internal-errors/' + data[i].errorid,
+                    'body': data[i].description});
         }
     }
 }
@@ -613,67 +613,67 @@ function updateMenuBalloons(data)
             text += data[i].pname + ' ' + data[i].name;
             sendNotification('New balloon:',
                  {'tag': 'ball_' + data[i].baloonid,
-                  'link': domjudge_base_url + '/jury/balloons',
-                  'body': text});
+                        'link': domjudge_base_url + '/jury/balloons',
+                        'body': text});
         }
     }
 }
 
 function initializeAjaxModals()
 {
-	var $body = $('body');
-	$body.on('click', '[data-ajax-modal]', function() {
-		var $elem = $(this);
-		var url = $elem.attr('href');
-		if (!url) {
-			return;
-		}
-		$.ajax({
-			url: url,
-			cache: false
-		}).done(function(data, status, jqXHR) {
-			if (jqXHR.getResponseHeader('X-Login-Page')) {
-				window.location = jqXHR.getResponseHeader('X-Login-Page');
-			} else {
-				var $data = $(data);
-				$('body').append($data);
-				$data.modal('show');
-				if ($elem.data('ajax-modal-after')) {
-					window[$elem.data('ajax-modal-after')]($elem);
-				}
+    var $body = $('body');
+    $body.on('click', '[data-ajax-modal]', function() {
+        var $elem = $(this);
+        var url = $elem.attr('href');
+        if (!url) {
+            return;
+        }
+        $.ajax({
+            url: url,
+            cache: false
+        }).done(function(data, status, jqXHR) {
+            if (jqXHR.getResponseHeader('X-Login-Page')) {
+                window.location = jqXHR.getResponseHeader('X-Login-Page');
+            } else {
+                var $data = $(data);
+                $('body').append($data);
+                $data.modal('show');
+                if ($elem.data('ajax-modal-after')) {
+                    window[$elem.data('ajax-modal-after')]($elem);
+                }
 
-				$data.on('hidden.bs.modal', function () {
-					$data.remove();
-				});
-			}
-		});
-		return false;
-	});
+                $data.on('hidden.bs.modal', function () {
+                    $data.remove();
+                });
+            }
+        });
+        return false;
+    });
 
-	$body.on('click', '.modal-dialog button[data-url]', function() {
-		var url = $(this).data('url');
-		$.ajax({
-			url: url,
-			method: 'POST'
-		}).done(function(data) {
-			window.location = data.url;
-		});
-	});
+    $body.on('click', '.modal-dialog button[data-url]', function() {
+        var url = $(this).data('url');
+        $.ajax({
+            url: url,
+            method: 'POST'
+        }).done(function(data) {
+            window.location = data.url;
+        });
+    });
 }
 
 function pinScoreheader()
 {
-	var static_in_url = new URL(window.location.toString().toLowerCase()).searchParams.get("static");
-	var static_scoreboard = static_in_url==="true" || static_in_url==='1';
-	if (!static_scoreboard) {
-		$('.scoreheader th').css('top', $('.fixed-top').css('height'));
-		if ('ResizeObserver' in window) {
-			var resizeObserver = new ResizeObserver(() => {
-				$('.scoreheader th').css('top', $('.fixed-top').css('height'));
-			});
-			resizeObserver.observe($('.fixed-top')[0]);
-		}
-	}
+    var static_in_url = new URL(window.location.toString().toLowerCase()).searchParams.get("static");
+    var static_scoreboard = static_in_url==="true" || static_in_url==='1';
+    if (!static_scoreboard) {
+        $('.scoreheader th').css('top', $('.fixed-top').css('height'));
+        if ('ResizeObserver' in window) {
+            var resizeObserver = new ResizeObserver(() => {
+                $('.scoreheader th').css('top', $('.fixed-top').css('height'));
+            });
+            resizeObserver.observe($('.fixed-top')[0]);
+        }
+    }
 }
 
 function humanReadableTimeDiff(seconds) {

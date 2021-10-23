@@ -123,7 +123,7 @@ class ScoreboardIntegrationTest extends KernelTestCase
         $hostname = self::CONTEST_NAME.'-judgehost';
         $this->judgehost = $this->em->getRepository(Judgehost::class)
             ->findOneBy(['hostname' => $hostname]);
-        if ( !$this->judgehost ) {
+        if (!$this->judgehost) {
             $this->judgehost = new Judgehost();
             $this->judgehost
                 ->setHostname($hostname);
@@ -145,7 +145,7 @@ class ScoreboardIntegrationTest extends KernelTestCase
                 ->setName(self::CONTEST_NAME.' team '.$i)
                 ->setCategory($category);
             $this->em->persist($this->teams[$i]);
-       }
+        }
 
         for($i=0; $i<self::NUM_PROBLEMS; $i++) {
             $letter = chr(ord('a') + $i);
@@ -173,7 +173,7 @@ class ScoreboardIntegrationTest extends KernelTestCase
     protected function tearDown(): void
     {
         // Preserve the data for inspection if a test failed.
-        if ( !$this->hasFailed() ) {
+        if (!$this->hasFailed()) {
             $this->em->remove($this->contest);
             $this->em->remove($this->judgehost);
             $this->em->remove($this->rejudging);
@@ -411,7 +411,7 @@ class ScoreboardIntegrationTest extends KernelTestCase
     {
         $scores = $scoreboard->getScores();
 
-        foreach ( $expected_scores as $row ) {
+        foreach ($expected_scores as $row) {
             $team = $row['team'];
             $name = $team->getEffectiveName();
 
@@ -500,7 +500,7 @@ class ScoreboardIntegrationTest extends KernelTestCase
             ->setSubmittime($submittime);
         $this->em->persist($submission);
 
-        if ( $verdict!==null ) {
+        if ($verdict!==null) {
             $judging = new Judging();
             $judging
                 ->setSubmission($submission)
@@ -509,7 +509,7 @@ class ScoreboardIntegrationTest extends KernelTestCase
                 ->setEndtime($submittime + 10)
                 ->setResult($verdict);
 
-            if ( $verified ) {
+            if ($verified) {
                 $judging
                     ->setVerified(true)
                     ->setJuryMember(self::CONTEST_NAME.'-auto-verifier');
@@ -531,7 +531,7 @@ class ScoreboardIntegrationTest extends KernelTestCase
 
     function getConfig(string $name)
     {
-        if ( !in_array($name, $this->configValues) ) {
+        if (!in_array($name, $this->configValues)) {
             throw new \Exception("No configuration value set for '$name'");
         }
 

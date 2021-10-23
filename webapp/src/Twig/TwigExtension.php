@@ -392,19 +392,19 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
      */
     public function countryFlag(?string $countryCode, bool $showFullname = false): string
     {
-       if (empty($countryCode)) return '';
+        if (empty($countryCode)) return '';
 
-       $countryAlpha2  = strtolower(Countries::getAlpha2Code($countryCode));
-       $assetFunction  = $this->twig->getFunction('asset')->getCallable();
-       $countryFlagUrl = call_user_func($assetFunction, sprintf('flags/4x3/%s.svg', $countryAlpha2));
+        $countryAlpha2  = strtolower(Countries::getAlpha2Code($countryCode));
+        $assetFunction  = $this->twig->getFunction('asset')->getCallable();
+        $countryFlagUrl = call_user_func($assetFunction, sprintf('flags/4x3/%s.svg', $countryAlpha2));
 
-       $countryName    = Countries::getAlpha3Name($countryCode);
+        $countryName    = Countries::getAlpha3Name($countryCode);
 
-       if ($showFullname) {
-           return sprintf('<img src="%s" alt="" class="countryflag"> %s',
+        if ($showFullname) {
+            return sprintf('<img src="%s" alt="" class="countryflag"> %s',
                $countryFlagUrl, $countryName);
-       }
-       return sprintf('<img loading="lazy" src="%s" alt="%s" title="%s" class="countryflag">',
+        }
+        return sprintf('<img loading="lazy" src="%s" alt="%s" title="%s" class="countryflag">',
            $countryFlagUrl, $countryCode, $countryName);
     }
 

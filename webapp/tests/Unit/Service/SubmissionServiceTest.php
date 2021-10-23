@@ -13,7 +13,7 @@ class SubmissionServiceTest extends KernelTestCase
      */
     public function testGetFinalResult(array $runresults, array $resultsPrio, ?string $result) : void
     {
-       self::assertSame($result, SubmissionService::getFinalResult($runresults, $resultsPrio));
+        self::assertSame($result, SubmissionService::getFinalResult($runresults, $resultsPrio));
     }
 
     public function provideRunResults() : Generator {
