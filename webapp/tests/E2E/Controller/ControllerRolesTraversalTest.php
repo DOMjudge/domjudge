@@ -90,9 +90,9 @@ class ControllerRolesTraversalTest extends BaseTest
     {
         $done = [];
         do {
-            $toCheck = array_diff($urlsToCheck,$done);
+            $toCheck = array_diff($urlsToCheck, $done);
             foreach ($toCheck as $url) {
-                if (strpos($url,'/jury/contests') !== false) {
+                if (strpos($url, '/jury/contests') !== false) {
                     continue;
                 }
                 if (!$this->urlExcluded($url)) {
@@ -101,7 +101,7 @@ class ControllerRolesTraversalTest extends BaseTest
                 $done[] = $url;
             }
         }
-        while (array_diff($done,$urlsToCheck));
+        while (array_diff($done, $urlsToCheck));
         return $urlsToCheck;
     }
 
@@ -176,7 +176,7 @@ class ControllerRolesTraversalTest extends BaseTest
         $this->client->request('GET', '/jury/change-contest/-1');
         $this->client->request('GET', $url);
         $response = $this->client->getResponse();
-        self::assertNotEquals(500, $response->getStatusCode(), $message=sprintf('Failed at %s',$url));
+        self::assertNotEquals(500, $response->getStatusCode(), $message=sprintf('Failed at %s', $url));
         if ($dropdown) {
             self::assertSelectorExists('a#navbarDropdownContests:contains("no contest")');
         }

@@ -177,7 +177,7 @@ class ScoreboardIntegrationTest extends KernelTestCase
             $this->em->remove($this->contest);
             $this->em->remove($this->judgehost);
             $this->em->remove($this->rejudging);
-            foreach ($this->teams    as $team)    $this->em->remove($team);
+            foreach ($this->teams as $team)    $this->em->remove($team);
             foreach ($this->problems as $problem) $this->em->remove($problem);
         }
 
@@ -418,9 +418,9 @@ class ScoreboardIntegrationTest extends KernelTestCase
             $score = $scores[$team->getTeamid()];
             $this->assertInstanceOf(TeamScore::class, $score);
 
-            $this->assertEquals($row['rank'],   $score->rank, "Rank for '$name'");
+            $this->assertEquals($row['rank'], $score->rank, "Rank for '$name'");
             $this->assertEquals($row['solved'], $score->numPoints, "# solved for '$name'");
-            $this->assertEquals($row['time'],   $score->totalTime, "Total time for '$name'");
+            $this->assertEquals($row['time'], $score->totalTime, "Total time for '$name'");
         }
     }
 
@@ -429,7 +429,7 @@ class ScoreboardIntegrationTest extends KernelTestCase
         $matrix = $scoreboard->getMatrix();
         $teams = [];
         $probs = [];
-        foreach ($scoreboard->getTeams()    as $team) $teams[$team->getTeamid()] = $team;
+        foreach ($scoreboard->getTeams() as $team) $teams[$team->getTeamid()] = $team;
         foreach ($scoreboard->getProblems() as $prob) $probs[$prob->getProbid()] = $prob;
 
         $fts_probid2teamid = [];

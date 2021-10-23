@@ -596,7 +596,7 @@ if ($retval!==0) {
     error("chroot validation check exited with exitcode $retval");
 }
 
-foreach ($endpoints as $id=>$endpoint) {
+foreach ($endpoints as $id => $endpoint) {
     $endpointID = $id;
     registerJudgehost($myhost);
 }
@@ -611,7 +611,7 @@ $lastWorkdir = null;
 while (true) {
     // If all endpoints are waiting, sleep for a bit
     $dosleep = true;
-    foreach ($endpoints as $id=>$endpoint) {
+    foreach ($endpoints as $id => $endpoint) {
         if ($endpoint['errorred']) {
             $endpointID = $id;
             registerJudgehost($myhost);
@@ -629,7 +629,7 @@ while (true) {
         } else {
             usleep($waittime);
         }
-        $waittime = min($waittime*2,MAXIMAL_WAITTIME_USEC);
+        $waittime = min($waittime*2, MAXIMAL_WAITTIME_USEC);
     }
 
     // Increment our currentEndpoint pointer

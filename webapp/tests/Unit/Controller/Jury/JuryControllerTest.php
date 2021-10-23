@@ -194,7 +194,7 @@ abstract class JuryControllerTest extends BaseTest
                 // First fill with default values, the 0th item of the array
                 // Overwrite with data to test with.
                 foreach ([static::$addEntities[0], $element] as $item) {
-                    foreach ($item as $id=>$field) {
+                    foreach ($item as $id => $field) {
                         // Skip elements which we cannot set yet
                         // We can not set checkboxes directly
                         // We can not set the fields set by JS directly
@@ -233,12 +233,12 @@ abstract class JuryControllerTest extends BaseTest
             }
             $this->verifyPageResponse('GET', static::$baseUrl, 200);
             foreach (static::$addEntities as $element) {
-                foreach ($element as $id=>$value) {
+                foreach ($element as $id => $value) {
                     if (is_array($value)) {
                         if (in_array($id, static::$addEntitiesCount)) {
                             self::assertSelectorExists('body:contains("' . count($element[$id]) . '")');
                         } else {
-                            foreach ($value as $id2=>$value2) {
+                            foreach ($value as $id2 => $value2) {
                                 if (is_array($value2)) {
                                     $this->helperCheckExistance((string)$id, $value2, $element);
                                 }
@@ -290,9 +290,9 @@ abstract class JuryControllerTest extends BaseTest
             $button = $this->client->getCrawler()->selectButton('Save');
             $form = $button->form($formFields, 'POST');
             $this->client->submit($form);
-            self::assertNotEquals($this->client->getResponse()->getStatusCode(),500);
+            self::assertNotEquals($this->client->getResponse()->getStatusCode(), 500);
             $this->verifyPageResponse('GET', $singlePageLink, 200);
-            foreach ($formDataValues as $id=>$element) {
+            foreach ($formDataValues as $id => $element) {
                 if (in_array($formDataKeys[$id], static::$addEntitiesShown)) {
                     self::assertSelectorExists('body:contains("' . $element . '")');
                 }
@@ -305,8 +305,8 @@ abstract class JuryControllerTest extends BaseTest
         foreach (static::$addEntities as $row) {
             $formdataKeys = [];
             $formdataValues = [];
-            foreach (static::$addEntities[0] as $key=>$value) {
-                if (!in_array($key,static::$editEntitiesSkipFields)) {
+            foreach (static::$addEntities[0] as $key => $value) {
+                if (!in_array($key, static::$editEntitiesSkipFields)) {
                     $formdataKeys[] = $key;
                     // There are some special fields like passwords which we only update when set.
                     if (in_array($key, static::$specialFieldOnlyUpdate)) {

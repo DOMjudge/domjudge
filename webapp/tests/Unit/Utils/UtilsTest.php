@@ -169,7 +169,7 @@ class UtilsTest extends TestCase
             $now = time();
             $year = 365*24*3600;
             for ($i=0; $i<10000; $i++) {
-                $t = (float)sprintf('%d.%03d', $now - $year + rand(0,2*$year), rand(0,999));
+                $t = (float)sprintf('%d.%03d', $now - $year + rand(0, 2*$year), rand(0, 999));
                 $t2 = Utils::toEpochFloat(Utils::absTime($t));
                 self::assertEqualsWithDelta($t, $t2, 0.0000001, "comparing random times in TZ=$tz");
             }
@@ -406,11 +406,11 @@ class UtilsTest extends TestCase
      */
     public function testCalcPenaltyTime() : void
     {
-        self::assertEquals(0,  Utils::calcPenaltyTime(true, 1, 20, false));
+        self::assertEquals(0, Utils::calcPenaltyTime(true, 1, 20, false));
         self::assertEquals(20, Utils::calcPenaltyTime(true, 2, 20, false));
         self::assertEquals(40, Utils::calcPenaltyTime(true, 3, 20, false));
         self::assertEquals(60, Utils::calcPenaltyTime(true, 4, 20, false));
-        self::assertEquals(0,  Utils::calcPenaltyTime(true, 1, 25, false));
+        self::assertEquals(0, Utils::calcPenaltyTime(true, 1, 25, false));
         self::assertEquals(25, Utils::calcPenaltyTime(true, 2, 25, false));
         self::assertEquals(50, Utils::calcPenaltyTime(true, 3, 25, false));
         self::assertEquals(75, Utils::calcPenaltyTime(true, 4, 25, false));
@@ -421,11 +421,11 @@ class UtilsTest extends TestCase
      */
     public function testCalcPenaltyTimeSeconds() : void
     {
-        self::assertEquals(0,    Utils::calcPenaltyTime(true, 1, 20, true));
+        self::assertEquals(0, Utils::calcPenaltyTime(true, 1, 20, true));
         self::assertEquals(1200, Utils::calcPenaltyTime(true, 2, 20, true));
         self::assertEquals(2400, Utils::calcPenaltyTime(true, 3, 20, true));
         self::assertEquals(3600, Utils::calcPenaltyTime(true, 4, 20, true));
-        self::assertEquals(0,    Utils::calcPenaltyTime(true, 1, 50, true));
+        self::assertEquals(0, Utils::calcPenaltyTime(true, 1, 50, true));
         self::assertEquals(3000, Utils::calcPenaltyTime(true, 2, 50, true));
         self::assertEquals(6000, Utils::calcPenaltyTime(true, 3, 50, true));
         self::assertEquals(9000, Utils::calcPenaltyTime(true, 4, 50, true));
@@ -891,7 +891,7 @@ part.";
 
         $response = Utils::StreamAsBinaryFile($content, $filename)->__toString();
 
-        self::assertRegExp('#Content-Disposition:\s+attachment; filename="' . str_replace('.','\.', $filename) . '"#', $response);
+        self::assertRegExp('#Content-Disposition:\s+attachment; filename="' . str_replace('.', '\.', $filename) . '"#', $response);
         self::assertRegExp("#Content-Type:\s+application/octet-stream#", $response);
         self::assertRegExp("#Content-Length:\s+$length#", $response);
         self::assertRegExp("#Content-Transfer-Encoding:\s+binary#", $response);
@@ -902,14 +902,14 @@ part.";
      */
     public function testToTsvField() : void
     {
-        self::assertEquals('team name',    Utils::toTsvField('team name'));
+        self::assertEquals('team name', Utils::toTsvField('team name'));
         self::assertEquals('Team,,, name', Utils::toTsvField('Team,,, name'));
-        self::assertEquals('team\\nname',  Utils::toTsvField("team\nname"));
+        self::assertEquals('team\\nname', Utils::toTsvField("team\nname"));
         self::assertEquals('team\\tname\\nexample\\t', Utils::toTsvField("team\tname\nexample\t"));
         self::assertEquals('team\\r\\nname', Utils::toTsvField("team\r\nname"));
         self::assertEquals('tea\\\\mname', Utils::toTsvField("tea\\mname"));
-        self::assertEquals('team nåme…',   Utils::toTsvField("team nåme…"));
-        self::assertEquals('team🎈name',   Utils::toTsvField("team🎈name"));
+        self::assertEquals('team nåme…', Utils::toTsvField("team nåme…"));
+        self::assertEquals('team🎈name', Utils::toTsvField("team🎈name"));
     }
 
     /**
@@ -919,17 +919,17 @@ part.";
     {
         $bs  = "\\";
         $tab = "\t";
-        self::assertEquals(["team name", "rank"],    Utils::parseTsvLine("team name".$tab."rank"));
+        self::assertEquals(["team name", "rank"], Utils::parseTsvLine("team name".$tab."rank"));
         self::assertEquals(["team\tname\t", "rank"], Utils::parseTsvLine("team".$bs."t"."name".$bs."t".$tab."rank"));
         self::assertEquals(["team\nname\r", "rank"], Utils::parseTsvLine("team".$bs."n"."name".$bs."r".$tab."rank"));
         self::assertEquals(["team\\name\\", "rank"], Utils::parseTsvLine("team".$bs.$bs."name".$bs.$bs.$tab."rank"));
-        self::assertEquals([$bs],                    Utils::parseTsvLine($bs.$bs));
-        self::assertEquals([$bs."t"],                Utils::parseTsvLine($bs.$bs."t"));
-        self::assertEquals(["Team,,, name"],         Utils::parseTsvLine("Team,,, name\n"));
+        self::assertEquals([$bs], Utils::parseTsvLine($bs.$bs));
+        self::assertEquals([$bs."t"], Utils::parseTsvLine($bs.$bs."t"));
+        self::assertEquals(["Team,,, name"], Utils::parseTsvLine("Team,,, name\n"));
         self::assertEquals(["Team", "", "", " nm "], Utils::parseTsvLine("Team".$tab.$tab.$tab." nm \r\n"));
-        self::assertEquals(["tea\\mname", "rank"],   Utils::parseTsvLine("tea".$bs.$bs."mname".$tab."rank"));
-        self::assertEquals(["team nåme…", "rank"],   Utils::parseTsvLine("team nåme…".$tab."rank"));
-        self::assertEquals(["team🎈name", "rank"],   Utils::parseTsvLine("team🎈name".$tab."rank"));
+        self::assertEquals(["tea\\mname", "rank"], Utils::parseTsvLine("tea".$bs.$bs."mname".$tab."rank"));
+        self::assertEquals(["team nåme…", "rank"], Utils::parseTsvLine("team nåme…".$tab."rank"));
+        self::assertEquals(["team🎈name", "rank"], Utils::parseTsvLine("team🎈name".$tab."rank"));
     }
 
     /**

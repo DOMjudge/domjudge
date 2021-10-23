@@ -76,7 +76,7 @@ class ConfigController extends AbstractController
         unset($spec);
         /** @var Configuration[] $options */
         $options = $this->em->createQueryBuilder()
-            ->from(Configuration::class, 'c',  'c.name')
+            ->from(Configuration::class, 'c', 'c.name')
             ->select('c')
             ->getQuery()
             ->getResult();

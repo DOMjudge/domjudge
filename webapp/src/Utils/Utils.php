@@ -600,7 +600,7 @@ class Utils
         $l = sizeof($lcs);
         $i = 0;
         $j = 0;
-        for ($k = 0; $k < $l ; $k++) {
+        for ($k = 0; $k < $l; $k++) {
             while ($i < $n1 && $tokens1[$i] != $lcs[$k]) {
                 $diff .= "<del>" . Utils::specialchars($tokens1[$i]) . "</del> ";
                 $i++;
@@ -857,7 +857,7 @@ class Utils
      * @param string $filename
      * @return StreamedResponse
      */
-    public static function streamAsBinaryFile(string $content, string $filename, string $type='octet-stream'): StreamedResponse
+    public static function streamAsBinaryFile(string $content, string $filename, string $type = 'octet-stream'): StreamedResponse
     {
         $response = new StreamedResponse();
         $response->setCallback(function () use ($content) {
