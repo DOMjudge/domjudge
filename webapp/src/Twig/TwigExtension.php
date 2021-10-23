@@ -938,7 +938,6 @@ __EDITOR__.getSession().on('change', function() {
     textarea.value = __EDITOR__.getSession().getValue();
 });
 JS;
-
         } else {
             $extraForEdit = '';
         }

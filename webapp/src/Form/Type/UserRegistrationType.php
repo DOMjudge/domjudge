@@ -226,7 +226,6 @@ class UserRegistrationType extends AbstractType
                 ->getOneOrNullResult();
             $user->addUserRole($role);
         });
-
     }
 
     /**

@@ -9,7 +9,6 @@ use JMS\Serializer\Annotation as Serializer;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Intl\Countries;
 
-
 /**
  * Affilitations for teams (e.g.: university, company).
  *

@@ -340,5 +340,4 @@ class GeneralInfoController extends AbstractFOSRestController
             return 'cid';
         }
     }
-
 }

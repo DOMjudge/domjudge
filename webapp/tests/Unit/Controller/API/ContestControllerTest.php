@@ -48,7 +48,6 @@ class ContestControllerTest extends BaseTest
         $this->removeTestContainer();
 
         parent::setUp();
-
     }
 
     protected function tearDown(): void

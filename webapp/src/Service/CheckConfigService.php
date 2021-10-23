@@ -690,7 +690,6 @@ class CheckConfigService
                         // Contestproblem is checked using Problem
                         ContestProblem::class,
                     ]) && ($externalIdField = $this->eventLogService->externalIdFieldForEntity($class))) {
-
                     $result[$shortClass] = $this->checkExternalIdentifiers($class, $externalIdField);
                 }
             } catch (BadMethodCallException $e) {

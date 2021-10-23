@@ -27,7 +27,6 @@ use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Annotation\Route;
 
-
 /**
  * @Route("/jury/teams")
  * @IsGranted("ROLE_JURY")

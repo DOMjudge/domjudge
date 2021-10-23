@@ -47,5 +47,4 @@ class ProblemControllerTest extends BaseTest
     ];
 
     protected $expectedAbsent = ['4242', 'nonexistent'];
-
 }

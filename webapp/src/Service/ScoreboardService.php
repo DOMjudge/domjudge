@@ -951,7 +951,6 @@ class ScoreboardService
         ];
 
         if ($contest) {
-
             if ($request && $response) {
                 $scoreFilter = $this->initializeScoreboardFilter($request, $response);
             } else {

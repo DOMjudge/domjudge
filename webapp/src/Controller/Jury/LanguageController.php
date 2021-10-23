@@ -332,6 +332,4 @@ class LanguageController extends BaseController
                                      [$language], $this->generateUrl('jury_languages')
         );
     }
-
-
 }

@@ -153,7 +153,6 @@ abstract class BaseController extends AbstractController
                 $tableRelations = [];
                 foreach ($metadata->getAssociationMappings() as $associationMapping) {
                     if (isset($associationMapping['joinColumns']) && count($associationMapping['joinColumns']) === 1) {
-
                         foreach ($associationMapping['joinColumns'] as $joinColumn) {
                             $type                                = $joinColumn['onDelete'] ?? null;
                             $tableRelations[$associationMapping['fieldName']] = [

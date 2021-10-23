@@ -104,7 +104,6 @@ class DOMJudgeXHeadersAuthenticator extends AbstractGuardAuthenticator
         if ($request->attributes->get('_route') === 'login'
             && $request->isMethod('POST')
             && $request->request->get('loginmethod') === 'xheaders') {
-
             // Use target URL from session if set
             if ($providerKey !== null &&
                 $targetUrl = $this->getTargetPath($request->getSession(), $providerKey)) {
