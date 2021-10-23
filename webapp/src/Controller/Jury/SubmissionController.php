@@ -964,7 +964,7 @@ class SubmissionController extends BaseController
 
         if ($judging->getResult() === null) {
             $this->addFlash('warning', 'Please be patient, this judging is still in progress.');
-        } else if ($judging->getJudgeCompletely()) {
+        } elseif ($judging->getJudgeCompletely()) {
             $this->addFlash('warning', 'This judging was already requested to be judged completely.');
         } else {
             $numRequested = $this->em->getConnection()->executeUpdate(

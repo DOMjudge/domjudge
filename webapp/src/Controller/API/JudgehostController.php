@@ -452,7 +452,7 @@ class JudgehostController extends AbstractFOSRestController
                             ]
                         );
                         $this->em->flush();
-                    } else if ($judging->getResult() !== Judging::RESULT_COMPILER_ERROR) {
+                    } elseif ($judging->getResult() !== Judging::RESULT_COMPILER_ERROR) {
                         // The new result contradicts a former one, that's not good.
                         // Since at least one other judgehost was successful, but we were not, assume that the current judgehost
                         // is broken and disable it.
