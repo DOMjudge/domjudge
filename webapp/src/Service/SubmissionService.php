@@ -610,7 +610,7 @@ class SubmissionService
         $judging
             ->setContest($contest)
             ->setSubmission($submission);
-        if ($juryMember !== NULL) {
+        if ($juryMember !== null) {
             $judging->setJuryMember($juryMember);
         }
         $this->em->persist($judging);

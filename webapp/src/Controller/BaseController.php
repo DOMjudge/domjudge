@@ -258,7 +258,7 @@ abstract class BaseController extends AbstractController
         EntityManagerInterface $entityManager
     ): array
     {
-        $isError          = False;
+        $isError          = false;
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         $inflector        = InflectorFactory::create()->build();
         $readableType     = str_replace('_', ' ', Utils::tableForEntity($entities[0]));
