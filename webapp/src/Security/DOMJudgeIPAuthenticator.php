@@ -175,7 +175,6 @@ class DOMJudgeIPAuthenticator extends AbstractGuardAuthenticator
         if ($request->attributes->get('_route') === 'login'
             && $request->isMethod('POST')
             && $request->request->get('loginmethod') === 'ipaddress') {
-
             // Use target URL from session if set
             if ($providerKey !== null &&
                 $targetUrl = $this->getTargetPath($request->getSession(), $providerKey)) {

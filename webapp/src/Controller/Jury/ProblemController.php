@@ -40,7 +40,6 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Yaml\Yaml;
 use ZipArchive;
 
-
 /**
  * @Route("/jury/problems")
  * @IsGranted("ROLE_JURY")

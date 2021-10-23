@@ -1381,5 +1381,4 @@ class DOMJudgeService
 
         return $res;
     }
-
 }

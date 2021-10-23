@@ -6,7 +6,6 @@ use App\Service\SubmissionService;
 use Generator;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
-
 class SubmissionServiceTest extends KernelTestCase
 {
     /**

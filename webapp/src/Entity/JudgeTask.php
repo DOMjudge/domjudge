@@ -386,7 +386,6 @@ class JudgeTask
                 return JudgeTask::PRIORITY_HIGH;
             default:
                 return JudgeTask::PRIORITY_DEFAULT;
-
         }
     }
 }

@@ -925,7 +925,6 @@ class ImportEventFeedCommand extends Command
                 ->setEndtimeString($fullDuration)
                 ->setFreezetimeString($fullFreeze)
                 ->updateTimes();
-
         } else {
             // Now set the data
             $contest
@@ -1299,7 +1298,6 @@ class ImportEventFeedCommand extends Command
                 $this->addPendingEvent('organization', $organizationId, $event);
                 return;
             }
-
         }
         $team
             ->setCategory($category)

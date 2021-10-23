@@ -30,5 +30,4 @@ class AwardsControllerTest extends BaseTest
     public function testListWithAbsentIds(): void {
         static::markTestSkipped(static::$skipMessageIDs);
     }
-
 }

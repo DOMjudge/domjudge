@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 
 namespace App\Tests\Unit\Controller\API;
+
 use App\Service\DOMJudgeService;
 
 class ExecutableControllerTest extends BaseTest
@@ -49,6 +50,4 @@ class ExecutableControllerTest extends BaseTest
 
         return $this->unzipString($decoded);
     }
-
-
 }

@@ -609,7 +609,6 @@ $endpointIDs = array_keys($endpoints);
 $currentEndpoint = 0;
 $lastWorkdir = null;
 while (true) {
-
     // If all endpoints are waiting, sleep for a bit
     $dosleep = true;
     foreach ($endpoints as $id=>$endpoint) {
@@ -1018,7 +1017,6 @@ function cleanup_judging(string $workdir) : void
     if ($retval!==0) {
         warning("evict script exited with exitcode $retval");
     }
-
 }
 
 function compile(array $judgeTask, string $workdir, string $workdirpath, array $compile_config, string $cpuset_opt,

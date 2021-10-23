@@ -180,5 +180,4 @@ class FreezeData
         $duration = Utils::difftime((float)$this->contest->getStarttime(), (float)$this->contest->getEndtime());
         return (int)($passed * 100. / $duration);
     }
-
 }

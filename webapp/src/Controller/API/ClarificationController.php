@@ -322,5 +322,4 @@ class ClarificationController extends AbstractRestController
     {
         return sprintf('clar.%s', $this->eventLogService->externalIdFieldForEntity(Clarification::class) ?? 'clarid');
     }
-
 }

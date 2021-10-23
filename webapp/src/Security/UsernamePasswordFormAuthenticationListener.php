@@ -24,6 +24,4 @@ class UsernamePasswordFormAuthenticationListener extends BaseUsernamePasswordFor
         }
         return parent::requiresAuthentication($request);
     }
-
-
 }

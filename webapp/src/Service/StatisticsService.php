@@ -320,7 +320,6 @@ class StatisticsService
             if (!in_array($s->getProblem(), $problems)) {
                 $problems[] = $s->getProblem();
             }
-
         }
         usort($submissions, function ($a, $b) {
             if ($a->getSubmitTime() == $b->getSubmitTime()) {

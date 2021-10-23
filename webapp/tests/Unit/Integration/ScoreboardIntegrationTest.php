@@ -449,7 +449,6 @@ class ScoreboardIntegrationTest extends KernelTestCase
                                     "Check FTS matches for team $teamname, problem $probname");
             }
         }
-
     }
 
     function recalcScoreCaches()

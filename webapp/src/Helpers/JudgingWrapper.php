@@ -49,6 +49,4 @@ class JudgingWrapper
     {
         return Utils::roundedFloat($this->maxRunTime);
     }
-
-
 }

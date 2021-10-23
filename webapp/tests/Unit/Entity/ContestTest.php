@@ -31,5 +31,4 @@ class ContestTest extends TestCase
         $contest->addRemovedInterval($removedInterval);
         $this->assertEquals(42+(1*3600)+(47*60)+11 + 444, $contest->getAbsoluteTime("+1:47:11"));
     }
-
 }
