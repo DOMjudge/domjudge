@@ -461,9 +461,9 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
                     $text  = '✓';
                     $class = 'success';
                 }
-            } else if (array_key_exists('valid', $testcase) && !$testcase['valid']) {
+            } elseif (array_key_exists('valid', $testcase) && !$testcase['valid']) {
                 $text = '✕';
-            } else if (array_key_exists('hostname', $testcase) && $testcase['hostname'] !== null) {
+            } elseif (array_key_exists('hostname', $testcase) && $testcase['hostname'] !== null) {
                 $text = '↺';
                 $class = 'info';
             }
@@ -522,7 +522,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
                         $text = '✓';
                         $class = 'success';
                     }
-                } else if ($run->getJudgeTask()->getJudgehost() !== null) {
+                } elseif ($run->getJudgeTask()->getJudgehost() !== null) {
                     $text = '↺';
                     $class = 'info';
                 }

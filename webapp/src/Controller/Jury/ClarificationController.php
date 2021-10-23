@@ -96,7 +96,7 @@ class ClarificationController extends AbstractController
                 $queryBuilder->expr()->eq('clar.queue', ':queue')
             ))
                 ->setParameter(':queue', $currentQueue);
-        } else if ($currentQueue !== "all") {
+        } elseif ($currentQueue !== "all") {
             $queryBuilder->andWhere('clar.queue = :queue')
                 ->setParameter(':queue', $currentQueue);
         }
