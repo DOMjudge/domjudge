@@ -23,6 +23,7 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
@@ -102,7 +103,7 @@ class JuryMiscController extends BaseController
                 ];
             }, $affiliations);
         } elseif (!$this->isGranted('ROLE_JURY')) {
-            throw new HttpException(401, 'Permission denied');
+            throw new AccessDeniedHttpException('Permission denied');
         } elseif ($datatype === 'problems') {
             $problems = $qb->from(Problem::class, 'p')
                 ->select('p.probid', 'p.name')
@@ -181,24 +182,6 @@ class JuryMiscController extends BaseController
                     'text' => $displayname,
                 ];
             }, $contests);
-        } elseif ($datatype === 'affiliations') {
-            $affiliations = $qb->from(TeamAffiliation::class, 'a')
-                ->select('a.affilid', 'a.name', 'a.shortname')
-                ->where($qb->expr()->like('a.name', '?1'))
-                ->orWhere($qb->expr()->like('a.shortname', '?1'))
-                ->orWhere($qb->expr()->eq('a.affilid', '?2'))
-                ->orderBy('a.name', 'ASC')
-                ->getQuery()->setParameter(1, '%' . $q . '%')
-                ->setParameter(2, $q)
-                ->getResult();
-
-            $results = array_map(function (array $affiliation) {
-                $displayname = $affiliation['name'] . " (" . $affiliation['affilid'] . ")";
-                return [
-                    'id' => $affiliation['affilid'],
-                    'text' => $displayname,
-                ];
-            }, $affiliations);
         } else {
             throw new NotFoundHttpException("Unknown AJAX data type: " . $datatype);
         }
