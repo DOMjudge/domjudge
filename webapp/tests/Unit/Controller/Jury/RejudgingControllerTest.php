@@ -58,7 +58,7 @@ class RejudgingControllerTest extends BaseTest
     public function setRejudgingState(?string $contestName): void
     {
         $em = $this->client->getContainer()->get('doctrine.orm.entity_manager');
-        if ($contestName === NULL) {
+        if ($contestName === null) {
             $cid = -1;
         } else {
             /** @var Contest $contest */
@@ -118,7 +118,7 @@ class RejudgingControllerTest extends BaseTest
         foreach(RejudgingStatesFixture::rejudgingStages() as $stage){
             $show[] = $stage[0];
         }
-        yield [Null, $show, [], 4];
+        yield [null, $show, [], 4];
 
         // Rejudging during a contest
         foreach(['demoprac','demo'] as $contestName) {
@@ -128,7 +128,7 @@ class RejudgingControllerTest extends BaseTest
             foreach(RejudgingStatesFixture::rejudgingStages() as $stage){
                 if(in_array($contestName, $stage[4])){
                     $show[] = $stage[0];
-                    if ($stage[1] === NULL) {
+                    if ($stage[1] === null) {
                         $todo++;
                     }
                 } else {

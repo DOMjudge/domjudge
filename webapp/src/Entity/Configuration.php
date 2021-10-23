@@ -59,9 +59,9 @@ class Configuration
     public function setValue($value): Configuration
     {
         // Do not use 'True'/'False' but 1/0 since the former cannot be parsed by the old code.
-        if ($value === TRUE) {
+        if ($value === true) {
             $value = 1;
-        } elseif ($value === FALSE) {
+        } elseif ($value === false) {
             $value = 0;
         }
 

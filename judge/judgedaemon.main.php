@@ -146,13 +146,13 @@ function request(string $url, string $verb = 'GET', $data = '', bool $failonerro
             $errstr = "Authentication failed (error $status) while contacting $url. " .
                 "Check credentials in restapi.secret.";
         } else {
-            $json = json_decode($response, TRUE);
-            if ($json !== NULL) {
-                $response = var_export($json, TRUE);
+            $json = json_decode($response, true);
+            if ($json !== null) {
+                $response = var_export($json, true);
             }
             $errstr = "Error while executing curl $verb to url " . $url .
                 ": http status code: " . $status .
-                ", request size = " . strlen(print_r($data, TRUE)) .
+                ", request size = " . strlen(print_r($data, true)) .
                 ", response: " . $response;
         }
         if ($failonerror) {
@@ -577,7 +577,7 @@ if (!empty($options['e'])) {
             $new_judging_run,
             false
         );
-        if ($response !== NULL) {
+        if ($response !== null) {
             break;
         }
     }
@@ -886,7 +886,7 @@ while (true) {
         if (!judge($judgetask)) {
             // Potentially return remaining outstanding judgetasks here.
             $returnedJudgings = request('judgehosts', 'POST', 'hostname=' . urlencode($myhost), false);
-            if ($returnedJudgings !== NULL) {
+            if ($returnedJudgings !== null) {
                 $returnedJudgings = dj_json_decode($returnedJudgings);
                 foreach ($returnedJudgings as $jud) {
                     $workdir = judging_directory($workdirpath, $jud);
@@ -939,7 +939,7 @@ function registerJudgehost($myhost)
     // If there are any unfinished judgings in the queue in my name,
     // they will not be finished. Give them back.
     $unfinished = request('judgehosts', 'POST', 'hostname=' . urlencode($myhost), false);
-    if ($unfinished === NULL) {
+    if ($unfinished === null) {
         logmsg(LOG_WARNING, "Registering judgehost on endpoint $endpointID failed.");
     } else {
         $unfinished = dj_json_decode($unfinished);
@@ -1234,7 +1234,7 @@ function judge(array $judgeTask): bool
     logmsg(LOG_INFO, "  🏃 Running testcase $judgeTask[testcase_id]...");
     $testcasedir = $workdir . "/testcase" . sprintf('%05d', $judgeTask['testcase_id']);
     $tcfile = fetchTestcase($workdirpath, $judgeTask['testcase_id'], $judgeTask['judgetaskid'], $judgeTask['testcase_hash']);
-    if ($tcfile === NULL) {
+    if ($tcfile === null) {
         // error while fetching testcase
         return false;
     }
@@ -1393,11 +1393,11 @@ function fetchTestcase($workdirpath, $testcase_id, $judgetaskid, $testcase_hash)
         return $tcfile;
     }
     $content = request(sprintf('judgehosts/get_files/testcase/%s', $testcase_id), 'GET', '', false);
-    if ($content === NULL) {
+    if ($content === null) {
         $error = 'Download of ' . $inout . ' failed for case ' . $testcase_id . ', check your problem integrity.';
         logmsg(LOG_ERR, $error);
         disable('testcase', 'testcaseid', $testcase_id, $error, $judgetaskid);
-        return NULL;
+        return null;
     }
     $files = dj_json_decode($content);
     unset($content);

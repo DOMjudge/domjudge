@@ -415,7 +415,7 @@ class DOMJudgeService
                 ->from(Rejudging::class, 'r')
                 ->andWhere('r.endtime is null');
             $curContest = $this->getCurrentContest();
-            if ($curContest !== NULL) {
+            if ($curContest !== null) {
                 $rejudgings = $rejudgings->join('r.submissions', 's')
                     ->andWhere('s.contest = :contest')
                     ->setParameter(':contest', $curContest->getCid())
@@ -757,7 +757,7 @@ class DOMJudgeService
             throw new ServiceUnavailableHttpException(null, 'Not enough memory to extract zip archive');
         } elseif ($res !== true) {
             throw new ServiceUnavailableHttpException(null,
-                'Unknown error while extracting zip archive: ' . print_r($res, TRUE));
+                'Unknown error while extracting zip archive: ' . print_r($res, true));
         }
 
         return $zip;

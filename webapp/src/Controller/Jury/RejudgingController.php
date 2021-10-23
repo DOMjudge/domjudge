@@ -99,7 +99,7 @@ class RejudgingController extends BaseController
         $queryBuilder = $this->em->createQueryBuilder()
             ->select('r')
             ->from(Rejudging::class, 'r');
-        if ($curContest !== NULL) {
+        if ($curContest !== null) {
             $queryBuilder = $queryBuilder->leftJoin(Judging::class, 'j', Join::WITH, 'j.rejudging = r')
                 ->andWhere('j.contest = :contest')
                 ->setParameter(':contest', $curContest->getCid())
@@ -877,7 +877,7 @@ class RejudgingController extends BaseController
             $results = [];
             $runresults = [];
             foreach ($curJudgings as $judging) {
-                if (!in_array($judging['result'], $results) && $judging['result'] != NULL) {
+                if (!in_array($judging['result'], $results) && $judging['result'] != null) {
                     $results[] = $judging['result'];
                 }
                 $judging_runs = $this->em->createQueryBuilder()

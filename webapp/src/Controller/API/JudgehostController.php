@@ -768,9 +768,9 @@ class JudgehostController extends AbstractFOSRestController
 
         // The judgetaskid is allowed to be NULL.
         $judgeTaskId = $request->request->get('judgetaskid');
-        $judging = NULL;
-        $judgingId = NULL;
-        $cid = NULL;
+        $judging = null;
+        $judgingId = null;
+        $cid = null;
         if ($judgeTaskId) {
             /** @var JudgeTask $judgeTask */
             $judgeTask = $this->em->getRepository(JudgeTask::class)->findOneBy(['judgetaskid' => $judgeTaskId]);
@@ -1054,7 +1054,7 @@ class JudgehostController extends AbstractFOSRestController
 
             $hasNullResults = false;
             foreach ($runresults as $runresult) {
-                if ($runresult === NULL) {
+                if ($runresult === null) {
                     $hasNullResults = true;
                     break;
                 }
@@ -1185,7 +1185,7 @@ class JudgehostController extends AbstractFOSRestController
                         ->andWhere('j.rejudging = :rejudgingid')
                         ->setParameter('rejudgingid', $rejudging->getRejudgingid())
                         ->getQuery()
-                        ->setHint(Query::HINT_REFRESH, TRUE)
+                        ->setHint(Query::HINT_REFRESH, true)
                         ->getResult();
                     // TODO: Pick up priority from previous judgings?
                     $this->rejudgingService->createRejudging($rejudging->getReason(), JudgeTask::PRIORITY_DEFAULT, $judgings,

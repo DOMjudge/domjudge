@@ -363,7 +363,7 @@ abstract class JuryControllerTest extends BaseTest
 
     public function testDeleteExtraEntity(): void
     {
-        if (static::$deleteExtra !== NULL) {
+        if (static::$deleteExtra !== null) {
             if (isset(static::$deleteExtra['fixture'])) {
                 $this->loadFixture(static::$deleteExtra['fixture']);
             }
@@ -374,7 +374,7 @@ abstract class JuryControllerTest extends BaseTest
             self::assertSelectorNotExists('body:contains("' . static::$deleteExtra['selector'] . '")');
             $this->verifyPageResponse('GET', static::$deleteExtra['deleteurl'], 404);
         } else {
-            self::assertTrue(True, "Test skipped");
+            self::assertTrue(true, "Test skipped");
         }
     }
 }

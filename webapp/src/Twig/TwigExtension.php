@@ -823,11 +823,11 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         $idx = 0;
         while ($idx < strlen($log)) {
             $slashPos = strpos($log, "/", $idx);
-            if ($slashPos === FALSE) break;
+            if ($slashPos === false) break;
             $time = substr($log, $idx + 1, $slashPos - $idx - 1);
             $idx = $slashPos + 1;
             $closePos = strpos($log, "]", $idx);
-            if ($closePos === FALSE) {
+            if ($closePos === false) {
                 break;
             }
             $lenStr = substr($log, $idx, $closePos - $idx);
