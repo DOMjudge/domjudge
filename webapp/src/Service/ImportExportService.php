@@ -401,15 +401,15 @@ class ImportExportService
     {
         // We'll here assume that the requested file will be of the current contest,
         // as all our scoreboard interfaces do. Column format explanation:
-        // Col	Description	Example content	Type
-        // 1	Institution name	University of Virginia	string
-        // 2	External ID	24314	integer
-        // 3	Position in contest	1	integer
-        // 4	Number of problems the team has solved	4	integer
-        // 5	Total Time	534	integer
-        // 6	Time of the last accepted submission	233	integer   -1 if none
-        // 6+2i-1	Number of submissions for problem i	2	integer
-        // 6+2i	Time when problem i was solved	233	integer   -1 if not solved
+        // Col  Description Example content Type
+        // 1    Institution name    University of Virginia  string
+        // 2    External ID 24314   integer
+        // 3    Position in contest 1   integer
+        // 4    Number of problems the team has solved  4   integer
+        // 5    Total Time  534 integer
+        // 6    Time of the last accepted submission    233 integer   -1 if none
+        // 6+2i-1   Number of submissions for problem i 2   integer
+        // 6+2i Time when problem i was solved  233 integer   -1 if not solved
 
         $contest = $this->dj->getCurrentContest();
         if ($contest === null) {
@@ -456,13 +456,13 @@ class ImportExportService
     {
         // we'll here assume that the requested file will be of the current contest,
         // as all our scoreboard interfaces do
-        // 1 	External ID 	24314 	integer
-        // 2 	Rank in contest 	1 	integer
-        // 3 	Award 	Gold Medal 	string
-        // 4 	Number of problems the team has solved 	4 	integer
-        // 5 	Total Time 	534 	integer
-        // 6 	Time of the last submission 	233 	integer
-        // 7 	Group Winner 	North American 	string
+        // 1    External ID     24314   integer
+        // 2    Rank in contest     1   integer
+        // 3    Award   Gold Medal  string
+        // 4    Number of problems the team has solved  4   integer
+        // 5    Total Time  534     integer
+        // 6    Time of the last submission     233     integer
+        // 7    Group Winner    North American  string
 
         $contest = $this->dj->getCurrentContest();
         if ($contest === null) {

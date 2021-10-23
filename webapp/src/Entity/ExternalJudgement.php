@@ -241,7 +241,7 @@ class ExternalJudgement
         return $this;
     }
 
-   public function getContest(): ?Contest
+    public function getContest(): ?Contest
     {
         return $this->contest;
     }

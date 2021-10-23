@@ -240,14 +240,14 @@ EOF;
                 $val = $dataToSet[$specName];
             }
             if ($specName == 'verification_required' &&
-                $oldValue && !$val ) {
+                $oldValue && !$val) {
                 // If toggled off, we have to send events for all judgings
                 // that are complete, but not verified yet. Scoreboard
                 // cache refresh should take care of the rest. See #645.
                 $this->logUnverifiedJudgings($eventLog);
                 $needsMerge = true;
             }
-            switch ( $spec['type'] ) {
+            switch ($spec['type']) {
                 case 'bool':
                     $optionToSet->setValue((bool)$val);
                     break;
@@ -295,7 +295,7 @@ EOF;
             }
         }
 
-        if ( $needsMerge ) {
+        if ($needsMerge) {
             foreach ($options as $option) $this->em->merge($option);
         }
 

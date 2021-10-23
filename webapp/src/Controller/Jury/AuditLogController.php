@@ -107,7 +107,7 @@ class AuditLogController extends AbstractController
             }
 
             $cid = $logline->getCid();
-            if ( $cid ) {
+            if ($cid) {
                     $data['where']['value'] = "c" . $cid;
                     $data['where']['sortvalue'] = $cid;
                     $data['where']['link'] = $this->generateUrl('jury_contest', ['contestId' => $cid]);

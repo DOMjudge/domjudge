@@ -38,8 +38,8 @@ class TeamClarificationType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder->add('recipient', TextType::class, [
-	    'data' => 'Jury',
-	    'disabled' => true,
+        'data' => 'Jury',
+        'disabled' => true,
         ]);
 
         $subjects = [];

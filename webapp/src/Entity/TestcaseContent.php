@@ -83,7 +83,7 @@ class TestcaseContent
         return $this;
     }
 
-   public function getTestcase(): Testcase
+    public function getTestcase(): Testcase
     {
         return $this->testcase;
     }

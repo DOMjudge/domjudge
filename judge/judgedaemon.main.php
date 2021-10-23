@@ -74,7 +74,7 @@ function close_curl_handles()
 {
     global $endpoints;
     foreach($endpoints as $id => $endpoint) {
-        if ( ! empty($endpoint['ch']) ) {
+        if (! empty($endpoint['ch'])) {
             curl_close($endpoint['ch']);
             unset($endpoints[$id]['ch']);
         }
@@ -164,7 +164,7 @@ function request(string $url, string $verb = 'GET', $data = '', bool $failonerro
         }
     }
 
-    if ( $endpoints[$endpointID]['errorred'] ) {
+    if ($endpoints[$endpointID]['errorred']) {
         $endpoints[$endpointID]['errorred'] = false;
         $endpoints[$endpointID]['waiting'] = false;
         logmsg(LOG_NOTICE, "Reconnected to endpoint $endpointID.");
@@ -359,23 +359,23 @@ function fetch_executable_internal(
                     return [null, "executable must either provide an executable file named 'build' or a C/C++/Java or Python file.", null];
                 }
                 switch ($execlang) {
-                case 'c':
-                    $buildscript .= "gcc -Wall -O2 -std=gnu11 '$source' -o run -lm\n";
+                    case 'c':
+                        $buildscript .= "gcc -Wall -O2 -std=gnu11 '$source' -o run -lm\n";
                     break;
-                case 'cpp':
-                    $buildscript .= "g++ -Wall -O2 -std=gnu++17 '$source' -o run\n";
+                    case 'cpp':
+                        $buildscript .= "g++ -Wall -O2 -std=gnu++17 '$source' -o run\n";
                     break;
-                case 'java':
-                    $source = basename($source, ".java");
-                    $buildscript .= "javac -cp ./ -d ./ '$source'.java\n";
-                    $buildscript .= "echo '#!/bin/sh' > run\n";
-                    // no main class detection here
-                    $buildscript .= "echo 'java -cp ./ '$source >> run\n";
+                    case 'java':
+                        $source = basename($source, ".java");
+                        $buildscript .= "javac -cp ./ -d ./ '$source'.java\n";
+                        $buildscript .= "echo '#!/bin/sh' > run\n";
+                        // no main class detection here
+                        $buildscript .= "echo 'java -cp ./ '$source >> run\n";
                     break;
-                case 'py':
-                    $buildscript .= "echo '#!/bin/sh' > run\n";
-                    // TODO: Check if it's 'python' or 'python3'
-                    $buildscript .= "echo 'python '$source >> run\n";
+                    case 'py':
+                        $buildscript .= "echo '#!/bin/sh' > run\n";
+                        // TODO: Check if it's 'python' or 'python3'
+                        $buildscript .= "echo 'python '$source >> run\n";
                     break;
                 }
                 if (file_put_contents($execbuildpath, $buildscript) === false) {
@@ -398,7 +398,7 @@ function fetch_executable_internal(
         if (!is_file($execrunpath) || !is_executable($execrunpath)) {
             return [null, "Invalid build file, must produce an executable file 'run'.", null];
         }
-        if ( $combined_run_compare ) {
+        if ($combined_run_compare) {
             # For combined run and compare (i.e. for interactive problems), we
             # need to wrap the jury provided 'run' script with 'runpipe' to
             # handle the bidirectional communication.  First 'run' is renamed to
@@ -485,7 +485,7 @@ if (isset($options['h'])) {
     usage();
 }
 
-if ( posix_getuid()==0 || posix_geteuid()==0 ) {
+if (posix_getuid()==0 || posix_geteuid()==0) {
     echo "This program should not be run as root.\n";
     exit(1);
 }
@@ -970,7 +970,7 @@ function disable(string $kind, string $idcolumn, $id, string $description,
         '&judgehostlog=' . urlencode(base64_encode($judgehostlog)) .
         '&disabled=' . urlencode($disabled) .
         '&hostname=' . urlencode($myhost);
-    if ( isset($judgeTaskId) ) {
+    if (isset($judgeTaskId)) {
         $args .= '&judgetaskid=' . urlencode((string)$judgeTaskId);
     }
 

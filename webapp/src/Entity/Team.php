@@ -180,7 +180,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface
         return $this;
     }
 
-   public function getTeamid(): ?int
+    public function getTeamid(): ?int
     {
         return $this->teamid;
     }
@@ -203,7 +203,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface
         return $this;
     }
 
-   public function getName(): string
+    public function getName(): string
     {
         return $this->name;
     }

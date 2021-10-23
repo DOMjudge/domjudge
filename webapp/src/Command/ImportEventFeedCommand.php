@@ -506,11 +506,11 @@ class ImportEventFeedCommand extends Command
         $contestData = null;
         $this->readEventsFromFile($file,
             function(array $event, string $line, &$shouldStop) use ($file, &$contestData) {
-            if ($event['type'] === 'contests') {
-                $contestData = $event['data'];
-                $shouldStop = true;
-            }
-        });
+                if ($event['type'] === 'contests') {
+                    $contestData = $event['data'];
+                    $shouldStop = true;
+                }
+            });
 
         if (!$this->compareContestId($contestData)) {
             fclose($file);
@@ -534,18 +534,18 @@ class ImportEventFeedCommand extends Command
 
         $this->readEventsFromFile($file,
             function(array $event, string $line, &$shouldStop) use ($cacheFile, $file, &$sinceEventIdFound) {
-            if ($sinceEventIdFound) {
-                $this->importEvent($event);
-                $this->lastEventId = $event['id'];
-                fwrite($cacheFile, $line . "\n");
-            } elseif ($event['id'] === $this->sinceEventId) {
-                $sinceEventIdFound = true;
-            }
+                if ($sinceEventIdFound) {
+                    $this->importEvent($event);
+                    $this->lastEventId = $event['id'];
+                    fwrite($cacheFile, $line . "\n");
+                } elseif ($event['id'] === $this->sinceEventId) {
+                    $sinceEventIdFound = true;
+                }
 
-            if ($this->shouldStop) {
-                $shouldStop = true;
-            }
-        });
+                if ($this->shouldStop) {
+                    $shouldStop = true;
+                }
+            });
 
         fclose($file);
         fclose($cacheFile);

@@ -229,7 +229,7 @@ class CheckConfigService
             $vars[$row['Variable_name']] = $row['Value'];
         }
         # MySQL 8 has "transaction_isolation" instead of "tx_isolation".
-        if ( isset($vars['transaction_isolation']) ) {
+        if (isset($vars['transaction_isolation'])) {
             $vars['tx_isolation'] = $vars['transaction_isolation'];
         }
         $max_inout_r = $this->em->getConnection()->fetchAll('SELECT GREATEST(MAX(LENGTH(input)),MAX(LENGTH(output))) as max FROM testcase_content');
@@ -374,7 +374,7 @@ class CheckConfigService
             $this->passwordEncoder->encodePassword($tmp_user, $plainPassword);
             $time_end = microtime(true);
             $counter++;
-        } while ( ($time_end - $time_start) < $time_duration_sample);
+        } while (($time_end - $time_start) < $time_duration_sample);
 
         if ($counter>300) {
             return ['caption' => 'User password hashing',
@@ -549,14 +549,14 @@ class CheckConfigService
                 $result = 'E';
                 $morelanguageerrors[$langid] .= sprintf("No compile script found for %s\n", $langid);
             } elseif ($compile = $language->getCompileExecutable()->getExecid()) {
-               $exec = $this->em->getRepository(Executable::class)->findOneBy(['execid' => $compile]);
-               if (!$exec) {
-                   $result = 'E';
-                   $morelanguageerrors[$langid] .= sprintf("Compile script %s not found for %s\n", $compile, $langid);
-               } elseif ($exec->getType() !== "compile") {
-                   $result = 'E';
-                   $morelanguageerrors[$langid] .= sprintf("Compile script %s exists but is of wrong type (%s instead of compile) for %s\n", $compile, $exec->getType(), $langid);
-               }
+                $exec = $this->em->getRepository(Executable::class)->findOneBy(['execid' => $compile]);
+                if (!$exec) {
+                    $result = 'E';
+                    $morelanguageerrors[$langid] .= sprintf("Compile script %s not found for %s\n", $compile, $langid);
+                } elseif ($exec->getType() !== "compile") {
+                    $result = 'E';
+                    $morelanguageerrors[$langid] .= sprintf("Compile script %s exists but is of wrong type (%s instead of compile) for %s\n", $compile, $exec->getType(), $langid);
+                }
             }
         }
 

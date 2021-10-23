@@ -40,9 +40,9 @@ class GatlingDataFixture extends AbstractDefaultDataFixture implements FixtureGr
         // Enable a bunch of languages:
         $langs = ["csharp", "adb", "f95", "hs", "lua", "pas", "py3", "rb", "scala", "kt"];
         foreach($langs as $langid) {
-          $lang = $manager->getRepository(Language::class)->findOneBy(['langid' => $langid]);
-          $lang->setAllowSubmit(true);
-          $manager->persist($lang);
+            $lang = $manager->getRepository(Language::class)->findOneBy(['langid' => $langid]);
+            $lang->setAllowSubmit(true);
+            $manager->persist($lang);
         }
 
 

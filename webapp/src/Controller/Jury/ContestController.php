@@ -669,7 +669,7 @@ class ContestController extends BaseController
         /** @var Contest $contest */
         $contest  = $this->em->getRepository(Contest::class)->find($contestId);
         if ($contest === null) {
-           throw new BadRequestHttpException("Contest with cid=$contestId not found.");
+            throw new BadRequestHttpException("Contest with cid=$contestId not found.");
         }
         $judgehosts = $this->em->getRepository(Judgehost::class)->findBy([
             'active' => true,
