@@ -178,7 +178,19 @@ DEBOOTDEB="debootstrap_1.0.118ubuntu1_all.deb"
 # variables; if none are given the following defaults are used.
 
 # Ubuntu mirror, modify to match closest mirror
-[ -z "$DEBMIRROR" ] && DEBMIRROR="http://us.archive.ubuntu.com./ubuntu/"
+if [ -z "$DEBMIRROR" ]; then
+	# x86_64 can use the main Ubuntu repo's, other
+	# architectures need to use a mirror from ubuntu-ports.
+	# Besides the main mirror (ports.ubuntu.com) currently
+	# only the one from kumi.systems seems to have most ports
+	# and it is faster than ports.ubuntu.com so we use that as
+	# default.
+	if [ "$(uname -m)" = "x86_64" ]; then
+		DEBMIRROR="http://us.archive.ubuntu.com./ubuntu/"
+	else
+		DEBMIRROR="http://mirror.kumi.systems/ubuntu-ports/"
+	fi
+fi
 
 # A local caching proxy to use for apt-get,
 # (typically an install of aptcacher-ng), for example:
