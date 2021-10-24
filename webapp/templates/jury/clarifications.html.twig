@@ -117,6 +117,11 @@
                 'aoColumnDefs': [
                     {aTargets: ['_all'], bSortable: true, bSearchable: true}
                 ],
+                // Left align the filter box. Modified from the Bootstrap 5 default at
+                // https://datatables.net/reference/option/dom
+                'dom': "<'row'f>" +
+                       "<'row'<'col-sm-12'tr>>" +
+                       "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
             });
             $('.qbut').on('change', function () {
                 var icon = $("#qig" + $(this).attr('data-clarid') );
