@@ -123,6 +123,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             new TwigFilter('scoreTime', [$this, 'scoreTime']),
             new TwigFilter('statusClass', [$this, 'statusClass']),
             new TwigFilter('statusIcon', [$this, 'statusIcon'], ['is_safe' => ['html']]),
+            new TwigFilter('affiliationLogo', [$this, 'affiliationLogo'], ['is_safe' => ['html']]),
             new TwigFilter('descriptionExpand', [$this, 'descriptionExpand'], ['is_safe' => ['html']]),
             new TwigFilter('wrapUnquoted', [$this, 'wrapUnquoted']),
             new TwigFilter('hexColorToRGBA', [$this, 'hexColorToRGBA']),
@@ -320,6 +321,22 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
                 return 'unknown';
         }
         return sprintf('<i class="fas fa-%s-circle"></i>', $icon);
+    }
+
+    /**
+     * Expand affiliation ID to an image
+     * @param string|null $affiliationId The affiliation ID to get the logo for
+     * @return string
+     */
+    public function affiliationLogo(string $affiliationId, string $shortName): string
+    {
+        $organizationFilePath = sprintf('images/affiliations/%s.png', $affiliationId);
+        if($this->assetExists($organizationFilePath)) {
+            return sprintf('<img src="../%s" alt="%s" class="affiliation-logo">',
+                $organizationFilePath, $shortName);
+        }
+
+        return '';
     }
 
     /**

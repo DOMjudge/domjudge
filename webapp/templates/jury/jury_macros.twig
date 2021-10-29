@@ -102,6 +102,8 @@
                                 {%- elseif row.link is defined %}<a href="{{ row.link }}">{% endif %}
                                     {% if key == "status" %}
                                     {{- (item.value|default(item.default|default('')))|statusIcon() -}}
+                                    {% elseif key == "affiliation_logo" %}
+                                    {{- (item.value|default(item.default|default('')))|affiliationLogo(item.title) -}}
                                     {% else %}
                                     {{- (item.value|default(item.default|default(''))) -}}
                                     {% endif %}
