@@ -177,6 +177,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             new TwigFilter('statusClass', [$this, 'statusClass']),
             new TwigFilter('statusIcon', [$this, 'statusIcon'], ['is_safe' => ['html']]),
             new TwigFilter('countryFlag', [$this, 'countryFlag'], ['is_safe' => ['html']]),
+            new TwigFilter('affiliationLogo', [$this, 'affiliationLogo'], ['is_safe' => ['html']]),
             new TwigFilter('descriptionExpand', [$this, 'descriptionExpand'], ['is_safe' => ['html']]),
             new TwigFilter('wrapUnquoted', [$this, 'wrapUnquoted']),
             new TwigFilter('hexColorToRGBA', [$this, 'hexColorToRGBA']),
@@ -406,6 +407,23 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         }
         return sprintf('<img loading="lazy" src="%s" alt="%s" title="%s" class="countryflag">',
            $countryFlagUrl, $countryCode, $countryName);
+    }
+
+    /**
+     * Expand affiliation ID to an image
+     * @param string|null $affiliationId The affiliation ID to get the logo for
+     * @return string
+     */
+    public function affiliationLogo(string $affiliationId, string $shortName): string
+    {
+        if ($asset = $this->dj->assetPath($affiliationId, 'affiliation')) {
+            $assetFunction  = $this->twig->getFunction('asset')->getCallable();
+            $assetUrl       = call_user_func($assetFunction, $asset);
+            return sprintf('<img src="%s" alt="%s" class="affiliation-logo">',
+                $assetUrl, $shortName);
+        }
+
+        return '';
     }
 
     /**

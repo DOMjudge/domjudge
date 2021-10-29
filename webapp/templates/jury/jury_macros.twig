@@ -120,6 +120,8 @@
                                     {{- (item.value|default(item.default|default('')))|statusIcon -}}
                                     {% elseif key == "country" %}
                                     {{- (item.value|default(item.default|default('')))|countryFlag -}}
+                                    {% elseif key == "affiliation_logo" %}
+                                    {{- (item.value|default(item.default|default('')))|affiliationLogo(item.title) -}}
                                     {% else %}
                                     {{- (item.value|default(item.default|default(''))) -}}
                                     {% endif %}

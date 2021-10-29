@@ -90,7 +90,7 @@ class TeamAffiliationController extends BaseController
 
         if ($showFlags) {
             $table_fields['country'] = ['title' => 'country', 'sort' => true];
-            $table_fields['logo'] = ['title' => 'logo', 'sort' => false];
+            $table_fields['affiliation_logo'] = ['title' => 'logo', 'sort' => false];
         }
 
         $table_fields['num_teams'] = ['title' => '# teams', 'sort' => true];
@@ -145,15 +145,8 @@ class TeamAffiliationController extends BaseController
                 ];
             }
 
-            $organizationFilePath = sprintf('images/affiliations/%s.png', $teamAffiliation->getExternalid() ?? $teamAffiliation->getAffilid());
-            $affiliationLogo = '';
-            if (file_exists($webDir . '/' . $organizationFilePath)) {
-                $affiliationLogo = sprintf('<img src="%s" alt="%s" class="affiliation-logo">',
-                    $assetPackage->getUrl($organizationFilePath), $teamAffiliation->getShortname());
-            }
-
-            $affiliationdata['logo'] = [
-                'value' => $affiliationLogo,
+            $affiliationdata['affiliation_logo'] = [
+                'value' => $teamAffiliation->getExternalid() ?? $teamAffiliation->getAffilid(),
                 'title' => $teamAffiliation->getShortname(),
             ];
 
