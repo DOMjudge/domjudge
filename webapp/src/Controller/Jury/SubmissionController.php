@@ -675,7 +675,7 @@ class SubmissionController extends BaseController
 
         $submission = $this->em->getRepository(Submission::class)
             ->findOneBy([
-                            'cid' => $this->dj->getCurrentContest()->getCid(),
+                            'contest' => $this->dj->getCurrentContest(),
                             'externalid' => $externalId
                         ]);
 
