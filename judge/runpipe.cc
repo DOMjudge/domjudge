@@ -51,7 +51,7 @@
 using namespace std;
 
 /* Use the POSIX minimum for PIPE_BUF. */
-#define BUF_SIZE 512
+#define BUF_SIZE 1048576
 
 extern int errno;
 
@@ -257,7 +257,7 @@ void pump_pipes(int *fd_out, int *fd_in, int from_val)
 	FD_SET(*fd_out, &readfds);
 
 	tv.tv_sec = 0;
-	tv.tv_usec = 1000; /* FIXME: this is just in order to not block */
+	tv.tv_usec = 20; /* FIXME: this is just in order to not block */
 	r = select(*fd_out+1, &readfds, NULL, NULL, &tv);
 	if ( r==-1 && errno!=EINTR ) error(errno,"waiting for child data");
 	gettimeofday(&tv, NULL);
