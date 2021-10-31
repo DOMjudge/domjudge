@@ -50,7 +50,7 @@
 
 using namespace std;
 
-/* Use the POSIX minimum for PIPE_BUF. */
+/* Use a buffer size of 1MB, the typical maximum pipe size. */
 #define BUF_SIZE 1048576
 
 extern int errno;
