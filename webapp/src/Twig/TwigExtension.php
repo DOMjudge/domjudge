@@ -754,7 +754,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             $common_prefix = substr($common_prefix, 0, $len);
         }
         if (empty($common_prefix)) {
-            return implode(", ", array_map($this->printHost(), $hostname));
+            return implode(", ", array_map([$this, 'printHost'], $hostnames));
         } else {
             $len_prefix = strlen($common_prefix);
             $local_parts = array_map(function ($host) use ($len_prefix) {
