@@ -325,4 +325,13 @@ class Testcase
     {
         return $this->external_runs;
     }
+
+    public function getDownloadName(): string
+    {
+        if ($this->getOrigInputFilename()) {
+            return $this->getOrigInputFilename();
+        }
+
+        return sprintf('p%d.t%d', $this->getProblem()->getProbid(), $this->getRank());
+    }
 }
