@@ -14,7 +14,6 @@ class AwardsControllerTest extends BaseTest
      */
     protected $expectedObjects = [
             'winner' => ["id" => "winner", "citation" => "Contest winner", "team_ids" => [2]],
-            'gold-medal' => ["id" => "gold-medal", "citation" => "Gold medal winner", "team_ids" => [2]],
     ];
 
     protected $expectedAbsent = ['bronze-medal', 'first-to-solve'];

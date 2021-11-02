@@ -200,10 +200,10 @@ class ImportExportService
         $visibleCategories = $this->em->getRepository(TeamCategory::class)->findBy(['visible' => true]);
 
         if (empty($visibleCategories)) {
-            $contest->setProcessAwards(false);
+            $contest->setMedalsEnabled(false);
         } else {
             foreach ($visibleCategories as $visibleCategory) {
-                $contest->addAwardsCategory($visibleCategory);
+                $contest->addMedalCategory($visibleCategory);
             }
         }
 

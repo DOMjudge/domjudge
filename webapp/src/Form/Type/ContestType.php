@@ -76,35 +76,33 @@ class ContestType extends AbstractExternalIdEntityType
             ],
             'help' => 'Disable this to stop recording balloons. Usually you can just leave this enabled.',
         ]);
-        $builder->add('processAwards', ChoiceType::class, [
+        $builder->add('medalsEnabled', ChoiceType::class, [
             'expanded' => true,
             'choices' => [
                 'Yes' => true,
                 'No' => false,
             ],
-            'help' => 'Whether to process medal (gold, silver, bronze) awards for this contest.',
+            'help' => 'Whether to enable medals (gold, silver, bronze) for this contest.',
         ]);
-        $builder->add('awardsCategories', EntityType::class, [
+        $builder->add('medalCategories', EntityType::class, [
             'required' => false,
             'class' => TeamCategory::class,
             'multiple' => true,
             'choice_label' => function (TeamCategory $category) {
                 return $category->getName();
             },
-            'help' => 'List of team categories that will receive awards for this contest.',
+            'help' => 'List of team categories that will receive medals for this contest.',
         ]);
-        $builder->add('goldAwards', IntegerType::class, [
-            'required' => false,
-            'help' => 'The number of gold awards for this contest.',
-        ]);
-        $builder->add('silverAwards', IntegerType::class, [
-            'required' => false,
-            'help' => 'The number of silver awards for this contest.',
-        ]);
-        $builder->add('bronzeAwards', IntegerType::class, [
-            'required' => false,
-            'help' => 'The number of bronze awards for this contest. Note that when finalizing a contest, the "Additional Bronze Medals" will be added to this.',
-        ]);
+        foreach (['gold', 'silver', 'bronze'] as $medalType) {
+            $help = "The number of $medalType medals for this contest.";
+            if ($medalType === 'bronze') {
+                $help .= ' Note that when finalizing a contest, the "Additional Bronze Medals" will be added to this.';
+            }
+            $builder->add($medalType . 'Medals', IntegerType::class, [
+                'required' => false,
+                'help'     => $help,
+            ]);
+        }
         $builder->add('public', ChoiceType::class, [
             'expanded' => true,
             'label' => 'Enable public scoreboard',
