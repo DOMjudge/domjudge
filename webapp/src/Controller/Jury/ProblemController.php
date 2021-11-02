@@ -824,12 +824,13 @@ class ProblemController extends BaseController
         if ($type === 'image') {
             $extension = $testcase->getImageType();
             $mimetype  = sprintf('image/%s', $extension);
+            $filename  = sprintf('p%d.t%d.%s', $probId, $rank, $extension);
         } else {
             $extension = substr($type, 0, -3);
             $mimetype  = 'text/plain';
+            $filename  = sprintf('%s.%s', $testcase->getDownloadName(), $extension);
         }
 
-        $filename = sprintf('p%d.t%d.%s', $probId, $rank, $extension);
         $content  = null;
 
         switch ($type) {
