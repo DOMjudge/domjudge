@@ -1585,6 +1585,7 @@ class JudgehostController extends AbstractFOSRestController
                 ->getQuery()
                 ->execute();
             $this->em->flush();
+            $this->dj->auditlog('queuetask', $jobId, 'deleted');
         } else {
             return $this->serializeJudgeTasks($judgetasks, $judgehost);
         }
