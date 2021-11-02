@@ -261,9 +261,9 @@ img.affiliation-logo {
 .score_pending   { background: #6666FF; }
 .score_incorrect { background: #e87272; }
 
-.gold-award   { background-color: #EEC710 }
-.silver-award { background-color: #AAA }
-.bronze-award { background-color: #C08E55 }
+.gold-medal   { background-color: #EEC710 }
+.silver-medal { background-color: #AAA }
+.bronze-medal { background-color: #C08E55 }
 
 #scoresolv,#scoretotal { width: 2.5em; }
 .scorenc,.scorett,.scorepl { text-align: center; width: 2ex; }

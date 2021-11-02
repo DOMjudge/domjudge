@@ -35,7 +35,7 @@ class ContestFixture extends AbstractExampleDataFixture implements DependentFixt
             ->setPublic(false)
             ->setOpenToAllTeams(false)
             ->addTeam($this->getReference(TeamFixture::TEAM_REFERENCE))
-            ->addAwardsCategory($this->getReference(TeamCategoryFixture::PARTICIPANTS_REFERENCE));
+            ->addMedalCategory($this->getReference(TeamCategoryFixture::PARTICIPANTS_REFERENCE));
 
         $demoContest = new Contest();
         $demoContest
@@ -73,7 +73,7 @@ class ContestFixture extends AbstractExampleDataFixture implements DependentFixt
                     date('Y') + 2
                 )
             )
-            ->addAwardsCategory($this->getReference(TeamCategoryFixture::PARTICIPANTS_REFERENCE));
+            ->addMedalCategory($this->getReference(TeamCategoryFixture::PARTICIPANTS_REFERENCE));
 
         $manager->persist($demoPracticeContest);
         $manager->persist($demoContest);

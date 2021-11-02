@@ -18,8 +18,8 @@
 {% set hasDifferentCategoryColors = scoreboard.categoryColors(limitToTeamIds) %}
 {% set scores = scoreboard.scores | filter(score => limitToTeams is null or score.team.teamid in limitToTeamIds) %}
 {% set problems = scoreboard.problems %}
-{% set processAwards = contest.processAwards %}
-{% set awardsCategories = contest.awardsCategories %}
+{% set medalsEnabled = contest.medalsEnabled %}
+{% set medalCategories = contest.medalCategories %}
 
 {% if maxWidth > 0 %}
     <style>
@@ -113,15 +113,15 @@
             {% set previousTeam = null %}
         {% endif %}
 
-        {# process awards color #}
-        {% set awardColor = '' %}
-        {% if showLegends and processAwards and score.team.category in awardsCategories and score.numPoints > 0 %}
-            {% if score.rank <= contest.goldAwards %}
-                {% set awardColor = 'gold-award' %}
-            {% elseif score.rank <= contest.goldAwards + contest.silverAwards %}
-                {% set awardColor = 'silver-award' %}
-            {% elseif score.rank <= contest.goldAwards + contest.silverAwards + contest.bronzeAwards + contest.b %}
-                {% set awardColor = 'bronze-award' %}
+        {# process medal color #}
+        {% set medalColor = '' %}
+        {% if showLegends and medalsEnabled and score.team.category in medalCategories and score.numPoints > 0 %}
+            {% if score.rank <= contest.goldMedals %}
+                {% set medalColor = 'gold-medal' %}
+            {% elseif score.rank <= contest.goldMedals + contest.silverMedals %}
+                {% set medalColor = 'silver-medal' %}
+            {% elseif score.rank <= contest.goldMedals + contest.silverMedals + contest.bronzeMedals + contest.b %}
+                {% set medalColor = 'bronze-medal' %}
             {% endif %}
         {% endif %}
 
@@ -133,7 +133,7 @@
             {% set color = score.team.category.color %}
         {% endif %}
         <tr class="{{ classes | join(' ') }}" id="team:{{ score.team.teamid }}">
-            <td class="scorepl {{awardColor}}">
+            <td class="scorepl {{medalColor}}">
                 {# Only print rank when score is different from the previous team #}
                 {% if not displayRank %}
                     ?
@@ -347,23 +347,19 @@
         </table>
     {% endif %}
 
-    {% if processAwards %}
+    {% if medalsEnabled %}
         <table class="scoreboard scorelegend {% if jury %}scoreboard_jury{% endif %}">
             <thead>
             <tr>
-                <th scope="col">Awards {% if not scoreboard.freezeData.showFinal %}(tentative){% endif %}</th>
+                <th scope="col">Medals {% if not scoreboard.freezeData.showFinal %}(tentative){% endif %}</th>
             </tr>
             </thead>
             <tbody>
-                <tr class="gold-award">
-                    <td>Gold Award</td>
-                </tr>
-                <tr class="silver-award">
-                    <td>Silver Award</td>
-                </tr>
-                <tr class="bronze-award">
-                    <td>Bronze Award</td>
-                </tr>
+                {% for medalType in ['Gold', 'Silver', 'Bronze'] %}
+                    <tr class="{{ medalType | lower }}-medal">
+                        <td>{{ medalType }} Medal</td>
+                    </tr>
+                {% endfor %}
             </tbody>
         </table>
     {% endif %}

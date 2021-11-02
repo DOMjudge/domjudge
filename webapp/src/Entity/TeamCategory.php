@@ -100,16 +100,16 @@ class TeamCategory extends BaseApiEntity
     private $contests;
 
     /**
-     * @ORM\ManyToMany(targetEntity="Contest", mappedBy="awards_categories")
+     * @ORM\ManyToMany(targetEntity="Contest", mappedBy="medal_categories")
      * @Serializer\Exclude()
      */
-    private $contests_for_awards;
+    private $contests_for_medals;
 
     public function __construct()
     {
         $this->teams               = new ArrayCollection();
         $this->contests            = new ArrayCollection();
-        $this->contests_for_awards = new ArrayCollection();
+        $this->contests_for_medals = new ArrayCollection();
     }
 
     public function __toString(): string
@@ -235,26 +235,26 @@ class TeamCategory extends BaseApiEntity
     /**
      * @return Collection|Contest[]
      */
-    public function getContestsForAwards(): Collection
+    public function getContestsForMedals(): Collection
     {
-        return $this->contests_for_awards;
+        return $this->contests_for_medals;
     }
 
-    public function addContestForAwards(Contest $contest): self
+    public function addContestForMedals(Contest $contest): self
     {
-        if (!$this->contests_for_awards->contains($contest)) {
-            $this->contests_for_awards[] = $contest;
-            $contest->addAwardsCategory($this);
+        if (!$this->contests_for_medals->contains($contest)) {
+            $this->contests_for_medals[] = $contest;
+            $contest->addMedalCategory($this);
         }
 
         return $this;
     }
 
-    public function removeContestForAwards(Contest $contest): self
+    public function removeContestForMedals(Contest $contest): self
     {
-        if ($this->contests_for_awards->contains($contest)) {
-            $this->contests_for_awards->removeElement($contest);
-            $contest->removeAwardsCategories($this);
+        if ($this->contests_for_medals->contains($contest)) {
+            $this->contests_for_medals->removeElement($contest);
+            $contest->removeMedalCategories($this);
         }
 
         return $this;

@@ -107,31 +107,31 @@
                     <td>{{ contest.processBalloons | printYesNo }}</td>
                 </tr>
                 <tr>
-                    <th>Process awards</th>
-                    <td>{{ contest.processAwards | printYesNo }}</td>
+                    <th>Process medals</th>
+                    <td>{{ contest.medalsEnabled | printYesNo }}</td>
                 </tr>
                 <tr>
-                    <th>Awards</th>
+                    <th>Medals</th>
                     <td>
-                        {% if contest.processAwards %}
+                        {% if contest.medalsEnabled %}
                             <div class="card">
                                 <h6 class="card-header" id="categories">
                                     <a class="collapsed d-block text-dark pt-0 pb-0" data-toggle="collapse" href="#collapsecategories" aria-expanded="true" aria-controls="collapsecategories" id="collapseheader">
-                                        {{ (contest.goldAwards > 0) + (contest.silverAwards > 0) + (contest.bronzeAwards > 0) }} different types of awards (Show/Hide details)
+                                        {{ (contest.goldMedals > 0) + (contest.silverMedals > 0) + (contest.bronzeMedals > 0) }} different types of medals (Show/Hide details)
                                         <i class="fa fa-chevron-down float-right"></i>
                                     </a>
                                 </h6>
                                 <div id="collapsecategories" class="collapse collapsed" aria-labelledby="categories">
                                     <div class="card-body pb-1">
-                                        <a>{{ contest.goldAwards }} Gold Medal</a>
+                                        <a>{{ contest.goldMedals }} Gold Medal(s)</a>
                                         <br>
-                                        <a>{{ contest.silverAwards }} Silver Medal</a>
+                                        <a>{{ contest.silverMedals }} Silver Medal(s)</a>
                                         <br>
-                                        <a>{{ contest.bronzeAwards }} Bronze Medal</a>
+                                        <a>{{ contest.bronzeMedals }} Bronze Medal(s)</a>
                                         <br>
                                         For all teams from the following categories:
                                         <ul>
-                                            {% for category in contest.awardsCategories %}
+                                            {% for category in contest.medalCategories %}
                                                 <li>
                                                     <a href="{{ path('jury_team_category', {'categoryId': category.categoryid}) }}">
                                                         {{ category.name }}

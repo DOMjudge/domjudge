@@ -155,12 +155,12 @@ class AwardsController extends AbstractRestController
             if ($rank === 1) {
                 $overall_winners[] = $teamid;
             }
-            if ($contest->getProcessAwards() && $contest->getAwardsCategories()->contains($teamScore->team->getCategory())) {
-                if ($rank <= $contest->getGoldAwards()) {
+            if ($contest->getMedalsEnabled() && $contest->getMedalCategories()->contains($teamScore->team->getCategory())) {
+                if ($rank <= $contest->getGoldMedals()) {
                     $medal_winners['gold'][] = $teamid;
-                } elseif ($rank <= $contest->getGoldAwards() + $contest->getSilverAwards()) {
+                } elseif ($rank <= $contest->getGoldMedals() + $contest->getSilverMedals()) {
                     $medal_winners['silver'][] = $teamid;
-                } elseif ($rank <= $contest->getGoldAwards() + $contest->getSilverAwards() + $contest->getBronzeAwards() + $additionalBronzeMedals) {
+                } elseif ($rank <= $contest->getGoldMedals() + $contest->getSilverMedals() + $contest->getBronzeMedals() + $additionalBronzeMedals) {
                     $medal_winners['bronze'][] = $teamid;
                 }
             }
