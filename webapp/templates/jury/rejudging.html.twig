@@ -181,12 +181,14 @@
                 </label>
             {%- endfor %}
         </div>&nbsp;
-        <div class="btn-group-toggle btn-group-sm" data-toggle="buttons">
-            <label class="btn btn-outline-secondary {% if showStatistics %}active{% endif %}">
-                <input type="checkbox" id="statistics-toggle" {% if showStatistics %}checked{% endif %} autocomplete="off">
-                <i class="fas fa-list-ol"></i> Statistics
-            </label>
-        </div>
+        {% if rejudging.repeat %}
+            <div class="btn-group-toggle btn-group-sm" data-toggle="buttons">
+                <label class="btn btn-outline-secondary {% if showStatistics %}active{% endif %}">
+                    <input type="checkbox" id="statistics-toggle" {% if showStatistics %}checked{% endif %} autocomplete="off">
+                    <i class="fas fa-list-ol"></i> Statistics
+                </label>
+            </div>
+        {% endif %}
     </div>
 
     <form action="{{ path('jury_rejudging', {rejudgingId: rejudging.rejudgingid}) }}" method="get">
