@@ -1574,7 +1574,9 @@ class JudgehostController extends AbstractFOSRestController
             ->getQuery()
             ->getResult();
         if (empty($judgetasks)) {
-            // TODO: race condition with judge remaining
+            // TODO: There is currently a race condition when a jury member requests the remaining test cases to be
+            // judged in the time between allocating the final batch and the next judgehost checking in and deleting
+            // the queuetask here.
             $this->em->createQueryBuilder()
                 ->from(QueueTask::class, 'qt')
                 ->andWhere('qt.jobid = :jobid')
