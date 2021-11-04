@@ -1,0 +1,91 @@
+name: "Mayhem API analysis"
+
+on:
+  schedule:
+    - cron: '5 21 * * *'
+
+jobs:
+  mayhem:
+    name: Mayhem API analysis
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    env:
+      DB_DATABASE: domjudge
+      DB_USER: user
+      DB_PASSWORD: password
+    steps:
+      - uses: actions/checkout@v2
+
+      # Install default DOMjudge dommserver apt packages
+      - name: Install domserver required apt packages
+        run: |
+          sudo apt update
+          sudo apt install -y acl zip unzip nginx php php-fpm php-gd \
+                              php-cli php-intl php-mbstring php-mysql php-curl php-json \
+                              php-xml php-zip composer ntp make sudo debootstrap \
+                              libcgroup-dev lsof php-cli php-curl php-json php-xml \
+                              php-zip procps gcc g++ default-jre-headless \
+                              default-jdk-headless ghc fp-compiler autoconf automake bats \
+                              python3-sphinx python3-sphinx-rtd-theme rst2pdf fontconfig \
+                              python3-yaml latexmk
+
+      - name: Install composer files
+        run: |
+          composer install --no-scripts
+          composer run-script package-versions-dump
+
+      # We install in the current directory to keep mounts possible etc.
+      - name: Configure Makefile
+        run: |
+          DIR=$(pwd)
+          make configure
+          ./configure --with-baseurl='http://localhost/domjudge/' --enable-doc-build=no --prefix=$HOME/domjudge
+
+      # sudo because its default in the manual
+      - name: Compile domserver
+        run: |
+          make domserver
+          sudo make install-domserver
+
+      # GitHub action does not start the SQL server.
+      - name: Start DB
+        run: |
+          sudo /etc/init.d/mysql start
+
+      - name: Setup DB
+        run: |
+          $HOME/domjudge/domserver/bin/dj_setup_database -uroot -proot install
+
+      - name: Setup PHP-FPM
+        run: |
+          sudo cp $HOME/domjudge/domserver/etc/domjudge-fpm.conf /etc/php/7.4/fpm/pool.d/domjudge.conf
+          sudo systemctl restart php7.4-fpm
+          sudo systemctl status php7.4-fpm
+
+      - name: Finish Nginx
+        run: |
+          # configure and restart nginx
+          sudo rm -f /etc/nginx/sites-enabled/*
+          sudo cp $HOME/domjudge/domserver/etc/nginx-conf /etc/nginx/sites-enabled/domjudge
+          sudo systemctl restart nginx
+
+      - name: Get the working API doc
+        run: curl http://localhost/domjudge/api/doc.json
+
+      - name: Mayhem for API
+        uses: ForAllSecure/mapi-action@193b709971cc377675e33284aecbf9229853e010
+        continue-on-error: true
+        with:
+          mapi-token: ${{ secrets.MAPI_TOKEN }}
+          api-url: http://localhost/domjudge/api # <- ✏️ update this
+          api-spec: http://localhost/domjudge/api/doc.json # <- ✏️ update this
+          duration: 60
+          sarif-report: mapi.sarif
+
+      - name: Upload SARIF file
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: mapi.sarif
