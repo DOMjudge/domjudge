@@ -1,6 +1,8 @@
 variables:
   SAST_EXCLUDED_ANALYZERS: "brakeman,eslint,flawfinder,kubesec,mobsf,nodejs-scan,pmd-apex,security-code-scan,sobelow,spotbugs"
   SECURE_LOG_LEVEL: debug
+  SAST_EXCLUDED_PATHS: "html,tests,localhost,gitlab"
+  SAST_FLAWFINDER_LEVEL: 5
 
 stages:
   - visual_pre
