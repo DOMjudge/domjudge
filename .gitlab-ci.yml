@@ -3,6 +3,7 @@ variables:
   SECURE_LOG_LEVEL: debug
   SAST_EXCLUDED_PATHS: "html,tests,localhost,gitlab"
   SAST_FLAWFINDER_LEVEL: 5
+  SAST_ANALYZER_IMAGE_TAG: "2.13.1"
 
 stages:
   - visual_pre
