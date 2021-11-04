@@ -1,0 +1,9 @@
+{
+  "SCAN_DEBUG_MODE": "debug",
+  "SCAN_ANNOTATE_PR": 0,
+  "build_break_rules": {
+    "default": {"max_critical": 0, "max_high": 0, "max_medium": 0, "max_low": 0},
+    "Python Source Analyzer": {"max_critical": 0, "max_high": 0, "max_medium": 0, "max_low": 0},
+    "Shell Script Analysis": {"max_low": 7}
+  }
+}
