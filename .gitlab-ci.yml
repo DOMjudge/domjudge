@@ -1,5 +1,5 @@
 variables:
-  SAST_EXCLUDED_ANALYZERS: "brakeman,kubesec,mobsf,nodejs-scan,pmd-apex,security-code-scan,sobelow,spotbugs"
+  SAST_EXCLUDED_ANALYZERS: "brakeman,eslint,flawfinder,kubesec,mobsf,nodejs-scan,pmd-apex,security-code-scan,sobelow,spotbugs"
 
 stages:
   - visual_pre
