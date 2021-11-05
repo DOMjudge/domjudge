@@ -1219,7 +1219,7 @@ class DOMJudgeService
             ->from(QueueTask::class, 'qt')
             ->select('MAX(qt.teamPriority) AS max, COUNT(qt.jobid) AS count')
             ->andWhere('qt.team = :team')
-            ->andWhere('qt.teamPriority = :priority')
+            ->andWhere('qt.priority = :priority')
             ->setParameter(':team', $team)
             ->setParameter(':priority', $priority)
             ->getQuery()
