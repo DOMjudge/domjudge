@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Controller\API;
 
+use App\DataFixtures\Test\ClarificationFixture;
 use App\DataFixtures\Test\RemoveTeamFromDemoUserFixture;
 use App\Entity\Clarification;
 use App\Entity\Problem;
@@ -14,7 +15,8 @@ class ClarificationControllerTest extends BaseTest
 
     protected $apiUser = 'admin';
 
-    // These come from the ExampleData\ClarificationFixture class
+    protected static $fixtures = [ ClarificationFixture::class ];
+
     protected $expectedObjects = [
         '1' => [
             "problem_id"   => "1",

@@ -4,6 +4,8 @@ namespace App\Tests\Unit\Controller\Jury;
 
 use App\Tests\Unit\BaseTest;
 
+use App\DataFixtures\Test\ClarificationFixture;
+
 class ClarificationControllerTest extends BaseTest
 {
     protected $roles = ['jury'];
@@ -25,6 +27,35 @@ class ClarificationControllerTest extends BaseTest
 
         self::assertSelectorExists('html:contains("Can you tell me how")');
         self::assertSelectorExists('html:contains("21:47")');
+    }
+
+    /**
+     * Test that unanswered and answered clarifications are under the right header
+     */
+    public function testClarificationRequestIndexNewAndOldUnderRightHeader() : void
+    {
+        $this->loadFixture(ClarificationFixture::class);
+
+        $this->verifyPageResponse('GET', '/jury/clarifications', 200);
+        $crawler = $this->getCurrentCrawler();
+
+        self::assertSelectorTextContains('h3#newrequests ~ div.table-wrapper', 'Is it necessary to');
+        self::assertSelectorTextContains('h3#oldrequests ~ div.table-wrapper', 'Can you tell me how');
+    }
+    /**
+     * Test that general clarification is under general clarifications header
+     */
+    public function testClarificationRequestIndexHasGeneralClarifications() : void
+    {
+        $this->loadFixture(ClarificationFixture::class);
+
+        $this->verifyPageResponse('GET', '/jury/clarifications', 200);
+        $crawler = $this->getCurrentCrawler();
+
+        // general clarification to all
+        self::assertSelectorTextContains('h3#clarifications ~ div.table-wrapper', 'Lunch is served');
+        // jury initiated message to specific team
+        self::assertSelectorTextContains('h3#clarifications ~ div.table-wrapper', 'There was a mistake');
     }
 
     /**
