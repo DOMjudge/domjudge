@@ -212,6 +212,7 @@ maintainer-install: build domserver-create-dirs judgehost-create-dirs webapp/.en
 	ln -sf $(CURDIR)/judge/judgedaemon $(judgehost_bindir)
 	ln -sf $(CURDIR)/judge/runguard $(judgehost_bindir)
 	ln -sf $(CURDIR)/judge/runpipe  $(judgehost_bindir)
+	ln -sf $(CURDIR)/judge/create_cgroups  $(judgehost_bindir)
 	ln -sf $(CURDIR)/sql/dj_setup_database $(domserver_bindir)
 	$(MAKE) -C misc-tools maintainer-install
 	$(MAKE) -C doc/manual maintainer-install
