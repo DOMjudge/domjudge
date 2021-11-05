@@ -110,7 +110,7 @@ class ClarificationController extends AbstractController
         $wheres            = [
             'new' => 'clar.sender IS NOT NULL AND clar.answered = 0',
             'old' => 'clar.sender IS NOT NULL AND clar.answered != 0',
-            'general' => 'clar.sender IS NULL AND clar.recipient IS NULL',
+            'general' => 'clar.sender IS NULL AND clar.in_reply_to IS NULL',
         ];
         foreach ($wheres as $type => $where) {
             $clarifications = (clone $queryBuilder)
