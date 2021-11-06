@@ -619,7 +619,8 @@ class SubmissionService
         // This is so that we can use the submitid/judgingid below.
         $this->em->flush();
 
-        $this->dj->maybeCreateJudgeTasks($judging);
+        $this->dj->maybeCreateJudgeTasks($judging,
+            $source === 'problem import' ? JudgeTask::PRIORITY_LOW : JudgeTask::PRIORITY_DEFAULT);
 
         $this->em->transactional(function () use ($contest, $submission) {
             $this->em->flush();
