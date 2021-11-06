@@ -5,7 +5,6 @@ nelmio_api_doc:
             description: DOMjudge API v4
             version: "%domjudge.version%"
         security:
-            - {}
             - basicAuth: []
         components:
             securitySchemes:
