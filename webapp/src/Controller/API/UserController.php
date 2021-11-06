@@ -26,8 +26,8 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 /**
  * @Rest\Route("/users", defaults={"_format" = "json"})
  * @OA\Tag(name="Users")
- * @OA\Response(response="404", ref="#/components/schemas/NotFound")
- * @OA\Response(response="401", ref="#/components/schemas/Unauthorized")
+ * @OA\Response(response="404", ref="#/components/responses/NotFound")
+ * @OA\Response(response="401", ref="#/components/responses/Unauthorized")
  */
 class UserController extends AbstractRestController
 {

@@ -43,11 +43,12 @@ nelmio_api_doc:
                     schema:
                         type: boolean
                         default: false
-            schemas:
+            responses:
                 NotFound:
                     description: The specified resource was not found
                 Unauthorized:
                     description: Unauthorized
+            schemas:
                 ImageList:
                     type: array
                     items:
