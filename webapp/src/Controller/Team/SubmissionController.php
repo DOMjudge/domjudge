@@ -111,13 +111,11 @@ class SubmissionController extends BaseController
                 }
                 $entryPoint = $form->get('entry_point')->getData() ?: null;
                 $submission = $this->submissionService->submitSolution(
-                    $team, $this->dj->getUser(), $problem->getProbid(), $contest, $language, $files, null,
+                    $team, $this->dj->getUser(), $problem->getProbid(), $contest, $language, $files, 'team page', null,
                     null, $entryPoint, null, null, $message
                 );
 
                 if ($submission) {
-                    $this->dj->auditlog('submission', $submission->getSubmitid(), 'added',
-                                        'via teampage', null, $contest->getCid());
                     $this->addFlash(
                         'success',
                         'Submission done! Watch for the verdict in the list below.'

@@ -439,7 +439,7 @@ class SubmissionController extends AbstractRestController
         // Now submit the solution
         $submission = $this->submissionService->submitSolution(
             $team, $user, $problem, $problem->getContest(), $language,
-            $files, null, null, $entryPoint, $submissionId, $time, $message
+            $files, 'API', null, null, $entryPoint, $submissionId, $time, $message
         );
 
         // Clean up temporary if needed

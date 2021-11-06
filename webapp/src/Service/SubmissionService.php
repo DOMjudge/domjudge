@@ -374,6 +374,7 @@ class SubmissionService
      * @param Contest|int         $contest
      * @param Language|string     $language
      * @param UploadedFile[]      $files
+     * @param string              $source
      * @param Submission|int|null $originalSubmission
      * @param string|null         $juryMember
      * @param string|null         $entryPoint
@@ -390,6 +391,7 @@ class SubmissionService
         $contest,
         $language,
         array $files,
+        $source = null,
         $juryMember = null,
         $originalSubmission = null,
         string $entryPoint = null,
@@ -642,6 +644,9 @@ class SubmissionService
         $this->dj->alert('submit', sprintf('submission %d: team %d, language %s, problem %d',
                                            $submission->getSubmitid(), $team->getTeamid(),
                                            $language->getLangid(), $problem->getProblem()->getProbid()));
+
+        $this->dj->auditlog('submission', $submission->getSubmitid(), 'added',
+            'via ' . $source ?? 'unknown', null, $contest->getCid());
 
         if (Utils::difftime((float)$contest->getEndtime(), $submitTime) <= 0) {
             $this->logger->info(
