@@ -1,0 +1,29 @@
+name: Lint OpenApi
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    # The branches below must be a subset of the branches above
+    branches: [ main ]
+  schedule:
+    - cron: '21 5 * * *'
+
+jobs:
+  lint-api:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install DOMjudge
+        run: .github/workflowscripts/baseinstall.sh
+
+      - name: Dump the OpenAPI
+        run: .github/workflowscripts/getapi.sh
+
+      - name: OpenAPI Lint Checks
+        uses: nwestfall/openapi-action@v1.0.2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          file: ./openapi.json
