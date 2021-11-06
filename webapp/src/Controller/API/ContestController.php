@@ -39,8 +39,8 @@ use Symfony\Component\Yaml\Yaml;
 /**
  * @Rest\Route("/contests")
  * @OA\Tag(name="Contests")
- * @OA\Response(response="404", ref="#/components/schemas/NotFound")
- * @OA\Response(response="401", ref="#/components/schemas/Unauthorized")
+ * @OA\Response(response="404", ref="#/components/responses/NotFound")
+ * @OA\Response(response="401", ref="#/components/responses/Unauthorized")
  */
 class ContestController extends AbstractRestController
 {

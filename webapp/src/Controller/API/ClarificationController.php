@@ -23,8 +23,8 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
  * @Rest\Route("/contests/{cid}/clarifications")
  * @OA\Tag(name="Clarifications")
  * @OA\Parameter(ref="#/components/parameters/cid")
- * @OA\Response(response="404", ref="#/components/schemas/NotFound")
- * @OA\Response(response="401", ref="#/components/schemas/Unauthorized")
+ * @OA\Response(response="404", ref="#/components/responses/NotFound")
+ * @OA\Response(response="401", ref="#/components/responses/Unauthorized")
  */
 class ClarificationController extends AbstractRestController
 {
