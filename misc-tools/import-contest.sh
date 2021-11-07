@@ -7,7 +7,7 @@ set -euo pipefail
 
 if [ $# -eq 0 ]; then
   echo "Usage: $0 <domjudge-api-url>"
-  exit -1
+  exit 1
 fi
 api_url="$1"
 
@@ -147,7 +147,7 @@ if [ -r problems.yaml ] || [ -r problems.json ] || [ -r problemset.yaml ]; then
             read -r -p "No team associated with your account. Jury submissions won't be imported. Really continue? [y/N] " response
             response=${response,,}
             if [[ ! $response =~ ^(yes|y| ) ]]; then
-                exit -1
+                exit 2
             fi
         fi
         set -e

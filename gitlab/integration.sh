@@ -230,7 +230,7 @@ if [ $NUMNOTVERIFIED -ne 2 ] || [ $NUMNOMAGIC -ne 0 ] || [ $NUMSUBS -gt $((NUMVE
 		fi
 		echo;
 	done
-	exit -1;
+	exit 1;
 fi
 
 section_start api_check "Performing API checks"
