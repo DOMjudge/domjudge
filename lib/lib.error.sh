@@ -20,7 +20,7 @@ logmsg ()
 
 	msglevel="$1"; shift
 	msec=`date '+%N'`
-	stamp="[`date '+%b %d %T'`.`printf "%.3s" $msec`] $PROGNAME[$$]:"
+	stamp="[`date '+%b %d %T'`.`printf "%.3s" $msec`] ${PROGNAME}[$$]:"
 # Expand backslash escape sequences using printf, since support for
 # echo with(out) option -e is unreliable. First use echo to put spaces
 # between arguments.
