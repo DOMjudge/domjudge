@@ -628,11 +628,12 @@ class SubmissionService
                                         EventLogService::ACTION_CREATE, $contest->getCid());
         });
 
-        // Reload contest, team and contestproblem for now, as
+        // Reload submission, contest, team and contestproblem for now, as
         // EventLogService::log will clear the Doctrine entity manager.
         /** @var Contest $contest */
         /** @var Team $team */
         /** @var ContestProblem $problem */
+        $submission = $this->em->getRepository(Submission::class)->find($submission->getSubmitid());
         $contest = $this->em->getRepository(Contest::class)->find($contest->getCid());
         $team    = $this->em->getRepository(Team::class)->find($team->getTeamid());
         $problem = $this->em->getRepository(ContestProblem::class)->find([
