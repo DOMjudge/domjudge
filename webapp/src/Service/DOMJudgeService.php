@@ -1220,15 +1220,23 @@ class DOMJudgeService
             ->select('MAX(qt.teamPriority) AS max, COUNT(qt.jobid) AS count')
             ->andWhere('qt.team = :team')
             ->andWhere('qt.priority = :priority')
+            ->andWhere('qt.teamPriority >= :cutoffTeamPriority')
             ->setParameter(':team', $team)
             ->setParameter(':priority', $priority)
+            // Only consider judgings which have been placed at most 60 virtual seconds ago.
+            ->setParameter(':cutoffTeamPriority', (int)$submission->getSubmittime() - 60)
             ->getQuery()
             ->getOneOrNullResult();
 
-        // Teams that submit often, slowing down the queue should not be able to starve other teams of a judgement.
-        // For every pending job in the queue by that team, add a penalty (60s).
-        // To ensure that submissions will be ordered by submission time, use at least the current maximal team priority.
-        // Jobs with a lower priority are judged earlier.
+        // Teams that submit frequently slow down the judge queue but should not be able to starve other teams of their
+        // deserved and timely judgement.
+        // For every "recent" pending job in the queue by that team, add a penalty (60s). Our definiition of "recent"
+        // includes all submissions that have been placed at a virtual time (including penalty) more recent than 60s
+        // ago. This is done in order to avoid punishing teams who submit while their submissions are stuck in the queue
+        // for other reasons, for example an internal error for a problem or language.
+        // To ensure that submissions will still be ordered by submission time, use at least the current maximal team
+        // priority.
+        // Jobs with a lower team priority are judged earlier.
         // Assume the following situation:
         // - a team submits three times at time X
         // - the team priority for the submissions are X, X+60, X+120 respectively
