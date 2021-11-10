@@ -37,6 +37,10 @@ jobs:
           composer install --no-scripts
           composer run-script package-versions-dump
 
+      # Patch the operationId to be unique again to conform to OpenApi standard
+      - name: Patch upstream
+        run: sudo sed -i "s/\$operation->operationId =/#\$operation->operationId =/g" lib/vendor/nelmio/api-doc-bundle/OpenApiPhp/DefaultOperationId.php
+
       # We install in the current directory to keep mounts possible etc.
       - name: Configure Makefile
         run: |
