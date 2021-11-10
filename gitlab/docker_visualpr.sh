@@ -114,11 +114,8 @@ export CURLOPTS="--fail -sq -m 30 -b $COOKIEJAR"
 # Breaks so removed for now
 # date -s "18 May 2004 12:05:57"
 
-cat /etc/nginx/sites-enabled/*
-
 service php7.4-fpm status
 
-exit 0
 # Make an initial request which will get us a session id, and grab the csrf token from it
 CSRFTOKEN=$(curl $CURLOPTS -c $COOKIEJAR "http://localhost/domjudge/login" 2>/dev/null | sed -n 's/.*_csrf_token.*value="\(.*\)".*/\1/p')
 # Make a second request with our session + csrf token to actually log in
@@ -126,8 +123,10 @@ if [ "$ROLE" != "none" ]; then
     curl $CURLOPTS -c $COOKIEJAR \
         -F "_csrf_token=$CSRFTOKEN" \
         -F "_username=admin" \
-        -F "_password=$ADMINPASS" "http://localhost/domjudge/login"
+        -F "_password=$ADMINPASS" "http://localhost/domjudge/login" || true
 fi
+
+exit 0
 
 cd "$DIR"
 
