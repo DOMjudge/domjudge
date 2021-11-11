@@ -27,8 +27,8 @@ class TimeStringValidator extends ConstraintValidator
 
         if ($constraint->allowRelative) {
             $regex   = $constraint->relativeIsPositive ?
-                "/^(\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d(\.\d{1,6})? [A-Za-z][A-Za-z0-9_\/+-]{1,35}|\+\d{1,4}:\d\d(:\d\d(\.\d{1,6})?)?)$/" :
-                "/^(\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d(\.\d{1,6})? [A-Za-z][A-Za-z0-9_\/+-]{1,35}|-\d{1,4}:\d\d(:\d\d(\.\d{1,6})?)?)$/";
+                "/^(\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d(\.\d{1,6})? [A-Za-z][A-Za-z0-9_\/+-]{1,35}|\+\d+:\d\d(:\d\d(\.\d{1,6})?)?)$/" :
+                "/^(\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d(\.\d{1,6})? [A-Za-z][A-Za-z0-9_\/+-]{1,35}|-\d+:\d\d(:\d\d(\.\d{1,6})?)?)$/";
             $message = $constraint->absoluteRelativeMessage;
         } else {
             $regex   = "/^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d(\.\d{1,6})? [A-Za-z][A-Za-z0-9_\/+-]{1,35}$/";
