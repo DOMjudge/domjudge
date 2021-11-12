@@ -137,7 +137,7 @@ class ContestController extends AbstractRestController
      *     name="onlyActive",
      *     in="query",
      *     description="Whether to only return data pertaining to contests that are active",
-     *     @OA\Schema(type="boolean", default="false")
+     *     @OA\Schema(type="boolean", default=false)
      * )
      * @throws NonUniqueResultException
      */
@@ -381,13 +381,13 @@ class ContestController extends AbstractRestController
      *     name="strict",
      *     in="query",
      *     description="Whether to only include CCS compliant properties in the response",
-     *     @OA\Schema(type="boolean", default="false")
+     *     @OA\Schema(type="boolean", default=false)
      * )
      * @OA\Parameter(
      *     name="stream",
      *     in="query",
      *     description="Whether to stream the output or stop immediately",
-     *     @OA\Schema(type="boolean", default="true")
+     *     @OA\Schema(type="boolean", default=true)
      * )
      * @OA\Response(
      *     response="200",
