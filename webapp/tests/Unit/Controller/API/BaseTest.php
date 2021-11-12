@@ -206,7 +206,7 @@ abstract class BaseTest extends BaseBaseTest
     }
 
     /**
-     * Test that the list action returns the expected objects if IDs are passed..
+     * Test that the list action returns the expected objects if IDs are passed.
      */
     public function testListWithIds()
     {

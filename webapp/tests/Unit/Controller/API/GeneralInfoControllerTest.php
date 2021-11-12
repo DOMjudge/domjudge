@@ -160,7 +160,7 @@ class GeneralInfoControllerTest extends BaseTest
             /** @var BinaryFileResponse $response */
             $response = $this->client->getResponse();
             static::assertEquals(404, $response->getStatusCode());
-            static::assertEquals(sprintf('Country flag for %s of size %s not found.', strtoupper($countryCode), $size), json_decode($response->getContent(), true)['message']);
+            static::assertEquals(sprintf('country flag for %s of size %s not found', strtoupper($countryCode), $size), json_decode($response->getContent(), true)['message']);
         });
     }
 
@@ -182,7 +182,7 @@ class GeneralInfoControllerTest extends BaseTest
             /** @var BinaryFileResponse $response */
             $response = $this->client->getResponse();
             static::assertEquals(404, $response->getStatusCode());
-            static::assertEquals(sprintf('Country %s does not exist.', strtoupper($countryCode)), json_decode($response->getContent(), true)['message']);
+            static::assertEquals(sprintf('country %s does not exist', strtoupper($countryCode)), json_decode($response->getContent(), true)['message']);
         });
     }
 

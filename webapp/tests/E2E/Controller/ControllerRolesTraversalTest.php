@@ -152,7 +152,7 @@ class ControllerRolesTraversalTest extends BaseTest
      * Test that having the team role for example is enough to view pages of that role.
      * This test should detect mistakes where a page is disabled when the user has a
      * certain role instead of allowing when the correct role is there.
-     * @var string $roleBaseURL The base URL of the role.
+     * @var string   $roleBaseURL The base URL of the role.
      * @var string[] $baseRoles The default role of the user.
      * @var string[] $optionalRoles The roles which should not restrict the viewable pages.
      * @dataProvider provideRoleAccessData
