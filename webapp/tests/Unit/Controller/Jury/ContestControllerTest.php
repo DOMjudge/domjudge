@@ -6,8 +6,8 @@ use App\Entity\Contest;
 
 class ContestControllerTest extends JuryControllerTest
 {
-    protected static $identifingEditAttribute = 'shortname';
-    protected static $defaultEditEntityName   = 'demoprac';
+    protected static $identifyingEditAttribute = 'shortname';
+    protected static $defaultEditEntityName    = 'demoprac';
     protected static $baseUrl        = '/jury/contests';
     protected static $exampleEntries = ['Demo contest','Demo practice session'];
     protected static $shortTag       = 'contest';
@@ -119,7 +119,7 @@ class ContestControllerTest extends JuryControllerTest
 
     public function testCheckAddEntityAdmin(): void
     {
-        // Add external ID's when needed
+        // Add external ID's when needed.
         if (!$this->dataSourceIsLocal()) {
             foreach (static::$addEntities as &$entity) {
                 $entity['externalid'] = $entity['shortname'];

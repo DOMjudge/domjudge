@@ -7,7 +7,6 @@ use App\Entity\Contest;
 use App\Tests\Unit\BaseTest as BaseBaseTest;
 use App\Utils\FreezeData;
 use Generator;
-use PHPUnit\Framework\TestCase;
 
 class FreezeDataTest extends BaseBaseTest
 {
@@ -18,11 +17,11 @@ class FreezeDataTest extends BaseBaseTest
         $contest = $em->getRepository(Contest::class)->findOneBy(['name' => $reference]);
         return new FreezeData($contest);
     }
-    
+
     /**
-     * Testing all functions separate makes little sense as they all need similar data
-     * By keeping the assertions separate its still easy to see where we get a possible failure.
-     * 
+     * Testing all functions separate makes little sense as they all need similar data.
+     * By keeping the assertions separate it's still easy to see where we get a possible failure.
+     *
      * @dataProvider provideContestProgress
      */
     public function testFreezeData(

@@ -75,7 +75,7 @@ EOF;
 
     protected function getContest($cid): Contest
     {
-        // First clear the entity manager to have all data
+        // First clear the entity manager to have all data.
         static::$container->get(EntityManagerInterface::class)->clear();
         $config = static::$container->get(ConfigurationService::class);
         $dataSource = $config->get('data_source');

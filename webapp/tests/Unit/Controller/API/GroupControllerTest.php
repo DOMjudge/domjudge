@@ -34,6 +34,6 @@ class GroupControllerTest extends BaseTest
     ];
 
     // We test explicitly for groups 1 and 5 here, which are hidden groups and
-    // should not be returned for non-admin users
+    // should not be returned for non-admin users.
     protected $expectedAbsent = ['4242', 'nonexistent', '1', '5'];
 }

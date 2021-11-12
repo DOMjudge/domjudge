@@ -11,7 +11,7 @@ class ClarificationControllerTest extends BaseTest
     protected $roles = ['jury'];
 
     /**
-     * Test that the jury clarifications page contains the correct information
+     * Test that the jury clarifications page contains the correct information.
      */
     public function testClarificationRequestIndex() : void
     {
@@ -30,7 +30,7 @@ class ClarificationControllerTest extends BaseTest
     }
 
     /**
-     * Test that unanswered and answered clarifications are under the right header
+     * Test that unanswered and answered clarifications are under the right header.
      */
     public function testClarificationRequestIndexNewAndOldUnderRightHeader() : void
     {
@@ -43,7 +43,7 @@ class ClarificationControllerTest extends BaseTest
         self::assertSelectorTextContains('h3#oldrequests ~ div.table-wrapper', 'Can you tell me how');
     }
     /**
-     * Test that general clarification is under general clarifications header
+     * Test that general clarification is under general clarifications header.
      */
     public function testClarificationRequestIndexHasGeneralClarifications() : void
     {
@@ -52,14 +52,14 @@ class ClarificationControllerTest extends BaseTest
         $this->verifyPageResponse('GET', '/jury/clarifications', 200);
         $crawler = $this->getCurrentCrawler();
 
-        // general clarification to all
+        // General clarification to all.
         self::assertSelectorTextContains('h3#clarifications ~ div.table-wrapper', 'Lunch is served');
-        // jury initiated message to specific team
+        // Jury initiated message to specific team.
         self::assertSelectorTextContains('h3#clarifications ~ div.table-wrapper', 'There was a mistake');
     }
 
     /**
-     * Test that the jury can view a clarification
+     * Test that the jury can view a clarification.
      */
     public function testClarificationRequestView() : void
     {
@@ -76,7 +76,7 @@ class ClarificationControllerTest extends BaseTest
     }
 
     /**
-     * Test that the jury can send a clarification to everyone
+     * Test that the jury can send a clarification to everyone.
      */
     public function testClarificationRequestComposeForm() : void
     {

@@ -76,7 +76,7 @@ class OrganizationControllerTest extends BaseTest
 
     public function testList()
     {
-        // Remove country and country flag if not enabled
+        // Remove country and country flag if not enabled.
         $showFlags = static::$container->get(ConfigurationService::class)->get('show_flags');
         if (!$showFlags) {
             foreach ($this->expectedObjects as &$object) {
@@ -93,7 +93,7 @@ class OrganizationControllerTest extends BaseTest
      */
     public function testSingle($id, array $expectedProperties)
     {
-        // Remove country and country flag if not enabled
+        // Remove country and country flag if not enabled.
         $showFlags = static::$container->get(ConfigurationService::class)->get('show_flags');
         if (!$showFlags) {
             $expectedProperties['country'] = null;
@@ -109,13 +109,13 @@ class OrganizationControllerTest extends BaseTest
 
     protected function setUp(): void
     {
-        // Make sure we have an organization logo for organization 1 by copying an existing file
+        // Make sure we have an organization logo for organization 1 by copying an existing file.
         $fileToCopy = __DIR__ . '/../../../../public/js/hv.png';
         $organizationLogosDir = __DIR__ . '/../../../../public/images/affiliations/';
         $this->organizationLogo = $organizationLogosDir . '1.png';
         copy($fileToCopy, $this->organizationLogo);
 
-        // Make sure we remove the test container, since we need to rebuild it for the images to work
+        // Make sure we remove the test container, since we need to rebuild it for the images to work.
         $this->removeTestContainer();
 
         parent::setUp();
@@ -123,20 +123,20 @@ class OrganizationControllerTest extends BaseTest
 
     protected function tearDown(): void
     {
-        // Remove the image again
+        // Remove the image again.
         unlink($this->organizationLogo);
         $this->removeTestContainer();
     }
 
     /**
-     * Test that when we disable showing country flags, the country and flag of an affiliation are not exposed
+     * Test that when we disable showing country flags, the country and flag of an affiliation are not exposed.
      */
     public function testCountryAbsentWhenDisabled()
     {
         $this->withChangedConfiguration('show_flags', false, function () {
             $apiEndpoint = $this->apiEndpoint;
             $contestId = $this->getDemoContestId();
-            // The hardcoded 1 here is the team affiliation from the TeamAffiliationFixture example data fixture
+            // The hardcoded 1 here is the team affiliation from the TeamAffiliationFixture example data fixture.
             $organizationId = $this->dataSourceIsLocal() ? 1 : 'utrecht';
             $response = $this->verifyApiJsonResponse('GET', "/contests/$contestId/$apiEndpoint/$organizationId", 200);
 

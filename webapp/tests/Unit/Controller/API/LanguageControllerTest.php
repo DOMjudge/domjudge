@@ -23,7 +23,7 @@ class LanguageControllerTest extends BaseTest
         ],
     ];
 
-    // Kotlin has allow_submit=false by default, so we don't expect it.
+    // Kotlin has allow_submit=false by default, so we don't expect it..
     protected $expectedAbsent = ['kotlin', 'nonexistent'];
 
     protected static $fixtures = [

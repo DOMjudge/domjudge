@@ -15,8 +15,7 @@ use Generator;
 class ScoreboardTest extends BaseBaseTest
 {
     /**
-     * Test that the scoreboard tie breaker works with two teams without
-     * any scores
+     * Test that the scoreboard tiebreaker works with two teams without any scores.
      */
     public function testScoreTiebreakerEmptyTeams() : void
     {
@@ -25,7 +24,7 @@ class ScoreboardTest extends BaseBaseTest
         $scoreA = new TeamScore($teamA);
         $scoreB = new TeamScore($teamB);
 
-        // Always test in both directions for symmetry
+        // Always test in both directions for symmetry.
         $tie = Scoreboard::scoreTieBreaker($scoreA, $scoreB);
         self::assertEquals(0, $tie);
         $tie = Scoreboard::scoreTieBreaker($scoreB, $scoreA);
@@ -33,7 +32,7 @@ class ScoreboardTest extends BaseBaseTest
     }
 
     /**
-     * Test that the scoreboard tie breaker works with two teams with equal scores
+     * Test that the scoreboard tiebreaker works with two teams with equal scores.
      */
     public function testScoreTiebreakerEqualTeams() : void
     {
@@ -55,7 +54,7 @@ class ScoreboardTest extends BaseBaseTest
     }
 
     /**
-     * Test that the scoreboard tie breaker works if only one team has scores
+     * Test that the scoreboard tiebreaker works if only one team has scores.
      */
     public function testScoreTiebreakerOneTeamEmpty() : void
     {
@@ -75,8 +74,7 @@ class ScoreboardTest extends BaseBaseTest
 
 
     /**
-     * Test that the scoreboard tie breaker works if both teams have the same
-     * highest score
+     * Test that the scoreboard tiebreaker works if both teams have the same highest score.
      */
     public function testScoreTiebreakerHighestEqual() : void
     {
@@ -98,7 +96,7 @@ class ScoreboardTest extends BaseBaseTest
     }
 
     /**
-     * Test that the scoreboard tie breaker works if scores are different
+     * Test that the scoreboard tiebreaker works if scores are different.
      */
     public function testScoreTiebreakerUnequal() : void
     {

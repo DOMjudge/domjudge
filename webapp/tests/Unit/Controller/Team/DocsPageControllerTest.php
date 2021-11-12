@@ -19,7 +19,7 @@ class DocsPageControllerTest extends BaseTest
     }
 
     /**
-     * Test that having docs.yaml does show docs link
+     * Test that having docs.yaml does show docs link.
      */
     public function testDocsLinkInMenu() : void
     {
@@ -29,7 +29,7 @@ class DocsPageControllerTest extends BaseTest
     }
 
     /**
-     * Test content of docs page shows items from docs.yaml
+     * Test content of docs page shows items from docs.yaml.
      */
     public function testDocsPage() : void
     {

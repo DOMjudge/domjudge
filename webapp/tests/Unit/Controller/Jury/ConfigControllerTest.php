@@ -34,7 +34,7 @@ class ConfigControllerTest extends BaseTest
     }
 
     /**
-     * Test that config settings page contains some expected options
+     * Test that config settings page contains some expected options.
      */
     public function testConfigSettingsPresent() : void
     {

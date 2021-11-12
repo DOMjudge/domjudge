@@ -2,12 +2,10 @@
 
 namespace App\Tests\Unit\Controller\API;
 
-use App\Service\DOMJudgeService;
-
 class ExecutableControllerTest extends BaseTest
 {
     /**
-     * Test that a non logged in user can not access the executables
+     * Test that a non-logged-in user can not access the executables.
      */
     public function testExecutablesNoAnonAccess()
     {
@@ -15,7 +13,7 @@ class ExecutableControllerTest extends BaseTest
     }
 
     /**
-     * Test that a team user can not access the executables
+     * Test that a team user can not access the executables.
      */
     public function testExecutablesNoTeamAccess()
     {
@@ -23,7 +21,7 @@ class ExecutableControllerTest extends BaseTest
     }
 
     /**
-     * Test that a non-existent executable can not be fetched
+     * Test that a non-existent executable can not be fetched.
      */
     public function testExecutablesDoesNotExist()
     {
@@ -31,7 +29,7 @@ class ExecutableControllerTest extends BaseTest
     }
 
     /**
-     * Test that an executable can be fetched
+     * Test that an executable can be fetched.
      */
     public function testFetchExecutable()
     {

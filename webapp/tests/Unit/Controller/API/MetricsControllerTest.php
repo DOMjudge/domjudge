@@ -11,7 +11,7 @@ class MetricsControllerTest extends BaseTest
     ];
 
     /**
-     * Test that a non logged in user can not access the prometheus metrics
+     * Test that a non-logged-in user can not access the prometheus metrics.
      */
     public function testPrometheusNoAccess()
     {
@@ -19,7 +19,7 @@ class MetricsControllerTest extends BaseTest
     }
 
     /**
-     * Test that the Prometheus metrics give the basic expected output format
+     * Test that the Prometheus metrics give the basic expected output format.
      */
     public function testPrometheusMetrics()
     {

@@ -16,7 +16,7 @@ class BalloonControllerTest extends BaseTest
         $this->verifyPageResponse('GET', '/jury/balloons', 200);
         self::assertSelectorExists('h1:contains("Balloons - Demo contest")');
 
-        // Test database does not contain balloon info
+        // Test database does not contain balloon info.
         self::assertSelectorExists('div.alert:contains("No balloons")');
     }
 }

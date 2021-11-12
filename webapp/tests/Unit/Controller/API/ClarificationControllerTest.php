@@ -45,7 +45,7 @@ class ClarificationControllerTest extends BaseTest
     protected $expectedAbsent = ['4242', 'nonexistent'];
 
     /**
-     * Test that a non logged in user can not add a clarification
+     * Test that a non-logged-in user can not add a clarification.
      */
     public function testAddNoAccess()
     {
@@ -55,7 +55,7 @@ class ClarificationControllerTest extends BaseTest
     }
 
     /**
-     * Test that if invalid data is supplied, the correct message is returned
+     * Test that if invalid data is supplied, the correct message is returned.
      *
      * @dataProvider provideAddInvalidData
      */
@@ -89,7 +89,7 @@ class ClarificationControllerTest extends BaseTest
     }
 
     /**
-     * Test that passing an ID is not allowed when performing a POST
+     * Test that passing an ID is not allowed when performing a POST.
      */
     public function testSupplyIdInPost()
     {
@@ -100,7 +100,7 @@ class ClarificationControllerTest extends BaseTest
     }
 
     /**
-     * Test that passing a wrong ID is not allowed when performing a PUT
+     * Test that passing a wrong ID is not allowed when performing a PUT.
      */
     public function testSupplyWrongIdInPut()
     {
@@ -111,7 +111,7 @@ class ClarificationControllerTest extends BaseTest
     }
 
     /**
-     * Test that when creating a clarification as a user without an association team an error is returned
+     * Test that when creating a clarification as a user without an association team an error is returned.
      */
     public function testMissingTeam()
     {
@@ -125,7 +125,7 @@ class ClarificationControllerTest extends BaseTest
     }
 
     /**
-     * Test that creating a clarification works as expected
+     * Test that creating a clarification works as expected.
      *
      * @dataProvider provideAddSuccess
      */
@@ -159,7 +159,7 @@ class ClarificationControllerTest extends BaseTest
 
         $clarificationId = $submittedClarification['id'];
 
-        // Now load the clarification
+        // Now load the clarification.
         $clarificationRepository = static::$container->get(EntityManagerInterface::class)->getRepository(Clarification::class);
         if ($idIsExternal) {
             /** @var Clarification $clarification */
@@ -184,7 +184,7 @@ class ClarificationControllerTest extends BaseTest
             static::assertEquals($expectedTime, $clarification->getAbsoluteSubmitTime());
         }
 
-        // Also load the clarification from the API, to see it now gets returned
+        // Also load the clarification from the API, to see it now gets returned.
         $clarificationFromApi = $this->verifyApiJsonResponse('GET', "/contests/$contestId/$apiEndpoint/$clarificationId", 200, 'admin');
         static::assertEquals($expectedBody, $clarificationFromApi['text'], 'Wrong body');
         if ($expectedProblemId !== null) {

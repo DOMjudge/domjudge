@@ -38,13 +38,13 @@ class ContestControllerTest extends BaseTest
 
     protected function setUp(): void
     {
-        // Make sure we have a contest banner by copying an existing file
+        // Make sure we have a contest banner by copying an existing file.
         $fileToCopy = __DIR__ . '/../../../../public/js/hv.png';
         $imagesDir = __DIR__ . '/../../../../public/images/';
         $this->banner = $imagesDir . 'banner.png';
         copy($fileToCopy, $this->banner);
 
-        // Make sure we remove the test container, since we need to rebuild it for the images to work
+        // Make sure we remove the test container, since we need to rebuild it for the images to work.
         $this->removeTestContainer();
 
         parent::setUp();

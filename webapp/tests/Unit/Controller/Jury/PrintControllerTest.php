@@ -12,7 +12,7 @@ class PrintControllerTest extends BaseTest
     protected const PRINT_COMMAND = 'echo [language] && /bin/cat [file]';
 
     /**
-     * Test that by default printing is disabled
+     * Test that by default printing is disabled.
      */
     public function testPrintingDisabledJuryIndexPage() : void
     {
@@ -21,8 +21,8 @@ class PrintControllerTest extends BaseTest
     }
 
     /**
-     * Test that if printing is disabled, we get an access denied exception
-     * when visiting the print page
+     * Test that if printing is disabled, we get access denied exception
+     * when visiting the print page.
      */
     public function testPrintingDisabledAccessDenied() : void
     {
@@ -30,7 +30,7 @@ class PrintControllerTest extends BaseTest
     }
 
     /**
-     * Test that when printing is enabled the link is shown
+     * Test that when printing is enabled the link is shown.
      */
     public function testPrintingEnabledJuryIndexPage() : void
     {
@@ -42,7 +42,7 @@ class PrintControllerTest extends BaseTest
     }
 
     /**
-     * Test that if printing is enabled, we can actually print something
+     * Test that if printing is enabled, we can actually print something.
      */
     public function testPrintingEnabledSubmitForm() : void
     {

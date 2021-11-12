@@ -17,8 +17,8 @@ class ProblemControllerTest extends JuryControllerTest
                                         'a.btn[title="Import problem"]' => ['admin' => [" Import problem"],'jury'=>[]]];
     protected static $identifingEditAttribute = 'name';
     protected static $defaultEditEntityName   = 'Hello World';
-    // Note: we replace the deleteurl in testDeleteExtraEntity below with the actual attachment ID
-    // This can change when running the tests multiple times
+    // Note: we replace the deleteurl in testDeleteExtraEntity below with the actual attachment ID.
+    // This can change when running the tests multiple times.
     protected static $deleteExtra      = ['pageurl'   => '/jury/problems/3',
                                           'deleteurl' => '/jury/problems/attachments/1/delete',
                                           'selector'  => 'interactor'];
@@ -42,7 +42,7 @@ class ProblemControllerTest extends JuryControllerTest
 
     public function testCheckAddEntityAdmin(): void
     {
-        // Add external ID's when needed
+        // Add external IDs when needed.
         if (!$this->dataSourceIsLocal()) {
             foreach (static::$addEntities as &$entity) {
                 $entity['externalid'] = md5(json_encode($entity));

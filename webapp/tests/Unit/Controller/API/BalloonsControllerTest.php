@@ -7,23 +7,19 @@ use Generator;
 class BalloonsControllerTest extends BaseTest
 {
     /**
-     * In the default test setup there are no judgings yet so no balloons
+     * In the default test setup there are no judgings yet, so no balloons,
      */
     public function testBalloonsNoJudgings()
     {
         $contestId = $this->getDemoContestId();
-
         $response = $this->verifyApiJsonResponse('GET', "/contests/$contestId/balloons", 200, 'admin');
-
         static::assertEquals([], $response);
     }
 
     public function testBalloonsNoJudgingsToDo()
     {
         $contestId = $this->getDemoContestId();
-
         $response = $this->verifyApiJsonResponse('GET', "/contests/$contestId/balloons?todo=1", 200, 'admin');
-
         static::assertEquals([], $response);
     }
 
@@ -33,7 +29,6 @@ class BalloonsControllerTest extends BaseTest
     public function testBalloonsAccessForPrivilegedUsersOnly(?string $user, int $result)
     {
         $contestId = $this->getDemoContestId();
-
         $this->verifyApiJsonResponse('GET', "/contests/$contestId/balloons", $result, $user);
     }
 

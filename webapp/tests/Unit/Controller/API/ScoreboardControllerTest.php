@@ -13,7 +13,7 @@ class ScoreboardControllerTest extends BaseTest
     protected static $fixtures = [ExtendDemoPracticeSessionTimeFixture::class, SampleEventsFixture::class];
 
     /**
-     * Test that the given user has the correct access to the scoreboard for the given contest
+     * Test that the given user has the correct access to the scoreboard for the given contest.
      *
      * @dataProvider provideScoreboardAccess
      */
@@ -30,16 +30,16 @@ class ScoreboardControllerTest extends BaseTest
 
     public function provideScoreboardAccess(): Generator
     {
-        // Contest 2 is a public contest, everyone should have access
+        // Contest 2 is a public contest, everyone should have access.
         yield [null, 2, false, true];
         yield ['demo', 2, false, true];
         yield ['demo', 2, true, true];
         yield ['admin', 2, false, true];
 
-        // Contest 1 is not public, but the team demo belongs to has access
+        // Contest 1 is not public, but the team demo belongs to was granted access explicitly.
         yield [null, 1, false, false];
         yield ['demo', 1, false, true];
-        yield ['demo', 1, true, false]; // If we remove the team from the demo user, it should not be able to access the contest anymore
+        yield ['demo', 1, true, false]; // If we remove the team from the demo user, it should not be able to access the contest anymore.
         yield ['admin', 1, false, true];
     }
 }

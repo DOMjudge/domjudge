@@ -9,7 +9,7 @@ class ConfigControllerTest extends BaseTest
     private $endpoint = '/config';
 
     /**
-     * Test that same public config variables are returned for all role types
+     * Test that same public config variables are returned for all role types.
      *
      * @dataProvider provideUsers
      */
@@ -31,7 +31,7 @@ class ConfigControllerTest extends BaseTest
     }
 
     /**
-     * Test that secret config variables are not returned for non-admin
+     * Test that secret config variables are not returned for non-admin.
      *
      * @dataProvider provideUnprivilegedUsers
      */
@@ -102,7 +102,7 @@ class ConfigControllerTest extends BaseTest
     }
 
     /**
-     * Test that invalid data is not accepted
+     * Test that invalid data is not accepted.
      */
     public function testConfigChangeAPIInvalidDataIsRejected()
     {
@@ -111,7 +111,7 @@ class ConfigControllerTest extends BaseTest
     }
 
     /**
-     * Test that anonymous and team users cannot change configuration
+     * Test that anonymous and team users cannot change configuration.
      */
     public function testConfigChangeNotAllowedForUnprivilegedUsers()
     {
@@ -121,7 +121,7 @@ class ConfigControllerTest extends BaseTest
     }
 
     /**
-     * Test that anonymous and team users cannot run the config checker
+     * Test that anonymous and team users cannot run the config checker.
      */
     public function testConfigCheckerNotAllowedForUnprivilegedUsers()
     {
@@ -130,11 +130,11 @@ class ConfigControllerTest extends BaseTest
     }
 
     /**
-     * Test the config checker endpoint returns expected content
+     * Test the config checker endpoint returns expected content.
      */
     public function testConfigCheckerWorksForAdmin()
     {
-        // In the test setup, the config check returns some errors so expected result is 500
+        // In the test setup, the config check returns some errors so expected result is 500.
         $response = $this->verifyApiJsonResponse('GET', $this->endpoint .'/check', 500, 'admin');
 
         $sections = ['System', 'Configuration', 'Contests', 'Problems and languages', 'Teams', 'External identifiers'];
@@ -161,7 +161,7 @@ class ConfigControllerTest extends BaseTest
     }
 
     /**
-     * Test that a specific variable can be requested and returns just this variable
+     * Test that a specific variable can be requested and returns just this variable.
      */
     public function testConfigReturnsSpecificPublicVariable()
     {
@@ -173,9 +173,9 @@ class ConfigControllerTest extends BaseTest
     }
 
     /**
-     * Test that a non-existent specific variable cannot be requested
+     * Test that a non-existent specific variable cannot be requested.
      */
-    public function testConfigRequestNonExistantVariableThrowsError()
+    public function testConfigRequestNonExistentVariableThrowsError()
     {
         $this->verifyApiJsonResponse('GET', $this->endpoint . '?name=not_exist', 500);
     }
