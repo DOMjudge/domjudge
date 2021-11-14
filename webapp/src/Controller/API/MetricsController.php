@@ -57,10 +57,12 @@ class MetricsController extends AbstractFOSRestController
     }
 
     /**
+     * Metrics of this installation for use by Prometheus
      * @Rest\Get("/prometheus")
      * @OA\Response(
      *     response="200",
-     *     description="Metrics of this installation for use by Prometheus"
+     *     description="Metrics of this installation for use by Prometheus",
+     *     @OA\MediaType(mediaType="text/plain"),
      * )
      */
     public function prometheusAction(Request $request): Response
