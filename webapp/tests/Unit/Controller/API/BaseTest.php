@@ -257,7 +257,7 @@ abstract class BaseTest extends BaseBaseTest
         }
         // Note that the 42 here is a contest that doesn't exist.
         $response = $this->verifyApiJsonResponse('GET', "/contests/42/$apiEndpoint", 404, $this->apiUser);
-        static::assertEquals('Contest with ID \'42\' not found.', $response['message']);
+        static::assertEquals('Contest with ID \'42\' not found', $response['message']);
     }
 
     /**
@@ -288,7 +288,7 @@ abstract class BaseTest extends BaseBaseTest
         $ids = array_merge($expectedObjectIds, $this->expectedAbsent);
         $url = $this->helperGetEndpointURL($apiEndpoint);
         $response = $this->verifyApiJsonResponse('GET', $url . "?" . http_build_query(['ids' => $ids]), 404, $this->apiUser);
-        static::assertEquals('One or more objects not found.', $response['message']);
+        static::assertEquals('One or more objects not found', $response['message']);
     }
 
     /**
@@ -341,7 +341,7 @@ abstract class BaseTest extends BaseBaseTest
 
         // Note that the 42 here is a contest that doesn't exist.
         $url = "/contests/42/$apiEndpoint/123";
-        $message = 'Contest with ID \'42\' not found.';
+        $message = 'Contest with ID \'42\' not found';
 
         $response = $this->verifyApiJsonResponse('GET', $url, 404, $this->apiUser);
         static::assertEquals($message, $response['message']);
