@@ -569,7 +569,7 @@ if (!empty($options['e'])) {
     $new_judging_run = (array) json_decode(base64_decode(file_get_contents($options['j'])));
     $judgeTaskId = $options['t'];
 
-    for ($i = 0; $i < 3; $i++) {
+    for ($i = 0; $i < 5; $i++) {
         $response = request(
             sprintf('judgehosts/add-judging-run/%s/%s', $new_judging_run['hostname'],
                 urlencode((string)$judgeTaskId)),
@@ -578,8 +578,11 @@ if (!empty($options['e'])) {
             false
         );
         if ($response !== null) {
+            logmsg(LOG_DEBUG, "Adding judging run result for jt$judgeTaskId successful.");
             break;
         }
+        logmsg(LOG_WARNING, "Failed to report $judgeTaskId in attempt #" . ($i + 1) . ".");
+        usleep(100 + random_int(200, ($i+1)*1000));
     }
     unlink($options['j']);
     exit(0);
