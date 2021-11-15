@@ -141,7 +141,7 @@ abstract class JuryControllerTest extends BaseTest
                         $elements[$element] = $values[$role];
                     }
                 }
-                yield [$role, 200, $elements, $exampleEntry];
+                yield [$role, 200, $elements, (string)$exampleEntry];
             }
         }
         foreach (static::$rolesDisallowed as $role) {
