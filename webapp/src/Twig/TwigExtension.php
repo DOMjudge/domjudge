@@ -75,21 +75,6 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
     protected $projectDir;
 
     /**
-     * @var array
-     */
-    protected $customCssFiles;
-
-    /**
-     * @var array
-     */
-    protected $customJsFiles;
-
-    /**
-     * @var bool
-     */
-    protected $bannerExists;
-
-    /**
      * TwigExtension constructor.
      *
      * @param DOMJudgeService               $dj
@@ -101,9 +86,6 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
      * @param TokenStorageInterface         $tokenStorage
      * @param AuthorizationCheckerInterface $authorizationChecker
      * @param string                        $projectDir
-     * @param array                         $customCssFiles
-     * @param array                         $customJsFiles
-     * @param bool                          $bannerExists
      */
     public function __construct(
         DOMJudgeService $dj,
@@ -114,10 +96,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         EventLogService $eventLogService,
         TokenStorageInterface $tokenStorage,
         AuthorizationCheckerInterface $authorizationChecker,
-        string $projectDir,
-        array $customCssFiles,
-        array $customJsFiles,
-        bool $bannerExists
+        string $projectDir
     ) {
         $this->dj                   = $dj;
         $this->config               = $config;
@@ -128,9 +107,6 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         $this->tokenStorage         = $tokenStorage;
         $this->authorizationChecker = $authorizationChecker;
         $this->projectDir           = $projectDir;
-        $this->customCssFiles       = $customCssFiles;
-        $this->customJsFiles        = $customJsFiles;
-        $this->bannerExists         = $bannerExists;
     }
 
     public function getFunctions()
@@ -140,7 +116,6 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             new TwigFunction('calculatePenaltyTime', [$this, 'calculatePenaltyTime']),
             new TwigFunction('showExternalId', [$this, 'showExternalId']),
             new TwigFunction('customAssetFiles', [$this, 'customAssetFiles']),
-            new TwigFunction('bannerExists', [$this, 'bannerExists']),
         ];
     }
 
@@ -1042,15 +1017,6 @@ JS;
     }
 
     /**
-     * Determine whether the banner exists
-     * @return bool
-     */
-    public function bannerExists(): bool
-    {
-        return $this->bannerExists;
-    }
-
-    /**
      * Get custom assets of the given type
      * @param string $type
      *
@@ -1059,9 +1025,9 @@ JS;
     public function customAssetFiles(string $type): array
     {
         if ($type === 'css') {
-            return $this->customCssFiles;
+            return $this->dj->getAssetFiles('css/custom', 'css');
         } elseif ($type === 'js') {
-            return $this->customJsFiles;
+            return $this->dj->getAssetFiles('js/custom', 'js');
         }
 
         return [];

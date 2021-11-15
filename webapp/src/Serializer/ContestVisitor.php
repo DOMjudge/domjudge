@@ -15,6 +15,7 @@ use JMS\Serializer\Metadata\StaticPropertyMetadata;
 
 /**
  * Class ContestVisitor
+ *
  * @package App\Serializer
  */
 class ContestVisitor implements EventSubscriberInterface
@@ -35,28 +36,20 @@ class ContestVisitor implements EventSubscriberInterface
     protected $eventLogService;
 
     /**
-     * @var bool
-     */
-    protected $bannerExists;
-
-    /**
      * ContestVisitor constructor.
      *
      * @param ConfigurationService $config
      * @param DOMJudgeService      $dj
      * @param EventLogService      $eventLogService
-     * @param bool                 $bannerExists
      */
     public function __construct(
         ConfigurationService $config,
         DOMJudgeService $dj,
-        EventLogService $eventLogService,
-        bool $bannerExists
+        EventLogService $eventLogService
     ) {
         $this->config = $config;
         $this->dj = $dj;
         $this->eventLogService = $eventLogService;
-        $this->bannerExists = $bannerExists;
     }
 
     /**
@@ -93,15 +86,16 @@ class ContestVisitor implements EventSubscriberInterface
         );
         $visitor->visitProperty($property, (int)$this->config->get('penalty_time'));
 
-        if ($this->bannerExists) {
-            $idField = sprintf('get%s', ucfirst($this->eventLogService->externalIdFieldForEntity(Contest::class) ?? 'cid'));
-            $id = call_user_func([$contest, $idField]);
+        $idField = sprintf('get%s', ucfirst($this->eventLogService->externalIdFieldForEntity(Contest::class) ?? 'cid'));
+        $id = call_user_func([$contest, $idField]);
 
-            $banner = sprintf('%s/public/images/banner.png', $this->dj->getDomjudgeWebappDir());
-
+        // Banner
+        if ($banner = $this->dj->assetPath((string)$id, 'contest', true)) {
             $imageSize = getimagesize($banner);
 
-            $route = $this->dj->apiRelativeUrl('v4_contest_banner', ['id' => $id]);
+            $route = $this->dj->apiRelativeUrl(
+                'v4_contest_banner', ['id' => $id]
+            );
             $property = new StaticPropertyMetadata(
                 Contest::class,
                 'banner',

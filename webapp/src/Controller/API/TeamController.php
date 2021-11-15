@@ -4,7 +4,13 @@ namespace App\Controller\API;
 
 use App\Entity\Contest;
 use App\Entity\Team;
+use App\Entity\TeamAffiliation;
+use App\Service\AssetUpdateService;
+use App\Service\ConfigurationService;
+use App\Service\DOMJudgeService;
+use App\Service\EventLogService;
 use App\Service\ImportExportService;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
 use Exception;
@@ -13,6 +19,7 @@ use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Annotations as OA;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -27,6 +34,23 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  */
 class TeamController extends AbstractRestController
 {
+    /**
+     * @var AssetUpdateService
+     */
+    protected $assetUpdater;
+
+    public function __construct(
+        EntityManagerInterface $entityManager,
+        DOMJudgeService $dj,
+        ConfigurationService $config,
+        EventLogService $eventLogService,
+        AssetUpdateService $assetUpdater
+    )
+    {
+        parent::__construct($entityManager, $dj, $config, $eventLogService);
+        $this->assetUpdater = $assetUpdater;
+    }
+
     /**
      * Get all the teams for this contest
      * @Rest\Get("")
@@ -122,6 +146,90 @@ class TeamController extends AbstractRestController
         }
 
         return static::sendBinaryFileResponse($request, $teamPhoto, 'image/jpeg');
+    }
+
+    /**
+     * Delete the photo for the given team
+     * @Rest\Delete("/{id}/photo.jpg", name="delete_team_photo")
+     * @IsGranted("ROLE_ADMIN")
+     * @OA\Response(response="204", description="Deleting photo succeeded")
+     * @OA\Parameter(ref="#/components/parameters/id")
+     */
+    public function deletePhotoAction(Request $request, string $id): Response
+    {
+        /** @var Team $team */
+        $team = $this->getQueryBuilder($request)
+            ->andWhere(sprintf('%s = :id', $this->getIdField()))
+            ->setParameter(':id', $id)
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        if ($team === null) {
+            throw new NotFoundHttpException(sprintf('Object with ID \'%s\' not found', $id));
+        }
+
+        $team->setClearPhoto(true);
+
+        $this->assetUpdater->updateAssets($team);
+        $this->eventLogService->log('teams', $team->getTeamid(), EventLogService::ACTION_UPDATE,
+            $this->getContestId($request));
+
+        return new Response('', Response::HTTP_NO_CONTENT);
+    }
+
+    /**
+     * Set the photo for the given team
+     * @Rest\POST("/{id}/photo.jpg", name="post_team_photo")
+     * @Rest\PUT("/{id}/photo.jpg", name="put_team_photo")
+     * @OA\RequestBody(
+     *     required=true,
+     *     @OA\MediaType(
+     *         mediaType="multipart/form-data",
+     *         @OA\Schema(
+     *             required={"photo"},
+     *             @OA\Property(
+     *                 property="photo",
+     *                 type="string",
+     *                 format="binary",
+     *                 description="The photo to use."
+     *             )
+     *         )
+     *     )
+     * )
+     * @IsGranted("ROLE_ADMIN")
+     * @OA\Response(response="400", description="Invalid data provided")
+     * @OA\Response(response="204", description="Setting photo succeeded")
+     * @OA\Parameter(ref="#/components/parameters/id")
+     */
+    public function setPhotoAction(Request $request, string $id): Response
+    {
+        /** @var Team $team */
+        $team = $this->getQueryBuilder($request)
+            ->andWhere(sprintf('%s = :id', $this->getIdField()))
+            ->setParameter(':id', $id)
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        if ($team === null) {
+            throw new NotFoundHttpException(sprintf('Object with ID \'%s\' not found', $id));
+        }
+
+        /** @var UploadedFile $photo */
+        $photo = $request->files->get('photo');
+
+        if (!$photo) {
+            throw new BadRequestHttpException("Please supply a photo");
+        } else if ($photo->getMimeType() !== 'image/jpeg') {
+            throw new BadRequestHttpException("Only JPG's are supported");
+        }
+
+        $team->setPhotoFile($photo);
+
+        $this->assetUpdater->updateAssets($team);
+        $this->eventLogService->log('teams', $team->getTeamid(), EventLogService::ACTION_UPDATE,
+            $this->getContestId($request));
+
+        return new Response('', Response::HTTP_NO_CONTENT);
     }
 
     /**

@@ -13,6 +13,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Exception;
 use JMS\Serializer\Annotation as Serializer;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
@@ -315,6 +316,19 @@ class Contest extends BaseApiEntity
     private $public = true;
 
     /**
+     * @var UploadedFile|null
+     * @Assert\File(mimeTypes={"image/png"}, mimeTypesMessage="Only PNG's are allowed")
+     * @Serializer\Exclude()
+     */
+    private $bannerFile;
+
+    /**
+     * @var bool
+     * @Serializer\Exclude()
+     */
+    private $clearBanner = false;
+
+    /**
      * @var boolean
      * @ORM\Column(type="boolean", name="open_to_all_teams",
      *     options={"comment"="Is this contest open to all teams?",
@@ -390,7 +404,7 @@ class Contest extends BaseApiEntity
         $this->medal_categories = new ArrayCollection();
     }
 
-    public function getCid(): int
+    public function getCid(): ?int
     {
         return $this->cid;
     }
@@ -1307,6 +1321,28 @@ class Contest extends BaseApiEntity
             $this->team_categories->removeElement($teamCategory);
         }
 
+        return $this;
+    }
+
+    public function getBannerFile(): ?UploadedFile
+    {
+        return $this->bannerFile;
+    }
+
+    public function setBannerFile(?UploadedFile $bannerFile): Contest
+    {
+        $this->bannerFile = $bannerFile;
+        return $this;
+    }
+
+    public function isClearBanner(): bool
+    {
+        return $this->clearBanner;
+    }
+
+    public function setClearBanner(bool $clearBanner): Contest
+    {
+        $this->clearBanner = $clearBanner;
         return $this;
     }
 }

@@ -22,11 +22,6 @@ services:
             $logsDir: '%kernel.logs_dir%'
             $sqlDir: '%domjudge.sqldir%'
             $etcDir: '%domjudge.etcdir%'
-            $customCssFiles: '%domjudge.custom_css_files%'
-            $customJsFiles: '%domjudge.custom_js_files%'
-            $affiliationLogos: '%domjudge.affiliations_logos%'
-            $teamImages: '%domjudge.team_images%'
-            $bannerExists: '%domjudge.banner_exists%'
 
     # makes classes in src/ available to be used as services
     # this creates a service per class whose id is the fully-qualified class name

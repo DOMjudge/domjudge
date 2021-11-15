@@ -6,6 +6,7 @@ use App\Controller\API\ClarificationController;
 use App\Doctrine\DBAL\Types\JudgeTaskType;
 use App\Entity\AuditLog;
 use App\Entity\Balloon;
+use App\Entity\BaseApiEntity;
 use App\Entity\Clarification;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
@@ -23,6 +24,7 @@ use App\Entity\QueueTask;
 use App\Entity\Rejudging;
 use App\Entity\Submission;
 use App\Entity\Team;
+use App\Entity\TeamAffiliation;
 use App\Entity\Testcase;
 use App\Entity\User;
 use App\Utils\FreezeData;
@@ -100,16 +102,6 @@ class DOMJudgeService
      */
     protected $defaultRunExecutable = null;
 
-    /**
-     * @var array
-     */
-    protected $affiliationLogos;
-
-    /**
-     * @var array
-     */
-    protected $teamImages;
-
     const DATA_SOURCE_LOCAL = 0;
     const DATA_SOURCE_CONFIGURATION_EXTERNAL = 1;
     const DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL = 2;
@@ -131,8 +123,6 @@ class DOMJudgeService
      * @param HttpKernelInterface           $httpKernel
      * @param ConfigurationService          $config
      * @param RouterInterface               $router
-     * @param array                         $affiliationLogos
-     * @param array                         $teamImages
      */
     public function __construct(
         EntityManagerInterface $em,
@@ -143,9 +133,7 @@ class DOMJudgeService
         TokenStorageInterface $tokenStorage,
         HttpKernelInterface $httpKernel,
         ConfigurationService $config,
-        RouterInterface $router,
-        array $affiliationLogos,
-        array $teamImages
+        RouterInterface $router
     ) {
         $this->em                   = $em;
         $this->logger               = $logger;
@@ -156,8 +144,6 @@ class DOMJudgeService
         $this->httpKernel           = $httpKernel;
         $this->config               = $config;
         $this->router               = $router;
-        $this->affiliationLogos     = $affiliationLogos;
-        $this->teamImages           = $teamImages;
     }
 
     /**
@@ -1314,33 +1300,83 @@ class DOMJudgeService
     }
 
     /**
+     * Get asset files in the given directory with the given extension
+     */
+    public function getAssetFiles(string $path, string $extension): array
+    {
+        $customDir = sprintf('%s/public/%s', $this->params->get('kernel.project_dir'), $path);
+        if (!is_dir($customDir)) {
+            return [];
+        }
+
+        $results = [];
+        foreach (scandir($customDir) as $file) {
+            if (strpos($file, '.' . $extension) !== false) {
+                $results[] = $file;
+            }
+        }
+
+        return $results;
+    }
+
+    /**
      * Get the path of an asset if it exists
      *
      * @param string $name
      * @param string $type
      * @param bool $fullPath If true, get the full path. If false, get the webserver relative path
+     * @param bool $force If true, also return the asset path if it does not exist currently
      *
      * @return string|null
      */
-    public function assetPath(string $name, string $type, bool $fullPath = false): ?string
+    public function assetPath(string $name, string $type, bool $fullPath = false, bool $force = false): ?string
     {
         $prefix = $fullPath ? ($this->getDomjudgeWebappDir() . '/public/') : '';
         switch ($type) {
             case 'affiliation':
                 $extension = 'png';
-                $var = $this->affiliationLogos;
                 $dir = 'images/affiliations';
                 break;
             case 'team':
                 $extension = 'jpg';
-                $var = $this->teamImages;
                 $dir = 'images/teams';
+                break;
+            case 'contest':
+                $extension = 'png';
+                $dir = 'images/banners';
                 break;
         }
 
         if (isset($extension)) {
-            if (in_array($name . '.' . $extension, $var)) {
+            $assets = $this->getAssetFiles($dir, $extension);
+            if ($force || in_array($name . '.' . $extension, $assets)) {
                 return sprintf('%s%s/%s.%s', $prefix, $dir, $name, $extension);
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Get the full asset path for the given entity and property
+     */
+    public function fullAssetPath(BaseApiEntity $entity, string $property, bool $useExternalid): ?string
+    {
+        if ($entity instanceof Team) {
+            switch ($property) {
+                case 'photo':
+                    return $this->assetPath((string)$entity->getTeamid(), 'team', true, true);
+            }
+        } elseif ($entity instanceof TeamAffiliation) {
+            switch ($property) {
+                case 'logo':
+                    return $this->assetPath($useExternalid ? $entity->getExternalid() : (string)$entity->getAffilid(), 'affiliation', true, true);
+            }
+
+        } elseif ($entity instanceof Contest) {
+            switch ($property) {
+                case 'banner':
+                    return $this->assetPath($useExternalid ? $entity->getExternalid() : (string)$entity->getCid(), 'contest', true, true);
             }
         }
 

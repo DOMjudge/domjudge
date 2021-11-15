@@ -5,18 +5,36 @@ namespace App\Form\Type;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\Team;
+use App\Entity\TeamAffiliation;
 use App\Entity\TeamCategory;
+use App\Service\DOMJudgeService;
+use App\Service\EventLogService;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class ContestType extends AbstractExternalIdEntityType
 {
+    /**
+     * @var DOMJudgeService
+     */
+    protected $dj;
+
+    public function __construct(EventLogService $eventLogService, DOMJudgeService $dj)
+    {
+        parent::__construct($eventLogService);
+        $this->dj = $dj;
+    }
+
     /**
      * @param FormBuilderInterface $builder
      * @param array                $options
@@ -148,6 +166,14 @@ class ContestType extends AbstractExternalIdEntityType
             ],
             'help' => 'When disabled, the contest is hidden from teams (even when active) and judging is disabled. Disabling is a quick way to remove access to it without changing any other settings.',
         ]);
+        $builder->add('bannerFile', FileType::class, [
+            'label' => 'Banner',
+            'required' => false,
+        ]);
+        $builder->add('clearBanner', CheckboxType::class, [
+            'label' => 'Delete banner',
+            'required' => false,
+        ]);
         $builder->add('problems', CollectionType::class, [
             'entry_type' => ContestProblemType::class,
             'prototype' => true,
@@ -159,6 +185,19 @@ class ContestType extends AbstractExternalIdEntityType
         ]);
 
         $builder->add('save', SubmitType::class);
+
+        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) {
+            /** @var Contest|null $contest */
+            $contest = $event->getData();
+            $form = $event->getForm();
+
+            $idField = sprintf('get%s', ucfirst($this->eventLogService->externalIdFieldForEntity(Contest::class) ?? 'cid'));
+            $id = (string)call_user_func([$contest, $idField]);
+
+            if (!$contest || !$this->dj->assetPath($id, 'contest')) {
+                $form->remove('clearBanner');
+            }
+        });
     }
 
     public function configureOptions(OptionsResolver $resolver)

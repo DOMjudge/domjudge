@@ -6,6 +6,7 @@ use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\Event;
 use App\Entity\TeamAffiliation;
+use App\Service\AssetUpdateService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
@@ -49,15 +50,22 @@ class ContestController extends AbstractRestController
      */
     protected $importExportService;
 
+    /**
+     * @var AssetUpdateService
+     */
+    protected $assetUpdater;
+
     public function __construct(
         EntityManagerInterface $entityManager,
         DOMJudgeService $dj,
         ConfigurationService $config,
         EventLogService $eventLogService,
-        ImportExportService $importExportService
+        ImportExportService $importExportService,
+        AssetUpdateService $assetUpdater
     ) {
         parent::__construct($entityManager, $dj, $config, $eventLogService);
         $this->importExportService = $importExportService;
+        $this->assetUpdater = $assetUpdater;
     }
 
     /**
@@ -191,13 +199,97 @@ class ContestController extends AbstractRestController
             throw new NotFoundHttpException(sprintf('Object with ID \'%s\' not found', $id));
         }
 
-        $banner = sprintf('%s/public/images/banner.png', $this->dj->getDomjudgeWebappDir());
+        $banner = $this->dj->assetPath($id, 'contest', true);
 
         if (!file_exists($banner)) {
             throw new NotFoundHttpException('Contest banner not found');
         }
 
         return static::sendBinaryFileResponse($request, $banner, 'image/png');
+    }
+
+    /**
+     * Delete the banner for the given contest
+     * @Rest\Delete("/{id}/banner.png", name="delete_contest_banner")
+     * @IsGranted("ROLE_ADMIN")
+     * @OA\Response(response="204", description="Deleting banner succeeded")
+     * @OA\Parameter(ref="#/components/parameters/id")
+     */
+    public function deleteBannerAction(Request $request, string $id): Response
+    {
+        /** @var Contest $contest */
+        $contest = $this->getQueryBuilder($request)
+            ->andWhere(sprintf('%s = :id', $this->getIdField()))
+            ->setParameter(':id', $id)
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        if ($contest === null) {
+            throw new NotFoundHttpException(sprintf('Object with ID \'%s\' not found', $id));
+        }
+
+        $contest->setClearBanner(true);
+
+        $this->assetUpdater->updateAssets($contest);
+        $this->eventLogService->log('contests', $contest->getCid(), EventLogService::ACTION_UPDATE,
+            $contest->getCid());
+
+        return new Response('', Response::HTTP_NO_CONTENT);
+    }
+
+    /**
+     * Set the banner for the given contest
+     * @Rest\POST("/{id}/banner.png", name="post_contest_banner")
+     * @Rest\PUT("/{id}/banner.png", name="put_contest_banner")
+     * @OA\RequestBody(
+     *     required=true,
+     *     @OA\MediaType(
+     *         mediaType="multipart/form-data",
+     *         @OA\Schema(
+     *             required={"banner"},
+     *             @OA\Property(
+     *                 property="banner",
+     *                 type="string",
+     *                 format="binary",
+     *                 description="The banner to use."
+     *             )
+     *         )
+     *     )
+     * )
+     * @IsGranted("ROLE_ADMIN")
+     * @OA\Response(response="400", description="Invalid data provided")
+     * @OA\Response(response="204", description="Setting banner succeeded")
+     * @OA\Parameter(ref="#/components/parameters/id")
+     */
+    public function setBannerAction(Request $request, string $id): Response
+    {
+        /** @var Contest $contest */
+        $contest = $this->getQueryBuilder($request)
+            ->andWhere(sprintf('%s = :id', $this->getIdField()))
+            ->setParameter(':id', $id)
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        if ($contest === null) {
+            throw new NotFoundHttpException(sprintf('Object with ID \'%s\' not found', $id));
+        }
+
+        /** @var UploadedFile $banner */
+        $banner = $request->files->get('banner');
+
+        if (!$banner) {
+            throw new BadRequestHttpException("Please supply a banner");
+        } else if ($banner->getMimeType() !== 'image/png') {
+            throw new BadRequestHttpException("Only PNG's are supported");
+        }
+
+        $contest->setBannerFile($banner);
+
+        $this->assetUpdater->updateAssets($contest);
+        $this->eventLogService->log('contests', $contest->getCid(), EventLogService::ACTION_UPDATE,
+            $contest->getCid());
+
+        return new Response('', Response::HTTP_NO_CONTENT);
     }
 
     /**

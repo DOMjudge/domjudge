@@ -19,6 +19,7 @@ use App\Entity\Testcase;
 use App\Form\Type\ContestType;
 use App\Form\Type\FinalizeContestType;
 use App\Form\Type\RemovedIntervalType;
+use App\Service\AssetUpdateService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
@@ -71,18 +72,25 @@ class ContestController extends BaseController
      */
     protected $eventLogService;
 
+    /**
+     * @var AssetUpdateService
+     */
+    protected $assetUpdater;
+
     public function __construct(
         EntityManagerInterface $em,
         DOMJudgeService $dj,
         ConfigurationService $config,
         KernelInterface $kernel,
-        EventLogService $eventLogService
+        EventLogService $eventLogService,
+        AssetUpdateService $assetUpdater
     ) {
         $this->em              = $em;
         $this->dj              = $dj;
         $this->config          = $config;
         $this->eventLogService = $eventLogService;
         $this->kernel          = $kernel;
+        $this->assetUpdater    = $assetUpdater;
     }
 
     /**
@@ -534,6 +542,7 @@ class ContestController extends BaseController
             /** @var ContestProblem[] $deletedProblems */
             $deletedProblems = $getDeletedEntities($contest->getProblems(), 'getProbid');
 
+            $this->assetUpdater->updateAssets($contest);
             $this->saveEntity($this->em, $this->eventLogService, $this->dj, $contest,
                               $contest->getCid(), false);
 
@@ -642,6 +651,7 @@ class ContestController extends BaseController
                     $problem->setContest($contest);
                     $this->em->persist($problem);
                 }
+                $this->assetUpdater->updateAssets($contest);
                 $this->saveEntity($this->em, $this->eventLogService, $this->dj, $contest, null, true);
                 // Note that we do not send out create events for problems,
                 // teams and team categories for this contest. This happens

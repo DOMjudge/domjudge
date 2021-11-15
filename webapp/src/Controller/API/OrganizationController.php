@@ -2,9 +2,15 @@
 
 namespace App\Controller\API;
 
+use App\Entity\Contest;
 use App\Entity\Team;
 use App\Entity\TeamAffiliation;
+use App\Service\AssetUpdateService;
+use App\Service\ConfigurationService;
+use App\Service\DOMJudgeService;
+use App\Service\EventLogService;
 use App\Service\ImportExportService;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
 use Exception;
@@ -12,6 +18,7 @@ use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Annotations as OA;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -26,6 +33,23 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  */
 class OrganizationController extends AbstractRestController
 {
+    /**
+     * @var AssetUpdateService
+     */
+    protected $assetUpdater;
+
+    public function __construct(
+        EntityManagerInterface $entityManager,
+        DOMJudgeService $dj,
+        ConfigurationService $config,
+        EventLogService $eventLogService,
+        AssetUpdateService $assetUpdater
+    )
+    {
+        parent::__construct($entityManager, $dj, $config, $eventLogService);
+        $this->assetUpdater = $assetUpdater;
+    }
+
     /**
      * Get all the organizations for this contest
      * @Rest\Get("")
@@ -109,6 +133,90 @@ class OrganizationController extends AbstractRestController
         }
 
         return static::sendBinaryFileResponse($request, $affiliationLogo, 'image/png');
+    }
+
+    /**
+     * Delete the logo for the given organization
+     * @Rest\Delete("/{id}/logo.png", name="delete_organization_logo")
+     * @IsGranted("ROLE_ADMIN")
+     * @OA\Response(response="204", description="Deleting logo succeeded")
+     * @OA\Parameter(ref="#/components/parameters/id")
+     */
+    public function deleteLogoAction(Request $request, string $id): Response
+    {
+        /** @var TeamAffiliation $teamAffiliation */
+        $teamAffiliation = $this->getQueryBuilder($request)
+            ->andWhere(sprintf('%s = :id', $this->getIdField()))
+            ->setParameter(':id', $id)
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        if ($teamAffiliation === null) {
+            throw new NotFoundHttpException(sprintf('Object with ID \'%s\' not found', $id));
+        }
+
+        $teamAffiliation->setClearLogo(true);
+
+        $this->assetUpdater->updateAssets($teamAffiliation);
+        $this->eventLogService->log('organizations', $teamAffiliation->getAffilid(), EventLogService::ACTION_UPDATE,
+            $this->getContestId($request));
+
+        return new Response('', Response::HTTP_NO_CONTENT);
+    }
+
+    /**
+     * Set the logo for the given organization
+     * @Rest\POST("/{id}/logo.png", name="post_organization_logo")
+     * @Rest\PUT("/{id}/logo.png", name="put_organization_logo")
+     * @OA\RequestBody(
+     *     required=true,
+     *     @OA\MediaType(
+     *         mediaType="multipart/form-data",
+     *         @OA\Schema(
+     *             required={"logo"},
+     *             @OA\Property(
+     *                 property="logo",
+     *                 type="string",
+     *                 format="binary",
+     *                 description="The logo to use."
+     *             )
+     *         )
+     *     )
+     * )
+     * @IsGranted("ROLE_ADMIN")
+     * @OA\Response(response="400", description="Invalid data provided")
+     * @OA\Response(response="204", description="Setting logo succeeded")
+     * @OA\Parameter(ref="#/components/parameters/id")
+     */
+    public function setLogoAction(Request $request, string $id): Response
+    {
+        /** @var TeamAffiliation $teamAffiliation */
+        $teamAffiliation = $this->getQueryBuilder($request)
+            ->andWhere(sprintf('%s = :id', $this->getIdField()))
+            ->setParameter(':id', $id)
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        if ($teamAffiliation === null) {
+            throw new NotFoundHttpException(sprintf('Object with ID \'%s\' not found', $id));
+        }
+
+        /** @var UploadedFile $logo */
+        $logo = $request->files->get('logo');
+
+        if (!$logo) {
+            throw new BadRequestHttpException("Please supply a logo");
+        } else if ($logo->getMimeType() !== 'image/png') {
+            throw new BadRequestHttpException("Only PNG's are supported");
+        }
+
+        $teamAffiliation->setLogoFile($logo);
+
+        $this->assetUpdater->updateAssets($teamAffiliation);
+        $this->eventLogService->log('organizations', $teamAffiliation->getAffilid(), EventLogService::ACTION_UPDATE,
+            $this->getContestId($request));
+
+        return new Response('', Response::HTTP_NO_CONTENT);
     }
 
     /**

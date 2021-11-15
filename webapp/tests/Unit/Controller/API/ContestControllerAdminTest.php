@@ -85,4 +85,39 @@ EOF;
             return static::$container->get(EntityManagerInterface::class)->getRepository(Contest::class)->findOneBy(['externalid' => $cid]);
         }
     }
+
+    public function testBannerManagement(): void
+    {
+        // First, make sure we have no banner
+        $id = 2;
+        if ($this->objectClassForExternalId !== null) {
+            $id = $this->resolveEntityId($this->objectClassForExternalId, (string)$id);
+        }
+        $url = $this->helperGetEndpointURL($this->apiEndpoint, (string)$id);
+        $object = $this->verifyApiJsonResponse('GET', $url, 200, $this->apiUser);
+        self::assertArrayNotHasKey('banner', $object);
+
+        // Now upload a banner
+        $banner = new UploadedFile(__DIR__ . '/../../../../public/js/hv.png', 'hv.png');
+        $this->verifyApiJsonResponse('POST', $url . '/banner.png', 204, $this->apiUser, null, ['banner' => $banner]);
+
+        // Verify we do have a banner now
+        $object = $this->verifyApiJsonResponse('GET', $url, 200, $this->apiUser);
+        $bannerConfig = [
+            [
+                'href'   => "contests/$id/banner.png",
+                'mime'   => 'image/png',
+                'width'  => 181,
+                'height' => 101,
+            ],
+        ];
+        self::assertSame($bannerConfig, $object['banner']);
+
+        // Delete the banner again
+        $this->verifyApiJsonResponse('DELETE', $url . '/banner.png', 204, $this->apiUser);
+
+        // Verify we have no banner anymore
+        $object = $this->verifyApiJsonResponse('GET', $url, 200, $this->apiUser);
+        self::assertArrayNotHasKey('banner', $object);
+    }
 }

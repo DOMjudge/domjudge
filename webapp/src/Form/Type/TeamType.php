@@ -8,6 +8,7 @@ use App\Entity\Team;
 use App\Entity\TeamAffiliation;
 use App\Entity\TeamCategory;
 use App\Entity\User;
+use App\Service\DOMJudgeService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -15,6 +16,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
@@ -32,9 +34,15 @@ class TeamType extends AbstractType
      */
     protected $em;
 
-    public function __construct(EntityManagerInterface $em)
+    /**
+     * @var DOMJudgeService
+     */
+    protected $dj;
+
+    public function __construct(EntityManagerInterface $em, DOMJudgeService $dj)
     {
         $this->em = $em;
+        $this->dj = $dj;
     }
 
     /**
@@ -110,6 +118,14 @@ class TeamType extends AbstractType
                 'No' => false,
             ],
         ]);
+        $builder->add('photoFile', FileType::class, [
+            'label' => 'Photo',
+            'required' => false,
+        ]);
+        $builder->add('clearPhoto', CheckboxType::class, [
+            'label' => 'Delete photo',
+            'required' => false,
+        ]);
         $builder->add('addUserForTeam', CheckboxType::class, [
             'label' => 'Add new user for this team',
             'required' => false,
@@ -134,19 +150,25 @@ class TeamType extends AbstractType
                 $form->remove('users');
             }
 
-            // Make sure the user has the team role to make validation work
-            /** @var User|false $user */
-            $user = $team->getUsers()->first();
-            if ($user && !$this->em->contains($team)) {
-                /** @var Role $role */
-                $role = $this->em->createQueryBuilder()
-                    ->from(Role::class, 'r')
-                    ->select('r')
-                    ->andWhere('r.dj_role = :team')
-                    ->setParameter(':team', 'team')
-                    ->getQuery()
-                    ->getOneOrNullResult();
-                $user->addUserRole($role);
+            if ($team) {
+                // Make sure the user has the team role to make validation work
+                /** @var User|false $user */
+                $user = $team->getUsers()->first();
+                if ($user && !$this->em->contains($team)) {
+                    /** @var Role $role */
+                    $role = $this->em->createQueryBuilder()
+                        ->from(Role::class, 'r')
+                        ->select('r')
+                        ->andWhere('r.dj_role = :team')
+                        ->setParameter(':team', 'team')
+                        ->getQuery()
+                        ->getOneOrNullResult();
+                    $user->addUserRole($role);
+                }
+            }
+
+            if (!$team || !$this->dj->assetPath((string)$team->getTeamid(), 'team')) {
+                $form->remove('clearPhoto');
             }
         });
     }
