@@ -829,9 +829,7 @@ class ScoreboardService
             foreach ($category->getTeams() as $team) {
                 if ($teamaffil = $team->getAffiliation()) {
                     $affiliations[$teamaffil->getName()] = [
-                        'id'   => $this->eventLogService->externalIdFieldForEntity($teamaffil) ?
-                            $teamaffil->getExternalid() :
-                            $teamaffil->getAffilid(),
+                        'id'   => $teamaffil->getApiId($this->eventLogService),
                         'name' => $teamaffil->getName(),
                     ];
                 }

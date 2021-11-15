@@ -86,8 +86,7 @@ class ContestVisitor implements EventSubscriberInterface
         );
         $visitor->visitProperty($property, (int)$this->config->get('penalty_time'));
 
-        $idField = sprintf('get%s', ucfirst($this->eventLogService->externalIdFieldForEntity(Contest::class) ?? 'cid'));
-        $id = call_user_func([$contest, $idField]);
+        $id = $contest->getApiId($this->eventLogService);
 
         // Banner
         if ($banner = $this->dj->assetPath((string)$id, 'contest', true)) {

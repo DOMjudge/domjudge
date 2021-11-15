@@ -84,8 +84,7 @@ class TeamAffiliationType extends AbstractExternalIdEntityType
             $affiliation = $event->getData();
             $form = $event->getForm();
 
-            $idField = sprintf('get%s', ucfirst($this->eventLogService->externalIdFieldForEntity(TeamAffiliation::class) ?? 'affilid'));
-            $id = (string)call_user_func([$affiliation, $idField]);
+            $id = $affiliation ? $affiliation->getApiId($this->eventLogService) : null;
 
             if (!$affiliation || !$this->dj->assetPath($id, 'affiliation')) {
                 $form->remove('clearLogo');
