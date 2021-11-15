@@ -182,6 +182,9 @@
                     {% set contestId = contest.externalid %}
                 {% endif %}
                 {% set banner = contestId | assetPath('contest') %}
+                {% if not banner %}
+                    {% set banner = globalBannerAssetPath() %}
+                {% endif %}
                 {% if banner %}
                     <tr>
                         <th>Banner</th>

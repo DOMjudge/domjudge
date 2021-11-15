@@ -116,6 +116,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             new TwigFunction('calculatePenaltyTime', [$this, 'calculatePenaltyTime']),
             new TwigFunction('showExternalId', [$this, 'showExternalId']),
             new TwigFunction('customAssetFiles', [$this, 'customAssetFiles']),
+            new TwigFunction('globalBannerAssetPath', [$this->dj, 'globalBannerAssetPath']),
         ];
     }
 

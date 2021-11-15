@@ -7,6 +7,9 @@
         {% set contestId = contest.externalid %}
     {% endif %}
     {% set bannerImage = contestId | assetPath('contest') %}
+    {% if not bannerImage %}
+        {% set bannerImage = globalBannerAssetPath() %}
+    {% endif %}
     {% if bannerImage %}
         <img class="banner" src="{{ asset(bannerImage) }}" alt="Banner">
     {% endif %}

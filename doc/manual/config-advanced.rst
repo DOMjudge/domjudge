@@ -25,7 +25,9 @@ path of your installation) as follows:
   team's numeric ID as shown in the DOMjudge interface.
 - *Contest Banners*: a page-wide banner can be shown on the public scoreboard
   if that image is placed in `public/images/banners/1.png` where *1* is the
-  contest's numeric ID as shown in the DOMjudge interface.
+  contest's numeric ID as shown in the DOMjudge interface. Alternatively, you
+  can place a file at `public/images/banner.png` which will be used as a banner
+  for all contests. Contest-specific banners always have priority.
 
 .. note::
 
