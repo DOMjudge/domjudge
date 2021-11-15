@@ -72,8 +72,7 @@ class TeamAffiliationVisitor implements EventSubscriberInterface
         /** @var TeamAffiliation $affiliation */
         $affiliation = $event->getObject();
 
-        $idField = sprintf('get%s', ucfirst($this->eventLogService->externalIdFieldForEntity(TeamAffiliation::class) ?? 'affilid'));
-        $id = call_user_func([$affiliation, $idField]);
+        $id = $affiliation->getApiId($this->eventLogService);
 
         // Country flag
         if ($this->config->get('show_flags') && $affiliation->getCountry()) {

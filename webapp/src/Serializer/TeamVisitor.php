@@ -71,13 +71,13 @@ class TeamVisitor implements EventSubscriberInterface
 
         $imageSize = getimagesize($teamPhoto);
 
-        $idField = sprintf('get%s', ucfirst($this->eventLogService->externalIdFieldForEntity(Team::class) ?? 'teamid'));
+        $id = $team->getApiId($this->eventLogService);
 
         $route = $this->dj->apiRelativeUrl(
             'v4_team_photo',
             [
                 'cid' => $this->requestStack->getCurrentRequest()->attributes->get('cid'),
-                'id'  => call_user_func([$team, $idField]),
+                'id'  => $id,
             ]
         );
         $property = new StaticPropertyMetadata(

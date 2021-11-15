@@ -27,13 +27,13 @@ abstract class BaseApiEntity
     /**
      * Get the API ID for this entity.
      *
-     * @return mixed
+     * @return string
      * @throws Exception
      */
-    public function getApiId(EventLogService $eventLogService)
+    public function getApiId(EventLogService $eventLogService): string
     {
         $field = $eventLogService->apiIdFieldForEntity($this);
         $method = 'get'.ucfirst($field);
-        return $this->{$method}();
+        return (string)$this->{$method}();
     }
 }
