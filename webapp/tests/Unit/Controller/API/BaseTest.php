@@ -270,7 +270,7 @@ abstract class BaseTest extends BaseBaseTest
         }
         $url = $this->helperGetEndpointURL($apiEndpoint);
         $response = $this->verifyApiJsonResponse('GET', $url . "?" . http_build_query(['ids' => 2]), 400, $this->apiUser);
-        static::assertEquals("'ids' should be an array of IDs to fetch.", $response['message']);
+        static::assertEquals("'ids' should be an array of ID's to fetch", $response['message']);
     }
 
     /**
