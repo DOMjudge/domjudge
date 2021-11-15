@@ -1357,6 +1357,19 @@ class DOMJudgeService
         return null;
     }
 
+    public function globalBannerAssetPath(): ?string
+    {
+        // This is put in a separate method (and not as a special case in assetPath) since
+        // fullAssetPath uses assetPath as well and we do not want to show the 'delete banner'
+        // checkbox when a global banner has been set.
+        $bannerFile = 'images/banner.png';
+        if (file_exists($this->getDomjudgeWebappDir() . '/public/' . $bannerFile)) {
+            return $bannerFile;
+        }
+
+        return null;
+    }
+
     /**
      * Get the full asset path for the given entity and property
      */
