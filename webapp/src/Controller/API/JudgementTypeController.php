@@ -15,6 +15,7 @@ use Symfony\Component\Intl\Exception\NotImplementedException;
 /**
  * @Rest\Route("/contests/{cid}/judgement-types")
  * @OA\Tag(name="Judgement types")
+ * @OA\Response(response="400", ref="#/components/responses/InvalidResponse")
  */
 class JudgementTypeController extends AbstractRestController
 {
