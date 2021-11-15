@@ -29,6 +29,7 @@ use Symfony\Component\Routing\RouterInterface;
 
 /**
  * @OA\Tag(name="General")
+ * @OA\Response(response="400", ref="#/components/responses/InvalidResponse")
  */
 class GeneralInfoController extends AbstractFOSRestController
 {
