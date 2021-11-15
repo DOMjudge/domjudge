@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
@@ -118,6 +119,19 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface
      * @Serializer\Exclude()
      */
     private $addUserForTeam = false;
+
+    /**
+     * @var UploadedFile|null
+     * @Assert\File(mimeTypes={"image/jpeg"}, mimeTypesMessage="Only JPG's are allowed")
+     * @Serializer\Exclude()
+     */
+    private $photoFile;
+
+    /**
+     * @var bool
+     * @Serializer\Exclude()
+     */
+    private $clearPhoto = false;
 
     /**
      * @ORM\ManyToOne(targetEntity="TeamAffiliation", inversedBy="teams")
@@ -308,6 +322,28 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface
     public function getAddUserForTeam(): bool
     {
         return $this->addUserForTeam;
+    }
+
+    public function getPhotoFile(): ?UploadedFile
+    {
+        return $this->photoFile;
+    }
+
+    public function setPhotoFile(?UploadedFile $photoFile): Team
+    {
+        $this->photoFile = $photoFile;
+        return $this;
+    }
+
+    public function isClearPhoto(): bool
+    {
+        return $this->clearPhoto;
+    }
+
+    public function setClearPhoto(bool $clearPhoto): Team
+    {
+        $this->clearPhoto = $clearPhoto;
+        return $this;
     }
 
     public function setAffiliation(TeamAffiliation $affiliation = null): Team

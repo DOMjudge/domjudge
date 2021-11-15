@@ -7,7 +7,8 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
-use Symfony\Component\Intl\Countries;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Affilitations for teams (e.g.: university, company).
@@ -80,6 +81,19 @@ class TeamAffiliation extends BaseApiEntity
      * @Country()
      */
     private $country;
+
+    /**
+     * @var UploadedFile|null
+     * @Assert\File(mimeTypes={"image/png"}, mimeTypesMessage="Only PNG's are allowed")
+     * @Serializer\Exclude()
+     */
+    private $logoFile;
+
+    /**
+     * @var bool
+     * @Serializer\Exclude()
+     */
+    private $clearLogo = false;
 
     /**
      * @var string
@@ -172,6 +186,28 @@ class TeamAffiliation extends BaseApiEntity
     public function getComments(): ?string
     {
         return $this->comments;
+    }
+
+    public function getLogoFile(): ?UploadedFile
+    {
+        return $this->logoFile;
+    }
+
+    public function setLogoFile(?UploadedFile $logoFile): TeamAffiliation
+    {
+        $this->logoFile = $logoFile;
+        return $this;
+    }
+
+    public function isClearLogo(): bool
+    {
+        return $this->clearLogo;
+    }
+
+    public function setClearLogo(bool $clearLogo): TeamAffiliation
+    {
+        $this->clearLogo = $clearLogo;
+        return $this;
     }
 
     public function addTeam(Team $team): TeamAffiliation

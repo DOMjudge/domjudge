@@ -7,6 +7,7 @@ use App\Entity\Contest;
 use App\Entity\Team;
 use App\Entity\User;
 use App\Form\Type\TeamType;
+use App\Service\AssetUpdateService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
@@ -58,18 +59,25 @@ class TeamController extends BaseController
      */
     protected $eventLogService;
 
+    /**
+     * @var AssetUpdateService
+     */
+    protected $assetUpdater;
+
     public function __construct(
         EntityManagerInterface $em,
         DOMJudgeService $dj,
         ConfigurationService $config,
         KernelInterface $kernel,
-        EventLogService $eventLogService
+        EventLogService $eventLogService,
+        AssetUpdateService $assetUpdater
     ) {
         $this->em              = $em;
         $this->dj              = $dj;
         $this->config          = $config;
         $this->eventLogService = $eventLogService;
         $this->kernel          = $kernel;
+        $this->assetUpdater    = $assetUpdater;
     }
 
     /**
@@ -370,6 +378,7 @@ class TeamController extends BaseController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $this->assetUpdater->updateAssets($team);
             $this->saveEntity($this->em, $this->eventLogService, $this->dj, $team,
                               $team->getTeamid(), false);
             return $this->redirect($this->generateUrl(
@@ -429,6 +438,7 @@ class TeamController extends BaseController
                 $user->setName($team->getEffectiveName());
             }
             $this->em->persist($team);
+            $this->assetUpdater->updateAssets($team);
             $this->saveEntity($this->em, $this->eventLogService, $this->dj, $team, null, true);
             return $this->redirect($this->generateUrl(
                 'jury_team',

@@ -23,12 +23,13 @@ path of your installation) as follows:
 - *Team pictures*: a photo of the team will be shown in the team details
   page if `public/images/teams/456.jpg` exists, where *456* is the
   team's numeric ID as shown in the DOMjudge interface.
-- *Banner*: a page-wide banner can be shown on the public scoreboard
-  if that image is placed in `public/images/banner.png`.
+- *Contest Banners*: a page-wide banner can be shown on the public scoreboard
+  if that image is placed in `public/images/banners/1.png` where *1* is the
+  contest's numeric ID as shown in the DOMjudge interface.
 
 .. note::
 
-  The IDs for affiliations and teams need to be the *external ID*
+  The IDs for affiliations and contests need to be the *external ID*
   if the ``data_source`` setting of DOMjudge is set to external.
 
 It is also possible to load custom CSS and/or JavaScript files. To do so, place

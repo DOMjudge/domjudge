@@ -108,6 +108,7 @@ abstract class BaseController extends AbstractController
     ): void {
         $auditLogType = Utils::tableForEntity($entity);
 
+        $entityManager->persist($entity);
         $entityManager->flush();
 
         // If we have no ID but we do have a Doctrine entity, automatically

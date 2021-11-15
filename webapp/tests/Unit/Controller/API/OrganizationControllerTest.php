@@ -5,6 +5,7 @@ namespace App\Tests\Unit\Controller\API;
 use App\DataFixtures\Test\SampleAffiliationsFixture;
 use App\Entity\TeamAffiliation;
 use App\Service\ConfigurationService;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class OrganizationControllerTest extends BaseTest
 {
@@ -32,14 +33,7 @@ class OrganizationControllerTest extends BaseTest
                     'height' => 512,
                 ],
             ],
-            'logo'         => [
-                [
-                    'href'   => 'contests/2/organizations/1/logo.png',
-                    'mime'   => 'image/png',
-                    'width'  => 181,
-                    'height' => 101
-                ]
-            ]
+            'logo' => null,
         ],
         SampleAffiliationsFixture::class . ':0' => [
             'name'         => 'FAU',
@@ -103,32 +97,6 @@ class OrganizationControllerTest extends BaseTest
     }
 
     /**
-     * @var string
-     */
-    protected $organizationLogo;
-
-    protected function setUp(): void
-    {
-        // Make sure we have an organization logo for organization 1 by copying an existing file.
-        $fileToCopy = __DIR__ . '/../../../../public/js/hv.png';
-        $organizationLogosDir = __DIR__ . '/../../../../public/images/affiliations/';
-        $this->organizationLogo = $organizationLogosDir . '1.png';
-        copy($fileToCopy, $this->organizationLogo);
-
-        // Make sure we remove the test container, since we need to rebuild it for the images to work.
-        $this->removeTestContainer();
-
-        parent::setUp();
-    }
-
-    protected function tearDown(): void
-    {
-        // Remove the image again.
-        unlink($this->organizationLogo);
-        $this->removeTestContainer();
-    }
-
-    /**
      * Test that when we disable showing country flags, the country and flag of an affiliation are not exposed.
      */
     public function testCountryAbsentWhenDisabled()
@@ -143,5 +111,42 @@ class OrganizationControllerTest extends BaseTest
             static::assertArrayNotHasKey('country', $response);
             static::assertArrayNotHasKey('country_flag', $response);
         });
+    }
+
+    public function testLogoManagement(): void
+    {
+        // Note: we are doing this as admin as we require privileges
+
+        // First, make sure we have no logo
+        $id = 1;
+        if ($this->objectClassForExternalId !== null) {
+            $id = $this->resolveEntityId($this->objectClassForExternalId, (string)$id);
+        }
+        $url = $this->helperGetEndpointURL($this->apiEndpoint, (string)$id);
+        $object = $this->verifyApiJsonResponse('GET', $url, 200, 'admin');
+        self::assertArrayNotHasKey('logo', $object);
+
+        // Now upload a logo
+        $logo = new UploadedFile(__DIR__ . '/../../../../public/js/hv.png', 'hv.png');
+        $this->verifyApiJsonResponse('POST', $url . '/logo.png', 204, 'admin', null, ['logo' => $logo]);
+
+        // Verify we do have a logo now
+        $object = $this->verifyApiJsonResponse('GET', $url, 200, 'admin');
+        $logoConfig = [
+            [
+                'href'   => "contests/2/organizations/$id/logo.png",
+                'mime'   => 'image/png',
+                'width'  => 181,
+                'height' => 101
+            ]
+        ];
+        self::assertSame($logoConfig, $object['logo']);
+
+        // Delete the logo again
+        $this->verifyApiJsonResponse('DELETE', $url . '/logo.png', 204, 'admin');
+
+        // Verify we have no banner anymore
+        $object = $this->verifyApiJsonResponse('GET', $url, 200, 'admin');
+        self::assertArrayNotHasKey('logo', $object);
     }
 }

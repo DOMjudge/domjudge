@@ -5,6 +5,7 @@ namespace App\Controller\Jury;
 use App\Controller\BaseController;
 use App\Entity\TeamAffiliation;
 use App\Form\Type\TeamAffiliationType;
+use App\Service\AssetUpdateService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
@@ -52,18 +53,25 @@ class TeamAffiliationController extends BaseController
      */
     protected $eventLogService;
 
+    /**
+     * @var AssetUpdateService
+     */
+    protected $assetUpdater;
+
     public function __construct(
         EntityManagerInterface $em,
         DOMJudgeService $dj,
         ConfigurationService $config,
         KernelInterface $kernel,
-        EventLogService $eventLogService
+        EventLogService $eventLogService,
+        AssetUpdateService $assetUpdater
     ) {
         $this->em              = $em;
         $this->dj              = $dj;
         $this->config          = $config;
         $this->kernel          = $kernel;
         $this->eventLogService = $eventLogService;
+        $this->assetUpdater    = $assetUpdater;
     }
 
     /**
@@ -225,6 +233,7 @@ class TeamAffiliationController extends BaseController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $this->assetUpdater->updateAssets($teamAffiliation);
             $this->saveEntity($this->em, $this->eventLogService, $this->dj, $teamAffiliation,
                               $teamAffiliation->getAffilid(), false);
             return $this->redirect($this->generateUrl(
@@ -273,6 +282,7 @@ class TeamAffiliationController extends BaseController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $this->em->persist($teamAffiliation);
+            $this->assetUpdater->updateAssets($teamAffiliation);
             $this->saveEntity($this->em, $this->eventLogService, $this->dj, $teamAffiliation, null, true);
             return $this->redirect($this->generateUrl(
                 'jury_team_affiliation',

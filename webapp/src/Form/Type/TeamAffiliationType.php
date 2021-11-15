@@ -2,15 +2,19 @@
 
 namespace App\Form\Type;
 
+use App\Entity\Contest;
 use App\Entity\TeamAffiliation;
 use App\Service\ConfigurationService;
+use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
-use App\Utils\Utils;
-use stdClass;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Intl\Countries;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -22,17 +26,18 @@ class TeamAffiliationType extends AbstractExternalIdEntityType
     protected $configuration;
 
     /**
-     * TeamAffiliationType constructor.
-     *
-     * @param EventLogService      $eventLogService
-     * @param ConfigurationService $configuration
+     * @var DOMJudgeService
      */
+    protected $dj;
+
     public function __construct(
         EventLogService $eventLogService,
-        ConfigurationService $configuration
+        ConfigurationService $configuration,
+        DOMJudgeService $dj
     ) {
         parent::__construct($eventLogService);
         $this->configuration = $configuration;
+        $this->dj = $dj;
     }
 
     /**
@@ -64,7 +69,28 @@ class TeamAffiliationType extends AbstractExternalIdEntityType
                 'rows' => 6,
             ],
         ]);
+        $builder->add('logoFile', FileType::class, [
+            'label' => 'Logo',
+            'required' => false,
+        ]);
+        $builder->add('clearLogo', CheckboxType::class, [
+            'label' => 'Delete logo',
+            'required' => false,
+        ]);
         $builder->add('save', SubmitType::class);
+
+        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) {
+            /** @var TeamAffiliation|null $affiliation */
+            $affiliation = $event->getData();
+            $form = $event->getForm();
+
+            $idField = sprintf('get%s', ucfirst($this->eventLogService->externalIdFieldForEntity(TeamAffiliation::class) ?? 'affilid'));
+            $id = (string)call_user_func([$affiliation, $idField]);
+
+            if (!$affiliation || !$this->dj->assetPath($id, 'affiliation')) {
+                $form->remove('clearLogo');
+            }
+        });
     }
 
 
