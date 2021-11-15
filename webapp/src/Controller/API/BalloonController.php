@@ -53,12 +53,7 @@ class BalloonController extends AbstractRestController
      *     response="204",
      *     description="The balloon was now marked as done or already marked as such.",
      * )
-     * @OA\Parameter(
-     *     name="balloonId",
-     *     in="path",
-     *     description="The balloonId to mark as done.",
-     *     @OA\Schema(type="integer")
-     * )
+     * @OA\Parameter(ref="#/components/parameters/cid")
      * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_BALLOON')")
      * @throws Exception
      */

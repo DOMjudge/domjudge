@@ -19,6 +19,27 @@ nelmio_api_doc:
                     required: true
                     schema:
                         type: string
+                    examples:
+                        int1:
+                            value: 1
+                            summary: The Demo practice contest (datasource=0) 
+                        int2:
+                            value: 2
+                            summary: The Demo contest (datasource=0) 
+                        string:
+                            value: "demo"
+                            summary: The Demo contest (datasource=1) 
+                balloonId:
+                    name: balloonId
+                    in: path
+                    description: The balloonId to mark as done.
+                    required: true
+                    schema:
+                        type: integer
+                    examples:
+                        balloon:
+                            value: 1
+                            summary: First balloon of the contest
                 id:
                     name: id
                     in: path
@@ -26,6 +47,19 @@ nelmio_api_doc:
                     required: true
                     schema:
                         type: string
+                    examples:
+                        generic:
+                            value: 1
+                            summary: Most Entities are integer indexed
+                        participants:
+                            value: 3
+                            summary: Participants group
+                        award:
+                            value: "winner"
+                            summary: "Default Award entity"
+                        executable:
+                            value: "py3"
+                            summary: "Compile executable for python3"
                 idlist:
                     name: ids[]
                     in: query
@@ -48,6 +82,8 @@ nelmio_api_doc:
                     description: The specified resource was not found
                 Unauthorized:
                     description: Unauthorized
+                InvalidResponse:
+                    description: The specified resource identifier is malformed
             schemas:
                 ImageList:
                     type: array
