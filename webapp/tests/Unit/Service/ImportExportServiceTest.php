@@ -27,7 +27,10 @@ class ImportExportServiceTest extends KernelTestCase
      */
     public function testImportContestDataErrors($data, string $expectedMessage)
     {
-        self::assertFalse(static::$container->get(ImportExportService::class)->importContestData($data, $message, $cid));
+
+        /** @var ImportExportService $importExportService */
+        $importExportService = static::$container->get(ImportExportService::class);
+        self::assertFalse($importExportService->importContestData($data, $message, $cid));
         self::assertEquals($expectedMessage, $message);
         self::assertNull($cid);
     }
@@ -92,7 +95,9 @@ class ImportExportServiceTest extends KernelTestCase
      */
     public function testImportContestDataSuccess($data, string $expectedShortName, array $expectedProblems = [])
     {
-        self::assertTrue(static::$container->get(ImportExportService::class)->importContestData($data, $message, $cid), 'Importing failed: ' . $message);
+        /** @var ImportExportService $importExportService */
+        $importExportService = static::$container->get(ImportExportService::class);
+        self::assertTrue($importExportService->importContestData($data, $message, $cid), 'Importing failed: ' . $message);
         self::assertNull($message);
         self::assertIsString($cid);
 
@@ -138,7 +143,7 @@ class ImportExportServiceTest extends KernelTestCase
             ],
             'test-contest__-__test',
         ];
-        // Real life example from NWERC 2020 practice session, including problems
+        // Real life example from NWERC 2020 practice session, including problems.
         yield [
             [
                 'duration'                 => '2:00:00',
@@ -198,10 +203,12 @@ class ImportExportServiceTest extends KernelTestCase
             'start_time'                 => '2020-01-01T12:34:56+02:00',
             'scoreboard_freeze_duration' => '1:00:00',
         ];
-        static::$container->get(ImportExportService::class)->importContestData($contestData, $message, $cid);
+        /** @var ImportExportService $importExportService */
+        $importExportService = static::$container->get(ImportExportService::class);
+        $importExportService->importContestData($contestData, $message, $cid);
 
         $contest = $this->getContest($cid);
-        self::assertTrue(static::$container->get(ImportExportService::class)->importProblemsData($contest, $data, $ids));
+        self::assertTrue($importExportService->importProblemsData($contest, $data, $ids));
         self::assertNotNull($ids);
         self::assertCount(count($expectedProblems), $ids);
 
@@ -326,7 +333,7 @@ class ImportExportServiceTest extends KernelTestCase
         // - Judge
         // - Admin
         // - Analyst (will be ignored)
-        // We also set the IP address for some of the accounts
+        // We also set the IP address for some accounts.
         $accounts = <<<EOF
 accounts	1
 team	Team 1	team001	password1
@@ -421,10 +428,13 @@ EOF;
         $fileName = tempnam(static::$container->get(DOMJudgeService::class)->getDomjudgeTmpDir(), 'accounts-tsv');
         file_put_contents($fileName, $accounts);
         $file = new UploadedFile($fileName, 'accounts.tsv');
-        $importCount = static::$container->get(ImportExportService::class)->importTsv('accounts', $file, $message);
-        // Remove the file, we don't need it anymore
+        /** @var ImportExportService $importExportService */
+        $importExportService = static::$container->get(ImportExportService::class);
+        $importCount = $importExportService->importTsv('accounts', $file, $message);
+        // Remove the file, we don't need it anymore.
         unlink($fileName);
-        // We expect 8 accounts to be created: 4 team accounts, 2 judge accounts and 2 admin accounts. No analyst accounts
+        // We expect 8 accounts to be created: 4 team accounts, 2 judge accounts and 2 admin accounts. No
+        // analyst accounts.
         self::assertEquals(8, $importCount);
         self::assertNull($message);
 
@@ -433,20 +443,20 @@ EOF;
 
         $passwordEncoder = static::$container->get(UserPasswordEncoderInterface::class);
 
-        // Check for all expected users
+        // Check for all expected users.
         foreach ($expectedUsers as $data) {
             $user = $em->getRepository(User::class)->findOneBy(['username' => $data['username']]);
             self::assertNotNull($user, "User $data[username] does not exist");
             self::assertEquals($data['name'], $user->getName());
             self::assertTrue($passwordEncoder->isPasswordValid($user, $data['password']));
-            // To verify roles we need to sort them
+            // To verify roles we need to sort them.
             $roles = $user->getRoleList();
             sort($roles);
             $dataRoles = $data['roles'];
             sort($dataRoles);
             self::assertEquals($dataRoles, $roles);
 
-            // Verify the team
+            // Verify the team.
             if (isset($data['team'])) {
                 self::assertNotNull($user->getTeam());
                 $team = $user->getTeam();
@@ -468,7 +478,7 @@ EOF;
             }
         }
 
-        // Check all unexpected users are not present
+        // Check all unexpected users are not present.
         foreach ($unexpectedUsers as $username) {
             $user = $em->getRepository(User::class)->findOneBy(['username' => $username]);
             self::assertNull($user, "User $username should not exist");
@@ -477,7 +487,7 @@ EOF;
 
     protected function getContest($cid): Contest
     {
-        // First clear the entity manager to have all data
+        // First clear the entity manager to have all data.
         static::$container->get(EntityManagerInterface::class)->clear();
         $config = static::$container->get(ConfigurationService::class);
         $dataSource = $config->get('data_source');

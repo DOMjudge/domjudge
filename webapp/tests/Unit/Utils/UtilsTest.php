@@ -488,7 +488,7 @@ class UtilsTest extends TestCase
     }
 
     /**
-     * Test that printhost does not truncates an IP address
+     * Test that printhost does not truncate an IP address.
      */
     public function testPrinthostIP() : void
     {
@@ -606,7 +606,7 @@ class UtilsTest extends TestCase
 
     /**
      * Test that string is not cut when not longer than 1 over requested maximum,
-     * counting multi byte characters as one.
+     * counting multi-byte characters as one.
      */
     public function testCutStringNoopMB() : void
     {
@@ -617,7 +617,7 @@ class UtilsTest extends TestCase
 
     /**
      * Test that string is cut when one longer than requested maximum,
-     * counting multi byte characters as one.
+     * counting multi-byte characters as one.
      */
     public function testCutStringCutMB() : void
     {

@@ -6,8 +6,8 @@ use App\Entity\Language;
 
 class LanguagesControllerTest extends JuryControllerTest
 {
-    protected static $identifingEditAttribute = 'name';
-    protected static $defaultEditEntityName   = 'Java';
+    protected static $identifyingEditAttribute = 'name';
+    protected static $defaultEditEntityName    = 'Java';
     protected static $baseUrl          = '/jury/languages';
     protected static $exampleEntries   = ['c','csharp','Haskell','Bash shell',"pas, p",'no','yes','R','r'];
     protected static $shortTag         = 'language';

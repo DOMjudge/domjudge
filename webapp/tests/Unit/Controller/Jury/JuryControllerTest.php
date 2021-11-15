@@ -8,9 +8,7 @@ use Doctrine\ORM\EntityManager;
 use Generator;
 
 /**
- * Class JuryControllerTest
- *
- * This abstract class will have the default functionality tested for Jury pages
+ * This abstract class will have the default functionality tested for Jury pages.
  *
  * @package App\Tests\Unit\Controller\Jury
  */
@@ -36,7 +34,7 @@ abstract class JuryControllerTest extends BaseTest
     protected static $defaultEditEntityName  = null;
     protected static $specialFieldOnlyUpdate = [];
     protected static $editEntitiesSkipFields = [];
-    
+
     public function __construct($name = null, array $data = [], $dataName = '')
     {
         parent::__construct($name, $data, $dataName);
@@ -64,7 +62,7 @@ abstract class JuryControllerTest extends BaseTest
     protected static $getIDFunc;
 
     /**
-     * Test that jury <???> overview page exists
+     * Test that jury <???> overview page exists.
      * @dataProvider provideBasePage
      */
     public function testPageOverview(
@@ -104,10 +102,10 @@ abstract class JuryControllerTest extends BaseTest
 
     /**
      * Data provider used to test role access. Each item contains:
-     * - the base role the user has
-     * - the endpoint to check
-     * - expected statusCode for this role
-     * - the method to try (GET, POST)
+     * - the base role the user has,
+     * - the endpoint to check,
+     * - expected statusCode for this role,
+     * - the method to try (GET, POST).
      */
     public function provideRoleAccessData(): Generator
     {
@@ -129,9 +127,9 @@ abstract class JuryControllerTest extends BaseTest
 
     /**
      * Data provider used to test if the starting pages are sane
-     * - the base role of the user
-     * - the expected HTTP statusCode
-     * - the pre-existing entry
+     * - the base role of the user,
+     * - the expected HTTP statusCode,
+     * - the pre-existing entry.
      */
     public function provideBasePage(): Generator
     {
@@ -152,7 +150,7 @@ abstract class JuryControllerTest extends BaseTest
     }
 
     /**
-     * Test that jury role can NOT add a new entity for this controller
+     * Test that jury role can NOT add a new entity for this controller.
      */
     public function testCheckAddEntityJury(): void
     {
@@ -165,7 +163,7 @@ abstract class JuryControllerTest extends BaseTest
         }
     }
 
-    public function helperCheckExistance(string $id, $value, array $element): void {
+    public function helperCheckExistence(string $id, $value, array $element): void {
         if (in_array($id, static::$addEntitiesShown)) {
             $tmpValue = $element[$id];
             if (is_bool($value)) {
@@ -179,7 +177,7 @@ abstract class JuryControllerTest extends BaseTest
     }
 
     /**
-     * Test that admin can add a new entity for this controller
+     * Test that admin can add a new entity for this controller.
      */
     public function testCheckAddEntityAdmin(): void
     {
@@ -195,9 +193,9 @@ abstract class JuryControllerTest extends BaseTest
                 // Overwrite with data to test with.
                 foreach ([static::$addEntities[0], $element] as $item) {
                     foreach ($item as $id => $field) {
-                        // Skip elements which we cannot set yet
-                        // We can not set checkboxes directly
-                        // We can not set the fields set by JS directly
+                        // Skip elements which we cannot set yet.
+                        // We can not set checkboxes directly.
+                        // We can not set the fields set by JS directly.
                         if (is_bool($field) || $id === static::$addPlus) {
                             continue;
                         }
@@ -236,16 +234,16 @@ abstract class JuryControllerTest extends BaseTest
                 foreach ($element as $id => $value) {
                     if (is_array($value)) {
                         if (in_array($id, static::$addEntitiesCount)) {
-                            self::assertSelectorExists('body:contains("' . count($element[$id]) . '")');
+                            self::assertSelectorExists('body:contains("' . count($value) . '")');
                         } else {
-                            foreach ($value as $id2 => $value2) {
+                            foreach ($value as $value2) {
                                 if (is_array($value2)) {
-                                    $this->helperCheckExistance((string)$id, $value2, $element);
+                                    $this->helperCheckExistence((string)$id, $value2, $element);
                                 }
                             }
                         }
                     } else {
-                        $this->helperCheckExistance($id, $value, $element);
+                        $this->helperCheckExistence($id, $value, $element);
                     }
                 }
             }
@@ -253,8 +251,8 @@ abstract class JuryControllerTest extends BaseTest
     }
 
     /**
-     * Test that admin can add edit an entity for this controller
-     * 
+     * Test that admin can add edit an entity for this controller.
+     *
      * @dataProvider provideEditEntities
      */
     public function testCheckEditEntityAdmin(string $identifier, array $formDataKeys, array $formDataValues): void
@@ -320,7 +318,7 @@ abstract class JuryControllerTest extends BaseTest
     }
 
     /**
-     * Test that the standard user can delete an entity
+     * Test that the standard user can delete an entity.
      *
      * @dataProvider provideDeleteEntity
      */
@@ -331,7 +329,7 @@ abstract class JuryControllerTest extends BaseTest
         $this->logIn();
         $this->loadFixtures(static::$deleteFixtures);
         $this->verifyPageResponse('GET', static::$baseUrl, 200);
-        // Find a CID we can delete
+        // Find a CID we can delete.
         $em = self::$container->get('doctrine')->getManager();
         $ent = $em->getRepository(static::$className)->findOneBy([$identifier => $entityShortName]);
         self::assertSelectorExists('i[class*=fa-trash-alt]');
@@ -346,7 +344,7 @@ abstract class JuryControllerTest extends BaseTest
     }
 
     /**
-     * - entityShortname to delete
+     * - entityShortname to delete.
      */
     public function provideDeleteEntity(): Generator
     {

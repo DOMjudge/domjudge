@@ -21,6 +21,7 @@ use App\Utils\Scoreboard\SingleTeamScoreboard;
 use App\Utils\Scoreboard\TeamScore;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManager;
+use Exception;
 use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
@@ -486,7 +487,8 @@ class ScoreboardIntegrationTest extends KernelTestCase
         float $contest_time_seconds,
         $verdict,
         bool $verified = false
-    ) {
+    ): Submission
+    {
         $cp = $this->em->getRepository(ContestProblem::class)->find(
             [ 'contest' => $this->contest, 'problem' => $problem ]
         );
@@ -532,7 +534,7 @@ class ScoreboardIntegrationTest extends KernelTestCase
     function getConfig(string $name)
     {
         if (!in_array($name, $this->configValues)) {
-            throw new \Exception("No configuration value set for '$name'");
+            throw new Exception("No configuration value set for '$name'");
         }
 
         return $this->configValues[$name];

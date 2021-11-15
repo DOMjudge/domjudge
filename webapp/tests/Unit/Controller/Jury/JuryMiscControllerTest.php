@@ -10,7 +10,7 @@ class JuryMiscControllerTest extends BaseTest
     protected $roles = ['jury'];
 
     /**
-     * Test that if no user is logged in the user gets redirected to the login page
+     * Test that if no user is logged in the user gets redirected to the login page.
      */
     public function testJuryRedirectToLogin() : void
     {
@@ -20,22 +20,22 @@ class JuryMiscControllerTest extends BaseTest
     }
 
     /**
-     * Test the login process for a jury member
+     * Test the login process for a jury member.
      */
     public function testLogin(): void
     {
         $this->logOut();
 
-        // Make sure the suer has the correct permissions
+        // Make sure the suer has the correct permissions.
         $this->setupUser();
 
-        // test incorrect and correct password
+        // Test incorrect and correct password.
         $this->loginHelper('demo', 'foo', 'http://localhost/login', 401);
         $this->loginHelper('demo', 'demo', 'http://localhost/jury', 200);
     }
 
     /**
-     * Test that the jury index page works
+     * Test that the jury index page works.
      */
     public function testJuryIndexPage(): void
     {
@@ -46,7 +46,7 @@ class JuryMiscControllerTest extends BaseTest
     }
 
     /**
-     * Test that the ajax endpoints return the correct data
+     * Test that the ajax endpoints return the correct data.
      *
      * @dataProvider provideJuryAjax
      */

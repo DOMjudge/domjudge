@@ -51,7 +51,7 @@ class SubmissionControllerTest extends BaseTest
     ];
 
     /**
-     * Test that a non logged in user can not add a submission
+     * Test that a non-logged-in user can not add a submission.
      */
     public function testAddSubmissionNoAccess()
     {
@@ -61,7 +61,7 @@ class SubmissionControllerTest extends BaseTest
     }
 
     /**
-     * Test that if invalid data is supplied, the correct message is returned
+     * Test that if invalid data is supplied, the correct message is returned.
      *
      * @dataProvider provideAddInvalidData
      */
@@ -173,7 +173,7 @@ class SubmissionControllerTest extends BaseTest
     }
 
     /**
-     * Test that passing an ID is not allowed when performing a POST
+     * Test that passing an ID is not allowed when performing a POST.
      */
     public function testSupplyIdInPost()
     {
@@ -184,7 +184,7 @@ class SubmissionControllerTest extends BaseTest
     }
 
     /**
-     * Test that passing a wrong ID is not allowed when performing a PUT
+     * Test that passing a wrong ID is not allowed when performing a PUT.
      */
     public function testSupplyWrongIdInPut()
     {
@@ -195,7 +195,7 @@ class SubmissionControllerTest extends BaseTest
     }
 
     /**
-     * Test that when submitting for a language that requires an entry point but not supplying an error is returned
+     * Test that when submitting for a language that requires an entry point but not supplying an error is returned.
      */
     public function testMissingEntryPoint()
     {
@@ -209,7 +209,7 @@ class SubmissionControllerTest extends BaseTest
     }
 
     /**
-     * Test that when submitting as a user without an association team an error is returned
+     * Test that when submitting as a user without an association team an error is returned.
      *
      * @dataProvider provideMissingTeam
      */
@@ -231,7 +231,7 @@ class SubmissionControllerTest extends BaseTest
     }
 
     /**
-     * Test that adding submissions works as expected
+     * Test that adding submissions works as expected.
      *
      * @dataProvider provideAddSuccess
      */
@@ -312,15 +312,15 @@ class SubmissionControllerTest extends BaseTest
         }
         static::assertEquals($expectedFiles, $submissionFiles, 'Wrong files');
 
-        // Also load the submission from the API, to see it now gets returned
+        // Also load the submission from the API, to see it now gets returned.
         $contestId = $this->getDemoContestId();
         $apiEndpoint = $this->apiEndpoint;
-        $submissionFromApi = $this->verifyApiJsonResponse('GET', "/contests/$contestId/$apiEndpoint/$submissionId", 200, 'admin');
+        $this->verifyApiJsonResponse('GET', "/contests/$contestId/$apiEndpoint/$submissionId", 200, 'admin');
     }
 
     public function provideAddSuccess(): Generator
     {
-        // Submit a single file as a file upload
+        // Submit a single file as a file upload.
         yield [
             'demo',
             [
@@ -364,7 +364,7 @@ class SubmissionControllerTest extends BaseTest
                 'another.cpp'  => file_get_contents(__DIR__ . '/BaseTest.php'),
             ],
         ];
-        // Submit with an entrypoint
+        // Submit with an entrypoint.
         yield [
             'demo',
             [
@@ -406,7 +406,7 @@ class SubmissionControllerTest extends BaseTest
             null,
             ['main.cpp' => '// No content'],
         ];
-        // Submit multiple files in CLICS format, also provide mime
+        // Submit multiple files in CLICS format, also provide mime.
         yield [
             'demo',
             [
@@ -433,7 +433,7 @@ class SubmissionControllerTest extends BaseTest
                 'another.java' => 'A second java file',
             ],
         ];
-        // Submit as admin under a different team ID
+        // Submit as admin under a different team ID.
         yield [
             'admin',
             [
@@ -452,7 +452,7 @@ class SubmissionControllerTest extends BaseTest
             null,
             ['main.cpp' => '// No content'],
         ];
-        // Submit as admin under a different user ID
+        // Submit as admin under a different user ID.
         yield [
             'admin',
             [
@@ -472,7 +472,7 @@ class SubmissionControllerTest extends BaseTest
             null,
             ['main.cpp' => '// No content'],
         ];
-        // Submit as admin and specify the submission ID
+        // Submit as admin and specify the submission ID.
         yield [
             'admin',
             [
@@ -492,7 +492,7 @@ class SubmissionControllerTest extends BaseTest
             null,
             ['main.cpp' => '// No content'],
         ];
-        // Submit as admin and specify time
+        // Submit as admin and specify time.
         yield [
             'admin',
             [
@@ -517,7 +517,7 @@ class SubmissionControllerTest extends BaseTest
     /**
      * Get a base64 encoded ZIP with the files as contents.
      *
-     * Note: this method can not be called inside a data provider, since it uses the container
+     * Note: this method can not be called inside a data provider, since it uses the container.
      *
      * @param array $files Mapping from filename to contents
      *

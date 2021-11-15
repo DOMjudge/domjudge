@@ -6,8 +6,8 @@ use App\Entity\Judgehost;
 
 class JudgehostControllerTest extends JuryControllerTest
 {
-    protected static $identifingEditAttribute = 'hostname';
-    protected static $defaultEditEntityName   = 'example-judgehost1';
+    protected static $identifyingEditAttribute = 'hostname';
+    protected static $defaultEditEntityName    = 'example-judgehost1';
     protected static $baseUrl        = '/jury/judgehosts';
     protected static $exampleEntries = ['example-judgehost1'];
     protected static $deleteEntities = ['hostname' => ['example-judgehost1']];

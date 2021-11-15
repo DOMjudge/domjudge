@@ -27,7 +27,7 @@ class ImportExportControllerTest extends BaseTest
     }
 
     /**
-     * Test that the expected contest dropdowns on the index page are present
+     * Test that the expected contest dropdowns on the index page are present.
      *
      * @dataProvider provideContests
      */
@@ -40,7 +40,7 @@ class ImportExportControllerTest extends BaseTest
     }
 
     /**
-     * Test that the expected dynamic items on the index page are present
+     * Test that the expected dynamic items on the index page are present.
      *
      * @dataProvider provideSortOrders
      */
@@ -64,7 +64,7 @@ class ImportExportControllerTest extends BaseTest
     }
 
     /**
-     * Test that submit buttons show an icon
+     * Test that submit buttons show an icon.
      */
     public function testIndexButtonsHaveIcons() : void
     {
@@ -75,7 +75,7 @@ class ImportExportControllerTest extends BaseTest
     }
 
     /**
-     * Test export of contest.yaml
+     * Test export of contest.yaml.
      *
      * @dataProvider provideContestYamlContents
      */
@@ -177,7 +177,7 @@ HEREDOC;
     }
 
     /**
-     * Test export of groups.tsv and teams.tsv
+     * Test export of groups.tsv and teams.tsv.
      *
      * @dataProvider provideTsvContents
      */
@@ -215,7 +215,7 @@ Utrecht University	exteam	1	0	0	0	0	-1	0	-1	0	-1
     }
 
     /**
-     * Test export of clarifications.html
+     * Test export of clarifications.html.
      */
     public function testClarificationsHtmlExport(): void
     {
@@ -230,9 +230,9 @@ Utrecht University	exteam	1	0	0	0	0	-1	0	-1	0	-1
     }
 
     /**
-     * Test export of results.html
+     * Test export of results.html.
      */
-    public function testRsultsHtmlExport(): void
+    public function testResultsHtmlExport(): void
     {
         $this->verifyPageResponse('GET', '/jury/import-export', 200);
         $link = $this->getCurrentCrawler()->filter('li:contains("results.html") a:contains("for sort order 0")')->link();
@@ -243,9 +243,9 @@ Utrecht University	exteam	1	0	0	0	0	-1	0	-1	0	-1
     }
 
     /**
-     * Test export of ICPC results.html
+     * Test export of ICPC results.html.
      */
-    public function testICPCRsultsHtmlExport(): void
+    public function testICPCResultsHtmlExport(): void
     {
         $this->verifyPageResponse('GET', '/jury/import-export', 200);
         $link = $this->getCurrentCrawler()->filter('li:contains("ICPC site results.html") a:contains("for sort order 0")')->link();

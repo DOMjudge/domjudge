@@ -2,7 +2,6 @@
 
 namespace App\Tests\Unit\Controller\API;
 
-use App\Entity\Contest;
 use App\Entity\Problem;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
@@ -15,7 +14,7 @@ class ProblemControllerAdminTest extends ProblemControllerTest
 
     protected function setUp(): void
     {
-        // When queried as admin, extra information is returned about each problem
+        // When queried as admin, extra information is returned about each problem.
         $this->expectedObjects[1]['test_data_count'] = 1;
         $this->expectedObjects[2]['test_data_count'] = 3;
         $this->expectedObjects[3]['test_data_count'] = 1;
@@ -73,12 +72,12 @@ EOF;
 
         $expectedProblems = ['A' => 'ascendingphoto', 'B' => 'boss', 'C' => 'connect'];
 
-        // First clear the entity manager to have all data
+        // First clear the entity manager to have all data.
         static::$container->get(EntityManagerInterface::class)->clear();
 
         $addedProblems = [];
 
-        // Now load the problems with the given ID's
+        // Now load the problems with the given IDs.
         $config = static::$container->get(ConfigurationService::class);
         $dataSource = $config->get('data_source');
         foreach ($ids as $id) {

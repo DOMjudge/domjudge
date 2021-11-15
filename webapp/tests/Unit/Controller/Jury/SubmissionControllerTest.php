@@ -20,7 +20,7 @@ class SubmissionControllerTest extends BaseTest
     }
 
     /**
-     * Test the filtered views do throw server errors
+     * Test the filtered views do throw server errors.
      *
      * @dataProvider provideViews
      */

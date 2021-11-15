@@ -13,7 +13,7 @@ class ProblemControllerTest extends BaseTest
     protected $roles = ['team'];
 
     /**
-     * Test that the problem index page shows the correct information
+     * Test that the problem index page shows the correct information.
      *
      * @dataProvider withLimitsProvider
      */
@@ -51,11 +51,11 @@ class ProblemControllerTest extends BaseTest
             ) {
                 $crawler = $this->client->request('GET', '/team/problems');
 
-                // Check that the correct menu item is selected
+                // Check that the correct menu item is selected.
                 $this->assertSelectorTextContains('.nav-item.active .nav-link',
                     'Problemset');
 
-                // Get the card bodies and verify we have exatly three of them
+                // Get the card bodies and verify we have exactly three of them.
                 $cardBodies = $crawler->filter('.card-body');
                 $this->assertSame(3, $cardBodies->count());
 
@@ -76,7 +76,7 @@ class ProblemControllerTest extends BaseTest
                             $card->filter('h4.card-subtitle')->count());
                     }
 
-                    // Download the problem text and make sure it is correct
+                    // Download the problem text and make sure it is correct.
                     $problemTextLink = $card->selectLink('text');
                     ob_start();
                     $this->client->click($problemTextLink->link());
@@ -94,11 +94,11 @@ class ProblemControllerTest extends BaseTest
     }
 
     /**
-     * Test that the problems page shows only sample data
+     * Test that the problems page shows only sample data.
      */
     public function testSamples() : void
     {
-        // First, enable two samples for the fltcmp problem
+        // First, enable two samples for the fltcmp problem.
         $em = self::$container->get(EntityManagerInterface::class);
         /** @var Problem $problem */
         $problem = $em->getRepository(Problem::class)->findOneBy(['externalid' => 'fltcmp']);
@@ -116,16 +116,16 @@ class ProblemControllerTest extends BaseTest
 
         $crawler = $this->client->request('GET', '/team/problems');
 
-        // Get the card bodies
+        // Get the card bodies.
         $cardBodies = $crawler->filter('.card-body');
 
-        // The first and last card should not have any samples
+        // The first and last card should not have any samples.
         self::assertSame(0,
                          $cardBodies->eq(0)->filter('.list-group .list-group-item')->count());
         self::assertSame(0,
                          $cardBodies->eq(2)->filter('.list-group .list-group-item')->count());
 
-        // Check the link to download all samples
+        // Check the link to download all samples.
         $link = $cardBodies->eq(1)->filter('a')->eq(1);
         self::assertSame('samples', $link->text(null, true));
         self::assertSame(sprintf('/team/%d/samples.zip',
@@ -133,7 +133,7 @@ class ProblemControllerTest extends BaseTest
                          $link->attr('href'));
 
         // Download the sample and make sure the contents are correct.
-        // We use ob_ methods since this is a streamed response
+        // We use ob_ methods since this is a streamed response.
         ob_start();
         $this->client->click($link->link());
         $zipfile = ob_get_clean();
@@ -143,7 +143,7 @@ class ProblemControllerTest extends BaseTest
             self::assertSame($samples[$i]->getContent()->getInput(), $content["$i.in"]);
             self::assertSame($samples[$i]->getContent()->getOutput(), $content["$i.out"]);
         }
-        // Does not contain more than these 4 files
+        // Does not contain more than these 4 files.
         self::assertCount(4, $content);
     }
 }

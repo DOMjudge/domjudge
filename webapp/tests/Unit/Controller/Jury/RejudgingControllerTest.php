@@ -48,7 +48,7 @@ class RejudgingControllerTest extends BaseTest
         $this->logIn();
         $this->loadFixture(RejudgingStatesFixture::class);
         $this->verifyPageResponse('GET', '/jury/rejudgings', 200);
-        // The sorting is done in JS (and cannot be tested), this is the inverse ordering of the Fixture
+        // The sorting is done in JS (and cannot be tested), this is the inverse ordering of the Fixture.
         foreach(['Canceled','Finished','0Percent_2','0Percent_1','Unit','MultiContest'] as $index => $reason)
         {
             self::assertSelectorExists('tr:nth-child('.($index+1).'):contains("'.$reason.'")');
@@ -102,9 +102,9 @@ class RejudgingControllerTest extends BaseTest
         $this->setRejudgingState($contestName);
         $this->verifyPageResponse('GET', '/jury', 200);
         self::assertSelectorTextContains($DOMselector, 'rejudgings');
-        // We cannot count the amount of rejudghings here.
+        // We cannot count the amount of rejudgings here.
 
-        // We check the page where the data comes from
+        // We check the page where the data comes from.
         $this->client->request('GET', '/jury/updates');
         $response = $this->client->getResponse();
         $jsonResponse = json_decode($response->getContent(), true);
@@ -113,7 +113,7 @@ class RejudgingControllerTest extends BaseTest
 
     public function provideShownRejudgings(): Generator
     {
-        // The case where no contest is active/chosen/current
+        // The case where no contest is active/chosen/current.
         $show = [];
         foreach(RejudgingStatesFixture::rejudgingStages() as $stage){
             $show[] = $stage[0];

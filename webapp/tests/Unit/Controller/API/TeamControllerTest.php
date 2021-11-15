@@ -37,12 +37,12 @@ class TeamControllerTest extends BaseTest
 
     protected function setUp(): void
     {
-        // Make sure we have a team photo for team 2 by copying an existing file
+        // Make sure we have a team photo for team 2 by copying an existing file.
         $teamPhotosDir = __DIR__ . '/../../../../public/images/teams/';
         $this->teamPhoto = $teamPhotosDir . '2.jpg';
         copy($teamPhotosDir . 'domjudge.jpg', $this->teamPhoto);
 
-        // Make sure we remove the test container, since we need to rebuild it for the images to work
+        // Make sure we remove the test container, since we need to rebuild it for the images to work.
         $this->removeTestContainer();
 
         parent::setUp();
@@ -50,7 +50,7 @@ class TeamControllerTest extends BaseTest
 
     protected function tearDown(): void
     {
-        // Remove the image again
+        // Remove the image again.
         unlink($this->teamPhoto);
         $this->removeTestContainer();
     }

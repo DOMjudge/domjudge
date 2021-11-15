@@ -12,6 +12,7 @@ use Generator;
 use PHPUnit\Framework\MockObject\Builder\InvocationMocker;
 use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Log\LoggerInterface;
+use ReflectionException;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Yaml\Yaml;
 
@@ -306,9 +307,8 @@ class ConfigurationServiceTest extends KernelTestCase
      * @dataProvider provideAddOptionsExecutables
      *
      * @param string $item
-     * @param array $item
-     *
-     * @throws Exception
+     * @param array $expected
+     * @throws ReflectionException
      */
     public function testAddOptionsExecutables(string $item, array $expected) : void
     {
@@ -420,7 +420,7 @@ class ConfigurationServiceTest extends KernelTestCase
         }
 
         self::assertNotNull(
-            $foundItem, 'Config item not found in db-config.yaml'
+            $foundItem, 'Config item not found in db-config.yaml.'
         );
 
         return $foundItem;

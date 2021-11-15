@@ -19,11 +19,10 @@ use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\DomCrawler\Link;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
+use ZipArchive;
 
 /**
- * Class BaseTest
- *
- * This abstract class can be used to have default functionality to test cases
+ * This abstract class can be used to have default functionality to test cases.
  *
  * @package App\Tests
  */
@@ -39,7 +38,7 @@ abstract class BaseTest extends WebTestCase
     protected $fixtureExecutor;
 
     /**
-     * What fixtures to load
+     * What fixtures to load.
      *
      * @var string[]
      */
@@ -47,13 +46,13 @@ abstract class BaseTest extends WebTestCase
 
     protected function setUp(): void
     {
-        // Reset the kernel to make sure we have a clean slate
+        // Reset the kernel to make sure we have a clean slate.
         self::ensureKernelShutdown();
 
-        // Create a client to communicate with the application
+        // Create a client to communicate with the application.
         $this->client = self::createClient();
 
-        // Log in if we have any roles
+        // Log in if we have any roles.
         if (!empty($this->roles)) {
             $this->logIn();
         }
@@ -64,7 +63,7 @@ abstract class BaseTest extends WebTestCase
     }
 
     /**
-     * Load the given fixturs
+     * Load the given fixtures.
      *
      * @throws Exception
      */
@@ -86,7 +85,7 @@ abstract class BaseTest extends WebTestCase
     }
 
     /**
-     * Load the given fixture
+     * Load the given fixture.
      *
      * @throws Exception
      */
@@ -96,11 +95,11 @@ abstract class BaseTest extends WebTestCase
     }
 
     /**
-     * Resolve any references in the given ID
+     * Resolve any references in the given ID.
      */
     protected function resolveReference($id)
     {
-        // If the object ID contains a :, it is a reference to a fixture item, so get it
+        // If the object ID contains a :, it is a reference to a fixture item, so get it.
         if (is_string($id) && strpos($id, ':') !== false) {
             $referenceObject = $this->fixtureExecutor->getReferenceRepository()->getReference($id);
             $metadata = static::$container->get(EntityManagerInterface::class)->getClassMetadata(get_class($referenceObject));
@@ -119,14 +118,14 @@ abstract class BaseTest extends WebTestCase
     ): KernelBrowser {
         $crawler = $this->client->request('GET', '/login');
 
-        # load login page
+        // Load login page.
         $response = $this->client->getResponse();
         $message = var_export($response, true);
         self::assertEquals(200, $response->getStatusCode(), $message);
 
         $csrf_token = $this->client->getContainer()->get('security.csrf.token_manager')->getToken('authenticate');
 
-        # submit form
+        // Submit form.
         $button = $crawler->selectButton('Sign in');
         $form = $button->form(array(
             '_username'   => $username,
@@ -138,7 +137,7 @@ abstract class BaseTest extends WebTestCase
         $response = $this->client->getResponse();
         $this->client->followRedirects(false);
 
-        # check redirected to $redirectPage
+        // Check redirect to $redirectPage.
         $message = var_export($response, true);
         self::assertEquals($responseCode, $response->getStatusCode(),
             $message);
@@ -174,10 +173,10 @@ abstract class BaseTest extends WebTestCase
     }
 
     /**
-     * Log out a user
+     * Log out a user.
      *
      * This is needed when you set $roles but have a test that should be used
-     * while being logged out
+     * while being logged out.
      */
     protected function logOut(): void
     {
@@ -186,7 +185,7 @@ abstract class BaseTest extends WebTestCase
     }
 
     /**
-     * Set up the demo user with the roles given in $roles
+     * Set up the demo user with the roles given in $roles.
      */
     protected function setupUser(): User
     {
@@ -196,11 +195,11 @@ abstract class BaseTest extends WebTestCase
         if ($user === null) {
             throw new Exception("No user 'demo' found, are you using the correct database?");
         }
-        // Clear all user roles, so we can set them specifically to what we want
+        // Clear all user roles, so we can set them specifically to what we want.
         foreach ($user->getUserRoles() as $role) {
             $user->removeUserRole($role);
         }
-        // Now add the roles
+        // Now add the roles.
         foreach ($this->roles as $role) {
             $user->addUserRole($em->getRepository(Role::class)->findOneBy(['dj_role' => $role]));
         }
@@ -210,7 +209,7 @@ abstract class BaseTest extends WebTestCase
     }
 
     /**
-     * Run the given callback while temporarily changing the given configuration setting
+     * Run the given callback while temporarily changing the given configuration setting.
      *
      * @param mixed $configValue
      */
@@ -223,13 +222,13 @@ abstract class BaseTest extends WebTestCase
         $eventLog = self::$container->get(EventLogService::class);
         $dj = self::$container->get(DOMJudgeService::class);
 
-        // Build up the data to set
+        // Build up the data to set.
         $dataToSet = [$configKey => $configValue];
 
-        // Save the changes
+        // Save the changes.
         $config->saveChanges($dataToSet, $eventLog, $dj);
 
-        // Call the callback
+        // Call the callback.
         $callback();
     }
 
@@ -274,7 +273,7 @@ abstract class BaseTest extends WebTestCase
     }
 
     /**
-     * Whether the data source is local
+     * Whether the data source is local.
      */
     protected function dataSourceIsLocal(): bool
     {
@@ -284,7 +283,7 @@ abstract class BaseTest extends WebTestCase
     }
 
     /**
-     * Get the contest ID of the demo contest based on the data source setting
+     * Get the contest ID of the demo contest based on the data source setting.
      *
      * @return string
      */
@@ -298,13 +297,13 @@ abstract class BaseTest extends WebTestCase
     }
 
     /**
-     * Resolve the entity ID for the given class if not running in local mode
+     * Resolve the entity ID for the given class if not running in local mode.
      */
     protected function resolveEntityId(string $class, string $id): string
     {
         if (!$this->dataSourceIsLocal()) {
             $entity = static::$container->get(EntityManagerInterface::class)->getRepository($class)->find($id);
-            // If we can't find the entity, assume we use an invalid one
+            // If we can't find the entity, assume we use an invalid one.
             if ($entity === null) {
                 return $id;
             }
@@ -320,7 +319,7 @@ abstract class BaseTest extends WebTestCase
      */
     protected function unzipString(string $content): array
     {
-        $zip = new \ZipArchive();
+        $zip = new ZipArchive();
         $tempFilename = tempnam(static::$container->get(DOMJudgeService::class)->getDomjudgeTmpDir(), "domjudge-test-");
         file_put_contents($tempFilename, $content);
 

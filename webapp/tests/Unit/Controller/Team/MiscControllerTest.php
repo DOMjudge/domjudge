@@ -16,31 +16,31 @@ class MiscControllerTest extends BaseTest
 
     public function testTeamRedirectToLogin() : void
     {
-        // Log out, we are testing public functionality
+        // Log out, we are testing public functionality.
         $this->logOut();
 
         $this->verifyPageResponse('GET', '/team', 302, 'http://localhost/login');
     }
 
     /**
-     * Test the login process for teams
+     * Test the login process for teams.
      */
     public function testLogin() : void
     {
-        // Log out, we are testing log in functionality
+        // Log out, we are testing log in functionality.
         $this->logOut();
 
-        // Make sure the user has the correct permissions
+        // Make sure the user has the correct permissions.
         $this->setupUser();
 
-        // test incorrect and correct password
+        // Test incorrect and correct password.
         $this->loginHelper('demo', 'foo', 'http://localhost/login', 401);
         $this->loginHelper('demo', 'demo', 'http://localhost/team', 200);
     }
 
     /**
      * Test that the team overview page contains the correct data for normal
-     * and AJAX requests
+     * and AJAX requests.
      *
      * @dataProvider ajaxProvider
      */
@@ -69,8 +69,8 @@ class MiscControllerTest extends BaseTest
     }
 
     /**
-     * Test that if printing is disabled, we get an access denied exception
-     * when visiting the print page
+     * Test that if printing is disabled, we get access denied exception.
+     * when visiting the print page.
      */
     public function testPrintingDisabledAccessDenied() : void
     {
@@ -78,7 +78,7 @@ class MiscControllerTest extends BaseTest
     }
 
     /**
-     * Test that when printing is enabled the link is shown
+     * Test that when printing is enabled the link is shown.
      */
     public function testPrintingEnabledTeamMenu() : void
     {
@@ -90,7 +90,7 @@ class MiscControllerTest extends BaseTest
     }
 
     /**
-     * Test that if printing is enabled, we can actually print something
+     * Test that if printing is enabled, we can actually print something.
      */
     public function testPrintingEnabledSubmitForm() : void
     {
@@ -117,7 +117,7 @@ class MiscControllerTest extends BaseTest
     }
 
     /**
-     * Test that it is possible to change contests
+     * Test that it is possible to change contests.
      *
      * @dataProvider withReferrerProvider
      */
@@ -127,7 +127,7 @@ class MiscControllerTest extends BaseTest
         $startString = strftime('%Y-%m-%d %H:%M:%S ',
                 $start) . date_default_timezone_get();
 
-        // Create a second contest
+        // Create a second contest.
         $contest = new Contest();
         $contest
             ->setName('Test contest for switching')
@@ -146,23 +146,23 @@ class MiscControllerTest extends BaseTest
 
         $crawler = $this->client->request('GET', '/team/scoreboard');
 
-        // Verify we are on the demo contest
+        // Verify we are on the demo contest.
         self::assertSelectorTextContains('.card-header span', 'Demo contest');
 
         if ($withReferrer) {
-            // Now click the change contest menu item
+            // Now click the change contest menu item.
             $link = $crawler->filter('a.dropdown-item:contains("switch")')->link();
 
             $this->client->click($link);
         } else {
-            // Make sure to clear the history so we do not have a referrer
+            // Make sure to clear the history, so we do not have a referrer.
             $this->client->getHistory()->clear();
             $this->client->request('GET', '/team/change-contest/' . $contest->getCid());
         }
 
         $this->client->followRedirect();
 
-        // Check that we are still on the scoreboard
+        // Check that we are still on the scoreboard.
         if ($withReferrer) {
             self::assertEquals('http://localhost/team/scoreboard',
                                $this->client->getRequest()->getUri());
@@ -170,11 +170,11 @@ class MiscControllerTest extends BaseTest
             self::assertEquals('http://localhost/team',
                                $this->client->getRequest()->getUri());
 
-            // Go to the scoreboard again
+            // Go to the scoreboard again.
             $this->client->request('GET', '/team/scoreboard');
         }
 
-        // And check that the contest has changed
+        // And check that the contest has changed.
         self::assertSelectorTextContains('.card-header span', 'Test contest for switching');
     }
 
@@ -185,7 +185,7 @@ class MiscControllerTest extends BaseTest
     }
 
     /**
-     * Test that no docs.yaml does not show docs link
+     * Test that no docs.yaml does not show docs link.
      */
     public function testDocsNoDocs() : void
     {

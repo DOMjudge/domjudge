@@ -6,7 +6,7 @@ use App\Entity\User;
 
 class UserControllerTest extends JuryControllerTest
 {
-    protected static $identifingEditAttribute   = 'username';
+    protected static $identifyingEditAttribute  = 'username';
     protected static $defaultEditEntityName     = 'judgehost';
     protected static $editEntitiesSkipFields    = ['username'];
     protected static $specialFieldOnlyUpdate    = ['plainPassword'];

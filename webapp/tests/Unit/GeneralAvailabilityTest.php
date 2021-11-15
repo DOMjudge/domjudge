@@ -12,7 +12,7 @@ class GeneralAvailabilityTest extends BaseTest
     public function testPageIsSuccessful(string $url, int $code) : void
     {
         if ($url === '/api/contests/2' && !$this->dataSourceIsLocal()) {
-            // Use external ID for contest
+            // Use external ID for contest.
             $url = '/api/contests/demo';
         }
 

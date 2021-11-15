@@ -11,7 +11,7 @@ class JudgehostControllerTest extends BaseTest
 
     protected static $skipMessageCI = "This is very dependent on the contributor setup, check this in CI.";
     protected static $skipMessageIDs = "Filtering on IDs not implemented in this endpoint.";
-    
+
     protected $expectedObjects = [];
 
     protected $expectedAbsent = ['4242', 'nonexistent'];
@@ -44,7 +44,7 @@ class JudgehostControllerTest extends BaseTest
     }
 
     /**
-     * Test that the endpoint returns an empty list for objects that don't exist
+     * Test that the endpoint returns an empty list for objects that don't exist.
      *
      * @dataProvider provideSingleNotFound
      */
@@ -52,6 +52,6 @@ class JudgehostControllerTest extends BaseTest
         $id = $this->resolveReference($id);
         $url = $this->helperGetEndpointURL($this->apiEndpoint, $id);
         $object = $this->verifyApiJsonResponse('GET', $url, 200, $this->apiUser);
-        static::assertEquals($object, []);
+        static::assertEquals([], $object);
     }
 }

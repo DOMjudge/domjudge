@@ -11,11 +11,11 @@ class ControllerRolesTraversalTest extends BaseTest
 
     /**
      * @See: https://www.oreilly.com/library/view/php-cookbook/1565926811/ch04s25.html
-     * Get all combinations of roles with at minimal the starting roles
+     * Get all combinations of roles with at minimal the starting roles.
      */
     protected function roleCombinations(array $start_roles, array $possible_roles) : array
     {
-        // initialize by adding the empty set
+        // Initialize by adding the empty set.
         $results = [$start_roles];
 
         foreach ($possible_roles as $element) {
@@ -57,7 +57,7 @@ class ControllerRolesTraversalTest extends BaseTest
     }
 
     /**
-     * Crawl the webpage assume this is allowed and return all other links on the page
+     * Crawl the webpage assume this is allowed and return all other links on the page.
      * @return string[] Found links on crawled URL
      */
     protected function crawlPageGetLinks(string $url, int $statusCode) : array
@@ -84,7 +84,7 @@ class ControllerRolesTraversalTest extends BaseTest
     }
 
     /**
-     * Follow all links on a list of pages while new pages are found
+     * Follow all links on a list of pages while new pages are found.
      */
     protected function getAllPages(array $urlsToCheck) : array
     {
@@ -106,9 +106,9 @@ class ControllerRolesTraversalTest extends BaseTest
     }
 
     /**
-     * Finds all the pages reachable with $roles on URL $roleBaseURL with optionally traversing all links
-     * @var string[] $roleBaseURL The URL of the current Roles
-     * @var string[] $roles The tested Roles,
+     * Finds all the pages reachable with $roles on URL $roleBaseURL with optionally traversing all links.
+     * @var string[] $roleBaseURL The URL of the current roles.
+     * @var string[] $roles The tested roles.
      */
     protected function getPagesRoles(array $roleBaseURL, array $roles, bool $allPages) : array
     {
@@ -121,7 +121,7 @@ class ControllerRolesTraversalTest extends BaseTest
         }
         $urlsToCheck = array_merge([], ...$urlsFoundPerRole);
 
-        // Find all pages, currently this sometimes breaks as some routes have the same logic
+        // Find all pages, currently this sometimes breaks as some routes have the same logic.
         if ($allPages) {
             $urlsToCheck = $this->getAllPages($urlsToCheck);
         }
@@ -152,8 +152,9 @@ class ControllerRolesTraversalTest extends BaseTest
      * Test that having the team role for example is enough to view pages of that role.
      * This test should detect mistakes where a page is disabled when the user has a
      * certain role instead of allowing when the correct role is there.
-     * @var string[] $baseRoles The standard role of the user
-     * @var string[] $optionalRoles The roles which should not restrict the viewable pages
+     * @var string   $roleBaseURL The base URL of the role.
+     * @var string[] $baseRoles The default role of the user.
+     * @var string[] $optionalRoles The roles which should not restrict the viewable pages.
      * @dataProvider provideRoleAccessData
      */
     public function testRoleAccess(string $roleBaseURL, array $baseRoles, array $optionalRoles, bool $allPages) : void
@@ -176,7 +177,7 @@ class ControllerRolesTraversalTest extends BaseTest
         $this->client->request('GET', '/jury/change-contest/-1');
         $this->client->request('GET', $url);
         $response = $this->client->getResponse();
-        self::assertNotEquals(500, $response->getStatusCode(), $message=sprintf('Failed at %s', $url));
+        self::assertNotEquals(500, $response->getStatusCode(), sprintf('Failed at %s', $url));
         if ($dropdown) {
             self::assertSelectorExists('a#navbarDropdownContests:contains("no contest")');
         }
@@ -184,9 +185,10 @@ class ControllerRolesTraversalTest extends BaseTest
 
     /**
      * Test that having for example the jury role does not allow access to the pages of other roles.
-     * @var string[] $roleOthersBaseURL The BaseURLs of the other roles
-     * @var string[] $roles The tested Roles,
-     * @var string[] $rolesOther The other Roles
+     * @var string $roleBaseURL The base URL of the role.
+     * @var string[] $roleOthersBaseURL The base URLs of the other roles.
+     * @var string[] $roles The tested roles.
+     * @var string[] $rolesOther The other roles.
      * @dataProvider provideRoleAccessOtherRoles
      */
     public function testRoleAccessOtherRoles(
@@ -208,7 +210,7 @@ class ControllerRolesTraversalTest extends BaseTest
     }
 
     /**
-     * Test that pages depending on a active contest doesn't crash on the server.
+     * Test that pages depending on an active contest doesn't crash on the server.
      * @dataProvider provideNoContestScenario
      */
     public function testNoContestAccess(string $roleBaseURL, array $baseRoles) : void
@@ -225,10 +227,10 @@ class ControllerRolesTraversalTest extends BaseTest
 
     /**
      * Data provider used to test role access. Each item contains:
-     * - the page to visit
-     * - the base roles the user has
-     * - additional roles to add to the user
-     * - Whether to also recursively visit linked pages
+     * - the page to visit,
+     * - the base roles the user has,
+     * - additional roles to add to the user,
+     * - whether to also recursively visit linked pages.
      */
     public function provideRoleAccessData() : Generator
     {
@@ -243,11 +245,11 @@ class ControllerRolesTraversalTest extends BaseTest
     /**
      * Data provider used to test if having one role does not add access of other roles
      * Each item contains:
-     * - the base page of the tested role
-     * - the base pages of the other roles
-     * - the tested role
-     * - the other excluded roles
-     * - Whether to also recursively visit linked pages
+     * - the base page of the tested role,
+     * - the base pages of the other roles,
+     * - the tested role,
+     * - the other excluded roles,
+     * - whether to also recursively visit linked pages.
      **/
     public function provideRoleAccessOtherRoles() : Generator
     {

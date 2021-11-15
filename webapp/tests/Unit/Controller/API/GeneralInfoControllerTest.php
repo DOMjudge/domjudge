@@ -22,7 +22,7 @@ class GeneralInfoControllerTest extends BaseTest
     }
 
     /**
-     * Test that both the API base as the info endpoint return the same data
+     * Test that both the API base as the info endpoint return the same data.
      */
     public function testInfoReturnsVariables()
     {
@@ -42,16 +42,16 @@ class GeneralInfoControllerTest extends BaseTest
 
     public function testStatusNoPublicAccess()
     {
-        $response = $this->verifyApiJsonResponse('GET', "/status", 401);
+        $this->verifyApiJsonResponse('GET', "/status", 401);
     }
 
     public function testStatusNoTeamAccess()
     {
-        $response = $this->verifyApiJsonResponse('GET', "/status", 403, 'demo');
+        $this->verifyApiJsonResponse('GET', "/status", 403, 'demo');
     }
 
     /**
-     * Test the basic output of the status endpoint without submissions present
+     * Test the basic output of the status endpoint without submissions present.
      */
     public function testStatusAdminBasicOperation()
     {
@@ -68,7 +68,7 @@ class GeneralInfoControllerTest extends BaseTest
     }
 
     /**
-     * Test that adding two submissions is reflected in the status endpoint
+     * Test that adding two submissions is reflected in the status endpoint.
      */
     public function testStatusAdminSubmissionsPresent()
     {
@@ -87,11 +87,11 @@ class GeneralInfoControllerTest extends BaseTest
 
     public function testUserEndpointMustBeLoggedIn()
     {
-        $response = $this->verifyApiJsonResponse('GET', "/status", 401);
+        $this->verifyApiJsonResponse('GET', "/status", 401);
     }
 
     /**
-     * Test user endpoint with different users
+     * Test user endpoint with different users.
      * @dataProvider provideUsers
      */
     public function testUserEndpoint(string $username, string $fullname, string $teamname, array $roles)
@@ -117,7 +117,7 @@ class GeneralInfoControllerTest extends BaseTest
     }
 
     /**
-     * Test that when a country flag exists, the correct data is returned
+     * Test that when a country flag exists, the correct data is returned.
      *
      * @dataProvider provideCountryFlagExists
      */
@@ -145,11 +145,11 @@ class GeneralInfoControllerTest extends BaseTest
     {
         yield ['NLD', '4x3'];
         yield ['DEU', '1x1'];
-        yield ['gbr', '4x3']; // Also test case insensitivity
+        yield ['gbr', '4x3']; // Also test case insensitivity.
     }
 
     /**
-     * Test that when a country flag of given size does not exist, the correct message is returned
+     * Test that when a country flag of given size does not exist, the correct message is returned.
      *
      * @dataProvider provideCountryFlagSizeNotFound
      */
@@ -171,7 +171,7 @@ class GeneralInfoControllerTest extends BaseTest
     }
 
     /**
-     * Test that when a country does not exist, the correct message is returned
+     * Test that when a country does not exist, the correct message is returned.
      *
      * @dataProvider provideCountryFlagNotFound
      */
@@ -195,7 +195,7 @@ class GeneralInfoControllerTest extends BaseTest
     }
 
     /**
-     * Test that if flags are disabled, no flag is returned
+     * Test that if flags are disabled, no flag is returned.
      *
      * @dataProvider provideCountryFlagExists
      */
