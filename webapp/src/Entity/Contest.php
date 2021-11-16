@@ -44,7 +44,7 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
  * @UniqueEntity("shortname")
  * @UniqueEntity("externalid")
  */
-class Contest extends BaseApiEntity
+class Contest extends BaseApiEntity implements AssetEntityInterface
 {
     const STARTTIME_UPDATE_MIN_SECONDS_BEFORE = 30;
 
@@ -1351,5 +1351,30 @@ class Contest extends BaseApiEntity
     {
         $this->clearBanner = $clearBanner;
         return $this;
+    }
+
+    public function getAssetProperties(): array
+    {
+        return ['banner'];
+    }
+
+    public function getAssetFile(string $property): ?UploadedFile
+    {
+        switch ($property) {
+            case 'banner':
+                return $this->getBannerFile();
+        }
+
+        return null;
+    }
+
+    public function isClearAsset(string $property): ?bool
+    {
+        switch ($property) {
+            case 'banner':
+                return $this->isClearBanner();
+        }
+
+        return null;
     }
 }
