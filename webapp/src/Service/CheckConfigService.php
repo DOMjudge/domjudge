@@ -2,9 +2,9 @@
 
 namespace App\Service;
 
+use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\Executable;
-use App\Entity\Judgehost;
 use App\Entity\Language;
 use App\Entity\Problem;
 use App\Entity\Team;
@@ -113,6 +113,7 @@ class CheckConfigService
         $contests = [
             'activecontests' => $this->checkContestActive(),
             'validcontests' => $this->checkContestsValidate(),
+            'banners' => $this->checkContestBanners(),
         ];
 
         $results['Contests'] = $contests;
@@ -125,6 +126,7 @@ class CheckConfigService
         $results['Problems and languages'] = $pl;
 
         $teams = [
+            'photos' => $this->checkTeamPhotos(),
             'affiliations' => $this->checkAffiliations(),
             'teamdupenames' => $this->checkTeamDuplicateNames(),
             'selfregistration' => $this->checkSelfRegistration(),
@@ -443,6 +445,46 @@ class CheckConfigService
                     ($desc ?: 'No problems found.')];
     }
 
+    public function checkContestBanners() : array
+    {
+        // Fetch all active and future contests
+        /** @var Contest[] $contests */
+        $contests = $this->dj->getCurrentContests(null, true);
+
+        $desc = '';
+        $result = 'O';
+        foreach ($contests as $contest) {
+            if ($cid = $contest->getApiId($this->eventLogService)) {
+                $bannerpath = $this->dj->assetPath($cid, 'contest', true, true);
+                $contestName = 'c' . $contest->getCid() . ' (' . $contest->getShortname() . ')';
+                if (file_exists($bannerpath)) {
+                    if (($filesize = filesize($bannerpath)) > 2 * 1024 * 1024) {
+                        $result = 'W';
+                        $desc .= sprintf("Banner for %s bigger than 2mb (size is %.2fMb)\n", $contestName, $filesize / 1024 / 1024);
+                    } else {
+                        $size = @getimagesize($bannerpath);
+                        $width = $size[0];
+                        $height = $size[1];
+                        $ratio = $width / $height;
+                        if ($width > 1920) {
+                            $result = 'W';
+                            $desc .= sprintf("Banner for %s is wider than 1920\n", $contestName);
+                        } elseif ($ratio < 3 || $ratio > 6) {
+                            $result = 'W';
+                            $desc .= sprintf("Banner for %s is has a ratio of 1:%.2f, between 1:3 and 1:6 recommended\n", $contestName, $ratio);
+                        }
+                    }
+                }
+            }
+        }
+
+        $desc = $desc ?: 'Everything OK';
+
+        return ['caption' => 'Contest banners',
+                'result' => $result,
+                'desc' => $desc];
+    }
+
     public function checkProblemsValidate() : array
     {
         $problems = $this->em->getRepository(Problem::class)->findAll();
@@ -577,6 +619,30 @@ class CheckConfigService
                     ($desc ?: 'No languages with problems found.')];
     }
 
+    public function checkTeamPhotos() : array
+    {
+        /** @var Team[] $teams */
+        $teams = $this->em->getRepository(Team::class)->findAll();
+
+        $desc = '';
+        $result = 'O';
+        foreach ($teams as $team) {
+            if ($tid = $team->getApiId($this->eventLogService)) {
+                $photopath = $this->dj->assetPath($tid, 'team', true, true);
+                if (file_exists($photopath) && ($filesize = filesize($photopath)) > 5 * 1024 * 1024) {
+                    $result = 'W';
+                    $desc .= sprintf("Photo for t%d (%s) bigger than 5mb (size is %.2fMb)\n", $team->getTeamid(), $team->getName(), $filesize / 1024 / 1024);
+                }
+            }
+        }
+
+        $desc = $desc ?: 'Everything OK';
+
+        return ['caption' => 'Team photos',
+                'result' => $result,
+                'desc' => $desc];
+    }
+
     public function checkAffiliations() : array
     {
         $show_logos = $this->config->get('show_affiliation_logos');
@@ -587,28 +653,36 @@ class CheckConfigService
                 'desc' => 'Affiliations display disabled, skipping checks'];
         }
 
+        /** @var TeamAffiliation[] $affils */
         $affils = $this->em->getRepository(TeamAffiliation::class)->findAll();
 
         $result = 'O';
         $desc = '';
-        $webDir = sprintf('%s/public/', $this->dj->getDomjudgeWebappDir());
         foreach ($affils as $affiliation) {
             // don't care about unused affiliations
             if (count($affiliation->getTeams()) === 0) {
                 continue;
             }
             if ($show_logos) {
-                if ($aid = $affiliation->getAffilid()) {
-                    $logopath = $webDir . sprintf('images/affiliations/%s.png', $aid);
-                    if ($this->eventLogService->externalIdFieldForEntity($affiliation)) {
-                        $logopath = $webDir . sprintf('images/affiliations/%s.png', $affiliation->getExternalid());
-                    }
+                if ($aid = $affiliation->getApiId($this->eventLogService)) {
+                    $logopath = $this->dj->assetPath($aid, 'affiliation', true, true);
                     if (!file_exists($logopath)) {
                         $result = 'W';
                         $desc   .= sprintf("Logo for %s does not exist (looking for %s)\n", $affiliation->getShortname(), $logopath);
                     } elseif (!is_readable($logopath)) {
                         $result = 'W';
-                        $desc   .= sprintf("Logo for %s not readable (looking for %s)\n", $affiliation->getShortname(), $logopath);
+                        $desc .= sprintf("Logo for %s not readable (looking for %s)\n", $affiliation->getShortname(), $logopath);
+                    } elseif (($filesize = filesize($logopath)) > 500 * 1024) {
+                        $result = 'W';
+                        $desc .= sprintf("Logo for %s bigger than 500Kb (size is %.2fKb)\n", $affiliation->getShortname(), $filesize / 1024);
+                    } else {
+                        $size = @getimagesize($logopath);
+                        $width = $size[0];
+                        $height = $size[1];
+                        if ($width !== 64 || $height !== 64) {
+                            $result = 'W';
+                            $desc   .= sprintf("Logo for %s is not 64x64\n", $affiliation->getShortname());
+                        }
                     }
                 }
             }

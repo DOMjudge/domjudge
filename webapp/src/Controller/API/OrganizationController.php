@@ -19,10 +19,14 @@ use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Annotations as OA;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Validator\ConstraintViolation;
+use Symfony\Component\Validator\ConstraintViolationList;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
  * @Rest\Route("/contests/{cid}/organizations")
@@ -188,7 +192,7 @@ class OrganizationController extends AbstractRestController
      * @OA\Response(response="204", description="Setting logo succeeded")
      * @OA\Parameter(ref="#/components/parameters/id")
      */
-    public function setLogoAction(Request $request, string $id): Response
+    public function setLogoAction(Request $request, string $id, ValidatorInterface $validator): Response
     {
         /** @var TeamAffiliation $teamAffiliation */
         $teamAffiliation = $this->getQueryBuilder($request)
@@ -205,12 +209,14 @@ class OrganizationController extends AbstractRestController
         $logo = $request->files->get('logo');
 
         if (!$logo) {
-            throw new BadRequestHttpException("Please supply a logo");
-        } else if ($logo->getMimeType() !== 'image/png') {
-            throw new BadRequestHttpException("Only PNG's are supported");
+            return new JsonResponse(['title' => 'Validation failed', 'errors' => ['Please supply a logo']], Response::HTTP_BAD_REQUEST);
         }
 
         $teamAffiliation->setLogoFile($logo);
+
+        if ($errorResponse = $this->responseForErrors($validator->validate($teamAffiliation), true)) {
+            return $errorResponse;
+        }
 
         $this->assetUpdater->updateAssets($teamAffiliation);
         $this->eventLogService->log('organizations', $teamAffiliation->getAffilid(), EventLogService::ACTION_UPDATE,
