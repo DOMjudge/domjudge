@@ -5,7 +5,6 @@ namespace App\Controller\API;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\Event;
-use App\Entity\TeamAffiliation;
 use App\Service\AssetUpdateService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
@@ -22,10 +21,9 @@ use FOS\RestBundle\Controller\Annotations as Rest;
 use JMS\Serializer\Metadata\PropertyMetadata;
 use Metadata\MetadataFactoryInterface;
 use Nelmio\ApiDocBundle\Annotation\Model;
+use OpenApi\Annotations as OA;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use OpenApi\Annotations as OA;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -35,6 +33,7 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\KernelInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Yaml\Yaml;
 
 /**
@@ -261,7 +260,7 @@ class ContestController extends AbstractRestController
      * @OA\Response(response="204", description="Setting banner succeeded")
      * @OA\Parameter(ref="#/components/parameters/id")
      */
-    public function setBannerAction(Request $request, string $id): Response
+    public function setBannerAction(Request $request, string $id, ValidatorInterface $validator): Response
     {
         /** @var Contest $contest */
         $contest = $this->getQueryBuilder($request)
@@ -278,12 +277,14 @@ class ContestController extends AbstractRestController
         $banner = $request->files->get('banner');
 
         if (!$banner) {
-            throw new BadRequestHttpException("Please supply a banner");
-        } else if ($banner->getMimeType() !== 'image/png') {
-            throw new BadRequestHttpException("Only PNG's are supported");
+            return new JsonResponse(['title' => 'Validation failed', 'errors' => ['Please supply a banner']], Response::HTTP_BAD_REQUEST);
         }
 
         $contest->setBannerFile($banner);
+
+        if ($errorResponse = $this->responseForErrors($validator->validate($contest), true)) {
+            return $errorResponse;
+        }
 
         $this->assetUpdater->updateAssets($contest);
         $this->eventLogService->log('contests', $contest->getCid(), EventLogService::ACTION_UPDATE,

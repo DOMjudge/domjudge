@@ -20,10 +20,12 @@ use OpenApi\Annotations as OA;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
  * @Rest\Route("/contests/{cid}/teams")
@@ -201,7 +203,7 @@ class TeamController extends AbstractRestController
      * @OA\Response(response="204", description="Setting photo succeeded")
      * @OA\Parameter(ref="#/components/parameters/id")
      */
-    public function setPhotoAction(Request $request, string $id): Response
+    public function setPhotoAction(Request $request, string $id, ValidatorInterface $validator): Response
     {
         /** @var Team $team */
         $team = $this->getQueryBuilder($request)
@@ -218,12 +220,14 @@ class TeamController extends AbstractRestController
         $photo = $request->files->get('photo');
 
         if (!$photo) {
-            throw new BadRequestHttpException("Please supply a photo");
-        } else if ($photo->getMimeType() !== 'image/jpeg') {
-            throw new BadRequestHttpException("Only JPG's are supported");
+            return new JsonResponse(['title' => 'Validation failed', 'errors' => ['Please supply a photo']], Response::HTTP_BAD_REQUEST);
         }
 
         $team->setPhotoFile($photo);
+
+        if ($errorResponse = $this->responseForErrors($validator->validate($team), true)) {
+            return $errorResponse;
+        }
 
         $this->assetUpdater->updateAssets($team);
         $this->eventLogService->log('teams', $team->getTeamid(), EventLogService::ACTION_UPDATE,

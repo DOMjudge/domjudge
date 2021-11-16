@@ -14,11 +14,14 @@ use Doctrine\ORM\QueryBuilder;
 use Exception;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Validator\ConstraintViolationInterface;
+use Symfony\Component\Validator\ConstraintViolationListInterface;
 
 /**
  * Class AbstractRestController
@@ -321,5 +324,27 @@ abstract class AbstractRestController extends AbstractFOSRestController
         }
 
         return $response;
+    }
+
+    public function responseForErrors(ConstraintViolationListInterface $violations, bool $singleProperty = false): ?JsonResponse
+    {
+        if ($violations->count()) {
+            $errors = [];
+            /** @var ConstraintViolationInterface $violation */
+            foreach ($violations as $violation) {
+                if ($singleProperty) {
+                    $errors[] = $violation->getMessage();
+                } else {
+                    $errors[$violation->getPropertyPath()][] = $violation->getMessage();
+                }
+            }
+            $data = [
+                'title' => 'Validation failed',
+                'errors' => $errors
+            ];
+            return new JsonResponse($data, Response::HTTP_BAD_REQUEST);
+        }
+
+        return null;
     }
 }
