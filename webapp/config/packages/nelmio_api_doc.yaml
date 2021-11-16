@@ -80,10 +80,22 @@ nelmio_api_doc:
             responses:
                 NotFound:
                     description: The specified resource was not found
+                    content:
+                        text/html:
+                            schema:
+                                type: string
                 Unauthorized:
                     description: Unauthorized
+                    content:
+                        text/html:
+                            schema:
+                                type: string
                 InvalidResponse:
                     description: The specified resource identifier is malformed
+                    content:
+                        text/html:
+                            schema:
+                                type: string
             schemas:
                 ImageList:
                     type: array
