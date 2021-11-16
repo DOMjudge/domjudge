@@ -308,12 +308,18 @@ abstract class AbstractRestController extends AbstractFOSRestController
     /**
      * Send a binary file response, sending a 304 if it did not modify since last requested
      */
-    public static function sendBinaryFileResponse(Request $request, string $fileName, string $contentType): BinaryFileResponse
+    public static function sendBinaryFileResponse(Request $request, string $fileName): BinaryFileResponse
     {
         // Note: we set auto-etag to true to automatically send the ETag based on the file contents.
         // ETags can be used to determine whether the file changed and if it didn't change, the response will
         // be a 304 Not Modified
         $response = new BinaryFileResponse($fileName, 200, [], true, null, true);
+        $contentType = mime_content_type($fileName);
+        // Some SVG's do not have an XML header and mime_content_type reports those incorrectly.
+        // image/svg+xml is the official mimetype for all SVG's
+        if ($contentType === 'image/svg') {
+            $contentType = 'image/svg+xml';
+        }
         $response->headers->set('Content-Type', $contentType);
 
         // Check if we need to send a 304 Not Modified and if so, send it

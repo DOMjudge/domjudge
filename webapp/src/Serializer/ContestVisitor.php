@@ -6,6 +6,7 @@ use App\Entity\Contest;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
+use App\Utils\Utils;
 use Exception;
 use JMS\Serializer\EventDispatcher\Events;
 use JMS\Serializer\EventDispatcher\EventSubscriberInterface;
@@ -90,7 +91,7 @@ class ContestVisitor implements EventSubscriberInterface
 
         // Banner
         if ($banner = $this->dj->assetPath((string)$id, 'contest', true)) {
-            $imageSize = getimagesize($banner);
+            $imageSize = Utils::getImageSize($banner);
 
             $route = $this->dj->apiRelativeUrl(
                 'v4_contest_banner', ['id' => $id]
@@ -100,7 +101,7 @@ class ContestVisitor implements EventSubscriberInterface
                 'banner',
                 null
             );
-            $visitor->visitProperty($property, [['href' => $route, 'mime' => 'image/png', 'width' => $imageSize[0], 'height' => $imageSize[1]]]);
+            $visitor->visitProperty($property, [['href' => $route, 'mime' => mime_content_type($banner), 'width' => $imageSize[0], 'height' => $imageSize[1]]]);
         }
     }
 }

@@ -36,10 +36,18 @@ class AssetUpdateService
         $fs = new Filesystem();
 
         foreach ($entity->getAssetProperties() as $assetProperty) {
-            $assetPath = $this->dj->fullAssetPath($entity, $assetProperty, $this->eventLog->externalIdFieldForEntity($entity) !== null);
-            if ($entity->isClearAsset($assetProperty) && file_exists($assetPath)) {
-                unlink($assetPath);
+            $assetPaths = [];
+            foreach (DOMJudgeService::MIMETYPE_TO_EXTENSION as $mimetype => $extension) {
+                $assetPaths[$mimetype] = $this->dj->fullAssetPath($entity, $assetProperty, $this->eventLog->externalIdFieldForEntity($entity) !== null, $extension);
+            }
+            if ($entity->isClearAsset($assetProperty)) {
+                foreach ($assetPaths as $assetPath) {
+                    if (file_exists($assetPath)) {
+                        unlink($assetPath);
+                    }
+                }
             } elseif ($entity->getAssetFile($assetProperty)) {
+                $assetPath = $assetPaths[$entity->getAssetFile($assetProperty)->getMimeType()];
                 $fs->copy($entity->getAssetFile($assetProperty)->getRealPath(), $assetPath);
             }
         }

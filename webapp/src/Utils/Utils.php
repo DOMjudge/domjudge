@@ -735,6 +735,34 @@ class Utils
     }
 
     /**
+     * Get the image size of the given image.
+     *
+     * This method supports PNG, JPG, BMP, GIF and SVG files
+     *
+     * Returns an array with three items: the width, height and ratio between width and height
+     */
+    public static function getImageSize(string $filename): array
+    {
+        if (mime_content_type($filename) === 'image/svg+xml') {
+            $svg = simplexml_load_file($filename);
+            if ($viewBox = $svg['viewBox']) {
+                $viewBoxData = explode(' ', (string)$viewBox);
+                $width = (int)$viewBoxData[2];
+                $height = (int)$viewBoxData[3];
+            } else {
+                $width = (int)$svg['width'];
+                $height = (int)$svg['height'];
+            }
+        } else {
+            $size = @getimagesize($filename);
+            $width = $size[0];
+            $height = $size[1];
+        }
+
+        return [$width, $height, $width / $height];
+    }
+
+    /**
      * Returns TRUE iff string $haystack starts with string $needle
      * @param string $haystack
      * @param string $needle

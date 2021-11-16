@@ -124,7 +124,7 @@ class GeneralInfoControllerTest extends BaseTest
     public function testCountryFlagExists(string $countryCode, string $size)
     {
         $this->withChangedConfiguration('show_flags', true, function() use ($countryCode, $size) {
-            $this->client->request('GET', "/api/country-flags/$countryCode/$size.svg");
+            $this->client->request('GET', "/api/country-flags/$countryCode/$size");
             /** @var BinaryFileResponse $response */
             $response = $this->client->getResponse();
             static::assertEquals(200, $response->getStatusCode());
@@ -156,7 +156,7 @@ class GeneralInfoControllerTest extends BaseTest
     public function testCountryFlagNotFound(string $countryCode, string $size)
     {
         $this->withChangedConfiguration('show_flags', true, function() use ($countryCode, $size) {
-            $this->client->request('GET', "/api/country-flags/$countryCode/$size.svg");
+            $this->client->request('GET', "/api/country-flags/$countryCode/$size");
             /** @var BinaryFileResponse $response */
             $response = $this->client->getResponse();
             static::assertEquals(404, $response->getStatusCode());
@@ -178,7 +178,7 @@ class GeneralInfoControllerTest extends BaseTest
     public function testCountryNotFound(string $countryCode, string $size)
     {
         $this->withChangedConfiguration('show_flags', true, function() use ($countryCode, $size) {
-            $this->client->request('GET', "/api/country-flags/$countryCode/$size.svg");
+            $this->client->request('GET', "/api/country-flags/$countryCode/$size");
             /** @var BinaryFileResponse $response */
             $response = $this->client->getResponse();
             static::assertEquals(404, $response->getStatusCode());
@@ -202,7 +202,7 @@ class GeneralInfoControllerTest extends BaseTest
     public function testCountryFlagDisabled(string $countryCode, string $size)
     {
         $this->withChangedConfiguration('show_flags', false, function () use ($countryCode, $size) {
-            $this->client->request('GET', "/api/country-flags/$countryCode/$size.svg");
+            $this->client->request('GET', "/api/country-flags/$countryCode/$size");
             /** @var BinaryFileResponse $response */
             $response = $this->client->getResponse();
             static::assertEquals(404, $response->getStatusCode());

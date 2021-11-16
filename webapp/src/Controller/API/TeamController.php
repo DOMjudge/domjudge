@@ -120,11 +120,13 @@ class TeamController extends AbstractRestController
 
     /**
      * Get the photo for the given team
-     * @Rest\Get("/{id}/photo.jpg", name="team_photo")
+     * @Rest\Get("/{id}/photo", name="team_photo")
      * @OA\Response(
      *     response="200",
-     *     description="Returns the given team photo in JPG format",
-     *     @OA\MediaType(mediaType="image/jpeg")
+     *     description="Returns the given team photo in PNG, JPG or SVG format",
+     *     @OA\MediaType(mediaType="image/png"),
+     *     @OA\MediaType(mediaType="image/jpeg"),
+     *     @OA\MediaType(mediaType="image/svg+xml")
      * )
      * @OA\Parameter(ref="#/components/parameters/id")
      */
@@ -147,12 +149,12 @@ class TeamController extends AbstractRestController
             throw new NotFoundHttpException('Team photo not found');
         }
 
-        return static::sendBinaryFileResponse($request, $teamPhoto, 'image/jpeg');
+        return static::sendBinaryFileResponse($request, $teamPhoto);
     }
 
     /**
      * Delete the photo for the given team
-     * @Rest\Delete("/{id}/photo.jpg", name="delete_team_photo")
+     * @Rest\Delete("/{id}/photo", name="delete_team_photo")
      * @IsGranted("ROLE_ADMIN")
      * @OA\Response(response="204", description="Deleting photo succeeded")
      * @OA\Parameter(ref="#/components/parameters/id")
@@ -181,8 +183,8 @@ class TeamController extends AbstractRestController
 
     /**
      * Set the photo for the given team
-     * @Rest\POST("/{id}/photo.jpg", name="post_team_photo")
-     * @Rest\PUT("/{id}/photo.jpg", name="put_team_photo")
+     * @Rest\POST("/{id}/photo", name="post_team_photo")
+     * @Rest\PUT("/{id}/photo", name="put_team_photo")
      * @OA\RequestBody(
      *     required=true,
      *     @OA\MediaType(

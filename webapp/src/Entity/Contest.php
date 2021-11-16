@@ -317,7 +317,7 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
 
     /**
      * @var UploadedFile|null
-     * @Assert\File(mimeTypes={"image/png"}, mimeTypesMessage="Only PNG's are allowed")
+     * @Assert\File(mimeTypes={"image/png","image/jpeg","image/svg+xml"}, mimeTypesMessage="Only PNG's, JPG's and SVG's are allowed")
      * @Serializer\Exclude()
      */
     private $bannerFile;

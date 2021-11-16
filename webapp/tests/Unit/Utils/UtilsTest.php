@@ -4,6 +4,7 @@ namespace App\Tests\Unit\Utils;
 
 use App\Entity\TeamAffiliation;
 use App\Utils\Utils;
+use Generator;
 use PHPUnit\Framework\TestCase;
 
 class UtilsTest extends TestCase
@@ -707,6 +708,26 @@ class UtilsTest extends TestCase
         $thumb = Utils::getImageThumb($image, $maxsize, $tmp, $error);
         self::assertFalse($thumb);
         self::assertEquals('Could not determine image information.', $error);
+    }
+
+    /**
+     * Test getting image size
+     *
+     * @dataProvider provideTestGetImageSize
+     */
+    public function testGetImageSize(string $filename, int $expectedWidth, int $expectedHeight): void
+    {
+        [$width, $height, $ratio] = Utils::getImageSize($filename);
+        self::assertEquals($expectedWidth, $width);
+        self::assertEquals($expectedHeight, $height);
+        self::assertEquals($width / $height, $ratio);
+    }
+
+    public function provideTestGetImageSize(): Generator
+    {
+        yield [__DIR__ . '/../../../public/js/hs.png', 181, 101];
+        yield [__DIR__ . '/../../../public/images/teams/domjudge.jpg', 320, 200];
+        yield [__DIR__ . '/../../../public/images/DOMjudgelogo.svg', 510, 1122];
     }
 
     /**

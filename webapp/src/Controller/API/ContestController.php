@@ -177,11 +177,13 @@ class ContestController extends AbstractRestController
 
     /**
      * Get the banner for the given contest
-     * @Rest\Get("/{id}/banner.png", name="contest_banner")
+     * @Rest\Get("/{id}/banner", name="contest_banner")
      * @OA\Response(
      *     response="200",
-     *     description="Returns the given contest banner in PNG format",
-     *     @OA\MediaType(mediaType="image/png")
+     *     description="Returns the given contest banner in PNG, JPG or SVG format",
+     *     @OA\MediaType(mediaType="image/png"),
+     *     @OA\MediaType(mediaType="image/jpeg"),
+     *     @OA\MediaType(mediaType="image/svg+xml")
      * )
      * @OA\Parameter(ref="#/components/parameters/id")
      */
@@ -204,12 +206,12 @@ class ContestController extends AbstractRestController
             throw new NotFoundHttpException('Contest banner not found');
         }
 
-        return static::sendBinaryFileResponse($request, $banner, 'image/png');
+        return static::sendBinaryFileResponse($request, $banner);
     }
 
     /**
      * Delete the banner for the given contest
-     * @Rest\Delete("/{id}/banner.png", name="delete_contest_banner")
+     * @Rest\Delete("/{id}/banner", name="delete_contest_banner")
      * @IsGranted("ROLE_ADMIN")
      * @OA\Response(response="204", description="Deleting banner succeeded")
      * @OA\Parameter(ref="#/components/parameters/id")
@@ -238,8 +240,8 @@ class ContestController extends AbstractRestController
 
     /**
      * Set the banner for the given contest
-     * @Rest\POST("/{id}/banner.png", name="post_contest_banner")
-     * @Rest\PUT("/{id}/banner.png", name="put_contest_banner")
+     * @Rest\POST("/{id}/banner", name="post_contest_banner")
+     * @Rest\PUT("/{id}/banner", name="put_contest_banner")
      * @OA\RequestBody(
      *     required=true,
      *     @OA\MediaType(

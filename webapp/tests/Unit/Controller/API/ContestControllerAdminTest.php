@@ -6,6 +6,7 @@ use App\Entity\Contest;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class ContestControllerAdminTest extends ContestControllerTest
@@ -98,23 +99,29 @@ EOF;
         self::assertArrayNotHasKey('banner', $object);
 
         // Now upload a banner
-        $banner = new UploadedFile(__DIR__ . '/../../../../public/js/hv.png', 'hv.png');
-        $this->verifyApiJsonResponse('POST', $url . '/banner.png', 204, $this->apiUser, null, ['banner' => $banner]);
+        $bannerFile = __DIR__ . '/../../../../public/images/DOMjudgelogo.svg';
+        $banner = new UploadedFile($bannerFile, 'DOMjudgelogo.svg');
+        $this->verifyApiJsonResponse('POST', $url . '/banner', 204, $this->apiUser, null, ['banner' => $banner]);
 
         // Verify we do have a banner now
         $object = $this->verifyApiJsonResponse('GET', $url, 200, $this->apiUser);
         $bannerConfig = [
             [
-                'href'   => "contests/$id/banner.png",
-                'mime'   => 'image/png',
-                'width'  => 181,
-                'height' => 101,
+                'href'   => "contests/$id/banner",
+                'mime'   => 'image/svg+xml',
+                'width'  => 510,
+                'height' => 1122
             ],
         ];
         self::assertSame($bannerConfig, $object['banner']);
 
+        $this->client->request('GET', '/api' . $url . '/banner');
+        /** @var BinaryFileResponse $response */
+        $response = $this->client->getResponse();
+        self::assertFileEquals($bannerFile, $response->getFile()->getRealPath());
+
         // Delete the banner again
-        $this->verifyApiJsonResponse('DELETE', $url . '/banner.png', 204, $this->apiUser);
+        $this->verifyApiJsonResponse('DELETE', $url . '/banner', 204, $this->apiUser);
 
         // Verify we have no banner anymore
         $object = $this->verifyApiJsonResponse('GET', $url, 200, $this->apiUser);
