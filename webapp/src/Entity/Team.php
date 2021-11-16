@@ -27,7 +27,7 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
  *     })
  * @UniqueEntity("icpcid")
  */
-class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface
+class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface, AssetEntityInterface
 {
     /**
      * @var int
@@ -558,5 +558,30 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface
         return $contest->isOpenToAllTeams() ||
             $this->getContests()->contains($contest) ||
             ($this->getCategory() !== null && $this->getCategory()->inContest($contest));
+    }
+
+    public function getAssetProperties(): array
+    {
+        return ['photo'];
+    }
+
+    public function getAssetFile(string $property): ?UploadedFile
+    {
+        switch ($property) {
+            case 'photo':
+                return $this->getPhotoFile();
+        }
+
+        return null;
+    }
+
+    public function isClearAsset(string $property): ?bool
+    {
+        switch ($property) {
+            case 'photo':
+                return $this->isClearPhoto();
+        }
+
+        return null;
     }
 }

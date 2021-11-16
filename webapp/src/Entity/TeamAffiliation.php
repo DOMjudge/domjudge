@@ -32,7 +32,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * )
  * @UniqueEntity("externalid")
  */
-class TeamAffiliation extends BaseApiEntity
+class TeamAffiliation extends BaseApiEntity implements AssetEntityInterface
 {
     /**
      * @var int
@@ -224,5 +224,30 @@ class TeamAffiliation extends BaseApiEntity
     public function getTeams(): Collection
     {
         return $this->teams;
+    }
+
+    public function getAssetProperties(): array
+    {
+        return ['logo'];
+    }
+
+    public function getAssetFile(string $property): ?UploadedFile
+    {
+        switch ($property) {
+            case 'logo':
+                return $this->getLogoFile();
+        }
+
+        return null;
+    }
+
+    public function isClearAsset(string $property): ?bool
+    {
+        switch ($property) {
+            case 'logo':
+                return $this->isClearLogo();
+        }
+
+        return null;
     }
 }
