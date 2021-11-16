@@ -109,11 +109,13 @@ class OrganizationController extends AbstractRestController
 
     /**
      * Get the logo for the given organization
-     * @Rest\Get("/{id}/logo.png", name="organization_logo")
+     * @Rest\Get("/{id}/logo", name="organization_logo")
      * @OA\Response(
      *     response="200",
-     *     description="Returns the given organization logo in PNG format",
-     *     @OA\MediaType(mediaType="image/png")
+     *     description="Returns the given organization logo in PNG, JPG or SVG format",
+     *     @OA\MediaType(mediaType="image/png"),
+     *     @OA\MediaType(mediaType="image/jpeg"),
+     *     @OA\MediaType(mediaType="image/svg+xml")
      * )
      * @OA\Parameter(ref="#/components/parameters/id")
      */
@@ -136,12 +138,12 @@ class OrganizationController extends AbstractRestController
             throw new NotFoundHttpException('Affiliation logo not found');
         }
 
-        return static::sendBinaryFileResponse($request, $affiliationLogo, 'image/png');
+        return static::sendBinaryFileResponse($request, $affiliationLogo);
     }
 
     /**
      * Delete the logo for the given organization
-     * @Rest\Delete("/{id}/logo.png", name="delete_organization_logo")
+     * @Rest\Delete("/{id}/logo", name="delete_organization_logo")
      * @IsGranted("ROLE_ADMIN")
      * @OA\Response(response="204", description="Deleting logo succeeded")
      * @OA\Parameter(ref="#/components/parameters/id")
@@ -170,8 +172,8 @@ class OrganizationController extends AbstractRestController
 
     /**
      * Set the logo for the given organization
-     * @Rest\POST("/{id}/logo.png", name="post_organization_logo")
-     * @Rest\PUT("/{id}/logo.png", name="put_organization_logo")
+     * @Rest\POST("/{id}/logo", name="post_organization_logo")
+     * @Rest\PUT("/{id}/logo", name="put_organization_logo")
      * @OA\RequestBody(
      *     required=true,
      *     @OA\MediaType(

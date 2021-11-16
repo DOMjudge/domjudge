@@ -42,6 +42,7 @@
 		"php": "^7.2.5",
 		"ext-ctype": "*",
 		"ext-curl": "*",
+		"ext-fileinfo": "*",
 		"ext-gd": "*",
 		"ext-iconv": "*",
 		"ext-intl": "*",
@@ -94,7 +95,7 @@
 		"twig/extra-bundle": "^3.3",
 		"twig/string-extra": "^3.3",
 		"twig/twig": "^2.11"
-	},
+    },
 	"require-dev": {
 		"dama/doctrine-test-bundle": "^6.5",
 		"squizlabs/php_codesniffer": "*",

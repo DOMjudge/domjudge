@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Controller\API;
 
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class TeamControllerTest extends BaseTest
@@ -39,14 +40,15 @@ class TeamControllerTest extends BaseTest
         self::assertArrayNotHasKey('photo', $object);
 
         // Now upload a photo
-        $photo = new UploadedFile(__DIR__ . '/../../../../public/images/teams/domjudge.jpg', 'domjudge.jpg');
-        $this->verifyApiJsonResponse('POST', $url . '/photo.jpg', 204, 'admin', null, ['photo' => $photo]);
+        $photoFile = __DIR__ . '/../../../../public/images/teams/domjudge.jpg';
+        $photo = new UploadedFile($photoFile, 'domjudge.jpg');
+        $this->verifyApiJsonResponse('POST', $url . '/photo', 204, 'admin', null, ['photo' => $photo]);
 
         // Verify we do have a photo now
         $object = $this->verifyApiJsonResponse('GET', $url, 200, 'admin');
         $logoConfig = [
             [
-                'href'   => "contests/2/teams/$id/photo.jpg",
+                'href'   => "contests/2/teams/$id/photo",
                 'mime'   => 'image/jpeg',
                 'width'  => 320,
                 'height' => 200
@@ -55,8 +57,13 @@ class TeamControllerTest extends BaseTest
         ];
         self::assertSame($logoConfig, $object['photo']);
 
+        $this->client->request('GET', '/api' . $url . '/photo');
+        /** @var BinaryFileResponse $response */
+        $response = $this->client->getResponse();
+        self::assertFileEquals($photoFile, $response->getFile()->getRealPath());
+
         // Delete the logo again
-        $this->verifyApiJsonResponse('DELETE', $url . '/photo.jpg', 204, 'admin');
+        $this->verifyApiJsonResponse('DELETE', $url . '/photo', 204, 'admin');
 
         // Verify we have no banner anymore
         $object = $this->verifyApiJsonResponse('GET', $url, 200, 'admin');

@@ -455,18 +455,15 @@ class CheckConfigService
         $result = 'O';
         foreach ($contests as $contest) {
             if ($cid = $contest->getApiId($this->eventLogService)) {
-                $bannerpath = $this->dj->assetPath($cid, 'contest', true, true);
+                $bannerpath = $this->dj->assetPath($cid, 'contest', true);
                 $contestName = 'c' . $contest->getCid() . ' (' . $contest->getShortname() . ')';
-                if (file_exists($bannerpath)) {
+                if ($bannerpath) {
                     if (($filesize = filesize($bannerpath)) > 2 * 1024 * 1024) {
                         $result = 'W';
                         $desc .= sprintf("Banner for %s bigger than 2mb (size is %.2fMb)\n", $contestName, $filesize / 1024 / 1024);
                     } else {
-                        $size = @getimagesize($bannerpath);
-                        $width = $size[0];
-                        $height = $size[1];
-                        $ratio = $width / $height;
-                        if ($width > 1920) {
+                        [$width, $height, $ratio] = Utils::getImageSize($bannerpath);
+                        if (mime_content_type($bannerpath) !== 'image/svg+xml' && $width > 1920) {
                             $result = 'W';
                             $desc .= sprintf("Banner for %s is wider than 1920\n", $contestName);
                         } elseif ($ratio < 3 || $ratio > 6) {
@@ -628,8 +625,8 @@ class CheckConfigService
         $result = 'O';
         foreach ($teams as $team) {
             if ($tid = $team->getApiId($this->eventLogService)) {
-                $photopath = $this->dj->assetPath($tid, 'team', true, true);
-                if (file_exists($photopath) && ($filesize = filesize($photopath)) > 5 * 1024 * 1024) {
+                $photopath = $this->dj->assetPath($tid, 'team', true);
+                if ($photopath && ($filesize = filesize($photopath)) > 5 * 1024 * 1024) {
                     $result = 'W';
                     $desc .= sprintf("Photo for t%d (%s) bigger than 5mb (size is %.2fMb)\n", $team->getTeamid(), $team->getName(), $filesize / 1024 / 1024);
                 }
@@ -665,21 +662,25 @@ class CheckConfigService
             }
             if ($show_logos) {
                 if ($aid = $affiliation->getApiId($this->eventLogService)) {
-                    $logopath = $this->dj->assetPath($aid, 'affiliation', true, true);
-                    if (!file_exists($logopath)) {
+                    $logopath = $this->dj->assetPath($aid, 'affiliation', true);
+                    $logopathMask = str_replace('.jpg', '.{jpg,png,svg}', $this->dj->assetPath($aid, 'affiliation', true, 'jpg'));
+                    if (!$logopath) {
                         $result = 'W';
-                        $desc   .= sprintf("Logo for %s does not exist (looking for %s)\n", $affiliation->getShortname(), $logopath);
+                        $desc   .= sprintf("Logo for %s does not exist (looking for %s)\n", $affiliation->getShortname(), $logopathMask);
                     } elseif (!is_readable($logopath)) {
                         $result = 'W';
-                        $desc .= sprintf("Logo for %s not readable (looking for %s)\n", $affiliation->getShortname(), $logopath);
+                        $desc .= sprintf("Logo for %s not readable (looking for %s)\n", $affiliation->getShortname(), $logopathMask);
                     } elseif (($filesize = filesize($logopath)) > 500 * 1024) {
                         $result = 'W';
                         $desc .= sprintf("Logo for %s bigger than 500Kb (size is %.2fKb)\n", $affiliation->getShortname(), $filesize / 1024);
                     } else {
-                        $size = @getimagesize($logopath);
-                        $width = $size[0];
-                        $height = $size[1];
-                        if ($width !== 64 || $height !== 64) {
+                        [$width, $height, $ratio] = Utils::getImageSize($logopath);
+                        if (mime_content_type($logopath) === 'image/svg+xml') {
+                            // For SVG's we check the ratio
+                            $result = 'W';
+                            $desc   .= sprintf("Logo for %s has a ratio of 1:%.2f, should be 1:1\n", $affiliation->getShortname(), $ratio);
+                        } elseif ($width !== 64 || $height !== 64) {
+                            // For other images we check the size
                             $result = 'W';
                             $desc   .= sprintf("Logo for %s is not 64x64\n", $affiliation->getShortname());
                         }

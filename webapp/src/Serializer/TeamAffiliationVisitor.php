@@ -6,6 +6,7 @@ use App\Entity\TeamAffiliation;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
+use App\Utils\Utils;
 use Exception;
 use JMS\Serializer\EventDispatcher\Events;
 use JMS\Serializer\EventDispatcher\EventSubscriberInterface;
@@ -105,7 +106,7 @@ class TeamAffiliationVisitor implements EventSubscriberInterface
 
         // Affiliation logo
         if ($affiliationLogo = $this->dj->assetPath((string)$id, 'affiliation', true)) {
-            $imageSize = getimagesize($affiliationLogo);
+            $imageSize = Utils::getImageSize($affiliationLogo);
 
             $route = $this->dj->apiRelativeUrl(
                 'v4_organization_logo',
@@ -119,7 +120,7 @@ class TeamAffiliationVisitor implements EventSubscriberInterface
                 'logo',
                 null
             );
-            $visitor->visitProperty($property, [['href' => $route, 'mime' => 'image/png', 'width' => $imageSize[0], 'height' => $imageSize[1]]]);
+            $visitor->visitProperty($property, [['href' => $route, 'mime' => mime_content_type($affiliationLogo), 'width' => $imageSize[0], 'height' => $imageSize[1]]]);
         }
     }
 }

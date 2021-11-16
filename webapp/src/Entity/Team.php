@@ -122,7 +122,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
 
     /**
      * @var UploadedFile|null
-     * @Assert\File(mimeTypes={"image/jpeg"}, mimeTypesMessage="Only JPG's are allowed")
+     * @Assert\File(mimeTypes={"image/png","image/jpeg","image/svg+xml"}, mimeTypesMessage="Only PNG's, JPG's and SVG's are allowed")
      * @Serializer\Exclude()
      */
     private $photoFile;

@@ -2,8 +2,8 @@
 
 namespace App\Service;
 
-use App\Controller\API\ClarificationController;
 use App\Doctrine\DBAL\Types\JudgeTaskType;
+use App\Entity\AssetEntityInterface;
 use App\Entity\AuditLog;
 use App\Entity\Balloon;
 use App\Entity\BaseApiEntity;
@@ -110,6 +110,12 @@ class DOMJudgeService
     // does not start with a dot or dash or ends with a dot. We could but it would make the
     // regex way more complicated and would also complicate the logic in ImportExportService::importContestYaml
     const EXTERNAL_IDENTIFIER_REGEX = '/^[a-zA-Z0-9_.-]+$/';
+
+    const MIMETYPE_TO_EXTENSION = [
+        'image/png'     => 'png',
+        'image/jpeg'    => 'jpg',
+        'image/svg+xml' => 'svg',
+    ];
 
     /**
      * DOMJudgeService constructor.
@@ -1302,7 +1308,7 @@ class DOMJudgeService
     /**
      * Get asset files in the given directory with the given extension
      */
-    public function getAssetFiles(string $path, string $extension): array
+    public function getAssetFiles(string $path): array
     {
         $customDir = sprintf('%s/public/%s', $this->params->get('kernel.project_dir'), $path);
         if (!is_dir($customDir)) {
@@ -1311,8 +1317,10 @@ class DOMJudgeService
 
         $results = [];
         foreach (scandir($customDir) as $file) {
-            if (strpos($file, '.' . $extension) !== false) {
-                $results[] = $file;
+            foreach (static::MIMETYPE_TO_EXTENSION as $extension) {
+                if (strpos($file, '.' . $extension) !== false) {
+                    $results[] = $file;
+                }
             }
         }
 
@@ -1325,32 +1333,31 @@ class DOMJudgeService
      * @param string $name
      * @param string $type
      * @param bool $fullPath If true, get the full path. If false, get the webserver relative path
-     * @param bool $force If true, also return the asset path if it does not exist currently
+     * @param string|null $forceExtension If set, also return the asset path if it does not exist currently and use the given extension
      *
      * @return string|null
      */
-    public function assetPath(string $name, string $type, bool $fullPath = false, bool $force = false): ?string
+    public function assetPath(string $name, string $type, bool $fullPath = false, ?string $forceExtension = null): ?string
     {
         $prefix = $fullPath ? ($this->getDomjudgeWebappDir() . '/public/') : '';
         switch ($type) {
             case 'affiliation':
-                $extension = 'png';
                 $dir = 'images/affiliations';
                 break;
             case 'team':
-                $extension = 'jpg';
                 $dir = 'images/teams';
                 break;
             case 'contest':
-                $extension = 'png';
                 $dir = 'images/banners';
                 break;
         }
 
-        if (isset($extension)) {
-            $assets = $this->getAssetFiles($dir, $extension);
-            if ($force || in_array($name . '.' . $extension, $assets)) {
-                return sprintf('%s%s/%s.%s', $prefix, $dir, $name, $extension);
+        if (isset($dir)) {
+            $assets = $this->getAssetFiles($dir);
+            foreach (static::MIMETYPE_TO_EXTENSION as $extension) {
+                if ($forceExtension === $extension || (!$forceExtension && in_array($name . '.' . $extension, $assets))) {
+                    return sprintf('%s%s/%s.%s', $prefix, $dir, $name, $extension);
+                }
             }
         }
 
@@ -1362,9 +1369,11 @@ class DOMJudgeService
         // This is put in a separate method (and not as a special case in assetPath) since
         // fullAssetPath uses assetPath as well and we do not want to show the 'delete banner'
         // checkbox when a global banner has been set.
-        $bannerFile = 'images/banner.png';
-        if (file_exists($this->getDomjudgeWebappDir() . '/public/' . $bannerFile)) {
-            return $bannerFile;
+        $bannerFiles = ['images/banner.png', 'iamges/banner.jpg', 'images/banner.svg'];
+        foreach ($bannerFiles as $bannerFile) {
+            if (file_exists($this->getDomjudgeWebappDir() . '/public/' . $bannerFile)) {
+                return $bannerFile;
+            }
         }
 
         return null;
@@ -1373,23 +1382,23 @@ class DOMJudgeService
     /**
      * Get the full asset path for the given entity and property
      */
-    public function fullAssetPath(BaseApiEntity $entity, string $property, bool $useExternalid): ?string
+    public function fullAssetPath(AssetEntityInterface $entity, string $property, bool $useExternalid, ?string $forceExtension = null): ?string
     {
         if ($entity instanceof Team) {
             switch ($property) {
                 case 'photo':
-                    return $this->assetPath((string)$entity->getTeamid(), 'team', true, true);
+                    return $this->assetPath((string)$entity->getTeamid(), 'team', true, $forceExtension);
             }
         } elseif ($entity instanceof TeamAffiliation) {
             switch ($property) {
                 case 'logo':
-                    return $this->assetPath($useExternalid ? $entity->getExternalid() : (string)$entity->getAffilid(), 'affiliation', true, true);
+                    return $this->assetPath($useExternalid ? $entity->getExternalid() : (string)$entity->getAffilid(), 'affiliation', true, $forceExtension);
             }
 
         } elseif ($entity instanceof Contest) {
             switch ($property) {
                 case 'banner':
-                    return $this->assetPath($useExternalid ? $entity->getExternalid() : (string)$entity->getCid(), 'contest', true, true);
+                    return $this->assetPath($useExternalid ? $entity->getExternalid() : (string)$entity->getCid(), 'contest', true, $forceExtension);
             }
         }
 

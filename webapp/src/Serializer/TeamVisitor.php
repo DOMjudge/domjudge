@@ -5,6 +5,7 @@ namespace App\Serializer;
 use App\Entity\Team;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
+use App\Utils\Utils;
 use Exception;
 use JMS\Serializer\EventDispatcher\Events;
 use JMS\Serializer\EventDispatcher\EventSubscriberInterface;
@@ -69,7 +70,7 @@ class TeamVisitor implements EventSubscriberInterface
             return;
         }
 
-        $imageSize = getimagesize($teamPhoto);
+        $imageSize = Utils::getImageSize($teamPhoto);
 
         $id = $team->getApiId($this->eventLogService);
 
@@ -85,6 +86,6 @@ class TeamVisitor implements EventSubscriberInterface
             'photo',
             null
         );
-        $visitor->visitProperty($property, [['href' => $route, 'mime' => 'image/jpeg', 'width' => $imageSize[0], 'height' => $imageSize[1]]]);
+        $visitor->visitProperty($property, [['href' => $route, 'mime' => mime_content_type($teamPhoto), 'width' => $imageSize[0], 'height' => $imageSize[1]]]);
     }
 }

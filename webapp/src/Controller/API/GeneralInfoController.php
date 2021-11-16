@@ -291,7 +291,7 @@ class GeneralInfoController extends AbstractFOSRestController
 
     /**
      * Get the flag for the given country
-     * @Rest\Get("/country-flags/{countryCode}/{size}.svg")
+     * @Rest\Get("/country-flags/{countryCode}/{size}")
      * @OA\Response(
      *     response="200",
      *     description="Returns the given country flag in SVG format",
@@ -326,7 +326,7 @@ class GeneralInfoController extends AbstractFOSRestController
             throw new NotFoundHttpException("country flag for $alpha3code of size $size not found");
         }
 
-        return AbstractRestController::sendBinaryFileResponse($request, $flagFile, 'image/svg+xml');
+        return AbstractRestController::sendBinaryFileResponse($request, $flagFile);
     }
 
     /**

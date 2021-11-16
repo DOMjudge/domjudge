@@ -5,6 +5,7 @@ namespace App\Tests\Unit\Controller\API;
 use App\DataFixtures\Test\SampleAffiliationsFixture;
 use App\Entity\TeamAffiliation;
 use App\Service\ConfigurationService;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class OrganizationControllerTest extends BaseTest
@@ -21,13 +22,13 @@ class OrganizationControllerTest extends BaseTest
             'country'      => 'NLD',
             'country_flag' => [
                 [
-                    'href'   => 'country-flags/NLD/4x3.svg',
+                    'href'   => 'country-flags/NLD/4x3',
                     'mime'   => 'image/svg+xml',
                     'width'  => 640,
                     'height' => 480,
                 ],
                 [
-                    'href'   => 'country-flags/NLD/1x1.svg',
+                    'href'   => 'country-flags/NLD/1x1',
                     'mime'   => 'image/svg+xml',
                     'width'  => 512,
                     'height' => 512,
@@ -41,13 +42,13 @@ class OrganizationControllerTest extends BaseTest
             'country'      => 'DEU',
             'country_flag' => [
                 [
-                    'href'   => 'country-flags/DEU/4x3.svg',
+                    'href'   => 'country-flags/DEU/4x3',
                     'mime'   => 'image/svg+xml',
                     'width'  => 640,
                     'height' => 480,
                 ],
                 [
-                    'href'   => 'country-flags/DEU/1x1.svg',
+                    'href'   => 'country-flags/DEU/1x1',
                     'mime'   => 'image/svg+xml',
                     'width'  => 512,
                     'height' => 512,
@@ -127,14 +128,15 @@ class OrganizationControllerTest extends BaseTest
         self::assertArrayNotHasKey('logo', $object);
 
         // Now upload a logo
-        $logo = new UploadedFile(__DIR__ . '/../../../../public/js/hv.png', 'hv.png');
-        $this->verifyApiJsonResponse('POST', $url . '/logo.png', 204, 'admin', null, ['logo' => $logo]);
+        $logoFile = __DIR__ . '/../../../../public/js/hv.png';
+        $logo = new UploadedFile($logoFile, 'hv.png');
+        $this->verifyApiJsonResponse('POST', $url . '/logo', 204, 'admin', null, ['logo' => $logo]);
 
         // Verify we do have a logo now
         $object = $this->verifyApiJsonResponse('GET', $url, 200, 'admin');
         $logoConfig = [
             [
-                'href'   => "contests/2/organizations/$id/logo.png",
+                'href'   => "contests/2/organizations/$id/logo",
                 'mime'   => 'image/png',
                 'width'  => 181,
                 'height' => 101
@@ -142,8 +144,13 @@ class OrganizationControllerTest extends BaseTest
         ];
         self::assertSame($logoConfig, $object['logo']);
 
+        $this->client->request('GET', '/api' . $url . '/logo');
+        /** @var BinaryFileResponse $response */
+        $response = $this->client->getResponse();
+        self::assertFileEquals($logoFile, $response->getFile()->getRealPath());
+
         // Delete the logo again
-        $this->verifyApiJsonResponse('DELETE', $url . '/logo.png', 204, 'admin');
+        $this->verifyApiJsonResponse('DELETE', $url . '/logo', 204, 'admin');
 
         // Verify we have no banner anymore
         $object = $this->verifyApiJsonResponse('GET', $url, 200, 'admin');
