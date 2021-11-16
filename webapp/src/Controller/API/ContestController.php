@@ -238,10 +238,6 @@ class ContestController extends AbstractRestController
      *     description="Contest start time changed successfully",
      * )
      * @OA\Response(
-     *     response="400",
-     *     description="Invalid input data"
-     * )
-     * @OA\Response(
      *     response="403",
      *     description="Changing start time not allowed"
      * )
