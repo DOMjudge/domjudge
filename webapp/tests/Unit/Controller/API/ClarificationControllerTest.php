@@ -95,7 +95,7 @@ class ClarificationControllerTest extends BaseTest
         $this->assertEquals("Can you tell me how to solve this problem?", $clarificationFromApi[0]['text']);
 
         $this->assertEquals("2", $clarificationFromApi[1]['to_team_id']);
-        $this->assertEquals("> Can you tell me how to solve this problem?\n\nNo, read the problem statement.", $clarificationFromApi[1]['text']);
+        $this->assertEquals("> Can you tell me how to solve this problem?\r\n\r\nNo, read the problem statement.", $clarificationFromApi[1]['text']);
 
         $this->assertEquals("2", $clarificationFromApi[2]['from_team_id']);
         $this->assertEquals("Is it necessary to read the problem statement carefully?", $clarificationFromApi[2]['text']);
