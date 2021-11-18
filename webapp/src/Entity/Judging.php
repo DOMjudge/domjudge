@@ -535,7 +535,7 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
         $hostnames = [];
         /** @var JudgingRun $run */
         foreach ($this->getRuns() as $run) {
-            if ($run->getJudgeTask()->getJudgehost() === null) {
+            if ($run->getJudgeTask() === null || $run->getJudgeTask()->getJudgehost() === null) {
                 continue;
             }
             $hostnames[] = $run->getJudgeTask()->getJudgehost()->getHostname();
