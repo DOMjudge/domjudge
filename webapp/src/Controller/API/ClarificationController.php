@@ -59,7 +59,9 @@ class ClarificationController extends AbstractRestController
     /**
      * Get the given clarifications for this contest.
      *
-     * Note that we restrict the returned clarifications in the query builder.
+     * Note that we restrict the returned clarifications based on the user's role.
+     * Admin and api_reader get everything, anonymous gets only general clarifications,
+     * team user gets general clarifications plus those sent from or to the team.
      * @throws NonUniqueResultException
      * @Rest\Get("/{id}")
      * @OA\Response(

@@ -36,6 +36,33 @@ class ClarificationControllerTest extends BaseTest
             "contest_time" => "-16525:12:02.310",
             "text"         => "> Can you tell me how to solve this problem?\r\n\r\nNo, read the problem statement.",
         ],
+        ClarificationFixture::class . ':0' => [
+            "problem_id"   => "1",
+            "from_team_id" => "2",
+            "to_team_id"   => null,
+            "reply_to_id"  => null,
+            "time"         => "2018-02-11T21:48:58.901+00:00",
+            "contest_time" => "-16525:11:01.098",
+            "text"         => "Is it necessary to read the problem statement carefully?",
+        ],
+        ClarificationFixture::class . ':1' => [
+            "problem_id"   => null,
+            "from_team_id" => null,
+            "to_team_id"   => null,
+            "reply_to_id"  => null,
+            "time"         => "2018-02-11T21:53:20.000+00:00",
+            "contest_time" => "-16525:06:40.000",
+            "text"         => "Lunch is served",
+        ],
+        ClarificationFixture::class . ':2' => [
+            "problem_id"   => "1",
+            "from_team_id" => null,
+            "to_team_id"   => "2",
+            "reply_to_id"  => null,
+            "time"         => "2018-02-11T21:47:43.689+00:00",
+            "contest_time" => "-16525:12:16.310",
+            "text"         => "There was a mistake in judging this problem. Please try again",
+        ],
     ];
 
     protected $entityReferences = [
@@ -43,6 +70,42 @@ class ClarificationControllerTest extends BaseTest
     ];
 
     protected $expectedAbsent = ['4242', 'nonexistent'];
+
+    public function testAnonymousOnlyGeneral()
+    {
+        $contestId = $this->getDemoContestId();
+        $apiEndpoint = $this->apiEndpoint;
+        $clarificationFromApi = $this->verifyApiJsonResponse('GET', "/contests/$contestId/$apiEndpoint", 200);
+
+        $this->assertCount(1, $clarificationFromApi);
+        $this->assertEquals("Lunch is served", $clarificationFromApi[0]['text']);
+        $this->assertEquals("2018-02-11T21:53:20.000+00:00", $clarificationFromApi[0]['time']);
+        $this->assertEquals("-16525:06:40.000", $clarificationFromApi[0]['contest_time']);
+    }
+
+    public function testTeamOnlyGeneralAndRelatedToTeam()
+    {
+        $contestId = $this->getDemoContestId();
+        $apiEndpoint = $this->apiEndpoint;
+        $clarificationFromApi = $this->verifyApiJsonResponse('GET', "/contests/$contestId/$apiEndpoint", 200, 'demo');
+
+        $this->assertCount(5, $clarificationFromApi);
+
+        $this->assertEquals("2", $clarificationFromApi[0]['from_team_id']);
+        $this->assertEquals("Can you tell me how to solve this problem?", $clarificationFromApi[0]['text']);
+
+        $this->assertEquals("2", $clarificationFromApi[1]['to_team_id']);
+        $this->assertEquals("> Can you tell me how to solve this problem?\n\nNo, read the problem statement.", $clarificationFromApi[1]['text']);
+
+        $this->assertEquals("2", $clarificationFromApi[2]['from_team_id']);
+        $this->assertEquals("Is it necessary to read the problem statement carefully?", $clarificationFromApi[2]['text']);
+
+        $this->assertNull($clarificationFromApi[3]['to_team_id']);
+        $this->assertEquals("Lunch is served", $clarificationFromApi[3]['text']);
+
+        $this->assertEquals("2", $clarificationFromApi[4]['to_team_id']);
+        $this->assertEquals("There was a mistake in judging this problem. Please try again", $clarificationFromApi[4]['text']);
+    }
 
     /**
      * Test that a non-logged-in user can not add a clarification.

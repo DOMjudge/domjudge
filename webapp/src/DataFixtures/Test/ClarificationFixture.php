@@ -42,16 +42,17 @@ class ClarificationFixture extends AbstractTestDataFixture
         $juryGeneralToTeam = new Clarification();
         $juryGeneralToTeam
             ->setContest($contest)
-            ->setSubmittime(15183856633.689197000)
+            ->setSubmittime(1518385663.689197000)
             ->setRecipient($team)
             ->setJuryMember('admin')
             ->setProblem($problem)
             ->setBody("There was a mistake in judging this problem. Please try again")
             ->setAnswered(true);
 
-        $manager->persist($unhandledClarification);
-        $manager->persist($juryGeneral);
-        $manager->persist($juryGeneralToTeam);
-        $manager->flush();
+        foreach ([$unhandledClarification, $juryGeneral, $juryGeneralToTeam] as $index => $clar) {
+            $manager->persist($clar);
+            $manager->flush();
+            $this->addReference(sprintf('%s:%d', static::class, $index), $clar);
+        }
     }
 }
