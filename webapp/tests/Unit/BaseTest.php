@@ -299,9 +299,9 @@ abstract class BaseTest extends WebTestCase
     /**
      * Resolve the entity ID for the given class if not running in local mode.
      */
-    protected function resolveEntityId(string $class, string $id): string
+    protected function resolveEntityId(string $class, ?string $id): ?string
     {
-        if (!$this->dataSourceIsLocal()) {
+        if ($id !== null && !$this->dataSourceIsLocal()) {
             $entity = static::$container->get(EntityManagerInterface::class)->getRepository($class)->find($id);
             // If we can't find the entity, assume we use an invalid one.
             if ($entity === null) {
