@@ -30,8 +30,8 @@ jobs:
         continue-on-error: true
         with:
           mapi-token: ${{ secrets.MAPI_TOKEN }}
-          api-url: http://localhost/domjudge/api # <- ✏️ update this
-          api-spec: http://localhost/domjudge/api/doc.json # <- ✏️ update this
+          api-url: http://localhost/domjudge
+          api-spec: http://localhost/domjudge/api/doc.json # swagger/openAPI doc hosted here
           duration: 60
           sarif-report: mapi.sarif
 
