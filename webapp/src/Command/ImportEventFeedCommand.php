@@ -1188,6 +1188,7 @@ class ImportEventFeedCommand extends Command
         if ($contestProblem) {
             $action = EventLogService::ACTION_UPDATE;
         } else {
+            $this->logger->warning("No contest problem found in DOMjudge yet, creating one");
             $contestProblem = new ContestProblem();
             $contestProblem
                 ->setProblem($problem)
@@ -1196,11 +1197,37 @@ class ImportEventFeedCommand extends Command
             $problem->addContestProblem($contestProblem);
         }
 
-        $problem->setName($event['data']['name']);
+        if ($problem->getName() !== $event['data']['name']) {
+            $this->logger->warning(
+                'Problem name from DOMjudge (%s) does not match feed (%s)',
+                [ $problem->getName(), $event['data']['name'] ]
+            );
+            $problem->setName($event['data']['name']);
+        }
 
-        $contestProblem
-            ->setShortname($event['data']['label'])
-            ->setColor($event['data']['rgb'] ?? null);
+        if (isset($event['data']['time_limit']) && $problem->getTimelimit() !== $event['data']['time_limit']) {
+            $this->logger->warning(
+                'Time limit from DOMjudge (%.3f) does not match feed (%.3f)',
+                [ $problem->getTimelimit(), $event['data']['time_limit'] ]
+            );
+            $problem->setTimelimit($event['data']['time_limit']);
+        }
+
+        if ($contestProblem->getShortname() !== $event['data']['label']) {
+            $this->logger->warning(
+                'Contest problem shortname from DOMjudge (%s) does not match feed (%s)',
+                [ $contestProblem->getShortname(), $event['data']['label'] ]
+            );
+            $contestProblem->setShortname($event['data']['label']);
+        }
+
+        if ($contestProblem->getColor() !== $event['data']['rgb'] ?? null) {
+            $this->logger->warning(
+                'Contest problem color from DOMjudge (%s) does not match feed (%s)',
+                [ $contestProblem->getColor(), $event['data']['rgb'] ]
+            );
+            $contestProblem->setColor($event['data']['rgb'] ?? null);
+        }
 
         // Save data and emit event
         if ($action === EventLogService::ACTION_CREATE) {
