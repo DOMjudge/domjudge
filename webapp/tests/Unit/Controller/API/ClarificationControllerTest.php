@@ -76,6 +76,7 @@ class ClarificationControllerTest extends BaseTest
         $contestId = $this->getDemoContestId();
         $apiEndpoint = $this->apiEndpoint;
         $clarificationFromApi = $this->verifyApiJsonResponse('GET', "/contests/$contestId/$apiEndpoint", 200);
+var_dump($clarificationFromApi);
 
         $this->assertCount(1, $clarificationFromApi);
         $this->assertEquals("Lunch is served", $clarificationFromApi[0]['text']);
@@ -88,6 +89,7 @@ class ClarificationControllerTest extends BaseTest
         $contestId = $this->getDemoContestId();
         $apiEndpoint = $this->apiEndpoint;
         $clarificationFromApi = $this->verifyApiJsonResponse('GET', "/contests/$contestId/$apiEndpoint", 200, 'demo');
+var_dump($clarificationFromApi);
 
         $this->assertCount(5, $clarificationFromApi);
 
