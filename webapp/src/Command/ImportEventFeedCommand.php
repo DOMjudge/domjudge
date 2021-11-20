@@ -240,6 +240,12 @@ class ImportEventFeedCommand extends Command
                 InputOption::VALUE_NONE,
                 'Restart importing events from the beginning. ' .
                 'If this option is not given, importing will resume where it left off.'
+            )
+            ->addOption(
+                'skip-event-id',
+                'k',
+                InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY,
+                "ID('s) of events to skip."
             );
     }
 
@@ -343,11 +349,11 @@ class ImportEventFeedCommand extends Command
         $this->verdicts = include $verdictsConfig;
 
         if ($this->client === null) {
-            if (!$this->importFromFile($input->getOption('from-start'))) {
+            if (!$this->importFromFile($input->getOption('from-start'), $input->getOption('skip-event-id'))) {
                 return static::STATUS_ERROR;
             }
         } else {
-            if (!$this->importFromUrl($input->getOption('from-start'))) {
+            if (!$this->importFromUrl($input->getOption('from-start'), $input->getOption('skip-event-id'))) {
                 return static::STATUS_ERROR;
             }
         }
@@ -491,12 +497,13 @@ class ImportEventFeedCommand extends Command
     /**
      * Import events from the given local file
      *
-     * @param bool $fromStart
+     * @param bool     $fromStart
+     * @param string[] $eventsToSkip
      *
      * @return bool False if the import should stop, true otherwise.
      * @throws Exception
      */
-    protected function importFromFile(bool $fromStart)
+    protected function importFromFile(bool $fromStart, array $eventsToSkip)
     {
         $this->logger->info('Importing from local file %s', [ $this->feedFile ]);
 
@@ -533,9 +540,9 @@ class ImportEventFeedCommand extends Command
         $sinceEventIdFound = $this->sinceEventId === null;
 
         $this->readEventsFromFile($file,
-            function(array $event, string $line, &$shouldStop) use ($cacheFile, $file, &$sinceEventIdFound) {
+            function(array $event, string $line, &$shouldStop) use ($eventsToSkip, $cacheFile, $file, &$sinceEventIdFound) {
                 if ($sinceEventIdFound) {
-                    $this->importEvent($event);
+                    $this->importEvent($event, $eventsToSkip);
                     $this->lastEventId = $event['id'];
                     fwrite($cacheFile, $line . "\n");
                 } elseif ($event['id'] === $this->sinceEventId) {
@@ -556,12 +563,13 @@ class ImportEventFeedCommand extends Command
     /**
      * Import events from the given URL
      *
-     * @param bool $fromStart
+     * @param bool     $fromStart
+     * @param string[] $eventsToSkip
      *
      * @return bool False if the import should stop, true otherwise.
      * @throws TransportExceptionInterface
      */
-    protected function importFromUrl(bool $fromStart)
+    protected function importFromUrl(bool $fromStart, array $eventsToSkip)
     {
         $this->logger->info(
             'Importing from URL %s. Press ^C to quit (might take a bit to be detected).',
@@ -614,14 +622,14 @@ class ImportEventFeedCommand extends Command
 
             $buffer = '';
 
-            $processBuffer = function() use ($cacheFile, &$buffer) {
+            $processBuffer = function() use ($eventsToSkip, $cacheFile, &$buffer) {
                 while (($newlinePos = strpos($buffer, "\n")) !== false) {
                     $line   = substr($buffer, 0, $newlinePos);
                     $buffer = substr($buffer, $newlinePos + 1);
 
                     if (!empty($line)) {
                         $event = $this->dj->jsonDecode($line);
-                        $this->importEvent($event);
+                        $this->importEvent($event, $eventsToSkip);
 
                         $this->lastEventId = $event['id'];
                         fwrite($cacheFile, $line . "\n");
@@ -784,10 +792,11 @@ class ImportEventFeedCommand extends Command
 
     /**
      * Import the given event
-     * @param array $event
+     * @param array    $event
+     * @param string[] $eventsToSkip
      * @throws Exception
      */
-    protected function importEvent(array $event)
+    protected function importEvent(array $event, array $eventsToSkip)
     {
         // Check whether we have received an exit signal
         if (function_exists('pcntl_signal_dispatch')) {
@@ -795,6 +804,12 @@ class ImportEventFeedCommand extends Command
         }
         if ($this->shouldStop) {
             $this->logger->notice('Received signal, exiting.');
+            return;
+        }
+
+        if (in_array($event['id'], $eventsToSkip)) {
+            $this->logger->info("Skipping event with ID %s and type %s as requested",
+                [ $event['id'], $event['type'] ]);
             return;
         }
 
