@@ -134,6 +134,12 @@ abstract class AbstractRestController extends AbstractFOSRestController
         if (!$request->query->has('strict') || !$request->query->getBoolean('strict')) {
             $groups[] = 'Nonstrict';
         }
+        if ($this->dj->checkrole('api_reader')) {
+            $groups[] = 'Restricted';
+        }
+        if (in_array('Nonstrict', $groups) && in_array('Restricted', $groups)) {
+            $groups[] = 'RestrictedNonstrict';
+        }
         $view->getContext()->setGroups($groups);
 
         $response = $this->handleView($view);

@@ -99,7 +99,7 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
      * @ORM\Column(type="boolean", name="answered",
      *     options={"comment"="Has been answered by jury?","default":"0"},
      *     nullable=false)
-     * @Serializer\Exclude()
+     * @Serializer\Groups({"RestrictedNonstrict"})
      */
     private $answered = false;
 
