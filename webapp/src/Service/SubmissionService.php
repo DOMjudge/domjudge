@@ -374,7 +374,7 @@ class SubmissionService
      * @param Contest|int         $contest
      * @param Language|string     $language
      * @param UploadedFile[]      $files
-     * @param string              $source
+     * @param string|null         $source
      * @param Submission|int|null $originalSubmission
      * @param string|null         $juryMember
      * @param string|null         $entryPoint
@@ -526,7 +526,7 @@ class SubmissionService
             }
             $totalSize += $file->getSize();
 
-            if ($language->getFilterCompilerFiles()) {
+            if ($source !== 'shadowing' && $language->getFilterCompilerFiles()) {
                 $matchesExtension = false;
                 foreach ($language->getExtensions() as $extension) {
                     $extensionLength = strlen($extension);
@@ -541,7 +541,7 @@ class SubmissionService
             }
         }
 
-        if ($language->getFilterCompilerFiles() && $extensionMatchCount === 0) {
+        if ($source !== 'shadowing' && $language->getFilterCompilerFiles() && $extensionMatchCount === 0) {
             $message = sprintf(
                 "None of the submitted files match any of the allowed " .
                 "extensions for %s (allowed: %s)",
