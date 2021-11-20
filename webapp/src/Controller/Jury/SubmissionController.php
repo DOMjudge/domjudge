@@ -424,6 +424,7 @@ class SubmissionController extends BaseController
                     $runResult['memory'] = Utils::printsize((int)$metadata['memory-bytes'], 2);
                     $runResult['exitcode'] = $metadata['exitcode'];
                     $runResult['signal'] = $metadata['signal'] ?? -1;
+                    $runResult['output_limit'] = $metadata['output-truncated'];
                 }
                 $runResult['terminated'] = preg_match('/timelimit exceeded.*hard (wall|cpu) time/',
                                                       (string)$runResult['output_system']);

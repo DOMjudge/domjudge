@@ -644,6 +644,12 @@
                                     aria-expanded="false">
                                 show complete metadata
                             </button>
+                            {% if runsOutput[runIdx].output_limit %}
+                                <div class="alert alert-warning">
+                                    The submission output (<code>{{ runsOutput[runIdx].output_limit }}</code>) was
+                                    truncated because of the configured output limit.
+                                </div>
+                            {% endif %}
                             <div class="collapse" id="collapseExample-{{ runIdx }}">
                                   <div class="card card-body output_text">{{ runsOutput[runIdx].metadata }}</div>
                             </div>
