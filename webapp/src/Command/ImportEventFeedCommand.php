@@ -1205,7 +1205,7 @@ class ImportEventFeedCommand extends Command
             $problem->setName($event['data']['name']);
         }
 
-        if (isset($event['data']['time_limit']) && $problem->getTimelimit() !== $event['data']['time_limit']) {
+        if (isset($event['data']['time_limit']) && abs($problem->getTimelimit() - $event['data']['time_limit']) > 0.001) {
             $this->logger->warning(
                 'Time limit from DOMjudge (%.3f) does not match feed (%.3f)',
                 [ $problem->getTimelimit(), $event['data']['time_limit'] ]
