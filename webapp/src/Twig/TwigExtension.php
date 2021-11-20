@@ -807,6 +807,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         if (preg_match($truncated, $log, $matches)) {
             $truncation = $matches[0];
             $log = preg_replace($truncated, "", $log);
+            $log = rtrim($log);
         }
         if ($forTeam) {
             $header = "<table><tr><th>jury</th><th>your submission<th></tr>\n";
@@ -826,9 +827,6 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             }
             $lenStr = substr($log, $idx, $closePos - $idx);
             $len = (int)$lenStr;
-            if ($idx + 3 + $len >= strlen($log)) {
-                break;
-            }
             $idx = $closePos + 1;
             $is_validator = $log[$idx] == '>';
             $content = htmlspecialchars(substr($log, $idx + 3, $len));
