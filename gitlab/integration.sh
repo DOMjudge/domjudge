@@ -103,14 +103,12 @@ section_end judgehost
 
 section_start more_setup "Remaining setup (e.g. starting judgedaemon)"
 # download domjudge-scripts for API check
-cd $HOME
-composer -n require justinrainbow/json-schema
-echo -e "\033[0m"
-PATH=${PATH}:${HOME}/vendor/bin
-git clone --depth=1000 https://github.com/DOMjudge/domjudge-scripts.git
-# Pin at specific past version because of api format changes
-cd domjudge-scripts && git reset --hard 99076a14ba8347077eb45539a33952c31ca92187
-CHECK_API=${HOME}/domjudge-scripts/contest-api/check-api.sh
+#cd $HOME
+#composer -n require justinrainbow/json-schema
+#echo -e "\033[0m"
+#PATH=${PATH}:${HOME}/vendor/bin
+#git clone --depth=1 https://github.com/DOMjudge/domjudge-scripts.git
+#CHECK_API=${HOME}/domjudge-scripts/contest-api/check-api.sh
 
 # Recreate domjudge-run-0 user with random UID to prevent clashes with
 # existing users in the host and other CI jobs, which can lead to
@@ -219,18 +217,18 @@ if [ $NUMNOTVERIFIED -ne 2 ] || [ $NUMNOMAGIC -ne 0 ] || [ $NUMSUBS -gt $((NUMVE
 	exit -1;
 fi
 
-section_start api_check "Performing API checks"
+#section_start api_check "Performing API checks"
 # Start logging again
-set -x
+#set -x
 
 # Delete contest so API check does not fail because of empty results.
-echo "DELETE FROM contest WHERE cid=1" | mysql domjudge
+#echo "DELETE FROM contest WHERE cid=1" | mysql domjudge
 
 # Check the Contest API:
-$CHECK_API -n -C -e -a 'strict=1' http://admin:$ADMINPASS@localhost/domjudge/api
-section_end api_check |& tee "$gitlabartifacts/check_api.log"
+#$CHECK_API -n -C -e -a 'strict=1' http://admin:$ADMINPASS@localhost/domjudge/api
+#section_end api_check |& tee "$gitlabartifacts/check_api.log"
 
-section_start validate_feed "Validate the eventfeed against API (ignoring failures)"
-cd ${DIR}/misc-tools
-./compare-cds.sh http://localhost/domjudge 2 |& tee "$gitlabartifacts/compare_cds.log" || true
-section_end validate_feed
+#section_start validate_feed "Validate the eventfeed against API (ignoring failures)"
+#cd ${DIR}/misc-tools
+#./compare-cds.sh http://localhost/domjudge 2 |& tee "$gitlabartifacts/compare_cds.log" || true
+#section_end validate_feed
