@@ -828,8 +828,15 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             $lenStr = substr($log, $idx, $closePos - $idx);
             $len = (int)$lenStr;
             $idx = $closePos + 1;
+            if ($idx >= strlen($log)) {
+                break;
+            }
             $is_validator = $log[$idx] == '>';
-            $content = htmlspecialchars(substr($log, $idx + 3, $len));
+            $content = substr($log, $idx + 3, $len);
+            if (empty($content)) {
+                break;
+            }
+            $content = htmlspecialchars($content);
             $content = '<td class="output_text">'
                 . str_replace("\n", "\u{21B5}<br/>", $content)
                 . '</td>';
