@@ -170,3 +170,13 @@ div.submission-summary > span {
 .clr-picker .clr-alpha {
     display: none;
 }
+
+.inline-verify-form p {
+    margin-bottom: 0;
+}
+
+.table-3-striped tbody tr:nth-of-type(6n+1),
+.table-3-striped tbody tr:nth-of-type(6n+2),
+.table-3-striped tbody tr:nth-of-type(6n+3) {
+    background-color: rgba(0,0,0,.05);
+}

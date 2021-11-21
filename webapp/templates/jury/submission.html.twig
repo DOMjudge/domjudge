@@ -197,14 +197,14 @@
                 , but as {{ selectedJudging.result | printValidJuryResult }}
                 by DOMjudge.
             </p>
-        </div>
 
-        {% include 'jury/partials/verify_form.html.twig' with {
-            label: 'Shadow difference verified',
-            judging: externalJudgement,
-            form_action: path('jury_shadow_difference_verify', {extjudgementid: externalJudgement.extjudgementid}),
-            show_form: true,
-            show_icat: false} %}
+            {% include 'jury/partials/verify_form.html.twig' with {
+                label: 'Shadow difference verified',
+                judging: externalJudgement,
+                form_action: path('jury_shadow_difference_verify', {extjudgementid: externalJudgement.extjudgementid}),
+                show_form: true,
+                show_icat: false} %}
+        </div>
     {% endif %}
 
     {% if not sameTestcaseIds and selectedJudging is not null and selectedJudging.result is not empty %}
