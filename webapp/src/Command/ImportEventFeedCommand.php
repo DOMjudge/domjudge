@@ -1236,7 +1236,7 @@ class ImportEventFeedCommand extends Command
             $contestProblem->setShortname($event['data']['label']);
         }
 
-        if ($contestProblem->getColor() !== $event['data']['rgb'] ?? null) {
+        if ($contestProblem->getColor() !== ($event['data']['rgb'] ?? null)) {
             $this->logger->warning(
                 'Contest problem color from DOMjudge (%s) does not match feed (%s)',
                 [ $contestProblem->getColor(), $event['data']['rgb'] ]
