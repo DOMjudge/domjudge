@@ -45,7 +45,7 @@ error ()
 	trap - EXIT
 
 	if [ "$@" ]; then
-		logmsg $LOG_ERR "error: $@"
+		logmsg $LOG_ERR "error: $*"
 	else
 		logmsg $LOG_ERR "unexpected error, aborting!"
 	fi
@@ -55,5 +55,5 @@ error ()
 
 warning ()
 {
-	logmsg $LOG_WARNING "warning: $@"
+	logmsg $LOG_WARNING "warning: $*"
 }
