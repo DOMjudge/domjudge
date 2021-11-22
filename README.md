@@ -44,9 +44,9 @@ Copyright & Licensing
 
 DOMjudge is Copyright (c) 2004 - 2021 by the DOMjudge developers and
 all respective contributors. The current DOMjudge developers are Jaap
-Eldering, Nicky Gerritsen, Keith Johnson, Thijs Kinkhorst, Michael
-Vasseur and Tobias Werth; see the manual for a complete list of
-contributors.
+Eldering, Nicky Gerritsen, Keith Johnson, Thijs Kinkhorst, Mart
+Pluijmaekers, Michael Vasseur and Tobias Werth; see the manual for
+a complete list of contributors.
 
 DOMjudge, including its documentation, is free software; you can
 redistribute it and/or modify it under the terms of the GNU General
