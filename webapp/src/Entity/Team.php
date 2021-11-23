@@ -29,6 +29,10 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
  */
 class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface, AssetEntityInterface
 {
+    const DONT_ADD_USER = 'dont-add-user';
+    const CREATE_NEW_USER = 'create-new-user';
+    const ADD_EXISTING_USER = 'add-existing-user';
+
     /**
      * @var int
      *
@@ -115,10 +119,23 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
     private $penalty = 0;
 
     /**
-     * @var bool
+     * @var string
      * @Serializer\Exclude()
      */
-    private $addUserForTeam = false;
+    private $addUserForTeam = self::DONT_ADD_USER;
+
+    /**
+     * @var string|null
+     * @Assert\Regex("/^[a-z0-9@._-]+$/i", message="Only alphanumeric characters and _-@. are allowed")
+     * @Serializer\Exclude
+     */
+    private $newUsername;
+
+    /**
+     * @var User|null
+     * @Serializer\Exclude
+     */
+    private $existingUser;
 
     /**
      * @var UploadedFile|null
@@ -307,11 +324,34 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
     }
 
     /**
-     * Set whether to add a user for this team. Will not be stored, but is used in validation.
+     * Set whether to add a new user for this team, link an existing one or do nothing.
+     * Will not be stored, but is used in validation.
      */
-    public function setAddUserForTeam(bool $addUserForTeam)
+    public function setAddUserForTeam(string $addUserForTeam)
     {
         $this->addUserForTeam = $addUserForTeam;
+    }
+
+    /**
+     * Set the username of a new user to add when $addUserForTeam is
+     * static::CREATE_NEW_USER
+     * Will not be stored, but is used in validation.
+     */
+    public function setNewUsername(?string $newUsername): Team
+    {
+        $this->newUsername = $newUsername;
+        return $this;
+    }
+
+    /**
+     * Set the user to link when $addUserForTeam is
+     * static::ADD_EXISTING_USER
+     * Will not be stored, but is used in validation.
+     */
+    public function setExistingUser(?User $existingUser): Team
+    {
+        $this->existingUser = $existingUser;
+        return $this;
     }
 
     public function getPenalty(): int
@@ -319,9 +359,19 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
         return $this->penalty;
     }
 
-    public function getAddUserForTeam(): bool
+    public function getAddUserForTeam(): string
     {
         return $this->addUserForTeam;
+    }
+
+    public function getNewUsername(): ?string
+    {
+        return $this->newUsername;
+    }
+
+    public function getExistingUser(): ?User
+    {
+        return $this->existingUser;
     }
 
     public function getPhotoFile(): ?UploadedFile
@@ -538,16 +588,16 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
      */
     public function validate(ExecutionContextInterface $context)
     {
-        if ($this->getAddUserForTeam()) {
-            if (empty($this->getUsers()->first()->getUsername())) {
+        if ($this->getAddUserForTeam() === static::CREATE_NEW_USER) {
+            if (empty($this->getNewUsername())) {
                 $context
                     ->buildViolation('Required when adding a user')
-                    ->atPath('users[0].username')
+                    ->atPath('newUsername')
                     ->addViolation();
-            } elseif (!preg_match('/^[a-zA-Z0-9_-]+$/', $this->getUsers()->first()->getUsername())) {
+            } elseif (!preg_match('/^[a-zA-Z0-9_-]+$/', $this->getNewUsername())) {
                 $context
                     ->buildViolation('May only contain [a-zA-Z0-9_-].')
-                    ->atPath('users[0].username')
+                    ->atPath('newUsername')
                     ->addViolation();
             }
         }
