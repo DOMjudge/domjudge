@@ -1,5 +1,8 @@
 DOMjudge Programming Contest Judging System
 
+Version 7.3.5 - DEV
+-------------------
+
 Version 7.3.4 - 23 November 2022
 --------------------------------
  - Fix AJAX-refreshed pages breaking when using back button.
