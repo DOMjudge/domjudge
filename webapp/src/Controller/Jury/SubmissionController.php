@@ -570,7 +570,7 @@ class SubmissionController extends BaseController
      * @throws NonUniqueResultException
      * @throws Exception
      */
-    public function requestFullDebug(Judging $jid): RedirectResponse
+    public function requestFullDebug(Request $request, Judging $jid): RedirectResponse
     {
         $submission = $jid->getSubmission();
         /** @var Executable $defaultFullDebugExecutable */
@@ -599,10 +599,10 @@ class SubmissionController extends BaseController
             }
             $this->em->flush();
         }
-        return $this->redirectToRoute('jury_submission', [
+        return $this->redirectToLocalReferrer($this->router, $request, $this->generateUrl('jury_submission', [
             'submitId' => $jid->getSubmission()->getSubmitid(),
             'jid' => $jid->getJudgingid(),
-        ]);
+        ]));
     }
 
     /**
@@ -624,7 +624,7 @@ class SubmissionController extends BaseController
      * @throws NonUniqueResultException
      * @throws Exception
      */
-    public function requestOutput(Judging $jid, JudgingRun $jrid): RedirectResponse
+    public function requestOutput(Request $request, Judging $jid, JudgingRun $jrid): RedirectResponse
     {
         $submission = $jid->getSubmission();
         $testcase = $jrid->getTestcase();
@@ -640,10 +640,10 @@ class SubmissionController extends BaseController
             ->setTestcaseHash($testcase->getMd5sumInput() . '_' . $testcase->getMd5sumOutput());
         $this->em->persist($judgeTask);
         $this->em->flush();
-        return $this->redirectToRoute('jury_submission', [
+        return $this->redirectToLocalReferrer($this->router, $request, $this->generateUrl('jury_submission', [
             'submitId' => $jid->getSubmission()->getSubmitid(),
             'jid' => $jid->getJudgingid(),
-        ]);
+        ]));
     }
 
     /**
@@ -997,7 +997,9 @@ class SubmissionController extends BaseController
                 $this->addFlash('info', "Requested $numRequested remaining runs to be judged.");
             }
         }
-        return $this->redirectToRoute('jury_submission_by_judging', ['jid' => $judgingId]);
+        return $this->redirectToLocalReferrer($this->router, $request,
+            $this->generateUrl('jury_submission_by_judging', ['jid' => $judgingId])
+        );
     }
 
     /**
@@ -1032,7 +1034,9 @@ class SubmissionController extends BaseController
         $problem = $this->em->getRepository(Problem::class)->find($problemId);
         $scoreboardService->calculateScoreRow($contest, $team, $problem);
 
-        return $this->redirectToRoute('jury_submission', ['submitId' => $submission->getSubmitid()]);
+        return $this->redirectToLocalReferrer($this->router, $request,
+            $this->generateUrl('jury_submission', ['submitId' => $submission->getSubmitid()])
+        );
     }
 
     /**
@@ -1095,16 +1099,16 @@ class SubmissionController extends BaseController
             $balloonService->updateBalloons($judging->getContest(), $judging->getSubmission(), $judging);
         }
 
-        // Redirect to referrer page after verification or back to submission page when unverifying.
+        // Redirect to local referrer page but fall back to same defaults
         if ($request->request->getBoolean('verified')) {
             $this->addFlash('info', "Verified judging j$judgingId");
-            $redirect = $request->request->get('redirect', $this->generateUrl('jury_submissions'));
+            $redirect = $this->generateUrl('jury_submissions');
         } else {
             $this->addFlash('info', "Unmarked judging j$judgingId as verified");
             $redirect = $this->generateUrl('jury_submission_by_judging', ['jid' => $judgingId]);
         }
 
-        return $this->redirect($redirect);
+        return $this->redirectToLocalReferrer($this->router, $request, $redirect);
     }
 
 
@@ -1131,14 +1135,14 @@ class SubmissionController extends BaseController
                 $verified ? 'set verified' : 'set unverified');
         });
 
-        // Redirect to referrer page after verification or back to submission page when unverifying.
+        // Redirect to local referrer page but fall back to same defaults
         if ($request->request->getBoolean('verified')) {
-            $redirect = $request->request->get('redirect', $this->generateUrl('jury_shadow_differences'));
+            $redirect = $this->generateUrl('jury_shadow_differences');
         } else {
             $redirect = $this->generateUrl('jury_submission_by_external_judgement', ['externalJudgement' => $extjudgementid]);
         }
 
-        return $this->redirect($redirect);
+        return $this->redirectToLocalReferrer($this->router, $request, $redirect);
     }
 
     protected function determineFileChanged(array $files, array $oldFiles): array
@@ -1217,7 +1221,9 @@ class SubmissionController extends BaseController
                 if ($action === 'claim') {
                     return $this->redirectToRoute('jury_submission', ['submitId' => $judging->getSubmission()->getSubmitid()]);
                 } else {
-                    return $this->redirectToRoute('jury_submissions');
+                    return $this->redirectToLocalReferrer($this->router, $request,
+                        $this->generateUrl('jury_submissions')
+                    );
                 }
             }
         }
