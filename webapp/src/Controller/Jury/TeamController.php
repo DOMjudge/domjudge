@@ -4,6 +4,7 @@ namespace App\Controller\Jury;
 
 use App\Controller\BaseController;
 use App\Entity\Contest;
+use App\Entity\Role;
 use App\Entity\Team;
 use App\Entity\User;
 use App\Form\Type\TeamType;
@@ -421,8 +422,7 @@ class TeamController extends BaseController
     public function addAction(Request $request): Response
     {
         $team = new Team();
-        $team->setAddUserForTeam(true);
-        $team->addUser(new User());
+        $team->setAddUserForTeam(Team::CREATE_NEW_USER);
         $form = $this->createForm(TeamType::class, $team);
 
         $form->handleRequest($request);
@@ -430,12 +430,18 @@ class TeamController extends BaseController
         if ($form->isSubmitted() && $form->isValid()) {
             /** @var User $user */
             $user = $team->getUsers()->first();
-            if (!$team->getAddUserForTeam()) {
-                // If we do not want to add a user, remove it again
-                $team->removeUser($user);
-            } else {
-                // Otherwise, set the user's name to the team name
+            if ($team->getAddUserForTeam() === Team::CREATE_NEW_USER) {
+                // Create a user for the team
+                $user = new User();
+                $user->setUsername($team->getAddUserForTeam());
+                $team->addUser($user);
+                // Make sure the user has the team role to make validation work
+                $role = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'team']);
+                $user->addUserRole($role);
+                // Set the user's name to the team name when creating a new user
                 $user->setName($team->getEffectiveName());
+            } elseif ($team->getAddUserForTeam() === Team::ADD_EXISTING_USER) {
+                $team->addUser($team->getExistingUser());
             }
             $this->em->persist($team);
             $this->assetUpdater->updateAssets($team);

@@ -12,10 +12,13 @@
         {{ form_row(form.comments) }}
         {{ form_row(form.contests) }}
         {{ form_row(form.enabled) }}
-        {% if form.offsetExists('users') %}
+        {% if form.offsetExists('existingUser') %}
             {{ form_row(form.addUserForTeam) }}
-            <div data-user-field>
-                {{ form_row(form.users) }}
+            <div data-existing-user>
+                {{ form_row(form.existingUser) }}
+            </div>
+            <div data-new-username>
+                {{ form_row(form.newUsername) }}
             </div>
         {% endif %}
         {{ form_end(form) }}
@@ -24,12 +27,26 @@
 
 <script>
     $(function () {
-        $('#team_addUserForTeam').on('change', function () {
-            if ($(this).is(':checked')) {
-                $('[data-user-field]').show();
-            } else {
-                $('[data-user-field]').hide();
+        var $addUserForTeam = $('#team_addUserForTeam');
+        var addUserForTeamChanged = function () {
+            var $existingUserField = $('[data-existing-user]');
+            var $newUsernameField = $('[data-new-username]');
+            switch ($addUserForTeam.val()) {
+                case 'dont-add-user':
+                    $existingUserField.hide();
+                    $newUsernameField.hide();
+                    break;
+                case 'create-new-user':
+                    $existingUserField.hide();
+                    $newUsernameField.show();
+                    break;
+                case 'add-existing-user':
+                    $existingUserField.show();
+                    $newUsernameField.hide();
+                    break;
             }
-        });
+        };
+        $addUserForTeam.on('change', addUserForTeamChanged);
+        addUserForTeamChanged();
     })
 </script>

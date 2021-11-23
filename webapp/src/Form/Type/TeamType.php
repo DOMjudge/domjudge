@@ -15,7 +15,6 @@ use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -56,14 +55,14 @@ class TeamType extends AbstractType
             'label' => 'Team name',
         ]);
         $builder->add('displayName', TextType::class, [
-            'label' => 'Display name',
+            'label'    => 'Display name',
             'required' => false,
-            'help' => 'If provided, will display this instead of the team name in certain places, like the scoreboard.',
+            'help'     => 'If provided, will display this instead of the team name in certain places, like the scoreboard.',
         ]);
         $builder->add('icpcid', TextType::class, [
-            'label' => 'ICPC ID',
-            'required' => false,
-            'help' => 'Optional ID of the team in the ICPC CMS.',
+            'label'       => 'ICPC ID',
+            'required'    => false,
+            'help'        => 'Optional ID of the team in the ICPC CMS.',
             'constraints' => [
                 new Regex(
                     [
@@ -80,10 +79,10 @@ class TeamType extends AbstractType
             'required' => false,
         ]);
         $builder->add('affiliation', EntityType::class, [
-            'class' => TeamAffiliation::class,
-            'required' => false,
-            'choice_label' => 'name',
-            'placeholder' => '-- no affiliation --',
+            'class'         => TeamAffiliation::class,
+            'required'      => false,
+            'choice_label'  => 'name',
+            'placeholder'   => '-- no affiliation --',
             'query_builder' => function (EntityRepository $er) {
                 return $er->createQueryBuilder('a')->orderBy('a.name');
             },
@@ -92,48 +91,56 @@ class TeamType extends AbstractType
             'label' => 'Penalty time',
         ]);
         $builder->add('room', TextType::class, [
-            'label' => 'Location',
+            'label'    => 'Location',
             'required' => false,
         ]);
         $builder->add('comments', TextareaType::class, [
             'required' => false,
-            'attr' => [
+            'attr'     => [
                 'rows' => 10,
             ]
         ]);
         $builder->add('contests', EntityType::class, [
-            'class' => Contest::class,
-            'required' => false,
-            'choice_label' => 'name',
-            'multiple' => true,
-            'by_reference' => false,
+            'class'         => Contest::class,
+            'required'      => false,
+            'choice_label'  => 'name',
+            'multiple'      => true,
+            'by_reference'  => false,
             'query_builder' => function (EntityRepository $er) {
                 return $er->createQueryBuilder('c')->where('c.openToAllTeams = false')->orderBy('c.name');
             },
         ]);
         $builder->add('enabled', ChoiceType::class, [
             'expanded' => true,
-            'choices' => [
+            'choices'  => [
                 'Yes' => true,
-                'No' => false,
+                'No'  => false,
             ],
         ]);
         $builder->add('photoFile', FileType::class, [
-            'label' => 'Photo',
+            'label'    => 'Photo',
             'required' => false,
         ]);
         $builder->add('clearPhoto', CheckboxType::class, [
-            'label' => 'Delete photo',
+            'label'    => 'Delete photo',
             'required' => false,
         ]);
-        $builder->add('addUserForTeam', CheckboxType::class, [
-            'label' => 'Add new user for this team',
-            'required' => false,
+        $builder->add('addUserForTeam', ChoiceType::class, [
+            'label'   => 'Add user to this team',
+            'choices' => [
+                "Don't add user"    => Team::DONT_ADD_USER,
+                'Create new user'   => Team::CREATE_NEW_USER,
+                'Add existing user' => Team::ADD_EXISTING_USER,
+            ],
         ]);
-        $builder->add('users', CollectionType::class, [
-            'entry_type' => MinimalUserType::class,
-            'entry_options' => ['label' => false],
-            'label' => false,
+        $builder->add('existingUser', EntityType::class, [
+            'class'        => User::class,
+            'label'        => "User",
+            'required'     => true,
+            'choice_label' => 'name',
+        ]);
+        $builder->add('newUsername', TextType::class, [
+            'label'    => 'Username',
             'required' => false,
         ]);
 
@@ -147,24 +154,8 @@ class TeamType extends AbstractType
 
             if ($team && $team->getTeamid() !== null) {
                 $form->remove('addUserForTeam');
-                $form->remove('users');
-            }
-
-            if ($team) {
-                // Make sure the user has the team role to make validation work
-                /** @var User|false $user */
-                $user = $team->getUsers()->first();
-                if ($user && !$this->em->contains($team)) {
-                    /** @var Role $role */
-                    $role = $this->em->createQueryBuilder()
-                        ->from(Role::class, 'r')
-                        ->select('r')
-                        ->andWhere('r.dj_role = :team')
-                        ->setParameter(':team', 'team')
-                        ->getQuery()
-                        ->getOneOrNullResult();
-                    $user->addUserRole($role);
-                }
+                $form->remove('existingUser');
+                $form->remove('newUsername');
             }
 
             if (!$team || !$this->dj->assetPath((string)$team->getTeamid(), 'team')) {
