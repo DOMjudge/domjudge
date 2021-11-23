@@ -296,9 +296,9 @@ This will be documented in the problem description.
 Restrictions
 ````````````
 
-To prevent abuse, keep the jury system stable and give everyone
-clear and equal environments, there are some restrictions to which all
-submissions are subjected:
+Submissions are run in a sandbox to prevent abuse, keep the jury system
+stable and give everyone clear and equal environments. There
+are some restrictions to which all submissions are subjected:
 
 compile time
   Compilation of your program may take no longer than |COMPILETIME|
@@ -319,12 +319,17 @@ memory
   If your program tries to use more memory, it will most likely abort,
   resulting in a run error.
 
+creating new files
+  Do not create new files. The sandbox will not allow this and the file open
+  function will return a failure. Using the file without handling this error can
+  result in a runtime error depending on the submission language.
+
 number of processes
   You are not supposed to explicitly create multiple processes (threads). This is
   to no avail anyway, because your program has exactly 1 processor core fully
-  at its disposal. To increase stability of the system, DOMjudge
-  executes submissions in a sandbox where a maximum of |PROCLIMIT| processes
-  can be run simultaneously (including processes that started your program).
+  at its disposal. DOMjudge executes submissions in a sandbox where a maximum
+  of |PROCLIMIT| processes can be run simultaneously (including processes that
+  started your program).
 
   People who have never programmed with multiple processes (or have
   never heard of "threads") do not have to worry: a normal program
