@@ -19,7 +19,7 @@
 {% set scores = scoreboard.scores | filter(score => limitToTeams is null or score.team.teamid in limitToTeamIds) %}
 {% set problems = scoreboard.problems %}
 {% set medalsEnabled = contest.medalsEnabled %}
-{% if scoreFilter.filteredOn is not empty %}
+{% if scoreFilter and scoreFilter.filteredOn is not empty %}
     {% set medalsEnabled = false %}
 {% endif %}
 {% set medalCategories = contest.medalCategories %}
