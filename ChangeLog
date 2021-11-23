@@ -1,7 +1,18 @@
 DOMjudge Programming Contest Judging System
 
-Version 7.3.4 - DEV
--------------------
+Version 7.3.4 - 23 November 2022
+--------------------------------
+ - Fix AJAX-refreshed pages breaking when using back button.
+ - Fix compatibility with MySQL 8.
+ - Fix creating chroot with Debian bullseye.
+ - Fix compile error in Swift compiler script.
+ - Fix unsafe encoding of HTML in some Twig templates.
+ - Allow more than 4 digits for hours in contest duration.
+ - Allow shortname as first item of yaml dictionary in problem import.
+ - API: Fix list problems with ids for non-jury members.
+ - API: Do not return contests that are not yet active.
+ - API: Fix general info controller for external data sources.
+ - Improve documentation.
 
 Version 7.3.3 - 5 April 2021
 ----------------------------
