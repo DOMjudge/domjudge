@@ -50,15 +50,33 @@ home directory::
   make judgehost
   sudo make install-judgehost
 
+The judgedaemon can be run on various hardware configurations;
+- A virtual machine, typically these have 1 or 2 cores and no hyperthreading, because the kernel will schedule its own tasks on CPU 0, we advice CPU 1,
+- A default office machine, these sometimes have hyperthreading. Verify if the machine has hyperthreading and consider turning it off and as a rule of thumb pick CPU 2 as CPU 1 could be a hyperthreading core, be on the same die as CPU 0 and therefore share memory with that CPU. If more cores available as a rule of thumb moving to the highest CPU should be considered.
+- Multiple on a single high-grade server with multiple CPUs or a CPU with multiple cores. Check for hyperthreading and if possible run the judgedaemons on separate CPU packages/dies both from each other and when possible different from CPU 0. See the section :ref:`multiple-judgedaemons` for running multiple judgedaemons on a single host.
+
+For the next section we assume a machine with possibly hyperthreading and 3 or more CPUs. This can be checked with::
+
+  lscpu | grep "Thread(s) per core"
+
+having a value above 1 indicates hyperthreading or::
+
+  cat /sys/devices/system/cpu/smt/active
+
+a value of `1` or `on`. The target CPU core to restrict the judgedaemon to below should be in the range of::
+
+  cat /sys/devices/system/cpu/online
+
 For running solution programs under a non-privileged user, a user and group have
 to be added to the system that acts as judgehost. This user does not
 need a home-directory or password, so the following command would
-suffice to add a user and group ``domjudge-run-1`` with minimal privileges::
+suffice to add a user and group ``domjudge-run-2`` with minimal privileges
+with the judgedaemon restricted to CPU core 2::
 
-  sudo useradd -d /nonexistent -U -M -s /bin/false domjudge-run-0
+  sudo useradd -d /nonexistent -U -M -s /bin/false domjudge-run-2
 
-The ``-0`` suffix corresponds to a judgedaemon bound to CPU core 0
-with the option ``-n 0``, see :ref:`start-judgedaemon`. If you do not
+The ``-2`` suffix corresponds to a judgedaemon bound to CPU core 2
+with the option ``-n 2``, see :ref:`start-judgedaemon`. If you do not
 want to bind the judgedaemon to a core, create a user ``domjudge-run``
 and start the judgedaemon without ``-n`` option.
 See the section :ref:`multiple-judgedaemons` for running multiple
@@ -128,6 +146,9 @@ Edit grub config to add cgroup memory and swap accounting to the boot
 options. Edit ``/etc/default/grub`` and change the default
 commandline to
 ``GRUB_CMDLINE_LINUX_DEFAULT="quiet cgroup_enable=memory swapaccount=1"``
+Optionally the timings can be made more stable by not letting the OS schedule
+any other tasks on the same CPU core the judgedaemon is using:
+``GRUB_CMDLINE_LINUX_DEFAULT="quiet cgroup_enable=memory swapaccount=1 isolcpus=2"``
 On modern distros (e.g. Debian bullseye) which have cgroup v2 enabled by
 default, you need to add ``systemd.unified_cgroup_hierarchy=0`` as well.
 Then run ``update-grub`` and reboot.
@@ -175,7 +196,7 @@ Starting the judgedaemon
 
 Finally start the judgedaemon::
 
-  bin/judgedaemon -n 0
+  bin/judgedaemon -n 2
 
 Upon its first connection to the domserver API, the judgehost will be
 auto-registered and will be by default enabled. If you wish to
@@ -185,5 +206,4 @@ before starting the judgedaemon.
 
 The judgedaemon can also be run as a service by running::
 
-  sudo systemctl enable domjudge-judgehost
-  sudo systemctl start  domjudge-judgehost
+  sudo systemctl enable --now domjudge-judgehost
