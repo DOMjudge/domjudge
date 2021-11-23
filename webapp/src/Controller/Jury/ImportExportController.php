@@ -317,7 +317,7 @@ class ImportExportController extends BaseController
     }
 
     /**
-     * @Route("/export/{type<groups|teams|scoreboard|results>}.tsv", name="jury_tsv_export")
+     * @Route("/export/{type<groups|teams|results>}.tsv", name="jury_tsv_export")
      * @return RedirectResponse|StreamedResponse
      * @throws Exception
      */
@@ -332,9 +332,6 @@ class ImportExportController extends BaseController
                     break;
                 case 'teams':
                     $data = $this->importExportService->getTeamData();
-                    break;
-                case 'scoreboard':
-                    $data = $this->importExportService->getScoreboardData();
                     break;
                 case 'results':
                     $sortOrder = $request->query->getInt('sort_order');
