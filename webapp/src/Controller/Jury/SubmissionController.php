@@ -136,7 +136,9 @@ class SubmissionController extends BaseController
             $contests = [$contest->getCid() => $contest];
         }
 
-        $limit = $viewTypes[$view] == 'newest' ? 50 : 0;
+        $latestCount = 50;
+
+        $limit = $viewTypes[$view] == 'newest' ? $latestCount : 0;
 
         /** @var Submission[] $submissions */
         [$submissions, $submissionCounts] =
@@ -199,11 +201,11 @@ class SubmissionController extends BaseController
             'filteredResults' => $filteredVerdicts,
             'showExternalResult' => $this->config->get('data_source') ==
                 DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL,
+            'showTestcases' => count($submissions) <= $latestCount,
         ];
 
         // For ajax requests, only return the submission list partial
         if ($request->isXmlHttpRequest()) {
-            $data['showTestcases'] = true;
             return $this->render('jury/partials/submission_list.html.twig', $data);
         }
 
