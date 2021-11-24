@@ -1,27 +1,15 @@
-variables:
-  SAST_EXCLUDED_ANALYZERS: "brakeman,eslint,flawfinder,kubesec,mobsf,nodejs-scan,pmd-apex,security-code-scan,sobelow,spotbugs"
-  SECURE_LOG_LEVEL: debug
-  SAST_EXCLUDED_PATHS: "html,tests,localhost,gitlab"
-  SAST_FLAWFINDER_LEVEL: 5
-
-semgrep-sast:
-  variables:
-    SAST_ANALYZER_IMAGE_TAG: "2.13.1"
+include:
+  - '/gitlab/.sast-ci.yml'
 
 stages:
+  - test
   - visual_pre
   - integration
   - compare
   - accessibility
-  - test
   - unit
   - style
-
-include:
-  - template: Security/Secret-Detection.gitlab-ci.yml
-  - template: Dependency-Scanning.gitlab-ci.yml
-  - template: SAST.gitlab-ci.yml
-  - template: License-Scanning.gitlab-ci.yml
+  - sast
 
 .db_config: &mysql_db
   services:
