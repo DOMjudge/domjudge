@@ -1,5 +1,9 @@
 #!/bin/bash
 
+set -euxo pipefail
+
+export PS4='(${BASH_SOURCE}:${LINENO}): - [$?] $ '
+
 shopt -s expand_aliases
 alias trace_on='set -x'
 alias trace_off='{ set +x; } 2>/dev/null'
@@ -18,14 +22,27 @@ alias section_start_collap='trace_off ; section_start_internal true'
 alias section_start='trace_off ; section_start_internal false'
 alias section_end='trace_off ; section_end_internal '
 
-mkdir screenshots"$1"
-set -euxo pipefail
-
-section_start_collap setup "Setup and install"
-
-export PS4='(${BASH_SOURCE}:${LINENO}): - [$?] $ '
+section_start_collap db "Resetup the DB"
+cat > ~/.my.cnf <<EOF
+[client]
+host=sqlserver
+user=root
+password=password
+EOF
+cat ~/.my.cnf
 
 DIR=$(pwd)
+# setup database and add special user
+cd /opt/domjudge/domserver
+setfacl -m u:www-data:r etc/restapi.secret etc/initial_admin_password.secret \
+                        etc/dbpasswords.secret etc/symfony_app.secret
+cd $DIR
+
+section_end db
+
+mkdir screenshots"$1"
+
+section_start_collap setup "Setup and install"
 
 find /etc/nginx -type f
 find /etc/php/7.4/ -type f
