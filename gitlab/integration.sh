@@ -125,8 +125,16 @@ CHECK_API=${HOME}/domjudge-scripts/contest-api/check-api.sh
 # Recreate domjudge-run-0 user with random UID to prevent clashes with
 # existing users in the host and other CI jobs, which can lead to
 # unforeseen process limits being hit.
-sudo userdel -f -r domjudge-run-0
-sudo useradd -d /nonexistent -g nogroup -s /bin/false -u $((2000+(RANDOM%1000))) domjudge-run-0
+PINNING=""
+if [ $PIN_JUDGEDAEMON -eq 1 ]; then
+	PINNING="-0"
+fi
+RUN_USER="domjudge-run$PINNING"
+if id "$RUN_USER" &>/dev/null; then
+    userdel -f -r $RUN_USER
+fi
+
+sudo useradd -d /nonexistent -g nogroup -s /bin/false -u $((2000+(RANDOM%1000))) $RUN_USER
 
 # start judgedaemon
 cd /opt/domjudge/judgehost/
@@ -137,7 +145,10 @@ set +e
 mount -t proc proc /proc
 set -e
 
-sudo -u domjudge bin/judgedaemon -n 0 |& tee /tmp/judgedaemon.log &
+if [ $PIN_JUDGEDAEMON -eq 1 ]; then
+	PINNING="-n 0"
+fi
+sudo -u domjudge bin/judgedaemon $PINNING |& tee /tmp/judgedaemon.log &
 sleep 5
 
 section_end more_setup
