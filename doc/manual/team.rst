@@ -188,7 +188,8 @@ COMPILER-ERROR
   disabled).
   Note that when compilation takes more than |COMPILETIME| seconds,
   it is aborted and this counts as a compilation error.
-  *Compilation errors do not incur penalty time.*
+  *Compilation errors do not incur penalty time. The administrator of
+  the contest can change this scoring.*
 
 TIMELIMIT
   Your program took longer than the maximum allowed time for this
