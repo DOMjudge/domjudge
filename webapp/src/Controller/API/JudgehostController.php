@@ -1381,6 +1381,10 @@ class JudgehostController extends AbstractFOSRestController
         // This is case 1) from above: continue what we have started.
         $lastJobId = $this->em->createQueryBuilder()
             ->from(JudgeTask::class, 'jt')
+            // Note: we are joining on queue tasks here since if there is no more queue task, there is also no more
+            // work to be done. If we would not do this join, the getJudgetasks would try to delete the queue task,
+            // which is both slow and results in spamming the auditlog
+            ->innerJoin(QueueTask::class, 'qt', Join::WITH, 'qt.jobid = jt.jobid')
             ->select('jt.jobid')
             ->andWhere('jt.judgehost = :judgehost')
             ->andWhere('jt.type = :type')
