@@ -101,23 +101,28 @@ Thijs Kinkhorst, Mart Pluijmaekers, Michael Vasseur and Tobias Werth;
 Peter van de Werken has retired as developer.
 Many other people have contributed:
 Michael Baer,
+Jelle Besseling,
 Jeroen Bransen,
 Matt Claycomb,
 Stijn van Drongelen,
 Rob Franken,
 Marc Furon,
 Ragnar Groot Koerkamp,
+Kihoon Han,
 Matt Hermes,
 Michał Kaczanowicz,
 Jacob Kleerekoper,
 Jason Klein,
 Andreas Kohn,
+Yevgeny Kazakov,
+Blaz Korecic,
 Ruud Koot,
 Ilya Kornakov,
 Jan Kuipers,
 Robin Lee,
 Tom Levy,
 Richard Lobb,
+Shuibin Long,
 Alex Muntada,
 Dominik Paulus,
 Bert Peters,
@@ -128,8 +133,12 @@ Matt Steele,
 Shuhei Takahashi,
 Sergei Vorobev,
 Hoai-Thu Vuong,
+Sheldon Warkentin,
+Christopher Weyand,
 Jeroen van Wolffelaar,
-and Github users mpsijm, sylxjtu.
+Tim "S.D.Eagle" Zeitz,
+XiaoYang,
+and Github users mpsijm, sylxjtu, s911415.
 Some code has been ported from the ETH Zurich fork by Christoph
 Krautz, Thomas Rast et al.
 
