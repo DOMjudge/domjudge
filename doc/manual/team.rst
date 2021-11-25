@@ -201,7 +201,7 @@ RUN-ERROR
   There was an error during the execution of your program. This can have
   a lot of different causes like division by zero, incorrectly
   addressing memory (e.g. by indexing arrays out of bounds), trying to
-  use more memory than the limit, etc.
+  use more memory than the limit, reading or writing to files, etc.
   Also check that your program exits with exit code 0!
 
 NO-OUTPUT
