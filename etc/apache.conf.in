@@ -99,6 +99,18 @@ RewriteRule Makefile$ - [F]
     RewriteEngine Off
 </Directory>
 
+# When running a proxy or loadbalancer in front of this apache instance,
+# you can use these directives to trust the proxy / loadbalancer and let
+# this apache instance use the correct client IP. Note that if you use a
+# virtual host, these directives can also be placed inside the
+# VirtualHost block
+
+# The header to get the client IP from
+# RemoteIPHeader X-Forwarded-For
+# The IP address of the proxy / loadbalancer. Use this directive multiple
+# times if you need to use more than one IP address
+# RemoteIPInternalProxy 1.2.3.4
+
 # vim: syntax=apachestyle
 # Local Variables:
 # mode: apache

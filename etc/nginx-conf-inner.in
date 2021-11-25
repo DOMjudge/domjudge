@@ -53,3 +53,13 @@ add_header X-XSS-Protection "1; mode=block";
 
 error_log /var/log/nginx/domjudge.log;
 access_log /var/log/nginx/domjudge.log;
+
+# When running a proxy or loadbalancer in front of this nginx instance,
+# you can use these directives to trust the proxy / loadbalancer and let
+# this nginx instance use the correct client IP
+
+# The header to get the client IP from
+# real_ip_header X-Forwarded-For;
+# The IP address of the proxy / loadbalancer. Use this directive multiple
+# times if you need to use more than one IP address
+# set_real_ip_from 1.2.3.4;

@@ -131,6 +131,32 @@ though. To use this configuration, perform the following steps::
 The judgehosts connect to DOMjudge via the DOMjudge API so need
 to be able to access at least this part of the web interface.
 
+Running behind a proxy or loadbalancer
+--------------------------------------
+
+When running the DOMserver behind a proxy or loadbalancer, you might still want
+to have the webserver and/or the DOMserver know the original client IP. By
+default DOMjudge and the webserver (both nginx and Apache) will not use the
+client IP, but rather the IP of the proxy / loadbalancer.
+
+The preferred way to do this is in the webserver configuration. See
+``/etc/apache2/conf-available/domjudge.conf`` for Apache and
+``/etc/nginx/sites-enabled/domjudge`` for nginx. Look for ``loadbalancer``
+in the file. When using this approach both the webserver and DOMjudge itself
+will know the actual IP of the client.
+
+If you cannot edit the webserver configuration for some reason, there is an
+alternative way to configure this. Edit the file ``webapp/.env.local`` (create
+it if it does not exist) and add a line in the form of::
+
+  TRUSTED_PROXIES=1.2.3.4
+
+Where ``1.2.3.4`` is the IP address of the proxy or loadbalancer. You can set
+multiple IP addresses by separating them by a comma (``,``). The drawback to
+this approach is that the webserver is not aware of the actual client IP. This
+means that access logs for the webserver will still report the IP of the proxy
+or loadbalancer.
+
 Log in to DOMjudge
 ------------------
 The DOMserver should now be operational. You can access the web application
