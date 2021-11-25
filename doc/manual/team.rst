@@ -224,6 +224,7 @@ TOO-LATE
 
 The judges may have prepared multiple test files for each problem.
 DOMjudge will report back the first non-correct result as verdict.
+*If there are multiple verdicts with the same priority, the first encountered one will be returned.*
 
 Clarifications
 --------------
