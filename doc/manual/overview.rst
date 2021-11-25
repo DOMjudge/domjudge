@@ -97,7 +97,8 @@ Copyright and licencing
 -----------------------
 
 DOMjudge is developed by Jaap Eldering, Nicky Gerritsen, Keith Johnson,
-Thijs Kinkhorst and Tobias Werth; Peter van de Werken has retired as developer.
+Thijs Kinkhorst, Mart Pluijmaekers, Michael Vasseur and Tobias Werth;
+Peter van de Werken has retired as developer.
 Many other people have contributed:
 Michael Baer,
 Jeroen Bransen,
@@ -120,13 +121,11 @@ Richard Lobb,
 Alex Muntada,
 Dominik Paulus,
 Bert Peters,
-Mart Pluijmaekers,
 Ludo Pulles,
 Tobias Polzer,
 Jeroen Schot,
 Matt Steele,
 Shuhei Takahashi,
-Michael Vasseur,
 Sergei Vorobev,
 Hoai-Thu Vuong,
 Jeroen van Wolffelaar,
