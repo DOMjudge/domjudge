@@ -108,8 +108,7 @@ These guesses can be overruled with the options
 ``-e entry_point``.
 
 See ``submit --help`` for a complete list of all options,
-extensions and some examples.  Use ``submit --help | less``
-when the help text does not fit on one screen.
+extensions and some examples.
 
 ``submit`` will check your file and warns you for some problems:
 for example when the file has not been modified for a long time or
