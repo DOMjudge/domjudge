@@ -149,6 +149,7 @@ commandline to
 Optionally the timings can be made more stable by not letting the OS schedule
 any other tasks on the same CPU core the judgedaemon is using:
 ``GRUB_CMDLINE_LINUX_DEFAULT="quiet cgroup_enable=memory swapaccount=1 isolcpus=2"``
+
 On modern distros (e.g. Debian bullseye) which have cgroup v2 enabled by
 default, you need to add ``systemd.unified_cgroup_hierarchy=0`` as well.
 Then run ``update-grub`` and reboot.
@@ -200,9 +201,10 @@ Finally start the judgedaemon::
 
 Upon its first connection to the domserver API, the judgehost will be
 auto-registered and will be by default enabled. If you wish to
-add a new judgehost but have it initially disabled, you can add it
-manually through the DOMjudge web interface and set it to disabled
-before starting the judgedaemon.
+add a new judgehost but have it initially disabled, you can change the config
+setting to automatically pause judges on first connection or manually add it
+through the DOMjudge web interface and set it to disabled before starting
+the judgedaemon.
 
 The judgedaemon can also be run as a service by running::
 
