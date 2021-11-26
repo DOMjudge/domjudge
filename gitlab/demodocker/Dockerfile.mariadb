@@ -1,0 +1,4 @@
+FROM mariadb
+
+COPY dj_setup_database /bin/
+RUN dj_setup_database -q install
