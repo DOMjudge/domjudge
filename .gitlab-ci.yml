@@ -374,6 +374,21 @@ Docker check (latest/dind):
     - docker ps -a
     - docker images -a
 
+Docker check (latest/latest):
+  <<: *clean_ordering
+  services:
+    - docker:latest
+    - name: mariadb
+      alias: mariasqlserver
+    - name: mysql
+      command: ["--default-authentication-plugin=mysql_native_password"]
+      alias: mysqlserver
+  image: docker:latest
+  script:
+    - docker info
+    - docker ps -a
+    - docker images -a
+
 #Create Docker image for PR (docker/dind):
 #  stage: build
 #  script:
