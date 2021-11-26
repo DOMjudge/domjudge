@@ -389,6 +389,17 @@ Docker check (latest/latest):
     - docker ps -a
     - docker images -a
 
+Domserver installation image:
+  stage: build
+  image: docker:dind
+  services:
+    - docker:dind
+  script:
+    - cd ..
+    - docker build -t $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA --build-arg DJ_ETC=/opt/domjudge/domserver/etc --build-arg DJ_SRC=/tmp/domjudge -f domjudge/gitlab/demodocker/Dockerfile .
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker push $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
+
 #Create Docker image for PR (docker/dind):
 #  stage: build
 #  script:
@@ -534,48 +545,3 @@ Docker check (latest/latest):
 #    - docker push $CI_REGISTRY/domjudge/domjudge/mariadb:$CI_COMMIT_SHA
 #    - docker push $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
 #    - docker push $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
-
-Domserver installation image:
-  stage: build
-  image: docker:dind
-  services:
-    - docker:dind
-  script:
-    - git fetch
-    - git config --global user.email "never@commits.ci"
-    - git config --global user.name "Rebase against main"
-    - echo -e "section_start:`date +%s`:diff[collapsed=true]\r\e[0K'Git Diff'"
-    - git diff origin/main
-    - echo -e "section_end:`date +%s`:diff\r\e[0K"
-    - git pull origin main
-    - cd ..
-    - docker build -t $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA --build-arg DJ_ETC=/opt/domjudge/domserver/etc --build-arg DJ_SRC=/tmp/domjudge -f domjudge/gitlab/demodocker/Dockerfile .
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-    - docker push $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
-
-Domserver visual inspection of the PR:
-  <<: *retry_job
-  <<: *long_job
-  stage: visual_pre
-  image: $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
-  services:
-    - mariadb
-  variables:
-    MYSQL_ROOT_PASSWORD: password
-    DOCKER_HOST: tcp://docker:2375/
-    DOCKER_DRIVER: overlay2
-  parallel:
-    matrix:
-      - URL: team
-        ROLE: [jury,admin,team]
-      - URL: public
-        ROLE: [none,jury,admin,balloon,team]
-  script:
-    - ./gitlab/docker_visualpr.sh pr
-  artifacts:
-    when: always
-    paths:
-      - screenshotspr
-      - html
-      - wget.log
-
