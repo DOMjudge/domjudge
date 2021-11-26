@@ -27,9 +27,6 @@ export PS4='(${BASH_SOURCE}:${LINENO}): - [$?] $ '
 
 DIR=$(pwd)
 
-find /etc/nginx -type f
-find /etc/php7.4/ -type f
-
 # Set up
 "$( dirname "${BASH_SOURCE[0]}" )"/docker_base.sh
 
