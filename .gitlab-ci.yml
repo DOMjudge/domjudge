@@ -359,21 +359,6 @@ Docker check (dind/latest):
     - docker ps -a
     - docker images -a
 
-Docker check (latest/dind):
-  <<: *clean_ordering
-  services:
-    - docker:latest
-    - name: mariadb
-      alias: mariasqlserver
-    - name: mysql
-      command: ["--default-authentication-plugin=mysql_native_password"]
-      alias: mysqlserver
-  image: docker:dind
-  script:
-    - docker info
-    - docker ps -a
-    - docker images -a
-
 #Create Docker image for PR (docker/dind):
 #  stage: build
 #  script:
@@ -530,6 +515,7 @@ dom_install_image:
     - docker build -t $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA --build-arg DJ_ETC=/opt/domjudge/domserver/etc --build-arg DJ_SRC=/tmp/domjudge -f domjudge/gitlab/demodocker/Dockerfile .
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
     - docker push $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
+    - echo "$CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA"
 
 Domserver visual inspection of the PR:
   <<: *retry_job
