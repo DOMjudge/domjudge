@@ -116,6 +116,8 @@ export CURLOPTS="--fail -sq -m 30 -b $COOKIEJAR"
 
 service php7.4-fpm status
 
+curl $CURLOPTS -c $COOKIEJAR "http://localhost/domjudge"
+
 # Make an initial request which will get us a session id, and grab the csrf token from it
 CSRFTOKEN=$(curl $CURLOPTS -c $COOKIEJAR "http://localhost/domjudge/login" 2>/dev/null | sed -n 's/.*_csrf_token.*value="\(.*\)".*/\1/p')
 # Make a second request with our session + csrf token to actually log in
