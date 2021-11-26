@@ -520,7 +520,7 @@ Docker check (latest/dind):
 #    - docker push $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
 #    - docker push $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
 
-dom_install_image:
+Domserver installation image:
   stage: build
   image: docker:dind
   services:
@@ -535,7 +535,6 @@ Domserver visual inspection of the PR:
   <<: *retry_job
   <<: *long_job
   stage: visual_pre
-  needs: [dom_install_image]
   image: $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
   services:
     - mariadb
