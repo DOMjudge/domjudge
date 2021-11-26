@@ -400,148 +400,148 @@ Domserver installation image:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
     - docker push $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
 
-#Create Docker image for PR (docker/dind):
-#  stage: build
-#  script:
-#    - docker build -t $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA -f gitlab/demodocker/Dockerfile .
-#    - docker create --name extract $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
-#    - docker cp extract:/opt/domjudge/domserver/bin/dj_setup_database ./
-#    - docker rm extract
-#    - docker build -t $CI_REGISTRY/domjudge/domjudge/mariadb:$CI_COMMIT_SHA -f gitlab/demodocker/Dockerfile.mariadb .
-#    - docker build -t $CI_REGISTRY/domjudge/domjudge/mysql:$CI_COMMIT_SHA -f gitlab/demodocker/Dockerfile.mysql .
-#    - docker push $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
-#    - docker push $CI_REGISTRY/domjudge/domjudge/mysql:$CI_COMMIT_SHA
-#    - docker push $CI_REGISTRY/domjudge/domjudge/mariadb:$CI_COMMIT_SHA
-#    - docker push $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
-#    - docker push $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
-#
-#Create Docker image for PR (local/dind):
-#  stage: build
-#  image: docker:dind
-#  script:
-#    - DOCKER_HOST=tcp://localhost:2375/
-#    - docker info
-#    - docker build --host-network -t $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA -f gitlab/demodocker/Dockerfile .
-#    - docker create --name extract $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
-#    - docker cp extract:/opt/domjudge/domserver/bin/dj_setup_database ./
-#    - docker rm extract
-#    - docker build -t $CI_REGISTRY/domjudge/domjudge/mariadb:$CI_COMMIT_SHA -f gitlab/demodocker/Dockerfile.mariadb .
-#    - docker build -t $CI_REGISTRY/domjudge/domjudge/mysql:$CI_COMMIT_SHA -f gitlab/demodocker/Dockerfile.mysql .
-#    - docker push $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
-#    - docker push $CI_REGISTRY/domjudge/domjudge/mysql:$CI_COMMIT_SHA
-#    - docker push $CI_REGISTRY/domjudge/domjudge/mariadb:$CI_COMMIT_SHA
-#    - docker push $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
-#    - docker push $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
-#
-#Create Docker image for PR (docker/normal):
-#  stage: build
-#  image: docker:latest
-#  script:
-#    - docker info
-#    - docker build --host-network -t $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA -f gitlab/demodocker/Dockerfile .
-#    - docker create --name extract $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
-#    - docker cp extract:/opt/domjudge/domserver/bin/dj_setup_database ./
-#    - docker rm extract
-#    - docker build -t $CI_REGISTRY/domjudge/domjudge/mariadb:$CI_COMMIT_SHA -f gitlab/demodocker/Dockerfile.mariadb .
-#    - docker build -t $CI_REGISTRY/domjudge/domjudge/mysql:$CI_COMMIT_SHA -f gitlab/demodocker/Dockerfile.mysql .
-#    - docker push $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
-#    - docker push $CI_REGISTRY/domjudge/domjudge/mysql:$CI_COMMIT_SHA
-#    - docker push $CI_REGISTRY/domjudge/domjudge/mariadb:$CI_COMMIT_SHA
-#    - docker push $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
-#    - docker push $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
-#
-#Create Docker image for PR (localhost/normal):
-#  stage: build
-#  image: docker:latest
-#  script:
-#    - DOCKER_HOST=tcp://localhost:2375/
-#    - docker info
-#    - docker build --host-network -t $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA -f gitlab/demodocker/Dockerfile .
-#    - docker create --name extract $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
-#    - docker cp extract:/opt/domjudge/domserver/bin/dj_setup_database ./
-#    - docker rm extract
-#    - docker build -t $CI_REGISTRY/domjudge/domjudge/mariadb:$CI_COMMIT_SHA -f gitlab/demodocker/Dockerfile.mariadb .
-#    - docker build -t $CI_REGISTRY/domjudge/domjudge/mysql:$CI_COMMIT_SHA -f gitlab/demodocker/Dockerfile.mysql .
-#    - docker push $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
-#    - docker push $CI_REGISTRY/domjudge/domjudge/mysql:$CI_COMMIT_SHA
-#    - docker push $CI_REGISTRY/domjudge/domjudge/mariadb:$CI_COMMIT_SHA
-#    - docker push $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
-#    - docker push $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
-#
-#Create Docker image for PR (services/docker/dind):
-#  stage: build
-#  image: docker:dind
-#  services: 
-#    - docker:dind
-#  script:
-#    - docker info
-#    - docker build --host-network -t $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA -f gitlab/demodocker/Dockerfile .
-#    - docker create --name extract $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
-#    - docker cp extract:/opt/domjudge/domserver/bin/dj_setup_database ./
-#    - docker rm extract
-#    - docker build -t $CI_REGISTRY/domjudge/domjudge/mariadb:$CI_COMMIT_SHA -f gitlab/demodocker/Dockerfile.mariadb .
-#    - docker build -t $CI_REGISTRY/domjudge/domjudge/mysql:$CI_COMMIT_SHA -f gitlab/demodocker/Dockerfile.mysql .
-#    - docker push $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
-#    - docker push $CI_REGISTRY/domjudge/domjudge/mysql:$CI_COMMIT_SHA
-#    - docker push $CI_REGISTRY/domjudge/domjudge/mariadb:$CI_COMMIT_SHA
-#    - docker push $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
-#    - docker push $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
-#
-#Create Docker image for PR (services/local/dind):
-#  stage: build
-#  image: docker:dind
-#  services:
-#    - docker:dind
-#  script:
-#    - DOCKER_HOST=tcp://localhost:2375/
-#    - docker info
-#    - docker build --host-network -t $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA -f gitlab/demodocker/Dockerfile .
-#    - docker create --name extract $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
-#    - docker cp extract:/opt/domjudge/domserver/bin/dj_setup_database ./
-#    - docker rm extract
-#    - docker build -t $CI_REGISTRY/domjudge/domjudge/mariadb:$CI_COMMIT_SHA -f gitlab/demodocker/Dockerfile.mariadb .
-#    - docker build -t $CI_REGISTRY/domjudge/domjudge/mysql:$CI_COMMIT_SHA -f gitlab/demodocker/Dockerfile.mysql .
-#    - docker push $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
-#    - docker push $CI_REGISTRY/domjudge/domjudge/mysql:$CI_COMMIT_SHA
-#    - docker push $CI_REGISTRY/domjudge/domjudge/mariadb:$CI_COMMIT_SHA
-#    - docker push $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
-#    - docker push $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
-#
-#Create Docker image for PR (services/docker/normal):
-#  stage: build
-#  image: docker:latest
-#  services:
-#    - docker:dind
-#  script:
-#    - docker info
-#    - docker build --host-network -t $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA -f gitlab/demodocker/Dockerfile .
-#    - docker create --name extract $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
-#    - docker cp extract:/opt/domjudge/domserver/bin/dj_setup_database ./
-#    - docker rm extract
-#    - docker build -t $CI_REGISTRY/domjudge/domjudge/mariadb:$CI_COMMIT_SHA -f gitlab/demodocker/Dockerfile.mariadb .
-#    - docker build -t $CI_REGISTRY/domjudge/domjudge/mysql:$CI_COMMIT_SHA -f gitlab/demodocker/Dockerfile.mysql .
-#    - docker push $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
-#    - docker push $CI_REGISTRY/domjudge/domjudge/mysql:$CI_COMMIT_SHA
-#    - docker push $CI_REGISTRY/domjudge/domjudge/mariadb:$CI_COMMIT_SHA
-#    - docker push $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
-#    - docker push $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
-#
-#Create Docker image for PR (services/localhost/normal):
-#  stage: build
-#  image: docker:latest
-#  services: 
-#    - docker:dind
-#  script:
-#    - DOCKER_HOST=tcp://localhost:2375/
-#    - docker info
-#    - docker build --host-network -t $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA -f gitlab/demodocker/Dockerfile .
-#    - docker create --name extract $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
-#    - docker cp extract:/opt/domjudge/domserver/bin/dj_setup_database ./
-#    - docker rm extract
-#    - docker build -t $CI_REGISTRY/domjudge/domjudge/mariadb:$CI_COMMIT_SHA -f gitlab/demodocker/Dockerfile.mariadb .
-#    - docker build -t $CI_REGISTRY/domjudge/domjudge/mysql:$CI_COMMIT_SHA -f gitlab/demodocker/Dockerfile.mysql .
-#    - docker push $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
-#    - docker push $CI_REGISTRY/domjudge/domjudge/mysql:$CI_COMMIT_SHA
-#    - docker push $CI_REGISTRY/domjudge/domjudge/mariadb:$CI_COMMIT_SHA
-#    - docker push $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
-#    - docker push $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
+Create Docker image for PR (docker/dind):
+  stage: build
+  script:
+    - docker build -t $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA -f gitlab/demodocker/Dockerfile .
+    - docker create --name extract $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
+    - docker cp extract:/opt/domjudge/domserver/bin/dj_setup_database ./
+    - docker rm extract
+    - docker build -t $CI_REGISTRY/domjudge/domjudge/mariadb:$CI_COMMIT_SHA -f gitlab/demodocker/Dockerfile.mariadb .
+    - docker build -t $CI_REGISTRY/domjudge/domjudge/mysql:$CI_COMMIT_SHA -f gitlab/demodocker/Dockerfile.mysql .
+    - docker push $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
+    - docker push $CI_REGISTRY/domjudge/domjudge/mysql:$CI_COMMIT_SHA
+    - docker push $CI_REGISTRY/domjudge/domjudge/mariadb:$CI_COMMIT_SHA
+    - docker push $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
+    - docker push $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
+
+Create Docker image for PR (local/dind):
+  stage: build
+  image: docker:dind
+  script:
+    - DOCKER_HOST=tcp://localhost:2375/
+    - docker info
+    - docker build --host-network -t $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA -f gitlab/demodocker/Dockerfile .
+    - docker create --name extract $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
+    - docker cp extract:/opt/domjudge/domserver/bin/dj_setup_database ./
+    - docker rm extract
+    - docker build -t $CI_REGISTRY/domjudge/domjudge/mariadb:$CI_COMMIT_SHA -f gitlab/demodocker/Dockerfile.mariadb .
+    - docker build -t $CI_REGISTRY/domjudge/domjudge/mysql:$CI_COMMIT_SHA -f gitlab/demodocker/Dockerfile.mysql .
+    - docker push $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
+    - docker push $CI_REGISTRY/domjudge/domjudge/mysql:$CI_COMMIT_SHA
+    - docker push $CI_REGISTRY/domjudge/domjudge/mariadb:$CI_COMMIT_SHA
+    - docker push $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
+    - docker push $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
+
+Create Docker image for PR (docker/normal):
+  stage: build
+  image: docker:latest
+  script:
+    - docker info
+    - docker build --host-network -t $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA -f gitlab/demodocker/Dockerfile .
+    - docker create --name extract $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
+    - docker cp extract:/opt/domjudge/domserver/bin/dj_setup_database ./
+    - docker rm extract
+    - docker build -t $CI_REGISTRY/domjudge/domjudge/mariadb:$CI_COMMIT_SHA -f gitlab/demodocker/Dockerfile.mariadb .
+    - docker build -t $CI_REGISTRY/domjudge/domjudge/mysql:$CI_COMMIT_SHA -f gitlab/demodocker/Dockerfile.mysql .
+    - docker push $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
+    - docker push $CI_REGISTRY/domjudge/domjudge/mysql:$CI_COMMIT_SHA
+    - docker push $CI_REGISTRY/domjudge/domjudge/mariadb:$CI_COMMIT_SHA
+    - docker push $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
+    - docker push $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
+
+Create Docker image for PR (localhost/normal):
+  stage: build
+  image: docker:latest
+  script:
+    - DOCKER_HOST=tcp://localhost:2375/
+    - docker info
+    - docker build --host-network -t $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA -f gitlab/demodocker/Dockerfile .
+    - docker create --name extract $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
+    - docker cp extract:/opt/domjudge/domserver/bin/dj_setup_database ./
+    - docker rm extract
+    - docker build -t $CI_REGISTRY/domjudge/domjudge/mariadb:$CI_COMMIT_SHA -f gitlab/demodocker/Dockerfile.mariadb .
+    - docker build -t $CI_REGISTRY/domjudge/domjudge/mysql:$CI_COMMIT_SHA -f gitlab/demodocker/Dockerfile.mysql .
+    - docker push $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
+    - docker push $CI_REGISTRY/domjudge/domjudge/mysql:$CI_COMMIT_SHA
+    - docker push $CI_REGISTRY/domjudge/domjudge/mariadb:$CI_COMMIT_SHA
+    - docker push $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
+    - docker push $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
+
+Create Docker image for PR (services/docker/dind):
+  stage: build
+  image: docker:dind
+  services: 
+    - docker:dind
+  script:
+    - docker info
+    - docker build --host-network -t $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA -f gitlab/demodocker/Dockerfile .
+    - docker create --name extract $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
+    - docker cp extract:/opt/domjudge/domserver/bin/dj_setup_database ./
+    - docker rm extract
+    - docker build -t $CI_REGISTRY/domjudge/domjudge/mariadb:$CI_COMMIT_SHA -f gitlab/demodocker/Dockerfile.mariadb .
+    - docker build -t $CI_REGISTRY/domjudge/domjudge/mysql:$CI_COMMIT_SHA -f gitlab/demodocker/Dockerfile.mysql .
+    - docker push $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
+    - docker push $CI_REGISTRY/domjudge/domjudge/mysql:$CI_COMMIT_SHA
+    - docker push $CI_REGISTRY/domjudge/domjudge/mariadb:$CI_COMMIT_SHA
+    - docker push $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
+    - docker push $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
+
+Create Docker image for PR (services/local/dind):
+  stage: build
+  image: docker:dind
+  services:
+    - docker:dind
+  script:
+    - DOCKER_HOST=tcp://localhost:2375/
+    - docker info
+    - docker build --host-network -t $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA -f gitlab/demodocker/Dockerfile .
+    - docker create --name extract $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
+    - docker cp extract:/opt/domjudge/domserver/bin/dj_setup_database ./
+    - docker rm extract
+    - docker build -t $CI_REGISTRY/domjudge/domjudge/mariadb:$CI_COMMIT_SHA -f gitlab/demodocker/Dockerfile.mariadb .
+    - docker build -t $CI_REGISTRY/domjudge/domjudge/mysql:$CI_COMMIT_SHA -f gitlab/demodocker/Dockerfile.mysql .
+    - docker push $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
+    - docker push $CI_REGISTRY/domjudge/domjudge/mysql:$CI_COMMIT_SHA
+    - docker push $CI_REGISTRY/domjudge/domjudge/mariadb:$CI_COMMIT_SHA
+    - docker push $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
+    - docker push $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
+
+Create Docker image for PR (services/docker/normal):
+  stage: build
+  image: docker:latest
+  services:
+    - docker:dind
+  script:
+    - docker info
+    - docker build --host-network -t $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA -f gitlab/demodocker/Dockerfile .
+    - docker create --name extract $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
+    - docker cp extract:/opt/domjudge/domserver/bin/dj_setup_database ./
+    - docker rm extract
+    - docker build -t $CI_REGISTRY/domjudge/domjudge/mariadb:$CI_COMMIT_SHA -f gitlab/demodocker/Dockerfile.mariadb .
+    - docker build -t $CI_REGISTRY/domjudge/domjudge/mysql:$CI_COMMIT_SHA -f gitlab/demodocker/Dockerfile.mysql .
+    - docker push $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
+    - docker push $CI_REGISTRY/domjudge/domjudge/mysql:$CI_COMMIT_SHA
+    - docker push $CI_REGISTRY/domjudge/domjudge/mariadb:$CI_COMMIT_SHA
+    - docker push $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
+    - docker push $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
+
+Create Docker image for PR (services/localhost/normal):
+  stage: build
+  image: docker:latest
+  services: 
+    - docker:dind
+  script:
+    - DOCKER_HOST=tcp://localhost:2375/
+    - docker info
+    - docker build --host-network -t $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA -f gitlab/demodocker/Dockerfile .
+    - docker create --name extract $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
+    - docker cp extract:/opt/domjudge/domserver/bin/dj_setup_database ./
+    - docker rm extract
+    - docker build -t $CI_REGISTRY/domjudge/domjudge/mariadb:$CI_COMMIT_SHA -f gitlab/demodocker/Dockerfile.mariadb .
+    - docker build -t $CI_REGISTRY/domjudge/domjudge/mysql:$CI_COMMIT_SHA -f gitlab/demodocker/Dockerfile.mysql .
+    - docker push $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
+    - docker push $CI_REGISTRY/domjudge/domjudge/mysql:$CI_COMMIT_SHA
+    - docker push $CI_REGISTRY/domjudge/domjudge/mariadb:$CI_COMMIT_SHA
+    - docker push $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
+    - docker push $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
