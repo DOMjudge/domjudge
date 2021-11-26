@@ -262,7 +262,7 @@ phpcs_compatibility:
     - export PS4='[$?] $'
   parallel:
     matrix:
-      - PHPVERSION: ["7.2","7.3","7.4","8.0"]
+      - PHPVERSION: ["7.2","7.3","7.4","8.0","8.1"]
   script:
     - >
       phpcs -s -p --colors
