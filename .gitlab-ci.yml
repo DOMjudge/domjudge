@@ -1,8 +1,10 @@
 include:
-  - '/gitlab/.sast-ci.yml'
+  - '/gitlab/ci/build-image.yml'
+  - '/gitlab/ci/sast.yml'
 
 stages:
   - test
+  - build
   - visual_pre
   - integration
   - compare
