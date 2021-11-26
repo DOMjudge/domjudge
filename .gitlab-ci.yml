@@ -513,11 +513,13 @@ dom_install_image:
   script:
     - cd ..
     - docker build -t $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA --build-arg DJ_ETC=/opt/domjudge/domserver/etc --build-arg DJ_SRC=/tmp/domjudge -f domjudge/gitlab/demodocker/Dockerfile .
+    #- docker create --name extract $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
+    #- docker cp extract:gitlabartifacts ./
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
     - docker push $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
     - echo "$CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA"
 
-Domserver visual inspection of the PR:
+dom_visual_usage:
   <<: *retry_job
   <<: *long_job
   stage: visual_pre
@@ -532,9 +534,7 @@ Domserver visual inspection of the PR:
   parallel:
     matrix:
       - URL: team
-        ROLE: [jury,admin,team]
-      - URL: public
-        ROLE: [none,jury,admin,balloon,team]
+        ROLE: [team]
   script:
     - ./gitlab/docker_visualpr.sh pr
   artifacts:
