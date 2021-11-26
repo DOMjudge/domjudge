@@ -389,13 +389,3 @@ Docker check (latest/latest):
     - docker ps -a
     - docker images -a
 
-Domserver installation image:
-  stage: build
-  image: docker:dind
-  services:
-    - docker:dind
-  script:
-    - cd ..
-    - docker build -t $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA --build-arg DJ_ETC=/opt/domjudge/domserver/etc --build-arg DJ_SRC=/tmp/domjudge -f domjudge/gitlab/demodocker/Dockerfile .
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-    - docker push $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
