@@ -46,5 +46,5 @@ sudo rm -f /etc/nginx/sites-enabled/*
 sudo cp /opt/domjudge/domserver/etc/nginx-conf /etc/nginx/sites-enabled/domjudge
 sudo /usr/sbin/nginx
 
-systemctl enable nginx
-systemctl enable php7.4-fpm
+service nginx enable
+service php7.4-fpm enable
