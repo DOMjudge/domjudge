@@ -1160,18 +1160,30 @@ class JudgehostController extends AbstractFOSRestController
                     ->getSingleScalarResult();
                 // Only "cancel" the rejudging if it's not the last.
                 if ($numberOfRepetitions < $rejudging->getRepeat()) {
-                    $rejudging
-                        ->setEndtime(Utils::now())
-                        ->setFinishUser(null)
-                        ->setValid(false);
+                    $rejudgingid = $rejudging->getRejudgingid();
+                    $numUpdated = $this->em->getConnection()->executeStatement(
+                        'UPDATE rejudging
+                        SET endtime = :endtime, valid = 0
+                        WHERE rejudgingid = :rejudgingid
+                          AND endtime IS NULL',
+                        [
+                            'endtime' => Utils::now(),
+                            'rejudgingid' => $rejudgingid,
+                        ]
+                    );
                     $this->em->flush();
+                    if ($numUpdated == 0) {
+                        // Due to parallel judging some other judgehost did the same calculation just now and beat us
+                        // to it.
+                        return;
+                    }
 
                     // Reset association before creating the new rejudging.
-                    $this->em->getConnection()->executeUpdate(
+                    $this->em->getConnection()->executeStatement(
                         'UPDATE submission
                             SET rejudgingid = NULL
                             WHERE rejudgingid = :rejudgingid',
-                        [':rejudgingid' => $rejudging->getRejudgingid()]);
+                        [':rejudgingid' => $rejudgingid]);
                     $this->em->flush();
 
                     $skipped = [];
@@ -1183,7 +1195,7 @@ class JudgehostController extends AbstractFOSRestController
                         ->leftJoin('s.team', 't')
                         ->select('j', 's', 'r', 't')
                         ->andWhere('j.rejudging = :rejudgingid')
-                        ->setParameter('rejudgingid', $rejudging->getRejudgingid())
+                        ->setParameter('rejudgingid', $rejudgingid)
                         ->getQuery()
                         ->setHint(Query::HINT_REFRESH, true)
                         ->getResult();
