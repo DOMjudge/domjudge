@@ -395,60 +395,6 @@ class ImportExportService
     }
 
     /**
-     * Get scoreboard data
-     * @return array
-     * @throws Exception
-     */
-    public function getScoreboardData(): array
-    {
-        // We'll here assume that the requested file will be of the current contest,
-        // as all our scoreboard interfaces do. Column format explanation:
-        // Col  Description Example content Type
-        // 1    Institution name    University of Virginia  string
-        // 2    External ID 24314   integer
-        // 3    Position in contest 1   integer
-        // 4    Number of problems the team has solved  4   integer
-        // 5    Total Time  534 integer
-        // 6    Time of the last accepted submission    233 integer   -1 if none
-        // 6+2i-1   Number of submissions for problem i 2   integer
-        // 6+2i Time when problem i was solved  233 integer   -1 if not solved
-
-        $contest = $this->dj->getCurrentContest();
-        if ($contest === null) {
-            throw new BadRequestHttpException('No current contest');
-        }
-        $scoreIsInSeconds = (bool)$this->config->get('score_in_seconds');
-        $scoreboard       = $this->scoreboardService->getScoreboard($contest, true);
-
-        $data = [];
-        foreach ($scoreboard->getScores() as $teamScore) {
-            $maxtime = -1;
-            $drow    = [];
-            /** @var ScoreboardMatrixItem $matrixItem */
-            foreach ($scoreboard->getMatrix()[$teamScore->team->getTeamid()] as $matrixItem) {
-                $time    = Utils::scoretime($matrixItem->time, $scoreIsInSeconds);
-                $drow[]  = $matrixItem->numSubmissions;
-                $drow[]  = $matrixItem->isCorrect ? $time : -1;
-                $maxtime = max($maxtime, $time);
-            }
-
-            $data[] = array_merge(
-                [
-                    $teamScore->team->getAffiliation() ? $teamScore->team->getAffiliation()->getName() : '',
-                    $teamScore->team->getIcpcid(),
-                    $teamScore->rank,
-                    $teamScore->numPoints,
-                    $teamScore->totalTime,
-                    $maxtime,
-                ],
-                $drow
-            );
-        }
-
-        return $data;
-    }
-
-    /**
      * Get results data for the given sortorder
      * @param int $sortOrder
      * @return array

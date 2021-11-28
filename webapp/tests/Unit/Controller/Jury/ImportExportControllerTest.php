@@ -23,7 +23,7 @@ class ImportExportControllerTest extends BaseTest
         self::assertSelectorExists('small:contains(\'Create a "Web Services Token"\')');
 
         // We've reached the end of the page.
-        self::assertSelectorExists('li:contains("scoreboard.tsv")');
+        self::assertSelectorExists('li:contains("results.tsv")');
     }
 
     /**
@@ -207,10 +207,6 @@ HEREDOC;
 2	Self-Registered
 3	Participants
 4	Observers
-'];
-        yield ['a:contains("scoreboard.tsv")', 'scoreboard	1
-Utrecht University	exteam	1	0	0	0	0	-1	0	-1	0	-1
-		1	0	0	0	0	-1	0	-1	0	-1
 '];
     }
 
