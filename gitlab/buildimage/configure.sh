@@ -45,12 +45,6 @@ cd /opt/domjudge/domserver
 setfacl -m u:www-data:r etc/restapi.secret etc/initial_admin_password.secret \
                         etc/dbpasswords.secret etc/symfony_app.secret
 
-# Install the DB in both SQL servers
-for SQLSERVER in mariadb mysql; do
-    sudo echo "dummy:${SQLSERVER}:domjudge:domjudge:domjudge" | tee etc/dbpasswords.secret
-    sudo -u www-data bin/dj_setup_database -uroot -p${MYSQL_ROOT_PASSWORD} -q install
-done
-
 # configure and restart nginx
 sudo rm -f /etc/nginx/sites-enabled/*
 sudo cp /opt/domjudge/domserver/etc/nginx-conf /etc/nginx/sites-enabled/domjudge

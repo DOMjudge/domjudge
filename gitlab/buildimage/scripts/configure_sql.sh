@@ -1,5 +1,7 @@
 #!/bin/sh -eu
 
+export PS4='(${0}:${LINENO}): - [$?] $ '
+
 set -eux
 
 cd /opt/domjudge/domserver/
