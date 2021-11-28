@@ -95,6 +95,8 @@ webstandard_check_role:
         TEST: [w3cval,WCAG2A,WCAG2AA]
       - ROLE: jury
         TEST: [w3cval]
+      - ROLE: admin
+        TEST: [w3cval]
   stage: accessibility
   image: domjudge/gitlabci:2.1
   variables:
