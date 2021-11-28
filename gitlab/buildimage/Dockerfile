@@ -17,7 +17,6 @@ RUN sudo -u domjudge ./gitlab/buildimage/configure.sh
 
 # On start of container start some services
 RUN cp -r ./gitlab/buildimage/scripts /
-RUN ls -atrl /scripts
 
 # Expose HTTP port
 EXPOSE 80
