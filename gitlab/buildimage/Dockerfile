@@ -2,6 +2,7 @@ FROM domjudge/gitlabci:2.1
 
 ARG DJ_SRC
 ARG DJ_ETC
+ARG MYSQL_ROOT_PASSWORD
 
 ENV DEBIAN_FRONTEND=noninteractive
 
