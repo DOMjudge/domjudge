@@ -92,7 +92,11 @@ if [ "$TEST" = "w3cval" ]; then
     wget https://github.com/validator/validator/releases/latest/download/vnu.linux.zip
     unzip -q vnu.linux.zip
     section_end test_suite
-    FLTR='--filterpattern .*form.*|.*style.*|.*autocomplete.*|.*scope.*|.*descendant.*|.*child.*'
+    if [ "$ROLE" = "public" ]; then
+        FLTR='--filterpattern .*form.*|.*autocomplete.*|.*scope.*|.*descendant.*|.*child.*'
+    else
+        FLTR='--filterpattern .*form.*|.*style.*|.*autocomplete.*|.*scope.*|.*descendant.*|.*child.*'
+    fi
     for typ in html css svg
     do
 	$DIR/vnu-runtime-image/bin/vnu --errors-only --exit-zero-always --skip-non-$typ --format json $FLTR $url 2> result.json
