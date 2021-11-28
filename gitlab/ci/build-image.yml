@@ -11,3 +11,14 @@ build_containers:
     - docker:dind
   script:
     - ./gitlab/build_ci_container.sh
+
+visual_pr:
+  stage: visual_pre
+  needs: [build_containers]
+  image: docker:dind
+  services:
+    - name: $CI_REGISTRY/domjudge/domjudge/mariadb:$CI_COMMIT_SHA
+      alias: sqlserver
+  image: $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
+  script:
+    - service nginx status
