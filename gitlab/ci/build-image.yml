@@ -21,4 +21,5 @@ visual_pr:
       alias: sqlserver
   image: $CI_REGISTRY/domjudge/domjudge/domserver:$CI_COMMIT_SHA
   script:
+    - gitlab/buildimage/scripts/start.sh
     - service nginx status
