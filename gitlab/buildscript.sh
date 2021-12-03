@@ -28,7 +28,8 @@ for CONTAINER in mariadb mysql; do
     docker tag $URL $URL
     docker push $URL
 done
-docker run -i --net=sqlnetwork --name mariadbcommited -e MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD} $CI_REGISTRY/mvasseur/domjudge/$CONTAINER:$CI_COMMIT_SHA
+docker run --net=sqlnetwork --name mariadbcommited -e MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD} $CI_REGISTRY/mvasseur/domjudge/$CONTAINER:$CI_COMMIT_SHA
+sleep 30s
 docker run --net=sqlnetwork $CI_REGISTRY/mvasseur/domjudge/domserver:$CI_COMMIT_SHA /scripts/dbs2.sh
 #- >
 #  for CONTAINER in mariadb mysql domserver; do
