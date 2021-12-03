@@ -378,7 +378,7 @@ build_containers:
   services:
     - docker:dind
   script:
-    - . gitlab/buildscript.sh
+    - ./gitlab/buildscript.sh
     ## Start the MariaDB container to connect to
     ## We install first against this one, and later against the mysql server
     #- docker network create sqlnetwork
