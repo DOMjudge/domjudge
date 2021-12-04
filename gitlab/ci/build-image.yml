@@ -1,2 +1,13 @@
 # Build the DOMjudge image
 # Used for visual testing, unit -, and integration.
+
+build_containers:
+  needs: []
+  stage: build
+  image: docker:dind
+  variables:
+    MYSQL_ROOT_PASSWORD: password
+  services:
+    - docker:dind
+  script:
+    - ./gitlab/build_ci_container.sh
