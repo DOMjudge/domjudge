@@ -156,7 +156,17 @@ section_end more_setup
 section_start submitting "Submitting test sources (including Kattis example)"
 cd ${DIR}/tests
 export SUBMITBASEURL='http://localhost/domjudge/'
-make check test-stress
+
+# Keep the tests which are expected to fail out of the symfony log
+make check-problems
+if [ -f /opt/domjudge/domserver/webapp/var/log/prod.log ]; then
+    mv /opt/domjudge/domserver/webapp/var/log/prod.log{,.stash}
+fi
+make test-bad-expected-results
+if [ -f /opt/domjudge/domserver/webapp/var/log/prod.log.stash ]; then
+    mv /opt/domjudge/domserver/webapp/var/log/prod.log{.stash,}
+fi
+make test-stress
 
 # Prepare to load example problems from Kattis/problemtools
 echo "INSERT INTO userrole (userid, roleid) VALUES (3, 1);" | mysql domjudge
