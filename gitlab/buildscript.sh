@@ -4,6 +4,9 @@ export PS4='(${0}:${LINENO}): - [$?] $ '
 
 set -eux
 
+# Lowercase group name
+CI_PROJECT_NAMESPACE=$(echo "$CI_PROJECT_NAMESPACE" | awk '{print tolower($0)}')
+
 # Start the MariaDB container to connect to
 # We install first against this one, and later against the mysql server
 docker network create sqlnetwork
