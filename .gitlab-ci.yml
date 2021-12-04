@@ -371,6 +371,7 @@ build_containers_local:
 # Used for visual testing, unit -, and integration.
 
 build_containers:
+  needs: []
   stage: build
   image: docker:dind
   variables:
