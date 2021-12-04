@@ -65,7 +65,7 @@ class AuditLog
 
     /**
      * @var string
-     * @ORM\Column(type="string", name="action", length=64,
+     * @ORM\Column(type="string", name="action", length=128,
      *     options={"comment"="Description of action performed"},
      *     nullable=true)
      */
