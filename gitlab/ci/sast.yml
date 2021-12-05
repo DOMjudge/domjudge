@@ -3,11 +3,13 @@ include:
   - template: SAST.gitlab-ci.yml
 
 variables:
-  SAST_EXCLUDED_ANALYZERS: "brakeman,eslint,flawfinder,kubesec,mobsf,nodejs-scan,pmd-apex,security-code-scan,sobelow,spotbugs"
+  SAST_EXCLUDED_ANALYZERS: "brakeman,eslint,flawfinder,spotbugs"
   SECURE_LOG_LEVEL: debug
   SAST_EXCLUDED_PATHS: "html,tests,localhost,gitlab"
   SAST_FLAWFINDER_LEVEL: 5
 
+# We cannot use an extends template here as we include
+# the script key from the other included templates here.
 .sast_ordering: &when_possible
   stage: sast
   needs: []
