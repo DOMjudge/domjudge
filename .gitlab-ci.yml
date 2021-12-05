@@ -1,5 +1,6 @@
 include:
   - '/gitlab/ci/sast.yml'
+  - '/gitlab/ci/unit.yml'
   - '/gitlab/ci/template.yml'
   - '/gitlab/ci/misc.yml'
 
@@ -16,17 +17,6 @@ stages:
 
 image: domjudge/gitlabci:2.1
 
-.db_config: &mysql_db
-  services:
-    - name: mysql
-      command: ["--default-authentication-plugin=mysql_native_password"]
-      alias: sqlserver
-
-.db_config: &maria_db
-  services:
-    - name: mariadb
-      alias: sqlserver
-
 .retry_time: &normal_job
   <<: *clean_ordering
   timeout: 15m
@@ -35,32 +25,6 @@ image: domjudge/gitlabci:2.1
   <<: *clean_ordering
   timeout: 30m
 # Due to the retry this will be worst case 3*timeout before the job fails
-
-.unit_job_template: &unit_job
-  stage: unit
-  image: domjudge/gitlabci:2.1
-  # Disabled for now as it drastically speeds up running unit tests and we don't use it yet
-  # before_script:
-  #   - apt-get update -yqq
-  #   - apt-get install php-xdebug -yqq
-  variables:
-    MYSQL_ROOT_PASSWORD: password
-    MARIADB_PORT_3306_TCP_ADDR: sqlserver
-  script:
-    - ./gitlab/unit-tests.sh
-  artifacts:
-    when: always
-    paths:
-      - unit-tests.xml
-      - coverage-html
-      - deprecation.txt
-    reports:
-      junit:
-        - unit-tests.xml
-  cache:
-    key: unit-tests
-    paths:
-      - lib/vendor/
 
 webstandard_check_role:
   <<: *matrix_retry_job
@@ -91,18 +55,6 @@ webstandard_check_role:
       - w3chtmlpublic.json
       - w3ccsspublic.json
       - w3csvgpublic.json
-
-run unit tests:
-  <<: *retry_job
-  <<: *normal_job
-  <<: *maria_db
-  <<: *unit_job
-
-run unit tests (MySQL):
-  <<: *retry_job
-  <<: *normal_job
-  <<: *mysql_db
-  <<: *unit_job
 
 visual_pr:
   <<: *retry_job
