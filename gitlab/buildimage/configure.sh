@@ -1,4 +1,4 @@
-#!/bin/sh -eu
+#!/bin/sh
 
 export PS4='(${0}:${LINENO}): - [$?] $ '
 
