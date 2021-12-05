@@ -1,6 +1,7 @@
 include:
   - '/gitlab/ci/sast.yml'
   - '/gitlab/ci/template.yml'
+  - '/gitlab/ci/misc.yml'
 
 stages:
   - test
@@ -13,6 +14,8 @@ stages:
   - ci_checks
   - sast
 
+image: domjudge/gitlabci:2.1
+
 .db_config: &mysql_db
   services:
     - name: mysql
@@ -23,10 +26,6 @@ stages:
   services:
     - name: mariadb
       alias: sqlserver
-
-.retry_time: &short_job
-  <<: *clean_ordering
-  timeout: 7m
 
 .retry_time: &normal_job
   <<: *clean_ordering
@@ -92,22 +91,6 @@ webstandard_check_role:
       - w3chtmlpublic.json
       - w3ccsspublic.json
       - w3csvgpublic.json
-
-check syntax:
-  <<: *retry_job
-  <<: *short_job
-  stage: style
-  image: domjudge/gitlabci:2.1
-  script:
-    - ./gitlab/syntax.sh
-
-check static codecov:
-  <<: *retry_job
-  <<: *tiny_job
-  stage: style
-  script:
-    - curl -s https://codecov.io/bash > newcodecov
-    - diff newcodecov gitlab/uploadcodecov.sh
 
 run unit tests:
   <<: *retry_job
@@ -246,80 +229,6 @@ integration_unpinned_judgehost:
     MYSQL_ROOT_PASSWORD: password
     MARIADB_PORT_3306_TCP_ADDR: sqlserver
     PIN_JUDGEDAEMON: 0
-
-phpcs_compatibility:
-  <<: *tiny_job
-  stage: style
-  image: pipelinecomponents/php-codesniffer:latest
-  before_script:
-    - set -euxo pipefail
-    - export PS4='[$?] $'
-  parallel:
-    matrix:
-      - PHPVERSION: ["7.2","7.3","7.4","8.0","8.1"]
-  script:
-    - >
-      phpcs -s -p --colors
-      --standard=PHPCompatibility
-      --extensions=php
-      --runtime-set testVersion $PHPVERSION
-      lib/lib.*.php
-      etc
-      judge
-      webapp/src
-      webapp/tests
-      webapp/public
-      webapp/config
-
-# This finds different problems from codesniffer
-php linter:
-  <<: *tiny_job
-  stage: style
-  image: pipelinecomponents/php-linter:latest
-  script:
-    - ls
-    - >
-      parallel-lint --colors
-      lib/lib.*.php
-      etc
-      judge
-      webapp/src
-      webapp/tests
-      webapp/public
-      webapp/config
-
-php-cs-fixer:
-  <<: *tiny_job
-  stage: style
-  image:
-    name: cytopia/php-cs-fixer
-    entrypoint: [""]
-  artifacts:
-    when: always
-    reports:
-      codequality: code-quality.json
-    paths:
-      - code_quality_debug.json
-  script:
-    - /usr/bin/php-cs-fixer fix --format=gitlab --dry-run --diff . > code-quality.json || true
-    - cp code-quality.json code_quality_debug.json
-
-codespell:
-  <<: *tiny_job
-  stage: style
-  image: domjudge/gitlabci:2.1
-  script:
-    - pip install codespell
-    - python3 gitlab/codespell_gitlab.py
-
-detect dump:
-  <<: *tiny_job
-  stage: style
-  image: domjudge/gitlabci:2.1
-  script:
-    - OUT=$(grep -H -n --exclude-dir=.git -r "dump(" ./ | grep -v "js/ace\|Yaml::dump")
-    - echo $OUT
-    - exit $(($(wc -l <<< $OUT)-1))
 
 draw_graph:
   stage: ci_checks
