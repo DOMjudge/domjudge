@@ -31,6 +31,10 @@
   extends: [.clean_ordering]
   timeout: 15m
 
+.long_job:
+  extends: [.clean_ordering]
+  timeout: 30m
+
 .mysql_job:
   script:
     - /bin/true
