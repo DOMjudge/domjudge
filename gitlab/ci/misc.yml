@@ -1,0 +1,82 @@
+check syntax:
+  extends: [.short_job]
+  stage: style
+  script:
+    - ./gitlab/syntax.sh
+
+check static codecov:
+  extends: [.tiny_job]
+  stage: ci_checks
+  image: bash
+  script:
+    - wget https://codecov.io/bash -O newcodecov
+    - diff newcodecov gitlab/uploadcodecov.sh
+
+phpcs_compatibility:
+  extends: [.tiny_job]
+  stage: style
+  image: pipelinecomponents/php-codesniffer:latest
+  parallel:
+    matrix:
+      - PHPVERSION: ["7.2","7.3","7.4","8.0","8.1"]
+  script:
+    - >
+      phpcs -s -p --colors
+      --standard=PHPCompatibility
+      --extensions=php
+      --runtime-set testVersion $PHPVERSION
+      lib/lib.*.php
+      etc
+      judge
+      webapp/src
+      webapp/tests
+      webapp/public
+      webapp/config
+
+# This finds different problems from codesniffer
+php linter:
+  extends: [.tiny_job]
+  stage: style
+  image: pipelinecomponents/php-linter:latest
+  script:
+    - >
+      parallel-lint --colors
+      lib/lib.*.php
+      etc
+      judge
+      webapp/src
+      webapp/tests
+      webapp/public
+      webapp/config
+
+php-cs-fixer:
+  extends: [.tiny_job]
+  stage: style
+  image:
+    name: cytopia/php-cs-fixer
+    entrypoint: [""]
+  artifacts:
+    when: always
+    reports:
+      codequality: code-quality.json
+  script:
+    - /usr/bin/php-cs-fixer fix --format=gitlab --dry-run --diff . > code-quality.json || true
+
+codespell:
+  extends: [.tiny_job]
+  stage: style
+  script:
+    - python3 gitlab/codespell_gitlab.py
+
+detect dump:
+  extends: [.tiny_job]
+  image: bash
+  stage: style
+  script:
+    - OUT=$(find ./
+        -name ".git" -type d -prune -o 
+        -name "cache" -type d -prune -o
+        -name "ace" -type d -prune -o
+        -type f -print0 | xargs -0 grep --color "dump(" | grep -v "Yaml::dump(")
+    - echo $OUT
+    - exit $(($(wc -l <<< $OUT)-1))

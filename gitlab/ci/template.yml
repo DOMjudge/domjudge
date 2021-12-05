@@ -1,6 +1,10 @@
 # This placeholder job tries to start as soon as possible
 .clean_ordering:
   needs: []
+  retry:
+    max: 0 #Max is 2, set when gitlab is flacky
+    when:
+      - always
   artifacts:
     when: always
     paths:
@@ -18,3 +22,7 @@
 .tiny_job:
   extends: [.clean_ordering]
   timeout: 3m
+
+.short_job:
+  extends: [.clean_ordering]
+  timeout: 7m
