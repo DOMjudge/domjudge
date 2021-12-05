@@ -1,5 +1,6 @@
 include:
   - '/gitlab/ci/sast.yml'
+  - '/gitlab/ci/template.yml'
 
 stages:
   - test
@@ -9,6 +10,7 @@ stages:
   - accessibility
   - unit
   - style
+  - ci_checks
   - sast
 
 .db_config: &mysql_db
@@ -21,26 +23,6 @@ stages:
   services:
     - name: mariadb
       alias: sqlserver
-
-.retry_config: &retry_job
-  retry:
-    max: 0 #Max is 2, set when gitlab is flacky
-    when:
-      - always
-
-.retry_config: &matrix_retry_job
-  retry:
-    max: 2 #Max is 2, set when gitlab is flacky
-    when:
-      - always
-
-.clean_ordering: &clean_ordering
-  needs: []
-# These seem to be overwritten when a job actually specifies these
-
-.retry_time: &tiny_job
-  <<: *clean_ordering
-  timeout: 3m
 
 .retry_time: &short_job
   <<: *clean_ordering
@@ -338,3 +320,14 @@ detect dump:
     - OUT=$(grep -H -n --exclude-dir=.git -r "dump(" ./ | grep -v "js/ace\|Yaml::dump")
     - echo $OUT
     - exit $(($(wc -l <<< $OUT)-1))
+
+draw_graph:
+  stage: ci_checks
+  image: devdemisto/matplotlib:1.0.0.24512
+  script:
+    - ls duration
+    - python3 showtimedata.py
+  artifacts:
+    paths:
+      - time.png
+      - duration

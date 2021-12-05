@@ -1,0 +1,20 @@
+# This placeholder job tries to start as soon as possible
+.clean_ordering:
+  needs: []
+  artifacts:
+    when: always
+    paths:
+      - duration
+  script:
+    - /bin/true
+  before_script:
+    - mkdir -p duration
+    - LOG=${CI_JOB_NAME// /_}.txt
+    - echo "job_begin" $(date +%s) >> ./duration/$LOG
+  after_script:
+    - LOG=${CI_JOB_NAME// /_}.txt
+    - echo "job_end" $(date +%s) >> ./duration/$LOG
+
+.tiny_job:
+  extends: [.clean_ordering]
+  timeout: 3m
