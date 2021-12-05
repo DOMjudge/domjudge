@@ -1,0 +1,32 @@
+.unit_job:
+  extends: [.normal_job]
+  stage: unit
+  # Disabled for now as it drastically speeds up running unit tests and we don't use it yet
+  # before_script:
+  #   - apt-get update -yqq
+  #   - apt-get install php-xdebug -yqq
+  variables:
+    MYSQL_ROOT_PASSWORD: password
+    MARIADB_PORT_3306_TCP_ADDR: sqlserver
+  script:
+    - ./gitlab/unit-tests.sh
+  artifacts:
+    when: always
+    paths:
+      - unit-tests.xml
+      - coverage-html
+      - deprecation.txt
+      - duration
+    reports:
+      junit:
+        - unit-tests.xml
+  cache:
+    key: unit-tests
+    paths:
+      - lib/vendor/
+
+run unit tests:
+  extends: [.unit_job,.mariadb_job]
+
+run unit tests (MySQL):
+  extends: [.unit_job,.mysql_job]
