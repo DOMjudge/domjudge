@@ -1,0 +1,27 @@
+webstandard_check_role:
+  extends: [.short_job,.mariadb_job]
+  parallel:
+    matrix:
+      - ROLE: public
+        TEST: [w3cval,WCAG2A,WCAG2AA]
+      - ROLE: team
+        TEST: [w3cval,WCAG2A,WCAG2AA]
+      - ROLE: balloon
+        TEST: [w3cval,WCAG2A,WCAG2AA]
+      - ROLE: jury
+        TEST: [w3cval]
+      - ROLE: admin
+        TEST: [w3cval]
+  stage: accessibility
+  variables:
+    MYSQL_ROOT_PASSWORD: password
+  script:
+    - ./gitlab/webstandard.sh
+  artifacts:
+    when: always
+    paths:
+      - public
+      - w3chtmlpublic.json
+      - w3ccsspublic.json
+      - w3csvgpublic.json
+      - duration
