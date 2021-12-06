@@ -2,6 +2,7 @@ include:
   - '/gitlab/ci/sast.yml'
   - '/gitlab/ci/unit.yml'
   - '/gitlab/ci/integration.yml'
+  - '/gitlab/ci/webstandard.yml'
   - '/gitlab/ci/template.yml'
   - '/gitlab/ci/misc.yml'
 
@@ -21,36 +22,6 @@ image: domjudge/gitlabci:2.1
 .retry_time: &normal_job
   <<: *clean_ordering
   timeout: 15m
-
-webstandard_check_role:
-  <<: *matrix_retry_job
-  <<: *short_job
-  <<: *maria_db
-  parallel:
-    matrix:
-      - ROLE: public
-        TEST: [w3cval,WCAG2A,WCAG2AA]
-      - ROLE: team
-        TEST: [w3cval,WCAG2A,WCAG2AA]
-      - ROLE: balloon
-        TEST: [w3cval,WCAG2A,WCAG2AA]
-      - ROLE: jury
-        TEST: [w3cval]
-      - ROLE: admin
-        TEST: [w3cval]
-  stage: accessibility
-  image: domjudge/gitlabci:2.1
-  variables:
-    MYSQL_ROOT_PASSWORD: password
-  script:
-    - ./gitlab/webstandard.sh
-  artifacts:
-    when: always
-    paths:
-      - public
-      - w3chtmlpublic.json
-      - w3ccsspublic.json
-      - w3csvgpublic.json
 
 visual_pr:
   <<: *retry_job
