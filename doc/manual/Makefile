@@ -34,7 +34,7 @@ maintainer-install: docs
 
 clean-l:
 	rm -rf build/doctrees build/team/.doctrees
-	$(MAKE) -C build/team clean
+	-$(MAKE) -C build/team clean
 
 maintainer-clean-l:
 	rm -rf build conf_ref.rst
