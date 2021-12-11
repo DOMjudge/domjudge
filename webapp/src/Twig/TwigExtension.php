@@ -333,7 +333,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         $organizationFilePath = sprintf('images/affiliations/%s.png', $affiliationId);
         if($this->assetExists($organizationFilePath)) {
             return sprintf('<img src="../%s" alt="%s" class="affiliation-logo">',
-                $organizationFilePath, $shortName);
+                Utils::specialchars($organizationFilePath), Utils::specialchars($shortName));
         }
 
         return '';
