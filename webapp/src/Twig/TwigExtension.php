@@ -396,7 +396,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             $assetFunction  = $this->twig->getFunction('asset')->getCallable();
             $assetUrl       = call_user_func($assetFunction, $asset);
             return sprintf('<img src="%s" alt="%s" class="affiliation-logo">',
-                $assetUrl, $shortName);
+                Utils::specialchars($assetUrl), Utils::specialchars($shortName));
         }
 
         return '';
