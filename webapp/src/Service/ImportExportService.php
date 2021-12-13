@@ -1060,7 +1060,7 @@ class ImportExportService
                     // allow any username in the form "abc" where a and c are arbitrary
                     // strings that contain no numbers and b only contains numbers. The teamid
                     // id is then "b".
-                    // Note that https://ccs-specs.icpc.io/ccs_system_requirements#accountstsv
+                    // Note that https://ccs-specs.icpc.io/2021-11/ccs_system_requirements#accountstsv
                     // assumes team accounts of the form "team-nnn" where
                     // nnn is a zero-padded team number.
                     $teamId = preg_replace('/^[^0-9]*0*([0-9]+)[^0-9]*$/', '\1', $line[2]);

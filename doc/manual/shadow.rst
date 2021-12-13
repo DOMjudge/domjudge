@@ -118,8 +118,8 @@ differences:
 * If the primary system has a different verdict than DOMjudge, a warning will be
   displayed.
 
-.. _Contest API specification: https://ccs-specs.icpc.io/contest_api
+.. _Contest API specification: https://ccs-specs.icpc.io/2021-11/contest_api
 .. _ICPC Tools CDS: https://tools.icpc.global/cds
 .. _Kattis: https://www.kattis.com
 .. _PC-Squared: http://pc2.ecs.csus.edu
-.. _CCS requirements specification: https://ccs-specs.icpc.io/ccs_system_requirements
+.. _CCS requirements specification: https://ccs-specs.icpc.io/2021-11/ccs_system_requirements

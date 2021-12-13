@@ -4,7 +4,7 @@
  * @configure_input@
  *
  * Import contest data from an event feed following the Contest API specification.
- * See https://ccs-specs.icpc.io/contest_api
+ * See https://ccs-specs.icpc.io/2021-11/contest_api
  *
  * The following assumptions and caveats are of note:
  * - The contest that will be imported to should already contain the problems,

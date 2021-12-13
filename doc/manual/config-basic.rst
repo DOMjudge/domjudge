@@ -140,4 +140,4 @@ it need not have started yet). You can verify whether the submissions
 gave the expected answer in the Judging Verifier, available from
 the jury index page.
 
-.. _ICPC-compatible teams.tsv files: https://ccs-specs.icpc.io/ccs_system_requirements#teamstsv
+.. _ICPC-compatible teams.tsv files: https://ccs-specs.icpc.io/2021-11/ccs_system_requirements#teamstsv

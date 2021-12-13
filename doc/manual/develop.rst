@@ -173,5 +173,5 @@ Loading development fixture data
 To debug failing Unit tests the fixtures can be loaded with:
 ``./webapp/bin/console domjudge:load-development-data SampleSubmissionsFixture`` in the current database.
 
-.. _CCS Contest API specification: https://ccs-specs.icpc.io/contest_api
+.. _CCS Contest API specification: https://ccs-specs.icpc.io/2021-11/contest_api
 .. _OpenAPI Specification ver. 3: https://swagger.io/specification/
