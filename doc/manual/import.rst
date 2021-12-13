@@ -328,6 +328,6 @@ exist or updated when they do. Teams will be set to 'enabled' if their ICPC CMS
 status is 'ACCEPTED', of disabled otherwise. Affilations are not updated or
 deleted even when all teams cancel.
 
-.. _CCS specification: https://ccs-specs.icpc.io/ccs_system_requirements#appendix-file-formats
+.. _CCS specification: https://ccs-specs.icpc.io/2021-11/ccs_system_requirements#appendix-file-formats
 .. _.netrc: https://www.gnu.org/software/inetutils/manual/html_node/The-_002enetrc-file.html
 .. _httpie: https://httpie.org/
