@@ -28,7 +28,7 @@ CHROOTDIR="@judgehost_chrootdir@"
 
 # Fallback Debian and release (codename) to bootstrap (note: overridden right below):
 DISTRO="Debian"
-RELEASE="stretch"
+RELEASE=""
 
 # List of possible architectures to install chroot for:
 DEBIAN_ARCHLIST="amd64,arm64,armel,armhf,i386,mips,mips64el,mipsel,ppc64el,s390x"
@@ -119,6 +119,16 @@ if [ "$DISTRO" != 'Debian' ] && [ "$DISTRO" != 'Ubuntu' ]; then
 	error "Invalid distribution specified, only 'Debian' and 'Ubuntu' are supported."
 fi
 
+# Use the correct default release based on the distro:
+if [ "$DISTRO" = "Debian" ] && [ -z "$RELEASE" ]; then
+	RELEASE="stable"
+	echo "Defaulting to '$RELEASE' release for Debian"
+fi
+if [ "$DISTRO" = "Ubuntu" ] && [ -z "$RELEASE" ]; then
+	RELEASE="focal"
+	echo "Defaulting to '$RELEASE' release for Ubuntu"
+fi
+
 if [ "$(id -u)" != 0 ]; then
     echo "Warning: you probably need to run this program as root."
 fi
@@ -182,7 +192,7 @@ if [ -z "$DEBMIRROR" ]; then
 	# x86_64 can use the main Ubuntu repo's, other
 	# architectures need to use a mirror from ubuntu-ports.
 	if [ "$(uname -m)" = "x86_64" ]; then
-		DEBMIRROR="http://us.archive.ubuntu.com./ubuntu/"
+		DEBMIRROR="http://us.archive.ubuntu.com/ubuntu/"
 	else
 		DEBMIRROR="http://ports.ubuntu.com/ubuntu-ports/"
 	fi
