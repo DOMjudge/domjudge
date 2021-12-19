@@ -12,8 +12,20 @@
 # Abort when a single command fails(or uninitialized variable is accessed):
 set -eu
 
+cleanup() {
+    # Unmount things on cleanup
+    umount -f "$CHROOTDIR/proc" >/dev/null 2>&1  || /bin/true
+    umount -f "$CHROOTDIR/sys" >/dev/null 2>&1  || /bin/true
+    umount -f "$CHROOTDIR/dev/pts" >/dev/null 2>&1  || /bin/true
+    # Cleanup docker directory if present
+    ([ -n "$WORKDIR" ] && [ -d "$WORKDIR" ] && rm -rf "$WORKDIR") || /bin/true
+}
+trap cleanup EXIT
+
 # Default directory where to build the chroot tree:
 CHROOTDIR="@judgehost_chrootdir@"
+
+WORKDIR=""
 
 usage()
 {
@@ -24,7 +36,8 @@ Creates a chroot environment from a docker image
 Options:
   -i <image>:<tag>   Docker image to build chroot from
   -d <dir>           Directory where to build the chroot environment.
-  -y                 Force overwriting the chroot dir and downloading debootstrap.
+  -y                 Force overwriting the chroot dir.
+  -f                 Force downloading docker even if it is already installed.
   -h                 Display this help.
 
 This script must be run as root, <chrootdir> is the non-existing
@@ -45,12 +58,14 @@ error()
 # Read command-line parameters:
 SHOWHELP=0
 FORCEYES=0
+FORCEDOWNLOAD=0
 IMAGE=""
-while getopts 'i:d:yh' OPT ; do
+while getopts 'i:d:yfh' OPT ; do
     case $OPT in
         i) IMAGE=$OPTARG ;;
         d) CHROOTDIR=$OPTARG ;;
         y) FORCEYES=1 ;;
+        f) FORCEDOWNLOAD=1 ;;
         h) SHOWHELP=1 ;;
         \?) error "Could not parse options." ;;
     esac
@@ -73,7 +88,7 @@ fi
 [ -z "$IMAGE" ] && error "No docker image specified (-i image:tag)"
 
 if [ -e "$CHROOTDIR" ]; then
-    if [ ! "$FORCEYES" ]; then
+    if [ "$FORCEYES" = 0 ]; then
         printf "'%s' already exists. Remove? (y/N) " "$CHROOTDIR"
         read -r yn
         if [ "$yn" != "y" ] && [ "$yn" != "Y" ]; then
@@ -88,46 +103,58 @@ mkdir -p "$CHROOTDIR"
 cd "$CHROOTDIR"
 CHROOTDIR="$PWD"
 
+if [ "$FORCEDOWNLOAD" = 0 ] && command -v docker >/dev/null; then
+    if ! docker version >/dev/null 2>/dev/null; then
+        error "Docker appears to be installed, but it doesn't seem to work. Is the daemon running?"
+    fi
+    DOCKER="docker"
+else
+    WORKDIR="$(mktemp -d)"
+    echo "Download temporary docker version in $WORKDIR"
 
-WORKDIR="$(mktemp -d)"
-DOCKER_BINARY_PATH="$WORKDIR/docker-binary"
-mkdir "$DOCKER_BINARY_PATH"
+    DOCKER_BINARY_PATH="$WORKDIR/docker-binary"
+    mkdir "$DOCKER_BINARY_PATH"
 
-echo "Downloading and extracting docker binaries"
-DOCKER_DOWNLOAD_URL="https://download.docker.com/linux/static/stable/x86_64/docker-18.06.1-ce.tgz"
-curl "$DOCKER_DOWNLOAD_URL" | tar -C "$DOCKER_BINARY_PATH" --strip-components=1 -xzf -
-echo "{}" > "$WORKDIR/docker-config.json"
+    echo "Downloading and extracting docker binaries"
+    DOCKER_DOWNLOAD_URL="https://download.docker.com/linux/static/stable/x86_64/docker-20.10.12.tgz"
+    curl "$DOCKER_DOWNLOAD_URL" | tar -C "$DOCKER_BINARY_PATH" --strip-components=1 -xzf -
+    echo "{}" > "$WORKDIR/docker-config.json"
 
-echo "Launching docker daemon so we can download/extract files"
-export PATH="$DOCKER_BINARY_PATH:$PATH"
-"$DOCKER_BINARY_PATH/dockerd" \
-    --data-root   "$WORKDIR/docker-data" \
-    --exec-root   "$WORKDIR/docker-exec" \
-    --pidfile     "$WORKDIR/docker.pid" \
-    --config-file "$WORKDIR/docker-config.json" \
-    --host        "unix://$WORKDIR/docker.sock" \
-    --group       root \
-    --iptables=false \
-    --bridge=none &
+    echo "Launching docker daemon so we can download/extract files"
+    export PATH="$DOCKER_BINARY_PATH:$PATH"
+    "$DOCKER_BINARY_PATH/dockerd" \
+        --data-root   "$WORKDIR/docker-data" \
+        --exec-root   "$WORKDIR/docker-exec" \
+        --pidfile     "$WORKDIR/docker.pid" \
+        --config-file "$WORKDIR/docker-config.json" \
+        --host        "unix://$WORKDIR/docker.sock" \
+        --group       root \
+        --iptables=false \
+        --bridge=none &
+    sleep 1s
 
-DOCKER="$DOCKER_BINARY_PATH/docker -H unix://$WORKDIR/docker.sock"
+    DOCKER="$DOCKER_BINARY_PATH/docker -H unix://$WORKDIR/docker.sock"
+fi
 
 echo "Running docker to download/extract the contents of an image"
 container="$($DOCKER create "$IMAGE")"
 $DOCKER export "$container" | tar -C "$CHROOTDIR" -xf -
+$DOCKER rm "$container"
 
-echo "Shutting down docker daemon"
-kill -9 "$(cat "$WORKDIR/docker.pid")"
+if [ -n "$WORKDIR" ]; then
+    echo "Shutting down docker daemon"
+    kill -9 "$(cat "$WORKDIR/docker.pid")"
 
-# Wait a bit to make sure all files are closed and we can umount
-sleep 1
+    # Wait a bit to make sure all files are closed and we can umount
+    sleep 1
 
-# Unmount anything mounted there (docker leaves some things behind)
-awk "\$2 ~ \"^$WORKDIR\" { print \$2 }" /proc/mounts | while IFS= read -r mountpoint; do
-    umount "$mountpoint"
-done
+    # Unmount anything mounted there (docker leaves some things behind)
+    awk "\$2 ~ \"^$WORKDIR\" { print \$2 }" /proc/mounts | while IFS= read -r mountpoint; do
+        umount "$mountpoint"
+    done
 
-rm -rf "$WORKDIR" || true
+    rm -rf "$WORKDIR" || true
+fi
 
 
 # Do some final domjudge specific set up of the chroot
