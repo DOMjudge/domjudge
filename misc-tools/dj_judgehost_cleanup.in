@@ -34,7 +34,7 @@ Commands:
 EOF
 }
 
-if [ `id -u` -ne 0 ]; then
+if [ "$(id -u)" -ne 0 ]; then
     echo "This program must be run as root."
     echo
     usage
@@ -44,9 +44,9 @@ fi
 case $1 in
     mount*)
         echo "Cleaning up stale mounts..."
-        for i in $(cat /proc/mounts | cut -d ' ' -f 2 | grep -E "^$JUDGINGDIR/") ; do
-            umount $i
-            echo "Unmounted $i"
+        cut -d ' ' -f 2 /proc/mounts | grep -E "^$JUDGINGDIR" | while IFS= read -r mountpoint; do
+            umount "$mountpoint"
+            echo "Unmounted $mountpoint"
             sleep 0.1
         done
         echo "Done."
@@ -62,7 +62,7 @@ case $1 in
             for i in testcase executable; do
                 if [ -d "$i/" ]; then
                     echo "    removing $i cache"
-                    rm -rf "$i/"
+                    rm -rf "${i:?}/"
                 fi
             done
             cd - >/dev/null
@@ -71,7 +71,7 @@ case $1 in
         ;;
 
     judging*)
-        if cat /proc/mounts | cut -d ' ' -f 2 | grep -E "^$JUDGINGDIR/" >/dev/null 2>&1 ; then
+        if cut -d ' ' -f 2 /proc/mounts | grep -E "^$JUDGINGDIR/" >/dev/null 2>&1; then
             echo "There are (stale) bind mounts under $JUDGINGDIR/."
             echo "Make sure that all judgedaemons on this host are stopped, and then"
             echo "run '$PROGNAME mount' to clean up any stale bind mounts."
@@ -83,10 +83,9 @@ case $1 in
             [ -d "$d" ] || continue
             cd "$d"
             echo "  in $d:"
-            for i in $(ls -d * 2>/dev/null | grep -E '^[0-9]+$' || true); do
-                [ -d "$i" ] || continue
-                echo "    removing judging data for contest $i"
-                rm -rf "$i/"
+            find . -type d -regex '\./[0-9]+' | while IFS= read -r contest; do
+                echo "    removing judging data for contest $contest"
+                rm -rf "${contest:?}/"
             done
             cd - >/dev/null
         done
