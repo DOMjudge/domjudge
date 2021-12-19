@@ -11,15 +11,17 @@ if [ $# -eq 0 ]; then
 fi
 api_url="$1"
 
-# Add --verify=no here if you want to drop SSL verification during upload.
-httpie_options=""
+myhttp() {
+    # Add --verify=no here if you want to drop SSL verification during upload.
+    http --check-status "$@"
+}
 
 if [ -r groups.json ]; then
     read -r -p "Import groups (from groups.json)? [y/N] " response
     response=${response,,}
     if [[ $response =~ ^(yes|y| ) ]]; then
         echo "Importing groups."
-        http $httpie_options --check-status -b -f POST "$api_url/users/groups" json@groups.json
+        myhttp -b -f POST "$api_url/users/groups" json@groups.json
     else
         echo "Skipping groups import."
     fi
@@ -28,7 +30,7 @@ elif [ -r groups.tsv ]; then
     response=${response,,}
     if [[ $response =~ ^(yes|y| ) ]]; then
         echo "Importing groups."
-        http $httpie_options --check-status -b -f POST "$api_url/users/groups" tsv@groups.tsv
+        myhttp -b -f POST "$api_url/users/groups" tsv@groups.tsv
     else
         echo "Skipping groups import."
     fi
@@ -41,7 +43,7 @@ if [ -r organizations.json ]; then
     response=${response,,}
     if [[ $response =~ ^(yes|y| ) ]]; then
         echo "Importing organizations."
-        http $httpie_options --check-status -b -f POST "$api_url/users/organizations" json@organizations.json
+        myhttp -b -f POST "$api_url/users/organizations" json@organizations.json
     else
         echo "Skipping organizations import."
     fi
@@ -54,7 +56,7 @@ if [ -r teams.json ]; then
     response=${response,,}
     if [[ $response =~ ^(yes|y| ) ]]; then
         echo "Importing teams."
-        http $httpie_options --check-status -b -f POST "$api_url/users/teams" json@teams.json
+        myhttp -b -f POST "$api_url/users/teams" json@teams.json
     else
         echo "Skipping teams import."
     fi
@@ -63,7 +65,7 @@ elif [ -r teams2.tsv ]; then
     response=${response,,}
     if [[ $response =~ ^(yes|y| ) ]]; then
         echo "Importing teams."
-        http $httpie_options --check-status -b -f POST "$api_url/users/teams" tsv@teams2.tsv
+        myhttp -b -f POST "$api_url/users/teams" tsv@teams2.tsv
     else
         echo "Skipping teams import."
     fi
@@ -76,7 +78,7 @@ if [ -r accounts.tsv ]; then
     response=${response,,}
     if [[ $response =~ ^(yes|y| ) ]] || [[ -z $response ]]; then
         echo "Importing accounts."
-        http $httpie_options --check-status -b -f POST "$api_url/users/accounts" tsv@accounts.tsv
+        myhttp -b -f POST "$api_url/users/accounts" tsv@accounts.tsv
     else
         echo "Skipping accounts import."
     fi
@@ -98,14 +100,14 @@ if [ -r contest.yaml ] || [ -r contest.json ]; then
     if [[ $response =~ ^(yes|y| ) ]] || [[ -z $response ]]; then
         echo "Importing contest."
         if [ -r contest.json ]; then
-            cid=$(http $httpie_options --check-status -b -f POST "$api_url/contests" json@contest.json | jq -r '.')
+            cid=$(myhttp -b -f POST "$api_url/contests" json@contest.json | jq -r '.')
         else
             if [ -r problemset.yaml ]; then
                 cat contest.yaml problemset.yaml > combined.yaml
-                cid=$(http $httpie_options --check-status -b -f POST "$api_url/contests" yaml@combined.yaml | jq -r '.')
+                cid=$(myhttp -b -f POST "$api_url/contests" yaml@combined.yaml | jq -r '.')
                 rm combined.yaml
             else
-                cid=$(http $httpie_options --check-status -b -f POST "$api_url/contests" yaml@contest.yaml | jq -r '.')
+                cid=$(myhttp -b -f POST "$api_url/contests" yaml@contest.yaml | jq -r '.')
             fi
         fi
         echo "  -> cid=$cid"
@@ -127,9 +129,9 @@ if [ -r problems.yaml ] || [ -r problems.json ]; then
             read -r -p "Please specify the contest id: " cid
         fi
         if [ -r problems.json ]; then
-            http $httpie_options --check-status --quiet -b -f POST "$api_url/contests/$cid/problems/add-data" data@problems.json
+            myhttp --quiet -b -f POST "$api_url/contests/$cid/problems/add-data" data@problems.json
         else
-            http $httpie_options --check-status --quiet -b -f POST "$api_url/contests/$cid/problems/add-data" data@problems.yaml
+            myhttp --quiet -b -f POST "$api_url/contests/$cid/problems/add-data" data@problems.yaml
         fi
     else
         echo "Skipping problem metadata import."
@@ -143,7 +145,7 @@ if [ -r problems.yaml ] || [ -r problems.json ] || [ -r problemset.yaml ]; then
     response=${response,,}
     if [[ $response =~ ^(yes|y| ) ]] || [[ -z $response ]]; then
         set +e
-        if [ "$(http $httpie_options --check-status --pretty=format "$api_url/user" | jq  '.team')" = "null" ]; then
+        if [ "$(myhttp --pretty=format "$api_url/user" | jq  '.team')" = "null" ]; then
             read -r -p "No team associated with your account. Jury submissions won't be imported. Really continue? [y/N] " response
             response=${response,,}
             if [[ ! $response =~ ^(yes|y| ) ]]; then
@@ -177,11 +179,11 @@ if [ -r problems.yaml ] || [ -r problems.json ] || [ -r problemset.yaml ]; then
                 cd "$prob"
                 zip -r "../$prob" -- .timelimit *
             )
-            probid=$(http $httpie_options --check-status --pretty=format "$api_url/contests/$cid/problems" | jq -r ".[] | select(.externalid==\"$prob\").id")
+            probid=$(myhttp --pretty=format "$api_url/contests/$cid/problems" | jq -r ".[] | select(.externalid==\"$prob\").id")
             read -r -p "Ready to import problem '$prob' to probid=$probid. Continue? [Y/n] " response
             response=${response,,}
             if [[ $response =~ ^(yes|y| ) ]] || [[ -z $response ]]; then
-                http --timeout 3000 $httpie_options --check-status -f POST "$api_url/contests/$cid/problems" zip@"${prob}.zip" problem="$probid"
+                myhttp --timeout 3000 -f POST "$api_url/contests/$cid/problems" zip@"${prob}.zip" problem="$probid"
             fi
         done
     else

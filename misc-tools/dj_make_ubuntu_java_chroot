@@ -31,19 +31,23 @@ mount -t sysfs sysfs "$CHROOTDIR/sys"
 # Required for some warning messages about writing to log files
 mount --bind /dev/pts "$CHROOTDIR/dev/pts"
 
-chroot "$CHROOTDIR" /bin/sh -c debconf-set-selections <<EOF
+in_chroot() {
+    chroot "$CHROOTDIR" "$@"
+}
+
+in_chroot /bin/sh -c debconf-set-selections <<EOF
 debconf shared/accepted-oracle-license-v1-1 select true
 debconf shared/accepted-oracle-license-v1-1 seen true
 EOF
 
 
 PROXYSETTINGS="http_proxy=\"$DEBPROXY\" https_proxy=\"$DEBPROXY\""
-chroot "$CHROOTDIR" /bin/sh -c "$PROXYSETTINGS apt-add-repository -y ppa:webupd8team/java"
-chroot "$CHROOTDIR" /bin/sh -c "$PROXYSETTINGS apt-get update"
-chroot "$CHROOTDIR" /bin/sh -c "$PROXYSETTINGS apt-get install oracle-java8-installer"
+in_chroot /bin/sh -c "$PROXYSETTINGS apt-add-repository -y ppa:webupd8team/java"
+in_chroot /bin/sh -c "$PROXYSETTINGS apt-get update"
+in_chroot /bin/sh -c "$PROXYSETTINGS apt-get install oracle-java8-installer"
 
-chroot "$CHROOTDIR" /bin/sh -c "apt-get autoremove --purge"
-chroot "$CHROOTDIR" /bin/sh -c "apt-get clean"
+in_chroot /bin/sh -c "apt-get autoremove --purge"
+in_chroot /bin/sh -c "apt-get clean"
 
 umount "$CHROOTDIR/dev/pts"
 umount "$CHROOTDIR/sys"
