@@ -141,15 +141,17 @@ CDS_PID=$!
 wait_for_quiet cds.log 10
 echo "CDS initialized"
 
+CDS_URL="https://localhost:8443/api/contests/$DOMJUDGE_CID"
+
 echo "Load the CDS Contest endpoint to make it start reading the event feed"
-curl -k --connect-timeout 5 --max-time 10 -u admin:$CDS_ADMIN_PASS https://localhost:8443/api/contests/$DOMJUDGE_CID >/dev/null 2>&1
+curl -k --connect-timeout 5 --max-time 10 -u "admin:$CDS_ADMIN_PASS" "$CDS_URL" >/dev/null 2>&1
 wait_for_quiet cds.log 10
 
 # Clear old files from previous runs
 rm -f cds-events.json cds-scoreboard.json dj-events.json dj-scoreboard.json
 
 echo "Getting the eventfeed from the cds(please be patient)"
-curl -s -k --connect-timeout 5 --no-buffer -u admin:$CDS_ADMIN_PASS https://localhost:8443/api/contests/$DOMJUDGE_CID/event-feed > cds-events.json 2>/dev/null &
+curl -s -k --connect-timeout 5 --no-buffer -u admin:$CDS_ADMIN_PASS "$CDS_URL/event-feed" > cds-events.json 2>/dev/null &
 CURL_PID=$!
 wait_for_quiet cds-events.json
 # shellcheck disable=SC2015
@@ -164,7 +166,7 @@ wait_for_quiet dj-events.json
 { kill $CURL_PID && wait $CURL_PID || true; } >/dev/null 2>&1
 
 echo "Get the scoreboard from the cds"
-curl -s -k --connect-timeout 5 --no-buffer -u admin:$CDS_ADMIN_PASS https://localhost:8443/api/contests/$DOMJUDGE_CID/scoreboard > cds-scoreboard.json 2>/dev/null
+curl -s -k --connect-timeout 5 --no-buffer -u "admin:$CDS_ADMIN_PASS" "$CDS_URL/scoreboard" > cds-scoreboard.json 2>/dev/null
 echo "Get the scoreboard from domjudge"
 curl -s -k --connect-timeout 5 --no-buffer -u "$CCS_USER:$CCS_PASS" "$CCS_URL/scoreboard" > dj-scoreboard.json 2>/dev/null
 

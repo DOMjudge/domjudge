@@ -94,7 +94,8 @@ DOCKER_BINARY_PATH="$WORKDIR/docker-binary"
 mkdir "$DOCKER_BINARY_PATH"
 
 echo "Downloading and extracting docker binaries"
-curl https://download.docker.com/linux/static/stable/x86_64/docker-18.06.1-ce.tgz | tar -C $DOCKER_BINARY_PATH --strip-components=1 -xzf -
+DOCKER_DOWNLOAD_URL="https://download.docker.com/linux/static/stable/x86_64/docker-18.06.1-ce.tgz"
+curl "$DOCKER_DOWNLOAD_URL" | tar -C "$DOCKER_BINARY_PATH" --strip-components=1 -xzf -
 echo "{}" > "$WORKDIR/docker-config.json"
 
 echo "Launching docker daemon so we can download/extract files"
