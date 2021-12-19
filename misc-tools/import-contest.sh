@@ -157,11 +157,11 @@ if [ -r problems.yaml ] || [ -r problems.json ] || [ -r problemset.yaml ]; then
             read -r -p "Please specify the contest id: " cid
         fi
         if [ -r problems.yaml ]; then
-            probs=$(cat problems.yaml | grep -oP "(?<=id:\s)[',\"]?[[:alnum:]]*[',\"]?(?=,|$)")
+            probs=$(grep -oP "(?<=id:\s)[',\"]?[[:alnum:]]*[',\"]?(?=,|$)" problems.yaml)
         elif [ -r problems.json ]; then
-            probs=$(cat problems.json | jq -r '.[].id')
+            probs=$(jq -r '.[].id' < problems.json)
         else
-            probs=$(cat problemset.yaml | grep -oP "(?<=short-name:\s)[',\"]?[[:alnum:]]*[',\"]?(?=,|$)")
+            probs=$(grep -oP "(?<=short-name:\s)[',\"]?[[:alnum:]]*[',\"]?(?=,|$)" problemset.yaml)
         fi
         for prob in $probs; do
             prob="${prob//[,\',\"]/}"

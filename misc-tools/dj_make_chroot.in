@@ -35,15 +35,15 @@ DEBIAN_ARCHLIST="amd64,arm64,armel,armhf,i386,mips,mips64el,mipsel,ppc64el,s390x
 UBUNTU_ARCHLIST="amd64,arm64,armhf,i386,powerpc,ppc64el,s390x"
 
 # If host system is Debian or Ubuntu, use its release and architecture by default
-if [ "x$(lsb_release -i -s || true)" = 'xDebian' ] || \
-   [ "x$(lsb_release -i -s || true)" = 'xUbuntu' ]; then
+if [ "$(lsb_release -i -s || true)" = 'Debian' ] || \
+   [ "$(lsb_release -i -s || true)" = 'Ubuntu' ]; then
     DISTRO="$(lsb_release -i -s)"
     RELEASE="$(lsb_release -c -s)"
-    if [ "x$(lsb_release -i -s)" = 'xDebian' ]; then
-        if [ "x$(lsb_release -c -s)" = "xsid" ]; then
+    if [ "$(lsb_release -i -s)" = 'Debian' ]; then
+        if [ "$(lsb_release -c -s)" = "sid" ]; then
             RELEASE='unstable'
         fi
-        if [ "x$(lsb_release -r -s)" = 'xtesting' ]; then
+        if [ "$(lsb_release -r -s)" = 'testing' ]; then
             RELEASE='testing'
         fi
     fi
@@ -286,14 +286,14 @@ cp -r /usr/share/ca-certificates/* "$CHROOTDIR/usr/share/ca-certificates" || tru
 cp -r /usr/local/share/ca-certificates/* "$CHROOTDIR/usr/local/share/ca-certificates" || true
 
 if [ "$DISTRO" = 'Debian' ]; then
-    if [ "x$RELEASE" = 'xtesting' -o "x$RELEASE" = 'xunstable' ]; then
+    if [ "$RELEASE" = 'testing' ] || [ "$RELEASE" = 'unstable' ]; then
         DISABLE_SECURITY='#'
     fi
     SECURITY_RELEASE="$RELEASE-security"
-    if [ "x$RELEASE" = 'xjessie' -o "x$RELEASE" = 'xstretch' -o "x$RELEASE" = 'xbuster' ]; then
+    if [ "$RELEASE" = 'jessie' ] || [ "$RELEASE" = 'stretch' ] || [ "$RELEASE" = 'buster' ]; then
         SECURITY_RELEASE="$RELEASE/updates"
     fi
-cat > "$CHROOTDIR/etc/apt/sources.list" <<EOF
+    cat > "$CHROOTDIR/etc/apt/sources.list" <<EOF
 # Release as specified or taken from host (incl. optional security repository):
 
 # $RELEASE
@@ -303,7 +303,7 @@ ${DISABLE_SECURITY}deb http://security.debian.org    $SECURITY_RELEASE    main
 EOF
 fi
 if [ "$DISTRO" = 'Ubuntu' ]; then
-cat > "$CHROOTDIR/etc/apt/sources.list" <<EOF
+    cat > "$CHROOTDIR/etc/apt/sources.list" <<EOF
 deb $DEBMIRROR $RELEASE main
 deb $DEBMIRROR $RELEASE universe
 deb $DEBMIRROR $RELEASE-updates main
