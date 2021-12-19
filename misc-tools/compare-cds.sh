@@ -4,12 +4,12 @@ BASEDIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 ARG1=${1:-}
 if [[ $ARG1 == "--help" || $ARG1 == "-h" ]]; then
-  echo "Usage: $0 <DOMJUDGE_URL> <CONTESTID>"
-  echo ""
-  echo "<DOMJUDGE_URL>    The base URL of your domjudge installation"
-  echo "                  (default: http://localhost/domjudge)"
-  echo "<CONTESTID>       The contest id you want to validate(default: 2)"
-  exit 1
+    echo "Usage: $0 <DOMJUDGE_URL> <CONTESTID>"
+    echo ""
+    echo "<DOMJUDGE_URL>    The base URL of your domjudge installation"
+    echo "                  (default: http://localhost/domjudge)"
+    echo "<CONTESTID>       The contest id you want to validate(default: 2)"
+    exit 1
 fi
 
 DOMJUDGE_URL="${1:-http://localhost/domjudge}"
@@ -36,42 +36,41 @@ CDS_URL="https://github.com/icpctools/icpctools/releases/download/v${CDS_VERSION
 UTILS_URL="https://github.com/icpctools/icpctools/releases/download/v${UTILS_VERSION}/contestUtil-${UTILS_VERSION}.zip"
 
 wait_for_quiet() {
-  FILE_TO_WATCH="$1"
-  DELAY="${2:-5}"
+    FILE_TO_WATCH="$1"
+    DELAY="${2:-5}"
 
-  echo "Waiting for ${DELAY}s of inactivity for file: $(basename $FILE_TO_WATCH)"
+    echo "Waiting for ${DELAY}s of inactivity for file: $(basename $FILE_TO_WATCH)"
 
-  LAST_SIZE="-1"
-  SIZE="$(stat -c%s "$FILE_TO_WATCH")"
-  while (( LAST_SIZE < SIZE )); do
-    if (( LAST_SIZE > 0 )); then
-      echo "    file has size $SIZE(was $LAST_SIZE), still changing"
-    else
-      echo "    file has size $SIZE"
-    fi
-    sleep $DELAY
-    LAST_SIZE="$SIZE"
+    LAST_SIZE="-1"
     SIZE="$(stat -c%s "$FILE_TO_WATCH")"
-  done
+    while (( LAST_SIZE < SIZE )); do
+        if (( LAST_SIZE > 0 )); then
+            echo "    file has size $SIZE(was $LAST_SIZE), still changing"
+        else
+            echo "    file has size $SIZE"
+        fi
+        sleep $DELAY
+        LAST_SIZE="$SIZE"
+        SIZE="$(stat -c%s "$FILE_TO_WATCH")"
+    done
 }
 
 
 echo "Checking for cds"
 CDS_DIR="$BASEDIR/icpctools/cds-$CDS_VERSION"
 if [ ! -d "$CDS_DIR" ]; then
+    mkdir -p icpctools/source_archives
+    SOURCE_ARCHIVE="icpctools/source_archives/icpctools-cds-$CDS_VERSION.zip"
+    if [ ! -f $SOURCE_ARCHIVE ]; then
+        echo "    Downloading cds($CDS_VERSION)..."
+        curl -L --insecure "$CDS_URL" -o $SOURCE_ARCHIVE >/dev/null 2>&1
+    fi
 
-  mkdir -p icpctools/source_archives
-  SOURCE_ARCHIVE="icpctools/source_archives/icpctools-cds-$CDS_VERSION.zip"
-  if [ ! -f $SOURCE_ARCHIVE ]; then
-    echo "    Downloading cds($CDS_VERSION)..."
-    curl -L --insecure "$CDS_URL" -o $SOURCE_ARCHIVE >/dev/null 2>&1
-  fi
-
-  echo "    Extracting cds..."
-  TMPDIR="$(mktemp -d)"
-  unzip -d $TMPDIR $SOURCE_ARCHIVE >/dev/null 2>&1
-  mv $TMPDIR/wlp $CDS_DIR
-  rm -r "$TMPDIR"
+    echo "    Extracting cds..."
+    TMPDIR="$(mktemp -d)"
+    unzip -d $TMPDIR $SOURCE_ARCHIVE >/dev/null 2>&1
+    mv $TMPDIR/wlp $CDS_DIR
+    rm -r "$TMPDIR"
 fi
 echo "CDS present"
 
@@ -79,19 +78,18 @@ echo "CDS present"
 echo "Checking for contest utils"
 CONTESTUTIL_DIR="$BASEDIR/icpctools/contestutil-$UTILS_VERSION"
 if [ ! -d "$CONTESTUTIL_DIR" ]; then
+    mkdir -p icpctools/source_archives
+    SOURCE_ARCHIVE="icpctools/source_archives/icpctools-contestutil-$UTILS_VERSION.zip"
+    if [ ! -f $SOURCE_ARCHIVE ]; then
+        echo "    Downloading contest utils($UTILS_VERSION)..."
+        curl -L --insecure "$UTILS_URL" -o $SOURCE_ARCHIVE >/dev/null 2>&1
+    fi
 
-  mkdir -p icpctools/source_archives
-  SOURCE_ARCHIVE="icpctools/source_archives/icpctools-contestutil-$UTILS_VERSION.zip"
-  if [ ! -f $SOURCE_ARCHIVE ]; then
-    echo "    Downloading contest utils($UTILS_VERSION)..."
-    curl -L --insecure "$UTILS_URL" -o $SOURCE_ARCHIVE >/dev/null 2>&1
-  fi
-
-  echo "    Extracting contest utils..."
-  TMPDIR="$(mktemp -d)"
-  unzip -d $TMPDIR/contestUtil $SOURCE_ARCHIVE >/dev/null 2>&1
-  mv $TMPDIR/contestUtil $CONTESTUTIL_DIR
-  rm -r "$TMPDIR"
+    echo "    Extracting contest utils..."
+    TMPDIR="$(mktemp -d)"
+    unzip -d $TMPDIR/contestUtil $SOURCE_ARCHIVE >/dev/null 2>&1
+    mv $TMPDIR/contestUtil $CONTESTUTIL_DIR
+    rm -r "$TMPDIR"
 fi
 echo "Contest utils present"
 
@@ -99,35 +97,36 @@ echo "Contest utils present"
 echo "Checking for CDP directory"
 CDP_DIR="$BASEDIR/icpctools/cdp"
 if [ -d "$CDP_DIR" ]; then
-  echo "    cdp directory present, deleting"
-  # For some reason on my system the first rm fails
-  rm -rf "$CDP_DIR" 2>/dev/null || true
-  sleep 1
-  rm -rf "$CDP_DIR"
+    echo "    cdp directory present, deleting"
+    # For some reason on my system the first rm fails
+    rm -rf "$CDP_DIR" 2>/dev/null || true
+    sleep 1
+    rm -rf "$CDP_DIR"
 fi
 mkdir -p "$CDP_DIR"
+
 
 echo "Configuring CDS contest"
 cat <<EOF > "$CDS_DIR/usr/servers/cds/config/cdsConfig.xml"
 <cds>
-	<contest location="$BASEDIR/icpctools/cdp">
-		<ccs url="$CCS_URL" user="$CCS_USER" password="$CCS_PASS"/>
-	</contest>
+    <contest location="$BASEDIR/icpctools/cdp">
+        <ccs url="$CCS_URL" user="$CCS_USER" password="$CCS_PASS"/>
+    </contest>
 </cds>
 EOF
 
 echo "Configuring CDS users"
 cat <<EOF > "$CDS_DIR/usr/servers/cds/users.xml"
 <server description="ACM ICPC contest clients">
-   <!-- Change passwords immediately to secure the contest -->
-   <basicRegistry>
-      <user name="admin" password="$CDS_ADMIN_PASS"/>
-      <user name="balloon" password="$CDS_BALLOON_PASS"/>
-      <user name="public" password="$CDS_PUBLIC_PASS"/>
-      <user name="presentation" password="$CDS_PRESENTATION_PASS"/>
-      <user name="myicpc" password="$CDS_MYICPC_PASS"/>
-      <user name="live" password="$CDS_LIVE_PASS"/>
-   </basicRegistry>
+    <!-- Change passwords immediately to secure the contest -->
+    <basicRegistry>
+        <user name="admin" password="$CDS_ADMIN_PASS"/>
+        <user name="balloon" password="$CDS_BALLOON_PASS"/>
+        <user name="public" password="$CDS_PUBLIC_PASS"/>
+        <user name="presentation" password="$CDS_PRESENTATION_PASS"/>
+        <user name="myicpc" password="$CDS_MYICPC_PASS"/>
+        <user name="live" password="$CDS_LIVE_PASS"/>
+    </basicRegistry>
 </server>
 EOF
 
@@ -190,11 +189,11 @@ set -e
 
 RET=0
 if [ $SCOREBOARD_CHECK -ne 0 ]; then
-  echo "Scoreboard comparison failed"
-  RET=1
+    echo "Scoreboard comparison failed"
+    RET=1
 fi
 if [ $EVENTFEED_CHECK -ne 0 ]; then
-  echo "Event-Feed comparison failed"
-  RET=1
+    echo "Event-Feed comparison failed"
+    RET=1
 fi
 exit $RET

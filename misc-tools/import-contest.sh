@@ -6,8 +6,8 @@
 set -euo pipefail
 
 if [ $# -eq 0 ]; then
-  echo "Usage: $0 <domjudge-api-url>"
-  exit 1
+    echo "Usage: $0 <domjudge-api-url>"
+    exit 1
 fi
 api_url="$1"
 
