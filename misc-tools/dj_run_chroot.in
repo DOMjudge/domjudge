@@ -23,7 +23,7 @@ CHROOTDIR="@judgehost_chrootdir@"
 
 usage()
 {
-	cat <<EOF
+    cat <<EOF
 Usage: $0 [options]... [command]
 Runs <command> inside the prebuilt chroot environment. If no command is
 given, then an interactive shell inside the chroot is started.
@@ -57,21 +57,21 @@ error()
 
 # Read command-line parameters:
 while getopts 'd:h' OPT ; do
-	case $OPT in
-		d) CHROOTDIR=$OPTARG ;;
-		h) SHOWHELP=1 ;;
-		\?) error "Could not parse options." ;;
-	esac
+    case $OPT in
+        d) CHROOTDIR=$OPTARG ;;
+        h) SHOWHELP=1 ;;
+        \?) error "Could not parse options." ;;
+    esac
 done
 shift $((OPTIND-1))
 
 if [ -n "$SHOWHELP" ]; then
-	usage
-	exit 0
+    usage
+    exit 0
 fi
 
 if [ $# -eq 0 ]; then
-	INTERACTIVE=1
+    INTERACTIVE=1
 fi
 
 if [ "$(id -u)" != 0 ]; then
@@ -102,9 +102,9 @@ export LC_ALL=C
 [ -n "$INTERACTIVE" ] && echo "Entering chroot in '$CHROOTDIR'."
 
 if [ -n "$INTERACTIVE" ]; then
-	chroot "$CHROOTDIR"
+    chroot "$CHROOTDIR"
 else
-	chroot "$CHROOTDIR" /bin/sh -c "$*"
+    chroot "$CHROOTDIR" /bin/sh -c "$*"
 fi
 
 umount "$CHROOTDIR/dev/pts"

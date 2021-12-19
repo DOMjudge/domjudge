@@ -17,7 +17,7 @@ CHROOTDIR="@judgehost_chrootdir@"
 
 usage()
 {
-	cat <<EOF
+    cat <<EOF
 Usage: $0 [options]...
 Creates a chroot environment from a docker image
 
@@ -47,22 +47,22 @@ SHOWHELP=0
 FORCEYES=0
 IMAGE=""
 while getopts 'i:d:yh' OPT ; do
-	case $OPT in
-		i) IMAGE=$OPTARG ;;
-		d) CHROOTDIR=$OPTARG ;;
-		y) FORCEYES=1 ;;
-		h) SHOWHELP=1 ;;
-		\?) error "Could not parse options." ;;
-	esac
+    case $OPT in
+        i) IMAGE=$OPTARG ;;
+        d) CHROOTDIR=$OPTARG ;;
+        y) FORCEYES=1 ;;
+        h) SHOWHELP=1 ;;
+        \?) error "Could not parse options." ;;
+    esac
 done
 shift $((OPTIND-1))
 if [ $# -gt 0 ]; then
-	error "Additional arguments specified."
+    error "Additional arguments specified."
 fi
 
 if [ "$SHOWHELP" -eq "1" ]; then
-	usage
-	exit 0
+    usage
+    exit 0
 fi
 
 if [ "$(id -u)" != 0 ]; then
@@ -73,15 +73,15 @@ fi
 [ -z "$IMAGE" ] && error "No docker image specified(-i image:tag)"
 
 if [ -e "$CHROOTDIR" ]; then
-	if [ ! "$FORCEYES" ]; then
-		printf "'%s' already exists. Remove? (y/N) " "$CHROOTDIR"
-		read -r yn
-		if [ "$yn" != "y" ] && [ "$yn" != "Y" ]; then
-			error "Chrootdir already exists, exiting."
-		fi
-	fi
-	cleanup
-	rm -rf "$CHROOTDIR"
+    if [ ! "$FORCEYES" ]; then
+        printf "'%s' already exists. Remove? (y/N) " "$CHROOTDIR"
+        read -r yn
+        if [ "$yn" != "y" ] && [ "$yn" != "Y" ]; then
+            error "Chrootdir already exists, exiting."
+        fi
+    fi
+    cleanup
+    rm -rf "$CHROOTDIR"
 fi
 
 mkdir -p "$CHROOTDIR"
@@ -142,7 +142,7 @@ sed -i "s/^root::/root:*:/" "$CHROOTDIR/etc/shadow"
 # Create a file to test that in the judging environment no
 # access to group root readable files is available:
 echo "This file should not be readable inside the judging environment!" \
-	> "$CHROOTDIR/etc/root-permission-test.txt"
+  > "$CHROOTDIR/etc/root-permission-test.txt"
 chmod 0640 "$CHROOTDIR/etc/root-permission-test.txt"
 
 

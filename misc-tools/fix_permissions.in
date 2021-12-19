@@ -12,8 +12,8 @@ WEBSERVER_GROUP="@WEBSERVER_GROUP@"
 set -e
 
 if [ `id -u` -ne 0 ]; then
-	echo "Error: can only change permissions as root."
-	exit 1
+    echo "Error: can only change permissions as root."
+    exit 1
 fi
 
 # DESTDIR may optionally be past through the environment by make.

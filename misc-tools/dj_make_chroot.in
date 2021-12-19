@@ -37,24 +37,24 @@ UBUNTU_ARCHLIST="amd64,arm64,armhf,i386,powerpc,ppc64el,s390x"
 # If host system is Debian or Ubuntu, use its release and architecture by default
 if [ "x$(lsb_release -i -s || true)" = 'xDebian' ] || \
    [ "x$(lsb_release -i -s || true)" = 'xUbuntu' ]; then
-	DISTRO="$(lsb_release -i -s)"
-	RELEASE="$(lsb_release -c -s)"
-	if [ "x$(lsb_release -i -s)" = 'xDebian' ]; then
-		if [ "x$(lsb_release -c -s)" = "xsid" ]; then
-			RELEASE='unstable'
-		fi
-		if [ "x$(lsb_release -r -s)" = 'xtesting' ]; then
-			RELEASE='testing'
-		fi
-	fi
-	if [ -z "$ARCH" ]; then
-		ARCH="$(dpkg --print-architecture)"
-	fi
+    DISTRO="$(lsb_release -i -s)"
+    RELEASE="$(lsb_release -c -s)"
+    if [ "x$(lsb_release -i -s)" = 'xDebian' ]; then
+        if [ "x$(lsb_release -c -s)" = "xsid" ]; then
+            RELEASE='unstable'
+        fi
+        if [ "x$(lsb_release -r -s)" = 'xtesting' ]; then
+            RELEASE='testing'
+        fi
+    fi
+    if [ -z "$ARCH" ]; then
+        ARCH="$(dpkg --print-architecture)"
+    fi
 fi
 
 usage()
 {
-	cat <<EOF
+    cat <<EOF
 Usage: $0 [options]...
 Creates a chroot environment with Java JRE support using the
 Debian or Ubuntu GNU/Linux distribution.
@@ -92,41 +92,41 @@ error()
 
 # Read command-line parameters:
 while getopts 'a:d:D:R:i:r:l:yh' OPT ; do
-	case $OPT in
-		a) ARCH=$OPTARG ;;
-		d) CHROOTDIR=$OPTARG ;;
-		D) DISTRO=$OPTARG ;;
-		R) RELEASE=$OPTARG ;;
-		i) INSTALLDEBS_EXTRA=$OPTARG ;;
-		r) REMOVEDEBS_EXTRA=$OPTARG ;;
-		l) LOCALDEBS=$OPTARG ;;
-		y) FORCEYES=1 ;;
-		h) SHOWHELP=1 ;;
-		\?) error "Could not parse options." ;;
-	esac
+    case $OPT in
+        a) ARCH=$OPTARG ;;
+        d) CHROOTDIR=$OPTARG ;;
+        D) DISTRO=$OPTARG ;;
+        R) RELEASE=$OPTARG ;;
+        i) INSTALLDEBS_EXTRA=$OPTARG ;;
+        r) REMOVEDEBS_EXTRA=$OPTARG ;;
+        l) LOCALDEBS=$OPTARG ;;
+        y) FORCEYES=1 ;;
+        h) SHOWHELP=1 ;;
+        \?) error "Could not parse options." ;;
+    esac
 done
 shift $((OPTIND-1))
 if [ $# -gt 0 ]; then
-	error "Additional arguments specified."
+    error "Additional arguments specified."
 fi
 
 if [ -n "$SHOWHELP" ]; then
-	usage
-	exit 0
+    usage
+    exit 0
 fi
 
 if [ "$DISTRO" != 'Debian' ] && [ "$DISTRO" != 'Ubuntu' ]; then
-	error "Invalid distribution specified, only 'Debian' and 'Ubuntu' are supported."
+    error "Invalid distribution specified, only 'Debian' and 'Ubuntu' are supported."
 fi
 
 # Use the correct default release based on the distro:
 if [ "$DISTRO" = "Debian" ] && [ -z "$RELEASE" ]; then
-	RELEASE="stable"
-	echo "Defaulting to '$RELEASE' release for Debian"
+    RELEASE="stable"
+    echo "Defaulting to '$RELEASE' release for Debian"
 fi
 if [ "$DISTRO" = "Ubuntu" ] && [ -z "$RELEASE" ]; then
-	RELEASE="focal"
-	echo "Defaulting to '$RELEASE' release for Ubuntu"
+    RELEASE="focal"
+    echo "Defaulting to '$RELEASE' release for Ubuntu"
 fi
 
 if [ "$(id -u)" != 0 ]; then
@@ -139,69 +139,69 @@ fi
 # Various settings that can be tweaked, specific per distribution:
 if [ "$DISTRO" = 'Debian' ]; then
 
-# Packages to include during bootstrap process (comma separated):
-INCLUDEDEBS="ca-certificates"
+    # Packages to include during bootstrap process (comma separated):
+    INCLUDEDEBS="ca-certificates"
 
-# Packages to install after upgrade (space separated):
-INSTALLDEBS="gcc g++ make default-jdk-headless default-jre-headless pypy3 python3 locales"
-# For C# support add: mono-runtime libmono-system2.0-cil
-# However running mono within chroot still gives errors...
+    # Packages to install after upgrade (space separated):
+    INSTALLDEBS="gcc g++ make default-jdk-headless default-jre-headless pypy3 python3 locales"
+    # For C# support add: mono-runtime libmono-system2.0-cil
+    # However running mono within chroot still gives errors...
 
-# Packages to remove after upgrade (space separated):
-REMOVEDEBS=""
+    # Packages to remove after upgrade (space separated):
+    REMOVEDEBS=""
 
-# Which debootstrap package to install on non-Debian systems:
-DEBOOTDEB="debootstrap_1.0.114_all.deb"
+    # Which debootstrap package to install on non-Debian systems:
+    DEBOOTDEB="debootstrap_1.0.114_all.deb"
 
-# The Debian mirror/proxy below can be passed as environment
-# variables; if none are given the following defaults are used.
+    # The Debian mirror/proxy below can be passed as environment
+    # variables; if none are given the following defaults are used.
 
-# Debian mirror. deb.debian.org will pick the 'closest'.
-[ -z "$DEBMIRROR" ] && DEBMIRROR="http://deb.debian.org/debian"
+    # Debian mirror. deb.debian.org will pick the 'closest'.
+    [ -z "$DEBMIRROR" ] && DEBMIRROR="http://deb.debian.org/debian"
 
-# A local caching proxy to use for apt-get,
-# (typically an install of aptcacher-ng), for example:
-#DEBPROXY="http://aptcacher-ng.example.com:3142/"
-[ -z "$DEBPROXY" ] && DEBPROXY=""
+    # A local caching proxy to use for apt-get,
+    # (typically an install of aptcacher-ng), for example:
+    #DEBPROXY="http://aptcacher-ng.example.com:3142/"
+    [ -z "$DEBPROXY" ] && DEBPROXY=""
 
 fi
 
 if [ "$DISTRO" = 'Ubuntu' ]; then
 
-# Packages to include during bootstrap process (comma separated):
-INCLUDEDEBS=""
+    # Packages to include during bootstrap process (comma separated):
+    INCLUDEDEBS=""
 
-# Packages to install after upgrade (space separated):
-INSTALLDEBS="gcc g++ make default-jdk-headless default-jre-headless pypy pypy3 python3 locales"
-# For C# support add: mono-mcs mono-devel
-# However running mono within chroot still gives errors...
+    # Packages to install after upgrade (space separated):
+    INSTALLDEBS="gcc g++ make default-jdk-headless default-jre-headless pypy pypy3 python3 locales"
+    # For C# support add: mono-mcs mono-devel
+    # However running mono within chroot still gives errors...
 
-# Packages to remove after upgrade (space separated):
-REMOVEDEBS=""
+    # Packages to remove after upgrade (space separated):
+    REMOVEDEBS=""
 
-# Which debootstrap package to install on non-Ubuntu systems:
-# This is only used when the default distro changed from Debian to
-# Ubuntu. The version below corresponds to Ubuntu 20.04 Focal.
-DEBOOTDEB="debootstrap_1.0.118ubuntu1_all.deb"
+    # Which debootstrap package to install on non-Ubuntu systems:
+    # This is only used when the default distro changed from Debian to
+    # Ubuntu. The version below corresponds to Ubuntu 20.04 Focal.
+    DEBOOTDEB="debootstrap_1.0.118ubuntu1_all.deb"
 
-# The Debian mirror/proxy below can be passed as environment
-# variables; if none are given the following defaults are used.
+    # The Debian mirror/proxy below can be passed as environment
+    # variables; if none are given the following defaults are used.
 
-# Ubuntu mirror, modify to match closest mirror
-if [ -z "$DEBMIRROR" ]; then
-	# x86_64 can use the main Ubuntu repo's, other
-	# architectures need to use a mirror from ubuntu-ports.
-	if [ "$(uname -m)" = "x86_64" ]; then
-		DEBMIRROR="http://us.archive.ubuntu.com/ubuntu/"
-	else
-		DEBMIRROR="http://ports.ubuntu.com/ubuntu-ports/"
-	fi
-fi
+    # Ubuntu mirror, modify to match closest mirror
+    if [ -z "$DEBMIRROR" ]; then
+        # x86_64 can use the main Ubuntu repo's, other
+        # architectures need to use a mirror from ubuntu-ports.
+        if [ "$(uname -m)" = "x86_64" ]; then
+            DEBMIRROR="http://us.archive.ubuntu.com/ubuntu/"
+        else
+            DEBMIRROR="http://ports.ubuntu.com/ubuntu-ports/"
+        fi
+    fi
 
-# A local caching proxy to use for apt-get,
-# (typically an install of aptcacher-ng), for example:
-#DEBPROXY="http://aptcacher-ng.example.com:3142/"
-[ -z "$DEBPROXY" ] && DEBPROXY=""
+    # A local caching proxy to use for apt-get,
+    # (typically an install of aptcacher-ng), for example:
+    #DEBPROXY="http://aptcacher-ng.example.com:3142/"
+    [ -z "$DEBPROXY" ] && DEBPROXY=""
 
 fi
 
@@ -212,15 +212,15 @@ REMOVEDEBS=" $REMOVEDEBS  $(echo $REMOVEDEBS_EXTRA  | tr , ' ')"
 export DEBIAN_FRONTEND=noninteractive
 
 if [ -e "$CHROOTDIR" ]; then
-	if [ ! "$FORCEYES" ]; then
-		printf "'%s' already exists. Remove? (y/N) " "$CHROOTDIR"
-		read -r yn
-		if [ "$yn" != "y" ] && [ "$yn" != "Y" ]; then
-			error "Chrootdir already exists, exiting."
-		fi
-	fi
-	cleanup
-	rm -rf "$CHROOTDIR"
+    if [ ! "$FORCEYES" ]; then
+        printf "'%s' already exists. Remove? (y/N) " "$CHROOTDIR"
+        read -r yn
+        if [ "$yn" != "y" ] && [ "$yn" != "Y" ]; then
+            error "Chrootdir already exists, exiting."
+        fi
+    fi
+    cleanup
+    rm -rf "$CHROOTDIR"
 fi
 
 mkdir -p "$CHROOTDIR"
@@ -229,42 +229,42 @@ CHROOTDIR="$PWD"
 
 if [ ! -x /usr/sbin/debootstrap ]; then
 
-	echo "This script will install debootstrap on your system."
-	if [ ! "$FORCEYES" ]; then
-		printf "Continue? (y/N) "
-		read -r yn
-		if [ "$yn" != "y" ] && [ "$yn" != "Y" ]; then
-			exit 1;
-		fi
-	fi
+    echo "This script will install debootstrap on your system."
+    if [ ! "$FORCEYES" ]; then
+        printf "Continue? (y/N) "
+        read -r yn
+        if [ "$yn" != "y" ] && [ "$yn" != "Y" ]; then
+            exit 1;
+        fi
+    fi
 
-	if [ -f /etc/debian_version ]; then
+    if [ -f /etc/debian_version ]; then
 
-		cd /
-		apt-get install debootstrap
+        cd /
+        apt-get install debootstrap
 
-	else
-		mkdir "$CHROOTDIR/debootstrap"
-		cd "$CHROOTDIR/debootstrap"
+    else
+        mkdir "$CHROOTDIR/debootstrap"
+        cd "$CHROOTDIR/debootstrap"
 
-		wget "$DEBMIRROR/pool/main/d/debootstrap/${DEBOOTDEB}"
+        wget "$DEBMIRROR/pool/main/d/debootstrap/${DEBOOTDEB}"
 
-		ar -x "$DEBOOTDEB"
-		cd /
-		zcat "$CHROOTDIR/debootstrap/data.tar.gz" | tar xv
+        ar -x "$DEBOOTDEB"
+        cd /
+        zcat "$CHROOTDIR/debootstrap/data.tar.gz" | tar xv
 
-		rm -rf "$CHROOTDIR/debootstrap"
-	fi
+        rm -rf "$CHROOTDIR/debootstrap"
+    fi
 fi
 
 INCLUDEOPT=""
 if [ -n "$INCLUDEDEBS" ]; then
-	INCLUDEOPT="--include=$INCLUDEDEBS"
+    INCLUDEOPT="--include=$INCLUDEDEBS"
 fi
 EXCLUDEOPT=""
 # shellcheck disable=SC2153
 if [ -n "$EXCLUDEDEBS" ]; then
-	EXCLUDEOPT="--exclude=$EXCLUDEDEBS"
+    EXCLUDEOPT="--exclude=$EXCLUDEDEBS"
 fi
 
 BOOTSTRAP_COMMAND="/usr/sbin/debootstrap"
@@ -277,7 +277,7 @@ echo "Running debootstrap to install base system, this may take a while..."
 # Add extra paths that are not set by default on Redhat-like systems.
 # shellcheck disable=SC2086
 eval PATH="$PATH:/bin:/sbin:/usr/sbin" $BOOTSTRAP_COMMAND $INCLUDEOPT $EXCLUDEOPT \
-	--variant=minbase --arch "$ARCH" "$RELEASE" "$CHROOTDIR" "$DEBMIRROR"
+  --variant=minbase --arch "$ARCH" "$RELEASE" "$CHROOTDIR" "$DEBMIRROR"
 
 rm -f "$CHROOTDIR/etc/resolv.conf"
 cp /etc/resolv.conf /etc/hosts /etc/hostname "$CHROOTDIR/etc" || true
@@ -286,19 +286,19 @@ cp -r /usr/share/ca-certificates/* "$CHROOTDIR/usr/share/ca-certificates" || tru
 cp -r /usr/local/share/ca-certificates/* "$CHROOTDIR/usr/local/share/ca-certificates" || true
 
 if [ "$DISTRO" = 'Debian' ]; then
-	if [ "x$RELEASE" = 'xtesting' -o "x$RELEASE" = 'xunstable' ]; then
-		DISABLE_SECURITY='#'
-	fi
-	SECURITY_RELEASE="$RELEASE-security"
-	if [ "x$RELEASE" = 'xjessie' -o "x$RELEASE" = 'xstretch' -o "x$RELEASE" = 'xbuster' ]; then
-		SECURITY_RELEASE="$RELEASE/updates"
-	fi
+    if [ "x$RELEASE" = 'xtesting' -o "x$RELEASE" = 'xunstable' ]; then
+        DISABLE_SECURITY='#'
+    fi
+    SECURITY_RELEASE="$RELEASE-security"
+    if [ "x$RELEASE" = 'xjessie' -o "x$RELEASE" = 'xstretch' -o "x$RELEASE" = 'xbuster' ]; then
+        SECURITY_RELEASE="$RELEASE/updates"
+    fi
 cat > "$CHROOTDIR/etc/apt/sources.list" <<EOF
 # Release as specified or taken from host (incl. optional security repository):
 
 # $RELEASE
-deb $DEBMIRROR			$RELEASE		main
-${DISABLE_SECURITY}deb http://security.debian.org	$SECURITY_RELEASE	main
+deb $DEBMIRROR            $RELEASE        main
+${DISABLE_SECURITY}deb http://security.debian.org    $SECURITY_RELEASE    main
 
 EOF
 fi
@@ -337,33 +337,33 @@ mount --bind /dev/pts "$CHROOTDIR/dev/pts"
 export LC_ALL=C
 
 chroot "$CHROOTDIR" /bin/sh -c debconf-set-selections <<EOF
-passwd	passwd/root-password-crypted	password
-passwd	passwd/user-password-crypted	password
-passwd	passwd/root-password		password
-passwd	passwd/root-password-again	password
-passwd	passwd/user-password-again	password
-passwd	passwd/user-password		password
-passwd	passwd/shadow			boolean	true
-passwd	passwd/username-bad		note
-passwd	passwd/password-mismatch	note
-passwd	passwd/username			string
-passwd	passwd/make-user		boolean	true
-passwd	passwd/md5			boolean	false
-passwd	passwd/user-fullname		string
-passwd	passwd/user-uid			string
-passwd	passwd/password-empty		note
-debconf	debconf/priority	select	high
-debconf	debconf/frontend	select	Noninteractive
-locales	locales/locales_to_be_generated	multiselect
-locales	locales/default_environment_locale	select	None
+passwd     passwd/root-password-crypted          password
+passwd     passwd/user-password-crypted          password
+passwd     passwd/root-password                  password
+passwd     passwd/root-password-again            password
+passwd     passwd/user-password-again            password
+passwd     passwd/user-password                  password
+passwd     passwd/shadow                         boolean        true
+passwd     passwd/username-bad                   note
+passwd     passwd/password-mismatch              note
+passwd     passwd/username                       string
+passwd     passwd/make-user                      boolean        true
+passwd     passwd/md5                            boolean        false
+passwd     passwd/user-fullname                  string
+passwd     passwd/user-uid                       string
+passwd     passwd/password-empty                 note
+debconf    debconf/priority                      select         high
+debconf    debconf/frontend                      select         Noninteractive
+locales    locales/locales_to_be_generated       multiselect
+locales    locales/default_environment_locale    select         None
 EOF
 
 if [ "$DISTRO" = 'Ubuntu' ]; then
-# Disable upstart init scripts(so upgrades work), we don't need to actually run
-# any services in the chroot, so this is fine.
-# Refer to: http://ubuntuforums.org/showthread.php?t=1326721
-chroot "$CHROOTDIR" /bin/sh -c "dpkg-divert --local --rename --add /sbin/initctl"
-chroot "$CHROOTDIR" /bin/sh -c "ln -s /bin/true /sbin/initctl"
+    # Disable upstart init scripts(so upgrades work), we don't need to actually run
+    # any services in the chroot, so this is fine.
+    # Refer to: http://ubuntuforums.org/showthread.php?t=1326721
+    chroot "$CHROOTDIR" /bin/sh -c "dpkg-divert --local --rename --add /sbin/initctl"
+    chroot "$CHROOTDIR" /bin/sh -c "ln -s /bin/true /sbin/initctl"
 fi
 
 # Upgrade the system, and install/remove packages as desired
@@ -371,10 +371,10 @@ chroot "$CHROOTDIR" /bin/sh -c "apt-get update && apt-get dist-upgrade"
 chroot "$CHROOTDIR" /bin/sh -c "apt-get clean"
 chroot "$CHROOTDIR" /bin/sh -c "apt-get install $INSTALLDEBS"
 if [ -n "$LOCALDEBS" ]; then
-	DIR=$(mktemp -d -p "$CHROOTDIR/tmp" 'dj_chroot_debs_XXXXXX')
-	# shellcheck disable=SC2046
-	cp $(echo "$LOCALDEBS" | tr , ' ') "$DIR"
-	chroot "$CHROOTDIR" /bin/sh -c "dpkg -i /${DIR#$CHROOTDIR}/*.deb"
+    DIR=$(mktemp -d -p "$CHROOTDIR/tmp" 'dj_chroot_debs_XXXXXX')
+    # shellcheck disable=SC2046
+    cp $(echo "$LOCALDEBS" | tr , ' ') "$DIR"
+    chroot "$CHROOTDIR" /bin/sh -c "dpkg -i /${DIR#$CHROOTDIR}/*.deb"
 fi
 
 # Do some cleanup of the chroot
@@ -384,9 +384,9 @@ chroot "$CHROOTDIR" /bin/sh -c "apt-get clean"
 
 # Remove unnecessary setuid bits
 chroot "$CHROOTDIR" /bin/sh -c "chmod a-s /usr/bin/wall /usr/bin/newgrp \
-	/usr/bin/chage /usr/bin/chfn /usr/bin/chsh /usr/bin/expiry \
-	/usr/bin/gpasswd /usr/bin/passwd \
-	/bin/su /bin/mount /bin/umount /sbin/unix_chkpwd" || true
+  /usr/bin/chage /usr/bin/chfn /usr/bin/chsh /usr/bin/expiry \
+  /usr/bin/gpasswd /usr/bin/passwd \
+  /bin/su /bin/mount /bin/umount /sbin/unix_chkpwd" || true
 
 # Disable root account
 sed -i "s/^root::/root:*:/" "$CHROOTDIR/etc/shadow"
@@ -394,7 +394,7 @@ sed -i "s/^root::/root:*:/" "$CHROOTDIR/etc/shadow"
 # Create a file to test that in the judging environment no
 # access to group root readable files is available:
 echo "This file should not be readable inside the judging environment!" \
-	> "$CHROOTDIR/etc/root-permission-test.txt"
+  > "$CHROOTDIR/etc/root-permission-test.txt"
 chmod 0640 "$CHROOTDIR/etc/root-permission-test.txt"
 
 umount "$CHROOTDIR/dev/pts"
