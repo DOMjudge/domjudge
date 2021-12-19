@@ -11,13 +11,13 @@ WEBSERVER_GROUP="@WEBSERVER_GROUP@"
 
 set -e
 
-if [ `id -u` -ne 0 ]; then
+if [ "$(id -u)" -ne 0 ]; then
     echo "Error: can only change permissions as root."
     exit 1
 fi
 
 # DESTDIR may optionally be past through the environment by make.
-chown -R ${DOMJUDGE_USER}:${WEBSERVER_GROUP} ${DESTDIR}${WEBAPPDIR}/var
-chmod -R g+rwxs                              ${DESTDIR}${WEBAPPDIR}/var
-setfacl -R -m d:g::rwX                       ${DESTDIR}${WEBAPPDIR}/var
-setfacl -R -m d:u:${DOMJUDGE_USER}:rwX       ${DESTDIR}${WEBAPPDIR}/var
+chown -R ${DOMJUDGE_USER}:${WEBSERVER_GROUP} "${DESTDIR}${WEBAPPDIR}/var"
+chmod -R g+rwxs                              "${DESTDIR}${WEBAPPDIR}/var"
+setfacl -R -m d:g::rwX                       "${DESTDIR}${WEBAPPDIR}/var"
+setfacl -R -m d:u:${DOMJUDGE_USER}:rwX       "${DESTDIR}${WEBAPPDIR}/var"

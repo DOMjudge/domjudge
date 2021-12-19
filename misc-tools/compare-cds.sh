@@ -39,7 +39,7 @@ wait_for_quiet() {
     FILE_TO_WATCH="$1"
     DELAY="${2:-5}"
 
-    echo "Waiting for ${DELAY}s of inactivity for file: $(basename $FILE_TO_WATCH)"
+    echo "Waiting for ${DELAY}s of inactivity for file: $(basename "$FILE_TO_WATCH")"
 
     LAST_SIZE="-1"
     SIZE="$(stat -c%s "$FILE_TO_WATCH")"
@@ -49,7 +49,7 @@ wait_for_quiet() {
         else
             echo "    file has size $SIZE"
         fi
-        sleep $DELAY
+        sleep "$DELAY"
         LAST_SIZE="$SIZE"
         SIZE="$(stat -c%s "$FILE_TO_WATCH")"
     done
@@ -68,8 +68,8 @@ if [ ! -d "$CDS_DIR" ]; then
 
     echo "    Extracting cds..."
     TMPDIR="$(mktemp -d)"
-    unzip -d $TMPDIR $SOURCE_ARCHIVE >/dev/null 2>&1
-    mv $TMPDIR/wlp $CDS_DIR
+    unzip -d "$TMPDIR" "$SOURCE_ARCHIVE" >/dev/null 2>&1
+    mv "$TMPDIR/wlp" "$CDS_DIR"
     rm -r "$TMPDIR"
 fi
 echo "CDS present"
@@ -87,8 +87,8 @@ if [ ! -d "$CONTESTUTIL_DIR" ]; then
 
     echo "    Extracting contest utils..."
     TMPDIR="$(mktemp -d)"
-    unzip -d $TMPDIR/contestUtil $SOURCE_ARCHIVE >/dev/null 2>&1
-    mv $TMPDIR/contestUtil $CONTESTUTIL_DIR
+    unzip -d "$TMPDIR/contestUtil" "$SOURCE_ARCHIVE" >/dev/null 2>&1
+    mv "$TMPDIR/contestUtil" "$CONTESTUTIL_DIR"
     rm -r "$TMPDIR"
 fi
 echo "Contest utils present"
@@ -130,7 +130,7 @@ cat <<EOF > "$CDS_DIR/usr/servers/cds/users.xml"
 </server>
 EOF
 
-cd $BASEDIR/icpctools # cd so the logs directory ends up in a less annoying place
+cd "$BASEDIR/icpctools" # cd so the logs directory ends up in a less annoying place
 
 echo "Start the cds"
 CDS="$CDS_DIR/bin/server run cds"
@@ -157,7 +157,7 @@ wait_for_quiet cds-events.json
 
 
 echo "Get the event-feed from domjudge(please be patient)"
-curl -s -k --connect-timeout 5 --no-buffer -u $CCS_USER:$CCS_PASS $CCS_URL/event-feed > dj-events.json 2>/dev/null &
+curl -s -k --connect-timeout 5 --no-buffer -u "$CCS_USER:$CCS_PASS" "$CCS_URL/event-feed" > dj-events.json 2>/dev/null &
 CURL_PID=$!
 wait_for_quiet dj-events.json
 # shellcheck disable=SC2015
@@ -166,7 +166,7 @@ wait_for_quiet dj-events.json
 echo "Get the scoreboard from the cds"
 curl -s -k --connect-timeout 5 --no-buffer -u admin:$CDS_ADMIN_PASS https://localhost:8443/api/contests/$DOMJUDGE_CID/scoreboard > cds-scoreboard.json 2>/dev/null
 echo "Get the scoreboard from domjudge"
-curl -s -k --connect-timeout 5 --no-buffer -u $CCS_USER:$CCS_PASS $CCS_URL/scoreboard > dj-scoreboard.json 2>/dev/null
+curl -s -k --connect-timeout 5 --no-buffer -u "$CCS_USER:$CCS_PASS" "$CCS_URL/scoreboard" > dj-scoreboard.json 2>/dev/null
 
 
 
@@ -177,13 +177,13 @@ echo "    stopped"
 
 echo "Comparing the eventfeeds"
 set +e
-$CONTESTUTIL_DIR/eventFeed.sh --compare cds-events.json dj-events.json
+"$CONTESTUTIL_DIR/eventFeed.sh" --compare cds-events.json dj-events.json
 EVENTFEED_CHECK=$?
 set -e
 
 echo "Comparing the scoreboards"
 set +e
-$CONTESTUTIL_DIR/scoreboardUtil.sh cds-scoreboard.json dj-scoreboard.json
+"$CONTESTUTIL_DIR/scoreboardUtil.sh" cds-scoreboard.json dj-scoreboard.json
 SCOREBOARD_CHECK=$?
 set -e
 
