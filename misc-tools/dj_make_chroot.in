@@ -205,8 +205,8 @@ if [ "$DISTRO" = 'Ubuntu' ]; then
 
 fi
 
-INSTALLDEBS="$INSTALLDEBS $(echo $INSTALLDEBS_EXTRA | tr , ' ')"
-REMOVEDEBS=" $REMOVEDEBS  $(echo $REMOVEDEBS_EXTRA  | tr , ' ')"
+INSTALLDEBS="$INSTALLDEBS $(echo "$INSTALLDEBS_EXTRA" | tr , ' ')"
+REMOVEDEBS="$REMOVEDEBS   $(echo "$REMOVEDEBS_EXTRA"  | tr , ' ')"
 
 # To prevent (libc6) upgrade questions:
 export DEBIAN_FRONTEND=noninteractive
@@ -374,7 +374,7 @@ if [ -n "$LOCALDEBS" ]; then
     DIR=$(mktemp -d -p "$CHROOTDIR/tmp" 'dj_chroot_debs_XXXXXX')
     # shellcheck disable=SC2046
     cp $(echo "$LOCALDEBS" | tr , ' ') "$DIR"
-    chroot "$CHROOTDIR" /bin/sh -c "dpkg -i /${DIR#$CHROOTDIR}/*.deb"
+    chroot "$CHROOTDIR" /bin/sh -c "dpkg -i /${DIR#"$CHROOTDIR"}/*.deb"
 fi
 
 # Do some cleanup of the chroot

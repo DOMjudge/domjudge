@@ -70,7 +70,7 @@ if [ "$(id -u)" != 0 ]; then
 fi
 
 [ -z "$CHROOTDIR" ] && error "No chroot directory given or default known."
-[ -z "$IMAGE" ] && error "No docker image specified(-i image:tag)"
+[ -z "$IMAGE" ] && error "No docker image specified (-i image:tag)"
 
 if [ -e "$CHROOTDIR" ]; then
     if [ ! "$FORCEYES" ]; then
@@ -99,31 +99,31 @@ echo "{}" > "$WORKDIR/docker-config.json"
 
 echo "Launching docker daemon so we can download/extract files"
 export PATH="$DOCKER_BINARY_PATH:$PATH"
-$DOCKER_BINARY_PATH/dockerd \
-  --data-root $WORKDIR/docker-data \
-  --exec-root $WORKDIR/docker-exec \
-  --pidfile $WORKDIR/docker.pid \
-  --config-file $WORKDIR/docker-config.json \
-  --host unix://$WORKDIR/docker.sock \
-  --group root \
+"$DOCKER_BINARY_PATH/dockerd" \
+  --data-root   "$WORKDIR/docker-data" \
+  --exec-root   "$WORKDIR/docker-exec" \
+  --pidfile     "$WORKDIR/docker.pid" \
+  --config-file "$WORKDIR/docker-config.json" \
+  --host        "unix://$WORKDIR/docker.sock" \
+  --group       root \
   --iptables=false \
   --bridge=none &
 
 DOCKER="$DOCKER_BINARY_PATH/docker -H unix://$WORKDIR/docker.sock"
 
 echo "Running docker to download/extract the contents of an image"
-container="$($DOCKER create $IMAGE)"
-$DOCKER export "$container" | tar -C $CHROOTDIR -xf -
+container="$($DOCKER create "$IMAGE")"
+$DOCKER export "$container" | tar -C "$CHROOTDIR" -xf -
 
 echo "Shutting down docker daemon"
-kill -9 "$(cat $WORKDIR/docker.pid)"
+kill -9 "$(cat "$WORKDIR/docker.pid")"
 
 # Wait a bit to make sure all files are closed and we can umount
 sleep 1
 
-# Unmount anything mounted there(docker leaves some things behind)
-awk "\$2 ~ \"^$WORKDIR\" { print \$2 }" /proc/mounts | while read -r mountpoint; do
-    umount $mountpoint
+# Unmount anything mounted there (docker leaves some things behind)
+awk "\$2 ~ \"^$WORKDIR\" { print \$2 }" /proc/mounts | while IFS= read -r mountpoint; do
+    umount "$mountpoint"
 done
 
 rm -rf "$WORKDIR" || true
