@@ -67,7 +67,8 @@ Options:
   -i <debs>    List of extra package names to install (comma separated).
   -r <debs>    List of extra package names to remove (comma separated).
   -l <debs>    List of local package files to install (comma separated).
-  -y           Force overwriting the chroot dir and downloading debootstrap.
+  -y           Force overwriting the chroot dir and installing debootstrap.
+  -f           Force the download of debootstrap even if it's already installed.
   -h           Display this help.
 
 This script must be run as root, <chrootdir> is the non-existing
@@ -90,8 +91,11 @@ error()
     exit 1
 }
 
+FORCEYES=0
+FORCEDOWNLOAD=0
+
 # Read command-line parameters:
-while getopts 'a:d:D:R:i:r:l:yh' OPT ; do
+while getopts 'a:d:D:R:i:r:l:yfh' OPT ; do
     case $OPT in
         a) ARCH=$OPTARG ;;
         d) CHROOTDIR=$OPTARG ;;
@@ -101,6 +105,7 @@ while getopts 'a:d:D:R:i:r:l:yh' OPT ; do
         r) REMOVEDEBS_EXTRA=$OPTARG ;;
         l) LOCALDEBS=$OPTARG ;;
         y) FORCEYES=1 ;;
+        f) FORCEDOWNLOAD=1 ;;
         h) SHOWHELP=1 ;;
         \?) error "Could not parse options." ;;
     esac
@@ -211,14 +216,18 @@ REMOVEDEBS="$REMOVEDEBS   $(echo "$REMOVEDEBS_EXTRA"  | tr , ' ')"
 # To prevent (libc6) upgrade questions:
 export DEBIAN_FRONTEND=noninteractive
 
-if [ -e "$CHROOTDIR" ]; then
-    if [ ! "$FORCEYES" ]; then
-        printf "'%s' already exists. Remove? (y/N) " "$CHROOTDIR"
+confirmation() {
+    if [ "$FORCEYES" = 0 ]; then
+        printf "%s (y/N): " "$1"
         read -r yn
         if [ "$yn" != "y" ] && [ "$yn" != "Y" ]; then
-            error "Chrootdir already exists, exiting."
+            error "${2:-"Exiting."}"
         fi
     fi
+}
+
+if [ -e "$CHROOTDIR" ]; then
+    confirmation "$CHROOTDIR already exists, remove?" "Chrootdir already exists, exiting."
     cleanup
     rm -rf "$CHROOTDIR"
 fi
@@ -227,34 +236,24 @@ mkdir -p "$CHROOTDIR"
 cd "$CHROOTDIR"
 CHROOTDIR="$PWD"
 
-if [ ! -x /usr/sbin/debootstrap ]; then
-
-    echo "This script will install debootstrap on your system."
-    if [ ! "$FORCEYES" ]; then
-        printf "Continue? (y/N) "
-        read -r yn
-        if [ "$yn" != "y" ] && [ "$yn" != "Y" ]; then
-            exit 1;
-        fi
-    fi
-
-    if [ -f /etc/debian_version ]; then
-
-        cd /
-        apt-get install debootstrap
-
-    else
-        mkdir "$CHROOTDIR/debootstrap"
-        cd "$CHROOTDIR/debootstrap"
-
-        wget "$DEBMIRROR/pool/main/d/debootstrap/${DEBOOTDEB}"
-
+if [ "$FORCEDOWNLOAD" = 0 ] && command -v debootstrap >/dev/null; then
+    BOOTSTRAP_COMMAND=$(command -v debootstrap)
+    echo "Using debootstrap from $BOOTSTRAP_COMMAND"
+elif [ "$FORCEDOWNLOAD" = 0 ] && [ -f /etc/debian_version ]; then
+    confirmation "Do you want to install debootstrap using apt-get?" "debootstrap is required, exiting."
+    apt-get install -y debootstrap
+    BOOTSTRAP_COMMAND=$(command -v debootstrap)
+else
+    WORKDIR=$(mktemp -d)
+    echo "Downloading debootstrap to temporary directory at $WORKDIR"
+    (
+        cd "$WORKDIR"
+        wget "$DEBMIRROR/pool/main/d/debootstrap/$DEBOOTDEB"
         ar -x "$DEBOOTDEB"
-        cd /
-        zcat "$CHROOTDIR/debootstrap/data.tar.gz" | tar xv
-
-        rm -rf "$CHROOTDIR/debootstrap"
-    fi
+        zcat data.tar.gz | tar x
+    )
+    # this allows debootstrap to run without being installed in /
+    BOOTSTRAP_COMMAND="DEBOOTSTRAP_DIR=\"$WORKDIR/usr/share/debootstrap\" \"$WORKDIR/usr/sbin/debootstrap\""
 fi
 
 INCLUDEOPT=""
@@ -267,7 +266,6 @@ if [ -n "$EXCLUDEDEBS" ]; then
     EXCLUDEOPT="--exclude=$EXCLUDEDEBS"
 fi
 
-BOOTSTRAP_COMMAND="/usr/sbin/debootstrap"
 if [ -n "$DEBPROXY" ]; then
     BOOTSTRAP_COMMAND="http_proxy=\"$DEBPROXY\" $BOOTSTRAP_COMMAND"
 fi
@@ -278,6 +276,10 @@ echo "Running debootstrap to install base system, this may take a while..."
 # shellcheck disable=SC2086
 eval PATH="$PATH:/bin:/sbin:/usr/sbin" $BOOTSTRAP_COMMAND $INCLUDEOPT $EXCLUDEOPT \
     --variant=minbase --arch "$ARCH" "$RELEASE" "$CHROOTDIR" "$DEBMIRROR"
+
+if [ -n "$WORKDIR" ] && [ -d "$WORKDIR" ]; then
+    rm -rf "$WORKDIR"
+fi
 
 rm -f "$CHROOTDIR/etc/resolv.conf"
 cp /etc/resolv.conf /etc/hosts /etc/hostname "$CHROOTDIR/etc" || true
