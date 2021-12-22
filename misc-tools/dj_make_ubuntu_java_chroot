@@ -32,22 +32,22 @@ mount -t sysfs sysfs "$CHROOTDIR/sys"
 mount --bind /dev/pts "$CHROOTDIR/dev/pts"
 
 in_chroot() {
-    chroot "$CHROOTDIR" "$@"
+    chroot "$CHROOTDIR" /bin/sh -c "$@"
 }
 
-in_chroot /bin/sh -c debconf-set-selections <<EOF
+in_chroot debconf-set-selections <<EOF
 debconf shared/accepted-oracle-license-v1-1 select true
 debconf shared/accepted-oracle-license-v1-1 seen true
 EOF
 
 
 PROXYSETTINGS="http_proxy=\"$DEBPROXY\" https_proxy=\"$DEBPROXY\""
-in_chroot /bin/sh -c "$PROXYSETTINGS apt-add-repository -y ppa:webupd8team/java"
-in_chroot /bin/sh -c "$PROXYSETTINGS apt-get update"
-in_chroot /bin/sh -c "$PROXYSETTINGS apt-get install oracle-java8-installer"
+in_chroot "$PROXYSETTINGS apt-add-repository -y ppa:webupd8team/java"
+in_chroot "$PROXYSETTINGS apt-get update"
+in_chroot "$PROXYSETTINGS apt-get install oracle-java8-installer"
 
-in_chroot /bin/sh -c "apt-get autoremove --purge"
-in_chroot /bin/sh -c "apt-get clean"
+in_chroot "apt-get autoremove --purge"
+in_chroot "apt-get clean"
 
 umount "$CHROOTDIR/dev/pts"
 umount "$CHROOTDIR/sys"
