@@ -83,7 +83,7 @@ case $1 in
             [ -d "$d" ] || continue
             cd "$d"
             echo "  in $d:"
-            find . -type d -regex '\./[0-9]+' | while IFS= read -r contest; do
+            find . -maxdepth 1 -type d -regex '\./[0-9]+' | while IFS= read -r contest; do
                 echo "    removing judging data for contest $contest"
                 rm -rf "${contest:?}/"
             done

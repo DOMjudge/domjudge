@@ -337,10 +337,10 @@ mount --bind /dev/pts "$CHROOTDIR/dev/pts"
 export LC_ALL=C
 
 in_chroot() {
-    chroot "$CHROOTDIR" "$@"
+    chroot "$CHROOTDIR" /bin/sh -c "$@"
 }
 
-in_chroot /bin/sh -c debconf-set-selections <<EOF
+in_chroot debconf-set-selections <<EOF
 passwd     passwd/root-password-crypted          password
 passwd     passwd/user-password-crypted          password
 passwd     passwd/root-password                  password
@@ -366,28 +366,28 @@ if [ "$DISTRO" = 'Ubuntu' ]; then
     # Disable upstart init scripts(so upgrades work), we don't need to actually run
     # any services in the chroot, so this is fine.
     # Refer to: http://ubuntuforums.org/showthread.php?t=1326721
-    in_chroot /bin/sh -c "dpkg-divert --local --rename --add /sbin/initctl"
-    in_chroot /bin/sh -c "ln -s /bin/true /sbin/initctl"
+    in_chroot "dpkg-divert --local --rename --add /sbin/initctl"
+    in_chroot "ln -s /bin/true /sbin/initctl"
 fi
 
 # Upgrade the system, and install/remove packages as desired
-in_chroot /bin/sh -c "apt-get update && apt-get dist-upgrade"
-in_chroot /bin/sh -c "apt-get clean"
-in_chroot /bin/sh -c "apt-get install $INSTALLDEBS"
+in_chroot "apt-get update && apt-get dist-upgrade"
+in_chroot "apt-get clean"
+in_chroot "apt-get install $INSTALLDEBS"
 if [ -n "$LOCALDEBS" ]; then
     DIR=$(mktemp -d -p "$CHROOTDIR/tmp" 'dj_chroot_debs_XXXXXX')
     # shellcheck disable=SC2046
     cp $(echo "$LOCALDEBS" | tr , ' ') "$DIR"
-    in_chroot /bin/sh -c "dpkg -i /${DIR#"$CHROOTDIR"}/*.deb"
+    in_chroot "dpkg -i /${DIR#"$CHROOTDIR"}/*.deb"
 fi
 
 # Do some cleanup of the chroot
-in_chroot /bin/sh -c "apt-get remove --purge $REMOVEDEBS"
-in_chroot /bin/sh -c "apt-get autoremove --purge"
-in_chroot /bin/sh -c "apt-get clean"
+in_chroot "apt-get remove --purge $REMOVEDEBS"
+in_chroot "apt-get autoremove --purge"
+in_chroot "apt-get clean"
 
 # Remove unnecessary setuid bits
-in_chroot /bin/sh -c "chmod a-s /usr/bin/wall /usr/bin/newgrp \
+in_chroot "chmod a-s /usr/bin/wall /usr/bin/newgrp \
   /usr/bin/chage /usr/bin/chfn /usr/bin/chsh /usr/bin/expiry \
   /usr/bin/gpasswd /usr/bin/passwd \
   /bin/su /bin/mount /bin/umount /sbin/unix_chkpwd" || true
