@@ -36,6 +36,7 @@ location @domjudgeFront {
 	fastcgi_param SCRIPT_NAME $prefix/index.php;
 	fastcgi_param REQUEST_URI $prefix$uri?$args;
 	fastcgi_param DOCUMENT_ROOT $domjudgeRoot;
+	fastcgi_param HTTPS $http_x_forwarded_proto if_not_empty;
 	# Prevents URIs that include the front controller. This will 404:
 	# http://domain.tld/app_dev.php/some-path
 	internal;

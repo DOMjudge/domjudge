@@ -10,6 +10,13 @@ upstream domjudge {
 	#server unix:/run/php/php7.0-fpm.sock; # default on ubuntu servers
 }
 
+# Read the HTTPS field from the X-Forwarded-Proto field from any upstream proxy
+# Fall back to the internal $https variable if not set
+map $http_x_forwarded_proto $fastcgi_param_https_variable {
+	default $https;
+	https 'on';
+}
+
 ### http host config ###
 #
 
