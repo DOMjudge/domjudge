@@ -13,12 +13,9 @@ check static codecov:
     - diff newcodecov gitlab/uploadcodecov.sh
 
 phpcs_compatibility:
-  extends: [.tiny_job]
+  extends: [.phpsupported_job,.tiny_job]
   stage: style
   image: pipelinecomponents/php-codesniffer:latest
-  parallel:
-    matrix:
-      - PHPVERSION: ["7.2","7.3","7.4","8.0","8.1"]
   script:
     - >
       phpcs -s -p --colors
