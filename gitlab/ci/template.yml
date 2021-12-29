@@ -49,3 +49,10 @@
   services:
     - name: mariadb
       alias: sqlserver
+
+.phpsupported_job:
+  script:
+    - /bin/true
+  parallel:
+    matrix:
+      - PHPVERSION: ["7.2","7.3","7.4","8.0"]

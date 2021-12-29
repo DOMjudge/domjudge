@@ -4,6 +4,15 @@ set -euxo pipefail
 
 . gitlab/dind.profile
 
+version=$1
+[ "$version" = "7.4" ] && CODECOVERAGE=1 || CODECOVERAGE=0
+
+section_start_collap phpinfo "Show the new PHP info"
+update-alternatives --set php /usr/bin/php${version}
+php -v
+php -m
+section_end phpinfo
+
 # Set up
 "$( dirname "${BASH_SOURCE[0]}" )"/base.sh
 
@@ -24,26 +33,35 @@ cd /opt/domjudge/domserver
 export APP_ENV="test"
 
 # Run phpunit tests.
+pcov=""
+phpcov=""
+if [ "$CODECOVERAGE" -eq 1 ]; then
+    phpcov="-dpcov.enabled=1 -dpcov.directory=webapp/src"
+    pcov="--coverage-html=${CI_PROJECT_DIR}/coverage-html --coverage-clover coverage.xml"
+fi
 set +e
-php -dpcov.enabled=1 -dpcov.directory=webapp/src lib/vendor/bin/phpunit -c webapp/phpunit.xml.dist --log-junit ${CI_PROJECT_DIR}/unit-tests.xml --colors=never --coverage-html=${CI_PROJECT_DIR}/coverage-html --coverage-clover coverage.xml > phpunit.out
+php $phpcov lib/vendor/bin/phpunit -c webapp/phpunit.xml.dist --log-junit ${CI_PROJECT_DIR}/unit-tests.xml --colors=never $pcov > phpunit.out
 UNITSUCCESS=$?
 set -e
-CNT=$(sed -n '/Generating code coverage report/,$p' phpunit.out | grep -v DoctrineTestBundle | grep -v ^$ | wc -l)
-FILE=deprecation.txt
-sed -n '/Generating code coverage report/,$p' phpunit.out > ${CI_PROJECT_DIR}/$FILE
-if [ $CNT -lt 5 ]; then
-    STATE=success
-else
-    STATE=failure
+CNT=0
+if [ $CODECOVERAGE -eq 1 ]; then
+    CNT=$(sed -n '/Generating code coverage report/,$p' phpunit.out | grep -v DoctrineTestBundle | grep -v ^$ | wc -l)
+    FILE=deprecation.txt
+    sed -n '/Generating code coverage report/,$p' phpunit.out > ${CI_PROJECT_DIR}/$FILE
+    if [ $CNT -lt 8 ]; then
+        STATE=success
+    else
+        STATE=failure
+    fi
+    ORIGINAL="gitlab.com/DOMjudge"
+    REPLACETO="domjudge.gitlab.io/-"
+    # Copied from CCS
+    curl https://api.github.com/repos/domjudge/domjudge/statuses/$CI_COMMIT_SHA \
+      -X POST \
+      -H "Authorization: token $GH_BOT_TOKEN_OBSCURED" \
+      -H "Accept: application/vnd.github.v3+json" \
+      -d "{\"state\": \"$STATE\", \"target_url\": \"${CI_JOB_URL/$ORIGINAL/$REPLACETO}/artifacts/$FILE\", \"description\":\"Symfony deprecations\", \"context\": \"Symfony deprecation\"}"
 fi
-ORIGINAL="gitlab.com/DOMjudge"
-REPLACETO="domjudge.gitlab.io/-"
-# Copied from CCS
-curl https://api.github.com/repos/domjudge/domjudge/statuses/$CI_COMMIT_SHA \
-  -X POST \
-  -H "Authorization: token $GH_BOT_TOKEN_OBSCURED" \
-  -H "Accept: application/vnd.github.v3+json" \
-  -d "{\"state\": \"$STATE\", \"target_url\": \"${CI_JOB_URL/$ORIGINAL/$REPLACETO}/artifacts/$FILE\", \"description\":\"Symfony deprecations\", \"context\": \"Symfony deprecation\"}"
 if [ $UNITSUCCESS -eq 0 ]; then
     STATE=success
 else
@@ -53,13 +71,15 @@ curl https://api.github.com/repos/domjudge/domjudge/statuses/$CI_COMMIT_SHA \
     -X POST \
     -H "Authorization: token $GH_BOT_TOKEN_OBSCURED" \
     -H "Accept: application/vnd.github.v3+json" \
-    -d "{\"state\": \"$STATE\", \"target_url\": \"${CI_PIPELINE_URL}/test_report\", \"description\":\"Unit tests\", \"context\": \"unit_tests\"}"
+    -d "{\"state\": \"$STATE\", \"target_url\": \"${CI_PIPELINE_URL}/test_report\", \"description\":\"Unit tests\", \"context\": \"unit_tests ($version)\"}"
 if [ $UNITSUCCESS -ne 0 ]; then
     exit 1
 fi
 
-section_start_collap uploadcoverage "Upload code coverage"
-# Only upload when we got working unit-tests.
-set +u # Uses some variables which are not set
-. $DIR/gitlab/uploadcodecov.sh 1>/dev/zero 2>/dev/zero
-section_end uploadcoverage
+if [ $CODECOVERAGE -eq 1 ]; then
+    section_start_collap uploadcoverage "Upload code coverage"
+    # Only upload when we got working unit-tests.
+    set +u # Uses some variables which are not set
+    . $DIR/gitlab/uploadcodecov.sh 1>/dev/zero 2>/dev/zero
+    section_end uploadcoverage
+fi
