@@ -26,7 +26,7 @@
       - lib/vendor/
 
 run unit tests:
-  extends: [.unit_job,.mariadb_job]
+  extends: [.mariadb_job,.unit_job]
 
 run unit tests (MySQL):
-  extends: [.unit_job,.mysql_job]
+  extends: [.mysql_job,.unit_job]
