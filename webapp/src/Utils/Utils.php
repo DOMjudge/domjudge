@@ -473,7 +473,7 @@ class Utils
         if (empty($datetime)) {
             return '';
         }
-        return Utils::specialchars(strftime($format, (int)floor($datetime)));
+        return Utils::specialchars(strftime($format, (int)$datetime));
     }
 
     /**
