@@ -533,7 +533,7 @@ class ScoreboardIntegrationTest extends KernelTestCase
 
     function getConfig(string $name)
     {
-        if (!in_array($name, $this->configValues)) {
+        if (!array_key_exists($name, $this->configValues)) {
             throw new Exception("No configuration value set for '$name'");
         }
 
