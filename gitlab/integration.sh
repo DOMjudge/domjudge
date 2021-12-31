@@ -21,6 +21,15 @@ alias section_start='trace_off ; section_start_internal '
 alias section_end='trace_off ; section_end_internal '
 
 set -euxo pipefail
+
+version=$1
+
+section_start phpinfo "Show the new PHP info"
+update-alternatives --set php /usr/bin/php${version}
+php -v
+php -m
+section_end phpinfo
+
 DIR=$(pwd)
 
 function finish() {
@@ -83,9 +92,9 @@ ADMINPASS=$(cat etc/initial_admin_password.secret)
 cp etc/initial_admin_password.secret "$gitlabartifacts/"
 
 # configure and restart php-fpm
-sudo cp /opt/domjudge/domserver/etc/domjudge-fpm.conf "/etc/php/7.4/fpm/pool.d/domjudge-fpm.conf"
-echo "php_admin_value[date.timezone] = Europe/Amsterdam" | sudo tee -a "/etc/php/7.4/fpm/pool.d/domjudge-fpm.conf"
-sudo /usr/sbin/php-fpm7.4
+sudo cp /opt/domjudge/domserver/etc/domjudge-fpm.conf "/etc/php/$version/fpm/pool.d/domjudge-fpm.conf"
+echo "php_admin_value[date.timezone] = Europe/Amsterdam" | sudo tee -a "/etc/php/$version/fpm/pool.d/domjudge-fpm.conf"
+sudo /usr/sbin/php-fpm${version}
 
 section_end setup
 
