@@ -56,8 +56,7 @@ class ConfigurationServiceTest extends KernelTestCase
         $this->configRepository       = $this->createMock(ObjectRepository::class);
         $this->emGetRepositoryExpects = $this->em->expects(self::any())
             ->method('getRepository')
-            ->with(Configuration::class)
-            ->willReturn($this->configRepository);
+            ->willReturnMap([[Configuration::class, $this->configRepository]]);
         $this->logger                 = $this->createMock(LoggerInterface::class);
         $this->config                 = new ConfigurationService(
             $this->em, $this->logger,
@@ -134,7 +133,7 @@ class ConfigurationServiceTest extends KernelTestCase
      */
     public function testInvalidItem(string $itemName, bool $publicOnly) : void
     {
-        $this->expectExceptionMessageRegExp("/^Configuration variable '.*' not found\.$/");
+        $this->expectExceptionMessageMatches("/^Configuration variable '.*' not found\.$/");
         $this->configRepository->expects(self::never())
             ->method('findAll');
 
@@ -340,10 +339,8 @@ class ConfigurationServiceTest extends KernelTestCase
 
         $execRepository = $this->createMock(ObjectRepository::class);
 
-        $this->emGetRepositoryExpects->getMatcher()->setParametersMatcher(null);
         $this->emGetRepositoryExpects
-            ->with(Executable::class)
-            ->willReturn($execRepository);
+            ->willReturnMap([[Configuration::class, $this->configRepository], [Executable::class, $execRepository]]);
 
         $execRepository->expects(self::once())
             ->method('findBy')
