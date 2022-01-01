@@ -24,7 +24,7 @@ class ClarificationControllerTest extends BaseTest
             "to_team_id"   => null,
             "reply_to_id"  => null,
             "time"         => "2018-02-11T21:47:18.901+00:00",
-            "contest_time" => "-16525:12:41.098",
+            "contest_time" => "-25309:12:41.098",
             "text"         => "Can you tell me how to solve this problem?",
             "answered"     => true,
         ],
@@ -34,7 +34,7 @@ class ClarificationControllerTest extends BaseTest
             "to_team_id"   => "2",
             "reply_to_id"  => "1",
             "time"         => "2018-02-11T21:47:57.689+00:00",
-            "contest_time" => "-16525:12:02.310",
+            "contest_time" => "-25309:12:02.310",
             "text"         => "> Can you tell me how to solve this problem?\r\n\r\nNo, read the problem statement.",
             "answered"     => true,
         ],
@@ -44,7 +44,7 @@ class ClarificationControllerTest extends BaseTest
             "to_team_id"   => null,
             "reply_to_id"  => null,
             "time"         => "2018-02-11T21:48:58.901+00:00",
-            "contest_time" => "-16525:11:01.098",
+            "contest_time" => "-25309:11:01.098",
             "text"         => "Is it necessary to read the problem statement carefully?",
             "answered"     => false,
         ],
@@ -54,7 +54,7 @@ class ClarificationControllerTest extends BaseTest
             "to_team_id"   => null,
             "reply_to_id"  => null,
             "time"         => "2018-02-11T21:53:20.000+00:00",
-            "contest_time" => "-16525:06:40.000",
+            "contest_time" => "-25309:06:40.000",
             "text"         => "Lunch is served",
             "answered"     => true,
         ],
@@ -64,7 +64,7 @@ class ClarificationControllerTest extends BaseTest
             "to_team_id"   => "2",
             "reply_to_id"  => null,
             "time"         => "2018-02-11T21:47:43.689+00:00",
-            "contest_time" => "-16525:12:16.310",
+            "contest_time" => "-25309:12:16.310",
             "text"         => "There was a mistake in judging this problem. Please try again",
             "answered"     => true,
         ],
@@ -85,7 +85,7 @@ class ClarificationControllerTest extends BaseTest
         $this->assertCount(1, $clarificationFromApi);
         $this->assertEquals("Lunch is served", $clarificationFromApi[0]['text']);
         $this->assertEquals("2018-02-11T21:53:20.000+00:00", $clarificationFromApi[0]['time']);
-        $this->assertEquals("-16525:06:40.000", $clarificationFromApi[0]['contest_time']);
+        $this->assertEquals("-25309:06:40.000", $clarificationFromApi[0]['contest_time']);
         $this->assertArrayNotHasKey('answered', $clarificationFromApi[0]);
     }
 
