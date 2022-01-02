@@ -12,6 +12,7 @@ visual_pr:
       - URL: public
         ROLE: [none,jury,admin,balloon,team]
   script:
+    - echo $CI_JOB_NAME
     - git fetch
     - git config --global user.email "never@commits.ci"
     - git config --global user.name "Rebase against main"
