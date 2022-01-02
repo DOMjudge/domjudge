@@ -64,7 +64,8 @@
 		"fortawesome/font-awesome": "5.*",
 		"friendsofsymfony/rest-bundle": "^3.0",
 		"ircmaxell/password-compat": "*",
-		"jms/serializer-bundle": "^3.4",
+		"jms/serializer": "^3.6",
+		"jms/serializer-bundle": "^3.6",
 		"mbostock/d3": "^3.5",
 		"nelmio/api-doc-bundle": "^4.2",
 		"novus/nvd3": "^1.8",
@@ -79,7 +80,7 @@
 		"symfony/css-selector": "4.4.*",
 		"symfony/dotenv": "4.4.*",
 		"symfony/expression-language": "4.4.*",
-		"symfony/flex": "^1.4",
+		"symfony/flex": "^1.17",
 		"symfony/form": "4.4.*",
 		"symfony/framework-bundle": "4.4.*",
 		"symfony/http-client": "4.4.*",
@@ -123,7 +124,11 @@
 			"php": "7.2.5"
 		},
 		"vendor-dir": "lib/vendor",
-		"component-dir": "lib/vendor/components"
+		"component-dir": "lib/vendor/components",
+		"allow-plugins": {
+			"composer/package-versions-deprecated": true,
+			"symfony/flex": true
+		}
 	},
 	"replace": {
 		"paragonie/random_compat": "2.*",
