@@ -490,7 +490,7 @@ class JudgehostController extends AbstractFOSRestController
                     $problem    = $submission->getProblem();
                     $this->scoreboardService->calculateScoreRow($contest, $team, $problem);
 
-                    $message = sprintf("submission %i, judging %i: compiler-error",
+                    $message = sprintf("submission %d, judging %d: compiler-error",
                                        $submission->getSubmitid(), $judging->getJudgingid());
                     $this->dj->alert('reject', $message);
                 });
