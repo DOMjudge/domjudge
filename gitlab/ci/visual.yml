@@ -60,10 +60,18 @@ visual_main:
 visual_compare:
   extends: [.normal_job]
   stage: compare
+  parallel:
+    matrix:
+      - URL: team
+        ROLE: [jury,admin,team]
+      - URL: public
+        ROLE: [none,jury,admin,balloon,team]
   needs:
-    - visual_pr
-    - visual_main
+    - "visual_pr: [$URL,$ROLE]"
+    - "visual_main [$URL,$ROLE]"
   script:
+    - export EURL="$URL"
+    - export EROLE="$ROLE"
     - ./gitlab/visualcompare.sh
   artifacts:
     when: always

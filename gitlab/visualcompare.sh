@@ -75,7 +75,7 @@ set +e
 MANY=$(ls $VISUALCHANGES|grep -v 'main\|pr'|wc -l)
 set -e
 FILE="browse/$VISUALCHANGES"
-CONTEXT="UI diffs"
+CONTEXT="UI diffs ($EROLE, $EURL)"
 DESCRIPTION="Placeholder for message"
 URL="URL to the results"
 
