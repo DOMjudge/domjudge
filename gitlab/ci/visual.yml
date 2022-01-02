@@ -68,8 +68,8 @@ visual_compare:
       - URL: public
         ROLE: [none,jury,admin,balloon,team]
   needs:
-    - visual_pr: [$URL, $ROLE]
-    - visual_main: [$URL, $ROLE]
+    - "visual_pr: [$URL, $ROLE]"
+    - "visual_main: [$URL, $ROLE]"
   script:
     - echo $CI_JOB_NAME
     - export EURL="$URL"
