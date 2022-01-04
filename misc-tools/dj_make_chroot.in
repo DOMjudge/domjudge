@@ -277,7 +277,7 @@ echo "Running debootstrap to install base system, this may take a while..."
 # Add extra paths that are not set by default on Redhat-like systems.
 # shellcheck disable=SC2086
 eval PATH="$PATH:/bin:/sbin:/usr/sbin" $BOOTSTRAP_COMMAND $INCLUDEOPT $EXCLUDEOPT \
-  --variant=minbase --arch "$ARCH" "$RELEASE" "$CHROOTDIR" "$DEBMIRROR"
+    --variant=minbase --arch "$ARCH" "$RELEASE" "$CHROOTDIR" "$DEBMIRROR"
 
 rm -f "$CHROOTDIR/etc/resolv.conf"
 cp /etc/resolv.conf /etc/hosts /etc/hostname "$CHROOTDIR/etc" || true
@@ -388,9 +388,9 @@ in_chroot "apt-get clean"
 
 # Remove unnecessary setuid bits
 in_chroot "chmod a-s /usr/bin/wall /usr/bin/newgrp \
-  /usr/bin/chage /usr/bin/chfn /usr/bin/chsh /usr/bin/expiry \
-  /usr/bin/gpasswd /usr/bin/passwd \
-  /bin/su /bin/mount /bin/umount /sbin/unix_chkpwd" || true
+    /usr/bin/chage /usr/bin/chfn /usr/bin/chsh /usr/bin/expiry \
+    /usr/bin/gpasswd /usr/bin/passwd \
+    /bin/su /bin/mount /bin/umount /sbin/unix_chkpwd" || true
 
 # Disable root account
 sed -i "s/^root::/root:*:/" "$CHROOTDIR/etc/shadow"
@@ -398,7 +398,7 @@ sed -i "s/^root::/root:*:/" "$CHROOTDIR/etc/shadow"
 # Create a file to test that in the judging environment no
 # access to group root readable files is available:
 echo "This file should not be readable inside the judging environment!" \
-  > "$CHROOTDIR/etc/root-permission-test.txt"
+    > "$CHROOTDIR/etc/root-permission-test.txt"
 chmod 0640 "$CHROOTDIR/etc/root-permission-test.txt"
 
 umount "$CHROOTDIR/dev/pts"

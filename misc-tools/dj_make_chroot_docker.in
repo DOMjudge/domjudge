@@ -101,14 +101,14 @@ echo "{}" > "$WORKDIR/docker-config.json"
 echo "Launching docker daemon so we can download/extract files"
 export PATH="$DOCKER_BINARY_PATH:$PATH"
 "$DOCKER_BINARY_PATH/dockerd" \
-  --data-root   "$WORKDIR/docker-data" \
-  --exec-root   "$WORKDIR/docker-exec" \
-  --pidfile     "$WORKDIR/docker.pid" \
-  --config-file "$WORKDIR/docker-config.json" \
-  --host        "unix://$WORKDIR/docker.sock" \
-  --group       root \
-  --iptables=false \
-  --bridge=none &
+    --data-root   "$WORKDIR/docker-data" \
+    --exec-root   "$WORKDIR/docker-exec" \
+    --pidfile     "$WORKDIR/docker.pid" \
+    --config-file "$WORKDIR/docker-config.json" \
+    --host        "unix://$WORKDIR/docker.sock" \
+    --group       root \
+    --iptables=false \
+    --bridge=none &
 
 DOCKER="$DOCKER_BINARY_PATH/docker -H unix://$WORKDIR/docker.sock"
 
@@ -143,7 +143,7 @@ sed -i "s/^root::/root:*:/" "$CHROOTDIR/etc/shadow"
 # Create a file to test that in the judging environment no
 # access to group root readable files is available:
 echo "This file should not be readable inside the judging environment!" \
-  > "$CHROOTDIR/etc/root-permission-test.txt"
+    > "$CHROOTDIR/etc/root-permission-test.txt"
 chmod 0640 "$CHROOTDIR/etc/root-permission-test.txt"
 
 
