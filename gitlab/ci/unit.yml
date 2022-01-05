@@ -1,5 +1,6 @@
 .unit_job:
   extends: [.normal_job]
+  allow_failure: true
   stage: unit
   # Disabled for now as it drastically speeds up running unit tests and we don't use it yet
   # before_script:

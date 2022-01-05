@@ -1,5 +1,6 @@
 webstandard_check_role:
   extends: [.short_job,.mariadb_job]
+  allow_failure: true
   parallel:
     matrix:
       - ROLE: public

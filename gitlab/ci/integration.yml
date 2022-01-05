@@ -13,6 +13,7 @@
     key: integration
     paths:
       - lib/vendor/
+  allow_failure: true
 
 .orig_integration_job:
   extends: [.long_job]

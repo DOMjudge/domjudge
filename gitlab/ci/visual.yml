@@ -1,6 +1,7 @@
 visual_pr:
   extends: [.mariadb_job,.long_job]
   stage: visual_pre
+  allow_failure: true
   variables:
     MYSQL_ROOT_PASSWORD: password
     DOCKER_HOST: tcp://docker:2375/
@@ -31,6 +32,7 @@ visual_pr:
 visual_main:
   extends: [.mariadb_job,.long_job]
   stage: visual_pre
+  allow_failure: true
   variables:
     MYSQL_ROOT_PASSWORD: password
     DOCKER_HOST: tcp://docker:2375/
@@ -60,6 +62,7 @@ visual_main:
 visual_compare:
   extends: [.normal_job]
   stage: compare
+  allow_failure: true
   needs:
     - visual_pr
     - visual_main

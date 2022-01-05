@@ -1,6 +1,7 @@
 check syntax:
   extends: [.short_job]
   stage: style
+  allow_failure: true
   script:
     - ./gitlab/syntax.sh
 
@@ -8,12 +9,14 @@ check static codecov:
   extends: [.tiny_job]
   stage: ci_checks
   image: bash
+  allow_failure: true
   script:
     - wget https://codecov.io/bash -O newcodecov
     - diff newcodecov gitlab/uploadcodecov.sh
 
 phpcs_compatibility:
   extends: [.tiny_job]
+  allow_failure: true
   stage: style
   image: pipelinecomponents/php-codesniffer:latest
   parallel:
@@ -37,6 +40,7 @@ phpcs_compatibility:
 php linter:
   extends: [.tiny_job]
   stage: style
+  allow_failure: true
   image: pipelinecomponents/php-linter:latest
   script:
     - >
@@ -52,6 +56,7 @@ php linter:
 php-cs-fixer:
   extends: [.tiny_job]
   stage: style
+  allow_failure: true
   image:
     name: cytopia/php-cs-fixer
     entrypoint: [""]
@@ -65,6 +70,7 @@ php-cs-fixer:
 codespell:
   extends: [.tiny_job]
   stage: style
+  allow_failure: true
   script:
     - python3 gitlab/codespell_gitlab.py
 
@@ -72,6 +78,7 @@ detect dump:
   extends: [.tiny_job]
   image: bash
   stage: style
+  allow_failure: true
   script:
     - OUT=$(find ./
         -name ".git" -type d -prune -o 
