@@ -7,6 +7,7 @@ version=$1
 
 show_phpinfo $version
 
+section_start_collap baseinstall "Setup the shared domjudge code"
 # Set up
 "$( dirname "${BASH_SOURCE[0]}" )"/base.sh
 
@@ -24,6 +25,7 @@ cp composer.json /opt/domjudge/domserver/
 cd /opt/domjudge/domserver
 
 export APP_ENV="test"
+section_end baseinstall
 
 # Run phpunit tests.
 pcov=""

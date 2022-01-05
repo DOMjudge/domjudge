@@ -22,7 +22,7 @@ function finish() {
 }
 trap finish EXIT
 
-section_start setup "Setup and install"
+section_start_collap baseinstall "Setup the shared domjudge code"
 
 # Set up
 "$( dirname "${BASH_SOURCE[0]}" )"/base.sh
@@ -66,7 +66,7 @@ sudo cp /opt/domjudge/domserver/etc/domjudge-fpm.conf "/etc/php/$version/fpm/poo
 echo "php_admin_value[date.timezone] = Europe/Amsterdam" | sudo tee -a "/etc/php/$version/fpm/pool.d/domjudge-fpm.conf"
 sudo /usr/sbin/php-fpm${version}
 
-section_end setup
+section_end baseinstall
 
 section_start submit_client "Test submit client"
 cd ${DIR}/submit
@@ -203,6 +203,7 @@ NUMVERIFIED=$(   curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier
 NUMNOMAGIC=$(    curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier" | grep "without magic string"    | sed -r 's/^.* ([0-9]+) without magic string.*$/\1/')
 section_end judging
 
+section_start_collap waitsubmissions "Wait for judgings"
 # We expect
 # - two submissions with ambiguous outcome,
 # - no submissions without magic string,
@@ -232,6 +233,7 @@ if [ $NUMNOTVERIFIED -ne 2 ] || [ $NUMNOMAGIC -ne 0 ] || [ $NUMSUBS -gt $((NUMVE
 	done
 	exit 1;
 fi
+section_end waitsubmissions
 
 section_start api_check "Performing API checks"
 # Start logging again
