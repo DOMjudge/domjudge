@@ -2,20 +2,20 @@
 
 . gitlab/dind.profile
 
-section_start_collap setup "Setup and install"
-
+section_start_collap basesetup "Base installation"
 # Set up
 "$( dirname "${BASH_SOURCE[0]}" )"/base.sh
+section_end basesetup
 
 trap log_on_err ERR
 
 cd /opt/domjudge/domserver
 
+section_start_collap phpfpm "Setup PHP-FPM"
 # configure and restart php-fpm
 sudo cp /opt/domjudge/domserver/etc/domjudge-fpm.conf "/etc/php/7.4/fpm/pool.d/domjudge-fpm.conf"
 sudo /usr/sbin/php-fpm7.4
-
-section_end setup
+section_end phpfpm
 
 section_start_collap testuser "Setup the test user"
 # We're using the admin user in all possible roles
@@ -55,8 +55,7 @@ section_end testuser
 
 # Could try different entrypoints
 FOUNDERR=0
-for url in public
-do
+url="public"
 mkdir $url
 cd $url
 cp $DIR/cookies.txt ./
@@ -96,11 +95,13 @@ if [ "$TEST" = "w3cval" ]; then
     fi
     for typ in html css svg
     do
-	$DIR/vnu-runtime-image/bin/vnu --errors-only --exit-zero-always --skip-non-$typ --format json $FLTR $url 2> result.json
-        NEWFOUNDERRORS=`$DIR/vnu-runtime-image/bin/vnu --errors-only --exit-zero-always --skip-non-$typ --format gnu $FLTR $url 2>&1 | wc -l`
-        FOUNDERR=$((NEWFOUNDERRORS+FOUNDERR))
-        python3 -m "json.tool" < result.json > w3c$typ$url.json
-        trace_off; python3 gitlab/jsontogitlab.py w3c$typ$url.json; trace_on
+        section_start_collap test_suite_${typ} "Run testsuite ${typ}"
+	    $DIR/vnu-runtime-image/bin/vnu --errors-only --exit-zero-always --skip-non-$typ --format json $FLTR $url 2> result.json
+            NEWFOUNDERRORS=`$DIR/vnu-runtime-image/bin/vnu --errors-only --exit-zero-always --skip-non-$typ --format gnu $FLTR $url 2>&1 | wc -l`
+            FOUNDERR=$((NEWFOUNDERRORS+FOUNDERR))
+            python3 -m "json.tool" < result.json > w3c$typ$url.json
+            trace_off; python3 gitlab/jsontogitlab.py w3c$typ$url.json; trace_on
+        section_end test_suite_${typ}
     done
 else
     section_start_collap upstream_problems "Remove files from upstream with problems"
@@ -126,6 +127,5 @@ else
         section_end ${file//\//}
     done
 fi
-done
 echo "Found: " $FOUNDERR
 [ "$FOUNDERR" -eq 0 ]
