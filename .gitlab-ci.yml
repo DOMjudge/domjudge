@@ -23,10 +23,12 @@ image: domjudge/gitlabci:2.1
 draw_graph:
   stage: ci_checks
   image: devdemisto/matplotlib:1.0.0.24512
+  allow_failure: true
   script:
-    - ls duration
-    - python3 showtimedata.py
+    - mkdir plot
+    - python3 gitlab/showtimedata.py
   artifacts:
+    when: always
     paths:
-      - time.png
+      - plot
       - duration
