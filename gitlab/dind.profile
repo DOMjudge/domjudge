@@ -6,6 +6,7 @@ mkdir -p "$gitlabartifacts"
 export DIR=$(pwd)
 export PS4='(${BASH_SOURCE}:${LINENO}): - [$?] $ '
 export GITSHA=$(git rev-parse HEAD || true)
+export LOG=${CI_JOB_NAME// /_}.txt
 
 shopt -s expand_aliases
 alias trace_on='set -x'
@@ -13,11 +14,13 @@ alias trace_off='{ set +x; } 2>/dev/null'
 
 function section_start_internal() {
     echo -e "section_start:`date +%s`:$2[collapsed=$1]\r\e[0K$3"
+    echo "begin|${2}" $(date +%s) >> $DIR/duration/$LOG
     trace_on
 }
 
 function section_end_internal() {
     echo -e "section_end:`date +%s`:$1\r\e[0K"
+    echo "end|${1}" $(date +%s) >> $DIR/duration/$LOG
     trace_on
 }
 
