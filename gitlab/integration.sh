@@ -1,36 +1,10 @@
 #!/bin/bash
 
-gitlabartifacts="$(pwd)/gitlabartifacts"
-mkdir -p "$gitlabartifacts"
-
-shopt -s expand_aliases
-alias trace_on='set -x'
-alias trace_off='{ set +x; } 2>/dev/null'
-
-function section_start_internal() {
-	echo -e "section_start:`date +%s`:$1[collapsed=true]\r\e[0K$2"
-	trace_on
-}
-
-function section_end_internal() {
-	echo -e "section_end:`date +%s`:$1\r\e[0K"
-	trace_on
-}
-
-alias section_start='trace_off ; section_start_internal '
-alias section_end='trace_off ; section_end_internal '
-
-set -euxo pipefail
+. gitlab/dind.profile
 
 version=$1
 
-section_start phpinfo "Show the new PHP info"
-update-alternatives --set php /usr/bin/php${version}
-php -v
-php -m
-section_end phpinfo
-
-DIR=$(pwd)
+show_phpinfo $version
 
 function finish() {
 	echo -e "\\n\\n=======================================================\\n"
@@ -49,10 +23,6 @@ function finish() {
 trap finish EXIT
 
 section_start setup "Setup and install"
-
-export PS4='(${BASH_SOURCE}:${LINENO}): - [$?] $ '
-
-GITSHA=$(git rev-parse HEAD || true)
 
 # Set up
 "$( dirname "${BASH_SOURCE[0]}" )"/base.sh

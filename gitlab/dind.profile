@@ -1,3 +1,12 @@
+set -euxo pipefail
+
+export gitlabartifacts="$(pwd)/gitlabartifacts"
+mkdir -p "$gitlabartifacts"
+
+export DIR=$(pwd)
+export PS4='(${BASH_SOURCE}:${LINENO}): - [$?] $ '
+export GITSHA=$(git rev-parse HEAD || true)
+
 shopt -s expand_aliases
 alias trace_on='set -x'
 alias trace_off='{ set +x; } 2>/dev/null'
@@ -26,3 +35,10 @@ function log_on_err() {
     fi
 }
 
+function show_phpinfo() {
+    section_start_collap phpinfo "Show the new PHP info"
+    update-alternatives --set php /usr/bin/php${1}
+    php -v
+    php -m
+    section_end phpinfo
+}

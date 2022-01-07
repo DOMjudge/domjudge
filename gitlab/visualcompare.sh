@@ -1,9 +1,7 @@
 #!/bin/bash
 # https://askubuntu.com/questions/209517/does-diff-exist-for-images
 
-set -euxo pipefail
-export PS4='(${BASH_SOURCE}:${LINENO}): - [$?] $ '
-
+. gitlab/dind.profile
 
 if grep "^pr-" <<< "$CI_COMMIT_BRANCH"; then
     GITHUB_PR=$(cut -d '/' -f1 <<< "${CI_COMMIT_BRANCH##pr-}")
@@ -16,7 +14,6 @@ else
     GITHUB_PR=${GITHUB_PR%,}
 fi
 
-DIR=$(pwd)
 ADDREMLOG="$DIR"/addrem.log
 ADD=0
 DEL=0

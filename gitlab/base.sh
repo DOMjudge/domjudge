@@ -1,16 +1,8 @@
 #!/bin/bash
 
-set -euxo pipefail
+. gitlab/dind.profile
 
-export PS4='(${BASH_SOURCE}:${LINENO}): - [$?] $ '
-
-gitlabartifacts="$(pwd)/gitlabartifacts"
-mkdir -p "$gitlabartifacts"
-
-DIR=$(pwd)
 lsb_release -a
-
-GITSHA=$(git rev-parse HEAD || true)
 
 cat > ~/.my.cnf <<EOF
 [client]
