@@ -2,12 +2,14 @@
 
 {% block title %}Scoreboard {{ contest.shortname | default('') }} - {{ parent() }}{% endblock %}
 {% block content %}
-    {% set contestId = contest.cid %}
-    {% if showExternalId(contest) %}
-        {% set contestId = contest.externalid %}
+    {% if contest is defined %}
+        {% set contestId = contest.cid %}
+        {% if showExternalId(contest) %}
+            {% set contestId = contest.externalid %}
+        {% endif %}
+        {% set bannerImage = contestId | assetPath('contest') %}
     {% endif %}
-    {% set bannerImage = contestId | assetPath('contest') %}
-    {% if not bannerImage %}
+    {% if bannerImage is not defined or not bannerImage %}
         {% set bannerImage = globalBannerAssetPath() %}
     {% endif %}
     {% if bannerImage %}
