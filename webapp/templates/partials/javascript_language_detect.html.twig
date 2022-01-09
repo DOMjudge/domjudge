@@ -4,7 +4,7 @@
         switch (ext) {
                 {% for language in submission_languages %}
                 {% for extension in language.extensions %}
-            case '{{ extension }}':
+            case '{{ extension|lower }}':
                 return '{{ language.langid }}';
                 {% endfor %}
                 {% endfor %}
