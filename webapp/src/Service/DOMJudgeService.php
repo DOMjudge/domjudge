@@ -1369,7 +1369,7 @@ class DOMJudgeService
         // This is put in a separate method (and not as a special case in assetPath) since
         // fullAssetPath uses assetPath as well and we do not want to show the 'delete banner'
         // checkbox when a global banner has been set.
-        $bannerFiles = ['images/banner.png', 'iamges/banner.jpg', 'images/banner.svg'];
+        $bannerFiles = ['images/banner.png', 'images/banner.jpg', 'images/banner.svg'];
         foreach ($bannerFiles as $bannerFile) {
             if (file_exists($this->getDomjudgeWebappDir() . '/public/' . $bannerFile)) {
                 return $bannerFile;
