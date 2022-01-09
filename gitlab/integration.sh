@@ -68,13 +68,46 @@ sudo /usr/sbin/php-fpm${version}
 
 section_end baseinstall
 
-function test_submit_client() {
+function handle_submit_client() {
     section_start submit_client "Test submit client"
     cd ${DIR}/submit
     make check-full
     section_end submit_client
+
+    section_start submitting "Submitting test sources (including Kattis example)"
+    cd ${DIR}/tests
+    export SUBMITBASEURL='http://localhost/domjudge/'
+    
+    # Keep the tests which are expected to fail out of the symfony log
+    make check-problems
+    if [ -f /opt/domjudge/domserver/webapp/var/log/prod.log ]; then
+        mv /opt/domjudge/domserver/webapp/var/log/prod.log{,.stash}
+    fi
+    make test-bad-expected-results
+    if [ -f /opt/domjudge/domserver/webapp/var/log/prod.log.stash ]; then
+        mv /opt/domjudge/domserver/webapp/var/log/prod.log{.stash,}
+    fi
+    make test-stress
+    
+    # Prepare to load example problems from Kattis/problemtools
+    echo "INSERT INTO userrole (userid, roleid) VALUES (3, 1);" | mysql domjudge
+    cd /tmp
+    git clone --depth=1 https://github.com/Kattis/problemtools.git
+    cd problemtools/examples
+    mv hello hello_kattis
+    # Remove 2 submissions that will not pass validation. The first is because it is
+    # a Python 2 submission. The latter has a judgement type we do not understand.
+    rm different/submissions/accepted/different_py2.py different/submissions/slow_accepted/different_slow.py
+    for i in hello_kattis different guess; do
+    	(
+    		cd "$i"
+    		zip -r "../${i}.zip" -- *
+    	)
+    	curl --fail -X POST -n -N -F zip=@${i}.zip http://localhost/domjudge/api/contests/2/problems
+    done
+    section_end submitting
 }
-test_submit_client &
+handle_submit_client &
 
 section_start mount "Show runner mounts"
 mount
@@ -141,39 +174,6 @@ sudo -u domjudge bin/judgedaemon $PINNING |& tee /tmp/judgedaemon.log &
 sleep 5
 
 section_end more_setup
-
-section_start submitting "Submitting test sources (including Kattis example)"
-cd ${DIR}/tests
-export SUBMITBASEURL='http://localhost/domjudge/'
-
-# Keep the tests which are expected to fail out of the symfony log
-make check-problems
-if [ -f /opt/domjudge/domserver/webapp/var/log/prod.log ]; then
-    mv /opt/domjudge/domserver/webapp/var/log/prod.log{,.stash}
-fi
-make test-bad-expected-results
-if [ -f /opt/domjudge/domserver/webapp/var/log/prod.log.stash ]; then
-    mv /opt/domjudge/domserver/webapp/var/log/prod.log{.stash,}
-fi
-make test-stress
-
-# Prepare to load example problems from Kattis/problemtools
-echo "INSERT INTO userrole (userid, roleid) VALUES (3, 1);" | mysql domjudge
-cd /tmp
-git clone --depth=1 https://github.com/Kattis/problemtools.git
-cd problemtools/examples
-mv hello hello_kattis
-# Remove 2 submissions that will not pass validation. The first is because it is
-# a Python 2 submission. The latter has a judgement type we do not understand.
-rm different/submissions/accepted/different_py2.py different/submissions/slow_accepted/different_slow.py
-for i in hello_kattis different guess; do
-	(
-		cd "$i"
-		zip -r "../${i}.zip" -- *
-	)
-	curl --fail -X POST -n -N -F zip=@${i}.zip http://localhost/domjudge/api/contests/2/problems
-done
-section_end submitting
 
 section_start judging "Waiting until all submissions are judged"
 # wait for and check results
