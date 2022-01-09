@@ -23,22 +23,26 @@ DOMserver
 
  * For Apache: add ``etc/apache.conf`` to your Apache configuration and
    add ``etc/domjudge-fpm.conf`` to your PHP FPM pool directory, edit
-   it to your needs, reload web server::
+   it to your needs, reload web server
+
+   .. parsed-literal::
 
      sudo ln -s <DOMSERVER_INSTALL_PATH>/etc/apache.conf /etc/apache2/conf-available/domjudge.conf
-     sudo ln -s <DOMSERVER_INSTALL_PATH>/etc/domjudge-fpm.conf /etc/php/7.3/fpm/pool.d/domjudge.conf
+     sudo ln -s <DOMSERVER_INSTALL_PATH>/etc/domjudge-fpm.conf /etc/php/\ |phpversion|/fpm/pool.d/domjudge.conf
      sudo a2enmod proxy_fcgi setenvif rewrite
-     sudo a2enconf php7.3-fpm domjudge
-     sudo service php7.3-fpm reload
+     sudo a2enconf php\ |phpversion|-fpm domjudge
+     sudo service php\ |phpversion|-fpm reload
      sudo service apache2 reload
 
  * For nginx: add ``etc/nginx-conf`` to your nginx configuration and
    add ``etc/domjudge-fpm.conf`` to your PHP FPM pool directory, edit
-   it to your needs, reload web server::
+   it to your needs, reload web server
+
+   .. parsed-literal::
 
      sudo ln -s <DOMSERVER_INSTALL_PATH>/etc/nginx-conf /etc/nginx/sites-enabled/domjudge
-     sudo ln -s <DOMSERVER_INSTALL_PATH>/etc/domjudge-fpm.conf /etc/php/7.3/fpm/pool.d/domjudge.conf
-     sudo service php7.3-fpm reload
+     sudo ln -s <DOMSERVER_INSTALL_PATH>/etc/domjudge-fpm.conf /etc/php/\ |phpversion|/fpm/pool.d/domjudge.conf
+     sudo service php\ |phpversion|-fpm reload
      sudo service nginx reload
 
  * Check that the web interface works (/team, /public and /jury).
