@@ -68,10 +68,13 @@ sudo /usr/sbin/php-fpm${version}
 
 section_end baseinstall
 
-section_start submit_client "Test submit client"
-cd ${DIR}/submit
-make check-full
-section_end submit_client
+function test_submit_client() {
+    section_start submit_client "Test submit client"
+    cd ${DIR}/submit
+    make check-full
+    section_end submit_client
+}
+test_submit_client &
 
 section_start mount "Show runner mounts"
 mount
@@ -80,17 +83,20 @@ mount
 mount -o remount,exec,dev /builds
 section_end mount
 
-section_start judgehost "Configure judgehost"
-cd /opt/domjudge/judgehost/
-sudo cp /opt/domjudge/judgehost/etc/sudoers-domjudge /etc/sudoers.d/
-sudo chmod 400 /etc/sudoers.d/sudoers-domjudge
-sudo bin/create_cgroups
-
-if [ ! -d ${DIR}/chroot/domjudge/ ]; then
-	cd ${DIR}/misc-tools
-	time sudo ./dj_make_chroot -a amd64 |& tee "$gitlabartifacts/dj_make_chroot.log"
-fi
-section_end judgehost
+function setup_judgehost() {
+    section_start judgehost "Configure judgehost"
+    cd /opt/domjudge/judgehost/
+    sudo cp /opt/domjudge/judgehost/etc/sudoers-domjudge /etc/sudoers.d/
+    sudo chmod 400 /etc/sudoers.d/sudoers-domjudge
+    sudo bin/create_cgroups
+    
+    if [ ! -d ${DIR}/chroot/domjudge/ ]; then
+    	cd ${DIR}/misc-tools
+    	time sudo ./dj_make_chroot -a amd64 |& tee "$gitlabartifacts/dj_make_chroot.log"
+    fi
+    section_end judgehost
+}
+setup_judgehost
 
 section_start more_setup "Remaining setup (e.g. starting judgedaemon)"
 # download domjudge-scripts for API check
@@ -127,6 +133,10 @@ set -e
 if [ $PIN_JUDGEDAEMON -eq 1 ]; then
 	PINNING="-n 0"
 fi
+
+while [ ! -f ${DIR}/chroot/domjudge/etc/root-permission-test.txt ]; do
+    sleep 5
+done
 sudo -u domjudge bin/judgedaemon $PINNING |& tee /tmp/judgedaemon.log &
 sleep 5
 
