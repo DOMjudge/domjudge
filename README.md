@@ -1,3 +1,5 @@
+<img align="right" width="68px" src="./logo/DOMjudgelogo.svg">
+
 DOMjudge
 --------
 [![pipeline status](https://gitlab.com/DOMjudge/domjudge/badges/main/pipeline.svg)](https://gitlab.com/DOMjudge/domjudge/commits/main)
