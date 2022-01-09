@@ -97,7 +97,7 @@ Web server configuration
 For the web interface, you need to have a web server (e.g. nginx or Apache)
 installed on the DOMserver and made sure that PHP correctly works
 with it. Refer to the documentation of your web server and PHP for
-details. In the examples below, replace ``7.3`` with the PHP version
+details. In the examples below, replace |phpversion| with the PHP version
 you're installing.
 
 To configure the Apache web server for DOMjudge, use the Apache
@@ -106,26 +106,28 @@ examples for configuring the DOMjudge pages with an alias directive,
 or as a virtualhost, optionally with TLS; it also contains PHP and security
 settings. Reload the web server for changes to take effect.
 
-::
+.. parsed-literal::
 
   ln -s <DOMSERVER_INSTALL_PATH>/etc/apache.conf /etc/apache2/conf-available/domjudge.conf
-  ln -s <DOMSERVER_INSTALL_PATH>/etc/domjudge-fpm.conf /etc/php/7.3/fpm/pool.d/domjudge.conf
+  ln -s <DOMSERVER_INSTALL_PATH>/etc/domjudge-fpm.conf /etc/php/|phpversion|/fpm/pool.d/domjudge.conf
   a2enmod proxy_fcgi setenvif rewrite
-  a2enconf php7.3-fpm domjudge
+  a2enconf php\ |phpversion|-fpm domjudge
   # Edit the file /etc/apache2/conf-available/domjudge.conf and
-  # /etc/php/7.3/fpm/pool.d/domjudge.conf to your needs
-  service php7.3-fpm reload
+  # /etc/php/\ |phpversion|/fpm/pool.d/domjudge.conf to your needs
+  service php\ |phpversion|-fpm reload
   service apache2 reload
 
 An nginx webserver configuration snippet is also provided in
 ``etc/nginx-conf``.  You still need ``htpasswd`` from ``apache2-utils``
-though. To use this configuration, perform the following steps::
+though. To use this configuration, perform the following steps
+
+.. parsed-literal::
 
   ln -s <DOMSERVER_INSTALL_PATH>/etc/nginx-conf /etc/nginx/sites-enabled/domjudge
-  ln -s <DOMSERVER_INSTALL_PATH>/etc/domjudge-fpm.conf /etc/php/7.3/fpm/pool.d/domjudge.conf
+  ln -s <DOMSERVER_INSTALL_PATH>/etc/domjudge-fpm.conf /etc/php/\ |phpversion|/fpm/pool.d/domjudge.conf
   # Edit the files /etc/nginx/sites-enabled/domjudge and
-  # /etc/php/7.3/fpm/pool.d/domjudge.conf to your needs
-  service php7.3-fpm reload
+  # /etc/php/\ |phpversion|/fpm/pool.d/domjudge.conf to your needs
+  service php\ |phpversion|-fpm reload
   service nginx reload
 
 The judgehosts connect to DOMjudge via the DOMjudge API so need

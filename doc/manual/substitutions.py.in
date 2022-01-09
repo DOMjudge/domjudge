@@ -3,6 +3,7 @@
 rst_prolog = """
 .. |DOMjudge| replace:: @PACKAGE_NAME@
 
+.. |phpversion| replace:: @PHPVERSION@
 .. |baseurlteam| replace:: @BASEURL@%steam
 
 .. |SOURCESIZE| replace:: 256
