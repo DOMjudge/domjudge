@@ -288,6 +288,12 @@ AC_REPLACE_FUNCS([atexit dup2 getcwd gettimeofday memset mkdir realpath setenv \
                   socket strchr strdup strerror strncasecmp strrchr strstr strtol],
                  [],[AC_MSG_ERROR([required C function is missing.])])
 
+AC_CHECK_PROG(PHP_CHECK,php,yes)
+AS_IF([test x"$PHP_CHECK" != x"yes"],
+      [phpversion=7.4],
+      [phpversion=$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')])
+AC_SUBST(PHPVERSION, [$phpversion])
+
 AC_CONFIG_FILES([paths.mk])
 AC_OUTPUT
 
