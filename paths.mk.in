@@ -84,6 +84,7 @@ domserver_libvendordir = @domserver_libvendordir@
 domserver_logdir       = @domserver_logdir@
 domserver_rundir       = @domserver_rundir@
 domserver_tmpdir       = @domserver_tmpdir@
+PHPVERSION             = @PHPVERSION@
 
 judgehost_bindir       = @judgehost_bindir@
 judgehost_etcdir       = @judgehost_etcdir@
@@ -150,6 +151,7 @@ define substconfigvars
 	-e 's,@RUNUSER[@],@RUNUSER@,g' \
 	-e 's,@RUNGROUP[@],@RUNGROUP@,g' \
 	-e 's,@BASEURL[@],@BASEURL@,g' \
+	-e 's,@PHPVERSION[@],@PHPVERSION@,g' \
 	> $@
 @chmod --reference=$< $@
 endef

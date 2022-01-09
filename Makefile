@@ -252,7 +252,7 @@ maintainer-install: build domserver-create-dirs judgehost-create-dirs webapp/.en
 	@echo "           systemctl restart apache2"
 	@echo "        Nginx + PHP-FPM:"
 	@echo "           ln -sf $(CURDIR)/etc/nginx-conf /etc/nginx/sites-enabled/"
-	@echo "           ln -sf $(CURDIR)/etc/domjudge-fpm /etc/php/7.4/fpm/pool.d/domjudge.conf"
+	@echo "           ln -sf $(CURDIR)/etc/domjudge-fpm /etc/php/$(PHPVERSION)/fpm/pool.d/domjudge.conf"
 	@echo "           systemctl restart nginx"
 	@echo "           systemctl restart php-fpm"
 	@echo ""
@@ -277,11 +277,11 @@ maintainer-postinstall-apache: maintainer-postinstall-permissions
 
 maintainer-postinstall-nginx: maintainer-postinstall-permissions
 	@if [ ! -d "/etc/nginx/sites-enabled/" ]; then echo "Couldn't find directory /etc/nginx/sites-enabled/. Is nginx installed?"; false; fi
-	@if [ ! -d "/etc/php/7.4/fpm/pool.d/" ]; then echo "Couldn't find directory /etc/php/7.4/fpm/pool.d/. Is php-fpm installed?"; false; fi
+	@if [ ! -d "/etc/php/$(PHPVERSION)/fpm/pool.d/" ]; then echo "Couldn't find directory /etc/php/$(PHPVERSION)/fpm/pool.d/. Is php-fpm installed?"; false; fi
 	ln -sf $(CURDIR)/etc/nginx-conf /etc/nginx/sites-enabled/domjudge.conf
-	ln -sf $(CURDIR)/etc/domjudge-fpm.conf /etc/php/7.4/fpm/pool.d/domjudge-fpm.conf
+	ln -sf $(CURDIR)/etc/domjudge-fpm.conf /etc/php/$(PHPVERSION)/fpm/pool.d/domjudge-fpm.conf
 	systemctl restart nginx
-	systemctl restart php7.4-fpm
+	systemctl restart php$(PHPVERSION)-fpm
 
 # Removes created symlinks; generated logs, submissions, etc. remain in output subdir.
 maintainer-uninstall:
