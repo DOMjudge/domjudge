@@ -1,4 +1,4 @@
-<img align="left" width="80px" style="background-color:#fff" src="./docs/../doc/logos/DOMjudgelogo.png">
+<img align="left" width="96px" src="./logo/DOMjudgelogo-white-background.png">
 
 DOMjudge
 --------
