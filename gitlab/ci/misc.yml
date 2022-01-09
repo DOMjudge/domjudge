@@ -3,7 +3,8 @@ check syntax:
   stage: style
   allow_failure: true
   script:
-    - ./gitlab/syntax.sh
+    - /bin/true
+    #-./gitlab/syntax.sh
 
 check static codecov:
   extends: [.tiny_job]
