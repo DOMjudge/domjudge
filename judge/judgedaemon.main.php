@@ -281,7 +281,7 @@ function fetch_executable(
 // - an error message (null if successful)
 // - optional extra build log.
 function fetch_executable_internal(
-    string $workdirpath, string $type, string $execid, string $hash, bool $combined_run_compare) : array
+    string $workdirpath, string $type, string $execid, string $hash, bool $combined_run_compare = false) : array
 {
     $execdir         = join('/', [
         $workdirpath,
