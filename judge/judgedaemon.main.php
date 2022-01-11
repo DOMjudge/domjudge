@@ -1000,6 +1000,7 @@ function read_metadata(string $filename)
 
 function cleanup_judging(string $workdir) : void
 {
+    global $myhost;
     // revoke readablity for domjudge-run user to this workdir
     chmod($workdir, 0700);
 
