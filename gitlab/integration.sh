@@ -109,6 +109,19 @@ function handle_submit_client() {
 }
 handle_submit_client &
 
+function get_api_check() {
+    section_start get_api "Download API check script"
+    # download domjudge-scripts for API check
+    cd $HOME
+    composer -n require justinrainbow/json-schema
+    echo -e "\033[0m"
+    PATH=${PATH}:${HOME}/vendor/bin
+    git clone --depth=1 https://github.com/DOMjudge/domjudge-scripts.git
+    CHECK_API=${HOME}/domjudge-scripts/contest-api/check-api.sh
+    section_end get_api
+}
+get_api_check()
+
 section_start mount "Show runner mounts"
 mount
 # Currently gitlab has some runners with noexec/nodev,
@@ -132,14 +145,6 @@ function setup_judgehost() {
 setup_judgehost
 
 section_start more_setup "Remaining setup (e.g. starting judgedaemon)"
-# download domjudge-scripts for API check
-cd $HOME
-composer -n require justinrainbow/json-schema
-echo -e "\033[0m"
-PATH=${PATH}:${HOME}/vendor/bin
-git clone --depth=1 https://github.com/DOMjudge/domjudge-scripts.git
-CHECK_API=${HOME}/domjudge-scripts/contest-api/check-api.sh
-
 # Recreate domjudge-run-0 user with random UID to prevent clashes with
 # existing users in the host and other CI jobs, which can lead to
 # unforeseen process limits being hit.
