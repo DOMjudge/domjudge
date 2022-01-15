@@ -253,7 +253,7 @@ class ExecutableController extends BaseController
             throw new NotFoundHttpException(sprintf('Executable with ID %s not found', $execId));
         }
 
-        $zipFileContent = $executable->getZipfileContent($this->dj->getDomjudgeTmpDir());
+        $zipFileContent = $executable->getZipfileContent($this->dj->getDOMjudgeTmpDir());
         $filename = sprintf('%s.zip', $executable->getExecid());
 
         return Utils::streamAsBinaryFile($zipFileContent, $filename, 'zip');

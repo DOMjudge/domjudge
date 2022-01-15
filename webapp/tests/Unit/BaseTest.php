@@ -320,7 +320,7 @@ abstract class BaseTest extends WebTestCase
     protected function unzipString(string $content): array
     {
         $zip = new ZipArchive();
-        $tempFilename = tempnam(static::$container->get(DOMJudgeService::class)->getDomjudgeTmpDir(), "domjudge-test-");
+        $tempFilename = tempnam(static::$container->get(DOMJudgeService::class)->getDOMjudgeTmpDir(), "domjudge-test-");
         file_put_contents($tempFilename, $content);
 
         $zip->open($tempFilename);

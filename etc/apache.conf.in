@@ -83,7 +83,7 @@ RewriteRule Makefile$ - [F]
     #Header set Strict-Transport-Security "max-age=31556952"
 
     # The X-Frame-Options header defends against so-called 'clickjacking' attacks.
-    # Should you want to load part of ODMjudge (e.g. the public scoreboard) in
+    # Should you want to load part of DOMjudge (e.g. the public scoreboard) in
     # a HTML frame or iframe, disable this header for that part of DOMjudge only.
     Header set X-Frame-Options "DENY"
 

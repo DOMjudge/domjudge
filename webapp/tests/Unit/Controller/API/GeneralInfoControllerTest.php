@@ -132,7 +132,7 @@ class GeneralInfoControllerTest extends BaseTest
 
             $svgFile = sprintf(
                 '%s/public/flags/%s/%s.svg',
-                static::$container->get(DOMJudgeService::class)->getDomjudgeWebappDir(),
+                static::$container->get(DOMJudgeService::class)->getDOMjudgeWebappDir(),
                 $size, strtolower(Countries::getAlpha2Code(strtoupper($countryCode)))
             );
 
