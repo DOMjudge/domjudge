@@ -1,0 +1,12 @@
+on:
+    pull_request:
+
+name: Find DOMjudge misspellings
+ 
+jobs:
+    misspelling:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v2
+            - name: Report typos
+              run: .github/workflowscripts/find_typos.py
