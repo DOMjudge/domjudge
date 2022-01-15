@@ -115,12 +115,12 @@ function get_api_check() {
     cd $HOME
     composer -n require justinrainbow/json-schema
     echo -e "\033[0m"
-    PATH=${PATH}:${HOME}/vendor/bin
     git clone --depth=1 https://github.com/DOMjudge/domjudge-scripts.git
-    CHECK_API=${HOME}/domjudge-scripts/contest-api/check-api.sh
     section_end get_api
 }
-get_api_check()
+export PATH=${PATH}:${HOME}/vendor/bin
+export CHECK_API=${HOME}/domjudge-scripts/contest-api/check-api.sh
+get_api_check &
 
 section_start mount "Show runner mounts"
 mount
