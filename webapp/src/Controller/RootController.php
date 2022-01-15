@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 
-use App\Service\DOMJudgeService;
+use App\Service\DOMjudgeService;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
@@ -17,14 +17,14 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 class RootController extends BaseController
 {
     /**
-     * @var DOMJudgeService
+     * @var DOMjudgeService
      */
     protected $dj;
 
     /**
      * RootController constructor.
      */
-    public function __construct(DOMJudgeService $dj)
+    public function __construct(DOMjudgeService $dj)
     {
         $this->dj = $dj;
     }

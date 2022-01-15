@@ -9,7 +9,7 @@ use App\Entity\ImmutableExecutable;
 use App\Form\Type\ExecutableType;
 use App\Form\Type\ExecutableUploadType;
 use App\Service\ConfigurationService;
-use App\Service\DOMJudgeService;
+use App\Service\DOMjudgeService;
 use App\Service\EventLogService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
@@ -39,7 +39,7 @@ class ExecutableController extends BaseController
     protected $em;
 
     /**
-     * @var DOMJudgeService
+     * @var DOMjudgeService
      */
     protected $dj;
 
@@ -60,7 +60,7 @@ class ExecutableController extends BaseController
 
     public function __construct(
         EntityManagerInterface $em,
-        DOMJudgeService $dj,
+        DOMjudgeService $dj,
         ConfigurationService $config,
         KernelInterface $kernel,
         EventLogService $eventLogService

@@ -39,9 +39,9 @@ security:
             guard:
                 # SEE NOTE ABOVE IF CHANGING ANYTHING HERE
                 authenticators:
-                    - App\Security\DOMJudgeIPAuthenticator
-                    - App\Security\DOMJudgeBasicAuthenticator
-                entry_point: App\Security\DOMJudgeIPAuthenticator
+                    - App\Security\DOMjudgeIPAuthenticator
+                    - App\Security\DOMjudgeBasicAuthenticator
+                entry_point: App\Security\DOMjudgeIPAuthenticator
 
         # Provides prometheus metrics
         metrics:
@@ -52,9 +52,9 @@ security:
             guard:
                 # SEE NOTE ABOVE IF CHANGING ANYTHING HERE
                 authenticators:
-                    - App\Security\DOMJudgeIPAuthenticator
-                    - App\Security\DOMJudgeBasicAuthenticator
-                entry_point: App\Security\DOMJudgeIPAuthenticator
+                    - App\Security\DOMjudgeIPAuthenticator
+                    - App\Security\DOMjudgeBasicAuthenticator
+                entry_point: App\Security\DOMjudgeIPAuthenticator
 
         # rest of app does form_login
         main:
@@ -63,9 +63,9 @@ security:
             user_checker: App\Security\UserChecker
             guard:
                 authenticators:
-                    - App\Security\DOMJudgeXHeadersAuthenticator
-                    - App\Security\DOMJudgeIPAuthenticator
-                entry_point: App\Security\DOMJudgeXHeadersAuthenticator
+                    - App\Security\DOMjudgeXHeadersAuthenticator
+                    - App\Security\DOMjudgeIPAuthenticator
+                entry_point: App\Security\DOMjudgeXHeadersAuthenticator
             anonymous: ~
             form_login:
                 login_path: login

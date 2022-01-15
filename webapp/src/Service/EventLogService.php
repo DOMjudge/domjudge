@@ -134,7 +134,7 @@ class EventLogService implements ContainerAwareInterface
     ];
 
     /**
-     * @var DOMJudgeService
+     * @var DOMjudgeService
      */
     protected $dj;
 
@@ -154,7 +154,7 @@ class EventLogService implements ContainerAwareInterface
     protected $logger;
 
     public function __construct(
-        DOMJudgeService $dj,
+        DOMjudgeService $dj,
         ConfigurationService $config,
         EntityManagerInterface $em,
         LoggerInterface $logger
@@ -992,16 +992,16 @@ class EventLogService implements ContainerAwareInterface
         } else {
             $dataSource = $this->config->get('data_source');
 
-            if ($dataSource !== DOMJudgeService::DATA_SOURCE_LOCAL) {
+            if ($dataSource !== DOMjudgeService::DATA_SOURCE_LOCAL) {
                 $endpointType = $endpointData[self::KEY_TYPE];
                 if ($endpointType === self::TYPE_CONFIGURATION &&
                     in_array($dataSource, [
-                        DOMJudgeService::DATA_SOURCE_CONFIGURATION_EXTERNAL,
-                        DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL
+                        DOMjudgeService::DATA_SOURCE_CONFIGURATION_EXTERNAL,
+                        DOMjudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL
                     ])) {
                     $lookupExternalid = true;
                 } elseif ($endpointType === self::TYPE_LIVE &&
-                    $dataSource === DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL) {
+                    $dataSource === DOMjudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL) {
                     $lookupExternalid = true;
                 }
             }

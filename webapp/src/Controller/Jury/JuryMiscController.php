@@ -11,7 +11,7 @@ use App\Entity\Submission;
 use App\Entity\SubmissionFile;
 use App\Entity\Team;
 use App\Entity\TeamAffiliation;
-use App\Service\DOMJudgeService;
+use App\Service\DOMjudgeService;
 use App\Service\ScoreboardService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
@@ -44,14 +44,14 @@ class JuryMiscController extends BaseController
     protected $em;
 
     /**
-     * @var DOMJudgeService
+     * @var DOMjudgeService
      */
     protected $dj;
 
     /**
      * GeneralInfoController constructor.
      */
-    public function __construct(EntityManagerInterface $entityManager, DOMJudgeService $dj)
+    public function __construct(EntityManagerInterface $entityManager, DOMjudgeService $dj)
     {
         $this->em = $entityManager;
         $this->dj = $dj;

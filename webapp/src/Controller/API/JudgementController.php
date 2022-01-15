@@ -5,7 +5,7 @@ namespace App\Controller\API;
 use App\Entity\Judging;
 use App\Helpers\JudgingWrapper;
 use App\Service\ConfigurationService;
-use App\Service\DOMJudgeService;
+use App\Service\DOMjudgeService;
 use App\Service\EventLogService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
@@ -35,11 +35,11 @@ class JudgementController extends AbstractRestController implements QueryObjectT
 
     public function __construct(
         EntityManagerInterface $entityManager,
-        DOMJudgeService $DOMJudgeService,
+        DOMjudgeService $DOMjudgeService,
         ConfigurationService $config,
         EventLogService $eventLogService
     ) {
-        parent::__construct($entityManager, $DOMJudgeService, $config, $eventLogService);
+        parent::__construct($entityManager, $DOMjudgeService, $config, $eventLogService);
 
         $verdictsConfig = $this->dj->getDOMjudgeEtcDir() . '/verdicts.php';
         $this->verdicts = include $verdictsConfig;

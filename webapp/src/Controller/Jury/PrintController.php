@@ -6,7 +6,7 @@ use App\Controller\BaseController;
 use App\Entity\Language;
 use App\Form\Type\PrintType;
 use App\Service\ConfigurationService;
-use App\Service\DOMJudgeService;
+use App\Service\DOMjudgeService;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -32,7 +32,7 @@ class PrintController extends BaseController
     protected $em;
 
     /**
-     * @var DOMJudgeService
+     * @var DOMjudgeService
      */
     protected $dj;
 
@@ -43,7 +43,7 @@ class PrintController extends BaseController
 
     public function __construct(
         EntityManagerInterface $em,
-        DOMJudgeService $dj,
+        DOMjudgeService $dj,
         ConfigurationService $config
     ) {
         $this->em     = $em;

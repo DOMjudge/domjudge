@@ -3,7 +3,7 @@
 namespace App\Controller\API;
 
 use App\Entity\Submission;
-use App\Service\DOMJudgeService;
+use App\Service\DOMjudgeService;
 use App\Service\SubmissionService;
 use App\Entity\Team;
 use Doctrine\ORM\EntityManagerInterface;
@@ -33,7 +33,7 @@ class MetricsController extends AbstractFOSRestController
     protected $em;
 
     /**
-     * @var DOMJudgeService
+     * @var DOMjudgeService
      */
     protected $dj;
 
@@ -46,7 +46,7 @@ class MetricsController extends AbstractFOSRestController
 
     public function __construct(
         EntityManagerInterface $em,
-        DOMJudgeService $dj,
+        DOMjudgeService $dj,
         SubmissionService $submissionService,
         CollectorRegistry $registry
     ) {

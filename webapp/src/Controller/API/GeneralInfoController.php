@@ -6,7 +6,7 @@ use App\Entity\Contest;
 use App\Entity\User;
 use App\Service\CheckConfigService;
 use App\Service\ConfigurationService;
-use App\Service\DOMJudgeService;
+use App\Service\DOMjudgeService;
 use App\Service\EventLogService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
@@ -40,7 +40,7 @@ class GeneralInfoController extends AbstractFOSRestController
     protected $em;
 
     /**
-     * @var DOMJudgeService
+     * @var DOMjudgeService
      */
     protected $dj;
 
@@ -71,7 +71,7 @@ class GeneralInfoController extends AbstractFOSRestController
 
     public function __construct(
         EntityManagerInterface $em,
-        DOMJudgeService $dj,
+        DOMjudgeService $dj,
         ConfigurationService $config,
         EventLogService $eventLogService,
         CheckConfigService $checkConfigService,
@@ -169,7 +169,7 @@ class GeneralInfoController extends AbstractFOSRestController
         foreach ($contests as $contest) {
             $contestStats = $this->dj->getContestStats($contest);
             $contestStats['cid'] =
-                $this->config->get('data_source') === DOMJudgeService::DATA_SOURCE_LOCAL
+                $this->config->get('data_source') === DOMjudgeService::DATA_SOURCE_LOCAL
                     ? $contest->getCid() : $contest->getExternalid();
             $result[] = $contestStats;
         }

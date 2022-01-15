@@ -4,7 +4,7 @@ namespace App\DataFixtures\ExampleData;
 
 use App\Entity\Executable;
 use App\Entity\ImmutableExecutable;
-use App\Service\DOMJudgeService;
+use App\Service\DOMjudgeService;
 use Doctrine\Persistence\ObjectManager;
 use ZipArchive;
 
@@ -19,11 +19,11 @@ class ExecutableFixture extends AbstractExampleDataFixture
     protected $sqlDir;
 
     /**
-     * @var DOMJudgeService
+     * @var DOMjudgeService
      */
     protected $dj;
 
-    public function __construct(string $sqlDir, DOMJudgeService $dj)
+    public function __construct(string $sqlDir, DOMjudgeService $dj)
     {
         $this->sqlDir = $sqlDir;
         $this->dj = $dj;

@@ -13,7 +13,7 @@ use App\Entity\Submission;
 use App\Entity\Team;
 use App\Entity\TeamCategory;
 use App\Service\ConfigurationService;
-use App\Service\DOMJudgeService;
+use App\Service\DOMjudgeService;
 use App\Service\EventLogService;
 use App\Service\ScoreboardService;
 use App\Utils\Scoreboard\ScoreboardMatrixItem;
@@ -33,7 +33,7 @@ class ScoreboardIntegrationTest extends KernelTestCase
     public const NUM_TEAMS = 3;
 
     /**
-     * @var DOMJudgeService
+     * @var DOMjudgeService
      */
     private $dj;
 
@@ -101,7 +101,7 @@ class ScoreboardIntegrationTest extends KernelTestCase
             ->with($this->isType('string'))
             ->will($this->returnCallback([$this, 'getConfig']));
 
-        $this->dj = self::$container->get(DOMJudgeService::class);
+        $this->dj = self::$container->get(DOMjudgeService::class);
         $this->em = self::$container->get('doctrine')->getManager();
         $this->ss = new ScoreboardService(
             $this->em, $this->dj, $this->config,

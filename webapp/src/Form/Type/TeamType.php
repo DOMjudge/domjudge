@@ -8,7 +8,7 @@ use App\Entity\Team;
 use App\Entity\TeamAffiliation;
 use App\Entity\TeamCategory;
 use App\Entity\User;
-use App\Service\DOMJudgeService;
+use App\Service\DOMjudgeService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -34,11 +34,11 @@ class TeamType extends AbstractType
     protected $em;
 
     /**
-     * @var DOMJudgeService
+     * @var DOMjudgeService
      */
     protected $dj;
 
-    public function __construct(EntityManagerInterface $em, DOMJudgeService $dj)
+    public function __construct(EntityManagerInterface $em, DOMjudgeService $dj)
     {
         $this->em = $em;
         $this->dj = $dj;

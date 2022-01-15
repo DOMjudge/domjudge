@@ -5,7 +5,7 @@ namespace App\Controller\API;
 use App\Entity\Contest;
 use App\Entity\Submission;
 use App\Service\ConfigurationService;
-use App\Service\DOMJudgeService;
+use App\Service\DOMjudgeService;
 use App\Service\EventLogService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
@@ -35,7 +35,7 @@ abstract class AbstractRestController extends AbstractFOSRestController
     protected $em;
 
     /**
-     * @var DOMJudgeService
+     * @var DOMjudgeService
      */
     protected $dj;
 
@@ -54,7 +54,7 @@ abstract class AbstractRestController extends AbstractFOSRestController
      */
     public function __construct(
         EntityManagerInterface $entityManager,
-        DOMJudgeService $dj,
+        DOMjudgeService $dj,
         ConfigurationService $config,
         EventLogService $eventLogService
     ) {

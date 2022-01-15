@@ -16,7 +16,7 @@ use App\Form\Type\ProblemAttachmentType;
 use App\Form\Type\ProblemType;
 use App\Form\Type\ProblemUploadType;
 use App\Service\ConfigurationService;
-use App\Service\DOMJudgeService;
+use App\Service\DOMjudgeService;
 use App\Service\EventLogService;
 use App\Service\ImportProblemService;
 use App\Service\SubmissionService;
@@ -52,7 +52,7 @@ class ProblemController extends BaseController
     protected $em;
 
     /**
-     * @var DOMJudgeService
+     * @var DOMjudgeService
      */
     protected $dj;
 
@@ -83,7 +83,7 @@ class ProblemController extends BaseController
 
     public function __construct(
         EntityManagerInterface $em,
-        DOMJudgeService $dj,
+        DOMjudgeService $dj,
         ConfigurationService $config,
         KernelInterface $kernel,
         EventLogService $eventLogService,
@@ -459,7 +459,7 @@ class ProblemController extends BaseController
             'defaultCompareExecutable' => (string)$this->config->get('default_compare'),
             'showContest' => count($this->dj->getCurrentContests()) > 1,
             'showExternalResult' => $this->config->get('data_source') ===
-                DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL,
+                DOMjudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL,
             'refresh' => [
                 'after' => 15,
                 'url' => $this->generateUrl('jury_problem', ['probId' => $problem->getProbid()]),

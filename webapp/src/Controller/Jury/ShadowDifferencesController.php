@@ -11,7 +11,7 @@ use App\Controller\BaseController;
 use App\Entity\ExternalJudgement;
 use App\Entity\Judging;
 use App\Entity\Submission;
-use App\Service\DOMJudgeService;
+use App\Service\DOMjudgeService;
 use App\Service\SubmissionService;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -27,7 +27,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class ShadowDifferencesController extends BaseController
 {
     /**
-     * @var DOMJudgeService
+     * @var DOMjudgeService
      */
     protected $dj;
 
@@ -52,7 +52,7 @@ class ShadowDifferencesController extends BaseController
     protected $em;
 
     public function __construct(
-        DOMJudgeService $dj,
+        DOMjudgeService $dj,
         ConfigurationService $config,
         SubmissionService $submissions,
         SessionInterface $session,
@@ -73,7 +73,7 @@ class ShadowDifferencesController extends BaseController
      */
     public function indexAction(Request $request)
     {
-        $shadowMode = DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL;
+        $shadowMode = DOMjudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL;
         $dataSource = $this->config->get('data_source');
         if ($dataSource != $shadowMode) {
             $this->addFlash('danger', sprintf(

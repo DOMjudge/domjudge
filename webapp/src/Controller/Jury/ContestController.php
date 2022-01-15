@@ -21,7 +21,7 @@ use App\Form\Type\FinalizeContestType;
 use App\Form\Type\RemovedIntervalType;
 use App\Service\AssetUpdateService;
 use App\Service\ConfigurationService;
-use App\Service\DOMJudgeService;
+use App\Service\DOMjudgeService;
 use App\Service\EventLogService;
 use App\Utils\Utils;
 use Doctrine\Common\Collections\Collection;
@@ -53,7 +53,7 @@ class ContestController extends BaseController
     protected $em;
 
     /**
-     * @var DOMJudgeService
+     * @var DOMjudgeService
      */
     protected $dj;
 
@@ -79,7 +79,7 @@ class ContestController extends BaseController
 
     public function __construct(
         EntityManagerInterface $em,
-        DOMJudgeService $dj,
+        DOMjudgeService $dj,
         ConfigurationService $config,
         KernelInterface $kernel,
         EventLogService $eventLogService,

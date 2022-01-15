@@ -5,7 +5,7 @@ namespace App\Tests\Unit;
 use App\Entity\Role;
 use App\Entity\User;
 use App\Service\ConfigurationService;
-use App\Service\DOMJudgeService;
+use App\Service\DOMjudgeService;
 use App\Service\EventLogService;
 use Doctrine\Common\DataFixtures\Executor\ORMExecutor;
 use Doctrine\Common\DataFixtures\FixtureInterface;
@@ -220,7 +220,7 @@ abstract class BaseTest extends WebTestCase
     ): void {
         $config = self::$container->get(ConfigurationService::class);
         $eventLog = self::$container->get(EventLogService::class);
-        $dj = self::$container->get(DOMJudgeService::class);
+        $dj = self::$container->get(DOMjudgeService::class);
 
         // Build up the data to set.
         $dataToSet = [$configKey => $configValue];
@@ -279,7 +279,7 @@ abstract class BaseTest extends WebTestCase
     {
         $config = self::$container->get(ConfigurationService::class);
         $dataSource = $config->get('data_source');
-        return $dataSource === DOMJudgeService::DATA_SOURCE_LOCAL;
+        return $dataSource === DOMjudgeService::DATA_SOURCE_LOCAL;
     }
 
     /**
@@ -320,7 +320,7 @@ abstract class BaseTest extends WebTestCase
     protected function unzipString(string $content): array
     {
         $zip = new ZipArchive();
-        $tempFilename = tempnam(static::$container->get(DOMJudgeService::class)->getDOMjudgeTmpDir(), "domjudge-test-");
+        $tempFilename = tempnam(static::$container->get(DOMjudgeService::class)->getDOMjudgeTmpDir(), "domjudge-test-");
         file_put_contents($tempFilename, $content);
 
         $zip->open($tempFilename);

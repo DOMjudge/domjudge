@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 class AssetUpdateService
 {
     /**
-     * @var DOMJudgeService
+     * @var DOMjudgeService
      */
     protected $dj;
 
@@ -22,7 +22,7 @@ class AssetUpdateService
      */
     protected $eventLog;
 
-    public function __construct(DOMJudgeService $dj, EventLogService $eventLog)
+    public function __construct(DOMjudgeService $dj, EventLogService $eventLog)
     {
         $this->dj = $dj;
         $this->eventLog = $eventLog;
@@ -37,7 +37,7 @@ class AssetUpdateService
 
         foreach ($entity->getAssetProperties() as $assetProperty) {
             $assetPaths = [];
-            foreach (DOMJudgeService::MIMETYPE_TO_EXTENSION as $mimetype => $extension) {
+            foreach (DOMjudgeService::MIMETYPE_TO_EXTENSION as $mimetype => $extension) {
                 $assetPaths[$mimetype] = $this->dj->fullAssetPath($entity, $assetProperty, $this->eventLog->externalIdFieldForEntity($entity) !== null, $extension);
             }
             if ($entity->isClearAsset($assetProperty)) {

@@ -6,7 +6,7 @@ use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\Team;
 use App\Service\ConfigurationService;
-use App\Service\DOMJudgeService;
+use App\Service\DOMjudgeService;
 use App\Service\ScoreboardService;
 use App\Service\StatisticsService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -31,7 +31,7 @@ use Symfony\Component\Routing\RouterInterface;
 class PublicController extends BaseController
 {
     /**
-     * @var DOMJudgeService
+     * @var DOMjudgeService
      */
     protected $dj;
 
@@ -56,7 +56,7 @@ class PublicController extends BaseController
     protected $em;
 
     public function __construct(
-        DOMJudgeService $dj,
+        DOMjudgeService $dj,
         ConfigurationService $config,
         ScoreboardService $scoreboardService,
         StatisticsService $stats,

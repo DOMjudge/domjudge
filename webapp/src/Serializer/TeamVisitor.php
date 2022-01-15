@@ -3,7 +3,7 @@
 namespace App\Serializer;
 
 use App\Entity\Team;
-use App\Service\DOMJudgeService;
+use App\Service\DOMjudgeService;
 use App\Service\EventLogService;
 use App\Utils\Utils;
 use Exception;
@@ -17,7 +17,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
 class TeamVisitor implements EventSubscriberInterface
 {
     /**
-     * @var DOMJudgeService
+     * @var DOMjudgeService
      */
     protected $dj;
 
@@ -32,7 +32,7 @@ class TeamVisitor implements EventSubscriberInterface
     protected $requestStack;
 
     public function __construct(
-        DOMJudgeService $dj,
+        DOMjudgeService $dj,
         EventLogService $eventLogService,
         RequestStack $requestStack
     ) {

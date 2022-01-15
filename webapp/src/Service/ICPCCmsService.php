@@ -23,7 +23,7 @@ class ICPCCmsService
     const WS_CLICS = '/cm5-contest-rest/rest/contest/export/CLICS/CONTEST/';
 
     /**
-     * @var DOMJudgeService
+     * @var DOMjudgeService
      */
     protected $dj;
 
@@ -39,12 +39,12 @@ class ICPCCmsService
 
     /**
      * ICPCCmsService constructor.
-     * @param DOMJudgeService        $dj
+     * @param DOMjudgeService        $dj
      * @param EntityManagerInterface $em
      * @param                        $domjudgeVersion
      */
     public function __construct(
-        DOMJudgeService $dj,
+        DOMjudgeService $dj,
         EntityManagerInterface $em,
         $domjudgeVersion
     ) {
