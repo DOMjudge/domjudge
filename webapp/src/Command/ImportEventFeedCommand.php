@@ -345,7 +345,7 @@ class ImportEventFeedCommand extends Command
         $this->tokenStorage->setToken($token);
 
         // We need the verdicts to validate judgement-types
-        $verdictsConfig = $this->dj->getDomjudgeEtcDir() . '/verdicts.php';
+        $verdictsConfig = $this->dj->getDOMjudgeEtcDir() . '/verdicts.php';
         $this->verdicts = include $verdictsConfig;
 
         if ($this->client === null) {
@@ -394,7 +394,7 @@ class ImportEventFeedCommand extends Command
      */
     protected function readConfig(string $key): bool
     {
-        $file = $this->dj->getDomjudgeEtcDir() . '/shadowing.yaml';
+        $file = $this->dj->getDOMjudgeEtcDir() . '/shadowing.yaml';
         if (!file_exists($file)) {
             $this->logger->error("Shadowing YAML file '%s' does not exist",
                 [$file]);
@@ -531,7 +531,7 @@ class ImportEventFeedCommand extends Command
         }
 
         $cacheFilePath = sprintf('%s/shadow-%s.ndjson.cache',
-            $this->dj->getDomjudgeTmpDir(), $this->configKey);
+            $this->dj->getDOMjudgeTmpDir(), $this->configKey);
         $cacheFile     = fopen($cacheFilePath, $fromStart ? 'w' : 'a');
 
         $file = fopen($this->feedFile, 'r');
@@ -589,7 +589,7 @@ class ImportEventFeedCommand extends Command
         }
 
         $cacheFilePath = sprintf('%s/shadow-%s.ndjson.cache',
-            $this->dj->getDomjudgeTmpDir(), $this->configKey);
+            $this->dj->getDOMjudgeTmpDir(), $this->configKey);
         $cacheFile     = fopen($cacheFilePath, $fromStart ? 'w' : 'a');
 
         while (true) {
@@ -704,7 +704,7 @@ class ImportEventFeedCommand extends Command
     protected function determineSinceEventId()
     {
         $cacheFilePath = sprintf('%s/shadow-%s.ndjson.cache',
-            $this->dj->getDomjudgeTmpDir(), $this->configKey);
+            $this->dj->getDOMjudgeTmpDir(), $this->configKey);
 
         // If the file doesn't exist, we always start from the beginning
         if (!file_exists($cacheFilePath)) {
@@ -1678,7 +1678,7 @@ class ImportEventFeedCommand extends Command
                     $zipUrl = ($this->basePath ?? '') . $zipUrl;
                 }
 
-                $tmpdir = $this->dj->getDomjudgeTmpDir();
+                $tmpdir = $this->dj->getDOMjudgeTmpDir();
 
                 // Check if we have a local file
                 if (file_exists($zipUrl)) {

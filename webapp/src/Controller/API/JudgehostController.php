@@ -565,7 +565,7 @@ class JudgehostController extends AbstractFOSRestController
                 throw new BadRequestHttpException(
                     'Inconsistent data, no judging known with judgingid = ' . $judgeTask->getJobId() . '.');
             }
-            if ($tempFilename = tempnam($this->dj->getDomjudgeTmpDir(), "full-debug-")) {
+            if ($tempFilename = tempnam($this->dj->getDOMjudgeTmpDir(), "full-debug-")) {
                 $debug_package = base64_decode($request->request->get('full_debug'));
                 file_put_contents($tempFilename, $debug_package);
             }

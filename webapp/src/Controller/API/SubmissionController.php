@@ -390,7 +390,7 @@ class SubmissionController extends AbstractRestController
                 throw new BadRequestHttpException("The 'files[0].data' attribute is not base64 encoded.");
             }
 
-            $tmpDir = $this->dj->getDomjudgeTmpDir();
+            $tmpDir = $this->dj->getDOMjudgeTmpDir();
 
             // Now write the data to a temporary ZIP file
             if (!($tempZipFile = tempnam($tmpDir, 'submission_zip-'))) {

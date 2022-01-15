@@ -320,7 +320,7 @@ class GeneralInfoController extends AbstractFOSRestController
             throw new NotFoundHttpException("country $alpha3code does not exist");
         }
         $alpha2code = strtolower(Countries::getAlpha2Code($alpha3code));
-        $flagFile = sprintf('%s/public/flags/%s/%s.svg', $this->dj->getDomjudgeWebappDir(), $size, $alpha2code);
+        $flagFile = sprintf('%s/public/flags/%s/%s.svg', $this->dj->getDOMjudgeWebappDir(), $size, $alpha2code);
 
         if (!file_exists($flagFile)) {
             throw new NotFoundHttpException("country flag for $alpha3code of size $size not found");
