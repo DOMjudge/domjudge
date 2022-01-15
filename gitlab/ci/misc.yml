@@ -87,3 +87,11 @@ detect dump:
         -type f -print0 | xargs -0 grep --color "dump(" | grep -v "Yaml::dump(")
     - echo $OUT
     - exit $(($(wc -l <<< $OUT)-1))
+
+show cpu:
+  extends: [.tiny_job]
+  stage: style
+  allow_failure: true
+  script:
+    - nproc
+    - cat /proc/cpuinfo
