@@ -28,7 +28,7 @@ class RejudgingService
     protected $em;
 
     /**
-     * @var DOMJudgeService
+     * @var DOMjudgeService
      */
     protected $dj;
 
@@ -50,14 +50,14 @@ class RejudgingService
     /**
      * RejudgingService constructor.
      * @param EntityManagerInterface $em
-     * @param DOMJudgeService        $dj
+     * @param DOMjudgeService        $dj
      * @param ScoreboardService      $scoreboardService
      * @param EventLogService        $eventLogService
      * @param BalloonService         $balloonService
      */
     public function __construct(
         EntityManagerInterface $em,
-        DOMJudgeService $dj,
+        DOMjudgeService $dj,
         ScoreboardService $scoreboardService,
         EventLogService $eventLogService,
         BalloonService $balloonService

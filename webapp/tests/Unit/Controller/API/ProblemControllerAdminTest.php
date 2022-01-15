@@ -4,7 +4,7 @@ namespace App\Tests\Unit\Controller\API;
 
 use App\Entity\Problem;
 use App\Service\ConfigurationService;
-use App\Service\DOMJudgeService;
+use App\Service\DOMjudgeService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
@@ -81,7 +81,7 @@ EOF;
         $config = static::$container->get(ConfigurationService::class);
         $dataSource = $config->get('data_source');
         foreach ($ids as $id) {
-            if ($dataSource === DOMJudgeService::DATA_SOURCE_LOCAL) {
+            if ($dataSource === DOMjudgeService::DATA_SOURCE_LOCAL) {
                 /** @var Problem $problem */
                 $problem = static::$container->get(EntityManagerInterface::class)->getRepository(Problem::class)->find($id);
             } else {

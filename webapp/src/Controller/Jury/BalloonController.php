@@ -6,7 +6,7 @@ use App\Entity\Team;
 use App\Entity\TeamAffiliation;
 use App\Service\BalloonService;
 use App\Service\ConfigurationService;
-use App\Service\DOMJudgeService;
+use App\Service\DOMjudgeService;
 use App\Service\EventLogService;
 use Doctrine\ORM\EntityManagerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -28,7 +28,7 @@ class BalloonController extends AbstractController
     protected $em;
 
     /**
-     * @var DOMJudgeService
+     * @var DOMjudgeService
      */
     protected $dj;
 
@@ -44,7 +44,7 @@ class BalloonController extends AbstractController
 
     public function __construct(
         EntityManagerInterface $em,
-        DOMJudgeService $dj,
+        DOMjudgeService $dj,
         ConfigurationService $config,
         EventLogService $eventLogService
     ) {

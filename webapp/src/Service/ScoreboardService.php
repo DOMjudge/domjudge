@@ -44,7 +44,7 @@ class ScoreboardService
     protected $em;
 
     /**
-     * @var DOMJudgeService
+     * @var DOMjudgeService
      */
     protected $dj;
 
@@ -67,14 +67,14 @@ class ScoreboardService
      * ScoreboardService constructor.
      *
      * @param EntityManagerInterface $em
-     * @param DOMJudgeService        $dj
+     * @param DOMjudgeService        $dj
      * @param ConfigurationService   $config
      * @param LoggerInterface        $logger
      * @param EventLogService        $eventLogService
      */
     public function __construct(
         EntityManagerInterface $em,
-        DOMJudgeService $dj,
+        DOMjudgeService $dj,
         ConfigurationService $config,
         LoggerInterface $logger,
         EventLogService $eventLogService
@@ -332,7 +332,7 @@ class ScoreboardService
         }
 
         // Determine whether we will use external judgements instead of judgings
-        $useExternalJudgements = $this->config->get('data_source') == DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL;
+        $useExternalJudgements = $this->config->get('data_source') == DOMjudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL;
 
         // Note the clause 's.submittime < c.endtime': this is used to
         // filter out TOO-LATE submissions from pending, but it also means

@@ -4,7 +4,7 @@ namespace App\Tests\Unit\Controller\API;
 
 use App\Entity\Contest;
 use App\Service\ConfigurationService;
-use App\Service\DOMJudgeService;
+use App\Service\DOMjudgeService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -80,7 +80,7 @@ EOF;
         static::$container->get(EntityManagerInterface::class)->clear();
         $config = static::$container->get(ConfigurationService::class);
         $dataSource = $config->get('data_source');
-        if ($dataSource === DOMJudgeService::DATA_SOURCE_LOCAL) {
+        if ($dataSource === DOMjudgeService::DATA_SOURCE_LOCAL) {
             return static::$container->get(EntityManagerInterface::class)->getRepository(Contest::class)->find($cid);
         } else {
             return static::$container->get(EntityManagerInterface::class)->getRepository(Contest::class)->findOneBy(['externalid' => $cid]);

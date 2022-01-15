@@ -6,7 +6,7 @@ use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\User;
 use App\Service\ConfigurationService;
-use App\Service\DOMJudgeService;
+use App\Service\DOMjudgeService;
 use App\Service\ImportExportService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -425,7 +425,7 @@ EOF;
         ];
         $unexpectedUsers = ['analyst1', 'analyst2'];
 
-        $fileName = tempnam(static::$container->get(DOMJudgeService::class)->getDOMjudgeTmpDir(), 'accounts-tsv');
+        $fileName = tempnam(static::$container->get(DOMjudgeService::class)->getDOMjudgeTmpDir(), 'accounts-tsv');
         file_put_contents($fileName, $accounts);
         $file = new UploadedFile($fileName, 'accounts.tsv');
         /** @var ImportExportService $importExportService */
@@ -491,7 +491,7 @@ EOF;
         static::$container->get(EntityManagerInterface::class)->clear();
         $config = static::$container->get(ConfigurationService::class);
         $dataSource = $config->get('data_source');
-        if ($dataSource === DOMJudgeService::DATA_SOURCE_LOCAL) {
+        if ($dataSource === DOMjudgeService::DATA_SOURCE_LOCAL) {
             return static::$container->get(EntityManagerInterface::class)->getRepository(Contest::class)->find($cid);
         } else {
             return static::$container->get(EntityManagerInterface::class)->getRepository(Contest::class)->findOneBy(['externalid' => $cid]);

@@ -11,7 +11,7 @@ use App\Entity\SubmissionFile;
 use App\Entity\Team;
 use App\Entity\User;
 use App\Service\ConfigurationService;
-use App\Service\DOMJudgeService;
+use App\Service\DOMjudgeService;
 use App\Service\EventLogService;
 use App\Service\SubmissionService;
 use App\Utils\Utils;
@@ -48,7 +48,7 @@ class SubmissionController extends AbstractRestController
 
     public function __construct(
         EntityManagerInterface $entityManager,
-        DOMJudgeService $dj,
+        DOMjudgeService $dj,
         ConfigurationService $config,
         EventLogService $eventLogService,
         SubmissionService $submissionService
@@ -349,7 +349,7 @@ class SubmissionController extends AbstractRestController
             } elseif ($id !== $submissionId) {
                 throw new BadRequestHttpException('ID does not match URI.');
             } elseif ($this->isGranted('ROLE_API_WRITER')) {
-                if (preg_match(DOMJudgeService::EXTERNAL_IDENTIFIER_REGEX, $submissionId) !== 1) {
+                if (preg_match(DOMjudgeService::EXTERNAL_IDENTIFIER_REGEX, $submissionId) !== 1) {
                     throw new BadRequestHttpException(sprintf("ID '%s' is not valid.", $submissionId));
                 }
 

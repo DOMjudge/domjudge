@@ -7,7 +7,7 @@ use App\Entity\Team;
 use App\Entity\TeamAffiliation;
 use App\Service\AssetUpdateService;
 use App\Service\ConfigurationService;
-use App\Service\DOMJudgeService;
+use App\Service\DOMjudgeService;
 use App\Service\EventLogService;
 use App\Service\ImportExportService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -44,7 +44,7 @@ class OrganizationController extends AbstractRestController
 
     public function __construct(
         EntityManagerInterface $entityManager,
-        DOMJudgeService $dj,
+        DOMjudgeService $dj,
         ConfigurationService $config,
         EventLogService $eventLogService,
         AssetUpdateService $assetUpdater

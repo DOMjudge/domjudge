@@ -52,7 +52,7 @@ use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use ZipArchive;
 
-class DOMJudgeService
+class DOMjudgeService
 {
     protected $em;
     protected $logger;
@@ -118,7 +118,7 @@ class DOMJudgeService
     ];
 
     /**
-     * DOMJudgeService constructor.
+     * DOMjudgeService constructor.
      *
      * @param EntityManagerInterface        $em
      * @param LoggerInterface               $logger

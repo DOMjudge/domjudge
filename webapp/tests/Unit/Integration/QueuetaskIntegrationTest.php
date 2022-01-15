@@ -12,7 +12,7 @@ use App\Entity\TeamCategory;
 use App\Entity\Testcase;
 use App\Entity\TestcaseContent;
 use App\Service\ConfigurationService;
-use App\Service\DOMJudgeService;
+use App\Service\DOMjudgeService;
 use App\Service\EventLogService;
 use App\Service\ScoreboardService;
 use App\Service\SubmissionService;
@@ -30,7 +30,7 @@ class QueuetaskIntegrationTest extends KernelTestCase
     public const NUM_TEAMS = 3;
 
     /**
-     * @var DOMJudgeService
+     * @var DOMjudgeService
      */
     private $dj;
 
@@ -95,7 +95,7 @@ class QueuetaskIntegrationTest extends KernelTestCase
             ->with($this->isType('string'))
             ->will($this->returnCallback([$this, 'getConfig']));
 
-        $this->dj = self::$container->get(DOMJudgeService::class);
+        $this->dj = self::$container->get(DOMjudgeService::class);
         $this->em = self::$container->get('doctrine')->getManager();
 
         $this->scoreboardService = new ScoreboardService(

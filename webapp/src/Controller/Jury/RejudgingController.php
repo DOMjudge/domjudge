@@ -16,7 +16,7 @@ use App\Entity\Team;
 use App\Entity\User;
 use App\Form\Type\RejudgingType;
 use App\Service\ConfigurationService;
-use App\Service\DOMJudgeService;
+use App\Service\DOMjudgeService;
 use App\Service\RejudgingService;
 use App\Service\SubmissionService;
 use App\Utils\Utils;
@@ -50,7 +50,7 @@ class RejudgingController extends BaseController
     protected $em;
 
     /**
-     * @var DOMJudgeService
+     * @var DOMjudgeService
      */
     protected $dj;
 
@@ -76,7 +76,7 @@ class RejudgingController extends BaseController
 
     public function __construct(
         EntityManagerInterface $em,
-        DOMJudgeService $dj,
+        DOMjudgeService $dj,
         ConfigurationService $config,
         RejudgingService $rejudgingService,
         RouterInterface $router,
@@ -419,7 +419,7 @@ class RejudgingController extends BaseController
             'repetitions' => array_column($repetitions, 'rejudgingid'),
             'showStatistics' => $showStatistics,
             'showExternalResult' => $this->config->get('data_source') ==
-                DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL,
+                DOMjudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL,
             'stats' => $stats,
             'refresh' => [
                 'after' => 15,

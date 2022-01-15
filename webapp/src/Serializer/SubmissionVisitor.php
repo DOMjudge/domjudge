@@ -3,7 +3,7 @@
 namespace App\Serializer;
 
 use App\Entity\Submission;
-use App\Service\DOMJudgeService;
+use App\Service\DOMjudgeService;
 use App\Service\EventLogService;
 use Doctrine\ORM\EntityManagerInterface;
 use JMS\Serializer\EventDispatcher\Events;
@@ -19,7 +19,7 @@ use JMS\Serializer\Metadata\StaticPropertyMetadata;
 class SubmissionVisitor implements EventSubscriberInterface
 {
     /**
-     * @var DOMJudgeService
+     * @var DOMjudgeService
      */
     protected $dj;
 
@@ -35,12 +35,12 @@ class SubmissionVisitor implements EventSubscriberInterface
 
     /**
      * SubmissionVisitor constructor.
-     * @param DOMJudgeService        $dj
+     * @param DOMjudgeService        $dj
      * @param EventLogService        $eventLogService
      * @param EntityManagerInterface $em
      */
     public function __construct(
-        DOMJudgeService $dj,
+        DOMjudgeService $dj,
         EventLogService $eventLogService,
         EntityManagerInterface $em
     ) {

@@ -6,7 +6,7 @@ use App\Entity\Role;
 use App\Entity\Team;
 use App\Entity\User;
 use App\Service\ConfigurationService;
-use App\Service\DOMJudgeService;
+use App\Service\DOMjudgeService;
 use App\Service\EventLogService;
 use App\Service\ImportExportService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -38,7 +38,7 @@ class UserController extends AbstractRestController
 
     public function __construct(
         EntityManagerInterface $entityManager,
-        DOMJudgeService $dj,
+        DOMjudgeService $dj,
         ConfigurationService $config,
         EventLogService $eventLogService,
         ImportExportService $importExportService

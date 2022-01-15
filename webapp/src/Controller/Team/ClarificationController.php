@@ -9,7 +9,7 @@ use App\Entity\Problem;
 use App\Entity\Team;
 use App\Form\Type\TeamClarificationType;
 use App\Service\ConfigurationService;
-use App\Service\DOMJudgeService;
+use App\Service\DOMjudgeService;
 use App\Service\EventLogService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
@@ -38,7 +38,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class ClarificationController extends BaseController
 {
     /**
-     * @var DOMJudgeService
+     * @var DOMjudgeService
      */
     protected $dj;
 
@@ -63,7 +63,7 @@ class ClarificationController extends BaseController
     protected $formFactory;
 
     public function __construct(
-        DOMJudgeService $dj,
+        DOMjudgeService $dj,
         ConfigurationService $config,
         EntityManagerInterface $em,
         EventLogService $eventLogService,

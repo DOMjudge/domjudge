@@ -4,7 +4,7 @@ namespace App\Form\Type;
 
 use App\Entity\ContestProblem;
 use App\Service\ConfigurationService;
-use App\Service\DOMJudgeService;
+use App\Service\DOMjudgeService;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
@@ -14,7 +14,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 class TeamClarificationType extends AbstractType
 {
     /**
-     * @var DOMJudgeService
+     * @var DOMjudgeService
      */
     protected $dj;
 
@@ -24,7 +24,7 @@ class TeamClarificationType extends AbstractType
     protected $config;
 
     public function __construct(
-        DOMJudgeService $dj,
+        DOMjudgeService $dj,
         ConfigurationService $config
     ) {
         $this->dj     = $dj;

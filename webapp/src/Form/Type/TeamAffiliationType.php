@@ -5,7 +5,7 @@ namespace App\Form\Type;
 use App\Entity\Contest;
 use App\Entity\TeamAffiliation;
 use App\Service\ConfigurationService;
-use App\Service\DOMJudgeService;
+use App\Service\DOMjudgeService;
 use App\Service\EventLogService;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -26,14 +26,14 @@ class TeamAffiliationType extends AbstractExternalIdEntityType
     protected $configuration;
 
     /**
-     * @var DOMJudgeService
+     * @var DOMjudgeService
      */
     protected $dj;
 
     public function __construct(
         EventLogService $eventLogService,
         ConfigurationService $configuration,
-        DOMJudgeService $dj
+        DOMjudgeService $dj
     ) {
         parent::__construct($eventLogService);
         $this->configuration = $configuration;

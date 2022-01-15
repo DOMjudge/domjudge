@@ -18,7 +18,7 @@ use App\Form\Type\TsvImportType;
 use App\Service\ICPCCmsService;
 use App\Service\ImportProblemService;
 use App\Service\ConfigurationService;
-use App\Service\DOMJudgeService;
+use App\Service\DOMjudgeService;
 use App\Service\EventLogService;
 use App\Service\ImportExportService;
 use App\Service\ScoreboardService;
@@ -69,7 +69,7 @@ class ImportExportController extends BaseController
     protected $scoreboardService;
 
     /**
-     * @var DOMJudgeService
+     * @var DOMjudgeService
      */
     protected $dj;
 
@@ -91,7 +91,7 @@ class ImportExportController extends BaseController
         ImportExportService $importExportService,
         EntityManagerInterface $em,
         ScoreboardService $scoreboardService,
-        DOMJudgeService $dj,
+        DOMjudgeService $dj,
         ConfigurationService $config,
         EventLogService $eventLogService,
         ImportProblemService $importProblemService,

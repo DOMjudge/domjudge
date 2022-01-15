@@ -4,7 +4,7 @@ namespace App\Serializer;
 
 use App\Entity\Contest;
 use App\Service\ConfigurationService;
-use App\Service\DOMJudgeService;
+use App\Service\DOMjudgeService;
 use App\Service\EventLogService;
 use App\Utils\Utils;
 use Exception;
@@ -27,7 +27,7 @@ class ContestVisitor implements EventSubscriberInterface
     protected $config;
 
     /**
-     * @var DOMJudgeService
+     * @var DOMjudgeService
      */
     protected $dj;
 
@@ -40,12 +40,12 @@ class ContestVisitor implements EventSubscriberInterface
      * ContestVisitor constructor.
      *
      * @param ConfigurationService $config
-     * @param DOMJudgeService      $dj
+     * @param DOMjudgeService      $dj
      * @param EventLogService      $eventLogService
      */
     public function __construct(
         ConfigurationService $config,
-        DOMJudgeService $dj,
+        DOMjudgeService $dj,
         EventLogService $eventLogService
     ) {
         $this->config = $config;

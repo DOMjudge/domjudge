@@ -10,7 +10,7 @@ use App\DataFixtures\Test\SampleSubmissionsFixture;
 use App\Entity\Problem;
 use App\Entity\Submission;
 use App\Entity\SubmissionFile;
-use App\Service\DOMJudgeService;
+use App\Service\DOMjudgeService;
 use Doctrine\ORM\EntityManagerInterface;
 use Generator;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -526,7 +526,7 @@ class SubmissionControllerTest extends BaseTest
     protected function base64ZipWithFiles(array $files): string
     {
         $zip = new ZipArchive();
-        $tempFilename = tempnam(static::$container->get(DOMJudgeService::class)->getDOMjudgeTmpDir(), "api-submissions-test-");
+        $tempFilename = tempnam(static::$container->get(DOMjudgeService::class)->getDOMjudgeTmpDir(), "api-submissions-test-");
 
         $zip->open($tempFilename, ZipArchive::OVERWRITE);
         foreach ($files as $file => $content) {
