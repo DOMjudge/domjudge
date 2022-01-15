@@ -168,16 +168,14 @@ set +e
 mount -t proc proc /proc
 set -e
 
+if [ $PIN_JUDGEDAEMON -eq 1 ]; then
+	PINNING="-n 0"
+fi
+
 while [ ! -f ${DIR}/chroot/domjudge/etc/root-permission-test.txt ]; do
     sleep 5
 done
-
-for cpu in $(seq 0 $(($(nproc)-2))); do
-    if [ $PIN_JUDGEDAEMON -eq 1 ]; then
-        PINNING="-n $cpu"
-    fi
-    sudo -u domjudge bin/judgedaemon $PINNING |& tee /tmp/judgedaemon.log &
-done
+sudo -u domjudge bin/judgedaemon $PINNING |& tee /tmp/judgedaemon.log &
 sleep 5
 
 section_end more_setup
