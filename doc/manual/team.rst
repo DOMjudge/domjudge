@@ -188,7 +188,8 @@ COMPILER-ERROR
   disabled).
   Note that when compilation takes more than |COMPILETIME| seconds,
   it is aborted and this counts as a compilation error.
-  *Compilation errors do not incur penalty time.*
+  *Compilation errors do not incur penalty time. The administrator of
+  the contest can change this scoring.*
 
 TIMELIMIT
   Your program took longer than the maximum allowed time for this
@@ -200,7 +201,7 @@ RUN-ERROR
   There was an error during the execution of your program. This can have
   a lot of different causes like division by zero, incorrectly
   addressing memory (e.g. by indexing arrays out of bounds), trying to
-  use more memory than the limit, etc.
+  use more memory than the limit, reading or writing to files, etc.
   Also check that your program exits with exit code 0!
 
 NO-OUTPUT
@@ -222,7 +223,8 @@ TOO-LATE
   stored but will not be processed anymore.
 
 The judges may have prepared multiple test files for each problem.
-DOMjudge will report back the first non-correct result as verdict.
+DOMjudge will report back the first highest priority non-correct result as verdict.
+*Your administrator can decide on different priorities for non-correct results.*
 
 Clarifications
 --------------
