@@ -26,7 +26,11 @@ run unit tests:
     - mariadb
   variables:
     MYSQL_ROOT_PASSWORD: password
+  parallel:
+    matrix:
+      - PHPVERSION: ["7.2","7.3","7.4"]
   script:
+    - update-alternatives --set php /usr/bin/php${PHPVERSION}
     - ./gitlab/unit-tests.sh
   artifacts:
     when: always
@@ -51,6 +55,9 @@ integration:
   services:
     - docker:19-dind
     - mariadb
+  parallel:
+    matrix:
+      - PHPVERSION: ["7.2","7.3","7.4"]
   variables:
     MYSQL_ROOT_PASSWORD: password
     DOCKER_HOST: tcp://docker:2375/
@@ -60,7 +67,7 @@ integration:
     docker run --privileged \
       -v $CI_PROJECT_DIR:$CI_PROJECT_DIR \
       --net=host \
-      -e "TERM=xterm-256color" -e "HOME=$HOME" -e "USER=$USER" -e "MARIADB_PORT_3306_TCP_ADDR=$MARIADB_PORT_3306_TCP_ADDR" -e "MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD" \
+      -e "PHPVERSION=$PHPVERSION" -e "TERM=xterm-256color" -e "HOME=$HOME" -e "USER=$USER" -e "MARIADB_PORT_3306_TCP_ADDR=$MARIADB_PORT_3306_TCP_ADDR" -e "MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD" \
       domjudge/gitlabci:2.1 /bin/bash -eo pipefail -c "umask 0002; cd $CI_PROJECT_DIR; script --return -qfc \"./gitlab/integration.sh\" /dev/null | ts \"[%F %T]\" "
   artifacts:
     when: always

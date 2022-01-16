@@ -39,6 +39,12 @@ function finish() {
 }
 trap finish EXIT
 
+section_start phpinfo "Show the new PHP info"
+update-alternatives --set php /usr/bin/php${PHPVERSION}
+php -v
+php -m
+section_end phpinfo
+
 section_start setup "Setup and install"
 
 export PS4='(${BASH_SOURCE}:${LINENO}): - [$?] $ '
