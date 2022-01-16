@@ -28,7 +28,7 @@ run unit tests:
     MYSQL_ROOT_PASSWORD: password
   parallel:
     matrix:
-      - PHPVERSION: ["7.2","7.3","7.4"]
+      - PHPVERSION: ["7.2","7.3","7.4","8.0"]
   script:
     - update-alternatives --set php /usr/bin/php${PHPVERSION}
     - ./gitlab/unit-tests.sh
@@ -57,7 +57,7 @@ integration:
     - mariadb
   parallel:
     matrix:
-      - PHPVERSION: ["7.2","7.3","7.4"]
+      - PHPVERSION: ["7.2","7.3","7.4","8.0"]
   variables:
     MYSQL_ROOT_PASSWORD: password
     DOCKER_HOST: tcp://docker:2375/
