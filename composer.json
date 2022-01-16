@@ -116,7 +116,11 @@
 			"php": "7.2.5"
 		},
 		"vendor-dir": "lib/vendor",
-		"component-dir": "lib/vendor/components"
+		"component-dir": "lib/vendor/components",
+		"allow-plugins": {
+			"composer/package-versions-deprecated": true,
+			"symfony/flex": true
+		}
 	},
 	"replace": {
 		"paragonie/random_compat": "2.*",
