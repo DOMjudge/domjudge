@@ -254,6 +254,7 @@ curl $CURLOPTS -X POST -d 'contest=2&donow[freeze]=freeze now' http://localhost/
 curl $CURLOPTS -X POST -d 'contest=2&donow[end]=end now' http://localhost/domjudge/jury/contests || true
 curl $CURLOPTS -X POST -d 'finalize_contest[b]=0&finalize_contest[finalizecomment]=gitlab&finalize_contest[finalize]=' http://localhost/domjudge/jury/contests/2/finalize
 
+# shellcheck disable=SC2002,SC2196
 if cat /opt/domjudge/domserver/webapp/var/log/prod.log | egrep '(CRITICAL|ERROR):'; then
    exit 1
 fi

@@ -122,6 +122,7 @@ chmod a+rwx "$WORKDIR/compile"
 touch compile.out compile.meta
 
 # Copy compile script into chroot
+# shellcheck disable=SC2174
 mkdir -m 0777 -p "$WORKDIR/compile-script"
 cp -a $(dirname $COMPILE_SCRIPT)/* $PWD/compile-script
 
@@ -136,6 +137,7 @@ done
 
 logmsg $LOG_INFO "starting compile"
 
+# shellcheck disable=SC2236
 if [ ! -z "$ENTRY_POINT" ]; then
 	ENVIRONMENT_VARS="-V ENTRY_POINT=$ENTRY_POINT"
 fi
