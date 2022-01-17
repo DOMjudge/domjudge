@@ -38,7 +38,7 @@ UNITSUCCESS=$?
 set -e
 CNT=0
 if [ $CODECOVERAGE -eq 1 ]; then
-    CNT=$(sed -n '/Generating code coverage report/,$p' phpunit.out | grep -v DoctrineTestBundle | grep -v ^$ | wc -l)
+    CNT=$(sed -n '/Generating code coverage report/,$p' phpunit.out | grep -v DoctrineTestBundle | grep -cv ^$)
     FILE=deprecation.txt
     sed -n '/Generating code coverage report/,$p' phpunit.out > ${CI_PROJECT_DIR}/$FILE
     if [ $CNT -lt 4 ]; then

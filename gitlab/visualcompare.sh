@@ -72,7 +72,7 @@ CHANGE=0
 cd "$DIR"
 STATE="success"
 set +e
-MANY=$(ls $VISUALCHANGES|grep -v 'main\|pr'|wc -l)
+MANY=$(ls $VISUALCHANGES|grep -cv 'main\|pr')
 set -e
 FILE="browse/$VISUALCHANGES"
 CONTEXT="UI diffs"
