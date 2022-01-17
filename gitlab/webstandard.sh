@@ -11,11 +11,14 @@ trap log_on_err ERR
 
 cd /opt/domjudge/domserver
 
+function setup_php_fpm() {
 section_start_collap phpfpm "Setup PHP-FPM"
 # configure and restart php-fpm
 sudo cp /opt/domjudge/domserver/etc/domjudge-fpm.conf "/etc/php/7.4/fpm/pool.d/domjudge-fpm.conf"
 sudo /usr/sbin/php-fpm7.4
 section_end phpfpm
+}
+setup_php_fpm &
 
 section_start_collap testuser "Setup the test user"
 # We're using the admin user in all possible roles
@@ -61,7 +64,18 @@ cd $url
 cp $DIR/cookies.txt ./
 section_start_collap scrape "Scrape the site with the rebuild admin user"
 set +e
-wget \                                                                                                       --reject-regex logout \                                                                                 --recursive \                                                                                           --no-clobber \                                                                                          --page-requisites \                                                                                     --html-extension \                                                                                      --convert-links \                                                                                       --restrict-file-names=windows \                                                                         --domains localhost \                                                                                   --no-parent \                                                                                           --load-cookies cookies.txt \                                                                                http://localhost/domjudge/$url
+wget \
+    --reject-regex logout \
+    --recursive \
+    --no-clobber \
+    --page-requisites \
+    --html-extension \
+    --convert-links \
+    --restrict-file-names=windows \
+    --domains localhost \
+    --no-parent \
+    --load-cookies cookies.txt \
+    http://localhost/domjudge/$url
 RET=$?
 set -e
 #https://www.gnu.org/software/wget/manual/html_node/Exit-Status.html
@@ -95,13 +109,22 @@ if [ "$TEST" = "w3cval" ]; then
     fi
     for typ in html css svg
     do
-        section_start_collap test_suite_${typ} "Run testsuite ${typ}"
-	    $DIR/vnu-runtime-image/bin/vnu --errors-only --exit-zero-always --skip-non-$typ --format json $FLTR $url 2> result.json
-            NEWFOUNDERRORS=`$DIR/vnu-runtime-image/bin/vnu --errors-only --exit-zero-always --skip-non-$typ --format gnu $FLTR $url 2>&1 | wc -l`
-            FOUNDERR=$((NEWFOUNDERRORS+FOUNDERR))
-            python3 -m "json.tool" < result.json > w3c$typ$url.json
-            trace_off; python3 gitlab/jsontogitlab.py w3c$typ$url.json; trace_on
-        section_end test_suite_${typ}
+        function run_test() {
+            typ=$1
+            section_start_collap test_suite_${typ} "Run testsuite ${typ}"
+	        $DIR/vnu-runtime-image/bin/vnu --errors-only --exit-zero-always --skip-non-$typ --format json $FLTR $url 2> result.json
+                NEWFOUNDERRORS=`$DIR/vnu-runtime-image/bin/vnu --errors-only --exit-zero-always --skip-non-$typ --format gnu $FLTR $url 2>&1 | wc -l`
+                python3 -m "json.tool" < result.json > w3c$typ$url.json
+                trace_off; python3 gitlab/jsontogitlab.py w3c$typ$url.json; trace_on
+            section_end test_suite_${typ}
+            echo $NEWFOUNDERRORS > errors_${typ}
+        }
+        run_test $typ &
+    done
+    for typ in html css svg
+    do
+        ADDERROR=$(<errors_${typ})
+        FOUNDERR=$((ADDERROR+FOUNDERR))
     done
 else
     section_start_collap upstream_problems "Remove files from upstream with problems"
@@ -119,12 +142,26 @@ else
     ACCEPTEDERR=5
     for file in `find $url -name *.html`
     do
-        section_start ${file//\//} $file
-        # T is reasonable amount of errors to allow to not break
-        su domjudge -c "/node_modules/.bin/pa11y $STAN -T $ACCEPTEDERR $FLTR --reporter json ./$file" | python3 -m json.tool
-        ERR=`su domjudge -c "/node_modules/.bin/pa11y $STAN -T $ACCEPTEDERR $FLTR --reporter csv ./$file" | wc -l`
-        FOUNDERR=$((ERR+FOUNDERR-1)) # Remove header row
-        section_end ${file//\//}
+        function run_test() {
+            section_start ${file//\//} $file
+            # T is reasonable amount of errors to allow to not break
+            su domjudge -c "/node_modules/.bin/pa11y $STAN -T $ACCEPTEDERR $FLTR --reporter json ./$file" | python3 -m json.tool
+            ERR=`su domjudge -c "/node_modules/.bin/pa11y $STAN -T $ACCEPTEDERR $FLTR --reporter csv ./$file" | wc -l`
+            FOUNDERR=$((ERR+FOUNDERR-1)) # Remove header row
+            section_end ${file//\//}
+            IDENT=${file//\//}
+            echo $((ERR-1)) > errors_${IDENT}
+        }
+        run_test $file &
+    done
+    for file in `find $url -name *.html`
+    do
+        IDENT=${file//\//}
+        while [ ! -f $IDENT ]; do
+            sleep 1
+        done
+        ADDERROR=$(<errors_${IDENT})
+        FOUNDERR=$((ADDERROR+FOUNDERR))
     done
 fi
 echo "Found: " $FOUNDERR
