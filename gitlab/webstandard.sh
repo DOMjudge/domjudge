@@ -11,14 +11,11 @@ trap log_on_err ERR
 
 cd /opt/domjudge/domserver
 
-function setup_php_fpm() {
 section_start_collap phpfpm "Setup PHP-FPM"
 # configure and restart php-fpm
 sudo cp /opt/domjudge/domserver/etc/domjudge-fpm.conf "/etc/php/7.4/fpm/pool.d/domjudge-fpm.conf"
 sudo /usr/sbin/php-fpm7.4
 section_end phpfpm
-}
-setup_php_fpm &
 
 section_start_collap testuser "Setup the test user"
 # We're using the admin user in all possible roles
