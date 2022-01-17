@@ -8,6 +8,8 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v2
+            - name: Get config option in root
+              run: mv .github/workflowscripts/.codespellrc ./
             - name: Get dirs to skip
               id: list_to_csv
               run: echo "::set-output name=SKIP::$(awk '{print $1}' gitlab/codespellignorefiles.txt | paste -s -d, -)"
