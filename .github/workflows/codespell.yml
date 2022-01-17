@@ -19,4 +19,3 @@ jobs:
                   only_warn: 1
                   ignore_words_file: gitlab/codespellignorewords.txt
                   skip: ${{ steps.list_to_csv.outputs.SKIP }}
-                  builtin: clear,rare
