@@ -36,6 +36,7 @@ sudo rm -f /etc/nginx/sites-enabled/*
 sudo cp $HOME/domjudge/domserver/etc/nginx-conf /etc/nginx/sites-enabled/domjudge
 
 openssl req -nodes -new -x509 -keyout /tmp/server.key -out /tmp/server.crt -subj "/C=NL/ST=Noord-Holland/L=Amsterdam/O=TestingForPR/CN=localhost"
+# shellcheck disable=SC2002
 cat $(pwd)/.github/workflowscripts/nginx_extra | sudo tee -a /etc/nginx/sites-enabled/domjudge
 
 sudo systemctl restart nginx

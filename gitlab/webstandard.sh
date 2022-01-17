@@ -115,6 +115,7 @@ else
     fi
     cd $DIR
     ACCEPTEDERR=5
+    # shellcheck disable=SC2044,SC2035
     for file in `find $URL -name *.html`
     do
         section_start ${file//\//} $file

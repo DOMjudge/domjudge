@@ -73,6 +73,7 @@ if [ $CODECOVERAGE -eq 1 ]; then
     section_start_collap uploadcoverage "Upload code coverage"
     # Only upload when we got working unit-tests.
     set +u # Uses some variables which are not set
+    # shellcheck disable=SC1090
     . $DIR/gitlab/uploadcodecov.sh 1>/dev/zero 2>/dev/zero
     section_end uploadcoverage
 fi

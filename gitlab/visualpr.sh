@@ -155,8 +155,10 @@ service nginx restart
 section_end cpstatic
 
 section_start_collap capture "Capture the pages in a static webserver"
+# shellcheck disable=SC2089,SC2090
 SKIPPED="grep -v '\.eot\|\.ttf\|\.woff*\|\.js@*'"
 cd html/"$URL"/"$ROLE"/localhost/domjudge
+# shellcheck disable=SC2090
 for file in $(find ./ -type f|$SKIPPED); do
     urlpath="${file//.\//}"
     # Small risk of collision

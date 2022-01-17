@@ -29,6 +29,7 @@ fi
 echo "unused:${MARIADB_PORT_3306_TCP_ADDR}:domjudge:domjudge:domjudge:3306" > etc/dbpasswords.secret
 
 # Generate APP_SECRET for symfony
+# shellcheck disable=SC2164
 ( cd etc ; ./gensymfonysecret > symfony_app.secret )
 
 cat > webapp/config/static.yaml <<EOF
@@ -60,6 +61,7 @@ make build-scripts domserver judgehost docs |& tee "$GITLABARTIFACTS/make.log"
 sudo make install-domserver install-judgehost install-docs |& tee -a "$GITLABARTIFACTS/make.log"
 
 # setup database and add special user
+# shellcheck disable=SC2164
 cd /opt/domjudge/domserver
 setfacl -m u:www-data:r etc/restapi.secret etc/initial_admin_password.secret \
                         etc/dbpasswords.secret etc/symfony_app.secret
