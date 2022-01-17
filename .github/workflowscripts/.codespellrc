@@ -1,2 +1,3 @@
 [codespell]
 dictionary = .github/workflowscripts/domjudge.dict
+builtin = clear,rare
