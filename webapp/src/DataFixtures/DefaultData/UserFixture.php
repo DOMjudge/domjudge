@@ -49,7 +49,7 @@ class UserFixture extends AbstractDefaultDataFixture implements DependentFixture
         if (!($adminUser = $manager->getRepository(User::class)->findOneBy(['username' => 'admin']))) {
             $adminPasswordFile = sprintf(
                 '%s/%s',
-                $this->dj->getDOMjudgeEtcDir(),
+                $this->dj->getDomjudgeEtcDir(),
                 'initial_admin_password.secret'
             );
 
@@ -100,7 +100,7 @@ class UserFixture extends AbstractDefaultDataFixture implements DependentFixture
     {
         $restapiCredentialsFile = sprintf(
             '%s/%s',
-            $this->dj->getDOMjudgeEtcDir(),
+            $this->dj->getDomjudgeEtcDir(),
             'restapi.secret'
         );
         $credentials            = @file($restapiCredentialsFile);

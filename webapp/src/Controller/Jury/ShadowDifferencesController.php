@@ -92,7 +92,7 @@ class ShadowDifferencesController extends BaseController
         $this->session->save();
 
         $contest        = $this->dj->getCurrentContest();
-        $verdictsConfig = $this->dj->getDOMjudgeEtcDir() . '/verdicts.php';
+        $verdictsConfig = $this->dj->getDomjudgeEtcDir() . '/verdicts.php';
         $verdicts       = array_merge(['judging' => 'JU'], include $verdictsConfig);
 
         if (!$contest) {

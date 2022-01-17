@@ -289,7 +289,7 @@ class ProblemController extends BaseController
         $yamlString = '# Problem exported by DOMjudge on ' . date('c') . "\n" . Yaml::dump($yaml);
 
         $zip = new ZipArchive();
-        if (!($tempFilename = tempnam($this->dj->getDOMjudgeTmpDir(), "export-"))) {
+        if (!($tempFilename = tempnam($this->dj->getDomjudgeTmpDir(), "export-"))) {
             throw new ServiceUnavailableHttpException(null, 'Could not create temporary file.');
         }
 
@@ -551,7 +551,7 @@ class ProblemController extends BaseController
                                 return $this->redirectToRoute('jury_problem_testcases', ['probId' => $probId]);
                             }
                             $thumb = Utils::getImageThumb($content, $thumbnailSize,
-                                                          $this->dj->getDOMjudgeTmpDir(), $error);
+                                                          $this->dj->getDomjudgeTmpDir(), $error);
                             if ($thumb === false) {
                                 $this->addFlash('danger', sprintf('image: %s', $error));
                                 return $this->redirectToRoute('jury_problem_testcases', ['probId' => $probId]);
@@ -660,7 +660,7 @@ class ProblemController extends BaseController
                         return $this->redirectToRoute('jury_problem_testcases', ['probId' => $probId]);
                     }
                     $thumb = Utils::getImageThumb($content, $thumbnailSize,
-                                                  $this->dj->getDOMjudgeTmpDir(), $error);
+                                                  $this->dj->getDomjudgeTmpDir(), $error);
                     if ($thumb === false) {
                         $this->addFlash('danger', sprintf('image: %s', $error));
                         return $this->redirectToRoute('jury_problem_testcases', ['probId' => $probId]);

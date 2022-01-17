@@ -70,6 +70,6 @@ class ExecutableController extends AbstractFOSRestController
             throw new NotFoundHttpException(sprintf('Cannot find executable \'%s\'', $id));
         }
 
-        return base64_encode($executable->getZipfileContent($this->dj->getDOMjudgeTmpDir()));
+        return base64_encode($executable->getZipfileContent($this->dj->getDomjudgeTmpDir()));
     }
 }

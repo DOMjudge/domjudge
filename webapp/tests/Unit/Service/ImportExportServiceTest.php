@@ -425,7 +425,7 @@ EOF;
         ];
         $unexpectedUsers = ['analyst1', 'analyst2'];
 
-        $fileName = tempnam(static::$container->get(DOMJudgeService::class)->getDOMjudgeTmpDir(), 'accounts-tsv');
+        $fileName = tempnam(static::$container->get(DOMJudgeService::class)->getDomjudgeTmpDir(), 'accounts-tsv');
         file_put_contents($fileName, $accounts);
         $file = new UploadedFile($fileName, 'accounts.tsv');
         /** @var ImportExportService $importExportService */

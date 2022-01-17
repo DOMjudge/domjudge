@@ -693,7 +693,7 @@ class DOMJudgeService
      * Get the etc directory of this DOMjudge installation
      * @return string
      */
-    public function getDOMjudgeEtcDir(): string
+    public function getDomjudgeEtcDir(): string
     {
         return $this->params->get('domjudge.etcdir');
     }
@@ -702,7 +702,7 @@ class DOMJudgeService
      * Get the tmp directory of this DOMjudge installation
      * @return string
      */
-    public function getDOMjudgeTmpDir(): string
+    public function getDomjudgeTmpDir(): string
     {
         return $this->params->get('domjudge.tmpdir');
     }
@@ -711,7 +711,7 @@ class DOMJudgeService
      * Get the webapp directory of this DOMjudge installation
      * @return string
      */
-    public function getDOMjudgeWebappDir(): string
+    public function getDomjudgeWebappDir(): string
     {
         return $this->params->get('domjudge.webappdir');
     }
@@ -832,7 +832,7 @@ class DOMJudgeService
 
 
         $zip = new ZipArchive();
-        if (!($tempFilename = tempnam($this->getDOMjudgeTmpDir(), "export-"))) {
+        if (!($tempFilename = tempnam($this->getDomjudgeTmpDir(), "export-"))) {
             throw new ServiceUnavailableHttpException(null, 'Could not create temporary file.');
         }
 
@@ -1339,7 +1339,7 @@ class DOMJudgeService
      */
     public function assetPath(string $name, string $type, bool $fullPath = false, ?string $forceExtension = null): ?string
     {
-        $prefix = $fullPath ? ($this->getDOMjudgeWebappDir() . '/public/') : '';
+        $prefix = $fullPath ? ($this->getDomjudgeWebappDir() . '/public/') : '';
         switch ($type) {
             case 'affiliation':
                 $dir = 'images/affiliations';
@@ -1371,7 +1371,7 @@ class DOMJudgeService
         // checkbox when a global banner has been set.
         $bannerFiles = ['images/banner.png', 'images/banner.jpg', 'images/banner.svg'];
         foreach ($bannerFiles as $bannerFile) {
-            if (file_exists($this->getDOMjudgeWebappDir() . '/public/' . $bannerFile)) {
+            if (file_exists($this->getDomjudgeWebappDir() . '/public/' . $bannerFile)) {
                 return $bannerFile;
             }
         }

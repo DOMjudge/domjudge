@@ -526,7 +526,7 @@ class SubmissionControllerTest extends BaseTest
     protected function base64ZipWithFiles(array $files): string
     {
         $zip = new ZipArchive();
-        $tempFilename = tempnam(static::$container->get(DOMJudgeService::class)->getDOMjudgeTmpDir(), "api-submissions-test-");
+        $tempFilename = tempnam(static::$container->get(DOMJudgeService::class)->getDomjudgeTmpDir(), "api-submissions-test-");
 
         $zip->open($tempFilename, ZipArchive::OVERWRITE);
         foreach ($files as $file => $content) {
