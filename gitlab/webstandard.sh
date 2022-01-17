@@ -2,6 +2,17 @@
 
 . gitlab/dind.profile
 
+function install_testsuite() {
+if [ "$TEST" = "w3cval" ]; then
+    section_start_collap test_suite "Install testsuite"
+    cd $DIR
+    wget https://github.com/validator/validator/releases/latest/download/vnu.linux.zip
+    unzip -q vnu.linux.zip
+    section_end test_suite
+fi
+}
+install_testsuite &
+
 section_start_collap basesetup "Base installation"
 # Set up
 "$( dirname "${BASH_SOURCE[0]}" )"/base.sh
@@ -11,13 +22,13 @@ trap log_on_err ERR
 
 cd /opt/domjudge/domserver
 
-section_start_collap phpfpm "Setup PHP-FPM"
-# configure and restart php-fpm
+section_start setup_phpfpm "Configure and restart php-fpm"
 sudo cp /opt/domjudge/domserver/etc/domjudge-fpm.conf "/etc/php/7.4/fpm/pool.d/domjudge-fpm.conf"
 sudo /usr/sbin/php-fpm7.4
-section_end phpfpm
+section_end setup_phpfpm
 
 section_start_collap testuser "Setup the test user"
+cd $DIR
 # We're using the admin user in all possible roles
 echo "DELETE FROM userrole WHERE userid=1;" | mysql domjudge
 ADMINPASS=$(cat etc/initial_admin_password.secret)
@@ -90,11 +101,6 @@ if [ "$TEST" = "w3cval" ]; then
     rm -f localhost/domjudge/css/select2-bootstrap.min.css*
     section_end upstream_problems
 
-    section_start_collap test_suite "Install testsuite"
-    cd $DIR
-    wget https://github.com/validator/validator/releases/latest/download/vnu.linux.zip
-    unzip -q vnu.linux.zip
-    section_end test_suite
     FLTRALL='--filterpattern .*autocomplete.*|.*descendant.*|.*child.*'
     FLTRJURY='|.*form.*|.*scope.*'
     if [ "$ROLE" = jury ]; then
@@ -108,8 +114,9 @@ if [ "$TEST" = "w3cval" ]; then
     do
         function run_test() {
             typ=$1
+            cd $DIR
             section_start_collap test_suite_${typ} "Run testsuite ${typ}"
-	        $DIR/vnu-runtime-image/bin/vnu --errors-only --exit-zero-always --skip-non-$typ --format json $FLTR $url 2> result.json
+                $DIR/vnu-runtime-image/bin/vnu --errors-only --exit-zero-always --skip-non-$typ --format json $FLTR $url 2> result.json
                 NEWFOUNDERRORS=`$DIR/vnu-runtime-image/bin/vnu --errors-only --exit-zero-always --skip-non-$typ --format gnu $FLTR $url 2>&1 | wc -l`
                 python3 -m "json.tool" < result.json > w3c$typ$url.json
                 trace_off; python3 gitlab/jsontogitlab.py w3c$typ$url.json; trace_on
@@ -120,6 +127,9 @@ if [ "$TEST" = "w3cval" ]; then
     done
     for typ in html css svg
     do
+        while [ ! -f errors_${typ} ]; do
+            sleep 1
+        done
         ADDERROR=$(<errors_${typ})
         FOUNDERR=$((ADDERROR+FOUNDERR))
     done
@@ -140,21 +150,21 @@ else
     for file in `find $url -name *.html`
     do
         function run_test() {
-            section_start ${file//\//} $file
+            infile=$1
+            section_start ${infile//\//} $infile
             # T is reasonable amount of errors to allow to not break
-            su domjudge -c "/node_modules/.bin/pa11y $STAN -T $ACCEPTEDERR $FLTR --reporter json ./$file" | python3 -m json.tool
-            ERR=`su domjudge -c "/node_modules/.bin/pa11y $STAN -T $ACCEPTEDERR $FLTR --reporter csv ./$file" | wc -l`
-            FOUNDERR=$((ERR+FOUNDERR-1)) # Remove header row
-            section_end ${file//\//}
-            IDENT=${file//\//}
+            su domjudge -c "/node_modules/.bin/pa11y $STAN -T $ACCEPTEDERR $FLTR --reporter json ./$infile" | python3 -m json.tool
+            ERR=`su domjudge -c "/node_modules/.bin/pa11y $STAN -T $ACCEPTEDERR $FLTR --reporter csv ./$infile" | wc -l`
+            section_end ${infile//\//}
+            IDENT=${infile//\//}
             echo $((ERR-1)) > errors_${IDENT}
         }
-        run_test $file &
+        run_test $file
     done
     for file in `find $url -name *.html`
     do
         IDENT=${file//\//}
-        while [ ! -f $IDENT ]; do
+        while [ ! -f errors_${IDENT} ]; do
             sleep 1
         done
         ADDERROR=$(<errors_${IDENT})
