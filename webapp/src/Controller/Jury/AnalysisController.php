@@ -6,7 +6,7 @@ use App\Entity\Judging;
 use App\Entity\Problem;
 use App\Entity\Submission;
 use App\Entity\Team;
-use App\Service\DOMjudgeService;
+use App\Service\DOMJudgeService;
 use App\Service\StatisticsService;
 use Doctrine\ORM\Query\Expr;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
@@ -22,7 +22,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class AnalysisController extends AbstractController
 {
     /**
-     * @var DOMjudgeService
+     * @var DOMJudgeService
      */
     private $dj;
 
@@ -31,7 +31,7 @@ class AnalysisController extends AbstractController
      */
     private $stats;
 
-    public function __construct(DOMjudgeService $dj, StatisticsService $stats)
+    public function __construct(DOMJudgeService $dj, StatisticsService $stats)
     {
         $this->dj = $dj;
         $this->stats = $stats;

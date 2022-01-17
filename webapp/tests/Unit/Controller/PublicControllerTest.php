@@ -3,7 +3,7 @@
 namespace App\Tests\Unit\Controller;
 
 use App\Entity\Contest;
-use App\Service\DOMjudgeService;
+use App\Service\DOMJudgeService;
 use App\Tests\Unit\BaseTest;
 use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;

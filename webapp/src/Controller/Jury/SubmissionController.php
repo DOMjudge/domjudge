@@ -22,7 +22,7 @@ use App\Entity\Testcase;
 use App\Form\Type\SubmissionsFilterType;
 use App\Service\BalloonService;
 use App\Service\ConfigurationService;
-use App\Service\DOMjudgeService;
+use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\ScoreboardService;
 use App\Service\SubmissionService;
@@ -63,7 +63,7 @@ class SubmissionController extends BaseController
     protected $em;
 
     /**
-     * @var DOMjudgeService
+     * @var DOMJudgeService
      */
     protected $dj;
 
@@ -84,7 +84,7 @@ class SubmissionController extends BaseController
 
     public function __construct(
         EntityManagerInterface $em,
-        DOMjudgeService $dj,
+        DOMJudgeService $dj,
         ConfigurationService $config,
         SubmissionService $submissionService,
         RouterInterface $router
@@ -200,7 +200,7 @@ class SubmissionController extends BaseController
             'filteredTeams' => $filteredTeams,
             'filteredResults' => $filteredVerdicts,
             'showExternalResult' => $this->config->get('data_source') ==
-                DOMjudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL,
+                DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL,
             'showTestcases' => count($submissions) <= $latestCount,
         ];
 

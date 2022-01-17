@@ -8,7 +8,7 @@ use App\Entity\TeamAffiliation;
 use App\Entity\TeamCategory;
 use App\Entity\User;
 use App\Service\ConfigurationService;
-use App\Service\DOMjudgeService;
+use App\Service\DOMJudgeService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
@@ -35,7 +35,7 @@ use Symfony\Component\Validator\Context\ExecutionContext;
 class UserRegistrationType extends AbstractType
 {
     /**
-     * @var DOMjudgeService
+     * @var DOMJudgeService
      */
     protected $dj;
 
@@ -52,12 +52,12 @@ class UserRegistrationType extends AbstractType
     /**
      * UserRegistrationType constructor.
      *
-     * @param DOMjudgeService        $dj
+     * @param DOMJudgeService        $dj
      * @param ConfigurationService   $config
      * @param EntityManagerInterface $em
      */
     public function __construct(
-        DOMjudgeService $dj,
+        DOMJudgeService $dj,
         ConfigurationService $config,
         EntityManagerInterface $em
     ) {

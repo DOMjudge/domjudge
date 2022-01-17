@@ -3,7 +3,7 @@
 namespace App\Security;
 
 use App\Entity\User;
-use App\Service\DOMjudgeService;
+use App\Service\DOMJudgeService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -13,7 +13,7 @@ use Symfony\Component\Security\Core\Event\AuthenticationSuccessEvent;
 class UserStateUpdater implements EventSubscriberInterface
 {
     /**
-     * @var DOMjudgeService
+     * @var DOMJudgeService
      */
     protected $dj;
 
@@ -27,7 +27,7 @@ class UserStateUpdater implements EventSubscriberInterface
      */
     protected $requestStack;
 
-    public function __construct(DOMjudgeService $dj, EntityManagerInterface $em, RequestStack $requestStack)
+    public function __construct(DOMJudgeService $dj, EntityManagerInterface $em, RequestStack $requestStack)
     {
         $this->dj = $dj;
         $this->em = $em;

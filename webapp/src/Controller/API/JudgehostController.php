@@ -20,7 +20,7 @@ use App\Entity\SubmissionFile;
 use App\Entity\TestcaseContent;
 use App\Service\BalloonService;
 use App\Service\ConfigurationService;
-use App\Service\DOMjudgeService;
+use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\RejudgingService;
 use App\Service\ScoreboardService;
@@ -59,7 +59,7 @@ class JudgehostController extends AbstractFOSRestController
     protected $em;
 
     /**
-     * @var DOMjudgeService
+     * @var DOMJudgeService
      */
     protected $dj;
 
@@ -100,7 +100,7 @@ class JudgehostController extends AbstractFOSRestController
 
     public function __construct(
         EntityManagerInterface $em,
-        DOMjudgeService $dj,
+        DOMJudgeService $dj,
         ConfigurationService $config,
         EventLogService $eventLogService,
         ScoreboardService $scoreboardService,

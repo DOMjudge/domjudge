@@ -3,7 +3,7 @@
 namespace App\Tests\Unit\Controller\API;
 
 use App\DataFixtures\Test\SampleSubmissionsFixture;
-use App\Service\DOMjudgeService;
+use App\Service\DOMJudgeService;
 use Generator;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\Intl\Countries;
@@ -132,7 +132,7 @@ class GeneralInfoControllerTest extends BaseTest
 
             $svgFile = sprintf(
                 '%s/public/flags/%s/%s.svg',
-                static::$container->get(DOMjudgeService::class)->getDOMjudgeWebappDir(),
+                static::$container->get(DOMJudgeService::class)->getDOMjudgeWebappDir(),
                 $size, strtolower(Countries::getAlpha2Code(strtoupper($countryCode)))
             );
 

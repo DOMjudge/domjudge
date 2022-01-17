@@ -6,7 +6,7 @@ use App\Entity\Contest;
 use App\Entity\Event;
 use App\Entity\TeamCategory;
 use App\Service\ConfigurationService;
-use App\Service\DOMjudgeService;
+use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\ScoreboardService;
 use App\Utils\Scoreboard\Filter;
@@ -38,12 +38,12 @@ class ScoreboardController extends AbstractRestController
 
     public function __construct(
         EntityManagerInterface $entityManager,
-        DOMjudgeService $DOMjudgeService,
+        DOMJudgeService $DOMJudgeService,
         ConfigurationService $config,
         EventLogService $eventLogService,
         ScoreboardService $scoreboardService
     ) {
-        parent::__construct($entityManager, $DOMjudgeService, $config, $eventLogService);
+        parent::__construct($entityManager, $DOMJudgeService, $config, $eventLogService);
         $this->scoreboardService = $scoreboardService;
     }
 

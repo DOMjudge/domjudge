@@ -7,7 +7,7 @@ use App\Entity\Team;
 use App\Entity\TeamAffiliation;
 use App\Service\AssetUpdateService;
 use App\Service\ConfigurationService;
-use App\Service\DOMjudgeService;
+use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\ImportExportService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -43,7 +43,7 @@ class TeamController extends AbstractRestController
 
     public function __construct(
         EntityManagerInterface $entityManager,
-        DOMjudgeService $dj,
+        DOMJudgeService $dj,
         ConfigurationService $config,
         EventLogService $eventLogService,
         AssetUpdateService $assetUpdater

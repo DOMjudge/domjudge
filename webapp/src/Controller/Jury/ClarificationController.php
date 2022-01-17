@@ -9,7 +9,7 @@ use App\Entity\Problem;
 use App\Entity\Team;
 use App\Entity\User;
 use App\Service\ConfigurationService;
-use App\Service\DOMjudgeService;
+use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
@@ -35,7 +35,7 @@ class ClarificationController extends AbstractController
     protected $em;
 
     /**
-     * @var DOMjudgeService
+     * @var DOMJudgeService
      */
     protected $dj;
 
@@ -51,7 +51,7 @@ class ClarificationController extends AbstractController
 
     public function __construct(
         EntityManagerInterface $em,
-        DOMjudgeService $dj,
+        DOMJudgeService $dj,
         ConfigurationService $config,
         EventLogService $eventLogService
     ) {

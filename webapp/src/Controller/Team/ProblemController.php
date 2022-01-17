@@ -7,7 +7,7 @@ use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\ProblemAttachment;
 use App\Service\ConfigurationService;
-use App\Service\DOMjudgeService;
+use App\Service\DOMJudgeService;
 use App\Service\StatisticsService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
@@ -33,7 +33,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class ProblemController extends BaseController
 {
     /**
-     * @var DOMjudgeService
+     * @var DOMJudgeService
      */
     protected $dj;
 
@@ -56,7 +56,7 @@ class ProblemController extends BaseController
      * ProblemController constructor.
      */
     public function __construct(
-        DOMjudgeService $dj,
+        DOMJudgeService $dj,
         ConfigurationService $config,
         StatisticsService $stats,
         EntityManagerInterface $em

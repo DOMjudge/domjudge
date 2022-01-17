@@ -46,7 +46,7 @@ class ImportProblemService
     protected $logger;
 
     /**
-     * @var DOMjudgeService
+     * @var DOMJudgeService
      */
     protected $dj;
 
@@ -73,7 +73,7 @@ class ImportProblemService
     public function __construct(
         EntityManagerInterface $em,
         LoggerInterface $logger,
-        DOMjudgeService $dj,
+        DOMJudgeService $dj,
         ConfigurationService $config,
         EventLogService $eventLogService,
         SubmissionService $submissionService,

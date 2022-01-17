@@ -37,7 +37,7 @@ class CheckConfigService
     protected $config;
 
     /**
-     * @var DOMjudgeService
+     * @var DOMJudgeService
      */
     protected $dj;
 
@@ -70,7 +70,7 @@ class CheckConfigService
         bool $debug,
         EntityManagerInterface $em,
         ConfigurationService $config,
-        DOMjudgeService $dj,
+        DOMJudgeService $dj,
         EventLogService $eventLogService,
         RouterInterface $router,
         ValidatorInterface $validator,

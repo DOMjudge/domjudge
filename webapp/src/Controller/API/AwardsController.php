@@ -4,7 +4,7 @@ namespace App\Controller\API;
 
 use App\Entity\Contest;
 use App\Service\ConfigurationService;
-use App\Service\DOMjudgeService;
+use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\ScoreboardService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -38,12 +38,12 @@ class AwardsController extends AbstractRestController
      */
     public function __construct(
         EntityManagerInterface $entityManager,
-        DOMjudgeService $DOMjudgeService,
+        DOMJudgeService $DOMJudgeService,
         ConfigurationService $config,
         EventLogService $eventLogService,
         ScoreboardService $scoreboardService
     ) {
-        parent::__construct($entityManager, $DOMjudgeService, $config, $eventLogService);
+        parent::__construct($entityManager, $DOMJudgeService, $config, $eventLogService);
         $this->scoreboardService = $scoreboardService;
     }
 

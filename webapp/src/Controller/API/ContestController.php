@@ -7,7 +7,7 @@ use App\Entity\ContestProblem;
 use App\Entity\Event;
 use App\Service\AssetUpdateService;
 use App\Service\ConfigurationService;
-use App\Service\DOMjudgeService;
+use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\ImportExportService;
 use App\Utils\Utils;
@@ -56,7 +56,7 @@ class ContestController extends AbstractRestController
 
     public function __construct(
         EntityManagerInterface $entityManager,
-        DOMjudgeService $dj,
+        DOMJudgeService $dj,
         ConfigurationService $config,
         EventLogService $eventLogService,
         ImportExportService $importExportService,

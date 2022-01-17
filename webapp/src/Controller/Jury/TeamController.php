@@ -10,7 +10,7 @@ use App\Entity\User;
 use App\Form\Type\TeamType;
 use App\Service\AssetUpdateService;
 use App\Service\ConfigurationService;
-use App\Service\DOMjudgeService;
+use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\ScoreboardService;
 use App\Service\SubmissionService;
@@ -41,7 +41,7 @@ class TeamController extends BaseController
     protected $em;
 
     /**
-     * @var DOMjudgeService
+     * @var DOMJudgeService
      */
     protected $dj;
 
@@ -67,7 +67,7 @@ class TeamController extends BaseController
 
     public function __construct(
         EntityManagerInterface $em,
-        DOMjudgeService $dj,
+        DOMJudgeService $dj,
         ConfigurationService $config,
         KernelInterface $kernel,
         EventLogService $eventLogService,
@@ -349,7 +349,7 @@ class TeamController extends BaseController
         $data['submissions']        = $submissions;
         $data['submissionCounts']   = $submissionCounts;
         $data['showExternalResult'] = $this->config->get('data_source') ===
-            DOMjudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL;
+            DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL;
 
         if ($request->isXmlHttpRequest()) {
             $data['displayRank'] = true;

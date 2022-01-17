@@ -5,7 +5,7 @@ namespace App\Controller\Jury;
 use App\Entity\Configuration;
 use App\Service\CheckConfigService;
 use App\Service\ConfigurationService;
-use App\Service\DOMjudgeService;
+use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -34,7 +34,7 @@ class ConfigController extends AbstractController
     protected $logger;
 
     /**
-     * @var DOMjudgeService
+     * @var DOMJudgeService
      */
     protected $dj;
 
@@ -51,7 +51,7 @@ class ConfigController extends AbstractController
     public function __construct(
         EntityManagerInterface $em,
         LoggerInterface $logger,
-        DOMjudgeService $dj,
+        DOMJudgeService $dj,
         CheckConfigService $checkConfigService,
         ConfigurationService $config
     ) {

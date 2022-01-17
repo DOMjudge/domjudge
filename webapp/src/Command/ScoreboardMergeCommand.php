@@ -10,7 +10,7 @@ use App\Entity\Team;
 use App\Entity\TeamAffiliation;
 use App\Entity\TeamCategory;
 use App\Service\ConfigurationService;
-use App\Service\DOMjudgeService;
+use App\Service\DOMJudgeService;
 use App\Service\ScoreboardService;
 use App\Utils\FreezeData;
 use App\Utils\Scoreboard\Scoreboard;
@@ -43,7 +43,7 @@ use ZipArchive;
 class ScoreboardMergeCommand extends Command
 {
     /**
-     * @var DOMjudgeService
+     * @var DOMJudgeService
      */
     protected $dj;
 
@@ -80,7 +80,7 @@ class ScoreboardMergeCommand extends Command
     /**
      * ScoreboardMergeCommand constructor.
      *
-     * @param DOMjudgeService      $dj
+     * @param DOMJudgeService      $dj
      * @param ConfigurationService $config
      * @param Environment          $twig
      * @param HttpClientInterface  $client
@@ -90,7 +90,7 @@ class ScoreboardMergeCommand extends Command
      * @param string|null          $name
      */
     public function __construct(
-        DOMjudgeService $dj,
+        DOMJudgeService $dj,
         ConfigurationService $config,
         Environment $twig,
         HttpClientInterface $client,

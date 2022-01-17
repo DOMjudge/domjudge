@@ -31,7 +31,7 @@ class StatisticsService
     ];
 
     /**
-     * @var DOMjudgeService
+     * @var DOMJudgeService
      */
     private $dj;
 
@@ -43,10 +43,10 @@ class StatisticsService
     /**
      * StatisticsService constructor.
      *
-     * @param DOMjudgeService        $dj
+     * @param DOMJudgeService        $dj
      * @param EntityManagerInterface $em
      */
-    public function __construct(DOMjudgeService $dj, EntityManagerInterface $em)
+    public function __construct(DOMJudgeService $dj, EntityManagerInterface $em)
     {
         $this->dj = $dj;
         $this->em = $em;

@@ -2,7 +2,7 @@
 
 namespace App\EventListener;
 
-use App\Service\DOMjudgeService;
+use App\Service\DOMJudgeService;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\KernelInterface;
@@ -20,7 +20,7 @@ class ProfilerDisableListener implements EventSubscriberInterface
     protected $kernel;
 
     /**
-     * @var DOMjudgeService
+     * @var DOMJudgeService
      */
     protected $dj;
 
@@ -32,10 +32,10 @@ class ProfilerDisableListener implements EventSubscriberInterface
     /**
      * ProfilerDisableListener constructor.
      * @param KernelInterface $kernel
-     * @param DOMjudgeService $dj
+     * @param DOMJudgeService $dj
      * @param Profiler|null        $profiler
      */
-    public function __construct(KernelInterface $kernel, DOMjudgeService $dj, ?Profiler $profiler)
+    public function __construct(KernelInterface $kernel, DOMJudgeService $dj, ?Profiler $profiler)
     {
         $this->dj       = $dj;
         $this->profiler = $profiler;

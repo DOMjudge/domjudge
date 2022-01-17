@@ -14,7 +14,7 @@ use Symfony\Component\Security\Core\User\UserProviderInterface;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Component\Security\Guard\AbstractGuardAuthenticator;
 
-class DOMjudgeBasicAuthenticator extends AbstractGuardAuthenticator
+class DOMJudgeBasicAuthenticator extends AbstractGuardAuthenticator
 {
     private $csrfTokenManager;
     private $security;

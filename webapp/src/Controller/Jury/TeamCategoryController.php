@@ -7,7 +7,7 @@ use App\Entity\Submission;
 use App\Entity\TeamCategory;
 use App\Form\Type\TeamCategoryType;
 use App\Service\ConfigurationService;
-use App\Service\DOMjudgeService;
+use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\SubmissionService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -36,7 +36,7 @@ class TeamCategoryController extends BaseController
     protected $em;
 
     /**
-     * @var DOMjudgeService
+     * @var DOMJudgeService
      */
     protected $dj;
 
@@ -57,7 +57,7 @@ class TeamCategoryController extends BaseController
 
     public function __construct(
         EntityManagerInterface $em,
-        DOMjudgeService $dj,
+        DOMJudgeService $dj,
         ConfigurationService $config,
         KernelInterface $kernel,
         EventLogService $eventLogService
@@ -175,7 +175,7 @@ class TeamCategoryController extends BaseController
             'submissionCounts' => $submissionCounts,
             'showContest' => count($this->dj->getCurrentContests()) > 1,
             'showExternalResult' => $this->config->get('data_source') ==
-                DOMjudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL,
+                DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL,
             'refresh' => [
                 'after' => 15,
                 'url' => $this->generateUrl('jury_team_category', ['categoryId' => $teamCategory->getCategoryid()]),

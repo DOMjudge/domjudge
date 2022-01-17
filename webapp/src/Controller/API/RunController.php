@@ -5,7 +5,7 @@ namespace App\Controller\API;
 use App\Entity\JudgingRun;
 use App\Helpers\JudgingRunWrapper;
 use App\Service\ConfigurationService;
-use App\Service\DOMjudgeService;
+use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
@@ -35,11 +35,11 @@ class RunController extends AbstractRestController implements QueryObjectTransfo
 
     public function __construct(
         EntityManagerInterface $entityManager,
-        DOMjudgeService $DOMjudgeService,
+        DOMJudgeService $DOMJudgeService,
         ConfigurationService $config,
         EventLogService $eventLogService
     ) {
-        parent::__construct($entityManager, $DOMjudgeService, $config,
+        parent::__construct($entityManager, $DOMJudgeService, $config,
             $eventLogService);
 
         $verdictsConfig = $this->dj->getDOMjudgeEtcDir() . '/verdicts.php';

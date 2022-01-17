@@ -4,7 +4,7 @@ namespace App\Serializer;
 
 use App\Entity\TeamAffiliation;
 use App\Service\ConfigurationService;
-use App\Service\DOMjudgeService;
+use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Utils\Utils;
 use Exception;
@@ -18,7 +18,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
 class TeamAffiliationVisitor implements EventSubscriberInterface
 {
     /**
-     * @var DOMjudgeService
+     * @var DOMJudgeService
      */
     protected $dj;
 
@@ -38,7 +38,7 @@ class TeamAffiliationVisitor implements EventSubscriberInterface
     protected $requestStack;
 
     public function __construct(
-        DOMjudgeService $dj,
+        DOMJudgeService $dj,
         ConfigurationService $config,
         EventLogService $eventLogService,
         RequestStack $requestStack

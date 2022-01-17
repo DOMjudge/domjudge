@@ -5,7 +5,7 @@ namespace App\Form\Type;
 use App\Entity\Language;
 use App\Entity\Problem;
 use App\Service\ConfigurationService;
-use App\Service\DOMjudgeService;
+use App\Service\DOMJudgeService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Query\Expr\Join;
@@ -23,7 +23,7 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 class SubmitProblemType extends AbstractType
 {
     /**
-     * @var DOMjudgeService
+     * @var DOMJudgeService
      */
     protected $dj;
 
@@ -38,7 +38,7 @@ class SubmitProblemType extends AbstractType
     protected $em;
 
     public function __construct(
-        DOMjudgeService $dj,
+        DOMJudgeService $dj,
         ConfigurationService $config,
         EntityManagerInterface $em
     ) {

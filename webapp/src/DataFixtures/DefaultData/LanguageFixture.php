@@ -5,7 +5,7 @@ namespace App\DataFixtures\DefaultData;
 use App\Entity\Executable;
 use App\Entity\ImmutableExecutable;
 use App\Entity\Language;
-use App\Service\DOMjudgeService;
+use App\Service\DOMJudgeService;
 use Doctrine\Persistence\ObjectManager;
 use Psr\Log\LoggerInterface;
 use ZipArchive;
@@ -18,7 +18,7 @@ class LanguageFixture extends AbstractDefaultDataFixture
     protected $sqlDir;
 
     /**
-     * @var DOMjudgeService
+     * @var DOMJudgeService
      */
     protected $dj;
 
@@ -27,7 +27,7 @@ class LanguageFixture extends AbstractDefaultDataFixture
      */
     protected $logger;
 
-    public function __construct(string $sqlDir, DOMjudgeService $dj, LoggerInterface $logger)
+    public function __construct(string $sqlDir, DOMJudgeService $dj, LoggerInterface $logger)
     {
         $this->sqlDir = $sqlDir;
         $this->dj     = $dj;

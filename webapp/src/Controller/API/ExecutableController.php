@@ -4,7 +4,7 @@ namespace App\Controller\API;
 
 use App\Entity\Executable;
 use App\Entity\ExecutableFile;
-use App\Service\DOMjudgeService;
+use App\Service\DOMJudgeService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
@@ -28,13 +28,13 @@ class ExecutableController extends AbstractFOSRestController
     protected $em;
 
     /**
-     * @var DOMjudgeService
+     * @var DOMJudgeService
      */
     protected $dj;
 
     public function __construct(
         EntityManagerInterface $em,
-        DOMjudgeService $dj
+        DOMJudgeService $dj
     )
     {
         $this->em = $em;

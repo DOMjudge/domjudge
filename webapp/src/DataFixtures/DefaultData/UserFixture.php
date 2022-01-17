@@ -3,7 +3,7 @@
 namespace App\DataFixtures\DefaultData;
 
 use App\Entity\User;
-use App\Service\DOMjudgeService;
+use App\Service\DOMJudgeService;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 use Exception;
@@ -13,7 +13,7 @@ use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 class UserFixture extends AbstractDefaultDataFixture implements DependentFixtureInterface
 {
     /**
-     * @var DOMjudgeService
+     * @var DOMJudgeService
      */
     protected $dj;
 
@@ -32,7 +32,7 @@ class UserFixture extends AbstractDefaultDataFixture implements DependentFixture
      */
     protected $debug;
 
-    public function __construct(DOMjudgeService $dj, LoggerInterface $logger, UserPasswordEncoderInterface $passwordEncoder, bool $debug)
+    public function __construct(DOMJudgeService $dj, LoggerInterface $logger, UserPasswordEncoderInterface $passwordEncoder, bool $debug)
     {
         $this->dj              = $dj;
         $this->logger          = $logger;

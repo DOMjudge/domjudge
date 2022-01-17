@@ -17,7 +17,7 @@ use Symfony\Component\Security\Core\User\UserProviderInterface;
 use Symfony\Component\Security\Guard\AbstractGuardAuthenticator;
 use Symfony\Component\Security\Http\Util\TargetPathTrait;
 
-class DOMjudgeXHeadersAuthenticator extends AbstractGuardAuthenticator
+class DOMJudgeXHeadersAuthenticator extends AbstractGuardAuthenticator
 {
     use TargetPathTrait;
 
@@ -27,7 +27,7 @@ class DOMjudgeXHeadersAuthenticator extends AbstractGuardAuthenticator
     private $router;
 
     /**
-     * DOMjudgeXHeadersAuthenticator constructor.
+     * DOMJudgeXHeadersAuthenticator constructor.
      *
      * @param Security                     $security
      * @param UserPasswordEncoderInterface $encoder

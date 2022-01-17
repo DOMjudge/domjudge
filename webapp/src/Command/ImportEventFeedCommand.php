@@ -17,7 +17,7 @@ use App\Entity\TeamCategory;
 use App\Entity\Testcase;
 use App\Entity\User;
 use App\Service\ConfigurationService;
-use App\Service\DOMjudgeService;
+use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\ScoreboardService;
 use App\Service\SubmissionService;
@@ -60,7 +60,7 @@ class ImportEventFeedCommand extends Command
     protected $em;
 
     /**
-     * @var DOMjudgeService
+     * @var DOMJudgeService
      */
     protected $dj;
 
@@ -170,7 +170,7 @@ class ImportEventFeedCommand extends Command
      * ImportEventFeedCommand constructor.
      *
      * @param EntityManagerInterface $em
-     * @param DOMjudgeService        $dj
+     * @param DOMJudgeService        $dj
      * @param ConfigurationService   $config
      * @param EventLogService        $eventLogService
      * @param ScoreboardService      $scoreboardService
@@ -183,7 +183,7 @@ class ImportEventFeedCommand extends Command
      */
     public function __construct(
         EntityManagerInterface $em,
-        DOMjudgeService $dj,
+        DOMJudgeService $dj,
         ConfigurationService $config,
         EventLogService $eventLogService,
         ScoreboardService $scoreboardService,
@@ -281,7 +281,7 @@ class ImportEventFeedCommand extends Command
         }
 
         $dataSource = (int)$this->config->get('data_source');
-        $importDataSource = DOMjudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL;
+        $importDataSource = DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL;
         if ($dataSource !== $importDataSource) {
             $dataSourceOptions = $this->config->getConfigSpecification()['data_source']['options'];
             if ($this->allowImportAsPrimary) {

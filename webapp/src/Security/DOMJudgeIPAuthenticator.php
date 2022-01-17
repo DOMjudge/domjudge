@@ -4,7 +4,7 @@ namespace App\Security;
 
 use App\Entity\User;
 use App\Service\ConfigurationService;
-use App\Service\DOMjudgeService;
+use App\Service\DOMJudgeService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -22,7 +22,7 @@ use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Component\Security\Guard\AbstractGuardAuthenticator;
 use Symfony\Component\Security\Http\Util\TargetPathTrait;
 
-class DOMjudgeIPAuthenticator extends AbstractGuardAuthenticator
+class DOMJudgeIPAuthenticator extends AbstractGuardAuthenticator
 {
     use TargetPathTrait;
 
@@ -34,7 +34,7 @@ class DOMjudgeIPAuthenticator extends AbstractGuardAuthenticator
     private $requestStack;
 
     /**
-     * DOMjudgeIPAuthenticator constructor.
+     * DOMJudgeIPAuthenticator constructor.
      *
      * @param CsrfTokenManagerInterface $csrfTokenManager
      * @param Security                  $security

@@ -9,7 +9,7 @@ use App\Entity\JudgeTask;
 use App\Entity\Judging;
 use App\Form\Type\JudgehostsType;
 use App\Service\ConfigurationService;
-use App\Service\DOMjudgeService;
+use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Utils\Utils;
 use Doctrine\DBAL\DBALException;
@@ -40,7 +40,7 @@ class JudgehostController extends BaseController
     protected $em;
 
     /**
-     * @var DOMjudgeService
+     * @var DOMJudgeService
      */
     protected $dj;
 
@@ -61,7 +61,7 @@ class JudgehostController extends BaseController
 
     public function __construct(
         EntityManagerInterface $em,
-        DOMjudgeService $dj,
+        DOMJudgeService $dj,
         ConfigurationService $config,
         EventLogService $eventLog,
         KernelInterface $kernel

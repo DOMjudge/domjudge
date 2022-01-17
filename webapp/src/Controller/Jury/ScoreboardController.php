@@ -2,7 +2,7 @@
 
 namespace App\Controller\Jury;
 
-use App\Service\DOMjudgeService;
+use App\Service\DOMJudgeService;
 use App\Service\ScoreboardService;
 use Exception;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
@@ -18,7 +18,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class ScoreboardController extends AbstractController
 {
     /**
-     * @var DOMjudgeService
+     * @var DOMJudgeService
      */
     protected $dj;
 
@@ -28,7 +28,7 @@ class ScoreboardController extends AbstractController
     protected $scoreboardService;
 
     public function __construct(
-        DOMjudgeService $dj,
+        DOMJudgeService $dj,
         ScoreboardService $scoreboardService
     ) {
         $this->dj                = $dj;

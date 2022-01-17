@@ -2,7 +2,7 @@
 
 namespace App\Form\Type;
 
-use App\Service\DOMjudgeService;
+use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -48,7 +48,7 @@ class AbstractExternalIdEntityType extends AbstractType
                 'constraints' => [
                     new Regex(
                         [
-                            'pattern' => DOMjudgeService::EXTERNAL_IDENTIFIER_REGEX,
+                            'pattern' => DOMJudgeService::EXTERNAL_IDENTIFIER_REGEX,
                             'message' => 'Only letters, numbers, dashes, underscores and dots are allowed',
                         ]
                     ),

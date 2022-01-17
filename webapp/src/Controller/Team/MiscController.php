@@ -7,7 +7,7 @@ use App\Entity\Clarification;
 use App\Entity\Language;
 use App\Form\Type\PrintType;
 use App\Service\ConfigurationService;
-use App\Service\DOMjudgeService;
+use App\Service\DOMJudgeService;
 use App\Service\ScoreboardService;
 use App\Service\SubmissionService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -36,7 +36,7 @@ use Symfony\Component\Routing\RouterInterface;
 class MiscController extends BaseController
 {
     /**
-     * @var DOMjudgeService
+     * @var DOMJudgeService
      */
     protected $dj;
 
@@ -64,7 +64,7 @@ class MiscController extends BaseController
      * MiscController constructor.
      */
     public function __construct(
-        DOMjudgeService $dj,
+        DOMJudgeService $dj,
         ConfigurationService $config,
         EntityManagerInterface $em,
         ScoreboardService $scoreboardService,

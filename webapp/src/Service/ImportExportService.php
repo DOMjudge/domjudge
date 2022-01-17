@@ -44,7 +44,7 @@ class ImportExportService
     protected $scoreboardService;
 
     /**
-     * @var DOMjudgeService
+     * @var DOMJudgeService
      */
     protected $dj;
 
@@ -66,7 +66,7 @@ class ImportExportService
     public function __construct(
         EntityManagerInterface $em,
         ScoreboardService $scoreboardService,
-        DOMjudgeService $dj,
+        DOMJudgeService $dj,
         ConfigurationService $config,
         EventLogService $eventLogService,
         ValidatorInterface $validator
@@ -167,7 +167,7 @@ class ImportExportService
             return false;
         }
 
-        $invalid_regex = str_replace(['/^[', '+$/'], ['/[^', '/'], DOMjudgeService::EXTERNAL_IDENTIFIER_REGEX);
+        $invalid_regex = str_replace(['/^[', '+$/'], ['/[^', '/'], DOMJudgeService::EXTERNAL_IDENTIFIER_REGEX);
 
         $starttimeValue = $data['start-time'] ?? $data['start_time'];
 

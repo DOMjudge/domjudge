@@ -8,7 +8,7 @@ use App\Entity\InternalError;
 use App\Entity\Judgehost;
 use App\Entity\JudgeTask;
 use App\Entity\Problem;
-use App\Service\DOMjudgeService;
+use App\Service\DOMJudgeService;
 use App\Service\RejudgingService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
@@ -31,13 +31,13 @@ class InternalErrorController extends BaseController
     protected $em;
 
     /**
-     * @var DOMjudgeService
+     * @var DOMJudgeService
      */
     protected $dj;
 
     protected $rejudgingService;
 
-    public function __construct(EntityManagerInterface $em, DOMjudgeService $dj, RejudgingService $rejudgingService)
+    public function __construct(EntityManagerInterface $em, DOMJudgeService $dj, RejudgingService $rejudgingService)
     {
         $this->em = $em;
         $this->dj = $dj;

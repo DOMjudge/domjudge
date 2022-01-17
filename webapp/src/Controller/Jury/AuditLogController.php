@@ -6,7 +6,7 @@ use App\Entity\AuditLog;
 use App\Entity\Testcase;
 use App\Entity\User;
 use App\Service\ConfigurationService;
-use App\Service\DOMjudgeService;
+use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
@@ -31,7 +31,7 @@ class AuditLogController extends AbstractController
     protected $em;
 
     /**
-     * @var DOMjudgeService
+     * @var DOMJudgeService
      */
     protected $dj;
 
@@ -47,7 +47,7 @@ class AuditLogController extends AbstractController
 
     public function __construct(
         EntityManagerInterface $em,
-        DOMjudgeService $dj,
+        DOMJudgeService $dj,
         ConfigurationService $config,
         EventLogService $eventLogService
     ) {

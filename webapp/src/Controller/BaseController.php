@@ -9,7 +9,7 @@ use App\Entity\RankCache;
 use App\Entity\ScoreCache;
 use App\Entity\Team;
 use App\Entity\TeamCategory;
-use App\Service\DOMjudgeService;
+use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Utils\Utils;
 use Doctrine\DBAL\DBALException;
@@ -92,7 +92,7 @@ abstract class BaseController extends AbstractController
      * Save the given entity, adding an eventlog and auditlog entry
      * @param EntityManagerInterface $entityManager
      * @param EventLogService        $eventLogService
-     * @param DOMjudgeService        $DOMjudgeService
+     * @param DOMJudgeService        $DOMJudgeService
      * @param object                 $entity
      * @param mixed                  $id
      * @param bool                   $isNewEntity
@@ -101,7 +101,7 @@ abstract class BaseController extends AbstractController
     protected function saveEntity(
         EntityManagerInterface $entityManager,
         EventLogService $eventLogService,
-        DOMjudgeService $DOMjudgeService,
+        DOMJudgeService $DOMJudgeService,
         object $entity,
         $id,
         bool $isNewEntity
@@ -127,14 +127,14 @@ abstract class BaseController extends AbstractController
         }
 
         if ($endpoint = $eventLogService->endpointForEntity($entity)) {
-            foreach ($this->contestsForEntity($entity, $DOMjudgeService) as $contest) {
+            foreach ($this->contestsForEntity($entity, $DOMJudgeService) as $contest) {
                 $eventLogService->log($endpoint, $id,
                                       $isNewEntity ? EventLogService::ACTION_CREATE : EventLogService::ACTION_UPDATE,
                                       $contest->getCid());
             }
         }
 
-        $DOMjudgeService->auditlog($auditLogType, $id, $isNewEntity ? 'added' : 'updated');
+        $DOMJudgeService->auditlog($auditLogType, $id, $isNewEntity ? 'added' : 'updated');
     }
 
     /**
@@ -176,7 +176,7 @@ abstract class BaseController extends AbstractController
      */
     protected function commitDeleteEntity(
         $entity,
-        DOMjudgeService $DOMjudgeService,
+        DOMJudgeService $DOMJudgeService,
         EntityManagerInterface $entityManager,
         array $primaryKeyData,
         $eventLogService
@@ -190,7 +190,7 @@ abstract class BaseController extends AbstractController
 
         // Get the contests to trigger the event for. We do this before
         // deleting the entity, since linked data might have vanished
-        $contestsForEntity = $this->contestsForEntity($entity, $DOMjudgeService);
+        $contestsForEntity = $this->contestsForEntity($entity, $DOMJudgeService);
 
         $cid = null;
         // Remember the cid to use it in the EventLog later
@@ -222,7 +222,7 @@ abstract class BaseController extends AbstractController
 
         // Add an audit log entry
         $auditLogType = Utils::tableForEntity($entity);
-        $DOMjudgeService->auditlog($auditLogType, implode(', ', $primaryKeyData), 'deleted');
+        $DOMJudgeService->auditlog($auditLogType, implode(', ', $primaryKeyData), 'deleted');
 
         // Trigger the delete event
         if ($endpoint = $eventLogService->endpointForEntity($entity)) {
@@ -343,7 +343,7 @@ abstract class BaseController extends AbstractController
     protected function deleteEntities(
         Request $request,
         EntityManagerInterface $entityManager,
-        DOMjudgeService $DOMjudgeService,
+        DOMJudgeService $DOMJudgeService,
         EventLogService $eventLogService,
         KernelInterface $kernel,
         array $entities,
@@ -372,7 +372,7 @@ abstract class BaseController extends AbstractController
 
             $msgList = [];
             foreach ($entities as $entity) {
-                $this->commitDeleteEntity($entity, $DOMjudgeService, $entityManager, $primaryKeyData, $eventLogService);
+                $this->commitDeleteEntity($entity, $DOMJudgeService, $entityManager, $primaryKeyData, $eventLogService);
                 $description = $entity->getShortDescription();
                 $msgList[] = sprintf('Successfully deleted %s %s "%s"',
                                      $readableType, implode(', ', $primaryKeyData), $description);
@@ -440,11 +440,11 @@ abstract class BaseController extends AbstractController
     /**
      * Get the contests that an event for the given entity should be triggered on
      * @param                 $entity
-     * @param DOMjudgeService $dj
+     * @param DOMJudgeService $dj
      *
      * @return Contest[]
      */
-    protected function contestsForEntity($entity, DOMjudgeService $dj): array
+    protected function contestsForEntity($entity, DOMJudgeService $dj): array
     {
         // Determine contests to emit an event for for the given entity:
         // * If the entity is a Problem entity, use the getContest()

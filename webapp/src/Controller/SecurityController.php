@@ -9,7 +9,7 @@ use App\Entity\TeamCategory;
 use App\Entity\User;
 use App\Form\Type\UserRegistrationType;
 use App\Service\ConfigurationService;
-use App\Service\DOMjudgeService;
+use App\Service\DOMJudgeService;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -24,7 +24,7 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 class SecurityController extends AbstractController
 {
     /**
-     * @var DOMjudgeService
+     * @var DOMJudgeService
      */
     private $dj;
 
@@ -34,7 +34,7 @@ class SecurityController extends AbstractController
     protected $config;
 
     public function __construct(
-        DOMjudgeService $dj,
+        DOMJudgeService $dj,
         ConfigurationService $config
     ) {
         $this->dj = $dj;

@@ -10,7 +10,7 @@ use App\Entity\Submission;
 use App\Entity\Testcase;
 use App\Form\Type\SubmitProblemType;
 use App\Service\ConfigurationService;
-use App\Service\DOMjudgeService;
+use App\Service\DOMJudgeService;
 use App\Service\SubmissionService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
@@ -46,7 +46,7 @@ class SubmissionController extends BaseController
     protected $submissionService;
 
     /**
-     * @var DOMjudgeService
+     * @var DOMJudgeService
      */
     protected $dj;
 
@@ -63,7 +63,7 @@ class SubmissionController extends BaseController
     public function __construct(
         EntityManagerInterface $em,
         SubmissionService $submissionService,
-        DOMjudgeService $dj,
+        DOMJudgeService $dj,
         ConfigurationService $config,
         FormFactoryInterface $formFactory
     ) {

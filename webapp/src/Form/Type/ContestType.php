@@ -7,7 +7,7 @@ use App\Entity\ContestProblem;
 use App\Entity\Team;
 use App\Entity\TeamAffiliation;
 use App\Entity\TeamCategory;
-use App\Service\DOMjudgeService;
+use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
@@ -25,11 +25,11 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 class ContestType extends AbstractExternalIdEntityType
 {
     /**
-     * @var DOMjudgeService
+     * @var DOMJudgeService
      */
     protected $dj;
 
-    public function __construct(EventLogService $eventLogService, DOMjudgeService $dj)
+    public function __construct(EventLogService $eventLogService, DOMJudgeService $dj)
     {
         parent::__construct($eventLogService);
         $this->dj = $dj;

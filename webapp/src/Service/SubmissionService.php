@@ -55,7 +55,7 @@ class SubmissionService
     protected $logger;
 
     /**
-     * @var DOMjudgeService
+     * @var DOMJudgeService
      */
     protected $dj;
 
@@ -77,7 +77,7 @@ class SubmissionService
     public function __construct(
         EntityManagerInterface $em,
         LoggerInterface $logger,
-        DOMjudgeService $dj,
+        DOMJudgeService $dj,
         ConfigurationService $config,
         EventLogService $eventLogService,
         ScoreboardService $scoreboardService
@@ -269,7 +269,7 @@ class SubmissionService
         }
 
         if ($this->config->get('data_source') ==
-            DOMjudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL) {
+            DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL) {
             // When we are shadow, also load the external results
             $queryBuilder
                 ->leftJoin('s.external_judgements', 'ej', Join::WITH, 'ej.valid = 1')

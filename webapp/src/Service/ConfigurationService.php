@@ -190,14 +190,14 @@ EOF;
      *
      * @param array $dataToSet
      * @param EventLogService $eventLog
-     * @param DOMjudgeService $dj
+     * @param DOMJudgeService $dj
      *
      * @throws NonUniqueResultException
      */
     public function saveChanges(
         array $dataToSet,
         EventLogService $eventLog,
-        DOMjudgeService $dj
+        DOMJudgeService $dj
     ) {
         $specs = $this->getConfigSpecification();
         foreach ($specs as &$spec) {

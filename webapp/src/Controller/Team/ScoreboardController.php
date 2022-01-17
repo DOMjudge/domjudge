@@ -5,7 +5,7 @@ namespace App\Controller\Team;
 use App\Controller\BaseController;
 use App\Entity\Team;
 use App\Service\ConfigurationService;
-use App\Service\DOMjudgeService;
+use App\Service\DOMJudgeService;
 use App\Service\ScoreboardService;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -27,7 +27,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class ScoreboardController extends BaseController
 {
     /**
-     * @var DOMjudgeService
+     * @var DOMJudgeService
      */
     protected $dj;
 
@@ -50,7 +50,7 @@ class ScoreboardController extends BaseController
      * ScoreboardController constructor.
      */
     public function __construct(
-        DOMjudgeService $dj,
+        DOMJudgeService $dj,
         ConfigurationService $config,
         ScoreboardService $scoreboardService,
         EntityManagerInterface $em
