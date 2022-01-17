@@ -39,7 +39,7 @@ while read -r i ; do
 	fi
 	if grep -q "^#\\!.*/bin/sh" "$i" && \
 		[ "${i##*.}" != "zip" ] && \
-		echo "$i" | grep -qvE '(^\.\./(config|autom4te|install-sh|sql/files/defaultdata/hs/run|lib/vendor/|output|judge/judgedaemon))'; then
+		echo "$i" | grep -qvE '(^\.\./(misc-tools/dj_judgehost_cleanup.in|misc-tools/dj_make_chroot.in|config|autom4te|install-sh|sql/files/defaultdata/hs/run|lib/vendor/|output|judge/judgedaemon))'; then
 		# shellcheck disable=SC2001
 		echo "$i" | sed -e 's|^../|check for bashisms: |'
 		checkbashisms "$i"
@@ -51,8 +51,10 @@ while read -r i ; do
 		# https://github.com/koalaman/shellcheck/wiki/<code>
 		#
 		# SC1072: buggy on empty compile scripts, see https://github.com/koalaman/shellcheck/issues/384
-		# SC2034: many "unused variables" are actually used, or in compile scripts declared on purpose
-		# SC2086: there are too many cases where quoting is not necessary and tedious
-		shellcheck -f gcc -e 1072,2034,2086 "$i" | sed -e 's|^../|shellcheck: |'
+		# SC2006: both notations are easy to read
+		# SC2010: keep easy to read scripts as we don't have non-alphanumeric filenames
+        # SC2034: many "unused variables" are actually used, or in compile scripts declared on purpose
+		# SC2046,SC2061,SC2086: there are too many cases where quoting is not necessary and tedious
+		shellcheck -f gcc -e 1072,1091,2006,2010,2034,2046,2061,2086 "$i" | sed -e 's|^../|shellcheck: |'
 	fi
 done
