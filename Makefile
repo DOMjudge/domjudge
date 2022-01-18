@@ -52,7 +52,7 @@ dist: configure composer-dependencies composer-package-versions
 
 # Install PHP dependencies
 composer-dependencies:
-ifeq (, $(shell command -v composer))
+ifeq (, $(shell command -v composer 2> /dev/null))
 	$(error "'composer' command not found in $(PATH), install it via your package manager or https://getcomposer.org/download/")
 endif
 # We use --no-scripts here because at this point the autoload.php file is
