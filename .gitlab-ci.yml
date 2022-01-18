@@ -3,7 +3,7 @@ include:
   #- '/gitlab/ci/unit.yml'
   #- '/gitlab/ci/integration.yml'
   #- '/gitlab/ci/visual.yml'
-  #- '/gitlab/ci/webstandard.yml'
+  - '/gitlab/ci/webstandard.yml'
   - '/gitlab/ci/template.yml'
   #- '/gitlab/ci/misc.yml'
 
