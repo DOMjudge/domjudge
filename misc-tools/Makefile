@@ -29,7 +29,7 @@ install-judgehost:
 	$(INSTALL_PROG) -t $(DESTDIR)$(judgehost_bindir) $(SUBST_JUDGEHOST) \
 		dj_make_ubuntu_java_chroot
 
-maintainer-install:
+inplace-install:
 	for i in $(SUBST_DOMSERVER) ; do \
 		ln -sf $(CURDIR)/$$i $(domserver_bindir) ; \
 	done
