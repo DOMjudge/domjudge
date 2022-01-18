@@ -38,10 +38,3 @@ function log_on_err() {
     fi
 }
 
-function show_phpinfo() {
-    section_start_collap phpinfo "Show the new PHP info"
-    update-alternatives --set php /usr/bin/php${1}
-    php -v
-    php -m
-    section_end phpinfo
-}

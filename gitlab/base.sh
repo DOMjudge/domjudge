@@ -1,10 +1,17 @@
 #!/bin/bash
 
-. gitlab/dind.profile
+set -euxo pipefail
 
+export PS4='(${BASH_SOURCE}:${LINENO}): - [$?] $ '
+
+gitlabartifacts="$(pwd)/gitlabartifacts"
+mkdir -p "$gitlabartifacts"
+
+DIR=$(pwd)
 lsb_release -a
 
-section_start_collap sqldb "Setup database"
+GITSHA=$(git rev-parse HEAD || true)
+
 cat > ~/.my.cnf <<EOF
 [client]
 host=${MARIADB_PORT_3306_TCP_ADDR}
@@ -31,7 +38,6 @@ echo "unused:${MARIADB_PORT_3306_TCP_ADDR}:domjudge:domjudge:domjudge:3306" > et
 
 # Generate APP_SECRET for symfony
 ( cd etc ; ./gensymfonysecret > symfony_app.secret )
-section_end sqldb
 
 cat > webapp/config/static.yaml <<EOF
 parameters:
@@ -49,15 +55,12 @@ parameters:
     domjudge.baseurl: http://localhost/domjudge
 EOF
 
-section_start_collap composer "Install all composer libraries"
 # install all php dependencies
 export APP_ENV="prod"
 composer install --no-scripts
 composer run-script package-versions-dump
 echo -e "\033[0m"
-section_end composer
 
-section_start_collap makeconfigure "Install with Make file and finish configuration"
 # configure, make and install (but skip documentation)
 make configure
 ./configure --with-baseurl='http://localhost/domjudge/' --with-domjudge-user=domjudge --with-judgehost_chrootdir=${DIR}/chroot/domjudge |& tee "$gitlabartifacts/configure.log"
@@ -74,4 +77,3 @@ sudo -u www-data bin/dj_setup_database -uroot -p${MYSQL_ROOT_PASSWORD} -q instal
 sudo rm -f /etc/nginx/sites-enabled/*
 sudo cp /opt/domjudge/domserver/etc/nginx-conf /etc/nginx/sites-enabled/domjudge
 sudo /usr/sbin/nginx
-section_end makeconfigure

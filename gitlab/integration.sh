@@ -1,10 +1,36 @@
 #!/bin/bash
 
-. gitlab/dind.profile
+gitlabartifacts="$(pwd)/gitlabartifacts"
+mkdir -p "$gitlabartifacts"
+
+shopt -s expand_aliases
+alias trace_on='set -x'
+alias trace_off='{ set +x; } 2>/dev/null'
+
+function section_start_internal() {
+	echo -e "section_start:`date +%s`:$1[collapsed=true]\r\e[0K$2"
+	trace_on
+}
+
+function section_end_internal() {
+	echo -e "section_end:`date +%s`:$1\r\e[0K"
+	trace_on
+}
+
+alias section_start='trace_off ; section_start_internal '
+alias section_end='trace_off ; section_end_internal '
+
+set -euxo pipefail
 
 version=$1
 
-show_phpinfo $version
+section_start phpinfo "Show the new PHP info"
+update-alternatives --set php /usr/bin/php${version}
+php -v
+php -m
+section_end phpinfo
+
+DIR=$(pwd)
 
 function finish() {
 	echo -e "\\n\\n=======================================================\\n"
@@ -22,7 +48,11 @@ function finish() {
 }
 trap finish EXIT
 
-section_start_collap baseinstall "Setup the shared domjudge code"
+section_start setup "Setup and install"
+
+export PS4='(${BASH_SOURCE}:${LINENO}): - [$?] $ '
+
+GITSHA=$(git rev-parse HEAD || true)
 
 # Set up
 "$( dirname "${BASH_SOURCE[0]}" )"/base.sh
@@ -66,61 +96,12 @@ sudo cp /opt/domjudge/domserver/etc/domjudge-fpm.conf "/etc/php/$version/fpm/poo
 echo "php_admin_value[date.timezone] = Europe/Amsterdam" | sudo tee -a "/etc/php/$version/fpm/pool.d/domjudge-fpm.conf"
 sudo /usr/sbin/php-fpm${version}
 
-section_end baseinstall
+section_end setup
 
-function handle_submit_client() {
-    section_start submit_client "Test submit client"
-    cd ${DIR}/submit
-    make check-full
-    section_end submit_client
-
-    section_start submitting "Submitting test sources (including Kattis example)"
-    cd ${DIR}/tests
-    export SUBMITBASEURL='http://localhost/domjudge/'
-    
-    # Keep the tests which are expected to fail out of the symfony log
-    make check-problems
-    if [ -f /opt/domjudge/domserver/webapp/var/log/prod.log ]; then
-        mv /opt/domjudge/domserver/webapp/var/log/prod.log{,.stash}
-    fi
-    make test-bad-expected-results
-    if [ -f /opt/domjudge/domserver/webapp/var/log/prod.log.stash ]; then
-        mv /opt/domjudge/domserver/webapp/var/log/prod.log{.stash,}
-    fi
-    make test-stress
-    
-    # Prepare to load example problems from Kattis/problemtools
-    echo "INSERT INTO userrole (userid, roleid) VALUES (3, 1);" | mysql domjudge
-    cd /tmp
-    git clone --depth=1 https://github.com/Kattis/problemtools.git
-    cd problemtools/examples
-    mv hello hello_kattis
-    # Remove 2 submissions that will not pass validation. The first is because it is
-    # a Python 2 submission. The latter has a judgement type we do not understand.
-    rm different/submissions/accepted/different_py2.py different/submissions/slow_accepted/different_slow.py
-    for i in hello_kattis different guess; do
-    	(
-    		cd "$i"
-    		zip -r "../${i}.zip" -- *
-    	)
-    	curl --fail -X POST -n -N -F zip=@${i}.zip http://localhost/domjudge/api/contests/2/problems
-    done
-    section_end submitting
-}
-handle_submit_client &
-
-function get_api_check() {
-    section_start get_api "Download API check script"
-    # download domjudge-scripts for API check
-    cd $HOME
-    composer -n require justinrainbow/json-schema
-    echo -e "\033[0m"
-    git clone --depth=1 https://github.com/DOMjudge/domjudge-scripts.git
-    section_end get_api
-}
-export PATH=${PATH}:${HOME}/vendor/bin
-export CHECK_API=${HOME}/domjudge-scripts/contest-api/check-api.sh
-get_api_check &
+section_start submit_client "Test submit client"
+cd ${DIR}/submit
+make check-full
+section_end submit_client
 
 section_start mount "Show runner mounts"
 mount
@@ -129,22 +110,27 @@ mount
 mount -o remount,exec,dev /builds
 section_end mount
 
-function setup_judgehost() {
-    section_start judgehost "Configure judgehost"
-    cd /opt/domjudge/judgehost/
-    sudo cp /opt/domjudge/judgehost/etc/sudoers-domjudge /etc/sudoers.d/
-    sudo chmod 400 /etc/sudoers.d/sudoers-domjudge
-    sudo bin/create_cgroups
-    
-    if [ ! -d ${DIR}/chroot/domjudge/ ]; then
-    	cd ${DIR}/misc-tools
-    	time sudo ./dj_make_chroot -a amd64 |& tee "$gitlabartifacts/dj_make_chroot.log"
-    fi
-    section_end judgehost
-}
-setup_judgehost
+section_start judgehost "Configure judgehost"
+cd /opt/domjudge/judgehost/
+sudo cp /opt/domjudge/judgehost/etc/sudoers-domjudge /etc/sudoers.d/
+sudo chmod 400 /etc/sudoers.d/sudoers-domjudge
+sudo bin/create_cgroups
+
+if [ ! -d ${DIR}/chroot/domjudge/ ]; then
+	cd ${DIR}/misc-tools
+	time sudo ./dj_make_chroot -a amd64 |& tee "$gitlabartifacts/dj_make_chroot.log"
+fi
+section_end judgehost
 
 section_start more_setup "Remaining setup (e.g. starting judgedaemon)"
+# download domjudge-scripts for API check
+cd $HOME
+composer -n require justinrainbow/json-schema
+echo -e "\033[0m"
+PATH=${PATH}:${HOME}/vendor/bin
+git clone --depth=1 https://github.com/DOMjudge/domjudge-scripts.git
+CHECK_API=${HOME}/domjudge-scripts/contest-api/check-api.sh
+
 # Recreate domjudge-run-0 user with random UID to prevent clashes with
 # existing users in the host and other CI jobs, which can lead to
 # unforeseen process limits being hit.
@@ -171,14 +157,43 @@ set -e
 if [ $PIN_JUDGEDAEMON -eq 1 ]; then
 	PINNING="-n 0"
 fi
-
-while [ ! -f ${DIR}/chroot/domjudge/etc/root-permission-test.txt ]; do
-    sleep 5
-done
 sudo -u domjudge bin/judgedaemon $PINNING |& tee /tmp/judgedaemon.log &
 sleep 5
 
 section_end more_setup
+
+section_start submitting "Submitting test sources (including Kattis example)"
+cd ${DIR}/tests
+export SUBMITBASEURL='http://localhost/domjudge/'
+
+# Keep the tests which are expected to fail out of the symfony log
+make check-problems
+if [ -f /opt/domjudge/domserver/webapp/var/log/prod.log ]; then
+    mv /opt/domjudge/domserver/webapp/var/log/prod.log{,.stash}
+fi
+make test-bad-expected-results
+if [ -f /opt/domjudge/domserver/webapp/var/log/prod.log.stash ]; then
+    mv /opt/domjudge/domserver/webapp/var/log/prod.log{.stash,}
+fi
+make test-stress
+
+# Prepare to load example problems from Kattis/problemtools
+echo "INSERT INTO userrole (userid, roleid) VALUES (3, 1);" | mysql domjudge
+cd /tmp
+git clone --depth=1 https://github.com/Kattis/problemtools.git
+cd problemtools/examples
+mv hello hello_kattis
+# Remove 2 submissions that will not pass validation. The first is because it is
+# a Python 2 submission. The latter has a judgement type we do not understand.
+rm different/submissions/accepted/different_py2.py different/submissions/slow_accepted/different_slow.py
+for i in hello_kattis different guess; do
+	(
+		cd "$i"
+		zip -r "../${i}.zip" -- *
+	)
+	curl --fail -X POST -n -N -F zip=@${i}.zip http://localhost/domjudge/api/contests/2/problems
+done
+section_end submitting
 
 section_start judging "Waiting until all submissions are judged"
 # wait for and check results
@@ -218,7 +233,6 @@ NUMVERIFIED=$(   curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier
 NUMNOMAGIC=$(    curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier" | grep "without magic string"    | sed -r 's/^.* ([0-9]+) without magic string.*$/\1/')
 section_end judging
 
-section_start_collap waitsubmissions "Wait for judgings"
 # We expect
 # - two submissions with ambiguous outcome,
 # - no submissions without magic string,
@@ -248,7 +262,6 @@ if [ $NUMNOTVERIFIED -ne 2 ] || [ $NUMNOMAGIC -ne 0 ] || [ $NUMSUBS -gt $((NUMVE
 	done
 	exit 1;
 fi
-section_end waitsubmissions
 
 section_start api_check "Performing API checks"
 # Start logging again

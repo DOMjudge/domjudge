@@ -1,14 +1,18 @@
 #!/bin/bash
 
+set -euxo pipefail
+
 . gitlab/dind.profile
 
 version=$1
-suite=$2
 [ "$version" = "7.4" ] && CODECOVERAGE=1 || CODECOVERAGE=0
 
-show_phpinfo $version
+section_start_collap phpinfo "Show the new PHP info"
+update-alternatives --set php /usr/bin/php${version}
+php -v
+php -m
+section_end phpinfo
 
-section_start_collap baseinstall "Setup the shared domjudge code"
 # Set up
 "$( dirname "${BASH_SOURCE[0]}" )"/base.sh
 
@@ -23,12 +27,11 @@ cp webapp/.env.test /opt/domjudge/domserver/webapp/
 # We also need the composer.json for PHPunit to detect the correct directory.
 cp composer.json /opt/domjudge/domserver/
 
+DIR=$(pwd)
 cd /opt/domjudge/domserver
 
 export APP_ENV="test"
-section_end baseinstall
 
-section_start unittest "Run the actual Unit tests"
 # Run phpunit tests.
 pcov=""
 phpcov=""
@@ -37,10 +40,8 @@ if [ "$CODECOVERAGE" -eq 1 ]; then
     pcov="--coverage-html=${CI_PROJECT_DIR}/coverage-html --coverage-clover coverage.xml"
 fi
 set +e
-php $phpcov lib/vendor/bin/phpunit -c webapp/phpunit.xml.dist --log-junit ${CI_PROJECT_DIR}/unit-tests.xml --colors=never $pcov webapp/tests/$suite > phpunit.out
+php $phpcov lib/vendor/bin/phpunit -c webapp/phpunit.xml.dist --log-junit ${CI_PROJECT_DIR}/unit-tests.xml --colors=never $pcov > phpunit.out
 UNITSUCCESS=$?
-section_end unittest
-section_start_collap unitreports "Report the coverage and possible failures"
 set -e
 CNT=0
 if [ $CODECOVERAGE -eq 1 ]; then
@@ -74,10 +75,11 @@ curl https://api.github.com/repos/domjudge/domjudge/statuses/$CI_COMMIT_SHA \
 if [ $UNITSUCCESS -ne 0 ]; then
     exit 1
 fi
-section_end unitreports
 
 if [ $CODECOVERAGE -eq 1 ]; then
+    section_start_collap uploadcoverage "Upload code coverage"
     # Only upload when we got working unit-tests.
     set +u # Uses some variables which are not set
     . $DIR/gitlab/uploadcodecov.sh 1>/dev/zero 2>/dev/zero
+    section_end uploadcoverage
 fi
