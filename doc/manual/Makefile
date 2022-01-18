@@ -28,7 +28,7 @@ install-docs: docs
 	$(call install_tree,$(DESTDIR)$(domjudge_docdir)/manual,build/html)
 	$(INSTALL_DATA) -t $(DESTDIR)$(domjudge_docdir)/manual build/domjudge-team-manual.pdf
 
-maintainer-install: docs
+inplace-install: docs
 	ln -sf build/html
 	ln -sf build/team
 
@@ -53,4 +53,4 @@ team:
 	$(MAKE) -C build/team domjudge-team-manual.pdf
 	cp build/team/domjudge-team-manual.pdf build
 
-.PHONY: docs distdocs install-docs maintainer-install html team
+.PHONY: docs distdocs install-docs inplace-install html team
