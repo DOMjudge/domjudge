@@ -68,10 +68,10 @@ def get_data(overall,job):
         if avg==0.0:
             avg=0.001
         for event,value in {k: v for k, v in sorted(tmp.items(), key=lambda item: item[1])}.items():
-            if value/avg < 1.0:
-                if overall:
-                    skiplst.add(event)
-                continue
+            #if value/avg < 1.0:
+            #    if overall:
+            #        skiplst.add(event)
+            #    continue
             multiplier = int((-100+value*100)/avg)
             timestr = str(timedelta(seconds=int(value)))
             print(f"{event}: {multiplier} {timestr}")
