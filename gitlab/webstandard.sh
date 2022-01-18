@@ -130,7 +130,7 @@ else
         su domjudge -c "/node_modules/.bin/pa11y $STAN -T $ACCEPTEDERR $FLTR --reporter json ./$file" | python3 -m json.tool
         ERR=`su domjudge -c "/node_modules/.bin/pa11y $STAN -T $ACCEPTEDERR $FLTR --reporter csv ./$file" | wc -l`
         FOUNDERR=$((ERR+FOUNDERR-1)) # Remove header row
-        section_end $file
+        section_end ${file//\//}
     done
 fi
 done
