@@ -43,11 +43,17 @@ def get_data(overall,job):
         last_finish = event[np.where(end==max(end))[0][0]]
         print(f"Last start: {last_start}")
         print(f"Last finish: {last_finish}")
+        tmp = {}
         for name in storage_job.keys():
             if 'orig_' in name:
                 time_orig = storage_job[name]['job']['end']-storage_job[name]['job']['begin']
                 time_new = storage_job[name.replace('orig_','')]['job']['end']-storage_job[name.replace('orig_','')]['job']['begin']
-                print(name, time_orig-time_new)
+                try:
+                    tmp[name.replace('orig_','').split('_')[0]].append(time_orig-time_new)
+                except KeyError:
+                    tmp[name.replace('orig_','').split('_')[0]] = [time_orig-time_new]
+        for k,v in tmp.items():
+            print(k, min(v), max(v), sum(v)/len(v)) #-9=15
     else:
         print(f"\n\n-----{job}-----")
     msg = ["Duration of job","End of Job","Begin of Job"]
