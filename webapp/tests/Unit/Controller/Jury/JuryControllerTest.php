@@ -35,9 +35,9 @@ abstract class JuryControllerTest extends BaseTest
     protected static $specialFieldOnlyUpdate = [];
     protected static $editEntitiesSkipFields = [];
 
-    public function __construct($name = null, array $data = [], $dataName = '')
+    protected function setUp(): void
     {
-        parent::__construct($name, $data, $dataName);
+        parent::setUp();
         $this->addButton = ' Add new ' . static::$shortTag;
     }
 
