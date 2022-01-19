@@ -196,7 +196,7 @@ inplace-conf: dist
 
 # Run Symfony in dev mode (for maintainer-mode):
 webapp/.env.local:
-	echo "# This file was automatically created by 'make maintainer-conf' to run" >> $@
+	echo "# This file was automatically created by 'make maintainer-conf' to run" > $@
 	echo "# the DOMjudge Symfony application in developer mode. Adjust as needed." >> $@
 	echo "APP_ENV=dev" >> $@
 
