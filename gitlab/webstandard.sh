@@ -123,7 +123,7 @@ if [ "$TEST" = "w3cval" ]; then
             section_end test_suite_${typ}
             echo $NEWFOUNDERRORS > errors_${typ}
         }
-        run_test $typ &
+        run_test $typ
     done
     for typ in html css svg
     do
