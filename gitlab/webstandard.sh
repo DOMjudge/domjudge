@@ -88,7 +88,7 @@ RET=$?
 set -e
 #https://www.gnu.org/software/wget/manual/html_node/Exit-Status.html
 # Exit code 4 is network error which we can ignore
-if [ $RET -ne 4 ]; then
+if [ $RET -ne 4 ] -a [ $RET -ne 0 ]; then
     exit $RET
 fi
 section_end scrape
