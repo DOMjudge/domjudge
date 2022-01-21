@@ -62,14 +62,13 @@ section_end testuser
 
 # Could try different entrypoints
 FOUNDERR=0
-for url in public
-do
-mkdir $url
-cd $url
+URL=public
+mkdir $URL
+cd $URL
 cp $DIR/cookies.txt ./
 section_start_collap scrape "Scrape the site with the rebuild admin user"
 set +e
-wget \                                                                                                       --reject-regex logout \                                                                                 --recursive \                                                                                           --no-clobber \                                                                                          --page-requisites \                                                                                     --html-extension \                                                                                      --convert-links \                                                                                       --restrict-file-names=windows \                                                                         --domains localhost \                                                                                   --no-parent \                                                                                           --load-cookies cookies.txt \                                                                                http://localhost/domjudge/$url
+wget \                                                                                                       --reject-regex logout \                                                                                 --recursive \                                                                                           --no-clobber \                                                                                          --page-requisites \                                                                                     --html-extension \                                                                                      --convert-links \                                                                                       --restrict-file-names=windows \                                                                         --domains localhost \                                                                                   --no-parent \                                                                                           --load-cookies cookies.txt \                                                                                http://localhost/domjudge/$URL
 RET=$?
 set -e
 #https://www.gnu.org/software/wget/manual/html_node/Exit-Status.html
@@ -103,11 +102,11 @@ if [ "$TEST" = "w3cval" ]; then
     fi
     for typ in html css svg
     do
-        $DIR/vnu-runtime-image/bin/vnu --errors-only --exit-zero-always --skip-non-$typ --format json $FLTR $url 2> result.json
-        NEWFOUNDERRORS=`$DIR/vnu-runtime-image/bin/vnu --errors-only --exit-zero-always --skip-non-$typ --format gnu $FLTR $url 2>&1 | wc -l`
+        $DIR/vnu-runtime-image/bin/vnu --errors-only --exit-zero-always --skip-non-$typ --format json $FLTR $URL 2> result.json
+        NEWFOUNDERRORS=`$DIR/vnu-runtime-image/bin/vnu --errors-only --exit-zero-always --skip-non-$typ --format gnu $FLTR $URL 2>&1 | wc -l`
         FOUNDERR=$((NEWFOUNDERRORS+FOUNDERR))
-        python3 -m "json.tool" < result.json > w3c$typ$url.json
-        trace_off; python3 gitlab/jsontogitlab.py w3c$typ$url.json; trace_on
+        python3 -m "json.tool" < result.json > w3c$typ$URL.json
+        trace_off; python3 gitlab/jsontogitlab.py w3c$typ$URL.json; trace_on
     done
 else
     section_start_collap upstream_problems "Remove files from upstream with problems"
@@ -123,7 +122,7 @@ else
     fi
     cd $DIR
     ACCEPTEDERR=5
-    for file in `find $url -name *.html`
+    for file in `find $URL -name *.html`
     do
         section_start ${file//\//} $file
         # T is reasonable amount of errors to allow to not break
@@ -133,6 +132,5 @@ else
         section_end $file
     done
 fi
-done
 echo "Found: " $FOUNDERR
 [ "$FOUNDERR" -eq 0 ]
