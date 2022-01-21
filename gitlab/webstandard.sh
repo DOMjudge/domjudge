@@ -103,7 +103,7 @@ if [ "$TEST" = "w3cval" ]; then
     fi
     for typ in html css svg
     do
-	$DIR/vnu-runtime-image/bin/vnu --errors-only --exit-zero-always --skip-non-$typ --format json $FLTR $url 2> result.json
+        $DIR/vnu-runtime-image/bin/vnu --errors-only --exit-zero-always --skip-non-$typ --format json $FLTR $url 2> result.json
         NEWFOUNDERRORS=`$DIR/vnu-runtime-image/bin/vnu --errors-only --exit-zero-always --skip-non-$typ --format gnu $FLTR $url 2>&1 | wc -l`
         FOUNDERR=$((NEWFOUNDERRORS+FOUNDERR))
         python3 -m "json.tool" < result.json > w3c$typ$url.json
@@ -115,11 +115,11 @@ else
     section_end upstream_problems
 
     if [ $TEST == "axe" ]; then
-	    STAN="-e $TEST"
-	    FLTR=""
+        STAN="-e $TEST"
+        FLTR=""
     else
-	    STAN="-s $TEST"
-	    FLTR="-E '#DataTables_Table_0 > tbody > tr > td > a','#menuDefault > a','#filter-card > div > div > div > span > span:nth-child(1) > span > ul > li > input','.problem-badge'"
+        STAN="-s $TEST"
+        FLTR="-E '#DataTables_Table_0 > tbody > tr > td > a','#menuDefault > a','#filter-card > div > div > div > span > span:nth-child(1) > span > ul > li > input','.problem-badge'"
     fi
     cd $DIR
     ACCEPTEDERR=5
