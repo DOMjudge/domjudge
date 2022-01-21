@@ -47,6 +47,7 @@ visual_main:
     - git branch --set-upstream-to=origin/main main
     - git pull
     - git checkout $CI_COMMIT_SHA -- gitlab/visualpr.sh # Always compare with the same tests
+    - git checkout $CI_COMMIT_SHA -- gitlab/ci_settings.sh
     - git checkout $CI_COMMIT_SHA -- gitlab/default-nginx
     - git checkout $CI_COMMIT_SHA -- gitlab/visualreg.css
     - ./gitlab/visualpr.sh main

@@ -1,31 +1,10 @@
 #!/bin/bash
 
-shopt -s expand_aliases
-alias trace_on='set -x'
-alias trace_off='{ set +x; } 2>/dev/null'
-
-function section_start_internal() {
-    echo -e "section_start:$(date +%s):$2[collapsed=$1]\r\e[0K$3"
-    trace_on
-}
-
-function section_end_internal() {
-    echo -e "section_end:$(date +%s):$1\r\e[0K"
-    trace_on
-}
-
-alias section_start_collap='trace_off ; section_start_internal true'
-alias section_start='trace_off ; section_start_internal false'
-alias section_end='trace_off ; section_end_internal '
+. gitlab/ci_settings.sh
 
 mkdir screenshots"$1"
-set -euxo pipefail
 
 section_start_collap setup "Setup and install"
-
-export PS4='(${BASH_SOURCE}:${LINENO}): - [$?] $ '
-
-DIR=$(pwd)
 
 # Set up
 "$( dirname "${BASH_SOURCE[0]}" )"/base.sh
@@ -36,20 +15,7 @@ echo "INSERT INTO userrole (userid, roleid) VALUES (3, 2);" | mysql domjudge
 # Add netrc file for demo user login
 echo "machine localhost login demo password demo" > ~/.netrc
 
-LOGFILE="/opt/domjudge/domserver/webapp/var/log/prod.log"
 WGETLOGFILE="$DIR"/wget.log
-
-function log_on_err() {
-    echo -e "\\n\\n=======================================================\\n"
-    echo "Symfony log:"
-    if sudo test -f "$LOGFILE" ; then
-        sudo cat "$LOGFILE"
-    fi
-    # We have access to the host date/time, reset this back
-    # service ntp stop
-    # ntpd -gq
-    # service ntp start
-}
 
 trap log_on_err ERR
 

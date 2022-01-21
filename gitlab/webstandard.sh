@@ -1,15 +1,8 @@
 #!/bin/bash
 
-. gitlab/dind.profile
-
-set -euxo pipefail
+. gitlab/ci_settings.sh
 
 section_start_collap setup "Setup and install"
-
-export PS4='(${BASH_SOURCE}:${LINENO}): - [$?] $ '
-
-DIR=$(pwd)
-GITSHA=$(git rev-parse HEAD || true)
 
 # Set up
 "$( dirname "${BASH_SOURCE[0]}" )"/base.sh

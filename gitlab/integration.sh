@@ -1,58 +1,28 @@
 #!/bin/bash
 
-gitlabartifacts="$(pwd)/gitlabartifacts"
-mkdir -p "$gitlabartifacts"
-
-shopt -s expand_aliases
-alias trace_on='set -x'
-alias trace_off='{ set +x; } 2>/dev/null'
-
-function section_start_internal() {
-    echo -e "section_start:`date +%s`:$1[collapsed=true]\r\e[0K$2"
-    trace_on
-}
-
-function section_end_internal() {
-    echo -e "section_end:`date +%s`:$1\r\e[0K"
-    trace_on
-}
-
-alias section_start='trace_off ; section_start_internal '
-alias section_end='trace_off ; section_end_internal '
-
-set -euxo pipefail
+. gitlab/ci_settings.sh
 
 version=$1
 
-section_start phpinfo "Show the new PHP info"
-update-alternatives --set php /usr/bin/php${version}
-php -v
-php -m
-section_end phpinfo
-
-DIR=$(pwd)
+show_phpinfo $version
 
 function finish() {
     echo -e "\\n\\n=======================================================\\n"
     echo "Storing artifacts..."
     trace_on
     set +e
-    mysqldump domjudge > "$gitlabartifacts/db.sql"
-    cp /var/log/nginx/domjudge.log "$gitlabartifacts/nginx.log"
-    cp /opt/domjudge/domserver/webapp/var/log/prod.log "$gitlabartifacts/symfony.log"
-    cp /tmp/judgedaemon.log "$gitlabartifacts/judgedaemon.log"
-    cp /proc/cmdline "$gitlabartifacts/cmdline"
-    cp /chroot/domjudge/etc/apt/sources.list "$gitlabartifacts/sources.list"
-    cp /chroot/domjudge/debootstrap/debootstrap.log "$gitlabartifacts/debootstrap.log"
-    cp "${DIR}/misc-tools/icpctools/*json" "$gitlabartifacts/"
+    mysqldump domjudge > "$GITLABARTIFACTS/db.sql"
+    cp /var/log/nginx/domjudge.log "$GITLABARTIFACTS/nginx.log"
+    cp /opt/domjudge/domserver/webapp/var/log/prod.log "$GITLABARTIFACTS/symfony.log"
+    cp /tmp/judgedaemon.log "$GITLABARTIFACTS/judgedaemon.log"
+    cp /proc/cmdline "$GITLABARTIFACTS/cmdline"
+    cp /chroot/domjudge/etc/apt/sources.list "$GITLABARTIFACTS/sources.list"
+    cp /chroot/domjudge/debootstrap/debootstrap.log "$GITLABARTIFACTS/debootstrap.log"
+    cp "${DIR}/misc-tools/icpctools/*json" "$GITLABARTIFACTS/"
 }
 trap finish EXIT
 
 section_start setup "Setup and install"
-
-export PS4='(${BASH_SOURCE}:${LINENO}): - [$?] $ '
-
-GITSHA=$(git rev-parse HEAD || true)
 
 # Set up
 "$( dirname "${BASH_SOURCE[0]}" )"/base.sh
@@ -89,7 +59,7 @@ UPDATE team_category SET visible = 1;
 EOF
 
 ADMINPASS=$(cat etc/initial_admin_password.secret)
-cp etc/initial_admin_password.secret "$gitlabartifacts/"
+cp etc/initial_admin_password.secret "$GITLABARTIFACTS/"
 
 # configure and restart php-fpm
 sudo cp /opt/domjudge/domserver/etc/domjudge-fpm.conf "/etc/php/$version/fpm/pool.d/domjudge-fpm.conf"
@@ -118,7 +88,7 @@ sudo bin/create_cgroups
 
 if [ ! -d ${DIR}/chroot/domjudge/ ]; then
     cd ${DIR}/misc-tools
-    time sudo ./dj_make_chroot -a amd64 |& tee "$gitlabartifacts/dj_make_chroot.log"
+    time sudo ./dj_make_chroot -a amd64 |& tee "$GITLABARTIFACTS/dj_make_chroot.log"
 fi
 section_end judgehost
 
@@ -279,9 +249,9 @@ curl $CURLOPTS -X POST -d 'finalize_contest[b]=0&finalize_contest[finalizecommen
 
 # Check the Contest API:
 $CHECK_API -n -C -e -a 'strict=1' http://admin:$ADMINPASS@localhost/domjudge/api
-section_end api_check |& tee "$gitlabartifacts/check_api.log"
+section_end api_check |& tee "$GITLABARTIFACTS/check_api.log"
 
 section_start validate_feed "Validate the eventfeed against API (ignoring failures)"
 cd ${DIR}/misc-tools
-./compare-cds.sh http://localhost/domjudge 2 |& tee "$gitlabartifacts/compare_cds.log" || true
+./compare-cds.sh http://localhost/domjudge 2 |& tee "$GITLABARTIFACTS/compare_cds.log" || true
 section_end validate_feed
