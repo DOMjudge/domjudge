@@ -1,17 +1,11 @@
 #!/bin/bash
 
-set -euxo pipefail
-
-. gitlab/dind.profile
+. gitlab/ci_settings.sh
 
 version=$1
 [ "$version" = "7.4" ] && CODECOVERAGE=1 || CODECOVERAGE=0
 
-section_start_collap phpinfo "Show the new PHP info"
-update-alternatives --set php /usr/bin/php${version}
-php -v
-php -m
-section_end phpinfo
+show_phpinfo $version
 
 # Set up
 "$( dirname "${BASH_SOURCE[0]}" )"/base.sh
@@ -27,7 +21,6 @@ cp webapp/.env.test /opt/domjudge/domserver/webapp/
 # We also need the composer.json for PHPunit to detect the correct directory.
 cp composer.json /opt/domjudge/domserver/
 
-DIR=$(pwd)
 cd /opt/domjudge/domserver
 
 export APP_ENV="test"
