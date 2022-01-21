@@ -415,7 +415,7 @@ class Utils
     public static function scoretime($time, bool $scoreIsInSeconds) : int
     {
         if ($scoreIsInSeconds) {
-            $result = (int)floor($time);
+            $result = (int)($time);
         } else {
             $result = (int)floor($time / 60);
         }
