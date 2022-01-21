@@ -8,13 +8,13 @@ alias trace_on='set -x'
 alias trace_off='{ set +x; } 2>/dev/null'
 
 function section_start_internal() {
-	echo -e "section_start:`date +%s`:$1[collapsed=true]\r\e[0K$2"
-	trace_on
+    echo -e "section_start:`date +%s`:$1[collapsed=true]\r\e[0K$2"
+    trace_on
 }
 
 function section_end_internal() {
-	echo -e "section_end:`date +%s`:$1\r\e[0K"
-	trace_on
+    echo -e "section_end:`date +%s`:$1\r\e[0K"
+    trace_on
 }
 
 alias section_start='trace_off ; section_start_internal '
@@ -33,18 +33,18 @@ section_end phpinfo
 DIR=$(pwd)
 
 function finish() {
-	echo -e "\\n\\n=======================================================\\n"
-	echo "Storing artifacts..."
-	trace_on
-	set +e
-	mysqldump domjudge > "$gitlabartifacts/db.sql"
-	cp /var/log/nginx/domjudge.log "$gitlabartifacts/nginx.log"
-	cp /opt/domjudge/domserver/webapp/var/log/prod.log "$gitlabartifacts/symfony.log"
-	cp /tmp/judgedaemon.log "$gitlabartifacts/judgedaemon.log"
-	cp /proc/cmdline "$gitlabartifacts/cmdline"
-	cp /chroot/domjudge/etc/apt/sources.list "$gitlabartifacts/sources.list"
-	cp /chroot/domjudge/debootstrap/debootstrap.log "$gitlabartifacts/debootstrap.log"
-	cp "${DIR}/misc-tools/icpctools/*json" "$gitlabartifacts/"
+    echo -e "\\n\\n=======================================================\\n"
+    echo "Storing artifacts..."
+    trace_on
+    set +e
+    mysqldump domjudge > "$gitlabartifacts/db.sql"
+    cp /var/log/nginx/domjudge.log "$gitlabartifacts/nginx.log"
+    cp /opt/domjudge/domserver/webapp/var/log/prod.log "$gitlabartifacts/symfony.log"
+    cp /tmp/judgedaemon.log "$gitlabartifacts/judgedaemon.log"
+    cp /proc/cmdline "$gitlabartifacts/cmdline"
+    cp /chroot/domjudge/etc/apt/sources.list "$gitlabartifacts/sources.list"
+    cp /chroot/domjudge/debootstrap/debootstrap.log "$gitlabartifacts/debootstrap.log"
+    cp "${DIR}/misc-tools/icpctools/*json" "$gitlabartifacts/"
 }
 trap finish EXIT
 
@@ -117,8 +117,8 @@ sudo chmod 400 /etc/sudoers.d/sudoers-domjudge
 sudo bin/create_cgroups
 
 if [ ! -d ${DIR}/chroot/domjudge/ ]; then
-	cd ${DIR}/misc-tools
-	time sudo ./dj_make_chroot -a amd64 |& tee "$gitlabartifacts/dj_make_chroot.log"
+    cd ${DIR}/misc-tools
+    time sudo ./dj_make_chroot -a amd64 |& tee "$gitlabartifacts/dj_make_chroot.log"
 fi
 section_end judgehost
 
@@ -136,7 +136,7 @@ CHECK_API=${HOME}/domjudge-scripts/contest-api/check-api.sh
 # unforeseen process limits being hit.
 PINNING=""
 if [ $PIN_JUDGEDAEMON -eq 1 ]; then
-	PINNING="-0"
+    PINNING="-0"
 fi
 RUN_USER="domjudge-run$PINNING"
 if id "$RUN_USER" &>/dev/null; then
@@ -155,7 +155,7 @@ mount -t proc proc /proc
 set -e
 
 if [ $PIN_JUDGEDAEMON -eq 1 ]; then
-	PINNING="-n 0"
+    PINNING="-n 0"
 fi
 sudo -u domjudge bin/judgedaemon $PINNING |& tee /tmp/judgedaemon.log &
 sleep 5
@@ -187,11 +187,11 @@ mv hello hello_kattis
 # a Python 2 submission. The latter has a judgement type we do not understand.
 rm different/submissions/accepted/different_py2.py different/submissions/slow_accepted/different_slow.py
 for i in hello_kattis different guess; do
-	(
-		cd "$i"
-		zip -r "../${i}.zip" -- *
-	)
-	curl --fail -X POST -n -N -F zip=@${i}.zip http://localhost/domjudge/api/contests/2/problems
+    (
+        cd "$i"
+        zip -r "../${i}.zip" -- *
+    )
+    curl --fail -X POST -n -N -F zip=@${i}.zip http://localhost/domjudge/api/contests/2/problems
 done
 section_end submitting
 
@@ -209,23 +209,23 @@ curl $CURLOPTS -c $COOKIEJAR -F "_csrf_token=$CSRFTOKEN" -F "_username=admin" -F
 
 # Send a general clarification to later test if we see the event.
 curl $CURLOPTS -F "sendto=" -F "problem=2-" -F "bodytext=Testing" -F "submit=Send" \
-	 "http://localhost/domjudge/jury/clarifications/send" -o /dev/null
+     "http://localhost/domjudge/jury/clarifications/send" -o /dev/null
 
 # Don't spam the log.
 set +x
 
 while /bin/true; do
-	sleep 30s
-	curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier?verify_multiple=1" -o /dev/null
+    sleep 30s
+    curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier?verify_multiple=1" -o /dev/null
 
-	# Check if we are done, i.e. everything is judged or something got disabled by internal error...
-	if tail /tmp/judgedaemon.log | grep -q "No submissions in queue"; then
-		break
-	fi
-	# ... or something has crashed.
-	if ! pgrep -f judgedaemon; then
-		break
-	fi
+    # Check if we are done, i.e. everything is judged or something got disabled by internal error...
+    if tail /tmp/judgedaemon.log | grep -q "No submissions in queue"; then
+        break
+    fi
+    # ... or something has crashed.
+    if ! pgrep -f judgedaemon; then
+        break
+    fi
 done
 
 NUMNOTVERIFIED=$(curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier" | grep "submissions checked"     | sed -r 's/^.* ([0-9]+) submissions checked.*$/\1/')
@@ -238,29 +238,29 @@ section_end judging
 # - no submissions without magic string,
 # - and all submissions to be judged.
 if [ $NUMNOTVERIFIED -ne 2 ] || [ $NUMNOMAGIC -ne 0 ] || [ $NUMSUBS -gt $((NUMVERIFIED+NUMNOTVERIFIED)) ]; then
-	section_start error "Short error description"
-	# We error out below anyway, so no need to fail earlier than that.
-	set +e
-	echo "verified subs: $NUMVERIFIED, unverified subs: $NUMNOTVERIFIED, total subs: $NUMSUBS"
-	echo "(expected 2 submissions to be unverified, but all to be processed)"
-	echo "Of these $NUMNOMAGIC do not have the EXPECTED_RESULTS string (should be 0)."
-	curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier?verify_multiple=1" | w3m -dump -T text/html
-	section_end error
+    section_start error "Short error description"
+    # We error out below anyway, so no need to fail earlier than that.
+    set +e
+    echo "verified subs: $NUMVERIFIED, unverified subs: $NUMNOTVERIFIED, total subs: $NUMSUBS"
+    echo "(expected 2 submissions to be unverified, but all to be processed)"
+    echo "Of these $NUMNOMAGIC do not have the EXPECTED_RESULTS string (should be 0)."
+    curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier?verify_multiple=1" | w3m -dump -T text/html
+    section_end error
 
-	section_start logfiles "All the more or less useful logfiles"
-	for i in /opt/domjudge/judgehost/judgings/*/*/*/*/*/compile.out; do
-		echo $i;
-		head -n 100 $i;
-		dir=$(dirname $i)
-		if [ -r $dir/testcase001/system.out ]; then
-			head $dir/testcase001/system.out
-			head $dir/testcase001/runguard.err
-			head $dir/testcase001/program.err
-			head $dir/testcase001/program.meta
-		fi
-		echo;
-	done
-	exit 1;
+    section_start logfiles "All the more or less useful logfiles"
+    for i in /opt/domjudge/judgehost/judgings/*/*/*/*/*/compile.out; do
+        echo $i;
+        head -n 100 $i;
+        dir=$(dirname $i)
+        if [ -r $dir/testcase001/system.out ]; then
+            head $dir/testcase001/system.out
+            head $dir/testcase001/runguard.err
+            head $dir/testcase001/program.err
+            head $dir/testcase001/program.meta
+        fi
+        echo;
+    done
+    exit 1;
 fi
 
 section_start api_check "Performing API checks"
