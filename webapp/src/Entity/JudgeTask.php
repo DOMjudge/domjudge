@@ -195,6 +195,17 @@ class JudgeTask
      */
     private $starttime;
 
+    /**
+     * @ORM\OneToMany(targetEntity="JudgingRun", mappedBy="judgetask")
+     * @Serializer\Exclude()
+     */
+    private $judging_runs;
+
+    public function __construct()
+    {
+        $this->judging_runs  = new ArrayCollection();
+    }
+
     public function getJudgetaskid(): int
     {
         return $this->judgetaskid;
@@ -387,5 +398,32 @@ class JudgeTask
             default:
                 return JudgeTask::PRIORITY_DEFAULT;
         }
+    }
+
+    public function addJudgingRun(JudgingRun $judgingRun): JudgeTask
+    {
+        $this->judging_runs[] = $judgingRun;
+        return $this;
+    }
+
+    public function removeJudgingRun(JudgingRun $judgingRun): JudgeTask
+    {
+        $this->judging_runs->removeElement($judgingRun);
+        return $this;
+    }
+
+    public function getJudgingRuns(): Collection
+    {
+        return $this->judging_runs;
+    }
+
+    /**
+     * Gets the first judging run for this judgetask.
+     *
+     * This is useful when this judgetask is joined to a single run to get code completion in Twig templates.
+     */
+    public function getFirstJudgingRun(): ?JudgingRun
+    {
+        return $this->judging_runs->first() ?: null;
     }
 }

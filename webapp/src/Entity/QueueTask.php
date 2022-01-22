@@ -74,7 +74,7 @@ class QueueTask
     private $team;
 
     /**
-     * @var double
+     * @var double|null
      * @ORM\Column(type="decimal", precision=32, scale=9, name="starttime", options={"comment"="Time started work",
      *                             "unsigned"=true}, nullable=true)
      * @Serializer\Exclude()
@@ -136,7 +136,10 @@ class QueueTask
         return $this;
     }
 
-    public function getStartTime(): ?float
+    /**
+     * @return string|float|null
+     */
+    public function getStartTime()
     {
         return $this->startTime;
     }

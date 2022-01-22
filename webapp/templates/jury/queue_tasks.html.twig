@@ -1,0 +1,18 @@
+{% extends 'jury/base.html.twig' %}
+{% import "jury/jury_macros.twig" as macros %}
+
+{% block title %}Queue tasks - {{ parent() }}{% endblock %}
+
+{% block extrahead %}
+    {{ parent() }}
+    {{ macros.table_extrahead() }}
+{% endblock %}
+
+{% block content %}
+
+    <h1>Queue tasks</h1>
+
+    {{ macros.table(queueTasksTable, tableFields, numActions, {'ordering': 'false'}) }}
+
+{% endblock %}
+

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "49ee040a98938b100ff1ea54893b8421",
+    "content-hash": "9d47bf3675b08d8972dbc17b81eb904e",
     "packages": [
         {
             "name": "angel-vladov/select2-theme-bootstrap4",
@@ -2849,9 +2849,6 @@
             },
             "require": {
                 "php": "^7.1 || ^8.0"
-            },
-            "replace": {
-                "myclabs/deep-copy": "self.version"
             },
             "require-dev": {
                 "doctrine/collections": "^1.0",
@@ -7256,7 +7253,7 @@
                     "type": "tidelift"
                 }
             ],
-            "abandoned": "use `EnglishInflector` from the String component instead",
+            "abandoned": "EnglishInflector from the String component",
             "time": "2021-10-29T15:39:54+00:00"
         },
         {
@@ -10987,9 +10984,11 @@
         "ext-pcntl": "*",
         "ext-zip": "*"
     },
-    "platform-dev": [],
+    "platform-dev": {
+        "ext-dom": "*"
+    },
     "platform-overrides": {
         "php": "7.2.5"
     },
-    "plugin-api-version": "2.1.0"
+    "plugin-api-version": "2.2.0"
 }
