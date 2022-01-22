@@ -3,9 +3,16 @@
 namespace App\Tests\Unit\Controller\Jury;
 
 use App\Entity\BaseApiEntity;
+use App\Entity\Contest;
+use App\Entity\Problem;
+use App\Entity\Submission;
+use App\Entity\Team;
+use App\Service\SubmissionService;
 use App\Tests\Unit\BaseTest;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Generator;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 /**
  * This abstract class will have the default functionality tested for Jury pages.
@@ -374,5 +381,20 @@ abstract class JuryControllerTest extends BaseTest
         } else {
             self::assertTrue(true, "Test skipped");
         }
+    }
+
+    protected function addSubmission(string $team, string $problem, string $contest = 'demo'): Submission
+    {
+        /** @var EntityManagerInterface $em */
+        $em = static::$container->get(EntityManagerInterface::class);
+        $contest = $em->getRepository(Contest::class)->findOneBy(['shortname' => $contest]);
+        $team = $em->getRepository(Team::class)->findOneBy(['name' => $team]);
+        $problem = $em->getRepository(Problem::class)->findOneBy(['externalid' => $problem]);
+        /** @var SubmissionService $submissionService */
+        $submissionService = static::$container->get(SubmissionService::class);
+        return $submissionService->submitSolution(
+            $team, null, $problem, $contest, 'c',
+            [new UploadedFile(__FILE__, "foo.c", null, null, true)]
+        );
     }
 }
