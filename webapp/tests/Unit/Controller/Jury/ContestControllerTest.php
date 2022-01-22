@@ -3,6 +3,9 @@
 namespace App\Tests\Unit\Controller\Jury;
 
 use App\Entity\Contest;
+use App\Entity\JudgeTask;
+use App\Entity\QueueTask;
+use Doctrine\ORM\EntityManagerInterface;
 
 class ContestControllerTest extends JuryControllerTest
 {
@@ -127,5 +130,58 @@ class ContestControllerTest extends JuryControllerTest
             unset($entity);
         }
         parent::testCheckAddEntityAdmin();
+    }
+
+    public function testUnlockJudgeTasks(): void
+    {
+        // First, check that adding a submission creates a queue task and 3 judge tasks
+        $this->addSubmission('DOMjudge', 'fltcmp');
+        /** @var EntityManagerInterface $em */
+        $em = static::$container->get(EntityManagerInterface::class);
+        $queueTaskQuery = $em->createQueryBuilder()
+            ->from(QueueTask::class, 'qt')
+            ->select('COUNT(qt)')
+            ->getQuery();
+        $judgeTaskQuery = $em->createQueryBuilder()
+            ->from(JudgeTask::class, 'jt')
+            ->select('COUNT(jt)')
+            ->getQuery();
+
+        self::assertEquals(1, $queueTaskQuery->getSingleScalarResult());
+        self::assertEquals(3, $judgeTaskQuery->getSingleScalarResult());
+
+        // Now, disable the problem
+        $contest = $em->getRepository(Contest::class)->findOneBy(['shortname' => 'demo']);
+        $contestId = $contest->getCid();
+        $url = "/jury/contests/$contestId/edit";
+        $this->verifyPageResponse('GET', $url, 200);
+
+        $crawler = $this->getCurrentCrawler();
+        $form = $crawler->filter('form')->form();
+        $formData = $form->getValues();
+        $problemIndex = null;
+        foreach ($formData as $key => $value) {
+            if (preg_match('/^contest\[problems\]\[(\d+)\]\[shortname\]$/', $key, $matches) === 1 && $value === 'fltcmp') {
+                $problemIndex = $matches[1];
+                $formData["contest[problems][$problemIndex][allowJudge]"] = '0';
+            }
+        }
+
+        $this->client->submit($form, $formData);
+
+        // Submit again
+        $this->addSubmission('DOMjudge', 'fltcmp');
+
+        // This should not add more queue or judge tasks
+        self::assertEquals(1, $queueTaskQuery->getSingleScalarResult());
+        self::assertEquals(3, $judgeTaskQuery->getSingleScalarResult());
+
+        // Enable judging again
+        $formData["contest[problems][$problemIndex][allowJudge]"] = '1';
+        $this->client->submit($form, $formData);
+
+        // This should add more queue and judge tasks
+        self::assertEquals(2, $queueTaskQuery->getSingleScalarResult());
+        self::assertEquals(6, $judgeTaskQuery->getSingleScalarResult());
     }
 }
