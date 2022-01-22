@@ -133,7 +133,7 @@
                         <td>
                             {%- if action %}
 
-                                <a href="{{ action.link }}" title="{{ action.title }}" {% if action.ajaxModal is defined and action.ajaxModal %}data-ajax-modal{% endif %}>
+                                <a {% if action.disabled is defined and action.disabled %}class="disabled"{% endif %} {% if action.link is defined %}href="{{ action.link }}"{% endif %} title="{{ action.title }}" {% if action.ajaxModal is defined and action.ajaxModal %}data-ajax-modal{% endif %}>
                                     <i class="fas fa-{{ action.icon }}"></i>
                                 </a>
                             {%- endif %}

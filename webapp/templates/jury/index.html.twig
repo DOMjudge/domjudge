@@ -60,6 +60,9 @@
                         <li><a href="{{ path('jury_scoreboard') }}">Scoreboard</a></li>
                         <li><a href="{{ path('analysis_index') }}">Statistics/Analysis</a></li>
                         <li><a href="{{ path('jury_submissions') }}">Submissions</a></li>
+                        {% if is_granted('ROLE_ADMIN') %}
+                            <li><a href="{{ path('jury_queue_tasks') }}">Queue tasks</a></li>
+                        {% endif %}
                         {% if show_shadow_differences %}
                             <li><a href="{{ path('jury_shadow_differences') }}">Shadow Differences</a></li>
                         {% endif %}

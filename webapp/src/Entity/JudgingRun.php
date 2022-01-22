@@ -98,7 +98,7 @@ class JudgingRun extends BaseApiEntity
     private $output;
 
     /**
-     * @ORM\ManyToOne(targetEntity="JudgeTask")
+     * @ORM\ManyToOne(targetEntity="JudgeTask", inversedBy="judging_runs")
      * @ORM\JoinColumn(name="judgetaskid", referencedColumnName="judgetaskid")
      * @Serializer\Exclude()
      */

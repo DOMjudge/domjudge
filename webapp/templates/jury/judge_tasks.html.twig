@@ -1,0 +1,51 @@
+{% extends 'jury/base.html.twig' %}
+{% import "jury/jury_macros.twig" as macros %}
+
+{% block title %}Judge tasks for queue task {{ queueTask.queueTaskid }} - {{ parent() }}{% endblock %}
+
+{% block extrahead %}
+    {{ parent() }}
+    {{ macros.table_extrahead() }}
+{% endblock %}
+
+{% block content %}
+
+    <h1>Judge tasks for queue task {{ queueTask.queueTaskid }}</h1>
+
+    {% if firstJudgeTask is not null %}
+        <div class="row">
+            <div class="col-lg-4">
+                <table class="table table-sm table-striped">
+                    <tr>
+                        <th>Submission</th>
+                        <td>
+                            <a href="{{ path('jury_submission', {'submitId': firstJudgeTask.firstJudgingRun.judging.submission.submitid }) }}">
+                                {{ firstJudgeTask.firstJudgingRun.judging.submission.submitid }}
+                            </a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Judging</th>
+                        <td>
+                            <a href="{{ path('jury_submission_by_judging', {'jid': firstJudgeTask.jobId }) }}">
+                                {{ firstJudgeTask.jobId }}
+                            </a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Priority</th>
+                        <td>{{ judgeTaksPriority }}</td>
+                    </tr>
+                    <tr>
+                        <th>UUID</th>
+                        <td class="text-monospace small">{{ firstJudgeTask.uuid }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    {% endif %}
+
+    {{ macros.table(judgeTasksTable, tableFields, numActions, {'ordering': 'false'}) }}
+
+{% endblock %}
+

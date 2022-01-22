@@ -97,6 +97,7 @@
 		"twig/twig": "^2.11"
 	},
 	"require-dev": {
+		"ext-dom": "*",
 		"dama/doctrine-test-bundle": "^6.5",
 		"squizlabs/php_codesniffer": "*",
 		"symfony/debug-bundle": "4.4.*",
