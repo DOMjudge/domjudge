@@ -28,12 +28,12 @@
  *        to secret data etc).
  *
  * - wrong_answer(std::string msg, ...):
- *        printf-style function for exitting and giving Wrong Answer,
+ *        printf-style function for exiting and giving Wrong Answer,
  *        and emitting a judge message (which would typically explain
  *        the cause of the Wrong Answer)
  *
  * - judge_error(std::string msg, ...):
- *        printf-style function for exitting and giving Judge Error,
+ *        printf-style function for exiting and giving Judge Error,
  *        and emitting a judge message (which would typically explain
  *        the cause of the Judge Error)
  *
