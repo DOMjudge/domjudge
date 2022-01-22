@@ -36,19 +36,22 @@ for URL in ./*; do
             PR="$DIR"/"$SPR"/"$ROLE"/"$FILE"
             MR="$DIR"/"$SMR"/"$ROLE"/"$FILE"
             if test -f "$MR"; then
-                # This fails when there is a change in time between the branches
-                set +e
-                idiff -warn 100 -fail 0.5 "$PR" "$MR" -abs -od -scale 10.0;RET=$?
-                set -e
-                # There is the problem of detecting if a change is wanted or unwanted, currently check all the captured
-                # screenshots against main for changes
-                if [ $RET -ne 0 ]; then
-                    REMOVE=".html-ff.png"
-                    ENDPOINT=${FILE/$REMOVE}
-                    STORDIR="$DIR"/"$VISUALCHANGES"
-                    compare "$PR" "$MR" -highlight-color blue "$STORDIR"/"${ROLE}"_"${FILE}" || true
-                    cp "$MR" "$STORDIR"/"${ROLE}"_main_"${FILE}"
-                    cp "$PR" "$STORDIR"/"${ROLE}"_pr_"${FILE}"
+                # If the md5sum is the same there is most likely no visual change
+                if [ $(md5sum "$PR"|cut -f1 -d' ') != $(md5sum "$MR"|cut -f1 -d' ') ]; then
+                    # This fails when there is a change in time between the branches
+                    set +e
+                    idiff -warn 100 -fail 0.5 "$PR" "$MR" -abs -od -scale 10.0;RET=$?
+                    set -e
+                    # There is the problem of detecting if a change is wanted or unwanted, currently check all the captured
+                    # screenshots against main for changes
+                    if [ $RET -ne 0 ]; then
+                        REMOVE=".html-ff.png"
+                        ENDPOINT=${FILE/$REMOVE}
+                        STORDIR="$DIR"/"$VISUALCHANGES"
+                        compare "$PR" "$MR" -highlight-color blue "$STORDIR"/"${ROLE}"_"${FILE}" || true
+                        cp "$MR" "$STORDIR"/"${ROLE}"_main_"${FILE}"
+                        cp "$PR" "$STORDIR"/"${ROLE}"_pr_"${FILE}"
+                    fi
                 fi
             else
                 ADD=$((ADD+1))
