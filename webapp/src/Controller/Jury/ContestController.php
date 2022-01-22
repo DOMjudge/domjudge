@@ -503,6 +503,10 @@ class ContestController extends BaseController
             $problems = $contest->getProblems()->toArray();
             foreach ($problems as $problem) {
                 $problem->setContest($contest);
+
+                if ($problem->getAllowJudge()) {
+                    $this->dj->unblockJudgeTasksForProblem($problem->getProbid());
+                }
             }
 
             // Determine the removed teams, team categories and problems.
