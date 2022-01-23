@@ -131,7 +131,7 @@ class QueueTaskController extends BaseController
     }
 
     /**
-     * @Route("/change-priority/{queueTask}/{priority}", name="jury_queue_task_change_priority")
+     * @Route("/{queueTask}/change-priority/{priority}", name="jury_queue_task_change_priority")
      */
     public function changePriorityAction(QueueTask $queueTask, int $priority): RedirectResponse
     {
@@ -160,7 +160,7 @@ class QueueTaskController extends BaseController
     }
 
     /**
-     * @Route("/judgetasks/{queueTask}", name="jury_queue_task_judge_tasks")
+     * @Route("/{queueTask}/judgetasks", name="jury_queue_task_judge_tasks")
      */
     public function viewJudgeTasksAction(QueueTask $queueTask): Response
     {
