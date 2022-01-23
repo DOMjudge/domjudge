@@ -42,9 +42,9 @@ UNIX_TIMESTAMP=$(date +%s)
 STARTTIME=$((UNIX_TIMESTAMP-TIMEHELP))
 export TZ="Europe/Amsterdam"
 STARTTIME_STRING="$(date  -d @$STARTTIME +'%F %T Europe/Amsterdam')"
-FREEZETIME=$((UNIX_TIMESTAMP+15))
+FREEZETIME=$((UNIX_TIMESTAMP+TIMEHELP))
 FREEZETIME_STRING="$(date  -d @$FREEZETIME +'%F %T Europe/Amsterdam')"
-ENDTIME=$((UNIX_TIMESTAMP+TIMEHELP))
+ENDTIME=$((UNIX_TIMESTAMP+TIMEHELP+TIMEHELP))
 ENDTIME_STRING="$(date  -d @$ENDTIME +'%F %T Europe/Amsterdam')"
 # Database changes to make the REST API and event feed match better.
 cat <<EOF | mysql domjudge
