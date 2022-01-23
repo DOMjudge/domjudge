@@ -104,7 +104,7 @@ class QueueTaskControllerTest extends BaseTest
             ->getSingleResult();
         $queueTaskId = $queueTask->getQueueTaskid();
         $priority = JudgeTask::PRIORITY_HIGH;
-        $this->verifyPageResponse('GET', "/jury/queuetasks/change-priority/$queueTaskId/$priority", 302);
+        $this->verifyPageResponse('GET', "/jury/queuetasks/$queueTaskId/change-priority/$priority", 302);
 
         // Clear entity manager since we have changed the queue task priority and otherwise we would get the old data
         $this->em->clear();
@@ -197,7 +197,7 @@ class QueueTaskControllerTest extends BaseTest
         $queueTaskId = $queueTask->getQueueTaskid();
         $judgeTask = $this->em->getRepository(JudgeTask::class)->findOneBy(['jobid' => $submission->getJudgings()->first()->getJudgingid()]);
 
-        $this->verifyPageResponse('GET', "/jury/queuetasks/judgetasks/$queueTaskId", 200);
+        $this->verifyPageResponse('GET', "/jury/queuetasks/$queueTaskId/judgetasks", 200);
 
         $crawler = $this->getCurrentCrawler();
         self::assertSelectorExists('title:contains("Judge tasks for queue task ' . $queueTaskId . '")');
