@@ -14,6 +14,7 @@ function finish() {
     mysqldump domjudge > "$GITLABARTIFACTS/db.sql"
     cp /var/log/nginx/domjudge.log "$GITLABARTIFACTS/nginx.log"
     cp /opt/domjudge/domserver/webapp/var/log/prod.log "$GITLABARTIFACTS/symfony.log"
+    cp /opt/domjudge/domserver/webapp/var/log/prod.log.errors "$GITLABARTIFACTS/symfony_errors.log"
     cp /tmp/judgedaemon.log "$GITLABARTIFACTS/judgedaemon.log"
     cp /proc/cmdline "$GITLABARTIFACTS/cmdline"
     cp /chroot/domjudge/etc/apt/sources.list "$GITLABARTIFACTS/sources.list"
@@ -136,13 +137,19 @@ section_start submitting "Submitting test sources (including Kattis example)"
 cd ${DIR}/tests
 export SUBMITBASEURL='http://localhost/domjudge/'
 
-# Keep the tests which are expected to fail out of the symfony log
 make check-problems
+# Stash the logs as we dont want to store the logs for erroneous submissions
 if [ -f /opt/domjudge/domserver/webapp/var/log/prod.log ]; then
     mv /opt/domjudge/domserver/webapp/var/log/prod.log{,.stash}
 fi
 make test-bad-expected-results
+if [ ! -f /opt/domjudge/domserver/webapp/var/log/prod.log ]; then
+    # The log should have PHP errors,
+    exit 1
+fi
+mv /opt/domjudge/domserver/webapp/var/log/prod.log{,.errors}
 if [ -f /opt/domjudge/domserver/webapp/var/log/prod.log.stash ]; then
+    # Restore the original log
     mv /opt/domjudge/domserver/webapp/var/log/prod.log{.stash,}
 fi
 make test-stress
