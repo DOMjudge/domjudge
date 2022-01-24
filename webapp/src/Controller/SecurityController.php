@@ -146,9 +146,12 @@ class SecurityController extends AbstractController
                 switch ($registration_form->get('affiliation')->getData()) {
                     case 'new':
                         $affiliation = new TeamAffiliation();
+                        $shortName = $this->getShortName($registration_form->get('affiliationShortName')->getData());
+                        $name = $this->getShortName($registration_form->get('affiliationName')->getData());
+                        $this->logger->error($shortName, ['length' => strlen($shortName), 'bool' => strlen($shortName)>$shortNameLength]);
                         $affiliation
-                            ->setName($registration_form->get('affiliationName')->getData())
-                            ->setShortname($registration_form->get('affiliationName')->getData());
+                            ->setName($name)
+                            ->setShortname($shortName);
                         if ($registration_form->has('affiliationCountry')) {
                             $affiliation->setCountry($registration_form->get('affiliationCountry')->getData());
                         }

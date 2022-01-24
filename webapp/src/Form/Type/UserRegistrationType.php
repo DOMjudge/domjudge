@@ -139,6 +139,15 @@ class UserRegistrationType extends AbstractType
                         'placeholder' => 'Affiliation name',
                     ],
                     'mapped' => false,
+                ])
+                ->add('affiliationShortName', TextType::class, [
+                    'label' => false,
+                    'required' => false,
+                    'attr' => [
+                        'placeholder' => 'Affiliation shortname',
+                        'maxlength' => '32',
+                    ],
+                    'mapped' => false,
                 ]);
             if ($this->config->get('show_flags')) {
                 $builder->add('affiliationCountry', ChoiceType::class, [
@@ -213,16 +222,19 @@ class UserRegistrationType extends AbstractType
                 $form = $context->getRoot();
                 switch ($form->get('affiliation')->getData()) {
                     case 'new':
-                        $affiliationName = $form->get('affiliationName')->getData();
-                        if (empty($affiliationName)) {
-                            $context->buildViolation('This value should not be blank.')
-                                ->atPath('affiliationName')
-                                ->addViolation();
-                        }
-                        if ($this->em->getRepository(TeamAffiliation::class)->findOneBy(['name' => $affiliationName])) {
-                            $context->buildViolation('This affiliation name is already in use.')
-                                ->atPath('affiliationName')
-                                ->addViolation();
+                        foreach(['Name','ShortName'] as $identifier) {
+                            $name = $form->get('affiliation'.$identifier)->getData();
+                            if (empty($name)) {
+                                $context->buildViolation('This value should not be blank.')
+                                    ->atPath('affiliation'.$identifier)
+                                    ->addViolation();
+                            }
+                            if ($this->em->getRepository(TeamAffiliation::class)->findOneBy([strtolower($identifier) => $name])) {
+                                $context->buildViolation('This affiliation '.strtolower($identifier).' is already in use.')
+                                    ->atPath('affiliation'.$identifier)
+                                    ->addViolation();
+                            
+                            }
                         }
                         break;
                     case 'existing':
