@@ -96,7 +96,7 @@ class QueueTaskController extends BaseController
                     'icon' => static::PRIORITY_ICON_MAP[$priority],
                     'title' => 'change priority to ' . $readable,
                     'link' => $this->generateUrl('jury_queue_task_change_priority', [
-                        'queueTask' => $queueTask->getQueueTaskid(),
+                        'queueTaskId' => $queueTask->getQueueTaskid(),
                         'priority' => $priority,
                     ]),
                 ];
@@ -113,7 +113,7 @@ class QueueTaskController extends BaseController
                 'icon' => 'list',
                 'title' => 'view judgetasks',
                 'link' => $this->generateUrl('jury_queue_task_judge_tasks', [
-                    'queueTask' => $queueTask->getQueueTaskid(),
+                    'queueTaskId' => $queueTask->getQueueTaskid(),
                 ]),
             ];
 
@@ -131,10 +131,16 @@ class QueueTaskController extends BaseController
     }
 
     /**
-     * @Route("/{queueTask}/change-priority/{priority}", name="jury_queue_task_change_priority")
+     * @Route("/{queueTaskId}/change-priority/{priority}", name="jury_queue_task_change_priority")
      */
-    public function changePriorityAction(QueueTask $queueTask, int $priority): RedirectResponse
+    public function changePriorityAction(int $queueTaskId, int $priority): RedirectResponse
     {
+        $queueTask = $this->em->getRepository(QueueTask::class)->find($queueTaskId);
+        if (!$queueTask) {
+            $this->addFlash('danger', 'Queue task does not exist (anymore)');
+            return $this->redirectToRoute('jury_queue_tasks');
+        }
+
         if (!isset(static::PRIORITY_MAP[$priority])) {
             throw new BadRequestHttpException('Invalid priority');
         }
@@ -160,10 +166,16 @@ class QueueTaskController extends BaseController
     }
 
     /**
-     * @Route("/{queueTask}/judgetasks", name="jury_queue_task_judge_tasks")
+     * @Route("/{queueTaskId}/judgetasks", name="jury_queue_task_judge_tasks")
      */
-    public function viewJudgeTasksAction(QueueTask $queueTask): Response
+    public function viewJudgeTasksAction(int $queueTaskId): Response
     {
+        $queueTask = $this->em->getRepository(QueueTask::class)->find($queueTaskId);
+        if (!$queueTask) {
+            $this->addFlash('danger', 'Queue task does not exist (anymore)');
+            return $this->redirectToRoute('jury_queue_tasks');
+        }
+
         /** @var JudgeTask[] $judgeTasks */
         $judgeTasks = $this->em->createQueryBuilder()
             ->select('jt', 'jh', 'jr')
