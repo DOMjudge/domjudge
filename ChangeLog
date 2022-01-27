@@ -42,7 +42,15 @@ Version 8.0.0 - DEV
    to convert it to the new style (see 'boolfind' example) or change it to
    include the old run_wrapper.
  - Replace jscolor by coloris.
-
+ - Created insights page in current work queue
+ - Increase performance by not dynamically loading classes.
+ - Added alternative inplace install mode
+ - Added PHP8.0 support
+ - Add option to default pause new judgedaemons
+ - Added medals to scoreboard
+ - Warn contestants if file has not been modified for some time
+ - Make public/team pages mostly WCAG2A compliant
+ - Add support to import multiple accounts per team and IP addresses for users.
 
 Version 7.3.2 - 23 November 2020
 --------------------------------
