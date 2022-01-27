@@ -1,7 +1,7 @@
 DOMjudge Programming Contest Judging System
 
-Version 8.0.0 - DEV
--------------------
+Version 8.0.0 - 30 January 2022
+-------------------------------
  - Compilation of submissions now happens inside the chroot.
    NOTE when upgrading: you need to install compilers and other
    dependencies for the compile phase inside the DOMjudge chroot.
