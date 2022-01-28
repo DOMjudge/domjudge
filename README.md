@@ -83,12 +83,12 @@ https://www.domjudge.org/
 
 Announcements of new releases are sent to our low volume announcements
 mailinglist. Subscription to this list is done via
-https://www.domjudge.org/mailman/listinfo/domjudge-announce
+https://www.domjudge.org/mailman/postorius/lists/domjudge-announce.domjudge.org/
 
 The developers can be reached through the mailinglist
 domjudge-devel@domjudge.org. You need to be subscribed before
 you can post. Information, subscription and archives are available at:
-https://www.domjudge.org/mailman/listinfo/domjudge-devel
+https://www.domjudge.org/mailman/postorius/lists/domjudge-devel.domjudge.org/
 
 DOMjudge has a Slack workspace where a number of developers and
 users of DOMjudge linger. More information can be found at

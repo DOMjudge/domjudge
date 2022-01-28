@@ -21,7 +21,7 @@ Note that GitHub issues are not a good place to ask questions (see below).
 ## Questions and problems
 
 Please ask any questions on the
-[DOMjudge-devel mailinglist](https://www.domjudge.org/mailman/listinfo/domjudge-devel).
+[DOMjudge-devel mailinglist](https://www.domjudge.org/mailman/postorius/lists/domjudge-devel.domjudge.org/).
 Also if you have a problem and you are not 100% sure this is a bug,
 please first ask/discuss it on the mailinglist.
 
