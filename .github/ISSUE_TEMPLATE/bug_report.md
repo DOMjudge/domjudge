@@ -9,7 +9,7 @@ assignees: ''
 
 NOTE: If this is a _discussion starter_, you need any _installation help_ or have a _question_ on how to accomplish something,
 rather post at [our discussion channel](https://www.domjudge.org/chat) or send an email to our
-[DOMjudge-devel mailinglist](https://www.domjudge.org/mailman/listinfo/domjudge-devel)
+[DOMjudge-devel mailinglist](https://www.domjudge.org/mailman/postorius/lists/domjudge-devel.domjudge.org/)
 instead of filing an issue here.
 
 ### Description of the problem

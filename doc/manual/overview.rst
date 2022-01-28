@@ -177,12 +177,12 @@ Contact
 The DOMjudge homepage can be found at: https://www.domjudge.org/
 
 We have a low volume `mailing list for announcements
-<https://www.domjudge.org/mailman/listinfo/domjudge-announce>`_
+<https://www.domjudge.org/mailman/postorius/lists/domjudge-announce.domjudge.org/>`_
 of new releases.
 The authors can be reached through the development mailing list.
 You need to be subscribed before you can post. See the
 `development list information page
-<https://www.domjudge.org/mailman/listinfo/domjudge-devel>`_
+<https://www.domjudge.org/mailman/postorius/lists/domjudge-devel.domjudge.org/>`_
 for subscription and more details.
 
 There is a wiki which collects other pieces of information about
