@@ -8,6 +8,7 @@ use App\Entity\Submission;
 use App\Entity\Team;
 use App\Service\DOMJudgeService;
 use App\Service\StatisticsService;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\Expr;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -21,20 +22,15 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class AnalysisController extends AbstractController
 {
-    /**
-     * @var DOMJudgeService
-     */
-    private $dj;
+    private DOMJudgeService $dj;
+    private StatisticsService $stats;
+    private EntityManagerInterface $em;
 
-    /**
-     * @var StatisticsService
-     */
-    private $stats;
-
-    public function __construct(DOMJudgeService $dj, StatisticsService $stats)
+    public function __construct(DOMJudgeService $dj, StatisticsService $stats, EntityManagerInterface $em)
     {
         $this->dj = $dj;
         $this->stats = $stats;
+        $this->em = $em;
     }
 
     /**
@@ -42,7 +38,7 @@ class AnalysisController extends AbstractController
      */
     public function indexAction(Request $request): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $contest = $this->dj->getCurrentContest();
 
         if ($contest === null) {

@@ -41,6 +41,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 /**
  * @Route("/jury/rejudgings")
+ * @IsGranted("ROLE_JURY")
  */
 class RejudgingController extends BaseController
 {

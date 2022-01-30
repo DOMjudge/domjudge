@@ -13,7 +13,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Generator;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class ImportExportServiceTest extends KernelTestCase
 {
@@ -439,16 +439,16 @@ EOF;
         self::assertNull($message);
 
         /** @var EntityManagerInterface $em */
-        $em = static::$container->get(EntityManagerInterface::class);
+        $em = static::getContainer()->get(EntityManagerInterface::class);
 
-        $passwordEncoder = static::$container->get(UserPasswordEncoderInterface::class);
+        $userPasswordHasher = static::getContainer()->get(UserPasswordHasherInterface::class);
 
         // Check for all expected users.
         foreach ($expectedUsers as $data) {
             $user = $em->getRepository(User::class)->findOneBy(['username' => $data['username']]);
             self::assertNotNull($user, "User $data[username] does not exist");
             self::assertEquals($data['name'], $user->getName());
-            self::assertTrue($passwordEncoder->isPasswordValid($user, $data['password']));
+            self::assertTrue($userPasswordHasher->isPasswordValid($user, $data['password']));
             // To verify roles we need to sort them.
             $roles = $user->getRoleList();
             sort($roles);

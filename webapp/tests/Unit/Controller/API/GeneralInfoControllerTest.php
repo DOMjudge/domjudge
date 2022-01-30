@@ -34,7 +34,7 @@ class GeneralInfoControllerTest extends BaseTest
             static::assertIsArray($response);
             static::assertCount(4, $response);
             static::assertEquals(static::API_VERSION, $response['api_version']);
-            static::assertRegExp('/^\d+\.\d+\.\d+/', $response['domjudge_version']);
+            static::assertMatchesRegularExpression('/^\d+\.\d+\.\d+/', $response['domjudge_version']);
             static::assertEquals('test', $response['environment']);
             static::assertStringStartsWith('http', $response['doc_url']);
         }

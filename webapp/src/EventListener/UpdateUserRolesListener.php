@@ -48,7 +48,6 @@ class UpdateUserRolesListener implements EventSubscriberInterface
         if ($user instanceof UserInterface && $roles !== $user->getRoles()) {
             $token = new UsernamePasswordToken(
                 $user,
-                null,
                 'main',
                 $user->getRoles()
             );

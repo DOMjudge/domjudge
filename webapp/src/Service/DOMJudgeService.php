@@ -267,7 +267,7 @@ class DOMJudgeService
 
     public function getClientIp()
     {
-        return $this->requestStack->getMasterRequest()->getClientIp();
+        return $this->requestStack->getMainRequest()->getClientIp();
     }
 
     /**
@@ -480,7 +480,6 @@ class DOMJudgeService
             $this->tokenStorage->setToken(
                 new UsernamePasswordToken(
                     $currentToken->getUser(),
-                    null,
                     'main',
                     ['ROLE_ADMIN']
                 )

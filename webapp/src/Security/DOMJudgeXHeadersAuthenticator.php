@@ -8,6 +8,7 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
@@ -122,8 +123,6 @@ class DOMJudgeXHeadersAuthenticator extends AbstractAuthenticator implements Aut
      */
     public function start(Request $request, AuthenticationException $authException = null): Response
     {
-        $data = ['message' => 'Authentication Required'];
-
-        return new JsonResponse($data, Response::HTTP_UNAUTHORIZED);
+        return new RedirectResponse($this->router->generate('login', [], UrlGeneratorInterface::ABSOLUTE_URL));
     }
 }
