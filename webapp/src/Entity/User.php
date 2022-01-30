@@ -10,6 +10,7 @@ use Exception;
 use JMS\Serializer\Annotation as Serializer;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\EquatableInterface;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -24,7 +25,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *     uniqueConstraints={@ORM\UniqueConstraint(name="username", columns={"username"}, options={"lengths":{190}})})
  * @UniqueEntity("username", message="The username '{{ value }}' is already in use.")
  */
-class User implements UserInterface, EquatableInterface, \Serializable
+class User implements UserInterface, PasswordAuthenticatedUserInterface, EquatableInterface, \Serializable
 {
     /**
      * @var int
@@ -435,5 +436,13 @@ class User implements UserInterface, EquatableInterface, \Serializable
         }
 
         return true;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getUserIdentifier(): string
+    {
+        return $this->getUsername();
     }
 }

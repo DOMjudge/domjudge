@@ -16,9 +16,9 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 class SecurityController extends AbstractController
@@ -105,7 +105,7 @@ class SecurityController extends AbstractController
     public function registerAction(
         Request $request,
         AuthorizationCheckerInterface $authorizationChecker,
-        UserPasswordEncoderInterface $passwordEncoder
+        UserPasswordHasherInterface $passwordHasher
     )
     {
         // Redirect if already logged in
@@ -125,7 +125,7 @@ class SecurityController extends AbstractController
         $registration_form->handleRequest($request);
         if ($registration_form->isSubmitted() && $registration_form->isValid()) {
             $plainPass = $registration_form->get('plainPassword')->getData();
-            $password  = $passwordEncoder->encodePassword($user, $plainPass);
+            $password  = $passwordHasher->hashPassword($user, $plainPass);
             $user->setPassword($password);
             if ($user->getName() === null) {
                 $user->setName($user->getUsername());

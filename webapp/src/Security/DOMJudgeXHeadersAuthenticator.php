@@ -7,43 +7,50 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\Security;
-use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
-use Symfony\Component\Security\Guard\AbstractGuardAuthenticator;
+use Symfony\Component\Security\Http\Authenticator\AbstractAuthenticator;
+use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
+use Symfony\Component\Security\Http\Authenticator\Passport\Credentials\PasswordCredentials;
+use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
+use Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface;
 use Symfony\Component\Security\Http\Util\TargetPathTrait;
 
-class DOMJudgeXHeadersAuthenticator extends AbstractGuardAuthenticator
+class DOMJudgeXHeadersAuthenticator extends AbstractAuthenticator implements AuthenticationEntryPointInterface
 {
     use TargetPathTrait;
 
-    private $security;
-    private $encoder;
-    private $config;
-    private $router;
+    private Security $security;
+    private UserProviderInterface $userProvider;
+    private UserPasswordHasherInterface $hasher;
+    private ConfigurationService $config;
+    private RouterInterface $router;
 
     /**
      * DOMJudgeXHeadersAuthenticator constructor.
      *
      * @param Security                     $security
-     * @param UserPasswordEncoderInterface $encoder
+     * @param UserProviderInterface        $userProvider
+     * @param UserPasswordHasherInterface  $hasher
      * @param ConfigurationService         $config
      * @param RouterInterface              $router
      */
     public function __construct(
         Security $security,
-        UserPasswordEncoderInterface $encoder,
+        UserProviderInterface $userProvider,
+        UserPasswordHasherInterface $hasher,
         ConfigurationService $config,
         RouterInterface $router
     ) {
-        $this->security = $security;
-        $this->encoder  = $encoder;
-        $this->config   = $config;
-        $this->router   = $router;
+        $this->security     = $security;
+        $this->userProvider = $userProvider;
+        $this->hasher       = $hasher;
+        $this->config       = $config;
+        $this->router       = $router;
     }
 
     /**
@@ -64,50 +71,39 @@ class DOMJudgeXHeadersAuthenticator extends AbstractGuardAuthenticator
         if ($this->security->getUser()) {
             return false;
         }
+
+        if (!$request->headers->has('X-DOMjudge-Login')
+            || !$request->headers->has('X-DOMjudge-Pass')) {
+            return false;
+        }
+
         // We also support authenticating if it's a POST to the login route
         if ($request->attributes->get('_route') === 'login'
             && $request->isMethod('POST')
             && $request->request->get('loginmethod') === 'xheaders') {
             return true;
         }
+
         return false;
     }
 
-    /**
-     * Called on every request. Return whatever credentials you want to
-     * be passed to getUser() as $credentials.
-     */
-    public function getCredentials(Request $request)
+    public function authenticate(Request $request): Passport
     {
-        return [
-            'username' => trim($request->headers->get('X-DOMjudge-Login')),
-            'password' => $password = base64_decode(trim($request->headers->get('X-DOMjudge-Pass'))),
-        ];
+        $username = trim($request->headers->get('X-DOMjudge-Login'));
+        $password = base64_decode(trim($request->headers->get('X-DOMjudge-Pass')));
+        return new Passport(new UserBadge($username), new PasswordCredentials($password));
     }
 
-    public function getUser($credentials, UserProviderInterface $userProvider): ?UserInterface
-    {
-        if ($credentials['username'] == null) {
-            return null;
-        }
-        return $userProvider->loadUserByUsername($credentials['username']);
-    }
-
-    public function checkCredentials($credentials, UserInterface $user): bool
-    {
-        return $this->encoder->isPasswordValid($user, $credentials['password']);
-    }
-
-    public function onAuthenticationSuccess(Request $request, TokenInterface $token, $providerKey): ?Response
+    public function onAuthenticationSuccess(Request $request, TokenInterface $token, $firewallName): ?Response
     {
         // on success, redirect to the last page or the homepage if it was a user triggered action
         if ($request->attributes->get('_route') === 'login'
             && $request->isMethod('POST')
             && $request->request->get('loginmethod') === 'xheaders') {
             // Use target URL from session if set
-            if ($providerKey !== null &&
-                $targetUrl = $this->getTargetPath($request->getSession(), $providerKey)) {
-                $this->removeTargetPath($request->getSession(), $providerKey);
+            if ($firewallName !== null &&
+                $targetUrl = $this->getTargetPath($request->getSession(), $firewallName)) {
+                $this->removeTargetPath($request->getSession(), $firewallName);
                 return new RedirectResponse($targetUrl);
             }
 
@@ -129,10 +125,5 @@ class DOMJudgeXHeadersAuthenticator extends AbstractGuardAuthenticator
         $data = ['message' => 'Authentication Required'];
 
         return new JsonResponse($data, Response::HTTP_UNAUTHORIZED);
-    }
-
-    public function supportsRememberMe(): bool
-    {
-        return false;
     }
 }

@@ -16,8 +16,8 @@ use App\Utils\Utils;
 use BadMethodCallException;
 use Doctrine\Inflector\InflectorFactory;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\RouterInterface;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
@@ -62,9 +62,9 @@ class CheckConfigService
     protected $debug;
 
     /**
-     * @var UserPasswordEncoderInterface
+     * @var UserPasswordHasherInterface
      */
-    protected $passwordEncoder;
+    protected $passwordHasher;
 
     public function __construct(
         bool $debug,
@@ -74,7 +74,7 @@ class CheckConfigService
         EventLogService $eventLogService,
         RouterInterface $router,
         ValidatorInterface $validator,
-        UserPasswordEncoderInterface $passwordEncoder
+        UserPasswordHasherInterface $passwordHasher
     ) {
         $this->debug           = $debug;
         $this->em              = $em;
@@ -83,7 +83,7 @@ class CheckConfigService
         $this->eventLogService = $eventLogService;
         $this->router          = $router;
         $this->validator       = $validator;
-        $this->passwordEncoder = $passwordEncoder;
+        $this->passwordHasher  = $passwordHasher;
     }
 
     public function runAll() : array
@@ -373,7 +373,7 @@ class CheckConfigService
         $time_start = microtime(true);
         do {
             $plainPassword = $this->randomString(12);
-            $this->passwordEncoder->encodePassword($tmp_user, $plainPassword);
+            $this->passwordHasher->hashPassword($tmp_user, $plainPassword);
             $time_end = microtime(true);
             $counter++;
         } while (($time_end - $time_start) < $time_duration_sample);
