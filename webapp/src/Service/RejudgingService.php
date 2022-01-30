@@ -202,7 +202,7 @@ class RejudgingService
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
-    public function finishRejudging(Rejudging $rejudging, string $action, callable $progressReporter = null)
+    public function finishRejudging(Rejudging $rejudging, string $action, callable $progressReporter = null): bool
     {
         // This might take a while
         ini_set('max_execution_time', '300');
@@ -378,7 +378,7 @@ class RejudgingService
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
-    public function calculateTodo(Rejudging $rejudging)
+    public function calculateTodo(Rejudging $rejudging): array
     {
         // Make sure we have the most recent data. This is necessary to
         // guarantee that repeated rejugdings are scheduled correctly.

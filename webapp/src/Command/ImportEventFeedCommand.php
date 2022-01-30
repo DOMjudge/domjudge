@@ -260,7 +260,7 @@ class ImportEventFeedCommand extends Command
      * @throws TransportExceptionInterface
      * @throws NonUniqueResultException
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         // Disable SQL logging if we do not run explicitly in debug mode.
         // This would cause a serious memory leak otherwise since this is a
@@ -503,7 +503,7 @@ class ImportEventFeedCommand extends Command
      * @return bool False if the import should stop, true otherwise.
      * @throws Exception
      */
-    protected function importFromFile(bool $fromStart, array $eventsToSkip)
+    protected function importFromFile(bool $fromStart, array $eventsToSkip): bool
     {
         $this->logger->info('Importing from local file %s', [ $this->feedFile ]);
 
@@ -569,7 +569,7 @@ class ImportEventFeedCommand extends Command
      * @return bool False if the import should stop, true otherwise.
      * @throws TransportExceptionInterface
      */
-    protected function importFromUrl(bool $fromStart, array $eventsToSkip)
+    protected function importFromUrl(bool $fromStart, array $eventsToSkip): bool
     {
         $this->logger->info(
             'Importing from URL %s. Press ^C to quit (might take a bit to be detected).',

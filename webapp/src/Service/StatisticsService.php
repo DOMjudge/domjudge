@@ -59,7 +59,7 @@ class StatisticsService
      *
      * @return ContestProblem[]
      */
-    public function getContestProblems(Contest $contest)
+    public function getContestProblems(Contest $contest): array
     {
         return $this->em->createQueryBuilder()
             ->select('cp', 'p')
@@ -78,7 +78,7 @@ class StatisticsService
      *
      * @return Team[]
      */
-    public function getTeams(Contest $contest, string $filter)
+    public function getTeams(Contest $contest, string $filter): array
     {
         if ($contest->isOpenToAllTeams()) {
             return $this->applyFilter($this->em->createQueryBuilder()
@@ -265,7 +265,7 @@ class StatisticsService
      *
      * @return array
      */
-    public function getTeamStats(Contest $contest, Team $team)
+    public function getTeamStats(Contest $contest, Team $team): array
     {
         // Get a whole bunch of judgings(and related objects)
         // Where:
@@ -566,7 +566,7 @@ class StatisticsService
      *
      * @return QueryBuilder
      */
-    protected function applyFilter(QueryBuilder $queryBuilder, string $filter)
+    protected function applyFilter(QueryBuilder $queryBuilder, string $filter): QueryBuilder
     {
         switch ($filter) {
             case 'visiblecat':
@@ -595,7 +595,7 @@ class StatisticsService
      *
      * @return int[]
      */
-    protected function getNumTestcases(Contest $contest)
+    protected function getNumTestcases(Contest $contest): array
     {
         // Need to query directly the count, otherwise symfony memory explodes
         // I think because it tries to load the testdata if you do this the naive way.
@@ -625,7 +625,7 @@ class StatisticsService
      *
      * @return array
      */
-    protected function getTeamNumSubmissions(Contest $contest, string $filter)
+    protected function getTeamNumSubmissions(Contest $contest, string $filter): array
     {
         // Figure out how many submissions each team has
         $results = $this->applyFilter($this->em->createQueryBuilder()

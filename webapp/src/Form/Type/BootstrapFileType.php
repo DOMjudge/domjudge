@@ -6,7 +6,7 @@ use Symfony\Component\Form\Extension\Core\Type\FileType;
 
 class BootstrapFileType extends FileType
 {
-    public function getBlockPrefix()
+    public function getBlockPrefix(): string
     {
         return 'bootstrap_file';
     }

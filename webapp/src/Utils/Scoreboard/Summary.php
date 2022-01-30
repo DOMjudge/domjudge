@@ -106,7 +106,7 @@ class Summary
      * @param $problemId
      * @return ProblemSummary|null
      */
-    public function getProblem($problemId)
+    public function getProblem($problemId): ?ProblemSummary
     {
         return $this->problems[$problemId] ?? null;
     }

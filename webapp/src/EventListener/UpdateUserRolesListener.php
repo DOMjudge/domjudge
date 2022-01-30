@@ -23,15 +23,15 @@ class UpdateUserRolesListener implements EventSubscriberInterface
     /**
      * @inheritDoc
      */
-    public static function getSubscribedEvents()
+    public static function getSubscribedEvents(): array
     {
         return [RequestEvent::class => 'onRequest'];
     }
 
     public function onRequest(RequestEvent $event)
     {
-        // Only handle master requests, not sub requests
-        if (!$event->isMasterRequest()) {
+        // Only handle main requests, not sub requests
+        if (!$event->isMainRequest()) {
             return;
         }
 

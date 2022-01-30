@@ -801,7 +801,7 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
      *
      * @return int|null
      */
-    public function getBronzeMedals(): int
+    public function getBronzeMedals(): ?int
     {
         return $this->bronzeMedals;
     }

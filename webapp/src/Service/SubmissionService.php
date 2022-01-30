@@ -118,7 +118,7 @@ class SubmissionService
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
-    public function getSubmissionList(array $contests, array $restrictions, int $limit = 0)
+    public function getSubmissionList(array $contests, array $restrictions, int $limit = 0): array
     {
         if (empty($contests)) {
             return [[], []];
@@ -324,7 +324,7 @@ class SubmissionService
      * @param array        $resultsPrio
      * @return string|null
      */
-    public static function getFinalResult(array $runresults, array $resultsPrio)
+    public static function getFinalResult(array $runresults, array $resultsPrio): ?string
     {
         // Whether we have NULL results.
         $haveNullResult = false;

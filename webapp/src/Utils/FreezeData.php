@@ -43,7 +43,7 @@ class FreezeData
      * @param bool $jury
      * @return bool
      */
-    public function showFinal(bool $jury = false)
+    public function showFinal(bool $jury = false): bool
     {
         if (!isset($this->cache[self::KEY_SHOW_FINAL]) ||
             !isset($this->cache[self::KEY_SHOW_FINAL_JURY])) {
@@ -72,7 +72,7 @@ class FreezeData
      * Whether to show the frozen scoreboard
      * @return bool
      */
-    public function showFrozen()
+    public function showFrozen(): bool
     {
         if (!isset($this->cache[self::KEY_SHOW_FROZEN])) {
             if (!$this->contest || !$this->contest->getStarttimeEnabled()) {
@@ -96,7 +96,7 @@ class FreezeData
      * Whether the contest has started
      * @return bool
      */
-    public function started()
+    public function started(): bool
     {
         if (!isset($this->cache[self::KEY_STARTED])) {
             if (!$this->contest || !$this->contest->getStarttimeEnabled()) {
@@ -114,7 +114,7 @@ class FreezeData
      * Whether the contest has stopped
      * @return bool
      */
-    public function stopped()
+    public function stopped(): bool
     {
         if (!isset($this->cache[self::KEY_STOPPED])) {
             if (!$this->contest || !$this->contest->getStarttimeEnabled()) {
@@ -132,7 +132,7 @@ class FreezeData
      * Whether the contest is running
      * @return bool
      */
-    public function running()
+    public function running(): bool
     {
         if (!isset($this->cache[self::KEY_RUNNING])) {
             $this->cache[self::KEY_RUNNING] = $this->started() && !$this->stopped();
@@ -146,7 +146,7 @@ class FreezeData
      * This is normally only used when we have a downstream CDS
      * @return bool
      */
-    public function finalized()
+    public function finalized(): bool
     {
         if (!isset($this->cache[self::KEY_FINALIZED])) {
             if (!$this->contest || !$this->contest->getStarttimeEnabled()) {
@@ -165,7 +165,7 @@ class FreezeData
      * Get the progress of this freezedata
      * @return int
      */
-    public function getProgress()
+    public function getProgress(): int
     {
         $now = Utils::now();
         if (!$this->started()) {

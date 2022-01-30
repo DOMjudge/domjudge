@@ -28,8 +28,8 @@ use Exception;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -70,9 +70,9 @@ class RejudgingController extends BaseController
     protected $router;
 
     /**
-     * @var SessionInterface
+     * @var RequestStack
      */
-    protected $session;
+    protected $requestStack;
 
     public function __construct(
         EntityManagerInterface $em,
@@ -80,14 +80,14 @@ class RejudgingController extends BaseController
         ConfigurationService $config,
         RejudgingService $rejudgingService,
         RouterInterface $router,
-        SessionInterface $session
+        RequestStack $requestStack
     ) {
         $this->em               = $em;
         $this->dj               = $dj;
         $this->config           = $config;
         $this->rejudgingService = $rejudgingService;
         $this->router           = $router;
-        $this->session          = $session;
+        $this->requestStack     = $requestStack;
     }
 
     /**
@@ -232,7 +232,7 @@ class RejudgingController extends BaseController
         int $rejudgingId
     ): Response {
         // Close the session, as this might take a while and we don't need the session below
-        $this->session->save();
+        $this->requestStack->getSession()->save();
 
         /** @var Rejudging $rejudging */
         $rejudging = $this->em->createQueryBuilder()

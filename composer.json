@@ -19,9 +19,9 @@
 			"type": "package",
 			"package": {
 				"name": "angel-vladov/select2-theme-bootstrap4",
-				"version": "0.2.0-beta.3",
+				"version": "1.0.0",
 				"dist": {
-					"url": "https://github.com/angel-vladov/select2-theme-bootstrap4/archive/0.2.0-beta.3.zip",
+					"url": "https://github.com/angel-vladov/select2-theme-bootstrap4/archive/1.0.0.zip",
 					"type": "zip"
 				}
 			}
@@ -39,7 +39,7 @@
 		}
 	],
 	"require": {
-		"php": "^7.2.5",
+		"php": "^7.4.0",
 		"ext-ctype": "*",
 		"ext-curl": "*",
 		"ext-fileinfo": "*",
@@ -51,59 +51,62 @@
 		"ext-mysqli": "*",
 		"ext-pcntl": "*",
 		"ext-zip": "*",
-		"angel-vladov/select2-theme-bootstrap4": "0.2.0-beta.3",
+		"angel-vladov/select2-theme-bootstrap4": "1.0.0",
 		"components/flag-icon-css": "^3.5",
-		"components/jquery": "^3.3",
+		"components/jquery": "^3.6",
 		"datatables/datatables": "^1.10",
-		"doctrine/doctrine-bundle": "^2.0",
-		"doctrine/doctrine-fixtures-bundle": "^3.2",
-		"doctrine/doctrine-migrations-bundle": "^2.0",
-		"doctrine/orm": "^2.6",
+		"doctrine/doctrine-bundle": "^2.5",
+		"doctrine/doctrine-fixtures-bundle": "^3.4",
+		"doctrine/doctrine-migrations-bundle": "^2.2",
+		"doctrine/orm": "^2.11",
 		"eligrey/filesaver": "2.*",
-		"endclothing/prometheus_client_php": "^0.9.1",
+		"endclothing/prometheus_client_php": "^1.0",
 		"fortawesome/font-awesome": "5.*",
-		"friendsofsymfony/rest-bundle": "^3.0",
+		"friendsofsymfony/rest-bundle": "^3.1",
 		"ircmaxell/password-compat": "*",
-		"jms/serializer-bundle": "^3.4",
+		"jms/serializer-bundle": "^4.0",
 		"mbostock/d3": "^3.5",
-		"nelmio/api-doc-bundle": "^4.2",
+		"nelmio/api-doc-bundle": "^4.8",
 		"novus/nvd3": "^1.8",
 		"phpunit/phpunit": "~8.4",
 		"ramsey/uuid": "^4.2",
 		"sebastian/diff": "^3.0",
 		"select2/select2": "4.*",
-		"sensio/framework-extra-bundle": "^5.4.0",
-		"symfony/asset": "4.4.*",
-		"symfony/browser-kit": "4.4.*",
-		"symfony/console": "4.4.*",
-		"symfony/css-selector": "4.4.*",
-		"symfony/dotenv": "4.4.*",
-		"symfony/expression-language": "4.4.*",
+		"sensio/framework-extra-bundle": "^6.0.0",
+		"symfony/asset": "5.4.*",
+		"symfony/browser-kit": "5.4.*",
+		"symfony/console": "5.4.*",
+		"symfony/css-selector": "5.4.*",
+		"symfony/dotenv": "5.4.*",
+		"symfony/expression-language": "5.4.*",
 		"symfony/flex": "^1.4",
-		"symfony/form": "4.4.*",
-		"symfony/framework-bundle": "4.4.*",
-		"symfony/http-client": "4.4.*",
+		"symfony/form": "5.4.*",
+		"symfony/framework-bundle": "5.4.*",
+		"symfony/http-client": "5.4.*",
+		"symfony/inflector": "5.4.*",
+		"symfony/intl": "5.4.*",
+		"symfony/mime": "5.4.*",
 		"symfony/monolog-bundle": "^3.4.0",
-		"symfony/security-bundle": "4.4.*",
-		"symfony/security-csrf": "4.4.*",
-		"symfony/stopwatch": "4.4.*",
-		"symfony/twig-bundle": "^4.4",
-		"symfony/validator": "4.4.*",
-		"symfony/web-profiler-bundle": "4.4.*",
-		"symfony/yaml": "4.4.*",
-		"twbs/bootstrap": "^4.3.0",
+		"symfony/security-bundle": "5.4.*",
+		"symfony/security-csrf": "5.4.*",
+		"symfony/stopwatch": "5.4.*",
+		"symfony/twig-bundle": "5.4.*",
+		"symfony/validator": "5.4.*",
+		"symfony/web-profiler-bundle": "5.4.*",
+		"symfony/yaml": "5.4.*",
+		"twbs/bootstrap": "^4.6.0",
 		"twig/extra-bundle": "^3.3",
 		"twig/string-extra": "^3.3",
-		"twig/twig": "^2.11"
+		"twig/twig": "^3.0"
 	},
 	"require-dev": {
 		"ext-dom": "*",
-		"dama/doctrine-test-bundle": "^6.5",
+		"dama/doctrine-test-bundle": "^6.7",
 		"squizlabs/php_codesniffer": "*",
-		"symfony/debug-bundle": "4.4.*",
+		"symfony/debug-bundle": "5.4.*",
 		"symfony/maker-bundle": "^1.13",
-		"symfony/phpunit-bridge": "^4.4",
-		"symfony/var-dumper": "4.4.*"
+		"symfony/phpunit-bridge": "5.4.*",
+		"symfony/var-dumper": "5.4.*"
 	},
 	"autoload": {
 		"psr-4": {
@@ -121,7 +124,7 @@
 		},
 		"sort-packages": true,
 		"platform": {
-			"php": "7.2.5"
+			"php": "7.4.0"
 		},
 		"vendor-dir": "lib/vendor",
 		"component-dir": "lib/vendor/components",
@@ -158,7 +161,7 @@
 		"symfony": {
 			"root-dir": "webapp/",
 			"allow-contrib": true,
-			"require": "4.4.*"
+			"require": "5.4.*"
 		}
 	}
 }

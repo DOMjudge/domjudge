@@ -39,7 +39,7 @@ class OrdinalItem
     /**
      * @return object
      */
-    public function getItem()
+    public function getItem(): object
     {
         return $this->item;
     }

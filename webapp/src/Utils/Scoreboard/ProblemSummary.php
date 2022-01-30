@@ -55,7 +55,7 @@ class ProblemSummary
      * @param int $sortorder
      * @return int|null
      */
-    public function getBestTimeInMinutes(int $sortorder)
+    public function getBestTimeInMinutes(int $sortorder): ?int
     {
         if (isset($this->bestTimes[$sortorder])) {
             return ((int)($this->bestTimes[$sortorder] / 60));

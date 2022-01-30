@@ -94,7 +94,7 @@ class RunController extends AbstractRestController implements QueryObjectTransfo
      * )
      * @throws NonUniqueResultException
      */
-    public function listAction(Request $request)
+    public function listAction(Request $request): Response
     {
         return parent::performListAction($request);
     }

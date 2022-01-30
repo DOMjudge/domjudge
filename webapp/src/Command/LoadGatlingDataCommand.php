@@ -28,7 +28,7 @@ class LoadGatlingDataCommand extends Command
      * @inheritDoc
      * @throws Exception
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $command   = $this->getApplication()->find('doctrine:fixtures:load');
         $arguments = [

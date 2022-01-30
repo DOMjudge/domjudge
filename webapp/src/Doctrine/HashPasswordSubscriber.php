@@ -21,7 +21,7 @@ class HashPasswordSubscriber implements EventSubscriber
         $this->passwordEncoder = $passwordEncoder;
     }
 
-    public function getSubscribedEvents()
+    public function getSubscribedEvents(): array
     {
         return [Events::prePersist, Events::preUpdate];
     }

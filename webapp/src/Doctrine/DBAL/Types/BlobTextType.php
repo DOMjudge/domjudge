@@ -15,7 +15,7 @@ use Doctrine\DBAL\Types\TextType;
  */
 class BlobTextType extends TextType
 {
-    public function getName()
+    public function getName(): string
     {
         return 'blobtext';
     }
@@ -23,7 +23,7 @@ class BlobTextType extends TextType
     /**
      * @inheritDoc
      */
-    public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform)
+    public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform): string
     {
         return $platform->getBlobTypeDeclarationSQL($fieldDeclaration);
     }
@@ -31,7 +31,7 @@ class BlobTextType extends TextType
     /**
      * @inheritDoc
      */
-    public function requiresSQLCommentHint(AbstractPlatform $platform)
+    public function requiresSQLCommentHint(AbstractPlatform $platform): bool
     {
         return true;
     }

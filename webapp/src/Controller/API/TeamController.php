@@ -202,7 +202,6 @@ class TeamController extends AbstractRestController
      *     )
      * )
      * @IsGranted("ROLE_ADMIN")
-     * @OA\Response(response="400", description="Invalid data provided")
      * @OA\Response(response="204", description="Setting photo succeeded")
      * @OA\Parameter(ref="#/components/parameters/id")
      */

@@ -37,7 +37,7 @@ class UserStateUpdater implements EventSubscriberInterface
     /**
      * @inheritDoc
      */
-    public static function getSubscribedEvents()
+    public static function getSubscribedEvents(): array
     {
         return [AuthenticationSuccessEvent::class => 'updateUserState'];
     }

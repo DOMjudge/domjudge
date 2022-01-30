@@ -184,7 +184,7 @@ class ICPCCmsService
      * @param string|null $message
      * @return bool
      */
-    public function uploadStandings(string $token, string $contest, string &$message = null)
+    public function uploadStandings(string $token, string $contest, string &$message = null): bool
     {
         // TODO: reimplement
 
@@ -203,7 +203,7 @@ class ICPCCmsService
      * @throws TransportExceptionInterface
      * @throws DecodingExceptionInterface
      */
-    protected function getBearerToken(string $token, string &$message = null)
+    protected function getBearerToken(string $token, string &$message = null): ?string
     {
         $response = $this->client->request('POST', self::WS_TOKEN_URL, [
             'body' => [

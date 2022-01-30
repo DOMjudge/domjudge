@@ -14,7 +14,7 @@ class UsernamePasswordFormAuthenticationListener extends BaseUsernamePasswordFor
     /**
      * @inheritDoc
      */
-    protected function requiresAuthentication(Request $request)
+    protected function requiresAuthentication(Request $request): bool
     {
         // Disable the check when logging in with a custom authentication method
         if ($request->attributes->get('_route') === 'login'

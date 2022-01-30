@@ -28,7 +28,7 @@ class JudgeTaskType extends Type
     /**
      * @inheritDoc
      */
-    public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform)
+    public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform): string
     {
         $statuses = implode(', ', array_map(function (string $status) {
             return sprintf("'%s'", $status);
@@ -58,7 +58,7 @@ class JudgeTaskType extends Type
     /**
      * @inheritDoc
      */
-    public function getName()
+    public function getName(): string
     {
         return self::ENUM_JUDGE_TASK_TYPE;
     }
@@ -66,7 +66,7 @@ class JudgeTaskType extends Type
     /**
      * @inheritDoc
      */
-    public function requiresSQLCommentHint(AbstractPlatform $platform)
+    public function requiresSQLCommentHint(AbstractPlatform $platform): bool
     {
         return true;
     }
