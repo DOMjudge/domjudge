@@ -8,7 +8,7 @@ use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 use Exception;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class UserFixture extends AbstractDefaultDataFixture implements DependentFixtureInterface
 {
@@ -23,20 +23,20 @@ class UserFixture extends AbstractDefaultDataFixture implements DependentFixture
     protected $logger;
 
     /**
-     * @var UserPasswordEncoderInterface
+     * @var UserPasswordHasherInterface
      */
-    protected $passwordEncoder;
+    protected $passwordHasher;
 
     /**
      * @var bool
      */
     protected $debug;
 
-    public function __construct(DOMJudgeService $dj, LoggerInterface $logger, UserPasswordEncoderInterface $passwordEncoder, bool $debug)
+    public function __construct(DOMJudgeService $dj, LoggerInterface $logger, UserPasswordHasherInterface $passwordHasher, bool $debug)
     {
         $this->dj              = $dj;
         $this->logger          = $logger;
-        $this->passwordEncoder = $passwordEncoder;
+        $this->passwordHasher  = $passwordHasher;
         $this->debug           = $debug;
     }
 
@@ -62,7 +62,7 @@ class UserFixture extends AbstractDefaultDataFixture implements DependentFixture
             $adminUser
                 ->setUsername('admin')
                 ->setName('Administrator')
-                ->setPassword($this->passwordEncoder->encodePassword($adminUser, trim($adminpasswordContents)))
+                ->setPassword($this->passwordHasher->hashPassword($adminUser, trim($adminpasswordContents)))
                 ->addUserRole($this->getReference(RoleFixture::ADMIN_REFERENCE));
             if ($this->debug) {
                 $domjudgeTeam = $this->getReference(TeamFixture::DOMJUDGE_REFERENCE);
@@ -80,7 +80,7 @@ class UserFixture extends AbstractDefaultDataFixture implements DependentFixture
             $judgehostUser
                 ->setUsername('judgehost')
                 ->setName('User for judgedaemons')
-                ->setPassword($this->passwordEncoder->encodePassword($judgehostUser, $this->getRestapiPassword()))
+                ->setPassword($this->passwordHasher->hashPassword($judgehostUser, $this->getRestapiPassword()))
                 ->addUserRole($this->getReference(RoleFixture::JUDGEHOST_REFERENCE));
             $manager->persist($judgehostUser);
         } else {

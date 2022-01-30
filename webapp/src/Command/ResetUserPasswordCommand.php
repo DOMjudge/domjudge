@@ -10,7 +10,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 /**
  * Class ResetUserPasswordCommand
@@ -22,23 +22,16 @@ class ResetUserPasswordCommand extends Command
     const STATUS_OK = 0;
     const STATUS_ERROR = 1;
 
-    /**
-     * @var EntityManagerInterface
-     */
-    protected $em;
-
-    /**
-     * @var UserPasswordEncoderInterface
-     */
-    protected $passwordEncoder;
+    protected EntityManagerInterface $em;
+    protected UserPasswordHasherInterface $passwordHasher;
 
     public function __construct(
         EntityManagerInterface $em,
-        UserPasswordEncoderInterface $passwordEncoder
+        UserPasswordHasherInterface $passwordHasher
     ) {
         parent::__construct();
         $this->em = $em;
-        $this->passwordEncoder = $passwordEncoder;
+        $this->passwordHasher = $passwordHasher;
     }
 
     protected function configure(): void
@@ -70,7 +63,7 @@ class ResetUserPasswordCommand extends Command
         $password = Utils::generatePassword();
 
         $user->setPassword(
-            $this->passwordEncoder->encodePassword($user, $password)
+            $this->passwordHasher->hashPassword($user, $password)
         );
         $this->em->flush();
 

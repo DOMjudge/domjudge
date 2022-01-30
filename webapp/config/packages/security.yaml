@@ -1,13 +1,14 @@
 # To get started with security, check out the documentation:
 # https://symfony.com/doc/current/security.html
 security:
+    enable_authenticator_manager: true
     role_hierarchy:
         ROLE_JURY: [ROLE_CLARIFICATION_RW, ROLE_API, ROLE_API_READER, ROLE_API_SOURCE_READER]
         ROLE_ADMIN: [ROLE_JURY, ROLE_JUDGEHOST, ROLE_API_WRITER]
         ROLE_SUPER_ADMIN: [ROLE_ADMIN, ROLE_ALLOWED_TO_SWITCH]
 
 
-    encoders:
+    password_hashers:
         App\Entity\User:
             algorithm: 'bcrypt'
             cost: 7
@@ -19,7 +20,7 @@ security:
 
 
     firewalls:
-        # NOTE: If you change anything in this section, or move the guard authenticators around
+        # NOTE: If you change anything in this section, or move the authenticators around
         # NOTE: make sure to update the $stateless_fw_contexts variables in each guard authenticator
         # NOTE: Otherwise they may not be enabled.
 
@@ -35,13 +36,11 @@ security:
             provider: domjudge_db_provider
             stateless: true
             user_checker: App\Security\UserChecker
-            anonymous: ~
-            guard:
-                # SEE NOTE ABOVE IF CHANGING ANYTHING HERE
-                authenticators:
-                    - App\Security\DOMJudgeIPAuthenticator
-                    - App\Security\DOMJudgeBasicAuthenticator
-                entry_point: App\Security\DOMJudgeIPAuthenticator
+            entry_point: App\Security\DOMJudgeIPAuthenticator
+            # SEE NOTE ABOVE IF CHANGING ANYTHING HERE
+            custom_authenticators:
+                - App\Security\DOMJudgeIPAuthenticator
+                - App\Security\DOMJudgeBasicAuthenticator
 
         # Provides prometheus metrics
         metrics:
@@ -49,28 +48,25 @@ security:
             provider: domjudge_db_provider
             stateless: true
             user_checker: App\Security\UserChecker
-            guard:
-                # SEE NOTE ABOVE IF CHANGING ANYTHING HERE
-                authenticators:
-                    - App\Security\DOMJudgeIPAuthenticator
-                    - App\Security\DOMJudgeBasicAuthenticator
-                entry_point: App\Security\DOMJudgeIPAuthenticator
+            entry_point: App\Security\DOMJudgeIPAuthenticator
+            # SEE NOTE ABOVE IF CHANGING ANYTHING HERE
+            custom_authenticators:
+                - App\Security\DOMJudgeIPAuthenticator
+                - App\Security\DOMJudgeBasicAuthenticator
 
         # rest of app does form_login
         main:
             pattern: ^/
             provider: domjudge_db_provider
             user_checker: App\Security\UserChecker
-            guard:
-                authenticators:
-                    - App\Security\DOMJudgeXHeadersAuthenticator
-                    - App\Security\DOMJudgeIPAuthenticator
-                entry_point: App\Security\DOMJudgeXHeadersAuthenticator
-            anonymous: ~
+            entry_point: App\Security\DOMJudgeXHeadersAuthenticator
+            custom_authenticators:
+                - App\Security\DOMJudgeXHeadersAuthenticator
+                - App\Security\DOMJudgeIPAuthenticator
             form_login:
                 login_path: login
                 check_path: login
-                csrf_token_generator: security.csrf.token_manager
+                enable_csrf: true
                 use_referer: true
 
             logout:
@@ -78,9 +74,9 @@ security:
                 target: /public
 
     access_control:
-        - { path: ^/$, roles: IS_AUTHENTICATED_ANONYMOUSLY }
-        - { path: ^/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
-        - { path: ^/register, roles: IS_AUTHENTICATED_ANONYMOUSLY }
-        - { path: ^/public, roles: IS_AUTHENTICATED_ANONYMOUSLY }
-        - { path: ^/api, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/$, roles: PUBLIC_ACCESS }
+        - { path: ^/login, roles: PUBLIC_ACCESS }
+        - { path: ^/register, roles: PUBLIC_ACCESS }
+        - { path: ^/public, roles: PUBLIC_ACCESS }
+        - { path: ^/api, roles: PUBLIC_ACCESS }
         - { path: ^/, roles: IS_AUTHENTICATED_FULLY }
