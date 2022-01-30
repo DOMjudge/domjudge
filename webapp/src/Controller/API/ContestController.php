@@ -41,7 +41,6 @@ use Symfony\Component\Yaml\Yaml;
  * @OA\Tag(name="Contests")
  * @OA\Response(response="404", ref="#/components/responses/NotFound")
  * @OA\Response(response="401", ref="#/components/responses/Unauthorized")
- * @OA\Response(response="400", ref="#/components/responses/InvalidResponse")
  */
 class ContestController extends AbstractRestController
 {
@@ -259,7 +258,6 @@ class ContestController extends AbstractRestController
      *     )
      * )
      * @IsGranted("ROLE_ADMIN")
-     * @OA\Response(response="400", description="Invalid data provided")
      * @OA\Response(response="204", description="Setting banner succeeded")
      * @OA\Parameter(ref="#/components/parameters/id")
      */

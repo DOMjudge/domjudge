@@ -24,7 +24,7 @@ class JsonType extends BaseJsonType
     /**
      * @inheritDoc
      */
-    public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform)
+    public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform): string
     {
         if (!empty($fieldDeclaration['length'])) {
             if ($fieldDeclaration['length'] <= 255) {
@@ -57,7 +57,7 @@ class JsonType extends BaseJsonType
     /**
      * @inheritDoc
      */
-    public function requiresSQLCommentHint(AbstractPlatform $platform)
+    public function requiresSQLCommentHint(AbstractPlatform $platform): bool
     {
         return true;
     }

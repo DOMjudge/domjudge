@@ -50,7 +50,7 @@ class CheckDatabaseConfigurationDefaultValuesCommand extends Command
      * @inheritDoc
      * @throws \Exception
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $style    = new SymfonyStyle($input, $output);
         $messages = [];

@@ -25,7 +25,7 @@ use Twig\Extension\AbstractExtension;
 use Twig\Extension\GlobalsInterface;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
-use Twig_Environment as Environment;
+use Twig\Environment;
 
 class TwigExtension extends AbstractExtension implements GlobalsInterface
 {
@@ -109,7 +109,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         $this->projectDir           = $projectDir;
     }
 
-    public function getFunctions()
+    public function getFunctions(): array
     {
         return [
             new TwigFunction('button', [$this, 'button'], ['is_safe' => ['html']]),
@@ -120,7 +120,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         ];
     }
 
-    public function getFilters()
+    public function getFilters(): array
     {
         return [
             new TwigFilter('printtimediff', [$this, 'printtimediff']),
@@ -164,7 +164,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         ];
     }
 
-    public function getGlobals()
+    public function getGlobals(): array
     {
         $refresh_cookie = $this->dj->getCookie("domjudge_refresh");
         $refresh_flag   = ($refresh_cookie == null || (bool)$refresh_cookie);
@@ -408,7 +408,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
      * @param bool       $external If true, show external testcase results
      * @return string
      */
-    public function testcaseResults(Submission $submission, bool $external = false)
+    public function testcaseResults(Submission $submission, bool $external = false): string
     {
         // We use a direct SQL query here for performance reasons
         if ($external) {
@@ -486,7 +486,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
      * @param bool       $isExternal
      * @return string
      */
-    public function displayTestcaseResults(array $testcases, bool $submissionDone, bool $isExternal = false)
+    public function displayTestcaseResults(array $testcases, bool $submissionDone, bool $isExternal = false): string
     {
         $results = '';
         $lastTypeSample = true;
@@ -640,7 +640,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
      * @return string|null
      * @throws \Exception
      */
-    public function externalCcsUrl(Submission $submission)
+    public function externalCcsUrl(Submission $submission): ?string
     {
         $extCcsUrl = $this->config->get('external_ccs_submission_url');
         if (!empty($extCcsUrl)) {
@@ -857,7 +857,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
      * @return string
      * @throws \Exception
      */
-    public function runDiff(array $runOutput)
+    public function runDiff(array $runOutput): string
     {
         // TODO: can be improved using diffposition.txt
         // FIXME: only show when diffposition.txt is set?
@@ -965,7 +965,7 @@ JS;
      * @param $difftext
      * @return string
      */
-    protected function parseSourceDiff($difftext)
+    protected function parseSourceDiff($difftext): string
     {
         $line   = strtok((string)$difftext, "\n"); // first line
         $return = '';
@@ -994,7 +994,7 @@ JS;
      * @param SubmissionFile $oldFile
      * @return string
      */
-    public function showDiff(SubmissionFile $newFile, SubmissionFile $oldFile)
+    public function showDiff(SubmissionFile $newFile, SubmissionFile $oldFile): string
     {
         $differ = new Differ;
         return $this->parseSourceDiff($differ->diff($oldFile->getSourcecode(), $newFile->getSourcecode()));
@@ -1081,7 +1081,7 @@ JS;
      * @return int
      * @throws \Exception
      */
-    public function scoreTime($time)
+    public function scoreTime($time): int
     {
         return Utils::scoretime($time, (bool)$this->config->get('score_in_seconds'));
     }
@@ -1093,7 +1093,7 @@ JS;
      * @return int
      * @throws \Exception
      */
-    public function calculatePenaltyTime(bool $solved, int $num_submissions)
+    public function calculatePenaltyTime(bool $solved, int $num_submissions): int
     {
         return Utils::calcPenaltyTime($solved, $num_submissions, (int)$this->config->get('penalty_time'),
                                       (bool)$this->config->get('score_in_seconds'));
@@ -1134,7 +1134,7 @@ EOF;
      * @return bool
      * @throws \Exception
      */
-    public function showExternalId($entity): Bool
+    public function showExternalId($entity): bool
     {
         return $this->eventLogService->externalIdFieldForEntity($entity) !== null;
     }
@@ -1190,7 +1190,7 @@ EOF;
      *
      * @return string
      */
-    public function toTsvField(string $field)
+    public function toTsvField(string $field): string
     {
         return Utils::toTsvField($field);
     }
@@ -1202,7 +1202,7 @@ EOF;
      *
      * @return string
      */
-    public function fileTypeIcon(string $type)
+    public function fileTypeIcon(string $type): string
     {
         switch ($type) {
             case 'pdf':

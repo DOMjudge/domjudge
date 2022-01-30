@@ -16,7 +16,7 @@ class BinaryJsonType extends JsonType
     /**
      * @inheritDoc
      */
-    public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform)
+    public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform): string
     {
         return 'LONGBLOB';
     }
@@ -24,7 +24,7 @@ class BinaryJsonType extends JsonType
     /**
      * @inheritDoc
      */
-    public function getName()
+    public function getName(): string
     {
         return 'binaryjson';
     }

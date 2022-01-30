@@ -135,7 +135,7 @@ class ScoreboardService
      * @return Scoreboard|null
      * @throws \Exception
      */
-    public function getTeamScoreboard(Contest $contest, int $teamId, bool $showFtsInFreeze = true)
+    public function getTeamScoreboard(Contest $contest, int $teamId, bool $showFtsInFreeze = true): ?Scoreboard
     {
         $freezeData = new FreezeData($contest);
 
@@ -761,7 +761,7 @@ class ScoreboardService
      * @param Response|null $response
      * @return Filter
      */
-    public function initializeScoreboardFilter(Request $request, Response $response)
+    public function initializeScoreboardFilter(Request $request, Response $response): Filter
     {
         $scoreFilter = [];
         if ($this->dj->getCookie('domjudge_scorefilter')) {
@@ -800,7 +800,7 @@ class ScoreboardService
      * @param Contest $contest
      * @return array
      */
-    public function getGroupedAffiliations(Contest $contest)
+    public function getGroupedAffiliations(Contest $contest): array
     {
         $queryBuilder = $this->em->createQueryBuilder()
             ->from(TeamCategory::class, 'cat')
@@ -988,7 +988,7 @@ class ScoreboardService
      * @param Filter|null $filter
      * @return Team[]
      */
-    protected function getTeams(Contest $contest, bool $jury = false, Filter $filter = null)
+    protected function getTeams(Contest $contest, bool $jury = false, Filter $filter = null): array
     {
         $queryBuilder = $this->em->createQueryBuilder()
             ->from(Team::class, 't', 't.teamid')
@@ -1047,7 +1047,7 @@ class ScoreboardService
      * @param Contest $contest
      * @return ContestProblem[]
      */
-    protected function getProblems(Contest $contest)
+    protected function getProblems(Contest $contest): array
     {
         $queryBuilder = $this->em->createQueryBuilder()
             ->from(ContestProblem::class, 'cp')
@@ -1086,7 +1086,7 @@ class ScoreboardService
      * @param bool $jury
      * @return TeamCategory[]
      */
-    protected function getCategories(bool $jury)
+    protected function getCategories(bool $jury): array
     {
         $queryBuilder = $this->em->createQueryBuilder()
             ->from(TeamCategory::class, 'cat', 'cat.categoryid')
@@ -1108,7 +1108,7 @@ class ScoreboardService
      * @param Team|null $team
      * @return ScoreCache[]
      */
-    protected function getScorecache(Contest $contest, Team $team = null)
+    protected function getScorecache(Contest $contest, Team $team = null): array
     {
         $queryBuilder = $this->em->createQueryBuilder()
             ->from(ScoreCache::class, 's')
@@ -1132,7 +1132,7 @@ class ScoreboardService
      * @return RankCache|null
      * @throws NonUniqueResultException
      */
-    protected function getRankcache(Contest $contest, Team $team)
+    protected function getRankcache(Contest $contest, Team $team): ?RankCache
     {
         $queryBuilder = $this->em->createQueryBuilder()
             ->from(RankCache::class, 'r')

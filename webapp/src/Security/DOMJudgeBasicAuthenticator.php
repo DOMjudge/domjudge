@@ -35,7 +35,7 @@ class DOMJudgeBasicAuthenticator extends AbstractGuardAuthenticator
      * used for the request. Returning false will cause this authenticator
      * to be skipped.
      */
-    public function supports(Request $request)
+    public function supports(Request $request): bool
     {
         // if there is already an authenticated user (likely due to the session)
         // then return null and skip authentication: there is no need.
@@ -73,7 +73,7 @@ class DOMJudgeBasicAuthenticator extends AbstractGuardAuthenticator
         ];
     }
 
-    public function getUser($credentials, UserProviderInterface $userProvider)
+    public function getUser($credentials, UserProviderInterface $userProvider): ?UserInterface
     {
         if ($credentials['username'] === null) {
             return null;
@@ -81,18 +81,18 @@ class DOMJudgeBasicAuthenticator extends AbstractGuardAuthenticator
         return $userProvider->loadUserByUsername($credentials['username']);
     }
 
-    public function checkCredentials($credentials, UserInterface $user)
+    public function checkCredentials($credentials, UserInterface $user): bool
     {
         return $this->encoder->isPasswordValid($user, $credentials['password']);
     }
 
-    public function onAuthenticationSuccess(Request $request, TokenInterface $token, $providerKey)
+    public function onAuthenticationSuccess(Request $request, TokenInterface $token, $providerKey): ?Response
     {
         // on success, let the request continue
         return null;
     }
 
-    public function onAuthenticationFailure(Request $request, AuthenticationException $exception)
+    public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response
     {
         # We only throw an error if the credentials provided were wrong or the user doesn't exist
         # Otherwise we pass along to the next authenticator
@@ -109,14 +109,14 @@ class DOMJudgeBasicAuthenticator extends AbstractGuardAuthenticator
     /**
      * Called when authentication is needed, but it's not sent
      */
-    public function start(Request $request, AuthenticationException $authException = null)
+    public function start(Request $request, AuthenticationException $authException = null): Response
     {
         $resp = new Response('', Response::HTTP_UNAUTHORIZED);
         $resp->headers->set('WWW-Authenticate', sprintf('Basic realm="%s"', 'Secured Area'));
         return $resp;
     }
 
-    public function supportsRememberMe()
+    public function supportsRememberMe(): bool
     {
         return false;
     }

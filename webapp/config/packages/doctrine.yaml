@@ -8,7 +8,6 @@ doctrine:
             collate: utf8mb4_unicode_ci
 
         url: '%env(resolve:DATABASE_URL)%'
-        override_url: true
         types:
             tinyint: App\Doctrine\DBAL\Types\TinyIntType
             blobtext: App\Doctrine\DBAL\Types\BlobTextType

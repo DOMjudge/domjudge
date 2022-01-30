@@ -16,8 +16,8 @@ use App\Service\SubmissionService;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -42,9 +42,9 @@ class ShadowDifferencesController extends BaseController
     protected $submissions;
 
     /**
-     * @var SessionInterface
+     * @var RequestStack
      */
-    protected $session;
+    protected $requestStack;
 
     /**
      * @var EntityManagerInterface
@@ -55,14 +55,14 @@ class ShadowDifferencesController extends BaseController
         DOMJudgeService $dj,
         ConfigurationService $config,
         SubmissionService $submissions,
-        SessionInterface $session,
+        RequestStack $requestStack,
         EntityManagerInterface $em
     ) {
-        $this->dj          = $dj;
-        $this->config      = $config;
-        $this->submissions = $submissions;
-        $this->session     = $session;
-        $this->em          = $em;
+        $this->dj           = $dj;
+        $this->config       = $config;
+        $this->submissions  = $submissions;
+        $this->requestStack = $requestStack;
+        $this->em           = $em;
     }
 
     /**
@@ -89,7 +89,7 @@ class ShadowDifferencesController extends BaseController
         }
 
         // Close the session, as this might take a while and we don't need the session below
-        $this->session->save();
+        $this->requestStack->getSession()->save();
 
         $contest        = $this->dj->getCurrentContest();
         $verdictsConfig = $this->dj->getDomjudgeEtcDir() . '/verdicts.php';

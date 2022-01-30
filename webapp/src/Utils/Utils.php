@@ -935,7 +935,7 @@ class Utils
      *
      * @return array
      */
-    public static function reindex(array $array, callable $callback)
+    public static function reindex(array $array, callable $callback): array
     {
         $reindexed = [];
         array_walk($array, function ($item, $key) use (&$reindexed, $callback) {

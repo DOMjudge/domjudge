@@ -85,7 +85,7 @@ class ImportExportService
      * @return array
      * @throws Exception
      */
-    public function getContestYamlData(Contest $contest)
+    public function getContestYamlData(Contest $contest): array
     {
         // TODO: it seems we dump contest.yaml and system.yaml and problemset.yaml in one here?
 
@@ -400,7 +400,7 @@ class ImportExportService
      * @return array
      * @throws Exception
      */
-    public function getResultsData(int $sortOrder)
+    public function getResultsData(int $sortOrder): array
     {
         // we'll here assume that the requested file will be of the current contest,
         // as all our scoreboard interfaces do

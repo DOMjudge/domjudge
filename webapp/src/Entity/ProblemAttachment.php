@@ -116,7 +116,7 @@ class ProblemAttachment
      *
      * @return ProblemAttachmentContent
      */
-    public function getContent(): ?ProblemAttachmentContent
+    public function getContent(): ProblemAttachmentContent
     {
         return $this->content->first() ?: null;
     }

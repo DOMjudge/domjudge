@@ -789,7 +789,7 @@ class EventLogService implements ContainerAwareInterface
      * @return bool True if and only if all references are present
      * @throws Exception
      */
-    protected function hasAllDependentObjectEvents(Contest $contest, string $type, array $data)
+    protected function hasAllDependentObjectEvents(Contest $contest, string $type, array $data): bool
     {
         // Build up the referenced data to check for
         $toCheck = [
@@ -863,7 +863,7 @@ class EventLogService implements ContainerAwareInterface
      * @param Event[] $events
      * @return Event[]
      */
-    protected function getExistingEvents(array $events)
+    protected function getExistingEvents(array $events): array
     {
         $endpointIds = array_map(function(Event $event) {
             return $event->getEndpointid();
@@ -964,7 +964,7 @@ class EventLogService implements ContainerAwareInterface
      * @return string|null
      * @throws Exception
      */
-    public function externalIdFieldForEntity($entity)
+    public function externalIdFieldForEntity($entity): ?string
     {
         // Allow to pass in a class instance: convert it to its class type
         if (is_object($entity)) {
@@ -1020,7 +1020,7 @@ class EventLogService implements ContainerAwareInterface
      * @return string
      * @throws Exception
      */
-    public function apiIdFieldForEntity($entity)
+    public function apiIdFieldForEntity($entity): string
     {
         if ($field = $this->externalIdFieldForEntity($entity)) {
             return $field;
@@ -1039,7 +1039,7 @@ class EventLogService implements ContainerAwareInterface
      * @param object|string $entity
      * @return string|null
      */
-    public function endpointForEntity($entity)
+    public function endpointForEntity($entity): ?string
     {
         // Allow to pass in a class instance: convert it to its class type
         if (is_object($entity)) {

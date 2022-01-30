@@ -51,7 +51,7 @@ class DOMJudgeXHeadersAuthenticator extends AbstractGuardAuthenticator
      * used for the request. Returning false will cause this authenticator
      * to be skipped.
      */
-    public function supports(Request $request)
+    public function supports(Request $request): bool
     {
         $authmethods = $this->config->get('auth_methods');
         $auth_allow_xheaders = in_array('xheaders', $authmethods);
@@ -85,7 +85,7 @@ class DOMJudgeXHeadersAuthenticator extends AbstractGuardAuthenticator
         ];
     }
 
-    public function getUser($credentials, UserProviderInterface $userProvider)
+    public function getUser($credentials, UserProviderInterface $userProvider): ?UserInterface
     {
         if ($credentials['username'] == null) {
             return null;
@@ -93,12 +93,12 @@ class DOMJudgeXHeadersAuthenticator extends AbstractGuardAuthenticator
         return $userProvider->loadUserByUsername($credentials['username']);
     }
 
-    public function checkCredentials($credentials, UserInterface $user)
+    public function checkCredentials($credentials, UserInterface $user): bool
     {
         return $this->encoder->isPasswordValid($user, $credentials['password']);
     }
 
-    public function onAuthenticationSuccess(Request $request, TokenInterface $token, $providerKey)
+    public function onAuthenticationSuccess(Request $request, TokenInterface $token, $providerKey): ?Response
     {
         // on success, redirect to the last page or the homepage if it was a user triggered action
         if ($request->attributes->get('_route') === 'login'
@@ -116,7 +116,7 @@ class DOMJudgeXHeadersAuthenticator extends AbstractGuardAuthenticator
         return null;
     }
 
-    public function onAuthenticationFailure(Request $request, AuthenticationException $exception)
+    public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response
     {
         return null;
     }
@@ -124,14 +124,14 @@ class DOMJudgeXHeadersAuthenticator extends AbstractGuardAuthenticator
     /**
      * Called when authentication is needed, but it's not sent
      */
-    public function start(Request $request, AuthenticationException $authException = null)
+    public function start(Request $request, AuthenticationException $authException = null): Response
     {
         $data = ['message' => 'Authentication Required'];
 
         return new JsonResponse($data, Response::HTTP_UNAUTHORIZED);
     }
 
-    public function supportsRememberMe()
+    public function supportsRememberMe(): bool
     {
         return false;
     }

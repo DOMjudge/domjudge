@@ -161,7 +161,7 @@ class ScoreboardMergeCommand extends Command
      * @throws SyntaxError
      * @throws Exception
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $style = new SymfonyStyle($input, $output);
         $teams = [];

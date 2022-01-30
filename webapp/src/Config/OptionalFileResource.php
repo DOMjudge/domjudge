@@ -35,7 +35,7 @@ class OptionalFileResource implements SelfCheckingResourceInterface
         return $this->resource;
     }
 
-    public function isFresh($timestamp)
+    public function isFresh($timestamp): bool
     {
         $exists = file_exists($this->resource);
         if ($exists !== $this->exists) {

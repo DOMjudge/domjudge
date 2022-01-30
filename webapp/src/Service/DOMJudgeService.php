@@ -155,7 +155,7 @@ class DOMJudgeService
     /**
      * @return EntityManagerInterface
      */
-    public function getEntityManager()
+    public function getEntityManager(): EntityManagerInterface
     {
         return $this->em;
     }
@@ -166,7 +166,7 @@ class DOMJudgeService
      * @param bool     $alsofuture If true, also get future contests
      * @return Contest[]
      */
-    public function getCurrentContests($onlyofteam = null, bool $alsofuture = false)
+    public function getCurrentContests($onlyofteam = null, bool $alsofuture = false): array
     {
         $now = Utils::now();
         $qb  = $this->em->createQueryBuilder();
@@ -198,7 +198,7 @@ class DOMJudgeService
      * @param bool     $alsofuture If true, also get future contests
      * @return Contest|null
      */
-    public function getCurrentContest($onlyofteam = null, bool $alsofuture = false)
+    public function getCurrentContest($onlyofteam = null, bool $alsofuture = false): ?Contest
     {
         $contests = $this->getCurrentContests($onlyofteam, $alsofuture);
         if ($this->requestStack->getCurrentRequest()) {
@@ -224,7 +224,7 @@ class DOMJudgeService
      * @param int $cid
      * @return Contest|null
      */
-    public function getContest($cid)
+    public function getContest($cid): ?Contest
     {
         return $this->em->getRepository(Contest::class)->find($cid);
     }
@@ -234,7 +234,7 @@ class DOMJudgeService
      * @param int $teamid
      * @return Team|null
      */
-    public function getTeam($teamid)
+    public function getTeam($teamid): ?Team
     {
         return $this->em->getRepository(Team::class)->find($teamid);
     }
@@ -244,7 +244,7 @@ class DOMJudgeService
      * @param int $probid
      * @return Problem|null
      */
-    public function getProblem($probid)
+    public function getProblem($probid): ?Problem
     {
         return $this->em->getRepository(Problem::class)->find($probid);
     }
@@ -274,7 +274,7 @@ class DOMJudgeService
      * Get the logged in user
      * @return User|null
      */
-    public function getUser()
+    public function getUser(): ?User
     {
         $token = $this->tokenStorage->getToken();
         if ($token == null) {
@@ -812,7 +812,7 @@ class DOMJudgeService
      * @param ContestProblem $contestProblem
      * @return string Content of samples zip file.
      */
-    public function getSamplesZipContent(ContestProblem $contestProblem)
+    public function getSamplesZipContent(ContestProblem $contestProblem): string
     {
         /** @var Testcase[] $testcases */
         $testcases = $this->em->createQueryBuilder()

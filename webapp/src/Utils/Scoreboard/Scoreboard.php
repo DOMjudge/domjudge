@@ -182,7 +182,7 @@ class Scoreboard
      * Get the progress of this scoreboard
      * @return int
      */
-    public function getProgress()
+    public function getProgress(): int
     {
         return $this->getFreezeData()->getProgress();
     }
@@ -318,7 +318,7 @@ class Scoreboard
      * @param TeamScore $b
      * @return int
      */
-    protected static function scoreboardCompare(TeamScore $a, TeamScore $b)
+    protected static function scoreboardCompare(TeamScore $a, TeamScore $b): int
     {
         // First order by our predefined sortorder based on category
         $a_sortorder = $a->team->getCategory()->getSortorder();
@@ -413,7 +413,7 @@ class Scoreboard
      * @param array|null $limitToTeamIds
      * @return TeamCategory[]
      */
-    public function getUsedCategories(array $limitToTeamIds = null)
+    public function getUsedCategories(array $limitToTeamIds = null): array
     {
         $usedCategories = [];
         foreach ($this->scores as $score) {

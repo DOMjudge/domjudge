@@ -62,7 +62,7 @@ class DOMJudgeIPAuthenticator extends AbstractGuardAuthenticator
     /**
      * @inheritDoc
      */
-    public function supports(Request $request)
+    public function supports(Request $request): bool
     {
         // Make sure ipaddress auth is enabled.
         $authmethods          = $this->config->get('auth_methods');
@@ -122,7 +122,7 @@ class DOMJudgeIPAuthenticator extends AbstractGuardAuthenticator
     /**
      * @inheritDoc
      */
-    public function getUser($credentials, UserProviderInterface $userProvider)
+    public function getUser($credentials, UserProviderInterface $userProvider): ?UserInterface
     {
         $userRepo = $this->em->getRepository(User::class);
         $filters  = [
@@ -156,7 +156,7 @@ class DOMJudgeIPAuthenticator extends AbstractGuardAuthenticator
     /**
      * @inheritDoc
      */
-    public function checkCredentials($credentials, UserInterface $user)
+    public function checkCredentials($credentials, UserInterface $user): bool
     {
         // check credentials - e.g. make sure the password is valid
         // no credential check is needed in this case, as if we have a user,
@@ -169,7 +169,7 @@ class DOMJudgeIPAuthenticator extends AbstractGuardAuthenticator
     /**
      * @inheritDoc
      */
-    public function onAuthenticationSuccess(Request $request, TokenInterface $token, $providerKey)
+    public function onAuthenticationSuccess(Request $request, TokenInterface $token, $providerKey): ?Response
     {
         // on success, redirect to the last page or the homepage if it was a user triggered action
         if ($request->attributes->get('_route') === 'login'
@@ -190,7 +190,7 @@ class DOMJudgeIPAuthenticator extends AbstractGuardAuthenticator
     /**
      * @inheritDoc
      */
-    public function onAuthenticationFailure(Request $request, AuthenticationException $exception)
+    public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response
     {
         // We never fail the authentication request, something else might handle it
         return null;
@@ -199,7 +199,7 @@ class DOMJudgeIPAuthenticator extends AbstractGuardAuthenticator
     /**
      * @inheritDoc
      */
-    public function start(Request $request, AuthenticationException $authException = null)
+    public function start(Request $request, AuthenticationException $authException = null): Response
     {
         // If this is the guard that fails/is configured to allow access as the entry_point
         // send the user a basic auth dialog, as that's probably what they're expecting
@@ -211,7 +211,7 @@ class DOMJudgeIPAuthenticator extends AbstractGuardAuthenticator
     /**
      * @inheritDoc
      */
-    public function supportsRememberMe()
+    public function supportsRememberMe(): bool
     {
         return false;
     }

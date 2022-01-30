@@ -15,7 +15,7 @@ class BodyTooBigListener implements EventSubscriberInterface
     /**
      * @inheritDoc
      */
-    public static function getSubscribedEvents()
+    public static function getSubscribedEvents(): array
     {
         return [ControllerEvent::class => 'onKernelController',];
     }
@@ -31,7 +31,7 @@ class BodyTooBigListener implements EventSubscriberInterface
         $request = $event->getRequest();
         if ($request->isMethod('POST') || $request->isMethod('PATCH') || $request->isMethod('PUT')) {
             if ($request->request->count() === 0 && $request->files->count() === 0 &&
-                $request->headers->get('content-length', 0) > 0) {
+                $request->headers->get('content-length', '0') > 0) {
                 $msg = sprintf(
                     "Body data exceeded php.ini's 'post_max_size' directive (currently set to %s)",
                     ini_get('post_max_size')
