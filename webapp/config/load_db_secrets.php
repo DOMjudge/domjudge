@@ -12,7 +12,7 @@ function get_db_url()
     // proper serverVersion, which is needed for automatically creating migrations.
     $localEnvFile = WEBAPPDIR . '/.env.local';
     if (file_exists($localEnvFile)) {
-        $dotenv = new Dotenv(false);
+        $dotenv = (new Dotenv())->usePutenv(false);
         $localEnvData = $dotenv->parse(file_get_contents($localEnvFile));
         if (isset($localEnvData['DATABASE_URL'])) {
             return $localEnvData['DATABASE_URL'];

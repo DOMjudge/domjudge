@@ -1,46 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <!-- https://phpunit.readthedocs.io/en/latest/configuration.html -->
-<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:noNamespaceSchemaLocation="../lib/vendor/phpunit/phpunit/phpunit.xsd"
-         backupGlobals="false"
-         colors="true"
-         bootstrap="config/bootstrap.php"
->
-    <php>
-        <ini name="error_reporting" value="-1" />
-        <server name="APP_ENV" value="test" force="true" />
-        <server name="SHELL_VERBOSITY" value="-1" />
-        <server name="SYMFONY_PHPUNIT_REMOVE" value="" />
-        <server name="SYMFONY_PHPUNIT_VERSION" value="8.5" />
-        <ini name="date.timezone" value="UTC" />
-        <env name="KERNEL_CLASS" value="App\Kernel" />
-    </php>
-
-    <testsuites>
-        <testsuite name="Unit tests">
-            <directory>tests/Unit</directory>
-        </testsuite>
-        <testsuite name="End to end tests (slow)">
-            <directory>tests/E2E</directory>
-        </testsuite>
-    </testsuites>
-
-    <filter>
-        <whitelist processUncoveredFilesFromWhitelist="true">
-            <directory suffix=".php">src</directory>
-            <exclude>
-                <directory suffix=".php">src/Migrations</directory>
-                <directory suffix=".php">src/DataFixtures</directory>
-            </exclude>
-        </whitelist>
-    </filter>
-
-    <listeners>
-        <listener class="Symfony\Bridge\PhpUnit\SymfonyTestsListener" />
-    </listeners>
-
-    <extensions>
-        <extension class="DAMA\DoctrineTestBundle\PHPUnit\PHPUnitExtension"/>
-    </extensions>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd" backupGlobals="false" colors="true" bootstrap="config/bootstrap.php">
+  <coverage processUncoveredFiles="true">
+    <include>
+      <directory suffix=".php">src</directory>
+    </include>
+    <exclude>
+      <directory suffix=".php">src/Migrations</directory>
+      <directory suffix=".php">src/DataFixtures</directory>
+    </exclude>
+  </coverage>
+  <php>
+    <ini name="error_reporting" value="-1"/>
+    <server name="APP_ENV" value="test" force="true"/>
+    <server name="SHELL_VERBOSITY" value="-1"/>
+    <server name="SYMFONY_PHPUNIT_REMOVE" value=""/>
+    <server name="SYMFONY_PHPUNIT_VERSION" value="8.5"/>
+    <ini name="date.timezone" value="UTC"/>
+    <env name="KERNEL_CLASS" value="App\Kernel"/>
+  </php>
+  <testsuites>
+    <testsuite name="Unit tests">
+      <directory>tests/Unit</directory>
+    </testsuite>
+    <testsuite name="End to end tests (slow)">
+      <directory>tests/E2E</directory>
+    </testsuite>
+  </testsuites>
+  <listeners>
+    <listener class="Symfony\Bridge\PhpUnit\SymfonyTestsListener"/>
+  </listeners>
+  <extensions>
+    <extension class="DAMA\DoctrineTestBundle\PHPUnit\PHPUnitExtension"/>
+  </extensions>
 </phpunit>

@@ -18,6 +18,7 @@ class YamlConfigLoader extends FileLoader
 {
     /**
      * @inheritDoc
+     * @return mixed
      */
     public function load($resource, $type = null)
     {

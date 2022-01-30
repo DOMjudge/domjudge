@@ -38,6 +38,7 @@ class JsonType extends BaseJsonType
 
     /**
      * @inheritdoc
+     * @return mixed
      */
     public function convertToDatabaseValue($value, AbstractPlatform $platform)
     {

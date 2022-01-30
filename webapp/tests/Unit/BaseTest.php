@@ -157,19 +157,7 @@ abstract class BaseTest extends WebTestCase
      */
     protected function logIn(): void
     {
-        $session = $this->client->getContainer()->get('session');
-
-        $firewallName = 'main';
-        $firewallContext = 'main';
-
-        $user = $this->setupUser();
-        $token = new UsernamePasswordToken($user, null, $firewallName,
-            $user->getRoles());
-        $session->set('_security_' . $firewallContext, serialize($token));
-        $session->save();
-
-        $cookie = new Cookie($session->getName(), $session->getId());
-        $this->client->getCookieJar()->set($cookie);
+        $this->client->loginUser($this->setupUser());
     }
 
     /**
@@ -180,7 +168,11 @@ abstract class BaseTest extends WebTestCase
      */
     protected function logOut(): void
     {
-        $session = $this->client->getContainer()->get('session');
+        if ($this->client->getContainer()->has('session.factory')) {
+            $session = $this->client->getContainer()->get('session.factory')->createSession();
+        } else {
+            $session = $this->client->getContainer()->get('session');
+        }
         $this->client->getCookieJar()->expire($session->getName());
     }
 

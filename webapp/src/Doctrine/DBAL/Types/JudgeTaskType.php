@@ -27,6 +27,7 @@ class JudgeTaskType extends Type
 
     /**
      * @inheritDoc
+     * @return mixed
      */
     public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform): string
     {
@@ -38,6 +39,7 @@ class JudgeTaskType extends Type
 
     /**
      * @inheritDoc
+     * @return mixed
      */
     public function convertToPHPValue($value, AbstractPlatform $platform)
     {
@@ -46,6 +48,7 @@ class JudgeTaskType extends Type
 
     /**
      * @inheritDoc
+     * @return mixed
      */
     public function convertToDatabaseValue($value, AbstractPlatform $platform)
     {

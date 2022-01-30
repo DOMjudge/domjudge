@@ -31,6 +31,7 @@ class InternalErrorStatusType extends Type
 
     /**
      * @inheritDoc
+     * @return mixed
      */
     public function convertToPHPValue($value, AbstractPlatform $platform)
     {
@@ -39,6 +40,7 @@ class InternalErrorStatusType extends Type
 
     /**
      * @inheritDoc
+     * @return mixed
      */
     public function convertToDatabaseValue($value, AbstractPlatform $platform)
     {
