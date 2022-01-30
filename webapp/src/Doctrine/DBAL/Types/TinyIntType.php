@@ -36,6 +36,7 @@ class TinyIntType extends Type
 
     /**
      * {@inheritdoc}
+     * @return mixed
      */
     public function convertToPHPValue($value, AbstractPlatform $platform)
     {

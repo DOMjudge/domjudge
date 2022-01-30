@@ -37,10 +37,10 @@ use Symfony\Component\HttpKernel\Profiler\Profiler;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 /**
  * @Route("/jury/rejudgings")
- * @IsGranted("ROLE_JURY")
  */
 class RejudgingController extends BaseController
 {
