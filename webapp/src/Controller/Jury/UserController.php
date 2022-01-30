@@ -264,7 +264,6 @@ class UserController extends BaseController
             if ($user->getUserid() === $this->dj->getUser()->getUserid()) {
                 $token = new UsernamePasswordToken(
                     $user,
-                    null,
                     'main',
                     $user->getRoles()
                 );

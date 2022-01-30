@@ -18,7 +18,9 @@ class RejudgingControllerTest extends BaseTest
     {
         $this->roles = $roles;
         $this->logOut();
-        $this->logIn();
+        if ($roles) {
+            $this->logIn();
+        }
         $this->verifyPageResponse('GET', '/jury/rejudgings', $http);
         if($http===200) {
             foreach(['No rejudgings defined',' Add new rejudging','Rejudgings'] as $element) {

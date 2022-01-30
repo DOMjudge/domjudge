@@ -14,11 +14,9 @@ use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
-use Symfony\Component\BrowserKit\Cookie;
 use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\DomCrawler\Link;
 use Symfony\Component\PropertyAccess\PropertyAccess;
-use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use ZipArchive;
 
 /**
@@ -123,14 +121,11 @@ abstract class BaseTest extends WebTestCase
         $message = var_export($response, true);
         self::assertEquals(200, $response->getStatusCode(), $message);
 
-        $csrf_token = $this->client->getContainer()->get('security.csrf.token_manager')->getToken('authenticate');
-
         // Submit form.
         $button = $crawler->selectButton('Sign in');
         $form = $button->form(array(
             '_username'   => $username,
             '_password'   => $password,
-            '_csrf_token' => $csrf_token,
         ));
         $this->client->followRedirects();
         $this->client->submit($form);
@@ -328,9 +323,11 @@ abstract class BaseTest extends WebTestCase
 
     protected function removeTestContainer(): void
     {
-        $container = __DIR__ . '/../../var/cache/test/srcApp_KernelTestDebugContainer.php';
+        self::ensureKernelShutdown();
+        $container = __DIR__ . '/../../var/cache/test/App_KernelTestDebugContainer.php';
         if (file_exists($container)) {
             unlink($container);
         }
+        self::bootKernel();
     }
 }

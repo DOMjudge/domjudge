@@ -10,6 +10,7 @@ use App\Entity\User;
 use App\Form\Type\UserRegistrationType;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
+use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -23,22 +24,18 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 class SecurityController extends AbstractController
 {
-    /**
-     * @var DOMJudgeService
-     */
-    private $dj;
-
-    /**
-     * @var ConfigurationService
-     */
-    protected $config;
+    private DOMJudgeService $dj;
+    private ConfigurationService $config;
+    private EntityManagerInterface $em;
 
     public function __construct(
         DOMJudgeService $dj,
-        ConfigurationService $config
+        ConfigurationService $config,
+        EntityManagerInterface $em
     ) {
         $this->dj = $dj;
         $this->config = $config;
+        $this->em = $em;
     }
 
     /**
@@ -70,7 +67,7 @@ class SecurityController extends AbstractController
         // last username entered by the user
         $lastUsername = $authUtils->getLastUsername();
 
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         $clientIP             = $this->dj->getClientIp();
         $auth_ipaddress_users = [];
@@ -113,7 +110,7 @@ class SecurityController extends AbstractController
             return $this->redirect($this->generateUrl('root'));
         }
 
-        $em                              = $this->getDoctrine()->getManager();
+        $em                              = $this->em;
         $selfRegistrationCategoriesCount = $em->getRepository(TeamCategory::class)->count(['allow_self_registration' => 1]);
 
         if ($selfRegistrationCategoriesCount === 0) {

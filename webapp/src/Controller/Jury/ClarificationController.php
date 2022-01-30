@@ -249,7 +249,7 @@ class ClarificationController extends AbstractController
 
     protected function getClarificationFormData(Team $team = null): array
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         if ($team !== null) {
             $teamlist[$team->getTeamid()] = sprintf("%s (t%s)", $team->getEffectiveName(), $team->getTeamid());
         } else {

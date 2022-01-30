@@ -32,7 +32,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @Serializer\VirtualProperty(
  *     "short_name",
  *     exp="object.getShortname()",
- *     options={@Serializer\Groups("Nonstrict"), @Serializer\Type("string")}
+ *     options={@Serializer\Groups({"Nonstrict"}), @Serializer\Type("string")}
  * )
  */
 class ContestProblem

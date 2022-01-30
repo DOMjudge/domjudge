@@ -141,11 +141,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
         $objects      = $ordinalArray->getItems();
 
         if ($request->query->has('ids')) {
-            $ids = $request->query->get('ids', []);
-            if (!is_array($ids)) {
-                throw new BadRequestHttpException('\'ids\' should be an array of ID\'s to fetch');
-            }
-
+            $ids = $request->query->all('ids');
             $ids = array_unique($ids);
 
             $objects = [];

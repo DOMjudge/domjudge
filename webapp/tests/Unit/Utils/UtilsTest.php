@@ -912,10 +912,10 @@ part.";
 
         $response = Utils::StreamAsBinaryFile($content, $filename)->__toString();
 
-        self::assertRegExp('#Content-Disposition:\s+attachment; filename="' . str_replace('.', '\.', $filename) . '"#', $response);
-        self::assertRegExp("#Content-Type:\s+application/octet-stream#", $response);
-        self::assertRegExp("#Content-Length:\s+$length#", $response);
-        self::assertRegExp("#Content-Transfer-Encoding:\s+binary#", $response);
+        self::assertMatchesRegularExpression('#Content-Disposition:\s+attachment; filename="' . str_replace('.', '\.', $filename) . '"#', $response);
+        self::assertMatchesRegularExpression("#Content-Type:\s+application/octet-stream#", $response);
+        self::assertMatchesRegularExpression("#Content-Length:\s+$length#", $response);
+        self::assertMatchesRegularExpression("#Content-Transfer-Encoding:\s+binary#", $response);
     }
 
     /**

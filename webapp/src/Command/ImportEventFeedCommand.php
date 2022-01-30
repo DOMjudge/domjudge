@@ -341,7 +341,7 @@ class ImportEventFeedCommand extends Command
             $this->logger->error('No admin user found. Please create at least one');
             return static::STATUS_ERROR;
         }
-        $token = new UsernamePasswordToken($user, null, 'main', $user->getRoles());
+        $token = new UsernamePasswordToken($user, 'main', $user->getRoles());
         $this->tokenStorage->setToken($token);
 
         // We need the verdicts to validate judgement-types
