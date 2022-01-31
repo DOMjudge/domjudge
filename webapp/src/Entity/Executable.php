@@ -179,7 +179,7 @@ class Executable
         if (!($tempzipFile = tempnam($tempdir, "/executable-"))) {
             throw new ServiceUnavailableHttpException(null, 'Failed to create temporary file');
         }
-        $zipArchive->open($tempzipFile);
+        $zipArchive->open($tempzipFile, ZipArchive::CREATE | ZipArchive::OVERWRITE);
 
         /** @var ExecutableFile[] $files */
         $files = array_values($this->getImmutableExecutable()->getFiles()->toArray());
