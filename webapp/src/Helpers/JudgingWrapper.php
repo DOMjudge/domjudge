@@ -15,7 +15,7 @@ class JudgingWrapper
     protected $judging;
 
     /**
-     * @var float
+     * @var float|null
      * @Serializer\Exclude()
      */
     protected $maxRunTime;
@@ -40,12 +40,12 @@ class JudgingWrapper
     }
 
     /**
-     * @return float
+     * @return float|null
      * @Serializer\VirtualProperty()
      * @Serializer\SerializedName("max_run_time")
      * @Serializer\Type("float")
      */
-    public function getMaxRunTime(): float
+    public function getMaxRunTime(): ?float
     {
         return Utils::roundedFloat($this->maxRunTime);
     }
