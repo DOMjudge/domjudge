@@ -674,6 +674,9 @@ class DOMJudgeService
     public function internalApiRequest(string $url, string $method = Request::METHOD_GET, array $queryData = [])
     {
         $request  = Request::create('/api' . $url, $method, $queryData);
+        if ($this->requestStack->getCurrentRequest() && $this->requestStack->getCurrentRequest()->hasSession()) {
+            $request->setSession($this->requestStack->getSession());
+        }
         $response = $this->getHttpKernel()->handle($request, HttpKernelInterface::SUB_REQUEST);
 
         $status = $response->getStatusCode();
