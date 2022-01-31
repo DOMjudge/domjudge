@@ -22,11 +22,11 @@ if [ ! -x /usr/bin/shellcheck ]; then
 	exit -1
 fi
 
-find .. \( -path ../lib/vendor            -prune \
-	-o -path ../webapp/var            -prune \
-	-o -path ../output                -prune \
-	-o -path ../.git                  -prune \
-	-o -path ../webapp/src/Migrations -prune \
+find .. \( -path ../lib/vendor        -prune \
+	-o -path ../webapp/var        -prune \
+	-o -path ../output            -prune \
+	-o -path ../.git              -prune \
+	-o -path ../webapp/migrations -prune \
         -o -type f \) \
 	-a -type f |  \
 while read -r i ; do
