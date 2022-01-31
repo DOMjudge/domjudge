@@ -360,7 +360,7 @@ class ImportProblemService
                             }
                             file_put_contents($tempzipFile, $outputValidatorZip);
                             $zipArchive = new ZipArchive();
-                            $zipArchive->open($tempzipFile, ZipArchive::CREATE | ZipArchive::OVERWRITE);
+                            $zipArchive->open($tempzipFile, ZipArchive::CREATE);
 
                             $executable         = new Executable();
                             $executable
