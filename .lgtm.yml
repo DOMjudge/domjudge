@@ -14,7 +14,6 @@ extraction:
   cpp:
     prepare:
       packages:
-        - composer
         - php-curl
         - php-gd
         - php-intl
@@ -22,8 +21,15 @@ extraction:
         - php-mysql
         - php-xml
         - php-zip
+        - php-cli
     configure:
       command:
+        - mkdir -p $LGTM_WORKSPACE/bin
+        - export PATH=$LGTM_WORKSPACE/bin:$PATH
+        - php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+        - HASH="$(wget -q -O - https://composer.github.io/installer.sig)"
+        - php -r "if (hash_file('SHA384', 'composer-setup.php') === '$HASH') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;"
+        - php composer-setup.php --install-dir=$LGTM_WORKSPACE/bin --filename=composer
         - make dist DOC_BUILD_ENABLED=no
         - ./configure --disable-doc-build
     index:
