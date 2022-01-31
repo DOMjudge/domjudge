@@ -11,7 +11,12 @@
 
 ## Reporting a Vulnerability
 
-Please provide a PR to fix the vulnerability when possible without affecting the supported PHP versions.
-If this is not possible please send us an email at team@domjudge.org, or contact us at Slack (see https://www.domjudge.org/chat)
+If you want to report a vulnerability, please do not use the issue tracker
+or pull request, but instead contact security@domjudge.org so we can assess
+the issue and publish a fix when making it public.
 
-We try to keep you updated at least once a month in case of larger vulnerabilities.
+Please mention the affected DOMjudge version and details of the vulnerability
+and how to reproduce it. We promise to publicly disclose the reported
+vulnerability, with the appropriate credit if desired, when we've agreed
+on a proper way to solve it. We try to keep you updated at least once a
+month in case of more complex vulnerabilities.
