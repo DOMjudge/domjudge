@@ -3,6 +3,11 @@ TOPDIR=../..
 endif
 include $(TOPDIR)/Makefile.global
 
+ifneq ($(QUIET),)
+export LATEXMKOPTS=-quiet
+QUIET_REDIRECT = >/dev/null 2>&1
+endif
+
 SUBST_CONFIGS = version.py substitutions.py
 
 $(SUBST_CONFIGS): %: %.in $(TOPDIR)/paths.mk
@@ -50,7 +55,7 @@ html: conf_ref.rst
 
 team:
 	sphinx-build -b latex . build/team $(subst 1,-Q,$(QUIET))
-	$(MAKE) -C build/team domjudge-team-manual.pdf
+	$(MAKE) -C build/team domjudge-team-manual.pdf $(QUIET_REDIRECT)
 	cp build/team/domjudge-team-manual.pdf build
 
 .PHONY: docs distdocs install-docs inplace-install html team
