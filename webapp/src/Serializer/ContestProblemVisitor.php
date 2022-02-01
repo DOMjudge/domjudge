@@ -12,9 +12,6 @@ use JMS\Serializer\Metadata\StaticPropertyMetadata;
 
 class ContestProblemVisitor implements EventSubscriberInterface
 {
-    /**
-     * @inheritdoc
-     */
     public static function getSubscribedEvents(): array
     {
         return [
@@ -27,10 +24,6 @@ class ContestProblemVisitor implements EventSubscriberInterface
         ];
     }
 
-    /**
-     * @param ObjectEvent $event
-     * @throws \Exception
-     */
     public function onPostSerialize(ObjectEvent $event)
     {
         /** @var JsonSerializationVisitor $visitor */

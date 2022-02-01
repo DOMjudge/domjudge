@@ -438,9 +438,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Equatab
         return true;
     }
 
-    /**
-     * @inheritDoc
-     */
     public function getUserIdentifier(): string
     {
         return $this->getUsername();

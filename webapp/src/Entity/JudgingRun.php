@@ -109,11 +109,6 @@ class JudgingRun extends BaseApiEntity
         $this->output = new ArrayCollection();
     }
 
-    /**
-     * Get runid
-     *
-     * @return integer
-     */
     public function getRunid(): int
     {
         return $this->runid;

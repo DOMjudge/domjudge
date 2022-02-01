@@ -783,9 +783,6 @@ class EventLogService implements ContainerAwareInterface
 
     /**
      * Check if all events for dependent objects are present for the given type and data
-     * @param Contest $contest
-     * @param string  $type
-     * @param array   $data
      * @return bool True if and only if all references are present
      * @throws Exception
      */
@@ -893,9 +890,6 @@ class EventLogService implements ContainerAwareInterface
 
     /**
      * Convert the given internal ID's into external ID's usable by the API
-     * @param string $type
-     * @param array  $ids
-     * @return array
      * @throws Exception
      */
     protected function getExternalIds(string $type, array $ids): array
@@ -961,7 +955,6 @@ class EventLogService implements ContainerAwareInterface
      * Get the external ID field for a given entity type. Will return null if
      * no external ID field should be used
      * @param object|string $entity
-     * @return string|null
      * @throws Exception
      */
     public function externalIdFieldForEntity($entity): ?string
@@ -1016,8 +1009,7 @@ class EventLogService implements ContainerAwareInterface
 
     /**
      * Get the API ID field for a given entity type.
-     * @param object $entity
-     * @return string
+     * @param object|string $entity
      * @throws Exception
      */
     public function apiIdFieldForEntity($entity): string
@@ -1037,7 +1029,6 @@ class EventLogService implements ContainerAwareInterface
     /**
      * Get the endpoint to use for the given entity
      * @param object|string $entity
-     * @return string|null
      */
     public function endpointForEntity($entity): ?string
     {

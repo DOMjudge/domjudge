@@ -13,17 +13,11 @@ use Doctrine\DBAL\Platforms\AbstractPlatform;
  */
 class BinaryJsonType extends JsonType
 {
-    /**
-     * @inheritDoc
-     */
-    public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform): string
+    public function getSQLDeclaration(array $column, AbstractPlatform $platform): string
     {
         return 'LONGBLOB';
     }
 
-    /**
-     * @inheritDoc
-     */
     public function getName(): string
     {
         return 'binaryjson';

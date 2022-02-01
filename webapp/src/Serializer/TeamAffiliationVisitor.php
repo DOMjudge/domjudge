@@ -61,11 +61,6 @@ class TeamAffiliationVisitor implements EventSubscriberInterface
         ];
     }
 
-    /**
-     * @param ObjectEvent $event
-     *
-     * @throws Exception
-     */
     public function onPostSerialize(ObjectEvent $event)
     {
         /** @var JsonSerializationVisitor $visitor */

@@ -23,18 +23,11 @@ class SetExternalIdVisitor implements EventSubscriberInterface
      */
     protected $eventLogService;
 
-    /**
-     * ContestVisitor constructor.
-     * @param EventLogService $eventLogService
-     */
     public function __construct(EventLogService $eventLogService)
     {
         $this->eventLogService = $eventLogService;
     }
 
-    /**
-     * @inheritdoc
-     */
     public static function getSubscribedEvents(): array
     {
         return [
@@ -46,10 +39,6 @@ class SetExternalIdVisitor implements EventSubscriberInterface
         ];
     }
 
-    /**
-     * @param ObjectEvent $event
-     * @throws \Exception
-     */
     public function onPostSerialize(ObjectEvent $event)
     {
         /** @var JsonSerializationVisitor $visitor */

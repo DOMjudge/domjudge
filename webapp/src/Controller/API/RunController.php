@@ -50,7 +50,6 @@ class RunController extends AbstractRestController implements QueryObjectTransfo
     /**
      * Get all the runs for this contest
      * @param Request $request
-     * @return Response
      * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST') or is_granted('ROLE_API_READER')")
      * @Rest\Get("")
      * @OA\Response(

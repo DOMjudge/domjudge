@@ -14,10 +14,9 @@ class OrdinalArray
     /**
      * @var OrdinalItem[]
      */
-    protected $items;
+    protected array $items;
 
     /**
-     * OrdinalArray constructor.
      * @param array|\Traversable $items
      */
     public function __construct($items)

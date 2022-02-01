@@ -48,9 +48,6 @@ class HashPasswordSubscriber implements EventSubscriber
         $em->getUnitOfWork()->recomputeSingleEntityChangeSet($meta, $entity);
     }
 
-    /**
-     * @param User $entity
-     */
     private function encodePassword(User $entity)
     {
         if (!$entity->getPlainPassword()) {

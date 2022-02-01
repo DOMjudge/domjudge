@@ -6,7 +6,6 @@ use App\Doctrine\DBAL\Types\JudgeTaskType;
 use App\Entity\AssetEntityInterface;
 use App\Entity\AuditLog;
 use App\Entity\Balloon;
-use App\Entity\BaseApiEntity;
 use App\Entity\Clarification;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
@@ -37,6 +36,7 @@ use Doctrine\ORM\Query\Expr\Join;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Cookie;
+use Symfony\Component\HttpFoundation\InputBag;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
@@ -152,9 +152,6 @@ class DOMJudgeService
         $this->router               = $router;
     }
 
-    /**
-     * @return EntityManagerInterface
-     */
     public function getEntityManager(): EntityManagerInterface
     {
         return $this->em;
@@ -162,11 +159,13 @@ class DOMJudgeService
 
     /**
      * Return all the contests that are currently active indexed by contest ID
+     *
      * @param int|null $onlyofteam If -1, get only public contests. If > 0 get only contests for the given team
      * @param bool     $alsofuture If true, also get future contests
+     *
      * @return Contest[]
      */
-    public function getCurrentContests($onlyofteam = null, bool $alsofuture = false): array
+    public function getCurrentContests(?int $onlyofteam = null, bool $alsofuture = false): array
     {
         $now = Utils::now();
         $qb  = $this->em->createQueryBuilder();
@@ -196,9 +195,8 @@ class DOMJudgeService
      * Get the currently selected contest
      * @param int|null $onlyofteam If -1, get only public contests. If > 0 get only contests for the given team
      * @param bool     $alsofuture If true, also get future contests
-     * @return Contest|null
      */
-    public function getCurrentContest($onlyofteam = null, bool $alsofuture = false): ?Contest
+    public function getCurrentContest(?int $onlyofteam = null, bool $alsofuture = false): ?Contest
     {
         $contests = $this->getCurrentContests($onlyofteam, $alsofuture);
         if ($this->requestStack->getCurrentRequest()) {
@@ -221,30 +219,24 @@ class DOMJudgeService
 
     /**
      * Get the contest with the given contest ID
-     * @param int $cid
-     * @return Contest|null
      */
-    public function getContest($cid): ?Contest
+    public function getContest(int $cid): ?Contest
     {
         return $this->em->getRepository(Contest::class)->find($cid);
     }
 
     /**
      * Get the team with the given team ID
-     * @param int $teamid
-     * @return Team|null
      */
-    public function getTeam($teamid): ?Team
+    public function getTeam(?int $teamid): ?Team
     {
         return $this->em->getRepository(Team::class)->find($teamid);
     }
 
     /**
      * Get the problem with the given team ID
-     * @param int $probid
-     * @return Problem|null
      */
-    public function getProblem($probid): ?Problem
+    public function getProblem(?int $probid): ?Problem
     {
         return $this->em->getRepository(Problem::class)->find($probid);
     }
@@ -272,7 +264,6 @@ class DOMJudgeService
 
     /**
      * Get the logged in user
-     * @return User|null
      */
     public function getUser(): ?User
     {
@@ -294,8 +285,8 @@ class DOMJudgeService
 
     /**
      * Get the value of the cookie with the given name
-     * @param string $cookieName
-     * @return mixed|null
+     *
+     * @return bool|float|int|string|InputBag|null
      */
     public function getCookie(string $cookieName)
     {
@@ -310,26 +301,17 @@ class DOMJudgeService
 
     /**
      * Set the given cookie on the response, returning the response again to allow chaining
-     * @param string        $cookieName
-     * @param string        $value
-     * @param int           $expire
-     * @param string|null   $path
-     * @param string        $domain
-     * @param bool          $secure
-     * @param bool          $httponly
-     * @param Response|null $response
-     * @return Response
      */
     public function setCookie(
         string $cookieName,
         string $value = '',
         int $expire = 0,
-        string $path = null,
+        ?string $path = null,
         string $domain = '',
         bool $secure = false,
         bool $httponly = false,
-        Response $response = null
-    ) {
+        ?Response $response = null
+    ): Response {
         if ($response === null) {
             $response = new Response();
         }
@@ -344,22 +326,15 @@ class DOMJudgeService
 
     /**
      * Clear the given cookie on the response, returning the response again to allow chaining
-     * @param string        $cookieName
-     * @param string|null   $path
-     * @param string        $domain
-     * @param bool          $secure
-     * @param bool          $httponly
-     * @param Response|null $response
-     * @return Response
      */
     public function clearCookie(
         string $cookieName,
-        string $path = null,
+        ?string $path = null,
         string $domain = '',
         bool $secure = false,
         bool $httponly = false,
-        Response $response = null
-    ) {
+        ?Response $response = null
+    ): Response {
         if ($response === null) {
             $response = new Response();
         }
@@ -546,7 +521,6 @@ class DOMJudgeService
 
     /**
      * Decode a JSON string and handle errors
-     * @param string $str
      * @return mixed
      */
     public function jsonDecode(string $str)
@@ -561,7 +535,6 @@ class DOMJudgeService
     /**
      * Decode a JSON string and handle errors
      * @param $data
-     * @return string
      */
     public function jsonEncode($data): string
     {
@@ -665,9 +638,6 @@ class DOMJudgeService
     /**
      * Perform an internal API request to the given URL with the given data
      *
-     * @param string $url
-     * @param string $method
-     * @param array  $queryData
      * @return mixed|null
      * @throws \Exception
      */
@@ -693,7 +663,6 @@ class DOMJudgeService
 
     /**
      * Get the etc directory of this DOMjudge installation
-     * @return string
      */
     public function getDomjudgeEtcDir(): string
     {
@@ -702,7 +671,6 @@ class DOMJudgeService
 
     /**
      * Get the tmp directory of this DOMjudge installation
-     * @return string
      */
     public function getDomjudgeTmpDir(): string
     {
@@ -711,7 +679,6 @@ class DOMJudgeService
 
     /**
      * Get the webapp directory of this DOMjudge installation
-     * @return string
      */
     public function getDomjudgeWebappDir(): string
     {
@@ -720,7 +687,6 @@ class DOMJudgeService
 
     /**
      * Get the documentation links
-     * @return array
      */
     public function getDocLinks(): array
     {
@@ -729,7 +695,6 @@ class DOMJudgeService
 
     /**
      * Get the directory used for storing cache files
-     * @return string
      */
     public function getCacheDir(): string
     {
@@ -738,8 +703,6 @@ class DOMJudgeService
 
     /**
      * Open the given ZIP file
-     * @param string $filename
-     * @return ZipArchive
      */
     public function openZipFile(string $filename): ZipArchive
     {
@@ -770,7 +733,6 @@ class DOMJudgeService
      * @param string|null $teamname Teamname of the team this user belongs to, if any
      * @param int|null    $teamid   Teamid of the team this user belongs to, if any
      * @param string|null $location Room/place of the team, if any.
-     * @return array
      * @throws \Exception
      */
     public function printFile(
@@ -811,7 +773,6 @@ class DOMJudgeService
     /**
      * Get a ZIP with sample data
      *
-     * @param ContestProblem $contestProblem
      * @return string Content of samples zip file.
      */
     public function getSamplesZipContent(ContestProblem $contestProblem): string
@@ -903,8 +864,6 @@ class DOMJudgeService
     }
 
     /**
-     * @param Contest $contest
-     * @return array
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
@@ -1332,12 +1291,8 @@ class DOMJudgeService
     /**
      * Get the path of an asset if it exists
      *
-     * @param string $name
-     * @param string $type
      * @param bool $fullPath If true, get the full path. If false, get the webserver relative path
      * @param string|null $forceExtension If set, also return the asset path if it does not exist currently and use the given extension
-     *
-     * @return string|null
      */
     public function assetPath(string $name, string $type, bool $fullPath = false, ?string $forceExtension = null): ?string
     {

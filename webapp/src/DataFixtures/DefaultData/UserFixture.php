@@ -12,25 +12,10 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class UserFixture extends AbstractDefaultDataFixture implements DependentFixtureInterface
 {
-    /**
-     * @var DOMJudgeService
-     */
-    protected $dj;
-
-    /**
-     * @var LoggerInterface
-     */
-    protected $logger;
-
-    /**
-     * @var UserPasswordHasherInterface
-     */
-    protected $passwordHasher;
-
-    /**
-     * @var bool
-     */
-    protected $debug;
+    protected DOMJudgeService $dj;
+    protected LoggerInterface $logger;
+    protected UserPasswordHasherInterface $passwordHasher;
+    protected bool $debug;
 
     public function __construct(DOMJudgeService $dj, LoggerInterface $logger, UserPasswordHasherInterface $passwordHasher, bool $debug)
     {
@@ -93,7 +78,6 @@ class UserFixture extends AbstractDefaultDataFixture implements DependentFixture
     /**
      * Get the password for the REST API
      *
-     * @return string
      * @throws Exception
      */
     protected function getRestapiPassword(): string

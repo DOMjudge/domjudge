@@ -7,9 +7,6 @@ use Symfony\Component\HttpKernel\Event\ResponseEvent;
 
 class ApiHeadersListener implements EventSubscriberInterface
 {
-    /**
-     * @inheritDoc
-     */
     public static function getSubscribedEvents(): array
     {
         return [ResponseEvent::class => 'onKernelResponse',];

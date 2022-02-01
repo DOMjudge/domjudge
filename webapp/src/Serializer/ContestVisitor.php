@@ -7,7 +7,6 @@ use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Utils\Utils;
-use Exception;
 use JMS\Serializer\EventDispatcher\Events;
 use JMS\Serializer\EventDispatcher\EventSubscriberInterface;
 use JMS\Serializer\EventDispatcher\ObjectEvent;
@@ -36,13 +35,6 @@ class ContestVisitor implements EventSubscriberInterface
      */
     protected $eventLogService;
 
-    /**
-     * ContestVisitor constructor.
-     *
-     * @param ConfigurationService $config
-     * @param DOMJudgeService      $dj
-     * @param EventLogService      $eventLogService
-     */
     public function __construct(
         ConfigurationService $config,
         DOMJudgeService $dj,
@@ -53,9 +45,6 @@ class ContestVisitor implements EventSubscriberInterface
         $this->eventLogService = $eventLogService;
     }
 
-    /**
-     * @inheritdoc
-     */
     public static function getSubscribedEvents(): array
     {
         return [
@@ -68,11 +57,6 @@ class ContestVisitor implements EventSubscriberInterface
         ];
     }
 
-    /**
-     * @param ObjectEvent $event
-     *
-     * @throws Exception
-     */
     public function onPostSerialize(ObjectEvent $event)
     {
         /** @var JsonSerializationVisitor $visitor */

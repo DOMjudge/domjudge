@@ -32,7 +32,6 @@ class RightFunction extends FunctionNode
     protected $lengthExpression = null;
 
     /**
-     * @inheritdoc
      * @throws ASTException
      */
     public function getSql(SqlWalker $sqlWalker): string
@@ -43,7 +42,6 @@ class RightFunction extends FunctionNode
     }
 
     /**
-     * @inheritdoc
      * @throws QueryException
      */
     public function parse(Parser $parser): void
