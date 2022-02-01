@@ -12,12 +12,9 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
  */
 class BodyTooBigListener implements EventSubscriberInterface
 {
-    /**
-     * @inheritDoc
-     */
     public static function getSubscribedEvents(): array
     {
-        return [ControllerEvent::class => 'onKernelController',];
+        return [ControllerEvent::class => 'onKernelController'];
     }
 
     public function onKernelController(ControllerEvent $event)

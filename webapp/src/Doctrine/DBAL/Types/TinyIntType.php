@@ -8,44 +8,31 @@ use Doctrine\DBAL\Types\Type;
 
 class TinyIntType extends Type
 {
-    /**
-     * {@inheritdoc}
-     */
     public function getName(): string
     {
         return 'tinyint';
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform): string
+    public function getSQLDeclaration(array $column, AbstractPlatform $platform): string
     {
         $declaration = 'TINYINT';
 
-        if (isset($fieldDeclaration['length'])) {
-            $declaration .= sprintf('(%d)', $fieldDeclaration['length']);
+        if (isset($column['length'])) {
+            $declaration .= sprintf('(%d)', $column['length']);
         }
 
-        if (($fieldDeclaration['unsigned']) ?? false) {
+        if (($column['unsigned']) ?? false) {
             $declaration .= ' UNSIGNED';
         }
 
         return $declaration;
     }
 
-    /**
-     * {@inheritdoc}
-     * @return mixed
-     */
-    public function convertToPHPValue($value, AbstractPlatform $platform)
+    public function convertToPHPValue($value, AbstractPlatform $platform): ?int
     {
         return $value === null ? null : (int)$value;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getBindingType(): int
     {
         return ParameterType::INTEGER;

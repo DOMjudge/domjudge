@@ -8,19 +8,13 @@ use Symfony\Component\HttpKernel\Profiler\Profiler;
 
 class AddContentSecurityPolicyListener implements EventSubscriberInterface
 {
-    /**
-     * @var Profiler|null
-     */
-    protected $profiler;
+    protected ?Profiler $profiler;
 
     public function __construct(?Profiler $profiler)
     {
         $this->profiler = $profiler;
     }
 
-    /**
-     * @inheritDoc
-     */
     public static function getSubscribedEvents(): array
     {
         return [ResponseEvent::class => 'onKernelResponse'];

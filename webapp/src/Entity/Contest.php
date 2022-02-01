@@ -688,24 +688,12 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
         return $this->processBalloons;
     }
 
-    /**
-     * Set medalsEnabled
-     *
-     * @param boolean $medalsEnabled
-     *
-     * @return Contest
-     */
     public function setMedalsEnabled(bool $medalsEnabled): Contest
     {
         $this->medalsEnabled = $medalsEnabled;
         return $this;
     }
 
-    /**
-     * Get medalsEnabled
-     *
-     * @return boolean
-     */
     public function getMedalsEnabled(): bool
     {
         return $this->medalsEnabled;
@@ -737,70 +725,34 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
         return $this;
     }
 
-    /**
-     * Set goldMedals
-     *
-     * @param int|null $goldMedals
-     *
-     * @return Contest
-     */
     public function setGoldMedals(?int $goldMedals): Contest
     {
         $this->goldMedals = $goldMedals;
         return $this;
     }
 
-    /**
-     * Get goldMedals
-     *
-     * @return int|null
-     */
     public function getGoldMedals(): ?int
     {
         return $this->goldMedals;
     }
 
-    /**
-     * Set silverMedals
-     *
-     * @param int|null $silverMedals
-     *
-     * @return Contest
-     */
     public function setSilverMedals(?int $silverMedals): Contest
     {
         $this->silverMedals = $silverMedals;
         return $this;
     }
 
-    /**
-     * Get silverMedals
-     *
-     * @return int|null
-     */
     public function getSilverMedals(): ?int
     {
         return $this->silverMedals;
     }
 
-    /**
-     * Set bronzeMedals
-     *
-     * @param int|null $bronzeMedals
-     *
-     * @return Contest
-     */
     public function setBronzeMedals(?int $bronzeMedals): Contest
     {
         $this->bronzeMedals = $bronzeMedals;
         return $this;
     }
 
-    /**
-     * Get bronzeMedals
-     *
-     * @return int|null
-     */
     public function getBronzeMedals(): ?int
     {
         return $this->bronzeMedals;
@@ -947,11 +899,10 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     }
 
     /**
-     * @param $time_string
      * @return float|int|null
      * @throws Exception
      */
-    public function getAbsoluteTime($time_string)
+    public function getAbsoluteTime(?string $time_string)
     {
         if ($time_string === null) {
             return null;

@@ -37,7 +37,6 @@ class TruncateFunction extends FunctionNode
     protected $appendWhenTruncatedExpression = null;
 
     /**
-     * @inheritdoc
      * @throws ASTException
      */
     public function getSql(SqlWalker $sqlWalker): string
@@ -52,7 +51,6 @@ class TruncateFunction extends FunctionNode
     }
 
     /**
-     * @inheritdoc
      * @throws QueryException
      */
     public function parse(Parser $parser): void

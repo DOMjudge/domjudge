@@ -17,7 +17,6 @@ use Symfony\Component\Yaml\Yaml;
 class YamlConfigLoader extends FileLoader
 {
     /**
-     * @inheritDoc
      * @return mixed
      */
     public function load($resource, $type = null)
@@ -25,9 +24,6 @@ class YamlConfigLoader extends FileLoader
         return Yaml::parse(file_get_contents($resource));
     }
 
-    /**
-     * @inheritDoc
-     */
     public function supports($resource, $type = null): bool
     {
         return is_string($resource) &&

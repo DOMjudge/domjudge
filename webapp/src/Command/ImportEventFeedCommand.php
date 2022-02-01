@@ -252,11 +252,6 @@ class ImportEventFeedCommand extends Command
     /**
      * @inheritdoc
      *
-     * @param InputInterface  $input
-     * @param OutputInterface $output
-     *
-     * @return int
-     *
      * @throws TransportExceptionInterface
      * @throws NonUniqueResultException
      */
@@ -388,8 +383,6 @@ class ImportEventFeedCommand extends Command
     /**
      * Read the shadowing.yaml file and process it for the given key
      *
-     * @param string $key
-     *
      * @return bool False if the import should stop, true otherwise.
      */
     protected function readConfig(string $key): bool
@@ -497,7 +490,6 @@ class ImportEventFeedCommand extends Command
     /**
      * Import events from the given local file
      *
-     * @param bool     $fromStart
      * @param string[] $eventsToSkip
      *
      * @return bool False if the import should stop, true otherwise.
@@ -563,7 +555,6 @@ class ImportEventFeedCommand extends Command
     /**
      * Import events from the given URL
      *
-     * @param bool     $fromStart
      * @param string[] $eventsToSkip
      *
      * @return bool False if the import should stop, true otherwise.
@@ -763,8 +754,6 @@ class ImportEventFeedCommand extends Command
 
     /**
      * Compare the external contest ID of the configured contest to the given data.
-     *
-     * @param array $externalContestData
      *
      * @return bool False if the import should stop, true otherwise.
      */

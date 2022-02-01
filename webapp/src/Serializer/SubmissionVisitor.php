@@ -33,12 +33,6 @@ class SubmissionVisitor implements EventSubscriberInterface
      */
     protected $em;
 
-    /**
-     * SubmissionVisitor constructor.
-     * @param DOMJudgeService        $dj
-     * @param EventLogService        $eventLogService
-     * @param EntityManagerInterface $em
-     */
     public function __construct(
         DOMJudgeService $dj,
         EventLogService $eventLogService,
@@ -49,9 +43,6 @@ class SubmissionVisitor implements EventSubscriberInterface
         $this->em              = $em;
     }
 
-    /**
-     * @inheritdoc
-     */
     public static function getSubscribedEvents(): array
     {
         return [
@@ -64,10 +55,6 @@ class SubmissionVisitor implements EventSubscriberInterface
         ];
     }
 
-    /**
-     * @param ObjectEvent $event
-     * @throws \Exception
-     */
     public function onPostSerialize(ObjectEvent $event)
     {
         if ($this->dj->checkrole('jury')) {

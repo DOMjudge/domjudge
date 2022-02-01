@@ -26,13 +26,7 @@ class JudgingWrapper
      */
     protected $judgementTypeId;
 
-    /**
-     * JudgingWrapper constructor.
-     * @param Judging $judging
-     * @param float|null $maxRunTime
-     * @param string|null $judgementTypeId
-     */
-    public function __construct(Judging $judging, float $maxRunTime = null, string $judgementTypeId = null)
+    public function __construct(Judging $judging, ?float $maxRunTime = null, ?string $judgementTypeId = null)
     {
         $this->judging         = $judging;
         $this->maxRunTime      = $maxRunTime;
@@ -40,7 +34,6 @@ class JudgingWrapper
     }
 
     /**
-     * @return float|null
      * @Serializer\VirtualProperty()
      * @Serializer\SerializedName("max_run_time")
      * @Serializer\Type("float")

@@ -26,45 +26,14 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
  */
 class CheckConfigService
 {
-    /**
-     * @var EntityManagerInterface
-     */
-    protected $em;
-
-    /**
-     * @var ConfigurationService
-     */
-    protected $config;
-
-    /**
-     * @var DOMJudgeService
-     */
-    protected $dj;
-
-    /**
-     * @var EventLogService
-     */
-    protected $eventLogService;
-
-    /**
-     * @var ValidatorInterface
-     */
-    protected $validator;
-
-    /**
-     * @var RouterInterface
-     */
-    protected $router;
-
-    /**
-     * @var bool
-     */
-    protected $debug;
-
-    /**
-     * @var UserPasswordHasherInterface
-     */
-    protected $passwordHasher;
+    protected EntityManagerInterface $em;
+    protected ConfigurationService $config;
+    protected DOMJudgeService $dj;
+    protected EventLogService $eventLogService;
+    protected ValidatorInterface $validator;
+    protected RouterInterface $router;
+    protected bool $debug;
+    protected UserPasswordHasherInterface $passwordHasher;
 
     public function __construct(
         bool $debug,

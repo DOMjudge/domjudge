@@ -18,10 +18,7 @@ class InternalErrorStatusType extends Type
     const STATUS_IGNORED             = 'ignored';
     const ALL_STATUSES = [self::STATUS_OPEN, self::STATUS_RESOLVED, self::STATUS_IGNORED];
 
-    /**
-     * @inheritDoc
-     */
-    public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform): string
+    public function getSQLDeclaration(array $column, AbstractPlatform $platform): string
     {
         $statuses = implode(', ', array_map(function (string $status) {
             return sprintf("'%s'", $status);
@@ -30,7 +27,6 @@ class InternalErrorStatusType extends Type
     }
 
     /**
-     * @inheritDoc
      * @return mixed
      */
     public function convertToPHPValue($value, AbstractPlatform $platform)
@@ -39,7 +35,6 @@ class InternalErrorStatusType extends Type
     }
 
     /**
-     * @inheritDoc
      * @return mixed
      */
     public function convertToDatabaseValue($value, AbstractPlatform $platform)
@@ -50,17 +45,11 @@ class InternalErrorStatusType extends Type
         return $value;
     }
 
-    /**
-     * @inheritDoc
-     */
     public function getName(): string
     {
         return self::ENUM_INTERNAL_ERROR_STATUS;
     }
 
-    /**
-     * @inheritDoc
-     */
     public function requiresSQLCommentHint(AbstractPlatform $platform): bool
     {
         return true;

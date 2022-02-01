@@ -14,31 +14,21 @@ use JMS\Serializer\Annotation as Serializer;
 class OrdinalItem
 {
     /**
-     * @var int
      * @Serializer\SerializedName("ordinal")
      */
-    protected $ordinal;
+    protected int $ordinal;
 
     /**
-     * @var object
      * @Serializer\Inline()
      */
-    protected $item;
+    protected object $item;
 
-    /**
-     * OrdinalItem constructor.
-     * @param int $ordinal
-     * @param object $item
-     */
-    public function __construct(int $ordinal, $item)
+    public function __construct(int $ordinal, object $item)
     {
         $this->ordinal = $ordinal;
         $this->item    = $item;
     }
 
-    /**
-     * @return object
-     */
     public function getItem(): object
     {
         return $this->item;

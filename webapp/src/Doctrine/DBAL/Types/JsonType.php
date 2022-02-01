@@ -21,24 +21,21 @@ use Doctrine\DBAL\Types\JsonType as BaseJsonType;
  */
 class JsonType extends BaseJsonType
 {
-    /**
-     * @inheritDoc
-     */
-    public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform): string
+    public function getSQLDeclaration(array $column, AbstractPlatform $platform): string
     {
-        if (!empty($fieldDeclaration['length'])) {
-            if ($fieldDeclaration['length'] <= 255) {
-                return $platform->getVarcharTypeDeclarationSQL($fieldDeclaration);
+        if (!empty($column['length'])) {
+            if ($column['length'] <= 255) {
+                return $platform->getVarcharTypeDeclarationSQL($column);
             } else {
-                return $platform->getClobTypeDeclarationSQL($fieldDeclaration);
+                return $platform->getClobTypeDeclarationSQL($column);
             }
         }
         return 'LONGTEXT';
     }
 
     /**
-     * @inheritdoc
-     * @return mixed
+     * @return string|false||null
+     * @throws ConversionException
      */
     public function convertToDatabaseValue($value, AbstractPlatform $platform)
     {
@@ -55,9 +52,6 @@ class JsonType extends BaseJsonType
         return $encoded;
     }
 
-    /**
-     * @inheritDoc
-     */
     public function requiresSQLCommentHint(AbstractPlatform $platform): bool
     {
         return true;

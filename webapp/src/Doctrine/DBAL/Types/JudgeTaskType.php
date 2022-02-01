@@ -26,10 +26,9 @@ class JudgeTaskType extends Type
     ];
 
     /**
-     * @inheritDoc
      * @return mixed
      */
-    public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform): string
+    public function getSQLDeclaration(array $column, AbstractPlatform $platform): string
     {
         $statuses = implode(', ', array_map(function (string $status) {
             return sprintf("'%s'", $status);
@@ -38,7 +37,6 @@ class JudgeTaskType extends Type
     }
 
     /**
-     * @inheritDoc
      * @return mixed
      */
     public function convertToPHPValue($value, AbstractPlatform $platform)
@@ -47,7 +45,6 @@ class JudgeTaskType extends Type
     }
 
     /**
-     * @inheritDoc
      * @return mixed
      */
     public function convertToDatabaseValue($value, AbstractPlatform $platform)
@@ -58,17 +55,11 @@ class JudgeTaskType extends Type
         return $value;
     }
 
-    /**
-     * @inheritDoc
-     */
     public function getName(): string
     {
         return self::ENUM_JUDGE_TASK_TYPE;
     }
 
-    /**
-     * @inheritDoc
-     */
     public function requiresSQLCommentHint(AbstractPlatform $platform): bool
     {
         return true;

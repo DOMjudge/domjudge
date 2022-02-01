@@ -63,17 +63,13 @@ class ICPCCmsService
 
     /**
      * Import teams from the ICPC CMS
-     * @param string      $token
-     * @param string      $contest
-     * @param string|null $message
-     * @return bool
      * @throws ClientExceptionInterface
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
      * @throws TransportExceptionInterface
      * @throws DecodingExceptionInterface
      */
-    public function importTeams(string $token, string $contest, string &$message = null): bool
+    public function importTeams(string $token, string $contest, ?string &$message = null): bool
     {
         $bearerToken = $this->getBearerToken($token, $message);
         if ($bearerToken === null) {
@@ -179,12 +175,8 @@ class ICPCCmsService
 
     /**
      * Upload standings to the ICPC CMS
-     * @param string      $token
-     * @param string      $contest
-     * @param string|null $message
-     * @return bool
      */
-    public function uploadStandings(string $token, string $contest, string &$message = null): bool
+    public function uploadStandings(string $token, string $contest, ?string &$message = null): bool
     {
         // TODO: reimplement
 
@@ -194,16 +186,13 @@ class ICPCCmsService
 
     /**
      * Convert the given web service token to a bearer token
-     * @param string      $token
-     * @param string|null $message
-     * @return string|null
      * @throws ClientExceptionInterface
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
      * @throws TransportExceptionInterface
      * @throws DecodingExceptionInterface
      */
-    protected function getBearerToken(string $token, string &$message = null): ?string
+    protected function getBearerToken(string $token, ?string &$message = null): ?string
     {
         $response = $this->client->request('POST', self::WS_TOKEN_URL, [
             'body' => [
