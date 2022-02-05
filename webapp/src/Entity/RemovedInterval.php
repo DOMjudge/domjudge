@@ -28,7 +28,7 @@ class RemovedInterval
     private int $intervalid;
 
     /**
-     * @var double|sring
+     * @var double|string
      * @ORM\Column(type="decimal", precision=32, scale=9, name="starttime",
      *     options={"comment"="Initial time of removed interval", "unsigned"=true},
      *     nullable=false)
@@ -36,7 +36,7 @@ class RemovedInterval
     private $starttime;
 
     /**
-     * @var double|sring
+     * @var double|string
      * @ORM\Column(type="decimal", precision=32, scale=9, name="endtime",
      *     options={"comment"="Final time of removed interval", "unsigned"=true},
      *     nullable=false)
