@@ -8,6 +8,7 @@ use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -28,7 +29,7 @@ class ContestProblemType extends AbstractType
         $builder->add('shortname', TextType::class, [
             'label' => 'Short name',
         ]);
-        $builder->add('points');
+        $builder->add('points', IntegerType::class);
         $builder->add('allowSubmit', ChoiceType::class, [
             'choices' => [
                 'Yes' => true,
