@@ -9,6 +9,7 @@ use App\Entity\TeamAffiliation;
 use App\Entity\TeamCategory;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
+use Exception;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -24,10 +25,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class ContestType extends AbstractExternalIdEntityType
 {
-    /**
-     * @var DOMJudgeService
-     */
-    protected $dj;
+    protected DOMJudgeService $dj;
 
     public function __construct(EventLogService $eventLogService, DOMJudgeService $dj)
     {
@@ -36,11 +34,9 @@ class ContestType extends AbstractExternalIdEntityType
     }
 
     /**
-     * @param FormBuilderInterface $builder
-     * @param array                $options
-     * @throws \Exception
+     * @throws Exception
      */
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $this->addExternalIdField($builder, Contest::class);
         $builder->add('shortname', TextType::class, [
@@ -193,7 +189,7 @@ class ContestType extends AbstractExternalIdEntityType
         });
     }
 
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults(['data_class' => Contest::class]);
     }

@@ -22,20 +22,9 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 class SubmitProblemType extends AbstractType
 {
-    /**
-     * @var DOMJudgeService
-     */
-    protected $dj;
-
-    /**
-     * @var ConfigurationService
-     */
-    protected $config;
-
-    /**
-     * @var EntityManagerInterface
-     */
-    protected $em;
+    protected DOMJudgeService $dj;
+    protected ConfigurationService $config;
+    protected EntityManagerInterface $em;
 
     public function __construct(
         DOMJudgeService $dj,
@@ -47,7 +36,7 @@ class SubmitProblemType extends AbstractType
         $this->config = $config;
     }
 
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $allowMultipleFiles = $this->config->get('sourcefiles_limit') > 1;
         $user               = $this->dj->getUser();

@@ -12,7 +12,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class FinalizeContestType extends AbstractType
 {
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder->add('b', IntegerType::class, [
             'label' => 'Additional Bronze Medals'
@@ -24,7 +24,7 @@ class FinalizeContestType extends AbstractType
         $builder->add('finalize', SubmitType::class);
     }
 
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults(['data_class' => Contest::class]);
     }

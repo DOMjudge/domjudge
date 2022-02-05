@@ -11,7 +11,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 
 class ProblemUploadType extends AbstractType
 {
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder->add('contest', EntityType::class, [
             'class' => Contest::class,

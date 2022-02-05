@@ -11,17 +11,14 @@ use Symfony\Component\Form\FormBuilderInterface;
 
 class PrintType extends AbstractType
 {
-    /**
-     * @var EntityManagerInterface
-     */
-    protected $em;
+    protected EntityManagerInterface $em;
 
     public function __construct(EntityManagerInterface $em)
     {
         $this->em = $em;
     }
 
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $languages       = $this->em->getRepository(Language::class)->findAll();
         $languageChoices = [];

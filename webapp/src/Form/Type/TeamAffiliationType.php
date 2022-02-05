@@ -7,6 +7,7 @@ use App\Entity\TeamAffiliation;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
+use Exception;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
@@ -20,15 +21,8 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class TeamAffiliationType extends AbstractExternalIdEntityType
 {
-    /**
-     * @var ConfigurationService
-     */
-    protected $configuration;
-
-    /**
-     * @var DOMJudgeService
-     */
-    protected $dj;
+    protected ConfigurationService $configuration;
+    protected DOMJudgeService $dj;
 
     public function __construct(
         EventLogService $eventLogService,
@@ -41,11 +35,9 @@ class TeamAffiliationType extends AbstractExternalIdEntityType
     }
 
     /**
-     * @param FormBuilderInterface $builder
-     * @param array                $options
-     * @throws \Exception
+     * @throws Exception
      */
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $countries = [];
         foreach (Countries::getAlpha3Codes() as $alpha3) {
@@ -93,7 +85,7 @@ class TeamAffiliationType extends AbstractExternalIdEntityType
     }
 
 
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults(['data_class' => TeamAffiliation::class]);
     }

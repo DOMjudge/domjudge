@@ -5,6 +5,7 @@ namespace App\Form\Type;
 use App\Entity\Executable;
 use App\Entity\Language;
 use Doctrine\ORM\EntityRepository;
+use Exception;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
@@ -18,11 +19,9 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 class LanguageType extends AbstractExternalIdEntityType
 {
     /**
-     * @param FormBuilderInterface $builder
-     * @param array                $options
-     * @throws \Exception
+     * @throws Exception
      */
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $this->addExternalIdField($builder, Language::class);
         $builder->add('langid', TextType::class, [
@@ -95,7 +94,7 @@ class LanguageType extends AbstractExternalIdEntityType
         });
     }
 
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults(['data_class' => Language::class]);
     }

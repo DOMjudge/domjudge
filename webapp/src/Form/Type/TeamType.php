@@ -11,6 +11,7 @@ use App\Entity\User;
 use App\Service\DOMJudgeService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
+use Exception;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
@@ -28,15 +29,8 @@ use Symfony\Component\Validator\Constraints\Regex;
 
 class TeamType extends AbstractType
 {
-    /**
-     * @var EntityManagerInterface
-     */
-    protected $em;
-
-    /**
-     * @var DOMJudgeService
-     */
-    protected $dj;
+    protected EntityManagerInterface $em;
+    protected DOMJudgeService $dj;
 
     public function __construct(EntityManagerInterface $em, DOMJudgeService $dj)
     {
@@ -45,11 +39,9 @@ class TeamType extends AbstractType
     }
 
     /**
-     * @param FormBuilderInterface $builder
-     * @param array                $options
-     * @throws \Exception
+     * @throws Exception
      */
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder->add('name', TextType::class, [
             'label' => 'Team name',
@@ -163,7 +155,7 @@ class TeamType extends AbstractType
         });
     }
 
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults(['data_class' => Team::class]);
     }

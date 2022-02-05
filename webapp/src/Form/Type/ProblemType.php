@@ -5,6 +5,7 @@ namespace App\Form\Type;
 use App\Entity\Executable;
 use App\Entity\Problem;
 use Doctrine\ORM\EntityRepository;
+use Exception;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
@@ -20,11 +21,9 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 class ProblemType extends AbstractExternalIdEntityType
 {
     /**
-     * @param FormBuilderInterface $builder
-     * @param array                $options
-     * @throws \Exception
+     * @throws Exception
      */
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $this->addExternalIdField($builder, Problem::class);
         $builder->add('name', TextType::class);
@@ -91,7 +90,7 @@ class ProblemType extends AbstractExternalIdEntityType
         });
     }
 
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults(['data_class' => Problem::class]);
     }
