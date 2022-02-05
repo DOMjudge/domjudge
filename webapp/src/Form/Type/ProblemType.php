@@ -51,13 +51,11 @@ class ProblemType extends AbstractExternalIdEntityType
             'required' => false,
             'placeholder' => '-- default run script --',
             'choice_label' => 'description',
-            'query_builder' => function (EntityRepository $er) {
-                return $er
-                    ->createQueryBuilder('e')
-                    ->where('e.type = :run')
-                    ->setParameter(':run', 'run')
-                    ->orderBy('e.execid');
-            },
+            'query_builder' => fn(EntityRepository $er) => $er
+                ->createQueryBuilder('e')
+                ->where('e.type = :run')
+                ->setParameter(':run', 'run')
+                ->orderBy('e.execid'),
         ]);
         $builder->add('compareExecutable', EntityType::class, [
             'label' => 'Compare script',
@@ -65,13 +63,11 @@ class ProblemType extends AbstractExternalIdEntityType
             'required' => false,
             'placeholder' => '-- default compare script --',
             'choice_label' => 'description',
-            'query_builder' => function (EntityRepository $er) {
-                return $er
-                    ->createQueryBuilder('e')
-                    ->where('e.type = :compare')
-                    ->setParameter(':compare', 'compare')
-                    ->orderBy('e.execid');
-            },
+            'query_builder' => fn(EntityRepository $er) => $er
+                ->createQueryBuilder('e')
+                ->where('e.type = :compare')
+                ->setParameter(':compare', 'compare')
+                ->orderBy('e.execid'),
         ]);
         $builder->add('specialCompareArgs', TextType::class, [
             'label' => 'Compare script arguments',

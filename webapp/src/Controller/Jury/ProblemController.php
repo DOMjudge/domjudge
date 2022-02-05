@@ -514,9 +514,7 @@ class ProblemController extends BaseController
             ->getResult();
 
         /** @var Testcase[] $testcases */
-        $testcases = array_map(function ($data) {
-            return $data[0];
-        }, $testcaseData);
+        $testcases = array_map(fn($data) => $data[0], $testcaseData);
 
         if ($request->isMethod('POST')) {
             $messages      = [];

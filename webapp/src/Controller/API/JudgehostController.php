@@ -224,12 +224,10 @@ class JudgehostController extends AbstractFOSRestController
             $this->giveBackJudging($judging->getJudgingid(), $judgehost);
         }
 
-        return array_map(function (Judging $judging) {
-            return [
-                'jobid' => $judging->getJudgingid(),
-                'submitid' => $judging->getSubmission()->getSubmitid(),
-            ];
-        }, $judgings);
+        return array_map(fn(Judging $judging) => [
+            'jobid' => $judging->getJudgingid(),
+            'submitid' => $judging->getSubmission()->getSubmitid(),
+        ], $judgings);
     }
 
     /**

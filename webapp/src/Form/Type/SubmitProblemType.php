@@ -60,27 +60,24 @@ class SubmitProblemType extends AbstractType
 
         $problemConfig = [
             'class' => Problem::class,
-            'query_builder' => function (EntityRepository $er) use ($contest) {
-                return $er->createQueryBuilder('p')
-                    ->join('p.contest_problems', 'cp', Join::WITH, 'cp.contest = :contest')
-                    ->select('p', 'cp')
-                    ->andWhere('cp.allowSubmit = 1')
-                    ->setParameter(':contest', $contest)
-                    ->addOrderBy('cp.shortname');
-            },
-            'choice_label' => function (Problem $problem) {
-                return sprintf('%s - %s', $problem->getContestProblems()->first()->getShortName(), $problem->getName());
-            },
+            'query_builder' => fn(EntityRepository $er) => $er->createQueryBuilder('p')
+                ->join('p.contest_problems', 'cp', Join::WITH, 'cp.contest = :contest')
+                ->select('p', 'cp')
+                ->andWhere('cp.allowSubmit = 1')
+                ->setParameter(':contest', $contest)
+                ->addOrderBy('cp.shortname'),
+            'choice_label' => fn(Problem $problem) => sprintf(
+                '%s - %s', $problem->getContestProblems()->first()->getShortName(), $problem->getName()
+            ),
             'placeholder' => 'Select a problem',
         ];
         $builder->add('problem', EntityType::class, $problemConfig);
 
         $builder->add('language', EntityType::class, [
             'class' => Language::class,
-            'query_builder' => function (EntityRepository $er) {
-                return $er->createQueryBuilder('l')
-                    ->andWhere('l.allowSubmit = 1');
-            },
+            'query_builder' => fn(EntityRepository $er) => $er
+                ->createQueryBuilder('l')
+                ->andWhere('l.allowSubmit = 1'),
             'choice_label' => 'name',
             'placeholder' => 'Select a language',
         ]);

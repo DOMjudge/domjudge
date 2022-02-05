@@ -277,9 +277,7 @@ class RejudgingController extends BaseController
                 ->getQuery()
                 ->getResult();
 
-            $getSubmissionId = function (Judging $judging) {
-                return $judging->getSubmission()->getSubmitid();
-            };
+            $getSubmissionId = fn(Judging $judging) => $judging->getSubmission()->getSubmitid();
             $originalVerdicts = Utils::reindex($originalVerdicts, $getSubmissionId);
             $newVerdicts = Utils::reindex($newVerdicts, $getSubmissionId);
         });
@@ -481,9 +479,7 @@ class RejudgingController extends BaseController
             $formData['contests'] = is_null($currentContest) ? [] : [$currentContest];
         }
         $verdicts             = $formBuilder->get('verdicts')->getOption('choices');
-        $incorrectVerdicts    = array_filter($verdicts, function ($k) {
-            return $k != 'correct';
-        });
+        $incorrectVerdicts    = array_filter($verdicts, fn($k) => $k != 'correct');
         $formData['verdicts'] = $incorrectVerdicts;
 
         $form = $formBuilder->setData($formData)->getForm();
@@ -496,24 +492,30 @@ class RejudgingController extends BaseController
                 'reason'     => $formData['reason'],
                 'priority'   => JudgeTask::parsePriority($formData['priority']),
                 'repeat'     => $formData['repeat'],
-                'contests'   => array_map(function (Contest $contest) {
-                    return $contest->getCid();
-                }, $formData['contests'] ? $formData['contests']->toArray() : []),
-                'problems'   => array_map(function (Problem $problem) {
-                    return $problem->getProbid();
-                }, $formData['problems'] ? $formData['problems']->toArray() : []),
-                'languages'  => array_map(function (Language $language) {
-                    return $language->getLangid();
-                }, $formData['languages'] ? $formData['languages']->toArray() : []),
-                'teams'      => array_map(function (Team $team) {
-                    return $team->getTeamid();
-                }, $formData['teams'] ? $formData['teams']->toArray() : []),
-                'users'      => array_map(function (User $user) {
-                    return $user->getUserid();
-                }, $formData['users'] ? $formData['users']->toArray() : []),
-                'judgehosts' => array_map(function (Judgehost $judgehost) {
-                    return $judgehost->getJudgehostid();
-                }, $formData['judgehosts'] ? $formData['judgehosts']->toArray() : []),
+                'contests'   => array_map(
+                    fn(Contest $contest) => $contest->getCid(),
+                    $formData['contests'] ? $formData['contests']->toArray() : []
+                ),
+                'problems'   => array_map(
+                    fn(Problem $problem) => $problem->getProbid(),
+                    $formData['problems'] ? $formData['problems']->toArray() : []
+                ),
+                'languages'  => array_map(
+                    fn(Language $language) => $language->getLangid(),
+                    $formData['languages'] ? $formData['languages']->toArray() : []
+                ),
+                'teams'      => array_map(
+                    fn(Team $team) => $team->getTeamid(),
+                    $formData['teams'] ? $formData['teams']->toArray() : []
+                ),
+                'users'      => array_map(
+                    fn(User $user) => $user->getUserid(),
+                    $formData['users'] ? $formData['users']->toArray() : []
+                ),
+                'judgehosts' => array_map(
+                    fn(Judgehost $judgehost) => $judgehost->getJudgehostid(),
+                    $formData['judgehosts'] ? $formData['judgehosts']->toArray() : []
+                ),
                 'verdicts'   => array_values($formData['verdicts']),
                 'before'     => $formData['before'],
                 'after'      => $formData['after'],
@@ -909,11 +911,7 @@ class RejudgingController extends BaseController
             }
         }
         sort($judging_runs_differ);
-        usort($runtime_spread,
-            function ($a, $b) {
-                return $b['spread'] <=> $a['spread'];
-            }
-        );
+        usort($runtime_spread, fn($a, $b) => $b['spread'] <=> $a['spread']);
 
         $max_list_len = 10;
         $runtime_spread_list = [];

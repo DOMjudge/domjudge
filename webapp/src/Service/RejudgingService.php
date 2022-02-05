@@ -307,9 +307,7 @@ class RejudgingService
                         ->setParameter(':judgingid', $submission['judgingid'])
                         ->getQuery()
                         ->getResult();
-                    $runIds  = array_map(function (array $data) {
-                        return $data['runid'];
-                    }, $runData);
+                    $runIds  = array_map(fn(array $data) => $data['runid'], $runData);
                     if (!empty($runIds)) {
                         $this->eventLogService->log('judging_run', $runIds,
                                                     EventLogService::ACTION_CREATE,

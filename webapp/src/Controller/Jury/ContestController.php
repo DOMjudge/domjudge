@@ -777,19 +777,17 @@ class ContestController extends BaseController
         }
 
         /** @var int[] $submissionIds */
-        $submissionIds = array_map(function (array $data) {
-            return $data['submitid'];
-        }, $this->em->createQueryBuilder()
-               ->from(Submission::class, 's')
-               ->join('s.judgings', 'j', Join::WITH, 'j.valid = 1')
-               ->select('s.submitid')
-               ->andWhere('s.contest = :contest')
-               ->andWhere('s.valid = true')
-               ->andWhere('j.result IS NULL')
-               ->setParameter(':contest', $contest)
-               ->orderBy('s.submitid')
-               ->getQuery()
-               ->getResult()
+        $submissionIds = array_map(fn(array $data) => $data['submitid'], $this->em->createQueryBuilder()
+            ->from(Submission::class, 's')
+            ->join('s.judgings', 'j', Join::WITH, 'j.valid = 1')
+            ->select('s.submitid')
+            ->andWhere('s.contest = :contest')
+            ->andWhere('s.valid = true')
+            ->andWhere('j.result IS NULL')
+            ->setParameter(':contest', $contest)
+            ->orderBy('s.submitid')
+            ->getQuery()
+            ->getResult()
         );
 
         if (count($submissionIds) > 0) {
@@ -797,16 +795,14 @@ class ContestController extends BaseController
         }
 
         /** @var int[] $clarificationIds */
-        $clarificationIds = array_map(function (array $data) {
-            return $data['clarid'];
-        }, $this->em->createQueryBuilder()
-               ->from(Clarification::class, 'c')
-               ->select('c.clarid')
-               ->andWhere('c.contest = :contest')
-               ->andWhere('c.answered = false')
-               ->setParameter(':contest', $contest)
-               ->getQuery()
-               ->getResult()
+        $clarificationIds = array_map(fn(array $data) => $data['clarid'], $this->em->createQueryBuilder()
+            ->from(Clarification::class, 'c')
+            ->select('c.clarid')
+            ->andWhere('c.contest = :contest')
+            ->andWhere('c.answered = false')
+            ->setParameter(':contest', $contest)
+            ->getQuery()
+            ->getResult()
         );
         if (count($clarificationIds) > 0) {
             $blockers[] = 'Unanswered clarifications found: ' . implode(', ', $clarificationIds);

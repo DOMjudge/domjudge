@@ -122,12 +122,10 @@ class UserRegistrationType extends AbstractType
                     'mapped' => false,
                     'choice_label' => 'name',
                     'placeholder' => '-- Select category --',
-                    'query_builder' => function (EntityRepository $er) {
-                        return $er
-                            ->createQueryBuilder('c')
-                            ->where('c.allow_self_registration = 1')
-                            ->orderBy('c.sortorder');
-                    },
+                    'query_builder' => fn(EntityRepository $er) => $er
+                        ->createQueryBuilder('c')
+                        ->where('c.allow_self_registration = 1')
+                        ->orderBy('c.sortorder'),
                     'attr' => [
                         'placeholder' => 'Category',
                     ],

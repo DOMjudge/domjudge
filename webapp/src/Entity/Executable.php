@@ -183,9 +183,7 @@ class Executable
 
         /** @var ExecutableFile[] $files */
         $files = array_values($this->getImmutableExecutable()->getFiles()->toArray());
-        usort($files, function ($a, $b) {
-            return $a->getRank() <=> $b->getRank();
-        });
+        usort($files, fn($a, $b) => $a->getRank() <=> $b->getRank());
         foreach ($files as $file) {
             $zipArchive->addFromString($file->getFilename(), $file->getFileContent());
             if ($file->isExecutable()) {

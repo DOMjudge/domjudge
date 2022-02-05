@@ -20,9 +20,10 @@ class InternalErrorStatusType extends Type
 
     public function getSQLDeclaration(array $column, AbstractPlatform $platform): string
     {
-        $statuses = implode(', ', array_map(function (string $status) {
-            return sprintf("'%s'", $status);
-        }, self::ALL_STATUSES));
+        $statuses = implode(', ', array_map(
+            fn(string $status) => sprintf("'%s'", $status),
+            self::ALL_STATUSES
+        ));
         return sprintf("ENUM(%s)", $statuses);
     }
 

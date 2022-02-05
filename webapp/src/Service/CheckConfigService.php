@@ -373,9 +373,10 @@ class CheckConfigService
         return ['caption' => 'Active contests',
                 'result' => 'O',
                 'desc' => 'Currently active contests: ' .
-                    implode(', ', array_map(function ($contest) {
-                        return 'c'.$contest->getCid() . ' (' . $contest->getShortname() . ')';
-                    }, $contests))];
+                    implode(', ', array_map(
+                        fn($contest) => 'c' . $contest->getCid() . ' (' . $contest->getShortname() . ')',
+                        $contests
+                    ))];
     }
 
     public function checkContestsValidate() : array

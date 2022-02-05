@@ -193,9 +193,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             'alpha3_countries' => Countries::getAlpha3Names(),
             'alpha3_alpha2_country_mapping' => array_combine(
                 Countries::getAlpha3Codes(),
-                array_map(function ($alpha3) {
-                    return Countries::getAlpha2Code($alpha3);
-                }, Countries::getAlpha3Codes())
+                array_map(fn($alpha3) => Countries::getAlpha2Code($alpha3), Countries::getAlpha3Codes())
             ),
             'show_shadow_differences' => $this->tokenStorage->getToken() &&
                                          $this->authorizationChecker->isGranted('ROLE_ADMIN') &&
@@ -733,9 +731,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             return implode(", ", array_map([$this, 'printHost'], $hostnames));
         } else {
             $len_prefix = strlen($common_prefix);
-            $local_parts = array_map(function ($host) use ($len_prefix) {
-                return substr($host, $len_prefix);
-            }, $local_parts);
+            $local_parts = array_map(fn($host) => substr($host, $len_prefix), $local_parts);
             return $this->printHost($common_prefix . "{" . implode(",", $local_parts) . "}", true);
         }
     }

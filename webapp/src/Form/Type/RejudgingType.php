@@ -67,12 +67,10 @@ class RejudgingType extends AbstractType
             'required' => false,
             'multiple' => true,
             'choice_label' => 'name',
-            'query_builder' => function (EntityRepository $er) {
-                return $er
-                    ->createQueryBuilder('c')
-                    ->where('c.enabled = 1')
-                    ->orderBy('c.cid');
-            },
+            'query_builder' => fn(EntityRepository $er) => $er
+                ->createQueryBuilder('c')
+                ->where('c.enabled = 1')
+                ->orderBy('c.cid'),
         ]);
         $builder->add('problems', EntityType::class, [
             'multiple' => true,
@@ -88,12 +86,10 @@ class RejudgingType extends AbstractType
             'class' => Language::class,
             'required' => false,
             'choice_label' => 'name',
-            'query_builder' => function (EntityRepository $er) {
-                return $er
-                    ->createQueryBuilder('l')
-                    ->where('l.allowSubmit = 1')
-                    ->orderBy('l.name');
-            },
+            'query_builder' => fn(EntityRepository $er) => $er
+                ->createQueryBuilder('l')
+                ->where('l.allowSubmit = 1')
+                ->orderBy('l.name'),
         ]);
         $builder->add('teams', EntityType::class, [
             'multiple' => true,
@@ -109,12 +105,10 @@ class RejudgingType extends AbstractType
             'required' => false,
             'multiple' => true,
             'choice_label' => 'name',
-            'query_builder' => function (EntityRepository $er) {
-                return $er
-                    ->createQueryBuilder('u')
-                    ->where('u.enabled = 1')
-                    ->orderBy('u.name');
-            },
+            'query_builder' => fn(EntityRepository $er) => $er
+                ->createQueryBuilder('u')
+                ->where('u.enabled = 1')
+                ->orderBy('u.name'),
         ]);
         $builder->add('judgehosts', EntityType::class, [
             'multiple' => true,
@@ -122,11 +116,9 @@ class RejudgingType extends AbstractType
             'class' => Judgehost::class,
             'required' => false,
             'choice_label' => 'hostname',
-            'query_builder' => function (EntityRepository $er) {
-                return $er
-                    ->createQueryBuilder('j')
-                    ->orderBy('j.hostname');
-            },
+            'query_builder' => fn(EntityRepository $er) => $er
+                ->createQueryBuilder('j')
+                ->orderBy('j.hostname'),
         ]);
 
         $verdicts = [

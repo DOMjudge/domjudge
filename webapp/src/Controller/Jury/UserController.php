@@ -141,9 +141,7 @@ class UserController extends BaseController
             }
 
             $userdata['user_roles'] = [
-                'value' => implode(', ', array_map(function (Role $role) {
-                    return $role->getDjRole();
-                }, $u->getUserRoles()))
+                'value' => implode(', ', array_map(fn(Role $role) => $role->getDjRole(), $u->getUserRoles()))
             ];
 
             // Create action links

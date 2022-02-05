@@ -332,9 +332,7 @@ class EventLogService implements ContainerAwareInterface
                         ->setParameter(':problem', $dataId)
                         ->getQuery()
                         ->getScalarResult();
-                    $contestIdsForId = array_map(function (array $data) {
-                        return $data['contestId'];
-                    }, $contestIdData);
+                    $contestIdsForId = array_map(fn(array $data) => $data['contestId'], $contestIdData);
                     $expectedEvents  += count($contestIdsForId);
                     $contestIds      = array_unique(array_merge($contestIds, $contestIdsForId));
                 }
@@ -342,9 +340,7 @@ class EventLogService implements ContainerAwareInterface
                 $expectedEvents = 0;
                 foreach ($dataIds as $dataId) {
                     $contests        = $this->dj->getCurrentContests($dataId);
-                    $contestIdsForId = array_map(function (Contest $contest) {
-                        return $contest->getCid();
-                    }, $contests);
+                    $contestIdsForId = array_map(fn(Contest $contest) => $contest->getCid(), $contests);
                     $expectedEvents  += count($contestIdsForId);
                     $contestIds      = array_unique(array_merge($contestIds, $contestIdsForId));
                 }
@@ -358,9 +354,7 @@ class EventLogService implements ContainerAwareInterface
                 $contestId = $contestIds[0];
             } else {
                 $contests       = $this->dj->getCurrentContests();
-                $contestIds     = array_map(function (Contest $contest) {
-                    return $contest->getCid();
-                }, $contests);
+                $contestIds     = array_map(fn(Contest $contest) => $contest->getCid(), $contests);
                 $expectedEvents = count($dataIds) * count($contestIds);
             }
         }
@@ -372,9 +366,7 @@ class EventLogService implements ContainerAwareInterface
 
         // Generate JSON content if not set, for deletes this is only the ID.
         if ($action === self::ACTION_DELETE) {
-            $json = array_values(array_map(function ($id) {
-                return ['id' => (string)$id];
-            }, $ids));
+            $json = array_values(array_map(fn($id) => ['id' => (string)$id], $ids));
         } elseif ($json === null) {
             $url = $endpoint[self::KEY_URL];
 
@@ -514,9 +506,7 @@ class EventLogService implements ContainerAwareInterface
 
         // First, remove all times that are still null or will happen in the future,
         // as we do not need to check them
-        $states = array_filter($states, function ($time) {
-            return $time !== null && Utils::now() >= $time;
-        });
+        $states = array_filter($states, fn($time) => $time !== null && Utils::now() >= $time);
 
         // Now sort the remaining times in increasing order,
         // as that is the order in which we want to add the events
@@ -917,9 +907,7 @@ class EventLogService implements ContainerAwareInterface
         if (isset($externalIdAlwaysAllowed[$entity])) {
             $fullField = $externalIdAlwaysAllowed[$entity];
             [$table, $field] = explode('.', $fullField);
-            return array_map(function (array $item) use ($field) {
-                return $item['externalid'] ?? $item[$field];
-            }, $this->em->createQueryBuilder()
+            return array_map(fn(array $item) => $item['externalid'] ?? $item[$field], $this->em->createQueryBuilder()
                 ->from($entity, $table)
                 ->select($fullField, sprintf('%s.externalid', $table))
                 ->andWhere(sprintf('%s IN (:ids)', $fullField))
@@ -940,15 +928,16 @@ class EventLogService implements ContainerAwareInterface
                                                       $type));
         }
 
-        return array_map(function (array $item) use ($endpointData) {
-            return $item[$endpointData[self::KEY_EXTERNAL_ID]];
-        }, $this->em->createQueryBuilder()
+        return array_map(
+            fn(array $item) => $item[$endpointData[self::KEY_EXTERNAL_ID]],
+            $this->em->createQueryBuilder()
                ->from($entity, 'e')
                ->select(sprintf('e.%s', $endpointData[self::KEY_EXTERNAL_ID]))
                ->andWhere(sprintf('e.%s IN (:ids)', $primaryKeyField))
                ->setParameter(':ids', $ids)
                ->getQuery()
-               ->getScalarResult());
+               ->getScalarResult()
+        );
     }
 
     /**

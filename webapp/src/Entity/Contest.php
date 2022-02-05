@@ -1189,11 +1189,10 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
         /** @var ContestProblem $problem */
         foreach ($this->problems as $idx => $problem) {
             // Check if the problem ID is unique
-            $otherProblemIds = $this->problems->filter(function (ContestProblem $otherProblem) use ($problem) {
-                return $otherProblem !== $problem;
-            })->map(function (ContestProblem $problem) {
-                return $problem->getProblem()->getProbid();
-            })->toArray();
+            $otherProblemIds = $this->problems
+                ->filter(fn(ContestProblem $otherProblem) => $otherProblem !== $problem)
+                ->map(fn(ContestProblem $problem) => $problem->getProblem()->getProbid())
+                ->toArray();
             $problemId       = $problem->getProblem()->getProbid();
             if (in_array($problemId, $otherProblemIds)) {
                 $context
@@ -1203,11 +1202,10 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
             }
 
             // Check if the problem shortname is unique
-            $otherShortNames = $this->problems->filter(function (ContestProblem $otherProblem) use ($problem) {
-                return $otherProblem !== $problem;
-            })->map(function (ContestProblem $problem) {
-                return strtolower($problem->getShortname());
-            })->toArray();
+            $otherShortNames = $this->problems
+                ->filter(fn(ContestProblem $otherProblem) => $otherProblem !== $problem)
+                ->map(fn(ContestProblem $problem) => strtolower($problem->getShortname()))
+                ->toArray();
             $shortname = strtolower($problem->getShortname());
             if (in_array($shortname, $otherShortNames)) {
                 $context

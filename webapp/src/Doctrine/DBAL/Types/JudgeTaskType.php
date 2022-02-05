@@ -30,9 +30,10 @@ class JudgeTaskType extends Type
      */
     public function getSQLDeclaration(array $column, AbstractPlatform $platform): string
     {
-        $statuses = implode(', ', array_map(function (string $status) {
-            return sprintf("'%s'", $status);
-        }, self::ALL_TYPES));
+        $statuses = implode(', ', array_map(
+            fn(string $status) => sprintf("'%s'", $status),
+            self::ALL_TYPES
+        ));
         return sprintf("ENUM(%s)", $statuses);
     }
 

@@ -671,9 +671,7 @@ while (true) {
                         $candidateDirs[] = $workdirpath . "/" . $subdir;
                     }
                 }
-                uasort($candidateDirs, function ($a, $b) {
-                    return filemtime($a) <=> filemtime($b);
-                });
+                uasort($candidateDirs, fn($a, $b) => filemtime($a) <=> filemtime($b));
                 $after = $before = disk_free_space(JUDGEDIR);
                 logmsg(LOG_INFO,
                     "🗑 Low on diskspace, cleaning up (" . count($candidateDirs) . " potential candidates).");

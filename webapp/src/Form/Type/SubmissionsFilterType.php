@@ -72,12 +72,10 @@ class SubmissionsFilterType extends AbstractType
             "class" => Language::class,
             "required" => false,
             "choice_label" => "name",
-            "query_builder" => function (EntityRepository $er) {
-                return $er
-                    ->createQueryBuilder("l")
-                    ->where("l.allowSubmit = 1")
-                    ->orderBy("l.name");
-            },
+            "query_builder" => fn(EntityRepository $er) => $er
+                ->createQueryBuilder("l")
+                ->where("l.allowSubmit = 1")
+                ->orderBy("l.name"),
             "attr" => ["data-filter-field" => "language-id"],
         ]);
 

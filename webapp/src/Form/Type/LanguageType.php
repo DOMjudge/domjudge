@@ -60,13 +60,11 @@ class LanguageType extends AbstractExternalIdEntityType
             'required' => false,
             'placeholder' => '-- no executable --',
             'choice_label' => 'execid',
-            'query_builder' => function (EntityRepository $er) {
-                return $er
-                    ->createQueryBuilder('e')
-                    ->where('e.type = :compile')
-                    ->setParameter(':compile', 'compile')
-                    ->orderBy('e.execid');
-            },
+            'query_builder' => fn(EntityRepository $er) => $er
+                ->createQueryBuilder('e')
+                ->where('e.type = :compile')
+                ->setParameter(':compile', 'compile')
+                ->orderBy('e.execid'),
         ]);
         $builder->add('extensions', CollectionType::class, [
             'error_bubbling' => false,

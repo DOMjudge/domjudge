@@ -83,9 +83,7 @@ class TeamType extends AbstractType
             'required'      => false,
             'choice_label'  => 'name',
             'placeholder'   => '-- no affiliation --',
-            'query_builder' => function (EntityRepository $er) {
-                return $er->createQueryBuilder('a')->orderBy('a.name');
-            },
+            'query_builder' => fn(EntityRepository $er) => $er->createQueryBuilder('a')->orderBy('a.name'),
         ]);
         $builder->add('penalty', IntegerType::class, [
             'label' => 'Penalty time',
@@ -106,9 +104,10 @@ class TeamType extends AbstractType
             'choice_label'  => 'name',
             'multiple'      => true,
             'by_reference'  => false,
-            'query_builder' => function (EntityRepository $er) {
-                return $er->createQueryBuilder('c')->where('c.openToAllTeams = false')->orderBy('c.name');
-            },
+            'query_builder' => fn(EntityRepository $er) => $er
+                ->createQueryBuilder('c')
+                ->where('c.openToAllTeams = false')
+                ->orderBy('c.name'),
         ]);
         $builder->add('enabled', ChoiceType::class, [
             'expanded' => true,

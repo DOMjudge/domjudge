@@ -228,9 +228,7 @@ class SubmissionController extends AbstractRestController
                 }
             }
             if (!$hasAny) {
-                $requiredListQuoted = array_map(function ($item) {
-                    return "'$item'";
-                }, $requiredList);
+                $requiredListQuoted = array_map(fn($item) => "'$item'", $requiredList);
                 throw new BadRequestHttpException(
                     sprintf("One of the arguments %s is mandatory.", implode(', ', $requiredListQuoted)));
             }

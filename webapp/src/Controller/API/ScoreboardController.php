@@ -189,9 +189,7 @@ class ScoreboardController extends AbstractRestController
                 $row['problems'][] = $problem;
             }
 
-            usort($row['problems'], function ($a, $b) {
-                return $a['label'] <=> $b['label'];
-            });
+            usort($row['problems'], fn($a, $b) => $a['label'] <=> $b['label']);
 
             if ($request->query->getBoolean('strict')) {
                 foreach ($row['problems'] as $key => $data) {

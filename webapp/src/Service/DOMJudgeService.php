@@ -963,9 +963,7 @@ class DOMJudgeService
             $freezeData = new FreezeData($contest);
             $data['stats'] = $statistics->getGroupedProblemsStats(
                 $contest,
-                array_map(function (ContestProblem $problem) {
-                    return $problem->getProblem();
-                }, $problems),
+                array_map(fn(ContestProblem $problem) => $problem->getProblem(), $problems),
                 $freezeData->showFinal(false),
                 (bool)$this->config->get('verification_required')
             );
@@ -1132,9 +1130,7 @@ class DOMJudgeService
             $judgetaskInsertParams[':testcase_id' . $testcase->getTestcaseid()] = $testcase->getTestcaseid();
             $judgetaskInsertParams[':testcase_hash' . $testcase->getTestcaseid()] = $testcase->getMd5sumInput() . '_' . $testcase->getMd5sumOutput();
         }
-        $judgetaskColumns = array_map(function (string $column) {
-            return substr($column, 1);
-        }, $judgetaskDefaultParamNames);
+        $judgetaskColumns = array_map(fn(string $column) => substr($column, 1), $judgetaskDefaultParamNames);
         $judgetaskInsertQuery = sprintf(
             'INSERT INTO judgetask (%s, testcase_id, testcase_hash) VALUES %s',
             implode(', ', $judgetaskColumns),

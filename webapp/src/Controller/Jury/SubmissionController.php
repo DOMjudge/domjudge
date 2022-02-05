@@ -280,12 +280,8 @@ class SubmissionController extends BaseController
             ->getResult();
 
         /** @var Judging[] $judgings */
-        $judgings    = array_map(function ($data) {
-            return $data[0];
-        }, $judgingData);
-        $maxRunTimes = array_map(function ($data) {
-            return $data['max_runtime'];
-        }, $judgingData);
+        $judgings    = array_map(fn($data) => $data[0], $judgingData);
+        $maxRunTimes = array_map(fn($data) => $data['max_runtime'], $judgingData);
 
         $selectedJudging = null;
         // Find the selected judging

@@ -106,9 +106,7 @@ class ContestType extends AbstractExternalIdEntityType
             'required' => false,
             'class' => TeamCategory::class,
             'multiple' => true,
-            'choice_label' => function (TeamCategory $category) {
-                return $category->getName();
-            },
+            'choice_label' => fn(TeamCategory $category) => $category->getName(),
             'help' => 'List of team categories that will receive medals for this contest.',
         ]);
         foreach (['gold', 'silver', 'bronze'] as $medalType) {
@@ -143,18 +141,14 @@ class ContestType extends AbstractExternalIdEntityType
             'required' => false,
             'class' => Team::class,
             'multiple' => true,
-            'choice_label' => function (Team $team) {
-                return sprintf('%s (t%d)', $team->getEffectiveName(), $team->getTeamid());
-            },
+            'choice_label' => fn(Team $team) => sprintf('%s (t%d)', $team->getEffectiveName(), $team->getTeamid()),
             'help' => 'List of teams participating in the contest, in case it is not open to all teams.',
         ]);
         $builder->add('teamCategories', EntityType::class, [
             'required' => false,
             'class' => TeamCategory::class,
             'multiple' => true,
-            'choice_label' => function (TeamCategory $category) {
-                return $category->getName();
-            },
+            'choice_label' => fn(TeamCategory $category) => $category->getName(),
             'help' => 'List of team categories participating in the contest, in case it is not open to all teams.',
         ]);
         $builder->add('enabled', ChoiceType::class, [
