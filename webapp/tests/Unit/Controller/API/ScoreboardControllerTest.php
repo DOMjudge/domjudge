@@ -10,7 +10,7 @@ use Generator;
 
 class ScoreboardControllerTest extends BaseTest
 {
-    protected static $fixtures = [ExtendDemoPracticeSessionTimeFixture::class, SampleEventsFixture::class];
+    protected static array $fixtures = [ExtendDemoPracticeSessionTimeFixture::class, SampleEventsFixture::class];
 
     /**
      * Test that the given user has the correct access to the scoreboard for the given contest.

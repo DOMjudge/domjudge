@@ -7,13 +7,13 @@ use Generator;
 
 class ControllerRolesTraversalTest extends BaseTest
 {
-    protected static $loginURL = "http://localhost/login";
+    protected static string $loginURL = "http://localhost/login";
 
     /**
      * @See: https://www.oreilly.com/library/view/php-cookbook/1565926811/ch04s25.html
      * Get all combinations of roles with at minimal the starting roles.
      */
-    protected function roleCombinations(array $start_roles, array $possible_roles) : array
+    protected function roleCombinations(array $start_roles, array $possible_roles): array
     {
         // Initialize by adding the empty set.
         $results = [$start_roles];
@@ -30,7 +30,7 @@ class ControllerRolesTraversalTest extends BaseTest
      * Some URLs are not setup in the testing framework or have a function for the
      * user UX/login process, those are skipped.
      **/
-    protected function urlExcluded(string $url) : bool
+    protected function urlExcluded(string $url): bool
     {
         return ($url === '' ||                                                 // Empty URL
             $url[0] === '#' ||                                          // Links to local page
@@ -60,10 +60,10 @@ class ControllerRolesTraversalTest extends BaseTest
      * Crawl the webpage assume this is allowed and return all other links on the page.
      * @return string[] Found links on crawled URL
      */
-    protected function crawlPageGetLinks(string $url, int $statusCode) : array
+    protected function crawlPageGetLinks(string $url, int $statusCode): array
     {
         if($this->urlExcluded($url)) {
-            self::markTestFailed('The URL should already have been filtered away.');
+            self::fail('The URL should already have been filtered away.');
         }
         $crawler = $this->client->request('GET', $url);
         $response = $this->client->getResponse();
@@ -86,7 +86,7 @@ class ControllerRolesTraversalTest extends BaseTest
     /**
      * Follow all links on a list of pages while new pages are found.
      */
-    protected function getAllPages(array $urlsToCheck) : array
+    protected function getAllPages(array $urlsToCheck): array
     {
         $done = [];
         do {
@@ -110,7 +110,7 @@ class ControllerRolesTraversalTest extends BaseTest
      * @var string[] $roleBaseURL The URL of the current roles.
      * @var string[] $roles The tested roles.
      */
-    protected function getPagesRoles(array $roleBaseURL, array $roles, bool $allPages) : array
+    protected function getPagesRoles(array $roleBaseURL, array $roles, bool $allPages): array
     {
         $this->roles = $roles;
         $this->logOut();
@@ -134,7 +134,7 @@ class ControllerRolesTraversalTest extends BaseTest
      * specific role instead of allowing when the correct role is there.
      * @var string[] $roleURLs
      */
-    protected function verifyAccess(array $combinations, array $roleURLs) : void
+    protected function verifyAccess(array $combinations, array $roleURLs): void
     {
         foreach ($combinations as $static_roles) {
             $this->roles = $static_roles;
@@ -157,7 +157,7 @@ class ControllerRolesTraversalTest extends BaseTest
      * @var string[] $optionalRoles The roles which should not restrict the viewable pages.
      * @dataProvider provideRoleAccessData
      */
-    public function testRoleAccess(string $roleBaseURL, array $baseRoles, array $optionalRoles, bool $allPages) : void
+    public function testRoleAccess(string $roleBaseURL, array $baseRoles, array $optionalRoles, bool $allPages): void
     {
         $this->roles = $baseRoles;
         $this->logOut();
@@ -170,7 +170,7 @@ class ControllerRolesTraversalTest extends BaseTest
         $this->verifyAccess($combinations, $urlsToCheck);
     }
 
-    public function visitWithNoContest($url, $dropdown) {
+    public function visitWithNoContest(string $url, bool $dropdown): void {
         // We only care for the outcome, shorten the code by skipping steps.
         $this->client->followRedirects(true);
         // Explicit set no active contest.
@@ -192,11 +192,12 @@ class ControllerRolesTraversalTest extends BaseTest
      * @dataProvider provideRoleAccessOtherRoles
      */
     public function testRoleAccessOtherRoles(
-        string $roleBaseURL, array $roleOthersBaseURL,
-        array $roles, array $rolesOther,
+        string $roleBaseURL,
+        array $roleOthersBaseURL,
+        array $roles,
+        array $rolesOther,
         bool $allPages
-    ) : void
-    {
+    ): void {
         $urlsToCheck        = $this->getPagesRoles([$roleBaseURL], $roles, $allPages);
         $urlsToCheckOther   = $this->getPagesRoles($roleOthersBaseURL, $rolesOther, $allPages);
         $this->roles = $roles;
@@ -213,7 +214,7 @@ class ControllerRolesTraversalTest extends BaseTest
      * Test that pages depending on an active contest doesn't crash on the server.
      * @dataProvider provideNoContestScenario
      */
-    public function testNoContestAccess(string $roleBaseURL, array $baseRoles) : void
+    public function testNoContestAccess(string $roleBaseURL, array $baseRoles): void
     {
         $this->roles = $baseRoles;
         $this->logOut();
@@ -232,7 +233,7 @@ class ControllerRolesTraversalTest extends BaseTest
      * - additional roles to add to the user,
      * - whether to also recursively visit linked pages.
      */
-    public function provideRoleAccessData() : Generator
+    public function provideRoleAccessData(): Generator
     {
         yield ['/jury',     ['admin'],              ['jury','team','balloon','clarification_rw'],           false];
         yield ['/jury',     ['jury'],               ['admin','team','balloon','clarification_rw'],          false];
@@ -251,7 +252,7 @@ class ControllerRolesTraversalTest extends BaseTest
      * - the other excluded roles,
      * - whether to also recursively visit linked pages.
      **/
-    public function provideRoleAccessOtherRoles() : Generator
+    public function provideRoleAccessOtherRoles(): Generator
     {
         yield ['/jury',     ['/jury','/team'],  ['admin'],              ['jury','team'],                                        false];
         yield ['/jury',     ['/jury','/team'],  ['jury'],               ['admin','team'],                                       false];
@@ -261,7 +262,7 @@ class ControllerRolesTraversalTest extends BaseTest
         yield ['/public',   ['/jury','/team'],  [],                     ['admin','jury','team','balloon','clarification_rw'],   true];
     }
 
-    public function provideNoContestScenario() : Generator
+    public function provideNoContestScenario(): Generator
     {
         yield ['/jury',     ['admin']];
         yield ['/jury',     ['jury']];

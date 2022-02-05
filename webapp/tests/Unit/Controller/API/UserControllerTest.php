@@ -4,11 +4,11 @@ namespace App\Tests\Unit\Controller\API;
 
 class UserControllerTest extends BaseTest
 {
-    protected $apiEndpoint = 'users';
+    protected ?string $apiEndpoint = 'users';
 
-    protected $apiUser = 'admin';
+    protected ?string $apiUser = 'admin';
 
-    protected $expectedObjects = [
+    protected array $expectedObjects = [
         1 => [
             "team" => "DOMjudge",
             "roles" => [
@@ -48,5 +48,5 @@ class UserControllerTest extends BaseTest
         ],
     ];
 
-    protected $expectedAbsent = ['4242', 'nonexistent'];
+    protected array $expectedAbsent = ['4242', 'nonexistent'];
 }

@@ -11,9 +11,9 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class ContestControllerAdminTest extends ContestControllerTest
 {
-    protected $apiUser = 'admin';
+    protected ?string $apiUser = 'admin';
 
-    public function testAddYaml()
+    public function testAddYaml(): void
     {
         $yaml = <<<EOF
 duration: 2:00:00
@@ -49,7 +49,7 @@ EOF;
         self::assertSame('NWERC 2020 Practice Session', $this->getContest($cid)->getName());
     }
 
-    public function testAddJson()
+    public function testAddJson(): void
     {
         $json = <<<EOF
 {
@@ -77,13 +77,13 @@ EOF;
     protected function getContest($cid): Contest
     {
         // First clear the entity manager to have all data.
-        static::$container->get(EntityManagerInterface::class)->clear();
-        $config = static::$container->get(ConfigurationService::class);
+        static::getContainer()->get(EntityManagerInterface::class)->clear();
+        $config = static::getContainer()->get(ConfigurationService::class);
         $dataSource = $config->get('data_source');
         if ($dataSource === DOMJudgeService::DATA_SOURCE_LOCAL) {
-            return static::$container->get(EntityManagerInterface::class)->getRepository(Contest::class)->find($cid);
+            return static::getContainer()->get(EntityManagerInterface::class)->getRepository(Contest::class)->find($cid);
         } else {
-            return static::$container->get(EntityManagerInterface::class)->getRepository(Contest::class)->findOneBy(['externalid' => $cid]);
+            return static::getContainer()->get(EntityManagerInterface::class)->getRepository(Contest::class)->findOneBy(['externalid' => $cid]);
         }
     }
 

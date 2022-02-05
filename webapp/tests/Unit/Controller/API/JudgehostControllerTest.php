@@ -6,33 +6,37 @@ use Generator;
 
 class JudgehostControllerTest extends BaseTest
 {
-    protected $apiEndpoint = 'judgehosts';
-    protected $apiUser = 'admin';
+    protected ?string $apiEndpoint = 'judgehosts';
+    protected ?string $apiUser     = 'admin';
 
-    protected static $skipMessageCI = "This is very dependent on the contributor setup, check this in CI.";
-    protected static $skipMessageIDs = "Filtering on IDs not implemented in this endpoint.";
+    protected static string $skipMessageCI  = "This is very dependent on the contributor setup, check this in CI.";
+    protected static string $skipMessageIDs = "Filtering on IDs not implemented in this endpoint.";
 
-    protected $expectedObjects = [];
+    protected array $expectedObjects = [];
 
-    protected $expectedAbsent = ['4242', 'nonexistent'];
+    protected array $expectedAbsent = ['4242', 'nonexistent'];
 
-    public function testList(): void {
-        if(getenv("CI")) {
+    public function testList(): void
+    {
+        if (getenv("CI")) {
             parent::testList();
         } else {
             static::markTestSkipped(static::$skipMessageCI);
         }
     }
 
-    public function testListWithIds(): void {
+    public function testListWithIds(): void
+    {
         static::markTestSkipped(static::$skipMessageIDs);
     }
 
-    public function testListWithIdsNotArray(): void {
+    public function testListWithIdsNotArray(): void
+    {
         static::markTestSkipped(static::$skipMessageIDs);
     }
 
-    public function testListWithAbsentIds(): void {
+    public function testListWithAbsentIds(): void
+    {
         static::markTestSkipped(static::$skipMessageIDs);
     }
 
@@ -48,7 +52,8 @@ class JudgehostControllerTest extends BaseTest
      *
      * @dataProvider provideSingleNotFound
      */
-    public function testSingleNotFound(string $id): void {
+    public function testSingleNotFound(string $id): void
+    {
         $id = $this->resolveReference($id);
         $url = $this->helperGetEndpointURL($this->apiEndpoint, $id);
         $object = $this->verifyApiJsonResponse('GET', $url, 200, $this->apiUser);

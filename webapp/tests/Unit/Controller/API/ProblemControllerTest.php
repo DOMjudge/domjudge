@@ -8,9 +8,9 @@ class ProblemControllerTest extends BaseTest
        for tests with the admin user see ProblemControllerAdminTest.
      */
 
-    protected $apiEndpoint = 'problems';
+    protected ?string $apiEndpoint = 'problems';
 
-    protected $expectedObjects = [
+    protected array $expectedObjects = [
       3 => [
         "ordinal" => 0,
         "id" => "3",
@@ -46,5 +46,5 @@ class ProblemControllerTest extends BaseTest
       ],
     ];
 
-    protected $expectedAbsent = ['4242', 'nonexistent'];
+    protected array $expectedAbsent = ['4242', 'nonexistent'];
 }

@@ -10,10 +10,10 @@ use Doctrine\ORM\EntityManagerInterface;
 
 class PublicControllerTest extends BaseTest
 {
-    public function testScoreboardNoContests()
+    public function testScoreboardNoContests(): void
     {
         // Deactivate the demo contest
-        $em = static::$container->get(EntityManagerInterface::class);
+        $em = static::getContainer()->get(EntityManagerInterface::class);
         /** @var Contest $contest */
         $contest = $em->getRepository(Contest::class)->findOneBy(['externalid' => 'demo']);
         $contest->setDeactivatetimeString((new \DateTime())->sub(new \DateInterval('PT1H'))->format(DateTimeInterface::ISO8601));

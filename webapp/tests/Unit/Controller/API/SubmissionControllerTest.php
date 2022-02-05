@@ -18,11 +18,11 @@ use ZipArchive;
 
 class SubmissionControllerTest extends BaseTest
 {
-    protected $apiEndpoint = 'submissions';
+    protected ?string $apiEndpoint = 'submissions';
 
-    protected $apiUser = 'admin';
+    protected ?string $apiUser = 'admin';
 
-    protected $expectedObjects = [
+    protected array $expectedObjects = [
         SampleSubmissionsFixture::class . ':0' => [
             'problem_id'  => '1',
             'language_id' => 'cpp',
@@ -39,13 +39,13 @@ class SubmissionControllerTest extends BaseTest
         ],
     ];
 
-    protected $entityReferences = [
+    protected array $entityReferences = [
         'problem_id' => Problem::class,
     ];
 
-    protected $expectedAbsent = ['4242', 'nonexistent'];
+    protected array $expectedAbsent = ['4242', 'nonexistent'];
 
-    protected static $fixtures = [
+    protected static array $fixtures = [
         SampleSubmissionsFixture::class,
         AddMoreDemoUsersFixture::class,
     ];
@@ -53,7 +53,7 @@ class SubmissionControllerTest extends BaseTest
     /**
      * Test that a non-logged-in user can not add a submission.
      */
-    public function testAddSubmissionNoAccess()
+    public function testAddSubmissionNoAccess(): void
     {
         $contestId = $this->getDemoContestId();
         $apiEndpoint = $this->apiEndpoint;
@@ -65,7 +65,7 @@ class SubmissionControllerTest extends BaseTest
      *
      * @dataProvider provideAddInvalidData
      */
-    public function testAddInvalidData(string $user, array $dataToSend, string $expectedMessage)
+    public function testAddInvalidData(string $user, array $dataToSend, string $expectedMessage): void
     {
         if (isset($dataToSend['problem_id'])) {
             $dataToSend['problem_id'] = $this->resolveEntityId(Problem::class, (string)$dataToSend['problem_id']);
@@ -175,7 +175,7 @@ class SubmissionControllerTest extends BaseTest
     /**
      * Test that passing an ID is not allowed when performing a POST.
      */
-    public function testSupplyIdInPost()
+    public function testSupplyIdInPost(): void
     {
         $contestId = $this->getDemoContestId();
         $apiEndpoint = $this->apiEndpoint;
@@ -186,7 +186,7 @@ class SubmissionControllerTest extends BaseTest
     /**
      * Test that passing a wrong ID is not allowed when performing a PUT.
      */
-    public function testSupplyWrongIdInPut()
+    public function testSupplyWrongIdInPut(): void
     {
         $contestId = $this->getDemoContestId();
         $apiEndpoint = $this->apiEndpoint;
@@ -197,7 +197,7 @@ class SubmissionControllerTest extends BaseTest
     /**
      * Test that when submitting for a language that requires an entry point but not supplying an error is returned.
      */
-    public function testMissingEntryPoint()
+    public function testMissingEntryPoint(): void
     {
         $this->loadFixture(EnableKotlinFixture::class);
 
@@ -213,7 +213,7 @@ class SubmissionControllerTest extends BaseTest
      *
      * @dataProvider provideMissingTeam
      */
-    public function testMissingTeam(string $username)
+    public function testMissingTeam(string $username): void
     {
         $this->loadFixtures([RemoveTeamFromDemoUserFixture::class, RemoveTeamFromAdminUserFixture::class]);
 
@@ -249,7 +249,7 @@ class SubmissionControllerTest extends BaseTest
         ?string $expectedTime, // If known
         array $expectedFiles,
         ?string $expectedEntryPoint = null
-    ) {
+    ): void {
         $this->loadFixture(EnableKotlinFixture::class);
 
         if (isset($dataToSend['problem'])) {
@@ -285,7 +285,7 @@ class SubmissionControllerTest extends BaseTest
         $submissionId = $submittedSubmission['id'];
 
         // Now load the submission
-        $submissionRepository = static::$container->get(EntityManagerInterface::class)->getRepository(Submission::class);
+        $submissionRepository = static::getContainer()->get(EntityManagerInterface::class)->getRepository(Submission::class);
         if ($idIsExternal) {
             /** @var Submission $submission */
             $submission = $submissionRepository->findOneBy(['externalid' => $submissionId]);
@@ -526,7 +526,7 @@ class SubmissionControllerTest extends BaseTest
     protected function base64ZipWithFiles(array $files): string
     {
         $zip = new ZipArchive();
-        $tempFilename = tempnam(static::$container->get(DOMJudgeService::class)->getDomjudgeTmpDir(), "api-submissions-test-");
+        $tempFilename = tempnam(static::getContainer()->get(DOMJudgeService::class)->getDomjudgeTmpDir(), "api-submissions-test-");
 
         $zip->open($tempFilename, ZipArchive::OVERWRITE);
         foreach ($files as $file => $content) {

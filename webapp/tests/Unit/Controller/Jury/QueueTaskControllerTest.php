@@ -21,17 +21,14 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class QueueTaskControllerTest extends BaseTest
 {
-    /** @var EntityManagerInterface */
-    private $em;
-
-    /** @var SubmissionService */
-    private $submissionService;
+    private EntityManagerInterface $em;
+    private SubmissionService $submissionService;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->em = self::$container->get(EntityManagerInterface::class);
-        $this->submissionService = self::$container->get(SubmissionService::class);
+        $this->em = self::getContainer()->get(EntityManagerInterface::class);
+        $this->submissionService = self::getContainer()->get(SubmissionService::class);
     }
 
     /**
@@ -63,7 +60,7 @@ class QueueTaskControllerTest extends BaseTest
         self::assertEquals(0, $tableBody->children()->count());
     }
 
-    public function testData()
+    public function testData(): void
     {
         $this->roles = ['admin'];
         $this->logOut();
@@ -154,7 +151,7 @@ class QueueTaskControllerTest extends BaseTest
         );
     }
 
-    protected function verifyRowForSubmission(Crawler $rowCrawler, Submission $submission)
+    protected function verifyRowForSubmission(Crawler $rowCrawler, Submission $submission): void
     {
         // Find the queue task for this submission by querying on the judging
         /** @var QueueTask $queueTask */
@@ -182,7 +179,7 @@ class QueueTaskControllerTest extends BaseTest
         self::assertEquals('not started yet', $starttime);
     }
 
-    protected function verifyJudgetaskPage(Submission $submission)
+    protected function verifyJudgetaskPage(Submission $submission): void
     {
         // Find the queue task for this submission by querying on the judging
         /** @var QueueTask $queueTask */

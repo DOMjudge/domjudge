@@ -6,14 +6,14 @@ use App\DataFixtures\Test\SampleSubmissionsFixture;
 
 class MetricsControllerTest extends BaseTest
 {
-    protected static $fixtures = [
+    protected static array $fixtures = [
         SampleSubmissionsFixture::class,
     ];
 
     /**
      * Test that a non-logged-in user can not access the prometheus metrics.
      */
-    public function testPrometheusNoAccess()
+    public function testPrometheusNoAccess(): void
     {
         $this->verifyApiResponse('GET', "/metrics/prometheus", 401);
     }
@@ -21,7 +21,7 @@ class MetricsControllerTest extends BaseTest
     /**
      * Test that the Prometheus metrics give the basic expected output format.
      */
-    public function testPrometheusMetrics()
+    public function testPrometheusMetrics(): void
     {
         $expected =<<<EOF
 # HELP domjudge_submissions_correct Number of correct submissions

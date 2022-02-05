@@ -5,11 +5,11 @@ namespace App\Tests\Unit\Utils\Scoreboard;
 use App\DataFixtures\Test\ContestTimeFixture;
 use App\Entity\Contest;
 use App\Entity\Team;
+use App\Tests\Unit\BaseTest as BaseBaseTest;
+use App\Tests\Unit\Utils\FreezeDataTest;
 use App\Utils\FreezeData;
 use App\Utils\Scoreboard\Scoreboard;
 use App\Utils\Scoreboard\TeamScore;
-use App\Tests\Unit\Utils\FreezeDataTest;
-use App\Tests\Unit\BaseTest as BaseBaseTest;
 use Generator;
 
 class ScoreboardTest extends BaseBaseTest
@@ -17,7 +17,7 @@ class ScoreboardTest extends BaseBaseTest
     /**
      * Test that the scoreboard tiebreaker works with two teams without any scores.
      */
-    public function testScoreTiebreakerEmptyTeams() : void
+    public function testScoreTiebreakerEmptyTeams(): void
     {
         $teamA = new Team();
         $teamB = new Team();
@@ -34,7 +34,7 @@ class ScoreboardTest extends BaseBaseTest
     /**
      * Test that the scoreboard tiebreaker works with two teams with equal scores.
      */
-    public function testScoreTiebreakerEqualTeams() : void
+    public function testScoreTiebreakerEqualTeams(): void
     {
         $teamA = new Team();
         $teamB = new Team();
@@ -56,7 +56,7 @@ class ScoreboardTest extends BaseBaseTest
     /**
      * Test that the scoreboard tiebreaker works if only one team has scores.
      */
-    public function testScoreTiebreakerOneTeamEmpty() : void
+    public function testScoreTiebreakerOneTeamEmpty(): void
     {
         $teamA = new Team();
         $teamB = new Team();
@@ -76,7 +76,7 @@ class ScoreboardTest extends BaseBaseTest
     /**
      * Test that the scoreboard tiebreaker works if both teams have the same highest score.
      */
-    public function testScoreTiebreakerHighestEqual() : void
+    public function testScoreTiebreakerHighestEqual(): void
     {
         $teamA = new Team();
         $teamB = new Team();
@@ -98,7 +98,7 @@ class ScoreboardTest extends BaseBaseTest
     /**
      * Test that the scoreboard tiebreaker works if scores are different.
      */
-    public function testScoreTiebreakerUnequal() : void
+    public function testScoreTiebreakerUnequal(): void
     {
         $teamA = new Team();
         $teamB = new Team();
@@ -121,11 +121,17 @@ class ScoreboardTest extends BaseBaseTest
      * @dataProvider provideFreezeDataProgress
      */
     public function testScoreboardProgress(
-        string $reference, int $progress,
-        bool $_1, bool $_2, bool $_3, bool $_4, bool $_5, bool $_6): void
-    {
+        string $reference,
+        int $progress,
+        bool $_1,
+        bool $_2,
+        bool $_3,
+        bool $_4,
+        bool $_5,
+        bool $_6
+    ): void {
         $this->loadFixture(ContestTimeFixture::class);
-        $em = self::$container->get('doctrine')->getManager();
+        $em = self::getContainer()->get('doctrine')->getManager();
         $contest = $em->getRepository(Contest::class)->findOneBy(['name' => $reference]);
         $freezeData = new FreezeData($contest);
         $scoreBoard = new Scoreboard($contest, [], [], [], [], $freezeData, false, 0, true);

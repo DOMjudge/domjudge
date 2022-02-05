@@ -26,21 +26,14 @@ use ZipArchive;
  */
 abstract class BaseTest extends WebTestCase
 {
-    /** @var KernelBrowser */
-    protected $client;
+    protected KernelBrowser $client;
 
     /** @var string[] */
-    protected $roles = [];
+    protected array        $roles           = [];
+    protected ?ORMExecutor $fixtureExecutor = null;
 
-    /** @var ORMExecutor */
-    protected $fixtureExecutor;
-
-    /**
-     * What fixtures to load.
-     *
-     * @var string[]
-     */
-    protected static $fixtures = [];
+    /** What fixtures to load. */
+    protected static array $fixtures = [];
 
     protected function setUp(): void
     {
@@ -65,10 +58,10 @@ abstract class BaseTest extends WebTestCase
      *
      * @throws Exception
      */
-    protected function loadFixtures(array $fixtures)
+    protected function loadFixtures(array $fixtures): void
     {
         if ($this->fixtureExecutor === null) {
-            $this->fixtureExecutor = new ORMExecutor(static::$container->get(EntityManagerInterface::class));
+            $this->fixtureExecutor = new ORMExecutor(static::getContainer()->get(EntityManagerInterface::class));
         }
 
         $loader = new Loader();
@@ -87,7 +80,7 @@ abstract class BaseTest extends WebTestCase
      *
      * @throws Exception
      */
-    protected function loadFixture(string $fixture)
+    protected function loadFixture(string $fixture): void
     {
         $this->loadFixtures([$fixture]);
     }
@@ -100,7 +93,7 @@ abstract class BaseTest extends WebTestCase
         // If the object ID contains a :, it is a reference to a fixture item, so get it.
         if (is_string($id) && strpos($id, ':') !== false) {
             $referenceObject = $this->fixtureExecutor->getReferenceRepository()->getReference($id);
-            $metadata = static::$container->get(EntityManagerInterface::class)->getClassMetadata(get_class($referenceObject));
+            $metadata = static::getContainer()->get(EntityManagerInterface::class)->getClassMetadata(get_class($referenceObject));
             $propertyAccessor = PropertyAccess::createPropertyAccessor();
             return $propertyAccessor->getValue($referenceObject, $metadata->getSingleIdentifierColumnName());
         }
@@ -205,9 +198,9 @@ abstract class BaseTest extends WebTestCase
         $configValue,
         callable $callback
     ): void {
-        $config = self::$container->get(ConfigurationService::class);
-        $eventLog = self::$container->get(EventLogService::class);
-        $dj = self::$container->get(DOMJudgeService::class);
+        $config = self::getContainer()->get(ConfigurationService::class);
+        $eventLog = self::getContainer()->get(EventLogService::class);
+        $dj = self::getContainer()->get(DOMJudgeService::class);
 
         // Build up the data to set.
         $dataToSet = [$configKey => $configValue];
@@ -264,7 +257,7 @@ abstract class BaseTest extends WebTestCase
      */
     protected function dataSourceIsLocal(): bool
     {
-        $config = self::$container->get(ConfigurationService::class);
+        $config = self::getContainer()->get(ConfigurationService::class);
         $dataSource = $config->get('data_source');
         return $dataSource === DOMJudgeService::DATA_SOURCE_LOCAL;
     }
@@ -289,7 +282,7 @@ abstract class BaseTest extends WebTestCase
     protected function resolveEntityId(string $class, ?string $id): ?string
     {
         if ($id !== null && !$this->dataSourceIsLocal()) {
-            $entity = static::$container->get(EntityManagerInterface::class)->getRepository($class)->find($id);
+            $entity = static::getContainer()->get(EntityManagerInterface::class)->getRepository($class)->find($id);
             // If we can't find the entity, assume we use an invalid one.
             if ($entity === null) {
                 return $id;
@@ -307,7 +300,7 @@ abstract class BaseTest extends WebTestCase
     protected function unzipString(string $content): array
     {
         $zip = new ZipArchive();
-        $tempFilename = tempnam(static::$container->get(DOMJudgeService::class)->getDomjudgeTmpDir(), "domjudge-test-");
+        $tempFilename = tempnam(static::getContainer()->get(DOMJudgeService::class)->getDomjudgeTmpDir(), "domjudge-test-");
         file_put_contents($tempFilename, $content);
 
         $zip->open($tempFilename);

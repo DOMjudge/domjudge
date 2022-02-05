@@ -101,12 +101,12 @@ class ScoreboardIntegrationTest extends KernelTestCase
             ->with($this->isType('string'))
             ->will($this->returnCallback([$this, 'getConfig']));
 
-        $this->dj = self::$container->get(DOMJudgeService::class);
-        $this->em = self::$container->get('doctrine')->getManager();
+        $this->dj = self::getContainer()->get(DOMJudgeService::class);
+        $this->em = self::getContainer()->get('doctrine')->getManager();
         $this->ss = new ScoreboardService(
             $this->em, $this->dj, $this->config,
-            self::$container->get(LoggerInterface::class),
-            self::$container->get(EventLogService::class)
+            self::getContainer()->get(LoggerInterface::class),
+            self::getContainer()->get(EventLogService::class)
         );
 
         // Create a contest, problems and teams for which to test the

@@ -7,12 +7,12 @@ use Generator;
 
 class ImportExportControllerTest extends BaseTest
 {
-    protected $roles = ['admin'];
+    protected array $roles = ['admin'];
 
     /**
      * Test that the basic building blocks of the index page are there.
      */
-    public function testIndexBasic() : void
+    public function testIndexBasic(): void
     {
         $this->verifyPageResponse('GET', '/jury/import-export', 200);
 
@@ -31,7 +31,7 @@ class ImportExportControllerTest extends BaseTest
      *
      * @dataProvider provideContests
      */
-    public function testIndexContestDropdowns(string $contest) : void
+    public function testIndexContestDropdowns(string $contest): void
     {
         $this->verifyPageResponse('GET', '/jury/import-export', 200);
 
@@ -44,7 +44,7 @@ class ImportExportControllerTest extends BaseTest
      *
      * @dataProvider provideSortOrders
      */
-    public function testIndexGeneratedItems(string $sortOrder) : void
+    public function testIndexGeneratedItems(string $sortOrder): void
     {
         $this->verifyPageResponse('GET', '/jury/import-export', 200);
 
@@ -66,7 +66,7 @@ class ImportExportControllerTest extends BaseTest
     /**
      * Test that submit buttons show an icon.
      */
-    public function testIndexButtonsHaveIcons() : void
+    public function testIndexButtonsHaveIcons(): void
     {
         $this->verifyPageResponse('GET', '/jury/import-export', 200);
 

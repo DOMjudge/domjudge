@@ -12,7 +12,7 @@ class UtilsTest extends TestCase
     /**
      * Test that the absTime function returns the correct data
      */
-    public function testAbsTime() : void
+    public function testAbsTime(): void
     {
         $tz = date_default_timezone_get();
         date_default_timezone_set('Asia/Kathmandu');
@@ -24,7 +24,7 @@ class UtilsTest extends TestCase
      * Test that the absTime function returns the correct data when using a
      * time with millisecond precision
      */
-    public function testAbsTimeWithMillis() : void
+    public function testAbsTimeWithMillis(): void
     {
         $tz = date_default_timezone_get();
         date_default_timezone_set('Asia/Kathmandu');
@@ -36,7 +36,7 @@ class UtilsTest extends TestCase
      * Test that the absTime function returns the correct data when using a
      * time with millisecond precision when flooring the result
      */
-    public function testAbsTimeWithMillisFloored() : void
+    public function testAbsTimeWithMillisFloored(): void
     {
         $tz = date_default_timezone_get();
         date_default_timezone_set('Asia/Kathmandu');
@@ -48,7 +48,7 @@ class UtilsTest extends TestCase
      * Test that the absTime function returns the correct data when using a
      * time with 0000 milliseconds
      */
-    public function testAbsTimeWithMillis9999() : void
+    public function testAbsTimeWithMillis9999(): void
     {
         $tz = date_default_timezone_get();
         date_default_timezone_set('Asia/Kathmandu');
@@ -67,7 +67,7 @@ class UtilsTest extends TestCase
     /**
      * Test that the relTime function returns the correct data
      */
-    public function testRelTime() : void
+    public function testRelTime(): void
     {
         self::assertEquals('1:18:31.000', Utils::relTime(4711));
     }
@@ -76,7 +76,7 @@ class UtilsTest extends TestCase
      * Test that the relTime function returns the correct data when using a
      * time with millisecond precision
      */
-    public function testRelTimeWithMillis() : void
+    public function testRelTimeWithMillis(): void
     {
         self::assertEquals('1:18:31.081', Utils::relTime(4711.0815));
     }
@@ -85,7 +85,7 @@ class UtilsTest extends TestCase
      * Test that the relTime function returns the correct data when using a
      * time with millisecond precision when flooring the result
      */
-    public function testRelTimeWithMillisFloored() : void
+    public function testRelTimeWithMillisFloored(): void
     {
         self::assertEquals('1:18:31', Utils::relTime(4711.0815, true));
     }
@@ -94,7 +94,7 @@ class UtilsTest extends TestCase
      * Test that the relTIme function returns the correct data when using a
      * time with 0000 milliseconds
      */
-    public function testRelTimeWithMillis9999() : void
+    public function testRelTimeWithMillis9999(): void
     {
         self::assertEquals('1:18:31.999', Utils::relTime(4711.9999));
     }
@@ -103,7 +103,7 @@ class UtilsTest extends TestCase
      * Test that the relTime function returns the correct data when using a
      * negative value
      */
-    public function testNegativeRelTime() : void
+    public function testNegativeRelTime(): void
     {
         self::assertEquals('-3:25:45.000', Utils::relTime(-12345));
     }
@@ -112,7 +112,7 @@ class UtilsTest extends TestCase
      * Test that the relTime function returns the correct data when using a
      * negative value and a time with millisecond precision
      */
-    public function testNegativeRelTimeWithMillis() : void
+    public function testNegativeRelTimeWithMillis(): void
     {
         self::assertEquals('-3:25:45.678', Utils::relTime(-12345.6789));
     }
@@ -121,7 +121,7 @@ class UtilsTest extends TestCase
      * Test that the relTime function returns the correct data when using a
      * negative value and a time with millisecond precision when flooring the result
      */
-    public function testNegativeRelTimeWithMillisFloored() : void
+    public function testNegativeRelTimeWithMillisFloored(): void
     {
         self::assertEquals('-3:25:45', Utils::relTime(-12345.6789, true));
     }
@@ -129,7 +129,7 @@ class UtilsTest extends TestCase
     /**
      * Test that the toEpochFloat function works with a leap day
      */
-    public function testToEpochFloatLeapday() : void
+    public function testToEpochFloatLeapday(): void
     {
         $tz = date_default_timezone_get();
         date_default_timezone_set('Europe/Amsterdam');
@@ -140,7 +140,7 @@ class UtilsTest extends TestCase
     /**
      * Test that the toEpochFloat function works on a DST change
      */
-    public function testToEpochFloatDstChange() : void
+    public function testToEpochFloatDstChange(): void
     {
         $tz = date_default_timezone_get();
         date_default_timezone_set('Europe/Amsterdam');
@@ -152,7 +152,7 @@ class UtilsTest extends TestCase
     /**
      * Test that the toEpochFloat works with random data
      */
-    public function testAbsTimeToEpochFloatRandom() : void
+    public function testAbsTimeToEpochFloatRandom(): void
     {
         $tz_orig = date_default_timezone_get();
 
@@ -182,7 +182,7 @@ class UtilsTest extends TestCase
     /**
      * Test that printtime returns an empty string when no date is passed
      */
-    public function testPrinttimeNotime() : void
+    public function testPrinttimeNotime(): void
     {
         self::assertEquals('', Utils::printTime(null, "%H:%M"));
     }
@@ -190,7 +190,7 @@ class UtilsTest extends TestCase
     /**
      * Test that the printtime function returns the correct result
      */
-    public function testPrinttime() : void
+    public function testPrinttime(): void
     {
         $tz = date_default_timezone_get();
         date_default_timezone_set('UTC');
@@ -203,7 +203,7 @@ class UtilsTest extends TestCase
     /**
      * Test that the printtimediff function returns the correct result
      */
-    public function testPrinttimediff() : void
+    public function testPrinttimediff(): void
     {
         // Test the empty end case,
         self::assertEquals("00:00", Utils::printtimediff(microtime(true)));
@@ -237,7 +237,7 @@ class UtilsTest extends TestCase
     /**
      * Test the difftime function
      */
-    public function testDifftime() : void
+    public function testDifftime(): void
     {
         $now = Utils::now();
         $offset = 10;
@@ -253,7 +253,7 @@ class UtilsTest extends TestCase
      * Note: the function "assumes" the first is larger than the second
      * according to its specification.
      */
-    public function testTimeStringDiff() : void
+    public function testTimeStringDiff(): void
     {
         self::assertEquals("01:00:00", Utils::timeStringDiff("16:00:00", "15:00:00"));
         self::assertEquals("00:00:03", Utils::timeStringDiff("16:00:00", "15:59:57"));
@@ -267,7 +267,7 @@ class UtilsTest extends TestCase
      * Test function that converts colour name to hex notation.
      * If value is already hexadecimal, return it unchanged.
      */
-    public function testConvertToHexNoop() : void
+    public function testConvertToHexNoop(): void
     {
         $color = '#aa43c3';
         self::assertEquals($color, Utils::convertToHex($color));
@@ -279,7 +279,7 @@ class UtilsTest extends TestCase
      * Test function that converts colour name to hex notation.
      * Returns correct value for known colour names.
      */
-    public function testConvertToHexConvert() : void
+    public function testConvertToHexConvert(): void
     {
         self::assertEquals('#B22222', Utils::convertToHex('firebrick'));
         self::assertEquals('#00BFFF', Utils::convertToHex('deep sky blue'));
@@ -315,7 +315,7 @@ class UtilsTest extends TestCase
      * Test function that converts colour name to hex notation.
      * Returns null for unknown values.
      */
-    public function testConvertToHexUnknown() : void
+    public function testConvertToHexUnknown(): void
     {
         self::assertNull(Utils::convertToHex('doesnotexist'));
         self::assertNull(Utils::convertToHex('#aabbccdd'));
@@ -326,7 +326,7 @@ class UtilsTest extends TestCase
      * Test function that converts colour hex notation to (nearest) name.
      * If value is not hexadecimal, return it unchanged.
      */
-    public function testConvertToColorNoop() : void
+    public function testConvertToColorNoop(): void
     {
         $color = 'doesnotexist';
         self::assertEquals($color, Utils::convertToColor($color));
@@ -344,7 +344,7 @@ class UtilsTest extends TestCase
      * Test function that converts colour hex notation to (nearest) name.
      * Returns correct value for known colour names.
      */
-    public function testConvertToColorConvertExact() : void
+    public function testConvertToColorConvertExact(): void
     {
         self::assertEquals('firebrick', Utils::convertToColor('#B22222'));
         self::assertEquals('firebrick', Utils::convertToColor('#b22222'));
@@ -356,7 +356,7 @@ class UtilsTest extends TestCase
      * Test function that converts colour hex notation to (nearest) name.
      * Returns correct closest value for known colour names.
      */
-    public function testConvertToColorConvertClosest() : void
+    public function testConvertToColorConvertClosest(): void
     {
         self::assertEquals('white', Utils::convertToColor('#fffffe'));
         self::assertEquals('black', Utils::convertToColor('#000010'));
@@ -365,7 +365,7 @@ class UtilsTest extends TestCase
     /**
      * Test float rounding function called with null.
      */
-    public function testRoundedFloatNull() : void
+    public function testRoundedFloatNull(): void
     {
         self::assertNull(Utils::roundedFloat(null));
     }
@@ -373,7 +373,7 @@ class UtilsTest extends TestCase
     /**
      * Test float rounding function called with a number without decimals.
      */
-    public function testRoundedFloatNoDecimals() : void
+    public function testRoundedFloatNoDecimals(): void
     {
         self::assertEquals(-5, Utils::roundedFloat(-5));
         self::assertEquals(100, Utils::roundedFloat(100));
@@ -382,7 +382,7 @@ class UtilsTest extends TestCase
     /**
      * Test float rounding function called with a number with decimals to default number of decimals.
      */
-    public function testRoundedFloatDecimals() : void
+    public function testRoundedFloatDecimals(): void
     {
         self::assertEquals(6.01, Utils::roundedFloat(6.01));
         self::assertEquals(6.002, Utils::roundedFloat(6.002));
@@ -393,7 +393,7 @@ class UtilsTest extends TestCase
     /**
      * Test float rounding function called with a number with decimals to a specified number of decimals.
      */
-    public function testRoundedFloatDecimalsSpecifiedLength() : void
+    public function testRoundedFloatDecimalsSpecifiedLength(): void
     {
         self::assertEquals(6.01, Utils::roundedFloat(6.01, 2));
         self::assertEquals(6.01, Utils::roundedFloat(6.01, 5));
@@ -405,7 +405,7 @@ class UtilsTest extends TestCase
     /**
      * Test that penalty time is correctly calculated.
      */
-    public function testCalcPenaltyTime() : void
+    public function testCalcPenaltyTime(): void
     {
         self::assertEquals(0, Utils::calcPenaltyTime(true, 1, 20, false));
         self::assertEquals(20, Utils::calcPenaltyTime(true, 2, 20, false));
@@ -420,7 +420,7 @@ class UtilsTest extends TestCase
     /**
      * Test that penalty time is correctly calculated in seconds.
      */
-    public function testCalcPenaltyTimeSeconds() : void
+    public function testCalcPenaltyTimeSeconds(): void
     {
         self::assertEquals(0, Utils::calcPenaltyTime(true, 1, 20, true));
         self::assertEquals(1200, Utils::calcPenaltyTime(true, 2, 20, true));
@@ -435,7 +435,7 @@ class UtilsTest extends TestCase
     /**
      * Test that penalty time is correctly calculated: problem not solved.
      */
-    public function testCalcPenaltyTimeNotSolved() : void
+    public function testCalcPenaltyTimeNotSolved(): void
     {
         self::assertEquals(0, Utils::calcPenaltyTime(false, 1, 20, false));
         self::assertEquals(0, Utils::calcPenaltyTime(false, 2, 20, false));
@@ -450,7 +450,7 @@ class UtilsTest extends TestCase
     /**
      * Test that the scoreboard time is correctly truncated, time is in seconds
      */
-    public function testScoreTimeInSeconds() : void
+    public function testScoreTimeInSeconds(): void
     {
         self::assertEquals(0, Utils::scoretime(0, true));
         self::assertEquals(0, Utils::scoretime(0.05, true));
@@ -460,7 +460,7 @@ class UtilsTest extends TestCase
     /**
      * Test that the scoreboard time is correctly truncated, time is in minutes
      */
-    public function testScoreTimeInMinutes() : void
+    public function testScoreTimeInMinutes(): void
     {
         self::assertEquals(0, Utils::scoretime(0, false));
         self::assertEquals(0, Utils::scoretime(35, false));
@@ -473,7 +473,7 @@ class UtilsTest extends TestCase
     /**
      * Test that printhost truncates a hostname
      */
-    public function testPrinthost() : void
+    public function testPrinthost(): void
     {
         self::assertEquals("my", Utils::printhost("my.example.hostname.example.com"));
         self::assertEquals("hostonly", Utils::printhost("hostonly"));
@@ -482,7 +482,7 @@ class UtilsTest extends TestCase
     /**
      * Test that printhost does not truncate a hostname
      */
-    public function testPrinthostFull() : void
+    public function testPrinthostFull(): void
     {
         self::assertEquals("my.example.hostname.example.com", Utils::printhost("my.example.hostname.example.com", true));
         self::assertEquals("hostonly", Utils::printhost("hostonly", true));
@@ -491,7 +491,7 @@ class UtilsTest extends TestCase
     /**
      * Test that printhost does not truncate an IP address.
      */
-    public function testPrinthostIP() : void
+    public function testPrinthostIP(): void
     {
         self::assertEquals("127.0.0.1", Utils::printhost("127.0.0.1"));
         self::assertEquals("2001:610:0:800f:f816:3eff:fe15:c440", Utils::printhost("2001:610:0:800f:f816:3eff:fe15:c440"));
@@ -501,7 +501,7 @@ class UtilsTest extends TestCase
     /**
      * Test that printsize prints some sizes
      */
-    public function testPrintsize() : void
+    public function testPrintsize(): void
     {
         self::assertEquals("0 B", Utils::printsize(0));
         self::assertEquals("1000 B", Utils::printsize(1000));
@@ -516,7 +516,7 @@ class UtilsTest extends TestCase
     /**
      * Test that printsize prints some sizes with specified number of decimals
      */
-    public function testPrintsizeDecimalsSpecified() : void
+    public function testPrintsizeDecimalsSpecified(): void
     {
         self::assertEquals("0 B", Utils::printsize(0, 4));
         self::assertEquals("1.00 KB", Utils::printsize(1025, 2));
@@ -528,7 +528,7 @@ class UtilsTest extends TestCase
     /**
      * Basic testing of the LCSdiff function
      */
-    public function testComputeLcsDiff() : void
+    public function testComputeLcsDiff(): void
     {
         $line_a = "DOMjudge is a system for running programming contests,";
         $line_b = "DOMjudge is a very good system for running programming contests,";
@@ -554,7 +554,7 @@ class UtilsTest extends TestCase
     /**
      * Testing of the LCSdiff function with long strings
      */
-    public function testComputeLcsDiffLonglines() : void
+    public function testComputeLcsDiffLonglines(): void
     {
         $line_a = "DOMjudge is a system for running programming contests,";
         $line_b = "This usually means that teams are on-site and have a fixed time period (mostly 5 hours) and one computer to solve a number of problems (mostly 8-12). Problems are solved by writing a program in one of the allowed languages, that reads input according to the problem input specification and writes the correct, corresponding output. The judging is done by submitting the source code of the solution to the jury. There the jury system automatically compiles and runs the program and compares the program output with the expected output. This software can be used to handle the submission and judging during such contests. It also handles feedback to the teams and communication on problems (clarification requests). It has web interfaces for the jury, the teams (their submissions and clarification requests) and the public (scoreboard).";
@@ -567,7 +567,7 @@ class UtilsTest extends TestCase
     /**
      * Test that the specialchars function returns the correct result
      */
-    public function testSpecialchars() : void
+    public function testSpecialchars(): void
     {
         $plain = "Example string to test";
         self::assertEquals($plain, Utils::specialchars($plain));
@@ -587,7 +587,7 @@ class UtilsTest extends TestCase
     /**
      * Test that string is not cut when shorter or one longer than requested maximum
      */
-    public function testCutStringNoop() : void
+    public function testCutStringNoop(): void
     {
         $string = 'Example string.';
         self::assertEquals($string, Utils::cutString($string, 70));
@@ -599,7 +599,7 @@ class UtilsTest extends TestCase
     /**
      * Test that string is cut when one longer than requested maximum
      */
-    public function testCutStringCut() : void
+    public function testCutStringCut(): void
     {
         $string = 'Example string.';
         self::assertEquals("Examp…", Utils::cutString($string, 5));
@@ -609,7 +609,7 @@ class UtilsTest extends TestCase
      * Test that string is not cut when not longer than 1 over requested maximum,
      * counting multi-byte characters as one.
      */
-    public function testCutStringNoopMB() : void
+    public function testCutStringNoopMB(): void
     {
         $string = '📍📍📍';
         self::assertEquals($string, Utils::cutString($string, 3));
@@ -620,7 +620,7 @@ class UtilsTest extends TestCase
      * Test that string is cut when one longer than requested maximum,
      * counting multi-byte characters as one.
      */
-    public function testCutStringCutMB() : void
+    public function testCutStringCutMB(): void
     {
         $string = '📍📍📍📍📍📍';
         self::assertEquals("📍📍📍…", Utils::cutString($string, 3));
@@ -630,7 +630,7 @@ class UtilsTest extends TestCase
     /**
      * Test image type png
      */
-    public function testGetImageType() : void
+    public function testGetImageType(): void
     {
         $logo = __DIR__ . '/../../../public/images/teams/domjudge.jpg';
         $image = file_get_contents($logo);
@@ -644,7 +644,7 @@ class UtilsTest extends TestCase
     /**
      * Test image type with no implemented logic
      */
-    public function testGetImageTypeNotImplemented() : void
+    public function testGetImageTypeNotImplemented(): void
     {
         $logo = __DIR__ . '/../../../public/images/DOMjudgelogo.svg';
         $image = file_get_contents($logo);
@@ -658,7 +658,7 @@ class UtilsTest extends TestCase
     /**
      * Test image type with invalid image
      */
-    public function testGetImageTypeError() : void
+    public function testGetImageTypeError(): void
     {
         $image = 'Not really an image';
         $error = null;
@@ -698,7 +698,7 @@ class UtilsTest extends TestCase
     /**
      * Test image thumb with invalid image
      */
-    public function testGetImageThumbError() : void
+    public function testGetImageThumbError(): void
     {
         $image = 'Not really an image';
         $error = null;
@@ -733,7 +733,7 @@ class UtilsTest extends TestCase
     /**
      * Test that the wrapUnquoted function returns the correct result
      */
-    public function testWrapUnquotedSingleLineUnquoted() : void
+    public function testWrapUnquotedSingleLineUnquoted(): void
     {
         $text = "This is an example text.";
         self::assertEquals($text, Utils::wrapUnquoted($text));
@@ -743,7 +743,7 @@ class UtilsTest extends TestCase
      * Test that the specialchars function returns the correct result with a
      * long line
      */
-    public function testWrapUnquotedLongLineUnquoted() : void
+    public function testWrapUnquotedLongLineUnquoted(): void
     {
         $text = "This is an example text.";
         $result = "This is an
@@ -756,7 +756,7 @@ text.";
      * Test that the specialchars function returns the correct result with a
      * long quoted line
      */
-    public function testWrapUnquotedLongLineWithQuoted() : void
+    public function testWrapUnquotedLongLineWithQuoted(): void
     {
         $text = "> > This is an example text.
 > And another long line appears here.
@@ -793,7 +793,7 @@ you know";
      * Test that the specialchars function returns the correct result with a
      * long quoted line with a custom quote character
      */
-    public function testWrapUnquotedLongLineWithQuotedCustomQuoteCharacter() : void
+    public function testWrapUnquotedLongLineWithQuotedCustomQuoteCharacter(): void
     {
         $text = "# This is an example text.
 # And another long line appears here.
@@ -814,7 +814,7 @@ part.";
     /**
      * Test that the startsWith function returns the correct result
      */
-    public function testStartsWith() : void
+    public function testStartsWith(): void
     {
         $text = "The quick brown fox jumped over the lazy dog.";
         $start = "The quick";
@@ -826,7 +826,7 @@ part.";
     /**
      * Test that the endsWith function returns the correct result
      */
-    public function testEndsWith() : void
+    public function testEndsWith(): void
     {
         $text = "The quick brown fox jumped over the lazy dog.";
         $end = "lazy dog.";
@@ -839,7 +839,7 @@ part.";
      * Test that the generatePassword function generates a valid password (when
      * using more entropy)
      */
-    public function testGeneratePasswordMoreEntropy() : void
+    public function testGeneratePasswordMoreEntropy(): void
     {
         $passes = [];
         $onlyCorrectChars = true;
@@ -859,7 +859,7 @@ part.";
      * Test that the generatePassword function generates a valid password when
      * using less entropy
      */
-    public function testGeneratePasswordWithLessEntropy() : void
+    public function testGeneratePasswordWithLessEntropy(): void
     {
         $passes = [];
         $onlyalnum = true;
@@ -881,7 +881,7 @@ part.";
     /**
      * Test that PHP ini values for bytes are converted correctly.
      */
-    public function testPhpiniToBytes() : void
+    public function testPhpiniToBytes(): void
     {
         self::assertEquals(100, Utils::phpiniToBytes('100'));
         self::assertEquals(100*1024**3, Utils::phpiniToBytes('100g'));
@@ -895,7 +895,7 @@ part.";
     /**
      * Test that we get the correct table name for an entity
      */
-    public function testTableForEntity() : void
+    public function testTableForEntity(): void
     {
         $entity = new TeamAffiliation();
         self::assertEquals('team_affiliation', Utils::tableForEntity($entity));
@@ -904,7 +904,7 @@ part.";
     /**
      * Test that returning a binary file sets correct header
      */
-    public function testStreamAsBinaryFile() : void
+    public function testStreamAsBinaryFile(): void
     {
         $content = 'The quick brown fox jumps over the lazy dog.';
         $filename = 'foxdog.txt';
@@ -921,7 +921,7 @@ part.";
     /**
      * Test Tab Separated Value encoding
      */
-    public function testToTsvField() : void
+    public function testToTsvField(): void
     {
         self::assertEquals('team name', Utils::toTsvField('team name'));
         self::assertEquals('Team,,, name', Utils::toTsvField('Team,,, name'));
@@ -936,7 +936,7 @@ part.";
     /**
      * Test Tab Separated Value parsing
      */
-    public function testParseTsvLine() : void
+    public function testParseTsvLine(): void
     {
         $bs  = "\\";
         $tab = "\t";
@@ -956,7 +956,7 @@ part.";
     /**
      * Test that reindexing an array works
      */
-    public function testReindex() : void
+    public function testReindex(): void
     {
         $input = [1, 2, 3];
         $expectedOutput = [2 => 1, 4 => 2, 6 => 3];

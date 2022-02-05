@@ -6,7 +6,7 @@ use App\Tests\Unit\BaseTest;
 
 class DocsPageControllerTest extends BaseTest
 {
-    protected $roles = ['team'];
+    protected array $roles = ['team'];
 
     protected const YAML = __DIR__ . '/../../../../../etc/docs.yaml';
 
@@ -21,7 +21,7 @@ class DocsPageControllerTest extends BaseTest
     /**
      * Test that having docs.yaml does show docs link.
      */
-    public function testDocsLinkInMenu() : void
+    public function testDocsLinkInMenu(): void
     {
         $this->verifyPageResponse('GET', '/team', 200);
 
@@ -31,7 +31,7 @@ class DocsPageControllerTest extends BaseTest
     /**
      * Test content of docs page shows items from docs.yaml.
      */
-    public function testDocsPage() : void
+    public function testDocsPage(): void
     {
         $this->verifyPageResponse('GET', '/team/docs', 200);
 

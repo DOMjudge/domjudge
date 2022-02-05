@@ -12,7 +12,7 @@ class GeneralInfoControllerTest extends BaseTest
 {
     private const API_VERSION = 4;
 
-    public function testVersionReturnsApiVersion()
+    public function testVersionReturnsApiVersion(): void
     {
         $response = $this->verifyApiJsonResponse('GET', "/version", 200);
 
@@ -24,7 +24,7 @@ class GeneralInfoControllerTest extends BaseTest
     /**
      * Test that both the API base as the info endpoint return the same data.
      */
-    public function testInfoReturnsVariables()
+    public function testInfoReturnsVariables(): void
     {
         $infoEndpoints = ['/', '/info'];
 
@@ -40,12 +40,12 @@ class GeneralInfoControllerTest extends BaseTest
         }
     }
 
-    public function testStatusNoPublicAccess()
+    public function testStatusNoPublicAccess(): void
     {
         $this->verifyApiJsonResponse('GET', "/status", 401);
     }
 
-    public function testStatusNoTeamAccess()
+    public function testStatusNoTeamAccess(): void
     {
         $this->verifyApiJsonResponse('GET', "/status", 403, 'demo');
     }
@@ -53,7 +53,7 @@ class GeneralInfoControllerTest extends BaseTest
     /**
      * Test the basic output of the status endpoint without submissions present.
      */
-    public function testStatusAdminBasicOperation()
+    public function testStatusAdminBasicOperation(): void
     {
         $response = $this->verifyApiJsonResponse('GET', "/status", 200, 'admin');
 
@@ -70,7 +70,7 @@ class GeneralInfoControllerTest extends BaseTest
     /**
      * Test that adding two submissions is reflected in the status endpoint.
      */
-    public function testStatusAdminSubmissionsPresent()
+    public function testStatusAdminSubmissionsPresent(): void
     {
         $this->loadFixture(SampleSubmissionsFixture::class);
         $response = $this->verifyApiJsonResponse('GET', "/status", 200, 'admin');
@@ -85,7 +85,7 @@ class GeneralInfoControllerTest extends BaseTest
         static::assertEquals($expected, $response);
     }
 
-    public function testUserEndpointMustBeLoggedIn()
+    public function testUserEndpointMustBeLoggedIn(): void
     {
         $this->verifyApiJsonResponse('GET', "/status", 401);
     }
@@ -94,7 +94,7 @@ class GeneralInfoControllerTest extends BaseTest
      * Test user endpoint with different users.
      * @dataProvider provideUsers
      */
-    public function testUserEndpoint(string $username, string $fullname, string $teamname, array $roles)
+    public function testUserEndpoint(string $username, string $fullname, string $teamname, array $roles): void
     {
         $response = $this->verifyApiJsonResponse('GET', "/user", 200, $username);
 
@@ -121,7 +121,7 @@ class GeneralInfoControllerTest extends BaseTest
      *
      * @dataProvider provideCountryFlagExists
      */
-    public function testCountryFlagExists(string $countryCode, string $size)
+    public function testCountryFlagExists(string $countryCode, string $size): void
     {
         $this->withChangedConfiguration('show_flags', true, function() use ($countryCode, $size) {
             $this->client->request('GET', "/api/country-flags/$countryCode/$size");
@@ -132,7 +132,7 @@ class GeneralInfoControllerTest extends BaseTest
 
             $svgFile = sprintf(
                 '%s/public/flags/%s/%s.svg',
-                static::$container->get(DOMJudgeService::class)->getDomjudgeWebappDir(),
+                static::getContainer()->get(DOMJudgeService::class)->getDomjudgeWebappDir(),
                 $size, strtolower(Countries::getAlpha2Code(strtoupper($countryCode)))
             );
 
@@ -153,7 +153,7 @@ class GeneralInfoControllerTest extends BaseTest
      *
      * @dataProvider provideCountryFlagSizeNotFound
      */
-    public function testCountryFlagNotFound(string $countryCode, string $size)
+    public function testCountryFlagNotFound(string $countryCode, string $size): void
     {
         $this->withChangedConfiguration('show_flags', true, function() use ($countryCode, $size) {
             $this->client->request('GET', "/api/country-flags/$countryCode/$size");
@@ -175,7 +175,7 @@ class GeneralInfoControllerTest extends BaseTest
      *
      * @dataProvider provideCountryFlagNotFound
      */
-    public function testCountryNotFound(string $countryCode, string $size)
+    public function testCountryNotFound(string $countryCode, string $size): void
     {
         $this->withChangedConfiguration('show_flags', true, function() use ($countryCode, $size) {
             $this->client->request('GET', "/api/country-flags/$countryCode/$size");
@@ -199,7 +199,7 @@ class GeneralInfoControllerTest extends BaseTest
      *
      * @dataProvider provideCountryFlagExists
      */
-    public function testCountryFlagDisabled(string $countryCode, string $size)
+    public function testCountryFlagDisabled(string $countryCode, string $size): void
     {
         $this->withChangedConfiguration('show_flags', false, function () use ($countryCode, $size) {
             $this->client->request('GET', "/api/country-flags/$countryCode/$size");

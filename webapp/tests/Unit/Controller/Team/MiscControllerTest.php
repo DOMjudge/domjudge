@@ -10,11 +10,11 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class MiscControllerTest extends BaseTest
 {
-    protected $roles = ['team'];
+    protected array $roles = ['team'];
 
     private const PRINT_COMMAND = 'echo [language] && /bin/cat [file]';
 
-    public function testTeamRedirectToLogin() : void
+    public function testTeamRedirectToLogin(): void
     {
         // Log out, we are testing public functionality.
         $this->logOut();
@@ -25,7 +25,7 @@ class MiscControllerTest extends BaseTest
     /**
      * Test the login process for teams.
      */
-    public function testLogin() : void
+    public function testLogin(): void
     {
         // Log out, we are testing log in functionality.
         $this->logOut();
@@ -44,7 +44,7 @@ class MiscControllerTest extends BaseTest
      *
      * @dataProvider ajaxProvider
      */
-    public function testTeamOverviewPage(bool $ajax) : void
+    public function testTeamOverviewPage(bool $ajax): void
     {
         $this->verifyPageResponse('GET', '/team', 200, null, $ajax);
 
@@ -56,13 +56,13 @@ class MiscControllerTest extends BaseTest
         self::assertEquals('Clarification Requests', $h1s[2]);
     }
 
-    public function ajaxProvider() : Generator
+    public function ajaxProvider(): Generator
     {
         yield [false];
         yield [true];
     }
 
-    public function testPrintingDisabledTeamMenu() : void
+    public function testPrintingDisabledTeamMenu(): void
     {
         $this->verifyPageResponse('GET', '/team', 200);
         self::assertSelectorNotExists('a:contains("Print")');
@@ -72,7 +72,7 @@ class MiscControllerTest extends BaseTest
      * Test that if printing is disabled, we get access denied exception.
      * when visiting the print page.
      */
-    public function testPrintingDisabledAccessDenied() : void
+    public function testPrintingDisabledAccessDenied(): void
     {
         $this->verifyPageResponse('GET', '/team/print', 403);
     }
@@ -80,7 +80,7 @@ class MiscControllerTest extends BaseTest
     /**
      * Test that when printing is enabled the link is shown.
      */
-    public function testPrintingEnabledTeamMenu() : void
+    public function testPrintingEnabledTeamMenu(): void
     {
         $this->withChangedConfiguration('print_command', static::PRINT_COMMAND,
             function () {
@@ -92,7 +92,7 @@ class MiscControllerTest extends BaseTest
     /**
      * Test that if printing is enabled, we can actually print something.
      */
-    public function testPrintingEnabledSubmitForm() : void
+    public function testPrintingEnabledSubmitForm(): void
     {
         $this->withChangedConfiguration('print_command', static::PRINT_COMMAND,
             function () {
@@ -121,7 +121,7 @@ class MiscControllerTest extends BaseTest
      *
      * @dataProvider withReferrerProvider
      */
-    public function testChangeContest(bool $withReferrer) : void
+    public function testChangeContest(bool $withReferrer): void
     {
         $start       = (int)floor(microtime(true) - 1800);
         $startString = strftime('%Y-%m-%d %H:%M:%S ',
@@ -138,7 +138,7 @@ class MiscControllerTest extends BaseTest
             ->setEndtimeString('+05:00')
             ->setFreezetimeString('+04:00');
 
-        $em = self::$container->get(EntityManagerInterface::class);
+        $em = self::getContainer()->get(EntityManagerInterface::class);
         $em->persist($contest);
         $em->flush();
 
@@ -178,7 +178,7 @@ class MiscControllerTest extends BaseTest
         self::assertSelectorTextContains('.card-header span', 'Test contest for switching');
     }
 
-    public function withReferrerProvider() : Generator
+    public function withReferrerProvider(): Generator
     {
         yield [true];
         yield [false];
@@ -187,7 +187,7 @@ class MiscControllerTest extends BaseTest
     /**
      * Test that no docs.yaml does not show docs link.
      */
-    public function testDocsNoDocs() : void
+    public function testDocsNoDocs(): void
     {
         $this->verifyPageResponse('GET', '/team', 200);
 

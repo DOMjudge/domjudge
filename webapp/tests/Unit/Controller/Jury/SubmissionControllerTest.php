@@ -8,8 +8,8 @@ use Generator;
 
 class SubmissionControllerTest extends BaseTest
 {
-    protected $roles = ['jury'];
-    protected static $baseURL = '/jury/submissions';
+    protected array         $roles   = ['jury'];
+    protected static string $baseURL = '/jury/submissions';
 
     /**
      * Test that the basic building blocks of the index page are there.

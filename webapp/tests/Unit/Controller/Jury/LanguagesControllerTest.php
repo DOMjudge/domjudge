@@ -10,26 +10,26 @@ use Symfony\Component\HttpFoundation\Request;
 
 class LanguagesControllerTest extends JuryControllerTest
 {
-    protected static $identifyingEditAttribute = 'name';
-    protected static $defaultEditEntityName    = 'Java';
-    protected static $baseUrl          = '/jury/languages';
-    protected static $exampleEntries   = ['c','csharp','Haskell','Bash shell',"pas, p",'no','yes','R','r'];
-    protected static $shortTag         = 'language';
-    protected static $deleteEntities   = ['name' => ['C++']];
-    protected static $getIDFunc        = 'getLangid';
-    protected static $className        = Language::class;
-    protected static $DOM_elements     = ['h1' => ['Languages']];
-    protected static $addPlus          = 'extensions';
-    protected static $addForm          = 'language[';
-    protected static $addEntitiesShown = ['langid','externalid','name','timefactor'];
-    protected static $addEntities      = [];
+    protected static string  $identifyingEditAttribute = 'name';
+    protected static ?string $defaultEditEntityName    = 'Java';
+    protected static string  $baseUrl                  = '/jury/languages';
+    protected static array   $exampleEntries           = ['c', 'csharp', 'Haskell', 'Bash shell', "pas, p", 'no', 'yes', 'R', 'r'];
+    protected static string  $shortTag                 = 'language';
+    protected static array   $deleteEntities           = ['name' => ['C++']];
+    protected static string  $getIDFunc                = 'getLangid';
+    protected static string  $className                = Language::class;
+    protected static array   $DOM_elements             = ['h1' => ['Languages']];
+    protected static ?string $addPlus                  = 'extensions';
+    protected static string  $addForm                  = 'language[';
+    protected static array   $addEntitiesShown         = ['langid', 'externalid', 'name', 'timefactor'];
+    protected static array   $addEntities              = [];
 
     public function testUnlockJudgeTasksFormEdit(): void
     {
         // First, check that adding a submission creates a queue task and 3 judge tasks
         $this->addSubmission('DOMjudge', 'fltcmp');
         /** @var EntityManagerInterface $em */
-        $em = static::$container->get(EntityManagerInterface::class);
+        $em = static::getContainer()->get(EntityManagerInterface::class);
         $queueTaskQuery = $em->createQueryBuilder()
             ->from(QueueTask::class, 'qt')
             ->select('COUNT(qt)')
@@ -73,7 +73,7 @@ class LanguagesControllerTest extends JuryControllerTest
         // First, check that adding a submission creates a queue task and 3 judge tasks
         $this->addSubmission('DOMjudge', 'fltcmp');
         /** @var EntityManagerInterface $em */
-        $em = static::$container->get(EntityManagerInterface::class);
+        $em = static::getContainer()->get(EntityManagerInterface::class);
         $queueTaskQuery = $em->createQueryBuilder()
             ->from(QueueTask::class, 'qt')
             ->select('COUNT(qt)')

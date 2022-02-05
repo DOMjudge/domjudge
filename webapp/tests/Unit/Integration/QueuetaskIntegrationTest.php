@@ -17,7 +17,7 @@ use App\Service\EventLogService;
 use App\Service\ScoreboardService;
 use App\Service\SubmissionService;
 use App\Utils\Utils;
-use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
@@ -29,50 +29,22 @@ class QueuetaskIntegrationTest extends KernelTestCase
     public const NUM_PROBLEMS = 3;
     public const NUM_TEAMS = 3;
 
-    /**
-     * @var DOMJudgeService
-     */
-    private $dj;
-
-    /**
-     * @var SubmissionService
-     */
-    private $submissionService;
-
-    /**
-     * @var ScoreboardService
-     */
-    private $scoreboardService;
-
-    /**
-     * @var EntityManager
-     */
-    private $em;
+    private SubmissionService $submissionService;
+    private ScoreboardService $scoreboardService;
+    private ?EntityManagerInterface $em;
 
     /**
      * @var ConfigurationService|MockObject
      */
     private $config;
+    private array $configValues;
+    private Contest $contest;
 
-    /**
-     * @var array
-     */
-    private $configValues;
+    /** @var Problem[] */
+    private array $problems;
 
-    /**
-     * @var Contest
-     */
-    private $contest;
-
-    /**
-     * @var Problem[]
-     */
-    private $problems;
-
-    /**
-     * @var Team[]
-     */
-    private $teams;
+    /** @var Team[] */
+    private array $teams;
 
     protected function setUp(): void
     {
@@ -95,20 +67,20 @@ class QueuetaskIntegrationTest extends KernelTestCase
             ->with($this->isType('string'))
             ->will($this->returnCallback([$this, 'getConfig']));
 
-        $this->dj = self::$container->get(DOMJudgeService::class);
-        $this->em = self::$container->get('doctrine')->getManager();
+        $dj = self::getContainer()->get(DOMJudgeService::class);
+        $this->em = self::getContainer()->get('doctrine')->getManager();
 
         $this->scoreboardService = new ScoreboardService(
-            $this->em, $this->dj, $this->config,
-            self::$container->get(LoggerInterface::class),
-            self::$container->get(EventLogService::class)
+            $this->em, $dj, $this->config,
+            self::getContainer()->get(LoggerInterface::class),
+            self::getContainer()->get(EventLogService::class)
         );
         $this->submissionService = new SubmissionService(
             $this->em,
-            self::$container->get(LoggerInterface::class),
-            $this->dj,
+            self::getContainer()->get(LoggerInterface::class),
+            $dj,
             $this->config,
-            self::$container->get(EventLogService::class),
+            self::getContainer()->get(EventLogService::class),
             $this->scoreboardService
         );
 
@@ -199,7 +171,7 @@ class QueuetaskIntegrationTest extends KernelTestCase
         $this->em = null; // avoid memory leaks
     }
 
-    private function submit($time, Team $team = null, Problem $problem = null, string $source = 'team page'): QueueTask
+    private function submit($time, ?Team $team = null, ?Problem $problem = null, string $source = 'team page'): QueueTask
     {
         $contest = $this->em->getRepository(Contest::class)->find($this->contest->getCid());
         $team = $team ?? $this->teams[0];
@@ -221,7 +193,7 @@ class QueuetaskIntegrationTest extends KernelTestCase
         return $queuetask;
     }
 
-    public function testNormalSubmissions()
+    public function testNormalSubmissions(): void
     {
         $time = Utils::now();
 
@@ -270,7 +242,7 @@ class QueuetaskIntegrationTest extends KernelTestCase
         self::assertEquals((int)$time, $thirdTeamThirdTask->getTeamPriority());
     }
 
-    public function testRogueTeam()
+    public function testRogueTeam(): void
     {
         $time = Utils::now();
         $startTimeAsInt = (int)$time;
@@ -336,7 +308,8 @@ class QueuetaskIntegrationTest extends KernelTestCase
         self::assertEquals([0, 90, 180], $normalTeamPrios);
     }
 
-    function testSubmittingAsInTheComment() {
+    public function testSubmittingAsInTheComment(): void
+    {
         // See comment in DOMjudgeService.php where we describe the queue behavior.
         $time = Utils::now();
 
@@ -360,7 +333,8 @@ class QueuetaskIntegrationTest extends KernelTestCase
         self::assertEquals($third->getTeamPriority()+1, $fourth->getTeamPriority());
     }
 
-    function testPriorities() {
+    public function testPriorities(): void
+    {
         $time = Utils::now();
 
         $normal = $this->submit($time, $this->teams[0], null, 'team page');
@@ -376,12 +350,12 @@ class QueuetaskIntegrationTest extends KernelTestCase
         self::assertEquals(JudgeTask::PRIORITY_LOW, $problem_import->getPriority());
     }
 
-    function setConfig(string $name, $value)
+    public function setConfig(string $name, $value): void
     {
         $this->configValues[$name] = $value;
     }
 
-    function getConfig(string $name)
+    public function getConfig(string $name)
     {
         if (!array_key_exists($name, $this->configValues)) {
             throw new \Exception("No configuration value set for '$name'");

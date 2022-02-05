@@ -11,12 +11,13 @@ class SubmissionServiceTest extends KernelTestCase
     /**
      * @dataProvider provideRunResults
      */
-    public function testGetFinalResult(array $runresults, array $resultsPrio, ?string $result) : void
+    public function testGetFinalResult(array $runresults, array $resultsPrio, ?string $result): void
     {
         self::assertSame($result, SubmissionService::getFinalResult($runresults, $resultsPrio));
     }
 
-    public function provideRunResults() : Generator {
+    public function provideRunResults(): Generator
+    {
         $defaultPrios = [
             'memory-limit' => 99,
             'output-limit' => 99,

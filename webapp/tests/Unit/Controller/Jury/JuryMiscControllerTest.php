@@ -7,12 +7,12 @@ use Generator;
 
 class JuryMiscControllerTest extends BaseTest
 {
-    protected $roles = ['jury'];
+    protected array $roles = ['jury'];
 
     /**
      * Test that if no user is logged in the user gets redirected to the login page.
      */
-    public function testJuryRedirectToLogin() : void
+    public function testJuryRedirectToLogin(): void
     {
         $this->logOut();
 

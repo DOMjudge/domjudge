@@ -6,12 +6,12 @@ use App\Tests\Unit\BaseTest;
 
 class ConfigControllerTest extends BaseTest
 {
-    protected $roles = ['admin'];
+    protected array $roles = ['admin'];
 
     /**
      * Test that configcheck page completes.
      */
-    public function testConfigCheck() : void
+    public function testConfigCheck(): void
     {
         $this->verifyPageResponse('GET', '/jury/config/check', 200);
         self::assertSelectorExists(sprintf('div.card-body:contains("You have PHP version %s.")', PHP_VERSION));
@@ -25,7 +25,7 @@ class ConfigControllerTest extends BaseTest
     /**
      * Test that phpinfo page completes.
      */
-    public function testConfigCheckPhpInfo() : void
+    public function testConfigCheckPhpInfo(): void
     {
         $this->verifyPageResponse('GET', '/jury/config/check/phpinfo', 200);
         $content = $this->client->getResponse()->getContent();
@@ -36,7 +36,7 @@ class ConfigControllerTest extends BaseTest
     /**
      * Test that config settings page contains some expected options.
      */
-    public function testConfigSettingsPresent() : void
+    public function testConfigSettingsPresent(): void
     {
         $this->verifyPageResponse('GET', '/jury/config', 200);
 
@@ -52,7 +52,7 @@ class ConfigControllerTest extends BaseTest
     /**
      * Test that a different penalty time shows up in this page.
      */
-    public function testChangedPenaltyTime() : void
+    public function testChangedPenaltyTime(): void
     {
         $this->withChangedConfiguration('penalty_time', "30",
             function () {

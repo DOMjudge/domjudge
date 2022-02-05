@@ -4,9 +4,9 @@ namespace App\Tests\Unit\Controller\API;
 
 class ContestControllerTest extends BaseTest
 {
-    protected $apiEndpoint = 'contests';
+    protected ?string $apiEndpoint = 'contests';
 
-    protected $expectedObjects = [
+    protected array $expectedObjects = [
         '2' => [
             'formal_name'                => 'Demo contest',
             'penalty_time'               => 20,
@@ -22,5 +22,5 @@ class ContestControllerTest extends BaseTest
         ],
     ];
 
-    protected $expectedAbsent = ['4242', 'nonexistent'];
+    protected array $expectedAbsent = ['4242', 'nonexistent'];
 }
