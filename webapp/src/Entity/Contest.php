@@ -1016,7 +1016,7 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
             }
 
             $resultItem['label'] = sprintf('%s time', ucfirst($time));
-            $resultItem['time']  = Utils::printtime($timeValue, '%Y-%m-%d %H:%M (%Z)');
+            $resultItem['time']  = Utils::printtime($timeValue, 'Y-m-d H:i:s (T)');
             if ($time === 'start' && !$this->getStarttimeEnabled()) {
                 $resultItem['class'] = 'ignore';
             }

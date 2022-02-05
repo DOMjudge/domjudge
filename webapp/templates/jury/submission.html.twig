@@ -135,7 +135,7 @@
 
         <span>
             <i class="fas fa-clock" title="Submittime:"></i>
-            <span title="{{ submission.submittime | printtime('%Y-%m-%d %H:%M:%S (%Z)') }}">
+            <span title="{{ submission.submittime | printtime('Y-m-d H:i:s (T)') }}">
                 {{ submission.submittime | printtime(null, submission.contest) }}
             </span>
         </span>
@@ -365,7 +365,7 @@
                         {% set judgehostLink = path('jury_judgehost', {judgehostid: judgehostid}) %}
                         <a href="{{ judgehostLink }}">{{ hostname | printHost }}</a>
                     {% endfor %} -
-                    <span class="judgetime">Judging started: {{ selectedJudging.starttime | printtime('%H:%M:%S') }}
+                    <span class="judgetime">Judging started: {{ selectedJudging.starttime | printtime('H:i:s') }}
                         {%- if selectedJudging.endtime -%}
                             , finished in {{ selectedJudging.starttime | printtimediff(selectedJudging.endtime) }}s
                         {%- elseif selectedJudging.valid or selectedJudging.rejudging -%}
@@ -376,7 +376,7 @@
                     </span>
                 {% endif -%}
                 {%- if externalJudgement is not null %}
-                    <span class="judgetime">(external judging started: {{ externalJudgement.starttime | printtime('%H:%M:%S') }}
+                    <span class="judgetime">(external judging started: {{ externalJudgement.starttime | printtime('H:i:s') }}
                         {%- if externalJudgement.endtime -%}
                             , finished in {{ externalJudgement.starttime | printtimediff(externalJudgement.endtime) }}s
                         {%- else -%}

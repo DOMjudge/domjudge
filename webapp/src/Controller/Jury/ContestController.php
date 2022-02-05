@@ -131,7 +131,7 @@ class ContestController extends BaseController
             }
 
             $now       = (int)floor(Utils::now());
-            $nowstring = strftime('%Y-%m-%d %H:%M:%S ', $now) . date_default_timezone_get();
+            $nowstring = date('Y-m-d H:i:s ', $now) . date_default_timezone_get();
             $this->dj->auditlog('contest', $contest->getCid(), $time . ' now', $nowstring);
 
             // Special case delay/resume start (only sets/unsets starttime_undefined).
@@ -350,7 +350,7 @@ class ContestController extends BaseController
                     $timeTitle = '-';
                 } else {
                     $timeValue = Utils::printtime($time, $timeFormat);
-                    $timeTitle = Utils::printtime($time, '%Y-%m-%d %H:%M:%S (%Z)');
+                    $timeTitle = Utils::printtime($time, 'Y-m-d H:i:s (T)');
                 }
                 $contestdata[$timeField . 'time']['value']     = $timeValue;
                 $contestdata[$timeField . 'time']['sortvalue'] = $time;
@@ -631,7 +631,7 @@ class ContestController extends BaseController
     {
         $contest = new Contest();
         // Set default activate time
-        $contest->setActivatetimeString(strftime('%Y-%m-%d %H:%M:00 ') . date_default_timezone_get());
+        $contest->setActivatetimeString(date('Y-m-d H:i:00 ') . date_default_timezone_get());
 
         $form = $this->createForm(ContestType::class, $contest);
 
@@ -773,7 +773,7 @@ class ContestController extends BaseController
         $blockers = [];
         if (Utils::difftime((float)$contest->getEndtime(), Utils::now()) > 0) {
             $blockers[] = sprintf('Contest not ended yet (will end at %s)',
-                                  Utils::printtime($contest->getEndtime(), '%Y-%m-%d %H:%M:%S (%Z)'));
+                                  Utils::printtime($contest->getEndtime(), 'Y-m-d H:i:s (T)'));
         }
 
         /** @var int[] $submissionIds */

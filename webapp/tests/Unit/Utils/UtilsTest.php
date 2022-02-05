@@ -184,7 +184,7 @@ class UtilsTest extends TestCase
      */
     public function testPrinttimeNotime() : void
     {
-        self::assertEquals('', Utils::printTime(null, "%H:%M"));
+        self::assertEquals('', Utils::printTime(null, "H:i"));
     }
 
     /**
@@ -196,7 +196,7 @@ class UtilsTest extends TestCase
         date_default_timezone_set('UTC');
         $timestamp = 1544964581.3604;
         $expected = '2018-12-16 12:49';
-        self::assertEquals($expected, Utils::printtime($timestamp, '%Y-%m-%d %H:%M'));
+        self::assertEquals($expected, Utils::printtime($timestamp, 'Y-m-d H:i'));
         date_default_timezone_set($tz);
     }
 

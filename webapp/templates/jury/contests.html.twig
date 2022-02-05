@@ -72,7 +72,7 @@
                 <strong>No active contest.</strong> Upcoming:<br/>
                 <p>
                     <i>{{ upcoming_contest.name }} ({{ upcoming_contest.shortname }})</i>;
-                    active from {{ upcoming_contest.activatetime | printtime('%a %d %b %Y %T %Z') }}
+                    active from {{ upcoming_contest.activatetime | printtime('D d M Y H:i:s T') }}
                 </p>
                 <form action="{{ path('jury_contests') }}" method="post">
                     <input type="hidden" name="contest" value="{{ upcoming_contest.cid }}"/>

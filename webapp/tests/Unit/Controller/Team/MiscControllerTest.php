@@ -124,7 +124,7 @@ class MiscControllerTest extends BaseTest
     public function testChangeContest(bool $withReferrer) : void
     {
         $start       = (int)floor(microtime(true) - 1800);
-        $startString = strftime('%Y-%m-%d %H:%M:%S ',
+        $startString = date('Y-m-d H:i:s ',
                 $start) . date_default_timezone_get();
 
         // Create a second contest.

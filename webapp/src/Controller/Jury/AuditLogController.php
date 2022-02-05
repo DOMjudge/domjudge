@@ -87,7 +87,7 @@ class AuditLogController extends AbstractController
 
             $time = $logline->getLogTime();
             $data['when']['value'] = Utils::printtime($time, $timeFormat);
-            $data['when']['title'] = Utils::printtime($time, "%Y-%m-%d %H:%M:%S (%Z)");
+            $data['when']['title'] = Utils::printtime($time, "Y-m-d H:i:s (T)");
             $data['when']['sortvalue'] = $time;
 
             $data['who']['value'] = $logline->getUser();

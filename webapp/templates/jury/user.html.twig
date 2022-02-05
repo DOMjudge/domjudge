@@ -94,7 +94,7 @@
                     <th>First login</th>
                     <td>
                         {% if user.firstLogin %}
-                            {{ user.firstLogin | printtime('%a %d %b %Y %T %Z') }}
+                            {{ user.firstLogin | printtime('D d M Y H:i:s T') }}
                         {% else %}
                             -
                         {% endif %}
@@ -104,7 +104,7 @@
                     <th>Last login</th>
                     <td>
                         {% if user.lastLogin %}
-                            {{ user.lastLogin | printtime('%a %d %b %Y %T %Z') }}
+                            {{ user.lastLogin | printtime('D d M Y H:i:s T') }}
                         {% else %}
                             -
                         {% endif %}

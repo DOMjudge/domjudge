@@ -50,7 +50,7 @@ function logmsg(int $msglevel, string $string)
     $string = substr($string, 0, 10000);
 
     $msec = sprintf("%03d", (int)(explode(' ', microtime())[0]*1000));
-    $stamp = "[" . strftime("%b %d %H:%M:%S") . ".$msec] " . SCRIPT_ID .
+    $stamp = "[" . date('M d H:i:s') . ".$msec] " . SCRIPT_ID .
         (function_exists('posix_getpid') ? "[" . posix_getpid() . "]" : "") .
         ": ";
 
