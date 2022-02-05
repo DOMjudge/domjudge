@@ -37,30 +37,11 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class ClarificationController extends BaseController
 {
-    /**
-     * @var DOMJudgeService
-     */
-    protected $dj;
-
-    /**
-     * @var ConfigurationService
-     */
-    protected $config;
-
-    /**
-     * @var EntityManagerInterface
-     */
-    protected $em;
-
-    /**
-     * @var EventLogService
-     */
-    protected $eventLogService;
-
-    /**
-     * @var FormFactoryInterface
-     */
-    protected $formFactory;
+    protected DOMJudgeService $dj;
+    protected ConfigurationService $config;
+    protected EntityManagerInterface $em;
+    protected EventLogService $eventLogService;
+    protected FormFactoryInterface $formFactory;
 
     public function __construct(
         DOMJudgeService $dj,
@@ -81,7 +62,7 @@ class ClarificationController extends BaseController
      * @throws NonUniqueResultException
      * @throws Exception
      */
-    public function viewAction(Request $request, int $clarId) : Response
+    public function viewAction(Request $request, int $clarId): Response
     {
         $categories = $this->config->get('clar_categories');
         $user       = $this->dj->getUser();
@@ -167,7 +148,7 @@ class ClarificationController extends BaseController
      * @Route("/clarifications/add", name="team_clarification_add")
      * @throws Exception
      */
-    public function addAction(Request $request) : Response
+    public function addAction(Request $request): Response
     {
         $categories = $this->config->get('clar_categories');
         $user       = $this->dj->getUser();

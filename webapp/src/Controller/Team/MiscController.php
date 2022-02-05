@@ -35,30 +35,11 @@ use Symfony\Component\Routing\RouterInterface;
  */
 class MiscController extends BaseController
 {
-    /**
-     * @var DOMJudgeService
-     */
-    protected $dj;
-
-    /**
-     * @var ConfigurationService
-     */
-    protected $config;
-
-    /**
-     * @var EntityManagerInterface
-     */
-    protected $em;
-
-    /**
-     * @var ScoreboardService
-     */
-    protected $scoreboardService;
-
-    /**
-     * @var SubmissionService
-     */
-    protected $submissionService;
+    protected DOMJudgeService $dj;
+    protected ConfigurationService $config;
+    protected EntityManagerInterface $em;
+    protected ScoreboardService $scoreboardService;
+    protected SubmissionService $submissionService;
 
     /**
      * MiscController constructor.
@@ -83,7 +64,7 @@ class MiscController extends BaseController
      * @throws NonUniqueResultException
      * @throws Exception
      */
-    public function homeAction(Request $request) : Response
+    public function homeAction(Request $request): Response
     {
         $user    = $this->dj->getUser();
         $team    = $user->getTeam();
@@ -171,7 +152,7 @@ class MiscController extends BaseController
     /**
      * @Route("/change-contest/{contestId<-?\d+>}", name="team_change_contest")
      */
-    public function changeContestAction(Request $request, RouterInterface $router, int $contestId) : Response
+    public function changeContestAction(Request $request, RouterInterface $router, int $contestId): Response
     {
         if ($this->isLocalReferer($router, $request)) {
             $response = new RedirectResponse($request->headers->get('referer'));
@@ -186,7 +167,7 @@ class MiscController extends BaseController
      * @Route("/print", name="team_print")
      * @throws Exception
      */
-    public function printAction(Request $request) : Response
+    public function printAction(Request $request): Response
     {
         if (!$this->config->get('print_command')) {
             throw new AccessDeniedHttpException("Printing disabled in config");

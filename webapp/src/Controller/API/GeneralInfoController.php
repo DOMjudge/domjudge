@@ -33,42 +33,15 @@ use Symfony\Component\Routing\RouterInterface;
  */
 class GeneralInfoController extends AbstractFOSRestController
 {
-    protected $apiVersion = 4;
+    protected const API_VERSION = 4;
 
-    /**
-     * @var EntityManagerInterface
-     */
-    protected $em;
-
-    /**
-     * @var DOMJudgeService
-     */
-    protected $dj;
-
-    /**
-     * @var ConfigurationService
-     */
-    protected $config;
-
-    /**
-     * @var EventLogService
-     */
-    protected $eventLogService;
-
-    /**
-     * @var EventLogService
-     */
-    protected $checkConfigService;
-
-    /**
-     * @var RouterInterface
-     */
-    protected $router;
-
-    /**
-     * @var LoggerInterface
-     */
-    protected $logger;
+    protected EntityManagerInterface $em;
+    protected DOMJudgeService $dj;
+    protected ConfigurationService $config;
+    protected EventLogService $eventLogService;
+    protected CheckConfigService $checkConfigService;
+    protected RouterInterface $router;
+    protected LoggerInterface $logger;
 
     public function __construct(
         EntityManagerInterface $em,
@@ -102,7 +75,7 @@ class GeneralInfoController extends AbstractFOSRestController
      */
     public function getVersionAction(): array
     {
-        return ['api_version' => $this->apiVersion];
+        return ['api_version' => static::API_VERSION];
     }
 
     /**
@@ -124,7 +97,7 @@ class GeneralInfoController extends AbstractFOSRestController
     public function getInfoAction(): array
     {
         return [
-            'api_version' => $this->apiVersion,
+            'api_version' => static::API_VERSION,
             'domjudge_version' => $this->getParameter('domjudge.version'),
             'environment' => $this->getParameter('kernel.environment'),
             'doc_url' => $this->router->generate('app.swagger_ui', [], RouterInterface::ABSOLUTE_URL),
@@ -187,7 +160,7 @@ class GeneralInfoController extends AbstractFOSRestController
      *     @Model(type=User::class)
      * )
      */
-    public function getUserAction() : User
+    public function getUserAction(): User
     {
         $user = $this->dj->getUser();
         if ($user === null) {
@@ -214,7 +187,7 @@ class GeneralInfoController extends AbstractFOSRestController
      * )
      * @throws Exception
      */
-    public function getDatabaseConfigurationAction(Request $request) : array
+    public function getDatabaseConfigurationAction(Request $request): array
     {
         $onlypublic = !($this->dj->checkrole('jury') || $this->dj->checkrole('judgehost'));
         $name       = $request->query->get('name');

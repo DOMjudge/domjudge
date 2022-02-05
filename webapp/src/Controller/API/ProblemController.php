@@ -17,8 +17,8 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
 use Exception;
 use FOS\RestBundle\Controller\Annotations as Rest;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use OpenApi\Annotations as OA;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -36,15 +36,8 @@ use Symfony\Component\Yaml\Yaml;
  */
 class ProblemController extends AbstractRestController implements QueryObjectTransformer
 {
-    /**
-     * @var ImportProblemService
-     */
-    protected $importProblemService;
-
-    /**
-     * @var ImportExportService
-     */
-    protected $importExportService;
+    protected ImportProblemService $importProblemService;
+    protected ImportExportService $importExportService;
 
     public function __construct(
         EntityManagerInterface $entityManager,
@@ -82,9 +75,11 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
      *     response="200",
      *     description="Returns the API ID's of the added problems.",
      * )
+     *
      * @throws BadRequestHttpException
+     * @throws NonUniqueResultException
      */
-    public function addProblemsAction(Request $request) : array
+    public function addProblemsAction(Request $request): array
     {
         // Note we use /add-data as URL here since we already have a route listening
         // on POST /, which is to add a problem ZIP.
@@ -203,7 +198,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
      * )
      * @throws NonUniqueResultException
      */
-    public function addProblemAction(Request $request) : array
+    public function addProblemAction(Request $request): array
     {
         $file     = $request->files->get('zip');
         if (empty($file)) {
@@ -277,7 +272,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
      * @OA\Parameter(ref="#/components/parameters/id")
      * @OA\Parameter(ref="#/components/parameters/strict")
      */
-    public function singleAction(Request $request, string $id) : Response
+    public function singleAction(Request $request, string $id): Response
     {
         $ordinalArray = new OrdinalArray($this->listActionHelper($request));
 
@@ -337,8 +332,8 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
 
     /**
      * Transform the given object before returning it from the API
-     * @param mixed $object
-     * @return mixed
+     * @param array $object
+     * @return ContestProblem|ContestProblemWrapper
      */
     public function transformObject($object)
     {

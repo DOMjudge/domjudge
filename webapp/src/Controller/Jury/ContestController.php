@@ -27,6 +27,7 @@ use App\Utils\Utils;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\PersistentCollection;
 use Doctrine\ORM\Query\Expr\Join;
 use Exception;
@@ -47,35 +48,12 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class ContestController extends BaseController
 {
-    /**
-     * @var EntityManagerInterface
-     */
-    protected $em;
-
-    /**
-     * @var DOMJudgeService
-     */
-    protected $dj;
-
-    /**
-     * @var ConfigurationService
-     */
-    protected $config;
-
-    /**
-     * @var KernelInterface
-     */
-    protected $kernel;
-
-    /**
-     * @var EventLogService
-     */
-    protected $eventLogService;
-
-    /**
-     * @var AssetUpdateService
-     */
-    protected $assetUpdater;
+    protected EntityManagerInterface $em;
+    protected DOMJudgeService $dj;
+    protected ConfigurationService $config;
+    protected KernelInterface $kernel;
+    protected EventLogService $eventLogService;
+    protected AssetUpdateService $assetUpdater;
 
     public function __construct(
         EntityManagerInterface $em,
@@ -96,8 +74,9 @@ class ContestController extends BaseController
     /**
      * @Route("", name="jury_contests")
      * @throws NonUniqueResultException
+     * @throws NoResultException
      */
-    public function indexAction(Request $request, KernelInterface $kernel): Response
+    public function indexAction(Request $request): Response
     {
         $em = $this->em;
 
@@ -481,10 +460,9 @@ class ContestController extends BaseController
     /**
      * @Route("/{contestId<\d+>}/edit", name="jury_contest_edit")
      * @IsGranted("ROLE_ADMIN")
-     * @return RedirectResponse|Response
      * @throws Exception
      */
-    public function editAction(Request $request, int $contestId)
+    public function editAction(Request $request, int $contestId): Response
     {
         /** @var Contest $contest */
         $contest = $this->em->getRepository(Contest::class)->find($contestId);
@@ -584,10 +562,9 @@ class ContestController extends BaseController
     /**
      * @Route("/{contestId<\d+>}/delete", name="jury_contest_delete")
      * @IsGranted("ROLE_ADMIN")
-     * @return RedirectResponse|Response
      * @throws Exception
      */
-    public function deleteAction(Request $request, int $contestId)
+    public function deleteAction(Request $request, int $contestId): Response
     {
         /** @var Contest $contest */
         $contest = $this->em->getRepository(Contest::class)->find($contestId);
@@ -602,10 +579,9 @@ class ContestController extends BaseController
     /**
      * @Route("/{contestId<\d+>}/problems/{probId<\d+>}/delete", name="jury_contest_problem_delete")
      * @IsGranted("ROLE_ADMIN")
-     * @return RedirectResponse|Response
      * @throws Exception
      */
-    public function deleteProblemAction(Request $request, int $contestId, int $probId)
+    public function deleteProblemAction(Request $request, int $contestId, int $probId): Response
     {
         /** @var ContestProblem $contestProblem */
         $contestProblem = $this->em->getRepository(ContestProblem::class)->find([
@@ -627,7 +603,7 @@ class ContestController extends BaseController
      * @Route("/add", name="jury_contest_add")
      * @IsGranted("ROLE_ADMIN")
      */
-    public function addAction(Request $request) : Response
+    public function addAction(Request $request): Response
     {
         $contest = new Contest();
         // Set default activate time
@@ -638,7 +614,7 @@ class ContestController extends BaseController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->em->transactional(function () use ($contest) {
+            $this->em->wrapInTransaction(function () use ($contest) {
                 // A little 'hack': we need to first persist and save the
                 // contest, before we can persist and save the problem,
                 // because we need a contest ID
@@ -676,9 +652,8 @@ class ContestController extends BaseController
 
     /**
      * @Route("/{contestId<\d+>}/prefetch", name="jury_contest_prefetch")
-     * @return RedirectResponse|Response
      */
-    public function prefetchAction(Request $request, int $contestId)
+    public function prefetchAction(Request $request, int $contestId): Response
     {
         /** @var Contest $contest */
         $contest  = $this->em->getRepository(Contest::class)->find($contestId);
@@ -764,9 +739,8 @@ class ContestController extends BaseController
     /**
      * @Route("/{contestId<\d+>}/finalize", name="jury_contest_finalize")
      * @IsGranted("ROLE_ADMIN")
-     * @return RedirectResponse|Response
      */
-    public function finalizeAction(Request $request, int $contestId)
+    public function finalizeAction(Request $request, int $contestId): Response
     {
         /** @var Contest $contest */
         $contest  = $this->em->getRepository(Contest::class)->find($contestId);

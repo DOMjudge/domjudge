@@ -32,10 +32,7 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
  */
 class UserController extends AbstractRestController
 {
-    /**
-     * @var ImportExportService
-     */
-    protected $importExportService;
+    protected ImportExportService $importExportService;
 
     public function __construct(
         EntityManagerInterface $entityManager,
@@ -127,7 +124,7 @@ class UserController extends AbstractRestController
      * )
      * @throws Exception
      */
-    public function addOrganizationsAction(Request $request) : string
+    public function addOrganizationsAction(Request $request): string
     {
         /** @var UploadedFile $jsonFile */
         $jsonFile = $request->files->get('json') ?: [];
@@ -216,7 +213,9 @@ class UserController extends AbstractRestController
      *     response="200",
      *     description="Returns a (currently meaningless) status message.",
      * )
+     *
      * @throws BadRequestHttpException
+     * @throws Exception
      */
     public function addAccountsAction(Request $request): string
     {

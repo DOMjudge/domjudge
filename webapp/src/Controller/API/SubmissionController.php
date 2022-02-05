@@ -27,7 +27,6 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
@@ -42,10 +41,7 @@ use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
  */
 class SubmissionController extends AbstractRestController
 {
-    /**
-     * @var SubmissionService
-     */
-    protected $submissionService;
+    protected SubmissionService $submissionService;
 
     public function __construct(
         EntityManagerInterface $entityManager,
@@ -84,7 +80,7 @@ class SubmissionController extends AbstractRestController
      * )
      * @throws NonUniqueResultException
      */
-    public function listAction(Request $request) : Response
+    public function listAction(Request $request): Response
     {
         return parent::performListAction($request);
     }
@@ -106,7 +102,7 @@ class SubmissionController extends AbstractRestController
      * @OA\Parameter(ref="#/components/parameters/id")
      * @OA\Parameter(ref="#/components/parameters/strict")
      */
-    public function singleAction(Request $request, string $id) : Response
+    public function singleAction(Request $request, string $id): Response
     {
         return parent::performSingleAction($request, $id);
     }
@@ -457,7 +453,6 @@ class SubmissionController extends AbstractRestController
      * Get the files for the given submission as a ZIP archive
      * @Rest\Get("/{id}/files", name="submission_files")
      * @IsGranted("ROLE_API_SOURCE_READER")
-     * @return Response|StreamedResponse
      * @throws NonUniqueResultException
      * @OA\Response(
      *     response="200",
@@ -470,7 +465,7 @@ class SubmissionController extends AbstractRestController
      * )
      * @OA\Parameter(ref="#/components/parameters/id")
      */
-    public function getSubmissionFilesAction(Request $request, string $id)
+    public function getSubmissionFilesAction(Request $request, string $id): Response
     {
         $queryBuilder = $this->getQueryBuilder($request)
             ->join('s.files', 'f')
@@ -508,7 +503,7 @@ class SubmissionController extends AbstractRestController
      * )
      * @OA\Parameter(ref="#/components/parameters/id")
      */
-    public function getSubmissionSourceCodeAction(Request $request, string $id) : array
+    public function getSubmissionSourceCodeAction(Request $request, string $id): array
     {
         $queryBuilder = $this->em->createQueryBuilder()
             ->from(SubmissionFile::class, 'f')

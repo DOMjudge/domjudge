@@ -25,17 +25,9 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class InternalErrorController extends BaseController
 {
-    /**
-     * @var EntityManagerInterface
-     */
-    protected $em;
-
-    /**
-     * @var DOMJudgeService
-     */
-    protected $dj;
-
-    protected $rejudgingService;
+    protected EntityManagerInterface $em;
+    protected DOMJudgeService $dj;
+    protected RejudgingService $rejudgingService;
 
     public function __construct(EntityManagerInterface $em, DOMJudgeService $dj, RejudgingService $rejudgingService)
     {
@@ -103,7 +95,7 @@ class InternalErrorController extends BaseController
     /**
      * @Route("/{errorId<\d+>}", methods={"GET"}, name="jury_internal_error")
      */
-    public function viewAction(int $errorId) : Response
+    public function viewAction(int $errorId): Response
     {
         /** @var InternalError $internalError */
         $internalError = $this->em->getRepository(InternalError::class)->find($errorId);
@@ -158,7 +150,7 @@ class InternalErrorController extends BaseController
         /** @var InternalError $internalError */
         $internalError = $this->em->getRepository(InternalError::class)->find($errorId);
         $status        = $action === 'ignore' ? InternalErrorStatusType::STATUS_IGNORED : InternalErrorStatusType::STATUS_RESOLVED;
-        $this->em->transactional(function () use ($internalError, $status) {
+        $this->em->wrapInTransaction(function () use ($internalError, $status) {
             $internalError->setStatus($status);
             if ($status === InternalErrorStatusType::STATUS_RESOLVED) {
                 $this->dj->setInternalError(

@@ -13,9 +13,8 @@ use Doctrine\ORM\QueryBuilder;
 use Exception;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use OpenApi\Annotations as OA;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -32,7 +31,7 @@ class RunController extends AbstractRestController implements QueryObjectTransfo
     /**
      * @var string[]
      */
-    protected $verdicts;
+    protected array $verdicts;
 
     public function __construct(
         EntityManagerInterface $entityManager,
@@ -49,7 +48,6 @@ class RunController extends AbstractRestController implements QueryObjectTransfo
 
     /**
      * Get all the runs for this contest
-     * @param Request $request
      * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST') or is_granted('ROLE_API_READER')")
      * @Rest\Get("")
      * @OA\Response(
@@ -116,7 +114,7 @@ class RunController extends AbstractRestController implements QueryObjectTransfo
      * @OA\Parameter(ref="#/components/parameters/id")
      * @OA\Parameter(ref="#/components/parameters/strict")
      */
-    public function singleAction(Request $request, string $id) : Response
+    public function singleAction(Request $request, string $id): Response
     {
         return parent::performSingleAction($request, $id);
     }
@@ -179,7 +177,7 @@ class RunController extends AbstractRestController implements QueryObjectTransfo
         return 'jr.runid';
     }
 
-    public function transformObject($object) : JudgingRunWrapper
+    public function transformObject($object): JudgingRunWrapper
     {
         /** @var JudgingRun $judgingRun */
         $judgingRun      = $object;

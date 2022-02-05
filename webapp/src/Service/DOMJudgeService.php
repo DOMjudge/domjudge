@@ -901,6 +901,9 @@ class DOMJudgeService
         return $stats;
     }
 
+    /**
+     * @throws NonUniqueResultException
+     */
     public function getTwigDataForProblemsAction(int $teamId, StatisticsService $statistics): array {
         $contest            = $this->getCurrentContest($teamId);
         $showLimits         = (bool)$this->config->get('show_limits_on_team_page');

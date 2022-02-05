@@ -69,8 +69,10 @@ class RejudgingController extends BaseController
 
     /**
      * @Route("", name="jury_rejudgings")
+     * @throws NoResultException
+     * @throws NonUniqueResultException
      */
-    public function indexAction(Request $request): Response
+    public function indexAction(): Response
     {
         $curContest = $this->dj->getCurrentContest();
         $queryBuilder = $this->em->createQueryBuilder()
@@ -105,7 +107,6 @@ class RejudgingController extends BaseController
         $timeFormat       = (string)$this->config->get('time_format');
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         $rejudgings_table = [];
-        /** @var Rejudging $rejudging */
         foreach ($rejudgings as $rejudging) {
             $rejudgingdata = [];
             // Get whatever fields we can from the problem object itself.
@@ -246,7 +247,7 @@ class RejudgingController extends BaseController
         $originalVerdicts = [];
         $newVerdicts      = [];
 
-        $this->em->transactional(function () use ($rejudging, &$originalVerdicts, &$newVerdicts) {
+        $this->em->wrapInTransaction(function () use ($rejudging, &$originalVerdicts, &$newVerdicts) {
             $expr             = $this->em->getExpressionBuilder();
             $originalVerdicts = $this->em->createQueryBuilder()
                 ->from(Judging::class, 'j')
@@ -415,11 +416,15 @@ class RejudgingController extends BaseController
      *     "/{rejudgingId<\d+>}/{action<cancel|apply>}",
      *     name="jury_rejudging_finish"
      * )
-     * @return Response|StreamedResponse
      * @throws NonUniqueResultException
      */
-    public function finishAction(Request $request, RejudgingService $rejudgingService, ?Profiler $profiler, int $rejudgingId, string $action)
-    {
+    public function finishAction(
+        Request $request,
+        RejudgingService $rejudgingService,
+        ?Profiler $profiler,
+        int $rejudgingId,
+        string $action
+    ): Response {
         // Note: we use a XMLHttpRequest here as Symfony does not support streaming Twig output
 
         // Disable the profiler toolbar to avoid OOMs.

@@ -44,15 +44,8 @@ use Symfony\Component\Yaml\Yaml;
  */
 class ContestController extends AbstractRestController
 {
-    /**
-     * @var ImportExportService
-     */
-    protected $importExportService;
-
-    /**
-     * @var AssetUpdateService
-     */
-    protected $assetUpdater;
+    protected ImportExportService $importExportService;
+    protected AssetUpdateService $assetUpdater;
 
     public function __construct(
         EntityManagerInterface $entityManager,
@@ -98,7 +91,7 @@ class ContestController extends AbstractRestController
      * )
      * @throws BadRequestHttpException
      */
-    public function addContestAction(Request $request) : string
+    public function addContestAction(Request $request): string
     {
         /** @var UploadedFile $yamlFile */
         $yamlFile = $request->files->get('yaml') ?: [];
@@ -148,7 +141,7 @@ class ContestController extends AbstractRestController
      * )
      * @throws NonUniqueResultException
      */
-    public function listAction(Request $request) : Response
+    public function listAction(Request $request): Response
     {
         return parent::performListAction($request);
     }
@@ -170,7 +163,7 @@ class ContestController extends AbstractRestController
      * @OA\Parameter(ref="#/components/parameters/cid")
      * @OA\Parameter(ref="#/components/parameters/strict")
      */
-    public function singleAction(Request $request, string $cid) : Response
+    public function singleAction(Request $request, string $cid): Response
     {
         return parent::performSingleAction($request, $cid);
     }
@@ -335,7 +328,7 @@ class ContestController extends AbstractRestController
      *     description="Changing start time not allowed"
      * )
      */
-    public function changeStartTimeAction(Request $request, string $cid) : Response
+    public function changeStartTimeAction(Request $request, string $cid): Response
     {
         $contest  = $this->getContestWithId($request, $cid);
         $now      = Utils::now();
@@ -400,7 +393,7 @@ class ContestController extends AbstractRestController
      *     @OA\MediaType(mediaType="application/x-yaml")
      * )
      */
-    public function getContestYamlAction(Request $request, string $cid) : StreamedResponse
+    public function getContestYamlAction(Request $request, string $cid): StreamedResponse
     {
         $contest      = $this->getContestWithId($request, $cid);
         $penalty_time = $this->config->get('penalty_time');
@@ -436,7 +429,7 @@ class ContestController extends AbstractRestController
      *     @OA\JsonContent(ref="#/components/schemas/ContestState")
      * )
      */
-    public function getContestStateAction(Request $request, string $cid) : ?array
+    public function getContestStateAction(Request $request, string $cid): ?array
     {
         $contest         = $this->getContestWithId($request, $cid);
         $inactiveAllowed = $this->isGranted('ROLE_API_READER');
@@ -452,7 +445,6 @@ class ContestController extends AbstractRestController
      * @Rest\Get("/{cid}/event-feed")
      * @OA\Get()
      * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_API_READER')")
-     * @return Response|StreamedResponse
      * @throws NonUniqueResultException
      * @OA\Parameter(ref="#/components/parameters/cid")
      * @OA\Parameter(
@@ -503,7 +495,7 @@ class ContestController extends AbstractRestController
         string $cid,
         MetadataFactoryInterface $metadataFactory,
         KernelInterface $kernel
-    ) {
+    ): Response {
         $contest = $this->getContestWithId($request, $cid);
         // Make sure this script doesn't hit the PHP maximum execution timeout.
         set_time_limit(0);
@@ -690,7 +682,7 @@ class ContestController extends AbstractRestController
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
-    public function getStatusAction(Request $request, string $cid) : array
+    public function getStatusAction(Request $request, string $cid): array
     {
         return $this->dj->getContestStats($this->getContestWithId($request, $cid));
     }
@@ -700,9 +692,6 @@ class ContestController extends AbstractRestController
         return $this->getContestQueryBuilder($request->query->getBoolean('onlyActive', false));
     }
 
-    /**
-     * @throws Exception
-     */
     protected function getIdField(): string
     {
         return sprintf('c.%s', $this->eventLogService->externalIdFieldForEntity(Contest::class) ?? 'cid');

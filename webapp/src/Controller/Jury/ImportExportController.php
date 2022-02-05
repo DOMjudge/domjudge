@@ -8,19 +8,19 @@ use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\Problem;
 use App\Entity\TeamCategory;
-use App\Form\Type\ICPCCmsType;
 use App\Form\Type\ContestExportType;
 use App\Form\Type\ContestImportType;
+use App\Form\Type\ICPCCmsType;
 use App\Form\Type\JsonImportType;
 use App\Form\Type\ProblemsImportType;
 use App\Form\Type\ProblemUploadType;
 use App\Form\Type\TsvImportType;
-use App\Service\ICPCCmsService;
-use App\Service\ImportProblemService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
+use App\Service\ICPCCmsService;
 use App\Service\ImportExportService;
+use App\Service\ImportProblemService;
 use App\Service\ScoreboardService;
 use App\Utils\Scoreboard\Filter;
 use App\Utils\Utils;
@@ -29,13 +29,17 @@ use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Yaml\Yaml;
+use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
 /**
  * @Route("/jury/import-export")
@@ -43,48 +47,15 @@ use Symfony\Component\Yaml\Yaml;
  */
 class ImportExportController extends BaseController
 {
-    /**
-     * @var ICPCCmsService
-     */
-    protected $icpcCmsService;
-
-    /**
-     * @var ImportExportService
-     */
-    protected $importExportService;
-
-    /**
-     * @var ImportProblemService
-     */
-    protected $importProblemService;
-
-    /**
-     * @var EntityManagerInterface
-     */
-    protected $em;
-
-    /**
-     * @var ScoreboardService
-     */
-    protected $scoreboardService;
-
-    /**
-     * @var DOMJudgeService
-     */
-    protected $dj;
-
-    /**
-     * @var ConfigurationService
-     */
-    protected $config;
-
-    /**
-     * @var EventLogService
-     */
-    protected $eventLogService;
-
-    /** @var string */
-    protected $domjudgeVersion;
+    protected ICPCCmsService $icpcCmsService;
+    protected ImportExportService $importExportService;
+    protected ImportProblemService $importProblemService;
+    protected EntityManagerInterface $em;
+    protected ScoreboardService $scoreboardService;
+    protected DOMJudgeService $dj;
+    protected ConfigurationService $config;
+    protected EventLogService $eventLogService;
+    protected string $domjudgeVersion;
 
     public function __construct(
         ICPCCmsService $icpcCmsService,
@@ -110,9 +81,13 @@ class ImportExportController extends BaseController
 
     /**
      * @Route("", name="jury_import_export")
-     * @throws Exception
+     * @throws ClientExceptionInterface
+     * @throws DecodingExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws TransportExceptionInterface
      */
-    public function indexAction(Request $request) : Response
+    public function indexAction(Request $request): Response
     {
         $tsvForm = $this->createForm(TsvImportType::class);
 
@@ -318,10 +293,9 @@ class ImportExportController extends BaseController
 
     /**
      * @Route("/export/{type<groups|teams|results>}.tsv", name="jury_tsv_export")
-     * @return RedirectResponse|StreamedResponse
      * @throws Exception
      */
-    public function exportTsvAction(Request $request, string $type)
+    public function exportTsvAction(Request $request, string $type): Response
     {
         $data    = [];
         $version = 1;
@@ -362,7 +336,7 @@ class ImportExportController extends BaseController
      * @Route("/export/{type<results|results-icpc|clarifications>}.html", name="jury_html_export")
      * @throws Exception
      */
-    public function exportHtmlAction(Request $request, string $type) : Response
+    public function exportHtmlAction(Request $request, string $type): Response
     {
         try {
             switch ($type) {
@@ -384,7 +358,7 @@ class ImportExportController extends BaseController
     /**
      * @throws Exception
      */
-    protected function getResultsHtml(Request $request, bool $useIcpcLayout) : Response
+    protected function getResultsHtml(Request $request, bool $useIcpcLayout): Response
     {
         /** @var TeamCategory[] $categories */
         $categories  = $this->em->createQueryBuilder()
@@ -526,7 +500,7 @@ class ImportExportController extends BaseController
     /**
      * @throws Exception
      */
-    protected function getClarificationsHtml() : Response
+    protected function getClarificationsHtml(): Response
     {
         $contest = $this->dj->getCurrentContest();
         if ($contest === null) {

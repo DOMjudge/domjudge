@@ -10,7 +10,6 @@ use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\ScoreboardService;
 use App\Utils\Scoreboard\Filter;
-use App\Utils\Scoreboard\ScoreboardMatrixItem;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
@@ -19,8 +18,6 @@ use Exception;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use OpenApi\Annotations as OA;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
-use Symfony\Component\Intl\Exception\NotImplementedException;
 
 /**
  * @Rest\Route("/contests/{cid}/scoreboard")
@@ -32,10 +29,7 @@ use Symfony\Component\Intl\Exception\NotImplementedException;
  */
 class ScoreboardController extends AbstractRestController
 {
-    /**
-     * @var ScoreboardService
-     */
-    protected $scoreboardService;
+    protected ScoreboardService $scoreboardService;
 
     public function __construct(
         EntityManagerInterface $entityManager,
@@ -95,7 +89,7 @@ class ScoreboardController extends AbstractRestController
      * @throws NonUniqueResultException
      * @throws Exception
      */
-    public function getScoreboardAction(Request $request) : array
+    public function getScoreboardAction(Request $request): array
     {
         $filter = new Filter();
         if ($request->query->has('category')) {
@@ -170,7 +164,6 @@ class ScoreboardController extends AbstractRestController
                 'problems' => [],
             ];
 
-            /** @var ScoreboardMatrixItem $matrixItem */
             foreach ($scoreboard->getMatrix()[$teamScore->team->getTeamid()] as $problemId => $matrixItem) {
                 $contestProblem = $scoreboard->getProblems()[$problemId];
                 $problem        = [
@@ -206,11 +199,11 @@ class ScoreboardController extends AbstractRestController
 
     protected function getQueryBuilder(Request $request): QueryBuilder
     {
-        throw new NotImplementedException();
+        throw new Exception('Not implemented');
     }
 
     protected function getIdField(): string
     {
-        throw new NotImplementedException();
+        throw new Exception('Not implemented');
     }
 }

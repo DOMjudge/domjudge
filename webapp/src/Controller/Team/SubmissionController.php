@@ -35,30 +35,11 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class SubmissionController extends BaseController
 {
-    /**
-     * @var EntityManagerInterface
-     */
-    protected $em;
-
-    /**
-     * @var SubmissionService
-     */
-    protected $submissionService;
-
-    /**
-     * @var DOMJudgeService
-     */
-    protected $dj;
-
-    /**
-     * @var ConfigurationService
-     */
-    protected $config;
-
-    /**
-     * @var FormFactoryInterface
-     */
-    protected $formFactory;
+    protected EntityManagerInterface $em;
+    protected SubmissionService $submissionService;
+    protected DOMJudgeService $dj;
+    protected ConfigurationService $config;
+    protected FormFactoryInterface $formFactory;
 
     public function __construct(
         EntityManagerInterface $em,
@@ -140,7 +121,7 @@ class SubmissionController extends BaseController
      * @Route("/submission/{submitId<\d+>}", name="team_submission")
      * @throws NonUniqueResultException
      */
-    public function viewAction(Request $request, int $submitId) : Response
+    public function viewAction(Request $request, int $submitId): Response
     {
         $verificationRequired = (bool)$this->config->get('verification_required');
         $showCompile      = $this->config->get('show_compile');
@@ -232,7 +213,7 @@ class SubmissionController extends BaseController
      * @Route("/submission/{submitId<\d+>}/download", name="team_submission_download")
      * @throws NonUniqueResultException
      */
-    public function downloadAction(int $submitId) : Response
+    public function downloadAction(int $submitId): Response
     {
         $allowDownload = (bool)$this->config->get('allow_team_submission_download');
         if (!$allowDownload) {

@@ -30,30 +30,11 @@ use Symfony\Component\Routing\RouterInterface;
  */
 class PublicController extends BaseController
 {
-    /**
-     * @var DOMJudgeService
-     */
-    protected $dj;
-
-    /**
-     * @var ConfigurationService
-     */
-    protected $config;
-
-    /**
-     * @var ScoreboardService
-     */
-    protected $scoreboardService;
-
-    /**
-     * @var StatisticsService
-     */
-    protected $stats;
-
-    /**
-     * @var EntityManagerInterface
-     */
-    protected $em;
+    protected DOMJudgeService $dj;
+    protected ConfigurationService $config;
+    protected ScoreboardService $scoreboardService;
+    protected StatisticsService $stats;
+    protected EntityManagerInterface $em;
 
     public function __construct(
         DOMJudgeService $dj,

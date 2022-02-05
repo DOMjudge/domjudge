@@ -40,14 +40,13 @@ class SecurityController extends AbstractController
 
     /**
      * @Route("/login", name="login")
-     * @return RedirectResponse|Response
      * @throws Exception
      */
     public function loginAction(
         Request $request,
         AuthorizationCheckerInterface $authorizationChecker,
         AuthenticationUtils $authUtils
-    )
+    ): Response
     {
         $allowIPAuth = false;
         $authmethods = $this->config->get('auth_methods');
@@ -96,14 +95,13 @@ class SecurityController extends AbstractController
 
     /**
      * @Route("/register", name="register")
-     * @return RedirectResponse|Response
      * @throws Exception
      */
     public function registerAction(
         Request $request,
         AuthorizationCheckerInterface $authorizationChecker,
         UserPasswordHasherInterface $passwordHasher
-    )
+    ): Response
     {
         // Redirect if already logged in
         if ($authorizationChecker->isGranted('IS_AUTHENTICATED_FULLY')) {
