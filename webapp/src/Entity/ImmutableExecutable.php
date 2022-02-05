@@ -47,6 +47,11 @@ class ImmutableExecutable
      */
     private ?string $hash;
 
+    public function __construct()
+    {
+        $this->files = new ArrayCollection();
+    }
+
     public function getImmutableExecId(): int
     {
         return $this->immutable_execid;
