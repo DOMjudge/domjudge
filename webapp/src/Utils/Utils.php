@@ -450,7 +450,7 @@ class Utils
 
         $exact = true;
         for ($i = 0; $i < count($units) && $display > $factor; $i++) {
-            if (($display % $factor)!=0) {
+            if (((int)$display % $factor)!=0) {
                 $exact = false;
             }
             $display /= $factor;
