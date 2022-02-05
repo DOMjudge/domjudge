@@ -25,6 +25,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query\Expr\Join;
+use Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -38,40 +39,12 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class ScoreboardService
 {
-    /**
-     * @var EntityManagerInterface
-     */
-    protected $em;
+    protected EntityManagerInterface $em;
+    protected DOMJudgeService $dj;
+    protected ConfigurationService $config;
+    protected LoggerInterface $logger;
+    protected EventLogService $eventLogService;
 
-    /**
-     * @var DOMJudgeService
-     */
-    protected $dj;
-
-    /**
-     * @var ConfigurationService
-     */
-    protected $config;
-
-    /**
-     * @var LoggerInterface
-     */
-    protected $logger;
-
-    /**
-     * @var EventLogService
-     */
-    protected $eventLogService;
-
-    /**
-     * ScoreboardService constructor.
-     *
-     * @param EntityManagerInterface $em
-     * @param DOMJudgeService        $dj
-     * @param ConfigurationService   $config
-     * @param LoggerInterface        $logger
-     * @param EventLogService        $eventLogService
-     */
     public function __construct(
         EntityManagerInterface $em,
         DOMJudgeService $dj,
@@ -95,15 +68,14 @@ class ScoreboardService
      * @param Filter|null $filter      Filter to use for the scoreboard.
      * @param bool        $visibleOnly Iff $jury is true, determines whether
      *                                 to show non-publicly visible teams.
-     * @return Scoreboard|null
-     * @throws \Exception
+     * @throws Exception
      */
     public function getScoreboard(
         Contest $contest,
         bool $jury = false,
-        Filter $filter = null,
+        ?Filter $filter = null,
         bool $visibleOnly = false
-    ) {
+    ): ?Scoreboard {
         $freezeData = new FreezeData($contest);
 
         // Don't leak information before start of contest
@@ -132,8 +104,7 @@ class ScoreboardService
      * @param int     $teamId          The ID of the team to get the scoreboard for.
      * @param bool    $showFtsInFreeze If false, the scoreboard will hide first
      *                                 to solve for submissions after contest freeze.
-     * @return Scoreboard|null
-     * @throws \Exception
+     * @throws Exception
      */
     public function getTeamScoreboard(Contest $contest, int $teamId, bool $showFtsInFreeze = true): ?Scoreboard
     {
@@ -160,20 +131,14 @@ class ScoreboardService
     /**
      * Calculate the rank for a single team based on the cache tables.
      *
-     * @param Contest         $contest
-     * @param Team            $team
-     * @param RankCache|null  $rankCache
-     * @param FreezeData|null $freezeData
-     * @param bool            $jury
-     * @return int
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
     public function calculateTeamRank(
         Contest $contest,
         Team $team,
-        RankCache $rankCache = null,
-        FreezeData $freezeData = null,
+        ?RankCache $rankCache = null,
+        ?FreezeData $freezeData = null,
         bool $jury = false
     ) {
         if ($freezeData === null) {
@@ -295,19 +260,16 @@ class ScoreboardService
      * Due to current transactions usage, this function MUST NOT do anything
      * inside a transaction.
      *
-     * @param Contest $contest
-     * @param Team    $team
-     * @param Problem $problem
-     * @param bool    $updateRankCache If set to false, do not update the rankcache.
+     * @param bool $updateRankCache If set to false, do not update the rankcache.
      * @throws DBALException
-     * @throws \Exception
+     * @throws Exception
      */
     public function calculateScoreRow(
         Contest $contest,
         Team    $team,
         Problem $problem,
         bool    $updateRankCache = true
-    ) {
+    ): void {
         $this->logger->debug(
             "ScoreboardService::calculateScoreRow '%d' '%d' '%d'",
             [ $contest->getCid(), $team->getTeamid(), $problem->getProbid() ]
@@ -327,7 +289,7 @@ class ScoreboardService
                               $contest->getCid(), $team->getTeamid(), $problem->getProbid());
         if ($this->em->getConnection()->fetchColumn('SELECT GET_LOCK(:lock, 3)',
                                                     [':lock' => $lockString]) != 1) {
-            throw new \Exception(sprintf("ScoreboardService::calculateScoreRow failed to obtain lock '%s'",
+            throw new Exception(sprintf("ScoreboardService::calculateScoreRow failed to obtain lock '%s'",
                                          $lockString));
         }
 
@@ -521,7 +483,7 @@ class ScoreboardService
 
         if ($this->em->getConnection()->fetchColumn('SELECT RELEASE_LOCK(:lock)',
                                                     [':lock' => $lockString]) != 1) {
-            throw new \Exception('ScoreboardService::calculateScoreRow failed to release lock');
+            throw new Exception('ScoreboardService::calculateScoreRow failed to release lock');
         }
 
         // If we found a new correct result, update the rank cache too
@@ -538,11 +500,9 @@ class ScoreboardService
      * Due to current transactions usage, this function MUST NOT do anything
      * inside a transaction.
      *
-     * @param Contest $contest
-     * @param Team    $team
-     * @throws \Exception
+     * @throws Exception
      */
-    public function updateRankCache(Contest $contest, Team $team)
+    public function updateRankCache(Contest $contest, Team $team): void
     {
         $this->logger->debug("ScoreboardService::updateRankCache '%d' '%d'",
                              [ $contest->getCid(), $team->getTeamid() ]);
@@ -552,7 +512,7 @@ class ScoreboardService
         $lockString = sprintf('domjudge.%d.%d', $contest->getCid(), $team->getTeamid());
         if ($this->em->getConnection()->fetchColumn('SELECT GET_LOCK(:lock, 3)',
                                                     [':lock' => $lockString]) != 1) {
-            throw new \Exception(sprintf("ScoreboardService::updateRankCache failed to obtain lock '%s'", $lockString));
+            throw new Exception(sprintf("ScoreboardService::updateRankCache failed to obtain lock '%s'", $lockString));
         }
 
         // Fetch contest problems. We can not add it as a relation on
@@ -630,7 +590,7 @@ class ScoreboardService
 
         if ($this->em->getConnection()->fetchColumn('SELECT RELEASE_LOCK(:lock)',
                                                     [':lock' => $lockString]) != 1) {
-            throw new \Exception('ScoreboardService::updateRankCache failed to release lock');
+            throw new Exception('ScoreboardService::updateRankCache failed to release lock');
         }
     }
 
@@ -639,11 +599,9 @@ class ScoreboardService
      *
      * $progressReporter (optional) should be a callable that takes a string.
      *
-     * @param Contest $contest
-     * @param mixed   $progressReporter
-     * @throws \Exception
+     * @throws Exception
      */
-    public function refreshCache(Contest $contest, $progressReporter = null)
+    public function refreshCache(Contest $contest, ?callable $progressReporter = null): void
     {
         $this->dj->auditlog('contest', $contest->getCid(), 'refresh scoreboard cache');
 
@@ -753,11 +711,8 @@ class ScoreboardService
 
     /**
      * Initialize the scoreboard filter for the given request
-     * @param Request       $request
-     * @param Response|null $response
-     * @return Filter
      */
-    public function initializeScoreboardFilter(Request $request, Response $response): Filter
+    public function initializeScoreboardFilter(Request $request, ?Response $response): Filter
     {
         $scoreFilter = [];
         if ($this->dj->getCookie('domjudge_scorefilter')) {
@@ -793,8 +748,6 @@ class ScoreboardService
 
     /**
      * Get a list of affiliation names grouped on category name
-     * @param Contest $contest
-     * @return array
      */
     public function getGroupedAffiliations(Contest $contest): array
     {
@@ -849,10 +802,7 @@ class ScoreboardService
 
     /**
      * Get values to display in the scoreboard filter
-     * @param Contest $contest
-     * @param bool    $jury
-     * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     public function getFilterValues(Contest $contest, bool $jury): array
     {
@@ -915,15 +865,7 @@ class ScoreboardService
 
     /**
      * Get the scoreboard Twig data for a given contest
-     * @param Request      $request
-     * @param Response     $response
-     * @param string       $refreshUrl
-     * @param bool         $jury
-     * @param bool         $public
-     * @param bool         $static
-     * @param Contest|null $contest
-     * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     public function getScoreboardTwigData(
         ?Request $request,
@@ -932,9 +874,9 @@ class ScoreboardService
         bool $jury,
         bool $public,
         bool $static,
-        Contest $contest = null,
-        Scoreboard $scoreboard = null
-    ) {
+        ?Contest $contest = null,
+        ?Scoreboard $scoreboard = null
+    ): array {
         $data = [
             'refresh' => [
                 'after' => 30,
@@ -979,9 +921,6 @@ class ScoreboardService
 
     /**
      * Get the teams to display on the scoreboard
-     * @param Contest     $contest
-     * @param bool        $jury
-     * @param Filter|null $filter
      * @return Team[]
      */
     protected function getTeams(Contest $contest, bool $jury = false, Filter $filter = null): array
@@ -1040,7 +979,6 @@ class ScoreboardService
      *
      * Note that this will return only a partial object for optimization purposes.
      *
-     * @param Contest $contest
      * @return ContestProblem[]
      */
     protected function getProblems(Contest $contest): array
@@ -1079,7 +1017,6 @@ class ScoreboardService
 
     /**
      * Get the categories to display on the scoreboard
-     * @param bool $jury
      * @return TeamCategory[]
      */
     protected function getCategories(bool $jury): array
@@ -1100,11 +1037,9 @@ class ScoreboardService
 
     /**
      * Get the scorecache used to calculate the scoreboard
-     * @param Contest   $contest
-     * @param Team|null $team
      * @return ScoreCache[]
      */
-    protected function getScorecache(Contest $contest, Team $team = null): array
+    protected function getScorecache(Contest $contest, ?Team $team = null): array
     {
         $queryBuilder = $this->em->createQueryBuilder()
             ->from(ScoreCache::class, 's')
@@ -1123,9 +1058,6 @@ class ScoreboardService
 
     /**
      * Get the rank cache for the given team
-     * @param Contest $contest
-     * @param Team    $team
-     * @return RankCache|null
      * @throws NonUniqueResultException
      */
     protected function getRankcache(Contest $contest, Team $team): ?RankCache

@@ -22,39 +22,12 @@ class RejudgingService
     const ACTION_APPLY = 'apply';
     const ACTION_CANCEL = 'cancel';
 
-    /**
-     * @var EntityManagerInterface
-     */
-    protected $em;
+    protected EntityManagerInterface $em;
+    protected DOMJudgeService $dj;
+    protected ScoreboardService $scoreboardService;
+    protected EventLogService $eventLogService;
+    protected BalloonService $balloonService;
 
-    /**
-     * @var DOMJudgeService
-     */
-    protected $dj;
-
-    /**
-     * @var ScoreboardService
-     */
-    protected $scoreboardService;
-
-    /**
-     * @var EventLogService
-     */
-    protected $eventLogService;
-
-    /**
-     * @var BalloonService
-     */
-    protected $balloonService;
-
-    /**
-     * RejudgingService constructor.
-     * @param EntityManagerInterface $em
-     * @param DOMJudgeService        $dj
-     * @param ScoreboardService      $scoreboardService
-     * @param EventLogService        $eventLogService
-     * @param BalloonService         $balloonService
-     */
     public function __construct(
         EntityManagerInterface $em,
         DOMJudgeService $dj,
@@ -75,29 +48,25 @@ class RejudgingService
      * @param string          $reason           Reason for this rejudging
      * @param array           $judgings         List of judgings to rejudging
      * @param bool            $autoApply        Whether the judgings should be automatically applied.
-     * @param int             $repeat
-     * @param Rejudging|null  $repeatedRejudging
      * @param array          &$skipped          Returns list of judgings not included.
      * @param callable|null   $progressReporter If set, report progress using this callback. Will get two values:
      *                                          - the progress as an integer
      *                                          - the log to display
      *
-     * @return Rejudging|null
      */
     public function createRejudging(
         string $reason,
         int $priority,
         array $judgings,
         bool $autoApply,
-        int $repeat,
+        ?int $repeat,
         ?Rejudging $repeatedRejudging,
         array &$skipped,
         ?callable $progressReporter = null
-    ) {
+    ): ?Rejudging {
         // This might take a while. Make sure we do not timeout
         set_time_limit(0);
 
-        /** @var Rejudging $rejudging */
         $rejudging = new Rejudging();
         $rejudging
             ->setStartUser($this->dj->getUser())
@@ -202,7 +171,7 @@ class RejudgingService
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
-    public function finishRejudging(Rejudging $rejudging, string $action, callable $progressReporter = null): bool
+    public function finishRejudging(Rejudging $rejudging, string $action, ?callable $progressReporter = null): bool
     {
         // This might take a while
         ini_set('max_execution_time', '300');
@@ -371,8 +340,6 @@ class RejudgingService
     }
 
     /**
-     * @param Rejudging $rejudging
-     * @return array
      * @throws NoResultException
      * @throws NonUniqueResultException
      */

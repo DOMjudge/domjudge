@@ -33,35 +33,12 @@ use Symfony\Component\Yaml\Yaml;
 
 class ImportExportService
 {
-    /**
-     * @var EntityManagerInterface
-     */
-    protected $em;
-
-    /**
-     * @var ScoreboardService
-     */
-    protected $scoreboardService;
-
-    /**
-     * @var DOMJudgeService
-     */
-    protected $dj;
-
-    /**
-     * @var ConfigurationService
-     */
-    protected $config;
-
-    /**
-     * @var EventLogService
-     */
-    protected $eventLogService;
-
-    /**
-     * @var ValidatorInterface
-     */
-    protected $validator;
+    protected EntityManagerInterface $em;
+    protected ScoreboardService $scoreboardService;
+    protected DOMJudgeService $dj;
+    protected ConfigurationService $config;
+    protected EventLogService $eventLogService;
+    protected ValidatorInterface $validator;
 
     public function __construct(
         EntityManagerInterface $em,
@@ -81,7 +58,6 @@ class ImportExportService
 
     /**
      * Get the YAML data for a given contest
-     * @param Contest $contest
      * @return array
      * @throws Exception
      */
@@ -342,7 +318,6 @@ class ImportExportService
 
     /**
      * Get group data
-     * @return array
      */
     public function getGroupData(): array
     {
@@ -364,7 +339,6 @@ class ImportExportService
 
     /**
      * Get team data
-     * @return array
      */
     public function getTeamData(): array
     {
@@ -396,8 +370,6 @@ class ImportExportService
 
     /**
      * Get results data for the given sortorder
-     * @param int $sortOrder
-     * @return array
      * @throws Exception
      */
     public function getResultsData(int $sortOrder): array
@@ -464,7 +436,6 @@ class ImportExportService
                 continue;
             }
             $maxTime = -1;
-            /** @var ScoreboardMatrixItem $matrixItem */
             foreach ($scoreboard->getMatrix()[$teamScore->team->getTeamid()] as $matrixItem) {
                 $time    = Utils::scoretime($matrixItem->time, $scoreIsInSeconds);
                 $maxTime = max($maxTime, $time);
@@ -540,13 +511,9 @@ class ImportExportService
 
     /**
      * Import a TSV file
-     * @param string       $type
-     * @param UploadedFile $file
-     * @param string|null  $message
-     * @return int
      * @throws Exception
      */
-    public function importTsv(string $type, UploadedFile $file, string &$message = null): int
+    public function importTsv(string $type, UploadedFile $file, ?string &$message = null): int
     {
         $content = file($file->getRealPath());
         // The first line of the tsv is always the format with a version number.
@@ -579,13 +546,9 @@ class ImportExportService
 
     /**
      * Import a JSON file
-     * @param string       $type
-     * @param UploadedFile $file
-     * @param string|null  $message
-     * @return int
      * @throws Exception
      */
-    public function importJson(string $type, UploadedFile $file, string &$message = null): int
+    public function importJson(string $type, UploadedFile $file, ?string &$message = null): int
     {
         $content = file_get_contents($file->getRealPath());
         $data = json_decode($content, true);
@@ -613,12 +576,9 @@ class ImportExportService
 
     /**
      * Import groups TSV
-     * @param array       $content
-     * @param string|null $message
-     * @return int
      * @throws Exception
      */
-    protected function importGroupsTsv(array $content, string &$message = null): int
+    protected function importGroupsTsv(array $content, ?string &$message = null): int
     {
         $groupData = [];
         $l         = 1;
@@ -641,14 +601,11 @@ class ImportExportService
     /**
      * Import groups JSON
      *
-     * @param array               $data
-     * @param string|null         $message
      * @param TeamCategory[]|null $saved The saved groups
      *
-     * @return int
      * @throws Exception
      */
-    public function importGroupsJson(array $data, string &$message = null, array &$saved = null): int
+    public function importGroupsJson(array $data, ?string &$message = null, ?array &$saved = null): int
     {
         $groupData = [];
         foreach ($data as $idx => $group) {
@@ -671,14 +628,11 @@ class ImportExportService
     /**
      * Import group data from the given array
      *
-     * @param array $groupData
      * @param TeamCategory[]|null $saved The saved groups
-     *
-     * @return int
      *
      * @throws NonUniqueResultException
      */
-    protected function importGroupData(array $groupData, array &$saved = null): int
+    protected function importGroupData(array $groupData, ?array &$saved = null): int
     {
         // We want to overwrite the ID so change the ID generator
         $metadata = $this->em->getClassMetaData(TeamCategory::class);
@@ -728,14 +682,11 @@ class ImportExportService
     /**
      * Import organizations JSON
      *
-     * @param array                  $data
-     * @param string|null            $message
      * @param TeamAffiliation[]|null $saved The saved groups
      *
-     * @return int
      * @throws Exception
      */
-    public function importOrganizationsJson(array $data, string &$message = null, array &$saved = null): int
+    public function importOrganizationsJson(array $data, ?string &$message = null, ?array &$saved = null): int
     {
         $organizationData = [];
         foreach ($data as $idx => $organization) {
@@ -753,14 +704,11 @@ class ImportExportService
     /**
      * Import organization data from the given array
      *
-     * @param array                  $organizationData
      * @param TeamAffiliation[]|null $saved The saved groups
-     *
-     * @return int
      *
      * @throws NonUniqueResultException
      */
-    protected function importOrganizationData(array $organizationData, array &$saved = null): int
+    protected function importOrganizationData(array $organizationData, ?array &$saved = null): int
     {
         foreach ($organizationData as $organizationItem) {
             $externalId      = $organizationItem['externalid'];
@@ -797,12 +745,9 @@ class ImportExportService
 
     /**
      * Import teams TSV
-     * @param array       $content
-     * @param string|null $message
-     * @return int
      * @throws NonUniqueResultException
      */
-    protected function importTeamsTsv(array $content, string &$message = null): int
+    protected function importTeamsTsv(array $content, ?string &$message = null): int
     {
         $teamData = [];
         $l        = 1;
@@ -855,14 +800,11 @@ class ImportExportService
     /**
      * Import teams JSON
      *
-     * @param array       $data
-     * @param string|null $message
      * @param Team[]|null $saved The saved teams
      *
-     * @return int
      * @throws Exception
      */
-    public function importTeamsJson(array $data, string &$message = null, array &$saved = null): int
+    public function importTeamsJson(array $data, ?string &$message = null, ?array &$saved = null): int
     {
         $teamData = [];
         foreach ($data as $idx => $team) {
@@ -887,14 +829,11 @@ class ImportExportService
     /**
      * Import team data from the given array
      *
-     * @param array       $teamData
      * @param Team[]|null $saved The saved teams
-     *
-     * @return int
      *
      * @throws NonUniqueResultException
      */
-    protected function importTeamData(array $teamData, array &$saved = null): int
+    protected function importTeamData(array $teamData, ?array &$saved = null): int
     {
         // We want to overwrite the ID so change the ID generator
         $metadata = $this->em->getClassMetaData(TeamCategory::class);
@@ -1014,12 +953,9 @@ class ImportExportService
 
     /**
      * Import accounts TSV
-     * @param array       $content
-     * @param string|null $message
-     * @return int
      * @throws Exception
      */
-    protected function importAccountsTsv(array $content, string &$message = null): int
+    protected function importAccountsTsv(array $content, ?string &$message = null): int
     {
         $accountData = [];
         $l           = 1;

@@ -35,40 +35,13 @@ use ZipArchive;
  */
 class ImportProblemService
 {
-    /**
-     * @var EntityManagerInterface
-     */
-    protected $em;
-
-    /**
-     * @var LoggerInterface
-     */
-    protected $logger;
-
-    /**
-     * @var DOMJudgeService
-     */
-    protected $dj;
-
-    /**
-     * @var ConfigurationService
-     */
-    protected $config;
-
-    /**
-     * @var SubmissionService
-     */
-    protected $submissionService;
-
-    /**
-     * @var EventLogService
-     */
-    protected $eventLogService;
-
-    /**
-     * @var ValidatorInterface
-     */
-    protected $validator;
+    protected EntityManagerInterface $em;
+    protected LoggerInterface $logger;
+    protected DOMJudgeService $dj;
+    protected ConfigurationService $config;
+    protected SubmissionService $submissionService;
+    protected EventLogService $eventLogService;
+    protected ValidatorInterface $validator;
 
     public function __construct(
         EntityManagerInterface $em,
@@ -90,23 +63,17 @@ class ImportProblemService
 
     /**
      * Import a zipped problem
-     * @param ZipArchive   $zip
-     * @param              $clientName
-     * @param Problem|null $problem
-     * @param Contest|null $contest
-     * @param array        $messages
-     * @return Problem|null
      * @throws DBALException
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
     public function importZippedProblem(
         ZipArchive $zip,
-        $clientName,
-        Problem $problem = null,
-        Contest $contest = null,
-        array &$messages = []
-    ) {
+        string $clientName,
+        ?Problem $problem = null,
+        ?Contest $contest = null,
+        ?array &$messages = []
+    ): ?Problem {
         // This might take a while
         ini_set('max_execution_time', '300');
 

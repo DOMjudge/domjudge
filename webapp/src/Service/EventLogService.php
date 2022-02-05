@@ -51,7 +51,7 @@ class EventLogService implements ContainerAwareInterface
     // TODO: add a way to specify when to use external ID using some (DB)
     // config instead of hardcoding it here. Also relates to
     // AbstractRestController::getIdField
-    public $apiEndpoints = [
+    public array $apiEndpoints = [
         'contests' => [
             self::KEY_TYPE => self::TYPE_CONFIGURATION,
             self::KEY_URL => '',
@@ -128,30 +128,15 @@ class EventLogService implements ContainerAwareInterface
     ];
 
     // Entities to endpoints. Will be filled automatically except for special cases
-    protected $entityToEndpoint = [
+    protected array $entityToEndpoint = [
         // Special case for contest problems, as they should map to problems
         ContestProblem::class => 'problems',
     ];
 
-    /**
-     * @var DOMJudgeService
-     */
-    protected $dj;
-
-    /**
-     * @var ConfigurationService
-     */
-    protected $config;
-
-    /**
-     * @var EntityManagerInterface
-     */
-    protected $em;
-
-    /**
-     * @var LoggerInterface
-     */
-    protected $logger;
+    protected DOMJudgeService $dj;
+    protected ConfigurationService $config;
+    protected EntityManagerInterface $em;
+    protected LoggerInterface $logger;
 
     public function __construct(
         DOMJudgeService $dj,
@@ -217,8 +202,8 @@ class EventLogService implements ContainerAwareInterface
         string $type,
         $dataIds,
         string $action,
-        $contestId = null,
-        $json = null,
+        ?int $contestId = null,
+        ?string $json = null,
         $ids = null,
         bool $checkEvents = true
     ) {
@@ -475,10 +460,9 @@ class EventLogService implements ContainerAwareInterface
     /**
      * Add all state events for the given contest that are not added yet but
      * should have happened already
-     * @param Contest $contest
      * @throws Exception
      */
-    public function addMissingStateEvents(Contest $contest)
+    public function addMissingStateEvents(Contest $contest): void
     {
         // Make sure we get a fresh contest
         $this->em->refresh($contest);
@@ -584,11 +568,6 @@ class EventLogService implements ContainerAwareInterface
      * This method will make sure that the events are all only inserted once,
      * even if called simultaneously from different processes.
      *
-     * @param Contest $contest
-     * @param string  $endpointType
-     * @param array   $endpointIds
-     * @param array   $contents
-     *
      * @throws NonUniqueResultException
      * @throws Exception
      */
@@ -596,8 +575,8 @@ class EventLogService implements ContainerAwareInterface
         Contest $contest,
         string $endpointType,
         array $endpointIds,
-        $contents
-    ) {
+        array $contents
+    ): void {
         if (empty($endpointIds)) {
             return;
         }
@@ -675,10 +654,6 @@ class EventLogService implements ContainerAwareInterface
      * This method will make sure that the event is only inserted once,
      * even if called simultaneously from different processes.
      *
-     * @param Contest $contest
-     * @param string  $endpointType
-     * @param string  $endpointId
-     * @param mixed   $content
      * @throws NonUniqueResultException
      * @throws Exception
      */
@@ -686,8 +661,8 @@ class EventLogService implements ContainerAwareInterface
         Contest $contest,
         string $endpointType,
         string $endpointId,
-        $content
-    ) {
+        array $content
+    ): void {
         $this->insertEvents($contest, $endpointType, [$endpointId], [$content]);
     }
 
@@ -696,11 +671,10 @@ class EventLogService implements ContainerAwareInterface
      * are marked as 'Configuration' on
      * https://ccs-specs.icpc.io/2021-11/contest_api#types-of-endpoints
      *
-     * @param Contest $contest
      * @throws NonUniqueResultException
      * @throws Exception
      */
-    public function initStaticEvents(Contest $contest)
+    public function initStaticEvents(Contest $contest): void
     {
         // Loop over all configuration endpoints with an URL and check if we have all data
         foreach ($this->apiEndpoints as $endpoint => $endpointData) {

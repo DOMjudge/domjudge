@@ -7,7 +7,6 @@ use App\Entity\Contest;
 use App\Entity\Judging;
 use App\Entity\ScoreCache;
 use App\Entity\Submission;
-use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
@@ -17,22 +16,9 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class BalloonService
 {
-    /**
-     * @var EntityManagerInterface
-     */
-    protected $em;
+    protected EntityManagerInterface $em;
+    protected ConfigurationService $config;
 
-    /**
-     * @var ConfigurationService
-     */
-    protected $config;
-
-    /**
-     * BalloonService constructor.
-     *
-     * @param EntityManagerInterface $em
-     * @param ConfigurationService   $config
-     */
     public function __construct(
         EntityManagerInterface $em,
         ConfigurationService $config
@@ -46,9 +32,6 @@ class BalloonService
      *
      * This function double checks that the judging is correct and confirmed.
      *
-     * @param Contest      $contest
-     * @param Submission   $submission
-     * @param Judging|null $judging
      * @throws NoResultException
      * @throws NonUniqueResultException
      * @throws ORMException
@@ -56,9 +39,8 @@ class BalloonService
     public function updateBalloons(
         Contest $contest,
         Submission $submission,
-        Judging $judging = null
-    ) : void
-    {
+        ?Judging $judging = null
+    ): void {
         // Balloon processing disabled for contest
         if (!$contest->getProcessBalloons()) {
             return;
@@ -210,7 +192,7 @@ class BalloonService
         return $balloons_table;
     }
 
-    public function setDone(int $balloonId) : void
+    public function setDone(int $balloonId): void
     {
         $em = $this->em;
         $balloon = $em->getRepository(Balloon::class)->find($balloonId);

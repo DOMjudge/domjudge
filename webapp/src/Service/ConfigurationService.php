@@ -23,40 +23,13 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class ConfigurationService
 {
-    /**
-     * @var EntityManagerInterface
-     */
-    protected $em;
-
-    /**
-     * @var LoggerInterface
-     */
-    protected $logger;
-
-    /**
-     * @var ConfigCacheFactoryInterface
-     */
-    protected $configCache;
-
-    /**
-     * @var bool
-     */
-    protected $debug;
-
-    /**
-     * @var string
-     */
-    protected $cacheDir;
-
-    /**
-     * @var string
-     */
-    protected $etcDir;
-
-    /**
-     * @var array
-     */
-    protected $dbConfigCache = null;
+    protected EntityManagerInterface $em;
+    protected LoggerInterface $logger;
+    protected ConfigCacheFactoryInterface $configCache;
+    protected bool $debug;
+    protected string $cacheDir;
+    protected string $etcDir;
+    protected ?array $dbConfigCache = null;
 
     /**
      * ConfigurationService constructor.
@@ -109,9 +82,6 @@ class ConfigurationService
     /**
      * Get all the configuration values, indexed by name
      *
-     * @param bool $onlyIfPublic
-     *
-     * @return array
      * @throws Exception
      */
     public function all(bool $onlyIfPublic = false): array
@@ -181,16 +151,11 @@ EOF;
                 // @codeCoverageIgnoreEnd
             });
 
-        $specification = require $cacheFile;
-        return $specification;
+        return require $cacheFile;
     }
 
     /**
      * Save the changes from the given request
-     *
-     * @param array $dataToSet
-     * @param EventLogService $eventLog
-     * @param DOMJudgeService $dj
      *
      * @throws NonUniqueResultException
      */
@@ -307,7 +272,7 @@ EOF;
     /**
      * @throws NonUniqueResultException
      */
-    private function logUnverifiedJudgings(EventLogService $eventLog)
+    private function logUnverifiedJudgings(EventLogService $eventLog): void
     {
         /** @var Judging[] $judgings */
         $judgings = $this->em->getRepository(Judging::class)->findBy(
@@ -369,10 +334,6 @@ EOF;
      *
      * This method is used to add predefined options that need to be loaded
      * from the database to certain items.
-     *
-     * @param array $item
-     *
-     * @return array
      */
     public function addOptions(array $item): array
     {

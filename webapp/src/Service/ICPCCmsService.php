@@ -22,27 +22,10 @@ class ICPCCmsService
     const WS_TOKEN_URL = '/auth/realms/cm5/protocol/openid-connect/token';
     const WS_CLICS = '/cm5-contest-rest/rest/contest/export/CLICS/CONTEST/';
 
-    /**
-     * @var DOMJudgeService
-     */
-    protected $dj;
+    protected DOMJudgeService $dj;
+    protected EntityManagerInterface $em;
+    protected HttpClientInterface $client;
 
-    /**
-     * @var EntityManagerInterface
-     */
-    protected $em;
-
-    /**
-     * @var HttpClientInterface
-     */
-    protected $client;
-
-    /**
-     * ICPCCmsService constructor.
-     * @param DOMJudgeService        $dj
-     * @param EntityManagerInterface $em
-     * @param                        $domjudgeVersion
-     */
     public function __construct(
         DOMJudgeService $dj,
         EntityManagerInterface $em,
@@ -88,7 +71,7 @@ class ICPCCmsService
         }
         if ($response->getStatusCode() < 200 || $response->getStatusCode() >= 300) {
             $message = sprintf('Unknown error while retrieving data from %s, status code: %d, %s',
-                               BASE_URI, $response->getStatusCode(), $response->getContent(false));
+                               static::BASE_URI, $response->getStatusCode(), $response->getContent(false));
             return false;
         }
 
@@ -210,7 +193,7 @@ class ICPCCmsService
         }
         if ($response->getStatusCode() < 200 || $response->getStatusCode() >= 300) {
             $message = sprintf('Unknown error while retrieving data from %s, status code: %d, %s',
-                               BASE_URI, $response->getStatusCode(), $response->getContent(false));
+                               static::BASE_URI, $response->getStatusCode(), $response->getContent(false));
             return null;
         }
 

@@ -456,7 +456,7 @@ class ClarificationController extends AbstractController
 
         $clarId = $clarification->getClarId();
         $this->dj->auditlog('clarification', $clarId, 'added', null, null, $cid);
-        $this->eventLogService->log('clarification', $clarId, 'create', $cid);
+        $this->eventLogService->log('clarification', $clarId, 'create', (int)$cid);
         // Reload clarification to make sure we have a fresh one after calling the event log service
         $clarification = $this->em->getRepository(Clarification::class)->find($clarId);
 
