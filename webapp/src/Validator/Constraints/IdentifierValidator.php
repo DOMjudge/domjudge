@@ -9,10 +9,7 @@ use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 
 class IdentifierValidator extends ConstraintValidator
 {
-    /**
-     * @inheritdoc
-     */
-    public function validate($value, Constraint $constraint)
+    public function validate($value, Constraint $constraint): void
     {
         if (!$constraint instanceof Identifier) {
             throw new UnexpectedTypeException($constraint, Identifier::class);

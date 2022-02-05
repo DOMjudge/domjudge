@@ -9,5 +9,5 @@ use Symfony\Component\Validator\Constraint;
  */
 class Country extends Constraint
 {
-    public $message = 'Only (uppercase) ISO3166-1 alpha-3 values are allowed';
+    public string $message = 'Only (uppercase) ISO3166-1 alpha-3 values are allowed';
 }

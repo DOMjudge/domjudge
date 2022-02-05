@@ -18,10 +18,7 @@ use JMS\Serializer\Metadata\StaticPropertyMetadata;
  */
 class SetExternalIdVisitor implements EventSubscriberInterface
 {
-    /**
-     * @var EventLogService
-     */
-    protected $eventLogService;
+    protected EventLogService $eventLogService;
 
     public function __construct(EventLogService $eventLogService)
     {
@@ -39,7 +36,7 @@ class SetExternalIdVisitor implements EventSubscriberInterface
         ];
     }
 
-    public function onPostSerialize(ObjectEvent $event)
+    public function onPostSerialize(ObjectEvent $event): void
     {
         /** @var JsonSerializationVisitor $visitor */
         $visitor = $event->getVisitor();

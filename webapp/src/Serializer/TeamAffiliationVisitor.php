@@ -17,25 +17,10 @@ use Symfony\Component\HttpFoundation\RequestStack;
 
 class TeamAffiliationVisitor implements EventSubscriberInterface
 {
-    /**
-     * @var DOMJudgeService
-     */
-    protected $dj;
-
-    /**
-     * @var ConfigurationService
-     */
-    protected $config;
-
-    /**
-     * @var EventLogService
-     */
-    protected $eventLogService;
-
-    /**
-     * @var RequestStack
-     */
-    protected $requestStack;
+    protected DOMJudgeService $dj;
+    protected ConfigurationService $config;
+    protected EventLogService $eventLogService;
+    protected RequestStack $requestStack;
 
     public function __construct(
         DOMJudgeService $dj,
@@ -61,7 +46,7 @@ class TeamAffiliationVisitor implements EventSubscriberInterface
         ];
     }
 
-    public function onPostSerialize(ObjectEvent $event)
+    public function onPostSerialize(ObjectEvent $event): void
     {
         /** @var JsonSerializationVisitor $visitor */
         $visitor = $event->getVisitor();

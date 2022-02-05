@@ -8,23 +8,14 @@ use JMS\Serializer\Annotation as Serializer;
 
 class JudgingWrapper
 {
-    /**
-     * @var Judging
-     * @Serializer\Inline()
-     */
-    protected $judging;
+    /** @Serializer\Inline() */
+    protected Judging $judging;
 
-    /**
-     * @var float|null
-     * @Serializer\Exclude()
-     */
-    protected $maxRunTime;
+    /** @Serializer\Exclude() */
+    protected ?float $maxRunTime;
 
-    /**
-     * @var string
-     * @Serializer\SerializedName("judgement_type_id")
-     */
-    protected $judgementTypeId;
+    /** @Serializer\SerializedName("judgement_type_id") */
+    protected ?string $judgementTypeId;
 
     public function __construct(Judging $judging, ?float $maxRunTime = null, ?string $judgementTypeId = null)
     {

@@ -13,14 +13,10 @@ use JMS\Serializer\Annotation as Serializer;
  */
 class OrdinalItem
 {
-    /**
-     * @Serializer\SerializedName("ordinal")
-     */
+    /** @Serializer\SerializedName("ordinal") */
     protected int $ordinal;
 
-    /**
-     * @Serializer\Inline()
-     */
+    /** @Serializer\Inline() */
     protected object $item;
 
     public function __construct(int $ordinal, object $item)

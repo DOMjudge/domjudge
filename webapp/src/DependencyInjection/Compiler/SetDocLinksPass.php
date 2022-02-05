@@ -9,7 +9,7 @@ use Symfony\Component\Yaml\Yaml;
 
 class SetDocLinksPass implements CompilerPassInterface
 {
-    public function process(ContainerBuilder $container)
+    public function process(ContainerBuilder $container): void
     {
         $etcDir = $container->getParameter('domjudge.etcdir');
         $docsFile = sprintf('%s/docs.yaml', $etcDir);

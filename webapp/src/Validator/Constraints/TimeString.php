@@ -9,9 +9,9 @@ use Symfony\Component\Validator\Constraint;
  */
 class TimeString extends Constraint
 {
-    public $allowRelative = true;
-    public $relativeIsPositive = true;
+    public bool $allowRelative = true;
+    public bool $relativeIsPositive = true;
 
-    public $absoluteMessage = 'Only absolute time strings are allowed';
-    public $absoluteRelativeMessage = 'Only absolute or relative time strings are allowed';
+    public string $absoluteMessage = 'Only absolute time strings are allowed';
+    public string $absoluteRelativeMessage = 'Only absolute or relative time strings are allowed';
 }

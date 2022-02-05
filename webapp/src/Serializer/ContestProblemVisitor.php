@@ -24,7 +24,7 @@ class ContestProblemVisitor implements EventSubscriberInterface
         ];
     }
 
-    public function onPostSerialize(ObjectEvent $event)
+    public function onPostSerialize(ObjectEvent $event): void
     {
         /** @var JsonSerializationVisitor $visitor */
         $visitor = $event->getVisitor();

@@ -20,20 +20,9 @@ use JMS\Serializer\Metadata\StaticPropertyMetadata;
  */
 class ContestVisitor implements EventSubscriberInterface
 {
-    /**
-     * @var ConfigurationService
-     */
-    protected $config;
-
-    /**
-     * @var DOMJudgeService
-     */
-    protected $dj;
-
-    /**
-     * @var EventLogService
-     */
-    protected $eventLogService;
+    protected ConfigurationService $config;
+    protected DOMJudgeService $dj;
+    protected EventLogService $eventLogService;
 
     public function __construct(
         ConfigurationService $config,
@@ -57,7 +46,7 @@ class ContestVisitor implements EventSubscriberInterface
         ];
     }
 
-    public function onPostSerialize(ObjectEvent $event)
+    public function onPostSerialize(ObjectEvent $event): void
     {
         /** @var JsonSerializationVisitor $visitor */
         $visitor = $event->getVisitor();

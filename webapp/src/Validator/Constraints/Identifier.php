@@ -9,5 +9,5 @@ use Symfony\Component\Validator\Constraint;
  */
 class Identifier extends Constraint
 {
-    public $message = 'Only alphanumeric characters and ._- are allowed';
+    public string $message = 'Only alphanumeric characters and ._- are allowed';
 }

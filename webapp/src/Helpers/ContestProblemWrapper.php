@@ -7,23 +7,12 @@ use JMS\Serializer\Annotation as Serializer;
 
 class ContestProblemWrapper
 {
-    /**
-     * @var ContestProblem
-     * @Serializer\Inline()
-     */
-    protected $contestProblem;
+    /** @Serializer\Inline() */
+    protected ContestProblem $contestProblem;
 
-    /**
-     * @var int
-     * @Serializer\SerializedName("test_data_count")
-     */
-    protected $testDataCount;
+    /** @Serializer\SerializedName("test_data_count") */
+    protected int $testDataCount;
 
-    /**
-     * ProblemWrapper constructor.
-     * @param ContestProblem $contestProblem
-     * @param int $testDataCount
-     */
     public function __construct(ContestProblem $contestProblem, int $testDataCount)
     {
         $this->contestProblem = $contestProblem;

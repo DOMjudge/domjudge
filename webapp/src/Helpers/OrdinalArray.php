@@ -2,6 +2,8 @@
 
 namespace App\Helpers;
 
+use Traversable;
+
 /**
  * Class OrdinalArray
  *
@@ -11,13 +13,11 @@ namespace App\Helpers;
  */
 class OrdinalArray
 {
-    /**
-     * @var OrdinalItem[]
-     */
+    /** @var OrdinalItem[] */
     protected array $items;
 
     /**
-     * @param array|\Traversable $items
+     * @param array|Traversable $items
      */
     public function __construct($items)
     {
