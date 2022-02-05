@@ -20,52 +20,46 @@ class JudgingRunOutput
      * reverse of this relation will always be loaded. See the commit message of commit
      * 9e421f96691ec67ed62767fe465a6d8751edd884 for a more elaborate explanation
      *
-     * @var JudgingRun
      * @ORM\Id
      * @ORM\ManyToOne(targetEntity="App\Entity\JudgingRun", inversedBy="output")
      * @ORM\JoinColumn(name="runid", referencedColumnName="runid", onDelete="CASCADE")
      */
-    private $run;
+    private JudgingRun $run;
 
     /**
-     * @var string
      * @ORM\Column(type="blobtext", length=4294967295, name="output_run",
      *     options={"comment"="Output of running the program"},
      *     nullable=true)
      */
-    private $output_run;
+    private ?string $output_run;
 
     /**
-     * @var string
      * @ORM\Column(type="blobtext", length=4294967295, name="output_diff",
      *     options={"comment"="Diffing the program output and testcase output"},
      *     nullable=true)
      */
-    private $output_diff;
+    private ?string $output_diff;
 
     /**
-     * @var string
      * @ORM\Column(type="blobtext", length=4294967295, name="output_error",
      *     options={"comment"="Standard error output of the program"},
      *     nullable=true)
      */
-    private $output_error;
+    private ?string $output_error;
 
     /**
-     * @var string
      * @ORM\Column(type="blobtext", length=4294967295, name="output_system",
      *     options={"comment"="Judging system output"},
      *     nullable=true)
      */
-    private $output_system;
+    private ?string $output_system;
 
     /**
-     * @var string
      * @ORM\Column(type="blobtext", length=4294967295, name="metadata",
      *     options={"comment"="Judging metadata"},
      *     nullable=true)
      */
-    private $metadata;
+    private ?string $metadata;
 
     public function setRun(JudgingRun $run): JudgingRunOutput
     {

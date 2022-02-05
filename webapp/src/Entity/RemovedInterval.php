@@ -20,17 +20,15 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 class RemovedInterval
 {
     /**
-     * @var int
-     *
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer", name="intervalid", length=4,
      *     options={"comment"="Removed interval ID","unsigned"=true}, nullable=false)
      */
-    private $intervalid;
+    private int $intervalid;
 
     /**
-     * @var double
+     * @var double|sring
      * @ORM\Column(type="decimal", precision=32, scale=9, name="starttime",
      *     options={"comment"="Initial time of removed interval", "unsigned"=true},
      *     nullable=false)
@@ -38,7 +36,7 @@ class RemovedInterval
     private $starttime;
 
     /**
-     * @var double
+     * @var double|sring
      * @ORM\Column(type="decimal", precision=32, scale=9, name="endtime",
      *     options={"comment"="Final time of removed interval", "unsigned"=true},
      *     nullable=false)
@@ -46,28 +44,26 @@ class RemovedInterval
     private $endtime;
 
     /**
-     * @var string
      * @ORM\Column(type="string", length=64, name="starttime_string",
      *     options={"comment"="Authoritative (absolute only) string representation of starttime"},
      *     nullable=false)
      * @TimeString(allowRelative=false)
      */
-    private $starttimeString;
+    private string $starttimeString;
 
     /**
-     * @var string
      * @ORM\Column(type="string", length=64, name="endtime_string",
      *     options={"comment"="Authoritative (absolute only) string representation of endtime"},
      *     nullable=false)
      * @TimeString(allowRelative=false)
      */
-    private $endtimeString;
+    private string $endtimeString;
 
     /**
      * @ORM\ManyToOne(targetEntity="Contest", inversedBy="removedIntervals")
      * @ORM\JoinColumn(name="cid", referencedColumnName="cid", onDelete="CASCADE")
      */
-    private $contest;
+    private Contest $contest;
 
     public function getIntervalid(): ?int
     {

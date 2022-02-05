@@ -20,58 +20,51 @@ use JMS\Serializer\Annotation as Serializer;
 class ExecutableFile
 {
     /**
-     * @var int
-     *
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer", name="execfileid", length=4,
      *     options={"comment"="Executable file ID","unsigned"=true},
      *     nullable=false)
      */
-    private $execfileid;
+    private int $execfileid;
 
     /**
-     * @var string
      * @ORM\Column(type="string", name="filename", length=255, options={"comment"="Filename as uploaded"}, nullable=false)
      */
-    private $filename;
+    private string $filename;
 
     /**
-     * @var int
      * @ORM\Column(type="integer", name="ranknumber",
      *     options={"comment"="Order of the executable files, zero-indexed", "unsigned"=true},
      *     nullable=false)
      */
-    private $rank;
+    private int $rank;
 
     /**
      * @ORM\ManyToOne(targetEntity="ImmutableExecutable", inversedBy="files")
      * @ORM\JoinColumn(name="immutable_execid", referencedColumnName="immutable_execid", onDelete="CASCADE")
      */
-    private $immutableExecutable;
+    private ImmutableExecutable $immutableExecutable;
 
     /**
-     * @var string
      * @ORM\Column(type="blobtext", name="file_content", length=4294967295,
      *     options={"comment"="Full file content"}, nullable=false)
      */
-    private $fileContent;
+    private string $fileContent;
 
     /**
-     * @var string
      * @ORM\Column(type="string", name="hash", length=32, options={"comment"="hash of the content"}, nullable=true)
      */
-    private $hash;
+    private string $hash;
 
     /**
-     * @var boolean
      * @ORM\Column(type="boolean", name="is_executable",
      *     options={"comment"="Whether this file gets an executable bit.",
      *              "default"="0"},
      *     nullable=false)
      * @Serializer\Exclude()
      */
-    private $isExecutable = false;
+    private bool $isExecutable = false;
 
     public function getExecFileId(): int
     {

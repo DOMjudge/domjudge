@@ -28,8 +28,6 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
     const RESULT_COMPILER_ERROR = 'compiler-error';
 
     /**
-     * @var int
-     *
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer", name="judgingid", length=4,
@@ -37,10 +35,10 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
      * @Serializer\SerializedName("id")
      * @Serializer\Type("string")
      */
-    protected $judgingid;
+    protected int $judgingid;
 
     /**
-     * @var double
+     * @var double|string|null
      * @ORM\Column(type="decimal", precision=32, scale=9, name="starttime",
      *     options={"comment"="Time judging started", "unsigned"=true},
      *     nullable=true)
@@ -49,7 +47,7 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
     private $starttime;
 
     /**
-     * @var double
+     * @var double|string|null
      * @ORM\Column(type="decimal", precision=32, scale=9, name="endtime",
      *     options={"comment"="Time judging ended, null = still busy",
      *              "unsigned"=true},
@@ -59,53 +57,48 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
     private $endtime;
 
     /**
-     * @var string
      * @ORM\Column(type="string", name="result", length=32,
      *     options={"comment"="Result string as defined in config.php"},
      *     nullable=true)
      * @Serializer\Exclude()
      */
-    private $result;
+    private ?string $result;
 
     /**
-     * @var boolean
      * @ORM\Column(type="boolean", name="verified",
      *     options={"comment"="Result verified by jury member?",
      *              "default"="0"},
      *     nullable=false)
      * @Serializer\Exclude()
      */
-    private $verified = false;
+    private bool $verified = false;
 
     /**
-     * @var string
      * @ORM\Column(type="string", name="jury_member", length=255,
      *     options={"comment"="Name of jury member who verified this"},
      *     nullable=true)
      * @Serializer\Exclude()
      */
-    private $jury_member;
+    private ?string $jury_member;
 
     /**
-     * @var string
      * @ORM\Column(type="string", name="verify_comment", length=255,
      *     options={"comment"="Optional additional information provided by the verifier"},
      *     nullable=true)
      * @Serializer\Exclude()
      */
-    private $verify_comment;
+    private ?string $verify_comment;
 
     /**
-     * @var boolean
      * @ORM\Column(type="boolean", name="valid",
      *     options={"comment"="Old judging is marked as invalid when rejudging",
      *              "default"="1"},
      *     nullable=false)
      */
-    private $valid = true;
+    private bool $valid = true;
 
     /**
-     * @var resource
+     * @var resource|null
      * @ORM\Column(type="blob", name="output_compile",
      *     options={"comment"="Output of the compiling the program"},
      *     nullable=true)
@@ -114,47 +107,43 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
     private $output_compile;
 
     /**
-     * @var string
      * @ORM\Column(type="blobtext", length=4294967295, name="metadata",
      *     options={"comment"="Compilation metadata"},
      *     nullable=true)
      * @Serializer\Exclude()
      */
-    private $compile_metadata;
+    private ?string $compile_metadata;
 
     /**
      * @Serializer\Exclude()
      */
-    private $output_compile_as_string = null;
+    private ?string $output_compile_as_string = null;
 
     /**
-     * @var boolean
      * @ORM\Column(type="boolean", name="seen",
      *     options={"comment"="Whether the team has seen this judging",
      *              "default"="0"},
      *     nullable=false)
      * @Serializer\Exclude()
      */
-    private $seen = false;
+    private bool $seen = false;
 
     /**
-     * @var boolean
      * @ORM\Column(type="boolean", name="judge_completely",
      *     options={"comment"="Explicitly requested to be judged completely.",
      *              "default"="0"},
      *     nullable=false)
      * @Serializer\Exclude()
      */
-    private $judgeCompletely = false;
+    private bool $judgeCompletely = false;
 
     /**
-     * @var string
      * @ORM\Column(type="string", name="uuid",
      *     options={"comment"="UUID, to make caching of compilation results safe."},
      *     nullable=false)
      * @Serializer\Exclude()
      */
-    private $uuid;
+    private string $uuid;
 
 
     /**
@@ -162,14 +151,14 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
      * @ORM\JoinColumn(name="cid", referencedColumnName="cid", onDelete="CASCADE")
      * @Serializer\Exclude()
      */
-    private $contest;
+    private ?Contest $contest;
 
     /**
      * @ORM\ManyToOne(targetEntity="Submission", inversedBy="judgings")
      * @ORM\JoinColumn(name="submitid", referencedColumnName="submitid", onDelete="CASCADE")
      * @Serializer\Exclude()
      */
-    private $submission;
+    private Submission $submission;
 
     /**
      * rejudgings have one parent judging
@@ -177,7 +166,7 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
      * @ORM\JoinColumn(name="rejudgingid", referencedColumnName="rejudgingid", onDelete="SET NULL")
      * @Serializer\Exclude()
      */
-    private $rejudging;
+    private ?Rejudging $rejudging;
 
     /**
      * Rejudgings have one parent judging.
@@ -185,19 +174,19 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
      * @ORM\JoinColumn(name="prevjudgingid", referencedColumnName="judgingid", onDelete="SET NULL")
      * @Serializer\Exclude()
      */
-    private $original_judging;
+    private ?Judging $original_judging;
 
     /**
      * @ORM\OneToMany(targetEntity="JudgingRun", mappedBy="judging")
      * @Serializer\Exclude()
      */
-    private $runs;
+    private Collection $runs;
 
     /**
      * @ORM\OneToMany(targetEntity="DebugPackage", mappedBy="judging")
      * @Serializer\Exclude()
      */
-    private $debug_packages;
+    private Collection $debug_packages;
 
     /**
      * Rejudgings have one parent judging.
@@ -205,7 +194,7 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
      * @ORM\JoinColumn(name="errorid", referencedColumnName="errorid", onDelete="SET NULL")
      * @Serializer\Exclude()
      */
-    private $internalError;
+    private ?InternalError $internalError;
 
     public function getMaxRuntime(): ?float
     {
@@ -457,6 +446,7 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
     public function __construct()
     {
         $this->runs = new ArrayCollection();
+        $this->debug_packages = new ArrayCollection();
         $this->uuid = Uuid::uuid4()->toString();
     }
 
@@ -471,7 +461,7 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
         return $this;
     }
 
-    public function removeRun(JudgingRun $run)
+    public function removeRun(JudgingRun $run): void
     {
         $this->runs->removeElement($run);
     }
@@ -545,7 +535,7 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
         return $hostnames;
     }
 
-    public function getDebugPackages()
+    public function getDebugPackages(): Collection
     {
         return $this->debug_packages;
     }

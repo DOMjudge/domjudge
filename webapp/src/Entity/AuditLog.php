@@ -15,71 +15,63 @@ use Doctrine\ORM\Mapping as ORM;
 class AuditLog
 {
     /**
-     * @var int
-     *
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer", name="logid", length=4,
      *     options={"comment"="Audit log ID","unsigned"=true}, nullable=false)
      */
-    private $logid;
+    private ?int $logid;
 
     /**
-     * @var double
+     * @var double|string
      * @ORM\Column(type="decimal", precision=32, scale=9, name="logtime", options={"comment"="Timestamp of the logentry", "unsigned"=true}, nullable=false)
      */
     private $logtime;
 
     /**
-     * @var int
      * @ORM\Column(type="integer", name="cid", length=4,
      *     options={"comment"="Contest ID associated to this entry",
      *              "unsigned"=true},
      *     nullable=true)
      */
-    private $cid;
+    private ?int $cid;
 
     /**
-     * @var string
      * @ORM\Column(type="string", name="user", length=255,
      *     options={"comment"="User who performed this action"},
      *     nullable=true)
      */
-    private $user;
+    private ?string $user;
 
     /**
-     * @var string
      * @ORM\Column(type="string", name="datatype", length=32,
      *     options={"comment"="Reference to DB table associated to this entry"},
      *     nullable=true)
      */
-    private $datatype;
+    private string $datatype;
 
     /**
-     * @var string
      * @ORM\Column(type="string", name="dataid", length=64,
      *     options={"comment"="Identifier in reference table"},
      *     nullable=true)
      */
-    private $dataid;
+    private ?string $dataid;
 
     /**
-     * @var string
      * @ORM\Column(type="string", name="action", length=128,
      *     options={"comment"="Description of action performed"},
      *     nullable=true)
      */
-    private $action;
+    private string $action;
 
     /**
-     * @var string
      * @ORM\Column(type="string", name="extrainfo", length=255,
      *     options={"comment"="Optional additional description of the entry"},
      *     nullable=true)
      */
-    private $extrainfo;
+    private ?string $extrainfo;
 
-    public function getLogid(): int
+    public function getLogid(): ?int
     {
         return $this->logid;
     }

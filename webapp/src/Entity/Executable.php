@@ -29,45 +29,43 @@ class Executable
      * @Assert\NotBlank()
      * @Identifier()
      */
-    private $execid;
+    private string $execid;
 
     /**
-     * @var string
      * @ORM\Column(type="string", name="description", length=255,
      *     options={"comment"="Description of this executable"},
      *     nullable=true)
      * @Assert\NotBlank()
      */
-    private $description;
+    private ?string $description = null;
 
     /**
-     * @var string
      * @ORM\Column(type="string", name="type", length=32,
      *     options={"comment"="Type of executable"}, nullable=false)
      * @Assert\Choice({"compare", "compile", "run"})
      */
-    private $type;
+    private string $type;
 
     /**
      * @ORM\OneToOne(targetEntity="ImmutableExecutable")
      * @ORM\JoinColumn(name="immutable_execid", referencedColumnName="immutable_execid")
      */
-    private $immutableExecutable;
+    private ImmutableExecutable $immutableExecutable;
 
     /**
      * @ORM\OneToMany(targetEntity="Language", mappedBy="compile_executable")
      */
-    private $languages;
+    private Collection $languages;
 
     /**
      * @ORM\OneToMany(targetEntity="Problem", mappedBy="compare_executable")
      */
-    private $problems_compare;
+    private Collection $problems_compare;
 
     /**
      * @ORM\OneToMany(targetEntity="Problem", mappedBy="run_executable")
      */
-    private $problems_run;
+    private Collection $problems_run;
 
     public function __construct()
     {
@@ -120,7 +118,7 @@ class Executable
         return $this;
     }
 
-    public function removeLanguage(Language $language)
+    public function removeLanguage(Language $language): void
     {
         $this->languages->removeElement($language);
     }
@@ -136,7 +134,7 @@ class Executable
         return $this;
     }
 
-    public function removeProblemsCompare(Problem $problemsCompare)
+    public function removeProblemsCompare(Problem $problemsCompare): void
     {
         $this->problems_compare->removeElement($problemsCompare);
     }
@@ -152,7 +150,7 @@ class Executable
         return $this;
     }
 
-    public function removeProblemsRun(Problem $problemsRun)
+    public function removeProblemsRun(Problem $problemsRun): void
     {
         $this->problems_run->removeElement($problemsRun);
     }

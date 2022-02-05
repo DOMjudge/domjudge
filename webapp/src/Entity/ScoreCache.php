@@ -19,37 +19,31 @@ use Doctrine\ORM\Mapping as ORM;
 class ScoreCache
 {
     /**
-     * @var int
-     *
      * @ORM\Column(type="integer", name="submissions_restricted", length=4,
      *     options={"comment"="Number of submissions made (restricted audiences)",
      *              "unsigned"=true,"default"="0"},
      *     nullable=false)
      */
-    private $submissions_restricted = 0;
+    private int $submissions_restricted = 0;
 
     /**
-     * @var int
-     *
      * @ORM\Column(type="integer", name="pending_restricted", length=4,
      *     options={"comment"="Number of submissions pending judgement (restricted audience)",
      *              "unsigned"=true,"default"="0"},
      *     nullable=false)
      */
-    private $pending_restricted = 0;
+    private int $pending_restricted = 0;
 
     /**
-     * @var boolean
-     *
      * @ORM\Column(type="boolean", name="is_correct_restricted",
      *     options={"comment"="Has there been a correct submission? (restricted audience)",
      *              "default"="0"},
      *     nullable=false)
      */
-    private $is_correct_restricted = false;
+    private bool $is_correct_restricted = false;
 
     /**
-     * @var double
+     * @var double|string
      * @ORM\Column(type="decimal", precision=32, scale=9, name="solvetime_restricted",
      *     options={"comment"="Seconds into contest when problem solved (restricted audience)",
      *              "default"="0"},
@@ -59,37 +53,31 @@ class ScoreCache
 
 
     /**
-     * @var int
-     *
      * @ORM\Column(type="integer", name="submissions_public", length=4,
      *     options={"comment"="Number of submissions made (public)",
      *              "unsigned"=true,"default"="0"},
      *     nullable=false)
      */
-    private $submissions_public = 0;
+    private int $submissions_public = 0;
 
     /**
-     * @var int
-     *
      * @ORM\Column(type="integer", name="pending_public", length=4,
      *     options={"comment"="Number of submissions pending judgement (public)",
      *              "unsigned"=true,"default"="0"},
      *     nullable=false)
      */
-    private $pending_public = 0;
+    private int $pending_public = 0;
 
     /**
-     * @var boolean
-     *
      * @ORM\Column(type="boolean", name="is_correct_public",
      *     options={"comment"="Has there been a correct submission? (public)",
      *              "default"="0"},
      *     nullable=false)
      */
-    private $is_correct_public = false;
+    private bool $is_correct_public = false;
 
     /**
-     * @var double
+     * @var double|string
      * @ORM\Column(type="decimal", precision=32, scale=9, name="solvetime_public",
      *     options={"comment"="Seconds into contest when problem solved (public)",
      *              "default"="0"},
@@ -98,35 +86,33 @@ class ScoreCache
     private $solvetime_public = 0;
 
     /**
-     * @var boolean
-     *
      * @ORM\Column(type="boolean", name="is_first_to_solve",
      *     options={"comment"="Is this the first solution to this problem?",
      *              "default"="0"},
      *     nullable=false)
      */
-    private $is_first_to_solve = false;
+    private bool $is_first_to_solve = false;
 
     /**
      * @ORM\Id
      * @ORM\ManyToOne(targetEntity="Contest")
      * @ORM\JoinColumn(name="cid", referencedColumnName="cid", onDelete="CASCADE")
      */
-    private $contest;
+    private Contest $contest;
 
     /**
      * @ORM\Id
      * @ORM\ManyToOne(targetEntity="Team")
      * @ORM\JoinColumn(name="teamid", referencedColumnName="teamid", onDelete="CASCADE")
      */
-    private $team;
+    private Team $team;
 
     /**
      * @ORM\Id
      * @ORM\ManyToOne(targetEntity="Problem")
      * @ORM\JoinColumn(name="probid", referencedColumnName="probid", onDelete="CASCADE")
      */
-    private $problem;
+    private Problem $problem;
 
     public function setSubmissionsRestricted(int $submissionsRestricted): ScoreCache
     {
@@ -237,7 +223,7 @@ class ScoreCache
         return $this;
     }
 
-    public function getContest(): ScoreCache
+    public function getContest(): Contest
     {
         return $this->contest;
     }

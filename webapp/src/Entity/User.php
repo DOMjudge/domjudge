@@ -28,8 +28,6 @@ use Symfony\Component\Validator\Constraints as Assert;
 class User implements UserInterface, PasswordAuthenticatedUserInterface, EquatableInterface, \Serializable
 {
     /**
-     * @var int
-     *
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer", name="userid", length=4,
@@ -37,33 +35,30 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Equatab
      * @Serializer\SerializedName("id")
      * @Serializer\Type("string")
      */
-    private $userid;
+    private ?int $userid = null;
 
     /**
-     * @var string
      * @ORM\Column(type="string", name="username", length=255,
      *     options={"comment"="User login name"}, nullable=false)
      * @Assert\Regex("/^[a-z0-9@._-]+$/i", message="Only alphanumeric characters and _-@. are allowed")
      */
-    private $username = '';
+    private string $username = '';
 
     /**
-     * @var string
      * @ORM\Column(type="string", name="name", length=255,
      *     options={"comment"="Name"}, nullable=false)
      */
-    private $name = '';
+    private string $name = '';
 
     /**
-     * @var string
      * @ORM\Column(type="string", name="email", length=255,
      *     options={"comment"="Email address"}, nullable=true)
      * @Assert\Email()
      */
-    private $email = null;
+    private ?string $email = null;
 
     /**
-     * @var double
+     * @var double|string|null
      * @ORM\Column(type="decimal", precision=32, scale=9, name="last_login",
      *     options={"comment"="Time of last successful login", "unsigned"=true},
      *     nullable=true)
@@ -72,7 +67,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Equatab
     private $last_login;
 
     /**
-     * @var double
+     * @var double|string|null
      * @ORM\Column(type="decimal", precision=32, scale=9, name="first_login",
      *     options={"comment"="Time of first login", "unsigned"=true},
      *     nullable=true)
@@ -81,53 +76,48 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Equatab
     private $first_login;
 
     /**
-     * @var string
      * @ORM\Column(type="string", name="last_ip_address", length=255,
      *     options={"comment"="Last IP address of successful login"},
      *     nullable=true)
      * @Serializer\SerializedName("last_ip")
      */
-    private $last_ip_address;
+    private ?string $last_ip_address;
 
     /**
-     * @var string
      * @ORM\Column(type="string", name="password", length=255,
      *     options={"comment"="Password hash"}, nullable=true)
      * @Serializer\Exclude()
      */
-    private $password;
+    private ?string $password = null;
 
     /**
-     * @var string|null
      * @Serializer\Exclude()
      */
-    private $plainPassword;
+    private ?string $plainPassword = null;
 
     /**
-     * @var string
      * @ORM\Column(type="string", name="ip_address", length=255,
      *     options={"comment"="IP Address used to autologin"},
      *     nullable=true)
      * @Serializer\SerializedName("ip")
      * @Assert\Ip(version="all")
      */
-    private $ipAddress;
+    private ?string $ipAddress;
 
     /**
-     * @var boolean
      * @ORM\Column(type="boolean", name="enabled",
      *     options={"comment"="Whether the user is able to log in",
      *              "default"="1"},
      *     nullable=false)
      */
-    private $enabled = true;
+    private bool $enabled = true;
 
     /**
      * @ORM\ManyToOne(targetEntity="Team", inversedBy="users")
      * @ORM\JoinColumn(name="teamid", referencedColumnName="teamid", onDelete="SET NULL")
      * @Serializer\Exclude()
      */
-    private $team;
+    private ?Team $team;
 
     /**
      * @ORM\ManyToMany(targetEntity="Role", inversedBy="users")
@@ -141,13 +131,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Equatab
      * Note that this property is called `user_roles` and not `roles` because the
      * UserInterface expects roles/getRoles to return a string list of roles, not objects.
      */
-    private $user_roles;
+    private Collection $user_roles;
 
     /**
      * @ORM\OneToMany(targetEntity="Submission", mappedBy="user")
      * @Serializer\Exclude()
      */
-    private $submissions;
+    private Collection $submissions;
 
     public function getSalt(): ?string
     {
@@ -359,7 +349,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Equatab
         return $this;
     }
 
-    public function removeUserRole(Role $role)
+    public function removeUserRole(Role $role): void
     {
         $this->user_roles->removeElement($role);
     }
@@ -404,7 +394,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Equatab
         return $this;
     }
 
-    public function removeSubmission(Submission $submission)
+    public function removeSubmission(Submission $submission): void
     {
         $this->submissions->removeElement($submission);
     }

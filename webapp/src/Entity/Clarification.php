@@ -31,7 +31,6 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 class Clarification extends BaseApiEntity implements ExternalRelationshipEntityInterface
 {
     /**
-     * @var int
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer", length=4, name="clarid",
@@ -40,109 +39,103 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
      * @Serializer\SerializedName("id")
      * @Serializer\Type("string")
      */
-    protected $clarid;
+    protected int $clarid;
 
     /**
-     * @var string
      * @ORM\Column(type="string", name="externalid", length=255,
      *     options={"comment"="Clarification ID in an external system, should be unique inside a single contest",
      *              "collation"="utf8mb4_bin"},
      *     nullable=true)
      */
-    protected $externalid;
+    protected ?string $externalid;
 
     /**
-     * @var double
+     * @var double|string
      * @ORM\Column(type="decimal", precision=32, scale=9, name="submittime", options={"comment"="Time sent", "unsigned"=true}, nullable=false)
      * @Serializer\Exclude()
      */
     private $submittime;
 
     /**
-     * @var string
      * @ORM\Column(type="string", name="jury_member", length=255,
      *     options={"comment"="Name of jury member who answered this"},
      *     nullable=true)
      * @Serializer\Exclude()
      */
-    private $jury_member;
+    private ?string $jury_member;
 
     /**
-     * @var string
      * @ORM\Column(type="string", name="category", length=255,
      *     options={"comment"="Category associated to this clarification; only set for non problem clars"},
      *     nullable=true)
      * @Serializer\Exclude()
      */
-    private $category;
+    private ?string $category;
 
     /**
-     * @var string
      * @ORM\Column(type="string", name="queue", length=255,
      *     options={"comment"="Queue associated to this clarification"},
      *     nullable=true)
      * @Serializer\Exclude()
      */
-    private $queue;
+    private ?string $queue;
 
     /**
-     * @var string
      * @ORM\Column(type="text", length=4294967295, name="body",
      *     options={"comment"="Clarification text"},
      *     nullable=false)
      * @Serializer\SerializedName("text")
      */
-    private $body;
+    private string $body;
 
     /**
-     * @var boolean
      * @ORM\Column(type="boolean", name="answered",
      *     options={"comment"="Has been answered by jury?","default":"0"},
      *     nullable=false)
      * @Serializer\Groups({"RestrictedNonstrict"})
      */
-    private $answered = false;
+    private bool $answered = false;
 
     /**
      * @ORM\ManyToOne(targetEntity="Problem", inversedBy="clarifications")
      * @ORM\JoinColumn(name="probid", referencedColumnName="probid", onDelete="SET NULL")
      * @Serializer\Exclude()
      */
-    private $problem;
+    private ?Problem $problem = null;
 
     /**
      * @ORM\ManyToOne(targetEntity="Contest", inversedBy="clarifications")
      * @ORM\JoinColumn(name="cid", referencedColumnName="cid", onDelete="CASCADE")
      * @Serializer\Exclude()
      */
-    private $contest;
+    private Contest $contest;
 
     /**
      * @ORM\ManyToOne(targetEntity="Clarification", inversedBy="replies")
      * @ORM\JoinColumn(name="respid", referencedColumnName="clarid", onDelete="SET NULL")
      * @Serializer\Exclude()
      */
-    private $in_reply_to;
+    private ?Clarification $in_reply_to = null;
 
     /**
      * @ORM\OneToMany(targetEntity="Clarification", mappedBy="in_reply_to")
      * @Serializer\Exclude()
      */
-    private $replies;
+    private Collection $replies;
 
     /**
      * @ORM\ManyToOne(targetEntity="Team", inversedBy="sent_clarifications")
      * @ORM\JoinColumn(name="sender", referencedColumnName="teamid", onDelete="CASCADE")
      * @Serializer\Exclude()
      */
-    private $sender;
+    private ?Team $sender = null;
 
     /**
      * @ORM\ManyToOne(targetEntity="Team", inversedBy="received_clarifications")
      * @ORM\JoinColumn(name="recipient", referencedColumnName="teamid", onDelete="CASCADE")
      * @Serializer\Exclude()
      */
-    private $recipient;
+    private ?Team $recipient = null;
 
     public function __construct()
     {

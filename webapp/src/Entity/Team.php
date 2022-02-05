@@ -34,74 +34,65 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
     const ADD_EXISTING_USER = 'add-existing-user';
 
     /**
-     * @var int
-     *
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer", name="teamid", length=4, options={"comment"="Team ID", "unsigned"=true}, nullable=false)
      * @Serializer\SerializedName("id")
      * @Serializer\Type("string")
      */
-    protected $teamid;
+    protected ?int $teamid = null;
 
     /**
-     * @var string
      * @ORM\Column(type="string", name="icpcid", length=255, options={"comment"="Team ID in the ICPC system",
      *                            "collation"="utf8mb4_bin"}, nullable=true)
      * @Serializer\SerializedName("icpc_id")
      */
-    protected $icpcid;
+    protected ?string $icpcid;
 
     /**
-     * @var string
      * @ORM\Column(type="string", name="name", length=255, options={"comment"="Team name", "collation"="utf8mb4_bin"},
      *                            nullable=false)
      */
-    private $name = '';
+    private string $name = '';
 
     /**
-     * @var string|null
      * @ORM\Column(type="string", name="display_name", length=255, options={"comment"="Team display name", "collation"="utf8mb4_bin"},
      *                            nullable=true)
      */
-    private $display_name = null;
+    private ?string $display_name = null;
 
     /**
-     * @var boolean
      * @ORM\Column(type="boolean", name="enabled",
      *     options={"comment"="Whether the team is visible and operational",
      *              "default"=1},
      *     nullable=false)
      * @Serializer\Exclude()
      */
-    private $enabled = true;
+    private bool $enabled = true;
 
     /**
-     * @var string
      * @ORM\Column(type="text", length=4294967295, name="members", options={"comment"="Team member names (freeform)"},
      *                          nullable=true)
      * @Serializer\Groups({"Nonstrict"})
      */
-    private $members;
+    private ?string $members;
 
     /**
-     * @var string
      * @ORM\Column(type="string", length=255, name="room", options={"comment"="Physical location of team"},
      *                            nullable=true)
      * @Serializer\Exclude()
      */
-    private $room;
+    private ?string $room;
 
     /**
-     * @var string
      * @ORM\Column(type="text", length=4294967295, name="comments", options={"comment"="Comments about this team"},
      *                          nullable=true)
      * @Serializer\Exclude()
      */
-    private $comments;
+    private ?string $comments;
 
     /**
-     * @var double
+     * @var double|string|null
      * @ORM\Column(type="decimal", precision=32, scale=9, name="judging_last_started",
      *     options={"comment"="Start time of last judging for priorization",
      *              "unsigned"=true}, nullable=true)
@@ -110,90 +101,84 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
     private $judging_last_started;
 
     /**
-     * @var int
      * @ORM\Column(type="integer", name="penalty",
      *     options={"comment"="Additional penalty time in minutes","default"=0},
      *     nullable=false)
      * @Serializer\Exclude()
      */
-    private $penalty = 0;
+    private int $penalty = 0;
 
     /**
-     * @var string
      * @Serializer\Exclude()
      */
-    private $addUserForTeam = self::DONT_ADD_USER;
+    private string $addUserForTeam = self::DONT_ADD_USER;
 
     /**
-     * @var string|null
      * @Assert\Regex("/^[a-z0-9@._-]+$/i", message="Only alphanumeric characters and _-@. are allowed")
      * @Serializer\Exclude
      */
-    private $newUsername;
+    private ?string $newUsername;
 
     /**
-     * @var User|null
      * @Serializer\Exclude
      */
-    private $existingUser;
+    private ?User $existingUser;
 
     /**
-     * @var UploadedFile|null
      * @Assert\File(mimeTypes={"image/png","image/jpeg","image/svg+xml"}, mimeTypesMessage="Only PNG's, JPG's and SVG's are allowed")
      * @Serializer\Exclude()
      */
-    private $photoFile;
+    private ?UploadedFile $photoFile = null;
 
     /**
-     * @var bool
      * @Serializer\Exclude()
      */
-    private $clearPhoto = false;
+    private bool $clearPhoto = false;
 
     /**
      * @ORM\ManyToOne(targetEntity="TeamAffiliation", inversedBy="teams")
      * @ORM\JoinColumn(name="affilid", referencedColumnName="affilid", onDelete="SET NULL")
      * @Serializer\Exclude()
      */
-    private $affiliation;
+    private ?TeamAffiliation $affiliation;
 
     /**
      * @ORM\ManyToOne(targetEntity="TeamCategory", inversedBy="teams")
      * @ORM\JoinColumn(name="categoryid", referencedColumnName="categoryid", onDelete="CASCADE")
      * @Serializer\Exclude()
      */
-    private $category;
+    private ?TeamCategory $category;
 
     /**
      * @ORM\ManyToMany(targetEntity="Contest", mappedBy="teams")
      * @Serializer\Exclude()
      */
-    private $contests;
+    private Collection $contests;
 
     /**
      * @ORM\OneToMany(targetEntity="User", mappedBy="team", cascade={"persist"})
      * @Serializer\Exclude()
      * @Assert\Valid()
      */
-    private $users;
+    private Collection $users;
 
     /**
      * @ORM\OneToMany(targetEntity="Submission", mappedBy="team")
      * @Serializer\Exclude()
      */
-    private $submissions;
+    private Collection $submissions;
 
     /**
      * @ORM\OneToMany(targetEntity="Clarification", mappedBy="sender")
      * @Serializer\Exclude()
      */
-    private $sent_clarifications;
+    private Collection $sent_clarifications;
 
     /**
      * @ORM\OneToMany(targetEntity="Clarification", mappedBy="recipient")
      * @Serializer\Exclude()
      */
-    private $received_clarifications;
+    private Collection $received_clarifications;
 
     /**
      * @ORM\ManyToMany(targetEntity="Clarification")
@@ -203,7 +188,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
      * )
      * @Serializer\Exclude()
      */
-    private $unread_clarifications;
+    private Collection $unread_clarifications;
 
     public function setTeamid(int $teamid): Team
     {
@@ -327,7 +312,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
      * Set whether to add a new user for this team, link an existing one or do nothing.
      * Will not be stored, but is used in validation.
      */
-    public function setAddUserForTeam(string $addUserForTeam)
+    public function setAddUserForTeam(string $addUserForTeam): void
     {
         $this->addUserForTeam = $addUserForTeam;
     }
@@ -445,7 +430,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
         return $this;
     }
 
-    public function removeContest(Contest $contest)
+    public function removeContest(Contest $contest): void
     {
         $this->contests->removeElement($contest);
         $contest->removeTeam($this);
@@ -463,7 +448,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
         return $this;
     }
 
-    public function removeUser(User $user)
+    public function removeUser(User $user): void
     {
         $this->users->removeElement($user);
     }
@@ -479,7 +464,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
         return $this;
     }
 
-    public function removeSubmission(Submission $submission)
+    public function removeSubmission(Submission $submission): void
     {
         $this->submissions->removeElement($submission);
     }
@@ -511,7 +496,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
         return $this;
     }
 
-    public function removeReceivedClarification(Clarification $receivedClarification)
+    public function removeReceivedClarification(Clarification $receivedClarification): void
     {
         $this->received_clarifications->removeElement($receivedClarification);
     }
@@ -527,7 +512,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
         return $this;
     }
 
-    public function removeUnreadClarification(Clarification $unreadClarification)
+    public function removeUnreadClarification(Clarification $unreadClarification): void
     {
         $this->unread_clarifications->removeElement($unreadClarification);
     }
@@ -586,7 +571,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
     /**
      * @Assert\Callback()
      */
-    public function validate(ExecutionContextInterface $context)
+    public function validate(ExecutionContextInterface $context): void
     {
         if ($this->getAddUserForTeam() === static::CREATE_NEW_USER) {
             if (empty($this->getNewUsername())) {

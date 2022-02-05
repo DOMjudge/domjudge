@@ -26,66 +26,58 @@ use JMS\Serializer\Annotation as Serializer;
 class ExternalJudgement
 {
     /**
-     * @var int
-     *
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer", name="extjudgementid",
      *     options={"comment"="External judgement ID","unsigned"=true},
      *     nullable=false)
      */
-    private $extjudgementid;
+    private int $extjudgementid;
 
     /**
-     * @var string
      * @ORM\Column(type="string", name="externalid", length=255,
      *     options={"comment"="Judgement ID in external system, should be unique inside a single contest",
      *              "collation"="utf8mb4_bin"},
      *     nullable=true)
      */
-    protected $externalid;
+    protected string $externalid;
 
     /**
-     * @var string|null
-     *
      * @ORM\Column(name="result", type="string", length=32,
      *     options={"comment"="Result string as obtained from external system. null if not finished yet"},
      *     nullable=true)
      */
-    private $result = null;
+    private ?string $result = null;
 
     /**
-     * @var boolean
      * @ORM\Column(type="boolean", name="verified",
      *     options={"comment"="Result / difference verified?",
      *              "default"=0},
      *     nullable=false)
      * @Serializer\Exclude()
      */
-    private $verified = false;
+    private bool $verified = false;
 
     /**
-     * @var string|null
      * @ORM\Column(type="string", name="jury_member", length=255,
      *     options={"comment"="Name of user who verified the result / diference",
      *              "default"=NULL},
      *     nullable=true)
      * @Serializer\Exclude()
      */
-    private $jury_member;
+    private ?string $jury_member;
 
     /**
-     * @var string
      * @ORM\Column(type="string", name="verify_comment", length=255,
      *     options={"comment"="Optional additional information provided by the verifier",
      *              "default"=NULL},
      *     nullable=true)
      * @Serializer\Exclude()
      */
-    private $verify_comment;
+    private ?string $verify_comment;
 
     /**
-     * @var double
+     * @var double|string
      *
      * @ORM\Column(type="decimal", precision=32, scale=9, name="starttime",
      *              options={"comment"="Time judging started", "unsigned"=true},
@@ -94,7 +86,7 @@ class ExternalJudgement
     private $starttime;
 
     /**
-     * @var double
+     * @var double|string|null
      *
      * @ORM\Column(type="decimal", precision=32, scale=9, name="endtime",
      *     options={"comment"="Time judging ended, null = still busy",
@@ -104,34 +96,29 @@ class ExternalJudgement
     private $endtime = null;
 
     /**
-     * @var boolean
      * @ORM\Column(type="boolean", name="valid",
      *     options={"comment"="Old external judgement is marked as invalid when receiving a new one",
      *              "default"="1"},
      *     nullable=false)
      */
-    private $valid = true;
+    private bool $valid = true;
 
     /**
-     * @var Contest
-     *
      * @ORM\ManyToOne(targetEntity="App\Entity\Contest")
      * @ORM\JoinColumn(name="cid", referencedColumnName="cid", onDelete="CASCADE")
      */
-    private $contest;
+    private Contest $contest;
 
     /**
-     * @var Submission
-     *
      * @ORM\ManyToOne(targetEntity="Submission", inversedBy="external_judgements")
      * @ORM\JoinColumn(name="submitid", referencedColumnName="submitid", onDelete="CASCADE")
      */
-    private $submission;
+    private Submission $submission;
 
     /**
      * @ORM\OneToMany(targetEntity="ExternalRun", mappedBy="external_judgement")
      */
-    private $external_runs;
+    private Collection $external_runs;
 
     public function __construct()
     {
@@ -263,7 +250,7 @@ class ExternalJudgement
         return $this;
     }
 
-    public function removeExternalRun(ExternalRun $externalRun)
+    public function removeExternalRun(ExternalRun $externalRun): void
     {
         $this->external_runs->removeElement($externalRun);
     }

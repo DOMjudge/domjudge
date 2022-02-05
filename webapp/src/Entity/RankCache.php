@@ -20,44 +20,36 @@ use Doctrine\ORM\Mapping as ORM;
 class RankCache
 {
     /**
-     * @var int
-     *
      * @ORM\Column(type="integer", name="points_restricted", length=4,
      *     options={"comment"="Total correctness points (restricted audience)",
      *              "unsigned"=true,"default"="0"},
      *     nullable=false)
      */
-    private $points_restricted = 0;
+    private int $points_restricted = 0;
 
     /**
-     * @var int
-     *
      * @ORM\Column(type="integer", name="totaltime_restricted", length=4,
      *     options={"comment"="Total penalty time in minutes (restricted audience)",
      *              "default"="0"},
      *     nullable=false)
      */
-    private $totaltime_restricted = 0;
+    private int $totaltime_restricted = 0;
 
     /**
-     * @var int
-     *
      * @ORM\Column(type="integer", name="points_public", length=4,
      *     options={"comment"="Total correctness points (public)",
      *              "unsigned"=true,"default"="0"},
      *     nullable=false)
      */
-    private $points_public = 0;
+    private int $points_public = 0;
 
     /**
-     * @var int
-     *
      * @ORM\Column(type="integer", name="totaltime_public", length=4,
      *     options={"comment"="Total penalty time in minutes (public)",
      *              "default"="0"},
      *     nullable=false)
      */
-    private $totaltime_public = 0;
+    private int $totaltime_public = 0;
 
 
     /**
@@ -65,14 +57,14 @@ class RankCache
      * @ORM\ManyToOne(targetEntity="Contest")
      * @ORM\JoinColumn(name="cid", referencedColumnName="cid", onDelete="CASCADE")
      */
-    private $contest;
+    private Contest $contest;
 
     /**
      * @ORM\Id
      * @ORM\ManyToOne(targetEntity="Team")
      * @ORM\JoinColumn(name="teamid", referencedColumnName="teamid", onDelete="CASCADE")
      */
-    private $team;
+    private Team $team;
 
     public function setPointsRestricted(int $pointsRestricted): RankCache
     {

@@ -27,7 +27,6 @@ abstract class BaseApiEntity
     /**
      * Get the API ID for this entity.
      *
-     * @return string
      * @throws Exception
      */
     public function getApiId(EventLogService $eventLogService): string
