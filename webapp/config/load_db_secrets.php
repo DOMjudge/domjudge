@@ -6,7 +6,7 @@
 
 use Symfony\Component\Dotenv\Dotenv;
 
-function get_db_url()
+function get_db_url(): string
 {
     // Allow .env.local to override the DATABASE_URL since it can contain the
     // proper serverVersion, which is needed for automatically creating migrations.
@@ -37,7 +37,7 @@ function get_db_url()
     return sprintf('mysql://%s:%s@%s:%d/%s?serverVersion=5.7.0', $user, $pass, $host, $port ?? 3306, $db);
 }
 
-function get_app_secret()
+function get_app_secret(): string
 {
     $appsecretsfile = ETCDIR . '/symfony_app.secret';
     $contents = file_get_contents($appsecretsfile);
