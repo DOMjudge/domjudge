@@ -9,10 +9,7 @@ class TeamCategoryFixture extends AbstractExampleDataFixture
 {
     public const PARTICIPANTS_REFERENCE = 'participants';
 
-    /**
-     * @inheritDoc
-     */
-    public function load(ObjectManager $manager)
+    public function load(ObjectManager $manager): void
     {
         $participants = new TeamCategory();
         $participants->setName('Participants');

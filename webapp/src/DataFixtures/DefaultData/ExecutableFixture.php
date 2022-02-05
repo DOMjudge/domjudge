@@ -11,20 +11,9 @@ use ZipArchive;
 
 class ExecutableFixture extends AbstractDefaultDataFixture
 {
-    /**
-     * @var string
-     */
-    protected $sqlDir;
-
-    /**
-     * @var DOMJudgeService
-     */
-    protected $dj;
-
-    /**
-     * @var LoggerInterface
-     */
-    protected $logger;
+    protected string $sqlDir;
+    protected DOMJudgeService $dj;
+    protected LoggerInterface $logger;
 
     public function __construct(string $sqlDir, DOMJudgeService $dj, LoggerInterface $logger)
     {
@@ -33,10 +22,7 @@ class ExecutableFixture extends AbstractDefaultDataFixture
         $this->logger = $logger;
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function load(ObjectManager $manager)
+    public function load(ObjectManager $manager): void
     {
         $data = [
             // ID,         description,               type
@@ -66,9 +52,6 @@ class ExecutableFixture extends AbstractDefaultDataFixture
         $manager->flush();
     }
 
-    /**
-     * @inheritDoc
-     */
     public static function getGroups(): array
     {
         return ['default', 'gatling'];

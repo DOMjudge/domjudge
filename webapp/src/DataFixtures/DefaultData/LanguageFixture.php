@@ -12,20 +12,9 @@ use ZipArchive;
 
 class LanguageFixture extends AbstractDefaultDataFixture
 {
-    /**
-     * @var string
-     */
-    protected $sqlDir;
-
-    /**
-     * @var DOMJudgeService
-     */
-    protected $dj;
-
-    /**
-     * @var LoggerInterface
-     */
-    protected $logger;
+    protected string $sqlDir;
+    protected DOMJudgeService $dj;
+    protected LoggerInterface $logger;
 
     public function __construct(string $sqlDir, DOMJudgeService $dj, LoggerInterface $logger)
     {
@@ -34,10 +23,7 @@ class LanguageFixture extends AbstractDefaultDataFixture
         $this->logger = $logger;
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function load(ObjectManager $manager)
+    public function load(ObjectManager $manager): void
     {
         $data = [
             // ID      external ID   name           extensions                 require  entry point   allow   allow   time   compile

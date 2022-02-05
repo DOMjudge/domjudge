@@ -25,11 +25,7 @@ class UserFixture extends AbstractDefaultDataFixture implements DependentFixture
         $this->debug           = $debug;
     }
 
-    /**
-     * @inheritDoc
-     * @throws Exception
-     */
-    public function load(ObjectManager $manager)
+    public function load(ObjectManager $manager): void
     {
         if (!($adminUser = $manager->getRepository(User::class)->findOneBy(['username' => 'admin']))) {
             $adminPasswordFile = sprintf(
@@ -109,10 +105,7 @@ class UserFixture extends AbstractDefaultDataFixture implements DependentFixture
         throw new Exception("No credentials found in REST API credentials file $restapiCredentialsFile");
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function getDependencies()
+    public function getDependencies(): array
     {
         return [RoleFixture::class];
     }

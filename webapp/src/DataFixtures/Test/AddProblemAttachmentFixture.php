@@ -9,7 +9,7 @@ use Doctrine\Persistence\ObjectManager;
 
 class AddProblemAttachmentFixture extends AbstractTestDataFixture
 {
-    public function load(ObjectManager $manager)
+    public function load(ObjectManager $manager): void
     {
         $interactor = "import random
 import sys

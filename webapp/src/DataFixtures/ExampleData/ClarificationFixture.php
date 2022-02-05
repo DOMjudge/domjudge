@@ -8,10 +8,7 @@ use Doctrine\Persistence\ObjectManager;
 
 class ClarificationFixture extends AbstractExampleDataFixture implements DependentFixtureInterface
 {
-    /**
-     * @inheritDoc
-     */
-    public function load(ObjectManager $manager)
+    public function load(ObjectManager $manager): void
     {
         $teamClarification = new Clarification();
         $teamClarification
@@ -39,10 +36,7 @@ class ClarificationFixture extends AbstractExampleDataFixture implements Depende
         $manager->flush();
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function getDependencies()
+    public function getDependencies(): array
     {
         return [TeamFixture::class, ContestFixture::class, ProblemFixture::class];
     }

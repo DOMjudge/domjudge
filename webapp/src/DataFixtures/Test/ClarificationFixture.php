@@ -10,10 +10,7 @@ use Doctrine\Persistence\ObjectManager;
 
 class ClarificationFixture extends AbstractTestDataFixture
 {
-    /**
-     * @inheritDoc
-     */
-    public function load(ObjectManager $manager)
+    public function load(ObjectManager $manager): void
     {
         /** @var Contest $contest */
         $contest = $manager->getRepository(Contest::class)->findOneBy(['shortname' => 'demo']);

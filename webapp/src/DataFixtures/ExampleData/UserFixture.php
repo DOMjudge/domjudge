@@ -9,10 +9,7 @@ use Doctrine\Persistence\ObjectManager;
 
 class UserFixture extends AbstractExampleDataFixture implements DependentFixtureInterface
 {
-    /**
-     * @inheritDoc
-     */
-    public function load(ObjectManager $manager)
+    public function load(ObjectManager $manager): void
     {
         $user = new User();
         $user
@@ -26,10 +23,7 @@ class UserFixture extends AbstractExampleDataFixture implements DependentFixture
         $manager->flush();
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function getDependencies()
+    public function getDependencies(): array
     {
         return [TeamFixture::class];
     }

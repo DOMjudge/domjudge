@@ -12,20 +12,14 @@ class RoleFixture extends AbstractDefaultDataFixture
     public const JUDGEHOST_REFERENCE = 'judgehost';
     public const TEAM_REFERENCE = 'team';
 
-    /**
-     * @var LoggerInterface
-     */
-    protected $logger;
+    protected LoggerInterface $logger;
 
     public function __construct(LoggerInterface $logger)
     {
         $this->logger = $logger;
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function load(ObjectManager $manager)
+    public function load(ObjectManager $manager): void
     {
         // Mapping from role to description
         $roles = [

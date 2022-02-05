@@ -7,9 +7,6 @@ use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 
 abstract class AbstractExampleDataFixture extends Fixture implements FixtureGroupInterface
 {
-    /**
-     * @inheritDoc
-     */
     public static function getGroups(): array
     {
         return ['example'];

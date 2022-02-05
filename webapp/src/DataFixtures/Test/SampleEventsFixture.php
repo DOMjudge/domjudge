@@ -9,7 +9,7 @@ use Doctrine\Persistence\ObjectManager;
 
 class SampleEventsFixture extends AbstractTestDataFixture
 {
-    public function load(ObjectManager $manager)
+    public function load(ObjectManager $manager): void
     {
         $contests = $manager->getRepository(Contest::class)->findAll();
         foreach ($contests as $contest) {

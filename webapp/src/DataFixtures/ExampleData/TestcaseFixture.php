@@ -9,10 +9,7 @@ use Doctrine\Persistence\ObjectManager;
 
 class TestcaseFixture extends AbstractExampleDataFixture implements DependentFixtureInterface
 {
-    /**
-     * @inheritDoc
-     */
-    public function load(ObjectManager $manager)
+    public function load(ObjectManager $manager): void
     {
         $this->addTestcase(
             $manager,
@@ -58,15 +55,6 @@ class TestcaseFixture extends AbstractExampleDataFixture implements DependentFix
         );
     }
 
-    /**
-     * Add a testcase
-     * @param ObjectManager $manager
-     * @param string        $problem
-     * @param int           $rank
-     * @param string        $input
-     * @param string        $output
-     * @param string|null   $description
-     */
     protected function addTestcase(
         ObjectManager $manager,
         string $problem,
@@ -74,7 +62,7 @@ class TestcaseFixture extends AbstractExampleDataFixture implements DependentFix
         string $input,
         string $output,
         ?string $description = null
-    ) {
+    ): void {
         $testcase = new Testcase();
         $content  = new TestcaseContent();
         $testcase
@@ -92,10 +80,7 @@ class TestcaseFixture extends AbstractExampleDataFixture implements DependentFix
         $manager->flush();
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function getDependencies()
+    public function getDependencies(): array
     {
         return [ProblemFixture::class];
     }

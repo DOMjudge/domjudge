@@ -26,14 +26,14 @@ class ContestTimeFixture extends AbstractTestDataFixture
                     ['afterDeactivationNFr',         -35,        -30,   null,   -20, null,      null,       -5],
                     ['noDeactivationNFr',            -35,        -30,   null,   -20, null,      null,     null]];
 
-    function getTime(?int $multiplier): ?string
+    protected function getTime(?int $multiplier): ?string
     {
         return is_null($multiplier) ? null : Utils::absTime(Utils::now()+$multiplier*60);
     }
 
-    public function load(ObjectManager $manager)
+    public function load(ObjectManager $manager): void
     {
-        foreach(self::VALUES as $row) {
+        foreach (self::VALUES as $row) {
             $name = $row[0];
             $timeActivate = $this->getTime($row[1]);
             $timeStart = $this->getTime($row[2]);
@@ -47,8 +47,8 @@ class ContestTimeFixture extends AbstractTestDataFixture
                     ->setExternalid($name)
                     ->setShortname($name)
                     ->setActivatetimeString($timeActivate)
-                    ->setStartTimeString($timeStart) 
-                    ->setFreezeTimeString($timeFreeze) 
+                    ->setStartTimeString($timeStart)
+                    ->setFreezeTimeString($timeFreeze)
                     ->setEndTimeString($timeEnd)
                     ->setFinalizeTime($timeFinalized)
                     ->setUnfreezeTimeString($timeUnfrozen)

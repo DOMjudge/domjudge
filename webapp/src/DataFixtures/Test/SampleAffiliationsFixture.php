@@ -8,7 +8,7 @@ use Doctrine\Persistence\ObjectManager;
 
 class SampleAffiliationsFixture extends Fixture
 {
-    public function load(ObjectManager $manager)
+    public function load(ObjectManager $manager): void
     {
         $affiliationData = [
             // short name, name,                                                country
