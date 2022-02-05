@@ -15,9 +15,8 @@ use Symfony\Component\Config\Resource\SelfCheckingResourceInterface;
  */
 class OptionalFileResource implements SelfCheckingResourceInterface
 {
-    private $resource;
-
-    private $exists;
+    private string $resource;
+    private bool $exists;
 
     public function __construct(string $resource)
     {
@@ -25,17 +24,17 @@ class OptionalFileResource implements SelfCheckingResourceInterface
         $this->exists = file_exists($resource);
     }
 
-    public function __toString()
+    public function __toString(): string
     {
         return $this->resource;
     }
 
-    public function getResource()
+    public function getResource(): string
     {
         return $this->resource;
     }
 
-    public function isFresh($timestamp): bool
+    public function isFresh(int $timestamp): bool
     {
         $exists = file_exists($this->resource);
         if ($exists !== $this->exists) {
