@@ -14,10 +14,7 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class LoadGatlingDataCommand extends Command
 {
-    /**
-     * @inheritDoc
-     */
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setName('domjudge:load-gatling-data')
@@ -25,7 +22,6 @@ class LoadGatlingDataCommand extends Command
     }
 
     /**
-     * @inheritDoc
      * @throws Exception
      */
     protected function execute(InputInterface $input, OutputInterface $output): int

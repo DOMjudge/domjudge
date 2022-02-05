@@ -42,53 +42,14 @@ use ZipArchive;
  */
 class ScoreboardMergeCommand extends Command
 {
-    /**
-     * @var DOMJudgeService
-     */
-    protected $dj;
+    protected DOMJudgeService $dj;
+    protected ConfigurationService $config;
+    protected Environment $twig;
+    protected HttpClientInterface $client;
+    protected ScoreboardService $scoreboardService;
+    protected RouterInterface $router;
+    protected string $projectDir;
 
-    /**
-     * @var ConfigurationService
-     */
-    protected $config;
-
-    /**
-     * @var Environment
-     */
-    protected $twig;
-
-    /**
-     * @var HttpClientInterface
-     */
-    protected $client;
-
-    /**
-     * @var ScoreboardService
-     */
-    protected $scoreboardService;
-
-    /**
-     * @var RouterInterface
-     */
-    protected $router;
-
-    /**
-     * @var string
-     */
-    protected $projectDir;
-
-    /**
-     * ScoreboardMergeCommand constructor.
-     *
-     * @param DOMJudgeService      $dj
-     * @param ConfigurationService $config
-     * @param Environment          $twig
-     * @param HttpClientInterface  $client
-     * @param ScoreboardService    $scoreboardService
-     * @param RouterInterface      $router
-     * @param string               $projectDir
-     * @param string|null          $name
-     */
     public function __construct(
         DOMJudgeService $dj,
         ConfigurationService $config,
@@ -109,10 +70,7 @@ class ScoreboardMergeCommand extends Command
         $this->projectDir = $projectDir;
     }
 
-    /**
-     * @inheritdoc
-     */
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setName('scoreboard:merge')
@@ -150,7 +108,6 @@ class ScoreboardMergeCommand extends Command
     }
 
     /**
-     * @inheritdoc
      * @throws ClientExceptionInterface
      * @throws DecodingExceptionInterface
      * @throws RedirectionExceptionInterface
@@ -413,6 +370,6 @@ class ScoreboardMergeCommand extends Command
 
         $style->success(sprintf('Merged scoreboard data written to %s',
                                 $input->getArgument('output-file')));
-        return 0;
+        return static::SUCCESS;
     }
 }

@@ -26,7 +26,7 @@ use DateTime;
 use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Id\AssignedGenerator;
-use Doctrine\ORM\Mapping\ClassMetadata;
+use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\ORM\NonUniqueResultException;
 use Exception;
 use Psr\Log\LoggerInterface;
@@ -42,6 +42,10 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
+use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
@@ -54,94 +58,29 @@ class ImportEventFeedCommand extends Command
     const STATUS_OK = 0;
     const STATUS_ERROR = 1;
 
-    /**
-     * @var EntityManagerInterface
-     */
-    protected $em;
-
-    /**
-     * @var DOMJudgeService
-     */
-    protected $dj;
-
-    /**
-     * @var ConfigurationService
-     */
-    protected $config;
-
-    /**
-     * @var EventLogService
-     */
-    protected $eventLogService;
-
-    /**
-     * @var ScoreboardService
-     */
-    protected $scoreboardService;
-
-    /**
-     * @var SubmissionService
-     */
-    protected $submissionService;
-
-    /**
-     * @var TokenStorageInterface
-     */
-    protected $tokenStorage;
-
-    /**
-     * @var bool
-     */
-    protected $debug;
-
-    /**
-     * @var string
-     */
-    protected $domjudgeVersion;
-
-    /**
-     * @var LoggerInterface
-     */
-    protected $logger;
-
-    /** @var HttpClientInterface|null */
-    protected $client;
-
-    /** @var string */
-    protected $configKey;
-
-    /** @var int|string */
-    protected $contestIdFromConfig;
-
-    /** @var int */
-    protected $contestId;
-
-    /** @var string|null */
-    protected $feedUrl;
-
-    /** @var string|null */
-    protected $feedFile;
-
-    /** @var string|null */
-    protected $basePath;
-
-    /** @var bool */
-    protected $allowImportAsPrimary;
-
-    /** @var bool */
-    protected $allowExternalIdMismatch;
-
-    /** @var string|null */
-    protected $sinceEventId = null;
-
-    /** @var bool */
-    protected $shouldStop = false;
-
-    /** @var string|null */
-    protected $lastEventId = null;
-
-    /** @var array */
-    protected $verdicts = [];
+    protected EntityManagerInterface $em;
+    protected DOMJudgeService $dj;
+    protected ConfigurationService $config;
+    protected EventLogService $eventLogService;
+    protected ScoreboardService $scoreboardService;
+    protected SubmissionService $submissionService;
+    protected TokenStorageInterface $tokenStorage;
+    protected bool $debug;
+    protected string $domjudgeVersion;
+    protected LoggerInterface $logger;
+    protected ?HttpClientInterface $client;
+    protected string $configKey;
+    protected string $contestIdFromConfig;
+    protected int $contestId;
+    protected ?string $feedUrl;
+    protected ?string $feedFile;
+    protected ?string $basePath;
+    protected bool $allowImportAsPrimary;
+    protected bool $allowExternalIdMismatch;
+    protected ?string $sinceEventId = null;
+    protected bool $shouldStop = false;
+    protected ?string $lastEventId = null;
+    protected array $verdicts = [];
 
     /**
      * This array will hold all events that are waiting on a dependent event
@@ -154,9 +93,8 @@ class ImportEventFeedCommand extends Command
      * - The first dimension is the type of the dependent event type
      * - The second dimension is the (external) ID of the dependent event
      * - The third dimension contains an array of all events that should be processed
-     * @var array
      */
-    protected $pendingEvents = [
+    protected array $pendingEvents = [
         // Initialize it with all types that can be a dependent event. Note that Language is not here, as they should exist already
         'team' => [],
         'group' => [],
@@ -166,21 +104,6 @@ class ImportEventFeedCommand extends Command
         'submission' => [],
     ];
 
-    /**
-     * ImportEventFeedCommand constructor.
-     *
-     * @param EntityManagerInterface $em
-     * @param DOMJudgeService        $dj
-     * @param ConfigurationService   $config
-     * @param EventLogService        $eventLogService
-     * @param ScoreboardService      $scoreboardService
-     * @param SubmissionService      $submissionService
-     * @param TokenStorageInterface  $tokenStorage
-     * @param LoggerInterface        $logger
-     * @param bool                   $debug
-     * @param string                 $domjudgeVersion
-     * @param string|null            $name
-     */
     public function __construct(
         EntityManagerInterface $em,
         DOMJudgeService $dj,
@@ -207,10 +130,7 @@ class ImportEventFeedCommand extends Command
         $this->domjudgeVersion   = $domjudgeVersion;
     }
 
-    /**
-     * @inheritdoc
-     */
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setName('import:eventfeed')
@@ -254,6 +174,7 @@ class ImportEventFeedCommand extends Command
      *
      * @throws TransportExceptionInterface
      * @throws NonUniqueResultException
+     * @throws Exception
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
@@ -314,11 +235,11 @@ class ImportEventFeedCommand extends Command
 
         // For teams and team categories we want to overwrite the ID so change the ID generator
         $metadata = $this->em->getClassMetaData(TeamCategory::class);
-        $metadata->setIdGeneratorType(ClassMetadata::GENERATOR_TYPE_NONE);
+        $metadata->setIdGeneratorType(ClassMetadataInfo::GENERATOR_TYPE_NONE);
         $metadata->setIdGenerator(new AssignedGenerator());
 
         $metadata = $this->em->getClassMetaData(Team::class);
-        $metadata->setIdGeneratorType(ClassMetadata::GENERATOR_TYPE_NONE);
+        $metadata->setIdGeneratorType(ClassMetadataInfo::GENERATOR_TYPE_NONE);
         $metadata->setIdGenerator(new AssignedGenerator());
 
         // Find an admin user as we need one to make sure we can read all events
@@ -375,7 +296,7 @@ class ImportEventFeedCommand extends Command
     /**
      * Process a stop command from a signal handler
      */
-    public function stopCommand()
+    public function stopCommand(): void
     {
         $this->shouldStop = true;
     }
@@ -421,7 +342,7 @@ class ImportEventFeedCommand extends Command
             return false;
         }
 
-        $this->contestIdFromConfig = $config['id'];
+        $this->contestIdFromConfig = (string)$config['id'];
 
         if (!is_string($config['feed-url'] ?? null) && !is_string($config['feed-file'] ?? null)) {
             $this->logger->error("Config does not contain 'feed-url' or 'feed-file'");
@@ -559,6 +480,10 @@ class ImportEventFeedCommand extends Command
      *
      * @return bool False if the import should stop, true otherwise.
      * @throws TransportExceptionInterface
+     * @throws ClientExceptionInterface
+     * @throws DecodingExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
      */
     protected function importFromUrl(bool $fromStart, array $eventsToSkip): bool
     {
@@ -692,7 +617,7 @@ class ImportEventFeedCommand extends Command
     /**
      * Determine the event ID to use to pass as since_id
      */
-    protected function determineSinceEventId()
+    protected function determineSinceEventId(): void
     {
         $cacheFilePath = sprintf('%s/shadow-%s.ndjson.cache',
             $this->dj->getDomjudgeTmpDir(), $this->configKey);
@@ -723,9 +648,8 @@ class ImportEventFeedCommand extends Command
      * - A boolean that can be set to true (pass-by-reference) to stop processing
      *
      * @param resource $filePointer
-     * @param callable $callback
      */
-    protected function readEventsFromFile($filePointer, callable $callback)
+    protected function readEventsFromFile($filePointer, callable $callback): void
     {
         $buffer = '';
         while (!feof($filePointer) || !empty($buffer)) {
@@ -781,11 +705,12 @@ class ImportEventFeedCommand extends Command
 
     /**
      * Import the given event
-     * @param array    $event
+     * @param array $event
      * @param string[] $eventsToSkip
+     * @throws TransportExceptionInterface
      * @throws Exception
      */
-    protected function importEvent(array $event, array $eventsToSkip)
+    protected function importEvent(array $event, array $eventsToSkip): void
     {
         // Check whether we have received an exit signal
         if (function_exists('pcntl_signal_dispatch')) {
@@ -855,7 +780,7 @@ class ImportEventFeedCommand extends Command
      * @param array $event
      * @throws Exception
      */
-    protected function importContest(array $event)
+    protected function importContest(array $event): void
     {
         if ($event['op'] === EventLogService::ACTION_DELETE) {
             $this->logger->error(
@@ -962,7 +887,7 @@ class ImportEventFeedCommand extends Command
      * @param array $event
      * @throws Exception
      */
-    protected function validateJudgementType(array $event)
+    protected function validateJudgementType(array $event): void
     {
         if ($event['op'] !== EventLogService::ACTION_CREATE) {
             $this->logger->error(
@@ -1012,7 +937,7 @@ class ImportEventFeedCommand extends Command
      * @param array $event
      * @throws Exception
      */
-    protected function validateLanguage(array $event)
+    protected function validateLanguage(array $event): void
     {
         if ($event['op'] !== EventLogService::ACTION_CREATE) {
             $this->logger->error(
@@ -1041,7 +966,7 @@ class ImportEventFeedCommand extends Command
      * @param array $event
      * @throws Exception
      */
-    protected function importGroup(array $event)
+    protected function importGroup(array $event): void
     {
         $this->logger->info('Importing group %s event %s', [ $event['op'], $event['id'] ]);
 
@@ -1104,7 +1029,7 @@ class ImportEventFeedCommand extends Command
      * @param array $event
      * @throws Exception
      */
-    protected function importOrganization(array $event)
+    protected function importOrganization(array $event): void
     {
         $this->logger->info('Importing organization %s event %s', [ $event['op'], $event['id'] ]);
 
@@ -1161,7 +1086,7 @@ class ImportEventFeedCommand extends Command
      * @param array $event
      * @throws Exception
      */
-    protected function importProblem(array $event)
+    protected function importProblem(array $event): void
     {
         if ($event['op'] === EventLogService::ACTION_DELETE) {
             $this->logger->error(
@@ -1248,7 +1173,7 @@ class ImportEventFeedCommand extends Command
      * @param array $event
      * @throws Exception
      */
-    protected function importTeam(array $event)
+    protected function importTeam(array $event): void
     {
         $this->logger->info('Importing team %s event %s', [ $event['op'], $event['id'] ]);
 
@@ -1360,7 +1285,7 @@ class ImportEventFeedCommand extends Command
      * @param array $event
      * @throws Exception
      */
-    protected function importClarification(array $event)
+    protected function importClarification(array $event): void
     {
         $this->logger->info('Importing clarification %s event %s', [ $event['op'], $event['id'] ]);
 
@@ -1480,12 +1405,10 @@ class ImportEventFeedCommand extends Command
     /**
      * Import the given submission event
      *
-     * @param array $event
-     *
      * @throws Exception
      * @throws TransportExceptionInterface
      */
-    protected function importSubmission(array $event)
+    protected function importSubmission(array $event): void
     {
         $this->logger->info('Importing submission %s event %s', [ $event['op'], $event['id'] ]);
 
@@ -1787,10 +1710,9 @@ class ImportEventFeedCommand extends Command
 
     /**
      * Import the given judgement event
-     * @param array $event
      * @throws Exception
      */
-    protected function importJudgement(array $event)
+    protected function importJudgement(array $event): void
     {
         // Note that we do not emit events for imported judgements, as we will generate our own
         $this->logger->info('Importing judgement %s event %s', [ $event['op'], $event['id'] ]);
@@ -1898,10 +1820,9 @@ class ImportEventFeedCommand extends Command
 
     /**
      * Import the given run event
-     * @param array $event
      * @throws Exception
      */
-    protected function importRun(array $event)
+    protected function importRun(array $event): void
     {
         // Note that we do not emit events for imported runs, as we will generate our own
         $this->logger->info('Importing run %s event %s', [ $event['op'], $event['id'] ]);
@@ -1997,11 +1918,11 @@ class ImportEventFeedCommand extends Command
 
     /**
      * Process all pending events for the given type and (external) ID
-     * @param string $type
-     * @param mixed  $id
+     * @param mixed $id
      * @throws Exception
+     * @throws TransportExceptionInterface
      */
-    protected function processPendingEvents(string $type, $id)
+    protected function processPendingEvents(string $type, $id): void
     {
         // Process pending events
         if (isset($this->pendingEvents[$type][$id])) {
@@ -2022,11 +1943,9 @@ class ImportEventFeedCommand extends Command
 
     /**
      * Add a pending event for the given type and (external) ID
-     * @param string $type
-     * @param mixed  $id
-     * @param array  $event
+     * @param mixed $id
      */
-    protected function addPendingEvent(string $type, $id, array $event)
+    protected function addPendingEvent(string $type, $id, array $event): void
     {
         $this->logger->warning(
             'Cannot currently import %s event %s, because it is dependent on %s %s',
@@ -2040,7 +1959,6 @@ class ImportEventFeedCommand extends Command
     }
 
     /**
-     * @param Submission $submission
      * @throws NonUniqueResultException
      * @throws DBALException
      */
