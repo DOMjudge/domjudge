@@ -23,7 +23,7 @@ function judging_directory(string $workdirpath, array $judgeTask) : string
         . $judgeTask['jobid'];
 }
 
-function read_credentials()
+function read_credentials(): void
 {
     global $endpoints;
 
@@ -61,6 +61,9 @@ function read_credentials()
     }
 }
 
+/**
+ * @return resource|false
+ */
 function setup_curl_handle(string $restuser, string $restpass)
 {
     $curl_handle = curl_init();
@@ -71,7 +74,7 @@ function setup_curl_handle(string $restuser, string $restpass)
     return $curl_handle;
 }
 
-function close_curl_handles()
+function close_curl_handles(): void
 {
     global $endpoints;
     foreach($endpoints as $id => $endpoint) {
@@ -177,7 +180,7 @@ function request(string $url, string $verb = 'GET', $data = '', bool $failonerro
 /**
  * Retrieve the configuration through the REST API.
  */
-function djconfig_refresh() : void
+function djconfig_refresh(): void
 {
     global $domjudge_config;
 
@@ -227,10 +230,10 @@ const INITIAL_WAITTIME_USEC =  100*1000;
 const MAXIMAL_WAITTIME_USEC = 5000*1000;
 $waittime = INITIAL_WAITTIME_USEC;
 
-define('SCRIPT_ID', 'judgedaemon');
-define('CHROOT_SCRIPT', 'chroot-startstop.sh');
+const SCRIPT_ID = 'judgedaemon';
+const CHROOT_SCRIPT = 'chroot-startstop.sh';
 
-function usage()
+function usage(): void
 {
     echo "Usage: " . SCRIPT_ID . " [OPTION]...\n" .
         "Start the judgedaemon.\n\n" .
@@ -914,7 +917,7 @@ while (true) {
     // restart the judging loop
 }
 
-function registerJudgehost($myhost)
+function registerJudgehost(string $myhost): void
 {
     global $endpoints, $endpointID;
     $endpoint = &$endpoints[$endpointID];
@@ -956,7 +959,7 @@ function registerJudgehost($myhost)
 }
 
 function disable(string $kind, string $idcolumn, $id, string $description,
-                 $judgeTaskId = null, $extra_log = null)
+                 ?int $judgeTaskId = null, ?string $extra_log = null): void
 {
     global $myhost;
     $disabled = dj_json_encode(array(
@@ -981,7 +984,7 @@ function disable(string $kind, string $idcolumn, $id, string $description,
     logmsg(LOG_ERR, "=> internal error " . $error_id);
 }
 
-function read_metadata(string $filename)
+function read_metadata(string $filename): ?array
 {
     if (!is_readable($filename)) return null;
 
@@ -1376,7 +1379,7 @@ function judge(array $judgeTask): bool
     return $ret;
 }
 
-function fetchTestcase($workdirpath, $testcase_id, $judgetaskid, $testcase_hash): ?array
+function fetchTestcase(string $workdirpath, string $testcase_id, int $judgetaskid, string $testcase_hash): ?array
 {
     // Get both in- and output files, only if we didn't have them already.
     $tcfile = [];
