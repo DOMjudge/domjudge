@@ -37,7 +37,7 @@ class Problem extends BaseApiEntity
      * @ORM\Column(type="integer", name="probid", options={"comment"="Problem ID","unsigned"="true"}, nullable=false)
      * @Serializer\Exclude()
      */
-    protected int $probid;
+    protected ?int $probid = null;
 
     /**
      * @ORM\Column(type="string", name="externalid", length=255,
