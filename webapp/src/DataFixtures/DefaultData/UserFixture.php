@@ -73,8 +73,6 @@ class UserFixture extends AbstractDefaultDataFixture implements DependentFixture
 
     /**
      * Get the password for the REST API
-     *
-     * @throws Exception
      */
     protected function getRestapiPassword(): string
     {

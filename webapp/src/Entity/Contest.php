@@ -481,7 +481,6 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     }
 
     /**
-     * @throws Exception
      * @Serializer\VirtualProperty()
      * @Serializer\SerializedName("end_time")
      * @Serializer\Type("DateTime")
@@ -877,7 +876,6 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
 
     /**
      * @return float|int|null
-     * @throws Exception
      */
     public function getAbsoluteTime(?string $time_string)
     {

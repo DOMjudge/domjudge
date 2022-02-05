@@ -40,7 +40,6 @@ class SecurityController extends AbstractController
 
     /**
      * @Route("/login", name="login")
-     * @throws Exception
      */
     public function loginAction(
         Request $request,
@@ -95,7 +94,6 @@ class SecurityController extends AbstractController
 
     /**
      * @Route("/register", name="register")
-     * @throws Exception
      */
     public function registerAction(
         Request $request,

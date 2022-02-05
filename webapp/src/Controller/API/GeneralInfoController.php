@@ -185,7 +185,6 @@ class GeneralInfoController extends AbstractFOSRestController
      *     required=false,
      *     @OA\Schema(type="string")
      * )
-     * @throws Exception
      */
     public function getDatabaseConfigurationAction(Request $request): array
     {
@@ -219,7 +218,8 @@ class GeneralInfoController extends AbstractFOSRestController
      *     @OA\MediaType(mediaType="application/x-www-form-urlencoded"),
      *     @OA\MediaType(mediaType="application/json")
      * )
-     * @throws Exception
+     *
+     * @throws NonUniqueResultException
      */
     public function updateConfigurationAction(Request $request): array
     {

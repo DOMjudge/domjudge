@@ -119,9 +119,6 @@ class RunController extends AbstractRestController implements QueryObjectTransfo
         return parent::performSingleAction($request, $id);
     }
 
-    /**
-     * @throws Exception
-     */
     protected function getQueryBuilder(Request $request): QueryBuilder
     {
         $queryBuilder = $this->em->createQueryBuilder()

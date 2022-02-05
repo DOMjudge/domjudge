@@ -103,7 +103,6 @@ class ClarificationController extends AbstractRestController
      *     @Model(type=Clarification::class)
      * )
      * @throws NonUniqueResultException
-     * @throws Exception
      */
     public function addAction(Request $request, ?string $id): Response
     {

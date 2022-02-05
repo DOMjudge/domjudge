@@ -243,9 +243,6 @@ class ContestProblem
         return $this->getProblem()->getExternalid();
     }
 
-    /**
-     * @throws Exception
-     */
     public function getApiId(EventLogService $eventLogService): string
     {
         return $this->getProblem()->getApiId($eventLogService);

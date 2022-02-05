@@ -175,9 +175,12 @@ class ImportEventFeedCommand extends Command
     /**
      * @inheritdoc
      *
-     * @throws TransportExceptionInterface
+     * @throws ClientExceptionInterface
+     * @throws DecodingExceptionInterface
      * @throws NonUniqueResultException
-     * @throws Exception
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws TransportExceptionInterface
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
@@ -417,7 +420,7 @@ class ImportEventFeedCommand extends Command
      * @param string[] $eventsToSkip
      *
      * @return bool False if the import should stop, true otherwise.
-     * @throws Exception
+     * @throws TransportExceptionInterface
      */
     protected function importFromFile(bool $fromStart, array $eventsToSkip): bool
     {
@@ -708,7 +711,6 @@ class ImportEventFeedCommand extends Command
 
     /**
      * Import the given event
-     * @param array $event
      * @param string[] $eventsToSkip
      * @throws TransportExceptionInterface
      * @throws Exception
@@ -780,8 +782,6 @@ class ImportEventFeedCommand extends Command
 
     /**
      * Import the given contest event
-     * @param array $event
-     * @throws Exception
      */
     protected function importContest(array $event): void
     {
@@ -887,8 +887,6 @@ class ImportEventFeedCommand extends Command
 
     /**
      * Validate the given judgement type event
-     * @param array $event
-     * @throws Exception
      */
     protected function validateJudgementType(array $event): void
     {
@@ -937,8 +935,6 @@ class ImportEventFeedCommand extends Command
 
     /**
      * Validate the given language event
-     * @param array $event
-     * @throws Exception
      */
     protected function validateLanguage(array $event): void
     {
@@ -966,8 +962,6 @@ class ImportEventFeedCommand extends Command
 
     /**
      * Import the given group event
-     * @param array $event
-     * @throws Exception
      */
     protected function importGroup(array $event): void
     {
@@ -1029,8 +1023,6 @@ class ImportEventFeedCommand extends Command
 
     /**
      * Import the given organization event
-     * @param array $event
-     * @throws Exception
      */
     protected function importOrganization(array $event): void
     {
@@ -1086,8 +1078,6 @@ class ImportEventFeedCommand extends Command
 
     /**
      * Import the given problem event
-     * @param array $event
-     * @throws Exception
      */
     protected function importProblem(array $event): void
     {
@@ -1173,8 +1163,6 @@ class ImportEventFeedCommand extends Command
 
     /**
      * Import the given team event
-     * @param array $event
-     * @throws Exception
      */
     protected function importTeam(array $event): void
     {
@@ -1285,8 +1273,6 @@ class ImportEventFeedCommand extends Command
 
     /**
      * Import the given clarification event
-     * @param array $event
-     * @throws Exception
      */
     protected function importClarification(array $event): void
     {
@@ -1408,7 +1394,6 @@ class ImportEventFeedCommand extends Command
     /**
      * Import the given submission event
      *
-     * @throws Exception
      * @throws TransportExceptionInterface
      */
     protected function importSubmission(array $event): void
@@ -1713,7 +1698,6 @@ class ImportEventFeedCommand extends Command
 
     /**
      * Import the given judgement event
-     * @throws Exception
      */
     protected function importJudgement(array $event): void
     {
@@ -1823,7 +1807,6 @@ class ImportEventFeedCommand extends Command
 
     /**
      * Import the given run event
-     * @throws Exception
      */
     protected function importRun(array $event): void
     {
@@ -1922,7 +1905,6 @@ class ImportEventFeedCommand extends Command
     /**
      * Process all pending events for the given type and (external) ID
      * @param mixed $id
-     * @throws Exception
      * @throws TransportExceptionInterface
      */
     protected function processPendingEvents(string $type, $id): void
@@ -1939,7 +1921,7 @@ class ImportEventFeedCommand extends Command
                     'Processing pending event with ID %s and type %s...',
                     [ $event['id'], $event['type'] ]
                 );
-                $this->importEvent($event);
+                $this->importEvent($event, []);
             }
         }
     }

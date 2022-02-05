@@ -460,7 +460,6 @@ class ContestController extends BaseController
     /**
      * @Route("/{contestId<\d+>}/edit", name="jury_contest_edit")
      * @IsGranted("ROLE_ADMIN")
-     * @throws Exception
      */
     public function editAction(Request $request, int $contestId): Response
     {
@@ -562,7 +561,6 @@ class ContestController extends BaseController
     /**
      * @Route("/{contestId<\d+>}/delete", name="jury_contest_delete")
      * @IsGranted("ROLE_ADMIN")
-     * @throws Exception
      */
     public function deleteAction(Request $request, int $contestId): Response
     {
@@ -579,7 +577,6 @@ class ContestController extends BaseController
     /**
      * @Route("/{contestId<\d+>}/problems/{probId<\d+>}/delete", name="jury_contest_problem_delete")
      * @IsGranted("ROLE_ADMIN")
-     * @throws Exception
      */
     public function deleteProblemAction(Request $request, int $contestId, int $probId): Response
     {

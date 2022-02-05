@@ -113,7 +113,6 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
      * @OA\Parameter(ref="#/components/parameters/idlist")
      * @OA\Parameter(ref="#/components/parameters/strict")
      * @throws NonUniqueResultException
-     * @throws Exception
      */
     public function listAction(Request $request): Response
     {
@@ -262,7 +261,6 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
     /**
      * Get the given problem for this contest
      * @throws NonUniqueResultException
-     * @throws Exception
      * @Rest\Get("/{id}")
      * @OA\Response(
      *     response="200",
@@ -322,9 +320,6 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
         return $queryBuilder;
     }
 
-    /**
-     * @throws Exception
-     */
     protected function getIdField(): string
     {
         return sprintf('p.%s', $this->eventLogService->externalIdFieldForEntity(Problem::class) ?? 'probid');

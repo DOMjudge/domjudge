@@ -70,9 +70,6 @@ class LanguageController extends AbstractRestController
             ->andWhere('lang.allowSubmit = 1');
     }
 
-    /**
-     * @throws Exception
-     */
     protected function getIdField(): string
     {
         return sprintf('lang.%s', $this->eventLogService->externalIdFieldForEntity(Language::class) ?? 'langid');

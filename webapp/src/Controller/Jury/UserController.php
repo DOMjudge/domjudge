@@ -61,7 +61,6 @@ class UserController extends BaseController
 
     /**
      * @Route("", name="jury_users")
-     * @throws Exception
      */
     public function indexAction(): Response
     {
@@ -210,7 +209,6 @@ class UserController extends BaseController
     /**
      * @Route("/{userId<\d+>}/edit", name="jury_user_edit")
      * @IsGranted("ROLE_ADMIN")
-     * @throws Exception
      */
     public function editAction(Request $request, int $userId): Response
     {
@@ -259,7 +257,6 @@ class UserController extends BaseController
     /**
      * @Route("/{userId<\d+>}/delete", name="jury_user_delete")
      * @IsGranted("ROLE_ADMIN")
-     * @throws Exception
      */
     public function deleteAction(Request $request, int $userId): Response
     {
@@ -276,7 +273,6 @@ class UserController extends BaseController
     /**
      * @Route("/add", name="jury_user_add")
      * @IsGranted("ROLE_ADMIN")
-     * @throws Exception
      */
     public function addAction(Request $request): Response
     {

@@ -1467,7 +1467,7 @@ class JudgehostController extends AbstractFOSRestController
         }
 
         $now = Utils::now();
-        $numUpdated = $this->em->getConnection()->executeUpdate(
+        $numUpdated = $this->em->getConnection()->executeStatement(
             'UPDATE judgetask SET judgehostid = :judgehostid, starttime = :starttime WHERE starttime IS NULL AND valid = 1 AND judgetaskid IN (:ids)',
             [
                 ':judgehostid' => $judgehost->getJudgehostid(),
@@ -1485,7 +1485,7 @@ class JudgehostController extends AbstractFOSRestController
         }
 
         // We got at least one, let's update the starttime of the corresponding judging if haven't done so in the past.
-        $starttime_set = $this->em->getConnection()->executeUpdate(
+        $starttime_set = $this->em->getConnection()->executeStatement(
             'UPDATE judging SET starttime = :starttime WHERE judgingid = :jobid AND starttime IS NULL',
             [
                 ':starttime' => $now,
@@ -1498,7 +1498,7 @@ class JudgehostController extends AbstractFOSRestController
             $submission = $this->em->getRepository(Submission::class)->findOneBy(['submitid' => $submit_id]);
             $teamid = $submission->getTeam()->getTeamid();
 
-            $this->em->getConnection()->executeUpdate(
+            $this->em->getConnection()->executeStatement(
                 'UPDATE team SET judging_last_started = :starttime WHERE teamid = :teamid',
                 [
                     ':starttime' => $now,

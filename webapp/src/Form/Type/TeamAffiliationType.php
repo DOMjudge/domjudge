@@ -34,9 +34,6 @@ class TeamAffiliationType extends AbstractExternalIdEntityType
         $this->dj = $dj;
     }
 
-    /**
-     * @throws Exception
-     */
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $countries = [];

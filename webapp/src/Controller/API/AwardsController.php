@@ -83,7 +83,6 @@ class AwardsController extends AbstractRestController
 
     /**
      * Get the awards data for the given request and optional award ID
-     * @throws Exception
      */
     protected function getAwardsData(Request $request, string $requestedType = null): ?array
     {

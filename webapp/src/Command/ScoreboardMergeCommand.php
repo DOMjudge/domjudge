@@ -116,7 +116,6 @@ class ScoreboardMergeCommand extends Command
      * @throws LoaderError
      * @throws RuntimeError
      * @throws SyntaxError
-     * @throws Exception
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {

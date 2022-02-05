@@ -55,8 +55,6 @@ abstract class BaseTest extends WebTestCase
 
     /**
      * Load the given fixtures.
-     *
-     * @throws Exception
      */
     protected function loadFixtures(array $fixtures): void
     {
@@ -77,8 +75,6 @@ abstract class BaseTest extends WebTestCase
 
     /**
      * Load the given fixture.
-     *
-     * @throws Exception
      */
     protected function loadFixture(string $fixture): void
     {

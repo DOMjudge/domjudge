@@ -135,7 +135,6 @@ class LanguageController extends BaseController
     /**
      * @Route("/add", name="jury_language_add")
      * @IsGranted("ROLE_ADMIN")
-     * @throws Exception
      */
     public function addAction(Request $request): Response
     {
@@ -253,7 +252,6 @@ class LanguageController extends BaseController
     /**
      * @Route("/{langId}/edit", name="jury_language_edit")
      * @IsGranted("ROLE_ADMIN")
-     * @throws Exception
      */
     public function editAction(Request $request, string $langId): Response
     {
@@ -292,7 +290,6 @@ class LanguageController extends BaseController
     /**
      * @Route("/{langId}/delete", name="jury_language_delete")
      * @IsGranted("ROLE_ADMIN")
-     * @throws Exception
      */
     public function deleteAction(Request $request, string $langId): Response
     {

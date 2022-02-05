@@ -45,7 +45,6 @@ class ScoreboardController extends BaseController
 
     /**
      * @Route("/scoreboard", name="team_scoreboard")
-     * @throws Exception
      */
     public function scoreboardAction(Request $request): Response
     {
@@ -67,7 +66,6 @@ class ScoreboardController extends BaseController
 
     /**
      * @Route("/team/{teamId<\d+>}", name="team_team")
-     * @throws Exception
      */
     public function teamAction(Request $request, int $teamId): Response
     {

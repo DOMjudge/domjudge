@@ -174,7 +174,6 @@ class TeamCategoryController extends BaseController
     /**
      * @Route("/{categoryId<\d+>}/edit", name="jury_team_category_edit")
      * @IsGranted("ROLE_ADMIN")
-     * @throws Exception
      */
     public function editAction(Request $request, int $categoryId): Response
     {
@@ -204,7 +203,6 @@ class TeamCategoryController extends BaseController
     /**
      * @Route("/{categoryId<\d+>}/delete", name="jury_team_category_delete")
      * @IsGranted("ROLE_ADMIN")
-     * @throws Exception
      */
     public function deleteAction(Request $request, int $categoryId): Response
     {
@@ -221,7 +219,6 @@ class TeamCategoryController extends BaseController
     /**
      * @Route("/add", name="jury_team_category_add")
      * @IsGranted("ROLE_ADMIN")
-     * @throws Exception
      */
     public function addAction(Request $request): Response
     {

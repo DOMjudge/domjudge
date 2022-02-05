@@ -45,7 +45,6 @@ class ConfigController extends AbstractController
 
     /**
      * @Route("", name="jury_config")
-     * @throws Exception
      */
     public function indexAction(EventLogService $eventLogService, Request $request): Response
     {

@@ -32,9 +32,6 @@ class RejudgingType extends AbstractType
         $this->em = $em;
     }
 
-    /**
-     * @throws Exception
-     */
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder->add('reason', TextType::class);

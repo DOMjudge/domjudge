@@ -57,7 +57,6 @@ class SubmissionController extends BaseController
 
     /**
      * @Route("/submit/{problem}", name="team_submit")
-     * @throws Exception
      */
     public function createAction(Request $request, ?Problem $problem = null): Response
     {

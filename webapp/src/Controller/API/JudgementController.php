@@ -106,9 +106,6 @@ class JudgementController extends AbstractRestController implements QueryObjectT
         return parent::performSingleAction($request, $id);
     }
 
-    /**
-     * @throws Exception
-     */
     protected function getQueryBuilder(Request $request): QueryBuilder
     {
         $queryBuilder = $this->em->createQueryBuilder()

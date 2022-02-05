@@ -191,7 +191,6 @@ class ExecutableController extends BaseController
 
     /**
      * @Route("/{execId}", name="jury_executable")
-     * @throws Exception
      */
     public function viewAction(string $execId): Response
     {
@@ -265,7 +264,6 @@ class ExecutableController extends BaseController
     /**
      * @Route("/{execId}/edit", name="jury_executable_edit")
      * @IsGranted("ROLE_ADMIN")
-     * @throws Exception
      */
     public function editAction(Request $request, string $execId): Response
     {

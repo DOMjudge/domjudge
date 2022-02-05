@@ -470,7 +470,6 @@ class RejudgingController extends BaseController
 
     /**
      * @Route("/add", name="jury_rejudging_add")
-     * @throws Exception
      */
     public function addAction(Request $request, FormFactoryInterface $formFactory): Response
     {

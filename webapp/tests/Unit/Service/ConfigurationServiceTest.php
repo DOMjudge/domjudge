@@ -73,8 +73,6 @@ class ConfigurationServiceTest extends KernelTestCase
 
     /**
      * @dataProvider provideConfigDefaults
-     *
-     * @throws Exception
      */
     public function testConfigDefaults(string $categoryName, string $itemName): void
     {
@@ -90,8 +88,6 @@ class ConfigurationServiceTest extends KernelTestCase
 
     /**
      * @dataProvider provideConfigDefaults
-     *
-     * @throws Exception
      */
     public function testConfigDefaultsAll(
         string $categoryName,
@@ -140,8 +136,6 @@ class ConfigurationServiceTest extends KernelTestCase
      * @dataProvider provideConfigFromDatabase
      *
      * @param mixed  $dbValue
-     *
-     * @throws Exception
      */
     public function testConfigFromDatabase(
         string $itemName,
@@ -173,8 +167,6 @@ class ConfigurationServiceTest extends KernelTestCase
      * @dataProvider provideConfigFromDatabase
      *
      * @param mixed  $dbValue
-     *
-     * @throws Exception
      */
     public function testConfigFromDatabaseAll(
         string $itemName,
@@ -213,8 +205,6 @@ class ConfigurationServiceTest extends KernelTestCase
 
     /**
      * @dataProvider provideAllHidesNonPublic
-     *
-     * @throws Exception
      */
     public function testAllHidesNonPublic(string $itemName): void
     {
@@ -233,9 +223,6 @@ class ConfigurationServiceTest extends KernelTestCase
         yield ['default_run'];
     }
 
-    /**
-     * @throws Exception
-     */
     public function testUnknownConfigsNonPublic(): void
     {
         $unknownItems = [
@@ -261,9 +248,6 @@ class ConfigurationServiceTest extends KernelTestCase
         self::assertArrayNotHasKey('unknown2', $all);
     }
 
-    /**
-     * @throws Exception
-     */
     public function testUnknownConfigsPublic(): void
     {
         $unknownItems = [
@@ -348,8 +332,6 @@ class ConfigurationServiceTest extends KernelTestCase
 
     /**
      * @dataProvider provideAddOptionsResults
-     *
-     * @throws Exception
      */
     public function testAddOptionsResults(string $item): void
     {

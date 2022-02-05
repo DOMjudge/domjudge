@@ -19,7 +19,6 @@ class JudgementTypeController extends AbstractRestController
 {
     /**
      * Get all the judgement types for this contest
-     * @throws Exception
      * @Rest\Get("")
      * @OA\Response(
      *     response="200",
@@ -31,6 +30,8 @@ class JudgementTypeController extends AbstractRestController
      * )
      * @OA\Parameter(ref="#/components/parameters/idlist")
      * @OA\Parameter(ref="#/components/parameters/strict")
+     *
+     * @throws NonUniqueResultException
      */
     public function listAction(Request $request): array
     {
@@ -54,7 +55,6 @@ class JudgementTypeController extends AbstractRestController
     /**
      * Get the given judgement type for this contest
      * @throws NonUniqueResultException
-     * @throws Exception
      * @Rest\Get("/{id}")
      * @OA\Response(
      *     response="200",
@@ -79,7 +79,6 @@ class JudgementTypeController extends AbstractRestController
 
     /**
      * Get the judgement types, optionally filtered on the given ID's
-     * @throws Exception
      */
     protected function getJudgementTypes(array $filteredOn = null): ?array
     {

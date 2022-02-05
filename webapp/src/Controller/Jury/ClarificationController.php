@@ -48,7 +48,6 @@ class ClarificationController extends AbstractController
 
     /**
      * @Route("", name="jury_clarifications")
-     * @throws Exception
      */
     public function indexAction(Request $request): Response
     {
@@ -131,7 +130,6 @@ class ClarificationController extends AbstractController
 
     /**
      * @Route("/{id<\d+>}", name="jury_clarification")
-     * @throws Exception
      */
     public function viewAction(int $id): Response
     {
@@ -274,7 +272,6 @@ class ClarificationController extends AbstractController
 
     /**
      * @Route("/send", methods={"GET"}, name="jury_clarification_new")
-     * @throws Exception
      */
     public function composeClarificationAction(Request $request): Response
     {

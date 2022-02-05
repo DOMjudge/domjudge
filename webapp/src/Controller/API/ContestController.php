@@ -292,7 +292,6 @@ class ContestController extends AbstractRestController
      * @Rest\Patch("/{cid}")
      * @IsGranted("ROLE_API_WRITER")
      * @throws NonUniqueResultException
-     * @throws Exception
      * @OA\Parameter(
      *     name="cid",
      *     in="path",
@@ -385,7 +384,6 @@ class ContestController extends AbstractRestController
      * Get the contest in YAML format
      * @Rest\Get("/{cid}/contest-yaml")
      * @throws NonUniqueResultException
-     * @throws Exception
      * @OA\Parameter(ref="#/components/parameters/cid")
      * @OA\Response(
      *     response="200",

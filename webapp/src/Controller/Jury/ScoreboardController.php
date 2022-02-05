@@ -30,7 +30,6 @@ class ScoreboardController extends AbstractController
 
     /**
      * @Route("", name="jury_scoreboard")
-     * @throws Exception
      */
     public function scoreboardAction(Request $request): Response
     {

@@ -90,7 +90,6 @@ abstract class BaseController extends AbstractController
 
     /**
      * Save the given entity, adding an eventlog and auditlog entry
-     * @throws Exception
      */
     protected function saveEntity(
         EntityManagerInterface $entityManager,

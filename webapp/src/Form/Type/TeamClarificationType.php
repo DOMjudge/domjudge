@@ -25,9 +25,6 @@ class TeamClarificationType extends AbstractType
         $this->config = $config;
     }
 
-    /**
-     * @throws Exception
-     */
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder->add('recipient', TextType::class, [

@@ -87,7 +87,6 @@ class ScoreboardController extends AbstractRestController
      *     @OA\Schema(type="integer")
      * )
      * @throws NonUniqueResultException
-     * @throws Exception
      */
     public function getScoreboardAction(Request $request): array
     {

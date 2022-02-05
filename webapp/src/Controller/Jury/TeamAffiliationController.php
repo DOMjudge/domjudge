@@ -149,7 +149,6 @@ class TeamAffiliationController extends BaseController
 
     /**
      * @Route("/{affilId<\d+>}", name="jury_team_affiliation")
-     * @throws Exception
      */
     public function viewAction(Request $request, ScoreboardService $scoreboardService, int $affilId): Response
     {
@@ -192,7 +191,6 @@ class TeamAffiliationController extends BaseController
     /**
      * @Route("/{affilId<\d+>}/edit", name="jury_team_affiliation_edit")
      * @IsGranted("ROLE_ADMIN")
-     * @throws Exception
      */
     public function editAction(Request $request, int $affilId): Response
     {
@@ -225,7 +223,6 @@ class TeamAffiliationController extends BaseController
     /**
      * @Route("/{affilId<\d+>}/delete", name="jury_team_affiliation_delete")
      * @IsGranted("ROLE_ADMIN")
-     * @throws Exception
      */
     public function deleteAction(Request $request, int $affilId): Response
     {
@@ -242,7 +239,6 @@ class TeamAffiliationController extends BaseController
     /**
      * @Route("/add", name="jury_team_affiliation_add")
      * @IsGranted("ROLE_ADMIN")
-     * @throws Exception
      */
     public function addAction(Request $request): Response
     {

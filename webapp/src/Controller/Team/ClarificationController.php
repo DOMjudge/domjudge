@@ -60,7 +60,6 @@ class ClarificationController extends BaseController
     /**
      * @Route("/clarifications/{clarId<\d+>}", name="team_clarification")
      * @throws NonUniqueResultException
-     * @throws Exception
      */
     public function viewAction(Request $request, int $clarId): Response
     {
@@ -146,7 +145,6 @@ class ClarificationController extends BaseController
 
     /**
      * @Route("/clarifications/add", name="team_clarification_add")
-     * @throws Exception
      */
     public function addAction(Request $request): Response
     {

@@ -42,7 +42,6 @@ class PrintController extends BaseController
 
     /**
      * @Route("", name="jury_print")
-     * @throws Exception
      */
     public function showAction(Request $request): Response
     {

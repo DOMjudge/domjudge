@@ -585,7 +585,6 @@ class DOMJudgeService
      * Perform an internal API request to the given URL with the given data
      *
      * @return mixed|null
-     * @throws Exception
      */
     public function internalApiRequest(string $url, string $method = Request::METHOD_GET, array $queryData = [])
     {
@@ -679,7 +678,6 @@ class DOMJudgeService
      * @param string|null $teamname Teamname of the team this user belongs to, if any
      * @param int|null    $teamid   Teamid of the team this user belongs to, if any
      * @param string|null $location Room/place of the team, if any.
-     * @throws Exception
      */
     public function printFile(
         string $filename,

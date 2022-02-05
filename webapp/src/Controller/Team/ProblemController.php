@@ -50,7 +50,6 @@ class ProblemController extends BaseController
     /**
      * @Route("/problems", name="team_problems")
      * @throws NonUniqueResultException
-     * @throws Exception
      */
     public function problemsAction(): Response
     {

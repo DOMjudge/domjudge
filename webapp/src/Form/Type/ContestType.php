@@ -33,9 +33,6 @@ class ContestType extends AbstractExternalIdEntityType
         $this->dj = $dj;
     }
 
-    /**
-     * @throws Exception
-     */
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $this->addExternalIdField($builder, Contest::class);

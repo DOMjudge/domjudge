@@ -73,7 +73,6 @@ class ProblemController extends BaseController
 
     /**
      * @Route("", name="jury_problems")
-     * @throws Exception
      */
     public function indexAction(): Response
     {
@@ -367,7 +366,6 @@ class ProblemController extends BaseController
      * @Route("/{probId<\d+>}", name="jury_problem")
      * @throws NoResultException
      * @throws NonUniqueResultException
-     * @throws Exception
      */
     public function viewAction(Request $request, SubmissionService $submissionService, int $probId): Response
     {
@@ -464,7 +462,6 @@ class ProblemController extends BaseController
 
     /**
      * @Route("/{probId<\d+>}/testcases", name="jury_problem_testcases")
-     * @throws Exception
      */
     public function testcasesAction(Request $request, int $probId): Response
     {
@@ -829,7 +826,6 @@ class ProblemController extends BaseController
     /**
      * @Route("/{probId<\d+>}/edit", name="jury_problem_edit")
      * @IsGranted("ROLE_ADMIN")
-     * @throws Exception
      */
     public function editAction(Request $request, int $probId): Response
     {
@@ -905,7 +901,6 @@ class ProblemController extends BaseController
     /**
      * @Route("/{probId<\d+>}/delete", name="jury_problem_delete")
      * @IsGranted("ROLE_ADMIN")
-     * @throws Exception
      */
     public function deleteAction(Request $request, int $probId): Response
     {
@@ -937,7 +932,6 @@ class ProblemController extends BaseController
     /**
      * @Route("/attachments/{attachmentId<\d+>}/delete", name="jury_attachment_delete")
      * @IsGranted("ROLE_ADMIN")
-     * @throws Exception
      */
     public function deleteAttachmentAction(Request $request, int $attachmentId): Response
     {
@@ -956,7 +950,6 @@ class ProblemController extends BaseController
     /**
      * @Route("/{testcaseId<\d+>}/delete_testcase", name="jury_testcase_delete")
      * @IsGranted("ROLE_ADMIN")
-     * @throws Exception
      */
     public function deleteTestcaseAction(Request $request, int $testcaseId): Response
     {
@@ -986,7 +979,6 @@ class ProblemController extends BaseController
     /**
      * @Route("/add", name="jury_problem_add")
      * @IsGranted("ROLE_ADMIN")
-     * @throws Exception
      */
     public function addAction(Request $request): Response
     {

@@ -460,7 +460,6 @@ class EventLogService implements ContainerAwareInterface
     /**
      * Add all state events for the given contest that are not added yet but
      * should have happened already
-     * @throws Exception
      */
     public function addMissingStateEvents(Contest $contest): void
     {
@@ -569,7 +568,6 @@ class EventLogService implements ContainerAwareInterface
      * even if called simultaneously from different processes.
      *
      * @throws NonUniqueResultException
-     * @throws Exception
      */
     protected function insertEvents(
         Contest $contest,
@@ -655,7 +653,6 @@ class EventLogService implements ContainerAwareInterface
      * even if called simultaneously from different processes.
      *
      * @throws NonUniqueResultException
-     * @throws Exception
      */
     protected function insertEvent(
         Contest $contest,
@@ -672,7 +669,6 @@ class EventLogService implements ContainerAwareInterface
      * https://ccs-specs.icpc.io/2021-11/contest_api#types-of-endpoints
      *
      * @throws NonUniqueResultException
-     * @throws Exception
      */
     public function initStaticEvents(Contest $contest): void
     {
@@ -748,7 +744,6 @@ class EventLogService implements ContainerAwareInterface
     /**
      * Check if all events for dependent objects are present for the given type and data
      * @return bool True if and only if all references are present
-     * @throws Exception
      */
     protected function hasAllDependentObjectEvents(Contest $contest, string $type, array $data): bool
     {
@@ -854,7 +849,6 @@ class EventLogService implements ContainerAwareInterface
 
     /**
      * Convert the given internal ID's into external ID's usable by the API
-     * @throws Exception
      */
     protected function getExternalIds(string $type, array $ids): array
     {
@@ -918,7 +912,6 @@ class EventLogService implements ContainerAwareInterface
      * Get the external ID field for a given entity type. Will return null if
      * no external ID field should be used
      * @param object|string $entity
-     * @throws Exception
      */
     public function externalIdFieldForEntity($entity): ?string
     {
@@ -973,7 +966,6 @@ class EventLogService implements ContainerAwareInterface
     /**
      * Get the API ID field for a given entity type.
      * @param object|string $entity
-     * @throws Exception
      */
     public function apiIdFieldForEntity($entity): string
     {

@@ -227,7 +227,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Equatab
      * @Serializer\VirtualProperty()
      * @Serializer\SerializedName("last_login_time")
      * @Serializer\Type("DateTime")
-     * @throws Exception
      */
     public function getLastLoginAsDateTime(): ?DateTime
     {
@@ -251,7 +250,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Equatab
      * @Serializer\VirtualProperty()
      * @Serializer\SerializedName("first_login_time")
      * @Serializer\Type("DateTime")
-     * @throws Exception
      */
     public function getFirstLoginAsDateTime(): ?DateTime
     {

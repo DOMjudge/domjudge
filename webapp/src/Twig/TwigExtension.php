@@ -168,7 +168,6 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
      * Print a time formatted as specified. The format is according to strftime().
      * @param string|float $datetime
      * @param Contest|null $contest If given, print time relative to that contest start.
-     * @throws Exception
      */
     public function printtime($datetime, ?string $format = null, ?Contest $contest = null): string
     {
@@ -210,7 +209,6 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
      *
      * @param string|float $datetime
      * @param Contest|null $contest If given, print time relative to that contest start.
-     * @throws Exception
      */
     public function printtimeHover($datetime, ?Contest $contest = null): string
     {
@@ -557,7 +555,6 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
 
     /**
      * Return the URL to an external CCS for the given submission if available
-     * @throws Exception
      */
     public function externalCcsUrl(Submission $submission): ?string
     {
@@ -761,7 +758,6 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
 
     /**
      * Output a run diff
-     * @throws Exception
      */
     public function runDiff(array $runOutput): string
     {
@@ -900,7 +896,6 @@ JS;
 
     /**
      * Print the start time of the given contest
-     * @throws Exception
      */
     public function printContestStart(Contest $contest): string
     {
@@ -968,7 +963,6 @@ JS;
     /**
      * Display the scoretime for the given time
      * @param string|float $time
-     * @throws Exception
      */
     public function scoreTime($time): int
     {
@@ -977,7 +971,6 @@ JS;
 
     /**
      * Calculate the penalty time for the given data
-     * @throws Exception
      */
     public function calculatePenaltyTime(bool $solved, int $num_submissions): int
     {
@@ -1015,7 +1008,6 @@ EOF;
     /**
      * Whether to show the external ID for the given entity
      * @param object|string $entity
-     * @throws Exception
      */
     public function showExternalId($entity): bool
     {

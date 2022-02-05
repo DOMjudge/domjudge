@@ -243,7 +243,6 @@ class TeamController extends BaseController
 
     /**
      * @Route("/{teamId<\d+>}", name="jury_team")
-     * @throws Exception
      */
     public function viewAction(
         Request $request,
@@ -339,7 +338,6 @@ class TeamController extends BaseController
     /**
      * @Route("/{teamId<\d+>}/edit", name="jury_team_edit")
      * @IsGranted("ROLE_ADMIN")
-     * @throws Exception
      */
     public function editAction(Request $request, int $teamId): Response
     {
@@ -372,7 +370,6 @@ class TeamController extends BaseController
     /**
      * @Route("/{teamId<\d+>}/delete", name="jury_team_delete")
      * @IsGranted("ROLE_ADMIN")
-     * @throws Exception
      */
     public function deleteAction(Request $request, int $teamId): Response
     {
@@ -389,7 +386,6 @@ class TeamController extends BaseController
     /**
      * @Route("/add", name="jury_team_add")
      * @IsGranted("ROLE_ADMIN")
-     * @throws Exception
      */
     public function addAction(Request $request): Response
     {

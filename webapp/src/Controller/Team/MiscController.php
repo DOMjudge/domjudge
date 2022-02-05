@@ -62,7 +62,6 @@ class MiscController extends BaseController
      * @Route("", name="team_index")
      * @throws NoResultException
      * @throws NonUniqueResultException
-     * @throws Exception
      */
     public function homeAction(Request $request): Response
     {
@@ -165,7 +164,6 @@ class MiscController extends BaseController
 
     /**
      * @Route("/print", name="team_print")
-     * @throws Exception
      */
     public function printAction(Request $request): Response
     {

@@ -32,9 +32,6 @@ class SubmissionsFilterType extends AbstractType
         $this->em = $em;
     }
 
-    /**
-     * @throws Exception
-     */
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $contests = $builder->getData()["contests"];

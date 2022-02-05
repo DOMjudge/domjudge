@@ -32,9 +32,6 @@ class CheckDatabaseConfigurationDefaultValuesCommand extends Command
             );
     }
 
-    /**
-     * @throws Exception
-     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $style    = new SymfonyStyle($input, $output);

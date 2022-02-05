@@ -239,7 +239,6 @@ abstract class AbstractRestController extends AbstractFOSRestController
     abstract protected function getIdField(): string;
 
     /**
-     * @return array|int|mixed|string
      * @throws NonUniqueResultException
      */
     protected function listActionHelper(Request $request): array

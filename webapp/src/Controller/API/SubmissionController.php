@@ -205,7 +205,6 @@ class SubmissionController extends AbstractRestController
      *     )
      * )
      * @throws NonUniqueResultException
-     * @throws Exception
      */
     public function addSubmissionAction(Request $request, ?string $id): Response
     {
@@ -581,9 +580,6 @@ class SubmissionController extends AbstractRestController
         return $queryBuilder;
     }
 
-    /**
-     * @throws Exception
-     */
     protected function getIdField(): string
     {
         return sprintf('s.%s', $this->eventLogService->externalIdFieldForEntity(Submission::class) ?? 'submitid');

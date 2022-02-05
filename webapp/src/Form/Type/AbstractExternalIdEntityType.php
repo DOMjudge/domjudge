@@ -29,7 +29,6 @@ class AbstractExternalIdEntityType extends AbstractType
 
     /**
      * Add an external ID field if the given entity class needs it
-     * @throws Exception
      */
     protected function addExternalIdField(FormBuilderInterface $builder, string $entity): void
     {

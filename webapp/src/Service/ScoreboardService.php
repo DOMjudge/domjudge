@@ -68,7 +68,6 @@ class ScoreboardService
      * @param Filter|null $filter      Filter to use for the scoreboard.
      * @param bool        $visibleOnly Iff $jury is true, determines whether
      *                                 to show non-publicly visible teams.
-     * @throws Exception
      */
     public function getScoreboard(
         Contest $contest,
@@ -104,7 +103,6 @@ class ScoreboardService
      * @param int     $teamId          The ID of the team to get the scoreboard for.
      * @param bool    $showFtsInFreeze If false, the scoreboard will hide first
      *                                 to solve for submissions after contest freeze.
-     * @throws Exception
      */
     public function getTeamScoreboard(Contest $contest, int $teamId, bool $showFtsInFreeze = true): ?Scoreboard
     {
@@ -262,7 +260,6 @@ class ScoreboardService
      *
      * @param bool $updateRankCache If set to false, do not update the rankcache.
      * @throws DBALException
-     * @throws Exception
      */
     public function calculateScoreRow(
         Contest $contest,
@@ -499,8 +496,6 @@ class ScoreboardService
      *
      * Due to current transactions usage, this function MUST NOT do anything
      * inside a transaction.
-     *
-     * @throws Exception
      */
     public function updateRankCache(Contest $contest, Team $team): void
     {
@@ -598,8 +593,6 @@ class ScoreboardService
      * Recalculate the scoreCache and rankCache of a contest.
      *
      * $progressReporter (optional) should be a callable that takes a string.
-     *
-     * @throws Exception
      */
     public function refreshCache(Contest $contest, ?callable $progressReporter = null): void
     {
@@ -802,7 +795,6 @@ class ScoreboardService
 
     /**
      * Get values to display in the scoreboard filter
-     * @throws Exception
      */
     public function getFilterValues(Contest $contest, bool $jury): array
     {
@@ -865,7 +857,6 @@ class ScoreboardService
 
     /**
      * Get the scoreboard Twig data for a given contest
-     * @throws Exception
      */
     public function getScoreboardTwigData(
         ?Request $request,

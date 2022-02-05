@@ -59,7 +59,6 @@ class ImportExportService
     /**
      * Get the YAML data for a given contest
      * @return array
-     * @throws Exception
      */
     public function getContestYamlData(Contest $contest): array
     {
@@ -370,7 +369,6 @@ class ImportExportService
 
     /**
      * Get results data for the given sortorder
-     * @throws Exception
      */
     public function getResultsData(int $sortOrder): array
     {
@@ -511,7 +509,6 @@ class ImportExportService
 
     /**
      * Import a TSV file
-     * @throws Exception
      */
     public function importTsv(string $type, UploadedFile $file, ?string &$message = null): int
     {
@@ -546,7 +543,6 @@ class ImportExportService
 
     /**
      * Import a JSON file
-     * @throws Exception
      */
     public function importJson(string $type, UploadedFile $file, ?string &$message = null): int
     {
@@ -576,7 +572,6 @@ class ImportExportService
 
     /**
      * Import groups TSV
-     * @throws Exception
      */
     protected function importGroupsTsv(array $content, ?string &$message = null): int
     {
@@ -602,8 +597,6 @@ class ImportExportService
      * Import groups JSON
      *
      * @param TeamCategory[]|null $saved The saved groups
-     *
-     * @throws Exception
      */
     public function importGroupsJson(array $data, ?string &$message = null, ?array &$saved = null): int
     {
@@ -683,8 +676,6 @@ class ImportExportService
      * Import organizations JSON
      *
      * @param TeamAffiliation[]|null $saved The saved groups
-     *
-     * @throws Exception
      */
     public function importOrganizationsJson(array $data, ?string &$message = null, ?array &$saved = null): int
     {
@@ -801,8 +792,6 @@ class ImportExportService
      * Import teams JSON
      *
      * @param Team[]|null $saved The saved teams
-     *
-     * @throws Exception
      */
     public function importTeamsJson(array $data, ?string &$message = null, ?array &$saved = null): int
     {
@@ -953,7 +942,6 @@ class ImportExportService
 
     /**
      * Import accounts TSV
-     * @throws Exception
      */
     protected function importAccountsTsv(array $content, ?string &$message = null): int
     {

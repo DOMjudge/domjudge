@@ -461,7 +461,6 @@ class Problem extends BaseApiEntity
     /**
      * @ORM\PrePersist()
      * @ORM\PreUpdate()
-     * @throws Exception
      */
     public function processProblemText(): void
     {

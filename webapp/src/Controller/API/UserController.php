@@ -74,7 +74,6 @@ class UserController extends AbstractRestController
      *     response="200",
      *     description="Returns a (currently meaningless) status message.",
      * )
-     * @throws Exception
      */
     public function addGroupsAction(Request $request): string
     {
@@ -122,7 +121,6 @@ class UserController extends AbstractRestController
      *     response="200",
      *     description="Returns a (currently meaningless) status message.",
      * )
-     * @throws Exception
      */
     public function addOrganizationsAction(Request $request): string
     {
@@ -166,7 +164,6 @@ class UserController extends AbstractRestController
      *     response="200",
      *     description="Returns a (currently meaningless) status message.",
      * )
-     * @throws Exception
      */
     public function addTeamsAction(Request $request): string
     {
@@ -215,7 +212,6 @@ class UserController extends AbstractRestController
      * )
      *
      * @throws BadRequestHttpException
-     * @throws Exception
      */
     public function addAccountsAction(Request $request): string
     {
@@ -372,9 +368,6 @@ class UserController extends AbstractRestController
         return $queryBuilder;
     }
 
-    /**
-     * @throws Exception
-     */
     protected function getIdField(): string
     {
         return 'u.userid';

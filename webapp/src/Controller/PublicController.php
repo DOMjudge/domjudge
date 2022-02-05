@@ -52,7 +52,6 @@ class PublicController extends BaseController
 
     /**
      * @Route("", name="public_index")
-     * @throws Exception
      */
     public function scoreboardAction(Request $request): Response
     {
@@ -134,7 +133,6 @@ class PublicController extends BaseController
 
     /**
      * @Route("/team/{teamId<\d+>}", name="public_team")
-     * @throws Exception
      */
     public function teamAction(Request $request, int $teamId): Response
     {
@@ -157,7 +155,6 @@ class PublicController extends BaseController
     /**
      * @Route("/problems", name="public_problems")
      * @throws NonUniqueResultException
-     * @throws Exception
      */
     public function problemsAction(): Response
     {

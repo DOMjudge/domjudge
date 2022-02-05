@@ -293,7 +293,6 @@ class ImportExportController extends BaseController
 
     /**
      * @Route("/export/{type<groups|teams|results>}.tsv", name="jury_tsv_export")
-     * @throws Exception
      */
     public function exportTsvAction(Request $request, string $type): Response
     {
@@ -334,7 +333,6 @@ class ImportExportController extends BaseController
 
     /**
      * @Route("/export/{type<results|results-icpc|clarifications>}.html", name="jury_html_export")
-     * @throws Exception
      */
     public function exportHtmlAction(Request $request, string $type): Response
     {
@@ -355,9 +353,6 @@ class ImportExportController extends BaseController
         }
     }
 
-    /**
-     * @throws Exception
-     */
     protected function getResultsHtml(Request $request, bool $useIcpcLayout): Response
     {
         /** @var TeamCategory[] $categories */
@@ -497,9 +492,6 @@ class ImportExportController extends BaseController
         return $response;
     }
 
-    /**
-     * @throws Exception
-     */
     protected function getClarificationsHtml(): Response
     {
         $contest = $this->dj->getCurrentContest();

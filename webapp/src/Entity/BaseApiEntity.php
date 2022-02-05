@@ -16,8 +16,6 @@ abstract class BaseApiEntity
 {
     /**
      * Get the API ID field name for this entity.
-     *
-     * @throws Exception
      */
     public function getApiIdField(EventLogService $eventLogService): string
     {
@@ -26,8 +24,6 @@ abstract class BaseApiEntity
 
     /**
      * Get the API ID for this entity.
-     *
-     * @throws Exception
      */
     public function getApiId(EventLogService $eventLogService): string
     {

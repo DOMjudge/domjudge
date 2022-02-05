@@ -202,7 +202,6 @@ class SubmissionController extends BaseController
     /**
      * @Route("/{submitId<\d+>}", name="jury_submission")
      * @throws NonUniqueResultException
-     * @throws Exception
      */
     public function viewAction(Request $request, int $submitId): Response
     {
@@ -544,7 +543,6 @@ class SubmissionController extends BaseController
 
     /**
      * @Route("/request-full-debug/{jid}", name="request_full_debug")
-     * @throws Exception
      */
     public function requestFullDebug(Request $request, Judging $jid): RedirectResponse
     {
@@ -799,7 +797,6 @@ class SubmissionController extends BaseController
 
     /**
      * @Route("/{submission}/edit-source", name="jury_submission_edit_source")
-     * @throws Exception
      */
     public function editSourceAction(Request $request, Submission $submission): Response
     {
@@ -927,7 +924,6 @@ class SubmissionController extends BaseController
     /**
      * @Route("/{judgingId<\d+>}/request-remaining", name="jury_submission_request_remaining", methods={"POST"})
      * @throws DBALException
-     * @throws Exception
      */
     public function requestRemainingRuns(Request $request, int $judgingId): RedirectResponse
     {
@@ -977,7 +973,6 @@ class SubmissionController extends BaseController
      * @Route("/{submitId<\d+>}/update-status", name="jury_submission_update_status", methods={"POST"})
      * @IsGranted("ROLE_ADMIN")
      * @throws DBALException
-     * @throws Exception
      */
     public function updateStatusAction(
         EventLogService $eventLogService,

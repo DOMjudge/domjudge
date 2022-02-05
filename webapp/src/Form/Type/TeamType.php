@@ -38,9 +38,6 @@ class TeamType extends AbstractType
         $this->dj = $dj;
     }
 
-    /**
-     * @throws Exception
-     */
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder->add('name', TextType::class, [
