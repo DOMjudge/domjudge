@@ -68,7 +68,9 @@ class ImportEventFeedCommand extends Command
     protected bool $debug;
     protected string $domjudgeVersion;
     protected LoggerInterface $logger;
+
     protected ?HttpClientInterface $client;
+
     protected string $configKey;
     protected string $contestIdFromConfig;
     protected int $contestId;
@@ -78,6 +80,7 @@ class ImportEventFeedCommand extends Command
     protected bool $allowImportAsPrimary;
     protected bool $allowExternalIdMismatch;
     protected ?string $sinceEventId = null;
+
     protected bool $shouldStop = false;
     protected ?string $lastEventId = null;
     protected array $verdicts = [];
