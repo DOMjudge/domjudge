@@ -4,45 +4,15 @@ namespace App\Utils\Scoreboard;
 
 class ScoreboardMatrixItem
 {
-    /**
-     * @var bool
-     */
-    public $isCorrect;
+    public bool $isCorrect;
+    public bool $isFirst;
+    public int $numSubmissions;
+    public int $numSubmissionsPending;
 
-    /**
-     * @var bool
-     */
-    public $isFirst;
-
-    /**
-     * @var int
-     */
-    public $numSubmissions;
-
-    /**
-     * @var int
-     */
-    public $numSubmissionsPending;
-
-    /**
-     * @var float|string
-     */
+    /** @var float|string */
     public $time;
+    public int $penaltyTime;
 
-    /**
-     * @var int
-     */
-    public $penaltyTime;
-
-    /**
-     * ScoreboardMatrixItem constructor.
-     * @param bool $isCorrect
-     * @param bool $isFirst
-     * @param int $numSubmissions
-     * @param int $numSubmissionsPending
-     * @param float|string $time
-     * @param int $penaltyTime
-     */
     public function __construct(
         bool $isCorrect,
         bool $isFirst,

@@ -20,82 +20,37 @@ use Exception;
  */
 class Scoreboard
 {
-    /**
-     * @var Contest
-     */
-    protected $contest;
+    protected Contest $contest;
+
+    /** @var Team[] */
+    protected array $teams;
+
+    /** @var TeamCategory[] */
+    protected array $categories;
+
+    /** @var ContestProblem[] */
+    protected array $problems;
+
+    /** @var ScoreCache[] */
+    protected array $scoreCache;
+    protected FreezeData $freezeData;
+    protected bool $restricted;
+    protected int $penaltyTime;
+    protected bool $scoreIsInSeconds;
+
+    /** @var ScoreboardMatrixItem[][] */
+    protected array $matrix = [];
+    protected Summary $summary;
+
+    /** @var TeamScore[] */
+    protected array $scores = [];
+    protected ?array $bestInCategoryData = null;
 
     /**
-     * @var Team[]
-     */
-    protected $teams;
-
-    /**
-     * @var TeamCategory[]
-     */
-    protected $categories;
-
-    /**
-     * @var ContestProblem[]
-     */
-    protected $problems;
-
-    /**
-     * @var ScoreCache[]
-     */
-    protected $scoreCache;
-
-    /**
-     * @var FreezeData
-     */
-    protected $freezeData;
-
-    /**
-     * @var bool
-     */
-    protected $restricted;
-
-    /**
-     * @var int
-     */
-    protected $penaltyTime;
-
-    /**
-     * @var bool
-     */
-    protected $scoreIsInSeconds;
-
-    /**
-     * @var ScoreboardMatrixItem[][]
-     */
-    protected $matrix = [];
-
-    /**
-     * @var Summary
-     */
-    protected $summary;
-
-    /**
-     * @var TeamScore[]
-     */
-    protected $scores = [];
-
-    /**
-     * @var array
-     */
-    protected $bestInCategoryData = null;
-
-    /**
-     * Scoreboard constructor.
-     * @param Contest          $contest
      * @param Team[]           $teams
      * @param TeamCategory[]   $categories
      * @param ContestProblem[] $problems
      * @param ScoreCache[]     $scoreCache
-     * @param FreezeData       $freezeData
-     * @param bool             $jury
-     * @param int              $penaltyTime
-     * @param bool             $scoreIsInSeconds
      */
     public function __construct(
         Contest $contest,
@@ -154,9 +109,6 @@ class Scoreboard
         return $this->matrix;
     }
 
-    /**
-     * @return Summary
-     */
     public function getSummary(): Summary
     {
         return $this->summary;
@@ -170,9 +122,6 @@ class Scoreboard
         return $this->scores;
     }
 
-    /**
-     * @return FreezeData
-     */
     public function getFreezeData(): FreezeData
     {
         return $this->freezeData;
@@ -180,7 +129,6 @@ class Scoreboard
 
     /**
      * Get the progress of this scoreboard
-     * @return int
      */
     public function getProgress(): int
     {
@@ -190,7 +138,7 @@ class Scoreboard
     /**
      * Initialize the scoreboard data
      */
-    protected function initializeScoreboard()
+    protected function initializeScoreboard(): void
     {
         // Initialize summary
         $this->summary = new Summary($this->problems);
@@ -205,7 +153,7 @@ class Scoreboard
     /**
      * Calculate the scoreboard data, filling the summary, matrix and scores properties
      */
-    protected function calculateScoreboard()
+    protected function calculateScoreboard(): void
     {
         // Calculate matrix and update scores
         $this->matrix = [];
@@ -314,9 +262,6 @@ class Scoreboard
      * - Then, use the scoreCompare function to determine the actual ordering
      *   based on number of problems solved and the time it took;
      * - If still equal, order on team name alphabetically.
-     * @param TeamScore $a
-     * @param TeamScore $b
-     * @return int
      */
     protected static function scoreboardCompare(TeamScore $a, TeamScore $b): int
     {
@@ -348,9 +293,6 @@ class Scoreboard
      * - highest points from correct solutions;
      * - least amount of total time spent on these solutions;
      * - the tie-breaker function below
-     * @param TeamScore $a
-     * @param TeamScore $b
-     * @return int
      */
     protected static function scoreCompare(TeamScore $a, TeamScore $b): int
     {
@@ -370,9 +312,6 @@ class Scoreboard
      * Tie-breaker comparison function, called from the 'scoreCompare' function
      * above. Scores based on the following criterion:
      * - fastest submission time for latest correct problem
-     * @param TeamScore $a
-     * @param TeamScore $b
-     * @return int
      */
     public static function scoreTiebreaker(TeamScore $a, TeamScore $b): int
     {
@@ -395,7 +334,6 @@ class Scoreboard
 
     /**
      * Return whether to show points for this scoreboard
-     * @return bool
      */
     public function showPoints(): bool
     {
@@ -410,10 +348,9 @@ class Scoreboard
 
     /**
      * Return the used team categories for this scoreboard
-     * @param array|null $limitToTeamIds
      * @return TeamCategory[]
      */
-    public function getUsedCategories(array $limitToTeamIds = null): array
+    public function getUsedCategories(?array $limitToTeamIds = null): array
     {
         $usedCategories = [];
         foreach ($this->scores as $score) {
@@ -434,10 +371,8 @@ class Scoreboard
 
     /**
      * Return whether this scoreboard has multiple category colors.
-     * @param array|null $limitToTeamIds
-     * @return bool
      */
-    public function hasCategoryColors(array $limitToTeamIds = null): bool
+    public function hasCategoryColors(?array $limitToTeamIds = null): bool
     {
         $colors = [];
         foreach ($this->scores as $score) {
@@ -460,11 +395,8 @@ class Scoreboard
 
     /**
      * Determine whether this team is the best in the given category
-     * @param Team       $team
-     * @param array|null $limitToTeamIds
-     * @return bool
      */
-    public function isBestInCategory(Team $team, array $limitToTeamIds = null): bool
+    public function isBestInCategory(Team $team, ?array $limitToTeamIds = null): bool
     {
         if ($this->bestInCategoryData === null) {
             $this->bestInCategoryData = [];
@@ -496,9 +428,6 @@ class Scoreboard
 
     /**
      * Determine whether this team was the first team to solve this problem
-     * @param Team           $team
-     * @param ContestProblem $problem
-     * @return bool
      */
     public function solvedFirst(Team $team, ContestProblem $problem): bool
     {

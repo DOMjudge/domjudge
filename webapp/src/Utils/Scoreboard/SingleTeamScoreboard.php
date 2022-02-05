@@ -20,38 +20,14 @@ use App\Utils\Utils;
  */
 class SingleTeamScoreboard extends Scoreboard
 {
-    /**
-     * @var Team
-     */
-    protected $team;
+    protected Team $team;
+    protected int $teamRank;
+    protected ?RankCache $rankCache;
+    protected bool $showRestrictedFts;
 
     /**
-     * @var int
-     */
-    protected $teamRank;
-
-    /**
-     * @var RankCache|null
-     */
-    protected $rankCache;
-
-    /**
-     * @var bool
-     */
-    protected $showRestrictedFts;
-
-    /**
-     * SingleTeamScoreboard constructor.
-     * @param Contest          $contest
-     * @param Team             $team
-     * @param int              $teamRank
      * @param ContestProblem[] $problems
-     * @param RankCache|null   $rankCache
      * @param ScoreCache[]     $scoreCache
-     * @param FreezeData       $freezeData
-     * @param bool             $showFtsInFreeze
-     * @param int              $penaltyTime
-     * @param bool             $scoreIsInSeconds
      */
     public function __construct(
         Contest $contest,
@@ -73,10 +49,7 @@ class SingleTeamScoreboard extends Scoreboard
             $penaltyTime, $scoreIsInSeconds);
     }
 
-    /**
-     * @inheritdoc
-     */
-    protected function calculateScoreboard()
+    protected function calculateScoreboard(): void
     {
         $teamScore = $this->scores[$this->team->getTeamid()];
         if ($this->rankCache !== null) {
