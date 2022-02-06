@@ -74,7 +74,7 @@ class JudgeTask
 
     /**
      * @ORM\Column(type="string", name="uuid",
-     *     options={"comment"="Optional UUID, used for caching."},
+     *     options={"comment"="Optional UUID for the associated judging, used for caching."},
      *     nullable=true)
      */
     private ?string $uuid;
@@ -124,7 +124,7 @@ class JudgeTask
 
     /**
      * @ORM\Column(type="string", name="testcase_hash", length=100,
-     *     options={"comment"="Testcase Hash","unsigned"=true},
+     *     options={"comment"="Testcase Hash"},
      *     nullable=true)
      * @Serializer\Type("string")
      */
