@@ -180,3 +180,7 @@ div.submission-summary > span {
 .table-3-striped tbody tr:nth-of-type(6n+3) {
     background-color: rgba(0,0,0,.05);
 }
+
+.button-row {
+    margin-bottom: 1rem;
+}

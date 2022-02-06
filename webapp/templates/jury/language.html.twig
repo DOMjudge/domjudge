@@ -86,13 +86,13 @@
         </div>
     </div>
 
-    <p>
+    <div class="button-row">
         {%- if is_granted('ROLE_ADMIN') -%}
             {{ button(path('jury_language_edit', {'langId': language.langid}), 'Edit', 'primary', 'edit') }}
             {{ button(path('jury_language_delete', {'langId': language.langid}), 'Delete', 'danger', 'trash-alt', true) }}
         {% endif %}
         {% include 'jury/partials/rejudge_form.html.twig' with {table: 'language', id: language.langid, buttonClass: 'btn-secondary'} %}
-    </p>
+    </div>
 
     <h2>Submissions in {{ language.name }}</h2>
 
