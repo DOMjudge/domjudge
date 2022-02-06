@@ -124,13 +124,13 @@
         </div>
     </div>
 
-    <p>
+    <div class="button-row">
         {%- if is_granted('ROLE_ADMIN') -%}
             {{ button(path('jury_user_edit', {'userId': user.userid}), 'Edit', 'primary', 'edit') }}
             {{ button(path('jury_user_delete', {'userId': user.userid}), 'Delete', 'danger', 'trash-alt', true) }}
         {% endif %}
         {% include 'jury/partials/rejudge_form.html.twig' with {table: 'user', id: user.userid, buttonClass: 'btn-secondary'} %}
-    </p>
+    </div>
 
     <h2>Submissions for {{ user.name }}</h2>
 
