@@ -91,11 +91,8 @@ if [ "$TEST" = "w3cval" ]; then
     unzip -q vnu.linux.zip
     section_end test_suite
     FLTRALL='--filterpattern .*autocomplete.*|.*descendant.*|.*child.*'
-    FLTRJURY='.*form.*'
-    if [ "$ROLE" = jury ]; then
-        FLTR="$FLTRALL|$FLTRJURY"
-    elif [ "$ROLE" = admin ]; then
-        FLTR="$FLTRALL|$FLTRJURY|.*option.*"
+    if [ "$ROLE" = admin ]; then
+        FLTR="$FLTRALL|.*option.*|.*non-hidden.*"
     else
         FLTR="$FLTRALL"
     fi
