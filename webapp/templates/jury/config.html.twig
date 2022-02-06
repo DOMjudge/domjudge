@@ -18,7 +18,7 @@
     <h1>Configuration</h1>
 
     <form method="post">
-        <ul class="nav nav-pills nav-fill" id="configtab" role="tablist">
+        <ul class="nav nav-pills nav-fill" id="configtablist" role="tablist">
             {% for category in options %}
                 <li class="nav-item" role="presentation">
                     <a class="nav-link {{ (category.name == 'Scoring') ? 'active' : '' }}" id="{{ category.name|replace({' ': ''}) }}-tab" data-toggle="tab" href="#{{ category.name|replace({' ': ''}) }}" role="tab">{{ category.name }}</a>
