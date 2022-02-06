@@ -71,9 +71,6 @@ class UserFixture extends AbstractDefaultDataFixture implements DependentFixture
         $manager->flush();
     }
 
-    /**
-     * Get the password for the REST API
-     */
     protected function getRestapiPassword(): string
     {
         $restapiCredentialsFile = sprintf(

@@ -237,7 +237,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         string $text,
         string $type = 'primary',
         ?string $icon = null,
-        ?bool $isAjaxModal = false
+        bool $isAjaxModal = false
     ): string {
         if ($icon) {
             $icon = sprintf('<i class="fas fa-%s"></i>&nbsp;', $icon);

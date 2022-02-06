@@ -53,7 +53,7 @@ class Testcase
     private int $ranknumber;
 
     /**
-     * @var resource|nill
+     * @var resource|null
      * @ORM\Column(type="blob", length=4294967295, name="description",
      *     options={"comment"="Description of this testcase"},
      *     nullable=true)

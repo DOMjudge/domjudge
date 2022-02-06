@@ -187,7 +187,7 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
      *     nullable=false)
      * @Serializer\Exclude()
      */
-    private ?int $goldMedals = 4;
+    private int $goldMedals = 4;
 
     /**
      * @ORM\Column(type="smallint", length=3, name="silver_medals",
@@ -195,7 +195,7 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
      *     nullable=false)
      * @Serializer\Exclude()
      */
-    private ?int $silverMedals = 4;
+    private int $silverMedals = 4;
 
     /**
      * @ORM\Column(type="smallint", length=3, name="bronze_medals",
@@ -203,7 +203,7 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
      *     nullable=false)
      * @Serializer\Exclude()
      */
-    private ?int $bronzeMedals = 4;
+    private int $bronzeMedals = 4;
 
     /**
      * @var double|string
@@ -701,35 +701,35 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
         return $this;
     }
 
-    public function setGoldMedals(?int $goldMedals): Contest
+    public function setGoldMedals(int $goldMedals): Contest
     {
         $this->goldMedals = $goldMedals;
         return $this;
     }
 
-    public function getGoldMedals(): ?int
+    public function getGoldMedals(): int
     {
         return $this->goldMedals;
     }
 
-    public function setSilverMedals(?int $silverMedals): Contest
+    public function setSilverMedals(int $silverMedals): Contest
     {
         $this->silverMedals = $silverMedals;
         return $this;
     }
 
-    public function getSilverMedals(): ?int
+    public function getSilverMedals(): int
     {
         return $this->silverMedals;
     }
 
-    public function setBronzeMedals(?int $bronzeMedals): Contest
+    public function setBronzeMedals(int $bronzeMedals): Contest
     {
         $this->bronzeMedals = $bronzeMedals;
         return $this;
     }
 
-    public function getBronzeMedals(): ?int
+    public function getBronzeMedals(): int
     {
         return $this->bronzeMedals;
     }
