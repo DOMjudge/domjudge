@@ -31,8 +31,7 @@ abstract class BaseTest extends WebTestCase
     /** @var string[] */
     protected array        $roles           = [];
     protected ?ORMExecutor $fixtureExecutor = null;
-
-    /** What fixtures to load. */
+    /** @var string[] */
     protected static array $fixtures = [];
 
     protected function setUp(): void
