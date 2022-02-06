@@ -46,7 +46,7 @@ class AuditLog
     /**
      * @ORM\Column(type="string", name="datatype", length=32,
      *     options={"comment"="Reference to DB table associated to this entry"},
-     *     nullable=true)
+     *     nullable=false)
      */
     private string $datatype;
 
@@ -60,7 +60,7 @@ class AuditLog
     /**
      * @ORM\Column(type="string", name="action", length=128,
      *     options={"comment"="Description of action performed"},
-     *     nullable=true)
+     *     nullable=false)
      */
     private string $action;
 
