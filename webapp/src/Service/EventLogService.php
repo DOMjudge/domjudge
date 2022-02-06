@@ -604,7 +604,7 @@ class EventLogService implements ContainerAwareInterface
             $endpointType,
             $firstEndpointId
         );
-        if ($this->em->getConnection()->fetchColumn('SELECT GET_LOCK(:lock, 1)',
+        if ($this->em->getConnection()->fetchOne('SELECT GET_LOCK(:lock, 1)',
                 [':lock' => $lockString]) != 1) {
             throw new Exception('EventLogService::insertEvent failed to obtain lock: ' . $lockString);
         }
@@ -640,7 +640,7 @@ class EventLogService implements ContainerAwareInterface
         $this->em->flush();
 
         // Make sure to release the lock again
-        if ($this->em->getConnection()->fetchColumn('SELECT RELEASE_LOCK(:lock)',
+        if ($this->em->getConnection()->fetchOne('SELECT RELEASE_LOCK(:lock)',
                 [':lock' => $lockString]) != 1) {
             throw new Exception('EventLogService::insertEvent failed to release lock');
         }

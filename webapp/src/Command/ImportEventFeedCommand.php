@@ -173,9 +173,8 @@ class ImportEventFeedCommand extends Command
     }
 
     /**
-     * @inheritdoc
-     *
      * @throws ClientExceptionInterface
+     * @throws DBALException
      * @throws DecodingExceptionInterface
      * @throws NonUniqueResultException
      * @throws RedirectionExceptionInterface
@@ -299,9 +298,6 @@ class ImportEventFeedCommand extends Command
         return static::STATUS_OK;
     }
 
-    /**
-     * Process a stop command from a signal handler
-     */
     public function stopCommand(): void
     {
         $this->shouldStop = true;
@@ -415,11 +411,11 @@ class ImportEventFeedCommand extends Command
     }
 
     /**
-     * Import events from the given local file
-     *
      * @param string[] $eventsToSkip
      *
      * @return bool False if the import should stop, true otherwise.
+     * @throws DBALException
+     * @throws NonUniqueResultException
      * @throws TransportExceptionInterface
      */
     protected function importFromFile(bool $fromStart, array $eventsToSkip): bool
@@ -480,16 +476,16 @@ class ImportEventFeedCommand extends Command
     }
 
     /**
-     * Import events from the given URL
-     *
      * @param string[] $eventsToSkip
      *
      * @return bool False if the import should stop, true otherwise.
-     * @throws TransportExceptionInterface
      * @throws ClientExceptionInterface
+     * @throws DBALException
      * @throws DecodingExceptionInterface
+     * @throws NonUniqueResultException
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
+     * @throws TransportExceptionInterface
      */
     protected function importFromUrl(bool $fromStart, array $eventsToSkip): bool
     {
@@ -620,9 +616,6 @@ class ImportEventFeedCommand extends Command
         }
     }
 
-    /**
-     * Determine the event ID to use to pass as since_id
-     */
     protected function determineSinceEventId(): void
     {
         $cacheFilePath = sprintf('%s/shadow-%s.ndjson.cache',
@@ -712,8 +705,9 @@ class ImportEventFeedCommand extends Command
     /**
      * Import the given event
      * @param string[] $eventsToSkip
+     * @throws DBALException
+     * @throws NonUniqueResultException
      * @throws TransportExceptionInterface
-     * @throws Exception
      */
     protected function importEvent(array $event, array $eventsToSkip): void
     {
@@ -781,7 +775,7 @@ class ImportEventFeedCommand extends Command
     }
 
     /**
-     * Import the given contest event
+     * @throws NonUniqueResultException
      */
     protected function importContest(array $event): void
     {
@@ -885,9 +879,6 @@ class ImportEventFeedCommand extends Command
                                     $contest->getCid());
     }
 
-    /**
-     * Validate the given judgement type event
-     */
     protected function validateJudgementType(array $event): void
     {
         if ($event['op'] !== EventLogService::ACTION_CREATE) {
@@ -933,9 +924,6 @@ class ImportEventFeedCommand extends Command
         }
     }
 
-    /**
-     * Validate the given language event
-     */
     protected function validateLanguage(array $event): void
     {
         if ($event['op'] !== EventLogService::ACTION_CREATE) {
@@ -961,7 +949,7 @@ class ImportEventFeedCommand extends Command
     }
 
     /**
-     * Import the given group event
+     * @throws NonUniqueResultException
      */
     protected function importGroup(array $event): void
     {
@@ -1022,7 +1010,7 @@ class ImportEventFeedCommand extends Command
     }
 
     /**
-     * Import the given organization event
+     * @throws NonUniqueResultException
      */
     protected function importOrganization(array $event): void
     {
@@ -1077,7 +1065,7 @@ class ImportEventFeedCommand extends Command
     }
 
     /**
-     * Import the given problem event
+     * @throws NonUniqueResultException
      */
     protected function importProblem(array $event): void
     {
@@ -1161,9 +1149,6 @@ class ImportEventFeedCommand extends Command
         $this->processPendingEvents('problem', $problem->getExternalid());
     }
 
-    /**
-     * Import the given team event
-     */
     protected function importTeam(array $event): void
     {
         $this->logger->info('Importing team %s event %s', [ $event['op'], $event['id'] ]);
@@ -1272,7 +1257,7 @@ class ImportEventFeedCommand extends Command
     }
 
     /**
-     * Import the given clarification event
+     * @throws NonUniqueResultException
      */
     protected function importClarification(array $event): void
     {
@@ -1392,9 +1377,9 @@ class ImportEventFeedCommand extends Command
     }
 
     /**
-     * Import the given submission event
-     *
      * @throws TransportExceptionInterface
+     * @throws DBALException
+     * @throws NonUniqueResultException
      */
     protected function importSubmission(array $event): void
     {
@@ -1697,7 +1682,7 @@ class ImportEventFeedCommand extends Command
     }
 
     /**
-     * Import the given judgement event
+     * @throws DBALException
      */
     protected function importJudgement(array $event): void
     {
@@ -1805,9 +1790,6 @@ class ImportEventFeedCommand extends Command
         $this->processPendingEvents('judgement', $judgement->getExternalid());
     }
 
-    /**
-     * Import the given run event
-     */
     protected function importRun(array $event): void
     {
         // Note that we do not emit events for imported runs, as we will generate our own
@@ -1902,11 +1884,6 @@ class ImportEventFeedCommand extends Command
         $this->em->flush();
     }
 
-    /**
-     * Process all pending events for the given type and (external) ID
-     * @param mixed $id
-     * @throws TransportExceptionInterface
-     */
     protected function processPendingEvents(string $type, $id): void
     {
         // Process pending events
@@ -1926,10 +1903,6 @@ class ImportEventFeedCommand extends Command
         }
     }
 
-    /**
-     * Add a pending event for the given type and (external) ID
-     * @param mixed $id
-     */
     protected function addPendingEvent(string $type, $id, array $event): void
     {
         $this->logger->warning(
