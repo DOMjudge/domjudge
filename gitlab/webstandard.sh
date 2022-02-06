@@ -90,7 +90,7 @@ if [ "$TEST" = "w3cval" ]; then
     wget https://github.com/validator/validator/releases/latest/download/vnu.linux.zip
     unzip -q vnu.linux.zip
     section_end test_suite
-    FLTRALL='--filterpattern .*autocomplete.*|.*descendant.*|.*child.*'
+    FLTRALL='--filterpattern .*autocomplete.*|.*child.*'
     if [ "$ROLE" = admin ]; then
         FLTR="$FLTRALL|.*option.*|.*non-hidden.*"
     else
