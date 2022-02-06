@@ -86,7 +86,7 @@ class QueueTaskController extends BaseController
 
             // Format start time
             if (!empty($queueTaskData['starttime']['value'])) {
-                $queueTaskData['starttime']['value'] = Utils::printtime($queueTaskData['starttime']['value'], "%Y-%m-%d %H:%M:%S (%Z)");
+                $queueTaskData['starttime']['value'] = Utils::printtime($queueTaskData['starttime']['value'], "Y-m-d H:i:s (T)");
             } else {
                 $queueTaskData['starttime']['value'] = 'not started yet';
             }
@@ -208,7 +208,7 @@ class QueueTaskController extends BaseController
 
             // Format start time
             if (!empty($judgeTaskData['starttime']['value'])) {
-                $judgeTaskData['starttime']['value'] = Utils::printtime($judgeTaskData['starttime']['value'], "%Y-%m-%d %H:%M:%S (%Z)");
+                $judgeTaskData['starttime']['value'] = Utils::printtime($judgeTaskData['starttime']['value'], "Y-m-d H:i:s (T)");
             } else {
                 $judgeTaskData['starttime']['value'] = 'not started yet';
             }

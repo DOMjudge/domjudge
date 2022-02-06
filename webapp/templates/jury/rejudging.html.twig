@@ -56,7 +56,7 @@
                     <th>Start time</th>
                     <td>
                         {% if rejudging.starttime %}
-                            <span title="{{ rejudging.starttime | printtime('%Y-%m-%d %H:%M:%S (%Z)') }}">
+                            <span title="{{ rejudging.starttime | printtime('Y-m-d H:i:s (T)') }}">
                                 {{ rejudging.starttime | printtime }}
                             </span>
                         {% else %}
@@ -68,7 +68,7 @@
                     <th>Apply time</th>
                     <td>
                         {% if rejudging.endtime %}
-                            <span title="{{ rejudging.endtime | printtime('%Y-%m-%d %H:%M:%S (%Z)') }}">
+                            <span title="{{ rejudging.endtime | printtime('Y-m-d H:i:s (T)') }}">
                                 {{ rejudging.endtime | printtime }}
                             </span>
                         {% else %}

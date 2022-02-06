@@ -223,9 +223,9 @@
             description: Print times of contest events relative to contest start (instead of absolute).
         -   name: time_format
             type: string
-            default_value: "%H:%M"
+            default_value: "H:i"
             public: false
-            description: The format used to print times. For formatting options see the PHP 'strftime' function.
+            description: The format used to print times. For formatting options see the PHP 'date' function.
         -   name: thumbnail_size
             type: int
             default_value: 200

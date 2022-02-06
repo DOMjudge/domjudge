@@ -79,7 +79,7 @@ class InternalErrorController extends BaseController
                 }
             }
 
-            $internalerrordata['time']['value'] = Utils::printtime($internalerrordata['time']['value'], '%F %T');
+            $internalerrordata['time']['value'] = Utils::printtime($internalerrordata['time']['value'], 'Y-m-d H:i:s');
 
             // Save this to our list of rows
             $internal_errors_table[] = [

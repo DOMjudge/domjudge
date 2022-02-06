@@ -216,7 +216,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
     }
 
     /**
-     * Print a time formatted as specified. The format is according to strftime().
+     * Print a time formatted as specified. The format is according to date().
      * @param string|float $datetime
      * @param string|null  $format
      * @param Contest|null $contest If given, print time relative to that contest start.
@@ -272,7 +272,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             $datetime = Utils::now();
         }
         return '<span title="' .
-            Utils::printtime($datetime, '%Y-%m-%d %H:%M (%Z)') . '">' .
+            Utils::printtime($datetime, 'Y-m-d H:i:s (T)') . '">' .
             $this->printtime($datetime, null, $contest) .
             '</span>';
     }

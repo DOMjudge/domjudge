@@ -25,7 +25,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *     uniqueConstraints={@ORM\UniqueConstraint(name="username", columns={"username"}, options={"lengths":{190}})})
  * @UniqueEntity("username", message="The username '{{ value }}' is already in use.")
  */
-class User implements UserInterface, PasswordAuthenticatedUserInterface, EquatableInterface, \Serializable
+class User implements UserInterface, PasswordAuthenticatedUserInterface, EquatableInterface
 {
     /**
      * @var int
@@ -159,22 +159,22 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Equatab
         $this->plainPassword = null;
     }
 
-    public function serialize()
+    public function __serialize(): array
     {
-        return serialize(array(
+        return [
             $this->userid,
             $this->username,
             $this->password,
-        ));
+        ];
     }
 
-    public function unserialize($serialized)
+    public function __unserialize(array $data): void
     {
-        list(
+        [
             $this->userid,
             $this->username,
-            $this->password
-        ) = unserialize($serialized);
+            $this->password,
+        ] = $data;
     }
 
     public function getUserid(): ?int

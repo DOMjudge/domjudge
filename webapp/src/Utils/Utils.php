@@ -450,7 +450,7 @@ class Utils
 
         $exact = true;
         for ($i = 0; $i < count($units) && $display > $factor; $i++) {
-            if (($display % $factor)!=0) {
+            if (((int)$display % $factor)!=0) {
                 $exact = false;
             }
             $display /= $factor;
@@ -463,7 +463,7 @@ class Utils
     }
 
     /**
-     * Print a time formatted as specified. The format is according to strftime().
+     * Print a time formatted as specified. The format is according to date().
      * @param string|float $datetime
      * @param string       $format
      * @return string
@@ -473,7 +473,7 @@ class Utils
         if (empty($datetime)) {
             return '';
         }
-        return Utils::specialchars(strftime($format, (int)$datetime));
+        return Utils::specialchars(date($format, (int)$datetime));
     }
 
     /**

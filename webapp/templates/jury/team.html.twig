@@ -47,7 +47,7 @@
                     <th>First login</th>
                     <td>
                         {% if team.users is not empty and team.users.first.firstLogin %}
-                            {{ team.users.first.firstLogin | printtime('%a %d %b %Y %T %Z') }}
+                            {{ team.users.first.firstLogin | printtime('D d M Y H:i:s T') }}
                         {% else %}
                             -
                         {% endif %}

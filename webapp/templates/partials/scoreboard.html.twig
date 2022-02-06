@@ -150,7 +150,7 @@
     {% endif %} {# not scoreboard is null and not jury #}
 
     <p id="lastmod">
-        Last Update: {{ null | printtime('%a %d %b %Y %T %Z') }}<br/>
+        Last Update: {{ null | printtime('D d M Y H:i:s T') }}<br/>
         using <a href="https://www.domjudge.org/" target="_top">DOMjudge</a>
     </p>
 {% endif %}
