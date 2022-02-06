@@ -169,25 +169,16 @@ class DOMJudgeService
         return null;
     }
 
-    /**
-     * Get the contest with the given contest ID
-     */
     public function getContest(int $cid): ?Contest
     {
         return $this->em->getRepository(Contest::class)->find($cid);
     }
 
-    /**
-     * Get the team with the given team ID
-     */
     public function getTeam(?int $teamid): ?Team
     {
         return $this->em->getRepository(Team::class)->find($teamid);
     }
 
-    /**
-     * Get the problem with the given team ID
-     */
     public function getProblem(?int $probid): ?Problem
     {
         return $this->em->getRepository(Problem::class)->find($probid);
@@ -209,14 +200,11 @@ class DOMJudgeService
         return $this->authorizationChecker->isGranted('ROLE_' . strtoupper($rolename));
     }
 
-    public function getClientIp()
+    public function getClientIp(): string
     {
         return $this->requestStack->getMainRequest()->getClientIp();
     }
 
-    /**
-     * Get the logged in user
-     */
     public function getUser(): ?User
     {
         $token = $this->tokenStorage->getToken();
@@ -236,8 +224,6 @@ class DOMJudgeService
     }
 
     /**
-     * Get the value of the cookie with the given name
-     *
      * @return bool|float|int|string|InputBag|null
      */
     public function getCookie(string $cookieName)
@@ -251,9 +237,6 @@ class DOMJudgeService
         return $this->requestStack->getCurrentRequest()->cookies->get($cookieName);
     }
 
-    /**
-     * Set the given cookie on the response, returning the response again to allow chaining
-     */
     public function setCookie(
         string $cookieName,
         string $value = '',
@@ -276,9 +259,6 @@ class DOMJudgeService
         return $response;
     }
 
-    /**
-     * Clear the given cookie on the response, returning the response again to allow chaining
-     */
     public function clearCookie(
         string $cookieName,
         ?string $path = null,
@@ -393,8 +373,6 @@ class DOMJudgeService
      * Run the given callable with all roles.
      *
      * This will result in all calls to checkrole() to return true.
-     *
-     * @param callable $callable
      */
     public function withAllRoles(callable $callable): void
     {
@@ -419,11 +397,6 @@ class DOMJudgeService
     /**
      * Log an action to the auditlog table
      *
-     * @param string          $datatype
-     * @param mixed           $dataid
-     * @param string          $action
-     * @param mixed|null      $extraInfo
-     * @param mixed|null      $forceUsername
      * @param string|int|null $cid
      */
     public function auditlog(
@@ -606,49 +579,31 @@ class DOMJudgeService
         return $this->jsonDecode($response->getContent());
     }
 
-    /**
-     * Get the etc directory of this DOMjudge installation
-     */
     public function getDomjudgeEtcDir(): string
     {
         return $this->params->get('domjudge.etcdir');
     }
 
-    /**
-     * Get the tmp directory of this DOMjudge installation
-     */
     public function getDomjudgeTmpDir(): string
     {
         return $this->params->get('domjudge.tmpdir');
     }
 
-    /**
-     * Get the webapp directory of this DOMjudge installation
-     */
     public function getDomjudgeWebappDir(): string
     {
         return $this->params->get('domjudge.webappdir');
     }
 
-    /**
-     * Get the documentation links
-     */
     public function getDocLinks(): array
     {
         return $this->params->get('domjudge.doc_links');
     }
 
-    /**
-     * Get the directory used for storing cache files
-     */
     public function getCacheDir(): string
     {
         return $this->params->get('kernel.cache_dir');
     }
 
-    /**
-     * Open the given ZIP file
-     */
     public function openZipFile(string $filename): ZipArchive
     {
         $zip = new ZipArchive();
