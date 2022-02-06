@@ -34,7 +34,7 @@ class JsonType extends BaseJsonType
     }
 
     /**
-     * @return string|false||null
+     * @return string|false|null
      * @throws ConversionException
      */
     public function convertToDatabaseValue($value, AbstractPlatform $platform)

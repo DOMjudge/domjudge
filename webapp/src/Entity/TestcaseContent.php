@@ -15,56 +15,49 @@ use Doctrine\ORM\Mapping as ORM;
 class TestcaseContent
 {
     /**
-     * @var int
-     *
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer", name="tc_contentid", length=4,
      *     options={"comment"="Testcase content ID","unsigned"=true},
      *     nullable=false)
      */
-    private $tc_contentid;
+    private int $tc_contentid;
 
     /**
      * We use a ManyToOne instead of a OneToOne here, because otherwise the
      * reverse of this relation will always be loaded. See the commit message of commit
      * 9e421f96691ec67ed62767fe465a6d8751edd884 for a more elaborate explanation
      *
-     * @var Testcase
      * @ORM\ManyToOne(targetEntity="Testcase", inversedBy="content")
      * @ORM\JoinColumn(name="testcaseid", referencedColumnName="testcaseid", onDelete="CASCADE")
      */
-    private $testcase;
+    private Testcase $testcase;
 
     /**
-     * @var string
      * @ORM\Column(type="blobtext", length=4294967295, name="input",
      *     options={"comment"="Input data"}, nullable=true)
      */
-    private $input;
+    private ?string $input;
 
     /**
-     * @var string
      * @ORM\Column(type="blobtext", length=4294967295, name="output",
      *     options={"comment"="Output data"}, nullable=true)
      */
-    private $output;
+    private ?string $output;
 
     /**
-     * @var string
      * @ORM\Column(type="blobtext", length=4294967295, name="image",
      *     options={"comment"="A graphical representation of the testcase"},
      *     nullable=true)
      */
-    private $image;
+    private ?string $image;
 
     /**
-     * @var string
      * @ORM\Column(type="blobtext", length=4294967295, name="image_thumb",
      *     options={"comment"="Automatically created thumbnail of the image"},
      *     nullable=true)
      */
-    private $image_thumb;
+    private ?string $image_thumb;
 
     public function getTestcaseContentId(): int
     {

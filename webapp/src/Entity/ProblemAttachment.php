@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Utils\Utils;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -23,23 +24,23 @@ class ProblemAttachment
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer", options={"comment"="Attachment ID","unsigned"="true"})
      */
-    private $attachmentid;
+    private ?int $attachmentid;
 
     /**
      * @ORM\Column(type="string", length=255, options={"comment"="Filename of attachment"})
      */
-    private $name;
+    private ?string $name;
 
     /**
      * @ORM\Column(type="string", length=4, options={"comment"="File type of attachment"})
      */
-    private $type;
+    private ?string $type;
 
     /**
      * @ORM\ManyToOne(targetEntity=Problem::class, inversedBy="attachments")
      * @ORM\JoinColumn(name="probid", referencedColumnName="probid", onDelete="CASCADE")
      */
-    private $problem;
+    private ?Problem $problem;
 
     /**
      * We use a OneToMany instead of a OneToOne here, because otherwise this
@@ -49,7 +50,7 @@ class ProblemAttachment
      * @var ProblemAttachmentContent[]|ArrayCollection
      * @ORM\OneToMany(targetEntity=ProblemAttachmentContent::class, mappedBy="attachment", cascade={"persist"}, orphanRemoval=true)
      */
-    private $content;
+    private Collection $content;
 
     public function __construct()
     {

@@ -12,20 +12,9 @@ use Symfony\Component\Security\Core\Event\AuthenticationSuccessEvent;
 
 class UserStateUpdater implements EventSubscriberInterface
 {
-    /**
-     * @var DOMJudgeService
-     */
-    protected $dj;
-
-    /**
-     * @var EntityManagerInterface
-     */
-    protected $em;
-
-    /**
-     * @var RequestStack
-     */
-    protected $requestStack;
+    protected DOMJudgeService $dj;
+    protected EntityManagerInterface $em;
+    protected RequestStack $requestStack;
 
     public function __construct(DOMJudgeService $dj, EntityManagerInterface $em, RequestStack $requestStack)
     {
@@ -39,7 +28,7 @@ class UserStateUpdater implements EventSubscriberInterface
         return [AuthenticationSuccessEvent::class => 'updateUserState'];
     }
 
-    public function updateUserState(AuthenticationSuccessEvent $event)
+    public function updateUserState(AuthenticationSuccessEvent $event): void
     {
         if ($event->getAuthenticationToken() && ($user = $event->getAuthenticationToken()->getUser()) && $user instanceof User) {
             $user->setLastLogin(Utils::now());

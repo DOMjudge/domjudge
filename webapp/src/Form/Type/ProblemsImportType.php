@@ -10,14 +10,14 @@ use Symfony\Component\Form\FormBuilderInterface;
 
 class ProblemsImportType extends AbstractType
 {
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder->add('contest', EntityType::class, [
             'class' => Contest::class,
             'required' => true,
-            'choice_label' => function (Contest $contest) {
-                return sprintf('c%d: %s - %s', $contest->getCid(), $contest->getShortname(), $contest->getName());
-            },
+            'choice_label' => fn(Contest $contest) => sprintf(
+                'c%d: %s - %s', $contest->getCid(), $contest->getShortname(), $contest->getName()
+            ),
         ]);
         $builder->add('file', BootstrapFileType::class, [
             'required' => true,

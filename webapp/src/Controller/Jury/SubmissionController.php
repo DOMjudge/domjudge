@@ -57,30 +57,11 @@ use Symfony\Component\Routing\RouterInterface;
  */
 class SubmissionController extends BaseController
 {
-    /**
-     * @var EntityManagerInterface
-     */
-    protected $em;
-
-    /**
-     * @var DOMJudgeService
-     */
-    protected $dj;
-
-    /**
-     * @var ConfigurationService
-     */
-    protected $config;
-
-    /**
-     * @var SubmissionService
-     */
-    protected $submissionService;
-
-    /**
-     * @var RouterInterface
-     */
-    protected $router;
+    protected EntityManagerInterface $em;
+    protected DOMJudgeService $dj;
+    protected ConfigurationService $config;
+    protected SubmissionService $submissionService;
+    protected RouterInterface $router;
 
     public function __construct(
         EntityManagerInterface $em,
@@ -221,9 +202,8 @@ class SubmissionController extends BaseController
     /**
      * @Route("/{submitId<\d+>}", name="jury_submission")
      * @throws NonUniqueResultException
-     * @throws Exception
      */
-    public function viewAction(Request $request, int $submitId)
+    public function viewAction(Request $request, int $submitId): Response
     {
         $judgingId   = $request->query->get('jid');
         $rejudgingId = $request->query->get('rejudgingid');
@@ -280,12 +260,8 @@ class SubmissionController extends BaseController
             ->getResult();
 
         /** @var Judging[] $judgings */
-        $judgings    = array_map(function ($data) {
-            return $data[0];
-        }, $judgingData);
-        $maxRunTimes = array_map(function ($data) {
-            return $data['max_runtime'];
-        }, $judgingData);
+        $judgings    = array_map(fn($data) => $data[0], $judgingData);
+        $maxRunTimes = array_map(fn($data) => $data['max_runtime'], $judgingData);
 
         $selectedJudging = null;
         // Find the selected judging
@@ -567,8 +543,6 @@ class SubmissionController extends BaseController
 
     /**
      * @Route("/request-full-debug/{jid}", name="request_full_debug")
-     * @throws NonUniqueResultException
-     * @throws Exception
      */
     public function requestFullDebug(Request $request, Judging $jid): RedirectResponse
     {
@@ -607,8 +581,6 @@ class SubmissionController extends BaseController
 
     /**
      * @Route("/download-full-debug/{debug_package_id}", name="download_full_debug")
-     * @throws NonUniqueResultException
-     * @throws Exception
      */
     public function downloadFullDebug(DebugPackage $debugPackage): StreamedResponse
     {
@@ -621,8 +593,6 @@ class SubmissionController extends BaseController
 
     /**
      * @Route("/request-output/{jid}/{jrid}", name="request_output")
-     * @throws NonUniqueResultException
-     * @throws Exception
      */
     public function requestOutput(Request $request, Judging $jid, JudgingRun $jrid): RedirectResponse
     {
@@ -827,10 +797,8 @@ class SubmissionController extends BaseController
 
     /**
      * @Route("/{submission}/edit-source", name="jury_submission_edit_source")
-     * @return RedirectResponse|Response
-     * @throws Exception
      */
-    public function editSourceAction(Request $request, Submission $submission)
+    public function editSourceAction(Request $request, Submission $submission): Response
     {
         if (!$this->dj->getUser()->getTeam() || !$this->dj->checkrole('team')) {
             $this->addFlash('danger', 'You cannot re-submit code without being a team.');
@@ -956,7 +924,6 @@ class SubmissionController extends BaseController
     /**
      * @Route("/{judgingId<\d+>}/request-remaining", name="jury_submission_request_remaining", methods={"POST"})
      * @throws DBALException
-     * @throws Exception
      */
     public function requestRemainingRuns(Request $request, int $judgingId): RedirectResponse
     {
@@ -1006,7 +973,6 @@ class SubmissionController extends BaseController
      * @Route("/{submitId<\d+>}/update-status", name="jury_submission_update_status", methods={"POST"})
      * @IsGranted("ROLE_ADMIN")
      * @throws DBALException
-     * @throws Exception
      */
     public function updateStatusAction(
         EventLogService $eventLogService,
@@ -1053,7 +1019,7 @@ class SubmissionController extends BaseController
         Request $request,
         int $judgingId
     ): RedirectResponse {
-        $this->em->transactional(function () use ($eventLogService, $request, $judgingId) {
+        $this->em->wrapInTransaction(function () use ($eventLogService, $request, $judgingId) {
             /** @var Judging $judging */
             $judging  = $this->em->getRepository(Judging::class)->find($judgingId);
             $verified = $request->request->getBoolean('verified');
@@ -1122,7 +1088,7 @@ class SubmissionController extends BaseController
     ): RedirectResponse {
         /** @var ExternalJudgement $judgement */
         $judgement  = $this->em->getRepository(ExternalJudgement::class)->find($extjudgementid);
-        $this->em->transactional(function () use ($eventLogService, $request, $judgement) {
+        $this->em->wrapInTransaction(function () use ($eventLogService, $request, $judgement) {
             $verified = $request->request->getBoolean('verified');
             $comment  = $request->request->get('comment');
             $judgement
@@ -1187,6 +1153,9 @@ class SubmissionController extends BaseController
         return $result;
     }
 
+    /**
+     * @param Judging|ExternalJudgement|null $judging
+     */
     protected function processClaim($judging, Request $request, ?string &$claimWarning) : ?RedirectResponse
     {
         $user   = $this->dj->getUser();

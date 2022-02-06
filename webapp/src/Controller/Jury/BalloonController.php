@@ -22,25 +22,10 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class BalloonController extends AbstractController
 {
-    /**
-     * @var EntityManagerInterface
-     */
-    protected $em;
-
-    /**
-     * @var DOMJudgeService
-     */
-    protected $dj;
-
-    /**
-     * @var ConfigurationService
-     */
-    protected $config;
-
-    /**
-     * @var EventLogService
-     */
-    protected $eventLogService;
+    protected EntityManagerInterface $em;
+    protected DOMJudgeService $dj;
+    protected ConfigurationService $config;
+    protected EventLogService $eventLogService;
 
     public function __construct(
         EntityManagerInterface $em,
@@ -57,9 +42,8 @@ class BalloonController extends AbstractController
     /**
      * @Route("", name="jury_balloons")
      */
-    public function indexAction(Request $request, BalloonService $balloonService): Response
+    public function indexAction(BalloonService $balloonService): Response
     {
-
         $contest = $this->dj->getCurrentContest();
         if(is_null($contest)) {
             return $this->render('jury/balloons.html.twig');
@@ -127,7 +111,7 @@ class BalloonController extends AbstractController
     /**
      * @Route("/{balloonId}/done", name="jury_balloons_setdone")
      */
-    public function setDoneAction(Request $request, int $balloonId, BalloonService $balloonService): RedirectResponse
+    public function setDoneAction(int $balloonId, BalloonService $balloonService): RedirectResponse
     {
         $balloonService->setDone($balloonId);
 

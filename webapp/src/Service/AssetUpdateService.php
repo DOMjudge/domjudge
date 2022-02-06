@@ -12,15 +12,8 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class AssetUpdateService
 {
-    /**
-     * @var DOMJudgeService
-     */
-    protected $dj;
-
-    /**
-     * @var EventLogService
-     */
-    protected $eventLog;
+    protected DOMJudgeService $dj;
+    protected EventLogService $eventLog;
 
     public function __construct(DOMJudgeService $dj, EventLogService $eventLog)
     {

@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class ProblemControllerAdminTest extends ProblemControllerTest
 {
-    protected $apiUser = 'admin';
+    protected ?string $apiUser = 'admin';
 
     protected function setUp(): void
     {
@@ -21,7 +21,7 @@ class ProblemControllerAdminTest extends ProblemControllerTest
         parent::setUp();
     }
 
-    public function testAddJson()
+    public function testAddJson(): void
     {
         $json = <<<EOF
 [
@@ -73,19 +73,19 @@ EOF;
         $expectedProblems = ['A' => 'ascendingphoto', 'B' => 'boss', 'C' => 'connect'];
 
         // First clear the entity manager to have all data.
-        static::$container->get(EntityManagerInterface::class)->clear();
+        static::getContainer()->get(EntityManagerInterface::class)->clear();
 
         $addedProblems = [];
 
         // Now load the problems with the given IDs.
-        $config = static::$container->get(ConfigurationService::class);
+        $config = static::getContainer()->get(ConfigurationService::class);
         $dataSource = $config->get('data_source');
         foreach ($ids as $id) {
             if ($dataSource === DOMJudgeService::DATA_SOURCE_LOCAL) {
                 /** @var Problem $problem */
-                $problem = static::$container->get(EntityManagerInterface::class)->getRepository(Problem::class)->find($id);
+                $problem = static::getContainer()->get(EntityManagerInterface::class)->getRepository(Problem::class)->find($id);
             } else {
-                $problem = static::$container->get(EntityManagerInterface::class)->getRepository(Problem::class)->findOneBy(['externalid' => $id]);
+                $problem = static::getContainer()->get(EntityManagerInterface::class)->getRepository(Problem::class)->findOneBy(['externalid' => $id]);
             }
 
             $addedProblems[$problem->getContestProblems()->first()->getShortName()] = $problem->getExternalid();

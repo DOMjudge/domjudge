@@ -4,7 +4,6 @@ namespace App\Controller\API;
 
 use App\Entity\Contest;
 use App\Entity\Team;
-use App\Entity\TeamAffiliation;
 use App\Service\AssetUpdateService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
@@ -18,7 +17,6 @@ use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Annotations as OA;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -37,10 +35,7 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
  */
 class TeamController extends AbstractRestController
 {
-    /**
-     * @var AssetUpdateService
-     */
-    protected $assetUpdater;
+    protected AssetUpdateService $assetUpdater;
 
     public function __construct(
         EntityManagerInterface $entityManager,
@@ -114,7 +109,7 @@ class TeamController extends AbstractRestController
      * @OA\Parameter(ref="#/components/parameters/id")
      * @OA\Parameter(ref="#/components/parameters/strict")
      */
-    public function singleAction(Request $request, string $id) : Response
+    public function singleAction(Request $request, string $id): Response
     {
         return parent::performSingleAction($request, $id);
     }
@@ -312,9 +307,6 @@ class TeamController extends AbstractRestController
         return $queryBuilder;
     }
 
-    /**
-     * @throws Exception
-     */
     protected function getIdField(): string
     {
         return sprintf('t.%s', $this->eventLogService->externalIdFieldForEntity(Team::class) ?? 'teamid');

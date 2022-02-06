@@ -17,7 +17,7 @@ class BodyTooBigListener implements EventSubscriberInterface
         return [ControllerEvent::class => 'onKernelController'];
     }
 
-    public function onKernelController(ControllerEvent $event)
+    public function onKernelController(ControllerEvent $event): void
     {
         // When we have a POST, PUT or PATCH but no request or file attributes
         // but we do have a non-zero content-length header, the caller

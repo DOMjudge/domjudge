@@ -21,19 +21,17 @@ use JMS\Serializer\Annotation as Serializer;
 class Rejudging
 {
     /**
-     * @var int
-     *
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer", name="rejudgingid", length=4,
      *     options={"comment"="Rejudging ID","unsigned"=true},
      *     nullable=false)
      */
-    private $rejudgingid;
+    private int $rejudgingid;
 
 
     /**
-     * @var double
+     * @var double|string
      * @ORM\Column(type="decimal", precision=32, scale=9, name="starttime",
      *     options={"comment"="Time rejudging started", "unsigned"=true},
      *     nullable=false)
@@ -41,7 +39,7 @@ class Rejudging
     private $starttime;
 
     /**
-     * @var double
+     * @var double|string|null
      * @ORM\Column(type="decimal", precision=32, scale=9, name="endtime",
      *     options={"comment"="Time rejudging ended, null = still busy",
      *              "unsigned"=true},
@@ -50,72 +48,67 @@ class Rejudging
     private $endtime;
 
     /**
-     * @var string
      * @ORM\Column(type="string", name="reason", length=255,
      *     options={"comment"="Reason to start this rejudge"}, nullable=false)
      */
-    private $reason;
+    private string $reason;
 
     /**
-     * @var boolean
      * @ORM\Column(type="boolean", name="valid",
      *     options={"comment"="Rejudging is marked as invalid if canceled",
      *              "default"="1"},
      *     nullable=false)
      */
-    private $valid = true;
+    private bool $valid = true;
 
     /**
      * Who started the rejudging.
      * @ORM\ManyToOne(targetEntity="User")
      * @ORM\JoinColumn(name="userid_start", referencedColumnName="userid", onDelete="SET NULL")
      */
-    private $start_user;
+    private ?User $start_user;
 
     /**
      * Who finished the rejudging.
      * @ORM\ManyToOne(targetEntity="User")
      * @ORM\JoinColumn(name="userid_finish", referencedColumnName="userid", onDelete="SET NULL")
      */
-    private $finish_user;
+    private ?User $finish_user;
 
     /**
      * One rejudging has many judgings.
      * @ORM\OneToMany(targetEntity="Judging", mappedBy="rejudging")
      */
-    private $judgings;
+    private Collection $judgings;
 
     /**
      * One rejudging has many submissions.
      * @ORM\OneToMany(targetEntity="App\Entity\Submission", mappedBy="rejudging")
      */
-    private $submissions;
+    private Collection $submissions;
 
     /**
-     * @var boolean
      * @ORM\Column(type="boolean", name="auto_apply",
      *     options={"comment"="If set, judgings are accepted automatically.",
      *              "default"="0"},
      *     nullable=false)
      */
-    private $autoApply = true;
+    private bool $autoApply = true;
 
     /**
-     * @var int
-     *
      * @ORM\Column(type="integer", name="`repeat`",
      *     options={"comment"="Number of times this rejudging will be repeated.",
      *              "unsigned"=true},
      *     nullable=true)
      */
-    private $repeat;
+    private ?int $repeat;
 
     /**
      * @ORM\ManyToOne(targetEntity="Rejudging")
      * @ORM\JoinColumn(name="repeat_rejudgingid", referencedColumnName="rejudgingid", onDelete="SET NULL")
      * @Serializer\Exclude()
      */
-    private $repeatedRejudging;
+    private ?Rejudging $repeatedRejudging;
 
     public function __construct()
     {

@@ -18,20 +18,9 @@ use JMS\Serializer\Metadata\StaticPropertyMetadata;
  */
 class SubmissionVisitor implements EventSubscriberInterface
 {
-    /**
-     * @var DOMJudgeService
-     */
-    protected $dj;
-
-    /**
-     * @var EventLogService
-     */
-    protected $eventLogService;
-
-    /**
-     * @var EntityManagerInterface
-     */
-    protected $em;
+    protected DOMJudgeService $dj;
+    protected EventLogService $eventLogService;
+    protected EntityManagerInterface $em;
 
     public function __construct(
         DOMJudgeService $dj,
@@ -55,7 +44,7 @@ class SubmissionVisitor implements EventSubscriberInterface
         ];
     }
 
-    public function onPostSerialize(ObjectEvent $event)
+    public function onPostSerialize(ObjectEvent $event): void
     {
         if ($this->dj->checkrole('jury')) {
             /** @var JsonSerializationVisitor $visitor */

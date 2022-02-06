@@ -51,7 +51,7 @@ class EventLogService implements ContainerAwareInterface
     // TODO: add a way to specify when to use external ID using some (DB)
     // config instead of hardcoding it here. Also relates to
     // AbstractRestController::getIdField
-    public $apiEndpoints = [
+    public array $apiEndpoints = [
         'contests' => [
             self::KEY_TYPE => self::TYPE_CONFIGURATION,
             self::KEY_URL => '',
@@ -128,30 +128,15 @@ class EventLogService implements ContainerAwareInterface
     ];
 
     // Entities to endpoints. Will be filled automatically except for special cases
-    protected $entityToEndpoint = [
+    protected array $entityToEndpoint = [
         // Special case for contest problems, as they should map to problems
         ContestProblem::class => 'problems',
     ];
 
-    /**
-     * @var DOMJudgeService
-     */
-    protected $dj;
-
-    /**
-     * @var ConfigurationService
-     */
-    protected $config;
-
-    /**
-     * @var EntityManagerInterface
-     */
-    protected $em;
-
-    /**
-     * @var LoggerInterface
-     */
-    protected $logger;
+    protected DOMJudgeService $dj;
+    protected ConfigurationService $config;
+    protected EntityManagerInterface $em;
+    protected LoggerInterface $logger;
 
     public function __construct(
         DOMJudgeService $dj,
@@ -217,8 +202,8 @@ class EventLogService implements ContainerAwareInterface
         string $type,
         $dataIds,
         string $action,
-        $contestId = null,
-        $json = null,
+        ?int $contestId = null,
+        ?string $json = null,
         $ids = null,
         bool $checkEvents = true
     ) {
@@ -332,9 +317,7 @@ class EventLogService implements ContainerAwareInterface
                         ->setParameter(':problem', $dataId)
                         ->getQuery()
                         ->getScalarResult();
-                    $contestIdsForId = array_map(function (array $data) {
-                        return $data['contestId'];
-                    }, $contestIdData);
+                    $contestIdsForId = array_map(fn(array $data) => $data['contestId'], $contestIdData);
                     $expectedEvents  += count($contestIdsForId);
                     $contestIds      = array_unique(array_merge($contestIds, $contestIdsForId));
                 }
@@ -342,9 +325,7 @@ class EventLogService implements ContainerAwareInterface
                 $expectedEvents = 0;
                 foreach ($dataIds as $dataId) {
                     $contests        = $this->dj->getCurrentContests($dataId);
-                    $contestIdsForId = array_map(function (Contest $contest) {
-                        return $contest->getCid();
-                    }, $contests);
+                    $contestIdsForId = array_map(fn(Contest $contest) => $contest->getCid(), $contests);
                     $expectedEvents  += count($contestIdsForId);
                     $contestIds      = array_unique(array_merge($contestIds, $contestIdsForId));
                 }
@@ -358,9 +339,7 @@ class EventLogService implements ContainerAwareInterface
                 $contestId = $contestIds[0];
             } else {
                 $contests       = $this->dj->getCurrentContests();
-                $contestIds     = array_map(function (Contest $contest) {
-                    return $contest->getCid();
-                }, $contests);
+                $contestIds     = array_map(fn(Contest $contest) => $contest->getCid(), $contests);
                 $expectedEvents = count($dataIds) * count($contestIds);
             }
         }
@@ -372,9 +351,7 @@ class EventLogService implements ContainerAwareInterface
 
         // Generate JSON content if not set, for deletes this is only the ID.
         if ($action === self::ACTION_DELETE) {
-            $json = array_values(array_map(function ($id) {
-                return ['id' => (string)$id];
-            }, $ids));
+            $json = array_values(array_map(fn($id) => ['id' => (string)$id], $ids));
         } elseif ($json === null) {
             $url = $endpoint[self::KEY_URL];
 
@@ -483,10 +460,8 @@ class EventLogService implements ContainerAwareInterface
     /**
      * Add all state events for the given contest that are not added yet but
      * should have happened already
-     * @param Contest $contest
-     * @throws Exception
      */
-    public function addMissingStateEvents(Contest $contest)
+    public function addMissingStateEvents(Contest $contest): void
     {
         // Make sure we get a fresh contest
         $this->em->refresh($contest);
@@ -514,9 +489,7 @@ class EventLogService implements ContainerAwareInterface
 
         // First, remove all times that are still null or will happen in the future,
         // as we do not need to check them
-        $states = array_filter($states, function ($time) {
-            return $time !== null && Utils::now() >= $time;
-        });
+        $states = array_filter($states, fn($time) => $time !== null && Utils::now() >= $time);
 
         // Now sort the remaining times in increasing order,
         // as that is the order in which we want to add the events
@@ -594,20 +567,14 @@ class EventLogService implements ContainerAwareInterface
      * This method will make sure that the events are all only inserted once,
      * even if called simultaneously from different processes.
      *
-     * @param Contest $contest
-     * @param string  $endpointType
-     * @param array   $endpointIds
-     * @param array   $contents
-     *
      * @throws NonUniqueResultException
-     * @throws Exception
      */
     protected function insertEvents(
         Contest $contest,
         string $endpointType,
         array $endpointIds,
-        $contents
-    ) {
+        array $contents
+    ): void {
         if (empty($endpointIds)) {
             return;
         }
@@ -637,7 +604,7 @@ class EventLogService implements ContainerAwareInterface
             $endpointType,
             $firstEndpointId
         );
-        if ($this->em->getConnection()->fetchColumn('SELECT GET_LOCK(:lock, 1)',
+        if ($this->em->getConnection()->fetchOne('SELECT GET_LOCK(:lock, 1)',
                 [':lock' => $lockString]) != 1) {
             throw new Exception('EventLogService::insertEvent failed to obtain lock: ' . $lockString);
         }
@@ -673,7 +640,7 @@ class EventLogService implements ContainerAwareInterface
         $this->em->flush();
 
         // Make sure to release the lock again
-        if ($this->em->getConnection()->fetchColumn('SELECT RELEASE_LOCK(:lock)',
+        if ($this->em->getConnection()->fetchOne('SELECT RELEASE_LOCK(:lock)',
                 [':lock' => $lockString]) != 1) {
             throw new Exception('EventLogService::insertEvent failed to release lock');
         }
@@ -685,19 +652,14 @@ class EventLogService implements ContainerAwareInterface
      * This method will make sure that the event is only inserted once,
      * even if called simultaneously from different processes.
      *
-     * @param Contest $contest
-     * @param string  $endpointType
-     * @param string  $endpointId
-     * @param mixed   $content
      * @throws NonUniqueResultException
-     * @throws Exception
      */
     protected function insertEvent(
         Contest $contest,
         string $endpointType,
         string $endpointId,
-        $content
-    ) {
+        array $content
+    ): void {
         $this->insertEvents($contest, $endpointType, [$endpointId], [$content]);
     }
 
@@ -706,11 +668,9 @@ class EventLogService implements ContainerAwareInterface
      * are marked as 'Configuration' on
      * https://ccs-specs.icpc.io/2021-11/contest_api#types-of-endpoints
      *
-     * @param Contest $contest
      * @throws NonUniqueResultException
-     * @throws Exception
      */
-    public function initStaticEvents(Contest $contest)
+    public function initStaticEvents(Contest $contest): void
     {
         // Loop over all configuration endpoints with an URL and check if we have all data
         foreach ($this->apiEndpoints as $endpoint => $endpointData) {
@@ -784,7 +744,6 @@ class EventLogService implements ContainerAwareInterface
     /**
      * Check if all events for dependent objects are present for the given type and data
      * @return bool True if and only if all references are present
-     * @throws Exception
      */
     protected function hasAllDependentObjectEvents(Contest $contest, string $type, array $data): bool
     {
@@ -890,7 +849,6 @@ class EventLogService implements ContainerAwareInterface
 
     /**
      * Convert the given internal ID's into external ID's usable by the API
-     * @throws Exception
      */
     protected function getExternalIds(string $type, array $ids): array
     {
@@ -917,9 +875,7 @@ class EventLogService implements ContainerAwareInterface
         if (isset($externalIdAlwaysAllowed[$entity])) {
             $fullField = $externalIdAlwaysAllowed[$entity];
             [$table, $field] = explode('.', $fullField);
-            return array_map(function (array $item) use ($field) {
-                return $item['externalid'] ?? $item[$field];
-            }, $this->em->createQueryBuilder()
+            return array_map(fn(array $item) => $item['externalid'] ?? $item[$field], $this->em->createQueryBuilder()
                 ->from($entity, $table)
                 ->select($fullField, sprintf('%s.externalid', $table))
                 ->andWhere(sprintf('%s IN (:ids)', $fullField))
@@ -940,22 +896,22 @@ class EventLogService implements ContainerAwareInterface
                                                       $type));
         }
 
-        return array_map(function (array $item) use ($endpointData) {
-            return $item[$endpointData[self::KEY_EXTERNAL_ID]];
-        }, $this->em->createQueryBuilder()
+        return array_map(
+            fn(array $item) => $item[$endpointData[self::KEY_EXTERNAL_ID]],
+            $this->em->createQueryBuilder()
                ->from($entity, 'e')
                ->select(sprintf('e.%s', $endpointData[self::KEY_EXTERNAL_ID]))
                ->andWhere(sprintf('e.%s IN (:ids)', $primaryKeyField))
                ->setParameter(':ids', $ids)
                ->getQuery()
-               ->getScalarResult());
+               ->getScalarResult()
+        );
     }
 
     /**
      * Get the external ID field for a given entity type. Will return null if
      * no external ID field should be used
      * @param object|string $entity
-     * @throws Exception
      */
     public function externalIdFieldForEntity($entity): ?string
     {
@@ -1010,7 +966,6 @@ class EventLogService implements ContainerAwareInterface
     /**
      * Get the API ID field for a given entity type.
      * @param object|string $entity
-     * @throws Exception
      */
     public function apiIdFieldForEntity($entity): string
     {

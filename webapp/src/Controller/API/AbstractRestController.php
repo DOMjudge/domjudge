@@ -3,7 +3,6 @@
 namespace App\Controller\API;
 
 use App\Entity\Contest;
-use App\Entity\Submission;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
@@ -29,29 +28,11 @@ use Symfony\Component\Validator\ConstraintViolationListInterface;
  */
 abstract class AbstractRestController extends AbstractFOSRestController
 {
-    /**
-     * @var EntityManagerInterface
-     */
-    protected $em;
+    protected EntityManagerInterface $em;
+    protected DOMJudgeService $dj;
+    protected ConfigurationService $config;
+    protected EventLogService $eventLogService;
 
-    /**
-     * @var DOMJudgeService
-     */
-    protected $dj;
-
-    /**
-     * @var ConfigurationService
-     */
-    protected $config;
-
-    /**
-     * @var EventLogService
-     */
-    protected $eventLogService;
-
-    /**
-     * AbstractRestController constructor.
-     */
     public function __construct(
         EntityManagerInterface $entityManager,
         DOMJudgeService $dj,
@@ -258,10 +239,9 @@ abstract class AbstractRestController extends AbstractFOSRestController
     abstract protected function getIdField(): string;
 
     /**
-     * @return array|int|mixed|string
      * @throws NonUniqueResultException
      */
-    protected function listActionHelper(Request $request)
+    protected function listActionHelper(Request $request): array
     {
         // Make sure we clear the entity manager class, for when this method is called multiple times by internal requests.
         $this->em->clear();
@@ -335,8 +315,10 @@ abstract class AbstractRestController extends AbstractFOSRestController
         return $response;
     }
 
-    public function responseForErrors(ConstraintViolationListInterface $violations, bool $singleProperty = false): ?JsonResponse
-    {
+    public function responseForErrors(
+        ConstraintViolationListInterface $violations,
+        bool $singleProperty = false
+    ): ?JsonResponse {
         if ($violations->count()) {
             $errors = [];
             /** @var ConstraintViolationInterface $violation */

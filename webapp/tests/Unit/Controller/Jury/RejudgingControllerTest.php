@@ -9,7 +9,7 @@ use Generator;
 
 class RejudgingControllerTest extends BaseTest
 {
-    protected $roles = ['admin'];
+    protected array $roles = ['admin'];
 
     /**
      * @dataProvider provideRoles
@@ -43,7 +43,7 @@ class RejudgingControllerTest extends BaseTest
         }
     }
 
-    public function testCorrectSorting() : void
+    public function testCorrectSorting(): void
     {
         $this->roles = ['admin'];
         $this->logOut();
@@ -77,10 +77,10 @@ class RejudgingControllerTest extends BaseTest
      **/
     public function testRejudgingCurrentContest(
         ?string $contestName,
-        array $shown, array $hidden,
+        array $shown,
+        array $hidden,
         int $todo
-    ): void
-    {
+    ): void {
         $this->setRejudgingState($contestName);
         $this->verifyPageResponse('GET', '/jury/rejudgings', 200);
         foreach($shown as $rejudging) {
@@ -96,10 +96,10 @@ class RejudgingControllerTest extends BaseTest
      **/
     public function testRejudgingCounterMenu(
         ?string $contestName,
-        array $shown, array $hidden,
+        array $shown,
+        array $hidden,
         int $todo
-    ): void
-    {
+    ): void {
         $DOMselector = '#menu_rejudgings';
         $this->setRejudgingState($contestName);
         $this->verifyPageResponse('GET', '/jury', 200);

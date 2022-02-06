@@ -8,10 +8,7 @@ use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 
 class TimeStringValidator extends ConstraintValidator
 {
-    /**
-     * @inheritdoc
-     */
-    public function validate($value, Constraint $constraint)
+    public function validate($value, Constraint $constraint): void
     {
         if (!$constraint instanceof TimeString) {
             throw new UnexpectedTypeException($constraint, TimeString::class);

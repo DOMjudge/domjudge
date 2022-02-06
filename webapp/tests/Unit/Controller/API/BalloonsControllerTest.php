@@ -9,14 +9,14 @@ class BalloonsControllerTest extends BaseTest
     /**
      * In the default test setup there are no judgings yet, so no balloons,
      */
-    public function testBalloonsNoJudgings()
+    public function testBalloonsNoJudgings(): void
     {
         $contestId = $this->getDemoContestId();
         $response = $this->verifyApiJsonResponse('GET', "/contests/$contestId/balloons", 200, 'admin');
         static::assertEquals([], $response);
     }
 
-    public function testBalloonsNoJudgingsToDo()
+    public function testBalloonsNoJudgingsToDo(): void
     {
         $contestId = $this->getDemoContestId();
         $response = $this->verifyApiJsonResponse('GET', "/contests/$contestId/balloons?todo=1", 200, 'admin');
@@ -26,7 +26,7 @@ class BalloonsControllerTest extends BaseTest
     /**
      * @dataProvider provideUnprivilegedUsers
      */
-    public function testBalloonsAccessForPrivilegedUsersOnly(?string $user, int $result)
+    public function testBalloonsAccessForPrivilegedUsersOnly(?string $user, int $result): void
     {
         $contestId = $this->getDemoContestId();
         $this->verifyApiJsonResponse('GET', "/contests/$contestId/balloons", $result, $user);

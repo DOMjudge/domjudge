@@ -4,14 +4,13 @@ namespace App\Controller\API;
 
 use App\Entity\Contest;
 use App\Service\BalloonService;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\QueryBuilder;
 use Exception;
 use FOS\RestBundle\Controller\Annotations as Rest;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use OpenApi\Annotations as OA;
-use Doctrine\ORM\QueryBuilder;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Intl\Exception\NotImplementedException;
 
 /**
  * @Rest\Route("/contests/{cid}/balloons")
@@ -37,7 +36,8 @@ class BalloonController extends AbstractRestController
      *     description="Only show balloons not handed out yet.",
      *     @OA\Schema(type="boolean")
      * )
-     * @throws Exception
+     *
+     * @throws NonUniqueResultException
      */
     public function listAction(Request $request, BalloonService $balloonService): array
     {
@@ -55,20 +55,19 @@ class BalloonController extends AbstractRestController
      * )
      * @OA\Parameter(ref="#/components/parameters/balloonId")
      * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_BALLOON')")
-     * @throws Exception
      */
-    public function markDoneAction(Request $request, int $balloonId, BalloonService $balloonService) : void
+    public function markDoneAction(int $balloonId, BalloonService $balloonService): void
     {
         $balloonService->setDone($balloonId);
     }
 
     protected function getQueryBuilder(Request $request): QueryBuilder
     {
-        throw new NotImplementedException();
+        throw new Exception('Not implemented');
     }
 
     protected function getIdField(): string
     {
-        throw new NotImplementedException();
+        throw new Exception('Not implemented');
     }
 }

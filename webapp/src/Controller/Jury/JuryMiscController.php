@@ -8,7 +8,6 @@ use App\Entity\Judging;
 use App\Entity\Language;
 use App\Entity\Problem;
 use App\Entity\Submission;
-use App\Entity\SubmissionFile;
 use App\Entity\Team;
 use App\Entity\TeamAffiliation;
 use App\Service\DOMJudgeService;
@@ -38,15 +37,8 @@ use Symfony\Component\Routing\RouterInterface;
  */
 class JuryMiscController extends BaseController
 {
-    /**
-     * @var EntityManagerInterface
-     */
-    protected $em;
-
-    /**
-     * @var DOMJudgeService
-     */
-    protected $dj;
+    protected EntityManagerInterface $em;
+    protected DOMJudgeService $dj;
 
     /**
      * GeneralInfoController constructor.
@@ -61,7 +53,7 @@ class JuryMiscController extends BaseController
      * @Route("", name="jury_index")
      * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_BALLOON') or is_granted('ROLE_CLARIFICATION_RW')")
      */
-    public function indexAction(Request $request): Response
+    public function indexAction(): Response
     {
         return $this->render('jury/index.html.twig');
     }
@@ -70,7 +62,7 @@ class JuryMiscController extends BaseController
      * @Route("/updates", methods={"GET"}, name="jury_ajax_updates")
      * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_BALLOON')")
      */
-    public function updatesAction(Request $request): JsonResponse
+    public function updatesAction(): JsonResponse
     {
         return $this->json($this->dj->getUpdates());
     }
@@ -110,10 +102,10 @@ class JuryMiscController extends BaseController
                 ->getQuery()->setParameter(1, '%' . $q . '%')
                 ->getResult();
 
-            $results = array_map(function (array $location) {
-                return ['id'   => $location['room'],
-                        'text' => $location['room']];
-            }, $locations);
+            $results = array_map(fn(array $location) => [
+                'id' => $location['room'],
+                'text' => $location['room']
+            ], $locations);
         } elseif (!$this->isGranted('ROLE_JURY')) {
             throw new AccessDeniedHttpException('Permission denied');
         } elseif ($datatype === 'problems') {
@@ -204,9 +196,8 @@ class JuryMiscController extends BaseController
     /**
      * @Route("/refresh-cache", name="jury_refresh_cache")
      * @IsGranted("ROLE_ADMIN")
-     * @return Response|StreamedResponse
      */
-    public function refreshCacheAction(Request $request, ScoreboardService $scoreboardService)
+    public function refreshCacheAction(Request $request, ScoreboardService $scoreboardService): Response
     {
         // Note: we use a XMLHttpRequest here as Symfony does not support
         // streaming Twig output.
@@ -252,9 +243,8 @@ class JuryMiscController extends BaseController
     /**
      * @Route("/judging-verifier", name="jury_judging_verifier")
      * @IsGranted("ROLE_JURY")
-     * @return Response|StreamedResponse
      */
-    public function judgingVerifierAction(Request $request)
+    public function judgingVerifierAction(Request $request): Response
     {
         /** @var Submission[] $submissions */
         $submissions = [];

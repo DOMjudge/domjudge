@@ -10,40 +10,28 @@ use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 
 abstract class BaseTest extends BaseBaseTest
 {
-    protected static $rootEndpoints = ['contests','judgehosts','users'];
+    protected static array $rootEndpoints = ['contests', 'judgehosts', 'users'];
 
     /** @var KernelBrowser */
-    protected $client;
+    protected KernelBrowser $client;
 
-    /**
-     * The API endpoint to query for this test.
-     *
-     * @var string|null
-     */
-    protected $apiEndpoint = null;
+    /** The API endpoint to query for this test */
+    protected ?string $apiEndpoint = null;
 
     /**
      * The username of the user to use for the tests.
      * Currently, only admin and demo are supported.
      * Leave set to null to use no user.
-     *
-     * @var string|null
      */
-    protected $apiUser = null;
+    protected ?string $apiUser = null;
 
     /**
      * Fill this array with expected objects the API should return, indexed on ID.
-     *
-     * @var array
      */
-    protected $expectedObjects = [];
+    protected array $expectedObjects = [];
 
-    /**
-     * If the class to check uses external IDs in non-local mode, set the class name.
-     *
-     * @var string|null
-     */
-    protected $objectClassForExternalId = null;
+    /** If the class to check uses external IDs in non-local mode, set the class name. */
+    protected ?string $objectClassForExternalId = null;
 
     /**
      * When using a non-local data source this is used to look up external IDs.
@@ -51,26 +39,22 @@ abstract class BaseTest extends BaseBaseTest
      *
      * @var string[]
      */
-    protected $entityReferences = [];
+    protected array $entityReferences = [];
 
     /**
      * Fill this array with IDs of object that should not be present.
      *
      * @var string[]
      */
-    protected $expectedAbsent = [];
-
-    /**
-     * @var Contest
-     */
-    protected $demoContest;
+    protected array $expectedAbsent = [];
+    protected Contest $demoContest;
 
     protected function setUp(): void
     {
         parent::setUp();
 
         // Load the contest used in tests.
-        $this->demoContest = static::$container->get(EntityManagerInterface::class)
+        $this->demoContest = static::getContainer()->get(EntityManagerInterface::class)
             ->getRepository(Contest::class)
             ->findOneBy(['shortname' => 'demo']);
     }
@@ -101,7 +85,7 @@ abstract class BaseTest extends BaseBaseTest
         if ($user === 'admin') {
             $adminPasswordFile = sprintf(
                 '%s/%s',
-                static::$container->getParameter('domjudge.etcdir'),
+                static::getContainer()->getParameter('domjudge.etcdir'),
                 'initial_admin_password.secret'
             );
             $server['PHP_AUTH_USER'] = 'admin';
@@ -158,7 +142,7 @@ abstract class BaseTest extends BaseBaseTest
     /**
      * Test that the list action returns the expected objects.
      */
-    public function testList()
+    public function testList(): void
     {
         if (($apiEndpoint = $this->apiEndpoint) === null) {
             static::markTestSkipped('No endpoint defined.');
@@ -208,7 +192,7 @@ abstract class BaseTest extends BaseBaseTest
     /**
      * Test that the list action returns the expected objects if IDs are passed.
      */
-    public function testListWithIds()
+    public function testListWithIds(): void
     {
         if (($apiEndpoint = $this->apiEndpoint) === null) {
             static::markTestSkipped('No endpoint defined.');
@@ -244,7 +228,7 @@ abstract class BaseTest extends BaseBaseTest
     /**
      * Test that the list action returns the correct error when the contest is not found.
      */
-    public function testListContestNotFound()
+    public function testListContestNotFound(): void
     {
         if (($apiEndpoint = $this->apiEndpoint) === null) {
             static::markTestSkipped('No endpoint defined.');
@@ -263,7 +247,7 @@ abstract class BaseTest extends BaseBaseTest
     /**
      * Test that the list method returns the correct error when the IDs parameter is not an array.
      */
-    public function testListWithIdsNotArray()
+    public function testListWithIdsNotArray(): void
     {
         if (($apiEndpoint = $this->apiEndpoint) === null) {
             static::markTestSkipped('No endpoint defined.');
@@ -276,7 +260,7 @@ abstract class BaseTest extends BaseBaseTest
     /**
      * Test that the list method returns the correct error when passing IDs that don't exist.
      */
-    public function testListWithAbsentIds()
+    public function testListWithAbsentIds(): void
     {
         if (($apiEndpoint = $this->apiEndpoint) === null) {
             static::markTestSkipped('No endpoint defined.');
@@ -296,7 +280,7 @@ abstract class BaseTest extends BaseBaseTest
      *
      * @dataProvider provideSingle
      */
-    public function testSingle($id, array $expectedProperties)
+    public function testSingle($id, array $expectedProperties): void
     {
         foreach ($this->entityReferences as $field => $class) {
             $expectedProperties[$field] = $this->resolveEntityId($class, $expectedProperties[$field]);
@@ -330,7 +314,7 @@ abstract class BaseTest extends BaseBaseTest
     /**
      * Test that the single action returns the correct error when the contest is not found.
      */
-    public function testSingleContestNotFound()
+    public function testSingleContestNotFound(): void
     {
         if (($apiEndpoint = $this->apiEndpoint) === null) {
             static::markTestSkipped('No endpoint defined.');
@@ -352,7 +336,7 @@ abstract class BaseTest extends BaseBaseTest
      *
      * @dataProvider provideSingleNotFound
      */
-    public function testSingleNotFound(string $id)
+    public function testSingleNotFound(string $id): void
     {
         $id = $this->resolveReference($id);
         if (($apiEndpoint = $this->apiEndpoint) === null) {

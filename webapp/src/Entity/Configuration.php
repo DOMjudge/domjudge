@@ -14,23 +14,20 @@ use Doctrine\ORM\Mapping as ORM;
 class Configuration
 {
     /**
-     * @var int
-     *
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer", name="configid", length=4,
      *     options={"comment"="Configuration ID","unsigned"=true}, nullable=false)
      */
-    private $configid;
+    private int $configid;
 
     /**
-     * @var string
      * @ORM\Column(type="string", name="name", length=32, options={"comment"="Name of the configuration variable"}, nullable=false)
      */
-    private $name;
+    private string $name;
 
     /**
-     * @var string
+     * @var mixed
      * @ORM\Column(type="json", length=4294967295, name="value",
      *     options={"comment"="Content of the configuration variable (JSON encoded)"},
      *     nullable=false)

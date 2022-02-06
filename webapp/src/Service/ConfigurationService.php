@@ -8,13 +8,12 @@ use App\Entity\Executable;
 use App\Entity\Judging;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
-use Exception;
+use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Config\ConfigCacheFactoryInterface;
 use Symfony\Component\Config\ConfigCacheInterface;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Config\Resource\FileResource;
-use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Class ConfigurationService
@@ -23,40 +22,13 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class ConfigurationService
 {
-    /**
-     * @var EntityManagerInterface
-     */
-    protected $em;
-
-    /**
-     * @var LoggerInterface
-     */
-    protected $logger;
-
-    /**
-     * @var ConfigCacheFactoryInterface
-     */
-    protected $configCache;
-
-    /**
-     * @var bool
-     */
-    protected $debug;
-
-    /**
-     * @var string
-     */
-    protected $cacheDir;
-
-    /**
-     * @var string
-     */
-    protected $etcDir;
-
-    /**
-     * @var array
-     */
-    protected $dbConfigCache = null;
+    protected EntityManagerInterface $em;
+    protected LoggerInterface $logger;
+    protected ConfigCacheFactoryInterface $configCache;
+    protected bool $debug;
+    protected string $cacheDir;
+    protected string $etcDir;
+    protected ?array $dbConfigCache = null;
 
     /**
      * ConfigurationService constructor.
@@ -92,15 +64,15 @@ class ConfigurationService
      *                             public
      *
      * @return mixed The configuration value
-     * @throws Exception If the config can't be found and not default is
-     *                   supplied
+     * @throws InvalidArgumentException If the config can't be found and not default is
+     *                                  supplied
      */
     public function get(string $name, bool $onlyIfPublic = false)
     {
         $spec = $this->getConfigSpecification()[$name] ?? null;
 
         if (!isset($spec) || ($onlyIfPublic && !$spec['public'])) {
-            throw new Exception("Configuration variable '$name' not found.");
+            throw new InvalidArgumentException("Configuration variable '$name' not found.");
         }
 
         return $this->getDbValues()[$name] ?? $spec['default_value'];
@@ -109,10 +81,7 @@ class ConfigurationService
     /**
      * Get all the configuration values, indexed by name
      *
-     * @param bool $onlyIfPublic
-     *
-     * @return array
-     * @throws Exception
+     * @throws InvalidArgumentException
      */
     public function all(bool $onlyIfPublic = false): array
     {
@@ -142,8 +111,6 @@ class ConfigurationService
 
     /**
      * Get all configuration specifications
-     *
-     * @throws Exception
      */
     public function getConfigSpecification(): array
     {
@@ -181,16 +148,11 @@ EOF;
                 // @codeCoverageIgnoreEnd
             });
 
-        $specification = require $cacheFile;
-        return $specification;
+        return require $cacheFile;
     }
 
     /**
      * Save the changes from the given request
-     *
-     * @param array $dataToSet
-     * @param EventLogService $eventLog
-     * @param DOMJudgeService $dj
      *
      * @throws NonUniqueResultException
      */
@@ -307,7 +269,7 @@ EOF;
     /**
      * @throws NonUniqueResultException
      */
-    private function logUnverifiedJudgings(EventLogService $eventLog)
+    private function logUnverifiedJudgings(EventLogService $eventLog): void
     {
         /** @var Judging[] $judgings */
         $judgings = $this->em->getRepository(Judging::class)->findBy(
@@ -369,10 +331,6 @@ EOF;
      *
      * This method is used to add predefined options that need to be loaded
      * from the database to certain items.
-     *
-     * @param array $item
-     *
-     * @return array
      */
     public function addOptions(array $item): array
     {

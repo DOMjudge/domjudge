@@ -21,15 +21,8 @@ use Doctrine\ORM\Query\SqlWalker;
  */
 class RightFunction extends FunctionNode
 {
-    /**
-     * @var Node|null
-     */
-    protected $fieldExpression = null;
-
-    /**
-     * @var Node|null
-     */
-    protected $lengthExpression = null;
+    protected ?Node $fieldExpression = null;
+    protected ?Node $lengthExpression = null;
 
     /**
      * @throws ASTException

@@ -5,6 +5,7 @@ namespace App\Form\Type;
 use App\Entity\Executable;
 use App\Entity\Problem;
 use Doctrine\ORM\EntityRepository;
+use Exception;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
@@ -19,12 +20,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class ProblemType extends AbstractExternalIdEntityType
 {
-    /**
-     * @param FormBuilderInterface $builder
-     * @param array                $options
-     * @throws \Exception
-     */
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $this->addExternalIdField($builder, Problem::class);
         $builder->add('name', TextType::class);
@@ -51,13 +47,11 @@ class ProblemType extends AbstractExternalIdEntityType
             'required' => false,
             'placeholder' => '-- default run script --',
             'choice_label' => 'description',
-            'query_builder' => function (EntityRepository $er) {
-                return $er
-                    ->createQueryBuilder('e')
-                    ->where('e.type = :run')
-                    ->setParameter(':run', 'run')
-                    ->orderBy('e.execid');
-            },
+            'query_builder' => fn(EntityRepository $er) => $er
+                ->createQueryBuilder('e')
+                ->where('e.type = :run')
+                ->setParameter(':run', 'run')
+                ->orderBy('e.execid'),
         ]);
         $builder->add('compareExecutable', EntityType::class, [
             'label' => 'Compare script',
@@ -65,13 +59,11 @@ class ProblemType extends AbstractExternalIdEntityType
             'required' => false,
             'placeholder' => '-- default compare script --',
             'choice_label' => 'description',
-            'query_builder' => function (EntityRepository $er) {
-                return $er
-                    ->createQueryBuilder('e')
-                    ->where('e.type = :compare')
-                    ->setParameter(':compare', 'compare')
-                    ->orderBy('e.execid');
-            },
+            'query_builder' => fn(EntityRepository $er) => $er
+                ->createQueryBuilder('e')
+                ->where('e.type = :compare')
+                ->setParameter(':compare', 'compare')
+                ->orderBy('e.execid'),
         ]);
         $builder->add('specialCompareArgs', TextType::class, [
             'label' => 'Compare script arguments',
@@ -95,7 +87,7 @@ class ProblemType extends AbstractExternalIdEntityType
         });
     }
 
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults(['data_class' => Problem::class]);
     }

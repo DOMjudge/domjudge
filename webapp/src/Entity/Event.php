@@ -20,17 +20,15 @@ use Doctrine\ORM\Mapping as ORM;
 class Event
 {
     /**
-     * @var integer
-     *
      * @ORM\Id
      * @ORM\Column(name="eventid", type="integer", nullable=false, length=4,
      *     options={"comment"="Event ID","unsigned"=true})
      * @ORM\GeneratedValue(strategy="IDENTITY")
      */
-    private $eventid;
+    private int $eventid;
 
     /**
-     * @var double
+     * @var double|string
      *
      * @ORM\Column(name="eventtime", type="decimal", precision=32, scale=9,
      *     nullable=false, options={"comment"="When the event occurred","unsigned"=true})
@@ -38,28 +36,22 @@ class Event
     private $eventtime;
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="endpointtype", type="string", length=32, nullable=false,
      *     options={"comment"="API endpoint associated to this entry"})
      */
-    private $endpointtype;
+    private string $endpointtype;
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="endpointid", type="string", length=64, nullable=false,
      *     options={"comment"="API endpoint (external) ID"})
      */
-    private $endpointid;
+    private string $endpointid;
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="action", type="string", length=32, nullable=false,
      *     options={"comment"="Description of action performed"})
      */
-    private $action;
+    private string $action;
 
     /**
      * @var resource
@@ -70,12 +62,10 @@ class Event
     private $content;
 
     /**
-     * @var Contest
-     *
      * @ORM\ManyToOne(targetEntity="Contest", inversedBy="problems")
      * @ORM\JoinColumn(name="cid", referencedColumnName="cid", onDelete="CASCADE")
      */
-    private $contest;
+    private ?Contest $contest;
 
     public function setEventid(int $eventid): Event
     {

@@ -37,17 +37,6 @@ class DOMJudgeIPAuthenticator extends AbstractAuthenticator implements Authentic
     private RequestStack $requestStack;
     private UserProviderInterface $userProvider;
 
-    /**
-     * DOMJudgeIPAuthenticator constructor.
-     *
-     * @param CsrfTokenManagerInterface $csrfTokenManager
-     * @param Security                  $security
-     * @param EntityManagerInterface    $em
-     * @param ConfigurationService      $config
-     * @param RouterInterface           $router
-     * @param RequestStack              $requestStack
-     * @param UserProviderInterface     $userProvider
-     */
     public function __construct(
         CsrfTokenManagerInterface $csrfTokenManager,
         Security $security,
@@ -66,9 +55,6 @@ class DOMJudgeIPAuthenticator extends AbstractAuthenticator implements Authentic
         $this->userProvider     = $userProvider;
     }
 
-    /**
-     * @inheritDoc
-     */
     public function supports(Request $request): bool
     {
         // Make sure ipaddress auth is enabled.
@@ -147,9 +133,6 @@ class DOMJudgeIPAuthenticator extends AbstractAuthenticator implements Authentic
         return new SelfValidatingPassport(new UserBadge($user->getUsername()));
     }
 
-    /**
-     * @inheritDoc
-     */
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, $firewallName): ?Response
     {
         // on success, redirect to the last page or the homepage if it was a user triggered action
@@ -168,18 +151,12 @@ class DOMJudgeIPAuthenticator extends AbstractAuthenticator implements Authentic
         return null;
     }
 
-    /**
-     * @inheritDoc
-     */
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response
     {
         // We never fail the authentication request, something else might handle it
         return null;
     }
 
-    /**
-     * @inheritDoc
-     */
     public function start(Request $request, AuthenticationException $authException = null): Response
     {
         // If this is the guard that fails/is configured to allow access as the entry_point

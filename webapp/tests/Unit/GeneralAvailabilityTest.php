@@ -9,7 +9,7 @@ class GeneralAvailabilityTest extends BaseTest
     /**
      * @dataProvider urlProvider
      */
-    public function testPageIsSuccessful(string $url, int $code) : void
+    public function testPageIsSuccessful(string $url, int $code): void
     {
         if ($url === '/api/contests/2' && !$this->dataSourceIsLocal()) {
             // Use external ID for contest.
@@ -23,7 +23,7 @@ class GeneralAvailabilityTest extends BaseTest
         self::assertEquals($code, $actual, var_export($response, true));
     }
 
-    public function urlProvider() : Generator
+    public function urlProvider(): Generator
     {
         yield ['/public/problems', 200];
         yield ['/public', 200];

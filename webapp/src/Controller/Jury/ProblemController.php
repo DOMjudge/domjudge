@@ -28,7 +28,6 @@ use Doctrine\ORM\Query\Expr\Join;
 use Exception;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -46,40 +45,13 @@ use ZipArchive;
  */
 class ProblemController extends BaseController
 {
-    /**
-     * @var EntityManagerInterface
-     */
-    protected $em;
-
-    /**
-     * @var DOMJudgeService
-     */
-    protected $dj;
-
-    /**
-     * @var ConfigurationService
-     */
-    protected $config;
-
-    /**
-     * @var KernelInterface
-     */
-    protected $kernel;
-
-    /**
-     * @var EventLogService
-     */
-    protected $eventLogService;
-
-    /**
-     * @var SubmissionService
-     */
-    protected $submissionService;
-
-    /**
-     * @var ImportProblemService
-     */
-    protected $importProblemService;
+    protected EntityManagerInterface $em;
+    protected DOMJudgeService $dj;
+    protected ConfigurationService $config;
+    protected KernelInterface $kernel;
+    protected EventLogService $eventLogService;
+    protected SubmissionService $submissionService;
+    protected ImportProblemService $importProblemService;
 
     public function __construct(
         EntityManagerInterface $em,
@@ -101,9 +73,8 @@ class ProblemController extends BaseController
 
     /**
      * @Route("", name="jury_problems")
-     * @throws Exception
      */
-    public function indexAction(Request $request) : Response
+    public function indexAction(): Response
     {
         $problems = $this->em->createQueryBuilder()
             ->select('partial p.{probid,externalid,name,timelimit,memlimit,outputlimit}', 'COUNT(tc.testcaseid) AS testdatacount')
@@ -238,7 +209,7 @@ class ProblemController extends BaseController
      * @IsGranted("ROLE_JURY")
      * @throws NonUniqueResultException
      */
-    public function exportAction(int $problemId) : StreamedResponse
+    public function exportAction(int $problemId): StreamedResponse
     {
         // This might take a while
         ini_set('max_execution_time', '300');
@@ -395,9 +366,8 @@ class ProblemController extends BaseController
      * @Route("/{probId<\d+>}", name="jury_problem")
      * @throws NoResultException
      * @throws NonUniqueResultException
-     * @throws Exception
      */
-    public function viewAction(Request $request, SubmissionService $submissionService, int $probId) : Response
+    public function viewAction(Request $request, SubmissionService $submissionService, int $probId): Response
     {
         /** @var Problem $problem */
         $problem = $this->em->getRepository(Problem::class)->find($probId);
@@ -492,9 +462,8 @@ class ProblemController extends BaseController
 
     /**
      * @Route("/{probId<\d+>}/testcases", name="jury_problem_testcases")
-     * @throws Exception
      */
-    public function testcasesAction(Request $request, int $probId) : Response
+    public function testcasesAction(Request $request, int $probId): Response
     {
         /** @var Problem $problem */
         $problem = $this->em->getRepository(Problem::class)->find($probId);
@@ -514,9 +483,7 @@ class ProblemController extends BaseController
             ->getResult();
 
         /** @var Testcase[] $testcases */
-        $testcases = array_map(function ($data) {
-            return $data[0];
-        }, $testcaseData);
+        $testcases = array_map(fn($data) => $data[0], $testcaseData);
 
         if ($request->isMethod('POST')) {
             $messages      = [];
@@ -735,7 +702,7 @@ class ProblemController extends BaseController
      *     )
      * @IsGranted("ROLE_ADMIN")
      */
-    public function moveTestcaseAction(int $probId, int $rank, string $direction) : Response
+    public function moveTestcaseAction(int $probId, int $rank, string $direction): Response
     {
         /** @var Problem $problem */
         $problem = $this->em->getRepository(Problem::class)->find($probId);
@@ -780,7 +747,7 @@ class ProblemController extends BaseController
 
         if ($current !== null && $other !== null) {
             // (probid, rank) is a unique key, so we must switch via a temporary rank, and use a transaction.
-            $this->em->transactional(function () use ($current, $other, $numTestcases) {
+            $this->em->wrapInTransaction(function () use ($current, $other, $numTestcases) {
                 $otherRank   = $other->getRank();
                 $currentRank = $current->getRank();
                 $other->setRank($numTestcases + 1);
@@ -804,7 +771,7 @@ class ProblemController extends BaseController
      *     )
      * @throws NonUniqueResultException
      */
-    public function fetchTestcaseAction(int $probId, int $rank, string $type) : Response
+    public function fetchTestcaseAction(int $probId, int $rank, string $type): Response
     {
         /** @var Testcase $testcase */
         $testcase = $this->em->createQueryBuilder()
@@ -859,10 +826,8 @@ class ProblemController extends BaseController
     /**
      * @Route("/{probId<\d+>}/edit", name="jury_problem_edit")
      * @IsGranted("ROLE_ADMIN")
-     * @return RedirectResponse|Response
-     * @throws Exception
      */
-    public function editAction(Request $request, int $probId)
+    public function editAction(Request $request, int $probId): Response
     {
         /** @var Problem $problem */
         $problem = $this->em->getRepository(Problem::class)->find($probId);
@@ -936,10 +901,8 @@ class ProblemController extends BaseController
     /**
      * @Route("/{probId<\d+>}/delete", name="jury_problem_delete")
      * @IsGranted("ROLE_ADMIN")
-     * @return RedirectResponse|Response
-     * @throws Exception
      */
-    public function deleteAction(Request $request, int $probId)
+    public function deleteAction(Request $request, int $probId): Response
     {
         /** @var Problem $problem */
         $problem = $this->em->getRepository(Problem::class)->find($probId);
@@ -969,7 +932,6 @@ class ProblemController extends BaseController
     /**
      * @Route("/attachments/{attachmentId<\d+>}/delete", name="jury_attachment_delete")
      * @IsGranted("ROLE_ADMIN")
-     * @throws Exception
      */
     public function deleteAttachmentAction(Request $request, int $attachmentId): Response
     {
@@ -988,7 +950,6 @@ class ProblemController extends BaseController
     /**
      * @Route("/{testcaseId<\d+>}/delete_testcase", name="jury_testcase_delete")
      * @IsGranted("ROLE_ADMIN")
-     * @throws Exception
      */
     public function deleteTestcaseAction(Request $request, int $testcaseId): Response
     {
@@ -1018,9 +979,8 @@ class ProblemController extends BaseController
     /**
      * @Route("/add", name="jury_problem_add")
      * @IsGranted("ROLE_ADMIN")
-     * @throws Exception
      */
-    public function addAction(Request $request) : Response
+    public function addAction(Request $request): Response
     {
         $problem = new Problem();
 

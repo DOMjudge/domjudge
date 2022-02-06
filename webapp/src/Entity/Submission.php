@@ -34,8 +34,6 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 class Submission extends BaseApiEntity implements ExternalRelationshipEntityInterface
 {
     /**
-     * @var int
-     *
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer", length=4, name="submitid",
@@ -44,10 +42,9 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
      * @Serializer\SerializedName("id")
      * @Serializer\Type("string")
      */
-    protected $submitid;
+    protected int $submitid;
 
     /**
-     * @var string
      * @ORM\Column(type="string", name="externalid", length=255,
      *     options={"comment"="Specifies ID of submission if imported from external CCS, e.g. Kattis",
      *              "collation"="utf8mb4_bin"},
@@ -55,10 +52,10 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
      * @Serializer\Groups({"Nonstrict"})
      * @Serializer\SerializedName("external_id")
      */
-    protected $externalid;
+    protected ?string $externalid;
 
     /**
-     * @var double
+     * @var double|string
      * @ORM\Column(type="decimal", precision=32, scale=9, name="submittime", options={"comment"="Time submitted",
      *                             "unsigned"=true}, nullable=false)
      * @Serializer\Exclude()
@@ -66,67 +63,64 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
     private $submittime;
 
     /**
-     * @var boolean
      * @ORM\Column(type="boolean", name="valid",
      *     options={"comment"="If false ignore this submission in all scoreboard calculations",
      *              "default"="1"},
      *     nullable=false)
      * @Serializer\Exclude()
      */
-    private $valid = true;
+    private bool $valid = true;
 
     /**
-     * @var array
      * @ORM\Column(type="json", name="expected_results", length=255,
      *     options={"comment"="JSON encoded list of expected results - used to validate jury submissions"},
      *     nullable=true)
      * @Serializer\Exclude()
      */
-    private $expected_results;
+    private ?array $expected_results;
 
     /**
-     * @var string
      * @ORM\Column(type="string", name="entry_point", length=255,
      *     options={"comment"="Optional entry point. Can be used e.g. for java main class."},
      *     nullable=true)
      * @Serializer\Expose(if="context.getAttribute('domjudge_service').checkrole('jury')")
      */
-    private $entry_point;
+    private ?string $entry_point;
 
     /**
      * @ORM\ManyToOne(targetEntity="Contest", inversedBy="submissions")
      * @ORM\JoinColumn(name="cid", referencedColumnName="cid", onDelete="CASCADE")
      * @Serializer\Exclude()
      */
-    private $contest;
+    private Contest $contest;
 
     /**
      * @ORM\ManyToOne(targetEntity="Language", inversedBy="submissions")
      * @ORM\JoinColumn(name="langid", referencedColumnName="langid", onDelete="CASCADE")
      * @Serializer\Exclude()
      */
-    private $language;
+    private Language $language;
 
     /**
      * @ORM\ManyToOne(targetEntity="Team", inversedBy="submissions")
      * @ORM\JoinColumn(name="teamid", referencedColumnName="teamid", onDelete="CASCADE")
      * @Serializer\Exclude()
      */
-    private $team;
+    private Team $team;
 
     /**
      * @ORM\ManyToOne(targetEntity="User", inversedBy="submissions")
      * @ORM\JoinColumn(name="userid", referencedColumnName="userid", onDelete="CASCADE")
      * @Serializer\Exclude()
      */
-    private $user;
+    private ?User $user;
 
     /**
      * @ORM\ManyToOne(targetEntity="Problem", inversedBy="submissions")
      * @ORM\JoinColumn(name="probid", referencedColumnName="probid", onDelete="CASCADE")
      * @Serializer\Exclude()
      */
-    private $problem;
+    private Problem $problem;
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\ContestProblem", inversedBy="submissions")
@@ -136,32 +130,32 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
      * })
      * @Serializer\Exclude()
      */
-    private $contest_problem;
+    private ContestProblem $contest_problem;
 
     /**
      * @ORM\OneToMany(targetEntity="Judging", mappedBy="submission")
      * @Serializer\Exclude()
      */
-    private $judgings;
+    private Collection $judgings;
 
     /**
      * @ORM\OneToMany(targetEntity="App\Entity\ExternalJudgement", mappedBy="submission")
      * @Serializer\Exclude()
      */
-    private $external_judgements;
+    private Collection $external_judgements;
 
     /**
      * @var ArrayCollection
      * @ORM\OneToMany(targetEntity="SubmissionFile", mappedBy="submission")
      * @Serializer\Exclude()
      */
-    private $files;
+    private Collection $files;
 
     /**
      * @ORM\OneToMany(targetEntity="Balloon", mappedBy="submission")
      * @Serializer\Exclude()
      */
-    private $balloons;
+    private Collection $balloons;
 
     /**
      * rejudgings have one parent judging
@@ -169,28 +163,27 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
      * @ORM\JoinColumn(name="rejudgingid", referencedColumnName="rejudgingid", onDelete="SET NULL")
      * @Serializer\Exclude()
      */
-    private $rejudging;
+    private ?Rejudging $rejudging;
 
     /**
-     * @var Submission|null
      * @ORM\ManyToOne(targetEntity="App\Entity\Submission", inversedBy="resubmissions")
      * @ORM\JoinColumn(name="origsubmitid", referencedColumnName="submitid", onDelete="SET NULL")
      * @Serializer\Exclude()
      */
-    private $originalSubmission;
+    private ?Submission $originalSubmission;
 
     /**
      * @var ArrayCollection
      * @ORM\OneToMany(targetEntity="App\Entity\Submission", mappedBy="originalSubmission")
      * @Serializer\Exclude()
      */
-    private $resubmissions;
+    private Collection $resubmissions;
 
     /**
-     * @var string|null Holds the old result in the case this submission is displayed in a rejudging table.
+     * Holds the old result in the case this submission is displayed in a rejudging table.
      * @Serializer\Exclude()
      */
-    private $old_result;
+    private ?string $old_result;
 
     public function getResult(): ?string
     {
@@ -341,7 +334,7 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
         return $this;
     }
 
-    public function removeJudging(Judging $judging)
+    public function removeJudging(Judging $judging): void
     {
         $this->judgings->removeElement($judging);
     }
@@ -368,7 +361,7 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
         return $this;
     }
 
-    public function removeFile(SubmissionFile $file)
+    public function removeFile(SubmissionFile $file): void
     {
         $this->files->removeElement($file);
     }
@@ -384,7 +377,7 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
         return $this;
     }
 
-    public function removeBalloon(Balloon $balloon)
+    public function removeBalloon(Balloon $balloon): void
     {
         $this->balloons->removeElement($balloon);
     }
@@ -505,7 +498,7 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
     /**
      * @return Collection|Submission[]
      */
-    public function getResubmissions()
+    public function getResubmissions(): Collection
     {
         return $this->resubmissions;
     }
@@ -544,7 +537,7 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
         return $this;
     }
 
-    public function removeExternalJudgement(ExternalJudgement $externalJudgement)
+    public function removeExternalJudgement(ExternalJudgement $externalJudgement): void
     {
         $this->external_judgements->removeElement($externalJudgement);
     }

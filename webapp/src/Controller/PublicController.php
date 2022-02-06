@@ -30,30 +30,11 @@ use Symfony\Component\Routing\RouterInterface;
  */
 class PublicController extends BaseController
 {
-    /**
-     * @var DOMJudgeService
-     */
-    protected $dj;
-
-    /**
-     * @var ConfigurationService
-     */
-    protected $config;
-
-    /**
-     * @var ScoreboardService
-     */
-    protected $scoreboardService;
-
-    /**
-     * @var StatisticsService
-     */
-    protected $stats;
-
-    /**
-     * @var EntityManagerInterface
-     */
-    protected $em;
+    protected DOMJudgeService $dj;
+    protected ConfigurationService $config;
+    protected ScoreboardService $scoreboardService;
+    protected StatisticsService $stats;
+    protected EntityManagerInterface $em;
 
     public function __construct(
         DOMJudgeService $dj,
@@ -71,7 +52,6 @@ class PublicController extends BaseController
 
     /**
      * @Route("", name="public_index")
-     * @throws Exception
      */
     public function scoreboardAction(Request $request): Response
     {
@@ -153,7 +133,6 @@ class PublicController extends BaseController
 
     /**
      * @Route("/team/{teamId<\d+>}", name="public_team")
-     * @throws Exception
      */
     public function teamAction(Request $request, int $teamId): Response
     {
@@ -176,7 +155,6 @@ class PublicController extends BaseController
     /**
      * @Route("/problems", name="public_problems")
      * @throws NonUniqueResultException
-     * @throws Exception
      */
     public function problemsAction(): Response
     {

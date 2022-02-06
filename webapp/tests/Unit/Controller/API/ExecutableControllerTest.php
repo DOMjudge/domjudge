@@ -7,7 +7,7 @@ class ExecutableControllerTest extends BaseTest
     /**
      * Test that a non-logged-in user can not access the executables.
      */
-    public function testExecutablesNoAnonAccess()
+    public function testExecutablesNoAnonAccess(): void
     {
         $this->verifyApiResponse('GET', "/executables/compare", 401);
     }
@@ -15,7 +15,7 @@ class ExecutableControllerTest extends BaseTest
     /**
      * Test that a team user can not access the executables.
      */
-    public function testExecutablesNoTeamAccess()
+    public function testExecutablesNoTeamAccess(): void
     {
         $this->verifyApiResponse('GET', "/executables/compare", 403, 'demo');
     }
@@ -23,7 +23,7 @@ class ExecutableControllerTest extends BaseTest
     /**
      * Test that a non-existent executable can not be fetched.
      */
-    public function testExecutablesDoesNotExist()
+    public function testExecutablesDoesNotExist(): void
     {
         $this->verifyApiResponse('GET', "/executables/volare", 404, 'admin');
     }
@@ -31,7 +31,7 @@ class ExecutableControllerTest extends BaseTest
     /**
      * Test that an executable can be fetched.
      */
-    public function testFetchExecutable()
+    public function testFetchExecutable(): void
     {
         $response = $this->verifyApiJsonResponse('GET', "/executables/compare", 200, 'admin');
         $contents = $this->base64unzip($response);

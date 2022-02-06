@@ -30,10 +30,7 @@ class GatlingDataFixture extends AbstractDefaultDataFixture implements FixtureGr
         return ['gatling'];
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function load(ObjectManager $manager)
+    public function load(ObjectManager $manager): void
     {
         $num_jury_accounts = 25;
 
@@ -120,10 +117,7 @@ class GatlingDataFixture extends AbstractDefaultDataFixture implements FixtureGr
         $manager->flush();
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function getDependencies()
+    public function getDependencies(): array
     {
         return [ProblemFixture::class];
     }

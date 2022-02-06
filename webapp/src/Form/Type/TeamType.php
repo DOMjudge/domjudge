@@ -11,6 +11,7 @@ use App\Entity\User;
 use App\Service\DOMJudgeService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
+use Exception;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
@@ -28,15 +29,8 @@ use Symfony\Component\Validator\Constraints\Regex;
 
 class TeamType extends AbstractType
 {
-    /**
-     * @var EntityManagerInterface
-     */
-    protected $em;
-
-    /**
-     * @var DOMJudgeService
-     */
-    protected $dj;
+    protected EntityManagerInterface $em;
+    protected DOMJudgeService $dj;
 
     public function __construct(EntityManagerInterface $em, DOMJudgeService $dj)
     {
@@ -44,12 +38,7 @@ class TeamType extends AbstractType
         $this->dj = $dj;
     }
 
-    /**
-     * @param FormBuilderInterface $builder
-     * @param array                $options
-     * @throws \Exception
-     */
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder->add('name', TextType::class, [
             'label' => 'Team name',
@@ -83,9 +72,7 @@ class TeamType extends AbstractType
             'required'      => false,
             'choice_label'  => 'name',
             'placeholder'   => '-- no affiliation --',
-            'query_builder' => function (EntityRepository $er) {
-                return $er->createQueryBuilder('a')->orderBy('a.name');
-            },
+            'query_builder' => fn(EntityRepository $er) => $er->createQueryBuilder('a')->orderBy('a.name'),
         ]);
         $builder->add('penalty', IntegerType::class, [
             'label' => 'Penalty time',
@@ -106,9 +93,10 @@ class TeamType extends AbstractType
             'choice_label'  => 'name',
             'multiple'      => true,
             'by_reference'  => false,
-            'query_builder' => function (EntityRepository $er) {
-                return $er->createQueryBuilder('c')->where('c.openToAllTeams = false')->orderBy('c.name');
-            },
+            'query_builder' => fn(EntityRepository $er) => $er
+                ->createQueryBuilder('c')
+                ->where('c.openToAllTeams = false')
+                ->orderBy('c.name'),
         ]);
         $builder->add('enabled', ChoiceType::class, [
             'expanded' => true,
@@ -164,7 +152,7 @@ class TeamType extends AbstractType
         });
     }
 
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults(['data_class' => Team::class]);
     }

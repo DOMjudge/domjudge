@@ -21,20 +21,9 @@ use Doctrine\ORM\Query\SqlWalker;
  */
 class TruncateFunction extends FunctionNode
 {
-    /**
-     * @var Node|null
-     */
-    protected $fieldExpression = null;
-
-    /**
-     * @var Node|null
-     */
-    protected $lengthExpression = null;
-
-    /**
-     * @var Node|null
-     */
-    protected $appendWhenTruncatedExpression = null;
+    protected ?Node $fieldExpression = null;
+    protected ?Node $lengthExpression = null;
+    protected ?Node $appendWhenTruncatedExpression = null;
 
     /**
      * @throws ASTException

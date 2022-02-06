@@ -6,9 +6,9 @@ use App\DataFixtures\Test\EnableJavaEntrypointFixture;
 
 class LanguageControllerTest extends BaseTest
 {
-    protected $apiEndpoint = 'languages';
+    protected ?string $apiEndpoint = 'languages';
 
-    protected $expectedObjects = [
+    protected array $expectedObjects = [
         'cpp'  => [
             'name'                 => 'C++',
             'entry_point_required' => false,
@@ -24,9 +24,9 @@ class LanguageControllerTest extends BaseTest
     ];
 
     // Kotlin has allow_submit=false by default, so we don't expect it.
-    protected $expectedAbsent = ['kotlin', 'nonexistent'];
+    protected array $expectedAbsent = ['kotlin', 'nonexistent'];
 
-    protected static $fixtures = [
+    protected static array $fixtures = [
         EnableJavaEntrypointFixture::class,
     ];
 }

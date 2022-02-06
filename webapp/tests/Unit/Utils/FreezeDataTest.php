@@ -10,10 +10,10 @@ use Generator;
 
 class FreezeDataTest extends BaseBaseTest
 {
-    protected function getContestData($reference) : FreezeData
+    protected function getContestData(string $reference): FreezeData
     {
         $this->loadFixture(ContestTimeFixture::class);
-        $em = self::$container->get('doctrine')->getManager();
+        $em = self::getContainer()->get('doctrine')->getManager();
         $contest = $em->getRepository(Contest::class)->findOneBy(['name' => $reference]);
         return new FreezeData($contest);
     }
@@ -33,8 +33,7 @@ class FreezeDataTest extends BaseBaseTest
         bool $stopped,
         bool $showFrozen,
         bool $showFinal
-    ) : void
-    {
+    ): void {
         $data = $this->getContestData($reference);
         self::assertEquals($progress, $data->getProgress());
         self::assertEquals($finalized, $data->finalized());
@@ -56,7 +55,7 @@ class FreezeDataTest extends BaseBaseTest
      * - ShowFrozen
      * - ShowFinal
      */
-    public function provideContestProgress() : Generator
+    public function provideContestProgress(): Generator
     {
         yield ['beforeActivation',              -1, false, false, false, false, false, false];
         yield ['beforeStart',                   -1, false, false, false, false, false, false];

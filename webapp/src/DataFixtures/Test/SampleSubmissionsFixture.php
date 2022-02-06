@@ -24,9 +24,9 @@ class SampleSubmissionsFixture extends AbstractTestDataFixture
         /** @var Contest $contest */
         $contest = $manager->getRepository(Contest::class)->findOneBy(['shortname' => 'demo']);
         foreach ($submissionData as $index => $submissionItem) {
-            $problem = $contest->getProblems()->filter(function (ContestProblem $problem) use ($submissionItem) {
-                return $problem->getShortname() === $submissionItem[1];
-            })->first();
+            $problem = $contest->getProblems()->filter(
+                fn(ContestProblem $problem) => $problem->getShortname() === $submissionItem[1]
+            )->first();
             $submission = (new Submission())
                 ->setContest($contest)
                 ->setTeam($manager->getRepository(Team::class)->findOneBy(['name' => $submissionItem[0]]))

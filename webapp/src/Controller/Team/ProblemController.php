@@ -5,13 +5,11 @@ namespace App\Controller\Team;
 use App\Controller\BaseController;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
-use App\Entity\ProblemAttachment;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\StatisticsService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
-use Doctrine\ORM\Query\Expr\Join;
 use Exception;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -32,29 +30,11 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class ProblemController extends BaseController
 {
-    /**
-     * @var DOMJudgeService
-     */
-    protected $dj;
+    protected DOMJudgeService $dj;
+    protected ConfigurationService $config;
+    protected StatisticsService $stats;
+    protected EntityManagerInterface $em;
 
-    /**
-     * @var ConfigurationService
-     */
-    protected $config;
-
-    /**
-     * @var StatisticsService
-     */
-    protected $stats;
-
-    /**
-     * @var EntityManagerInterface
-     */
-    protected $em;
-
-    /**
-     * ProblemController constructor.
-     */
     public function __construct(
         DOMJudgeService $dj,
         ConfigurationService $config,
@@ -70,9 +50,8 @@ class ProblemController extends BaseController
     /**
      * @Route("/problems", name="team_problems")
      * @throws NonUniqueResultException
-     * @throws Exception
      */
-    public function problemsAction() : Response
+    public function problemsAction(): Response
     {
         $teamId = $this->dj->getUser()->getTeam()->getTeamid();
         return $this->render('team/problems.html.twig',

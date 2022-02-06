@@ -48,11 +48,10 @@ class ShadowDifferencesController extends BaseController
 
     /**
      * @Route("", name="jury_shadow_differences")
-     * @return RedirectResponse|Response
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
-    public function indexAction(Request $request)
+    public function indexAction(Request $request): Response
     {
         $shadowMode = DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL;
         $dataSource = $this->config->get('data_source');

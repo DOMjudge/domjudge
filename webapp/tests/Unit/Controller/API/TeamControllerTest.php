@@ -7,9 +7,9 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class TeamControllerTest extends BaseTest
 {
-    protected $apiEndpoint = 'teams';
+    protected ?string $apiEndpoint = 'teams';
 
-    protected $expectedObjects = [
+    protected array $expectedObjects = [
         '2' => [
             'organization_id' => '1',
             'group_ids'       => ['3'],
@@ -24,7 +24,7 @@ class TeamControllerTest extends BaseTest
         ],
     ];
 
-    protected $expectedAbsent = ['4242', 'nonexistent'];
+    protected array $expectedAbsent = ['4242', 'nonexistent'];
 
     public function testLogoManagement(): void
     {

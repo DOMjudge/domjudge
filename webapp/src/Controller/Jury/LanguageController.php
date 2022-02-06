@@ -15,7 +15,6 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Exception;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Symfony\Component\Asset\Packages;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -30,30 +29,11 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class LanguageController extends BaseController
 {
-    /**
-     * @var EntityManagerInterface
-     */
-    protected $em;
-
-    /**
-     * @var DOMJudgeService
-     */
-    protected $dj;
-
-    /**
-     * @var ConfigurationService
-     */
-    protected $config;
-
-    /**
-     * @var KernelInterface
-     */
-    protected $kernel;
-
-    /**
-     * @var EventLogService
-     */
-    protected $eventLogService;
+    protected EntityManagerInterface $em;
+    protected DOMJudgeService $dj;
+    protected ConfigurationService $config;
+    protected KernelInterface $kernel;
+    protected EventLogService $eventLogService;
 
     public function __construct(
         EntityManagerInterface $em,
@@ -72,7 +52,7 @@ class LanguageController extends BaseController
     /**
      * @Route("", name="jury_languages")
      */
-    public function indexAction(Request $request, Packages $assetPackage): Response
+    public function indexAction(): Response
     {
         $em = $this->em;
         /** @var Language[] $languages */
@@ -155,7 +135,6 @@ class LanguageController extends BaseController
     /**
      * @Route("/add", name="jury_language_add")
      * @IsGranted("ROLE_ADMIN")
-     * @throws Exception
      */
     public function addAction(Request $request): Response
     {
@@ -189,7 +168,7 @@ class LanguageController extends BaseController
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
-    public function viewAction(Request $request, SubmissionService $submissionService, string $langId) : Response
+    public function viewAction(Request $request, SubmissionService $submissionService, string $langId): Response
     {
         /** @var Language $language */
         $language = $this->em->getRepository(Language::class)->find($langId);
@@ -229,9 +208,8 @@ class LanguageController extends BaseController
 
     /**
      * @Route("/{langId}/toggle-submit", name="jury_language_toggle_submit")
-     * @return RedirectResponse|Response
      */
-    public function toggleSubmitAction(Request $request, string $langId)
+    public function toggleSubmitAction(Request $request, string $langId): Response
     {
         /** @var Language $language */
         $language = $this->em->getRepository(Language::class)->find($langId);
@@ -249,9 +227,8 @@ class LanguageController extends BaseController
 
     /**
      * @Route("/{langId}/toggle-judge", name="jury_language_toggle_judge")
-     * @return RedirectResponse|Response
      */
-    public function toggleJudgeAction(Request $request, string $langId)
+    public function toggleJudgeAction(Request $request, string $langId): Response
     {
         /** @var Language $language */
         $language = $this->em->getRepository(Language::class)->find($langId);
@@ -275,10 +252,8 @@ class LanguageController extends BaseController
     /**
      * @Route("/{langId}/edit", name="jury_language_edit")
      * @IsGranted("ROLE_ADMIN")
-     * @return RedirectResponse|Response
-     * @throws Exception
      */
-    public function editAction(Request $request, string $langId)
+    public function editAction(Request $request, string $langId): Response
     {
         /** @var Language $language */
         $language = $this->em->getRepository(Language::class)->find($langId);
@@ -315,12 +290,8 @@ class LanguageController extends BaseController
     /**
      * @Route("/{langId}/delete", name="jury_language_delete")
      * @IsGranted("ROLE_ADMIN")
-     * @param Request $request
-     * @param string  $langId
-     * @return RedirectResponse|Response
-     * @throws Exception
      */
-    public function deleteAction(Request $request, string $langId)
+    public function deleteAction(Request $request, string $langId): Response
     {
         /** @var Language $language */
         $language = $this->em->getRepository(Language::class)->find($langId);

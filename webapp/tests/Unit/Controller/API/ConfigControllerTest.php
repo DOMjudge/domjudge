@@ -6,14 +6,14 @@ use Generator;
 
 class ConfigControllerTest extends BaseTest
 {
-    private $endpoint = '/config';
+    private string $endpoint = '/config';
 
     /**
      * Test that same public config variables are returned for all role types.
      *
      * @dataProvider provideUsers
      */
-    public function testConfigReturnsPublicVariables(?string $user)
+    public function testConfigReturnsPublicVariables(?string $user): void
     {
         $response = $this->verifyApiJsonResponse('GET', $this->endpoint, 200, $user);
 
@@ -35,7 +35,7 @@ class ConfigControllerTest extends BaseTest
      *
      * @dataProvider provideUnprivilegedUsers
      */
-    public function testConfigDoesNotReturnSecretVariables(?string $user)
+    public function testConfigDoesNotReturnSecretVariables(?string $user): void
     {
         $response = $this->verifyApiJsonResponse('GET', $this->endpoint, 200, $user);
 
@@ -46,7 +46,7 @@ class ConfigControllerTest extends BaseTest
         }
     }
 
-    public function testConfigReturnsSecretVariablesForAdmin()
+    public function testConfigReturnsSecretVariablesForAdmin(): void
     {
         $response = $this->verifyApiJsonResponse('GET', $this->endpoint, 200, 'admin');
 
@@ -63,7 +63,7 @@ class ConfigControllerTest extends BaseTest
      * Test that changing a config variable is reflected in the output,
      * and a different variable remains unchanged.
      */
-    public function testConfigChangeVisible()
+    public function testConfigChangeVisible(): void
     {
         $response = $this->verifyApiJsonResponse('GET', $this->endpoint, 200);
 
@@ -83,7 +83,7 @@ class ConfigControllerTest extends BaseTest
     /**
      * Test that changing a config variable via the API works and is reflected in the output.
      */
-    public function testConfigChangeAPIVisible()
+    public function testConfigChangeAPIVisible(): void
     {
         $response = $this->verifyApiJsonResponse('GET', $this->endpoint, 200, 'admin');
 
@@ -104,7 +104,7 @@ class ConfigControllerTest extends BaseTest
     /**
      * Test that invalid data is not accepted.
      */
-    public function testConfigChangeAPIInvalidDataIsRejected()
+    public function testConfigChangeAPIInvalidDataIsRejected(): void
     {
         $proposedChange = 'not an array';
         $this->verifyApiJsonResponse('PUT', $this->endpoint, 400, 'admin', $proposedChange);
@@ -113,7 +113,7 @@ class ConfigControllerTest extends BaseTest
     /**
      * Test that anonymous and team users cannot change configuration.
      */
-    public function testConfigChangeNotAllowedForUnprivilegedUsers()
+    public function testConfigChangeNotAllowedForUnprivilegedUsers(): void
     {
         $proposedChange = ['compile_penalty' => true, 'penalty_time' => 21];
         $this->verifyApiJsonResponse('PUT', $this->endpoint, 401, null, $proposedChange);
@@ -123,7 +123,7 @@ class ConfigControllerTest extends BaseTest
     /**
      * Test that anonymous and team users cannot run the config checker.
      */
-    public function testConfigCheckerNotAllowedForUnprivilegedUsers()
+    public function testConfigCheckerNotAllowedForUnprivilegedUsers(): void
     {
         $this->verifyApiJsonResponse('GET', $this->endpoint . '/check', 401);
         $this->verifyApiJsonResponse('GET', $this->endpoint . '/check', 403, 'demo');
@@ -132,7 +132,7 @@ class ConfigControllerTest extends BaseTest
     /**
      * Test the config checker endpoint returns expected content.
      */
-    public function testConfigCheckerWorksForAdmin()
+    public function testConfigCheckerWorksForAdmin(): void
     {
         // In the test setup, the config check returns some errors so expected result is 500.
         $response = $this->verifyApiJsonResponse('GET', $this->endpoint .'/check', 500, 'admin');
@@ -163,7 +163,7 @@ class ConfigControllerTest extends BaseTest
     /**
      * Test that a specific variable can be requested and returns just this variable.
      */
-    public function testConfigReturnsSpecificPublicVariable()
+    public function testConfigReturnsSpecificPublicVariable(): void
     {
         $response = $this->verifyApiJsonResponse('GET', $this->endpoint . '?name=penalty_time', 200);
 
@@ -175,7 +175,7 @@ class ConfigControllerTest extends BaseTest
     /**
      * Test that a non-existent specific variable cannot be requested.
      */
-    public function testConfigRequestNonExistentVariableThrowsError()
+    public function testConfigRequestNonExistentVariableThrowsError(): void
     {
         $this->verifyApiJsonResponse('GET', $this->endpoint . '?name=not_exist', 500);
     }

@@ -9,10 +9,7 @@ class TeamAffiliationFixture extends AbstractExampleDataFixture
 {
     public const AFFILIATION_REFERENCE = 'affiliation';
 
-    /**
-     * @inheritDoc
-     */
-    public function load(ObjectManager $manager)
+    public function load(ObjectManager $manager): void
     {
         $affiliation = new TeamAffiliation();
         $affiliation

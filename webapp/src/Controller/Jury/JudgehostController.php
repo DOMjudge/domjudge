@@ -34,30 +34,11 @@ class JudgehostController extends BaseController
 {
     // Note: when adding or modifying routes, make sure they do not clash with the /judgehosts/{hostname} route
 
-    /**
-     * @var EntityManagerInterface
-     */
-    protected $em;
-
-    /**
-     * @var DOMJudgeService
-     */
-    protected $dj;
-
-    /**
-     * @var ConfigurationService
-     */
-    protected $config;
-
-    /**
-     * @var EventLogService
-     */
-    protected $eventLog;
-
-    /**
-     * @var KernelInterface
-     */
-    protected $kernel;
+    protected EntityManagerInterface $em;
+    protected DOMJudgeService $dj;
+    protected ConfigurationService $config;
+    protected EventLogService $eventLog;
+    protected KernelInterface $kernel;
 
     public function __construct(
         EntityManagerInterface $em,
@@ -94,8 +75,7 @@ class JudgehostController extends BaseController
             'last_judgingid' => ['title' => 'last judging'],
         ];
 
-        $now           = Utils::now();
-        $contest       = $this->dj->getCurrentContest();
+        $now = Utils::now();
 
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         $time_warn = $this->config->get('judgehost_warning');
@@ -399,7 +379,7 @@ class JudgehostController extends BaseController
      * @Route("/edit/multiple", name="jury_judgehost_edit")
      * @IsGranted("ROLE_ADMIN")
      */
-    public function editMultipleAction(Request $request) : Response
+    public function editMultipleAction(Request $request): Response
     {
         $querybuilder = $this->em->createQueryBuilder()
             ->from(Judgehost::class, 'j')

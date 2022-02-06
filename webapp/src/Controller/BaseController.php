@@ -90,13 +90,6 @@ abstract class BaseController extends AbstractController
 
     /**
      * Save the given entity, adding an eventlog and auditlog entry
-     * @param EntityManagerInterface $entityManager
-     * @param EventLogService        $eventLogService
-     * @param DOMJudgeService        $DOMJudgeService
-     * @param object                 $entity
-     * @param mixed                  $id
-     * @param bool                   $isNewEntity
-     * @throws Exception
      */
     protected function saveEntity(
         EntityManagerInterface $entityManager,
@@ -179,7 +172,7 @@ abstract class BaseController extends AbstractController
         DOMJudgeService $DOMJudgeService,
         EntityManagerInterface $entityManager,
         array $primaryKeyData,
-        $eventLogService
+        EventLogService $eventLogService
     ): void
     {
         // Used to remove data from the rank and score caches
@@ -197,7 +190,7 @@ abstract class BaseController extends AbstractController
         if ($entity instanceof Contest) {
             $cid = $entity->getCid();
         }
-        $entityManager->transactional(function () use ($entityManager, $entity) {
+        $entityManager->wrapInTransaction(function () use ($entityManager, $entity) {
             if ($entity instanceof Problem) {
                 // Deleting problem is a special case: its dependent tables do not
                 // form a tree, and a delete to judging_run can only cascade from
@@ -439,8 +432,7 @@ abstract class BaseController extends AbstractController
 
     /**
      * Get the contests that an event for the given entity should be triggered on
-     * @param                 $entity
-     * @param DOMJudgeService $dj
+     * @param mixed $entity
      *
      * @return Contest[]
      */

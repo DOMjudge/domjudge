@@ -6,9 +6,9 @@ use App\Tests\Unit\BaseTest;
 
 class ClarificationControllerTest extends BaseTest
 {
-    protected $roles = ['team'];
+    protected array $roles = ['team'];
 
-    public function testClarificationRequest() : void
+    public function testClarificationRequest(): void
     {
         $this->verifyPageResponse('GET', '/team', 200);
 

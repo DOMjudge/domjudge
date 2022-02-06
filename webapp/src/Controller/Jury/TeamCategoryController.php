@@ -15,8 +15,6 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Exception;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Symfony\Component\Asset\Packages;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -30,30 +28,11 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class TeamCategoryController extends BaseController
 {
-    /**
-     * @var EntityManagerInterface
-     */
-    protected $em;
-
-    /**
-     * @var DOMJudgeService
-     */
-    protected $dj;
-
-    /**
-     * @var ConfigurationService
-     */
-    protected $config;
-
-    /**
-     * @var KernelInterface
-     */
-    protected $kernel;
-
-    /**
-     * @var EventLogService
-     */
-    protected $eventLogService;
+    protected EntityManagerInterface $em;
+    protected DOMJudgeService $dj;
+    protected ConfigurationService $config;
+    protected KernelInterface $kernel;
+    protected EventLogService $eventLogService;
 
     public function __construct(
         EntityManagerInterface $em,
@@ -72,7 +51,7 @@ class TeamCategoryController extends BaseController
     /**
      * @Route("", name="jury_team_categories")
      */
-    public function indexAction(Request $request, Packages $assetPackage): Response
+    public function indexAction(): Response
     {
         $em             = $this->em;
         $teamCategories = $em->createQueryBuilder()
@@ -154,7 +133,7 @@ class TeamCategoryController extends BaseController
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
-    public function viewAction(Request $request, SubmissionService $submissionService, int $categoryId) : Response
+    public function viewAction(Request $request, SubmissionService $submissionService, int $categoryId): Response
     {
         /** @var TeamCategory $teamCategory */
         $teamCategory = $this->em->getRepository(TeamCategory::class)->find($categoryId);
@@ -195,10 +174,8 @@ class TeamCategoryController extends BaseController
     /**
      * @Route("/{categoryId<\d+>}/edit", name="jury_team_category_edit")
      * @IsGranted("ROLE_ADMIN")
-     * @return RedirectResponse|Response
-     * @throws Exception
      */
-    public function editAction(Request $request, int $categoryId)
+    public function editAction(Request $request, int $categoryId): Response
     {
         /** @var TeamCategory $teamCategory */
         $teamCategory = $this->em->getRepository(TeamCategory::class)->find($categoryId);
@@ -226,10 +203,8 @@ class TeamCategoryController extends BaseController
     /**
      * @Route("/{categoryId<\d+>}/delete", name="jury_team_category_delete")
      * @IsGranted("ROLE_ADMIN")
-     * @return RedirectResponse|Response
-     * @throws Exception
      */
-    public function deleteAction(Request $request, int $categoryId)
+    public function deleteAction(Request $request, int $categoryId): Response
     {
         /** @var TeamCategory $teamCategory */
         $teamCategory = $this->em->getRepository(TeamCategory::class)->find($categoryId);
@@ -244,9 +219,8 @@ class TeamCategoryController extends BaseController
     /**
      * @Route("/add", name="jury_team_category_add")
      * @IsGranted("ROLE_ADMIN")
-     * @throws Exception
      */
-    public function addAction(Request $request) : Response
+    public function addAction(Request $request): Response
     {
         $teamCategory = new TeamCategory();
 

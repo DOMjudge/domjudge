@@ -19,14 +19,12 @@ use JMS\Serializer\Annotation as Serializer;
 class ImmutableExecutable
 {
     /**
-     * @var int
-     *
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer", name="immutable_execid", length=4,
      *     options={"comment"="ID","unsigned"=true}, nullable=false)
      */
-    private $immutable_execid;
+    private int $immutable_execid;
 
     // TODO: Add more metadata like a link to parent and timestamp
 
@@ -35,21 +33,24 @@ class ImmutableExecutable
      * @ORM\JoinColumn(name="userid", referencedColumnName="userid", onDelete="SET NULL")
      * @Serializer\Exclude()
      */
-    private $user;
+    private User $user;
 
     /**
-     * @var ArrayCollection
      * @ORM\OneToMany(targetEntity="ExecutableFile", mappedBy="immutableExecutable")
      * @ORM\OrderBy({"filename"="ASC"})
      * @Serializer\Exclude()
      */
-    private $files;
+    private ?Collection $files;
 
     /**
-     * @var string
      * @ORM\Column(type="string", name="hash", length=32, options={"comment"="hash of the files"}, nullable=true)
      */
-    private $hash;
+    private ?string $hash;
+
+    public function __construct()
+    {
+        $this->files = new ArrayCollection();
+    }
 
     public function getImmutableExecId(): int
     {
@@ -85,9 +86,7 @@ class ImmutableExecutable
         }
         $this->hash = md5(
             join(array_map(
-                    function (ExecutableFile $file) {
-                        return $file->getHash();
-                    },
+                    fn(ExecutableFile $file) => $file->getHash(),
                     $this->files->toArray())
             )
         );
@@ -98,7 +97,8 @@ class ImmutableExecutable
         return $this->files;
     }
 
-    public function getHash() {
+    public function getHash(): ?string
+    {
         return $this->hash;
     }
 }

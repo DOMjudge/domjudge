@@ -26,7 +26,6 @@ use Symfony\Component\Validator\Constraints as Assert;
 class Language extends BaseApiEntity
 {
     /**
-     * @var string
      * @ORM\Id
      * @ORM\Column(type="string", name="langid", length=32, options={"comment"="Language ID (string)"}, nullable=false)
      * @Serializer\Exclude()
@@ -34,24 +33,22 @@ class Language extends BaseApiEntity
      * @Assert\NotEqualTo("add")
      * @Identifier()
      */
-    protected $langid;
+    protected ?string $langid = null;
 
     /**
-     * @var string
      * @ORM\Column(type="string", name="externalid", length=255, nullable=true,
      *     options={"comment"="Language ID to expose in the REST API"})
      * @Serializer\SerializedName("id")
      * @Serializer\Groups({"Default", "Nonstrict"})
      */
-    protected $externalid;
+    protected ?string $externalid;
 
     /**
-     * @var string
      * @ORM\Column(type="string", name="name", length=255, options={"comment"="Descriptive language name"}, nullable=false)
      * @Serializer\Groups({"Default", "Nonstrict"})
      * @Assert\NotBlank()
      */
-    private $name = '';
+    private string $name = '';
 
     /**
      * @var string[]
@@ -61,38 +58,34 @@ class Language extends BaseApiEntity
      * @Serializer\Type("array<string>")
      * @Assert\NotBlank()
      */
-    private $extensions = [];
+    private array $extensions = [];
 
     /**
-     * @var bool
      * @ORM\Column(type="boolean", name="filter_compiler_files",
      *     options={"comment"="Whether to filter the files passed to the compiler by the extension list.",
      *              "default"="1"},
      *     nullable=false)
      * @Serializer\Groups({"Nonstrict"})
      */
-    private $filterCompilerFiles = true;
+    private bool $filterCompilerFiles = true;
 
     /**
-     * @var boolean
      * @ORM\Column(type="boolean", name="allow_submit",
      *     options={"comment"="Are submissions accepted in this language?","default"="1"},
      *     nullable=false)
      * @Serializer\Exclude()
      */
-    private $allowSubmit = true;
+    private bool $allowSubmit = true;
 
     /**
-     * @var boolean
      * @ORM\Column(type="boolean", name="allow_judge",
      *     options={"comment"="Are submissions in this language judged?","default"="1"},
      *     nullable=false)
      * @Serializer\Groups({"Nonstrict"})
      */
-    private $allowJudge = true;
+    private bool $allowJudge = true;
 
     /**
-     * @var double
      * @ORM\Column(type="float", name="time_factor",
      *     options={"comment"="Language-specific factor multiplied by problem run times","default"="1"},
      *     nullable=false)
@@ -101,38 +94,36 @@ class Language extends BaseApiEntity
      * @Assert\GreaterThan(0)
      * @Assert\NotBlank()
      */
-    private $timeFactor = 1;
+    private float $timeFactor = 1;
 
     /**
-     * @var bool
      * @ORM\Column(type="boolean", name="require_entry_point",
      *     options={"comment"="Whether submissions require a code entry point to be specified.","default":"0"},
      *     nullable=false)
      * @Serializer\SerializedName("entry_point_required")
      */
-    private $require_entry_point = false;
+    private bool $require_entry_point = false;
 
     /**
-     * @var string
      * @ORM\Column(type="string", name="entry_point_description",
      *     options={"comment"="The description used in the UI for the entry point field."},
      *     nullable=true)
      * @Serializer\SerializedName("entry_point_name")
      */
-    private $entry_point_description = null;
+    private ?string $entry_point_description = null;
 
     /**
      * @ORM\ManyToOne(targetEntity="Executable", inversedBy="languages")
      * @ORM\JoinColumn(name="compile_script", referencedColumnName="execid", onDelete="SET NULL")
      * @Serializer\Exclude()
      */
-    private $compile_executable;
+    private ?Executable $compile_executable;
 
     /**
      * @ORM\OneToMany(targetEntity="Submission", mappedBy="language")
      * @Serializer\Exclude()
      */
-    private $submissions;
+    private Collection $submissions;
 
     public function setLangid(string $langid): Language
     {

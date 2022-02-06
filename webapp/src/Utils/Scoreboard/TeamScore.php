@@ -6,35 +6,14 @@ use App\Entity\Team;
 
 class TeamScore
 {
-    /**
-     * @var Team
-     */
-    public $team;
+    public Team $team;
+    public int $numPoints = 0;
 
-    /**
-     * @var int
-     */
-    public $numPoints = 0;
+    /** @var float[] */
+    public array $solveTimes = [];
+    public int $rank = 0;
+    public int $totalTime;
 
-    /**
-     * @var float[]
-     */
-    public $solveTimes = [];
-
-    /**
-     * @var int
-     */
-    public $rank = 0;
-
-    /**
-     * @var int
-     */
-    public $totalTime;
-
-    /**
-     * TeamScore constructor.
-     * @param Team $team
-     */
     public function __construct(Team $team)
     {
         $this->team      = $team;

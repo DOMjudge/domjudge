@@ -2,7 +2,6 @@
 
 namespace App\Service;
 
-use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\Executable;
 use App\Entity\Language;
@@ -55,7 +54,7 @@ class CheckConfigService
         $this->passwordHasher  = $passwordHasher;
     }
 
-    public function runAll() : array
+    public function runAll(): array
     {
         $results = [];
 
@@ -108,7 +107,7 @@ class CheckConfigService
         return $results;
     }
 
-    public function checkPhpVersion() : array
+    public function checkPhpVersion(): array
     {
         $my = PHP_VERSION;
         $req = '7.2.5';
@@ -118,7 +117,7 @@ class CheckConfigService
                 'desc' => sprintf('You have PHP version %s. The minimum required is %s', $my, $req)];
     }
 
-    public function checkPhpExtensions() : array
+    public function checkPhpExtensions(): array
     {
         $required = ['json', 'mbstring', 'mysqli', 'zip', 'gd', 'intl'];
         $optional = [];
@@ -144,7 +143,7 @@ class CheckConfigService
                 'desc' => $remark];
     }
 
-    public function checkPhpSettings() : array
+    public function checkPhpSettings(): array
     {
         $sourcefiles_limit = $this->config->get('sourcefiles_limit');
         $max_files = ini_get('max_file_uploads');
@@ -188,9 +187,9 @@ class CheckConfigService
                 'desc' => $desc];
     }
 
-    public function checkMysqlSettings() : array
+    public function checkMysqlSettings(): array
     {
-        $r = $this->em->getConnection()->fetchAll(
+        $r = $this->em->getConnection()->fetchAllAssociative(
             'SHOW variables WHERE Variable_name IN
                  ("innodb_log_file_size", "max_connections", "max_allowed_packet",
                   "tx_isolation", "transaction_isolation")'
@@ -203,7 +202,7 @@ class CheckConfigService
         if (isset($vars['transaction_isolation'])) {
             $vars['tx_isolation'] = $vars['transaction_isolation'];
         }
-        $max_inout_r = $this->em->getConnection()->fetchAll('SELECT GREATEST(MAX(LENGTH(input)),MAX(LENGTH(output))) as max FROM testcase_content');
+        $max_inout_r = $this->em->getConnection()->fetchAllAssociative('SELECT GREATEST(MAX(LENGTH(input)),MAX(LENGTH(output))) as max FROM testcase_content');
         $max_inout = (int)reset($max_inout_r)['max'];
 
         $result = 'O';
@@ -238,7 +237,7 @@ class CheckConfigService
                 'desc' => $desc ?: 'MySQL settings are all ok'];
     }
 
-    public function checkAdminPass() : array
+    public function checkAdminPass(): array
     {
         $res = 'O';
         $desc = 'Password for "admin" has been changed from the default.';
@@ -255,7 +254,7 @@ class CheckConfigService
                 'desc' => $desc];
     }
 
-    public function checkDefaultCompareRunExist() : array
+    public function checkDefaultCompareRunExist(): array
     {
         $res = 'O';
         $desc = '';
@@ -276,7 +275,7 @@ class CheckConfigService
                 'desc' => $desc];
     }
 
-    public function checkScriptFilesizevsMemoryLimit() : array
+    public function checkScriptFilesizevsMemoryLimit(): array
     {
         if ($this->config->get('script_filesize_limit') <=
             $this->config->get('memory_limit')) {
@@ -294,7 +293,7 @@ class CheckConfigService
             ];
     }
 
-    public function checkDebugDisabled() : array
+    public function checkDebugDisabled(): array
     {
         if ($this->debug) {
             return ['caption' => 'Debugging',
@@ -306,7 +305,7 @@ class CheckConfigService
                 'desc' => 'Debugging disabled.'];
     }
 
-    public function checkTmpdirWritable() : array
+    public function checkTmpdirWritable(): array
     {
         $tmpdir = $this->dj->getDomjudgeTmpDir();
         if (is_writable($tmpdir)) {
@@ -323,7 +322,7 @@ class CheckConfigService
                  $tmpdir)];
     }
 
-    private function randomString(int $length) : string
+    private function randomString(int $length): string
     {
         $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
         $charactersLength = strlen($characters);
@@ -334,7 +333,7 @@ class CheckConfigService
         return $randomString;
     }
 
-    public function checkHashTime() : array
+    public function checkHashTime(): array
     {
         $tmp_user = new User();
         $counter = 0;
@@ -362,7 +361,7 @@ class CheckConfigService
             'desc' => sprintf('Hashing cost is reasonable (Did %d hashes).', $counter)];
     }
 
-    public function checkContestActive() : array
+    public function checkContestActive(): array
     {
         $contests = $this->dj->getCurrentContests();
         if (empty($contests)) {
@@ -373,12 +372,13 @@ class CheckConfigService
         return ['caption' => 'Active contests',
                 'result' => 'O',
                 'desc' => 'Currently active contests: ' .
-                    implode(', ', array_map(function ($contest) {
-                        return 'c'.$contest->getCid() . ' (' . $contest->getShortname() . ')';
-                    }, $contests))];
+                    implode(', ', array_map(
+                        fn($contest) => 'c' . $contest->getCid() . ' (' . $contest->getShortname() . ')',
+                        $contests
+                    ))];
     }
 
-    public function checkContestsValidate() : array
+    public function checkContestsValidate(): array
     {
         // Fetch all active and future contests
         $contests = $this->dj->getCurrentContests(null, true);
@@ -414,10 +414,9 @@ class CheckConfigService
                     ($desc ?: 'No problems found.')];
     }
 
-    public function checkContestBanners() : array
+    public function checkContestBanners(): array
     {
         // Fetch all active and future contests
-        /** @var Contest[] $contests */
         $contests = $this->dj->getCurrentContests(null, true);
 
         $desc = '';
@@ -451,7 +450,7 @@ class CheckConfigService
                 'desc' => $desc];
     }
 
-    public function checkProblemsValidate() : array
+    public function checkProblemsValidate(): array
     {
         $problems = $this->em->getRepository(Problem::class)->findAll();
         $script_filesize_limit = $this->config->get('script_filesize_limit');
@@ -537,7 +536,7 @@ class CheckConfigService
                     ($desc ?: 'No problems with problems found.')];
     }
 
-    public function checkLanguagesValidate() : array
+    public function checkLanguagesValidate(): array
     {
         $languages = $this->em->getRepository(Language::class)->findAll();
 
@@ -585,7 +584,7 @@ class CheckConfigService
                     ($desc ?: 'No languages with problems found.')];
     }
 
-    public function checkTeamPhotos() : array
+    public function checkTeamPhotos(): array
     {
         /** @var Team[] $teams */
         $teams = $this->em->getRepository(Team::class)->findAll();
@@ -609,7 +608,7 @@ class CheckConfigService
                 'desc' => $desc];
     }
 
-    public function checkAffiliations() : array
+    public function checkAffiliations(): array
     {
         $show_logos = $this->config->get('show_affiliation_logos');
 
@@ -664,7 +663,7 @@ class CheckConfigService
             'desc' => $desc];
     }
 
-    public function checkTeamDuplicateNames() : array
+    public function checkTeamDuplicateNames(): array
     {
         $teams = $this->em->getRepository(Team::class)->findAll();
 
@@ -688,7 +687,7 @@ class CheckConfigService
             'desc' => $desc];
     }
 
-    public function checkSelfRegistration() : array
+    public function checkSelfRegistration(): array
     {
         $result = 'O';
         $desc = '';
@@ -717,7 +716,7 @@ class CheckConfigService
             'desc' => $desc];
     }
 
-    public function checkAllExternalIdentifiers() : array
+    public function checkAllExternalIdentifiers(): array
     {
         // Get all entity classes
         $dir   = realpath(sprintf('%s/src/Entity', $this->dj->getDomjudgeWebappDir()));
@@ -744,7 +743,7 @@ class CheckConfigService
         return $result;
     }
 
-    protected function checkExternalIdentifiers($class, $externalIdField) : array
+    protected function checkExternalIdentifiers(string $class, string $externalIdField): array
     {
         $parts      = explode('\\', $class);
         $entityType = $parts[count($parts) - 1];

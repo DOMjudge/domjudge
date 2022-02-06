@@ -22,20 +22,9 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 class SubmitProblemType extends AbstractType
 {
-    /**
-     * @var DOMJudgeService
-     */
-    protected $dj;
-
-    /**
-     * @var ConfigurationService
-     */
-    protected $config;
-
-    /**
-     * @var EntityManagerInterface
-     */
-    protected $em;
+    protected DOMJudgeService $dj;
+    protected ConfigurationService $config;
+    protected EntityManagerInterface $em;
 
     public function __construct(
         DOMJudgeService $dj,
@@ -47,7 +36,7 @@ class SubmitProblemType extends AbstractType
         $this->config = $config;
     }
 
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $allowMultipleFiles = $this->config->get('sourcefiles_limit') > 1;
         $user               = $this->dj->getUser();
@@ -60,27 +49,24 @@ class SubmitProblemType extends AbstractType
 
         $problemConfig = [
             'class' => Problem::class,
-            'query_builder' => function (EntityRepository $er) use ($contest) {
-                return $er->createQueryBuilder('p')
-                    ->join('p.contest_problems', 'cp', Join::WITH, 'cp.contest = :contest')
-                    ->select('p', 'cp')
-                    ->andWhere('cp.allowSubmit = 1')
-                    ->setParameter(':contest', $contest)
-                    ->addOrderBy('cp.shortname');
-            },
-            'choice_label' => function (Problem $problem) {
-                return sprintf('%s - %s', $problem->getContestProblems()->first()->getShortName(), $problem->getName());
-            },
+            'query_builder' => fn(EntityRepository $er) => $er->createQueryBuilder('p')
+                ->join('p.contest_problems', 'cp', Join::WITH, 'cp.contest = :contest')
+                ->select('p', 'cp')
+                ->andWhere('cp.allowSubmit = 1')
+                ->setParameter(':contest', $contest)
+                ->addOrderBy('cp.shortname'),
+            'choice_label' => fn(Problem $problem) => sprintf(
+                '%s - %s', $problem->getContestProblems()->first()->getShortName(), $problem->getName()
+            ),
             'placeholder' => 'Select a problem',
         ];
         $builder->add('problem', EntityType::class, $problemConfig);
 
         $builder->add('language', EntityType::class, [
             'class' => Language::class,
-            'query_builder' => function (EntityRepository $er) {
-                return $er->createQueryBuilder('l')
-                    ->andWhere('l.allowSubmit = 1');
-            },
+            'query_builder' => fn(EntityRepository $er) => $er
+                ->createQueryBuilder('l')
+                ->andWhere('l.allowSubmit = 1'),
             'choice_label' => 'name',
             'placeholder' => 'Select a language',
         ]);

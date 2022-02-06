@@ -10,6 +10,7 @@ use App\Entity\Team;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
+use Exception;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -24,26 +25,14 @@ use Symfony\Component\Validator\Constraints\Regex;
 
 class SubmissionsFilterType extends AbstractType
 {
-    /**
-     * @var EntityManagerInterface
-     */
-    protected $em;
+    protected EntityManagerInterface $em;
 
-    /**
-     * RejudgingType constructor.
-     * @param EntityManagerInterface $em
-     */
     public function __construct(EntityManagerInterface $em)
     {
         $this->em = $em;
     }
 
-    /**
-     * @param FormBuilderInterface $builder
-     * @param array                $options
-     * @throws \Exception
-     */
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $contests = $builder->getData()["contests"];
 
@@ -72,12 +61,10 @@ class SubmissionsFilterType extends AbstractType
             "class" => Language::class,
             "required" => false,
             "choice_label" => "name",
-            "query_builder" => function (EntityRepository $er) {
-                return $er
-                    ->createQueryBuilder("l")
-                    ->where("l.allowSubmit = 1")
-                    ->orderBy("l.name");
-            },
+            "query_builder" => fn(EntityRepository $er) => $er
+                ->createQueryBuilder("l")
+                ->where("l.allowSubmit = 1")
+                ->orderBy("l.name"),
             "attr" => ["data-filter-field" => "language-id"],
         ]);
 

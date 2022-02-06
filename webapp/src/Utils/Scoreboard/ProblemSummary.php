@@ -4,32 +4,18 @@ namespace App\Utils\Scoreboard;
 
 class ProblemSummary
 {
-    /**
-     * @var int[]
-     */
-    public $numSubmissions = [];
+    /** @var int[] */
+    public array $numSubmissions = [];
 
-    /**
-     * @var int[]
-     */
-    public $numSubmissionsPending = [];
+    /** @var int[] */
+    public array $numSubmissionsPending = [];
 
-    /**
-     * @var int[]
-     */
-    public $numSubmissionsCorrect = [];
+    /** @var int[] */
+    public array $numSubmissionsCorrect = [];
 
-    /**
-     * @var float[]
-     */
-    public $bestTimes = [];
+    /** @var float[] */
+    public array $bestTimes = [];
 
-    /**
-     * @param int $sortorder
-     * @param int $numSubmissions
-     * @param int $numSubmissionsPending
-     * @param int $numSubmissionsCorrect
-     */
     public function addSubmissionCounts(
         int $sortorder,
         int $numSubmissions,
@@ -52,8 +38,6 @@ class ProblemSummary
 
     /**
      * Get the best time in minutes for the given sortorder
-     * @param int $sortorder
-     * @return int|null
      */
     public function getBestTimeInMinutes(int $sortorder): ?int
     {
@@ -64,8 +48,7 @@ class ProblemSummary
     }
 
     /**
-     * @param int   $sortorder
-     * @param float $bestTime
+     * @param string|float $bestTime
      */
     public function updateBestTime(int $sortorder, $bestTime)
     {

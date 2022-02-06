@@ -11,13 +11,10 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
 use Exception;
 use FOS\RestBundle\Controller\Annotations as Rest;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use OpenApi\Annotations as OA;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\Intl\Exception\NotImplementedException;
 
 /**
  * @Rest\Route("/contests/{cid}/awards")
@@ -29,14 +26,8 @@ use Symfony\Component\Intl\Exception\NotImplementedException;
  */
 class AwardsController extends AbstractRestController
 {
-    /**
-     * @var ScoreboardService
-     */
-    protected $scoreboardService;
+    protected ScoreboardService $scoreboardService;
 
-    /**
-     * ScoreboardController constructor.
-     */
     public function __construct(
         EntityManagerInterface $entityManager,
         DOMJudgeService $DOMJudgeService,
@@ -92,7 +83,6 @@ class AwardsController extends AbstractRestController
 
     /**
      * Get the awards data for the given request and optional award ID
-     * @throws Exception
      */
     protected function getAwardsData(Request $request, string $requestedType = null): ?array
     {
@@ -197,11 +187,11 @@ class AwardsController extends AbstractRestController
 
     protected function getQueryBuilder(Request $request): QueryBuilder
     {
-        throw new NotImplementedException();
+        throw new Exception('Not implemented');
     }
 
     protected function getIdField(): string
     {
-        throw new NotImplementedException();
+        throw new Exception('Not implemented');
     }
 }

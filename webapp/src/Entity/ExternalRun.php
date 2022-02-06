@@ -22,35 +22,30 @@ use Doctrine\ORM\Mapping as ORM;
 class ExternalRun
 {
     /**
-     * @var int
-     *
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer", name="extrunid", length=4,
      *     options={"comment"="External run ID","unsigned"=true}, nullable=false)
      */
-    private $extrunid;
+    private int $extrunid;
 
     /**
-     * @var string
      * @ORM\Column(type="string", name="externalid", length=255,
      *     options={"comment"="Run ID in external system, should be unique inside a single contest",
      *              "collation"="utf8mb4_bin"},
      *     nullable=true)
      */
-    protected $externalid;
+    protected ?string $externalid;
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="result", type="string", length=32,
      *              options={"comment"="Result string as obtained from external system"},
      *              nullable=false)
      */
-    private $result;
+    private string $result;
 
     /**
-     * @var double
+     * @var double|string
      *
      * @ORM\Column(type="decimal", precision=32, scale=9, name="endtime",
      *              options={"comment"="Time run ended", "unsigned"=true},
@@ -59,7 +54,7 @@ class ExternalRun
     private $endtime;
 
     /**
-     * @var double
+     * @var double|string
      *
      * @ORM\Column(type="float", name="runtime",
      *              options={"comment"="Running time on this testcase"}, nullable=false)
@@ -67,28 +62,22 @@ class ExternalRun
     private $runtime;
 
     /**
-     * @var ExternalJudgement
-     *
      * @ORM\ManyToOne(targetEntity="ExternalJudgement", inversedBy="external_runs")
      * @ORM\JoinColumn(name="extjudgementid", referencedColumnName="extjudgementid", onDelete="CASCADE")
      */
-    private $external_judgement;
+    private ExternalJudgement $external_judgement;
 
     /**
-     * @var Testcase
-     *
      * @ORM\ManyToOne(targetEntity="Testcase", inversedBy="external_runs")
      * @ORM\JoinColumn(name="testcaseid", referencedColumnName="testcaseid", onDelete="CASCADE")
      */
-    private $testcase;
+    private Testcase $testcase;
 
     /**
-     * @var Contest
-     *
      * @ORM\ManyToOne(targetEntity="App\Entity\Contest")
      * @ORM\JoinColumn(name="cid", referencedColumnName="cid", onDelete="CASCADE")
      */
-    private $contest;
+    private Contest $contest;
 
     public function getExtrunid(): int
     {

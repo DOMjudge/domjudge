@@ -33,30 +33,11 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class ExecutableController extends BaseController
 {
-    /**
-     * @var EntityManagerInterface
-     */
-    protected $em;
-
-    /**
-     * @var DOMJudgeService
-     */
-    protected $dj;
-
-    /**
-     * @var ConfigurationService
-     */
-    protected $config;
-
-    /**
-     * @var KernelInterface
-     */
-    protected $kernel;
-
-    /**
-     * @var EventLogService
-     */
-    protected $eventLogService;
+    protected EntityManagerInterface $em;
+    protected DOMJudgeService $dj;
+    protected ConfigurationService $config;
+    protected KernelInterface $kernel;
+    protected EventLogService $eventLogService;
 
     public function __construct(
         EntityManagerInterface $em,
@@ -75,7 +56,7 @@ class ExecutableController extends BaseController
     /**
      * @Route("", name="jury_executables")
      */
-    public function indexAction(Request $request) : Response
+    public function indexAction(Request $request): Response
     {
         $data = [];
         $form = $this->createForm(ExecutableUploadType::class, $data);
@@ -146,7 +127,7 @@ class ExecutableController extends BaseController
      * @Route("/add", name="jury_executable_add")
      * @IsGranted("ROLE_ADMIN")
      */
-    public function addAction(Request $request) : Response
+    public function addAction(Request $request): Response
     {
         $data = [];
         $form = $this->createForm(ExecutableUploadType::class, $data);
@@ -210,9 +191,8 @@ class ExecutableController extends BaseController
 
     /**
      * @Route("/{execId}", name="jury_executable")
-     * @throws Exception
      */
-    public function viewAction(Request $request, string $execId) : Response
+    public function viewAction(string $execId): Response
     {
         /** @var Executable $executable */
         $executable = $this->em->getRepository(Executable::class)->find($execId);
@@ -231,7 +211,7 @@ class ExecutableController extends BaseController
     /**
      * @Route("/{execId}/content", name="jury_executable_content")
      */
-    public function contentAction(string $execId) : Response
+    public function contentAction(string $execId): Response
     {
         /** @var Executable $executable */
         $executable = $this->em->getRepository(Executable::class)->find($execId);
@@ -245,7 +225,7 @@ class ExecutableController extends BaseController
     /**
      * @Route("/{execId}/download", name="jury_executable_download")
      */
-    public function downloadAction(string $execId) : Response
+    public function downloadAction(string $execId): Response
     {
         /** @var Executable $executable */
         $executable = $this->em->getRepository(Executable::class)->find($execId);
@@ -262,7 +242,7 @@ class ExecutableController extends BaseController
     /**
      * @Route("/{execId}/download/{index}", name="jury_executable_download_single")
      */
-    public function downloadSingleAction(string $execId, int $index) : Response
+    public function downloadSingleAction(string $execId, int $index): Response
     {
         /** @var Executable $executable */
         $executable = $this->em->getRepository(Executable::class)->find($execId);
@@ -284,9 +264,8 @@ class ExecutableController extends BaseController
     /**
      * @Route("/{execId}/edit", name="jury_executable_edit")
      * @IsGranted("ROLE_ADMIN")
-     * @throws Exception
      */
-    public function editAction(Request $request, string $execId) : Response
+    public function editAction(Request $request, string $execId): Response
     {
         /** @var Executable $executable */
         $executable = $this->em->getRepository(Executable::class)->find($execId);
@@ -344,9 +323,8 @@ class ExecutableController extends BaseController
     /**
      * @Route("/{execId}/delete", name="jury_executable_delete")
      * @IsGranted("ROLE_ADMIN")
-     * @return Response
      */
-    public function deleteAction(Request $request, string $execId) : Response
+    public function deleteAction(Request $request, string $execId): Response
     {
         /** @var Executable $executable */
         $executable = $this->em->getRepository(Executable::class)->find($execId);
@@ -362,7 +340,7 @@ class ExecutableController extends BaseController
      * @Route("/{execId}/edit-files", name="jury_executable_edit_files")
      * @IsGranted("ROLE_ADMIN")
      */
-    public function editFilesAction(Request $request, string $execId) : Response
+    public function editFilesAction(Request $request, string $execId): Response
     {
         /** @var Executable $executable */
         $executable = $this->em->getRepository(Executable::class)->find($execId);
@@ -423,14 +401,14 @@ class ExecutableController extends BaseController
     /**
      * Get the data to use for the executable editor
      */
-    protected function dataForEditor(Executable $executable) : array
+    protected function dataForEditor(Executable $executable): array
     {
         $immutable_executable = $executable->getImmutableExecutable();
 
-        $filenames     = [];
-        $file_contents = [];
-        $aceFilenames  = [];
-        $skippedBinary = [];
+        $filenames      = [];
+        $file_contents  = [];
+        $aceFilenames   = [];
+        $skippedBinary  = [];
         $executableBits = [];
         foreach ($immutable_executable->getFiles() as $file) {
             /** @var ExecutableFile $file */

@@ -19,20 +19,11 @@ class FreezeData
     const KEY_RUNNING = 'running';
     const KEY_FINALIZED = 'finalized';
 
-    /**
-     * @var Contest|null
-     */
-    protected $contest;
+    protected ?Contest $contest;
 
-    /**
-     * @var bool[]
-     */
-    protected $cache = [];
+    /** @var bool[] */
+    protected array $cache = [];
 
-    /**
-     * FreezeData constructor.
-     * @param Contest|null $contest
-     */
     public function __construct(Contest $contest = null)
     {
         $this->contest = $contest;
@@ -40,8 +31,6 @@ class FreezeData
 
     /**
      * Whether to show final scores
-     * @param bool $jury
-     * @return bool
      */
     public function showFinal(bool $jury = false): bool
     {
@@ -70,7 +59,6 @@ class FreezeData
 
     /**
      * Whether to show the frozen scoreboard
-     * @return bool
      */
     public function showFrozen(): bool
     {
@@ -94,7 +82,6 @@ class FreezeData
 
     /**
      * Whether the contest has started
-     * @return bool
      */
     public function started(): bool
     {
@@ -112,7 +99,6 @@ class FreezeData
 
     /**
      * Whether the contest has stopped
-     * @return bool
      */
     public function stopped(): bool
     {
@@ -130,7 +116,6 @@ class FreezeData
 
     /**
      * Whether the contest is running
-     * @return bool
      */
     public function running(): bool
     {
@@ -144,7 +129,6 @@ class FreezeData
     /**
      * Whether the contest is finalized
      * This is normally only used when we have a downstream CDS
-     * @return bool
      */
     public function finalized(): bool
     {
@@ -163,7 +147,6 @@ class FreezeData
 
     /**
      * Get the progress of this freezedata
-     * @return int
      */
     public function getProgress(): int
     {

@@ -28,6 +28,7 @@ use App\Service\SubmissionService;
 use App\Utils\Utils;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DBALException;
+use Doctrine\DBAL\Exception;
 use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
@@ -54,50 +55,15 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  */
 class JudgehostController extends AbstractFOSRestController
 {
-    /**
-     * @var EntityManagerInterface
-     */
-    protected $em;
-
-    /**
-     * @var DOMJudgeService
-     */
-    protected $dj;
-
-    /**
-     * @var ConfigurationService
-     */
-    protected $config;
-
-    /**
-     * @var EventLogService
-     */
-    protected $eventLogService;
-
-    /**
-     * @var ScoreboardService
-     */
-    protected $scoreboardService;
-
-    /**
-     * @var SubmissionService
-     */
-    protected $submissionService;
-
-    /**
-     * @var BalloonService
-     */
-    protected $balloonService;
-
-    /**
-     * @var RejudgingService
-     */
-    protected $rejudgingService;
-
-    /**
-     * @var LoggerInterface
-     */
-    protected $logger;
+    protected EntityManagerInterface $em;
+    protected DOMJudgeService $dj;
+    protected ConfigurationService $config;
+    protected EventLogService $eventLogService;
+    protected ScoreboardService $scoreboardService;
+    protected SubmissionService $submissionService;
+    protected BalloonService $balloonService;
+    protected RejudgingService $rejudgingService;
+    protected LoggerInterface $logger;
 
     public function __construct(
         EntityManagerInterface $em,
@@ -137,7 +103,7 @@ class JudgehostController extends AbstractFOSRestController
      *     @OA\Schema(type="string")
      * )
      */
-    public function getJudgehostsAction(Request $request) : array
+    public function getJudgehostsAction(Request $request): array
     {
         $queryBuilder = $this->em->createQueryBuilder()
             ->from(Judgehost::class, 'j')
@@ -173,7 +139,7 @@ class JudgehostController extends AbstractFOSRestController
      * )
      * @throws NonUniqueResultException
      */
-    public function createJudgehostAction(Request $request) : array
+    public function createJudgehostAction(Request $request): array
     {
         if (!$request->request->has('hostname')) {
             throw new BadRequestHttpException('Argument \'hostname\' is mandatory');
@@ -224,12 +190,10 @@ class JudgehostController extends AbstractFOSRestController
             $this->giveBackJudging($judging->getJudgingid(), $judgehost);
         }
 
-        return array_map(function (Judging $judging) {
-            return [
-                'jobid' => $judging->getJudgingid(),
-                'submitid' => $judging->getSubmission()->getSubmitid(),
-            ];
-        }, $judgings);
+        return array_map(fn(Judging $judging) => [
+            'jobid' => $judging->getJudgingid(),
+            'submitid' => $judging->getSubmission()->getSubmitid(),
+        ], $judgings);
     }
 
     /**
@@ -261,7 +225,7 @@ class JudgehostController extends AbstractFOSRestController
      *     )
      * )
      */
-    public function updateJudgeHostAction(Request $request, string $hostname) : array
+    public function updateJudgeHostAction(Request $request, string $hostname): array
     {
         if (!$request->request->has('active')) {
             throw new BadRequestHttpException('Argument \'active\' is mandatory');
@@ -326,7 +290,7 @@ class JudgehostController extends AbstractFOSRestController
      * )
      * @throws NonUniqueResultException
      */
-    public function updateJudgingAction(Request $request, string $hostname, int $judgetaskid) : void
+    public function updateJudgingAction(Request $request, string $hostname, int $judgetaskid): void
     {
         /** @var Judgehost $judgehost */
         $judgehost = $this->em->getRepository(Judgehost::class)->findOneBy(['hostname' => $hostname]);
@@ -356,7 +320,7 @@ class JudgehostController extends AbstractFOSRestController
 
         if ($request->request->has('output_compile')) {
             if ($request->request->has('entry_point')) {
-                $this->em->transactional(function () use ($query, $request, &$judging) {
+                $this->em->wrapInTransaction(function () use ($query, $request, &$judging) {
                     $submission = $judging->getSubmission();
                     $submission->setEntryPoint($request->request->get('entry_point'));
                     $this->em->flush();
@@ -420,7 +384,7 @@ class JudgehostController extends AbstractFOSRestController
                     }
                 }
             } else {
-                $this->em->transactional(function () use (
+                $this->em->wrapInTransaction(function () use (
                     $request,
                     $judgehost,
                     $judging,
@@ -673,7 +637,7 @@ class JudgehostController extends AbstractFOSRestController
         Request $request,
         string $hostname,
         int $judgeTaskId
-    ) : int {
+    ): int {
         $required = [
             'runresult',
             'runtime',
@@ -846,7 +810,7 @@ class JudgehostController extends AbstractFOSRestController
 
         if ($field_name !== null) {
             // Disable any outstanding judgetasks with the same script that have not been claimed yet.
-            $this->em->transactional(function (EntityManager $em) use($field_name, $disabled_id, $error) {
+            $this->em->wrapInTransaction(function (EntityManager $em) use($field_name, $disabled_id, $error) {
                 $judgingids = $em->getConnection()->executeQuery(
                     'SELECT DISTINCT jobid'
                     . ' FROM judgetask'
@@ -894,7 +858,6 @@ class JudgehostController extends AbstractFOSRestController
 
     /**
      * Give back the unjudged runs from the judging with the given judging ID
-     * @param int       $judgingId
      * @param Judgehost|null $judgehost If set, only partially returns judgetasks instead of full judging.
      */
     protected function giveBackJudging(int $judgingId, ?Judgehost $judgehost): void
@@ -902,7 +865,7 @@ class JudgehostController extends AbstractFOSRestController
         /** @var Judging $judging */
         $judging = $this->em->getRepository(Judging::class)->find($judgingId);
         if ($judging) {
-            $this->em->transactional(function () use ($judging, $judgehost) {
+            $this->em->wrapInTransaction(function () use ($judging, $judgehost) {
                 /** @var JudgingRun $run */
                 foreach ($judging->getRuns() as $run) {
                     if ($judgehost === null) {
@@ -968,7 +931,7 @@ class JudgehostController extends AbstractFOSRestController
         string $outputDiff,
         string $outputRun,
         string $metadata
-    ) {
+    ): bool {
         $resultsRemap = $this->config->get('results_remap');
         $resultsPrio  = $this->config->get('results_prio');
 
@@ -978,7 +941,7 @@ class JudgehostController extends AbstractFOSRestController
             $runResult = $resultsRemap[$runResult];
         }
 
-        $this->em->transactional(function () use (
+        $this->em->wrapInTransaction(function () use (
             $judgeTaskId,
             $runTime,
             $runResult,
@@ -1098,7 +1061,6 @@ class JudgehostController extends AbstractFOSRestController
                     );
                 }
 
-                /** @var Submission $submission */
                 $submission = $judging->getSubmission();
                 $contest    = $submission->getContest();
                 $team       = $submission->getTeam();
@@ -1226,7 +1188,7 @@ class JudgehostController extends AbstractFOSRestController
      * )
      * @OA\Parameter(ref="#/components/parameters/id")
      */
-    public function getFilesAction(string $type, string $id) : array
+    public function getFilesAction(string $type, string $id): array
     {
         switch($type) {
             case 'source':
@@ -1416,7 +1378,7 @@ class JudgehostController extends AbstractFOSRestController
         // This is case 2.a) from above: start something new.
         // This runs transactional to prevent a queue task being picked up twice.
         $judgetasks = null;
-        $this->em->transactional(function() use ($judgehost, $max_batchsize, &$judgetasks) {
+        $this->em->wrapInTransaction(function() use ($judgehost, $max_batchsize, &$judgetasks) {
             $jobid = $this->em->createQueryBuilder()
                 ->from(QueueTask::class, 'qt')
                 ->select('qt.jobid')
@@ -1485,8 +1447,11 @@ class JudgehostController extends AbstractFOSRestController
         return [];
     }
 
-    /** @param JudgeTask[] $judgeTasks */
-    private function serializeJudgeTasks($judgeTasks, Judgehost $judgehost): array
+    /**
+     * @param JudgeTask[] $judgeTasks
+     * @throws Exception
+     */
+    private function serializeJudgeTasks(array $judgeTasks, Judgehost $judgehost): array
     {
         if (empty($judgeTasks)) {
             return [];
@@ -1502,7 +1467,7 @@ class JudgehostController extends AbstractFOSRestController
         }
 
         $now = Utils::now();
-        $numUpdated = $this->em->getConnection()->executeUpdate(
+        $numUpdated = $this->em->getConnection()->executeStatement(
             'UPDATE judgetask SET judgehostid = :judgehostid, starttime = :starttime WHERE starttime IS NULL AND valid = 1 AND judgetaskid IN (:ids)',
             [
                 ':judgehostid' => $judgehost->getJudgehostid(),
@@ -1520,7 +1485,7 @@ class JudgehostController extends AbstractFOSRestController
         }
 
         // We got at least one, let's update the starttime of the corresponding judging if haven't done so in the past.
-        $starttime_set = $this->em->getConnection()->executeUpdate(
+        $starttime_set = $this->em->getConnection()->executeStatement(
             'UPDATE judging SET starttime = :starttime WHERE judgingid = :jobid AND starttime IS NULL',
             [
                 ':starttime' => $now,
@@ -1533,7 +1498,7 @@ class JudgehostController extends AbstractFOSRestController
             $submission = $this->em->getRepository(Submission::class)->findOneBy(['submitid' => $submit_id]);
             $teamid = $submission->getTeam()->getTeamid();
 
-            $this->em->getConnection()->executeUpdate(
+            $this->em->getConnection()->executeStatement(
                 'UPDATE team SET judging_last_started = :starttime WHERE teamid = :teamid',
                 [
                     ':starttime' => $now,
@@ -1569,7 +1534,10 @@ class JudgehostController extends AbstractFOSRestController
         return $partialJudgeTasks;
     }
 
-    private function getJudgetasks($jobId, $max_batchsize, $judgehost): ?array
+    /**
+     * @param string|int|null $jobId
+     */
+    private function getJudgetasks($jobId, int $max_batchsize, Judgehost $judgehost): ?array
     {
         if ($jobId === null) {
             return null;

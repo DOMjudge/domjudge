@@ -30,32 +30,15 @@ class StatisticsService
         'all' => 'All teams',
     ];
 
-    /**
-     * @var DOMJudgeService
-     */
-    private $dj;
+    private EntityManagerInterface $em;
 
-    /**
-     * @var EntityManagerInterface
-     */
-    private $em;
-
-    /**
-     * StatisticsService constructor.
-     *
-     * @param DOMJudgeService        $dj
-     * @param EntityManagerInterface $em
-     */
-    public function __construct(DOMJudgeService $dj, EntityManagerInterface $em)
+    public function __construct(EntityManagerInterface $em)
     {
-        $this->dj = $dj;
         $this->em = $em;
     }
 
     /**
      * Get the problems for the given contest
-     *
-     * @param Contest $contest
      *
      * @return ContestProblem[]
      */
@@ -72,9 +55,6 @@ class StatisticsService
 
     /**
      * Get the teams for the given contest and view filter
-     *
-     * @param Contest $contest
-     * @param string  $filter
      *
      * @return Team[]
      */
@@ -114,13 +94,9 @@ class StatisticsService
     /**
      * Get miscellaneous contest statistics
      *
-     * @param Contest $contest
      * @param Team[]  $teams
-     * @param string  $filter
      * @param bool    $noFrozen             Do not show frozen data
      * @param bool    $verificationRequired Only show verified submissions
-     *
-     * @return array
      */
     public function getMiscContestStatistics(
         Contest $contest,
@@ -128,7 +104,7 @@ class StatisticsService
         string $filter,
         bool $noFrozen = false,
         bool $verificationRequired = false
-    ) {
+    ): array {
         $numTestcases = $this->getNumTestcases($contest);
         $numSubmissions = $this->getTeamNumSubmissions($contest, $filter);
 
@@ -259,11 +235,6 @@ class StatisticsService
 
     /**
      * Get the team statistics for the given team
-     *
-     * @param Contest $contest
-     * @param Team    $team
-     *
-     * @return array
      */
     public function getTeamStats(Contest $contest, Team $team): array
     {
@@ -360,7 +331,7 @@ class StatisticsService
         Contest $contest,
         Problem $problem,
         string $view
-    ) {
+    ): array {
         // Get a whole bunch of judgings(and related objects)
         // Where:
         //   - The judging is valid
@@ -442,19 +413,14 @@ class StatisticsService
     }
 
     /**
-     * @param Contest   $contest
      * @param Problem[] $problems
-     * @param bool      $showFrozen
-     * @param bool      $verificationRequired
-     *
-     * @return array
      */
     public function getGroupedProblemsStats(
         Contest $contest,
         array $problems,
         bool $showFrozen,
         bool $verificationRequired
-    ) {
+    ): array {
         $stats = [
             'problems' => [],
             'numBuckets' => static::NUM_GROUPED_BINS,
@@ -560,11 +526,6 @@ class StatisticsService
 
     /**
      * Apply the filter to the given query builder
-     *
-     * @param QueryBuilder $queryBuilder
-     * @param string       $filter
-     *
-     * @return QueryBuilder
      */
     protected function applyFilter(QueryBuilder $queryBuilder, string $filter): QueryBuilder
     {
@@ -580,7 +541,7 @@ class StatisticsService
         return $queryBuilder;
     }
 
-    protected static function setOrIncrement(array &$array, $index)
+    protected static function setOrIncrement(array &$array, $index): void
     {
         if (!array_key_exists($index, $array)) {
             $array[$index] = 0;
@@ -590,8 +551,6 @@ class StatisticsService
 
     /**
      * Get the number of testcases per problem
-     *
-     * @param Contest $contest
      *
      * @return int[]
      */
@@ -619,9 +578,6 @@ class StatisticsService
 
     /**
      * Get the number of submissions per team
-     *
-     * @param Contest $contest
-     * @param string  $filter
      *
      * @return array
      */

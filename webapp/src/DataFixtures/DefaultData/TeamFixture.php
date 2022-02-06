@@ -11,20 +11,14 @@ class TeamFixture extends AbstractDefaultDataFixture implements DependentFixture
 {
     public const DOMJUDGE_REFERENCE = 'domjudge';
 
-    /**
-     * @var LoggerInterface
-     */
-    protected $logger;
+    protected LoggerInterface $logger;
 
     public function __construct(LoggerInterface $logger)
     {
         $this->logger = $logger;
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function load(ObjectManager $manager)
+    public function load(ObjectManager $manager): void
     {
         if (!($team = $manager->getRepository(Team::class)->findOneBy(['name' => 'DOMjudge']))) {
             $team = (new Team())
@@ -39,10 +33,7 @@ class TeamFixture extends AbstractDefaultDataFixture implements DependentFixture
         $this->addReference(self::DOMJUDGE_REFERENCE, $team);
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function getDependencies()
+    public function getDependencies(): array
     {
         return [TeamCategoryFixture::class];
     }

@@ -17,15 +17,8 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class ScoreboardController extends AbstractController
 {
-    /**
-     * @var DOMJudgeService
-     */
-    protected $dj;
-
-    /**
-     * @var ScoreboardService
-     */
-    protected $scoreboardService;
+    protected DOMJudgeService $dj;
+    protected ScoreboardService $scoreboardService;
 
     public function __construct(
         DOMJudgeService $dj,
@@ -37,9 +30,8 @@ class ScoreboardController extends AbstractController
 
     /**
      * @Route("", name="jury_scoreboard")
-     * @throws Exception
      */
-    public function scoreboardAction(Request $request) : Response
+    public function scoreboardAction(Request $request): Response
     {
         $response   = new Response();
         $refreshUrl = $this->generateUrl('jury_scoreboard');

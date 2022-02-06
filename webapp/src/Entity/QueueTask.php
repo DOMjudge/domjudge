@@ -28,53 +28,47 @@ use Symfony\Component\Validator\Constraints as Assert;
 class QueueTask
 {
     /**
-     * @var int
-     *
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer", name="queuetaskid", length=4,
      *     options={"comment"="Queuetask ID","unsigned"=true},
      *     nullable=false)
      */
-    private $queuetaskid;
+    private int $queuetaskid;
 
     /**
-     * @var int
-     *
      * @ORM\Column(type="integer", name="jobid", length=4,
      *     options={"comment"="All queuetasks with the same jobid belong together.","unsigned"=true},
      *     nullable=true)
      * @Serializer\Type("string")
      */
-    private $jobid;
+    private ?int $jobid;
 
     /**
-     * @var int
      * @ORM\Column(type="integer", name="priority", length=4,
      *     options={"comment"="Priority; negative means higher priority",
      *              "unsigned"=false},
      *     nullable=false)
      */
-    private $priority;
+    private int $priority;
 
     /**
-     * @var int
      * @ORM\Column(type="integer", name="teampriority", length=4,
      *     options={"comment"="Team Priority; somewhat magic, lower implies higher priority.",
      *              "unsigned"=false},
      *     nullable=false)
      */
-    private $teamPriority;
+    private int $teamPriority;
 
     /**
      * @ORM\ManyToOne(targetEntity="Team")
      * @ORM\JoinColumn(name="teamid", referencedColumnName="teamid", onDelete="CASCADE")
      * @Serializer\Exclude()
      */
-    private $team;
+    private ?Team $team;
 
     /**
-     * @var double|null
+     * @var double|string|null
      * @ORM\Column(type="decimal", precision=32, scale=9, name="starttime", options={"comment"="Time started work",
      *                             "unsigned"=true}, nullable=true)
      * @Serializer\Exclude()

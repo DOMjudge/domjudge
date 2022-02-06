@@ -4,9 +4,9 @@ namespace App\Tests\Unit\Controller\API;
 
 class JudgementTypesControllerTest extends BaseTest
 {
-    protected $apiEndpoint = 'judgement-types';
+    protected ?string $apiEndpoint = 'judgement-types';
 
-    protected $expectedObjects = [
+    protected array $expectedObjects = [
         'AC' => [
             'id'        => 'AC',
             'name'      => 'correct',
@@ -27,9 +27,9 @@ class JudgementTypesControllerTest extends BaseTest
         ],
     ];
 
-    protected $expectedAbsent = ['nonexistent'];
+    protected array $expectedAbsent = ['nonexistent'];
 
-    public function testJudgementTypeChangedPenalty()
+    public function testJudgementTypeChangedPenalty(): void
     {
         $this->withChangedConfiguration('compile_penalty', true, function () {
             $contestId = $this->getDemoContestId();

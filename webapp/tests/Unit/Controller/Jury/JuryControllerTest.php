@@ -21,26 +21,26 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
  */
 abstract class JuryControllerTest extends BaseTest
 {
-    protected        $roles             = ['admin'];
-    protected        $addButton         = '';
-    protected static $rolesView         = ['admin','jury'];
-    protected static $rolesDisallowed   = ['team'];
-    protected static $exampleEntries    = ['overwrite_in_class'];
-    protected static $prefixURL         = 'http://localhost';
-    protected static $add               = '/add';
-    protected static $edit              = '/edit';
-    protected static $delete            = '/delete';
-    protected static $deleteEntities    = [];
-    protected static $deleteFixtures    = [];
-    protected static $shortTag          = '';
-    protected static $addPlus           = null;
-    protected static $addForm           = '';
-    protected static $deleteExtra       = null;
-    protected static $addEntities       = [];
-    protected static $addEntitiesCount  = [];
-    protected static $defaultEditEntityName  = null;
-    protected static $specialFieldOnlyUpdate = [];
-    protected static $editEntitiesSkipFields = [];
+    protected array $roles                          = ['admin'];
+    protected string $addButton                     = '';
+    protected static array $rolesView               = ['admin', 'jury'];
+    protected static array $rolesDisallowed         = ['team'];
+    protected static array $exampleEntries          = ['overwrite_in_class'];
+    protected static string $prefixURL              = 'http://localhost';
+    protected static string $add                    = '/add';
+    protected static string $edit                   = '/edit';
+    protected static string $delete                 = '/delete';
+    protected static array $deleteEntities          = [];
+    protected static array $deleteFixtures          = [];
+    protected static string $shortTag               = '';
+    protected static ?string $addPlus               = null;
+    protected static string $addForm                = '';
+    protected static ?array $deleteExtra            = null;
+    protected static array $addEntities             = [];
+    protected static array $addEntitiesCount        = [];
+    protected static ?string $defaultEditEntityName = null;
+    protected static array $specialFieldOnlyUpdate  = [];
+    protected static array $editEntitiesSkipFields  = [];
 
     protected function setUp(): void
     {
@@ -51,22 +51,9 @@ abstract class JuryControllerTest extends BaseTest
     /**
      * @var String[]|array[] $DOM_elements
      */
-    protected static $DOM_elements;
-
-    /**
-     * @var EntityManager $em
-     */
-    protected $em;
-
-    /**
-     * @var BaseApiEntity $className ;
-     */
-    protected static $className;
-
-    /**
-     * @var string $getIDFunc ;
-     */
-    protected static $getIDFunc;
+    protected static array $DOM_elements;
+    protected static string $className;
+    protected static string $getIDFunc;
 
     /**
      * Test that jury <???> overview page exists.
@@ -337,7 +324,7 @@ abstract class JuryControllerTest extends BaseTest
         $this->loadFixtures(static::$deleteFixtures);
         $this->verifyPageResponse('GET', static::$baseUrl, 200);
         // Find a CID we can delete.
-        $em = self::$container->get('doctrine')->getManager();
+        $em = self::getContainer()->get('doctrine')->getManager();
         $ent = $em->getRepository(static::$className)->findOneBy([$identifier => $entityShortName]);
         self::assertSelectorExists('i[class*=fa-trash-alt]');
         self::assertSelectorExists('body:contains("' . $entityShortName . '")');
@@ -386,12 +373,12 @@ abstract class JuryControllerTest extends BaseTest
     protected function addSubmission(string $team, string $problem, string $contest = 'demo'): Submission
     {
         /** @var EntityManagerInterface $em */
-        $em = static::$container->get(EntityManagerInterface::class);
+        $em = static::getContainer()->get(EntityManagerInterface::class);
         $contest = $em->getRepository(Contest::class)->findOneBy(['shortname' => $contest]);
         $team = $em->getRepository(Team::class)->findOneBy(['name' => $team]);
         $problem = $em->getRepository(Problem::class)->findOneBy(['externalid' => $problem]);
         /** @var SubmissionService $submissionService */
-        $submissionService = static::$container->get(SubmissionService::class);
+        $submissionService = static::getContainer()->get(SubmissionService::class);
         return $submissionService->submitSolution(
             $team, null, $problem, $contest, 'c',
             [new UploadedFile(__FILE__, "foo.c", null, null, true)]

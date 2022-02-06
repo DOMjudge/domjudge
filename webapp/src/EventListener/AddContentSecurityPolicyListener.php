@@ -20,7 +20,7 @@ class AddContentSecurityPolicyListener implements EventSubscriberInterface
         return [ResponseEvent::class => 'onKernelResponse'];
     }
 
-    public function onKernelResponse(ResponseEvent $event)
+    public function onKernelResponse(ResponseEvent $event): void
     {
         // Set the correct CSP based on whether the profiler is enabled, since
         // the profiler requires 'unsafe-eval' for script-src 'self'

@@ -8,10 +8,7 @@ use Doctrine\Persistence\ObjectManager;
 
 class ContestProblemFixture extends AbstractExampleDataFixture implements DependentFixtureInterface
 {
-    /**
-     * @inheritDoc
-     */
-    public function load(ObjectManager $manager)
+    public function load(ObjectManager $manager): void
     {
         $helloPractice = new ContestProblem();
         $helloPractice
@@ -47,10 +44,7 @@ class ContestProblemFixture extends AbstractExampleDataFixture implements Depend
         $manager->flush();
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function getDependencies()
+    public function getDependencies(): array
     {
         return [ContestFixture::class, ProblemFixture::class];
     }

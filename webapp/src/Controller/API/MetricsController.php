@@ -27,22 +27,10 @@ use Prometheus\RenderTextFormat;
  */
 class MetricsController extends AbstractFOSRestController
 {
-    /**
-     * @var EntityManagerInterface
-     */
-    protected $em;
-
-    /**
-     * @var DOMJudgeService
-     */
-    protected $dj;
-
-    /**
-     * @var SubmissionService
-     */
-    protected $submissionService;
-
-    protected $registry;
+    protected EntityManagerInterface $em;
+    protected DOMJudgeService $dj;
+    protected SubmissionService $submissionService;
+    protected CollectorRegistry $registry;
 
     public function __construct(
         EntityManagerInterface $em,
@@ -50,10 +38,10 @@ class MetricsController extends AbstractFOSRestController
         SubmissionService $submissionService,
         CollectorRegistry $registry
     ) {
-        $this->em        = $em;
-        $this->dj        = $dj;
+        $this->em                = $em;
+        $this->dj                = $dj;
         $this->submissionService = $submissionService;
-        $this->registry = $registry;
+        $this->registry          = $registry;
     }
 
     /**
@@ -65,7 +53,7 @@ class MetricsController extends AbstractFOSRestController
      *     @OA\MediaType(mediaType="text/plain"),
      * )
      */
-    public function prometheusAction(Request $request): Response
+    public function prometheusAction(): Response
     {
         $registry = $this->registry;
         $em = $this->em;

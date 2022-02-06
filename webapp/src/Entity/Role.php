@@ -17,30 +17,27 @@ use Doctrine\ORM\Mapping as ORM;
 class Role
 {
     /**
-     * @var int
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer", name="roleid", length=4,
      *     options={"comment"="Role ID","unsigned"=true}, nullable=false)
      */
-    private $roleid;
+    private int $roleid;
 
     /**
-     * @var string
      * @ORM\Column(type="string", name="role", length=32, options={"comment"="Role name"}, nullable=false)
      */
-    private $dj_role;
+    private string $dj_role;
 
     /**
-     * @var string
      * @ORM\Column(type="string", name="description", length=255, options={"comment"="Description for the web interface"}, nullable=false)
      */
-    private $description;
+    private string $description;
 
     /**
      * @ORM\ManyToMany(targetEntity="User", mappedBy="user_roles")
      */
-    private $users;
+    private Collection $users;
 
     public function getRole(): string
     {
@@ -85,7 +82,7 @@ class Role
         return $this;
     }
 
-    public function removeUser(User $user)
+    public function removeUser(User $user): void
     {
         $this->users->removeElement($user);
     }

@@ -17,8 +17,8 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class FlattenExceptionHandler implements SubscribingHandlerInterface
 {
-    private $messagesMap;
-    private $debug;
+    private ExceptionValueMap $messagesMap;
+    private bool $debug;
 
     public function __construct(ExceptionValueMap $messagesMap, bool $debug)
     {
@@ -43,7 +43,7 @@ class FlattenExceptionHandler implements SubscribingHandlerInterface
         FlattenException $exception,
         array $type,
         Context $context
-    ) {
+    ): array {
         return $visitor->visitArray($this->convertToArray($exception, $context),
             $type);
     }

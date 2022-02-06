@@ -6,12 +6,12 @@ use App\Tests\Unit\BaseTest;
 
 class BalloonControllerTest extends BaseTest
 {
-    protected $roles = ['jury'];
+    protected array $roles = ['jury'];
 
     /**
      * Test that jury role can access balloons page.
      */
-    public function testBalloonsAccessForJury() : void
+    public function testBalloonsAccessForJury(): void
     {
         $this->verifyPageResponse('GET', '/jury/balloons', 200);
         self::assertSelectorExists('h1:contains("Balloons - Demo contest")');

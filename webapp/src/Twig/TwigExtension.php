@@ -16,77 +16,31 @@ use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\SubmissionService;
 use App\Utils\Utils;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 use SebastianBergmann\Diff\Differ;
 use Symfony\Component\Intl\Countries;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
+use Twig\Environment;
 use Twig\Extension\AbstractExtension;
 use Twig\Extension\GlobalsInterface;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
-use Twig\Environment;
 
 class TwigExtension extends AbstractExtension implements GlobalsInterface
 {
-    /**
-     * @var DOMJudgeService
-     */
-    protected $dj;
+    protected DOMJudgeService $dj;
+    protected ConfigurationService $config;
+    protected Environment $twig;
+    protected EntityManagerInterface $em;
+    protected SubmissionService $submissionService;
+    protected EventLogService $eventLogService;
+    protected TokenStorageInterface $tokenStorage;
+    protected AuthorizationCheckerInterface $authorizationChecker;
+    protected string $projectDir;
 
-    /**
-     * @var ConfigurationService
-     */
-    protected $config;
-
-    /**
-     * @var Environment
-     */
-    protected $twig;
-
-    /**
-     * @var EntityManagerInterface
-     */
-    protected $em;
-
-    /**
-     * @var SubmissionService
-     */
-    protected $submissionService;
-
-    /**
-     * @var EventLogService
-     */
-    protected $eventLogService;
-
-    /**
-     * @var TokenStorageInterface
-     */
-    protected $tokenStorage;
-
-    /**
-     * @var AuthorizationCheckerInterface
-     */
-    protected $authorizationChecker;
-
-    /**
-     * @var string
-     */
-    protected $projectDir;
-
-    /**
-     * TwigExtension constructor.
-     *
-     * @param DOMJudgeService               $dj
-     * @param ConfigurationService          $config
-     * @param Environment                   $twig
-     * @param EntityManagerInterface        $em
-     * @param SubmissionService             $submissionService
-     * @param EventLogService               $eventLogService
-     * @param TokenStorageInterface         $tokenStorage
-     * @param AuthorizationCheckerInterface $authorizationChecker
-     * @param string                        $projectDir
-     */
     public function __construct(
         DOMJudgeService $dj,
         ConfigurationService $config,
@@ -193,9 +147,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             'alpha3_countries' => Countries::getAlpha3Names(),
             'alpha3_alpha2_country_mapping' => array_combine(
                 Countries::getAlpha3Codes(),
-                array_map(function ($alpha3) {
-                    return Countries::getAlpha2Code($alpha3);
-                }, Countries::getAlpha3Codes())
+                array_map(fn($alpha3) => Countries::getAlpha2Code($alpha3), Countries::getAlpha3Codes())
             ),
             'show_shadow_differences' => $this->tokenStorage->getToken() &&
                                          $this->authorizationChecker->isGranted('ROLE_ADMIN') &&
@@ -206,11 +158,8 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
 
     /**
      * Print the time difference between two times
-     * @param float      $start
-     * @param float|null $end
-     * @return string
      */
-    public function printtimediff(float $start, float $end = null): string
+    public function printtimediff(float $start, ?float $end = null): string
     {
         return Utils::printtimediff($start, $end);
     }
@@ -218,12 +167,9 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
     /**
      * Print a time formatted as specified. The format is according to date().
      * @param string|float $datetime
-     * @param string|null  $format
      * @param Contest|null $contest If given, print time relative to that contest start.
-     * @return string
-     * @throws \Exception
      */
-    public function printtime($datetime, string $format = null, Contest $contest = null): string
+    public function printtime($datetime, ?string $format = null, ?Contest $contest = null): string
     {
         if ($datetime === null) {
             $datetime = Utils::now();
@@ -263,10 +209,8 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
      *
      * @param string|float $datetime
      * @param Contest|null $contest If given, print time relative to that contest start.
-     * @return string
-     * @throws \Exception
      */
-    public function printtimeHover($datetime, Contest $contest = null): string
+    public function printtimeHover($datetime, ?Contest $contest = null): string
     {
         if ($datetime === null) {
             $datetime = Utils::now();
@@ -279,8 +223,6 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
 
     /**
      * print a yes/no field
-     * @param bool $val
-     * @return string
      */
     public static function printYesNo(bool $val): string
     {
@@ -289,20 +231,14 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
 
     /**
      * render a button
-     * @param string      $url
-     * @param string      $text
-     * @param string      $type
-     * @param string|null $icon
-     * @param bool        $isAjaxModal
-     * @return string
      */
     public function button(
         string $url,
         string $text,
         string $type = 'primary',
-        string $icon = null,
+        ?string $icon = null,
         bool $isAjaxModal = false
-    ) {
+    ): string {
         if ($icon) {
             $icon = sprintf('<i class="fas fa-%s"></i>&nbsp;', $icon);
         }
@@ -317,8 +253,6 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
 
     /**
      * Map user/team/judgehost status to a cssclass
-     * @param string $status
-     * @return string
      */
     public static function statusClass(string $status): string
     {
@@ -337,8 +271,6 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
 
     /**
      * Map user/team/judgehost status to an icon
-     * @param string $status
-     * @return string
      */
     public static function statusIcon(string $status): string
     {
@@ -363,9 +295,8 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
 
     /**
      * Expand countrycode to a flag and optionally full country name  representation
-     * @param string $countryCode The Alpha3 country code to look up
+     * @param string|null $countryCode The Alpha3 country code to look up
      * @param bool $showFullname Also output the country's full name
-     * @return string
      */
     public function countryFlag(?string $countryCode, bool $showFullname = false): string
     {
@@ -387,8 +318,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
 
     /**
      * Expand affiliation ID to an image
-     * @param string|null $affiliationId The affiliation ID to get the logo for
-     * @return string
+     * @param string $affiliationId The affiliation ID to get the logo for
      */
     public function affiliationLogo(string $affiliationId, string $shortName): string
     {
@@ -404,11 +334,9 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
 
     /**
      * Output the testcase results for the given submissions
-     * @param Submission $submission
-     * @param bool       $external If true, show external testcase results
-     * @return string
+     * @param bool $external If true, show external testcase results
      */
-    public function testcaseResults(Submission $submission, bool $external = false): string
+    public function testcaseResults(Submission $submission, ?bool $external = false): string
     {
         // We use a direct SQL query here for performance reasons
         if ($external) {
@@ -482,9 +410,6 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
      * TODO: this function shares a lot with the above one, unify them?
      *
      * @param Testcase[] $testcases
-     * @param bool       $submissionDone
-     * @param bool       $isExternal
-     * @return string
      */
     public function displayTestcaseResults(array $testcases, bool $submissionDone, bool $isExternal = false): string
     {
@@ -547,12 +472,8 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
 
     /**
      * Print the given result
-     * @param string $result
-     * @param bool   $valid
-     * @param bool   $jury
-     * @return string
      */
-    public function printResult($result, bool $valid = true, bool $jury = false): string
+    public function printResult(?string $result, bool $valid = true, bool $jury = false): string
     {
         switch ($result) {
             case 'too-late':
@@ -584,10 +505,8 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
 
     /**
      * Print the given result for the jury, assuming it is valid
-     * @param string $result
-     * @return string
      */
-    public function printValidJuryResult($result): string
+    public function printValidJuryResult(?string $result): string
     {
         return $this->printResult($result, true, true);
     }
@@ -636,9 +555,6 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
 
     /**
      * Return the URL to an external CCS for the given submission if available
-     * @param Submission $submission
-     * @return string|null
-     * @throws \Exception
      */
     public function externalCcsUrl(Submission $submission): ?string
     {
@@ -657,9 +573,8 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
 
     /**
      * Prints the first file (and potentially the number of additional files).
-     * @return string
      */
-    public function printFiles($files): string
+    public function printFiles(Collection $files): string
     {
         $files = $files->toArray();
         if (empty($files)) {
@@ -679,9 +594,6 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
     /**
      * Formats a given hostname. If $full = true, then the full hostname will be printed,
      * else only the local part (for keeping tables readable)
-     * @param string $hostname
-     * @param bool   $full
-     * @return string
      */
     public function printHost(string $hostname, bool $full = false): string
     {
@@ -696,8 +608,6 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
 
     /**
      * Formats a list of given hostnames, extracting a common prefix.
-     * @param array $hostnames
-     * @return string
      */
     public function printHosts(array $hostnames): string
     {
@@ -733,17 +643,13 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             return implode(", ", array_map([$this, 'printHost'], $hostnames));
         } else {
             $len_prefix = strlen($common_prefix);
-            $local_parts = array_map(function ($host) use ($len_prefix) {
-                return substr($host, $len_prefix);
-            }, $local_parts);
+            $local_parts = array_map(fn($host) => substr($host, $len_prefix), $local_parts);
             return $this->printHost($common_prefix . "{" . implode(",", $local_parts) . "}", true);
         }
     }
 
     /**
      * Get the number of lines in a given string
-     * @param string $input
-     * @return int
      */
     public function lineCount(string $input): int
     {
@@ -752,8 +658,6 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
 
     /**
      * Parse the run diff for a given difftext
-     * @param string $difftext
-     * @return string
      */
     public function parseRunDiff(string $difftext): string
     {
@@ -800,7 +704,8 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         return $return;
     }
 
-    public function interactiveLog(string $log, bool $forTeam = false) {
+    public function interactiveLog(string $log, bool $forTeam = false): string
+    {
         $truncated = '/\[output display truncated after \d* B\]$/';
         $matches = [];
         $truncation = "";
@@ -853,9 +758,6 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
 
     /**
      * Output a run diff
-     * @param array $runOutput
-     * @return string
-     * @throws \Exception
      */
     public function runDiff(array $runOutput): string
     {
@@ -899,22 +801,19 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
 
     /**
      * Output a (readonly) code editor for the given submission file
-     * @param string      $code
-     * @param string      $index
      * @param string|null $language        Ace language to use
      * @param bool        $editable        Whether to allow editing
      * @param string      $elementToUpdate HTML element to update when input changes
      * @param string|null $filename        If $language is null, filename to use to determine language
-     * @return string
      */
     public function codeEditor(
         string $code,
         string $index,
-        string $language = null,
+        ?string $language = null,
         bool $editable = false,
         string $elementToUpdate = '',
-        string $filename = null
-    ) {
+        ?string $filename = null
+    ): string {
         $editor = <<<HTML
 <div class="editor" id="__EDITOR__">%s</div>
 <script>
@@ -962,8 +861,6 @@ JS;
 
     /**
      * Parse the given source diff
-     * @param $difftext
-     * @return string
      */
     protected function parseSourceDiff($difftext): string
     {
@@ -990,9 +887,6 @@ JS;
 
     /**
      * Show a diff between two files
-     * @param SubmissionFile $newFile
-     * @param SubmissionFile $oldFile
-     * @return string
      */
     public function showDiff(SubmissionFile $newFile, SubmissionFile $oldFile): string
     {
@@ -1002,9 +896,6 @@ JS;
 
     /**
      * Print the start time of the given contest
-     * @param Contest $contest
-     * @return string
-     * @throws \Exception
      */
     public function printContestStart(Contest $contest): string
     {
@@ -1024,9 +915,6 @@ JS;
 
     /**
      * Get custom assets of the given type
-     * @param string $type
-     *
-     * @return array
      */
     public function customAssetFiles(string $type): array
     {
@@ -1041,9 +929,6 @@ JS;
 
     /**
      * Print the relative time in h:mm:ss[.uuuuuu] format.
-     * @param float $relativeTime
-     * @param bool  $useMicroseconds
-     * @return string
      */
     public function printTimeRelative(float $relativeTime, bool $useMicroseconds = false): string
     {
@@ -1078,8 +963,6 @@ JS;
     /**
      * Display the scoretime for the given time
      * @param string|float $time
-     * @return int
-     * @throws \Exception
      */
     public function scoreTime($time): int
     {
@@ -1088,10 +971,6 @@ JS;
 
     /**
      * Calculate the penalty time for the given data
-     * @param bool $solved
-     * @param int  $num_submissions
-     * @return int
-     * @throws \Exception
      */
     public function calculatePenaltyTime(bool $solved, int $num_submissions): int
     {
@@ -1101,10 +980,8 @@ JS;
 
     /**
      * Print the given description, collapsing it by default if it is too big
-     * @param string|null $description
-     * @return string
      */
-    public function descriptionExpand(string $description = null): string
+    public function descriptionExpand(?string $description = null): string
     {
         if ($description == null) {
             return '';
@@ -1131,8 +1008,6 @@ EOF;
     /**
      * Whether to show the external ID for the given entity
      * @param object|string $entity
-     * @return bool
-     * @throws \Exception
      */
     public function showExternalId($entity): bool
     {
@@ -1141,10 +1016,6 @@ EOF;
 
     /**
      * Wrap unquoted text
-     * @param string $text
-     * @param int    $width
-     * @param string $quote
-     * @return string
      */
     public function wrapUnquoted(string $text, int $width = 75, string $quote = '>'): string
     {
@@ -1153,9 +1024,6 @@ EOF;
 
     /**
      * Convert a hex color to RGBA
-     * @param string $text
-     * @param float  $opacity
-     * @return string
      */
     public function hexColorToRGBA(string $text, float $opacity = 1): string
     {
@@ -1185,10 +1053,6 @@ EOF;
 
     /**
      * Convert the given string to a field that is safe to use in a TSV file
-     *
-     * @param string $field
-     *
-     * @return string
      */
     public function toTsvField(string $field): string
     {
@@ -1197,10 +1061,6 @@ EOF;
 
     /**
      * Determine the icon name for a given file type
-     *
-     * @param string $type
-     *
-     * @return string
      */
     public function fileTypeIcon(string $type): string
     {

@@ -9,10 +9,10 @@ class ApiHeadersListener implements EventSubscriberInterface
 {
     public static function getSubscribedEvents(): array
     {
-        return [ResponseEvent::class => 'onKernelResponse',];
+        return [ResponseEvent::class => 'onKernelResponse'];
     }
 
-    public function onKernelResponse(ResponseEvent $event)
+    public function onKernelResponse(ResponseEvent $event): void
     {
         $request = $event->getRequest();
         // Check if this is an API request

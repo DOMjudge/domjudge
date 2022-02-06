@@ -25,25 +25,10 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class AuditLogController extends AbstractController
 {
-    /**
-     * @var EntityManagerInterface
-     */
-    protected $em;
-
-    /**
-     * @var DOMJudgeService
-     */
-    protected $dj;
-
-    /**
-     * @var ConfigurationService
-     */
-    protected $config;
-
-    /**
-     * @var EventLogService
-     */
-    protected $eventLogService;
+    protected EntityManagerInterface $em;
+    protected DOMJudgeService $dj;
+    protected ConfigurationService $config;
+    protected EventLogService $eventLogService;
 
     public function __construct(
         EntityManagerInterface $em,
@@ -60,7 +45,7 @@ class AuditLogController extends AbstractController
     /**
      * @Route("", name="jury_auditlog")
      */
-    public function indexAction(Request $request, Packages $assetPackage, KernelInterface $kernel): Response
+    public function indexAction(Request $request): Response
     {
         $timeFormat = (string)$this->config->get('time_format');
 

@@ -31,15 +31,6 @@ class DOMJudgeXHeadersAuthenticator extends AbstractAuthenticator implements Aut
     private ConfigurationService $config;
     private RouterInterface $router;
 
-    /**
-     * DOMJudgeXHeadersAuthenticator constructor.
-     *
-     * @param Security                     $security
-     * @param UserProviderInterface        $userProvider
-     * @param UserPasswordHasherInterface  $hasher
-     * @param ConfigurationService         $config
-     * @param RouterInterface              $router
-     */
     public function __construct(
         Security $security,
         UserProviderInterface $userProvider,

@@ -34,28 +34,10 @@ use Symfony\Component\Validator\Context\ExecutionContext;
 
 class UserRegistrationType extends AbstractType
 {
-    /**
-     * @var DOMJudgeService
-     */
-    protected $dj;
+    protected DOMJudgeService $dj;
+    protected ConfigurationService $config;
+    protected EntityManagerInterface $em;
 
-    /**
-     * @var ConfigurationService
-     */
-    protected $config;
-
-    /**
-     * @var EntityManagerInterface
-     */
-    protected $em;
-
-    /**
-     * UserRegistrationType constructor.
-     *
-     * @param DOMJudgeService        $dj
-     * @param ConfigurationService   $config
-     * @param EntityManagerInterface $em
-     */
     public function __construct(
         DOMJudgeService $dj,
         ConfigurationService $config,
@@ -66,10 +48,7 @@ class UserRegistrationType extends AbstractType
         $this->em     = $em;
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
             ->add('username', TextType::class, [
@@ -122,12 +101,10 @@ class UserRegistrationType extends AbstractType
                     'mapped' => false,
                     'choice_label' => 'name',
                     'placeholder' => '-- Select category --',
-                    'query_builder' => function (EntityRepository $er) {
-                        return $er
-                            ->createQueryBuilder('c')
-                            ->where('c.allow_self_registration = 1')
-                            ->orderBy('c.sortorder');
-                    },
+                    'query_builder' => fn(EntityRepository $er) => $er
+                        ->createQueryBuilder('c')
+                        ->where('c.allow_self_registration = 1')
+                        ->orderBy('c.sortorder'),
                     'attr' => [
                         'placeholder' => 'Category',
                     ],
@@ -228,10 +205,7 @@ class UserRegistrationType extends AbstractType
         });
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $validateAffiliation = function ($data, ExecutionContext $context) {
             if ($this->config->get('show_affiliations')) {

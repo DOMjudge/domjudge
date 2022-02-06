@@ -8,7 +8,8 @@ use PHPUnit\Framework\TestCase;
 
 class ContestTest extends TestCase
 {
-    public function testGetAbsoluteTime() {
+    public function testGetAbsoluteTime(): void
+    {
         $contest = new Contest();
         $contest->setStarttime(42);
 

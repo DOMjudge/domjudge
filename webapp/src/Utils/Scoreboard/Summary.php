@@ -4,30 +4,18 @@ namespace App\Utils\Scoreboard;
 
 class Summary
 {
-    /**
-     * @var int[]
-     */
-    protected $numberOfPoints = [];
+    /** @var int[] */
+    protected array $numberOfPoints = [];
 
-    /**
-     * @var int[]
-     */
-    protected $affiliations = [];
+    /** @var int[] */
+    protected array $affiliations = [];
 
-    /**
-     * @var int[]
-     */
-    protected $countries = [];
+    /** @var int[] */
+    protected array $countries = [];
 
-    /**
-     * @var ProblemSummary[]
-     */
-    protected $problems = [];
+    /** @var ProblemSummary[] */
+    protected array $problems = [];
 
-    /**
-     * Summary constructor.
-     * @param array $problems
-     */
     public function __construct(array $problems)
     {
         foreach (array_keys($problems) as $problemId) {
@@ -35,20 +23,12 @@ class Summary
         }
     }
 
-    /**
-     * @param int $sortorder
-     * @return int
-     */
     public function getNumberOfPoints(int $sortorder): int
     {
         return $this->numberOfPoints[$sortorder] ?? 0;
     }
 
-    /**
-     * @param int $sortorder
-     * @param int $numberOfPoints
-     */
-    public function addNumberOfPoints(int $sortorder, int $numberOfPoints)
+    public function addNumberOfPoints(int $sortorder, int $numberOfPoints): void
     {
         if (!isset($this->numberOfPoints[$sortorder])) {
             $this->numberOfPoints[$sortorder] = 0;
@@ -64,10 +44,7 @@ class Summary
         return $this->affiliations;
     }
 
-    /**
-     * @param int $affiliationId
-     */
-    public function incrementAffiliationValue(int $affiliationId)
+    public function incrementAffiliationValue(int $affiliationId): void
     {
         if (!isset($this->affiliations[$affiliationId])) {
             $this->affiliations[$affiliationId] = 0;
@@ -83,10 +60,7 @@ class Summary
         return $this->countries;
     }
 
-    /**
-     * @param string $country
-     */
-    public function incrementCountryValue(string $country)
+    public function incrementCountryValue(string $country): void
     {
         if (!isset($this->countries[$country])) {
             $this->countries[$country] = 0;
@@ -102,11 +76,7 @@ class Summary
         return $this->problems;
     }
 
-    /**
-     * @param $problemId
-     * @return ProblemSummary|null
-     */
-    public function getProblem($problemId): ?ProblemSummary
+    public function getProblem(int $problemId): ?ProblemSummary
     {
         return $this->problems[$problemId] ?? null;
     }

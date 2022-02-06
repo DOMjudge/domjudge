@@ -10,20 +10,14 @@ class TeamCategoryFixture extends AbstractDefaultDataFixture
 {
     public const SYSTEM_REFERENCE = 'system';
 
-    /**
-     * @var LoggerInterface
-     */
-    protected $logger;
+    protected LoggerInterface $logger;
 
     public function __construct(LoggerInterface $logger)
     {
         $this->logger = $logger;
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function load(ObjectManager $manager)
+    public function load(ObjectManager $manager): void
     {
         $data = [
             // Name,            Sort order, Color,     Visible

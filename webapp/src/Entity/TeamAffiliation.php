@@ -35,7 +35,6 @@ use Symfony\Component\Validator\Constraints as Assert;
 class TeamAffiliation extends BaseApiEntity implements AssetEntityInterface
 {
     /**
-     * @var int
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer", name="affilid", length=4,
@@ -44,71 +43,64 @@ class TeamAffiliation extends BaseApiEntity implements AssetEntityInterface
      * @Serializer\SerializedName("id")
      * @Serializer\Type("string")
      */
-    protected $affilid;
+    protected ?int $affilid = null;
 
     /**
-     * @var string
      * @ORM\Column(type="string", name="externalid", length=255,
      *     options={"comment"="Team affiliation ID in an external system",
      *              "collation"="utf8mb4_bin"},
      *     nullable=true)
      * @Serializer\Exclude()
      */
-    protected $externalid;
+    protected ?string $externalid;
 
     /**
-     * @var string
      * @ORM\Column(type="string", name="shortname", length=32,
      *     options={"comment"="Short descriptive name"}, nullable=false)
      * @Serializer\SerializedName("name")
      */
-    private $shortname;
+    private string $shortname;
 
     /**
-     * @var string
      * @ORM\Column(type="string", name="name", length=255,
      *     options={"comment"="Descriptive name"}, nullable=false)
      * @Serializer\SerializedName("formal_name")
      */
-    private $name;
+    private string $name;
 
     /**
-     * @var string
      * @ORM\Column(type="string", length=3, name="country",
      *     options={"comment"="ISO 3166-1 alpha-3 country code","fixed"=true},
      *     nullable=true)
      * @Serializer\Expose(if="context.getAttribute('config_service').get('show_flags')")
      * @Country()
      */
-    private $country;
+    private ?string $country;
 
     /**
-     * @var UploadedFile|null
      * @Assert\File(mimeTypes={"image/png","image/jpeg","image/svg+xml"}, mimeTypesMessage="Only PNG's, JPG's and SVG's are allowed")
      * @Serializer\Exclude()
      */
-    private $logoFile;
+    private ?UploadedFile $logoFile = null;
 
     /**
-     * @var bool
      * @Serializer\Exclude()
      */
-    private $clearLogo = false;
+    private bool $clearLogo = false;
 
     /**
-     * @var string
      * @ORM\Column(type="text", length=4294967295, name="comments",
      *     options={"comment"="Comments"},
      *     nullable=true)
      * @Serializer\Exclude()
      */
-    private $comments;
+    private ?string $comments;
 
     /**
      * @ORM\OneToMany(targetEntity="Team", mappedBy="affiliation")
      * @Serializer\Exclude()
      */
-    private $teams;
+    private Collection $teams;
 
     public function __construct()
     {
@@ -216,7 +208,7 @@ class TeamAffiliation extends BaseApiEntity implements AssetEntityInterface
         return $this;
     }
 
-    public function removeTeam(Team $team)
+    public function removeTeam(Team $team): void
     {
         $this->teams->removeElement($team);
     }

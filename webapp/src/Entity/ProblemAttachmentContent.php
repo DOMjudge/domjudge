@@ -17,18 +17,17 @@ class ProblemAttachmentContent
      * reverse of this relation will always be loaded. See the commit message of commit
      * 9e421f96691ec67ed62767fe465a6d8751edd884 for a more elaborate explanation
      *
-     * @var ProblemAttachment
      * @ORM\Id
      * @ORM\ManyToOne(targetEntity=ProblemAttachment::class, inversedBy="content")
      * @ORM\JoinColumn(name="attachmentid", referencedColumnName="attachmentid", onDelete="CASCADE")
      */
-    private $attachment;
+    private ProblemAttachment $attachment;
 
     /**
      * @ORM\Column(type="blobtext", length=4294967295, name="content",
      *     options={"comment"="Attachment content"})
      */
-    private $content;
+    private string $content;
 
     public function getAttachment(): ProblemAttachment
     {

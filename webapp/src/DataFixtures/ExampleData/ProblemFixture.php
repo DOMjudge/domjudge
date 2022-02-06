@@ -13,34 +13,19 @@ class ProblemFixture extends AbstractExampleDataFixture implements DependentFixt
     public const FLTCMP_REFERENCE   = 'fltcmp';
     public const BOOLFIND_REFERENCE = 'boolfind';
 
-    /**
-     * @var string
-     */
-    protected $projectDir;
+    protected string $projectDir;
 
-    /**
-     * @inheritDoc
-     */
     public static function getGroups(): array
     {
         return ['example', 'gatling'];
     }
 
-    /**
-     * ProblemFixture constructor.
-     * @param string $projectDir
-     */
     public function __construct(string $projectDir)
     {
         $this->projectDir = $projectDir;
     }
 
-    /**
-     * Load data fixtures with the passed EntityManager
-     *
-     * @param ObjectManager $manager
-     */
-    public function load(ObjectManager $manager)
+    public function load(ObjectManager $manager): void
     {
         $examplesDir = sprintf('%s/public/doc/examples/', $this->projectDir);
 
@@ -91,10 +76,7 @@ class ProblemFixture extends AbstractExampleDataFixture implements DependentFixt
         $this->addReference(self::BOOLFIND_REFERENCE, $boolfind);
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function getDependencies()
+    public function getDependencies(): array
     {
         return [ExecutableFixture::class];
     }

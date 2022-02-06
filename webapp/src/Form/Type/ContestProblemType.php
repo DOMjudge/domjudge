@@ -14,19 +14,15 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class ContestProblemType extends AbstractType
 {
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder->add('problem', EntityType::class, [
             'class' => Problem::class,
             'required' => true,
-            'choice_label' => function (Problem $problem) {
-                return sprintf('p%d - %s', $problem->getProbid(), $problem->getName());
-            },
-            'query_builder' => function (EntityRepository $er) {
-                return $er
-                    ->createQueryBuilder('p')
-                    ->orderBy('p.probid');
-            },
+            'choice_label' => fn(Problem $problem) => sprintf('p%d - %s', $problem->getProbid(), $problem->getName()),
+            'query_builder' => fn(EntityRepository $er) => $er
+                ->createQueryBuilder('p')
+                ->orderBy('p.probid'),
         ]);
 
         $builder->add('shortname', TextType::class, [
@@ -62,7 +58,7 @@ class ContestProblemType extends AbstractType
         ]);
     }
 
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults(['data_class' => ContestProblem::class]);
     }

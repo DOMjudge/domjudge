@@ -7,7 +7,8 @@ use PHPUnit\Framework\TestCase;
 
 class ClarificationTest extends TestCase
 {
-    public function testSummary() {
+    public function testSummary(): void
+    {
        $clarification = new Clarification();
        $text =
 'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod
@@ -17,14 +18,16 @@ tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.';
            $clarification->getSummary());
     }
 
-    public function testUncutSummary() {
+    public function testUncutSummary(): void
+    {
         $clarification = new Clarification();
         $text = 'Is this a quick question?';
         $clarification->setBody($text);
         $this->assertEquals($text . ' ', $clarification->getSummary());
     }
 
-    public function testIgnoreQuotedText() {
+    public function testIgnoreQuotedText(): void
+    {
         $clarification = new Clarification();
         $text =
 '> Does P equal NP?
@@ -34,7 +37,8 @@ You bet.';
         $this->assertEquals('You bet. ', $clarification->getSummary());
     }
 
-    public function testMergeNewlines() {
+    public function testMergeNewlines(): void
+    {
         $clarification = new Clarification();
         $text =
 'First line,

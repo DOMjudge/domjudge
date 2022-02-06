@@ -69,8 +69,10 @@ class RejudgingController extends BaseController
 
     /**
      * @Route("", name="jury_rejudgings")
+     * @throws NoResultException
+     * @throws NonUniqueResultException
      */
-    public function indexAction(Request $request): Response
+    public function indexAction(): Response
     {
         $curContest = $this->dj->getCurrentContest();
         $queryBuilder = $this->em->createQueryBuilder()
@@ -105,7 +107,6 @@ class RejudgingController extends BaseController
         $timeFormat       = (string)$this->config->get('time_format');
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         $rejudgings_table = [];
-        /** @var Rejudging $rejudging */
         foreach ($rejudgings as $rejudging) {
             $rejudgingdata = [];
             // Get whatever fields we can from the problem object itself.
@@ -246,7 +247,7 @@ class RejudgingController extends BaseController
         $originalVerdicts = [];
         $newVerdicts      = [];
 
-        $this->em->transactional(function () use ($rejudging, &$originalVerdicts, &$newVerdicts) {
+        $this->em->wrapInTransaction(function () use ($rejudging, &$originalVerdicts, &$newVerdicts) {
             $expr             = $this->em->getExpressionBuilder();
             $originalVerdicts = $this->em->createQueryBuilder()
                 ->from(Judging::class, 'j')
@@ -277,9 +278,7 @@ class RejudgingController extends BaseController
                 ->getQuery()
                 ->getResult();
 
-            $getSubmissionId = function (Judging $judging) {
-                return $judging->getSubmission()->getSubmitid();
-            };
+            $getSubmissionId = fn(Judging $judging) => $judging->getSubmission()->getSubmitid();
             $originalVerdicts = Utils::reindex($originalVerdicts, $getSubmissionId);
             $newVerdicts = Utils::reindex($newVerdicts, $getSubmissionId);
         });
@@ -417,11 +416,15 @@ class RejudgingController extends BaseController
      *     "/{rejudgingId<\d+>}/{action<cancel|apply>}",
      *     name="jury_rejudging_finish"
      * )
-     * @return Response|StreamedResponse
      * @throws NonUniqueResultException
      */
-    public function finishAction(Request $request, RejudgingService $rejudgingService, ?Profiler $profiler, int $rejudgingId, string $action)
-    {
+    public function finishAction(
+        Request $request,
+        RejudgingService $rejudgingService,
+        ?Profiler $profiler,
+        int $rejudgingId,
+        string $action
+    ): Response {
         // Note: we use a XMLHttpRequest here as Symfony does not support streaming Twig output
 
         // Disable the profiler toolbar to avoid OOMs.
@@ -467,7 +470,6 @@ class RejudgingController extends BaseController
 
     /**
      * @Route("/add", name="jury_rejudging_add")
-     * @throws Exception
      */
     public function addAction(Request $request, FormFactoryInterface $formFactory): Response
     {
@@ -481,9 +483,7 @@ class RejudgingController extends BaseController
             $formData['contests'] = is_null($currentContest) ? [] : [$currentContest];
         }
         $verdicts             = $formBuilder->get('verdicts')->getOption('choices');
-        $incorrectVerdicts    = array_filter($verdicts, function ($k) {
-            return $k != 'correct';
-        });
+        $incorrectVerdicts    = array_filter($verdicts, fn($k) => $k != 'correct');
         $formData['verdicts'] = $incorrectVerdicts;
 
         $form = $formBuilder->setData($formData)->getForm();
@@ -496,24 +496,30 @@ class RejudgingController extends BaseController
                 'reason'     => $formData['reason'],
                 'priority'   => JudgeTask::parsePriority($formData['priority']),
                 'repeat'     => $formData['repeat'],
-                'contests'   => array_map(function (Contest $contest) {
-                    return $contest->getCid();
-                }, $formData['contests'] ? $formData['contests']->toArray() : []),
-                'problems'   => array_map(function (Problem $problem) {
-                    return $problem->getProbid();
-                }, $formData['problems'] ? $formData['problems']->toArray() : []),
-                'languages'  => array_map(function (Language $language) {
-                    return $language->getLangid();
-                }, $formData['languages'] ? $formData['languages']->toArray() : []),
-                'teams'      => array_map(function (Team $team) {
-                    return $team->getTeamid();
-                }, $formData['teams'] ? $formData['teams']->toArray() : []),
-                'users'      => array_map(function (User $user) {
-                    return $user->getUserid();
-                }, $formData['users'] ? $formData['users']->toArray() : []),
-                'judgehosts' => array_map(function (Judgehost $judgehost) {
-                    return $judgehost->getJudgehostid();
-                }, $formData['judgehosts'] ? $formData['judgehosts']->toArray() : []),
+                'contests'   => array_map(
+                    fn(Contest $contest) => $contest->getCid(),
+                    $formData['contests'] ? $formData['contests']->toArray() : []
+                ),
+                'problems'   => array_map(
+                    fn(Problem $problem) => $problem->getProbid(),
+                    $formData['problems'] ? $formData['problems']->toArray() : []
+                ),
+                'languages'  => array_map(
+                    fn(Language $language) => $language->getLangid(),
+                    $formData['languages'] ? $formData['languages']->toArray() : []
+                ),
+                'teams'      => array_map(
+                    fn(Team $team) => $team->getTeamid(),
+                    $formData['teams'] ? $formData['teams']->toArray() : []
+                ),
+                'users'      => array_map(
+                    fn(User $user) => $user->getUserid(),
+                    $formData['users'] ? $formData['users']->toArray() : []
+                ),
+                'judgehosts' => array_map(
+                    fn(Judgehost $judgehost) => $judgehost->getJudgehostid(),
+                    $formData['judgehosts'] ? $formData['judgehosts']->toArray() : []
+                ),
                 'verdicts'   => array_values($formData['verdicts']),
                 'before'     => $formData['before'],
                 'after'      => $formData['after'],
@@ -909,11 +915,7 @@ class RejudgingController extends BaseController
             }
         }
         sort($judging_runs_differ);
-        usort($runtime_spread,
-            function ($a, $b) {
-                return $b['spread'] <=> $a['spread'];
-            }
-        );
+        usort($runtime_spread, fn($a, $b) => $b['spread'] <=> $a['spread']);
 
         $max_list_len = 10;
         $runtime_spread_list = [];

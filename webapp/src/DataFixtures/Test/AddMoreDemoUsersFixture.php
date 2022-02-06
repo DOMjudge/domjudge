@@ -9,7 +9,7 @@ use Doctrine\Persistence\ObjectManager;
 
 class AddMoreDemoUsersFixture extends AbstractTestDataFixture
 {
-    public function load(ObjectManager $manager)
+    public function load(ObjectManager $manager): void
     {
         $user = new User();
         $user

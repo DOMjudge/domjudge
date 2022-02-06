@@ -10,10 +10,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class LoadDefaultDataCommand extends Command
 {
-    /**
-     * @inheritDoc
-     */
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setName('domjudge:load-default-data')
@@ -21,7 +18,6 @@ class LoadDefaultDataCommand extends Command
     }
 
     /**
-     * @inheritDoc
      * @throws Exception
      */
     protected function execute(InputInterface $input, OutputInterface $output): int

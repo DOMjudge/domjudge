@@ -17,7 +17,7 @@ use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
@@ -34,40 +34,14 @@ use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
  */
 class UserController extends BaseController
 {
-    /**
-     * @var EntityManagerInterface
-     */
-    protected $em;
+    protected const MIN_PASSWORD_LENGTH = 10;
 
-    /**
-     * @var DOMJudgeService
-     */
-    protected $dj;
-
-    /**
-     * @var ConfigurationService
-     */
-    protected $config;
-
-    /**
-     * @var KernelInterface
-     */
-    protected $kernel;
-
-    /**
-     * @var EventLogService
-     */
-    protected $eventLogService;
-
-    /**
-     * @var TokenStorageInterface
-     */
-    protected $tokenStorage;
-
-    /**
-     * @var int
-     */
-    protected $minPasswordLength = 10;
+    protected EntityManagerInterface $em;
+    protected DOMJudgeService $dj;
+    protected ConfigurationService $config;
+    protected KernelInterface $kernel;
+    protected EventLogService $eventLogService;
+    protected TokenStorageInterface $tokenStorage;
 
     public function __construct(
         EntityManagerInterface $em,
@@ -87,9 +61,8 @@ class UserController extends BaseController
 
     /**
      * @Route("", name="jury_users")
-     * @throws Exception
      */
-    public function indexAction() : Response
+    public function indexAction(): Response
     {
         /** @var User[] $users */
         $users = $this->em->createQueryBuilder()
@@ -141,9 +114,7 @@ class UserController extends BaseController
             }
 
             $userdata['user_roles'] = [
-                'value' => implode(', ', array_map(function (Role $role) {
-                    return $role->getDjRole();
-                }, $u->getUserRoles()))
+                'value' => implode(', ', array_map(fn(Role $role) => $role->getDjRole(), $u->getUserRoles()))
             ];
 
             // Create action links
@@ -191,9 +162,8 @@ class UserController extends BaseController
 
     /**
      * @Route("/{userId<\d+>}", name="jury_user")
-     * @return RedirectResponse|Response
      */
-    public function viewAction(Request $request, int $userId, SubmissionService $submissionService)
+    public function viewAction(int $userId, SubmissionService $submissionService): Response
     {
         /** @var User $user */
         $user = $this->em->getRepository(User::class)->find($userId);
@@ -223,24 +193,24 @@ class UserController extends BaseController
         ]);
     }
 
-    public function checkPasswordLength(User $user, $form) {
-        if ($user->getPlainPassword() && strlen($user->getPlainPassword())<$this->minPasswordLength) {
-            $this->addFlash('danger', "Password should be " . $this->minPasswordLength . "+ chars.");
+    public function checkPasswordLength(User $user, FormInterface $form): ?Response {
+        if ($user->getPlainPassword() && strlen($user->getPlainPassword()) < static::MIN_PASSWORD_LENGTH) {
+            $this->addFlash('danger', "Password should be " . static::MIN_PASSWORD_LENGTH . "+ chars.");
             return $this->render('jury/user_edit.html.twig', [
                 'user' => $user,
                 'form' => $form->createView(),
-                'min_password_length' => $this->minPasswordLength,
+                'min_password_length' => static::MIN_PASSWORD_LENGTH,
             ]);
         }
+
+        return null;
     }
 
     /**
      * @Route("/{userId<\d+>}/edit", name="jury_user_edit")
      * @IsGranted("ROLE_ADMIN")
-     * @return RedirectResponse|Response
-     * @throws Exception
      */
-    public function editAction(Request $request, int $userId)
+    public function editAction(Request $request, int $userId): Response
     {
         /** @var User $user */
         $user = $this->em->getRepository(User::class)->find($userId);
@@ -280,17 +250,15 @@ class UserController extends BaseController
         return $this->render('jury/user_edit.html.twig', [
             'user'                => $user,
             'form'                => $form->createView(),
-            'min_password_length' => $this->minPasswordLength,
+            'min_password_length' => static::MIN_PASSWORD_LENGTH,
         ]);
     }
 
     /**
      * @Route("/{userId<\d+>}/delete", name="jury_user_delete")
      * @IsGranted("ROLE_ADMIN")
-     * @return RedirectResponse|Response
-     * @throws Exception
      */
-    public function deleteAction(Request $request, int $userId)
+    public function deleteAction(Request $request, int $userId): Response
     {
         /** @var User $user */
         $user = $this->em->getRepository(User::class)->find($userId);
@@ -305,9 +273,8 @@ class UserController extends BaseController
     /**
      * @Route("/add", name="jury_user_add")
      * @IsGranted("ROLE_ADMIN")
-     * @throws Exception
      */
-    public function addAction(Request $request) : Response
+    public function addAction(Request $request): Response
     {
         $user = new User();
         if ($request->query->has('team')) {
@@ -333,7 +300,7 @@ class UserController extends BaseController
         return $this->render('jury/user_add.html.twig', [
             'user' => $user,
             'form' => $form->createView(),
-            'min_password_length' => $this->minPasswordLength,
+            'min_password_length' => static::MIN_PASSWORD_LENGTH,
         ]);
     }
 
@@ -341,7 +308,7 @@ class UserController extends BaseController
      * @Route("/generate-passwords", name="jury_generate_passwords")
      * @IsGranted("ROLE_ADMIN")
      */
-    public function generatePasswordsAction(Request $request) : Response
+    public function generatePasswordsAction(Request $request): Response
     {
         $form = $this->createForm(GeneratePasswordsType::class);
         $form->handleRequest($request);

@@ -3,6 +3,7 @@ namespace App\Entity;
 
 use App\Utils\Utils;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
 
@@ -24,8 +25,6 @@ use JMS\Serializer\Annotation as Serializer;
 class JudgingRun extends BaseApiEntity
 {
     /**
-     * @var int
-     *
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer", name="runid", length=4,
@@ -34,28 +33,26 @@ class JudgingRun extends BaseApiEntity
      * @Serializer\SerializedName("id")
      * @Serializer\Type("string")
      */
-    protected $runid;
+    protected int $runid;
 
     /**
-     * @var int
      * @ORM\Column(type="integer", name="judgetaskid", length=4,
      *     options={"comment"="JudgeTask ID","unsigned"=true,"default"=NULL},
      *     nullable=true)
      * @Serializer\Exclude()
      */
-    private $judgetaskid;
+    private ?int $judgetaskid;
 
     /**
-     * @var string
      * @ORM\Column(type="string", name="runresult", length=32,
      *     options={"comment"="Result of this run, NULL if not finished yet"},
      *     nullable=true)
      * @Serializer\Exclude()
      */
-    private $runresult;
+    private ?string $runresult;
 
     /**
-     * @var double
+     * @var double|string|null
      * @ORM\Column(type="float", name="runtime",
      *     options={"comment"="Submission running time on this testcase"},
      *     nullable=true)
@@ -64,7 +61,7 @@ class JudgingRun extends BaseApiEntity
     private $runtime;
 
     /**
-     * @var double
+     * @var double|string|null
      * @ORM\Column(type="decimal", precision=32, scale=9, name="endtime",
      *     options={"comment"="Time run judging ended", "unsigned"=true},
      *     nullable=true)
@@ -77,14 +74,14 @@ class JudgingRun extends BaseApiEntity
      * @ORM\JoinColumn(name="judgingid", referencedColumnName="judgingid", onDelete="CASCADE")
      * @Serializer\Exclude()
      */
-    private $judging;
+    private Judging $judging;
 
     /**
      * @ORM\ManyToOne(targetEntity="Testcase", inversedBy="judging_runs")
      * @ORM\JoinColumn(name="testcaseid", referencedColumnName="testcaseid")
      * @Serializer\Exclude()
      */
-    private $testcase;
+    private Testcase $testcase;
 
     /**
      * We use a OneToMany instead of a OneToOne here, because otherwise this
@@ -95,14 +92,14 @@ class JudgingRun extends BaseApiEntity
      * @ORM\OneToMany(targetEntity="JudgingRunOutput", mappedBy="run", cascade={"persist"}, orphanRemoval=true)
      * @Serializer\Exclude()
      */
-    private $output;
+    private Collection $output;
 
     /**
      * @ORM\ManyToOne(targetEntity="JudgeTask", inversedBy="judging_runs")
      * @ORM\JoinColumn(name="judgetaskid", referencedColumnName="judgetaskid")
      * @Serializer\Exclude()
      */
-    private $judgetask;
+    private ?JudgeTask $judgetask;
 
     public function __construct()
     {

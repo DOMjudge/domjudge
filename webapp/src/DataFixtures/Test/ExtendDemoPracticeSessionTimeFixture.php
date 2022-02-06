@@ -8,7 +8,7 @@ use Doctrine\Persistence\ObjectManager;
 
 class ExtendDemoPracticeSessionTimeFixture extends AbstractTestDataFixture
 {
-    public function load(ObjectManager $manager)
+    public function load(ObjectManager $manager): void
     {
         // Make sure the demo practice contest is still running
         /** @var Contest $demoPracticeContest */

@@ -25,11 +25,10 @@ class ImportExportServiceTest extends KernelTestCase
     /**
      * @dataProvider provideImportContestDataErrors
      */
-    public function testImportContestDataErrors($data, string $expectedMessage)
+    public function testImportContestDataErrors($data, string $expectedMessage): void
     {
-
         /** @var ImportExportService $importExportService */
-        $importExportService = static::$container->get(ImportExportService::class);
+        $importExportService = static::getContainer()->get(ImportExportService::class);
         self::assertFalse($importExportService->importContestData($data, $message, $cid));
         self::assertEquals($expectedMessage, $message);
         self::assertNull($cid);
@@ -93,10 +92,10 @@ class ImportExportServiceTest extends KernelTestCase
     /**
      * @dataProvider provideImportContestDataSuccess
      */
-    public function testImportContestDataSuccess($data, string $expectedShortName, array $expectedProblems = [])
+    public function testImportContestDataSuccess($data, string $expectedShortName, array $expectedProblems = []): void
     {
         /** @var ImportExportService $importExportService */
-        $importExportService = static::$container->get(ImportExportService::class);
+        $importExportService = static::getContainer()->get(ImportExportService::class);
         self::assertTrue($importExportService->importContestData($data, $message, $cid), 'Importing failed: ' . $message);
         self::assertNull($message);
         self::assertIsString($cid);
@@ -193,7 +192,7 @@ class ImportExportServiceTest extends KernelTestCase
     /**
      * @dataProvider provideImportProblemsDataSuccess
      */
-    public function testImportProblemsDataSuccess($data, array $expectedProblems)
+    public function testImportProblemsDataSuccess($data, array $expectedProblems): void
     {
         // First create a new contest by import it
         $contestData = [
@@ -204,7 +203,7 @@ class ImportExportServiceTest extends KernelTestCase
             'scoreboard_freeze_duration' => '1:00:00',
         ];
         /** @var ImportExportService $importExportService */
-        $importExportService = static::$container->get(ImportExportService::class);
+        $importExportService = static::getContainer()->get(ImportExportService::class);
         $importExportService->importContestData($contestData, $message, $cid);
 
         $contest = $this->getContest($cid);
@@ -325,7 +324,7 @@ class ImportExportServiceTest extends KernelTestCase
         ];
     }
 
-    public function testImportAccountsTsvSuccess()
+    public function testImportAccountsTsvSuccess(): void
     {
         // We test all account types twice:
         // - Team without postfix
@@ -425,11 +424,11 @@ EOF;
         ];
         $unexpectedUsers = ['analyst1', 'analyst2'];
 
-        $fileName = tempnam(static::$container->get(DOMJudgeService::class)->getDomjudgeTmpDir(), 'accounts-tsv');
+        $fileName = tempnam(static::getContainer()->get(DOMJudgeService::class)->getDomjudgeTmpDir(), 'accounts-tsv');
         file_put_contents($fileName, $accounts);
         $file = new UploadedFile($fileName, 'accounts.tsv');
         /** @var ImportExportService $importExportService */
-        $importExportService = static::$container->get(ImportExportService::class);
+        $importExportService = static::getContainer()->get(ImportExportService::class);
         $importCount = $importExportService->importTsv('accounts', $file, $message);
         // Remove the file, we don't need it anymore.
         unlink($fileName);
@@ -488,13 +487,13 @@ EOF;
     protected function getContest($cid): Contest
     {
         // First clear the entity manager to have all data.
-        static::$container->get(EntityManagerInterface::class)->clear();
-        $config = static::$container->get(ConfigurationService::class);
+        static::getContainer()->get(EntityManagerInterface::class)->clear();
+        $config = static::getContainer()->get(ConfigurationService::class);
         $dataSource = $config->get('data_source');
         if ($dataSource === DOMJudgeService::DATA_SOURCE_LOCAL) {
-            return static::$container->get(EntityManagerInterface::class)->getRepository(Contest::class)->find($cid);
+            return static::getContainer()->get(EntityManagerInterface::class)->getRepository(Contest::class)->find($cid);
         } else {
-            return static::$container->get(EntityManagerInterface::class)->getRepository(Contest::class)->findOneBy(['externalid' => $cid]);
+            return static::getContainer()->get(EntityManagerInterface::class)->getRepository(Contest::class)->findOneBy(['externalid' => $cid]);
         }
     }
 }

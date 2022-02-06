@@ -7,38 +7,42 @@ use App\Entity\Problem;
 
 class ProblemControllerTest extends JuryControllerTest
 {
-    protected static $baseUrl          = '/jury/problems';
-    protected static $exampleEntries   = ['Hello World', 'default',5,3,2,1];
-    protected static $shortTag         = 'problem';
-    protected static $deleteEntities   = ['name' => ['Hello World']];
-    protected static $getIDFunc        = 'getProbid';
-    protected static $className        = Problem::class;
-    protected static $DOM_elements     = ['h1' => ['Problems'],
-                                        'a.btn[title="Import problem"]' => ['admin' => [" Import problem"],'jury'=>[]]];
-    protected static $identifyingEditAttribute = 'name';
-    protected static $defaultEditEntityName    = 'Hello World';
+    protected static string  $baseUrl                  = '/jury/problems';
+    protected static array   $exampleEntries           = ['Hello World', 'default', 5, 3, 2, 1];
+    protected static string  $shortTag                 = 'problem';
+    protected static array   $deleteEntities           = ['name' => ['Hello World']];
+    protected static string  $getIDFunc                = 'getProbid';
+    protected static string  $className                = Problem::class;
+    protected static array   $DOM_elements             = [
+        'h1'                            => ['Problems'],
+        'a.btn[title="Import problem"]' => ['admin' => [" Import problem"], 'jury' => []]
+    ];
+    protected static string  $identifyingEditAttribute = 'name';
+    protected static ?string $defaultEditEntityName    = 'Hello World';
     // Note: we replace the deleteurl in testDeleteExtraEntity below with the actual attachment ID.
     // This can change when running the tests multiple times.
-    protected static $deleteExtra      = ['pageurl'   => '/jury/problems/3',
-                                          'deleteurl' => '/jury/problems/attachments/1/delete',
-                                          'selector'  => 'interactor'];
-    protected static $addForm          = 'problem[';
-    protected static $addEntitiesShown = ['name'];
-    protected static $addEntities      = [['name' => 'Problem',
-                                           'timelimit' => '1',
-                                           'memlimit' => '1073741824',
-                                           'outputlimit' => '1073741824',
-                                           'problemtextFile' => '',
-                                           'runExecutable' => 'boolfind_run',
-                                           'compareExecutable' => '',
-                                           'combinedRunCompare' => true,
-                                           'specialCompareArgs' => ''],
-                                          ['name' => 'Long time',
-                                           'timelimit' => '3600'],
-                                          ['name' => 'Default limits',
-                                           'memlimit' => '', 'outputlimit' => ''],
-                                          ['name' => 'Args',
-                                           'specialCompareArgs' => 'args']];
+    protected static ?array $deleteExtra      = [
+        'pageurl'   => '/jury/problems/3',
+        'deleteurl' => '/jury/problems/attachments/1/delete',
+        'selector'  => 'interactor'
+    ];
+    protected static string $addForm          = 'problem[';
+    protected static array  $addEntitiesShown = ['name'];
+    protected static array  $addEntities      = [['name'               => 'Problem',
+                                                 'timelimit'          => '1',
+                                                 'memlimit'           => '1073741824',
+                                                 'outputlimit'        => '1073741824',
+                                                 'problemtextFile'    => '',
+                                                 'runExecutable'      => 'boolfind_run',
+                                                 'compareExecutable'  => '',
+                                                 'combinedRunCompare' => true,
+                                                 'specialCompareArgs' => ''],
+                                                ['name' => 'Long time',
+                                                 'timelimit' => '3600'],
+                                                ['name' => 'Default limits',
+                                                 'memlimit' => '', 'outputlimit' => ''],
+                                                ['name' => 'Args',
+                                                 'specialCompareArgs' => 'args']];
 
     public function testCheckAddEntityAdmin(): void
     {

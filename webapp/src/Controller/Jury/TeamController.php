@@ -35,35 +35,12 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class TeamController extends BaseController
 {
-    /**
-     * @var EntityManagerInterface
-     */
-    protected $em;
-
-    /**
-     * @var DOMJudgeService
-     */
-    protected $dj;
-
-    /**
-     * @var ConfigurationService
-     */
-    protected $config;
-
-    /**
-     * @var KernelInterface
-     */
-    protected $kernel;
-
-    /**
-     * @var EventLogService
-     */
-    protected $eventLogService;
-
-    /**
-     * @var AssetUpdateService
-     */
-    protected $assetUpdater;
+    protected EntityManagerInterface $em;
+    protected DOMJudgeService $dj;
+    protected ConfigurationService $config;
+    protected KernelInterface $kernel;
+    protected EventLogService $eventLogService;
+    protected AssetUpdateService $assetUpdater;
 
     public function __construct(
         EntityManagerInterface $em,
@@ -84,7 +61,7 @@ class TeamController extends BaseController
     /**
      * @Route("", name="jury_teams")
      */
-    public function indexAction(Request $request, Packages $assetPackage): Response
+    public function indexAction(): Response
     {
         /** @var Team[] $teams */
         $teams = $this->em->createQueryBuilder()
@@ -266,15 +243,13 @@ class TeamController extends BaseController
 
     /**
      * @Route("/{teamId<\d+>}", name="jury_team")
-     * @return RedirectResponse|Response
-     * @throws Exception
      */
     public function viewAction(
         Request $request,
         int $teamId,
         ScoreboardService $scoreboardService,
         SubmissionService $submissionService
-    ) {
+    ): Response {
         /** @var Team $team */
         $team = $this->em->getRepository(Team::class)->find($teamId);
         if (!$team) {
@@ -363,10 +338,8 @@ class TeamController extends BaseController
     /**
      * @Route("/{teamId<\d+>}/edit", name="jury_team_edit")
      * @IsGranted("ROLE_ADMIN")
-     * @return RedirectResponse|Response
-     * @throws Exception
      */
-    public function editAction(Request $request, int $teamId)
+    public function editAction(Request $request, int $teamId): Response
     {
         /** @var Team $team */
         $team = $this->em->getRepository(Team::class)->find($teamId);
@@ -397,10 +370,8 @@ class TeamController extends BaseController
     /**
      * @Route("/{teamId<\d+>}/delete", name="jury_team_delete")
      * @IsGranted("ROLE_ADMIN")
-     * @return RedirectResponse|Response
-     * @throws Exception
      */
-    public function deleteAction(Request $request, int $teamId)
+    public function deleteAction(Request $request, int $teamId): Response
     {
         /** @var Team $team */
         $team = $this->em->getRepository(Team::class)->find($teamId);
@@ -415,9 +386,6 @@ class TeamController extends BaseController
     /**
      * @Route("/add", name="jury_team_add")
      * @IsGranted("ROLE_ADMIN")
-     * @return Response
-     * @throws NonUniqueResultException
-     * @throws Exception
      */
     public function addAction(Request $request): Response
     {

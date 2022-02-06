@@ -22,43 +22,38 @@ use JMS\Serializer\Annotation as Serializer;
 class Testcase
 {
     /**
-     * @var int
-     *
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer", name="testcaseid", length=4,
      *     options={"comment"="Testcase ID","unsigned"=true},
      *     nullable=false)
      */
-    private $testcaseid;
+    private int $testcaseid;
 
     /**
-     * @var string
      * @ORM\Column(type="string", name="md5sum_input", length=32,
      *     options={"comment"="Checksum of input data","fixed"=true},
      *     nullable=true)
      */
-    private $md5sum_input;
+    private ?string $md5sum_input;
 
     /**
-     * @var string
      * @ORM\Column(type="string", name="md5sum_output", length=32,
      *     options={"comment"="Checksum of output data","fixed"=true},
      *     nullable=true)
      */
-    private $md5sum_output;
+    private ?string $md5sum_output;
 
     /**
-     * @var int
      * @ORM\Column(type="integer", name="`ranknumber`", length=4,
      *     options={"comment"="Determines order of the testcases in judging",
      *              "unsigned"=true},
      *     nullable=false)
      */
-    private $ranknumber;
+    private int $ranknumber;
 
     /**
-     * @var resource
+     * @var resource|null
      * @ORM\Column(type="blob", length=4294967295, name="description",
      *     options={"comment"="Description of this testcase"},
      *     nullable=true)
@@ -66,75 +61,70 @@ class Testcase
      */
     private $description;
 
-    private $description_as_string = null;
+    private ?string $description_as_string = null;
 
     /**
-     * @var string
      * @ORM\Column(type="string", name="orig_input_filename", length=255,
      *     options={"comment"="Original basename of the input file.","default"=NULL},
      *     nullable=true)
      * @Serializer\Exclude()
      */
-    private $orig_input_filename;
+    private ?string $orig_input_filename;
 
     /**
-     * @var string
      * @ORM\Column(type="string", name="image_type", length=4,
      *     options={"comment"="File type of the image and thumbnail"},
      *     nullable=true)
      * @Serializer\Exclude()
      */
-    private $image_type;
+    private ?string $image_type;
 
     /**
-     * @var boolean
      * @ORM\Column(type="boolean", name="sample",
      *     options={"comment"="Sample testcases that can be shared with teams",
      *              "default"="0"},
      *     nullable=false)
      * @Serializer\Exclude()
      */
-    private $sample = false;
+    private bool $sample = false;
 
     /**
-     * @var boolean
      * @ORM\Column(type="boolean", name="deleted",
      *     options={"comment"="Deleted testcases are kept for referential integrity.",
      *              "default"="0"},
      *     nullable=false)
      * @Serializer\Exclude()
      */
-    private $deleted = false;
+    private bool $deleted = false;
 
     /**
      * @ORM\OneToMany(targetEntity="JudgingRun", mappedBy="testcase")
      * @Serializer\Exclude()
      */
-    private $judging_runs;
+    private Collection $judging_runs;
 
     /**
      * @ORM\OneToMany(targetEntity="ExternalRun", mappedBy="testcase")
      * @Serializer\Exclude()
      */
-    private $external_runs;
+    private Collection $external_runs;
 
     /**
      * We use a OneToMany instead of a OneToOne here, because otherwise this
      * relation will always be loaded. See the commit message of commit
      * 9e421f96691ec67ed62767fe465a6d8751edd884 for a more elaborate explanation
      *
-     * @var TestcaseContent[]|ArrayCollection
      * @ORM\OneToMany(targetEntity="TestcaseContent", mappedBy="testcase", cascade={"persist"}, orphanRemoval=true)
      * @Serializer\Exclude()
      */
-    private $content;
+    private Collection $content;
 
     /**
      * @ORM\ManyToOne(targetEntity="Problem", inversedBy="testcases")
      * @ORM\JoinColumn(name="probid", referencedColumnName="probid", onDelete="CASCADE")
      * @Serializer\Exclude()
      */
-    private $problem;
+    private Problem $problem;
 
     public function __construct()
     {

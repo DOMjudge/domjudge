@@ -13,15 +13,8 @@ class ExecutableFixture extends AbstractExampleDataFixture
     const BOOLFIND_CMP_REFERENCE = 'boolfind-cmp';
     const BOOLFIND_RUN_REFERENCE = 'boolfind-run';
 
-    /**
-     * @var string
-     */
-    protected $sqlDir;
-
-    /**
-     * @var DOMJudgeService
-     */
-    protected $dj;
+    protected string $sqlDir;
+    protected DOMJudgeService $dj;
 
     public function __construct(string $sqlDir, DOMJudgeService $dj)
     {
@@ -29,10 +22,7 @@ class ExecutableFixture extends AbstractExampleDataFixture
         $this->dj = $dj;
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function load(ObjectManager $manager)
+    public function load(ObjectManager $manager): void
     {
         $boolfindRunFile = sprintf(
             '%s/files/examples/boolfind_run.zip',

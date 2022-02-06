@@ -2,18 +2,17 @@
 
 namespace App\Tests\Unit\Controller\Jury;
 
-use App\Tests\Unit\BaseTest;
-
 use App\DataFixtures\Test\ClarificationFixture;
+use App\Tests\Unit\BaseTest;
 
 class ClarificationControllerTest extends BaseTest
 {
-    protected $roles = ['jury'];
+    protected array $roles = ['jury'];
 
     /**
      * Test that the jury clarifications page contains the correct information.
      */
-    public function testClarificationRequestIndex() : void
+    public function testClarificationRequestIndex(): void
     {
         $this->verifyPageResponse('GET', '/jury', 200);
         $link = $this->verifyLinkToURL('Clarifications',
@@ -32,7 +31,7 @@ class ClarificationControllerTest extends BaseTest
     /**
      * Test that unanswered and answered clarifications are under the right header.
      */
-    public function testClarificationRequestIndexNewAndOldUnderRightHeader() : void
+    public function testClarificationRequestIndexNewAndOldUnderRightHeader(): void
     {
         $this->loadFixture(ClarificationFixture::class);
 
@@ -45,7 +44,7 @@ class ClarificationControllerTest extends BaseTest
     /**
      * Test that general clarification is under general clarifications header.
      */
-    public function testClarificationRequestIndexHasGeneralClarifications() : void
+    public function testClarificationRequestIndexHasGeneralClarifications(): void
     {
         $this->loadFixture(ClarificationFixture::class);
 
@@ -61,7 +60,7 @@ class ClarificationControllerTest extends BaseTest
     /**
      * Test that the jury can view a clarification.
      */
-    public function testClarificationRequestView() : void
+    public function testClarificationRequestView(): void
     {
         $this->verifyPageResponse('GET', '/jury/clarifications/1', 200);
 
@@ -78,7 +77,7 @@ class ClarificationControllerTest extends BaseTest
     /**
      * Test that the jury can send a clarification to everyone.
      */
-    public function testClarificationRequestComposeForm() : void
+    public function testClarificationRequestComposeForm(): void
     {
         $this->verifyPageResponse('GET', '/jury/clarifications', 200);
         $link = $this->verifyLinkToURL('Send clarification',

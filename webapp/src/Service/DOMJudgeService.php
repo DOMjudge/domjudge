@@ -33,6 +33,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query\Expr\Join;
+use Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Cookie;
@@ -54,53 +55,17 @@ use ZipArchive;
 
 class DOMJudgeService
 {
-    protected $em;
-    protected $logger;
-
-    /**
-     * @var RequestStack
-     */
-    protected $requestStack;
-
-    /**
-     * @var ParameterBagInterface
-     */
-    protected $params;
-
-    /**
-     * @var AuthorizationCheckerInterface
-     */
-    protected $authorizationChecker;
-
-    /**
-     * @var TokenStorageInterface
-     */
-    protected $tokenStorage;
-
-    /**
-     * @var HttpKernelInterface
-     */
-    protected $httpKernel;
-
-    /**
-     * @var ConfigurationService
-     */
-    protected $config;
-
-    /**
-     * @var RouterInterface
-     */
-    protected $router;
-
-    /**
-     * @var Executable|null
-     */
-    protected $defaultCompareExecutable = null;
-
-    /**
-     * @var Executable|null
-     */
-    protected $defaultRunExecutable = null;
+    protected EntityManagerInterface $em;
+    protected LoggerInterface $logger;
+    protected RequestStack $requestStack;
+    protected ParameterBagInterface $params;
+    protected AuthorizationCheckerInterface $authorizationChecker;
+    protected TokenStorageInterface $tokenStorage;
+    protected HttpKernelInterface $httpKernel;
+    protected ConfigurationService $config;
+    protected RouterInterface $router;
+    protected ?Executable $defaultCompareExecutable = null;
+    protected ?Executable $defaultRunExecutable = null;
 
     const DATA_SOURCE_LOCAL = 0;
     const DATA_SOURCE_CONFIGURATION_EXTERNAL = 1;
@@ -117,19 +82,6 @@ class DOMJudgeService
         'image/svg+xml' => 'svg',
     ];
 
-    /**
-     * DOMJudgeService constructor.
-     *
-     * @param EntityManagerInterface        $em
-     * @param LoggerInterface               $logger
-     * @param RequestStack                  $requestStack
-     * @param ParameterBagInterface         $params
-     * @param AuthorizationCheckerInterface $authorizationChecker
-     * @param TokenStorageInterface         $tokenStorage
-     * @param HttpKernelInterface           $httpKernel
-     * @param ConfigurationService          $config
-     * @param RouterInterface               $router
-     */
     public function __construct(
         EntityManagerInterface $em,
         LoggerInterface $logger,
@@ -217,25 +169,16 @@ class DOMJudgeService
         return null;
     }
 
-    /**
-     * Get the contest with the given contest ID
-     */
     public function getContest(int $cid): ?Contest
     {
         return $this->em->getRepository(Contest::class)->find($cid);
     }
 
-    /**
-     * Get the team with the given team ID
-     */
     public function getTeam(?int $teamid): ?Team
     {
         return $this->em->getRepository(Team::class)->find($teamid);
     }
 
-    /**
-     * Get the problem with the given team ID
-     */
     public function getProblem(?int $probid): ?Problem
     {
         return $this->em->getRepository(Problem::class)->find($probid);
@@ -257,14 +200,11 @@ class DOMJudgeService
         return $this->authorizationChecker->isGranted('ROLE_' . strtoupper($rolename));
     }
 
-    public function getClientIp()
+    public function getClientIp(): string
     {
         return $this->requestStack->getMainRequest()->getClientIp();
     }
 
-    /**
-     * Get the logged in user
-     */
     public function getUser(): ?User
     {
         $token = $this->tokenStorage->getToken();
@@ -284,8 +224,6 @@ class DOMJudgeService
     }
 
     /**
-     * Get the value of the cookie with the given name
-     *
      * @return bool|float|int|string|InputBag|null
      */
     public function getCookie(string $cookieName)
@@ -299,9 +237,6 @@ class DOMJudgeService
         return $this->requestStack->getCurrentRequest()->cookies->get($cookieName);
     }
 
-    /**
-     * Set the given cookie on the response, returning the response again to allow chaining
-     */
     public function setCookie(
         string $cookieName,
         string $value = '',
@@ -324,9 +259,6 @@ class DOMJudgeService
         return $response;
     }
 
-    /**
-     * Clear the given cookie on the response, returning the response again to allow chaining
-     */
     public function clearCookie(
         string $cookieName,
         ?string $path = null,
@@ -441,10 +373,8 @@ class DOMJudgeService
      * Run the given callable with all roles.
      *
      * This will result in all calls to checkrole() to return true.
-     *
-     * @param callable $callable
      */
-    public function withAllRoles(callable $callable)
+    public function withAllRoles(callable $callable): void
     {
         $currentToken = $this->tokenStorage->getToken();
         // We need a 'user' to create a token. However, even if you
@@ -467,12 +397,7 @@ class DOMJudgeService
     /**
      * Log an action to the auditlog table
      *
-     * @param string     $datatype
-     * @param mixed      $dataid
-     * @param string     $action
-     * @param mixed|null $extraInfo
-     * @param mixed|null $forceUsername
-     * @param int|null   $cid
+     * @param string|int|null $cid
      */
     public function auditlog(
         string $datatype,
@@ -509,11 +434,8 @@ class DOMJudgeService
     /**
      * Call alert plugin program to perform user configurable action on
      * important system events. See default alert script for more details.
-     *
-     * @param string $messageType
-     * @param string $description
      */
-    public function alert(string $messageType, string $description = '')
+    public function alert(string $messageType, string $description = ''): void
     {
         $alert = $this->params->get('domjudge.libdir') . '/alert';
         system(sprintf('%s %s %s &', $alert, escapeshellarg($messageType), escapeshellarg($description)));
@@ -534,7 +456,7 @@ class DOMJudgeService
 
     /**
      * Decode a JSON string and handle errors
-     * @param $data
+     * @param mixed $data
      */
     public function jsonEncode($data): string
     {
@@ -547,11 +469,8 @@ class DOMJudgeService
 
     /**
      * Dis- or re-enable what caused an internal error.
-     * @param array        $disabled
-     * @param Contest|null $contest
-     * @param bool|null    $enabled
      */
-    public function setInternalError($disabled, $contest, $enabled)
+    public function setInternalError(array $disabled, ?Contest $contest, ?bool $enabled)
     {
         switch ($disabled['kind']) {
             case 'problem':
@@ -639,7 +558,6 @@ class DOMJudgeService
      * Perform an internal API request to the given URL with the given data
      *
      * @return mixed|null
-     * @throws \Exception
      */
     public function internalApiRequest(string $url, string $method = Request::METHOD_GET, array $queryData = [])
     {
@@ -661,49 +579,31 @@ class DOMJudgeService
         return $this->jsonDecode($response->getContent());
     }
 
-    /**
-     * Get the etc directory of this DOMjudge installation
-     */
     public function getDomjudgeEtcDir(): string
     {
         return $this->params->get('domjudge.etcdir');
     }
 
-    /**
-     * Get the tmp directory of this DOMjudge installation
-     */
     public function getDomjudgeTmpDir(): string
     {
         return $this->params->get('domjudge.tmpdir');
     }
 
-    /**
-     * Get the webapp directory of this DOMjudge installation
-     */
     public function getDomjudgeWebappDir(): string
     {
         return $this->params->get('domjudge.webappdir');
     }
 
-    /**
-     * Get the documentation links
-     */
     public function getDocLinks(): array
     {
         return $this->params->get('domjudge.doc_links');
     }
 
-    /**
-     * Get the directory used for storing cache files
-     */
     public function getCacheDir(): string
     {
         return $this->params->get('kernel.cache_dir');
     }
 
-    /**
-     * Open the given ZIP file
-     */
     public function openZipFile(string $filename): ZipArchive
     {
         $zip = new ZipArchive();
@@ -733,7 +633,6 @@ class DOMJudgeService
      * @param string|null $teamname Teamname of the team this user belongs to, if any
      * @param int|null    $teamid   Teamid of the team this user belongs to, if any
      * @param string|null $location Room/place of the team, if any.
-     * @throws \Exception
      */
     public function printFile(
         string $filename,
@@ -901,7 +800,11 @@ class DOMJudgeService
         return $stats;
     }
 
-    public function getTwigDataForProblemsAction(int $teamId, StatisticsService $statistics): array {
+    /**
+     * @throws NonUniqueResultException
+     */
+    public function getTwigDataForProblemsAction(int $teamId, StatisticsService $statistics): array
+    {
         $contest            = $this->getCurrentContest($teamId);
         $showLimits         = (bool)$this->config->get('show_limits_on_team_page');
         $defaultMemoryLimit = (int)$this->config->get('memory_limit');
@@ -963,9 +866,7 @@ class DOMJudgeService
             $freezeData = new FreezeData($contest);
             $data['stats'] = $statistics->getGroupedProblemsStats(
                 $contest,
-                array_map(function (ContestProblem $problem) {
-                    return $problem->getProblem();
-                }, $problems),
+                array_map(fn(ContestProblem $problem) => $problem->getProblem(), $problems),
                 $freezeData->showFinal(false),
                 (bool)$this->config->get('verification_required')
             );
@@ -1049,7 +950,6 @@ class DOMJudgeService
 
     public function maybeCreateJudgeTasks(Judging $judging, int $priority = JudgeTask::PRIORITY_DEFAULT): void
     {
-        /** @var Submission $submission */
         $submission = $judging->getSubmission();
         $problem    = $submission->getContestProblem();
         $language   = $submission->getLanguage();
@@ -1132,9 +1032,7 @@ class DOMJudgeService
             $judgetaskInsertParams[':testcase_id' . $testcase->getTestcaseid()] = $testcase->getTestcaseid();
             $judgetaskInsertParams[':testcase_hash' . $testcase->getTestcaseid()] = $testcase->getMd5sumInput() . '_' . $testcase->getMd5sumOutput();
         }
-        $judgetaskColumns = array_map(function (string $column) {
-            return substr($column, 1);
-        }, $judgetaskDefaultParamNames);
+        $judgetaskColumns = array_map(fn(string $column) => substr($column, 1), $judgetaskDefaultParamNames);
         $judgetaskInsertQuery = sprintf(
             'INSERT INTO judgetask (%s, testcase_id, testcase_hash) VALUES %s',
             implode(', ', $judgetaskColumns),
@@ -1241,7 +1139,8 @@ class DOMJudgeService
         return $executable->getImmutableExecutable();
     }
 
-    private function getProblemsForExecutable(Executable $executable) {
+    private function getProblemsForExecutable(Executable $executable): array
+    {
         $ret = array_merge($executable->getProblemsCompare()->toArray(),
             $executable->getProblemsRun()->toArray());
 

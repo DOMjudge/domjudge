@@ -7,31 +7,31 @@ use App\Service\ConfigurationService;
 
 class TeamAffiliationControllerTest extends JuryControllerTest
 {
-    protected static $baseUrl          = '/jury/affiliations';
-    protected static $exampleEntries   = ['UU','Utrecht University',1];
-    protected static $shortTag         = 'affiliation';
-    protected static $deleteEntities   = ['shortname' => ['UU']];
-    protected static $getIDFunc        = 'getAffilid';
-    protected static $className        = TeamAffiliation::class;
-    protected static $DOM_elements     = ['h1' => ['Affiliations']];
-    protected static $identifyingEditAttribute = 'shortname';
-    protected static $defaultEditEntityName    = 'UU';
-    protected static $addForm          = 'team_affiliation[';
-    protected static $addEntitiesShown = ['shortname','name'];
-    protected static $addEntities      = [['shortname' => 'short',
-                                           'name' => 'New Affil',
-                                           'country' => 'NLD',
-                                           'comments' => 'Lorem ipsum dolor sit amet.'],
-                                          ['shortname' => 'cl',
-                                           'name' => 'Countryless',
-                                           'country' => ''],
-                                          ['shortname' => 'com',
-                                           'name' => 'No comment',
-                                           'comments' => '']];
+    protected static string  $baseUrl                  = '/jury/affiliations';
+    protected static array   $exampleEntries           = ['UU', 'Utrecht University', 1];
+    protected static string  $shortTag                 = 'affiliation';
+    protected static array   $deleteEntities           = ['shortname' => ['UU']];
+    protected static string  $getIDFunc                = 'getAffilid';
+    protected static string  $className                = TeamAffiliation::class;
+    protected static array   $DOM_elements             = ['h1' => ['Affiliations']];
+    protected static string  $identifyingEditAttribute = 'shortname';
+    protected static ?string $defaultEditEntityName    = 'UU';
+    protected static string  $addForm                  = 'team_affiliation[';
+    protected static array   $addEntitiesShown         = ['shortname', 'name'];
+    protected static array  $addEntities              = [['shortname' => 'short',
+                                                         'name'      => 'New Affil',
+                                                         'country'   => 'NLD',
+                                                         'comments'  => 'Lorem ipsum dolor sit amet.'],
+                                                        ['shortname' => 'cl',
+                                                        'name' => 'Countryless',
+                                                        'country' => ''],
+                                                       ['shortname' => 'com',
+                                                        'name' => 'No comment',
+                                                        'comments' => '']];
 
     public function testCheckAddEntityAdmin(): void
     {
-        $config = static::$container->get(ConfigurationService::class);
+        $config = static::getContainer()->get(ConfigurationService::class);
         $showFlags = $config->get('show_flags');
         // Remove setting country when we don't show it.
         if (!$showFlags) {

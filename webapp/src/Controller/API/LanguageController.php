@@ -37,7 +37,7 @@ class LanguageController extends AbstractRestController
      * @OA\Parameter(ref="#/components/parameters/strict")
      * @throws NonUniqueResultException
      */
-    public function listAction(Request $request) : Response
+    public function listAction(Request $request): Response
     {
         return parent::performListAction($request);
     }
@@ -54,7 +54,7 @@ class LanguageController extends AbstractRestController
      * @OA\Parameter(ref="#/components/parameters/id")
      * @OA\Parameter(ref="#/components/parameters/strict")
      */
-    public function singleAction(Request $request, string $id) : Response
+    public function singleAction(Request $request, string $id): Response
     {
         return parent::performSingleAction($request, $id);
     }
@@ -70,9 +70,6 @@ class LanguageController extends AbstractRestController
             ->andWhere('lang.allowSubmit = 1');
     }
 
-    /**
-     * @throws Exception
-     */
     protected function getIdField(): string
     {
         return sprintf('lang.%s', $this->eventLogService->externalIdFieldForEntity(Language::class) ?? 'langid');

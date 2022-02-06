@@ -5,6 +5,7 @@ namespace App\Form\Type;
 use App\Entity\ContestProblem;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
+use Exception;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
@@ -13,15 +14,8 @@ use Symfony\Component\Form\FormBuilderInterface;
 
 class TeamClarificationType extends AbstractType
 {
-    /**
-     * @var DOMJudgeService
-     */
-    protected $dj;
-
-    /**
-     * @var ConfigurationService
-     */
-    protected $config;
+    protected DOMJudgeService $dj;
+    protected ConfigurationService $config;
 
     public function __construct(
         DOMJudgeService $dj,
@@ -31,11 +25,7 @@ class TeamClarificationType extends AbstractType
         $this->config = $config;
     }
 
-    /**
-     * @inheritdoc
-     * @throws \Exception
-     */
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder->add('recipient', TextType::class, [
         'data' => 'Jury',

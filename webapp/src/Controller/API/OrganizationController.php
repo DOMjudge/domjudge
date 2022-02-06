@@ -2,8 +2,6 @@
 
 namespace App\Controller\API;
 
-use App\Entity\Contest;
-use App\Entity\Team;
 use App\Entity\TeamAffiliation;
 use App\Service\AssetUpdateService;
 use App\Service\ConfigurationService;
@@ -24,8 +22,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\Validator\ConstraintViolation;
-use Symfony\Component\Validator\ConstraintViolationList;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
@@ -38,10 +34,7 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
  */
 class OrganizationController extends AbstractRestController
 {
-    /**
-     * @var AssetUpdateService
-     */
-    protected $assetUpdater;
+    protected AssetUpdateService $assetUpdater;
 
     public function __construct(
         EntityManagerInterface $entityManager,
@@ -81,7 +74,7 @@ class OrganizationController extends AbstractRestController
      * )
      * @throws NonUniqueResultException
      */
-    public function listAction(Request $request) : Response
+    public function listAction(Request $request): Response
     {
         return parent::performListAction($request);
     }
@@ -103,7 +96,7 @@ class OrganizationController extends AbstractRestController
      * @OA\Parameter(ref="#/components/parameters/id")
      * @OA\Parameter(ref="#/components/parameters/strict")
      */
-    public function singleAction(Request $request, string $id) : Response
+    public function singleAction(Request $request, string $id): Response
     {
         return parent::performSingleAction($request, $id);
     }
@@ -283,9 +276,6 @@ class OrganizationController extends AbstractRestController
         return $queryBuilder;
     }
 
-    /**
-     * @throws Exception
-     */
     protected function getIdField(): string
     {
         return sprintf('ta.%s', $this->eventLogService->externalIdFieldForEntity(TeamAffiliation::class) ?? 'affilid');

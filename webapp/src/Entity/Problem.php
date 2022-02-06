@@ -6,6 +6,7 @@ use App\Utils\Utils;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Exception;
 use JMS\Serializer\Annotation as Serializer;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -31,33 +32,28 @@ use Symfony\Component\Validator\Constraints as Assert;
 class Problem extends BaseApiEntity
 {
     /**
-     * @var int
-     *
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer", name="probid", options={"comment"="Problem ID","unsigned"="true"}, nullable=false)
      * @Serializer\Exclude()
      */
-    protected $probid;
+    protected ?int $probid = null;
 
     /**
-     * @var string|null
      * @ORM\Column(type="string", name="externalid", length=255,
      *     options={"comment"="Problem ID in an external system, should be unique inside a single contest",
      *              "collation"="utf8mb4_bin"},
      *     nullable=true)
      * @Serializer\Groups({"Nonstrict"})
      */
-    protected $externalid;
+    protected ?string $externalid;
 
     /**
-     * @var string
      * @ORM\Column(type="string", name="name", length=255, options={"comment"="Descriptive name"}, nullable=false)
      */
-    private $name;
+    private string $name;
 
     /**
-     * @var double
      * @ORM\Column(type="float", name="timelimit",
      *     options={"comment"="Maximum run time (in seconds) for this problem",
      *              "default"="0","unsigned"="true"},
@@ -65,10 +61,9 @@ class Problem extends BaseApiEntity
      * @Serializer\Exclude()
      * @Assert\GreaterThan(0)
      */
-    private $timelimit = 0;
+    private float $timelimit = 0;
 
     /**
-     * @var int
      * @ORM\Column(type="integer", name="memlimit",
      *     options={"comment"="Maximum memory available (in kB) for this problem",
      *              "unsigned"=true},
@@ -76,10 +71,9 @@ class Problem extends BaseApiEntity
      * @Serializer\Exclude()
      * @Assert\GreaterThan(0)
      */
-    private $memlimit;
+    private ?int $memlimit = null;
 
     /**
-     * @var int
      * @ORM\Column(type="integer", name="outputlimit",
      *     options={"comment"="Maximum output size (in kB) for this problem",
      *              "unsigned"=true},
@@ -87,26 +81,24 @@ class Problem extends BaseApiEntity
      * @Serializer\Exclude()
      * @Assert\GreaterThan(0)
      */
-    private $outputlimit;
+    private ?int $outputlimit = null;
 
     /**
-     * @var string
      * @ORM\Column(type="string", name="special_compare_args", length=255,
      *     options={"comment"="Optional arguments to special_compare script"},
      *     nullable=true)
      * @Serializer\Exclude()
      */
-    private $special_compare_args;
+    private ?string $special_compare_args = null;
 
     /**
-     * @var boolean
      * @ORM\Column(type="boolean", name="combined_run_compare",
      *     options={"comment"="Use the exit code of the run script to compute the verdict",
      *              "default":"0"},
      *     nullable=false)
      * @Serializer\Exclude()
      */
-    private $combined_run_compare = false;
+    private bool $combined_run_compare = false;
 
     /**
      * @var resource
@@ -115,61 +107,58 @@ class Problem extends BaseApiEntity
      *     nullable=true)
      * @Serializer\Exclude()
      */
-    private $problemtext;
+    private $problemtext = null;
 
     /**
-     * @var UploadedFile|null
      * @Assert\File()
      * @Serializer\Exclude()
      */
-    private $problemtextFile;
+    private ?UploadedFile $problemtextFile = null;
 
     /**
-     * @var bool
      * @Serializer\Exclude()
      */
-    private $clearProblemtext = false;
+    private bool $clearProblemtext = false;
 
     /**
-     * @var string
      * @ORM\Column(type="string", length=4, name="problemtext_type",
      *     options={"comment"="File type of problem text"},
      *     nullable=true)
      * @Serializer\Exclude()
      */
-    private $problemtext_type;
+    private ?string $problemtext_type = null;
 
     /**
      * @ORM\OneToMany(targetEntity="Submission", mappedBy="problem")
      * @Serializer\Exclude()
      */
-    private $submissions;
+    private Collection $submissions;
 
     /**
      * @ORM\OneToMany(targetEntity="Clarification", mappedBy="problem")
      * @Serializer\Exclude()
      */
-    private $clarifications;
+    private Collection $clarifications;
 
     /**
      * @ORM\OneToMany(targetEntity="ContestProblem", mappedBy="problem")
      * @Serializer\Exclude()
      */
-    private $contest_problems;
+    private Collection $contest_problems;
 
     /**
      * @ORM\ManyToOne(targetEntity="Executable", inversedBy="problems_compare")
      * @ORM\JoinColumn(name="special_compare", referencedColumnName="execid", onDelete="SET NULL")
      * @Serializer\Exclude()
      */
-    private $compare_executable;
+    private ?Executable $compare_executable = null;
 
     /**
      * @ORM\ManyToOne(targetEntity="Executable", inversedBy="problems_run")
      * @ORM\JoinColumn(name="special_run", referencedColumnName="execid", onDelete="SET NULL")
      * @Serializer\Exclude()
      */
-    private $run_executable;
+    private ?Executable $run_executable = null;
 
     /**
      * @ORM\OneToMany(targetEntity="Testcase", mappedBy="problem")
@@ -177,22 +166,15 @@ class Problem extends BaseApiEntity
      * @Serializer\Exclude()
      * Note that we order the test cases here by ranknumber to make use of it during judgetask creation.
      */
-    private $testcases;
+    private Collection $testcases;
 
     /**
      * @ORM\OneToMany(targetEntity=ProblemAttachment::class, mappedBy="problem", orphanRemoval=true)
      * @ORM\OrderBy({"name"="ASC"})
      * @Serializer\Exclude()
      */
-    private $attachments;
+    private Collection $attachments;
 
-    /**
-     * Set probid
-     *
-     * @param integer $probId
-     *
-     * @return Problem
-     */
     public function setProbid(int $probid): Problem
     {
         $this->probid = $probid;
@@ -400,7 +382,7 @@ class Problem extends BaseApiEntity
         return $this;
     }
 
-    public function removeContestProblem(ContestProblem $contestProblem)
+    public function removeContestProblem(ContestProblem $contestProblem): void
     {
         $this->contest_problems->removeElement($contestProblem);
     }
@@ -419,7 +401,7 @@ class Problem extends BaseApiEntity
         return $this;
     }
 
-    public function removeSubmission(Submission $submission)
+    public function removeSubmission(Submission $submission): void
     {
         $this->submissions->removeElement($submission);
     }
@@ -435,7 +417,7 @@ class Problem extends BaseApiEntity
         return $this;
     }
 
-    public function removeClarification(Clarification $clarification)
+    public function removeClarification(Clarification $clarification): void
     {
         $this->clarifications->removeElement($clarification);
     }
@@ -479,9 +461,8 @@ class Problem extends BaseApiEntity
     /**
      * @ORM\PrePersist()
      * @ORM\PreUpdate()
-     * @throws \Exception
      */
-    public function processProblemText()
+    public function processProblemText(): void
     {
         if ($this->isClearProblemtext()) {
             $this
@@ -519,7 +500,7 @@ class Problem extends BaseApiEntity
             }
 
             if (!isset($problemTextType)) {
-                throw new \Exception('Problem statement has unknown file type.');
+                throw new Exception('Problem statement has unknown file type.');
             }
 
             $this

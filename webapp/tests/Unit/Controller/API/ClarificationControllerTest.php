@@ -11,13 +11,13 @@ use Generator;
 
 class ClarificationControllerTest extends BaseTest
 {
-    protected $apiEndpoint = 'clarifications';
+    protected ?string $apiEndpoint = 'clarifications';
 
-    protected $apiUser = 'admin';
+    protected ?string $apiUser = 'admin';
 
-    protected static $fixtures = [ ClarificationFixture::class ];
+    protected static array $fixtures = [ClarificationFixture::class];
 
-    protected $expectedObjects = [
+    protected array $expectedObjects = [
         '1' => [
             "problem_id"   => "1",
             "from_team_id" => "2",
@@ -70,13 +70,13 @@ class ClarificationControllerTest extends BaseTest
         ],
     ];
 
-    protected $entityReferences = [
+    protected array $entityReferences = [
         'problem_id' => Problem::class,
     ];
 
-    protected $expectedAbsent = ['4242', 'nonexistent'];
+    protected array $expectedAbsent = ['4242', 'nonexistent'];
 
-    public function testAnonymousOnlyGeneral()
+    public function testAnonymousOnlyGeneral(): void
     {
         $contestId = $this->getDemoContestId();
         $apiEndpoint = $this->apiEndpoint;
@@ -89,7 +89,7 @@ class ClarificationControllerTest extends BaseTest
         $this->assertArrayNotHasKey('answered', $clarificationFromApi[0]);
     }
 
-    public function testTeamOnlyGeneralAndRelatedToTeam()
+    public function testTeamOnlyGeneralAndRelatedToTeam(): void
     {
         $contestId = $this->getDemoContestId();
         $apiEndpoint = $this->apiEndpoint;
@@ -121,7 +121,7 @@ class ClarificationControllerTest extends BaseTest
     /**
      * Test that a non-logged-in user can not add a clarification.
      */
-    public function testAddNoAccess()
+    public function testAddNoAccess(): void
     {
         $contestId = $this->getDemoContestId();
         $apiEndpoint = $this->apiEndpoint;
@@ -133,7 +133,7 @@ class ClarificationControllerTest extends BaseTest
      *
      * @dataProvider provideAddInvalidData
      */
-    public function testAddInvalidData(string $user, array $dataToSend, string $expectedMessage)
+    public function testAddInvalidData(string $user, array $dataToSend, string $expectedMessage): void
     {
         $contestId = $this->getDemoContestId();
         $apiEndpoint = $this->apiEndpoint;
@@ -165,7 +165,7 @@ class ClarificationControllerTest extends BaseTest
     /**
      * Test that passing an ID is not allowed when performing a POST.
      */
-    public function testSupplyIdInPost()
+    public function testSupplyIdInPost(): void
     {
         $contestId = $this->getDemoContestId();
         $apiEndpoint = $this->apiEndpoint;
@@ -176,7 +176,7 @@ class ClarificationControllerTest extends BaseTest
     /**
      * Test that passing a wrong ID is not allowed when performing a PUT.
      */
-    public function testSupplyWrongIdInPut()
+    public function testSupplyWrongIdInPut(): void
     {
         $contestId = $this->getDemoContestId();
         $apiEndpoint = $this->apiEndpoint;
@@ -187,7 +187,7 @@ class ClarificationControllerTest extends BaseTest
     /**
      * Test that when creating a clarification as a user without an association team an error is returned.
      */
-    public function testMissingTeam()
+    public function testMissingTeam(): void
     {
         $this->loadFixture(RemoveTeamFromDemoUserFixture::class);
 
@@ -214,7 +214,7 @@ class ClarificationControllerTest extends BaseTest
         ?int $expectedRecipientId,
         ?string $expectedClarificationExternalId, // If known
         ?string $expectedTime // If known
-    )
+    ): void
     {
         if (isset($dataToSend['problem_id'])) {
             $dataToSend['problem_id'] = $this->resolveEntityId(Problem::class, $dataToSend['problem_id']);
@@ -234,7 +234,7 @@ class ClarificationControllerTest extends BaseTest
         $clarificationId = $submittedClarification['id'];
 
         // Now load the clarification.
-        $clarificationRepository = static::$container->get(EntityManagerInterface::class)->getRepository(Clarification::class);
+        $clarificationRepository = static::getContainer()->get(EntityManagerInterface::class)->getRepository(Clarification::class);
         if ($idIsExternal) {
             /** @var Clarification $clarification */
             $clarification = $clarificationRepository->findOneBy(['externalid' => $clarificationId]);

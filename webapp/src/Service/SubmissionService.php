@@ -44,35 +44,12 @@ class SubmissionService
         'RUN_TIME_ERROR' => 'RUN-ERROR'
     ];
 
-    /**
-     * @var EntityManagerInterface
-     */
-    protected $em;
-
-    /**
-     * @var LoggerInterface
-     */
-    protected $logger;
-
-    /**
-     * @var DOMJudgeService
-     */
-    protected $dj;
-
-    /**
-     * @var ConfigurationService
-     */
-    protected $config;
-
-    /**
-     * @var EventLogService
-     */
-    protected $eventLogService;
-
-    /**
-     * @var ScoreboardService
-     */
-    protected $scoreboardService;
+    protected EntityManagerInterface $em;
+    protected LoggerInterface $logger;
+    protected DOMJudgeService $dj;
+    protected ConfigurationService $config;
+    protected EventLogService $eventLogService;
+    protected ScoreboardService $scoreboardService;
 
     public function __construct(
         EntityManagerInterface $em,
@@ -110,9 +87,6 @@ class SubmissionService
      * - old_result: result of old judging to filter on
      * - result: result of current judging to filter on
      *
-     * @param array $contests
-     * @param array $restrictions
-     * @param int   $limit
      * @return array An array with two elements: the first one is the list of
      *               submissions and the second one is an array with counts.
      * @throws NoResultException
@@ -320,9 +294,7 @@ class SubmissionService
      * judging runs. Runs can be NULL if not run yet. A return value of
      * NULL means that a final result cannot be determined yet; this may
      * only occur when not all testcases have been run yet.
-     * @param string[]     $runresults
-     * @param array        $resultsPrio
-     * @return string|null
+     * @param string[] $runresults
      */
     public static function getFinalResult(array $runresults, array $resultsPrio): ?string
     {
@@ -374,14 +346,7 @@ class SubmissionService
      * @param Contest|int         $contest
      * @param Language|string     $language
      * @param UploadedFile[]      $files
-     * @param string|null         $source
      * @param Submission|int|null $originalSubmission
-     * @param string|null         $juryMember
-     * @param string|null         $entryPoint
-     * @param string|null         $externalId
-     * @param float|null          $submitTime
-     * @param string|null         $message
-     * @return Submission|null
      * @throws DBALException
      */
     public function submitSolution(
@@ -391,14 +356,14 @@ class SubmissionService
         $contest,
         $language,
         array $files,
-        $source = null,
-        $juryMember = null,
+        ?string $source = null,
+        ?string $juryMember = null,
         $originalSubmission = null,
-        string $entryPoint = null,
-        $externalId = null,
-        float $submitTime = null,
-        string &$message = null
-    ) {
+        ?string $entryPoint = null,
+        ?string $externalId = null,
+        ?float $submitTime = null,
+        ?string &$message = null
+    ): ?Submission {
         if (!$team instanceof Team) {
             $team = $this->em->getRepository(Team::class)->find($team);
         }
@@ -662,8 +627,6 @@ class SubmissionService
 
     /**
      * Checks given source file for expected results string
-     * @param string $source
-     * @param array  $resultsRemap
      * @return array|false|null Array of expected results if found, false when multiple matches are found, or null otherwise.
      */
     public static function getExpectedResults(string $source, array $resultsRemap)
@@ -710,8 +673,6 @@ class SubmissionService
 
     /**
      * Normalize the given expected result
-     * @param string $result
-     * @return string
      */
     public static function normalizeExpectedResult(string $result): string
     {
@@ -725,8 +686,6 @@ class SubmissionService
     /**
      * Compute the filename of a given submission. $fileData must be an array
      * that contains the data from submission and submission_file.
-     * @param array $fileData
-     * @return string
      */
     public function getSourceFilename(array $fileData): string
     {
@@ -744,9 +703,6 @@ class SubmissionService
     /**
      * Get a response object containing the given submission as a ZIP
      *
-     * @param Submission $submission
-     *
-     * @return StreamedResponse
      * @throws ServiceUnavailableHttpException
      */
     public function getSubmissionZipResponse(Submission $submission): StreamedResponse

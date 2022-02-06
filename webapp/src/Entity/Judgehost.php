@@ -22,8 +22,6 @@ use Symfony\Component\Validator\Constraints as Assert;
 class Judgehost
 {
     /**
-     * @var int
-     *
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer", name="judgehostid", length=4,
@@ -32,26 +30,24 @@ class Judgehost
      * @Serializer\SerializedName("id")
      * @Serializer\Type("string")
      */
-    private $judgehostid;
+    private int $judgehostid;
 
     /**
-     * @var string
      * @ORM\Column(type="string", name="hostname", length=64, options={"comment"="Resolvable hostname of judgehost"}, nullable=false)
      * @Assert\Regex("/^[A-Za-z0-9_\-.]*$/", message="Invalid hostname. Only characters in [A-Za-z0-9_\-.] are allowed.")
      */
-    private $hostname;
+    private string $hostname;
 
     /**
-     * @var boolean
      * @ORM\Column(type="boolean", name="active",
      *     options={"comment"="Should this host take on judgings?",
      *              "default"="1"},
      *     nullable=false)
      */
-    private $active = true;
+    private bool $active = true;
 
     /**
-     * @var double
+     * @var double|string
      * @ORM\Column(type="decimal", precision=32, scale=9, name="polltime",
      *     options={"comment"="Time of last poll by autojudger",
      *              "unsigned"=true},
@@ -63,16 +59,15 @@ class Judgehost
      * @ORM\OneToMany(targetEntity="JudgeTask", mappedBy="judgehost")
      * @Serializer\Exclude()
      */
-    private $judgetasks;
+    private Collection $judgetasks;
 
     /**
-     * @var boolean
      * @ORM\Column(type="boolean", name="hidden",
      *     options={"comment"="Should this host be hidden in the overview?",
      *              "default"="0"},
      *     nullable=false)
      */
-    private $hidden = false;
+    private bool $hidden = false;
 
     public function __construct()
     {
@@ -130,7 +125,7 @@ class Judgehost
         return $this;
     }
 
-    public function removeJudgeTask(JudgeTask $judgeTask)
+    public function removeJudgeTask(JudgeTask $judgeTask): void
     {
         $this->judgetasks->removeElement($judgeTask);
     }

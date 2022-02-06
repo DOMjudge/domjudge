@@ -9,7 +9,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 
 class JudgehostsType extends AbstractType
 {
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder->add('judgehosts', CollectionType::class, [
             'entry_type' => JudgehostType::class,

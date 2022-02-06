@@ -23,6 +23,9 @@ class LoadDevelopmentDataCommand extends Command
             );
     }
 
+    /**
+     * @throws Exception
+     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $command   = $this->getApplication()->find('doctrine:fixtures:load');
