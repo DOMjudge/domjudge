@@ -520,9 +520,6 @@
     "symfony/http-kernel": {
         "version": "v4.3.2"
     },
-    "symfony/inflector": {
-        "version": "v5.4.3"
-    },
     "symfony/intl": {
         "version": "v5.4.3"
     },
