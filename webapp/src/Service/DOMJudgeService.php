@@ -143,6 +143,11 @@ class DOMJudgeService
         return $qb->getQuery()->getResult();
     }
 
+    public function getCurrrentContestCookie(): ?int
+    {
+        return $this->requestStack->getCurrentRequest()->cookies->getInt('domjudge_cid');
+    }
+
     /**
      * Get the currently selected contest
      * @param int|null $onlyofteam If -1, get only public contests. If > 0 get only contests for the given team
@@ -152,7 +157,7 @@ class DOMJudgeService
     {
         $contests = $this->getCurrentContests($onlyofteam, $alsofuture);
         if ($this->requestStack->getCurrentRequest()) {
-            $selected_cid = $this->requestStack->getCurrentRequest()->cookies->get('domjudge_cid');
+            $selected_cid = $this->getCurrrentContestCookie();
             if ($selected_cid == -1) {
                 return null;
             }

@@ -94,7 +94,7 @@ var doReload = true;
 function reloadPage()
 {
     if (doReload) {
-        location.reload();
+        window.location.reload();
     }
 }
 
@@ -425,6 +425,15 @@ function processAjaxResponse(jqXHR, data) {
     if (jqXHR.getResponseHeader('X-Login-Page')) {
         window.location = jqXHR.getResponseHeader('X-Login-Page');
     } else {
+        var newCurrentContest = parseInt(jqXHR.getResponseHeader('X-Current-Contest'));
+        var currentContest = parseInt($('[data-current-contest]').data('current-contest'));
+
+        // If the contest ID changed from another tab, reload or whole page
+        if (newCurrentContest !== currentContest) {
+            window.location.reload();
+            return;
+        }
+
         var $refreshTarget = $('[data-ajax-refresh-target]');
         var $data = $(data);
         // When using the static scoreboard, we need to find the children of the [data-ajax-refresh-target]
