@@ -710,7 +710,7 @@ class DOMJudgeService
 
         foreach ($testcases as $index => $testcase) {
             foreach (['input', 'output'] as $type) {
-                $extension = substr($type, 0, -3);
+                $extension = Testcase::EXTENSION_MAPPING[$type];
 
                 $filename = sprintf("%s.%s", $index + 1, $extension);
                 $content  = null;
