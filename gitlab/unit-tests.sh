@@ -3,7 +3,7 @@
 . gitlab/ci_settings.sh
 
 version=$1
-[ "$version" = "7.4" ] && CODECOVERAGE=1 || CODECOVERAGE=0
+[ "$version" = "8.1" ] && CODECOVERAGE=1 || CODECOVERAGE=0
 
 show_phpinfo $version
 
@@ -41,7 +41,7 @@ if [ $CODECOVERAGE -eq 1 ]; then
     CNT=$(sed -n '/Generating code coverage report/,$p' phpunit.out | grep -v DoctrineTestBundle | grep -cv ^$)
     FILE=deprecation.txt
     sed -n '/Generating code coverage report/,$p' phpunit.out > ${CI_PROJECT_DIR}/$FILE
-    if [ $CNT -lt 12 ]; then
+    if [ $CNT -lt 14 ]; then
         STATE=success
     else
         STATE=failure
