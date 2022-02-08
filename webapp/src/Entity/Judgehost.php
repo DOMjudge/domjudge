@@ -39,12 +39,12 @@ class Judgehost
     private string $hostname;
 
     /**
-     * @ORM\Column(type="boolean", name="active",
+     * @ORM\Column(type="boolean", name="enabled",
      *     options={"comment"="Should this host take on judgings?",
      *              "default"="1"},
      *     nullable=false)
      */
-    private bool $active = true;
+    private bool $enabled = true;
 
     /**
      * @var double|string
@@ -95,15 +95,15 @@ class Judgehost
         return $this->getHostname();
     }
 
-    public function setActive(bool $active): Judgehost
+    public function setEnabled(bool $enabled): Judgehost
     {
-        $this->active = $active;
+        $this->enabled = $enabled;
         return $this;
     }
 
-    public function getActive(): bool
+    public function getEnabled(): bool
     {
-        return $this->active;
+        return $this->enabled;
     }
 
     /** @param string|float $polltime */

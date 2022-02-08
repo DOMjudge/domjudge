@@ -4,7 +4,7 @@
     <thead>
     <tr>
         <th>{{ form_label(form.judgehosts.vars.prototype.hostname) }}</th>
-        <th>{{ form_label(form.judgehosts.vars.prototype.active) }}</th>
+        <th>{{ form_label(form.judgehosts.vars.prototype.enabled) }}</th>
         <th>{{ form_label(form.judgehosts.vars.prototype.hidden) }}</th>
     </tr>
     </thead>
@@ -15,8 +15,8 @@
                 {{ form_widget(judgehost.hostname) }}
             </td>
             <td style="width: 10%">
-                {{ form_widget(judgehost.active) }}
-                {{ form_errors(judgehost.active) }}
+                {{ form_widget(judgehost.enabled) }}
+                {{ form_errors(judgehost.enabled) }}
             </td>
             <td style="width: 10%">
                 {{ form_widget(judgehost.hidden) }}

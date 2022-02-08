@@ -162,7 +162,7 @@ class JudgehostController extends AbstractFOSRestController
         } else {
             $judgehost = new Judgehost();
             $judgehost->setHostname($hostname);
-            $judgehost->setActive((bool)$this->config->get('judgehost_activated_by_default'));
+            $judgehost->setEnabled((bool)$this->config->get('judgehost_activated_by_default'));
             $this->em->persist($judgehost);
         }
         $this->em->flush();
@@ -217,8 +217,8 @@ class JudgehostController extends AbstractFOSRestController
      *         mediaType="application/x-www-form-urlencoded",
      *         @OA\Schema(
      *             @OA\Property(
-     *                 property="active",
-     *                 description="The new active state of the judgehost",
+     *                 property="enabled",
+     *                 description="The new enabled state of the judgehost",
      *                 type="boolean"
      *             )
      *         )
@@ -227,13 +227,14 @@ class JudgehostController extends AbstractFOSRestController
      */
     public function updateJudgeHostAction(Request $request, string $hostname): array
     {
-        if (!$request->request->has('active')) {
-            throw new BadRequestHttpException('Argument \'active\' is mandatory');
+        if (!$request->request->has('enabled')) {
+            throw new BadRequestHttpException('Argument \'enabled\' is mandatory');
         }
 
+        /** @var Judgehost $judgehost */
         $judgehost = $this->em->getRepository(Judgehost::class)->findOneBy(['hostname' => $hostname]);
         if ($judgehost) {
-            $judgehost->setActive($request->request->getBoolean('active'));
+            $judgehost->setEnabled($request->request->getBoolean('enabled'));
             $this->em->flush();
         }
 
@@ -1307,7 +1308,7 @@ class JudgehostController extends AbstractFOSRestController
         $this->em->flush();
 
         // If this judgehost is not active, there's nothing to do.
-        if (!$judgehost->getActive()) {
+        if (!$judgehost->getEnabled()) {
             return [];
         }
 

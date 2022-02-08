@@ -17,7 +17,7 @@ class JudgehostType extends AbstractType
         $builder->add('hostname', TextType::class, [
             'attr' => ['readonly' => true],
         ]);
-        $builder->add('active', ChoiceType::class, [
+        $builder->add('enabled', ChoiceType::class, [
             'choices' => [
                 'yes' => true,
                 'no' => false,

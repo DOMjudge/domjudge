@@ -12,7 +12,7 @@ class JudgehostFixture extends AbstractExampleDataFixture
         $judgehost = new Judgehost();
         $judgehost
             ->setHostname('example-judgehost1')
-            ->setActive(false);
+            ->setEnabled(false);
 
         $manager->persist($judgehost);
         $manager->flush();
