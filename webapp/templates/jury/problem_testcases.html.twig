@@ -68,7 +68,7 @@
                     </td>
                     <td class="filename">
                         <a href="{{ path('jury_problem_testcase_fetch', {'probId': problem.probid, 'rank': testcase.rank, 'type': 'input'}) }}">
-                            {{ testcase.downloadName }}.in
+                            {{ testcase.downloadName }}.{{ extensionMapping.input }}
                         </a>
                     </td>
                     <td class="size">
@@ -94,7 +94,7 @@
                 <tr>
                     <td class="filename">
                         <a href="{{ path('jury_problem_testcase_fetch', {'probId': problem.probid, 'rank': testcase.rank, 'type': 'output'}) }}">
-                            {{ testcase.downloadName }}.out
+                            {{ testcase.downloadName }}.{{ extensionMapping.output }}
                         </a>
                     </td>
                     <td class="size">

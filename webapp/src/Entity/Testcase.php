@@ -21,6 +21,12 @@ use JMS\Serializer\Annotation as Serializer;
  */
 class Testcase
 {
+    // Mapping from type to extension
+    public const EXTENSION_MAPPING = [
+        'input'  => 'in',
+        'output' => 'ans',
+    ];
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")

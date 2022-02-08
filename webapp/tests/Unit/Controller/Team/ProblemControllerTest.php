@@ -141,7 +141,7 @@ class ProblemControllerTest extends BaseTest
 
         for ($i = 1; $i <= 2; $i++) {
             self::assertSame($samples[$i]->getContent()->getInput(), $content["$i.in"]);
-            self::assertSame($samples[$i]->getContent()->getOutput(), $content["$i.out"]);
+            self::assertSame($samples[$i]->getContent()->getOutput(), $content["$i.ans"]);
         }
         // Does not contain more than these 4 files.
         self::assertCount(4, $content);

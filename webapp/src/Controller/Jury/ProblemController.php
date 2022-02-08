@@ -690,6 +690,7 @@ class ProblemController extends BaseController
             'problem' => $problem,
             'testcases' => $testcases,
             'testcaseData' => $testcaseData,
+            'extensionMapping' => Testcase::EXTENSION_MAPPING,
         ];
 
         return $this->render('jury/problem_testcases.html.twig', $data);
@@ -793,7 +794,7 @@ class ProblemController extends BaseController
             $mimetype  = sprintf('image/%s', $extension);
             $filename  = sprintf('p%d.t%d.%s', $probId, $rank, $extension);
         } else {
-            $extension = substr($type, 0, -3);
+            $extension = Testcase::EXTENSION_MAPPING[$type];
             $mimetype  = 'text/plain';
             $filename  = sprintf('%s.%s', $testcase->getDownloadName(), $extension);
         }
