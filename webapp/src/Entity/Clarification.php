@@ -47,7 +47,7 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
      *              "collation"="utf8mb4_bin"},
      *     nullable=true)
      */
-    protected ?string $externalid;
+    protected ?string $externalid = null;
 
     /**
      * @var double|string

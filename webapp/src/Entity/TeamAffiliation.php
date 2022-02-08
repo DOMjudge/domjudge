@@ -52,7 +52,7 @@ class TeamAffiliation extends BaseApiEntity implements AssetEntityInterface
      *     nullable=true)
      * @Serializer\Exclude()
      */
-    protected ?string $externalid;
+    protected ?string $externalid = null;
 
     /**
      * @ORM\Column(type="string", name="shortname", length=32,

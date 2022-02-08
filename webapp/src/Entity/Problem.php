@@ -46,7 +46,7 @@ class Problem extends BaseApiEntity
      *     nullable=true)
      * @Serializer\Groups({"Nonstrict"})
      */
-    protected ?string $externalid;
+    protected ?string $externalid = null;
 
     /**
      * @ORM\Column(type="string", name="name", length=255, options={"comment"="Descriptive name"}, nullable=false)

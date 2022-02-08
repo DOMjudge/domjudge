@@ -41,7 +41,7 @@ class Language extends BaseApiEntity
      * @Serializer\SerializedName("id")
      * @Serializer\Groups({"Default", "Nonstrict"})
      */
-    protected ?string $externalid;
+    protected ?string $externalid = null;
 
     /**
      * @ORM\Column(type="string", name="name", length=255, options={"comment"="Descriptive language name"}, nullable=false)

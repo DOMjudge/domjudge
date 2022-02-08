@@ -52,7 +52,7 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
      * @Serializer\Groups({"Nonstrict"})
      * @Serializer\SerializedName("external_id")
      */
-    protected ?string $externalid;
+    protected ?string $externalid = null;
 
     /**
      * @var double|string

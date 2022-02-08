@@ -63,7 +63,7 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
      * @Serializer\Groups({"Nonstrict"})
      * @Serializer\SerializedName("external_id")
      */
-    protected ?string $externalid;
+    protected ?string $externalid = null;
 
     /**
      * @ORM\Column(type="string", name="name", length=255, options={"comment"="Descriptive name"}, nullable=false)
