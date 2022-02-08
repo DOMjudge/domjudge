@@ -61,7 +61,7 @@
                                                                 {% set submissionText = 'submissions' %}
                                                             {% endif %}
                                                             {% if not current_contest.freezeData.showFinal and current_contest.freezetime and stat.start.timestamp >= current_contest.freezetime %}
-                                                                {% set maxBucketSize = max(stats.maxBucketSizeCorrect, stats.maxBucketSizeIncorrect) %}
+                                                                {% set maxBucketSize = max(1, stats.maxBucketSizeCorrect, stats.maxBucketSizeIncorrect) %}
                                                                 {% set bucket = (count / maxBucketSize * 9) | round(0, 'ceil') %}
                                                                 {% set itemClass = 'frozen' ~ '-' ~ bucket %}
                                                                 {% set label = count ~ ' ' ~ submissionText ~ ' in freeze' %}
