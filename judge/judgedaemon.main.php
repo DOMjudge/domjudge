@@ -150,7 +150,7 @@ function request(string $url, string $verb = 'GET', $data = '', bool $failonerro
             $errstr = "Authentication failed (error $status) while contacting $url. " .
                 "Check credentials in restapi.secret.";
         } else {
-            $json = json_decode($response, true);
+            $json = dj_json_decode($response, true);
             if ($json !== null) {
                 $response = var_export($json, true);
             }
@@ -569,7 +569,7 @@ if (!empty($options['e'])) {
     $endpointID = $options['e'];
     $endpoint = $endpoints[$endpointID];
     $endpoints[$endpointID]['ch'] = setup_curl_handle($endpoint['user'], $endpoint['pass']);
-    $new_judging_run = (array) json_decode(base64_decode(file_get_contents($options['j'])));
+    $new_judging_run = (array) dj_json_decode(base64_decode(file_get_contents($options['j'])));
     $judgeTaskId = $options['t'];
 
     for ($i = 0; $i < 5; $i++) {
@@ -1349,7 +1349,7 @@ function judge(array $judgeTask): bool
         // Post result back asynchronously. PHP is lacking multi-threading, so
         // we just call ourselves again.
         $tmpfile = tempnam(TMPDIR, 'judging_run_');
-        file_put_contents($tmpfile, base64_encode(json_encode($new_judging_run)));
+        file_put_contents($tmpfile, base64_encode(dj_json_encode($new_judging_run)));
         $judgedaemon = BINDIR . '/judgedaemon';
         $cmd = $judgedaemon
             . ' -e ' . $endpointID

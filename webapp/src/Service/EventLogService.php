@@ -228,8 +228,8 @@ class EventLogService implements ContainerAwareInterface
         $jsonPassed = isset($json);
 
         // Make a combined string to keep track of the data ID's
-        $dataidsCombined = json_encode($dataIds);
-        $idsCombined     = $ids === null ? null : (is_array($ids) ? json_encode($ids) : $ids);
+        $dataidsCombined = $this->dj->jsonEncode($dataIds);
+        $idsCombined     = $ids === null ? null : (is_array($ids) ? $this->dj->jsonEncode($ids) : $ids);
 
         $this->logger->debug(
             "EventLogService::log arguments: '%s' '%s' '%s' '%s' '%s' '%s'",
@@ -286,14 +286,14 @@ class EventLogService implements ContainerAwareInterface
             $ids = [$ids];
         }
 
-        $idsCombined = $ids === null ? null : (is_array($ids) ? json_encode($ids) : $ids);
+        $idsCombined = $ids === null ? null : (is_array($ids) ? $this->dj->jsonEncode($ids) : $ids);
 
         // State is a special case, as it works without an ID
         if ($type !== 'state' && count(array_filter($ids)) !== count($dataIds)) {
             $this->logger->warning(
                 "EventLogService::log API ID not specified or inferred ".
                 "from data for type %s and data ID's '%s'",
-                [ $type, json_encode($dataIds) ]
+                [ $type, $this->dj->jsonEncode($dataIds) ]
             );
             return;
         }

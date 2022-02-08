@@ -547,11 +547,14 @@ class ImportExportService
     public function importJson(string $type, UploadedFile $file, ?string &$message = null): int
     {
         $content = file_get_contents($file->getRealPath());
-        $data = json_decode($content, true);
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            $message = 'File contents is not valid JSON: ' . json_last_error_msg();
+        try {
+            $data = $this->dj->jsonDecode($content);
+        }
+        catch (\JsonException $e) {
+            $message = "File contents is not valid JSON: " . $e->getMessage();
             return -1;
         }
+
         if (!is_array($data) || !is_int(key($data))) {
             $message = 'File contents does not contain JSON array';
             return -1;

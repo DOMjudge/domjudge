@@ -447,29 +447,21 @@ class DOMJudgeService
     }
 
     /**
-     * Decode a JSON string and handle errors
+     * Decode a JSON string with our preferred settings
      * @return mixed
      */
     public function jsonDecode(string $str)
     {
-        $res = json_decode($str, true);
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new HttpException(500, sprintf("Error decoding JSON data '%s': %s", $str, json_last_error_msg()));
-        }
-        return $res;
+        return json_decode($str, true, 512, JSON_THROW_ON_ERROR);
     }
 
     /**
-     * Decode a JSON string and handle errors
+     * Encode a JSON string with our preferred settings
      * @param mixed $data
      */
     public function jsonEncode($data): string
     {
-        $res = json_encode($data);
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new HttpException(500, sprintf("Error encoding data to JSON: %s", json_last_error_msg()));
-        }
-        return $res;
+        return json_encode($data, JSON_PRESERVE_ZERO_FRACTION | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
     }
 
     /**
@@ -990,7 +982,7 @@ class DOMJudgeService
             ':run_script_id'     => $runExecutable->getImmutableExecId(),
             // TODO: store this in the database as well instead of recomputing it here over and over again, doing
             // this will also help to make the whole data immutable.
-            ':compile_config'    => json_encode(
+            ':compile_config'    => $this->jsonEncode(
                 [
                     'script_timelimit'      => $this->config->get('script_timelimit'),
                     'script_memory_limit'   => $this->config->get('script_memory_limit'),
@@ -1000,7 +992,7 @@ class DOMJudgeService
                     'hash'                  => $compileExecutable->getHash(),
                 ]
             ),
-            ':run_config'        => json_encode(
+            ':run_config'        => $this->jsonEncode(
                 [
                     'time_limit'    => $problem->getProblem()->getTimelimit() * $submission->getLanguage()->getTimeFactor(),
                     'memory_limit'  => $memoryLimit,
@@ -1010,7 +1002,7 @@ class DOMJudgeService
                     'hash'          => $runExecutable->getHash(),
                 ]
             ),
-            ':compare_config'    => json_encode(
+            ':compare_config'    => $this->jsonEncode(
                 [
                     'script_timelimit'      => $this->config->get('script_timelimit'),
                     'script_memory_limit'   => $this->config->get('script_memory_limit'),

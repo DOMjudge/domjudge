@@ -7,27 +7,19 @@
  */
 
 /**
- * Decode a JSON string and handle errors.
+ * Decode a JSON string with our preferred settings.
  */
 function dj_json_decode(string $str)
 {
-    $res = json_decode($str, true);
-    if (json_last_error() !== JSON_ERROR_NONE) {
-        error("Error decoding JSON data '$str': ".json_last_error_msg());
-    }
-    return $res;
+    return json_decode($str, true, 512, JSON_THROW_ON_ERROR);
 }
 
 /**
- * Encode data to JSON and handle errors.
+ * Encode data to JSON with our preferred settings.
  */
 function dj_json_encode($data) : string
 {
-    $res = json_encode($data, JSON_PRESERVE_ZERO_FRACTION | JSON_UNESCAPED_SLASHES);
-    if (json_last_error() !== JSON_ERROR_NONE) {
-        error("Error encoding data to JSON: ".json_last_error_msg());
-    }
-    return $res;
+    return json_encode($data, JSON_PRESERVE_ZERO_FRACTION | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
 }
 
 /**

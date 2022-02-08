@@ -43,13 +43,7 @@ class JsonType extends BaseJsonType
             return null;
         }
 
-        $encoded = json_encode($value, JSON_PRESERVE_ZERO_FRACTION);
-
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            throw ConversionException::conversionFailedSerialization($value, 'json', json_last_error_msg());
-        }
-
-        return $encoded;
+        return json_encode($value, JSON_PRESERVE_ZERO_FRACTION | JSON_THROW_ON_ERROR);
     }
 
     public function requiresSQLCommentHint(AbstractPlatform $platform): bool
