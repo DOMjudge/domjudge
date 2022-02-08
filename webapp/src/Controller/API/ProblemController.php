@@ -250,7 +250,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
             }
         }
         if (!empty($errors)) {
-            throw new BadRequestHttpException(json_encode($errors));
+            throw new BadRequestHttpException($this->dj->jsonEncode($errors));
         }
         return [
             'problem_id' => $probId,

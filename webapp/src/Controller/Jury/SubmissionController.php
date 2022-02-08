@@ -568,7 +568,7 @@ class SubmissionController extends BaseController
                     ->setJobId($jid->getJudgingid())
                     ->setUuid($jid->getUuid())
                     ->setRunScriptId($executable->getImmutableExecId())
-                    ->setRunConfig(json_encode(['hash' => $executable->getHash()]));
+                    ->setRunConfig($this->dj->jsonEncode(['hash' => $executable->getHash()]));
                 $this->em->persist($judgeTask);
             }
             $this->em->flush();
