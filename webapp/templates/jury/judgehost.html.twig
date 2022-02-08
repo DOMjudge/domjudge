@@ -28,8 +28,8 @@
                     <td>{{ judgehost.hostname | printHost }}</td>
                 </tr>
                 <tr>
-                    <th>Active</th>
-                    <td>{{ judgehost.active | printYesNo }}</td>
+                    <th>Enabled</th>
+                    <td>{{ judgehost.enabled | printYesNo }}</td>
                 </tr>
                 <tr>
                     <th>Status</th>
@@ -47,15 +47,15 @@
 
     <div class="mb-4">
         {%- if is_granted('ROLE_ADMIN') -%}
-            {%- if judgehost.active -%}
-                {% set url = path('jury_judgehost_deactivate', {judgehostid: judgehost.judgehostid}) %}
+            {%- if judgehost.enabled -%}
+                {% set url = path('jury_judgehost_disable', {judgehostid: judgehost.judgehostid}) %}
                 {% set icon = 'pause' %}
-                {% set action = 'Deactivate' %}
+                {% set action = 'Disable' %}
                 {% set class = 'warning' %}
             {%- else -%}
-                {% set url = path('jury_judgehost_activate', {judgehostid: judgehost.judgehostid}) %}
+                {% set url = path('jury_judgehost_enable', {judgehostid: judgehost.judgehostid}) %}
                 {% set icon = 'play' %}
-                {% set action = 'Activate' %}
+                {% set action = 'Enable' %}
                 {% set class = 'success' %}
             {%- endif -%}
             {{ button(url, action, class, icon) }}

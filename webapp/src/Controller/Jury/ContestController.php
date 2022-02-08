@@ -658,8 +658,8 @@ class ContestController extends BaseController
             throw new BadRequestHttpException("Contest with cid=$contestId not found.");
         }
         $judgehosts = $this->em->getRepository(Judgehost::class)->findBy([
-            'active' => true,
-            'hidden' => false,
+            'enabled' => true,
+            'hidden'  => false,
         ]);
         $cnt = 0;
         foreach ($judgehosts as $judgehost) {

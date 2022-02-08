@@ -19,14 +19,14 @@
     {%- if is_granted('ROLE_ADMIN') %}
 
         <div class="mb-4">
-            <form action="{{ path('jury_judgehost_activate_all') }}" method="post" class="d-inline">
-                <button type="submit" name="cmd-activate" class="btn btn-success">
+            <form action="{{ path('jury_judgehost_enable_all') }}" method="post" class="d-inline">
+                <button type="submit" name="cmd-enable" class="btn btn-success">
                     <i class="fas fa-play"></i>
                     Start all judgehosts
                 </button>
             </form>
-            <form action="{{ path('jury_judgehost_deactivate_all') }}" method="post" class="d-inline">
-                <button type="submit" name="cmd-deactivate" class="btn btn-warning">
+            <form action="{{ path('jury_judgehost_disable_all') }}" method="post" class="d-inline">
+                <button type="submit" name="cmd-disable" class="btn btn-warning">
                     <i class="fas fa-pause"></i>
                     Stop all judgehosts
                 </button>

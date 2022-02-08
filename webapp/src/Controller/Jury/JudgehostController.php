@@ -70,7 +70,7 @@ class JudgehostController extends BaseController
         $table_fields = [
             'judgehostid' => ['title' => 'ID'],
             'hostname' => ['title' => 'hostname'],
-            'active' => ['title' => 'active'],
+            'enabled' => ['title' => 'enabled'],
             'status' => ['title' => 'status'],
             'last_judgingid' => ['title' => 'last judging'],
         ];
@@ -137,25 +137,25 @@ class JudgehostController extends BaseController
                     'value' => $status,
                     'title' => $statustitle,
                 ],
-                'active' => [
-                    'value' => $judgehost->getActive() ? 'yes' : 'no',
+                'enabled' => [
+                    'value' => $judgehost->getEnabled() ? 'yes' : 'no',
                 ],
             ]);
 
             // Create action links
             if ($this->isGranted('ROLE_ADMIN')) {
-                if ($judgehost->getActive()) {
-                    $activeicon = 'pause';
-                    $activecmd  = 'deactivate';
-                    $route      = 'jury_judgehost_deactivate';
+                if ($judgehost->getEnabled()) {
+                    $enableicon = 'pause';
+                    $enablecmd  = 'disable';
+                    $route      = 'jury_judgehost_disable';
                 } else {
-                    $activeicon = 'play';
-                    $activecmd  = 'activate';
-                    $route      = 'jury_judgehost_activate';
+                    $enableicon = 'play';
+                    $enablecmd  = 'enable';
+                    $route      = 'jury_judgehost_enable';
                 }
                 $judgehostactions[] = [
-                    'icon' => $activeicon,
-                    'title' => sprintf('%s judgehost', $activecmd),
+                    'icon' => $enableicon,
+                    'title' => sprintf('%s judgehost', $enablecmd),
                     'link' => $this->generateUrl($route, ['judgehostid' => $judgehost->getJudgehostid()]),
                 ];
 
@@ -174,7 +174,7 @@ class JudgehostController extends BaseController
                 'data' => $judgehostdata,
                 'actions' => $judgehostactions,
                 'link' => $this->generateUrl('jury_judgehost', ['judgehostid' => $judgehost->getJudgehostid()]),
-                'cssclass' => $judgehost->getActive() ? '' : 'disabled',
+                'cssclass' => $judgehost->getEnabled() ? '' : 'disabled',
             ];
         }
 
@@ -284,50 +284,52 @@ class JudgehostController extends BaseController
     }
 
     /**
-     * @Route("/{judgehostid}/activate", name="jury_judgehost_activate")
+     * @Route("/{judgehostid}/enable", name="jury_judgehost_enable")
      * @IsGranted("ROLE_ADMIN")
      */
-    public function activateAction(RouterInterface $router, Request $request, int $judgehostid): RedirectResponse
+    public function enableAction(RouterInterface $router, Request $request, int $judgehostid): RedirectResponse
     {
+        /** @var Judgehost $judgehost */
         $judgehost = $this->em->getRepository(Judgehost::class)->find($judgehostid);
-        $judgehost->setActive(true);
+        $judgehost->setEnabled(true);
         $this->em->flush();
-        $this->dj->auditlog('judgehost', $judgehost->getJudgehostid(), 'marked active');
+        $this->dj->auditlog('judgehost', $judgehost->getJudgehostid(), 'marked enabled');
         return $this->redirectToLocalReferrer($router, $request, $this->generateUrl('jury_judgehosts'));
     }
 
     /**
-     * @Route("/{judgehostid}/deactivate", name="jury_judgehost_deactivate")
+     * @Route("/{judgehostid}/disable", name="jury_judgehost_disable")
      * @IsGranted("ROLE_ADMIN")
      */
-    public function deactivateAction(RouterInterface $router, Request $request, int $judgehostid): RedirectResponse
+    public function disableAction(RouterInterface $router, Request $request, int $judgehostid): RedirectResponse
     {
+        /** @var Judgehost $judgehost */
         $judgehost = $this->em->getRepository(Judgehost::class)->find($judgehostid);
-        $judgehost->setActive(false);
+        $judgehost->setEnabled(false);
         $this->em->flush();
-        $this->dj->auditlog('judgehost', $judgehost->getJudgehostid(), 'marked inactive');
+        $this->dj->auditlog('judgehost', $judgehost->getJudgehostid(), 'marked disabled');
         return $this->redirectToLocalReferrer($router, $request, $this->generateUrl('jury_judgehosts'));
     }
 
     /**
-     * @Route("/activate-all", methods={"POST"}, name="jury_judgehost_activate_all")
+     * @Route("/enable-all", methods={"POST"}, name="jury_judgehost_enable_all")
      * @IsGranted("ROLE_ADMIN")
      */
-    public function activateAllAction(): RedirectResponse
+    public function enableAllAction(): RedirectResponse
     {
-        $this->em->createQuery('UPDATE App\Entity\Judgehost j set j.active = true')->execute();
-        $this->dj->auditlog('judgehost', null, 'marked all active');
+        $this->em->createQuery('UPDATE App\Entity\Judgehost j set j.enabled = true')->execute();
+        $this->dj->auditlog('judgehost', null, 'marked all enabled');
         return $this->redirectToRoute('jury_judgehosts');
     }
 
     /**
-     * @Route("/deactivate-all", methods={"POST"}, name="jury_judgehost_deactivate_all")
+     * @Route("/disable-all", methods={"POST"}, name="jury_judgehost_disable_all")
      * @IsGranted("ROLE_ADMIN")
      */
-    public function deactivateAllAction(): RedirectResponse
+    public function disableAllAction(): RedirectResponse
     {
-        $this->em->createQuery('UPDATE App\Entity\Judgehost j set j.active = false')->execute();
-        $this->dj->auditlog('judgehost', null, 'marked all inactive');
+        $this->em->createQuery('UPDATE App\Entity\Judgehost j set j.enabled = false')->execute();
+        $this->dj->auditlog('judgehost', null, 'marked all disabled');
         return $this->redirectToRoute('jury_judgehosts');
     }
 
@@ -342,7 +344,7 @@ class JudgehostController extends BaseController
         $critical_threshold = $now - $time_crit;
 
         $ret = $this->em->createQuery(
-            'UPDATE App\Entity\Judgehost j set j.active = false, j.hidden = true WHERE j.polltime IS NULL OR j.polltime < :threshold')
+            'UPDATE App\Entity\Judgehost j set j.enabled = false, j.hidden = true WHERE j.polltime IS NULL OR j.polltime < :threshold')
             ->setParameter(':threshold', $critical_threshold)
             ->execute();
         $this->dj->auditlog('judgehost', null, 'auto-hiding judgehosts');

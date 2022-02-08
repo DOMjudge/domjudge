@@ -308,7 +308,7 @@ class DOMJudgeService
             $judgehosts = $this->em->createQueryBuilder()
                 ->select('j.hostname', 'j.polltime')
                 ->from(Judgehost::class, 'j')
-                ->andWhere('j.active = 1')
+                ->andWhere('j.enabled = 1')
                 ->andWhere('j.hidden = 0')
                 ->andWhere('j.polltime < :i')
                 ->setParameter('i', time() - $this->config->get('judgehost_critical'))
@@ -493,9 +493,9 @@ class DOMJudgeService
             case 'judgehost':
                 $this->em->createQueryBuilder()
                     ->update(Judgehost::class, 'j')
-                    ->set('j.active', ':active')
+                    ->set('j.enabled', ':enabled')
                     ->andWhere('j.hostname = :hostname')
-                    ->setParameter(':active', $enabled)
+                    ->setParameter(':enabled', $enabled)
                     ->setParameter(':hostname', $disabled['hostname'])
                     ->getQuery()
                     ->execute();

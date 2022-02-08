@@ -478,7 +478,7 @@ class SubmissionController extends BaseController
             $numActiveJudgehosts = (int)$this->em->createQueryBuilder()
                 ->from(Judgehost::class, 'j')
                 ->select('count(j.judgehostid)')
-                ->andWhere('j.active = 1')
+                ->andWhere('j.enabled = 1')
                 ->getQuery()
                 ->getSingleScalarResult();
             if ($numActiveJudgehosts == 0) {
