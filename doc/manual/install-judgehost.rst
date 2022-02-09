@@ -42,6 +42,9 @@ For Red Hat::
 
 Building and installing
 -----------------------
+These instructions assume a release `tarball <https://www.domjudge.org/download>`_, see :ref:`this section <bootstrap>`
+for instructions to build from git sources.
+
 After installing the software listed above, run configure. In this
 example to install DOMjudge in the directory ``domjudge`` under your
 home directory::

@@ -14,7 +14,7 @@ DOMserver
  * Install either nginx or Apache and PHP.
  * Make sure PHP works for the web server and command line scripts.
 
- * Extract the source tarball and run
+ * Extract the `source tarball <https://www.domjudge.org/download>`_ and run
    ``./configure --with-baseurl=<url> && make domserver``.
  * Run ``sudo make install-domserver`` to install the system.
 
@@ -52,7 +52,7 @@ DOMserver
 
 Judgehosts
 ----------
- * Extract the source tarball and run
+ * Extract the `source tarball <https://www.domjudge.org/download>`_ and run
    ``./configure --with-baseurl=<url> && make judgehost``.
  * Run ``sudo make install-judgehost`` to install the system.
 
