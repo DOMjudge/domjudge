@@ -56,3 +56,4 @@
   parallel:
     matrix:
       - PHPVERSION: ["7.4","8.0","8.1"]
+        TEST: ["E2E","Unit"]

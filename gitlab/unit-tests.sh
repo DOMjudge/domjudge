@@ -3,6 +3,7 @@
 . gitlab/ci_settings.sh
 
 version=$1
+unittest=$2
 [ "$version" = "8.1" ] && CODECOVERAGE=1 || CODECOVERAGE=0
 
 show_phpinfo $version
@@ -33,7 +34,7 @@ if [ "$CODECOVERAGE" -eq 1 ]; then
     pcov="--coverage-html=${CI_PROJECT_DIR}/coverage-html --coverage-clover coverage.xml"
 fi
 set +e
-php $phpcov lib/vendor/bin/phpunit -c webapp/phpunit.xml.dist --log-junit ${CI_PROJECT_DIR}/unit-tests.xml --colors=never $pcov > phpunit.out
+php $phpcov lib/vendor/bin/phpunit -c webapp/phpunit.xml.dist webapp/tests/$unittest --log-junit ${CI_PROJECT_DIR}/unit-tests.xml --colors=never $pcov > phpunit.out
 UNITSUCCESS=$?
 set -e
 CNT=0

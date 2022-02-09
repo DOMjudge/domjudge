@@ -10,7 +10,7 @@
     MARIADB_PORT_3306_TCP_ADDR: sqlserver
   script:
     - if [ -z ${PHPVERSION+x} ]; then export PHPVERSION=7.4; fi
-    - ./gitlab/unit-tests.sh $PHPVERSION
+    - ./gitlab/unit-tests.sh $PHPVERSION $TEST
   artifacts:
     when: always
     paths:
@@ -31,3 +31,6 @@ run unit tests:
 
 run unit tests (MySQL):
   extends: [.mysql_job,.unit_job]
+  parallel:
+    matrix:
+      - TEST: ["E2E","Unit"]
