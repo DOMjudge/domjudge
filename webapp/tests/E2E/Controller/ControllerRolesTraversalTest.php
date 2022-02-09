@@ -28,11 +28,10 @@ class ControllerRolesTraversalTest extends BaseTest
      * ''                       //       Empty URL
      * '#'                      //       Links to local page
      * '/logout'                //       Application links
-     * '/login'
      **/
     protected static array $substrings = ['http','activate','deactivate','/jury/change-contest/','/text','/input','/output','/export','/download','/phpinfo','javascript','.zip'];
-    protected static array $fullstrings = ['','#','/logout','/login'];
-    protected static array $riskyURLs = ['nonExistent','2nd'];
+    protected static array $fullstrings = ['/logout'];
+    protected static array $riskyURLs = ['nonExistant','activate','deactivate','/jury/change-contest','/input','/login'];
     protected static array $dataSources = [DJS::DATA_SOURCE_LOCAL, DJS::DATA_SOURCE_CONFIGURATION_EXTERNAL, DJS::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL];
 
     protected function getLoops(): array

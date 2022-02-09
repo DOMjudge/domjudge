@@ -13,6 +13,7 @@
     - if [ "TEST" = "UNIT" ] -a [ "CRAWL_DATASOURCES" != "0" ]; then exit 0; fi
     - if [ "TEST" = "E2E" ] -a [ "CRAWL_DATASOURCES" != "0" ] -a [ "CI_COMMIT_BRANCH" != "main" ]; then exit 0; fi
     - export CRAWL_DATASOURCES
+    - export CRAWL_RISKY
     - ./gitlab/unit-tests.sh $PHPVERSION $TEST
   artifacts:
     when: always
