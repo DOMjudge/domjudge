@@ -15,6 +15,7 @@ DOMjudge also offers an `OpenAPI Specification ver. 3`_
 compatible JSON file, which can be found at
 `http(s)://yourhost.example.edu/domjudge/api/doc.json`.
 
+.. _bootstrap:
 
 Bootstrapping from Git repository sources
 -----------------------------------------

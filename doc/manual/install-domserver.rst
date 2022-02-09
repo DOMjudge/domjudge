@@ -48,6 +48,9 @@ distributions like CentOS and Fedora::
 
 Installation
 ------------
+These instructions assume a `tarball <https://www.domjudge.org/download>`_, see :ref:`this section <bootstrap>`
+for instructions to build from git sources.
+
 The DOMjudge build/install system consists of a ``configure``
 script and makefiles, but when installing it, some more care has to be
 taken than simply running ``./configure && make && make install``.
