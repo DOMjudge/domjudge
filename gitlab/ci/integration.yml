@@ -3,6 +3,7 @@
   stage: integration
   script:
     - if [ -z ${PHPVERSION+x} ]; then export PHPVERSION=7.4; fi
+    - if [ "$TEST" = "E2E" ]; then exit 0; fi
     - timeout --signal=15 40m ./gitlab/integration.sh $PHPVERSION
   artifacts:
     when: always
