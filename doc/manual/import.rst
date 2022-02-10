@@ -86,6 +86,7 @@ It should be a JSON array with objects, each object should contain the following
 fields:
 
 - ``id``: the external affiliation ID. Must be unique
+- ``icpc_id`` (optional): an external ID, e.g. from the ICPC CMS, may be empty
 - ``name``: the affiliation short name as used in the jury interface and certain
   exports
 - ``formal_name``: the affiliation name as used on the scoreboard
@@ -95,11 +96,13 @@ Example ``organizations.json``::
 
   [{
     "id": "INST-42",
+    "icpc_id": "42",
     "name": "LU",
     "formal_name": "Lund University",
     "country": "SWE"
   }, {
     "id": "INST-43",
+    "icpc_id": "43",
     "name": "FAU",
     "formal_name": "Friedrich-Alexander-University Erlangen-Nuremberg",
     "country": "DEU"

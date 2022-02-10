@@ -13,8 +13,8 @@ class OrganizationControllerTest extends BaseTest
     protected ?string $apiEndpoint = 'organizations';
 
     protected array $expectedObjects = [
-        '1'                                      => [
-            'icpc_id'      => '1',
+        '1'                                     => [
+            'icpc_id'      => null,
             'shortname'    => 'UU',
             'id'           => '1',
             'name'         => 'UU',
@@ -34,9 +34,10 @@ class OrganizationControllerTest extends BaseTest
                     'height' => 512,
                 ],
             ],
-            'logo' => null,
+            'logo'         => null,
         ],
         SampleAffiliationsFixture::class . ':0' => [
+            'icpc_id'      => '1234',
             'name'         => 'FAU',
             'formal_name'  => 'Friedrich-Alexander-Universität Erlangen-Nürnberg',
             'country'      => 'DEU',
@@ -56,6 +57,7 @@ class OrganizationControllerTest extends BaseTest
             ],
         ],
         SampleAffiliationsFixture::class . ':1' => [
+            'icpc_id'      => 'abc-icpc-id',
             'name'         => 'ABC',
             'formal_name'  => 'Affiliation without country',
             'country'      => null,

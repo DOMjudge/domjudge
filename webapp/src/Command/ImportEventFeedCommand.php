@@ -1048,7 +1048,8 @@ class ImportEventFeedCommand extends Command
 
         $affiliation
             ->setName($event['data']['formal_name'] ?? $event['data']['name'])
-            ->setShortname($event['data']['name']);
+            ->setShortname($event['data']['name'])
+            ->setIcpcid($event['data']['icpc_id'] ?? null);
         if (isset($event['data']['country'])) {
             $affiliation->setCountry($event['data']['country']);
         }
