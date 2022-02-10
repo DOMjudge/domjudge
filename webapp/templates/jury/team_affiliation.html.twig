@@ -26,6 +26,16 @@
                     </tr>
                 {% endif %}
                 <tr>
+                    <th>ICPC ID</th>
+                    <td>
+                        {% if teamAffiliation.icpcid %}
+                            {{ teamAffiliation.icpcid }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
                     <th>Shortname</th>
                     <td>{{ teamAffiliation.shortname }}</td>
                 </tr>

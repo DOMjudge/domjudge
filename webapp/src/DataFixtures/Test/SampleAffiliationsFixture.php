@@ -11,9 +11,9 @@ class SampleAffiliationsFixture extends Fixture
     public function load(ObjectManager $manager): void
     {
         $affiliationData = [
-            // short name, name,                                                country
-            ['FAU',        'Friedrich-Alexander-Universität Erlangen-Nürnberg', 'DEU'],
-            ['ABC',        'Affiliation without country',                        null],
+            // short name, name,                                                country, ICPC ID
+            ['FAU',        'Friedrich-Alexander-Universität Erlangen-Nürnberg', 'DEU',   '1234'],
+            ['ABC',        'Affiliation without country',                        null,   'abc-icpc-id'],
         ];
 
         foreach ($affiliationData as $index => $affiliationItem) {
@@ -21,7 +21,8 @@ class SampleAffiliationsFixture extends Fixture
                 ->setExternalid($affiliationItem[0])
                 ->setShortname($affiliationItem[0])
                 ->setName($affiliationItem[1])
-                ->setCountry($affiliationItem[2]);
+                ->setCountry($affiliationItem[2])
+                ->setIcpcid($affiliationItem[3]);
             $manager->persist($affiliation);
             $manager->flush();
             // Add a reference, since the submission ID changes during testing because of the auto increment

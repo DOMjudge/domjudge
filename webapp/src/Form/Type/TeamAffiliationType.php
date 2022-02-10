@@ -13,11 +13,13 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Intl\Countries;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\Regex;
 
 class TeamAffiliationType extends AbstractExternalIdEntityType
 {
@@ -43,6 +45,19 @@ class TeamAffiliationType extends AbstractExternalIdEntityType
         }
 
         $this->addExternalIdField($builder, TeamAffiliation::class);
+        $builder->add('icpcid', TextType::class, [
+            'label'       => 'ICPC ID',
+            'required'    => false,
+            'help'        => 'Optional ID of the organization in the ICPC CMS.',
+            'constraints' => [
+                new Regex(
+                    [
+                        'pattern' => '/^[a-zA-Z0-9_-]+$/i',
+                        'message' => 'Only letters, numbers, dashes and underscores are allowed.',
+                    ]
+                )
+            ]
+        ]);
         $builder->add('shortname');
         $builder->add('name');
         if ($this->configuration->get('show_flags')) {

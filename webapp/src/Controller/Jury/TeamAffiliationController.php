@@ -67,6 +67,7 @@ class TeamAffiliationController extends BaseController
 
         $table_fields = [
             'affilid' => ['title' => 'ID', 'sort' => true],
+            'icpcid' => ['title' => 'ICPC ID', 'sort' => true],
             'shortname' => ['title' => 'shortname', 'sort' => true],
             'name' => ['title' => 'name', 'sort' => true, 'default_sort' => true],
         ];

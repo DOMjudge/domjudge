@@ -689,6 +689,7 @@ class ImportExportService
                 'shortname' => @$organization['name'],
                 'name' => @$organization['formal_name'],
                 'country' => @$organization['country'],
+                'icpc_id' => $organization['icpc_id'] ?? null,
             ];
         }
 
@@ -721,7 +722,8 @@ class ImportExportService
             $teamAffiliation
                 ->setShortname($organizationItem['shortname'])
                 ->setName($organizationItem['name'])
-                ->setCountry($organizationItem['country']);
+                ->setCountry($organizationItem['country'])
+                ->setIcpcid($organizationItem['icpc_id'] ?? null);
             $this->em->flush();
             if ($contest = $this->dj->getCurrentContest()) {
                 $this->eventLogService->log('team_affiliation', $teamAffiliation->getAffilid(), $action,

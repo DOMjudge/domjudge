@@ -21,11 +21,6 @@ use Symfony\Component\Validator\Constraints as Assert;
  *         @ORM\UniqueConstraint(name="externalid", columns={"externalid"}, options={"lengths": {190}}),
  *     })
  * @Serializer\VirtualProperty(
- *     "icpcId",
- *     exp="object.getAffilid()",
- *     options={@Serializer\Type("string")}
- * )
- * @Serializer\VirtualProperty(
  *     "shortName",
  *     exp="object.getShortname()",
  *     options={@Serializer\Type("string"), @Serializer\SerializedName("shortname"), @Serializer\Groups({"Nonstrict"})}
@@ -53,6 +48,15 @@ class TeamAffiliation extends BaseApiEntity implements AssetEntityInterface
      * @Serializer\Exclude()
      */
     protected ?string $externalid = null;
+
+    /**
+     * @ORM\Column(type="string", name="icpcid", length=255,
+     *     options={"comment"="External identifier from ICPC CMS",
+     *              "collation"="utf8mb4_bin"},
+     *     nullable=true)
+     * @Serializer\SerializedName("icpc_id")
+     */
+    protected ?string $icpcid = null;
 
     /**
      * @ORM\Column(type="string", name="shortname", length=32,
@@ -128,6 +132,17 @@ class TeamAffiliation extends BaseApiEntity implements AssetEntityInterface
     public function getExternalid(): ?string
     {
         return $this->externalid;
+    }
+
+    public function setIcpcid(?string $icpcid): TeamAffiliation
+    {
+        $this->icpcid = $icpcid;
+        return $this;
+    }
+
+    public function getIcpcid(): ?string
+    {
+        return $this->icpcid;
     }
 
     public function setShortname(string $shortname): TeamAffiliation
