@@ -12,20 +12,24 @@ class TeamCategoryFixture extends AbstractExampleDataFixture
     public function load(ObjectManager $manager): void
     {
         $participants = new TeamCategory();
-        $participants->setName('Participants');
+        $participants
+            ->setName('Participants')
+            ->setExternalid('participants');
 
         $observers = new TeamCategory();
         $observers
             ->setName('Observers')
             ->setSortorder(1)
-            ->setColor('#ffcc33');
+            ->setColor('#ffcc33')
+            ->setExternalid('observers');
 
         $organisation = new TeamCategory();
         $organisation
             ->setName('Organisation')
             ->setSortorder(1)
             ->setColor('#ff99cc')
-            ->setVisible(false);
+            ->setVisible(false)
+            ->setExternalid('organization');
 
         $manager->persist($participants);
         $manager->persist($observers);

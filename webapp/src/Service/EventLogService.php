@@ -76,6 +76,7 @@ class EventLogService implements ContainerAwareInterface
             self::KEY_TYPE => self::TYPE_CONFIGURATION,
             self::KEY_ENTITY => TeamCategory::class,
             self::KEY_TABLES => ['team_category'],
+            self::KEY_EXTERNAL_ID => 'externalid',
         ],
         'organizations' => [
             self::KEY_TYPE => self::TYPE_CONFIGURATION,
@@ -972,7 +973,7 @@ class EventLogService implements ContainerAwareInterface
         if ($field = $this->externalIdFieldForEntity($entity)) {
             return $field;
         }
-        $class    = get_class($entity);
+        $class    = is_object($entity) ? get_class($entity) : $entity;
         $metadata = $this->em->getClassMetadata($class);
         try {
             return $metadata->getSingleIdentifierFieldName();

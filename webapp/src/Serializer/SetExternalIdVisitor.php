@@ -70,7 +70,22 @@ class SetExternalIdVisitor implements EventSubscriberInterface
         if ($object instanceof ExternalRelationshipEntityInterface) {
             foreach ($object->getExternalRelationships() as $field => $entity) {
                 try {
-                    if ($entity && $externalIdField = $this->eventLogService->externalIdFieldForEntity(get_class($entity))) {
+                    if (is_array($entity)) {
+                        if (empty($entity) || !($externalIdField = $this->eventLogService->externalIdFieldForEntity(get_class($entity[0])))) {
+                            continue;
+                        }
+                        $method = sprintf('get%s', ucfirst($externalIdField));
+                        $property = new StaticPropertyMetadata(
+                            get_class($object),
+                            $field,
+                            null
+                        );
+                        $data = [];
+                        foreach ($entity as $item) {
+                            $data[] = $item->{$method}();
+                        }
+                        $visitor->visitProperty($property, $data);
+                    } elseif ($entity && $externalIdField = $this->eventLogService->externalIdFieldForEntity(get_class($entity))) {
                         $method = sprintf('get%s', ucfirst($externalIdField));
                         if (method_exists($entity, $method)) {
                             $property = new StaticPropertyMetadata(
