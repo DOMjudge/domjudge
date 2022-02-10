@@ -13,7 +13,6 @@ use App\Entity\TeamAffiliation;
 use App\Entity\TeamCategory;
 use App\Entity\User;
 use App\Utils\Scoreboard\Filter;
-use App\Utils\Scoreboard\ScoreboardMatrixItem;
 use App\Utils\Utils;
 use Collator;
 use DateTime;
@@ -23,13 +22,11 @@ use Doctrine\ORM\Id\AssignedGenerator;
 use Doctrine\ORM\Id\IdentityGenerator;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\NonUniqueResultException;
-use Exception;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Validator\ConstraintViolationInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
-use Symfony\Component\Yaml\Yaml;
 
 class ImportExportService
 {
@@ -330,7 +327,7 @@ class ImportExportService
 
         $data = [];
         foreach ($categories as $category) {
-            $data[] = [$category->getCategoryid(), $category->getName()];
+            $data[] = [$category->getApiId($this->eventLogService), $category->getName()];
         }
 
         return $data;
@@ -355,7 +352,7 @@ class ImportExportService
             $data[] = [
                 $team->getTeamid(),
                 $team->getIcpcid(),
-                $team->getCategory()->getCategoryid(),
+                $team->getCategory()->getApiId($this->eventLogService),
                 $team->getEffectiveName(),
                 $team->getAffiliation() ? $team->getAffiliation()->getName() : '',
                 $team->getAffiliation() ? $team->getAffiliation()->getShortname() : '',
@@ -374,7 +371,7 @@ class ImportExportService
     {
         // we'll here assume that the requested file will be of the current contest,
         // as all our scoreboard interfaces do
-        // 1    External ID     24314   integer
+        // 1    External ID     24314   string
         // 2    Rank in contest     1   integer
         // 3    Award   Gold Medal  string
         // 4    Number of problems the team has solved  4   integer
@@ -611,6 +608,7 @@ class ImportExportService
             }
             $groupData[] = [
                 'categoryid' => @$group['id'],
+                'icpc_id' => @$group['icpc_id'],
                 'name' => @$group['name'],
                 'visible' => !($group['hidden'] ?? false),
                 'sortorder' => @$group['sortorder'],
@@ -637,18 +635,15 @@ class ImportExportService
             if (empty($groupItem['categoryid'])) {
                 $categoryId = null;
                 $teamCategory = null;
-                $metadata->setIdGeneratorType(ClassMetadata::GENERATOR_TYPE_IDENTITY);
-                $metadata->setIdGenerator(new IdentityGenerator());
             } else {
-                $categoryId = (int)$groupItem['categoryid'];
-                $teamCategory = $this->em->getRepository(TeamCategory::class)->find($categoryId);
-                $metadata->setIdGeneratorType(ClassMetadata::GENERATOR_TYPE_NONE);
-                $metadata->setIdGenerator(new AssignedGenerator());
+                $categoryId = $groupItem['categoryid'];
+                $field = $this->eventLogService->apiIdFieldForEntity(TeamCategory::class);
+                $teamCategory = $this->em->getRepository(TeamCategory::class)->findOneBy([$field => $categoryId]);
             }
             if (!$teamCategory) {
                 $teamCategory = new TeamCategory();
                 if ($categoryId !== null) {
-                    $teamCategory->setCategoryid($categoryId);
+                    $teamCategory->setExternalid($categoryId);
                 }
                 $this->em->persist($teamCategory);
                 $action = EventLogService::ACTION_CREATE;
@@ -659,7 +654,8 @@ class ImportExportService
                 ->setName($groupItem['name'])
                 ->setVisible($groupItem['visible'] ?? true)
                 ->setSortorder($groupItem['sortorder'] ?? 0)
-                ->setColor($groupItem['color'] ?? null);
+                ->setColor($groupItem['color'] ?? null)
+                ->setIcpcid($groupItem['icpc_id'] ?? null);
             $this->em->flush();
             if ($contest = $this->dj->getCurrentContest()) {
                 $this->eventLogService->log('team_category', $teamCategory->getCategoryid(), $action,
@@ -829,11 +825,6 @@ class ImportExportService
      */
     protected function importTeamData(array $teamData, ?array &$saved = null): int
     {
-        // We want to overwrite the ID so change the ID generator
-        $metadata = $this->em->getClassMetaData(TeamCategory::class);
-        $metadata->setIdGeneratorType(ClassMetadata::GENERATOR_TYPE_NONE);
-        $metadata->setIdGenerator(new AssignedGenerator());
-
         $createdAffiliations = [];
         $createdTeams        = [];
         $updatedTeams        = [];
@@ -874,11 +865,12 @@ class ImportExportService
             unset($teamItem['team']['affilid']);
 
             if (!empty($teamItem['team']['categoryid'])) {
-                $teamCategory = $this->em->getRepository(TeamCategory::class)->find($teamItem['team']['categoryid']);
+                $field = $this->eventLogService->apiIdFieldForEntity(TeamCategory::class);
+                $teamCategory = $this->em->getRepository(TeamCategory::class)->findOneBy([$field => $teamItem['team']['categoryid']]);
                 if (!$teamCategory) {
                     $teamCategory = new TeamCategory();
                     $teamCategory
-                        ->setCategoryid((int)$teamItem['team']['categoryid'])
+                        ->setExternalid($teamItem['team']['categoryid'])
                         ->setName($teamItem['team']['categoryid'] . ' - auto-create during import');
                     $this->em->persist($teamCategory);
                     $this->dj->auditlog('team_category', $teamCategory->getCategoryid(),
@@ -962,7 +954,8 @@ class ImportExportService
             $juryCategory
                 ->setName('Jury')
                 ->setSortorder(100)
-                ->setVisible(false);
+                ->setVisible(false)
+                ->setExternalid('jury');
             $this->em->persist($juryCategory);
             $this->em->flush();
         }

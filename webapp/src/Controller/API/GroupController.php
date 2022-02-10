@@ -98,7 +98,9 @@ class GroupController extends AbstractRestController
         }
 
         $group = $saved[0];
-        $id = $group->getCategoryid();
+        $idField = $this->eventLogService->externalIdFieldForEntity(TeamCategory::class) ?? 'teamid';
+        $method = sprintf('get%s', ucfirst($idField));
+        $id = call_user_func([$group, $method]);
 
         return $this->renderCreateData($request, $saved[0], 'group', $id);
     }
@@ -122,6 +124,6 @@ class GroupController extends AbstractRestController
 
     protected function getIdField(): string
     {
-        return 'c.categoryid';
+        return sprintf('c.%s', $this->eventLogService->externalIdFieldForEntity(TeamCategory::class) ?? 'categoryid');
     }
 }

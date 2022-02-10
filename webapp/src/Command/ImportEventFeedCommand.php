@@ -238,11 +238,6 @@ class ImportEventFeedCommand extends Command
 
         $this->contestId = $contest->getCid();
 
-        // For teams and team categories we want to overwrite the ID so change the ID generator
-        $metadata = $this->em->getClassMetaData(TeamCategory::class);
-        $metadata->setIdGeneratorType(ClassMetadataInfo::GENERATOR_TYPE_NONE);
-        $metadata->setIdGenerator(new AssignedGenerator());
-
         $metadata = $this->em->getClassMetaData(Team::class);
         $metadata->setIdGeneratorType(ClassMetadataInfo::GENERATOR_TYPE_NONE);
         $metadata->setIdGenerator(new AssignedGenerator());
@@ -969,7 +964,7 @@ class ImportEventFeedCommand extends Command
         if ($event['op'] === EventLogService::ACTION_DELETE) {
             // We need to delete the category
 
-            $category = $this->em->getRepository(TeamCategory::class)->find($groupId);
+            $category = $this->em->getRepository(TeamCategory::class)->findOneBy(['externalid' => $groupId]);
             if ($category) {
                 $this->em->remove($category);
                 $this->em->flush();
@@ -985,7 +980,7 @@ class ImportEventFeedCommand extends Command
 
         // First, load the category
         /** @var TeamCategory $category */
-        $category = $this->em->getRepository(TeamCategory::class)->find($groupId);
+        $category = $this->em->getRepository(TeamCategory::class)->findOneBy(['externalid' => $groupId]);
         if ($category) {
             $action = EventLogService::ACTION_UPDATE;
         } else {
@@ -994,7 +989,7 @@ class ImportEventFeedCommand extends Command
         }
 
         $category
-            ->setCategoryid((int)$event['data']['id'])
+            ->setExternalid($event['data']['id'])
             ->setName($event['data']['name'])
             ->setVisible(!($event['data']['hidden'] ?? false));
 
@@ -1006,7 +1001,7 @@ class ImportEventFeedCommand extends Command
         $this->eventLogService->log('groups', $category->getCategoryid(), $action,
                                     $this->contestId);
 
-        $this->processPendingEvents('group', $category->getCategoryid());
+        $this->processPendingEvents('group', $category->getExternalid());
     }
 
     /**
@@ -1214,7 +1209,7 @@ class ImportEventFeedCommand extends Command
                 return;
             } else {
                 /** @var TeamCategory $category */
-                $category = $this->em->getRepository(TeamCategory::class)->find($groupId);
+                $category = $this->em->getRepository(TeamCategory::class)->findOneBy(['externalid' => $groupId]);
                 if (!$category) {
                     $this->addPendingEvent('group', $groupId, $event);
                     return;

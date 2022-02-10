@@ -64,6 +64,7 @@ class TeamCategoryController extends BaseController
             ->getQuery()->getResult();
         $table_fields   = [
             'categoryid' => ['title' => 'ID', 'sort' => true],
+            'icpcid' => ['title' => 'ICPC ID', 'sort' => true],
             'sortorder' => ['title' => 'sort', 'sort' => true, 'default_sort' => true],
             'name' => ['title' => 'name', 'sort' => true],
             'num_teams' => ['title' => '# teams', 'sort' => true],

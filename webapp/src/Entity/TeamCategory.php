@@ -5,6 +5,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -14,17 +15,16 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Table(
  *     name="team_category",
  *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Categories for teams (e.g.: participants, observers, ...)"},
- *     indexes={@ORM\Index(name="sortorder", columns={"sortorder"})})
+ *     indexes={@ORM\Index(name="sortorder", columns={"sortorder"})},
+ *     uniqueConstraints={
+ *         @ORM\UniqueConstraint(name="externalid", columns={"externalid"}, options={"lengths": {190}}),
+ *     })
  * @Serializer\VirtualProperty(
  *     "hidden",
  *     exp="!object.getVisible()",
  *     options={@Serializer\Type("boolean")}
  * )
- * @Serializer\VirtualProperty(
- *     "icpc_id",
- *     exp="object.getCategoryid()",
- *     options={@Serializer\Type("string")}
- * )
+ * @UniqueEntity("externalid")
  */
 class TeamCategory extends BaseApiEntity
 {
@@ -37,6 +37,24 @@ class TeamCategory extends BaseApiEntity
      * @Serializer\Type("string")
      */
     protected ?int $categoryid = null;
+
+    /**
+     * @ORM\Column(type="string", name="externalid", length=255,
+     *     options={"comment"="Team category ID in an external system",
+     *              "collation"="utf8mb4_bin"},
+     *     nullable=true)
+     * @Serializer\Exclude()
+     */
+    protected ?string $externalid = null;
+
+    /**
+     * @ORM\Column(type="string", name="icpcid", length=255,
+     *     options={"comment"="External identifier from ICPC CMS",
+     *              "collation"="utf8mb4_bin"},
+     *     nullable=true)
+     * @Serializer\SerializedName("icpc_id")
+     */
+    protected ?string $icpcid = null;
 
     /**
      * @ORM\Column(type="string", name="name", length=255,
@@ -109,6 +127,28 @@ class TeamCategory extends BaseApiEntity
     public function __toString(): string
     {
         return $this->name;
+    }
+
+    public function setExternalid(?string $externalid): TeamCategory
+    {
+        $this->externalid = $externalid;
+        return $this;
+    }
+
+    public function getExternalid(): ?string
+    {
+        return $this->externalid;
+    }
+
+    public function setIcpcid(?string $icpcid): TeamCategory
+    {
+        $this->icpcid = $icpcid;
+        return $this;
+    }
+
+    public function getIcpcid(): ?string
+    {
+        return $this->icpcid;
     }
 
     public function setCategoryid(int $categoryid): TeamCategory

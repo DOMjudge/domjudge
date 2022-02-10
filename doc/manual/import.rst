@@ -22,7 +22,8 @@ Prepare a file called ``groups.json`` which contains the team categories.
 It should be a JSON array with objects, each object should contain the following
 fields:
 
-- ``id``: the (integer) category ID to use. Must be unique
+- ``id``: the category ID to use. Must be unique
+- ``icpc_id`` (optional): an external ID, e.g. from the ICPC CMS, may be empty
 - ``name``: the name of the team category as shown on the scoreboard
 - ``hidden`` (defaults to ``false``): if ``true``, teams in this category will
   not be shown on the scoreboard
@@ -33,6 +34,7 @@ Example ``groups.json``::
 
   [{
     "id": "13337",
+    "icpc_id": "123",
     "name": "Companies",
     "hidden": true
   }, {
@@ -57,7 +59,7 @@ Prepare a file called ``groups.tsv`` which contains the team categories.
 The first line should contain ``File_Version 1`` (tab-separated).
 Each of the following lines must contain the following elements separated by tabs:
 
-- the (integer) )category ID. Must be unique
+- the category ID. Must be unique
 - the name of the team category as shown on the scoreboard
 
 Example ``groups.tsv``::

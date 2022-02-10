@@ -20,9 +20,9 @@ class TeamCategoryFixture extends AbstractDefaultDataFixture
     public function load(ObjectManager $manager): void
     {
         $data = [
-            // Name,            Sort order, Color,     Visible
-            ['System',          9,          '#ff2bea', false],
-            ['Self-Registered', 8,          '#33cc44', true],
+            // Name,            Sort order, Color,     Visible, External ID
+            ['System',          9,          '#ff2bea', false,   'system'],
+            ['Self-Registered', 8,          '#33cc44', true,    'self-registered'],
         ];
 
         foreach ($data as $item) {
@@ -31,7 +31,8 @@ class TeamCategoryFixture extends AbstractDefaultDataFixture
                     ->setName($item[0])
                     ->setSortorder($item[1])
                     ->setColor($item[2])
-                    ->setVisible($item[3]);
+                    ->setVisible($item[3])
+                    ->setExternalid($item[4]);
                 $manager->persist($category);
                 $manager->flush();
             } else {
