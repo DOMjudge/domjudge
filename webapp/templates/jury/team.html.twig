@@ -19,6 +19,12 @@
                     <th>ID</th>
                     <td>{{ team.teamid }}</td>
                 </tr>
+                {% if showExternalId(team) %}
+                    <tr>
+                        <th>External ID</th>
+                        <td>{{ team.externalid }}</td>
+                    </tr>
+                {% endif %}
                 <tr>
                     <th>ICPC ID</th>
                     <td>

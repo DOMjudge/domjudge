@@ -120,6 +120,13 @@ class TeamController extends BaseController
             'stats' => ['title' => 'stats', 'sort' => true,],
         ];
 
+        // Insert external ID field when configured to use it
+        if ($externalIdField = $this->eventLogService->externalIdFieldForEntity(Team::class)) {
+            $table_fields = array_slice($table_fields, 0, 1, true) +
+                [$externalIdField => ['title' => 'external ID', 'sort' => true]] +
+                array_slice($table_fields, 1, null, true);
+        }
+
         $userDataPerTeam = $this->em->createQueryBuilder()
             ->from(Team::class, 't', 't.teamid')
             ->leftJoin('t.users', 'u')

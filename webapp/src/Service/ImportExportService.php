@@ -19,7 +19,6 @@ use DateTime;
 use DateTimeZone;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Id\AssignedGenerator;
-use Doctrine\ORM\Id\IdentityGenerator;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\NonUniqueResultException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -350,7 +349,7 @@ class ImportExportService
         $data = [];
         foreach ($teams as $team) {
             $data[] = [
-                $team->getTeamid(),
+                $team->getApiId($this->eventLogService),
                 $team->getIcpcid(),
                 $team->getCategory()->getApiId($this->eventLogService),
                 $team->getEffectiveName(),
@@ -885,18 +884,20 @@ class ImportExportService
             // Determine if we need to set the team ID manually or automatically
             if (empty($teamItem['team']['teamid'])) {
                 $team = null;
-                $metadata->setIdGeneratorType(ClassMetadata::GENERATOR_TYPE_IDENTITY);
-                $metadata->setIdGenerator(new IdentityGenerator());
             } else {
-                $team = $this->em->getRepository(Team::class)->find($teamItem['team']['teamid']);
-                $metadata->setIdGeneratorType(ClassMetadata::GENERATOR_TYPE_NONE);
-                $metadata->setIdGenerator(new AssignedGenerator());
+                $field = $this->eventLogService->externalIdFieldForEntity(Team::class);
+                $team = $this->em->getRepository(Team::class)->findOneBy([$field => $teamItem['team']['teamid']]);
             }
             if (!$team) {
                 $team  = new Team();
                 $added = true;
             } else {
                 $added = false;
+            }
+
+            if (!empty($teamItem['team']['teamid'])) {
+                $team->setExternalid($teamItem['team']['teamid']);
+                unset($teamItem['team']['teamid']);
             }
 
             $propertyAccessor = PropertyAccess::createPropertyAccessor();
