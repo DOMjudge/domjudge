@@ -14,7 +14,7 @@ final class Version20220210171746 extends AbstractMigration
 {
     public function getDescription() : string
     {
-        return 'Add externak ID field to teams';
+        return 'Add external ID field to teams';
     }
 
     public function up(Schema $schema) : void
