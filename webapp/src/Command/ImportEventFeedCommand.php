@@ -28,7 +28,6 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Id\AssignedGenerator;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\ORM\NonUniqueResultException;
-use Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -237,10 +236,6 @@ class ImportEventFeedCommand extends Command
         }
 
         $this->contestId = $contest->getCid();
-
-        $metadata = $this->em->getClassMetaData(Team::class);
-        $metadata->setIdGeneratorType(ClassMetadataInfo::GENERATOR_TYPE_NONE);
-        $metadata->setIdGenerator(new AssignedGenerator());
 
         // Find an admin user as we need one to make sure we can read all events
         /** @var User $user */
@@ -1160,12 +1155,10 @@ class ImportEventFeedCommand extends Command
             return;
         }
 
-        $teamId = (int)$teamId;
-
         if ($event['op'] === EventLogService::ACTION_DELETE) {
             // We need to delete the team
 
-            $team = $this->em->getRepository(Team::class)->findOneBy(['teamid' => $teamId]);
+            $team = $this->em->getRepository(Team::class)->findOneBy(['externalid' => $teamId]);
             if ($team) {
                 $this->em->remove($team);
                 $this->em->flush();
@@ -1181,13 +1174,13 @@ class ImportEventFeedCommand extends Command
 
         // First, load the team
         /** @var Team $team */
-        $team = $this->em->getRepository(Team::class)->findOneBy(['teamid' => $teamId]);
+        $team = $this->em->getRepository(Team::class)->findOneBy(['externalid' => $teamId]);
         if ($team) {
             $action = EventLogService::ACTION_UPDATE;
         } else {
             $team = new Team();
             $team
-                ->setTeamid($teamId)
+                ->setExternalid($teamId)
                 ->setIcpcid($icpcId);
             $action = EventLogService::ACTION_CREATE;
         }
@@ -1296,7 +1289,7 @@ class ImportEventFeedCommand extends Command
         $fromTeam   = null;
         if ($fromTeamId !== null) {
             /** @var Team $fromTeam */
-            $fromTeam = $this->em->getRepository(Team::class)->findOneBy(['teamid' => $fromTeamId]);
+            $fromTeam = $this->em->getRepository(Team::class)->findOneBy(['externalid' => $fromTeamId]);
             if (!$fromTeam) {
                 $this->addPendingEvent('team', $fromTeamId, $event);
                 return;
@@ -1307,7 +1300,7 @@ class ImportEventFeedCommand extends Command
         $toTeam   = null;
         if ($toTeamId !== null) {
             /** @var Team $toTeam */
-            $toTeam = $this->em->getRepository(Team::class)->findOneBy(['teamid' => $toTeamId]);
+            $toTeam = $this->em->getRepository(Team::class)->findOneBy(['externalid' => $toTeamId]);
             if (!$toTeam) {
                 $this->addPendingEvent('team', $toTeamId, $event);
                 return;
@@ -1436,7 +1429,7 @@ class ImportEventFeedCommand extends Command
 
         $teamId = $event['data']['team_id'];
         /** @var Team $team */
-        $team = $this->em->getRepository(Team::class)->findOneBy(['teamid' => $teamId]);
+        $team = $this->em->getRepository(Team::class)->findOneBy(['externalid' => $teamId]);
         if (!$team) {
             $this->addPendingEvent('team', $teamId, $event);
             return;

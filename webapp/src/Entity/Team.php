@@ -23,9 +23,9 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
  *         @ORM\Index(name="categoryid", columns={"categoryid"})
  *     },
  *     uniqueConstraints={
- *         @ORM\UniqueConstraint(name="icpcid", columns={"icpcid"}, options={"lengths": {190}}),
+ *         @ORM\UniqueConstraint(name="externalid", columns={"externalid"}, options={"lengths": {190}}),
  *     })
- * @UniqueEntity("icpcid")
+ * @UniqueEntity("externalid")
  */
 class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface, AssetEntityInterface
 {
@@ -41,6 +41,15 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
      * @Serializer\Type("string")
      */
     protected ?int $teamid = null;
+
+    /**
+     * @ORM\Column(type="string", name="externalid", length=255,
+     *     options={"comment"="Team affiliation ID in an external system",
+     *              "collation"="utf8mb4_bin"},
+     *     nullable=true)
+     * @Serializer\Exclude()
+     */
+    protected ?string $externalid = null;
 
     /**
      * @ORM\Column(type="string", name="icpcid", length=255, options={"comment"="Team ID in the ICPC system",
@@ -199,6 +208,17 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
     public function getTeamid(): ?int
     {
         return $this->teamid;
+    }
+
+    public function setExternalid(?string $externalid): Team
+    {
+        $this->externalid = $externalid;
+        return $this;
+    }
+
+    public function getExternalid(): ?string
+    {
+        return $this->externalid;
     }
 
     public function setIcpcid(?string $icpcid): Team

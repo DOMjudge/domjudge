@@ -35,7 +35,7 @@ class EventLogService implements ContainerAwareInterface
     const KEY_URL = 'url';
     const KEY_ENTITY = 'entity';
     const KEY_TABLES = 'tables';
-    const KEY_EXTERNAL_ID = 'extid';
+    const KEY_USE_EXTERNAL_ID = 'use-external-id';
     const KEY_ALWAYS_USE_EXTERNAL_ID = 'always-use-external-id';
 
     // Types of endpoints
@@ -55,7 +55,7 @@ class EventLogService implements ContainerAwareInterface
         'contests' => [
             self::KEY_TYPE => self::TYPE_CONFIGURATION,
             self::KEY_URL => '',
-            self::KEY_EXTERNAL_ID => 'externalid',
+            self::KEY_USE_EXTERNAL_ID => true,
         ],
         'judgement-types' => [ // hardcoded in $VERDICTS and the API
             self::KEY_TYPE => self::TYPE_CONFIGURATION,
@@ -64,29 +64,30 @@ class EventLogService implements ContainerAwareInterface
         ],
         'languages' => [
             self::KEY_TYPE => self::TYPE_CONFIGURATION,
-            self::KEY_EXTERNAL_ID => 'externalid',
+            self::KEY_USE_EXTERNAL_ID => true,
             self::KEY_ALWAYS_USE_EXTERNAL_ID => true,
         ],
         'problems' => [
             self::KEY_TYPE => self::TYPE_CONFIGURATION,
             self::KEY_TABLES => ['problem', 'contestproblem'],
-            self::KEY_EXTERNAL_ID => 'externalid',
+            self::KEY_USE_EXTERNAL_ID => true,
         ],
         'groups' => [
             self::KEY_TYPE => self::TYPE_CONFIGURATION,
             self::KEY_ENTITY => TeamCategory::class,
             self::KEY_TABLES => ['team_category'],
-            self::KEY_EXTERNAL_ID => 'externalid',
+            self::KEY_USE_EXTERNAL_ID => true,
         ],
         'organizations' => [
             self::KEY_TYPE => self::TYPE_CONFIGURATION,
             self::KEY_ENTITY => TeamAffiliation::class,
             self::KEY_TABLES => ['team_affiliation'],
-            self::KEY_EXTERNAL_ID => 'externalid',
+            self::KEY_USE_EXTERNAL_ID => true,
         ],
         'teams' => [
             self::KEY_TYPE => self::TYPE_CONFIGURATION,
             self::KEY_TABLES => ['team', 'contestteam'],
+            self::KEY_USE_EXTERNAL_ID => true,
         ],
         'state' => [
             self::KEY_TYPE => self::TYPE_AGGREGATE,
@@ -95,7 +96,7 @@ class EventLogService implements ContainerAwareInterface
         ],
         'submissions' => [
             self::KEY_TYPE => self::TYPE_LIVE,
-            self::KEY_EXTERNAL_ID => 'externalid',
+            self::KEY_USE_EXTERNAL_ID => true,
         ],
         'judgements' => [
             self::KEY_TYPE => self::TYPE_LIVE,
@@ -109,7 +110,7 @@ class EventLogService implements ContainerAwareInterface
         ],
         'clarifications' => [
             self::KEY_TYPE => self::TYPE_LIVE,
-            self::KEY_EXTERNAL_ID => 'externalid',
+            self::KEY_USE_EXTERNAL_ID => true,
         ],
         'awards' => [
             self::KEY_TYPE => self::TYPE_AGGREGATE,
@@ -858,7 +859,7 @@ class EventLogService implements ContainerAwareInterface
         }
 
         $endpointData = $this->apiEndpoints[$type];
-        if (!isset($endpointData[self::KEY_EXTERNAL_ID])) {
+        if (!isset($endpointData[self::KEY_USE_EXTERNAL_ID])) {
             return $ids;
         }
 
@@ -898,10 +899,10 @@ class EventLogService implements ContainerAwareInterface
         }
 
         return array_map(
-            fn(array $item) => $item[$endpointData[self::KEY_EXTERNAL_ID]],
+            fn(array $item) => $item['externalid'],
             $this->em->createQueryBuilder()
                ->from($entity, 'e')
-               ->select(sprintf('e.%s', $endpointData[self::KEY_EXTERNAL_ID]))
+               ->select('e.externalid')
                ->andWhere(sprintf('e.%s IN (:ids)', $primaryKeyField))
                ->setParameter('ids', $ids)
                ->getQuery()
@@ -932,13 +933,13 @@ class EventLogService implements ContainerAwareInterface
 
         $endpointData = $this->apiEndpoints[$this->entityToEndpoint[$entity]];
 
-        if (!isset($endpointData[self::KEY_EXTERNAL_ID])) {
+        if (!isset($endpointData[self::KEY_USE_EXTERNAL_ID])) {
             return null;
         }
 
-        $lookupExternalid = false;
+        $useExternalId = false;
         if ($endpointData[self::KEY_ALWAYS_USE_EXTERNAL_ID] ?? false) {
-            $lookupExternalid = true;
+            $useExternalId = true;
         } else {
             $dataSource = $this->config->get('data_source');
 
@@ -949,16 +950,16 @@ class EventLogService implements ContainerAwareInterface
                         DOMJudgeService::DATA_SOURCE_CONFIGURATION_EXTERNAL,
                         DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL
                     ])) {
-                    $lookupExternalid = true;
+                    $useExternalId = true;
                 } elseif ($endpointType === self::TYPE_LIVE &&
                     $dataSource === DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL) {
-                    $lookupExternalid = true;
+                    $useExternalId = true;
                 }
             }
         }
 
-        if ($lookupExternalid) {
-            return $endpointData[self::KEY_EXTERNAL_ID];
+        if ($useExternalId) {
+            return 'externalid';
         } else {
             return null;
         }

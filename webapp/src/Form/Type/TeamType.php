@@ -3,17 +3,15 @@
 namespace App\Form\Type;
 
 use App\Entity\Contest;
-use App\Entity\Role;
 use App\Entity\Team;
 use App\Entity\TeamAffiliation;
 use App\Entity\TeamCategory;
 use App\Entity\User;
 use App\Service\DOMJudgeService;
+use App\Service\EventLogService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
-use Exception;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
-use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
@@ -27,26 +25,26 @@ use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Regex;
 
-class TeamType extends AbstractType
+class TeamType extends AbstractExternalIdEntityType
 {
     protected EntityManagerInterface $em;
     protected DOMJudgeService $dj;
 
-    public function __construct(EntityManagerInterface $em, DOMJudgeService $dj)
-    {
+    public function __construct(
+        EventLogService $eventLogService,
+        EntityManagerInterface $em,
+        DOMJudgeService $dj
+    ) {
+        parent::__construct($eventLogService);
         $this->em = $em;
         $this->dj = $dj;
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        $this->addExternalIdField($builder, Team::class);
         $builder->add('name', TextType::class, [
             'label' => 'Team name',
-        ]);
-        $builder->add('displayName', TextType::class, [
-            'label'    => 'Display name',
-            'required' => false,
-            'help'     => 'If provided, will display this instead of the team name in certain places, like the scoreboard.',
         ]);
         $builder->add('icpcid', TextType::class, [
             'label'       => 'ICPC ID',
@@ -60,6 +58,11 @@ class TeamType extends AbstractType
                     ]
                 )
             ]
+        ]);
+        $builder->add('displayName', TextType::class, [
+            'label'    => 'Display name',
+            'required' => false,
+            'help'     => 'If provided, will display this instead of the team name in certain places, like the scoreboard.',
         ]);
         $builder->add('category', EntityType::class, [
             'class' => TeamCategory::class,

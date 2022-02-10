@@ -129,7 +129,7 @@ Prepare a file called ``teams.json`` which contains the teams.
 It should be a JSON array with objects, each object should contain the following
 fields:
 
-- ``id``: the (integer) team ID. Must be unique
+- ``id``: the team ID. Must be unique
 - ``icpc_id`` (optional): an external ID, e.g. from the ICPC CMS, may be empty
 - ``group_ids``: an array with one element: the category ID this team belongs to
 - ``name``: the team name as used in the web interface
@@ -168,7 +168,7 @@ Prepare a file called ``teams2.tsv`` which contains the teams.
 The first line should contain ``File_Version	2`` (tab-separated).
 Each of the following lines must contain the following elements separated by tabs:
 
-- the (integer) team ID. Must be unique
+- the team ID. Must be unique
 - an external ID, e.g. from the ICPC CMS, may be empty
 - the category ID this team belongs to
 - the team name as used in the web interface
