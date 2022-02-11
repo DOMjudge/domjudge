@@ -24,9 +24,9 @@ final class Version20210407120356 extends AbstractMigration
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
 
         if ($schema->getTable('executable')->hasColumn('zipfile')) {
-            $oldRows = $this->connection->executeQuery('SELECT execid, zipfile FROM executable')->fetchAll();
+            $oldRows = $this->connection->executeQuery('SELECT execid, zipfile FROM executable')->fetchAllAssociative();
             foreach ($oldRows as $oldRow) {
-                $this->connection->exec('INSERT INTO immutable_executable (`userid`) VALUES (null)');
+                $this->connection->executeStatement('INSERT INTO immutable_executable (`userid`) VALUES (null)');
                 $immutable_execid = $this->connection->lastInsertId();
 
                 $tmpzip = tempnam('/tmp', 'zipfile');
@@ -46,7 +46,7 @@ final class Version20210407120356 extends AbstractMigration
                         && (($attr >> 16) & 0100) === 0) {
                         $executableBit = '0';
                     }
-                    $this->connection->exec(
+                    $this->connection->executeStatement(
                         'INSERT INTO executable_file '
                         . '(`immutable_execid`, `filename`, `ranknumber`, `file_content`, `is_executable`) '
                         . 'VALUES (' . $immutable_execid . ', "' . $filename . '", '
@@ -55,7 +55,7 @@ final class Version20210407120356 extends AbstractMigration
                     );
                 }
 
-                $this->connection->exec(
+                $this->connection->executeStatement(
                     'UPDATE executable SET immutable_execid = '
                     . $immutable_execid . ' WHERE execid = "' . $oldRow['execid'] . '"'
                 );

@@ -12,7 +12,7 @@ use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Utils\Utils;
-use Doctrine\DBAL\DBALException;
+use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
@@ -122,8 +122,8 @@ class JudgehostController extends BaseController
                 ->select('jt.jobid')
                 ->andWhere('jt.judgehost = :judgehost')
                 ->andWhere('jt.type = :type')
-                ->setParameter(':judgehost', $judgehost)
-                ->setParameter(':type', JudgeTaskType::JUDGING_RUN)
+                ->setParameter('judgehost', $judgehost)
+                ->setParameter('type', JudgeTaskType::JUDGING_RUN)
                 ->orderBy('jt.starttime', 'DESC')
                 ->setMaxResults(1)
                 ->getQuery()
@@ -207,7 +207,7 @@ class JudgehostController extends BaseController
             ->from(Judgehost::class, 'j')
             ->select('j')
             ->andWhere('j.judgehostid = :judgehostid')
-            ->setParameter(':judgehostid', $judgehostid)
+            ->setParameter('judgehostid', $judgehostid)
             ->getQuery()
             ->getOneOrNullResult();
 
@@ -236,8 +236,8 @@ class JudgehostController extends BaseController
                 ->leftJoin('j.rejudging', 'r')
                 ->andWhere('j.contest IN (:contests)')
                 ->andWhere('jt.judgehost = :judgehost')
-                ->setParameter(':contests', $contests)
-                ->setParameter(':judgehost', $judgehost)
+                ->setParameter('contests', $contests)
+                ->setParameter('judgehost', $judgehost)
                 ->orderBy('j.starttime', 'DESC')
                 ->addOrderBy('j.judgingid', 'DESC')
                 ->getQuery()
@@ -275,7 +275,7 @@ class JudgehostController extends BaseController
             ->from(Judgehost::class, 'j')
             ->select('j')
             ->andWhere('j.judgehostid = :judgehostid')
-            ->setParameter(':judgehostid', $judgehostid)
+            ->setParameter('judgehostid', $judgehostid)
             ->getQuery()
             ->getOneOrNullResult();
 
@@ -345,7 +345,7 @@ class JudgehostController extends BaseController
 
         $ret = $this->em->createQuery(
             'UPDATE App\Entity\Judgehost j set j.enabled = false, j.hidden = true WHERE j.polltime IS NULL OR j.polltime < :threshold')
-            ->setParameter(':threshold', $critical_threshold)
+            ->setParameter('threshold', $critical_threshold)
             ->execute();
         $this->dj->auditlog('judgehost', null, 'auto-hiding judgehosts');
         return $this->redirectToRoute('jury_judgehosts');

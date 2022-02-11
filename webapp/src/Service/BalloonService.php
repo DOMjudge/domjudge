@@ -10,7 +10,7 @@ use App\Entity\Submission;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
-use Doctrine\ORM\ORMException;
+use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\Query\Expr\Join;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -66,9 +66,9 @@ class BalloonService
             ->andWhere('s.problem = :probid')
             ->andWhere('s.team = :teamid')
             ->andWhere('s.contest = :cid')
-            ->setParameter(':probid', $submission->getProblem())
-            ->setParameter(':teamid', $submission->getTeam())
-            ->setParameter(':cid', $submission->getContest())
+            ->setParameter('probid', $submission->getProblem())
+            ->setParameter('teamid', $submission->getTeam())
+            ->setParameter('cid', $submission->getContest())
             ->getQuery()
             ->getSingleScalarResult();
 
@@ -112,7 +112,7 @@ class BalloonService
             ->leftJoin('t.category', 'c')
             ->leftJoin('t.affiliation', 'a')
             ->andWhere('co.cid = :cid')
-            ->setParameter(':cid', $contest->getCid())
+            ->setParameter('cid', $contest->getCid())
             ->orderBy('b.done', 'ASC')
             ->addOrderBy('s.submittime', 'DESC');
 

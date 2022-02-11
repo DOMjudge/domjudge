@@ -53,7 +53,7 @@ class SubmitProblemType extends AbstractType
                 ->join('p.contest_problems', 'cp', Join::WITH, 'cp.contest = :contest')
                 ->select('p', 'cp')
                 ->andWhere('cp.allowSubmit = 1')
-                ->setParameter(':contest', $contest)
+                ->setParameter('contest', $contest)
                 ->addOrderBy('cp.shortname'),
             'choice_label' => fn(Problem $problem) => sprintf(
                 '%s - %s', $problem->getContestProblems()->first()->getShortName(), $problem->getName()

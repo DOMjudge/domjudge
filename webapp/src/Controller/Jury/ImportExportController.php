@@ -518,7 +518,7 @@ class ImportExportController extends BaseController
             ->leftJoin('c.problem', 'p')
             ->select('c')
             ->andWhere('c.contest = :contest')
-            ->setParameter(':contest', $contest)
+            ->setParameter('contest', $contest)
             ->addOrderBy('c.category')
             ->addOrderBy('p.probid')
             ->addOrderBy('c.submittime')
@@ -544,7 +544,7 @@ class ImportExportController extends BaseController
             ->from(ContestProblem::class, 'cp')
             ->select('cp')
             ->andWhere('cp.contest = :contest')
-            ->setParameter(':contest', $contest)
+            ->setParameter('contest', $contest)
             ->getQuery()
             ->getResult();
         $contestProblemsIndexed = [];

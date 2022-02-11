@@ -314,7 +314,7 @@ class EventLogService implements ContainerAwareInterface
                         ->from(ContestProblem::class, 'cp')
                         ->select('DISTINCT(cp.contest) AS contestId')
                         ->andWhere('cp.problem = :problem')
-                        ->setParameter(':problem', $dataId)
+                        ->setParameter('problem', $dataId)
                         ->getQuery()
                         ->getScalarResult();
                     $contestIdsForId = array_map(fn(array $data) => $data['contestId'], $contestIdData);
@@ -502,8 +502,8 @@ class EventLogService implements ContainerAwareInterface
             ->select('e')
             ->andWhere('e.contest = :contest')
             ->andWhere('e.endpointtype = :state')
-            ->setParameter(':contest', $contest)
-            ->setParameter(':state', 'state')
+            ->setParameter('contest', $contest)
+            ->setParameter('state', 'state')
             ->orderBy('e.eventid')
             ->getQuery()
             ->getResult();
@@ -605,7 +605,7 @@ class EventLogService implements ContainerAwareInterface
             $firstEndpointId
         );
         if ($this->em->getConnection()->fetchOne('SELECT GET_LOCK(:lock, 1)',
-                [':lock' => $lockString]) != 1) {
+                ['lock' => $lockString]) != 1) {
             throw new Exception('EventLogService::insertEvent failed to obtain lock: ' . $lockString);
         }
 
@@ -641,7 +641,7 @@ class EventLogService implements ContainerAwareInterface
 
         // Make sure to release the lock again
         if ($this->em->getConnection()->fetchOne('SELECT RELEASE_LOCK(:lock)',
-                [':lock' => $lockString]) != 1) {
+                ['lock' => $lockString]) != 1) {
             throw new Exception('EventLogService::insertEvent failed to release lock');
         }
     }
@@ -796,9 +796,9 @@ class EventLogService implements ContainerAwareInterface
                     ->andWhere('e.contest = :contest')
                     ->andWhere('e.endpointtype = :endpoint')
                     ->andWhere('e.endpointid = :endpointid')
-                    ->setParameter(':contest', $contest)
-                    ->setParameter(':endpoint', $endpointType)
-                    ->setParameter(':endpointid', $endpointId)
+                    ->setParameter('contest', $contest)
+                    ->setParameter('endpoint', $endpointType)
+                    ->setParameter('endpointid', $endpointId)
                     ->getQuery()
                     ->getSingleScalarResult();
 
@@ -835,9 +835,9 @@ class EventLogService implements ContainerAwareInterface
             ->andWhere('e.endpointtype = :endpoint')
             ->andWhere('e.endpointid IN (:endpointids)')
             ->andWhere('e2.eventid IS NULL')
-            ->setParameter(':contest', $events[0]->getContest())
-            ->setParameter(':endpoint', $events[0]->getEndpointtype())
-            ->setParameter(':endpointids', $endpointIds)
+            ->setParameter('contest', $events[0]->getContest())
+            ->setParameter('endpoint', $events[0]->getEndpointtype())
+            ->setParameter('endpointids', $endpointIds)
             ->orderBy('e.eventid', 'DESC')
             ->getQuery()
             ->getResult();
@@ -879,7 +879,7 @@ class EventLogService implements ContainerAwareInterface
                 ->from($entity, $table)
                 ->select($fullField, sprintf('%s.externalid', $table))
                 ->andWhere(sprintf('%s IN (:ids)', $fullField))
-                ->setParameter(':ids', $ids)
+                ->setParameter('ids', $ids)
                 ->getQuery()
                 ->getScalarResult());
         }
@@ -902,7 +902,7 @@ class EventLogService implements ContainerAwareInterface
                ->from($entity, 'e')
                ->select(sprintf('e.%s', $endpointData[self::KEY_EXTERNAL_ID]))
                ->andWhere(sprintf('e.%s IN (:ids)', $primaryKeyField))
-               ->setParameter(':ids', $ids)
+               ->setParameter('ids', $ids)
                ->getQuery()
                ->getScalarResult()
         );

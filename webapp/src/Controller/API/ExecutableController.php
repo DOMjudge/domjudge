@@ -48,7 +48,7 @@ class ExecutableController extends AbstractFOSRestController
             ->from(Executable::class, 'e')
             ->select('e')
             ->andWhere('e.execid = :id')
-            ->setParameter(':id', $id)
+            ->setParameter('id', $id)
             ->setMaxResults(1)
             ->getQuery()
             ->getOneOrNullResult();

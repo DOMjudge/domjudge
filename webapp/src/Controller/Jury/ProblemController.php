@@ -219,8 +219,8 @@ class ProblemController extends BaseController
             ->leftJoin('p.contest_problems', 'cp', Join::WITH, 'cp.contest = :contest')
             ->select('p', 'cp')
             ->andWhere('p.probid = :problemId')
-            ->setParameter(':problemId', $problemId)
-            ->setParameter(':contest', $this->dj->getCurrentContest())
+            ->setParameter('problemId', $problemId)
+            ->setParameter('contest', $this->dj->getCurrentContest())
             ->getQuery()
             ->getOneOrNullResult();
 
@@ -284,8 +284,8 @@ class ProblemController extends BaseController
                 ->select('t', 'c')
                 ->andWhere('t.problem = :problem')
                 ->andWhere('t.sample = :sample')
-                ->setParameter(':problem', $problem)
-                ->setParameter(':sample', $isSample)
+                ->setParameter('problem', $problem)
+                ->setParameter('sample', $isSample)
                 ->orderBy('t.ranknumber')
                 ->getQuery()
                 ->getResult();
@@ -299,8 +299,8 @@ class ProblemController extends BaseController
             ->andWhere('s.problem = :problem')
             ->andWhere('s.contest = :contest')
             ->andWhere('s.expected_results IS NOT NULL')
-            ->setParameter(':problem', $problem)
-            ->setParameter(':contest', $this->dj->getCurrentContest())
+            ->setParameter('problem', $problem)
+            ->setParameter('contest', $this->dj->getCurrentContest())
             ->getQuery()
             ->getResult();
 
@@ -477,7 +477,7 @@ class ProblemController extends BaseController
             ->select('tc', 'LENGTH(content.input) AS input_size', 'LENGTH(content.output) AS output_size',
                      'LENGTH(content.image) AS image_size', 'tc.image_type')
             ->andWhere('tc.problem = :problem')
-            ->setParameter(':problem', $problem)
+            ->setParameter('problem', $problem)
             ->orderBy('tc.ranknumber')
             ->getQuery()
             ->getResult();
@@ -716,7 +716,7 @@ class ProblemController extends BaseController
             ->from(Testcase::class, 'tc', 'tc.ranknumber')
             ->select('tc')
             ->andWhere('tc.problem = :problem')
-            ->setParameter(':problem', $problem)
+            ->setParameter('problem', $problem)
             ->orderBy('tc.ranknumber')
             ->getQuery()
             ->getResult();
@@ -781,8 +781,8 @@ class ProblemController extends BaseController
             ->select('tc', 'tcc')
             ->andWhere('tc.problem = :problem')
             ->andWhere('tc.ranknumber = :ranknumber')
-            ->setParameter(':problem', $probId)
-            ->setParameter(':ranknumber', $rank)
+            ->setParameter('problem', $probId)
+            ->setParameter('ranknumber', $rank)
             ->getQuery()
             ->getOneOrNullResult();
         if (!$testcase) {

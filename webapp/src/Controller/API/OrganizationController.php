@@ -118,7 +118,7 @@ class OrganizationController extends AbstractRestController
         /** @var TeamAffiliation $teamAffiliation */
         $teamAffiliation = $this->getQueryBuilder($request)
             ->andWhere(sprintf('%s = :id', $this->getIdField()))
-            ->setParameter(':id', $id)
+            ->setParameter('id', $id)
             ->getQuery()
             ->getOneOrNullResult();
 
@@ -147,7 +147,7 @@ class OrganizationController extends AbstractRestController
         /** @var TeamAffiliation $teamAffiliation */
         $teamAffiliation = $this->getQueryBuilder($request)
             ->andWhere(sprintf('%s = :id', $this->getIdField()))
-            ->setParameter(':id', $id)
+            ->setParameter('id', $id)
             ->getQuery()
             ->getOneOrNullResult();
 
@@ -192,7 +192,7 @@ class OrganizationController extends AbstractRestController
         /** @var TeamAffiliation $teamAffiliation */
         $teamAffiliation = $this->getQueryBuilder($request)
             ->andWhere(sprintf('%s = :id', $this->getIdField()))
-            ->setParameter(':id', $id)
+            ->setParameter('id', $id)
             ->getQuery()
             ->getOneOrNullResult();
 
@@ -270,7 +270,7 @@ class OrganizationController extends AbstractRestController
         if ($request->query->has('country')) {
             $queryBuilder
                 ->andWhere('ta.country = :country')
-                ->setParameter(':country', $request->query->get('country'));
+                ->setParameter('country', $request->query->get('country'));
         }
 
         return $queryBuilder;

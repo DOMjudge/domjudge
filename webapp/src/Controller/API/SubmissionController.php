@@ -287,8 +287,8 @@ class SubmissionController extends AbstractRestController
                                $this->eventLogService->externalIdFieldForEntity(Problem::class) ?? 'probid'))
             ->andWhere('cp.contest = :contest')
             ->andWhere('cp.allowSubmit = 1')
-            ->setParameter(':problem', $data['problem'])
-            ->setParameter(':contest', $this->getContestId($request))
+            ->setParameter('problem', $data['problem'])
+            ->setParameter('contest', $this->getContestId($request))
             ->getQuery()
             ->getOneOrNullResult();
 
@@ -305,7 +305,7 @@ class SubmissionController extends AbstractRestController
             ->andWhere(sprintf('lang.%s = :language',
                                $this->eventLogService->externalIdFieldForEntity(Language::class) ?? 'langid'))
             ->andWhere('lang.allowSubmit = 1')
-            ->setParameter(':language', $data['language'])
+            ->setParameter('language', $data['language'])
             ->getQuery()
             ->getOneOrNullResult();
 
@@ -353,8 +353,8 @@ class SubmissionController extends AbstractRestController
                     ->select('s')
                     ->andWhere('(s.externalid IS NULL AND s.submitid = :submitid) OR s.externalid = :submitid')
                     ->andWhere('s.contest = :contest')
-                    ->setParameter(':submitid', $submissionId)
-                    ->setParameter(':contest', $problem->getContest())
+                    ->setParameter('submitid', $submissionId)
+                    ->setParameter('contest', $problem->getContest())
                     ->getQuery()
                     ->getOneOrNullResult();
                 if ($existingSubmission !== null) {
@@ -469,7 +469,7 @@ class SubmissionController extends AbstractRestController
         $queryBuilder = $this->getQueryBuilder($request)
             ->join('s.files', 'f')
             ->select('s, f')
-            ->setParameter(':id', $id);
+            ->setParameter('id', $id);
 
         $idField = $this->getIdField();
         if ($idField === 's.submitid') {
@@ -510,8 +510,8 @@ class SubmissionController extends AbstractRestController
             ->select('f, s')
             ->andWhere('s.contest = :cid')
             ->andWhere('s.submitid = :submitid')
-            ->setParameter(':cid', $this->getContestId($request))
-            ->setParameter(':submitid', $id)
+            ->setParameter('cid', $this->getContestId($request))
+            ->setParameter('submitid', $id)
             ->orderBy('f.ranknumber');
 
         /** @var SubmissionFile[] $files */
@@ -547,13 +547,13 @@ class SubmissionController extends AbstractRestController
             ->andWhere('s.valid = 1')
             ->andWhere('s.contest = :cid')
             ->andWhere('t.enabled = 1')
-            ->setParameter(':cid', $cid)
+            ->setParameter('cid', $cid)
             ->orderBy('s.submitid');
 
         if ($request->query->has('language_id')) {
             $queryBuilder
                 ->andWhere('s.language = :langid')
-                ->setParameter(':langid', $request->query->get('language_id'));
+                ->setParameter('langid', $request->query->get('language_id'));
         }
 
         // If an ID has not been given directly, only show submissions before contest end

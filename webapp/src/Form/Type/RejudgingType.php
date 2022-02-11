@@ -153,7 +153,7 @@ class RejudgingType extends AbstractType
                 ->join('p.contest_problems', 'cp')
                 ->select('p')
                 ->andWhere('cp.contest IN (:contests)')
-                ->setParameter(':contests', $contests)
+                ->setParameter('contests', $contests)
                 ->addOrderBy('p.name')
                 ->getQuery()
                 ->getResult();
@@ -187,7 +187,7 @@ class RejudgingType extends AbstractType
                     ->join('t.category', 'cat')
                     ->leftJoin('cat.contests', 'cc')
                     ->andWhere('c IN (:contests) OR cc IN (:contests)')
-                    ->setParameter(':contests', $contests);
+                    ->setParameter('contests', $contests);
             }
 
             $teams = $teamsQueryBuilder->getQuery()->getResult();

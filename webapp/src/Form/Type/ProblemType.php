@@ -50,7 +50,7 @@ class ProblemType extends AbstractExternalIdEntityType
             'query_builder' => fn(EntityRepository $er) => $er
                 ->createQueryBuilder('e')
                 ->where('e.type = :run')
-                ->setParameter(':run', 'run')
+                ->setParameter('run', 'run')
                 ->orderBy('e.execid'),
         ]);
         $builder->add('compareExecutable', EntityType::class, [
@@ -62,7 +62,7 @@ class ProblemType extends AbstractExternalIdEntityType
             'query_builder' => fn(EntityRepository $er) => $er
                 ->createQueryBuilder('e')
                 ->where('e.type = :compare')
-                ->setParameter(':compare', 'compare')
+                ->setParameter('compare', 'compare')
                 ->orderBy('e.execid'),
         ]);
         $builder->add('specialCompareArgs', TextType::class, [

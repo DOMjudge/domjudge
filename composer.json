@@ -58,7 +58,7 @@
 		"datatables/datatables": "^1.10",
 		"doctrine/doctrine-bundle": "^2.5",
 		"doctrine/doctrine-fixtures-bundle": "^3.4",
-		"doctrine/doctrine-migrations-bundle": "^2.2",
+		"doctrine/doctrine-migrations-bundle": "^3.0",
 		"doctrine/orm": "^2.11",
 		"eligrey/filesaver": "2.*",
 		"endclothing/prometheus_client_php": "^1.0",

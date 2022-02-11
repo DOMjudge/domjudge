@@ -327,7 +327,7 @@ class UserController extends AbstractRestController
                 ->select('t')
                 ->andWhere(sprintf('t.%s = :team',
                     $this->eventLogService->externalIdFieldForEntity(Team::class) ?? 'teamid'))
-                ->setParameter(':team', $request->request->get('team_id'))
+                ->setParameter('team', $request->request->get('team_id'))
                 ->getQuery()
                 ->getOneOrNullResult();
 
@@ -362,7 +362,7 @@ class UserController extends AbstractRestController
         if ($request->query->has('team')) {
             $queryBuilder
                 ->andWhere('u.team = :team')
-                ->setParameter(':team', $request->query->get('team'));
+                ->setParameter('team', $request->query->get('team'));
         }
 
         return $queryBuilder;

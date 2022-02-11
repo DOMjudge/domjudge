@@ -140,8 +140,8 @@ class SubmissionController extends BaseController
             ->andWhere('j.submission = :submitId')
             ->andWhere('j.valid = 1')
             ->andWhere('s.team = :team')
-            ->setParameter(':submitId', $submitId)
-            ->setParameter(':team', $team)
+            ->setParameter('submitId', $submitId)
+            ->setParameter('team', $team)
             ->getQuery()
             ->getOneOrNullResult();
 
@@ -165,8 +165,8 @@ class SubmissionController extends BaseController
                 ->select('t', 'jr', 'tc')
                 ->andWhere('t.problem = :problem')
                 ->andWhere('t.sample = 1')
-                ->setParameter(':judging', $judging)
-                ->setParameter(':problem', $judging->getSubmission()->getProblem())
+                ->setParameter('judging', $judging)
+                ->setParameter('problem', $judging->getSubmission()->getProblem())
                 ->orderBy('t.ranknumber');
 
             if ($outputDisplayLimit < 0) {
@@ -183,8 +183,8 @@ class SubmissionController extends BaseController
                     ->addSelect('TRUNCATE(jro.output_diff, :outputDisplayLimit, :outputTruncateMessage) AS output_diff')
                     ->addSelect('TRUNCATE(jro.output_error, :outputDisplayLimit, :outputTruncateMessage) AS output_error')
                     ->addSelect('TRUNCATE(jro.output_system, :outputDisplayLimit, :outputTruncateMessage) AS output_system')
-                    ->setParameter(':outputDisplayLimit', $outputDisplayLimit)
-                    ->setParameter(':outputTruncateMessage', $outputTruncateMessage);
+                    ->setParameter('outputDisplayLimit', $outputDisplayLimit)
+                    ->setParameter('outputTruncateMessage', $outputTruncateMessage);
             }
 
             $runs = $queryBuilder
@@ -228,8 +228,8 @@ class SubmissionController extends BaseController
             ->select('s, f')
             ->andWhere('s.submitid = :submitId')
             ->andWhere('s.team = :team')
-            ->setParameter(':submitId', $submitId)
-            ->setParameter(':team', $team)
+            ->setParameter('submitId', $submitId)
+            ->setParameter('team', $team)
             ->getQuery()
             ->getOneOrNullResult();
 

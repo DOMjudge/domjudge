@@ -96,7 +96,7 @@ class ShadowDifferencesController extends BaseController
             ->select('s', 'ej', 'j')
             ->andWhere('s.contest = :contest')
             ->andWhere('s.externalid IS NOT NULL')
-            ->setParameter(':contest', $contest)
+            ->setParameter('contest', $contest)
             ->getQuery()
             ->getResult();
 

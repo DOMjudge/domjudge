@@ -17,7 +17,7 @@ use App\Entity\Testcase;
 use App\Entity\User;
 use App\Utils\FreezeData;
 use App\Utils\Utils;
-use Doctrine\DBAL\DBALException;
+use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
@@ -104,7 +104,7 @@ class SubmissionService
             ->join('s.team', 't')
             ->join('s.contest_problem', 'cp')
             ->andWhere('s.contest IN (:contests)')
-            ->setParameter(':contests', array_keys($contests))
+            ->setParameter('contests', array_keys($contests))
             ->orderBy('s.submittime', 'DESC')
             ->addOrderBy('s.submitid', 'DESC');
 
@@ -125,7 +125,7 @@ class SubmissionService
                     'j.original_judging = jold2.judgingid')
                 ->addSelect('COALESCE(jold.result, jold2.result) AS oldresult')
                 ->andWhere('s.rejudging = :rejudgingid OR j.rejudging = :rejudgingid')
-                ->setParameter(':rejudgingid', $restrictions['rejudgingid']);
+                ->setParameter('rejudgingid', $restrictions['rejudgingid']);
 
             if (isset($restrictions['rejudgingdiff'])) {
                 if ($restrictions['rejudgingdiff']) {
@@ -138,7 +138,7 @@ class SubmissionService
             if (isset($restrictions['old_result'])) {
                 $queryBuilder
                     ->andWhere('COALESCE(jold.result, jold2.result) = :oldresult')
-                    ->setParameter(':oldresult', $restrictions['old_result']);
+                    ->setParameter('oldresult', $restrictions['old_result']);
             }
         } else {
             $queryBuilder->leftJoin('s.judgings', 'j', Join::WITH, 'j.valid = 1');
@@ -192,44 +192,44 @@ class SubmissionService
             } else {
                 $queryBuilder
                     ->andWhere('ej.result = :externalresult')
-                    ->setParameter(':externalresult', $restrictions['external_result']);
+                    ->setParameter('externalresult', $restrictions['external_result']);
             }
         }
 
         if (isset($restrictions['teamid'])) {
             $queryBuilder
                 ->andWhere('s.team = :teamid')
-                ->setParameter(':teamid', $restrictions['teamid']);
+                ->setParameter('teamid', $restrictions['teamid']);
         }
 
         if (isset($restrictions['userid'])) {
             $queryBuilder
                 ->andWhere('s.user = :userid')
-                ->setParameter(':userid', $restrictions['userid']);
+                ->setParameter('userid', $restrictions['userid']);
         }
 
         if (isset($restrictions['categoryid'])) {
             $queryBuilder
                 ->andWhere('t.category = :categoryid')
-                ->setParameter(':categoryid', $restrictions['categoryid']);
+                ->setParameter('categoryid', $restrictions['categoryid']);
         }
 
         if (isset($restrictions['probid'])) {
             $queryBuilder
                 ->andWhere('s.problem = :probid')
-                ->setParameter(':probid', $restrictions['probid']);
+                ->setParameter('probid', $restrictions['probid']);
         }
 
         if (isset($restrictions['langid'])) {
             $queryBuilder
                 ->andWhere('s.language = :langid')
-                ->setParameter(':langid', $restrictions['langid']);
+                ->setParameter('langid', $restrictions['langid']);
         }
 
         if (isset($restrictions['judgehost'])) {
             $queryBuilder
                 ->andWhere('s.judgehost = :judgehost')
-                ->setParameter(':judgehost', $restrictions['judgehost']);
+                ->setParameter('judgehost', $restrictions['judgehost']);
         }
 
         if (isset($restrictions['result'])) {
@@ -238,7 +238,7 @@ class SubmissionService
             } else {
                 $queryBuilder
                     ->andWhere('j.result = :result')
-                    ->setParameter(':result', $restrictions['result']);
+                    ->setParameter('result', $restrictions['result']);
             }
         }
 
@@ -587,7 +587,7 @@ class SubmissionService
         $this->dj->maybeCreateJudgeTasks($judging,
             $source === 'problem import' ? JudgeTask::PRIORITY_LOW : JudgeTask::PRIORITY_DEFAULT);
 
-        $this->em->transactional(function () use ($contest, $submission) {
+        $this->em->wrapInTransaction(function () use ($contest, $submission) {
             $this->em->flush();
             $this->eventLogService->log('submission', $submission->getSubmitid(),
                                         EventLogService::ACTION_CREATE, $contest->getCid());

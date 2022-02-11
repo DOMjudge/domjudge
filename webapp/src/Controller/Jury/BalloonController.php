@@ -79,7 +79,7 @@ class BalloonController extends AbstractController
                 ->from(TeamAffiliation::class, 'a')
                 ->select('a')
                 ->where('a.affilid IN (:affilIds)')
-                ->setParameter(':affilIds', $filters['affiliation-id'])
+                ->setParameter('affilIds', $filters['affiliation-id'])
                 ->getQuery()
                 ->getResult();
         }
@@ -89,7 +89,7 @@ class BalloonController extends AbstractController
                 ->from(Team::class, 'a')
                 ->select('a')
                 ->where('a.room IN (:rooms)')
-                ->setParameter(':rooms', $filters['location-str'])
+                ->setParameter('rooms', $filters['location-str'])
                 ->getQuery()
                 ->getResult();
         }
