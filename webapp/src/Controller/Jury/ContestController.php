@@ -301,7 +301,7 @@ class ContestController extends BaseController
                     ->join('t.category', 'cat')
                     ->leftJoin('cat.contests', 'cc')
                     ->andWhere('c.cid = :cid OR cc.cid = :cid')
-                    ->setParameter(':cid', $contest->getCid())
+                    ->setParameter('cid', $contest->getCid())
                     ->getQuery()
                     ->getSingleScalarResult();
                 $contestdata['num_teams'] = ['value' => $teamCount];
@@ -357,7 +357,7 @@ class ContestController extends BaseController
             ->select('c')
             ->andWhere('c.activatetime > :now')
             ->andWhere('c.enabled = 1')
-            ->setParameter(':now', Utils::now())
+            ->setParameter('now', Utils::now())
             ->orderBy('c.activatetime')
             ->setMaxResults(1)
             ->getQuery()
@@ -399,7 +399,7 @@ class ContestController extends BaseController
             ->from(RemovedInterval::class, 'i')
             ->select('i')
             ->andWhere('i.contest = :contest')
-            ->setParameter(':contest', $contest)
+            ->setParameter('contest', $contest)
             ->orderBy('i.starttime')
             ->getQuery()
             ->getResult();
@@ -410,7 +410,7 @@ class ContestController extends BaseController
             ->join('cp.problem', 'p')
             ->select('cp', 'partial p.{probid,externalid,name,timelimit,memlimit}')
             ->andWhere('cp.contest = :contest')
-            ->setParameter(':contest', $contest)
+            ->setParameter('contest', $contest)
             ->orderBy('cp.shortname')
             ->getQuery()
             ->getResult();
@@ -755,7 +755,7 @@ class ContestController extends BaseController
             ->andWhere('s.contest = :contest')
             ->andWhere('s.valid = true')
             ->andWhere('j.result IS NULL')
-            ->setParameter(':contest', $contest)
+            ->setParameter('contest', $contest)
             ->orderBy('s.submitid')
             ->getQuery()
             ->getResult()
@@ -771,7 +771,7 @@ class ContestController extends BaseController
             ->select('c.clarid')
             ->andWhere('c.contest = :contest')
             ->andWhere('c.answered = false')
-            ->setParameter(':contest', $contest)
+            ->setParameter('contest', $contest)
             ->getQuery()
             ->getResult()
         );

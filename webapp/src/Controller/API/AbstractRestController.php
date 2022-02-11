@@ -74,11 +74,11 @@ abstract class AbstractRestController extends AbstractFOSRestController
             $table        = explode('.', $idField)[0];
             $queryBuilder = $this->getQueryBuilder($request)
                 ->andWhere(sprintf('(%s.externalid IS NULL AND %s = :id) OR %s.externalid = :id', $table, $idField, $table))
-                ->setParameter(':id', $id);
+                ->setParameter('id', $id);
         } else {
             $queryBuilder = $this->getQueryBuilder($request)
                 ->andWhere(sprintf('%s = :id', $idField))
-                ->setParameter(':id', $id);
+                ->setParameter('id', $id);
         }
 
         $object = $queryBuilder
@@ -175,7 +175,7 @@ abstract class AbstractRestController extends AbstractFOSRestController
             $qb
                 ->andWhere('c.activatetime <= :now')
                 ->andWhere('c.deactivatetime IS NULL OR c.deactivatetime > :now')
-                ->setParameter(':now', $now);
+                ->setParameter('now', $now);
         }
 
         // Filter on contests this user has access to
@@ -185,7 +185,7 @@ abstract class AbstractRestController extends AbstractFOSRestController
                     ->leftJoin('c.team_categories', 'tc')
                     ->leftJoin('tc.teams', 'tct')
                     ->andWhere('ct.teamid = :teamid OR tct.teamid = :teamid OR c.openToAllTeams = 1')
-                    ->setParameter(':teamid', $this->dj->getUser()->getTeam());
+                    ->setParameter('teamid', $this->dj->getUser()->getTeam());
             } else {
                 $qb->andWhere('c.public = 1');
             }
@@ -206,7 +206,7 @@ abstract class AbstractRestController extends AbstractFOSRestController
         $qb = $this->getContestQueryBuilder($request->query->getBoolean('onlyActive', false));
         $qb
             ->andWhere(sprintf('c.%s = :cid', $this->getContestIdField()))
-            ->setParameter(':cid', $request->attributes->get('cid'));
+            ->setParameter('cid', $request->attributes->get('cid'));
 
         /** @var Contest $contest */
         $contest = $qb->getQuery()->getOneOrNullResult();
@@ -264,13 +264,13 @@ abstract class AbstractRestController extends AbstractFOSRestController
                 $or = $queryBuilder->expr()->orX();
                 foreach ($ids as $index => $id) {
                     $or->add(sprintf('(%s.externalid IS NULL AND %s = :id%s) OR %s.externalid = :id%s', $table, $idField, $index, $table, $index));
-                    $queryBuilder->setParameter(sprintf(':id%s', $index), $id);
+                    $queryBuilder->setParameter(sprintf('id%s', $index), $id);
                 }
                 $queryBuilder->andWhere($or);
             } else {
                 $queryBuilder
                     ->andWhere(sprintf('%s IN (:ids)', $this->getIdField()))
-                    ->setParameter(':ids', $ids);
+                    ->setParameter('ids', $ids);
             }
         }
 

@@ -12,7 +12,7 @@ use App\Entity\TeamCategory;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Utils\Utils;
-use Doctrine\DBAL\DBALException;
+use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\Inflector\InflectorFactory;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\MappingException;
@@ -199,13 +199,13 @@ abstract class BaseController extends AbstractController
                 // via submission -> judging -> judging_run.
                 $entityManager->getConnection()->executeQuery(
                     'DELETE FROM submission WHERE probid = :probid',
-                    [':probid' => $entity->getProbid()]
+                    ['probid' => $entity->getProbid()]
                 );
                 // Also delete internal errors that are "connected" to this problem.
                 $disabledJson = '{"kind":"problem","probid":' . $entity->getProbid() . '}';
                 $entityManager->getConnection()->executeQuery(
                     'DELETE FROM internal_error WHERE disabled = :disabled',
-                    [':disabled' => $disabledJson]
+                    ['disabled' => $disabledJson]
                 );
                 $entityManager->clear();
                 $entity = $entityManager->getRepository(Problem::class)->find($entity->getProbid());
@@ -237,11 +237,11 @@ abstract class BaseController extends AbstractController
             // with same ID being created at the same time is negligible.
             $entityManager->getConnection()->executeQuery(
                 'DELETE FROM scorecache WHERE teamid = :teamid',
-                [':teamid' => $teamId]
+                ['teamid' => $teamId]
             );
             $entityManager->getConnection()->executeQuery(
                 'DELETE FROM rankcache WHERE teamid = :teamid',
-                [':teamid' => $teamId]
+                ['teamid' => $teamId]
             );
         }
     }
@@ -273,7 +273,7 @@ abstract class BaseController extends AbstractController
                                 ->from($table, 't')
                                 ->select(sprintf('COUNT(t.%s) AS cnt', $column))
                                 ->andWhere(sprintf('t.%s = :value', $column))
-                                ->setParameter(':value', $primaryKeyColumnValue)
+                                ->setParameter('value', $primaryKeyColumnValue)
                                 ->getQuery()
                                 ->getSingleScalarResult();
                             if ($count > 0) {

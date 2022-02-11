@@ -185,7 +185,7 @@ class ContestController extends AbstractRestController
         /** @var Contest $contest */
         $contest = $this->getQueryBuilder($request)
             ->andWhere(sprintf('%s = :id', $this->getIdField()))
-            ->setParameter(':id', $id)
+            ->setParameter('id', $id)
             ->getQuery()
             ->getOneOrNullResult();
 
@@ -214,7 +214,7 @@ class ContestController extends AbstractRestController
         /** @var Contest $contest */
         $contest = $this->getQueryBuilder($request)
             ->andWhere(sprintf('%s = :id', $this->getIdField()))
-            ->setParameter(':id', $id)
+            ->setParameter('id', $id)
             ->getQuery()
             ->getOneOrNullResult();
 
@@ -259,7 +259,7 @@ class ContestController extends AbstractRestController
         /** @var Contest $contest */
         $contest = $this->getQueryBuilder($request)
             ->andWhere(sprintf('%s = :id', $this->getIdField()))
-            ->setParameter(':id', $id)
+            ->setParameter('id', $id)
             ->getQuery()
             ->getOneOrNullResult();
 
@@ -590,7 +590,7 @@ class ContestController extends AbstractRestController
                 if ($typeFilter !== false) {
                     $qb = $qb
                         ->andWhere('e.endpointtype IN (:types)')
-                        ->setParameter(':types', $typeFilter);
+                        ->setParameter('types', $typeFilter);
                 }
                 if (!$canViewAll) {
                     $restricted_types = ['judgements', 'runs', 'clarifications'];
@@ -599,7 +599,7 @@ class ContestController extends AbstractRestController
                     }
                     $qb = $qb
                         ->andWhere('e.endpointtype NOT IN (:restricted_types)')
-                        ->setParameter(':restricted_types', $restricted_types);
+                        ->setParameter('restricted_types', $restricted_types);
                 }
 
                 $q = $qb->getQuery();
@@ -703,7 +703,7 @@ class ContestController extends AbstractRestController
     {
         $queryBuilder = $this->getQueryBuilder($request)
             ->andWhere(sprintf('%s = :id', $this->getIdField()))
-            ->setParameter(':id', $id);
+            ->setParameter('id', $id);
 
         $contest = $queryBuilder->getQuery()->getOneOrNullResult();
 

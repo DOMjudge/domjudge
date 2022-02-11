@@ -28,7 +28,6 @@ use App\Entity\Testcase;
 use App\Entity\User;
 use App\Utils\FreezeData;
 use App\Utils\Utils;
-use Doctrine\DBAL\FetchMode;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
@@ -127,13 +126,13 @@ class DOMJudgeService
                 ->leftJoin('c.team_categories', 'tc')
                 ->leftJoin('tc.teams', 'tct')
                 ->andWhere('ct.teamid = :teamid OR tct.teamid = :teamid OR c.openToAllTeams = 1')
-                ->setParameter(':teamid', $onlyofteam);
+                ->setParameter('teamid', $onlyofteam);
         } elseif ($onlyofteam === -1) {
             $qb->andWhere('c.public = 1');
         }
         $qb->andWhere('c.enabled = 1')
             ->andWhere('c.deactivatetime IS NULL OR c.deactivatetime > :now')
-            ->setParameter(':now', $now)
+            ->setParameter('now', $now)
             ->orderBy('c.activatetime');
 
         if (!$alsofuture) {
@@ -322,7 +321,7 @@ class DOMJudgeService
             if ($curContest !== null) {
                 $rejudgings = $rejudgings->join('r.submissions', 's')
                     ->andWhere('s.contest = :contest')
-                    ->setParameter(':contest', $curContest->getCid())
+                    ->setParameter('contest', $curContest->getCid())
                     ->distinct();
             }
             $rejudgings = $rejudgings->getQuery()->getResult();
@@ -348,13 +347,13 @@ class DOMJudgeService
             ->leftJoin('s.team', 't')
             ->andWhere('co.cid = :cid')
             ->andWhere('b.done = 0')
-            ->setParameter(':cid', $contest->getCid());
+            ->setParameter('cid', $contest->getCid());
 
             $freezetime = $contest->getFreezeTime();
             if ($freezetime !== null && !(bool)$this->config->get('show_balloons_postfreeze')) {
                 $balloonsQuery
                     ->andWhere('s.submittime < :freeze')
-                    ->setParameter(':freeze', $freezetime);
+                    ->setParameter('freeze', $freezetime);
             }
 
             $balloons = $balloonsQuery->getQuery()->getResult();
@@ -476,9 +475,9 @@ class DOMJudgeService
                     ->set('p.allowJudge', ':enabled')
                     ->andWhere('p.contest = :cid')
                     ->andWhere('p.problem = :probid')
-                    ->setParameter(':enabled', $enabled)
-                    ->setParameter(':cid', $contest)
-                    ->setParameter(':probid', $disabled['probid'])
+                    ->setParameter('enabled', $enabled)
+                    ->setParameter('cid', $contest)
+                    ->setParameter('probid', $disabled['probid'])
                     ->getQuery()
                     ->execute();
                 break;
@@ -487,8 +486,8 @@ class DOMJudgeService
                     ->update(Judgehost::class, 'j')
                     ->set('j.enabled', ':enabled')
                     ->andWhere('j.hostname = :hostname')
-                    ->setParameter(':enabled', $enabled)
-                    ->setParameter(':hostname', $disabled['hostname'])
+                    ->setParameter('enabled', $enabled)
+                    ->setParameter('hostname', $disabled['hostname'])
                     ->getQuery()
                     ->execute();
                 break;
@@ -497,8 +496,8 @@ class DOMJudgeService
                     ->update(Language::class, 'lang')
                     ->set('lang.allowJudge', ':enabled')
                     ->andWhere('lang.langid = :langid')
-                    ->setParameter(':enabled', $enabled)
-                    ->setParameter(':langid', $disabled['langid'])
+                    ->setParameter('enabled', $enabled)
+                    ->setParameter('langid', $disabled['langid'])
                     ->getQuery()
                     ->execute();
                 break;
@@ -683,8 +682,8 @@ class DOMJudgeService
             ->andWhere('tc.problem = :problem')
             ->andWhere('tc.sample = 1')
             ->andWhere('cp.allowSubmit = 1')
-            ->setParameter(':problem', $contestProblem->getProblem())
-            ->setParameter(':contest', $contestProblem->getContest())
+            ->setParameter('problem', $contestProblem->getProblem())
+            ->setParameter('contest', $contestProblem->getContest())
             ->orderBy('tc.testcaseid')
             ->getQuery()
             ->getResult();
@@ -747,9 +746,9 @@ class DOMJudgeService
             ->select('a', 'ac')
             ->andWhere('a.problem = :problem')
             ->andWhere('a.attachmentid = :attachmentid')
-            ->setParameter(':problem', $contestProblem->getProbid())
-            ->setParameter(':contest', $contestProblem->getContest())
-            ->setParameter(':attachmentid', $attachmentId)
+            ->setParameter('problem', $contestProblem->getProbid())
+            ->setParameter('contest', $contestProblem->getContest())
+            ->setParameter('attachmentid', $attachmentId)
             ->getQuery()
             ->getOneOrNullResult();
         if (!$attachment) {
@@ -771,7 +770,7 @@ class DOMJudgeService
                 'SELECT COUNT(s)
                 FROM App\Entity\Submission s
                 WHERE s.contest = :cid')
-            ->setParameter(':cid', $contest->getCid())
+            ->setParameter('cid', $contest->getCid())
             ->getSingleScalarResult();
         $stats['num_queued'] = (int)$this->em
             ->createQuery(
@@ -781,7 +780,7 @@ class DOMJudgeService
                 WHERE s.contest = :cid
                 AND j.result IS NULL
                 AND s.valid = 1')
-            ->setParameter(':cid', $contest->getCid())
+            ->setParameter('cid', $contest->getCid())
             ->getSingleScalarResult();
         $stats['num_judging'] = (int)$this->em
             ->createQuery(
@@ -792,7 +791,7 @@ class DOMJudgeService
                 AND j.result IS NULL
                 AND j.valid = 1
                 AND s.valid = 1')
-            ->setParameter(':cid', $contest->getCid())
+            ->setParameter('cid', $contest->getCid())
             ->getSingleScalarResult();
         return $stats;
     }
@@ -827,7 +826,7 @@ class DOMJudgeService
                 ->select('partial p.{probid,name,externalid,problemtext_type,timelimit,memlimit}', 'cp', 'a')
                 ->andWhere('cp.contest = :contest')
                 ->andWhere('cp.allowSubmit = 1')
-                ->setParameter(':contest', $contest)
+                ->setParameter('contest', $contest)
                 ->addOrderBy('cp.shortname')
                 ->getQuery()
                 ->getResult();
@@ -840,7 +839,7 @@ class DOMJudgeService
                 ->select('p.probid', 'SUM(tc.sample) AS numsamples')
                 ->andWhere('cp.contest = :contest')
                 ->andWhere('cp.allowSubmit = 1')
-                ->setParameter(':contest', $contest)
+                ->setParameter('contest', $contest)
                 ->groupBy('cp.problem')
                 ->getQuery()
                 ->getResult();
@@ -918,7 +917,7 @@ class DOMJudgeService
             ->join(Language::class, 'l', Join::WITH, 's.language = l.langid')
             ->where('jt.jobid IS NULL')
             ->andWhere('l.langid = :langid')
-            ->setParameter(':langid', $langId)
+            ->setParameter('langid', $langId)
             ->getQuery()
             ->getResult();
         foreach ($judgings as $judging) {
@@ -937,7 +936,7 @@ class DOMJudgeService
             ->join(Problem::class, 'p', Join::WITH, 's.problem = p.probid')
             ->where('jt.jobid IS NULL')
             ->andWhere('p.probid = :probid')
-            ->setParameter(':probid', $probId)
+            ->setParameter('probid', $probId)
             ->getQuery()
             ->getResult();
         foreach ($judgings as $judging) {
@@ -1035,13 +1034,20 @@ class DOMJudgeService
             implode(', ', $judgetaskColumns),
             implode(', ', $judgetaskInsertParts)
         );
-        $this->em->getConnection()->executeQuery($judgetaskInsertQuery, $judgetaskInsertParams);
+
+        $judgetaskInsertParamsWithoutColon = [];
+        foreach ($judgetaskInsertParams as $key => $param) {
+            $key = str_replace(':', '', $key);
+            $judgetaskInsertParamsWithoutColon[$key] = $param;
+        }
+
+        $this->em->getConnection()->executeQuery($judgetaskInsertQuery, $judgetaskInsertParamsWithoutColon);
 
         // Step 3: Fetch the judgetasks ID's per testcase.
         $judgetaskData = $this->em->getConnection()->executeQuery(
             'SELECT judgetaskid, testcase_id FROM judgetask WHERE jobid = :jobid ORDER BY judgetaskid',
-            [':jobid' => $judging->getJudgingid()]
-        )->fetchAll(FetchMode::ASSOCIATIVE);
+            ['jobid' => $judging->getJudgingid()]
+        )->fetchAllAssociative();
 
         // Step 4: Create and insert the corresponding judging runs.
         $judgingRunInsertParams = [':judgingid' => $judging->getJudgingid()];
@@ -1060,7 +1066,13 @@ class DOMJudgeService
             implode(', ', $judgingRunInsertParts)
         );
 
-        $this->em->getConnection()->executeQuery($judgingRunInsertQuery, $judgingRunInsertParams);
+        $judgingRunInsertParamsWithoutColon = [];
+        foreach ($judgingRunInsertParams as $key => $param) {
+            $key = str_replace(':', '', $key);
+            $judgingRunInsertParamsWithoutColon[$key] = $param;
+        }
+
+        $this->em->getConnection()->executeQuery($judgingRunInsertQuery, $judgingRunInsertParamsWithoutColon);
 
         $team = $submission->getTeam();
         $result = $this->em->createQueryBuilder()
@@ -1069,10 +1081,10 @@ class DOMJudgeService
             ->andWhere('qt.team = :team')
             ->andWhere('qt.priority = :priority')
             ->andWhere('qt.teamPriority >= :cutoffTeamPriority')
-            ->setParameter(':team', $team)
-            ->setParameter(':priority', $priority)
+            ->setParameter('team', $team)
+            ->setParameter('priority', $priority)
             // Only consider judgings which have been placed at most 60 virtual seconds ago.
-            ->setParameter(':cutoffTeamPriority', (int)$submission->getSubmittime() - 60)
+            ->setParameter('cutoffTeamPriority', (int)$submission->getSubmittime() - 60)
             ->getQuery()
             ->getOneOrNullResult();
 
@@ -1268,12 +1280,12 @@ class DOMJudgeService
             ->leftJoin('tc.contests', 'cc')
             ->andWhere(sprintf('t.%s = :team', $idField))
             ->andWhere('t.enabled = 1')
-            ->setParameter(':team', $teamId);
+            ->setParameter('team', $teamId);
 
         if (!$contest->isOpenToAllTeams()) {
             $queryBuilder
                 ->andWhere('c.cid = :cid OR cc.cid = :cid')
-                ->setParameter(':cid', $contest->getCid());
+                ->setParameter('cid', $contest->getCid());
         }
 
         /** @var Team $team */

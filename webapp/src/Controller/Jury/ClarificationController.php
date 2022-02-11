@@ -70,7 +70,7 @@ class ClarificationController extends AbstractController
             ->leftJoin('p.contest_problems', 'cp', Join::WITH, 'cp.contest = clar.contest')
             ->select('clar', 'p', 'cp')
             ->andWhere('clar.contest in (:contestIds)')
-            ->setParameter(':contestIds', $contestIds)
+            ->setParameter('contestIds', $contestIds)
             ->orderBy('clar.submittime', 'DESC')
             ->addOrderBy('clar.clarid', 'DESC');
 
@@ -79,10 +79,10 @@ class ClarificationController extends AbstractController
                 $queryBuilder->expr()->isNull('clar.queue'),
                 $queryBuilder->expr()->eq('clar.queue', ':queue')
             ))
-                ->setParameter(':queue', $currentQueue);
+                ->setParameter('queue', $currentQueue);
         } elseif ($currentQueue !== "all") {
             $queryBuilder->andWhere('clar.queue = :queue')
-                ->setParameter(':queue', $currentQueue);
+                ->setParameter('queue', $currentQueue);
         }
 
         /**
@@ -248,7 +248,7 @@ class ClarificationController extends AbstractController
             ->select('cp, partial p.{probid,externalid,name}')
             ->innerJoin('cp.problem', 'p')
             ->where('cp.contest IN (:contests)')
-            ->setParameter(':contests', $contests)
+            ->setParameter('contests', $contests)
             ->orderBy('cp.shortname')
             ->getQuery()->getResult();
 

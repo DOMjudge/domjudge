@@ -15,7 +15,7 @@ use App\Entity\Team;
 use App\Entity\Testcase;
 use App\Entity\TestcaseContent;
 use App\Utils\Utils;
-use Doctrine\DBAL\DBALException;
+use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
@@ -386,7 +386,7 @@ class ImportProblemService
                 ->from(Testcase::class, 't')
                 ->select('MAX(t.ranknumber)')
                 ->andWhere('t.problem = :problem')
-                ->setParameter(':problem', $problem)
+                ->setParameter('problem', $problem)
                 ->getQuery()
                 ->getSingleScalarResult();
             $rank    = $maxRank + 1;
@@ -460,11 +460,11 @@ class ImportProblemService
                         ->andWhere('t.sample = :sample')
                         ->andWhere('t.orig_input_filename = :orig_input_filename')
                         ->andWhere('t.problem = :problem')
-                        ->setParameter(':inputmd5', $md5in)
-                        ->setParameter(':outputmd5', $md5out)
-                        ->setParameter(':sample', $type === 'sample')
-                        ->setParameter(':orig_input_filename', $dataFile)
-                        ->setParameter(':problem', $problem)
+                        ->setParameter('inputmd5', $md5in)
+                        ->setParameter('outputmd5', $md5out)
+                        ->setParameter('sample', $type === 'sample')
+                        ->setParameter('orig_input_filename', $dataFile)
+                        ->setParameter('problem', $problem)
                         ->getQuery()
                         ->getOneOrNullResult();
 
@@ -540,8 +540,8 @@ class ImportProblemService
                     ->select('a')
                     ->andWhere('a.name = :name')
                     ->andWhere('a.problem = :problem')
-                    ->setParameter(':name', $name)
-                    ->setParameter(':problem', $problem)
+                    ->setParameter('name', $name)
+                    ->setParameter('problem', $problem)
                     ->getQuery()
                     ->getOneOrNullResult();
             } else {

@@ -345,13 +345,13 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             $externalJudgement   = $submission->getExternalJudgements()->first();
             $externalJudgementId = $externalJudgement ? $externalJudgement->getExtjudgementid() : null;
             $probId              = $submission->getProblem()->getProbid();
-            $testcases           = $this->em->getConnection()->fetchAll(
+            $testcases           = $this->em->getConnection()->fetchAllAssociative(
                 'SELECT er.result as runresult, t.ranknumber, t.description
                   FROM testcase t
                   LEFT JOIN external_run er ON (er.testcaseid = t.testcaseid
                                               AND er.extjudgementid = :extjudgementid)
                   WHERE t.probid = :probid ORDER BY ranknumber',
-                [':extjudgementid' => $externalJudgementId, ':probid' => $probId]);
+                ['extjudgementid' => $externalJudgementId, 'probid' => $probId]);
 
             $submissionDone = $externalJudgement ? !empty($externalJudgement->getEndtime()) : false;
         } else {
@@ -359,7 +359,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             $judging   = $submission->getJudgings()->first();
             $judgingId = $judging ? $judging->getJudgingid() : null;
             $probId    = $submission->getProblem()->getProbid();
-            $testcases = $this->em->getConnection()->fetchAll(
+            $testcases = $this->em->getConnection()->fetchAllAssociative(
                 'SELECT r.runresult, jh.hostname, jt.valid, t.ranknumber, t.description
                   FROM testcase t
                   LEFT JOIN judging_run r ON (r.testcaseid = t.testcaseid
@@ -367,7 +367,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
                   LEFT JOIN judgetask jt ON (r.judgetaskid = jt.judgetaskid)
                   LEFT JOIN judgehost jh on (jt.judgehostid = jh.judgehostid)
                   WHERE t.probid = :probid ORDER BY ranknumber',
-                [':judgingid' => $judgingId, ':probid' => $probId]);
+                ['judgingid' => $judgingId, 'probid' => $probId]);
 
             $submissionDone = $judging ? !empty($judging->getEndtime()) : false;
         }

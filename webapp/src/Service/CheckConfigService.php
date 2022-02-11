@@ -499,7 +499,7 @@ class CheckConfigService
                 ->from(Testcase::class, 'tc')
                 ->join('tc.content', 'tcc')
                 ->andWhere('tc.problem = :probid')
-                ->setParameter(':probid', $probid)
+                ->setParameter('probid', $probid)
                 ->getQuery()
                 ->getResult();
             if (count($tcs_size) === 0) {
@@ -753,7 +753,7 @@ class CheckConfigService
             ->from($class, 'e')
             ->select('e')
             ->andWhere(sprintf('e.%s IS NULL or e.%s = :empty', $externalIdField, $externalIdField))
-            ->setParameter(':empty', '')
+            ->setParameter('empty', '')
             ->getQuery()
             ->getResult();
 

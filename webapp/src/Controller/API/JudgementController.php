@@ -116,7 +116,7 @@ class JudgementController extends AbstractRestController implements QueryObjectT
             ->leftJoin('j.rejudging', 'r')
             ->leftJoin('j.runs', 'jr')
             ->andWhere('j.contest = :cid')
-            ->setParameter(':cid', $this->getContestId($request))
+            ->setParameter('cid', $this->getContestId($request))
             ->groupBy('j.judgingid')
             ->orderBy('j.judgingid');
 
@@ -125,7 +125,7 @@ class JudgementController extends AbstractRestController implements QueryObjectT
         if ($request->query->has('result')) {
             $queryBuilder
                 ->andWhere('j.result = :result')
-                ->setParameter(':result', $request->query->get('result'));
+                ->setParameter('result', $request->query->get('result'));
         } elseif (!$roleAllowsVisibility) {
             $queryBuilder->andWhere('j.result IS NOT NULL');
         }
@@ -133,13 +133,13 @@ class JudgementController extends AbstractRestController implements QueryObjectT
         if (!$roleAllowsVisibility) {
             $queryBuilder
                 ->andWhere('s.team = :team')
-                ->setParameter(':team', $this->dj->getUser()->getTeam());
+                ->setParameter('team', $this->dj->getUser()->getTeam());
         }
 
         if ($request->query->has('submission_id')) {
             $queryBuilder
                 ->andWhere('j.submission = :submission')
-                ->setParameter(':submission', $request->query->get('submission_id'));
+                ->setParameter('submission', $request->query->get('submission_id'));
         }
 
         $specificJudgingRequested = $request->attributes->has('id')

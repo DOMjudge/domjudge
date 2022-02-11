@@ -27,12 +27,12 @@ use App\Service\EventLogService;
 use App\Service\ScoreboardService;
 use App\Service\SubmissionService;
 use App\Utils\Utils;
-use Doctrine\DBAL\DBALException;
+use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
-use Doctrine\ORM\ORMException;
+use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\Query\Expr\Join;
 use Exception;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
@@ -134,7 +134,7 @@ class SubmissionController extends BaseController
                 ->from(Problem::class, 'p')
                 ->select('p')
                 ->where('p.probid IN (:problemIds)')
-                ->setParameter(':problemIds', $filters['problem-id'])
+                ->setParameter('problemIds', $filters['problem-id'])
                 ->getQuery()
                 ->getResult();
         }
@@ -144,7 +144,7 @@ class SubmissionController extends BaseController
                 ->from(Language::class, 'lang')
                 ->select('lang')
                 ->where('lang.langid IN (:langIds)')
-                ->setParameter(':langIds', $filters['language-id'])
+                ->setParameter('langIds', $filters['language-id'])
                 ->getQuery()
                 ->getResult();
         }
@@ -154,7 +154,7 @@ class SubmissionController extends BaseController
                 ->from(Team::class, 't')
                 ->select('t')
                 ->where('t.teamid IN (:teamIds)')
-                ->setParameter(':teamIds', $filters['team-id'])
+                ->setParameter('teamIds', $filters['team-id'])
                 ->getQuery()
                 ->getResult();
         }
@@ -236,7 +236,7 @@ class SubmissionController extends BaseController
             ->leftJoin('s.contest_problem', 'cp')
             ->select('s', 't', 'p', 'l', 'c', 'partial f.{submitfileid, filename}', 'cp', 'ej')
             ->andWhere('s.submitid = :submitid')
-            ->setParameter(':submitid', $submitId)
+            ->setParameter('submitid', $submitId)
             ->getQuery()
             ->getOneOrNullResult();
 
@@ -251,8 +251,8 @@ class SubmissionController extends BaseController
             ->select('j', 'r', 'MAX(jr.runtime) AS max_runtime')
             ->andWhere('j.contest = :contest')
             ->andWhere('j.submission = :submission')
-            ->setParameter(':contest', $submission->getContest())
-            ->setParameter(':submission', $submission)
+            ->setParameter('contest', $submission->getContest())
+            ->setParameter('submission', $submission)
             ->groupBy('j.judgingid')
             ->orderBy('j.starttime')
             ->addOrderBy('j.judgingid')
@@ -300,8 +300,8 @@ class SubmissionController extends BaseController
                 ->leftJoin('t.external_runs', 'er', Join::WITH, 'er.external_judgement = :judging')
                 ->select('t', 'er')
                 ->andWhere('t.problem = :problem')
-                ->setParameter(':judging', $externalJudgement)
-                ->setParameter(':problem', $submission->getProblem())
+                ->setParameter('judging', $externalJudgement)
+                ->setParameter('problem', $submission->getProblem())
                 ->orderBy('t.ranknumber');
 
             $externalRunResults = $queryBuilder
@@ -319,7 +319,7 @@ class SubmissionController extends BaseController
             ->select('jh.judgehostid', 'jh.hostname')
             ->andWhere('jt.judgehost IS NOT NULL')
             ->andWhere('jt.jobid = :judging')
-            ->setParameter(':judging', $selectedJudging)
+            ->setParameter('judging', $selectedJudging)
             ->groupBy('jh.hostname')
             ->orderBy('jh.hostname')
             ->getQuery()
@@ -341,8 +341,8 @@ class SubmissionController extends BaseController
                 ->leftJoin('jr.output', 'jro')
                 ->select('t', 'jr', 'tc.image_thumb AS image_thumb', 'jro.metadata')
                 ->andWhere('t.problem = :problem')
-                ->setParameter(':judging', $selectedJudging)
-                ->setParameter(':problem', $submission->getProblem())
+                ->setParameter('judging', $selectedJudging)
+                ->setParameter('problem', $submission->getProblem())
                 ->orderBy('t.ranknumber');
             if ($outputDisplayLimit < 0) {
                 $queryBuilder
@@ -359,8 +359,8 @@ class SubmissionController extends BaseController
                     ->addSelect('TRUNCATE(jro.output_diff, :outputDisplayLimit, :outputTruncateMessage) AS output_diff')
                     ->addSelect('TRUNCATE(jro.output_error, :outputDisplayLimit, :outputTruncateMessage) AS output_error')
                     ->addSelect('TRUNCATE(jro.output_system, :outputDisplayLimit, :outputTruncateMessage) AS output_system')
-                    ->setParameter(':outputDisplayLimit', $outputDisplayLimit)
-                    ->setParameter(':outputTruncateMessage', $outputTruncateMessage);
+                    ->setParameter('outputDisplayLimit', $outputDisplayLimit)
+                    ->setParameter('outputTruncateMessage', $outputTruncateMessage);
             }
 
             $runResults = $queryBuilder
@@ -371,7 +371,7 @@ class SubmissionController extends BaseController
                 ->from(JudgeTask::class, 'jt')
                 ->select('jt.testcase_id')
                 ->andWhere('jt.jobid = :judging')
-                ->setParameter(':judging', $selectedJudging)
+                ->setParameter('judging', $selectedJudging)
                 ->orderBy('jt.judgetaskid')
                 ->getQuery()
                 ->getScalarResult();
@@ -430,9 +430,9 @@ class SubmissionController extends BaseController
                 ->andWhere('s.team = :team')
                 ->andWhere('s.problem = :problem')
                 ->andWhere('s.submittime < :submittime')
-                ->setParameter(':team', $submission->getTeam())
-                ->setParameter(':problem', $submission->getProblem())
-                ->setParameter(':submittime', $submission->getSubmittime())
+                ->setParameter('team', $submission->getTeam())
+                ->setParameter('problem', $submission->getProblem())
+                ->setParameter('submittime', $submission->getSubmittime())
                 ->orderBy('s.submittime', 'DESC')
                 ->setMaxResults(1)
                 ->getQuery()
@@ -449,7 +449,7 @@ class SubmissionController extends BaseController
                 ->select('j')
                 ->andWhere('j.submission = :submission')
                 ->andWhere('j.valid = 1')
-                ->setParameter(':submission', $lastSubmission)
+                ->setParameter('submission', $lastSubmission)
                 ->orderBy('j.judgingid', 'DESC')
                 ->setMaxResults(1)
                 ->getQuery()
@@ -463,8 +463,8 @@ class SubmissionController extends BaseController
                     ->leftJoin('t.judging_runs', 'jr', Join::WITH, 'jr.judging = :judging')
                     ->select('t', 'jr')
                     ->andWhere('t.problem = :problem')
-                    ->setParameter(':judging', $lastJudging)
-                    ->setParameter(':problem', $submission->getProblem())
+                    ->setParameter('judging', $lastJudging)
+                    ->setParameter('problem', $submission->getProblem())
                     ->orderBy('t.ranknumber')
                     ->getQuery()
                     ->getResult();
@@ -503,8 +503,8 @@ class SubmissionController extends BaseController
                 ->andWhere('jt.type = :type')
                 ->andWhere('jt.jobid = :judgingid')
                 ->andWhere('jt.starttime IS NULL')
-                ->setParameter(':type', JudgeTaskType::DEBUG_INFO)
-                ->setParameter(':judgingid', $judging->getJudgingid())
+                ->setParameter('type', JudgeTaskType::DEBUG_INFO)
+                ->setParameter('judgingid', $judging->getJudgingid())
                 ->getQuery()
                 ->getSingleScalarResult();
         }
@@ -691,8 +691,8 @@ class SubmissionController extends BaseController
                 ->select('file')
                 ->andWhere('file.ranknumber = :ranknumber')
                 ->andWhere('file.submission = :submission')
-                ->setParameter(':ranknumber', $request->query->get('fetch'))
-                ->setParameter(':submission', $submission)
+                ->setParameter('ranknumber', $request->query->get('fetch'))
+                ->setParameter('submission', $submission)
                 ->getQuery()
                 ->getOneOrNullResult();
             if (!$file) {
@@ -715,7 +715,7 @@ class SubmissionController extends BaseController
             ->from(SubmissionFile::class, 'file')
             ->select('file')
             ->andWhere('file.submission = :submission')
-            ->setParameter(':submission', $submission)
+            ->setParameter('submission', $submission)
             ->orderBy('file.ranknumber')
             ->getQuery()
             ->getResult();
@@ -731,7 +731,7 @@ class SubmissionController extends BaseController
                 ->from(SubmissionFile::class, 'file')
                 ->select('file')
                 ->andWhere('file.submission = :submission')
-                ->setParameter(':submission', $originalSubmission)
+                ->setParameter('submission', $originalSubmission)
                 ->orderBy('file.ranknumber')
                 ->getQuery()
                 ->getResult();
@@ -744,10 +744,10 @@ class SubmissionController extends BaseController
                 ->andWhere('s.language = :langid')
                 ->andWhere('s.submittime < :submittime')
                 ->andWhere('s.originalSubmission = :origsubmitid')
-                ->setParameter(':probid', $submission->getProblem())
-                ->setParameter(':langid', $submission->getLanguage())
-                ->setParameter(':submittime', $submission->getSubmittime())
-                ->setParameter(':origsubmitid', $submission->getOriginalSubmission())
+                ->setParameter('probid', $submission->getProblem())
+                ->setParameter('langid', $submission->getLanguage())
+                ->setParameter('submittime', $submission->getSubmittime())
+                ->setParameter('origsubmitid', $submission->getOriginalSubmission())
                 ->orderBy('s.submittime', 'DESC')
                 ->setMaxResults(1)
                 ->getQuery()
@@ -760,10 +760,10 @@ class SubmissionController extends BaseController
                 ->andWhere('s.problem = :probid')
                 ->andWhere('s.language = :langid')
                 ->andWhere('s.submittime < :submittime')
-                ->setParameter(':teamid', $submission->getTeam())
-                ->setParameter(':probid', $submission->getProblem())
-                ->setParameter(':langid', $submission->getLanguage())
-                ->setParameter(':submittime', $submission->getSubmittime())
+                ->setParameter('teamid', $submission->getTeam())
+                ->setParameter('probid', $submission->getProblem())
+                ->setParameter('langid', $submission->getLanguage())
+                ->setParameter('submittime', $submission->getSubmittime())
                 ->orderBy('s.submittime', 'DESC')
                 ->setMaxResults(1)
                 ->getQuery()
@@ -775,7 +775,7 @@ class SubmissionController extends BaseController
             ->from(SubmissionFile::class, 'file')
             ->select('file')
             ->andWhere('file.submission = :submission')
-            ->setParameter(':submission', $oldSubmission)
+            ->setParameter('submission', $oldSubmission)
             ->orderBy('file.ranknumber')
             ->getQuery()
             ->getResult();
@@ -813,7 +813,7 @@ class SubmissionController extends BaseController
             ->from(SubmissionFile::class, 'file')
             ->select('file')
             ->andWhere('file.submission = :submission')
-            ->setParameter(':submission', $submission)
+            ->setParameter('submission', $submission)
             ->orderBy('file.ranknumber')
             ->getQuery()
             ->getResult();
@@ -837,7 +837,7 @@ class SubmissionController extends BaseController
                         ->join('p.contest_problems', 'cp')
                         ->andWhere('cp.allowSubmit = 1')
                         ->andWhere('cp.contest = :contest')
-                        ->setParameter(':contest', $submission->getContest())
+                        ->setParameter('contest', $submission->getContest())
                         ->orderBy('p.name');
                 },
             ])
@@ -938,12 +938,12 @@ class SubmissionController extends BaseController
         } elseif ($judging->getJudgeCompletely()) {
             $this->addFlash('warning', 'This judging was already requested to be judged completely.');
         } else {
-            $numRequested = $this->em->getConnection()->executeUpdate(
+            $numRequested = $this->em->getConnection()->executeStatement(
                 'UPDATE judgetask SET valid=1'
                 . ' WHERE jobid=:jobid'
                 . ' AND judgehostid IS NULL',
                 [
-                    ':jobid' => $judgingId,
+                    'jobid' => $judgingId,
                 ]
             );
             $judging->setJudgeCompletely(true);
@@ -1055,7 +1055,7 @@ class SubmissionController extends BaseController
                     ->join('t.category', 'cat')
                     ->leftJoin('cat.contests', 'cc')
                     ->andWhere('c.cid = :cid OR cc.cid = :cid')
-                    ->setParameter(':cid', $judging->getContest()->getCid());
+                    ->setParameter('cid', $judging->getContest()->getCid());
             }
             /** @var Team[] $teams */
             $teams = $teamsQueryBuilder->getQuery()->getResult();

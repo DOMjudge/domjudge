@@ -133,8 +133,8 @@ class ClarificationController extends AbstractRestController
                     $this->eventLogService->externalIdFieldForEntity(Problem::class) ?? 'probid'))
                 ->andWhere('cp.contest = :contest')
                 ->andWhere('cp.allowSubmit = 1')
-                ->setParameter(':problem', $problemId)
-                ->setParameter(':contest', $contestId)
+                ->setParameter('problem', $problemId)
+                ->setParameter('contest', $contestId)
                 ->getQuery()
                 ->getOneOrNullResult();
 
@@ -155,8 +155,8 @@ class ClarificationController extends AbstractRestController
                 ->andWhere(sprintf('c.%s = :clarification',
                     $this->eventLogService->externalIdFieldForEntity(Clarification::class) ?? 'clarid'))
                 ->andWhere('c.contest = :contest')
-                ->setParameter(':clarification', $replyToId)
-                ->setParameter(':contest', $contestId)
+                ->setParameter('clarification', $replyToId)
+                ->setParameter('contest', $contestId)
                 ->getQuery()
                 ->getOneOrNullResult();
 
@@ -234,8 +234,8 @@ class ClarificationController extends AbstractRestController
                     ->select('c')
                     ->andWhere('(c.externalid IS NULL AND c.clarid = :clarid) OR c.externalid = :clarid')
                     ->andWhere('c.contest = :contest')
-                    ->setParameter(':clarid', $clarificationId)
-                    ->setParameter(':contest', $contestId)
+                    ->setParameter('clarid', $clarificationId)
+                    ->setParameter('contest', $contestId)
                     ->getQuery()
                     ->getOneOrNullResult();
                 if ($existingClarification !== null) {
@@ -289,7 +289,7 @@ class ClarificationController extends AbstractRestController
             ->leftJoin('clar.problem', 'p')
             ->select('clar, c, r, reply, p')
             ->andWhere('clar.contest = :cid')
-            ->setParameter(':cid', $this->getContestId($request));
+            ->setParameter('cid', $this->getContestId($request));
 
         if (!$this->dj->checkrole('api_reader') &&
             !$this->dj->checkrole('judgehost'))
@@ -297,7 +297,7 @@ class ClarificationController extends AbstractRestController
             if ($this->dj->checkrole('team')) {
                 $queryBuilder
                     ->andWhere('clar.sender = :team OR clar.recipient = :team OR (clar.sender IS NULL AND clar.recipient IS NULL)')
-                    ->setParameter(':team', $this->dj->getUser()->getTeam());
+                    ->setParameter('team', $this->dj->getUser()->getTeam());
             } else {
                 $queryBuilder
                     ->andWhere('clar.sender IS NULL')
@@ -308,7 +308,7 @@ class ClarificationController extends AbstractRestController
         if ($request->query->has('problem')) {
             $queryBuilder
                 ->andWhere('clar.probid = :problem')
-                ->setParameter(':problem', $request->query->get('problem'));
+                ->setParameter('problem', $request->query->get('problem'));
         }
 
         return $queryBuilder;

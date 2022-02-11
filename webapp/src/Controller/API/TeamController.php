@@ -131,7 +131,7 @@ class TeamController extends AbstractRestController
         /** @var Team $team */
         $team = $this->getQueryBuilder($request)
             ->andWhere(sprintf('%s = :id', $this->getIdField()))
-            ->setParameter(':id', $id)
+            ->setParameter('id', $id)
             ->getQuery()
             ->getOneOrNullResult();
 
@@ -160,7 +160,7 @@ class TeamController extends AbstractRestController
         /** @var Team $team */
         $team = $this->getQueryBuilder($request)
             ->andWhere(sprintf('%s = :id', $this->getIdField()))
-            ->setParameter(':id', $id)
+            ->setParameter('id', $id)
             ->getQuery()
             ->getOneOrNullResult();
 
@@ -205,7 +205,7 @@ class TeamController extends AbstractRestController
         /** @var Team $team */
         $team = $this->getQueryBuilder($request)
             ->andWhere(sprintf('%s = :id', $this->getIdField()))
-            ->setParameter(':id', $id)
+            ->setParameter('id', $id)
             ->getQuery()
             ->getOneOrNullResult();
 
@@ -284,13 +284,13 @@ class TeamController extends AbstractRestController
         if ($request->query->has('category')) {
             $queryBuilder
                 ->andWhere('t.category = :category')
-                ->setParameter(':category', $request->query->get('category'));
+                ->setParameter('category', $request->query->get('category'));
         }
 
         if ($request->query->has('affiliation')) {
             $queryBuilder
                 ->andWhere('t.affiliation = :affiliation')
-                ->setParameter(':affiliation', $request->query->get('affiliation'));
+                ->setParameter('affiliation', $request->query->get('affiliation'));
         }
 
         if (!$this->dj->checkrole('api_reader') || $request->query->getBoolean('public')) {
@@ -301,7 +301,7 @@ class TeamController extends AbstractRestController
         if (!$contest->isOpenToAllTeams()) {
             $queryBuilder
                 ->andWhere('c.cid = :cid OR cc.cid = :cid')
-                ->setParameter(':cid', $contest->getCid());
+                ->setParameter('cid', $contest->getCid());
         }
 
         return $queryBuilder;

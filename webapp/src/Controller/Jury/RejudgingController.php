@@ -81,7 +81,7 @@ class RejudgingController extends BaseController
         if ($curContest !== null) {
             $queryBuilder = $queryBuilder->leftJoin(Judging::class, 'j', Join::WITH, 'j.rejudging = r')
                 ->andWhere('j.contest = :contest')
-                ->setParameter(':contest', $curContest->getCid())
+                ->setParameter('contest', $curContest->getCid())
                 ->distinct();
         }
         /** @var Rejudging[] $rejudgings */
@@ -219,7 +219,7 @@ class RejudgingController extends BaseController
             ->leftJoin('r.finish_user', 'f')
             ->select('r', 's', 'f')
             ->andWhere('r.rejudgingid = :rejudgingid')
-            ->setParameter(':rejudgingid', $rejudgingId)
+            ->setParameter('rejudgingid', $rejudgingId)
             ->getQuery()
             ->getOneOrNullResult();
 
@@ -264,7 +264,7 @@ class RejudgingController extends BaseController
                                   ->getDQL()
                     )
                 )
-                ->setParameter(':rejudging', $rejudging)
+                ->setParameter('rejudging', $rejudging)
                 ->getQuery()
                 ->getResult();
 
@@ -274,7 +274,7 @@ class RejudgingController extends BaseController
                 ->select('j, s')
                 ->andWhere('j.rejudging = :rejudging')
                 ->andWhere('j.endtime IS NOT NULL')
-                ->setParameter(':rejudging', $rejudging)
+                ->setParameter('rejudging', $rejudging)
                 ->getQuery()
                 ->getResult();
 
@@ -360,8 +360,8 @@ class RejudgingController extends BaseController
             ->select('r.rejudgingid')
             ->andWhere('r.repeatedRejudging = :repeat_rejudgingid')
             ->andWhere('r.rejudgingid != :rejudgingid')
-            ->setParameter(':repeat_rejudgingid', $rejudging->getRepeatedRejudging())
-            ->setParameter(':rejudgingid', $rejudging->getRejudgingid())
+            ->setParameter('repeat_rejudgingid', $rejudging->getRepeatedRejudging())
+            ->setParameter('rejudgingid', $rejudging->getRejudgingid())
             ->orderBy('r.rejudgingid')
             ->getQuery()
             ->getScalarResult();
@@ -437,7 +437,7 @@ class RejudgingController extends BaseController
             ->from(Rejudging::class, 'r')
             ->select('r')
             ->andWhere('r.rejudgingid = :rejudgingid')
-            ->setParameter(':rejudgingid', $rejudgingId)
+            ->setParameter('rejudgingid', $rejudgingId)
             ->getQuery()
             ->getOneOrNullResult();
 
@@ -552,31 +552,31 @@ class RejudgingController extends BaseController
                 if (count($contests)) {
                     $queryBuilder
                         ->andWhere('j.contest IN (:contests)')
-                        ->setParameter(':contests', $contests);
+                        ->setParameter('contests', $contests);
                 }
                 $problems = $data['problems'] ?? [];
                 if (count($problems)) {
                     $queryBuilder
                         ->andWhere('s.problem IN (:problems)')
-                        ->setParameter(':problems', $problems);
+                        ->setParameter('problems', $problems);
                 }
                 $languages = $data['languages'] ?? [];
                 if (count($languages)) {
                     $queryBuilder
                         ->andWhere('s.language IN (:languages)')
-                        ->setParameter(':languages', $languages);
+                        ->setParameter('languages', $languages);
                 }
                 $teams = $data['teams'] ?? [];
                 if (count($teams)) {
                     $queryBuilder
                         ->andWhere('s.team IN (:teams)')
-                        ->setParameter(':teams', $teams);
+                        ->setParameter('teams', $teams);
                 }
                 $users = $data['users'] ?? [];
                 if (count($users)) {
                     $queryBuilder
                         ->andWhere('s.user IN (:users)')
-                        ->setParameter(':users', $users);
+                        ->setParameter('users', $users);
                 }
                 $judgehosts = $data['judgehosts'] ?? [];
                 if (count($judgehosts)) {
@@ -584,14 +584,14 @@ class RejudgingController extends BaseController
                         ->innerJoin('j.runs', 'jr')
                         ->innerJoin('jr.judgetask', 'jt')
                         ->andWhere('jt.judgehost IN (:judgehosts)')
-                        ->setParameter(':judgehosts', $judgehosts)
+                        ->setParameter('judgehosts', $judgehosts)
                         ->distinct();
                 }
                 $verdicts = $data['verdicts'] ?? [];
                 if (count($verdicts)) {
                     $queryBuilder
                         ->andWhere('j.result IN (:verdicts)')
-                        ->setParameter(':verdicts', $verdicts);
+                        ->setParameter('verdicts', $verdicts);
                 }
                 $before = $data['before'] ?? null;
                 $after  = $data['after'] ?? null;
@@ -608,13 +608,13 @@ class RejudgingController extends BaseController
                         $beforeTime = $contest->getAbsoluteTime($before);
                         $queryBuilder
                             ->andWhere('s.submittime <= :before')
-                            ->setParameter(':before', $beforeTime);
+                            ->setParameter('before', $beforeTime);
                     }
                     if (!empty($after)) {
                         $afterTime = $contest->getAbsoluteTime($after);
                         $queryBuilder
                             ->andWhere('s.submittime >= :after')
-                            ->setParameter(':after', $afterTime);
+                            ->setParameter('after', $afterTime);
                     }
                 }
 
@@ -732,8 +732,8 @@ class RejudgingController extends BaseController
                 ->andWhere('j.contest IN (:contests)')
                 ->andWhere('j.valid = 1')
                 ->andWhere(sprintf('%s = :id', $tablemap[$table]))
-                ->setParameter(':contests', $contests)
-                ->setParameter(':id', $id);
+                ->setParameter('contests', $contests)
+                ->setParameter('id', $id);
 
             if ($table === 'rejudging') {
                 $queryBuilder->join('s.judgings', 'j2');
@@ -746,7 +746,7 @@ class RejudgingController extends BaseController
             } elseif (!$includeAll) {
                 $queryBuilder
                     ->andWhere('j.result != :correct')
-                    ->setParameter(':correct', 'correct');
+                    ->setParameter('correct', 'correct');
             }
 
             /** @var array[] $judgings */
@@ -838,7 +838,7 @@ class RejudgingController extends BaseController
                 '(j.endtime - j.starttime) AS duration'
             )
             ->andWhere('r.repeatedRejudging = :repeat_rejudgingid')
-            ->setParameter(':repeat_rejudgingid', $rejudging->getRepeatedRejudging())
+            ->setParameter('repeat_rejudgingid', $rejudging->getRepeatedRejudging())
             ->groupBy('j.judgingid')
             ->orderBy('j.judgingid')
             ->getQuery()
@@ -868,7 +868,7 @@ class RejudgingController extends BaseController
                     ->select('t.ranknumber', 'jr.runresult')
                     ->leftJoin('jr.testcase', 't')
                     ->andWhere('jr.judging = :judgingid')
-                    ->setParameter(':judgingid', $judging['judgingid'])
+                    ->setParameter('judgingid', $judging['judgingid'])
                     ->orderBy('t.ranknumber')
                     ->getQuery()
                     ->getArrayResult();
@@ -894,7 +894,7 @@ class RejudgingController extends BaseController
                 ->leftJoin('jr.judging', 'j')
                 ->leftJoin('jr.testcase', 't')
                 ->andWhere('j.submission = :submitid')
-                ->setParameter(':submitid', $submitid)
+                ->setParameter('submitid', $submitid)
                 ->groupBy('jr.testcase')
                 ->getQuery()
                 ->getArrayResult();

@@ -76,8 +76,8 @@ class ClarificationController extends BaseController
             ->select('c, p, co')
             ->andWhere('c.contest = :contest')
             ->andWhere('c.clarid = :clarId')
-            ->setParameter(':contest', $contest)
-            ->setParameter(':clarId', $clarId)
+            ->setParameter('contest', $contest)
+            ->setParameter('clarId', $clarId)
             ->getQuery()
             ->getOneOrNullResult();
 

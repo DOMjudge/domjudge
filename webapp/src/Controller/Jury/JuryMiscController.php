@@ -255,7 +255,7 @@ class JuryMiscController extends BaseController
                 ->select('s', 'j')
                 ->andWhere('s.contest IN (:contests)')
                 ->andWhere('j.result IS NOT NULL')
-                ->setParameter(':contests', $contests)
+                ->setParameter('contests', $contests)
                 ->getQuery()
                 ->getResult();
         }

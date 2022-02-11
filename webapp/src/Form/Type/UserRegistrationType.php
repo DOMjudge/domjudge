@@ -198,7 +198,7 @@ class UserRegistrationType extends AbstractType
                 ->from(Role::class, 'r')
                 ->select('r')
                 ->andWhere('r.dj_role = :team')
-                ->setParameter(':team', 'team')
+                ->setParameter('team', 'team')
                 ->getQuery()
                 ->getOneOrNullResult();
             $user->addUserRole($role);

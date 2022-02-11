@@ -132,24 +132,24 @@ class RunController extends AbstractRestController implements QueryObjectTransfo
             // With the new judgehost API we pre-create the judging_runs; only expose those who correspond to a real run
             // on a judgehost.
             ->andWhere('jr.endtime IS NOT NULL')
-            ->setParameter(':cid', $this->getContestId($request));
+            ->setParameter('cid', $this->getContestId($request));
 
         if ($request->query->has('first_id')) {
             $queryBuilder
                 ->andWhere('jr.runid >= :first_id')
-                ->setParameter(':first_id', $request->query->get('first_id'));
+                ->setParameter('first_id', $request->query->get('first_id'));
         }
 
         if ($request->query->has('last_id')) {
             $queryBuilder
                 ->andWhere('jr.runid = :last_id')
-                ->setParameter(':last_id', $request->query->get('last_id'));
+                ->setParameter('last_id', $request->query->get('last_id'));
         }
 
         if ($request->query->has('judging_id')) {
             $queryBuilder
                 ->andWhere('jr.judging = :judging_id')
-                ->setParameter(':judging_id', $request->query->get('judging_id'));
+                ->setParameter('judging_id', $request->query->get('judging_id'));
         }
 
         if ($request->query->has('limit')) {

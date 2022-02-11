@@ -59,7 +59,7 @@ class LanguageType extends AbstractExternalIdEntityType
             'query_builder' => fn(EntityRepository $er) => $er
                 ->createQueryBuilder('e')
                 ->where('e.type = :compile')
-                ->setParameter(':compile', 'compile')
+                ->setParameter('compile', 'compile')
                 ->orderBy('e.execid'),
         ]);
         $builder->add('extensions', CollectionType::class, [

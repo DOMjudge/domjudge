@@ -219,7 +219,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
                 ->from(Problem::class, 'p')
                 ->select('p')
                 ->andWhere(sprintf('%s = :id', $this->getIdField()))
-                ->setParameter(':id', $probId)
+                ->setParameter('id', $probId)
                 ->getQuery()
                 ->getOneOrNullResult();
             if (empty($problem)) {
@@ -308,7 +308,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
             ->select('cp, partial p.{probid,externalid,name,timelimit,memlimit}, COUNT(tc.testcaseid) AS testdatacount')
             ->andWhere('cp.contest = :cid')
             ->andWhere('cp.allowSubmit = 1')
-            ->setParameter(':cid', $contestId)
+            ->setParameter('cid', $contestId)
             ->orderBy('cp.shortname')
             ->groupBy('cp.problem');
 

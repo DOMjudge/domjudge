@@ -174,7 +174,7 @@ EOF;
             ->getQuery()
             ->getResult();
 
-        $needsMerge = false;
+        $logUnverifiedJudgings = false;
         foreach ($specs as $specName => $spec) {
             $oldValue = $spec['default_value'];
             if (isset($options[$specName])) {
@@ -206,8 +206,9 @@ EOF;
                 // If toggled off, we have to send events for all judgings
                 // that are complete, but not verified yet. Scoreboard
                 // cache refresh should take care of the rest. See #645.
-                $this->logUnverifiedJudgings($eventLog);
-                $needsMerge = true;
+                // We log unverified judgings after saving all configuration
+                // since it will invalidate Doctrine entities
+                $logUnverifiedJudgings = true;
             }
             switch ($spec['type']) {
                 case 'bool':
@@ -257,11 +258,11 @@ EOF;
             }
         }
 
-        if ($needsMerge) {
-            foreach ($options as $option) $this->em->merge($option);
-        }
-
         $this->em->flush();
+
+        if ($logUnverifiedJudgings) {
+            $this->logUnverifiedJudgings($eventLog);
+        }
 
         $this->dbConfigCache = null;
     }

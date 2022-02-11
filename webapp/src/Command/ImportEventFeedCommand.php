@@ -23,7 +23,7 @@ use App\Service\ScoreboardService;
 use App\Service\SubmissionService;
 use App\Utils\Utils;
 use DateTime;
-use Doctrine\DBAL\DBALException;
+use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Id\AssignedGenerator;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
@@ -254,7 +254,7 @@ class ImportEventFeedCommand extends Command
             ->select('u')
             ->join('u.user_roles', 'r')
             ->andWhere('r.dj_role = :role')
-            ->setParameter(':role', 'admin')
+            ->setParameter('role', 'admin')
             ->setMaxResults(1)
             ->getQuery()
             ->getOneOrNullResult();
@@ -1765,7 +1765,7 @@ class ImportEventFeedCommand extends Command
             ->from(ExternalJudgement::class, 'ej')
             ->select('ej')
             ->andWhere('ej.submission = :submission')
-            ->setParameter(':submission', $submission)
+            ->setParameter('submission', $submission)
             ->orderBy('ej.starttime', 'DESC')
             ->getQuery()
             ->getResult();
@@ -1858,8 +1858,8 @@ class ImportEventFeedCommand extends Command
             ->select('t')
             ->andWhere('t.problem = :problem')
             ->andWhere('t.ranknumber = :ranknumber')
-            ->setParameter(':problem', $problem->getProblem())
-            ->setParameter(':ranknumber', $rank)
+            ->setParameter('problem', $problem->getProblem())
+            ->setParameter('ranknumber', $rank)
             ->getQuery()
             ->getOneOrNullResult();
 
