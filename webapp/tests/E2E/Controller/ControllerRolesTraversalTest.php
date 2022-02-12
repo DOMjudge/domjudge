@@ -211,7 +211,7 @@ class ControllerRolesTraversalTest extends BaseTest
     }
 
     /**
-     * Test that pages depending on an active contest doesn't crash on the server.
+     * Test that pages depending on an active contest do not crash on the server.
      * @dataProvider provideNoContestScenario
      */
     public function testNoContestAccess(string $roleBaseURL, array $baseRoles): void
