@@ -2,12 +2,63 @@
 
 namespace App\Tests\E2E\Controller;
 
+use App\Service\ConfigurationService;
+use App\Service\DOMJudgeService as DJS;
+use App\Service\EventLogService;
 use App\Tests\Unit\BaseTest;
 use Generator;
 
 class ControllerRolesTraversalTest extends BaseTest
 {
     protected static string $loginURL = "http://localhost/login";
+
+    /**
+     * 'http';                  //       External links
+     * 'activate';
+     * 'deactivate';
+     * '/jury/change-contest/';
+     * '/text';                 //       PDFs/text/binaries dirty the report
+     * '/input';                // TODO: Mimetype from the headers
+     * '/output';
+     * '/export';
+     * '/download';
+     * '/phpinfo';
+     * 'javascript';
+     * '.zip';
+     * ''                       //       Empty URL
+     * '#'                      //       Links to local page
+     * '/logout'                //       Application links
+     * '/login'
+     **/
+    protected static array $substrings = ['http','activate','deactivate','/jury/change-contest/','/text','/input','/output','/export','/download','/phpinfo','javascript','.zip'];
+    protected static array $fullstrings = ['','#','/logout','/login'];
+    protected static array $riskyURLs = ['nonExistent','2nd'];
+    protected static array $dataSources = [DJS::DATA_SOURCE_LOCAL, DJS::DATA_SOURCE_CONFIGURATION_EXTERNAL, DJS::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL];
+
+    protected function getLoops(): array
+    {
+        $dataSources = [];
+        $riskyURLs = [];
+        if(array_key_exists('CRAWL_DATASOURCES', getenv())) {
+            $dataSources = explode(',',getenv('CRAWL_DATASOURCES'));
+        } elseif(!array_key_exists('CRAWL_ALL', getenv())) {
+            $dataSources = array_slice(self::$dataSources,0,1);
+        }
+        if(array_key_exists('CRAWL_RISKY', getenv())) {
+            $riskyURLs = explode(',',getenv('CRAWL_RISKY'));
+        } elseif(!array_key_exists('CRAWL_ALL', getenv())) {
+            $riskyURLs = array_slice(self::$riskyURLs,0,1);
+        }
+        return ['dataSources' => $dataSources, 'riskyURLs' => $riskyURLs];
+    }
+
+    protected function setupDataSource(int $dataSource): void
+    {
+        $config   = self::getContainer()->get(ConfigurationService::class);
+        $eventLog = self::getContainer()->get(EventLogService::class);
+        $dj       = self::getContainer()->get(DJS::class);
+        $config->saveChanges(['data_source'=>$dataSource], $eventLog, $dj);
+    }
 
     /**
      * @See: https://www.oreilly.com/library/view/php-cookbook/1565926811/ch04s25.html
@@ -30,36 +81,35 @@ class ControllerRolesTraversalTest extends BaseTest
      * Some URLs are not setup in the testing framework or have a function for the
      * user UX/login process, those are skipped.
      **/
-    protected function urlExcluded(string $url): bool
+    protected function urlExcluded(string $url, string $skip): bool
     {
-        return ($url === '' ||                                //       Empty URL
-            $url[0] === '#' ||                                //       Links to local page
-            strpos($url, 'http') !== false ||                 //       External links
-            strpos($url, '/doc') === 0 ||                     //       Documentation is not setup
-            strpos($url, '/api') === 0 ||                     //       API is not functional in framework
-            $url === '/logout' ||                             //       Application links
-            $url === '/login' ||
-            strpos($url, 'activate') !== false ||
-            strpos($url, 'deactivate') !== false ||
-            strpos($url, '/jury/change-contest/') !== false ||
-            strpos($url, '/text') !== false ||                //       Pdfs/text/binaries dirty the report
-            strpos($url, '/input') !== false ||               // TODO: Mimetype from the headers
-            strpos($url, '/output') !== false ||
-            strpos($url, '/export') !== false ||
-            strpos($url, '/download') !== false ||
-            strpos($url, '/phpinfo') !== false ||
-            strpos($url, 'javascript') !== false ||
-            strpos($url, '.zip') !== false
-        );
+        foreach(self::$substrings as $subs) {
+            if(strpos($url, $subs) !== false && $subs !== $skip)  {
+                return true;
+            }
+        }
+        foreach(self::$fullstrings as $fuls) {
+            if($url === $fuls && $fuls !== $skip) {
+                return true;
+            }
+        }
+        // Documentation is not setup
+        // API is not functional in framework
+        foreach(['/doc','/api'] as $extension) {
+            if (strpos($url, $extension) === 0) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
      * Crawl the webpage assume this is allowed and return all other links on the page.
      * @return string[] Found links on crawled URL
      */
-    protected function crawlPageGetLinks(string $url, int $statusCode): array
+    protected function crawlPageGetLinks(string $url, int $statusCode, string $skip): array
     {
-        if($this->urlExcluded($url)) {
+        if($this->urlExcluded($url, $skip)) {
             self::fail('The URL should already have been filtered away.');
         }
         $crawler = $this->client->request('GET', $url);
@@ -67,13 +117,15 @@ class ControllerRolesTraversalTest extends BaseTest
         $message = var_export($response, true);
         if(($statusCode === 403 || $statusCode === 401) && $response->isRedirection()) {
             self::assertEquals($response->headers->get('location'), $this::$loginURL);
+        } elseif(($response->getStatusCode() === 302 ) && $response->isRedirection()) {
+            self::assertTrue(strpos($response->headers->get('location'), '/public') !== false);
         } else {
             self::assertEquals($statusCode, $response->getStatusCode(), $message);
         }
         $ret = [];
         $tmp = array_unique($crawler->filter('a')->extract(['href']));
         foreach($tmp as $possUrl) {
-            if(!$this->urlExcluded($possUrl)) {
+            if(!$this->urlExcluded($possUrl, $skip)) {
                 $ret[] = $possUrl;
             }
         }
@@ -83,7 +135,7 @@ class ControllerRolesTraversalTest extends BaseTest
     /**
      * Follow all links on a list of pages while new pages are found.
      */
-    protected function getAllPages(array $urlsToCheck): array
+    protected function getAllPages(array $urlsToCheck, string $skip): array
     {
         $done = [];
         do {
@@ -92,8 +144,8 @@ class ControllerRolesTraversalTest extends BaseTest
                 if (strpos($url, '/jury/contests') !== false) {
                     continue;
                 }
-                if (!$this->urlExcluded($url)) {
-                    $urlsToCheck = array_unique(array_merge($urlsToCheck, $this->crawlPageGetLinks($url, 200)));
+                if (!$this->urlExcluded($url, $skip)) {
+                    $urlsToCheck = array_unique(array_merge($urlsToCheck, $this->crawlPageGetLinks($url, 200, $skip)));
                 }
                 $done[] = $url;
             }
@@ -107,20 +159,20 @@ class ControllerRolesTraversalTest extends BaseTest
      * @var string[] $roleBaseURL The URL of the current roles.
      * @var string[] $roles The tested roles.
      */
-    protected function getPagesRoles(array $roleBaseURL, array $roles, bool $allPages): array
+    protected function getPagesRoles(array $roleBaseURL, array $roles, bool $allPages, $skip): array
     {
         $this->roles = $roles;
         $this->logOut();
         $this->logIn();
         $urlsFoundPerRole = [];
         foreach ($roleBaseURL as $baseURL) {
-            $urlsFoundPerRole[] = $this->crawlPageGetLinks($baseURL, 200);
+            $urlsFoundPerRole[] = $this->crawlPageGetLinks($baseURL, 200, $skip);
         }
         $urlsToCheck = array_merge([], ...$urlsFoundPerRole);
 
         // Find all pages, currently this sometimes breaks as some routes have the same logic.
         if ($allPages) {
-            $urlsToCheck = $this->getAllPages($urlsToCheck);
+            $urlsToCheck = $this->getAllPages($urlsToCheck, $skip);
         }
         return $urlsToCheck;
     }
@@ -131,15 +183,15 @@ class ControllerRolesTraversalTest extends BaseTest
      * specific role instead of allowing when the correct role is there.
      * @var string[] $roleURLs
      */
-    protected function verifyAccess(array $combinations, array $roleURLs): void
+    protected function verifyAccess(array $combinations, array $roleURLs, string $skip): void
     {
         foreach ($combinations as $static_roles) {
             $this->roles = $static_roles;
             $this->logOut();
             $this->logIn();
             foreach ($roleURLs as $url) {
-                if(!$this->urlExcluded($url)) {
-                    $this->crawlPageGetLinks($url, 200);
+                if(!$this->urlExcluded($url, $skip)) {
+                    $this->crawlPageGetLinks($url, 200, $skip);
                 }
             }
         }
@@ -152,19 +204,21 @@ class ControllerRolesTraversalTest extends BaseTest
      * @var string   $roleBaseURL The base URL of the role.
      * @var string[] $baseRoles The default role of the user.
      * @var string[] $optionalRoles The roles which should not restrict the viewable pages.
+     * @var int      $dataSource Put the installation in this dataSource mode.
      * @dataProvider provideRoleAccessData
      */
-    public function testRoleAccess(string $roleBaseURL, array $baseRoles, array $optionalRoles, bool $allPages): void
+    public function testRoleAccess(string $roleBaseURL, array $baseRoles, array $optionalRoles, bool $allPages, int $dataSource, string $skip): void
     {
+        $this->setupDatasource($dataSource);
         $this->roles = $baseRoles;
         $this->logOut();
         $this->logIn();
-        $urlsToCheck = $this->crawlPageGetLinks($roleBaseURL, 200);
+        $urlsToCheck = $this->crawlPageGetLinks($roleBaseURL, 200, $skip);
         if ($allPages) {
-            $urlsToCheck = $this->getAllPages($urlsToCheck);
+            $urlsToCheck = $this->getAllPages($urlsToCheck, $skip);
         }
         $combinations = $this->roleCombinations($baseRoles, $optionalRoles);
-        $this->verifyAccess($combinations, $urlsToCheck);
+        $this->verifyAccess($combinations, $urlsToCheck, $skip);
     }
 
     public function visitWithNoContest(string $url, bool $dropdown): void {
@@ -193,16 +247,19 @@ class ControllerRolesTraversalTest extends BaseTest
         array $roleOthersBaseURL,
         array $roles,
         array $rolesOther,
-        bool $allPages
+        bool $allPages,
+        int $dataSource,
+        string $skip
     ): void {
-        $urlsToCheck        = $this->getPagesRoles([$roleBaseURL], $roles, $allPages);
-        $urlsToCheckOther   = $this->getPagesRoles($roleOthersBaseURL, $rolesOther, $allPages);
+        $this->setupDataSource($dataSource);
+        $urlsToCheck        = $this->getPagesRoles([$roleBaseURL], $roles, $allPages, $skip);
+        $urlsToCheckOther   = $this->getPagesRoles($roleOthersBaseURL, $rolesOther, $allPages, $skip);
         $this->roles = $roles;
         $this->logOut();
         $this->logIn();
         foreach (array_diff($urlsToCheckOther, $urlsToCheck) as $url) {
-            if (!$this->urlExcluded($url)) {
-                $this->crawlPageGetLinks($url, 403);
+            if (!$this->urlExcluded($url, $skip)) {
+                $this->crawlPageGetLinks($url, 403, $skip);
             }
         }
     }
@@ -211,13 +268,14 @@ class ControllerRolesTraversalTest extends BaseTest
      * Test that pages depending on an active contest do not crash on the server.
      * @dataProvider provideNoContestScenario
      */
-    public function testNoContestAccess(string $roleBaseURL, array $baseRoles): void
+    public function testNoContestAccess(string $roleBaseURL, array $baseRoles, int $dataSource, $skip): void
     {
+        $this->setupDataSource($dataSource);
         $this->roles = $baseRoles;
         $this->logOut();
         $this->logIn();
-        $urlsToCheck = $this->crawlPageGetLinks($roleBaseURL, 200);
-        $urlsToCheck = $this->getAllPages($urlsToCheck);
+        $urlsToCheck = $this->crawlPageGetLinks($roleBaseURL, 200, $skip);
+        $urlsToCheck = $this->getAllPages($urlsToCheck, $skip);
         foreach($urlsToCheck as $url) {
             $this->visitWithNoContest($url, $roleBaseURL !== '/team');
         }
@@ -232,12 +290,18 @@ class ControllerRolesTraversalTest extends BaseTest
      */
     public function provideRoleAccessData(): Generator
     {
-        yield ['/jury',   ['admin'],            ['jury','team','balloon','clarification_rw'],         false];
-        yield ['/jury',   ['jury'],             ['admin','team','balloon','clarification_rw'],        false];
-        yield ['/jury',   ['balloon'],          ['admin','team','clarification_rw'],                  true];
-        yield ['/jury',   ['clarification_rw'], ['admin','team','balloon'],                           true];
-        yield ['/team',   ['team'],             ['admin','jury','balloon','clarification_rw'],        true];
-        yield ['/public', [],                   ['team','admin','jury','balloon','clarification_rw'], true];
+        extract($this->getLoops());
+        foreach ($riskyURLs as $skip) {
+            foreach ($dataSources as $str_data_source) {
+                $data_source = (int)$str_data_source;
+                yield ['/jury',   ['admin'],            ['jury','team','balloon','clarification_rw'],         false, $data_source, $skip];
+                yield ['/jury',   ['jury'],             ['admin','team','balloon','clarification_rw'],        false, $data_source, $skip];
+                yield ['/jury',   ['balloon'],          ['admin','team','clarification_rw'],                  true,  $data_source, $skip];
+                yield ['/jury',   ['clarification_rw'], ['admin','team','balloon'],                           true,  $data_source, $skip];
+                yield ['/team',   ['team'],             ['admin','jury','balloon','clarification_rw'],        true,  $data_source, $skip];
+                yield ['/public', [],                   ['team','admin','jury','balloon','clarification_rw'], true,  $data_source, $skip];
+            }
+        }
     }
 
     /**
@@ -251,20 +315,32 @@ class ControllerRolesTraversalTest extends BaseTest
      **/
     public function provideRoleAccessOtherRoles(): Generator
     {
-        yield ['/jury',   ['/jury','/team'], ['admin'],            ['jury','team'],                                      false];
-        yield ['/jury',   ['/jury','/team'], ['jury'],             ['admin','team'],                                     false];
-        yield ['/jury',   ['/jury','/team'], ['balloon'],          ['admin','team','clarification_rw'],                  false];
-        yield ['/jury',   ['/jury','/team'], ['clarification_rw'], ['admin','team','balloon'],                           false];
-        yield ['/team',   ['/jury'],         ['team'],             ['admin','jury','balloon','clarification_rw'],        true];
-        yield ['/public', ['/jury','/team'], [],                   ['admin','jury','team','balloon','clarification_rw'], true];
+        extract($this->getLoops());
+        foreach ($riskyURLs as $skip) {
+            foreach ($dataSources as $str_data_source) {
+                $data_source = (int)$str_data_source;
+                yield ['/jury',   ['/jury','/team'], ['admin'],            ['jury','team'],                                        false, $data_source, $skip];
+                yield ['/jury',   ['/jury','/team'], ['jury'],             ['admin','team'],                                       false, $data_source, $skip];
+                yield ['/jury',   ['/jury','/team'], ['balloon'],          ['admin','team','clarification_rw'],                    false, $data_source, $skip];
+                yield ['/jury',   ['/jury','/team'], ['clarification_rw'], ['admin','team','balloon'],                             false, $data_source, $skip];
+                yield ['/team',   ['/jury'],         ['team'],             ['admin','jury','balloon','clarification_rw'],          true, $data_source, $skip];
+                yield ['/public', ['/jury','/team'], [],                   ['admin','jury','team','balloon','clarification_rw'],   true, $data_source, $skip];
+            }
+        }
     }
 
     public function provideNoContestScenario(): Generator
     {
-        yield ['/jury', ['admin']];
-        yield ['/jury', ['jury']];
-        yield ['/jury', ['balloon']];
-        yield ['/jury', ['clarification_rw']];
-        yield ['/team', ['team']];
+        extract($this->getLoops());
+        foreach ($riskyURLs as $skip) {
+            foreach ($dataSources as $str_data_source) {
+                $data_source = (int)$str_data_source;
+                yield ['/jury', ['admin'],            $data_source, $skip];
+                yield ['/jury', ['jury'],             $data_source, $skip];
+                yield ['/jury', ['balloon'],          $data_source, $skip];
+                yield ['/jury', ['clarification_rw'], $data_source, $skip];
+                yield ['/team', ['team'],             $data_source, $skip];
+            }
+        }
     }
 }
