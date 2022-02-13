@@ -32,21 +32,21 @@ class ControllerRolesTraversalTest extends BaseTest
      **/
     protected function urlExcluded(string $url): bool
     {
-        return ($url === '' ||                                                 // Empty URL
-            $url[0] === '#' ||                                          // Links to local page
-            strpos($url, 'http') !== false ||                        // External links
-            strpos($url, '/doc') === 0 ||                     // Documentation is not setup
-            strpos($url, '/api') === 0 ||                     // API is not functional in framework
-            strpos($url, '/delete') !== false ||                     // Breaks MockData
-            strpos($url, '/add') !== false ||                        //TODO: Should be fixable
+        return ($url === '' ||                                //       Empty URL
+            $url[0] === '#' ||                                //       Links to local page
+            strpos($url, 'http') !== false ||                 //       External links
+            strpos($url, '/doc') === 0 ||                     //       Documentation is not setup
+            strpos($url, '/api') === 0 ||                     //       API is not functional in framework
+            strpos($url, '/delete') !== false ||              //       Breaks MockData
+            strpos($url, '/add') !== false ||                 // TODO: Should be fixable
             strpos($url, '/edit') !== false ||
-            $url === '/logout' ||                                           // Application links
+            $url === '/logout' ||                             //       Application links
             $url === '/login' ||
             strpos($url, 'activate') !== false ||
             strpos($url, 'deactivate') !== false ||
             strpos($url, '/jury/change-contest/') !== false ||
-            strpos($url, '/text') !== false ||                       // Pdfs/text/binaries dirty the report
-            strpos($url, '/input') !== false ||                      // TODO: mimetype from the headers
+            strpos($url, '/text') !== false ||                //       Pdfs/text/binaries dirty the report
+            strpos($url, '/input') !== false ||               // TODO: Mimetype from the headers
             strpos($url, '/output') !== false ||
             strpos($url, '/export') !== false ||
             strpos($url, '/download') !== false ||
@@ -185,7 +185,7 @@ class ControllerRolesTraversalTest extends BaseTest
 
     /**
      * Test that having for example the jury role does not allow access to the pages of other roles.
-     * @var string $roleBaseURL The base URL of the role.
+     * @var string   $roleBaseURL The base URL of the role.
      * @var string[] $roleOthersBaseURL The base URLs of the other roles.
      * @var string[] $roles The tested roles.
      * @var string[] $rolesOther The other roles.
@@ -235,12 +235,12 @@ class ControllerRolesTraversalTest extends BaseTest
      */
     public function provideRoleAccessData(): Generator
     {
-        yield ['/jury',     ['admin'],              ['jury','team','balloon','clarification_rw'],           false];
-        yield ['/jury',     ['jury'],               ['admin','team','balloon','clarification_rw'],          false];
-        yield ['/jury',     ['balloon'],            ['admin','team','clarification_rw'],                    true];
-        yield ['/jury',     ['clarification_rw'],   ['admin','team','balloon'],                             true];
-        yield ['/team',     ['team'],               ['admin','jury','balloon','clarification_rw'],          true];
-        yield ['/public',   [],                     ['team','admin','jury','balloon','clarification_rw'],   true];
+        yield ['/jury',   ['admin'],            ['jury','team','balloon','clarification_rw'],         false];
+        yield ['/jury',   ['jury'],             ['admin','team','balloon','clarification_rw'],        false];
+        yield ['/jury',   ['balloon'],          ['admin','team','clarification_rw'],                  true];
+        yield ['/jury',   ['clarification_rw'], ['admin','team','balloon'],                           true];
+        yield ['/team',   ['team'],             ['admin','jury','balloon','clarification_rw'],        true];
+        yield ['/public', [],                   ['team','admin','jury','balloon','clarification_rw'], true];
     }
 
     /**
@@ -254,20 +254,20 @@ class ControllerRolesTraversalTest extends BaseTest
      **/
     public function provideRoleAccessOtherRoles(): Generator
     {
-        yield ['/jury',     ['/jury','/team'],  ['admin'],              ['jury','team'],                                        false];
-        yield ['/jury',     ['/jury','/team'],  ['jury'],               ['admin','team'],                                       false];
-        yield ['/jury',     ['/jury','/team'],  ['balloon'],            ['admin','team','clarification_rw'],                    false];
-        yield ['/jury',     ['/jury','/team'],  ['clarification_rw'],   ['admin','team','balloon'],                             false];
-        yield ['/team',     ['/jury'],          ['team'],               ['admin','jury','balloon','clarification_rw'],          true];
-        yield ['/public',   ['/jury','/team'],  [],                     ['admin','jury','team','balloon','clarification_rw'],   true];
+        yield ['/jury',   ['/jury','/team'], ['admin'],            ['jury','team'],                                      false];
+        yield ['/jury',   ['/jury','/team'], ['jury'],             ['admin','team'],                                     false];
+        yield ['/jury',   ['/jury','/team'], ['balloon'],          ['admin','team','clarification_rw'],                  false];
+        yield ['/jury',   ['/jury','/team'], ['clarification_rw'], ['admin','team','balloon'],                           false];
+        yield ['/team',   ['/jury'],         ['team'],             ['admin','jury','balloon','clarification_rw'],        true];
+        yield ['/public', ['/jury','/team'], [],                   ['admin','jury','team','balloon','clarification_rw'], true];
     }
 
     public function provideNoContestScenario(): Generator
     {
-        yield ['/jury',     ['admin']];
-        yield ['/jury',     ['jury']];
-        yield ['/jury',     ['balloon']];
-        yield ['/jury',     ['clarification_rw']];
-        yield ['/team',     ['team']];
+        yield ['/jury', ['admin']];
+        yield ['/jury', ['jury']];
+        yield ['/jury', ['balloon']];
+        yield ['/jury', ['clarification_rw']];
+        yield ['/team', ['team']];
     }
 }
