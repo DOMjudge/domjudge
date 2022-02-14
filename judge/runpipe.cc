@@ -111,7 +111,7 @@ void resize_pipe(int fd) {
   if (max_pipe_size == FAILED)
     return;
   if (max_pipe_size == UNINIT) {
-    FILE *f;
+    FILE *f = nullptr;
     if ((f = fopen(PROC_MAX_PIPE_SIZE, "r")) == NULL) {
       max_pipe_size = FAILED;
       warning(errno, "could not open '%s'", PROC_MAX_PIPE_SIZE);
@@ -179,7 +179,7 @@ struct process_t {
   // Whether the process exited.
   bool exited = false;
   // Information about the exited process. Meaningful only if exited == true.
-  int exitInfo;
+  int exitInfo = -1;
 
   process_t(size_t index) : index(index) {}
 
@@ -295,6 +295,11 @@ struct output_file_t {
       error(errno, "failed to create proxy output file at %s", path.c_str());
   }
 
+  output_file_t(const output_file_t &) = delete;
+  output_file_t(const output_file_t &&) = delete;
+  output_file_t &operator=(const output_file_t &) = delete;
+  output_file_t &operator=(const output_file_t &&) = delete;
+
   ~output_file_t() {
     if (output_file == -1)
       return;
@@ -388,18 +393,18 @@ struct state_t {
 
   void parse_flags(int argc, char **argv) {
     // clang-format off
-		struct option const long_opts[] = {
-			{"verbose", no_argument,       NULL,               'v'},
-			{"help",    no_argument,       &args.show_help,    1 },
-			{"version", no_argument,       &args.show_version, 1 },
-			{"outprog", required_argument, NULL,               'o'},
-			{"outmeta", required_argument, NULL,               'M'},
-			{ NULL,     0,                 NULL,                0 }
-		};
+    struct option const long_opts[] = {
+      {"verbose", no_argument,       nullptr,            'v'},
+      {"help",    no_argument,       &args.show_help,    1  },
+      {"version", no_argument,       &args.show_version, 1  },
+      {"outprog", required_argument, nullptr,            'o'},
+      {"outmeta", required_argument, nullptr,            'M'},
+      { nullptr,  0,                 nullptr,             0 }
+    };
     // clang-format on
 
     progname = argv[0];
-    int opt;
+    int opt = -1;
     while ((opt = getopt_long(argc, argv, "+o:M:vh", long_opts, NULL)) != -1) {
       switch (opt) {
       case 0: /* long-only option */
@@ -502,7 +507,7 @@ struct state_t {
   // the children and then restore the default signal handler.
   void install_sigterm_handler() {
     sigset_t sigmask;
-    struct sigaction sigact;
+    struct sigaction sigact {};
 
     if (sigemptyset(&sigmask))
       error(errno, "creating signal mask");
@@ -516,7 +521,7 @@ struct state_t {
     sigact.sa_handler = [](int) {
       // When SIGTERM is received, the original handler is restored and then
       // the signal is propagated to the children.
-      struct sigaction sigact;
+      struct sigaction sigact {};
       sigact.sa_handler = SIG_IGN;
       sigact.sa_flags = 0;
       if (sigemptyset(&sigact.sa_mask))
@@ -590,7 +595,7 @@ struct state_t {
       process_t &process = processes[i];
       process_t &other = processes[j];
 
-      fd_t read_end, write_end;
+      fd_t read_end = -1, write_end = -1;
       if (has_proxy()) {
         // Use two pipes for the given direction with the
         // proxy in between.
@@ -625,7 +630,7 @@ struct state_t {
 
     auto add_fd = [&](fd_t fd) {
       logmsg(LOG_DEBUG, "epoll will listen for fd %d", fd);
-      epoll_event ev;
+      epoll_event ev{};
       ev.data.fd = fd;
       ev.events = EPOLLIN;
       if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, fd, &ev))
@@ -657,7 +662,7 @@ struct state_t {
         error(errno, "failed to read from exit pipe");
     }
 
-    int status;
+    int status = -1;
     // Check if a child exited without blocking.
     pid_t pid = waitpid(-1, &status, WNOHANG);
     if (pid < 0)
