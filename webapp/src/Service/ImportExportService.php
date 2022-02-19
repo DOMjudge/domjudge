@@ -972,7 +972,7 @@ class ImportExportService
                 case 'judge':
                     $roles[]  = $juryRole;
                     $roles[]  = $teamRole;
-                    $juryTeam = ['name' => $line[1], 'category' => $juryCategory, 'members' => $line[1]];
+                    $juryTeam = ['name' => $line[1], 'externalid' => $line[2], 'category' => $juryCategory, 'members' => $line[1]];
                     break;
                 case 'team':
                     $roles[] = $teamRole;
@@ -1034,6 +1034,7 @@ class ImportExportService
                     $team
                         ->setName($accountItem['team']['name'])
                         ->setCategory($accountItem['team']['category'])
+                        ->setExternalid($accountItem['team']['externalid'])
                         ->setMembers($accountItem['team']['members'] ?? null);
                     $this->em->persist($team);
                     $action = EventLogService::ACTION_CREATE;
