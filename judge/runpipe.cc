@@ -88,8 +88,9 @@ const int N_PROC = 2;
 // Set the NONBLOCK flag for a file descriptor.
 void set_non_blocking(fd_t fd) {
   int flags = fcntl(fd, F_GETFL, 0);
-  if (fcntl(fd, F_SETFL, flags | O_NONBLOCK))
+  if (fcntl(fd, F_SETFL, flags | O_NONBLOCK)) {
     error(errno, "failed to set fd %d to non blocking", fd);
+  }
 }
 
 /* Try to resize pipes to their maximum size on Linux. We do this to make it
@@ -108,8 +109,9 @@ void resize_pipe(int fd) {
   const int FAILED = -2;
   static int max_pipe_size = UNINIT;
 
-  if (max_pipe_size == FAILED)
+  if (max_pipe_size == FAILED) {
     return;
+  }
   if (max_pipe_size == UNINIT) {
     FILE *f = nullptr;
     if ((f = fopen(PROC_MAX_PIPE_SIZE, "r")) == NULL) {
@@ -120,8 +122,9 @@ void resize_pipe(int fd) {
     if (fscanf(f, "%d", &max_pipe_size) != 1) {
       max_pipe_size = FAILED;
       warning(errno, "could not read from '%s'", PROC_MAX_PIPE_SIZE);
-      if (fclose(f) != 0)
+      if (fclose(f) != 0) {
         warning(errno, "could not close '%s'", PROC_MAX_PIPE_SIZE);
+      }
       return;
     }
     if (fclose(f) != 0) {
@@ -130,8 +133,9 @@ void resize_pipe(int fd) {
   }
 
   int new_size = fcntl(fd, F_SETPIPE_SZ, max_pipe_size);
-  if (new_size == -1)
+  if (new_size == -1) {
     warning(errno, "could not change pipe size of %d", fd);
+  }
 
   logmsg(LOG_DEBUG, "set pipe fd %d to size %d", fd, new_size);
 }
@@ -146,8 +150,9 @@ void write_all(fd_t fd, const char *data, ssize_t size) {
     ssize_t nwrite = write(fd, data + index, size - index);
     // Note that this pipe is not NONBLOCK, so here we may block (but
     // usually don't).
-    if (nwrite < 0)
+    if (nwrite < 0) {
       error(errno, "failed to write to fd %d", fd);
+    }
     index += nwrite;
   }
 }
@@ -193,32 +198,38 @@ struct process_t {
   }
 
   string exit_info_to_string() const {
-    if (!exited)
+    if (!exited) {
       return "not exited yed";
-    if (WIFEXITED(exitInfo))
+    }
+    if (WIFEXITED(exitInfo)) {
       return string("exited with status ") + to_string(WEXITSTATUS(exitInfo));
-    if (WIFSIGNALED(exitInfo))
+    }
+    if (WIFSIGNALED(exitInfo)) {
       return string("exited with signal ") + to_string(WTERMSIG(exitInfo));
+    }
     return "unknown";
   }
 
   // Whether this process exited with a status code (and not with a signal).
   bool has_exited_with_code() const {
-    if (!exited)
+    if (!exited) {
       return false;
+    }
     return WIFEXITED(exitInfo);
   }
 
   // Whether this process exited with a signal (and not with a status code).
   bool has_exited_with_signal() const {
-    if (!exited)
+    if (!exited) {
       return false;
+    }
     return WIFSIGNALED(exitInfo);
   }
 
   int exit_code() const {
-    if (!has_exited_with_code())
+    if (!has_exited_with_code()) {
       return -1;
+    }
     return WEXITSTATUS(exitInfo);
   }
 
@@ -227,11 +238,13 @@ struct process_t {
     fd_t stdio[3] = {stdin, stdout, FDREDIR_NONE};
 
     vector<const char *> argv(args.size());
-    for (size_t i = 0; i < args.size(); i++)
+    for (size_t i = 0; i < args.size(); i++) {
       argv[i] = args[i].c_str();
+    }
     pid = execute(cmd.c_str(), argv.data(), args.size(), stdio, 0);
-    if (pid < 0)
+    if (pid < 0) {
       error(errno, "failed to execute command #%ld", index);
+    }
     logmsg(LOG_DEBUG, "started #%ld, pid %d", index, pid);
   }
 
@@ -285,14 +298,16 @@ struct output_file_t {
 
   output_file_t(string path) {
     // If the output file is not enable this struct only does noops.
-    if (path.empty())
+    if (path.empty()) {
       return;
+    }
 
     start = chrono::steady_clock::now();
     output_file = open(path.c_str(), O_CREAT | O_CLOEXEC | O_WRONLY | O_TRUNC,
                        S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
-    if (output_file == -1)
+    if (output_file == -1) {
       error(errno, "failed to create proxy output file at %s", path.c_str());
+    }
   }
 
   output_file_t(const output_file_t &) = delete;
@@ -301,17 +316,20 @@ struct output_file_t {
   output_file_t &operator=(const output_file_t &&) = delete;
 
   ~output_file_t() {
-    if (output_file == -1)
+    if (output_file == -1) {
       return;
-    if (close(output_file))
+    }
+    if (close(output_file)) {
       error(errno, "failed to close proxy output file");
+    }
   }
 
   // Write all the data into the output file, including the header of this
   // message. The buffer should be at least long size+1.
   void write(char *buffer, ssize_t size, const process_t &from) {
-    if (output_file == -1)
+    if (output_file == -1) {
       return;
+    }
 
     // The runtime is converted into sec + millis manually instead of with %f
     // because benchmarks showed that it's quite expensive.
@@ -328,8 +346,9 @@ struct output_file_t {
         snprintf(header, HEADER_SIZE, "[%3d.%03ds/%ld]%c: ", time_sec,
                  time_millis, size, direction);
     // Check that snprintf didn't truncate the header.
-    if (header_len >= static_cast<int>(HEADER_SIZE))
+    if (header_len >= static_cast<int>(HEADER_SIZE)) {
       error(0, "header size too small: %d > %ld", header_len, HEADER_SIZE);
+    }
 
     write_all(output_file, header, header_len);
     buffer[size] = '\n'; // avoids another call to write_all just for the \n
@@ -509,12 +528,15 @@ struct state_t {
     sigset_t sigmask;
     struct sigaction sigact {};
 
-    if (sigemptyset(&sigmask))
+    if (sigemptyset(&sigmask)) {
       error(errno, "creating signal mask");
-    if (sigprocmask(SIG_SETMASK, &sigmask, NULL))
+    }
+    if (sigprocmask(SIG_SETMASK, &sigmask, NULL)) {
       error(errno, "unmasking signals");
-    if (sigaddset(&sigmask, SIGTERM))
+    }
+    if (sigaddset(&sigmask, SIGTERM)) {
       error(errno, "setting signal mask");
+    }
 
     sigact.sa_flags = SA_RESETHAND | SA_RESTART;
     sigact.sa_mask = sigmask;
@@ -524,19 +546,23 @@ struct state_t {
       struct sigaction sigact {};
       sigact.sa_handler = SIG_IGN;
       sigact.sa_flags = 0;
-      if (sigemptyset(&sigact.sa_mask))
+      if (sigemptyset(&sigact.sa_mask)) {
         warning(errno, "creating signal mask");
-      if (sigaction(SIGTERM, &sigact, NULL))
+      }
+      if (sigaction(SIGTERM, &sigact, NULL)) {
         warning(errno, "cannot restore signal handler");
+      }
 
       logmsg(LOG_DEBUG, "sending SIGTERM to child processes");
-      if (kill(0, SIGTERM))
+      if (kill(0, SIGTERM)) {
         error(errno, "sending SIGTERM");
+      }
     };
 
     logmsg(LOG_DEBUG, "installing SIGTERM handler");
-    if (sigaction(SIGTERM, &sigact, NULL))
+    if (sigaction(SIGTERM, &sigact, NULL)) {
       error(errno, "installing signal handler");
+    }
   }
 
   // Install an handler for the SIGCHLD signal. The handler will send a byte to
@@ -544,16 +570,18 @@ struct state_t {
   // This method can be called only once.
   void install_sigchld_handler() {
     fd_t fds[2];
-    if (pipe2(fds, O_CLOEXEC | O_NONBLOCK))
+    if (pipe2(fds, O_CLOEXEC | O_NONBLOCK)) {
       error(errno, "creating exit pipes");
+    }
 
     // The lambda below cannot capture anything, otherwise it couldn't be made
     // into a function pointer. Therefore the write_end must have a static
     // lifetime.
     fd_t read_end = fds[0];
     static fd_t write_end = -1;
-    if (write_end != -1)
+    if (write_end != -1) {
       error(0, "install_sigchld_handler can be called only once");
+    }
     write_end = fds[1];
 
     logmsg(LOG_DEBUG, "exit handler will send event using %d -> %d", write_end,
@@ -578,8 +606,9 @@ struct state_t {
     // Create and setup a pipe.
     auto make_pipe = [&]() {
       fd_t fds[2];
-      if (pipe2(fds, O_CLOEXEC))
+      if (pipe2(fds, O_CLOEXEC)) {
         error(errno, "creating pipes");
+      }
       fd_t read_end = fds[0];
       fd_t write_end = fds[1];
       resize_pipe(read_end);
@@ -625,21 +654,24 @@ struct state_t {
   // Create the epoll and register the file descriptors to it.
   void init_epoll() {
     epoll_fd = epoll_create1(0);
-    if (epoll_fd == -1)
+    if (epoll_fd == -1) {
       error(errno, "error creating epoll");
+    }
 
     auto add_fd = [&](fd_t fd) {
       logmsg(LOG_DEBUG, "epoll will listen for fd %d", fd);
       epoll_event ev{};
       ev.data.fd = fd;
       ev.events = EPOLLIN;
-      if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, fd, &ev))
+      if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, fd, &ev)) {
         error(errno, "failed to add fd %d to epoll", fd);
+      }
     };
 
     // Always listen for child exit events.
-    if (child_exited_pipe == -1)
+    if (child_exited_pipe == -1) {
       error(0, "SIGCHLD handler not installed");
+    }
     add_fd(child_exited_pipe);
 
     // Listen for incoming data only when proxy is enabled.
@@ -658,29 +690,34 @@ struct state_t {
     if (read(child_exited_pipe, buffer, 1) != 1) {
       // This function may be called also if no one wrote in the pipe, so ignore
       // those errors but still try to wait for a child.
-      if (errno != EAGAIN && errno != EWOULDBLOCK)
+      if (errno != EAGAIN && errno != EWOULDBLOCK) {
         error(errno, "failed to read from exit pipe");
+      }
     }
 
     int status = -1;
     // Check if a child exited without blocking.
     pid_t pid = waitpid(-1, &status, WNOHANG);
-    if (pid < 0)
+    if (pid < 0) {
       error(errno, "failed to wait for child exit");
+    }
     // No child has exited.
-    if (pid == 0)
+    if (pid == 0) {
       return false;
+    }
 
     logmsg(LOG_DEBUG, "child with pid %d exited", pid);
 
-    if (first_process_exit_id == -1)
+    if (first_process_exit_id == -1) {
       first_process_exit_id = pid;
+    }
 
     // Search the exited process and store its exit information.
     bool found = false;
     for (auto &proc : processes) {
-      if (proc.pid != pid)
+      if (proc.pid != pid) {
         continue;
+      }
 
       proc.on_exit(status);
       found = true;
@@ -693,17 +730,20 @@ struct state_t {
       proc.close_fds();
     }
 
-    if (!found)
+    if (!found) {
       error(0, "unknown child with pid %d exited", pid);
+    }
 
     return true;
   }
 
   // Check if every process has exited.
   bool has_everyone_exited() {
-    for (const auto &proc : processes)
-      if (!proc.exited)
+    for (const auto &proc : processes) {
+      if (!proc.exited) {
         return false;
+      }
+    }
     return true;
   }
 
@@ -725,8 +765,9 @@ struct state_t {
       }
       if (nread < 0) {
         // We read what was ready, don't block and return.
-        if (errno == EAGAIN || errno == EWOULDBLOCK)
+        if (errno == EAGAIN || errno == EWOULDBLOCK) {
           return;
+        }
         error(errno, "failed to read from pipe of #%ld", from.index);
       }
       // We've read nread bytes, write them to the other process' pipe.
@@ -754,8 +795,9 @@ struct state_t {
       if (num_events == -1) {
         // When a signal is triggered, epoll_wait exits with EINTR, but that's
         // ok for us. We can just wait again.
-        if (errno == EINTR)
+        if (errno == EINTR) {
           continue;
+        }
         error(errno, "failed to wait on epoll");
       }
 
@@ -784,12 +826,14 @@ struct state_t {
         // A process wrote in one of the pipes to the proxy.
         for (size_t i = 0; i < processes.size(); i++) {
           const auto &from = processes[i];
-          if (fd != from.process_to_proxy)
+          if (fd != from.process_to_proxy) {
             continue;
+          }
           const auto &to = processes[(i + 1) % processes.size()];
           // Do not write to an exited process.
-          if (to.exited)
+          if (to.exited) {
             break;
+          }
           pump_proxy_pipe(from, to, output_file);
         }
       }
@@ -797,21 +841,24 @@ struct state_t {
 
   finish:
     logmsg(LOG_DEBUG, "all processes exited");
-    if (!args.output_file.empty())
+    if (!args.output_file.empty()) {
       logmsg(LOG_INFO, "total communication amount: %ld KiB",
              total_bytes_transferred / 1024);
+    }
   }
 
   // Write the metadata to file, if enabled.
   void write_meta() {
-    if (args.meta_file.empty())
+    if (args.meta_file.empty()) {
       return;
+    }
 
     auto total_duration = chrono::high_resolution_clock::now() - start;
 
     ofstream meta(args.meta_file);
-    if (meta.fail())
+    if (meta.fail()) {
       error(errno, "failed to open meta file at %s", args.meta_file.c_str());
+    }
     meta << "exitcode: " << main_process().exit_code() << endl;
     meta << "bytes-transferred: " << total_bytes_transferred << endl;
     meta << "total-duration-us: " << total_duration.count() / 1000 << endl;
@@ -825,8 +872,9 @@ int main(int argc, char **argv) {
   state_t state(argc, argv);
 
   // Enter a new session since we are dealing with signals.
-  if (setsid() < 0)
+  if (setsid() < 0) {
     error(errno, "failed to create a new session");
+  }
   state.install_sigterm_handler();
   state.install_sigchld_handler();
   state.setup_pipes();
@@ -849,8 +897,9 @@ int main(int argc, char **argv) {
   // The exit status should match the one of the first command.
   auto main_process = state.main_process();
   int exit_code = main_process.exit_code();
-  if (exit_code != -1)
+  if (exit_code != -1) {
     return exit_code;
+  }
 
   // The first command exited with a signal.
   error(0, "the first process crashed! %s",
