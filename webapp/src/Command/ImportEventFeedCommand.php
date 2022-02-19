@@ -54,9 +54,6 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
  */
 class ImportEventFeedCommand extends Command
 {
-    const STATUS_OK = 0;
-    const STATUS_ERROR = 1;
-
     protected EntityManagerInterface $em;
     protected DOMJudgeService $dj;
     protected ConfigurationService $config;
@@ -197,7 +194,7 @@ class ImportEventFeedCommand extends Command
         pcntl_signal(SIGINT, [$this, 'stopCommand']);
 
         if (!$this->readConfig($input->getArgument('contest'))) {
-            return static::STATUS_ERROR;
+            return static::FAILURE;
         }
 
         $dataSource = (int)$this->config->get('data_source');
@@ -214,7 +211,7 @@ class ImportEventFeedCommand extends Command
                     "data_source configuration setting is set to '%s' but should be '%s'. Set 'allow-import-as-primary' in YAML to continue.",
                     [ $dataSourceOptions[$dataSource], $dataSourceOptions[$importDataSource] ]
                 );
-                return static::STATUS_ERROR;
+                return static::FAILURE;
             }
         }
 
@@ -227,7 +224,7 @@ class ImportEventFeedCommand extends Command
                 'Contest with ID %s not found, exiting.',
                 [ $this->contestIdFromConfig ]
             );
-            return static::STATUS_ERROR;
+            return static::FAILURE;
         } else {
             $this->logger->notice(
                 'Starting event feed import into contest with ID %d (external ID %s) [DOMjudge/%s]',
@@ -250,7 +247,7 @@ class ImportEventFeedCommand extends Command
             ->getOneOrNullResult();
         if (!$user) {
             $this->logger->error('No admin user found. Please create at least one');
-            return static::STATUS_ERROR;
+            return static::FAILURE;
         }
         $token = new UsernamePasswordToken($user, 'main', $user->getRoles());
         $this->tokenStorage->setToken($token);
@@ -261,11 +258,11 @@ class ImportEventFeedCommand extends Command
 
         if ($this->client === null) {
             if (!$this->importFromFile($input->getOption('from-start'), $input->getOption('skip-event-id'))) {
-                return static::STATUS_ERROR;
+                return static::FAILURE;
             }
         } else {
             if (!$this->importFromUrl($input->getOption('from-start'), $input->getOption('skip-event-id'))) {
-                return static::STATUS_ERROR;
+                return static::FAILURE;
             }
         }
 
@@ -285,7 +282,7 @@ class ImportEventFeedCommand extends Command
             }
         }
 
-        return static::STATUS_OK;
+        return static::SUCCESS;
     }
 
     public function stopCommand(): void
