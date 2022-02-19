@@ -21,7 +21,7 @@
 
 .tiny_job:
   extends: [.clean_ordering]
-  timeout: 3m
+  timeout: 4m
 
 .short_job:
   extends: [.clean_ordering]
