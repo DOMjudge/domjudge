@@ -9,5 +9,5 @@ make configure
 make judgehost |& tee "$GITLABARTIFACTS/make.log"
 section_end compile
 
-cd judge/test || exit 1
+cd judge/runpipe_test || exit 1
 make test |& tee "$GITLABARTIFACTS/test.log"
