@@ -10,16 +10,6 @@ exampleA:
     # Can either be the numeric ID or the external ID.
     # If it matches both a numeric and external ID, the external ID has precedence.
     id: 2
-    # Normally DOMjudge only allows importing when the `data_source`
-    # configuration option is set to 'configuration and live data external'.
-    # Enabling this option allows importing with other `data_source` values.
-    # Optional.
-    # allow-import-as-primary: true
-    # By default, DOMjudge checks if the external ID of the contest in DOMjudge
-    # matches with the external system to prevent importing to the wrong
-    # contest. If you do want to import into such a contest, enable this
-    # option. Optional.
-    # allow-external-id-mismatch: true
     # URL to import from.
     feed-url: https://example.com/api/contests/exampleA/event-feed
     # Username to use for authenticating to the feed. Optional.

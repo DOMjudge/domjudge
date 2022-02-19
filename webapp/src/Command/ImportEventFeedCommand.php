@@ -73,8 +73,6 @@ class ImportEventFeedCommand extends Command
     protected ?string $feedUrl;
     protected ?string $feedFile;
     protected ?string $basePath;
-    protected bool $allowImportAsPrimary;
-    protected bool $allowExternalIdMismatch;
     protected ?string $sinceEventId = null;
 
     protected bool $shouldStop = false;
@@ -201,18 +199,11 @@ class ImportEventFeedCommand extends Command
         $importDataSource = DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL;
         if ($dataSource !== $importDataSource) {
             $dataSourceOptions = $this->config->getConfigSpecification()['data_source']['options'];
-            if ($this->allowImportAsPrimary) {
-                $this->logger->warning(
-                    "data_source configuration setting is set to '%s'; 'allow-import-as-primary' set so continuing...",
-                    [ $dataSourceOptions[$dataSource] ]
-                );
-            } else {
-                $this->logger->error(
-                    "data_source configuration setting is set to '%s' but should be '%s'. Set 'allow-import-as-primary' in YAML to continue.",
-                    [ $dataSourceOptions[$dataSource], $dataSourceOptions[$importDataSource] ]
-                );
-                return static::FAILURE;
-            }
+            $this->logger->error(
+                "data_source configuration setting is set to '%s' but should be '%s'.",
+                [ $dataSourceOptions[$dataSource], $dataSourceOptions[$importDataSource] ]
+            );
+            return static::FAILURE;
         }
 
         $contestRepository = $this->em->getRepository(Contest::class);
@@ -390,9 +381,6 @@ class ImportEventFeedCommand extends Command
             $this->feedFile = $config['feed-file'];
             $this->basePath = $config['base-path'];
         }
-
-        $this->allowImportAsPrimary    = $config['allow-import-as-primary'] ?? false;
-        $this->allowExternalIdMismatch = $config['allow-external-id-mismatch'] ?? false;
 
         return true;
     }
@@ -672,18 +660,11 @@ class ImportEventFeedCommand extends Command
         /** @var Contest $contest */
         $contest = $this->em->getRepository(Contest::class)->find($this->contestId);
         if ($contest->getExternalid() !== $externalContestData['id']) {
-            if ($this->allowExternalIdMismatch) {
-                $this->logger->warning(
-                    "Contest ID in external system (%s) does not match external ID in DOMjudge (%s); 'allow-external-id-mismatch' set so continuing...",
-                    [ $externalContestData['id'], $contest->getExternalid() ]
-                );
-            } else {
-                $this->logger->error(
-                    "Contest ID in external system (%s) does not match external ID in DOMjudge (%s). Set 'allow-external-id-mismatch' in YAML to continue.",
-                    [ $externalContestData['id'], $contest->getExternalid() ]
-                );
-                return false;
-            }
+            $this->logger->error(
+                "Contest ID in external system (%s) does not match external ID in DOMjudge (%s).",
+                [ $externalContestData['id'], $contest->getExternalid() ]
+            );
+            return false;
         }
 
         return true;
