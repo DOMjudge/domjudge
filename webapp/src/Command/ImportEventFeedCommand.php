@@ -61,9 +61,9 @@ class ImportEventFeedCommand extends Command
     protected ScoreboardService $scoreboardService;
     protected SubmissionService $submissionService;
     protected TokenStorageInterface $tokenStorage;
-    protected bool $debug;
     protected string $domjudgeVersion;
     protected LoggerInterface $logger;
+    protected ?Profiler $profiler;
 
     protected ?HttpClientInterface $client;
 
@@ -110,7 +110,7 @@ class ImportEventFeedCommand extends Command
         SubmissionService $submissionService,
         TokenStorageInterface $tokenStorage,
         LoggerInterface $logger,
-        bool $debug,
+        ?Profiler $profiler,
         string $domjudgeVersion,
         string $name = null
     ) {
@@ -123,7 +123,7 @@ class ImportEventFeedCommand extends Command
         $this->submissionService = $submissionService;
         $this->tokenStorage      = $tokenStorage;
         $this->logger            = $logger;
-        $this->debug             = $debug;
+        $this->profiler          = $profiler;
         $this->domjudgeVersion   = $domjudgeVersion;
     }
 
@@ -177,11 +177,11 @@ class ImportEventFeedCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        // Disable SQL logging if we do not run explicitly in debug mode.
-        // This would cause a serious memory leak otherwise since this is a
-        // long running process.
-        if (!$this->debug) {
-            $this->em->getConnection()->getConfiguration()->setSQLLogger(null);
+        // Disable SQL logging and profiling. This would cause a serious memory leak otherwise
+        // since this is a long running process.
+        $this->em->getConnection()->getConfiguration()->setSQLLogger();
+        if ($this->profiler) {
+            $this->profiler->disable();
         }
 
         // Set the verbosity level to very verbose, to always get info and
