@@ -327,6 +327,18 @@ upgrade)
 		echo "You may also remove those users from MySQL."
 	fi
 	read_dbpasswords
+
+	# Check if we need to upgrade the Doctrine migrations table
+	if ! echo "SHOW CREATE TABLE \`doctrine_migration_versions\`" | mysql "$DBNAME" >/dev/null 2>&1; then
+		symfony_console doctrine:migrations:sync-metadata-storage -n
+		# shellcheck disable=SC2016
+		echo 'INSERT INTO `doctrine_migration_versions`
+			(version, executed_at, execution_time)
+			SELECT concat("DoctrineMigrations\\\\Version", version), executed_at, 1
+			FROM migration_versions;' | mysql "$DBNAME"
+		 echo "DROP TABLE \`migration_versions\`" | mysql "$DBNAME"
+	fi
+
 	symfony_console doctrine:migrations:migrate -n
 	DBUSER=$domjudge_DBUSER PASSWD=$domjudge_PASSWD symfony_console domjudge:load-default-data
 	verbose "DOMjudge database upgrade completed."
