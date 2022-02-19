@@ -2,8 +2,8 @@
 
 namespace App\Command;
 
+use App\Entity\BaseApiEntity;
 use App\Entity\Clarification;
-use App\Entity\Configuration;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\ExternalJudgement;
@@ -25,8 +25,6 @@ use App\Utils\Utils;
 use DateTime;
 use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Id\AssignedGenerator;
-use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\ORM\NonUniqueResultException;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
@@ -37,6 +35,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\HttpClient\Exception\TransportException;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpKernel\Profiler\Profiler;
+use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Yaml\Exception\ParseException;
@@ -137,11 +137,7 @@ class ImportEventFeedCommand extends Command
                 'Import contest data from an event feed following the Contest API specification:' . PHP_EOL .
                 'https://ccs-specs.icpc.io/2021-11/contest_api' . PHP_EOL . PHP_EOL .
                 'Note the following assumptions and caveats:' . PHP_EOL .
-                '- The contest to import into should already contain the problems,' . PHP_EOL .
-                '  because the event feed does not contain the testcases.' . PHP_EOL .
-                '- Problems will be updated, but not their test_data_count, time_limit or ordinal.' . PHP_EOL .
-                '- Judgement types will not be imported, but only verified.' . PHP_EOL .
-                '- Languages will not be imported, but only verified.' . PHP_EOL .
+                '- Configuration data will only be verified.' . PHP_EOL .
                 '- Team members will not be imported.' . PHP_EOL .
                 '- Awards will not be imported.' . PHP_EOL .
                 '- State will not be imported.'
@@ -707,7 +703,7 @@ class ImportEventFeedCommand extends Command
                 }
                 break;
             case 'contests':
-                $this->importContest($event);
+                $this->validateContest($event);
                 break;
             case 'judgement-types':
                 $this->validateJudgementType($event);
@@ -716,16 +712,16 @@ class ImportEventFeedCommand extends Command
                 $this->validateLanguage($event);
                 break;
             case 'groups':
-                $this->importGroup($event);
+                $this->validateGroup($event);
                 break;
             case 'organizations':
-                $this->importOrganization($event);
+                $this->validateOrganization($event);
                 break;
             case 'problems':
-                $this->importProblem($event);
+                $this->validateProblem($event);
                 break;
             case 'teams':
-                $this->importTeam($event);
+                $this->validateTeam($event);
                 break;
             case 'clarifications':
                 $this->importClarification($event);
@@ -745,7 +741,7 @@ class ImportEventFeedCommand extends Command
     /**
      * @throws NonUniqueResultException
      */
-    protected function importContest(array $event): void
+    protected function validateContest(array $event): void
     {
         if ($event['op'] === EventLogService::ACTION_DELETE) {
             $this->logger->error(
@@ -755,9 +751,9 @@ class ImportEventFeedCommand extends Command
             return;
         }
 
-        $this->logger->info('Importing contest %s event %s', [ $event['op'], $event['id'] ]);
+        $this->logger->info('Validating contest %s event %s', [ $event['op'], $event['id'] ]);
 
-        // First, reload the contest so we can set it's data
+        // First, reload the contest so we can check it's data
         /** @var Contest $contest */
         $contest = $this->em->getRepository(Contest::class)->find($this->contestId);
 
@@ -800,6 +796,10 @@ class ImportEventFeedCommand extends Command
             $fullFreeze = null;
         }
 
+        $toCheck = [
+            'name' => $event['data']['name'],
+        ];
+
         // The timezones are given in ISO 8601 and we only support names.
         // This is why we will use the platform default timezone and just verify it matches
         $startTime = $event['data']['start_time'] === null ? null : new DateTime($event['data']['start_time']);
@@ -812,39 +812,28 @@ class ImportEventFeedCommand extends Command
                     [ $startTime->format('e'), date_default_timezone_get() ]
                 );
             }
-            // Now set the data
-            $contest
-                ->setStarttimeEnabled(true)
-                ->setStarttimeString($startTime->format('Y-m-d H:i:s') . ' ' . date_default_timezone_get())
-                ->setEndtimeString($fullDuration)
-                ->setFreezetimeString($fullFreeze)
-                ->updateTimes();
+            $toCheck = [
+                'start_time_enabled' => true,
+                'start_time_string'  => $startTime->format('Y-m-d H:i:s') . ' ' . date_default_timezone_get(),
+                'end_time'           => $contest->getAbsoluteTime($fullDuration),
+                'freeze_time'        => $contest->getAbsoluteTime($fullFreeze),
+            ];
         } else {
-            // Now set the data
-            $contest
-                ->setStarttimeEnabled(false);
+            $toCheck = [
+                'start_time_enabled' => false,
+            ];
         }
 
-        $contest->setName($event['data']['name']);
+        $this->compareValues('contest', $contest, $toCheck);
 
-        // Also update the penalty time
+        // Also compare the penalty time
         $penaltyTime = (int)$event['data']['penalty_time'];
         if ($this->config->get('penalty_time') != $penaltyTime) {
-            /** @var Configuration $penaltyTimeConfig */
-            $penaltyTimeConfig = $this->em->getRepository(Configuration::class)->findOneBy(['name' => 'penalty_time']);
-            if (!$penaltyTimeConfig) {
-                $penaltyTimeConfig = new Configuration();
-                $penaltyTimeConfig->setName('penalty_time');
-                $this->em->persist($penaltyTimeConfig);
-            }
-            $penaltyTimeConfig->setValue((int)$event['data']['penalty_time']);
+            $this->logger->warning(
+                'Penalty time differs between feed (%d) and us (%d)',
+                [ $penaltyTime, $this->config->get('penalty_time') ]
+            );
         }
-
-        // Save data and emit event
-        $this->em->flush();
-        // For contests we know we always do an update action as the contest must exist for this script to run
-        $this->eventLogService->log('contest', $contest->getCid(), EventLogService::ACTION_UPDATE,
-                                    $contest->getCid());
     }
 
     protected function validateJudgementType(array $event): void
@@ -858,7 +847,7 @@ class ImportEventFeedCommand extends Command
         }
 
         $this->logger->info(
-            'Validating judgement-types %s event %s',
+            'Validating judgement-type %s event %s',
             [ $event['op'], $event['id'] ]
         );
 
@@ -902,7 +891,7 @@ class ImportEventFeedCommand extends Command
             return;
         }
 
-        $this->logger->info('Validating languages %s event %s', [ $event['op'], $event['id'] ]);
+        $this->logger->info('Validating language %s event %s', [ $event['op'], $event['id'] ]);
 
         $extId = $event['data']['id'];
         /** @var Language $language */
@@ -916,127 +905,88 @@ class ImportEventFeedCommand extends Command
         }
     }
 
-    /**
-     * @throws NonUniqueResultException
-     */
-    protected function importGroup(array $event): void
+    protected function validateGroup(array $event): void
     {
-        $this->logger->info('Importing group %s event %s', [ $event['op'], $event['id'] ]);
+        $this->logger->info('Validating group %s event %s', [ $event['op'], $event['id'] ]);
 
         $groupId = $event['data']['id'];
-        if (!is_numeric($groupId)) {
-            $this->logger->error(
-                'Cannot import group %s: only integer ID\'s are supported',
+
+        /** @var TeamCategory|null $category */
+        $category = $this->em->getRepository(TeamCategory::class)->findOneBy(['externalid' => $groupId]);
+
+        if ($event['op'] === EventLogService::ACTION_DELETE) {
+            // We need to check if the the category is known
+            if ($category) {
+                $this->logger->warning(
+                    'Group with external ID %s deleted in feed but found in DOMjudge',
+                    [ $groupId ]
+                );
+            }
+            return;
+        }
+
+        if (!$category) {
+            $this->logger->warning(
+                'Group with external ID %s not found in DOMjudge',
                 [ $groupId ]
             );
             return;
         }
 
-        $groupId = (int)$groupId;
+        $toCheck = [
+            'name'    => $event['data']['name'],
+            'visible' => !($event['data']['hidden'] ?? false),
+            'icpcid'  => $event['data']['icpc_id'] ?? null,
+        ];
 
-        if ($event['op'] === EventLogService::ACTION_DELETE) {
-            // We need to delete the category
-
-            $category = $this->em->getRepository(TeamCategory::class)->findOneBy(['externalid' => $groupId]);
-            if ($category) {
-                $this->em->remove($category);
-                $this->em->flush();
-                $this->eventLogService->log('groups', $category->getCategoryid(),
-                                            EventLogService::ACTION_DELETE,
-                                            $this->contestId, null, $category->getCategoryid());
-                return;
-            } else {
-                $this->logger->error('Cannot delete nonexistent group %s', [ $groupId ]);
-            }
-            return;
-        }
-
-        // First, load the category
-        /** @var TeamCategory $category */
-        $category = $this->em->getRepository(TeamCategory::class)->findOneBy(['externalid' => $groupId]);
-        if ($category) {
-            $action = EventLogService::ACTION_UPDATE;
-        } else {
-            $category = new TeamCategory();
-            $action   = EventLogService::ACTION_CREATE;
-        }
-
-        $category
-            ->setExternalid($event['data']['id'])
-            ->setName($event['data']['name'])
-            ->setVisible(!($event['data']['hidden'] ?? false));
-
-        // Save data and emit event
-        if ($action === EventLogService::ACTION_CREATE) {
-            $this->em->persist($category);
-        }
-        $this->em->flush();
-        $this->eventLogService->log('groups', $category->getCategoryid(), $action,
-                                    $this->contestId);
+        $this->compareValues('group', $category, $toCheck);
 
         $this->processPendingEvents('group', $category->getExternalid());
     }
 
-    /**
-     * @throws NonUniqueResultException
-     */
-    protected function importOrganization(array $event): void
+    protected function validateOrganization(array $event): void
     {
-        $this->logger->info('Importing organization %s event %s', [ $event['op'], $event['id'] ]);
+        $this->logger->info('Validating organization %s event %s', [ $event['op'], $event['id'] ]);
 
         $organizationId = $event['data']['id'];
 
-        if ($event['op'] === EventLogService::ACTION_DELETE) {
-            // We need to delete the affiliation
+        /** @var TeamAffiliation|null $affiliation */
+        $affiliation = $this->em->getRepository(TeamAffiliation::class)->findOneBy(['externalid' => $organizationId]);
 
-            $affiliation = $this->em->getRepository(TeamAffiliation::class)->findOneBy(['externalid' => $organizationId]);
+        if ($event['op'] === EventLogService::ACTION_DELETE) {
+            // We need to check if the the affiliation is known
             if ($affiliation) {
-                $this->em->remove($affiliation);
-                $this->em->flush();
-                $this->eventLogService->log('organizations', $affiliation->getAffilid(),
-                                            EventLogService::ACTION_DELETE,
-                                            $this->contestId, null, $affiliation->getExternalid());
-                return;
-            } else {
-                $this->logger->error('Cannot delete nonexistent organiation %s', [ $organizationId ]);
+                $this->logger->warning(
+                    'Organization with external ID %s deleted in feed but found in DOMjudge',
+                    [ $organizationId ]
+                );
             }
             return;
         }
 
-        // First, load the affiliation
-        /** @var TeamAffiliation $affiliation */
-        $affiliation = $this->em->getRepository(TeamAffiliation::class)->findOneBy(['externalid' => $organizationId]);
-        if ($affiliation) {
-            $action = EventLogService::ACTION_UPDATE;
-        } else {
-            $affiliation = new TeamAffiliation();
-            $affiliation->setExternalid($organizationId);
-            $action = EventLogService::ACTION_CREATE;
+        if (!$affiliation) {
+            $this->logger->warning(
+                'Organization with external ID %s not found in DOMjudge',
+                [ $organizationId ]
+            );
+            return;
         }
 
-        $affiliation
-            ->setName($event['data']['formal_name'] ?? $event['data']['name'])
-            ->setShortname($event['data']['name'])
-            ->setIcpcid($event['data']['icpc_id'] ?? null);
+        $toCheck = [
+            'name'      => $event['data']['formal_name'] ?? $event['data']['name'],
+            'shortname' => $event['data']['name'],
+            'icpcid'    => $event['data']['icpc_id'] ?? null,
+        ];
         if (isset($event['data']['country'])) {
-            $affiliation->setCountry($event['data']['country']);
+            $toCheck['country'] = $event['data']['country'];
         }
 
-        // Save data and emit event
-        if ($action === EventLogService::ACTION_CREATE) {
-            $this->em->persist($affiliation);
-        }
-        $this->em->flush();
-        $this->eventLogService->log('organizations', $affiliation->getAffilid(), $action,
-                                    $this->contestId);
+        $this->compareValues('organization', $affiliation, $toCheck);
 
         $this->processPendingEvents('organization', $affiliation->getExternalid());
     }
 
-    /**
-     * @throws NonUniqueResultException
-     */
-    protected function importProblem(array $event): void
+    protected function validateProblem(array $event): void
     {
         if ($event['op'] === EventLogService::ACTION_DELETE) {
             $this->logger->error(
@@ -1046,7 +996,7 @@ class ImportEventFeedCommand extends Command
             return;
         }
 
-        $this->logger->info('Importing problem %s event %s', [ $event['op'], $event['id'] ]);
+        $this->logger->info('Validating problem %s event %s', [ $event['op'], $event['id'] ]);
 
         $problemId = $event['data']['id'];
 
@@ -1054,7 +1004,10 @@ class ImportEventFeedCommand extends Command
         /** @var Problem $problem */
         $problem = $this->em->getRepository(Problem::class)->findOneBy(['externalid' => $problemId]);
         if (!$problem) {
-            $this->logger->error('Problem %s not found, cannot import', [ $problemId ]);
+            $this->logger->warning(
+                'Problem with external ID %s nout found in DOMjudge',
+                [ $problemId ]
+            );
             return;
         }
 
@@ -1064,161 +1017,64 @@ class ImportEventFeedCommand extends Command
             'contest' => $this->contestId,
             'problem' => $problem,
         ]);
-        if ($contestProblem) {
-            $action = EventLogService::ACTION_UPDATE;
-        } else {
-            $this->logger->warning("No contest problem found in DOMjudge yet, creating one");
-            $contestProblem = new ContestProblem();
-            $contestProblem
-                ->setProblem($problem)
-                ->setContest($this->em->getRepository(Contest::class)->find($this->contestId));
-            $action = EventLogService::ACTION_CREATE;
-            $problem->addContestProblem($contestProblem);
+        if (!$contestProblem) {
+            $this->logger->warning("No contest problem found in DOMjudge yet");
+            return;
         }
 
-        if ($problem->getName() !== $event['data']['name']) {
-            $this->logger->warning(
-                'Problem name from DOMjudge (%s) does not match feed (%s)',
-                [ $problem->getName(), $event['data']['name'] ]
-            );
-            $problem->setName($event['data']['name']);
-        }
+        $toCheckProblem = [
+            'name' => $event['data']['name'],
+            'timelimit' => $event['data']['time_limit'],
+        ];
+        $toCheckContestProblem = [
+            'shortname' => $event['data']['label'],
+            'color' => $event['data']['rgb'] ?? null,
+        ];
 
-        if (isset($event['data']['time_limit']) && abs($problem->getTimelimit() - $event['data']['time_limit']) > 0.001) {
-            $this->logger->warning(
-                'Time limit from DOMjudge (%.3f) does not match feed (%.3f)',
-                [ $problem->getTimelimit(), $event['data']['time_limit'] ]
-            );
-            $problem->setTimelimit($event['data']['time_limit']);
-        }
-
-        if ($contestProblem->getShortname() !== $event['data']['label']) {
-            $this->logger->warning(
-                'Contest problem shortname from DOMjudge (%s) does not match feed (%s)',
-                [ $contestProblem->getShortname(), $event['data']['label'] ]
-            );
-            $contestProblem->setShortname($event['data']['label']);
-        }
-
-        if ($contestProblem->getColor() !== ($event['data']['rgb'] ?? null)) {
-            $this->logger->warning(
-                'Contest problem color from DOMjudge (%s) does not match feed (%s)',
-                [ $contestProblem->getColor(), $event['data']['rgb'] ]
-            );
-            $contestProblem->setColor($event['data']['rgb'] ?? null);
-        }
-
-        // Save data and emit event
-        if ($action === EventLogService::ACTION_CREATE) {
-            $this->em->persist($contestProblem);
-        }
-        $this->em->flush();
-        $this->eventLogService->log('problems', $problem->getProbid(), $action, $this->contestId);
-
-        $this->processPendingEvents('problem', $problem->getExternalid());
+        $this->compareValues('problem', $problem, $toCheckProblem);
+        $this->compareValues('contest problem', $problem, $toCheckContestProblem, $contestProblem);
     }
 
-    protected function importTeam(array $event): void
+    protected function validateTeam(array $event): void
     {
-        $this->logger->info('Importing team %s event %s', [ $event['op'], $event['id'] ]);
+        $this->logger->info('Validating team %s event %s', [ $event['op'], $event['id'] ]);
 
         $teamId = $event['data']['id'];
-        $icpcId = $event['data']['icpc_id'];
 
-        if (!is_numeric($teamId)) {
-            $this->logger->error(
-                'Cannot import team %s: only integer ID\'s are supported',
+        /** @var Team|null $team */
+        $team = $this->em->getRepository(Team::class)->findOneBy(['externalid' => $teamId]);
+
+        if ($event['op'] === EventLogService::ACTION_DELETE) {
+            // We need to check if the the team is known
+            if ($team) {
+                $this->logger->warning(
+                    'Team with external ID %s deleted in feed but found in DOMjudge',
+                    [ $teamId ]
+                );
+            }
+            return;
+        }
+
+        if (!$team) {
+            $this->logger->warning(
+                'Team with external ID %s not found in DOMjudge',
                 [ $teamId ]
             );
             return;
         }
 
-        if ($event['op'] === EventLogService::ACTION_DELETE) {
-            // We need to delete the team
-
-            $team = $this->em->getRepository(Team::class)->findOneBy(['externalid' => $teamId]);
-            if ($team) {
-                $this->em->remove($team);
-                $this->em->flush();
-                $this->eventLogService->log('teams', $team->getTeamid(),
-                                            EventLogService::ACTION_DELETE,
-                                            $this->contestId, null, $team->getTeamid());
-                return;
-            } else {
-                $this->logger->error('Cannot delete nonexistent team %s', [ $teamId ]);
-            }
-            return;
+        $toCheck = [
+            'name'                   => $event['data']['formal_name'] ?? $event['data']['name'],
+            'display_name'           => $event['data']['display_name'] ?? null,
+            'affiliation.externalid' => $event['data']['organization_id'],
+            'category.externalid'    => $event['data']['group_ids'][0] ?? null,
+            'icpcid'                 => $event['data']['icpc_id'] ?? null,
+        ];
+        if (isset($event['data']['country'])) {
+            $toCheck['country'] = $event['data']['country'];
         }
 
-        // First, load the team
-        /** @var Team $team */
-        $team = $this->em->getRepository(Team::class)->findOneBy(['externalid' => $teamId]);
-        if ($team) {
-            $action = EventLogService::ACTION_UPDATE;
-        } else {
-            $team = new Team();
-            $team
-                ->setExternalid($teamId)
-                ->setIcpcid($icpcId);
-            $action = EventLogService::ACTION_CREATE;
-        }
-
-        // Now check if we have all dependent data
-
-        $groupIds = $event['data']['group_ids'] ?? [];
-        $category = null;
-        if (count($groupIds) > 1) {
-            $this->logger->warning('Team belongs to more than one group; only using the first one');
-        }
-        if (count($groupIds) >= 1) {
-            $groupId = reset($groupIds);
-            if (!is_numeric($groupId)) {
-                $this->logger->error(
-                    'Cannot import team with group ID %s: only integer ID\'s are supported',
-                    [ $groupId ]
-                );
-                return;
-            } else {
-                /** @var TeamCategory $category */
-                $category = $this->em->getRepository(TeamCategory::class)->findOneBy(['externalid' => $groupId]);
-                if (!$category) {
-                    $this->addPendingEvent('group', $groupId, $event);
-                    return;
-                }
-            }
-        }
-
-        $organizationId = $event['data']['organization_id'] ?? null;
-        $affiliation    = null;
-        if ($organizationId !== null) {
-            /** @var TeamAffiliation $affiliation */
-            $affiliation = $this->em->getRepository(TeamAffiliation::class)->findOneBy(['externalid' => $organizationId]);
-            if (!$affiliation) {
-                $this->addPendingEvent('organization', $organizationId, $event);
-                return;
-            }
-        }
-        $team
-            ->setCategory($category)
-            ->setAffiliation($affiliation)
-            ->setName($event['data']['name'])
-            ->setDisplayName($event['data']['display_name'] ?? null);
-
-        // Also check if this is a private contest. If so, we need to add the team to the contest
-        /** @var Contest $contest */
-        $contest = $this->em->getRepository(Contest::class)->find($this->contestId);
-        if (!$contest->isOpenToAllTeams()) {
-            if (!$contest->getTeams()->contains($team)) {
-                $contest->addTeam($team);
-            }
-        }
-
-        // Save data and emit event
-        if ($action === EventLogService::ACTION_CREATE) {
-            $this->em->persist($team);
-        }
-        $this->em->flush();
-        $this->eventLogService->log('teams', $team->getTeamid(), $action, $this->contestId);
+        $this->compareValues('team', $team, $toCheck);
 
         $this->processPendingEvents('team', $team->getTeamid());
     }
@@ -1904,5 +1760,31 @@ class ImportEventFeedCommand extends Command
         $team = $this->em->getRepository(Team::class)->find($teamId);
         $problem = $this->em->getRepository(Problem::class)->find($problemId);
         $this->scoreboardService->calculateScoreRow($contest, $team, $problem);
+    }
+
+    private function compareValues(
+        string        $entityType,
+        BaseApiEntity $entity,
+        array         $values,
+        ?object       $entiyToCompare = null
+    ): void {
+        $propertyAccessor = PropertyAccess::createPropertyAccessor();
+        $diff = [];
+        foreach ($values as $field => $value) {
+            $ourValue = $propertyAccessor->getValue($entiyToCompare ?? $entity, $field);
+            if ($value !== $ourValue) {
+                $diff[$field] = $ourValue;
+            }
+        }
+
+        if (!empty($diff)) {
+            $externalId = $entity->getApiId($this->eventLogService);
+            $message = "The following fields for $entityType with external ID $externalId are different between us and the event:";
+            foreach ($diff as $field => $ourValue) {
+                $message .= "\n- $field: $ourValue vs $values[$field]";
+            }
+
+            $this->logger->warning($message);
+        }
     }
 }
