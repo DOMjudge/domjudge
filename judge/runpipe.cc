@@ -25,7 +25,7 @@
 // one to stdin of the other. Furthermore, we must be able to look at their
 // traffic and write it to file.
 //
-// We called "proxy" the component that inspects the traffic and writes it to
+// We call "proxy" the component that inspects the traffic and writes it to
 // the output file. The proxy is enabled only if the output file is provided.
 //
 // With #0 we refer to the first process (the main process), with #1 to the
@@ -38,8 +38,6 @@
 // Unfortunately, epoll doesn't support waiting for a process exit, but we can
 // emulate it by sending a message in the SIGCHLD signal handler using an extra
 // pipe.
-//
-// The behaviour is different if the proxy is enabled or not.
 //
 // If the proxy is not enabled (i.e. no traffic capturing), the pipes are setup
 // like this:
@@ -163,10 +161,8 @@ struct process_t {
   // The 0-based index of this process. The 0-th process is the main process.
   size_t index;
 
-  // File descriptor of where the stdout is redirected to.
-  fd_t stdout = -1;
-  // File descriptor of where the stdin is coming from.
-  fd_t stdin = -1;
+  fd_t stdout = -1; // FD of where the stdout is redirected to.
+  fd_t stdin = -1;  // FD of where the stdin is coming from.
 
   // If the proxy is active (i.e. -o is provided), these are the file
   // descriptors for its communication.
@@ -181,7 +177,6 @@ struct process_t {
   // process.
   pid_t pid = -1;
 
-  // Whether the process exited.
   bool exited = false;
   // Information about the exited process. Meaningful only if exited == true.
   int exitInfo = -1;
@@ -285,11 +280,10 @@ struct process_t {
 // [time_in_seconds/bytes]direction: content\n
 //
 // Where:
-//   time_in_seconds is the amount of time passed from the start of the
-//     execution
-//   bytes is the number of bytes of "content"
-//   direction is > if "content" is sent by the main process, < otherwise
-//   content is a sequence of "bytes" bytes, followed by a new-line
+//   time_in_seconds: the amount of time passed from the start of the execution
+//   bytes: the number of bytes of "content"
+//   direction: > if "content" is sent by the main process, < otherwise
+//   content: a sequence of "bytes" bytes, followed by a new-line
 struct output_file_t {
   // The file descriptor of the file where to write.
   fd_t output_file = -1;
