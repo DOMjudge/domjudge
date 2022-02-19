@@ -98,10 +98,8 @@ void set_non_blocking(fd_t fd) {
  */
 // For Linux specific fcntl F_SETPIPE_SZ command.
 #if __gnu_linux__
-#define PROC_MAX_PIPE_SIZE "/proc/sys/fs/pipe-max-size"
-#endif
+const char *PROC_MAX_PIPE_SIZE = "/proc/sys/fs/pipe-max-size";
 
-#ifdef PROC_MAX_PIPE_SIZE
 void resize_pipe(int fd) {
   const int UNINIT = -1;
   const int FAILED = -2;
@@ -137,7 +135,9 @@ void resize_pipe(int fd) {
 
   logmsg(LOG_DEBUG, "set pipe fd %d to size %d", fd, new_size);
 }
-#endif
+#else  // __gnu_linux__
+void resize_pipe(int fd) {}
+#endif // __gnu_linux__
 
 // Write all the data into the file descriptor. It is assumed that the file
 // descriptor is *not* NONBLOCK. This function blocks until all the data is
