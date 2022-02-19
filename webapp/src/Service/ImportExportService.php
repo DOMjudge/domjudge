@@ -18,8 +18,6 @@ use Collator;
 use DateTime;
 use DateTimeZone;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Id\AssignedGenerator;
-use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\NonUniqueResultException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -885,7 +883,7 @@ class ImportExportService
             if (empty($teamItem['team']['teamid'])) {
                 $team = null;
             } else {
-                $field = $this->eventLogService->externalIdFieldForEntity(Team::class);
+                $field = $this->eventLogService->externalIdFieldForEntity(Team::class) ?? 'teamid';
                 $team = $this->em->getRepository(Team::class)->findOneBy([$field => $teamItem['team']['teamid']]);
             }
             if (!$team) {
@@ -992,7 +990,8 @@ class ImportExportService
                                            $line[2]);
                         return -1;
                     }
-                    $team = $this->em->getRepository(Team::class)->find($teamId);
+                    $field = $this->eventLogService->externalIdFieldForEntity(Team::class) ?? 'teamid';
+                    $team  = $this->em->getRepository(Team::class)->findOneBy([$field => $teamId]);
                     if ($team === null) {
                         $message = sprintf('unknown team id %s on line %d', $teamId, $l);
                         return -1;
