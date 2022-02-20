@@ -60,6 +60,9 @@ abstract class BaseController extends AbstractController
     {
         if (strpos($referer, $prefix) === 0) {
             $path = substr($referer, strlen($prefix));
+            if (($questionMark = strpos($path, '?')) !== false) {
+                $path = substr($path, 0, $questionMark);
+            }
             $context = $router->getContext();
             $method = $context->getMethod();
             $context->setMethod('GET');

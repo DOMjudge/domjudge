@@ -1,0 +1,19 @@
+{% extends "jury/base.html.twig" %}
+{% import "jury/jury_macros.twig" as macros %}
+
+{% block title %}External contest source {{ externalContestSource.extsourceid }} - {{ parent() }}{% endblock %}
+
+{% block extrahead %}
+    {{ parent() }}
+    {{ macros.table_extrahead() }}
+{% endblock %}
+
+{% block content %}
+
+    <h1>External contest source {{ externalContestSource.extsourceid }}</h1>
+
+    <div data-ajax-refresh-target>
+        {% include 'jury/partials/external_contest_source.html.twig' %}
+    </div>
+
+{% endblock %}

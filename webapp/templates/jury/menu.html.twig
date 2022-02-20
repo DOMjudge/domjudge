@@ -48,13 +48,21 @@
                 </li>
 
                 {% if show_shadow_differences %}
-                    <li class="nav-item {% if current_route == 'jury_shadow_differences' %}active{% endif %}">
-                        {% if current_contest is null %}
-                            <a class="nav-link disabled">
-                        {% else %}
-                            <a class="nav-link" href="{{ path('jury_shadow_differences') }}">
-                        {% endif %}
-                        <i class="fas fa-not-equal"></i> shadow differences</a>
+                    <li class="nav-item dropdown {% if current_route == 'jury_shadow_differences' or current_route starts with 'jury_external_contest_source' %}active{% endif %}">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownShadow" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fas fa-copy"></i> shadowing
+                            <span class="badge badge-danger" id="num-alerts-shadowdifferences"></span>
+                            <span class="badge badge-warning" id="num-alerts-externalcontestsources"></span>
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <a class="dropdown-item {% if current_contest is null %}dropdown-disabled{% endif %} {% if current_route == 'jury_shadow_differences' %}active{% endif %}"
+                                {% if current_contest is not null %}href="{{ path('jury_shadow_differences') }}"{% endif %} id="menu_shadow_differences">
+                                <i class="fas fa-not-equal fa-fw"></i> shadow differences <span class="badge badge-danger" id="num-alerts-shadowdifferences-sub"></span>
+                            </a>
+                            <a class="dropdown-item {% if current_route starts with 'jury_external_contest_source' %}active{% endif %}" href="{{ path('jury_external_contest_sources') }}" id="menu_external_contest_sources">
+                                <i class="fas fa-laptop-code fa-fw"></i> external contest sources <span class="badge badge-warning" id="num-alerts-externalcontestsources-sub"></span>
+                            </a>
+                        </div>
                     </li>
                 {% endif %}
 
