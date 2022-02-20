@@ -46,7 +46,7 @@ class SubmissionsFilterType extends AbstractType
             ->addOrderBy("p.name")
             ->getQuery()
             ->getResult();
-        $builder->add("problem", EntityType::class, [
+        $builder->add("problem-id", EntityType::class, [
             "multiple" => true,
             "label" => "Filter on problem(s)",
             "class" => Problem::class,
@@ -55,7 +55,7 @@ class SubmissionsFilterType extends AbstractType
             "choices" => $problems,
             "attr" => ["data-filter-field" => "problem-id"],
         ]);
-        $builder->add("language", EntityType::class, [
+        $builder->add("language-id", EntityType::class, [
             "multiple" => true,
             "label" => "Filter on language(s)",
             "class" => Language::class,
@@ -93,7 +93,7 @@ class SubmissionsFilterType extends AbstractType
         }
 
         $teams = $teamsQueryBuilder->getQuery()->getResult();
-        $builder->add("team", EntityType::class, [
+        $builder->add("team-id", EntityType::class, [
             "multiple" => true,
             "label" => "Filter on team(s)",
             "class" => Team::class,
@@ -113,7 +113,7 @@ class SubmissionsFilterType extends AbstractType
             "judging",
             "queued",
         ];
-        $builder->add("verdict", ChoiceType::class, [
+        $builder->add("result", ChoiceType::class, [
             "label" => "Filter on result(s)",
             "multiple" => true,
             "required" => false,

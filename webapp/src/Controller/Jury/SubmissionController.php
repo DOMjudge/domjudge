@@ -30,11 +30,10 @@ use App\Utils\Utils;
 use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
-use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\Query\Expr\Join;
-use Exception;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -127,40 +126,6 @@ class SubmissionController extends BaseController
 
         // Load preselected filters
         $filters          = $this->dj->jsonDecode((string)$this->dj->getCookie('domjudge_submissionsfilter') ?: '[]');
-        $filteredProblems = $filteredLanguages = $filteredTeams = $filteredVerdicts = [];
-        if (isset($filters['problem-id'])) {
-            /** @var Problem[] $filteredProblems */
-            $filteredProblems = $this->em->createQueryBuilder()
-                ->from(Problem::class, 'p')
-                ->select('p')
-                ->where('p.probid IN (:problemIds)')
-                ->setParameter('problemIds', $filters['problem-id'])
-                ->getQuery()
-                ->getResult();
-        }
-        if (isset($filters['language-id'])) {
-            /** @var Language[] $filteredLanguages */
-            $filteredLanguages = $this->em->createQueryBuilder()
-                ->from(Language::class, 'lang')
-                ->select('lang')
-                ->where('lang.langid IN (:langIds)')
-                ->setParameter('langIds', $filters['language-id'])
-                ->getQuery()
-                ->getResult();
-        }
-        if (isset($filters['team-id'])) {
-            /** @var Team[] $filteredTeams */
-            $filteredTeams = $this->em->createQueryBuilder()
-                ->from(Team::class, 't')
-                ->select('t')
-                ->where('t.teamid IN (:teamIds)')
-                ->setParameter('teamIds', $filters['team-id'])
-                ->getQuery()
-                ->getResult();
-        }
-        if (isset($filters['result'])) {
-            $filteredVerdicts = $filters['result'];
-        }
 
         $verdictsConfig = $this->dj->getDomjudgeEtcDir() . '/verdicts.php';
         $results = array_keys(include $verdictsConfig);
@@ -176,10 +141,6 @@ class SubmissionController extends BaseController
             'showContest' => count($contests) > 1,
             'hasFilters' => !empty($filters),
             'results' => $results,
-            'filteredProblems' => $filteredProblems,
-            'filteredLanguages' => $filteredLanguages,
-            'filteredTeams' => $filteredTeams,
-            'filteredResults' => $filteredVerdicts,
             'showExternalResult' => $this->config->get('data_source') ==
                 DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL,
             'showTestcases' => count($submissions) <= $latestCount,
@@ -191,9 +152,13 @@ class SubmissionController extends BaseController
         }
 
         // Build the filter form.
-        $form = $this->createForm(SubmissionsFilterType::class, [
+        $filtersForForm                = $filters;
+        $filtersForForm['problem-id']  = $this->em->getRepository(Problem::class)->findBy(['probid' => $filtersForForm['problem-id'] ?? []]);
+        $filtersForForm['language-id'] = $this->em->getRepository(Language::class)->findBy(['langid' => $filtersForForm['language-id'] ?? []]);
+        $filtersForForm['team-id']     = $this->em->getRepository(Team::class)->findBy(['teamid' => $filtersForForm['team-id'] ?? []]);
+        $form = $this->createForm(SubmissionsFilterType::class, array_merge($filtersForForm, [
             "contests" => $contests,
-        ]);
+        ]));
         $data["form"] = $form->createView();
 
         return $this->render('jury/submissions.html.twig', $data, $response);
