@@ -1214,7 +1214,6 @@ class ExternalContestSourceService
                             $this->addOrUpdateWarning($event, ExternalSourceWarning::TYPE_SUBMISSION_ERROR, [
                                 'message' => 'Cannot download ZIP',
                             ]);
-                            dump($zipUrl);
                             exit;
                             unlink($zipFile);
                             return;
@@ -1223,7 +1222,6 @@ class ExternalContestSourceService
                         $this->addOrUpdateWarning($event, ExternalSourceWarning::TYPE_SUBMISSION_ERROR, [
                             'message' => 'Cannot download ZIP: ' . $e->getMessage(),
                         ]);
-                        dump($zipUrl);
                         exit;
                         unlink($zipFile);
                         return;

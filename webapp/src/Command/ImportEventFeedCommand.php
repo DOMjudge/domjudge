@@ -159,18 +159,18 @@ class ImportEventFeedCommand extends Command
 
         $this->style->success('Starting import. Press ^C to quit (might take a bit to be detected).');
 
-        $progessBar = new ProgressBar($output);
-        $progessBar->setFormat('[%bar%] %message%');
-        $progessBar->setMessage('Start reading feed...');
-        $progessBar->start();
+        $progressBar = new ProgressBar($output);
+        $progressBar->setFormat('[%bar%] %message%');
+        $progressBar->setMessage('Start reading feed...');
+        $progressBar->start();
 
-        $progressReporter = function ($readingToLastEventId) use ($progessBar) {
+        $progressReporter = function ($readingToLastEventId) use ($progressBar) {
             if ($readingToLastEventId) {
-                $progessBar->setMessage('Scanning file for start event ' . $this->sourceService->getLastReadEventId());
+                $progressBar->setMessage('Scanning file for start event ' . $this->sourceService->getLastReadEventId());
             } else {
-                $progessBar->setMessage('Read up to event ' . $this->sourceService->getLastReadEventId());
+                $progressBar->setMessage('Read up to event ' . $this->sourceService->getLastReadEventId());
             }
-            $progessBar->advance();
+            $progressBar->advance();
         };
 
         if (!$this->sourceService->import($fromStart, $eventsToSkip, $progressReporter)) {
