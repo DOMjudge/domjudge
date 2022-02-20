@@ -12,6 +12,7 @@ use App\Entity\ContestProblem;
 use App\Entity\Executable;
 use App\Entity\ExecutableFile;
 use App\Entity\ExternalContestSource;
+use App\Entity\ExternalSourceWarning;
 use App\Entity\ImmutableExecutable;
 use App\Entity\InternalError;
 use App\Entity\Judgehost;
@@ -293,6 +294,7 @@ class DOMJudgeService
         $balloons                 = [];
         $shadow_difference_count  = 0;
         $external_contest_sources = [];
+        $external_source_warning_count = [];
 
         if ($this->checkRole('jury')) {
             if ($contest) {
@@ -362,6 +364,14 @@ class DOMJudgeService
                     ->andWhere('ecs.lastPollTime < :i OR ecs.lastPollTime is NULL')
                     ->setParameter('i', time() - $this->config->get('external_contest_source_critical'))
                     ->getQuery()->getResult();
+
+                $external_source_warning_count = $this->em->createQueryBuilder()
+                                                     ->select('COUNT(w.extwarningid)')
+                                                     ->from(ExternalSourceWarning::class, 'w')
+                                                     ->innerJoin('w.externalContestSource', 'ecs')
+                                                     ->andWhere('ecs.enabled = true')
+                                                     ->getQuery()
+                                                     ->getSingleScalarResult();
             }
         }
 
@@ -396,6 +406,7 @@ class DOMJudgeService
             'balloons' => $balloons,
             'shadow_difference_count' => $shadow_difference_count,
             'external_contest_sources' => $external_contest_sources,
+            'external_source_warning_count' => $external_source_warning_count,
         ];
     }
 

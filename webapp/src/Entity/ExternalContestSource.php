@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
@@ -84,6 +86,16 @@ class ExternalContestSource
      * @ORM\JoinColumn(name="cid", referencedColumnName="cid", onDelete="CASCADE")
      */
     private Contest $contest;
+
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\ExternalSourceWarning", mappedBy="externalContestSource")
+     */
+    private Collection $warnings;
+
+    public function __construct()
+    {
+        $this->warnings = new ArrayCollection();
+    }
 
     public function getExtsourceid(): ?int
     {
@@ -181,6 +193,32 @@ class ExternalContestSource
     public function getContest(): Contest
     {
         return $this->contest;
+    }
+
+    /**
+     * @return Collection|ExternalSourceWarning[]
+     */
+    public function getExternalSourceWarnings(): Collection
+    {
+        return $this->warnings;
+    }
+
+    public function addExternalSourceWarning(ExternalSourceWarning $warning): self
+    {
+        if (!$this->warnings->contains($warning)) {
+            $this->warnings[] = $warning;
+        }
+
+        return $this;
+    }
+
+    public function removeExternalSourceWarning(ExternalSourceWarning $warning): self
+    {
+        if ($this->warnings->contains($warning)) {
+            $this->warnings->removeElement($warning);
+        }
+
+        return $this;
     }
 
     public function getShortDescription(): string

@@ -38,6 +38,12 @@
                 </tr>
             {% endif %}
             <tr>
+                <th>Command</th>
+                <td>
+                    <code>{{ webappDir }}/bin/console import:eventfeed {{ externalContestSource.extsourceid }}</code>
+                </td>
+            </tr>
+            <tr>
                 <th>Status</th>
                 <td>
                     {% if not externalContestSource.lastPollTime %}
@@ -70,8 +76,3 @@
         </table>
     </div>
 </div>
-
-<p>
-    {{ button(path('jury_external_contest_source_edit', {'extsourceid': externalContestSource.extsourceid}), 'Edit', 'primary', 'edit') }}
-    {{ button(path('jury_external_contest_source_delete', {'extsourceid': externalContestSource.extsourceid}), 'Delete', 'danger', 'trash-alt', true) }}
-</p>

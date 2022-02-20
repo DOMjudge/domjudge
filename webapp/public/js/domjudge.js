@@ -652,14 +652,23 @@ function updateMenuShadowDifferences(data)
 function updateMenuExternalContestSources(data)
 {
     var numDown = data.external_contest_sources.length;
-    if ( numDown == 0 ) {
+    var numWarnings = data.external_source_warning_count;
+    if ( numDown == 0 && numWarnings == 0 ) {
         $("#num-alerts-externalcontestsources").hide();
         $("#num-alerts-externalcontestsources-sub").html("");
         $("#menu_shadow_differences").removeClass("text-danger");
     } else {
-        $("#num-alerts-externalcontestsources").html(numDown);
+        $("#num-alerts-externalcontestsources").html(numDown + numWarnings);
         $("#num-alerts-externalcontestsources").show();
-        $("#num-alerts-externalcontestsources-sub").html(numDown + " down");
+        var text;
+        if (numDown > 0 && numWarnings > 0) {
+            text = numDown + " down, " + numWarnings + " warnings";
+        } else if (numDown > 0) {
+            text = numDown + " down";
+        }  else {
+            text = numWarnings + " warnings";
+        }
+        $("#num-alerts-externalcontestsources-sub").html(text);
         $("#menu_external_contest_sources").addClass("text-danger");
     }
 }

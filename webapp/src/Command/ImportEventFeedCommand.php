@@ -177,20 +177,6 @@ class ImportEventFeedCommand extends Command
             return static::FAILURE;
         }
 
-        if (!empty($this->sourceService->getPendingEvents())) {
-            $pendingEventsWarning = "Some events could not be processed, because they still have missing dependent events:";
-            foreach ($this->sourceService->getPendingEvents() as $type => $eventData) {
-                foreach ($eventData as $id => $events) {
-                    foreach ($events as $event) {
-                        $pendingEventsWarning .= "\nCould not process $event[type] event $event[id], because it is " .
-                                                 "dependent on missing $type event $id";
-                    }
-                }
-            }
-
-            $this->style->warning($pendingEventsWarning);
-        }
-
         return static::SUCCESS;
     }
 

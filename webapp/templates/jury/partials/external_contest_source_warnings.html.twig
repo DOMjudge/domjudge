@@ -1,0 +1,13 @@
+{% import "jury/jury_macros.twig" as macros %}
+{% if refresh is defined and refresh.ajax is defined and refresh.ajax %}
+    <div class="d-none" data-new-source-info>
+        {% include 'jury/partials/external_contest_source_info.html.twig' %}
+    </div>
+    <div class="d-none" data-new-warning-header>
+        {% include 'jury/partials/external_contest_source_warning_header.html.twig' %}
+    </div>
+{% endif %}
+
+<div class="warnings-table">
+    {{ macros.table(warningTable, warningTableFields, 0, {ordering: 'false', searching: 'false'}) }}
+</div>
