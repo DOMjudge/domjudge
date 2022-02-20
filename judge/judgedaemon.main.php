@@ -150,7 +150,7 @@ function request(string $url, string $verb = 'GET', $data = '', bool $failonerro
             $errstr = "Authentication failed (error $status) while contacting $url. " .
                 "Check credentials in restapi.secret.";
         } else {
-            $json = dj_json_decode($response, true);
+            $json = dj_json_decode($response);
             if ($json !== null) {
                 $response = var_export($json, true);
             }
