@@ -336,7 +336,7 @@ upgrade)
 			(version, executed_at, execution_time)
 			SELECT concat("DoctrineMigrations\\\\Version", version), executed_at, 1
 			FROM migration_versions;' | mysql "$DBNAME"
-		 echo "DROP TABLE \`migration_versions\`" | mysql "$DBNAME"
+		echo "DROP TABLE \`migration_versions\`" | mysql "$DBNAME"
 	fi
 
 	symfony_console doctrine:migrations:migrate -n
