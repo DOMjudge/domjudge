@@ -37,9 +37,6 @@ class ControllerRolesTraversalTest extends BaseTest
             strpos($url, 'http') !== false ||                 //       External links
             strpos($url, '/doc') === 0 ||                     //       Documentation is not setup
             strpos($url, '/api') === 0 ||                     //       API is not functional in framework
-            strpos($url, '/delete') !== false ||              //       Breaks MockData
-            strpos($url, '/add') !== false ||                 // TODO: Should be fixable
-            strpos($url, '/edit') !== false ||
             $url === '/logout' ||                             //       Application links
             $url === '/login' ||
             strpos($url, 'activate') !== false ||
