@@ -10,6 +10,9 @@
     MARIADB_PORT_3306_TCP_ADDR: sqlserver
   script:
     - if [ -z ${PHPVERSION+x} ]; then export PHPVERSION=7.4; fi
+    - if [ "TEST" = "UNIT" ] -a [ "CRAWL_DATASOURCES" != "0" ]; then exit 0; fi
+    - if [ "TEST" = "E2E" ] -a [ "CRAWL_DATASOURCES" != "0" ] -a [ "CI_COMMIT_BRANCH" != "main" ]; then exit 0; fi
+    - export CRAWL_DATASOURCES
     - ./gitlab/unit-tests.sh $PHPVERSION $TEST
   artifacts:
     when: always
