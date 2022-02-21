@@ -57,3 +57,4 @@
     matrix:
       - PHPVERSION: ["7.4","8.0","8.1"]
         TEST: ["E2E","Unit"]
+        CRAWL_DATASOURCES: ["0","1","2"]
