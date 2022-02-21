@@ -13,10 +13,10 @@
     - /bin/true
   before_script:
     - mkdir -p duration
-    - LOG=${CI_JOB_NAME// /_}.txt
+    - LOG=$(echo $CI_JOB_NAME|base64)
     - echo "job_begin" $(date +%s) >> ./duration/$LOG
   after_script:
-    - LOG=${CI_JOB_NAME// /_}.txt
+    - LOG=$(echo $CI_JOB_NAME|base64)
     - echo "job_end" $(date +%s) >> ./duration/$LOG
 
 .tiny_job:
