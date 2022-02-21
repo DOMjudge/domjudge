@@ -127,6 +127,9 @@ class ControllerRolesTraversalTest extends BaseTest
         foreach($tmp as $possUrl) {
             if(!$this->urlExcluded($possUrl, $skip)) {
                 $ret[] = $possUrl;
+                if(strpos($possUrl,'#') === false) {
+                    $ret[] = $possUrl.'#';
+                }
             }
         }
         return $ret;
