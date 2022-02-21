@@ -74,6 +74,7 @@ section_end scrape
 if [ "$TEST" = "w3cval" ]; then
     section_start_collap upstream_problems "Remove files from upstream with problems"
     rm -rf localhost/domjudge/doc
+    rm -rf localhost/domjudge/css/fontawesome-all.min.css*
     rm -rf localhost/domjudge/bundles/nelmioapidoc*
     rm -f localhost/domjudge/css/bootstrap.min.css*
     rm -f localhost/domjudge/css/select2-bootstrap.min.css*
