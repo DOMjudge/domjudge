@@ -43,7 +43,16 @@ else
 fi
 
 # Byte-compile:
-kotlinc -d . "$@"
+# Adding -Djava.io.tmpdir=/ here to avoid the compiler from crashing.
+# As part of the preloader of the kotlin compiler, the value of this property
+# gets copied into the idea.home.path property here:
+# https://github.com/JetBrains/kotlin/blob/8a0969156f86b7d1ae09ce140794ff554109c25f/compiler/cli/src/org/jetbrains/kotlin/cli/jvm/compiler/compat.kt#L23
+# Then in the actual compiler, the value of the property gets checked whether it is a directory:
+# https://github.com/JetBrains/intellij-community/blob/f36a688bd8541b7302246ea4f4b8f76b2223d2d7/platform/util/src/com/intellij/openapi/application/PathManager.java#L88
+# Typically, java.io.tmpdir is a /tmp which doesn't exist in our chroot so the
+# check fails. When passing in / as java.io.tmpdir, kotlinc is happy, although
+# the dir is not writable.
+kotlinc -d . -Djava.io.tmpdir=/ "$@"
 EXITCODE=$?
 [ "$EXITCODE" -ne 0 ] && exit $EXITCODE
 
