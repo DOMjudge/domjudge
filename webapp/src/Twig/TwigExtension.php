@@ -919,10 +919,8 @@ JS;
      */
     public function customAssetFiles(string $type): array
     {
-        if ($type === 'css') {
-            return $this->dj->getAssetFiles('css/custom', 'css');
-        } elseif ($type === 'js') {
-            return $this->dj->getAssetFiles('js/custom', 'js');
+        if (in_array($type, ['css', 'js'])) {
+            return $this->dj->getAssetFiles("$type/custom");
         }
 
         return [];
