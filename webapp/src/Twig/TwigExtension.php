@@ -18,7 +18,6 @@ use App\Service\SubmissionService;
 use App\Utils\Utils;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityManagerInterface;
-use Exception;
 use SebastianBergmann\Diff\Differ;
 use Symfony\Component\Intl\Countries;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
@@ -157,9 +156,6 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         ];
     }
 
-    /**
-     * Print the time difference between two times
-     */
     public function printtimediff(float $start, ?float $end = null): string
     {
         return Utils::printtimediff($start, $end);
@@ -222,17 +218,11 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             '</span>';
     }
 
-    /**
-     * print a yes/no field
-     */
     public static function printYesNo(bool $val): string
     {
         return $val ? 'Yes' : 'No';
     }
 
-    /**
-     * render a button
-     */
     public function button(
         string $url,
         string $text,
@@ -252,9 +242,6 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         }
     }
 
-    /**
-     * Map user/team/judgehost status to a cssclass
-     */
     public static function statusClass(string $status): string
     {
         switch ($status) {
@@ -270,9 +257,6 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         return '';
     }
 
-    /**
-     * Map user/team/judgehost status to an icon
-     */
     public static function statusIcon(string $status): string
     {
         switch ($status) {
@@ -294,33 +278,24 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         return sprintf('<i class="fas fa-%s-circle" aria-hidden="true"></i><span class="sr-only">%s</span>', $icon, $status);
     }
 
-    /**
-     * Expand countrycode to a flag and optionally full country name  representation
-     * @param string|null $countryCode The Alpha3 country code to look up
-     * @param bool $showFullname Also output the country's full name
-     */
-    public function countryFlag(?string $countryCode, bool $showFullname = false): string
+    public function countryFlag(?string $alpha3CountryCode, bool $showFullname = false): string
     {
-        if (empty($countryCode)) return '';
+        if (empty($alpha3CountryCode)) return '';
 
-        $countryAlpha2  = strtolower(Countries::getAlpha2Code($countryCode));
+        $countryAlpha2  = strtolower(Countries::getAlpha2Code($alpha3CountryCode));
         $assetFunction  = $this->twig->getFunction('asset')->getCallable();
         $countryFlagUrl = call_user_func($assetFunction, sprintf('flags/4x3/%s.svg', $countryAlpha2));
 
-        $countryName    = Countries::getAlpha3Name($countryCode);
+        $countryName    = Countries::getAlpha3Name($alpha3CountryCode);
 
         if ($showFullname) {
             return sprintf('<img src="%s" alt="" class="countryflag"> %s',
                $countryFlagUrl, $countryName);
         }
         return sprintf('<img loading="lazy" src="%s" alt="%s" title="%s" class="countryflag">',
-           $countryFlagUrl, $countryCode, $countryName);
+           $countryFlagUrl, $alpha3CountryCode, $countryName);
     }
 
-    /**
-     * Expand affiliation ID to an image
-     * @param string $affiliationId The affiliation ID to get the logo for
-     */
     public function affiliationLogo(string $affiliationId, string $shortName): string
     {
         if ($asset = $this->dj->assetPath($affiliationId, 'affiliation')) {
@@ -333,14 +308,10 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         return '';
     }
 
-    /**
-     * Output the testcase results for the given submissions
-     * @param bool $external If true, show external testcase results
-     */
-    public function testcaseResults(Submission $submission, ?bool $external = false): string
+    public function testcaseResults(Submission $submission, ?bool $showExternal = false): string
     {
         // We use a direct SQL query here for performance reasons
-        if ($external) {
+        if ($showExternal) {
             /** @var ExternalJudgement|null $externalJudgement */
             $externalJudgement   = $submission->getExternalJudgements()->first();
             $externalJudgementId = $externalJudgement ? $externalJudgement->getExtjudgementid() : null;
@@ -405,15 +376,10 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         return $results;
     }
 
-    /**
-     * Display testcase results
-     *
-     * TODO: this function shares a lot with the above one, unify them?
-     *
-     * @param Testcase[] $testcases
-     */
+    // TODO: this function shares a lot with the above one, unify them?
     public function displayTestcaseResults(array $testcases, bool $submissionDone, bool $isExternal = false): string
     {
+        /** @var Testcase[] $testcases */
         $results = '';
         $lastTypeSample = true;
         foreach ($testcases as $testcase) {
@@ -471,9 +437,6 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         return $results;
     }
 
-    /**
-     * Print the given result
-     */
     public function printResult(?string $result, bool $valid = true, bool $jury = false): string
     {
         switch ($result) {
@@ -504,17 +467,11 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         return sprintf('<span class="sol %s">%s</span>', $valid ? $style : 'disabled', $result);
     }
 
-    /**
-     * Print the given result for the jury, assuming it is valid
-     */
     public function printValidJuryResult(?string $result): string
     {
         return $this->printResult($result, true, true);
     }
 
-    /**
-     * Print the given submission for the jury, assuming it is valid
-     */
     public function printValidJurySubmissionResult(Submission $submission, bool $forDisplay = true): string
     {
         /** @var Judging|null $firstJudging */
@@ -554,9 +511,6 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         return $output;
     }
 
-    /**
-     * Return the URL to an external CCS for the given submission if available
-     */
     public function externalCcsUrl(Submission $submission): ?string
     {
         $extCcsUrl = $this->config->get('external_ccs_submission_url');
@@ -649,17 +603,11 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         }
     }
 
-    /**
-     * Get the number of lines in a given string
-     */
     public function lineCount(string $input): int
     {
         return mb_substr_count($input, "\n");
     }
 
-    /**
-     * Parse the run diff for a given difftext
-     */
     public function parseRunDiff(string $difftext): string
     {
         $line = strtok($difftext, "\n"); //first line
@@ -668,7 +616,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         }
         $return = $line . "\n";
 
-        // Add second line 'team ? reference'
+        // Add second line 'team ? reference'.
         $line   = strtok("\n");
         $return .= $line . "\n";
 
@@ -757,9 +705,6 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         return $header . $body . "</table>" . $truncation;
     }
 
-    /**
-     * Output a run diff
-     */
     public function runDiff(array $runOutput): string
     {
         // TODO: can be improved using diffposition.txt
@@ -859,10 +804,6 @@ JS;
                            sprintf($editor, $code, $editable ? 'false' : 'true', $mode, $extraForEdit));
     }
 
-
-    /**
-     * Parse the given source diff
-     */
     protected function parseSourceDiff($difftext): string
     {
         $line   = strtok((string)$difftext, "\n"); // first line
@@ -886,18 +827,12 @@ JS;
         return $return;
     }
 
-    /**
-     * Show a diff between two files
-     */
     public function showDiff(SubmissionFile $newFile, SubmissionFile $oldFile): string
     {
         $differ = new Differ;
         return $this->parseSourceDiff($differ->diff($oldFile->getSourcecode(), $newFile->getSourcecode()));
     }
 
-    /**
-     * Print the start time of the given contest
-     */
     public function printContestStart(Contest $contest): string
     {
         $res = "scheduled to start ";
@@ -908,15 +843,12 @@ JS;
             // Today
             $res .= "at " . $this->printtime($contest->getStarttime());
         } else {
-            // Print full date
+            // Print full date.
             $res .= "on " . $this->printtime($contest->getStarttime(), '%a %d %b %Y %T %Z');
         }
         return $res;
     }
 
-    /**
-     * Get custom assets of the given type
-     */
     public function customAssetFiles(string $type): array
     {
         if ($type === 'css') {
@@ -962,7 +894,7 @@ JS;
     }
 
     /**
-     * Display the scoretime for the given time
+     * Display the scoretime for the given time.
      * @param string|float $time
      */
     public function scoreTime($time): int
@@ -970,9 +902,6 @@ JS;
         return Utils::scoretime($time, (bool)$this->config->get('score_in_seconds'));
     }
 
-    /**
-     * Calculate the penalty time for the given data
-     */
     public function calculatePenaltyTime(bool $solved, int $num_submissions): int
     {
         return Utils::calcPenaltyTime($solved, $num_submissions, (int)$this->config->get('penalty_time'),
@@ -980,7 +909,7 @@ JS;
     }
 
     /**
-     * Print the given description, collapsing it by default if it is too big
+     * Print the given description, collapsing it by default if it is too big.
      */
     public function descriptionExpand(?string $description = null): string
     {
@@ -1007,7 +936,7 @@ EOF;
     }
 
     /**
-     * Whether to show the external ID for the given entity
+     * Whether to show the external ID for the given entity.
      * @param object|string $entity
      */
     public function showExternalId($entity): bool
@@ -1015,17 +944,11 @@ EOF;
         return $this->eventLogService->externalIdFieldForEntity($entity) !== null;
     }
 
-    /**
-     * Wrap unquoted text
-     */
     public function wrapUnquoted(string $text, int $width = 75, string $quote = '>'): string
     {
         return Utils::wrapUnquoted($text, $width, $quote);
     }
 
-    /**
-     * Convert a hex color to RGBA
-     */
     public function hexColorToRGBA(string $text, float $opacity = 1): string
     {
         $col = Utils::convertToHex($text);
@@ -1040,7 +963,7 @@ EOF;
         $m = current($m);
         switch (count($m)) {
             case 4:
-                // We also have opacity; load that
+                // We also have opacity; load that.
                 $opacity = hexdec(array_pop($m));
             case 3:
                 $vals = array_map("hexdec", $m);
@@ -1052,17 +975,11 @@ EOF;
         return $text;
     }
 
-    /**
-     * Convert the given string to a field that is safe to use in a TSV file
-     */
     public function toTsvField(string $field): string
     {
         return Utils::toTsvField($field);
     }
 
-    /**
-     * Determine the icon name for a given file type
-     */
     public function fileTypeIcon(string $type): string
     {
         switch ($type) {
@@ -1085,14 +1002,14 @@ EOF;
         $rgb = Utils::convertToHex($problem->getColor() ?? '#ffffff');
         $background = Utils::parseHexColor($rgb);
 
-        // Pick a border that's a bit darker
+        // Pick a border that's a bit darker.
         $darker = $background;
         $darker[0] = max($darker[0] - 64, 0);
         $darker[1] = max($darker[1] - 64, 0);
         $darker[2] = max($darker[2] - 64, 0);
         $border = Utils::rgbToHex($darker);
 
-        // Pick the foreground text color based on the background color
+        // Pick the foreground text color based on the background color.
         $foreground = ($background[0] + $background[1] + $background[2] > 450) ? '#000000' : '#ffffff';
         return sprintf(
             '<span class="badge problem-badge" style="background-color: %s; min-width: 28px; border: 1px solid %s"><span style="color: %s;">%s</span></span>',
