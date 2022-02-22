@@ -51,7 +51,6 @@ EOF
 # install all php dependencies
 export APP_ENV="prod"
 composer install --no-scripts
-composer run-script package-versions-dump
 echo -e "\033[0m"
 
 # configure, make and install (but skip documentation)

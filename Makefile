@@ -48,7 +48,7 @@ domserver judgehost docs: paths.mk config
 install-domserver: domserver domserver-create-dirs
 install-judgehost: judgehost judgehost-create-dirs
 install-docs: docs-create-dirs
-dist: configure composer-dependencies composer-package-versions
+dist: configure composer-dependencies
 
 # Install PHP dependencies
 composer-dependencies:
@@ -61,10 +61,6 @@ endif
 
 composer-dependencies-dev:
 	composer $(subst 1,-q,$(QUIET)) install --prefer-dist --no-scripts
-
-# Write composer version information, needed for Doctrine migrations
-composer-package-versions:
-	composer $(subst 1,-q,$(QUIET)) run-script package-versions-dump
 
 # Generate documentation for distribution. Remove this dependency from
 # dist above for quicker building from git sources.

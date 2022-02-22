@@ -17,7 +17,6 @@ php -r "if (hash_file('SHA384', 'composer-setup.php') === '$HASH') { echo 'Insta
 sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer
 
 composer install --no-scripts
-composer run-script package-versions-dump
 
 sudo sed -i "s/\$operation->operationId =/#\$operation->operationId =/g" lib/vendor/nelmio/api-doc-bundle/OpenApiPhp/DefaultOperationId.php
 
