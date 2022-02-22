@@ -130,7 +130,7 @@ class Testcase
      * @ORM\JoinColumn(name="probid", referencedColumnName="probid", onDelete="CASCADE")
      * @Serializer\Exclude()
      */
-    private Problem $problem;
+    private ?Problem $problem;
 
     public function __construct()
     {
@@ -301,7 +301,7 @@ class Testcase
         return $this;
     }
 
-    public function getProblem(): Problem
+    public function getProblem(): ?Problem
     {
         return $this->problem;
     }
