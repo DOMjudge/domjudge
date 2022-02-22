@@ -80,99 +80,112 @@
                                             {% endif %}
                                         {% elseif option.type == 'array_keyval' %}
                                             <br/>
-                                            {% set counter = 0 %}
-                                            {% for key,val in option.value %}
-                                                {% if option.key_options is not null %}
-                                                    <select class="form-control form-control-sm custom-select custom-select-sm"
-                                                            style="width:10em;text-align:right;display:inline-block;"
-                                                            name="config_{{ option.name }}[{{ counter }}][key]">
-                                                        {% for value, label in option.key_options %}
-                                                            <option {% if key == value %}selected{% endif %} value="{{ value }}">{{ label }}</option>
-                                                        {% endfor %}
-                                                    </select>
-                                                {% else %}
-                                                    <input class="form-control form-control-sm"
-                                                           style="width:10em;text-align:right;display:inline-block;" type="text"
-                                                           value="{{ key }}"
-                                                           name="config_{{ option.name }}[{{ counter }}][key]"
-                                                           id="config_{{ option.name }}_{{ counter }}__key_">
-                                                {% endif %}
-                                                {% if option.value_options is not null %}
-                                                    <select class="form-control form-control-sm custom-select custom-select-sm"
-                                                            style="width:30em;display:inline-block;"
-                                                            name="config_{{ option.name }}[{{ counter }}][val]">
-                                                        {% for value, label in option.value_options %}
-                                                            <option {% if val == value %}selected{% endif %} value="{{ value }}">{{ label }}</option>
-                                                        {% endfor %}
-                                                    </select>
-                                                {% else %}
-                                                    <input class="form-control form-control-sm"
-                                                           style="width:30em;display:inline-block;" type="text"
-                                                           value="{{ val }}"
-                                                           name="config_{{ option.name }}[{{ counter }}][val]"
-                                                           id="config_{{ option.name }}_{{ counter }}__val">
-                                                    {% endif %}
-                                                <br/>
-                                                {% set counter = counter + 1 %}
-                                            {% endfor %}
-                                            {% if option.key_options is not null %}
-                                                <select class="form-control form-control-sm custom-select custom-select-sm"
-                                                        style="width:10em;text-align:right;display:inline-block;"
-                                                        name="config_{{ option.name }}[{{ counter }}][key]">
-                                                    {% for value, label in option.key_options %}
-                                                        <option value="{{ value }}">{{ label }}</option>
-                                                    {% endfor %}
-                                                </select>
-                                            {% else %}
-                                                <input class="form-control form-control-sm"
-                                                       style="width:10em;text-align:right;display:inline-block;" type="text"
-                                                       name="config_{{ option.name }}[{{ counter }}][key]"
-                                                       id="config_{{ option.name }}_{{ counter }}__key_">
-                                            {% endif %}
-                                            {% if option.value_options is not null %}
-                                                <select class="form-control form-control-sm custom-select custom-select-sm"
-                                                        style="width:30em;display:inline-block;"
-                                                        name="config_{{ option.name }}[{{ counter }}][val]">
-                                                    {% for value, label in option.value_options %}
-                                                        <option value="{{ value }}">{{ label }}</option>
-                                                    {% endfor %}
-                                                </select>
-                                            {% else %}
-                                                <input class="form-control form-control-sm"
-                                                       style="width:30em;display:inline-block;" type="text"
-                                                       name="config_{{ option.name }}[{{ counter }}][val]"
-                                                       id="config_{{ option.name }}_{{ counter }}__val">
-                                                {% endif %}
+                                            <div data-collection>
+                                                {% set counter = 0 %}
+                                                {% for key,val in option.value %}
+                                                    <div data-collection-item class="mb-2">
+                                                        {% if option.key_options is not null %}
+                                                            <select class="form-control form-control-sm custom-select custom-select-sm"
+                                                                    style="width:10em;text-align:right;display:inline-block;"
+                                                                    name="config_{{ option.name }}[{{ counter }}][key]">
+                                                                {% for value, label in option.key_options %}
+                                                                    <option {% if key == value %}selected{% endif %} value="{{ value }}">{{ label }}</option>
+                                                                {% endfor %}
+                                                            </select>
+                                                        {% else %}
+                                                            <input class="form-control form-control-sm"
+                                                                   style="width:10em;text-align:right;display:inline-block;" type="text"
+                                                                   value="{{ key }}"
+                                                                   name="config_{{ option.name }}[{{ counter }}][key]"
+                                                                   id="config_{{ option.name }}_{{ counter }}__key_">
+                                                        {% endif %}
+                                                        {% if option.value_options is not null %}
+                                                            <select class="form-control form-control-sm custom-select custom-select-sm"
+                                                                    style="width:30em;display:inline-block;"
+                                                                    name="config_{{ option.name }}[{{ counter }}][val]">
+                                                                {% for value, label in option.value_options %}
+                                                                    <option {% if val == value %}selected{% endif %} value="{{ value }}">{{ label }}</option>
+                                                                {% endfor %}
+                                                            </select>
+                                                        {% else %}
+                                                            <input class="form-control form-control-sm"
+                                                                   style="width:30em;display:inline-block;" type="text"
+                                                                   value="{{ val }}"
+                                                                   name="config_{{ option.name }}[{{ counter }}][val]"
+                                                                   id="config_{{ option.name }}_{{ counter }}__val">
+                                                            {% endif %}
+                                                        {% set counter = counter + 1 %}
+                                                    </div>
+                                                {% endfor %}
+                                                <script type="text/template" data-index="{{ counter }}">
+                                                    <div data-collection-item class="mb-2">
+                                                        {% if option.key_options is not null %}
+                                                            <select class="form-control form-control-sm custom-select custom-select-sm"
+                                                                    style="width:10em;text-align:right;display:inline-block;"
+                                                                    name="config_{{ option.name }}[__idx__][key]">
+                                                                {% for value, label in option.key_options %}
+                                                                    <option value="{{ value }}">{{ label }}</option>
+                                                                {% endfor %}
+                                                            </select>
+                                                        {% else %}
+                                                            <input class="form-control form-control-sm"
+                                                                   style="width:10em;text-align:right;display:inline-block;" type="text"
+                                                                   name="config_{{ option.name }}[__idx__][key]"
+                                                                   id="config_{{ option.name }}___idx____key_">
+                                                        {% endif %}
+                                                        {% if option.value_options is not null %}
+                                                            <select class="form-control form-control-sm custom-select custom-select-sm"
+                                                                    style="width:30em;display:inline-block;"
+                                                                    name="config_{{ option.name }}[__idx__][val]">
+                                                                {% for value, label in option.value_options %}
+                                                                    <option value="{{ value }}">{{ label }}</option>
+                                                                {% endfor %}
+                                                            </select>
+                                                        {% else %}
+                                                            <input class="form-control form-control-sm"
+                                                                   style="width:30em;display:inline-block;" type="text"
+                                                                   name="config_{{ option.name }}[__idx__][val]"
+                                                                   id="config_{{ option.name }}___idx____val">
+                                                        {% endif %}
+                                                    </div>
+                                                </script>
+                                            </div>
                                             <br/>
                                         {% elseif option.type == 'array_val' %}
                                             <br/>
-                                            {% if option.options is not null %}
-                                                <select class="form-control form-control-sm custom-select custom-select-sm"
-                                                        style="width:30em;display:inline-block;"
-                                                        multiple
-                                                        name="config_{{ option.name }}[]"
-                                                        id="config_{{ option.name }}">
-                                                    {% for value in option.options %}
-                                                        <option {% if value in option.value %}selected{% endif %} value="{{ value }}">{{ value }}</option>
-                                                    {% endfor %}
-                                                </select>
-                                            {% else %}
-                                                {% set counter = 0 %}
-                                                {% for val in option.value %}
-                                                    <input class="form-control form-control-sm"
-                                                           style="width:30em;display:inline-block;" type="text"
-                                                           value="{{ val }}"
-                                                           name="config_{{ option.name }}[{{ counter }}]"
-                                                           id="config_{{ option.name }}_{{ counter }}_">
-                                                    <br/>
-                                                    {% set counter = counter + 1 %}
-                                                {% endfor %}
-                                                <input class="form-control form-control-sm"
-                                                       style="width:30em;display:inline-block;" type="text"
-                                                       name="config_{{ option.name }}[{{ counter }}]"
-                                                       id="config_{{ option.name }}_{{ counter }}_">
-                                                <br/>
-                                            {% endif %}
+                                                {% if option.options is not null %}
+                                                    <select class="form-control form-control-sm custom-select custom-select-sm"
+                                                            style="width:30em;display:inline-block;"
+                                                            multiple
+                                                            name="config_{{ option.name }}[]"
+                                                            id="config_{{ option.name }}">
+                                                        {% for value in option.options %}
+                                                            <option {% if value in option.value %}selected{% endif %} value="{{ value }}">{{ value }}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                {% else %}
+                                                    <div data-collection>
+                                                        {% set counter = 0 %}
+                                                        {% for val in option.value %}
+                                                            <div data-collection-item class="mb-2">
+                                                                <input class="form-control form-control-sm"
+                                                                       style="width:30em;display:inline-block;" type="text"
+                                                                       value="{{ val }}"
+                                                                       name="config_{{ option.name }}[{{ counter }}]"
+                                                                       id="config_{{ option.name }}_{{ counter }}_">
+                                                            </div>
+                                                            {% set counter = counter + 1 %}
+                                                        {% endfor %}
+                                                        <script type="text/template" data-index="{{ counter }}">
+                                                            <div data-collection-item class="mb-2">
+                                                                <input class="form-control form-control-sm"
+                                                                       style="width:30em;display:inline-block;" type="text"
+                                                                       name="config_{{ option.name }}[__idx__]"
+                                                                       id="config_{{ option.name }}___idx___">
+                                                            </div>
+                                                        </script>
+                                                    </div>
+                                                {% endif %}
                                         {% endif %}
                                         <small class="text-muted">{{ option.description }}</small>
                                     </div>
@@ -186,4 +199,50 @@
         </div>
         <input class="btn btn-primary" type="submit" value="Save all changes" id="save" name="save">
     </form>
+{% endblock %}
+
+{% block extrafooter %}
+    <script>
+        $(function () {
+            function addDeleteLink($collectionItem) {
+                var $removeFormButton = $('<button type="button" class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>');
+                $collectionItem.append($removeFormButton);
+
+                $removeFormButton.on('click', function(e) {
+                    $collectionItem.remove();
+                });
+            }
+
+            function addCollectionItem($collection, $addButton) {
+                var $template = $('script[type="text/template"]', $collection);
+                var template = $template.text();
+                var index = $template.data('index');
+                var newRow = template;
+                newRow = newRow.replace(/__idx__/g, index);
+                $template.data('index', index + 1);
+                var $newRow = $(newRow);
+                $addButton.before($newRow);
+                addDeleteLink($newRow);
+            }
+
+            function addAddLink($collection) {
+                var $addButton = $('<button type="button" class="btn btn-sm btn-secondary"><i class="fas fa-plus"></i></button>');
+                $collection.append($addButton);
+
+                $addButton.on('click', function (e) {
+                    addCollectionItem($collection, $addButton);
+                });
+            }
+
+            $('[data-collection]').each(function() {
+                var $collection = $(this);
+
+                addAddLink($collection);
+
+                $('[data-collection-item]', $collection).each(function() {
+                    addDeleteLink($(this));
+                })
+            })
+        });
+    </script>
 {% endblock %}
