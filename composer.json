@@ -151,8 +151,7 @@
 		],
 		"post-update-cmd": [
 			"@auto-scripts"
-		],
-		"package-versions-dump": "PackageVersions\\Installer::dumpVersionsClass"
+		]
 	},
 	"conflict": {
 		"symfony/symfony": "*"
