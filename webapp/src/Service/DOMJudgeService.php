@@ -287,13 +287,13 @@ class DOMJudgeService
     {
         $contest = $this->getCurrentContest();
 
-        $clarifications           = [];
-        $judgehosts               = [];
-        $rejudgings               = [];
-        $internal_errors          = [];
-        $balloons                 = [];
-        $shadow_difference_count  = 0;
-        $external_contest_sources = [];
+        $clarifications                = [];
+        $judgehosts                    = [];
+        $rejudgings                    = [];
+        $internal_errors               = [];
+        $balloons                      = [];
+        $shadow_difference_count       = 0;
+        $external_contest_sources      = [];
         $external_source_warning_count = [];
 
         if ($this->checkRole('jury')) {
