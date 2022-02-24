@@ -839,12 +839,12 @@ JS;
         if (!$contest->getStarttimeEnabled()) {
             $res = "start delayed, was scheduled ";
         }
-        if ($this->printtime(Utils::now(), '%Y%m%d') == $this->printtime($contest->getStarttime(), '%Y%m%d')) {
+        if ($this->printtime(Utils::now(), 'Ymd') == $this->printtime($contest->getStarttime(), 'Ymd')) {
             // Today
             $res .= "at " . $this->printtime($contest->getStarttime());
         } else {
-            // Print full date.
-            $res .= "on " . $this->printtime($contest->getStarttime(), '%a %d %b %Y %T %Z');
+            // Print full date
+            $res .= "on " . $this->printtime($contest->getStarttime(), 'D d M Y H:i:s T');
         }
         return $res;
     }
