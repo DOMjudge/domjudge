@@ -24,7 +24,8 @@ that it will be a shadow for an external system. This will:
 
 * Expose external ID's in the API for both configuration and live data, i.e.
   problems, teams, etc. as well as submissions, judgings and runs.
-* Add a *Shadow Differences* item to the jury menu and homepage for admins.
+* Add a *Shadow Differences* and *External Contest Sources* item to the jury
+  menu and homepage for admins.
 * Expose additional information in the submission overview and detail pages.
 
 You can also set the *external_ccs_submission_url* to a URL template. If you set
@@ -35,46 +36,30 @@ use DOMjudge as system to shadow from, you should enter
 Importing or creating the contest and problems
 ----------------------------------------------
 
-The contest needs to exist in DOMjudge *and* have all problems loaded. It is
-best to not have any other data for the contest like teams, team categories,
-team affiliations, submissions and clarifications. The easiest way to create the
-contest is to import it. For this you need a ``contest.yaml`` and a
-``problemset.yaml`` as described in the `CCS requirements specification`_.
-Furthermore you need problem directories as described on the
-:doc:`problem format <problem-format>` page. Place the two YAML files and all
-directories together in one directory and use the
-``misc-tools/import-contest.sh`` script to import them. Do not try to import
-groups, teams or accounts using it, but do import all other things. Note that
-it will complain that no team is associated with your account so it can't import
-jury submissions. That is fine since these submissions will be read using the
-event feed later on.
+The contest needs to exist in DOMjudge *and* have all problems loaded. All other
+configuration data, like teams, team categories and team affiliations should also
+exist. The easiest way to create the contest and configuration data is to import
+it. For this you need JSON files as described in the :doc:`Import <import>` chapter.
+Furthermore you need problem directories as described on that same page. Place
+all the files and all directories together in one directory and use the
+``misc-tools/import-contest.sh`` script to import them. Note that, if you have no
+team linked to your account, it will complain that it can't import jury
+submissions because you have no team linked to your account. That is fine since
+these submissions will be read using the event feed later on.
 
-Creating the shadowing config file
-----------------------------------
+Configuration the external contest source
+-----------------------------------------
 
-On the DOMserver, copy the file ``etc/shadowing.yaml.dist`` to
-``etc/shadowing.yaml`` and modify its contents. The ``.dist`` file contains
-comments as to what each field in the file means, but to summarize:
-
-- As the key pick a recognizable identifier, for example the ID of the contest
-  in the external system.
-- Set ``id`` to the (database) ID of the contest in DOMjudge that you created.
-- Set the ``feed-url``, ``username`` and ``password`` fields to the correct data
-  as provided by the primary system you will be shadowing.
-- Check if you need any of the other options like ``allow-insecure-ssl``. All
-  other options should only be used if you know what you are doing.
+In the DOMjudge admin interface, go to the *External Contest Sources* page and
+create an external contest source. Select the contest to import into and enter
+the source you want to import from.
 
 Running the event feed import command
 -------------------------------------
 
 After doing all above steps, you can run the event feed import command to start
-importing events from the primary system. From the DOMserver installation
-directory, run::
-
-  import/import-event-feed key-from-yaml
-
-Where ``key-from-yaml`` is the key you configured in the previous step. The
-command will start running and import events.
+importing events from the primary system. The external contest source detail
+page will show you the exact command to run.
 
 If the command loses its connection to the primary system it will automatically
 reconnect and continue reading where it left off. To stop the command, press
@@ -82,12 +67,22 @@ reconnect and continue reading where it left off. To stop the command, press
 
 If you ever want to restart reading the feed from the beginning (for example
 when the primary system had an error and fixed that), you can pass
-``--from-start`` to the command to start reading from the beginning. Note that
-the way DOMjudge keeps track of the events that it already processed is by
-keeping a copy of the event feed in ``TMPDIR`` as defined in
-``/etc/domserver-static.php``. This feed is named after the key you configured
-in the YAML file, so if you ever reuse the key, make sure to remove the cached
-file or pass ``--from-start``.
+``--from-start`` to the command to start reading from the beginning.
+
+Viewing import warnings
+-----------------------
+
+During import a lot can happen. For example, an external system can send an event
+that contains an unknown dependency, it can send an event we can't process or we
+might not be able to download a submission ZIP.
+
+The external contest source detail page will show a list of all warnings that
+occurred during import. If an event that is imported later fixes a warning, the
+warning will automatically disappear.
+
+The detail page also shows when the feed reader last checked in, what the last event
+was that it processed and when it processed that event. This might be useful information
+to keep track of while shadowing.
 
 Viewing shadow differences
 --------------------------
@@ -104,6 +99,11 @@ Clicking any of the red cells will show detailed information about the
 differences that correspond to it. You can also use the dropdowns in the
 *Details* section. Clicking on a submission will bring you to the submission
 detail page.
+
+For submissions with a difference between the primary and shadow system,
+you can mark a difference as verified on this page. This will make it not show
+up when only showing *Verified* submissions. The menu badge will also not take
+them into account.
 
 The submission details page shows more information related to the shadow
 differences:

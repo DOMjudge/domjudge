@@ -11,6 +11,8 @@ use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\Executable;
 use App\Entity\ExecutableFile;
+use App\Entity\ExternalContestSource;
+use App\Entity\ExternalSourceWarning;
 use App\Entity\ImmutableExecutable;
 use App\Entity\InternalError;
 use App\Entity\Judgehost;
@@ -32,7 +34,6 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query\Expr\Join;
-use Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Cookie;
@@ -286,11 +287,14 @@ class DOMJudgeService
     {
         $contest = $this->getCurrentContest();
 
-        $clarifications  = [];
-        $judgehosts      = [];
-        $rejudgings      = [];
-        $internal_errors = [];
-        $balloons        = [];
+        $clarifications                = [];
+        $judgehosts                    = [];
+        $rejudgings                    = [];
+        $internal_errors               = [];
+        $balloons                      = [];
+        $shadow_difference_count       = 0;
+        $external_contest_sources      = [];
+        $external_source_warning_count = [];
 
         if ($this->checkRole('jury')) {
             if ($contest) {
@@ -334,6 +338,41 @@ class DOMJudgeService
                 ->andWhere('ie.status = :status')
                 ->setParameter('status', 'open')
                 ->getQuery()->getResult();
+
+            if ($this->config->get('data_source') === DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL) {
+                if ($contest) {
+                    $shadow_difference_count = $this->em->createQueryBuilder()
+                        ->from(Submission::class, 's')
+                        ->innerJoin('s.external_judgements', 'ej', Join::WITH, 'ej.valid = 1')
+                        ->innerJoin('s.judgings', 'j', Join::WITH, 'j.valid = 1')
+                        ->select('COUNT(s.submitid)')
+                        ->andWhere('s.contest = :contest')
+                        ->andWhere('s.externalid IS NOT NULL')
+                        ->andWhere('ej.result IS NOT NULL')
+                        ->andWhere('j.result IS NOT NULL')
+                        ->andWhere('ej.result != j.result')
+                        ->andWhere('ej.verified = false')
+                        ->setParameter('contest', $contest)
+                        ->getQuery()
+                        ->getSingleScalarResult();
+                }
+
+                $external_contest_sources = $this->em->createQueryBuilder()
+                    ->select('ecs.extsourceid', 'ecs.lastPollTime')
+                    ->from(ExternalContestSource::class, 'ecs')
+                    ->andWhere('ecs.enabled = true')
+                    ->andWhere('ecs.lastPollTime < :i OR ecs.lastPollTime is NULL')
+                    ->setParameter('i', time() - $this->config->get('external_contest_source_critical'))
+                    ->getQuery()->getResult();
+
+                $external_source_warning_count = $this->em->createQueryBuilder()
+                                                     ->select('COUNT(w.extwarningid)')
+                                                     ->from(ExternalSourceWarning::class, 'w')
+                                                     ->innerJoin('w.externalContestSource', 'ecs')
+                                                     ->andWhere('ecs.enabled = true')
+                                                     ->getQuery()
+                                                     ->getSingleScalarResult();
+            }
         }
 
         if ($this->checkrole('balloon')) {
@@ -364,7 +403,10 @@ class DOMJudgeService
             'judgehosts' => $judgehosts,
             'rejudgings' => $rejudgings,
             'internal_errors' => $internal_errors,
-            'balloons' => $balloons
+            'balloons' => $balloons,
+            'shadow_difference_count' => $shadow_difference_count,
+            'external_contest_sources' => $external_contest_sources,
+            'external_source_warning_count' => $external_source_warning_count,
         ];
     }
 

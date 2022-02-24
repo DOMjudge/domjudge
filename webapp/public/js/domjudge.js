@@ -530,6 +530,12 @@ function updateMenuAlerts()
             updateMenuJudgehosts(json.judgehosts);
             updateMenuInternalErrors(json.internal_errors);
             updateMenuBalloons(json.balloons);
+            if (json.shadow_difference_count !== undefined) {
+                updateMenuShadowDifferences(json.shadow_difference_count);
+            }
+            if (json.external_contest_sources !== undefined) {
+                updateMenuExternalContestSources(json);
+            }
         }
     });
 }
@@ -625,6 +631,45 @@ function updateMenuBalloons(data)
                         'link': domjudge_base_url + '/jury/balloons',
                         'body': text});
         }
+    }
+}
+
+function updateMenuShadowDifferences(data)
+{
+    var num = data;
+    if ( num == 0 ) {
+        $("#num-alerts-shadowdifferences").hide();
+        $("#num-alerts-shadowdifferences-sub").html("");
+        $("#menu_shadow_differences").removeClass("text-danger");
+    } else {
+        $("#num-alerts-shadowdifferences").html(num);
+        $("#num-alerts-shadowdifferences").show();
+        $("#num-alerts-shadowdifferences-sub").html(num + " differences");
+        $("#menu_shadow_differences").addClass("text-danger");
+    }
+}
+
+function updateMenuExternalContestSources(data)
+{
+    var numDown = data.external_contest_sources.length;
+    var numWarnings = data.external_source_warning_count;
+    if ( numDown == 0 && numWarnings == 0 ) {
+        $("#num-alerts-externalcontestsources").hide();
+        $("#num-alerts-externalcontestsources-sub").html("");
+        $("#menu_shadow_differences").removeClass("text-danger");
+    } else {
+        $("#num-alerts-externalcontestsources").html(numDown + numWarnings);
+        $("#num-alerts-externalcontestsources").show();
+        var text;
+        if (numDown > 0 && numWarnings > 0) {
+            text = numDown + " down, " + numWarnings + " warnings";
+        } else if (numDown > 0) {
+            text = numDown + " down";
+        }  else {
+            text = numWarnings + " warnings";
+        }
+        $("#num-alerts-externalcontestsources-sub").html(text);
+        $("#menu_external_contest_sources").addClass("text-danger");
     }
 }
 

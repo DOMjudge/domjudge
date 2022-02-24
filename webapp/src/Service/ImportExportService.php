@@ -18,8 +18,6 @@ use Collator;
 use DateTime;
 use DateTimeZone;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Id\AssignedGenerator;
-use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\NonUniqueResultException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -885,7 +883,7 @@ class ImportExportService
             if (empty($teamItem['team']['teamid'])) {
                 $team = null;
             } else {
-                $field = $this->eventLogService->externalIdFieldForEntity(Team::class);
+                $field = $this->eventLogService->externalIdFieldForEntity(Team::class) ?? 'teamid';
                 $team = $this->em->getRepository(Team::class)->findOneBy([$field => $teamItem['team']['teamid']]);
             }
             if (!$team) {
@@ -974,7 +972,7 @@ class ImportExportService
                 case 'judge':
                     $roles[]  = $juryRole;
                     $roles[]  = $teamRole;
-                    $juryTeam = ['name' => $line[1], 'category' => $juryCategory, 'members' => $line[1]];
+                    $juryTeam = ['name' => $line[1], 'externalid' => $line[2], 'category' => $juryCategory, 'members' => $line[1]];
                     break;
                 case 'team':
                     $roles[] = $teamRole;
@@ -992,7 +990,8 @@ class ImportExportService
                                            $line[2]);
                         return -1;
                     }
-                    $team = $this->em->getRepository(Team::class)->find($teamId);
+                    $field = $this->eventLogService->externalIdFieldForEntity(Team::class) ?? 'teamid';
+                    $team  = $this->em->getRepository(Team::class)->findOneBy([$field => $teamId]);
                     if ($team === null) {
                         $message = sprintf('unknown team id %s on line %d', $teamId, $l);
                         return -1;
@@ -1035,6 +1034,7 @@ class ImportExportService
                     $team
                         ->setName($accountItem['team']['name'])
                         ->setCategory($accountItem['team']['category'])
+                        ->setExternalid($accountItem['team']['externalid'])
                         ->setMembers($accountItem['team']['members'] ?? null);
                     $this->em->persist($team);
                     $action = EventLogService::ACTION_CREATE;

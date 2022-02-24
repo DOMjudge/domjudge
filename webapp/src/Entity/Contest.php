@@ -368,16 +368,25 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
      */
     private Collection $removedIntervals;
 
+    /**
+     * @var ArrayCollection
+     * @ORM\OneToMany(targetEntity="App\Entity\ExternalContestSource", mappedBy="contest")
+     * @Serializer\Exclude()
+     * @Assert\Valid()
+     */
+    private Collection $externalContestSources;
+
     public function __construct()
     {
-        $this->problems         = new ArrayCollection();
-        $this->teams            = new ArrayCollection();
-        $this->removedIntervals = new ArrayCollection();
-        $this->clarifications   = new ArrayCollection();
-        $this->submissions      = new ArrayCollection();
-        $this->internal_errors  = new ArrayCollection();
-        $this->team_categories  = new ArrayCollection();
-        $this->medal_categories = new ArrayCollection();
+        $this->problems               = new ArrayCollection();
+        $this->teams                  = new ArrayCollection();
+        $this->removedIntervals       = new ArrayCollection();
+        $this->clarifications         = new ArrayCollection();
+        $this->submissions            = new ArrayCollection();
+        $this->internal_errors        = new ArrayCollection();
+        $this->team_categories        = new ArrayCollection();
+        $this->medal_categories       = new ArrayCollection();
+        $this->externalContestSources = new ArrayCollection();
     }
 
     public function getCid(): ?int
@@ -1243,6 +1252,32 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     {
         if ($this->team_categories->contains($teamCategory)) {
             $this->team_categories->removeElement($teamCategory);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|ExternalContestSource[]
+     */
+    public function getExternalContestSources(): Collection
+    {
+        return $this->externalContestSources;
+    }
+
+    public function addExternalContestSource(ExternalContestSource $externalContestSource): self
+    {
+        if (!$this->externalContestSources->contains($externalContestSource)) {
+            $this->externalContestSources[] = $externalContestSource;
+        }
+
+        return $this;
+    }
+
+    public function removeExternalContestSource(ExternalContestSource $externalContestSource): self
+    {
+        if ($this->externalContestSources->contains($externalContestSource)) {
+            $this->externalContestSources->removeElement($externalContestSource);
         }
 
         return $this;

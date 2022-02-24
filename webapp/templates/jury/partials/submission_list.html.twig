@@ -251,12 +251,14 @@
                 </tr>
                 <tr>
                     <td colspan="3" class="inline-verify-form">
-                        {% include 'jury/partials/verify_form.html.twig' with {
-                            label: 'Shadow difference verified',
-                            judging: externalJudgement,
-                            form_action: path('jury_shadow_difference_verify', {extjudgementid: externalJudgement.extjudgementid}),
-                            show_form: true,
-                            show_icat: false} %}
+                        {% if externalJudgement is not null %}
+                            {% include 'jury/partials/verify_form.html.twig' with {
+                                label: 'Shadow difference verified',
+                                judging: externalJudgement,
+                                form_action: path('jury_shadow_difference_verify', {extjudgementid: externalJudgement.extjudgementid}),
+                                show_form: true,
+                                show_icat: false} %}
+                        {% endif %}
                     </td>
                 </tr>
             {% endif %}

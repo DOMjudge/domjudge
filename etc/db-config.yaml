@@ -303,3 +303,8 @@
             public: false
             description: URL of an ICPC iCAT instance if such is available; will be linked to from the submission verification box.
             docdescription: See https://github.com/icpc-live/autoanalyst
+        -   name: external_contest_source_critical
+            type: int
+            default_value: 120
+            public: false
+            description: Time in seconds after an external contest source reader last checked in before showing its status as "critical".

@@ -46,7 +46,7 @@ class ScoreCache
      * @var double|string
      * @ORM\Column(type="decimal", precision=32, scale=9, name="solvetime_restricted",
      *     options={"comment"="Seconds into contest when problem solved (restricted audience)",
-     *              "default"="0"},
+     *              "default"=0},
      *     nullable=false)
      */
     private $solvetime_restricted = 0;

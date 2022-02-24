@@ -1,0 +1,131 @@
+{% extends "jury/base.html.twig" %}
+{% import "jury/jury_macros.twig" as macros %}
+
+{% block title %}External contest source {{ externalContestSource.extsourceid }} - {{ parent() }}{% endblock %}
+
+{% block extrahead %}
+    {{ parent() }}
+    {{ macros.table_extrahead() }}
+    {{ macros.select2_extrahead() }}
+    <style>
+        .table-wrapper {
+            display: block;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+
+    <h1>External contest source {{ externalContestSource.extsourceid }}</h1>
+
+    <div data-source-info>
+        {% include 'jury/partials/external_contest_source_info.html.twig' %}
+    </div>
+
+    <p>
+        {{ button(path('jury_external_contest_source_edit', {'extsourceid': externalContestSource.extsourceid}), 'Edit', 'primary', 'edit') }}
+        {{ button(path('jury_external_contest_source_delete', {'extsourceid': externalContestSource.extsourceid}), 'Delete', 'danger', 'trash-alt', true) }}
+    </p>
+
+    <div data-warning-header>
+        {% include 'jury/partials/external_contest_source_warning_header.html.twig' %}
+    </div>
+
+    <div class="mb-3">
+        <div class="btn-group-toggle" data-toggle="buttons">
+            <label class="btn btn-outline-secondary {% if hasFilters %}active{% endif %}">
+                <input type="checkbox" id="filter-toggle" {% if hasFilters %}checked{% endif %} autocomplete="off">
+                <i class="fas fa-filter"></i> Filter
+            </label>
+        </div>
+        <div class="card mt-3{% if not hasFilters %} d-none{% endif %}" id="filter-card">
+            <div class="card-body col-sm-6">
+                {{ form(form) }}
+            </div>
+        </div>
+    </div>
+
+    <div data-ajax-refresh-target data-ajax-refresh-after="updateData">
+        {% include 'jury/partials/external_contest_source_warnings.html.twig' %}
+    </div>
+
+{% endblock %}
+
+{% block extrafooter %}
+    <script>
+        $(function () {
+            $('#filter-toggle').on('change', function () {
+                if ($(this).is(':checked')) {
+                    $('#filter-card').removeClass('d-none');
+                } else {
+                    $('#filter-card').addClass('d-none');
+                }
+            });
+
+            $('#external_source_warnings_filter_clear').on('click', function () {
+                $('select[data-filter-field]').val([]).trigger('change');
+            });
+
+            window.process_warnings_filter = function () {
+                var $trs = $('div.warnings-table table.data-table > tbody > tr');
+
+                var filters = [];
+
+                $('select[data-filter-field]').each(function () {
+                    var $filterField = $(this);
+                    if ($filterField.val().length) {
+                        filters.push({
+                            field: $filterField.data('filter-field'),
+                            values: $filterField.val()
+                        });
+                    }
+                });
+
+                var warnings_filter = {};
+                for (var i = 0; i < filters.length; i++) {
+                    warnings_filter[filters[i].field] = filters[i].values;
+                }
+
+                console.warn(warnings_filter);
+                console.warn(filters);
+
+                setCookie('domjudge_external_source_filter', JSON.stringify(warnings_filter));
+
+                if (filters.length === 0) {
+                    $trs.show();
+                } else {
+                    $trs
+                        .hide()
+                        .filter(function () {
+                            var $tr = $(this);
+
+                            for (var i = 0; i < filters.length; i++) {
+                                var value = "" + $('td[data-' + filters[i].field + ']', $tr).data(filters[i].field);
+                                if (filters[i].values.indexOf(value) === -1) {
+                                    return false;
+                                }
+                            }
+
+                            return true;
+                        })
+                        .show();
+                }
+            };
+
+            $('select[data-filter-field]').on('change', process_warnings_filter);
+            window.process_warnings_filter();
+
+            window.updateData = function () {
+                var $sourceInfoData = $('[data-new-source-info]');
+                var $sourceInfo = $('[data-source-info]');
+                $sourceInfo.html($sourceInfoData.children());
+
+                var $warningHeaderData = $('[data-new-warning-header]');
+                var $warningHeader = $('[data-warning-header]');
+                $warningHeader.html($warningHeaderData.children());
+
+                window.process_warnings_filter();
+            };
+        });
+    </script>
+{% endblock %}
