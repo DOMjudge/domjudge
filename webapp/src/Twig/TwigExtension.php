@@ -936,7 +936,6 @@ EOF;
     }
 
     /**
-     * Whether to show the external ID for the given entity.
      * @param object|string $entity
      */
     public function showExternalId($entity): bool
