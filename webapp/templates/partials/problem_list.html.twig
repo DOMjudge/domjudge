@@ -1,6 +1,6 @@
 {# problem \App\Entity\ContestProblem #}
 
-<h1 class="mt-4 text-center">Contest problems</h1>
+<h1 class="mt-4 text-center">{{ current_contest.name }} problems</h1>
 
 {% if problems is empty %}
     <div class="alert alert-secondary">No problem texts available at this point.</div>
