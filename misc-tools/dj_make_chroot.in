@@ -67,6 +67,8 @@ Options:
   -i <debs>    List of extra package names to install (comma separated).
   -r <debs>    List of extra package names to remove (comma separated).
   -l <debs>    List of local package files to install (comma separated).
+  -p <url>     HTTP(S) Proxy URL to use during package install
+  -m <url>     Debian or Ubuntu mirror URL to be used for package installation
   -y           Force overwriting the chroot dir and installing debootstrap.
   -f           Force the download of debootstrap even if it's already installed.
   -h           Display this help.
@@ -79,6 +81,10 @@ default chrootdir is '@judgehost_chrootdir@'.
 Available architectures:
 Debian: $DEBIAN_ARCHLIST
 Ubuntu: $UBUNTU_ARCHLIST
+
+Environment Overrides:
+DEBPROXY: Sets http(s) proxy to be used for package installation
+DEBMIRROR: Sets mirror URL to be used for package registry
 
 EOF
 }
@@ -95,7 +101,7 @@ FORCEYES=0
 FORCEDOWNLOAD=0
 
 # Read command-line parameters:
-while getopts 'a:d:D:R:i:r:l:yfh' OPT ; do
+while getopts 'a:d:D:R:i:r:l:p:m:yfh' OPT ; do
     case $OPT in
         a) ARCH=$OPTARG ;;
         d) CHROOTDIR=$OPTARG ;;
@@ -104,6 +110,8 @@ while getopts 'a:d:D:R:i:r:l:yfh' OPT ; do
         i) INSTALLDEBS_EXTRA=$OPTARG ;;
         r) REMOVEDEBS_EXTRA=$OPTARG ;;
         l) LOCALDEBS=$OPTARG ;;
+        p) DEBPROXY=$OPTARG ;;
+        m) DEBMIRROR=$OPTARG ;;
         y) FORCEYES=1 ;;
         f) FORCEDOWNLOAD=1 ;;
         h) SHOWHELP=1 ;;
