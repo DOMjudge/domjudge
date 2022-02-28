@@ -83,8 +83,8 @@ Debian: $DEBIAN_ARCHLIST
 Ubuntu: $UBUNTU_ARCHLIST
 
 Environment Overrides:
-DEBPROXY: Sets http(s) proxy to be used for package installation
-DEBMIRROR: Sets mirror URL to be used for package registry
+DEBPROXY: Sets http(s) proxy to be used for package installation (Overridden if -p argument is used)
+DEBMIRROR: Sets mirror URL to be used for package registry (Overridden if -m argument is used)
 
 EOF
 }
