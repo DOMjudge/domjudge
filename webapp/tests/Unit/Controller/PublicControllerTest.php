@@ -22,4 +22,9 @@ class PublicControllerTest extends BaseTest
         $this->verifyPageResponse('GET', '/public', 200);
         self::assertSelectorExists('p.nodata:contains("No active contest")');
     }
+
+    public function testNoSelfRegister(): void
+    {
+        $this->verifyPageResponse('GET', '/register', 403);
+    }
 }

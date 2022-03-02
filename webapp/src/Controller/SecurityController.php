@@ -110,7 +110,7 @@ class SecurityController extends AbstractController
         $selfRegistrationCategoriesCount = $em->getRepository(TeamCategory::class)->count(['allow_self_registration' => 1]);
 
         if ($selfRegistrationCategoriesCount === 0) {
-            throw new HttpException(400, "Registration not enabled");
+            throw new HttpException(403, "Registration not enabled");
         }
 
         $user              = new User();
