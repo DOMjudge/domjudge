@@ -2,7 +2,7 @@
 .clean_ordering:
   needs: []
   retry:
-    max: 0 #Max is 2, set when gitlab is flacky
+    max: 2 #Max is 2, set when gitlab is flacky
     when:
       - always
   artifacts:
