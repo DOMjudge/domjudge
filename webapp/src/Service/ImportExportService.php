@@ -518,7 +518,7 @@ class ImportExportService
         }
         $regex = sprintf("/^(File_Version|%s)\t%s$/i", $type, $versionMatch);
         if (!preg_match($regex, $version)) {
-            $message = sprintf("Unknown format or version: %s != %s", $version, $versionMatch);
+            $message = sprintf("TSV has unknown format or version: %s != %s", $version, $versionMatch);
             return -1;
         }
 

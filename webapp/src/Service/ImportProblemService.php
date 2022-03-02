@@ -88,8 +88,15 @@ class ImportProblemService
 
         $defaultTimelimit = 10;
 
-        // Read problem properties
         $propertiesString = $zip->getFromName($propertiesFile);
+        $problemYaml = $zip->getFromName($yamlFile);
+
+        if ($propertiesString === false && $problemYaml === false) {
+            $messages[] = sprintf('Error: zip contains neither %s nor %s, not a valid Problem Archive?',
+                $propertiesFile, $yamlFile);
+            return null;
+        }
+
         $properties = [];
 
         if ($propertiesString !== false) {
@@ -225,8 +232,6 @@ class ImportProblemService
             return null;
         }
 
-        // parse problem.yaml
-        $problemYaml = $zip->getFromName($yamlFile);
         if ($problemYaml !== false) {
             $yamlData = Yaml::parse($problemYaml);
 
