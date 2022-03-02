@@ -235,7 +235,12 @@ class ImportExportController extends BaseController
         if ($contestImportForm->isSubmitted() && $contestImportForm->isValid()) {
             /** @var UploadedFile $file */
             $file = $contestImportForm->get('file')->getData();
-            $data = Yaml::parseFile($file->getRealPath(), Yaml::PARSE_DATETIME);
+            try {
+                $data = Yaml::parseFile($file->getRealPath(), Yaml::PARSE_DATETIME);
+            } catch (\Symfony\Component\Yaml\Exception\ParseException $e) {
+                $this->addFlash('danger', "Parse error in YAML/JSON file: " . $e->getMessage());
+                return $this->redirectToRoute('jury_import_export');
+            }
             if ($this->importExportService->importContestData($data, $message, $cid)) {
                 $this->addFlash('success',
                                 sprintf('The file %s is successfully imported.', $file->getClientOriginalName()));
@@ -252,7 +257,12 @@ class ImportExportController extends BaseController
         if ($problemsImportForm->isSubmitted() && $problemsImportForm->isValid()) {
             /** @var UploadedFile $file */
             $file = $problemsImportForm->get('file')->getData();
-            $data = Yaml::parseFile($file->getRealPath(), Yaml::PARSE_DATETIME);
+            try {
+                $data = Yaml::parseFile($file->getRealPath(), Yaml::PARSE_DATETIME);
+            } catch (\Symfony\Component\Yaml\Exception\ParseException $e) {
+                $this->addFlash('danger', "Parse error in YAML/JSON file: " . $e->getMessage());
+                return $this->redirectToRoute('jury_import_export');
+            }
             if ($this->importExportService->importProblemsData($problemsImportForm->get('contest')->getData(), $data)) {
                 $this->addFlash('success',
                     sprintf('The file %s is successfully imported.', $file->getClientOriginalName()));
