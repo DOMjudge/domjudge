@@ -174,7 +174,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Equatab
 
     public function setUsername(?string $username): User
     {
-        $this->username = $username;
+        $this->username = (string)$username;
         return $this;
     }
 
