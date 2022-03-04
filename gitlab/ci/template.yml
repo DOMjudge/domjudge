@@ -62,4 +62,4 @@
       - PHPVERSION: ["8.0"]
         TEST: ["E2E"]
         CRAWL_DATASOURCES: ["0"]
-        CRAWL_RISKY: ['activate','/jury/change-contest/','/input','javascript','.zip','/logout']
+        CRAWL_RISKY: ['activate','binaryfiles','javascript']

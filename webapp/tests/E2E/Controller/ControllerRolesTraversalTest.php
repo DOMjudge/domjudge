@@ -29,10 +29,11 @@ class ControllerRolesTraversalTest extends BaseTest
      * '#'                      //       Links to local page
      * '/logout'                //       Application links
      **/
-    protected static array $substrings = ['http','activate','deactivate','/jury/change-contest/','/text','/input','/output','/export','/download','/phpinfo','javascript','.zip'];
-    protected static array $fullstrings = ['/logout'];
-    protected static array $riskyURLs = ['nonExistant','activate','deactivate','/jury/change-contest','/input','/login'];
-    protected static array $dataSources = [DJS::DATA_SOURCE_LOCAL, DJS::DATA_SOURCE_CONFIGURATION_EXTERNAL, DJS::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL];
+    protected static array $substrings       = ['http','activate','deactivate','/jury/change-contest/','/phpinfo','javascript'];
+    protected static array $binarysubstrings = ['/text','/input','/output','/export','/download','.zip'];
+    protected static array $fullstrings      = ['/logout'];
+    protected static array $riskyURLs        = ['nonExistant','activate','deactivate','/jury/change-contest','/input','/login'];
+    protected static array $dataSources      = [DJS::DATA_SOURCE_LOCAL, DJS::DATA_SOURCE_CONFIGURATION_EXTERNAL, DJS::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL];
 
     protected function getLoops(): array
     {
@@ -82,7 +83,11 @@ class ControllerRolesTraversalTest extends BaseTest
      **/
     protected function urlExcluded(string $url, string $skip): bool
     {
-        foreach(self::$substrings as $subs) {
+        $tmpSubstrings = self::$substrings;
+        if($skip !== 'binaryfiles') {
+            $tmpSubstrings = array_merge($tmpSubstrings, self::$binarysubstrings);
+        }
+        foreach($tmpSubstrings as $subs) {
             if(strpos($url, $subs) !== false && $subs !== $skip)  {
                 return true;
             }
