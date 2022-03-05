@@ -11,7 +11,7 @@
 {% block content %}
 
     <div data-ajax-refresh-target data-ajax-refresh-after="pinScoreheader">
-        {% include 'partials/scoreboard.html.twig' with {jury: true} %}
+        {% include 'partials/scoreboard.html.twig' with {jury: is_granted('ROLE_JURY'), public: not is_granted('ROLE_JURY')} %}
     </div>
 
 {% endblock %}
