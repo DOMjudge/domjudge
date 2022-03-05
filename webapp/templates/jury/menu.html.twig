@@ -10,7 +10,7 @@
         <ul class="navbar-nav mr-auto">
 
             {% if is_granted('ROLE_BALLOON') %}
-                <li class="nav-item">
+                <li class="nav-item {% if current_route == 'jury_balloons' %}active{% endif %}">
                     <a class="nav-link" href="{{ path('jury_balloons') }}">
                         <i class="fas fa-map-marker-alt"></i> balloons
                         <span class="badge badge-info" id="num-alerts-balloons"></span>
@@ -71,7 +71,7 @@
                 </li>
             {% endif %}
 
-            {% if is_granted('ROLE_JURY') %}
+            {% if is_granted('ROLE_JURY') or is_granted('ROLE_BALLOON') %}
                 <li class="nav-item {% if current_route == 'jury_scoreboard' %}active{% endif %}">
                     <a class="nav-link" href="{{ path('jury_scoreboard') }}"><i class="fas fa-list-ol"></i> scoreboard</a>
                 </li>

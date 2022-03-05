@@ -232,7 +232,7 @@ class ControllerRolesTraversalTest extends BaseTest
         $this->client->request('GET', $url);
         $response = $this->client->getResponse();
         self::assertNotEquals(500, $response->getStatusCode(), sprintf('Failed at %s', $url));
-        if ($dropdown) {
+        if ($dropdown && strpos($url, '/public') === false) {
             self::assertSelectorExists('a#navbarDropdownContests:contains("no contest")');
         }
     }
