@@ -30,8 +30,8 @@ class ControllerRolesTraversalTest extends BaseTest
      * '/logout'                //       Application links
      **/
     protected static array $substrings       = ['http','activate','deactivate','/jury/change-contest/','/phpinfo','javascript'];
-    protected static array $binarysubstrings = ['/text','/input','/output'];
-    protected static array $searchbinarysubstrings = ['/export','/download','.zip'];
+    protected static array $binarysubstrings = [];
+    protected static array $searchbinarysubstrings = ['/text','/input','/output','/export','/download','.zip'];
     protected static array $fullstrings      = ['/logout'];
     protected static array $riskyURLs        = ['nonExistant','activate','deactivate','/jury/change-contest','/input','/login'];
     protected static array $dataSources      = [DJS::DATA_SOURCE_LOCAL, DJS::DATA_SOURCE_CONFIGURATION_EXTERNAL, DJS::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL];
