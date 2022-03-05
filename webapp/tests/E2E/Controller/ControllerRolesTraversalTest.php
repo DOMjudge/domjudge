@@ -30,7 +30,8 @@ class ControllerRolesTraversalTest extends BaseTest
      * '/logout'                //       Application links
      **/
     protected static array $substrings       = ['http','activate','deactivate','/jury/change-contest/','/phpinfo','javascript'];
-    protected static array $binarysubstrings = ['/text','/input','/output','/export','/download','.zip'];
+    protected static array $binarysubstrings = ['/text','/input','/output'];
+    protected static array $searchbinarysubstrings = ['/export','/download','.zip'];
     protected static array $fullstrings      = ['/logout'];
     protected static array $riskyURLs        = ['nonExistant','activate','deactivate','/jury/change-contest','/input','/login'];
     protected static array $dataSources      = [DJS::DATA_SOURCE_LOCAL, DJS::DATA_SOURCE_CONFIGURATION_EXTERNAL, DJS::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL];
@@ -83,7 +84,7 @@ class ControllerRolesTraversalTest extends BaseTest
      **/
     protected function urlExcluded(string $url, string $skip): bool
     {
-        $tmpSubstrings = self::$substrings;
+        $tmpSubstrings = array_merge(self::$binarysubstrings,self::$substrings);
         if($skip !== 'binaryfiles') {
             $tmpSubstrings = array_merge($tmpSubstrings, self::$binarysubstrings);
         }
