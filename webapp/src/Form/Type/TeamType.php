@@ -143,7 +143,7 @@ class TeamType extends AbstractExternalIdEntityType
             $team = $event->getData();
             $form = $event->getForm();
 
-            if ($team && $team->getTeamid() !== null) {
+            if ($team && $team->getTeamid() !== null && $team->getUsers()->count()>0) {
                 $form->remove('addUserForTeam');
                 $form->remove('existingUser');
                 $form->remove('newUsername');
