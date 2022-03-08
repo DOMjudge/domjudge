@@ -410,6 +410,18 @@ EOF;
                 ],
             ],
             [
+                'roles' => ['jury', 'team'],
+                'name' => 'Another judge member',
+                'username' => 'judge2',
+                'password' => 'password6',
+                'ip' => '9.10.11.12',
+                'team' => [
+                    'name' => 'Another judge member',
+                    'category' => 'Jury',
+                    'description' => 'Another judge member',
+                ],
+            ],
+            [
                 'roles' => ['admin'],
                 'name' => 'Some admin',
                 'username' => 'adminx',
@@ -470,7 +482,10 @@ EOF;
                     self::assertEquals($data['team']['category'], $team->getCategory()->getName());
                 }
                 if (isset($data['team']['members'])) {
-                    self::assertEquals($data['team']['members'], $team->getMembers());
+                    self::assertEquals($data['team']['members'], $team->getPublicDescription());
+                }
+                if (isset($data['team']['description'])) {
+                    self::assertEquals($data['team']['description'], $team->getPublicDescription());
                 }
             } else {
                 self::assertNull($user->getTeam());
