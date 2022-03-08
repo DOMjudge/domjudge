@@ -67,7 +67,8 @@ class TeamType extends AbstractExternalIdEntityType
         $builder->add('category', EntityType::class, [
             'class' => TeamCategory::class,
         ]);
-        $builder->add('members', TextareaType::class, [
+        $builder->add('publicdescription', TextareaType::class, [
+            'label' => 'Public description',
             'required' => false,
         ]);
         $builder->add('affiliation', EntityType::class, [
@@ -84,7 +85,8 @@ class TeamType extends AbstractExternalIdEntityType
             'label'    => 'Location',
             'required' => false,
         ]);
-        $builder->add('comments', TextareaType::class, [
+        $builder->add('internalcomments', TextareaType::class, [
+            'label' => 'Internal comments (jury viewable only)',
             'required' => false,
             'attr'     => [
                 'rows' => 10,

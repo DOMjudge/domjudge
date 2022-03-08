@@ -802,7 +802,7 @@ class ImportExportService
                     'categoryid' => $team['group_ids'][0] ?? null,
                     'name' => @$team['name'],
                     'display_name' => @$team['display_name'],
-                    'members' => @$team['members'],
+                    'publicdescription' => @$team['members'],
                 ],
                 'team_affiliation' => [
                     'externalid' => $team['organization_id'] ?? null,
@@ -972,7 +972,7 @@ class ImportExportService
                 case 'judge':
                     $roles[]  = $juryRole;
                     $roles[]  = $teamRole;
-                    $juryTeam = ['name' => $line[1], 'externalid' => $line[2], 'category' => $juryCategory, 'members' => $line[1]];
+                    $juryTeam = ['name' => $line[1], 'externalid' => $line[2], 'category' => $juryCategory, 'publicdescription' => $line[1]];
                     break;
                 case 'team':
                     $roles[] = $teamRole;
@@ -1035,7 +1035,7 @@ class ImportExportService
                         ->setName($accountItem['team']['name'])
                         ->setCategory($accountItem['team']['category'])
                         ->setExternalid($accountItem['team']['externalid'])
-                        ->setMembers($accountItem['team']['members'] ?? null);
+                        ->setPublicDescription($accountItem['team']['publicdescription'] ?? null);
                     $this->em->persist($team);
                     $action = EventLogService::ACTION_CREATE;
                 } else {

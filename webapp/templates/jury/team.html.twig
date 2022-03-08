@@ -149,18 +149,18 @@
                     </td>
                 </tr>
                 {% endif %}
-                {% if team.comments is not empty %}
+                {% if team.internalcomments is not empty %}
                 <tr>
-                    <th>Comments</th>
+                    <th>Internal comments (Jury only)</th>
                     <td>
-                        {{ team.comments | nl2br }}
+                        {{ team.internalcomments | nl2br }}
                     </td>
                 </tr>
                 {% endif %}
-                {% if team.members is not empty %}
+                {% if team.publicdescription is not empty %}
                     <tr>
-                        <th>Members</th>
-                        <td>{{ team.members | nl2br }}</td>
+                        <th>Description (Public)</th>
+                        <td>{{ team.publicdescription | nl2br }}</td>
                     </tr>
                 {% endif %}
             </table>

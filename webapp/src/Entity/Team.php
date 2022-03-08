@@ -80,11 +80,11 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
     private bool $enabled = true;
 
     /**
-     * @ORM\Column(type="text", length=4294967295, name="members", options={"comment"="Team member names (freeform)"},
+     * @ORM\Column(type="text", length=4294967295, name="publicdescription", options={"comment"="Public team definition; for example: Team member names (freeform)"},
      *                          nullable=true)
      * @Serializer\Groups({"Nonstrict"})
      */
-    private ?string $members;
+    private ?string $publicDescription;
 
     /**
      * @ORM\Column(type="string", length=255, name="room", options={"comment"="Physical location of team"},
@@ -94,11 +94,11 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
     private ?string $room;
 
     /**
-     * @ORM\Column(type="text", length=4294967295, name="comments", options={"comment"="Comments about this team"},
+     * @ORM\Column(type="text", length=4294967295, name="internalcomments", options={"comment"="Internal comments about this team (jury only)"},
      *                          nullable=true)
      * @Serializer\Exclude()
      */
-    private ?string $comments;
+    private ?string $internalComments;
 
     /**
      * @var double|string|null
@@ -276,15 +276,15 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
         return $this->enabled;
     }
 
-    public function setMembers(?string $members): Team
+    public function setPublicDescription(?string $publicDescription): Team
     {
-        $this->members = $members;
+        $this->publicDescription = $publicDescription;
         return $this;
     }
 
-    public function getMembers(): ?string
+    public function getPublicDescription(): ?string
     {
-        return $this->members;
+        return $this->publicDescription;
     }
 
     public function setRoom(string $room): Team
@@ -298,15 +298,15 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
         return $this->room;
     }
 
-    public function setComments(string $comments): Team
+    public function setInternalComments(?string $comments): Team
     {
-        $this->comments = $comments;
+        $this->internalComments = $comments;
         return $this;
     }
 
-    public function getComments(): ?string
+    public function getInternalComments(): ?string
     {
-        return $this->comments;
+        return $this->internalComments;
     }
 
     /** @param string|float $judgingLastStarted */

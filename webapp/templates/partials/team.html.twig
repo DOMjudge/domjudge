@@ -15,10 +15,10 @@
                     <th>Category</th>
                     <td>{{ team.category.name }}</td>
                 </tr>
-                {% if team.members is not empty %}
+                {% if team.publicdescription is not empty %}
                     <tr>
-                        <th>Members</th>
-                        <td>{{ team.members | nl2br }}</td>
+                        <th>Description</th>
+                        <td>{{ team.publicdescription | nl2br }}</td>
                     </tr>
                 {% endif %}
                 {% if showAffiliations and team.affiliation is not empty %}

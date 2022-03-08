@@ -93,12 +93,12 @@ class TeamAffiliation extends BaseApiEntity implements AssetEntityInterface
     private bool $clearLogo = false;
 
     /**
-     * @ORM\Column(type="text", length=4294967295, name="comments",
-     *     options={"comment"="Comments"},
+     * @ORM\Column(type="text", length=4294967295, name="internalcomments",
+     *     options={"comment"="Internal comments (jury only)"},
      *     nullable=true)
      * @Serializer\Exclude()
      */
-    private ?string $comments;
+    private ?string $internalComments;
 
     /**
      * @ORM\OneToMany(targetEntity="Team", mappedBy="affiliation")
@@ -184,15 +184,15 @@ class TeamAffiliation extends BaseApiEntity implements AssetEntityInterface
         return $this->country;
     }
 
-    public function setComments(string $comments): TeamAffiliation
+    public function setInternalComments(?string $comments): TeamAffiliation
     {
-        $this->comments = $comments;
+        $this->internalComments = $comments;
         return $this;
     }
 
-    public function getComments(): ?string
+    public function getInternalComments(): ?string
     {
-        return $this->comments;
+        return $this->internalComments;
     }
 
     public function getLogoFile(): ?UploadedFile

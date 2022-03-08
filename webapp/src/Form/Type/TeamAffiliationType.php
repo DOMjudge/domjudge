@@ -67,7 +67,8 @@ class TeamAffiliationType extends AbstractExternalIdEntityType
                 'placeholder' => 'No country',
             ]);
         }
-        $builder->add('comments', TextareaType::class, [
+        $builder->add('internalcomments', TextareaType::class, [
+            'label' => 'Internal comments (jury viewable only)',
             'required' => false,
             'attr' => [
                 'rows' => 6,
