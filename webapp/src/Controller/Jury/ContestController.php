@@ -335,13 +335,12 @@ class ContestController extends BaseController
                 } else {
                     $timeValue = Utils::printtime($time, $timeFormat);
                     $timeTitle = Utils::printtime($time, 'Y-m-d H:i:s (T)');
-                    $dayInSeconds = 24*60*60;
                     if($timeField === 'activate' && $contest->getStarttimeEnabled()) {
-                        if(Utils::difftime($contestdata['starttime']['value'], $time)/$dayInSeconds>1.0) {
+                        if(Utils::difftime($contestdata['starttime']['value'], $time)>Utils::DAY_IN_SECONDS) {
                             $timeIcon  = 'calendar-minus';
                         };
                     } elseif($timeField === 'end' && $contest->getStarttimeEnabled()) {
-                        if(Utils::difftime($time, $startTime)/$dayInSeconds>1.0) {
+                        if(Utils::difftime($time, $startTime)>Utils::DAY_IN_SECONDS) {
                             $timeIcon  = 'calendar-plus';
                         };
                     }

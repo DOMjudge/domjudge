@@ -164,6 +164,8 @@ class Utils
 
     const GD_MISSING = 'Cannot import image: the PHP GD library is missing.';
 
+    const DAY_IN_SECONDS = 60*60*24;
+
     /**
      * returns the milliseconds part of a time stamp truncated at three digits
      */
