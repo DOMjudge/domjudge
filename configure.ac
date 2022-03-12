@@ -1,6 +1,6 @@
 # Process this file with autoconf to produce a configure script.
 AC_INIT([DOMjudge],
-        m4_esyscmd([grep 'version' README.md | sed -n '1s/^.*version //p' | tr -d '\n']),
+        m4_esyscmd([grep 'version' README.md | sed -n '1s/^.*version //p' | sed "s/$/$(command -v git >/dev/null 2>&1 && git rev-parse --is-inside-work-tree >/dev/null 2>&1 && git rev-parse --short HEAD | sed 's|^|\\/|' || echo '' )/" | tr -d '\n']),
         [domjudge-devel@domjudge.org])
 AC_PREREQ([2.64])
 AC_CONFIG_HEADERS([etc/config.h])
