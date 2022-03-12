@@ -319,8 +319,13 @@ class ContestController extends BaseController
                 'start',
                 'end',
             ];
+            $startTime = null;
             foreach ($timeFields as $timeField) {
                 $time = $contestdata[$timeField . 'time']['value'];
+                if($timeField === 'start') {
+                    $startTime = $time;
+                }
+                $timeIcon = null;
                 if (!$contest->getStarttimeEnabled() && $timeField != 'activate') {
                     $time      = null;
                 }
@@ -330,10 +335,23 @@ class ContestController extends BaseController
                 } else {
                     $timeValue = Utils::printtime($time, $timeFormat);
                     $timeTitle = Utils::printtime($time, 'Y-m-d H:i:s (T)');
+                    $dayInSeconds = 24*60*60;
+                    if($timeField === 'activate' && $contest->getStarttimeEnabled()) {
+                        if(Utils::difftime($contestdata['starttime']['value'], $time)/$dayInSeconds>1.0) {
+                            $timeIcon  = 'calendar-minus';
+                        };
+                    } elseif($timeField === 'end' && $contest->getStarttimeEnabled()) {
+                        if(Utils::difftime($time, $startTime)/$dayInSeconds>1.0) {
+                            $timeIcon  = 'calendar-plus';
+                        };
+                    }
                 }
                 $contestdata[$timeField . 'time']['value']     = $timeValue;
                 $contestdata[$timeField . 'time']['sortvalue'] = $time;
                 $contestdata[$timeField . 'time']['title']     = $timeTitle;
+                if($timeIcon !== null) {
+                    $contestdata[$timeField . 'time']['icon']  = $timeIcon;
+                }
             }
 
             $styles = [];
