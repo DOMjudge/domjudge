@@ -128,6 +128,7 @@
                                     {% else %}
                                     {{- (item.value|default(item.default|default(''))) -}}
                                     {% endif %}
+                                    {% if item.icon is defined %}<i class="fas fa-{{ item.icon }}"></i>{%- endif %}
                                     {%- if item.link is defined or row.link is defined -%}</a>{% endif %}
                         </td>
                     {%- endfor %}
