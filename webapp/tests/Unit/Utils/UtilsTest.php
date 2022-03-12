@@ -227,10 +227,10 @@ class UtilsTest extends TestCase
         $end += 13*60;
         self::assertEquals("20:04", Utils::printtimediff($start, $end));
 
-        $end += (72*60*60);
+        $end += (3*Utils::DAY_IN_SECONDS);
         self::assertEquals("3d 0:20:04", Utils::printtimediff($start, $end));
 
-        $end += (365*24*60*60);
+        $end += (365*Utils::DAY_IN_SECONDS);
         self::assertEquals("368d 0:20:04", Utils::printtimediff($start, $end));
     }
 
