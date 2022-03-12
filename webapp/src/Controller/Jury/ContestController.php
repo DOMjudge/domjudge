@@ -491,6 +491,21 @@ class ContestController extends BaseController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $formData = $form->getData();
+            $timeZones = [];
+            foreach (['Activate','Deactivate','Start','End','Freeze','Unfreeze'] as $timeString) {
+                $fields = explode(' ', $formData->{'get'.$timeString.'timeString'}());
+                if (count($fields) > 1) {
+                    $timeZones[] = $fields[2];
+                }
+            }
+            if (count(array_unique($timeZones)) > 1) {
+                $this->addFlash('danger', 'Contest should not have multiple timezones.');
+                return $this->render('jury/contest_add.html.twig', [
+                    'form' => $form->createView(),
+                ]);
+            }
+
             // We need to explicitly assign the contest on all problems, because
             // otherwise we can not save new problems on the contest.
             /** @var ContestProblem[] $problems */
