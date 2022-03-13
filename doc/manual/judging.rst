@@ -223,6 +223,6 @@ If you see error messages of the form::
   error: found processes still running as 'domjudge-run', check manually:
   2342 apport
 
-Then you still have ``apport`` installed and/or running. This occurs on
+Then you still have ``apport`` installed and running. This error message occurs when
 submitting segmentation fault solutions. Disable or uninstall the apport
 daemon on all judgehosts.
