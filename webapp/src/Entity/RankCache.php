@@ -9,7 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Entity()
  * @ORM\Table(
  *     name="rankcache",
- *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Scoreboard rank cache"},
+ *     options={"collation"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Scoreboard rank cache"},
  *     indexes={
  *         @ORM\Index(name="order_restricted", columns={"cid","points_restricted","totaltime_restricted"}),
  *         @ORM\Index(name="order_public", columns={"cid","points_public","totaltime_public"}),

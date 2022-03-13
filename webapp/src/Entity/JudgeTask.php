@@ -24,7 +24,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *         @ORM\Index(name="judgehostid_valid_priority", columns={"judgehostid", "valid", "priority"}),
  *         @ORM\Index(name="specific_type", columns={"judgehostid", "starttime", "valid", "type", "priority", "judgetaskid"}),
  *     },
- *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Individual judge tasks."}
+ *     options={"collation"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Individual judge tasks."}
  *     )
  */
 class JudgeTask

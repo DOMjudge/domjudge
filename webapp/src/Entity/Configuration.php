@@ -8,7 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
  *
  * @ORM\Entity()
  * @ORM\Table(name="configuration",
- *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Global configuration variables"},
+ *     options={"collation"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Global configuration variables"},
  *     uniqueConstraints={@ORM\UniqueConstraint(name="name", columns={"name"})})
  */
 class Configuration

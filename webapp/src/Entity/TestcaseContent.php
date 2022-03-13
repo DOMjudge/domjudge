@@ -10,7 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Entity
  * @ORM\Table(
  *     name="testcase_content",
- *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4","comment"="Stores contents of testcase"})
+ *     options={"collation"="utf8mb4_unicode_ci", "charset"="utf8mb4","comment"="Stores contents of testcase"})
  */
 class TestcaseContent
 {

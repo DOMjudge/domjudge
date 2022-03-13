@@ -14,7 +14,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Entity()
  * @ORM\Table(
  *     name="team_category",
- *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Categories for teams (e.g.: participants, observers, ...)"},
+ *     options={"collation"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Categories for teams (e.g.: participants, observers, ...)"},
  *     indexes={@ORM\Index(name="sortorder", columns={"sortorder"})},
  *     uniqueConstraints={
  *         @ORM\UniqueConstraint(name="externalid", columns={"externalid"}, options={"lengths": {190}}),
@@ -64,7 +64,7 @@ class TeamCategory extends BaseApiEntity
     private string $name;
 
     /**
-     * @ORM\Column(type="tinyint", name="sortorder", length=1,
+     * @ORM\Column(type="tinyint", name="sortorder",
      *     options={"comment"="Where to sort this category on the scoreboard",
      *              "unsigned"=true,"default"="0"},
      *     nullable=false)

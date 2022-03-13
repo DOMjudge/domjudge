@@ -10,7 +10,7 @@ use JMS\Serializer\Annotation as Serializer;
  * @ORM\Entity()
  * @ORM\Table(
  *     name="executable_file",
- *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Files associated to an executable"},
+ *     options={"collation"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Files associated to an executable"},
  *     indexes={@ORM\Index(name="immutable_execid", columns={"immutable_execid"})},
  *     uniqueConstraints={
  *         @ORM\UniqueConstraint(name="rankindex", columns={"immutable_execid", "ranknumber"}),

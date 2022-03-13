@@ -10,7 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Entity
  * @ORM\Table(
  *     name="judging_run_output",
- *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Stores output of judging run"},
+ *     options={"collation"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Stores output of judging run"},
  *     indexes={@ORM\Index(name="runid", columns={"runid"})})
  */
 class JudgingRunOutput

@@ -12,7 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
  *     indexes={
  *         @ORM\Index(name="judgingid", columns={"judgingid"}),
  *     },
- *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Debug packages."}
+ *     options={"collation"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Debug packages."}
  *     )
  */
 class DebugPackage

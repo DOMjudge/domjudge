@@ -22,7 +22,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *         @ORM\Index(name="teamid", columns={"teamid"}),
  *         @ORM\Index(name="starttime", columns={"starttime"}),
  *     },
- *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Work items."}
+ *     options={"collation"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Work items."}
  *     )
  */
 class QueueTask

@@ -10,7 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Entity()
  * @ORM\Table(
  *     name="submission_file",
- *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Files associated to a submission"},
+ *     options={"collation"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Files associated to a submission"},
  *     indexes={@ORM\Index(name="submitid", columns={"submitid"})},
  *     uniqueConstraints={
  *         @ORM\UniqueConstraint(name="rankindex", columns={"submitid", "ranknumber"}),

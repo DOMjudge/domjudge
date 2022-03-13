@@ -11,7 +11,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Entity()
  * @ORM\Table(
  *     name="role",
- *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Possible user roles"},
+ *     options={"collation"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Possible user roles"},
  *     uniqueConstraints={@ORM\UniqueConstraint(name="role", columns={"role"})})
  */
 class Role

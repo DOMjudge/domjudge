@@ -16,7 +16,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Entity()
  * @ORM\Table(
  *     name="team_affiliation",
- *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Affilitations for teams (e.g.: university, company)"},
+ *     options={"collation"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Affilitations for teams (e.g.: university, company)"},
  *     uniqueConstraints={
  *         @ORM\UniqueConstraint(name="externalid", columns={"externalid"}, options={"lengths": {190}}),
  *     })

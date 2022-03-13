@@ -14,7 +14,7 @@ use Ramsey\Uuid\Uuid;
  * @ORM\Entity()
  * @ORM\Table(
  *     name="judging",
- *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Result of judging a submission"},
+ *     options={"collation"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Result of judging a submission"},
  *     indexes={
  *         @ORM\Index(name="submitid", columns={"submitid"}),
  *         @ORM\Index(name="cid", columns={"cid"}),

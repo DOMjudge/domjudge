@@ -8,7 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Entity
  * @ORM\Table(
  *     name="problem_attachment_content",
- *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4","comment"="Stores contents of problem attachments"})
+ *     options={"collation"="utf8mb4_unicode_ci", "charset"="utf8mb4","comment"="Stores contents of problem attachments"})
  */
 class ProblemAttachmentContent
 {

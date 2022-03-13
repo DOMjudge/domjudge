@@ -9,7 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
  *
  * @ORM\Table(
  *     name="event",
- *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Log of all events during a contest"},
+ *     options={"collation"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Log of all events during a contest"},
  *     indexes={
  *         @ORM\Index(name="eventtime", columns={"cid","eventtime"}),
  *         @ORM\Index(name="cid", columns={"cid"}),

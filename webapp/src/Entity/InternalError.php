@@ -13,7 +13,7 @@ use JMS\Serializer\Annotation as Serializer;
  * @ORM\Entity()
  * @ORM\Table(
  *     name="internal_error",
- *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Log of judgehost internal errors"},
+ *     options={"collation"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Log of judgehost internal errors"},
  *     indexes={
  *         @ORM\Index(name="judgingid", columns={"judgingid"}),
  *         @ORM\Index(name="cid", columns={"cid"})

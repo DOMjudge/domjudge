@@ -10,7 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Entity()
  * @ORM\Table(
  *     name="auditlog",
- *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Log of all actions performed"})
+ *     options={"collation"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Log of all actions performed"})
  */
 class AuditLog
 {

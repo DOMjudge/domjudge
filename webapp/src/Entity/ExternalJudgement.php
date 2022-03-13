@@ -12,7 +12,7 @@ use JMS\Serializer\Annotation as Serializer;
  *
  * @ORM\Table(
  *     name="external_judgement",
- *     options={"comment":"Judgement in external system"},
+ *     options={"collation"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment":"Judgement in external system"},
  *     indexes={
  *         @ORM\Index(name="submitid", columns={"submitid"}),
  *         @ORM\Index(name="cid", columns={"cid"}),

@@ -15,7 +15,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Entity()
  * @ORM\Table(
  *     name="language",
- *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Programming languages in which teams can submit solutions"},
+ *     options={"collation"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Programming languages in which teams can submit solutions"},
  *     indexes={@ORM\Index(name="compile_script", columns={"compile_script"})},
  *     uniqueConstraints={
  *         @ORM\UniqueConstraint(name="externalid", columns={"externalid"}, options={"lengths": {190}}),

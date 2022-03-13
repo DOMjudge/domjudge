@@ -14,7 +14,7 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
  * @ORM\Entity()
  * @ORM\Table(
  *     name="removed_interval",
- *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Time intervals removed from the contest for scoring"},
+ *     options={"collation"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Time intervals removed from the contest for scoring"},
  *     indexes={@ORM\Index(name="cid", columns={"cid"})})
  */
 class RemovedInterval

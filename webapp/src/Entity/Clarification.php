@@ -14,7 +14,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  * @ORM\Entity()
  * @ORM\Table(
  *     name="clarification",
- *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Clarification requests by teams and responses by the jury"},
+ *     options={"collation"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Clarification requests by teams and responses by the jury"},
  *     indexes={
  *         @ORM\Index(name="respid", columns={"respid"}),
  *         @ORM\Index(name="probid", columns={"probid"}),

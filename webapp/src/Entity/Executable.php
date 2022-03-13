@@ -15,7 +15,7 @@ use ZipArchive;
  * @ORM\Entity()
  * @ORM\Table(
  *     name="executable",
- *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4",
+ *     options={"collation"="utf8mb4_unicode_ci", "charset"="utf8mb4",
  *              "comment"="Compile, compare, and run script executable bundles"}
  *     )
  */

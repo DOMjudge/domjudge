@@ -12,7 +12,7 @@ use JMS\Serializer\Annotation as Serializer;
  * @ORM\Entity()
  * @ORM\Table(
  *     name="testcase",
- *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Stores testcases per problem"},
+ *     options={"collation"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Stores testcases per problem"},
  *     indexes={
  *         @ORM\Index(name="probid", columns={"probid"}),
  *         @ORM\Index(name="sample", columns={"sample"})

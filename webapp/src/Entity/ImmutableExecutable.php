@@ -12,7 +12,7 @@ use JMS\Serializer\Annotation as Serializer;
  * @ORM\Entity()
  * @ORM\Table(
  *     name="immutable_executable",
- *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4",
+ *     options={"collation"="utf8mb4_unicode_ci", "charset"="utf8mb4",
  *              "comment"="Immutable wrapper for a collection of files for executable bundles."}
  *     )
  */

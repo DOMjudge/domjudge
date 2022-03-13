@@ -15,7 +15,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  * @ORM\Entity()
  * @ORM\Table(
  *     name="submission",
- *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4","comment"="All incoming submissions"},
+ *     options={"collation"="utf8mb4_unicode_ci", "charset"="utf8mb4","comment"="All incoming submissions"},
  *     indexes={
  *         @ORM\Index(name="teamid", columns={"cid","teamid"}),
  *         @ORM\Index(name="teamid_2", columns={"teamid"}),
