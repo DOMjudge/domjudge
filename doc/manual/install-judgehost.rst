@@ -44,7 +44,7 @@ Removing apport
 ---------------
 
 Some systems (like Ubuntu) ship with ``apport``, which conflicts with judging.
-To uninstall uit, run::
+To uninstall it, run::
 
   sudo apt remove apport
 
