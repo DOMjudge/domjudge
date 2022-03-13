@@ -854,6 +854,8 @@ class ProblemController extends BaseController
             $data = $uploadForm->getData();
             /** @var UploadedFile $archive */
             $archive  = $data['archive'];
+            /** @var bool $deleteDataFirst */
+            $deleteDataFirst = $problemFormData['delete_data_first'] ?? false;
             $messages = [];
 
             /** @var Contest|null $contest */
@@ -870,7 +872,7 @@ class ProblemController extends BaseController
                 $zip        = $this->dj->openZipFile($archive->getRealPath());
                 $clientName = $archive->getClientOriginalName();
                 if ($this->importProblemService->importZippedProblem(
-                    $zip, $clientName, $problem, $contest, $messages
+                    $zip, $clientName, $problem, $contest, $deleteDataFirst, $messages
                 )) {
                     $this->dj->auditlog('problem', $problem->getProbid(), 'upload zip', $clientName);
                 } else {

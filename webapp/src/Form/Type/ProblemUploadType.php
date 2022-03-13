@@ -5,6 +5,7 @@ namespace App\Form\Type;
 use App\Entity\Contest;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -27,6 +28,10 @@ class ProblemUploadType extends AbstractType
             'attr' => [
                 'accept' => 'application/zip',
             ],
+        ]);
+        $builder->add('delete_data_first', CheckboxType::class, [
+            'help' => 'If checked, all existing testcases and attachment for the problem will be deleted, if any. Only useful for existing problems.',
+            'required' => false,
         ]);
         $builder->add('upload', SubmitType::class, ['label' => 'Import', 'icon' => 'fa-upload']);
     }

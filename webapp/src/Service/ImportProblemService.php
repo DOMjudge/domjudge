@@ -75,6 +75,7 @@ class ImportProblemService
         string $clientName,
         ?Problem $problem = null,
         ?Contest $contest = null,
+        bool $deleteDataFirst = false,
         ?array &$messages = []
     ): ?Problem {
         // This might take a while
@@ -396,8 +397,24 @@ class ImportProblemService
             }
         }
 
+        if ($deleteDataFirst && $problem->getProbid()) {
+            // Delete current testcases. We do this with a direct query, because
+            // otherwise we can get duplicate key errors, since Doctrine first performs
+            // inserts and only then deletes
+            $numDeleted = $this->em->createQueryBuilder()
+                ->from(Testcase::class, 'tc')
+                ->delete()
+                ->where('tc.problem = :problem')
+                ->setParameter('problem', $problem)
+                ->getQuery()
+                ->execute();
+            if ($numDeleted > 0) {
+                $messages[] = sprintf('Deleted %d existing testcase(s)', $numDeleted);
+            }
+        }
+
         // Insert/update testcases
-        if ($problem->getProbid()) {
+        if (!$deleteDataFirst && $problem->getProbid()) {
             // Find the current max rank
             $maxRank = (int)$this->em->createQueryBuilder()
                 ->from(Testcase::class, 't')
@@ -466,7 +483,7 @@ class ImportProblemService
                 $md5in  = md5($testInput);
                 $md5out = md5($testOutput);
 
-                if ($problem->getProbid()) {
+                if (!$deleteDataFirst && $problem->getProbid()) {
                     // Skip testcases that already exist identically
                     $existingTestcase = $this->em
                         ->createQueryBuilder()
@@ -526,6 +543,18 @@ class ImportProblemService
             }
         }
 
+        if ($deleteDataFirst && $problem->getProbid()) {
+            $attachmentCount = $problem->getAttachments()->count();
+            foreach ($problem->getAttachments() as $attachment) {
+                $problem->removeAttachment($attachment);
+                $this->em->remove($attachment);
+            }
+
+            if ($attachmentCount > 0) {
+                $messages[] = sprintf('Deleted %d existing attachment(s)', $attachmentCount);
+            }
+        }
+
         $numAttachments = 0;
         for ($j = 0; $j < $zip->numFiles; $j++) {
             $filename = $zip->getNameIndex($j);
@@ -549,7 +578,7 @@ class ImportProblemService
             }
 
             // Check if an attachment already exists, since then we overwrite it
-            if ($problem->getProbid()) {
+            if (!$deleteDataFirst && $problem->getProbid()) {
                 /** @var ProblemAttachment|null $attachment */
                 $attachment = $this->em
                     ->createQueryBuilder()
@@ -824,6 +853,7 @@ class ImportProblemService
         set_time_limit(120);
 
         $probId  = $request->request->get('problem');
+        $deleteDataFirst = $request->request->getBoolean('delete_data_first');
         $problem = null;
         if (!empty($probId)) {
             $problem = $this->em->createQueryBuilder()
@@ -844,7 +874,7 @@ class ImportProblemService
             $clientName  = $file->getClientOriginalName();
             $messages    = [];
             $newProblem  = $this->importZippedProblem(
-                $zip, $clientName, $problem, $contest, $messages
+                $zip, $clientName, $problem, $contest, $deleteDataFirst, $messages
             );
             $allMessages = array_merge($allMessages, $messages);
             if ($newProblem) {
