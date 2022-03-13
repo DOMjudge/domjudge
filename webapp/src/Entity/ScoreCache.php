@@ -9,7 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Entity()
  * @ORM\Table(
  *     name="scorecache",
- *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Scoreboard cache"},
+ *     options={"collation"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Scoreboard cache"},
  *     indexes={
  *         @ORM\Index(name="cid", columns={"cid"}),
  *         @ORM\Index(name="teamid", columns={"teamid"}),
@@ -46,7 +46,7 @@ class ScoreCache
      * @var double|string
      * @ORM\Column(type="decimal", precision=32, scale=9, name="solvetime_restricted",
      *     options={"comment"="Seconds into contest when problem solved (restricted audience)",
-     *              "default"=0},
+     *              "default"="0.000000000"},
      *     nullable=false)
      */
     private $solvetime_restricted = 0;
@@ -80,7 +80,7 @@ class ScoreCache
      * @var double|string
      * @ORM\Column(type="decimal", precision=32, scale=9, name="solvetime_public",
      *     options={"comment"="Seconds into contest when problem solved (public)",
-     *              "default"="0"},
+     *              "default"="0.000000000"},
      *     nullable=false)
      */
     private $solvetime_public = 0;

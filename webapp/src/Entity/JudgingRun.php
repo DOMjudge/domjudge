@@ -13,7 +13,7 @@ use JMS\Serializer\Annotation as Serializer;
  * @ORM\Entity()
  * @ORM\Table(
  *     name="judging_run",
- *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Result of a testcase run within a judging"},
+ *     options={"collation"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Result of a testcase run within a judging"},
  *     uniqueConstraints={
  *         @ORM\UniqueConstraint(name="testcaseid", columns={"judgingid", "testcaseid"})
  *     },

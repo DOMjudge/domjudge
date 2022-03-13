@@ -8,7 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Entity
  * @ORM\Table(
  *     name="external_source_warning",
- *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4",
+ *     options={"collation"="utf8mb4_unicode_ci", "charset"="utf8mb4",
  *              "comment"="Warnings for external sources"},
  *     uniqueConstraints={
  *         @ORM\UniqueConstraint(name="hash", columns={"extsourceid", "hash"}, options={"lengths"={NULL,190}})

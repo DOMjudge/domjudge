@@ -12,7 +12,7 @@ use JMS\Serializer\Annotation as Serializer;
  * @ORM\Entity()
  * @ORM\Table(
  *     name="rejudging",
- *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Rejudge group"},
+ *     options={"collation"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Rejudge group"},
  *     indexes={
  *         @ORM\Index(name="userid_start", columns={"userid_start"}),
  *         @ORM\Index(name="userid_finish", columns={"userid_finish"})

@@ -17,7 +17,7 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
  * @ORM\Entity()
  * @ORM\Table(
  *     name="team",
- *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"},
+ *     options={"collation"="utf8mb4_unicode_ci", "charset"="utf8mb4"},
  *     indexes={
  *         @ORM\Index(name="affilid", columns={"affilid"}),
  *         @ORM\Index(name="categoryid", columns={"categoryid"})

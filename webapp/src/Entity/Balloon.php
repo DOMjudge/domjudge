@@ -9,7 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Entity()
  * @ORM\Table(
  *     name="balloon",
- *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Balloons to be handed out"},
+ *     options={"collation"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Balloons to be handed out"},
  *     indexes={@ORM\Index(name="submitid", columns={"submitid"})}
  *     )
  */

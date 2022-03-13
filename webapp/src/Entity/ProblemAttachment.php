@@ -12,7 +12,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
  * @ORM\Entity()
  * @ORM\Table(
  *     name="problem_attachment",
- *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4","comment"="Attachments belonging to problems"},
+ *     options={"collation"="utf8mb4_unicode_ci", "charset"="utf8mb4","comment"="Attachments belonging to problems"},
  *     indexes={
  *         @ORM\Index(name="name", columns={"attachmentid", "name"}, options={"lengths": {null, 190}})
  *     })

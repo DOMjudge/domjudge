@@ -16,7 +16,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Entity()
  * @ORM\Table(
  *     name="contestproblem",
- *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Many-to-Many mapping of contests and problems"},
+ *     options={"collation"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Many-to-Many mapping of contests and problems"},
  *     indexes={
  *         @ORM\Index(name="cid", columns={"cid"}),
  *         @ORM\Index(name="probid", columns={"probid"})

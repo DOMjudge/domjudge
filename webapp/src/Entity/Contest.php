@@ -23,7 +23,7 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
  * @ORM\Entity()
  * @ORM\Table(
  *     name="contest",
- *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Contests that will be run with this install"},
+ *     options={"collation"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Contests that will be run with this install"},
  *     indexes={@ORM\Index(name="cid", columns={"cid", "enabled"})},
  *     uniqueConstraints={
  *         @ORM\UniqueConstraint(name="externalid", columns={"externalid"}, options={"lengths": {190}}),
@@ -148,7 +148,7 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     private $finalizetime = null;
 
     /**
-     * @ORM\Column(type="text", name="finalizecomment",
+     * @ORM\Column(type="text", name="finalizecomment", length=65535,
      *     options={"comment"="Comments by the finalizer"},
      *     nullable=true)
      * @Serializer\Exclude()

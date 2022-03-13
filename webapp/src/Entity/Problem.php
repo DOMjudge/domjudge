@@ -20,7 +20,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Entity()
  * @ORM\Table(
  *     name="problem",
- *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4","comment"="Problems the teams can submit solutions for"},
+ *     options={"collation"="utf8mb4_unicode_ci", "charset"="utf8mb4","comment"="Problems the teams can submit solutions for"},
  *     indexes={
  *         @ORM\Index(name="externalid", columns={"externalid"}, options={"lengths": {190}}),
  *         @ORM\Index(name="special_run", columns={"special_run"}),

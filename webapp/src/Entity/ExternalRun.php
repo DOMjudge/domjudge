@@ -9,7 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
  *
  * @ORM\Table(
  *     name="external_run",
- *     options={"comment":"Run in external system"},
+ *     options={"collation"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment":"Run in external system"},
  *     indexes={
  *         @ORM\Index(name="extjudgementid", columns={"extjudgementid"}),
  *         @ORM\Index(name="testcaseid", columns={"testcaseid"})

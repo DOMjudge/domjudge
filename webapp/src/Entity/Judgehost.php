@@ -13,7 +13,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Entity()
  * @ORM\Table(
  *     name="judgehost",
- *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Hostnames of the autojudgers"},
+ *     options={"collation"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Hostnames of the autojudgers"},
  *     uniqueConstraints={
  *         @ORM\UniqueConstraint(name="hostname", columns={"hostname"})
  *     })

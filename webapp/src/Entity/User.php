@@ -20,7 +20,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Entity()
  * @ORM\Table(
  *     name="user",
- *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Users that have access to DOMjudge"},
+ *     options={"collation"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Users that have access to DOMjudge"},
  *     indexes={@ORM\Index(name="teamid", columns={"teamid"})},
  *     uniqueConstraints={@ORM\UniqueConstraint(name="username", columns={"username"}, options={"lengths":{190}})})
  * @UniqueEntity("username", message="The username '{{ value }}' is already in use.")
