@@ -30,7 +30,7 @@ class ProblemUploadType extends AbstractType
             ],
         ]);
         $builder->add('delete_data_first', CheckboxType::class, [
-            'help' => 'If checked, all existing testcases and attachment for the problem will be deleted, if any. Only useful for existing problems.',
+            'help' => 'If checked, all existing testcases and attachments for the problem will be deleted, if any. Only useful for existing problems.',
             'required' => false,
         ]);
         $builder->add('upload', SubmitType::class, ['label' => 'Import', 'icon' => 'fa-upload']);
