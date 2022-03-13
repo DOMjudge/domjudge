@@ -24,8 +24,7 @@ class PublicControllerTest extends BaseTest
     protected static array  $duplicateFields = ['username'=>['input'=>'selfregister','error'=>'The username \'"selfregistered"\' is already in use.'],
                                                 'teamName'=>['input'=>'Example teamname','error'=>'This team name is already in use.'],
                                                 'affiliationName'=>['input'=>'Utrecht University','error'=>'This affiliation name is already in use.'],
-                                                'affiliationShortName'=>['input'=>'UU','error'=>'This affiliation shortname is already in use.'],
-                                                'affiliationShortName'=>['input'=>'uu','error'=>'This affiliation shortname is already in use.']];
+                                                'affiliationShortName'=>['input'=>'UU','error'=>'This affiliation shortname is already in use.']];
 
     public function testScoreboardNoContests(): void
     {
