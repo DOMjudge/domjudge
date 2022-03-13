@@ -224,5 +224,5 @@ If you see error messages of the form::
   2342 apport
 
 Then you still have ``apport`` installed and running. This error message occurs when
-submitting segmentation fault solutions. Disable or uninstall the apport
+judging submissions that trigger a segmentation fault. Disable or uninstall the apport
 daemon on all judgehosts.
