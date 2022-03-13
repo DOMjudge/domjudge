@@ -40,6 +40,14 @@ For Red Hat::
 
 .. _installing-judgehost:
 
+Removing apport
+---------------
+
+Some systems (like Ubuntu) ship with ``apport``, which conflicts with judging.
+To uninstall uit, run::
+
+  sudo apt remove apport
+
 Building and installing
 -----------------------
 These instructions assume a release `tarball <https://www.domjudge.org/download>`_, see :ref:`this section <bootstrap>`

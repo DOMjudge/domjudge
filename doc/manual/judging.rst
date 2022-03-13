@@ -215,3 +215,14 @@ create dedicated a user `domjudge` under which to install and run everything.
   be used to run normal DOMjudge processes; this user is only for
   internal use.
 
+'found processes still running ... apport'
+``````````````````````````````````````````
+
+If you see error messages of the form::
+
+  error: found processes still running as 'domjudge-run', check manually:
+  2342 apport
+
+Then you still have ``apport`` installed and/or running. This occurs on
+submitting segmentation fault solutions. Disable or uninstall the apport
+daemon on all judgehosts.
