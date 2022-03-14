@@ -16,6 +16,11 @@ myhttp() {
     http --check-status "$@"
 }
 
+if ! command -v http 1>/dev/zero; then
+    echo "Please install httpie."
+    exit 1
+fi
+
 if [ -r groups.json ]; then
     read -r -p "Import groups (from groups.json)? [y/N] " response
     response=${response,,}
