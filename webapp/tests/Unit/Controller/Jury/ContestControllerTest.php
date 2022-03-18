@@ -46,6 +46,66 @@ class ContestControllerTest extends JuryControllerTest
                                                            'silverMedals' => '1',
                                                            'bronzeMedals' => '1',
                                                            'medalCategories' => ['0' => '2']],
+                                                          ['shortname'            => 'otzcet',
+                                                           'name'                 => 'Other timezone (CET)',
+                                                           'activatetimeString'   => '2021-07-17 16:08:00 CET',
+                                                           'starttimeString'      => '2021-07-17 16:09:00 CET',
+                                                           'freezetimeString'     => '2021-07-17 16:10:00 CET',
+                                                           'endtimeString'        => '2021-07-17 16:11:00 CET',
+                                                           'unfreezetimeString'   => '2021-07-17 16:12:00 CET',
+                                                           'deactivatetimeString' => '2021-07-17 16:13:00 CET'],
+                                                          ['shortname'            => 'otzunder',
+                                                           'name'                 => 'Other timezone (Underscore)',
+                                                           'activatetimeString'   => '2021-07-17 16:08:00 America/Porto_Velho',
+                                                           'starttimeString'      => '2021-07-17 16:09:00 America/Porto_Velho',
+                                                           'freezetimeString'     => '2021-07-17 16:10:00 America/Porto_Velho',
+                                                           'endtimeString'        => '2021-07-17 16:11:00 America/Porto_Velho',
+                                                           'unfreezetimeString'   => '',
+                                                           'deactivatetimeString' => ''],
+                                                          ['shortname'            => 'otzGMT',
+                                                           'name'                 => 'Other timezone (GMT)',
+                                                           'activatetimeString'   => '2021-07-17 16:08:00 Etc/GMT-3',
+                                                           'starttimeString'      => '2021-07-17 16:09:00 Etc/GMT-3',
+                                                           'freezetimeString'     => '2021-07-17 16:10:00 Etc/GMT-3',
+                                                           'endtimeString'        => '2021-07-17 16:11:00 Etc/GMT-3',
+                                                           'unfreezetimeString'   => '',
+                                                           'deactivatetimeString' => ''],
+                                                          ['shortname'            => 'otzrel',
+                                                           'name'                 => 'Other timezone (Relative)',
+                                                           'activatetimeString'   => '-10:00',
+                                                           'starttimeString'      => '2021-07-17 16:09:00 Atlantic/Reykjavik',
+                                                           'freezetimeString'     => '+0:01',
+                                                           'endtimeString'        => '+1111:11',
+                                                           'unfreezetimeString'   => '',
+                                                           'deactivatetimeString' => ''],
+                                                          ['shortname'            => 'nofr',
+                                                           'name'                 => 'No Freeze',
+                                                           'freezetimeString'     => '',
+                                                           'unfreezetimeString'   => ''],
+                                                          ['shortname'            => 'dirstart',
+                                                           'name'                 => 'Direct start minimal',
+                                                           'activatetimeString'   => '2021-07-17 16:08:00 Europe/Amsterdam',
+                                                           'starttimeString'      => '2021-07-17 16:08:00 Europe/Amsterdam',
+                                                           'freezetimeString'     => '',
+                                                           'endtimeString'        => '2021-07-17 16:11:00 Europe/Amsterdam',
+                                                           'unfreezetimeString'   => '',
+                                                           'deactivatetimeString' => ''],
+                                                           ['shortname'            => 'dirfreeze',
+                                                           'name'                 => 'Direct freeze minimal',
+                                                           'activatetimeString'   => '2021-07-17 16:07:59 Europe/Amsterdam',
+                                                           'starttimeString'      => '2021-07-17 16:08:00 Europe/Amsterdam',
+                                                           'freezetimeString'     => '2021-07-17 16:08:00 Europe/Amsterdam',
+                                                           'endtimeString'        => '2021-07-17 16:11:00 Europe/Amsterdam',
+                                                           'unfreezetimeString'   => '2021-07-17 16:11:00 Europe/Amsterdam',
+                                                           'deactivatetimeString' => '2021-07-17 16:11:00 Europe/Amsterdam'],
+                                                          ['shortname'            => 'dirfreezerel',
+                                                           'name'                 => 'Direct freeze minimal relative',
+                                                           'activatetimeString'   => '-0:00',
+                                                           'starttimeString'      => '2021-07-17 16:08:00 Europe/Amsterdam',
+                                                           'freezetimeString'     => '+0:00',
+                                                           'endtimeString'        => '+10:00',
+                                                           'unfreezetimeString'   => '+25:00',
+                                                           'deactivatetimeString' => ''],
                                                           ['shortname' => 'rel',
                                                            'name' => 'Relative contest',
                                                            'activatetimeString' => '-1:00',
@@ -178,5 +238,64 @@ class ContestControllerTest extends JuryControllerTest
         // This should add more queue and judge tasks
         self::assertEquals(2, $queueTaskQuery->getSingleScalarResult());
         self::assertEquals(6, $judgeTaskQuery->getSingleScalarResult());
+    }
+
+    public function testCheckAddMultipleTimezonesAdmin(): void
+    {
+        $input = ['shortname' => 'tz',
+                  'name' => 'Timezones',
+                  'activatetimeString' => '1990-07-17 16:00:00 Africa/Douala',
+                  'starttimeString' => '1990-07-17 16:00:00 Etc/GMT+2',
+                  'freezetimeString' => '1990-07-17 16:00:00 America/Paramaribo'];
+        $this->roles = ['admin'];
+        $this->logOut();
+        $this->logIn();
+        $this->verifyPageResponse('GET', static::$baseUrl, 200);
+        if (static::$add !== '') {
+            self::assertSelectorExists('a:contains(' . $this->addButton . ')');
+            foreach ([$input] as $element) {
+                $formFields = [];
+                // First fill with default values, the 0th item of the array
+                // Overwrite with data to test with.
+                foreach ([static::$addEntities[0], $element] as $item) {
+                    foreach ($item as $id => $field) {
+                        // Skip elements which we cannot set yet.
+                        // We can not set checkboxes directly.
+                        // We can not set the fields set by JS directly.
+                        if (is_bool($field) || $id === static::$addPlus) {
+                            continue;
+                        }
+                        $formId = str_replace('.', '][', $id);
+                        $formFields[static::$addForm . $formId . "]"] = $field;
+                    }
+                }
+                $this->verifyPageResponse('GET', static::$baseUrl . static::$add, 200);
+                $button = $this->client->getCrawler()->selectButton('Save');
+                $form = $button->form($formFields, 'POST');
+                $formName = str_replace('[', '', static::$addForm);
+                // Get the underlying object to inject elements not currently in the DOM.
+                $rawValues = $form->getPhpValues();
+                foreach ([static::$addEntities[0], $element] as $item) {
+                    if (key_exists(static::$addPlus, $item)) {
+                        $rawValues[$formName . static::$addPlus . ']'] = $item[static::$addPlus];
+                    }
+                }
+                // Set checkboxes
+                foreach ([static::$addEntities[0], $element] as $item) {
+                    foreach ($item as $id => $field) {
+                        if (!is_bool($field)) {
+                            continue;
+                        }
+                        if ($field) {
+                            $form[$formName][$id]->tick();
+                        } else {
+                            $form[$formName][$id]->untick();
+                        }
+                    }
+                }
+                $this->client->submit($form);
+            }
+            self::assertSelectorExists('body:contains("Contest should not have multiple timezones.")');
+        }
     }
 }

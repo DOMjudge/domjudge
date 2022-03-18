@@ -494,9 +494,12 @@ class ContestController extends BaseController
             $formData = $form->getData();
             $timeZones = [];
             foreach (['Activate','Deactivate','Start','End','Freeze','Unfreeze'] as $timeString) {
-                $fields = explode(' ', $formData->{'get'.$timeString.'timeString'}());
-                if (count($fields) > 1) {
-                    $timeZones[] = $fields[2];
+                $tmpValue = $formData->{'get'.$timeString.'timeString'}();
+                if ($tmpValue !== '' && !is_null($tmpValue)) {
+                    $fields = explode(' ', $tmpValue);
+                    if (count($fields) > 1) {
+                        $timeZones[] = $fields[2];
+                    }
                 }
             }
             if (count(array_unique($timeZones)) > 1) {
@@ -643,6 +646,24 @@ class ContestController extends BaseController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $formData = $form->getData();
+            $timeZones = [];
+            foreach (['Activate','Deactivate','Start','End','Freeze','Unfreeze'] as $timeString) {
+                $tmpValue = $formData->{'get'.$timeString.'timeString'}();
+                if ($tmpValue !== '' && !is_null($tmpValue)) {
+                    $fields = explode(' ', $tmpValue);
+                    if (count($fields) > 1) {
+                        $timeZones[] = $fields[2];
+                    }
+                }
+            }
+            if (count(array_unique($timeZones)) > 1) {
+                $this->addFlash('danger', 'Contest should not have multiple timezones.');
+                return $this->render('jury/contest_add.html.twig', [
+                    'form' => $form->createView(),
+                ]);
+            }
+
             $this->em->wrapInTransaction(function () use ($contest) {
                 // A little 'hack': we need to first persist and save the
                 // contest, before we can persist and save the problem,
