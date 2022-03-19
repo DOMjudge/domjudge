@@ -140,7 +140,7 @@ class SecurityController extends AbstractController
                 ->addUser($user)
                 ->setName($teamName)
                 ->setCategory($teamCategory)
-                ->setComments('Registered by ' . $this->dj->getClientIp() . ' on ' . date('r'));
+                ->setInternalComments('Registered by ' . $this->dj->getClientIp() . ' on ' . date('r'));
 
             if ($this->config->get('show_affiliations')) {
                 switch ($registration_form->get('affiliation')->getData()) {

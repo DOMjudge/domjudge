@@ -2,11 +2,9 @@
 
 namespace App\DataFixtures\Test;
 
-use App\DataFixtures\ExampleData\TeamFixture;
 use App\Entity\Role;
 use App\Entity\User;
 use App\Entity\Team;
-use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 
 class SelfRegisteredUserFixture extends AbstractTestDataFixture

@@ -117,7 +117,7 @@ class ICPCCmsService
                         ->setCategory($participants)
                         ->setAffiliation($affiliation)
                         ->setEnabled($enabled)
-                        ->setComments('Status: ' . $teamData['status'])
+                        ->setInternalComments('Status: ' . $teamData['status'])
                         ->setIcpcid($teamData['teamId'])
                         ->setRoom($siteName);
                     $this->em->persist($team);
@@ -139,7 +139,7 @@ class ICPCCmsService
                         ->setCategory($participants)
                         ->setAffiliation($affiliation)
                         ->setEnabled($enabled)
-                        ->setComments('Status: ' . $teamData['status'])
+                        ->setInternalComments('Status: ' . $teamData['status'])
                         ->setIcpcid($teamData['teamId'])
                         ->setRoom($siteName);
 

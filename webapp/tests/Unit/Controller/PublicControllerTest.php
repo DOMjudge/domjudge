@@ -27,7 +27,7 @@ class PublicControllerTest extends BaseTest
                                                 'affiliationName'=>['input'=>'Utrecht University','error'=>'This affiliation name is already in use.'],
                                                 'affiliationShortName'=>['input'=>'UU','error'=>'This affiliation shortname is already in use.'],
                                                 'affiliationShortName'=>['input'=>'uu','error'=>'This affiliation shortname is already in use.']];
-    
+
     public function testScoreboardNoContests(): void
     {
         // Deactivate the demo contest
