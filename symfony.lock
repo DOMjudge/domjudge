@@ -118,14 +118,14 @@
     "doctrine/persistence": {
         "version": "1.1.1"
     },
-    "doctrine/reflection": {
-        "version": "v1.0.0"
-    },
     "doctrine/sql-formatter": {
         "version": "1.1.1"
     },
     "eligrey/filesaver": {
         "version": "2.0.2"
+    },
+    "endclothing/prometheus_client_php": {
+        "version": "1.0.1"
     },
     "fortawesome/font-awesome": {
         "version": "5.9.0"
@@ -145,50 +145,17 @@
             "config/packages/fos_rest.yaml"
         ]
     },
-    "hoa/compiler": {
-        "version": "3.17.08.08"
+    "guzzlehttp/guzzle": {
+        "version": "6.5.5"
     },
-    "hoa/consistency": {
-        "version": "1.17.05.02"
+    "guzzlehttp/promises": {
+        "version": "1.5.1"
     },
-    "hoa/event": {
-        "version": "1.17.01.13"
-    },
-    "hoa/exception": {
-        "version": "1.17.01.16"
-    },
-    "hoa/file": {
-        "version": "1.17.07.11"
-    },
-    "hoa/iterator": {
-        "version": "2.17.01.10"
-    },
-    "hoa/math": {
-        "version": "1.17.05.16"
-    },
-    "hoa/protocol": {
-        "version": "1.17.01.14"
-    },
-    "hoa/regex": {
-        "version": "1.17.01.13"
-    },
-    "hoa/stream": {
-        "version": "1.17.02.21"
-    },
-    "hoa/ustring": {
-        "version": "4.17.01.16"
-    },
-    "hoa/visitor": {
-        "version": "2.17.01.16"
-    },
-    "hoa/zformat": {
-        "version": "1.17.01.10"
+    "guzzlehttp/psr7": {
+        "version": "1.8.3"
     },
     "ircmaxell/password-compat": {
         "version": "v1.0.4"
-    },
-    "jdorn/sql-formatter": {
-        "version": "v1.2.17"
     },
     "jms/metadata": {
         "version": "2.0.0"
@@ -212,12 +179,6 @@
     },
     "laminas/laminas-code": {
         "version": "3.4.1"
-    },
-    "laminas/laminas-eventmanager": {
-        "version": "3.2.1"
-    },
-    "laminas/laminas-zendframework-bridge": {
-        "version": "1.1.0"
     },
     "mbostock/d3": {
         "version": "v3.5.17"
@@ -247,17 +208,11 @@
     "novus/nvd3": {
         "version": "v1.8.6"
     },
-    "ocramius/proxy-manager": {
-        "version": "2.2.2"
-    },
     "phar-io/manifest": {
         "version": "1.0.3"
     },
     "phar-io/version": {
         "version": "2.0.1"
-    },
-    "php": {
-        "version": "7.2.5"
     },
     "phpdocumentor/reflection-common": {
         "version": "1.0.1"
@@ -312,8 +267,14 @@
     "psr/event-dispatcher": {
         "version": "1.0.0"
     },
+    "psr/http-message": {
+        "version": "1.0.1"
+    },
     "psr/log": {
         "version": "1.1.0"
+    },
+    "ralouphie/getallheaders": {
+        "version": "3.0.3"
     },
     "ramsey/collection": {
         "version": "1.1.4"
@@ -731,9 +692,6 @@
     },
     "willdurand/negotiation": {
         "version": "v2.3.1"
-    },
-    "zendframework/zend-code": {
-        "version": "3.3.1"
     },
     "zircote/swagger-php": {
         "version": "2.0.14"
