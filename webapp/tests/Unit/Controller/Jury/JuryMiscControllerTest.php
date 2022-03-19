@@ -2,7 +2,21 @@
 
 namespace App\Tests\Unit\Controller\Jury;
 
+use App\DataFixtures\Test\SampleSubmissionsMultipleTriesFixture;
+use App\DataFixtures\Test\SampleSubmissionsThreeTriesCorrectFixture;
+use App\DataFixtures\Test\SampleSubmissionsThreeTriesCorrectSameLanguageFixture;
+use App\DataFixtures\Test\DemoNonPublicContestFixture;
+use App\DataFixtures\Test\DemoPostDeactivateContestFixture;
+use App\DataFixtures\Test\DemoPreActivationContestFixture;
+use App\DataFixtures\Test\DemoPreDeactivateContestFixture;
+use App\DataFixtures\Test\DemoPreEndContestFixture;
+use App\DataFixtures\Test\DemoPreFreezeContestFixture;
+use App\DataFixtures\Test\DemoPreStartContestFixture;
+use App\DataFixtures\Test\DemoPreUnfreezeContestFixture;
+use App\Entity\Contest;
+use App\Service\ScoreboardService;
 use App\Tests\Unit\BaseTest;
+use Doctrine\ORM\EntityManagerInterface;
 use Generator;
 
 class JuryMiscControllerTest extends BaseTest
@@ -43,6 +57,99 @@ class JuryMiscControllerTest extends BaseTest
 
         $this->verifyPageResponse('GET', '/jury', 200);
         self::assertSelectorExists('html:contains("DOMjudge Jury interface")');
+    }
+
+    /**
+     * @dataProvider provideContestStageForBalloon
+     */
+    public function testBalloonScoreboard(array $fixtures, bool $public, string $contestStage): void
+    {
+        $visibleElements = ["rank","team","Summary","boolfind"];
+        $nonActiveStages = ["preActivation","postDeactivate"];
+        $this->loadFixtures($fixtures);
+        /** @var ScoreboardService $sbs */
+        $sbs = static::getContainer()->get(ScoreboardService::class);
+        /** @var EntityManagerInterface $em */
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+        $contest = $em->getRepository(Contest::class)->findOneBy(['shortname' => 'demo']);
+        $sbs->refreshCache($contest);
+        $this->roles = ['balloon'];
+        $this->logOut();
+        $this->logIn();
+        $this->verifyPageResponse('GET', '/jury', 200);
+        $response = $this->client->getResponse();
+        self::assertEquals('200', $response->getStatusCode());
+        self::assertSelectorExists('body:contains("scoreboard")');
+        foreach(['/public','/jury/scoreboard'] as $url) {
+            $this->verifyPageResponse('GET', $url, 200);
+            if (in_array($contestStage, $nonActiveStages) || (!$public && $url==='/public')) {
+                $elements = ["No active contest"];
+            } elseif ($contestStage === 'preStart') {
+                $elements = ["scheduled to start on",'Demo contest','Utrecht University'];
+            } elseif ($contestStage === 'preFreeze') {
+                $elements = ["3 tries",'Demo contest','Utrecht University'];
+            } elseif (in_array($contestStage, ['preEnd','preUnfreeze'])) {
+                $elements = ["0 + 4 tries","3 tries","2 + 1 tries",'Demo contest','Utrecht University'];
+                if ($contestStage === 'preFreeze') {
+                    $elements[] = 'contest over, waiting for results';
+                }
+            } else {
+                $elements = $visibleElements;
+            }
+            foreach($elements as $selector) {
+                self::assertSelectorExists('body:contains("'.$selector.'")');
+            }
+            if (in_array($contestStage,['preFreeze','preEnd']) && $public) {
+                self::assertSelectorExists('span.submcorrect:contains("1")');
+                if (in_array($contestStage, ['preEnd','preUnfreeze'])) {
+                    self::assertSelectorExists('span.submpend:contains("1")');
+                    self::assertSelectorExists('span.submpend:contains("4")');
+                    self::assertSelectorExists('span.submreject:contains("2")');
+                    self::assertSelectorExists('span.submreject:contains("0")');
+                }
+            }
+        }
+        foreach(range(1,3) as $id) {
+            $statusCode = in_array($contestStage, ['preActivation','preStart','postDeactivate']) || !$public ? 404 : 200;
+            $this->verifyPageResponse('HEAD', '/public/problems/'.$id.'/text',$statusCode);
+        }
+        $this->verifyPageResponse('GET', '/public/problems', 200);
+        if (in_array($contestStage, array_merge(['preStart'],$nonActiveStages)) || !$public) {
+            self::assertSelectorExists('body:contains("No problem texts available at this point.")');
+            self::assertSelectorNotExists('body:contains("boolfind")');
+        } else {
+            self::assertSelectorExists('body:contains("boolfind")');
+        }
+    }
+
+    public function provideContestStageForBalloon(): Generator
+    {
+        foreach(
+            ['preActivation'=>[DemoPreActivationContestFixture::class],
+             'preStart'=>[DemoPreStartContestFixture::class],
+             'preFreeze'=>[DemoPreFreezeContestFixture::class,SampleSubmissionsThreeTriesCorrectFixture::class],
+             'preEnd'=>[DemoPreEndContestFixture::class,
+                        SampleSubmissionsMultipleTriesFixture::class,
+                        SampleSubmissionsThreeTriesCorrectFixture::class,
+                        SampleSubmissionsThreeTriesCorrectSameLanguageFixture::class],
+             'preUnfreeze'=>[DemoPreUnfreezeContestFixture::class,
+                             SampleSubmissionsMultipleTriesFixture::class,
+                             SampleSubmissionsThreeTriesCorrectFixture::class,
+                             SampleSubmissionsThreeTriesCorrectSameLanguageFixture::class],
+             'preDeactivate'=>[DemoPreDeactivateContestFixture::class,
+                               SampleSubmissionsMultipleTriesFixture::class,
+                               SampleSubmissionsThreeTriesCorrectFixture::class,
+                               SampleSubmissionsThreeTriesCorrectSameLanguageFixture::class],
+             'postDeactivate'=>[DemoPostDeactivateContestFixture::class,
+                                SampleSubmissionsMultipleTriesFixture::class,
+                                SampleSubmissionsThreeTriesCorrectFixture::class,
+                                SampleSubmissionsThreeTriesCorrectSameLanguageFixture::class]
+            ] as $ident=>$timeFixture) {
+            foreach([true,false] as $public) {
+                $fixture = $public ? [] : [DemoNonPublicContestFixture::class];
+                yield [array_merge($fixture,$timeFixture),$public, $ident];
+            }
+        }
     }
 
     /**
