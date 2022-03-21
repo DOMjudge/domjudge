@@ -551,7 +551,7 @@ class ImportProblemService
             }
 
             if ($attachmentCount > 0) {
-                $messages[] = sprintf('Deleted %d existing attachment(s)', $attachmentCount);
+                $messages[] = sprintf('Deleted %d existing attachment(s).', $attachmentCount);
             }
         }
 
