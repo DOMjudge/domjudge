@@ -3,8 +3,6 @@
 /judgedaemon
 /runguard
 /runpipe
-/runpipe1
-/runpipe2
 /evict
 /create-cgroups.service
 /domjudge-judgedaemon@.service
