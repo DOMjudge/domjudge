@@ -83,8 +83,8 @@ class ImportProblemService
         $submission_file = 'submissions.json';
         $problemIsNew    = $problem === null;
 
-        $iniKeysProblem        = ['name', 'timelimit', 'special_run', 'special_compare'];
-        $iniKeysContestProblem = ['allow_submit', 'allow_judge', 'points', 'color'];
+        $iniKeysProblem        = ['name', 'timelimit', 'special_run', 'special_compare', 'externalid'];
+        $iniKeysContestProblem = ['allow_submit', 'allow_judge', 'points', 'color', 'short-name'];
 
         $defaultTimelimit = 10;
 
@@ -112,6 +112,13 @@ class ImportProblemService
         $problemProperties        = array_intersect_key($properties, array_flip($iniKeysProblem));
         $contestProblemProperties = array_intersect_key($properties, array_flip($iniKeysContestProblem));
 
+        // The property in the INI is called short-name (because that is what we have called it in exports),
+        // but the property on the contest problem is shortname, so remap it
+        if (isset($contestProblemProperties['short-name'])) {
+            $contestProblemProperties['shortname'] = $contestProblemProperties['short-name'];
+            unset($contestProblemProperties['short-name']);
+        }
+
         // Set timelimit from alternative source:
         if (!isset($problemProperties['timelimit']) &&
             ($str = $zip->getFromName($tleFile)) !== false) {
@@ -129,7 +136,9 @@ class ImportProblemService
             $problemProperties['externalid'] = $externalId;
         }
 
-        $contestProblemProperties['shortname'] = $externalId;
+        if (!isset($contestProblemProperties['shortname'])) {
+            $contestProblemProperties['shortname'] = $externalId;
+        }
 
         // Set default of 1 point for a problem if not specified
         if (!isset($contestProblemProperties['points'])) {
