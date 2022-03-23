@@ -2,6 +2,8 @@
 
 namespace App\Tests\Unit\Controller\API;
 
+use App\DataFixtures\Test\DummyProblemFixture;
+
 class ProblemControllerTest extends BaseTest
 {
     /* This tests with the anonymous user;
@@ -47,4 +49,39 @@ class ProblemControllerTest extends BaseTest
     ];
 
     protected array $expectedAbsent = ['4242', 'nonexistent'];
+
+    public function testDeleteNotAllowed(): void
+    {
+        if ($this->apiUser === 'admin') {
+            $this->markTestSkipped('Only run for non-admins.');
+        }
+
+        // Check that we can not delete the problem
+        $url = $this->helperGetEndpointURL($this->apiEndpoint) . '/2';
+        $this->verifyApiJsonResponse('DELETE', $url, 401, $this->apiUser);
+
+        // Check that we still have three problems left
+        $indexUrl = $this->helperGetEndpointURL($this->apiEndpoint);
+        $problems = $this->verifyApiJsonResponse('GET', $indexUrl, 200, $this->apiUser);
+        self::assertCount(3, $problems);
+    }
+
+    public function testAddNotAllowed(): void
+    {
+        if ($this->apiUser === 'admin') {
+            $this->markTestSkipped('Only run for non-admins.');
+        }
+
+        $this->loadFixture(DummyProblemFixture::class);
+
+        // Check that we can not add a problem
+        $problemId = $this->resolveReference(DummyProblemFixture::class . ':0');
+        $url = $this->helperGetEndpointURL($this->apiEndpoint) . '/' . $problemId;
+        $this->verifyApiJsonResponse('DELETE', $url, 401, $this->apiUser, ['label' => 'dummy']);
+
+        // Check that we still have three problems left
+        $indexUrl = $this->helperGetEndpointURL($this->apiEndpoint);
+        $problems = $this->verifyApiJsonResponse('GET', $indexUrl, 200, $this->apiUser);
+        self::assertCount(3, $problems);
+    }
 }
