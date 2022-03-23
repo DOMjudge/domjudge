@@ -20,11 +20,10 @@
         <link rel="stylesheet" href="{{ asset('style_domjudge.css') }}">
 
         {{ extrahead|default('') }}
-
-        {% for file in customAssetFiles('css') %}
-            <link rel="stylesheet" href="{{ asset('css/custom/' ~ file) }}">
-        {% endfor %}
     {% endblock %}
+    {% for file in customAssetFiles('css') %}
+        <link rel="stylesheet" href="{{ asset('css/custom/' ~ file) }}">
+    {% endfor %}
 </head>
 <body{% if static is defined and static %} class="static"{% endif%}>
 {% block menu %}{% endblock %}
