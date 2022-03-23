@@ -146,6 +146,14 @@ if [ $RET -ne 4 ] && [ $RET -ne 8 ] && [ $RET -ne 0 ]; then
 fi
 section_end scrape
 
+section_start_collap removecommithash "Remove HEAD hash from files"
+while IFS= read -r -d '' file; do
+    newname=${file%@v=*}
+    echo $newname
+    mv $file $newname
+done < <(find ./ -type f -name "*@v=*" -print0)
+section_end removecommithash
+
 section_start_collap cpstatic "Store scraped files in nginx"
 cd "$DIR"
 mkdir /var/www/html/"$URL"/
