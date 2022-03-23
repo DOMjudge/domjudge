@@ -1228,7 +1228,7 @@ class DOMJudgeService
 
         $results = [];
         foreach (scandir($customDir) as $file) {
-            foreach (static::MIMETYPE_TO_EXTENSION as $extension) {
+            foreach (array_merge(['css','js'], static::MIMETYPE_TO_EXTENSION) as $extension) {
                 if (strpos($file, '.' . $extension) !== false) {
                     $results[] = $file;
                 }
