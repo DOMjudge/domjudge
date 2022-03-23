@@ -162,7 +162,6 @@ class PublicController extends BaseController
             $this->dj->getTwigDataForProblemsAction(-1, $this->stats));
     }
 
-
     /**
      * @Route("/problems/{probId<\d+>}/text", name="public_problem_text")
      */
