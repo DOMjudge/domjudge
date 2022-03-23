@@ -8,6 +8,7 @@ use App\Service\CheckConfigService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
+use App\Service\ImportProblemService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
@@ -42,6 +43,7 @@ class GeneralInfoController extends AbstractFOSRestController
     protected CheckConfigService $checkConfigService;
     protected RouterInterface $router;
     protected LoggerInterface $logger;
+    protected ImportProblemService $importProblemService;
 
     public function __construct(
         EntityManagerInterface $em,
@@ -50,15 +52,17 @@ class GeneralInfoController extends AbstractFOSRestController
         EventLogService $eventLogService,
         CheckConfigService $checkConfigService,
         RouterInterface $router,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        ImportProblemService $importProblemService
     ) {
-        $this->em                 = $em;
-        $this->dj                 = $dj;
-        $this->eventLogService    = $eventLogService;
-        $this->checkConfigService = $checkConfigService;
-        $this->router             = $router;
-        $this->config             = $config;
-        $this->logger             = $logger;
+        $this->em                   = $em;
+        $this->dj                   = $dj;
+        $this->eventLogService      = $eventLogService;
+        $this->checkConfigService   = $checkConfigService;
+        $this->router               = $router;
+        $this->config               = $config;
+        $this->logger               = $logger;
+        $this->importProblemService = $importProblemService;
     }
 
     /**
@@ -301,6 +305,49 @@ class GeneralInfoController extends AbstractFOSRestController
         }
 
         return AbstractRestController::sendBinaryFileResponse($request, $flagFile);
+    }
+
+    /**
+     * Add a problem without linking it to a contest.
+     * @Rest\Post("/problems")
+     * @IsGranted("ROLE_ADMIN")
+     * @OA\Post()
+     * @OA\Tag(name="Problems")
+     * @OA\RequestBody(
+     *     required=true,
+     *     @OA\MediaType(
+     *         mediaType="multipart/form-data",
+     *         @OA\Schema(
+     *             required={"zip"},
+     *             @OA\Property(
+     *                 property="zip",
+     *                 type="string",
+     *                 format="binary",
+     *                 description="The problem archive to import"
+     *             ),
+     *             @OA\Property(
+     *                 property="problem",
+     *                 description="Optional: problem id to update.",
+     *                 type="string"
+     *             )
+     *         )
+     *     )
+     * )
+     * @OA\Response(
+     *     response="200",
+     *     description="Returns the ID of the imported problem and any messages produced",
+     *     @OA\JsonContent(
+     *         type="object",
+     *         @OA\Property(property="problem_id", type="integer", description="The ID of the imported problem"),
+     *         @OA\Property(property="messages", type="array",
+     *             @OA\Items(type="string", description="Messages produced while adding problems")
+     *         )
+     *     )
+     * )
+     */
+    public function addProblemAction(Request $request): array
+    {
+        return $this->importProblemService->importProblemFromRequest($request);
     }
 
     /**

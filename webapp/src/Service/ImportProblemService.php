@@ -19,9 +19,12 @@ use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
+use Exception;
 use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Validator\ConstraintViolationInterface;
@@ -792,5 +795,68 @@ class ImportProblemService
         $messages[] = sprintf('Saved problem %d', $problem->getProbid());
 
         return $problem;
+    }
+
+    public function importProblemFromRequest(Request $request, ?int $contestId = null): array
+    {
+        $file = $request->files->get('zip');
+        if (empty($file)) {
+            throw new BadRequestHttpException('ZIP file missing');
+        }
+
+        $contest = null;
+        if ($contestId) {
+            /** @var Contest $contest */
+            $contest = $this->em->getRepository(Contest::class)->find($contestId);
+        }
+        $allMessages = [];
+
+        // Only timeout after 2 minutes, since importing may take a while.
+        set_time_limit(120);
+
+        $probId  = $request->request->get('problem');
+        $problem = null;
+        if (!empty($probId)) {
+            $problem = $this->em->createQueryBuilder()
+                ->from(Problem::class, 'p')
+                ->select('p')
+                ->andWhere(sprintf('p.%s = :id', $this->eventLogService->externalIdFieldForEntity(Problem::class) ?? 'probid'))
+                ->setParameter('id', $probId)
+                ->getQuery()
+                ->getOneOrNullResult();
+            if (empty($problem)) {
+                throw new BadRequestHttpException('Specified \'problem\' does not exist.');
+            }
+        }
+        $errors = [];
+        $zip    = null;
+        try {
+            $zip         = $this->dj->openZipFile($file->getRealPath());
+            $clientName  = $file->getClientOriginalName();
+            $messages    = [];
+            $newProblem  = $this->importZippedProblem(
+                $zip, $clientName, $problem, $contest, $messages
+            );
+            $allMessages = array_merge($allMessages, $messages);
+            if ($newProblem) {
+                $this->dj->auditlog('problem', $newProblem->getProbid(), 'upload zip', $clientName);
+                $probId = $newProblem->getApiId($this->eventLogService);
+            } else {
+                $errors = array_merge($errors, $messages);
+            }
+        } catch (Exception $e) {
+            $allMessages[] = $e->getMessage();
+        } finally {
+            if ($zip) {
+                $zip->close();
+            }
+        }
+        if (!empty($errors)) {
+            throw new BadRequestHttpException($this->dj->jsonEncode($errors));
+        }
+        return [
+            'problem_id' => $probId,
+            'messages'   => $allMessages,
+        ];
     }
 }
