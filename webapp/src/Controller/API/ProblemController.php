@@ -208,6 +208,137 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
     }
 
     /**
+     * Unlink a problem from this contest.
+     * @Rest\Delete("/{id}")
+     * @IsGranted("ROLE_ADMIN")
+     * @OA\Response(response="204", description="Problem unlinked from contest succeeded")
+     * @OA\Parameter(ref="#/components/parameters/id")
+     */
+    public function unlinkProblemAction(Request $request, string $id): Response
+    {
+        $problem = $this->em->createQueryBuilder()
+                            ->from(Problem::class, 'p')
+                            ->select('p')
+                            ->andWhere(sprintf('%s = :id', $this->getIdField()))
+                            ->setParameter('id', $id)
+                            ->getQuery()
+                            ->getOneOrNullResult();
+
+        if (empty($problem)) {
+            throw new NotFoundHttpException(sprintf('Object with ID \'%s\' not found', $id));
+        }
+
+        $cid = $this->getContestId($request);
+
+        /** @var ContestProblem|null $contestProblem */
+        $contestProblem = $this->em->createQueryBuilder()
+                                   ->from(ContestProblem::class, 'cp')
+                                   ->select('cp')
+                                   ->andWhere('cp.contest = :contest')
+                                   ->andWhere('cp.problem = :problem')
+                                   ->setParameter('contest', $cid)
+                                   ->setParameter('problem', $problem)
+                                   ->getQuery()
+                                   ->getOneOrNullResult();
+
+        if (empty($contestProblem)) {
+            throw new NotFoundHttpException(sprintf('Object with ID \'%s\' not found', $id));
+        }
+
+        $this->em->remove($contestProblem);
+        $id = [$contestProblem->getCid(), $contestProblem->getProbid()];
+        $this->dj->auditlog('contest_problem', implode(', ', $id), 'deleted');
+        $this->eventLogService->log('problem', $contestProblem->getProbid(),
+                                    EventLogService::ACTION_DELETE, $cid,
+                                    null, null, false);
+
+        return new Response('', Response::HTTP_NO_CONTENT);
+    }
+
+    /**
+     * Link an existing problem to this contest.
+     * @Rest\Put("/{id}")
+     * @IsGranted("ROLE_ADMIN")
+     * @OA\RequestBody(
+     *     required=true,
+     *     @OA\MediaType(
+     *         mediaType="application/json",
+     *         @OA\Schema(ref="#/components/schemas/ContestProblemPut")
+     *     )
+     * )
+     * @OA\Response(
+     *     response="200",
+     *     description="Returns the linked problem for this contest",
+     *     @OA\JsonContent(ref="#/components/schemas/ContestProblem")
+     * )
+     * @OA\Parameter(ref="#/components/parameters/id")
+     */
+    public function linkProblemAction(Request $request, string $id): Response
+    {
+        $required = ['label'];
+        foreach ($required as $argument) {
+            if (!$request->request->has($argument)) {
+                throw new BadRequestHttpException(sprintf("Argument '%s' is mandatory.", $argument));
+            }
+        }
+
+        $problem = $this->em->createQueryBuilder()
+                            ->from(Problem::class, 'p')
+                            ->select('p')
+                            ->andWhere(sprintf('%s = :id', $this->getIdField()))
+                            ->setParameter('id', $id)
+                            ->getQuery()
+                            ->getOneOrNullResult();
+
+        if (empty($problem)) {
+            throw new NotFoundHttpException(sprintf('Object with ID \'%s\' not found', $id));
+        }
+
+        $cid = $this->getContestId($request);
+
+        /** @var ContestProblem|null $contestProblem */
+        $contestProblem = $this->em->createQueryBuilder()
+                                   ->from(ContestProblem::class, 'cp')
+                                   ->select('cp')
+                                   ->andWhere('cp.contest = :contest')
+                                   ->andWhere('cp.problem = :problem')
+                                   ->setParameter('contest', $cid)
+                                   ->setParameter('problem', $problem)
+                                   ->getQuery()
+                                   ->getOneOrNullResult();
+
+        if (!empty($contestProblem)) {
+            throw new BadRequestHttpException('Problem already linked to contest');
+        }
+
+        $contest = $this->em->getRepository(Contest::class)->find($this->getContestId($request));
+
+        $lazyEvalResults = null;
+        if ($request->request->has('lazy_eval_results')) {
+            $lazyEvalResults = $request->request->getBoolean('lazy_eval_results');
+        }
+
+        $contestProblem = (new ContestProblem())
+            ->setContest($contest)
+            ->setProblem($problem)
+            ->setShortname($request->request->get('label'))
+            ->setColor($request->request->get('rgb') ?? $request->request->get('color'))
+            ->setPoints($request->request->getInt('points', 1))
+            ->setLazyEvalResults($lazyEvalResults);
+
+        $this->em->persist($contestProblem);
+        $this->em->flush();
+
+        $fullId = [$contestProblem->getCid(), $contestProblem->getProbid()];
+        $this->dj->auditlog('contest_problem', implode(', ', $fullId), 'added');
+        $this->eventLogService->log('problem', $contestProblem->getProbid(),
+                                    EventLogService::ACTION_CREATE, $cid,
+                                    null, null, false);
+
+        return $this->singleAction($request, $id);
+    }
+
+    /**
      * Get the given problem for this contest
      * @throws NonUniqueResultException
      * @Rest\Get("/{id}")

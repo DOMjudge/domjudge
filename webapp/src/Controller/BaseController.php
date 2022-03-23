@@ -5,7 +5,7 @@ namespace App\Controller;
 use App\Entity\BaseApiEntity;
 use App\Entity\Contest;
 use App\Entity\JudgeTask;
-use App\Entity\Judging;
+use App\Entity\ContestProblem;
 use App\Entity\Problem;
 use App\Entity\RankCache;
 use App\Entity\ScoreCache;
@@ -21,7 +21,6 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\MappingException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
-use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -231,8 +230,12 @@ abstract class BaseController extends AbstractController
                 if (!$entity instanceof Contest) {
                     $cid = $contest->getCid();
                 }
+                $dataId = $primaryKeyData[0];
+                if ($entity instanceof ContestProblem) {
+                    $dataId = $entity->getProbid();
+                }
                 // TODO: cascade deletes. Maybe use getDependentEntities()?
-                $eventLogService->log($endpoint, $primaryKeyData[0],
+                $eventLogService->log($endpoint, $dataId,
                     EventLogService::ACTION_DELETE,
                     $cid, null, null, false);
             }

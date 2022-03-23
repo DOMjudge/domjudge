@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Controller\API;
 
+use App\DataFixtures\Test\DummyProblemFixture;
 use App\Entity\Problem;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
@@ -92,5 +93,81 @@ EOF;
         }
 
         self::assertEquals($expectedProblems, $addedProblems);
+    }
+
+    public function testDelete(): void
+    {
+        // Check that we can delete the problem
+        $url = $this->helperGetEndpointURL($this->apiEndpoint) . '/2';
+        $this->verifyApiJsonResponse('DELETE', $url, 204, $this->apiUser);
+
+        // Check that we now have two problems left
+        $indexUrl = $this->helperGetEndpointURL($this->apiEndpoint);
+        $problems = $this->verifyApiJsonResponse('GET', $indexUrl, 200, $this->apiUser);
+        self::assertCount(2, $problems);
+    }
+
+    public function testDeleteNotFound(): void
+    {
+        // Check that we can delete the problem
+        $url = $this->helperGetEndpointURL($this->apiEndpoint) . '/4';
+        $this->verifyApiJsonResponse('DELETE', $url, 404, $this->apiUser);
+    }
+
+    public function testAdd(): void
+    {
+        $this->loadFixture(DummyProblemFixture::class);
+
+        $body = [
+            'label'        => 'newproblem',
+            'points'       => 3,
+            'rgb'        => '#013370',
+            'allow_submit' => true,
+            'allow_judge'  => true,
+        ];
+
+        $problemId = $this->resolveReference(DummyProblemFixture::class . ':0');
+
+        // Check that we can not add any problem
+        $url             = $this->helperGetEndpointURL($this->apiEndpoint) . '/' . $problemId;
+        $problemResponse = $this->verifyApiJsonResponse('PUT', $url, 200, $this->apiUser, $body);
+
+        $expected = [
+            'id'         => $problemId,
+            'ordinal'    => 3, // `newproblem` comes after `boolfind`, `fltcmp` and `hello`
+            'time_limit' => 2,
+            'name'       => 'Dummy problem',
+            'label'      => $body['label'],
+            'color'      => 'midnightblue', // Closest to #013370
+            'rgb'        => $body['rgb'],
+        ];
+
+        foreach ($expected as $key => $value) {
+            self::assertArrayHasKey($key, $problemResponse);
+            self::assertEquals($value, $problemResponse[$key], "$key has correct value");
+        }
+
+        // Check that we now have four problems
+        $indexUrl = $this->helperGetEndpointURL($this->apiEndpoint);
+        $problems = $this->verifyApiJsonResponse('GET', $indexUrl, 200, $this->apiUser);
+        self::assertCount(4, $problems);
+    }
+
+    public function testAddNotFound(): void
+    {
+        // Check that we can delete the problem
+        $url = $this->helperGetEndpointURL($this->apiEndpoint) . '/notfound';
+        $response = $this->verifyApiJsonResponse('PUT', $url, 404, $this->apiUser, ['label' => 'dummy']);
+        self::assertEquals("Object with ID 'notfound' not found", $response['message']);
+    }
+
+    public function testAddExisting(): void
+    {
+        $this->loadFixture(DummyProblemFixture::class);
+
+        // Check that we can not add a problem that is already added
+        $url = $this->helperGetEndpointURL($this->apiEndpoint) . '/2';
+        $response = $this->verifyApiJsonResponse('PUT', $url, 400, $this->apiUser, ['label' => 'dummy']);
+        self::assertEquals('Problem already linked to contest', $response['message']);
     }
 }
