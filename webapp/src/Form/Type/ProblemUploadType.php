@@ -9,6 +9,7 @@ use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class ProblemUploadType extends AbstractType
 {
@@ -29,10 +30,17 @@ class ProblemUploadType extends AbstractType
                 'accept' => 'application/zip',
             ],
         ]);
-        $builder->add('delete_data_first', CheckboxType::class, [
-            'help' => 'If checked, all existing testcases and attachments for the problem will be deleted, if any. Only useful for existing problems.',
-            'required' => false,
-        ]);
+        if ($options['show_delete_data_first']) {
+            $builder->add('delete_data_first', CheckboxType::class, [
+                'help'     => 'If checked, old data will be deleted.',
+                'required' => false,
+            ]);
+        }
         $builder->add('upload', SubmitType::class, ['label' => 'Import', 'icon' => 'fa-upload']);
+    }
+
+    public function configureOptions(OptionsResolver $resolver)
+    {
+        $resolver->setDefaults(['show_delete_data_first' => false]);
     }
 }

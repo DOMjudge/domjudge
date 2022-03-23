@@ -229,7 +229,7 @@ class Problem extends BaseApiEntity
         return Utils::roundedFloat($this->timelimit);
     }
 
-    public function setMemlimit(int $memlimit): Problem
+    public function setMemlimit(?int $memlimit): Problem
     {
         $this->memlimit = $memlimit;
         return $this;
@@ -240,7 +240,7 @@ class Problem extends BaseApiEntity
         return $this->memlimit;
     }
 
-    public function setOutputlimit(int $outputlimit): Problem
+    public function setOutputlimit(?int $outputlimit): Problem
     {
         $this->outputlimit = $outputlimit;
         return $this;

@@ -182,8 +182,8 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
      *                 type="string"
      *             ),
      *             @OA\Property(
-     *                 property="delete_data_first",
-     *                 description="Optional: whether to delete testcase/attachment data before importing into an existing problem.",
+     *                 property="delete_old_data",
+     *                 description="Optional: whether to delete old (existing) data before importing into an existing problem.",
      *                 type="boolean"
      *             )
      *         )

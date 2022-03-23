@@ -75,7 +75,7 @@ class ImportProblemService
         string $clientName,
         ?Problem $problem = null,
         ?Contest $contest = null,
-        bool $deleteDataFirst = false,
+        bool $deleteOldData = false,
         ?array &$messages = []
     ): ?Problem {
         // This might take a while
@@ -180,6 +180,14 @@ class ImportProblemService
                     ->setContest($contest);
             }
         } else {
+            if ($problem->getExternalid() !== $problemProperties['externalid']) {
+                $messages[] = sprintf(
+                    'External ID of problem to import into (%s) does not match new external ID (%s).',
+                $problem->getExternalid(), $problemProperties['externalid']
+                );
+                return null;
+            }
+
             if ($contest !== null) {
                 // Find the correct contest problem
                 /** @var ContestProblem $possibleContestProblem */
@@ -199,6 +207,62 @@ class ImportProblemService
                     // Don't overwrite the shortname for a contestproblem when
                     // it already exists.
                     unset($contestProblemProperties['shortname']);
+                }
+            }
+        }
+
+        if ($deleteOldData && $problem->getProbid()) {
+            if (abs($problem->getTimelimit() - $defaultTimelimit) > 0.001) {
+                $problem->setTimelimit($defaultTimelimit);
+                $messages[] = 'Resetting time limit.';
+            }
+            if ($problem->getCompareExecutable()) {
+                $problem->setCompareExecutable();
+                $messages[] = 'Clearing compare executable.';
+            }
+            if ($problem->getSpecialCompareArgs()) {
+                $problem->setSpecialCompareArgs('');
+                $messages[] = 'Clearing compare arguments.';
+            }
+            if ($problem->getRunExecutable()) {
+                $problem->setRunExecutable();
+                $messages[] = 'Clearing run executable.';
+            }
+            if ($problem->getCombinedRunCompare()) {
+                $problem->setCombinedRunCompare(false);
+                $messages[] = 'Clearing combined run and compare script flag.';
+            }
+            if ($problem->getMemlimit()) {
+                $problem->setMemlimit(null);
+                $messages[] = 'Clearing memory limit.';
+            }
+            if ($problem->getOutputlimit()) {
+                $problem->setOutputlimit(null);
+                $messages[] = 'Clearing output limit.';
+            }
+            if ($problem->getProblemtext() || $problem->getProblemtextType()) {
+                $problem
+                    ->setProblemtext(null)
+                    ->setProblemtextType(null);
+                $messages[] = 'Clearing problem text.';
+            }
+
+            if ($contestProblem) {
+                if ($contestProblem->getPoints() !== 1) {
+                    $contestProblem->setPoints(1);
+                    $messages[] = 'Resetting problem points.';
+                }
+                if (!$contestProblem->getAllowSubmit()) {
+                    $contestProblem->setAllowSubmit(true);
+                    $messages[] = 'Resetting problem allow submit.';
+                }
+                if (!$contestProblem->getAllowJudge()) {
+                    $contestProblem->setAllowJudge(true);
+                    $messages[] = 'Resetting problem allow judge.';
+                }
+                if ($contestProblem->getColor()) {
+                    $contestProblem->setColor(null);
+                    $messages[] = 'Clearing problem color.';
                 }
             }
         }
@@ -397,7 +461,7 @@ class ImportProblemService
             }
         }
 
-        if ($deleteDataFirst && $problem->getProbid()) {
+        if ($deleteOldData && $problem->getProbid()) {
             // Delete current testcases. We do this with a direct query, because
             // otherwise we can get duplicate key errors, since Doctrine first performs
             // inserts and only then deletes
@@ -414,7 +478,7 @@ class ImportProblemService
         }
 
         // Insert/update testcases
-        if (!$deleteDataFirst && $problem->getProbid()) {
+        if (!$deleteOldData && $problem->getProbid()) {
             // Find the current max rank
             $maxRank = (int)$this->em->createQueryBuilder()
                 ->from(Testcase::class, 't')
@@ -483,7 +547,7 @@ class ImportProblemService
                 $md5in  = md5($testInput);
                 $md5out = md5($testOutput);
 
-                if (!$deleteDataFirst && $problem->getProbid()) {
+                if (!$deleteOldData && $problem->getProbid()) {
                     // Skip testcases that already exist identically
                     $existingTestcase = $this->em
                         ->createQueryBuilder()
@@ -543,7 +607,7 @@ class ImportProblemService
             }
         }
 
-        if ($deleteDataFirst && $problem->getProbid()) {
+        if ($deleteOldData && $problem->getProbid()) {
             $attachmentCount = $problem->getAttachments()->count();
             foreach ($problem->getAttachments() as $attachment) {
                 $problem->removeAttachment($attachment);
@@ -578,7 +642,7 @@ class ImportProblemService
             }
 
             // Check if an attachment already exists, since then we overwrite it
-            if (!$deleteDataFirst && $problem->getProbid()) {
+            if (!$deleteOldData && $problem->getProbid()) {
                 /** @var ProblemAttachment|null $attachment */
                 $attachment = $this->em
                     ->createQueryBuilder()
@@ -853,7 +917,7 @@ class ImportProblemService
         set_time_limit(120);
 
         $probId  = $request->request->get('problem');
-        $deleteDataFirst = $request->request->getBoolean('delete_data_first');
+        $deleteOldData = $request->request->getBoolean('delete_data_first');
         $problem = null;
         if (!empty($probId)) {
             $problem = $this->em->createQueryBuilder()
@@ -874,7 +938,7 @@ class ImportProblemService
             $clientName  = $file->getClientOriginalName();
             $messages    = [];
             $newProblem  = $this->importZippedProblem(
-                $zip, $clientName, $problem, $contest, $deleteDataFirst, $messages
+                $zip, $clientName, $problem, $contest, $deleteOldData, $messages
             );
             $allMessages = array_merge($allMessages, $messages);
             if ($newProblem) {
