@@ -4,9 +4,8 @@ namespace App\Tests\Unit\Controller;
 
 use App\DataFixtures\Test\EnableSelfregisterFixture;
 use App\DataFixtures\Test\EnableSelfregisterSecondCategoryFixture;
-use App\DataFixtures\Test\SelfregisteredUserFixture;
+use App\DataFixtures\Test\SelfRegisteredUserFixture;
 use App\Entity\Contest;
-use App\Service\DOMJudgeService;
 use App\Tests\Unit\BaseTest;
 use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
@@ -94,7 +93,7 @@ class PublicControllerTest extends BaseTest
         foreach(['affiliationName','affiliationShortName'] as $field) {
             if(array_key_exists($field, $inputs)) {
                 $this->verifyPageResponse('GET', static::$urlAffil, 200);
-                self::assertSelectorExists('html:contains("'.$inputs[$field].'")');    
+                self::assertSelectorExists('html:contains("'.$inputs[$field].'")');
             }
         }
     }

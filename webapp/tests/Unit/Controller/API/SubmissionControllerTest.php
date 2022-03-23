@@ -103,7 +103,7 @@ class SubmissionControllerTest extends BaseTest
         yield [
             'demo',
             ['problem_id' => 1, 'language_id' => 'cpp', 'files' => 'this is not an array'],
-            "The 'files' attribute must be an array with a single item, containing an object with a base64 encoded data field."
+            "Unexpected value for parameter \"files\": expecting \"array\", got \"string\"."
         ];
         yield [
             'demo',

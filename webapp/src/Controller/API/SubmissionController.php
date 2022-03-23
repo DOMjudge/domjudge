@@ -369,8 +369,8 @@ class SubmissionController extends AbstractRestController
 
         if ($request->request->has('files')) {
             // CCS spec format, files are a ZIP, get them and transform them into a file object
-            $filesList = $request->request->get('files');
-            if (!is_array($filesList) || count($filesList) !== 1 || !isset($filesList[0]['data'])) {
+            $filesList = $request->request->all('files');
+            if (count($filesList) !== 1 || !isset($filesList[0]['data'])) {
                 throw new BadRequestHttpException("The 'files' attribute must be an array with a single item, containing an object with a base64 encoded data field.");
             }
 
