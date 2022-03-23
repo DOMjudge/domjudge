@@ -199,63 +199,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
      */
     public function addProblemAction(Request $request): array
     {
-        $file     = $request->files->get('zip');
-        if (empty($file)) {
-            throw new BadRequestHttpException('ZIP file missing');
-        }
-
-        $contestId = $this->getContestId($request);
-        /** @var Contest $contest */
-        $contest     = $this->em->getRepository(Contest::class)->find($contestId);
-        $allMessages = [];
-
-        // Only timeout after 2 minutes, since importing may take a while.
-        set_time_limit(120);
-
-        $probId = $request->request->get('problem');
-        $problem = null;
-        if (!empty($probId)) {
-            $problem = $this->em->createQueryBuilder()
-                ->from(Problem::class, 'p')
-                ->select('p')
-                ->andWhere(sprintf('%s = :id', $this->getIdField()))
-                ->setParameter('id', $probId)
-                ->getQuery()
-                ->getOneOrNullResult();
-            if (empty($problem)) {
-                throw new BadRequestHttpException('Specified \'problem\' does not exist.');
-            }
-        }
-        $errors = [];
-        $zip = null;
-        try {
-            $zip         = $this->dj->openZipFile($file->getRealPath());
-            $clientName  = $file->getClientOriginalName();
-            $messages    = [];
-            $newProblem  = $this->importProblemService->importZippedProblem(
-                $zip, $clientName, $problem, $contest, $messages
-            );
-            $allMessages = array_merge($allMessages, $messages);
-            if ($newProblem) {
-                $this->dj->auditlog('problem', $newProblem->getProbid(), 'upload zip', $clientName);
-                $probId = $newProblem->getApiId($this->eventLogService);
-            } else {
-                $errors = array_merge($errors, $messages);
-            }
-        } catch (Exception $e) {
-            $allMessages[] = $e->getMessage();
-        } finally {
-            if ($zip) {
-                $zip->close();
-            }
-        }
-        if (!empty($errors)) {
-            throw new BadRequestHttpException($this->dj->jsonEncode($errors));
-        }
-        return [
-            'problem_id' => $probId,
-            'messages' => $allMessages,
-        ];
+        return $this->importProblemService->importProblemFromRequest($request, $this->getContestId($request));
     }
 
     /**
