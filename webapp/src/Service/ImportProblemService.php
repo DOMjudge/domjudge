@@ -473,7 +473,7 @@ class ImportProblemService
                 ->getQuery()
                 ->execute();
             if ($numDeleted > 0) {
-                $messages[] = sprintf('Deleted %d existing testcase(s)', $numDeleted);
+                $messages[] = sprintf('Deleted %d existing testcase(s).', $numDeleted);
             }
         }
 
