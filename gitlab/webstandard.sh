@@ -81,10 +81,6 @@ if [ "$TEST" = "w3cval" ]; then
     rm -f localhost/domjudge/jury/config/check/phpinfo*
     section_end upstream_problems
 
-    section_start_collap upstream_icpc "Remove icpc only features"
-    rm -rf localhost/domjudge/jury/import-export/export/results-icpc.html*
-    section_end upstream_icpc
-
     section_start_collap test_suite "Install testsuite"
     cd $DIR
     wget https://github.com/validator/validator/releases/latest/download/vnu.linux.zip

@@ -105,17 +105,6 @@
                                 {% endfor %}
                             </ul>
                         </li>
-                        <li>
-                            ICPC site <code>results.html</code>:
-                            <ul>
-                                {% for sort_order, names in sort_orders %}
-                                    <li>
-                                        <a href="{{ path('jury_html_export', {'type': 'results-icpc', 'sort_order': sort_order}) }}">for sort order {{ sort_order }}</a>
-                                        ({{ names | join(', ') }})
-                                    </li>
-                                {% endfor %}
-                            </ul>
-                        </li>
                     <li>
                         <a href="{{ path('jury_html_export', {'type': 'clarifications'}) }}" target="_blank"><code>clarifications.html</code></a>
                     </li>
