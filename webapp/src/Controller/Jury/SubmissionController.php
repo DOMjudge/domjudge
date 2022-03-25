@@ -14,7 +14,6 @@ use App\Entity\Judging;
 use App\Entity\JudgingRun;
 use App\Entity\Language;
 use App\Entity\Problem;
-use App\Entity\QueueTask;
 use App\Entity\Submission;
 use App\Entity\SubmissionFile;
 use App\Entity\Team;
@@ -897,38 +896,8 @@ class SubmissionController extends BaseController
         if ($judging === null) {
             throw new BadRequestHttpException("Unknown judging with '$judgingId' requested.");
         }
+        $this->judgeRemaining([$judging]);
 
-        if ($judging->getResult() === null) {
-            $this->addFlash('warning', 'Please be patient, this judging is still in progress.');
-        } elseif ($judging->getJudgeCompletely()) {
-            $this->addFlash('warning', 'This judging was already requested to be judged completely.');
-        } else {
-            $numRequested = $this->em->getConnection()->executeStatement(
-                'UPDATE judgetask SET valid=1'
-                . ' WHERE jobid=:jobid'
-                . ' AND judgehostid IS NULL',
-                [
-                    'jobid' => $judgingId,
-                ]
-            );
-            $judging->setJudgeCompletely(true);
-            $this->em->flush();
-
-            $submission = $judging->getSubmission();
-            $queueTask = new QueueTask();
-            $queueTask->setJobId($judging->getJudgingid())
-                ->setPriority(JudgeTask::PRIORITY_LOW)
-                ->setTeam($submission->getTeam())
-                ->setTeamPriority((int)$submission->getSubmittime())
-                ->setStartTime(null);
-            $this->em->persist($queueTask);
-            $this->em->flush();
-            if ($numRequested == 0) {
-                $this->addFlash('warning', 'No more remaining runs to be judged.');
-            } else {
-                $this->addFlash('info', "Requested $numRequested remaining runs to be judged.");
-            }
-        }
         return $this->redirectToLocalReferrer($this->router, $request,
             $this->generateUrl('jury_submission_by_judging', ['jid' => $judgingId])
         );

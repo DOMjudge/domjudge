@@ -318,6 +318,7 @@
                         <th>Color</th>
                         <th>Lazy eval</th>
                         <th></th>
+                        <th></th>
                     </tr>
                     </thead>
                     <tbody>
@@ -350,9 +351,16 @@
                             </td>
                             <td>
                                 {% if is_granted('ROLE_ADMIN') %}
-                                    <a href="{{ path('jury_contest_problem_delete', {'contestId': contest.cid, 'probId': problem.probid}) }}"
+                                    <a title="Unlink problem from contest" href="{{ path('jury_contest_problem_delete', {'contestId': contest.cid, 'probId': problem.probid}) }}"
                                        data-ajax-modal>
                                         <i class="fas fa-trash-alt"></i>
+                                    </a>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if is_granted('ROLE_ADMIN') %}
+                                    <a title="Judge remaining" href="{{ path('jury_contest_problem_request_remaining', {'contestId': contest.cid, 'probId': problem.probid}) }}">
+                                        <i class="fas fa-gavel"></i>
                                     </a>
                                 {% endif %}
                             </td>
@@ -373,6 +381,7 @@
             {% else %}
                 {{ button(path('jury_contest_finalize', {'contestId': contest.cid}), 'Finalize this contest', 'secondary', 'lock') }}
             {% endif %}
+            {{ button(path('jury_contest_request_remaining', {'contestId': contest.cid}), 'Judge remaining', 'secondary', 'gavel') }}
         {% endif %}
         {{ button(path('jury_contest_prefetch', {'contestId': contest.cid}), 'Heat up judgehosts with contest data', 'secondary', 'download') }}
         {% include 'jury/partials/rejudge_form.html.twig' with {table: 'contest', id: contest.cid, buttonClass: 'btn-secondary'} %}

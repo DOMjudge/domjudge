@@ -9,6 +9,7 @@ use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\Judgehost;
 use App\Entity\JudgeTask;
+use App\Entity\Judging;
 use App\Entity\Language;
 use App\Entity\Problem;
 use App\Entity\RemovedInterval;
@@ -854,5 +855,66 @@ class ContestController extends BaseController
             'blockers' => $blockers,
             'form' => $form->createView(),
         ]);
+    }
+
+    /**
+     * @Route("/{contestId<\d+>}/request-remaining", name="jury_contest_request_remaining")
+     */
+    public function requestRemainingRunsWholeContestAction(int $contestId): RedirectResponse
+    {
+        /** @var Contest $contest */
+        $contest = $this->em->getRepository(Contest::class)->find($contestId);
+        if (!$contest) {
+            throw new NotFoundHttpException(sprintf('Contest with ID %s not found', $contestId));
+        }
+        $judgings = $this->em->createQueryBuilder()
+                             ->from(Judging::class, 'j')
+                             ->select('j')
+                             ->join('j.submission', 's')
+                             ->join('s.team', 't')
+                             ->join('t.category', 'tc')
+                             ->andWhere('tc.visible = true')
+                             ->andWhere('j.valid = true')
+                             ->andWhere('s.contest = :contestId')
+                             ->setParameter('contestId', $contestId)
+                             ->getQuery()
+                             ->getResult();
+        $this->judgeRemaining($judgings);
+        return $this->redirect($this->generateUrl('jury_contest', ['contestId' => $contestId]));
+    }
+
+    /**
+     * @Route("/{contestId<\d+>}/problems/{probId<\d+>}/request-remaining", name="jury_contest_problem_request_remaining")
+     */
+    public function requestRemainingRunsContestProblemAction(int $contestId, int $probId): RedirectResponse
+    {
+        /** @var ContestProblem $contestProblem */
+        $contestProblem = $this->em->getRepository(ContestProblem::class)->find([
+            'contest' => $contestId,
+            'problem' => $probId
+        ]);
+        if (!$contestProblem) {
+            throw new NotFoundHttpException(
+                sprintf('Contest problem with contest ID %s and problem ID %s not found',
+                        $contestId, $probId)
+            );
+        }
+
+        $judgings = $this->em->createQueryBuilder()
+                             ->from(Judging::class, 'j')
+                             ->select('j')
+                             ->join('j.submission', 's')
+                             ->join('s.team', 't')
+                             ->join('t.category', 'tc')
+                             ->andWhere('s.problem = :problemId')
+                             ->andWhere('tc.visible = true')
+                             ->andWhere('j.valid = true')
+                             ->andWhere('s.contest = :contestId')
+                             ->setParameter('problemId', $probId)
+                             ->setParameter('contestId', $contestId)
+                             ->getQuery()
+                             ->getResult();
+        $this->judgeRemaining($judgings);
+        return $this->redirect($this->generateUrl('jury_contest', ['contestId' => $contestId]));
     }
 }
