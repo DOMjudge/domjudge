@@ -237,17 +237,4 @@ HEREDOC;
         self::assertSelectorExists('th:contains("Example teamname")');
         self::assertSelectorExists('th:contains("hello: Hello World")');
     }
-
-    /**
-     * Test export of ICPC results.html.
-     */
-    public function testICPCResultsHtmlExport(): void
-    {
-        $this->verifyPageResponse('GET', '/jury/import-export', 200);
-        $link = $this->getCurrentCrawler()->filter('li:contains("ICPC site results.html") a:contains("for sort order 0")')->link();
-        $this->client->click($link);
-        self::assertSelectorExists('table#medalTable .row1.gold td[class="name"]:contains("Example teamname")');
-        self::assertSelectorExists('table#uniTable th:contains("Honorable mention")');
-        self::assertSelectorExists('table#firstTable td[class="name"]:contains("Hello World")');
-    }
 }

@@ -342,15 +342,14 @@ class ImportExportController extends BaseController
     }
 
     /**
-     * @Route("/export/{type<results|results-icpc|clarifications>}.html", name="jury_html_export")
+     * @Route("/export/{type<results|clarifications>}.html", name="jury_html_export")
      */
     public function exportHtmlAction(Request $request, string $type): Response
     {
         try {
             switch ($type) {
                 case 'results':
-                case 'results-icpc':
-                    return $this->getResultsHtml($request, $type === 'results-icpc');
+                    return $this->getResultsHtml($request);
                 case 'clarifications':
                     return $this->getClarificationsHtml();
                 default:
@@ -363,7 +362,7 @@ class ImportExportController extends BaseController
         }
     }
 
-    protected function getResultsHtml(Request $request, bool $useIcpcLayout): Response
+    protected function getResultsHtml(Request $request): Response
     {
         /** @var TeamCategory[] $categories */
         $categories  = $this->em->createQueryBuilder()
@@ -489,11 +488,7 @@ class ImportExportController extends BaseController
             'download' => $request->query->getBoolean('download'),
             'sortOrder' => $sortOrder,
         ];
-        if ($useIcpcLayout) {
-            $response = $this->render('jury/export/results_icpc.html.twig', $data);
-        } else {
-            $response = $this->render('jury/export/results.html.twig', $data);
-        }
+        $response = $this->render('jury/export/results.html.twig', $data);
 
         if ($request->query->getBoolean('download')) {
             $response->headers->set('Content-disposition', 'attachment; filename=results.html');
