@@ -24,6 +24,7 @@ final class Version20220210155918 extends AbstractMigration
 
         $this->addSql('ALTER TABLE team_category ADD externalid VARCHAR(255) DEFAULT NULL COLLATE `utf8mb4_bin` COMMENT \'Team category ID in an external system\' AFTER `categoryid`, ADD icpcid VARCHAR(255) DEFAULT NULL COLLATE `utf8mb4_bin` COMMENT \'External identifier from ICPC CMS\' AFTER `externalid`');
         $this->addSql('CREATE UNIQUE INDEX externalid ON team_category (externalid(190))');
+        $this->addSql('UPDATE team_category SET externalid = categoryid');
     }
 
     public function down(Schema $schema) : void
