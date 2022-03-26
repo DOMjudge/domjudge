@@ -435,6 +435,13 @@ class ImportExportController extends BaseController
 
         $collator = new Collator('en_US');
         $collator->sort($honorable);
+        usort($ranked, function(array $a, array $b) use ($collator): int {
+            if ($a['rank'] !== $b['rank']) {
+                return $a['rank'] <=> $b['rank'];
+            }
+
+            return $collator->compare($a['team'], $b['team']);
+        });
 
         $problems     = $scoreboard->getProblems();
         $matrix       = $scoreboard->getMatrix();
