@@ -25,7 +25,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *     uniqueConstraints={@ORM\UniqueConstraint(name="username", columns={"username"}, options={"lengths":{190}})})
  * @UniqueEntity("username", message="The username '{{ value }}' is already in use.")
  */
-class User implements UserInterface, PasswordAuthenticatedUserInterface, EquatableInterface
+class User implements UserInterface, PasswordAuthenticatedUserInterface, EquatableInterface, ExternalRelationshipEntityInterface
 {
     /**
      * @ORM\Id
@@ -47,6 +47,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Equatab
     /**
      * @ORM\Column(type="string", name="name", length=255,
      *     options={"comment"="Name"}, nullable=false)
+     * @Serializer\Groups({"Nonstrict"})
      */
     private string $name = '';
 
@@ -54,6 +55,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Equatab
      * @ORM\Column(type="string", name="email", length=255,
      *     options={"comment"="Email address"}, nullable=true)
      * @Assert\Email()
+     * @Serializer\Groups({"Nonstrict"})
      */
     private ?string $email = null;
 
@@ -80,6 +82,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Equatab
      *     options={"comment"="Last IP address of successful login"},
      *     nullable=true)
      * @Serializer\SerializedName("last_ip")
+     * @Serializer\Groups({"Nonstrict"})
      */
     private ?string $last_ip_address;
 
@@ -109,6 +112,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Equatab
      *     options={"comment"="Whether the user is able to log in",
      *              "default"="1"},
      *     nullable=false)
+     * @Serializer\Groups({"Nonstrict"})
      */
     private bool $enabled = true;
 
@@ -226,6 +230,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Equatab
     /**
      * @Serializer\VirtualProperty()
      * @Serializer\SerializedName("last_login_time")
+     * @Serializer\Groups({"Nonstrict"})
      * @Serializer\Type("DateTime")
      */
     public function getLastLoginAsDateTime(): ?DateTime
@@ -249,6 +254,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Equatab
     /**
      * @Serializer\VirtualProperty()
      * @Serializer\SerializedName("first_login_time")
+     * @Serializer\Groups({"Nonstrict"})
      * @Serializer\Type("DateTime")
      */
     public function getFirstLoginAsDateTime(): ?DateTime
@@ -335,6 +341,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Equatab
         return $this->getTeam() ? $this->getTeam()->getEffectiveName() : null;
     }
 
+    /**
+     * @Serializer\VirtualProperty()
+     * @Serializer\SerializedName("team_id")
+     * @Serializer\Type("string")
+     */
+    public function getTeamId(): ?int
+    {
+        return $this->getTeam() ? $this->getTeam()->getTeamid() : null;
+    }
+
     public function __construct()
     {
         $this->user_roles = new ArrayCollection();
@@ -361,6 +377,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Equatab
      * Get the roles of this user as an array of strings
      * @Serializer\VirtualProperty()
      * @Serializer\SerializedName("roles")
+     * @Serializer\Groups({"Nonstrict"})
      * @Serializer\Type("array<string>")
      */
     public function getRoleList(): array
@@ -371,6 +388,30 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Equatab
         }
 
         return $result;
+    }
+
+    /**
+     * Get the type of this user for the CCS Specs Contest API
+     * @Serializer\VirtualProperty()
+     * @Serializer\SerializedName("type")
+     * @Serializer\Type("string")
+     */
+    public function getType(): ?string
+    {
+        // Types allowed by the CCS Specs Contest API in order of most permissions to least
+        // Either key=>value where key is the DOMjudge role and value is the API type or
+        // only value, where both the DOMjudge role and API type are the same
+        $allowedTypes = ['admin', 'jury' => 'judge', 'api_reader' => 'admin', 'team'];
+        foreach ($allowedTypes as $role => $allowedType) {
+            if (is_numeric($role)) {
+                $role = $allowedType;
+            }
+            if (in_array($role, $this->getRoleList())) {
+                return $allowedType;
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -429,5 +470,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Equatab
     public function getUserIdentifier(): string
     {
         return $this->getUsername();
+    }
+
+    public function getExternalRelationships(): array
+    {
+        return [
+            'team_id' => $this->getTeam(),
+        ];
     }
 }
