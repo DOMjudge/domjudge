@@ -25,6 +25,7 @@ final class Version20220210171746 extends AbstractMigration
         $this->addSql('DROP INDEX icpcid ON team');
         $this->addSql('ALTER TABLE team ADD externalid VARCHAR(255) DEFAULT NULL COLLATE `utf8mb4_bin` COMMENT \'Team affiliation ID in an external system\' AFTER `teamid`');
         $this->addSql('CREATE UNIQUE INDEX externalid ON team (externalid(190))');
+        $this->addSql('UPDATE team SET externalid = teamid');
     }
 
     public function down(Schema $schema) : void
