@@ -295,10 +295,6 @@ class TeamController extends BaseController
             $data['limitToTeams'] = [$team];
         }
 
-        // We need to clear the entity manager, because loading the team scoreboard seems to break getting submission
-        // contestproblems for the contest we get the scoreboard for
-        $this->em->clear();
-
         $restrictions    = [];
         $restrictionText = null;
         if ($request->query->has('restrict')) {
