@@ -37,7 +37,7 @@ path of your installation) as follows:
 
 .. note::
 
-  The IDs for affiliations and contests need to be the *external ID*
+  The IDs for affiliations, teams and contests need to be the *external ID*
   if the ``data_source`` setting of DOMjudge is set to external.
 
 It is also possible to load custom CSS and/or JavaScript files. To do so, place

@@ -165,7 +165,11 @@
                 {% endif %}
             </table>
         </div>
-    {% set teamImage = team.teamId | assetPath('team') %}
+    {% set teamId = team.teamid %}
+    {% if showExternalId(team) %}
+        {% set teamId = team.externalid %}
+    {% endif %}
+    {% set teamImage = teamId | assetPath('team') %}
     {% if teamImage %}
         <div class="col">
         <img id="teampicture" src="{{ asset(teamImage) }}" alt="Picture of team {{ team.name }}"
