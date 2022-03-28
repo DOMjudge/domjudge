@@ -65,6 +65,7 @@
         <p>
             {{ button(path('jury_team_category_edit', {'categoryId': teamCategory.categoryid}), 'Edit', 'primary', 'edit') }}
             {{ button(path('jury_team_category_delete', {'categoryId': teamCategory.categoryid}), 'Delete', 'danger', 'trash-alt', true) }}
+            {{ button(path('jury_team_category_request_remaining', {'categoryId': teamCategory.categoryid}), 'Judge remaining', 'secondary', 'gavel') }}
         </p>
     {% endif %}
 
