@@ -3,6 +3,7 @@
 namespace App\Controller\Jury;
 
 use App\Controller\BaseController;
+use App\Entity\Judging;
 use App\Entity\Submission;
 use App\Entity\TeamCategory;
 use App\Form\Type\TeamCategoryType;
@@ -16,6 +17,7 @@ use Doctrine\ORM\NoResultException;
 use Exception;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\KernelInterface;
@@ -238,5 +240,35 @@ class TeamCategoryController extends BaseController
         return $this->render('jury/team_category_add.html.twig', [
             'form' => $form->createView(),
         ]);
+    }
+
+    /**
+     * @Route("/{categoryId<\d+>}/request-remaining", name="jury_team_category_request_remaining")
+     */
+    public function requestRemainingRunsWholeTeamCategoryAction(string $categoryId): RedirectResponse
+    {
+        /** @var TeamCategory $category */
+        $category = $this->em->getRepository(TeamCategory::class)->find($categoryId);
+        if (!$category) {
+            throw new NotFoundHttpException(sprintf('Team category with ID %s not found', $categoryId));
+        }
+        $contestId = $this->dj->getCurrentContest()->getCid();
+        $query = $this->em->createQueryBuilder()
+                          ->from(Judging::class, 'j')
+                          ->select('j')
+                          ->join('j.submission', 's')
+                          ->join('s.team', 't')
+                          ->join('t.category', 'tc')
+                          ->andWhere('j.valid = true')
+                          ->andWhere('tc.category = :categoryId')
+                          ->setParameter('categoryId', $categoryId);
+        if ($contestId > -1) {
+            $query->andWhere('s.contest = :contestId')
+                  ->setParameter('contestId', $contestId);
+        }
+        $judgings = $query->getQuery()
+                          ->getResult();
+        $this->judgeRemaining($judgings);
+        return $this->redirect($this->generateUrl('jury_team_category', ['categoryId' => $categoryId]));
     }
 }

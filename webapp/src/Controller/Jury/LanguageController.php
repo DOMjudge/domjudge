@@ -3,6 +3,7 @@
 namespace App\Controller\Jury;
 
 use App\Controller\BaseController;
+use App\Entity\Judging;
 use App\Entity\Language;
 use App\Entity\Submission;
 use App\Form\Type\LanguageType;
@@ -302,5 +303,36 @@ class LanguageController extends BaseController
         return $this->deleteEntities($request, $this->em, $this->dj, $this->eventLogService, $this->kernel,
                                      [$language], $this->generateUrl('jury_languages')
         );
+    }
+
+    /**
+     * @Route("/{langId}/request-remaining", name="jury_language_request_remaining")
+     */
+    public function requestRemainingRunsWholeLanguageAction(string $langId): RedirectResponse
+    {
+        /** @var Language $language */
+        $language = $this->em->getRepository(Language::class)->find($langId);
+        if (!$language) {
+            throw new NotFoundHttpException(sprintf('Language with ID %s not found', $langId));
+        }
+        $contestId = $this->dj->getCurrentContest()->getCid();
+        $query = $this->em->createQueryBuilder()
+                          ->from(Judging::class, 'j')
+                          ->select('j')
+                          ->join('j.submission', 's')
+                          ->join('s.team', 't')
+                          ->join('t.category', 'tc')
+                          ->andWhere('tc.visible = true')
+                          ->andWhere('j.valid = true')
+                          ->andWhere('s.language = :langId')
+                          ->setParameter('langId', $langId);
+        if ($contestId > -1) {
+            $query->andWhere('s.contest = :contestId')
+                  ->setParameter('contestId', $contestId);
+        }
+        $judgings = $query->getQuery()
+                          ->getResult();
+        $this->judgeRemaining($judgings);
+        return $this->redirect($this->generateUrl('jury_language', ['langId' => $langId]));
     }
 }

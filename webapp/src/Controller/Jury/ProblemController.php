@@ -5,6 +5,7 @@ namespace App\Controller\Jury;
 use App\Controller\BaseController;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
+use App\Entity\Judging;
 use App\Entity\Problem;
 use App\Entity\ProblemAttachment;
 use App\Entity\ProblemAttachmentContent;
@@ -29,6 +30,7 @@ use Exception;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -1026,5 +1028,36 @@ class ProblemController extends BaseController
                                     $testcase->getContent()->getImage());
             }
         }
+    }
+
+    /**
+     * @Route("/{probId<\d+>}/request-remaining", name="jury_problem_request_remaining")
+     */
+    public function requestRemainingRunsWholeProblemAction(string $probId): RedirectResponse
+    {
+        /** @var Problem $problem */
+        $problem = $this->em->getRepository(Problem::class)->find($probId);
+        if (!$problem) {
+            throw new NotFoundHttpException(sprintf('Problem with ID %s not found', $probId));
+        }
+        $contestId = $this->dj->getCurrentContest()->getCid();
+        $query = $this->em->createQueryBuilder()
+                          ->from(Judging::class, 'j')
+                          ->select('j')
+                          ->join('j.submission', 's')
+                          ->join('s.team', 't')
+                          ->join('t.category', 'tc')
+                          ->andWhere('j.valid = true')
+                          ->andWhere('tc.visible = true')
+                          ->andWhere('s.problem = :probId')
+                          ->setParameter('probId', $probId);
+        if ($contestId > -1) {
+            $query->andWhere('s.contest = :contestId')
+                  ->setParameter('contestId', $contestId);
+        }
+        $judgings = $query->getQuery()
+                          ->getResult();
+        $this->judgeRemaining($judgings);
+        return $this->redirect($this->generateUrl('jury_problem', ['probId' => $probId]));
     }
 }
