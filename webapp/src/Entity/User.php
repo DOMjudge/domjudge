@@ -346,6 +346,16 @@ class User implements UserInterface, EquatableInterface, \Serializable
         return $this->getTeam() ? $this->getTeam()->getEffectiveName() : null;
     }
 
+    /**
+     * @Serializer\VirtualProperty()
+     * @Serializer\SerializedName("team_id")
+     * @Serializer\Type("string")
+     */
+    public function getTeamId(): ?int
+    {
+        return $this->getTeam() ? $this->getTeam()->getTeamid() : null;
+    }
+
     public function __construct()
     {
         $this->user_roles = new ArrayCollection();

@@ -11,6 +11,7 @@ class UserControllerTest extends BaseTest
     protected $expectedObjects = [
         1 => [
             "team" => "DOMjudge",
+            "team_id" => 1,
             "roles" => [
                 "admin",
                 "team"
@@ -24,6 +25,7 @@ class UserControllerTest extends BaseTest
         ],
         2 => [
             "team" => null,
+            "team_id" => null,
             "roles" => [
                 "judgehost"
             ],
@@ -36,6 +38,7 @@ class UserControllerTest extends BaseTest
         ],
         3 => [
             "team" => "Example teamname",
+            "team_id" => "2",
             "roles" => [
                  "team"
             ],
