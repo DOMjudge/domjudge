@@ -847,13 +847,15 @@ class ProblemController extends BaseController
         }
 
         $data       = [];
-        $uploadForm = $this->createForm(ProblemUploadType::class, $data);
+        $uploadForm = $this->createForm(ProblemUploadType::class, $data, ['show_delete_data_first' => true]);
         $uploadForm->handleRequest($request);
 
         if ($uploadForm->isSubmitted() && $uploadForm->isValid()) {
             $data = $uploadForm->getData();
             /** @var UploadedFile $archive */
             $archive  = $data['archive'];
+            /** @var bool $deleteOldData */
+            $deleteOldData = $problemFormData['delete_data_first'] ?? false;
             $messages = [];
 
             /** @var Contest|null $contest */
@@ -870,7 +872,7 @@ class ProblemController extends BaseController
                 $zip        = $this->dj->openZipFile($archive->getRealPath());
                 $clientName = $archive->getClientOriginalName();
                 if ($this->importProblemService->importZippedProblem(
-                    $zip, $clientName, $problem, $contest, $messages
+                    $zip, $clientName, $problem, $contest, $deleteOldData, $messages
                 )) {
                     $this->dj->auditlog('problem', $problem->getProbid(), 'upload zip', $clientName);
                 } else {

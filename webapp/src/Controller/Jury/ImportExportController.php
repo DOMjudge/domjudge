@@ -160,6 +160,8 @@ class ImportExportController extends BaseController
             $newProblem = null;
             /** @var Contest|null $contest */
             $contest = $problemFormData['contest'] ?? null;
+            /** @var bool $deleteOldData */
+            $deleteOldData = $problemFormData['delete_data_first'] ?? false;
             if ($contest === null) {
                 $contestId = null;
             } else {
@@ -175,11 +177,8 @@ class ImportExportController extends BaseController
                 } else {
                     $contest = $this->em->getRepository(Contest::class)->find($contestId);
                 }
-                // Check if the problem exists, since if it does, we need to load it
-                $externalId = preg_replace('/[^a-zA-Z0-9-_]/', '', basename($clientName, '.zip'));
-                $existingProblem = $this->em->getRepository(Problem::class)->findOneBy(['externalid' => $externalId]);
                 $newProblem = $this->importProblemService->importZippedProblem(
-                    $zip, $clientName, $existingProblem, $contest, $messages
+                    $zip, $clientName, null, $contest, $deleteOldData, $messages
                 );
                 $allMessages = array_merge($allMessages, $messages);
                 if ($newProblem) {
