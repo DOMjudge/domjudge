@@ -44,6 +44,8 @@ function show_phpinfo() {
     phpversion=$1
     section_start_collap phpinfo "Show the new PHP info"
     update-alternatives --set php /usr/bin/php"${phpversion}"
+    update-alternatives --set phpize /usr/bin/phpize"${phpversion}"
+    update-alternatives --set php-config /usr/bin/php-config"${phpversion}"
     php -v
     php -m
     section_end phpinfo
