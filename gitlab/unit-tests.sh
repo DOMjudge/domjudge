@@ -7,6 +7,12 @@ version=$1
 
 show_phpinfo $version
 
+if [ "$CODECOVERAGE" -eq 1 ]; then
+    # PHP 7.4 misses pcov by default, so install it
+    pecl install pcov
+    cp /etc/php/8.0/mods-available/pcov.ini /etc/php/7.4/cli/conf.d/20-pcov.ini
+fi
+
 # Set up
 "$( dirname "${BASH_SOURCE[0]}" )"/base.sh
 
