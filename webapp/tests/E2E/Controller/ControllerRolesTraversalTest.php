@@ -105,6 +105,10 @@ class ControllerRolesTraversalTest extends BaseTest
         } else {
             self::assertEquals($statusCode, $response->getStatusCode(), $message);
         }
+        // The inverse does not hold as tables can be empty.
+        if (count($this->getCurrentCrawler()->filter('input.multideletecheckbox'))) {
+            self::assertSelectorExists('button[type=submit]:contains("Remove selected")',$url);
+        }
         $ret = [];
         $tmp = array_unique($crawler->filter('a')->extract(['href']));
         foreach($tmp as $possUrl) {
