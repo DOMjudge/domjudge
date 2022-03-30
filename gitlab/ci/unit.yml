@@ -22,7 +22,6 @@
       - unit-tests.xml
       - coverage-html
       - deprecation.txt
-      - duration
     reports:
       junit:
         - unit-tests.xml
