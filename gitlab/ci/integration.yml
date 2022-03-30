@@ -11,7 +11,6 @@
     when: always
     paths:
       - gitlabartifacts
-      - duration
   cache:
     key: integration
     paths:

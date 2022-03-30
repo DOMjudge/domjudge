@@ -24,4 +24,3 @@ webstandard_check_role:
       - w3chtmlpublic.json
       - w3ccsspublic.json
       - w3csvgpublic.json
-      - duration

@@ -5,21 +5,8 @@
     max: 2 #Max is 2, set when gitlab is flacky
     when:
       - always
-  artifacts:
-    when: always
-    paths:
-      - duration
   script:
     - /bin/true
-  before_script:
-    - set -eux
-    - mkdir -p duration
-    - LOG=$(echo $CI_JOB_NAME|base64)
-    - echo "job_begin" $(date +%s) >> ./duration/$LOG
-  after_script:
-    - set -eux
-    - LOG=$(echo $CI_JOB_NAME|base64)
-    - echo "job_end" $(date +%s) >> ./duration/$LOG
 
 .tiny_job:
   extends: [.clean_ordering]

@@ -19,14 +19,3 @@ stages:
   - sast
 
 image: domjudge/gitlabci:2.1
-
-draw_graph:
-  stage: ci_checks
-  image: devdemisto/matplotlib:1.0.0.24512
-  script:
-    - ls duration
-    - python3 showtimedata.py
-  artifacts:
-    paths:
-      - time.png
-      - duration
