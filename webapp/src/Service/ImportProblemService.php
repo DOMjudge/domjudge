@@ -917,7 +917,7 @@ class ImportProblemService
         set_time_limit(120);
 
         $probId  = $request->request->get('problem');
-        $deleteOldData = $request->request->getBoolean('delete_data_first');
+        $deleteOldData = $request->request->getBoolean('delete_old_data');
         $problem = null;
         if (!empty($probId)) {
             $problem = $this->em->createQueryBuilder()
