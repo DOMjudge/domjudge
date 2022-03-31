@@ -849,7 +849,7 @@ class ProblemController extends BaseController
         }
 
         $data       = [];
-        $uploadForm = $this->createForm(ProblemUploadType::class, $data, ['show_delete_data_first' => true]);
+        $uploadForm = $this->createForm(ProblemUploadType::class, $data, ['show_delete_old_data' => true]);
         $uploadForm->handleRequest($request);
 
         if ($uploadForm->isSubmitted() && $uploadForm->isValid()) {
@@ -857,7 +857,7 @@ class ProblemController extends BaseController
             /** @var UploadedFile $archive */
             $archive  = $data['archive'];
             /** @var bool $deleteOldData */
-            $deleteOldData = $problemFormData['delete_data_first'] ?? false;
+            $deleteOldData = $problemFormData['delete_old_data'] ?? false;
             $messages = [];
 
             /** @var Contest|null $contest */

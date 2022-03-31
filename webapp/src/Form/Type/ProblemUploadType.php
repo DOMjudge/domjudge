@@ -30,8 +30,8 @@ class ProblemUploadType extends AbstractType
                 'accept' => 'application/zip',
             ],
         ]);
-        if ($options['show_delete_data_first']) {
-            $builder->add('delete_data_first', CheckboxType::class, [
+        if ($options['show_delete_old_data']) {
+            $builder->add('delete_old_data', CheckboxType::class, [
                 'help'     => 'If checked, old data will be deleted.',
                 'required' => false,
             ]);
@@ -41,6 +41,6 @@ class ProblemUploadType extends AbstractType
 
     public function configureOptions(OptionsResolver $resolver)
     {
-        $resolver->setDefaults(['show_delete_data_first' => false]);
+        $resolver->setDefaults(['show_delete_old_data' => false]);
     }
 }

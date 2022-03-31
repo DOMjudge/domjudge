@@ -161,7 +161,7 @@ class ImportExportController extends BaseController
             /** @var Contest|null $contest */
             $contest = $problemFormData['contest'] ?? null;
             /** @var bool $deleteOldData */
-            $deleteOldData = $problemFormData['delete_data_first'] ?? false;
+            $deleteOldData = $problemFormData['delete_old_data'] ?? false;
             if ($contest === null) {
                 $contestId = null;
             } else {
