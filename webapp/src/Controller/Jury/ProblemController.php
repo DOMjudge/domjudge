@@ -857,7 +857,7 @@ class ProblemController extends BaseController
             /** @var UploadedFile $archive */
             $archive  = $data['archive'];
             /** @var bool $deleteOldData */
-            $deleteOldData = $problemFormData['delete_old_data'] ?? false;
+            $deleteOldData = $data['delete_old_data'] ?? false;
             $messages = [];
 
             /** @var Contest|null $contest */
