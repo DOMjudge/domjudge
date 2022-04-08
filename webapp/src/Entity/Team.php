@@ -44,7 +44,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
 
     /**
      * @ORM\Column(type="string", name="externalid", length=255,
-     *     options={"comment"="Team affiliation ID in an external system",
+     *     options={"comment"="Team ID in an external system",
      *              "collation"="utf8mb4_bin"},
      *     nullable=true)
      * @Serializer\Exclude()
