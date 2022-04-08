@@ -17,6 +17,7 @@ use App\Entity\Team;
 use App\Entity\TeamAffiliation;
 use App\Entity\TeamCategory;
 use App\Entity\Testcase;
+use App\Entity\User;
 use App\Utils\Utils;
 use DateTime;
 use Doctrine\DBAL\Exception as DBALException;
@@ -541,6 +542,9 @@ class ExternalContestSourceService
             case 'teams':
                 $this->validateTeam($event);
                 break;
+            case 'accounts':
+                $this->validateAccount($event);
+                break;
             case 'clarifications':
                 $this->importClarification($event);
                 break;
@@ -869,6 +873,45 @@ class ExternalContestSourceService
         $this->compareValues($event, $team, $toCheck);
 
         $this->processPendingEvents('team', $team->getTeamid());
+    }
+
+    protected function validateAccount(array $event): void
+    {
+        $userId = $event['data']['id'];
+
+        /** @var User|null $user */
+        $user = $this->em
+            ->getRepository(User::class)
+            ->findOneBy(['externalid' => $userId]);
+
+        if ($event['op'] === EventLogService::ACTION_DELETE) {
+            // We need to check if the user is known
+            if ($user) {
+                $this->addOrUpdateWarning($event, ExternalSourceWarning::TYPE_ENTITY_SHOULD_NOT_EXIST);
+            }
+
+            $this->removeWarning($event, ExternalSourceWarning::TYPE_ENTITY_SHOULD_NOT_EXIST);
+            return;
+        }
+
+        if (!$user) {
+            $this->addOrUpdateWarning($event, ExternalSourceWarning::TYPE_ENTITY_NOT_FOUND);
+            return;
+        }
+
+        $this->removeWarning($event, ExternalSourceWarning::TYPE_ENTITY_NOT_FOUND);
+
+        $toCheck = [
+            'username'        => $event['data']['username'],
+            'ip'              => $event['data']['ip'] ?? null,
+            'name'            => $event['data']['name'] ?? null,
+            'type'            => $event['data']['type'] ?? null,
+            'team.externalid' => $event['data']['team_id'],
+        ];
+
+        $this->compareValues($event, $user, $toCheck);
+
+        $this->processPendingEvents('account', $user->getUserid());
     }
 
     /**
