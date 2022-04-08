@@ -1,6 +1,9 @@
 <div class="row">
     <div class="col-lg-4">
         {{ form_start(form) }}
+        {% if form.offsetExists('externalid') %}
+            {{ form_row(form.externalid) }}
+        {% endif %}
         {% if form.offsetExists('username') %}
             {{ form_row(form.username) }}
         {% endif %}

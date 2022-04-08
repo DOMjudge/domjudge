@@ -119,6 +119,6 @@ class AccountController extends AbstractRestController
 
     protected function getIdField(): string
     {
-        return 'u.userid';
+        return sprintf('u.%s', $this->eventLogService->externalIdFieldForEntity(User::class) ?? 'userid');
     }
 }

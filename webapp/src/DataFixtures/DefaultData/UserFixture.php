@@ -41,6 +41,7 @@ class UserFixture extends AbstractDefaultDataFixture implements DependentFixture
 
             $adminUser = new User();
             $adminUser
+                ->setExternalid('admin')
                 ->setUsername('admin')
                 ->setName('Administrator')
                 ->setPassword($this->passwordHasher->hashPassword($adminUser, trim($adminpasswordContents)))
@@ -59,6 +60,7 @@ class UserFixture extends AbstractDefaultDataFixture implements DependentFixture
         if (!($judgehostUser = $manager->getRepository(User::class)->findOneBy(['username' => 'judgehost']))) {
             $judgehostUser = new User();
             $judgehostUser
+                ->setExternalid('judgehost')
                 ->setUsername('judgehost')
                 ->setName('User for judgedaemons')
                 ->setPassword($this->passwordHasher->hashPassword($judgehostUser, $this->getRestapiPassword()))

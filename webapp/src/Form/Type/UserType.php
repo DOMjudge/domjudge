@@ -5,6 +5,7 @@ namespace App\Form\Type;
 use App\Entity\Role;
 use App\Entity\Team;
 use App\Entity\User;
+use App\Service\EventLogService;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
@@ -20,17 +21,19 @@ use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class UserType extends AbstractType
+class UserType extends AbstractExternalIdEntityType
 {
     protected EntityManagerInterface $em;
 
-    public function __construct(EntityManagerInterface $em)
+    public function __construct(EntityManagerInterface $em, EventLogService $eventLogService)
     {
+        parent::__construct($eventLogService);
         $this->em = $em;
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        $this->addExternalIdField($builder, Team::class);
         /** @var Team[] $teams */
         $teams = $this->em->createQueryBuilder()
             ->from(Team::class, 't', 't.teamid')
