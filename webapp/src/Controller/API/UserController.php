@@ -195,12 +195,23 @@ class UserController extends AbstractRestController
      *     @OA\MediaType(
      *         mediaType="multipart/form-data",
      *         @OA\Schema(
-     *             required={"tsv"},
      *             @OA\Property(
      *                 property="tsv",
      *                 type="string",
      *                 format="binary",
      *                 description="The accounts.tsv files to import."
+     *             ),
+     *             @OA\Property(
+     *                 property="json",
+     *                 type="string",
+     *                 format="binary",
+     *                 description="The accounts.json files to import."
+     *             ),
+     *             @OA\Property(
+     *                 property="yaml",
+     *                 type="string",
+     *                 format="binary",
+     *                 description="The accounts.yaml files to import."
      *             )
      *         )
      *     )
@@ -216,10 +227,27 @@ class UserController extends AbstractRestController
     {
         /** @var UploadedFile $tsvFile */
         $tsvFile = $request->files->get('tsv') ?: [];
-        $ret = $this->importExportService->importTsv('accounts', $tsvFile, $message);
-        if ($ret >= 0) {
-            // TODO: better return all teams here?
-            return "$ret new account(s) added successfully.";
+        /** @var UploadedFile $jsonFile */
+        $jsonFile = $request->files->get('json') ?: [];
+        /** @var UploadedFile $yamlFile */
+        $yamlFile      = $request->files->get('yaml') ?: [];
+        $providedFiles = array_filter([$tsvFile, $jsonFile, $yamlFile]);
+        if (count($providedFiles) !== 1) {
+            throw new BadRequestHttpException('Supply exactly one of \'json\', \'yaml\' or \'tsv\'');
+        }
+
+        // Treat the YAML as JSON, since we can parse both
+        if ($yamlFile) {
+            $jsonFile = $yamlFile;
+        }
+
+        $message = null;
+        if ($tsvFile && ($result = $this->importExportService->importTsv('accounts', $tsvFile, $message))) {
+            // TODO: better return all accounts here?
+            return "$result new account(s) successfully added.";
+        } elseif ($jsonFile && ($result = $this->importExportService->importJson('accounts', $jsonFile, $message))) {
+            // TODO: better return all accounts here?
+            return "$result new account(s) successfully added.";
         } else {
             throw new BadRequestHttpException("Error while adding accounts: $message");
         }
