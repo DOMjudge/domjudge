@@ -46,7 +46,7 @@ Example ``groups.json``::
   }]
 
 To import the file using the jury interface, go to `Import / export`, select
-`groups` under `JSON import`, select your file and click `Import`.
+`groups` under `Import JSON / YAML`, select your file and click `Import`.
 
 To import the file using the API run the following command::
 
@@ -111,7 +111,7 @@ Example ``organizations.json``::
   }]
 
 To import the file using the jury interface, go to `Import / export`, select
-`organizations` under `JSON import`, select your file and click `Import`.
+`organizations` under `Import JSON / YAML`, select your file and click `Import`.
 
 To import the file using the API run the following command::
 
@@ -155,7 +155,7 @@ Example ``teams.json``::
   }]
 
 To import the file using the jury interface, go to `Import / export`, select
-`teams` under `JSON import`, select your file and click `Import`.
+`teams` under `Import JSON / YAML`, select your file and click `Import`.
 
 To import the file using the API run the following command::
 
@@ -194,24 +194,75 @@ To import the file using the API run the following command::
 Importing accounts
 ------------------
 
+There are two formats to import accounts: a YAML format and a legacy TSV format.
+
+Using YAML
+^^^^^^^^^^
+
+Prepare a file called ``accounts.yaml`` which contains the accounts.
+It should be a YAML array with objects, each object should contain the following
+fields:
+
+- ``id``: the account ID. Must be unique
+- ``username``: the account username. Must be unique
+- ``password``: the password to use for the account
+- ``type``: the user type, one of ``team``, ``judge`` or ``admin``
+- ``team_id``: (optional) the external ID of the team this account belongs to
+- ``name``: (optional) the full name of the account
+- ``ip`` (optional): IP address to link to this account
+
+Example ``accounts.yaml``::
+
+   - id: team001
+     username: team001
+     password: P3xm33imve
+     type: team
+     name: team001
+     ip: 10.10.2.1
+
+   - id: team002
+     username: team002
+     password: qd4WHeJXbd
+     type: team
+     name: team002
+     ip: 10.10.2.2
+
+   - id: john
+     username: john
+     password: Uf4PYRA7mJ
+     type: judge
+     name: John Doe
+
 .. note::
 
-    Importing accounts is currently only possible using a TSV.
+    You can also use a JSON file instead of YAML. Make sure to name it
+    ``accounts.json`` in that case.
+
+To import the file using the jury interface, go to `Import / export`, select
+`accounts` under `Import JSON / YAML`, select your file and click `Import`.
+
+To import the file using the API run the following command::
+
+    http --check-status -b -f POST "<API_URL>/users/accounts" yaml@accounts.yaml
+
+Using the legacy TSV format
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Prepare a file called ``accounts.tsv`` which contains the team credentials.
 The first line should contain ``accounts  1`` (tab-separated).
 Each of the following lines must contain the following elements separated by tabs:
 
-- the user type, one of ``team`` or ``judge``
+- the user type, one of ``team``, ``judge`` or ``admin``
 - the full name of the user
 - the username
 - the password
+- (optional) the IP address to the user
 
 Example ``accounts.tsv``::
 
    accounts	1
-   team	team001	team001	P3xm33imve
-   team	team002	team002	qd4WHeJXbd
+   team	team001	team001	P3xm33imve	10.10.2.1
+   team	team002	team002	qd4WHeJXbd	10.10.2.2
    judge	John Doe	john	Uf4PYRA7mJ
 
 To import the file using the jury interface, go to `Import / export`, select

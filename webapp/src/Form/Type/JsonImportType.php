@@ -16,6 +16,7 @@ class JsonImportType extends AbstractType
                 'groups' => 'groups',
                 'organizations' => 'organizations',
                 'teams' => 'teams',
+                'accounts' => 'accounts',
             ],
         ]);
         $builder->add('file', BootstrapFileType::class, [

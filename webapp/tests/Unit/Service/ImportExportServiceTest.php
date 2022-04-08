@@ -347,6 +347,88 @@ analyst	Analyst number 1	analyst1	password9	13.14.15.16
 analyst	Analyst two	analyst2	password10
 EOF;
 
+        $fileName = tempnam(static::getContainer()->get(DOMJudgeService::class)->getDomjudgeTmpDir(), 'accounts-tsv');
+        file_put_contents($fileName, $accounts);
+        $file = new UploadedFile($fileName, 'accounts.tsv');
+        /** @var ImportExportService $importExportService */
+        $importExportService = static::getContainer()->get(ImportExportService::class);
+        $importCount = $importExportService->importTsv('accounts', $file, $message);
+        // Remove the file, we don't need it anymore.
+        unlink($fileName);
+
+        $this->testImportAccounts($importCount, $message, true);
+    }
+
+    public function testImportAccountsJsonSuccess(): void
+    {
+        // We test all account types twice:
+        // - Team
+        // - Judge
+        // - Admin
+        // - Analyst (will be ignored)
+        // We also set the IP address for some accounts.
+        $accounts = <<<EOF
+- id: team001
+  username: team001
+  name: Team 1
+  password: password1
+  type: team
+  team_id: 1
+- id: team2
+  username: team2
+  name: Team 2
+  password: password2
+  type: team
+  team_id: 2
+  ip: 1.2.3.4
+- id: judge1
+  username: judge1
+  name: Judge member 1
+  password: password5
+  type: judge
+- id: judge2
+  username: judge2
+  name: Another judge member
+  password: password6
+  type: judge
+  ip: 9.10.11.12
+- id: adminx
+  username: adminx
+  name: Some admin
+  password: password7
+  type: admin
+- id: adminy
+  username: adminy
+  name: Another admin
+  password: password8
+  type: admin
+- id: analyst1
+  username: analyst1
+  name: Analyst number 1
+  password: password9
+  type: analyst
+  ip: 13.14.15.16
+- id: analyst2
+  username: analyst2
+  name: Analyst two
+  password: password10
+  type: analyst
+EOF;
+
+        $fileName = tempnam(static::getContainer()->get(DOMJudgeService::class)->getDomjudgeTmpDir(), 'accounts-yaml');
+        file_put_contents($fileName, $accounts);
+        $file = new UploadedFile($fileName, 'accounts.yaml');
+        /** @var ImportExportService $importExportService */
+        $importExportService = static::getContainer()->get(ImportExportService::class);
+        $importCount = $importExportService->importJson('accounts', $file, $message);
+        // Remove the file, we don't need it anymore.
+        unlink($fileName);
+
+        $this->testImportAccounts($importCount, $message, false);
+    }
+
+    protected function testImportAccounts(int $importCount, ?string $message, bool $forTsv): void
+    {
         $expectedUsers = [
             [
                 'roles' => ['team'],
@@ -363,25 +445,6 @@ EOF;
                 'username' => 'team2',
                 'password' => 'password2',
                 'ip' => '1.2.3.4',
-                'team' => [
-                    'id' => 2,
-                ],
-            ],
-            [
-                'roles' => ['team'],
-                'name' => 'Team 2 user a',
-                'username' => 'team02a',
-                'password' => 'password3',
-                'ip' => '5.6.7.8',
-                'team' => [
-                    'id' => 2,
-                ],
-            ],
-            [
-                'roles' => ['team'],
-                'name' => 'Team 2 user b',
-                'username' => 'team02b',
-                'password' => 'password4',
                 'team' => [
                     'id' => 2,
                 ],
@@ -410,18 +473,6 @@ EOF;
                 ],
             ],
             [
-                'roles' => ['jury', 'team'],
-                'name' => 'Another judge member',
-                'username' => 'judge2',
-                'password' => 'password6',
-                'ip' => '9.10.11.12',
-                'team' => [
-                    'name' => 'Another judge member',
-                    'category' => 'Jury',
-                    'description' => 'Another judge member',
-                ],
-            ],
-            [
                 'roles' => ['admin'],
                 'name' => 'Some admin',
                 'username' => 'adminx',
@@ -434,19 +485,32 @@ EOF;
                 'password' => 'password8',
             ],
         ];
+        if ($forTsv) {
+            $expectedUsers = array_merge($expectedUsers, [
+                [
+                    'roles' => ['team'],
+                    'name' => 'Team 2 user a',
+                    'username' => 'team02a',
+                    'password' => 'password3',
+                    'ip' => '5.6.7.8',
+                    'team' => [
+                        'id' => 2,
+                    ],
+                ],
+                [
+                    'roles' => ['team'],
+                    'name' => 'Team 2 user b',
+                    'username' => 'team02b',
+                    'password' => 'password4',
+                    'team' => [
+                        'id' => 2,
+                    ],
+                ],
+            ]);
+        }
         $unexpectedUsers = ['analyst1', 'analyst2'];
 
-        $fileName = tempnam(static::getContainer()->get(DOMJudgeService::class)->getDomjudgeTmpDir(), 'accounts-tsv');
-        file_put_contents($fileName, $accounts);
-        $file = new UploadedFile($fileName, 'accounts.tsv');
-        /** @var ImportExportService $importExportService */
-        $importExportService = static::getContainer()->get(ImportExportService::class);
-        $importCount = $importExportService->importTsv('accounts', $file, $message);
-        // Remove the file, we don't need it anymore.
-        unlink($fileName);
-        // We expect 8 accounts to be created: 4 team accounts, 2 judge accounts and 2 admin accounts. No
-        // analyst accounts.
-        self::assertEquals(8, $importCount);
+        self::assertEquals(count($expectedUsers), $importCount);
         self::assertNull($message);
 
         /** @var EntityManagerInterface $em */
@@ -469,7 +533,7 @@ EOF;
 
             // Verify the team.
             if (isset($data['team'])) {
-                self::assertNotNull($user->getTeam());
+                self::assertNotNull($user->getTeam(), $data['username']);
                 $team = $user->getTeam();
                 if (isset($data['team']['id'])) {
                     self::assertEquals($data['team']['id'], $team->getTeamid());

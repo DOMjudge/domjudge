@@ -24,6 +24,8 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Validator\ConstraintViolationInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\Yaml\Exception\ParseException;
+use Symfony\Component\Yaml\Yaml;
 
 class ImportExportService
 {
@@ -543,10 +545,14 @@ class ImportExportService
         $content = file_get_contents($file->getRealPath());
         try {
             $data = $this->dj->jsonDecode($content);
-        }
-        catch (\JsonException $e) {
-            $message = "File contents is not valid JSON: " . $e->getMessage();
-            return -1;
+        } catch (\JsonException $e) {
+            // Check if we can parse it as YAML
+            try {
+                $data = Yaml::parse($content, Yaml::PARSE_DATETIME);
+            } catch (ParseException $e) {
+                $message = "File contents is not valid JSON or YAML: " . $e->getMessage();
+                return -1;
+            }
         }
 
         if (!is_array($data) || !is_int(key($data))) {
@@ -561,6 +567,8 @@ class ImportExportService
                 return $this->importOrganizationsJson($data, $message);
             case 'teams':
                 return $this->importTeamsJson($data, $message);
+            case 'accounts':
+                return $this->importAccountsJson($data, $message);
             default:
                 $message = sprintf('Invalid import type %s', $type);
                 return -1;
@@ -814,6 +822,73 @@ class ImportExportService
     }
 
     /**
+     * Import accounts JSON
+     *
+     * @param User[]|null $saved The saved users
+     */
+    public function importAccountsJson(array $data, ?string &$message = null, ?array &$saved = null): int
+    {
+        $teamRole     = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'team']);
+        $juryRole     = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'jury']);
+        $adminRole    = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'admin']);
+        $juryCategory = $this->em->getRepository(TeamCategory::class)->findOneBy(['name' => 'Jury']);
+        if (!$juryCategory) {
+            $juryCategory = new TeamCategory();
+            $juryCategory
+                ->setName('Jury')
+                ->setSortorder(100)
+                ->setVisible(false)
+                ->setExternalid('jury');
+            $this->em->persist($juryCategory);
+            $this->em->flush();
+        }
+        $accountData = [];
+        foreach ($data as $idx => $account) {
+            $juryTeam = null;
+            $roles    = [];
+            switch ($account['type']) {
+                case 'admin':
+                    $roles[] = $adminRole;
+                    break;
+                case 'judge':
+                    $roles[]  = $juryRole;
+                    $roles[]  = $teamRole;
+                    $juryTeam = [
+                        'name'              => $account['name'] ?? $account['username'],
+                        'externalid'        => $account['externalid'] ?? $account['username'],
+                        'category'          => $juryCategory,
+                        'publicdescription' => $account['name'] ?? $account['username'],
+                    ];
+                    break;
+                case 'team':
+                    $roles[] = $teamRole;
+                    break;
+                case 'analyst':
+                case 'staff':
+                    // Ignore type analyst and staff for now. We don't have a useful mapping yet.
+                    continue 2;
+                default:
+                    $message = sprintf('unknown role on index %d: %s', $idx, $account['type']);
+                    return -1;
+            }
+            $accountData[] = [
+                'user' => [
+                    'name'           => $account['name'] ?? null,
+                    'externalid'     => $account['id'] ?? $account['username'],
+                    'username'       => $account['username'],
+                    'plain_password' => $account['password'],
+                    'teamid'         => $account['team_id'] ?? null,
+                    'user_roles'     => $roles,
+                    'ip_address'     => $account['ip'] ?? null,
+                ],
+                'team' => $juryTeam,
+            ];
+        }
+
+        return $this->importAccountData($accountData, $saved);
+    }
+
+    /**
      * Import team data from the given array
      *
      * @param Team[]|null $saved The saved teams
@@ -937,6 +1012,115 @@ class ImportExportService
     }
 
     /**
+     * Import account data from the given array
+     *
+     * @param User[]|null $saved The saved users
+     *
+     * @throws NonUniqueResultException
+     */
+    protected function importAccountData(array $accountData, ?array &$saved = null): int
+    {
+        $createdUsers = [];
+        $updatedUsers = [];
+        $newTeams     = [];
+        foreach ($accountData as $accountItem) {
+            if (!empty($accountItem['team'])) {
+                $team = $this->em->getRepository(Team::class)->findOneBy([
+                    'name' => $accountItem['team']['name'],
+                    'category' => $accountItem['team']['category']
+                ]);
+                if ($team === null) {
+                    $team = new Team();
+                    $team
+                        ->setName($accountItem['team']['name'])
+                        ->setCategory($accountItem['team']['category'])
+                        ->setExternalid($accountItem['team']['externalid'])
+                        ->setPublicDescription($accountItem['team']['publicdescription'] ?? null);
+                    $this->em->persist($team);
+                    $action = EventLogService::ACTION_CREATE;
+                } else {
+                    $action = EventLogService::ACTION_UPDATE;
+                }
+                $this->em->flush();
+                $newTeams[] = [
+                    'team' => $team,
+                    'action' => $action,
+                ];
+                $this->dj->auditlog('team', $team->getTeamid(), 'replaced',
+                    'imported from tsv, autocreated for judge');
+                $accountItem['user']['team'] = $team;
+                unset($accountItem['user']['teamid']);
+            }
+
+            $user = $this->em->getRepository(User::class)->findOneBy(['username' => $accountItem['user']['username']]);
+            if (!$user) {
+                $user  = new User();
+                $added = true;
+            } else {
+                $added = false;
+            }
+
+            if (array_key_exists('teamid', $accountItem['user'])) {
+                $teamId = $accountItem['user']['teamid'];
+                unset($accountItem['user']['teamid']);
+                $team = null;
+                if ($teamId !== null) {
+                    $field = $this->eventLogService->apiIdFieldForEntity(Team::class);
+                    $team  = $this->em->getRepository(Team::class)->findOneBy([$field => $teamId]);
+                    if (!$team) {
+                        $team = new Team();
+                        $team
+                            ->setExternalid($teamId)
+                            ->setName($teamId . ' - auto-create during import');
+                        $this->em->persist($team);
+                        $this->dj->auditlog('team', $team->getTeamid(),
+                            'added', 'imported from tsv');
+                    }
+                }
+                $accountItem['user']['team'] = $team;
+            }
+
+            $propertyAccessor = PropertyAccess::createPropertyAccessor();
+            foreach ($accountItem['user'] as $field => $value) {
+                $propertyAccessor->setValue($user, $field, $value);
+            }
+
+            if ($added) {
+                $this->em->persist($user);
+            }
+            $this->em->flush();
+            if ($added) {
+                $createdUsers[] = $user->getUserid();
+            } else {
+                $updatedUsers[] = $user->getUserid();
+            }
+
+            if ($saved !== null) {
+                $saved[] = $user;
+            }
+
+            $this->dj->auditlog('user', $user->getUserid(), 'replaced', 'imported from tsv');
+        }
+
+        if ($contest = $this->dj->getCurrentContest()) {
+            foreach ($newTeams as $newTeam) {
+                $team = $newTeam['team'];
+                $action = $newTeam['action'];
+                $this->eventLogService->log('team', $team->getTeamid(), $action, $contest->getCid());
+            }
+
+            if (!empty($createdUsers)) {
+                $this->eventLogService->log('user', $createdUsers, 'create', $contest->getCid());
+            }
+            if (!empty($updatedUsers)) {
+                $this->eventLogService->log('user', $updatedUsers, 'update', $contest->getCid());
+            }
+        }
+
+        return count($accountData);
+    }
+
+    /**
      * Import accounts TSV
      */
     protected function importAccountsTsv(array $content, ?string &$message = null): int
@@ -959,8 +1143,6 @@ class ImportExportService
             $this->em->flush();
         }
 
-        $createdUsers = [];
-        $updatedUsers = [];
         foreach ($content as $line) {
             $l++;
             $line = Utils::parseTsvLine(trim($line));
@@ -1025,76 +1207,6 @@ class ImportExportService
             ];
         }
 
-        $newTeams = [];
-        foreach ($accountData as $accountItem) {
-            if (!empty($accountItem['team'])) {
-                $team = $this->em->getRepository(Team::class)->findOneBy([
-                    'name' => $accountItem['team']['name'],
-                    'category' => $accountItem['team']['category']
-                ]);
-                if ($team === null) {
-                    $team = new Team();
-                    $team
-                        ->setName($accountItem['team']['name'])
-                        ->setCategory($accountItem['team']['category'])
-                        ->setExternalid($accountItem['team']['externalid'])
-                        ->setPublicDescription($accountItem['team']['publicdescription'] ?? null);
-                    $this->em->persist($team);
-                    $action = EventLogService::ACTION_CREATE;
-                } else {
-                    $action = EventLogService::ACTION_UPDATE;
-                }
-                $this->em->flush();
-                $newTeams[] = [
-                    'team' => $team,
-                    'action' => $action,
-                ];
-                $this->dj->auditlog('team', $team->getTeamid(), 'replaced',
-                                    'imported from tsv, autocreated for judge');
-                $accountItem['user']['team'] = $team;
-            }
-
-            $user = $this->em->getRepository(User::class)->findOneBy(['username' => $accountItem['user']['username']]);
-            if (!$user) {
-                $user  = new User();
-                $added = true;
-            } else {
-                $added = false;
-            }
-
-            $propertyAccessor = PropertyAccess::createPropertyAccessor();
-            foreach ($accountItem['user'] as $field => $value) {
-                $propertyAccessor->setValue($user, $field, $value);
-            }
-
-            if ($added) {
-                $this->em->persist($user);
-            }
-            $this->em->flush();
-            if ($added) {
-                $createdUsers[] = $user->getUserid();
-            } else {
-                $updatedUsers[] = $user->getUserid();
-            }
-
-            $this->dj->auditlog('user', $user->getUserid(), 'replaced', 'imported from tsv');
-        }
-
-        if ($contest = $this->dj->getCurrentContest()) {
-            foreach ($newTeams as $newTeam) {
-                $team = $newTeam['team'];
-                $action = $newTeam['action'];
-                $this->eventLogService->log('team', $team->getTeamid(), $action, $contest->getCid());
-            }
-
-            if (!empty($createdUsers)) {
-                $this->eventLogService->log('user', $createdUsers, 'create', $contest->getCid());
-            }
-            if (!empty($updatedUsers)) {
-                $this->eventLogService->log('user', $updatedUsers, 'update', $contest->getCid());
-            }
-        }
-
-        return count($accountData);
+        return $this->importAccountData($accountData);
     }
 }
