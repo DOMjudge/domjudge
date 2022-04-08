@@ -11,6 +11,7 @@ use App\Entity\Team;
 use App\Entity\TeamCategory;
 use App\Entity\Testcase;
 use App\Entity\TestcaseContent;
+use App\Entity\User;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
@@ -21,6 +22,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Symfony\Bundle\FrameworkBundle\Test\TestBrowserToken;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class QueuetaskIntegrationTest extends KernelTestCase
@@ -145,6 +147,16 @@ class QueuetaskIntegrationTest extends KernelTestCase
             }
         }
         $this->em->flush();
+
+        // We need *some* user token set because some of these tests initialize static events,
+        // which needs a user to check permissions.
+        // Using the TestBrowserToken is the easiest way to do this.
+        $user  = $this->em->getRepository(User::class)->findAll()[0];
+        $token = new TestBrowserToken([], $user, 'main');
+        if (method_exists($token, 'setAuthenticated')) {
+            $token->setAuthenticated(true, false);
+        }
+        self::getContainer()->get('security.untracked_token_storage')->setToken($token);
     }
 
     protected function tearDown(): void

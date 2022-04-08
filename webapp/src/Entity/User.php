@@ -22,10 +22,13 @@ use Symfony\Component\Validator\Constraints as Assert;
  *     name="user",
  *     options={"collation"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Users that have access to DOMjudge"},
  *     indexes={@ORM\Index(name="teamid", columns={"teamid"})},
- *     uniqueConstraints={@ORM\UniqueConstraint(name="username", columns={"username"}, options={"lengths":{190}})})
+ *     uniqueConstraints={
+ *         @ORM\UniqueConstraint(name="username", columns={"username"}, options={"lengths":{190}}),
+ *         @ORM\UniqueConstraint(name="externalid", columns={"externalid"}, options={"lengths":{190}}),
+ *     })
  * @UniqueEntity("username", message="The username '{{ value }}' is already in use.")
  */
-class User implements UserInterface, PasswordAuthenticatedUserInterface, EquatableInterface, ExternalRelationshipEntityInterface
+class User extends BaseApiEntity implements UserInterface, PasswordAuthenticatedUserInterface, EquatableInterface, ExternalRelationshipEntityInterface
 {
     /**
      * @ORM\Id
@@ -36,6 +39,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Equatab
      * @Serializer\Type("string")
      */
     private ?int $userid = null;
+
+    /**
+     * @ORM\Column(type="string", name="externalid", length=255,
+     *     options={"comment"="User ID in an external system",
+     *              "collation"="utf8mb4_bin"},
+     *     nullable=true)
+     * @Serializer\Exclude()
+     */
+    protected ?string $externalid = null;
 
     /**
      * @ORM\Column(type="string", name="username", length=255,
@@ -174,6 +186,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Equatab
     public function getUserid(): ?int
     {
         return $this->userid;
+    }
+
+    public function setExternalid(?string $externalid): User
+    {
+        $this->externalid = $externalid;
+        return $this;
+    }
+
+    public function getExternalid(): ?string
+    {
+        return $this->externalid;
     }
 
     public function setUsername(?string $username): User

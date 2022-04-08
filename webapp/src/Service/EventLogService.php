@@ -11,6 +11,7 @@ use App\Entity\JudgingRun;
 use App\Entity\Submission;
 use App\Entity\TeamAffiliation;
 use App\Entity\TeamCategory;
+use App\Entity\User;
 use App\Utils\Utils;
 use Doctrine\Inflector\InflectorFactory;
 use Doctrine\ORM\EntityManagerInterface;
@@ -126,6 +127,12 @@ class EventLogService implements ContainerAwareInterface
             self::KEY_TYPE => self::TYPE_AGGREGATE,
             self::KEY_ENTITY => null,
             self::KEY_TABLES => ['event'],
+        ],
+        'accounts' => [
+            self::KEY_TYPE => self::TYPE_CONFIGURATION,
+            self::KEY_ENTITY => User::class,
+            self::KEY_TABLES => ['user'],
+            self::KEY_USE_EXTERNAL_ID => true,
         ],
     ];
 

@@ -12,7 +12,6 @@ use App\Service\ImportExportService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
-use Exception;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Annotations as OA;
@@ -370,6 +369,6 @@ class UserController extends AbstractRestController
 
     protected function getIdField(): string
     {
-        return 'u.userid';
+        return sprintf('u.%s', $this->eventLogService->externalIdFieldForEntity(User::class) ?? 'userid');
     }
 }

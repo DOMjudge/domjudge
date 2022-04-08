@@ -19,6 +19,12 @@
                     <th>ID</th>
                     <td>{{ user.userid }}</td>
                 </tr>
+                {% if showExternalId(user) %}
+                    <tr>
+                        <th>External ID</th>
+                        <td>{{ user.externalid }}</td>
+                    </tr>
+                {% endif %}
                 <tr>
                     <th>Login</th>
                     <td class="teamid">{{ user.username }}</td>

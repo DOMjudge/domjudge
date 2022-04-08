@@ -13,6 +13,7 @@ class UserFixture extends AbstractExampleDataFixture implements DependentFixture
     {
         $user = new User();
         $user
+            ->setExternalid('demo')
             ->setUsername('demo')
             ->setName('demo user for example team')
             ->setPlainPassword('demo')

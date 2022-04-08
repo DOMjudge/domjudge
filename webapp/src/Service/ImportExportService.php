@@ -959,6 +959,8 @@ class ImportExportService
             $this->em->flush();
         }
 
+        $createdUsers = [];
+        $updatedUsers = [];
         foreach ($content as $line) {
             $l++;
             $line = Utils::parseTsvLine(trim($line));
@@ -1012,6 +1014,7 @@ class ImportExportService
             $accountData[] = [
                 'user' => [
                     'name' => $line[1],
+                    'externalid' => $line[2],
                     'username' => $line[2],
                     'plain_password' => $line[3],
                     'team' => $team,
@@ -1068,6 +1071,11 @@ class ImportExportService
                 $this->em->persist($user);
             }
             $this->em->flush();
+            if ($added) {
+                $createdUsers[] = $user->getUserid();
+            } else {
+                $updatedUsers[] = $user->getUserid();
+            }
 
             $this->dj->auditlog('user', $user->getUserid(), 'replaced', 'imported from tsv');
         }
@@ -1077,6 +1085,13 @@ class ImportExportService
                 $team = $newTeam['team'];
                 $action = $newTeam['action'];
                 $this->eventLogService->log('team', $team->getTeamid(), $action, $contest->getCid());
+            }
+
+            if (!empty($createdUsers)) {
+                $this->eventLogService->log('user', $createdUsers, 'create', $contest->getCid());
+            }
+            if (!empty($updatedUsers)) {
+                $this->eventLogService->log('user', $updatedUsers, 'update', $contest->getCid());
             }
         }
 
