@@ -721,9 +721,10 @@ class ExternalContestSourceService
             ->findOneBy(['externalid' => $groupId]);
 
         if ($event['op'] === EventLogService::ACTION_DELETE) {
-            // We need to check if the the category is known
+            // We need to check if the category is known
             if ($category) {
                 $this->addOrUpdateWarning($event, ExternalSourceWarning::TYPE_ENTITY_SHOULD_NOT_EXIST);
+                return;
             }
             $this->removeWarning($event, ExternalSourceWarning::TYPE_ENTITY_SHOULD_NOT_EXIST);
             return;
@@ -757,9 +758,10 @@ class ExternalContestSourceService
             ->findOneBy(['externalid' => $organizationId]);
 
         if ($event['op'] === EventLogService::ACTION_DELETE) {
-            // We need to check if the the affiliation is known
+            // We need to check if the affiliation is known
             if ($affiliation) {
                 $this->addOrUpdateWarning($event, ExternalSourceWarning::TYPE_ENTITY_SHOULD_NOT_EXIST);
+                return;
             }
             $this->removeWarning($event, ExternalSourceWarning::TYPE_ENTITY_SHOULD_NOT_EXIST);
             return;
@@ -843,9 +845,10 @@ class ExternalContestSourceService
             ->findOneBy(['externalid' => $teamId]);
 
         if ($event['op'] === EventLogService::ACTION_DELETE) {
-            // We need to check if the the team is known
+            // We need to check if the team is known
             if ($team) {
                 $this->addOrUpdateWarning($event, ExternalSourceWarning::TYPE_ENTITY_SHOULD_NOT_EXIST);
+                return;
             }
 
             $this->removeWarning($event, ExternalSourceWarning::TYPE_ENTITY_SHOULD_NOT_EXIST);
@@ -888,6 +891,7 @@ class ExternalContestSourceService
             // We need to check if the user is known
             if ($user) {
                 $this->addOrUpdateWarning($event, ExternalSourceWarning::TYPE_ENTITY_SHOULD_NOT_EXIST);
+                return;
             }
 
             $this->removeWarning($event, ExternalSourceWarning::TYPE_ENTITY_SHOULD_NOT_EXIST);
