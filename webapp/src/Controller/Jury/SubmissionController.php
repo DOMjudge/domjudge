@@ -1048,17 +1048,17 @@ class SubmissionController extends BaseController
     protected function determineFileChanged(array $files, array $oldFiles): array
     {
         $result = [
-            'added' => [],
-            'removed' => [],
-            'changed' => [],
-            'changedfiles' => [], // These will be shown, so we will add pairs of files here
-            'unchanged' => [],
+            'changed'      => [],
+            'changedfiles' => [], // These will be shown, so we will add pairs of files here.
+            'unchanged'    => [],
         ];
 
-        $newFilenames = [];
-        $oldFilenames = [];
+        $newFilenames = array_map(fn($f) => $f->getFilename(), $files);
+        $oldFilenames = array_map(fn($f) => $f->getFilename(), $oldFiles);
+        $result['added']   = array_diff($newFilenames, $oldFilenames);
+        $result['removed'] = array_diff($oldFilenames, $newFilenames);
+
         foreach ($files as $newfile) {
-            $oldFilenames = [];
             foreach ($oldFiles as $oldFile) {
                 if ($newfile->getFilename() === $oldFile->getFilename()) {
                     if ($oldFile->getSourcecode() === $newfile->getSourcecode()) {
@@ -1068,15 +1068,10 @@ class SubmissionController extends BaseController
                         $result['changedfiles'][] = [$newfile, $oldFile];
                     }
                 }
-                $oldFilenames[] = $oldFile->getFilename();
             }
-            $newFilenames[] = $newfile->getFilename();
         }
 
-        $result['added']   = array_diff($newFilenames, $oldFilenames);
-        $result['removed'] = array_diff($oldFilenames, $newFilenames);
-
-        // Special case: if we have exactly one file now and before but the filename is different, use that for diffing
+        // Special case: if there's just a single file (before and after) that has been renamed, use that for diffing.
         if (count($result['added']) === 1 && count($result['removed']) === 1 && empty($result['changed'])) {
             $result['added']        = [];
             $result['removed']      = [];
