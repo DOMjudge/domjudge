@@ -120,16 +120,7 @@ class CheckConfigService
     public function checkPhpExtensions(): array
     {
         $required = ['json', 'mbstring', 'mysqli', 'zip', 'gd', 'intl'];
-        $optional = [];
-
         $state = 'O'; $remark = '';
-        foreach ($optional as $ext => $why) {
-            if (!extension_loaded($ext)) {
-                $state = 'W';
-                $remark .= sprintf("Optional PHP extension '%s' not loaded; needed for %s\n",
-                    $ext, $why);
-            }
-        }
         foreach ($required as $ext) {
             if (!extension_loaded($ext)) {
                 $state = 'E';
