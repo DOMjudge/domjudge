@@ -615,34 +615,33 @@ class CheckConfigService
         $result = 'O';
         $desc = '';
         foreach ($affils as $affiliation) {
-            // don't care about unused affiliations
+            // Only check affiliations that are used, i.e. where there is at least one team.
             if (count($affiliation->getTeams()) === 0) {
                 continue;
             }
-            if ($show_logos) {
-                if ($aid = $affiliation->getApiId($this->eventLogService)) {
-                    $logopath = $this->dj->assetPath($aid, 'affiliation', true);
-                    $logopathMask = str_replace('.jpg', '.{jpg,png,svg}', $this->dj->assetPath($aid, 'affiliation', true, 'jpg'));
-                    if (!$logopath) {
+
+            if ($aid = $affiliation->getApiId($this->eventLogService)) {
+                $logopath = $this->dj->assetPath($aid, 'affiliation', true);
+                $logopathMask = str_replace('.jpg', '.{jpg,png,svg}', $this->dj->assetPath($aid, 'affiliation', true, 'jpg'));
+                if (!$logopath) {
+                    $result = 'W';
+                    $desc   .= sprintf("Logo for %s does not exist (looking for %s)\n", $affiliation->getShortname(), $logopathMask);
+                } elseif (!is_readable($logopath)) {
+                    $result = 'W';
+                    $desc .= sprintf("Logo for %s not readable (looking for %s)\n", $affiliation->getShortname(), $logopathMask);
+                } elseif (($filesize = filesize($logopath)) > 500 * 1024) {
+                    $result = 'W';
+                    $desc .= sprintf("Logo for %s bigger than 500Kb (size is %.2fKb)\n", $affiliation->getShortname(), $filesize / 1024);
+                } else {
+                    [$width, $height, $ratio] = Utils::getImageSize($logopath);
+                    if (mime_content_type($logopath) === 'image/svg+xml') {
+                        // For SVG's we check the ratio
                         $result = 'W';
-                        $desc   .= sprintf("Logo for %s does not exist (looking for %s)\n", $affiliation->getShortname(), $logopathMask);
-                    } elseif (!is_readable($logopath)) {
+                        $desc   .= sprintf("Logo for %s has a ratio of 1:%.2f, should be 1:1\n", $affiliation->getShortname(), $ratio);
+                    } elseif ($width !== 64 || $height !== 64) {
+                        // For other images we check the size
                         $result = 'W';
-                        $desc .= sprintf("Logo for %s not readable (looking for %s)\n", $affiliation->getShortname(), $logopathMask);
-                    } elseif (($filesize = filesize($logopath)) > 500 * 1024) {
-                        $result = 'W';
-                        $desc .= sprintf("Logo for %s bigger than 500Kb (size is %.2fKb)\n", $affiliation->getShortname(), $filesize / 1024);
-                    } else {
-                        [$width, $height, $ratio] = Utils::getImageSize($logopath);
-                        if (mime_content_type($logopath) === 'image/svg+xml') {
-                            // For SVG's we check the ratio
-                            $result = 'W';
-                            $desc   .= sprintf("Logo for %s has a ratio of 1:%.2f, should be 1:1\n", $affiliation->getShortname(), $ratio);
-                        } elseif ($width !== 64 || $height !== 64) {
-                            // For other images we check the size
-                            $result = 'W';
-                            $desc   .= sprintf("Logo for %s is not 64x64\n", $affiliation->getShortname());
-                        }
+                        $desc   .= sprintf("Logo for %s is not 64x64\n", $affiliation->getShortname());
                     }
                 }
             }
