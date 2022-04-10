@@ -33,6 +33,7 @@ use Doctrine\ORM\PersistentCollection;
 use Doctrine\ORM\Query\Expr\Join;
 use Exception;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -492,22 +493,9 @@ class ContestController extends BaseController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $formData = $form->getData();
-            $timeZones = [];
-            foreach (['Activate','Deactivate','Start','End','Freeze','Unfreeze'] as $timeString) {
-                $tmpValue = $formData->{'get'.$timeString.'timeString'}();
-                if ($tmpValue !== '' && !is_null($tmpValue)) {
-                    $fields = explode(' ', $tmpValue);
-                    if (count($fields) > 1) {
-                        $timeZones[] = $fields[2];
-                    }
-                }
-            }
-            if (count(array_unique($timeZones)) > 1) {
-                $this->addFlash('danger', 'Contest should not have multiple timezones.');
-                return $this->render('jury/contest_add.html.twig', [
-                    'form' => $form->createView(),
-                ]);
+            $response = $this->checkTimezones($form);
+            if ($response !== null) {
+                return $response;
             }
 
             // We need to explicitly assign the contest on all problems, because
@@ -647,28 +635,15 @@ class ContestController extends BaseController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $formData = $form->getData();
-            $timeZones = [];
-            foreach (['Activate','Deactivate','Start','End','Freeze','Unfreeze'] as $timeString) {
-                $tmpValue = $formData->{'get'.$timeString.'timeString'}();
-                if ($tmpValue !== '' && !is_null($tmpValue)) {
-                    $fields = explode(' ', $tmpValue);
-                    if (count($fields) > 1) {
-                        $timeZones[] = $fields[2];
-                    }
-                }
-            }
-            if (count(array_unique($timeZones)) > 1) {
-                $this->addFlash('danger', 'Contest should not have multiple timezones.');
-                return $this->render('jury/contest_add.html.twig', [
-                    'form' => $form->createView(),
-                ]);
+            $response = $this->checkTimezones($form);
+            if ($response !== null) {
+                return $response;
             }
 
             $this->em->wrapInTransaction(function () use ($contest) {
                 // A little 'hack': we need to first persist and save the
                 // contest, before we can persist and save the problem,
-                // because we need a contest ID
+                // because we need a contest ID.
                 /** @var ContestProblem[] $problems */
                 $problems = $contest->getProblems()->toArray();
                 foreach ($contest->getProblems() as $problem) {
@@ -916,5 +891,28 @@ class ContestController extends BaseController
                              ->getResult();
         $this->judgeRemaining($judgings);
         return $this->redirect($this->generateUrl('jury_contest', ['contestId' => $contestId]));
+    }
+
+    // Return null in case no error has been found.
+    private function checkTimezones(FormInterface $form): ?Response
+    {
+        $formData = $form->getData();
+        $timeZones = [];
+        foreach (['Activate', 'Deactivate', 'Start', 'End', 'Freeze', 'Unfreeze'] as $timeString) {
+            $tmpValue = $formData->{'get' . $timeString . 'timeString'}();
+            if ($tmpValue !== '' && !is_null($tmpValue)) {
+                $fields = explode(' ', $tmpValue);
+                if (count($fields) > 1) {
+                    $timeZones[] = $fields[2];
+                }
+            }
+        }
+        if (count(array_unique($timeZones)) > 1) {
+            $this->addFlash('danger', 'Contest should not have multiple timezones.');
+            return $this->render('jury/contest_add.html.twig', [
+                'form' => $form->createView(),
+            ]);
+        }
+        return null;
     }
 }
