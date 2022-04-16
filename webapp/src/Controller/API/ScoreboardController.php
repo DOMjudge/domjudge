@@ -155,7 +155,7 @@ class ScoreboardController extends AbstractRestController
             }
             $row = [
                 'rank' => $teamScore->rank,
-                'team_id' => (string)$teamScore->team->getApiId($this->eventLogService),
+                'team_id' => $teamScore->team->getApiId($this->eventLogService),
                 'score' => [
                     'num_solved' => $teamScore->numPoints,
                     'total_time' => $teamScore->totalTime,
@@ -167,7 +167,7 @@ class ScoreboardController extends AbstractRestController
                 $contestProblem = $scoreboard->getProblems()[$problemId];
                 $problem        = [
                     'label' => $contestProblem->getShortname(),
-                    'problem_id' => (string)$contestProblem->getApiId($this->eventLogService),
+                    'problem_id' => $contestProblem->getApiId($this->eventLogService),
                     'num_judged' => $matrixItem->numSubmissions,
                     'num_pending' => $matrixItem->numSubmissionsPending,
                     'solved' => $matrixItem->isCorrect,
