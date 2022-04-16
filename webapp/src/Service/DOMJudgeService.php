@@ -886,7 +886,6 @@ class DOMJudgeService
                 ->getQuery()
                 ->getResult();
 
-            $samples = [];
             foreach ($samplesData as $sample) {
                 $samples[$sample['probid']] = $sample['numsamples'];
             }
