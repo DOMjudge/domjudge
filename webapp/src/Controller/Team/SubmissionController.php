@@ -144,7 +144,7 @@ class SubmissionController extends BaseController
             ->getQuery()
             ->getOneOrNullResult();
 
-        // Update seen status when viewing submission
+        // Update seen status when viewing submission.
         if ($judging && $judging->getSubmission()->getSubmittime() < $contest->getEndtime() &&
             (!$verificationRequired || $judging->getVerified())) {
             $judging->setSeen(true);

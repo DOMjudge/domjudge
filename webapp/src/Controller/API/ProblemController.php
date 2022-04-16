@@ -99,7 +99,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
     }
 
     /**
-     * Get all the problems for this contest
+     * Get all the problems for this contest.
      * @Rest\Get("")
      * @OA\Response(
      *     response="200",
@@ -115,9 +115,10 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
      */
     public function listAction(Request $request): Response
     {
-        // Make sure we clear the entity manager class, for when this method is called multiple times by internal requests
+        // Make sure we clear the entity manager class, for when this method is called multiple times
+        // by internal requests.
         $this->em->clear();
-        // This method is overwritten, because we need to add ordinal values
+        // This method is overwritten, because we need to add ordinal values.
         $queryBuilder = $this->getQueryBuilder($request);
 
         $objects = $queryBuilder
@@ -338,7 +339,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
     }
 
     /**
-     * Get the given problem for this contest
+     * Get the given problem for this contest.
      * @throws NonUniqueResultException
      * @Rest\Get("/{id}")
      * @OA\Response(
@@ -391,7 +392,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
             ->orderBy('cp.shortname')
             ->groupBy('cp.problem');
 
-        // For non-API-reader users, only expose the problems after the contest has started
+        // For non-API-reader users, only expose the problems after the contest has started.
         if (!$this->dj->checkrole('api_reader') && $contest->getStartTimeObject()->getTimestamp() > time()) {
             $queryBuilder->andWhere('1 = 0');
         }
@@ -405,7 +406,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
     }
 
     /**
-     * Transform the given object before returning it from the API
+     * Transform the given object before returning it from the API.
      * @param array $object
      * @return ContestProblem|ContestProblemWrapper
      */

@@ -905,7 +905,7 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
             $seconds      *= $sign;
             $absoluteTime = $this->starttime + $seconds;
 
-            // Take into account the removed intervals
+            // Take into account the removed intervals.
             /** @var RemovedInterval[] $removedIntervals */
             $removedIntervals = $this->getRemovedIntervals()->toArray();
             usort($removedIntervals, function (RemovedInterval $a, RemovedInterval $b) {
@@ -991,7 +991,7 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
             } elseif (empty($timeValue)) {
                 $resultItem['icon'] = null;
             } elseif (Utils::difftime((float)$timeValue, $now) <= 0) {
-                // this event has passed, mark as such
+                // This event has passed, mark as such.
                 $resultItem['icon'] = 'check';
                 $prevchecked        = true;
             } elseif ($prevchecked) {
@@ -1091,7 +1091,7 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
      */
     public function updateTimes(): void
     {
-        // Update the start times, as this will update all other fields
+        // Update the start times, as this will update all other fields.
         $this->setStarttime((float)strtotime($this->getStarttimeString()));
         $this->setStarttimeString($this->getStarttimeString());
     }
@@ -1172,7 +1172,7 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
 
         /** @var ContestProblem $problem */
         foreach ($this->problems as $idx => $problem) {
-            // Check if the problem ID is unique
+            // Check if the problem ID is unique.
             $otherProblemIds = $this->problems
                 ->filter(fn(ContestProblem $otherProblem) => $otherProblem !== $problem)
                 ->map(fn(ContestProblem $problem) => $problem->getProblem()->getProbid())
@@ -1185,7 +1185,7 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
                     ->addViolation();
             }
 
-            // Check if the problem shortname is unique
+            // Check if the problem shortname is unique.
             $otherShortNames = $this->problems
                 ->filter(fn(ContestProblem $otherProblem) => $otherProblem !== $problem)
                 ->map(fn(ContestProblem $problem) => strtolower($problem->getShortname()))

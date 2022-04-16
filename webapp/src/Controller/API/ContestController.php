@@ -115,7 +115,7 @@ class ContestController extends AbstractRestController
     }
 
     /**
-     * Get all the contests
+     * Get all the contests.
      * @Rest\Get("")
      * @OA\Response(
      *     response="200",
@@ -146,7 +146,7 @@ class ContestController extends AbstractRestController
     }
 
     /**
-     * Get the given contest
+     * Get the given contest.
      * @throws NonUniqueResultException
      * @Rest\Get("/{cid}")
      * @OA\Response(
@@ -168,7 +168,7 @@ class ContestController extends AbstractRestController
     }
 
     /**
-     * Get the banner for the given contest
+     * Get the banner for the given contest.
      * @Rest\Get("/{id}/banner", name="contest_banner")
      * @OA\Response(
      *     response="200",
@@ -202,7 +202,7 @@ class ContestController extends AbstractRestController
     }
 
     /**
-     * Delete the banner for the given contest
+     * Delete the banner for the given contest.
      * @Rest\Delete("/{id}/banner", name="delete_contest_banner")
      * @IsGranted("ROLE_ADMIN")
      * @OA\Response(response="204", description="Deleting banner succeeded")
@@ -231,7 +231,7 @@ class ContestController extends AbstractRestController
     }
 
     /**
-     * Set the banner for the given contest
+     * Set the banner for the given contest.
      * @Rest\POST("/{id}/banner", name="post_contest_banner")
      * @Rest\PUT("/{id}/banner", name="put_contest_banner")
      * @OA\RequestBody(
@@ -287,7 +287,7 @@ class ContestController extends AbstractRestController
     }
 
     /**
-     * Change the start time of the given contest
+     * Change the start time of the given contest.
      * @Rest\Patch("/{cid}")
      * @IsGranted("ROLE_API_WRITER")
      * @throws NonUniqueResultException
@@ -380,7 +380,7 @@ class ContestController extends AbstractRestController
     }
 
     /**
-     * Get the contest in YAML format
+     * Get the contest in YAML format.
      * @Rest\Get("/{cid}/contest-yaml")
      * @throws NonUniqueResultException
      * @OA\Parameter(ref="#/components/parameters/cid")
@@ -438,7 +438,7 @@ class ContestController extends AbstractRestController
     }
 
     /**
-     * Get the event feed for the given contest
+     * Get the event feed for the given contest.
      * @Rest\Get("/{cid}/event-feed")
      * @OA\Get()
      * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_API_READER')")
@@ -567,17 +567,17 @@ class ContestController extends AbstractRestController
                 // detect it.
                 $skippedProperties['problems'][] = 'externalid';
 
-                // Users are called accounts
+                // Users are called accounts.
                 $skippedProperties['accounts'] = $skippedProperties['users'];
             }
 
-            // Initialize all static events
+            // Initialize all static events.
             $this->eventLogService->initStaticEvents($contest);
-            // Reload the contest as the above method will clear the entity manager
+            // Reload the contest as the above method will clear the entity manager.
             $contest = $this->getContestWithId($request, $cid);
 
             while (true) {
-                // Add missing state events that should have happened already
+                // Add missing state events that should have happened already.
                 $this->eventLogService->addMissingStateEvents($contest);
 
                 $qb = $this->em->createQueryBuilder()
@@ -665,7 +665,7 @@ class ContestController extends AbstractRestController
     }
 
     /**
-     * Get general status information
+     * Get general status information.
      * @Rest\Get("/{cid}/status")
      * @IsGranted("ROLE_API_READER")
      * @OA\Parameter(ref="#/components/parameters/cid")
@@ -698,7 +698,7 @@ class ContestController extends AbstractRestController
     }
 
     /**
-     * Get the contest with the given ID
+     * Get the contest with the given ID.
      * @throws NonUniqueResultException
      */
     protected function getContestWithId(Request $request, string $id): Contest

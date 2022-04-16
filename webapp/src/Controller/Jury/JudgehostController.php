@@ -32,7 +32,7 @@ use Symfony\Component\Routing\RouterInterface;
  */
 class JudgehostController extends BaseController
 {
-    // Note: when adding or modifying routes, make sure they do not clash with the /judgehosts/{hostname} route
+    // Note: when adding or modifying routes, make sure they do not clash with the /judgehosts/{hostname} route.
 
     protected EntityManagerInterface $em;
     protected DOMJudgeService $dj;
@@ -85,7 +85,7 @@ class JudgehostController extends BaseController
         foreach ($judgehosts as $judgehost) {
             $judgehostdata    = [];
             $judgehostactions = [];
-            // Get whatever fields we can from the problem object itself
+            // Get whatever fields we can from the problem object itself.
             foreach ($table_fields as $k => $v) {
                 if ($propertyAccessor->isReadable($judgehost, $k)) {
                     $judgehostdata[$k] = ['value' => $propertyAccessor->getValue($judgehost, $k)];
@@ -169,7 +169,7 @@ class JudgehostController extends BaseController
                 ];
             }
 
-            // Save this to our list of rows
+            // Save this to our list of rows.
             $judgehosts_table[] = [
                 'data' => $judgehostdata,
                 'actions' => $judgehostactions,

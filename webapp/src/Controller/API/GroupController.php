@@ -25,7 +25,7 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 class GroupController extends AbstractRestController
 {
     /**
-     * Get all the groups for this contest
+     * Get all the groups for this contest.
      * @Rest\Get("")
      * @OA\Parameter(ref="#/components/parameters/idlist")
      * @OA\Parameter(ref="#/components/parameters/strict")

@@ -41,12 +41,12 @@ class DOMJudgeBasicAuthenticator extends AbstractAuthenticator
             return false;
         }
 
-        // No credentials provided, so we can't try to auth anything
+        // No credentials provided, so we can't try to auth anything.
         if ($request->headers->get('php-auth-user', null) === null) {
             return false;
         }
 
-        // If it's stateless, we provide auth support every time
+        // If it's stateless, we provide auth support every time.
         $stateless_fw_contexts = [
           'security.firewall.map.context.api',
           'security.firewall.map.context.metrics',
@@ -71,21 +71,21 @@ class DOMJudgeBasicAuthenticator extends AbstractAuthenticator
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, $firewallName): ?Response
     {
-        // on success, let the request continue
+        // On success, let the request continue.
         return null;
     }
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response
     {
-        # We only throw an error if the credentials provided were wrong or the user doesn't exist
-        # Otherwise we pass along to the next authenticator
+        // We only throw an error if the credentials provided were wrong or the user doesn't exist.
+        // Otherwise, we pass along to the next authenticator.
         if ($exception instanceof BadCredentialsException || $exception instanceof UserNotFoundException) {
             $resp = new Response('', Response::HTTP_UNAUTHORIZED);
             $resp->headers->set('WWW-Authenticate', sprintf('Basic realm="%s"', 'Secured Area'));
             return $resp;
         }
 
-        // Let another guard authenticator handle it
+        // Let another guard authenticator handle it.
         return null;
     }
 }

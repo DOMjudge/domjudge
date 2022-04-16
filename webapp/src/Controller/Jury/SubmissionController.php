@@ -145,7 +145,7 @@ class SubmissionController extends BaseController
             'showTestcases' => count($submissions) <= $latestCount,
         ];
 
-        // For ajax requests, only return the submission list partial
+        // For ajax requests, only return the submission list partial.
         if ($request->isXmlHttpRequest()) {
             return $this->render('jury/partials/submission_list.html.twig', $data);
         }
@@ -228,7 +228,7 @@ class SubmissionController extends BaseController
         $maxRunTimes = array_map(fn($data) => $data['max_runtime'], $judgingData);
 
         $selectedJudging = null;
-        // Find the selected judging
+        // Find the selected judging.
         if ($judgingId !== null) {
             $selectedJudging = $judgings[$judgingId] ?? null;
         } else {
@@ -969,7 +969,7 @@ class SubmissionController extends BaseController
 
             if ((bool)$this->config->get('verification_required')) {
                 // Log to event table (case of no verification required is handled
-                // in the REST API API/JudgehostController::addJudgingRunAction
+                // in the REST API JudgehostController::addJudgingRunAction).
                 $eventLogService->log('judging', $judging->getJudgingid(), 'update', $judging->getContest()->getCid());
             }
         });
@@ -978,7 +978,8 @@ class SubmissionController extends BaseController
             $this->em->clear();
             /** @var Judging $judging */
             $judging = $this->em->getRepository(Judging::class)->find($judgingId);
-            // We need to update the score for all teams for this problem, since the first to solve might now have changed
+            // We need to update the score for all teams for this problem, since the first to solve might now
+            // have changed.
             $teamsQueryBuilder = $this->em->createQueryBuilder()
                                      ->from(Team::class, 't')
                                      ->select('t')

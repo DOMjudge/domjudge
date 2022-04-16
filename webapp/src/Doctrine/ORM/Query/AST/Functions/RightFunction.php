@@ -13,7 +13,7 @@ use Doctrine\ORM\Query\SqlWalker;
 /**
  * Class RightFunction
  *
- * Right function that truncates a field from the database from the right
+ * Right function that truncates a field from the database from the right.
  *
  * RightFunction ::= "RIGHT" "(" ArithmeticPrimary "," ArithmeticPrimary ")"
  *

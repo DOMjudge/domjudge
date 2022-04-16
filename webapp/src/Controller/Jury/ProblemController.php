@@ -96,7 +96,7 @@ class ProblemController extends BaseController
             'num_testcases' => ['title' => '# test cases', 'sort' => true],
         ];
 
-        // Insert external ID field when configured to use it
+        // Insert external ID field when configured to use it.
         if ($externalIdField = $this->eventLogService->externalIdFieldForEntity(Problem::class)) {
             $table_fields = array_slice($table_fields, 0, 1, true) +
                 [$externalIdField => ['title' => 'external ID', 'sort' => true]] +
@@ -123,7 +123,7 @@ class ProblemController extends BaseController
             $p              = $row[0];
             $problemdata    = [];
             $problemactions = [];
-            // Get whatever fields we can from the problem object itself
+            // Get whatever fields we can from the problem object itself.
             foreach ($table_fields as $k => $v) {
                 if ($propertyAccessor->isReadable($p, $k)) {
                     $problemdata[$k] = ['value' => $propertyAccessor->getValue($p, $k)];
@@ -168,7 +168,7 @@ class ProblemController extends BaseController
                 ];
             }
 
-            // Add formatted {mem,output}limit row data for the table
+            // Add formatted {mem,output}limit row data for the table.
             foreach (['memlimit', 'outputlimit'] as $col) {
                 $orig_value = @$problemdata[$col]['value'];
                 if (!isset($orig_value)) {
@@ -213,7 +213,7 @@ class ProblemController extends BaseController
      */
     public function exportAction(int $problemId): StreamedResponse
     {
-        // This might take a while
+        // This might take a while.
         ini_set('max_execution_time', '300');
         /** @var Problem $problem */
         $problem = $this->em->createQueryBuilder()
@@ -229,7 +229,7 @@ class ProblemController extends BaseController
         /** @var ContestProblem|null $contestProblem */
         $contestProblem = $problem->getContestProblems()->first();
 
-        // Build up INI
+        // Build up INI data.
         $iniData = [
             'timelimit' => $problem->getTimelimit(),
             'special_run' => $problem->getRunExecutable() ? $problem->getRunExecutable()->getExecid() : null,
@@ -244,7 +244,7 @@ class ProblemController extends BaseController
             }
         }
 
-        // Build up YAML
+        // Build up YAML.
         $yaml = ['name' => $problem->getName()];
         if (!empty($problem->getCompareExecutable())) {
             $yaml['validation'] = 'custom';
@@ -308,7 +308,7 @@ class ProblemController extends BaseController
 
         foreach ($solutions as $solution) {
             $results = $solution->getExpectedResults();
-            // Only support single outcome solutions
+            // Only support single outcome solutions.
             if (count($results) !== 1) {
                 continue;
             }
@@ -324,7 +324,7 @@ class ProblemController extends BaseController
             }
 
             if ($problemResult === null) {
-                // unsupported result
+                // Unsupported result.
                 continue;
             }
 
@@ -439,7 +439,7 @@ class ProblemController extends BaseController
             ],
         ];
 
-        // For ajax requests, only return the submission list partial
+        // For ajax requests, only return the submission list partial.
         if ($request->isXmlHttpRequest()) {
             $data['showTestcases'] = false;
             return $this->render('jury/partials/submission_list.html.twig', $data);
@@ -723,7 +723,7 @@ class ProblemController extends BaseController
             ->getQuery()
             ->getResult();
 
-        // First find testcase to switch with
+        // First find testcase to switch with.
         /** @var Testcase|null $last */
         $last = null;
         /** @var Testcase|null $other */

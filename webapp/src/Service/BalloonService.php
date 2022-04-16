@@ -41,23 +41,23 @@ class BalloonService
         Submission $submission,
         ?Judging $judging = null
     ): void {
-        // Balloon processing disabled for contest
+        // Balloon processing disabled for contest.
         if (!$contest->getProcessBalloons()) {
             return;
         }
 
-        // Make sure judging is correct
+        // Make sure judging is correct.
         if (!$judging || $judging->getResult() !== Judging::RESULT_CORRECT) {
             return;
         }
 
-        // Also make sure it is verified if this is required
+        // Also make sure it is verified if this is required.
         if (!$judging->getVerified() &&
             $this->config->get('verification_required')) {
             return;
         }
 
-        // prevent duplicate balloons in case of multiple correct submissions
+        // Prevent duplicate balloons in case of multiple correct submissions.
         $numCorrect = $this->em->createQueryBuilder()
             ->from(Balloon::class, 'b')
             ->join('b.submission', 's')
@@ -89,7 +89,7 @@ class BalloonService
             $freezetime = $contest->getFreezeTime();
         }
 
-        // Build a list of teams and the problems they solved first
+        // Build a list of teams and the problems they solved first.
         $firstSolved = $em->getRepository(ScoreCache::class)->findBy(['is_first_to_solve' => 1]);
         $firstSolvers = [];
         foreach ($firstSolved as $scoreCache) {
@@ -117,7 +117,7 @@ class BalloonService
             ->addOrderBy('s.submittime', 'DESC');
 
         $balloons = $query->getQuery()->getResult();
-        // Loop once over the results to get totals and awards
+        // Loop once over the results to get totals and awards.
         $TOTAL_BALLOONS = $AWARD_BALLOONS = [];
         foreach ($balloons as $balloonsData) {
             if ($balloonsData['color'] === null) {
@@ -132,11 +132,11 @@ class BalloonService
                 $AWARD_BALLOONS['problem'][$balloonsData['probid']][] = $balloonsData[0]->getBalloonId();
             }
             // Keep overwriting this - in the end it'll
-            // contain the id of the first balloon in this contest.
+            // contain the ID of the first balloon in this contest.
             $AWARD_BALLOONS['contest'] = $balloonsData[0]->getBalloonId();
         }
 
-        // Loop again to construct table
+        // Loop again to construct table.
         $balloons_table = [];
         foreach ($balloons as $balloonsData) {
             $color = $balloonsData['color'];

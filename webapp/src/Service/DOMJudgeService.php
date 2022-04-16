@@ -73,7 +73,7 @@ class DOMJudgeService
 
     // Regex external identifiers must adhere to. Note that we are not checking whether it
     // does not start with a dot or dash or ends with a dot. We could but it would make the
-    // regex way more complicated and would also complicate the logic in ImportExportService::importContestYaml
+    // regex way more complicated and would also complicate the logic in ImportExportService::importContestYaml.
     const EXTERNAL_IDENTIFIER_REGEX = '/^[a-zA-Z0-9_.-]+$/';
 
     const MIMETYPE_TO_EXTENSION = [
@@ -110,7 +110,7 @@ class DOMJudgeService
     }
 
     /**
-     * Return all the contests that are currently active indexed by contest ID
+     * Return all the contests that are currently active indexed by contest ID.
      *
      * @param int|null $onlyofteam If -1, get only public contests. If > 0 get only contests for the given team
      * @param bool     $alsofuture If true, also get future contests
@@ -219,8 +219,8 @@ class DOMJudgeService
 
         $user = $token->getUser();
 
-        // Ignore user objects if they aren't an App user
-        // Covers cases where users are not logged in
+        // Ignore user objects if they aren't an App user.
+        // Covers cases where users are not logged in.
         if (!is_a($user, 'App\Entity\User')) {
             return null;
         }
@@ -441,7 +441,7 @@ class DOMJudgeService
     }
 
     /**
-     * Log an action to the auditlog table
+     * Log an action to the auditlog table.
      *
      * @param string|int|null $cid
      */
@@ -488,7 +488,7 @@ class DOMJudgeService
     }
 
     /**
-     * Decode a JSON string with our preferred settings
+     * Decode a JSON string with our preferred settings.
      * @return mixed
      */
     public function jsonDecode(string $str)
@@ -497,7 +497,7 @@ class DOMJudgeService
     }
 
     /**
-     * Encode a JSON string with our preferred settings
+     * Encode a JSON string with our preferred settings.
      * @param mixed $data
      */
     public function jsonEncode($data): string
@@ -593,7 +593,7 @@ class DOMJudgeService
     }
 
     /**
-     * Perform an internal API request to the given URL with the given data
+     * Perform an internal API request to the given URL with the given data.
      *
      * @return mixed|null
      */
@@ -708,7 +708,7 @@ class DOMJudgeService
     }
 
     /**
-     * Get a ZIP with sample data
+     * Get a ZIP with sample data.
      *
      * @return string Content of samples zip file.
      */
@@ -1286,7 +1286,7 @@ class DOMJudgeService
     }
 
     /**
-     * Get the full asset path for the given entity and property
+     * Get the full asset path for the given entity and property.
      */
     public function fullAssetPath(AssetEntityInterface $entity, string $property, bool $useExternalid, ?string $forceExtension = null): ?string
     {
@@ -1341,7 +1341,7 @@ class DOMJudgeService
 
     public function parseMetadata($raw_metadata): array
     {
-        // TODO: reduce duplication with judgedaemon code.
+        // TODO: Reduce duplication with judgedaemon code.
         $contents = explode("\n", $raw_metadata);
         $res = [];
         foreach($contents as $line) {

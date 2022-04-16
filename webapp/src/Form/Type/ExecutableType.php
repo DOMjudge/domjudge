@@ -30,7 +30,7 @@ class ExecutableType extends AbstractType
         ]);
         $builder->add('save', SubmitType::class);
 
-        // Remove ID field when doing an edit
+        // Remove ID field when doing an edit.
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) {
             /** @var Executable|null $executable */
             $executable = $event->getData();

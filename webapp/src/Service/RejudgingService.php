@@ -64,7 +64,7 @@ class RejudgingService
         array &$skipped,
         ?callable $progressReporter = null
     ): ?Rejudging {
-        // This might take a while. Make sure we do not timeout
+        // This might take a while. Make sure we do not timeout.
         set_time_limit(0);
 
         $rejudging = new Rejudging();
@@ -173,7 +173,7 @@ class RejudgingService
      */
     public function finishRejudging(Rejudging $rejudging, string $action, ?callable $progressReporter = null): bool
     {
-        // This might take a while
+        // This might take a while.
         ini_set('max_execution_time', '300');
 
         if ($rejudging->getEndtime()) {
@@ -199,7 +199,7 @@ class RejudgingService
             }
         }
 
-        // Get all submissions that we should consider
+        // Get all submissions that we should consider.
         $submissions = $this->em->createQueryBuilder()
             ->from(Submission::class, 's')
             ->leftJoin('s.judgings', 'j', 'WITH', 'j.rejudging = :rejudging')
@@ -246,25 +246,25 @@ class RejudgingService
                         ['submitid' => $submission['submitid']]
                     );
 
-                    // Then set judging to valid
+                    // Then set judging to valid.
                     $this->em->getConnection()->executeQuery(
                         'UPDATE judging SET valid=1 WHERE submitid = :submitid AND rejudgingid = :rejudgingid',
                         ['submitid' => $submission['submitid'], 'rejudgingid' => $rejudgingId]
                     );
 
-                    // Remove relation from submission to rejudge
+                    // Remove relation from submission to rejudge.
                     $this->em->getConnection()->executeQuery(
                         'UPDATE submission SET rejudgingid=NULL WHERE submitid = :submitid',
                         ['submitid' => $submission['submitid']]
                     );
 
-                    // Update cache
+                    // Update caches.
                     $contest = $this->em->getRepository(Contest::class)->find($submission['cid']);
                     $team    = $this->em->getRepository(Team::class)->find($submission['teamid']);
                     $problem = $this->em->getRepository(Problem::class)->find($submission['probid']);
                     $this->scoreboardService->calculateScoreRow($contest, $team, $problem);
 
-                    // Update event log
+                    // Update event log.
                     $this->eventLogService->log('judging', $submission['judgingid'],
                                                 EventLogService::ACTION_CREATE,
                                                 $submission['cid'], null, null, false);
@@ -283,13 +283,13 @@ class RejudgingService
                                                     $submission['cid'], null, null, false);
                     }
 
-                    // Update balloons
+                    // Update balloons.
                     $contest    = $this->em->getRepository(Contest::class)->find($submission['cid']);
                     $submission = $this->em->getRepository(Submission::class)->find($submission['submitid']);
                     $this->balloonService->updateBalloons($contest, $submission);
                 });
             } elseif ($action === self::ACTION_CANCEL) {
-                // Reset submission and invalidate judging tasks
+                // Reset submission and invalidate judging tasks.
 
                 $params = [
                     'rejudgingid' => $rejudgingId,
@@ -324,7 +324,7 @@ class RejudgingService
             }
         }
 
-        // Update the rejudging itself
+        // Update the rejudging itself.
         /** @var Rejudging $rejudging */
         $rejudging = $this->em->getRepository(Rejudging::class)->find($rejudgingId);
         $user      = $this->em->getRepository(User::class)->find($this->dj->getUser()->getUserid());

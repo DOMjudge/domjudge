@@ -33,7 +33,7 @@ use Symfony\Component\HttpFoundation\Response;
 /**
  * Class ScoreboardService
  *
- * Service for scoreboard-related functions
+ * Service for scoreboard-related functions.
  *
  * @package App\Service
  */
@@ -77,7 +77,7 @@ class ScoreboardService
     ): ?Scoreboard {
         $freezeData = new FreezeData($contest);
 
-        // Don't leak information before start of contest
+        // Don't leak information before start of contest.
         if (!$freezeData->started() && !$jury) {
             return null;
         }
@@ -290,7 +290,7 @@ class ScoreboardService
                                          $lockString));
         }
 
-        // Determine whether we will use external judgements instead of judgings
+        // Determine whether we will use external judgements instead of judgings.
         $useExternalJudgements = $this->config->get('data_source') == DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL;
 
         // Note the clause 's.submittime < c.endtime': this is used to
@@ -483,7 +483,7 @@ class ScoreboardService
             throw new Exception('ScoreboardService::calculateScoreRow failed to release lock');
         }
 
-        // If we found a new correct result, update the rank cache too
+        // If we found a new correct result, update the rank cache too.
         if ($updateRankCache && ($correctJury || $correctPubl)) {
             $this->updateRankCache($contest, $team);
         }
@@ -551,7 +551,7 @@ class ScoreboardService
             ->getQuery()
             ->getResult();
 
-        // Process all score cache rows
+        // Process all score cache rows.
         foreach ($scoreCacheRows as $scoreCache) {
             foreach ($variants as $variant => $isRestricted) {
                 $probId = $scoreCache->getProblem()->getProbid();
@@ -643,7 +643,7 @@ class ScoreboardService
             return;
         }
 
-        // for each team, fetch the status of each problem
+        // for each team, fetch the status of each problem.
         foreach ($teams as $team) {
             $progressReporter(sprintf('Team %d:', $team->getTeamid()));
 
@@ -659,7 +659,7 @@ class ScoreboardService
 
         $progressReporter("\nDeleting irrelevant data...");
 
-        // Drop all teams and problems that do not exist in the contest
+        // Drop all teams and problems that do not exist in the contest.
         if (!empty($problems)) {
             $problemIds = array_map(fn(Problem $problem) => $problem->getProbid(), $problems);
         } else {
@@ -703,7 +703,7 @@ class ScoreboardService
     }
 
     /**
-     * Initialize the scoreboard filter for the given request
+     * Initialize the scoreboard filter for the given request.
      */
     public function initializeScoreboardFilter(Request $request, ?Response $response): Filter
     {
@@ -740,7 +740,7 @@ class ScoreboardService
     }
 
     /**
-     * Get a list of affiliation names grouped on category name
+     * Get a list of affiliation names grouped on category name.
      */
     public function getGroupedAffiliations(Contest $contest): array
     {
@@ -794,7 +794,7 @@ class ScoreboardService
     }
 
     /**
-     * Get values to display in the scoreboard filter
+     * Get values to display in the scoreboard filter.
      */
     public function getFilterValues(Contest $contest, bool $jury): array
     {
@@ -819,7 +819,7 @@ class ScoreboardService
             $filters['categories'][$category->getCategoryid()] = $category->getName();
         }
 
-        // show only affiliations / countries with visible teams
+        // Show only affiliations / countries with visible teams.
         if (empty($categories) || !$showAffiliations) {
             $filters['affiliations'] = [];
         } else {
@@ -856,7 +856,7 @@ class ScoreboardService
     }
 
     /**
-     * Get the scoreboard Twig data for a given contest
+     * Get the scoreboard Twig data for a given contest.
      */
     public function getScoreboardTwigData(
         ?Request $request,
@@ -911,7 +911,7 @@ class ScoreboardService
     }
 
     /**
-     * Get the teams to display on the scoreboard
+     * Get the teams to display on the scoreboard.
      * @return Team[]
      */
     protected function getTeams(Contest $contest, bool $jury = false, Filter $filter = null): array
@@ -1005,7 +1005,7 @@ class ScoreboardService
     }
 
     /**
-     * Get the categories to display on the scoreboard
+     * Get the categories to display on the scoreboard.
      * @return TeamCategory[]
      */
     protected function getCategories(bool $jury): array
@@ -1025,7 +1025,7 @@ class ScoreboardService
     }
 
     /**
-     * Get the scorecache used to calculate the scoreboard
+     * Get the scorecache used to calculate the scoreboard.
      * @return ScoreCache[]
      */
     protected function getScorecache(Contest $contest, ?Team $team = null): array
@@ -1046,7 +1046,7 @@ class ScoreboardService
     }
 
     /**
-     * Get the rank cache for the given team
+     * Get the rank cache for the given team.
      * @throws NonUniqueResultException
      */
     protected function getRankcache(Contest $contest, Team $team): ?RankCache

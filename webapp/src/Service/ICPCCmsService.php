@@ -89,7 +89,7 @@ class ICPCCmsService
             $siteName = $group['groupName'];
             foreach ($group['team'] as $teamData) {
                 $institutionName = $teamData['institutionName'];
-                // Note: affiliations are not updated and not deleted even if all teams have canceled
+                // Note: affiliations are not updated and not deleted even if all teams have canceled.
                 $affiliation = $this->em->getRepository(TeamAffiliation::class)->findOneBy(['name' => $institutionName]);
                 if ($affiliation === null) {
                     $shortName   = isset($teamData['institutionShortName']) ? $teamData['institutionShortName'] : $institutionName;
@@ -168,7 +168,7 @@ class ICPCCmsService
     }
 
     /**
-     * Convert the given web service token to a bearer token
+     * Convert the given web service token to a bearer token.
      * @throws ClientExceptionInterface
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface

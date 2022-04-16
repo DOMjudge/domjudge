@@ -50,7 +50,7 @@ class ClarificationController extends AbstractController
     public function indexAction(Request $request): Response
     {
         $contestIds = array_keys($this->dj->getCurrentContests());
-        // cid -1 will never happen, but otherwise the array is empty and that is not supported
+        // cid -1 will never happen, but otherwise the array is empty and that is not supported.
         if (empty($contestIds)) {
             $contestIds = [-1];
         }
@@ -60,7 +60,7 @@ class ClarificationController extends AbstractController
             $currentFilter = null;
         }
 
-        // Load the current queue, default to "all"
+        // Load the current queue, default to "all".
         $currentQueue = $request->query->has('queue') ? $request->query->get('queue') : "all";
         $queryBuilder = $this->em->createQueryBuilder()
             ->from(Clarification::class, 'clar')
@@ -273,7 +273,7 @@ class ClarificationController extends AbstractController
      */
     public function composeClarificationAction(Request $request): Response
     {
-        // TODO: use proper Symfony form for this
+        // TODO: Use a proper Symfony form for this.
 
         $data = $this->getClarificationFormData();
 
@@ -452,7 +452,7 @@ class ClarificationController extends AbstractController
         $clarId = $clarification->getClarId();
         $this->dj->auditlog('clarification', $clarId, 'added', null, null, $cid);
         $this->eventLogService->log('clarification', $clarId, 'create', (int)$cid);
-        // Reload clarification to make sure we have a fresh one after calling the event log service
+        // Reload clarification to make sure we have a fresh one after calling the event log service.
         $clarification = $this->em->getRepository(Clarification::class)->find($clarId);
 
         if($sendto) {

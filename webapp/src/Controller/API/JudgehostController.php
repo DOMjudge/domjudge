@@ -89,7 +89,7 @@ class JudgehostController extends AbstractFOSRestController
     }
 
     /**
-     * Get judgehosts
+     * Get judgehosts.
      * @Rest\Get("")
      * @IsGranted("ROLE_JURY")
      * @OA\Response(
@@ -198,7 +198,7 @@ class JudgehostController extends AbstractFOSRestController
     }
 
     /**
-     * Update the configuration of the given judgehost
+     * Update the configuration of the given judgehost.
      * @Rest\Put("/{hostname}")
      * @IsGranted("ROLE_JUDGEHOST")
      * @OA\Response(
@@ -243,7 +243,7 @@ class JudgehostController extends AbstractFOSRestController
     }
 
     /**
-     * Update the given judging for the given judgehost
+     * Update the given judging for the given judgehost.
      * @Rest\Put("/update-judging/{hostname}/{judgetaskid}")
      * @IsGranted("ROLE_JUDGEHOST")
      * @OA\Response(
@@ -332,7 +332,7 @@ class JudgehostController extends AbstractFOSRestController
                                                 EventLogService::ACTION_UPDATE, $contestId);
 
                     // As EventLogService::log() will clear the entity manager, so the judging has
-                    // now become detached. We will have to reload it
+                    // now become detached. We will have to reload it.
                     /** @var Judging $judging */
                     $judging = $query->getOneOrNullResult();
                 });
@@ -406,7 +406,7 @@ class JudgehostController extends AbstractFOSRestController
                         }
 
                         // As EventLogService::log() will clear the entity manager, so the judging has
-                        // now become detached. We will have to reload it
+                        // now become detached. We will have to reload it.
                         /** @var Judging $judging */
                         $judging = $query->getOneOrNullResult();
 
@@ -421,8 +421,8 @@ class JudgehostController extends AbstractFOSRestController
                         $this->em->flush();
                     } elseif ($judging->getResult() !== Judging::RESULT_COMPILER_ERROR) {
                         // The new result contradicts a former one, that's not good.
-                        // Since at least one other judgehost was successful, but we were not, assume that the current judgehost
-                        // is broken and disable it.
+                        // Since at least one other judgehost was successful, but we were not, assume that the
+                        // current judgehost is broken and disable it.
                         $disabled = [
                             'kind' => 'judgehost',
                             'hostname' => $judgehost->getHostname(),
@@ -680,7 +680,7 @@ class JudgehostController extends AbstractFOSRestController
     }
 
     /**
-     * Internal error reporting (back from judgehost)
+     * Internal error reporting (back from judgehost).
      *
      * @Rest\Post("/internal-error")
      * @IsGranted("ROLE_JUDGEHOST")
@@ -882,7 +882,7 @@ class JudgehostController extends AbstractFOSRestController
                         continue;
                     }
 
-                    // For the other runs, we need to reset the judge task if it belongs to the current judgehost
+                    // For the other runs, we need to reset the judge task if it belongs to the current judgehost.
                     if ($run->getJudgetask()->getJudgehost() && $run->getJudgetask()->getJudgehost()->getHostname() === $judgehost->getHostname()) {
                         $run->getJudgetask()
                             ->setJudgehost(null)
@@ -989,7 +989,7 @@ class JudgehostController extends AbstractFOSRestController
         $judgingRun = $this->em->getRepository(JudgingRun::class)->findOneBy(['judgetaskid' => $judgeTaskId]);
         $judging = $judgingRun->getJudging();
 
-        // result of this judging_run has been stored. now check whether
+        // Result of this judging_run has been stored. now check whether
         // we're done or if more testcases need to be judged.
 
         /** @var JudgingRun[] $runs */
@@ -1408,7 +1408,8 @@ class JudgehostController extends AbstractFOSRestController
         }
 
         if ($this->config->get('enable_parallel_judging')) {
-            // This is case 2.b) from above: contribute to a job someone else has started but we have not contributed yet.
+            // This is case 2.b) from above: contribute to a job someone else has started,
+            // but we have not contributed yet.
             $jobid = $this->em->createQueryBuilder()
                 ->from(QueueTask::class, 'qt')
                 ->select('qt.jobid')

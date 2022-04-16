@@ -64,10 +64,10 @@ class PublicController extends BaseController
             $refreshParams = [
                 'static' => 1,
             ];
-            // For static scoreboards, allow to pass a contest= param
+            // For static scoreboards, allow to pass a contest= param.
             if ($contestId = $request->query->get('contest')) {
                 if ($contestId === 'auto') {
-                    // Automatically detect the contest that is activated the latest
+                    // Automatically detect the contest that is activated the latest.
                     $contest      = null;
                     $activateTime = null;
                     foreach ($this->dj->getCurrentContests(-1) as $possibleContest) {
@@ -80,7 +80,7 @@ class PublicController extends BaseController
                         }
                     }
                 } else {
-                    // Find the contest with the given ID
+                    // Find the contest with the given ID.
                     $contest = null;
                     foreach ($this->dj->getCurrentContests(-1) as $possibleContest) {
                         if ($possibleContest->getCid() === $contestId || $possibleContest->getExternalid() === $contestId) {

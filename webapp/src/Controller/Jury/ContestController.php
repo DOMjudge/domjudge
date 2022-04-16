@@ -509,7 +509,7 @@ class ContestController extends BaseController
             // dependent event) anyway and adding the code here would
             // overcomplicate this function.
             // Note that getSnapshot() returns the data as retrieved from the
-            // database
+            // database.
             $getDeletedEntities = function(Collection $collection, string $idMethod) {
                 /** @var PersistentCollection $collection */
                 $deletedEntities = [];
@@ -644,7 +644,7 @@ class ContestController extends BaseController
                 $this->em->persist($contest);
                 $this->em->flush();
 
-                // Now we can assign the problems to the contest and persist them
+                // Now we can assign the problems to the contest and persist them.
                 foreach ($problems as $problem) {
                     $problem->setContest($contest);
                     $this->em->persist($problem);
@@ -655,7 +655,7 @@ class ContestController extends BaseController
                 // teams and team categories for this contest. This happens
                 // when someone connects to the event feed (or we have a
                 // dependent event) anyway and adding the code here would
-                // overcomplicate this function
+                // overcomplicate this function.
             });
             return $this->redirect($this->generateUrl(
                 'jury_contest',

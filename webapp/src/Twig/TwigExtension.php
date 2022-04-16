@@ -128,7 +128,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         $user = $this->dj->getUser();
         $team = $user ? $user->getTeam() : null;
 
-        // These variables mostly exist for the header template
+        // These variables mostly exist for the header template.
         return [
             'current_contest_id'            => $this->dj->getCurrrentContestCookie(),
             'current_contest'               => $this->dj->getCurrentContest(),

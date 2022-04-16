@@ -46,7 +46,7 @@ abstract class AbstractRestController extends AbstractFOSRestController
     }
 
     /**
-     * Get all objects for this endpoint
+     * Get all objects for this endpoint.
      * @throws NonUniqueResultException
      */
     protected function performListAction(Request $request): Response
@@ -55,16 +55,17 @@ abstract class AbstractRestController extends AbstractFOSRestController
     }
 
     /**
-     * Get a single object for this endpoint
+     * Get a single object for this endpoint.
      * @throws NonUniqueResultException
      */
     protected function performSingleAction(Request $request, string $id): Response
     {
-        // Make sure we clear the entity manager class, for when this method is called multiple times by internal requests
+        // Make sure we clear the entity manager class, for when this method is called multiple times
+        // by internal requests.
         $this->em->clear();
 
         // Special case for submissions and clarifications: they can have an external ID even if when running in
-        // full local mode, because one can use the API to upload one with an external ID
+        // full local mode, because one can use the API to upload one with an external ID.
         $externalIdAlwaysAllowed = [
             's.submitid',
             'clar.clarid',
@@ -97,7 +98,7 @@ abstract class AbstractRestController extends AbstractFOSRestController
     }
 
     /**
-     * Render the given data using the correct groups
+     * Render the given data using the correct groups.
      *
      * @param mixed    $data
      * @param string[] $extraheaders
@@ -110,7 +111,7 @@ abstract class AbstractRestController extends AbstractFOSRestController
     ): Response {
         $view = $this->view($data);
 
-        // Set the DOMjudge service on the context, so we can use it for permissions
+        // Set the DOMjudge service on the context, so we can use it for permissions.
         $view->getContext()->setAttribute('domjudge_service', $this->dj);
         $view->getContext()->setAttribute('config_service', $this->config);
 
@@ -133,7 +134,7 @@ abstract class AbstractRestController extends AbstractFOSRestController
     }
 
     /**
-     * Render the given create data using the correct groups
+     * Render the given create data using the correct groups.
      *
      * @param mixed      $data
      * @param string|int $id
@@ -158,7 +159,7 @@ abstract class AbstractRestController extends AbstractFOSRestController
     }
 
     /**
-     * Get the query builder used for getting contests
+     * Get the query builder used for getting contests.
      * @param bool $onlyActive return only contests that are active
      */
     protected function getContestQueryBuilder(bool $onlyActive = false): QueryBuilder
@@ -228,13 +229,13 @@ abstract class AbstractRestController extends AbstractFOSRestController
     }
 
     /**
-     * Get the query builder to use for request for this REST endpoint
+     * Get the query builder to use for request for this REST endpoint.
      * @throws NonUniqueResultException
      */
     abstract protected function getQueryBuilder(Request $request): QueryBuilder;
 
     /**
-     * Return the field used as ID in requests
+     * Return the field used as ID in requests.
      */
     abstract protected function getIdField(): string;
 
@@ -243,7 +244,8 @@ abstract class AbstractRestController extends AbstractFOSRestController
      */
     protected function listActionHelper(Request $request): array
     {
-        // Make sure we clear the entity manager class, for when this method is called multiple times by internal requests.
+        // Make sure we clear the entity manager class, for when this method is called multiple times
+        // by internal requests.
         $this->em->clear();
         $queryBuilder = $this->getQueryBuilder($request);
 
@@ -253,7 +255,7 @@ abstract class AbstractRestController extends AbstractFOSRestController
             $ids = array_unique($ids);
 
             // Special case for submissions and clarifications: they can have an external ID even if when running in
-            // full local mode, because one can use the API to upload one with an external ID
+            // full local mode, because one can use the API to upload one with an external ID.
             $externalIdAlwaysAllowed = [
                 's.submitid',
                 'clar.clarid',
@@ -289,25 +291,27 @@ abstract class AbstractRestController extends AbstractFOSRestController
     }
 
     /**
-     * Send a binary file response, sending a 304 if it did not modify since last requested
+     * Send a binary file response, sending a 304 if it did not modify since last requested.
      */
     public static function sendBinaryFileResponse(Request $request, string $fileName): BinaryFileResponse
     {
         // Note: we set auto-etag to true to automatically send the ETag based on the file contents.
         // ETags can be used to determine whether the file changed and if it didn't change, the response will
-        // be a 304 Not Modified
+        // be a 304 Not Modified.
         $response = new BinaryFileResponse($fileName, 200, [], true, null, true);
         $contentType = mime_content_type($fileName);
-        // Some SVG's do not have an XML header and mime_content_type reports those incorrectly.
-        // image/svg+xml is the official mimetype for all SVG's
+        // Some SVGs do not have an XML header and mime_content_type reports those incorrectly.
+        // image/svg+xml is the official mimetype for all SVGs.
         if ($contentType === 'image/svg') {
             $contentType = 'image/svg+xml';
         }
         $response->headers->set('Content-Type', $contentType);
 
-        // Check if we need to send a 304 Not Modified and if so, send it
-        // This is done both on the ETag / If-None-Match as well as the
-        // Last-Modified / If-Modified-Since header pairs
+        // Check if we need to send a 304 Not Modified and if so, send it.
+        // This is done both on the
+        // - ETag / If-None-Match and
+        // - Last-Modified / If-Modified-Since
+        // header pairs.
         if ($response->isNotModified($request)) {
             $response->send();
         }

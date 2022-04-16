@@ -30,7 +30,7 @@ class ExecutableController extends AbstractFOSRestController
     }
 
     /**
-     * Get the executable with the given ID
+     * Get the executable with the given ID.
      * @throws NonUniqueResultException
      * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST')")
      * @Rest\Get("/{id}")

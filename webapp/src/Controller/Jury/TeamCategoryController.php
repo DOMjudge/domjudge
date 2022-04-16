@@ -73,7 +73,7 @@ class TeamCategoryController extends BaseController
             'allow_self_registration' => ['title' => 'self-registration', 'sort' => true],
         ];
 
-        // Insert external ID field when configured to use it
+        // Insert external ID field when configured to use it.
         if ($externalIdField = $this->eventLogService->externalIdFieldForEntity(TeamCategory::class)) {
             $table_fields = array_slice($table_fields, 0, 1, true) +
                 [$externalIdField => ['title' => 'external ID', 'sort' => true]] +
@@ -87,7 +87,7 @@ class TeamCategoryController extends BaseController
             $teamCategory    = $teamCategoryData[0];
             $categorydata    = [];
             $categoryactions = [];
-            // Get whatever fields we can from the category object itself
+            // Get whatever fields we can from the category object itself.
             foreach ($table_fields as $k => $v) {
                 if ($propertyAccessor->isReadable($teamCategory, $k)) {
                     $categorydata[$k] = ['value' => $propertyAccessor->getValue($teamCategory, $k)];
@@ -164,7 +164,7 @@ class TeamCategoryController extends BaseController
             ],
         ];
 
-        // For ajax requests, only return the submission list partial
+        // For ajax requests, only return the submission list partial.
         if ($request->isXmlHttpRequest()) {
             $data['showTestcases'] = false;
             return $this->render('jury/partials/submission_list.html.twig', $data);

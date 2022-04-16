@@ -78,7 +78,7 @@ class TeamAffiliationController extends BaseController
 
         $table_fields['num_teams'] = ['title' => '# teams', 'sort' => true];
 
-        // Insert external ID field when configured to use it
+        // Insert external ID field when configured to use it.
         if ($externalIdField = $this->eventLogService->externalIdFieldForEntity(TeamAffiliation::class)) {
             $table_fields = array_slice($table_fields, 0, 1, true) +
                 [$externalIdField => ['title' => 'external ID', 'sort' => true]] +
@@ -94,7 +94,7 @@ class TeamAffiliationController extends BaseController
             $teamAffiliation    = $teamAffiliationData[0];
             $affiliationdata    = [];
             $affiliationactions = [];
-            // Get whatever fields we can from the affiliation object itself
+            // Get whatever fields we can from the affiliation object itself.
             foreach ($table_fields as $k => $v) {
                 if ($propertyAccessor->isReadable($teamAffiliation, $k)) {
                     $affiliationdata[$k] = ['value' => $propertyAccessor->getValue($teamAffiliation, $k)];
@@ -179,7 +179,7 @@ class TeamAffiliationController extends BaseController
             $data['limitToTeams'] = $teamAffiliation->getTeams();
         }
 
-        // For ajax requests, only return the submission list partial
+        // For ajax requests, only return the submission list partial.
         if ($request->isXmlHttpRequest()) {
             $data['displayRank'] = true;
             return $this->render('partials/scoreboard_table.html.twig', $data);

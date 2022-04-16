@@ -81,7 +81,7 @@ class GatlingDataFixture extends AbstractDefaultDataFixture implements FixtureGr
             );
         $manager->persist($gatlingContest);
 
-        // Add problem to the contest
+        // Add problem to the contest.
         $helloDemo = new ContestProblem();
         $helloDemo
             ->setShortname('hello')
@@ -91,18 +91,18 @@ class GatlingDataFixture extends AbstractDefaultDataFixture implements FixtureGr
 
         $manager->persist($helloDemo);
 
-        // Create a category to associate the gatling stuff with
+        // Create a category to associate the gatling stuff with.
         $category = new TeamCategory();
         $category
             ->setName('gatling')
             ->setSortorder(1)
-            ->setColor('#ff9e2a') // This is gatling orange
+            ->setColor('#ff9e2a') // This is gatling orange.
             ->setAllowSelfRegistration(true)
             ->setVisible(true);
 
         $manager->persist($category);
 
-        // Create some jury users for gatling to use
+        // Create some jury users for gatling to use.
         for($i=0; $i<$num_jury_accounts; $i++) {
             $acct_name = sprintf('gatling_jury_%05d', $i);
             $user = new User();

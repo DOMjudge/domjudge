@@ -81,7 +81,7 @@ class UserController extends BaseController
             'status' => ['title' => '', 'sort' => true],
         ];
 
-        // Insert external ID field when configured to use it
+        // Insert external ID field when configured to use it.
         if ($externalIdField = $this->eventLogService->externalIdFieldForEntity(User::class)) {
             $table_fields = array_slice($table_fields, 0, 1, true) +
                 [$externalIdField => ['title' => 'external ID', 'sort' => true]] +
@@ -94,7 +94,7 @@ class UserController extends BaseController
         foreach ($users as $u) {
             $userdata    = [];
             $useractions = [];
-            // Get whatever fields we can from the user object itself
+            // Get whatever fields we can from the user object itself.
             foreach ($table_fields as $k => $v) {
                 if ($propertyAccessor->isReadable($u, $k)) {
                     $userdata[$k] = ['value' => $propertyAccessor->getValue($u, $k)];
@@ -123,7 +123,7 @@ class UserController extends BaseController
                 'value' => implode(', ', array_map(fn(Role $role) => $role->getDjRole(), $u->getUserRoles()))
             ];
 
-            // Create action links
+            // Create action links.
             if ($this->isGranted('ROLE_ADMIN')) {
                 $useractions[] = [
                     'icon' => 'edit',
@@ -142,7 +142,7 @@ class UserController extends BaseController
                 ];
             }
 
-            // merge in the rest of the data
+            // Merge in the rest of the data.
             $userdata = array_merge($userdata, [
                 'status' => [
                     'value' => $status,
@@ -150,7 +150,7 @@ class UserController extends BaseController
                     'title' => $statustitle,
                 ],
             ]);
-            // Save this to our list of rows
+            // Save this to our list of rows.
             $users_table[] = [
                 'data' => $userdata,
                 'actions' => $useractions,
@@ -236,7 +236,7 @@ class UserController extends BaseController
                               $user->getUserid(),
                               false);
 
-            // If we save the currently logged in used, update the login token
+            // If we save the currently logged in used, update the login token.
             if ($user->getUserid() === $this->dj->getUser()->getUserid()) {
                 $token = new UsernamePasswordToken(
                     $user,

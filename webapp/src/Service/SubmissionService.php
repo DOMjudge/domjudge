@@ -520,7 +520,7 @@ class SubmissionService
 
         $this->logger->info('Submission input verified');
 
-        // First look up any expected results in all submission files, so as to minimize the
+        // First look up any expected results in all submission files to minimize the
         // SQL transaction time below.
         if ($this->dj->checkrole('jury')) {
             $results = null;
@@ -670,7 +670,7 @@ class SubmissionService
     }
 
     /**
-     * Normalize the given expected result
+     * Normalize the given expected result.
      */
     public static function normalizeExpectedResult(string $result): string
     {
@@ -699,7 +699,7 @@ class SubmissionService
     }
 
     /**
-     * Get a response object containing the given submission as a ZIP
+     * Get a response object containing the given submission as a ZIP.
      *
      * @throws ServiceUnavailableHttpException
      */

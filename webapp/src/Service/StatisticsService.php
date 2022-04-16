@@ -17,7 +17,7 @@ use Doctrine\ORM\QueryBuilder;
 /**
  * Class StatisticsService
  *
- * Service to display statistics data
+ * Service to display statistics data.
  *
  * @package App\Service
  */
@@ -55,7 +55,7 @@ class StatisticsService
     }
 
     /**
-     * Get the teams for the given contest and view filter
+     * Get the teams for the given contest and view filter.
      *
      * @return Team[]
      */
@@ -93,7 +93,7 @@ class StatisticsService
     }
 
     /**
-     * Get miscellaneous contest statistics
+     * Get miscellaneous contest statistics.
      *
      * @param Team[]  $teams
      * @param bool    $noFrozen             Do not show frozen data
@@ -109,8 +109,9 @@ class StatisticsService
         $numTestcases = $this->getNumTestcases($contest);
         $numSubmissions = $this->getTeamNumSubmissions($contest, $filter);
 
-        // Come up with misc stats
-        // find last correct judgement for a team, figure out how many minutes are left in the contest(or til now if now is earlier)
+        // Come up with misc stats.
+        // Find last correct judgement for a team, figure out how many minutes are left in the contest
+        // (or til now if now is earlier).
         $now = (new DateTime())->getTimeStamp();
         $misc = [
             'total_submissions' => 0,
@@ -207,7 +208,7 @@ class StatisticsService
             static::setOrIncrement($misc['teams_solved_n_problems'],
                 $teamStats['total_accepted']);
 
-            // Calculate how long it has been since their last submission
+            // Calculate how long it has been since their last submission.
             if ($lastSubmission != null) {
                 $miserySeconds = min(
                     $contest->getEndTime() - $lastSubmission->getSubmitTime(),
@@ -235,11 +236,11 @@ class StatisticsService
     }
 
     /**
-     * Get the team statistics for the given team
+     * Get the team statistics for the given team.
      */
     public function getTeamStats(Contest $contest, Team $team): array
     {
-        // Get a whole bunch of judgings(and related objects)
+        // Get a whole bunch of judgings (and related objects).
         // Where:
         //   - The judging is valid(NOT - for team pages it might be neat to see rejudgings/etc)
         //   - The judging submission is part of the selected contest
@@ -261,7 +262,7 @@ class StatisticsService
             ->setParameter('contest', $contest)
             ->getQuery()->getResult();
 
-        // Create a summary of the results(how many correct, timelimit, wrong-answer, etc)
+        // Create a summary of the results (how many correct, timelimit, wrong-answer, etc).
         $results = [];
         foreach ($judgings as $j) {
             if (!$j->getValid()) {
@@ -271,7 +272,7 @@ class StatisticsService
                 static::setOrIncrement($results, $j->getResult() ?? 'pending');
             }
         }
-        // Sort the judgings by runtime
+        // Sort the judgings by runtime.
         usort($judgings, function ($a, $b) {
             if ($a->getMaxRuntime() == $b->getMaxRuntime()) {
                 return 0;
@@ -279,7 +280,7 @@ class StatisticsService
             return $a->getMaxRuntime() < $b->getMaxRuntime() ? -1 : 1;
         });
 
-        // Go through the judgings we found, and get the submissions
+        // Go through the judgings we found, and get the submissions.
         $submissions = [];
         $problems = [];
         foreach ($judgings as $j) {
@@ -333,7 +334,7 @@ class StatisticsService
         Problem $problem,
         string $view
     ): array {
-        // Get a whole bunch of judgings(and related objects)
+        // Get a whole bunch of judgings (and related objects).
         // Where:
         //   - The judging is valid
         //   - The judging submission is part of the selected contest
@@ -357,13 +358,13 @@ class StatisticsService
             ->setParameter('contest', $contest)
             ->getQuery()->getResult();
 
-        // Create a summary of the results(how many correct, timelimit, wrong-answer, etc)
+        // Create a summary of the results (how many correct, timelimit, wrong-answer, etc).
         $results = [];
         foreach ($judgings as $j) {
             static::setOrIncrement($results, $j->getResult() ?? 'pending');
         }
 
-        // Sort the judgings by runtime
+        // Sort the judgings by runtime.
         usort($judgings, function ($a, $b) {
             if ($a->getMaxRuntime() == $b->getMaxRuntime()) {
                 return 0;
@@ -371,7 +372,7 @@ class StatisticsService
             return $a->getMaxRuntime() < $b->getMaxRuntime() ? -1 : 1;
         });
 
-        // Go through the judgings we found, and get the submissions
+        // Go through the judgings we found, and get the submissions.
         $submissions = [];
         foreach ($judgings as $j) {
             $submissions[] = $j->getSubmission();
@@ -426,7 +427,7 @@ class StatisticsService
             'problems' => [],
             'numBuckets' => static::NUM_GROUPED_BINS,
         ];
-        // Get a whole bunch of judgings(and related objects)
+        // Get a whole bunch of judgings (and related objects).
         // Where:
         //   - The judging is valid
         //   - The judging submission is part of the selected contest
@@ -452,7 +453,7 @@ class StatisticsService
             $judgingsQueryBuilder->andWhere('j.verified = true');
         }
 
-        // Determine the bins to use
+        // Determine the bins to use.
         $duration = $contest->getEndtime() - $contest->getStarttime(false);
         $binDuration = round($duration / static::NUM_GROUPED_BINS, 0);
 
@@ -526,7 +527,7 @@ class StatisticsService
     }
 
     /**
-     * Apply the filter to the given query builder
+     * Apply the filter to the given query builder.
      */
     protected function applyFilter(QueryBuilder $queryBuilder, string $filter): QueryBuilder
     {
@@ -551,7 +552,7 @@ class StatisticsService
     }
 
     /**
-     * Get the number of testcases per problem
+     * Get the number of testcases per problem.
      *
      * @return int[]
      */
@@ -578,13 +579,13 @@ class StatisticsService
     }
 
     /**
-     * Get the number of submissions per team
+     * Get the number of submissions per team.
      *
      * @return array
      */
     protected function getTeamNumSubmissions(Contest $contest, string $filter): array
     {
-        // Figure out how many submissions each team has
+        // Figure out how many submissions each team has.
         $results = $this->applyFilter($this->em->createQueryBuilder()
             ->select('t.teamid as teamid, count(t.teamid) as num_submissions')
             ->from(Submission::class, 's')

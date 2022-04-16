@@ -160,7 +160,7 @@ class AuditLogController extends AbstractController
             case 'team_category':
                 return $this->generateUrl('jury_team_category', ['categoryId' => $id]);
             case 'user':
-                // Pre 6.1, usernames were stored instead of numeric ids
+                // Pre 6.1, usernames were stored instead of numeric IDs.
                 if (!is_numeric($id)) {
                     $user = $this->em->getRepository(User::class)->findOneBy(['username'=>$id]);
                     $id = $user->getUserId();

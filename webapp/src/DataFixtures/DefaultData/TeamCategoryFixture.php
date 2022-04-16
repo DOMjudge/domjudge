@@ -39,7 +39,7 @@ class TeamCategoryFixture extends AbstractDefaultDataFixture
                 $this->logger->info('Category %s already exists, not created', [ $item[0] ]);
             }
 
-            // Make sure we have a reference to the system category, since we need it to create the admin user
+            // Make sure we have a reference to the system category, since we need it to create the admin user.
             if ($item[0] === 'System') {
                 $this->addReference(static::SYSTEM_REFERENCE, $category);
             }

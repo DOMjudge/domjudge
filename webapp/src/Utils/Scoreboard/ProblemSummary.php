@@ -37,7 +37,7 @@ class ProblemSummary
     }
 
     /**
-     * Get the best time in minutes for the given sortorder
+     * Get the best time in minutes for the given sortorder.
      */
     public function getBestTimeInMinutes(int $sortorder): ?int
     {

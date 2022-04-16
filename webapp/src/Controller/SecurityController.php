@@ -56,10 +56,10 @@ class SecurityController extends AbstractController
             return $this->redirect($this->generateUrl('root'));
         }
 
-        // get the login error if there is one
+        // Get the login error if there is one.
         $error = $authUtils->getLastAuthenticationError();
 
-        // last username entered by the user
+        // Last username entered by the user.
         $lastUsername = $authUtils->getLastUsername();
 
         $em = $this->em;
@@ -70,7 +70,7 @@ class SecurityController extends AbstractController
             $auth_ipaddress_users = $em->getRepository(User::class)->findBy(['ipAddress' => $clientIP, 'enabled' => 1]);
         }
 
-        // Add a header so we can detect that this is the login page
+        // Add a header so we can detect that this is the login page.
         $response = new Response();
         $response->headers->set('X-Login-Page', $this->generateUrl('login'));
         if (!empty($error)) {
@@ -130,7 +130,7 @@ class SecurityController extends AbstractController
                 $teamCategory = $registration_form->get('teamCategory')->getData();
             }
 
-            // Create a team to go with the user, then set some team attributes
+            // Create a team to go with the user, then set some team attributes.
             $team = new Team();
             $user->setTeam($team);
             $team

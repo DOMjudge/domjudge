@@ -100,7 +100,7 @@ class ImportEventFeedCommand extends Command
     {
         $this->style = new SymfonyStyle($input, $output);
         // Disable SQL logging and profiling. This would cause a serious memory leak otherwise
-        // since this is a long running process.
+        // since this is a long-running process.
         $this->em->getConnection()->getConfiguration()->setSQLLogger();
         if ($this->profiler) {
             $this->profiler->disable();
@@ -127,7 +127,7 @@ class ImportEventFeedCommand extends Command
             return static::FAILURE;
         }
 
-        // Find an admin user as we need one to make sure we can read all events
+        // Find an admin user as we need one to make sure we can read all events.
         /** @var User $user */
         $user = $this->em->createQueryBuilder()
                          ->from(User::class, 'u')
@@ -181,7 +181,7 @@ class ImportEventFeedCommand extends Command
     }
 
     /**
-     * Load the source with the given ID or ask for a source if null
+     * Load the source with the given ID or ask for a source if null.
      *
      * @return bool False if the import should stop, true otherwise.
      */
@@ -200,10 +200,10 @@ class ImportEventFeedCommand extends Command
                     );
                 }
                 $answer = $this->style->choice('Which external contest source do you want to use?', $choices);
-                // Parse the answer. Ideally we would set ID's as array keys, but since ID's are integers, Symfony will
+                // Parse the answer. Ideally we would set ID's as array keys, but since IDs are integers, Symfony will
                 // not return them (only if they are strings and even casting them to strings makes PHP change them back
                 // to integers).
-                // We start the answers with the ID, so we can just cast them
+                // We start the answers with the ID, so we can just cast them.
                 $extSourceId = (int)$answer;
             } else {
                 $this->style->error('No extsourceid provided and not running in interactive mode.');

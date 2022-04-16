@@ -58,7 +58,7 @@ class FreezeData
     }
 
     /**
-     * Whether to show the frozen scoreboard
+     * Whether to show the frozen scoreboard.
      */
     public function showFrozen(): bool
     {
@@ -66,11 +66,11 @@ class FreezeData
             if (!$this->contest || !$this->contest->getStarttimeEnabled()) {
                 $this->cache[self::KEY_SHOW_FROZEN] = false;
             } else {
-                // Freeze scoreboard if freeze time has been reached and we're not showing the final score yet
+                // Freeze scoreboard if freeze time has been reached and we're not showing the final score yet.
                 $now             = Utils::now();
                 $hasFreezeTime   = $this->contest->getFreezetime() !== null;
                 $hasUnfreezeTime = $this->contest->getUnfreezetime() !== null;
-                // Show frozen scoreboard when we are between freezetime and unfreezetime
+                // Show frozen scoreboard when we are between freezetime and unfreezetime.
                 $this->cache[self::KEY_SHOW_FROZEN] =
                     ($hasFreezeTime && Utils::difftime((float)$this->contest->getFreezetime(), $now) <= 0) &&
                     (!$hasUnfreezeTime || Utils::difftime($now, (float)$this->contest->getUnfreezetime()) <= 0);
@@ -81,7 +81,7 @@ class FreezeData
     }
 
     /**
-     * Whether the contest has started
+     * Whether the contest has started.
      */
     public function started(): bool
     {
@@ -98,7 +98,7 @@ class FreezeData
     }
 
     /**
-     * Whether the contest has stopped
+     * Whether the contest has stopped.
      */
     public function stopped(): bool
     {
@@ -115,7 +115,7 @@ class FreezeData
     }
 
     /**
-     * Whether the contest is running
+     * Whether the contest is running.
      */
     public function running(): bool
     {
@@ -127,8 +127,8 @@ class FreezeData
     }
 
     /**
-     * Whether the contest is finalized
-     * This is normally only used when we have a downstream CDS
+     * Whether the contest is finalized.
+     * This is normally only used when we have a downstream CDS.
      */
     public function finalized(): bool
     {
@@ -146,7 +146,7 @@ class FreezeData
     }
 
     /**
-     * Get the progress of this freezedata
+     * Get the progress of this freezedata.
      */
     public function getProgress(): int
     {

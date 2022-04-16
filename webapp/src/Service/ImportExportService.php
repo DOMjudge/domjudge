@@ -54,12 +54,12 @@ class ImportExportService
     }
 
     /**
-     * Get the YAML data for a given contest
+     * Get the YAML data for a given contest.
      * @return array
      */
     public function getContestYamlData(Contest $contest): array
     {
-        // TODO: it seems we dump contest.yaml and system.yaml and problemset.yaml in one here?
+        // TODO: It seems we dump contest.yaml and system.yaml and problemset.yaml in one here?
 
         $data = [
             'name' => $contest->getName(),
@@ -91,7 +91,7 @@ class ImportExportService
 
         /** @var ContestProblem $contestProblem */
         foreach ($contest->getProblems() as $contestProblem) {
-            // Our color field can be both a HTML color name and an RGB value.
+            // Our color field can be both an HTML color name and an RGB value.
             // If it is in RGB, we try to find the closest HTML color name.
             $color              = $contestProblem->getColor() === null ? null : Utils::convertToColor($contestProblem->getColor());
             $data['problems'][] = [
@@ -145,7 +145,7 @@ class ImportExportService
 
         if (is_string($starttimeValue)) {
             $starttime = date_create_from_format(DateTime::ISO8601, $starttimeValue) ?:
-                // make sure ISO 8601 but with the T replaced with a space also works
+                // Make sure ISO 8601 but with the T replaced with a space also works.
                 date_create_from_format('Y-m-d H:i:sO', $starttimeValue);
         } else {
             /** @var DateTime $starttime */
@@ -266,7 +266,7 @@ class ImportExportService
             }
         }
 
-        // We do not import language details, as there's very little to actually import
+        // We do not import language details, as there's very little to actually import.
 
         if (isset($data['problems'])) {
             $this->importProblemsData($contest, $data['problems']);
@@ -298,7 +298,7 @@ class ImportExportService
             $contestProblem
                 ->setShortname($problemLabel)
                 ->setColor($problemData['rgb'] ?? $problemData['color'] ?? null)
-                // We need to set both the entities as well as the ID's because of the composite primary key
+                // We need to set both the entities and the IDs because of the composite primary key.
                 ->setProblem($problem)
                 ->setContest($contest);
             $this->em->persist($contestProblem);
@@ -308,7 +308,7 @@ class ImportExportService
 
         $this->em->flush();
 
-        // For now this method will never fail so always return true
+        // For now this method will never fail so always return true.
         return true;
     }
 
@@ -365,12 +365,12 @@ class ImportExportService
     }
 
     /**
-     * Get results data for the given sortorder
+     * Get results data for the given sortorder.
      */
     public function getResultsData(int $sortOrder): array
     {
-        // we'll here assume that the requested file will be of the current contest,
-        // as all our scoreboard interfaces do
+        // We'll here assume that the requested file will be of the current contest,
+        // as all our scoreboard interfaces do:
         // 1    External ID     24314   string
         // 2    Rank in contest     1   integer
         // 3    Award   Gold Medal  string
@@ -411,7 +411,7 @@ class ImportExportService
             ->getResult();
 
         $numberOfTeams = count($scoreboard->getScores());
-        // determine number of problems solved by median team
+        // Determine number of problems solved by median team.
         $count  = 0;
         $median = 0;
         foreach ($scoreboard->getScores() as $teamScore) {
@@ -445,7 +445,7 @@ class ImportExportService
             } elseif ($rank <= 12 + $contest->getB()) {
                 $awardString = 'Bronze Medal';
             } elseif ($numPoints >= $median) {
-                // teams with equally solved number of problems get the same rank
+                // Teams with equally solved number of problems get the same rank.
                 if (!isset($ranks[$numPoints])) {
                     $ranks[$numPoints] = $rank;
                 }
@@ -474,10 +474,10 @@ class ImportExportService
             ];
         }
 
-        // sort by rank/name
+        // Sort by rank/name.
         uasort($data, function ($a, $b) use ($teams) {
             if ($a[1] != $b[1]) {
-                // Honorable mention has no rank
+                // Honorable mention has no rank.
                 if ($a[1] === '') {
                     return 1;
                 } elseif ($b[1] === '') {
@@ -505,13 +505,13 @@ class ImportExportService
     }
 
     /**
-     * Import a TSV file
+     * Import a TSV file.
      */
     public function importTsv(string $type, UploadedFile $file, ?string &$message = null): int
     {
         $content = file($file->getRealPath());
         // The first line of the tsv is always the format with a version number.
-        // currently we hardcode version 1 because there are no others
+        // Currently, we hardcode version 1 because there are no others.
         $version = rtrim(array_shift($content));
         // Two variants are in use: one where the first token is a static string
         // "File_Version" and the second where it's the type, e.g. "groups".
@@ -577,7 +577,7 @@ class ImportExportService
     }
 
     /**
-     * Import groups TSV
+     * Import groups TSV.
      */
     protected function importGroupsTsv(array $content, ?string &$message = null): int
     {
@@ -634,7 +634,7 @@ class ImportExportService
      */
     protected function importGroupData(array $groupData, ?array &$saved = null): int
     {
-        // We want to overwrite the ID so change the ID generator
+        // We want to overwrite the ID so change the ID generator.
         $metadata = $this->em->getClassMetaData(TeamCategory::class);
 
         foreach ($groupData as $groupItem) {
@@ -678,7 +678,7 @@ class ImportExportService
     }
 
     /**
-     * Import organizations JSON
+     * Import organizations JSON.
      *
      * @param TeamAffiliation[]|null $saved The saved groups
      */
@@ -699,7 +699,7 @@ class ImportExportService
     }
 
     /**
-     * Import organization data from the given array
+     * Import organization data from the given array.
      *
      * @param TeamAffiliation[]|null $saved The saved groups
      *
@@ -754,11 +754,11 @@ class ImportExportService
             $line = Utils::parseTsvLine(trim($line));
 
             // teams.tsv contains data pertaining both to affiliations and teams.
-            // hence return data for both tables.
+            // Hence, return data for both tables.
 
-            // we may do more integrity/format checking of the data here.
+            // We may do more integrity/format checking of the data here.
 
-            // Set ICPC  ID's to null if they are not given
+            // Set ICPC IDs to null if they are not given.
             $teamIcpcId = @$line[1];
             if (empty($teamIcpcId)) {
                 $teamIcpcId = null;
@@ -771,7 +771,7 @@ class ImportExportService
                 $affiliationExternalid = null;
             }
 
-            // Set team ID to ICPC ID if it has the literal value 'null' and the ICPC ID is numeric
+            // Set team ID to ICPC ID if it has the literal value 'null' and the ICPC ID is numeric.
             $teamId = @$line[0];
             if ($teamId === 'null' && is_numeric($teamIcpcId)) {
                 $teamId = (int)$teamIcpcId;
@@ -796,7 +796,7 @@ class ImportExportService
     }
 
     /**
-     * Import teams JSON
+     * Import teams JSON.
      *
      * @param Team[]|null $saved The saved teams
      */
@@ -823,7 +823,7 @@ class ImportExportService
     }
 
     /**
-     * Import accounts JSON
+     * Import accounts JSON.
      *
      * @param User[]|null $saved The saved users
      */
@@ -890,7 +890,7 @@ class ImportExportService
     }
 
     /**
-     * Import team data from the given array
+     * Import team data from the given array.
      *
      * @param Team[]|null $saved The saved teams
      *
@@ -902,7 +902,7 @@ class ImportExportService
         $createdTeams        = [];
         $updatedTeams        = [];
         foreach ($teamData as $teamItem) {
-            // it is legitimate that a team has no affiliation. Do not add it then.
+            // It is legitimate that a team has no affiliation. Do not add it then.
             $teamAffiliation = null;
             $teamCategory    = null;
             if (!empty($teamItem['team_affiliation']['shortname'])) {
@@ -1013,7 +1013,7 @@ class ImportExportService
     }
 
     /**
-     * Import account data from the given array
+     * Import account data from the given array.
      *
      * @param User[]|null $saved The saved users
      *
@@ -1161,7 +1161,7 @@ class ImportExportService
                     break;
                 case 'team':
                     $roles[] = $teamRole;
-                    // For now we assume we can find the teamid by parsing
+                    // For now, we assume we can find the teamid by parsing
                     // the username and taking the number in the middle, i.e. we
                     // allow any username in the form "abc" where a and c are arbitrary
                     // strings that contain no numbers and b only contains numbers. The teamid
@@ -1191,7 +1191,7 @@ class ImportExportService
             }
 
             // accounts.tsv contains data pertaining to users, their roles and
-            // teams. Hence return data for both tables.
+            // teams. Hence, return data for both tables.
 
             // We may do more integrity/format checking of the data here.
             $accountData[] = [

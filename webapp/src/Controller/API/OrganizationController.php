@@ -48,7 +48,7 @@ class OrganizationController extends AbstractRestController
     }
 
     /**
-     * Get all the organizations for this contest
+     * Get all the organizations for this contest.
      * @Rest\Get("")
      * @OA\Response(
      *     response="200",
@@ -79,7 +79,7 @@ class OrganizationController extends AbstractRestController
     }
 
     /**
-     * Get the given organization for this contest
+     * Get the given organization for this contest.
      * @throws NonUniqueResultException
      * @Rest\Get("/{id}")
      * @OA\Response(
@@ -101,7 +101,7 @@ class OrganizationController extends AbstractRestController
     }
 
     /**
-     * Get the logo for the given organization
+     * Get the logo for the given organization.
      * @Rest\Get("/{id}/logo", name="organization_logo")
      * @OA\Response(
      *     response="200",
@@ -135,7 +135,7 @@ class OrganizationController extends AbstractRestController
     }
 
     /**
-     * Delete the logo for the given organization
+     * Delete the logo for the given organization.
      * @Rest\Delete("/{id}/logo", name="delete_organization_logo")
      * @IsGranted("ROLE_ADMIN")
      * @OA\Response(response="204", description="Deleting logo succeeded")
@@ -164,7 +164,7 @@ class OrganizationController extends AbstractRestController
     }
 
     /**
-     * Set the logo for the given organization
+     * Set the logo for the given organization.
      * @Rest\POST("/{id}/logo", name="post_organization_logo")
      * @Rest\PUT("/{id}/logo", name="put_organization_logo")
      * @OA\RequestBody(
@@ -220,7 +220,7 @@ class OrganizationController extends AbstractRestController
     }
 
     /**
-     * Add a new organization
+     * Add a new organization.
      *
      * @Rest\Post()
      * @IsGranted("ROLE_API_WRITER")
@@ -259,7 +259,7 @@ class OrganizationController extends AbstractRestController
 
     protected function getQueryBuilder(Request $request): QueryBuilder
     {
-        // Call getContestId to make sure we have an active contest
+        // Call getContestId to make sure we have an active contest.
         $this->getContestId($request);
         $queryBuilder = $this->em->createQueryBuilder()
             ->from(TeamAffiliation::class, 'ta')

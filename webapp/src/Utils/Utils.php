@@ -166,7 +166,7 @@ class Utils
     const DAY_IN_SECONDS = 60*60*24;
 
     /**
-     * returns the milliseconds part of a time stamp truncated at three digits
+     * Returns the milliseconds part of a time stamp truncated at three digits.
      */
     private static function getMillis(float $seconds): string
     {
@@ -174,8 +174,8 @@ class Utils
     }
 
     /**
-     * prints the absolute time as yyyy-mm-ddThh:mm:ss(.uuu)?[+-]zz(:mm)?
-     * (with millis if $floored is false)
+     * Prints the absolute time as yyyy-mm-ddThh:mm:ss(.uuu)?[+-]zz(:mm)?
+     * (with millis if $floored is false).
      */
     public static function absTime($epoch, bool $floored = false): ?string
     {
@@ -189,8 +189,8 @@ class Utils
     }
 
     /**
-     * prints a time diff as relative time as (-)?(h)*h:mm:ss(.uuu)?
-     * (with millis if $floored is false)
+     * Prints a time diff as relative time as (-)?(h)*h:mm:ss(.uuu)?
+     * (with millis if $floored is false).
      */
     public static function relTime(float $seconds, bool $floored = false): string
     {
@@ -263,7 +263,7 @@ class Utils
     }
 
     /**
-     * Convert the given color to a hex value
+     * Convert the given color to a hex value.
      */
     public static function convertToHex(string $color): ?string
     {
@@ -279,7 +279,7 @@ class Utils
     }
 
     /**
-     * Convert the given hex color to the best matching string representation
+     * Convert the given hex color to the best matching string representation.
      */
     public static function convertToColor(string $hex): ?string
     {
@@ -320,7 +320,7 @@ class Utils
     }
 
     /**
-     * Parse a hex color into it's three RGB values
+     * Parse a hex color into it's three RGB values.
      */
     public static function parseHexColor(string $hex): array
     {
@@ -335,7 +335,7 @@ class Utils
     }
 
     /**
-     * Comvert an RGB component to its hex value
+     * Comvert an RGB component to its hex value.
      */
     public static function componentToHex(int $component): string
     {
@@ -344,7 +344,7 @@ class Utils
     }
 
     /**
-     * Convert an RGB triple into a CSS hex color
+     * Convert an RGB triple into a CSS hex color.
      */
     public static function rgbToHex(array $color): string
     {
@@ -352,7 +352,7 @@ class Utils
     }
 
     /**
-     * Return a rounded float
+     * Return a rounded float.
      */
     public static function roundedFloat(?float $value = null, int $decimals = 3): ?float
     {
@@ -395,7 +395,8 @@ class Utils
     }
 
     /**
-     * Get the time as used on the scoreboard (i.e. truncated minutes or seconds, depending on the scoreboard resolution setting).
+     * Get the time as used on the scoreboard (i.e. truncated minutes or seconds, depending on the scoreboard
+     * resolution setting).
      * @param float|string $time
      */
     public static function scoretime($time, bool $scoreIsInSeconds): int
@@ -411,7 +412,7 @@ class Utils
     /**
      * Formats a given hostname. If $full = true, then
      * the full hostname will be printed, else only
-     * the local part (for keeping tables readable)
+     * the local part (for keeping tables readable).
      */
     public static function printhost(string $hostname, bool $full = false): string
     {
@@ -523,13 +524,13 @@ class Utils
     }
 
     /**
-     * Compute the LCS diff of two lines
+     * Compute the LCS diff of two lines.
      */
     public static function computeLcsDiff(string $line1, string $line2): array
     {
         $tokens1 = preg_split('/\s+/', $line1);
         $tokens2 = preg_split('/\s+/', $line2);
-        $cutoff = 100; // a) LCS gets inperformant, b) the output is not longer readable
+        $cutoff = 100; // a) LCS gets in-performant, b) the output is no longer readable.
 
         $n1 = min($cutoff, sizeof($tokens1));
         $n2 = min($cutoff, sizeof($tokens2));
@@ -567,7 +568,7 @@ class Utils
         }
         $lcs = array_reverse($lcs);
 
-        // reconstruct diff
+        // Reconstruct diff.
         $diff = "";
         $l = sizeof($lcs);
         $i = 0;
@@ -603,7 +604,7 @@ class Utils
     }
 
     /**
-     * Determine the image type for this image
+     * Determine the image type for this image.
      * @return bool|string
      */
     public static function getImageType(string $image, ?string &$error = null)
@@ -630,7 +631,7 @@ class Utils
     }
 
     /**
-     * Generate resized thumbnail image and return as as string.
+     * Generate resized thumbnail image and return as string.
      * Return FALSE on errors and stores error message in $error if set.
      * @return bool|false|string
      */
@@ -703,9 +704,9 @@ class Utils
     /**
      * Get the image size of the given image.
      *
-     * This method supports PNG, JPG, BMP, GIF and SVG files
+     * This method supports PNG, JPG, BMP, GIF and SVG files.
      *
-     * Returns an array with three items: the width, height and ratio between width and height
+     * Returns an array with three items: the width, height and ratio between width and height.
      */
     public static function getImageSize(string $filename): array
     {
@@ -729,7 +730,7 @@ class Utils
     }
 
     /**
-     * Returns TRUE iff string $haystack starts with string $needle
+     * Returns TRUE iff string $haystack starts with string $needle.
      */
     public static function startsWith(string $haystack, string $needle): bool
     {
@@ -737,7 +738,7 @@ class Utils
     }
 
     /**
-     * Returns TRUE iff string $haystack ends with string $needle
+     * Returns TRUE iff string $haystack ends with string $needle.
      */
     public static function endsWith(string $haystack, string $needle): bool
     {
@@ -818,7 +819,7 @@ class Utils
     }
 
     /**
-     * Return the table name for the given entity
+     * Return the table name for the given entity.
      * @param $entity
      */
     public static function tableForEntity($entity): string
@@ -846,7 +847,7 @@ class Utils
     }
 
     /**
-     * Convert the given string to a field that is safe to use in a Tab Separated Values file
+     * Convert the given string to a field that is safe to use in a Tab Separated Values file.
      */
     public static function toTsvField(string $field) : string
     {
@@ -858,7 +859,7 @@ class Utils
     }
 
     /**
-     * Split a line from a Tab Separated Values file into fields
+     * Split a line from a Tab Separated Values file into fields.
      */
     public static function parseTsvLine(string $line): array
     {
@@ -866,7 +867,7 @@ class Utils
     }
 
     /**
-     * Reindex the given array by applying the callback to each item
+     * Reindex the given array by applying the callback to each item.
      */
     public static function reindex(array $array, callable $callback): array
     {

@@ -42,7 +42,7 @@ class MetricsController extends AbstractFOSRestController
     }
 
     /**
-     * Metrics of this installation for use by Prometheus
+     * Metrics of this installation for use by Prometheus.
      * @Rest\Get("/prometheus")
      * @OA\Response(
      *     response="200",
@@ -63,7 +63,7 @@ class MetricsController extends AbstractFOSRestController
         $m['submissions_queued']     = $registry->getOrRegisterGauge('domjudge', 'submissions_queued', "Number of queued submissions", ['contest']);
         $m['submissions_perteam']    = $registry->getOrRegisterGauge('domjudge', 'submissions_perteam', "Number of teams that have a queued submission", ['contest']);
 
-        // Get global team login metrics
+        // Get global team login metrics.
         $m['teams']           = $registry->getOrRegisterGauge('domjudge', 'teams', "Total number of teams", ['contest']);
         $m['teams_logged_in'] = $registry->getOrRegisterGauge('domjudge', 'teams_logged_in', "Number of teams logged in", ['contest']);
         $m['teams_submitted']  = $registry->getOrRegisterGauge('domjudge', 'teams_submitted', "Number of teams that have submitted at least once", ['contest']);
@@ -77,18 +77,18 @@ class MetricsController extends AbstractFOSRestController
             ->getQuery()
             ->getResult();
 
-        // Compute some regular gauges(how many submissions pending, etc)
+        // Compute some regular gauges (how many submissions pending, etc).
         $include_future = true;
         foreach ($this->dj->getCurrentContests(null, $include_future) as $contest) {
             $labels = [$contest->getShortname()];
 
-            // Get submissions stats for the contest
+            // Get submissions stats for the contest.
             /** @var Submission[] $submissions */
             list($submissions, $submissionCounts) = $this->submissionService->getSubmissionList([$contest->getCid() => $contest], [], 0);
             foreach ($submissionCounts as $kind => $count) {
                 $m['submissions_' . $kind]->set((int)$count, $labels);
             }
-            // Get team submission stats for the contest
+            // Get team submission stats for the contest.
             $teamids_correct = [];
             $teamids_submitted = [];
             foreach($submissions as $s) {
@@ -120,11 +120,11 @@ class MetricsController extends AbstractFOSRestController
             }
             reset($teams);
 
-            // Total number of teams in the contest
+            // Total number of teams in the contest.
             $total_teams = sizeof($teams);
             $m['teams']->set($total_teams, $labels);
 
-            // Figure out how many of the teams have users that logged in
+            // Figure out how many of the teams have users that logged in.
             $teams_logged_in = 0;
             foreach ($teams as $t) {
                 foreach ($t->getUsers() as $user) {
@@ -139,7 +139,7 @@ class MetricsController extends AbstractFOSRestController
 
 
         // Kinda ugly that we have to go to the registry directly to get the metrics out for
-        // rendering, but it seems to work well enough
+        // rendering, but it seems to work well enough.
         $renderer = new RenderTextFormat();
         $result = $renderer->render($registry->getMetricFamilySamples());
         return new Response($result, 200, ['Content-Type' => RenderTextFormat::MIME_TYPE]);

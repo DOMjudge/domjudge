@@ -28,10 +28,10 @@ class AccountController extends AbstractRestController
     // - The /api/contests/<cid> prefix to load the contest
     // - The fact that we have /api/contests/<cid>/account
     // Also it seems to not be possible to overwrite the OA\Tag or the base controller route when
-    // extending a controller
+    // extending a controller.
 
     /**
-     * Get all the accounts
+     * Get all the accounts.
      * @Rest\Get("/accounts")
      * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_API_READER')")
      * @OA\Response(
@@ -60,7 +60,7 @@ class AccountController extends AbstractRestController
     }
 
     /**
-     * Get the given account
+     * Get the given account.
      * @throws NonUniqueResultException
      * @Rest\Get("/accounts/{id}")
      * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_API_READER')")
@@ -80,7 +80,7 @@ class AccountController extends AbstractRestController
     }
 
     /**
-     * Get information about the currently logged in account
+     * Get information about the currently logged in account.
      * @Rest\Get("/account")
      * @OA\Response(
      *     response="200",
@@ -91,7 +91,7 @@ class AccountController extends AbstractRestController
      */
     public function getCurrentAction(Request $request): Response
     {
-        // Get the contest ID to make sure the contest exists
+        // Get the contest ID to make sure the contest exists.
         $this->getContestId($request);
 
         $user = $this->dj->getUser();

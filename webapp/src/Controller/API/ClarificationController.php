@@ -147,7 +147,7 @@ class ClarificationController extends AbstractRestController
         }
 
         if ($replyToId = $request->request->get('reply_to_id')) {
-            // Load the clarification
+            // Load the clarification.
             /** @var Clarification $replyTo */
             $replyTo = $this->em->createQueryBuilder()
                 ->from(Clarification::class, 'c')
@@ -188,12 +188,12 @@ class ClarificationController extends AbstractRestController
 
         $clarification->setSender($fromTeam);
 
-        // By default, send to jury
+        // By default, send to jury.
         $toTeam = null;
         if ($toTeamId = $request->request->get('to_team_id')) {
             $idField = $this->eventLogService->externalIdFieldForEntity(Team::class) ?? 'teamid';
 
-            // If the user is an admin or API writer, allow it to specify the team
+            // If the user is an admin or API writer, allow it to specify the team.
             if ($this->isGranted('ROLE_API_WRITER')) {
                 $toTeam = $this->dj->loadTeam($idField, $toTeamId, $contest);
             } else {
@@ -255,14 +255,14 @@ class ClarificationController extends AbstractRestController
             $clarification->setCategory(reset($clarificationCategoryNames));
         }
 
-        // We are ready to save the clarification
+        // We are ready to save the clarification.
         $this->em->persist($clarification);
         $this->em->flush();
 
         $this->dj->auditlog('clarification', $clarification->getClarid(), 'added', null, null, $contestId);
         $this->eventLogService->log('clarification', $clarification->getClarid(), 'create', $contestId);
 
-        // Refresh the clarification since the event log service will have unloaded it
+        // Refresh the clarification since the event log service will have unloaded it.
         $clarification = $this->em->getRepository(Clarification::class)->find($clarification->getClarid());
 
         if ($clarification->getRecipient()) {

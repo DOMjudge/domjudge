@@ -15,7 +15,7 @@ class ProblemAttachmentContent
     /**
      * We use a ManyToOne instead of a OneToOne here, because otherwise the
      * reverse of this relation will always be loaded. See the commit message of commit
-     * 9e421f96691ec67ed62767fe465a6d8751edd884 for a more elaborate explanation
+     * 9e421f96691ec67ed62767fe465a6d8751edd884 for a more elaborate explanation.
      *
      * @ORM\Id
      * @ORM\ManyToOne(targetEntity=ProblemAttachment::class, inversedBy="content")

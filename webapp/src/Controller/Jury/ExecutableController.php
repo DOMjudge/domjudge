@@ -80,7 +80,7 @@ class ExecutableController extends BaseController
         foreach ($executables as $e) {
             $execdata    = [];
             $execactions = [];
-            // Get whatever fields we can from the team object itself
+            // Get whatever fields we can from the team object itself.
             foreach ($table_fields as $k => $v) {
                 if ($propertyAccessor->isReadable($e, $k)) {
                     $execdata[$k] = ['value' => $propertyAccessor->getValue($e, $k)];
@@ -398,7 +398,7 @@ class ExecutableController extends BaseController
     }
 
     /**
-     * Get the data to use for the executable editor
+     * Get the data to use for the executable editor.
      */
     protected function dataForEditor(Executable $executable): array
     {
@@ -425,7 +425,7 @@ class ExecutableController extends BaseController
                 $aceFilenames[] = $filename;
             } else {
                 [$firstLine] = explode("\n", $content, 2);
-                // If the file does not contain a dot, see if we have a shebang which we can use as filename
+                // If the file does not contain a dot, see if we have a shebang which we can use as filename.
                 if (preg_match('/^#!.*\/([^\/]+)$/', $firstLine, $matches)) {
                     $aceFilenames[] = sprintf('temp.%s', $matches[1]);
                 } else {

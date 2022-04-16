@@ -49,7 +49,7 @@ class TeamController extends AbstractRestController
     }
 
     /**
-     * Get all the teams for this contest
+     * Get all the teams for this contest.
      * @Rest\Get("")
      * @OA\Response(
      *     response="200",
@@ -92,7 +92,7 @@ class TeamController extends AbstractRestController
     }
 
     /**
-     * Get the given team for this contest
+     * Get the given team for this contest.
      * @throws NonUniqueResultException
      * @Rest\Get("/{id}")
      * @OA\Response(
@@ -114,7 +114,7 @@ class TeamController extends AbstractRestController
     }
 
     /**
-     * Get the photo for the given team
+     * Get the photo for the given team.
      * @Rest\Get("/{id}/photo", name="team_photo")
      * @OA\Response(
      *     response="200",
@@ -148,7 +148,7 @@ class TeamController extends AbstractRestController
     }
 
     /**
-     * Delete the photo for the given team
+     * Delete the photo for the given team.
      * @Rest\Delete("/{id}/photo", name="delete_team_photo")
      * @IsGranted("ROLE_ADMIN")
      * @OA\Response(response="204", description="Deleting photo succeeded")
@@ -177,7 +177,7 @@ class TeamController extends AbstractRestController
     }
 
     /**
-     * Set the photo for the given team
+     * Set the photo for the given team.
      * @Rest\POST("/{id}/photo", name="post_team_photo")
      * @Rest\PUT("/{id}/photo", name="put_team_photo")
      * @OA\RequestBody(
@@ -233,7 +233,7 @@ class TeamController extends AbstractRestController
     }
 
     /**
-     * Add a new team
+     * Add a new team.
      *
      * @Rest\Post()
      * @IsGranted("ROLE_API_WRITER")
