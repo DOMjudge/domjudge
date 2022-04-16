@@ -719,10 +719,10 @@ class CheckConfigService
             $shortClass = str_replace('.php', '', $parts[count($parts) - 1]);
             $class      = sprintf('App\\Entity\\%s', $shortClass);
             try {
-                if (class_exists($class) && !in_array($class, [
-                        // Contestproblem is checked using Problem
-                        ContestProblem::class,
-                    ]) && ($externalIdField = $this->eventLogService->externalIdFieldForEntity($class))) {
+                if (class_exists($class)
+                    // ContestProblem is checked using Problem.
+                    && $class != ContestProblem::class
+                    && ($externalIdField = $this->eventLogService->externalIdFieldForEntity($class))) {
                     $result[$shortClass] = $this->checkExternalIdentifiers($class, $externalIdField);
                 }
             } catch (BadMethodCallException $e) {
