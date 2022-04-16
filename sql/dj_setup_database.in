@@ -59,24 +59,12 @@ mysql()
 	if [ -n "$PASSWD" ]; then
 		pass="-p$PASSWD"
 	else
-		pass=""
 		[ -n "$PROMPT_PASSWD" ] && pass="-p"
 		[ -n "$DBA_PASSWD" ]    && pass="-p$DBA_PASSWD"
 	fi
 
-	if [ -n "$USE_SOCKET" ]; then
-		if [ -n "$pass" ]; then
-			command mysql $user "$pass" -h "$DBHOST" --silent --skip-column-names "$@"
-		else
-			command mysql $user -h "$DBHOST" --silent --skip-column-names "$@"
-		fi
-	else
-		if [ -n "$pass" ]; then
-			command mysql $user "$pass" -h "$DBHOST" -P "$DBPORT" --silent --skip-column-names "$@"
-		else
-			command mysql $user -h "$DBHOST" -P "$DBPORT" --silent --skip-column-names "$@"
-		fi
-	fi
+	[ -z "$USE_SOCKET" ] && port="-P$DBPORT"
+	command mysql $user ${pass:+"$pass"} -h "$DBHOST" ${port:+"$port"} --silent --skip-column-names "$@"
 }
 
 # Quick shell hack to get a key from an INI file.
