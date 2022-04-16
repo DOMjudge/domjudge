@@ -38,6 +38,7 @@ Options:
   -u <user>  connect to MySQL with DB admin <user>
   -p <pass>  use password <pass> for DB admin user
   -r         read DB admin password from prompt
+  -s         connect via local socket (do not specify port)
 
 Note: you may want to store your credentials in ~/.my.cnf in order to
 not have to pass any of the options above.
@@ -62,10 +63,19 @@ mysql()
 		[ -n "$PROMPT_PASSWD" ] && pass="-p"
 		[ -n "$DBA_PASSWD" ]    && pass="-p$DBA_PASSWD"
 	fi
-	if [ -n "$pass" ]; then
-		command mysql $user "$pass" -h "$DBHOST" -P "$DBPORT" --silent --skip-column-names "$@"
+
+	if [ -n "$USE_SOCKET" ]; then
+		if [ -n "$pass" ]; then
+			command mysql $user "$pass" -h "$DBHOST" --silent --skip-column-names "$@"
+		else
+			command mysql $user -h "$DBHOST" --silent --skip-column-names "$@"
+		fi
 	else
-		command mysql $user -h "$DBHOST" -P "$DBPORT" --silent --skip-column-names "$@"
+		if [ -n "$pass" ]; then
+			command mysql $user "$pass" -h "$DBHOST" -P "$DBPORT" --silent --skip-column-names "$@"
+		else
+			command mysql $user -h "$DBHOST" -P "$DBPORT" --silent --skip-column-names "$@"
+		fi
 	fi
 }
 
@@ -228,7 +238,7 @@ remove_db_users()
 ### Script starts here ###
 
 # Parse command-line options:
-while getopts ':u:p:qr' OPT ; do
+while getopts ':u:p:qrs' OPT ; do
 	case "$OPT" in
 		u)
 			DBA_USER=$OPTARG
@@ -241,6 +251,9 @@ while getopts ':u:p:qr' OPT ; do
 			;;
 		r)
 			PROMPT_PASSWD=1
+			;;
+		s)
+			USE_SOCKET=1
 			;;
 		:)
 			echo "Error: option '$OPTARG' requires an argument."
