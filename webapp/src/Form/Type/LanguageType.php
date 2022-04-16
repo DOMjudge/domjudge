@@ -5,7 +5,6 @@ namespace App\Form\Type;
 use App\Entity\Executable;
 use App\Entity\Language;
 use Doctrine\ORM\EntityRepository;
-use Exception;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;

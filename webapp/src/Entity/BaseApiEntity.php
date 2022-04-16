@@ -3,7 +3,6 @@
 namespace App\Entity;
 
 use App\Service\EventLogService;
-use Exception;
 
 /**
  * Class BaseApiEntity

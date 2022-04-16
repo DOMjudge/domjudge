@@ -4,7 +4,6 @@ namespace App\Form\Type;
 
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
-use Exception;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;

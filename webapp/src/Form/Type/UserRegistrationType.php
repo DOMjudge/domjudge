@@ -9,10 +9,8 @@ use App\Entity\TeamCategory;
 use App\Entity\User;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
-use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
-use stdClass;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -233,7 +231,7 @@ class UserRegistrationType extends AbstractType
                                 $context->buildViolation('This affiliation '.strtolower($identifier).' is already in use.')
                                     ->atPath('affiliation'.$identifier)
                                     ->addViolation();
-                            
+
                             }
                         }
                         break;

@@ -2,7 +2,6 @@
 
 namespace App\Validator\Constraints;
 
-use App\Utils\Utils;
 use Symfony\Component\Intl\Countries;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;

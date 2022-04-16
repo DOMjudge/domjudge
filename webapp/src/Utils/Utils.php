@@ -3,7 +3,6 @@ namespace App\Utils;
 
 use DateTime;
 use Doctrine\Inflector\InflectorFactory;
-use Exception;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**

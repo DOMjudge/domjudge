@@ -1,12 +1,8 @@
 <?php declare(strict_types=1);
 namespace App\Entity;
 
-use App\Doctrine\DBAL\Types\JudgeTaskType;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
-use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * An item in the queue.

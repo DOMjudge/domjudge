@@ -5,7 +5,6 @@ namespace App\DataFixtures\ExampleData;
 use App\Entity\Contest;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
-use Exception;
 
 class ContestFixture extends AbstractExampleDataFixture implements DependentFixtureInterface
 {
