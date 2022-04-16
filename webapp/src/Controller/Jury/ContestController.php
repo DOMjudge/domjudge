@@ -166,28 +166,21 @@ class ContestController extends BaseController
                     ->setStarttimeEnabled(true);
                 $em->flush();
 
-                $this->eventLogService->log(
-                    'contest',
-                    $contest->getCid(),
-                    EventLogService::ACTION_UPDATE,
-                    $contest->getCid()
-                );
                 $this->addFlash('scoreboard_refresh',
                                 'After changing the contest start time, it may be ' .
                                 'necessary to recalculate any cached scoreboards.');
-                return $this->redirectToRoute('jury_contests');
             } else {
                 $method = sprintf('set%stimeString', $time);
                 $contest->{$method}($nowstring);
                 $em->flush();
-                $this->eventLogService->log(
-                    'contest',
-                    $contest->getCid(),
-                    EventLogService::ACTION_UPDATE,
-                    $contest->getCid()
-                );
-                return $this->redirectToRoute('jury_contests');
             }
+            $this->eventLogService->log(
+                'contest',
+                $contest->getCid(),
+                EventLogService::ACTION_UPDATE,
+                $contest->getCid()
+            );
+            return $this->redirectToRoute('jury_contests');
         }
 
         $contests = $em->createQueryBuilder()
