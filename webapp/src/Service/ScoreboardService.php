@@ -1001,9 +1001,7 @@ class ScoreboardService
             }
             $contestProblemsIndexed[$p->getProbid()] = $cp;
         }
-        $contestProblems = $contestProblemsIndexed;
-
-        return $contestProblems;
+        return $contestProblemsIndexed;
     }
 
     /**
