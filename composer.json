@@ -51,6 +51,7 @@
 		"ext-mysqli": "*",
 		"ext-pcntl": "*",
 		"ext-posix": "*",
+		"ext-simplexml": "*",
 		"ext-zip": "*",
 		"angel-vladov/select2-theme-bootstrap4": "1.0.0",
 		"components/flag-icon-css": "^3.5",
@@ -98,7 +99,7 @@
 		"twig/extra-bundle": "^3.3",
 		"twig/string-extra": "^3.3",
 		"twig/twig": "^3.0"
-    },
+	},
 	"require-dev": {
 		"ext-dom": "*",
 		"dama/doctrine-test-bundle": "^6.7",
