@@ -447,7 +447,7 @@ class CheckConfigService
         $script_filesize_limit = $this->config->get('script_filesize_limit');
         $output_limit = $this->config->get('output_limit');
 
-        $problemerrors = $scripterrors = [];
+        $problemerrors = $moreproblemerrors = [];
         $result = 'O';
         foreach ($problems as $problem) {
             $probid = $problem->getProbid();
@@ -531,7 +531,7 @@ class CheckConfigService
     {
         $languages = $this->em->getRepository(Language::class)->findAll();
 
-        $languageerrors = $scripterrors = [];
+        $languageerrors = $morelanguageerrors = [];
         $result = 'O';
         foreach ($languages as $language) {
             $langid = $language->getLangid();
