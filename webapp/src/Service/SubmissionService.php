@@ -22,12 +22,14 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query\Expr\Join;
+use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
+use ZipArchive;
 
 /**
  * Class SubmissionService
@@ -312,7 +314,7 @@ class SubmissionService
             } else {
                 $priority = $resultsPrio[$runresult];
                 if (empty($priority)) {
-                    throw new \InvalidArgumentException(sprintf("Unknown results '%s' found", $runresult));
+                    throw new InvalidArgumentException(sprintf("Unknown results '%s' found", $runresult));
                 }
                 if ($priority > $bestPriority) {
                     $bestRunResult = $runresult;
@@ -709,12 +711,12 @@ class SubmissionService
     {
         /** @var SubmissionFile[] $files */
         $files = $submission->getFiles();
-        $zip   = new \ZipArchive;
+        $zip   = new ZipArchive;
         if (!($tmpfname = tempnam($this->dj->getDomjudgeTmpDir(), "submission_file-"))) {
             throw new ServiceUnavailableHttpException(null, 'Could not create temporary file.');
         }
 
-        $res = $zip->open($tmpfname, \ZipArchive::OVERWRITE);
+        $res = $zip->open($tmpfname, ZipArchive::OVERWRITE);
         if ($res !== true) {
             throw new ServiceUnavailableHttpException(null, "Could not create temporary zip file.");
         }

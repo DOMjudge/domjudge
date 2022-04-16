@@ -34,6 +34,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
@@ -236,7 +237,7 @@ class ImportExportController extends BaseController
             $file = $contestImportForm->get('file')->getData();
             try {
                 $data = Yaml::parseFile($file->getRealPath(), Yaml::PARSE_DATETIME);
-            } catch (\Symfony\Component\Yaml\Exception\ParseException $e) {
+            } catch (ParseException $e) {
                 $this->addFlash('danger', "Parse error in YAML/JSON file: " . $e->getMessage());
                 return $this->redirectToRoute('jury_import_export');
             }
@@ -258,7 +259,7 @@ class ImportExportController extends BaseController
             $file = $problemsImportForm->get('file')->getData();
             try {
                 $data = Yaml::parseFile($file->getRealPath(), Yaml::PARSE_DATETIME);
-            } catch (\Symfony\Component\Yaml\Exception\ParseException $e) {
+            } catch (ParseException $e) {
                 $this->addFlash('danger', "Parse error in YAML/JSON file: " . $e->getMessage());
                 return $this->redirectToRoute('jury_import_export');
             }

@@ -13,6 +13,7 @@ use App\Entity\TeamAffiliation;
 use App\Entity\TeamCategory;
 use App\Entity\User;
 use App\Utils\Utils;
+use BadMethodCallException;
 use Doctrine\Inflector\InflectorFactory;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\MappingException;
@@ -169,7 +170,7 @@ class EventLogService implements ContainerAwareInterface
                 $entity    = $inflector->classify($singular);
                 $fullClass = sprintf('App\Entity\%s', $entity);
                 if (!class_exists($fullClass)) {
-                    throw new \BadMethodCallException(
+                    throw new BadMethodCallException(
                         sprintf('Class \'%s\' does not exist', $fullClass)
                     );
                 }
@@ -872,7 +873,7 @@ class EventLogService implements ContainerAwareInterface
 
         $entity = $endpointData[self::KEY_ENTITY];
         if (!$entity) {
-            throw new \BadMethodCallException(sprintf('No entity defined for type \'%s\'', $type));
+            throw new BadMethodCallException(sprintf('No entity defined for type \'%s\'', $type));
         }
 
         // Special case for submissions and clarifications: they can have an external ID even if when running in
@@ -901,7 +902,7 @@ class EventLogService implements ContainerAwareInterface
         try {
             $primaryKeyField = $metadata->getSingleIdentifierColumnName();
         } catch (MappingException $e) {
-            throw new \BadMethodCallException(sprintf('Entity \'%s\' as a composite primary key',
+            throw new BadMethodCallException(sprintf('Entity \'%s\' as a composite primary key',
                                                       $type));
         }
 
@@ -934,7 +935,7 @@ class EventLogService implements ContainerAwareInterface
         }
 
         if (!isset($this->entityToEndpoint[$entity])) {
-            throw new \BadMethodCallException(sprintf('Entity \'%s\' does not have a corresponding endpoint',
+            throw new BadMethodCallException(sprintf('Entity \'%s\' does not have a corresponding endpoint',
                                                       $entity));
         }
 
@@ -986,7 +987,7 @@ class EventLogService implements ContainerAwareInterface
         try {
             return $metadata->getSingleIdentifierFieldName();
         } catch (MappingException $e) {
-            throw new \BadMethodCallException("Entity '$class' has a composite primary key");
+            throw new BadMethodCallException("Entity '$class' has a composite primary key");
         }
     }
 

@@ -26,6 +26,7 @@ use App\Service\RejudgingService;
 use App\Service\ScoreboardService;
 use App\Service\SubmissionService;
 use App\Utils\Utils;
+use BadMethodCallException;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\DBAL\Exception;
@@ -1036,7 +1037,7 @@ class JudgehostController extends AbstractFOSRestController
             // This should only happen when the old result was NULL.
             if ($oldResult !== $result) {
                 if ($oldResult !== null) {
-                    throw new \BadMethodCallException('internal bug: the evaluated result changed during judging');
+                    throw new BadMethodCallException('internal bug: the evaluated result changed during judging');
                 }
 
                 if ($lazyEval) {

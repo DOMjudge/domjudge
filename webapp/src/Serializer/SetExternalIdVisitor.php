@@ -6,6 +6,7 @@ use App\Entity\Clarification;
 use App\Entity\ExternalRelationshipEntityInterface;
 use App\Entity\Submission;
 use App\Service\EventLogService;
+use BadMethodCallException;
 use JMS\Serializer\EventDispatcher\Events;
 use JMS\Serializer\EventDispatcher\EventSubscriberInterface;
 use JMS\Serializer\EventDispatcher\ObjectEvent;
@@ -63,7 +64,7 @@ class SetExternalIdVisitor implements EventSubscriberInterface
                 );
                 $visitor->visitProperty($property, $object->getExternalid());
             }
-        } catch (\BadMethodCallException $e) {
+        } catch (BadMethodCallException $e) {
             // Ignore these exceptions, as this means this is not an entity or it is not configured
         }
 
@@ -105,7 +106,7 @@ class SetExternalIdVisitor implements EventSubscriberInterface
                         );
                         $visitor->visitProperty($property, $entity->getExternalid());
                     }
-                } catch (\BadMethodCallException $e) {
+                } catch (BadMethodCallException $e) {
                     // Ignore these exceptions, as this means this is not an entity or it is not configured
                 }
             }

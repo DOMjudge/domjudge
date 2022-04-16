@@ -9,6 +9,7 @@ use App\Entity\Team;
 use App\Entity\TeamCategory;
 use App\Utils\FreezeData;
 use App\Utils\Utils;
+use Collator;
 use Exception;
 
 /**
@@ -280,7 +281,7 @@ class Scoreboard
 
         // Else, order by teamname alphabetically
         if ($a->team->getEffectiveName() != $b->team->getEffectiveName()) {
-            $collator = new \Collator('en');
+            $collator = new Collator('en');
             return $collator->compare($a->team->getEffectiveName(), $b->team->getEffectiveName());
         }
         // Undecided, should never happen in practice
