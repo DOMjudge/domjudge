@@ -64,7 +64,7 @@ class ImportProblemService
     }
 
     /**
-     * Import a zipped problem
+     * Import a zipped problem.
      * @throws DBALException
      * @throws NoResultException
      * @throws NonUniqueResultException
@@ -77,7 +77,7 @@ class ImportProblemService
         bool $deleteOldData = false,
         ?array &$messages = []
     ): ?Problem {
-        // This might take a while
+        // This might take a while.
         ini_set('max_execution_time', '300');
 
         $propertiesFile  = 'domjudge-problem.ini';
@@ -116,7 +116,7 @@ class ImportProblemService
         $contestProblemProperties = array_intersect_key($properties, array_flip($iniKeysContestProblem));
 
         // The property in the INI is called short-name (because that is what we have called it in exports),
-        // but the property on the contest problem is shortname, so remap it
+        // but the property on the contest problem is shortname, so remap it.
         if (isset($contestProblemProperties['short-name'])) {
             $contestProblemProperties['shortname'] = $contestProblemProperties['short-name'];
             unset($contestProblemProperties['short-name']);
@@ -188,7 +188,7 @@ class ImportProblemService
             }
 
             if ($contest !== null) {
-                // Find the correct contest problem
+                // Find the correct contest problem.
                 /** @var ContestProblem $possibleContestProblem */
                 foreach ($problem->getContestProblems() as $possibleContestProblem) {
                     if ($possibleContestProblem->getCid() === $contest->getCid()) {
@@ -320,7 +320,7 @@ class ImportProblemService
                 if (isset($yamlData['name'])) {
                     if (is_array($yamlData['name'])) {
                         foreach ($yamlData['name'] as $lang => $name) {
-                            // TODO: select a specific instead of the first language
+                            // TODO: select a specific instead of the first language.
                             $yamlProblemProperties['name'] = $name;
                             break;
                         }
@@ -347,7 +347,7 @@ class ImportProblemService
                     if (sizeof($validatorFiles) == 0) {
                         $messages[] = 'Custom validator specified but not found.';
                     } else {
-                        // file(s) have to share common directory
+                        // File(s) have to share common directory.
                         $validatorDir = mb_substr($validatorFiles[0], 0, mb_strrpos($validatorFiles[0], '/')) . '/';
                         $sameDir      = true;
                         foreach ($validatorFiles as $validatorFile) {
@@ -376,7 +376,7 @@ class ImportProblemService
                                 $newfilename = $tmpzipfiledir . "/" . $filebase;
                                 file_put_contents($newfilename, $content);
                                 if ($filebase === 'build' || $filebase === 'run') {
-                                    // mark special files as executable
+                                    // Mark special files as executable.
                                     chmod($newfilename, 0755);
                                 }
                             }
@@ -392,7 +392,7 @@ class ImportProblemService
                             $outputValidatorZip  = file_get_contents($tmpzipfiledir.'/outputvalidator.zip');
                             $outputValidatorName = substr($externalId, 0, 20) . '_cmp';
                             if ($this->em->getRepository(Executable::class)->find($outputValidatorName)) {
-                                // avoid name clash
+                                // Avoid name clash.
                                 $clashCount = 2;
                                 while ($this->em->getRepository(Executable::class)->find(
                                     $outputValidatorName . '_' . $clashCount)) {
@@ -445,7 +445,7 @@ class ImportProblemService
             }
         }
 
-        // Add problem statement, also look in obsolete location
+        // Add problem statement, also look in obsolete location.
         foreach (['', 'problem_statement/'] as $dir) {
             foreach (['pdf', 'html', 'txt'] as $type) {
                 $filename = sprintf('%sproblem.%s', $dir, $type);
@@ -463,7 +463,7 @@ class ImportProblemService
         if ($deleteOldData && $problem->getProbid()) {
             // Delete current testcases. We do this with a direct query, because
             // otherwise we can get duplicate key errors, since Doctrine first performs
-            // inserts and only then deletes
+            // inserts and only then deletes.
             $numDeleted = $this->em->createQueryBuilder()
                 ->from(Testcase::class, 'tc')
                 ->delete()
@@ -494,7 +494,7 @@ class ImportProblemService
         /** @var Testcase[] $testcases */
         $testcases = [];
 
-        // first insert sample, then secret data in alphabetical order
+        // First insert sample, then secret data in alphabetical order.
         foreach (['sample', 'secret'] as $type) {
             $numCases  = 0;
             $dataFiles = [];
@@ -547,7 +547,7 @@ class ImportProblemService
                 $md5out = md5($testOutput);
 
                 if (!$deleteOldData && $problem->getProbid()) {
-                    // Skip testcases that already exist identically
+                    // Skip testcases that already exist identically.
                     $existingTestcase = $this->em
                         ->createQueryBuilder()
                         ->from(Testcase::class, 't')
@@ -627,7 +627,7 @@ class ImportProblemService
 
             $content = $zip->getFromName($filename);
             if (empty($content)) {
-                // Empty file or directory, ignore
+                // Empty file or directory, ignore.
                 continue;
             }
 
@@ -640,7 +640,7 @@ class ImportProblemService
                 $type = 'txt';
             }
 
-            // Check if an attachment already exists, since then we overwrite it
+            // Check if an attachment already exists, since then we overwrite it.
             if (!$deleteOldData && $problem->getProbid()) {
                 /** @var ProblemAttachment|null $attachment */
                 $attachment = $this->em
@@ -699,7 +699,7 @@ class ImportProblemService
             $this->eventLogService->log('testcase', $testcase->getTestcaseid(), 'create');
         }
 
-        // submit reference solutions
+        // Submit reference solutions.
         if ($contest === null) {
             $messages[] = 'No jury solutions added: problem is not linked to a contest (yet).';
         } elseif (!$this->dj->getUser()->getTeam()) {

@@ -26,13 +26,13 @@ use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
- * This class is used to log events in the events table
+ * This class is used to log events in the events table.
  */
 class EventLogService implements ContainerAwareInterface
 {
     use ContainerAwareTrait;
 
-    // Keys used in below config
+    // Keys used in below config:
     const KEY_TYPE = 'type';
     const KEY_URL = 'url';
     const KEY_ENTITY = 'entity';
@@ -40,19 +40,19 @@ class EventLogService implements ContainerAwareInterface
     const KEY_USE_EXTERNAL_ID = 'use-external-id';
     const KEY_ALWAYS_USE_EXTERNAL_ID = 'always-use-external-id';
 
-    // Types of endpoints
+    // Types of endpoints:
     const TYPE_CONFIGURATION = 'configuration';
     const TYPE_LIVE = 'live';
     const TYPE_AGGREGATE = 'aggregate';
 
-    // Allowed actions
+    // Allowed actions:
     const ACTION_CREATE = 'create';
     const ACTION_UPDATE = 'update';
     const ACTION_DELETE = 'delete';
 
-    // TODO: add a way to specify when to use external ID using some (DB)
+    // TODO: Add a way to specify when to use external ID using some (DB)
     // config instead of hardcoding it here. Also relates to
-    // AbstractRestController::getIdField
+    // AbstractRestController::getIdField.
     public array $apiEndpoints = [
         'contests' => [
             self::KEY_TYPE => self::TYPE_CONFIGURATION,
@@ -137,9 +137,9 @@ class EventLogService implements ContainerAwareInterface
         ],
     ];
 
-    // Entities to endpoints. Will be filled automatically except for special cases
+    // Entities to endpoints. Will be filled automatically except for special cases.
     protected array $entityToEndpoint = [
-        // Special case for contest problems, as they should map to problems
+        // Special case for contest problems, as they should map to problems.
         ContestProblem::class => 'problems',
     ];
 
@@ -308,7 +308,7 @@ class EventLogService implements ContainerAwareInterface
             return;
         }
 
-        // Make sure ID arrays are 0-indexed
+        // Make sure ID arrays are 0-indexed.
         $dataIds = array_values($dataIds);
         $ids     = array_values($ids);
 
@@ -401,7 +401,7 @@ class EventLogService implements ContainerAwareInterface
         if ($jsonPassed) {
             $json = $this->dj->jsonDecode($json);
         } elseif (!in_array($type, ['contests', 'state'])) {
-            // Re-index JSON so we can look up the elements by ID
+            // Re-index JSON so we can look up the elements by ID.
             $tmp  = $json;
             $json = [];
             foreach ($tmp as $item) {
@@ -416,7 +416,7 @@ class EventLogService implements ContainerAwareInterface
                 $contest = $this->em->getRepository(Contest::class)->find($contestId);
 
                 if (in_array($type, ['contests', 'state']) || $jsonPassed) {
-                    // Contest and state endpoint are singular
+                    // Contest and state endpoint are singular.
                     $jsonElement = $json;
                 } elseif (isset($json[$ids[$idx]])) {
                     $jsonElement = $json[$ids[$idx]];
@@ -425,16 +425,16 @@ class EventLogService implements ContainerAwareInterface
                 }
 
                 if ($checkEvents) {
-                    // Check if all references for this event are present; if not, add all static data
+                    // Check if all references for this event are present; if not, add all static data.
                     if (!$this->hasAllDependentObjectEvents($contest, $type, $jsonElement)) {
-                        // Not all dependent objects are present, so insert all static events
+                        // Not all dependent objects are present, so insert all static events.
                         $this->initStaticEvents($contest);
                         // If new references are added, we need to reload the contest,
-                        // because the entity manager has been cleared
+                        // because the entity manager has been cleared.
                         $contest = $this->em->getRepository(Contest::class)->find($contest->getCid());
                     }
 
-                    // Add missing state events that should have happened already
+                    // Add missing state events that should have happened already.
                     $this->addMissingStateEvents($contest);
                 }
 
@@ -451,7 +451,7 @@ class EventLogService implements ContainerAwareInterface
             }
         }
 
-        // Now flush the entity manager, inserting all events
+        // Now flush the entity manager, inserting all events.
         $this->em->flush();
 
         if (count($events) !== $expectedEvents) {
@@ -469,11 +469,11 @@ class EventLogService implements ContainerAwareInterface
 
     /**
      * Add all state events for the given contest that are not added yet but
-     * should have happened already
+     * should have happened already.
      */
     public function addMissingStateEvents(Contest $contest): void
     {
-        // Make sure we get a fresh contest
+        // Make sure we get a fresh contest.
         $this->em->refresh($contest);
 
         // Because some states can happen in multiple different orders, we need to check per
@@ -488,7 +488,7 @@ class EventLogService implements ContainerAwareInterface
 
         // Because we have the events in order now, we can keep 'growing' the data to insert,
         // because every next state event will have the data from the previous one, together with
-        // the new data
+        // the new data.
         $dataToInsert = [];
 
         foreach ($states as $state => $time) {
@@ -498,14 +498,14 @@ class EventLogService implements ContainerAwareInterface
         $dataToInsert['end_of_updates'] = null;
 
         // First, remove all times that are still null or will happen in the future,
-        // as we do not need to check them
+        // as we do not need to check them.
         $states = array_filter($states, fn($time) => $time !== null && Utils::now() >= $time);
 
         // Now sort the remaining times in increasing order,
-        // as that is the order in which we want to add the events
+        // as that is the order in which we want to add the events.
         asort($states);
 
-        // Get all state events
+        // Get all state events.
         /** @var Event[] $stateEvents */
         $stateEvents = $this->em->createQueryBuilder()
             ->from(Event::class, 'e')
@@ -527,20 +527,20 @@ class EventLogService implements ContainerAwareInterface
             }
         }
 
-        // Now loop over the states and check if we already have an event for them
+        // Now loop over the states and check if we already have an event for them.
         foreach ($states as $field => $time) {
             $dataToInsert[$field] = Utils::absTime($time);
 
-            // If we already have an event with this field, continue
+            // If we already have an event with this field, continue.
             if (isset($dataPresent[$field])) {
                 continue;
             }
 
-            // Insert the event
+            // Insert the event.
             $this->insertEvent($contest, 'state', '', $dataToInsert);
 
             if ($field === 'finalized') {
-                // Insert all awards events
+                // Insert all awards events.
                 $url = sprintf('/contests/%s/awards', $contest->getApiId($this));
                 $awards = [];
                 $this->dj->withAllRoles(function () use ($url, &$awards) {
@@ -552,13 +552,13 @@ class EventLogService implements ContainerAwareInterface
             }
         }
 
-        // If we already have an event with end_of_updates, we are done
+        // If we already have an event with end_of_updates, we are done.
         if (isset($dataPresent['end_of_updates'])) {
             return;
         }
 
         // Special case, if both thawed and finalized are non-null or finalized is
-        // non-null but frozen, we also need to add an end_of_updates event
+        // non-null but frozen, we also need to add an end_of_updates event.
         if ($dataToInsert['finalized'] !== null &&
             ($dataToInsert['thawed'] !== null || $dataToInsert['frozen'] === null)) {
             $dataToInsert['end_of_updates'] = max(
@@ -566,7 +566,7 @@ class EventLogService implements ContainerAwareInterface
                 $dataToInsert['finalized']
             );
 
-            // Insert the end_of_updates event
+            // Insert the end_of_updates event.
             $this->insertEvent($contest, 'state', '', $dataToInsert);
         }
     }
@@ -608,7 +608,7 @@ class EventLogService implements ContainerAwareInterface
         }
 
         // Now we can insert the event. However, before doing so,
-        // get an advisory lock to make sure no one else is doing the same
+        // get an advisory lock to make sure no one else is doing the same.
         $lockString = sprintf('domjudge.eventlog.%d.%s.%s',
             $firstEvent->getContest()->getCid(),
             $endpointType,
@@ -621,11 +621,11 @@ class EventLogService implements ContainerAwareInterface
 
         // Note that for events without an ID (i.e. state), the endpointid
         // is set to ''. This means this call will also work for these
-        // kinds of events
+        // kinds of events.
         $existingEvents = $this->getExistingEvents($events);
 
         foreach ($events as $event) {
-            // If we have no event or the data is different, add it
+            // If we have no event or the data is different, add it.
             $existingEvent = $existingEvents[$event->getEndpointid()] ?? null;
             $existingData = $existingEvent === null ?
                 null :
@@ -637,7 +637,7 @@ class EventLogService implements ContainerAwareInterface
                     $event->setAction(self::ACTION_UPDATE);
                 } else {
                     // Set the action based on whether there was already an event
-                    // for the same endpoint and ID
+                    // for the same endpoint and ID.
                     $event->setAction(
                         $existingEvent === null ?
                             self::ACTION_CREATE :
@@ -649,7 +649,7 @@ class EventLogService implements ContainerAwareInterface
         }
         $this->em->flush();
 
-        // Make sure to release the lock again
+        // Make sure to release the lock again.
         if ($this->em->getConnection()->fetchOne('SELECT RELEASE_LOCK(:lock)',
                 ['lock' => $lockString]) != 1) {
             throw new Exception('EventLogService::insertEvent failed to release lock');
@@ -682,14 +682,14 @@ class EventLogService implements ContainerAwareInterface
      */
     public function initStaticEvents(Contest $contest): void
     {
-        // Loop over all configuration endpoints with an URL and check if we have all data
+        // Loop over all configuration endpoints with an URL and check if we have all data.
         foreach ($this->apiEndpoints as $endpoint => $endpointData) {
             if ($endpointData[EventLogService::KEY_TYPE] === EventLogService::TYPE_CONFIGURATION &&
                 isset($endpointData[EventLogService::KEY_URL])) {
                 $contestId = $contest->getApiId($this);
 
                 // Do an internal API request to the overview URL
-                // of the endpoint to get current data
+                // of the endpoint to get current data.
                 $url = sprintf('/contests/%s%s', $contestId,
                                $endpointData[EventLogService::KEY_URL]);
                 $this->dj->withAllRoles(function () use ($url, &$data) {
@@ -697,7 +697,7 @@ class EventLogService implements ContainerAwareInterface
                 });
 
                 // Get a partial reference to the contest,
-                // because calling internalApiRequest above will clear the entity manager
+                // because calling internalApiRequest above will clear the entity manager.
                 /** @var Contest $contest */
                 $contest = $this->em->getPartialReference(Contest::class, $contest->getCid());
 
@@ -734,7 +734,7 @@ class EventLogService implements ContainerAwareInterface
                     }
                 }
 
-                // Sort the data on ID to get a consistent order
+                // Sort the data on ID to get a consistent order.
                 usort($data, function ($a, $b) {
                     if (is_int($a['id']) && is_int($b['id'])) {
                         return $a['id'] <=> $b['id'];
@@ -742,7 +742,7 @@ class EventLogService implements ContainerAwareInterface
                     return strcmp((string)$a['id'], (string)$b['id']);
                 });
 
-                // Insert the events
+                // Insert the events.
                 $ids = array_map(function(array $row) {
                     return $row['id'];
                 }, $data);
@@ -752,12 +752,12 @@ class EventLogService implements ContainerAwareInterface
     }
 
     /**
-     * Check if all events for dependent objects are present for the given type and data
+     * Check if all events for dependent objects are present for the given type and data.
      * @return bool True if and only if all references are present
      */
     protected function hasAllDependentObjectEvents(Contest $contest, string $type, array $data): bool
     {
-        // Build up the referenced data to check for
+        // Build up the referenced data to check for.
         $toCheck = [
             'contests' => $contest->getApiId($this),
         ];
@@ -877,7 +877,7 @@ class EventLogService implements ContainerAwareInterface
         }
 
         // Special case for submissions and clarifications: they can have an external ID even if when running in
-        // full local mode, because one can use the API to upload one with an external ID
+        // full local mode, because one can use the API to upload one with an external ID.
         $externalIdAlwaysAllowed = [
             Submission::class    => 's.submitid',
             Clarification::class => 'clar.clarid',
@@ -920,16 +920,16 @@ class EventLogService implements ContainerAwareInterface
 
     /**
      * Get the external ID field for a given entity type. Will return null if
-     * no external ID field should be used
+     * no external ID field should be used.
      * @param object|string $entity
      */
     public function externalIdFieldForEntity($entity): ?string
     {
-        // Allow to pass in a class instance: convert it to its class type
+        // Allow passing in a class instance: convert it to its class type.
         if (is_object($entity)) {
             $entity = get_class($entity);
         }
-        // Special case: strip of Doctrine proxies
+        // Special case: strip of Doctrine proxies.
         if (strpos($entity, 'Proxies\\__CG__\\') === 0) {
             $entity = substr($entity, strlen('Proxies\\__CG__\\'));
         }
@@ -992,16 +992,16 @@ class EventLogService implements ContainerAwareInterface
     }
 
     /**
-     * Get the endpoint to use for the given entity
+     * Get the endpoint to use for the given entity.
      * @param object|string $entity
      */
     public function endpointForEntity($entity): ?string
     {
-        // Allow to pass in a class instance: convert it to its class type
+        // Allow passing in a class instance: convert it to its class type.
         if (is_object($entity)) {
             $entity = get_class($entity);
         }
-        // Special case: strip of Doctrine proxies
+        // Special case: strip of Doctrine proxies.
         if (strpos($entity, 'Proxies\\__CG__\\') === 0) {
             $entity = substr($entity, strlen('Proxies\\__CG__\\'));
         }

@@ -203,7 +203,7 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
         }
         $max = 0;
         foreach ($this->runs as $run) {
-            // JudgingRun::getRuntime can be null if it didn't run. We exclude these for the max runtime
+            // JudgingRun::getRuntime can be null if it didn't run. We exclude these for the max runtime.
             $max = max($run->getRuntime() ?? 0, $max);
         }
         return $max;

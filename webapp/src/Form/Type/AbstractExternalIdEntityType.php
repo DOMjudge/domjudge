@@ -13,7 +13,7 @@ use Symfony\Component\Validator\Constraints\Regex;
 /**
  * Class AbstractExternalIdEntityType
  *
- * Base class that can be used to automatically add an external ID field to forms that need them
+ * Base class that can be used to automatically add an external ID field to forms that need them.
  *
  * @package App\Form\Type
  */
@@ -27,7 +27,7 @@ class AbstractExternalIdEntityType extends AbstractType
     }
 
     /**
-     * Add an external ID field if the given entity class needs it
+     * Add an external ID field if the given entity class needs it.
      */
     protected function addExternalIdField(FormBuilderInterface $builder, string $entity): void
     {

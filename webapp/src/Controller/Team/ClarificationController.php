@@ -116,12 +116,12 @@ class ClarificationController extends BaseController
             throw new HttpException(401, 'Permission denied');
         }
 
-        // Get the "parent" message if we have one
+        // Get the "parent" message if we have one.
         if ($clarification->getInReplyTo()) {
             $clarification = $clarification->getInReplyTo();
         }
 
-        // Mark clarification as read
+        // Mark clarification as read.
         $team->removeUnreadClarification($clarification);
         foreach ($clarification->getReplies() as $reply) {
             $team->removeUnreadClarification($reply);
@@ -186,7 +186,7 @@ class ClarificationController extends BaseController
         Team $team
     ): void {
         $formData = $form->getData();
-        // First part will always be the contest ID, as Symfony will validate this
+        // First part will always be the contest ID, as Symfony will validate this.
         [, $problemId] = explode('-', $formData['subject']);
         $problem = null;
         $category = null;

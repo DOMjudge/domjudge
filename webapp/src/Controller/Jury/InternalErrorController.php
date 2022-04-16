@@ -112,7 +112,7 @@ class InternalErrorController extends BaseController
                 $affectedText = $problem->getName();
                 break;
             case 'judgehost':
-                // Judgehosts get disabled by their hostname, so we need to look it up here
+                // Judgehosts get disabled by their hostname, so we need to look it up here.
                 $judgehost    = $this->em->getRepository(Judgehost::class)->findOneBy(['hostname' => $disabled['hostname']]);
                 $affectedLink = $this->generateUrl('jury_judgehost', ['judgehostid' => $judgehost->getJudgehostid()]);
                 $affectedText = $disabled['hostname'];

@@ -67,7 +67,7 @@ class ShadowDifferencesController extends BaseController
             return $this->redirectToRoute('jury_index');
         }
 
-        // Close the session, as this might take a while and we don't need the session below
+        // Close the session, as this might take a while and we don't need the session below.
         $this->requestStack->getSession()->save();
 
         $contest        = $this->dj->getCurrentContest();
@@ -80,7 +80,7 @@ class ShadowDifferencesController extends BaseController
 
         $used         = [];
         $verdictTable = [];
-        // pre-fill $verdictTable to get a consistent ordering
+        // Pre-fill $verdictTable to get a consistent ordering.
         foreach ($verdicts as $verdict => $abbrev) {
             foreach ($verdicts as $verdict2 => $abbrev2) {
                 $verdictTable[$verdict][$verdict2] = [];
@@ -99,22 +99,22 @@ class ShadowDifferencesController extends BaseController
             ->getQuery()
             ->getResult();
 
-        // Helper function to add verdicts
+        // Helper function to add verdicts.
         $addVerdict = function ($unknownVerdict) use ($verdicts, &$verdictTable) {
-            // add column to existing rows
+            // Add column to existing rows.
             foreach ($verdicts as $verdict => $abbreviation) {
                 $verdictTable[$verdict][$unknownVerdict] = [];
             }
-            // add verdict to known verdicts
+            // Add verdict to known verdicts.
             $verdicts[$unknownVerdict] = $unknownVerdict;
-            // add row
+            // Add row.
             $verdictTable[$unknownVerdict] = [];
             foreach ($verdicts as $verdict => $abbreviation) {
                 $verdictTable[$unknownVerdict][$verdict] = [];
             }
         };
 
-        // Build up the verdict matrix
+        // Build up the verdict matrix.
         foreach ($submissions as $submitid => $submission) {
             /** @var ExternalJudgement|null $externalJudgement */
             $externalJudgement = $submission->getExternalJudgements()->first();
@@ -133,18 +133,18 @@ class ShadowDifferencesController extends BaseController
                 $externalResult = 'judging';
             }
 
-            // add verdicts to data structures if they are unknown up to now
+            // Add verdicts to data structures if they are unknown up to now.
             foreach ([$externalResult, $localResult] as $result) {
                 if (!array_key_exists($result, $verdicts)) {
                     $addVerdict($result);
                 }
             }
 
-            // mark them as used, so we can filter out unused cols/rows later
+            // Mark them as used, so we can filter out unused cols/rows later.
             $used[$externalResult] = true;
             $used[$localResult]    = true;
 
-            // append submitid to list of orig->new verdicts
+            // Append submitid to list of orig->new verdicts.
             $verdictTable[$externalResult][$localResult][] = $submitid;
         }
 

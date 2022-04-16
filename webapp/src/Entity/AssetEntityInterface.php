@@ -5,7 +5,7 @@ namespace App\Entity;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 /**
- * Entities that have assets should implement this interface
+ * Entities that have assets should implement this interface.
  */
 interface AssetEntityInterface
 {

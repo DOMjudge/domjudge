@@ -287,7 +287,7 @@ class JuryMiscController extends BaseController
                     $unexpected[$submissionId] = ['files' => $submissionFiles, 'actual' => $result, 'expected' => $expectedResults];
                 } elseif (count($expectedResults) > 1) {
                     if ($verifyMultiple) {
-                        // Judging result is as expected, set judging to verified
+                        // Judging result is as expected, set judging to verified.
                         $judging
                             ->setVerified(true)
                             ->setJuryMember($verifier);
@@ -296,7 +296,7 @@ class JuryMiscController extends BaseController
                         $multiple[$submissionId] = ['actual' => $result, 'expected' => $expectedResults, 'verified' => false];
                     }
                 } else {
-                    // Judging result is as expected, set judging to verified
+                    // Judging result is as expected, set judging to verified.
                     $judging
                         ->setVerified(true)
                         ->setJuryMember($verifier);

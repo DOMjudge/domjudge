@@ -100,7 +100,7 @@ class DOMJudgeIPAuthenticator extends AbstractAuthenticator implements Authentic
             }
         }
 
-        // Get the client IP address to use
+        // Get the client IP address to use.
         $clientIP = $this->requestStack->getMainRequest()->getClientIp();
         $username = $request->request->get('_username');
         $authbasicUsername = $request->headers->get('php-auth-user');
@@ -125,7 +125,7 @@ class DOMJudgeIPAuthenticator extends AbstractAuthenticator implements Authentic
             $user = $users[0];
         }
 
-        // Fail if we didn't find a user with a matching ip address
+        // Fail if we didn't find a user with a matching IP address.
         if ($user == null) {
             throw new UserNotFoundException();
         }
@@ -135,11 +135,11 @@ class DOMJudgeIPAuthenticator extends AbstractAuthenticator implements Authentic
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, $firewallName): ?Response
     {
-        // on success, redirect to the last page or the homepage if it was a user triggered action
+        // On success, redirect to the last page or the homepage if it was a user triggered action.
         if ($request->attributes->get('_route') === 'login'
             && $request->isMethod('POST')
             && $request->request->get('loginmethod') === 'ipaddress') {
-            // Use target URL from session if set
+            // Use target URL from session if set.
             if ($firewallName !== null &&
                 $targetUrl = $this->getTargetPath($request->getSession(), $firewallName)) {
                 $this->removeTargetPath($request->getSession(), $firewallName);
@@ -153,14 +153,14 @@ class DOMJudgeIPAuthenticator extends AbstractAuthenticator implements Authentic
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response
     {
-        // We never fail the authentication request, something else might handle it
+        // We never fail the authentication request, something else might handle it.
         return null;
     }
 
     public function start(Request $request, AuthenticationException $authException = null): Response
     {
         // If this is the guard that fails/is configured to allow access as the entry_point
-        // send the user a basic auth dialog, as that's probably what they're expecting
+        // send the user a basic auth dialog, as that's probably what they're expecting.
         $resp = new Response('', Response::HTTP_UNAUTHORIZED);
         $resp->headers->set('WWW-Authenticate', sprintf('Basic realm="%s"', 'Secured Area'));
         return $resp;

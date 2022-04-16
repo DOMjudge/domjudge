@@ -46,7 +46,7 @@ class RunController extends AbstractRestController implements QueryObjectTransfo
     }
 
     /**
-     * Get all the runs for this contest
+     * Get all the runs for this contest.
      * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST') or is_granted('ROLE_API_READER')")
      * @Rest\Get("")
      * @OA\Response(
@@ -96,7 +96,7 @@ class RunController extends AbstractRestController implements QueryObjectTransfo
     }
 
     /**
-     * Get the given run for this contest
+     * Get the given run for this contest.
      * @throws NonUniqueResultException
      * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST') or is_granted('ROLE_API_READER')")
      * @Rest\Get("/{id}")
@@ -155,7 +155,7 @@ class RunController extends AbstractRestController implements QueryObjectTransfo
             $queryBuilder->setMaxResults($request->query->getInt('limit'));
         }
 
-        // If an ID has not been given directly, only show runs before contest end
+        // If an ID has not been given directly, only show runs before contest end.
         if (!$request->attributes->has('id') && !$request->query->has('ids')) {
             $queryBuilder
                 ->andWhere('s.submittime < c.endtime')

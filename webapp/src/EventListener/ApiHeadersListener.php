@@ -15,9 +15,9 @@ class ApiHeadersListener implements EventSubscriberInterface
     public function onKernelResponse(ResponseEvent $event): void
     {
         $request = $event->getRequest();
-        // Check if this is an API request
+        // Check if this is an API request.
         if (strpos($request->getPathInfo(), '/api') === 0) {
-            // It is, so add CORS headers
+            // It is, so add CORS headers.
             $response = $event->getResponse();
             $response->headers->set('Access-Control-Allow-Origin', '*');
         }

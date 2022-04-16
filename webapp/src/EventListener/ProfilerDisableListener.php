@@ -35,7 +35,7 @@ class ProfilerDisableListener implements EventSubscriberInterface
 
     public function onKernelRequest(): void
     {
-        // Disable the profiler for users with the judgehost permission but not the admin one
+        // Disable the profiler for users with the judgehost permission but not the admin one.
         if ($this->profiler && $this->dj->checkrole('judgehost') && !$this->dj->checkrole('admin')) {
             $this->profiler->disable();
         }

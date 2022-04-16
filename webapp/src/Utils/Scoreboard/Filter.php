@@ -29,7 +29,7 @@ class Filter
     }
 
     /**
-     * Get a string to display on what has been filtered
+     * Get a string to display on what has been filtered.
      */
     public function getFilteredOn(): string
     {

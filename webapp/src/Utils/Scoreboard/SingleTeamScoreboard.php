@@ -58,10 +58,10 @@ class SingleTeamScoreboard extends Scoreboard
         }
         $teamScore->rank = $this->teamRank;
 
-        // Loop all info the scoreboard cache and put it in our own datastructure
+        // Loop all info the scoreboard cache and put it in our own data structure.
         $this->matrix = [];
         foreach ($this->scoreCache as $scoreRow) {
-            // Skip this row if the problem is not known by us
+            // Skip this row if the problem is not known by us.
             if (!array_key_exists($scoreRow->getProblem()->getProbid(), $this->problems)) {
                 continue;
             }
@@ -81,9 +81,9 @@ class SingleTeamScoreboard extends Scoreboard
             );
         }
 
-        // Fill in empty places in the matrix
+        // Fill in empty places in the matrix.
         foreach ($this->problems as $contestProblem) {
-            // Provide default scores when nothing submitted for this team + problem yet
+            // Provide default scores when nothing submitted for this team + problem yet.
             $teamId    = $this->team->getTeamid();
             $problemId = $contestProblem->getProbid();
             if (!isset($this->matrix[$teamId][$problemId])) {

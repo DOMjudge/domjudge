@@ -22,7 +22,7 @@ use Symfony\Component\HttpFoundation\Response;
 class LanguageController extends AbstractRestController
 {
     /**
-     * Get all the languages for this contest
+     * Get all the languages for this contest.
      * @Rest\Get("")
      * @OA\Response(
      *     response="200",
@@ -42,7 +42,7 @@ class LanguageController extends AbstractRestController
     }
 
     /**
-     * Get the given language for this contest
+     * Get the given language for this contest.
      * @throws NonUniqueResultException
      * @Rest\Get("/{id}")
      * @OA\Response(
@@ -61,7 +61,7 @@ class LanguageController extends AbstractRestController
     protected function getQueryBuilder(Request $request): QueryBuilder
     {
         // Make sure the contest exists by calling getContestId. Most API endpoints use the contest to filter its
-        // queries, but the languages endpoint does not. So we just call it here
+        // queries, but the languages endpoint does not. So we just call it here.
         $this->getContestId($request);
         return $this->em->createQueryBuilder()
             ->from(Language::class, 'lang')

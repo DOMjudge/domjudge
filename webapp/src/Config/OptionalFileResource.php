@@ -8,7 +8,7 @@ use Symfony\Component\Config\Resource\SelfCheckingResourceInterface;
 
 /**
  * This resource type is based on Symfony's built in FileResource but also
- * tracks presence of the file
+ * tracks presence of the file.
  *
  * @see FileResource
  * @see FileExistenceResource

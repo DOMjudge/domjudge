@@ -236,7 +236,7 @@ class UserController extends AbstractRestController
             throw new BadRequestHttpException('Supply exactly one of \'json\', \'yaml\' or \'tsv\'');
         }
 
-        // Treat the YAML as JSON, since we can parse both
+        // Treat the YAML as JSON, since we can parse both.
         if ($yamlFile) {
             $jsonFile = $yamlFile;
         }
@@ -254,7 +254,7 @@ class UserController extends AbstractRestController
     }
 
     /**
-     * Get all the users
+     * Get all the users.
      * @Rest\Get("")
      * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_API_READER')")
      * @OA\Response(
@@ -280,7 +280,7 @@ class UserController extends AbstractRestController
     }
 
     /**
-     * Get the given user
+     * Get the given user.
      * @throws NonUniqueResultException
      * @Rest\Get("/{id}")
      * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_API_READER')")
@@ -297,7 +297,7 @@ class UserController extends AbstractRestController
     }
 
     /**
-     * Add a new user
+     * Add a new user.
      *
      * @Rest\Post()
      * @IsGranted("ROLE_API_WRITER")

@@ -139,7 +139,7 @@ class TeamType extends AbstractExternalIdEntityType
 
         $builder->add('save', SubmitType::class);
 
-        // Remove ID field when doing an edit
+        // Remove ID field when doing an edit.
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) {
             /** @var Team|null $team */
             $team = $event->getData();

@@ -43,7 +43,7 @@ class ScoreboardController extends AbstractRestController
     }
 
     /**
-     * Get the scoreboard for this contest
+     * Get the scoreboard for this contest.
      * @Rest\Get("")
      * @OA\Response(
      *     response="200",
@@ -108,7 +108,7 @@ class ScoreboardController extends AbstractRestController
         if ($request->query->has('sortorder')) {
             $sortorder = $request->query->getInt('sortorder');
         } else {
-            // Get the lowest available sortorder
+            // Get the lowest available sortorder.
             $queryBuilder = $this->em->createQueryBuilder()
                 ->from(TeamCategory::class, 'c')
                 ->select('MIN(c.sortorder)');
@@ -119,11 +119,11 @@ class ScoreboardController extends AbstractRestController
         }
 
         /** @var Contest $contest */
-        // also checks access of user to the contest via getContestQueryBuilder() from superclass
+        // Also checks access of user to the contest via getContestQueryBuilder() from superclass.
         $contest = $this->em->getRepository(Contest::class)->find($this->getContestId($request));
 
-        // Get the event for this scoreboard
-        // TODO: add support for after_event_id
+        // Get the event for this scoreboard.
+        // TODO: Add support for after_event_id.
         /** @var Event $event */
         $event = $this->em->createQueryBuilder()
             ->from(Event::class, 'e')
@@ -135,7 +135,7 @@ class ScoreboardController extends AbstractRestController
 
         $scoreboard = $this->scoreboardService->getScoreboard($contest, !$public, $filter, !$allTeams);
 
-        // Build up scoreboard results
+        // Build up scoreboard results.
         $results = [
             'event_id' => (string)$event->getEventid(),
             'time' => Utils::absTime($event->getEventtime()),

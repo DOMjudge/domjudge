@@ -24,12 +24,12 @@ class UpdateUserRolesListener implements EventSubscriberInterface
 
     public function onRequest(RequestEvent $event): void
     {
-        // Only handle main requests, not sub requests
+        // Only handle main requests, not sub requests.
         if (!$event->isMainRequest()) {
             return;
         }
 
-        // If we have no token, do nothing
+        // If we have no token, do nothing.
         if (!$token = $this->tokenStorage->getToken()) {
             return;
         }
@@ -38,7 +38,7 @@ class UpdateUserRolesListener implements EventSubscriberInterface
         $roles = $token->getRoleNames();
 
         // If the roles from the token differ from the roles of the user,
-        // update the token
+        // update the token.
         if ($user instanceof UserInterface && $roles !== $user->getRoles()) {
             $token = new UsernamePasswordToken(
                 $user,

@@ -18,7 +18,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 class JudgementTypeController extends AbstractRestController
 {
     /**
-     * Get all the judgement types for this contest
+     * Get all the judgement types for this contest.
      * @Rest\Get("")
      * @OA\Response(
      *     response="200",
@@ -35,7 +35,7 @@ class JudgementTypeController extends AbstractRestController
      */
     public function listAction(Request $request): array
     {
-        // Call getContestId to make sure we have an active contest
+        // Call getContestId to make sure we have an active contest.
         $this->getContestId($request);
         $ids = null;
         if ($request->query->has('ids')) {
@@ -53,7 +53,7 @@ class JudgementTypeController extends AbstractRestController
     }
 
     /**
-     * Get the given judgement type for this contest
+     * Get the given judgement type for this contest.
      * @throws NonUniqueResultException
      * @Rest\Get("/{id}")
      * @OA\Response(
@@ -66,7 +66,7 @@ class JudgementTypeController extends AbstractRestController
      */
     public function singleAction(Request $request, string $id): array
     {
-        // Call getContestId to make sure we have an active contest
+        // Call getContestId to make sure we have an active contest.
         $this->getContestId($request);
         $judgementTypes = $this->getJudgementTypes([$id]);
 
@@ -78,7 +78,7 @@ class JudgementTypeController extends AbstractRestController
     }
 
     /**
-     * Get the judgement types, optionally filtered on the given ID's
+     * Get the judgement types, optionally filtered on the given IDs.
      */
     protected function getJudgementTypes(array $filteredOn = null): ?array
     {

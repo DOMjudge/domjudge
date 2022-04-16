@@ -156,7 +156,7 @@ class GeneralInfoController extends AbstractFOSRestController
     }
 
     /**
-     * Get information about the currently logged in user
+     * Get information about the currently logged in user.
      * @Rest\Get("/user")
      * @OA\Response(
      *     response="200",
@@ -175,7 +175,7 @@ class GeneralInfoController extends AbstractFOSRestController
     }
 
     /**
-     * Get configuration variables
+     * Get configuration variables.
      * @Rest\Get("/config")
      * @OA\Response(
      *     response="200",
@@ -209,7 +209,7 @@ class GeneralInfoController extends AbstractFOSRestController
     }
 
     /**
-     * Update configuration variables
+     * Update configuration variables.
      * @Rest\Put("/config")
      * @IsGranted("ROLE_ADMIN")
      * @OA\Response(
@@ -232,7 +232,7 @@ class GeneralInfoController extends AbstractFOSRestController
     }
 
     /**
-     * Check the DOMjudge configuration
+     * Check the DOMjudge configuration.
      * @Rest\Get("/config/check")
      * @IsGranted("ROLE_ADMIN")
      * @OA\Response(
@@ -268,7 +268,7 @@ class GeneralInfoController extends AbstractFOSRestController
     }
 
     /**
-     * Get the flag for the given country
+     * Get the flag for the given country.
      * @Rest\Get("/country-flags/{countryCode}/{size}")
      * @OA\Response(
      *     response="200",
@@ -285,7 +285,7 @@ class GeneralInfoController extends AbstractFOSRestController
     public function countryFlagAction(Request $request, string $countryCode, string $size): Response
     {
         // This API action exists for two reasons
-        // - Relative URL's are relative to the API root according to the CCS spec. This
+        // - Relative URLs are relative to the API root according to the CCS spec. This
         //   means that we need to have an API endpoint for files.
         // - This makes it that we can not return a flag if flags are disabled.
 
@@ -351,7 +351,7 @@ class GeneralInfoController extends AbstractFOSRestController
     }
 
     /**
-     * Get the field to use for getting contests by ID
+     * Get the field to use for getting contests by ID.
      */
     protected function getContestIdField(): string
     {

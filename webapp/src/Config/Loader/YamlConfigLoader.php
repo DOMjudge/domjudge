@@ -8,7 +8,7 @@ use Symfony\Component\Yaml\Yaml;
 /**
  * Class YamlConfigLoader
  *
- * Class that loads a YAML file
+ * Class that loads a YAML file.
  *
  * @see     https://symfony.com/doc/current/components/config/resources.html#resource-loaders
  *

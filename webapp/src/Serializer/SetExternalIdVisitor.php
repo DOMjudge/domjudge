@@ -65,7 +65,7 @@ class SetExternalIdVisitor implements EventSubscriberInterface
                 $visitor->visitProperty($property, $object->getExternalid());
             }
         } catch (BadMethodCallException $e) {
-            // Ignore these exceptions, as this means this is not an entity or it is not configured
+            // Ignore these exceptions, as this means this is not an entity or it is not configured.
         }
 
         if ($object instanceof ExternalRelationshipEntityInterface) {
@@ -107,7 +107,7 @@ class SetExternalIdVisitor implements EventSubscriberInterface
                         $visitor->visitProperty($property, $entity->getExternalid());
                     }
                 } catch (BadMethodCallException $e) {
-                    // Ignore these exceptions, as this means this is not an entity or it is not configured
+                    // Ignore these exceptions, as this means this is not an entity or it is not configured.
                 }
             }
         }

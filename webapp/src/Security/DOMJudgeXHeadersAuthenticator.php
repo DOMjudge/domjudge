@@ -57,7 +57,7 @@ class DOMJudgeXHeadersAuthenticator extends AbstractAuthenticator implements Aut
             return false;
         }
 
-        // if there is already an authenticated user (likely due to the session)
+        // If there is already an authenticated user (likely due to the session)
         // then return null and skip authentication: there is no need.
         if ($this->security->getUser()) {
             return false;
@@ -68,7 +68,7 @@ class DOMJudgeXHeadersAuthenticator extends AbstractAuthenticator implements Aut
             return false;
         }
 
-        // We also support authenticating if it's a POST to the login route
+        // We also support authenticating if it's a POST to the login route.
         if ($request->attributes->get('_route') === 'login'
             && $request->isMethod('POST')
             && $request->request->get('loginmethod') === 'xheaders') {
@@ -87,11 +87,11 @@ class DOMJudgeXHeadersAuthenticator extends AbstractAuthenticator implements Aut
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, $firewallName): ?Response
     {
-        // on success, redirect to the last page or the homepage if it was a user triggered action
+        // On success, redirect to the last page or the homepage if it was a user triggered action.
         if ($request->attributes->get('_route') === 'login'
             && $request->isMethod('POST')
             && $request->request->get('loginmethod') === 'xheaders') {
-            // Use target URL from session if set
+            // Use target URL from session if set.
             if ($firewallName !== null &&
                 $targetUrl = $this->getTargetPath($request->getSession(), $firewallName)) {
                 $this->removeTargetPath($request->getSession(), $firewallName);
@@ -109,7 +109,7 @@ class DOMJudgeXHeadersAuthenticator extends AbstractAuthenticator implements Aut
     }
 
     /**
-     * Called when authentication is needed, but it's not sent
+     * Called when authentication is needed, but it's not sent.
      */
     public function start(Request $request, AuthenticationException $authException = null): Response
     {

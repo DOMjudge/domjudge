@@ -155,7 +155,7 @@ class CheckConfigService
         $sizes = [];
         $postmaxvars = ['post_max_size', 'memory_limit', 'upload_max_filesize'];
         foreach ($postmaxvars as $var) {
-            /* skip 0 or empty values, and -1 which means 'unlimited' */
+            // Skip 0 or empty values, and -1 which means 'unlimited'.
             if ($size = Utils::phpiniToBytes(ini_get($var))) {
                 if ($size != '-1') {
                     $sizes[$var] = $size;
@@ -371,7 +371,7 @@ class CheckConfigService
 
     public function checkContestsValidate(): array
     {
-        // Fetch all active and future contests
+        // Fetch all active and future contests.
         $contests = $this->dj->getCurrentContests(null, true);
 
         $contesterrors = $cperrors = [];
@@ -407,7 +407,7 @@ class CheckConfigService
 
     public function checkContestBanners(): array
     {
-        // Fetch all active and future contests
+        // Fetch all active and future contests.
         $contests = $this->dj->getCurrentContests(null, true);
 
         $desc = '';
@@ -708,7 +708,7 @@ class CheckConfigService
 
     public function checkAllExternalIdentifiers(): array
     {
-        // Get all entity classes
+        // Get all entity classes.
         $dir   = realpath(sprintf('%s/src/Entity', $this->dj->getDomjudgeWebappDir()));
         $files = glob($dir . '/*.php');
 
@@ -726,7 +726,7 @@ class CheckConfigService
                     $result[$shortClass] = $this->checkExternalIdentifiers($class, $externalIdField);
                 }
             } catch (BadMethodCallException $e) {
-                // Ignore, this entity does not have an API endpoint
+                // Ignore, this entity does not have an API endpoint.
             }
         }
 
@@ -757,13 +757,13 @@ class CheckConfigService
                 $route       = sprintf('jury_%s', $inflector->tableize($entityType));
                 $routeParams = [];
                 foreach ($metadata->getIdentifierColumnNames() as $column) {
-                    // By default the ID param is the same as the column but then with Id instead of id
+                    // By default, the ID param is the same as the column but then with Id instead of id.
                     $param = str_replace('id', 'Id', $column);
                     if ($param === 'cId') {
-                        // For contests we use contestId instead of cId
+                        // For contests we use contestId instead of cId.
                         $param = 'contestId';
                     } elseif ($param === 'clarId') {
-                        // For clarifications it is id instead of clarId
+                        // For clarifications it is id instead of clarId.
                         $param = 'id';
                     }
                     $getter              = sprintf('get%s', ucfirst($column));

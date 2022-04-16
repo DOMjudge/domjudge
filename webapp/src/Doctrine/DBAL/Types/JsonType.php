@@ -14,7 +14,7 @@ use Doctrine\DBAL\Types\JsonType as BaseJsonType;
  * which gives some inconsistencies between the API and event feed.
  *
  * Also we always want a LONGTEXT field and not a JSON field, as that is only
- * supported by MySQL 5.7+
+ * supported by MySQL 5.7+.
  *
  * @package App\Doctrine\DBAL\Types
  */

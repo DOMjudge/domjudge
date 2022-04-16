@@ -12,7 +12,7 @@ class UserChecker implements UserCheckerInterface
 
     public function checkPreAuth(UserInterface $user): void
     {
-        // Nothing to check
+        // Nothing to check.
     }
 
     public function checkPostAuth(UserInterface $user): void

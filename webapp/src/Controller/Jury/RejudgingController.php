@@ -152,7 +152,7 @@ class RejudgingController extends BaseController
                 $class = $todo > 0 ? '' : 'unseen';
             }
 
-            // Save this to our list of rows
+            // Save this to our list of rows.
             $rejudgings_table[] = [
                 'data' => $rejudgingdata,
                 'actions' => [],
@@ -207,7 +207,7 @@ class RejudgingController extends BaseController
         SubmissionService $submissionService,
         int $rejudgingId
     ): Response {
-        // Close the session, as this might take a while and we don't need the session below
+        // Close the session, as this might take a while and we don't need the session below.
         $this->requestStack->getSession()->save();
 
         /** @var Rejudging $rejudging */
@@ -233,7 +233,7 @@ class RejudgingController extends BaseController
 
         $used         = [];
         $verdictTable = [];
-        // pre-fill $verdictTable to get a consistent ordering
+        // Pre-fill $verdictTable to get a consistent ordering.
         foreach ($verdicts as $verdict => $abbrev) {
             foreach ($verdicts as $verdict2 => $abbrev2) {
                 $verdictTable[$verdict][$verdict2] = [];
@@ -281,37 +281,37 @@ class RejudgingController extends BaseController
             $newVerdicts = Utils::reindex($newVerdicts, $getSubmissionId);
         });
 
-        // Helper function to add verdicts
+        // Helper function to add verdicts.
         $addVerdict = function ($unknownVerdict) use ($verdicts, &$verdictTable) {
-            // add column to existing rows
+            // Add column to existing rows.
             foreach ($verdicts as $verdict => $abbreviation) {
                 $verdictTable[$verdict][$unknownVerdict] = [];
             }
-            // add verdict to known verdicts
+            // Add verdict to known verdicts.
             $verdicts[$unknownVerdict] = $unknownVerdict;
-            // add row
+            // Add row.
             $verdictTable[$unknownVerdict] = [];
             foreach ($verdicts as $verdict => $abbreviation) {
                 $verdictTable[$unknownVerdict][$verdict] = [];
             }
         };
 
-        // Build up the verdict matrix
+        // Build up the verdict matrix.
         foreach ($newVerdicts as $submitid => $newVerdict) {
             $originalVerdict = $originalVerdicts[$submitid];
 
-            // add verdicts to data structures if they are unknown up to now
+            // Add verdicts to data structures if they are unknown up to now.
             foreach ([$newVerdict, $originalVerdict] as $verdict) {
                 if (!array_key_exists($verdict->getResult(), $verdicts)) {
                     $addVerdict($verdict->getResult());
                 }
             }
 
-            // mark them as used, so we can filter out unused cols/rows later
+            // Mark them as used, so we can filter out unused cols/rows later.
             $used[$originalVerdict->getResult()] = true;
             $used[$newVerdict->getResult()]      = true;
 
-            // append submitid to list of orig->new verdicts
+            // Append submitid to list of orig->new verdicts.
             $verdictTable[$originalVerdict->getResult()][$newVerdict->getResult()][] = $submitid;
         }
 
@@ -670,7 +670,7 @@ class RejudgingController extends BaseController
             throw new BadRequestHttpException('Rejudging pending/correct submissions requires admin rights');
         }
 
-        // Special case 'submission' for admin overrides
+        // Special case 'submission' for admin overrides.
         if ($this->dj->checkrole('admin') && ($table == 'submission')) {
             $includeAll = true;
         } elseif ($table === 'rejudging') {
@@ -683,7 +683,7 @@ class RejudgingController extends BaseController
             $reason     = $rejudging->getReason();
         }
 
-        /* These are the tables that we can deal with. */
+        // These are the tables that we can deal with.
         $tablemap = [
             'contest' => 's.contest',
             'judgehost' => 'jt.judgehost',
@@ -796,7 +796,8 @@ class RejudgingController extends BaseController
                         $redirect = $this->generateUrl('jury_team', ['teamId' => $id]);
                         break;
                     default:
-                        // This case never happens, since we already check above. Add it here to silence linter warnings.
+                        // This case never happens, since we already check above.
+                        // Add it here to silence linter warnings.
                         throw new BadRequestHttpException(sprintf('unknown table %s in rejudging', $table));
                 }
             }
@@ -884,7 +885,7 @@ class RejudgingController extends BaseController
                 }
             }
 
-            // Check for variations in runtimes across judgings
+            // Check for variations in runtimes across judgings.
             $runtimes = $this->em->createQueryBuilder()
                 ->from(JudgingRun::class, 'jr')
                 ->select('t.ranknumber', 'MAX(jr.runtime) - MIN(jr.runtime) AS spread')

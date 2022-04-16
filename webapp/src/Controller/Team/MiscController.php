@@ -92,7 +92,7 @@ class MiscController extends BaseController
             $data['limitToTeams'] = [$team];
             $data['verificationRequired'] = $this->config->get('verification_required');
             // We need to clear the entity manager, because loading the team scoreboard seems to break getting submission
-            // contestproblems for the contest we get the scoreboard for
+            // contestproblems for the contest we get the scoreboard for.
             $this->em->clear();
             $data['submissions'] = $this->submissionService->getSubmissionList(
                 [$contest->getCid() => $contest],

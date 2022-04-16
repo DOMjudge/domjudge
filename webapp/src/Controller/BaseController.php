@@ -36,14 +36,14 @@ use Symfony\Component\Routing\RouterInterface;
 /**
  * Class BaseController
  *
- * Base controller other controllers can inherit from to get shared functionality
+ * Base controller other controllers can inherit from to get shared functionality.
  *
  * @package App\Controller
  */
 abstract class BaseController extends AbstractController
 {
     /**
-     * Check whether the referrer in the request is of the current application
+     * Check whether the referrer in the request is of the current application.
      */
     protected function isLocalReferer(RouterInterface $router, Request $request): bool
     {
@@ -56,7 +56,7 @@ abstract class BaseController extends AbstractController
     }
 
     /**
-     * Check whether the given referer is local
+     * Check whether the given referer is local.
      */
     protected function isLocalRefererUrl(RouterInterface $router, string $referer, string $prefix): bool
     {
@@ -82,7 +82,7 @@ abstract class BaseController extends AbstractController
     }
 
     /**
-     * Redirect to the referrer if it is a known (local) route, otherwise redirect to the given URL
+     * Redirect to the referrer if it is a known (local) route, otherwise redirect to the given URL.
      */
     protected function redirectToLocalReferrer(RouterInterface $router, Request $request, string $defaultUrl): RedirectResponse
     {
@@ -94,7 +94,7 @@ abstract class BaseController extends AbstractController
     }
 
     /**
-     * Save the given entity, adding an eventlog and auditlog entry
+     * Save the given entity, adding an eventlog and auditlog entry.
      */
     protected function saveEntity(
         EntityManagerInterface $entityManager,
@@ -110,7 +110,7 @@ abstract class BaseController extends AbstractController
         $entityManager->flush();
 
         // If we have no ID but we do have a Doctrine entity, automatically
-        // get the primary key if possible
+        // get the primary key if possible.
         if ($id === null) {
             try {
                 $metadata = $entityManager->getClassMetadata(get_class($entity));
@@ -120,7 +120,7 @@ abstract class BaseController extends AbstractController
                     $id         = $accessor->getValue($entity, $primaryKey);
                 }
             } catch (MappingException $e) {
-                // Entity is not actually a Doctrine entity, ignore
+                // Entity is not actually a Doctrine entity, ignore.
             }
         }
 
@@ -180,25 +180,25 @@ abstract class BaseController extends AbstractController
         EventLogService $eventLogService
     ): void
     {
-        // Used to remove data from the rank and score caches
+        // Used to remove data from the rank and score caches.
         $teamId = null;
         if ($entity instanceof Team) {
             $teamId = $entity->getTeamid();
         }
 
         // Get the contests to trigger the event for. We do this before
-        // deleting the entity, since linked data might have vanished
+        // deleting the entity, since linked data might have vanished.
         $contestsForEntity = $this->contestsForEntity($entity, $DOMJudgeService);
 
         $cid = null;
-        // Remember the cid to use it in the EventLog later
+        // Remember the cid to use it in the EventLog later.
         if ($entity instanceof Contest) {
             $cid = $entity->getCid();
         }
         $entityManager->wrapInTransaction(function () use ($entityManager, $entity) {
             if ($entity instanceof Problem) {
-                // Deleting problem is a special case: its dependent tables do not
-                // form a tree, and a delete to judging_run can only cascade from
+                // Deleting a problem is a special case: its dependent tables do not
+                // form a tree, and the deletion of judging_run can only cascade from
                 // judging, not from testcase. Since MySQL does not define the
                 // order of cascading deletes, we need to manually first cascade
                 // via submission -> judging -> judging_run.
@@ -218,15 +218,15 @@ abstract class BaseController extends AbstractController
             $entityManager->remove($entity);
         });
 
-        // Add an audit log entry
+        // Add an audit log entry.
         $auditLogType = Utils::tableForEntity($entity);
         $DOMJudgeService->auditlog($auditLogType, implode(', ', $primaryKeyData), 'deleted');
 
-        // Trigger the delete event
+        // Trigger the delete event.
         if ($endpoint = $eventLogService->endpointForEntity($entity)) {
             foreach ($contestsForEntity as $contest) {
                 // When the $entity is a contest it has no id anymore after the EntityManager->remove
-                // for this reason we either remember it or check all other contests and use their cid
+                // for this reason we either remember it or check all other contests and use their cid.
                 if (!$entity instanceof Contest) {
                     $cid = $contest->getCid();
                 }
@@ -447,16 +447,16 @@ abstract class BaseController extends AbstractController
      */
     protected function contestsForEntity($entity, DOMJudgeService $dj): array
     {
-        // Determine contests to emit an event for for the given entity:
+        // Determine contests to emit an event for the given entity:
         // * If the entity is a Problem entity, use the getContest()
-        //   of every contest problem in getContestProblems()
+        //   of every contest problem in getContestProblems().
         // * If the entity is a Team (category) entity, get all active
         //   contests and use those that are open to all teams or the
-        //   team (category) belongs to
-        // * If the entity is a contest, use that
-        // * If the entity has a getContest() method, use that
-        // * If the entity has a getContests() method, use that
-        // Otherwise use the currently active contests
+        //   team (category) belongs to.
+        // * If the entity is a contest, use that.
+        // * If the entity has a getContest() method, use that.
+        // * If the entity has a getContests() method, use that.
+        // Otherwise, use the currently active contests.
         $contests = [];
         if ($entity instanceof Team || $entity instanceof TeamCategory) {
             $possibleContests = $dj->getCurrentContests();

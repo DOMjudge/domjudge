@@ -118,7 +118,7 @@ class Testcase
     /**
      * We use a OneToMany instead of a OneToOne here, because otherwise this
      * relation will always be loaded. See the commit message of commit
-     * 9e421f96691ec67ed62767fe465a6d8751edd884 for a more elaborate explanation
+     * 9e421f96691ec67ed62767fe465a6d8751edd884 for a more elaborate explanation.
      *
      * @ORM\OneToMany(targetEntity="TestcaseContent", mappedBy="testcase", cascade={"persist"}, orphanRemoval=true)
      * @Serializer\Exclude()

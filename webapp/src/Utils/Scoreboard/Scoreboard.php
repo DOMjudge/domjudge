@@ -15,7 +15,7 @@ use Exception;
 /**
  * Class Scoreboard
  *
- * This class represents the whole scoreboard
+ * This class represents the whole scoreboard.
  *
  * @package App\Utils\Scoreboard
  */
@@ -152,16 +152,16 @@ class Scoreboard
     }
 
     /**
-     * Calculate the scoreboard data, filling the summary, matrix and scores properties
+     * Calculate the scoreboard data, filling the summary, matrix and scores properties.
      */
     protected function calculateScoreboard(): void
     {
-        // Calculate matrix and update scores
+        // Calculate matrix and update scores.
         $this->matrix = [];
         foreach ($this->scoreCache as $scoreRow) {
             $teamId = $scoreRow->getTeam()->getTeamid();
             $probId = $scoreRow->getProblem()->getProbid();
-            // Skip this row if the team or problem is not known by us
+            // Skip this row if the team or problem is not known by us.
             if (!array_key_exists($teamId, $this->teams) ||
                 !array_key_exists($probId, $this->problems)) {
                 continue;
@@ -192,10 +192,10 @@ class Scoreboard
             }
         }
 
-        // Now sort the scores using the scoreboard sort function
+        // Now sort the scores using the scoreboard sort function.
         uasort($this->scores, [static::class, 'scoreboardCompare']);
 
-        // Loop over all teams to calculate ranks and totals
+        // Loop over all teams to calculate ranks and totals.
         $prevSortOrder  = -1;
         $rank           = 0;
         $previousTeamId = null;
@@ -210,7 +210,7 @@ class Scoreboard
             }
             $rank++;
 
-            // Use previous team rank when scores are equal
+            // Use previous team rank when scores are equal.
             if (isset($previousTeamId) &&
                 $this->scoreCompare($this->scores[$previousTeamId], $teamScore) == 0) {
                 $teamScore->rank = $this->scores[$previousTeamId]->rank;
@@ -219,7 +219,7 @@ class Scoreboard
             }
             $previousTeamId = $teamId;
 
-            // Keep summary statistics for the bottom row of our table
+            // Keep summary statistics for the bottom row of our table.
             // The numberOfPoints summary is useful only if they're all 1-point problems.
             $sortOrder = $teamScore->team->getCategory()->getSortorder();
             $this->summary->addNumberOfPoints($sortOrder, $teamScore->numPoints);
@@ -266,25 +266,25 @@ class Scoreboard
      */
     protected static function scoreboardCompare(TeamScore $a, TeamScore $b): int
     {
-        // First order by our predefined sortorder based on category
+        // First order by our predefined sortorder based on category.
         $a_sortorder = $a->team->getCategory()->getSortorder();
         $b_sortorder = $b->team->getCategory()->getSortorder();
         if ($a_sortorder != $b_sortorder) {
             return $a_sortorder <=> $b_sortorder;
         }
 
-        // Then compare scores
+        // Then compare scores.
         $scoreCompare = static::scoreCompare($a, $b);
         if ($scoreCompare != 0) {
             return $scoreCompare;
         }
 
-        // Else, order by teamname alphabetically
+        // Else, order by teamname alphabetically.
         if ($a->team->getEffectiveName() != $b->team->getEffectiveName()) {
             $collator = new Collator('en');
             return $collator->compare($a->team->getEffectiveName(), $b->team->getEffectiveName());
         }
-        // Undecided, should never happen in practice
+        // Undecided, should never happen in practice.
         return 0;
     }
 
@@ -293,19 +293,19 @@ class Scoreboard
      * above. Scores based on the following criteria:
      * - highest points from correct solutions;
      * - least amount of total time spent on these solutions;
-     * - the tie-breaker function below
+     * - the tie-breaker function below.
      */
     protected static function scoreCompare(TeamScore $a, TeamScore $b): int
     {
-        // More correctness points than someone else means higher rank
+        // More correctness points than someone else means higher rank.
         if ($a->numPoints != $b->numPoints) {
             return $b->numPoints <=> $a->numPoints;
         }
-        // Else, less time spent means higher rank
+        // Else, less time spent means higher rank.
         if ($a->totalTime != $b->totalTime) {
             return $a->totalTime <=> $b->totalTime;
         }
-        // Else tie-breaker rule
+        // Else tie-breaker rule.
         return static::scoreTiebreaker($a, $b);
     }
 
@@ -334,7 +334,7 @@ class Scoreboard
     }
 
     /**
-     * Return whether to show points for this scoreboard
+     * Return whether to show points for this scoreboard.
      */
     public function showPoints(): bool
     {
@@ -348,14 +348,14 @@ class Scoreboard
     }
 
     /**
-     * Return the used team categories for this scoreboard
+     * Return the used team categories for this scoreboard.
      * @return TeamCategory[]
      */
     public function getUsedCategories(?array $limitToTeamIds = null): array
     {
         $usedCategories = [];
         foreach ($this->scores as $score) {
-            // skip if we have limitteams and the team is not listed
+            // Skip if we have limitteams and the team is not listed.
             if (!empty($limitToTeamIds) &&
                 !in_array($score->team->getTeamid(), $limitToTeamIds)) {
                 continue;
@@ -377,7 +377,7 @@ class Scoreboard
     {
         $colors = [];
         foreach ($this->scores as $score) {
-            // skip if we have limitteams and the team is not listed
+            // Skip if we have limitteams and the team is not listed.
             if (!empty($limitToTeamIds) &&
                 !in_array($score->team->getTeamid(), $limitToTeamIds)) {
                 continue;
@@ -402,7 +402,7 @@ class Scoreboard
         if ($this->bestInCategoryData === null) {
             $this->bestInCategoryData = [];
             foreach ($this->scores as $score) {
-                // skip if we have limitteams and the team is not listed
+                // Skip if we have limitteams and the team is not listed.
                 if (!empty($limitToTeamIds) &&
                     !in_array($score->team->getTeamid(), $limitToTeamIds)) {
                     continue;
@@ -416,10 +416,10 @@ class Scoreboard
         }
 
         $categoryId = $team->getCategory()->getCategoryid();
-        // Only check the scores when the team has points
+        // Only check the scores when the team has points.
         if ($this->scores[$team->getTeamid()]->numPoints > 0) {
             // If the rank of this team is equal to the best team for this
-            // category, this team is best in that category
+            // category, this team is best in that category.
             return $this->scores[$this->bestInCategoryData[$categoryId]]->rank ===
                 $this->scores[$team->getTeamid()]->rank;
         }
@@ -428,7 +428,7 @@ class Scoreboard
     }
 
     /**
-     * Determine whether this team was the first team to solve this problem
+     * Determine whether this team was the first team to solve this problem.
      */
     public function solvedFirst(Team $team, ContestProblem $problem): bool
     {

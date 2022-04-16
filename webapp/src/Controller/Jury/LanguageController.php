@@ -71,7 +71,7 @@ class LanguageController extends BaseController
             'extensions' => ['title' => 'extensions', 'sort' => true],
         ];
 
-        // Insert external ID field when configured to use it
+        // Insert external ID field when configured to use it.
         if ($externalIdField = $this->eventLogService->externalIdFieldForEntity(Language::class)) {
             $table_fields = array_slice($table_fields, 0, 1, true) +
                 [$externalIdField => ['title' => 'external ID', 'sort' => true]] +
@@ -83,7 +83,7 @@ class LanguageController extends BaseController
         foreach ($languages as $lang) {
             $langdata    = [];
             $langactions = [];
-            // Get whatever fields we can from the language object itself
+            // Get whatever fields we can from the language object itself.
             foreach ($table_fields as $k => $v) {
                 if ($propertyAccessor->isReadable($lang, $k)) {
                     $langdata[$k] = ['value' => $propertyAccessor->getValue($lang, $k)];
@@ -108,7 +108,7 @@ class LanguageController extends BaseController
                 ];
             }
 
-            // merge in the rest of the data
+            // Merge in the rest of the data.
             $langdata = array_merge($langdata, [
                 'entrypoint' => ['value' => $lang->getRequireEntryPoint() ? 'yes' : 'no'],
                 'extensions' => ['value' => implode(', ', $lang->getExtensions())],
@@ -197,7 +197,7 @@ class LanguageController extends BaseController
             ],
         ];
 
-        // For ajax requests, only return the submission list partial
+        // For ajax requests, only return the submission list partial.
         if ($request->isXmlHttpRequest()) {
             $data['showTestcases'] = false;
             return $this->render('jury/partials/submission_list.html.twig', $data);

@@ -79,7 +79,7 @@ class ConfigurationService
     }
 
     /**
-     * Get all the configuration values, indexed by name
+     * Get all the configuration values, indexed by name.
      *
      * @throws InvalidArgumentException
      */
@@ -110,7 +110,7 @@ class ConfigurationService
     }
 
     /**
-     * Get all configuration specifications
+     * Get all configuration specifications.
      */
     public function getConfigSpecification(): array
     {
@@ -128,7 +128,7 @@ class ConfigurationService
                 $yamlConfig       = $loader->load($yamlDbConfigFile);
 
                 // We first modify the data such that it contains the category as a field,
-                //since requesting data is faster in that case
+                // since requesting data is faster in that case.
                 $config = [];
                 foreach ($yamlConfig as $category) {
                     foreach ($category['items'] as $item) {
@@ -152,7 +152,7 @@ EOF;
     }
 
     /**
-     * Save the changes from the given request
+     * Save the changes from the given request.
      *
      * @throws NonUniqueResultException
      */
@@ -207,7 +207,7 @@ EOF;
                 // that are complete, but not verified yet. Scoreboard
                 // cache refresh should take care of the rest. See #645.
                 // We log unverified judgings after saving all configuration
-                // since it will invalidate Doctrine entities
+                // since it will invalidate Doctrine entities.
                 $logUnverifiedJudgings = true;
             }
             switch ($spec['type']) {
@@ -293,7 +293,7 @@ EOF;
     }
 
     /**
-     * Get the configuration values from the database
+     * Get the configuration values from the database.
      *
      * @return array
      */
@@ -328,7 +328,7 @@ EOF;
     }
 
     /**
-     * Add options to some items
+     * Add options to some items.
      *
      * This method is used to add predefined options that need to be loaded
      * from the database to certain items.
