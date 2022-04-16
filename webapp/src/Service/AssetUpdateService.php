@@ -3,12 +3,7 @@
 namespace App\Service;
 
 use App\Entity\AssetEntityInterface;
-use App\Entity\BaseApiEntity;
-use App\Entity\Contest;
-use App\Entity\Team;
-use App\Entity\TeamAffiliation;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class AssetUpdateService
 {

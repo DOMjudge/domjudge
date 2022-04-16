@@ -2,18 +2,14 @@
 
 namespace App\Service;
 
-use App\Doctrine\DBAL\Types\JudgeTaskType;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
-use App\Entity\Executable;
 use App\Entity\JudgeTask;
 use App\Entity\Judging;
-use App\Entity\JudgingRun;
 use App\Entity\Language;
 use App\Entity\Submission;
 use App\Entity\SubmissionFile;
 use App\Entity\Team;
-use App\Entity\Testcase;
 use App\Entity\User;
 use App\Utils\FreezeData;
 use App\Utils\Utils;

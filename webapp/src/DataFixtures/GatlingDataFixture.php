@@ -11,7 +11,6 @@ use Doctrine\Persistence\ObjectManager;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\Language;
-use App\Entity\Team;
 use App\Entity\TeamCategory;
 use App\Entity\Role;
 use App\Entity\User;

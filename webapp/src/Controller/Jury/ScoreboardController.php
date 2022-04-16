@@ -4,7 +4,6 @@ namespace App\Controller\Jury;
 
 use App\Service\DOMJudgeService;
 use App\Service\ScoreboardService;
-use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
