@@ -272,7 +272,7 @@ class ImportExportService
             $this->importProblemsData($contest, $data['problems']);
         }
 
-        $cid = (string)$contest->getApiId($this->eventLogService);
+        $cid = $contest->getApiId($this->eventLogService);
 
         $this->em->flush();
         return true;
@@ -303,7 +303,7 @@ class ImportExportService
                 ->setContest($contest);
             $this->em->persist($contestProblem);
 
-            $ids[] = (string)$problem->getApiId($this->eventLogService);
+            $ids[] = $problem->getApiId($this->eventLogService);
         }
 
         $this->em->flush();

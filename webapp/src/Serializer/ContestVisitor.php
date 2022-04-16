@@ -63,7 +63,7 @@ class ContestVisitor implements EventSubscriberInterface
         $id = $contest->getApiId($this->eventLogService);
 
         // Banner
-        if ($banner = $this->dj->assetPath((string)$id, 'contest', true)) {
+        if ($banner = $this->dj->assetPath($id, 'contest', true)) {
             $imageSize = Utils::getImageSize($banner);
 
             $route = $this->dj->apiRelativeUrl(
