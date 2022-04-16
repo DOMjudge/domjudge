@@ -20,6 +20,7 @@ use App\Entity\Testcase;
 use App\Entity\User;
 use App\Utils\Utils;
 use DateTime;
+use DateTimeZone;
 use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
@@ -34,6 +35,7 @@ use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
+use ZipArchive;
 
 class ExternalContestSourceService
 {
@@ -620,8 +622,8 @@ class ExternalContestSourceService
         // This is why we will use the platform default timezone and just verify it matches
         $startTime = $event['data']['start_time'] === null ? null : new DateTime($event['data']['start_time']);
         if ($startTime !== null) {
-            $timezone        = new \DateTimeZone($startTime->format('e'));
-            $defaultTimezone = new \DateTimeZone(date_default_timezone_get());
+            $timezone        = new DateTimeZone($startTime->format('e'));
+            $defaultTimezone = new DateTimeZone(date_default_timezone_get());
             if ($timezone->getOffset($startTime) !== $defaultTimezone->getOffset($startTime)) {
                 $extraDiff['timezone_offset'] = [$defaultTimezone->getOffset($startTime), $timezone->getOffset($startTime)];
             }
@@ -1281,7 +1283,7 @@ class ExternalContestSourceService
                 }
 
                 // Open the ZIP file
-                $zip = new \ZipArchive();
+                $zip = new ZipArchive();
                 $zip->open($zipFile);
 
                 // Determine the files to submit

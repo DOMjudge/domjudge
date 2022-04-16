@@ -9,6 +9,7 @@ use App\Entity\Problem;
 use App\Entity\Submission;
 use App\Entity\Team;
 use App\Utils\Utils;
+use DateInterval;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
@@ -457,7 +458,7 @@ class StatisticsService
 
         for ($bin = 0; $bin < static::NUM_GROUPED_BINS; $bin++) {
             $start = new DateTime(Utils::absTime($contest->getStarttime(false) + $bin * $binDuration));
-            $end = (clone $start)->add(new \DateInterval(sprintf('PT%dS',
+            $end = (clone $start)->add(new DateInterval(sprintf('PT%dS',
                 $binDuration)));
             foreach ([true, false] as $correct) {
                 $queryBuilder = clone $judgingsQueryBuilder;

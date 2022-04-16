@@ -19,6 +19,7 @@ use DateTime;
 use DateTimeZone;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
+use JsonException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
@@ -545,7 +546,7 @@ class ImportExportService
         $content = file_get_contents($file->getRealPath());
         try {
             $data = $this->dj->jsonDecode($content);
-        } catch (\JsonException $e) {
+        } catch (JsonException $e) {
             // Check if we can parse it as YAML
             try {
                 $data = Yaml::parse($content, Yaml::PARSE_DATETIME);

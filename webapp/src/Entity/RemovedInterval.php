@@ -4,7 +4,9 @@ namespace App\Entity;
 
 use App\Utils\Utils;
 use App\Validator\Constraints\TimeString;
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
+use Exception;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
@@ -97,12 +99,12 @@ class RemovedInterval
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function setStarttimeString(string $starttimeString): RemovedInterval
     {
         $this->starttimeString = $starttimeString;
-        $date                  = new \DateTime($starttimeString);
+        $date                  = new DateTime($starttimeString);
         $this->starttime       = $date->format('U.v');
 
         return $this;
@@ -114,12 +116,12 @@ class RemovedInterval
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function setEndtimeString(string $endtimeString): RemovedInterval
     {
         $this->endtimeString = $endtimeString;
-        $date                = new \DateTime($endtimeString);
+        $date                = new DateTime($endtimeString);
         $this->endtime       = $date->format('U.v');
 
         return $this;
