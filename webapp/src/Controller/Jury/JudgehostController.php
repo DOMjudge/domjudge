@@ -352,32 +352,6 @@ class JudgehostController extends BaseController
     }
 
     /**
-     * @Route("/add/multiple", name="jury_judgehost_add")
-     * @IsGranted("ROLE_ADMIN")
-     */
-    public function addMultipleAction(Request $request): Response
-    {
-        $judgehosts = ['judgehosts' => [new Judgehost()]];
-        $form       = $this->createForm(JudgehostsType::class, $judgehosts);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            /** @var Judgehost $judgehost */
-            foreach ($form->getData()['judgehosts'] as $judgehost) {
-                $this->em->persist($judgehost);
-                $this->dj->auditlog('judgehost', $judgehost->getJudgehostid(), 'added');
-            }
-            $this->em->flush();
-
-            return $this->redirectToRoute('jury_judgehosts');
-        }
-
-        return $this->render('jury/judgehosts_add_multiple.html.twig', [
-            'form' => $form->createView(),
-        ]);
-    }
-
-    /**
      * @Route("/edit/multiple", name="jury_judgehost_edit")
      * @IsGranted("ROLE_ADMIN")
      */
