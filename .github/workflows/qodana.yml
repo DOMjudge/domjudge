@@ -1,0 +1,38 @@
+name: Qodana
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - main
+      - '7.*'
+      - '8.*'
+
+jobs:
+  qodana-php:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install composer php php-fpm php-gd \
+               php-cli php-intl php-mbstring php-mysql \
+               php-curl php-json php-xml php-zip
+      - name: 'Qodana Scan (PHP)'
+        uses: JetBrains/qodana-action@v2023.2
+        env:
+          QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
+        with:
+          args: --baseline,qodana.sarif.json,--print-problems,--fail-threshold,1,--linter,jetbrains/qodana-php
+          upload-result: true
+          pr-mode: true
+      - uses: actions/upload-artifact@v3
+        with:
+          name: qodana-baseline
+          path: ${{ runner.temp }}/qodana/results/qodana.sarif.json
+      - uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: ${{ runner.temp }}/qodana/results/qodana.sarif.json
