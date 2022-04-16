@@ -875,7 +875,6 @@ class RejudgingController extends BaseController
                 if (!in_array($judging_runs, $runresults)) {
                     $runresults[] = $judging_runs;
                 }
-                $judging_results[$judging['judgingid']] = $judging['result'];
             }
             // If there are diffs on the judging level, then they will show up in the matrix anyway.
             if (count($results) == 1) {
