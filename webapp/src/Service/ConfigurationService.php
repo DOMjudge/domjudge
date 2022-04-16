@@ -244,7 +244,7 @@ EOF;
                     break;
 
                 default:
-                    $this->logger->warn(
+                    $this->logger->warning(
                         "configuration option '%s' has unknown type '%s'",
                         [ $specName, $spec['type'] ]
                     );
