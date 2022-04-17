@@ -6,6 +6,7 @@ use App\Controller\BaseController;
 use App\Entity\Executable;
 use App\Entity\ExecutableFile;
 use App\Entity\ImmutableExecutable;
+use App\Entity\Role;
 use App\Form\Type\ExecutableType;
 use App\Form\Type\ExecutableUploadType;
 use App\Service\ConfigurationService;
@@ -208,20 +209,6 @@ class ExecutableController extends BaseController
     }
 
     /**
-     * @Route("/{execId}/content", name="jury_executable_content")
-     */
-    public function contentAction(string $execId): Response
-    {
-        /** @var Executable $executable */
-        $executable = $this->em->getRepository(Executable::class)->find($execId);
-        if (!$executable) {
-            throw new NotFoundHttpException(sprintf('Executable with ID %s not found', $execId));
-        }
-
-        return $this->render('jury/executable_content.html.twig', $this->dataForEditor($executable));
-    }
-
-    /**
      * @Route("/{execId}/download", name="jury_executable_download")
      */
     public function downloadAction(string $execId): Response
@@ -337,7 +324,6 @@ class ExecutableController extends BaseController
 
     /**
      * @Route("/{execId}/edit-files", name="jury_executable_edit_files")
-     * @IsGranted("ROLE_ADMIN")
      */
     public function editFilesAction(Request $request, string $execId): Response
     {
@@ -353,8 +339,10 @@ class ExecutableController extends BaseController
             $data['source' . $idx] = $content;
         }
 
-        $formBuilder = $this->createFormBuilder($data)
-            ->add('submit', SubmitType::class, ['label' => 'Save files']);
+        $formBuilder = $this->createFormBuilder($data);
+        if ($this->isGranted('ROLE_ADMIN')) {
+            $formBuilder->add('submit', SubmitType::class, ['label' => 'Save files']);
+        }
 
         foreach ($editorData['files'] as $idx => $content) {
             $formBuilder->add('source' . $idx, TextareaType::class);
@@ -362,7 +350,7 @@ class ExecutableController extends BaseController
 
         $form = $formBuilder->getForm();
 
-        // Handle the form if it is submitted
+        // Handle the form if it is submitted.
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $submittedData = $form->getData();
@@ -371,6 +359,10 @@ class ExecutableController extends BaseController
             $this->em->persist($immutableExecutable);
 
             foreach ($editorData['filenames'] as $idx => $filename) {
+                if (!$this->isGranted('ROLE_ADMIN')) {
+                    $this->addFlash('danger', 'You must have the admin role to submit changes.');
+                    return $this->redirectToRoute('jury_executable', ['execId' => $executable->getExecid()]);
+                }
                 $newContent = str_replace("\r\n", "\n", $submittedData['source' . $idx]);
 
                 $executableFile = new ExecutableFile();
