@@ -226,25 +226,25 @@ class ExecutableController extends BaseController
     }
 
     /**
-     * @Route("/{execId}/download/{index}", name="jury_executable_download_single")
+     * @Route("/{execId}/download/{rank}", name="jury_executable_download_single")
      */
-    public function downloadSingleAction(string $execId, int $index): Response
+    public function downloadSingleAction(string $execId, int $rank): Response
     {
         /** @var Executable $executable */
         $executable = $this->em->getRepository(Executable::class)->find($execId);
         if (!$executable) {
-            throw new NotFoundHttpException(sprintf('Executable with ID %s not found', $execId));
+            throw new NotFoundHttpException(sprintf('Executable with ID %s not found.', $execId));
         }
 
         /** @var ExecutableFile[] $files */
         $files = array_values($executable->getImmutableExecutable()->getFiles()->toArray());
         foreach ($files as $file) {
-            if ($file->getRank() == $index) {
+            if ($file->getRank() == $rank) {
                 return Utils::streamAsBinaryFile($file->getFileContent(), $file->getFilename());
             }
         }
 
-        throw new NotFoundHttpException(sprintf('No file with index %d found', $index));
+        throw new NotFoundHttpException(sprintf('No file with rank %d found.', $rank));
     }
 
     /**
@@ -401,7 +401,10 @@ class ExecutableController extends BaseController
         $aceFilenames   = [];
         $skippedBinary  = [];
         $executableBits = [];
-        foreach ($immutable_executable->getFiles() as $file) {
+
+        $files = $immutable_executable->getFiles()->toArray();
+        usort($files, fn($a,$b) => $a->getFilename() <=> $b->getFilename());
+        foreach ($files as $file) {
             /** @var ExecutableFile $file */
             $filename = $file->getFilename();
             $content = $file->getFileContent();
@@ -410,6 +413,7 @@ class ExecutableController extends BaseController
                 continue; // Skip binary files.
             }
             $filenames[] = $filename;
+            $ranks[] = $file->getRank();
             $file_contents[] = $content;
             $executableBits[] = $file->isExecutable();
 
@@ -431,6 +435,7 @@ class ExecutableController extends BaseController
             'skippedBinary' => $skippedBinary,
             'filenames' => $filenames,
             'aceFilenames' => $aceFilenames,
+            'ranks' => $ranks,
             'files' => $file_contents,
             'executableBits' => $executableBits,
         ];
