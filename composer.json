@@ -67,6 +67,7 @@
 		"friendsofsymfony/rest-bundle": "^3.1",
 		"ircmaxell/password-compat": "*",
 		"jms/serializer-bundle": "^4.0",
+		"league/commonmark": "^2.3",
 		"mbostock/d3": "^3.5",
 		"nelmio/api-doc-bundle": "^4.8",
 		"novus/nvd3": "^1.8",
@@ -97,6 +98,7 @@
 		"symfony/yaml": "5.4.*",
 		"twbs/bootstrap": "^4.6.0",
 		"twig/extra-bundle": "^3.3",
+		"twig/markdown-extra": "^3.3",
 		"twig/string-extra": "^3.3",
 		"twig/twig": "^3.0"
 	},

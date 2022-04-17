@@ -33,7 +33,7 @@
             type: array_keyval
             default_value: []
             public: false
-            description: Remap testcase result, e.g. to disable a specific result type such as 'no-output'.
+            description: Remap testcase result, e.g. to disable a specific result type such as `no-output`.
         -   name: score_in_seconds
             type: bool
             default_value: false
@@ -66,7 +66,7 @@
             type: int
             default_value: 100
             public: true
-            description: Maximum number of source files in one submission. Set to 1 to disable multi-file submissions.
+            description: Maximum number of source files in one submission. Set to `1` to disable multi-file submissions.
         -   name: script_timelimit
             type: int
             default_value: 30
@@ -81,22 +81,22 @@
             type: int
             default_value: 2621440
             public: false
-            description: Maximum filesize (in kB) compile/compare scripts may write. Submission will fail with compiler-error when trying to write more, so this should be greater than any *intermediate or final* result written by compilers.
+            description: Maximum filesize (in kB) compile/compare scripts may write. Submission will fail with compiler-error when trying to write more, so this should be greater than any **intermediate or final** result written by compilers.
         -   name: timelimit_overshoot
             type: string
             default_value: 1s|10%
             public: false
-            description: Time that submissions are kept running beyond timelimit before being killed. Specify as "Xs" for X seconds, "Y%" as percentage, or a combination of both separated by one of "+|&" for the sum, maximum, or minimum of both.
+            description: Time that submissions are kept running beyond timelimit before being killed. Specify as `Xs` for X seconds, `Y%` as percentage, or a combination of both separated by one of `+|&` for the sum, maximum, or minimum of both.
         -   name: output_storage_limit
             type: int
             default_value: 50000
             public: false
-            description: Maximum size of error/system output stored in the database (in bytes); use "-1" to disable any limits.
+            description: Maximum size of error/system output stored in the database (in bytes); use `-1` to disable any limits.
         -   name: output_display_limit
             type: int
             default_value: 2000
             public: false
-            description: Maximum size of run/diff/error/system output shown in the jury interface (in bytes); use "-1" to disable any limits.
+            description: Maximum size of run/diff/error/system output shown in the jury interface (in bytes); use `-1` to disable any limits.
         -   name: lazy_eval_results
             type: bool
             default_value: true
@@ -106,12 +106,12 @@
             type: int
             default_value: 30
             public: false
-            description: Time in seconds after a judgehost last checked in before showing its status as "warning".
+            description: Time in seconds after a judgehost last checked in before showing its status as `warning`.
         -   name: judgehost_critical
             type: int
             default_value: 120
             public: false
-            description: Time in seconds after a judgehost last checked in before showing its status as "critical".
+            description: Time in seconds after a judgehost last checked in before showing its status as `critical`.
         -   name: diskspace_error
             type: int
             default_value: 1048576
@@ -225,7 +225,7 @@
             type: string
             default_value: "H:i"
             public: false
-            description: The format used to print times. For formatting options see the PHP 'date' function.
+            description: The format used to print times. For formatting options see the PHP `date` function.
         -   name: thumbnail_size
             type: int
             default_value: 200
@@ -249,7 +249,7 @@
             type: int
             default_value: 0
             public: false
-            description: Maximum width of team column on scoreboard. Leave 0 for no maximum.
+            description: Maximum width of team column on scoreboard. Leave `0` for no maximum.
         -   name: show_public_stats
             type: bool
             default_value: true
@@ -285,7 +285,7 @@
             type: int
             default_value: 0
             public: false
-            description: "Source of data: used to indicate whether internal or external IDs are exposed in the API. 'configuration data external' is typically used when loading configuration data from the ICPC CMS, and 'configuration and live data external' when running DOMjudge as \"shadow system\"."
+            description: "Source of data: used to indicate whether internal or external IDs are exposed in the API. `configuration data external` is typically used when loading configuration data from the ICPC CMS, and `configuration and live data external` when running DOMjudge as \"shadow system\"."
             options:
                 0: all local
                 1: configuration data external
@@ -295,7 +295,7 @@
             type: string
             default_value: ""
             public: false
-            description: URL of a submission detail page on the external CCS. Placeholder [id] will be replaced by submission ID and [contest] by the contest ID. Leave empty to not display links to external CCS.
+            description: URL of a submission detail page on the external CCS. Placeholder `[id]` will be replaced by submission ID and `[contest]` by the contest ID. Leave empty to not display links to external CCS.
             docdescription: See :doc:`the chapter on running DOMjudge as a shadow system<shadow>` for more information.
         -   name: icat_url
             type: string
@@ -307,4 +307,4 @@
             type: int
             default_value: 120
             public: false
-            description: Time in seconds after an external contest source reader last checked in before showing its status as "critical".
+            description: Time in seconds after an external contest source reader last checked in before showing its status as `critical`.
