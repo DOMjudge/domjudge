@@ -6,17 +6,17 @@
             type: bool
             default_value: false
             public: false
-            description: Is verification of judgings by jury required before publication?
+            description: Is manual verification of judgings by jury required before publication?
         -   name: compile_penalty
             type: bool
             default_value: false
             public: true
-            description: Should submissions with compiler-error incur penalty time (and show on the scoreboard)?
+            description: Should submissions with compiler-error incur penalty time (and be shown on the scoreboard)?
         -   name: penalty_time
             type: int
             default_value: 20
             public: true
-            description: Penalty time in minutes per wrong submission (if finally solved).
+            description: Penalty time in minutes per wrong submission (if eventually solved).
         -   name: results_prio
             type: array_keyval
             default_value:
@@ -28,7 +28,7 @@
                 no-output: 99
                 correct: 1
             public: false
-            description: Priorities of results for determining final result with multiple testcases. Higher priority is used first as final result. With equal priority, the first occurring result determines the final result.
+            description: Priorities of results for determining final result with multiple testcases. Higher priority is used first as final result. With equal priority, the first (ordered by rank) incorrect result determines the final result.
         -   name: results_remap
             type: array_keyval
             default_value: []
@@ -38,7 +38,7 @@
             type: bool
             default_value: false
             public: true
-            description: Should the scoreboard resolution be measured in seconds instead of minutes?
+            description: Is the scoreboard resolution measured in seconds instead of minutes?
 -   category: Judging
     description: Options related to how judging is performed.
     items:
@@ -51,7 +51,7 @@
             type: int
             default_value: 8192
             public: false
-            description: Maximum output (in kB) submissions may generate. Any excessive output is truncated, so this should be greater than the maximum testdata output.
+            description: Maximum output (in kB) submissions may generate. Any excessive output is truncated, so this should be greater than the maximum testdata output. Can be overridden per problem.
         -   name: process_limit
             type: int
             default_value: 64
@@ -61,12 +61,12 @@
             type: int
             default_value: 256
             public: true
-            description: Maximum source code size (in kB) of a submission. This setting should be kept in sync with that in "etc/submit-config.h.in".
+            description: Maximum source code size (in kB) of a submission.
         -   name: sourcefiles_limit
             type: int
             default_value: 100
             public: true
-            description: Maximum number of source files in one submission. Set to one to disable multiple file submissions.
+            description: Maximum number of source files in one submission. Set to 1 to disable multi-file submissions.
         -   name: script_timelimit
             type: int
             default_value: 30
@@ -116,7 +116,7 @@
             type: int
             default_value: 1048576
             public: false
-            description: Minimum free disk space (in kB) on judgehosts.
+            description: Minimum free disk space (in kB) on judgehosts before posting an internal error.
         -   name: default_compare
             type: string
             default_value: compare
@@ -136,12 +136,12 @@
             type: bool
             default_value: true
             public: false
-            description: Allows to distribute one judging to multiple judgehosts.
+            description: Are submissions judged by multiple judgehosts in parallel?
         -   name: judgehost_activated_by_default
             type: bool
             default_value: true
             public: false
-            description: Activate a judgehost by default when a new one registers.
+            description: Activate a judgehost when it registers for the first time.
 -   category: Clarifications
     description: Options related to clarifications.
     items:
@@ -158,7 +158,7 @@
                 - No comment.
                 - Read the problem statement carefully.
             public: false
-            description: List of predefined clarification answers.
+            description: List of pre-defined clarification answers.
         -   name: clar_queues
             type: array_keyval
             default_value: []
@@ -210,7 +210,7 @@
             type: bool
             default_value: false
             public: true
-            description: Should teams be able to view a diff of their and the reference output to sample testcases?
+            description: Should teams be able to view a diff of their and the reference output on sample testcases?
         -   name: show_balloons_postfreeze
             type: bool
             default_value: false
