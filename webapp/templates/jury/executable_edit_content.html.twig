@@ -1,6 +1,6 @@
 {% extends "jury/base.html.twig" %}
 
-{% block title %}Edit content of executable {{ executable.execid }} - {{ parent() }}{% endblock %}
+{% block title %}Content of executable {{ executable.execid }} - {{ parent() }}{% endblock %}
 
 {% block extrahead %}
     {{ parent() }}
@@ -10,7 +10,7 @@
 
 {% block content %}
 
-    <h1>Edit content of executable {{ executable.execid }}</h1>
+    <h1>Content of executable <code>{{ executable.execid }}</code></h1>
 
     {{ form_start(form) }}
 
@@ -19,7 +19,7 @@
 
             <li class="nav-item">
                 <a class="nav-link {% if (selected is null and loop.first) or selected == idx %}active{% endif %}" data-toggle="tab"
-                   href="#source-{{ idx }}" role="tab">{{ filename }}{%  if (executableBits[idx]) %} <sub>x-bit</sub>{% endif %}</a>
+                   href="#source-{{ idx }}" role="tab"><code>{{ filename }}</code>{%  if (executableBits[idx]) %} <sub>x-bit</sub>{% endif %}</a>
             </li>
         {%- endfor %}
 
@@ -32,10 +32,6 @@
                     <a class="btn btn-secondary btn-sm"
                        href="{{ path('jury_executable_download_single', {execId: executable.execid, index: idx}) }}">
                         <i class="fas fa-download"></i> Download
-                    </a>
-                    <a class="btn btn-secondary btn-sm"
-                       href="{{ path('jury_executable_edit_files', {execId: executable.execid, index: idx}) }}">
-                        <i class="fas fa-pencil-alt"></i> Edit
                     </a>
                 </div>
 
