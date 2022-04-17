@@ -413,9 +413,9 @@ class ExecutableController extends BaseController
             /** @var ExecutableFile $file */
             $filename = $file->getFilename();
             $content = $file->getFileContent();
-            if (!mb_check_encoding($content, 'ASCII')) {
+            if (!mb_detect_encoding($content, null, true)) {
                 $skippedBinary[] = $filename;
-                continue; // skip binary files
+                continue; // Skip binary files.
             }
             $filenames[] = $filename;
             $file_contents[] = $content;

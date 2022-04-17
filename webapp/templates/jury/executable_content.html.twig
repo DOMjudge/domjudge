@@ -13,11 +13,11 @@
     <h1>View content of executable {{ executable.execid }}</h1>
 
     {% if skippedBinary is not empty %}
-        <div>
-            Binary files:
+        <div class="alert alert-warning">
+            We exclude these files from editing since we could not detect their encoding (e.g. they are binary files):
             <ul>
                 {% for file in skippedBinary %}
-                    <li>{{ file }}</li>
+                    <li><code>{{ file }}</code></li>
                 {% endfor %}
             </ul>
         </div>
