@@ -35,7 +35,7 @@
                     </a>
                 </div>
 
-                {{ files[idx] | codeEditor(idx, null, true, 'form_source' ~ idx, aceFilenames[idx]) }}
+                {{ files[idx] | codeEditor(idx, null, is_granted('ROLE_ADMIN'), 'form_source' ~ idx, aceFilenames[idx]) }}
                 <script>
                     $(function () {
                         $('#form_source{{ idx }}').closest('.form-group').hide();
