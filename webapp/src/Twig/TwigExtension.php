@@ -760,7 +760,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
     }
 
     /**
-     * Output a (readonly) code editor for the given submission file
+     * Output a (optionally readonly) code editor for the given submission file.
      * @param string|null $language Ace language to use
      * @param bool $editable Whether to allow editing
      * @param string $elementToUpdate HTML element to update when input changes
