@@ -33,6 +33,12 @@
                        href="{{ path('jury_executable_download_single', {execId: executable.execid, rank: ranks[idx]}) }}">
                         <i class="fas fa-download"></i> Download
                     </a>
+                    {% if is_granted('ROLE_ADMIN') %}
+                        <a class="btn btn-secondary btn-sm"
+                           href="{{ path('jury_executable_delete_single', {execId: executable.execid, rank: ranks[idx]}) }}">
+                            <i class="fas fa-trash"></i> Delete
+                        </a>
+                    {% endif %}
                 </div>
 
                 {{ files[idx] | codeEditor(idx, null, is_granted('ROLE_ADMIN'), 'form_source' ~ idx, aceFilenames[idx]) }}

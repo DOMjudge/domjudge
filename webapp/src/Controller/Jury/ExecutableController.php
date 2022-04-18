@@ -226,6 +226,31 @@ class ExecutableController extends BaseController
     }
 
     /**
+     * @Route("/{execId}/delete/{rank}", name="jury_executable_delete_single")
+     * @IsGranted("ROLE_ADMIN")
+     */
+    public function deleteSingleAction(string $execId, int $rank): Response
+    {
+        /** @var Executable $executable */
+        $executable = $this->em->getRepository(Executable::class)->find($execId);
+        if (!$executable) {
+            throw new NotFoundHttpException(sprintf('Executable with ID %s not found.', $execId));
+        }
+
+        /** @var ExecutableFile[] $files */
+        $files = array_values($executable->getImmutableExecutable()->getFiles()->toArray());
+        foreach ($files as $file) {
+            if ($file->getRank() == $rank) {
+                $this->em->remove($file);
+                $this->em->flush();
+                return $this->redirectToRoute('jury_executable_edit_files', ['execId' => $execId]);
+            }
+        }
+
+        throw new NotFoundHttpException(sprintf('No file with rank %d found.', $rank));
+    }
+
+    /**
      * @Route("/{execId}/download/{rank}", name="jury_executable_download_single")
      */
     public function downloadSingleAction(string $execId, int $rank): Response
