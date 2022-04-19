@@ -21,6 +21,7 @@ use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -269,7 +270,11 @@ class ExecutableController extends BaseController
         } else {
             $this->em->remove($file);
             $this->em->flush();
-            return $this->redirectToRoute('jury_executable_edit_files', ['execId' => $execId]);
+            $redirectUrl = $this->generateUrl('jury_executable_edit_files', ['execId' => $execId]);
+            if ($request->isXmlHttpRequest()) {
+                return new JsonResponse(['url' => $redirectUrl]);
+            }
+            return $this->redirect($redirectUrl);
         }
     }
 
