@@ -14,6 +14,7 @@ use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
+use FOS\RestBundle\Controller\Annotations as Rest;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\Form\Exception\InvalidArgumentException;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
@@ -229,7 +230,7 @@ class ExecutableController extends BaseController
      * @Route("/{execId}/delete/{rank}", name="jury_executable_delete_single")
      * @IsGranted("ROLE_ADMIN")
      */
-    public function deleteSingleAction(string $execId, int $rank): Response
+    public function deleteSingleAction(Request $request, string $execId, int $rank): Response
     {
         /** @var Executable $executable */
         $executable = $this->em->getRepository(Executable::class)->find($execId);
@@ -239,15 +240,37 @@ class ExecutableController extends BaseController
 
         /** @var ExecutableFile[] $files */
         $files = array_values($executable->getImmutableExecutable()->getFiles()->toArray());
+        $file = null;
         foreach ($files as $file) {
             if ($file->getRank() == $rank) {
-                $this->em->remove($file);
-                $this->em->flush();
-                return $this->redirectToRoute('jury_executable_edit_files', ['execId' => $execId]);
+                break;
             }
         }
+        if (!$file) {
+            throw new NotFoundHttpException(sprintf('File with rank %d not found in executable with ID %s.', $rank, $execId));
+        }
 
-        throw new NotFoundHttpException(sprintf('No file with rank %d found.', $rank));
+        if ($request->isMethod('GET')) {
+            $data = [
+                'type' => 'ExecutableFile',
+                'primaryKey' => $execId,
+                'description' => $file->getFilename(),
+                'messages' => [],
+                'isError' => false,
+                'showModalSubmit' => true,
+                'modalUrl' => $request->getRequestUri(),
+                'redirectUrl' => $this->generateUrl('jury_executable_edit_files', ['execId' => $execId]),
+            ];
+            if ($request->isXmlHttpRequest()) {
+                return $this->render('jury/delete_modal.html.twig', $data);
+            }
+
+            return $this->render('jury/delete.html.twig', $data);
+        } else {
+            $this->em->remove($file);
+            $this->em->flush();
+            return $this->redirectToRoute('jury_executable_edit_files', ['execId' => $execId]);
+        }
     }
 
     /**
@@ -426,6 +449,7 @@ class ExecutableController extends BaseController
         $aceFilenames   = [];
         $skippedBinary  = [];
         $executableBits = [];
+        $ranks          = [];
 
         $files = $immutable_executable->getFiles()->toArray();
         usort($files, fn($a,$b) => $a->getFilename() <=> $b->getFilename());
