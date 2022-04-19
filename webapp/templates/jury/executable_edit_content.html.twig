@@ -14,42 +14,48 @@
 
     {{ form_start(form) }}
 
-    <ul class="nav nav-tabs source-tab-nav" role="tablist">
-        {%- for idx, filename in filenames %}
+    {% if not filenames %}
+        <p class="nodata">No files in this executable.</p>
+    {% else %}
+        <ul class="nav nav-tabs source-tab-nav" role="tablist">
+            {%- for idx, filename in filenames %}
+                <li class="nav-item">
+                    <a class="nav-link {% if (selected is null and loop.first) or selected == idx %}active{% endif %}" data-toggle="tab"
+                       href="#source-{{ idx }}" role="tab"><code>{{ filename }}</code>{%  if (executableBits[idx]) %} <sub>x-bit</sub>{% endif %}</a>
+                </li>
+            {%- endfor %}
+        </ul>
+        <div class="tab-content source-tab">
+            {%- for idx, filename in filenames %}
+                <div class="tab-pane fade {% if (selected is null and loop.first) or selected == idx %}show active{% endif %}" id="source-{{ idx }}"
+                     role="tabpanel">
+                    <div class="mb-1">
+                        <a class="btn btn-secondary btn-sm"
+                           href="{{ path('jury_executable_download_single', {execId: executable.execid, rank: ranks[idx]}) }}">
+                            <i class="fas fa-download"></i> Download
+                        </a>
+                        {% if is_granted('ROLE_ADMIN') %}
+                            <a class="btn btn-secondary btn-sm"
+                               data-ajax-modal
+                               href="{{ path('jury_executable_delete_single', {execId: executable.execid, rank: ranks[idx]}) }}">
+                                <i class="fas fa-trash"></i> Delete
+                            </a>
+                        {% endif %}
+                    </div>
 
-            <li class="nav-item">
-                <a class="nav-link {% if (selected is null and loop.first) or selected == idx %}active{% endif %}" data-toggle="tab"
-                   href="#source-{{ idx }}" role="tab"><code>{{ filename }}</code>{%  if (executableBits[idx]) %} <sub>x-bit</sub>{% endif %}</a>
-            </li>
-        {%- endfor %}
-
-    </ul>
-    <div class="tab-content source-tab">
-        {%- for idx, filename in filenames %}
-            <div class="tab-pane fade {% if (selected is null and loop.first) or selected == idx %}show active{% endif %}" id="source-{{ idx }}"
-                 role="tabpanel">
-                <div class="mb-1">
-                    <a class="btn btn-secondary btn-sm"
-                       href="{{ path('jury_executable_download_single', {execId: executable.execid, rank: ranks[idx]}) }}">
-                        <i class="fas fa-download"></i> Download
-                    </a>
+                    {{ files[idx] | codeEditor(idx, null, is_granted('ROLE_ADMIN'), 'form_source' ~ idx, aceFilenames[idx]) }}
+                    <script>
+                        $(function () {
+                            $('#form_source{{ idx }}').closest('.form-group').hide();
+                        });
+                    </script>
                 </div>
-
-                {{ files[idx] | codeEditor(idx, null, is_granted('ROLE_ADMIN'), 'form_source' ~ idx, aceFilenames[idx]) }}
-                <script>
-                    $(function () {
-                        $('#form_source{{ idx }}').closest('.form-group').hide();
-                    });
-                </script>
+        <div class="row">
+            <div class="col-lg-4">
+                {{ form_widget(form) }}
             </div>
-        {%- endfor %}
-    </div>
-
-    <div class="row">
-        <div class="col-lg-4">
-            {{ form_widget(form) }}
         </div>
-    </div>
-    {{ form_end(form) }}
+        {{ form_end(form) }}
+    {% endif %}
 
 {% endblock %}
