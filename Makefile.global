@@ -24,11 +24,13 @@ include $(TOPDIR)/paths.mk
 endif
 
 # We should build docs if it not explicitly disabled and we're not
-# running "make maintainer-conf":
+# running "make maintainer-conf" or "make inplace-conf":
 BUILD_DOCS=no
 ifneq ($(DOC_BUILD_ENABLED),no)
 ifneq ($(MAKECMDGOALS),maintainer-conf)
+ifneq ($(MAKECMDGOALS),inplace-conf)
 BUILD_DOCS=yes
+endif
 endif
 endif
 export BUILD_DOCS
