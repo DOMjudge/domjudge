@@ -171,8 +171,9 @@ paths.mk:
 MAINT_CXFLAGS=-g -O1 -Wall -fstack-protector -D_FORTIFY_SOURCE=2 \
               -fPIE -Wformat -Wformat-security -pedantic
 MAINT_LDFLAGS=-fPIE -pie -Wl,-z,relro -Wl,-z,now
-maintainer-conf: inplace-conf composer-dependencies-dev webapp/.env.local
-inplace-conf: dist
+maintainer-conf: inplace-conf-common composer-dependencies-dev webapp/.env.local
+inplace-conf: inplace-conf-common composer-dependencies
+inplace-conf-common: dist
 	./configure $(subst 1,-q,$(QUIET)) --prefix=$(CURDIR) \
 	            --with-domserver_root=$(CURDIR) \
 	            --with-judgehost_root=$(CURDIR) \
@@ -318,7 +319,7 @@ clean-autoconf:
 	-rm -rf config.status config.cache config.log autom4te.cache
 
 .PHONY: $(addsuffix -create-dirs,domserver judgehost docs) check-root \
-        clean-autoconf $(addprefix inplace-,conf install uninstall) \
-        maintainer-conf config distdocs composer-dependencies \
-        composer-dependencies-dev \
+        $(addprefix inplace-,conf conf-common install uninstall) \
+        $(addprefix maintainer-,conf install) clean-autoconf config distdocs \
+        composer-dependencies composer-dependencies-dev \
         coverity-conf coverity-build
