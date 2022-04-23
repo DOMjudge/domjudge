@@ -652,7 +652,7 @@ function updateMenuShadowDifferences(data)
 function updateMenuExternalContestSources(data)
 {
     var numDown = data.external_contest_sources.length;
-    var numWarnings = data.external_source_warning_count;
+    var numWarnings = parseInt(data.external_source_warning_count);
     if ( numDown == 0 && numWarnings == 0 ) {
         $("#num-alerts-externalcontestsources").hide();
         $("#num-alerts-externalcontestsources-sub").html("");
