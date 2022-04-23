@@ -910,7 +910,7 @@ class ExternalContestSourceService
 
         $toCheck = [
             'username'        => $event['data']['username'],
-            'ip'              => $event['data']['ip'] ?? null,
+            'ip_address'      => $event['data']['ip'] ?? null,
             'name'            => $event['data']['name'] ?? null,
             'type'            => $event['data']['type'] ?? null,
             'team.externalid' => $event['data']['team_id'],
