@@ -73,14 +73,17 @@ class UserController extends BaseController
             ->getQuery()->getResult();
 
         $table_fields = [
-            'username' => ['title' => 'username', 'sort' => true, 'default_sort' => true],
-            'name' => ['title' => 'name', 'sort' => true],
-            'email' => ['title' => 'email', 'sort' => true],
+            'username'   => ['title' => 'username', 'sort' => true, 'default_sort' => true],
+            'name'       => ['title' => 'name', 'sort' => true],
+            'email'      => ['title' => 'email', 'sort' => true],
             'user_roles' => ['title' => 'roles', 'sort' => true],
-            'team' => ['title' => 'team', 'sort' => true],
-            'ip' => ['title' => 'ip', 'sort' => true],
-            'status' => ['title' => '', 'sort' => true],
+            'team'       => ['title' => 'team', 'sort' => true],
         ];
+        if ( in_array('ipaddress', $this->config->get('auth_methods')) ) {
+            $table_fields['ip_address'] = ['title' => 'autologin IP', 'sort' => true];
+        }
+        $table_fields['last_ip_address'] = ['title' => 'last IP', 'sort' => true];
+        $table_fields['status']          = ['title' => '', 'sort' => true];
 
         // Insert external ID field when configured to use it.
         if ($externalIdField = $this->eventLogService->externalIdFieldForEntity(User::class)) {
@@ -102,8 +105,6 @@ class UserController extends BaseController
                     $userdata[$k] = ['value' => $propertyAccessor->getValue($u, $k)];
                 }
             }
-            $ip = $this->config->get('ip_autologin') ? $u->getIpAddress() : $u->getLastIpAddress();
-            $userdata['ip'] = ['value' => $ip ?? '-'];
 
             $status = 'noconn';
             $statustitle = "no connections made";
@@ -126,6 +127,16 @@ class UserController extends BaseController
             $userdata['user_roles'] = [
                 'value' => implode(', ', array_map(fn(Role $role) => $role->getDjRole(), $u->getUserRoles()))
             ];
+
+            // Render IP address nicely.
+            foreach (['ip_address', 'last_ip_address'] as $field) {
+                if (!array_key_exists($field, $userdata)) continue;
+                if ($userdata[$field]['value']) {
+                    $userdata[$field]['value'] = Utils::printhost($userdata[$field]['value']);
+                }
+                $userdata[$field]['default']  = '-';
+                $userdata[$field]['cssclass'] = 'text-monospace small';
+            }
 
             // Create action links.
             if ($this->isGranted('ROLE_ADMIN')) {
