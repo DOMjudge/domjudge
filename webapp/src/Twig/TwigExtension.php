@@ -853,12 +853,12 @@ JS;
         if (!$contest->getStarttimeEnabled()) {
             $res = "start delayed, was scheduled ";
         }
-        if ($this->printtime(Utils::now(), 'Ymd') == $this->printtime($contest->getStarttime(), 'Ymd')) {
+        if ($this->printtime(Utils::now(), 'Ymd') == $this->printtime($contest->getStarttime(false), 'Ymd')) {
             // Today
-            $res .= "at " . $this->printtime($contest->getStarttime());
+            $res .= "at " . $this->printtime($contest->getStarttime(false));
         } else {
             // Print full date
-            $res .= "on " . $this->printtime($contest->getStarttime(), 'D d M Y H:i:s T');
+            $res .= "on " . $this->printtime($contest->getStarttime(false), 'D d M Y H:i:s T');
         }
         return $res;
     }
