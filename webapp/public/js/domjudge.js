@@ -426,10 +426,11 @@ function processAjaxResponse(jqXHR, data) {
         window.location = jqXHR.getResponseHeader('X-Login-Page');
     } else {
         var newCurrentContest = parseInt(jqXHR.getResponseHeader('X-Current-Contest'));
-        var currentContest = parseInt($('[data-current-contest]').data('current-contest'));
+        var dataCurrentContest = $('[data-current-contest]').data('current-contest');
+        var currentContest = parseInt(dataCurrentContest);
 
         // If the contest ID changed from another tab, reload or whole page
-        if (newCurrentContest !== currentContest) {
+        if (dataCurrentContest !== undefined && newCurrentContest !== currentContest) {
             window.location.reload();
             return;
         }
