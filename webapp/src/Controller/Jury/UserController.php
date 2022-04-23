@@ -78,6 +78,7 @@ class UserController extends BaseController
             'email' => ['title' => 'email', 'sort' => true],
             'user_roles' => ['title' => 'roles', 'sort' => true],
             'team' => ['title' => 'team', 'sort' => true],
+            'ip' => ['title' => 'ip', 'sort' => true],
             'status' => ['title' => '', 'sort' => true],
         ];
 
@@ -92,6 +93,7 @@ class UserController extends BaseController
         $users_table      = [];
         $timeFormat  = (string)$this->config->get('time_format');
         foreach ($users as $u) {
+            /** @var User $u */
             $userdata    = [];
             $useractions = [];
             // Get whatever fields we can from the user object itself.
@@ -100,6 +102,8 @@ class UserController extends BaseController
                     $userdata[$k] = ['value' => $propertyAccessor->getValue($u, $k)];
                 }
             }
+            $ip = $this->config->get('ip_autologin') ? $u->getIpAddress() : $u->getLastIpAddress();
+            $userdata['ip'] = ['value' => $ip ?? '-'];
 
             $status = 'noconn';
             $statustitle = "no connections made";
