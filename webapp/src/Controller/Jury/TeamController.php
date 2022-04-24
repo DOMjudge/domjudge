@@ -103,9 +103,9 @@ class TeamController extends BaseController
         $teams_that_solved = array_column($teams_that_solved, 'num_correct', 'teamid');
 
         $table_fields = [
-            'teamid' => ['title' => 'ID', 'sort' => true,],
+            'teamid' => ['title' => 'ID', 'sort' => true, 'default_sort' => true],
             'icpcid' => ['title' => 'ICPC ID', 'sort' => true,],
-            'effective_name' => ['title' => 'name', 'sort' => true, 'default_sort' => true],
+            'effective_name' => ['title' => 'name', 'sort' => true,],
             'category' => ['title' => 'category', 'sort' => true,],
             'affiliation' => ['title' => 'affiliation', 'sort' => true,],
             'num_contests' => ['title' => '# contests', 'sort' => true,],
