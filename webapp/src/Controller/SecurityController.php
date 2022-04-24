@@ -10,6 +10,7 @@ use App\Form\Type\UserRegistrationType;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use Doctrine\ORM\EntityManagerInterface;
+use Ramsey\Uuid\Uuid;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -134,6 +135,7 @@ class SecurityController extends AbstractController
             $team = new Team();
             $user->setTeam($team);
             $team
+                ->setExternalid(Uuid::uuid4()->toString())
                 ->addUser($user)
                 ->setName($teamName)
                 ->setCategory($teamCategory)
@@ -144,6 +146,7 @@ class SecurityController extends AbstractController
                     case 'new':
                         $affiliation = new TeamAffiliation();
                         $affiliation
+                            ->setExternalid(Uuid::uuid4()->toString())
                             ->setName($registration_form->get('affiliationName')->getData())
                             ->setShortname($registration_form->get('affiliationShortName')->getData());
                         if ($registration_form->has('affiliationCountry')) {
