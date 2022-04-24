@@ -47,6 +47,3 @@ run unit tests:
 
 run unit tests (MySQL):
   extends: [.mysql_job,.unit_job]
-
-run runpipe tests:
-  extends: [.runpipe_job]
