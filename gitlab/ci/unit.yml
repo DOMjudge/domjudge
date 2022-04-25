@@ -22,6 +22,8 @@
       - unit-tests.xml
       - coverage-html
       - deprecation.txt
+      - duration
+      - gitlabartifacts
     reports:
       junit:
         - unit-tests.xml
@@ -29,6 +31,16 @@
     key: unit-tests
     paths:
       - lib/vendor/
+
+run runpipe tests:
+  extends: [.normal_job]
+  stage: unit
+  script:
+    - ./gitlab/runpipe-tests.sh
+  artifacts:
+    when: always
+    paths:
+      - gitlabartifacts
 
 run unit tests:
   extends: [.mariadb_job,.phpsupported_job,.unit_job]
