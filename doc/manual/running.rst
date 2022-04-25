@@ -8,7 +8,7 @@ status of each team: a traffic light will show either of the
 following:
 
 - gray: the team has not (yet) connected to the web interface at all;
-- red: he team has connected but not submitted anything yet;
+- red: the team has connected but not submitted anything yet;
 - yellow: one or more submissions have been made, but none correct;
 - green: the team has made at least one submission that has
   been judged as correct.
