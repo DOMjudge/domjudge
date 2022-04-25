@@ -26,6 +26,9 @@
     "datatables/datatables": {
         "version": "1.10.19"
     },
+    "dflydev/dot-access-data": {
+        "version": "v3.0.1"
+    },
     "doctrine/annotations": {
         "version": "1.13",
         "recipe": {
@@ -180,6 +183,12 @@
     "laminas/laminas-code": {
         "version": "3.4.1"
     },
+    "league/commonmark": {
+        "version": "2.3.0"
+    },
+    "league/config": {
+        "version": "v1.1.1"
+    },
     "mbostock/d3": {
         "version": "v3.5.17"
     },
@@ -201,6 +210,12 @@
             "webapp/config/packages/nelmio_api_doc.yaml",
             "webapp/config/routes/nelmio_api_doc.yaml"
         ]
+    },
+    "nette/schema": {
+        "version": "v1.2.2"
+    },
+    "nette/utils": {
+        "version": "v3.2.7"
     },
     "nikic/php-parser": {
         "version": "v4.2.4"
@@ -677,6 +692,9 @@
     },
     "twig/extra-bundle": {
         "version": "v3.3.0"
+    },
+    "twig/markdown-extra": {
+        "version": "v3.3.8"
     },
     "twig/string-extra": {
         "version": "v3.3.0"
