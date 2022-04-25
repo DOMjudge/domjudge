@@ -47,3 +47,7 @@ run unit tests:
 
 run unit tests (MySQL):
   extends: [.mysql_job,.unit_job]
+  parallel:
+    matrix:
+      - TEST: ["E2E","Unit"]
+        CRAWL_DATASOURCES: ["0"]
