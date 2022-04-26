@@ -124,7 +124,7 @@ class BalloonService
                 continue;
             }
 
-            $TOTAL_BALLOONS[$balloonsData['teamid']][$balloonsData['probshortname']] = $balloonsData['color'];
+            $TOTAL_BALLOONS[$balloonsData['teamid']][$balloonsData['probshortname']] = $balloonsData[0]->getSubmission()->getContestProblem();
 
             // Keep a list of balloons that were first to solve this problem;
             // can be multiple, one for each sortorder.
@@ -139,11 +139,10 @@ class BalloonService
         // Loop again to construct table.
         $balloons_table = [];
         foreach ($balloons as $balloonsData) {
-            $color = $balloonsData['color'];
-
-            if ($color === null) {
+            if ($balloonsData['color'] === null) {
                 continue;
             }
+            /** @var Balloon $balloon */
             $balloon = $balloonsData[0];
             $done = $balloon->getDone();
 
@@ -162,8 +161,8 @@ class BalloonService
             $balloondata = [];
             $balloondata['balloonid'] = $balloonId;
             $balloondata['time'] = $stime;
-            $balloondata['color'] = $color;
             $balloondata['problem'] = $balloonsData['probshortname'];
+            $balloondata['contestproblem'] = $balloon->getSubmission()->getContestProblem();
             $balloondata['team'] = "t" . $balloonsData['teamid'] . ": " . $balloonsData['teamname'];
             $balloondata['teamid'] = $balloonsData['teamid'];
             $balloondata['location'] = $balloonsData['room'];

@@ -33,14 +33,14 @@
                 {%- endif -%}
                 <td>{{ balloon.data.balloonid }}</td>
                 <td data-order="{{ balloon.data.time }}">{{ balloon.data.time | printtime }}</td>
-                <td><i style="color: {{ balloon.data.color }}" class="fas fa-golf-ball"></i> {{ balloon.data.problem }}</td>
+                <td>{{ balloon.data.contestproblem | problemBadge }}</td>
                 <td>{{ balloon.data.team | u.truncate(teamname_max_length, '…') }}</td>
                 <td>{{ balloon.data.affiliation }}</td>
                 <td>{{ balloon.data.location }}</td>
                 <td>{{ balloon.data.category }}</td>
                 <td>
                 {%- for totalballoon in balloon.data.total -%}
-                    <i style="color: {{ totalballoon }}" class="fas fa-golf-ball"></i>
+                    {{ totalballoon | problemBadge }}&nbsp;
                 {%- endfor -%}
                 </td>
                 <td>{{ balloon.data.awards }}</td>
