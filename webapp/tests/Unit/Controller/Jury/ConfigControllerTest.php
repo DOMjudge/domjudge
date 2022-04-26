@@ -43,7 +43,7 @@ class ConfigControllerTest extends BaseTest
         self::assertSelectorExists('a.nav-link:contains("Scoring")');
 
         self::assertSelectorExists('label:contains("Penalty time:")');
-        self::assertSelectorExists('small:contains("Penalty time in minutes per wrong submission (if eventually solved).")');
+	self::assertSelectorExists('small:contains("Penalty time in minutes per wrong submission (if eventually solved).")');
         $crawler = $this->getCurrentCrawler();
         $minutes = $crawler->filter('input#config_penalty_time')->extract(['value']);
         self::assertEquals("20", $minutes[0]);
