@@ -6,6 +6,7 @@ use App\DataFixtures\Test\EnableSelfregisterFixture;
 use App\DataFixtures\Test\EnableSelfregisterSecondCategoryFixture;
 use App\DataFixtures\Test\SelfRegisteredUserFixture;
 use App\Entity\Contest;
+use App\Entity\User;
 use App\Tests\Unit\BaseTest;
 use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
@@ -94,6 +95,19 @@ class PublicControllerTest extends BaseTest
                 $this->verifyPageResponse('GET', static::$urlAffil, 200);
                 self::assertSelectorExists('html:contains("'.$inputs[$field].'")');
             }
+        }
+
+        /** @var User $user */
+        $user = static::getContainer()
+            ->get(EntityManagerInterface::class)
+            ->getRepository(User::class)
+            ->findOneBy(['username' => $inputs['username']]);
+
+        self::assertNotNull($user);
+        self::assertNotEmpty($user->getExternalid());
+        self::assertNotEmpty($user->getTeam()->getExternalid());
+        if ($inputs['affiliation'] !== 'none') {
+            self::assertNotEmpty($user->getTeam()->getAffiliation()->getExternalid());
         }
     }
 

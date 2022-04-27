@@ -112,6 +112,7 @@ class SecurityController extends AbstractController
         }
 
         $user              = new User();
+        $user->setExternalid(Uuid::uuid4()->toString());
         $registration_form = $this->createForm(UserRegistrationType::class, $user);
         $registration_form->handleRequest($request);
         if ($registration_form->isSubmitted() && $registration_form->isValid()) {
