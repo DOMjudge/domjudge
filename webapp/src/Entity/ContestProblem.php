@@ -2,11 +2,13 @@
 namespace App\Entity;
 
 use App\Service\EventLogService;
+use App\Utils\Utils;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 /**
  * Many-to-Many mapping of contests and problems.
@@ -244,5 +246,18 @@ class ContestProblem
     public function getApiId(EventLogService $eventLogService): string
     {
         return $this->getProblem()->getApiId($eventLogService);
+    }
+
+    /**
+     * @Assert\Callback()
+     */
+    public function validate(ExecutionContextInterface $context): void
+    {
+        if ($this->getColor() && Utils::convertToHex($this->getColor()) === null) {
+            $context
+                ->buildViolation('This is not a valid color')
+                ->atPath('color')
+                ->addViolation();
+        }
     }
 }
