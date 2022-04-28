@@ -438,11 +438,11 @@ class ImportExportService
 
             $rank      = $teamScore->rank;
             $numPoints = $teamScore->numPoints;
-            if ($rank <= 4) {
+            if ($rank <= ($contest->getGoldMedals() ?? 4)) {
                 $awardString = 'Gold Medal';
-            } elseif ($rank <= 8) {
+            } elseif ($rank <= ($contest->getGoldMedals() ?? 4) + ($contest->getSilverMedals() ?? 4)) {
                 $awardString = 'Silver Medal';
-            } elseif ($rank <= 12 + $contest->getB()) {
+            } elseif ($rank <= ($contest->getGoldMedals() ?? 4) + ($contest->getSilverMedals() ?? 4) + ($contest->getBronzeMedals() ?? 4) + $contest->getB()) {
                 $awardString = 'Bronze Medal';
             } elseif ($numPoints >= $median) {
                 // Teams with equally solved number of problems get the same rank.
