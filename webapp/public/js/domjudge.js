@@ -718,13 +718,16 @@ function initializeAjaxModals()
 
 function pinScoreheader()
 {
-    var static_in_url = new URL(window.location.toString().toLowerCase()).searchParams.get("static");
-    var static_scoreboard = static_in_url==="true" || static_in_url==='1';
+    var $scoreHeader = $('.scoreheader');
+    if (!$scoreHeader.length) {
+        return;
+    }
+    var static_scoreboard = $scoreHeader.data('static');
     if (!static_scoreboard) {
         $('.scoreheader th').css('top', $('.fixed-top').css('height'));
         if ('ResizeObserver' in window) {
             var resizeObserver = new ResizeObserver(() => {
-                $('.scoreheader th').css('top', $('.fixed-top').css('height'));
+                $scoreHeader.find('th').css('top', $('.fixed-top').css('height'));
             });
             resizeObserver.observe($('.fixed-top')[0]);
         }
