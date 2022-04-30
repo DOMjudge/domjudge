@@ -9,10 +9,11 @@ monolog:
             type: stream
             path: "%kernel.logs_dir%/%kernel.environment%.log"
             level: debug
+            channels: ["!event-feed-importer"]
         console:
             type: console
             process_psr_3_messages: false
-            channels: ["!event", "!doctrine", "!request"]
+            channels: ["!event", "!doctrine", "!request", "!event-feed-importer"]
         deprecation:
             type: stream
             path: "%kernel.logs_dir%/%kernel.environment%.deprecations.log"
