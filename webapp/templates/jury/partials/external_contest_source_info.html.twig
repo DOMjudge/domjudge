@@ -34,7 +34,14 @@
             {% if externalContestSource.password %}
                 <tr>
                     <th>Password</th>
-                    <td><code>{{ externalContestSource.password }}</code></td>
+                    <td>
+                        <code data-password-hidden>
+                            {% for i in 0..(externalContestSource.password|length) %}•{% endfor %}
+                        </code>
+                        <code data-password class="d-none">
+                            {{ externalContestSource.password }}
+                        </code>
+                    </td>
                 </tr>
             {% endif %}
             <tr>
@@ -76,3 +83,24 @@
         </table>
     </div>
 </div>
+
+<style>
+    code[data-password], code[data-password-hidden] {
+        cursor: pointer;
+    }
+</style>
+
+<script>
+    $(function() {
+        var $password = $('code[data-password]');
+        var $passwordHidden = $('code[data-password-hidden]');
+        $password.on('click', function() {
+            $password.addClass('d-none');
+            $passwordHidden.removeClass('d-none');
+        });
+        $passwordHidden.on('click', function() {
+            $passwordHidden.addClass('d-none');
+            $password.removeClass('d-none');
+        });
+    });
+</script>
