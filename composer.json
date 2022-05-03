@@ -76,6 +76,7 @@
 		"sebastian/diff": "^4.0",
 		"select2/select2": "4.*",
 		"sensio/framework-extra-bundle": "^6.0.0",
+		"sentry/sentry-symfony": "^4.2",
 		"symfony/asset": "5.4.*",
 		"symfony/browser-kit": "5.4.*",
 		"symfony/console": "5.4.*",
