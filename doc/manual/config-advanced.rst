@@ -411,3 +411,15 @@ full filesystem path of your installation) binary with the `cache:clear` subcomm
   webapp/bin/console cache:clear
 
 Note that this is different than clearing the scoreboard cache.
+
+Sending errors to Sentry
+------------------------
+
+DOMjudge has the possibility to send any errors to `Sentry`_. First, create an
+organization and project in Sentry and copy the Sentry DSN. Then create the file
+``webapp/.env.local`` and add to it the setting ``SENTRY_DSN=<dsn>`` where
+``<dsn>`` is the Sentry DSN you copied. Then :ref:`clear the cache <clear-cache>`
+for this change to take effect. Now all errors should appear in Sentry
+automatically.
+
+.. _Sentry: http://sentry.io

@@ -5,6 +5,9 @@
     "brick/math": {
         "version": "0.9.3"
     },
+    "clue/stream-filter": {
+        "version": "v1.6.0"
+    },
     "components/flag-icon-css": {
         "version": "3.5.0"
     },
@@ -157,8 +160,14 @@
     "guzzlehttp/psr7": {
         "version": "1.8.3"
     },
+    "http-interop/http-factory-guzzle": {
+        "version": "1.2.0"
+    },
     "ircmaxell/password-compat": {
         "version": "v1.0.4"
+    },
+    "jean85/pretty-package-versions": {
+        "version": "2.0.5"
     },
     "jms/metadata": {
         "version": "2.0.0"
@@ -229,6 +238,24 @@
     "phar-io/version": {
         "version": "2.0.1"
     },
+    "php-http/client-common": {
+        "version": "2.5.0"
+    },
+    "php-http/discovery": {
+        "version": "1.14.1"
+    },
+    "php-http/httplug": {
+        "version": "2.3.0"
+    },
+    "php-http/message": {
+        "version": "1.13.0"
+    },
+    "php-http/message-factory": {
+        "version": "v1.0.2"
+    },
+    "php-http/promise": {
+        "version": "1.1.0"
+    },
     "phpdocumentor/reflection-common": {
         "version": "1.0.1"
     },
@@ -281,6 +308,12 @@
     },
     "psr/event-dispatcher": {
         "version": "1.0.0"
+    },
+    "psr/http-client": {
+        "version": "1.0.1"
+    },
+    "psr/http-factory": {
+        "version": "1.0.1"
     },
     "psr/http-message": {
         "version": "1.0.1"
@@ -358,6 +391,24 @@
         },
         "files": [
             "webapp/config/packages/sensio_framework_extra.yaml"
+        ]
+    },
+    "sentry/sdk": {
+        "version": "3.1.1"
+    },
+    "sentry/sentry": {
+        "version": "3.4.0"
+    },
+    "sentry/sentry-symfony": {
+        "version": "4.2",
+        "recipe": {
+            "repo": "github.com/symfony/recipes-contrib",
+            "branch": "main",
+            "version": "3.0",
+            "ref": "9746f0823302d7980e5273ef7a69ef3f5ac80914"
+        },
+        "files": [
+            "webapp/config/packages/sentry.yaml"
         ]
     },
     "squizlabs/php_codesniffer": {
@@ -577,11 +628,17 @@
     "symfony/polyfill-php81": {
         "version": "v1.23.0"
     },
+    "symfony/polyfill-uuid": {
+        "version": "v1.25.0"
+    },
     "symfony/property-access": {
         "version": "v4.3.2"
     },
     "symfony/property-info": {
         "version": "v4.3.2"
+    },
+    "symfony/psr-http-message-bridge": {
+        "version": "v2.1.2"
     },
     "symfony/routing": {
         "version": "5.4",
