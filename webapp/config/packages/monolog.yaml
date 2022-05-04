@@ -1,6 +1,5 @@
 monolog:
     # Set up logger for the event feed importer.
-    # Note that all other handlers need "!event-feed-importer" in their channels
     # key, to make sure the logs don't also appear there.
     channels: ["event-feed-importer"]
     handlers:
