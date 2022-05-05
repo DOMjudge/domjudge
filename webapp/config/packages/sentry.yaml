@@ -9,7 +9,7 @@ services:
         arguments:
             $options:
                 ignore_exceptions:
-                    # Ignore this exeption. It is thrown before being redirected
+                    # Ignore this exception. It is thrown before being redirected
                     # to a login page or showing a 403. The former we do not want
                     # to show in Sentry and the latter triggers a AccessDeniedHttpException
                     - Symfony\Component\Security\Core\Exception\AccessDeniedException
