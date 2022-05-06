@@ -62,6 +62,7 @@ home directory::
   sudo make install-judgehost
 
 The judgedaemon can be run on various hardware configurations;
+
 - A virtual machine, typically these have 1 or 2 cores and no hyperthreading, because the kernel will schedule its own tasks on CPU 0, we advice CPU 1,
 - A default office machine, these sometimes have hyperthreading. Verify if the machine has hyperthreading and consider turning it off and as a rule of thumb pick CPU 2 as CPU 1 could be a hyperthreading core, be on the same die as CPU 0 and therefore share memory with that CPU. If more cores available as a rule of thumb moving to the highest CPU should be considered.
 - Multiple on a single high-grade server with multiple CPUs or a CPU with multiple cores. Check for hyperthreading and if possible run the judgedaemons on separate CPU packages/dies both from each other and when possible different from CPU 0. See the section :ref:`multiple-judgedaemons` for running multiple judgedaemons on a single host.
