@@ -105,11 +105,11 @@
 	},
 	"require-dev": {
 		"ext-dom": "*",
-		"dama/doctrine-test-bundle": "^6.7",
+		"dama/doctrine-test-bundle": "^7.0",
 		"squizlabs/php_codesniffer": "*",
 		"symfony/debug-bundle": "5.4.*",
-		"symfony/maker-bundle": "^1.13",
-		"symfony/phpunit-bridge": "5.4.*",
+		"symfony/maker-bundle": "^1.42",
+		"symfony/phpunit-bridge": "6.0.*",
 		"symfony/var-dumper": "5.4.*"
 	},
 	"autoload": {
