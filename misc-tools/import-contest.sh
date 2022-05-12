@@ -194,7 +194,7 @@ if [ -r problems.yaml ] || [ -r problems.json ] || [ -r problemset.yaml ]; then
             read -r -p "Please specify the contest id: " cid
         fi
         if [ -r problems.yaml ]; then
-            probs=$(grep -oP "(?<=id:\s)[',\"]?[[:alnum:]]*[',\"]?(?=,|$)" problems.yaml)
+            probs=$(grep -oP "(?<=id:\s)\s*[',\"]?[[:alnum:]]*[',\"]?(?=,|$)" problems.yaml)
         elif [ -r problems.json ]; then
             probs=$(jq -r '.[].id' < problems.json)
         else
