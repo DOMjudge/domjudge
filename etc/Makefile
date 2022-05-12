@@ -26,7 +26,7 @@ config: $(SUBST_CONFIGS)
 
 domserver: apache.conf nginx-conf nginx-conf-inner $(SECRETS)
 
-judgehost:
+judgehost: restapi.secret
 
 $(SECRETS):
 	./gen_all_secrets $(subst 1,-q,$(QUIET))
@@ -40,7 +40,7 @@ install-domserver:
 		verdicts.php db-config.yaml
 # Password files are installed from root Makefile.
 
-install-judgehost:
+install-judgehost: judgehost-static.php sudoers-domjudge
 	$(INSTALL_DATA) -t $(DESTDIR)$(judgehost_etcdir) \
 		judgehost-static.php sudoers-domjudge genrestapicredentials
 	$(INSTALL_DATA) -t $(DESTDIR)$(judgehost_etcdir) \
