@@ -423,4 +423,13 @@ class TeamController extends BaseController
             'form' => $form->createView(),
         ]);
     }
+
+    /**
+     * @Route("/deleteList", name="jury_teams_delete")
+     * @IsGranted("ROLE_ADMIN")
+     */
+    public function deleteListAction(Request $request): Response
+    {
+        return parent::deleteListActionHelper($request, Team::class, 'jury_teams', 'team');
+    }
 }

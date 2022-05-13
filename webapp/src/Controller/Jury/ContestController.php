@@ -961,4 +961,13 @@ class ContestController extends BaseController
         }
         return $this->redirect($this->generateUrl('jury_contest', ['contestId' => $contestId]));
     }
+
+    /**
+     * @Route("/deleteList", name="jury_contests_delete")
+     * @IsGranted("ROLE_ADMIN")
+     */
+    public function deleteListAction(Request $request): Response
+    {
+        return $this->deleteListActionHelper($request, Contest::class, 'jury_contests', 'contest');
+    }
 }

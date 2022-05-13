@@ -1126,4 +1126,13 @@ class ProblemController extends BaseController
         $this->judgeRemaining($judgings);
         return $this->redirect($this->generateUrl('jury_problem', ['probId' => $probId]));
     }
+
+    /**
+     * @Route("/deleteList", name="jury_problems_delete")
+     * @IsGranted("ROLE_ADMIN")
+     */
+    public function deleteListAction(Request $request): Response
+    {
+        return parent::deleteListActionHelper($request, Problem::class, 'jury_problems', 'problem');
+    }
 }

@@ -372,7 +372,7 @@ abstract class BaseController extends AbstractController
 
         [$isError, $primaryKeyData, $deleteTreeMessages] = $this->buildDeleteTree($entities, $relations, $entityManager);
         if (!empty($deleteTreeMessages)) {
-            $messages = $deleteTreeMessages;
+            $messages = array_unique($deleteTreeMessages);
         }
 
         // Check if we handle a list of deletable entities.
@@ -566,5 +566,30 @@ abstract class BaseController extends AbstractController
         } else {
             $this->addFlash('info', "Requested $numRequested remaining runs to be judged.");
         }
+    }
+
+    public function deleteListActionHelper(Request $request, string $class, string $redirectRoute, string $classHumanReadable): Response
+    {
+        $checkboxPrefix = 'ident';
+        $entitiesToDelete = [];
+        foreach (array_keys($request->request->all()) as $key) {
+            if (strpos($key, $checkboxPrefix) !== 0) {
+                continue;
+            }
+            $entityId = substr($key, strlen($checkboxPrefix));
+            $entity = $this->em->getRepository($class)->find($entityId);
+            if (!$entity) {
+                throw new NotFoundHttpException(sprintf('%s with ID %s not found', ucfirst($classHumanReadable), $entityId));
+            }
+            $entitiesToDelete[] = $entity;
+        }
+
+        if (count($entitiesToDelete) === 0) {
+            $this->addFlash('warning', sprintf('No %ss selected.', $classHumanReadable)); 
+            return $this->redirectToRoute($redirectRoute);
+        }
+
+        return $this->deleteEntities($request, $this->em, $this->dj, $this->eventLogService, $this->kernel,
+                                     $entitiesToDelete, $this->generateUrl($redirectRoute));
     }
 }
