@@ -8,9 +8,9 @@
 			"type": "package",
 			"package": {
 				"name": "fortawesome/font-awesome",
-				"version": "6.0.0",
+				"version": "6.1.1",
 				"dist": {
-					"url": "https://github.com/FortAwesome/Font-Awesome/releases/download/6.0.0/fontawesome-free-6.0.0-web.zip",
+					"url": "https://github.com/FortAwesome/Font-Awesome/releases/download/6.1.1/fontawesome-free-6.1.1-web.zip",
 					"type": "zip"
 				}
 			}
@@ -19,9 +19,9 @@
 			"type": "package",
 			"package": {
 				"name": "angel-vladov/select2-theme-bootstrap4",
-				"version": "1.0.0",
+				"version": "1.0.1",
 				"dist": {
-					"url": "https://github.com/angel-vladov/select2-theme-bootstrap4/archive/1.0.0.zip",
+					"url": "https://github.com/angel-vladov/select2-theme-bootstrap4/archive/1.0.1.zip",
 					"type": "zip"
 				}
 			}
@@ -30,9 +30,9 @@
 			"type": "package",
 			"package": {
 				"name": "eligrey/filesaver",
-				"version": "2.0.2",
+				"version": "2.0.4",
 				"dist": {
-					"url": "https://github.com/eligrey/FileSaver.js/archive/v2.0.2.zip",
+					"url": "https://github.com/eligrey/FileSaver.js/archive/v2.0.4.zip",
 					"type": "zip"
 				}
 			}
