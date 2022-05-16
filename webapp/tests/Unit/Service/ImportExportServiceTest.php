@@ -341,6 +341,7 @@ team	Team 2 user a	team02a	password3	5.6.7.8
 team	Team 2 user b	team02b	password4
 judge	Judge member 1	judge1	password5
 judge	Another judge member	judge2	password6	9.10.11.12
+jury	Wrongly named judge member	judge3	password6	9.10.11.12
 admin	Some admin	adminx	password7
 admin	Another admin	adminy	password8
 analyst	Analyst number 1	analyst1	password9	13.14.15.16
@@ -391,6 +392,12 @@ EOF;
   name: Another judge member
   password: password6
   type: judge
+  ip: 9.10.11.12
+- id: judge3
+  username: judge3
+  name: Wrongly named judge member
+  password: password6
+  type: jury
   ip: 9.10.11.12
 - id: adminx
   username: adminx
@@ -470,6 +477,18 @@ EOF;
                     'name' => 'Another judge member',
                     'category' => 'Jury',
                     'members' => 'Another judge member',
+                ],
+            ],
+            [
+                'roles' => ['jury', 'team'],
+                'name' => 'Wrongly named judge member',
+                'username' => 'judge3',
+                'password' => 'password6',
+                'ip' => '9.10.11.12',
+                'team' => [
+                    'name' => 'Wrongly named judge member',
+                    'category' => 'Jury',
+                    'members' => 'Wrongly named judge member',
                 ],
             ],
             [

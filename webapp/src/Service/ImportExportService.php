@@ -851,6 +851,7 @@ class ImportExportService
                 case 'admin':
                     $roles[] = $adminRole;
                     break;
+                case 'jury': // We don't break to let non existing role jury be interpret as role judge
                 case 'judge':
                     $roles[]  = $juryRole;
                     $roles[]  = $teamRole;
@@ -1154,6 +1155,7 @@ class ImportExportService
                 case 'admin':
                     $roles[] = $adminRole;
                     break;
+                case 'jury': // We don't break to let non existing role jury be interpret as role judge
                 case 'judge':
                     $roles[]  = $juryRole;
                     $roles[]  = $teamRole;
