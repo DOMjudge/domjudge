@@ -1182,7 +1182,13 @@ int main(int argc, char **argv)
 	/* Define the cgroup name that we will use and make sure it will
 	 * be unique. Note: group names must have slashes!
 	 */
-	snprintf(cgroupname, 255, "/domjudge/dj_cgroup_%d_%d/", getpid(), (int)time(NULL));
+	if ( cpuset!=NULL && strlen(cpuset)>0 ) {
+		strncpy(str, cpuset, 16);
+	} else {
+		str[0] = 0;
+	}
+	snprintf(cgroupname, 255, "/domjudge/dj_cgroup_%d_%.16s_%d.%06d/",
+	         getpid(), str, (int)progstarttime.tv_sec, (int)progstarttime.tv_usec);
 
 	cgroup_create();
 
