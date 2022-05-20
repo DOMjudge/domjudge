@@ -832,6 +832,7 @@ class ImportExportService
         $teamRole     = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'team']);
         $juryRole     = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'jury']);
         $adminRole    = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'admin']);
+        $balloonRole  = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'balloon']);
         $juryCategory = $this->em->getRepository(TeamCategory::class)->findOneBy(['name' => 'Jury']);
         if (!$juryCategory) {
             $juryCategory = new TeamCategory();
@@ -864,6 +865,9 @@ class ImportExportService
                     break;
                 case 'team':
                     $roles[] = $teamRole;
+                    break;
+                case 'balloon':
+                    $roles[] = $balloonRole;
                     break;
                 case 'analyst':
                 case 'staff':
@@ -1132,6 +1136,7 @@ class ImportExportService
         $teamRole    = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'team']);
         $juryRole    = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'jury']);
         $adminRole   = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'admin']);
+        $balloonRole  = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'balloon']);
 
         $juryCategory = $this->em->getRepository(TeamCategory::class)->findOneBy(['name' => 'Jury']);
         if (!$juryCategory) {
@@ -1183,6 +1188,9 @@ class ImportExportService
                         $message = sprintf('unknown team id %s on line %d', $teamId, $l);
                         return -1;
                     }
+                    break;
+                case 'balloon':
+                    $roles[] = $balloonRole;
                     break;
                 case 'analyst':
                     // Ignore type analyst for now. We don't have a useful mapping yet.
