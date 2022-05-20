@@ -851,10 +851,12 @@ class ImportExportService
             switch ($account['type']) {
                 case 'admin':
                     $roles[] = $adminRole;
-                    break;
+                    // Don't break so we can also add the jury features
                 case 'jury': // We don't break to let non existing role jury be interpret as role judge
                 case 'judge':
-                    $roles[]  = $juryRole;
+                    if ($account['type'] !== 'admin') {
+                        $roles[] = $juryRole;
+                    }
                     $roles[]  = $teamRole;
                     $juryTeam = [
                         'name'              => $account['name'] ?? $account['username'],
@@ -1159,10 +1161,12 @@ class ImportExportService
             switch ($line[0]) {
                 case 'admin':
                     $roles[] = $adminRole;
-                    break;
+                    // Don't break so we can also add the jury features
                 case 'jury': // We don't break to let non existing role jury be interpret as role judge
                 case 'judge':
-                    $roles[]  = $juryRole;
+                    if ($line[0] !== 'admin') {
+                        $roles[] = $juryRole;
+                    }
                     $roles[]  = $teamRole;
                     $juryTeam = ['name' => $line[1], 'externalid' => $line[2], 'category' => $juryCategory, 'publicdescription' => $line[1]];
                     break;

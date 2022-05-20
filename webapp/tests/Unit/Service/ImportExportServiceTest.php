@@ -504,16 +504,26 @@ EOF;
                 ],
             ],
             [
-                'roles' => ['admin'],
+                'roles' => ['admin','team'],
                 'name' => 'Some admin',
                 'username' => 'adminx',
                 'password' => 'password7',
+                'team' => [
+                    'name' => 'Some admin',
+                    'category' => 'Jury',
+                    'members' => 'Some admin',
+                ],
             ],
             [
-                'roles' => ['admin'],
+                'roles' => ['admin','team'],
                 'name' => 'Another admin',
                 'username' => 'adminy',
                 'password' => 'password8',
+                'team' => [
+                    'name' => 'Another admin',
+                    'category' => 'Jury',
+                    'members' => 'Another admin',
+                ],
             ],
             [
                 'roles' => ['balloon'],
