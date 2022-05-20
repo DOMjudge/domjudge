@@ -346,6 +346,8 @@ admin	Some admin	adminx	password7
 admin	Another admin	adminy	password8
 analyst	Analyst number 1	analyst1	password9	13.14.15.16
 analyst	Analyst two	analyst2	password10
+balloon	Balloon station	balloon1	password11
+balloon	Backup balloon station	balloon2	password12
 EOF;
 
         $fileName = tempnam(static::getContainer()->get(DOMJudgeService::class)->getDomjudgeTmpDir(), 'accounts-tsv');
@@ -420,6 +422,16 @@ EOF;
   name: Analyst two
   password: password10
   type: analyst
+- id: balloon1
+  username: balloon1
+  name: Balloon station
+  password: password11
+  type: balloon
+- id: balloon2
+  username: balloon2
+  name: Backup balloon station
+  password: password12
+  type: balloon
 EOF;
 
         $fileName = tempnam(static::getContainer()->get(DOMJudgeService::class)->getDomjudgeTmpDir(), 'accounts-yaml');
@@ -502,6 +514,18 @@ EOF;
                 'name' => 'Another admin',
                 'username' => 'adminy',
                 'password' => 'password8',
+            ],
+            [
+                'roles' => ['balloon'],
+                'name' => 'Balloon station',
+                'username' => 'balloon1',
+                'password' => 'password11',
+            ],
+            [
+                'roles' => ['balloon'],
+                'name' => 'Backup balloon station',
+                'username' => 'balloon2',
+                'password' => 'password12',
             ],
         ];
         if ($forTsv) {

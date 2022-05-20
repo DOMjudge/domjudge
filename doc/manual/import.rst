@@ -206,7 +206,7 @@ fields:
 - ``id``: the account ID. Must be unique
 - ``username``: the account username. Must be unique
 - ``password``: the password to use for the account
-- ``type``: the user type, one of ``team``, ``judge`` or ``admin``, ``jury`` will be interpret as ``judge``
+- ``type``: the user type, one of ``team``, ``judge``, ``admin`` or ``balloon``, ``jury`` will be interpret as ``judge``
 - ``team_id``: (optional) the external ID of the team this account belongs to
 - ``name``: (optional) the full name of the account
 - ``ip`` (optional): IP address to link to this account
@@ -252,7 +252,7 @@ Prepare a file called ``accounts.tsv`` which contains the team credentials.
 The first line should contain ``accounts  1`` (tab-separated).
 Each of the following lines must contain the following elements separated by tabs:
 
-- the user type, one of ``team``, ``judge`` or ``admin``, ``jury`` will be interpret as ``judge``
+- the user type, one of ``team``, ``judge``, ``admin`` or ``balloon``, ``jury`` will be interpret as ``judge``
 - the full name of the user
 - the username
 - the password
