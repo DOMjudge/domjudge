@@ -7,6 +7,11 @@ use Doctrine\Migrations\AbstractMigration;
 
 final class Version20190827175633 extends AbstractMigration
 {
+    public function isTransactional(): bool
+    {
+        return false;
+    }
+
     public function getDescription() : string
     {
         return 'add flag to filter compile files to language table';

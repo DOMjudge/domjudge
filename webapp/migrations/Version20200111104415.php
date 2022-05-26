@@ -17,6 +17,11 @@ final class Version20200111104415 extends AbstractMigration implements Container
 {
     use ContainerAwareTrait;
 
+    public function isTransactional(): bool
+    {
+        return false;
+    }
+
     public function getDescription(): string
     {
         return 'remove configuration options with default values';

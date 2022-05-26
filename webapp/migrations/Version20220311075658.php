@@ -12,6 +12,11 @@ use Doctrine\Migrations\AbstractMigration;
  */
 final class Version20220311075658 extends AbstractMigration
 {
+    public function isTransactional(): bool
+    {
+        return false;
+    }
+
     public function getDescription(): string
     {
         return 'Clarify difference between internal and external freeform fields.';

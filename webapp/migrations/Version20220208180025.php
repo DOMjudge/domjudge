@@ -12,6 +12,11 @@ use Doctrine\Migrations\AbstractMigration;
  */
 final class Version20220208180025 extends AbstractMigration
 {
+    public function isTransactional(): bool
+    {
+        return false;
+    }
+
     public function getDescription() : string
     {
         return 'Rename judgehost active to enabled';

@@ -12,6 +12,11 @@ use Doctrine\Migrations\AbstractMigration;
  */
 final class Version20191119183145 extends AbstractMigration
 {
+    public function isTransactional(): bool
+    {
+        return false;
+    }
+
     public function getDescription() : string
     {
         return 'add (cid, endpointtype, endpointid) index to event table';

@@ -7,6 +7,11 @@ use Doctrine\Migrations\AbstractMigration;
 
 final class Version20190803151406 extends AbstractMigration
 {
+    public function isTransactional(): bool
+    {
+        return false;
+    }
+
     public function getDescription(): string
     {
         return 'Change table structure to reflect Doctrine entities.';

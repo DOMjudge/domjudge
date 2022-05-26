@@ -17,6 +17,11 @@ final class Version20191031203138 extends AbstractMigration implements Container
 {
     use ContainerAwareTrait;
 
+    public function isTransactional(): bool
+    {
+        return false;
+    }
+
     public function getDescription(): string
     {
         return 'add .py to Python 3 extension list and remove it for Python 2';

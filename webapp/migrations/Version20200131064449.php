@@ -15,6 +15,11 @@ final class Version20200131064449 extends AbstractMigration implements Container
 {
     use ContainerAwareTrait;
 
+    public function isTransactional(): bool
+    {
+        return false;
+    }
+
     public function getDescription() : string
     {
         return 'replace configuration option registration_category_name with a boolean field for each category';
