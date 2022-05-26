@@ -1,5 +1,5 @@
 visual_pr:
-  extends: [.mariadb_job,.long_job]
+  extends: [.mariadb_job,.long_job,.cached_vendor]
   stage: visual_pre
   variables:
     MYSQL_ROOT_PASSWORD: password
@@ -29,7 +29,7 @@ visual_pr:
       - wget.log
 
 visual_main:
-  extends: [.mariadb_job,.long_job]
+  extends: [.mariadb_job,.long_job,.cached_vendor]
   stage: visual_pre
   variables:
     MYSQL_ROOT_PASSWORD: password
