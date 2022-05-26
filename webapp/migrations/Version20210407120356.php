@@ -13,6 +13,11 @@ use ZipArchive;
  */
 final class Version20210407120356 extends AbstractMigration
 {
+    public function isTransactional(): bool
+    {
+        return false;
+    }
+
     public function getDescription() : string
     {
         return 'Populate immutable executable tables.';

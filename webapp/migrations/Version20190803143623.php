@@ -7,6 +7,11 @@ use Doctrine\Migrations\AbstractMigration;
 
 final class Version20190803143623 extends AbstractMigration
 {
+    public function isTransactional(): bool
+    {
+        return false;
+    }
+
     public function getDescription(): string
     {
         return 'split contest.public in contest.public and contest.open_to_all_teams';

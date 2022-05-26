@@ -9,6 +9,11 @@ use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 
 final class Version20190803123217 extends AbstractMigration
 {
+    public function isTransactional(): bool
+    {
+        return false;
+    }
+
     public function getDescription(): string
     {
         return 'Migrate database to DOMjudge version 7.0.0';

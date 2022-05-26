@@ -7,6 +7,11 @@ use Doctrine\Migrations\AbstractMigration;
 
 final class Version20190803145008 extends AbstractMigration
 {
+    public function isTransactional(): bool
+    {
+        return false;
+    }
+
     public function getDescription(): string
     {
         return 'move testcase and judging run fields with lots of data to separate tables';

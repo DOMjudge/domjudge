@@ -10,6 +10,11 @@ use Doctrine\Migrations\AbstractMigration;
  */
 final class Version20190803144354 extends AbstractMigration
 {
+    public function isTransactional(): bool
+    {
+        return false;
+    }
+
     public function getDescription(): string
     {
         return 'add external judgements and runs';
