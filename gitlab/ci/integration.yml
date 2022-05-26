@@ -1,5 +1,5 @@
 .integration_job:
-  extends: [.long_job]
+  extends: [.long_job,.cached_vendor]
   stage: integration
   script:
     - set -eux
@@ -11,10 +11,6 @@
     when: always
     paths:
       - gitlabartifacts
-  cache:
-    key: integration
-    paths:
-      - lib/vendor/
 
 # TODO: Re-enable when gitlab is in better shape...
 #  cache:

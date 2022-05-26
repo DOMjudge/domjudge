@@ -24,6 +24,13 @@
   extends: [.clean_ordering]
   timeout: 30m
 
+.cached_vendor:
+  extends: [.clean_ordering]
+  cache:
+    key: libvendor-260522
+    paths:
+      - lib/vendor/
+
 .mysql_job:
   script:
     - /bin/true

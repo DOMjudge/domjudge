@@ -1,5 +1,5 @@
 .unit_job:
-  extends: [.normal_job]
+  extends: [.normal_job,.cached_vendor]
   stage: unit
   # Disabled for now as it drastically speeds up running unit tests and we don't use it yet
   # before_script:
@@ -27,10 +27,6 @@
     reports:
       junit:
         - unit-tests.xml
-  cache:
-    key: unit-tests
-    paths:
-      - lib/vendor/
 
 run runpipe tests:
   extends: [.normal_job]
