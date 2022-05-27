@@ -587,7 +587,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
     {
         return [
             'organization_id' => $this->getAffiliation(),
-            'group_ids'       => [$this->getCategory()],
+            'group_ids'       => array_values(array_filter([$this->getCategory()])),
         ];
     }
 
