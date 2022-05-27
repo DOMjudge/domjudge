@@ -148,7 +148,7 @@ class TeamAffiliation extends BaseApiEntity implements AssetEntityInterface
     public function setShortname(string $shortname): TeamAffiliation
     {
         // Truncate shortname here to make the import more robust. TODO: is this the right place/behavior?
-        $this->shortname = substr($shortname, 0, 32);
+        $this->shortname = mb_substr($shortname, 0, 32);
         return $this;
     }
 
