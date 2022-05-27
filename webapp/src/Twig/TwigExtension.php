@@ -21,6 +21,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityManagerInterface;
 use SebastianBergmann\Diff\Differ;
 use Symfony\Component\Intl\Countries;
+use Symfony\Component\Intl\Exception\MissingResourceException;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Twig\Environment;
@@ -286,7 +287,11 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
     {
         if (empty($alpha3CountryCode)) return '';
 
-        $countryAlpha2  = strtolower(Countries::getAlpha2Code($alpha3CountryCode));
+        try {
+            $countryAlpha2 = strtolower(Countries::getAlpha2Code($alpha3CountryCode));
+        } catch (MissingResourceException $e) {
+            return '';
+        }
         $assetFunction  = $this->twig->getFunction('asset')->getCallable();
         $countryFlagUrl = call_user_func($assetFunction, sprintf('flags/4x3/%s.svg', $countryAlpha2));
 
