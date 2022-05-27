@@ -27,7 +27,6 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use JsonException;
 use LogicException;
-use mysql_xdevapi\Warning;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpClient\Exception\TransportException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -1363,12 +1362,7 @@ class ExternalContestSourceService
             } else {
                 $zipUrl = $event['data']['files'][0]['href'];
                 if (preg_match('/^https?:\/\//', $zipUrl) === 0) {
-                    // Relative URL. First check if it starts with a /. If so, remove it as our baseurl already contains it
-                    if (strpos($zipUrl, '/') === 0) {
-                        $zipUrl = substr($zipUrl, 1);
-                    }
-
-                    // Now prepend the base URL.
+                    // Relative URL, prepend the base URL.
                     $zipUrl = ($this->basePath ?? '') . $zipUrl;
                 }
 
@@ -1395,17 +1389,15 @@ class ExternalContestSourceService
                         if ($response->getStatusCode() !== 200) {
                             // TODO: Retry a couple of times.
                             $this->addOrUpdateWarning($event, ExternalSourceWarning::TYPE_SUBMISSION_ERROR, [
-                                'message' => 'Cannot download ZIP',
+                                'message' => 'Cannot download ZIP from ' . $zipUrl,
                             ]);
-                            exit;
                             unlink($zipFile);
                             return;
                         }
                     } catch (TransportExceptionInterface $e) {
                         $this->addOrUpdateWarning($event, ExternalSourceWarning::TYPE_SUBMISSION_ERROR, [
-                            'message' => 'Cannot download ZIP: ' . $e->getMessage(),
+                            'message' => 'Cannot download ZIP from ' . $zipUrl . ': ' . $e->getMessage(),
                         ]);
-                        exit;
                         unlink($zipFile);
                         return;
                     }
