@@ -1,7 +1,7 @@
 DOMjudge Programming Contest Judging System
 
-Version 8.1.0 - DEV
--------------------
+Version 8.1.0 - 1 June 2022
+---------------------------
  - Document that minimum PHP version is now 7.4.0.
  - Add support for PHP 8.1.
  - Upgrade Symfony to 5.4 LTS and upgrade other library dependencies.
@@ -10,6 +10,27 @@ Version 8.1.0 - DEV
    supported by `date`.
  - Dropped the presentation-error verdict, databases from before DOMjudge 5.0
    will be altered to replace the verdict with wrong-answer.
+ - Changed API import to give admin users a team.
+ - Balloon users can now be created via the API.
+ - Shadow mode will now fix missing data by reading from the primary CCS.
+ - Fixed cgroup naming for docker to prevent sharing the same container.
+ - Removed python2 in the chroot, remove python3 in favor of pypy3 in chroot.
+ - Added support for sentry for logging.
+ - Added default external IDs on all places.
+ - Fixed medals on scoreboard for filtered scoreboards.
+ - Dropped old balloons CLI.
+ - Reimplementation of runpipe for interactive problems.
+ - Individual files can now be removed from executables.
+ - Added mysql socket option, for when port/IP is not used.
+ - Added support for accounts.{yaml,json} for import script.
+ - Added support for judgeremaining for problems.
+ - Add option to delete existing testcases/attachments/other data when
+   importing a problem.
+ - Dropped support for ICPC results HTML export feature.
+ - Balloon runners can now always see the frozen scoreboard.
+ - Custom CSS can now be used for the login page.
+ - Removed option to use multiple timezones in same contest.
+ - Fixed kotlin compile script for modern versions.
 
 Version 8.0.0 - 30 January 2022
 -------------------------------
