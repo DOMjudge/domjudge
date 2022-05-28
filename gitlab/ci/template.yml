@@ -19,6 +19,13 @@
     - LOG=${CI_JOB_NAME// /_}.txt
     - echo "job_end" $(date +%s) >> ./duration/$LOG
 
+.cached_vendor:
+  extends: [.clean_ordering]
+  cache:
+    key: libvendor-80-280522
+    paths:
+      - lib/vendor/
+
 .tiny_job:
   extends: [.clean_ordering]
   timeout: 3m
