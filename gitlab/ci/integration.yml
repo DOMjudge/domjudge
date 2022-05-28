@@ -1,5 +1,5 @@
 .integration_job:
-  extends: [.long_job]
+  extends: [.long_job,.cached_vendor]
   stage: integration
   script:
     - if [ -z ${PHPVERSION+x} ]; then export PHPVERSION=7.4; fi
@@ -9,10 +9,6 @@
     paths:
       - gitlabartifacts
       - duration
-  cache:
-    key: integration
-    paths:
-      - lib/vendor/
 
 # TODO: Re-enable when gitlab is in better shape...
 #  cache:
