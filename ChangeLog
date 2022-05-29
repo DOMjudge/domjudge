@@ -9,7 +9,7 @@ Version 8.1.0 - DEV
    configured a custom `time_format`, you need to update it to the format
    supported by `date`.
  - Dropped the presentation-error verdict, databases from before DOMjudge 5.0
- will be altered to replace the verdict with wrong-answer
+   will be altered to replace the verdict with wrong-answer.
 
 Version 8.0.0 - 30 January 2022
 -------------------------------
