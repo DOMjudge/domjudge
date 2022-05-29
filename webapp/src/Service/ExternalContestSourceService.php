@@ -935,23 +935,25 @@ class ExternalContestSourceService
             );
             $team = new Team();
             $this->em->persist($team);
-            if (!empty($event['data']['organization_id'])) {
-                $affiliation = $this->em->getRepository(TeamAffiliation::class)->findOneBy(['externalid' => $event['data']['organization_id']]);
-                if (!$affiliation) {
-                    $affiliation = new TeamAffiliation();
-                    $this->em->persist($affiliation);
-                }
-                $team->setAffiliation($affiliation);
-            }
-            if (!empty($event['data']['group_ids'][0])) {
-                $category = $this->em->getRepository(TeamCategory::class)->findOneBy(['externalid' => $event['data']['group_ids'][0]]);
-                if (!$category) {
-                    $category = new TeamCategory();
-                    $this->em->persist($category);
-                }
-                $team->setCategory($category);
-            }
             $action = EventLogService::ACTION_CREATE;
+        }
+
+        if (!empty($event['data']['organization_id'])) {
+            $affiliation = $this->em->getRepository(TeamAffiliation::class)->findOneBy(['externalid' => $event['data']['organization_id']]);
+            if (!$affiliation) {
+                $affiliation = new TeamAffiliation();
+                $this->em->persist($affiliation);
+            }
+            $team->setAffiliation($affiliation);
+        }
+
+        if (!empty($event['data']['group_ids'][0])) {
+            $category = $this->em->getRepository(TeamCategory::class)->findOneBy(['externalid' => $event['data']['group_ids'][0]]);
+            if (!$category) {
+                $category = new TeamCategory();
+                $this->em->persist($category);
+            }
+            $team->setCategory($category);
         }
 
         $this->removeWarning($event, ExternalSourceWarning::TYPE_ENTITY_NOT_FOUND);
