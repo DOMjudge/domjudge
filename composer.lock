@@ -6685,23 +6685,23 @@
         },
         {
             "name": "sentry/sentry-symfony",
-            "version": "4.2.10",
+            "version": "4.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/getsentry/sentry-symfony.git",
-                "reference": "d1d2895c028676113cb191516b80b91abcde31f3"
+                "reference": "12d0f9674b8a829fdf1a2cfbb3fd6b94ec4de893"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/getsentry/sentry-symfony/zipball/d1d2895c028676113cb191516b80b91abcde31f3",
-                "reference": "d1d2895c028676113cb191516b80b91abcde31f3",
+                "url": "https://api.github.com/repos/getsentry/sentry-symfony/zipball/12d0f9674b8a829fdf1a2cfbb3fd6b94ec4de893",
+                "reference": "12d0f9674b8a829fdf1a2cfbb3fd6b94ec4de893",
                 "shasum": ""
             },
             "require": {
                 "jean85/pretty-package-versions": "^1.5 || ^2.0",
                 "php": "^7.2||^8.0",
                 "php-http/discovery": "^1.11",
-                "sentry/sdk": "^3.1",
+                "sentry/sdk": "^3.2",
                 "symfony/cache-contracts": "^1.1||^2.4||^3.0",
                 "symfony/config": "^3.4.44||^4.4.20||^5.0.11||^6.0",
                 "symfony/console": "^3.4.44||^4.4.20||^5.0.11||^6.0",
@@ -6746,7 +6746,7 @@
             "type": "symfony-bundle",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "4.2.x-dev",
+                    "dev-master": "4.3.x-dev",
                     "releases/3.2.x": "3.2.x-dev",
                     "releases/2.x": "2.x-dev",
                     "releases/1.x": "1.x-dev"
@@ -6784,7 +6784,7 @@
             ],
             "support": {
                 "issues": "https://github.com/getsentry/sentry-symfony/issues",
-                "source": "https://github.com/getsentry/sentry-symfony/tree/4.2.10"
+                "source": "https://github.com/getsentry/sentry-symfony/tree/4.3.0"
             },
             "funding": [
                 {
@@ -6796,7 +6796,7 @@
                     "type": "custom"
                 }
             ],
-            "time": "2022-05-17T08:20:17+00:00"
+            "time": "2022-05-30T12:09:35+00:00"
         },
         {
             "name": "symfony/asset",
