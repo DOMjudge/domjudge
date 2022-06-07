@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 
-#
-# import-contest.py -- Convenience script to import a contest (including metadata, teams and
-# problems) via the command line. Supports reading credentials from ~/.netrc. See also
-# https://www.domjudge.org/docs/manual/main/import.html
-#
-# Part of the DOMjudge Programming Contest Jury System and licensed
-# under the GNU GPL. See README and COPYING for details.
-#
+'''
+import-contest.py -- Convenience script to import a contest (including metadata, teams and
+problems) via the command line. Supports reading credentials from ~/.netrc. See also
+https://www.domjudge.org/docs/manual/main/import.html
+
+Part of the DOMjudge Programming Contest Jury System and licensed
+under the GNU GPL. See README and COPYING for details.
+'''
 
 import fileinput
 import json
