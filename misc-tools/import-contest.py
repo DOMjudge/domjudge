@@ -39,6 +39,19 @@ def usage():
     print(f"Usage '{sys.argv[0]} <domjudge-api-url>")
     exit(1)
 
+def parse_api_response(name: str, response: requests.Response):
+    # The connection worked, but we may have received an HTTP error
+    if response.status_code >= 300:
+        print(response.text)
+        if response.status_code == 401:
+            raise RuntimeError(
+                "Authentication failed, please check your DOMjudge credentials in ~/.netrc.")
+        else:
+            raise RuntimeError(
+                f"API request {name} failed (code {response.status_code}).")
+
+    # We got a successful HTTP response. It worked. Return the full response
+    return json.loads(response.text)
 
 def do_api_request(name: str):
     '''Perform an API call to the given endpoint and return its data.
@@ -60,16 +73,7 @@ def do_api_request(name: str):
     except requests.exceptions.RequestException as e:
         raise RuntimeError(e)
 
-    if response.status_code >= 300:
-        print(response.text)
-        if response.status_code == 401:
-            raise RuntimeError(
-                'Authentication failed, please check your DOMjudge credentials in ~/.netrc.')
-        else:
-            raise RuntimeError(
-                f'API request {name} failed (code {response.status_code}).')
-
-    return json.loads(response.text)
+    return parse_api_response(name, response)
 
 
 def upload_file(name: str, apifilename: str, file: str, data: dict = {}):
@@ -93,18 +97,7 @@ def upload_file(name: str, apifilename: str, file: str, data: dict = {}):
 
     response = requests.post(url, files=files, headers=headers, data=data)
 
-    # The connection worked, but we may have received an HTTP error
-    if response.status_code >= 300:
-        print(response.text)
-        if response.status_code == 401:
-            raise RuntimeError(
-                "Authentication failed, please check your DOMjudge credentials in ~/.netrc.")
-        else:
-            raise RuntimeError(
-                f"File upload failed failed (code {response.status_code})")
-
-    # We got a successful HTTP response. It worked. Return the full response
-    return json.loads(response.text)
+    return parse_api_response(name, response)
 
 
 def import_file(basename: str, files: List[str]):
