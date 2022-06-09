@@ -360,11 +360,11 @@ Putting all API imports together
 
 If you prepare your contest configuration as we described in the previous
 subsections, you can also use the script that we provide in
-`misc-tools/import-contest.py`.
+`misc-tools/import-contest`.
 
 Call it from your contest folder like this::
 
-    misc-tools/import-contest.py <API_URL>
+    misc-tools/import-contest <API_URL>
 
 Importing from ICPC CMS API
 ---------------------------
