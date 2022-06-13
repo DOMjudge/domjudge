@@ -195,7 +195,7 @@ if os.path.exists("problems.yaml") or os.path.exists("problems.json") or os.path
                             for problem in problemData["problems"]]
 
         for problem in problems:
-            print(F"Preparing problem '{problem}'.")
+            print(f"Preparing problem '{problem}'.")
             if os.path.exists(f"{problem}.zip"):
                 os.unlink(f"{problem}.zip")
             if not os.path.isdir(problem) or not os.path.isfile(f"{problem}/problem.yaml"):
