@@ -154,7 +154,7 @@ if os.path.exists("contest.yaml"):
         cid = upload_file("contests", "yaml", file)
 elif os.path.exists("contest.json"):
     if confirm("Import contest metadata (from contest.json)?", True):
-        print(f"Importing contest.")
+        print("Importing contest.")
         cid = upload_file("contests", "json", "contest.json")
 else:
     print("Neither 'contest.yaml' nor 'contest.json' found, skipping contest metadata import.")
