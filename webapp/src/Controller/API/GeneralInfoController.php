@@ -39,8 +39,8 @@ class GeneralInfoController extends AbstractFOSRestController
 {
     protected const API_VERSION = 4;
 
-    public const CCS_SPEC_API_VERSION = '2021-11';
-    public const CCS_SPEC_API_URL = 'https://ccs-specs.icpc.io/2021-11/contest_api';
+    public const CCS_SPEC_API_VERSION = 'draft';
+    public const CCS_SPEC_API_URL = 'https://ccs-specs.icpc.io/master/contest_api';
 
     protected EntityManagerInterface $em;
     protected DOMJudgeService $dj;
@@ -98,7 +98,7 @@ class GeneralInfoController extends AbstractFOSRestController
      *     @OA\JsonContent(
      *         type="object",
      *         @OA\Property(property="version", type="string", description="Version of the CCS Specs Contest API the API adheres to"),
-     *         @OA\Property(property="version_url", type="string", description="URL with the speification of the Contest API"),
+     *         @OA\Property(property="version_url", type="string", description="URL with the specification of the Contest API"),
      *         @OA\Property(
      *             property="domjudge",
      *             type="object",
