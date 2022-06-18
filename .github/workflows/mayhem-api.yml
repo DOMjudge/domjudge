@@ -26,7 +26,7 @@ jobs:
         run: .github/workflowscripts/getapi.sh
 
       - name: Mayhem for API
-        uses: ForAllSecure/mapi-action@193b709971cc377675e33284aecbf9229853e010
+        uses: ForAllSecure/mapi-action@v1
         continue-on-error: true
         with:
           mapi-token: ${{ secrets.MAPI_TOKEN }}
