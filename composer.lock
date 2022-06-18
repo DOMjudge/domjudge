@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b2e11481da47fe1c0f1594357876e04a",
+    "content-hash": "c1dc6d56c9d54aa698efe14c0e99de60",
     "packages": [
         {
             "name": "angel-vladov/select2-theme-bootstrap4",
