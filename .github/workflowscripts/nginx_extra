@@ -5,5 +5,5 @@ server {
   ssl_session_timeout 5m;
   ssl_prefer_server_ciphers on;
   add_header Strict-Transport-Security max-age=31556952;
-  include /home/runner/domjudge/domserver/etc/nginx-conf-inner;
+  include /opt/domjudge/domserver/etc/nginx-conf-inner;
 }
