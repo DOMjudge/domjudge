@@ -135,14 +135,16 @@ class ScoreboardController extends AbstractRestController
 
         $scoreboard = $this->scoreboardService->getScoreboard($contest, !$public, $filter, !$allTeams);
 
-        // Build up scoreboard results.
-        $results = [
-            'event_id' => (string)$event->getEventid(),
-            'time' => Utils::absTime($event->getEventtime()),
-            'contest_time' => Utils::relTime($event->getEventtime() - $contest->getStarttime()),
-            'state' => $contest->getState(),
-            'rows' => [],
-        ];
+        if ($event) {
+            // Build up scoreboard results.
+            $results = [
+                'event_id' => (string)$event->getEventid(),
+                'time' => Utils::absTime($event->getEventtime()),
+                'contest_time' => Utils::relTime($event->getEventtime() - $contest->getStarttime()),
+                'state' => $contest->getState(),
+                'rows' => [],
+            ];
+        }
 
         // Return early if there's nothing to display yet.
         if (!$scoreboard) return $results;
