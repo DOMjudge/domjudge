@@ -177,7 +177,7 @@ class ConfigControllerTest extends BaseTest
      */
     public function testConfigRequestNonExistentVariableThrowsError(): void
     {
-        $this->verifyApiJsonResponse('GET', $this->endpoint . '?name=not_exist', 500);
+        $this->verifyApiJsonResponse('GET', $this->endpoint . '?name=not_exist', 400);
     }
 
     public function provideUsers(): Generator
