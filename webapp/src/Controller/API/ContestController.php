@@ -194,11 +194,10 @@ class ContestController extends AbstractRestController
 
         $banner = $this->dj->assetPath($id, 'contest', true);
 
-        if (!file_exists($banner)) {
-            throw new NotFoundHttpException('Contest banner not found');
+        if ($banner && file_exists($banner)) {
+            return static::sendBinaryFileResponse($request, $banner);
         }
-
-        return static::sendBinaryFileResponse($request, $banner);
+        throw new NotFoundHttpException('Contest banner not found');
     }
 
     /**

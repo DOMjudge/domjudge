@@ -127,11 +127,11 @@ class OrganizationController extends AbstractRestController
 
         $affiliationLogo = $this->dj->assetPath($id, 'affiliation', true);
 
-        if (!file_exists($affiliationLogo)) {
-            throw new NotFoundHttpException('Affiliation logo not found');
+        if ($affiliationLogo && file_exists($affiliationLogo)) {
+            return static::sendBinaryFileResponse($request, $affiliationLogo);
         }
 
-        return static::sendBinaryFileResponse($request, $affiliationLogo);
+        throw new NotFoundHttpException('Affiliation logo not found');
     }
 
     /**
