@@ -307,7 +307,7 @@ class ClarificationController extends AbstractRestController
 
         if ($request->query->has('problem')) {
             $queryBuilder
-                ->andWhere('clar.probid = :problem')
+                ->andWhere('clar.problem = :problem')
                 ->setParameter('problem', $request->query->get('problem'));
         }
 
