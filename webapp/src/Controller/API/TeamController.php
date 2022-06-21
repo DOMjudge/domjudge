@@ -140,11 +140,10 @@ class TeamController extends AbstractRestController
 
         $teamPhoto = $this->dj->assetPath($id, 'team', true);
 
-        if (!file_exists($teamPhoto)) {
-            throw new NotFoundHttpException('Team photo not found');
+        if ($teamPhoto && file_exists($teamPhoto)) {
+            return static::sendBinaryFileResponse($request, $teamPhoto);
         }
-
-        return static::sendBinaryFileResponse($request, $teamPhoto);
+        throw new NotFoundHttpException('Team photo not found');
     }
 
     /**
