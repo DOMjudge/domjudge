@@ -15,6 +15,7 @@ use Doctrine\ORM\NoResultException;
 use Exception;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
+use InvalidArgumentException;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Annotations as OA;
 use Psr\Log\LoggerInterface;
@@ -196,7 +197,11 @@ class GeneralInfoController extends AbstractFOSRestController
         $name       = $request->query->get('name');
 
         if ($name) {
-            $result = $this->config->get($name, $onlypublic);
+            try {
+                $result = $this->config->get($name, $onlypublic);
+            } catch (InvalidArgumentException $e) {
+                throw new BadRequestHttpException(sprintf('Parameter with name: %s not found', $name));
+            }
         } else {
             $result = $this->config->all($onlypublic);
         }
