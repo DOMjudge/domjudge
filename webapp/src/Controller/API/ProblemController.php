@@ -181,11 +181,6 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
      *                 property="problem",
      *                 description="Optional: problem id to update.",
      *                 type="string"
-     *             ),
-     *             @OA\Property(
-     *                 property="delete_old_data",
-     *                 description="Optional: whether to delete old (existing) data before importing into an existing problem.",
-     *                 type="boolean"
      *             )
      *         )
      *     )

@@ -74,7 +74,6 @@ class ImportProblemService
         string $clientName,
         ?Problem $problem = null,
         ?Contest $contest = null,
-        bool $deleteOldData = false,
         ?array &$messages = []
     ): ?Problem {
         // This might take a while.
@@ -210,59 +209,24 @@ class ImportProblemService
             }
         }
 
-        if ($deleteOldData && $problem->getProbid()) {
-            if (abs($problem->getTimelimit() - $defaultTimelimit) > 0.001) {
-                $problem->setTimelimit($defaultTimelimit);
-                $messages[] = 'Resetting time limit.';
-            }
-            if ($problem->getCompareExecutable()) {
-                $problem->setCompareExecutable();
-                $messages[] = 'Clearing compare executable.';
-            }
-            if ($problem->getSpecialCompareArgs()) {
-                $problem->setSpecialCompareArgs('');
-                $messages[] = 'Clearing compare arguments.';
-            }
-            if ($problem->getRunExecutable()) {
-                $problem->setRunExecutable();
-                $messages[] = 'Clearing run executable.';
-            }
-            if ($problem->getCombinedRunCompare()) {
-                $problem->setCombinedRunCompare(false);
-                $messages[] = 'Clearing combined run and compare script flag.';
-            }
-            if ($problem->getMemlimit()) {
-                $problem->setMemlimit(null);
-                $messages[] = 'Clearing memory limit.';
-            }
-            if ($problem->getOutputlimit()) {
-                $problem->setOutputlimit(null);
-                $messages[] = 'Clearing output limit.';
-            }
-            if ($problem->getProblemtext() || $problem->getProblemtextType()) {
-                $problem
-                    ->setProblemtext(null)
-                    ->setProblemtextType(null);
-                $messages[] = 'Clearing problem text.';
-            }
+        // Reset problem settings that might not appear in the ZIP back to default
+        if ($problem->getProbid()) {
+            $problem
+                ->setCompareExecutable()
+                ->setSpecialCompareArgs('')
+                ->setRunExecutable()
+                ->setCombinedRunCompare(false)
+                ->setMemlimit(null)
+                ->setOutputlimit(null)
+                ->setProblemtext(null)
+                ->setProblemtextType(null);
 
             if ($contestProblem) {
-                if ($contestProblem->getPoints() !== 1) {
-                    $contestProblem->setPoints(1);
-                    $messages[] = 'Resetting problem points.';
-                }
-                if (!$contestProblem->getAllowSubmit()) {
-                    $contestProblem->setAllowSubmit(true);
-                    $messages[] = 'Resetting problem allow submit.';
-                }
-                if (!$contestProblem->getAllowJudge()) {
-                    $contestProblem->setAllowJudge(true);
-                    $messages[] = 'Resetting problem allow judge.';
-                }
-                if ($contestProblem->getColor()) {
-                    $contestProblem->setColor(null);
-                    $messages[] = 'Clearing problem color.';
-                }
+                $contestProblem
+                    ->setPoints(1)
+                    ->setAllowSubmit(true)
+                    ->setAllowJudge(true)
+                    ->setColor(null);
             }
         }
 
@@ -454,45 +418,52 @@ class ImportProblemService
                     $problem
                         ->setProblemtext($text)
                         ->setProblemtextType($type);
-                    $messages[] = "Added problem statement from: $filename";
+                    $messages[] = "Added/updated problem statement from: $filename";
                     break;
                 }
             }
         }
 
-        if ($deleteOldData && $problem->getProbid()) {
-            // Delete current testcases. We do this with a direct query, because
-            // otherwise we can get duplicate key errors, since Doctrine first performs
-            // inserts and only then deletes.
-            $numDeleted = $this->em->createQueryBuilder()
-                ->from(Testcase::class, 'tc')
-                ->delete()
-                ->where('tc.problem = :problem')
-                ->setParameter('problem', $problem)
-                ->getQuery()
-                ->execute();
-            if ($numDeleted > 0) {
-                $messages[] = sprintf('Deleted %d existing testcase(s).', $numDeleted);
-            }
-        }
-
-        // Insert/update testcases
-        if (!$deleteOldData && $problem->getProbid()) {
-            // Find the current max rank
-            $maxRank = (int)$this->em->createQueryBuilder()
+        // Load the current testcases to see if we need to delete, update or insert testcases.
+        $existingTestcases = [];
+        if ($problem->getProbid()) {
+            /** @var Testcase[] $testcaseData */
+            $testcaseData = $this->em
+                ->createQueryBuilder()
                 ->from(Testcase::class, 't')
-                ->select('MAX(t.ranknumber)')
+                ->select('t')
                 ->andWhere('t.problem = :problem')
                 ->setParameter('problem', $problem)
                 ->getQuery()
-                ->getSingleScalarResult();
-            $rank    = $maxRank + 1;
-        } else {
-            $rank = 1;
+                ->getResult();
+            foreach ($testcaseData as $testcase) {
+                $index                     = sprintf(
+                    '%s-%s-%s',
+                    $testcase->getMd5sumInput(),
+                    $testcase->getMd5sumOutput(),
+                    $testcase->getOrigInputFilename());
+                $existingTestcases[$index] = $testcase;
+            }
         }
 
+        $touchedTestcases = [];
+
+        // Keep track of the final testcases. We do this because we need rank them.
+        // We can't do this 'on the fly' when updating since we will get
+        // issues with duplicate keys. Instead, we give every testcase a temporary
+        // rank we know is unique and give the final ranks in the end.
         /** @var Testcase[] $testcases */
-        $testcases = [];
+        $testcases     = [];
+        $testcaseNames = [];
+
+        $startRank = 1;
+        // We temporarily assign ranks starting from the current max rank + 1 when updating a problem.
+        // These are guaranteed to not exist.
+        if ($problem->getProbid()) {
+            $startRank = $problem->getTestcases()->count() + 1;
+        }
+        $rank       = $startRank;
+        $actualRank = 1;
 
         // First insert sample, then secret data in alphabetical order.
         foreach (['sample', 'secret'] as $type) {
@@ -546,29 +517,29 @@ class ImportProblemService
                 $md5in  = md5($testInput);
                 $md5out = md5($testOutput);
 
-                if (!$deleteOldData && $problem->getProbid()) {
-                    // Skip testcases that already exist identically.
-                    $existingTestcase = $this->em
-                        ->createQueryBuilder()
-                        ->from(Testcase::class, 't')
-                        ->select('t')
-                        ->andWhere('t.md5sum_input = :inputmd5')
-                        ->andWhere('t.md5sum_output = :outputmd5')
-                        ->andWhere('t.sample = :sample')
-                        ->andWhere('t.orig_input_filename = :orig_input_filename')
-                        ->andWhere('t.problem = :problem')
-                        ->setParameter('inputmd5', $md5in)
-                        ->setParameter('outputmd5', $md5out)
-                        ->setParameter('sample', $type === 'sample')
-                        ->setParameter('orig_input_filename', $dataFile)
-                        ->setParameter('problem', $problem)
-                        ->getQuery()
-                        ->getOneOrNullResult();
-
-                    if (isset($existingTestcase)) {
-                        $messages[] = sprintf('Skipped %s testcase %s: already exists', $type, $dataFile);
-                        continue;
+                // Check if we have an existing testcase with the same data.
+                $index = sprintf('%s-%s-%s', $md5in, $md5out, $dataFile);
+                $touchedTestcases[$index] = $index;
+                if (isset($existingTestcases[$index])) {
+                    $testcase = $existingTestcases[$index];
+                    $sample   = $type === 'sample';
+                    $changed = false;
+                    if ($testcase->getSample() !== $sample) {
+                        $testcase->setSample($sample);
+                        $changed = true;
                     }
+                    if ($testcase->getRank() !== $actualRank) {
+                        $changed = true;
+                    }
+                    $testcase->setRank($rank);
+                    if ($changed) {
+                        $numCases++;
+                        $testcaseNames[] = $dataFile;
+                    }
+                    $rank++;
+                    $actualRank++;
+                    $testcases[] = $testcase;
+                    continue;
                 }
 
                 $testcase        = new Testcase();
@@ -596,27 +567,51 @@ class ImportProblemService
                 $this->em->persist($testcase);
 
                 $rank++;
+                $actualRank++;
                 $numCases++;
 
                 $testcases[] = $testcase;
+                $testcaseNames[] = $dataFile;
             }
             if ($numCases > 0) {
-                $messages[] = sprintf("Added %d %s testcase(s): {%s}.{in,ans}",
-                    $numCases, $type, join(',', $dataFiles));
+                $messages[] = sprintf("Added/updated %d %s testcase(s): {%s}.{in,ans}",
+                    $numCases, $type, join(',', $testcaseNames));
             }
         }
 
-        if ($deleteOldData && $problem->getProbid()) {
-            $attachmentCount = $problem->getAttachments()->count();
-            foreach ($problem->getAttachments() as $attachment) {
-                $problem->removeAttachment($attachment);
-                $this->em->remove($attachment);
-            }
-
-            if ($attachmentCount > 0) {
-                $messages[] = sprintf('Deleted %d existing attachment(s).', $attachmentCount);
+        $removedTestcases = [];
+        foreach ($existingTestcases as $index => $testcase) {
+            if (!isset($touchedTestcases[$index])) {
+                $removedTestcases[] = $testcase->getOrigInputFilename();
+                $testcase
+                    ->setDeleted(true)
+                    ->setProblem(null);
             }
         }
+
+        if (!empty($removedTestcases)) {
+            $messages[] = sprintf("Removed %d testcase(s): {%s}.{in,ans}",
+                count($removedTestcases), join(',', $removedTestcases));
+        }
+
+        // Load the current attachments to see if we need to delete, update or insert attachments
+        $existingAttachments = [];
+        if ($problem->getProbid()) {
+            /** @var ProblemAttachment[] $attachmentData */
+            $attachmentData = $this->em
+                ->createQueryBuilder()
+                ->from(ProblemAttachment::class, 'a')
+                ->select('a')
+                ->andWhere('a.problem = :problem')
+                ->setParameter('problem', $problem)
+                ->getQuery()
+                ->getResult();
+            foreach ($attachmentData as $attachment) {
+                $existingAttachments[$attachment->getName()] = $attachment;
+            }
+        }
+
+        $touchedAttachments = [];
 
         $numAttachments = 0;
         for ($j = 0; $j < $zip->numFiles; $j++) {
@@ -641,27 +636,19 @@ class ImportProblemService
             }
 
             // Check if an attachment already exists, since then we overwrite it.
-            if (!$deleteOldData && $problem->getProbid()) {
-                /** @var ProblemAttachment|null $attachment */
-                $attachment = $this->em
-                    ->createQueryBuilder()
-                    ->from(ProblemAttachment::class, 'a')
-                    ->select('a')
-                    ->andWhere('a.name = :name')
-                    ->andWhere('a.problem = :problem')
-                    ->setParameter('name', $name)
-                    ->setParameter('problem', $problem)
-                    ->getQuery()
-                    ->getOneOrNullResult();
+            if (isset($existingAttachments[$name])) {
+                $attachment = $existingAttachments[$name];
             } else {
                 $attachment = null;
             }
 
             if ($attachment) {
                 $attachmentContent = $attachment->getContent();
-                $attachmentContent->setContent($content);
-
-                $messages[] = sprintf("Updated attachment '%s'", $name);
+                if ($content !== $attachmentContent->getContent()) {
+                    $attachmentContent->setContent($content);
+                    $messages[] = sprintf("Updated attachment '%s'", $name);
+                    $numAttachments++;
+                }
             } else {
                 $attachment = new ProblemAttachment();
                 $attachmentContent = new ProblemAttachmentContent();
@@ -676,14 +663,42 @@ class ImportProblemService
                 $this->em->persist($attachment);
 
                 $messages[] = sprintf("Added attachment '%s'", $name);
+                $numAttachments++;
             }
 
-            $numAttachments++;
+            $touchedAttachments[$attachment->getName()] = $attachment->getName();
         }
-        $messages[] = sprintf("Added/updated %d attachment(s).", $numAttachments);
+
+        if ($numAttachments > 0) {
+            $messages[] = sprintf("Added/updated %d attachment(s).", $numAttachments);
+        }
+
+        $removedAttachments = [];
+        foreach ($existingAttachments as $index => $attachment) {
+            if (!isset($touchedAttachments[$index])) {
+                $removedAttachments[] = $attachment->getName();
+                $this->em->remove($attachment);
+            }
+        }
+
+        if (!empty($removedAttachments)) {
+            $messages[] = sprintf("Removed %d attachments(s): {%s}",
+                count($removedAttachments), join(',', $removedAttachments));
+        }
 
         $this->em->persist($problem);
-        $this->em->flush();
+        $this->em->wrapInTransaction(function() use ($testcases, $startRank) {
+            $this->em->flush();
+            // Set actual ranks if needed
+            if ($startRank !== 1) {
+                $rank = 1;
+                foreach ($testcases as $testcase) {
+                    $testcase->setRank($rank);
+                    $rank++;
+                }
+            }
+            $this->em->flush();
+        });
         if ($contestProblem) {
             $contestProblem->setProblem($problem);
             $contestProblem->setContest($contest);
@@ -695,11 +710,7 @@ class ImportProblemService
         $probid = $problem->getProbid();
         $this->eventLogService->log('problem', $problem->getProbid(), $problemIsNew ? 'create' : 'update', $cid);
 
-        foreach ($testcases as $testcase) {
-            $this->eventLogService->log('testcase', $testcase->getTestcaseid(), 'create');
-        }
-
-        // Submit reference solutions.
+        // submit reference solutions.
         if ($contest === null) {
             $messages[] = 'No jury solutions added: problem is not linked to a contest (yet).';
         } elseif (!$this->dj->getUser()->getTeam()) {
@@ -916,7 +927,6 @@ class ImportProblemService
         set_time_limit(120);
 
         $probId  = $request->request->get('problem');
-        $deleteOldData = $request->request->getBoolean('delete_old_data');
         $problem = null;
         if (!empty($probId)) {
             $problem = $this->em->createQueryBuilder()
@@ -937,7 +947,7 @@ class ImportProblemService
             $clientName  = $file->getClientOriginalName();
             $messages    = [];
             $newProblem  = $this->importZippedProblem(
-                $zip, $clientName, $problem, $contest, $deleteOldData, $messages
+                $zip, $clientName, $problem, $contest, $messages
             );
             $allMessages = array_merge($allMessages, $messages);
             if ($newProblem) {
