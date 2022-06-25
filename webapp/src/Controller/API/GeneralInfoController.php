@@ -159,6 +159,7 @@ class GeneralInfoController extends AbstractFOSRestController
     /**
      * Get information about the currently logged in user.
      * @Rest\Get("/user")
+     * @IsGranted("IS_AUTHENTICATED_FULLY")
      * @OA\Response(
      *     response="200",
      *     description="Information about the logged in user",
@@ -167,12 +168,7 @@ class GeneralInfoController extends AbstractFOSRestController
      */
     public function getUserAction(): User
     {
-        $user = $this->dj->getUser();
-        if ($user === null) {
-            throw new HttpException(401, 'Permission denied');
-        }
-
-        return $user;
+        return $this->dj->getUser();
     }
 
     /**
