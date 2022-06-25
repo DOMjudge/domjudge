@@ -161,8 +161,6 @@ class ImportExportController extends BaseController
             $newProblem = null;
             /** @var Contest|null $contest */
             $contest = $problemFormData['contest'] ?? null;
-            /** @var bool $deleteOldData */
-            $deleteOldData = $problemFormData['delete_old_data'] ?? false;
             if ($contest === null) {
                 $contestId = null;
             } else {
@@ -179,7 +177,7 @@ class ImportExportController extends BaseController
                     $contest = $this->em->getRepository(Contest::class)->find($contestId);
                 }
                 $newProblem = $this->importProblemService->importZippedProblem(
-                    $zip, $clientName, null, $contest, $deleteOldData, $messages
+                    $zip, $clientName, null, $contest, $messages
                 );
                 $allMessages = array_merge($allMessages, $messages);
                 if ($newProblem) {
