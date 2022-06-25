@@ -109,6 +109,8 @@ def import_file(entity: str, files: List[str]):
                 type = file.split('.')[1]
                 response = upload_file(f'/users/{entity}', type, file)
                 print(json.dumps(response, indent=4))
+                # After the first successfully imported file, we should stop
+                return
             else:
                 print(f'Skipping {entity} import.')
             any_matched = True
