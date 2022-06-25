@@ -128,6 +128,11 @@ if len(sys.argv) < 2:
 
 api_url = sys.argv[1]
 
+user_data = do_api_request('user')
+if 'admin' not in user_data['roles']:
+    print('Your user does not have the \'admin\' role, can not import.')
+    exit(1)
+
 import_file('group', ['groups.json', 'groups.tsv'])
 import_file('organization', ['organizations.json'])
 import_file('team', ['teams.json', 'teams2.tsv'])
