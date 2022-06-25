@@ -245,21 +245,27 @@ nelmio_api_doc:
                     properties:
                         started:
                             type: string
+                            nullable: true
                             format: date-time
                         ended:
                             type: string
+                            nullable: true
                             format: date-time
                         frozen:
                             type: string
+                            nullable: true
                             format: date-time
                         thawed:
                             type: string
+                            nullable: true
                             format: date-time
                         finalized:
                             type: string
+                            nullable: true
                             format: date-time
                         end_of_updates:
                             type: string
+                            nullable: true
                             format: date-time
                 Award:
                     type: object
