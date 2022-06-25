@@ -38,6 +38,7 @@ use Symfony\Component\Yaml\Yaml;
 /**
  * @Rest\Route("/contests")
  * @OA\Tag(name="Contests")
+ * @OA\Response(response="400", ref="#/components/responses/InvalidResponse")
  * @OA\Response(response="404", ref="#/components/responses/NotFound")
  * @OA\Response(response="401", ref="#/components/responses/Unauthorized")
  */
