@@ -76,7 +76,6 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
      *                            nullable=false)
      * @Serializer\Groups({"Nonstrict"})
      * @Identifier()
-     * @Assert\NotBlank()
      */
     private string $shortname = '';
 
