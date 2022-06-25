@@ -135,6 +135,7 @@ class ScoreboardController extends AbstractRestController
 
         $scoreboard = $this->scoreboardService->getScoreboard($contest, !$public, $filter, !$allTeams);
 
+        $results = [];
         if ($event) {
             // Build up scoreboard results.
             $results = [
