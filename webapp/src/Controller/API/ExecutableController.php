@@ -40,6 +40,7 @@ class ExecutableController extends AbstractFOSRestController
      *     description="Information about the requested executable",
      *     @OA\JsonContent(type="string", description="Base64-encoded executable contents")
      * )
+     * @OA\Response(response="401", ref="#/components/responses/Unauthorized")
      */
     public function singleAction(string $id): string
     {
