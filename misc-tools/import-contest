@@ -100,27 +100,27 @@ def upload_file(name: str, apifilename: str, file: str, data: dict = {}):
     return parse_api_response(name, response)
 
 
-def import_file(basename: str, files: List[str]):
+def import_file(entity: str, files: List[str]):
     any_matched = False
     for file in files:
         if os.path.exists(file):
-            if confirm(f'Import {basename}s from {file}?', False):
-                print(f'Importing {basename}s.')
+            if confirm(f'Import {entity} from {file}?', False):
+                print(f'Importing {entity}.')
                 type = file.split('.')[1]
-                response = upload_file(f'/users/{basename}s', type, file)
+                response = upload_file(f'/users/{entity}', type, file)
                 print(json.dumps(response, indent=4))
             else:
-                print(f'Skipping {basename}s import.')
+                print(f'Skipping {entity} import.')
             any_matched = True
     if not any_matched:
         if len(files) == 1:
-            print(f'\'{files[0]}\' not found, skipping {basename}s import.')
+            print(f'\'{files[0]}\' not found, skipping {entity} import.')
         else:
             prefix = [f'\'{item}\'' for item in files[:-1]]
             prefix_joined = ', '.join(prefix)
             last = f'\'{files[-1]}\''
             print(
-                f'Neither {prefix_joined} nor {last} found, skipping {basename}s import.')
+                f'Neither {prefix_joined} nor {last} found, skipping {entity} import.')
 
 
 if len(sys.argv) < 2:
@@ -133,10 +133,10 @@ if 'admin' not in user_data['roles']:
     print('Your user does not have the \'admin\' role, can not import.')
     exit(1)
 
-import_file('group', ['groups.json', 'groups.tsv'])
-import_file('organization', ['organizations.json'])
-import_file('team', ['teams.json', 'teams2.tsv'])
-import_file('account', ['accounts.json', 'accounts.yaml', 'accounts.tsv'])
+import_file('groups', ['groups.json', 'groups.tsv'])
+import_file('organizations', ['organizations.json'])
+import_file('teams', ['teams.json', 'teams2.tsv'])
+import_file('accounts', ['accounts.json', 'accounts.yaml', 'accounts.tsv'])
 
 # Contest import is a special case: we can have a contest.yaml and problemset.yaml and then we need
 # to import the combined file. We can also gather the contest ID.
