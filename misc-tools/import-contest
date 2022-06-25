@@ -143,14 +143,13 @@ import_file('accounts', ['accounts.json', 'accounts.yaml', 'accounts.tsv'])
 # Contest import is a special case: we can have a contest.yaml and problemset.yaml and then we need
 # to import the combined file. We can also gather the contest ID.
 if os.path.exists('contest.yaml'):
-    combine = False
+    input_files = ['contest.yaml']
     if os.path.exists('problemset.yaml'):
-        combine = True
-        question = 'Import contest metadata (from contest.yaml and problemset.yaml)?'
-    else:
-        question = 'Import contest metadata (from contest.yaml)?'
+        input_files.append('problemset.yaml')
+    input_files_joined = ' and '.join(input_files)
+    question = f'Import contest metadata (from {input_files_joined})?'
     if confirm(question, True):
-        if combine:
+        if len(input_files) > 1:
             with open('combined.yaml', 'w') as combined, fileinput.input(['contest.yaml', 'problemset.yaml']) as files:
                 for line in files:
                     combined.write(line)
