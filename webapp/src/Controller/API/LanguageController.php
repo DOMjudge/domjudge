@@ -16,7 +16,7 @@ use Symfony\Component\HttpFoundation\Response;
  * @OA\Tag(name="Languages")
  * @OA\Parameter(ref="#/components/parameters/cid")
  * @OA\Response(response="404", ref="#/components/responses/NotFound")
- * @OA\Response(response="401", ref="#/components/responses/Unauthorized")
+ * @OA\Response(response="401", ref="#/components/responses/Unauthenticated")
  * @OA\Response(response="400", ref="#/components/responses/InvalidResponse")
  */
 class LanguageController extends AbstractRestController

@@ -20,7 +20,7 @@ use Prometheus\RenderTextFormat;
 /**
  * @Route("/metrics")
  * @IsGranted("ROLE_API_READER")
- * @OA\Response(response="401", ref="#/components/responses/Unauthorized")
+ * @OA\Response(response="401", ref="#/components/responses/Unauthenticated")
  * @OA\Tag(name="Metrics")
  */
 class MetricsController extends AbstractFOSRestController
