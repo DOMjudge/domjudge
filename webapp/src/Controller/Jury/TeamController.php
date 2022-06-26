@@ -399,7 +399,7 @@ class TeamController extends BaseController
             if ($team->getAddUserForTeam() === Team::CREATE_NEW_USER) {
                 // Create a user for the team.
                 $user = new User();
-                $user->setUsername($team->getAddUserForTeam());
+                $user->setUsername($team->getNewUsername());
                 $team->addUser($user);
                 // Make sure the user has the team role to make validation work.
                 $role = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'team']);
