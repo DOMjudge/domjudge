@@ -18,7 +18,8 @@ class TeamAffiliationControllerTest extends JuryControllerTest
     protected static ?string $defaultEditEntityName    = 'UU';
     protected static string  $addForm                  = 'team_affiliation[';
     protected static array   $addEntitiesShown         = ['shortname', 'name'];
-    protected static array  $addEntities              = [['shortname' => 'short',
+    protected static array   $overviewNotShown         = ['country'];
+    protected static array   $addEntities              = [['shortname' => 'short',
                                                          'name'      => 'New Affil',
                                                          'country'   => 'NLD',
                                                          'internalcomments'  => 'Lorem ipsum dolor sit amet.'],

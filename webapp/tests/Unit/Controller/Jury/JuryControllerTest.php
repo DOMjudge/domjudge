@@ -41,6 +41,7 @@ abstract class JuryControllerTest extends BaseTest
     protected static ?string $defaultEditEntityName = null;
     protected static array $specialFieldOnlyUpdate  = [];
     protected static array $editEntitiesSkipFields  = [];
+    protected static array $overviewNotShown        = [];
 
     protected function setUp(): void
     {
@@ -182,6 +183,7 @@ abstract class JuryControllerTest extends BaseTest
         if (static::$add !== '') {
             self::assertSelectorExists('a:contains(' . $this->addButton . ')');
             foreach (static::$addEntities as $element) {
+                $combinedValues = [];
                 $formFields = [];
                 // First fill with default values, the 0th item of the array
                 // Overwrite with data to test with.
@@ -195,6 +197,7 @@ abstract class JuryControllerTest extends BaseTest
                         }
                         $formId = str_replace('.', '][', $id);
                         $formFields[static::$addForm . $formId . "]"] = $field;
+                        $combinedValues[$id] = $field;
                     }
                 }
                 $this->verifyPageResponse('GET', static::$baseUrl . static::$add, 200);
@@ -222,6 +225,12 @@ abstract class JuryControllerTest extends BaseTest
                     }
                 }
                 $this->client->submit($form);
+                $this->client->followRedirect();
+                foreach ($combinedValues as $key=>$value) {
+                    if (!is_array($value) && !in_array($key, static::$overviewNotShown)) {
+                        self::assertSelectorExists('body:contains("' . $value . '")');
+                    }
+                }
             }
             $this->verifyPageResponse('GET', static::$baseUrl, 200);
             foreach (static::$addEntities as $element) {
