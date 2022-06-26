@@ -41,6 +41,7 @@ class ExecutableController extends AbstractFOSRestController
      *     @OA\JsonContent(type="string", description="Base64-encoded executable contents")
      * )
      * @OA\Response(response="401", ref="#/components/responses/Unauthenticated")
+     * @OA\Response(response="403", ref="#/components/responses/Unauthorized")
      */
     public function singleAction(string $id): string
     {

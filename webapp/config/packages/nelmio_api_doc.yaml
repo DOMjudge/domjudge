@@ -85,7 +85,13 @@ nelmio_api_doc:
                             schema:
                                 type: object
                 Unauthenticated:
-                    description: Unauthenticated
+                    description: Unauthenticated, authentication is missing
+                Unauthorized:
+                    description: Unauthorized, user needs an additional role
+                    content:
+                        application/json:
+                            schema:
+                                type: object
                 InvalidResponse:
                     description: The specified resource identifier is malformed
                     content:
