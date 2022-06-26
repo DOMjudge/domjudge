@@ -84,8 +84,8 @@ nelmio_api_doc:
                         application/json:
                             schema:
                                 type: object
-                Unauthorized:
-                    description: Unauthorized
+                Unauthenticated:
+                    description: Unauthenticated
                 InvalidResponse:
                     description: The specified resource identifier is malformed
                     content:
