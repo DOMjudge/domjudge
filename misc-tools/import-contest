@@ -2,8 +2,10 @@
 
 '''
 import-contest -- Convenience script to import a contest (including metadata, teams and
-problems) via the command line. Supports reading credentials from ~/.netrc. See also
-https://www.domjudge.org/docs/manual/main/import.html
+problems) via the command line. Supports reading credentials from ~/.netrc.
+See also https://www.domjudge.org/docs/manual/main/import.html
+(replace main with the DOMjudge major.minor version if you are running a released version,
+i.e. use 8.1 for DOMjudge 8.1.x)
 
 Part of the DOMjudge Programming Contest Jury System and licensed
 under the GNU GPL. See README and COPYING for details.
