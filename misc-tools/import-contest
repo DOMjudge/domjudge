@@ -1,0 +1,222 @@
+#!/usr/bin/env python3
+
+'''
+import-contest -- Convenience script to import a contest (including metadata, teams and
+problems) via the command line. Supports reading credentials from ~/.netrc.
+See also https://www.domjudge.org/docs/manual/main/import.html
+(replace main with the DOMjudge major.minor version if you are running a released version,
+i.e. use 8.1 for DOMjudge 8.1.x)
+
+Part of the DOMjudge Programming Contest Jury System and licensed
+under the GNU GPL. See README and COPYING for details.
+'''
+
+import fileinput
+import json
+import os.path
+import requests
+import requests.utils
+import sys
+from typing import List
+import yaml
+
+headers = {
+    'user-agent': f'domjudge-import-contest ({requests.utils.default_user_agent()})'}
+
+api_url = None
+cid = None
+
+
+def confirm(message: str, default: bool) -> bool:
+    answer = 'x'
+    while answer not in ['y', 'n']:
+        yn = 'Y/n' if default else 'y/N'
+        answer = input(f'{message} ({yn}) ').lower()
+        if answer == '':
+            answer = 'y' if default else 'n'
+    return answer == 'y'
+
+
+def usage():
+    print(f'Usage {sys.argv[0]} <domjudge-api-url>')
+    exit(1)
+
+def parse_api_response(name: str, response: requests.Response):
+    # The connection worked, but we may have received an HTTP error
+    if response.status_code >= 300:
+        print(response.text)
+        if response.status_code == 401:
+            raise RuntimeError(
+                'Authentication failed, please check your DOMjudge credentials in ~/.netrc.')
+        else:
+            raise RuntimeError(
+                f'API request {name} failed (code {response.status_code}).')
+
+    # We got a successful HTTP response. It worked. Return the full response
+    return json.loads(response.text)
+
+def do_api_request(name: str):
+    '''Perform an API call to the given endpoint and return its data.
+
+    Parameters:
+        name (str): the endpoint to call
+
+    Returns:
+        The endpoint contents.
+
+    Raises:
+        RuntimeError when the response is not JSON or the HTTP status code is non 2xx.
+    '''
+
+    url = f'{api_url}/{name}'
+
+    try:
+        response = requests.get(url, headers=headers)
+    except requests.exceptions.RequestException as e:
+        raise RuntimeError(e)
+
+    return parse_api_response(name, response)
+
+
+def upload_file(name: str, apifilename: str, file: str, data: dict = {}):
+    '''Upload the given file to the API at the given path with the given name.
+
+    Parameters:
+        name (str): the endpoint to call
+        apifilename (str): the argument name for the file to upload
+        file (str): the file to upload
+
+    Returns:
+        The parsed endpoint contents.
+
+    Raises:
+        RuntimeError when the HTTP status code is non 2xx.
+    '''
+
+    files = [(apifilename, open(file, 'rb'))]
+
+    url = f'{api_url}/{name}'
+
+    response = requests.post(url, files=files, headers=headers, data=data)
+
+    return parse_api_response(name, response)
+
+
+def import_file(entity: str, files: List[str]):
+    any_matched = False
+    for file in files:
+        if os.path.exists(file):
+            if confirm(f'Import {entity} from {file}?', False):
+                print(f'Importing {entity}.')
+                type = file.split('.')[1]
+                response = upload_file(f'/users/{entity}', type, file)
+                print(json.dumps(response, indent=4))
+                # After the first successfully imported file, we should stop
+                return
+            else:
+                print(f'Skipping {entity} import.')
+            any_matched = True
+    if not any_matched:
+        if len(files) == 1:
+            print(f'\'{files[0]}\' not found, skipping {entity} import.')
+        else:
+            prefix = [f'\'{item}\'' for item in files[:-1]]
+            prefix_joined = ', '.join(prefix)
+            last = f'\'{files[-1]}\''
+            print(
+                f'Neither {prefix_joined} nor {last} found, skipping {entity} import.')
+
+
+if len(sys.argv) < 2:
+    usage()
+
+api_url = sys.argv[1]
+
+user_data = do_api_request('user')
+if 'admin' not in user_data['roles']:
+    print('Your user does not have the \'admin\' role, can not import.')
+    exit(1)
+
+import_file('groups', ['groups.json', 'groups.tsv'])
+import_file('organizations', ['organizations.json'])
+import_file('teams', ['teams.json', 'teams2.tsv'])
+import_file('accounts', ['accounts.json', 'accounts.yaml', 'accounts.tsv'])
+
+# Contest import is a special case: we can have a contest.yaml and problemset.yaml and then we need
+# to import the combined file. We can also gather the contest ID.
+if os.path.exists('contest.yaml'):
+    input_files = ['contest.yaml']
+    if os.path.exists('problemset.yaml'):
+        input_files.append('problemset.yaml')
+    input_files_joined = ' and '.join(input_files)
+    question = f'Import contest metadata (from {input_files_joined})?'
+    if confirm(question, True):
+        if len(input_files) > 1:
+            with open('combined.yaml', 'w') as combined, fileinput.input(['contest.yaml', 'problemset.yaml']) as files:
+                for line in files:
+                    combined.write(line)
+            file = 'combined.yaml'
+        else:
+            file = 'contest.yaml'
+        print(f'Importing contest.')
+        cid = upload_file('contests', 'yaml', file)
+elif os.path.exists('contest.json'):
+    if confirm('Import contest metadata (from contest.json)?', True):
+        print('Importing contest.')
+        cid = upload_file('contests', 'json', 'contest.json')
+else:
+    print('Neither \'contest.yaml\' nor \'contest.json\' found, skipping contest metadata import.')
+
+if cid is not None:
+    print(f' -> cid={cid}')
+
+# Problem import is also special: we need to upload each individual problem and detect what they are
+if os.path.exists('problems.yaml') or os.path.exists('problems.json') or os.path.exists('problemset.yaml'):
+    if confirm('Import problems?', True):
+        # Check if our user is linked to a team
+        user_data = do_api_request('user')
+        if not 'team' in user_data and not confirm('No team associated with your account. Jury submissions won\'t be imported. Really continue?', False):
+            exit(2)
+
+        print('Importing problems.')
+
+        if cid is None:
+            cid = answer = input('Please specify the contest id: ')
+
+        # We might need to translate the problem external ID's into an internal ID (when we are in data source = local mode)
+        # For this, we get the problems from the API and create a dict with the mapping
+        problem_mapping = {problem['externalid']: problem['id']
+                           for problem in do_api_request(f'contests/{cid}/problems')}
+
+        if os.path.exists('problems.yaml'):
+            with open('problems.yaml') as problemFile:
+                problemData = yaml.safe_load(problemFile)
+                problems = [problem['id'] for problem in problemData]
+        elif os.path.exists('problems.json'):
+            with open('problems.json') as problemFile:
+                problemData = json.load(problemFile)
+                problems = [problem['id'] for problem in problemData]
+        else:  # problemset.json
+            with open('problemset.yaml') as problemFile:
+                problemData = yaml.safe_load(problemFile)
+                problems = [problem['short-name']
+                            for problem in problemData['problems']]
+
+        for problem in problems:
+            print(f'Preparing problem \'{problem}\'.')
+            if os.path.exists(f'{problem}.zip'):
+                os.unlink(f'{problem}.zip')
+            if not os.path.isdir(problem) or not os.path.isfile(f'{problem}/problem.yaml'):
+                print('Problem directory not found or doesn\'t contain a problem.yaml.')
+                exit(3)
+            os.system(f'cd {problem} && zip -r \'../{problem}\' -- .timelimit *')
+
+            problem_id = problem_mapping[problem]
+            if confirm(f'Ready to import problem \'{problem}\' to probid={problem_id}. Continue?', True):
+                response = upload_file(
+                    f'contests/{cid}/problems', 'zip', f'{problem}.zip', {'problem': problem_id})
+                print(json.dumps(response, indent=4))
+    else:
+        print('Skipping contest import.')
+else:
+    print('Neither \'problems.yaml\', \'problems.json\' nor \'problemset.yaml\' found, skipping problems import.')

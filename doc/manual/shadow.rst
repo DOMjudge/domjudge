@@ -42,7 +42,7 @@ exist. The easiest way to create the contest and configuration data is to import
 it. For this you need JSON files as described in the :doc:`Import <import>` chapter.
 Furthermore you need problem directories as described on that same page. Place
 all the files and all directories together in one directory and use the
-``misc-tools/import-contest.sh`` script to import them. Note that, if you have no
+``misc-tools/import-contest`` script to import them. Note that, if you have no
 team linked to your account, it will complain that it can't import jury
 submissions because you have no team linked to your account. That is fine since
 these submissions will be read using the event feed later on.
