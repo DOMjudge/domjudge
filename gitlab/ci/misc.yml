@@ -20,6 +20,7 @@ phpcs_compatibility:
     matrix:
       - PHPVERSION: ["7.4","8.0","8.1"]
   script:
+    - phpcs --config-set installed_paths /app/vendor/phpcompatibility/php-compatibility
     - >
       phpcs -s -p --colors
       --standard=PHPCompatibility
