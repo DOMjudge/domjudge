@@ -95,7 +95,7 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
      * @Serializer\SerializedName("last_ip")
      * @Serializer\Groups({"Nonstrict"})
      */
-    private ?string $last_ip_address;
+    private ?string $last_ip_address = null;
 
     /**
      * @ORM\Column(type="string", name="password", length=255,
@@ -132,7 +132,7 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
      * @ORM\JoinColumn(name="teamid", referencedColumnName="teamid", onDelete="SET NULL")
      * @Serializer\Exclude()
      */
-    private ?Team $team;
+    private ?Team $team = null;
 
     /**
      * @ORM\ManyToMany(targetEntity="Role", inversedBy="users")
