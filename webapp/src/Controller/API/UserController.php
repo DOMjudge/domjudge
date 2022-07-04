@@ -366,6 +366,9 @@ class UserController extends AbstractRestController
 
         $roles = (array)$request->request->get('roles');
         foreach ($roles as $djRole) {
+            if ($djRole === '') {
+                continue;
+            }
             $role = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => $djRole]);
             if ($role === null) {
                 throw new BadRequestHttpException(sprintf("Role %s not found", $djRole));
