@@ -86,7 +86,7 @@ class User implements UserInterface, EquatableInterface, \Serializable
      *     nullable=true)
      * @Serializer\SerializedName("last_ip")
      */
-    private $last_ip_address;
+    private $last_ip_address = null;
 
     /**
      * @var string
@@ -126,7 +126,7 @@ class User implements UserInterface, EquatableInterface, \Serializable
      * @ORM\JoinColumn(name="teamid", referencedColumnName="teamid", onDelete="SET NULL")
      * @Serializer\Exclude()
      */
-    private $team;
+    private $team = null;
 
     /**
      * @ORM\ManyToMany(targetEntity="Role", inversedBy="users")
