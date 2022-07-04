@@ -324,7 +324,7 @@ class UserController extends AbstractRestController
             ->setPlainPassword($request->request->get('password'))
             ->setEnabled($request->request->getBoolean('enabled', true));
 
-        if ($request->request->has('team_id')) {
+        if ($request->request->get('team_id')) {
             /** @var Team $team */
             $team = $this->em->createQueryBuilder()
                 ->from(Team::class, 't')
