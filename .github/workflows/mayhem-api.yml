@@ -34,6 +34,9 @@ jobs:
           api-spec: http://localhost/domjudge/api/doc.json # swagger/openAPI doc hosted here
           duration: 60
           sarif-report: mapi.sarif
+          run-args:
+              --config
+              .github/workflowscripts/mapi.config
 
       - name: Upload SARIF file
         uses: github/codeql-action/upload-sarif@v2
