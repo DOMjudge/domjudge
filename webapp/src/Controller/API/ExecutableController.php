@@ -40,6 +40,7 @@ class ExecutableController extends AbstractFOSRestController
      *     description="Information about the requested executable",
      *     @OA\JsonContent(type="string", description="Base64-encoded executable contents")
      * )
+     * @OA\Response(response="400", ref="#/components/responses/InvalidResponse")
      * @OA\Response(response="401", ref="#/components/responses/Unauthenticated")
      * @OA\Response(response="403", ref="#/components/responses/Unauthorized")
      */
