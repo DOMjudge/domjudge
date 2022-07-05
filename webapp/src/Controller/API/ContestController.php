@@ -144,6 +144,7 @@ class ContestController extends AbstractRestController
      */
     public function listAction(Request $request): Response
     {
+        
         return parent::performListAction($request);
     }
 
@@ -686,7 +687,11 @@ class ContestController extends AbstractRestController
 
     protected function getQueryBuilder(Request $request): QueryBuilder
     {
-        return $this->getContestQueryBuilder($request->query->getBoolean('onlyActive', false));
+        try {
+            return $this->getContestQueryBuilder($request->query->getBoolean('onlyActive', false));
+        } catch (\TypeError $e) {
+            throw new BadRequestHttpException('\'onlyActive\' must be a boolean.');
+        }
     }
 
     protected function getIdField(): string
