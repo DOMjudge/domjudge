@@ -348,6 +348,9 @@ abstract class JuryControllerTest extends BaseTest
                     self::assertSelectorExists('body:contains("' . $element . '")');
                 }
             }
+            // Check that the Edit button is visible on an entity page.
+            $this->verifyPageResponse('GET', substr($editLink, 0, strlen($editLink)-strlen(static::$edit)), 200);
+            self::assertSelectorExists('a:contains("' . $this->editButton . '")');
         }
     }
 
@@ -381,15 +384,20 @@ abstract class JuryControllerTest extends BaseTest
         $this->logOut();
         $this->logIn();
         $this->loadFixtures(static::$deleteFixtures);
-        $this->verifyPageResponse('GET', static::$baseUrl, 200);
         // Find a CID we can delete.
         $em = self::getContainer()->get('doctrine')->getManager();
         $ent = $em->getRepository(static::$className)->findOneBy([$identifier => $entityShortName]);
+        $entityUrl = static::$baseUrl . '/' . $ent->{static::$getIDFunc}();
+        // Check that the Delete button is visible on an entity page.
+        $this->verifyPageResponse('GET', $entityUrl, 200);
+        self::assertSelectorExists('a:contains("' . $this->deleteButton . '")');
+        // Follow the route via the overview page.
+        $this->verifyPageResponse('GET', static::$baseUrl, 200);
         self::assertSelectorExists('i[class*=fa-trash-alt]');
         self::assertSelectorExists('body:contains("' . $entityShortName . '")');
         $this->verifyPageResponse(
             'GET',
-            static::$baseUrl . '/' . $ent->{static::$getIDFunc}() . static::$delete,
+            $entityUrl . static::$delete,
             200
         );
         $this->client->submitForm('Delete', []);
