@@ -23,13 +23,17 @@ abstract class JuryControllerTest extends BaseTest
 {
     protected array $roles                          = ['admin'];
     protected string $addButton                     = '';
+    protected string $editButton                    = ' Edit';
+    protected string $deleteButton                  = ' Delete';
     protected static array $rolesView               = ['admin', 'jury'];
     protected static array $rolesDisallowed         = ['team'];
     protected static array $exampleEntries          = ['overwrite_in_class'];
     protected static string $prefixURL              = 'http://localhost';
     protected static string $add                    = '/add';
     protected static string $edit                   = '/edit';
+    protected static string $editDefault            = '/edit';
     protected static string $delete                 = '/delete';
+    protected static string $deleteDefault          = '/delete';
     protected static array $deleteEntities          = [];
     protected static array $deleteFixtures          = [];
     protected static string $shortTag               = '';
@@ -158,6 +162,54 @@ abstract class JuryControllerTest extends BaseTest
         }
     }
 
+    /**
+     * Test that jury role can NOT edit or delete an entity for this controller.
+     */
+    public function testCheckEditDeleteEntityJury(): void
+    {
+        $this->roles = ['jury'];
+        $this->logOut();
+        $this->logIn();
+        $this->verifyPageResponse('GET', static::$baseUrl, 200);
+        $this->client->followRedirects(true);
+        $crawler = $this->getCurrentCrawler();
+        // Check if the edit/delete action keys are visible.
+        foreach([static::$editDefault, static::$deleteDefault, static::$edit, static::$delete] as $identifier) {
+            if ($identifier === '') continue;
+            $singlePageLink = null;
+            foreach ($crawler->filter('a') as $node) {
+                if (strpos($node->nodeValue, $identifier) !== false) {
+                    $singlePageLink = $node->getAttribute('href');
+                    break;
+                }
+            }
+            self::assertEquals($singlePageLink, null, 'Found link ending with '.$identifier);
+        }
+        // Find an ID we can edit/delete.
+        foreach (array_merge(array_slice(static::$deleteEntities, 0, 1), [static::$identifyingEditAttribute=>static::$defaultEditEntityName]) as $identifier => $entityShortName) {
+            $em = self::getContainer()->get('doctrine')->getManager();
+            $ent = $em->getRepository(static::$className)->findOneBy([$identifier => $entityShortName]);
+            $entityUrl = static::$baseUrl . '/' . $ent->{static::$getIDFunc}();
+            foreach ([static::$delete=>static::$deleteDefault,
+                      static::$edit=>static::$editDefault] as $postfix=>$default) {
+                $code = 403;
+                if ($postfix === '') {
+                    $code = 404;
+                }
+                $this->verifyPageResponse(
+                    'GET',
+                    $entityUrl . $default,
+                    $code
+                );
+            }
+            // Check that the buttons are not visible, on the page itself.
+            $this->verifyPageResponse('GET', $entityUrl, 200);
+            foreach ([$this->editButton, $this->deleteButton] as $button) {
+                self::assertSelectorNotExists('a:contains("' . $button . '")');
+            }
+        }
+    }
+
     public function helperCheckExistence(string $id, $value, array $element): void {
         if (in_array($id, static::$addEntitiesShown)) {
             $tmpValue = $element[$id];
@@ -266,6 +318,7 @@ abstract class JuryControllerTest extends BaseTest
         $this->loadFixtures(static::$deleteFixtures);
         $this->verifyPageResponse('GET', static::$baseUrl, 200);
         if (static::$edit !== '') {
+            $singlePageLink = null;
             $this->client->followRedirects(true);
             $crawler = $this->getCurrentCrawler();
             foreach ($crawler->filter('a') as $node) {
