@@ -14,6 +14,12 @@
     {% else %}
         <div class="alert alert-warning">
             <form method="post">
+                
+                {% for item in primaryKeyItems %}
+                    <input type="hidden" name="ident{{ item }}" value="1">
+                {% endfor %}
+                <input type='hidden' name='confirmation' value='1'>
+
                 <p>You're about to delete {{ type }} {{ primaryKey }} "{{ description }}".</p>
 
                 {% if messages is not empty %}

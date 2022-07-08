@@ -415,6 +415,7 @@ abstract class BaseController extends AbstractController
             'showModalSubmit' => !$isError,
             'modalUrl' => $request->getRequestUri(),
             'redirectUrl' => $redirectUrl,
+            'primaryKeyItems' => $primaryKeyData,
         ];
         if ($request->isXmlHttpRequest()) {
             return $this->render('jury/delete_modal.html.twig', $data);
