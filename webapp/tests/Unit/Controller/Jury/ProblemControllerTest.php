@@ -10,7 +10,7 @@ class ProblemControllerTest extends JuryControllerTest
     protected static string  $baseUrl                  = '/jury/problems';
     protected static array   $exampleEntries           = ['Hello World', 'default', 5, 3, 2, 1];
     protected static string  $shortTag                 = 'problem';
-    protected static array   $deleteEntities           = ['Hello World'];
+    protected static array   $deleteEntities           = ['Hello World','Float special compare test'];
     protected static string  $deleteEntityIdentifier   = 'name';
     protected static string  $getIDFunc                = 'getProbid';
     protected static string  $className                = Problem::class;
