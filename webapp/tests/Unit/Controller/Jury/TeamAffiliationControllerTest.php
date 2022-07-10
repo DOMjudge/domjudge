@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Controller\Jury;
 
+use App\DataFixtures\Test\SampleAffiliationsFixture;
 use App\Entity\TeamAffiliation;
 use App\Service\ConfigurationService;
 
@@ -12,6 +13,7 @@ class TeamAffiliationControllerTest extends JuryControllerTest
     protected static string  $shortTag                 = 'affiliation';
     protected static array   $deleteEntities           = ['UU'];
     protected static string  $deleteEntityIdentifier   = 'shortname';
+    protected static array   $deleteFixtures           = [SampleAffiliationsFixture::class];
     protected static string  $getIDFunc                = 'getAffilid';
     protected static string  $className                = TeamAffiliation::class;
     protected static array   $DOM_elements             = ['h1' => ['Affiliations']];
