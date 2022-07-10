@@ -10,7 +10,8 @@ class TeamAffiliationControllerTest extends JuryControllerTest
     protected static string  $baseUrl                  = '/jury/affiliations';
     protected static array   $exampleEntries           = ['UU', 'Utrecht University', 1];
     protected static string  $shortTag                 = 'affiliation';
-    protected static array   $deleteEntities           = ['shortname' => ['UU']];
+    protected static array   $deleteEntities           = ['UU'];
+    protected static string  $deleteEntityIdentifier   = 'shortname';
     protected static string  $getIDFunc                = 'getAffilid';
     protected static string  $className                = TeamAffiliation::class;
     protected static array   $DOM_elements             = ['h1' => ['Affiliations']];

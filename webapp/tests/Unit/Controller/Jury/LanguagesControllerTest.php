@@ -15,7 +15,8 @@ class LanguagesControllerTest extends JuryControllerTest
     protected static string  $baseUrl                  = '/jury/languages';
     protected static array   $exampleEntries           = ['c', 'csharp', 'Haskell', 'Bash shell', "pas, p", 'no', 'yes', 'R', 'r'];
     protected static string  $shortTag                 = 'language';
-    protected static array   $deleteEntities           = ['name' => ['C++']];
+    protected static array   $deleteEntities           = ['C++'];
+    protected static string  $deleteEntityIdentifier   = 'name';
     protected static string  $getIDFunc                = 'getLangid';
     protected static string  $className                = Language::class;
     protected static array   $DOM_elements             = ['h1' => ['Languages']];
