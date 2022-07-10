@@ -1,5 +1,10 @@
 DOMjudge Programming Contest Judging System
 
+Version 8.0.1 - 11 July 2022
+----------------------------
+ - Bugfix to create user when creating a team
+ - Bugfix in creating users via the API
+
 Version 8.0.0 - 30 January 2022
 -------------------------------
  - Compilation of submissions now happens inside the chroot.
