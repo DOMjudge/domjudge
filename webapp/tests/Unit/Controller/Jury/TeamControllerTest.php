@@ -12,7 +12,8 @@ class TeamControllerTest extends JuryControllerTest
     protected static string  $baseUrl                  = '/jury/teams';
     protected static array   $exampleEntries           = ['exteam', 'DOMjudge', 'System', 'UU'];
     protected static string  $shortTag                 = 'team';
-    protected static array   $deleteEntities           = ['name' => ['DOMjudge']];
+    protected static array   $deleteEntities           = ['DOMjudge'];
+    protected static string  $deleteEntityIdentifier   = 'name';
     protected static string  $getIDFunc                = 'getTeamid';
     protected static string  $className                = Team::class;
     protected static array   $DOM_elements             = ['h1' => ['Teams']];

@@ -14,7 +14,8 @@ class ContestControllerTest extends JuryControllerTest
     protected static string  $baseUrl                  = '/jury/contests';
     protected static array   $exampleEntries           = ['Demo contest', 'Demo practice session'];
     protected static string  $shortTag                 = 'contest';
-    protected static array   $deleteEntities           = ['name' => ['Demo practice session']];
+    protected static array   $deleteEntities           = ['Demo practice session'];
+    protected static string  $deleteEntityIdentifier   = 'name';
     protected static string  $getIDFunc                = 'getCid';
     protected static string  $className                = Contest::class;
     protected static array $DOM_elements               = ['h1'                            => ['Contests'],

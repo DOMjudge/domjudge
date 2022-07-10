@@ -36,6 +36,7 @@ abstract class JuryControllerTest extends BaseTest
     protected static string $deleteDefault            = '/delete';
     protected static array $deleteEntities            = [];
     protected static string $identifyingEditAttribute = '';
+    protected static string $deleteEntityIdentifier   = '';
     protected static array $deleteFixtures            = [];
     protected static string $shortTag                 = '';
     protected static ?string $addPlus                 = null;
@@ -187,7 +188,12 @@ abstract class JuryControllerTest extends BaseTest
             self::assertEquals($singlePageLink, null, 'Found link ending with '.$identifier);
         }
         // Find an ID we can edit/delete.
-        foreach (array_merge(array_slice(static::$deleteEntities, 0, 1), [static::$identifyingEditAttribute=>static::$defaultEditEntityName]) as $identifier => $entityShortName) {
+        foreach (array_merge(
+            [static::$deleteEntityIdentifier=>array_slice(static::$deleteEntities, 0, 1)],
+            [static::$identifyingEditAttribute=>static::$defaultEditEntityName]) as $identifier => $entityShortName) {
+            if ($identifier === '') {
+                continue;
+            }
             $em = self::getContainer()->get('doctrine')->getManager();
             $ent = $em->getRepository(static::$className)->findOneBy([$identifier => $entityShortName]);
             $entityUrl = static::$baseUrl . '/' . $ent->{static::$getIDFunc}();
@@ -379,7 +385,7 @@ abstract class JuryControllerTest extends BaseTest
      *
      * @dataProvider provideDeleteEntity
      */
-    public function testDeleteEntity(string $identifier, string $entityShortName): void
+    public function testDeleteEntity(string $entityShortName): void
     {
         $this->roles = ['admin'];
         $this->logOut();
@@ -387,7 +393,7 @@ abstract class JuryControllerTest extends BaseTest
         $this->loadFixtures(static::$deleteFixtures);
         // Find a CID we can delete.
         $em = self::getContainer()->get('doctrine')->getManager();
-        $ent = $em->getRepository(static::$className)->findOneBy([$identifier => $entityShortName]);
+        $ent = $em->getRepository(static::$className)->findOneBy([static::$deleteEntityIdentifier => $entityShortName]);
         $entityUrl = static::$baseUrl . '/' . $ent->{static::$getIDFunc}();
         // Check that the Delete button is visible on an entity page.
         $this->verifyPageResponse('GET', $entityUrl, 200);
@@ -411,10 +417,8 @@ abstract class JuryControllerTest extends BaseTest
     public function provideDeleteEntity(): Generator
     {
         if (static::$delete !== '') {
-            foreach (static::$deleteEntities as $name => $entityList) {
-                foreach ($entityList as $entity) {
-                    yield [$name, $entity];
-                }
+            foreach (static::$deleteEntities as $entity) {
+                yield [$entity];
             }
         } else {
             self::markTestSkipped("No deletable entity.");

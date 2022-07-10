@@ -11,7 +11,8 @@ class TeamCategoryControllerTest extends JuryControllerTest
     protected static string  $baseUrl                  = '/jury/categories';
     protected static array   $exampleEntries           = ['Participants', 'Observers', 'System', 'yes', 'no'];
     protected static string  $shortTag                 = 'category';
-    protected static array   $deleteEntities           = ['name' => ['System']];
+    protected static array   $deleteEntities           = ['System'];
+    protected static string  $deleteEntityIdentifier   = 'name';
     protected static string  $getIDFunc                = 'getCategoryid';
     protected static string  $className                = TeamCategory::class;
     protected static array   $DOM_elements             = ['h1' => ['Categories']];

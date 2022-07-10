@@ -10,7 +10,8 @@ class JudgehostControllerTest extends JuryControllerTest
     protected static ?string $defaultEditEntityName    = 'example-judgehost1';
     protected static string  $baseUrl                  = '/jury/judgehosts';
     protected static array   $exampleEntries           = ['example-judgehost1'];
-    protected static array   $deleteEntities           = ['hostname' => ['example-judgehost1']];
+    protected static array   $deleteEntities           = ['example-judgehost1'];
+    protected static string  $deleteEntityIdentifier   = 'hostname';
     protected static string  $getIDFunc                = 'getJudgehostid';
     protected static string  $className                = Judgehost::class;
     protected static array   $DOM_elements             = ['h1' => ['Judgehosts']];
