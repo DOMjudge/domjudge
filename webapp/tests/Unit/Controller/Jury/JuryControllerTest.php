@@ -21,32 +21,32 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
  */
 abstract class JuryControllerTest extends BaseTest
 {
-    protected array $roles                          = ['admin'];
-    protected string $addButton                     = '';
-    protected string $editButton                    = ' Edit';
-    protected string $deleteButton                  = ' Delete';
-    protected static array $rolesView               = ['admin', 'jury'];
-    protected static array $rolesDisallowed         = ['team'];
-    protected static array $exampleEntries          = ['overwrite_in_class'];
-    protected static string $prefixURL              = 'http://localhost';
-    protected static string $add                    = '/add';
-    protected static string $edit                   = '/edit';
-    protected static string $editDefault            = '/edit';
-    protected static string $delete                 = '/delete';
-    protected static string $deleteDefault          = '/delete';
-    protected static array $deleteEntities          = [];
+    protected array $roles                            = ['admin'];
+    protected string $addButton                       = '';
+    protected string $editButton                      = ' Edit';
+    protected string $deleteButton                    = ' Delete';
+    protected static array $rolesView                 = ['admin', 'jury'];
+    protected static array $rolesDisallowed           = ['team'];
+    protected static array $exampleEntries            = ['overwrite_in_class'];
+    protected static string $prefixURL                = 'http://localhost';
+    protected static string $add                      = '/add';
+    protected static string $edit                     = '/edit';
+    protected static string $editDefault              = '/edit';
+    protected static string $delete                   = '/delete';
+    protected static string $deleteDefault            = '/delete';
+    protected static array $deleteEntities            = [];
     protected static string $identifyingEditAttribute = '';
-    protected static array $deleteFixtures          = [];
-    protected static string $shortTag               = '';
-    protected static ?string $addPlus               = null;
-    protected static string $addForm                = '';
-    protected static ?array $deleteExtra            = null;
-    protected static array $addEntities             = [];
-    protected static array $addEntitiesCount        = [];
-    protected static ?string $defaultEditEntityName = null;
-    protected static array $specialFieldOnlyUpdate  = [];
-    protected static array $editEntitiesSkipFields  = [];
-    protected static array $overviewNotShown        = [];
+    protected static array $deleteFixtures            = [];
+    protected static string $shortTag                 = '';
+    protected static ?string $addPlus                 = null;
+    protected static string $addForm                  = '';
+    protected static ?array $deleteExtra              = null;
+    protected static array $addEntities               = [];
+    protected static array $addEntitiesCount          = [];
+    protected static ?string $defaultEditEntityName   = null;
+    protected static array $specialFieldOnlyUpdate    = [];
+    protected static array $editEntitiesSkipFields    = [];
+    protected static array $overviewNotShown          = [];
 
     protected function setUp(): void
     {
