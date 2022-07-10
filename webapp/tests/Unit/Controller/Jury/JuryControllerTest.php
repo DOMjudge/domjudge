@@ -35,6 +35,7 @@ abstract class JuryControllerTest extends BaseTest
     protected static string $delete                 = '/delete';
     protected static string $deleteDefault          = '/delete';
     protected static array $deleteEntities          = [];
+    protected static string $identifyingEditAttribute = '';
     protected static array $deleteFixtures          = [];
     protected static string $shortTag               = '';
     protected static ?string $addPlus               = null;
