@@ -356,6 +356,9 @@ abstract class BaseController extends AbstractController
         array $entities,
         string $redirectUrl
     ) : Response {
+        if (count($entities) === 0) {
+            throw new BadRequestHttpException('No entities provided.');
+        }
         // Assume that we only delete entities of the same class.
         foreach ($entities as $entity) {
             assert(get_class($entities[0]) === get_class($entity));
