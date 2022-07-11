@@ -7,6 +7,7 @@ use App\Entity\Contest;
 use App\Entity\Problem;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DomCrawler\Crawler;
+use Generator;
 
 class ProblemControllerTest extends JuryControllerTest
 {
@@ -15,6 +16,7 @@ class ProblemControllerTest extends JuryControllerTest
     protected static string  $shortTag                 = 'problem';
     protected static array   $deleteEntities           = ['Hello World','Float special compare test'];
     protected static string  $deleteEntityIdentifier   = 'name';
+    protected static bool    $multiDeleteImplemented   = true;
     protected static string  $getIDFunc                = 'getProbid';
     protected static string  $className                = Problem::class;
     protected static array   $DOM_elements             = [
@@ -105,5 +107,14 @@ class ProblemControllerTest extends JuryControllerTest
             'Delete',
         ];
         self::assertTrue(array_intersect($titles, $unexpectedTitles) == []);
+    }
+
+    public function provideDeletableEntities(): Generator
+    {
+        if (count(static::$deleteEntities) < 2) {
+            $this->markTestIncomplete('Not enough entities to test multidelete');
+        } else {
+            $this->markTestIncomplete('Delete should be implemented for Problems.');
+        }
     }
 }

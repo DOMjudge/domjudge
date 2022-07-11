@@ -3,6 +3,7 @@
 namespace App\Tests\Unit\Controller\Jury;
 
 use App\Entity\Team;
+use Generator;
 
 class TeamControllerTest extends JuryControllerTest
 {
@@ -14,6 +15,7 @@ class TeamControllerTest extends JuryControllerTest
     protected static string  $shortTag                 = 'team';
     protected static array   $deleteEntities           = ['DOMjudge','Example teamname'];
     protected static string  $deleteEntityIdentifier   = 'name';
+    protected static bool    $multiDeleteImplemented   = true;
     protected static string  $getIDFunc                = 'getTeamid';
     protected static string  $className                = Team::class;
     protected static array   $DOM_elements             = ['h1' => ['Teams']];
@@ -65,4 +67,13 @@ class TeamControllerTest extends JuryControllerTest
                                                           'contests' => [],
                                                           'displayName' => 'Team without contests'],
                                                          ];
+
+    public function provideDeletableEntities(): Generator
+    {
+        if (count(static::$deleteEntities) < 2) {
+            $this->markTestIncomplete('Not enough entities to test multidelete');
+        } else {
+            $this->markTestIncomplete('Delete should be implemented for Teams.');
+        }
+    }
 }

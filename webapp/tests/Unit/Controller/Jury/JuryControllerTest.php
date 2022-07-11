@@ -25,6 +25,7 @@ abstract class JuryControllerTest extends BaseTest
     protected string $addButton                       = '';
     protected string $editButton                      = ' Edit';
     protected string $deleteButton                    = ' Delete';
+    protected string $pluralShortTag                  = '';
     protected static array $rolesView                 = ['admin', 'jury'];
     protected static array $rolesDisallowed           = ['team'];
     protected static array $exampleEntries            = ['overwrite_in_class'];
@@ -35,6 +36,7 @@ abstract class JuryControllerTest extends BaseTest
     protected static string $delete                   = '/delete';
     protected static string $deleteDefault            = '/delete';
     protected static array $deleteEntities            = [];
+    protected static bool $multiDeleteImplemented     = false;
     protected static string $identifyingEditAttribute = '';
     protected static string $deleteEntityIdentifier   = '';
     protected static array $deleteFixtures            = [];
@@ -53,6 +55,8 @@ abstract class JuryControllerTest extends BaseTest
     {
         parent::setUp();
         $this->addButton = ' Add new ' . static::$shortTag;
+        $this->pluralShortTag = (substr(static::$shortTag, -1) !== 'y') ? static::$shortTag.'s' : substr(static::$shortTag, 0, -1).'ies';
+        $this->removeMultipleButton = 'Remove selected ' . $this->pluralShortTag;
     }
 
     /**
@@ -455,5 +459,100 @@ abstract class JuryControllerTest extends BaseTest
             $team, null, $problem, $contest, 'c',
             [new UploadedFile(__FILE__, "foo.c", null, null, true)]
         );
+    }
+
+    public function testMultiDeleteJurySelection(): void
+    {
+        $this->roles = ['jury'];
+        $this->logOut();
+        $this->logIn();
+        $this->loadFixtures(static::$deleteFixtures);
+        $this->client->followRedirects(true);
+        $this->verifyPageResponse('GET', static::$baseUrl, 200);
+        $em = self::getContainer()->get('doctrine')->getManager();
+        self::assertSelectorNotExists('button:contains("'.$this->removeMultipleButton.'")');
+        self::assertSelectorNotExists('input.multideletecheckbox');
+    }
+
+    public function testMultiDeleteEmptySelection(): void
+    {
+        if (static::$delete === '' || !static::$multiDeleteImplemented) {
+            self::markTestSkipped("Delete not implemented.");
+        }
+        $this->roles = ['admin'];
+        $this->logOut();
+        $this->logIn();
+        $this->loadFixtures(static::$deleteFixtures);
+        $this->client->followRedirects(true);
+        $this->verifyPageResponse('GET', static::$baseUrl, 200);
+        $em = self::getContainer()->get('doctrine')->getManager();
+        self::assertSelectorExists('button:contains("'.$this->removeMultipleButton.'")');
+        $this->client->request(
+            'POST',
+            static::$baseUrl.'/deleteList',
+            ['body' => ['confirmation' => '0', 'multidelete_submit' => '']]
+        );
+        self::assertSelectorExists('body:contains("No ' . $this->pluralShortTag . ' selected.")');
+
+    }
+
+    /**
+     * @dataProvider provideDeletableEntities
+     */
+    public function testMultiDelete(array $entityShortNameList, array $warningList): void
+    {
+        $this->roles = ['admin'];
+        $this->logOut();
+        $this->logIn();
+        $this->loadFixtures(static::$deleteFixtures);
+        $this->client->followRedirects(true);
+        $this->verifyPageResponse('GET', static::$baseUrl, 200);
+        $em = self::getContainer()->get('doctrine')->getManager();
+        self::assertSelectorExists('button:contains("'.$this->removeMultipleButton.'")');
+        $postData = [];
+        $postData['confirmation'] = '0';
+        $postData['multidelete_submit'] = '';
+        $ids = [];
+        $descriptions = [];
+        foreach ($entityShortNameList as $shortName) {
+            // Find the entityId to delete.
+            $ent = $em->getRepository(static::$className)->findOneBy([static::$deleteEntityIdentifier => $shortName]);
+            $idToDelete = $ent->{static::$getIDFunc}();
+            $postData['ident'.$idToDelete] = 'on';
+            $ids[] = $idToDelete;
+            $descriptions[] = $ent->getShortDescription();
+        }
+        $this->client->request(
+            'POST',
+            static::$baseUrl.'/deleteList',
+            $postData
+        );
+        $crawler = $this->getCurrentCrawler();
+        $crawlerElements = ['Warning, this will:','Are you sure?'];
+        $crawlerElements = array_merge($crawlerElements, $warningList);
+        foreach ([$ids, $descriptions, $crawlerElements] as $list) {
+            foreach ($list as $item) {
+                self::assertSelectorExists('body:contains("'.$item.'")');
+            }
+        }
+        foreach ($warningList as $warning) {
+            self::assertEquals(1,count($crawler->filter('li:contains("' . $warning . '")')));
+        }
+    }
+
+    public function provideDeletableEntities(): Generator
+    {
+        if (static::$delete !== '') {
+            if (count(static::$deleteEntities) < 2) {
+                $this->markTestIncomplete('Not enough entities to test multidelete');
+            } else {
+                if (static::$multiDeleteImplemented) {
+                    $this->markTestIncomplete('Currently not implemented.');
+                }
+                $this->markTestSkipped('Currently not implemented.');
+            }
+        } else {
+            self::markTestSkipped("No deletable entities.");
+        }
     }
 }

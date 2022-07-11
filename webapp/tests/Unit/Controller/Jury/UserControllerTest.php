@@ -15,6 +15,7 @@ class UserControllerTest extends JuryControllerTest
     protected static string  $shortTag                 = 'user';
     protected static array   $deleteEntities           = ['demo','judgehost'];
     protected static string  $deleteEntityIdentifier   = 'username';
+    protected static bool    $multiDeleteImplemented   = false;
     protected static string  $getIDFunc                = 'getUserid';
     protected static string  $className                = User::class;
     protected static array   $DOM_elements             = ['h1' => ['Users']];
