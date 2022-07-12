@@ -541,6 +541,24 @@ abstract class JuryControllerTest extends BaseTest
         foreach ($warningList as $warning) {
             self::assertEquals(1,count($crawler->filter('li:contains("' . $warning . '")')));
         }
+        // Send the same request again but with confirmation
+        $postData['confirmation'] = '1';
+        $this->client->request(
+            'POST',
+            static::$baseUrl.'/deleteList',
+            $postData
+        );
+        // Revisit to clean the flash messages.
+        $this->verifyPageResponse('GET', static::$baseUrl, 200);
+        foreach ([$descriptions, $entityShortNameList] as $list) {
+            foreach ($list as $item) {
+                if (in_array($item, ['demo','DOMjudge'])) {
+                    // These terms are also used in other links/entities.
+                    continue;
+                }
+                self::assertSelectorNotExists('body:contains("'.$item.'")');
+            }
+        }
     }
 
     public function provideDeletableEntities(): Generator
