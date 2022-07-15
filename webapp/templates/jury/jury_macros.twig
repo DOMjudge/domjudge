@@ -78,92 +78,92 @@
             <form method="post" action="{{ path(delete_list_endpoint) }}" name="multidelete" id="multidelete">
                 <input type='hidden' name='confirmation' value='0'>
         {% endif %}
-        <table class="data-table table table-sm table-striped" style="width:auto">
-            <thead class="">
-            <tr>
-                {%- set default_sort = 0 %}
-                {%- set default_sort_order = 'asc' %}
-                {%- for key,column in fields %}
-                    {%- if column.default_sort|default(false) %}
-                        {%- set default_sort = loop.index0 %}
-                        {%- if column.default_sort_order is defined %}
-                            {%- set default_sort_order = column.default_sort_order %}
-                        {%- endif %}
-                    {%- endif %}
-
-                    <th scope="col" class="
-                        {%- if column.sort is defined and column.sort %}sortable{%- endif %}
-                        {%- if (column.search is not defined) or column.search %} searchable{%- endif %}">
-                        {{- column.title|nl2br -}}
-                    </th>
-                {%- endfor %}
-                {%- if num_actions > 0 %}
-                    {%- for i in 1..num_actions %}
-
-                        <th scope="col"></th>
-                    {%- endfor %}
-                {%- endif %}
-                {% if multidelete and is_granted('ROLE_ADMIN') %}
-                    <th scope="col"></th>
-                {% endif %}
-
-            </tr>
-            </thead>
-            <tbody>
-            {%- for row in data %}
-
-                <tr class="{{ row.cssclass|default('') }}"
-                        {%- if row.style is defined %} style="{{ row.style }}"{% endif %}>
-                    {%- for key,column in fields %}
-                        {%- set item = attribute(row.data, key) %}
-
-                        <td
-                           class="{{ item.cssclass|default('') }}{% if key == "status" %} {{ item.value|statusClass() }}{% endif %}"
-                                {%- if item.title is defined %} title="{{ item.title }}"{% endif %}
-                                {%- if item.filterKey is defined and item.filterValue is defined %} data-{{ item.filterKey }}="{{ item.filterValue }}"{% endif %}
-                                {%- if item.sortvalue is defined %} data-sort="{{ item.sortvalue }}"{% endif %}>
-                            {%- if item.link is defined %}<a href="{{ item.link }}">
-                                {%- elseif row.link is defined %}<a href="{{ row.link }}">{% endif %}
-                                    {% if key == "status" %}
-                                    {{- (item.value|default(item.default|default('')))|statusIcon -}}
-                                    {% elseif key == "country" %}
-                                    {{- (item.value|default(item.default|default('')))|countryFlag -}}
-                                    {% elseif key == "affiliation_logo" %}
-                                    {{- (item.value|default(item.default|default('')))|affiliationLogo(item.title) -}}
-                                    {% elseif key == "warning_content" %}
-                                    {{- item.value|printWarningContent -}}
-                                    {% else %}
-                                    {{- (item.value|default(item.default|default(''))) -}}
-                                    {% endif %}
-                                    {% if item.icon is defined %}<i class="fas fa-{{ item.icon }}"></i>{%- endif %}
-                                    {%- if item.link is defined or row.link is defined -%}</a>{% endif %}
-                        </td>
-                    {%- endfor %}
-                    {%- for action in row.actions %}
-                        <td>
-                            {%- if action %}
-
-                                <a {% if action.disabled is defined and action.disabled %}class="disabled"{% endif %} {% if action.link is defined %}href="{{ action.link }}"{% endif %} title="{{ action.title }}" {% if action.ajaxModal is defined and action.ajaxModal %}data-ajax-modal{% endif %}>
-                                    <i class="fas fa-{{ action.icon }}"></i>
-                                </a>
+                <table class="data-table table table-sm table-striped" style="width:auto">
+                    <thead class="">
+                    <tr>
+                        {%- set default_sort = 0 %}
+                        {%- set default_sort_order = 'asc' %}
+                        {%- for key,column in fields %}
+                            {%- if column.default_sort|default(false) %}
+                                {%- set default_sort = loop.index0 %}
+                                {%- if column.default_sort_order is defined %}
+                                    {%- set default_sort_order = column.default_sort_order %}
+                                {%- endif %}
                             {%- endif %}
 
-                        </td>
+                            <th scope="col" class="
+                                {%- if column.sort is defined and column.sort %}sortable{%- endif %}
+                                {%- if (column.search is not defined) or column.search %} searchable{%- endif %}">
+                                {{- column.title|nl2br -}}
+                            </th>
+                        {%- endfor %}
+                        {%- if num_actions > 0 %}
+                            {%- for i in 1..num_actions %}
+
+                                <th scope="col"></th>
+                            {%- endfor %}
+                        {%- endif %}
+                        {% if multidelete and is_granted('ROLE_ADMIN') %}
+                            <th scope="col"></th>
+                        {% endif %}
+
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {%- for row in data %}
+
+                        <tr class="{{ row.cssclass|default('') }}"
+                                {%- if row.style is defined %} style="{{ row.style }}"{% endif %}>
+                            {%- for key,column in fields %}
+                                {%- set item = attribute(row.data, key) %}
+
+                                <td
+                                class="{{ item.cssclass|default('') }}{% if key == "status" %} {{ item.value|statusClass() }}{% endif %}"
+                                        {%- if item.title is defined %} title="{{ item.title }}"{% endif %}
+                                        {%- if item.filterKey is defined and item.filterValue is defined %} data-{{ item.filterKey }}="{{ item.filterValue }}"{% endif %}
+                                        {%- if item.sortvalue is defined %} data-sort="{{ item.sortvalue }}"{% endif %}>
+                                    {%- if item.link is defined %}<a href="{{ item.link }}">
+                                        {%- elseif row.link is defined %}<a href="{{ row.link }}">{% endif %}
+                                            {% if key == "status" %}
+                                            {{- (item.value|default(item.default|default('')))|statusIcon -}}
+                                            {% elseif key == "country" %}
+                                            {{- (item.value|default(item.default|default('')))|countryFlag -}}
+                                            {% elseif key == "affiliation_logo" %}
+                                            {{- (item.value|default(item.default|default('')))|affiliationLogo(item.title) -}}
+                                            {% elseif key == "warning_content" %}
+                                            {{- item.value|printWarningContent -}}
+                                            {% else %}
+                                            {{- (item.value|default(item.default|default(''))) -}}
+                                            {% endif %}
+                                            {% if item.icon is defined %}<i class="fas fa-{{ item.icon }}"></i>{%- endif %}
+                                            {%- if item.link is defined or row.link is defined -%}</a>{% endif %}
+                                </td>
+                            {%- endfor %}
+                            {%- for action in row.actions %}
+                                <td>
+                                    {%- if action %}
+
+                                        <a {% if action.disabled is defined and action.disabled %}class="disabled"{% endif %} {% if action.link is defined %}href="{{ action.link }}"{% endif %} title="{{ action.title }}" {% if action.ajaxModal is defined and action.ajaxModal %}data-ajax-modal{% endif %}>
+                                            <i class="fas fa-{{ action.icon }}"></i>
+                                        </a>
+                                    {%- endif %}
+
+                                </td>
+                            {%- endfor %}
+
+                            {% if multidelete and is_granted('ROLE_ADMIN') %}
+                                <td>
+                                    {%- set deleteIdentifier = attribute(row.data, fields|keys|first).value %}
+                                    <input class="multideletecheckbox" type="checkbox" name="ident{{ deleteIdentifier }}" />
+                                </td>
+                            {% endif %}
+                        </tr>
                     {%- endfor %}
 
-                    {% if multidelete and is_granted('ROLE_ADMIN') %}
-                        <td>
-                            {%- set deleteIdentifier = attribute(row.data, fields|keys|first).value %}
-                            <input class="multideletecheckbox" type="checkbox" name="ident{{ deleteIdentifier }}" />
-                        </td>
-                    {% endif %}
-                </tr>
-            {%- endfor %}
-
-            </tbody>
-        </table>
+                    </tbody>
+                </table>
         {% if multidelete and is_granted('ROLE_ADMIN') %}
-        </form>
+            </form>
         {% endif %}
     </div>
     <script>
