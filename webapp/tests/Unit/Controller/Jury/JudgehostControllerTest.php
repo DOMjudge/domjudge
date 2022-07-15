@@ -19,4 +19,5 @@ class JudgehostControllerTest extends JuryControllerTest
     protected static array   $DOM_elements             = ['h1' => ['Judgehosts']];
     protected static string  $add                      = '';
     protected static string  $edit                     = '';
+    protected static string  $shortTag                 = 'judgehost';
 }
