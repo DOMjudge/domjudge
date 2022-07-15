@@ -14,7 +14,7 @@ class ProblemControllerTest extends JuryControllerTest
     protected static string  $baseUrl                  = '/jury/problems';
     protected static array   $exampleEntries           = ['Hello World', 'default', 5, 3, 2, 1];
     protected static string  $shortTag                 = 'problem';
-    protected static array   $deleteEntities           = ['Hello World','Float special compare test'];
+    protected static array   $deleteEntities           = ['Hello World','Float special compare test','Boolean switch search'];
     protected static string  $deleteEntityIdentifier   = 'name';
     protected static bool    $multiDeleteImplemented   = true;
     protected static string  $getIDFunc                = 'getProbid';
@@ -111,10 +111,24 @@ class ProblemControllerTest extends JuryControllerTest
 
     public function provideDeletableEntities(): Generator
     {
-        if (count(static::$deleteEntities) < 2) {
-            $this->markTestIncomplete('Not enough entities to test multidelete');
-        } else {
-            $this->markTestIncomplete('Delete should be implemented for Problems.');
+        if (static::$delete === '') {
+            $this->markTestIncomplete('Delete should be implemented for problems.');
         }
+        if (count(static::$deleteEntities) < 2) {
+            $this->markTestIncomplete('Not enough entities to test multidelete.');
+        }
+        yield [static::$deleteEntities, ['Create dangling references in clarifications',
+                                         'Cascade to contest problems',
+                                         'Cascade to testcases, and possibly to dependent entities external runs, testcase contents']];
+        yield [array_slice(static::$deleteEntities, 0, 1), ['Create dangling references in clarifications',
+                                                            'Cascade to contest problems',
+                                                            'Cascade to testcases, and possibly to dependent entities external runs, testcase contents']];
+        yield [array_slice(static::$deleteEntities, 1, 1), ['Cascade to contest problems',
+                                                            'Cascade to testcases, and possibly to dependent entities external runs, testcase contents']];
+        yield [array_slice(static::$deleteEntities, 1, 2), ['Cascade to contest problems',
+                                                            'Cascade to testcases, and possibly to dependent entities external runs, testcase contents']];
+        yield [array_reverse(static::$deleteEntities), ['Create dangling references in clarifications',
+                                                        'Cascade to contest problems',
+                                                        'Cascade to testcases, and possibly to dependent entities external runs, testcase contents']];
     }
 }

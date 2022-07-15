@@ -528,7 +528,10 @@ abstract class JuryControllerTest extends BaseTest
             $postData
         );
         $crawler = $this->getCurrentCrawler();
-        $crawlerElements = ['Warning, this will:','Are you sure?'];
+        $crawlerElements = ['Are you sure?'];
+        if (count($warningList) > 0) {
+            $crawlerElements[] = 'Warning, this will:';
+        }
         $crawlerElements = array_merge($crawlerElements, $warningList);
         foreach ([$ids, $descriptions, $crawlerElements] as $list) {
             foreach ($list as $item) {
@@ -544,7 +547,7 @@ abstract class JuryControllerTest extends BaseTest
     {
         if (static::$delete !== '') {
             if (count(static::$deleteEntities) < 2) {
-                $this->markTestIncomplete('Not enough entities to test multidelete');
+                $this->markTestIncomplete('Not enough entities to test multidelete.');
             } else {
                 if (static::$multiDeleteImplemented) {
                     $this->markTestIncomplete('Currently not implemented.');

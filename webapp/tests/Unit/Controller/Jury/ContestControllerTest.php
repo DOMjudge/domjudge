@@ -379,11 +379,11 @@ class ContestControllerTest extends JuryControllerTest
 
     public function provideDeletableEntities(): Generator
     {
-        if (static::$delete !== '') {
-            $this->markTestIncomplete('Delete should be implemented for Contests.');
+        if (static::$delete === '') {
+            $this->markTestIncomplete('Delete should be implemented for contests.');
         }
         if (count(static::$deleteEntities) < 2) {
-            $this->markTestIncomplete('Not enough entities to test multidelete');
+            $this->markTestIncomplete('Not enough entities to test multidelete.');
         }
         yield [static::$deleteEntities, ['Cascade to contest problems','Cascade to clarifications']];
         yield [array_slice(static::$deleteEntities, 0, 1), ['Cascade to contest problems']];

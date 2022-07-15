@@ -68,12 +68,18 @@ class TeamControllerTest extends JuryControllerTest
                                                           'displayName' => 'Team without contests'],
                                                          ];
 
+
     public function provideDeletableEntities(): Generator
     {
-        if (count(static::$deleteEntities) < 2) {
-            $this->markTestIncomplete('Not enough entities to test multidelete');
-        } else {
-            $this->markTestIncomplete('Delete should be implemented for Teams.');
+        if (static::$delete === '') {
+            $this->markTestIncomplete('Delete should be implemented for teams.');
         }
+        if (count(static::$deleteEntities) < 2) {
+            $this->markTestIncomplete('Not enough entities to test multidelete.');
+        }
+        yield [static::$deleteEntities, ['Create dangling references in users']];
+        yield [array_slice(static::$deleteEntities, 0, 1), []];
+        yield [array_slice(static::$deleteEntities, 1, 1), []];
+        yield [array_reverse(static::$deleteEntities), ['Create dangling references in users']];
     }
 }
