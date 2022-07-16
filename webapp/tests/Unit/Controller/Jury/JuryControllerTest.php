@@ -548,6 +548,12 @@ abstract class JuryControllerTest extends BaseTest
             static::$baseUrl.'/deleteList',
             $postData
         );
+        // Check message in flashbox.
+        foreach ([$ids, $descriptions] as $list) {
+            foreach ($list as $item) {
+                self::assertSelectorExists('div.alert:contains("'.$item.'")');
+            }
+        }
         // Revisit to clean the flash messages.
         $this->verifyPageResponse('GET', static::$baseUrl, 200);
         foreach ([$descriptions, $entityShortNameList] as $list) {
