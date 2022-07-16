@@ -12,7 +12,7 @@
 
     <h1>Languages</h1>
 
-    {{ macros.table(languages, table_fields, num_actions, null, "", false) }}
+    {{ macros.table(languages, table_fields, num_actions) }}
 
     {% if is_granted('ROLE_ADMIN') %}
         <p>

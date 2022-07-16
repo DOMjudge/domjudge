@@ -71,10 +71,10 @@
     </style>
 {% endmacro %}
 
-{% macro table(data, fields, num_actions, options, delete_list_endpoint, multidelete=true) %}
+{% macro table(data, fields, num_actions, options, multidelete_list_endpoint) %}
 
     <div class="table-wrapper">
-        {% if multidelete and is_granted('ROLE_ADMIN') %}
+        {% if multidelete_list_endpoint is not null and is_granted('ROLE_ADMIN') %}
             <form method="post" action="{{ path(delete_list_endpoint) }}" name="multidelete" id="multidelete">
                 <input type='hidden' name='confirmation' value='0'>
         {% endif %}
@@ -103,7 +103,7 @@
                                 <th scope="col"></th>
                             {%- endfor %}
                         {%- endif %}
-                        {% if multidelete and is_granted('ROLE_ADMIN') %}
+                        {% if multidelete_list_endpoint is not null and is_granted('ROLE_ADMIN') %}
                             <th scope="col"></th>
                         {% endif %}
 
@@ -151,7 +151,7 @@
                                 </td>
                             {%- endfor %}
 
-                            {% if multidelete and is_granted('ROLE_ADMIN') %}
+                            {% if multidelete_list_endpoint is not null and is_granted('ROLE_ADMIN') %}
                                 <td>
                                     {%- set deleteIdentifier = attribute(row.data, fields|keys|first).value %}
                                     <input class="multideletecheckbox" type="checkbox" name="ident{{ deleteIdentifier }}" />
@@ -162,7 +162,7 @@
 
                     </tbody>
                 </table>
-        {% if multidelete and is_granted('ROLE_ADMIN') %}
+        {% if multidelete_list_endpoint is not null and is_granted('ROLE_ADMIN') %}
             </form>
         {% endif %}
     </div>

@@ -12,7 +12,7 @@
 
     <h1>Users</h1>
 
-    {{ macros.table(users, table_fields, num_actions, null, "", false) }}
+    {{ macros.table(users, table_fields, num_actions) }}
 
     {% if is_granted('ROLE_ADMIN') %}
         <p>
