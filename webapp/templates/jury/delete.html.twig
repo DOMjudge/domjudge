@@ -20,7 +20,17 @@
                 {% endfor %}
                 <input type='hidden' name='confirmation' value='1'>
 
-                <p>You're about to delete {{ type }} {{ primaryKey }} "{{ description }}".</p>
+                {% if primaryKeyItems|length == 1 %}
+                    <p>You're about to delete {{ type }} {{ primaryKey }} "{{ description }}".</p>
+                {% else %}
+                    <p>You're about to delete {{ type }}:
+                        <ul>
+                        {% for primaryKeyItem in primaryKeyItems %}
+                            <li>{{ descriptionItems[loop.index0] }} ({{ primaryKeyItem }})</li>
+                        {% endfor %}
+                        </ul>
+                    </p>
+                {% endif %}
 
                 {% if messages is not empty %}
                     <p>
