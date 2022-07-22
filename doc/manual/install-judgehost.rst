@@ -180,6 +180,8 @@ Note that this service will automatically be started if you use the
 customize the script ``judge/create_cgroups`` as required and run it
 after each boot.
 
+The script `jvm_footprint` can be used to measure the memory overhead of the JVM for languages such as Kotlin and Java.
+
 
 REST API credentials
 --------------------
