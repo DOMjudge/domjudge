@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Controller\API;
 
+use App\Controller\API\GeneralInfoController;
 use App\DataFixtures\Test\SampleSubmissionsFixture;
 use App\Service\DOMJudgeService;
 use Generator;
@@ -32,11 +33,12 @@ class GeneralInfoControllerTest extends BaseTest
             $response = $this->verifyApiJsonResponse('GET', $endpoint, 200);
 
             static::assertIsArray($response);
-            static::assertCount(4, $response);
-            static::assertEquals(static::API_VERSION, $response['api_version']);
-            static::assertMatchesRegularExpression('/^\d+\.\d+\.\d+/', $response['domjudge_version']);
-            static::assertEquals('test', $response['environment']);
-            static::assertStringStartsWith('http', $response['doc_url']);
+            static::assertCount(3, $response);
+            static::assertEquals(GeneralInfoController::CCS_SPEC_API_VERSION, $response['version']);
+            static::assertEquals(GeneralInfoController::CCS_SPEC_API_URL, $response['version_url']);
+            static::assertMatchesRegularExpression('/^\d+\.\d+\.\d+/', $response['domjudge']['version']);
+            static::assertEquals('test', $response['domjudge']['environment']);
+            static::assertStringStartsWith('http', $response['domjudge']['doc_url']);
         }
     }
 

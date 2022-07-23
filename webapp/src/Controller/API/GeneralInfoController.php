@@ -39,6 +39,9 @@ class GeneralInfoController extends AbstractFOSRestController
 {
     protected const API_VERSION = 4;
 
+    public const CCS_SPEC_API_VERSION = 'draft';
+    public const CCS_SPEC_API_URL = 'https://ccs-specs.icpc.io/master/contest_api';
+
     protected EntityManagerInterface $em;
     protected DOMJudgeService $dj;
     protected ConfigurationService $config;
@@ -94,20 +97,33 @@ class GeneralInfoController extends AbstractFOSRestController
      *     description="Information about the API and DOMjudge",
      *     @OA\JsonContent(
      *         type="object",
-     *         @OA\Property(property="api_version", type="integer"),
-     *         @OA\Property(property="domjudge_version", type="string"),
-     *         @OA\Property(property="environment", type="string"),
-     *         @OA\Property(property="doc_url", type="string")
+     *         @OA\Property(property="version", type="string", description="Version of the CCS Specs Contest API the API adheres to"),
+     *         @OA\Property(property="version_url", type="string", description="URL with the specification of the Contest API"),
+     *         @OA\Property(
+     *             property="domjudge",
+     *             type="object",
+     *             description="DOMjudge information",
+     *             properties={
+     *                 @OA\Property(property="api_version", type="integer", description="Version of the API"),
+     *                 @OA\Property(property="domjudge_version", type="string", description="Version of DOMjudge"),
+     *                 @OA\Property(property="environment", type="string", description="Environment DOMjudge is running in"),
+     *                 @OA\Property(property="doc_url", type="string", description="URL to DOMjudge API docs")
+     *             }
+     *         )
      *     )
      * )
      */
     public function getInfoAction(): array
     {
         return [
-            'api_version' => static::API_VERSION,
-            'domjudge_version' => $this->getParameter('domjudge.version'),
-            'environment' => $this->getParameter('kernel.environment'),
-            'doc_url' => $this->router->generate('app.swagger_ui', [], RouterInterface::ABSOLUTE_URL),
+            'version' => self::CCS_SPEC_API_VERSION,
+            'version_url' => self::CCS_SPEC_API_URL,
+            'domjudge' => [
+                'api_version' => static::API_VERSION,
+                'version' => $this->getParameter('domjudge.version'),
+                'environment' => $this->getParameter('kernel.environment'),
+                'doc_url' => $this->router->generate('app.swagger_ui', [], RouterInterface::ABSOLUTE_URL),
+            ],
         ];
     }
 
