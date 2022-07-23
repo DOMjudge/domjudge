@@ -195,6 +195,11 @@ class CheckConfigService
         }
         $max_inout_r = $this->em->getConnection()->fetchAllAssociative('SELECT GREATEST(MAX(LENGTH(input)),MAX(LENGTH(output))) as max FROM testcase_content');
         $max_inout = (int)reset($max_inout_r)['max'];
+        $output_limit = 1024*$this->config->get('output_limit');
+        if ($this->config->get('output_storage_limit') >= 0) {
+            $output_limit = 1024*$this->config->get('output_storage_limit');
+        }
+        $max_inout = max($max_inout, $output_limit);
 
         $result = 'O';
         $desc = '';
@@ -205,7 +210,7 @@ class CheckConfigService
 
         if ($vars['innodb_log_file_size'] < 10 * $max_inout) {
             $result = 'W';
-            $desc .= sprintf("MySQL's innodb_log_file_size is set to %s. You may want to raise this to 10x the maximum test case size (now %s).\n", Utils::printsize((int)$vars['innodb_log_file_size']), Utils::printsize($max_inout));
+            $desc .= sprintf("MySQL's innodb_log_file_size is set to %s. You may want to raise this to 10x the maximum of the test case size and output (storage) limit (now %s).\n", Utils::printsize((int)$vars['innodb_log_file_size']), Utils::printsize($max_inout));
         }
 
         $tx = ['REPEATABLE-READ', 'SERIALIZABLE'];
@@ -217,10 +222,10 @@ class CheckConfigService
         $recommended_max_allowed_packet = 16*1024*1024;
         if ($vars['max_allowed_packet'] < 2*$max_inout) {
             $result = 'E';
-            $desc .= sprintf("MySQL's max_allowed_packet is set to %s. You may want to raise this to about twice the maximum test case size (currently %s).\n", Utils::printsize((int)$vars['max_allowed_packet']), Utils::printsize($max_inout));
+            $desc .= sprintf("MySQL's max_allowed_packet is set to %s. You may want to raise this to about twice the maximum of the test case size and output (storage) limit (currently %s).\n", Utils::printsize((int)$vars['max_allowed_packet']), Utils::printsize($max_inout));
         } elseif ($vars['max_allowed_packet'] < $recommended_max_allowed_packet) {
             $result = 'W';
-            $desc .= sprintf("MySQL's max_allowed_packet is set to %s. You may want to raise this to about twice the maximum test case size (currently %s).\n", Utils::printsize((int)$vars['max_allowed_packet']), Utils::printsize($max_inout));
+            $desc .= sprintf("MySQL's max_allowed_packet is set to %s. We recommend at least 16MB.\n", Utils::printsize((int)$vars['max_allowed_packet']), Utils::printsize($max_inout));
         }
 
         return ['caption' => 'MySQL settings',
