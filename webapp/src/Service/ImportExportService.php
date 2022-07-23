@@ -5,7 +5,6 @@ namespace App\Service;
 use App\Entity\Configuration;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
-use App\Entity\Language;
 use App\Entity\Problem;
 use App\Entity\Role;
 use App\Entity\Team;
@@ -59,7 +58,7 @@ class ImportExportService
      */
     public function getContestYamlData(Contest $contest): array
     {
-        // TODO: It seems we dump contest.yaml and system.yaml and problemset.yaml in one here?
+        // We expect contest.yaml and problemset.yaml combined into one file here.
 
         $data = [
             'name' => $contest->getName(),
@@ -74,20 +73,8 @@ class ImportExportService
         }
         $data = array_merge($data, [
             'penalty-time' => $this->config->get('penalty_time'),
-            'default-clars' => $this->config->get('clar_answers'),
-            'clar-categories' => array_values($this->config->get('clar_categories')),
-            'languages' => [],
             'problems' => [],
         ]);
-
-        /** @var Language[] $languages */
-        $languages = $this->em->getRepository(Language::class)->findAll();
-        foreach ($languages as $language) {
-            // TODO: compiler, -flags, runner, -flags?
-            $data['languages'][] = [
-                'name' => $language->getName(),
-            ];
-        }
 
         /** @var ContestProblem $contestProblem */
         foreach ($contest->getProblems() as $contestProblem) {
@@ -226,47 +213,6 @@ class ImportExportService
                 $penaltyTimeConfiguration->setValue((int)$penaltyTime);
             }
         }
-
-        if (isset($data['default-clars'])) {
-            $currentClarificationAnswersConfiguration = $this->config->get('clar_answers');
-            if ($currentClarificationAnswersConfiguration != $data['default-clars']) {
-                $clarificationAnswersConfiguration = $this->em->getRepository(Configuration::class)->findOneBy(['name' => 'clar_answers']);
-                if (!$clarificationAnswersConfiguration) {
-                    $clarificationAnswersConfiguration = new Configuration();
-                    $clarificationAnswersConfiguration->setName('clar_answers');
-                    $this->em->persist($clarificationAnswersConfiguration);
-                }
-                $clarificationAnswersConfiguration->setValue($data['default-clars']);
-            }
-        }
-
-        if (is_array($data['clar-categories'] ?? null)) {
-            $currentClarificationCategoriesConfiguration = $this->config->get('clar_categories');
-            if ($currentClarificationCategoriesConfiguration != $data['clar-categories']) {
-                $clarificationCategoriesConfiguration = $this->em->getRepository(Configuration::class)->findOneBy(['name' => 'clar_categories']);
-                if (!$clarificationCategoriesConfiguration) {
-                    $clarificationCategoriesConfiguration = new Configuration();
-                    $clarificationCategoriesConfiguration->setName('clar_categories');
-                    $this->em->persist($clarificationCategoriesConfiguration);
-                }
-                $categories                           = [];
-                foreach ($data['clar-categories'] as $category) {
-                    $categoryKey              = substr(
-                        str_replace(
-                            [' ', ',', '.'],
-                            '-',
-                            strtolower($category)
-                        ),
-                        0,
-                        9
-                    );
-                    $categories[$categoryKey] = $category;
-                }
-                $clarificationCategoriesConfiguration->setValue($categories);
-            }
-        }
-
-        // We do not import language details, as there's very little to actually import.
 
         if (isset($data['problems'])) {
             $this->importProblemsData($contest, $data['problems']);
