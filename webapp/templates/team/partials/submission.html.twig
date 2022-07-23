@@ -25,14 +25,16 @@
                 Language:
                 <b>{{ judging.submission.language.name }}</b>
             </div>
-            <div class="p-2">
-                Compilation:
-                {% if judging.result == 'compiler-error' %}
-                    <span class="badge badge-danger">failed</span>
-                {% else %}
-                    <span class="badge badge-success">successful</span>
-                {% endif %}
-            </div>
+            {% if not showCompile %}
+                <div class="p-2">
+                    Compilation:
+                    {% if judging.result == 'compiler-error' %}
+                        <span class="badge badge-danger">failed</span>
+                    {% else %}
+                        <span class="badge badge-success">successful</span>
+                    {% endif %}
+                </div>
+            {% endif %}
         </div>
 
         {% if judging.result != 'compiler-error' %}
@@ -53,9 +55,17 @@
             </div>
         {% endif %}
 
-        {% if showCompile == 2 or (showCompile == 1 and judging.result == 'compiler-error') %}
+        {% if showCompile %}
             <hr/>
-            <h4 class="text-center">Compilation output</h4>
+            <h6 class="text-center">
+                Compilation
+                {% if judging.result == 'compiler-error' %}
+                    <span class="badge badge-danger">failed</span>
+                {% else %}
+                    <span class="badge badge-success">successful</span>
+                {% endif %}
+                with the following output
+            </h6>
             {% if judging.outputCompile(true) is not empty %}
                 <pre class="output_text pre-scrollable">{{ judging.outputCompile(true) }}</pre>
             {% else %}
