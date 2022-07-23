@@ -921,6 +921,8 @@ class DOMJudgeService
         for ($idx = 0; $idx < $zip->numFiles; $idx++) {
             $filename = basename($zip->getNameIndex($idx));
             if ($filename === $propertyFile) {
+                // This file is only for setting metadata of the executable,
+                // see webapp/src/Controller/Jury/ExecutableController.php.
                 continue;
             }
 
@@ -930,6 +932,10 @@ class DOMJudgeService
                 && $opsys==ZipArchive::OPSYS_UNIX
                 && (($attr >> 16) & 0100) === 0) {
                 $executableBit = false;
+            }
+            // As a special case force these files to be executable.
+            if ($filename==='build' || $filename==='run') {
+                $executableBit = true;
             }
             $executableFile = new ExecutableFile();
             $executableFile
