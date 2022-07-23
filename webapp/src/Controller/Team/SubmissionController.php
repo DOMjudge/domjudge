@@ -40,6 +40,10 @@ class SubmissionController extends BaseController
     protected ConfigurationService $config;
     protected FormFactoryInterface $formFactory;
 
+    const NEVER_SHOW_COMPILE_OUTPUT = 0;
+    const ONLY_SHOW_COMPILE_OUTPUT_ON_ERROR = 1;
+    const ALWAYS_SHOW_COMPILE_OUTPUT = 2;
+
     public function __construct(
         EntityManagerInterface $em,
         SubmissionService $submissionService,
@@ -191,14 +195,20 @@ class SubmissionController extends BaseController
                 ->getResult();
         }
 
+        $actuallyShowCompile = $showCompile == self::ALWAYS_SHOW_COMPILE_OUTPUT
+            || ($showCompile == self::ONLY_SHOW_COMPILE_OUTPUT_ON_ERROR && $judging->getResult() === 'compiler-error');
+
         $data = [
             'judging' => $judging,
             'verificationRequired' => $verificationRequired,
-            'showCompile' => $showCompile,
+            'showCompile' => $actuallyShowCompile,
             'allowDownload' => $allowDownload,
             'showSampleOutput' => $showSampleOutput,
             'runs' => $runs,
         ];
+        if ($actuallyShowCompile) {
+            $data['size'] = 'xl';
+        }
 
         if ($request->isXmlHttpRequest()) {
             return $this->render('team/submission_modal.html.twig', $data);
