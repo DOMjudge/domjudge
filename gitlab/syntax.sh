@@ -5,7 +5,7 @@ set -euo pipefail
 tests/syntax
 
 make configure
-./configure --with-baseurl='http://localhost/domjudge/'
+./configure --with-baseurl='http://localhost/domjudge/' --with-domjudge-user=root
 make install-docs
 make clean
 
