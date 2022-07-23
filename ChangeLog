@@ -1,5 +1,10 @@
 DOMjudge Programming Contest Judging System
 
+Version 8.1.1 - 11 July 2022
+----------------------------
+ - Bugfix to create user when creating a team
+ - Bugfix in creating users via the API
+
 Version 8.1.0 - 1 June 2022
 ---------------------------
  - Document that minimum PHP version is now 7.4.0.
