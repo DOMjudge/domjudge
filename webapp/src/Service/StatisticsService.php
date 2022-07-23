@@ -420,7 +420,7 @@ class StatisticsService
     public function getGroupedProblemsStats(
         Contest $contest,
         array $problems,
-        bool $showFrozen,
+        bool $showVerdictsInFreeze,
         bool $verificationRequired
     ): array {
         $stats = [
@@ -465,7 +465,7 @@ class StatisticsService
                 $queryBuilder = clone $judgingsQueryBuilder;
                 $queryBuilder->andWhere('s.submittime >= :starttime');
                 $queryBuilder->andWhere('s.submittime < :endtime');
-                if ($showFrozen || $end->getTimestamp() <= $contest->getFreezetime()) {
+                if ($showVerdictsInFreeze || $end->getTimestamp() <= $contest->getFreezetime()) {
                     // When we don't want to show frozen correct/incorrect submissions,
                     // get the same data for both correct and incorrect.
                     // This logic assumes the freeze matches with the start of a bucket.
