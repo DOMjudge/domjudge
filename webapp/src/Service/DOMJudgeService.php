@@ -901,10 +901,11 @@ class DOMJudgeService
 
         if ($contest && $this->config->get('show_public_stats')) {
             $freezeData = new FreezeData($contest);
+            $showVerdictsInFreeze = $freezeData->showFinal(false) || $contest->getFreezetime() === null;
             $data['stats'] = $statistics->getGroupedProblemsStats(
                 $contest,
                 array_map(fn(ContestProblem $problem) => $problem->getProblem(), $problems),
-                $freezeData->showFinal(false),
+                $showVerdictsInFreeze,
                 (bool)$this->config->get('verification_required')
             );
         }

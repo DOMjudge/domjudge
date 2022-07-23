@@ -4,8 +4,10 @@ namespace App\Tests\Unit\Controller;
 
 use App\DataFixtures\Test\EnableSelfregisterFixture;
 use App\DataFixtures\Test\EnableSelfregisterSecondCategoryFixture;
+use App\DataFixtures\Test\SampleSubmissionsInBucketsFixture;
 use App\DataFixtures\Test\SelfRegisteredUserFixture;
 use App\Entity\Contest;
+use App\Entity\Submission;
 use App\Entity\User;
 use App\Tests\Unit\BaseTest;
 use DateTimeInterface;
@@ -256,5 +258,61 @@ class PublicControllerTest extends BaseTest
         foreach([[EnableSelfregisterFixture::class],$fixtures] as $newFixtures) {
             yield[['username'=>'nonexistingaffiliation', 'teamName'=>'NewTeam2','affiliation'=>'existing','existingAffiliation'=>'42'],$newFixtures, '2'];
         }
+    }
+
+    /**
+     * Test that the problem statistics render the correct data
+     *
+     * @dataProvider provideTestProblemStatistics
+     */
+    public function testProblemStatistics(
+        bool $removeFreezeTime,
+        bool $removeUnfreezeTime,
+        int $expectedGreenBoxes,
+        int $expectedRedBoxes,
+        int $expectedBlueBoxes
+    ): void {
+        $this->loadFixture(SampleSubmissionsInBucketsFixture::class);
+        /** @var EntityManagerInterface $em */
+        $em          = self::getContainer()->get(EntityManagerInterface::class);
+        $demoContest = $em->getRepository(Contest::class)->findOneBy(['shortname' => 'demo']);
+        if ($removeFreezeTime) {
+            $demoContest->setFreezetimeString(null);
+        }
+        if ($removeUnfreezeTime) {
+            $demoContest->setUnfreezetimeString(null);
+        }
+        $em->flush();
+
+        // Get the problems page
+        $this->verifyPageResponse('GET', '/public/problems', 200);
+
+        $boxes            = $this->client->getCrawler()->filter('.problem-stats-item');
+        $correctClasses   = array_map(fn(int $n) => 'problem-stats-item correct-' . $n, range(1, 9));
+        $incorrectClasses = array_map(fn(int $n) => 'problem-stats-item incorrect-' . $n, range(1, 9));
+        $frozenClasses    = array_map(fn(int $n) => 'problem-stats-item frozen-' . $n, range(1, 9));
+        $correctBoxes     = $incorrectBoxes = $frozenBoxes = [];
+        /** @var \DOMElement $box */
+        foreach ($boxes as $box) {
+            $class = $box->getAttribute('class');
+            if (in_array($class, $correctClasses)) {
+                $correctBoxes[] = $box;
+            } elseif (in_array($class, $incorrectClasses)) {
+                $incorrectBoxes[] = $box;
+            } elseif (in_array($class, $frozenClasses)) {
+                $frozenBoxes[] = $box;
+            }
+        }
+
+        self::assertCount($expectedGreenBoxes, $correctBoxes);
+        self::assertCount($expectedRedBoxes, $incorrectBoxes);
+        self::assertCount($expectedBlueBoxes, $frozenBoxes);
+    }
+
+    public function provideTestProblemStatistics(): Generator
+    {
+        yield [false, false, 1, 1, 6]; // Keep both times, we expect one green, one red and six blue boxes (2 around the freeze and 4 at the end)
+        yield [true, true, 3, 3, 0]; // Remove both times, we expect three green and three red boxes
+        yield [false, true, 1, 1, 6]; // Remove the unfreeze time but not the freeze time, we expect one green, one red and six blue boxes
     }
 }
