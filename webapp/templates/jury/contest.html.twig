@@ -27,6 +27,13 @@
             This contest is final.
         </div>
     {% endif %}
+    {%- if is_granted('ROLE_ADMIN') -%}
+        {% if contest.isLocked %}
+            <div class="alert alert-danger">
+                This contest is locked. Unlock it to edit contest data.
+            </div>
+        {% endif %}
+    {% endif %}
 
     <div class="row">
         <div class="col-lg-5">
@@ -358,7 +365,7 @@
                                 </a>
                             </td>
                             <td>
-                                {% if is_granted('ROLE_ADMIN') %}
+                                {% if is_granted('ROLE_ADMIN') and not contest.isLocked %}
                                     <a title="Unlink problem from contest" href="{{ path('jury_contest_problem_delete', {'contestId': contest.cid, 'probId': problem.probid}) }}"
                                        data-ajax-modal>
                                         <i class="fas fa-trash-alt"></i>
@@ -382,12 +389,17 @@
 
     <div class="button-row">
         {%- if is_granted('ROLE_ADMIN') -%}
-            {{ button(path('jury_contest_edit', {'contestId': contest.cid}), 'Edit', 'primary', 'edit') }}
-            {{ button(path('jury_contest_delete', {'contestId': contest.cid}), 'Delete', 'danger', 'trash-alt', true) }}
-            {% if contest.finalizetime %}
-                {{ button(path('jury_contest_finalize', {'contestId': contest.cid}), 'Update finalization', 'secondary', 'lock') }}
+            {% if contest.isLocked %}
+                {{ button(path('jury_contest_unlock', {'contestId': contest.cid}), 'Unlock', 'danger', 'unlock') }}
             {% else %}
-                {{ button(path('jury_contest_finalize', {'contestId': contest.cid}), 'Finalize this contest', 'secondary', 'lock') }}
+                {{ button(path('jury_contest_edit', {'contestId': contest.cid}), 'Edit', 'primary', 'edit') }}
+                {{ button(path('jury_contest_delete', {'contestId': contest.cid}), 'Delete', 'danger', 'trash-alt', true) }}
+                {{ button(path('jury_contest_lock', {'contestId': contest.cid}), 'Lock', 'secondary', 'lock') }}
+                {% if contest.finalizetime %}
+                    {{ button(path('jury_contest_finalize', {'contestId': contest.cid}), 'Update finalization', 'secondary', 'lock') }}
+                {% else %}
+                    {{ button(path('jury_contest_finalize', {'contestId': contest.cid}), 'Finalize this contest', 'secondary', 'flag-checkered') }}
+                {% endif %}
             {% endif %}
             {{ button(path('jury_contest_request_remaining', {'contestId': contest.cid}), 'Judge remaining', 'secondary', 'gavel') }}
         {% endif %}

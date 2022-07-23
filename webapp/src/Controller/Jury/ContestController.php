@@ -33,6 +33,7 @@ use Doctrine\ORM\PersistentCollection;
 use Doctrine\ORM\Query\Expr\Join;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\Form\FormInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -94,6 +95,10 @@ class ContestController extends BaseController
             $contest = $em->getRepository(Contest::class)->find($request->request->get('contest'));
             if (!$contest) {
                 throw new NotFoundHttpException('Contest not found');
+            }
+            if ($contest->isLocked()) {
+                $this->addFlash('danger', 'You cannot modify a locked contest.');
+                return $this->redirectToRoute('jury_contests');
             }
 
             $time = key($doNow);
@@ -259,7 +264,7 @@ class ContestController extends BaseController
                 }
             }
 
-            if ($this->isGranted('ROLE_ADMIN')) {
+            if ($this->isGranted('ROLE_ADMIN') && !$contest->isLocked()) {
                 $contestactions[] = [
                     'icon' => 'edit',
                     'title' => 'edit this contest',
@@ -480,6 +485,11 @@ class ContestController extends BaseController
             throw new NotFoundHttpException(sprintf('Contest with ID %s not found', $contestId));
         }
 
+        if ($contest->isLocked()) {
+            $this->addFlash('danger', 'You cannot edit a locked contest.');
+            return $this->redirect($this->generateUrl('jury_contest', ['contestId' => $contestId]));
+        }
+
         $form = $this->createForm(ContestType::class, $contest);
 
         $form->handleRequest($request);
@@ -586,6 +596,11 @@ class ContestController extends BaseController
             throw new NotFoundHttpException(sprintf('Contest with ID %s not found', $contestId));
         }
 
+        if ($contest->isLocked()) {
+            $this->addFlash('danger', 'You cannot delete a locked contest.');
+            return $this->redirect($this->generateUrl('jury_contest', ['contestId' => $contestId]));
+        }
+
         return $this->deleteEntities($request, $this->em, $this->dj, $this->eventLogService, $this->kernel,
                                      [$contest], $this->generateUrl('jury_contests'));
     }
@@ -606,6 +621,11 @@ class ContestController extends BaseController
                 sprintf('Contest problem with contest ID %s and problem ID %s not found',
                         $contestId, $probId)
             );
+        }
+
+        if ($contestProblem->getContest()->isLocked()) {
+            $this->addFlash('danger', 'You cannot delete a problem from a locked contest.');
+            return $this->redirect($this->generateUrl('jury_contest', ['contestId' => $contestId]));
         }
 
         return $this->deleteEntities($request, $this->em, $this->dj, $this->eventLogService, $this->kernel,
@@ -906,5 +926,43 @@ class ContestController extends BaseController
             ]);
         }
         return null;
+    }
+
+    /**
+     * @Route("/{contestId<\d+>}/lock", name="jury_contest_lock")
+     * @IsGranted("ROLE_ADMIN")
+     */
+    public function lockAction(Request $request, int $contestId): Response
+    {
+        return $this->doLock($contestId, true);
+    }
+
+    /**
+     * @Route("/{contestId<\d+>}/unlock", name="jury_contest_unlock")
+     * @IsGranted("ROLE_ADMIN")
+     */
+    public function unlockAction(Request $request, int $contestId): Response
+    {
+        return $this->doLock($contestId, false);
+    }
+
+    private function doLock(int $contestId, bool $locked): Response
+    {
+        /** @var Contest $contest */
+        $contest = $this->em->getRepository(Contest::class)->find($contestId);
+        if (!$contest) {
+            throw new NotFoundHttpException(sprintf('Contest with ID %s not found.', $contestId));
+        }
+
+        $this->dj->auditlog('contest', $contest->getCid(), $locked ? 'lock' : 'unlock');
+        $contest->setIsLocked($locked);
+        $this->em->flush();
+
+        if ($locked) {
+            $this->addFlash('info', 'Contest has been locked, modifications are no longer possible.');
+        } else {
+            $this->addFlash('danger', 'Contest has been unlocked, modifications are possible again.');
+        }
+        return $this->redirect($this->generateUrl('jury_contest', ['contestId' => $contestId]));
     }
 }

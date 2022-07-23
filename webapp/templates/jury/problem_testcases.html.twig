@@ -24,7 +24,7 @@
         <table class="table table-sm table-striped table-hover testcases">
             <thead>
             <tr>
-                {% if is_granted('ROLE_ADMIN') %}
+                {% if allowEdit %}
                     <th></th>
                 {% endif %}
                 <th class="testrank">#</th>
@@ -32,7 +32,7 @@
                 <th>download</th>
                 <th>size</th>
                 <th>md5</th>
-                {% if is_granted('ROLE_ADMIN') %}
+                {% if allowEdit %}
                     <th>upload new</th>
                 {% endif %}
                 <th>description / image</th>
@@ -41,7 +41,7 @@
             <tbody>
             {% for rank, testcase in testcases %}
                 <tr>
-                    {% if is_granted('ROLE_ADMIN') %}
+                    {% if allowEdit %}
                         <td rowspan="2">
                             <a href="{{  path('jury_testcase_delete', {'testcaseId': testcase.testcaseid}) }}"
                                title="delete testcase {{ testcase.testcaseid }}"
@@ -51,12 +51,12 @@
                         </td>
                     {% endif %}
                     <td rowspan="2" class="testrank">
-                        {% if is_granted('ROLE_ADMIN') %}
+                        {% if allowEdit %}
                             <a href="{{ path('jury_problem_testcase_move', {'probId': problem.probid, 'rank': testcase.rank, 'direction': 'up'}) }}"
                                title="Move testcase up"><i class="fas fa-arrow-up"></i></a><br>
                         {% endif %}
                         {{ testcase.rank }}
-                        {% if is_granted('ROLE_ADMIN') %}
+                        {% if allowEdit %}
                             <br>
                             <a href="{{ path('jury_problem_testcase_move', {'probId': problem.probid, 'rank': testcase.rank, 'direction': 'down'}) }}"
                                title="Move testcase down"><i class="fas fa-arrow-down"></i></a>
@@ -77,7 +77,7 @@
                     <td class="md5 small">
                         {{ testcase.md5sumInput }}
                     </td>
-                    {% if is_granted('ROLE_ADMIN') %}
+                    {% if allowEdit %}
                         <td><div class="custom-file">
                             <input type="file" class="custom-file-input" name="update_input[{{ testcase.rank }}]" id="update_input_{{testcase.rank}}">
                             <label class="custom-file-label text-truncate text-muted" for="update_input_{{testcase.rank}}">new input file</label>
@@ -85,7 +85,7 @@
                     {% endif %}
                     <td class="testdesc">
                         <span class="testcase-description">{{ testcase.description(true) | descriptionExpand }}</span>
-                        {% if is_granted('ROLE_ADMIN') %}
+                        {% if allowEdit %}
                             <textarea class="d-none form-control testcase-description-field" name="description[{{ testcase.rank }}]">{{ testcase.description(true) }}</textarea>
                             <button type="button" class="float-right testcase-edit-description btn btn-secondary btn-sm">Edit</button>
                         {% endif %}
@@ -103,7 +103,7 @@
                     <td class="md5 small">
                         {{ testcase.md5sumOutput }}
                     </td>
-                    {% if is_granted('ROLE_ADMIN') %}
+                    {% if allowEdit %}
                         <td><div class="custom-file">
                             <input type="file" class="custom-file-input" name="update_output[{{ testcase.rank }}]" id="update_output_{{testcase.rank}}">
                             <label class="custom-file-label text-truncate text-muted" for="update_output_{{testcase.rank}}">new output file</label>
@@ -114,7 +114,7 @@
                             <a href="{{ path('jury_problem_testcase_fetch', {'probId': problem.probid, 'rank': testcase.rank, 'type': 'image'}) }}">
                                 <span class="filename">p{{ problem.probid }}.t{{ testcase.rank }}.{{ testcaseData[testcase.rank].image_type }}</span>
                             </a>
-                            {% if is_granted('ROLE_ADMIN') %}
+                            {% if allowEdit %}
                             &nbsp;
                             <div class="custom-file">
                                 <input type="file" class="custom-file-input" name="update_image[{{ testcase.rank }}]" id="update_image_{{testcase.rank}}">
@@ -122,7 +122,7 @@
                             </div>
                             {% endif %}
                         {% else %}
-                            {% if is_granted('ROLE_ADMIN') %}
+                            {% if allowEdit %}
                             <div class="custom-file">
                                 <input type="file" class="custom-file-input" name="update_image[{{ testcase.rank }}]" id="update_image_{{testcase.rank}}">
                                 <label class="custom-file-label text-truncate text-muted" for="update_image_{{testcase.rank}}">add an image</label>
@@ -138,7 +138,7 @@
         </table>
     {% endif %}
 
-    {% if is_granted('ROLE_ADMIN') %}
+    {% if allowEdit %}
         <h2>Create new testcase</h2>
 
         <div class="form-row">

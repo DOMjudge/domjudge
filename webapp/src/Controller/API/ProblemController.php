@@ -21,8 +21,10 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Yaml\Yaml;
 
 /**
@@ -87,7 +89,12 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
         /** @var Contest $contest */
         $contest = $this->em->getRepository(Contest::class)->find($contestId);
 
-        /** @var UploadedFile $file */
+        if ($contest->isLocked()) {
+            $contestUrl = $this->generateUrl('jury_contest', ['contestId' => $contestId], UrlGeneratorInterface::ABSOLUTE_URL);
+            throw new AccessDeniedHttpException('Contest is locked, go to ' . $contestUrl . ' to unlock it.');
+        }
+
+    /** @var UploadedFile $file */
         $file = $request->files->get('data') ?: [];
         // Note: we read the JSON as YAML, since any JSON is also YAML and this allows us
         // to import files with YAML inside them that match the JSON format
@@ -198,7 +205,14 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
      */
     public function addProblemAction(Request $request): array
     {
-        return $this->importProblemService->importProblemFromRequest($request, $this->getContestId($request));
+        $contestId = $this->getContestId($request);
+        /** @var Contest $contest */
+        $contest = $this->em->getRepository(Contest::class)->find($contestId);
+        if ($contest->isLocked()) {
+            $contestUrl = $this->generateUrl('jury_contest', ['contestId' => $contestId], UrlGeneratorInterface::ABSOLUTE_URL);
+            throw new AccessDeniedHttpException('Contest is locked, go to ' . $contestUrl . ' to unlock it.');
+        }
+        return $this->importProblemService->importProblemFromRequest($request, $contestId);
     }
 
     /**
@@ -237,6 +251,11 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
 
         if (empty($contestProblem)) {
             throw new NotFoundHttpException(sprintf('Object with ID \'%s\' not found', $id));
+        }
+        $contest = $contestProblem->getContest();
+        if ($contest->isLocked()) {
+            $contestUrl = $this->generateUrl('jury_contest', ['contestId' => $contest->getCid()], UrlGeneratorInterface::ABSOLUTE_URL);
+            throw new AccessDeniedHttpException('Contest is locked, go to ' . $contestUrl . ' to unlock it.');
         }
 
         $this->em->remove($contestProblem);
@@ -289,6 +308,11 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
         }
 
         $cid = $this->getContestId($request);
+        $contest = $this->em->getRepository(Contest::class)->find($cid);
+        if ($contest->isLocked()) {
+            $contestUrl = $this->generateUrl('jury_contest', ['contestId' => $contest->getCid()], UrlGeneratorInterface::ABSOLUTE_URL);
+            throw new AccessDeniedHttpException('Contest is locked, go to ' . $contestUrl . ' to unlock it.');
+        }
 
         /** @var ContestProblem|null $contestProblem */
         $contestProblem = $this->em->createQueryBuilder()

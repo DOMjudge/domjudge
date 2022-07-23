@@ -22,6 +22,9 @@
                     <div class="card">
                         <div class="card-header">
                             {{ contest.name }} ({{ contest.shortname }} - c{{ contest.cid }})
+                            {% if contest.locked %}
+                                <i class="fas fa-lock"></i>
+                            {% endif %}
                         </div>
                         <div class="card-body">
                             {% if not contest.starttimeEnabled and contest.finalizetime is not empty %}
@@ -40,7 +43,7 @@
                                         </td>
                                         <td class="{{ data.class|default('') }}"><b>{{ data.label }}:</b></td>
                                         <td class="{{ data.class|default('') }}">{{ data.time }}</td>
-                                        {% if is_granted('ROLE_ADMIN') %}
+                                        {% if is_granted('ROLE_ADMIN') and not contest.isLocked %}
                                             <td>
                                                 {% if data.show_button %}
                                                     <input type="submit" class="btn btn-primary btn-sm"

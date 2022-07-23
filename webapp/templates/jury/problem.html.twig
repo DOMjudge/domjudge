@@ -38,7 +38,10 @@
                             {{ problem.testcases.count }}
                         {% endif %}
                         <a href="{{ path('jury_problem_testcases', {'probId': problem.probid}) }}">details
-                            / edit</a>
+                            {%- if is_granted('ROLE_ADMIN') and not lockedProblem -%}
+                                / edit
+                            {% endif %}
+                        </a>
                     </td>
                 </tr>
                 <tr>
@@ -117,8 +120,10 @@
 
     <div class="button-row">
         {%- if is_granted('ROLE_ADMIN') -%}
-            {{ button(path('jury_problem_edit', {'probId': problem.probid}), 'Edit', 'primary', 'edit') }}
-            {{ button(path('jury_problem_delete', {'probId': problem.probid}), 'Delete', 'danger', 'trash-alt', true) }}
+            {%- if not lockedProblem -%}
+                {{ button(path('jury_problem_edit', {'probId': problem.probid}), 'Edit', 'primary', 'edit') }}
+                {{ button(path('jury_problem_delete', {'probId': problem.probid}), 'Delete', 'danger', 'trash-alt', true) }}
+            {% endif %}
             {{ button(path('jury_problem_request_remaining', {'probId': problem.probid}), 'Judge remaining', 'secondary', 'gavel') }}
         {% endif %}
         {{ button(path('jury_export_problem', {'problemId': problem.probid}), 'Export', 'secondary', 'download') }}
@@ -212,7 +217,7 @@
                                    class="btn btn-sm btn-primary">
                                     <i class="fas fa-download"></i>
                                 </a>
-                                {% if is_granted('ROLE_ADMIN') %}
+                                {% if is_granted('ROLE_ADMIN') and not lockedProblem %}
                                     <a href="{{ path('jury_attachment_delete', {'attachmentId': attachment.attachmentid}) }}"
                                        class="btn btn-sm btn-danger"
                                        data-ajax-modal>
@@ -224,7 +229,7 @@
                     {% endfor %}
                 {% endif %}
 
-                {% if is_granted('ROLE_ADMIN') %}
+                {% if is_granted('ROLE_ADMIN') and not lockedProblem %}
                     <tr>
                         <td>
                             {{ form_errors(problemAttachmentForm.content) }}
