@@ -1,5 +1,9 @@
 DOMjudge Programming Contest Judging System
 
+Version 8.1.2 - 23 July 2022
+----------------------------
+ - No changes, new tag to release with proper Changelog
+
 Version 8.1.1 - 11 July 2022
 ----------------------------
  - Bugfix to create user when creating a team
