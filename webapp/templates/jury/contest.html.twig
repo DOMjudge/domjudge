@@ -177,6 +177,14 @@
                         {% endif %}
                     </td>
                 </tr>
+                <tr>
+                    <th>Static scoreboard ZIP</th>
+                    <td>
+                        <a class="btn btn-sm btn-secondary" href="{{ path('public_scoreboard_data_zip', {contest: contest.cid}) }}">
+                            <i class="fas fa-download"></i> Download
+                        </a>
+                    </td>
+                </tr>
                 {% set contestId = contest.cid %}
                 {% if showExternalId(contest) %}
                     {% set contestId = contest.externalid %}
