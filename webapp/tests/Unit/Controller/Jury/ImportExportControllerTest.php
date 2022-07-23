@@ -100,55 +100,6 @@ start-time: '2021-01-01T11:00:00+00:00'
 duration: '26285:00:00.000'
 scoreboard-freeze-duration: '1:00:00'
 penalty-time: 20
-default-clars:
-    - 'No comment.'
-    - 'Read the problem statement carefully.'
-clar-categories:
-    - 'General issue'
-    - 'Technical issue'
-languages:
-    -
-        name: Ada
-    -
-        name: AWK
-    -
-        name: 'Bash shell'
-    -
-        name: C
-    -
-        name: C++
-    -
-        name: 'C#'
-    -
-        name: Fortran
-    -
-        name: Haskell
-    -
-        name: Java
-    -
-        name: JavaScript
-    -
-        name: Kotlin
-    -
-        name: Lua
-    -
-        name: Pascal
-    -
-        name: Perl
-    -
-        name: Prolog
-    -
-        name: 'Python 3'
-    -
-        name: R
-    -
-        name: Ruby
-    -
-        name: Scala
-    -
-        name: 'POSIX shell'
-    -
-        name: Swift
 problems:
     -
         label: boolfind
