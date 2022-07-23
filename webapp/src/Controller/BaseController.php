@@ -269,9 +269,10 @@ abstract class BaseController extends AbstractController
         $primaryKeyData   = [];
         $messages         = [];
         foreach ($entities as $entity) {
+            $primaryKeyDataTemp = [];
             foreach ($metadata->getIdentifierColumnNames() as $primaryKeyColumn) {
                 $primaryKeyColumnValue = $propertyAccessor->getValue($entity, $primaryKeyColumn);
-                $primaryKeyData[]      = $primaryKeyColumnValue;
+                $primaryKeyDataTemp[]      = $primaryKeyColumnValue;
 
                 // Check all relationships.
                 foreach ($relations as $table => $tableRelations) {
@@ -331,6 +332,7 @@ abstract class BaseController extends AbstractController
                     }
                 }
             }
+            $primaryKeyData[] = $primaryKeyDataTemp;
         }
         return [$isError, $primaryKeyData, $messages];
     }
@@ -373,14 +375,14 @@ abstract class BaseController extends AbstractController
             }
 
             $msgList = [];
-            foreach ($entities as $entity) {
-                $this->commitDeleteEntity($entity, $DOMJudgeService, $entityManager, $primaryKeyData, $eventLogService);
+            foreach ($entities as $id => $entity) {
+                $this->commitDeleteEntity($entity, $DOMJudgeService, $entityManager, $primaryKeyData[$id], $eventLogService);
                 $description = $entity->getShortDescription();
                 $msgList[] = sprintf('Successfully deleted %s %s "%s"',
-                                     $readableType, implode(', ', $primaryKeyData), $description);
+                                     $readableType, implode(', ', $primaryKeyData[$id]), $description);
             }
 
-            $msg = implode('\n', $msgList);
+            $msg = implode("\n", $msgList);
             $this->addFlash('success', $msg);
             if ($request->isXmlHttpRequest()) {
                 return new JsonResponse(['url' => $redirectUrl]);
@@ -396,7 +398,7 @@ abstract class BaseController extends AbstractController
 
         $data = [
             'type' => $readableType,
-            'primaryKey' => implode(', ', $primaryKeyData),
+            'primaryKey' => implode(', ', array_merge(...$primaryKeyData)),
             'description' => implode(',', $descriptions),
             'messages' => $messages,
             'isError' => $isError,
