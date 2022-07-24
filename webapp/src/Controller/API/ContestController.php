@@ -48,6 +48,9 @@ class ContestController extends AbstractRestController
     protected ImportExportService $importExportService;
     protected AssetUpdateService $assetUpdater;
 
+    public const EVENT_FEED_FORMAT_2022_07 = 0;
+    public const EVENT_FEED_FORMAT_2020_03 = 1;
+
     public function __construct(
         EntityManagerInterface $entityManager,
         DOMJudgeService $dj,
@@ -144,7 +147,6 @@ class ContestController extends AbstractRestController
      */
     public function listAction(Request $request): Response
     {
-        
         return parent::performListAction($request);
     }
 
@@ -494,6 +496,8 @@ class ContestController extends AbstractRestController
         $contest = $this->getContestWithId($request, $cid);
         // Make sure this script doesn't hit the PHP maximum execution timeout.
         set_time_limit(0);
+
+        // TODO: when we know the replacement of since_id, implement it
         if ($request->query->has('since_id')) {
             $since_id = $request->query->getInt('since_id');
             $event    = $this->em->getRepository(Event::class)->findOneBy([
@@ -507,10 +511,12 @@ class ContestController extends AbstractRestController
             $since_id = -1;
         }
 
+        $format = $this->config->get('event_feed_format');
+
         $response = new StreamedResponse();
         $response->headers->set('X-Accel-Buffering', 'no');
         $response->headers->set('Content-Type', 'application/x-ndjson');
-        $response->setCallback(function () use ($cid, $contest, $request, $since_id, $metadataFactory, $kernel) {
+        $response->setCallback(function () use ($format, $cid, $contest, $request, $since_id, $metadataFactory, $kernel) {
             $lastUpdate = 0;
             $lastIdSent = $since_id;
             $typeFilter = false;
@@ -624,15 +630,38 @@ class ContestController extends AbstractRestController
                             unset($data[$property]);
                         }
                     }
-                    $result = [
-                        'id' => (string)$event->getEventid(),
-                        'type' => (string)$event->getEndpointtype(),
-                        'op' => (string)$event->getAction(),
-                        'data' => $data,
-                    ];
+                    switch ($format) {
+                        case static::EVENT_FEED_FORMAT_2020_03:
+                            $result = [
+                                'id' => (string)$event->getEventid(),
+                                'type' => (string)$event->getEndpointtype(),
+                                'op' => (string)$event->getAction(),
+                                'data' => $data,
+                            ];
+                            break;
+                        case static::EVENT_FEED_FORMAT_2022_07:
+                            if ($event->getAction() === EventLogService::ACTION_DELETE) {
+                                $data = null;
+                            }
+                            $id   = (string)$event->getEndpointid() ?? null;
+                            $type = (string)$event->getEndpointtype();
+                            if ($type === 'contests') {
+                                // Special case: the type for a contest is singular and the ID must not be set
+                                $id   = null;
+                                $type = 'contest';
+                            }
+                            $result = [
+                                'id'   => $id,
+                                'type' => $type,
+                                'data' => $data,
+                            ];
+                            break;
+                    }
+
                     if (!$strict) {
                         $result['time'] = Utils::absTime($event->getEventtime());
                     }
+
                     echo $this->dj->jsonEncode($result) . "\n";
                     ob_flush();
                     flush();
