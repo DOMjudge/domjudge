@@ -195,7 +195,7 @@ class PublicController extends BaseController
                 }
 
                 if (!$contest) {
-                    throw new NotFoundHttpException('Specified contest not found');
+                    throw new NotFoundHttpException('Specified contest not found.');
                 }
             }
         }
