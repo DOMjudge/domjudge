@@ -84,12 +84,6 @@ fi
 cd "$CHROOTDIR"
 CHROOTDIR="$PWD"
 
-#rm -f "$CHROOTDIR/etc/resolv.conf"
-#cp /etc/resolv.conf /etc/hosts /etc/hostname "$CHROOTDIR/etc" || true
-#cp /etc/ssl/certs/ca-certificates.crt "$CHROOTDIR/etc/ssl/certs/" || true
-#cp -r /usr/share/ca-certificates/* "$CHROOTDIR/usr/share/ca-certificates" || true
-#cp -r /usr/local/share/ca-certificates/* "$CHROOTDIR/usr/local/share/ca-certificates" || true
-
 mount -t proc proc "$CHROOTDIR/proc"
 mount -t sysfs sysfs "$CHROOTDIR/sys"
 
