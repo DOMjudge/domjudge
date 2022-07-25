@@ -176,7 +176,7 @@ class PublicController extends BaseController
                 $contest      = null;
                 $activateTime = null;
                 foreach ($this->dj->getCurrentContests(-1) as $possibleContest) {
-                    if (!$possibleContest->getPublic() || !$possibleContest->getEnabled()) {
+                    if (!($possibleContest->getPublic() && $possibleContest->getEnabled())) {
                         continue;
                     }
                     if ($activateTime === null || $activateTime < $possibleContest->getActivatetime()) {
