@@ -173,7 +173,6 @@ class PublicController extends BaseController
         if ($contestId = $request->query->get('contest')) {
             if ($contestId === 'auto') {
                 // Automatically detect the contest that is activated the latest.
-                $contest      = null;
                 $activateTime = null;
                 foreach ($this->dj->getCurrentContests(-1) as $possibleContest) {
                     if (!($possibleContest->getPublic() && $possibleContest->getEnabled())) {
@@ -186,7 +185,6 @@ class PublicController extends BaseController
                 }
             } else {
                 // Find the contest with the given ID.
-                $contest = null;
                 foreach ($this->dj->getCurrentContests(-1) as $possibleContest) {
                     if ($possibleContest->getCid() == $contestId || $possibleContest->getExternalid() == $contestId) {
                         $contest = $possibleContest;
