@@ -195,6 +195,32 @@ abstract class BaseController extends AbstractController
         if ($entity instanceof Contest) {
             $cid = $entity->getCid();
         }
+
+        // Add an audit log entry.
+        $auditLogType = Utils::tableForEntity($entity);
+        $DOMJudgeService->auditlog($auditLogType, implode(', ', $primaryKeyData), 'deleted');
+
+        // Trigger the delete event. We need to do this before deleting the entity to make
+        // sure we can still find the entity in the table.
+        if ($endpoint = $eventLogService->endpointForEntity($entity)) {
+            foreach ($contestsForEntity as $contest) {
+                // When the $entity is a contest it has no id anymore after the EntityManager->remove
+                // for this reason we either remember it or check all other contests and use their cid.
+                if (!$entity instanceof Contest) {
+                    $cid = $contest->getCid();
+                }
+                $dataId = $primaryKeyData[0];
+                if ($entity instanceof ContestProblem) {
+                    $dataId = $entity->getProbid();
+                }
+                // TODO: cascade deletes. Maybe use getDependentEntities()?
+                $eventLogService->log($endpoint, $dataId,
+                    EventLogService::ACTION_DELETE,
+                    $cid, null, null, false);
+            }
+        }
+
+        // Now actually delete the entity.
         $entityManager->wrapInTransaction(function () use ($entityManager, $entity) {
             if ($entity instanceof Problem) {
                 // Deleting a problem is a special case: its dependent tables do not
@@ -217,29 +243,6 @@ abstract class BaseController extends AbstractController
             }
             $entityManager->remove($entity);
         });
-
-        // Add an audit log entry.
-        $auditLogType = Utils::tableForEntity($entity);
-        $DOMJudgeService->auditlog($auditLogType, implode(', ', $primaryKeyData), 'deleted');
-
-        // Trigger the delete event.
-        if ($endpoint = $eventLogService->endpointForEntity($entity)) {
-            foreach ($contestsForEntity as $contest) {
-                // When the $entity is a contest it has no id anymore after the EntityManager->remove
-                // for this reason we either remember it or check all other contests and use their cid.
-                if (!$entity instanceof Contest) {
-                    $cid = $contest->getCid();
-                }
-                $dataId = $primaryKeyData[0];
-                if ($entity instanceof ContestProblem) {
-                    $dataId = $entity->getProbid();
-                }
-                // TODO: cascade deletes. Maybe use getDependentEntities()?
-                $eventLogService->log($endpoint, $dataId,
-                    EventLogService::ACTION_DELETE,
-                    $cid, null, null, false);
-            }
-        }
 
         if ($entity instanceof Team) {
             // No need to do this in a transaction, since the chance of a team
