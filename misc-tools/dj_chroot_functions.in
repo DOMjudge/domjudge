@@ -1,0 +1,55 @@
+# @configure_input@
+#
+# Shared code for building and running a chroot.
+#
+# Part of the DOMjudge Programming Contest Jury System and licensed
+# under the GNU GPL. See README and COPYING for details.
+
+cleanup() {
+    # Unmount things on cleanup
+    umount -f "$CHROOTDIR/proc" >/dev/null 2>&1 || /bin/true
+    umount -f "$CHROOTDIR/sys" >/dev/null 2>&1 || /bin/true
+    umount -f "$CHROOTDIR/dev/pts" >/dev/null 2>&1 || /bin/true
+}
+
+normal_cleanup() {
+    umount "$CHROOTDIR/dev/pts"
+    umount "$CHROOTDIR/sys"
+    umount "$CHROOTDIR/proc"
+}
+
+error() {
+    echo "Error: $*"
+    echo
+    usage
+    exit 1
+}
+
+check_showhelp() {
+    if [ -n "$SHOWHELP" ]; then
+        usage
+        exit 0
+    fi
+}
+
+check_rootuser() {
+    if [ "$(id -u)" != 0 ]; then
+        echo "Warning: you probably need to run this program as root."
+    fi
+}
+
+move_into_chroot() {
+    cd "$CHROOTDIR"
+    CHROOTDIR="$PWD"
+}
+
+mount_host_special_files() {
+    mount -t proc proc "$CHROOTDIR/proc"
+    mount -t sysfs sysfs "$CHROOTDIR/sys"
+
+    # Required for some warning messages about writing to log files
+    mount --bind /dev/pts "$CHROOTDIR/dev/pts"
+}
+
+# Default directory where the chroot tree lives:
+CHROOTDIR="@judgehost_chrootdir@"

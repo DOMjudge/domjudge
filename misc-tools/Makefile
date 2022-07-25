@@ -8,7 +8,7 @@ OBJECTS =
 
 SUBST_DOMSERVER = fix_permissions
 
-SUBST_JUDGEHOST = dj_make_chroot dj_run_chroot dj_make_chroot_docker \
+SUBST_JUDGEHOST = dj_chroot_functions dj_make_chroot dj_make_chroot_docker \
                   dj_judgehost_cleanup
 
 SUBST_FILES = $(SUBST_DOMSERVER) $(SUBST_JUDGEHOST)

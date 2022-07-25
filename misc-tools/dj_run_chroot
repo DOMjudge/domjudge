@@ -1,5 +1,4 @@
 #!/bin/sh
-# @configure_input@
 #
 # Script to run a command or shell inside a chroot environment
 # prebuilt with the dj_make_chroot script.
@@ -10,16 +9,10 @@
 # Abort when a single command fails:
 set -e
 
-cleanup() {
-    # Unmount things on cleanup
-    umount -f "$CHROOTDIR/proc" >/dev/null 2>&1  || /bin/true
-    umount -f "$CHROOTDIR/sys" >/dev/null 2>&1  || /bin/true
-    umount -f "$CHROOTDIR/dev/pts" >/dev/null 2>&1  || /bin/true
-}
-trap cleanup EXIT
+# shellcheck source=./misc-tools/dj_chroot_functions
+. "$(dirname $0)/dj_chroot_functions"
 
-# Default directory where the chroot tree lives:
-CHROOTDIR="@judgehost_chrootdir@"
+trap cleanup EXIT
 
 usage()
 {
@@ -47,14 +40,6 @@ into the chroot tree, and then e.g. run:
 EOF
 }
 
-error()
-{
-    echo "Error: $*"
-    echo
-    usage
-    exit 1
-}
-
 # Read command-line parameters:
 while getopts 'd:h' OPT ; do
     case $OPT in
@@ -65,30 +50,19 @@ while getopts 'd:h' OPT ; do
 done
 shift $((OPTIND-1))
 
-if [ -n "$SHOWHELP" ]; then
-    usage
-    exit 0
-fi
+check_showhelp
+check_rootuser
 
 if [ $# -eq 0 ]; then
     INTERACTIVE=1
 fi
 
-if [ "$(id -u)" != 0 ]; then
-    echo "Warning: you probably need to run this program as root."
-fi
-
 [ -z "$CHROOTDIR" ] && error "No chroot directory given nor default known."
 [ -d "$CHROOTDIR" ] || error "Chrootdir '$CHROOTDIR' does not exist."
 
-cd "$CHROOTDIR"
-CHROOTDIR="$PWD"
+move_into_chroot
 
-mount -t proc proc "$CHROOTDIR/proc"
-mount -t sysfs sysfs "$CHROOTDIR/sys"
-
-# Required for some warning messages about writing to log files
-mount --bind /dev/pts "$CHROOTDIR/dev/pts"
+mount_host_special_files
 
 # Prevent perl locale warnings in the chroot:
 export LC_ALL=C
@@ -101,9 +75,7 @@ else
     chroot "$CHROOTDIR" /bin/sh -c "$*"
 fi
 
-umount "$CHROOTDIR/dev/pts"
-umount "$CHROOTDIR/sys"
-umount "$CHROOTDIR/proc"
+normal_cleanup
 
 [ -n "$INTERACTIVE" ] && echo "Exited chroot in '$CHROOTDIR'."
 exit 0
