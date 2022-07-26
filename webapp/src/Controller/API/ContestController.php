@@ -497,15 +497,20 @@ class ContestController extends AbstractRestController
         // Make sure this script doesn't hit the PHP maximum execution timeout.
         set_time_limit(0);
 
-        // TODO: when we know the replacement of since_id, implement it
-        if ($request->query->has('since_id')) {
-            $since_id = $request->query->getInt('since_id');
+        if ($request->query->has('since_token') || $request->query->has('since_id')) {
+            $since_id = (int)$request->query->get('since_token', $request->query->get('since_id'));
             $event    = $this->em->getRepository(Event::class)->findOneBy([
                 'eventid' => $since_id,
                 'contest' => $contest,
             ]);
             if ($event === null) {
-                return new Response('Invalid parameter "since_id" requested.', Response::HTTP_BAD_REQUEST);
+                return new Response(
+                    sprintf(
+                        'Invalid parameter "%s" requested.',
+                        $request->query->has('since_token') ? 'since_token' : 'since_id'
+                    ),
+                    Response::HTTP_BAD_REQUEST
+                );
             }
         } else {
             $since_id = -1;
@@ -651,9 +656,10 @@ class ContestController extends AbstractRestController
                                 $type = 'contest';
                             }
                             $result = [
-                                'id'   => $id,
-                                'type' => $type,
-                                'data' => $data,
+                                'token' => (string)$event->getEventid(),
+                                'id'    => $id,
+                                'type'  => $type,
+                                'data'  => $data,
                             ];
                             break;
                     }
