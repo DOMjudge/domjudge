@@ -47,7 +47,9 @@ class ExternalContestSourceType extends AbstractType
         $builder->add('username', TextType::class, [
             'required' => false,
         ]);
-        $builder->add('password', TextType::class);
+        $builder->add('password', TextType::class, [
+            'required' => false,
+        ]);
         $builder->add('save', SubmitType::class);
     }
 
