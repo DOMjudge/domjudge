@@ -37,9 +37,9 @@ class ExternalSourceWarning
     /**
      * @ORM\Column(type="string", name="last_event_id", length=255,
      *     options={"comment"="Last event ID this warning happened at"},
-     *     nullable=false)
+     *     nullable=true)
      */
-    private string $lastEventId;
+    private ?string $lastEventId;
 
     /**
      * @ORM\Column(type="decimal", precision=32, scale=9, name="time",
@@ -94,12 +94,12 @@ class ExternalSourceWarning
         return $this->extwarningid;
     }
 
-    public function getLastEventId(): string
+    public function getLastEventId(): ?string
     {
         return $this->lastEventId;
     }
 
-    public function setLastEventId(string $lastEventId): ExternalSourceWarning
+    public function setLastEventId(?string $lastEventId): ExternalSourceWarning
     {
         $this->lastEventId = $lastEventId;
         return $this;
