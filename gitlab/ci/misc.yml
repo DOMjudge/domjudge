@@ -81,3 +81,25 @@ detect dump:
         -type f -print0 | xargs -0 grep --color "dump(" | grep -v "Yaml::dump(")
     - echo $OUT
     - exit $(($(wc -l <<< $OUT)-1))
+
+run chroot script checks:
+  extends: [.short_job]
+  stage: chroot_checks
+  parallel:
+    matrix:
+      - ARCH:
+        - amd64
+        - arm64
+      #- DISTRO:
+      #    - Debian
+      #    - Ubuntu
+      #- RELEASE:
+      #    - focal
+      #    - bionic
+      #- DISTRO: Debian
+      #  RELEASE:
+      #    - wheezy
+      #    - buster
+  script:
+    - ./gitlab/chroot_checks.sh
+
