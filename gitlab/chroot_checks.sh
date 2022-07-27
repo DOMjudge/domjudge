@@ -20,8 +20,13 @@ function finish() {
 trap finish EXIT
 
 section_start setup "Setup and install"
-# Set up
-"$( dirname "${BASH_SOURCE[0]}" )"/base.sh
+lsb_release -a
+
+# configure, make and install (but skip documentation)
+make configure
+./configure --with-baseurl='http://localhost/domjudge/' --with-domjudge-user=domjudge --with-judgehost_chrootdir=${DIR}/chroot/domjudge |& tee "$GITLABARTIFACTS/configure.log"
+make judgehost |& tee "$GITLABARTIFACTS/make.log"
+sudo make install-judgehost |& tee -a "$GITLABARTIFACTS/make.log"
 section_end setup
 
 section_start mount "Show runner mounts"
