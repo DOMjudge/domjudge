@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # @configure_input@
 #
 # Script to generate a chroot environment from a docker image
