@@ -12,7 +12,7 @@ cleanup() {
     umount -f "$CHROOTDIR/dev/pts" >/dev/null 2>&1 || /bin/true
 }
 
-normal_cleanup() {
+unmount_filesystems() {
     umount "$CHROOTDIR/dev/pts"
     umount "$CHROOTDIR/sys"
     umount "$CHROOTDIR/proc"

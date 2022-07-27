@@ -76,7 +76,7 @@ else
     chroot "$CHROOTDIR" /bin/sh -c "$*"
 fi
 
-normal_cleanup
+unmount_filesystems
 
 [ -n "$INTERACTIVE" ] && echo "Exited chroot in '$CHROOTDIR'."
 exit 0

@@ -387,7 +387,7 @@ echo "This file should not be readable inside the judging environment!" \
     > "$CHROOTDIR/etc/root-permission-test.txt"
 chmod 0640 "$CHROOTDIR/etc/root-permission-test.txt"
 
-normal_cleanup
+unmount_filesystems
 
 echo "Done building chroot in $CHROOTDIR"
 exit 0
