@@ -38,11 +38,6 @@ check_rootuser() {
     fi
 }
 
-move_into_chroot() {
-    cd "$CHROOTDIR"
-    CHROOTDIR="$PWD"
-}
-
 mount_host_special_filesystems() {
     mount -t proc proc "$CHROOTDIR/proc"
     mount -t sysfs sysfs "$CHROOTDIR/sys"
