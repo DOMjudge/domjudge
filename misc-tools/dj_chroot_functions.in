@@ -10,6 +10,8 @@ cleanup() {
     umount -f "$CHROOTDIR/proc" >/dev/null 2>&1 || /bin/true
     umount -f "$CHROOTDIR/sys" >/dev/null 2>&1 || /bin/true
     umount -f "$CHROOTDIR/dev/pts" >/dev/null 2>&1 || /bin/true
+    # Cleanup docker directory if present
+    ([ -n "$WORKDIR" ] && [ -d "$WORKDIR" ] && rm -rf "$WORKDIR") || /bin/true
 }
 
 unmount_filesystems() {
@@ -46,5 +48,17 @@ mount_host_special_filesystems() {
     mount --bind /dev/pts "$CHROOTDIR/dev/pts"
 }
 
+copy_host_dns_truststore() {
+    # Do some final domjudge specific set up of the chroot
+    rm -f "$CHROOTDIR/etc/resolv.conf"
+    cp /etc/resolv.conf /etc/hosts /etc/hostname "$CHROOTDIR/etc" || true
+    cp /etc/ssl/certs/ca-certificates.crt "$CHROOTDIR/etc/ssl/certs/" || true
+    cp -r /usr/share/ca-certificates/* "$CHROOTDIR/usr/share/ca-certificates" || true
+    cp -r /usr/local/share/ca-certificates/* "$CHROOTDIR/usr/local/share/ca-certificates" || true
+}
+
 # Default directory where the chroot tree lives:
 CHROOTDIR="@judgehost_chrootdir@"
+
+# Workdir for docker
+WORKDIR=""

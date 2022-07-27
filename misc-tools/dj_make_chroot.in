@@ -269,11 +269,7 @@ if [ -n "$WORKDIR" ] && [ -d "$WORKDIR" ]; then
     rm -rf "$WORKDIR"
 fi
 
-rm -f "$CHROOTDIR/etc/resolv.conf"
-cp /etc/resolv.conf /etc/hosts /etc/hostname "$CHROOTDIR/etc" || true
-cp /etc/ssl/certs/ca-certificates.crt "$CHROOTDIR/etc/ssl/certs/" || true
-cp -r /usr/share/ca-certificates/* "$CHROOTDIR/usr/share/ca-certificates" || true
-cp -r /usr/local/share/ca-certificates/* "$CHROOTDIR/usr/local/share/ca-certificates" || true
+copy_host_dns_truststore
 
 if [ "$DISTRO" = 'Debian' ]; then
     if [ "$RELEASE" = 'testing' ] || [ "$RELEASE" = 'unstable' ]; then

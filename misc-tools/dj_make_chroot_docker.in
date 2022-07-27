@@ -12,20 +12,10 @@
 # Abort when a single command fails(or uninitialized variable is accessed):
 set -eu
 
-cleanup() {
-    # Unmount things on cleanup
-    umount -f "$CHROOTDIR/proc" >/dev/null 2>&1  || /bin/true
-    umount -f "$CHROOTDIR/sys" >/dev/null 2>&1  || /bin/true
-    umount -f "$CHROOTDIR/dev/pts" >/dev/null 2>&1  || /bin/true
-    # Cleanup docker directory if present
-    ([ -n "$WORKDIR" ] && [ -d "$WORKDIR" ] && rm -rf "$WORKDIR") || /bin/true
-}
+# shellcheck source=misc-tools/dj_chroot_functions
+. "$(dirname $0)/dj_chroot_functions"
+
 trap cleanup EXIT
-
-# Default directory where to build the chroot tree:
-CHROOTDIR="@judgehost_chrootdir@"
-
-WORKDIR=""
 
 usage()
 {
@@ -45,14 +35,6 @@ target location of the chroot (unless '-y' is specified). The
 default chrootdir is '@judgehost_chrootdir@'.
 
 EOF
-}
-
-error()
-{
-    echo "Error: $*"
-    echo
-    usage
-    exit 1
 }
 
 # Read command-line parameters:
@@ -75,14 +57,8 @@ if [ $# -gt 0 ]; then
     error "Additional arguments specified."
 fi
 
-if [ "$SHOWHELP" -eq "1" ]; then
-    usage
-    exit 0
-fi
-
-if [ "$(id -u)" != 0 ]; then
-    echo "Warning: you probably need to run this program as root."
-fi
+check_showhelp
+check_rootuser
 
 [ -z "$CHROOTDIR" ] && error "No chroot directory given or default known."
 [ -z "$IMAGE" ] && error "No docker image specified (-i image:tag)"
@@ -156,13 +132,7 @@ if [ -n "$WORKDIR" ]; then
     rm -rf "$WORKDIR" || true
 fi
 
-
-# Do some final domjudge specific set up of the chroot
-rm -f "$CHROOTDIR/etc/resolv.conf"
-cp /etc/resolv.conf /etc/hosts /etc/hostname "$CHROOTDIR/etc" || true
-cp /etc/ssl/certs/ca-certificates.crt "$CHROOTDIR/etc/ssl/certs/" || true
-cp -r /usr/share/ca-certificates/* "$CHROOTDIR/usr/share/ca-certificates" || true
-cp -r /usr/local/share/ca-certificates/* "$CHROOTDIR/usr/local/share/ca-certificates" || true
+copy_host_dns_truststore
 
 # Disable root account
 sed -i "s/^root::/root:*:/" "$CHROOTDIR/etc/shadow"
