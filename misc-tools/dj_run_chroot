@@ -60,7 +60,8 @@ fi
 [ -z "$CHROOTDIR" ] && error "No chroot directory given nor default known."
 [ -d "$CHROOTDIR" ] || error "Chrootdir '$CHROOTDIR' does not exist."
 
-move_into_chroot
+cd "$CHROOTDIR"
+CHROOTDIR="$PWD"
 
 mount_host_special_files
 
