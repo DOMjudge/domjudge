@@ -317,7 +317,7 @@ if [ -n "$DEBPROXY" ]; then
     echo "Acquire::http::Proxy \"$DEBPROXY\";" >> "$CHROOTDIR/etc/apt/apt.conf"
 fi
 
-mount_host_special_files
+mount_host_special_filesystems
 
 # Prevent perl locale warnings in the chroot:
 export LC_ALL=C

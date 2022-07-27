@@ -63,7 +63,7 @@ fi
 cd "$CHROOTDIR"
 CHROOTDIR="$PWD"
 
-mount_host_special_files
+mount_host_special_filesystems
 
 # Prevent perl locale warnings in the chroot:
 export LC_ALL=C
