@@ -55,17 +55,17 @@ cd ${DIR}/misc-tools || exit 1
 #for force in "1","0"
 #for help in "1","0"
 
-ARGS=""
-if [ -n "${ARCH+x}" ]; then
-    ARGS="$ARGS -a ${ARCH}"
-fi
-if [ -n "${DISTRO+x}" ]; then
-    ARGS="$ARGS -D ${DISTRO}"
-fi
-if [ -n "${RELEASE+x}" ]; then
-    ARGS="$ARGS -R ${RELEASE}"
-fi
-sudo ./dj_make_chroot ${ARGS} |& tee "$GITLABARTIFACTS/dj_make_chroot.log"
+#ARGS=""
+#if [ -n "${ARCH+x}" ]; then
+#    ARGS="$ARGS -a ${ARCH}"
+#fi
+#if [ -n "${DISTRO+x}" ]; then
+#    ARGS="$ARGS -D ${DISTRO}"
+#fi
+#if [ -n "${RELEASE+x}" ]; then
+#    ARGS="$ARGS -R ${RELEASE}"
+#fi
+#sudo ./dj_make_chroot ${ARGS} |& tee "$GITLABARTIFACTS/dj_make_chroot.log"
 section_end chroot
 
 section_start chroottest "Test chroot contents"
