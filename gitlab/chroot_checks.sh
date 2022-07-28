@@ -63,7 +63,7 @@ if [ -n "${DISTRO+x}" ]; then
     ARGS="$ARGS -D ${DISTRO}"
 fi
 if [ -n "${RELEASE+x}" ]; then
-    ARGS="$ARGS -D ${RELEASE}"
+    ARGS="$ARGS -R ${RELEASE}"
 fi
 sudo ./dj_make_chroot ${ARGS} |& tee "$GITLABARTIFACTS/dj_make_chroot.log"
 section_end chroot
