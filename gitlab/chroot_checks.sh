@@ -67,3 +67,8 @@ if [ -n "${RELEASE+x}" ]; then
 fi
 sudo ./dj_make_chroot ${ARGS} |& tee "$GITLABARTIFACTS/dj_make_chroot.log"
 section_end chroot
+
+section_start chroottest "Test chroot contents"
+cp submit/assert.bash ./
+bats ./chroot_tests.bats
+sudo ./dj_run_chroot "pypy3"

@@ -165,7 +165,12 @@ if [ "$DISTRO" = 'Ubuntu' ]; then
     INCLUDEDEBS=""
 
     # Packages to install after upgrade (space separated):
-    INSTALLDEBS="gcc g++ make default-jdk-headless default-jre-headless pypy3 locales"
+    INSTALLDEBS="gcc g++ make default-jdk-headless default-jre-headless locales"
+    if [ "amd64 arm64"==*"$ARCH"* ] && [ "focal jammy"==*"$RELEASE"* ]; then
+        INSTALLDEBS="${INSTALLDEBS} pypy3"
+    else
+        INSTALLDEBS="${INSTALLDEBS} python3"
+    fi
     # For C# support add: mono-mcs mono-devel
     # However running mono within chroot still gives errors...
 
