@@ -202,9 +202,10 @@ if [ "$DISTRO" = 'Ubuntu' ]; then
 
     # Ubuntu mirror, modify to match closest mirror
     if [ -z "$DEBMIRROR" ]; then
-        # x86_64 can use the main Ubuntu repo's, other
+        # x86(_64) can use the main Ubuntu repo's, other
         # architectures need to use a mirror from ubuntu-ports.
-        if [ "$(uname -m)" = "x86_64" ]; then
+        MAINSTREAM="amd64 i386"
+        if [ -z "${MAINSTREAM##*$ARCH*}" ]; then
             DEBMIRROR="http://us.archive.ubuntu.com/ubuntu/"
         else
             DEBMIRROR="http://ports.ubuntu.com/ubuntu-ports/"
