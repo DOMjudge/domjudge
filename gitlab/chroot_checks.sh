@@ -42,7 +42,7 @@ if [ -e ${DIR}/chroot/domjudge ]; then
     rm -rf ${DIR}/chroot/domjudge
 fi
 
-cd ${DIR}/misc-tools
+cd ${DIR}/misc-tools || exit 1
 #for arch in amd64,arm64,""
 #for dir in "/chroot","/builds/chroot","/notadir/chroot"
 #for dist in "Debian","Ubuntu","notLinux"
@@ -55,15 +55,15 @@ cd ${DIR}/misc-tools
 #for force in "1","0"
 #for help in "1","0"
 
-ARGS = ""
-if [ ! -z ${ARCH+x} ]; then
-    ARGS += " -a ${ARCH}"
+ARGS=""
+if [ -n "${ARCH+x}" ]; then
+    ARGS="$ARGS -a ${ARCH}"
 fi
-if [ ! -z ${DISTRO+x} ]; then
-    ARGS += " -D ${DISTRO}"
+if [ -n "${DISTRO+x}" ]; then
+    ARGS="$ARGS -D ${DISTRO}"
 fi
-if [ ! -z ${RELEASE+x} ]; then
-    ARGS += " -D ${RELEASE}"
+if [ -n "${RELEASE+x}" ]; then
+    ARGS="$ARGS -D ${RELEASE}"
 fi
 sudo ./dj_make_chroot ${ARGS} |& tee "$GITLABARTIFACTS/dj_make_chroot.log"
 section_end chroot
