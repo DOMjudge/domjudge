@@ -37,18 +37,21 @@ UBUNTU_ARCHLIST="amd64,arm64,armhf,i386,powerpc,ppc64el,s390x"
 # If host system is Debian or Ubuntu, use its release and architecture by default
 if [ "$(lsb_release -i -s || true)" = 'Debian' ] || \
    [ "$(lsb_release -i -s || true)" = 'Ubuntu' ]; then
-    DISTRO="$(lsb_release -i -s)"
-    RELEASE="$(lsb_release -c -s)"
-    if [ "$(lsb_release -i -s)" = 'Debian' ]; then
-        if [ "$(lsb_release -c -s)" = "sid" ]; then
-            RELEASE='unstable'
-        fi
-        if [ "$(lsb_release -r -s)" = 'testing' ]; then
-            RELEASE='testing'
-        fi
-    fi
     if [ -z "$ARCH" ]; then
         ARCH="$(dpkg --print-architecture)"
+    fi
+    # If Distro & Release are not specified pick the host value
+    if [ -z "$DISTRO" ] && [ -z "$RELEASE" ]; then
+        DISTRO="$(lsb_release -i -s)"
+        RELEASE="$(lsb_release -c -s)"
+        if [ "$(lsb_release -i -s)" = 'Debian' ]; then
+            if [ "$(lsb_release -c -s)" = "sid" ]; then
+                RELEASE='unstable'
+            fi
+            if [ "$(lsb_release -r -s)" = 'testing' ]; then
+                RELEASE='testing'
+            fi
+        fi
     fi
 fi
 
