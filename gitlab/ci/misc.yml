@@ -90,6 +90,8 @@ run chroot script checks:
       - ARCH:
         - amd64
         - arm64
+        - armhf
+        - i386
       #- DISTRO:
       #    - Debian
       #    - Ubuntu
