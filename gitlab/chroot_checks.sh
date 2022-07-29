@@ -44,8 +44,8 @@ fi
 
 cd ${DIR}/misc-tools || exit 1
 #for arch in amd64,arm64,""
-#for dir in "/chroot","/builds/chroot","/notadir/chroot"
 #for dist in "Debian","Ubuntu","notLinux"
+#for dir in "/chroot","/builds/chroot","/notadir/chroot"
 #for rel in "buster","wheeze","focal","bionic","notarelease"
 #for incdeb in "zip","nano"
 #for remdeb in "gcc","pypy3"
@@ -69,6 +69,7 @@ cd ${DIR}/misc-tools || exit 1
 section_end chroot
 
 section_start chroottest "Test chroot contents"
-cp submit/assert.bash ./
-bats ./chroot_tests.bats
-sudo ./dj_run_chroot "pypy3"
+cp ${DIR}/submit/assert.bash ./
+cp ${DIR}/gitlab/chroot.bats ./
+bats ./chroot.bats
+#sudo ./dj_run_chroot "pypy3"

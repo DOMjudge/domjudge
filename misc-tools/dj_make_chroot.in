@@ -154,6 +154,14 @@ fi
 
 [ -z "$ARCH" ]      && error "No architecture given or detected."
 
+ARCHLIST=$DEBIAN_ARCHLIST
+if [ "$DISTRO" = "Ubuntu" ]; then
+    ARCHLIST=$UBUNTU_ARCHLIST
+fi
+if [ -n "${ARCHLIST##*"$ARCH"*}" ]; then
+    error "Architecture $ARCH not supported for $DISTRO"    
+fi
+
 # Various settings that can be tweaked, specific per distribution:
 if [ "$DISTRO" = 'Debian' ]; then
 
@@ -191,7 +199,9 @@ if [ "$DISTRO" = 'Ubuntu' ]; then
 
     # Packages to install after upgrade (space separated):
     INSTALLDEBS="gcc g++ make default-jdk-headless default-jre-headless locales"
-    if [ "amd64 arm64"==*"$ARCH"* ] && [ "focal jammy"==*"$RELEASE"* ]; then
+    PYPY_ARCH="amd64,arm64,armhf,ppc64el,s390x"
+    PYPY_UBUNTU="focal jammy"
+    if [ -z "${PYPY_ARCH##*"$ARCH"*}" ] && [ -z "${PYPY_UBUNTU##*"$RELEASE"*}" ]; then
         INSTALLDEBS="${INSTALLDEBS} pypy3"
     else
         INSTALLDEBS="${INSTALLDEBS} python3"
