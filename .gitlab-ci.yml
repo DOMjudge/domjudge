@@ -1,8 +1,8 @@
 include:
-  - '/gitlab/ci/sast.yml'
-  - '/gitlab/ci/unit.yml'
-  - '/gitlab/ci/integration.yml'
-  - '/gitlab/ci/webstandard.yml'
+  #- '/gitlab/ci/sast.yml'
+  #- '/gitlab/ci/unit.yml'
+  #- '/gitlab/ci/integration.yml'
+  #- '/gitlab/ci/webstandard.yml'
   - '/gitlab/ci/template.yml'
   - '/gitlab/ci/misc.yml'
 
