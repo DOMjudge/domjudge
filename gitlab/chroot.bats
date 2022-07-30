@@ -20,7 +20,7 @@ load 'assert'
     fi
     run ./dj_make_chroot -a $ARCH
     assert_success
-    assert_partial "Done building chroot in /chroot/domjudge"
+    assert_partial "Done building chroot in /builds/DOMjudge/domjudge/chroot/domjudge"
     run ./dj_run_chroot "dpkg --print-architecture"
     assert_success
     assert_partial "$ARCH"
@@ -33,7 +33,7 @@ load 'assert'
     HOSTARCH=$(dpkg --print-architecture)
     run ./dj_make_chroot
     assert_success
-    assert_line "Done building chroot in /chroot/domjudge"
+    assert_line "Done building chroot in /builds/DOMjudge/domjudge/chroot/domjudge"
     run ./dj_run_chroot
     assert_success
     CHROOTARCH=$(dpkg --print-architecture)
@@ -55,7 +55,7 @@ load 'assert'
 #    fi
 #    run ./dj_make_chroot -D $DISTRO
 #    assert_success
-#    assert_line "Done building chroot in /chroot/domjudge"
+#    assert_line "Done building chroot in /builds/DOMjudge/domjudge/chroot/domjudge"
 #    run ./dj_run_chroot
 #    run cat /etc/issue
 #    assert_success
