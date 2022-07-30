@@ -92,9 +92,9 @@ run chroot script checks:
         - arm64
         - armhf
         - i386
-      #- DISTRO:
-      #    - Debian
-      #    - Ubuntu
+      - DISTRO:
+        - Debian
+        - Ubuntu
       #- RELEASE:
       #    - focal
       #    - bionic
