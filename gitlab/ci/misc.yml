@@ -83,7 +83,7 @@ detect dump:
     - exit $(($(wc -l <<< $OUT)-1))
 
 run chroot script checks:
-  extends: [.short_job]
+  extends: [.normal_job]
   stage: chroot_checks
   parallel:
     matrix:
