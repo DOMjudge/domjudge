@@ -34,27 +34,6 @@ RELEASE=""
 DEBIAN_ARCHLIST="amd64,arm64,armel,armhf,i386,mips,mips64el,mipsel,ppc64el,s390x"
 UBUNTU_ARCHLIST="amd64,arm64,armhf,i386,powerpc,ppc64el,s390x"
 
-# If host system is Debian or Ubuntu, use its release and architecture by default
-if [ "$(lsb_release -i -s || true)" = 'Debian' ] || \
-   [ "$(lsb_release -i -s || true)" = 'Ubuntu' ]; then
-    if [ -z "$ARCH" ]; then
-        ARCH="$(dpkg --print-architecture)"
-    fi
-    # If Distro & Release are not specified pick the host value
-    if [ -z "$DISTRO" ] && [ -z "$RELEASE" ]; then
-        DISTRO="$(lsb_release -i -s)"
-        RELEASE="$(lsb_release -c -s)"
-        if [ "$(lsb_release -i -s)" = 'Debian' ]; then
-            if [ "$(lsb_release -c -s)" = "sid" ]; then
-                RELEASE='unstable'
-            fi
-            if [ "$(lsb_release -r -s)" = 'testing' ]; then
-                RELEASE='testing'
-            fi
-        fi
-    fi
-fi
-
 usage()
 {
     cat <<EOF
@@ -150,6 +129,29 @@ if [ "$(id -u)" != 0 ]; then
 fi
 
 [ -z "$CHROOTDIR" ] && error "No chroot directory given or default known."
+
+# If host system is Debian or Ubuntu, use its release and architecture by default
+if [ "$(lsb_release -i -s || true)" = 'Debian' ] || \
+   [ "$(lsb_release -i -s || true)" = 'Ubuntu' ]; then
+    if [ -z "$ARCH" ]; then
+        ARCH="$(dpkg --print-architecture)"
+    fi
+    # If Distro is not specified pick the host value
+    # We assume that when someone passes only the RELEASE that its valid for the host distro
+    if [ -z "$DISTRO" ]; then
+        DISTRO="$(lsb_release -i -s)"
+        RELEASE="$(lsb_release -c -s)"
+        if [ "$(lsb_release -i -s)" = 'Debian' ]; then
+            if [ "$(lsb_release -c -s)" = "sid" ]; then
+                RELEASE='unstable'
+            fi
+            if [ "$(lsb_release -r -s)" = 'testing' ]; then
+                RELEASE='testing'
+            fi
+        fi
+    fi
+fi
+
 [ -z "$ARCH" ]      && error "No architecture given or detected."
 
 # Various settings that can be tweaked, specific per distribution:
