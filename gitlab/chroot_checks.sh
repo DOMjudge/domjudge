@@ -43,8 +43,6 @@ if [ -e ${DIR}/chroot/domjudge ]; then
 fi
 
 cd ${DIR}/misc-tools || exit 1
-#for arch in amd64,arm64,""
-#for dist in "Debian","Ubuntu","notLinux"
 #for dir in "/chroot","/builds/chroot","/notadir/chroot"
 #for rel in "buster","wheeze","focal","bionic","notarelease"
 #for incdeb in "zip","nano"
@@ -68,8 +66,11 @@ cd ${DIR}/misc-tools || exit 1
 #sudo ./dj_make_chroot ${ARGS} |& tee "$GITLABARTIFACTS/dj_make_chroot.log"
 section_end chroot
 
+
+
 section_start chroottest "Test chroot contents"
 cp ${DIR}/submit/assert.bash ./
 cp ${DIR}/gitlab/chroot.bats ./
+echo $CI_JOB_ID
 bats ./chroot.bats
-#sudo ./dj_run_chroot "pypy3"
+section_end chroottest
