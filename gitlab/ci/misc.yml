@@ -112,6 +112,9 @@ run chroot script checks:
         RELEASE:
         - stable
         - buster
+      - ARCH: armhf
+        DISTRO: Ubuntu
+        RELEASE: jammy
   script:
     - ./gitlab/chroot_checks.sh
 

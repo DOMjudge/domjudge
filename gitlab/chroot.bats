@@ -99,18 +99,33 @@ fi
     assert_line "Error: Invalid distribution specified, only 'Debian' and 'Ubuntu' are supported."
 }
 
-#@test "Unknown Release breaks" {
-#    if [ -n "${DISTRO+x}" ] || [ -n "${RELEASE+x}" ]; then
-#        skip "Distro/Release set"
-#    fi
-#    # Cleanup old dir if it exists
-#    run rm -rf /builds/DOMjudge/domjudge/chroot
-#    # Start testing
-#    run ./dj_make_chroot -R "Olympos"
-#    assert_failure
-#    assert_line "E: No such script: /usr/share/debootstrap/scripts/Olympos"
-#}
-#
+@test "Unknown Release breaks" {
+    if [ -n "${DISTRO+x}" ] || [ -n "${RELEASE+x}" ]; then
+        skip "Distro/Release set"
+    fi
+    # Cleanup old dir if it exists
+    rm -rf $CHROOT
+    # Start testing
+    run ./dj_make_chroot -R "Olympos"
+    assert_failure
+    assert_line "E: No such script: /usr/share/debootstrap/scripts/Olympos"
+}
+
+@test "Installing in another chroot dir works" {
+    if [ -z "${DIR+x}" ]; then
+        skip "Dir not set"
+    fi
+    # Cleanup old dir if it exists
+    rm -rf $CHROOT
+    # Start testing
+    run ./dj_make_chroot -d $DIR
+    assert_success
+    assert_partial "Done building chroot in $DIR"
+    run cat "$DIR/etc/root-permission-test.txt
+    assert_success
+    assert_line "This file should not be readable inside the judging environment!"
+}
+
 ##    run ./submit -c bestaatniet
 ##    assert_failure 1
 ##    assert_partial "error: No (valid) contest specified"
