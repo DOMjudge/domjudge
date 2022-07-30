@@ -49,32 +49,41 @@ load 'assert'
     assert_line "Error: Architecture dom04 not supported for Ubuntu"
 }
 
-#@test "Passing the Distro gives a chroot of that Distro" {
-#    if [ -n ${DISTRO+x} ]; then
-#        skip "Distro not set"
-#    fi
-#    run ./dj_make_chroot -D $DISTRO
-#    assert_success
-#    assert_line "Done building chroot in /builds/DOMjudge/domjudge/chroot/domjudge"
-#    run ./dj_run_chroot
-#    run cat /etc/issue
-#    assert_success
-#    if [ "Debian" = "$DISTRO" ]; then
-#        assert_regex "^Debian.*"
-#    else
-#        assert_regex "^Ubuntu.*"
-#    fi
-#}
-#
-#@test "Unknown Distro breaks" {
-#    if [ -z ${DISTRO+x} ]; then
-#        skip "Distro set"
-#    fi
-#    run ./dj_make_chroot -D "BSD"
-#    assert_failure
-#    assert_line "Error: Invalid distribution specified, only 'Debian' and 'Ubuntu' are supported."
-#}
-#
+@test "Passing the Distro gives a chroot of that Distro" {
+    if [ -n ${DISTRO+x} ]; then
+        skip "Distro not set"
+    fi
+    run ./dj_make_chroot -D $DISTRO
+    assert_success
+    assert_line "Done building chroot in /builds/DOMjudge/domjudge/chroot/domjudge"
+    run ./dj_run_chroot
+    run cat /etc/issue
+    assert_success
+    if [ "Debian" = "$DISTRO" ]; then
+        assert_partial "Debian"
+    else
+        assert_partial "Ubuntu"
+    fi
+}
+
+@test "Unknown Distro breaks" {
+    if [ -z ${DISTRO+x} ]; then
+        skip "Distro set"
+    fi
+    run ./dj_make_chroot -D "BSD"
+    assert_failure
+    assert_line "Error: Invalid distribution specified, only 'Debian' and 'Ubuntu' are supported."
+}
+
+@test "Unknown Release breaks" {
+    if [ -z ${RELEASE+x} ]; then
+        skip "Release set"
+    fi
+    run ./dj_make_chroot -R "Olympos"
+    assert_failure
+    assert_line "E: No such script: /usr/share/debootstrap/scripts/Olympus"
+}
+
 #@test "Passing Debian Release 
 
 
