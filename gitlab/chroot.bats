@@ -2,9 +2,9 @@
 
 load 'assert'
 
-CHROOT="chroot/domjudge"
-if [ -z "${CI+x}" ]; then
-    CHROOT="/builds/DOMjudge/domjudge/${CHROOT}"
+CHROOT="/chroot/domjudge"
+if [ -n "${CI_JOB_ID+x}" ]; then
+    CHROOT="/builds/DOMjudge/domjudge${CHROOT}"
 fi
 
 @test "help output" {
