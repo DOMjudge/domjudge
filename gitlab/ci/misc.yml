@@ -95,6 +95,11 @@ run chroot script checks:
       - DISTRO:
         - Debian
         - Ubuntu
+      - ARCH:
+        - amd64
+        DISTRO:
+        - Debian
+        - Ubuntu
       #- RELEASE:
       #    - focal
       #    - bionic
