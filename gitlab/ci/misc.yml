@@ -95,18 +95,23 @@ run chroot script checks:
       - DISTRO:
         - Debian
         - Ubuntu
+      - RELEASE:
+        - jammy
+        - bionic
       - ARCH:
         - amd64
         DISTRO:
         - Debian
         - Ubuntu
-      #- RELEASE:
-      #    - focal
-      #    - bionic
-      #- DISTRO: Debian
-      #  RELEASE:
-      #    - wheezy
-      #    - buster
+      - ARCH:
+        - arm64
+        RELEASE:
+        - xenial
+      - DISTRO:
+        - Debian
+        RELEASE:
+        - stable
+        - buster
   script:
     - ./gitlab/chroot_checks.sh
 
