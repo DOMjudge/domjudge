@@ -15,7 +15,7 @@ load 'assert'
 }
 
 @test "Test chroot works with architecture: $ARCH" {
-    if [ -z ${ARCH+x} ]; then
+    if [ -z "${ARCH+x}" ]; then
         skip "Arch not set"
     fi
     run ./dj_make_chroot -a $ARCH
@@ -27,7 +27,7 @@ load 'assert'
 }
 
 @test "Test chroot works without architecture given" {
-    if [ -n ${ARCH+x} ]; then
+    if [ -n "${ARCH+x}" ]; then
         skip "Arch set"
     fi
     HOSTARCH=$(dpkg --print-architecture)
@@ -41,7 +41,7 @@ load 'assert'
 }
 
 @test "Test chroot fails if unsupported architecture given" {
-    if [ -n ${ARCH+x} ]; then
+    if [ -n "${ARCH+x}" ]; then
         skip "Arch set"
     fi
     run ./dj_make_chroot -a dom04
@@ -50,7 +50,7 @@ load 'assert'
 }
 
 @test "Passing the Distro gives a chroot of that Distro" {
-    if [ -n ${DISTRO+x} ]; then
+    if [ -z "${DISTRO+x}" ]; then
         skip "Distro not set"
     fi
     run ./dj_make_chroot -D $DISTRO
@@ -67,7 +67,7 @@ load 'assert'
 }
 
 @test "Unknown Distro breaks" {
-    if [ -z ${DISTRO+x} ]; then
+    if [ -n "${DISTRO+x}" ]; then
         skip "Distro set"
     fi
     run ./dj_make_chroot -D "BSD"
@@ -76,12 +76,12 @@ load 'assert'
 }
 
 @test "Unknown Release breaks" {
-    if [ -z ${RELEASE+x} ]; then
-        skip "Release set"
+    if [ -n "${DISTRO+x}" ] || [ -n "${RELEASE+x}" ]; then
+        skip "Distro/Release set"
     fi
     run ./dj_make_chroot -R "Olympos"
     assert_failure
-    assert_line "E: No such script: /usr/share/debootstrap/scripts/Olympus"
+    assert_line "E: No such script: /usr/share/debootstrap/scripts/Olympos"
 }
 
 #@test "Passing Debian Release 
