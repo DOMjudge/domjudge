@@ -10,6 +10,7 @@ stages:
   - test
   - integration
   - accessibility
+  - chroot_checks
   - unit
   - style
   - ci_checks
