@@ -149,6 +149,14 @@ fi
 [ -z "$CHROOTDIR" ] && error "No chroot directory given or default known."
 [ -z "$ARCH" ]      && error "No architecture given or detected."
 
+ARCHLIST=','$DEBIAN_ARCHLIST','
+if [ "$DISTRO" = "Ubuntu" ]; then
+    ARCHLIST=','$UBUNTU_ARCHLIST','
+fi
+if [ -n "${ARCHLIST##*",$ARCH,"*}" ]; then
+    error "Architecture $ARCH not supported for $DISTRO"
+fi
+
 # Various settings that can be tweaked, specific per distribution:
 if [ "$DISTRO" = 'Debian' ]; then
 
