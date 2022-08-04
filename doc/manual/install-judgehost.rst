@@ -157,7 +157,8 @@ distributions may be different (send us your feedback!).
 Edit grub config to add cgroup memory and swap accounting to the boot
 options. Edit ``/etc/default/grub`` and change the default
 commandline to
-``GRUB_CMDLINE_LINUX_DEFAULT="quiet cgroup_enable=memory swapaccount=1"``
+``GRUB_CMDLINE_LINUX_DEFAULT="quiet cgroup_enable=memory swapaccount=1"``, if
+available also do the same for ``GRUB_CMDLINE_LINUX``.
 Optionally the timings can be made more stable by not letting the OS schedule
 any other tasks on the same CPU core the judgedaemon is using:
 ``GRUB_CMDLINE_LINUX_DEFAULT="quiet cgroup_enable=memory swapaccount=1 isolcpus=2"``
