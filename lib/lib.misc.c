@@ -54,7 +54,7 @@ int execute(const char *cmd, const char **args, int nargs, int stdio_fd[3], int 
 	char **argv;
 	int i, dir;
 
-	if ( (argv=(char **) malloc((nargs+2)*sizeof(char **)))==NULL ) return -1;
+	if ( (argv=(char **) malloc((nargs+2)*sizeof(char *)))==NULL ) return -1;
 
 	if ( err2out ) stdio_fd[2] = FDREDIR_NONE;
 
