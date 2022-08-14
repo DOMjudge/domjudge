@@ -17,9 +17,13 @@ function finish() {
     cp /opt/domjudge/domserver/webapp/var/log/prod.log.errors "$GITLABARTIFACTS/symfony_errors.log"
     cp /tmp/judgedaemon.log "$GITLABARTIFACTS/judgedaemon.log"
     cp /proc/cmdline "$GITLABARTIFACTS/cmdline"
-    cp /chroot/domjudge/etc/apt/sources.list "$GITLABARTIFACTS/sources.list"
-    cp /chroot/domjudge/debootstrap/debootstrap.log "$GITLABARTIFACTS/debootstrap.log"
-    cp "${DIR}/misc-tools/icpctools/*json" "$GITLABARTIFACTS/"
+    CHROOTDIR=/chroot/domjudge
+    if [ -n "${CI+x}" ]; then
+        CHROOTDIR=${DIR}${CHROOTDIR}
+    fi
+    cp $CHROOTDIR/etc/apt/sources.list "$GITLABARTIFACTS/sources.list"
+    cp $CHROOTDIR/debootstrap/debootstrap.log "$GITLABARTIFACTS/debootstrap.log"
+    cp "${DIR}"/misc-tools/icpctools/*json "$GITLABARTIFACTS/"
 }
 trap finish EXIT
 
