@@ -4,7 +4,7 @@ framework:
     fragments: ~
 
     session:
-        handler_id: ~
+        handler_id: "%env(DATABASE_URL)%"
         cookie_secure: auto
         cookie_samesite: lax
         storage_factory_id: session.storage.factory.native
