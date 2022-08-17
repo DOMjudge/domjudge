@@ -29,9 +29,10 @@ use Symfony\Component\Yaml\Yaml;
  * @Rest\Route("/contests/{cid}/problems")
  * @OA\Tag(name="Problems")
  * @OA\Parameter(ref="#/components/parameters/cid")
- * @OA\Response(response="404", ref="#/components/responses/NotFound")
- * @OA\Response(response="401", ref="#/components/responses/Unauthorized")
  * @OA\Response(response="400", ref="#/components/responses/InvalidResponse")
+ * @OA\Response(response="401", ref="#/components/responses/Unauthenticated")
+ * @OA\Response(response="403", ref="#/components/responses/Unauthorized")
+ * @OA\Response(response="404", ref="#/components/responses/NotFound")
  */
 class ProblemController extends AbstractRestController implements QueryObjectTransformer
 {
@@ -180,11 +181,6 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
      *                 property="problem",
      *                 description="Optional: problem id to update.",
      *                 type="string"
-     *             ),
-     *             @OA\Property(
-     *                 property="delete_old_data",
-     *                 description="Optional: whether to delete old (existing) data before importing into an existing problem.",
-     *                 type="boolean"
      *             )
      *         )
      *     )
@@ -420,35 +416,5 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
         } else {
             return $problem;
         }
-    }
-
-    /**
-     * GetPDFProblem
-     * @throws NonUniqueResultException
-     * @Rest\Get("/{id}/pdf")
-     * @OA\Response(
-     *     response="200",
-     *     description="Returns the given problem for this contest",
-     *     @OA\JsonContent(ref="#/components/schemas/ContestProblem")
-     * )
-     * @OA\Parameter(ref="#/components/parameters/id")
-     * @OA\Parameter(ref="#/components/parameters/strict")
-     */
-    public function getPDFProblem(int $probId): StreamedResponse
-    {
-        return $this->getBinaryFile($probId, function (
-            int $probId,
-            Contest $contest,
-            ContestProblem $contestProblem
-        ) {
-            $problem = $contestProblem->getProblem();
-
-            try {
-                return $problem->getProblemTextStreamedResponse();
-            } catch (BadRequestHttpException $e) {
-                $this->addFlash('danger', $e->getMessage());
-                return $this->redirectToRoute('public_problems');
-            }
-        });
     }
 }
