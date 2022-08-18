@@ -18,8 +18,8 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
  */
 class ExternalContestSource
 {
-    public const TYPE_CCS_API = 'ccs-api';
-    public const TYPE_CONTEST_ARCHIVE = 'contest-archive';
+    public const TYPE_CCS_API         = 'ccs-api';
+    public const TYPE_CONTEST_PACKAGE = 'contest-archive';
 
     /**
      * @ORM\Id
@@ -242,7 +242,7 @@ class ExternalContestSource
                 // Note: we could validate we have a valid CCS endpoint by checking the actual URL,
                 // but that seems overkill
                 break;
-            case static::TYPE_CONTEST_ARCHIVE:
+            case static::TYPE_CONTEST_PACKAGE:
                 // Clear username and password
                 $this
                     ->setUsername(null)
@@ -264,7 +264,7 @@ class ExternalContestSource
     {
         $mapping = [
             ExternalContestSource::TYPE_CCS_API         => 'CCS API (URL)',
-            ExternalContestSource::TYPE_CONTEST_ARCHIVE => 'Contest archive (directory)',
+            ExternalContestSource::TYPE_CONTEST_PACKAGE => 'Contest package (directory)',
         ];
         return $mapping[$type];
     }

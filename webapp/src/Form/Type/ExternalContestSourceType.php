@@ -38,11 +38,11 @@ class ExternalContestSourceType extends AbstractType
         $builder->add('type', ChoiceType::class, [
             'choices' => [
                 ExternalContestSource::readableType(ExternalContestSource::TYPE_CCS_API)         => ExternalContestSource::TYPE_CCS_API,
-                ExternalContestSource::readableType(ExternalContestSource::TYPE_CONTEST_ARCHIVE) => ExternalContestSource::TYPE_CONTEST_ARCHIVE,
+                ExternalContestSource::readableType(ExternalContestSource::TYPE_CONTEST_PACKAGE) => ExternalContestSource::TYPE_CONTEST_PACKAGE,
             ],
         ]);
         $builder->add('source', TextType::class, [
-            'help' => 'For contest archive: directory on disk to use. For CCS API: URL to contest in API.'
+            'help' => 'For contest package: directory on disk to use. For CCS API: URL to contest in API.'
         ]);
         $builder->add('username', TextType::class, [
             'required' => false,
