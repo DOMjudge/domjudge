@@ -217,7 +217,7 @@ class ExternalContestSourceService
         switch ($this->source->getType()) {
             case ExternalContestSource::TYPE_CCS_API:
                 return $this->importFromCcsApi($eventsToSkip, $progressReporter);
-            case ExternalContestSource::TYPE_CONTEST_ARCHIVE:
+            case ExternalContestSource::TYPE_CONTEST_PACKAGE:
                 return $this->importFromContestArchive($eventsToSkip, $progressReporter);
         }
 
@@ -470,12 +470,12 @@ class ExternalContestSourceService
                 }
                 $this->contestLoaded = true;
                 break;
-            case ExternalContestSource::TYPE_CONTEST_ARCHIVE:
+            case ExternalContestSource::TYPE_CONTEST_PACKAGE:
                 $this->cachedContestData = null;
                 $contestFile             = $this->source->getSource() . '/contest.json';
                 $eventFeedFile           = $this->source->getSource() . '/event-feed.ndjson';
                 if (!is_dir($this->source->getSource())) {
-                    $this->loadingError = 'Contest archive directory not found';
+                    $this->loadingError = 'Contest package directory not found';
                 } elseif (!is_file($contestFile)) {
                     $this->loadingError = 'contest.json not found in archive';
                 } elseif (!is_file($eventFeedFile)) {
