@@ -13,6 +13,7 @@ use JMS\Serializer\EventDispatcher\ObjectEvent;
 use JMS\Serializer\JsonSerializationVisitor;
 use JMS\Serializer\Metadata\StaticPropertyMetadata;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Intl\Countries;
 
 class TeamAffiliationVisitor implements EventSubscriberInterface
 {
@@ -64,14 +65,19 @@ class TeamAffiliationVisitor implements EventSubscriberInterface
             ];
 
             foreach ($countryFlagSizes as $size => $viewBoxSize) {
-                $route = $this->dj->apiRelativeUrl(
+                $alpha3code = strtoupper($affiliation->getCountry());
+                $alpha2code = strtolower(Countries::getAlpha2Code($alpha3code));
+                $flagFile   = sprintf('%s/public/flags/%s/%s.svg', $this->dj->getDomjudgeWebappDir(), $size, $alpha2code);
+                $route      = $this->dj->apiRelativeUrl(
                     'v4_app_api_generalinfo_countryflag', ['countryCode' => $affiliation->getCountry(), 'size' => $size]
                 );
                 $countryFlags[] = [
-                    'href'   => $route,
-                    'mime'   => 'image/svg+xml',
-                    'width'  => $viewBoxSize[0],
-                    'height' => $viewBoxSize[1],
+                    'href'     => $route,
+                    'mime'     => 'image/svg+xml',
+                    'width'    => $viewBoxSize[0],
+                    'height'   => $viewBoxSize[1],
+                    'hash'     => md5_file($flagFile),
+                    'filename' => 'country-flag-' . $size . '.svg',
                 ];
             }
 
@@ -86,6 +92,8 @@ class TeamAffiliationVisitor implements EventSubscriberInterface
         // Affiliation logo
         if ($affiliationLogo = $this->dj->assetPath((string)$id, 'affiliation', true)) {
             $imageSize = Utils::getImageSize($affiliationLogo);
+            $parts     = explode('.', $affiliationLogo);
+            $extension = $parts[count($parts) - 1];
 
             $route = $this->dj->apiRelativeUrl(
                 'v4_organization_logo',
@@ -99,7 +107,16 @@ class TeamAffiliationVisitor implements EventSubscriberInterface
                 'logo',
                 null
             );
-            $visitor->visitProperty($property, [['href' => $route, 'mime' => mime_content_type($affiliationLogo), 'width' => $imageSize[0], 'height' => $imageSize[1]]]);
+            $visitor->visitProperty($property, [
+                [
+                    'href'     => $route,
+                    'mime'     => mime_content_type($affiliationLogo),
+                    'width'    => $imageSize[0],
+                    'height'   => $imageSize[1],
+                    'hash'     => md5_file($affiliationLogo),
+                    'filename' => 'logo.' . $extension,
+                ]
+            ]);
         }
     }
 }
