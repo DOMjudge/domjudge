@@ -3,6 +3,9 @@
 namespace App\Tests\Unit\Controller\API;
 
 use App\DataFixtures\Test\DummyProblemFixture;
+use App\Entity\ContestProblem;
+use App\Entity\Problem;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ProblemControllerTest extends BaseTest
@@ -28,7 +31,7 @@ class ProblemControllerTest extends BaseTest
                 [
                     'href'     => 'contests/2/problems/3/statement',
                     'mime'     => 'application/pdf',
-                    'hash'     => '044e00aadd64c6f0e1d11e418b93e705',
+                    // hash will be added in setUp
                     'filename' => 'statement.pdf',
                 ],
             ],
@@ -47,7 +50,7 @@ class ProblemControllerTest extends BaseTest
                 [
                     'href'     => 'contests/2/problems/2/statement',
                     'mime'     => 'application/pdf',
-                    'hash'     => 'df6ab6f2072f4a8bddf0a0cb718002ab',
+                    // hash will be added in setUp
                     'filename' => 'statement.pdf',
                 ],
             ],
@@ -66,7 +69,7 @@ class ProblemControllerTest extends BaseTest
                 [
                     'href'     => 'contests/2/problems/1/statement',
                     'mime'     => 'application/pdf',
-                    'hash'     => '023027279facea39cbd94786fcf36fa8',
+                    // hash will be added in setUp
                     'filename' => 'statement.pdf',
                 ],
             ],
@@ -74,6 +77,20 @@ class ProblemControllerTest extends BaseTest
     ];
 
     protected array $expectedAbsent = ['4242', 'nonexistent'];
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        // Load hash of problem PDF
+        foreach ($this->expectedObjects as $id => $data) {
+            /** @var Problem $problem */
+            $problem = static::getContainer()
+                ->get(EntityManagerInterface::class)
+                ->getRepository(Problem::class)
+                ->find($id);
+            $this->expectedObjects[$id]['statement'][0]['hash'] = md5(stream_get_contents($problem->getProblemtext()));
+        }
+    }
 
     public function testDeleteNotAllowed(): void
     {
@@ -146,5 +163,26 @@ class ProblemControllerTest extends BaseTest
         }
         $url = $this->helperGetEndpointURL($apiEndpoint, $id) . '/statement';
         $this->verifyApiJsonResponse('GET', $url, 404, $this->apiUser);
+    }
+
+    /**
+     * Test that the single action returns the correct data.
+     *
+     * @dataProvider provideSingle
+     */
+    public function testSingle($id, array $expectedProperties): void
+    {
+        // First set the hash
+
+        /** @var EntityManagerInterface $em */
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+        /** @var Problem $problem */
+        $problem = $em
+            ->getRepository(Problem::class)
+            ->find($id);
+        // Refresh the problem to make sure the problem text is loaded again
+        $em->refresh($problem);
+        $expectedProperties['statement'][0]['hash'] = md5(stream_get_contents($problem->getProblemtext()));
+        parent::testSingle($id, $expectedProperties);
     }
 }
