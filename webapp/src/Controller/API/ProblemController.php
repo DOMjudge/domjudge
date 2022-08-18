@@ -5,6 +5,7 @@ namespace App\Controller\API;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\Problem;
+use App\Entity\Submission;
 use App\Helpers\ContestProblemWrapper;
 use App\Helpers\OrdinalArray;
 use App\Service\ConfigurationService;
@@ -369,6 +370,42 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
         return $this->renderData($request, $object);
     }
 
+    /**
+     * Get the statement for given problem for this contest.
+     * @throws NonUniqueResultException
+     * @Rest\Get("/{id}/statement")
+     * @OA\Response(
+     *     response="200",
+     *     description="Returns the given problem statement for this contest",
+     *     @OA\MediaType(mediaType="application/pdf")
+     * )
+     * @OA\Parameter(ref="#/components/parameters/id")
+     * @OA\Parameter(ref="#/components/parameters/strict")
+     */
+    public function statementAction(Request $request, string $id): Response
+    {
+        $queryBuilder = $this->getQueryBuilder($request)
+            ->setParameter('id', $id)
+            ->andWhere(sprintf('%s = :id', $this->getIdField()));
+
+        // Get the one result; we know it's only one since we filter on ID
+        $contestProblemData = $queryBuilder->getQuery()->getOneOrNullResult();
+
+        if (empty($contestProblemData)) {
+            throw new NotFoundHttpException(sprintf('Problem with ID \'%s\' not found', $id));
+        }
+
+        // The result contains the contest problem as well as the test data count. So get only the priblem
+        /** @var ContestProblem $contestProblem */
+        $contestProblem = $contestProblemData[0];
+
+        if ($contestProblem->getProblem()->getProblemtextType() !== 'pdf') {
+            throw new NotFoundHttpException(sprintf('Problem with ID \'%s\' has no PDF statement', $id));
+        }
+
+        return $contestProblem->getProblem()->getProblemTextStreamedResponse();
+    }
+
     protected function getQueryBuilder(Request $request): QueryBuilder
     {
         $contestId = $this->getContestId($request);
@@ -379,7 +416,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
             ->from(ContestProblem::class, 'cp')
             ->join('cp.problem', 'p')
             ->leftJoin('p.testcases', 'tc')
-            ->select('cp, partial p.{probid,externalid,name,timelimit,memlimit}, COUNT(tc.testcaseid) AS testdatacount')
+            ->select('cp, partial p.{probid,externalid,name,timelimit,memlimit,problemtext_type,problemtext}, COUNT(tc.testcaseid) AS testdatacount')
             ->andWhere('cp.contest = :cid')
             ->andWhere('cp.allowSubmit = 1')
             ->setParameter('cid', $contestId)

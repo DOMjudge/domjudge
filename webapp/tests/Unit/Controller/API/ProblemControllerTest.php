@@ -3,6 +3,7 @@
 namespace App\Tests\Unit\Controller\API;
 
 use App\DataFixtures\Test\DummyProblemFixture;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ProblemControllerTest extends BaseTest
 {
@@ -13,39 +14,63 @@ class ProblemControllerTest extends BaseTest
     protected ?string $apiEndpoint = 'problems';
 
     protected array $expectedObjects = [
-      3 => [
-        "ordinal" => 0,
-        "id" => "3",
-        "short_name" => "boolfind",
-        "label" => "boolfind",
-        "time_limit" => 5,
-        "externalid" => "boolfind",
-        "name" => "Boolean switch search",
-        "rgb" => "#008000",
-        "color" => "green",
-      ],
-      2 => [
-        "ordinal" => 1,
-        "id" => "2",
-        "short_name" => "fltcmp",
-        "label" => "fltcmp",
-        "time_limit" => 5,
-        "externalid" => "fltcmp",
-        "name" => "Float special compare test",
-        "rgb" => "#CD5C5C",
-        "color" => "indianred",
-      ],
-      1 => [
-        "ordinal" => 2,
-        "id" => "1",
-        "short_name" => "hello",
-        "label" => "hello",
-        "time_limit" => 5,
-        "externalid" => "hello",
-        "name" => "Hello World",
-        "rgb" => "#87CEEB",
-        "color" => "skyblue",
-      ],
+        3 => [
+            "ordinal"    => 0,
+            "id"         => "3",
+            "short_name" => "boolfind",
+            "label"      => "boolfind",
+            "time_limit" => 5,
+            "externalid" => "boolfind",
+            "name"       => "Boolean switch search",
+            "rgb"        => "#008000",
+            "color"      => "green",
+            "statement" => [
+                [
+                    'href'     => 'contests/2/problems/3/statement',
+                    'mime'     => 'application/pdf',
+                    'hash'     => '044e00aadd64c6f0e1d11e418b93e705',
+                    'filename' => 'statement.pdf',
+                ],
+            ],
+        ],
+        2 => [
+            "ordinal"    => 1,
+            "id"         => "2",
+            "short_name" => "fltcmp",
+            "label"      => "fltcmp",
+            "time_limit" => 5,
+            "externalid" => "fltcmp",
+            "name"       => "Float special compare test",
+            "rgb"        => "#CD5C5C",
+            "color"      => "indianred",
+            "statement" => [
+                [
+                    'href'     => 'contests/2/problems/2/statement',
+                    'mime'     => 'application/pdf',
+                    'hash'     => 'df6ab6f2072f4a8bddf0a0cb718002ab',
+                    'filename' => 'statement.pdf',
+                ],
+            ],
+        ],
+        1 => [
+            "ordinal"    => 2,
+            "id"         => "1",
+            "short_name" => "hello",
+            "label"      => "hello",
+            "time_limit" => 5,
+            "externalid" => "hello",
+            "name"       => "Hello World",
+            "rgb"        => "#87CEEB",
+            "color"      => "skyblue",
+            "statement" => [
+                [
+                    'href'     => 'contests/2/problems/1/statement',
+                    'mime'     => 'application/pdf',
+                    'hash'     => '023027279facea39cbd94786fcf36fa8',
+                    'filename' => 'statement.pdf',
+                ],
+            ],
+        ],
     ];
 
     protected array $expectedAbsent = ['4242', 'nonexistent'];
@@ -83,5 +108,43 @@ class ProblemControllerTest extends BaseTest
         $indexUrl = $this->helperGetEndpointURL($this->apiEndpoint);
         $problems = $this->verifyApiJsonResponse('GET', $indexUrl, 200, $this->apiUser);
         self::assertCount(3, $problems);
+    }
+
+    /**
+     * Test that the statement endpoint returns a PDF for objects that exist.
+     *
+     * @dataProvider provideSingle
+     */
+    public function testStatement($id): void
+    {
+        $id = $this->resolveReference($id);
+        if (($apiEndpoint = $this->apiEndpoint) === null) {
+            static::markTestSkipped('No endpoint defined.');
+        }
+        $url = $this->helperGetEndpointURL($apiEndpoint, (string)$id) . '/statement';
+
+        // Use output buffering since this is a streamed response
+        ob_start();
+        $this->client->request('GET', '/api' . $url);
+        $response = $this->client->getResponse();
+        ob_end_clean();
+        self::assertEquals(200, $response->getStatusCode(), 'Statement found');
+
+        // We can't easily check if the contents are actually a PDF, so assume it is
+    }
+
+    /**
+     * Test that the statement endpoint does not return anything for objects that don't exist.
+     *
+     * @dataProvider provideSingleNotFound
+     */
+    public function testStatementNotFound(string $id): void
+    {
+        $id = $this->resolveReference($id);
+        if (($apiEndpoint = $this->apiEndpoint) === null) {
+            static::markTestSkipped('No endpoint defined.');
+        }
+        $url = $this->helperGetEndpointURL($apiEndpoint, $id) . '/statement';
+        $this->verifyApiJsonResponse('GET', $url, 404, $this->apiUser);
     }
 }
