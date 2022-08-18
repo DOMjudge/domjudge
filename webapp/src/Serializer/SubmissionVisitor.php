@@ -63,7 +63,13 @@ class SubmissionVisitor implements EventSubscriberInterface
                 'files',
                 null
             );
-            $visitor->visitProperty($property, [['href' => $route, 'mime' => 'application/zip']]);
+            $visitor->visitProperty($property, [
+                [
+                    'href'     => $route,
+                    'mime'     => 'application/zip',
+                    'filename' => 'submission.zip',
+                ]
+            ]);
         }
     }
 }

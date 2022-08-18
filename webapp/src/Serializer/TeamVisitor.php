@@ -53,6 +53,9 @@ class TeamVisitor implements EventSubscriberInterface
             return;
         }
 
+        $parts     = explode('.', $teamPhoto);
+        $extension = $parts[count($parts) - 1];
+
         $imageSize = Utils::getImageSize($teamPhoto);
 
         $id = $team->getApiId($this->eventLogService);
@@ -69,6 +72,15 @@ class TeamVisitor implements EventSubscriberInterface
             'photo',
             null
         );
-        $visitor->visitProperty($property, [['href' => $route, 'mime' => mime_content_type($teamPhoto), 'width' => $imageSize[0], 'height' => $imageSize[1]]]);
+        $visitor->visitProperty($property, [
+            [
+                'href'     => $route,
+                'mime'     => mime_content_type($teamPhoto),
+                'width'    => $imageSize[0],
+                'height'   => $imageSize[1],
+                'hash'     => md5_file($teamPhoto),
+                'filename' => 'photo.' . $extension
+            ]
+        ]);
     }
 }

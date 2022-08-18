@@ -22,16 +22,20 @@ class OrganizationControllerTest extends BaseTest
             'country'      => 'NLD',
             'country_flag' => [
                 [
-                    'href'   => 'country-flags/NLD/4x3',
-                    'mime'   => 'image/svg+xml',
-                    'width'  => 640,
-                    'height' => 480,
+                    'href'     => 'country-flags/NLD/4x3',
+                    'mime'     => 'image/svg+xml',
+                    'width'    => 640,
+                    'height'   => 480,
+                    'hash'     => 'd4811c278d659bb33f910685dd356ad8',
+                    'filename' => 'country-flag-4x3.svg',
                 ],
                 [
-                    'href'   => 'country-flags/NLD/1x1',
-                    'mime'   => 'image/svg+xml',
-                    'width'  => 512,
-                    'height' => 512,
+                    'href'     => 'country-flags/NLD/1x1',
+                    'mime'     => 'image/svg+xml',
+                    'width'    => 512,
+                    'height'   => 512,
+                    'hash'     => '390aa40fd896fda40718cf28e5b20ba5',
+                    'filename' => 'country-flag-1x1.svg',
                 ],
             ],
             'logo'         => null,
@@ -43,16 +47,20 @@ class OrganizationControllerTest extends BaseTest
             'country'      => 'DEU',
             'country_flag' => [
                 [
-                    'href'   => 'country-flags/DEU/4x3',
-                    'mime'   => 'image/svg+xml',
-                    'width'  => 640,
-                    'height' => 480,
+                    'href'     => 'country-flags/DEU/4x3',
+                    'mime'     => 'image/svg+xml',
+                    'width'    => 640,
+                    'height'   => 480,
+                    'hash'     => '3e726c2b6a59e6e4543c0a1534d93796',
+                    'filename' => 'country-flag-4x3.svg',
                 ],
                 [
-                    'href'   => 'country-flags/DEU/1x1',
-                    'mime'   => 'image/svg+xml',
-                    'width'  => 512,
-                    'height' => 512,
+                    'href'     => 'country-flags/DEU/1x1',
+                    'mime'     => 'image/svg+xml',
+                    'width'    => 512,
+                    'height'   => 512,
+                    'hash'     => '4d7bac3b0b9ab578b009c54fecd5d06f',
+                    'filename' => 'country-flag-1x1.svg',
                 ],
             ],
         ],
@@ -138,10 +146,12 @@ class OrganizationControllerTest extends BaseTest
         $object = $this->verifyApiJsonResponse('GET', $url, 200, 'admin');
         $logoConfig = [
             [
-                'href'   => "contests/2/organizations/$id/logo",
-                'mime'   => 'image/png',
-                'width'  => 181,
-                'height' => 101
+                'href'     => "contests/2/organizations/$id/logo",
+                'mime'     => 'image/png',
+                'width'    => 181,
+                'height'   => 101,
+                'hash'     => '990d71cada17da100653636cf8490884',
+                'filename' => 'logo.png',
             ]
         ];
         self::assertSame($logoConfig, $object['logo']);

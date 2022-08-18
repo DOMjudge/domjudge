@@ -107,10 +107,12 @@ EOF;
         $object = $this->verifyApiJsonResponse('GET', $url, 200, $this->apiUser);
         $bannerConfig = [
             [
-                'href'   => "contests/$id/banner",
-                'mime'   => 'image/svg+xml',
-                'width'  => 510,
-                'height' => 1122
+                'href'     => "contests/$id/banner",
+                'mime'     => 'image/svg+xml',
+                'width'    => 510,
+                'height'   => 1122,
+                'hash'     => '237d2bfb305b77add6648c143ba3f9a2',
+                'filename' => 'banner.svg',
             ],
         ];
         self::assertSame($bannerConfig, $object['banner']);

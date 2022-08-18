@@ -111,6 +111,10 @@ nelmio_api_doc:
                                 type: string
                             mime:
                                 type: string
+                            hash:
+                                type: string
+                            filename:
+                                type: string
                             width:
                                 type: integer
                             height:
@@ -160,6 +164,8 @@ nelmio_api_doc:
                             href:
                                 type: string
                             mime:
+                                type: string
+                            filename:
                                 type: string
                 SourceCodeList:
                     type: array
