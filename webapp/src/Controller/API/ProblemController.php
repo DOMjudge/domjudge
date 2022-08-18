@@ -395,7 +395,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
             throw new NotFoundHttpException(sprintf('Problem with ID \'%s\' not found', $id));
         }
 
-        // The result contains the contest problem as well as the test data count. So get only the priblem
+        // The result contains the contest problem as well as the test data count. So get only the problem
         /** @var ContestProblem $contestProblem */
         $contestProblem = $contestProblemData[0];
 
