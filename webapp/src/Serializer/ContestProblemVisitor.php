@@ -78,7 +78,6 @@ class ContestProblemVisitor implements EventSubscriberInterface
                 [
                     'href'     => $route,
                     'mime'     => 'application/pdf',
-                    'hash'     => md5(stream_get_contents($contestProblem->getProblem()->getProblemtext())),
                     'filename' => 'statement.pdf',
                 ]
             ]);

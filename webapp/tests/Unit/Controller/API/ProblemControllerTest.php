@@ -31,7 +31,6 @@ class ProblemControllerTest extends BaseTest
                 [
                     'href'     => 'contests/2/problems/3/statement',
                     'mime'     => 'application/pdf',
-                    // hash will be added in setUp
                     'filename' => 'statement.pdf',
                 ],
             ],
@@ -50,7 +49,6 @@ class ProblemControllerTest extends BaseTest
                 [
                     'href'     => 'contests/2/problems/2/statement',
                     'mime'     => 'application/pdf',
-                    // hash will be added in setUp
                     'filename' => 'statement.pdf',
                 ],
             ],
@@ -69,7 +67,6 @@ class ProblemControllerTest extends BaseTest
                 [
                     'href'     => 'contests/2/problems/1/statement',
                     'mime'     => 'application/pdf',
-                    // hash will be added in setUp
                     'filename' => 'statement.pdf',
                 ],
             ],
@@ -77,20 +74,6 @@ class ProblemControllerTest extends BaseTest
     ];
 
     protected array $expectedAbsent = ['4242', 'nonexistent'];
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-        // Load hash of problem PDF
-        foreach ($this->expectedObjects as $id => $data) {
-            /** @var Problem $problem */
-            $problem = static::getContainer()
-                ->get(EntityManagerInterface::class)
-                ->getRepository(Problem::class)
-                ->find($id);
-            $this->expectedObjects[$id]['statement'][0]['hash'] = md5(stream_get_contents($problem->getProblemtext()));
-        }
-    }
 
     public function testDeleteNotAllowed(): void
     {
@@ -163,26 +146,5 @@ class ProblemControllerTest extends BaseTest
         }
         $url = $this->helperGetEndpointURL($apiEndpoint, $id) . '/statement';
         $this->verifyApiJsonResponse('GET', $url, 404, $this->apiUser);
-    }
-
-    /**
-     * Test that the single action returns the correct data.
-     *
-     * @dataProvider provideSingle
-     */
-    public function testSingle($id, array $expectedProperties): void
-    {
-        // First set the hash
-
-        /** @var EntityManagerInterface $em */
-        $em = static::getContainer()->get(EntityManagerInterface::class);
-        /** @var Problem $problem */
-        $problem = $em
-            ->getRepository(Problem::class)
-            ->find($id);
-        // Refresh the problem to make sure the problem text is loaded again
-        $em->refresh($problem);
-        $expectedProperties['statement'][0]['hash'] = md5(stream_get_contents($problem->getProblemtext()));
-        parent::testSingle($id, $expectedProperties);
     }
 }
