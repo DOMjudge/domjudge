@@ -49,7 +49,6 @@ class UserController extends AbstractRestController
      * Add one or more groups.
      * @Rest\Post("/groups")
      * @IsGranted("ROLE_ADMIN")
-     * @OA\Post()
      * @OA\RequestBody(
      *     required=true,
      *     @OA\MediaType(
@@ -101,7 +100,6 @@ class UserController extends AbstractRestController
      *
      * @Rest\Post("/organizations")
      * @IsGranted("ROLE_ADMIN")
-     * @OA\Post()
      * @OA\RequestBody(
      *     required=true,
      *     @OA\MediaType(
@@ -139,7 +137,6 @@ class UserController extends AbstractRestController
      * Add one or more teams.
      * @Rest\Post("/teams")
      * @IsGranted("ROLE_ADMIN")
-     * @OA\Post()
      * @OA\RequestBody(
      *     required=true,
      *     @OA\MediaType(
@@ -190,7 +187,6 @@ class UserController extends AbstractRestController
      * Add accounts to teams.
      * @Rest\Post("/accounts")
      * @IsGranted("ROLE_ADMIN")
-     * @OA\Post()
      * @OA\RequestBody(
      *     required=true,
      *     @OA\MediaType(

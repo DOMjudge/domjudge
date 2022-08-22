@@ -330,7 +330,6 @@ class GeneralInfoController extends AbstractFOSRestController
      * Add a problem without linking it to a contest.
      * @Rest\Post("/problems")
      * @IsGranted("ROLE_ADMIN")
-     * @OA\Post()
      * @OA\Tag(name="Problems")
      * @OA\RequestBody(
      *     required=true,

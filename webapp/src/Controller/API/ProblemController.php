@@ -56,7 +56,6 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
      * Add one or more problems.
      * @Rest\Post("/add-data")
      * @IsGranted("ROLE_ADMIN")
-     * @OA\Post()
      * @OA\RequestBody(
      *     required=true,
      *     @OA\MediaType(
@@ -164,7 +163,6 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
      * Add a problem to this contest.
      * @Rest\Post("")
      * @IsGranted("ROLE_ADMIN")
-     * @OA\Post()
      * @OA\RequestBody(
      *     required=true,
      *     @OA\MediaType(
