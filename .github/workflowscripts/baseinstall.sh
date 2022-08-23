@@ -17,6 +17,8 @@ section_end_internal () {
 alias section_start='trace_off ; section_start_internal '
 alias section_end='trace_off ; section_end_internal '
 
+export version="$1"
+
 set -eux
 
 section_start "Update packages"
@@ -46,6 +48,10 @@ export APP_ENV="dev"
 composer install --no-scripts
 section_end
 
+section_start "Set simple admin password"
+echo "password" > ./etc/initial_admin_password.secret
+section_end
+
 section_start "Install domserver"
 make configure
 ./configure --with-baseurl='https://localhost/domjudge/' --enable-doc-build=no --prefix="/opt/domjudge"
@@ -58,6 +64,25 @@ section_start "Explicit start mysql + install DB"
 sudo /etc/init.d/mysql start
 
 /opt/domjudge/domserver/bin/dj_setup_database -uroot -proot install
+section_end
+
+section_start "Setup user"
+# We're using the admin user in all possible roles
+echo "DELETE FROM userrole WHERE userid=1;" | mysql -uroot -proot domjudge
+if [ "$version" = "team" ]; then
+    # Add team to admin user
+    echo "INSERT INTO userrole (userid, roleid) VALUES (1, 3);" | mysql -uroot -proot domjudge
+    echo "UPDATE user SET teamid = 1 WHERE userid = 1;" | mysql -uroot -proot domjudge
+elif [ "$version" = "jury" ]; then
+    # Add jury to admin user
+    echo "INSERT INTO userrole (userid, roleid) VALUES (1, 2);" | mysql -uroot -proot domjudge
+elif [ "$version" = "balloon" ]; then
+    # Add balloon to admin user
+    echo "INSERT INTO userrole (userid, roleid) VALUES (1, 4);" | mysql -uroot -proot domjudge
+elif [ "$version" = "admin" ]; then
+    # Add admin to admin user
+    echo "INSERT INTO userrole (userid, roleid) VALUES (1, 1);" | mysql -uroot -proot domjudge
+fi
 section_end
 
 section_start "Setup webserver"
