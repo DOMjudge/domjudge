@@ -2,12 +2,15 @@ name: "Mayhem API analysis"
 
 on:
   schedule:
-    - cron: '5 21 * * *'
+    - cron: '5 21 1-31/2 * *'
 
 jobs:
   mayhem:
     name: Mayhem API analysis
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        version: ["team", "guest", "admin", "jury"]
     permissions:
       actions: read
       contents: read
@@ -20,23 +23,41 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Install DOMjudge
-        run: .github/workflowscripts/baseinstall.sh
+        run: .github/workflowscripts/baseinstall.sh ${{ matrix.version }}
 
       - name: Dump the OpenAPI
         run: .github/workflowscripts/getapi.sh
 
       - name: Mayhem for API
         uses: ForAllSecure/mapi-action@v1
+        if: ${{ matrix.version == 'guest' }}
         continue-on-error: true
         with:
           mapi-token: ${{ secrets.MAPI_TOKEN }}
           api-url: http://localhost/domjudge
           api-spec: http://localhost/domjudge/api/doc.json # swagger/openAPI doc hosted here
-          duration: 60
+          duration: 2m
           sarif-report: mapi.sarif
           run-args: |
               --config
               .github/workflowscripts/mapi.config
+
+      - name: Mayhem for API (For application role)
+        uses: ForAllSecure/mapi-action@v1
+        if: ${{ matrix.version != 'guest' }}
+        continue-on-error: true
+        with:
+          mapi-token: ${{ secrets.MAPI_TOKEN }}
+          target: domjudge-${{ matrix.version }}
+          api-url: http://localhost/domjudge
+          api-spec: http://localhost/domjudge/api/doc.json # swagger/openAPI doc hosted here
+          duration: 5m
+          sarif-report: mapi.sarif
+          run-args: |
+              --config
+              .github/workflowscripts/mapi.config
+              --basic-auth
+              admin:password
 
       - name: Upload SARIF file
         uses: github/codeql-action/upload-sarif@v2
