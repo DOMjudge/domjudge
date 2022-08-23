@@ -65,7 +65,6 @@ class ContestController extends AbstractRestController
      * Add a new contest.
      * @Rest\Post("")
      * @IsGranted("ROLE_ADMIN")
-     * @OA\Post()
      * @OA\RequestBody(
      *     required=true,
      *     @OA\MediaType(
@@ -438,7 +437,6 @@ class ContestController extends AbstractRestController
     /**
      * Get the event feed for the given contest.
      * @Rest\Get("/{cid}/event-feed")
-     * @OA\Get()
      * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_API_READER')")
      * @throws NonUniqueResultException
      * @OA\Parameter(ref="#/components/parameters/cid")

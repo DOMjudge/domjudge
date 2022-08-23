@@ -67,6 +67,7 @@ codespell:
   extends: [.tiny_job]
   stage: style
   script:
+    - awk '1;/Version 7.2.1 - 6 May 2020/{exit}' ChangeLog > latest_Changelog
     - python3 gitlab/codespell_gitlab.py
 
 detect dump:

@@ -113,8 +113,6 @@ class SubmissionController extends AbstractRestController
      * @Rest\Post("")
      * @Rest\Post("/")
      * @Rest\Put("/{id}")
-     * @OA\Post()
-     * @OA\Put()
      * @Security("is_granted('ROLE_TEAM') or is_granted('ROLE_API_WRITER')", message="You need to have the Team Member role to add a submission")
      * @OA\RequestBody(
      *     required=true,

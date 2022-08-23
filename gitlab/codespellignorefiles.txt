@@ -21,3 +21,4 @@ d3.min*
 jquery*
 coloris*
 nv.d3.min*
+composer*

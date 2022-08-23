@@ -4,7 +4,7 @@
  * @EXPECTED_RESULTS@: NO-OUTPUT
  *)
 
-program no_ouput(input, output);
+program no_output(input, output);
 
 begin
 end.

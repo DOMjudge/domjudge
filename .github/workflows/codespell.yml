@@ -8,6 +8,8 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v2
+            - name: Rewrite Changelog to find new mistakes
+              run: awk '1;/Version 7.2.1 - 6 May 2020/{exit}' ChangeLog > latest_Changelog
             - name: Get dirs to skip
               id: list_to_csv
               run: echo "::set-output name=SKIP::$(awk '{print $1}' gitlab/codespellignorefiles.txt | paste -s -d, -)"
