@@ -78,7 +78,6 @@ class TeamVisitor implements EventSubscriberInterface
                 'mime'     => mime_content_type($teamPhoto),
                 'width'    => $imageSize[0],
                 'height'   => $imageSize[1],
-                'hash'     => md5_file($teamPhoto),
                 'filename' => 'photo.' . $extension
             ]
         ]);
