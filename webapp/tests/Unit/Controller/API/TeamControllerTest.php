@@ -52,7 +52,6 @@ class TeamControllerTest extends BaseTest
                 'mime'     => 'image/jpeg',
                 'width'    => 320,
                 'height'   => 200,
-                'hash'     => '8ce6f598fe1a273fe09f7bf40817ad7e',
                 'filename' => 'photo.jpg',
             ]
         ];

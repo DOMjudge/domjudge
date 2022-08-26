@@ -76,7 +76,6 @@ class TeamAffiliationVisitor implements EventSubscriberInterface
                     'mime'     => 'image/svg+xml',
                     'width'    => $viewBoxSize[0],
                     'height'   => $viewBoxSize[1],
-                    'hash'     => md5_file($flagFile),
                     'filename' => 'country-flag-' . $size . '.svg',
                 ];
             }
@@ -113,7 +112,6 @@ class TeamAffiliationVisitor implements EventSubscriberInterface
                     'mime'     => mime_content_type($affiliationLogo),
                     'width'    => $imageSize[0],
                     'height'   => $imageSize[1],
-                    'hash'     => md5_file($affiliationLogo),
                     'filename' => 'logo.' . $extension,
                 ]
             ]);

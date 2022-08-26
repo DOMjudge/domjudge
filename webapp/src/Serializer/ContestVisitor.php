@@ -82,7 +82,6 @@ class ContestVisitor implements EventSubscriberInterface
                     'mime'     => mime_content_type($banner),
                     'width'    => $imageSize[0],
                     'height'   => $imageSize[1],
-                    'hash'     => md5_file($banner),
                     'filename' => 'banner.' . $extension,
                 ]
             ]);

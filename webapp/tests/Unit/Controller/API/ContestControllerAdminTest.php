@@ -111,7 +111,6 @@ EOF;
                 'mime'     => 'image/svg+xml',
                 'width'    => 510,
                 'height'   => 1122,
-                'hash'     => '237d2bfb305b77add6648c143ba3f9a2',
                 'filename' => 'banner.svg',
             ],
         ];
