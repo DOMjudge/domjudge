@@ -78,7 +78,7 @@ class ContestProblemVisitor implements EventSubscriberInterface
                 [
                     'href'     => $route,
                     'mime'     => 'application/pdf',
-                    'filename' => 'statement.pdf',
+                    'filename' => $contestProblem->getShortname() . '.pdf',
                 ]
             ]);
         }

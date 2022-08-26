@@ -3,10 +3,6 @@
 namespace App\Tests\Unit\Controller\API;
 
 use App\DataFixtures\Test\DummyProblemFixture;
-use App\Entity\ContestProblem;
-use App\Entity\Problem;
-use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ProblemControllerTest extends BaseTest
 {
@@ -27,11 +23,11 @@ class ProblemControllerTest extends BaseTest
             "name"       => "Boolean switch search",
             "rgb"        => "#008000",
             "color"      => "green",
-            "statement" => [
+            "statement"  => [
                 [
                     'href'     => 'contests/2/problems/3/statement',
                     'mime'     => 'application/pdf',
-                    'filename' => 'statement.pdf',
+                    'filename' => 'boolfind.pdf',
                 ],
             ],
         ],
@@ -45,11 +41,11 @@ class ProblemControllerTest extends BaseTest
             "name"       => "Float special compare test",
             "rgb"        => "#CD5C5C",
             "color"      => "indianred",
-            "statement" => [
+            "statement"  => [
                 [
                     'href'     => 'contests/2/problems/2/statement',
                     'mime'     => 'application/pdf',
-                    'filename' => 'statement.pdf',
+                    'filename' => 'fltcmp.pdf',
                 ],
             ],
         ],
@@ -63,11 +59,11 @@ class ProblemControllerTest extends BaseTest
             "name"       => "Hello World",
             "rgb"        => "#87CEEB",
             "color"      => "skyblue",
-            "statement" => [
+            "statement"  => [
                 [
                     'href'     => 'contests/2/problems/1/statement',
                     'mime'     => 'application/pdf',
-                    'filename' => 'statement.pdf',
+                    'filename' => 'hello.pdf',
                 ],
             ],
         ],
@@ -101,7 +97,7 @@ class ProblemControllerTest extends BaseTest
 
         // Check that we can not add a problem
         $problemId = $this->resolveReference(DummyProblemFixture::class . ':0');
-        $url = $this->helperGetEndpointURL($this->apiEndpoint) . '/' . $problemId;
+        $url       = $this->helperGetEndpointURL($this->apiEndpoint) . '/' . $problemId;
         $this->verifyApiJsonResponse('DELETE', $url, 401, $this->apiUser, ['label' => 'dummy']);
 
         // Check that we still have three problems left
