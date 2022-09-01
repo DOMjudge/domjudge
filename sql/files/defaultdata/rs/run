@@ -6,7 +6,7 @@ MEMLIMIT="$1" ; shift
 # first you need to ./make_ch_root -i rustc
 
 mkdir rob
-export TMPDIR=rob
+export TMPDIR=rust_tmp_dir
 rustc -C opt-level=3 -o "$DEST" "$@"
-rmdir rob
+rmdir rust_tmp_dir
 exit 0
