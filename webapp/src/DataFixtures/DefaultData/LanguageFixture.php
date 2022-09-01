@@ -46,6 +46,7 @@ class LanguageFixture extends AbstractDefaultDataFixture
             ['py3',    'python3',    'Python 3',    ['py', 'py3'],               false, 'Main file',  true,   true,   1,     'py3'],
             ['r',      'r',          'R',           ['R'],                       false, 'Main file',  false,  true,   1,     'r'],
             ['rb',     'ruby',       'Ruby',        ['rb'],                      false, 'Main file',  false,  true,   1,     'rb'],
+            ['rs',      'rust',      'Rust',        ['rs'],                      false, null,         false,  true,   1,     'rs'],
             ['scala',  'scala',      'Scala',       ['scala'],                   false, null,         false,  true,   1,     'scala'],
             ['sh',     'sh',         'POSIX shell', ['sh'],                      false, 'Main file',  false,  true,   1,     'sh'],
             ['swift',  'swift',      'Swift',       ['swift'],                   false, 'Main file',  false,  true,   1,     'swift'],

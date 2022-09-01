@@ -1,0 +1,12 @@
+#!/bin/sh
+
+DEST="$1" ; shift
+MEMLIMIT="$1" ; shift
+
+# first you need to ./make_ch_root -i rustc
+
+mkdir rob
+export TMPDIR=rob
+rustc -C opt-level=3 -o "$DEST" "$@"
+rmdir rob
+exit 0
