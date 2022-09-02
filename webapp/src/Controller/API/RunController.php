@@ -153,7 +153,11 @@ class RunController extends AbstractRestController implements QueryObjectTransfo
         }
 
         if ($request->query->has('limit')) {
-            $queryBuilder->setMaxResults($request->query->getInt('limit'));
+            $limit = $request->query->getInt('limit');
+            if ($limit<0) {
+                throw new BadRequestHttpException('Limiting below 0 not possible.');
+            }
+            $queryBuilder->setMaxResults($limit);
         }
 
         // If an ID has not been given directly, only show runs before contest end.
