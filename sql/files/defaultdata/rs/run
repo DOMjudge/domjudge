@@ -3,7 +3,7 @@
 DEST="$1" ; shift
 MEMLIMIT="$1" ; shift
 
-# first you need to ./make_ch_root -i rustc
+# first you need to ./dj_make_chroot -i rustc
 
 mkdir rust_tmp_dir
 export TMPDIR=rust_tmp_dir
