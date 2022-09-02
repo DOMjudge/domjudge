@@ -299,7 +299,7 @@ class Language extends BaseApiEntity
             case 'rb':
                 return 'ruby';
             case 'rs':
-                return 'rs';
+                return 'rust';
         }
         return $this->getLangid();
     }
