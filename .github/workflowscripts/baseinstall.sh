@@ -97,6 +97,10 @@ cat "$(pwd)/.github/workflowscripts/nginx_extra" | sudo tee -a /etc/nginx/sites-
 sudo nginx -t
 section_end
 
+section_start "Enable stacktrace in API response"
+echo "APP_ENV=dev" > /opt/domjudge/domserver/webapp/.env.local
+section_end
+
 section_start "Show webserver is up"
 for service in nginx php7.4-fpm; do
     sudo systemctl restart $service
