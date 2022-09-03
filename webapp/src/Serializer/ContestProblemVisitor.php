@@ -3,6 +3,8 @@
 namespace App\Serializer;
 
 use App\Entity\ContestProblem;
+use App\Service\DOMJudgeService;
+use App\Service\EventLogService;
 use App\Utils\Utils;
 use JMS\Serializer\EventDispatcher\Events;
 use JMS\Serializer\EventDispatcher\EventSubscriberInterface;
@@ -12,6 +14,17 @@ use JMS\Serializer\Metadata\StaticPropertyMetadata;
 
 class ContestProblemVisitor implements EventSubscriberInterface
 {
+    protected DOMJudgeService $dj;
+    protected EventLogService $eventLogService;
+
+    public function __construct(
+        DOMJudgeService $dj,
+        EventLogService $eventLogService
+    ) {
+        $this->dj              = $dj;
+        $this->eventLogService = $eventLogService;
+    }
+
     public static function getSubscribedEvents(): array
     {
         return [
@@ -45,6 +58,29 @@ class ContestProblemVisitor implements EventSubscriberInterface
                 null
             );
             $visitor->visitProperty($property, $color);
+        }
+
+        // Problem statement
+        if ($contestProblem->getProblem()->getProblemtextType() === 'pdf') {
+            $route = $this->dj->apiRelativeUrl(
+                'v4_app_api_problem_statement',
+                [
+                    'cid' => $contestProblem->getContest()->getApiId($this->eventLogService),
+                    'id'  => $contestProblem->getApiId($this->eventLogService),
+                ]
+            );
+            $property = new StaticPropertyMetadata(
+                ContestProblem::class,
+                'statement',
+                null
+            );
+            $visitor->visitProperty($property, [
+                [
+                    'href'     => $route,
+                    'mime'     => 'application/pdf',
+                    'filename' => $contestProblem->getShortname() . '.pdf',
+                ]
+            ]);
         }
     }
 }

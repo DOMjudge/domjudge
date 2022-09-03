@@ -102,6 +102,15 @@ nelmio_api_doc:
                             schema:
                                 type: string
             schemas:
+                FileList:
+                    type: array
+                    items:
+                        type: object
+                        properties:
+                            href:
+                                type: string
+                            mime:
+                                type: string
                 ImageList:
                     type: array
                     items:
@@ -152,11 +161,22 @@ nelmio_api_doc:
                             format: float
                         test_data_count:
                             type: integer
+                        statement:
+                            $ref: "#/components/schemas/StatementList"
                 Files:
                     properties:
                         files:
                             $ref: "#/components/schemas/ArchiveList"
                 ArchiveList:
+                    type: array
+                    items:
+                        type: object
+                        properties:
+                            href:
+                                type: string
+                            mime:
+                                type: string
+                StatementList:
                     type: array
                     items:
                         type: object
