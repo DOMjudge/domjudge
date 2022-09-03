@@ -94,7 +94,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
             throw new AccessDeniedHttpException('Contest is locked, go to ' . $contestUrl . ' to unlock it.');
         }
 
-    /** @var UploadedFile $file */
+        /** @var UploadedFile $file */
         $file = $request->files->get('data') ?: [];
         // Note: we read the JSON as YAML, since any JSON is also YAML and this allows us
         // to import files with YAML inside them that match the JSON format

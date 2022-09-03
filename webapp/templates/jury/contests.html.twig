@@ -43,7 +43,7 @@
                                         </td>
                                         <td class="{{ data.class|default('') }}"><b>{{ data.label }}:</b></td>
                                         <td class="{{ data.class|default('') }}">{{ data.time }}</td>
-                                        {% if is_granted('ROLE_ADMIN') and not contest.isLocked %}
+                                        {% if is_granted('ROLE_ADMIN') %}
                                             <td>
                                                 {% if data.show_button %}
                                                     <input type="submit" class="btn btn-primary btn-sm"

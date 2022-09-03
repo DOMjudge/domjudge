@@ -278,7 +278,7 @@ class ContestController extends AbstractRestController
             throw new AccessDeniedHttpException('Contest is locked, go to ' . $contestUrl . ' to unlock it.');
         }
 
-    /** @var UploadedFile $banner */
+        /** @var UploadedFile $banner */
         $banner = $request->files->get('banner');
 
         if (!$banner) {
@@ -345,9 +345,6 @@ class ContestController extends AbstractRestController
             $response = new JsonResponse('Missing "start_time" in request.', Response::HTTP_BAD_REQUEST);
         } elseif ($request->request->get('id') != $contest->getApiId($this->eventLogService)) {
             $response = new JsonResponse('Invalid "id" in request.', Response::HTTP_BAD_REQUEST);
-        } else if ($contest->isLocked()) {
-            $contestUrl = $this->generateUrl('jury_contest', ['contestId' => $cid], UrlGeneratorInterface::ABSOLUTE_URL);
-            throw new AccessDeniedHttpException('Contest is locked, go to ' . $contestUrl . ' to unlock it.');
         } elseif (!$request->request->has('force') &&
             $contest->getStarttime() != null &&
             $contest->getStarttime() < $now + 30) {

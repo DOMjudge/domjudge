@@ -96,10 +96,6 @@ class ContestController extends BaseController
             if (!$contest) {
                 throw new NotFoundHttpException('Contest not found');
             }
-            if ($contest->isLocked()) {
-                $this->addFlash('danger', 'You cannot modify a locked contest.');
-                return $this->redirectToRoute('jury_contests');
-            }
 
             $time = key($doNow);
             if (!in_array($time, $actions, true)) {
