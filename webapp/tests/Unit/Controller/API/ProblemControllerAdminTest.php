@@ -180,7 +180,7 @@ EOF;
         $body = [
             'label'        => 'newproblem',
             'points'       => 3,
-            'rgb'        => '#013370',
+            'rgb'          => '#013370',
             'allow_submit' => true,
             'allow_judge'  => true,
         ];
