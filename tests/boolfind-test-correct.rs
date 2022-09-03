@@ -1,5 +1,5 @@
 /*
- * Sample solution in C for the "boolfind" interactive problem.
+ * Sample solution in rust for the "boolfind" interactive problem.
  *
  * @EXPECTED_RESULTS@: CORRECT
  */
