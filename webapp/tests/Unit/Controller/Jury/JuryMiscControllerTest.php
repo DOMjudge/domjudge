@@ -208,9 +208,9 @@ class JuryMiscControllerTest extends BaseTest
                                                                      16 => ['id' => 'py3', 'text' => 'Python 3 (py3)'],
                                                                      17 => ['id' => 'r', 'text' => 'R (r)'],
                                                                      18 => ['id' => 'rb', 'text' => 'Ruby (rb)'],
-                                                                     19 => ['id' => 'scala', 'text' => 'Scala (scala)'],
-                                                                     20 => ['id' => 'swift', 'text' => 'Swift (swift)'],
-                                                                     21 => ['id' => 'rs', 'text' => 'Rust (rs)']]]];
+                                                                     19 => ['id' => 'rs', 'text' => 'Rust (rs)'],
+                                                                     20 => ['id' => 'scala', 'text' => 'Scala (scala)'],
+                                                                     21 => ['id' => 'swift', 'text' => 'Swift (swift)']]]];
                 yield ['contests', $status, [$role], ['results' => [0 => ['id' => 2, 'text' => 'Demo contest (demo - c2)'],
                                                                     1 => ['id' => 1,
                                                                           'text' => 'Demo practice session (demoprac - c1)']
