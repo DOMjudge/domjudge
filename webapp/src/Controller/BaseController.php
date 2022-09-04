@@ -408,7 +408,7 @@ abstract class BaseController extends AbstractController
         }
 
         if (count($entities) > 1) {
-            $readableType = (substr($readableType, -1) !== 'y') ? $readableType.'s' : substr($readableType, 0, -1).'ies';
+            $readableType = (substr($readableType, -1) === 'y') ? (substr($readableType, 0, -1).'ies') : ($readableType.'s');
         }
 
         $data = [
