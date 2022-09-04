@@ -1,0 +1,12 @@
+#!/bin/sh
+
+DEST="$1" ; shift
+MEMLIMIT="$1" ; shift
+
+# first you need to ./dj_make_chroot -i rustc
+
+mkdir rust_tmp_dir
+export TMPDIR=rust_tmp_dir
+rustc -C opt-level=3 -o "$DEST" "$@"
+rmdir rust_tmp_dir
+exit 0
