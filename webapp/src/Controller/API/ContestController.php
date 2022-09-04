@@ -657,7 +657,7 @@ class ContestController extends AbstractRestController
                             if ($event->getAction() === EventLogService::ACTION_DELETE) {
                                 $data = null;
                             }
-                            $id   = (string)$event->getEndpointid() ?? null;
+                            $id   = (string)$event->getEndpointid() ?: null;
                             $type = (string)$event->getEndpointtype();
                             if ($type === 'contests') {
                                 // Special case: the type for a contest is singular and the ID must not be set
