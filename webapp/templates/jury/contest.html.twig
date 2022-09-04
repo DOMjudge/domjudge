@@ -27,12 +27,10 @@
             This contest is final.
         </div>
     {% endif %}
-    {%- if is_granted('ROLE_ADMIN') -%}
-        {% if contest.isLocked %}
-            <div class="alert alert-danger">
-                This contest is locked. Unlock it to edit contest data.
-            </div>
-        {% endif %}
+    {%- if is_granted('ROLE_ADMIN') and contest.isLocked -%}
+        <div class="alert alert-danger">
+            This contest is locked. Unlock it to edit contest data.
+        </div>
     {% endif %}
 
     <div class="row">
