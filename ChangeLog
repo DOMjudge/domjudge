@@ -2,6 +2,7 @@ DOMjudge Programming Contest Judging System
 
 Version 8.2.0 - DEV
 -------------------
+ - Add support for Rust
 
 Version 8.1.0 - 1 June 2022
 ---------------------------
