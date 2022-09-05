@@ -380,6 +380,7 @@ class ContestController extends BaseController
             'contests_table' => $contests_table,
             'table_fields' => $table_fields,
             'num_actions' => $this->isGranted('ROLE_ADMIN') ? 2 : 0,
+            'delete_list_endpoint' => 'jury_contests_delete',
         ]);
     }
 

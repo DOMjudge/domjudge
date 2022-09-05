@@ -75,7 +75,7 @@
 
     <div class="table-wrapper">
         {% if multidelete_list_endpoint is not null and is_granted('ROLE_ADMIN') %}
-            <form method="post" action="{{ path(delete_list_endpoint) }}" name="multidelete" id="multidelete">
+            <form method="post" action="{{ path(multidelete_list_endpoint) }}" name="multidelete" id="multidelete">
                 <input type='hidden' name='confirmation' value='0'>
         {% endif %}
                 <table class="data-table table table-sm table-striped" style="width:auto">
