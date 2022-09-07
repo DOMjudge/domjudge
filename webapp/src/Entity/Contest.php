@@ -784,9 +784,10 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
         return $this->isLocked;
     }
 
-    public function setIsLocked(bool $isLocked): bool
+    public function setIsLocked(bool $isLocked): Contest
     {
-        return $this->isLocked = $isLocked;
+        $this->isLocked = $isLocked;
+        return $this;
     }
 
     public function addTeam(Team $team): Contest
