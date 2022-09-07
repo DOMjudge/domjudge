@@ -22,6 +22,9 @@
                     <div class="card">
                         <div class="card-header">
                             {{ contest.name }} ({{ contest.shortname }} - c{{ contest.cid }})
+                            {% if contest.locked %}
+                                <i class="fas fa-lock"></i>
+                            {% endif %}
                         </div>
                         <div class="card-body">
                             {% if not contest.starttimeEnabled and contest.finalizetime is not empty %}

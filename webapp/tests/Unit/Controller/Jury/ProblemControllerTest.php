@@ -3,7 +3,10 @@
 namespace App\Tests\Unit\Controller\Jury;
 
 use App\DataFixtures\Test\AddProblemAttachmentFixture;
+use App\Entity\Contest;
 use App\Entity\Problem;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\DomCrawler\Crawler;
 
 class ProblemControllerTest extends JuryControllerTest
 {
@@ -63,5 +66,44 @@ class ProblemControllerTest extends JuryControllerTest
         $attachmentId = $this->resolveReference(AddProblemAttachmentFixture::class . ':attachment');
         static::$deleteExtra['deleteurl'] = "/jury/problems/attachments/$attachmentId/delete";
         parent::testDeleteExtraEntity();
+    }
+
+    public function testLockedContest(): void
+    {
+        $this->roles = ['admin'];
+        $this->logOut();
+        $this->logIn();
+
+        /** @var EntityManagerInterface $em */
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+        $contest = $em->getRepository(Contest::class)->findOneBy(['shortname' => 'demo']);
+        $contest->setIsLocked(true);
+        $contestId = $contest->getCid();
+        $problem = $em->getRepository(Problem::class)->findOneBy(['probid' => 1]);
+        $probId = $problem->getProbid();
+        $editUrl = "/jury/problems/$probId/edit";
+        $deleteUrl = "/jury/problems/$probId/delete";
+        $problemUrl = "/jury/problems/$probId";
+        $em->flush();
+
+        $this->verifyPageResponse('GET', $problemUrl, 200);
+
+        $crawler = $this->getCurrentCrawler();
+        $alertText = $crawler->filterXPath('//div[contains(@class, "alert")]')->first()->text();
+        self::assertStringStartsWith('Cannot edit problem, it belongs to locked contest', $alertText);
+
+        $titles = $crawler->filterXPath('//div[@class="button-row"]')->children()->each(function (Crawler $node, $i) {
+            return $node->attr('title');
+        });
+        $expectedTitles = [
+            'Judge remaining',
+            'Export',
+        ];
+        self::assertTrue(array_intersect($titles, $expectedTitles) == $expectedTitles);
+        $unexpectedTitles = [
+            'Edit',
+            'Delete',
+        ];
+        self::assertTrue(array_intersect($titles, $unexpectedTitles) == []);
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Tests\Unit\Controller\API;
 
 use App\DataFixtures\Test\DummyProblemFixture;
+use App\DataFixtures\Test\LockedContestFixture;
 use App\Entity\Problem;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
@@ -169,5 +170,35 @@ EOF;
         $url = $this->helperGetEndpointURL($this->apiEndpoint) . '/2';
         $response = $this->verifyApiJsonResponse('PUT', $url, 400, $this->apiUser, ['label' => 'dummy']);
         self::assertEquals('Problem already linked to contest', $response['message']);
+    }
+
+    public function testAddToLocked(): void
+    {
+        $this->loadFixture(LockedContestFixture::class);
+        $this->loadFixture(DummyProblemFixture::class);
+
+        $body = [
+            'label'        => 'newproblem',
+            'points'       => 3,
+            'rgb'          => '#013370',
+            'allow_submit' => true,
+            'allow_judge'  => true,
+        ];
+
+        $problemId = $this->resolveReference(DummyProblemFixture::class . ':0');
+
+        $url = $this->helperGetEndpointURL($this->apiEndpoint) . '/' . $problemId;
+        $problemResponse = $this->verifyApiJsonResponse('PUT', $url, 403, $this->apiUser, $body);
+        self::assertStringContainsString('Contest is locked', $problemResponse['message']);
+    }
+
+    public function testDeleteFromLocked(): void
+    {
+        $this->loadFixture(LockedContestFixture::class);
+
+        // Check that we cannot delete the problem.
+        $url = $this->helperGetEndpointURL($this->apiEndpoint) . '/2';
+        $problemResponse = $this->verifyApiJsonResponse('DELETE', $url, 403, $this->apiUser);
+        self::assertStringContainsString('Contest is locked', $problemResponse['message']);
     }
 }

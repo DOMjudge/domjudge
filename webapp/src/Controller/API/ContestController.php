@@ -32,6 +32,7 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\KernelInterface;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Yaml\Yaml;
 
@@ -143,7 +144,7 @@ class ContestController extends AbstractRestController
      */
     public function listAction(Request $request): Response
     {
-        
+
         return parent::performListAction($request);
     }
 
@@ -222,6 +223,11 @@ class ContestController extends AbstractRestController
             throw new NotFoundHttpException(sprintf('Object with ID \'%s\' not found', $id));
         }
 
+        if ($contest->isLocked()) {
+            $contestUrl = $this->generateUrl('jury_contest', ['contestId' => $id], UrlGeneratorInterface::ABSOLUTE_URL);
+            throw new AccessDeniedHttpException('Contest is locked, go to ' . $contestUrl . ' to unlock it.');
+        }
+
         $contest->setClearBanner(true);
 
         $this->assetUpdater->updateAssets($contest);
@@ -265,6 +271,11 @@ class ContestController extends AbstractRestController
 
         if ($contest === null) {
             throw new NotFoundHttpException(sprintf('Object with ID \'%s\' not found', $id));
+        }
+
+        if ($contest->isLocked()) {
+            $contestUrl = $this->generateUrl('jury_contest', ['contestId' => $id], UrlGeneratorInterface::ABSOLUTE_URL);
+            throw new AccessDeniedHttpException('Contest is locked, go to ' . $contestUrl . ' to unlock it.');
         }
 
         /** @var UploadedFile $banner */

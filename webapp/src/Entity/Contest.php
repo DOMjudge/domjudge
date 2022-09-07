@@ -315,6 +315,15 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     private bool $openToAllTeams = true;
 
     /**
+     * @ORM\Column(type="boolean", name="is_locked",
+     *     options={"comment"="Is this contest locked for modifications?",
+     *              "default"=0},
+     *     nullable=false)
+     * @Serializer\Exclude()
+     */
+    private bool $isLocked = false;
+
+    /**
      * @ORM\ManyToMany(targetEntity="Team", inversedBy="contests")
      * @ORM\JoinTable(name="contestteam",
      *                joinColumns={@ORM\JoinColumn(name="cid", referencedColumnName="cid", onDelete="CASCADE")},
@@ -768,6 +777,17 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     public function isOpenToAllTeams(): bool
     {
         return $this->openToAllTeams;
+    }
+
+    public function isLocked(): bool
+    {
+        return $this->isLocked;
+    }
+
+    public function setIsLocked(bool $isLocked): Contest
+    {
+        $this->isLocked = $isLocked;
+        return $this;
     }
 
     public function addTeam(Team $team): Contest

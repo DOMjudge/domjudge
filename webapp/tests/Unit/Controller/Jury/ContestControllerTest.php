@@ -6,6 +6,7 @@ use App\Entity\Contest;
 use App\Entity\JudgeTask;
 use App\Entity\QueueTask;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\DomCrawler\Crawler;
 
 class ContestControllerTest extends JuryControllerTest
 {
@@ -298,5 +299,79 @@ class ContestControllerTest extends JuryControllerTest
             }
             self::assertSelectorExists('body:contains("Contest should not have multiple timezones.")');
         }
+    }
+
+    public function testLockedContest(): void
+    {
+        $this->roles = ['admin'];
+        $this->logOut();
+        $this->logIn();
+
+        /** @var EntityManagerInterface $em */
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+        $contest = $em->getRepository(Contest::class)->findOneBy(['shortname' => 'demo']);
+        $contest->setIsLocked(false);
+        $contestId = $contest->getCid();
+        $editUrl = "/jury/contests/$contestId/edit";
+        $deleteUrl = "/jury/contests/$contestId/delete";
+        $contestUrl = "/jury/contests/$contestId";
+        $em->flush();
+
+        // Contest is unlocked, so we should be able to edit.
+        $this->verifyPageResponse('GET', $editUrl, 200);
+
+        // We should see all normal buttons including a lock button.
+        $this->verifyPageResponse('GET', $contestUrl, 200);
+        $crawler = $this->getCurrentCrawler();
+        $titles = $crawler->filterXPath('//div[@class="button-row"]')->children()->each(function (Crawler $node, $i) {
+            return $node->attr('title');
+        });
+        $expectedTitles = [
+            'Edit',
+            'Delete',
+            'Lock',
+            'Finalize this contest',
+            'Judge remaining',
+            'Heat up judgehosts with contest data',
+        ];
+        self::assertTrue(array_intersect($titles, $expectedTitles) == $expectedTitles);
+
+        $contest = $em->getRepository(Contest::class)->findOneBy(['shortname' => 'demo']);
+        $contest->setIsLocked(true);
+        $em->flush();
+
+        // Contest is locked, so we should not be able to edit.
+        $this->verifyPageResponse('GET', $editUrl, 302, $contestUrl);
+
+        // We should not see buttons that modify state, but see the normal buttons.
+        $this->verifyPageResponse('GET', $contestUrl, 200);
+        $crawler = $this->getCurrentCrawler();
+        $titles = $crawler->filterXPath('//div[@class="button-row"]')->children()->each(function (Crawler $node, $i) {
+            return $node->attr('title');
+        });
+        $expectedTitles = [
+            'Unlock',
+            'Judge remaining',
+            'Heat up judgehosts with contest data',
+        ];
+        self::assertTrue(array_intersect($titles, $expectedTitles) == $expectedTitles);
+        $unexpectedTitles = [
+            'Finalize this contest',
+            'Edit',
+            'Delete',
+            'Lock',
+        ];
+        self::assertTrue(array_intersect($titles, $unexpectedTitles) == []);
+
+        // Deleting a locked contest does not work.
+        $this->verifyPageResponse('GET', $deleteUrl, 302, $contestUrl);
+
+        // Deleting an unlocked contest works.
+        $contest = $em->getRepository(Contest::class)->findOneBy(['shortname' => 'demo']);
+        $contest->setIsLocked(false);
+        $em->flush();
+        $this->verifyPageResponse('GET', $deleteUrl, 200);
+        $crawler = $this->getCurrentCrawler();
+        self::assertStringStartsWith('Delete contest ', $crawler->filter('h1')->text());
     }
 }
