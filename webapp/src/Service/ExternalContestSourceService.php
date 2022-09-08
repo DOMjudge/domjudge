@@ -289,8 +289,8 @@ class ExternalContestSourceService
                         $event = $this->dj->jsonDecode($line);
                         $this->importEvent($event, $eventsToSkip);
 
-                        $newFormat = !isset($event['op']);
-                        if ($newFormat) {
+                        $event_format_202207 = !isset($event['op']);
+                        if ($event_format_202207) {
                             $eventId = $event['token'] ?? null;
                         } else {
                             $eventId = $event['id'];
@@ -379,8 +379,8 @@ class ExternalContestSourceService
                 $lastEventId          = $this->getLastReadEventId();
                 $readingToLastEventId = false;
 
-                $newFormat = !isset($event['op']);
-                if ($newFormat) {
+                $event_format_202207 = !isset($event['op']);
+                if ($event_format_202207) {
                     $eventId = $event['token'] ?? null;
                 } else {
                     $eventId = $event['id'];
@@ -524,8 +524,8 @@ class ExternalContestSourceService
             return;
         }
 
-        $newFormat = !isset($event['op']);
-        if ($newFormat) {
+        $event_format_202207 = !isset($event['op']);
+        if ($event_format_202207) {
             $eventId = $event['token'] ?? null;
             if (!isset($event['data'])) {
                 $operation = EventLogService::ACTION_DELETE;
