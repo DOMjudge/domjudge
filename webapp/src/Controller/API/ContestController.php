@@ -49,8 +49,8 @@ class ContestController extends AbstractRestController
     protected ImportExportService $importExportService;
     protected AssetUpdateService $assetUpdater;
 
-    public const EVENT_FEED_FORMAT_2022_07 = 0;
-    public const EVENT_FEED_FORMAT_2020_03 = 1;
+    public const EVENT_FEED_FORMAT_2020_03 = 0;
+    public const EVENT_FEED_FORMAT_2022_07 = 1;
 
     public function __construct(
         EntityManagerInterface $entityManager,

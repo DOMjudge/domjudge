@@ -283,12 +283,12 @@
             docdescription: See :ref:`printing` for more information.
         -   name: event_feed_format
             type: int
-            default_value: 0
+            default_value: 1
             public: false
             description: "Format of the event feed to use"
             options:
-                0: New format in use since the `2022-07` version
-                1: Legacy format in use until the `2020-03` version
+                0: Legacy format in use until the `2020-03` version
+                1: New format in use since the `2022-07` version
                 # Note: there is also a `2021-11` version of the event feed, but this has never been used so we will not implement it
         -   name: data_source
             type: int
