@@ -14,9 +14,8 @@
     {% else %}
         <div class="alert alert-warning">
             <form method="post">
-                
                 {% for item in primaryKeyItems %}
-                    <input type="hidden" name="ident{{ item }}" value="1">
+                    <input type="hidden" name="ident{{ item[0] }}" value="1">
                 {% endfor %}
                 <input type='hidden' name='confirmation' value='1'>
 
@@ -26,7 +25,7 @@
                     <p>You're about to delete {{ type }}:
                         <ul>
                         {% for primaryKeyItem in primaryKeyItems %}
-                            <li>{{ descriptionItems[loop.index0] }} ({{ primaryKeyItem }})</li>
+                            <li>{{ descriptionItems[loop.index0] }} ({{ primaryKeyItem[0] }})</li>
                         {% endfor %}
                         </ul>
                     </p>

@@ -216,8 +216,8 @@ abstract class BaseController extends AbstractController
                 }
                 // TODO: cascade deletes. Maybe use getDependentEntities()?
                 $eventLogService->log($endpoint, $dataId,
-                    EventLogService::ACTION_DELETE,
-                    $cid, null, null, false);
+                                      EventLogService::ACTION_DELETE,
+                                      $cid, null, null, false);
             }
         }
 
@@ -243,6 +243,7 @@ abstract class BaseController extends AbstractController
                 $entity = $entityManager->getRepository(Problem::class)->find($entity->getProbid());
             }
             $entityManager->remove($entity);
+            $entityManager->flush();
         });
 
         if ($entity instanceof Team) {
@@ -384,17 +385,17 @@ abstract class BaseController extends AbstractController
                 throw new BadRequestHttpException(reset($messages));
             }
 
-            $msgList = [];
             foreach ($entities as $id => $entity) {
+                $msgList = [];
                 $this->commitDeleteEntity($entity, $DOMJudgeService, $entityManager, $primaryKeyData[$id], $eventLogService);
                 $description = $entity->getShortDescription();
-                $id = $primaryKeyData[$id];
+                $id = $primaryKeyData[$id][0];
                 $msgList[] = sprintf('Successfully deleted %s %s "%s"',
-                                     $readableType, implode(', ', $primaryKeyData[$id]), $description);
+                                     $readableType, $id, $description);
+                $msg = implode("\n", $msgList);
+                $this->addFlash('success', $msg);
             }
 
-            $msg = implode("\n", $msgList);
-            $this->addFlash('success', $msg);
             if ($request->isXmlHttpRequest()) {
                 return new JsonResponse(['url' => $redirectUrl]);
             }
