@@ -41,8 +41,10 @@ jobs:
           run-args: |
               --config
               .github/workflowscripts/mapi.config
-              --ignore-endpoint ".*strict=true.*"
-              --ignore-endpoint ".*strict=True.*"
+              --ignore-endpoint
+              ".*strict=true.*"
+              --ignore-endpoint
+              ".*strict=True.*"
 
       - name: Mayhem for API (For application role)
         uses: ForAllSecure/mapi-action@v1
@@ -60,10 +62,19 @@ jobs:
               .github/workflowscripts/mapi.config
               --basic-auth
               admin:password
-              --ignore-endpoint ".*strict=true.*"
-              --ignore-endpoint ".*strict=True.*"
+              --ignore-endpoint
+              ".*strict=true.*"
+              --ignore-endpoint
+              ".*strict=True.*"
 
       - name: Upload SARIF file
         uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: mapi.sarif
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.version }}-logs
+          path: |
+            /var/log/nginx
+            /home/runner/work/domjudge/domjudge/webapp/var/log/*.log
