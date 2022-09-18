@@ -142,6 +142,8 @@ import_file('organizations', ['organizations.json'])
 import_file('teams', ['teams.json', 'teams2.tsv'])
 import_file('accounts', ['accounts.json', 'accounts.yaml', 'accounts.tsv'])
 
+problems_imported = False
+
 # Contest import is a special case: we can have a contest.yaml and problemset.yaml and then we need
 # to import the combined file. We can also gather the contest ID.
 if os.path.exists('contest.yaml'):
@@ -152,6 +154,7 @@ if os.path.exists('contest.yaml'):
     question = f'Import contest metadata (from {input_files_joined})?'
     if confirm(question, True):
         if len(input_files) > 1:
+            problems_imported = True
             with open('combined.yaml', 'w') as combined, fileinput.input(['contest.yaml', 'problemset.yaml']) as files:
                 for line in files:
                     combined.write(line)
@@ -182,6 +185,13 @@ if os.path.exists('problems.yaml') or os.path.exists('problems.json') or os.path
 
         if cid is None:
             cid = answer = input('Please specify the contest id: ')
+
+        if not problems_imported:
+            if os.path.exists('problems.yaml'):
+                problems_file = 'problems.yaml'
+            else:
+                problems_file = 'problems.json'
+            upload_file(f'contests/{cid}/problems/add-data', 'data', problems_file)
 
         # We might need to translate the problem external ID's into an internal ID (when we are in data source = local mode)
         # For this, we get the problems from the API and create a dict with the mapping
