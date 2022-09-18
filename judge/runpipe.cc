@@ -582,7 +582,11 @@ struct state_t {
            read_end);
 
     signal(SIGCHLD, [](int) {
-      logmsg(LOG_DEBUG, "caught SIGCHLD signal");
+      // TODO: Decide whether to keep some logging as the line below. We can't
+      // use logmsg here since that will in turn call syslog which is not safe
+      // to do in a signal handler (see also `man signl-safety`).
+      // logmsg(LOG_DEBUG, "caught SIGCHLD signal");
+
       // Notify the main loop that a child exited by sending a message via
       // child_exited_pipe.
       static char buf[] = {42};
