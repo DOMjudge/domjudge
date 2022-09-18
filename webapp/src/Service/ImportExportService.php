@@ -586,10 +586,6 @@ class ImportExportService
         foreach ($content as $line) {
             $l++;
             $line = Utils::parseTsvLine(trim($line));
-            if (!is_numeric($line[0])) {
-                $message = sprintf('Invalid id format on line %d', $l);
-                return -1;
-            }
             $groupData[] = [
                 'categoryid' => @$line[0],
                 'name' => @$line[1]
@@ -608,10 +604,6 @@ class ImportExportService
     {
         $groupData = [];
         foreach ($data as $idx => $group) {
-            if (isset($group['id']) && !is_numeric($group['id'])) {
-                $message = sprintf('Invalid id format for object at index %d', $idx);
-                return -1;
-            }
             $groupData[] = [
                 'categoryid' => @$group['id'],
                 'icpc_id' => @$group['icpc_id'],
