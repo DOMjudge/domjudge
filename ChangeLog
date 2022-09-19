@@ -1,5 +1,11 @@
 DOMjudge Programming Contest Judging System
 
+Version 8.1.3 - 19 September 2022
+---------------------------------
+ - Bugfix for interactive problems with racecondition when logging and
+ terminating the submission
+ - Bugfix to allow non-numeric external IDs
+
 Version 8.1.2 - 23 July 2022
 ----------------------------
  - No changes, new tag to release with proper Changelog
