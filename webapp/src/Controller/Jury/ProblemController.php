@@ -483,11 +483,11 @@ class ProblemController extends BaseController
             throw new NotFoundHttpException(sprintf('Problem with ID %s not found', $probId));
         }
 
-        $lockedcontest = false;
+        $lockedContest = false;
         foreach ($problem->getcontestproblems() as $contestproblem) {
             /** @var contestproblem $contestproblem */
             if ($contestproblem->getcontest()->islocked()) {
-                $lockedcontest = true;
+                $lockedContest = true;
                 break;
             }
         }
