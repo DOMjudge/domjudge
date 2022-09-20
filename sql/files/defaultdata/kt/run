@@ -15,6 +15,11 @@ MAINSOURCE="$1"
 MAINCLASS=""
 COMPILESCRIPTDIR="$(dirname "$0")"
 
+# Replace this with the directory where kotlinc is located if it is not in your path
+# For example
+# KOTLIN_DIR=/usr/lib/kotlinc/bin
+KOTLIN_DIR="$(dirname "$(command -v kotlinc)")"
+
 # Stack size in the JVM in KB. Note that this will be deducted from
 # the total memory made available for the heap.
 MEMSTACK=65536
@@ -52,15 +57,17 @@ fi
 # Typically, java.io.tmpdir is a /tmp which doesn't exist in our chroot so the
 # check fails. When passing in / as java.io.tmpdir, kotlinc is happy, although
 # the dir is not writable.
-kotlinc -d . -Djava.io.tmpdir=/ "$@"
+"${KOTLIN_DIR}"/kotlinc -d . -Djava.io.tmpdir=/ "$@"
 EXITCODE=$?
 [ "$EXITCODE" -ne 0 ] && exit $EXITCODE
+
+KOTLIN_STDLIB="$(dirname "$KOTLIN_DIR")/lib/kotlin-stdlib.jar"
 
 if [ -z "$MAINCLASS" ]; then
 	# Look for class that has the 'main' function:
 	CLASSNAMES="$(find ./* -type f -regex '^.*\.class$' \
 	            | sed -e 's/\.class$//' -e 's/^\.\///' -e 's/\//./g')"
-	MAINCLASS=$(java -cp "$COMPILESCRIPTDIR" DetectMain "$(pwd)" $CLASSNAMES)
+	MAINCLASS=$(java -cp "$COMPILESCRIPTDIR:$KOTLIN_STDLIB" DetectMain "$(pwd)" $CLASSNAMES)
 	EXITCODE=$?
 
 	# Report the entry point, so it can be saved, e.g. for later replay:
@@ -69,7 +76,7 @@ if [ -z "$MAINCLASS" ]; then
 	[ "$EXITCODE" -ne 0 ] && exit $EXITCODE
 else
 	# Check if entry point is valid
-	java -cp "$COMPILESCRIPTDIR" DetectMain "$(pwd)" $MAINCLASS > /dev/null
+	java -cp "$COMPILESCRIPTDIR:$KOTLIN_STDLIB" DetectMain "$(pwd)" $MAINCLASS > /dev/null
 	EXITCODE=$?
 	[ "$EXITCODE" -ne 0 ] && exit $EXITCODE
 fi
@@ -94,7 +101,7 @@ fi
 # Add -J-DONLINE_JUDGE or -J-DDOMJUDGE below if you want it make easier for
 # teams to do local debugging.
 
-exec kotlin -Dfile.encoding=UTF-8 -J-XX:+UseSerialGC -J-Xss${MEMSTACK}k -J-Xms${MEMLIMITJAVA}k -J-Xmx${MEMLIMITJAVA}k '$MAINCLASS' "\$@"
+exec "${KOTLIN_DIR}"/kotlin -Dfile.encoding=UTF-8 -J-XX:+UseSerialGC -J-Xss${MEMSTACK}k -J-Xms${MEMLIMITJAVA}k -J-Xmx${MEMLIMITJAVA}k '$MAINCLASS' "\$@"
 EOF
 
 chmod a+x "$DEST"
