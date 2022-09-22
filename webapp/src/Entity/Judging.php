@@ -94,6 +94,7 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
      *     options={"comment"="Old judging is marked as invalid when rejudging",
      *              "default"="1"},
      *     nullable=false)
+     * @Serializer\Groups({"Nonstrict"})
      */
     private bool $valid = true;
 

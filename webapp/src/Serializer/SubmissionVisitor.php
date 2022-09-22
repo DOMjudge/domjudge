@@ -46,7 +46,7 @@ class SubmissionVisitor implements EventSubscriberInterface
 
     public function onPostSerialize(ObjectEvent $event): void
     {
-        if ($this->dj->checkrole('jury')) {
+        if ($this->dj->checkrole('api_source_reader')) {
             /** @var JsonSerializationVisitor $visitor */
             $visitor = $event->getVisitor();
             /** @var Submission $submission */
