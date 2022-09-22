@@ -251,7 +251,7 @@ class Problem extends BaseApiEntity
         return $this->outputlimit;
     }
 
-    public function setSpecialCompareArgs(string $specialCompareArgs): Problem
+    public function setSpecialCompareArgs(?string $specialCompareArgs): Problem
     {
         $this->special_compare_args = $specialCompareArgs;
         return $this;
