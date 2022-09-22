@@ -4,7 +4,13 @@ namespace App\Tests\Unit\Controller\API;
 
 class AccessControllerTest extends BaseTest
 {
-    public function testAccess(): void
+    public function testAccessAsDemo(): void
+    {
+        $url = $this->helperGetEndpointURL('access');
+        $this->verifyApiJsonResponse('GET', $url, 403, 'demo');
+    }
+
+    public function testAccessAsAdmin(): void
     {
         $url    = $this->helperGetEndpointURL('access');
         $access = $this->verifyApiJsonResponse('GET', $url, 200, 'admin');
@@ -18,7 +24,7 @@ class AccessControllerTest extends BaseTest
 
         $expectedEndpoints = [
             [
-                'type' => 'contest',
+                'type'       => 'contest',
                 'properties' => [
                     'id',
                     'name',
@@ -30,7 +36,7 @@ class AccessControllerTest extends BaseTest
                 ],
             ],
             [
-                'type' => 'judgement-types',
+                'type'       => 'judgement-types',
                 'properties' => [
                     'id',
                     'name',
@@ -39,7 +45,7 @@ class AccessControllerTest extends BaseTest
                 ],
             ],
             [
-                'type' => 'languages',
+                'type'       => 'languages',
                 'properties' => [
                     'id',
                     'name',
@@ -49,7 +55,7 @@ class AccessControllerTest extends BaseTest
                 ],
             ],
             [
-                'type' => 'problems',
+                'type'       => 'problems',
                 'properties' => [
                     'id',
                     'label',
@@ -63,7 +69,7 @@ class AccessControllerTest extends BaseTest
                 ],
             ],
             [
-                'type' => 'groups',
+                'type'       => 'groups',
                 'properties' => [
                     'id',
                     'icpc_id',
@@ -72,7 +78,7 @@ class AccessControllerTest extends BaseTest
                 ],
             ],
             [
-                'type' => 'organizations',
+                'type'       => 'organizations',
                 'properties' => [
                     'id',
                     'icpc_id',
@@ -83,7 +89,7 @@ class AccessControllerTest extends BaseTest
                 ],
             ],
             [
-                'type' => 'teams',
+                'type'       => 'teams',
                 'properties' => [
                     'id',
                     'icpc_id',
@@ -94,7 +100,7 @@ class AccessControllerTest extends BaseTest
                 ],
             ],
             [
-                'type' => 'state',
+                'type'       => 'state',
                 'properties' => [
                     'started',
                     'frozen',
@@ -105,7 +111,7 @@ class AccessControllerTest extends BaseTest
                 ],
             ],
             [
-                'type' => 'submissions',
+                'type'       => 'submissions',
                 'properties' => [
                     'id',
                     'language_id',
@@ -118,7 +124,7 @@ class AccessControllerTest extends BaseTest
                 ],
             ],
             [
-                'type' => 'judgements',
+                'type'       => 'judgements',
                 'properties' => [
                     'id',
                     'submission_id',
@@ -131,7 +137,7 @@ class AccessControllerTest extends BaseTest
                 ],
             ],
             [
-                'type' => 'runs',
+                'type'       => 'runs',
                 'properties' => [
                     'id',
                     'judgement_id',
@@ -143,7 +149,7 @@ class AccessControllerTest extends BaseTest
                 ],
             ],
             [
-                'type' => 'awards',
+                'type'       => 'awards',
                 'properties' => [
                     'id',
                     'citation',
