@@ -178,6 +178,7 @@ class UserRegistrationType extends AbstractType
                     'attr' => [
                         'placeholder' => 'Password',
                         'autocomplete' => 'new-password',
+                        'spellcheck' => 'false',
                     ],
                 ],
                 'second_options' => [
@@ -185,6 +186,7 @@ class UserRegistrationType extends AbstractType
                     'attr' => [
                         'placeholder' => 'Repeat Password',
                         'autocomplete' => 'new-password',
+                        'spellcheck' => 'false',
                     ],
                 ],
                 'mapped' => false,
