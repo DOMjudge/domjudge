@@ -584,9 +584,6 @@ class ContestController extends AbstractRestController
                 // entity, not the ContestProblem entity, so the above loop will not
                 // detect it.
                 $skippedProperties['problems'][] = 'externalid';
-
-                // Users are called accounts.
-                $skippedProperties['accounts'] = $skippedProperties['users'];
             }
 
             // Initialize all static events.

@@ -1103,7 +1103,6 @@ class ExternalContestSourceService
         $this->compareOrCreateValues($eventId, $entityType, $data['id'], $user, $toCheck);
 
         $this->em->flush();
-        $this->eventLog->log('accounts', $user->getUserid(), $action, $this->getSourceContestId());
 
         $this->processPendingEvents('account', $user->getUserid());
     }
