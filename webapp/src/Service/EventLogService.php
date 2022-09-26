@@ -39,6 +39,7 @@ class EventLogService implements ContainerAwareInterface
     const KEY_TABLES = 'tables';
     const KEY_USE_EXTERNAL_ID = 'use-external-id';
     const KEY_ALWAYS_USE_EXTERNAL_ID = 'always-use-external-id';
+    const KEY_SKIP_IN_EVENT_FEED = 'skip-in-event-feed';
 
     // Types of endpoints:
     const TYPE_CONFIGURATION = 'configuration';
@@ -134,6 +135,7 @@ class EventLogService implements ContainerAwareInterface
             self::KEY_ENTITY => User::class,
             self::KEY_TABLES => ['user'],
             self::KEY_USE_EXTERNAL_ID => true,
+            self::KEY_SKIP_IN_EVENT_FEED => true,
         ],
     ];
 
@@ -684,6 +686,9 @@ class EventLogService implements ContainerAwareInterface
     {
         // Loop over all configuration endpoints with an URL and check if we have all data.
         foreach ($this->apiEndpoints as $endpoint => $endpointData) {
+            if ($endpointData[static::KEY_SKIP_IN_EVENT_FEED] ?? false) {
+                continue;
+            }
             if ($endpointData[EventLogService::KEY_TYPE] === EventLogService::TYPE_CONFIGURATION &&
                 isset($endpointData[EventLogService::KEY_URL])) {
                 $contestId = $contest->getApiId($this);

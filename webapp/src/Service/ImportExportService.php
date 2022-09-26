@@ -1054,13 +1054,6 @@ class ImportExportService
                 $action = $newTeam['action'];
                 $this->eventLogService->log('team', $team->getTeamid(), $action, $contest->getCid());
             }
-
-            if (!empty($createdUsers)) {
-                $this->eventLogService->log('user', $createdUsers, 'create', $contest->getCid());
-            }
-            if (!empty($updatedUsers)) {
-                $this->eventLogService->log('user', $updatedUsers, 'update', $contest->getCid());
-            }
         }
 
         return count($accountData);
