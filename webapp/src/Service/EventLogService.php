@@ -426,7 +426,7 @@ class EventLogService implements ContainerAwareInterface
 
                 if ($checkEvents) {
                     // Check if all references for this event are present; if not, add all static data.
-                    if (!$this->hasAllDependentObjectEvents($contest, $type, $jsonElement)) {
+                    if ($action !== static::ACTION_DELETE && !$this->hasAllDependentObjectEvents($contest, $type, $jsonElement)) {
                         // Not all dependent objects are present, so insert all static events.
                         $this->initStaticEvents($contest);
                         // If new references are added, we need to reload the contest,
