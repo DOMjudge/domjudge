@@ -24,6 +24,10 @@ server {
 	listen 80;
 	listen [::]:80;
 
+	# If you are reading from the event feed, make sure this is large enough.
+	# If you have a slow event feed reader, nginx needs to keep the connection
+	# open long enough between two write operations
+	send_timeout 36000s;
 	include @domserver_etcdir@/nginx-conf-inner;
 }
 
@@ -59,5 +63,9 @@ server {
 	# DOMjudge installation only runs with a valid TLS certificate.
 # 	add_header Strict-Transport-Security max-age=31556952;
 
+	# If you are reading from the event feed, make sure this is large enough.
+	# If you have a slow event feed reader, nginx needs to keep the connection
+	# open long enough between two write operations
+#	send_timeout 36000s;
 # 	include @domserver_etcdir@/nginx-conf-inner;
 # }
