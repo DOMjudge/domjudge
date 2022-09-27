@@ -1061,15 +1061,16 @@ class ExternalContestSourceService
             );
             $user = new User();
             $this->em->persist($user);
-            if (!empty($data['team_id'])) {
-                $team = $this->em->getRepository(Team::class)->findOneBy(['externalid' => $data['team_id']]);
-                if (!$team) {
-                    $team = new Team();
-                    $this->em->persist($team);
-                }
-                $user->setTeam($team);
-            }
             $action = EventLogService::ACTION_CREATE;
+        }
+
+        if (!empty($data['team_id'])) {
+            $team = $this->em->getRepository(Team::class)->findOneBy(['externalid' => $data['team_id']]);
+            if (!$team) {
+                $team = new Team();
+                $this->em->persist($team);
+            }
+            $user->setTeam($team);
         }
 
         $toCheck = [
