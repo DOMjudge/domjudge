@@ -337,7 +337,7 @@ function fetch_executable_internal(
                     'c' => ['c'],
                     'cpp' => ['cpp', 'C', 'cc'],
                     'java' => ['java'],
-                    'py' => ['py', 'py2', 'py3'],
+                    'py' => ['py'],
                 ];
                 $buildscript = "#!/bin/sh\n\n";
                 $execlang = false;
