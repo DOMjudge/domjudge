@@ -81,7 +81,7 @@ class TeamAffiliation extends BaseApiEntity implements AssetEntityInterface
      * @Serializer\Expose(if="context.getAttribute('config_service').get('show_flags')")
      * @Country()
      */
-    private ?string $country;
+    private ?string $country = null;
 
     /**
      * @Assert\File(mimeTypes={"image/png","image/jpeg","image/svg+xml"}, mimeTypesMessage="Only PNG's, JPG's and SVG's are allowed")
