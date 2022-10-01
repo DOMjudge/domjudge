@@ -53,15 +53,17 @@ echo "password" > ./etc/initial_admin_password.secret
 section_end
 
 section_start "Install domserver"
-make inplace-conf CONFIGURE_FLAGS='--disable-doc-build --with-baseurl="https://localhost/domjudge/" --enable-doc-build=no'
-sudo make inplace-install
-sudo make inplace-postinstall-permissions
+make configure
+./configure --with-baseurl='https://localhost/domjudge/' --enable-doc-build=no --prefix="/opt/domjudge"
+
+make domserver
+sudo make install-domserver
 section_end
 
 section_start "Explicit start mysql + install DB"
 sudo /etc/init.d/mysql start
 
-sudo /home/runner/work/domjudge/domjudge/bin/dj_setup_database -uroot -proot install
+/opt/domjudge/domserver/bin/dj_setup_database -uroot -proot install
 section_end
 
 section_start "Setup user"
@@ -84,19 +86,15 @@ fi
 section_end
 
 section_start "Setup webserver"
-sudo cp /home/runner/work/domjudge/domjudge/etc/domjudge-fpm.conf /etc/php/7.4/fpm/pool.d/domjudge.conf
+sudo cp /opt/domjudge/domserver/etc/domjudge-fpm.conf /etc/php/7.4/fpm/pool.d/domjudge.conf
 
 sudo rm -f /etc/nginx/sites-enabled/*
-sudo cp /home/runner/work/domjudge/domjudge/etc/nginx-conf /etc/nginx/sites-enabled/domjudge
+sudo cp /opt/domjudge/domserver/etc/nginx-conf /etc/nginx/sites-enabled/domjudge
 
 openssl req -nodes -new -x509 -keyout /tmp/server.key -out /tmp/server.crt -subj "/C=NL/ST=Noord-Holland/L=Amsterdam/O=TestingForPR/CN=localhost"
 # shellcheck disable=SC2002
 cat "$(pwd)/.github/workflowscripts/nginx_extra" | sudo tee -a /etc/nginx/sites-enabled/domjudge
 sudo nginx -t
-section_end
-
-section_start "Enable stacktrace in API response"
-echo "APP_ENV=dev" | sudo tee /home/runner/work/domjudge/domjudge/webapp/.env.local
 section_end
 
 section_start "Show webserver is up"

@@ -28,6 +28,13 @@ jobs:
       - name: Dump the OpenAPI
         run: .github/workflowscripts/getapi.sh
 
+      - uses: actions/upload-artifact@v3
+        if: ${{ matrix.version == 'guest' }}
+        with:
+          name: all-apispec
+          path: |
+            /home/runner/work/domjudge/domjudge/openapi.json
+
       - name: Mayhem for API
         uses: ForAllSecure/mapi-action@v1
         if: ${{ matrix.version == 'guest' }}
@@ -77,4 +84,4 @@ jobs:
           name: ${{ matrix.version }}-logs
           path: |
             /var/log/nginx
-            /home/runner/work/domjudge/domjudge/webapp/var/log/*.log
+            /opt/domjudge/domserver/webapp/var/log/*.log
