@@ -23,7 +23,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @Serializer\VirtualProperty(
  *     "hidden",
  *     exp="!object.getVisible()",
- *     options={@Serializer\Type("boolean")}
+ *     options={@Serializer\Type("boolean"), @Serializer\Groups({"Nonstrict"})}
  * )
  * @UniqueEntity("externalid")
  */
