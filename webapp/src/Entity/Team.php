@@ -437,6 +437,16 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
         return $this->category;
     }
 
+    /**
+     * @Serializer\VirtualProperty()
+     * @Serializer\SerializedName("hidden")
+     * @Serializer\Type("bool")
+     */
+    public function getHidden(): bool
+    {
+        return $this->getCategory() ? !$this->getCategory()->getVisible() : true;
+    }
+
     public function __construct()
     {
         $this->contests                = new ArrayCollection();

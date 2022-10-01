@@ -5,6 +5,7 @@ namespace App\Controller\Jury;
 use App\Controller\BaseController;
 use App\Entity\Judging;
 use App\Entity\Submission;
+use App\Entity\Team;
 use App\Entity\TeamCategory;
 use App\Form\Type\TeamCategoryType;
 use App\Service\ConfigurationService;
@@ -192,6 +193,22 @@ class TeamCategoryController extends BaseController
         if ($form->isSubmitted() && $form->isValid()) {
             $this->saveEntity($this->em, $this->eventLogService, $this->dj, $teamCategory,
                               $teamCategory->getCategoryid(), false);
+            // Also emit an update event for all teams of the category, since the hidden property might have changed
+            $teams = $teamCategory->getTeams();
+            if (!$teams->isEmpty()) {
+                $teamIds = array_map(fn(Team $team) => $team->getTeamid(), $teams->toArray());
+                foreach ($this->contestsForEntity($teamCategory, $this->dj) as $contest) {
+                    $this->eventLogService->log(
+                        'teams',
+                        $teamIds,
+                        EventLogService::ACTION_UPDATE,
+                        $contest->getCid(),
+                        null,
+                        null,
+                        false
+                    );
+                }
+            }
             $this->addFlash('scoreboard_refresh', 'If the category sort order was changed, it may be necessary to recalculate any cached scoreboards.');
             return $this->redirectToRoute('jury_team_category', ['categoryId' => $teamCategory->getCategoryid()]);
         }
