@@ -109,7 +109,7 @@ def import_file(entity: str, files: List[str]):
             if confirm(f'Import {entity} from {file}?', False):
                 print(f'Importing {entity}.')
                 type = file.split('.')[1]
-                response = upload_file(f'/users/{entity}', type, file)
+                response = upload_file(f'users/{entity}', type, file)
                 print(json.dumps(response, indent=4))
                 # After the first successfully imported file, we should stop
                 return
