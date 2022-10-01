@@ -573,7 +573,8 @@ class ImportExportService
     protected function importGroupData(array $groupData, ?array &$saved = null): int
     {
         // We want to overwrite the ID so change the ID generator.
-        $metadata = $this->em->getClassMetaData(TeamCategory::class);
+        $createdCategories = [];
+        $updatedCategories = [];
 
         foreach ($groupData as $groupItem) {
             if (empty($groupItem['categoryid'])) {
@@ -584,15 +585,14 @@ class ImportExportService
                 $field = $this->eventLogService->apiIdFieldForEntity(TeamCategory::class);
                 $teamCategory = $this->em->getRepository(TeamCategory::class)->findOneBy([$field => $categoryId]);
             }
+            $added = false;
             if (!$teamCategory) {
                 $teamCategory = new TeamCategory();
                 if ($categoryId !== null) {
                     $teamCategory->setExternalid($categoryId);
                 }
                 $this->em->persist($teamCategory);
-                $action = EventLogService::ACTION_CREATE;
-            } else {
-                $action = EventLogService::ACTION_UPDATE;
+                $added = true;
             }
             $teamCategory
                 ->setName($groupItem['name'])
@@ -601,14 +601,24 @@ class ImportExportService
                 ->setColor($groupItem['color'] ?? null)
                 ->setIcpcid($groupItem['icpc_id'] ?? null);
             $this->em->flush();
-            if ($contest = $this->dj->getCurrentContest()) {
-                $this->eventLogService->log('team_category', $teamCategory->getCategoryid(), $action,
-                                            $contest->getCid());
-            }
             $this->dj->auditlog('team_category', $teamCategory->getCategoryid(), 'replaced',
                                              'imported from tsv / json');
+            if ($added) {
+                $createdCategories[] = $teamCategory->getCategoryid();
+            } else {
+                $updatedCategories[] = $teamCategory->getCategoryid();
+            }
             if ($saved !== null) {
                 $saved[] = $teamCategory;
+            }
+        }
+
+        if ($contest = $this->dj->getCurrentContest()) {
+            if (!empty($createdCategories)) {
+                $this->eventLogService->log('team_category', $createdCategories, 'create', $contest->getCid(), null, null, false);
+            }
+            if (!empty($updatedCategories)) {
+                $this->eventLogService->log('team_category', $updatedCategories, 'update', $contest->getCid(), null, null, false);
             }
         }
 
@@ -645,9 +655,12 @@ class ImportExportService
      */
     protected function importOrganizationData(array $organizationData, ?array &$saved = null): int
     {
+        $createdOrganizations = [];
+        $updatedOrganizations = [];
         foreach ($organizationData as $organizationItem) {
             $externalId      = $organizationItem['externalid'];
             $teamAffiliation = null;
+            $added           = false;
             if ($externalId !== null) {
                 $teamAffiliation = $this->em->getRepository(TeamAffiliation::class)->findOneBy(['externalid' => $externalId]);
             }
@@ -655,9 +668,7 @@ class ImportExportService
                 $teamAffiliation = new TeamAffiliation();
                 $teamAffiliation->setExternalid($externalId);
                 $this->em->persist($teamAffiliation);
-                $action = EventLogService::ACTION_CREATE;
-            } else {
-                $action = EventLogService::ACTION_UPDATE;
+                $added = true;
             }
             $teamAffiliation
                 ->setShortname($organizationItem['shortname'])
@@ -665,14 +676,24 @@ class ImportExportService
                 ->setCountry($organizationItem['country'])
                 ->setIcpcid($organizationItem['icpc_id'] ?? null);
             $this->em->flush();
-            if ($contest = $this->dj->getCurrentContest()) {
-                $this->eventLogService->log('team_affiliation', $teamAffiliation->getAffilid(), $action,
-                                            $contest->getCid());
+            if ($added) {
+                $createdOrganizations[] = $teamAffiliation->getAffilid();
+            } else {
+                $updatedOrganizations[] = $teamAffiliation->getAffilid();
             }
             $this->dj->auditlog('team_affiliation', $teamAffiliation->getAffilid(), 'replaced',
                                              'imported from tsv / json');
             if ($saved !== null) {
                 $saved[] = $teamAffiliation;
+            }
+        }
+
+        if ($contest = $this->dj->getCurrentContest()) {
+            if (!empty($createdOrganizations)) {
+                $this->eventLogService->log('team_affiliation', $createdOrganizations, 'create', $contest->getCid(), null, null, false);
+            }
+            if (!empty($updatedOrganizations)) {
+                $this->eventLogService->log('team_affiliation', $updatedOrganizations, 'update', $contest->getCid(), null, null, false);
             }
         }
 
@@ -947,10 +968,10 @@ class ImportExportService
                                             'create', $contest->getCid());
             }
             if (!empty($createdTeams)) {
-                $this->eventLogService->log('team', $createdTeams, 'create', $contest->getCid());
+                $this->eventLogService->log('team', $createdTeams, 'create', $contest->getCid(), null, null, false);
             }
             if (!empty($updatedTeams)) {
-                $this->eventLogService->log('team', $updatedTeams, 'update', $contest->getCid());
+                $this->eventLogService->log('team', $updatedTeams, 'update', $contest->getCid(), null, null, false);
             }
         }
 
