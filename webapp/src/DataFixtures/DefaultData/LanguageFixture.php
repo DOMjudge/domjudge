@@ -43,7 +43,7 @@ class LanguageFixture extends AbstractDefaultDataFixture
             ['pas',    'pascal',     'Pascal',      ['pas', 'p'],                false, 'Main file',  false,  true,   1,     'pas'],
             ['pl',     'pl',         'Perl',        ['pl'],                      false, 'Main file',  false,  true,   1,     'pl'],
             ['plg',    'prolog',     'Prolog',      ['plg'],                     false, 'Main file',  false,  true,   1,     'plg'],
-            ['py3',    'python3',    'Python 3',    ['py', 'py3'],               false, 'Main file',  true,   true,   1,     'py3'],
+            ['py3',    'python3',    'Python 3',    ['py'],                      false, 'Main file',  true,   true,   1,     'py3'],
             ['r',      'r',          'R',           ['R'],                       false, 'Main file',  false,  true,   1,     'r'],
             ['rb',     'ruby',       'Ruby',        ['rb'],                      false, 'Main file',  false,  true,   1,     'rb'],
             ['rs',     'rust',       'Rust',        ['rs'],                      false, null,         false,  true,   1,     'rs'],
