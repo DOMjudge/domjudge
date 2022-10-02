@@ -1716,7 +1716,7 @@ class ExternalContestSourceService
         }
 
         $time    = Utils::toEpochFloat($data['time']);
-        $runTime = $data['run_time'] ?? null;
+        $runTime = $data['run_time'] ?? 0.0;
 
         $judgementTypeId = $data['judgement_type_id'] ?? null;
         $verdictsFlipped = array_flip($this->verdicts);
