@@ -4,16 +4,14 @@
 
 section_start_collap setup "Setup and install"
 
+export version=7.4
+
 # Set up
 "$( dirname "${BASH_SOURCE[0]}" )"/base.sh
 
 trap log_on_err ERR
 
 cd /opt/domjudge/domserver
-
-# configure and restart php-fpm
-sudo cp /opt/domjudge/domserver/etc/domjudge-fpm.conf "/etc/php/7.4/fpm/pool.d/domjudge-fpm.conf"
-sudo /usr/sbin/php-fpm7.4
 
 section_end setup
 

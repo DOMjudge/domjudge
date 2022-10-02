@@ -2,7 +2,7 @@
 
 . gitlab/ci_settings.sh
 
-version=$1
+export version=$1
 
 show_phpinfo $version
 
@@ -27,6 +27,7 @@ function finish() {
 }
 trap finish EXIT
 
+export integration=1
 section_start setup "Setup and install"
 
 # Set up
@@ -65,11 +66,6 @@ EOF
 
 ADMINPASS=$(cat etc/initial_admin_password.secret)
 cp etc/initial_admin_password.secret "$GITLABARTIFACTS/"
-
-# configure and restart php-fpm
-sudo cp /opt/domjudge/domserver/etc/domjudge-fpm.conf "/etc/php/$version/fpm/pool.d/domjudge-fpm.conf"
-echo "php_admin_value[date.timezone] = Europe/Amsterdam" | sudo tee -a "/etc/php/$version/fpm/pool.d/domjudge-fpm.conf"
-sudo /usr/sbin/php-fpm${version}
 
 section_end setup
 
@@ -141,23 +137,6 @@ section_start submitting "Submitting test sources (including Kattis example)"
 cd ${DIR}/tests
 export SUBMITBASEURL='http://localhost/domjudge/'
 
-make check-problems
-# Stash the logs as we dont want to store the logs for erroneous submissions
-if [ -f /opt/domjudge/domserver/webapp/var/log/prod.log ]; then
-    mv /opt/domjudge/domserver/webapp/var/log/prod.log{,.stash}
-fi
-make test-bad-expected-results
-if [ ! -f /opt/domjudge/domserver/webapp/var/log/prod.log ]; then
-    # The log should have PHP errors,
-    exit 1
-fi
-mv /opt/domjudge/domserver/webapp/var/log/prod.log{,.errors}
-if [ -f /opt/domjudge/domserver/webapp/var/log/prod.log.stash ]; then
-    # Restore the original log
-    mv /opt/domjudge/domserver/webapp/var/log/prod.log{.stash,}
-fi
-make test-stress
-
 # Prepare to load example problems from Kattis/problemtools
 echo "INSERT INTO userrole (userid, roleid) VALUES (3, 1);" | mysql domjudge
 cd /tmp
@@ -172,13 +151,13 @@ for i in hello_kattis different guess; do
         cd "$i"
         zip -r "../${i}.zip" -- *
     )
-    curl --fail -X POST -n -N -F zip=@${i}.zip http://localhost/domjudge/api/contests/2/problems
+    curl --fail -X POST -n -N -F zip=@${i}.zip http://localhost/domjudge/api/contests/1/problems
 done
 section_end submitting
 
 section_start judging "Waiting until all submissions are judged"
 # wait for and check results
-NUMSUBS=$(curl --fail http://admin:$ADMINPASS@localhost/domjudge/api/contests/2/submissions | python3 -mjson.tool | grep -c '"id":')
+NUMSUBS=$(curl --fail http://admin:$ADMINPASS@localhost/domjudge/api/contests/1/submissions | python3 -mjson.tool | grep -c '"id":')
 export COOKIEJAR
 COOKIEJAR=$(mktemp --tmpdir)
 export CURLOPTS="--fail -sq -m 30 -b $COOKIEJAR"
@@ -189,7 +168,7 @@ CSRFTOKEN=$(curl $CURLOPTS -c $COOKIEJAR "http://localhost/domjudge/login" 2>/de
 curl $CURLOPTS -c $COOKIEJAR -F "_csrf_token=$CSRFTOKEN" -F "_username=admin" -F "_password=$ADMINPASS" "http://localhost/domjudge/login"
 
 # Send a general clarification to later test if we see the event.
-curl $CURLOPTS -F "sendto=" -F "problem=2-" -F "bodytext=Testing" -F "submit=Send" \
+curl $CURLOPTS -F "sendto=" -F "problem=1-" -F "bodytext=Testing" -F "submit=Send" \
      "http://localhost/domjudge/jury/clarifications/send" -o /dev/null
 
 # Don't spam the log.
@@ -248,15 +227,12 @@ section_start api_check "Performing API checks"
 # Start logging again
 set -x
 
-# Delete contest so API check does not fail because of empty results.
-echo "DELETE FROM contest WHERE cid=1" | mysql domjudge
-
 # Finalize contest so that awards appear in the feed; first freeze and end the
 # contest if that has not already been done.
 export CURLOPTS="--fail -m 30 -b $COOKIEJAR"
-curl $CURLOPTS -X POST -d 'contest=2&donow[freeze]=freeze now' http://localhost/domjudge/jury/contests || true
-curl $CURLOPTS -X POST -d 'contest=2&donow[end]=end now' http://localhost/domjudge/jury/contests || true
-curl $CURLOPTS -X POST -d 'finalize_contest[b]=0&finalize_contest[finalizecomment]=gitlab&finalize_contest[finalize]=' http://localhost/domjudge/jury/contests/2/finalize
+curl $CURLOPTS -X POST -d 'contest=1&donow[freeze]=freeze now' http://localhost/domjudge/jury/contests || true
+curl $CURLOPTS -X POST -d 'contest=1&donow[end]=end now' http://localhost/domjudge/jury/contests || true
+curl $CURLOPTS -X POST -d 'finalize_contest[b]=0&finalize_contest[finalizecomment]=gitlab&finalize_contest[finalize]=' http://localhost/domjudge/jury/contests/1/finalize
 
 # shellcheck disable=SC2002,SC2196
 if cat /opt/domjudge/domserver/webapp/var/log/prod.log | egrep '(CRITICAL|ERROR):'; then
@@ -269,5 +245,5 @@ section_end api_check |& tee "$GITLABARTIFACTS/check_api.log"
 
 section_start validate_feed "Validate the eventfeed against API (ignoring failures)"
 cd ${DIR}/misc-tools
-./compare-cds.sh http://localhost/domjudge 2 |& tee "$GITLABARTIFACTS/compare_cds.log" || true
+./compare-cds.sh http://localhost/domjudge 1 |& tee "$GITLABARTIFACTS/compare_cds.log" || true
 section_end validate_feed

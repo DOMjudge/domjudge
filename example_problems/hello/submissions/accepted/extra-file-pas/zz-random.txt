@@ -1,0 +1,10 @@
+This is a random text file!
+
+It should *NOT* be valid syntax in any language, since we include it
+in multi-file submissions, but these should be rejected with
+COMPILER-ERROR. If not, then teams could send in any code,
+precompiled, or in another language, and thus circumvent language (and
+possibly other) restrictions.
+
+@*@!2<>>$#! %
+&`*!'"~

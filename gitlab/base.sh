@@ -64,9 +64,28 @@ sudo make install-domserver install-judgehost install-docs |& tee -a "$GITLABART
 cd /opt/domjudge/domserver
 setfacl -m u:www-data:r etc/restapi.secret etc/initial_admin_password.secret \
                         etc/dbpasswords.secret etc/symfony_app.secret
-sudo -u www-data bin/dj_setup_database -uroot -p${MYSQL_ROOT_PASSWORD} -q install
 
 # configure and restart nginx
 sudo rm -f /etc/nginx/sites-enabled/*
 sudo cp /opt/domjudge/domserver/etc/nginx-conf /etc/nginx/sites-enabled/domjudge
 sudo /usr/sbin/nginx
+
+# configure and restart php-fpm
+# shellcheck disable=SC2154
+php_version="${version:-}"
+sudo cp /opt/domjudge/domserver/etc/domjudge-fpm.conf "/etc/php/$php_version/fpm/pool.d/domjudge-fpm.conf"
+echo "php_admin_value[date.timezone] = Europe/Amsterdam" | sudo tee -a "/etc/php/$php_version/fpm/pool.d/domjudge-fpm.conf"
+sudo /usr/sbin/php-fpm${php_version}
+
+
+passwd=$(cat etc/initial_admin_password.secret)
+echo "machine localhost login admin password $passwd" >> ~www-data/.netrc
+sudo -u www-data bin/dj_setup_database -uroot -p${MYSQL_ROOT_PASSWORD} bare-install
+
+# shellcheck disable=SC2154
+if [ -n "${integration:-}" ]; then
+	# Make sure admin has a team associated to insert submissions as well.
+	echo "UPDATE user SET teamid=1 WHERE userid=1;" | mysql domjudge
+fi
+
+sudo -u www-data bin/dj_setup_database -uroot -p${MYSQL_ROOT_PASSWORD} install-examples

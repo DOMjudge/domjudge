@@ -83,7 +83,6 @@ jobs:
 
     - name: Compile the build scripts for languages
       run: |
-        rm -rf sql/files/examples/boolfind_run*
         make build-scripts
 
     - name: Compile judgehost

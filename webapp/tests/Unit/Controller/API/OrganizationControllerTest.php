@@ -142,7 +142,7 @@ class OrganizationControllerTest extends BaseTest
         $object = $this->verifyApiJsonResponse('GET', $url, 200, 'admin');
         $logoConfig = [
             [
-                'href'     => "contests/2/organizations/$id/logo",
+                'href'     => "contests/1/organizations/$id/logo",
                 'mime'     => 'image/png',
                 'width'    => 181,
                 'height'   => 101,

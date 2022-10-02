@@ -1,0 +1,13 @@
+problems:
+- color: '#9486EA'
+  letter: A
+  rgb: '#9486EA'
+  short-name: hello
+- color: '#E93603'
+  letter: B
+  rgb: '#E93603'
+  short-name: fltcmp
+- color: '#9B630C'
+  letter: C
+  rgb: '#9B630C'
+  short-name: boolfind

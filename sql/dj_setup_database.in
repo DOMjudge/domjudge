@@ -9,6 +9,8 @@ set -e
 BINDIR="@domserver_bindir@"
 ETCDIR="@domserver_etcdir@"
 WEBAPPDIR="@domserver_webappdir@"
+EXAMPLEPROBDIR="@domserver_exampleprobdir@"
+BASEURL="@BASEURL@"
 
 PASSWDFILE="$ETCDIR/dbpasswords.secret"
 
@@ -285,7 +287,10 @@ uninstall)
 
 install-examples)
 	read_dbpasswords
+	
 	DBUSER=$domjudge_DBUSER PASSWD=$domjudge_PASSWD symfony_console domjudge:load-example-data
+	"$EXAMPLEPROBDIR"/generate-contest-yaml
+	( cd "$EXAMPLEPROBDIR" && yes y | "$BINDIR"/import-contest "${BASEURL}api" )
 	;;
 
 install-loadtest)
@@ -313,6 +318,8 @@ bare-install|install)
 	DBUSER=$domjudge_DBUSER PASSWD=$domjudge_PASSWD symfony_console domjudge:load-default-data
 	if [ "$1" = "install" ]; then
 		DBUSER=$domjudge_DBUSER PASSWD=$domjudge_PASSWD symfony_console domjudge:load-example-data
+		"$EXAMPLEPROBDIR"/generate-contest-yaml
+		( cd "$EXAMPLEPROBDIR" && yes y | "$BINDIR"/import-contest "${BASEURL}api" )
 	fi
 	if [ "$1" = "install" ]; then
 		verbose "SQL structure and default/example data installed."

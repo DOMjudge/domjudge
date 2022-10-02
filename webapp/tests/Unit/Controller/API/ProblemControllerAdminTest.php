@@ -18,7 +18,7 @@ class ProblemControllerAdminTest extends ProblemControllerTest
     {
         // When queried as admin, extra information is returned about each problem.
         $this->expectedObjects[1]['test_data_count'] = 1;
-        $this->expectedObjects[2]['test_data_count'] = 3;
+        $this->expectedObjects[2]['test_data_count'] = 1+3;
         $this->expectedObjects[3]['test_data_count'] = 1;
         parent::setUp();
     }
@@ -31,7 +31,7 @@ class ProblemControllerAdminTest extends ProblemControllerTest
         "color": "greenyellow",
         "externalid": "ascendingphoto",
         "id": "ascendingphoto",
-        "label": "A",
+        "label": "D",
         "name": "Ascending Photo",
         "ordinal": 0,
         "rgb": "#aeff21",
@@ -42,7 +42,7 @@ class ProblemControllerAdminTest extends ProblemControllerTest
         "color": "blueviolet",
         "externalid": "boss",
         "id": "boss",
-        "label": "B",
+        "label": "E",
         "name": "Boss Battle",
         "ordinal": 1,
         "rgb": "#5b29ff",
@@ -53,7 +53,7 @@ class ProblemControllerAdminTest extends ProblemControllerTest
         "color": "hotpink",
         "externalid": "connect",
         "id": "connect",
-        "label": "C",
+        "label": "F",
         "name": "Connect the Dots",
         "ordinal": 2,
         "rgb": "#ff4fa7",
@@ -72,7 +72,7 @@ EOF;
 
         self::assertIsArray($ids);
 
-        $expectedProblems = ['A' => 'ascendingphoto', 'B' => 'boss', 'C' => 'connect'];
+        $expectedProblems = ['D' => 'ascendingphoto', 'E' => 'boss', 'F' => 'connect'];
 
         // First clear the entity manager to have all data.
         static::getContainer()->get(EntityManagerInterface::class)->clear();

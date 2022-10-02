@@ -64,7 +64,8 @@ class JuryMiscControllerTest extends BaseTest
      */
     public function testBalloonScoreboard(array $fixtures, bool $public, string $contestStage): void
     {
-        $visibleElements = ["rank","team","Summary","boolfind"];
+        //self::assertEquals((string) $public, $contestStage);
+        $visibleElements = ["rank","team","Summary","C"];
         $nonActiveStages = ["preActivation","postDeactivate"];
         $this->loadFixtures($fixtures);
         /** @var ScoreboardService $sbs */
@@ -116,9 +117,8 @@ class JuryMiscControllerTest extends BaseTest
         $this->verifyPageResponse('GET', '/public/problems', 200);
         if (in_array($contestStage, array_merge(['preStart'], $nonActiveStages)) || !$public) {
             self::assertSelectorExists('body:contains("No problem texts available at this point.")');
-            self::assertSelectorNotExists('body:contains("boolfind")');
         } else {
-            self::assertSelectorExists('body:contains("boolfind")');
+            self::assertSelectorNotExists('body:contains("No problem texts available at this point.")');
         }
     }
 
@@ -212,9 +212,7 @@ class JuryMiscControllerTest extends BaseTest
                                                                      19 => ['id' => 'rs', 'text' => 'Rust (rs)'],
                                                                      20 => ['id' => 'scala', 'text' => 'Scala (scala)'],
                                                                      21 => ['id' => 'swift', 'text' => 'Swift (swift)']]]];
-                yield ['contests', $status, [$role], ['results' => [0 => ['id' => 2, 'text' => 'Demo contest (demo - c2)'],
-                                                                    1 => ['id' => 1,
-                                                                          'text' => 'Demo practice session (demoprac - c1)']
+                yield ['contests', $status, [$role], ['results' => [0 => ['id' => 1, 'text' => 'Demo contest (demo - c1)']
                                                                    ]]];
             }
         }

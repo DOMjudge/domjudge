@@ -39,7 +39,10 @@ class SubmissionService
         'ACCEPTED' => 'CORRECT',
         'WRONG_ANSWER' => 'WRONG-ANSWER',
         'TIME_LIMIT_EXCEEDED' => 'TIMELIMIT',
-        'RUN_TIME_ERROR' => 'RUN-ERROR'
+        'RUN_TIME_ERROR' => 'RUN-ERROR',
+        'COMPILER_ERROR' => 'COMPILER-ERROR',
+        'NO_OUTPUT' => 'NO-OUTPUT',
+        'OUTPUT_LIMIT' => 'OUTPUT-LIMIT'
     ];
 
     protected EntityManagerInterface $em;

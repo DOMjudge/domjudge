@@ -51,7 +51,7 @@ class RejudgingControllerTest extends BaseTest
         $this->loadFixture(RejudgingStatesFixture::class);
         $this->verifyPageResponse('GET', '/jury/rejudgings', 200);
         // The sorting is done in JS (and cannot be tested), this is the inverse ordering of the Fixture.
-        foreach (['Canceled','Finished','0Percent_2','0Percent_1','Unit','MultiContest'] as $index => $reason) {
+        foreach (['Canceled','Finished','0Percent_2','0Percent_1','Unit'] as $index => $reason) {
             self::assertSelectorExists('tr:nth-child('.($index+1).'):contains("'.$reason.'")');
         }
     }
@@ -119,10 +119,10 @@ class RejudgingControllerTest extends BaseTest
         foreach (RejudgingStatesFixture::rejudgingStages() as $stage) {
             $show[] = $stage[0];
         }
-        yield [null, $show, [], 4];
+        yield [null, $show, [], 3];
 
         // Rejudging during a contest
-        foreach (['demoprac','demo'] as $contestName) {
+        foreach (['demo'] as $contestName) {
             $show = [];
             $hidden = [];
             $todo = 0;

@@ -28,7 +28,7 @@ class TeamControllerTest extends JuryControllerTest
                                                            'penalty' => '0',
                                                            'room' => 'The first room',
                                                            'internalcomments' => 'This is a team without a user',
-                                                           'contests' => ['1'],
+                                                           'contests' => [],
                                                            'enabled' => '1',
                                                            'addUserForTeam' => Team::DONT_ADD_USER],
                                                           ['name' => 'Another Team',

@@ -229,8 +229,9 @@ class ImportProblemService
                 $contestProblem
                     ->setPoints(1)
                     ->setAllowSubmit(true)
-                    ->setAllowJudge(true)
-                    ->setColor(null);
+                    ->setAllowJudge(true);
+                // TODO: we should decide how and what to reset
+                    // ->setColor(null);
             }
         }
 

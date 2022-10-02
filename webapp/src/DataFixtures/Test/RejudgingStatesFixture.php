@@ -17,7 +17,6 @@ class RejudgingStatesFixture extends AbstractTestDataFixture
     public static function rejudgingStages(): array
     {
         $rejudgingStages = [];
-        $rejudgingStages[] = ['MultiContest',null,1,0,['demo','demoprac']];
         $rejudgingStages[] = ['Unit',null,0,1,['demo']];
         $rejudgingStages[] = ['0Percent_1',null,1,0,['demo']];
         $rejudgingStages[] = ['0Percent_2',null,2,0,['demo']];

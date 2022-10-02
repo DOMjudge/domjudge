@@ -10,19 +10,21 @@ class DemoPreUnfreezeContestFixture extends AbstractTestDataFixture
     public function load(ObjectManager $manager): void
     {
         $demoContest = $manager->getRepository(Contest::class)->findOneBy(['shortname' => 'demo']);
-        $demoContest->setEndtimeString(
-            sprintf(
-                '%s-01-01 09:00:00 Europe/Amsterdam',
-                date('Y')
+        $demoContest
+            ->setStarttimeString(date('Y') . '-01-01 00:00:00 Europe/Amsterdam')
+            ->setEndtimeString(
+                sprintf(
+                    '%s-01-01 09:00:00 Europe/Amsterdam',
+                    date('Y')
+                )
             )
-        )
-        ->setFreezetimeString('2021-01-03 12:34:56 Europe/Amsterdam')
-        ->setUnfreezetimeString(
-            sprintf(
-                '%s-01-01 09:00:00 Europe/Amsterdam',
-                date('Y') + 1
-            )
-        ); // Set the time explicit to guard against changes in the Default fixture.
+            ->setFreezetimeString('2021-01-03 12:34:56 Europe/Amsterdam')
+            ->setUnfreezetimeString(
+                sprintf(
+                    '%s-01-01 09:00:00 Europe/Amsterdam',
+                    date('Y') + 1
+                )
+            ); // Set the time explicit to guard against changes in the Default fixture.
         $manager->persist($demoContest);
         $manager->flush();
     }
