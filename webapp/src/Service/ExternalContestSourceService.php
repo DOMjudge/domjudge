@@ -673,7 +673,7 @@ class ExternalContestSourceService
 
         // The timezones are given in ISO 8601 and we only support names.
         // This is why we will use the platform default timezone and just verify it matches.
-        $startTime = $data['start_time'] === null ? null : new DateTime($data['start_time']);
+        $startTime = isset($data['start_time']) ? new DateTime($data['start_time']) : null;
         if ($startTime !== null) {
             // We prefer to use our default timezone, since that is a timezone name
             // The feed only has timezone offset, so we will only use it if the offset
