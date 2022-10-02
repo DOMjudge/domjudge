@@ -200,6 +200,7 @@ if os.path.exists('problems.yaml') or os.path.exists('problems.json') or os.path
                 problems = [problem['short-name']
                             for problem in problemData['problems']]
 
+        confirmIndividually = confirm("Confirm individually for every problem", False)
         for problem in problems:
             print(f'Preparing problem \'{problem}\'.')
             if os.path.exists(f'{problem}.zip'):
@@ -210,7 +211,7 @@ if os.path.exists('problems.yaml') or os.path.exists('problems.json') or os.path
             os.system(f'cd {problem} && zip -r \'../{problem}\' -- .timelimit *')
 
             problem_id = problem_mapping[problem]
-            if confirm(f'Ready to import problem \'{problem}\' to probid={problem_id}. Continue?', True):
+            if (confirmIndividually or confirm(f'Ready to import problem \'{problem}\' to probid={problem_id}. Continue?', True)):
                 response = upload_file(
                     f'contests/{cid}/problems', 'zip', f'{problem}.zip', {'problem': problem_id})
                 print(json.dumps(response, indent=4))
