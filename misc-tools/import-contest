@@ -146,7 +146,7 @@ problems_imported = False
 
 # Contest import is a special case: we can also gather the contest ID.
 if os.path.exists('contest.yaml'):
-    if confirm('Import contest metadata (from contest.json)?', True):
+    if confirm('Import contest metadata (from contest.yaml)?', True):
         print(f'Importing contest.')
         cid = upload_file('contests', 'yaml', 'contest.yaml')
 elif os.path.exists('contest.json'):
