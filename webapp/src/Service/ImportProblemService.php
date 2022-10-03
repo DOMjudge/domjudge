@@ -781,14 +781,15 @@ class ImportProblemService
 
                         if (!$submission) {
                             $messages['danger'][] = $submissionMessage;
-                        }
-                        $submission = $this->em->getRepository(Submission::class)->find($submission->getSubmitid());
-                        $submission->setExpectedResults($results);
-                        // Flush changes to submission.
-                        $this->em->flush();
+                        } else {
+                            $submission = $this->em->getRepository(Submission::class)->find($submission->getSubmitid());
+                            $submission->setExpectedResults($results);
+                            // Flush changes to submission.
+                            $this->em->flush();
 
-                        $successful_subs[] = "'" . $path . "'";
-                        $numJurySolutions++;
+                            $successful_subs[] = "'" . $path . "'";
+                            $numJurySolutions++;
+                        }
                     } else {
                         $too_large_subs[] = "'" . $path . "'";
                     }
