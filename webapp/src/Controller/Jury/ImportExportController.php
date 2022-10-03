@@ -195,8 +195,10 @@ class ImportExportController extends BaseController
                 }
             }
 
-            if (!empty($allMessages)) {
-                $this->addFlash('info', implode("\n", $allMessages));
+            foreach (['info', 'warning', 'danger'] as $type) {
+                if (!empty($allMessages[$type])) {
+                    $this->addFlash($type, implode("\n", $allMessages[$type]));
+                }
             }
 
             if ($newProblem !== null) {

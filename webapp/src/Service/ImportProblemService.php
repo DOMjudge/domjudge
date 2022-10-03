@@ -79,6 +79,10 @@ class ImportProblemService
         // This might take a while.
         ini_set('max_execution_time', '300');
 
+        foreach (['info', 'warning', 'danger'] as $type) {
+            $messages[$type] = [];
+        }
+
         $propertiesFile  = 'domjudge-problem.ini';
         $yamlFile        = 'problem.yaml';
         $tleFile         = '.timelimit';
@@ -94,7 +98,7 @@ class ImportProblemService
         $problemYaml = $zip->getFromName($yamlFile);
 
         if ($propertiesString === false && $problemYaml === false) {
-            $messages[] = sprintf('Error: ZIP file contains neither %s nor %s, not a valid problem archive?',
+            $messages['danger'][] = sprintf('ZIP file contains neither %s nor %s, not a valid problem archive?',
                 $propertiesFile, $yamlFile);
             return null;
         }
@@ -106,7 +110,7 @@ class ImportProblemService
             if (is_array($tryParseProperties)) {
                 $properties = $tryParseProperties;
             } else {
-                $messages[] = "The given domjudge-problem.ini is invalid, ignoring.";
+                $messages['warning'][] = "The given domjudge-problem.ini is invalid, ignoring.";
             }
         }
 
@@ -179,7 +183,7 @@ class ImportProblemService
             }
         } else {
             if ($problem->getExternalid() !== $problemProperties['externalid']) {
-                $messages[] = sprintf(
+                $messages['danger'][] = sprintf(
                     'Error: External ID of problem to import into (%s) does not match new external ID (%s).',
                 $problem->getExternalid(), $problemProperties['externalid']
                 );
@@ -241,7 +245,7 @@ class ImportProblemService
             $hasErrors = true;
             /** @var ConstraintViolationInterface $error */
             foreach ($errors as $error) {
-                $messages[] = sprintf(
+                $messages['danger'][] = sprintf(
                     'Error: problem.%s: %s',
                     $error->getPropertyPath(),
                     $error->getMessage()
@@ -259,7 +263,7 @@ class ImportProblemService
                 $hasErrors = true;
                 /** @var ConstraintViolationInterface $error */
                 foreach ($errors as $error) {
-                    $messages[] = sprintf(
+                    $messages['danger'][] = sprintf(
                         'Error: contestproblem.%s: %s',
                         $error->getPropertyPath(),
                         $error->getMessage()
@@ -326,7 +330,7 @@ class ImportProblemService
                     $problem
                         ->setProblemtext($text)
                         ->setProblemtextType($type);
-                    $messages[] = "Added/updated problem statement from: $filename";
+                    $messages['info'][] = "Added/updated problem statement from: $filename";
                     break;
                 }
             }
@@ -400,10 +404,10 @@ class ImportProblemService
                     if (($imageFile = $zip->getFromName($imageFileName)) !== false) {
                         $imageType = Utils::getImageType($imageFile, $errormsg);
                         if ($imageType === false) {
-                            $messages[] = sprintf("Reading '%s': %s", $imageFileName, $errormsg);
+                            $messages['info'][] = sprintf("Reading '%s': %s", $imageFileName, $errormsg);
                             $imageFile  = false;
                         } elseif ($imageType !== ($imgExtension == 'jpg' ? 'jpeg' : $imgExtension)) {
-                            $messages[] = sprintf("Extension of '%s' does not match type '%s'.",
+                            $messages['warning'][] = sprintf("Extension of '%s' does not match type '%s'.",
                                                   $imageFileName, $imageType);
                             $imageFile  = false;
                         } else {
@@ -415,7 +419,7 @@ class ImportProblemService
                             );
                             if ($imageThumb === false) {
                                 $imageThumb = null;
-                                $messages[] = sprintf("Reading '%s': %s", $imageFileName, $errormsg);
+                                $messages['info'][] = sprintf("Reading '%s': %s", $imageFileName, $errormsg);
                             }
                         }
                         break;
@@ -482,7 +486,7 @@ class ImportProblemService
                 $testcaseNames[] = $dataFile;
             }
             if ($numCases > 0) {
-                $messages[] = sprintf("Added/updated %d %s testcase(s): {%s}.{in,ans}",
+                $messages['info'][] = sprintf("Added/updated %d %s testcase(s): {%s}.{in,ans}",
                     $numCases, $type, join(',', $testcaseNames));
             }
         }
@@ -498,7 +502,7 @@ class ImportProblemService
         }
 
         if (!empty($removedTestcases)) {
-            $messages[] = sprintf("Removed %d testcase(s): {%s}.{in,ans}",
+            $messages['info'][] = sprintf("Removed %d testcase(s): {%s}.{in,ans}",
                 count($removedTestcases), join(',', $removedTestcases));
         }
 
@@ -554,7 +558,7 @@ class ImportProblemService
                 $attachmentContent = $attachment->getContent();
                 if ($content !== $attachmentContent->getContent()) {
                     $attachmentContent->setContent($content);
-                    $messages[] = sprintf("Updated attachment '%s'", $name);
+                    $messages['info'][] = sprintf("Updated attachment '%s'", $name);
                     $numAttachments++;
                 }
             } else {
@@ -570,7 +574,7 @@ class ImportProblemService
 
                 $this->em->persist($attachment);
 
-                $messages[] = sprintf("Added attachment '%s'", $name);
+                $messages['info'][] = sprintf("Added attachment '%s'", $name);
                 $numAttachments++;
             }
 
@@ -578,7 +582,7 @@ class ImportProblemService
         }
 
         if ($numAttachments > 0) {
-            $messages[] = sprintf("Added/updated %d attachment(s).", $numAttachments);
+            $messages['info'][] = sprintf("Added/updated %d attachment(s).", $numAttachments);
         }
 
         $removedAttachments = [];
@@ -590,7 +594,7 @@ class ImportProblemService
         }
 
         if (!empty($removedAttachments)) {
-            $messages[] = sprintf("Removed %d attachments(s): {%s}",
+            $messages['info'][] = sprintf("Removed %d attachments(s): {%s}",
                 count($removedAttachments), join(',', $removedAttachments));
         }
 
@@ -620,9 +624,9 @@ class ImportProblemService
 
         // Submit reference solutions.
         if ($contest === null) {
-            $messages[] = 'No jury solutions added: problem is not linked to a contest (yet).';
+            $messages['warning'][] = 'No jury solutions added: problem is not linked to a contest (yet).';
         } elseif (!$this->dj->getUser()->getTeam()) {
-            $messages[] = 'No jury solutions added: must associate team with your user first.';
+            $messages['warning'][] = 'No jury solutions added: must associate team with your user first.';
         } elseif ($contestProblem->getAllowSubmit()) {
             $subs_with_unknown_lang = [];
             $too_large_subs = [];
@@ -736,7 +740,7 @@ class ImportProblemService
                     if ($results === null) {
                         $results[] = $expectedResult;
                     } elseif (!in_array($expectedResult, $results)) {
-                        $messages[] = sprintf("Annotated result '%s' does not match directory for %s",
+                        $messages['info'][] = sprintf("Annotated result '%s' does not match directory for %s",
                                               implode(', ', $results), $path);
                     } elseif (!empty($expectedResult)) {
                         $results = [$expectedResult];
@@ -776,8 +780,7 @@ class ImportProblemService
                         );
 
                         if (!$submission) {
-                            $messages[] = $submissionMessage;
-                            return null;
+                            $messages['danger'][] = $submissionMessage;
                         }
                         $submission = $this->em->getRepository(Submission::class)->find($submission->getSubmitid());
                         $submission->setExpectedResults($results);
@@ -797,22 +800,22 @@ class ImportProblemService
             }
 
             if ($numJurySolutions > 0) {
-                $messages[] = sprintf('Added %d jury solution(s): %s', $numJurySolutions,
+                $messages['info'][] = sprintf('Added %d jury solution(s): %s', $numJurySolutions,
                     join(', ', $successful_subs));
             }
             if (!empty($subs_with_unknown_lang)) {
-                $messages[] = sprintf("Could not add jury solution due to unknown language: %s",
+                $messages['warning'][] = sprintf("Could not add jury solution due to unknown language: %s",
                     join(', ', $subs_with_unknown_lang));
             }
             if (!empty($too_large_subs)) {
-                $messages[] = sprintf("Could not add jury solution because they are too large: %s",
+                $messages['warning'][] = sprintf("Could not add jury solution because they are too large: %s",
                     join(', ', $too_large_subs));
             }
         } else {
-            $messages[] = 'No jury solutions added: problem not submittable.';
+            $messages['warning'][] = 'No jury solutions added: problem not submittable.';
         }
 
-        $messages[] = sprintf('Saved problem %d', $problem->getProbid());
+        $messages['info'][] = sprintf('Saved problem %d', $problem->getProbid());
 
         return $problem;
     }
@@ -891,7 +894,7 @@ class ImportProblemService
             }
         }
         if (sizeof($validatorFiles) == 0) {
-            $messages[] = 'Custom validator specified but not found.';
+            $messages['danger'][] = 'Custom validator specified but not found.';
         } else {
             // File(s) have to share common directory.
             $validatorDir = mb_substr($validatorFiles[0], 0, mb_strrpos($validatorFiles[0], '/')) . '/';
@@ -899,13 +902,13 @@ class ImportProblemService
             foreach ($validatorFiles as $validatorFile) {
                 if (!Utils::startsWith($validatorFile, $validatorDir)) {
                     $sameDir = false;
-                    $messages[] = sprintf('%s does not start with %s.',
+                    $messages['warning'][] = sprintf('%s does not start with %s.',
                         $validatorFile, $validatorDir);
                     break;
                 }
             }
             if (!$sameDir) {
-                $messages[] = 'Found multiple custom output validators.';
+                $messages['warning'][] = 'Found multiple custom output validators.';
             } else {
                 $tmpzipfiledir = exec("mktemp -d --tmpdir=" .
                     $this->dj->getDomjudgeTmpDir(),
@@ -971,7 +974,7 @@ class ImportProblemService
                     $problem->setCompareExecutable($executable);
                 }
 
-                $messages[] = "Added output validator '$outputValidatorName'.";
+                $messages['info'][] = "Added output validator '$outputValidatorName'.";
             }
         }
     }
