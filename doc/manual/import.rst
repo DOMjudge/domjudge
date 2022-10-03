@@ -354,6 +354,8 @@ Example ``problems.yaml``::
     You can also use a JSON file instead of YAML. Make sure to name it
     ``problems.json`` in that case.
 
+    The minimum required fields are `id` and `label`.
+
 To import the file using the jury interface, go to `Import / export`, then
 `Problems -> Import JSON / YAML`, select your file under `File`
 and click `Import`.
