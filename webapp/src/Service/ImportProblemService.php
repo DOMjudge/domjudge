@@ -880,7 +880,7 @@ class ImportProblemService
         ];
     }
 
-    private function searchAndAddValidator(ZipArchive $zip, ?array &$messages, $externalId, $validationMode, ?Problem $problem)
+    private function searchAndAddValidator(ZipArchive $zip, ?array &$messages, $externalId, $validationMode, ?Problem $problem): void
     {
         $validatorFiles = [];
         for ($i = 0; $i < $zip->numFiles; $i++) {
