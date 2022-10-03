@@ -211,7 +211,7 @@ if os.path.exists('problems.yaml') or os.path.exists('problems.json') or os.path
             os.system(f'cd {problem} && zip -r \'../{problem}\' -- .timelimit *')
 
             problem_id = problem_mapping[problem]
-            if (confirmIndividually or confirm(f'Ready to import problem \'{problem}\' to probid={problem_id}. Continue?', True)):
+            if ((not confirmIndividually) or confirm(f'Ready to import problem \'{problem}\' to probid={problem_id}. Continue?', True)):
                 response = upload_file(
                     f'contests/{cid}/problems', 'zip', f'{problem}.zip', {'problem': problem_id})
                 print(json.dumps(response, indent=4))
