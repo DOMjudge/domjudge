@@ -94,7 +94,7 @@ class ImportProblemService
         $problemYaml = $zip->getFromName($yamlFile);
 
         if ($propertiesString === false && $problemYaml === false) {
-            $messages[] = sprintf('Error: zip contains neither %s nor %s, not a valid Problem Archive?',
+            $messages[] = sprintf('Error: ZIP file contains neither %s nor %s, not a valid problem archive?',
                 $propertiesFile, $yamlFile);
             return null;
         }
@@ -180,7 +180,7 @@ class ImportProblemService
         } else {
             if ($problem->getExternalid() !== $problemProperties['externalid']) {
                 $messages[] = sprintf(
-                    'External ID of problem to import into (%s) does not match new external ID (%s).',
+                    'Error: External ID of problem to import into (%s) does not match new external ID (%s).',
                 $problem->getExternalid(), $problemProperties['externalid']
                 );
                 return null;
@@ -492,10 +492,10 @@ class ImportProblemService
                     if (($imageFile = $zip->getFromName($imageFileName)) !== false) {
                         $imageType = Utils::getImageType($imageFile, $errormsg);
                         if ($imageType === false) {
-                            $messages[] = sprintf("reading '%s': %s", $imageFileName, $errormsg);
+                            $messages[] = sprintf("Reading '%s': %s", $imageFileName, $errormsg);
                             $imageFile  = false;
                         } elseif ($imageType !== ($imgExtension == 'jpg' ? 'jpeg' : $imgExtension)) {
-                            $messages[] = sprintf("extension of '%s' does not match type '%s'",
+                            $messages[] = sprintf("Extension of '%s' does not match type '%s'.",
                                                   $imageFileName, $imageType);
                             $imageFile  = false;
                         } else {
@@ -507,7 +507,7 @@ class ImportProblemService
                             );
                             if ($imageThumb === false) {
                                 $imageThumb = null;
-                                $messages[] = sprintf("reading '%s': %s", $imageFileName, $errormsg);
+                                $messages[] = sprintf("Reading '%s': %s", $imageFileName, $errormsg);
                             }
                         }
                         break;
@@ -689,7 +689,7 @@ class ImportProblemService
         $this->em->persist($problem);
         $this->em->wrapInTransaction(function() use ($testcases, $startRank) {
             $this->em->flush();
-            // Set actual ranks if needed
+            // Set actual ranks if needed.
             if ($startRank !== 1) {
                 $rank = 1;
                 foreach ($testcases as $testcase) {
@@ -710,7 +710,7 @@ class ImportProblemService
         $probid = $problem->getProbid();
         $this->eventLogService->log('problem', $problem->getProbid(), $problemIsNew ? 'create' : 'update', $cid);
 
-        // submit reference solutions.
+        // Submit reference solutions.
         if ($contest === null) {
             $messages[] = 'No jury solutions added: problem is not linked to a contest (yet).';
         } elseif (!$this->dj->getUser()->getTeam()) {
@@ -873,7 +873,7 @@ class ImportProblemService
                         }
                         $submission = $this->em->getRepository(Submission::class)->find($submission->getSubmitid());
                         $submission->setExpectedResults($results);
-                        // Flush changes to submission
+                        // Flush changes to submission.
                         $this->em->flush();
 
                         $successful_subs[] = "'" . $path . "'";
