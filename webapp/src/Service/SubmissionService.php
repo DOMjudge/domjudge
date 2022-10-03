@@ -528,12 +528,14 @@ class SubmissionService
                 $fileResult = self::getExpectedResults(file_get_contents($file->getRealPath()),
                     $this->config->get('results_remap'));
                 if ($fileResult === false) {
-                        $message = "Found more than one @EXPECTED_RESULTS@ in file.";
+                        $message = sprintf("Found more than one @EXPECTED_RESULTS@ in file '%s'.",
+                            $file->getClientOriginalName());
                         return null;
                 }
                 if ($fileResult !== null) {
                     if ($results !== null) {
-                        $message = "Found more than one file with @EXPECTED_RESULTS@.";
+                        $message = sprintf("Found more than one file with @EXPECTED_RESULTS@, e.g. in '%s'.",
+                            $file->getClientOriginalName());
                         return null;
                     }
                     $results = $fileResult;

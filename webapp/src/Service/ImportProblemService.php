@@ -737,7 +737,7 @@ class ImportProblemService
                         $totalSize       += filesize($tempFileName);
                         $tempFiles[]     = $tempFileName;
                     }
-                    if ($results === null) {
+                    if ($results === false || $results === null) {
                         $results[] = $expectedResult;
                     } elseif (!in_array($expectedResult, $results)) {
                         $messages['info'][] = sprintf("Annotated result '%s' does not match directory for %s",
