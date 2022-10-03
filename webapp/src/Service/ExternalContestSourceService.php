@@ -565,6 +565,7 @@ class ExternalContestSourceService
             switch ($entityType) {
                 case 'awards':
                 case 'team-members':
+                case 'accounts':
                 case 'state':
                     $this->logger->debug("Ignoring event of type %s", [$entityType]);
                     if (isset($event['end_of_updates'])) {
@@ -591,9 +592,6 @@ class ExternalContestSourceService
                     break;
                 case 'teams':
                     $this->validateAndUpdateTeam($entityType, $eventId, $operation, $dataItem);
-                    break;
-                case 'accounts':
-                    $this->validateAndUpdateAccount($entityType, $eventId, $operation, $dataItem);
                     break;
                 case 'clarifications':
                     $this->importClarification($entityType, $eventId, $operation, $dataItem);
@@ -1028,84 +1026,6 @@ class ExternalContestSourceService
         $this->eventLog->log('teams', $team->getTeamid(), $action, $this->getSourceContestId());
 
         $this->processPendingEvents('team', $team->getTeamid());
-    }
-
-    protected function validateAndUpdateAccount(string $entityType, ?string $eventId, string $operation, array $data): void
-    {
-        $userId = $data['id'];
-
-        /** @var User|null $user */
-        $user = $this->em
-            ->getRepository(User::class)
-            ->findOneBy(['externalid' => $userId]);
-
-        if ($operation === EventLogService::ACTION_DELETE) {
-            // Delete user if we still have it
-            if ($user) {
-                $this->logger->warning(
-                    'Account with username %s should not exist, deleting',
-                    [$user->getUsername()]
-                );
-                $this->em->remove($user);
-                $this->em->flush();
-            }
-            return;
-        }
-
-        $action = EventLogService::ACTION_UPDATE;
-
-        if (!$user) {
-            $this->logger->warning(
-                'Account with username %s should exist, creating',
-                [$data['username']]
-            );
-            $user = new User();
-            $this->em->persist($user);
-            $action = EventLogService::ACTION_CREATE;
-        }
-
-        if (!empty($data['team_id'])) {
-            $team = $this->em->getRepository(Team::class)->findOneBy(['externalid' => $data['team_id']]);
-            if (!$team) {
-                $team = new Team();
-                $this->em->persist($team);
-            }
-            $user->setTeam($team);
-        }
-
-        $toCheck = [
-            'externalid'      => $data['id'],
-            'username'        => $data['username'],
-            'ip_address'      => $data['ip'] ?? null,
-            'name'            => $data['name'] ?? null,
-            'team.externalid' => $data['team_id'],
-        ];
-
-        $type = $data['type'] ?? null;
-
-        if ($user->getUserid() && $type && $user->getType() !== $type) {
-            $this->logger->warning(
-                'Type of user %s does not match between feed (%s) and local (%s), updating',
-                [$user->getUsername(), $type, $user->getType()]
-            );
-        }
-
-        $typeMapping = [
-            'admin' => 'admin',
-            'judge' => 'jury',
-            'team'  => 'team',
-        ];
-
-        if (isset($typeMapping[$type])) {
-            $role = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => $typeMapping[$type]]);
-            $user->addUserRole($role);
-        }
-
-        $this->compareOrCreateValues($eventId, $entityType, $data['id'], $user, $toCheck);
-
-        $this->em->flush();
-
-        $this->processPendingEvents('account', $user->getUserid());
     }
 
     /**
