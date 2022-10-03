@@ -226,9 +226,14 @@ class ImportExportService
 
     public function importProblemsData(Contest $contest, $problems, array &$ids = null): bool
     {
+        // For problemset.yaml the root key is called `problems`, so handle that case
+        if (isset($problems['problems'])) {
+            $problems = $problems['problems'];
+        }
+
         foreach ($problems as $problemData) {
-            // Deal with obsolete attribute names:
-            $problemName  = $problemData['name'] ?? $problemData['short-name'] ?? null;
+            // Deal with obsolete attribute names. Also for name fall back to ID if it is not specified.
+            $problemName  = $problemData['name'] ?? $problemData['short-name'] ?? $problemData['id'] ?? null;
             $problemLabel = $problemData['label'] ?? $problemData['letter'] ?? null;
 
             $problem = new Problem();

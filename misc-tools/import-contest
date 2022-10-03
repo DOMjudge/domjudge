@@ -144,25 +144,11 @@ import_file('accounts', ['accounts.json', 'accounts.yaml', 'accounts.tsv'])
 
 problems_imported = False
 
-# Contest import is a special case: we can have a contest.yaml and problemset.yaml and then we need
-# to import the combined file. We can also gather the contest ID.
+# Contest import is a special case: we can also gather the contest ID.
 if os.path.exists('contest.yaml'):
-    input_files = ['contest.yaml']
-    if os.path.exists('problemset.yaml'):
-        input_files.append('problemset.yaml')
-    input_files_joined = ' and '.join(input_files)
-    question = f'Import contest metadata (from {input_files_joined})?'
-    if confirm(question, True):
-        if len(input_files) > 1:
-            problems_imported = True
-            with open('combined.yaml', 'w') as combined, fileinput.input(['contest.yaml', 'problemset.yaml']) as files:
-                for line in files:
-                    combined.write(line)
-            file = 'combined.yaml'
-        else:
-            file = 'contest.yaml'
+    if confirm('Import contest metadata (from contest.json)?', True):
         print(f'Importing contest.')
-        cid = upload_file('contests', 'yaml', file)
+        cid = upload_file('contests', 'yaml', 'contest.yaml')
 elif os.path.exists('contest.json'):
     if confirm('Import contest metadata (from contest.json)?', True):
         print('Importing contest.')
@@ -189,8 +175,10 @@ if os.path.exists('problems.yaml') or os.path.exists('problems.json') or os.path
         if not problems_imported:
             if os.path.exists('problems.yaml'):
                 problems_file = 'problems.yaml'
-            else:
+            elif os.path.exists('problems.json'):
                 problems_file = 'problems.json'
+            else:
+                problems_file = 'problemset.yaml'
             upload_file(f'contests/{cid}/problems/add-data', 'data', problems_file)
 
         # We might need to translate the problem external ID's into an internal ID (when we are in data source = local mode)
