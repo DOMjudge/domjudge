@@ -299,99 +299,7 @@ class ImportProblemService
                 if (isset($yamlData['validation'])
                     && ($yamlData['validation'] == 'custom' ||
                         $yamlData['validation'] == 'custom interactive')) {
-                    // search for validator
-                    $validatorFiles = [];
-                    for ($j = 0; $j < $zip->numFiles; $j++) {
-                        $filename = $zip->getNameIndex($j);
-                        if (Utils::startsWith($filename, 'output_validators/') &&
-                            !Utils::endsWith($filename, '/')) {
-                            $validatorFiles[] = $filename;
-                        }
-                    }
-                    if (sizeof($validatorFiles) == 0) {
-                        $messages[] = 'Custom validator specified but not found.';
-                    } else {
-                        // File(s) have to share common directory.
-                        $validatorDir = mb_substr($validatorFiles[0], 0, mb_strrpos($validatorFiles[0], '/')) . '/';
-                        $sameDir      = true;
-                        foreach ($validatorFiles as $validatorFile) {
-                            if (!Utils::startsWith($validatorFile, $validatorDir)) {
-                                $sameDir    = false;
-                                $messages[] = sprintf('%s does not start with %s.',
-                                                      $validatorFile, $validatorDir);
-                                break;
-                            }
-                        }
-                        if (!$sameDir) {
-                            $messages[] = 'Found multiple custom output validators.';
-                        } else {
-                            $tmpzipfiledir = exec("mktemp -d --tmpdir=" .
-                                                  $this->dj->getDomjudgeTmpDir(),
-                                                  $dontcare, $retval);
-                            if ($retval != 0) {
-                                throw new ServiceUnavailableHttpException(
-                                    null, 'failed to create temporary directory'
-                                );
-                            }
-                            chmod($tmpzipfiledir, 0700);
-                            foreach ($validatorFiles as $validatorFile) {
-                                $content     = $zip->getFromName($validatorFile);
-                                $filebase    = basename($validatorFile);
-                                $newfilename = $tmpzipfiledir . "/" . $filebase;
-                                file_put_contents($newfilename, $content);
-                                if ($filebase === 'build' || $filebase === 'run') {
-                                    // Mark special files as executable.
-                                    chmod($newfilename, 0755);
-                                }
-                            }
-
-                            exec("zip -r -j '$tmpzipfiledir/outputvalidator.zip' '$tmpzipfiledir'",
-                                 $dontcare, $retval);
-                            if ($retval != 0) {
-                                throw new ServiceUnavailableHttpException(
-                                    null, 'failed to create zip file for output validator.'
-                                );
-                            }
-
-                            $outputValidatorZip  = file_get_contents($tmpzipfiledir.'/outputvalidator.zip');
-                            $outputValidatorName = substr($externalId, 0, 20) . '_cmp';
-                            if ($this->em->getRepository(Executable::class)->find($outputValidatorName)) {
-                                // Avoid name clash.
-                                $clashCount = 2;
-                                while ($this->em->getRepository(Executable::class)->find(
-                                    $outputValidatorName . '_' . $clashCount)) {
-                                    $clashCount++;
-                                }
-                                $outputValidatorName = $outputValidatorName . "_" . $clashCount;
-                            }
-
-                            $combinedRunCompare = $yamlData['validation'] == 'custom interactive';
-
-                            if (!($tempzipFile = tempnam($this->dj->getDomjudgeTmpDir(), "/executable-"))) {
-                                throw new ServiceUnavailableHttpException(null, 'Failed to create temporary file');
-                            }
-                            file_put_contents($tempzipFile, $outputValidatorZip);
-                            $zipArchive = new ZipArchive();
-                            $zipArchive->open($tempzipFile, ZipArchive::CREATE);
-
-                            $executable         = new Executable();
-                            $executable
-                                ->setExecid($outputValidatorName)
-                                ->setImmutableExecutable($this->dj->createImmutableExecutable($zipArchive))
-                                ->setDescription(sprintf('output validator for %s', $problem->getName()))
-                                ->setType($combinedRunCompare ? 'run' : 'compare');
-                            $this->em->persist($executable);
-
-                            if ($combinedRunCompare) {
-                                $problem->setCombinedRunCompare(true);
-                                $problem->setRunExecutable($executable);
-                            } else {
-                                $problem->setCompareExecutable($executable);
-                            }
-
-                            $messages[] = "Added output validator '$outputValidatorName'";
-                        }
-                    }
+                    $this->searchAndAddValidator($zip, $messages, $externalId, $yamlData['validation'], $problem);
                 }
 
                 if (isset($yamlData['limits'])) {
@@ -970,5 +878,101 @@ class ImportProblemService
             'problem_id' => $probId,
             'messages'   => $allMessages,
         ];
+    }
+
+    private function searchAndAddValidator(ZipArchive $zip, ?array &$messages, $externalId, $validationMode, ?Problem $problem): void
+    {
+        $validatorFiles = [];
+        for ($i = 0; $i < $zip->numFiles; $i++) {
+            $filename = $zip->getNameIndex($i);
+            if (Utils::startsWith($filename, 'output_validators/') &&
+                !Utils::endsWith($filename, '/')) {
+                $validatorFiles[] = $filename;
+            }
+        }
+        if (sizeof($validatorFiles) == 0) {
+            $messages[] = 'Custom validator specified but not found.';
+        } else {
+            // File(s) have to share common directory.
+            $validatorDir = mb_substr($validatorFiles[0], 0, mb_strrpos($validatorFiles[0], '/')) . '/';
+            $sameDir = true;
+            foreach ($validatorFiles as $validatorFile) {
+                if (!Utils::startsWith($validatorFile, $validatorDir)) {
+                    $sameDir = false;
+                    $messages[] = sprintf('%s does not start with %s.',
+                        $validatorFile, $validatorDir);
+                    break;
+                }
+            }
+            if (!$sameDir) {
+                $messages[] = 'Found multiple custom output validators.';
+            } else {
+                $tmpzipfiledir = exec("mktemp -d --tmpdir=" .
+                    $this->dj->getDomjudgeTmpDir(),
+                    $dontcare, $retval);
+                if ($retval != 0) {
+                    throw new ServiceUnavailableHttpException(
+                        null, 'Failed to create temporary directory.'
+                    );
+                }
+                chmod($tmpzipfiledir, 0700);
+                foreach ($validatorFiles as $validatorFile) {
+                    $content = $zip->getFromName($validatorFile);
+                    $filebase = basename($validatorFile);
+                    $newfilename = $tmpzipfiledir . "/" . $filebase;
+                    file_put_contents($newfilename, $content);
+                    if ($filebase === 'build' || $filebase === 'run') {
+                        // Mark special files as executable.
+                        chmod($newfilename, 0755);
+                    }
+                }
+
+                exec("zip -r -j '$tmpzipfiledir/outputvalidator.zip' '$tmpzipfiledir'",
+                    $dontcare, $retval);
+                if ($retval != 0) {
+                    throw new ServiceUnavailableHttpException(
+                        null, 'Failed to create ZIP file for output validator.'
+                    );
+                }
+
+                $outputValidatorZip = file_get_contents($tmpzipfiledir . '/outputvalidator.zip');
+                $outputValidatorName = substr($externalId, 0, 20) . '_cmp';
+                if ($this->em->getRepository(Executable::class)->find($outputValidatorName)) {
+                    // Avoid name clash.
+                    $clashCount = 2;
+                    while ($this->em->getRepository(Executable::class)->find(
+                        $outputValidatorName . '_' . $clashCount)) {
+                        $clashCount++;
+                    }
+                    $outputValidatorName = $outputValidatorName . "_" . $clashCount;
+                }
+
+                $combinedRunCompare = $validationMode == 'custom interactive';
+
+                if (!($tempzipFile = tempnam($this->dj->getDomjudgeTmpDir(), "/executable-"))) {
+                    throw new ServiceUnavailableHttpException(null, 'Failed to create temporary file.');
+                }
+                file_put_contents($tempzipFile, $outputValidatorZip);
+                $zipArchive = new ZipArchive();
+                $zipArchive->open($tempzipFile, ZipArchive::CREATE);
+
+                $executable = new Executable();
+                $executable
+                    ->setExecid($outputValidatorName)
+                    ->setImmutableExecutable($this->dj->createImmutableExecutable($zipArchive))
+                    ->setDescription(sprintf('output validator for %s', $problem->getName()))
+                    ->setType($combinedRunCompare ? 'run' : 'compare');
+                $this->em->persist($executable);
+
+                if ($combinedRunCompare) {
+                    $problem->setCombinedRunCompare(true);
+                    $problem->setRunExecutable($executable);
+                } else {
+                    $problem->setCompareExecutable($executable);
+                }
+
+                $messages[] = "Added output validator '$outputValidatorName'.";
+            }
+        }
     }
 }
