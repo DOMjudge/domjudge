@@ -20,7 +20,7 @@ function dj_json_decode(string $str)
  */
 function dj_json_try_decode(string $str)
 {
-    return json_decode($str, true, 512);
+    return json_decode($str, true);
 }
 
 /**

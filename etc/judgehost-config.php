@@ -10,3 +10,26 @@ define('SYSLOG', LOG_LOCAL0);
 // the submission can write to. Also the environment variable TMPDIR will
 // be set to this directory
 define('CREATE_WRITABLE_TEMP_DIR', getenv('DOMJUDGE_CREATE_WRITABLE_TEMP_DIR') ? true : false);
+
+// These define HTTP request backoff related constants.
+// If any transient network error occurs on nth trial,
+// judgehost retries HTTP request after (1000 * pow(factor, trial - 1) + rand(0, jitter)) ms.
+
+function define_backoff_params_from_env(string $var_name, int $default_value) {
+    if (defined($var_name)) {
+        return;
+    }
+    $options = array(
+        'options' => array(
+            'default' => $default_value,
+            'min_range' => 0,
+        ),
+    );
+    $final_value = filter_var(getenv('DOMJUDGE_' . $envvar_name), FILTER_VALIDATE_INT, $options);
+    echo $var_name . ": " . $final_value;
+    define($var_name, $final_value);
+}
+
+define_backoff_params_from_env('BACKOFF_JITTER_MS', 200);
+define_backoff_params_from_env('BACKOFF_FACTOR', 2);
+define_backoff_params_from_env('BACKOFF_STEPS', 3);

@@ -98,8 +98,7 @@ function close_curl_handles(): void
  * Every error except HTTP 401, 500 is considered transient.
  */
 $lastrequest = '';
-function request(
-    string $url, string $verb = 'GET', $data = '', bool $failonerror = true, int $jitter = 200, $factor = 2, $steps = 3)
+function request(string $url, string $verb = 'GET', $data = '', bool $failonerror = true)
 {
     global $endpoints, $endpointID, $lastrequest;
 
@@ -143,7 +142,7 @@ function request(
     $response = null;
     $errstr = null;
 
-    for ($trial = 1; $trial <= $steps; $trial++) {
+    for ($trial = 1; $trial <= BACKOFF_STEPS; $trial++) {
         $response = curl_exec($curl_handle);
         if ($response === false) {
             $errstr = "Error while executing curl $verb to url " . $url . ": " . curl_error($curl_handle);
@@ -153,7 +152,7 @@ function request(
                 $errstr = "Authentication failed (error $status) while contacting $url. " .
                     "Check credentials in restapi.secret.";
                 break;
-            } else if ($status != 200) {
+            } else if ($status < 200 || $status >= 300) {
                 $json = dj_json_try_decode($response);
                 if ($json !== null) {
                     $response = var_export($json, true);
@@ -170,14 +169,14 @@ function request(
                 break;
             }
         }
-        if ($trial == $steps) {
+        if ($trial == BACKOFF_STEPS) {
             $errstr = $errstr . " Retry limit reached.";
         } else {
             $warnstr = $errstr . " This request will be retried after about " .
-                $delay_in_ms . "ms... (" . $trial . "/" . $steps . ")";
+                $delay_in_ms . "ms... (" . $trial . "/" . BACKOFF_STEPS . ")";
             warning($warnstr);
-            usleep($delay_in_ms + random_int(0, $jitter));
-            $delay_in_ms = $delay_in_ms * $factor;
+            usleep($delay_in_ms + random_int(0, BACKOFF_JITTER_MS));
+            $delay_in_ms = $delay_in_ms * BACKOFF_FACTOR;
         }
     }
     if (!$succeeded) {
