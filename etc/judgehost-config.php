@@ -26,7 +26,6 @@ function define_backoff_params_from_env(string $var_name, int $default_value) {
         ),
     );
     $final_value = filter_var(getenv('DOMJUDGE_' . $var_name), FILTER_VALIDATE_INT, $options);
-    echo $var_name . ": " . $final_value;
     define($var_name, $final_value);
 }
 
