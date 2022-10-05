@@ -22,3 +22,4 @@ jquery*
 coloris*
 nv.d3.min*
 composer*
+./webapp/migrations/Version20221005090001.php
