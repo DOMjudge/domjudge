@@ -34,6 +34,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query\Expr\Join;
+use Doctrine\ORM\QueryBuilder;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Cookie;
@@ -954,16 +955,21 @@ class DOMJudgeService
         return $immutableExecutable;
     }
 
-    public function unblockJudgeTasksForLanguage(string $langId): void
+    public function helperUnblockJudgeTasks(): QueryBuilder
     {
-        // These are all the judgings that don't have associated judgetasks yet. Check whether we unblocked them.
-        $judgings = $this->em->createQueryBuilder()
+        return $this->em->createQueryBuilder()
             ->select('j')
             ->from(Judging::class, 'j')
             ->leftJoin(JudgeTask::class, 'jt', Join::WITH, 'j.judgingid = jt.jobid')
             ->join(Submission::class, 's', Join::WITH, 'j.submission = s.submitid')
+            ->where('jt.jobid IS NULL');
+    }
+
+    public function unblockJudgeTasksForLanguage(string $langId): void
+    {
+        // These are all the judgings that don't have associated judgetasks yet. Check whether we unblocked them.
+        $judgings = $this->helperUnblockJudgeTasks()
             ->join(Language::class, 'l', Join::WITH, 's.language = l.langid')
-            ->where('jt.jobid IS NULL')
             ->andWhere('l.langid = :langid')
             ->setParameter('langid', $langId)
             ->getQuery()
@@ -976,13 +982,8 @@ class DOMJudgeService
     public function unblockJudgeTasksForProblem(int $probId): void
     {
         // These are all the judgings that don't have associated judgetasks yet. Check whether we unblocked them.
-        $judgings = $this->em->createQueryBuilder()
-            ->select('j')
-            ->from(Judging::class, 'j')
-            ->leftJoin(JudgeTask::class, 'jt', Join::WITH, 'j.judgingid = jt.jobid')
-            ->join(Submission::class, 's', Join::WITH, 'j.submission = s.submitid')
+        $judgings = $this->helperUnblockJudgeTasks()
             ->join(Problem::class, 'p', Join::WITH, 's.problem = p.probid')
-            ->where('jt.jobid IS NULL')
             ->andWhere('p.probid = :probid')
             ->setParameter('probid', $probId)
             ->getQuery()
