@@ -75,6 +75,9 @@ class ConfigController extends AbstractController
                         }
                     }
                     $data[substr($key, strlen('config_'))] = $valueToUse;
+                    if ($key === 'config_lazy_eval_results' && $value !== DOMJudgeService::EVAL_DEMAND) {
+                        $this->dj->unblockJudgeTasks();
+                    }
                 }
             }
             $this->config->saveChanges($data, $eventLogService, $this->dj);
