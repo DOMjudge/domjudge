@@ -2,9 +2,6 @@
 
 namespace App\Tests\E2E\Controller;
 
-use App\Service\ConfigurationService;
-use App\Service\DOMJudgeService as DJS;
-use App\Service\EventLogService;
 use App\Tests\Unit\BaseTest;
 use Generator;
 
@@ -33,31 +30,17 @@ class ControllerRolesTraversalTest extends BaseTest
     protected static array $substrings = ['http','activate','deactivate','/jury/change-contest/','/text','/input','/output','/export','/download','/phpinfo','javascript','.zip'];
     protected static array $fullstrings = ['','#','/logout','/login'];
     protected static array $riskyURLs = ['nonExistent','2nd'];
-    protected static array $dataSources = [DJS::DATA_SOURCE_LOCAL, DJS::DATA_SOURCE_CONFIGURATION_EXTERNAL, DJS::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL];
 
     protected function getLoops(): array
     {
-        $dataSources = [];
+        $dataSources = $this->getDatasourceLoops()['dataSources'];
         $riskyURLs = [];
-        if(array_key_exists('CRAWL_DATASOURCES', getenv())) {
-            $dataSources = explode(',',getenv('CRAWL_DATASOURCES'));
-        } elseif(!array_key_exists('CRAWL_ALL', getenv())) {
-            $dataSources = array_slice(self::$dataSources,0,1);
-        }
         if(array_key_exists('CRAWL_RISKY', getenv())) {
             $riskyURLs = explode(',',getenv('CRAWL_RISKY'));
         } elseif(!array_key_exists('CRAWL_ALL', getenv())) {
             $riskyURLs = array_slice(self::$riskyURLs,0,1);
         }
         return ['dataSources' => $dataSources, 'riskyURLs' => $riskyURLs];
-    }
-
-    protected function setupDataSource(int $dataSource): void
-    {
-        $config   = self::getContainer()->get(ConfigurationService::class);
-        $eventLog = self::getContainer()->get(EventLogService::class);
-        $dj       = self::getContainer()->get(DJS::class);
-        $config->saveChanges(['data_source'=>$dataSource], $eventLog, $dj);
     }
 
     /**

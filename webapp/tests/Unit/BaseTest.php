@@ -33,6 +33,9 @@ abstract class BaseTest extends WebTestCase
     protected ?ORMExecutor $fixtureExecutor = null;
     /** @var string[] */
     protected static array $fixtures = [];
+    protected static array $dataSources = [DOMJudgeService::DATA_SOURCE_LOCAL,
+                                           DOMJudgeService::DATA_SOURCE_CONFIGURATION_EXTERNAL,
+                                           DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL];
 
     protected function setUp(): void
     {
@@ -317,5 +320,24 @@ abstract class BaseTest extends WebTestCase
             unlink($container);
         }
         self::bootKernel();
+    }
+
+    protected function getDatasourceLoops(): array
+    {
+        $dataSources = [];
+        if (array_key_exists('CRAWL_DATASOURCES', getenv())) {
+            $dataSources = explode(',',getenv('CRAWL_DATASOURCES'));
+        } elseif (!array_key_exists('CRAWL_ALL', getenv())) {
+            $dataSources = array_slice(self::$dataSources,0,1);
+        }
+        return ['dataSources' => $dataSources];
+    }
+
+    protected function setupDataSource(int $dataSource): void
+    {
+        $config   = self::getContainer()->get(ConfigurationService::class);
+        $eventLog = self::getContainer()->get(EventLogService::class);
+        $dj       = self::getContainer()->get(DOMJudgeService::class);
+        $config->saveChanges(['data_source'=>$dataSource], $eventLog, $dj);
     }
 }
