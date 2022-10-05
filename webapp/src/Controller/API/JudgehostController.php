@@ -325,7 +325,9 @@ class JudgehostController extends AbstractFOSRestController
         }
 
         if ($request->request->has('output_compile')) {
-            if ($request->request->has('entry_point')) {
+            // Note: we use ->get here instead of ->has since entry_point can be the empty string and then we do not
+            // want to update the submission or send out an update event
+            if ($request->request->get('entry_point')) {
                 $this->em->wrapInTransaction(function () use ($query, $request, &$judging) {
                     $submission = $judging->getSubmission();
                     $submission->setEntryPoint($request->request->get('entry_point'));
