@@ -330,6 +330,9 @@ class JudgehostController extends AbstractFOSRestController
             if ($request->request->get('entry_point')) {
                 $this->em->wrapInTransaction(function () use ($query, $request, &$judging) {
                     $submission = $judging->getSubmission();
+                    if ($submission->getEntryPoint() === $request->request->get('entry_point')) {
+                        return;
+                    }
                     $submission->setEntryPoint($request->request->get('entry_point'));
                     $this->em->flush();
                     $submissionId = $submission->getSubmitid();
