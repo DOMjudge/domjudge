@@ -17,7 +17,7 @@ MAINSOURCE="${ENTRY_POINT:-$1}"
 
 # Report the entry point, so it can be saved, e.g. for later replay:
 if [ -z "$ENTRY_POINT" ]; then
-	echo "Info: detected entry_point: $MAINCLASS"
+	echo "Info: detected entry_point: $MAINSOURCE"
 fi
 
 # Write executing script:
