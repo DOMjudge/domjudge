@@ -71,6 +71,10 @@ class DOMJudgeService
     const DATA_SOURCE_LOCAL = 0;
     const DATA_SOURCE_CONFIGURATION_EXTERNAL = 1;
     const DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL = 2;
+    const EVAL_DEFAULT = null;
+    const EVAL_LAZY = 1;
+    const EVAL_FULL = 2;
+    const EVAL_DEMAND = 3;
 
     // Regex external identifiers must adhere to. Note that we are not checking whether it
     // does not start with a dot or dash or ends with a dot. We could but it would make the
@@ -961,7 +965,6 @@ class DOMJudgeService
             ->select('j')
             ->from(Judging::class, 'j')
             ->leftJoin(JudgeTask::class, 'jt', Join::WITH, 'j.judgingid = jt.jobid')
-            ->join(Submission::class, 's', Join::WITH, 'j.submission = s.submitid')
             ->where('jt.jobid IS NULL');
     }
 
@@ -969,6 +972,7 @@ class DOMJudgeService
     {
         // These are all the judgings that don't have associated judgetasks yet. Check whether we unblocked them.
         $judgings = $this->helperUnblockJudgeTasks()
+            ->join(Submission::class, 's', Join::WITH, 'j.submission = s.submitid')
             ->join(Language::class, 'l', Join::WITH, 's.language = l.langid')
             ->andWhere('l.langid = :langid')
             ->setParameter('langid', $langId)
@@ -983,6 +987,7 @@ class DOMJudgeService
     {
         // These are all the judgings that don't have associated judgetasks yet. Check whether we unblocked them.
         $judgings = $this->helperUnblockJudgeTasks()
+            ->join(Submission::class, 's', Join::WITH, 'j.submission = s.submitid')
             ->join(Problem::class, 'p', Join::WITH, 's.problem = p.probid')
             ->andWhere('p.probid = :probid')
             ->setParameter('probid', $probId)
@@ -993,13 +998,54 @@ class DOMJudgeService
         }
     }
 
-    public function maybeCreateJudgeTasks(Judging $judging, int $priority = JudgeTask::PRIORITY_DEFAULT): void
+    public function unblockJudgeTasksForSubmission(string $submissionId): void
+    {
+        // These are all the judgings that don't have associated judgetasks yet. Check whether we unblocked them.
+        $judgings = $this->helperUnblockJudgeTasks()
+            ->join(Submission::class, 's', Join::WITH, 'j.submission = s.submitid')
+            ->andWhere('j.submission = :submissionid')
+            ->setParameter('submissionid', $submissionId)
+            ->getQuery()
+            ->getResult();
+        foreach ($judgings as $judging) {
+            $this->maybeCreateJudgeTasks($judging, JudgeTask::PRIORITY_DEFAULT, True);
+        }
+    }
+
+    public function unblockJudgeTasks(): void
+    {
+        // These are all the judgings that don't have associated judgetasks yet. Check whether we unblocked them.
+        $judgings = $this->helperUnblockJudgeTasks()
+            ->getQuery()
+            ->getResult();
+        foreach ($judgings as $judging) {
+            $this->maybeCreateJudgeTasks($judging);
+        }
+    }
+
+    public function maybeCreateJudgeTasks(Judging $judging, int $priority = JudgeTask::PRIORITY_DEFAULT, bool $manualRequest = False): void
     {
         $submission = $judging->getSubmission();
         $problem    = $submission->getContestProblem();
         $language   = $submission->getLanguage();
 
-        if (!$problem->getAllowJudge() || !$language->getAllowJudge()) {
+        $evalOnDemand = False;
+        // We have 2 cases, the problem picks the global value or the value is set.
+        if ( ((int)$problem->getLazyEvalResults() === (int)DOMJudgeService::EVAL_DEFAULT && $this->config->get('lazy_eval_results') === static::EVAL_DEMAND)
+             || $problem->getLazyEvalResults() === DOMJudgeService::EVAL_DEMAND) {
+            $evalOnDemand = True;
+        }
+        // Special case, we're shadow and someone submits on our side in that case
+        // we're not super lazy.
+        if ($this->config->get('data_source') === DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL
+            && $submission->getExternalid() === null) {
+                $evalOnDemand = False;
+        }
+        if ($manualRequest) {
+            // When explicitly requested, judge the submission.
+            $evalOnDemand = False;
+        }
+        if (!$problem->getAllowJudge() || !$language->getAllowJudge() || $evalOnDemand) {
             return;
         }
 

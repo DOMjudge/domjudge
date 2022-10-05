@@ -98,10 +98,14 @@
             public: false
             description: Maximum size of run/diff/error/system output shown in the jury interface (in bytes); use `-1` to disable any limits.
         -   name: lazy_eval_results
-            type: bool
-            default_value: true
+            type: int
+            default_value: 1
             public: false
-            description: Lazy evaluation of results? If enabled, stops judging as soon as a highest priority result is found, otherwise always all testcases will be judged.
+            description: Lazy evaluation of results? If enabled, stops judging as soon as a highest priority result is found, otherwise always all testcases will be judged. On request will not auto-start judging and is typically used when running as analyst system.
+            options:
+                1: Lazy
+                2: Full judging
+                3: Only on request
         -   name: judgehost_warning
             type: int
             default_value: 30

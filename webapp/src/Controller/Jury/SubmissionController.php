@@ -1129,4 +1129,13 @@ class SubmissionController extends BaseController
 
         return null;
     }
+
+    /**
+     * @Route("/{submitId<\d+>}/create-tasks", name="jury_submission_create_tasks")
+     */
+    public function createJudgeTasks(string $submitId): RedirectResponse {
+        $this->dj->unblockJudgeTasksForSubmission($submitId);
+        $this->addFlash('info', "Started judging for submission: $submitId");
+        return $this->redirectToRoute('jury_submission', ['submitId' => $submitId]);
+    }
 }

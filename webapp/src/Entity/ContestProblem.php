@@ -82,13 +82,13 @@ class ContestProblem
     private ?string $color = null;
 
     /**
-     * @ORM\Column(type="boolean", name="lazy_eval_results",
+     * @ORM\Column(type="integer", name="lazy_eval_results",
      *     options={"comment"="Whether to do lazy evaluation for this problem; if set this overrides the global configuration setting",
      *              "unsigned"="true"},
      *     nullable=true)
      * @Serializer\Exclude()
      */
-    private ?bool $lazyEvalResults;
+    private ?int $lazyEvalResults = null;
 
     /**
      * @var Contest|int
@@ -189,13 +189,13 @@ class ContestProblem
         return $this->color;
     }
 
-    public function setLazyEvalResults(?bool $lazyEvalResults): ContestProblem
+    public function setLazyEvalResults(?int $lazyEvalResults): ContestProblem
     {
-        $this->lazyEvalResults = $lazyEvalResults;
+        $this->lazyEvalResults = $lazyEvalResults === 0 ? null : $lazyEvalResults;
         return $this;
     }
 
-    public function getLazyEvalResults(): ?bool
+    public function getLazyEvalResults(): ?int
     {
         return $this->lazyEvalResults;
     }

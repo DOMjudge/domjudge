@@ -4,6 +4,7 @@ namespace App\Form\Type;
 
 use App\Entity\ContestProblem;
 use App\Entity\Problem;
+use App\Service\DOMJudgeService as DJS;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
@@ -53,8 +54,9 @@ class ContestProblemType extends AbstractType
             'label' => 'Lazy eval',
             'choices' => [
                 'Default' => null,
-                'Yes' => true,
-                'No' => false,
+                'Yes' => DJS::EVAL_LAZY,
+                'No' => DJS::EVAL_FULL,
+                'On demand' => DJS::EVAL_DEMAND,
             ],
         ]);
     }
