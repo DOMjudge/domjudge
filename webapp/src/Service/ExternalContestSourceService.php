@@ -1012,7 +1012,7 @@ class ExternalContestSourceService
             'externalid'             => $data['id'],
             'name'                   => $data['formal_name'] ?? $data['name'],
             'display_name'           => $data['display_name'] ?? null,
-            'affiliation.externalid' => $data['organization_id'],
+            'affiliation.externalid' => $data['organization_id'] ?? null,
             'category.externalid'    => $data['group_ids'][0] ?? null,
             'icpcid'                 => $data['icpc_id'] ?? null,
         ];
