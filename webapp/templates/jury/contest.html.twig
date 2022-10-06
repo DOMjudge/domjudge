@@ -355,11 +355,7 @@
                             {% endif %}
                             <td>
                                 <a href="{{ link }}">
-                                    {% if problem.lazyEvalResults is not null %}
-                                        {{ problem.lazyEvalResults | printYesNo }}
-                                    {% else %}
-                                        -
-                                    {% endif %}
+                                    {{ problem.lazyEvalResults | printLazyMode }}
                                 </a>
                             </td>
                             <td>
