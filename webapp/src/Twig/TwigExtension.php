@@ -88,6 +88,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             new TwigFilter('printHost', [$this, 'printHost'], ['is_safe' => ['html']]),
             new TwigFilter('printHosts', [$this, 'printHosts'], ['is_safe' => ['html']]),
             new TwigFilter('printFiles', [$this, 'printFiles'], ['is_safe' => ['html']]),
+            new TwigFilter('printLazyMode', [$this, 'printLazyMode']),
             new TwigFilter('printYesNo', [$this, 'printYesNo']),
             new TwigFilter('printSize', [Utils::class, 'printSize'], ['is_safe' => ['html']]),
             new TwigFilter('testcaseResults', [$this, 'testcaseResults'], ['is_safe' => ['html']]),
@@ -220,6 +221,22 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
                Utils::printtime($datetime, 'Y-m-d H:i:s (T)') . '">' .
                $this->printtime($datetime, null, $contest) .
                '</span>';
+    }
+
+    public static function printLazyMode(?int $val): string
+    {
+        switch ($val) {
+            case false;
+                return "-";
+            case DOMJudgeService::EVAL_DEMAND;
+                return "On demand";
+            case DOMJudgeService::EVAL_FULL;
+                return "No";
+            case DOMJudgeService::EVAL_LAZY;
+                return "Yes";
+            default:
+                return "Unknown mode $val";
+        }
     }
 
     public static function printYesNo(bool $val): string
