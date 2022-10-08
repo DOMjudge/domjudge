@@ -6,6 +6,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
+use OpenApi\Annotations as OA;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
@@ -46,6 +47,7 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
      *     options={"comment"="Clarification ID in an external system, should be unique inside a single contest",
      *              "collation"="utf8mb4_bin"},
      *     nullable=true)
+     * @OA\Property(nullable=true)
      */
     protected ?string $externalid = null;
 
@@ -267,6 +269,7 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
      * @Serializer\VirtualProperty()
      * @Serializer\SerializedName("problem_id")
      * @Serializer\Type("string")
+     * @OA\Property(nullable=true)
      */
     public function getProblemId(): ?int
     {
@@ -336,6 +339,7 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
      * @Serializer\VirtualProperty()
      * @Serializer\SerializedName("from_team_id")
      * @Serializer\Type("string")
+     * @OA\Property(nullable=true)
      */
     public function getSenderId(): ?int
     {
@@ -357,6 +361,7 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
      * @Serializer\VirtualProperty()
      * @Serializer\SerializedName("to_team_id")
      * @Serializer\Type("string")
+     * @OA\Property(nullable=true)
      */
     public function getRecipientId(): ?int
     {

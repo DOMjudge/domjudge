@@ -420,6 +420,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
      * @Serializer\VirtualProperty()
      * @Serializer\SerializedName("organization_id")
      * @Serializer\Type("string")
+     * @OA\Property(nullable=true)
      */
     public function getAffiliationId(): ?int
     {
@@ -581,6 +582,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
      * @Serializer\Type("string")
      * @Serializer\Groups({"Nonstrict"})
      * @Serializer\Expose(if="context.getAttribute('config_service').get('show_flags')")
+     * @OA\Property(nullable=true)
      */
     public function getNationality() : ?string
     {
