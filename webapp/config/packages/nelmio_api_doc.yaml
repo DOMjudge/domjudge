@@ -101,6 +101,15 @@ nelmio_api_doc:
                         text/html:
                             schema:
                                 type: string
+                PostAccountResponse:
+                    description: Returns a (currently meaningless) status message.
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                        text/html:
+                            schema:
+                                type: string
             schemas:
                 FileList:
                     type: array
@@ -113,6 +122,7 @@ nelmio_api_doc:
                                 type: string
                 ImageList:
                     type: array
+                    nullable: true
                     items:
                         type: object
                         properties:
