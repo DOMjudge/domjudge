@@ -18,7 +18,7 @@ phpcs_compatibility:
   image: pipelinecomponents/php-codesniffer:latest
   parallel:
     matrix:
-      - PHPVERSION: ["7.4","8.0","8.1"]
+      - PHPVERSION: ["7.4","8.1"]
   script:
     - phpcs --config-set installed_paths /app/vendor/phpcompatibility/php-compatibility
     - >
