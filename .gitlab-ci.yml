@@ -1,5 +1,4 @@
 include:
-  - '/gitlab/ci/sast.yml'
   - '/gitlab/ci/unit.yml'
   - '/gitlab/ci/integration.yml'
   - '/gitlab/ci/webstandard.yml'
@@ -14,6 +13,5 @@ stages:
   - unit
   - style
   - ci_checks
-  - sast
 
 image: domjudge/gitlabci:2.1
