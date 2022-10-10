@@ -1,6 +1,6 @@
 {# problem \App\Entity\ContestProblem #}
 
-<h1 class="mt-4 text-center">{{ current_contest.name | default('Contest') }} problems</h1>
+<h1 class="mt-4 text-center">{{ contest.name | default('Contest') }} problems</h1>
 
 {% if problems is empty %}
     <div class="alert alert-secondary">No problem texts available at this point.</div>
@@ -60,7 +60,7 @@
                                                             {% else %}
                                                                 {% set submissionText = 'submissions' %}
                                                             {% endif %}
-                                                            {% if not current_contest.freezeData.showFinal and current_contest.freezetime and stat.end.timestamp >= current_contest.freezetime %}
+                                                            {% if not contest.freezeData.showFinal and contest.freezetime and stat.end.timestamp >= contest.freezetime %}
                                                                 {% set maxBucketSize = max(1, stats.maxBucketSizeCorrect, stats.maxBucketSizeIncorrect) %}
                                                                 {% set bucket = (count / maxBucketSize * 9) | round(0, 'ceil') %}
                                                                 {% set itemClass = 'frozen' ~ '-' ~ bucket %}
@@ -74,7 +74,7 @@
                                                                 data-toggle="tooltip"
                                                                 data-placement="top"
                                                                 data-html="true"
-                                                                title="Between {{ stat.start.timestamp | printtime(null, current_contest) }} and {{ stat.end.timestamp | printtime(null, current_contest) }}:<br/>{{ label }}">
+                                                                title="Between {{ stat.start.timestamp | printtime(null, contest) }} and {{ stat.end.timestamp | printtime(null, contest) }}:<br/>{{ label }}">
                                                             </div>
                                                         {% endfor %}
                                                     </div>

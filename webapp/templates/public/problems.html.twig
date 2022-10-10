@@ -1,9 +1,10 @@
 {% extends "public/base.html.twig" %}
 
-{% block title %}Contest problems {{ current_contest.shortname | default('') }} - {{ parent() }}{% endblock %}
+{% block title %}Contest problems {{ current_public_contest.shortname | default('') }} - {{ parent() }}{% endblock %}
 
 {% block content %}
     {% include 'partials/problem_list.html.twig' with {
+        contest: current_public_contest,
         problem_text_path: 'public_problem_text',
         problem_attachment_path: 'public_problem_attachment',
         problem_sample_zip_path: 'public_problem_sample_zip'
