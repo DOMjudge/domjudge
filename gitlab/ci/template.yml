@@ -54,3 +54,12 @@
       - PHPVERSION: ["7.4","8.0","8.1"]
         TEST: ["E2E","Unit"]
         CRAWL_DATASOURCES: ["0","1","2"]
+
+.phpsupported_job_pr:
+  script:
+    - /bin/true
+  parallel:
+    matrix:
+      - PHPVERSION: ["8.1"]
+        TEST: ["E2E","Unit"]
+        CRAWL_DATASOURCES: ["0"]
