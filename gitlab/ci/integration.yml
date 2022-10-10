@@ -19,6 +19,9 @@
 #      - chroot
 
 integration_mysql:
+  only:
+    - main
+    - /^[0-9].[0-9]$/
   extends: [.mysql_job,.integration_job]
   variables:
     MYSQL_ROOT_PASSWORD: password
@@ -36,6 +39,9 @@ integration_mariadb:
     PIN_JUDGEDAEMON: 1
 
 integration_unpinned_judgehost:
+  only:
+    - main
+    - /^[0-9].[0-9]$/
   extends: [.mariadb_job,.integration_job]
   variables:
     MYSQL_ROOT_PASSWORD: password
