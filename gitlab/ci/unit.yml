@@ -39,9 +39,21 @@ run runpipe tests:
       - gitlabartifacts
 
 run unit tests:
+  only:
+    - main
+    - /^[0-9].[0-9]$/
   extends: [.mariadb_job,.phpsupported_job,.unit_job]
 
+run unit tests (PR):
+  except:
+    - main
+    - /^[0-9].[0-9]$/
+  extends: [.mariadb_job,.phpsupported_job_pr,.unit_job]
+
 run unit tests (MySQL):
+  only:
+    - main
+    - /^[0-9].[0-9]$/
   extends: [.mysql_job,.unit_job]
   parallel:
     matrix:
