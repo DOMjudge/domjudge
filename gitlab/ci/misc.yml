@@ -50,19 +50,6 @@ php linter:
       webapp/public
       webapp/config
 
-php-cs-fixer:
-  extends: [.tiny_job]
-  stage: style
-  image:
-    name: cytopia/php-cs-fixer
-    entrypoint: [""]
-  artifacts:
-    when: always
-    reports:
-      codequality: code-quality.json
-  script:
-    - /usr/bin/php-cs-fixer fix --format=gitlab --dry-run --diff . > code-quality.json || true
-
 codespell:
   extends: [.tiny_job]
   stage: style
