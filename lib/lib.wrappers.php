@@ -15,7 +15,7 @@ function dj_json_decode(string $str)
 }
 
 /**
- * Try decode a JSON string with our preferred settings.
+ * Try to decode a JSON string with our preferred settings.
  * Does not throw error, but errors can be obtained via json_last_error().
  */
 function dj_json_try_decode(string $str)

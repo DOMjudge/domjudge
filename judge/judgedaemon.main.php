@@ -137,7 +137,7 @@ function request(string $url, string $verb = 'GET', $data = '', bool $failonerro
         curl_setopt($curl_handle, CURLOPT_POSTFIELDS, null);
     }
 
-    $delay_in_ms = 1000;
+    $delay_in_ms = BACKOFF_INITIAL_DELAY_MS;
     $succeeded = false;
     $response = null;
     $errstr = null;
