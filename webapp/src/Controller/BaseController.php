@@ -241,9 +241,17 @@ abstract class BaseController extends AbstractController
                 );
                 $entityManager->clear();
                 $entity = $entityManager->getRepository(Problem::class)->find($entity->getProbid());
+            } elseif ($entity instanceof Team) {
+                $users = $entity->getUsers();
             }
+
             $entityManager->remove($entity);
-            $entityManager->flush();
+
+            if ($entity instanceof Team) {
+                foreach($users as $user) {
+                    $entityManager->refresh($user);
+                }
+            }
         });
 
         if ($entity instanceof Team) {
