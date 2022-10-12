@@ -341,27 +341,27 @@ class UserController extends BaseController
 
             $changes = [];
             foreach ($users as $user) {
-                 $doit = false;
-                 $roles = $user->getRoleList();
+                $doit = false;
+                $roles = $user->getRoleList();
 
-                 $isjury = in_array('jury', $roles);
-                 $isadmin = in_array('admin', $roles);
+                $isjury = in_array('jury', $roles);
+                $isadmin = in_array('admin', $roles);
 
-                 if (in_array('team', $groups) || in_array('team_nopass', $groups)) {
-                     if ($user->getTeam() && ! $isjury && ! $isadmin) {
-                         if (in_array('team', $groups) || empty($user->getPassword())) {
-                             $doit = true;
-                             $role = 'team';
-                         }
-                     }
-                 }
+                if (in_array('team', $groups) || in_array('team_nopass', $groups)) {
+                    if ($user->getTeam() && ! $isjury && ! $isadmin) {
+                        if (in_array('team', $groups) || empty($user->getPassword())) {
+                            $doit = true;
+                            $role = 'team';
+                        }
+                    }
+                }
 
-                 if ((in_array('judge', $groups) && $isjury) ||
+                if ((in_array('judge', $groups) && $isjury) ||
                     (in_array('admin', $groups) && $isadmin))
-                 {
-                     $doit = true;
-                     $role = in_array('admin', $groups) ? 'admin' : 'judge';
-                 }
+                {
+                    $doit = true;
+                    $role = in_array('admin', $groups) ? 'admin' : 'judge';
+                }
 
                 if ($doit) {
                     $newpass = Utils::generatePassword(false);
