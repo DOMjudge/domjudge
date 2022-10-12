@@ -120,7 +120,8 @@ class CheckConfigService
     public function checkPhpExtensions(): array
     {
         $required = ['json', 'mbstring', 'mysqli', 'zip', 'gd', 'intl'];
-        $state = 'O'; $remark = '';
+        $state = 'O';
+        $remark = '';
         foreach ($required as $ext) {
             if (!extension_loaded($ext)) {
                 $state = 'E';
