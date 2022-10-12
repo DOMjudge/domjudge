@@ -41,7 +41,6 @@ class GatlingDataFixture extends AbstractDefaultDataFixture implements FixtureGr
             $manager->persist($lang);
         }
 
-
         // Create a contest
         $gatlingContest = new Contest();
         $gatlingContest

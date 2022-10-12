@@ -1083,7 +1083,6 @@ EOF;
                 $rows = [];
                 $null = '&lt;null&gt;';
                 foreach ($warning->getContent()['diff'] as $field => $diff) {
-
                     $tdField    = "<td><code>$field</code></td>";
                     $tdUs       = sprintf(
                         '<td><code>%s</code></td>',
