@@ -39,11 +39,11 @@ class ScoreboardTest extends BaseBaseTest
         $teamA = new Team();
         $teamB = new Team();
         $scoreA = new TeamScore($teamA);
-        foreach([6, 367, 2, 100] as $time) {
+        foreach ([6, 367, 2, 100] as $time) {
             $scoreA->solveTimes[] = $time;
         }
         $scoreB = new TeamScore($teamB);
-        foreach([100, 6, 2, 367] as $time) {
+        foreach ([100, 6, 2, 367] as $time) {
             $scoreB->solveTimes[] = $time;
         }
 
@@ -61,7 +61,7 @@ class ScoreboardTest extends BaseBaseTest
         $teamA = new Team();
         $teamB = new Team();
         $scoreA = new TeamScore($teamA);
-        foreach([6, 367, 2, 100] as $time) {
+        foreach ([6, 367, 2, 100] as $time) {
             $scoreA->solveTimes[] = $time;
         }
         $scoreB = new TeamScore($teamB);
@@ -81,11 +81,11 @@ class ScoreboardTest extends BaseBaseTest
         $teamA = new Team();
         $teamB = new Team();
         $scoreA = new TeamScore($teamA);
-        foreach([6, 367, 2, 100] as $time) {
+        foreach ([6, 367, 2, 100] as $time) {
             $scoreA->solveTimes[] = $time;
         }
         $scoreB = new TeamScore($teamB);
-        foreach([23, 150, 367] as $time) {
+        foreach ([23, 150, 367] as $time) {
             $scoreB->solveTimes[] = $time;
         }
 
@@ -103,11 +103,11 @@ class ScoreboardTest extends BaseBaseTest
         $teamA = new Team();
         $teamB = new Team();
         $scoreA = new TeamScore($teamA);
-        foreach([6, 367, 2, 100] as $time) {
+        foreach ([6, 367, 2, 100] as $time) {
             $scoreA->solveTimes[] = $time;
         }
         $scoreB = new TeamScore($teamB);
-        foreach([23, 150, 2] as $time) {
+        foreach ([23, 150, 2] as $time) {
             $scoreB->solveTimes[] = $time;
         }
 

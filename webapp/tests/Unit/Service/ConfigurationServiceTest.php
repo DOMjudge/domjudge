@@ -276,7 +276,7 @@ class ConfigurationServiceTest extends KernelTestCase
      */
     public function testAddOptionsExecutables(string $item, array $expected): void
     {
-        if($item === 'default_compare') {
+        if ($item === 'default_compare') {
             $executables = [
                 (new Executable())
                     ->setExecid('exec1')
@@ -287,7 +287,7 @@ class ConfigurationServiceTest extends KernelTestCase
                     ->setType('compare')
                     ->setDescription('Descr 3'),
             ];
-        } elseif($item === 'default_run') {
+        } elseif ($item === 'default_run') {
             $executables = [
                 (new Executable())
                     ->setExecid('exec2')
