@@ -176,7 +176,7 @@ abstract class JuryControllerTest extends BaseTest
         $this->client->followRedirects(true);
         $crawler = $this->getCurrentCrawler();
         // Check if the edit/delete action keys are visible.
-        foreach([static::$editDefault, static::$deleteDefault, static::$edit, static::$delete] as $identifier) {
+        foreach ([static::$editDefault, static::$deleteDefault, static::$edit, static::$delete] as $identifier) {
             if ($identifier === '') continue;
             $singlePageLink = null;
             foreach ($crawler->filter('a') as $node) {

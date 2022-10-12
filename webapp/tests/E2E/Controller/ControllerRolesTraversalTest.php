@@ -35,9 +35,9 @@ class ControllerRolesTraversalTest extends BaseTest
     {
         $dataSources = $this->getDatasourceLoops()['dataSources'];
         $riskyURLs = [];
-        if(array_key_exists('CRAWL_RISKY', getenv())) {
+        if (array_key_exists('CRAWL_RISKY', getenv())) {
             $riskyURLs = explode(',', getenv('CRAWL_RISKY'));
-        } elseif(!array_key_exists('CRAWL_ALL', getenv())) {
+        } elseif (!array_key_exists('CRAWL_ALL', getenv())) {
             $riskyURLs = array_slice(self::$riskyURLs, 0, 1);
         }
         return ['dataSources' => $dataSources, 'riskyURLs' => $riskyURLs];
@@ -66,19 +66,19 @@ class ControllerRolesTraversalTest extends BaseTest
      **/
     protected function urlExcluded(string $url, string $skip): bool
     {
-        foreach(self::$substrings as $subs) {
-            if(strpos($url, $subs) !== false && $subs !== $skip)  {
+        foreach (self::$substrings as $subs) {
+            if (strpos($url, $subs) !== false && $subs !== $skip) {
                 return true;
             }
         }
-        foreach(self::$fullstrings as $fuls) {
-            if($url === $fuls && $fuls !== $skip) {
+        foreach (self::$fullstrings as $fuls) {
+            if ($url === $fuls && $fuls !== $skip) {
                 return true;
             }
         }
         // Documentation is not setup
         // API is not functional in framework
-        foreach(['/doc','/api'] as $extension) {
+        foreach (['/doc','/api'] as $extension) {
             if (strpos($url, $extension) === 0) {
                 return true;
             }
@@ -92,25 +92,25 @@ class ControllerRolesTraversalTest extends BaseTest
      */
     protected function crawlPageGetLinks(string $url, int $statusCode, string $skip): array
     {
-        if($this->urlExcluded($url, $skip)) {
+        if ($this->urlExcluded($url, $skip)) {
             self::fail('The URL should already have been filtered away.');
         }
         $crawler = $this->client->request('GET', $url);
         $response = $this->client->getResponse();
         $message = var_export($response, true);
-        if(($statusCode === 403 || $statusCode === 401) && $response->isRedirection()) {
+        if (($statusCode === 403 || $statusCode === 401) && $response->isRedirection()) {
             self::assertEquals($response->headers->get('location'), $this::$loginURL);
-        } elseif(($response->getStatusCode() === 302 ) && $response->isRedirection()) {
+        } elseif (($response->getStatusCode() === 302 ) && $response->isRedirection()) {
             self::assertTrue(strpos($response->headers->get('location'), '/public') !== false);
         } else {
             self::assertEquals($statusCode, $response->getStatusCode(), $message);
         }
         $ret = [];
         $tmp = array_unique($crawler->filter('a')->extract(['href']));
-        foreach($tmp as $possUrl) {
-            if(!$this->urlExcluded($possUrl, $skip)) {
+        foreach ($tmp as $possUrl) {
+            if (!$this->urlExcluded($possUrl, $skip)) {
                 $ret[] = $possUrl;
-                if(strpos($possUrl, '#') === false) {
+                if (strpos($possUrl, '#') === false) {
                     $ret[] = $possUrl.'#';
                 }
             }
@@ -135,8 +135,7 @@ class ControllerRolesTraversalTest extends BaseTest
                 }
                 $done[] = $url;
             }
-        }
-        while (array_diff($done, $urlsToCheck));
+        } while (array_diff($done, $urlsToCheck));
         return $urlsToCheck;
     }
 
@@ -176,7 +175,7 @@ class ControllerRolesTraversalTest extends BaseTest
             $this->logOut();
             $this->logIn();
             foreach ($roleURLs as $url) {
-                if(!$this->urlExcluded($url, $skip)) {
+                if (!$this->urlExcluded($url, $skip)) {
                     $this->crawlPageGetLinks($url, 200, $skip);
                 }
             }
@@ -262,7 +261,7 @@ class ControllerRolesTraversalTest extends BaseTest
         $this->logIn();
         $urlsToCheck = $this->crawlPageGetLinks($roleBaseURL, 200, $skip);
         $urlsToCheck = $this->getAllPages($urlsToCheck, $skip);
-        foreach($urlsToCheck as $url) {
+        foreach ($urlsToCheck as $url) {
             $this->visitWithNoContest($url, $roleBaseURL !== '/team');
         }
     }

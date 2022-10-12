@@ -1201,7 +1201,7 @@ class JudgehostController extends AbstractFOSRestController
      */
     public function getFilesAction(string $type, string $id): array
     {
-        switch($type) {
+        switch ($type) {
             case 'source':
                 return $this->getSourceFiles($id);
             case 'testcase':

@@ -357,8 +357,7 @@ class UserController extends BaseController
                 }
 
                 if ((in_array('judge', $groups) && $isjury) ||
-                    (in_array('admin', $groups) && $isadmin))
-                {
+                    (in_array('admin', $groups) && $isadmin)) {
                     $doit = true;
                     $role = in_array('admin', $groups) ? 'admin' : 'judge';
                 }

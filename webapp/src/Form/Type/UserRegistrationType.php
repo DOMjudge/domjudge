@@ -222,7 +222,7 @@ class UserRegistrationType extends AbstractType
                 $form = $context->getRoot();
                 switch ($form->get('affiliation')->getData()) {
                     case 'new':
-                        foreach(['Name','ShortName'] as $identifier) {
+                        foreach (['Name','ShortName'] as $identifier) {
                             $name = $form->get('affiliation'.$identifier)->getData();
                             if (empty($name)) {
                                 $context->buildViolation('This value should not be blank.')

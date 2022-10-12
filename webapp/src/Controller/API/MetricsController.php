@@ -93,7 +93,7 @@ class MetricsController extends AbstractFOSRestController
             // Get team submission stats for the contest.
             $teamids_correct = [];
             $teamids_submitted = [];
-            foreach($submissions as $s) {
+            foreach ($submissions as $s) {
                 if ($s->getResult() == "correct") {
                     $teamids_correct[$s->getTeam()->getTeamid()] = 1;
                 }
