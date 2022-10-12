@@ -17,7 +17,8 @@ class CheckDatabaseConfigurationDefaultValuesCommand extends Command
 {
     protected ConfigurationService $config;
 
-    public function __construct(ConfigurationService $config, string $name = null) {
+    public function __construct(ConfigurationService $config, string $name = null)
+    {
         parent::__construct($name);
         $this->config = $config;
     }
@@ -38,7 +39,8 @@ class CheckDatabaseConfigurationDefaultValuesCommand extends Command
         foreach ($this->config->getConfigSpecification() as $specification) {
             $message = sprintf(
                 'Configuration %s (in category %s) is of type %s but has wrong type for default_value (%s)',
-                $specification['name'], $specification['category'],
+                $specification['name'],
+                $specification['category'],
                 $specification['type'],
                 json_encode($specification['default_value'])
             );
