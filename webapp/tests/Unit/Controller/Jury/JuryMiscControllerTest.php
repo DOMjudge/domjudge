@@ -144,7 +144,7 @@ class JuryMiscControllerTest extends BaseTest
                                 SampleSubmissionsMultipleTriesFixture::class,
                                 SampleSubmissionsThreeTriesCorrectFixture::class,
                                 SampleSubmissionsThreeTriesCorrectSameLanguageFixture::class]
-            ] as $ident=>$timeFixture) {
+            ] as $ident => $timeFixture) {
             foreach ([true,false] as $public) {
                 $fixture = $public ? [] : [DemoNonPublicContestFixture::class];
                 yield [array_merge($fixture, $timeFixture),$public, $ident];
@@ -173,7 +173,7 @@ class JuryMiscControllerTest extends BaseTest
 
     public function provideJuryAjax(): Generator
     {
-        foreach ([200 => ['balloon','jury','admin'], 403 => ['team']] as $status=>$roles) {
+        foreach ([200 => ['balloon','jury','admin'], 403 => ['team']] as $status => $roles) {
             foreach ($roles as $role) {
                 yield ['affiliations', $status, [$role], ['results' => [0 => ['id' => 1,
                                                                               'text' => 'Utrecht University (1)']
@@ -181,7 +181,7 @@ class JuryMiscControllerTest extends BaseTest
                 yield ['locations', $status, [$role], ['results' => []]];
             }
         }
-        foreach ([200 => ['jury','admin'], 403 => ['balloon','team']] as $status=>$roles) {
+        foreach ([200 => ['jury','admin'], 403 => ['balloon','team']] as $status => $roles) {
             foreach ($roles as $role) {
                 yield ['problems', $status, [$role], ['results' => [0 => ['id' => 3, 'text' => 'Boolean switch search (p3)'],
                                                                     1 => ['id' => 2,

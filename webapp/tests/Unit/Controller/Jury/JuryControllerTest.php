@@ -198,7 +198,7 @@ abstract class JuryControllerTest extends BaseTest
             $ent = $em->getRepository(static::$className)->findOneBy([$identifier => $entityShortName]);
             $entityUrl = static::$baseUrl . '/' . $ent->{static::$getIDFunc}();
             foreach ([static::$delete=>static::$deleteDefault,
-                      static::$edit=>static::$editDefault] as $postfix=>$default) {
+                      static::$edit=>static::$editDefault] as $postfix => $default) {
                 $code = 403;
                 if ($postfix === '') {
                     $code = 404;
@@ -285,7 +285,7 @@ abstract class JuryControllerTest extends BaseTest
                 }
                 $this->client->submit($form);
                 $this->client->followRedirect();
-                foreach ($combinedValues as $key=>$value) {
+                foreach ($combinedValues as $key => $value) {
                     if (!is_array($value) && !in_array($key, static::$overviewNotShown)) {
                         self::assertSelectorExists('body:contains("' . $value . '")');
                     }
