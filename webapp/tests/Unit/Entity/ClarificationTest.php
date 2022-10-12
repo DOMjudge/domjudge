@@ -9,13 +9,13 @@ class ClarificationTest extends TestCase
 {
     public function testSummary(): void
     {
-       $clarification = new Clarification();
-       $text =
+        $clarification = new Clarification();
+        $text =
 'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod
 tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.';
-       $clarification->setBody($text);
-       $this->assertEquals('Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod …',
-           $clarification->getSummary());
+        $clarification->setBody($text);
+        $this->assertEquals('Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod …',
+            $clarification->getSummary());
     }
 
     public function testUncutSummary(): void

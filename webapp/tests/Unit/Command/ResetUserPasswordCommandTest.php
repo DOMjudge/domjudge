@@ -29,17 +29,19 @@ class ResetUserPasswordCommandTest extends BaseTest
         $this->commandTester = new CommandTester($this->command);
     }
 
-    public function apiRequest(string $password, int $statusCode, string $user = 'demo'): void {
+    public function apiRequest(string $password, int $statusCode, string $user = 'demo'): void
+    {
         $server = ['CONTENT_TYPE' => 'application/json'];
         $server['PHP_AUTH_USER'] = $user;
         $server['PHP_AUTH_PW'] = $password;
 
-        $this->client->request('GET', '/api/judgehosts',[],[],$server);
+        $this->client->request('GET', '/api/judgehosts', [], [], $server);
         $response = $this->client->getResponse();
         self::assertEquals($statusCode, $response->getStatusCode());
     }
 
-    public function helperResetForUser(string $defaultPassword, string $user = 'demo'): string {
+    public function helperResetForUser(string $defaultPassword, string $user = 'demo'): string
+    {
         $passwordPosition = 7;
         $this->roles = ['admin'];
         $this->setupUser();
@@ -52,18 +54,20 @@ class ResetUserPasswordCommandTest extends BaseTest
         // the output of the command in the console
         $output = $this->commandTester->getDisplay();
         $this->assertStringContainsString('[OK] New password for '.$user.' is', $output);
-        $newPassword = explode(' ',$output)[$passwordPosition];
+        $newPassword = explode(' ', $output)[$passwordPosition];
         $this->apiRequest($defaultPassword, 401);
         $this->apiRequest($newPassword, 200);
         return $newPassword;
     }
 
-    public function testApiUser(): void {
+    public function testApiUser(): void
+    {
         $newPassword = $this->helperResetForUser(self::$demoPassword);
         $this->helperResetForUser($newPassword);
     }
 
-    public function testApiUserNoResetOtherUser(): void {
+    public function testApiUserNoResetOtherUser(): void
+    {
         $adminPasswordFile = sprintf(
             '%s/%s',
             static::$container->getParameter('domjudge.etcdir'),
@@ -76,17 +80,20 @@ class ResetUserPasswordCommandTest extends BaseTest
         $this->apiRequest($newDemoPassword, 401, 'admin');
     }
 
-    public function testNonExistingUser(): void {
+    public function testNonExistingUser(): void
+    {
         $user = 'NotAnUser';
         $statusCode = $this->commandTester->execute(['username'=>$user]);
-        self::assertThat($statusCode, 
-                   $this->logicalNot($this->equalTo(new CommandIsSuccessful())),
-                   'Command should fail with missing parameters.');
+        self::assertThat(
+            $statusCode,
+            $this->logicalNot($this->equalTo(new CommandIsSuccessful())),
+            'Command should fail with missing parameters.');
         $output = $this->commandTester->getDisplay();
         $this->assertStringContainsString('[ERROR] Can not find user with username '.$user, $output);
     }
 
-    public function testMissingUserParameter(): void {
+    public function testMissingUserParameter(): void
+    {
         $output = '';
         try {
             $this->commandTester->execute([]);
@@ -96,7 +103,8 @@ class ResetUserPasswordCommandTest extends BaseTest
         $this->assertStringContainsString('Not enough arguments (missing: "username").', $output);
     }
 
-    public function testNonUsedParameter(): void {
+    public function testNonUsedParameter(): void
+    {
         $output = '';
         $user = 'demo';
         try {
@@ -107,7 +115,8 @@ class ResetUserPasswordCommandTest extends BaseTest
         $this->assertStringContainsString('The "Username" argument does not exist.', $output);
     }
 
-    public function testGetHelp(): void {
+    public function testGetHelp(): void
+    {
         $this->app->setAutoExit(false);
         $input = new ArrayInput(['command' => static::$commandName, '--help']);
         $outputBuffer = new BufferedOutput();
@@ -118,7 +127,7 @@ class ResetUserPasswordCommandTest extends BaseTest
                   'Arguments:','username','The username of the user to reset the password of',
                   'Options:',
                   'Display help for the given command. When no command is given display help for the list command'];
-        foreach($check as $message) {
+        foreach ($check as $message) {
             $this->assertStringContainsString($message, $output);
         }
     }

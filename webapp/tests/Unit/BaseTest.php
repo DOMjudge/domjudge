@@ -303,7 +303,7 @@ abstract class BaseTest extends WebTestCase
 
         $zip->open($tempFilename);
         $return = [];
-        for($i = 0; $i < $zip->count(); ++$i) {
+        for ($i = 0; $i < $zip->count(); ++$i) {
             $return[$zip->getNameIndex($i)] = $zip->getFromIndex($i);
         }
         $zip->close();
@@ -326,9 +326,9 @@ abstract class BaseTest extends WebTestCase
     {
         $dataSources = [];
         if (array_key_exists('CRAWL_DATASOURCES', getenv())) {
-            $dataSources = explode(',',getenv('CRAWL_DATASOURCES'));
+            $dataSources = explode(',', getenv('CRAWL_DATASOURCES'));
         } elseif (!array_key_exists('CRAWL_ALL', getenv())) {
-            $dataSources = array_slice(self::$dataSources,0,1);
+            $dataSources = array_slice(self::$dataSources, 0, 1);
         }
         return ['dataSources' => $dataSources];
     }
