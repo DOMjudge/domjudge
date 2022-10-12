@@ -74,10 +74,11 @@ class ScoreboardMergeCommand extends Command
         $this
             ->setName('scoreboard:merge')
             ->setDescription('Merges scoreboards from multiple sites from API endpoints.')
-            ->setHelp('Usage example: scoreboard:merge "BAPC preliminaries" ' .
-                      'https://judge.gehack.nl/api/v4/contests/3/ 3 ' .
-                      'http://ragnargrootkoerkamp.nl/upload/uva 2' . PHP_EOL . PHP_EOL .
-                      'This fetches teams and scoreboard data from API endpoints and prints a merged HTML scoreboard. It assumes times in minutes.'
+            ->setHelp(
+                'Usage example: scoreboard:merge "BAPC preliminaries" ' .
+                'https://judge.gehack.nl/api/v4/contests/3/ 3 ' .
+                'http://ragnargrootkoerkamp.nl/upload/uva 2' . PHP_EOL . PHP_EOL .
+                'This fetches teams and scoreboard data from API endpoints and prints a merged HTML scoreboard. It assumes times in minutes.'
             )
             ->addOption(
                 'category',
