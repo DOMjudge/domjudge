@@ -1008,7 +1008,7 @@ class DOMJudgeService
             ->getQuery()
             ->getResult();
         foreach ($judgings as $judging) {
-            $this->maybeCreateJudgeTasks($judging, JudgeTask::PRIORITY_DEFAULT, True);
+            $this->maybeCreateJudgeTasks($judging, JudgeTask::PRIORITY_DEFAULT, true);
         }
     }
 
@@ -1023,27 +1023,27 @@ class DOMJudgeService
         }
     }
 
-    public function maybeCreateJudgeTasks(Judging $judging, int $priority = JudgeTask::PRIORITY_DEFAULT, bool $manualRequest = False): void
+    public function maybeCreateJudgeTasks(Judging $judging, int $priority = JudgeTask::PRIORITY_DEFAULT, bool $manualRequest = false): void
     {
         $submission = $judging->getSubmission();
         $problem    = $submission->getContestProblem();
         $language   = $submission->getLanguage();
 
-        $evalOnDemand = False;
+        $evalOnDemand = false;
         // We have 2 cases, the problem picks the global value or the value is set.
         if ( ((int)$problem->getLazyEvalResults() === (int)DOMJudgeService::EVAL_DEFAULT && $this->config->get('lazy_eval_results') === static::EVAL_DEMAND)
              || $problem->getLazyEvalResults() === DOMJudgeService::EVAL_DEMAND) {
-            $evalOnDemand = True;
+            $evalOnDemand = true;
         }
         // Special case, we're shadow and someone submits on our side in that case
         // we're not super lazy.
         if ($this->config->get('data_source') === DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL
             && $submission->getExternalid() === null) {
-                $evalOnDemand = False;
+                $evalOnDemand = false;
         }
         if ($manualRequest) {
             // When explicitly requested, judge the submission.
-            $evalOnDemand = False;
+            $evalOnDemand = false;
         }
         if (!$problem->getAllowJudge() || !$language->getAllowJudge() || $evalOnDemand) {
             return;
