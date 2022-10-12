@@ -62,7 +62,7 @@ function read_credentials(): void
 }
 
 /**
- * @return resource|false
+ * @return CurlHandle|false
  */
 function setup_curl_handle(string $restuser, string $restpass)
 {
@@ -92,6 +92,10 @@ function close_curl_handles(): void
  * $data is the urlencoded data passed as GET or POST parameters.
  * When $failonerror is set to false, any error will be turned into a
  * warning and null is returned.
+ * This function retries request on transient network errors.
+ * To deal with the transient errors while avoiding overloads,
+ * this function uses exponential backoff algorithm.
+ * Every error except HTTP 401, 500 is considered transient.
  */
 $lastrequest = '';
 function request(string $url, string $verb = 'GET', $data = '', bool $failonerror = true)
@@ -133,32 +137,49 @@ function request(string $url, string $verb = 'GET', $data = '', bool $failonerro
         curl_setopt($curl_handle, CURLOPT_POSTFIELDS, null);
     }
 
-    $response = curl_exec($curl_handle);
-    if ($response === false) {
-        $errstr = "Error while executing curl $verb to url " . $url . ": " . curl_error($curl_handle);
-        if ($failonerror) {
-            error($errstr);
+    $delay_in_ms = BACKOFF_INITIAL_DELAY_MS;
+    $succeeded = false;
+    $response = null;
+    $errstr = null;
+
+    for ($trial = 1; $trial <= BACKOFF_STEPS; $trial++) {
+        $response = curl_exec($curl_handle);
+        if ($response === false) {
+            $errstr = "Error while executing curl $verb to url " . $url . ": " . curl_error($curl_handle);
         } else {
-            warning($errstr);
-            $endpoints[$endpointID]['errorred'] = true;
-            return null;
+            $status = curl_getinfo($curl_handle, CURLINFO_HTTP_CODE);
+            if ($status == 401) {
+                $errstr = "Authentication failed (error $status) while contacting $url. " .
+                    "Check credentials in restapi.secret.";
+                break;
+            } else if ($status < 200 || $status >= 300) {
+                $json = dj_json_try_decode($response);
+                if ($json !== null) {
+                    $response = var_export($json, true);
+                }
+                $errstr = "Error while executing curl $verb to url " . $url .
+                    ": http status code: " . $status .
+                    ", request size = " . strlen(print_r($data, true)) .
+                    ", response: " . $response;
+                if ($status == 500) {
+                    break;
+                }
+            } else {
+                $succeeded = true;
+                break;
+            }
+        }
+        if ($trial == BACKOFF_STEPS) {
+            $errstr = $errstr . " Retry limit reached.";
+        } else {
+            $warnstr = $errstr . " This request will be retried after about " .
+                $delay_in_ms . "ms... (" . $trial . "/" . BACKOFF_STEPS . ")";
+            warning($warnstr);
+            usleep($delay_in_ms + random_int(0, BACKOFF_JITTER_MS));
+            $delay_in_ms = $delay_in_ms * BACKOFF_FACTOR;
         }
     }
-    $status = curl_getinfo($curl_handle, CURLINFO_HTTP_CODE);
-    if ($status < 200 || $status >= 300) {
-        if ($status == 401) {
-            $errstr = "Authentication failed (error $status) while contacting $url. " .
-                "Check credentials in restapi.secret.";
-        } else {
-            $json = dj_json_decode($response);
-            if ($json !== null) {
-                $response = var_export($json, true);
-            }
-            $errstr = "Error while executing curl $verb to url " . $url .
-                ": http status code: " . $status .
-                ", request size = " . strlen(print_r($data, true)) .
-                ", response: " . $response;
-        }
+    if (!$succeeded) {
         if ($failonerror) {
             error($errstr);
         } else {

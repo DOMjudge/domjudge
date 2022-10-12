@@ -15,6 +15,15 @@ function dj_json_decode(string $str)
 }
 
 /**
+ * Try to decode a JSON string with our preferred settings.
+ * Does not throw error, but errors can be obtained via json_last_error().
+ */
+function dj_json_try_decode(string $str)
+{
+    return json_decode($str, true);
+}
+
+/**
  * Encode data to JSON with our preferred settings.
  */
 function dj_json_encode($data) : string
