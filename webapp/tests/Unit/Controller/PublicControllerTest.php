@@ -180,7 +180,7 @@ class PublicControllerTest extends BaseTest
     public function selfRegisterProvider(): Generator
     {
         foreach ([[EnableSelfregisterFixture::class],[EnableSelfregisterFixture::class,EnableSelfregisterSecondCategoryFixture::class]] as $fixtures) {
-            foreach (['2','4'] as $index=>$category) {
+            foreach (['2','4'] as $index => $category) {
                 if (count($fixtures)===1 && $index!==1) {
                     continue;
                 }
@@ -204,7 +204,7 @@ class PublicControllerTest extends BaseTest
     public function selfRegisterWrongPasswordProvider(): Generator
     {
         foreach ([[EnableSelfregisterFixture::class],[EnableSelfregisterFixture::class,EnableSelfregisterSecondCategoryFixture::class]] as $fixtures) {
-            foreach (['2','4'] as $index=>$category) {
+            foreach (['2','4'] as $index => $category) {
                 if ($index!==1) {
                     continue;
                 }
@@ -221,7 +221,7 @@ class PublicControllerTest extends BaseTest
         $password = 'foo';
         $fixtures = [EnableSelfregisterFixture::class, SelfRegisteredUserFixture::class];
         $category = '';
-        foreach (static::$duplicateFields as $field=>$value) {
+        foreach (static::$duplicateFields as $field => $value) {
             extract($value);
             $newInputs = $inputs;
             $newInputs[$field] = $input;
