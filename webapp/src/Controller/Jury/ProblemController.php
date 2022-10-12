@@ -1128,11 +1128,11 @@ class ProblemController extends BaseController
     }
 
     /**
-     * @Route("/deleteList", name="jury_problems_delete")
-     * @IsGranted("ROLE_ADMIN")
+     * @oute("/deleteList", name="jury_problems_delete")
+     * @sGranted("ROLE_ADMIN")
      */
-    public function deleteListAction(Request $request): Response
+    /*public function deleteListAction(Request $request): Response
     {
         return parent::deleteListActionHelper($request, Problem::class, 'jury_problems', 'problem');
-    }
+    }*/
 }

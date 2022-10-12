@@ -16,7 +16,7 @@ class ProblemControllerTest extends JuryControllerTest
     protected static string  $shortTag                 = 'problem';
     protected static array   $deleteEntities           = ['Hello World','Float special compare test','Boolean switch search'];
     protected static string  $deleteEntityIdentifier   = 'name';
-    protected static bool    $multiDeleteImplemented   = true;
+    //protected static bool    $multiDeleteImplemented   = true;
     protected static string  $getIDFunc                = 'getProbid';
     protected static string  $className                = Problem::class;
     protected static array   $DOM_elements             = [
@@ -109,7 +109,7 @@ class ProblemControllerTest extends JuryControllerTest
         self::assertTrue(array_intersect($titles, $unexpectedTitles) == []);
     }
 
-    public function provideDeletableEntities(): Generator
+    /*public function provideDeletableEntities(): Generator
     {
         if (static::$delete === '') {
             $this->markTestIncomplete('Delete should be implemented for problems.');
@@ -130,5 +130,5 @@ class ProblemControllerTest extends JuryControllerTest
         yield [array_reverse(static::$deleteEntities), ['Create dangling references in clarifications',
                                                         'Cascade to contest problems',
                                                         'Cascade to testcases, and possibly to dependent entities external runs, testcase contents']];
-    }
+    }*/
 }

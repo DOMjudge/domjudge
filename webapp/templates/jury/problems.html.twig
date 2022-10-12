@@ -12,15 +12,12 @@
 
     <h1>Problems</h1>
 
-    {{ macros.table(problems, table_fields, num_actions, null, "jury_problems_delete") }}
+    {{ macros.table(problems, table_fields, num_actions) }}
 
     {% if is_granted('ROLE_ADMIN') %}
         <p>
             {{ button(path('jury_problem_add'), 'Add new problem', 'primary', 'plus') }}
             {{ button(path('jury_import_export', {'_fragment':'problems'}), 'Import problem', 'primary', 'upload') }}
-            <button type="submit" form="multidelete" class="btn btn-danger" name="multidelete_submit">
-                <i class="fa fa-trash"></i> Remove selected problems
-            </button>
         </p>
     {% endif %}
 {% endblock %}
