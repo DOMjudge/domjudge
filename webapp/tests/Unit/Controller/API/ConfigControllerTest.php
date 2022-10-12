@@ -41,7 +41,7 @@ class ConfigControllerTest extends BaseTest
 
         static::assertIsArray($response);
         $secretvars = ['script_memory_limit', 'clar_answers', 'external_ccs_submission_url', 'data_source'];
-        foreach($secretvars as $secretvar) {
+        foreach ($secretvars as $secretvar) {
             static::assertArrayNotHasKey($secretvar, $response);
         }
     }
@@ -141,7 +141,7 @@ class ConfigControllerTest extends BaseTest
         static::assertIsArray($response);
         static::assertEquals($sections, array_keys($response));
 
-        foreach($sections as $section) {
+        foreach ($sections as $section) {
             static::assertIsArray($response[$section]);
             static::assertGreaterThan(0, count($response[$section]));
         }

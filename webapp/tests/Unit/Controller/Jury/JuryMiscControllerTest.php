@@ -80,7 +80,7 @@ class JuryMiscControllerTest extends BaseTest
         $response = $this->client->getResponse();
         self::assertEquals('200', $response->getStatusCode());
         self::assertSelectorExists('body:contains("scoreboard")');
-        foreach(['/public','/jury/scoreboard'] as $url) {
+        foreach (['/public','/jury/scoreboard'] as $url) {
             $this->verifyPageResponse('GET', $url, 200);
             if (in_array($contestStage, $nonActiveStages) || (!$public && $url==='/public')) {
                 $elements = ["No active contest"];
@@ -96,7 +96,7 @@ class JuryMiscControllerTest extends BaseTest
             } else {
                 $elements = $visibleElements;
             }
-            foreach($elements as $selector) {
+            foreach ($elements as $selector) {
                 self::assertSelectorExists('body:contains("'.$selector.'")');
             }
             if (in_array($contestStage, ['preFreeze','preEnd']) && $public) {
@@ -109,7 +109,7 @@ class JuryMiscControllerTest extends BaseTest
                 }
             }
         }
-        foreach(range(1, 3) as $id) {
+        foreach (range(1, 3) as $id) {
             $statusCode = in_array($contestStage, ['preActivation','preStart','postDeactivate']) || !$public ? 404 : 200;
             $this->verifyPageResponse('HEAD', '/public/problems/'.$id.'/text', $statusCode);
         }
@@ -124,7 +124,7 @@ class JuryMiscControllerTest extends BaseTest
 
     public function provideContestStageForBalloon(): Generator
     {
-        foreach(
+        foreach (
             ['preActivation'=>[DemoPreActivationContestFixture::class],
              'preStart'=>[DemoPreStartContestFixture::class],
              'preFreeze'=>[DemoPreFreezeContestFixture::class,SampleSubmissionsThreeTriesCorrectFixture::class],
@@ -145,7 +145,7 @@ class JuryMiscControllerTest extends BaseTest
                                 SampleSubmissionsThreeTriesCorrectFixture::class,
                                 SampleSubmissionsThreeTriesCorrectSameLanguageFixture::class]
             ] as $ident=>$timeFixture) {
-            foreach([true,false] as $public) {
+            foreach ([true,false] as $public) {
                 $fixture = $public ? [] : [DemoNonPublicContestFixture::class];
                 yield [array_merge($fixture, $timeFixture),$public, $ident];
             }
@@ -173,7 +173,7 @@ class JuryMiscControllerTest extends BaseTest
 
     public function provideJuryAjax(): Generator
     {
-        foreach([200 => ['balloon','jury','admin'], 403 => ['team']] as $status=>$roles) {
+        foreach ([200 => ['balloon','jury','admin'], 403 => ['team']] as $status=>$roles) {
             foreach ($roles as $role) {
                 yield ['affiliations', $status, [$role], ['results' => [0 => ['id' => 1,
                                                                               'text' => 'Utrecht University (1)']

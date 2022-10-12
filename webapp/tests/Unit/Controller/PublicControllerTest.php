@@ -55,15 +55,15 @@ class PublicControllerTest extends BaseTest
         $this->verifyPageResponse('GET', static::$urlRegister, 200);
         self::assertSelectorExists('h1:contains("Register Account")');
         $formFields = [];
-        foreach(static::$formFields as $field) {
+        foreach (static::$formFields as $field) {
             $key = static::$formFieldName.$field.']';
-            if(array_key_exists($field, $inputs)) {
+            if (array_key_exists($field, $inputs)) {
                 $formFields[$key] = $inputs[$field];
             } else {
                 $formFields[$key] = '';
             }
         }
-        if(count($fixtures)!==1 && $category !== "") {
+        if (count($fixtures)!==1 && $category !== "") {
             $formFields[static::$formFieldName.'teamCategory]'] = $category;
         }
         $formFields[static::$formFieldName."plainPassword][first]"] = $password;
@@ -87,13 +87,13 @@ class PublicControllerTest extends BaseTest
         $this->logOut();
         $this->logIn();
         $this->verifyPageResponse('GET', static::$urlUsers, 200);
-        foreach(['username','teamName'] as $field) {
+        foreach (['username','teamName'] as $field) {
             self::assertSelectorExists('html:contains("'.$inputs[$field].'")');
         }
         $this->verifyPageResponse('GET', static::$urlTeams, 200);
         self::assertSelectorExists('html:contains("'.$inputs['teamName'].'")');
-        foreach(['affiliationName','affiliationShortName'] as $field) {
-            if(array_key_exists($field, $inputs)) {
+        foreach (['affiliationName','affiliationShortName'] as $field) {
+            if (array_key_exists($field, $inputs)) {
                 $this->verifyPageResponse('GET', static::$urlAffil, 200);
                 self::assertSelectorExists('html:contains("'.$inputs[$field].'")');
             }
@@ -120,7 +120,7 @@ class PublicControllerTest extends BaseTest
     {
         $formFields = $this->setupSelfRegisterForm($inputs, $fixtures, $password, $category);
         self::assertSelectorNotExists('html:contains("This value should not be blank.")');
-        if(array_key_exists($rField, $inputs)) {
+        if (array_key_exists($rField, $inputs)) {
             $mutatedFormFields = $formFields;
             $mutatedFormFields[static::$formFieldName.$rField."]"] = '';
             $this->client->submitForm('Register', $mutatedFormFields);
@@ -154,7 +154,7 @@ class PublicControllerTest extends BaseTest
         $form = $button->form($formFields, 'POST');
         $rawValues = $form->getPhpValues();
         $rawValues["user_registration"]['teamCategory'] = $category;
-        if($inputs['affiliation'] === 'existing') {
+        if ($inputs['affiliation'] === 'existing') {
             $rawValues["user_registration"]['existingAffiliation'] = $inputs['existingAffiliation'];
         }
         $response = $this->client->request($form->getMethod(), $form->getUri(), $rawValues, $form->getPhpFiles());
@@ -179,9 +179,9 @@ class PublicControllerTest extends BaseTest
     // plainPassword
     public function selfRegisterProvider(): Generator
     {
-        foreach([[EnableSelfregisterFixture::class],[EnableSelfregisterFixture::class,EnableSelfregisterSecondCategoryFixture::class]] as $fixtures) {
-            foreach(['2','4'] as $index=>$category) {
-                if(count($fixtures)===1 && $index!==1) {
+        foreach ([[EnableSelfregisterFixture::class],[EnableSelfregisterFixture::class,EnableSelfregisterSecondCategoryFixture::class]] as $fixtures) {
+            foreach (['2','4'] as $index=>$category) {
+                if (count($fixtures)===1 && $index!==1) {
                     continue;
                 }
                 yield[['username'=>'minimaluser', 'teamName'=>'NewTeam','affiliation'=>'none'],'shirt-recognize-bar-together', $fixtures, $category];
@@ -194,7 +194,7 @@ class PublicControllerTest extends BaseTest
                 yield[['username'=>'klasse', 'teamName'=>'Klasse', 'affiliation'=>'existing','existingAffiliation'=>'1'],'p@ssword_Is_long', $fixtures, $category];
                 yield[['username'=>'newinstsamecountry', 'name'=>'CompetingDutchTeam', 'teamName'=>'SupperT3@m','affiliation'=>'new','affiliationName'=>'Vrije Universiteit',
                        'affiliationShortName'=>'vu','affiliationCountry'=>'NLD'],'demo', $fixtures, $category];
-                if(count($fixtures)===1) {
+                if (count($fixtures)===1) {
                     yield[['username'=>'reusevaluesofexistinguser', 'name'=>'selfregistered user for example team','email'=>'electronic@mail.tld','teamName'=>'EasyEnough','affiliation'=>'none'],'demo', array_merge($fixtures, [SelfRegisteredUserFixture::class]),''];
                 }
             }
@@ -203,9 +203,9 @@ class PublicControllerTest extends BaseTest
 
     public function selfRegisterWrongPasswordProvider(): Generator
     {
-        foreach([[EnableSelfregisterFixture::class],[EnableSelfregisterFixture::class,EnableSelfregisterSecondCategoryFixture::class]] as $fixtures) {
-            foreach(['2','4'] as $index=>$category) {
-                if($index!==1) {
+        foreach ([[EnableSelfregisterFixture::class],[EnableSelfregisterFixture::class,EnableSelfregisterSecondCategoryFixture::class]] as $fixtures) {
+            foreach (['2','4'] as $index=>$category) {
+                if ($index!==1) {
                     continue;
                 }
                 yield[['username'=>'twodifferentvalues', 'teamName'=>'NewTeam','affiliation'=>'none'],'shirt-recognize-bar-together', $fixtures, $category, '0112'];
@@ -221,15 +221,15 @@ class PublicControllerTest extends BaseTest
         $password = 'foo';
         $fixtures = [EnableSelfregisterFixture::class, SelfRegisteredUserFixture::class];
         $category = '';
-        foreach(static::$duplicateFields as $field=>$value) {
+        foreach (static::$duplicateFields as $field=>$value) {
             extract($value);
             $newInputs = $inputs;
             $newInputs[$field] = $input;
-            if(strpos($field, 'affiliation') !== false) {
+            if (strpos($field, 'affiliation') !== false) {
                 $newInputs['affiliation'] = 'new';
-                if($field==='affiliationShortName') {
+                if ($field==='affiliationShortName') {
                     $newInputs['affiliationName'] = 'New Affiliation';
-                } elseif($field==='affiliationName') {
+                } elseif ($field==='affiliationName') {
                     $newInputs['affiliationShortName'] = 'shortaffil';
                 }
             }
@@ -239,12 +239,12 @@ class PublicControllerTest extends BaseTest
 
     public function selfRegisterMissingFieldProvider(): Generator
     {
-        foreach($this->selfRegisterProvider() as $args) {
-            foreach(static::$requiredFields as $field) {
-                if($args[3]==='4') {
+        foreach ($this->selfRegisterProvider() as $args) {
+            foreach (static::$requiredFields as $field) {
+                if ($args[3]==='4') {
                     continue; // Skip the 2nd category to not generate so many tests.
                 }
-                if(array_key_exists($field, $args[0])) {
+                if (array_key_exists($field, $args[0])) {
                     yield array_merge($args, [$field]);
                 }
             }
@@ -255,7 +255,7 @@ class PublicControllerTest extends BaseTest
     {
         $fixtures = [EnableSelfregisterFixture::class,EnableSelfregisterSecondCategoryFixture::class];
         yield[['username'=>'nonexistingcategory', 'teamName'=>'NewTeam','affiliation'=>'none'], $fixtures, '42'];
-        foreach([[EnableSelfregisterFixture::class],$fixtures] as $newFixtures) {
+        foreach ([[EnableSelfregisterFixture::class],$fixtures] as $newFixtures) {
             yield[['username'=>'nonexistingaffiliation', 'teamName'=>'NewTeam2','affiliation'=>'existing','existingAffiliation'=>'42'],$newFixtures, '2'];
         }
     }

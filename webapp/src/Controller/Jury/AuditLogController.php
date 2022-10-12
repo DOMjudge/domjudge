@@ -64,7 +64,7 @@ class AuditLogController extends AbstractController
                       ->setMaxResults($limit);
         }
         $auditlog_table= [];
-        foreach($paginator as $logline) {
+        foreach ($paginator as $logline) {
             $data = [];
             $data['id']['value'] = $logline->getLogId();
 

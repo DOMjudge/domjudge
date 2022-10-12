@@ -35,7 +35,7 @@ class GatlingDataFixture extends AbstractDefaultDataFixture implements FixtureGr
 
         // Enable a bunch of languages:
         $langs = ["csharp", "adb", "f95", "hs", "lua", "pas", "py3", "rb", "scala", "kt"];
-        foreach($langs as $langid) {
+        foreach ($langs as $langid) {
             $lang = $manager->getRepository(Language::class)->findOneBy(['langid' => $langid]);
             $lang->setAllowSubmit(true);
             $manager->persist($lang);
@@ -103,7 +103,7 @@ class GatlingDataFixture extends AbstractDefaultDataFixture implements FixtureGr
         $manager->persist($category);
 
         // Create some jury users for gatling to use.
-        for($i=0; $i<$num_jury_accounts; $i++) {
+        for ($i=0; $i<$num_jury_accounts; $i++) {
             $acct_name = sprintf('gatling_jury_%05d', $i);
             $user = new User();
             $user

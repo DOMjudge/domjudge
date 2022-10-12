@@ -135,7 +135,7 @@ class ExecutableController extends BaseController
         $form = $this->createForm(ExecutableUploadType::class, $data);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()){
+        if ($form->isSubmitted() && $form->isValid()) {
             $propertyFile = 'domjudge-executable.ini';
             $data         = $form->getData();
             /** @var UploadedFile[] $archives */

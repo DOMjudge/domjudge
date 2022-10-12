@@ -250,13 +250,13 @@ class ClarificationController extends AbstractController
             ->orderBy('cp.shortname')
             ->getQuery()->getResult();
 
-        foreach($contests as $cid => $cdata) {
+        foreach ($contests as $cid => $cdata) {
             $cshort = $cdata->getShortName();
-            foreach($categories as $name => $desc) {
+            foreach ($categories as $name => $desc) {
                 $subject_options[$cshort]["$cid-$name"] = "$cshort - $desc";
             }
 
-            foreach($contestproblems as $cp) {
+            foreach ($contestproblems as $cp) {
                 if ($cp->getCid()!=$cid) continue;
                 $subject_options[$cshort]["$cid-" . $cp->getProbid()] =
                     $cshort . ' - ' .$cp->getShortname() . ': ' . $cp->getProblem()->getName();
@@ -295,7 +295,7 @@ class ClarificationController extends AbstractController
             throw new NotFoundHttpException(sprintf('Clarification with ID %i not found', $clarId));
         }
 
-        if($request->request->getBoolean('claimed')) {
+        if ($request->request->getBoolean('claimed')) {
             $clarification->setJuryMember($this->getUser()->getUsername());
             $this->em->flush();
             return $this->redirectToRoute('jury_clarification', ['id' => $clarId]);
@@ -377,7 +377,7 @@ class ClarificationController extends AbstractController
         $clarification->setQueue($queue);
         $this->em->flush();
 
-        if($request->isXmlHttpRequest()) {
+        if ($request->isXmlHttpRequest()) {
             return $this->json(true);
         }
         return $this->redirectToRoute('jury_clarification', ['id' => $clarId]);
@@ -390,7 +390,7 @@ class ClarificationController extends AbstractController
     {
         $clarification = new Clarification();
 
-        if($respid = $request->request->get('id')) {
+        if ($respid = $request->request->get('id')) {
             $respclar = $this->em->getRepository(Clarification::class)->find($respid);
             $clarification->setInReplyTo($respclar);
         }
@@ -426,7 +426,7 @@ class ClarificationController extends AbstractController
             }
         }
 
-        if($respid) {
+        if ($respid) {
             $queue = $respclar->getQueue();
         } else {
             $queue = $this->config->get('clar_default_problem_queue');
@@ -455,12 +455,12 @@ class ClarificationController extends AbstractController
         // Reload clarification to make sure we have a fresh one after calling the event log service.
         $clarification = $this->em->getRepository(Clarification::class)->find($clarId);
 
-        if($sendto) {
+        if ($sendto) {
             $team = $this->em->getRepository(Team::class)->find($sendto);
             $team->addUnreadClarification($clarification);
         } else {
             $teams = $this->em->getRepository(Team::class)->findAll();
-            foreach($teams as $team) {
+            foreach ($teams as $team) {
                 $team->addUnreadClarification($clarification);
             }
         }

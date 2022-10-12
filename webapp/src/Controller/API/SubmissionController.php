@@ -561,8 +561,7 @@ class SubmissionController extends AbstractRestController
         }
 
         if (!$this->dj->checkrole('api_reader') &&
-            !$this->dj->checkrole('judgehost'))
-        {
+            !$this->dj->checkrole('judgehost')) {
             $queryBuilder
                 ->join('t.category', 'cat');
             if ($this->dj->checkrole('team')) {

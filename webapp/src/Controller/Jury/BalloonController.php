@@ -44,7 +44,7 @@ class BalloonController extends AbstractController
     public function indexAction(BalloonService $balloonService): Response
     {
         $contest = $this->dj->getCurrentContest();
-        if(is_null($contest)) {
+        if (is_null($contest)) {
             return $this->render('jury/balloons.html.twig');
         }
 

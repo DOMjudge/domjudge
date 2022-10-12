@@ -29,7 +29,7 @@ class GeneralInfoControllerTest extends BaseTest
     {
         $infoEndpoints = ['/', '/info'];
 
-        foreach($infoEndpoints as $endpoint) {
+        foreach ($infoEndpoints as $endpoint) {
             $response = $this->verifyApiJsonResponse('GET', $endpoint, 200);
 
             static::assertIsArray($response);
@@ -107,7 +107,7 @@ class GeneralInfoControllerTest extends BaseTest
         static::assertTrue($response['enabled']);
         static::assertGreaterThanOrEqual($response['first_login_time'], $response['last_login_time']);
         $keysExpected = ['id', 'ip', 'last_ip', 'email'];
-        foreach($keysExpected as $keyExpected) {
+        foreach ($keysExpected as $keyExpected) {
             static::assertArrayHasKey($keyExpected, $response);
         }
     }

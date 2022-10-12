@@ -140,7 +140,7 @@ class ScoreboardIntegrationTest extends KernelTestCase
         $category = $this->em->getRepository(TeamCategory::class)
             ->findOneBy(['sortorder' => 0]);
 
-        for($i=0; $i<self::NUM_TEAMS; $i++) {
+        for ($i=0; $i<self::NUM_TEAMS; $i++) {
             $this->teams[$i] = new Team();
             $this->teams[$i]
                 ->setName(self::CONTEST_NAME.' team '.$i)
@@ -148,7 +148,7 @@ class ScoreboardIntegrationTest extends KernelTestCase
             $this->em->persist($this->teams[$i]);
         }
 
-        for($i=0; $i<self::NUM_PROBLEMS; $i++) {
+        for ($i=0; $i<self::NUM_PROBLEMS; $i++) {
             $letter = chr(ord('a') + $i);
             $this->problems[$i] = new Problem();
             $this->problems[$i]
@@ -336,7 +336,7 @@ class ScoreboardIntegrationTest extends KernelTestCase
         ];
 
         foreach ([ false, true ] as $jury) {
-            foreach([ null, '+1:00:00', '+1:20:00' ] as $freeze) {
+            foreach ([ null, '+1:00:00', '+1:20:00' ] as $freeze) {
                 $this->contest->setFreezetimeString($freeze);
                 $this->recalcScoreCaches();
 
@@ -372,7 +372,7 @@ class ScoreboardIntegrationTest extends KernelTestCase
         ];
 
         foreach ([ false, true ] as $jury) {
-            foreach([ null, '+1:00:00', '+1:20:00' ] as $freeze) {
+            foreach ([ null, '+1:00:00', '+1:20:00' ] as $freeze) {
                 $this->contest->setFreezetimeString($freeze);
                 $this->recalcScoreCaches();
 

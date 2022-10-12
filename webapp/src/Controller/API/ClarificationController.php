@@ -290,8 +290,7 @@ class ClarificationController extends AbstractRestController
             ->setParameter('cid', $this->getContestId($request));
 
         if (!$this->dj->checkrole('api_reader') &&
-            !$this->dj->checkrole('judgehost'))
-        {
+            !$this->dj->checkrole('judgehost')) {
             if ($this->dj->checkrole('team')) {
                 $queryBuilder
                     ->andWhere('clar.sender = :team OR clar.recipient = :team OR (clar.sender IS NULL AND clar.recipient IS NULL)')

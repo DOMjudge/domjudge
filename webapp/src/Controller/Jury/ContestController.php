@@ -317,7 +317,7 @@ class ContestController extends BaseController
             $startTime = null;
             foreach ($timeFields as $timeField) {
                 $time = $contestdata[$timeField . 'time']['value'];
-                if($timeField === 'start') {
+                if ($timeField === 'start') {
                     $startTime = $time;
                 }
                 $timeIcon = null;
@@ -330,12 +330,12 @@ class ContestController extends BaseController
                 } else {
                     $timeValue = Utils::printtime($time, $timeFormat);
                     $timeTitle = Utils::printtime($time, 'Y-m-d H:i:s (T)');
-                    if($timeField === 'activate' && $contest->getStarttimeEnabled()) {
-                        if(Utils::difftime($contestdata['starttime']['value'], $time)>Utils::DAY_IN_SECONDS) {
+                    if ($timeField === 'activate' && $contest->getStarttimeEnabled()) {
+                        if (Utils::difftime($contestdata['starttime']['value'], $time)>Utils::DAY_IN_SECONDS) {
                             $timeIcon  = 'calendar-minus';
                         };
-                    } elseif($timeField === 'end' && $contest->getStarttimeEnabled()) {
-                        if(Utils::difftime($time, $startTime)>Utils::DAY_IN_SECONDS) {
+                    } elseif ($timeField === 'end' && $contest->getStarttimeEnabled()) {
+                        if (Utils::difftime($time, $startTime)>Utils::DAY_IN_SECONDS) {
                             $timeIcon  = 'calendar-plus';
                         };
                     }
@@ -343,7 +343,7 @@ class ContestController extends BaseController
                 $contestdata[$timeField . 'time']['value']     = $timeValue;
                 $contestdata[$timeField . 'time']['sortvalue'] = $time;
                 $contestdata[$timeField . 'time']['title']     = $timeTitle;
-                if($timeIcon !== null) {
+                if ($timeIcon !== null) {
                     $contestdata[$timeField . 'time']['icon']  = $timeIcon;
                 }
             }

@@ -1398,7 +1398,7 @@ class DOMJudgeService
         // TODO: Reduce duplication with judgedaemon code.
         $contents = explode("\n", $raw_metadata);
         $res = [];
-        foreach($contents as $line) {
+        foreach ($contents as $line) {
             if (strpos($line, ":") !== false) {
                 [$key, $value] = explode(":", $line, 2);
                 $res[$key] = trim($value);
