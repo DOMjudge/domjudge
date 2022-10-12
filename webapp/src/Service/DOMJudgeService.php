@@ -735,7 +735,6 @@ class DOMJudgeService
             ->getQuery()
             ->getResult();
 
-
         $zip = new ZipArchive();
         if (!($tempFilename = tempnam($this->getDomjudgeTmpDir(), "export-"))) {
             throw new ServiceUnavailableHttpException(null, 'Could not create temporary file.');
@@ -1354,7 +1353,6 @@ class DOMJudgeService
                 case 'logo':
                     return $this->assetPath($useExternalid ? $entity->getExternalid() : (string)$entity->getAffilid(), 'affiliation', true, $forceExtension);
             }
-
         } elseif ($entity instanceof Contest) {
             switch ($property) {
                 case 'banner':

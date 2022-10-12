@@ -233,7 +233,6 @@ class UserRegistrationType extends AbstractType
                                 $context->buildViolation('This affiliation '.strtolower($identifier).' is already in use.')
                                     ->atPath('affiliation'.$identifier)
                                     ->addViolation();
-
                             }
                         }
                         break;

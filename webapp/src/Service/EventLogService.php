@@ -248,7 +248,6 @@ class EventLogService implements ContainerAwareInterface
             [ $type, $dataidsCombined, $action, $contestId, $json, $idsCombined ]
         );
 
-
         // Gracefully fail since we may call this from the generic
         // jury/edit.php page where we don't know which table gets updated.
         if (array_key_exists($type, $this->apiEndpoints)) {

@@ -139,7 +139,6 @@ class MetricsController extends AbstractFOSRestController
             $m['teams_logged_in']->set($teams_logged_in, $labels);
         }
 
-
         // Kinda ugly that we have to go to the registry directly to get the metrics out for
         // rendering, but it seems to work well enough.
         $renderer = new RenderTextFormat();

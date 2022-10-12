@@ -178,7 +178,6 @@ class StatisticsService
                     $s->getProblem()->getProbId());
                 $misc['problem_stats']['teams_attempted'][$s->getProblem()->getProbId()][$team->getTeamId()] = $team->getTeamId();
 
-
                 static::setOrIncrement($misc['language_stats']['total_submissions'],
                     $s->getLanguage()->getLangid());
                 $misc['language_stats']['teams_attempted'][$s->getLanguage()->getLangid()][$team->getTeamId()] = $team->getTeamId();
@@ -313,7 +312,6 @@ class StatisticsService
             return ($a->getJudgingid() < $b->getJudgingid()) ? -1 : 1;
         });
 
-
         $misc = [];
         $misc['correct_percentage'] = array_key_exists('correct',
             $results) ? ($results['correct'] / count($judgings)) * 100.0 : 0;
@@ -383,7 +381,6 @@ class StatisticsService
             }
             return ($a->getSubmitTime() < $b->getSubmitTime()) ? -1 : 1;
         });
-
 
         $misc = [];
         $teamsCorrect = [];

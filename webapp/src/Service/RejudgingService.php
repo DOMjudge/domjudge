@@ -85,7 +85,6 @@ class RejudgingService
             $this->em->flush();
         }
 
-
         $log = '';
         $singleJudging = (count($judgings) == 1);
         $index = 0;
