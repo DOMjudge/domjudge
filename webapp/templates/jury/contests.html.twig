@@ -93,9 +93,6 @@
         <p>
             {{ button(path('jury_contest_add'), 'Add new contest', 'primary', 'plus') }}
             {{ button(path('jury_import_export', {'_fragment':'contests'}), 'Import contest', 'primary', 'upload') }}
-            <button type="submit" form="multidelete" class="btn btn-danger" name="multidelete_submit">
-                <i class="fa fa-trash"></i> Remove selected contests
-            </button>
         </p>
     {% endif %}
 
