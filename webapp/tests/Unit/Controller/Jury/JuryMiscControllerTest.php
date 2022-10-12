@@ -99,7 +99,7 @@ class JuryMiscControllerTest extends BaseTest
             foreach($elements as $selector) {
                 self::assertSelectorExists('body:contains("'.$selector.'")');
             }
-            if (in_array($contestStage,['preFreeze','preEnd']) && $public) {
+            if (in_array($contestStage, ['preFreeze','preEnd']) && $public) {
                 self::assertSelectorExists('span.submcorrect:contains("1")');
                 if (in_array($contestStage, ['preEnd','preUnfreeze'])) {
                     self::assertSelectorExists('span.submpend:contains("1")');
@@ -109,12 +109,12 @@ class JuryMiscControllerTest extends BaseTest
                 }
             }
         }
-        foreach(range(1,3) as $id) {
+        foreach(range(1, 3) as $id) {
             $statusCode = in_array($contestStage, ['preActivation','preStart','postDeactivate']) || !$public ? 404 : 200;
-            $this->verifyPageResponse('HEAD', '/public/problems/'.$id.'/text',$statusCode);
+            $this->verifyPageResponse('HEAD', '/public/problems/'.$id.'/text', $statusCode);
         }
         $this->verifyPageResponse('GET', '/public/problems', 200);
-        if (in_array($contestStage, array_merge(['preStart'],$nonActiveStages)) || !$public) {
+        if (in_array($contestStage, array_merge(['preStart'], $nonActiveStages)) || !$public) {
             self::assertSelectorExists('body:contains("No problem texts available at this point.")');
             self::assertSelectorNotExists('body:contains("boolfind")');
         } else {
@@ -147,7 +147,7 @@ class JuryMiscControllerTest extends BaseTest
             ] as $ident=>$timeFixture) {
             foreach([true,false] as $public) {
                 $fixture = $public ? [] : [DemoNonPublicContestFixture::class];
-                yield [array_merge($fixture,$timeFixture),$public, $ident];
+                yield [array_merge($fixture, $timeFixture),$public, $ident];
             }
         }
     }

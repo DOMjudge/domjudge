@@ -36,9 +36,9 @@ class ControllerRolesTraversalTest extends BaseTest
         $dataSources = $this->getDatasourceLoops()['dataSources'];
         $riskyURLs = [];
         if(array_key_exists('CRAWL_RISKY', getenv())) {
-            $riskyURLs = explode(',',getenv('CRAWL_RISKY'));
+            $riskyURLs = explode(',', getenv('CRAWL_RISKY'));
         } elseif(!array_key_exists('CRAWL_ALL', getenv())) {
-            $riskyURLs = array_slice(self::$riskyURLs,0,1);
+            $riskyURLs = array_slice(self::$riskyURLs, 0, 1);
         }
         return ['dataSources' => $dataSources, 'riskyURLs' => $riskyURLs];
     }
@@ -110,7 +110,7 @@ class ControllerRolesTraversalTest extends BaseTest
         foreach($tmp as $possUrl) {
             if(!$this->urlExcluded($possUrl, $skip)) {
                 $ret[] = $possUrl;
-                if(strpos($possUrl,'#') === false) {
+                if(strpos($possUrl, '#') === false) {
                     $ret[] = $possUrl.'#';
                 }
             }
