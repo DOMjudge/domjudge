@@ -213,7 +213,7 @@ class ContestController extends BaseController
                 ->groupBy('i.contest')
                 ->getQuery()
                 ->getResult();
-            $removedIntervals = Utils::reindex($removedIntervals, function($data) {
+            $removedIntervals = Utils::reindex($removedIntervals, function ($data) {
                 return $data['cid'];
             });
         } else {
@@ -516,7 +516,7 @@ class ContestController extends BaseController
             // overcomplicate this function.
             // Note that getSnapshot() returns the data as retrieved from the
             // database.
-            $getDeletedEntities = function(Collection $collection, string $idMethod) {
+            $getDeletedEntities = function (Collection $collection, string $idMethod) {
                 /** @var PersistentCollection $collection */
                 $deletedEntities = [];
                 foreach ($collection->getSnapshot() as $oldEntity) {

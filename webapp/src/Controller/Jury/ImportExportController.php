@@ -435,7 +435,7 @@ class ImportExportController extends BaseController
 
         $collator = new Collator('en_US');
         $collator->sort($honorable);
-        usort($ranked, function(array $a, array $b) use ($collator): int {
+        usort($ranked, function (array $a, array $b) use ($collator): int {
             if ($a['rank'] !== $b['rank']) {
                 return $a['rank'] <=> $b['rank'];
             }

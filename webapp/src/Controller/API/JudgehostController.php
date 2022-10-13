@@ -821,7 +821,7 @@ class JudgehostController extends AbstractFOSRestController
 
         if ($field_name !== null) {
             // Disable any outstanding judgetasks with the same script that have not been claimed yet.
-            $this->em->wrapInTransaction(function (EntityManager $em) use($field_name, $disabled_id, $error) {
+            $this->em->wrapInTransaction(function (EntityManager $em) use ($field_name, $disabled_id, $error) {
                 $judgingids = $em->getConnection()->executeQuery(
                     'SELECT DISTINCT jobid'
                     . ' FROM judgetask'
@@ -1389,7 +1389,7 @@ class JudgehostController extends AbstractFOSRestController
         // This is case 2.a) from above: start something new.
         // This runs transactional to prevent a queue task being picked up twice.
         $judgetasks = null;
-        $this->em->wrapInTransaction(function() use ($judgehost, $max_batchsize, &$judgetasks) {
+        $this->em->wrapInTransaction(function () use ($judgehost, $max_batchsize, &$judgetasks) {
             $jobid = $this->em->createQueryBuilder()
                 ->from(QueueTask::class, 'qt')
                 ->select('qt.jobid')

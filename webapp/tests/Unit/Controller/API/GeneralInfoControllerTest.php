@@ -125,7 +125,7 @@ class GeneralInfoControllerTest extends BaseTest
      */
     public function testCountryFlagExists(string $countryCode, string $size): void
     {
-        $this->withChangedConfiguration('show_flags', true, function() use ($countryCode, $size) {
+        $this->withChangedConfiguration('show_flags', true, function () use ($countryCode, $size) {
             $this->client->request('GET', "/api/country-flags/$countryCode/$size");
             /** @var BinaryFileResponse $response */
             $response = $this->client->getResponse();
@@ -157,7 +157,7 @@ class GeneralInfoControllerTest extends BaseTest
      */
     public function testCountryFlagNotFound(string $countryCode, string $size): void
     {
-        $this->withChangedConfiguration('show_flags', true, function() use ($countryCode, $size) {
+        $this->withChangedConfiguration('show_flags', true, function () use ($countryCode, $size) {
             $this->client->request('GET', "/api/country-flags/$countryCode/$size");
             /** @var BinaryFileResponse $response */
             $response = $this->client->getResponse();
@@ -179,7 +179,7 @@ class GeneralInfoControllerTest extends BaseTest
      */
     public function testCountryNotFound(string $countryCode, string $size): void
     {
-        $this->withChangedConfiguration('show_flags', true, function() use ($countryCode, $size) {
+        $this->withChangedConfiguration('show_flags', true, function () use ($countryCode, $size) {
             $this->client->request('GET', "/api/country-flags/$countryCode/$size");
             /** @var BinaryFileResponse $response */
             $response = $this->client->getResponse();

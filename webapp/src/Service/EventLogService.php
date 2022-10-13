@@ -747,7 +747,7 @@ class EventLogService implements ContainerAwareInterface
                 });
 
                 // Insert the events.
-                $ids = array_map(function(array $row) {
+                $ids = array_map(function (array $row) {
                     return $row['id'];
                 }, $data);
                 $this->insertEvents($contest, $endpoint, $ids, $data);
@@ -835,7 +835,7 @@ class EventLogService implements ContainerAwareInterface
      */
     protected function getExistingEvents(array $events): array
     {
-        $endpointIds = array_map(function(Event $event) {
+        $endpointIds = array_map(function (Event $event) {
             return $event->getEndpointid();
         }, $events);
         /** @var Event[] $events */
@@ -856,7 +856,7 @@ class EventLogService implements ContainerAwareInterface
             ->getQuery()
             ->getResult();
 
-        return array_filter($events, function(Event $event) {
+        return array_filter($events, function (Event $event) {
             return $event->getAction() !== self::ACTION_DELETE;
         });
     }

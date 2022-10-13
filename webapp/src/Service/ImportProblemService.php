@@ -599,7 +599,7 @@ class ImportProblemService
         }
 
         $this->em->persist($problem);
-        $this->em->wrapInTransaction(function() use ($testcases, $startRank) {
+        $this->em->wrapInTransaction(function () use ($testcases, $startRank) {
             $this->em->flush();
             // Set actual ranks if needed.
             if ($startRank !== 1) {

@@ -103,7 +103,7 @@ class ProblemController extends BaseController
      */
     public function sampleZipAction(int $probId): StreamedResponse
     {
-        return $this->getBinaryFile($probId, function(int $probId, Contest $contest, ContestProblem $contestProblem) {
+        return $this->getBinaryFile($probId, function (int $probId, Contest $contest, ContestProblem $contestProblem) {
             return $this->dj->getSamplesZipStreamedResponse($contestProblem);
         });
     }

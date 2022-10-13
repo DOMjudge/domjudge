@@ -599,7 +599,7 @@ class ScoreboardService
         $this->dj->auditlog('contest', $contest->getCid(), 'refresh scoreboard cache');
 
         if ($progressReporter === null) {
-            $progressReporter = function($data) {};
+            $progressReporter = function ($data) {};
         }
 
         $queryBuilder = $this->em->createQueryBuilder()
