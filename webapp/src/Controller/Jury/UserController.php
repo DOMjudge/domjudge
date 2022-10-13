@@ -214,7 +214,8 @@ class UserController extends BaseController
         ]);
     }
 
-    public function checkPasswordLength(User $user, FormInterface $form): ?Response {
+    public function checkPasswordLength(User $user, FormInterface $form): ?Response
+    {
         if ($user->getPlainPassword() && strlen($user->getPlainPassword()) < static::MIN_PASSWORD_LENGTH) {
             $this->addFlash('danger', "Password should be " . static::MIN_PASSWORD_LENGTH . "+ chars.");
             return $this->render('jury/user_edit.html.twig', [

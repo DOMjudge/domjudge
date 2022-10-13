@@ -217,7 +217,8 @@ abstract class JuryControllerTest extends BaseTest
         }
     }
 
-    public function helperCheckExistence(string $id, $value, array $element): void {
+    public function helperCheckExistence(string $id, $value, array $element): void
+    {
         if (in_array($id, static::$addEntitiesShown)) {
             $tmpValue = $element[$id];
             if (is_bool($value)) {

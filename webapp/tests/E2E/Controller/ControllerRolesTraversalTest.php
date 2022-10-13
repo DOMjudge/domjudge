@@ -206,7 +206,8 @@ class ControllerRolesTraversalTest extends BaseTest
         $this->verifyAccess($combinations, $urlsToCheck, $skip);
     }
 
-    public function visitWithNoContest(string $url, bool $dropdown): void {
+    public function visitWithNoContest(string $url, bool $dropdown): void
+    {
         // We only care for the outcome, shorten the code by skipping steps.
         $this->client->followRedirects(true);
         // Explicit set no active contest.
