@@ -487,8 +487,7 @@ class ScoreboardIntegrationTest extends KernelTestCase
         float $contest_time_seconds,
         $verdict,
         bool $verified = false
-    ): Submission
-    {
+    ): Submission {
         $cp = $this->em->getRepository(ContestProblem::class)->find(
             [ 'contest' => $this->contest, 'problem' => $problem ]
         );

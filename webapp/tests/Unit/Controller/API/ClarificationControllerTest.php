@@ -214,8 +214,7 @@ class ClarificationControllerTest extends BaseTest
         ?int $expectedRecipientId,
         ?string $expectedClarificationExternalId, // If known
         ?string $expectedTime // If known
-    ): void
-    {
+    ): void {
         if (isset($dataToSend['problem_id'])) {
             $dataToSend['problem_id'] = $this->resolveEntityId(Problem::class, $dataToSend['problem_id']);
         }
