@@ -178,8 +178,7 @@ abstract class BaseController extends AbstractController
         EntityManagerInterface $entityManager,
         array $primaryKeyData,
         EventLogService $eventLogService
-    ): void
-    {
+    ): void {
         // Used to remove data from the rank and score caches.
         $teamId = null;
         if ($entity instanceof Team) {
@@ -262,8 +261,7 @@ abstract class BaseController extends AbstractController
         array $entities,
         array $relations,
         EntityManagerInterface $entityManager
-    ): array
-    {
+    ): array {
         $isError          = false;
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         $inflector        = InflectorFactory::create()->build();

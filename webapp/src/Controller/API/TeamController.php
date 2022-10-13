@@ -43,8 +43,7 @@ class TeamController extends AbstractRestController
         ConfigurationService $config,
         EventLogService $eventLogService,
         AssetUpdateService $assetUpdater
-    )
-    {
+    ) {
         parent::__construct($entityManager, $dj, $config, $eventLogService);
         $this->assetUpdater = $assetUpdater;
     }
