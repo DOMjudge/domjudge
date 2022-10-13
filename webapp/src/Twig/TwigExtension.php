@@ -226,13 +226,13 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
     public static function printLazyMode(?int $val): string
     {
         switch ($val) {
-            case false;
+            case false:
                 return "-";
-            case DOMJudgeService::EVAL_DEMAND;
+            case DOMJudgeService::EVAL_DEMAND:
                 return "On demand";
-            case DOMJudgeService::EVAL_FULL;
+            case DOMJudgeService::EVAL_FULL:
                 return "No";
-            case DOMJudgeService::EVAL_LAZY;
+            case DOMJudgeService::EVAL_LAZY:
                 return "Yes";
             default:
                 return "Unknown mode $val";
