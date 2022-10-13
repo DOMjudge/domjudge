@@ -370,7 +370,11 @@ class ExternalContestSourceService
         $skipEventsUpTo = $this->getLastReadEventId();
 
         $this->readEventsFromFile($file,
-            function (array $event, string $line, &$shouldStop) use (
+            function (
+                array $event,
+                string $line,
+                &$shouldStop
+            ) use (
                 $eventsToSkip,
                 $file,
                 &$skipEventsUpTo,
