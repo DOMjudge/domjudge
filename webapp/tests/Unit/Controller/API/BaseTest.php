@@ -126,7 +126,8 @@ abstract class BaseTest extends BaseBaseTest
         return json_decode($response, true);
     }
 
-    public function helperGetEndpointURL(string $apiEndpoint, ?string $id = null): string {
+    public function helperGetEndpointURL(string $apiEndpoint, ?string $id = null): string
+    {
         if (in_array($apiEndpoint, static::$rootEndpoints)) {
             $url = "/$apiEndpoint";
         } else {

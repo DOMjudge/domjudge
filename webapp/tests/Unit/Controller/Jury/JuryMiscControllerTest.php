@@ -157,7 +157,8 @@ class JuryMiscControllerTest extends BaseTest
      *
      * @dataProvider provideJuryAjax
      */
-    public function testJuryAjax(string $endpoint, int $status, array $newRoles, array $finalObject): void {
+    public function testJuryAjax(string $endpoint, int $status, array $newRoles, array $finalObject): void
+    {
         $url = '/jury/ajax/'.$endpoint;
         $this->roles = $newRoles;
         $this->logOut();
