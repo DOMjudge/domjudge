@@ -47,9 +47,13 @@ class PublicControllerTest extends BaseTest
         $this->verifyPageResponse('GET', static::$urlRegister, 403);
     }
 
-    private function setupSelfRegisterForm(array $inputs, array $fixtures, string $password,
-                                           string $category="", string $secondPassword="same"): array
-    {
+    private function setupSelfRegisterForm(
+        array $inputs,
+        array $fixtures,
+        string $password,
+        string $category="",
+        string $secondPassword="same"
+): array {
         $this->loadFixtures($fixtures);
         $this->logOut();
         $this->verifyPageResponse('GET', static::$urlRegister, 200);
@@ -164,9 +168,13 @@ class PublicControllerTest extends BaseTest
     /**
      * @dataProvider selfRegisterWrongPasswordProvider
      */
-    public function testSelfRegisterWrongPassword(array $inputs, string $password, array $fixtures,
-                                                  string $category, string $secondPassword): void
-    {
+    public function testSelfRegisterWrongPassword(
+        array $inputs,
+        string $password,
+        array $fixtures,
+        string $category,
+        string $secondPassword
+): void {
         $formFields = $this->setupSelfRegisterForm($inputs, $fixtures, $password, $category, $secondPassword);
         $selector = 'html:contains("The password fields must match.")';
         self::assertSelectorNotExists($selector);
