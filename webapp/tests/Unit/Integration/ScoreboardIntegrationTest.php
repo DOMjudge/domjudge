@@ -408,7 +408,7 @@ class ScoreboardIntegrationTest extends KernelTestCase
         }
     }
 
-    function assertScoresMatch($expected_scores, $scoreboard)
+    protected function assertScoresMatch($expected_scores, $scoreboard)
     {
         $scores = $scoreboard->getScores();
 
@@ -425,7 +425,7 @@ class ScoreboardIntegrationTest extends KernelTestCase
         }
     }
 
-    function assertFTSMatch($expected_fts, $scoreboard)
+    protected function assertFTSMatch($expected_fts, $scoreboard)
     {
         $matrix = $scoreboard->getMatrix();
         $teams = [];
@@ -452,13 +452,13 @@ class ScoreboardIntegrationTest extends KernelTestCase
         }
     }
 
-    function recalcScoreCaches()
+    protected function recalcScoreCaches()
     {
         $this->em->flush();
         $this->ss->refreshCache($this->contest);
     }
 
-    function createDefaultSubmissions()
+    protected function createDefaultSubmissions()
     {
         $lang = $this->em->getRepository(Language::class)->find('cpp');
 
@@ -480,7 +480,7 @@ class ScoreboardIntegrationTest extends KernelTestCase
         // No submissions for $this->teams[2]
     }
 
-    function createSubmission(
+    protected function createSubmission(
         Language $language,
         Problem $problem,
         Team $team,
@@ -526,12 +526,12 @@ class ScoreboardIntegrationTest extends KernelTestCase
         return $submission;
     }
 
-    function setConfig(string $name, $value)
+    public function setConfig(string $name, $value)
     {
         $this->configValues[$name] = $value;
     }
 
-    function getConfig(string $name)
+    public function getConfig(string $name)
     {
         if (!array_key_exists($name, $this->configValues)) {
             throw new Exception("No configuration value set for '$name'");
