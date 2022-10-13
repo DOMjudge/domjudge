@@ -714,7 +714,7 @@ class RejudgingController extends BaseController
             flush();
         };
 
-        return $this->streamResponse(function() use ($priority, $progressReporter, $repeat, $reason, $request, $autoApply, $includeAll, $id, $table, $tablemap) {
+        return $this->streamResponse(function () use ($priority, $progressReporter, $repeat, $reason, $request, $autoApply, $includeAll, $id, $table, $tablemap) {
             // Only rejudge submissions in active contests.
             $contests = $this->dj->getCurrentContests();
 

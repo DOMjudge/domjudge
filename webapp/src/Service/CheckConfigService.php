@@ -701,7 +701,7 @@ class CheckConfigService
                     $selfRegistrationCategories[0]->getName());
             } else {
                 $desc .= sprintf("Team categories allowed for self-registered teams: %s.\n",
-                    implode(', ', array_map(function($category) {
+                    implode(', ', array_map(function ($category) {
                         return $category->getName();
                     }, $selfRegistrationCategories)));
             }
