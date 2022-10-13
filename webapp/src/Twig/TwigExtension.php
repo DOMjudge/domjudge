@@ -996,8 +996,10 @@ EOF;
         $m = current($m);
         switch (count($m)) {
             case 4:
-                // We also have opacity; load that.
+                // We also have opacity; load that and use
+                // RGB of case 3
                 $opacity = hexdec(array_pop($m));
+                // no-break
             case 3:
                 $vals   = array_map("hexdec", $m);
                 $vals[] = $opacity;
