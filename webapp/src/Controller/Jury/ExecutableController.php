@@ -457,7 +457,7 @@ class ExecutableController extends BaseController
         $ranks          = [];
 
         $files = $immutable_executable->getFiles()->toArray();
-        usort($files, fn($a,$b) => $a->getFilename() <=> $b->getFilename());
+        usort($files, fn($a, $b) => $a->getFilename() <=> $b->getFilename());
         foreach ($files as $file) {
             /** @var ExecutableFile $file */
             $filename = $file->getFilename();
