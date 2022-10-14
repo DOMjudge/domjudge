@@ -922,15 +922,17 @@ class ProblemController extends BaseController
                     return $this->redirectToRoute('jury_problem', ['probId' => $problem->getProbid()]);
                 }
             } catch (Exception $e) {
-                $messages[] = $e->getMessage();
+                $messages['danger'][] = $e->getMessage();
             } finally {
                 if (isset($zip)) {
                     $zip->close();
                 }
             }
 
-            if (!empty($messages)) {
-                $this->addFlash('info', implode("\n", $messages));
+            foreach (['info', 'warning', 'danger'] as $type) {
+                if (!empty($messages[$type])) {
+                    $this->addFlash($type, implode("\n", $messages[$type]));
+                }
             }
 
             return $this->redirectToRoute('jury_problem', ['probId' => $problem->getProbid()]);
