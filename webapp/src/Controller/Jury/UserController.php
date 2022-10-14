@@ -130,7 +130,9 @@ class UserController extends BaseController
 
             // Render IP address nicely.
             foreach (['ip_address', 'last_ip_address'] as $field) {
-                if (!array_key_exists($field, $userdata)) continue;
+                if (!array_key_exists($field, $userdata)) {
+                    continue;
+                }
                 if ($userdata[$field]['value']) {
                     $userdata[$field]['value'] = Utils::printhost($userdata[$field]['value']);
                 }

@@ -302,7 +302,9 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
 
     public function countryFlag(?string $alpha3CountryCode, bool $showFullname = false): string
     {
-        if (empty($alpha3CountryCode)) return '';
+        if (empty($alpha3CountryCode)) {
+            return '';
+        }
 
         try {
             $countryAlpha2 = strtolower(Countries::getAlpha2Code($alpha3CountryCode));

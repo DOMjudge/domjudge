@@ -257,7 +257,9 @@ class ClarificationController extends AbstractController
             }
 
             foreach ($contestproblems as $cp) {
-                if ($cp->getCid()!=$cid) continue;
+                if ($cp->getCid()!=$cid) {
+                    continue;
+                }
                 $subject_options[$cshort]["$cid-" . $cp->getProbid()] =
                     $cshort . ' - ' .$cp->getShortname() . ': ' . $cp->getProblem()->getName();
             }
