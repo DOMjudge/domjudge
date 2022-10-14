@@ -42,7 +42,9 @@ class UserStateUpdater implements EventSubscriberInterface
 
             // Only log IP address on the main firewall.
             // Otherwise, we would log every API call and we do not want that.
-            if (method_exists($event->getAuthenticationToken(), 'getFirewallName') && $event->getAuthenticationToken()->getFirewallName() === 'main') {
+            if (method_exists($event->getAuthenticationToken(), 'getFirewallName')
+                && $event->getAuthenticationToken()->getFirewallName() === 'main'
+            ) {
                 $ip = $this->requestStack->getMainRequest()->getClientIp();
                 $this->dj->auditlog('user', $user->getUserid(), 'logged on on ' . $ip, null, $user->getUserName());
             }

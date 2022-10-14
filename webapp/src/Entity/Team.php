@@ -67,7 +67,8 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
     private string $name = '';
 
     /**
-     * @ORM\Column(type="string", name="display_name", length=255, options={"comment"="Team display name", "collation"="utf8mb4_bin"},
+     * @ORM\Column(type="string", name="display_name", length=255,
+     *     options={"comment"="Team display name", "collation"="utf8mb4_bin"},
      *                            nullable=true)
      * @OA\Property(nullable=true)
      */
@@ -83,7 +84,8 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
     private bool $enabled = true;
 
     /**
-     * @ORM\Column(type="text", length=4294967295, name="publicdescription", options={"comment"="Public team definition; for example: Team member names (freeform)"},
+     * @ORM\Column(type="text", length=4294967295, name="publicdescription",
+     *     options={"comment"="Public team definition; for example: Team member names (freeform)"},
      *                          nullable=true)
      * @Serializer\Groups({"Nonstrict"})
      * @OA\Property(nullable=true)
@@ -98,7 +100,8 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
     private ?string $room;
 
     /**
-     * @ORM\Column(type="text", length=4294967295, name="internalcomments", options={"comment"="Internal comments about this team (jury only)"},
+     * @ORM\Column(type="text", length=4294967295, name="internalcomments",
+     *     options={"comment"="Internal comments about this team (jury only)"},
      *                          nullable=true)
      * @Serializer\Exclude()
      */
