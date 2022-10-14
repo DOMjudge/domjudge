@@ -16,6 +16,7 @@ function check_sigterm() {
     printf "\033[31;1mSolution didn't receive SIGTERM\033[0m\n"
     exit 1
   fi
+  printf "\033[32;1mok\033[0m\n"
 }
 
 function run_test() {

@@ -241,6 +241,10 @@ struct process_t {
       error(errno, "failed to execute command #%ld", index);
     }
     logmsg(LOG_DEBUG, "started #%ld, pid %d", index, pid);
+    // Do not leak these file descriptors, otherwise we cannot detect if the
+    // process has closed stdout.
+    close(stdin);
+    close(stdout);
   }
 
   // Function called when the process exits.
@@ -254,7 +258,6 @@ struct process_t {
   void close_fds() {
     // First, close the pipes coming into the process (i.e. stdin).
     logmsg(LOG_DEBUG, "closing fd: %d (stdin) of %d", stdin, pid);
-    close(stdin);
     if (proxy_to_process != -1) {
       logmsg(LOG_DEBUG, "closing fd: %d (proxy -> process) of %d",
              proxy_to_process, pid);
@@ -264,7 +267,6 @@ struct process_t {
     // coming out of there. This will make sure all the pipes are closed.
     if (exited) {
       logmsg(LOG_DEBUG, "closing fd: %d (stdout) of %d", stdout, pid);
-      close(stdout);
       if (process_to_proxy != -1) {
         logmsg(LOG_DEBUG, "closing fd: %d (process -> proxy) of %d",
                process_to_proxy, pid);
@@ -748,7 +750,7 @@ struct state_t {
   // The pipe connecting from -> to has some data ready. Consume it reading as
   // much as possible, copy it to the target process and write it to the output
   // file.
-  void pump_proxy_pipe(const process_t &from, const process_t &to,
+  void pump_proxy_pipe(const process_t &from, process_t &to,
                        output_file_t &output_file) {
     const size_t BUF_SIZE = 1024 * 1024;
     char buffer[BUF_SIZE];
@@ -759,6 +761,9 @@ struct state_t {
       ssize_t nread = read(from.process_to_proxy, buffer, BUF_SIZE - 1);
       if (nread == 0) {
         warning(0, "EOF from process #%ld", from.index);
+        // The process closed stdout, we need to close our file descriptors as
+        // well.
+        to.close_fds();
         return;
       }
       if (nread < 0) {
@@ -827,7 +832,7 @@ struct state_t {
           if (fd != from.process_to_proxy) {
             continue;
           }
-          const auto &to = processes[(i + 1) % processes.size()];
+          auto &to = processes[(i + 1) % processes.size()];
           // Do not write to an exited process.
           if (to.exited) {
             break;
