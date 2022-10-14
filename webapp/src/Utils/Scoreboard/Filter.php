@@ -34,10 +34,18 @@ class Filter
     public function getFilteredOn(): string
     {
         $filteredOn = [];
-        if ($this->affiliations) $filteredOn[] = 'affiliations';
-        if ($this->countries)    $filteredOn[] = 'countries';
-        if ($this->categories)   $filteredOn[] = 'categories';
-        if ($this->teams)        $filteredOn[] = 'teams';
+        if ($this->affiliations) {
+            $filteredOn[] = 'affiliations';
+        }
+        if ($this->countries) {
+            $filteredOn[] = 'countries';
+        }
+        if ($this->categories) {
+            $filteredOn[] = 'categories';
+        }
+        if ($this->teams) {
+            $filteredOn[] = 'teams';
+        }
 
         return implode(', ', $filteredOn);
     }

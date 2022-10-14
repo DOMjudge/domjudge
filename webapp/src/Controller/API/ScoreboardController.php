@@ -149,7 +149,9 @@ class ScoreboardController extends AbstractRestController
         }
 
         // Return early if there's nothing to display yet.
-        if (!$scoreboard) return $results;
+        if (!$scoreboard) {
+            return $results;
+        }
 
         $scoreIsInSeconds = (bool)$this->config->get('score_in_seconds');
 

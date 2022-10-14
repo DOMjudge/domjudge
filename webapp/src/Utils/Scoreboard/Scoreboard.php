@@ -327,8 +327,12 @@ class Scoreboard
         if (!isset($atimes[0]) && !isset($btimes[0])) {
             return 0;
         }
-        if (!isset($atimes[0])) return -1;
-        if (!isset($btimes[0])) return 1;
+        if (!isset($atimes[0])) {
+            return -1;
+        }
+        if (!isset($btimes[0])) {
+            return 1;
+        }
 
         throw new Exception('Unhandled tie breaker case.');
     }
