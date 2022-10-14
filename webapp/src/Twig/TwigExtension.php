@@ -43,15 +43,15 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
     protected string $projectDir;
 
     public function __construct(
-        DOMJudgeService               $dj,
-        ConfigurationService          $config,
-        Environment                   $twig,
-        EntityManagerInterface        $em,
-        SubmissionService             $submissionService,
-        EventLogService               $eventLogService,
-        TokenStorageInterface         $tokenStorage,
+        DOMJudgeService $dj,
+        ConfigurationService $config,
+        Environment $twig,
+        EntityManagerInterface $em,
+        SubmissionService $submissionService,
+        EventLogService $eventLogService,
+        TokenStorageInterface $tokenStorage,
         AuthorizationCheckerInterface $authorizationChecker,
-        string                        $projectDir
+        string $projectDir
     ) {
         $this->dj                   = $dj;
         $this->config               = $config;
@@ -245,11 +245,11 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
     }
 
     public function button(
-        string  $url,
-        string  $text,
-        string  $type = 'primary',
+        string $url,
+        string $text,
+        string $type = 'primary',
         ?string $icon = null,
-        bool    $isAjaxModal = false
+        bool $isAjaxModal = false
     ): string {
         if ($icon) {
             $icon = sprintf('<i class="fas fa-%s"></i>&nbsp;', $icon);
@@ -791,11 +791,11 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
      * @param string|null $filename If $language is null, filename to use to determine language
      */
     public function codeEditor(
-        string  $code,
-        string  $index,
+        string $code,
+        string $index,
         ?string $language = null,
-        bool    $editable = false,
-        string  $elementToUpdate = '',
+        bool $editable = false,
+        string $elementToUpdate = '',
         ?string $filename = null
     ): string {
         $editor = <<<HTML

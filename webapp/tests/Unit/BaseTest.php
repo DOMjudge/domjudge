@@ -29,10 +29,10 @@ abstract class BaseTest extends WebTestCase
     protected KernelBrowser $client;
 
     /** @var string[] */
-    protected array        $roles           = [];
+    protected array $roles                  = [];
     protected ?ORMExecutor $fixtureExecutor = null;
     /** @var string[] */
-    protected static array $fixtures = [];
+    protected static array $fixtures    = [];
     protected static array $dataSources = [DOMJudgeService::DATA_SOURCE_LOCAL,
                                            DOMJudgeService::DATA_SOURCE_CONFIGURATION_EXTERNAL,
                                            DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL];

@@ -10,20 +10,20 @@ use Symfony\Component\HttpFoundation\Request;
 
 class LanguagesControllerTest extends JuryControllerTest
 {
-    protected static string  $identifyingEditAttribute = 'name';
-    protected static ?string $defaultEditEntityName    = 'Java';
-    protected static string  $baseUrl                  = '/jury/languages';
-    protected static array   $exampleEntries           = ['c', 'csharp', 'Haskell', 'Bash shell', "pas, p", 'no', 'yes', 'R', 'r'];
-    protected static string  $shortTag                 = 'language';
-    protected static array   $deleteEntities           = ['C++','C#','C','Kotlin'];
-    protected static string  $deleteEntityIdentifier   = 'name';
-    protected static string  $getIDFunc                = 'getLangid';
-    protected static string  $className                = Language::class;
-    protected static array   $DOM_elements             = ['h1' => ['Languages']];
-    protected static ?string $addPlus                  = 'extensions';
-    protected static string  $addForm                  = 'language[';
-    protected static array   $addEntitiesShown         = ['langid', 'externalid', 'name', 'timefactor'];
-    protected static array   $addEntities              = [];
+    protected static string $identifyingEditAttribute = 'name';
+    protected static ?string $defaultEditEntityName   = 'Java';
+    protected static string $baseUrl                  = '/jury/languages';
+    protected static array $exampleEntries            = ['c', 'csharp', 'Haskell', 'Bash shell', "pas, p", 'no', 'yes', 'R', 'r'];
+    protected static string $shortTag                 = 'language';
+    protected static array $deleteEntities            = ['C++','C#','C','Kotlin'];
+    protected static string $deleteEntityIdentifier   = 'name';
+    protected static string $getIDFunc                = 'getLangid';
+    protected static string $className                = Language::class;
+    protected static array $DOM_elements              = ['h1' => ['Languages']];
+    protected static ?string $addPlus                 = 'extensions';
+    protected static string $addForm                  = 'language[';
+    protected static array $addEntitiesShown          = ['langid', 'externalid', 'name', 'timefactor'];
+    protected static array $addEntities               = [];
 
     public function testUnlockJudgeTasksFormEdit(): void
     {

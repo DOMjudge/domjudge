@@ -21,10 +21,10 @@ class PublicControllerTest extends BaseTest
     protected static string $urlUsers        = '/jury/users';
     protected static string $urlTeams        = '/jury/teams';
     protected static string $urlAffil        = '/jury/affiliations';
-    protected static array  $requiredFields  = ['teamName','affiliationName','affiliationShortName','existingAffiliation'];
-    protected static array  $formFields      = ['username','name','email','teamName','affiliation','affiliationName',
+    protected static array $requiredFields   = ['teamName','affiliationName','affiliationShortName','existingAffiliation'];
+    protected static array $formFields       = ['username','name','email','teamName','affiliation','affiliationName',
                                                 'affiliationShortName','affiliationCountry','existingAffiliation'];
-    protected static array  $duplicateFields = ['username'=>['input'=>'selfregister','error'=>'The username \'"selfregistered"\' is already in use.'],
+    protected static array $duplicateFields  = ['username'=>['input'=>'selfregister','error'=>'The username \'"selfregistered"\' is already in use.'],
                                                 'teamName'=>['input'=>'Example teamname','error'=>'This team name is already in use.'],
                                                 'affiliationName'=>['input'=>'Utrecht University','error'=>'This affiliation name is already in use.'],
                                                 'affiliationShortName'=>['input'=>'UU','error'=>'This affiliation shortname is already in use.']];
@@ -51,8 +51,8 @@ class PublicControllerTest extends BaseTest
         array $inputs,
         array $fixtures,
         string $password,
-        string $category="",
-        string $secondPassword="same"
+        string $category = "",
+        string $secondPassword = "same"
     ): array {
         $this->loadFixtures($fixtures);
         $this->logOut();

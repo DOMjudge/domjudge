@@ -40,11 +40,11 @@ class ExternalContestSourceController extends BaseController
     private ExternalContestSourceService $sourceService;
 
     public function __construct(
-        EntityManagerInterface       $em,
-        DOMJudgeService              $dj,
-        ConfigurationService         $config,
-        EventLogService              $eventLog,
-        KernelInterface              $kernel,
+        EntityManagerInterface $em,
+        DOMJudgeService $dj,
+        ConfigurationService $config,
+        EventLogService $eventLog,
+        KernelInterface $kernel,
         ExternalContestSourceService $sourceService
     ) {
         $this->em            = $em;

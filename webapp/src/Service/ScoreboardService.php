@@ -263,9 +263,9 @@ class ScoreboardService
      */
     public function calculateScoreRow(
         Contest $contest,
-        Team    $team,
+        Team $team,
         Problem $problem,
-        bool    $updateRankCache = true
+        bool $updateRankCache = true
     ): void {
         $this->logger->debug(
             "ScoreboardService::calculateScoreRow '%d' '%d' '%d'",

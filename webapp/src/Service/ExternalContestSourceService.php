@@ -82,14 +82,14 @@ class ExternalContestSourceService
     ];
 
     public function __construct(
-        HttpClientInterface    $httpClient,
-        DOMJudgeService        $dj,
+        HttpClientInterface $httpClient,
+        DOMJudgeService $dj,
         EntityManagerInterface $em,
-        LoggerInterface        $eventFeedImporterLogger,
-        ConfigurationService   $config,
-        EventLogService        $eventLog,
-        SubmissionService      $submissionService,
-        ScoreboardService      $scoreboardService
+        LoggerInterface $eventFeedImporterLogger,
+        ConfigurationService $config,
+        EventLogService $eventLog,
+        SubmissionService $submissionService,
+        ScoreboardService $scoreboardService
     ) {
         $clientOptions           = [
             'headers' => [
@@ -1803,13 +1803,13 @@ class ExternalContestSourceService
     }
 
     private function compareOrCreateValues(
-        ?string       $eventId,
-        string        $entityType,
-        ?string       $entityId,
+        ?string $eventId,
+        string $entityType,
+        ?string $entityId,
         BaseApiEntity $entity,
-        array         $values,
-        array         $extraDiff = [],
-        bool          $updateEntity = true
+        array $values,
+        array $extraDiff = [],
+        bool $updateEntity = true
     ): void {
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         $diff             = [];
@@ -1886,7 +1886,7 @@ class ExternalContestSourceService
         string $entityType,
         ?string $entityId,
         string $type,
-        array  $content = []
+        array $content = []
     ): void {
         $hash       = ExternalSourceWarning::calculateHash($type, $entityType, $entityId);
         $warning    = $this->em
