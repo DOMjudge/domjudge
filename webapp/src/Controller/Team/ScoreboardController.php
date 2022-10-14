@@ -52,7 +52,13 @@ class ScoreboardController extends BaseController
         $contest    = $this->dj->getCurrentContest($user->getTeam()->getTeamid());
         $refreshUrl = $this->generateUrl('team_scoreboard');
         $data       = $this->scoreboardService->getScoreboardTwigData(
-            $request, $response, $refreshUrl, false, false, false, $contest
+            $request,
+            $response,
+            $refreshUrl,
+            false,
+            false,
+            false,
+            $contest
         );
         $data['myTeamId'] = $user->getTeam()->getTeamid();
 

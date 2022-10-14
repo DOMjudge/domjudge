@@ -264,19 +264,22 @@ class EventLogService implements ContainerAwareInterface
 
         if (!isset($endpoint)) {
             $this->logger->warning(
-                "EventLogService::log: invalid endpoint '%s' specified", [ $type ]
+                "EventLogService::log: invalid endpoint '%s' specified",
+                [ $type ]
             );
             return;
         }
         if (!in_array($action, [self::ACTION_CREATE, self::ACTION_UPDATE, self::ACTION_DELETE])) {
             $this->logger->warning(
-                "EventLogService::log: invalid action '%s' specified", [ $action ]
+                "EventLogService::log: invalid action '%s' specified",
+                [ $action ]
             );
             return;
         }
         if ($endpoint[self::KEY_URL] === null) {
             $this->logger->warning(
-                "EventLogService::log: no endpoint for '%s', ignoring", [ $type ]
+                "EventLogService::log: no endpoint for '%s', ignoring",
+                [ $type ]
             );
             return;
         }
@@ -384,7 +387,8 @@ class EventLogService implements ContainerAwareInterface
 
             if ($json === null) {
                 $this->logger->warning(
-                    "EventLogService::log got no JSON data from '%s'", [ $url ]
+                    "EventLogService::log got no JSON data from '%s'",
+                    [ $url ]
                 );
                 // If we didn't get data from the API, then that is probably
                 // because this particular data is not visible, for example
@@ -610,13 +614,16 @@ class EventLogService implements ContainerAwareInterface
 
         // Now we can insert the event. However, before doing so,
         // get an advisory lock to make sure no one else is doing the same.
-        $lockString = sprintf('domjudge.eventlog.%d.%s.%s',
+        $lockString = sprintf(
+            'domjudge.eventlog.%d.%s.%s',
             $firstEvent->getContest()->getCid(),
             $endpointType,
             $firstEndpointId
         );
-        if ($this->em->getConnection()->fetchOne('SELECT GET_LOCK(:lock, 1)',
-                ['lock' => $lockString]) != 1) {
+        if ($this->em->getConnection()->fetchOne(
+            'SELECT GET_LOCK(:lock, 1)',
+            ['lock' => $lockString]
+        ) != 1) {
             throw new Exception('EventLogService::insertEvent failed to obtain lock: ' . $lockString);
         }
 
@@ -651,8 +658,10 @@ class EventLogService implements ContainerAwareInterface
         $this->em->flush();
 
         // Make sure to release the lock again.
-        if ($this->em->getConnection()->fetchOne('SELECT RELEASE_LOCK(:lock)',
-                ['lock' => $lockString]) != 1) {
+        if ($this->em->getConnection()->fetchOne(
+            'SELECT RELEASE_LOCK(:lock)',
+            ['lock' => $lockString]
+        ) != 1) {
             throw new Exception('EventLogService::insertEvent failed to release lock');
         }
     }
@@ -694,8 +703,11 @@ class EventLogService implements ContainerAwareInterface
 
                 // Do an internal API request to the overview URL
                 // of the endpoint to get current data.
-                $url = sprintf('/contests/%s%s', $contestId,
-                               $endpointData[EventLogService::KEY_URL]);
+                $url = sprintf(
+                    '/contests/%s%s',
+                    $contestId,
+                    $endpointData[EventLogService::KEY_URL]
+                );
                 $this->dj->withAllRoles(function () use ($url, &$data) {
                     $data = $this->dj->internalApiRequest($url);
                 });
@@ -706,15 +718,19 @@ class EventLogService implements ContainerAwareInterface
                 $contest = $this->em->getPartialReference(Contest::class, $contest->getCid());
 
                 if ($data === null) {
-                    throw new Exception(sprintf("EventLogService::initializeStaticEvents no response data for endpoint '%s'.",
-                                                $endpoint));
+                    throw new Exception(sprintf(
+                        "EventLogService::initializeStaticEvents no response data for endpoint '%s'.",
+                        $endpoint
+                    ));
                 }
 
                 // Special case 'contests' since it is a single object:
                 if ($endpoint === 'contests') {
                     if (!is_array($data) || is_numeric(array_keys($data)[0])) {
-                        throw new Exception(sprintf("EventLogService::initializeStaticEvents Endpoint '%s' did not return a JSON object.",
-                                                    $endpoint));
+                        throw new Exception(sprintf(
+                            "EventLogService::initializeStaticEvents Endpoint '%s' did not return a JSON object.",
+                            $endpoint
+                        ));
                     }
 
                     $this->insertEvent($contest, $endpoint, $data['id'], $data);
@@ -722,19 +738,27 @@ class EventLogService implements ContainerAwareInterface
                 }
 
                 if (!is_array($data) || (!empty($data) && !is_numeric(array_keys($data)[0]))) {
-                    throw new Exception(sprintf("EventLogService::initializeStaticEvents Endpoint '%s' did not return a JSON list.",
-                                                $endpoint));
+                    throw new Exception(sprintf(
+                        "EventLogService::initializeStaticEvents Endpoint '%s' did not return a JSON list.",
+                        $endpoint
+                    ));
                 }
 
                 foreach ($data as $i => $row) {
                     if (!is_array($row) || is_numeric(array_keys($row)[0])) {
-                        throw new Exception(sprintf("EventLogService::initializeStaticEvents Endpoint '%s' did not return a JSON object for index %d.",
-                                                    $endpoint, $i));
+                        throw new Exception(sprintf(
+                            "EventLogService::initializeStaticEvents Endpoint '%s' did not return a JSON object for index %d.",
+                            $endpoint,
+                            $i
+                        ));
                     }
 
                     if (!isset($row['id'])) {
-                        throw new Exception(sprintf("EventLogService::initializeStaticEvents Endpoint '%s' did not return an `id` field for index %d.",
-                                                    $endpoint, $i));
+                        throw new Exception(sprintf(
+                            "EventLogService::initializeStaticEvents Endpoint '%s' did not return an `id` field for index %d.",
+                            $endpoint,
+                            $i
+                        ));
                     }
                 }
 
@@ -841,7 +865,10 @@ class EventLogService implements ContainerAwareInterface
         /** @var Event[] $events */
         $events = $this->em->createQueryBuilder()
             ->from(Event::class, 'e', 'e.endpointid')
-            ->leftJoin(Event::class, 'e2', Join::WITH,
+            ->leftJoin(
+                Event::class,
+                'e2',
+                Join::WITH,
                 'e2.contest = e.contest AND e2.endpointtype = e.endpointtype AND e2.endpointid = e.endpointid AND e2.eventid > e.eventid'
             )
             ->select('e')
@@ -906,8 +933,10 @@ class EventLogService implements ContainerAwareInterface
         try {
             $primaryKeyField = $metadata->getSingleIdentifierColumnName();
         } catch (MappingException $e) {
-            throw new BadMethodCallException(sprintf('Entity \'%s\' as a composite primary key',
-                                                      $type));
+            throw new BadMethodCallException(sprintf(
+                'Entity \'%s\' as a composite primary key',
+                $type
+            ));
         }
 
         return array_map(
@@ -939,8 +968,10 @@ class EventLogService implements ContainerAwareInterface
         }
 
         if (!isset($this->entityToEndpoint[$entity])) {
-            throw new BadMethodCallException(sprintf('Entity \'%s\' does not have a corresponding endpoint',
-                                                      $entity));
+            throw new BadMethodCallException(sprintf(
+                'Entity \'%s\' does not have a corresponding endpoint',
+                $entity
+            ));
         }
 
         $endpointData = $this->apiEndpoints[$this->entityToEndpoint[$entity]];

@@ -75,7 +75,8 @@ class BalloonService
         if ($numCorrect == 0) {
             $balloon = new Balloon();
             $balloon->setSubmission(
-                $this->em->getReference(Submission::class, $submission->getSubmitid()));
+                $this->em->getReference(Submission::class, $submission->getSubmitid())
+            );
             $this->em->persist($balloon);
             $this->em->flush();
         }
@@ -97,12 +98,21 @@ class BalloonService
         }
 
         $query = $em->createQueryBuilder()
-            ->select('b', 's.submittime', 'p.probid',
-                't.teamid', 't.name AS teamname', 't.room',
+            ->select(
+                'b',
+                's.submittime',
+                'p.probid',
+                't.teamid',
+                't.name AS teamname',
+                't.room',
                 'c.name AS catname',
-                'co.cid', 'co.shortname',
-                'cp.shortname AS probshortname', 'cp.color',
-                'a.affilid AS affilid', 'a.shortname AS affilshort')
+                'co.cid',
+                'co.shortname',
+                'cp.shortname AS probshortname',
+                'cp.color',
+                'a.affilid AS affilid',
+                'a.shortname AS affilshort'
+            )
             ->from(Balloon::class, 'b')
             ->leftJoin('b.submission', 's')
             ->leftJoin('s.problem', 'p')

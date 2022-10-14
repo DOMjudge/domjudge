@@ -56,8 +56,10 @@ class LanguageFixture extends AbstractDefaultDataFixture
             // Note: we only create the language if it doesn't exist yet.
             // If it does, we will not update the data
             if (!$manager->getRepository(Language::class)->find($item[0])) {
-                $file = sprintf('%s/files/defaultdata/%s.zip',
-                    $this->sqlDir, $item[9]
+                $file = sprintf(
+                    '%s/files/defaultdata/%s.zip',
+                    $this->sqlDir,
+                    $item[9]
                 );
                 if (!($executable = $manager->getRepository(Executable::class)->find($item[9]))) {
                     $executable = (new Executable())

@@ -34,11 +34,14 @@ class PrintControllerTest extends BaseTest
      */
     public function testPrintingEnabledJuryIndexPage(): void
     {
-        $this->withChangedConfiguration('print_command', static::PRINT_COMMAND,
+        $this->withChangedConfiguration(
+            'print_command',
+            static::PRINT_COMMAND,
             function () {
                 $this->verifyPageResponse('GET', '/jury', 200);
                 $this->assertSelectorExists('a:contains("Print")');
-            });
+            }
+        );
     }
 
     /**
@@ -46,7 +49,9 @@ class PrintControllerTest extends BaseTest
      */
     public function testPrintingEnabledSubmitForm(): void
     {
-        $this->withChangedConfiguration('print_command', static::PRINT_COMMAND,
+        $this->withChangedConfiguration(
+            'print_command',
+            static::PRINT_COMMAND,
             function () {
                 $this->verifyPageResponse('GET', '/jury/print', 200);
 
@@ -58,13 +63,18 @@ class PrintControllerTest extends BaseTest
                     'print[langid]' => 'csharp',
                 ]);
 
-                $this->assertSelectorTextContains('div.alert.alert-success',
-                    'File has been printed');
+                $this->assertSelectorTextContains(
+                    'div.alert.alert-success',
+                    'File has been printed'
+                );
 
                 $text = trim($crawler->filter('pre')->text(null, false));
                 $this->assertStringStartsWith('csharp', $text);
                 $this->assertStringEndsWith(
-                    trim(file_get_contents($testFile)), $text);
-            });
+                    trim(file_get_contents($testFile)),
+                    $text
+                );
+            }
+        );
     }
 }

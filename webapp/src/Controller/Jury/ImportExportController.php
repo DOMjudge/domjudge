@@ -177,12 +177,20 @@ class ImportExportController extends BaseController
                     $contest = $this->em->getRepository(Contest::class)->find($contestId);
                 }
                 $newProblem = $this->importProblemService->importZippedProblem(
-                    $zip, $clientName, null, $contest, $messages
+                    $zip,
+                    $clientName,
+                    null,
+                    $contest,
+                    $messages
                 );
                 $allMessages = array_merge($allMessages, $messages);
                 if ($newProblem) {
-                    $this->dj->auditlog('problem', $newProblem->getProbid(), 'upload zip',
-                        $clientName);
+                    $this->dj->auditlog(
+                        'problem',
+                        $newProblem->getProbid(),
+                        'upload zip',
+                        $clientName
+                    );
                 } else {
                     $this->addFlash('danger', implode("\n", $allMessages));
                     return $this->redirectToRoute('jury_problems');
@@ -242,8 +250,10 @@ class ImportExportController extends BaseController
                 return $this->redirectToRoute('jury_import_export');
             }
             if ($this->importExportService->importContestData($data, $message, $cid)) {
-                $this->addFlash('success',
-                                sprintf('The file %s is successfully imported.', $file->getClientOriginalName()));
+                $this->addFlash(
+                    'success',
+                    sprintf('The file %s is successfully imported.', $file->getClientOriginalName())
+                );
             } else {
                 $this->addFlash('danger', $message);
             }
@@ -264,8 +274,10 @@ class ImportExportController extends BaseController
                 return $this->redirectToRoute('jury_import_export');
             }
             if ($this->importExportService->importProblemsData($problemsImportForm->get('contest')->getData(), $data)) {
-                $this->addFlash('success',
-                    sprintf('The file %s is successfully imported.', $file->getClientOriginalName()));
+                $this->addFlash(
+                    'success',
+                    sprintf('The file %s is successfully imported.', $file->getClientOriginalName())
+                );
             } else {
                 $this->addFlash('danger', 'Failed importing problems');
             }

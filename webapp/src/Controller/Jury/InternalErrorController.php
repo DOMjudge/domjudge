@@ -165,8 +165,11 @@ class InternalErrorController extends BaseController
             ->getSingleResult();
         if ($action === 'ignore') {
             $internalError->setStatus(InternalErrorStatusType::STATUS_IGNORED);
-            $this->dj->auditlog('internal_error', $internalError->getErrorid(),
-                sprintf('internal error: %s', InternalErrorStatusType::STATUS_IGNORED));
+            $this->dj->auditlog(
+                'internal_error',
+                $internalError->getErrorid(),
+                sprintf('internal error: %s', InternalErrorStatusType::STATUS_IGNORED)
+            );
             $this->em->flush();
             return $this->redirectToRoute('jury_internal_error', ['errorId' => $internalError->getErrorid()]);
         }
@@ -191,8 +194,11 @@ class InternalErrorController extends BaseController
                         true
                     );
 
-                    $this->dj->auditlog('internal_error', $internalError->getErrorid(),
-                        sprintf('internal error: %s', InternalErrorStatusType::STATUS_RESOLVED));
+                    $this->dj->auditlog(
+                        'internal_error',
+                        $internalError->getErrorid(),
+                        sprintf('internal error: %s', InternalErrorStatusType::STATUS_RESOLVED)
+                    );
 
                     $affectedJudgings = $internalError->getAffectedJudgings();
                     if (!empty($affectedJudgings)) {
@@ -205,7 +211,8 @@ class InternalErrorController extends BaseController
                             0,
                             null,
                             $skipped,
-                            $progressReporter);
+                            $progressReporter
+                        );
                         $rejudgingUrl     = $this->generateUrl('jury_rejudging', ['rejudgingId' => $rejudging->getRejudgingid()]);
                         $internalErrorUrl = $this->generateUrl('jury_internal_error', ['errorId' => $internalError->getErrorid()]);
                         $message          = sprintf(

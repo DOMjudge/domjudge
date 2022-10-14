@@ -54,12 +54,15 @@ class ConfigControllerTest extends BaseTest
      */
     public function testChangedPenaltyTime(): void
     {
-        $this->withChangedConfiguration('penalty_time', "30",
+        $this->withChangedConfiguration(
+            'penalty_time',
+            "30",
             function () {
                 $this->verifyPageResponse('GET', '/jury/config', 200);
                 $crawler = $this->getCurrentCrawler();
                 $minutes = $crawler->filter('input#config_penalty_time')->extract(['value']);
                 $this->assertEquals("30", $minutes[0]);
-            });
+            }
+        );
     }
 }

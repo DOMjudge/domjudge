@@ -190,7 +190,8 @@ class ExternalContestSourceService
         return $this->em->createQuery(
             'SELECT ecs.lastEventId
                 FROM App\Entity\ExternalContestSource ecs
-                WHERE ecs.extsourceid = :extsourceid')
+                WHERE ecs.extsourceid = :extsourceid'
+        )
                         ->setParameter('extsourceid', $this->source->getExtsourceid())
                         ->getSingleScalarResult();
     }
@@ -369,7 +370,8 @@ class ExternalContestSourceService
 
         $skipEventsUpTo = $this->getLastReadEventId();
 
-        $this->readEventsFromFile($file,
+        $this->readEventsFromFile(
+            $file,
             function (
                 array $event,
                 string $line,
@@ -406,7 +408,8 @@ class ExternalContestSourceService
                 if ($this->shouldStopReading) {
                     $shouldStop = true;
                 }
-            });
+            }
+        );
 
         fclose($file);
 
@@ -463,8 +466,11 @@ class ExternalContestSourceService
             case ExternalContestSource::TYPE_CCS_API:
                 try {
                     // The base URL is the URL of the CCS API root.
-                    if (preg_match('/^(.*\/)contests\/.*/',
-                                   $this->source->getSource(), $matches) === 0) {
+                    if (preg_match(
+                        '/^(.*\/)contests\/.*/',
+                        $this->source->getSource(),
+                        $matches
+                    ) === 0) {
                         $this->loadingError      = 'Cannot determine base URL. Did you pass a CCS API contest URL?';
                         $this->cachedContestData = null;
                     } else {
@@ -552,17 +558,23 @@ class ExternalContestSourceService
         }
 
         if ($eventId !== null && in_array($eventId, $eventsToSKip)) {
-            $this->logger->info("Skipping event with ID %s and type %s as requested",
-                                [$eventId, $event['type']]);
+            $this->logger->info(
+                "Skipping event with ID %s and type %s as requested",
+                [$eventId, $event['type']]
+            );
             return;
         }
 
         if ($eventId !== null) {
-            $this->logger->debug("Importing event with ID %s and type %s...",
-                                 [$eventId, $event['type']]);
+            $this->logger->debug(
+                "Importing event with ID %s and type %s...",
+                [$eventId, $event['type']]
+            );
         } else {
-            $this->logger->debug("Importing event with type %s...",
-                                 [$event['type']]);
+            $this->logger->debug(
+                "Importing event with type %s...",
+                [$event['type']]
+            );
         }
 
         foreach ($data as $dataItem) {
@@ -623,7 +635,8 @@ class ExternalContestSourceService
             $eventId,
             $entityType,
             $data['id'],
-            [EventLogService::ACTION_CREATE, EventLogService::ACTION_UPDATE])
+            [EventLogService::ACTION_CREATE, EventLogService::ACTION_UPDATE]
+        )
         ) {
             return;
         }
@@ -1051,10 +1064,14 @@ class ExternalContestSourceService
             if ($clarification) {
                 $this->em->remove($clarification);
                 $this->em->flush();
-                $this->eventLog->log('clarifications', $clarification->getClarid(),
-                                     EventLogService::ACTION_DELETE,
-                                     $this->getSourceContestId(), null,
-                                     $clarification->getExternalid());
+                $this->eventLog->log(
+                    'clarifications',
+                    $clarification->getClarid(),
+                    EventLogService::ACTION_DELETE,
+                    $this->getSourceContestId(),
+                    null,
+                    $clarification->getExternalid()
+                );
                 return;
             } else {
                 $this->addOrUpdateWarning($eventId, $entityType, $data['id'], ExternalSourceWarning::TYPE_ENTITY_NOT_FOUND);
@@ -1170,8 +1187,12 @@ class ExternalContestSourceService
             $this->em->persist($clarification);
         }
         $this->em->flush();
-        $this->eventLog->log('clarifications', $clarification->getClarid(), $action,
-                             $this->getSourceContestId());
+        $this->eventLog->log(
+            'clarifications',
+            $clarification->getClarid(),
+            $action,
+            $this->getSourceContestId()
+        );
 
         $this->processPendingEvents('clarification', $clarification->getExternalid());
     }
@@ -1303,8 +1324,12 @@ class ExternalContestSourceService
                     // Special case: if we did not have an entrypoint yet, but we do get one now, update it
                     $submission->setEntryPoint($entryPoint);
                     $this->em->flush();
-                    $this->eventLog->log('submissions', $submission->getSubmitid(),
-                                         EventLogService::ACTION_UPDATE, $this->getSourceContestId());
+                    $this->eventLog->log(
+                        'submissions',
+                        $submission->getSubmitid(),
+                        EventLogService::ACTION_UPDATE,
+                        $this->getSourceContestId()
+                    );
                     $this->processPendingEvents('submission', $submission->getExternalid());
                     return;
                 } elseif ($entryPoint !== null) {
@@ -1409,8 +1434,11 @@ class ExternalContestSourceService
                     }
                     file_put_contents($tmpSubmissionFile, $content);
                     $filesToSubmit[] = new UploadedFile(
-                        $tmpSubmissionFile, $filename,
-                        null, null, true
+                        $tmpSubmissionFile,
+                        $filename,
+                        null,
+                        null,
+                        true
                     );
                 }
 
@@ -1422,8 +1450,18 @@ class ExternalContestSourceService
                 // Submit the solution
                 $contest    = $this->em->getRepository(Contest::class)->find($this->getSourceContestId());
                 $submission = $this->submissionService->submitSolution(
-                    $team, null, $contestProblem, $contest, $language, $filesToSubmit, 'shadowing', null,
-                    null, $entryPoint, $submissionId, $submitTime,
+                    $team,
+                    null,
+                    $contestProblem,
+                    $contest,
+                    $language,
+                    $filesToSubmit,
+                    'shadowing',
+                    null,
+                    null,
+                    $entryPoint,
+                    $submissionId,
+                    $submitTime,
                     $message
                 );
                 if (!$submission) {
@@ -1792,9 +1830,12 @@ class ExternalContestSourceService
         $problemId = $submission->getProblem()->getProbid();
 
         $this->em->flush();
-        $this->eventLog->log('submissions', $submission->getSubmitid(),
-                             $valid ? EventLogService::ACTION_CREATE : EventLogService::ACTION_DELETE,
-                             $this->getSourceContestId());
+        $this->eventLog->log(
+            'submissions',
+            $submission->getSubmitid(),
+            $valid ? EventLogService::ACTION_CREATE : EventLogService::ACTION_DELETE,
+            $this->getSourceContestId()
+        );
 
         $contest = $this->em->getRepository(Contest::class)->find($contestId);
         $team    = $this->em->getRepository(Team::class)->find($teamId);

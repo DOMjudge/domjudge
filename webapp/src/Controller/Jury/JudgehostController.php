@@ -113,8 +113,10 @@ class JudgehostController extends BaseController
                     $status = 'crit';
                     $all_checked_in_recently = false;
                 }
-                $statustitle = sprintf('last checked in %ss ago',
-                                       Utils::printtimediff((float)$judgehost->getPolltime()));
+                $statustitle = sprintf(
+                    'last checked in %ss ago',
+                    Utils::printtimediff((float)$judgehost->getPolltime())
+                );
             }
 
             $lastJobId = $this->em->createQueryBuilder()
@@ -279,8 +281,15 @@ class JudgehostController extends BaseController
             ->getQuery()
             ->getOneOrNullResult();
 
-        return $this->deleteEntities($request, $this->em, $this->dj, $this->eventLog, $this->kernel,
-                                     [$judgehost], $this->generateUrl('jury_judgehosts'));
+        return $this->deleteEntities(
+            $request,
+            $this->em,
+            $this->dj,
+            $this->eventLog,
+            $this->kernel,
+            [$judgehost],
+            $this->generateUrl('jury_judgehosts')
+        );
     }
 
     /**
@@ -344,7 +353,8 @@ class JudgehostController extends BaseController
         $critical_threshold = $now - $time_crit;
 
         $ret = $this->em->createQuery(
-            'UPDATE App\Entity\Judgehost j set j.enabled = false, j.hidden = true WHERE j.polltime IS NULL OR j.polltime < :threshold')
+            'UPDATE App\Entity\Judgehost j set j.enabled = false, j.hidden = true WHERE j.polltime IS NULL OR j.polltime < :threshold'
+        )
             ->setParameter('threshold', $critical_threshold)
             ->execute();
         $this->dj->auditlog('judgehost', null, 'auto-hiding judgehosts');

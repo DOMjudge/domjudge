@@ -327,7 +327,8 @@ class UserController extends AbstractRestController
         foreach ($required as $argument) {
             if (!$request->request->has($argument)) {
                 throw new BadRequestHttpException(
-                    sprintf("Argument '%s' is mandatory", $argument));
+                    sprintf("Argument '%s' is mandatory", $argument)
+                );
             }
         }
 
@@ -349,8 +350,10 @@ class UserController extends AbstractRestController
             $team = $this->em->createQueryBuilder()
                 ->from(Team::class, 't')
                 ->select('t')
-                ->andWhere(sprintf('t.%s = :team',
-                    $this->eventLogService->externalIdFieldForEntity(Team::class) ?? 'teamid'))
+                ->andWhere(sprintf(
+                    't.%s = :team',
+                    $this->eventLogService->externalIdFieldForEntity(Team::class) ?? 'teamid'
+                ))
                 ->setParameter('team', $request->request->get('team_id'))
                 ->getQuery()
                 ->getOneOrNullResult();

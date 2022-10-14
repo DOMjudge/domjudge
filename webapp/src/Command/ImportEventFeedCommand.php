@@ -120,10 +120,10 @@ class ImportEventFeedCommand extends Command
         if ($dataSource !== $importDataSource) {
             $dataSourceOptions = $this->config->getConfigSpecification()['data_source']['options'];
             $this->style->error(sprintf(
-                                    "data_source configuration setting is set to '%s' but should be '%s'.",
-                                    $dataSourceOptions[$dataSource],
-                                    $dataSourceOptions[$importDataSource]
-                                ));
+                "data_source configuration setting is set to '%s' but should be '%s'.",
+                $dataSourceOptions[$dataSource],
+                $dataSourceOptions[$importDataSource]
+            ));
             return static::FAILURE;
         }
 

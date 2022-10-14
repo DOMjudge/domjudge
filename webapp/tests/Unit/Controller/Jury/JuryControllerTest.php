@@ -192,7 +192,8 @@ abstract class JuryControllerTest extends BaseTest
         // Find an ID we can edit/delete.
         foreach (array_merge(
             [static::$deleteEntityIdentifier=>array_slice(static::$deleteEntities, 0, 1)],
-            [static::$identifyingEditAttribute=>static::$defaultEditEntityName]) as $identifier => $entityShortName) {
+            [static::$identifyingEditAttribute=>static::$defaultEditEntityName]
+        ) as $identifier => $entityShortName) {
             if ($identifier === '') {
                 continue;
             }
@@ -455,7 +456,11 @@ abstract class JuryControllerTest extends BaseTest
         /** @var SubmissionService $submissionService */
         $submissionService = static::getContainer()->get(SubmissionService::class);
         return $submissionService->submitSolution(
-            $team, null, $problem, $contest, 'c',
+            $team,
+            null,
+            $problem,
+            $contest,
+            'c',
             [new UploadedFile(__FILE__, "foo.c", null, null, true)]
         );
     }

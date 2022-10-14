@@ -274,8 +274,10 @@ class ProblemController extends BaseController
         $zip->addFromString('problem.yaml', $yamlString);
 
         if (!empty($problem->getProblemtext())) {
-            $zip->addFromString('problem.' . $problem->getProblemtextType(),
-                                stream_get_contents($problem->getProblemtext()));
+            $zip->addFromString(
+                'problem.' . $problem->getProblemtextType(),
+                stream_get_contents($problem->getProblemtext())
+            );
         }
 
         foreach ([true, false] as $isSample) {
@@ -495,8 +497,13 @@ class ProblemController extends BaseController
         $testcaseData = $this->em->createQueryBuilder()
             ->from(Testcase::class, 'tc', 'tc.ranknumber')
             ->join('tc.content', 'content')
-            ->select('tc', 'LENGTH(content.input) AS input_size', 'LENGTH(content.output) AS output_size',
-                     'LENGTH(content.image) AS image_size', 'tc.image_type')
+            ->select(
+                'tc',
+                'LENGTH(content.input) AS input_size',
+                'LENGTH(content.output) AS output_size',
+                'LENGTH(content.image) AS image_size',
+                'tc.image_type'
+            )
             ->andWhere('tc.problem = :problem')
             ->setParameter('problem', $problem)
             ->orderBy('tc.ranknumber')
@@ -542,8 +549,12 @@ class ProblemController extends BaseController
                                 $this->addFlash('danger', sprintf('image: %s', $error));
                                 return $this->redirectToRoute('jury_problem_testcases', ['probId' => $probId]);
                             }
-                            $thumb = Utils::getImageThumb($content, $thumbnailSize,
-                                                          $this->dj->getDomjudgeTmpDir(), $error);
+                            $thumb = Utils::getImageThumb(
+                                $content,
+                                $thumbnailSize,
+                                $this->dj->getDomjudgeTmpDir(),
+                                $error
+                            );
                             if ($thumb === false) {
                                 $this->addFlash('danger', sprintf('image: %s', $error));
                                 return $this->redirectToRoute('jury_problem_testcases', ['probId' => $probId]);
@@ -563,13 +574,20 @@ class ProblemController extends BaseController
                             }
                         }
 
-                        $this->dj->auditlog('testcase', $probId, 'updated',
-                                            sprintf('%s rank %d', $type, $rank));
+                        $this->dj->auditlog(
+                            'testcase',
+                            $probId,
+                            'updated',
+                            sprintf('%s rank %d', $type, $rank)
+                        );
 
-                        $message = sprintf('Updated %s for testcase %d with file %s (%s)',
-                                           $type, $rank,
-                                           $file->getClientOriginalName(),
-                                           Utils::printsize($file->getSize()));
+                        $message = sprintf(
+                            'Updated %s for testcase %d with file %s (%s)',
+                            $type,
+                            $rank,
+                            $file->getClientOriginalName(),
+                            Utils::printsize($file->getSize())
+                        );
 
                         if ($type === 'output' && $file->getSize() > $outputLimit * 1024) {
                             $message .= sprintf(
@@ -608,7 +626,8 @@ class ProblemController extends BaseController
                     } elseif (!$file->isValid()) {
                         $this->addFlash('danger', sprintf(
                             'File upload error new %s: %s. No changes made.',
-                            $type, $file->getErrorMessage()
+                            $type,
+                            $file->getErrorMessage()
                         ));
                         return $this->redirectToRoute('jury_problem_testcases', ['probId' => $probId]);
                     }
@@ -651,8 +670,12 @@ class ProblemController extends BaseController
                         $this->addFlash('danger', sprintf('image: %s', $error));
                         return $this->redirectToRoute('jury_problem_testcases', ['probId' => $probId]);
                     }
-                    $thumb = Utils::getImageThumb($content, $thumbnailSize,
-                                                  $this->dj->getDomjudgeTmpDir(), $error);
+                    $thumb = Utils::getImageThumb(
+                        $content,
+                        $thumbnailSize,
+                        $this->dj->getDomjudgeTmpDir(),
+                        $error
+                    );
                     if ($thumb === false) {
                         $this->addFlash('danger', sprintf('image: %s', $error));
                         return $this->redirectToRoute('jury_problem_testcases', ['probId' => $probId]);
@@ -670,9 +693,12 @@ class ProblemController extends BaseController
                 $inFile  = $request->files->get('add_input');
                 $outFile = $request->files->get('add_output');
                 $message = sprintf(
-                    'Added new testcase %d from files %s (%s) and %s (%s)', $maxrank,
-                    $inFile->getClientOriginalName(), Utils::printsize($inFile->getSize()),
-                    $outFile->getClientOriginalName(), Utils::printsize($outFile->getSize())
+                    'Added new testcase %d from files %s (%s) and %s (%s)',
+                    $maxrank,
+                    $inFile->getClientOriginalName(),
+                    Utils::printsize($inFile->getSize()),
+                    $outFile->getClientOriginalName(),
+                    Utils::printsize($outFile->getSize())
                 );
 
                 if (strlen($newTestcaseContent->getOutput()) > $outputLimit * 1024) {
@@ -705,14 +731,18 @@ class ProblemController extends BaseController
         foreach ($testcases as $rank => $testcase) {
             $input_md5 = $testcase->getMd5sumInput();
             if (isset($known_md5s[$input_md5])) {
-                $this->addFlash('warning',
-                    "Testcase #" . $rank . " has identical input to testcase #" . $known_md5s[$input_md5] . '.');
+                $this->addFlash(
+                    'warning',
+                    "Testcase #" . $rank . " has identical input to testcase #" . $known_md5s[$input_md5] . '.'
+                );
             }
             $known_md5s[$input_md5] = $rank;
         }
 
-        $this->addFlash('warning',
-            'Problem belongs to a locked contest, disallowing editing.');
+        $this->addFlash(
+            'warning',
+            'Problem belongs to a locked contest, disallowing editing.'
+        );
         $data = [
             'problem' => $problem,
             'testcases' => $testcases,
@@ -794,8 +824,12 @@ class ProblemController extends BaseController
                 $other->setRank($currentRank);
             });
 
-            $this->dj->auditlog('testcase', $probId, 'switch rank',
-                                             sprintf("%d <=> %d", $current->getRank(), $other->getRank()));
+            $this->dj->auditlog(
+                'testcase',
+                $probId,
+                'switch rank',
+                sprintf("%d <=> %d", $current->getRank(), $other->getRank())
+            );
         }
 
         return $this->redirectToRoute('jury_problem_testcases', ['probId' => $probId]);
@@ -885,8 +919,14 @@ class ProblemController extends BaseController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->saveEntity($this->em, $this->eventLogService, $this->dj, $problem,
-                              $problem->getProbid(), false);
+            $this->saveEntity(
+                $this->em,
+                $this->eventLogService,
+                $this->dj,
+                $problem,
+                $problem->getProbid(),
+                false
+            );
             return $this->redirectToRoute('jury_problem', ['probId' => $problem->getProbid()]);
         }
 
@@ -914,7 +954,11 @@ class ProblemController extends BaseController
                 $zip        = $this->dj->openZipFile($archive->getRealPath());
                 $clientName = $archive->getClientOriginalName();
                 if ($this->importProblemService->importZippedProblem(
-                    $zip, $clientName, $problem, $contest, $messages
+                    $zip,
+                    $clientName,
+                    $problem,
+                    $contest,
+                    $messages
                 )) {
                     $this->dj->auditlog('problem', $problem->getProbid(), 'upload zip', $clientName);
                 } else {
@@ -965,8 +1009,15 @@ class ProblemController extends BaseController
             }
         }
 
-        return $this->deleteEntities($request, $this->em, $this->dj, $this->eventLogService, $this->kernel,
-                                     [$problem], $this->generateUrl('jury_problems'));
+        return $this->deleteEntities(
+            $request,
+            $this->em,
+            $this->dj,
+            $this->eventLogService,
+            $this->kernel,
+            [$problem],
+            $this->generateUrl('jury_problems')
+        );
     }
 
     /**
@@ -977,8 +1028,10 @@ class ProblemController extends BaseController
         /** @var ProblemAttachment $attachment */
         $attachment = $this->em->getRepository(ProblemAttachment::class)->find($attachmentId);
         if (!$attachment) {
-            throw new NotFoundHttpException(sprintf('Attachment with ID %s not found',
-                $attachmentId));
+            throw new NotFoundHttpException(sprintf(
+                'Attachment with ID %s not found',
+                $attachmentId
+            ));
         }
 
         return $attachment->getStreamedResponse();
@@ -1007,8 +1060,15 @@ class ProblemController extends BaseController
             }
         }
 
-        return $this->deleteEntities($request, $this->em, $this->dj, $this->eventLogService, $this->kernel,
-                                     [$attachment], $this->generateUrl('jury_problem', ['probId' => $probId]));
+        return $this->deleteEntities(
+            $request,
+            $this->em,
+            $this->dj,
+            $this->eventLogService,
+            $this->kernel,
+            [$attachment],
+            $this->generateUrl('jury_problem', ['probId' => $probId])
+        );
     }
 
     /**
@@ -1092,8 +1152,10 @@ class ProblemController extends BaseController
             }
 
             if (!empty($testcase->getImageType())) {
-                $zip->addFromString($filename . '.' . $testcase->getImageType(),
-                                    $testcase->getContent()->getImage());
+                $zip->addFromString(
+                    $filename . '.' . $testcase->getImageType(),
+                    $testcase->getContent()->getImage()
+                );
             }
         }
     }

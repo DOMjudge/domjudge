@@ -15,8 +15,10 @@ class ClarificationControllerTest extends BaseTest
     public function testClarificationRequestIndex(): void
     {
         $this->verifyPageResponse('GET', '/jury', 200);
-        $link = $this->verifyLinkToURL('Clarifications',
-                                       'http://localhost/jury/clarifications');
+        $link = $this->verifyLinkToURL(
+            'Clarifications',
+            'http://localhost/jury/clarifications'
+        );
         $crawler = $this->client->click($link);
 
         $h3s = $crawler->filter('h3')->extract(array('_text'));
@@ -65,13 +67,19 @@ class ClarificationControllerTest extends BaseTest
         $this->verifyPageResponse('GET', '/jury/clarifications/1', 200);
 
         $clarificationText = $this->getCurrentCrawler()->filter('pre')->extract(array('_text'));
-        self::assertEquals('Can you tell me how to solve this problem?',
-                           $clarificationText[0]);
-        self::assertEquals("> Can you tell me how to solve this problem?\r\n\r\nNo, read the problem statement.",
-                           $clarificationText[1]);
+        self::assertEquals(
+            'Can you tell me how to solve this problem?',
+            $clarificationText[0]
+        );
+        self::assertEquals(
+            "> Can you tell me how to solve this problem?\r\n\r\nNo, read the problem statement.",
+            $clarificationText[1]
+        );
 
-        $this->verifyLinkToURL('Example teamname (t2)',
-                               'http://localhost/jury/teams/2');
+        $this->verifyLinkToURL(
+            'Example teamname (t2)',
+            'http://localhost/jury/teams/2'
+        );
     }
 
     /**
@@ -80,8 +88,10 @@ class ClarificationControllerTest extends BaseTest
     public function testClarificationRequestComposeForm(): void
     {
         $this->verifyPageResponse('GET', '/jury/clarifications', 200);
-        $link = $this->verifyLinkToURL('Send clarification',
-                                       'http://localhost/jury/clarifications/send');
+        $link = $this->verifyLinkToURL(
+            'Send clarification',
+            'http://localhost/jury/clarifications/send'
+        );
 
         $crawler = $this->client->click($link);
 
@@ -107,9 +117,13 @@ class ClarificationControllerTest extends BaseTest
         $this->client->followRedirect();
 
         self::assertSelectorTextContains('div.col-sm strong', 'All');
-        self::assertSelectorTextContains('span.clarification-subject',
-                                         'demo - Technical issue');
-        self::assertSelectorTextContains('pre.output-text',
-                                         'This is a clarification');
+        self::assertSelectorTextContains(
+            'span.clarification-subject',
+            'demo - Technical issue'
+        );
+        self::assertSelectorTextContains(
+            'pre.output-text',
+            'This is a clarification'
+        );
     }
 }

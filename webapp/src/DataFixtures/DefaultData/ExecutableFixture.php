@@ -36,8 +36,10 @@ class ExecutableFixture extends AbstractDefaultDataFixture
             // Note: we only create the executable if it doesn't exist yet.
             // If it does, we will not update the data
             if (!($executable = $manager->getRepository(Executable::class)->find($item[0]))) {
-                $file = sprintf('%s/files/defaultdata/%s.zip',
-                    $this->sqlDir, $item[0]
+                $file = sprintf(
+                    '%s/files/defaultdata/%s.zip',
+                    $this->sqlDir,
+                    $item[0]
                 );
                 $executable = (new Executable())
                     ->setExecid($item[0])

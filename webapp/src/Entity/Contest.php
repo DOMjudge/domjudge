@@ -933,8 +933,10 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
             });
             foreach ($removedIntervals as $removedInterval) {
                 if (Utils::difftime((float)$removedInterval->getStarttime(), (float)$absoluteTime) <= 0) {
-                    $absoluteTime += Utils::difftime((float)$removedInterval->getEndtime(),
-                                                     (float)$removedInterval->getStarttime());
+                    $absoluteTime += Utils::difftime(
+                        (float)$removedInterval->getEndtime(),
+                        (float)$removedInterval->getStarttime()
+                    );
                 }
             }
 
@@ -1052,8 +1054,10 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
 
             $resultItem['show_button'] = $showButton;
 
-            $closeToStart = Utils::difftime((float)$this->starttime,
-                                            $now) <= self::STARTTIME_UPDATE_MIN_SECONDS_BEFORE;
+            $closeToStart = Utils::difftime(
+                (float)$this->starttime,
+                $now
+            ) <= self::STARTTIME_UPDATE_MIN_SECONDS_BEFORE;
             if ($time === 'start' && !$closeToStart) {
                 $type                       = $this->getStarttimeEnabled() ? 'delay' : 'resume';
                 $resultItem['extra_button'] = [

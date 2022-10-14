@@ -108,8 +108,10 @@ class ExternalContestSourceController extends BaseController
                 } else {
                     $status = 'crit';
                 }
-                $statusTitle = sprintf('last checked in %ss ago',
-                                       Utils::printtimediff((float)$externalContestSource->getLastPollTime()));
+                $statusTitle = sprintf(
+                    'last checked in %ss ago',
+                    Utils::printtimediff((float)$externalContestSource->getLastPollTime())
+                );
             }
 
             if ($externalContestSource->getLastEventId() === null) {
@@ -302,8 +304,14 @@ class ExternalContestSourceController extends BaseController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->saveEntity($this->em, $this->eventLog, $this->dj, $externalContestSource,
-                              $externalContestSource->getExtsourceid(), false);
+            $this->saveEntity(
+                $this->em,
+                $this->eventLog,
+                $this->dj,
+                $externalContestSource,
+                $externalContestSource->getExtsourceid(),
+                false
+            );
             return $this->redirect($this->generateUrl(
                 'jury_external_contest_source',
                 ['extsourceid' => $externalContestSource->getExtsourceid()]
@@ -352,8 +360,15 @@ class ExternalContestSourceController extends BaseController
         /** @var ExternalContestSource $externalContestSource */
         $externalContestSource = $this->em->getRepository(ExternalContestSource::class)->find($extsourceid);
 
-        return $this->deleteEntities($request, $this->em, $this->dj, $this->eventLog, $this->kernel,
-                                     [$externalContestSource], $this->generateUrl('jury_external_contest_sources'));
+        return $this->deleteEntities(
+            $request,
+            $this->em,
+            $this->dj,
+            $this->eventLog,
+            $this->kernel,
+            [$externalContestSource],
+            $this->generateUrl('jury_external_contest_sources')
+        );
     }
 
     /**

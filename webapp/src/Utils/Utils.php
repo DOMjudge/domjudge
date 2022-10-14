@@ -663,8 +663,18 @@ class Utils
             return false;
         }
 
-        if (!imagecopyresampled($thumb, $orig, 0, 0, 0, 0,
-                                $thumbsize[0], $thumbsize[1], $info[0], $info[1])) {
+        if (!imagecopyresampled(
+            $thumb,
+            $orig,
+            0,
+            0,
+            0,
+            0,
+            $thumbsize[0],
+            $thumbsize[1],
+            $info[0],
+            $info[1]
+        )) {
             $error = 'Cannot create resized thumbnail image.';
             return false;
         }

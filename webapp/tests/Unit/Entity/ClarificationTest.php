@@ -14,8 +14,10 @@ class ClarificationTest extends TestCase
 'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod
 tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.';
         $clarification->setBody($text);
-        $this->assertEquals('Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod …',
-            $clarification->getSummary());
+        $this->assertEquals(
+            'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod …',
+            $clarification->getSummary()
+        );
     }
 
     public function testUncutSummary(): void
@@ -51,7 +53,9 @@ seventh line,
 eighth line,
 and so on.';
         $clarification->setBody($text);
-        $this->assertEquals('First line, second line, third line, fourth line, fifth line, sixth line, sevent…',
-            $clarification->getSummary());
+        $this->assertEquals(
+            'First line, second line, third line, fourth line, fifth line, sixth line, sevent…',
+            $clarification->getSummary()
+        );
     }
 }

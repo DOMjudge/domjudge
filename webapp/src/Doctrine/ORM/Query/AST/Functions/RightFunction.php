@@ -29,9 +29,11 @@ class RightFunction extends FunctionNode
      */
     public function getSql(SqlWalker $sqlWalker): string
     {
-        return sprintf('RIGHT(%s, %s)',
-                       $this->fieldExpression->dispatch($sqlWalker),
-                       $this->lengthExpression->dispatch($sqlWalker));
+        return sprintf(
+            'RIGHT(%s, %s)',
+            $this->fieldExpression->dispatch($sqlWalker),
+            $this->lengthExpression->dispatch($sqlWalker)
+        );
     }
 
     /**

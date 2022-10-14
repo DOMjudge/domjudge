@@ -214,8 +214,14 @@ class ClarificationController extends BaseController
         $this->em->persist($newClarification);
         $this->em->flush();
 
-        $this->dj->auditlog('clarification', $newClarification->getClarid(), 'added', null, null,
-            $contest->getCid());
+        $this->dj->auditlog(
+            'clarification',
+            $newClarification->getClarid(),
+            'added',
+            null,
+            null,
+            $contest->getCid()
+        );
         $this->eventLogService->log('clarification', $newClarification->getClarid(), 'create', $contest->getCid());
 
         $this->addFlash('success', 'Clarification sent to the jury');

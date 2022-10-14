@@ -127,8 +127,10 @@ class ClarificationController extends AbstractRestController
                 ->join('cp.problem', 'p')
                 ->join('cp.contest', 'c')
                 ->select('cp, c')
-                ->andWhere(sprintf('p.%s = :problem',
-                    $this->eventLogService->externalIdFieldForEntity(Problem::class) ?? 'probid'))
+                ->andWhere(sprintf(
+                    'p.%s = :problem',
+                    $this->eventLogService->externalIdFieldForEntity(Problem::class) ?? 'probid'
+                ))
                 ->andWhere('cp.contest = :contest')
                 ->andWhere('cp.allowSubmit = 1')
                 ->setParameter('problem', $problemId)
@@ -138,7 +140,8 @@ class ClarificationController extends AbstractRestController
 
             if ($problem === null) {
                 throw new BadRequestHttpException(
-                    sprintf("Problem '%s' not found.", $problemId));
+                    sprintf("Problem '%s' not found.", $problemId)
+                );
             }
 
             $clarification->setProblem($problem->getProblem());
@@ -150,8 +153,10 @@ class ClarificationController extends AbstractRestController
             $replyTo = $this->em->createQueryBuilder()
                 ->from(Clarification::class, 'c')
                 ->select('c')
-                ->andWhere(sprintf('c.%s = :clarification',
-                    $this->eventLogService->externalIdFieldForEntity(Clarification::class) ?? 'clarid'))
+                ->andWhere(sprintf(
+                    'c.%s = :clarification',
+                    $this->eventLogService->externalIdFieldForEntity(Clarification::class) ?? 'clarid'
+                ))
                 ->andWhere('c.contest = :contest')
                 ->setParameter('clarification', $replyToId)
                 ->setParameter('contest', $contestId)
@@ -160,7 +165,8 @@ class ClarificationController extends AbstractRestController
 
             if ($replyTo === null) {
                 throw new BadRequestHttpException(
-                    sprintf("Clarification '%s' not found.", $replyToId));
+                    sprintf("Clarification '%s' not found.", $replyToId)
+                );
             }
 
             $clarification->setInReplyTo($replyTo);

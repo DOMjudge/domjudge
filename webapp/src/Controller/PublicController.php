@@ -80,7 +80,13 @@ class PublicController extends BaseController
         }
 
         $data = $this->scoreboardService->getScoreboardTwigData(
-            $request, $response, $refreshUrl, false, true, $static, $contest
+            $request,
+            $response,
+            $refreshUrl,
+            false,
+            true,
+            $static,
+            $contest
         );
 
         if ($static) {
@@ -102,8 +108,14 @@ class PublicController extends BaseController
     {
         $contest = $this->getContestFromRequest($request) ?? $this->dj->getCurrentContest(-1);
         $data    = $this->scoreboardService->getScoreboardTwigData(
-                $request, null, '', false, true, true, $contest
-            ) + ['hide_menu' => true, 'current_contest' => $contest];
+            $request,
+            null,
+            '',
+            false,
+            true,
+            true,
+            $contest
+        ) + ['hide_menu' => true, 'current_contest' => $contest];
 
         $request = $requestStack->pop();
         // Use reflection to change the basepath property of the request, so we can detect
@@ -211,8 +223,16 @@ class PublicController extends BaseController
         } else {
             $response = $this->redirectToRoute('public_index');
         }
-        return $this->dj->setCookie('domjudge_cid', (string)$contestId, 0, null, '', false, false,
-                                                 $response);
+        return $this->dj->setCookie(
+            'domjudge_cid',
+            (string)$contestId,
+            0,
+            null,
+            '',
+            false,
+            false,
+            $response
+        );
     }
 
     /**
@@ -246,8 +266,10 @@ class PublicController extends BaseController
      */
     public function problemsAction(): Response
     {
-        return $this->render('public/problems.html.twig',
-            $this->dj->getTwigDataForProblemsAction(-1, $this->stats));
+        return $this->render(
+            'public/problems.html.twig',
+            $this->dj->getTwigDataForProblemsAction(-1, $this->stats)
+        );
     }
 
     /**
@@ -285,8 +307,10 @@ class PublicController extends BaseController
             Contest $contest,
             ContestProblem $contestProblem
         ) use ($attachmentId) {
-            return $this->dj->getAttachmentStreamedResponse($contestProblem,
-                $attachmentId);
+            return $this->dj->getAttachmentStreamedResponse(
+                $contestProblem,
+                $attachmentId
+            );
         });
     }
 

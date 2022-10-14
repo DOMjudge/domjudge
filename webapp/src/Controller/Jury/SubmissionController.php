@@ -368,8 +368,10 @@ class SubmissionController extends BaseController
                     $runResult['signal'] = $metadata['signal'] ?? -1;
                     $runResult['output_limit'] = $metadata['output-truncated'];
                 }
-                $runResult['terminated'] = preg_match('/timelimit exceeded.*hard (wall|cpu) time/',
-                                                      (string)$runResult['output_system']);
+                $runResult['terminated'] = preg_match(
+                    '/timelimit exceeded.*hard (wall|cpu) time/',
+                    (string)$runResult['output_system']
+                );
                 $runResult['hostname'] = null;
                 $runResult['judgehostid'] = null;
                 if ($firstJudgingRun && $firstJudgingRun->getJudgeTask() && $firstJudgingRun->getJudgeTask()->getJudgehost()) {
@@ -634,9 +636,14 @@ class SubmissionController extends BaseController
             throw new BadRequestHttpException('Problem while fetching team output');
         }
 
-        $filename = sprintf('p%d.t%d.%s.run%d.team%d.out', $submission->getProblem()->getProbid(), $run->getTestcase()->getRank(),
-                            $submission->getContestProblem()->getShortname(), $run->getRunid(),
-                            $submission->getTeam()->getTeamid());
+        $filename = sprintf(
+            'p%d.t%d.%s.run%d.team%d.out',
+            $submission->getProblem()->getProbid(),
+            $run->getTestcase()->getRank(),
+            $submission->getContestProblem()->getShortname(),
+            $run->getRunid(),
+            $submission->getTeam()->getTeamid()
+        );
 
         $outputRun = $run->getOutput()->getOutputRun();
         return Utils::streamAsBinaryFile($outputRun, $filename);
@@ -660,13 +667,17 @@ class SubmissionController extends BaseController
                 ->getQuery()
                 ->getOneOrNullResult();
             if (!$file) {
-                throw new NotFoundHttpException(sprintf('No submission file found with rank %s',
-                                                        $request->query->get('fetch')));
+                throw new NotFoundHttpException(sprintf(
+                    'No submission file found with rank %s',
+                    $request->query->get('fetch')
+                ));
             }
             // Download requested
             $response = new Response();
-            $response->headers->set('Content-Type',
-                                    sprintf('text/plain; name="%s"; charset="utf-8"', $file->getFilename()));
+            $response->headers->set(
+                'Content-Type',
+                sprintf('text/plain; name="%s"; charset="utf-8"', $file->getFilename())
+            );
             $response->headers->set('Content-Disposition', sprintf('attachment; filename="%s"', $file->getFilename()));
             $response->headers->set('Content-Length', (string)strlen($file->getSourcecode()));
             $response->setContent($file->getSourcecode());
@@ -898,7 +909,9 @@ class SubmissionController extends BaseController
         }
         $this->judgeRemaining([$judging]);
 
-        return $this->redirectToLocalReferrer($this->router, $request,
+        return $this->redirectToLocalReferrer(
+            $this->router,
+            $request,
             $this->generateUrl('jury_submission_by_judging', ['jid' => $judgingId])
         );
     }
@@ -925,16 +938,28 @@ class SubmissionController extends BaseController
 
         // KLUDGE: We can't log an "undelete", so we re-"create".
         // FIXME: We should also delete/recreate any dependent judging(runs).
-        $eventLogService->log('submission', $submission->getSubmitid(), ($valid ? 'create' : 'delete'),
-                              $submission->getContest()->getCid(), null, null, $valid);
-        $this->dj->auditlog('submission', $submission->getSubmitid(),
-                                         'marked ' . ($valid ? 'valid' : 'invalid'));
+        $eventLogService->log(
+            'submission',
+            $submission->getSubmitid(),
+            ($valid ? 'create' : 'delete'),
+            $submission->getContest()->getCid(),
+            null,
+            null,
+            $valid
+        );
+        $this->dj->auditlog(
+            'submission',
+            $submission->getSubmitid(),
+            'marked ' . ($valid ? 'valid' : 'invalid')
+        );
         $contest = $this->em->getRepository(Contest::class)->find($contestId);
         $team    = $this->em->getRepository(Team::class)->find($teamId);
         $problem = $this->em->getRepository(Problem::class)->find($problemId);
         $scoreboardService->calculateScoreRow($contest, $team, $problem);
 
-        return $this->redirectToLocalReferrer($this->router, $request,
+        return $this->redirectToLocalReferrer(
+            $this->router,
+            $request,
             $this->generateUrl('jury_submission', ['submitId' => $submission->getSubmitid()])
         );
     }
@@ -964,8 +989,11 @@ class SubmissionController extends BaseController
                 ->setVerifyComment($comment);
 
             $this->em->flush();
-            $this->dj->auditlog('judging', $judging->getJudgingid(),
-                                             $verified ? 'set verified' : 'set unverified');
+            $this->dj->auditlog(
+                'judging',
+                $judging->getJudgingid(),
+                $verified ? 'set verified' : 'set unverified'
+            );
 
             if ((bool)$this->config->get('verification_required')) {
                 // Log to event table (case of no verification required is handled
@@ -1032,8 +1060,11 @@ class SubmissionController extends BaseController
                 ->setVerifyComment($comment);
 
             $this->em->flush();
-            $this->dj->auditlog('external_judgement', $judgement->getExtjudgementid(),
-                $verified ? 'set verified' : 'set unverified');
+            $this->dj->auditlog(
+                'external_judgement',
+                $judgement->getExtjudgementid(),
+                $verified ? 'set verified' : 'set unverified'
+            );
         });
 
         // Redirect to local referrer page but fall back to same defaults
@@ -1103,8 +1134,11 @@ class SubmissionController extends BaseController
             if (!empty($judging->getJuryMember()) && $action === 'claim' &&
                 $user->getUsername() !== $judging->getJuryMember() &&
                 !$request->request->has('forceclaim')) {
-                $claimWarning = sprintf('%s has been claimed by %s. Claim again on this page to force an update.',
-                    ucfirst($type), $judging->getJuryMember());
+                $claimWarning = sprintf(
+                    '%s has been claimed by %s. Claim again on this page to force an update.',
+                    ucfirst($type),
+                    $judging->getJuryMember()
+                );
             } else {
                 $judging->setJuryMember($action === 'claim' ? $user->getUsername() : null);
                 $this->em->flush();
@@ -1120,7 +1154,9 @@ class SubmissionController extends BaseController
                 if ($action === 'claim') {
                     return $this->redirectToRoute('jury_submission', ['submitId' => $judging->getSubmission()->getSubmitid()]);
                 } else {
-                    return $this->redirectToLocalReferrer($this->router, $request,
+                    return $this->redirectToLocalReferrer(
+                        $this->router,
+                        $request,
                         $this->generateUrl('jury_submissions')
                     );
                 }

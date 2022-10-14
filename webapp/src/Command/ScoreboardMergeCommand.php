@@ -155,7 +155,8 @@ class ScoreboardMergeCommand extends Command
                 return 1;
             }
             $site['group_ids'] = array_map(
-                'intval', explode(',', $groupsString)
+                'intval',
+                explode(',', $groupsString)
             );
             $sites[] = $site;
         }
@@ -307,7 +308,14 @@ class ScoreboardMergeCommand extends Command
 
         // Render the scoreboard to HTML and print it.
         $data = $this->scoreboardService->getScoreboardTwigData(
-            null, null, '', false, true, true, $contest, $scoreboard
+            null,
+            null,
+            '',
+            false,
+            true,
+            true,
+            $contest,
+            $scoreboard
         );
         $data['hide_menu'] = true;
         $data['current_public_contest'] = $contest;
@@ -329,7 +337,9 @@ class ScoreboardMergeCommand extends Command
         ];
         foreach ($toMatch as $pattern => $replace) {
             $pattern = str_replace(
-                'ROOT_URL', preg_quote($rootUrl, '/'), $pattern
+                'ROOT_URL',
+                preg_quote($rootUrl, '/'),
+                $pattern
             );
             preg_match_all($pattern, $output, $matches);
             $filesToAdd = array_merge($filesToAdd, $matches[1]);
@@ -337,8 +347,10 @@ class ScoreboardMergeCommand extends Command
         }
 
         $zip = new ZipArchive();
-        $result = $zip->open($input->getArgument('output-file'),
-                             ZipArchive::CREATE | ZipArchive::OVERWRITE);
+        $result = $zip->open(
+            $input->getArgument('output-file'),
+            ZipArchive::CREATE | ZipArchive::OVERWRITE
+        );
         if ($result !== true) {
             $style->error('Can not open output file to write ZIP to: ' . $result);
             return 1;
@@ -360,15 +372,19 @@ class ScoreboardMergeCommand extends Command
             $pathRegex = sprintf('/^%s/', preg_quote($path, '/'));
             /** @var SplFileInfo $fileInfo */
             foreach ($finder->followLinks()->in($publicDir)->path($pathRegex)->name($file)->files() as $fileInfo) {
-                $zip->addFile($fileInfo->getRealPath(),
-                              $fileInfo->getRelativePathname());
+                $zip->addFile(
+                    $fileInfo->getRealPath(),
+                    $fileInfo->getRelativePathname()
+                );
             }
         }
 
         $zip->close();
 
-        $style->success(sprintf('Merged scoreboard data written to %s',
-                                $input->getArgument('output-file')));
+        $style->success(sprintf(
+            'Merged scoreboard data written to %s',
+            $input->getArgument('output-file')
+        ));
         return static::SUCCESS;
     }
 }

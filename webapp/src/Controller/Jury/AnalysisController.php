@@ -97,7 +97,8 @@ class AnalysisController extends AbstractController
             ]);
         }
 
-        return $this->render('jury/analysis/team.html.twig',
+        return $this->render(
+            'jury/analysis/team.html.twig',
             $this->stats->getTeamStats($contest, $team)
         );
     }
@@ -118,7 +119,8 @@ class AnalysisController extends AbstractController
         $filterKeys = array_keys(StatisticsService::FILTERS);
         $view = $request->query->get('view') ?: reset($filterKeys);
 
-        return $this->render('jury/analysis/problem.html.twig',
+        return $this->render(
+            'jury/analysis/problem.html.twig',
             $this->stats->getProblemStats($contest, $problem, $view)
         );
     }

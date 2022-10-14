@@ -30,13 +30,15 @@ class TruncateFunction extends FunctionNode
      */
     public function getSql(SqlWalker $sqlWalker): string
     {
-        return sprintf('IF(CHAR_LENGTH(%s) > %s, CONCAT(LEFT(%s, %s), %s), %s)',
-                       $this->fieldExpression->dispatch($sqlWalker),
-                       $this->lengthExpression->dispatch($sqlWalker),
-                       $this->fieldExpression->dispatch($sqlWalker),
-                       $this->lengthExpression->dispatch($sqlWalker),
-                       $this->appendWhenTruncatedExpression->dispatch($sqlWalker),
-                       $this->fieldExpression->dispatch($sqlWalker));
+        return sprintf(
+            'IF(CHAR_LENGTH(%s) > %s, CONCAT(LEFT(%s, %s), %s), %s)',
+            $this->fieldExpression->dispatch($sqlWalker),
+            $this->lengthExpression->dispatch($sqlWalker),
+            $this->fieldExpression->dispatch($sqlWalker),
+            $this->lengthExpression->dispatch($sqlWalker),
+            $this->appendWhenTruncatedExpression->dispatch($sqlWalker),
+            $this->fieldExpression->dispatch($sqlWalker)
+        );
     }
 
     /**

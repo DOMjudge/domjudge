@@ -94,8 +94,19 @@ class SubmissionController extends BaseController
                 }
                 $entryPoint = $form->get('entry_point')->getData() ?: null;
                 $submission = $this->submissionService->submitSolution(
-                    $team, $this->dj->getUser(), $problem->getProbid(), $contest, $language, $files, 'team page', null,
-                    null, $entryPoint, null, null, $message
+                    $team,
+                    $this->dj->getUser(),
+                    $problem->getProbid(),
+                    $contest,
+                    $language,
+                    $files,
+                    'team page',
+                    null,
+                    null,
+                    $entryPoint,
+                    null,
+                    null,
+                    $message
                 );
 
                 if ($submission) {
@@ -243,8 +254,10 @@ class SubmissionController extends BaseController
             ->getOneOrNullResult();
 
         if ($submission === null) {
-            throw new NotFoundHttpException(sprintf('Submission with ID \'%s\' not found',
-                $submitId));
+            throw new NotFoundHttpException(sprintf(
+                'Submission with ID \'%s\' not found',
+                $submitId
+            ));
         }
 
         return $this->submissionService->getSubmissionZipResponse($submission);

@@ -97,7 +97,8 @@ class ConfigurationService
             // Don't potentially leak information to public logging:
             if (!isset($specs[$name]) && !$onlyIfPublic) {
                 $this->logger->warning(
-                    'Configuration value %s not defined', [$name]
+                    'Configuration value %s not defined',
+                    [$name]
                 );
             }
             // $result[$name] exists iff it should be visible.
@@ -119,7 +120,8 @@ class ConfigurationService
         // See https://symfony.com/doc/4.3/components/config/caching.html for
         // more information.
         $cacheFile = $this->cacheDir . '/djDbConfig.php';
-        $this->configCache->cache($cacheFile,
+        $this->configCache->cache(
+            $cacheFile,
             function (ConfigCacheInterface $cache) {
                 // @codeCoverageIgnoreStart
                 $yamlDbConfigFile = $this->etcDir . '/db-config.yaml';
@@ -143,10 +145,13 @@ class ConfigurationService
 return {$code};
 EOF;
 
-                $cache->write($specification,
-                    [new FileResource($yamlDbConfigFile)]);
+                $cache->write(
+                    $specification,
+                    [new FileResource($yamlDbConfigFile)]
+                );
                 // @codeCoverageIgnoreEnd
-            });
+            }
+        );
 
         return require $cacheFile;
     }

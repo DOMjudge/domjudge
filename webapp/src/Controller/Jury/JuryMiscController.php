@@ -227,8 +227,10 @@ class JuryMiscController extends BaseController
 
                 $timeEnd = microtime(true);
 
-                $progressReporter(sprintf('Scoreboard cache refresh completed in %.2lf seconds.',
-                                          $timeEnd - $timeStart));
+                $progressReporter(sprintf(
+                    'Scoreboard cache refresh completed in %.2lf seconds.',
+                    $timeEnd - $timeStart
+                ));
             });
         }
 
@@ -337,7 +339,15 @@ class JuryMiscController extends BaseController
         } else {
             $response = $this->redirectToRoute('jury_index');
         }
-        return $this->dj->setCookie('domjudge_cid', (string)$contestId, 0, null, '', false, false,
-                                                 $response);
+        return $this->dj->setCookie(
+            'domjudge_cid',
+            (string)$contestId,
+            0,
+            null,
+            '',
+            false,
+            false,
+            $response
+        );
     }
 }

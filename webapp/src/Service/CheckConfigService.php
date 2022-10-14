@@ -170,8 +170,11 @@ class CheckConfigService
         $desc .= "\n\n" . sprintf('PHP POST/upload filesize is limited to %s.', Utils::printsize(min($sizes)));
         $desc .= "\n\nThis limit needs to be larger than the testcases you want to upload and than the amount of program output you expect the judgedaemons to post back to DOMjudge. We recommend at least 50 MB.\n\nNote that you need to ensure that all of the following php.ini parameters are at minimum the desired size:\n";
         foreach ($postmaxvars as $var) {
-            $desc .= sprintf("%s (now set to %s)\n", $var,
-                    (isset($sizes[$var]) ? Utils::printsize($sizes[$var]) : "unlimited"));
+            $desc .= sprintf(
+                "%s (now set to %s)\n",
+                $var,
+                (isset($sizes[$var]) ? Utils::printsize($sizes[$var]) : "unlimited")
+            );
         }
 
         return ['caption' => 'PHP settings',
@@ -310,15 +313,19 @@ class CheckConfigService
         if (is_writable($tmpdir)) {
             return ['caption' => 'TMPDIR writable',
                     'result' => 'O',
-                    'desc' => sprintf('TMPDIR (%s) can be used to store temporary ' .
+                    'desc' => sprintf(
+                        'TMPDIR (%s) can be used to store temporary ' .
                          'files for submission diffs and edits.',
-                         $tmpdir)];
+                        $tmpdir
+                    )];
         }
         return ['caption' => 'TMPDIR writable',
                 'result' => 'W',
-                'desc' => sprintf('TMPDIR (%s) is not writable by the webserver; ' .
-                 'Showing diffs and editing of submissions may not work.',
-                 $tmpdir)];
+                'desc' => sprintf(
+                    'TMPDIR (%s) is not writable by the webserver; ' .
+                    'Showing diffs and editing of submissions may not work.',
+                    $tmpdir
+                )];
     }
 
     private function randomString(int $length): string
@@ -494,7 +501,7 @@ class CheckConfigService
             }
 
             $tcs_size = $this->em->createQueryBuilder()
-                ->select('tc.testcaseid', 'tc.ranknumber', 'length(tcc.output) as output_size' )
+                ->select('tc.testcaseid', 'tc.ranknumber', 'length(tcc.output) as output_size')
                 ->from(Testcase::class, 'tc')
                 ->join('tc.content', 'tcc')
                 ->andWhere('tc.problem = :probid')
@@ -511,7 +518,9 @@ class CheckConfigService
                         $result = 'E';
                         $moreproblemerrors[$probid] .= sprintf(
                             "Testcase %s for p%s exceeds output limit of %s\n",
-                            $row['rank'], $probid, $problem_output_limit
+                            $row['rank'],
+                            $probid,
+                            $problem_output_limit
                         );
                     }
                 }
@@ -674,8 +683,11 @@ class CheckConfigService
         foreach ($seen as $teamname => $teams) {
             if (count($teams) > 1) {
                 $result = 'W';
-                $desc .= sprintf("Team name '%s' in use by multiple teams: %s",
-                         $teamname, implode(',', $teams) . "\n");
+                $desc .= sprintf(
+                    "Team name '%s' in use by multiple teams: %s",
+                    $teamname,
+                    implode(',', $teams) . "\n"
+                );
             }
         }
         $desc = $desc ?: 'Every team name is unique';
@@ -699,13 +711,18 @@ class CheckConfigService
         } else {
             $desc .= "Self-registration is enabled.\n";
             if (count($selfRegistrationCategories) === 1) {
-                $desc .= sprintf("Team category for self-registered teams: %s.\n",
-                    $selfRegistrationCategories[0]->getName());
+                $desc .= sprintf(
+                    "Team category for self-registered teams: %s.\n",
+                    $selfRegistrationCategories[0]->getName()
+                );
             } else {
-                $desc .= sprintf("Team categories allowed for self-registered teams: %s.\n",
+                $desc .= sprintf(
+                    "Team categories allowed for self-registered teams: %s.\n",
                     implode(', ', array_map(function ($category) {
                         return $category->getName();
-                    }, $selfRegistrationCategories)));
+                    },
+                    $selfRegistrationCategories))
+                );
             }
         }
 
@@ -777,10 +794,11 @@ class CheckConfigService
                     $getter              = sprintf('get%s', ucfirst($column));
                     $routeParams[$param] = $entity->{$getter}();
                 }
-                $description .= sprintf("<a href=\"%s\">%s %s</a> does not have an external ID\n",
-                                        $this->router->generate($route, $routeParams),
-                                        ucfirst(str_replace('_', ' ', $inflector->tableize($entityType))),
-                                        Utils::specialchars(implode(', ', $metadata->getIdentifierValues($entity)))
+                $description .= sprintf(
+                    "<a href=\"%s\">%s %s</a> does not have an external ID\n",
+                    $this->router->generate($route, $routeParams),
+                    ucfirst(str_replace('_', ' ', $inflector->tableize($entityType))),
+                    Utils::specialchars(implode(', ', $metadata->getIdentifierValues($entity)))
                 );
             }
         } else {

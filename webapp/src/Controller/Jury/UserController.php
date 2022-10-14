@@ -250,9 +250,14 @@ class UserController extends BaseController
             if ($errorResult = $this->checkPasswordLength($user, $form)) {
                 return $errorResult;
             }
-            $this->saveEntity($this->em, $this->eventLogService, $this->dj, $user,
-                              $user->getUserid(),
-                              false);
+            $this->saveEntity(
+                $this->em,
+                $this->eventLogService,
+                $this->dj,
+                $user,
+                $user->getUserid(),
+                false
+            );
 
             // If we save the currently logged in used, update the login token.
             if ($user->getUserid() === $this->dj->getUser()->getUserid()) {
@@ -290,8 +295,15 @@ class UserController extends BaseController
             throw new NotFoundHttpException(sprintf('User with ID %s not found', $userId));
         }
 
-        return $this->deleteEntities($request, $this->em, $this->dj, $this->eventLogService, $this->kernel,
-                                     [$user], $this->generateUrl('jury_users'));
+        return $this->deleteEntities(
+            $request,
+            $this->em,
+            $this->dj,
+            $this->eventLogService,
+            $this->kernel,
+            [$user],
+            $this->generateUrl('jury_users')
+        );
     }
 
     /**
@@ -383,7 +395,8 @@ class UserController extends BaseController
             ]);
             $disposition = $response->headers->makeDisposition(
                 ResponseHeaderBag::DISPOSITION_ATTACHMENT,
-                'accounts.tsv');
+                'accounts.tsv'
+            );
             $response->headers->set('Content-Disposition', $disposition);
             $response->headers->set('Content-Type', 'text/plain');
             return $response;

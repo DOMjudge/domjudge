@@ -157,8 +157,12 @@ class OrganizationController extends AbstractRestController
         $teamAffiliation->setClearLogo(true);
 
         $this->assetUpdater->updateAssets($teamAffiliation);
-        $this->eventLogService->log('organizations', $teamAffiliation->getAffilid(), EventLogService::ACTION_UPDATE,
-            $this->getContestId($request));
+        $this->eventLogService->log(
+            'organizations',
+            $teamAffiliation->getAffilid(),
+            EventLogService::ACTION_UPDATE,
+            $this->getContestId($request)
+        );
 
         return new Response('', Response::HTTP_NO_CONTENT);
     }
@@ -213,8 +217,12 @@ class OrganizationController extends AbstractRestController
         }
 
         $this->assetUpdater->updateAssets($teamAffiliation);
-        $this->eventLogService->log('organizations', $teamAffiliation->getAffilid(), EventLogService::ACTION_UPDATE,
-            $this->getContestId($request));
+        $this->eventLogService->log(
+            'organizations',
+            $teamAffiliation->getAffilid(),
+            EventLogService::ACTION_UPDATE,
+            $this->getContestId($request)
+        );
 
         return new Response('', Response::HTTP_NO_CONTENT);
     }

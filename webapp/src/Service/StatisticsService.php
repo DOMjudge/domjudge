@@ -172,14 +172,20 @@ class StatisticsService
                 $submissions[] = $s;
                 $misc['total_submissions']++;
                 $teamStats['total_submitted']++;
-                static::setOrIncrement($misc['problem_attempts'],
-                    $s->getProblem()->getProbId());
-                static::setOrIncrement($teamStats['problems_submitted'],
-                    $s->getProblem()->getProbId());
+                static::setOrIncrement(
+                    $misc['problem_attempts'],
+                    $s->getProblem()->getProbId()
+                );
+                static::setOrIncrement(
+                    $teamStats['problems_submitted'],
+                    $s->getProblem()->getProbId()
+                );
                 $misc['problem_stats']['teams_attempted'][$s->getProblem()->getProbId()][$team->getTeamId()] = $team->getTeamId();
 
-                static::setOrIncrement($misc['language_stats']['total_submissions'],
-                    $s->getLanguage()->getLangid());
+                static::setOrIncrement(
+                    $misc['language_stats']['total_submissions'],
+                    $s->getLanguage()->getLangid()
+                );
                 $misc['language_stats']['teams_attempted'][$s->getLanguage()->getLangid()][$team->getTeamId()] = $team->getTeamId();
 
                 if ($s->getResult() != 'correct') {
@@ -187,25 +193,35 @@ class StatisticsService
                 }
                 $misc['total_accepted']++;
                 $teamStats['total_accepted']++;
-                static::setOrIncrement($teamStats['problems_accepted'],
-                    $s->getProblem()->getProbId());
-                static::setOrIncrement($misc['problem_solutions'],
-                    $s->getProblem()->getProbId());
+                static::setOrIncrement(
+                    $teamStats['problems_accepted'],
+                    $s->getProblem()->getProbId()
+                );
+                static::setOrIncrement(
+                    $misc['problem_solutions'],
+                    $s->getProblem()->getProbId()
+                );
                 $misc['problem_stats']['teams_solved'][$s->getProblem()->getProbId()][$team->getTeamId()] = $team->getTeamId();
 
                 $misc['language_stats']['teams_solved'][$s->getLanguage()->getLangid()][$team->getTeamId()] = $team->getTeamId();
-                static::setOrIncrement($misc['language_stats']['total_solutions'],
-                    $s->getLanguage()->getLangid());
+                static::setOrIncrement(
+                    $misc['language_stats']['total_solutions'],
+                    $s->getLanguage()->getLangid()
+                );
 
                 if ($lastSubmission == null || $s->getSubmitTime() > $lastSubmission->getSubmitTime()) {
                     $lastSubmission = $s;
                 }
             }
             $misc['team_stats'][$team->getTeamId()] = $teamStats;
-            static::setOrIncrement($misc['team_attempted_n_problems'],
-                count($teamStats['problems_submitted']));
-            static::setOrIncrement($misc['teams_solved_n_problems'],
-                $teamStats['total_accepted']);
+            static::setOrIncrement(
+                $misc['team_attempted_n_problems'],
+                count($teamStats['problems_submitted'])
+            );
+            static::setOrIncrement(
+                $misc['teams_solved_n_problems'],
+                $teamStats['total_accepted']
+            );
 
             // Calculate how long it has been since their last submission.
             if ($lastSubmission != null) {
@@ -313,8 +329,10 @@ class StatisticsService
         });
 
         $misc = [];
-        $misc['correct_percentage'] = array_key_exists('correct',
-            $results) ? ($results['correct'] / count($judgings)) * 100.0 : 0;
+        $misc['correct_percentage'] = array_key_exists(
+            'correct',
+            $results
+        ) ? ($results['correct'] / count($judgings)) * 100.0 : 0;
 
         return [
             'contest' => $contest,
@@ -394,8 +412,10 @@ class StatisticsService
         }
         $misc['num_teams_attempted'] = count($teamsAttempted);
         $misc['num_teams_correct'] = count($teamsCorrect);
-        $misc['correct_percentage'] = array_key_exists('correct',
-            $results) ? ($results['correct'] / count($judgings)) * 100.0 : 0;
+        $misc['correct_percentage'] = array_key_exists(
+            'correct',
+            $results
+        ) ? ($results['correct'] / count($judgings)) * 100.0 : 0;
         $misc['teams_correct_percentage'] = count($teamsAttempted) > 0 ? (count($teamsCorrect) / count($teamsAttempted)) * 100.0 : 0;
 
         return [
@@ -456,8 +476,10 @@ class StatisticsService
 
         for ($bin = 0; $bin < static::NUM_GROUPED_BINS; $bin++) {
             $start = new DateTime(Utils::absTime($contest->getStarttime(false) + $bin * $binDuration));
-            $end = (clone $start)->add(new DateInterval(sprintf('PT%dS',
-                $binDuration)));
+            $end = (clone $start)->add(new DateInterval(sprintf(
+                'PT%dS',
+                $binDuration
+            )));
             foreach ([true, false] as $correct) {
                 $queryBuilder = clone $judgingsQueryBuilder;
                 $queryBuilder->andWhere('s.submittime >= :starttime');

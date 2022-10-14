@@ -104,7 +104,9 @@ class ScoreboardIntegrationTest extends KernelTestCase
         $this->dj = self::getContainer()->get(DOMJudgeService::class);
         $this->em = self::getContainer()->get('doctrine')->getManager();
         $this->ss = new ScoreboardService(
-            $this->em, $this->dj, $this->config,
+            $this->em,
+            $this->dj,
+            $this->config,
             self::getContainer()->get(LoggerInterface::class),
             self::getContainer()->get(EventLogService::class)
         );
@@ -454,8 +456,11 @@ class ScoreboardIntegrationTest extends KernelTestCase
                 $this->assertInstanceOf(ScoreboardMatrixItem::class, $item);
 
                 $expected = (@$fts_probid2teamid[$probid] === $teamid);
-                $this->assertEquals($expected, $item->isFirst,
-                                    "Check FTS matches for team $teamname, problem $probname");
+                $this->assertEquals(
+                    $expected,
+                    $item->isFirst,
+                    "Check FTS matches for team $teamname, problem $probname"
+                );
             }
         }
     }
