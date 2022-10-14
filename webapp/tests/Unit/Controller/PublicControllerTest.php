@@ -53,7 +53,7 @@ class PublicControllerTest extends BaseTest
         string $password,
         string $category="",
         string $secondPassword="same"
-): array {
+    ): array {
         $this->loadFixtures($fixtures);
         $this->logOut();
         $this->verifyPageResponse('GET', static::$urlRegister, 200);
@@ -174,7 +174,7 @@ class PublicControllerTest extends BaseTest
         array $fixtures,
         string $category,
         string $secondPassword
-): void {
+    ): void {
         $formFields = $this->setupSelfRegisterForm($inputs, $fixtures, $password, $category, $secondPassword);
         $selector = 'html:contains("The password fields must match.")';
         self::assertSelectorNotExists($selector);
