@@ -194,7 +194,9 @@ class CheckConfigService
         if (isset($vars['transaction_isolation'])) {
             $vars['tx_isolation'] = $vars['transaction_isolation'];
         }
-        $max_inout_r = $this->em->getConnection()->fetchAllAssociative('SELECT GREATEST(MAX(LENGTH(input)),MAX(LENGTH(output))) as max FROM testcase_content');
+        $max_inout_r = $this->em->getConnection()->fetchAllAssociative(
+            'SELECT GREATEST(MAX(LENGTH(input)),MAX(LENGTH(output))) as max FROM testcase_content'
+        );
         $max_inout = (int)reset($max_inout_r)['max'];
         $output_limit = 1024*$this->config->get('output_limit');
         if ($this->config->get('output_storage_limit') >= 0) {

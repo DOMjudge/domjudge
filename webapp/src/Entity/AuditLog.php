@@ -24,7 +24,8 @@ class AuditLog
 
     /**
      * @var double|string
-     * @ORM\Column(type="decimal", precision=32, scale=9, name="logtime", options={"comment"="Timestamp of the logentry", "unsigned"=true}, nullable=false)
+     * @ORM\Column(type="decimal", precision=32, scale=9, name="logtime",
+     *     options={"comment"="Timestamp of the logentry", "unsigned"=true}, nullable=false)
      */
     private $logtime;
 
