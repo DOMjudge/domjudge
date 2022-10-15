@@ -253,25 +253,34 @@ struct process_t {
     exitInfo = status;
   }
 
-  // Close the pipes we keep alive feeding data to the process. By closing
-  // these we signal the child that no more data is coming.
-  void close_fds() {
-    // First, close the pipes coming into the process (i.e. stdin).
-    logmsg(LOG_DEBUG, "closing fd: %d (stdin) of %d", stdin, pid);
+  // Close the file descriptor of the pipe coming into the process
+  // (i.e. proxy -> process).
+  void close_input_fd() {
     if (proxy_to_process != -1) {
       logmsg(LOG_DEBUG, "closing fd: %d (proxy -> process) of %d",
              proxy_to_process, pid);
       close(proxy_to_process);
     }
+  }
+
+  // Close the file descriptor of the pipe going out from the process
+  // (i.e. process -> proxy).
+  void close_output_fd() {
+    if (process_to_proxy != -1) {
+      logmsg(LOG_DEBUG, "closing fd: %d (process -> proxy) of %d",
+             process_to_proxy, pid);
+      close(process_to_proxy);
+    }
+  }
+
+  // Close the pipes we keep alive feeding data to the process. By closing
+  // these we signal the child that no more data is coming.
+  void close_fds() {
+    close_input_fd();
     // If this process is the one that exited, we should also close the pipes
     // coming out of there. This will make sure all the pipes are closed.
     if (exited) {
-      logmsg(LOG_DEBUG, "closing fd: %d (stdout) of %d", stdout, pid);
-      if (process_to_proxy != -1) {
-        logmsg(LOG_DEBUG, "closing fd: %d (process -> proxy) of %d",
-               process_to_proxy, pid);
-        close(process_to_proxy);
-      }
+      close_output_fd();
     }
   }
 };
@@ -750,7 +759,7 @@ struct state_t {
   // The pipe connecting from -> to has some data ready. Consume it reading as
   // much as possible, copy it to the target process and write it to the output
   // file.
-  void pump_proxy_pipe(const process_t &from, process_t &to,
+  void pump_proxy_pipe(process_t &from, process_t &to,
                        output_file_t &output_file) {
     const size_t BUF_SIZE = 1024 * 1024;
     char buffer[BUF_SIZE];
@@ -761,9 +770,10 @@ struct state_t {
       ssize_t nread = read(from.process_to_proxy, buffer, BUF_SIZE - 1);
       if (nread == 0) {
         warning(0, "EOF from process #%ld", from.index);
-        // The process closed stdout, we need to close our file descriptors as
-        // well.
-        to.close_fds();
+        // The process closed stdout, we need to close the pipe's file
+        // descriptors as well.
+        to.close_input_fd();
+        from.close_output_fd();
         return;
       }
       if (nread < 0) {
@@ -828,7 +838,7 @@ struct state_t {
 
         // A process wrote in one of the pipes to the proxy.
         for (size_t i = 0; i < processes.size(); i++) {
-          const auto &from = processes[i];
+          auto &from = processes[i];
           if (fd != from.process_to_proxy) {
             continue;
           }
