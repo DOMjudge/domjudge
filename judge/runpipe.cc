@@ -149,7 +149,8 @@ void write_all(fd_t fd, const char *data, ssize_t size) {
     // Note that this pipe is not NONBLOCK, so here we may block (but
     // usually don't).
     if (nwrite < 0) {
-      error(errno, "failed to write to fd %d", fd);
+      // This may fail, for example if the solution closes stdin.
+      break;
     }
     index += nwrite;
   }
@@ -888,6 +889,9 @@ int main(int argc, char **argv) {
   if (setsid() < 0) {
     error(errno, "failed to create a new session");
   }
+  // The processes may close their pipes, so we need to ignore "broken pipe"
+  // errors.
+  signal(SIGPIPE, SIG_IGN);
   state.install_sigterm_handler();
   state.install_sigchld_handler();
   state.setup_pipes();
