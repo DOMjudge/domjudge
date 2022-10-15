@@ -3,7 +3,7 @@ TOPDIR=../..
 endif
 include $(TOPDIR)/Makefile.global
 
-TESTCASES = J_closes_stdout J_returns_42 J_returns_43 S_exits_early J_exits_early S_doesnt_write J_doesnt_write sigterm
+TESTCASES = J_closes_stdout J_returns_42 J_returns_43 S_exits_early J_exits_early S_closes_stdin S_doesnt_write J_doesnt_write sigterm timeout_with_traffic
 RUNPIPES = runpipe
 
 TESTCASES_JUDGE = $(TESTCASES:=/judge)
