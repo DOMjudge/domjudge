@@ -316,7 +316,7 @@ class ContestController extends AbstractRestController
      *     @OA\MediaType(
      *         mediaType="application/x-www-form-urlencoded",
      *         @OA\Schema(
-     *             required={"id"},
+     *             required={"id","start_time"},
      *             @OA\Property(
      *                 property="id",
      *                 description="The ID of the contest to change the start time for",
@@ -327,6 +327,11 @@ class ContestController extends AbstractRestController
      *                 description="The new start time of the contest",
      *                 type="string",
      *                 format="date-time"
+     *             ),
+     *             @OA\Property(
+     *                 property="force",
+     *                 description="Force overwriting the start_time even when in next 30s",
+     *                 type="boolean",
      *             )
      *         )
      *     )
