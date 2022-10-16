@@ -1048,22 +1048,11 @@ class DOMJudgeService
             return;
         }
 
-        $memoryLimit = $problem->getProblem()->getMemlimit();
-        $outputLimit = $problem->getProblem()->getOutputlimit();
-        if (empty($memoryLimit)) {
-            $memoryLimit = $this->config->get('memory_limit');
-        }
-        if (empty($outputLimit)) {
-            $outputLimit = $this->config->get('output_limit');
-        }
-
         // We use a mass insert query, since that is way faster than doing a separate insert for each testcase.
         // We first insert judgetasks, then select their ID's and finally insert the judging runs.
-        $compileExecutable = $submission->getLanguage()->getCompileExecutable()->getImmutableExecutable();
-        $runExecutable = $this->getImmutableRunExecutable($problem);
-        $compareExecutable = $this->getImmutableCompareExecutable($problem);
 
         // Step 1: Create the template for the judgetasks.
+        $compileExecutable = $submission->getLanguage()->getCompileExecutable()->getImmutableExecutable();
         $judgetaskInsertParams = [
             ':type'              => JudgeTaskType::JUDGING_RUN,
             ':submitid'          => $submission->getSubmitid(),
@@ -1071,40 +1060,11 @@ class DOMJudgeService
             ':jobid'             => $judging->getJudgingid(),
             ':uuid'              => $judging->getUuid(),
             ':compile_script_id' => $compileExecutable->getImmutableExecId(),
-            ':compare_script_id' => $compareExecutable->getImmutableExecId(),
-            ':run_script_id'     => $runExecutable->getImmutableExecId(),
-            // TODO: store this in the database as well instead of recomputing it here over and over again, doing
-            // this will also help to make the whole data immutable.
-            ':compile_config'    => $this->jsonEncode(
-                [
-                    'script_timelimit'      => $this->config->get('script_timelimit'),
-                    'script_memory_limit'   => $this->config->get('script_memory_limit'),
-                    'script_filesize_limit' => $this->config->get('script_filesize_limit'),
-                    'language_extensions'   => $submission->getLanguage()->getExtensions(),
-                    'filter_compiler_files' => $submission->getLanguage()->getFilterCompilerFiles(),
-                    'hash'                  => $compileExecutable->getHash(),
-                ]
-            ),
-            ':run_config'        => $this->jsonEncode(
-                [
-                    'time_limit'    => $problem->getProblem()->getTimelimit() * $submission->getLanguage()->getTimeFactor(),
-                    'memory_limit'  => $memoryLimit,
-                    'output_limit'  => $outputLimit,
-                    'process_limit' => $this->config->get('process_limit'),
-                    'entry_point'   => $submission->getEntryPoint(),
-                    'hash'          => $runExecutable->getHash(),
-                ]
-            ),
-            ':compare_config'    => $this->jsonEncode(
-                [
-                    'script_timelimit'      => $this->config->get('script_timelimit'),
-                    'script_memory_limit'   => $this->config->get('script_memory_limit'),
-                    'script_filesize_limit' => $this->config->get('script_filesize_limit'),
-                    'compare_args'          => $problem->getProblem()->getSpecialCompareArgs(),
-                    'combined_run_compare'  => $problem->getProblem()->getCombinedRunCompare(),
-                    'hash'                  => $compareExecutable->getHash(),
-                ]
-            ),
+            ':compare_script_id' => $this->getImmutableCompareExecutable($problem)->getImmutableExecId(),
+            ':run_script_id'     => $this->getImmutableRunExecutable($problem)->getImmutableExecId(),
+            ':compile_config'    => $this->getCompileConfig($submission),
+            ':run_config'        => $this->getRunConfig($problem, $submission),
+            ':compare_config'    => $this->getCompareConfig($problem),
         ];
 
         $judgetaskDefaultParamNames = array_keys($judgetaskInsertParams);
@@ -1404,5 +1364,59 @@ class DOMJudgeService
         }
 
         return $res;
+    }
+
+    private function getRunConfig(ContestProblem $problem, Submission $submission): string
+    {
+        $memoryLimit = $problem->getProblem()->getMemlimit();
+        $outputLimit = $problem->getProblem()->getOutputlimit();
+        if (empty($memoryLimit)) {
+            $memoryLimit = $this->config->get('memory_limit');
+        }
+        if (empty($outputLimit)) {
+            $outputLimit = $this->config->get('output_limit');
+        }
+        $runExecutable = $this->getImmutableRunExecutable($problem);
+
+        return $this->jsonEncode(
+            [
+                'time_limit' => $problem->getProblem()->getTimelimit() * $submission->getLanguage()->getTimeFactor(),
+                'memory_limit' => $memoryLimit,
+                'output_limit' => $outputLimit,
+                'process_limit' => $this->config->get('process_limit'),
+                'entry_point' => $submission->getEntryPoint(),
+                'hash' => $runExecutable->getHash(),
+            ]
+        );
+    }
+
+    private function getCompareConfig(ContestProblem $problem): string
+    {
+        $compareExecutable = $this->getImmutableCompareExecutable($problem);
+        return $this->jsonEncode(
+            [
+                'script_timelimit' => $this->config->get('script_timelimit'),
+                'script_memory_limit' => $this->config->get('script_memory_limit'),
+                'script_filesize_limit' => $this->config->get('script_filesize_limit'),
+                'compare_args' => $problem->getProblem()->getSpecialCompareArgs(),
+                'combined_run_compare' => $problem->getProblem()->getCombinedRunCompare(),
+                'hash' => $compareExecutable->getHash(),
+            ]
+        );
+    }
+
+    private function getCompileConfig(Submission $submission): string
+    {
+        $compileExecutable = $submission->getLanguage()->getCompileExecutable()->getImmutableExecutable();
+        return $this->jsonEncode(
+            [
+                'script_timelimit' => $this->config->get('script_timelimit'),
+                'script_memory_limit' => $this->config->get('script_memory_limit'),
+                'script_filesize_limit' => $this->config->get('script_filesize_limit'),
+                'language_extensions' => $submission->getLanguage()->getExtensions(),
+                'filter_compiler_files' => $submission->getLanguage()->getFilterCompilerFiles(),
+                'hash' => $compileExecutable->getHash(),
+            ]
+        );
     }
 }
