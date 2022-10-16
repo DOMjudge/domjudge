@@ -571,6 +571,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
      * @Serializer\SerializedName("affiliation")
      * @Serializer\Type("string")
      * @Serializer\Groups({"Nonstrict"})
+     * @OA\Property(nullable=true)
      */
     public function getAffiliationName(): ?string
     {
