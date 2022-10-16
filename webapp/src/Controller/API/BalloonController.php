@@ -30,6 +30,10 @@ class BalloonController extends AbstractRestController
      * @OA\Response(
      *     response="200",
      *     description="Returns the balloons for this contest.",
+     *     @OA\JsonContent(
+     *         type="array",
+     *         @OA\Items(ref="#/components/schemas/Balloon")
+     *     )
      * )
      * @OA\Parameter(
      *     name="todo",

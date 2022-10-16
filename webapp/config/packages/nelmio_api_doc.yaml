@@ -348,6 +348,40 @@ nelmio_api_doc:
                             type: array
                             items:
                                 type: string
+                Balloon:
+                    type: object
+                    properties:
+                        balloonid:
+                            type: integer
+                        time:
+                            type: string
+                        problem:
+                            type: string
+                        contestproblem:
+                            $ref: "#/components/schemas/ContestProblem"
+                        team:
+                            type: string
+                        teamid:
+                            type: integer
+                        location:
+                            type: string
+                            nullable: true
+                        affiliation:
+                            type: string
+                            nullable: true
+                        affiliationid:
+                            type: integer
+                            nullable: true
+                        category:
+                            type: string
+                        total:
+                            type: array
+                            items:
+                                $ref: "#/components/schemas/ContestProblem"
+                        awards:
+                            type: string
+                        done:
+                            type: boolean
                 ClarificationPost:
                     type: object
                     required: [text]
