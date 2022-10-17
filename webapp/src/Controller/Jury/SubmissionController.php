@@ -519,9 +519,14 @@ class SubmissionController extends BaseController
                     $judgeTask->getCompareConfig(),
                     $errors);
                 if (!empty($errors)) {
-                    $this->addFlash('danger',
-                        "Some parameters have changed since the judging was created, consider rejudging.\n\n"
-                        . implode("\n", $errors));
+                    if ($selectedJudging->getValid()) {
+                        $type = 'danger';
+                        $header = "Some parameters have changed since the judging was created, consider rejudging.\n\n";
+                    } else {
+                        $type = 'warning';
+                        $header = "Some parameters have changed since the judging was created, but this judging is no longer valid.\n\n";
+                    }
+                    $this->addFlash($type, $header . implode("\n", $errors));
                 }
 
             }
