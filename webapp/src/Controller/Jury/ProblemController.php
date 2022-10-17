@@ -484,9 +484,9 @@ class ProblemController extends BaseController
         }
 
         $lockedContest = false;
-        foreach ($problem->getcontestproblems() as $contestproblem) {
+        foreach ($problem->getContestProblems() as $contestproblem) {
             /** @var contestproblem $contestproblem */
-            if ($contestproblem->getcontest()->islocked()) {
+            if ($contestproblem->getcontest()->isLocked()) {
                 $lockedContest = true;
                 break;
             }
@@ -711,8 +711,10 @@ class ProblemController extends BaseController
             $known_md5s[$input_md5] = $rank;
         }
 
-        $this->addFlash('warning',
-            'Problem belongs to a locked contest, disallowing editing.');
+        if ($lockedContest) {
+            $this->addFlash('warning',
+                'Problem belongs to a locked contest, disallowing editing.');
+        }
         $data = [
             'problem' => $problem,
             'testcases' => $testcases,
