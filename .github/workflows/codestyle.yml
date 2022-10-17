@@ -1,0 +1,18 @@
+name: Syntax checks
+on:
+  push:
+    branches:
+      - main
+      - '[0-9]+.[0-9]+'
+  pull_request:
+
+jobs:
+  syntax-job:
+    runs-on: ubuntu-latest
+    container:
+      image: domjudge/gitlabci:2.1
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run the syntax checks
+        run: .github/jobs/syntax.sh
+

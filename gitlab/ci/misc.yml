@@ -1,9 +1,3 @@
-check syntax:
-  extends: [.short_job]
-  stage: style
-  script:
-    - ./gitlab/syntax.sh
-
 check static codecov:
   extends: [.tiny_job]
   stage: ci_checks
