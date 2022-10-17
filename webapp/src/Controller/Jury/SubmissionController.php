@@ -1170,22 +1170,27 @@ class SubmissionController extends BaseController
         return $this->redirectToRoute('jury_submission', ['submitId' => $submitId]);
     }
 
-    private function maybeGetErrors(string $type, string $expectedConfigString, string $observedConfigString, array &$errors)
+    private function maybeGetErrors(string $type, string $expectedConfigString, string $observedConfigString, array &$allErrors)
     {
-        if ($expectedConfigString !== $observedConfigString) {
-            $expectedConfig = $this->dj->jsonDecode($expectedConfigString);
-            $observedConfig = $this->dj->jsonDecode($observedConfigString);
-            $errors[] = $type . ' changes:';
-            foreach (array_keys($expectedConfig) as $k) {
-                if ($expectedConfig[$k] !== $observedConfig[$k]) {
-                    if ($k === 'hash') {
-                        $errors[] = '- script has changed';
-                    } else {
-                        $errors[] = '- ' . preg_replace('/_/', ' ', $k) . ': '
-                            . $this->dj->jsonEncode($observedConfig[$k]) . ' → ' . $this->dj->jsonEncode($expectedConfig[$k]);
-                    }
+        $expectedConfig = $this->dj->jsonDecode($expectedConfigString);
+        $observedConfig = $this->dj->jsonDecode($observedConfigString);
+        $errors = [];
+        foreach (array_keys($expectedConfig) as $k) {
+            if ($expectedConfig[$k] != $observedConfig[$k]) {
+                if ($k === 'hash') {
+                    $errors[] = '- script has changed';
+                } else if ($k === 'entry_point') {
+                    // Changes to the entry point can only happen for jury submissions during initial problem upload.
+                    // Silently ignore.
+                } else {
+                    $errors[] = '- ' . preg_replace('/_/', ' ', $k) . ': '
+                        . $this->dj->jsonEncode($observedConfig[$k]) . ' → ' . $this->dj->jsonEncode($expectedConfig[$k]);
                 }
             }
+        }
+        if (!empty($errors)) {
+            $allErrors[] = $type . ' changes:';
+            array_push($allErrors, ...$errors);
         }
     }
 }
