@@ -1366,7 +1366,7 @@ class DOMJudgeService
         return $res;
     }
 
-    private function getRunConfig(ContestProblem $problem, Submission $submission): string
+    public function getRunConfig(ContestProblem $problem, Submission $submission): string
     {
         $memoryLimit = $problem->getProblem()->getMemlimit();
         $outputLimit = $problem->getProblem()->getOutputlimit();
@@ -1390,7 +1390,7 @@ class DOMJudgeService
         );
     }
 
-    private function getCompareConfig(ContestProblem $problem): string
+    public function getCompareConfig(ContestProblem $problem): string
     {
         $compareExecutable = $this->getImmutableCompareExecutable($problem);
         return $this->jsonEncode(
@@ -1405,7 +1405,7 @@ class DOMJudgeService
         );
     }
 
-    private function getCompileConfig(Submission $submission): string
+    public function getCompileConfig(Submission $submission): string
     {
         $compileExecutable = $submission->getLanguage()->getCompileExecutable()->getImmutableExecutable();
         return $this->jsonEncode(
