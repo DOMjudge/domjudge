@@ -524,7 +524,7 @@ class SubmissionController extends BaseController
                         $header = "Some parameters have changed since the judging was created, consider rejudging.\n\n";
                     } else {
                         $type = 'warning';
-                        $header = "Some parameters have changed since the judging was created, but this judging is no longer valid.\n\n";
+                        $header = "Some parameters have changed since the judging was created, but this judging has been superseded, please verify if that needs a rejudging.\n\n";
                     }
                     $this->addFlash($type, $header . implode("\n", $errors));
                 }
