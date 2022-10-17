@@ -500,6 +500,36 @@ class SubmissionController extends BaseController
                 'after' => 15,
                 'url' => $this->generateUrl('jury_submission', ['submitId' => $submission->getSubmitid()]),
             ];
+        } else {
+            $contestProblem = $submission->getContestProblem();
+            /** @var JudgeTask $judgeTask */
+            $judgeTask = $this->em->getRepository(JudgeTask::class)->findOneBy(['jobid' => $selectedJudging->getJudgingid()]);
+            if ($judgeTask !== null) {
+                $errors = [];
+                $this->maybeGetErrors('Compile config',
+                    $this->dj->getCompileConfig($submission),
+                    $judgeTask->getCompileConfig(),
+                    $errors);
+                $this->maybeGetErrors('Run config',
+                    $this->dj->getRunConfig($contestProblem, $submission),
+                    $judgeTask->getRunConfig(),
+                    $errors);
+                $this->maybeGetErrors('Compare config',
+                    $this->dj->getCompareConfig($contestProblem),
+                    $judgeTask->getCompareConfig(),
+                    $errors);
+                if (!empty($errors)) {
+                    if ($selectedJudging->getValid()) {
+                        $type = 'danger';
+                        $header = "Some parameters have changed since the judging was created, consider rejudging.\n\n";
+                    } else {
+                        $type = 'warning';
+                        $header = "Some parameters have changed since the judging was created, but this judging has been superseded, please verify if that needs a rejudging.\n\n";
+                    }
+                    $this->addFlash($type, $header . implode("\n", $errors));
+                }
+
+            }
         }
 
         return $this->render('jury/submission.html.twig', $twigData);
@@ -1138,5 +1168,24 @@ class SubmissionController extends BaseController
         $this->dj->unblockJudgeTasksForSubmission($submitId);
         $this->addFlash('info', "Started judging for submission: $submitId");
         return $this->redirectToRoute('jury_submission', ['submitId' => $submitId]);
+    }
+
+    private function maybeGetErrors(string $type, string $expectedConfigString, string $observedConfigString, array &$errors)
+    {
+        if ($expectedConfigString !== $observedConfigString) {
+            $expectedConfig = $this->dj->jsonDecode($expectedConfigString);
+            $observedConfig = $this->dj->jsonDecode($observedConfigString);
+            $errors[] = $type . ' changes:';
+            foreach (array_keys($expectedConfig) as $k) {
+                if ($expectedConfig[$k] !== $observedConfig[$k]) {
+                    if ($k === 'hash') {
+                        $errors[] = '- script has changed';
+                    } else {
+                        $errors[] = '- ' . preg_replace('/_/', ' ', $k) . ': '
+                            . $this->dj->jsonEncode($observedConfig[$k]) . ' → ' . $this->dj->jsonEncode($expectedConfig[$k]);
+                    }
+                }
+            }
+        }
     }
 }
