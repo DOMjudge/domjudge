@@ -1,0 +1,18 @@
+name: Unit tests
+on:
+  push:
+    branches:
+      - main
+      - '[0-9]+.[0-9]+'
+  pull_request:
+
+jobs:
+  check-static-codecov:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Download latest codecov upload script
+        run: wget https://codecov.io/bash -O newcodecov
+      - name: Detect changes to manually verify
+        run: diff newcodecov .github/jobs/uploadcodecov.sh
+

@@ -1,11 +1,3 @@
-check static codecov:
-  extends: [.tiny_job]
-  stage: ci_checks
-  image: bash
-  script:
-    - wget https://codecov.io/bash -O newcodecov
-    - diff newcodecov gitlab/uploadcodecov.sh
-
 run chroot script checks:
   extends: [.normal_job]
   stage: chroot_checks

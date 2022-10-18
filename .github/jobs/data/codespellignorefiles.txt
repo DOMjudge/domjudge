@@ -9,7 +9,7 @@
 ./ChangeLog
 ./config.guess
 ./gitlab/codespell.yml
-./gitlab/uploadcodecov.sh
+./.github/jobs/uploadcodecov.sh
 ./lib/vendor
 ./webapp/public/bundles
 ./webapp/public/js/ace
