@@ -1,4 +1,4 @@
-name: Syntax checks
+name: Codestandard
 on:
   push:
     branches:
@@ -15,4 +15,11 @@ jobs:
       - uses: actions/checkout@v2
       - name: Run the syntax checks
         run: .github/jobs/syntax.sh
+
+  detect-dump:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: "Search for leftover dump( statements"
+        run: .github/jobs/detect_dump.sh
 
