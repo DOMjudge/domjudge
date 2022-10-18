@@ -23,3 +23,20 @@ jobs:
       - name: "Search for leftover dump( statements"
         run: .github/jobs/detect_dump.sh
 
+  php-linter:
+    runs-on: ubuntu-latest
+    container:
+      image: pipelinecomponents/php-linter:latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Detect PHP linting issues
+        run: >
+          parallel-lint --colors
+          lib/lib.*.php
+          etc
+          judge
+          webapp/src
+          webapp/tests
+          webapp/public
+          webapp/config
+

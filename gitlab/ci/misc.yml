@@ -28,22 +28,6 @@ phpcs_compatibility:
       webapp/public
       webapp/config
 
-# This finds different problems from codesniffer
-php linter:
-  extends: [.tiny_job]
-  stage: style
-  image: pipelinecomponents/php-linter:latest
-  script:
-    - >
-      parallel-lint --colors
-      lib/lib.*.php
-      etc
-      judge
-      webapp/src
-      webapp/tests
-      webapp/public
-      webapp/config
-
 run chroot script checks:
   extends: [.normal_job]
   stage: chroot_checks
