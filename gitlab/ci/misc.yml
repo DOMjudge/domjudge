@@ -6,28 +6,6 @@ check static codecov:
     - wget https://codecov.io/bash -O newcodecov
     - diff newcodecov gitlab/uploadcodecov.sh
 
-phpcs_compatibility:
-  extends: [.tiny_job]
-  stage: style
-  image: pipelinecomponents/php-codesniffer:latest
-  parallel:
-    matrix:
-      - PHPVERSION: ["7.4","8.1"]
-  script:
-    - phpcs --config-set installed_paths /app/vendor/phpcompatibility/php-compatibility
-    - >
-      phpcs -s -p --colors
-      --standard=PHPCompatibility
-      --extensions=php
-      --runtime-set testVersion $PHPVERSION
-      lib/lib.*.php
-      etc
-      judge
-      webapp/src
-      webapp/tests
-      webapp/public
-      webapp/config
-
 run chroot script checks:
   extends: [.normal_job]
   stage: chroot_checks
