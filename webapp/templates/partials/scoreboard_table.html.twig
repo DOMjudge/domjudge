@@ -36,7 +36,6 @@
 
     {# output table column groups (for the styles) #}
     <colgroup>
-        <col id="scorerank"/>
         {% if showFlags %}
             <col id="scoreflags"/>
         {% else %}
@@ -46,10 +45,6 @@
             <col id="scorelogos"/>
         {% endif %}
         <col id="scoreteamname"/>
-    </colgroup>
-    <colgroup>
-        <col id="scoresolv"/>
-        <col id="scoretotal"/>
     </colgroup>
     <colgroup>
         {% if showTeamSubmissions or jury %}
@@ -66,9 +61,7 @@
 
     <thead>
     <tr class="scoreheader" data-static="{{ static }}">
-        <th title="rank" scope="col">rank</th>
         <th title="team name" scope="col" colspan="{{ teamColspan }}">team</th>
-        <th title="# solved / penalty time" colspan="2" scope="col">score</th>
         {% if showTeamSubmissions or jury %}
             {% for problem in problems %}
                 {% set link = null %}
@@ -136,16 +129,6 @@
             {% set color = score.team.category.color %}
         {% endif %}
         <tr class="{{ classes | join(' ') }}" id="team:{{ score.team.teamid }}">
-            <td class="scorepl {{medalColor}}">
-                {# Only print rank when score is different from the previous team #}
-                {% if not displayRank %}
-                    ?
-                {% elseif previousTeam is null or scoreboard.scores[previousTeam.teamid].rank != score.rank %}
-                    {{ score.rank }}
-                {% else %}
-                {% endif %}
-                {% set previousTeam = score.team %}
-            </td>
             <td class="scoreaf">
                 {% if showFlags %}
                     {% if score.team.affiliation %}
@@ -227,8 +210,6 @@
                 {% set totalTime = totalTime | printTimeRelative %}
             {% endif %}
             {% set totalPoints = score.numPoints %}
-            <td class="scorenc">{{ totalPoints }}</td>
-            <td class="scorett">{{ totalTime }}</td>
 
             {% if showTeamSubmissions or jury %}
                 {% for problem in problems %}
@@ -237,9 +218,6 @@
                     {% set matrixItem = scoreboard.matrix[score.team.teamid][problem.probid] %}
                     {% if matrixItem.isCorrect %}
                         {% set scoreCssClass = 'score_correct' %}
-                        {% if scoreboard.solvedFirst(score.team, problem) %}
-                            {% set scoreCssClass = scoreCssClass ~ ' score_first' %}
-                        {% endif %}
                     {% elseif showPending and matrixItem.numSubmissionsPending > 0 %}
                         {% set scoreCssClass = 'score_pending' %}
                     {% elseif matrixItem.numSubmissions > 0 %}
