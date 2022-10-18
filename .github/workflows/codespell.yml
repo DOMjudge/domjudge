@@ -12,10 +12,9 @@ jobs:
               run: awk '1;/Version 7.2.1 - 6 May 2020/{exit}' ChangeLog > latest_Changelog
             - name: Get dirs to skip
               id: list_to_csv
-              run: echo "::set-output name=SKIP::$(awk '{print $1}' gitlab/codespellignorefiles.txt | paste -s -d, -)"
+              run: echo "::set-output name=SKIP::$(awk '{print $1}' .github/jobs/data/codespellignorefiles.txt | paste -s -d, -)"
             - uses: codespell-project/actions-codespell@master
               with:
                   check_filenames: true
-                  only_warn: 1
-                  ignore_words_file: gitlab/codespellignorewords.txt
+                  ignore_words_file: .github/jobs/data/codespellignorewords.txt
                   skip: ${{ steps.list_to_csv.outputs.SKIP }}
