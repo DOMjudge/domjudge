@@ -1,9 +1,3 @@
-check syntax:
-  extends: [.short_job]
-  stage: style
-  script:
-    - ./gitlab/syntax.sh
-
 check static codecov:
   extends: [.tiny_job]
   stage: ci_checks
@@ -33,42 +27,6 @@ phpcs_compatibility:
       webapp/tests
       webapp/public
       webapp/config
-
-# This finds different problems from codesniffer
-php linter:
-  extends: [.tiny_job]
-  stage: style
-  image: pipelinecomponents/php-linter:latest
-  script:
-    - >
-      parallel-lint --colors
-      lib/lib.*.php
-      etc
-      judge
-      webapp/src
-      webapp/tests
-      webapp/public
-      webapp/config
-
-codespell:
-  extends: [.tiny_job]
-  stage: style
-  script:
-    - awk '1;/Version 7.2.1 - 6 May 2020/{exit}' ChangeLog > latest_Changelog
-    - python3 gitlab/codespell_gitlab.py
-
-detect dump:
-  extends: [.tiny_job]
-  image: bash
-  stage: style
-  script:
-    - OUT=$(find ./
-        -name ".git" -type d -prune -o
-        -name "cache" -type d -prune -o
-        -name "ace" -type d -prune -o
-        -type f -print0 | xargs -0 grep --color "dump(" | grep -v "Yaml::dump(")
-    - echo $OUT
-    - exit $(($(wc -l <<< $OUT)-1))
 
 run chroot script checks:
   extends: [.normal_job]
