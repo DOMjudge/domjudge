@@ -40,3 +40,28 @@ jobs:
           webapp/public
           webapp/config
 
+  phpcs_compatibility:
+    runs-on: ubuntu-latest
+    container:
+      image: pipelinecomponents/php-codesniffer:latest
+    strategy:
+      matrix:
+        PHPVERSION: ["7.4", "8.0", "8.1"]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set plugin config for version detection
+        run: phpcs --config-set installed_paths /app/vendor/phpcompatibility/php-compatibility
+      - name: Detect compatibility with supported PHP version
+        run: >
+          phpcs -s -p --colors
+          --standard=PHPCompatibility
+          --extensions=php
+          --runtime-set testVersion ${{ matrix.PHPVERSION }}
+          lib/lib.*.php
+          etc
+          judge
+          webapp/src
+          webapp/tests
+          webapp/public
+          webapp/config
+
