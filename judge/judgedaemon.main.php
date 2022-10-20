@@ -172,10 +172,11 @@ function request(string $url, string $verb = 'GET', $data = '', bool $failonerro
         if ($trial == BACKOFF_STEPS) {
             $errstr = $errstr . " Retry limit reached.";
         } else {
+            $retry_in_ms = $delay_in_ms + random_int(0, BACKOFF_JITTER_MS);
             $warnstr = $errstr . " This request will be retried after about " .
-                $delay_in_ms . "ms... (" . $trial . "/" . BACKOFF_STEPS . ")";
+                $retry_in_ms . "ms... (" . $trial . "/" . BACKOFF_STEPS . ")";
             warning($warnstr);
-            usleep($delay_in_ms + random_int(0, BACKOFF_JITTER_MS));
+            usleep(1000 * $retry_in_ms);
             $delay_in_ms = $delay_in_ms * BACKOFF_FACTOR;
         }
     }
