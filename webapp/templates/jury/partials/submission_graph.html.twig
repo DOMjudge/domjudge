@@ -58,7 +58,7 @@
         }
         chart.yAxis
             .tickValues(tickValues)
-            .axisLabel('Runtime(in s)');
+            .axisLabel('Runtime (in s)');
         return chart;
     }
 
@@ -84,6 +84,10 @@
         ];
         nv.addGraph(function () {
             var chart = create_chart(run_max_times, maxY);
+            chart.tooltip.contentGenerator(function (obj) {
+                var format = d3.format(".3f");
+                return "<b>" + obj.data.label + "</b><br><b>max runtime:</b> " + format(obj.data.value) + "s";
+            });
             chart.xAxis.axisLabel("Judging");
             d3.select('#maxruntime svg')
                 .datum(run_max_times)
