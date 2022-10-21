@@ -152,7 +152,7 @@
         {% if stats.judgings %}
             <h4>Judging verdicts</h4>
             <table class="table table-sm table-striped">
-                <tr><th>jID</th><th>rID</th><th>Judgehost</th><th>runtime</th><th>verdict</th></tr>
+                <tr><th>jID</th><th>rID</th><th>Judgehost</th><th>duration (incl. compile)</th><th>verdict</th></tr>
                 {% for judging in stats.judgings %}
                     <tr>
                         <td>{{ judging.judgingid }}</td>
