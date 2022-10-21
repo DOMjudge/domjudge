@@ -140,7 +140,7 @@
                 <tr><th>Judgehost</th><th>#judgings</th><th>avg. runtime</th><th>std.dev.</th><th>avg. duration</th></tr>
                 {% for judgehost in stats.judgehost_stats %}
                     <tr>
-                        <td>{{ judgehost.judgehost }}</td>
+                        <td>{{ judgehost.judgehost | printHost }}</td>
                         <td>{{ judgehost.njudged }}</td>
                         <td>{{ judgehost.avgrun | number_format(3) }}s</td>
                         <td>{{ judgehost.stddev | number_format(3) }}</td>
@@ -155,9 +155,9 @@
                 <tr><th>jID</th><th>rID</th><th>Judgehost</th><th>duration (incl. compile)</th><th>verdict</th></tr>
                 {% for judging in stats.judgings %}
                     <tr>
-                        <td>{{ judging.judgingid }}</td>
-                        <td>{{ judging.rejudgingid }}</td>
-                        <td>{{ judging.hostname }}</td>
+                        <td>j{{ judging.judgingid }}</td>
+                        <td>r{{ judging.rejudgingid }}</td>
+                        <td>{{ judging.hostname | printHost }}</td>
                         <td>{{ judging.duration | number_format(3) }}</td>
                         <td>{{ judging.result | printResult }}</td>
                     </tr>
