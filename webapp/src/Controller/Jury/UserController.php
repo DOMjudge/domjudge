@@ -393,4 +393,25 @@ class UserController extends BaseController
             'form' => $form->createView(),
         ]);
     }
+
+    /**
+     * @Route("/reset_login_status", name="jury_reset_login_status")
+     * @IsGranted("ROLE_ADMIN")
+     */
+    public function resetTeamLoginStatus(Request $request): Response
+    {
+        /** @var Role $teamRole */
+        $teamRole = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'team']);
+        $count = 0;
+        foreach ($teamRole->getUsers() as $user) {
+            /** @var User $user */
+            $user->setFirstLogin(null);
+            $user->setLastLogin(null);
+            $user->setLastIpAddress(null);
+            $count++;
+        }
+        $this->em->flush();
+        $this->addFlash('success', 'Reset login status all ' . $count . ' users with the team role.');
+        return $this->redirect($this->generateUrl('jury_users'));
+    }
 }

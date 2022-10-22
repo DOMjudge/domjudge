@@ -291,7 +291,7 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
         return $this->getFirstLogin() ? new DateTime(Utils::absTime($this->getFirstLogin())) : null;
     }
 
-    public function setLastIpAddress(string $lastIpAddress): User
+    public function setLastIpAddress(?string $lastIpAddress): User
     {
         $this->last_ip_address = $lastIpAddress;
         return $this;
