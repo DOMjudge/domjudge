@@ -24,6 +24,7 @@ $(SUBST_FILES): %: %.in $(TOPDIR)/paths.mk
 
 install-domserver:
 	$(INSTALL_PROG) -t $(DESTDIR)$(domserver_bindir) $(SUBST_DOMSERVER)
+	$(INSTALL_PROG) -t $(DESTDIR)$(domserver_bindir) import-contest
 
 install-judgehost:
 	$(INSTALL_PROG) -t $(DESTDIR)$(judgehost_bindir) $(SUBST_JUDGEHOST)
@@ -35,6 +36,7 @@ inplace-install:
 	for i in $(SUBST_JUDGEHOST) ; do \
 		ln -sf $(CURDIR)/$$i $(judgehost_bindir) ; \
 	done
+	ln -sf $(CURDIR)/import-contest $(judgehost_bindir)
 
 clean-l:
 	-rm -f $(TARGETS) $(OBJECTS)
