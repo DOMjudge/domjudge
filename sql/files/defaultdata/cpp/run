@@ -6,6 +6,9 @@
 DEST="$1" ; shift
 MEMLIMIT="$1" ; shift
 
+# Disable the use of #pramga to tell the compiler to change compile flags
+sed -i 's/^#pragma/\/\/ #pragma/i' "$@"
+
 # Add -DONLINE_JUDGE or -DDOMJUDGE below if you want it make easier for teams
 # to do local debugging.
 
