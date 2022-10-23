@@ -19,6 +19,6 @@ jobs:
           files: "**.php" # you may customize glob as needed
           scope: files
           phpcs_path: php phpcs.phar
-          standard: .github/workflowscripts/phpruleset.xml
+          standard: .github/jobs/data/phpruleset.xml
           fail_on_errors: false
           fail_on_warnings: false
