@@ -295,7 +295,7 @@ install-loadtest)
 	symfony_console doctrine:migrations:migrate -n
 	unset DB_FIRST_INSTALL
 	DBUSER=$domjudge_DBUSER PASSWD=$domjudge_PASSWD symfony_console domjudge:load-default-data
-    DBUSER=$domjudge_DBUSER PASSWD=$domjudge_PASSWD symfony_console domjudge:load-gatling-data
+	DBUSER=$domjudge_DBUSER PASSWD=$domjudge_PASSWD symfony_console domjudge:load-gatling-data
 	;;
 
 create-db-users)
