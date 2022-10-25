@@ -118,6 +118,7 @@ class GeneralInfoController extends AbstractFOSRestController
         return [
             'version' => self::CCS_SPEC_API_VERSION,
             'version_url' => self::CCS_SPEC_API_URL,
+            'name' => 'DOMjudge',
             'domjudge' => [
                 'api_version' => static::API_VERSION,
                 'version' => $this->getParameter('domjudge.version'),
