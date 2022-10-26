@@ -661,7 +661,10 @@ class SubmissionController extends BaseController
     public function teamOutputAction(Submission $submission, Contest $contest, JudgingRun $run): StreamedResponse
     {
         if ($run->getJudging()->getSubmission()->getSubmitid() !== $submission->getSubmitid() || $submission->getContest()->getCid() !== $contest->getCid()) {
-            throw new BadRequestHttpException('Problem while fetching team output');
+            throw new BadRequestHttpException('Integrity problem while fetching team output.');
+        }
+        if ($run->getOutput() === null) {
+            throw new BadRequestHttpException('No team output available (yet).');
         }
 
         $filename = sprintf('p%d.t%d.%s.run%d.team%d.out', $submission->getProblem()->getProbid(), $run->getTestcase()->getRank(),
