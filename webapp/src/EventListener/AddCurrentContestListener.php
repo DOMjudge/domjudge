@@ -22,6 +22,6 @@ class AddCurrentContestListener implements EventSubscriberInterface
 
     public function onKernelResponse(ResponseEvent $event)
     {
-        $event->getResponse()->headers->set('X-Current-Contest', $this->dj->getCurrrentContestCookie());
+        $event->getResponse()->headers->set('X-Current-Contest', $this->dj->getCurrentContestCookie());
     }
 }

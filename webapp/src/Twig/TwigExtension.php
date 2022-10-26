@@ -132,7 +132,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
 
         // These variables mostly exist for the header template.
         return [
-            'current_contest_id'            => $this->dj->getCurrrentContestCookie(),
+            'current_contest_id'            => $this->dj->getCurrentContestCookie(),
             'current_contest'               => $this->dj->getCurrentContest(),
             'current_contests'              => $this->dj->getCurrentContests(),
             'current_public_contest'        => $this->dj->getCurrentContest(-1),
