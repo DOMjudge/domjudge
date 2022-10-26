@@ -148,9 +148,13 @@ class DOMJudgeService
         return $qb->getQuery()->getResult();
     }
 
-    public function getCurrrentContestCookie(): ?int
+    public function getCurrentContestCookie(): ?int
     {
-        return $this->requestStack->getCurrentRequest()->cookies->getInt('domjudge_cid');
+        $request = $this->requestStack->getCurrentRequest();
+        if ($request === null || $request->cookies === null) {
+            return null;
+        }
+        return $request->cookies->getInt('domjudge_cid');
     }
 
     /**
@@ -162,7 +166,7 @@ class DOMJudgeService
     {
         $contests = $this->getCurrentContests($onlyofteam, $alsofuture);
         if ($this->requestStack->getCurrentRequest()) {
-            $selected_cid = $this->getCurrrentContestCookie();
+            $selected_cid = $this->getCurrentContestCookie();
             if ($selected_cid == -1) {
                 return null;
             }
