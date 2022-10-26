@@ -49,7 +49,7 @@
             {%- endif %}
 
             <th scope="col">time</th>
-            <th scope="col">team</th>
+            <th scope="col" colspan="2">team</th>
             <th scope="col">problem</th>
             <th scope="col">lang</th>
             {% if showExternalResult and showExternalTestcases %}
@@ -111,9 +111,15 @@
                 <td rowspan="{{ rowSpan }}" class="{{ tdExtraClass }}">
                     <a href="{{ link }}">{{ submission.submittime | printtime(null, submission.contest) }}</a>
                 </td>
+                <td rowspan="{{ rowSpan }}" class="{{ tdExtraClass }}" style="text-align: right;">
+                    <a href="{{ link }}">
+                        {{ submission.team | entityIdBadge('t') }}
+                    </a>
+                </td>
                 <td rowspan="{{ rowSpan }}" class="{{ tdExtraClass }}">
-                    <a href="{{ link }}"
-                       title="t{{ submission.team.teamid }}">{{ submission.team.name | u.truncate(teamname_max_length, '…') }}</a>
+                    <a href="{{ link }}">
+                        {{ submission.team.name | u.truncate(teamname_max_length, '…') }}
+                    </a>
                 </td>
                 <td class="probid{{ tdExtraClass }}" rowspan="{{ rowSpan }}">
                     <a href="{{ link }}"

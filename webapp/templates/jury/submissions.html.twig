@@ -107,6 +107,8 @@
                         })
                         .show();
                 }
+
+                $('table.submissions-table').find('[data-toggle="tooltip"]').tooltip();
             };
 
             $('select[data-filter-field]').on('change', process_submissions_filter);

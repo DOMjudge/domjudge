@@ -114,7 +114,8 @@
                            class="{{ item.cssclass|default('') }}{% if key == "status" %} {{ item.value|statusClass() }}{% endif %}"
                                 {%- if item.title is defined %} title="{{ item.title }}"{% endif %}
                                 {%- if item.filterKey is defined and item.filterValue is defined %} data-{{ item.filterKey }}="{{ item.filterValue }}"{% endif %}
-                                {%- if item.sortvalue is defined %} data-sort="{{ item.sortvalue }}"{% endif %}>
+                                {%- if item.sortvalue is defined %} data-sort="{{ item.sortvalue }}"{% endif %}
+                                {% if (column.render | default('')) == "entity_id_badge" %}style="text-align: right;" {% endif %}>
                             {%- if item.link is defined %}<a href="{{ item.link }}">
                                 {%- elseif row.link is defined %}<a href="{{ row.link }}">{% endif %}
                                     {% if key == "status" %}
@@ -125,6 +126,8 @@
                                     {{- (item.value|default(item.default|default('')))|affiliationLogo(item.title) -}}
                                     {% elseif key == "warning_content" %}
                                     {{- item.value|printWarningContent -}}
+                                    {% elseif (column.render | default('')) == "entity_id_badge" %}
+                                    {% if item.value %}{{- item.value|entityIdBadge(item.idPrefix|default('')) -}}{% endif %}
                                     {% else %}
                                     {{- (item.value|default(item.default|default(''))) -}}
                                     {% endif %}

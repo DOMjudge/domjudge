@@ -168,7 +168,7 @@
                         {% else %}
                             {% for team in contest.teams %}
                                 <a href="{{ path('jury_team', {'teamId': team.teamid}) }}">
-                                    {{ team.effectiveName }} (t{{ team.teamid }})
+                                    {{ team.effectiveName }} {{ team | entityIdBadge('t') }}
                                 </a>
                                 <br>
                             {% endfor %}

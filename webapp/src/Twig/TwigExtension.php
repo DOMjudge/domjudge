@@ -2,6 +2,7 @@
 
 namespace App\Twig;
 
+use App\Entity\BaseApiEntity;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\ExternalJudgement;
@@ -22,6 +23,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use SebastianBergmann\Diff\Differ;
 use Symfony\Component\Intl\Countries;
 use Symfony\Component\Intl\Exception\MissingResourceException;
+use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Twig\Environment;
@@ -119,6 +121,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             new TwigFilter('problemBadge', [$this, 'problemBadge'], ['is_safe' => ['html']]),
             new TwigFilter('printMetadata', [$this, 'printMetadata'], ['is_safe' => ['html']]),
             new TwigFilter('printWarningContent', [$this, 'printWarningContent'], ['is_safe' => ['html']]),
+            new TwigFilter('entityIdBadge', [$this, 'entityIdBadge'], ['is_safe' => ['html']]),
         ];
     }
 
@@ -1137,5 +1140,27 @@ EOF;
         }
 
         return '';
+    }
+
+    /**
+     * Get the entity ID badge to display for the given entity.
+     *
+     * When we are in a data source mode that uses external ID's, those will be used and the
+     * internal ID will be shown in a tooltip.
+     *
+     * @param string $idPrefix The prefix to use for the internal ID, if any.
+     */
+    public function entityIdBadge(BaseApiEntity $entity, string $idPrefix = ''): string
+    {
+        $propertyAccessor = PropertyAccess::createPropertyAccessor();
+        $metadata = $this->em->getClassMetadata(get_class($entity));
+        $primaryKeyColumn = $metadata->getIdentifierColumnNames()[0];
+        $externalIdField = $this->eventLogService->externalIdFieldForEntity($entity);
+
+        return $this->twig->render('jury/entity_id_badge.html.twig', [
+            'idPrefix' => $idPrefix,
+            'id' => $propertyAccessor->getValue($entity, $primaryKeyColumn),
+            'externalId' => $externalIdField ? $propertyAccessor->getValue($entity, $externalIdField) : null,
+        ]);
     }
 }
