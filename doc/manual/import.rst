@@ -425,11 +425,11 @@ You can retrieve the current configuration via
 
     http --check-status --pretty=format "<API_URL>/config" > config.json
 
-For your convenience, we added a script to update configuration via from a file
+For your convenience, we added a script to update configuration from a file
 called `config.json` in your current directory::
 
     misc-tools/configure-domjudge <API_URL>
 
-.. _CCS specification: https://ccs-specs.icpc.io/2021-11/ccs_system_requirements#appendix-file-formats
+.. _CCS specification: https://ccs-specs.icpc.io/2022-07/ccs_system_requirements#appendix-file-formats
 .. _.netrc: https://www.gnu.org/software/inetutils/manual/html_node/The-_002enetrc-file.html
 .. _httpie: https://httpie.org/
