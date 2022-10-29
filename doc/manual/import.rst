@@ -415,6 +415,21 @@ exist or updated when they do. Teams will be set to 'enabled' if their ICPC CMS
 status is 'ACCEPTED', of disabled otherwise. Affiliations are not updated or
 deleted even when all teams cancel.
 
+Importing DOMjudge configuration
+--------------------------------
+
+DOMjudge exposes its configuration at the `<API_URL>/config` endpoint in JSON
+form and accepts a `PUT` request to load/update configuration.
+
+You can retrieve the current configuration via
+
+    http --check-status --pretty=format "<API_URL>/config" > config.json
+
+For your convenience, we added a script to update configuration via from a file
+called `config.json` in your current directory::
+
+    misc-tools/configure-domjudge <API_URL>
+
 .. _CCS specification: https://ccs-specs.icpc.io/2021-11/ccs_system_requirements#appendix-file-formats
 .. _.netrc: https://www.gnu.org/software/inetutils/manual/html_node/The-_002enetrc-file.html
 .. _httpie: https://httpie.org/

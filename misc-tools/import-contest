@@ -1,16 +1,20 @@
 #!/usr/bin/env python3
 
 '''
-import-contest -- Convenience script to import a contest (including metadata, teams and
-problems) via the command line. Supports reading credentials from ~/.netrc.
+import-contest -- Convenience script to import a contest (including metadata,
+teams and problems) via the command line.
+
+Reads credentials from ~/.netrc.
+
 See also https://www.domjudge.org/docs/manual/main/import.html
-(replace main with the DOMjudge major.minor version if you are running a released version,
-i.e. use 8.1 for DOMjudge 8.1.x)
+(replace main with the DOMjudge major.minor version if you are running a
+released version, i.e. use 8.1 for DOMjudge 8.1.x)
 
 Part of the DOMjudge Programming Contest Jury System and licensed
 under the GNU GPL. See README and COPYING for details.
 '''
 
+import dj_utils
 import fileinput
 import json
 import os.path
@@ -20,96 +24,22 @@ import sys
 from typing import List
 import yaml
 
-headers = {
-    'user-agent': f'domjudge-import-contest ({requests.utils.default_user_agent()})'}
-
-api_url = None
 cid = None
-
-
-def confirm(message: str, default: bool) -> bool:
-    answer = 'x'
-    while answer not in ['y', 'n']:
-        yn = 'Y/n' if default else 'y/N'
-        answer = input(f'{message} ({yn}) ').lower()
-        if answer == '':
-            answer = 'y' if default else 'n'
-    return answer == 'y'
 
 
 def usage():
     print(f'Usage {sys.argv[0]} <domjudge-api-url>')
     exit(1)
 
-def parse_api_response(name: str, response: requests.Response):
-    # The connection worked, but we may have received an HTTP error
-    if response.status_code >= 300:
-        print(response.text)
-        if response.status_code == 401:
-            raise RuntimeError(
-                'Authentication failed, please check your DOMjudge credentials in ~/.netrc.')
-        else:
-            raise RuntimeError(
-                f'API request {name} failed (code {response.status_code}).')
-
-    # We got a successful HTTP response. It worked. Return the full response
-    return json.loads(response.text)
-
-def do_api_request(name: str):
-    '''Perform an API call to the given endpoint and return its data.
-
-    Parameters:
-        name (str): the endpoint to call
-
-    Returns:
-        The endpoint contents.
-
-    Raises:
-        RuntimeError when the response is not JSON or the HTTP status code is non 2xx.
-    '''
-
-    url = f'{api_url}/{name}'
-
-    try:
-        response = requests.get(url, headers=headers)
-    except requests.exceptions.RequestException as e:
-        raise RuntimeError(e)
-
-    return parse_api_response(name, response)
-
-
-def upload_file(name: str, apifilename: str, file: str, data: dict = {}):
-    '''Upload the given file to the API at the given path with the given name.
-
-    Parameters:
-        name (str): the endpoint to call
-        apifilename (str): the argument name for the file to upload
-        file (str): the file to upload
-
-    Returns:
-        The parsed endpoint contents.
-
-    Raises:
-        RuntimeError when the HTTP status code is non 2xx.
-    '''
-
-    files = [(apifilename, open(file, 'rb'))]
-
-    url = f'{api_url}/{name}'
-
-    response = requests.post(url, files=files, headers=headers, data=data)
-
-    return parse_api_response(name, response)
-
 
 def import_file(entity: str, files: List[str]):
     any_matched = False
     for file in files:
         if os.path.exists(file):
-            if confirm(f'Import {entity} from {file}?', False):
+            if dj_utils.confirm(f'Import {entity} from {file}?', False):
                 print(f'Importing {entity}.')
                 type = file.split('.')[1]
-                response = upload_file(f'users/{entity}', type, file)
+                response = dj_utils.upload_file(f'users/{entity}', type, file)
                 print(json.dumps(response, indent=4))
                 # After the first successfully imported file, we should stop
                 return
@@ -130,9 +60,9 @@ def import_file(entity: str, files: List[str]):
 if len(sys.argv) < 2:
     usage()
 
-api_url = sys.argv[1]
+dj_utils.api_url = sys.argv[1]
 
-user_data = do_api_request('user')
+user_data = dj_utils.do_api_request('user')
 if 'admin' not in user_data['roles']:
     print('Your user does not have the \'admin\' role, can not import.')
     exit(1)
@@ -146,13 +76,13 @@ problems_imported = False
 
 # Contest import is a special case: we can also gather the contest ID.
 if os.path.exists('contest.yaml'):
-    if confirm('Import contest metadata (from contest.yaml)?', True):
+    if dj_utils.confirm('Import contest metadata (from contest.yaml)?', True):
         print(f'Importing contest.')
-        cid = upload_file('contests', 'yaml', 'contest.yaml')
+        cid = dj_utils.upload_file('contests', 'yaml', 'contest.yaml')
 elif os.path.exists('contest.json'):
-    if confirm('Import contest metadata (from contest.json)?', True):
+    if dj_utils.confirm('Import contest metadata (from contest.json)?', True):
         print('Importing contest.')
-        cid = upload_file('contests', 'json', 'contest.json')
+        cid = dj_utils.upload_file('contests', 'json', 'contest.json')
 else:
     print('Neither \'contest.yaml\' nor \'contest.json\' found, skipping contest metadata import.')
 
@@ -161,10 +91,10 @@ if cid is not None:
 
 # Problem import is also special: we need to upload each individual problem and detect what they are
 if os.path.exists('problems.yaml') or os.path.exists('problems.json') or os.path.exists('problemset.yaml'):
-    if confirm('Import problems?', True):
+    if dj_utils.confirm('Import problems?', True):
         # Check if our user is linked to a team
-        user_data = do_api_request('user')
-        if not 'team' in user_data and not confirm('No team associated with your account. Jury submissions won\'t be imported. Really continue?', False):
+        user_data = dj_utils.do_api_request('user')
+        if not 'team' in user_data and not dj_utils.confirm('No team associated with your account. Jury submissions won\'t be imported. Really continue?', False):
             exit(2)
 
         print('Importing problems.')
@@ -179,12 +109,12 @@ if os.path.exists('problems.yaml') or os.path.exists('problems.json') or os.path
                 problems_file = 'problems.json'
             else:
                 problems_file = 'problemset.yaml'
-            upload_file(f'contests/{cid}/problems/add-data', 'data', problems_file)
+            dj_utils.upload_file(f'contests/{cid}/problems/add-data', 'data', problems_file)
 
         # We might need to translate the problem external ID's into an internal ID (when we are in data source = local mode)
         # For this, we get the problems from the API and create a dict with the mapping
         problem_mapping = {problem['externalid']: problem['id']
-                           for problem in do_api_request(f'contests/{cid}/problems')}
+                           for problem in dj_utils.do_api_request(f'contests/{cid}/problems')}
 
         if os.path.exists('problems.yaml'):
             with open('problems.yaml') as problemFile:
@@ -200,7 +130,7 @@ if os.path.exists('problems.yaml') or os.path.exists('problems.json') or os.path
                 problems = [problem['short-name']
                             for problem in problemData['problems']]
 
-        confirmIndividually = confirm("Confirm individually for every problem", False)
+        confirmIndividually = dj_utils.confirm("Confirm individually for every problem", False)
         for problem in problems:
             print(f'Preparing problem \'{problem}\'.')
             if os.path.exists(f'{problem}.zip'):
@@ -211,8 +141,8 @@ if os.path.exists('problems.yaml') or os.path.exists('problems.json') or os.path
             os.system(f'cd {problem} && zip -r \'../{problem}\' -- .timelimit *')
 
             problem_id = problem_mapping[problem]
-            if ((not confirmIndividually) or confirm(f'Ready to import problem \'{problem}\' to probid={problem_id}. Continue?', True)):
-                response = upload_file(
+            if ((not confirmIndividually) or dj_utils.confirm(f'Ready to import problem \'{problem}\' to probid={problem_id}. Continue?', True)):
+                response = dj_utils.upload_file(
                     f'contests/{cid}/problems', 'zip', f'{problem}.zip', {'problem': problem_id})
                 print(json.dumps(response, indent=4))
     else:
