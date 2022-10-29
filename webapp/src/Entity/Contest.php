@@ -12,6 +12,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Exception;
 use JMS\Serializer\Annotation as Serializer;
+use OpenApi\Annotations as OA;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -882,6 +883,7 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     /**
      * @Serializer\VirtualProperty()
      * @Serializer\Type("string")
+     * @OA\Property(nullable=true)
      */
     public function getScoreboardFreezeDuration(): ?string
     {
