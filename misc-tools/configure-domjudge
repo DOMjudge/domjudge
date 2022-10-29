@@ -1,0 +1,89 @@
+#!/usr/bin/env python3
+
+'''
+configure-domjudge -- Convenience script to update DOMjudge configuration.
+problems) via the command line.
+
+Reads credentials from ~/.netrc.
+
+See also https://www.domjudge.org/docs/manual/main/import.html
+(replace main with the DOMjudge major.minor version if you are running a
+released version, i.e. use 8.1 for DOMjudge 8.1.x)
+
+Part of the DOMjudge Programming Contest Jury System and licensed
+under the GNU GPL. See README and COPYING for details.
+'''
+
+import dj_utils
+import json
+import os.path
+import requests
+import requests.utils
+import sys
+from typing import List, Set
+
+def usage():
+    print(f'Usage {sys.argv[0]} <domjudge-api-url>')
+    exit(1)
+
+
+def compare_configs(expected_config: Set, actual_config: Set) -> (List, Set, Set):
+        diffs = []
+        for k in expected_config.keys():
+            if k in actual_config and expected_config[k] != actual_config[k]:
+                diffs.append(f'- {k}:\n   is: {actual_config[k]}\n  new: {expected_config[k]}')
+        if diffs:
+            print('Differences between actual and new configuration:')
+            for d in diffs:
+                print(d)
+
+        new_keys = set(expected_config.keys()).difference(set(actual_config.keys()))
+        missing_keys = set(actual_config.keys()).difference(set(expected_config.keys()))
+        return (diffs, new_keys, missing_keys)
+
+
+if len(sys.argv) < 2:
+    usage()
+
+dj_utils.api_url = sys.argv[1]
+
+user_data = dj_utils.do_api_request('user')
+if 'admin' not in user_data['roles']:
+    print('Your user does not have the \'admin\' role, can not import.')
+    exit(1)
+
+if os.path.exists('config.json'):
+    with open('config.json') as configFile:
+        actual_config = dj_utils.do_api_request('config')
+        expected_config = json.load(configFile)
+        diffs, new_keys, missing_keys = compare_configs(
+                actual_config=actual_config,
+                expected_config=expected_config
+        )
+        if diffs:
+            print('Differences between actual and new configuration:')
+            for d in diffs:
+                print(d)
+        if new_keys:
+            print(f'missing keys from actual config = {new_keys}')
+        if missing_keys:
+            print(f'missing keys from new config = {missing_keys}')
+        if diffs or new_keys or missing_keys:
+            if dj_utils.confirm('Upload these configuration changes?', True):
+                url = f'{dj_utils.api_url}/config'
+                response = requests.put(url, headers=dj_utils.headers, json=expected_config)
+                actual_config = dj_utils.parse_api_response('config', response)
+                diffs, new_keys, missing_keys = compare_configs(
+                        actual_config=actual_config,
+                        expected_config=expected_config
+                )
+                if diffs:
+                    print('There are still configuration differences after uploading:')
+                    for d in diffs:
+                        print(d)
+        else:
+            print('Configuration is already up-to-date, nothing to upload.')
+else:
+    print('Need a "config.json" to update configuration.')
+    sys.exit(1)
+
