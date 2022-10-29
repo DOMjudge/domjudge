@@ -302,6 +302,7 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
      * @Serializer\VirtualProperty()
      * @Serializer\SerializedName("reply_to_id")
      * @Serializer\Type("string")
+     * @OA\Property(nullable=true)
      */
     public function getInReplyToId(): ?int
     {
