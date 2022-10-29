@@ -5,6 +5,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
+use OpenApi\Annotations as OA;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -52,6 +53,7 @@ class Judgehost
      *     options={"comment"="Time of last poll by autojudger",
      *              "unsigned"=true},
      *     nullable=true)
+     * @OA\Property(nullable=true)
      */
     private $polltime;
 
