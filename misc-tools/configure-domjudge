@@ -2,7 +2,6 @@
 
 '''
 configure-domjudge -- Convenience script to update DOMjudge configuration.
-problems) via the command line.
 
 Reads credentials from ~/.netrc.
 
