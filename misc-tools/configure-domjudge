@@ -15,14 +15,12 @@ under the GNU GPL. See README and COPYING for details.
 '''
 
 import dj_utils
-import fileinput
 import json
 import os.path
 import requests
 import requests.utils
 import sys
 from typing import List, Set
-import yaml
 
 def usage():
     print(f'Usage {sys.argv[0]} <domjudge-api-url>')

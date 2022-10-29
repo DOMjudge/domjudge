@@ -18,8 +18,6 @@ import dj_utils
 import fileinput
 import json
 import os.path
-import requests
-import requests.utils
 import sys
 from typing import List
 import yaml
