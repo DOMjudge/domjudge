@@ -77,6 +77,5 @@ class ClarificationFixture extends AbstractTestDataFixture
 //        $handledClarification = $manager->getRepository(Clarification::class)->findOneBy(['body' => 'You have a fast calculator in front of you.']);
         $handledClarification->addReply($answerToExistingClar);
         $manager->flush();
-
     }
 }
