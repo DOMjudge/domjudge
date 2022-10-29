@@ -32,7 +32,7 @@ class AccessController extends AbstractRestController
      *     description="Access information for the given contest",
      *     @OA\JsonContent(
      *         type="object",
-     *         @OA\Property(property="capabilities", type="string"),
+     *         @OA\Property(property="capabilities", type="array", @OA\Items(type="string")),
      *         @OA\Property(
      *             property="endpoints",
      *             type="array",
