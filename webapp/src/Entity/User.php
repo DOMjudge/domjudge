@@ -120,6 +120,7 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
      *     nullable=true)
      * @Serializer\SerializedName("ip")
      * @Assert\Ip(version="all")
+     * @OA\Property(nullable=true)
      */
     private ?string $ipAddress;
 
@@ -364,6 +365,7 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
      * @Serializer\SerializedName("team")
      * @Serializer\Type("string")
      * @Serializer\Groups({"Nonstrict"})
+     * @OA\Property(nullable=true)
      */
     public function getTeamName(): ?string
     {
@@ -374,6 +376,7 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
      * @Serializer\VirtualProperty()
      * @Serializer\SerializedName("team_id")
      * @Serializer\Type("string")
+     * @OA\Property(nullable=true)
      */
     public function getTeamId(): ?int
     {
@@ -424,6 +427,7 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
      * @Serializer\VirtualProperty()
      * @Serializer\SerializedName("type")
      * @Serializer\Type("string")
+     * @OA\Property(nullable=true)
      */
     public function getType(): ?string
     {
