@@ -18,7 +18,7 @@ class ProblemControllerAdminTest extends ProblemControllerTest
     {
         // When queried as admin, extra information is returned about each problem.
         $this->expectedObjects[1]['test_data_count'] = 1;
-        $this->expectedObjects[2]['test_data_count'] = 1+3;
+        $this->expectedObjects[2]['test_data_count'] = 1+3; // 1 sample, 3 secret cases
         $this->expectedObjects[3]['test_data_count'] = 1;
         parent::setUp();
     }
