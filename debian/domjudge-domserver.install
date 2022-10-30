@@ -1,0 +1,2 @@
+lib/vendor		usr/share/domjudge/lib
+debian/src/dbpasswords.template usr/share/domjudge

@@ -1,0 +1,39 @@
+#! /bin/sh -e
+
+if [ -f /usr/share/debconf/confmodule ]; then
+    . /usr/share/debconf/confmodule
+fi
+if [ -f /usr/share/dbconfig-common/dpkg/postrm.mysql ]; then
+    . /usr/share/dbconfig-common/dpkg/postrm.mysql
+    dbc_go domjudge-domserver $@
+fi
+
+if [ -e /usr/share/apache2/apache2-maintscript-helper ] ; then
+  . /usr/share/apache2/apache2-maintscript-helper
+  apache2_invoke disconf domjudge
+fi
+
+if [ "$1" = "remove" ]; then
+        rm -rf /var/cache/domjudge
+fi
+
+if [ "$1" = "purge" ]; then
+        rm -f /etc/apache2/conf-available/domjudge.conf \
+                /etc/domjudge/symfony_app.secret \
+                /etc/domjudge/initial_admin_password.secret \
+                /etc/domjudge/dbpasswords.secret
+
+        if which ucf >/dev/null 2>&1; then
+                ucf --purge /etc/domjudge/dbpasswords.secret
+        fi
+
+	# Purge accumulated files (not entire /var/lib/domjudge
+	# since domjudge-judgehost may remain installed)
+	rm -rf /var/lib/domjudge/images \
+		/var/log/domjudge/domserver /etc/domjudge/dbpasswords.secret
+	rmdir --ignore-fail-on-non-empty /var/log/domjudge || true
+fi
+
+#DEBHELPER#
+
+exit 0

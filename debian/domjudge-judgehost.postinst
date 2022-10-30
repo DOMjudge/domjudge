@@ -1,0 +1,49 @@
+#!/bin/sh -e
+
+. /usr/share/debconf/confmodule
+
+if ! getent passwd domjudge >/dev/null; then
+	adduser --quiet --system domjudge --group --home /nonexistent --no-create-home
+fi
+if ! getent passwd domjudge-run >/dev/null; then
+	adduser --quiet --system domjudge-run --home /nonexistent --no-create-home
+fi
+for i in 0 1 2 3 4 5 6 7 8; do
+	if ! getent passwd domjudge-run-$i >/dev/null; then
+		adduser --quiet --system domjudge-run-$i --home /nonexistent --no-create-home
+	fi
+done
+if ! getent group domjudge-run >/dev/null; then
+	addgroup --quiet --system domjudge-run
+fi
+
+# Allow judgedaemon to write here, and only somewhat privileged users
+# (ones that may also read syslog) to inspect the logs and judgings
+chown domjudge:adm /var/log/domjudge/judgehost \
+	/var/lib/domjudge /var/lib/domjudge/judgings
+
+chmod 0751 /var/log/domjudge/judgehost /var/lib/domjudge/judgings
+
+# set up restapi credentials if not present
+RA_SECRET=/etc/domjudge/restapi.secret
+if [ ! -f $RA_SECRET ] ; then
+	db_get domjudge/api_endpoint
+	API_URL="$RET"
+
+	db_get domjudge/api_endpoint_user
+	API_USER="$RET"
+
+	db_get domjudge/api_endpoint_pass
+	API_PASS="$RET"
+
+	touch $RA_SECRET
+	chmod 640 $RA_SECRET
+	chgrp domjudge $RA_SECRET
+	printf "default\t$API_URL\t$API_USER\t$API_PASS\n" > $RA_SECRET
+fi
+
+#DEBHELPER#
+
+if [ ! -d /var/lib/domjudge/chroot/ ]; then
+	echo "Now please create a chroot by running 'dj_make_chroot' as root."
+fi

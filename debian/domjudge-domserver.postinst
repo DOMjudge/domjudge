@@ -1,0 +1,55 @@
+#!/bin/sh -e
+
+. /usr/share/debconf/confmodule
+. /usr/share/dbconfig-common/dpkg/postinst.mysql
+
+SF_SECRET=/etc/domjudge/symfony_app.secret
+if [ ! -f $SF_SECRET ] ; then
+	touch $SF_SECRET
+	chown root:www-data $SF_SECRET
+	chmod 0640 $SF_SECRET
+	/etc/domjudge/gensymfonysecret > $SF_SECRET
+fi
+
+RA_SECRET=/etc/domjudge/restapi.secret
+if [ ! -f $RA_SECRET ] ; then
+	touch $RA_SECRET
+	chown root:domjudge $RA_SECRET
+	chmod 0640 $RA_SECRET
+	/etc/domjudge/genrestapicredentials > $RA_SECRET
+fi
+
+IAP_SECRET=/etc/domjudge/initial_admin_password.secret
+if [ ! -f $IAP_SECRET ] ; then
+	touch $IAP_SECRET
+	chown root:www-data $IAP_SECRET
+	chmod 0640 $IAP_SECRET
+	/etc/domjudge/genadminpassword > $IAP_SECRET
+fi
+
+dbc_generate_include_owner="root:www-data"
+dbc_generate_include_perms="0640"
+dbc_generate_include_args="-o template_infile=/usr/share/domjudge/dbpasswords.template -C#"
+dbc_generate_include=template:/etc/domjudge/dbpasswords.secret
+dbc_go domjudge-domserver $@
+
+# flush any existing cache from previous versions
+rm -rf /var/cache/domjudge/*
+fix_permissions
+
+# Configure apache
+mkdir -p /etc/apache2/conf-available
+ln -sf ../../domjudge/apache.conf /etc/apache2/conf-available/domjudge.conf
+
+if [ -e /usr/share/apache2/apache2-maintscript-helper ] ; then
+	. /usr/share/apache2/apache2-maintscript-helper
+	apache2_invoke enmod rewrite
+	apache2_invoke enconf domjudge
+fi
+
+# Clean up files from older packages (<< 7.3.0)
+rm -f /etc/domjudge/domserver.dbconfig.php
+ucf --purge /etc/domjudge/domserver.dbconfig.php || true
+rm -rf /var/lib/domjudge/sessions /var/lib/domjudge/submissions
+
+#DEBHELPER#

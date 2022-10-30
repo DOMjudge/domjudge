@@ -1,0 +1,20 @@
+Template: domjudge/api_endpoint
+Type: string
+Default: http://localhost/domjudge/api
+Description: API URL:
+ The API URL for the DOMjudge Server you
+ want to judge for. You may change this
+ later by editing the restapi.secret file.
+
+Template: domjudge/api_endpoint_user
+Type: string
+Default: judgehost
+Description: API Username:
+ The username to be used to access the API endpoint.
+
+Template: domjudge/api_endpoint_pass
+Type: password
+Default: password
+Description: API Password:
+ The password to be used to access the API endpoint.
+

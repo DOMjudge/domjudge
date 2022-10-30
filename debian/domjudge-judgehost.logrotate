@@ -1,0 +1,8 @@
+/var/log/domjudge/judgehost/*.log {
+	weekly
+	missingok
+	rotate 6
+	compress
+	delaycompress
+	notifempty
+}

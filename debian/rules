@@ -1,0 +1,156 @@
+#!/usr/bin/make -f
+#export DH_VERBOSE=1
+
+include /usr/share/dpkg/pkg-info.mk
+
+DJDS=`pwd`/debian/domjudge-domserver
+DJJH=`pwd`/debian/domjudge-judgehost
+DJDC=`pwd`/debian/domjudge-doc
+
+build: build-arch build-indep
+build-arch: build-stamp
+build-indep: build-stamp
+build-stamp:
+	dh_testdir
+
+	# Make paths conform to Debian's desired layout.
+	# Set domjudge-user to root for now, since the user 'domjudge'
+	# may not exist at all on the build system. We chown the
+	# files in postinst.
+	./configure \
+		--enable-fhs \
+		--prefix=/usr \
+		--sysconfdir=/etc \
+		--localstatedir=/var \
+		\
+		--with-domjudge_docdir=\$${prefix}/share/doc/domjudge-doc \
+		\
+		--with-domserver_libdir=\$${prefix}/share/domjudge \
+		--with-domserver_libvendordir=\$${prefix}/share/domjudge/lib/vendor \
+		--with-domserver_webappdir=\$${prefix}/share/domjudge/webapp \
+		--with-domserver_logdir=/var/log/domjudge/domserver \
+		\
+		--with-judgehost_bindir=\$${prefix}/sbin \
+		--with-judgehost_libdir=\$${prefix}/share/domjudge \
+		--with-judgehost_libjudgedir=\$${prefix}/lib/domjudge \
+		--with-judgehost_chrootdir=/var/lib/domjudge/chroot \
+		--with-judgehost_logdir=/var/log/domjudge/judgehost \
+		\
+		--with-domjudge-user=domjudge
+
+	$(MAKE) all
+
+	touch build-stamp
+
+clean:
+	dh_testdir
+	dh_testroot
+	rm -f build-stamp
+	$(MAKE) distclean
+	# Because the build process overwrites the docs in the tarball,
+	# we remove everything so a second build does not fail. Missing
+	# files are acceptable to dpkg-bp (but triggers warnings)
+	rm -rf doc/manual/build/
+	dh_clean
+
+install:
+install: build
+	dh_testdir
+	dh_testroot
+	dh_prep
+	dh_installdirs
+	$(MAKE) DESTDIR=$(DJDS) install-domserver
+	$(MAKE) DESTDIR=$(DJJH) install-judgehost
+	$(MAKE) DESTDIR=$(DJDC) install-docs
+
+	dh_install
+
+	# clean up tmpdirs
+	# rmdir $(DJDS)/tmp $(DJJH)/tmp
+	rmdir $(DJDS)/var/run/domjudge $(DJJH)/var/run/domjudge
+
+	# clean up docs
+	cd $(DJDC)/usr/share/doc/domjudge-doc && \
+		rm COPYING* README.md ChangeLog
+
+	# This must be shipped in domjudge-common
+	rm $(DJDS)/etc/domjudge/genrestapicredentials \
+		$(DJDS)/usr/share/domjudge/*.php $(DJDS)/usr/share/domjudge/alert
+
+	# This is in domjudge-common
+	rm -r $(DJJH)/usr/share/domjudge/* \
+		$(DJJH)/etc/domjudge/genrestapicredentials
+
+	# Saviour lib.error.sh before we trash /u/s/d
+	cp lib/lib.error.sh $(DJJH)/usr/share/domjudge/
+
+	# We'd like these to be amendable by the admin(See domjudge-domserver.links)
+	cd $(DJDS)/usr/share/domjudge/webapp/public/images/ && \
+		mv teams affiliations ../../../../../../var/lib/domjudge/images/
+
+	# Remove so they can be symlinked to system dirs
+	rm -r $(DJDS)/usr/share/domjudge/webapp/var/cache \
+		$(DJDS)/usr/share/domjudge/webapp/var/log
+
+	# Makes no sense to include passwords generated on .deb build host
+	rm $(DJDS)/etc/domjudge/*.secret $(DJJH)/etc/domjudge/restapi.secret \
+		$(DJDS)/etc/domjudge/gendbpasswords
+
+	# Needs to be web-writable:
+	chgrp www-data $(DJDS)/var/log/domjudge/domserver $(DJDS)/var/cache/domjudge
+	chmod 0770 $(DJDS)/var/log/domjudge/domserver $(DJDS)/var/cache/domjudge
+
+	# Fixup sudoers file to match our assumptions for user/chroot location
+	sed -i 's#^root #domjudge #;s# root\\:# domjudge\\:#' $(DJJH)/etc/domjudge/sudoers-domjudge
+	sed -i 's#/\*/proc#/var/lib/domjudge/chroot*/proc#' $(DJJH)/etc/domjudge/sudoers-domjudge
+	sed -i 's#/chroot/domjudge/\*#/var/lib/domjudge/chroot*/*#' $(DJJH)/etc/domjudge/sudoers-domjudge
+	mv $(DJJH)/etc/domjudge/sudoers-domjudge $(DJJH)/etc/sudoers.d/domjudge
+	chmod 0440 $(DJJH)/etc/sudoers.d/domjudge
+
+        # Database configuration
+	cp -a debian/src/db_install \
+		$(DJDS)/usr/share/dbconfig-common/scripts/domjudge-domserver/install/mysql
+	cp -a debian/src/db_upgrade \
+		$(DJDS)/usr/share/dbconfig-common/scripts/domjudge-domserver/upgrade/mysql/$(DEB_VERSION)
+
+# Build architecture-independent files here.
+binary-indep: build install
+	dh_testdir -i
+	dh_testroot -i
+	dh_installdebconf -i
+	dh_installchangelogs -p domjudge-doc
+	dh_installchangelogs -p domjudge-common -p domjudge-domserver -X ChangeLog
+	dh_installdocs -i
+	dh_installlogrotate -i
+	dh_lintian -i
+	dh_link -i
+	dh_compress -i -X .pdf
+	dh_fixperms -i -X var/cache/domjudge -X var/log/domjudge -X var/lib/domjudge
+	dh_installdeb -i
+	dh_gencontrol -i
+	dh_md5sums -i
+	dh_builddeb -i
+
+# Build architecture-dependent files here.
+binary-arch: build install
+	dh_testdir -a
+	dh_testroot -a
+	dh_installchangelogs -a -X ChangeLog
+	dh_installdocs -a
+	dh_installsystemd -a
+	dh_installman -a
+	dh_installdebconf -a
+	dh_installexamples -a
+	dh_lintian -a
+	dh_strip -a
+	dh_link -a
+	dh_compress -a
+	dh_fixperms -a -X etc/sudoers.d/domjudge
+	dh_installdeb -a
+	dh_shlibdeps -a
+	dh_gencontrol -a
+	dh_md5sums -a
+	dh_builddeb -a
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary install

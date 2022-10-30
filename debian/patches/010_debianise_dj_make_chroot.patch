@@ -1,0 +1,35 @@
+Author: Thijs Kinkhorst <thijs@debian.org>
+Description: Update config and scripts to replace choices with Debian values.
+Forwarded: not-needed
+
+--- a/misc-tools/dj_make_chroot.in	2022-06-01 16:58:10.000000000 +0000
++++ b/misc-tools/dj_make_chroot.in	2022-06-09 19:19:24.954518891 +0000
+@@ -24,7 +24,7 @@
+ trap cleanup EXIT
+ 
+ # Default directory where to build the chroot tree:
+-CHROOTDIR="@judgehost_chrootdir@"
++CHROOTDIR="/var/lib/domjudge/chroot.new"
+ 
+ # Fallback Debian and release (codename) to bootstrap (note: overridden right below):
+ DISTRO="Debian"
+@@ -240,6 +240,7 @@
+     rm -rf "$CHROOTDIR"
+ fi
+ 
++rm -rf "$CHROOTDIR"
+ mkdir -p "$CHROOTDIR"
+ cd "$CHROOTDIR"
+ CHROOTDIR="$PWD"
+@@ -415,5 +416,10 @@
+ umount "$CHROOTDIR/sys"
+ umount "$CHROOTDIR/proc"
+ 
++if [ "$CHROOTDIR" = /var/lib/domjudge/chroot.new ]; then
++	mv /var/lib/domjudge/chroot.new /var/lib/domjudge/chroot
++	CHROOTDIR=/var/lib/domjudge/chroot
++fi
++
+ echo "Done building chroot in $CHROOTDIR"
+ exit 0
+Only in domjudge-8.1.0/misc-tools: dj_make_chroot.in.orig
