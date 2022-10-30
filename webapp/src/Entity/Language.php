@@ -127,6 +127,21 @@ class Language extends BaseApiEntity
      */
     private Collection $submissions;
 
+    /**
+     * @Serializer\VirtualProperty
+     * @Serializer\Type("string")
+     * @Serializer\SerializedName("compile_executable_hash")
+     * @OA\Property(nullable=true)
+     */
+    public function getCompileExecutableHash(): ?string
+    {
+        if ($this->compile_executable !== null) {
+            return $this->compile_executable->getImmutableExecutable()->getHash();
+        } else {
+            return null;
+        }
+    }
+
     public function setLangid(string $langid): Language
     {
         $this->langid = $langid;

@@ -27,19 +27,26 @@ def usage():
     exit(1)
 
 
-def compare_configs(expected_config: Set, actual_config: Set) -> (List, Set, Set):
-        diffs = []
-        for k in expected_config.keys():
-            if k in actual_config and expected_config[k] != actual_config[k]:
-                diffs.append(f'- {k}:\n   is: {actual_config[k]}\n  new: {expected_config[k]}')
-        if diffs:
-            print('Differences between actual and new configuration:')
-            for d in diffs:
-                print(d)
+def compare_configs(expected_config: Set, actual_config: Set, num_spaces=4) -> (List, Set, Set):
+    diffs = []
+    space_string = ' ' * num_spaces
+    for k in expected_config.keys():
+        if k in actual_config and expected_config[k] != actual_config[k]:
+            if isinstance(expected_config[k], dict):
+                d, n, m = compare_configs(expected_config[k], actual_config[k], num_spaces=num_spaces+2)
+                if d:
+                    diffs.append(f'{space_string}- {k}:')
+                    diffs.extend(d)
+            else:
+                diffs.append(f'{space_string}- {k}:\n   {space_string}is: {actual_config[k]}\n  {space_string}new: {expected_config[k]}')
+    
+    new_keys = set(expected_config.keys()).difference(set(actual_config.keys()))
+    missing_keys = set(actual_config.keys()).difference(set(expected_config.keys()))
+    return (diffs, new_keys, missing_keys)
 
-        new_keys = set(expected_config.keys()).difference(set(actual_config.keys()))
-        missing_keys = set(actual_config.keys()).difference(set(expected_config.keys()))
-        return (diffs, new_keys, missing_keys)
+
+def _keyify_list(l: List) -> Set:
+    return { elem['id']: elem for elem in l }
 
 
 if len(sys.argv) < 2:
@@ -53,6 +60,7 @@ if 'admin' not in user_data['roles']:
     exit(1)
 
 if os.path.exists('config.json'):
+    print('Comparing general DOMjudge configuration:')
     with open('config.json') as configFile:
         actual_config = dj_utils.do_api_request('config')
         expected_config = json.load(configFile)
@@ -61,15 +69,15 @@ if os.path.exists('config.json'):
                 expected_config=expected_config
         )
         if diffs:
-            print('Differences between actual and new configuration:')
+            print('  - Differences between actual and new configuration:')
             for d in diffs:
                 print(d)
         if new_keys:
-            print(f'missing keys from actual config = {new_keys}')
+            print(f'  - missing keys from actual config = {new_keys}')
         if missing_keys:
-            print(f'missing keys from new config = {missing_keys}')
+            print(f'  - missing keys from new config = {missing_keys}')
         if diffs or new_keys or missing_keys:
-            if dj_utils.confirm('Upload these configuration changes?', True):
+            if dj_utils.confirm('  - Upload these configuration changes?', True):
                 url = f'{dj_utils.api_url}/config'
                 response = requests.put(url, headers=dj_utils.headers, json=expected_config)
                 actual_config = dj_utils.parse_api_response('config', response)
@@ -78,12 +86,34 @@ if os.path.exists('config.json'):
                         expected_config=expected_config
                 )
                 if diffs:
-                    print('There are still configuration differences after uploading:')
+                    print('  - There are still configuration differences after uploading:')
                     for d in diffs:
                         print(d)
         else:
-            print('Configuration is already up-to-date, nothing to upload.')
+            print('  - Configuration is already up-to-date, nothing to upload.')
 else:
-    print('Need a "config.json" to update configuration.')
-    sys.exit(1)
+    print('Need a "config.json" to update general DOMjudge configuration.')
 
+if os.path.exists('languages.json'):
+    print('Comparing DOMjudge\'s language configuration:')
+    with open('languages.json') as langConfigFile:
+        actual_config = _keyify_list(dj_utils.do_api_request('languages'))
+        expected_config = _keyify_list(json.load(langConfigFile))
+        diffs, new_keys, missing_keys = compare_configs(
+                actual_config=actual_config,
+                expected_config=expected_config
+        )
+        if diffs:
+            print('  - Differences between actual and expected configuration:')
+            for d in diffs:
+                print(d)
+        if new_keys:
+            print(f'  - missing keys from actual config = {new_keys}')
+        if missing_keys:
+            print(f'  - missing keys from expected config = {missing_keys}')
+        if diffs or new_keys or missing_keys:
+            print('  - We cannot update the configuration yet, but you might want to change it via the UI.')
+        else:
+            print('  - Language configuration is already up-to-date, nothing to update.')
+else:
+    print('Need a "config.json" to verify DOMjudge\'s language configuration.')
