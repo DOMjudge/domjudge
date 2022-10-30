@@ -25,6 +25,7 @@ $(SUBST_FILES): %: %.in $(TOPDIR)/paths.mk
 install-domserver:
 	$(INSTALL_PROG) -t $(DESTDIR)$(domserver_bindir) $(SUBST_DOMSERVER)
 	$(INSTALL_PROG) -t $(DESTDIR)$(domserver_bindir) import-contest
+	$(INSTALL_PROG) -t $(DESTDIR)$(domserver_bindir) dj_utils.py
 
 install-judgehost:
 	$(INSTALL_PROG) -t $(DESTDIR)$(judgehost_bindir) $(SUBST_JUDGEHOST)
@@ -37,6 +38,7 @@ inplace-install:
 		ln -sf $(CURDIR)/$$i $(judgehost_bindir) ; \
 	done
 	ln -sf $(CURDIR)/import-contest $(judgehost_bindir)
+	ln -sf $(CURDIR)/dj_utils.py $(judgehost_bindir)
 
 clean-l:
 	-rm -f $(TARGETS) $(OBJECTS)
