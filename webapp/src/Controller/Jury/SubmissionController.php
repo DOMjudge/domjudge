@@ -446,7 +446,11 @@ class SubmissionController extends BaseController
                 ->getQuery()
                 ->getSingleScalarResult();
             if ($numActiveJudgehosts == 0) {
-                $unjudgableReasons[] = 'No active judgehost. Add or enable judgehosts!';
+                $extraMsg = '';
+                if (!$this->config->get('judgehost_activated_by_default')) {
+                    $extraMsg = ' (judgehosts are disabled by default in your configuration)';
+                }
+                $unjudgableReasons[] = 'No active judgehost. Add or enable judgehosts' . $extraMsg . '!';
             }
 
             if (!$submission->getLanguage()->getAllowJudge()) {
