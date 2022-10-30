@@ -17,7 +17,7 @@
     {% if is_granted('ROLE_ADMIN') %}
         <p>
             {{ button(path('jury_problem_add'), 'Add new problem', 'primary', 'plus') }}
-            {{ button(path('jury_import_export', {'_fragment':'problems'}), 'Import problem', 'primary', 'upload') }}
+            {{ button(path('jury_import_export', {'_fragment':'problemarchive'}), 'Import problem', 'primary', 'upload') }}
         </p>
     {% endif %}
 {% endblock %}
