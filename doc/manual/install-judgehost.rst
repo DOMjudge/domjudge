@@ -38,8 +38,6 @@ For Red Hat::
   sudo yum install make pkgconfig sudo libcgroup-devel lsof \
         php-cli php-mbstring php-xml php-process procps-ng
 
-.. _installing-judgehost:
-
 Removing apport
 ---------------
 
@@ -47,6 +45,8 @@ Some systems (like Ubuntu) ship with ``apport``, which conflicts with judging.
 To uninstall it, run::
 
   sudo apt remove apport
+
+.. _installing-judgehost:
 
 Building and installing
 -----------------------
