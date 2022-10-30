@@ -104,6 +104,7 @@
     {% set previousSortOrder = -1 %}
     {% set previousTeam = null %}
     {% set backgroundColors = {"#FFFFFF": 1} %}
+    {% set medalCount = 0 %}
     {% for score in scores %}
         {% set classes = [] %}
         {% if score.team.category.sortorder != previousSortOrder %}
@@ -119,11 +120,12 @@
         {# process medal color #}
         {% set medalColor = '' %}
         {% if showLegends and medalsEnabled and score.team.category in medalCategories and score.numPoints > 0 %}
-            {% if score.rank <= contest.goldMedals %}
+            {% set medalCount = medalCount + 1 %}
+            {% if medalCount <= contest.goldMedals %}
                 {% set medalColor = 'gold-medal' %}
-            {% elseif score.rank <= contest.goldMedals + contest.silverMedals %}
+            {% elseif medalCount <= contest.goldMedals + contest.silverMedals %}
                 {% set medalColor = 'silver-medal' %}
-            {% elseif score.rank <= contest.goldMedals + contest.silverMedals + contest.bronzeMedals + contest.b %}
+            {% elseif medalCount <= contest.goldMedals + contest.silverMedals + contest.bronzeMedals + contest.b %}
                 {% set medalColor = 'bronze-medal' %}
             {% endif %}
         {% endif %}
