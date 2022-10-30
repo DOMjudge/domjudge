@@ -213,7 +213,12 @@ class ImportProblemService
             }
         }
 
-        // Reset problem settings that might not appear in the ZIP back to default
+        // Reset problem settings that might not appear in the ZIP back to default.
+        // Note that we only reset settings here that make sense. In particular, we will
+        // not reset any settings that could also have been set while importing the problem set
+        // through problems.yaml/json or problemset.yaml. This means that we will not set the
+        // color and shortname properties on the contest problem unless explicitly specified.
+        // The same holds for the timelimit of the problem.
         if ($problem->getProbid()) {
             $problem
                 ->setCompareExecutable()
@@ -230,8 +235,6 @@ class ImportProblemService
                     ->setPoints(1)
                     ->setAllowSubmit(true)
                     ->setAllowJudge(true);
-                // TODO: we should decide how and what to reset
-                    // ->setColor(null);
             }
         }
 
