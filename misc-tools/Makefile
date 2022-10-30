@@ -1,12 +1,15 @@
 ifndef TOPDIR
 TOPDIR=..
 endif
+
+REC_TARGETS = inplace-install inplace-uninstall
+
 include $(TOPDIR)/Makefile.global
 
 TARGETS =
 OBJECTS =
 
-SUBST_DOMSERVER = fix_permissions
+SUBST_DOMSERVER = fix_permissions configure-domjudge import-contest
 
 SUBST_JUDGEHOST = dj_make_chroot dj_run_chroot dj_make_chroot_docker \
                   dj_judgehost_cleanup
@@ -24,21 +27,23 @@ $(SUBST_FILES): %: %.in $(TOPDIR)/paths.mk
 
 install-domserver:
 	$(INSTALL_PROG) -t $(DESTDIR)$(domserver_bindir) $(SUBST_DOMSERVER)
-	$(INSTALL_PROG) -t $(DESTDIR)$(domserver_bindir) import-contest
-	$(INSTALL_PROG) -t $(DESTDIR)$(domserver_bindir) dj_utils.py
+	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_libdir) dj_utils.py
 
 install-judgehost:
 	$(INSTALL_PROG) -t $(DESTDIR)$(judgehost_bindir) $(SUBST_JUDGEHOST)
 
-inplace-install:
+inplace-install-l:
 	for i in $(SUBST_DOMSERVER) ; do \
 		ln -sf $(CURDIR)/$$i $(domserver_bindir) ; \
 	done
 	for i in $(SUBST_JUDGEHOST) ; do \
 		ln -sf $(CURDIR)/$$i $(judgehost_bindir) ; \
 	done
-	ln -sf $(CURDIR)/import-contest $(judgehost_bindir)
-	ln -sf $(CURDIR)/dj_utils.py $(judgehost_bindir)
+	ln -sf $(CURDIR)/dj_utils.py $(domserver_libdir)
+
+inplace-uninstall-l:
+# bindir gets removed from the main Makefile
+	rm -f $(domserver_libdir)/dj_utils.py
 
 clean-l:
 	-rm -f $(TARGETS) $(OBJECTS)

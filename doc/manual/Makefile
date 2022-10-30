@@ -1,6 +1,9 @@
 ifndef TOPDIR
 TOPDIR=../..
 endif
+
+REC_TARGETS = inplace-install inplace-uninstall
+
 include $(TOPDIR)/Makefile.global
 
 ifneq ($(QUIET),)
@@ -34,8 +37,12 @@ install-docs: docs
 	$(INSTALL_DATA) -t $(DESTDIR)$(domjudge_docdir)/manual build/domjudge-team-manual.pdf
 
 inplace-install: docs
+inplace-install-l:
 	ln -sf build/html
 	ln -sf build/team
+
+inplace-uninstall-l:
+	-rm -f html team
 
 clean-l:
 	rm -rf build/doctrees build/team/.doctrees

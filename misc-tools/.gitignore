@@ -1,4 +1,6 @@
 /fix_permissions
+/configure-domjudge
+/import-contest
 /dj_make_chroot
 /dj_make_chroot_docker
 /dj_run_chroot

@@ -5,7 +5,7 @@
 export TOPDIR = $(shell pwd)
 
 REC_TARGETS=build domserver install-domserver judgehost install-judgehost \
-            docs install-docs
+            docs install-docs inplace-install inplace-uninstall
 
 # Global Makefile definitions
 include $(TOPDIR)/Makefile.global
@@ -84,6 +84,8 @@ judgehost:         SUBDIRS=etc                 judge              misc-tools
 install-judgehost: SUBDIRS=etc     lib         judge              misc-tools
 docs:              SUBDIRS=    doc
 install-docs:      SUBDIRS=    doc
+inplace-install:   SUBDIRS=    doc                                misc-tools
+inplace-uninstall: SUBDIRS=    doc                                misc-tools
 dist:              SUBDIRS=        lib sql                        misc-tools
 clean:             SUBDIRS=etc doc lib sql     judge submit tests misc-tools webapp
 distclean:         SUBDIRS=etc doc lib sql     judge submit tests misc-tools webapp
@@ -202,6 +204,7 @@ webapp/.env.local:
 # This stuff is a hack!
 maintainer-install: inplace-install
 inplace-install: build domserver-create-dirs judgehost-create-dirs
+inplace-install-l:
 # Replace libjudgedir with symlink to prevent lots of symlinks:
 	-rmdir $(judgehost_libjudgedir)
 	-rm -f $(judgehost_libjudgedir)
@@ -213,8 +216,6 @@ inplace-install: build domserver-create-dirs judgehost-create-dirs
 	ln -sf $(CURDIR)/judge/runpipe  $(judgehost_bindir)
 	ln -sf $(CURDIR)/judge/create_cgroups  $(judgehost_bindir)
 	ln -sf $(CURDIR)/sql/dj_setup_database $(domserver_bindir)
-	$(MAKE) -C misc-tools inplace-install
-	$(MAKE) -C doc/manual inplace-install
 # Create tmpdir and make tmpdir writable for webserver,
 # because judgehost-create-dirs sets wrong permissions:
 	$(MKDIR_P) $(domserver_tmpdir)
@@ -283,7 +284,7 @@ inplace-postinstall-nginx: inplace-postinstall-permissions
 	systemctl restart php$(PHPVERSION)-fpm
 
 # Removes created symlinks; generated logs, submissions, etc. remain in output subdir.
-inplace-uninstall:
+inplace-uninstall-l:
 	rm -f $(judgehost_libjudgedir)
 	rm -rf $(judgehost_bindir)
 
@@ -312,6 +313,7 @@ clean-l:
 distclean-l: clean-autoconf
 	-rm -f paths.mk
 
+maintainer-clean: inplace-uninstall
 maintainer-clean-l:
 	-rm -f configure aclocal.m4
 

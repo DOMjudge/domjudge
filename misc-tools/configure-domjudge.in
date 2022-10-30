@@ -13,13 +13,15 @@ Part of the DOMjudge Programming Contest Jury System and licensed
 under the GNU GPL. See README and COPYING for details.
 '''
 
-import dj_utils
 import json
 import os.path
 import requests
 import requests.utils
 import sys
 from typing import List, Set
+
+sys.path.append('@domserver_libdir@')
+import dj_utils
 
 def usage():
     print(f'Usage {sys.argv[0]} <domjudge-api-url>')
