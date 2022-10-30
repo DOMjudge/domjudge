@@ -123,7 +123,7 @@
                 </td>
                 <td class="probid{{ tdExtraClass }}" rowspan="{{ rowSpan }}">
                     <a href="{{ link }}"
-                       title="{{ submission.problem.name }}">{{ submission.contestProblem.shortname }}</a>
+                       title="{{ submission.problem.name }}">{{ submission.contestProblem | problemBadge }}</a>
                 </td>
                 <td class="langid{{ tdExtraClass }}" rowspan="{{ rowSpan }}">
                     <a href="{{ link }}"
