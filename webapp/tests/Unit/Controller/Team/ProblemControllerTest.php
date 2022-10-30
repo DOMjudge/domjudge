@@ -20,14 +20,19 @@ class ProblemControllerTest extends BaseTest
     public function testIndex(bool $withLimits): void
     {
         $problems     = [
-            'boolfind',
-            'fltcmp',
             'hello',
+            'fltcmp',
+            'boolfind',
         ];
         $descriptions = [
-            'Boolean switch search',
-            'Float special compare test',
             'Hello World',
+            'Float special compare test',
+            'Boolean switch search',
+        ];
+        $letters = [
+            'A',
+            'B',
+            'C',
         ];
         /** @var EntityManagerInterface $em */
         $em               = self::getContainer()->get(EntityManagerInterface::class);
@@ -47,7 +52,8 @@ class ProblemControllerTest extends BaseTest
                 $problemTexts,
                 $descriptions,
                 $problems,
-                $withLimits
+                $withLimits,
+                $letters
             ) {
                 $crawler = $this->client->request('GET', '/team/problems');
 
@@ -61,7 +67,7 @@ class ProblemControllerTest extends BaseTest
 
                 for ($i = 0; $i < 3; $i++) {
                     $card = $cardBodies->eq($i);
-                    $this->assertSame($problems[$i],
+                    $this->assertSame($letters[$i],
                         $card->filter('.card-title')->text(null, true));
                     $this->assertSame($descriptions[$i],
                         $card->filter('h3.card-subtitle')->text(null, true));

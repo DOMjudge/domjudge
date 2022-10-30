@@ -2,7 +2,7 @@
 
 . gitlab/ci_settings.sh
 
-version=$1
+export version=$1
 unittest=$2
 [ "$version" = "8.1" ] && CODECOVERAGE=1 || CODECOVERAGE=0
 

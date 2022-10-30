@@ -1,0 +1,15 @@
+- id: hello
+  label: A
+  ordinal: 1
+  rgb: '#9486EA'
+  time_limit: 5
+- id: fltcmp
+  label: B
+  ordinal: 2
+  rgb: '#E93603'
+  time_limit: 5
+- id: boolfind
+  label: C
+  ordinal: 3
+  rgb: '#9B630C'
+  time_limit: 5

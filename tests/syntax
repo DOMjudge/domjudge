@@ -27,6 +27,7 @@ find .. \( -path ../lib/vendor        -prune \
 	-o -path ../output            -prune \
 	-o -path ../.git              -prune \
 	-o -path ../webapp/migrations -prune \
+	-o -path ../example_problems  -prune \
         -o -type f \) \
 	-a -type f |  \
 while read -r i ; do

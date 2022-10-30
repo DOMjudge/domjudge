@@ -11,11 +11,11 @@ use Symfony\Component\DomCrawler\Crawler;
 class ContestControllerTest extends JuryControllerTest
 {
     protected static string  $identifyingEditAttribute = 'shortname';
-    protected static ?string $defaultEditEntityName    = 'demoprac';
+    protected static ?string $defaultEditEntityName    = 'demo';
     protected static string  $baseUrl                  = '/jury/contests';
-    protected static array   $exampleEntries           = ['Demo contest', 'Demo practice session'];
+    protected static array   $exampleEntries           = ['Demo contest'];
     protected static string  $shortTag                 = 'contest';
-    protected static array   $deleteEntities           = ['Demo practice session','Demo contest'];
+    protected static array   $deleteEntities           = ['Demo contest'];
     protected static string  $deleteEntityIdentifier   = 'name';
     protected static string  $getIDFunc                = 'getCid';
     protected static string  $className                = Contest::class;
@@ -23,8 +23,8 @@ class ContestControllerTest extends JuryControllerTest
                                                           'h3'                            => ['admin' => ['Current contests', 'All available contests'],
                                                              'jury' => []],
                                                           'a.btn[title="Import contest"]' => ['admin' => [" Import contest"],'jury'=>[]]];
-    protected static ?array $deleteExtra               = ['pageurl'   => '/jury/contests/2',
-                                                          'deleteurl' => '/jury/contests/2/problems/3/delete',
+    protected static ?array $deleteExtra               = ['pageurl'   => '/jury/contests/1',
+                                                          'deleteurl' => '/jury/contests/1/problems/3/delete',
                                                           'selector'  => 'Boolean switch search',
                                                           'fixture'   => null];
     protected static string $addForm                   = 'contest[';
@@ -191,7 +191,7 @@ class ContestControllerTest extends JuryControllerTest
 
     public function testUnlockJudgeTasks(): void
     {
-        // First, check that adding a submission creates a queue task and 3 judge tasks
+        // First, check that adding a submission creates a queue task and 4 judge tasks.
         $this->addSubmission('DOMjudge', 'fltcmp');
         /** @var EntityManagerInterface $em */
         $em = static::getContainer()->get(EntityManagerInterface::class);
@@ -205,9 +205,9 @@ class ContestControllerTest extends JuryControllerTest
             ->getQuery();
 
         self::assertEquals(1, $queueTaskQuery->getSingleScalarResult());
-        self::assertEquals(3, $judgeTaskQuery->getSingleScalarResult());
+        self::assertEquals(4, $judgeTaskQuery->getSingleScalarResult());
 
-        // Now, disable the problem
+        // Now, disable the problem.
         $contest = $em->getRepository(Contest::class)->findOneBy(['shortname' => 'demo']);
         $contestId = $contest->getCid();
         $url = "/jury/contests/$contestId/edit";
@@ -218,7 +218,7 @@ class ContestControllerTest extends JuryControllerTest
         $formData = $form->getValues();
         $problemIndex = null;
         foreach ($formData as $key => $value) {
-            if (preg_match('/^contest\[problems\]\[(\d+)\]\[shortname\]$/', $key, $matches) === 1 && $value === 'fltcmp') {
+            if (preg_match('/^contest\[problems\]\[(\d+)\]\[shortname\]$/', $key, $matches) === 1 && $value === 'B') {
                 $problemIndex = $matches[1];
                 $formData["contest[problems][$problemIndex][allowJudge]"] = '0';
             }
@@ -226,20 +226,20 @@ class ContestControllerTest extends JuryControllerTest
 
         $this->client->submit($form, $formData);
 
-        // Submit again
+        // Submit again.
         $this->addSubmission('DOMjudge', 'fltcmp');
 
-        // This should not add more queue or judge tasks
+        // This should not add more queue or judge tasks.
         self::assertEquals(1, $queueTaskQuery->getSingleScalarResult());
-        self::assertEquals(3, $judgeTaskQuery->getSingleScalarResult());
+        self::assertEquals(4, $judgeTaskQuery->getSingleScalarResult());
 
-        // Enable judging again
+        // Enable judging again.
         $formData["contest[problems][$problemIndex][allowJudge]"] = '1';
         $this->client->submit($form, $formData);
 
-        // This should add more queue and judge tasks
+        // This should add more queue and judge tasks.
         self::assertEquals(2, $queueTaskQuery->getSingleScalarResult());
-        self::assertEquals(6, $judgeTaskQuery->getSingleScalarResult());
+        self::assertEquals(8, $judgeTaskQuery->getSingleScalarResult());
     }
 
     public function testCheckAddMultipleTimezonesAdmin(): void

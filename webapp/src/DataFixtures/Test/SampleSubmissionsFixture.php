@@ -17,8 +17,8 @@ class SampleSubmissionsFixture extends AbstractTestDataFixture
     {
         $submissionData = [
             // team name,         problem shortname, language, submittime,            entry point, result
-            ['DOMjudge',          'hello',           'cpp',    '2021-01-01 12:34:56', null,        'success'],
-            ['Example teamname',  'boolfind',        'java',   '2021-03-04 12:00:00', 'Main',      'wrong-answer'],
+            ['DOMjudge',          'A',               'cpp',    '2021-01-01 12:34:56', null,        'success'],
+            ['Example teamname',  'C',               'java',   '2021-03-04 12:00:00', 'Main',      'wrong-answer'],
         ];
 
         /** @var Contest $contest */

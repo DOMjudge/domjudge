@@ -27,7 +27,7 @@ class LanguagesControllerTest extends JuryControllerTest
 
     public function testUnlockJudgeTasksFormEdit(): void
     {
-        // First, check that adding a submission creates a queue task and 3 judge tasks
+        // First, check that adding a submission creates a queue task and 4 judge tasks (1 sample, 3 secret cases).
         $this->addSubmission('DOMjudge', 'fltcmp');
         /** @var EntityManagerInterface $em */
         $em = static::getContainer()->get(EntityManagerInterface::class);
@@ -41,9 +41,9 @@ class LanguagesControllerTest extends JuryControllerTest
             ->getQuery();
 
         self::assertEquals(1, $queueTaskQuery->getSingleScalarResult());
-        self::assertEquals(3, $judgeTaskQuery->getSingleScalarResult());
+        self::assertEquals(4, $judgeTaskQuery->getSingleScalarResult());
 
-        // Now, disable the language
+        // Now, disable the language.
         $url = "/jury/languages/c/edit";
         $this->verifyPageResponse('GET', $url, 200);
 
@@ -53,25 +53,25 @@ class LanguagesControllerTest extends JuryControllerTest
         $formData['language[allowJudge]'] = '0';
         $this->client->submit($form, $formData);
 
-        // Submit again
+        // Submit again.
         $this->addSubmission('DOMjudge', 'fltcmp');
 
-        // This should not add more queue or judge tasks
+        // This should not add more queue or judge tasks.
         self::assertEquals(1, $queueTaskQuery->getSingleScalarResult());
-        self::assertEquals(3, $judgeTaskQuery->getSingleScalarResult());
+        self::assertEquals(4, $judgeTaskQuery->getSingleScalarResult());
 
-        // Enable judging again
+        // Enable judging again.
         $formData['language[allowJudge]'] = '1';
         $this->client->submit($form, $formData);
 
-        // This should add more queue and judge tasks
+        // This should add more queue and judge tasks.
         self::assertEquals(2, $queueTaskQuery->getSingleScalarResult());
-        self::assertEquals(6, $judgeTaskQuery->getSingleScalarResult());
+        self::assertEquals(8, $judgeTaskQuery->getSingleScalarResult());
     }
 
     public function testUnlockJudgeTasksToggle(): void
     {
-        // First, check that adding a submission creates a queue task and 3 judge tasks
+        // First, check that adding a submission creates a queue task and 4 judge tasks.
         $this->addSubmission('DOMjudge', 'fltcmp');
         /** @var EntityManagerInterface $em */
         $em = static::getContainer()->get(EntityManagerInterface::class);
@@ -85,24 +85,24 @@ class LanguagesControllerTest extends JuryControllerTest
             ->getQuery();
 
         self::assertEquals(1, $queueTaskQuery->getSingleScalarResult());
-        self::assertEquals(3, $judgeTaskQuery->getSingleScalarResult());
+        self::assertEquals(4, $judgeTaskQuery->getSingleScalarResult());
 
-        // Now, disable the language
+        // Now, disable the language.
         $url = "/jury/languages/c/toggle-judge";
         $this->client->request(Request::METHOD_POST, $url, ['allow_judge' => false]);
 
-        // Submit again
+        // Submit again.
         $this->addSubmission('DOMjudge', 'fltcmp');
 
-        // This should not add more queue or judge tasks
+        // This should not add more queue or judge tasks.
         self::assertEquals(1, $queueTaskQuery->getSingleScalarResult());
-        self::assertEquals(3, $judgeTaskQuery->getSingleScalarResult());
+        self::assertEquals(4, $judgeTaskQuery->getSingleScalarResult());
 
-        // Enable judging again
+        // Enable judging again.
         $this->client->request(Request::METHOD_POST, $url, ['allow_judge' => true]);
 
-        // This should add more queue and judge tasks
+        // This should add more queue and judge tasks.
         self::assertEquals(2, $queueTaskQuery->getSingleScalarResult());
-        self::assertEquals(6, $judgeTaskQuery->getSingleScalarResult());
+        self::assertEquals(8, $judgeTaskQuery->getSingleScalarResult());
     }
 }

@@ -84,6 +84,7 @@ domserver_libvendordir = @domserver_libvendordir@
 domserver_logdir       = @domserver_logdir@
 domserver_rundir       = @domserver_rundir@
 domserver_tmpdir       = @domserver_tmpdir@
+domserver_exampleprobdir = @domserver_exampleprobdir@
 PHPVERSION             = @PHPVERSION@
 
 judgehost_bindir       = @judgehost_bindir@
@@ -106,7 +107,8 @@ systemd_unitdir        = @systemd_unitdir@
 domserver_dirs = $(domserver_bindir) $(domserver_etcdir) \
                  $(domserver_libdir) $(domserver_libvendordir) \
                  $(domserver_logdir) $(domserver_rundir) \
-                 $(addprefix $(domserver_webappdir)/public/images/,affiliations countries teams)
+                 $(addprefix $(domserver_webappdir)/public/images/,affiliations countries teams) \
+		 $(domserver_exampleprobdir)
 
 judgehost_dirs = $(judgehost_bindir) $(judgehost_etcdir) $(judgehost_libdir) \
                  $(judgehost_libjudgedir) $(judgehost_logdir) \
@@ -133,6 +135,7 @@ define substconfigvars
 	-e 's,@domserver_logdir[@],@domserver_logdir@,g' \
 	-e 's,@domserver_rundir[@],@domserver_rundir@,g' \
 	-e 's,@domserver_tmpdir[@],@domserver_tmpdir@,g' \
+	-e 's,@domserver_exampleprobdir[@],@domserver_exampleprobdir@,g' \
 	-e 's,@judgehost_bindir[@],@judgehost_bindir@,g' \
 	-e 's,@judgehost_etcdir[@],@judgehost_etcdir@,g' \
 	-e 's,@judgehost_libdir[@],@judgehost_libdir@,g' \

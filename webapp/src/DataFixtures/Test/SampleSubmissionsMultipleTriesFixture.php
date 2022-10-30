@@ -17,10 +17,10 @@ class SampleSubmissionsMultipleTriesFixture extends AbstractTestDataFixture
     {
         $submissionData = [
             // team name,         problem shortname, language, submittime,            entry point, result
-            ['Example teamname',  'boolfind',        'cpp',    '2021-02-01 01:00:56', null,        'timelimit'],
-            ['Example teamname',  'boolfind',        'c',      '2021-02-01 03:15:56', null,        'run-error'],
-            ['Example teamname',  'boolfind',        'java',   '2021-02-01 18:00:00', 'Main',      'wrong-answer'],
-            ['Example teamname',  'boolfind',        'py3',    '2021-02-01 18:00:34', 'main',      'compiler-error'],
+            ['Example teamname',  'C',        'cpp',    '2021-02-01 01:00:56', null,        'timelimit'],
+            ['Example teamname',  'C',        'c',      '2021-02-01 03:15:56', null,        'run-error'],
+            ['Example teamname',  'C',        'java',   '2021-02-01 18:00:00', 'Main',      'wrong-answer'],
+            ['Example teamname',  'C',        'py3',    '2021-02-01 18:00:34', 'main',      'compiler-error'],
         ];
 
         /** @var Contest $contest */

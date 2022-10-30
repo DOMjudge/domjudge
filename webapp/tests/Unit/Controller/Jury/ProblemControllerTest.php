@@ -37,7 +37,7 @@ class ProblemControllerTest extends JuryControllerTest
                                                  'memlimit'           => '1073741824',
                                                  'outputlimit'        => '1073741824',
                                                  'problemtextFile'    => '',
-                                                 'runExecutable'      => 'boolfind_run',
+                                                 'runExecutable'      => 'boolfind_cmp',
                                                  'compareExecutable'  => '',
                                                  'combinedRunCompare' => true,
                                                  'specialCompareArgs' => ''],

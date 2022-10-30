@@ -191,6 +191,7 @@ AX_PATH(domserver_libvendordir, [$domserver_root/lib/vendor])
 AX_PATH(domserver_logdir,       [$domserver_root/log])
 AX_PATH(domserver_rundir,       [$domserver_root/run])
 AX_PATH(domserver_tmpdir,       [$domserver_root/tmp])
+AX_PATH(domserver_exampleprobdir, [$domserver_root/example_problems])
 AX_WITH_COMMENT(6,[     ])
 AX_PATH(judgehost_bindir,       [$judgehost_root/bin])
 AX_PATH(judgehost_etcdir,       [$judgehost_root/etc])
@@ -337,6 +338,7 @@ echo "    - run..............: AX_VAR_EXPAND($domserver_rundir)"
 echo "    - sql..............: AX_VAR_EXPAND($domserver_sqldir)"
 echo "    - tmp..............: AX_VAR_EXPAND($domserver_tmpdir)"
 echo "    - webapp...........: AX_VAR_EXPAND($domserver_webappdir)"
+echo "    - example_problems.: AX_VAR_EXPAND($domserver_exampleprobdir)"
 echo ""
 echo " * judgehost...........: AX_VAR_EXPAND($judgehost_root)"
 echo "    - bin..............: AX_VAR_EXPAND($judgehost_bindir)"

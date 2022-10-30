@@ -17,9 +17,9 @@ class SampleSubmissionsThreeTriesCorrectSameLanguageFixture extends AbstractTest
     {
         $submissionData = [
             // team name,         problem shortname, language, submittime,            entry point, result
-            ['Example teamname',  'fltcmp',          'cpp',    '2021-01-01 12:34:56', null,        'timelimit'],
-            ['Example teamname',  'fltcmp',          'cpp',    '2021-01-01 12:35:30', null,        'wrong-answer'],
-            ['Example teamname',  'fltcmp',          'cpp',    '2021-01-01 12:36:51', null,        'correct'],
+            ['Example teamname',  'B',          'cpp',    '2021-01-01 12:34:56', null,        'timelimit'],
+            ['Example teamname',  'B',          'cpp',    '2021-01-01 12:35:30', null,        'wrong-answer'],
+            ['Example teamname',  'B',          'cpp',    '2021-01-01 12:36:51', null,        'correct'],
         ];
 
         /** @var Contest $contest */

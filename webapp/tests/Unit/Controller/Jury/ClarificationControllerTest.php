@@ -3,7 +3,9 @@
 namespace App\Tests\Unit\Controller\Jury;
 
 use App\DataFixtures\Test\ClarificationFixture;
+use App\Entity\Clarification;
 use App\Tests\Unit\BaseTest;
+use Doctrine\ORM\EntityManagerInterface;
 
 class ClarificationControllerTest extends BaseTest
 {
@@ -14,6 +16,7 @@ class ClarificationControllerTest extends BaseTest
      */
     public function testClarificationRequestIndex(): void
     {
+        $this->loadFixture(ClarificationFixture::class);
         $this->verifyPageResponse('GET', '/jury', 200);
         $link = $this->verifyLinkToURL('Clarifications',
                                        'http://localhost/jury/clarifications');
@@ -24,8 +27,7 @@ class ClarificationControllerTest extends BaseTest
         self::assertEquals('Handled requests', $h3s[1]);
         self::assertEquals('General clarifications', $h3s[2]);
 
-        self::assertSelectorExists('html:contains("Can you tell me how")');
-        self::assertSelectorExists('html:contains("21:47")');
+        self::assertSelectorExists('html:contains("Is it necessary to read the problem statement carefully?")');
     }
 
     /**
@@ -39,7 +41,7 @@ class ClarificationControllerTest extends BaseTest
         $crawler = $this->getCurrentCrawler();
 
         self::assertSelectorTextContains('h3#newrequests ~ div.table-wrapper', 'Is it necessary to');
-        self::assertSelectorTextContains('h3#oldrequests ~ div.table-wrapper', 'Can you tell me how');
+        self::assertSelectorTextContains('h3#oldrequests ~ div.table-wrapper', 'What is 2+2?');
     }
     /**
      * Test that general clarification is under general clarifications header.
@@ -62,12 +64,16 @@ class ClarificationControllerTest extends BaseTest
      */
     public function testClarificationRequestView(): void
     {
-        $this->verifyPageResponse('GET', '/jury/clarifications/1', 200);
+        $this->loadFixture(ClarificationFixture::class);
+        /** @var Clarification $clar */
+        $clar = static::getContainer()->get(EntityManagerInterface::class)->getRepository(Clarification::class)->findOneBy(['body' => 'What is 2+2?']);
+        $this->verifyPageResponse('GET', '/jury/clarifications/' . $clar->getClarid(), 200);
 
+        $count = count(static::getContainer()->get(EntityManagerInterface::class)->getRepository(Clarification::class)->findAll());
         $clarificationText = $this->getCurrentCrawler()->filter('pre')->extract(array('_text'));
-        self::assertEquals('Can you tell me how to solve this problem?',
+        self::assertEquals('What is 2+2?',
                            $clarificationText[0]);
-        self::assertEquals("> Can you tell me how to solve this problem?\r\n\r\nNo, read the problem statement.",
+        self::assertEquals("You have a fast calculator in front of you.",
                            $clarificationText[1]);
 
         $this->verifyLinkToURL('Example teamname (t2)',
@@ -100,7 +106,7 @@ class ClarificationControllerTest extends BaseTest
 
         $this->client->submitForm('Send', [
             'sendto' => '',
-            'problem' => '2-tech',
+            'problem' => '1-tech',
             'bodytext' => 'This is a clarification',
         ]);
 

@@ -17,9 +17,9 @@ class SampleSubmissionsThreeTriesCorrectFixture extends AbstractTestDataFixture
     {
         $submissionData = [
             // team name,         problem shortname, language, submittime,            entry point, result
-            ['Example teamname',  'hello',           'cpp',    '2021-01-01 12:34:56', null,        'timelimit'],
-            ['Example teamname',  'hello',           'java',   '2021-01-02 12:00:00', 'Main',      'wrong-answer'],
-            ['Example teamname',  'hello',           'c',      '2021-01-04 12:34:56', null,        'correct'],
+            ['Example teamname',  'A',               'cpp',    '2021-01-01 12:34:56', null,        'timelimit'],
+            ['Example teamname',  'A',               'java',   '2021-01-02 12:00:00', 'Main',      'wrong-answer'],
+            ['Example teamname',  'A',               'c',      '2021-01-04 12:34:56', null,        'correct'],
         ];
 
         /** @var Contest $contest */

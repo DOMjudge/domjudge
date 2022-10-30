@@ -46,10 +46,36 @@ class ClarificationFixture extends AbstractTestDataFixture
             ->setBody("There was a mistake in judging this problem. Please try again")
             ->setAnswered(true);
 
-        foreach ([$unhandledClarification, $juryGeneral, $juryGeneralToTeam] as $index => $clar) {
+        $handledClarification = new Clarification();
+        $handledClarification
+            ->setContest($contest)
+            ->setSubmittime(1518385738.901348000)
+            ->setSender($team)
+            ->setProblem($problem)
+            ->setBody('What is 2+2?')
+            ->setAnswered(true);
+
+        foreach ([$unhandledClarification, $juryGeneral, $juryGeneralToTeam, $handledClarification] as $index => $clar) {
             $manager->persist($clar);
             $manager->flush();
             $this->addReference(sprintf('%s:%d', static::class, $index), $clar);
         }
+
+        $handledClarification = $manager->getRepository(Clarification::class)->findOneBy(['body' => 'What is 2+2?']);
+        $answerToExistingClar = new Clarification();
+        $answerToExistingClar
+            ->setContest($contest)
+            ->setSubmittime(1518385663.689197000)
+            ->setRecipient($team)
+            ->setJuryMember('admin')
+            ->setProblem($problem)
+            ->setBody('You have a fast calculator in front of you.')
+            ->setAnswered(true)
+            ->setInReplyTo($handledClarification);
+        $manager->persist($answerToExistingClar);
+ //       $manager->flush();
+//        $handledClarification = $manager->getRepository(Clarification::class)->findOneBy(['body' => 'You have a fast calculator in front of you.']);
+        $handledClarification->addReply($answerToExistingClar);
+        $manager->flush();
     }
 }
