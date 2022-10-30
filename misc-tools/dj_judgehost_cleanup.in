@@ -29,20 +29,14 @@ Commands:
   judgings  Delete detailed logs and compiled programs of judgings.
               Note that the most important data is stored in the database.
               The additional data on disk is mostly useful for debugging.
+  all       First unmount stale bind mounts, then delete all of the above.
   help      Display this usage information.
 
 EOF
 }
 
-if [ "$(id -u)" -ne 0 ]; then
-    echo "This program must be run as root."
-    echo
-    usage
-    exit 1
-fi
-
-case $1 in
-    mount*)
+cleanup_mounts()
+{
         echo "Cleaning up stale mounts..."
         cut -d ' ' -f 2 /proc/mounts | grep -E "^$JUDGINGDIR" | while IFS= read -r mountpoint; do
             umount "$mountpoint"
@@ -50,9 +44,10 @@ case $1 in
             sleep 0.1
         done
         echo "Done."
-        ;;
+}
 
-    cache)
+cleanup_cache()
+{
         echo "Cleaning up cached data..."
         cd "$JUDGINGDIR"
         for d in */*; do
@@ -68,9 +63,10 @@ case $1 in
             cd - >/dev/null
         done
         echo "Done."
-        ;;
+}
 
-    judging*)
+cleanup_judgings()
+{
         if cut -d ' ' -f 2 /proc/mounts | grep -E "^$JUDGINGDIR/" >/dev/null 2>&1; then
             echo "There are (stale) bind mounts under $JUDGINGDIR/."
             echo "Make sure that all judgedaemons on this host are stopped, and then"
@@ -90,6 +86,32 @@ case $1 in
             cd - >/dev/null
         done
         echo "Done."
+}
+
+if [ "$(id -u)" -ne 0 ]; then
+    echo "This program must be run as root."
+    echo
+    usage
+    exit 1
+fi
+
+case $1 in
+    mount*)
+	cleanup_mounts
+        ;;
+
+    cache)
+	cleanup_cache
+        ;;
+
+    judging*)
+	cleanup_judgings
+        ;;
+
+    all)
+	cleanup_mounts
+	cleanup_cache
+	cleanup_judgings
         ;;
 
     help|--help)
