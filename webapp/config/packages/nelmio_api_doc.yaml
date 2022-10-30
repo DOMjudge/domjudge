@@ -342,6 +342,7 @@ nelmio_api_doc:
                             format: password
                         enabled:
                             type: boolean
+                            nullable: true
                         team_id:
                             type: string
                         roles:
