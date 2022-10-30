@@ -70,7 +70,7 @@ class ClarificationControllerTest extends BaseTest
         self::assertEquals("> Can you tell me how to solve this problem?\r\n\r\nNo, read the problem statement.",
                            $clarificationText[1]);
 
-        $this->verifyLinkToURL('Example teamname (t2)',
+        $this->verifyLinkToURL('Example teamname',
                                'http://localhost/jury/teams/2');
     }
 
