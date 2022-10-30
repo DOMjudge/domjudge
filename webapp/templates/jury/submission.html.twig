@@ -95,7 +95,7 @@
         <span>
             <i class="fas fa-users" title="Team:"></i>
             <a href="{{ path('jury_team', {teamId: submission.team.teamid, cid: submission.contest.cid}) }}">
-                {{ submission.team.effectiveName }} (t{{ submission.team.teamid }})
+                {{ submission.team.effectiveName }} {{ submission.team | entityIdBadge('t') }}
             </a>
         </span>
 
@@ -103,7 +103,7 @@
             <span>
                 <i class="fas fa-user" title="User:"></i>
                 <a href="{{ path('jury_user', {userId: submission.user.userid, cid: submission.contest.cid}) }}">
-                    {{ submission.user.username }}
+                    {{ submission.user.username }} {{ submission.user | entityIdBadge('u') }}
                 </a>
             </span>
         {% endif %}
@@ -112,6 +112,7 @@
             <i class="fas fa-trophy" title="Contest:"></i>
             <a href="{{ path('jury_contest', {'contestId': submission.contest.cid}) }}">
                 {{ submission.contest.shortname }}
+                {{ submission.contest | entityIdBadge('c') }}
             </a>
         </span>
 
@@ -123,6 +124,7 @@
                 {% else %}
                     {{ submission.problem.name }}
                 {% endif %}
+                {{ submission.problem | entityIdBadge('p') }}
             </a>
         </span>
 
@@ -130,6 +132,7 @@
             <i class="fas fa-comments" title="Language:"></i>
             <a href="{{ path('jury_language', {'langId': submission.language.langid}) }}">
                 {{ submission.language.name }}
+                {{ submission.language | entityIdBadge }}
             </a>
         </span>
 

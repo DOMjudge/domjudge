@@ -93,15 +93,15 @@
                 <table class="data-table table table-sm table-striped table-hover">
                     <thead>
                     <tr>
-                        <th>ID</th>
+                        <th style="text-align: right;">ID</th>
                         <th>Teamname</th>
                     </tr>
                     </thead>
                     <tbody>
                     {% for team in teamAffiliation.teams %}
                         <tr>
-                            <td>
-                                <a href="{{ path('jury_team', {'teamId': team.teamid}) }}">{{ team.teamid }}</a>
+                            <td style="text-align: right;">
+                                <a href="{{ path('jury_team', {'teamId': team.teamid}) }}">{{ team | entityIdBadge('t') }}</a>
                             </td>
                             <td>
                                 <a href="{{ path('jury_team', {'teamId': team.teamid}) }}">{{ team.effectiveName }}</a>

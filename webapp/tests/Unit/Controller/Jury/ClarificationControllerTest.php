@@ -76,7 +76,7 @@ class ClarificationControllerTest extends BaseTest
         self::assertEquals("You have a fast calculator in front of you.",
                            $clarificationText[1]);
 
-        $this->verifyLinkToURL('Example teamname (t2)',
+        $this->verifyLinkToURL('Example teamname',
                                'http://localhost/jury/teams/2');
     }
 

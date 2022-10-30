@@ -22,7 +22,7 @@
 
 {% for clar in list %}
 
-<div class="card mb-3 {% if clar.from_teamid is not defined %}border-primary{% endif %}">
+<div class="card mb-3 {% if clar.from_team is not defined %}border-primary{% endif %}">
 <div class="card-header"><div class="row">
 <div class="col-sm">
     Clarification {{ clar.clarid }}
@@ -37,8 +37,8 @@
 <div class="row">
 <div class="col-sm">
 From:
-{% if clar.from_teamid is defined %}
-<a href="{{ path('jury_team', {teamId: clar.from_teamid}) }}">{{ clar.from_teamname }} (t{{ clar.from_teamid }})</a>
+{% if clar.from_team is defined %}
+<a href="{{ path('jury_team', {teamId: clar.from_team.teamid}) }}">{{ clar.from_teamname }} {{ clar.from_team | entityIdBadge('t') }}</a>
 {% else %}
 Jury
     {% if clar.from_jurymember is defined %}
@@ -80,9 +80,9 @@ Jury
 
 <div class="row">
 <div class="col-sm">To:
-{% if clar.to_teamid is defined %}
-<a href="{{ path('jury_team', {teamId: clar.to_teamid}) }}">{{ clar.to_teamname }} (t{{ clar.to_teamid }})</a>
-{% elseif clar.from_teamid is defined %}
+{% if clar.to_team is defined %}
+<a href="{{ path('jury_team', {teamId: clar.to_team.teamid}) }}">{{ clar.to_teamname }} {{ clar.to_team | entityIdBadge('t') }}</a>
+{% elseif clar.from_team is defined %}
 Jury
 {% else %}
 <strong>All</strong>

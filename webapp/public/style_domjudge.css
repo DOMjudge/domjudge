@@ -608,3 +608,7 @@ tr.ignore td, td.ignore, span.ignore {
 .problem-badge {
     font-size: 100%;
 }
+
+.tooltip .tooltip-inner {
+    max-width: 500px;
+}

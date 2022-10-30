@@ -169,12 +169,12 @@ class ClarificationController extends AbstractController
 
             if ($fromteam = $clar->getSender()) {
                 $data['from_teamname'] = $fromteam->getEffectiveName();
-                $data['from_teamid'] = $fromteam->getTeamid();
+                $data['from_team'] = $fromteam;
                 $concernsteam = $fromteam->getTeamid();
             }
             if ($toteam = $clar->getRecipient()) {
                 $data['to_teamname'] = $toteam->getEffectiveName();
-                $data['to_teamid'] = $toteam->getTeamid();
+                $data['to_team'] = $toteam;
             }
 
             $contest = $clar->getContest();

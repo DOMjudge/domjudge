@@ -77,6 +77,7 @@ class UserController extends BaseController
             'name'       => ['title' => 'name', 'sort' => true],
             'email'      => ['title' => 'email', 'sort' => true],
             'user_roles' => ['title' => 'roles', 'sort' => true],
+            'teamid'     => ['title' => '', 'sort' => false, 'render' => 'entity_id_badge'],
             'team'       => ['title' => 'team', 'sort' => true],
         ];
         if ( in_array('ipaddress', $this->config->get('auth_methods')) ) {
@@ -114,8 +115,12 @@ class UserController extends BaseController
             }
 
             if ($u->getTeam()) {
+                $userdata['teamid'] = [
+                    'value' => $u->getTeam(),
+                    'idPrefix' => 't',
+                ];
                 $userdata['team'] = [
-                    'value' => 't' . $u->getTeam()->getTeamid() . ' (' . $u->getTeamName() . ')',
+                    'value' => $u->getTeamName(),
                     'sortvalue' => $u->getTeam()->getTeamid(),
                     'link' => $this->generateUrl('jury_team', [
                         'teamId' => $u->getTeam()->getTeamid(),

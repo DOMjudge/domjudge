@@ -1,0 +1,7 @@
+<span class="badge badge-secondary id-badge" data-toggle="tooltip" data-placement="top" title="{% if externalId is not null %}External ID: {{ externalId }}, {% endif %}Internal ID: {{ idPrefix }}{{ id }}">
+    {% if externalId is not null %}
+        {{ externalId }}
+    {% else %}
+        {{ idPrefix }}{{ id }}
+    {% endif %}
+</span>
