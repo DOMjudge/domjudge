@@ -1,0 +1,30 @@
+#! /bin/sh -e
+
+if [ -d /var/lib/domjudge/chroot/proc ]; then
+	umount /var/lib/domjudge/chroot/proc || true
+fi
+if [ -d /var/lib/domjudge/chroot.new/proc ]; then
+	umount /var/lib/domjudge/chroot.new/proc || true
+fi
+
+if [ -f /usr/share/debconf/confmodule ]; then
+	. /usr/share/debconf/confmodule
+fi
+
+if [ "$1" = "purge" ]; then
+	rm -f /var/log/domjudge/judge.*.log
+	rm -rf /var/log/domjudge/judgehost
+	rm -rf /var/lib/domjudge/chroot
+	rm -rf /var/lib/domjudge/judgings
+
+	rm -f /etc/domjudge/restapi.secret
+
+	rmdir --ignore-fail-on-non-empty /var/log/domjudge || true
+
+	# Remove my changes to the db.
+	db_purge
+fi
+
+#DEBHELPER#
+
+exit 0

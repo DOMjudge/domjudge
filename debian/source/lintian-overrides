@@ -1,0 +1,3 @@
+source-is-missing
+build-depends-on-python-sphinx-only
+source-contains-prebuilt-windows-binary lib/vendor/symfony/console/Resources/bin/hiddeninput.exe

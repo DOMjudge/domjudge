@@ -1,0 +1,10 @@
+Document: domjudge-manual
+Title: DOMjudge Manual
+Author: The DOMjudge Developers
+Abstract: Installation and configuration of the DOMjudge programming
+ contest jury system.
+Section: Education
+
+Format: HTML
+Index: /usr/share/doc/domjudge-doc/manual/html/index.html
+Files: /usr/share/doc/domjudge-doc/manual/html/*.html

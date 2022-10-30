@@ -1,0 +1,4 @@
+/var/cache/domjudge /usr/share/domjudge/webapp/var/cache
+/var/log/domjudge/domserver /usr/share/domjudge/webapp/var/log
+/var/lib/domjudge/images/teams /usr/share/domjudge/webapp/public/images/teams
+/var/lib/domjudge/images/affiliations /usr/share/domjudge/webapp/public/images/affiliations
