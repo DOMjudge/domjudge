@@ -585,8 +585,11 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
      * Formats a given hostname. If $full = true, then the full hostname will be printed,
      * else only the local part (for keeping tables readable)
      */
-    public function printHost(string $hostname, bool $full = false): string
+    public function printHost(?string $hostname, bool $full = false): string
     {
+        if ($hostname === null) {
+           return '<span class="nodata">hostname unset</span>';
+        }
         // Shorten the hostname to first label, but not if it's an IP address.
         if (!$full && !preg_match('/^\d{1,3}(\.\d{1,3}){3}$/', $hostname)) {
             $expl     = explode('.', $hostname);
