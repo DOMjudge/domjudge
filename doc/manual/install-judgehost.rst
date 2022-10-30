@@ -85,7 +85,8 @@ need a home-directory or password, so the following command would
 suffice to add a user and group ``domjudge-run-2`` with minimal privileges
 with the judgedaemon restricted to CPU core 2::
 
-  sudo useradd -d /nonexistent -U -M -s /bin/false domjudge-run-2
+  sudo groupadd domjudge-run
+  sudo useradd -d /nonexistent -g domjudge-run -M -s /bin/false domjudge-run-2
 
 The ``-2`` suffix corresponds to a judgedaemon bound to CPU core 2
 with the option ``-n 2``, see :ref:`start-judgedaemon`. If you do not
