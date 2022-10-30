@@ -14,13 +14,15 @@ Part of the DOMjudge Programming Contest Jury System and licensed
 under the GNU GPL. See README and COPYING for details.
 '''
 
-import dj_utils
 import fileinput
 import json
 import os.path
 import sys
 from typing import List
 import yaml
+
+sys.path.append('@domserver_libdir@')
+import dj_utils
 
 cid = None
 
