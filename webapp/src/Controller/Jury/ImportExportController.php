@@ -238,7 +238,7 @@ class ImportExportController extends BaseController
             try {
                 $data = Yaml::parseFile($file->getRealPath(), Yaml::PARSE_DATETIME);
             } catch (ParseException $e) {
-                $this->addFlash('danger', "Parse error in YAML/JSON file: " . $e->getMessage());
+                $this->addFlash('danger', "Parse error in YAML/JSON file (" . $file->getClientOriginalName() . "): " . $e->getMessage());
                 return $this->redirectToRoute('jury_import_export');
             }
             if ($this->importExportService->importContestData($data, $message, $cid)) {
@@ -260,7 +260,7 @@ class ImportExportController extends BaseController
             try {
                 $data = Yaml::parseFile($file->getRealPath(), Yaml::PARSE_DATETIME);
             } catch (ParseException $e) {
-                $this->addFlash('danger', "Parse error in YAML/JSON file: " . $e->getMessage());
+                $this->addFlash('danger', "Parse error in YAML/JSON file (" . $file->getClientOriginalName() . "): " . $e->getMessage());
                 return $this->redirectToRoute('jury_import_export');
             }
             if ($this->importExportService->importProblemsData($problemsImportForm->get('contest')->getData(), $data)) {
