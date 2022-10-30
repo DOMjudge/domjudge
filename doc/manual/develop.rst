@@ -93,8 +93,9 @@ interfaces and extended logging. To run in development mode, create
 the file ``webapp/.env.local`` and add to it the setting
 ``APP_ENV=dev``. This is automatically done when running ``make
 maintainer-install`` when the file did not exist before.
-For more details see
-`https://symfony.com/doc/current/configuration/dot-env-changes.html`.
+For more details see the `Symfony documentation`_.
+
+:: _Symfony documentation: https://symfony.com/doc/current/configuration/dot-env-changes.html
 
 The ``webapp/.env.local`` file can also be used to overwrite the database
 version. This is needed to automatically generate migrations based on the
