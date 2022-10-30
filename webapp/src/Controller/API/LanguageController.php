@@ -12,7 +12,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * @Rest\Route("/contests/{cid}/languages")
+ * @Rest\Route("/")
  * @OA\Tag(name="Languages")
  * @OA\Parameter(ref="#/components/parameters/cid")
  * @OA\Response(response="400", ref="#/components/responses/InvalidResponse")
@@ -23,7 +23,9 @@ class LanguageController extends AbstractRestController
 {
     /**
      * Get all the languages for this contest.
-     * @Rest\Get("")
+     * @Rest\Get("languages")
+     * The languages endpoint doesn't require `cid` but the CLICS spec requires us to also expose it under a contest.
+     * @Rest\Get("contests/{cid}/languages")
      * @OA\Response(
      *     response="200",
      *     description="Returns all the languages for this contest",
@@ -44,7 +46,9 @@ class LanguageController extends AbstractRestController
     /**
      * Get the given language for this contest.
      * @throws NonUniqueResultException
-     * @Rest\Get("/{id}")
+     * @Rest\Get("languages/{id}")
+     * The languages endpoint doesn't require `cid` but the CLICS spec requires us to also expose it under a contest.
+     * @Rest\Get("contests/{cid}/languages/{id}")
      * @OA\Response(
      *     response="200",
      *     description="Returns the given language for this contest",
@@ -60,9 +64,12 @@ class LanguageController extends AbstractRestController
 
     protected function getQueryBuilder(Request $request): QueryBuilder
     {
-        // Make sure the contest exists by calling getContestId. Most API endpoints use the contest to filter its
-        // queries, but the languages endpoint does not. So we just call it here.
-        $this->getContestId($request);
+        if ($request->attributes->has('cid')) {
+            // If a contest was passed, make sure that contest exists by calling getContestId.
+            // Most API endpoints use the contest to filter its queries, but the languages endpoint does not. So we just
+            // call it here.
+            $this->getContestId($request);
+        }
         return $this->em->createQueryBuilder()
             ->from(Language::class, 'lang')
             ->select('lang')
