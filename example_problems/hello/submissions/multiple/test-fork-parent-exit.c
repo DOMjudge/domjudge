@@ -7,7 +7,7 @@
  * processes killed. Without cgroup support, this will crash the
  * judgedaemon because the child processes are found still running.
  *
- * @EXPECTED_RESULTS@: WRONG-ANSWER
+ * @EXPECTED_RESULTS@: WRONG-ANSWER, TIMELIMIT
  */
 
 #include <unistd.h>
