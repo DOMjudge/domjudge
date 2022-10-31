@@ -184,3 +184,7 @@ div.submission-summary > span {
 .button-row {
     margin-bottom: 1rem;
 }
+
+table.submissions-table {
+    width: auto;
+}
