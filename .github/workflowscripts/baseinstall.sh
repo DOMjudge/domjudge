@@ -50,6 +50,7 @@ section_end
 
 section_start "Set simple admin password"
 echo "password" > ./etc/initial_admin_password.secret
+echo "machine localhost login admin password password" > ~/.netrc
 section_end
 
 section_start "Install domserver"
