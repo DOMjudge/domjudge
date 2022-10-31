@@ -38,7 +38,7 @@
                 </td>
                 <td class="probid">
                     <a data-ajax-modal data-ajax-modal-after="markSeen" {% if link %}href="{{ link }}"{% endif %} title="{{ submission.problem.name }}">
-                        {{ submission.contestProblem.shortname }}
+                        {{ submission.contestProblem | problemBadge }}
                     </a>
                 </td>
                 <td class="langid">
