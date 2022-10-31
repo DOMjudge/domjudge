@@ -257,7 +257,17 @@ class GeneralInfoController extends AbstractFOSRestController
      * @IsGranted("ROLE_ADMIN")
      * @OA\Response(
      *     response="200",
-     *     description="Result of the various checks performed",
+     *     description="Result of the various checks performed, no problems found",
+     *     @OA\JsonContent(type="object")
+     * )
+     * @OA\Response(
+     *     response="250",
+     *     description="Result of the various checks performed, warnings found",
+     *     @OA\JsonContent(type="object")
+     * )
+     * @OA\Response(
+     *     response="260",
+     *     description="Result of the various checks performed, errors found.",
      *     @OA\JsonContent(type="object")
      * )
      */
@@ -266,17 +276,17 @@ class GeneralInfoController extends AbstractFOSRestController
         $result = $this->checkConfigService->runAll();
 
         // Determine HTTP response code.
-        // If at least one test error: 500
-        // If at least one test warning: 300
+        // If at least one test error: 260
+        // If at least one test warning: 250
         // Otherwise 200
-        // We use max() here to make sure that if it is 300/500 it will never be 'lowered'
+        // We use max() here to make sure that if it is 250/260 it will never be 'lowered'
         $aggregate = 200;
         foreach ($result as &$cat) {
             foreach ($cat as &$test) {
                 if ($test['result'] == 'E') {
-                    $aggregate = max($aggregate, 500);
+                    $aggregate = max($aggregate, 260);
                 } elseif ($test['result'] == 'W') {
-                    $aggregate = max($aggregate, 300);
+                    $aggregate = max($aggregate, 250);
                 }
                 unset($test['escape']);
             }
