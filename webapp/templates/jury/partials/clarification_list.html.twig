@@ -61,7 +61,7 @@
             <td><a href="{{ link }}" title="{{ recipient }}">{{ recipient | u.truncate(teamname_max_length, '…') }}</a></td>
             <td><a href="{{ link }}">
                     {%- if clarification.problem -%}
-                        problem {{ clarification.problem.contestProblems.first.shortname -}}
+                        problem {{ clarification.problem.contestProblems.first | problemBadge -}}
                     {%- elseif clarification.category -%}
                         {{- categories[clarification.category]|default('general') -}}
                     {%- else -%}
