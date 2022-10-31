@@ -22,7 +22,7 @@ int main()
 			failures += 1;
 		}
 		else if (pid == 0) {
-			while (1) {}; /* Child loops */
+			sleep(20); /* Child sleeps */
 		}
 		else {
 			successes += 1;
