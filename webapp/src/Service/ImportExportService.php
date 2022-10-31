@@ -154,7 +154,7 @@ class ImportExportService
                            ))
             ->setExternalid($contest->getShortname())
             ->setStarttimeString(date_format($starttime, 'Y-m-d H:i:s e'))
-            ->setActivatetimeString('-24:00')
+            ->setActivatetimeString((new DateTime())->format('Y-m-d H:i:s e'))
             ->setEndtimeString(sprintf('+%s', $data['duration']));
 
         // Get all visible categories. For now, we assume these are the ones getting awards
