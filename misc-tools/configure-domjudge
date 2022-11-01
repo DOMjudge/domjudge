@@ -31,7 +31,7 @@ def compare_configs(expected_config: Set, actual_config: Set, num_spaces=4) -> (
     space_string = ' ' * num_spaces
     for k in expected_config.keys():
         if k in actual_config and expected_config[k] != actual_config[k]:
-            if isinstance(expected_config[k], dict):
+            if isinstance(expected_config[k], dict) and isinstance(actual_config[k], dict):
                 d, n, m = compare_configs(expected_config[k], actual_config[k], num_spaces=num_spaces+2)
                 if d:
                     diffs.append(f'{space_string}- {k}:')
