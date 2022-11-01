@@ -241,9 +241,9 @@ class JudgehostController extends AbstractFOSRestController
         if ($judgehost) {
             $judgehost->setEnabled($request->request->getBoolean('enabled'));
             $this->em->flush();
+            return [$judgehost];
         }
-
-        return [$judgehost];
+        throw new NotFoundHttpException(sprintf('Judgehost with hostname \'%s\' not found', $hostname));
     }
 
     /**
