@@ -39,7 +39,7 @@ class LanguageFixture extends AbstractDefaultDataFixture
             ['java',   'java',       'Java',        ['java'],                    false, 'Main class', true,   true,   1,     'java_javac_detect'],
             ['js',     'javascript', 'JavaScript',  ['js'],                      false, 'Main file',  false,  true,   1,     'js'],
             ['lua',    'lua',        'Lua',         ['lua'],                     false, null,         false,  true,   1,     'lua'],
-            ['kt',     'kotlin',     'Kotlin',      ['kt'],                      true,  'Main class', false,  true,   1,     'kt'],
+            ['kt',     'kotlin',     'Kotlin',      ['kt'],                      true,  'Main class', true,   true,   1,     'kt'],
             ['pas',    'pascal',     'Pascal',      ['pas', 'p'],                false, 'Main file',  false,  true,   1,     'pas'],
             ['pl',     'pl',         'Perl',        ['pl'],                      false, 'Main file',  false,  true,   1,     'pl'],
             ['plg',    'prolog',     'Prolog',      ['plg'],                     false, 'Main file',  false,  true,   1,     'plg'],

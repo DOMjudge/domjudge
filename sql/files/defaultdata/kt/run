@@ -101,7 +101,7 @@ fi
 # Add -J-DONLINE_JUDGE or -J-DDOMJUDGE below if you want it make easier for
 # teams to do local debugging.
 
-exec "${KOTLIN_DIR}"/kotlin -Dfile.encoding=UTF-8 -J-XX:+UseSerialGC -J-Xss${MEMSTACK}k -J-Xms${MEMLIMITJAVA}k -J-Xmx${MEMLIMITJAVA}k '$MAINCLASS' "\$@"
+exec "${KOTLIN_DIR}"/kotlin -Dfile.encoding=UTF-8 -J-XX:+UseSerialGC -J-Xss64m -J-Xms1920m -J-Xmx1920m '$MAINCLASS' "\$@"
 EOF
 
 chmod a+x "$DEST"

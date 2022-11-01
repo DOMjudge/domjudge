@@ -15,5 +15,5 @@ MEMLIMIT="$1" ; shift
 # -O2:      Level 2 optimizations (default for speed)
 # -static:  Static link with all libraries
 # -pipe:    Use pipes for communication between stages of compilation
-g++ -x c++ -Wall -O2 -static -pipe -o "$DEST" "$@"
+g++ -x c++ -g -O2 -std=gnu++17 -static -pipe -o "$DEST" "$@"
 exit $?

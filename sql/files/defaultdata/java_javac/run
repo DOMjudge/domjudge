@@ -71,7 +71,7 @@ fi
 # Add -DONLINE_JUDGE or -DDOMJUDGE below if you want it make easier for teams
 # to do local debugging.
 
-exec java -Dfile.encoding=UTF-8 -XX:+UseSerialGC -Xss${MEMSTACK}k -Xms${MEMLIMITJAVA}k -Xmx${MEMLIMITJAVA}k '$MAINCLASS' "\$@"
+exec java -Dfile.encoding=UTF-8 -XX:+UseSerialGC -Xss64m -Xms1920m -Xmx1920m '$MAINCLASS' "\$@"
 EOF
 
 chmod a+x "$DEST"
