@@ -144,6 +144,10 @@ class ImportExportService
         }
 
         $starttime->setTimezone(new DateTimeZone(date_default_timezone_get()));
+        $activateTime = new DateTime();
+        if ($activateTime > $starttime) {
+            $activateTime = $starttime;
+        }
         $contest = new Contest();
         $contest
             ->setName($data['name'])
@@ -154,7 +158,7 @@ class ImportExportService
                            ))
             ->setExternalid($contest->getShortname())
             ->setStarttimeString(date_format($starttime, 'Y-m-d H:i:s e'))
-            ->setActivatetimeString((new DateTime())->format('Y-m-d H:i:s e'))
+            ->setActivatetimeString(date_format($activateTime, 'Y-m-d H:i:s e'))
             ->setEndtimeString(sprintf('+%s', $data['duration']));
 
         // Get all visible categories. For now, we assume these are the ones getting awards
