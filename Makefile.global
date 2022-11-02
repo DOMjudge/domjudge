@@ -47,11 +47,19 @@ fi )
 CFLAGS   += -DREVISION="\"$(REVISION)\""
 CXXFLAGS += -DREVISION="\"$(REVISION)\""
 
+USER_EXISTS:=$(shell id $(DOMJUDGE_USER) 2>/dev/null >/dev/null; echo $$?)
+
 # Install settings
 INSTALL_PROG    = $(INSTALL)
 INSTALL_DATA    = $(INSTALL) -m 0644
+ifeq ($(USER_EXISTS),0)
 INSTALL_USER    = $(INSTALL) -m 0644 -o $(DOMJUDGE_USER)
 INSTALL_WEBSITE = $(INSTALL) -m 0644 -o $(DOMJUDGE_USER) -g $(WEBSERVER_GROUP)
+else
+# This makes sure we still create things, even if the user doesn't exist
+INSTALL_USER    = $(INSTALL) -m 0644
+INSTALL_WEBSITE = $(INSTALL) -m 0644
+endif
 INSTALL_DIR     = $(INSTALL) -d
 # KLUDGE: how to install a tree of files with correct permissions?
 define install_tree
