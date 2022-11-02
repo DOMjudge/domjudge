@@ -14,7 +14,7 @@ fi
 RA_SECRET=/etc/domjudge/restapi.secret
 if [ ! -f $RA_SECRET ] ; then
 	touch $RA_SECRET
-	chown root:domjudge $RA_SECRET
+	chown root $RA_SECRET
 	chmod 0640 $RA_SECRET
 	/etc/domjudge/genrestapicredentials > $RA_SECRET
 fi
