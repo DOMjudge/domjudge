@@ -1,0 +1,63 @@
+name: "Debian Package Builder"
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  build-pkg:
+    name: Build debian packages
+    runs-on: ubuntu-20.04
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      # # We need the whole history so we can make a pretty version
+      # with:
+      #   fetch-depth: 0
+    - name: Install required tools
+      run: |
+        sudo apt update
+        sudo apt install -y acl zip unzip apache2 php php-fpm php-gd \
+                            php-cli php-intl php-mbstring php-mysql php-curl php-json \
+                            php-xml php-zip ntp make sudo debootstrap \
+                            libcgroup-dev lsof php-cli php-curl php-json php-xml \
+                            php-zip procps gcc g++ default-jre-headless \
+                            default-jdk-headless ghc fp-compiler autoconf automake bats \
+                            python3-sphinx python3-sphinx-rtd-theme rst2pdf fontconfig \
+                            python3-yaml latexmk
+
+        # texlive-latex-extra is required for building the docs now
+        # libcurl/libmagic/libjsoncpp are required for building the debian package
+        sudo apt install -y \
+          texlive-latex-extra \
+          libcurl4-gnutls-dev libmagic-dev libjsoncpp-dev
+        php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+        HASH="$(wget -q -O - https://composer.github.io/installer.sig)"
+        php -r "if (hash_file('SHA384', 'composer-setup.php') === '$HASH') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;"
+        sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer
+    - name: Add entry to debian changelog
+      run: |
+        sudo apt-get install -y devscripts equivs
+        MAJOR=8
+        MINOR=1
+        PATCH=3
+        VERSION=$(git log --date=format:%Y%m%d --pretty=$MAJOR.$MINOR.$PATCH~git%cd.%h -n1)
+        DEBFULLNAME="CI Builder" DEBMAIL="team@domjudge.org" dch -v $VERSION "Automated build"
+
+    - name: build the packages
+      run: |
+        make dist
+        # exclude some default set of files, don't sign changes or dsc, and only build binary packages (not source)
+        debuild -i -us -uc -b
+
+        # Because we can't grab artifacts from a parent directory, move them to the current directory
+        mv ../*.changes ../*.ddeb ../*.deb .
+
+    - uses: actions/upload-artifact@v3
+      with:
+        name: debian-packages
+        path: |
+          *.deb
+          *.ddeb
+          *.changes
