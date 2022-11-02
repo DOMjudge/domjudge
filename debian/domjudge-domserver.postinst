@@ -37,14 +37,26 @@ dbc_go domjudge-domserver $@
 rm -rf /var/cache/domjudge/*
 fix_permissions
 
-# Configure apache
-mkdir -p /etc/apache2/conf-available
-ln -sf ../../domjudge/apache.conf /etc/apache2/conf-available/domjudge.conf
+# Configure apache (if present)
+if [ -d /etc/apache2/conf-available ]; then
+	ln -sf /etc/domjudge/apache.conf /etc/apache2/conf-available/domjudge.conf
 
-if [ -e /usr/share/apache2/apache2-maintscript-helper ] ; then
-	. /usr/share/apache2/apache2-maintscript-helper
-	apache2_invoke enmod rewrite
-	apache2_invoke enconf domjudge
+	if [ -e /usr/share/apache2/apache2-maintscript-helper ] ; then
+		. /usr/share/apache2/apache2-maintscript-helper
+		apache2_invoke enmod rewrite
+		apache2_invoke enconf domjudge
+	fi
+fi
+
+# Configure nginx (if present)
+if [ -d /etc/nginx/sites-available ]; then
+	ln -sf /etc/domjudge/nginx-conf /etc/nginx/sites-available/domjudge
+	ln -sf /etc/nginx/sites-available/domjudge /etc/nginx/sites-enabled/domjudge
+fi
+
+# Configure php-fpm + restart it (if present)
+if [ -d /etc/php/7.4/fpm/pool.d ]; then
+	ln -sf /etc/domjudge/domjudge-fpm.conf /etc/php/7.4/fpm/pool.d/domjudge.conf
 fi
 
 # Clean up files from older packages (<< 7.3.0)
