@@ -27,7 +27,7 @@ if [ ! -x $BC ]; then
 	fi
 fi
 
-echo "We are '$0' with arguments '$@'."
+echo "We are '$0' with arguments '$*'."
 echo "calculating '10 + 2' using our submitted bc as '$BC':"
 
 $BC <<EOF
