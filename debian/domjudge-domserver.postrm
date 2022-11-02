@@ -5,7 +5,7 @@ if [ -f /usr/share/debconf/confmodule ]; then
 fi
 if [ -f /usr/share/dbconfig-common/dpkg/postrm.mysql ]; then
     . /usr/share/dbconfig-common/dpkg/postrm.mysql
-    dbc_go domjudge-domserver $@
+    dbc_go domjudge-domserver "$@"
 fi
 
 if [ -e /usr/share/apache2/apache2-maintscript-helper ] ; then
@@ -23,7 +23,7 @@ if [ "$1" = "purge" ]; then
                 /etc/domjudge/initial_admin_password.secret \
                 /etc/domjudge/dbpasswords.secret
 
-        if which ucf >/dev/null 2>&1; then
+        if command -v ucf >/dev/null 2>&1; then
                 ucf --purge /etc/domjudge/dbpasswords.secret
         fi
 
