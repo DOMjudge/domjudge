@@ -134,8 +134,8 @@ class ConfigControllerTest extends BaseTest
      */
     public function testConfigCheckerWorksForAdmin(): void
     {
-        // In the test setup, the config check returns some errors so expected result is 500.
-        $response = $this->verifyApiJsonResponse('GET', $this->endpoint .'/check', 500, 'admin');
+        // In the test setup, the config check returns some errors so expected result is 260.
+        $response = $this->verifyApiJsonResponse('GET', $this->endpoint .'/check', 260, 'admin');
 
         $sections = ['System', 'Configuration', 'Contests', 'Problems and languages', 'Teams', 'External identifiers'];
         static::assertIsArray($response);
