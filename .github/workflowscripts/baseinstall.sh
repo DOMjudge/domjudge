@@ -50,7 +50,7 @@ section_end
 
 section_start "Set simple admin password"
 echo "password" > ./etc/initial_admin_password.secret
-echo "machine localhost login admin password password" > ~/.netrc
+echo "default login admin password password" > ~/.netrc
 section_end
 
 section_start "Install domserver"
@@ -64,7 +64,32 @@ section_end
 section_start "Explicit start mysql + install DB"
 sudo /etc/init.d/mysql start
 
-/opt/domjudge/domserver/bin/dj_setup_database -uroot -proot install
+/opt/domjudge/domserver/bin/dj_setup_database -uroot -proot bare-install
+section_end
+
+section_start "Setup webserver"
+sudo cp /opt/domjudge/domserver/etc/domjudge-fpm.conf /etc/php/7.4/fpm/pool.d/domjudge.conf
+
+sudo rm -f /etc/nginx/sites-enabled/*
+sudo cp /opt/domjudge/domserver/etc/nginx-conf /etc/nginx/sites-enabled/domjudge
+
+openssl req -nodes -new -x509 -keyout /tmp/server.key -out /tmp/server.crt -subj "/C=NL/ST=Noord-Holland/L=Amsterdam/O=TestingForPR/CN=localhost"
+sudo cp /tmp/server.crt /usr/local/share/ca-certificates/
+sudo update-ca-certificates
+# shellcheck disable=SC2002
+cat "$(pwd)/.github/workflowscripts/nginx_extra" | sudo tee -a /etc/nginx/sites-enabled/domjudge
+sudo nginx -t
+section_end
+
+section_start "Show webserver is up"
+for service in nginx php7.4-fpm; do
+    sudo systemctl restart $service
+    sudo systemctl status  $service
+done
+section_end
+
+section_start "Install the example data"
+/opt/domjudge/domserver/bin/dj_setup_database -uroot -proot install-examples
 section_end
 
 section_start "Setup user"
@@ -86,21 +111,3 @@ elif [ "$version" = "admin" ]; then
 fi
 section_end
 
-section_start "Setup webserver"
-sudo cp /opt/domjudge/domserver/etc/domjudge-fpm.conf /etc/php/7.4/fpm/pool.d/domjudge.conf
-
-sudo rm -f /etc/nginx/sites-enabled/*
-sudo cp /opt/domjudge/domserver/etc/nginx-conf /etc/nginx/sites-enabled/domjudge
-
-openssl req -nodes -new -x509 -keyout /tmp/server.key -out /tmp/server.crt -subj "/C=NL/ST=Noord-Holland/L=Amsterdam/O=TestingForPR/CN=localhost"
-# shellcheck disable=SC2002
-cat "$(pwd)/.github/workflowscripts/nginx_extra" | sudo tee -a /etc/nginx/sites-enabled/domjudge
-sudo nginx -t
-section_end
-
-section_start "Show webserver is up"
-for service in nginx php7.4-fpm; do
-    sudo systemctl restart $service
-    sudo systemctl status  $service
-done
-section_end
