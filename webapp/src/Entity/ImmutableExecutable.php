@@ -89,7 +89,7 @@ class ImmutableExecutable
         $this->hash = md5(
             join(
                 array_map(
-                    fn(ExecutableFile $file) => $file->getHash(),
+                    fn(ExecutableFile $file) => $file->getHash() . $file->getFilename() . $file->isExecutable(),
                     $filesArray
                 )
             )
