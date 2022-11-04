@@ -332,6 +332,7 @@ function fetch_executable_internal(
         $files = dj_json_decode($content);
         unset($content);
         $concatenatedMd5s = '';
+        $filesArray = [];
         foreach ($files as $file) {
             $filename = $execbuilddir . '/' . $file['filename'];
             $content = base64_decode($file['content']);
@@ -340,9 +341,22 @@ function fetch_executable_internal(
             if ($file['is_executable']) {
                 chmod($filename, 0755);
             }
+            $filesArray[] = [
+                'hash' => md5($content),
+                'filename' => $file['filename'],
+                'is_executable' => $file['is_executable'],
+            ];
         }
         unset($files);
-        $computedHash = md5($concatenatedMd5s);
+        uasort($filesArray, fn(array $a, array $b) => strcmp($a['filename'], $b['filename']));
+        $computedHash = md5(
+            join(
+                array_map(
+                    fn($file) => $file['hash'] . $file['filename'] . $file['is_executable'],
+                    $filesArray
+                )
+            )
+        );
         if ($hash !== $computedHash) {
             return [null, "Unexpected hash ($computedHash), expected hash: $hash", null];
         }
