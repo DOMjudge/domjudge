@@ -22,32 +22,33 @@ if [ ! -x /usr/bin/shellcheck ]; then
 	exit -1
 fi
 
-find .. \( -path ../lib/vendor        -prune \
-	-o -path ../webapp/var        -prune \
-	-o -path ../output            -prune \
-	-o -path ../.git              -prune \
-	-o -path ../webapp/migrations -prune \
-	-o -path ../example_problems  -prune \
-        -o -type f \) \
+find . \( \
+       -path ./lib/vendor        -prune \
+	-o -path ./webapp/var        -prune \
+	-o -path ./output            -prune \
+	-o -path ./.git              -prune \
+	-o -path ./webapp/migrations -prune \
+	-o -path ./example_problems  -prune \
+    -o -type f \) \
 	-a -type f |  \
 while read -r i ; do
 	if [[ "$i" == *\.php ]] || grep -q "^#\\!.*php" "$i"; then
-		$PHP -l "$i" | sed -e 's|No syntax errors detected in ../|check PHP syntax: |'
-		if [[ "$i" == *\.php ]] && [ "$i" != "../webapp/config/bundles.php" ] && ! head -1 "$i"|grep -q "strict_types"; then
+		$PHP -l "$i" | sed -e 's|No syntax errors detected in ./|check PHP syntax: |'
+		if [[ "$i" == *\.php ]] && [ "$i" != "./webapp/config/bundles.php" ] && ! head -1 "$i"|grep -q "strict_types"; then
 			echo "PHP file missing strict types declaration: $i"
 			exit 1
 		fi
 	fi
 	if grep -q "^#\\!.*/bin/sh" "$i" && \
 		[ "${i##*.}" != "zip" ] && \
-		echo "$i" | grep -qvE '(^\.\./(misc-tools/dj_judgehost_cleanup.in|misc-tools/dj_make_chroot.in|config|autom4te|install-sh|sql/files/defaultdata/hs/run|sql/files/defaultdata/kt/run|lib/vendor/|output|judge/judgedaemon))'; then
+		echo "$i" | grep -qvE '(^\./(misc-tools/dj_judgehost_cleanup.in|misc-tools/dj_make_chroot.in|config|autom4te|install-sh|sql/files/defaultdata/hs/run|sql/files/defaultdata/kt/run|lib/vendor/|output|judge/judgedaemon))'; then
 		# shellcheck disable=SC2001
-		echo "$i" | sed -e 's|^../|check for bashisms: |'
+		echo "$i" | sed -e 's|^./|check for bashisms: |'
 		checkbashisms "$i"
 	fi
 	if grep -qE "^#\\!.*/bin/(ba)?sh" "$i" && \
 		[ "${i##*.}" != "zip" ] && \
-		echo "$i" | grep -qvE '(^\.\./(config|autom4te|install-sh|sql/files/defaultdata/hs/run|lib/vendor/|output|judge/judgedaemon))'; then
+		echo "$i" | grep -qvE '(^\./(config|autom4te|install-sh|sql/files/defaultdata/hs/run|lib/vendor/|output|judge/judgedaemon))'; then
 		# We ignore the following shellcheck warnings, for more details see:
 		# https://github.com/koalaman/shellcheck/wiki/<code>
 		#
@@ -56,6 +57,6 @@ while read -r i ; do
 		# SC2010: keep easy to read scripts as we don't have non-alphanumeric filenames
         # SC2034: many "unused variables" are actually used, or in compile scripts declared on purpose
 		# SC2046,SC2061,SC2086: there are too many cases where quoting is not necessary and tedious
-		shellcheck -f gcc -e 1072,1091,2006,2010,2034,2046,2061,2086 "$i" | sed -e 's|^../|shellcheck: |'
+		shellcheck -f gcc -e 1072,1091,2006,2010,2034,2046,2061,2086 "$i" | sed -e 's|^./|shellcheck: |'
 	fi
 done

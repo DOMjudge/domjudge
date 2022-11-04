@@ -2,7 +2,9 @@
 
 set -euo pipefail
 
-tests/syntax
+MYDIR=$(dirname "$0")
+
+$MYDIR/syntax-check
 
 make configure
 ./configure --with-baseurl='http://localhost/domjudge/' --with-domjudge-user=root
