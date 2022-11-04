@@ -15,6 +15,9 @@
 
     <div class="mt-4" data-flash-messages>
         {% include 'partials/messages.html.twig' %}
+        {% if not contest.allowSubmit %}
+            {% include 'partials/alert.html.twig' with {'type': 'danger', 'message': 'Submissions (temporarily) disabled.'} %}
+        {% endif %}
     </div>
 
     <div class="row">

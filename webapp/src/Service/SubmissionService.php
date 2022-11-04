@@ -434,6 +434,10 @@ class SubmissionService
                 sprintf("The contest is closed, no submissions accepted. [c%d]", $contest->getCid()));
         }
 
+        if (!$contest->getAllowSubmit()) {
+            throw new BadRequestHttpException('Submissions for contest (temporarily) disabled');
+        }
+
         if (!$language->getAllowSubmit()) {
             throw new BadRequestHttpException(
                 sprintf("Language '%s' not found in database or not submittable.", $language->getLangid()));

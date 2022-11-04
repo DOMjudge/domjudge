@@ -437,6 +437,25 @@ class ContestController extends BaseController
     }
 
     /**
+     * @Route("/{contestId}/toggle-submit", name="jury_contest_toggle_submit")
+     */
+    public function toggleSubmitAction(Request $request, string $contestId): Response
+    {
+        /** @var Contest $contest */
+        $contest = $this->em->getRepository(Contest::class)->find($contestId);
+        if (!$contest) {
+            throw new NotFoundHttpException(sprintf('Contest with ID %s not found', $contestId));
+        }
+
+        $contest->setAllowSubmit($request->request->getBoolean('allow_submit'));
+        $this->em->flush();
+
+        $this->dj->auditlog('contest', $contestId, 'set allow submit',
+            $request->request->getBoolean('allow_submit') ? 'yes' : 'no');
+        return $this->redirectToRoute('jury_contest', ['contestId' => $contestId]);
+    }
+
+    /**
      * @Route("/{contestId<\d+>}/remove-interval/{intervalId}",
      *        name="jury_contest_remove_interval", methods={"POST"})
      */
