@@ -386,6 +386,8 @@ tr.ignore td, td.ignore, span.ignore {
     height: auto;
     display: block;
     margin-bottom: 2rem;
+    max-width: 960px;
+    margin: auto;
 }
 
 #teampicture {
