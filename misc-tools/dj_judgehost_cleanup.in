@@ -9,8 +9,7 @@ set -e
 JUDGINGDIR=$(readlink -fn @judgehost_judgedir@)
 PROGNAME=$(basename "$0")
 
-usage()
-{
+usage() {
     cat <<EOF
 Usage: $PROGNAME <command>
 Perform various cleanup tasks on a judgehost.
@@ -35,8 +34,7 @@ Commands:
 EOF
 }
 
-cleanup_mounts()
-{
+cleanup_mounts() {
         echo "Cleaning up stale mounts..."
         cut -d ' ' -f 2 /proc/mounts | grep -E "^$JUDGINGDIR" | while IFS= read -r mountpoint; do
             umount "$mountpoint"
@@ -46,8 +44,7 @@ cleanup_mounts()
         echo "Done."
 }
 
-cleanup_cache()
-{
+cleanup_cache() {
         echo "Cleaning up cached data..."
         cd "$JUDGINGDIR"
         for d in */*; do
@@ -65,8 +62,7 @@ cleanup_cache()
         echo "Done."
 }
 
-cleanup_judgings()
-{
+cleanup_judgings() {
         if cut -d ' ' -f 2 /proc/mounts | grep -E "^$JUDGINGDIR/" >/dev/null 2>&1; then
             echo "There are (stale) bind mounts under $JUDGINGDIR/."
             echo "Make sure that all judgedaemons on this host are stopped, and then"
@@ -97,24 +93,24 @@ fi
 
 case $1 in
     mount*)
-	cleanup_mounts
+        cleanup_mounts
         ;;
 
     cache)
-	cleanup_cache
+        cleanup_cache
         ;;
 
     judging*)
-	cleanup_judgings
+        cleanup_judgings
         ;;
 
     all)
-	cleanup_mounts
-	cleanup_cache
-	cleanup_judgings
+        cleanup_mounts
+        cleanup_cache
+        cleanup_judgings
         ;;
 
-    help|--help)
+    help | --help)
         usage
         ;;
 
