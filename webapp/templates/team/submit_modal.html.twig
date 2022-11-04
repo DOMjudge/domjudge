@@ -16,6 +16,10 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 </div>
+            {% elseif not current_team_contest.allowSubmit %}
+                <div class="modal-body">
+                    {% include 'partials/alert.html.twig' with {'type': 'danger', 'message': 'Submissions (temporarily) disabled.'} %}
+                </div>
             {% else %}
                 {{ form_start(form) }}
                 <div class="modal-body">

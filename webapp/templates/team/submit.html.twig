@@ -4,28 +4,32 @@
 
 {% block content %}
     <div class="container submitform pt-5">
-        <h1 class="text-center">Submit {% if problem is not null %}problem {{ problem.name }}{% endif %}</h1>
-        {% if current_team_contest is empty or (not is_granted('ROLE_JURY') and not current_team_contest.freezeData.started) %}
-            <div class="container submitform">
-                <div class="alert alert-danger" role="alert">Contest has not yet started - cannot submit.</div>
-            </div>
+        {% if not current_team_contest.allowSubmit %}
+            {% include 'partials/alert.html.twig' with {'type': 'danger', 'message': 'Submissions (temporarily) disabled.'} %}
         {% else %}
+            <h1 class="text-center">Submit {% if problem is not null %}problem {{ problem.name }}{% endif %}</h1>
+            {% if current_team_contest is empty or (not is_granted('ROLE_JURY') and not current_team_contest.freezeData.started) %}
+                <div class="container submitform">
+                    <div class="alert alert-danger" role="alert">Contest has not yet started - cannot submit.</div>
+                </div>
+            {% else %}
 
-            {{ form_start(form) }}
-            {{ form_row(form.code) }}
-            {{ form_row(form.problem) }}
-            {{ form_row(form.language) }}
-            <div class="form-group" data-entry-point>
-                {{ form_label(form.entry_point) }}
-                {{ form_widget(form.entry_point) }}
-                {{ form_help(form.entry_point) }}
-            </div>
-            <div class="form-group">
-                <button type="submit" class="btn-success btn"><i class="fas fa-cloud-upload-alt"></i> Submit
-                </button>
-            </div>
-            {{ form_end(form) }}
+                {{ form_start(form) }}
+                {{ form_row(form.code) }}
+                {{ form_row(form.problem) }}
+                {{ form_row(form.language) }}
+                <div class="form-group" data-entry-point>
+                    {{ form_label(form.entry_point) }}
+                    {{ form_widget(form.entry_point) }}
+                    {{ form_help(form.entry_point) }}
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn-success btn"><i class="fas fa-cloud-upload-alt"></i> Submit
+                    </button>
+                </div>
+                {{ form_end(form) }}
 
+            {% endif %}
         {% endif %}
 
     </div>

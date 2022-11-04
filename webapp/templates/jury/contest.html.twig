@@ -108,6 +108,16 @@
                     <td>{{ contest.deactivatetimeString }}</td>
                 </tr>
                 <tr>
+                    <th>Allow submit</th>
+                    <td>
+                        {{ contest.allowSubmit | printYesNo }}
+                        <form action="{{ path('jury_contest_toggle_submit', {'contestId': contest.cid}) }}" method="post" class="d-inline">
+                            <input type="hidden" name="allow_submit" value="{{ not contest.allowSubmit }}" />
+                            <input type="submit" class="btn btn-sm btn-outline-secondary" value="toggle"/>
+                        </form>
+                    </td>
+                </tr>
+                <tr>
                     <th>Process balloons</th>
                     <td>{{ contest.processBalloons | printYesNo }}</td>
                 </tr>

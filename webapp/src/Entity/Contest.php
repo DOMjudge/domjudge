@@ -279,6 +279,14 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     private bool $enabled = true;
 
     /**
+     * @ORM\Column(type="boolean", name="allow_submit",
+     *     options={"comment"="Are submissions accepted in this contest?","default"="1"},
+     *     nullable=false)
+     * @Serializer\Groups({"Nonstrict"})
+     */
+    private bool $allowSubmit = true;
+
+    /**
      * @ORM\Column(type="boolean", name="process_balloons",
      *     options={"comment"="Will balloons be processed for this contest?","default"=1},
      *     nullable=false)
@@ -670,6 +678,17 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     public function getEnabled(): bool
     {
         return $this->enabled;
+    }
+
+    public function setAllowSubmit(bool $allowSubmit): Contest
+    {
+        $this->allowSubmit = $allowSubmit;
+        return $this;
+    }
+
+    public function getAllowSubmit(): bool
+    {
+        return $this->allowSubmit;
     }
 
     public function setProcessBalloons(bool $processBalloons): Contest
