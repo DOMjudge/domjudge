@@ -324,6 +324,15 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     private bool $openToAllTeams = true;
 
     /**
+     * @ORM\Column(type="text", length=65535, name="warning_message",
+     *     options={"comment"="Warning message for this contest shown on the scoreboards"},
+     *                          nullable=true)
+     * @Serializer\Groups({"Nonstrict"})
+     * @OA\Property(nullable=true)
+     */
+    private ?string $warningMessage = null;
+
+    /**
      * @ORM\Column(type="boolean", name="is_locked",
      *     options={"comment"="Is this contest locked for modifications?",
      *              "default"=0},
@@ -689,6 +698,17 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     public function getAllowSubmit(): bool
     {
         return $this->allowSubmit;
+    }
+
+    public function getWarningMessage(): ?string
+    {
+        return $this->warningMessage;
+    }
+
+    public function setWarningMessage(?string $warningMessage): Contest
+    {
+        $this->warningMessage = (empty($warningMessage) ? null : $warningMessage);
+        return $this;
     }
 
     public function setProcessBalloons(bool $processBalloons): Contest

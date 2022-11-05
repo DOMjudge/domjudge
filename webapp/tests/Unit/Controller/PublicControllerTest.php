@@ -42,6 +42,23 @@ class PublicControllerTest extends BaseTest
         self::assertSelectorExists('p.nodata:contains("No active contest")');
     }
 
+    public function testScoreboardWarningMessage(): void
+    {
+        $this->verifyPageResponse('GET', '/public', 200);
+        self::assertSelectorNotExists('div.alert-danger');
+
+        $msg = 'This is a test contest';
+
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+        /** @var Contest $contest */
+        $contest = $em->getRepository(Contest::class)->findOneBy(['externalid' => 'demo']);
+        $contest->setWarningMessage($msg);
+        $em->flush();
+
+        $this->verifyPageResponse('GET', '/public', 200);
+        self::assertSelectorTextContains('div.alert-danger', $msg);
+    }
+
     public function testNoSelfRegister(): void
     {
         $this->verifyPageResponse('GET', static::$urlRegister, 403);
