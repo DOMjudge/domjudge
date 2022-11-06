@@ -544,13 +544,13 @@ abstract class BaseController extends AbstractController
             }
         } else {
             if ($inProgress !== []) {
-                $this->addFlash('warning', sprintf('Please be patient, these judgings are still in progress: %s', implode(',', $inProgress)));
+                $this->addFlash('warning', sprintf('Please be patient, these judgings are still in progress: %s', implode(', ', $inProgress)));
             }
             if ($alreadyRequested !== []) {
-                $this->addFlash('warning', sprintf('These judgings were already requested to be judged completely: %s', implode(',', $alreadyRequested)));
+                $this->addFlash('warning', sprintf('These judgings were already requested to be judged completely: %s', implode(', ', $alreadyRequested)));
             }
             if ($invalidJudgings !== []) {
-                $this->addFlash('warning', sprintf('These judgings were skipped as they were superseded by other judgings: %s', implode(',', $invalidJudgings)));
+                $this->addFlash('warning', sprintf('These judgings were skipped as they were superseded by other judgings: %s', implode(', ', $invalidJudgings)));
             }
         }
         if ($numRequested === 0) {
