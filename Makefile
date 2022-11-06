@@ -57,10 +57,10 @@ ifeq (, $(shell command -v composer 2> /dev/null))
 endif
 # We use --no-scripts here because at this point the autoload.php file is
 # not generated yet, which is needed to run the post-install scripts.
-	composer $(subst 1,-q,$(QUIET)) install --prefer-dist -o -a --no-scripts
+	composer $(subst 1,-q,$(QUIET)) install --prefer-dist -o -a --no-scripts --no-plugins
 
 composer-dependencies-dev:
-	composer $(subst 1,-q,$(QUIET)) install --prefer-dist --no-scripts
+	composer $(subst 1,-q,$(QUIET)) install --prefer-dist --no-scripts --no-plugins
 
 # Generate documentation for distribution. Remove this dependency from
 # dist above for quicker building from git sources.
