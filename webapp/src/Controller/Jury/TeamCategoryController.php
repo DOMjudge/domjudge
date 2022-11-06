@@ -276,7 +276,9 @@ class TeamCategoryController extends BaseController
                           ->join('s.team', 't')
                           ->join('t.category', 'tc')
                           ->andWhere('j.valid = true')
+                          ->andWhere('j.result != :compiler_error')
                           ->andWhere('tc.category = :categoryId')
+                          ->setParameter('compiler_error', 'compiler-error')
                           ->setParameter('categoryId', $categoryId);
         if ($contestId > -1) {
             $query->andWhere('s.contest = :contestId')

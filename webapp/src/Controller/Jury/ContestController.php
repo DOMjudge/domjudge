@@ -877,7 +877,9 @@ class ContestController extends BaseController
                              ->join('t.category', 'tc')
                              ->andWhere('tc.visible = true')
                              ->andWhere('j.valid = true')
+                             ->andWhere('j.result != :compiler_error')
                              ->andWhere('s.contest = :contestId')
+                             ->setParameter('compiler_error', 'compiler-error')
                              ->setParameter('contestId', $contestId)
                              ->getQuery()
                              ->getResult();
@@ -911,9 +913,11 @@ class ContestController extends BaseController
                              ->andWhere('s.problem = :problemId')
                              ->andWhere('tc.visible = true')
                              ->andWhere('j.valid = true')
+                             ->andWhere('j.result != :compiler_error')
                              ->andWhere('s.contest = :contestId')
                              ->setParameter('problemId', $probId)
                              ->setParameter('contestId', $contestId)
+                             ->setParameter('compiler_error', 'compiler-error')
                              ->getQuery()
                              ->getResult();
         $this->judgeRemaining($judgings);

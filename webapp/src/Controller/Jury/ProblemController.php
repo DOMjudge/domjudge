@@ -1118,8 +1118,10 @@ class ProblemController extends BaseController
                           ->join('s.team', 't')
                           ->join('t.category', 'tc')
                           ->andWhere('j.valid = true')
+                          ->andWhere('j.result != :compiler_error')
                           ->andWhere('tc.visible = true')
                           ->andWhere('s.problem = :probId')
+                          ->setParameter('compiler_error', 'compiler-error')
                           ->setParameter('probId', $probId);
         if ($contestId > -1) {
             $query->andWhere('s.contest = :contestId')
