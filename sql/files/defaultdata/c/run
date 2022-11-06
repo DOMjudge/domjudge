@@ -16,5 +16,5 @@ MEMLIMIT="$1" ; shift
 # -static:  Static link with all libraries
 # -pipe:    Use pipes for communication between stages of compilation
 # -lm:      Link with math-library (has to be last argument!)
-gcc -x c -g -O2 -std=gnu11 -static -pipe "$DEST" "$@" -lm
+gcc -x c -g -O2 -std=gnu11 -static -pipe -o "$DEST" "$@" -lm
 exit $?
