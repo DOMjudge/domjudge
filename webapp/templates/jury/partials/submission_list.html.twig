@@ -118,7 +118,7 @@
                 </td>
                 <td rowspan="{{ rowSpan }}" class="{{ tdExtraClass }}">
                     <a href="{{ link }}">
-                        {{ submission.team.name | u.truncate(teamname_max_length, '…') }}
+                        {{ submission.team.effectiveName | u.truncate(teamname_max_length, '…') }}
                     </a>
                 </td>
                 <td class="probid{{ tdExtraClass }}" rowspan="{{ rowSpan }}">
