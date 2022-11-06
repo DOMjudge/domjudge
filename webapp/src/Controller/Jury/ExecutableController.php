@@ -417,6 +417,11 @@ class ExecutableController extends BaseController
                     return $this->redirectToRoute('jury_executable', ['execId' => $executable->getExecid()]);
                 }
                 $newContent = str_replace("\r\n", "\n", $submittedData['source' . $idx]);
+                if (!str_ends_with($newContent, "\n")) {
+                    // Ace swallows the newline at the end of file. Let's re-add it like most editors do.
+                    $newContent .= "\n";
+                }
+
 
                 $executableFile = new ExecutableFile();
                 $executableFile
