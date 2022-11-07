@@ -50,6 +50,7 @@ class ClarificationController extends AbstractController
      */
     public function indexAction(Request $request): Response
     {
+        $categories = $this->config->get('clar_categories');
         $contestIds = array_keys($this->dj->getCurrentContests());
         // cid -1 will never happen, but otherwise the array is empty and that is not supported.
         if (empty($contestIds)) {
@@ -124,6 +125,7 @@ class ClarificationController extends AbstractController
             'showExternalId' => $this->eventLogService->externalIdFieldForEntity(Clarification::class),
             'currentQueue' => $currentQueue,
             'currentFilter' => $currentFilter,
+            'categories' => $categories,
         ]);
     }
 
