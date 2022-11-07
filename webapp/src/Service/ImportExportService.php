@@ -306,7 +306,7 @@ class ImportExportService
         foreach ($teams as $team) {
             $data[] = [
                 $team->getApiId($this->eventLogService),
-                $team->getIcpcid(),
+                $team->getIcpcId(),
                 $team->getCategory()->getApiId($this->eventLogService),
                 $team->getEffectiveName(),
                 $team->getAffiliation() ? $team->getAffiliation()->getName() : '',
@@ -326,7 +326,7 @@ class ImportExportService
     {
         // We'll here assume that the requested file will be of the current contest,
         // as all our scoreboard interfaces do:
-        // 1    External ID     24314   string
+        // 1    ICPC ID     24314   string
         // 2    Rank in contest     1   integer
         // 3    Award   Gold Medal  string
         // 4    Number of problems the team has solved  4   integer
@@ -419,7 +419,7 @@ class ImportExportService
             }
 
             $data[] = [
-                $teamScore->team->getApiId($this->eventLogService),
+                $teamScore->team->getIcpcId(),
                 $rank,
                 $awardString,
                 $teamScore->numPoints,

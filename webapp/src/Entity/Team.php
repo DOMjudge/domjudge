@@ -232,7 +232,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
         return $this;
     }
 
-    public function getIcpcid(): ?string
+    public function getIcpcId(): ?string
     {
         return $this->icpcid;
     }
