@@ -5,7 +5,6 @@ namespace App\Controller;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\Team;
-use App\Helpers\RequestBasePathModifier;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\ScoreboardService;
@@ -110,6 +109,7 @@ class PublicController extends BaseController
         // all requested and assets
         $requestReflection = new ReflectionClass($request);
         $basePathProperty  = $requestReflection->getProperty('basePath');
+        $basePathProperty->setAccessible(true);
         $basePathProperty->setValue($request, '/CHANGE_ME');
         $requestStack->push($request);
 
