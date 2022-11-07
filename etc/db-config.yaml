@@ -318,3 +318,8 @@
             default_value: 120
             public: false
             description: Time in seconds after an external contest source reader last checked in before showing its status as `critical`.
+        -   name: adminer_enabled
+            type: bool
+            default_value: false
+            public: false
+            description: Is the Adminer Database Editor enabled?
