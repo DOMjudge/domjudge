@@ -1,0 +1,4 @@
+cloudcontestadminer:
+    resource: '../../src/Cloudcontest/AdminerBundle/Controller/'
+    type: annotation
+    prefix: /
