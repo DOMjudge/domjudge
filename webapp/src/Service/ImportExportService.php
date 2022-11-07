@@ -67,7 +67,7 @@ class ImportExportService
             'duration' => Utils::relTime($contest->getContestTime((float)$contest->getEndtime())),
         ];
         if ($warnMsg = $contest->getWarningMessage()) {
-            $data['warningMessage'] = $warnMsg;
+            $data['warning-message'] = $warnMsg;
         }
         if ($contest->getFreezetime() !== null) {
             $data['scoreboard-freeze-duration'] = Utils::relTime(
@@ -160,7 +160,7 @@ class ImportExportService
                                $data['shortname'] ?? $data['short-name'] ?? $data['id']
                            ))
             ->setExternalid($contest->getShortname())
-            ->setWarningMessage($data['warningMessage'] ?? null)
+            ->setWarningMessage($data['warning-message'] ?? null)
             ->setStarttimeString(date_format($starttime, 'Y-m-d H:i:s e'))
             ->setActivatetimeString(date_format($activateTime, 'Y-m-d H:i:s e'))
             ->setEndtimeString(sprintf('+%s', $data['duration']));
