@@ -378,7 +378,7 @@
                             </td>
                             <td>
                                 {% if is_granted('ROLE_ADMIN') %}
-                                    <a title="Judge remaining" href="{{ path('jury_contest_problem_request_remaining', {'contestId': contest.cid, 'probId': problem.probid}) }}">
+                                    <a title="Judge remaining testcases non-lazy" href="{{ path('jury_contest_problem_request_remaining', {'contestId': contest.cid, 'probId': problem.probid}) }}">
                                         <i class="fas fa-gavel"></i>
                                     </a>
                                 {% endif %}
@@ -405,7 +405,7 @@
                     {{ button(path('jury_contest_finalize', {'contestId': contest.cid}), 'Finalize this contest', 'secondary', 'flag-checkered') }}
                 {% endif %}
             {% endif %}
-            {{ button(path('jury_contest_request_remaining', {'contestId': contest.cid}), 'Judge remaining', 'secondary', 'gavel') }}
+            {{ button(path('jury_contest_request_remaining', {'contestId': contest.cid}), 'Judge remaining testcases non-lazy', 'secondary', 'gavel') }}
         {% endif %}
         {{ button(path('jury_contest_prefetch', {'contestId': contest.cid}), 'Heat up judgehosts with contest data', 'secondary', 'download') }}
         {% include 'jury/partials/rejudge_form.html.twig' with {table: 'contest', id: contest.cid, buttonClass: 'btn-secondary'} %}

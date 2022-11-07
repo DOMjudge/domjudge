@@ -331,7 +331,7 @@ class ContestControllerTest extends JuryControllerTest
             'Delete',
             'Lock',
             'Finalize this contest',
-            'Judge remaining',
+            'Judge remaining testcases non-lazy',
             'Heat up judgehosts with contest data',
         ];
         self::assertTrue(array_intersect($titles, $expectedTitles) == $expectedTitles);
@@ -351,7 +351,7 @@ class ContestControllerTest extends JuryControllerTest
         });
         $expectedTitles = [
             'Unlock',
-            'Judge remaining',
+            'Judge remaining testcases non-lazy',
             'Heat up judgehosts with contest data',
         ];
         self::assertTrue(array_intersect($titles, $expectedTitles) == $expectedTitles);
