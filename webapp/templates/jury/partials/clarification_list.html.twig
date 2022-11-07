@@ -12,8 +12,8 @@
         {%- endif %}
 
         <th scope="col">time</th>
-        <th scope="col" colspan="2">from</th>
-        <th scope="col" colspan="2">to</th>
+        <th scope="col">from</th>
+        <th scope="col">to</th>
         <th scope="col">subject</th>
 
         <th scope="col">text</th>
@@ -55,10 +55,10 @@
                 {%- set senderBadge = clarification.sender | entityIdBadge('t') %}
             {%- endif %}
 
-            <td><a href="{{ link }}" title="{{ sender }}" style="text-align: right">{{ senderBadge | raw }}</a></td>
-            <td><a href="{{ link }}" title="{{ sender }}">{{ sender | u.truncate(teamname_max_length, '…') }}</a></td>
-            <td><a href="{{ link }}" title="{{ recipient }}" style="text-align: right">{{ recipientBadge | raw }}</a></td>
-            <td><a href="{{ link }}" title="{{ recipient }}">{{ recipient | u.truncate(teamname_max_length, '…') }}</a></td>
+            <td><a href="{{ link }}" title="{{ sender }}" style="text-align: right">{{ senderBadge | raw }}</a>
+                <a href="{{ link }}" title="{{ sender }}">{{ sender | u.truncate(teamname_max_length, '…') }}</a></td>
+            <td><a href="{{ link }}" title="{{ recipient }}" style="text-align: right">{{ recipientBadge | raw }}</a>
+                <a href="{{ link }}" title="{{ recipient }}">{{ recipient | u.truncate(teamname_max_length, '…') }}</a></td>
             <td><a href="{{ link }}">
                     {%- if clarification.problem -%}
                         problem {{ clarification.problem.contestProblems.first | problemBadge -}}
