@@ -10,11 +10,14 @@ use App\Entity\Problem;
 use App\Entity\Submission;
 use App\Entity\Team;
 use App\Entity\TeamAffiliation;
+use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\ScoreboardService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\Expr\Join;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\ExpressionLanguage\Expression;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -35,9 +38,11 @@ class JuryMiscController extends BaseController
 
     #[IsGranted(new Expression("is_granted('ROLE_JURY') or is_granted('ROLE_BALLOON') or is_granted('ROLE_CLARIFICATION_RW')"))]
     #[Route(path: '', name: 'jury_index')]
-    public function indexAction(): Response
+    public function indexAction(ConfigurationService $config): Response
     {
-        return $this->render('jury/index.html.twig');
+        return $this->render('jury/index.html.twig', [
+            'adminer_enabled' => $config->get('adminer_enabled'),
+        ]);
     }
 
     #[IsGranted(new Expression("is_granted('ROLE_JURY') or is_granted('ROLE_BALLOON')"))]
@@ -315,5 +320,27 @@ class JuryMiscController extends BaseController
         }
         return $this->dj->setCookie('domjudge_cid', (string)$contestId, 0, null, '', false, false,
                                                  $response);
+    }
+
+    #[Route(path: "/adminer", name: "jury_adminer")]
+    #[IsGranted("ROLE_ADMIN")]
+    public function adminer(
+        #[Autowire('%domjudge.etcdir%')] string $etcDir,
+        #[Autowire('%kernel.project_dir%')] string $projectDir,
+        ConfigurationService $config
+    ) {
+        if (!$config->get('adminer_enabled')) {
+            throw new NotFoundHttpException();
+        }
+
+        // The adminer_object method needs this variable to know where to find the credentials
+        $GLOBALS['etcDir'] = $etcDir;
+
+        // Use output buffering since the streamed response doesn't work because Adminer needs the session
+        ob_start();
+        include_once $projectDir . '/resources/adminer.php';
+        $resp = ob_get_clean();
+
+        return new Response($resp);
     }
 }

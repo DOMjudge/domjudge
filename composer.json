@@ -115,7 +115,10 @@
 	"autoload": {
 		"psr-4": {
 			"App\\": "webapp/src/"
-		}
+		},
+		"files": [
+			"webapp/resources/functions.php"
+		]
 	},
 	"autoload-dev": {
 		"psr-4": {
