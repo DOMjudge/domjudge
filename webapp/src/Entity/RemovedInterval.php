@@ -27,7 +27,7 @@ class RemovedInterval
      * @ORM\Column(type="integer", name="intervalid", length=4,
      *     options={"comment"="Removed interval ID","unsigned"=true}, nullable=false)
      */
-    private int $intervalid;
+    private ?int $intervalid = null;
 
     /**
      * @var double|string
