@@ -32,7 +32,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 
 /**
- * @Rest\Route("/contests/{cid}/submissions")
+ * @Rest\Route("/")
  * @OA\Tag(name="Submissions")
  * @OA\Parameter(ref="#/components/parameters/cid")
  * @OA\Response(response="400", ref="#/components/responses/InvalidResponse")
@@ -57,7 +57,8 @@ class SubmissionController extends AbstractRestController
 
     /**
      * Get all the submissions for this contest.
-     * @Rest\Get("")
+     * @Rest\Get("submissions")
+     * @Rest\Get("contests/{cid}/submissions")
      * @OA\Response(
      *     response="200",
      *     description="Returns all the submissions for this contest",
@@ -89,7 +90,8 @@ class SubmissionController extends AbstractRestController
     /**
      * Get the given submission for this contest.
      * @throws NonUniqueResultException
-     * @Rest\Get("/{id}")
+     * @Rest\Get("submissions/{id}")
+     * @Rest\Get("contests/{cid}/submissions/{id}")
      * @OA\Response(
      *     response="200",
      *     description="Returns the given submission for this contest",
@@ -110,8 +112,8 @@ class SubmissionController extends AbstractRestController
 
     /**
      * Add a submission to this contest.
-     * @Rest\Post("")
-     * @Rest\Put("/{id}")
+     * @Rest\Post("contests/{cid}/submissions")
+     * @Rest\Put("contests/{cid}/submissions/{id}")
      * @Security("is_granted('ROLE_TEAM') or is_granted('ROLE_API_WRITER')", message="You need to have the Team Member role to add a submission")
      * @OA\RequestBody(
      *     required=true,
@@ -448,7 +450,8 @@ class SubmissionController extends AbstractRestController
 
     /**
      * Get the files for the given submission as a ZIP archive.
-     * @Rest\Get("/{id}/files", name="submission_files")
+     * @Rest\Get("contests/{cid}/submissions/{id}/files", name="submission_files")
+     * @Rest\Get("submissions/{id}/files", name="submission_files")
      * @IsGranted("ROLE_API_SOURCE_READER")
      * @throws NonUniqueResultException
      * @OA\Response(
@@ -490,7 +493,7 @@ class SubmissionController extends AbstractRestController
 
     /**
      * Get the source code of all the files for the given submission.
-     * @Rest\Get("/{id}/source-code")
+     * @Rest\Get("contests/{cid}/submissions/{id}/source-code")
      * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST')")
      * @throws NonUniqueResultException
      * @OA\Response(
@@ -536,17 +539,21 @@ class SubmissionController extends AbstractRestController
      */
     protected function getQueryBuilder(Request $request): QueryBuilder
     {
-        $cid          = $this->getContestId($request);
         $queryBuilder = $this->em->createQueryBuilder()
             ->from(Submission::class, 's')
             ->join('s.contest', 'c')
             ->join('s.team', 't')
             ->select('s')
             ->andWhere('s.valid = 1')
-            ->andWhere('s.contest = :cid')
             ->andWhere('t.enabled = 1')
-            ->setParameter('cid', $cid)
             ->orderBy('s.submitid');
+        if ($request->attributes->has('cid')) {
+            $cid = $this->getContestId($request);
+            $queryBuilder
+                ->andWhere('s.contest = :cid')
+                ->setParameter('cid', $cid);
+        }
+
 
         if ($request->query->has('language_id')) {
             $queryBuilder
