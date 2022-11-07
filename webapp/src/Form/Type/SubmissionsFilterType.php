@@ -5,6 +5,7 @@ namespace App\Form\Type;
 use App\Entity\Language;
 use App\Entity\Problem;
 use App\Entity\Team;
+use App\Entity\TeamCategory;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -56,6 +57,17 @@ class SubmissionsFilterType extends AbstractType
                 ->where("l.allowSubmit = 1")
                 ->orderBy("l.name"),
             "attr" => ["data-filter-field" => "language-id"],
+        ]);
+        $builder->add("category-id", EntityType::class, [
+            "multiple" => true,
+            "label" => "Filter on category(s)",
+            "class" => TeamCategory::class,
+            "required" => false,
+            "choice_label" => "name",
+            "query_builder" => fn(EntityRepository $er) => $er
+                ->createQueryBuilder("tc")
+                ->orderBy("tc.name"),
+            "attr" => ["data-filter-field" => "category-id"],
         ]);
 
         $teamsQueryBuilder = $this->em

@@ -86,6 +86,7 @@
             <tr class="{% if not submission.valid %}ignore{% endif %}"
                 data-problem-id="{{ submission.problem.probid }}"
                 data-team-id="{{ submission.team.teamid }}"
+                data-category-id="{{ submission.team.category.categoryid }}"
                 data-language-id="{{ submission.language.langid }}"
                 data-submission-id="{{ submission.submitid }}"
                 data-result="{{ submission | printValidJurySubmissionResult(false) }}">
