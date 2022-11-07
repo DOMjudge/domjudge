@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\Team;
+use App\Entity\TeamCategory;
 use App\Helpers\RequestBasePathModifier;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
@@ -88,6 +89,9 @@ class PublicController extends BaseController
         }
 
         $data['current_contest'] = $contest;
+
+        $selfRegistrationCategoriesCount = $this->em->getRepository(TeamCategory::class)->count(['allow_self_registration' => 1]);
+        $data['allow_registration'] = $selfRegistrationCategoriesCount !== 0;
 
         if ($request->isXmlHttpRequest()) {
             return $this->render('partials/scoreboard.html.twig', $data, $response);
@@ -246,8 +250,12 @@ class PublicController extends BaseController
      */
     public function problemsAction(): Response
     {
-        return $this->render('public/problems.html.twig',
-            $this->dj->getTwigDataForProblemsAction(-1, $this->stats));
+        $data = $this->dj->getTwigDataForProblemsAction(-1, $this->stats);
+
+        $selfRegistrationCategoriesCount = $this->em->getRepository(TeamCategory::class)->count(['allow_self_registration' => 1]);
+        $data['allow_registration'] = $selfRegistrationCategoriesCount !== 0;
+
+        return $this->render('public/problems.html.twig', $data);
     }
 
     /**
