@@ -6,6 +6,11 @@
 {% block extrahead %}
     {{ parent() }}
     {{ macros.table_extrahead() }}
+    <style>
+        .data-table td a, .data-table td a:hover {
+            display: inline;
+        }
+    </style>
 {% endblock %}
 
 {% block content %}
