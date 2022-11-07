@@ -320,8 +320,6 @@ class LanguageController extends BaseController
                           ->select('j')
                           ->join('j.submission', 's')
                           ->join('s.team', 't')
-                          ->join('t.category', 'tc')
-                          ->andWhere('tc.visible = true')
                           ->andWhere('j.valid = true')
                           ->andWhere('j.result != :compiler_error')
                           ->andWhere('s.language = :langId')
