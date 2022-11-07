@@ -36,10 +36,6 @@
                         href="{{ path('team_print') }}"><i class="fas fa-file-alt"></i> Print</a>
                 </li>
             {% endif %}
-            <li class="nav-item">
-                <a class="nav-link{% if current_route in ['team_scoreboard', 'team_team'] %} active{% endif %}"
-                    href="{{ path('team_scoreboard') }}"><i class="fas fa-list-ol"></i> Scoreboard</a>
-            </li>
             {% if doc_links is not empty %}
                 <li class="nav-item">
                     <a class="nav-link{% if current_route in ['team_docs'] %} active{% endif %}"
