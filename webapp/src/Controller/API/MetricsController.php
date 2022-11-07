@@ -76,6 +76,8 @@ class MetricsController extends AbstractFOSRestController
             ->select('t', 'u')
             ->from(Team::class, 't')
             ->leftJoin('t.users', 'u')
+            ->join('t.category', 'cat')
+            ->andWhere('cat.visible = true')
             ->getQuery()
             ->getResult();
 
