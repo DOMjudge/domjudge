@@ -111,9 +111,11 @@ class AwardsController extends AbstractRestController
                 $groups[$team->getCategory()->getCategoryid()] = $team->getCategory()->getName();
             }
             foreach ($scoreboard->getProblems() as $problem) {
+                $shortname = $problem->getShortname();
                 $probid = $problem->getApiId($this->eventLogService);
                 if ($scoreboard->solvedFirst($team, $problem)) {
                     $problem_winners[$probid][] = $teamid;
+                    $problem_shortname[$probid] = $shortname;
                 }
             }
         }
@@ -131,7 +133,7 @@ class AwardsController extends AbstractRestController
         foreach ($problem_winners as $id => $team_ids) {
             $type = 'first-to-solve-' . $id;
             $result = [ 'id' => $type,
-                'citation' => 'First to solve problem ' . $id,
+                'citation' => 'First to solve problem ' . $problem_shortname[$id],
                 'team_ids' => $team_ids];
             if ($requestedType === $type) {
                 return $result;
