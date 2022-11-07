@@ -17,6 +17,7 @@ use App\Entity\Problem;
 use App\Entity\Submission;
 use App\Entity\SubmissionFile;
 use App\Entity\Team;
+use App\Entity\TeamCategory;
 use App\Entity\Testcase;
 use App\Form\Type\SubmissionsFilterType;
 use App\Service\BalloonService;
@@ -155,6 +156,7 @@ class SubmissionController extends BaseController
         $filtersForForm['problem-id']  = $this->em->getRepository(Problem::class)->findBy(['probid' => $filtersForForm['problem-id'] ?? []]);
         $filtersForForm['language-id'] = $this->em->getRepository(Language::class)->findBy(['langid' => $filtersForForm['language-id'] ?? []]);
         $filtersForForm['team-id']     = $this->em->getRepository(Team::class)->findBy(['teamid' => $filtersForForm['team-id'] ?? []]);
+        $filtersForForm['category-id'] = $this->em->getRepository(TeamCategory::class)->findBy(['categoryid' => $filtersForForm['category-id'] ?? []]);
         $form = $this->createForm(SubmissionsFilterType::class, array_merge($filtersForForm, [
             "contests" => $contests,
         ]));
