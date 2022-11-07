@@ -18,4 +18,5 @@ return [
     DAMA\DoctrineTestBundle\DAMADoctrineTestBundle::class => ['test' => true],
     Twig\Extra\TwigExtraBundle\TwigExtraBundle::class => ['all' => true],
     Sentry\SentryBundle\SentryBundle::class => ['all' => true],
+    App\Cloudcontest\AdminerBundle\CloudcontestAdminerBundle::class => ['all' => true],
 ];
