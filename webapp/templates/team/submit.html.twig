@@ -4,7 +4,7 @@
 
 {% block content %}
     <div class="container submitform pt-5">
-        {% if not current_team_contest.allowSubmit %}
+        {% if current_team_contest is not empty and not current_team_contest.allowSubmit %}
             {% include 'partials/alert.html.twig' with {'type': 'danger', 'message': 'Submissions (temporarily) disabled.'} %}
         {% else %}
             <h1 class="text-center">Submit {% if problem is not null %}problem {{ problem.name }}{% endif %}</h1>
