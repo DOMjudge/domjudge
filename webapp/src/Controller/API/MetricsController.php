@@ -116,6 +116,7 @@ class MetricsController extends AbstractFOSRestController
                     ->join('t.category', 'cat')
                     ->leftJoin('cat.contests', 'cc')
                     ->andWhere('c.cid = :cid OR cc.cid = :cid')
+                    ->andWhere('cat.visible = true')
                     ->setParameter('cid', $contest->getCid())
                     ->getQuery()
                     ->getResult();
