@@ -61,3 +61,14 @@ jobs:
           *.deb
           *.ddeb
           *.changes
+
+    - name: publish to packagecloud
+      env:
+        PACKAGECLOUD_TOKEN: ${{ secrets.UBERGEEK42_PACKAGECLOUD_TOKEN }}
+      run: |
+        sudo apt-get install -y ruby ruby-dev
+        sudo gem install package_cloud
+        package_cloud push ubergeek42/domjudge-packages/ubuntu/focal domjudge-common*.deb
+        package_cloud push ubergeek42/domjudge-packages/ubuntu/focal domjudge-doc*.deb
+        package_cloud push ubergeek42/domjudge-packages/ubuntu/focal domjudge-domserver*.deb
+        package_cloud push ubergeek42/domjudge-packages/ubuntu/focal domjudge-judgehost*.deb
