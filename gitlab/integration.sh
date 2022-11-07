@@ -133,8 +133,7 @@ sleep 5
 
 section_end more_setup
 
-section_start submitting "Submitting test sources (including Kattis example)"
-cd ${DIR}/tests
+section_start submitting "Importing Kattis examples"
 export SUBMITBASEURL='http://localhost/domjudge/'
 
 # Prepare to load example problems from Kattis/problemtools
