@@ -107,8 +107,9 @@ class AwardsController extends AbstractRestController
         foreach ($scoreboard->getTeams() as $team) {
             $teamid = $team->getApiId($this->eventLogService);
             if ($scoreboard->isBestInCategory($team)) {
-                $group_winners[$team->getCategory()->getCategoryId()][] = $teamid;
-                $groups[$team->getCategory()->getCategoryid()] = $team->getCategory()->getName();
+                $catId = $team->getCategory()->getApiId($this->eventLogService);
+                $group_winners[$catId][] = $teamid;
+                $groups[$catId] = $team->getCategory()->getName();
             }
             foreach ($scoreboard->getProblems() as $problem) {
                 $shortname = $problem->getShortname();
