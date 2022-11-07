@@ -403,6 +403,9 @@ class ContestController extends BaseController
             $this->em->persist($newRemovedInterval);
             $this->em->flush();
 
+            $this->addFlash('scoreboard_refresh',
+                'After adding a removed time interval, it is ' .
+                'necessary to recalculate any cached scoreboards.');
             return $this->redirectToRoute('jury_contest', ['contestId' => $contestId]);
         }
 
@@ -485,6 +488,9 @@ class ContestController extends BaseController
         $contest->setStarttimeString($contest->getStarttimeString());
         $this->em->flush();
 
+        $this->addFlash('scoreboard_refresh',
+            'After removing a removed time interval, it is ' .
+            'necessary to recalculate any cached scoreboards.');
         return $this->redirectToRoute('jury_contest', ['contestId' => $contest->getCid()]);
     }
 
