@@ -55,9 +55,9 @@
                 {%- set senderBadge = clarification.sender | entityIdBadge('t') %}
             {%- endif %}
 
-            <td><a href="{{ link }}" title="{{ sender }}" style="text-align: right">{{ senderBadge | raw }}</a>
+            <td><a href="{{ link }}" title="{{ sender }}">{{ senderBadge | raw }}</a>&nbsp;
                 <a href="{{ link }}" title="{{ sender }}">{{ sender | u.truncate(teamname_max_length, '…') }}</a></td>
-            <td><a href="{{ link }}" title="{{ recipient }}" style="text-align: right">{{ recipientBadge | raw }}</a>
+            <td><a href="{{ link }}" title="{{ recipient }}">{{ recipientBadge | raw }}</a>&nbsp;
                 <a href="{{ link }}" title="{{ recipient }}">{{ recipient | u.truncate(teamname_max_length, '…') }}</a></td>
             <td><a href="{{ link }}">
                     {%- if clarification.problem -%}
