@@ -215,6 +215,12 @@ class SubmissionService
                 ->setParameter('categoryid', $restrictions['categoryid']);
         }
 
+        if (isset($restrictions['visible'])) {
+            $queryBuilder
+                ->innerJoin('t.category', 'cat')
+                ->andWhere('cat.visible = true');
+        }
+
         if (isset($restrictions['probid'])) {
             $queryBuilder
                 ->andWhere('s.problem = :probid')
