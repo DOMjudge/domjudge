@@ -451,7 +451,7 @@ class SubmissionController extends AbstractRestController
     /**
      * Get the files for the given submission as a ZIP archive.
      * @Rest\Get("contests/{cid}/submissions/{id}/files", name="submission_files")
-     * @Rest\Get("submissions/{id}/files", name="submission_files")
+     * @Rest\Get("submissions/{id}/files", name="submission_files_root")
      * @IsGranted("ROLE_API_SOURCE_READER")
      * @throws NonUniqueResultException
      * @OA\Response(
