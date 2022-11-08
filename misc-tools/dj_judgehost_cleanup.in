@@ -22,16 +22,26 @@ This will operate on data under $JUDGINGDIR
 
 Commands:
 
+  procs     Kill any remaining processes running as the restricted
+              domjudge-run* user. These can remain when the judging
+              process aborted in an unexpected way.
   mounts    Unmount stale bind mounts to the chroot. These can appear
               when then judgedaemon crashes in the middle of a judging.
   cache     Delete cached test cases and executables.
   judgings  Delete detailed logs and compiled programs of judgings.
               Note that the most important data is stored in the database.
               The additional data on disk is mostly useful for debugging.
-  all       First unmount stale bind mounts, then delete all of the above.
+  all       First kill remaining processes, then unmount stale bind mounts,
+              and finally delete cache and judging data.
   help      Display this usage information.
 
 EOF
+}
+
+kill_processes() {
+    echo "Killing remaining processes..."
+    pkill -G @RUNGROUP@
+    echo "Done."
 }
 
 cleanup_mounts() {
@@ -92,6 +102,10 @@ if [ "$(id -u)" -ne 0 ]; then
 fi
 
 case $1 in
+    proc*)
+        kill_processes
+        ;;
+
     mount*)
         cleanup_mounts
         ;;
@@ -105,6 +119,7 @@ case $1 in
         ;;
 
     all)
+        kill_processes
         cleanup_mounts
         cleanup_cache
         cleanup_judgings
