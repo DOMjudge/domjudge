@@ -35,53 +35,53 @@ EOF
 }
 
 cleanup_mounts() {
-        echo "Cleaning up stale mounts..."
-        cut -d ' ' -f 2 /proc/mounts | grep -E "^$JUDGINGDIR" | while IFS= read -r mountpoint; do
-            umount "$mountpoint"
-            echo "Unmounted $mountpoint"
-            sleep 0.1
-        done
-        echo "Done."
+    echo "Cleaning up stale mounts..."
+    cut -d ' ' -f 2 /proc/mounts | grep -E "^$JUDGINGDIR" | while IFS= read -r mountpoint; do
+        umount "$mountpoint"
+        echo "Unmounted $mountpoint"
+        sleep 0.1
+    done
+    echo "Done."
 }
 
 cleanup_cache() {
-        echo "Cleaning up cached data..."
-        cd "$JUDGINGDIR"
-        for d in */*; do
-            [ -d "$d" ] || continue
-            cd "$d"
-            echo "  in $d:"
-            for i in testcase executable; do
-                if [ -d "$i/" ]; then
-                    echo "    removing $i cache"
-                    rm -rf "${i:?}/"
-                fi
-            done
-            cd - >/dev/null
+    echo "Cleaning up cached data..."
+    cd "$JUDGINGDIR"
+    for d in */*; do
+        [ -d "$d" ] || continue
+        cd "$d"
+        echo "  in $d:"
+        for i in testcase executable; do
+            if [ -d "$i/" ]; then
+                echo "    removing $i cache"
+                rm -rf "${i:?}/"
+            fi
         done
-        echo "Done."
+        cd - >/dev/null
+    done
+    echo "Done."
 }
 
 cleanup_judgings() {
-        if cut -d ' ' -f 2 /proc/mounts | grep -E "^$JUDGINGDIR/" >/dev/null 2>&1; then
-            echo "There are (stale) bind mounts under $JUDGINGDIR/."
-            echo "Make sure that all judgedaemons on this host are stopped, and then"
-            echo "run '$PROGNAME mount' to clean up any stale bind mounts."
-            exit 1
-        fi
-        echo "Cleaning up judging data..."
-        cd "$JUDGINGDIR"
-        for d in */*; do
-            [ -d "$d" ] || continue
-            cd "$d"
-            echo "  in $d:"
-            find . -maxdepth 1 -type d -regex '\./[0-9]+' | while IFS= read -r contest; do
-                echo "    removing judging data for contest $contest"
-                rm -rf "${contest:?}/"
-            done
-            cd - >/dev/null
+    if cut -d ' ' -f 2 /proc/mounts | grep -E "^$JUDGINGDIR/" >/dev/null 2>&1; then
+        echo "There are (stale) bind mounts under $JUDGINGDIR/."
+        echo "Make sure that all judgedaemons on this host are stopped, and then"
+        echo "run '$PROGNAME mount' to clean up any stale bind mounts."
+        exit 1
+    fi
+    echo "Cleaning up judging data..."
+    cd "$JUDGINGDIR"
+    for d in */*; do
+        [ -d "$d" ] || continue
+        cd "$d"
+        echo "  in $d:"
+        find . -maxdepth 1 -type d -regex '\./[0-9]+' | while IFS= read -r contest; do
+            echo "    removing judging data for contest $contest"
+            rm -rf "${contest:?}/"
         done
-        echo "Done."
+        cd - >/dev/null
+    done
+    echo "Done."
 }
 
 if [ "$(id -u)" -ne 0 ]; then
