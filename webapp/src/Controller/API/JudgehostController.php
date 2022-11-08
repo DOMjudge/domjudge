@@ -1049,7 +1049,7 @@ class JudgehostController extends AbstractFOSRestController
             // This should only happen when the old result was NULL.
             if ($oldResult !== $result) {
                 if ($oldResult !== null) {
-                    throw new BadMethodCallException('internal bug: the evaluated result changed during judging');
+                    throw new BadMethodCallException(sprintf('internal bug: the evaluated result changed from %s to %s during judging', $oldResult, $result));
                 }
 
                 if ($lazyEval != DOMJudgeService::EVAL_FULL) {
