@@ -11,6 +11,12 @@
 {% if current_contest is null %}
     <p class="nodata">No active contest</p>
 {% else %}
+    {% if current_contest.warningMessage %}
+        <div class="alert alert-danger" role="alert">
+            {{ current_contest.warningMessage }}
+        </div>
+    {% endif %}
+
     <div class="card">
         <div class="card-header" style="font-family: Roboto, sans-serif; display: flex;">
             <span style="font-weight: bold;">{{ current_contest.name }}</span>

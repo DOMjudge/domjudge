@@ -168,6 +168,11 @@ class ContestType extends AbstractExternalIdEntityType
             'label' => 'Delete banner',
             'required' => false,
         ]);
+        $builder->add('warningMessage', TextType::class, [
+            'required' => false,
+            'label' => 'Scoreboard warning message',
+            'help' => 'When set, a warning message displayed above all scoreboards for this contest.',
+        ]);
         $builder->add('problems', CollectionType::class, [
             'entry_type' => ContestProblemType::class,
             'prototype' => true,
