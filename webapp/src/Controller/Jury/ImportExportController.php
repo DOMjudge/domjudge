@@ -389,7 +389,7 @@ class ImportExportController extends BaseController
 
         $teamNames = [];
         foreach ($teams as $team) {
-            $teamNames[$team->getApiId($this->eventLogService)] = $team->getEffectiveName();
+            $teamNames[$team->getIcpcId()] = $team->getEffectiveName();
         }
 
         $awarded       = [];
@@ -464,7 +464,7 @@ class ImportExportController extends BaseController
                     $firstToSolve[$problem->getProbid()] = [
                         'problem' => $problem->getShortname(),
                         'problem_name' => $problem->getProblem()->getName(),
-                        'team' => $teamNames[$team->getApiId($this->eventLogService)],
+                        'team' => $teamNames[$team->getIcpcId()],
                         'time' => Utils::scoretime($matrixItem->time, $scoreIsInSeconds),
                     ];
                 }
