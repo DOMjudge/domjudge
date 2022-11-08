@@ -18,7 +18,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * @Rest\Route("/contests/{cid}/judgements")
+ * @Rest\Route("/")
  * @OA\Tag(name="Judgements")
  * @OA\Parameter(ref="#/components/parameters/cid")
  * @OA\Response(response="404", ref="#/components/responses/NotFound")
@@ -48,7 +48,8 @@ class JudgementController extends AbstractRestController implements QueryObjectT
     /**
      * Get all the judgements for this contest.
      * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_TEAM') or is_granted('ROLE_JUDGEHOST') or is_granted('ROLE_API_READER')")
-     * @Rest\Get("")
+     * @Rest\Get("contests/{cid}/judgements")
+     * @Rest\Get("judgements")
      * @OA\Response(
      *     response="200",
      *     description="Returns all the judgements for this contest",
@@ -87,7 +88,8 @@ class JudgementController extends AbstractRestController implements QueryObjectT
      * Get the given judgement for this contest.
      * @throws NonUniqueResultException
      * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_TEAM') or is_granted('ROLE_JUDGEHOST') or is_granted('ROLE_API_READER')")
-     * @Rest\Get("/{id}")
+     * @Rest\Get("contests/{cid}/judgements/{id}")
+     * @Rest\Get("judgements/{id}")
      * @OA\Response(
      *     response="200",
      *     description="Returns the given judgement for this contest",
@@ -115,10 +117,14 @@ class JudgementController extends AbstractRestController implements QueryObjectT
             ->leftJoin('j.submission', 's')
             ->leftJoin('j.rejudging', 'r')
             ->leftJoin('j.runs', 'jr')
-            ->andWhere('j.contest = :cid')
-            ->setParameter('cid', $this->getContestId($request))
             ->groupBy('j.judgingid')
             ->orderBy('j.judgingid');
+
+        if ($request->attributes->has('cid')) {
+            $queryBuilder
+                ->andWhere('j.contest = :cid')
+                ->setParameter('cid', $this->getContestId($request));
+        }
 
         $roleAllowsVisibility = $this->dj->checkrole('api_reader')
             || $this->dj->checkrole('judgehost');
