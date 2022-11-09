@@ -326,7 +326,7 @@ class ImportProblemService
         }
 
         // Add problem statement, also look in obsolete location.
-        foreach (['', 'problem_statement/'] as $dir) {
+        foreach (['problem_statement/', ''] as $dir) {
             foreach (['pdf', 'html', 'txt'] as $type) {
                 $filename = sprintf('%sproblem.%s', $dir, $type);
                 $text     = $zip->getFromName($filename);
@@ -335,7 +335,7 @@ class ImportProblemService
                         ->setProblemtext($text)
                         ->setProblemtextType($type);
                     $messages['info'][] = "Added/updated problem statement from: $filename";
-                    break;
+                    break 2;
                 }
             }
         }
