@@ -46,7 +46,7 @@
                 {%- if clarification.recipient is null %}
                     {%- set recipient = 'All' %}
                 {%- else %}
-                    {%- set recipient = clarification.recipient.effectiveName ~ (clarification.recipient | entityIdBadge('t')) %}
+                    {%- set recipient = clarification.recipient.effectiveName %}
                     {%- set recipientBadge = clarification.recipient | entityIdBadge('t') %}
                 {%- endif %}
             {%- else %}
