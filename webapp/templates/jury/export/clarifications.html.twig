@@ -2,6 +2,10 @@
 
 {% block body %}
     <style>
+        h2 {
+            padding-top: 0;
+        }
+
         td:first-child {
             padding-right: 10px;
         }
@@ -13,9 +17,17 @@
         tr.top-line td {
             padding-top: 8px;
         }
+
+        .page-break {
+            page-break-before: always;
+        }
     </style>
 
     {% for queue, clarifications in grouped %}
+        {% if not loop.first %}
+            <div class="page-break" />
+            <h1>{{ title }}</h1>
+        {% endif %}
         <h2>{{ queues[queue] }}</h2>
         <table class="table">
             <thead>
