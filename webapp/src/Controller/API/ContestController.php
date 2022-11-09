@@ -545,6 +545,11 @@ class ContestController extends AbstractRestController
             $stream     = $request->query->getBoolean('stream', true);
             $canViewAll = $this->isGranted('ROLE_API_READER');
 
+            // Keep track of the last send state event; we may have the same
+            // event more than once in our table and we want to make sure we
+            // only send it out once.
+            $lastState = null;
+
             $skippedProperties = [];
             // Determine which properties we should not send out for strict clients.
             // We do this here instead of every loop to speed up sending events at
@@ -640,6 +645,16 @@ class ContestController extends AbstractRestController
                             unset($data['test_data_count']);
                         }
                     }
+
+                    // Do not send out the same state event twice
+                    if ($event->getEndpointtype() === 'state') {
+                        if ($data === $lastState) {
+                            continue;
+                        }
+
+                        $lastState = $data;
+                    }
+
                     if ($strict) {
                         $toSkip = $skippedProperties[$event->getEndpointtype()] ?? [];
                         foreach ($toSkip as $property) {
