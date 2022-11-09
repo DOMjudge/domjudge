@@ -21,11 +21,28 @@
         .page-break {
             page-break-before: always;
         }
+
+        /* CSS from Bootstrap for the team id badge. */
+        .badge {
+            display: inline-block;
+            padding: .25em .4em;
+            font-size: 75%;
+            font-weight: 700;
+            line-height: 1;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: baseline;
+            border-radius: .25rem;
+        }
+        .badge-secondary {
+            color: #fff;
+            background-color: #6c757d;
+        }
     </style>
 
     {% for queue, clarifications in grouped %}
         {% if not loop.first %}
-            <div class="page-break" />
+            <div class="page-break"></div>
             <h1>{{ title }}</h1>
         {% endif %}
         <h2>{{ queues[queue] }}</h2>
@@ -47,14 +64,14 @@
                     <td>{{ clarification.submitTime | printtime(null, contest) }}</td>
                     <td>
                         {% if clarification.sender %}
-                            {{ clarification.sender.effectiveName }}
+                            {{ clarification.sender.effectiveName }} {{ clarification.sender | entityIdBadge('t') }}
                         {% else %}
                             Jury ({{ clarification.juryMember }})
                         {% endif %}
                     </td>
                     <td>
                         {% if clarification.recipient and clarification.sender is empty %}
-                            {{ clarification.recipient.effectiveName }}
+                            {{ clarification.recipient.effectiveName }} {{ clarification.recipient | entityIdBadge('t') }}
                         {% elseif clarification.sender %}
                             Jury
                         {% else %}
