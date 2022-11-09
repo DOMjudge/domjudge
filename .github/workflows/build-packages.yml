@@ -2,8 +2,7 @@ name: "Debian Package Builder"
 
 on:
   push:
-    branches: [ main ]
-  pull_request:
+    branches: [ main, wfdhaka_online ]
 
 jobs:
   build-pkg:
