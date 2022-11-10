@@ -600,7 +600,29 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
     }
 
     /**
-     * Formats a list of given hostnames, extracting a common prefix.
+     * Extract the longest common prefix of all the provided strings.
+     */
+    private function getCommonPrefix(array $strings): string {
+        $common_prefix = $strings[0];
+        foreach ($strings as $string) {
+            $len = strlen($string);
+            while ($len > 0) {
+                if (substr_compare($common_prefix, $string, 0, $len) == 0) {
+                    break;
+                }
+                $len--;
+            }
+            if ($len == 0) {
+                $common_prefix = "";
+                break;
+            }
+            $common_prefix = substr($common_prefix, 0, $len);
+        }
+        return $common_prefix;
+    }
+
+    /**
+     * Formats a list of given hostnames, extracting a common prefix and suffix.
      */
     public function printHosts(array $hostnames): string
     {
@@ -621,27 +643,28 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             }
             $local_parts[] = $hostname;
         }
-        $common_prefix = $local_parts[0];
-        foreach ($local_parts as $local_part) {
-            $len = strlen($local_part);
-            while ($len > 0) {
-                if (substr_compare($common_prefix, $local_part, 0, $len) == 0) {
-                    break;
-                }
-                $len--;
-            }
-            if ($len == 0) {
-                $common_prefix = "";
-                break;
-            }
-            $common_prefix = substr($common_prefix, 0, $len);
-        }
-        if (empty($common_prefix)) {
+
+        // Extract the longest common prefix.
+        $common_prefix = $this->getCommonPrefix($local_parts);
+        $prefix_len = strlen($common_prefix);
+
+        // Extract the longest common suffix.
+        $reversed = array_map('strrev', $local_parts);
+        $common_suffix = strrev($this->getCommonPrefix($reversed));
+        $suffix_len = strlen($common_suffix);
+
+        // Extract the list of remaining parts. This list may contain empty values. If $common_prefix overlaps
+        // $common_suffix, then $common_prefix = $common_suffix = the entire string.
+        $middle_parts = array_map(fn($host) => substr($host, $prefix_len, strlen($host) - $prefix_len - $suffix_len), $local_parts);
+        // Usually the middle parts contain numbers, so use natural sort for them.
+        usort($middle_parts, 'strnatcmp');
+
+        if (empty($common_prefix) && empty($common_suffix)) {
+            // No common prefix nor suffix: list all the names without "{}".
             return implode(", ", array_map([$this, 'printHost'], $hostnames));
         } else {
-            $len_prefix  = strlen($common_prefix);
-            $local_parts = array_map(fn($host) => substr($host, $len_prefix), $local_parts);
-            return $this->printHost($common_prefix . "{" . implode(",", $local_parts) . "}", true);
+            $hosts = $common_prefix . "{" . implode(",", $middle_parts) . "}" . $common_suffix;
+            return $this->printHost($hosts, true);
         }
     }
 
