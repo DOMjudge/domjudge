@@ -13,6 +13,7 @@ use App\Entity\Language;
 use App\Entity\Submission;
 use App\Entity\SubmissionFile;
 use App\Entity\Testcase;
+use App\Service\AwardService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
@@ -40,6 +41,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
     protected EntityManagerInterface $em;
     protected SubmissionService $submissionService;
     protected EventLogService $eventLogService;
+    protected AwardService $awards;
     protected TokenStorageInterface $tokenStorage;
     protected AuthorizationCheckerInterface $authorizationChecker;
     protected string $projectDir;
@@ -51,6 +53,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         EntityManagerInterface        $em,
         SubmissionService             $submissionService,
         EventLogService               $eventLogService,
+        AwardService                  $awards,
         TokenStorageInterface         $tokenStorage,
         AuthorizationCheckerInterface $authorizationChecker,
         string                        $projectDir
@@ -61,6 +64,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         $this->em                   = $em;
         $this->submissionService    = $submissionService;
         $this->eventLogService      = $eventLogService;
+        $this->awards               = $awards;
         $this->tokenStorage         = $tokenStorage;
         $this->authorizationChecker = $authorizationChecker;
         $this->projectDir           = $projectDir;
@@ -122,6 +126,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             new TwigFilter('printMetadata', [$this, 'printMetadata'], ['is_safe' => ['html']]),
             new TwigFilter('printWarningContent', [$this, 'printWarningContent'], ['is_safe' => ['html']]),
             new TwigFilter('entityIdBadge', [$this, 'entityIdBadge'], ['is_safe' => ['html']]),
+            new TwigFilter('medalType', [$this->awards, 'medalType']),
         ];
     }
 

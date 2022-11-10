@@ -19,10 +19,6 @@
 {% set scores = scoreboard.scores | filter(score => limitToTeams is null or score.team.teamid in limitToTeamIds) %}
 {% set problems = scoreboard.problems %}
 {% set medalsEnabled = contest.medalsEnabled %}
-{% if scoreFilter and scoreFilter.filteredOn is not empty %}
-    {% set medalsEnabled = false %}
-{% endif %}
-{% set medalCategories = contest.medalCategories %}
 
 {% if maxWidth > 0 %}
     <style>
@@ -119,15 +115,8 @@
 
         {# process medal color #}
         {% set medalColor = '' %}
-        {% if showLegends and medalsEnabled and score.team.category in medalCategories and score.numPoints > 0 %}
-            {% set medalCount = medalCount + 1 %}
-            {% if medalCount <= contest.goldMedals %}
-                {% set medalColor = 'gold-medal' %}
-            {% elseif medalCount <= contest.goldMedals + contest.silverMedals %}
-                {% set medalColor = 'silver-medal' %}
-            {% elseif medalCount <= contest.goldMedals + contest.silverMedals + contest.bronzeMedals + contest.b %}
-                {% set medalColor = 'bronze-medal' %}
-            {% endif %}
+        {% if showLegends %}
+            {% set medalColor = score.team | medalType(contest, scoreboard) %}
         {% endif %}
 
         {# check whether this is us, otherwise use category colour #}
