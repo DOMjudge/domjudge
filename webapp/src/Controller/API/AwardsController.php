@@ -3,6 +3,7 @@
 namespace App\Controller\API;
 
 use App\Entity\Contest;
+use App\Service\AwardService;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
@@ -27,16 +28,19 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 class AwardsController extends AbstractRestController
 {
     protected ScoreboardService $scoreboardService;
+    protected AwardService $awards;
 
     public function __construct(
         EntityManagerInterface $entityManager,
         DOMJudgeService $DOMJudgeService,
         ConfigurationService $config,
         EventLogService $eventLogService,
-        ScoreboardService $scoreboardService
+        ScoreboardService $scoreboardService,
+        AwardService $awards
     ) {
         parent::__construct($entityManager, $DOMJudgeService, $config, $eventLogService);
         $this->scoreboardService = $scoreboardService;
+        $this->awards = $awards;
     }
 
     /**
@@ -51,6 +55,7 @@ class AwardsController extends AbstractRestController
      *     )
      * )
      * @OA\Parameter(ref="#/components/parameters/strict")
+     *
      * @throws Exception
      */
     public function listAction(Request $request): ?array
@@ -68,6 +73,7 @@ class AwardsController extends AbstractRestController
      * )
      * @OA\Parameter(ref="#/components/parameters/id")
      * @OA\Parameter(ref="#/components/parameters/strict")
+     *
      * @throws Exception
      */
     public function singleAction(Request $request, string $id): array
@@ -86,107 +92,20 @@ class AwardsController extends AbstractRestController
      */
     protected function getAwardsData(Request $request, string $requestedType = null): ?array
     {
-        // TODO: move this to a service so the scoreboard can use its logic.
-        // Probably best to do it when we implement https://github.com/DOMjudge/domjudge/issues/1079
-
         $public = !$this->dj->checkrole('api_reader');
         if ($this->dj->checkrole('api_reader') && $request->query->has('public')) {
             $public = $request->query->getBoolean('public');
         }
         /** @var Contest $contest */
-        $contest       = $this->em->getRepository(Contest::class)->find($this->getContestId($request));
-        $isJury        = $this->dj->checkrole('api_reader');
+        $contest = $this->em->getRepository(Contest::class)->find($this->getContestId($request));
+        $isJury = $this->dj->checkrole('api_reader');
         $accessAllowed = ($isJury && $contest->getEnabled()) || (!$isJury && $contest->isActive());
         if (!$accessAllowed) {
             throw new AccessDeniedHttpException();
         }
-        $additionalBronzeMedals = $contest->getB() ?? 0;
         $scoreboard = $this->scoreboardService->getScoreboard($contest, !$public, null, true);
-        $group_winners = $problem_winners = [];
-        $groups = [];
-        foreach ($scoreboard->getTeams() as $team) {
-            $teamid = $team->getApiId($this->eventLogService);
-            if ($scoreboard->isBestInCategory($team)) {
-                $catId = $team->getCategory()->getApiId($this->eventLogService);
-                $group_winners[$catId][] = $teamid;
-                $groups[$catId] = $team->getCategory()->getName();
-            }
-            foreach ($scoreboard->getProblems() as $problem) {
-                $shortname = $problem->getShortname();
-                $probid = $problem->getApiId($this->eventLogService);
-                if ($scoreboard->solvedFirst($team, $problem)) {
-                    $problem_winners[$probid][] = $teamid;
-                    $problem_shortname[$probid] = $shortname;
-                }
-            }
-        }
-        $results = [];
-        foreach ($group_winners as $id => $team_ids) {
-            $type = 'group-winner-' . $id;
-            $result = [ 'id' => $type,
-                'citation' => 'Winner(s) of group ' . $groups[$id],
-                'team_ids' => $team_ids];
-            if ($requestedType === $type) {
-                return $result;
-            }
-            $results[] = $result;
-        }
-        foreach ($problem_winners as $id => $team_ids) {
-            $type = 'first-to-solve-' . $id;
-            $result = [ 'id' => $type,
-                'citation' => 'First to solve problem ' . $problem_shortname[$id],
-                'team_ids' => $team_ids];
-            if ($requestedType === $type) {
-                return $result;
-            }
-            $results[] = $result;
-        }
-        $overall_winners = $medal_winners = [];
 
-        // Can we assume this is ordered just walk the first 12+B entries?
-        foreach ($scoreboard->getScores() as $teamScore) {
-            $rank = $teamScore->rank;
-            $teamid = $teamScore->team->getApiId($this->eventLogService);
-            if ($rank === 1) {
-                $overall_winners[] = $teamid;
-            }
-            if ($contest->getMedalsEnabled() && $contest->getMedalCategories()->contains($teamScore->team->getCategory())) {
-                if ($rank <= $contest->getGoldMedals()) {
-                    $medal_winners['gold'][] = $teamid;
-                } elseif ($rank <= $contest->getGoldMedals() + $contest->getSilverMedals()) {
-                    $medal_winners['silver'][] = $teamid;
-                } elseif ($rank <= $contest->getGoldMedals() + $contest->getSilverMedals() + $contest->getBronzeMedals() + $additionalBronzeMedals) {
-                    $medal_winners['bronze'][] = $teamid;
-                }
-            }
-        }
-        if (count($overall_winners) > 0) {
-            $type = 'winner';
-            $result = ['id' => $type,
-                'citation' => 'Contest winner',
-                'team_ids' => $overall_winners ];
-            if ($requestedType === $type) {
-                return $result;
-            }
-            $results[] = $result;
-        }
-        foreach ($medal_winners as $metal => $team_ids) {
-            $type = $metal . '-medal';
-            $result = ['id' => $metal . '-medal',
-                'citation' => ucfirst($metal) . ' medal winner',
-                'team_ids' => $team_ids ];
-            if ($requestedType === $type) {
-                return $result;
-            }
-            $results[] = $result;
-        }
-
-        // Specific type was requested, but not found above.
-        if (!is_null($requestedType)) {
-            return null;
-        }
-
-        return $results;
+        return $this->awards->getAwards($contest, $scoreboard, $requestedType);
     }
 
     protected function getQueryBuilder(Request $request): QueryBuilder
