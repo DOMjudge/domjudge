@@ -1,6 +1,6 @@
 {% extends "public/base.html.twig" %}
 
-{% block title %}Scoreboard {{ contest.shortname | default('') }} - {{ parent() }}{% endblock %}
+{% block title %}Scoreboard {{ contest.name | default('') }} - {{ parent() }}{% endblock %}
 {% block content %}
     {% if contest is defined %}
         {% set contestId = contest.cid %}

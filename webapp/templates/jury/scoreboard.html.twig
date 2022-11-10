@@ -1,7 +1,7 @@
 {% extends "jury/base.html.twig" %}
 {% import "jury/jury_macros.twig" as macros %}
 
-{% block title %}Scoreboard {{ contest.shortname | default('') }} - {{ parent() }}{% endblock %}
+{% block title %}Scoreboard {{ contest.name | default('') }} - {{ parent() }}{% endblock %}
 
 {% block extrahead %}
     {{ parent() }}
