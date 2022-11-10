@@ -259,7 +259,7 @@ class Utils
         $m = floor($s / 60);
         $s -= $m * 60;
 
-        return sprintf('%02d:%02d:%02d', $h, $m, $s);
+        return sprintf('%d:%02d:%02d', $h, $m, $s);
     }
 
     /**
