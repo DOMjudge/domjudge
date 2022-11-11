@@ -8,8 +8,6 @@ use App\Utils\Scoreboard\Scoreboard;
 
 class AwardService
 {
-    // TODO: add tests for this service
-
     protected EventLogService $eventLogService;
 
     public function __construct(EventLogService $eventLogService)
