@@ -2,11 +2,19 @@
 
 namespace App\Tests\Unit\Controller\API;
 
+use App\DataFixtures\Test\SampleSubmissionsThreeTriesCorrectFixture;
+use App\Entity\Contest;
+use App\Service\ScoreboardService;
+use Doctrine\ORM\EntityManagerInterface;
+
 class AwardsControllerTest extends BaseTest
 {
     protected ?string $apiEndpoint = 'awards';
 
     protected static string $skipMessageIDs = "Filtering on IDs not implemented in this endpoint.";
+
+    // We add a submission since we are not handing out any awards without it
+    protected static array $fixtures = [SampleSubmissionsThreeTriesCorrectFixture::class];
 
     /**
      * In the default test setup there are no judgings yet and one team.
@@ -17,6 +25,20 @@ class AwardsControllerTest extends BaseTest
     ];
 
     protected array $expectedAbsent = ['bronze-medal', 'first-to-solve'];
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // We need to refersh the scoreboard cache since we have added a submission
+        /** @var EntityManagerInterface $manager */
+        $manager = static::getContainer()->get(EntityManagerInterface::class);
+        /** @var Contest $contest */
+        $contest = $manager->getRepository(Contest::class)->findOneBy(['shortname' => 'demo']);
+        /** @var ScoreboardService $scoreboardService */
+        $scoreboardService = static::getContainer()->get(ScoreboardService::class);
+        $scoreboardService->refreshCache($contest);
+    }
 
     public function testListWithIds(): void
     {
