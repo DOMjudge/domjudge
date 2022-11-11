@@ -16,6 +16,7 @@ use JMS\Serializer\Annotation as Serializer;
  *         @ORM\UniqueConstraint(name="rankindex", columns={"immutable_execid", "ranknumber"}),
  *         @ORM\UniqueConstraint(name="filename", columns={"immutable_execid", "filename"}, options={"lengths": {NULL, 190}})
  *     })
+ * @ORM\HasLifecycleCallbacks()
  */
 class ExecutableFile
 {
@@ -137,5 +138,13 @@ class ExecutableFile
     public function isExecutable(): bool
     {
         return $this->isExecutable;
+    }
+
+    /**
+     * @ORM\PreRemove()
+     */
+    public function disallowDelete(): void
+    {
+        throw new \RuntimeException('An executable file cannot be deleted');
     }
 }

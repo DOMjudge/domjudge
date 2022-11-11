@@ -228,10 +228,10 @@ class ExecutableController extends BaseController
     }
 
     /**
-     * @Route("/{execId}/delete/{rank}", name="jury_executable_delete_single")
+     * @Route("/{execId}/delete/{rankToDelete}", name="jury_executable_delete_single")
      * @IsGranted("ROLE_ADMIN")
      */
-    public function deleteSingleAction(Request $request, string $execId, int $rank): Response
+    public function deleteSingleAction(Request $request, string $execId, int $rankToDelete): Response
     {
         /** @var Executable $executable */
         $executable = $this->em->getRepository(Executable::class)->find($execId);
@@ -241,21 +241,21 @@ class ExecutableController extends BaseController
 
         /** @var ExecutableFile[] $files */
         $files = array_values($executable->getImmutableExecutable()->getFiles()->toArray());
-        $file = null;
-        foreach ($files as $file) {
-            if ($file->getRank() == $rank) {
+        $fileToDelete = null;
+        foreach ($files as $fileToDelete) {
+            if ($fileToDelete->getRank() == $rankToDelete) {
                 break;
             }
         }
-        if (!$file) {
-            throw new NotFoundHttpException(sprintf('File with rank %d not found in executable with ID %s.', $rank, $execId));
+        if (!$fileToDelete) {
+            throw new NotFoundHttpException(sprintf('File with rank %d not found in executable with ID %s.', $rankToDelete, $execId));
         }
 
         if ($request->isMethod('GET')) {
             $data = [
                 'type' => 'ExecutableFile',
                 'primaryKey' => $execId,
-                'description' => $file->getFilename(),
+                'description' => $fileToDelete->getFilename(),
                 'messages' => [],
                 'isError' => false,
                 'showModalSubmit' => true,
@@ -268,7 +268,26 @@ class ExecutableController extends BaseController
 
             return $this->render('jury/delete.html.twig', $data);
         } else {
-            $this->em->remove($file);
+            // Create a copy of all files except $file
+            $files = [];
+            /** @var ExecutableFile $file */
+            foreach ($executable->getImmutableExecutable()->getFiles() as $file) {
+                if ($file->getRank() == $rankToDelete) {
+                    continue;
+                }
+
+                $executableFile = new ExecutableFile();
+                $executableFile
+                    ->setRank($file->getRank())
+                    ->setIsExecutable($file->isExecutable())
+                    ->setFilename($file->getFilename())
+                    ->setFileContent($file->getFileContent());
+                $this->em->persist($executableFile);
+                $files[] = $executableFile;
+            }
+            $immutableExecutable = new ImmutableExecutable($files);
+            $this->em->persist($immutableExecutable);
+            $executable->setImmutableExecutable($immutableExecutable);
             $this->em->flush();
             $redirectUrl = $this->generateUrl('jury_executable_edit_files', ['execId' => $execId]);
             if ($request->isXmlHttpRequest()) {
@@ -408,9 +427,7 @@ class ExecutableController extends BaseController
         if ($form->isSubmitted() && $form->isValid()) {
             $submittedData = $form->getData();
 
-            $immutableExecutable = new ImmutableExecutable();
-            $this->em->persist($immutableExecutable);
-
+            $files = [];
             foreach ($editorData['filenames'] as $idx => $filename) {
                 if (!$this->isGranted('ROLE_ADMIN')) {
                     $this->addFlash('danger', 'You must have the admin role to submit changes.');
@@ -426,14 +443,15 @@ class ExecutableController extends BaseController
                 $executableFile = new ExecutableFile();
                 $executableFile
                     ->setRank($idx)
-                    ->setImmutableExecutable($immutableExecutable)
                     ->setIsExecutable($editorData['executableBits'][$idx])
                     ->setFilename($filename)
                     ->setFileContent($newContent);
                 $this->em->persist($executableFile);
-                $immutableExecutable->addFile($executableFile);
+                $files[] = $executableFile;
             }
 
+            $immutableExecutable = new ImmutableExecutable($files);
+            $this->em->persist($immutableExecutable);
             $executable->setImmutableExecutable($immutableExecutable);
             $this->em->flush();
             $this->dj->auditlog('executable', $executable->getExecid(), 'updated');
