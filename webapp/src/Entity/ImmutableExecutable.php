@@ -1,4 +1,5 @@
 <?php declare(strict_types=1);
+
 namespace App\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
@@ -9,12 +10,15 @@ use JMS\Serializer\Annotation as Serializer;
 /**
  * Immutable wrapper for a collection of files for executable bundles.
  *
+ * Note: this class should have no setters, since its data is immutable.
+ *
  * @ORM\Entity()
  * @ORM\Table(
  *     name="immutable_executable",
  *     options={"collation"="utf8mb4_unicode_ci", "charset"="utf8mb4",
  *              "comment"="Immutable wrapper for a collection of files for executable bundles."}
  *     )
+ * @ORM\HasLifecycleCallbacks()
  */
 class ImmutableExecutable
 {
@@ -33,7 +37,7 @@ class ImmutableExecutable
      * @ORM\JoinColumn(name="userid", referencedColumnName="userid", onDelete="SET NULL")
      * @Serializer\Exclude()
      */
-    private User $user;
+    private ?User $user = null;
 
     /**
      * @ORM\OneToMany(targetEntity="ExecutableFile", mappedBy="immutableExecutable")
@@ -47,9 +51,18 @@ class ImmutableExecutable
      */
     private ?string $hash;
 
-    public function __construct()
+    /**
+     * @param ExecutableFile[] $files
+     */
+    public function __construct(array $files, ?User $user = null)
     {
         $this->files = new ArrayCollection();
+        foreach ($files as $file) {
+            $this->files->add($file);
+            $file->setImmutableExecutable($this);
+        }
+        $this->user = $user;
+        $this->updateHash();
     }
 
     public function getImmutableExecId(): int
@@ -57,28 +70,12 @@ class ImmutableExecutable
         return $this->immutable_execid;
     }
 
-    public function setUser(User $user): ImmutableExecutable
-    {
-        $this->user = $user;
-        return $this;
-    }
-
     public function getUser(): User
     {
         return $this->user;
     }
 
-    public function addFile(ExecutableFile $file): ImmutableExecutable
-    {
-        if ($this->files === null) {
-            $this->files = new ArrayCollection();
-        }
-        $this->files->add($file);
-        $this->updateHash();
-        return $this;
-    }
-
-    public function updateHash()
+    protected function updateHash()
     {
         if ($this->files === null) {
             $this->hash = null;
@@ -104,5 +101,13 @@ class ImmutableExecutable
     public function getHash(): ?string
     {
         return $this->hash;
+    }
+
+    /**
+     * @ORM\PreRemove()
+     */
+    public function disallowDelete(): void
+    {
+        throw new \RuntimeException('An immutable executable cannot be deleted');
     }
 }

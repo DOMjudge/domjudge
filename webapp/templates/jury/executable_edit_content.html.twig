@@ -37,7 +37,7 @@
                         {% if is_granted('ROLE_ADMIN') %}
                             <a class="btn btn-secondary btn-sm"
                                data-ajax-modal
-                               href="{{ path('jury_executable_delete_single', {execId: executable.execid, rank: ranks[idx]}) }}">
+                               href="{{ path('jury_executable_delete_single', {execId: executable.execid, rankToDelete: ranks[idx]}) }}">
                                 <i class="fas fa-trash"></i> Delete
                             </a>
                         {% endif %}

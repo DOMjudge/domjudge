@@ -924,9 +924,8 @@ class DOMJudgeService
     public function createImmutableExecutable(ZipArchive $zip): ImmutableExecutable
     {
         $propertyFile = 'domjudge-executable.ini';
-        $immutableExecutable = new ImmutableExecutable();
-        $this->em->persist($immutableExecutable);
         $rank = 0;
+        $files = [];
         for ($idx = 0; $idx < $zip->numFiles; $idx++) {
             $filename = basename($zip->getNameIndex($idx));
             if ($filename === $propertyFile) {
@@ -951,13 +950,13 @@ class DOMJudgeService
                 ->setRank($rank)
                 ->setFilename($filename)
                 ->setFileContent($zip->getFromIndex($idx))
-                ->setImmutableExecutable($immutableExecutable)
                 ->setIsExecutable($executableBit);
             $this->em->persist($executableFile);
-            $immutableExecutable->addFile($executableFile);
+            $files[] = $executableFile;
             $rank++;
         }
-        $immutableExecutable->updateHash();
+        $immutableExecutable = new ImmutableExecutable($files);
+        $this->em->persist($immutableExecutable);
         $this->em->flush();
         return $immutableExecutable;
     }
