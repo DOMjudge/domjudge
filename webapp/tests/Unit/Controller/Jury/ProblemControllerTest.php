@@ -96,7 +96,7 @@ class ProblemControllerTest extends JuryControllerTest
             return $node->attr('title');
         });
         $expectedTitles = [
-            'Judge remaining',
+            'Judge remaining testcases',
             'Export',
         ];
         self::assertTrue(array_intersect($titles, $expectedTitles) == $expectedTitles);
