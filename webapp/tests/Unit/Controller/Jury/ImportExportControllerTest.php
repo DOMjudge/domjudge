@@ -152,7 +152,7 @@ HEREDOC;
 2	exteam	3	Example teamname	Utrecht University	UU	NLD	utrecht
 '];
         yield ['li:contains("results.tsv") a:contains("for sort order 0")', 'results	1
-2	1	Gold Medal	0	0	0	Participants
+exteam	1	Gold Medal	0	0	0	Participants
 '];
         yield ['li:contains("results.tsv") a:contains("for sort order 1")', 'results	1
 '];
