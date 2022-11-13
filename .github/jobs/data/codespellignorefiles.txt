@@ -15,6 +15,7 @@
 ./webapp/public/js/ace
 ./webapp/templates/bundles
 ./webapp/var/cache
+./webapp/src/Cloudcontest/AdminerBundle
 FileSaver*
 bootstrap*
 d3.min*
@@ -24,3 +25,4 @@ nv.d3.min*
 composer*
 ./doc/logos
 ./m4
+./debian/changelog
