@@ -227,11 +227,13 @@ nelmio_api_doc:
                     properties:
                         judgement_type_id:
                             type: string
+                            nullable: true
                         judgehost:
                             type: string
                         max_run_time:
                             type: number
                             format: float
+                            nullable: true
                 RunExtraFields:
                     properties:
                         judgement_type_id:
