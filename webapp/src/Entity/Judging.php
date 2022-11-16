@@ -6,6 +6,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
+use OpenApi\Annotations as OA;
 use Ramsey\Uuid\Uuid;
 
 /**
@@ -53,6 +54,7 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
      *              "unsigned"=true},
      *     nullable=true)
      * @Serializer\Exclude()
+     * @OA\Property(nullable=true)
      */
     private $endtime;
 
@@ -241,6 +243,7 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
      * @Serializer\VirtualProperty()
      * @Serializer\SerializedName("start_time")
      * @Serializer\Type("string")
+     * @OA\Property(nullable=true)
      */
     public function getAbsoluteStartTime(): ?string
     {
@@ -274,6 +277,7 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
      * @Serializer\VirtualProperty()
      * @Serializer\SerializedName("end_time")
      * @Serializer\Type("string")
+     * @OA\Property(nullable=true)
      */
     public function getAbsoluteEndTime(): ?string
     {
@@ -284,6 +288,7 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
      * @Serializer\VirtualProperty()
      * @Serializer\SerializedName("end_contest_time")
      * @Serializer\Type("string")
+     * @OA\Property(nullable=true)
      */
     public function getRelativeEndTime(): ?string
     {
