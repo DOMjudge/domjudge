@@ -649,8 +649,8 @@ class ImportExportService
         foreach ($data as $idx => $organization) {
             $organizationData[] = [
                 'externalid' => @$organization['id'],
-                'shortname' => @$organization['name'],
-                'name' => @$organization['formal_name'],
+                'shortname' => @$organization['shortname'] ?? @$organization['name'],
+                'name' => @$organization['formal_name'] ?? @$organization['name'],
                 'country' => @$organization['country'],
                 'icpc_id' => $organization['icpc_id'] ?? null,
             ];
@@ -682,6 +682,9 @@ class ImportExportService
                 $teamAffiliation->setExternalid($externalId);
                 $this->em->persist($teamAffiliation);
                 $added = true;
+            }
+            if (!isset($organizationItem['shortname'])) {
+                throw new BadRequestHttpException('Shortname missing.');
             }
             $teamAffiliation
                 ->setShortname($organizationItem['shortname'])
