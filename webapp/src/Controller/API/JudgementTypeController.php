@@ -14,6 +14,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  * @Rest\Route("/contests/{cid}/judgement-types")
  * @OA\Tag(name="Judgement types")
  * @OA\Response(response="400", ref="#/components/responses/InvalidResponse")
+ * @OA\Response(response="401", ref="#/components/responses/Unauthenticated")
  */
 class JudgementTypeController extends AbstractRestController
 {
