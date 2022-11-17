@@ -339,6 +339,9 @@ class ContestController extends AbstractRestController
      * @OA\Response(
      *     response="200",
      *     description="Contest start time changed successfully",
+     *     @OA\JsonContent(
+     *         type="string"
+     *     )
      * )
      */
     public function changeStartTimeAction(Request $request, string $cid): Response
