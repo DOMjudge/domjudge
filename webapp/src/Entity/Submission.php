@@ -86,6 +86,7 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
      *     options={"comment"="Optional entry point. Can be used e.g. for java main class."},
      *     nullable=true)
      * @Serializer\Expose(if="context.getAttribute('domjudge_service').checkrole('jury')")
+     * @OA\Property(nullable=true)
      */
     private ?string $entry_point;
 
