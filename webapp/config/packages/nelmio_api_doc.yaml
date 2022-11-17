@@ -395,15 +395,19 @@ nelmio_api_doc:
                         problem_id:
                             type: string
                             description: The problem the clarification is for
+                            nullable: true
                         reply_to_id:
                             type: string
                             description: The ID of the clarification this clarification is a reply to
+                            nullable: true
                         from_team_id:
                             type: string
                             description: The team the clarification came from. Only used when adding a clarification as admin
+                            nullable: true
                         to_team_id:
                             type: string
                             description: The team the clarification must be sent to. Only used when adding a clarification as admin
+                            nullable: true
                         time:
                             type: string
                             format: date-time
