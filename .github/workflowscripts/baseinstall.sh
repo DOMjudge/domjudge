@@ -36,6 +36,8 @@ sudo apt install -y acl zip unzip nginx php php-fpm php-gd \
                     python3-yaml latexmk curl
 section_end
 
+export PHPVERSION=$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION."\n";')
+
 section_start "Install composer"
 php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
 HASH="$(wget -q -O - https://composer.github.io/installer.sig)"
@@ -68,7 +70,7 @@ sudo /etc/init.d/mysql start
 section_end
 
 section_start "Setup webserver"
-sudo cp /opt/domjudge/domserver/etc/domjudge-fpm.conf /etc/php/7.4/fpm/pool.d/domjudge.conf
+sudo cp /opt/domjudge/domserver/etc/domjudge-fpm.conf /etc/php/$PHPVERSION/fpm/pool.d/domjudge.conf
 
 sudo rm -f /etc/nginx/sites-enabled/*
 sudo cp /opt/domjudge/domserver/etc/nginx-conf /etc/nginx/sites-enabled/domjudge
@@ -82,7 +84,7 @@ sudo nginx -t
 section_end
 
 section_start "Show webserver is up"
-for service in nginx php7.4-fpm; do
+for service in nginx php${PHPVERSION}-fpm; do
     sudo systemctl restart $service
     sudo systemctl status  $service
 done
