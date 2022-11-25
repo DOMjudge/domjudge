@@ -21,7 +21,7 @@ class AwardServiceTest extends KernelTestCase
 
     protected function setUp(): void
     {
-        // THe contest with have 1 gold, 1 silver and 2 bronze medals
+        // The contest with have 1 gold, 1 silver and 2 bronze medals
         $this->contest = (new Contest())
             ->setMedalsEnabled(true)
             ->setGoldMedals(1)

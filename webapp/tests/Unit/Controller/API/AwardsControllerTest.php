@@ -30,7 +30,7 @@ class AwardsControllerTest extends BaseTest
     {
         parent::setUp();
 
-        // We need to refersh the scoreboard cache since we have added a submission
+        // We need to refresh the scoreboard cache since we added a submission
         /** @var EntityManagerInterface $manager */
         $manager = static::getContainer()->get(EntityManagerInterface::class);
         /** @var Contest $contest */
