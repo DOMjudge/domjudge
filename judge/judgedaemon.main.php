@@ -137,7 +137,7 @@ function request(string $url, string $verb = 'GET', $data = '', bool $failonerro
         curl_setopt($curl_handle, CURLOPT_POSTFIELDS, null);
     }
 
-    $delay_in_ms = BACKOFF_INITIAL_DELAY_MS;
+    $delay_in_sec = BACKOFF_INITIAL_DELAY_SEC;
     $succeeded = false;
     $response = null;
     $errstr = null;
@@ -172,12 +172,12 @@ function request(string $url, string $verb = 'GET', $data = '', bool $failonerro
         if ($trial == BACKOFF_STEPS) {
             $errstr = $errstr . " Retry limit reached.";
         } else {
-            $retry_in_ms = $delay_in_ms + random_int(0, BACKOFF_JITTER_MS);
+            $retry_in_sec = $delay_in_sec + BACKOFF_JITTER_SEC*rand()/getrandmax();
             $warnstr = $errstr . " This request will be retried after about " .
-                $retry_in_ms . "ms... (" . $trial . "/" . BACKOFF_STEPS . ")";
+                $retry_in_sec . "sec... (" . $trial . "/" . BACKOFF_STEPS . ")";
             warning($warnstr);
-            usleep(1000 * $retry_in_ms);
-            $delay_in_ms = $delay_in_ms * BACKOFF_FACTOR;
+            dj_sleep($retry_in_sec);
+            $delay_in_sec = $delay_in_sec * BACKOFF_FACTOR;
         }
     }
     if (!$succeeded) {
@@ -246,10 +246,9 @@ function rest_encode_file(string $file, $sizelimit = true) : string
     return base64_encode(dj_file_get_contents($file, $maxsize));
 }
 
-const SECOND_IN_USEC = 1000*1000;
-const INITIAL_WAITTIME_USEC =  100*1000; // 0.1 seconds
-const MAXIMAL_WAITTIME_USEC = 5000*1000; // 5   seconds
-$waittime = INITIAL_WAITTIME_USEC;
+const INITIAL_WAITTIME_SEC = 0.1;
+const MAXIMAL_WAITTIME_SEC = 5.0;
+$waittime = INITIAL_WAITTIME_SEC;
 
 const SCRIPT_ID = 'judgedaemon';
 const CHROOT_SCRIPT = 'chroot-startstop.sh';
@@ -580,7 +579,7 @@ if (!empty($options['e'])) {
             break;
         }
         logmsg(LOG_WARNING, "Failed to report $judgeTaskId in attempt #" . ($i + 1) . ".");
-        usleep(100 + random_int(200, ($i+1)*1000));
+        dj_sleep(0.0001 * random_int(3, ($i+1)*10));
     }
     unlink($options['j']);
     exit(0);
@@ -619,18 +618,14 @@ while (true) {
         }
         if (!$endpoint['waiting']) {
             $dosleep = false;
-            $waittime = INITIAL_WAITTIME_USEC;
+            $waittime = INITIAL_WAITTIME_SEC;
             break;
         }
     }
     // Sleep only if everything is "waiting" and only if we're looking at the first endpoint again
     if ($dosleep && $currentEndpoint==0) {
-        if ($waittime>SECOND_IN_USEC) {
-            sleep((int)($waittime/SECOND_IN_USEC));
-        } else {
-            usleep($waittime);
-        }
-        $waittime = min($waittime*2, MAXIMAL_WAITTIME_USEC);
+        dj_sleep($waittime);
+        $waittime = min($waittime*2, MAXIMAL_WAITTIME_SEC);
     }
 
     // Increment our currentEndpoint pointer
