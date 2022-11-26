@@ -71,3 +71,25 @@ function dj_escapeshellarg(?string $arg) : string
     if (!isset($arg) || $arg==='') return "''";
     return escapeshellarg($arg);
 }
+
+/**
+ * A simple function that allows to sleep for fractional seconds. Note that
+ * usleep is documented to consume CPU cycles and may not work for times
+ * larger than a second.
+ * Returns a boolean value for success or if the delay was interrupted by a
+ * signal, returns a float with the time remaining, similar to time_nanosleep.
+ */
+const SECOND_IN_NANOSECONDS = 1_000_000_000;
+
+function dj_sleep(float $seconds) : bool
+{
+    $seconds_int = (int)$seconds;
+    $nanoseconds = (int)(SECOND_IN_NANOSECONDS*($seconds-$seconds_int));
+
+    $result = time_nanosleep($seconds_int, $nanoseconds);
+    if (is_array($result)) {
+        $result = $result['seconds'] + $result['nanoseconds'] / SECOND_IN_NANOSECONDS;
+    }
+
+    return $result;
+}

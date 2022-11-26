@@ -13,9 +13,9 @@ define('CREATE_WRITABLE_TEMP_DIR', getenv('DOMJUDGE_CREATE_WRITABLE_TEMP_DIR') ?
 
 // These define HTTP request backoff related constants.
 // If any transient network error occurs on the nth trial,
-// the judgehost retries the HTTP request after (1000 * pow(factor, trial - 1) + rand(0, jitter)) ms.
+// the judgehost retries the HTTP request after pow(factor, trial - 1) + rand(0, jitter) sec.
 
-function define_backoff_params_from_env(string $var_name, int $default_value) {
+function define_backoff_params_from_env(string $var_name, int|float $default_value) {
     if (defined($var_name)) {
         return;
     }
@@ -29,7 +29,7 @@ function define_backoff_params_from_env(string $var_name, int $default_value) {
     define($var_name, $final_value);
 }
 
-define_backoff_params_from_env('BACKOFF_JITTER_MS', 200);
+define_backoff_params_from_env('BACKOFF_JITTER_SEC', 0.2);
 define_backoff_params_from_env('BACKOFF_FACTOR', 2);
 define_backoff_params_from_env('BACKOFF_STEPS', 3);
-define_backoff_params_from_env('BACKOFF_INITIAL_DELAY_MS', 1000);
+define_backoff_params_from_env('BACKOFF_INITIAL_DELAY_SEC', 1.0);
