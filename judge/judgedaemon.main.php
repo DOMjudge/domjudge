@@ -246,7 +246,6 @@ function rest_encode_file(string $file, $sizelimit = true) : string
     return base64_encode(dj_file_get_contents($file, $maxsize));
 }
 
-const SECOND_IN_USEC = 1000*1000;
 const INITIAL_WAITTIME_USEC =  100*1000; // 0.1 seconds
 const MAXIMAL_WAITTIME_USEC = 5000*1000; // 5   seconds
 $waittime = INITIAL_WAITTIME_USEC;
@@ -665,11 +664,7 @@ while (true) {
     }
     // Sleep only if everything is "waiting" and only if we're looking at the first endpoint again
     if ($dosleep && $currentEndpoint==0) {
-        if ($waittime>SECOND_IN_USEC) {
-            sleep((int)($waittime/SECOND_IN_USEC));
-        } else {
-            usleep($waittime);
-        }
+        usleep($waittime);
         $waittime = min($waittime*2, MAXIMAL_WAITTIME_USEC);
     }
 
