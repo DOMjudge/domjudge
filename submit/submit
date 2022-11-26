@@ -426,7 +426,7 @@ elif contests:
 languages = None
 problems = None
 if my_contest and baseurl:
-    if not my_contest['allow_submit']:
+    if 'allow_submit' in my_contest and not my_contest['allow_submit']:
         warn_user('Submissions for contest (temporarily) disabled')
         exit(1)
     languages = read_languages()
