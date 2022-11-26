@@ -579,7 +579,8 @@ if (!empty($options['e'])) {
             break;
         }
         logmsg(LOG_WARNING, "Failed to report $judgeTaskId in attempt #" . ($i + 1) . ".");
-        dj_sleep(0.0001 * random_int(3, ($i+1)*10));
+        $sleep_ms = 100 + random_int(200, ($i+1)*1000);
+        dj_sleep(0.001 * $sleep_ms);
     }
     unlink($options['j']);
     exit(0);
