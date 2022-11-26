@@ -62,6 +62,8 @@ class AnalysisController extends AbstractController
             ->select('s.submitid, MIN(j.judgingid) AS judgingid, s.submittime, MIN(j.starttime) - s.submittime AS timediff, COUNT(j.judgingid) AS num_judgings')
             ->andWhere('s.contest = :contest')
             ->setParameter('contest', $contest)
+            ->andWhere('s.team IN (:teams)')
+            ->setParameter('teams', $teams)
             ->groupBy('s.submitid')
             ->andHaving('timediff > :timediff')
             ->setParameter('timediff', $delayedTimeDiff)
