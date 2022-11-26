@@ -276,7 +276,8 @@ class SubmissionService
             'correct' => 'j.result LIKE \'correct\'',
             'ignored' => 's.valid = 0',
             'unverified' => 'j.verified = 0 AND j.result IS NOT NULL',
-            'queued' => 'j.result IS NULL'
+            'queued' => 'j.result IS NULL AND j.starttime IS NULL',
+            'judging' => 'j.starttime IS NOT NULL AND j.endtime IS NULL'
         ];
         foreach ($countQueryExtras as $count => $countQueryExtra) {
             $countQueryBuilder = (clone $queryBuilder)->select('COUNT(s.submitid) AS cnt');
