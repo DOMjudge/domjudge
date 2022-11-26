@@ -443,7 +443,7 @@ function fetch_executable_internal(
             # handle the bidirectional communication.  First 'run' is renamed to
             # 'runjury', and then replaced by the script below, which runs the
             # team submission and runjury programs and connects their pipes.
-            $runscript = file_get_contents(LIBDIR . '/judge/run-interactive.sh');
+            $runscript = file_get_contents(LIBJUDGEDIR . '/run-interactive.sh');
             if (rename($execrunpath, $execrunjurypath) === false) {
                 error("Could not move file 'run' to 'runjury' in $execbuilddir");
             }
