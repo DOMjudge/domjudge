@@ -30,8 +30,12 @@
             <span class="badge badge-dark">{{ submissionCounts.ignored }} ignored</span>
         {% endif %}
 
+        {% if submissionCounts.judging > 0 %}
+            <span class="badge badge-primary">{{ submissionCounts.judging }} judging</span>
+        {% endif %}
+
         {% if submissionCounts.queued > 0 %}
-            <span class="badge badge-primary">{{ submissionCounts.queued }} queued (from {{submissionCounts.perteam}} teams)</span>
+            <span class="badge badge-danger">{{ submissionCounts.queued }} queued (from {{submissionCounts.perteam}} teams)</span>
         {% endif %}
     </div>
 
