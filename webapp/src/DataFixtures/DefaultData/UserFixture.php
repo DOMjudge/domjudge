@@ -51,7 +51,7 @@ class UserFixture extends AbstractDefaultDataFixture implements DependentFixture
                 $adminUser
                     ->setTeam($domjudgeTeam)
                     ->addUserRole($this->getReference(RoleFixture::TEAM_REFERENCE));
-            };
+            }
             $manager->persist($adminUser);
         } else {
             $this->logger->info('User admin already exists, not created');

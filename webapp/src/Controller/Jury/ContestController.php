@@ -333,11 +333,11 @@ class ContestController extends BaseController
                     if ($timeField === 'activate' && $contest->getStarttimeEnabled()) {
                         if (Utils::difftime($contestdata['starttime']['value'], $time)>Utils::DAY_IN_SECONDS) {
                             $timeIcon  = 'calendar-minus';
-                        };
+                        }
                     } elseif ($timeField === 'end' && $contest->getStarttimeEnabled()) {
                         if (Utils::difftime($time, $startTime)>Utils::DAY_IN_SECONDS) {
                             $timeIcon  = 'calendar-plus';
-                        };
+                        }
                     }
                 }
                 $contestdata[$timeField . 'time']['value']     = $timeValue;
