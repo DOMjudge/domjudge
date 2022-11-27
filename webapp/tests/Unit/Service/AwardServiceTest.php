@@ -38,6 +38,7 @@ class AwardServiceTest extends KernelTestCase
             ->addMedalCategory($categoryB);
         $reflectedProblem = new ReflectionClass(TeamCategory::class);
         $teamIdProperty = $reflectedProblem->getProperty('categoryid');
+        $teamIdProperty->setAccessible(true);
         $teamIdProperty->setValue($categoryA, 1);
         $teamIdProperty->setValue($categoryB, 2);
         $categories = [$categoryA, $categoryB];
@@ -51,6 +52,7 @@ class AwardServiceTest extends KernelTestCase
                 ->setAffiliation(); // No affiliation needed
             $reflectedProblem = new ReflectionClass(Team::class);
             $teamIdProperty = $reflectedProblem->getProperty('teamid');
+            $teamIdProperty->setAccessible(true);
             $teamIdProperty->setValue($team, count($teams));
             $teams[] = $team;
         }
@@ -67,6 +69,7 @@ class AwardServiceTest extends KernelTestCase
                 ->setShortname($problemLabel);
             $reflectedProblem = new ReflectionClass(Problem::class);
             $probIdProperty = $reflectedProblem->getProperty('probid');
+            $probIdProperty->setAccessible(true);
             $probIdProperty->setValue($problem->getProblem(), count($problems));
             $problems[] = $problem;
         }
