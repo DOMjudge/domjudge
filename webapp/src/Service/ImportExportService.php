@@ -1000,8 +1000,6 @@ class ImportExportService
      */
     protected function importAccountData(array $accountData, ?array &$saved = null): int
     {
-        $createdUsers = [];
-        $updatedUsers = [];
         $newTeams     = [];
         foreach ($accountData as $accountItem) {
             if (!empty($accountItem['team'])) {
@@ -1069,11 +1067,6 @@ class ImportExportService
                 $this->em->persist($user);
             }
             $this->em->flush();
-            if ($added) {
-                $createdUsers[] = $user->getUserid();
-            } else {
-                $updatedUsers[] = $user->getUserid();
-            }
 
             if ($saved !== null) {
                 $saved[] = $user;
