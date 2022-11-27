@@ -92,7 +92,7 @@ class ICPCCmsService
                 // Note: affiliations are not updated and not deleted even if all teams have canceled.
                 $affiliation = $this->em->getRepository(TeamAffiliation::class)->findOneBy(['name' => $institutionName]);
                 if ($affiliation === null) {
-                    $shortName   = isset($teamData['institutionShortName']) ? $teamData['institutionShortName'] : $institutionName;
+                    $shortName   = $teamData['institutionShortName'] ?? $institutionName;
                     $affiliation = new TeamAffiliation();
                     $affiliation
                         ->setName($institutionName)
