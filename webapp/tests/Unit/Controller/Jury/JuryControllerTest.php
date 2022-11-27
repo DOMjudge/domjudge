@@ -187,7 +187,7 @@ abstract class JuryControllerTest extends BaseTest
                     break;
                 }
             }
-            self::assertEquals($singlePageLink, null, 'Found link ending with '.$identifier);
+            self::assertEquals(null, $singlePageLink, 'Found link ending with '.$identifier);
         }
         // Find an ID we can edit/delete.
         foreach (array_merge(
@@ -351,7 +351,7 @@ abstract class JuryControllerTest extends BaseTest
             $button = $this->client->getCrawler()->selectButton('Save');
             $form = $button->form($formFields, 'POST');
             $this->client->submit($form);
-            self::assertNotEquals($this->client->getResponse()->getStatusCode(), 500);
+            self::assertNotEquals(500, $this->client->getResponse()->getStatusCode());
             $this->verifyPageResponse('GET', $singlePageLink, 200);
             foreach ($formDataValues as $id => $element) {
                 if (in_array($formDataKeys[$id], static::$addEntitiesShown)) {
