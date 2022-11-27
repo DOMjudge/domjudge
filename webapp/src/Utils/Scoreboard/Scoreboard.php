@@ -175,7 +175,7 @@ class Scoreboard
 
             $this->matrix[$teamId][$probId] = new ScoreboardMatrixItem(
                 $scoreRow->getIsCorrect($this->restricted),
-                $scoreRow->getIsCorrect($this->restricted) ? $scoreRow->getIsFirstToSolve() : false,
+                $scoreRow->getIsCorrect($this->restricted) && $scoreRow->getIsFirstToSolve(),
                 $scoreRow->getSubmissions($this->restricted),
                 $scoreRow->getPending($this->restricted),
                 $scoreRow->getSolveTime($this->restricted),

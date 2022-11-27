@@ -360,7 +360,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
                   WHERE t.probid = :probid ORDER BY ranknumber',
                 ['extjudgementid' => $externalJudgementId, 'probid' => $probId]);
 
-            $submissionDone = $externalJudgement ? !empty($externalJudgement->getEndtime()) : false;
+            $submissionDone = $externalJudgement && !empty($externalJudgement->getEndtime());
         } else {
             /** @var Judging|null $judging */
             $judging   = $submission->getJudgings()->first();
@@ -376,7 +376,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
                   WHERE t.probid = :probid ORDER BY ranknumber',
                 ['judgingid' => $judgingId, 'probid' => $probId]);
 
-            $submissionDone = $judging ? !empty($judging->getEndtime()) : false;
+            $submissionDone = $judging && !empty($judging->getEndtime());
         }
 
         $results = '';
@@ -1097,18 +1097,17 @@ EOF;
             return '';
         }
         $metadata = $this->dj->parseMetadata($metadata);
-        $ret      = '<span style="display:inline; margin-left: 5px;">'
-                    . '<i class="fas fa-stopwatch" title="runtime"></i>'
-                    . $metadata['cpu-time'] . 's'
-                    . ' CPU, '
-                    . $metadata['wall-time'] . 's'
-                    . ' wall time, '
-                    . '<i class="fas fa-memory" title="RAM"></i>'
-                    . Utils::printsize((int)($metadata['memory-bytes']))
-                    . ', '
-                    . '<i class="fas fa-exitcode" title="runtime"></i>'
-                    . 'exit-code: ' . $metadata['exitcode'];
-        return $ret;
+        return '<span style="display:inline; margin-left: 5px;">'
+            . '<i class="fas fa-stopwatch" title="runtime"></i>'
+            . $metadata['cpu-time'] . 's'
+            . ' CPU, '
+            . $metadata['wall-time'] . 's'
+            . ' wall time, '
+            . '<i class="fas fa-memory" title="RAM"></i>'
+            . Utils::printsize((int)($metadata['memory-bytes']))
+            . ', '
+            . '<i class="fas fa-exitcode" title="runtime"></i>'
+            . 'exit-code: ' . $metadata['exitcode'];
     }
 
     public function printWarningContent(ExternalSourceWarning $warning): string

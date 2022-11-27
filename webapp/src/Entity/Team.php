@@ -448,7 +448,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
      */
     public function getHidden(): bool
     {
-        return $this->getCategory() ? !$this->getCategory()->getVisible() : true;
+        return !$this->getCategory() || !$this->getCategory()->getVisible();
     }
 
     public function __construct()
