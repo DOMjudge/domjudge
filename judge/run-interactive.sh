@@ -32,7 +32,7 @@ TESTOUT="$1"; shift
 META="$1"; shift
 FEEDBACK="$1"; shift
 
-MYDIR=$(dirname $0)
+MYDIR="$(dirname $0)"
 
 # Run the program while redirecting its stdin/stdout to 'runjury' via
 # 'runpipe'. Note that "$@" expands to separate, quoted arguments.
