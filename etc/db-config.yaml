@@ -229,7 +229,7 @@
             type: string
             default_value: "H:i"
             public: false
-            description: The format used to print times. For formatting options see the PHP `date` function.
+            description: The format used to print times. For formatting options see the [PHP `DateTime::format` function](https://www.php.net/manual/en/datetime.format.php).
         -   name: thumbnail_size
             type: int
             default_value: 200
@@ -289,7 +289,7 @@
             type: int
             default_value: 1
             public: false
-            description: "Format of the event feed to use"
+            description: Format of the event feed to use. See [current draft](https://ccs-specs.icpc.io/draft/contest_api#event-feed) and [versions available](https://ccs-specs.icpc.io/).
             options:
                 0: Legacy format in use until the `2020-03` version
                 1: New format in use since the `2022-07` version
