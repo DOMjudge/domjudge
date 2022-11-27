@@ -79,16 +79,16 @@ function dj_escapeshellarg(?string $arg) : string
  * Returns a boolean value for success or if the delay was interrupted by a
  * signal, returns a float with the time remaining, similar to time_nanosleep.
  */
-const SECOND_IN_NANOSECONDS = 1_000_000_000;
-
-function dj_sleep(float $seconds) : bool
+function dj_sleep(float $seconds)
 {
+    $second_in_nanoseconds = 1_000_000_000;
+
     $seconds_int = (int)$seconds;
-    $nanoseconds = (int)(SECOND_IN_NANOSECONDS*($seconds-$seconds_int));
+    $nanoseconds = (int)($second_in_nanoseconds * ($seconds-$seconds_int));
 
     $result = time_nanosleep($seconds_int, $nanoseconds);
     if (is_array($result)) {
-        $result = $result['seconds'] + $result['nanoseconds'] / SECOND_IN_NANOSECONDS;
+        $result = $result['seconds'] + $result['nanoseconds'] / $second_in_nanoseconds;
     }
 
     return $result;
