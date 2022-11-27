@@ -181,7 +181,8 @@ fi
 
 # Check if the compile script auto-detected the entry point, and if
 # so, store it in the compile.meta for later reuse, e.g. in a replay.
-grep '[Dd]etected entry_point: ' compile.tmp | sed 's/^.*etected //' >>compile.meta
+ENTRY_POINT_REGEX='[Dd]etected entry_point: '
+grep "$ENTRY_POINT_REGEX" compile.tmp | sed 's/^.*etected //' >>compile.meta
 
 logmsg $LOG_DEBUG "checking compilation exit-status"
 if grep '^time-result: .*timelimit' compile.meta >/dev/null 2>&1 ; then
@@ -199,7 +200,11 @@ if [ ! -f compile/program ] || [ ! -x compile/program ]; then
 	cat compile.tmp >>compile.out
 	cleanexit ${E_COMPILER_ERROR:-1}
 fi
-cat compile.tmp >>compile.out
+
+# Remove any entry point detection message when compilation succeeded,
+# since we already stored it above and it only confuses contestants.
+# Ignore the exit code, since grep returns 1 when no line matched.
+grep -v "$ENTRY_POINT_REGEX" compile.tmp >>compile.out || true
 
 logmsg $LOG_INFO "Compilation successful"
 cleanexit 0
