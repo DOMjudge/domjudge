@@ -15,7 +15,7 @@ define('CREATE_WRITABLE_TEMP_DIR', getenv('DOMJUDGE_CREATE_WRITABLE_TEMP_DIR') ?
 // If any transient network error occurs on the nth trial,
 // the judgehost retries the HTTP request after pow(factor, trial - 1) + rand(0, jitter) sec.
 
-function define_backoff_params_from_env(string $var_name, int|float $default_value) {
+function define_backoff_params_from_env(string $var_name, $default_value) {
     if (defined($var_name)) {
         return;
     }
@@ -25,7 +25,7 @@ function define_backoff_params_from_env(string $var_name, int|float $default_val
             'min_range' => 0,
         ),
     );
-    $final_value = filter_var(getenv('DOMJUDGE_' . $var_name), FILTER_VALIDATE_INT, $options);
+    $final_value = filter_var(getenv('DOMJUDGE_' . $var_name), FILTER_VALIDATE_FLOAT, $options);
     define($var_name, $final_value);
 }
 
