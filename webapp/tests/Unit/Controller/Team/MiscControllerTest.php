@@ -147,7 +147,7 @@ class MiscControllerTest extends BaseTest
         $crawler = $this->client->request('GET', '/team/scoreboard');
 
         // TODO: Enable again when unit tests are rewritten
-        return;
+        $this->markTestSkipped('Needs to be rewritten to handle different DB states.');
         // Verify we are on the demo contest.
         self::assertSelectorTextContains('.card-header span', 'Demo contest');
 
