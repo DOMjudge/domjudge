@@ -1188,7 +1188,7 @@ class SubmissionController extends BaseController
             if ($expectedConfig[$k] != $observedConfig[$k]) {
                 if ($k === 'hash') {
                     $errors[] = '- script has changed';
-                } else if ($k === 'entry_point') {
+                } elseif ($k === 'entry_point') {
                     // Changes to the entry point can only happen for jury submissions during initial problem upload.
                     // Silently ignore.
                 } else {
