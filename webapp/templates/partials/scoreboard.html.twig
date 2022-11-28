@@ -31,6 +31,9 @@
                     {% endif %}
                 {% elseif scoreboard.freezeData.stopped %}
                     contest over, waiting for results
+                {% elseif static %}
+                    {% set now = 'now'|date('U') %}
+                    {{ now | printremainingminutes(current_contest.endtime) }}
                 {% else %}
                     starts: {{ current_contest.starttime | printtime }} - ends: {{ current_contest.endtime | printtime }}
                 {% endif %}
