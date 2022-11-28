@@ -71,14 +71,14 @@ case "$1" in
 		fi
 		# Check that sudo works
 		TMPDIR="$(mktemp -d)"
-		cd $TMPDIR
+		cd "$TMPDIR"
 		mkdir -p dev
 		if ! sudo -n cp -pR /dev/random /dev/urandom /dev/null dev < /dev/null || [ ! -e dev/null ]; then
 			>&2 echo "cannot run sudo successfully, check that sudoers file is installed"
-			rm -rf $TMPDIR
+			rm -rf "$TMPDIR"
 			exit 2
 		fi
-		rm -rf $TMPDIR
+		rm -rf "$TMPDIR"
 		;;
 	start)
 
@@ -117,7 +117,7 @@ case "$1" in
 
 		for i in $SUBDIRMOUNTS ; do
 			if [ -L "$CHROOTORIGINAL/$i" ]; then
-				rm -f $i
+				rm -f "$i"
 			elif [ -d "$CHROOTORIGINAL/$i" ]; then
 				dj_umount "$PWD/$i"
 			fi
