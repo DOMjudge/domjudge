@@ -941,8 +941,12 @@ class ExternalContestSourceService
 
         $toCheckProblem = [
             'name'      => $data['name'],
-            'timelimit' => $data['time_limit'],
         ];
+
+        if (isset($data['time_limit'])) {
+            // At least PC^2 does not send us the time limit, so only check when it's present
+            $toCheckProblem['timelimit'] = $data['time_limit'];
+        }
 
         if ($contestProblem->getShortname() !== $data['label']) {
             $this->logger->warning(
