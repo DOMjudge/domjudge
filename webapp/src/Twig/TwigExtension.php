@@ -177,7 +177,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
 
     public function printremainingminutes(float $start, float $end): string
     {
-        $minutesRemaining = round(($end - $start)/60, 0);
+        $minutesRemaining = floor(($end - $start)/60, 0);
         if ($minutesRemaining < 1) {
             return 'less than 1 minute to go';
         } elseif ($minutesRemaining == 1) {
