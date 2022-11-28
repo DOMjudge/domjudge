@@ -148,9 +148,7 @@ class ImportEventFeedCommand extends Command
         $fromStart    = $input->getOption('from-start');
         $eventsToSkip = $input->getOption('skip-event-id');
 
-        if (!$this->compareContestId()) {
-            return static::FAILURE;
-        }
+        $this->compareContestId();
 
         $this->style->success('Starting import. Press ^C to quit (might take a bit to be detected).');
 
@@ -221,21 +219,16 @@ class ImportEventFeedCommand extends Command
 
     /**
      * Compare the external contest ID of the configured contest to the source.
-     *
-     * @return bool False if the import should stop, true otherwise.
      */
-    protected function compareContestId(): bool
+    protected function compareContestId(): void
     {
         $contest = $this->sourceService->getSourceContest();
         $ourId   = $contest->getExternalid();
         $theirId = $this->sourceService->getContestId();
         if ($ourId !== $theirId) {
-            $this->style->error(
+            $this->style->warning(
                 "Contest ID in external system $theirId does not match external ID in DOMjudge ($ourId)."
             );
-            return false;
         }
-
-        return true;
     }
 }
