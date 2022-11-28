@@ -520,7 +520,12 @@
             {% else %}
                 {% set message = 'successful' %}
                 {% if output is not empty %}
-                    {% set message = message ~ ' (with ' ~ (output | lineCount) ~ ' line(s) of output)' %}
+                    {% set outputLines = output | lineCount %}
+                    {% if outputLines == 1 %}
+                        {% set message = message ~ ' (with 1 line of output)' %}
+                    {% else %}
+                        {% set message = message ~ ' (with ' ~ outputLines ~ ' lines of output)' %}
+                    {% endif %}
                 {% endif %}
             {% endif %}
         {% endif %}
@@ -539,16 +544,18 @@
             <div class="collapse" id="collapseExample-compilemeta">
                 <div class="card card-body output_text">{{ selectedJudging.compileMetadata }}</div>
             </div>
-            <hr/>
-            <br/>
+            <hr>
+            <br>
         {% endif %}
+        <div class="card mb-3 {% if selectedJudging is null or selectedJudging.result != 'compiler-error' %}d-none{% endif%}"
+            id="detailcompile">
+            <div class="card-header">Compilation output</div>
         {% if output is empty %}
-            <p class="nodata{% if selectedJudging is null or selectedJudging.result != 'compiler-error' %} d-none{% endif %}"
-                id="detailcompile">There were no compiler errors or warnings.</p>
+            <div class="card-body nodata">There were no compiler errors or warnings.</div>
         {% else %}
-            <pre class="output_text {% if selectedJudging is null or selectedJudging.result != 'compiler-error' %} d-none{% endif %}"
-                id="detailcompile">{{ output }}</pre>
+            <div class="card-body"><pre class="output_text">{{ output }}</pre></div>
         {% endif %}
+        </div>
 
         {% if externalJudgement is not null or (selectedJudging is not null and selectedJudging.result != 'compiler-error') %}
             {# Show run info. Only when compilation was successful or we have an external judgement #}
