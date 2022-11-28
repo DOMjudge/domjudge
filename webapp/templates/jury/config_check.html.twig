@@ -81,4 +81,24 @@
 <div class="mt-5 mb-5">
 All checks complete. <i class="fas fa-clipboard-check"></i>
 </div>
+
+<details>
+<summary class="text-muted">Timing information</summary>
+<ul>
+{% for section in stopwatch.sections %}
+  {% if section.id %}
+  <li><strong>{{ section.id }}</strong>
+    <ul>
+    {% for event in section.events %}
+      {% if event.name != '__section__' %}
+      <li>{{ event }}</li>
+      {% endif %}
+    {% endfor %}
+    </ul>
+  </li>
+  {% endif %}
+{% endfor %}
+</ul>
+</details>
+
 {% endblock %}

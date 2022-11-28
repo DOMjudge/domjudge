@@ -20,6 +20,7 @@ class ConfigControllerTest extends BaseTest
 
         // We've reached the end of the page.
         self::assertSelectorExists('div:contains("All checks complete.")');
+        self::assertSelectorExists('details li:contains("checkTeamDuplicateNames")');
     }
 
     /**
