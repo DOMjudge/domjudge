@@ -659,11 +659,11 @@ class ExternalContestSourceService
             $freezeHourModifier   = $freezeNegative ? -1 : 1;
             $freezeInSeconds      = $freezeHourModifier * $freezeData[2] * 3600
                                     + 60 * $freezeData[3]
-                                    + (double)sprintf('%d.%03d', $freezeData[4], $freezeData[5]);
+                                    + (double)sprintf('%d.%03d', $freezeData[4], $freezeData[5] ?? 0);
             $durationHourModifier = $durationNegative ? -1 : 1;
             $durationInSeconds    = $durationHourModifier * $durationData[2] * 3600
                                     + 60 * $durationData[3]
-                                    + (double)sprintf('%d.%03d', $durationData[4], $durationData[5]);
+                                    + (double)sprintf('%d.%03d', $durationData[4], $durationData[5] ?? 0);
             $freezeStartSeconds   = $durationInSeconds - $freezeInSeconds;
             $freezeHour           = floor($freezeStartSeconds / 3600);
             $freezeMinutes        = floor(($freezeStartSeconds % 3600) / 60);
