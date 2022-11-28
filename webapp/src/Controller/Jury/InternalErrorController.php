@@ -206,16 +206,20 @@ class InternalErrorController extends BaseController
                             null,
                             $skipped,
                             $progressReporter);
-                        $rejudgingUrl     = $this->generateUrl('jury_rejudging', ['rejudgingId' => $rejudging->getRejudgingid()]);
-                        $internalErrorUrl = $this->generateUrl('jury_internal_error', ['errorId' => $internalError->getErrorid()]);
-                        $message          = sprintf(
-                            'Rejudging <a href="%s">r%d</a> created for internal error <a href="%s">%d</a>.',
-                            $rejudgingUrl,
-                            $rejudging->getRejudgingid(),
-                            $internalErrorUrl,
-                            $internalError->getErrorid()
-                        );
-                        $progressReporter(100, '', $message);
+                        if ($rejudging === null) {
+                            $this->addFlash('warning', 'All submissions that are affected by this internal error are already part of another rejudging.');
+                        } else {
+                            $rejudgingUrl = $this->generateUrl('jury_rejudging', ['rejudgingId' => $rejudging->getRejudgingid()]);
+                            $internalErrorUrl = $this->generateUrl('jury_internal_error', ['errorId' => $internalError->getErrorid()]);
+                            $message = sprintf(
+                                'Rejudging <a href="%s">r%d</a> created for internal error <a href="%s">%d</a>.',
+                                $rejudgingUrl,
+                                $rejudging->getRejudgingid(),
+                                $internalErrorUrl,
+                                $internalError->getErrorid()
+                            );
+                            $progressReporter(100, '', $message);
+                        }
                     }
                 });
             });
