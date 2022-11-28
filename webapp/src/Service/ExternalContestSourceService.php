@@ -57,6 +57,7 @@ class ExternalContestSourceService
     protected ?string $loadingError = null;
     protected bool $shouldStopReading = false;
     protected array $verdicts = [];
+    protected ?string $baseUrl = null;
 
     /**
      * This array will hold all events that are waiting on a dependent event
@@ -467,27 +468,31 @@ class ExternalContestSourceService
             case ExternalContestSource::TYPE_CCS_API:
                 try {
                     // The base URL is the URL of the CCS API root.
-                    if (preg_match('/^(.*\/)contests\/.*/',
-                                   $this->source->getSource(), $matches) === 0) {
-                        $this->loadingError      = 'Cannot determine base URL. Did you pass a CCS API contest URL?';
-                        $this->cachedContestData = null;
+                    if (preg_match('/^(.*\/)contests\/.*/', $this->source->getSource(), $matches) === 0) {
+                        $this->baseUrl = $this->source->getSource();
                     } else {
-                        $clientOptions = [
-                            'base_uri' => $matches[1],
-                        ];
-                        if ($this->source->getUsername()) {
-                            $auth = [$this->source->getUsername()];
-                            if (is_string($this->source->getPassword() ?? null)) {
-                                $auth[] = $this->source->getPassword();
-                            }
-                            $clientOptions['auth_basic'] = $auth;
-                        } else {
-                            $clientOptions['auth_basic'] = null;
-                        }
-                        $this->httpClient        = $this->httpClient->withOptions($clientOptions);
-                        $contestResponse         = $this->httpClient->request('GET', $this->source->getSource());
-                        $this->cachedContestData = $contestResponse->toArray();
+                        // If the URL does not contain `contests`, assume the whole URL is the base URL.
+                        // PC^2 works in this way.
+                        $this->baseUrl = $matches[1];
                     }
+                    // Set the base URL and do not throw an exception on SSL errors
+                    $clientOptions = [
+                        'verify_host' => false,
+                        'verify_peer' => false,
+                        'base_uri' => $this->baseUrl,
+                    ];
+                    if ($this->source->getUsername()) {
+                        $auth = [$this->source->getUsername()];
+                        if (is_string($this->source->getPassword() ?? null)) {
+                            $auth[] = $this->source->getPassword();
+                        }
+                        $clientOptions['auth_basic'] = $auth;
+                    } else {
+                        $clientOptions['auth_basic'] = null;
+                    }
+                    $this->httpClient        = $this->httpClient->withOptions($clientOptions);
+                    $contestResponse         = $this->httpClient->request('GET', $this->source->getSource());
+                    $this->cachedContestData = $contestResponse->toArray();
                 } catch (HttpExceptionInterface|DecodingExceptionInterface|TransportExceptionInterface $e) {
                     $this->cachedContestData = null;
                     $this->loadingError      = $e->getMessage();
@@ -1345,11 +1350,10 @@ class ExternalContestSourceService
                 $zipUrl = $data['files'][0]['href'];
                 if (preg_match('/^https?:\/\//', $zipUrl) === 0) {
                     // Relative URL, prepend the base URL.
-                    $zipUrl = ($this->basePath ?? '') . $zipUrl;
+                    $zipUrl = ($this->baseUrl ?? '') . $zipUrl;
                 }
 
                 $tmpdir = $this->dj->getDomjudgeTmpDir();
-
                 // Check if we have a local file.
                 if (file_exists($zipUrl)) {
                     // Yes, use it directly
