@@ -17,6 +17,13 @@ set $prefix /domjudge;
 # location / {
 # 	root $domjudgeRoot;
 # 	try_files $uri @domjudgeFront;
+#
+#	# Handle API requests separately to be able to split the log
+#	location /api/ {
+#		try_files $uri @domjudgeFrontApi;
+#		error_log /var/log/nginx/domjudge-api.log;
+#		access_log /var/log/nginx/domjudge-api.log;
+#	}
 # }
 
 # Or you can install it with a prefix
@@ -25,6 +32,12 @@ location /domjudge/ {
 	root $domjudgeRoot;
 	rewrite ^/domjudge/(.*)$ /$1 break;
 	try_files $uri @domjudgeFront;
+
+	# Handle API requests separately to be able to split the log
+	location /domjudge/api/ {
+		rewrite ^/domjudge/(.*)$ /$1 break;
+		try_files $uri @domjudgeFrontApi;
+	}
 }
 
 location @domjudgeFront {
@@ -40,6 +53,25 @@ location @domjudgeFront {
 	# Prevents URIs that include the front controller. This will 404:
 	# http://domain.tld/app_dev.php/some-path
 	internal;
+}
+
+location @domjudgeFrontApi {
+	fastcgi_split_path_info ^(.+\.php)(/.*)$;
+	fastcgi_pass domjudge;
+	include fastcgi_params;
+	fastcgi_param SERVER_NAME $host;
+	fastcgi_param SCRIPT_FILENAME $domjudgeRoot/index.php;
+	fastcgi_param SCRIPT_NAME $prefix/index.php;
+	fastcgi_param REQUEST_URI $prefix$uri?$args;
+	fastcgi_param DOCUMENT_ROOT $domjudgeRoot;
+	fastcgi_param HTTPS $http_x_forwarded_proto if_not_empty;
+	# Prevents URIs that include the front controller. This will 404:
+	# http://domain.tld/app_dev.php/some-path
+	internal;
+
+	# Use a separate log file for the API
+	error_log /var/log/nginx/domjudge-api.log;
+	access_log /var/log/nginx/domjudge-api.log;
 }
 
 # The X-Frame-Options header defends against so-called 'clickjacking' attacks.
