@@ -680,6 +680,10 @@ class ExternalContestSourceService
             $fullFreeze = null;
         }
 
+        // Keep track of whether the end time / freeze time changed, since we need to
+        // set the strings representations as well in that case
+        $endTimeChanged = $freezeTimeChanged = false;
+
         // The timezones are given in ISO 8601 and we only support names.
         // This is why we will use the platform default timezone and just verify it matches.
         $startTime = isset($data['start_time']) ? new DateTime($data['start_time']) : null;
@@ -687,19 +691,25 @@ class ExternalContestSourceService
             // We prefer to use our default timezone, since that is a timezone name
             // The feed only has timezone offset, so we will only use it if the offset
             // differs from our local timezone offset
-            $timezoneToUse = date_default_timezone_get();
             $feedTimezone  = new DateTimeZone($startTime->format('e'));
-            if ($contest->getStartTimeObject()) {
-                $ourTimezone = new DateTimeZone($contest->getStartTimeObject()->format('e'));
+            if ($contest->getStarttimeString()) {
+                $ourTimezone = new DateTimeZone((new DateTime($contest->getStarttimeString()))->format('e'));
             } else {
                 $ourTimezone = new DateTimeZone(date_default_timezone_get());
             }
+            $timezoneToUse = $ourTimezone->getName();
             if ($feedTimezone->getOffset($startTime) !== $ourTimezone->getOffset($startTime)) {
                 $timezoneToUse = $feedTimezone->getName();
                 $this->logger->warning(
                     'Timezone does not match between feed (%s) and local (%s)',
                     [$feedTimezone->getName(), $ourTimezone->getName()]
                 );
+            }
+            if ($contest->getStarttime() !== $contest->getAbsoluteTime($fullDuration)) {
+                $endTimeChanged = true;
+            }
+            if ($contest->getFreezetime() !== $contest->getAbsoluteTime($fullFreeze)) {
+                $freezeTimeChanged = true;
             }
             $toCheck = [
                 'start_time_enabled' => true,
@@ -725,6 +735,12 @@ class ExternalContestSourceService
         }
 
         $this->compareOrCreateValues($eventId, $entityType, $data['id'], $contest, $toCheck);
+        if ($endTimeChanged) {
+            $contest->setEndtimeString($fullDuration);
+        }
+        if ($freezeTimeChanged) {
+            $contest->setFreezetimeString($fullFreeze);
+        }
 
         $this->em->flush();
         $this->eventLog->log('contests', $contest->getCid(), EventLogService::ACTION_UPDATE, $this->getSourceContestId());
