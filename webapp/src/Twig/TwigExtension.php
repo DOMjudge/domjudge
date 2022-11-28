@@ -593,7 +593,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
     public function printHost(?string $hostname, bool $full = false): string
     {
         if ($hostname === null) {
-           return '<span class="nodata">hostname unset</span>';
+            return '<span class="nodata">hostname unset</span>';
         }
         // Shorten the hostname to first label, but not if it's an IP address.
         if (!$full && !preg_match('/^\d{1,3}(\.\d{1,3}){3}$/', $hostname)) {
@@ -607,7 +607,8 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
     /**
      * Extract the longest common prefix of all the provided strings.
      */
-    private function getCommonPrefix(array $strings): string {
+    private function getCommonPrefix(array $strings): string
+    {
         $common_prefix = $strings[0];
         foreach ($strings as $string) {
             $len = strlen($string);
