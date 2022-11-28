@@ -15,6 +15,7 @@ use App\Utils\Utils;
 use BadMethodCallException;
 use Doctrine\Inflector\InflectorFactory;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Stopwatch\Stopwatch;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -33,6 +34,7 @@ class CheckConfigService
     protected RouterInterface $router;
     protected bool $debug;
     protected UserPasswordHasherInterface $passwordHasher;
+    protected Stopwatch $stopwatch;
 
     public function __construct(
         bool $debug,
@@ -52,12 +54,14 @@ class CheckConfigService
         $this->router          = $router;
         $this->validator       = $validator;
         $this->passwordHasher  = $passwordHasher;
+        $this->stopwatch       = new Stopwatch();
     }
 
     public function runAll(): array
     {
         $results = [];
 
+        $this->stopwatch->openSection();
         $system = [
             'php_version' => $this->checkPhpVersion(),
             'php_extensions' => $this->checkPhpExtensions(),
@@ -66,7 +70,9 @@ class CheckConfigService
         ];
 
         $results['System'] = $system;
+        $this->stopwatch->stopSection('System');
 
+        $this->stopwatch->openSection();
         $config = [
             'adminpass' => $this->checkAdminPass(),
             'comparerun' => $this->checkDefaultCompareRunExist(),
@@ -77,7 +83,9 @@ class CheckConfigService
         ];
 
         $results['Configuration'] = $config;
+        $this->stopwatch->stopSection('Configuration');
 
+        $this->stopwatch->openSection();
         $contests = [
             'activecontests' => $this->checkContestActive(),
             'validcontests' => $this->checkContestsValidate(),
@@ -85,14 +93,18 @@ class CheckConfigService
         ];
 
         $results['Contests'] = $contests;
+        $this->stopwatch->stopSection('Contests');
 
+        $this->stopwatch->openSection();
         $pl = [
             'problems' => $this->checkProblemsValidate(),
             'languages' => $this->checkLanguagesValidate(),
         ];
 
         $results['Problems and languages'] = $pl;
+        $this->stopwatch->stopSection('Problems and languages');
 
+        $this->stopwatch->openSection();
         $teams = [
             'photos' => $this->checkTeamPhotos(),
             'affiliations' => $this->checkAffiliations(),
@@ -101,17 +113,22 @@ class CheckConfigService
         ];
 
         $results['Teams'] = $teams;
+        $this->stopwatch->stopSection('Teams');
 
+        $this->stopwatch->openSection();
         $results['External identifiers'] = $this->checkAllExternalIdentifiers();
+        $this->stopwatch->stopSection('External identifiers');
 
         return $results;
     }
 
     public function checkPhpVersion(): array
     {
+        $this->stopwatch->start(__FUNCTION__);
         $my = PHP_VERSION;
         $req = '7.4.0';
         $result = version_compare($my, $req, '>=');
+        $this->stopwatch->stop(__FUNCTION__);
         return ['caption' => 'PHP version',
                 'result' => ($result ? 'O' : 'E'),
                 'desc' => sprintf('You have PHP version %s. The minimum required is %s', $my, $req)];
@@ -119,6 +136,7 @@ class CheckConfigService
 
     public function checkPhpExtensions(): array
     {
+        $this->stopwatch->start(__FUNCTION__);
         $required = ['json', 'mbstring', 'mysqli', 'zip', 'gd', 'intl'];
         $state = 'O';
         $remark = '';
@@ -130,6 +148,7 @@ class CheckConfigService
         }
         $remark = ($remark ?: 'All required and recommended extensions present.');
 
+        $this->stopwatch->stop(__FUNCTION__);
         return ['caption' => 'PHP extensions',
                 'result' => $state,
                 'desc' => $remark];
@@ -137,6 +156,7 @@ class CheckConfigService
 
     public function checkPhpSettings(): array
     {
+        $this->stopwatch->start(__FUNCTION__);
         $sourcefiles_limit = $this->config->get('sourcefiles_limit');
         $max_files = ini_get('max_file_uploads');
 
@@ -174,6 +194,7 @@ class CheckConfigService
                     (isset($sizes[$var]) ? Utils::printsize($sizes[$var]) : "unlimited"));
         }
 
+        $this->stopwatch->stop(__FUNCTION__);
         return ['caption' => 'PHP settings',
                 'result' => $result,
                 'desc' => $desc];
@@ -181,6 +202,7 @@ class CheckConfigService
 
     public function checkMysqlSettings(): array
     {
+        $this->stopwatch->start(__FUNCTION__);
         $r = $this->em->getConnection()->fetchAllAssociative(
             'SHOW variables WHERE Variable_name IN
                  ("innodb_log_file_size", "max_connections", "max_allowed_packet",
@@ -231,6 +253,7 @@ class CheckConfigService
             $desc .= sprintf("MySQL's max_allowed_packet is set to %s. We recommend at least 16MB.\n", Utils::printsize((int)$vars['max_allowed_packet']), Utils::printsize($max_inout));
         }
 
+        $this->stopwatch->stop(__FUNCTION__);
         return ['caption' => 'MySQL settings',
                 'result' => $result,
                 'desc' => $desc ?: 'MySQL settings are all ok'];
@@ -238,6 +261,7 @@ class CheckConfigService
 
     public function checkAdminPass(): array
     {
+        $this->stopwatch->start(__FUNCTION__);
         $res = 'O';
         $desc = 'Password for "admin" has been changed from the default.';
 
@@ -248,6 +272,7 @@ class CheckConfigService
             $desc = 'The "admin" user still has the default password. You should change it immediately.';
         }
 
+        $this->stopwatch->stop(__FUNCTION__);
         return ['caption' => 'Non-default admin password',
                 'result' => $res,
                 'desc' => $desc];
@@ -255,6 +280,7 @@ class CheckConfigService
 
     public function checkDefaultCompareRunExist(): array
     {
+        $this->stopwatch->start(__FUNCTION__);
         $res = 'O';
         $desc = '';
 
@@ -269,6 +295,7 @@ class CheckConfigService
             }
         }
 
+        $this->stopwatch->stop(__FUNCTION__);
         return ['caption' => 'Default compare and run scripts exist',
                 'result' => $res,
                 'desc' => $desc];
@@ -276,12 +303,14 @@ class CheckConfigService
 
     public function checkScriptFilesizevsMemoryLimit(): array
     {
+        $this->stopwatch->start(__FUNCTION__);
         if ($this->config->get('script_filesize_limit') <=
             $this->config->get('memory_limit')) {
              $result = 'W';
         } else {
              $result = 'O';
         }
+        $this->stopwatch->stop(__FUNCTION__);
         return ['caption' => 'Compile file size vs. memory limit',
                 'result' => $result,
                 'desc' => 'If the script filesize limit is lower than the memory limit, then ' .
@@ -294,11 +323,14 @@ class CheckConfigService
 
     public function checkDebugDisabled(): array
     {
+        $this->stopwatch->start(__FUNCTION__);
         if ($this->debug) {
+            $this->stopwatch->stop(__FUNCTION__);
             return ['caption' => 'Debugging',
                 'result' => 'W',
                 'desc' => "Debugging enabled.\nShould not be enabled on live systems."];
         }
+        $this->stopwatch->stop(__FUNCTION__);
         return ['caption' => 'Debugging',
                 'result' => 'O',
                 'desc' => 'Debugging disabled.'];
@@ -306,14 +338,17 @@ class CheckConfigService
 
     public function checkTmpdirWritable(): array
     {
+        $this->stopwatch->start(__FUNCTION__);
         $tmpdir = $this->dj->getDomjudgeTmpDir();
         if (is_writable($tmpdir)) {
+            $this->stopwatch->stop(__FUNCTION__);
             return ['caption' => 'TMPDIR writable',
                     'result' => 'O',
                     'desc' => sprintf('TMPDIR (%s) can be used to store temporary ' .
                          'files for submission diffs and edits.',
                          $tmpdir)];
         }
+        $this->stopwatch->stop(__FUNCTION__);
         return ['caption' => 'TMPDIR writable',
                 'result' => 'W',
                 'desc' => sprintf('TMPDIR (%s) is not writable by the webserver; ' .
@@ -334,6 +369,7 @@ class CheckConfigService
 
     public function checkHashTime(): array
     {
+        $this->stopwatch->start(__FUNCTION__);
         $tmp_user = new User();
         $counter = 0;
         $time_duration_sample = 2;
@@ -346,15 +382,18 @@ class CheckConfigService
         } while (($time_end - $time_start) < $time_duration_sample);
 
         if ($counter>300) {
+            $this->stopwatch->stop(__FUNCTION__);
             return ['caption' => 'User password hashing',
                 'result' => 'W',
                 'desc' => sprintf('Hashing is too simple for small sized contests (Did %d hashes).', $counter)];
         }
         if ($counter<100) {
+            $this->stopwatch->stop(__FUNCTION__);
             return ['caption' => 'User password hashing',
                 'result' => 'W',
                 'desc' => sprintf('Hashing is too expensive for medium sized contests (%d done).', $counter)];
         }
+        $this->stopwatch->stop(__FUNCTION__);
         return ['caption' => 'User password hashing',
             'result' => 'O',
             'desc' => sprintf('Hashing cost is reasonable (Did %d hashes).', $counter)];
@@ -362,12 +401,15 @@ class CheckConfigService
 
     public function checkContestActive(): array
     {
+        $this->stopwatch->start(__FUNCTION__);
         $contests = $this->dj->getCurrentContests();
         if (empty($contests)) {
+            $this->stopwatch->stop(__FUNCTION__);
             return ['caption' => 'Active contests',
                     'result' => 'E',
                     'desc' => 'No currently active contests found. System will not function.'];
         }
+        $this->stopwatch->stop(__FUNCTION__);
         return ['caption' => 'Active contests',
                 'result' => 'O',
                 'desc' => 'Currently active contests: ' .
@@ -379,6 +421,7 @@ class CheckConfigService
 
     public function checkContestsValidate(): array
     {
+        $this->stopwatch->start(__FUNCTION__);
         // Fetch all active and future contests.
         $contests = $this->dj->getCurrentContests(null, true);
 
@@ -407,6 +450,7 @@ class CheckConfigService
                     (count($errors) == 0 ? 'no errors' : (string)$errors) ."\n" .$cperrors[$cid];
         }
 
+        $this->stopwatch->stop(__FUNCTION__);
         return ['caption' => 'Contests validation',
             'result' => $result,
             'desc' => "Validated all active and future contests:\n\n" .
@@ -415,6 +459,7 @@ class CheckConfigService
 
     public function checkContestBanners(): array
     {
+        $this->stopwatch->start(__FUNCTION__);
         // Fetch all active and future contests.
         $contests = $this->dj->getCurrentContests(null, true);
 
@@ -444,6 +489,7 @@ class CheckConfigService
 
         $desc = $desc ?: 'Everything OK';
 
+        $this->stopwatch->stop(__FUNCTION__);
         return ['caption' => 'Contest banners',
                 'result' => $result,
                 'desc' => $desc];
@@ -451,6 +497,7 @@ class CheckConfigService
 
     public function checkProblemsValidate(): array
     {
+        $this->stopwatch->start(__FUNCTION__);
         $problems = $this->em->getRepository(Problem::class)->findAll();
         $script_filesize_limit = $this->config->get('script_filesize_limit');
         $output_limit = $this->config->get('output_limit');
@@ -529,6 +576,7 @@ class CheckConfigService
             }
         }
 
+        $this->stopwatch->stop(__FUNCTION__);
         return ['caption' => 'Problems validation',
             'result' => $result,
             'desc' => "Validated all problems:\n\n" .
@@ -537,6 +585,7 @@ class CheckConfigService
 
     public function checkLanguagesValidate(): array
     {
+        $this->stopwatch->start(__FUNCTION__);
         $languages = $this->em->getRepository(Language::class)->findAll();
 
         $languageerrors = $morelanguageerrors = [];
@@ -577,6 +626,7 @@ class CheckConfigService
             }
         }
 
+        $this->stopwatch->stop(__FUNCTION__);
         return ['caption' => 'Languages validation',
             'result' => $result,
             'desc' => "Validated all languages:\n\n" .
@@ -585,6 +635,7 @@ class CheckConfigService
 
     public function checkTeamPhotos(): array
     {
+        $this->stopwatch->start(__FUNCTION__);
         /** @var Team[] $teams */
         $teams = $this->em->getRepository(Team::class)->findAll();
 
@@ -602,6 +653,7 @@ class CheckConfigService
 
         $desc = $desc ?: 'Everything OK';
 
+        $this->stopwatch->stop(__FUNCTION__);
         return ['caption' => 'Team photos',
                 'result' => $result,
                 'desc' => $desc];
@@ -609,9 +661,11 @@ class CheckConfigService
 
     public function checkAffiliations(): array
     {
+        $this->stopwatch->start(__FUNCTION__);
         $show_logos = $this->config->get('show_affiliation_logos');
 
         if (!$show_logos) {
+            $this->stopwatch->stop(__FUNCTION__);
             return ['caption' => 'Team affiliations',
                 'result' => 'O',
                 'desc' => 'Affiliations display disabled, skipping checks'];
@@ -656,6 +710,7 @@ class CheckConfigService
         }
         $desc = $desc ?: 'Everything OK';
 
+        $this->stopwatch->stop(__FUNCTION__);
         return ['caption' => 'Team affiliations',
             'result' => $result,
             'desc' => $desc];
@@ -663,6 +718,7 @@ class CheckConfigService
 
     public function checkTeamDuplicateNames(): array
     {
+        $this->stopwatch->start(__FUNCTION__);
         $teams = $this->em->getRepository(Team::class)->findAll();
 
         $result = 'O';
@@ -680,6 +736,7 @@ class CheckConfigService
         }
         $desc = $desc ?: 'Every team name is unique';
 
+        $this->stopwatch->stop(__FUNCTION__);
         return ['caption' => 'Team name uniqueness',
             'result' => $result,
             'desc' => $desc];
@@ -687,6 +744,7 @@ class CheckConfigService
 
     public function checkSelfRegistration(): array
     {
+        $this->stopwatch->start(__FUNCTION__);
         $result = 'O';
         $desc = '';
 
@@ -709,6 +767,7 @@ class CheckConfigService
             }
         }
 
+        $this->stopwatch->stop(__FUNCTION__);
         return ['caption' => 'Self-registration',
             'result' => $result,
             'desc' => $desc];
@@ -716,6 +775,7 @@ class CheckConfigService
 
     public function checkAllExternalIdentifiers(): array
     {
+        $this->stopwatch->start(__FUNCTION__);
         // Get all entity classes.
         $dir   = realpath(sprintf('%s/src/Entity', $this->dj->getDomjudgeWebappDir()));
         $files = glob($dir . '/*.php');
@@ -738,11 +798,13 @@ class CheckConfigService
             }
         }
 
+        $this->stopwatch->stop(__FUNCTION__);
         return $result;
     }
 
     protected function checkExternalIdentifiers(string $class, string $externalIdField): array
     {
+        $this->stopwatch->start(__FUNCTION__);
         $parts      = explode('\\', $class);
         $entityType = $parts[count($parts) - 1];
         $result     = 'O';
@@ -787,11 +849,17 @@ class CheckConfigService
             $description = 'All entities OK';
         }
 
+        $this->stopwatch->stop(__FUNCTION__);
         return [
             'caption' => ucfirst($inflector->pluralize(str_replace('_', ' ', $inflector->tableize($entityType)))),
             'result' => $result,
             'desc' => $description,
             'escape' => false,
         ];
+    }
+
+    public function getStopwatch()
+    {
+        return $this->stopwatch;
     }
 }
