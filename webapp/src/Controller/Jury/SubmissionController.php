@@ -908,7 +908,7 @@ class SubmissionController extends BaseController
                 unlink($file->getRealPath());
             }
 
-            if (!$submission) {
+            if (!$submittedSubmission) {
                 $this->addFlash('danger', $message);
                 return $this->redirectToRoute('jury_submission', ['submitId' => $submission->getSubmitid()]);
             }
