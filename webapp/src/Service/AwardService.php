@@ -10,12 +10,14 @@ class AwardService
 {
     protected EventLogService $eventLogService;
 
+    protected array $awardCache = [];
+
     public function __construct(EventLogService $eventLogService)
     {
         $this->eventLogService = $eventLogService;
     }
 
-    public function getAwards(Contest $contest, Scoreboard $scoreboard, string $requestedType = null): ?array
+    protected function loadAwards(Contest $contest, Scoreboard $scoreboard): void
     {
         $group_winners = $problem_winners = $problem_shortname = [];
         $groups = [];
@@ -38,22 +40,20 @@ class AwardService
         $results = [];
         foreach ($group_winners as $id => $team_ids) {
             $type = 'group-winner-' . $id;
-            $result = [ 'id' => $type,
+            $result = [
+                'id' => $type,
                 'citation' => 'Winner(s) of group ' . $groups[$id],
-                'team_ids' => $team_ids];
-            if ($requestedType === $type) {
-                return $result;
-            }
+                'team_ids' => $team_ids
+            ];
             $results[] = $result;
         }
         foreach ($problem_winners as $id => $team_ids) {
             $type = 'first-to-solve-' . $id;
-            $result = [ 'id' => $type,
+            $result = [
+                'id' => $type,
                 'citation' => 'First to solve problem ' . $problem_shortname[$id],
-                'team_ids' => $team_ids];
-            if ($requestedType === $type) {
-                return $result;
-            }
+                'team_ids' => $team_ids
+            ];
             $results[] = $result;
         }
         $overall_winners = $medal_winners = [];
@@ -87,9 +87,6 @@ class AwardService
                 'citation' => 'Contest winner',
                 'team_ids' => $overall_winners
             ];
-            if ($requestedType === $type) {
-                return $result;
-            }
             $results[] = $result;
         }
         foreach ($medal_winners as $metal => $team_ids) {
@@ -99,24 +96,38 @@ class AwardService
                 'citation' => ucfirst($metal) . ' medal winner',
                 'team_ids' => $team_ids
             ];
-            if ($requestedType === $type) {
-                return $result;
-            }
             $results[] = $result;
         }
 
-        // Specific type was requested, but not found above.
-        if (!is_null($requestedType)) {
-            return null;
+        $this->awardCache[$contest->getCid()] = $results;
+    }
+
+    public function getAwards(Contest $contest, Scoreboard $scoreboard, string $requestedType = null): ?array
+    {
+        if (!isset($this->awardCache[$contest->getCid()])) {
+            $this->loadAwards($contest, $scoreboard);
         }
 
-        return $results;
+        if ($requestedType === null) {
+            return $this->awardCache[$contest->getCid()];
+        }
+
+        foreach ($this->awardCache[$contest->getCid()] as $award) {
+            if ($award['id'] == $requestedType) {
+                return $award;
+            }
+        }
+
+        return null;
     }
 
     public function medalType(Team $team, Contest $contest, Scoreboard $scoreboard): ?string
     {
         $teamid = $team->getApiId($this->eventLogService);
-        $awards = $this->getAwards($contest, $scoreboard);
+        if (!isset($this->awardCache[$contest->getCid()])) {
+            $this->loadAwards($contest, $scoreboard);
+        }
+        $awards = $this->awardCache[$contest->getCid()];
         $awardsById = [];
         foreach ($awards as $award) {
             $awardsById[$award['id']] = $award;
