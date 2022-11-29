@@ -8,7 +8,11 @@ doctrine:
             collate: utf8mb4_unicode_ci
 
         url: '%env(resolve:DATABASE_URL)%'
-        profiling_collect_backtrace: '%kernel.debug%'
+        # If you want to view backtraces for queries in the Symfony debug bar,
+        # enable this. Note that this will have an impact on memory usage,
+        # especially when having many queries, like in the problem import or
+        # when running the event feed importer.
+        # profiling_collect_backtrace: '%kernel.debug%'
         types:
             tinyint: App\Doctrine\DBAL\Types\TinyIntType
             blobtext: App\Doctrine\DBAL\Types\BlobTextType
