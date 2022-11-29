@@ -7,6 +7,9 @@ use App\Entity\User;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\ExternalContestSourceService;
+use Doctrine\Bundle\DoctrineBundle\Middleware\DebugMiddleware;
+use Doctrine\DBAL\Driver\Middleware;
+use Doctrine\DBAL\Logging\Middleware as LoggingMiddleware;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Symfony\Component\Console\Command\Command;
@@ -99,12 +102,7 @@ class ImportEventFeedCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->style = new SymfonyStyle($input, $output);
-        // Disable SQL logging and profiling. This would cause a serious memory leak otherwise
-        // since this is a long-running process.
-        $this->em->getConnection()->getConfiguration()->setSQLLogger();
-        if ($this->profiler) {
-            $this->profiler->disable();
-        }
+        $this->disableSQLLoggingAndProfiling();
 
         $output->setVerbosity(OutputInterface::VERBOSITY_NORMAL);
 
@@ -229,6 +227,32 @@ class ImportEventFeedCommand extends Command
             $this->style->warning(
                 "Contest ID in external system $theirId does not match external ID in DOMjudge ($ourId)."
             );
+        }
+    }
+
+    /**
+     * @return void
+     */
+    protected function disableSQLLoggingAndProfiling(): void
+    {
+        // Disable SQL logging and profiling. This would cause a serious memory leak otherwise
+        // since this is a long-running process. We leave the Sentry middleware enabled since that
+        // is still useful and doesn't use that much memory.
+        $middlewares = $this->em->getConnection()->getConfiguration()->getMiddlewares();
+        $middlewares = array_values(array_filter($middlewares, function(Middleware $middleware): bool {
+            if ($middleware instanceof LoggingMiddleware) {
+                return false;
+            }
+
+            if ($middleware instanceof DebugMiddleware) {
+                return false;
+            }
+
+            return true;
+        }));
+        $this->em->getConnection()->getConfiguration()->setMiddlewares($middlewares);
+        if ($this->profiler) {
+            $this->profiler->disable();
         }
     }
 }
