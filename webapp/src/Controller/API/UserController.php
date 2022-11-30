@@ -84,12 +84,11 @@ class UserController extends AbstractRestController
             throw new BadRequestHttpException('Supply exactly one of \'json\' or \'tsv\'');
         }
         $message = null;
-        if ($tsvFile && ($result = $this->importExportService->importTsv('groups', $tsvFile, $message))) {
-            // TODO: better return all groups here
-            return "$result new group(s) successfully added.";
-        } elseif ($jsonFile && ($result = $this->importExportService->importJson('groups', $jsonFile, $message))) {
-            // TODO: better return all groups here
-            return "$result new group(s) successfully added.";
+        $result = -1;
+        if ((($tsvFile && ($result = $this->importExportService->importTsv('groups', $tsvFile, $message))) ||
+             ($jsonFile && ($result = $this->importExportService->importJson('groups', $jsonFile, $message)))) &&
+            $result >= 0) {
+             return "$result new group(s) successfully added.";
         } else {
             throw new BadRequestHttpException("Error while adding groups: $message");
         }
