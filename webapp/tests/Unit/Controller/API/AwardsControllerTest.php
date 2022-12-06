@@ -40,6 +40,15 @@ class AwardsControllerTest extends BaseTest
         $scoreboardService->refreshCache($contest);
     }
 
+    public function testAccessForBothAnonymousAndAuthenticated(): void
+    {
+        $url = $this->helperGetEndpointURL($this->apiEndpoint);
+        $this->verifyApiJsonResponse('GET', $url, 200);
+        foreach (['admin','demo'] as $user) {
+            $this->verifyApiJsonResponse('GET', $url, 200, $user);
+        }
+    }
+
     public function testListWithIds(): void
     {
         static::markTestSkipped(static::$skipMessageIDs);
