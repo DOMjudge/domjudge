@@ -49,4 +49,15 @@ class UserControllerTest extends BaseTest
     ];
 
     protected array $expectedAbsent = ['4242', 'nonexistent'];
+
+    public function testCreateUser(): void
+    {
+        $newUserPostData = ['username' => 'newUser',
+                            'name' => 'newUserWithName',
+                            'password' => 'xkcd-password-style-password',
+                            'roles' => ['team']];
+
+        $url = $this->helperGetEndpointURL($this->apiEndpoint);
+        $this->verifyApiJsonResponse('POST', $url, 201, 'admin', $newUserPostData);
+    }
 }
