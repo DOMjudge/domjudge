@@ -61,4 +61,28 @@ class AccountControllerTest extends BaseTest
         yield ['admin', ['id' => '1', 'team_id' => '1', 'username' => 'admin', 'type' => 'admin']];
         yield ['demo', ['id' => '3', 'team_id' => '2', 'username' => 'demo', 'type' => 'team']];
     }
+
+    public function testNewAddedAccount(): void
+    {
+        $myURL = $this->helperGetEndpointURL($this->apiEndpoint);
+        $objectsBeforeTest = $this->verifyApiJsonResponse('GET', $myURL, 200, $this->apiUser);
+
+        $newUserPostData = ['username' => 'newUser',
+                            'name' => 'newUserWithName',
+                            'password' => 'xkcd-password-style-password',
+                            'roles' => ['team']];
+        $url = $this->helperGetEndpointURL('users');
+        $this->verifyApiJsonResponse('POST', $url, 201, 'admin', $newUserPostData);
+
+        $objectsAfterTest  = $this->verifyApiJsonResponse('GET', $myURL, 200, $this->apiUser);
+        $newItems = array_map('unserialize', array_diff(array_map('serialize', $objectsAfterTest), array_map('serialize', $objectsBeforeTest)));
+        self::assertEquals(count($newItems), 1);
+        $listKey = array_keys($newItems)[0];
+        foreach ($newUserPostData as $key => $value) {
+            if ($key !== 'password') {
+                // For security we don't output the password in the API
+                self::assertEquals($newItems[$listKey][$key], $value);
+            }
+        }
+    }
 }
