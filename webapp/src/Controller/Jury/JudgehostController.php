@@ -177,7 +177,7 @@ class JudgehostController extends BaseController
             ];
         }
 
-        usort($judgehosts_table, function(array $a, array $b) {
+        usort($judgehosts_table, function (array $a, array $b) {
             return strnatcasecmp($a['data']['hostname']['value'], $b['data']['hostname']['value']);
         });
 

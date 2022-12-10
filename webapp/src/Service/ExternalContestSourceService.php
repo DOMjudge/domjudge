@@ -157,13 +157,13 @@ class ExternalContestSourceService
     {
         if (!$this->isValidContestSource()) {
             throw new LogicException('The contest source is not valid');
-	}
-	if (isset($this->cachedContestData['start_time'])) {
+        }
+        if (isset($this->cachedContestData['start_time'])) {
             return Utils::toEpochFloat($this->cachedContestData['start_time']);
-	} else {
+        } else {
             $this->logger->warning('Contest has no start time, is the contest paused?');
             return null;
-	}
+        }
     }
 
     public function getContestDuration(): string

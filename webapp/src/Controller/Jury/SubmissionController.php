@@ -534,7 +534,6 @@ class SubmissionController extends BaseController
                     }
                     $this->addFlash($type, $header . implode("\n", $errors));
                 }
-
             }
         }
 
