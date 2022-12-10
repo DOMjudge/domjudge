@@ -124,26 +124,25 @@ class JuryMiscControllerTest extends BaseTest
 
     public function provideContestStageForBalloon(): Generator
     {
-        foreach (
-            ['preActivation'=>[DemoPreActivationContestFixture::class],
-             'preStart'=>[DemoPreStartContestFixture::class],
-             'preFreeze'=>[DemoPreFreezeContestFixture::class,SampleSubmissionsThreeTriesCorrectFixture::class],
-             'preEnd'=>[DemoPreEndContestFixture::class,
-                        SampleSubmissionsMultipleTriesFixture::class,
-                        SampleSubmissionsThreeTriesCorrectFixture::class,
-                        SampleSubmissionsThreeTriesCorrectSameLanguageFixture::class],
-             'preUnfreeze'=>[DemoPreUnfreezeContestFixture::class,
+        foreach (['preActivation'=>[DemoPreActivationContestFixture::class],
+                  'preStart'=>[DemoPreStartContestFixture::class],
+                  'preFreeze'=>[DemoPreFreezeContestFixture::class,SampleSubmissionsThreeTriesCorrectFixture::class],
+                  'preEnd'=>[DemoPreEndContestFixture::class,
                              SampleSubmissionsMultipleTriesFixture::class,
                              SampleSubmissionsThreeTriesCorrectFixture::class,
                              SampleSubmissionsThreeTriesCorrectSameLanguageFixture::class],
-             'preDeactivate'=>[DemoPreDeactivateContestFixture::class,
-                               SampleSubmissionsMultipleTriesFixture::class,
-                               SampleSubmissionsThreeTriesCorrectFixture::class,
-                               SampleSubmissionsThreeTriesCorrectSameLanguageFixture::class],
-             'postDeactivate'=>[DemoPostDeactivateContestFixture::class,
-                                SampleSubmissionsMultipleTriesFixture::class,
-                                SampleSubmissionsThreeTriesCorrectFixture::class,
-                                SampleSubmissionsThreeTriesCorrectSameLanguageFixture::class]
+                  'preUnfreeze'=>[DemoPreUnfreezeContestFixture::class,
+                                  SampleSubmissionsMultipleTriesFixture::class,
+                                  SampleSubmissionsThreeTriesCorrectFixture::class,
+                                  SampleSubmissionsThreeTriesCorrectSameLanguageFixture::class],
+                  'preDeactivate'=>[DemoPreDeactivateContestFixture::class,
+                                    SampleSubmissionsMultipleTriesFixture::class,
+                                    SampleSubmissionsThreeTriesCorrectFixture::class,
+                                    SampleSubmissionsThreeTriesCorrectSameLanguageFixture::class],
+                  'postDeactivate'=>[DemoPostDeactivateContestFixture::class,
+                                     SampleSubmissionsMultipleTriesFixture::class,
+                                     SampleSubmissionsThreeTriesCorrectFixture::class,
+                                     SampleSubmissionsThreeTriesCorrectSameLanguageFixture::class]
             ] as $ident => $timeFixture) {
             foreach ([true,false] as $public) {
                 $fixture = $public ? [] : [DemoNonPublicContestFixture::class];
