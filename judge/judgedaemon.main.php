@@ -399,22 +399,22 @@ function fetch_executable_internal(
                 switch ($execlang) {
                     case 'c':
                         $buildscript .= "gcc -Wall -O2 -std=gnu11 '$source' -o run -lm\n";
-                    break;
+                        break;
                     case 'cpp':
                         $buildscript .= "g++ -Wall -O2 -std=gnu++17 '$source' -o run\n";
-                    break;
+                        break;
                     case 'java':
                         $source = basename($source, ".java");
                         $buildscript .= "javac -cp ./ -d ./ '$source'.java\n";
                         $buildscript .= "echo '#!/bin/sh' > run\n";
                         // no main class detection here
                         $buildscript .= "echo 'java -cp ./ '$source >> run\n";
-                    break;
+                        break;
                     case 'py':
                         $buildscript .= "echo '#!/bin/sh' > run\n";
                         // TODO: Check if it's 'python' or 'python3'
                         $buildscript .= "echo 'python '$source >> run\n";
-                    break;
+                        break;
                 }
                 if (file_put_contents($execbuildpath, $buildscript) === false) {
                     error("Could not write file 'build' in $execbuilddir");
