@@ -77,7 +77,7 @@ function setup_curl_handle(string $restuser, string $restpass)
 function close_curl_handles(): void
 {
     global $endpoints;
-    foreach($endpoints as $id => $endpoint) {
+    foreach ($endpoints as $id => $endpoint) {
         if (! empty($endpoint['ch'])) {
             curl_close($endpoint['ch']);
             unset($endpoints[$id]['ch']);
@@ -982,7 +982,7 @@ function read_metadata(string $filename): ?array
     // Don't quite treat it as YAML, but simply key/value pairs.
     $contents = explode("\n", dj_file_get_contents($filename));
     $res = [];
-    foreach($contents as $line) {
+    foreach ($contents as $line) {
         if (strpos($line, ":") !== false) {
             list($key, $value) = explode(":", $line, 2);
             $res[$key] = trim($value);

@@ -59,7 +59,7 @@ function overshoot_parse(float $timelimit, string $token) : float
             return $val;
         case '%':
             return $timelimit * 0.01*$val;
-        default: 
+        default:
             error("invalid timelimit overshoot token '$token'");
     }
 }
