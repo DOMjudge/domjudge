@@ -275,8 +275,13 @@ function read_judgehostlog(int $n = 20) : string
 // Fetches new executable from database if necessary, and runs build script to compile executable.
 // Returns an array with absolute path to run script and possibly an error message.
 function fetch_executable(
-    string $workdirpath, string $type, string $execid, string $hash, int $judgeTaskId, bool $combined_run_compare = false) : array
-{
+    string $workdirpath,
+    string $type,
+    string $execid,
+    string $hash,
+    int $judgeTaskId,
+    bool $combined_run_compare = false
+) : array {
     list($execrunpath, $error, $buildlogpath) = fetch_executable_internal($workdirpath, $type, $execid, $hash, $combined_run_compare);
     if (isset($error)) {
         $extra_log = null;
@@ -304,8 +309,12 @@ function fetch_executable(
 // - an error message (null if successful)
 // - optional extra build log.
 function fetch_executable_internal(
-    string $workdirpath, string $type, string $execid, string $hash, bool $combined_run_compare = false) : array
-{
+    string $workdirpath,
+    string $type,
+    string $execid,
+    string $hash,
+    bool $combined_run_compare = false
+) : array {
     $execdir         = join('/', [
         $workdirpath,
         'executable',
@@ -947,9 +956,14 @@ function registerJudgehost(string $myhost): void
     }
 }
 
-function disable(string $kind, string $idcolumn, $id, string $description,
-                 ?int $judgeTaskId = null, ?string $extra_log = null): void
-{
+function disable(
+    string $kind,
+    string $idcolumn,
+    $id,
+    string $description,
+    ?int $judgeTaskId = null,
+    ?string $extra_log = null
+): void {
     global $myhost;
     $disabled = dj_json_encode(array(
         'kind' => $kind,
@@ -1017,9 +1031,14 @@ function cleanup_judging(string $workdir) : void
     }
 }
 
-function compile(array $judgeTask, string $workdir, string $workdirpath, array $compile_config, string $cpuset_opt,
-    int $output_storage_limit): bool
-{
+function compile(
+    array $judgeTask,
+    string $workdir,
+    string $workdirpath,
+    array $compile_config,
+    string $cpuset_opt,
+    int $output_storage_limit
+): bool {
     global $myhost, $EXITCODES;
 
     // Re-use compilation if it already exists.
