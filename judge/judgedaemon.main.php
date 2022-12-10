@@ -975,7 +975,9 @@ function disable(string $kind, string $idcolumn, $id, string $description,
 
 function read_metadata(string $filename): ?array
 {
-    if (!is_readable($filename)) return null;
+    if (!is_readable($filename)) {
+        return null;
+    }
 
     // Don't quite treat it as YAML, but simply key/value pairs.
     $contents = explode("\n", dj_file_get_contents($filename));
