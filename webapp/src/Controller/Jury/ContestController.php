@@ -122,8 +122,11 @@ class ContestController extends BaseController
                 if (Utils::difftime((float)$contest->getStarttime(false), $now) <= $maxSeconds) {
                     $this->addFlash(
                         'error',
-                        sprintf("Cannot %s less than %d seconds before contest start.",
-                                $time, $maxSeconds)
+                        sprintf(
+                            "Cannot %s less than %d seconds before contest start.",
+                            $time,
+                            $maxSeconds
+                        )
                     );
                     return $this->redirectToRoute('jury_contests');
                 }
@@ -135,9 +138,11 @@ class ContestController extends BaseController
                     EventLogService::ACTION_UPDATE,
                     $contest->getCid()
                 );
-                $this->addFlash('scoreboard_refresh',
-                                'After changing the contest start time, it may be ' .
-                                'necessary to recalculate any cached scoreboards.');
+                $this->addFlash(
+                    'scoreboard_refresh',
+                    'After changing the contest start time, it may be ' .
+                    'necessary to recalculate any cached scoreboards.'
+                );
                 return $this->redirectToRoute('jury_contests');
             }
 
@@ -151,12 +156,16 @@ class ContestController extends BaseController
             // starttime is special because other, relative times depend on it.
             if ($time == 'start') {
                 if ($contest->getStarttimeEnabled() &&
-                    Utils::difftime((float)$contest->getStarttime(false),
-                                    $now) <= $maxSeconds) {
+                    Utils::difftime(
+                        (float)$contest->getStarttime(false),
+                        $now
+                    ) <= $maxSeconds) {
                     $this->addFlash(
                         'danger',
-                        sprintf("Cannot update starttime less than %d seconds before contest start.",
-                                $maxSeconds)
+                        sprintf(
+                            "Cannot update starttime less than %d seconds before contest start.",
+                            $maxSeconds
+                        )
                     );
                     return $this->redirectToRoute('jury_contests');
                 }
@@ -166,9 +175,11 @@ class ContestController extends BaseController
                     ->setStarttimeEnabled(true);
                 $em->flush();
 
-                $this->addFlash('scoreboard_refresh',
-                                'After changing the contest start time, it may be ' .
-                                'necessary to recalculate any cached scoreboards.');
+                $this->addFlash(
+                    'scoreboard_refresh',
+                    'After changing the contest start time, it may be ' .
+                    'necessary to recalculate any cached scoreboards.'
+                );
             } else {
                 $method = sprintf('set%stimeString', $time);
                 $contest->{$method}($nowstring);
@@ -403,9 +414,11 @@ class ContestController extends BaseController
             $this->em->persist($newRemovedInterval);
             $this->em->flush();
 
-            $this->addFlash('scoreboard_refresh',
+            $this->addFlash(
+                'scoreboard_refresh',
                 'After adding a removed time interval, it is ' .
-                'necessary to recalculate any cached scoreboards.');
+                'necessary to recalculate any cached scoreboards.'
+            );
             return $this->redirectToRoute('jury_contest', ['contestId' => $contestId]);
         }
 
@@ -453,8 +466,12 @@ class ContestController extends BaseController
         $contest->setAllowSubmit($request->request->getBoolean('allow_submit'));
         $this->em->flush();
 
-        $this->dj->auditlog('contest', $contestId, 'set allow submit',
-            $request->request->getBoolean('allow_submit') ? 'yes' : 'no');
+        $this->dj->auditlog(
+            'contest',
+            $contestId,
+            'set allow submit',
+            $request->request->getBoolean('allow_submit') ? 'yes' : 'no'
+        );
         return $this->redirectToRoute('jury_contest', ['contestId' => $contestId]);
     }
 
@@ -488,9 +505,11 @@ class ContestController extends BaseController
         $contest->setStarttimeString($contest->getStarttimeString());
         $this->em->flush();
 
-        $this->addFlash('scoreboard_refresh',
+        $this->addFlash(
+            'scoreboard_refresh',
             'After removing a removed time interval, it is ' .
-            'necessary to recalculate any cached scoreboards.');
+            'necessary to recalculate any cached scoreboards.'
+        );
         return $this->redirectToRoute('jury_contest', ['contestId' => $contest->getCid()]);
     }
 
@@ -571,8 +590,14 @@ class ContestController extends BaseController
             $deletedProblems = $getDeletedEntities($contest->getProblems(), 'getProbid');
 
             $this->assetUpdater->updateAssets($contest);
-            $this->saveEntity($this->em, $this->eventLogService, $this->dj, $contest,
-                              $contest->getCid(), false);
+            $this->saveEntity(
+                $this->em,
+                $this->eventLogService,
+                $this->dj,
+                $contest,
+                $contest->getCid(),
+                false
+            );
 
             $teamEndpoint         = $this->eventLogService->endpointForEntity(Team::class);
             $teamCategoryEndpoint = $this->eventLogService->endpointForEntity(TeamCategory::class);
@@ -580,16 +605,37 @@ class ContestController extends BaseController
 
             // TODO: cascade deletes. Maybe use getDependentEntities()?
             foreach ($deletedTeams as $team) {
-                $this->eventLogService->log($teamEndpoint, $team->getTeamid(),
-                    EventLogService::ACTION_DELETE, $contest->getCid(), null, null, false);
+                $this->eventLogService->log(
+                    $teamEndpoint,
+                    $team->getTeamid(),
+                    EventLogService::ACTION_DELETE,
+                    $contest->getCid(),
+                    null,
+                    null,
+                    false
+                );
             }
             foreach ($deletedTeamCategories as $category) {
-                $this->eventLogService->log($teamCategoryEndpoint, $category->getCategoryid(),
-                    EventLogService::ACTION_DELETE, $contest->getCid(), null, null, false);
+                $this->eventLogService->log(
+                    $teamCategoryEndpoint,
+                    $category->getCategoryid(),
+                    EventLogService::ACTION_DELETE,
+                    $contest->getCid(),
+                    null,
+                    null,
+                    false
+                );
             }
             foreach ($deletedProblems as $problem) {
-                $this->eventLogService->log($problemEndpoint, $problem->getProbid(),
-                    EventLogService::ACTION_DELETE, $contest->getCid(), null, null, false);
+                $this->eventLogService->log(
+                    $problemEndpoint,
+                    $problem->getProbid(),
+                    EventLogService::ACTION_DELETE,
+                    $contest->getCid(),
+                    null,
+                    null,
+                    false
+                );
             }
             return $this->redirect($this->generateUrl(
                 'jury_contest',
@@ -622,8 +668,15 @@ class ContestController extends BaseController
             return $this->redirect($this->generateUrl('jury_contest', ['contestId' => $contestId]));
         }
 
-        return $this->deleteEntities($request, $this->em, $this->dj, $this->eventLogService, $this->kernel,
-                                     [$contest], $this->generateUrl('jury_contests'));
+        return $this->deleteEntities(
+            $request,
+            $this->em,
+            $this->dj,
+            $this->eventLogService,
+            $this->kernel,
+            [$contest],
+            $this->generateUrl('jury_contests')
+        );
     }
 
     /**
@@ -639,8 +692,11 @@ class ContestController extends BaseController
         ]);
         if (!$contestProblem) {
             throw new NotFoundHttpException(
-                sprintf('Contest problem with contest ID %s and problem ID %s not found',
-                        $contestId, $probId)
+                sprintf(
+                    'Contest problem with contest ID %s and problem ID %s not found',
+                    $contestId,
+                    $probId
+                )
             );
         }
 
@@ -649,8 +705,15 @@ class ContestController extends BaseController
             return $this->redirect($this->generateUrl('jury_contest', ['contestId' => $contestId]));
         }
 
-        return $this->deleteEntities($request, $this->em, $this->dj, $this->eventLogService, $this->kernel,
-                                     [$contestProblem], $this->generateUrl('jury_contest', ['contestId' => $contestId]));
+        return $this->deleteEntities(
+            $request,
+            $this->em,
+            $this->dj,
+            $this->eventLogService,
+            $this->kernel,
+            [$contestProblem],
+            $this->generateUrl('jury_contest', ['contestId' => $contestId])
+        );
     }
 
     /**
@@ -805,8 +868,10 @@ class ContestController extends BaseController
         $contest  = $this->em->getRepository(Contest::class)->find($contestId);
         $blockers = [];
         if (Utils::difftime((float)$contest->getEndtime(), Utils::now()) > 0) {
-            $blockers[] = sprintf('Contest not ended yet (will end at %s)',
-                                  Utils::printtime($contest->getEndtime(), 'Y-m-d H:i:s (T)'));
+            $blockers[] = sprintf(
+                'Contest not ended yet (will end at %s)',
+                Utils::printtime($contest->getEndtime(), 'Y-m-d H:i:s (T)')
+            );
         }
 
         /** @var int[] $submissionIds */
@@ -820,8 +885,7 @@ class ContestController extends BaseController
             ->setParameter('contest', $contest)
             ->orderBy('s.submitid')
             ->getQuery()
-            ->getResult()
-        );
+            ->getResult());
 
         if (count($submissionIds) > 0) {
             $blockers[] = 'Unjudged submissions found: s' . implode(', s', $submissionIds);
@@ -835,8 +899,7 @@ class ContestController extends BaseController
             ->andWhere('c.answered = false')
             ->setParameter('contest', $contest)
             ->getQuery()
-            ->getResult()
-        );
+            ->getResult());
         if (count($clarificationIds) > 0) {
             $blockers[] = 'Unanswered clarifications found: ' . implode(', ', $clarificationIds);
         }
@@ -852,8 +915,12 @@ class ContestController extends BaseController
             if ($form->isSubmitted() && $form->isValid()) {
                 $contest->setFinalizetime(Utils::now());
                 $this->em->flush();
-                $this->dj->auditlog('contest', $contest->getCid(), 'finalized',
-                                                 $contest->getFinalizecomment());
+                $this->dj->auditlog(
+                    'contest',
+                    $contest->getCid(),
+                    'finalized',
+                    $contest->getFinalizecomment()
+                );
                 return $this->redirectToRoute('jury_contest', ['contestId' => $contest->getCid()]);
             }
         }
@@ -905,8 +972,11 @@ class ContestController extends BaseController
         ]);
         if (!$contestProblem) {
             throw new NotFoundHttpException(
-                sprintf('Contest problem with contest ID %s and problem ID %s not found',
-                        $contestId, $probId)
+                sprintf(
+                    'Contest problem with contest ID %s and problem ID %s not found',
+                    $contestId,
+                    $probId
+                )
             );
         }
 

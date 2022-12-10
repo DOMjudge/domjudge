@@ -169,8 +169,12 @@ class TeamController extends AbstractRestController
         $team->setClearPhoto(true);
 
         $this->assetUpdater->updateAssets($team);
-        $this->eventLogService->log('teams', $team->getTeamid(), EventLogService::ACTION_UPDATE,
-            $this->getContestId($request));
+        $this->eventLogService->log(
+            'teams',
+            $team->getTeamid(),
+            EventLogService::ACTION_UPDATE,
+            $this->getContestId($request)
+        );
 
         return new Response('', Response::HTTP_NO_CONTENT);
     }
@@ -225,8 +229,12 @@ class TeamController extends AbstractRestController
         }
 
         $this->assetUpdater->updateAssets($team);
-        $this->eventLogService->log('teams', $team->getTeamid(), EventLogService::ACTION_UPDATE,
-            $this->getContestId($request));
+        $this->eventLogService->log(
+            'teams',
+            $team->getTeamid(),
+            EventLogService::ACTION_UPDATE,
+            $this->getContestId($request)
+        );
 
         return new Response('', Response::HTTP_NO_CONTENT);
     }

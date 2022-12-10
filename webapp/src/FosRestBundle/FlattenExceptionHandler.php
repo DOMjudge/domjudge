@@ -44,8 +44,10 @@ class FlattenExceptionHandler implements SubscribingHandlerInterface
         array $type,
         Context $context
     ): array {
-        return $visitor->visitArray($this->convertToArray($exception, $context),
-            $type);
+        return $visitor->visitArray(
+            $this->convertToArray($exception, $context),
+            $type
+        );
     }
 
     private function convertToArray(

@@ -145,7 +145,7 @@ class ExecutableController extends BaseController
                 $zip         = $this->dj->openZipFile($archive->getRealPath());
                 $filename    = $archive->getClientOriginalName();
                 $id          = substr($filename, 0, strlen($filename) - strlen(".zip"));
-                if (! preg_match ('#^[a-z0-9_-]+$#i', $id)) {
+                if (! preg_match('#^[a-z0-9_-]+$#i', $id)) {
                     throw new InvalidArgumentException(sprintf("File base name '%s' must contain only alphanumerics", $id));
                 }
                 $description = $id;
@@ -336,8 +336,14 @@ class ExecutableController extends BaseController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->saveEntity($this->em, $this->eventLogService, $this->dj, $executable,
-                              $executable->getExecid(), false);
+            $this->saveEntity(
+                $this->em,
+                $this->eventLogService,
+                $this->dj,
+                $executable,
+                $executable->getExecid(),
+                false
+            );
             return $this->redirect($this->generateUrl(
                 'jury_executable',
                 ['execId' => $executable->getExecid()]
@@ -366,8 +372,14 @@ class ExecutableController extends BaseController
             $executable->setImmutableExecutable(
                 $this->dj->createImmutableExecutable($zip)
             );
-            $this->saveEntity($this->em, $this->eventLogService, $this->dj, $executable,
-                              $executable->getExecid(), false);
+            $this->saveEntity(
+                $this->em,
+                $this->eventLogService,
+                $this->dj,
+                $executable,
+                $executable->getExecid(),
+                false
+            );
             return $this->redirectToRoute('jury_executable', ['execId' => $executable->getExecid()]);
         }
 
@@ -390,8 +402,15 @@ class ExecutableController extends BaseController
             throw new NotFoundHttpException(sprintf('Executable with ID %s not found', $execId));
         }
 
-        return $this->deleteEntities($request, $this->em, $this->dj, $this->eventLogService, $this->kernel,
-                                     [$executable], $this->generateUrl('jury_executables'));
+        return $this->deleteEntities(
+            $request,
+            $this->em,
+            $this->dj,
+            $this->eventLogService,
+            $this->kernel,
+            [$executable],
+            $this->generateUrl('jury_executables')
+        );
     }
 
     /**

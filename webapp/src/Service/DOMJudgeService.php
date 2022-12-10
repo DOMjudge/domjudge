@@ -660,8 +660,10 @@ class DOMJudgeService
         } elseif ($res === ZIPARCHIVE::ER_MEMORY) {
             throw new ServiceUnavailableHttpException(null, 'Not enough memory to extract zip archive');
         } elseif ($res !== true) {
-            throw new ServiceUnavailableHttpException(null,
-                'Unknown error while extracting zip archive: ' . print_r($res, true));
+            throw new ServiceUnavailableHttpException(
+                null,
+                'Unknown error while extracting zip archive: ' . print_r($res, true)
+            );
         }
 
         return $zip;
@@ -819,7 +821,8 @@ class DOMJudgeService
             ->createQuery(
                 'SELECT COUNT(s)
                 FROM App\Entity\Submission s
-                WHERE s.contest = :cid')
+                WHERE s.contest = :cid'
+            )
             ->setParameter('cid', $contest->getCid())
             ->getSingleScalarResult();
         $stats['num_queued'] = (int)$this->em
@@ -829,7 +832,8 @@ class DOMJudgeService
                 LEFT JOIN App\Entity\Judging j WITH (j.submission = s.submitid AND j.valid != 0)
                 WHERE s.contest = :cid
                 AND j.result IS NULL
-                AND s.valid = 1')
+                AND s.valid = 1'
+            )
             ->setParameter('cid', $contest->getCid())
             ->getSingleScalarResult();
         $stats['num_judging'] = (int)$this->em
@@ -840,7 +844,8 @@ class DOMJudgeService
                 WHERE s.contest = :cid
                 AND j.result IS NULL
                 AND j.valid = 1
-                AND s.valid = 1')
+                AND s.valid = 1'
+            )
             ->setParameter('cid', $contest->getCid())
             ->getSingleScalarResult();
         return $stats;
@@ -1207,8 +1212,10 @@ class DOMJudgeService
 
     private function getProblemsForExecutable(Executable $executable): array
     {
-        $ret = array_merge($executable->getProblemsCompare()->toArray(),
-            $executable->getProblemsRun()->toArray());
+        $ret = array_merge(
+            $executable->getProblemsCompare()->toArray(),
+            $executable->getProblemsRun()->toArray()
+        );
 
         foreach (['run', 'compare'] as $type) {
             if ($executable->getExecid() == $this->config->get('default_' . $type)) {
@@ -1349,7 +1356,8 @@ class DOMJudgeService
 
         if (!$team) {
             throw new BadRequestHttpException(
-                sprintf("Team with ID '%s' not found in contest or not enabled.", $teamId));
+                sprintf("Team with ID '%s' not found in contest or not enabled.", $teamId)
+            );
         }
         return $team;
     }

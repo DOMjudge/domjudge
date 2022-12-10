@@ -126,9 +126,12 @@ abstract class BaseController extends AbstractController
 
         if ($endpoint = $eventLogService->endpointForEntity($entity)) {
             foreach ($this->contestsForEntity($entity, $DOMJudgeService) as $contest) {
-                $eventLogService->log($endpoint, $id,
-                                      $isNewEntity ? EventLogService::ACTION_CREATE : EventLogService::ACTION_UPDATE,
-                                      $contest->getCid());
+                $eventLogService->log(
+                    $endpoint,
+                    $id,
+                    $isNewEntity ? EventLogService::ACTION_CREATE : EventLogService::ACTION_UPDATE,
+                    $contest->getCid()
+                );
             }
         }
 
@@ -145,8 +148,10 @@ abstract class BaseController extends AbstractController
             $parts      = explode('/', $file);
             $shortClass = str_replace('.php', '', $parts[count($parts) - 1]);
             $class      = sprintf('App\\Entity\\%s', $shortClass);
-            if (class_exists($class) && !in_array($class,
-                [RankCache::class, ScoreCache::class, BaseApiEntity::class])) {
+            if (class_exists($class) && !in_array(
+                $class,
+                [RankCache::class, ScoreCache::class, BaseApiEntity::class]
+            )) {
                 $metadata = $entityManager->getClassMetadata($class);
 
                 $tableRelations = [];
@@ -213,9 +218,15 @@ abstract class BaseController extends AbstractController
                     $dataId = $entity->getProbid();
                 }
                 // TODO: cascade deletes. Maybe use getDependentEntities()?
-                $eventLogService->log($endpoint, $dataId,
+                $eventLogService->log(
+                    $endpoint,
+                    $dataId,
                     EventLogService::ACTION_DELETE,
-                    $cid, null, null, false);
+                    $cid,
+                    null,
+                    null,
+                    false
+                );
             }
         }
 
@@ -291,7 +302,8 @@ abstract class BaseController extends AbstractController
                                 $parts              = explode('\\', $table);
                                 $targetEntityType   = $parts[count($parts) - 1];
                                 $targetReadableType = str_replace(
-                                    '_', ' ',
+                                    '_',
+                                    ' ',
                                     $inflector->tableize($inflector->pluralize($targetEntityType))
                                 );
 
@@ -305,7 +317,8 @@ abstract class BaseController extends AbstractController
                                                 $parts                       = explode('\\', $dependentEntity);
                                                 $dependentEntityType         = $parts[count($parts) - 1];
                                                 $dependentEntitiesReadable[] = str_replace(
-                                                    '_', ' ',
+                                                    '_',
+                                                    ' ',
                                                     $inflector->tableize($inflector->pluralize($dependentEntityType))
                                                 );
                                             }
@@ -322,9 +335,13 @@ abstract class BaseController extends AbstractController
                                     case null:
                                         $isError  = true;
                                         $messages = [
-                                            sprintf('%s with %s "%s" is still referenced in %s, cannot delete.',
-                                                    ucfirst($readableType), $primaryKeyColumn, $primaryKeyColumnValue,
-                                                    $targetReadableType)
+                                            sprintf(
+                                                '%s with %s "%s" is still referenced in %s, cannot delete.',
+                                                ucfirst($readableType),
+                                                $primaryKeyColumn,
+                                                $primaryKeyColumnValue,
+                                                $targetReadableType
+                                            )
                                         ];
                                         break 4;
                                 }
@@ -379,8 +396,12 @@ abstract class BaseController extends AbstractController
             foreach ($entities as $id => $entity) {
                 $this->commitDeleteEntity($entity, $DOMJudgeService, $entityManager, $primaryKeyData[$id], $eventLogService);
                 $description = $entity->getShortDescription();
-                $msgList[] = sprintf('Successfully deleted %s %s "%s"',
-                                     $readableType, implode(', ', $primaryKeyData[$id]), $description);
+                $msgList[] = sprintf(
+                    'Successfully deleted %s %s "%s"',
+                    $readableType,
+                    implode(', ', $primaryKeyData[$id]),
+                    $description
+                );
             }
 
             $msg = implode("\n", $msgList);

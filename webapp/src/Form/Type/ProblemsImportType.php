@@ -16,7 +16,10 @@ class ProblemsImportType extends AbstractType
             'class' => Contest::class,
             'required' => true,
             'choice_label' => fn(Contest $contest) => sprintf(
-                'c%d: %s - %s', $contest->getCid(), $contest->getShortname(), $contest->getName()
+                'c%d: %s - %s',
+                $contest->getCid(),
+                $contest->getShortname(),
+                $contest->getName()
             ),
         ]);
         $builder->add('file', BootstrapFileType::class, [

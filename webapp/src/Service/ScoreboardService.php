@@ -88,8 +88,13 @@ class ScoreboardService
         $scoreCache = $this->getScorecache($contest);
 
         return new Scoreboard(
-            $contest, $teams, $categories, $problems,
-            $scoreCache, $freezeData, $jury,
+            $contest,
+            $teams,
+            $categories,
+            $problems,
+            $scoreCache,
+            $freezeData,
+            $jury,
             (int)$this->config->get('penalty_time'),
             (bool)$this->config->get('score_in_seconds')
         );
@@ -119,8 +124,14 @@ class ScoreboardService
         $teamRank   = $this->calculateTeamRank($contest, $team, $rankCache, $freezeData, true);
 
         return new SingleTeamScoreboard(
-            $contest, $team, $teamRank, $problems,
-            $rankCache, $scoreCache, $freezeData, $showFtsInFreeze,
+            $contest,
+            $team,
+            $teamRank,
+            $problems,
+            $rankCache,
+            $scoreCache,
+            $freezeData,
+            $showFtsInFreeze,
             (int)$this->config->get('penalty_time'),
             (bool)$this->config->get('score_in_seconds')
         );
@@ -160,9 +171,13 @@ class ScoreboardService
             ->andWhere('r.contest = :contest')
             ->andWhere('tc.sortorder = :sortorder')
             ->andWhere('t.enabled = 1')
-            ->andWhere(sprintf('r.points_%s > :points OR '.
+            ->andWhere(sprintf(
+                'r.points_%s > :points OR '.
                                '(r.points_%s = :points AND r.totaltime_%s < :totaltime)',
-                               $variant, $variant, $variant))
+                $variant,
+                $variant,
+                $variant
+            ))
             ->setParameter('contest', $contest)
             ->setParameter('sortorder', $sortOrder)
             ->setParameter('points', $points)
@@ -185,8 +200,11 @@ class ScoreboardService
                 ->andWhere('r.contest = :contest')
                 ->andWhere('tc.sortorder = :sortorder')
                 ->andWhere('t.enabled = 1')
-                ->andWhere(sprintf('r.points_%s = :points AND r.totaltime_%s = :totaltime',
-                                   $variant, $variant))
+                ->andWhere(sprintf(
+                    'r.points_%s = :points AND r.totaltime_%s = :totaltime',
+                    $variant,
+                    $variant
+                ))
                 ->setParameter('contest', $contest)
                 ->setParameter('sortorder', $sortOrder)
                 ->setParameter('points', $points)
@@ -238,8 +256,10 @@ class ScoreboardService
                     if ($tiedteam->getTeamid() == $team->getTeamid()) {
                         continue;
                     }
-                    if (Scoreboard::scoreTiebreaker($teamScores[$tiedteam->getTeamid()],
-                                                    $teamScores[$team->getTeamid()]) < 0) {
+                    if (Scoreboard::scoreTiebreaker(
+                        $teamScores[$tiedteam->getTeamid()],
+                        $teamScores[$team->getTeamid()]
+                    ) < 0) {
                         $rank++;
                     }
                 }
@@ -282,12 +302,20 @@ class ScoreboardService
 
         // First acquire an advisory lock to prevent other calls to this
         // method from interfering with our update.
-        $lockString = sprintf('domjudge.%d.%d.%d',
-                              $contest->getCid(), $team->getTeamid(), $problem->getProbid());
-        if ($this->em->getConnection()->fetchOne('SELECT GET_LOCK(:lock, 3)',
-                                                    ['lock' => $lockString]) != 1) {
-            throw new Exception(sprintf("ScoreboardService::calculateScoreRow failed to obtain lock '%s'",
-                                         $lockString));
+        $lockString = sprintf(
+            'domjudge.%d.%d.%d',
+            $contest->getCid(),
+            $team->getTeamid(),
+            $problem->getProbid()
+        );
+        if ($this->em->getConnection()->fetchOne(
+            'SELECT GET_LOCK(:lock, 3)',
+            ['lock' => $lockString]
+        ) != 1) {
+            throw new Exception(sprintf(
+                "ScoreboardService::calculateScoreRow failed to obtain lock '%s'",
+                $lockString
+            ));
         }
 
         // Determine whether we will use external judgements instead of judgings.
@@ -478,8 +506,10 @@ class ScoreboardService
             VALUES (:cid, :teamid, :probid, :submissionsRestricted, :pendingRestricted, :solvetimeRestricted, :isCorrectRestricted,
             :submissionsPublic, :pendingPublic, :solvetimePublic, :isCorrectPublic, :isFirstToSolve)', $params);
 
-        if ($this->em->getConnection()->fetchOne('SELECT RELEASE_LOCK(:lock)',
-                                                    ['lock' => $lockString]) != 1) {
+        if ($this->em->getConnection()->fetchOne(
+            'SELECT RELEASE_LOCK(:lock)',
+            ['lock' => $lockString]
+        ) != 1) {
             throw new Exception('ScoreboardService::calculateScoreRow failed to release lock');
         }
 
@@ -499,14 +529,18 @@ class ScoreboardService
      */
     public function updateRankCache(Contest $contest, Team $team): void
     {
-        $this->logger->debug("ScoreboardService::updateRankCache '%d' '%d'",
-                             [ $contest->getCid(), $team->getTeamid() ]);
+        $this->logger->debug(
+            "ScoreboardService::updateRankCache '%d' '%d'",
+            [ $contest->getCid(), $team->getTeamid() ]
+        );
 
         // First acquire an advisory lock to prevent other calls to this
         // method from interfering with our update.
         $lockString = sprintf('domjudge.%d.%d', $contest->getCid(), $team->getTeamid());
-        if ($this->em->getConnection()->fetchOne('SELECT GET_LOCK(:lock, 3)',
-                                                    ['lock' => $lockString]) != 1) {
+        if ($this->em->getConnection()->fetchOne(
+            'SELECT GET_LOCK(:lock, 3)',
+            ['lock' => $lockString]
+        ) != 1) {
             throw new Exception(sprintf("ScoreboardService::updateRankCache failed to obtain lock '%s'", $lockString));
         }
 
@@ -556,9 +590,12 @@ class ScoreboardService
             foreach ($variants as $variant => $isRestricted) {
                 $probId = $scoreCache->getProblem()->getProbid();
                 if (isset($contestProblems[$probId]) && $scoreCache->getIsCorrect($isRestricted)) {
-                    $penalty = Utils::calcPenaltyTime($scoreCache->getIsCorrect($isRestricted),
-                                                      $scoreCache->getSubmissions($isRestricted),
-                                                      $penaltyTime, $scoreIsInSeconds);
+                    $penalty = Utils::calcPenaltyTime(
+                        $scoreCache->getIsCorrect($isRestricted),
+                        $scoreCache->getSubmissions($isRestricted),
+                        $penaltyTime,
+                        $scoreIsInSeconds
+                    );
 
                     $numPoints[$variant] += $contestProblems[$probId]->getPoints();
                     $totalTime[$variant] += Utils::scoretime(
@@ -583,8 +620,10 @@ class ScoreboardService
             points_public, totaltime_public)
             VALUES (:cid, :teamid, :pointsRestricted, :totalTimeRestricted, :pointsPublic, :totalTimePublic)', $params);
 
-        if ($this->em->getConnection()->fetchOne('SELECT RELEASE_LOCK(:lock)',
-                                                    ['lock' => $lockString]) != 1) {
+        if ($this->em->getConnection()->fetchOne(
+            'SELECT RELEASE_LOCK(:lock)',
+            ['lock' => $lockString]
+        ) != 1) {
             throw new Exception('ScoreboardService::updateRankCache failed to release lock');
         }
     }
@@ -629,11 +668,14 @@ class ScoreboardService
             ->getQuery()
             ->getResult();
 
-        $message = sprintf('Recalculating all values for the scoreboard ' .
+        $message = sprintf(
+            'Recalculating all values for the scoreboard ' .
             'cache for contest %s (c%d, %d teams, %d problems)...',
             $contest->getShortname(),
             $contest->getCid(),
-            count($teams), count($problems));
+            count($teams),
+            count($problems)
+        );
         $progressReporter($message . "\n\n");
 
         if (count($teams) == 0) {
@@ -688,7 +730,9 @@ class ScoreboardService
         ];
         $this->em->getConnection()->executeQuery(
             'DELETE FROM scorecache WHERE cid = :cid AND probid NOT IN (:problemIds)',
-            $params, $types);
+            $params,
+            $types
+        );
 
         $params = [
             'cid' => $contest->getCid(),
@@ -696,10 +740,14 @@ class ScoreboardService
         ];
         $this->em->getConnection()->executeQuery(
             'DELETE FROM scorecache WHERE cid = :cid AND teamid NOT IN (:teamIds)',
-            $params, $types);
+            $params,
+            $types
+        );
         $this->em->getConnection()->executeQuery(
             'DELETE FROM rankcache WHERE cid = :cid AND teamid NOT IN (:teamIds)',
-            $params, $types);
+            $params,
+            $types
+        );
 
         $progressReporter(" done.\n\n");
     }
@@ -730,7 +778,12 @@ class ScoreboardService
         $this->dj->setCookie(
             'domjudge_scorefilter',
             $this->dj->jsonEncode($scoreFilter),
-            0, null, '', false, false, $response
+            0,
+            null,
+            '',
+            false,
+            false,
+            $response
         );
 
         return new Filter(

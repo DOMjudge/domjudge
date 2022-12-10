@@ -150,8 +150,14 @@ class LanguageController extends BaseController
                 $language->setExtensions(array_values($language->getExtensions()));
             }
             $this->em->persist($language);
-            $this->saveEntity($this->em, $this->eventLogService, $this->dj, $language,
-                              $language->getLangid(), true);
+            $this->saveEntity(
+                $this->em,
+                $this->eventLogService,
+                $this->dj,
+                $language,
+                $language->getLangid(),
+                true
+            );
             return $this->redirect($this->generateUrl(
                 'jury_language',
                 ['langId' => $language->getLangid()]
@@ -220,8 +226,12 @@ class LanguageController extends BaseController
         $language->setAllowSubmit($request->request->getBoolean('allow_submit'));
         $this->em->flush();
 
-        $this->dj->auditlog('language', $langId, 'set allow submit',
-                                         $request->request->getBoolean('allow_submit') ? 'yes' : 'no');
+        $this->dj->auditlog(
+            'language',
+            $langId,
+            'set allow submit',
+            $request->request->getBoolean('allow_submit') ? 'yes' : 'no'
+        );
         return $this->redirectToRoute('jury_language', ['langId' => $langId]);
     }
 
@@ -244,8 +254,12 @@ class LanguageController extends BaseController
             $this->dj->unblockJudgeTasksForLanguage($langId);
         }
 
-        $this->dj->auditlog('language', $langId, 'set allow judge',
-                                         $request->request->getBoolean('allow_judge') ? 'yes' : 'no');
+        $this->dj->auditlog(
+            'language',
+            $langId,
+            'set allow judge',
+            $request->request->getBoolean('allow_judge') ? 'yes' : 'no'
+        );
         return $this->redirectToRoute('jury_language', ['langId' => $langId]);
     }
 
@@ -270,8 +284,14 @@ class LanguageController extends BaseController
             if ($language->getExtensions()) {
                 $language->setExtensions(array_values($language->getExtensions()));
             }
-            $this->saveEntity($this->em, $this->eventLogService, $this->dj, $language,
-                              $language->getLangid(), false);
+            $this->saveEntity(
+                $this->em,
+                $this->eventLogService,
+                $this->dj,
+                $language,
+                $language->getLangid(),
+                false
+            );
             if ($language->getAllowJudge()) {
                 $this->dj->unblockJudgeTasksForLanguage($langId);
             }
@@ -299,8 +319,14 @@ class LanguageController extends BaseController
             throw new NotFoundHttpException(sprintf('Language with ID %s not found', $langId));
         }
 
-        return $this->deleteEntities($request, $this->em, $this->dj, $this->eventLogService, $this->kernel,
-                                     [$language], $this->generateUrl('jury_languages')
+        return $this->deleteEntities(
+            $request,
+            $this->em,
+            $this->dj,
+            $this->eventLogService,
+            $this->kernel,
+            [$language],
+            $this->generateUrl('jury_languages')
         );
     }
 

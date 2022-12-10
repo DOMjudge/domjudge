@@ -82,11 +82,14 @@ class MiscControllerTest extends BaseTest
      */
     public function testPrintingEnabledTeamMenu(): void
     {
-        $this->withChangedConfiguration('print_command', static::PRINT_COMMAND,
+        $this->withChangedConfiguration(
+            'print_command',
+            static::PRINT_COMMAND,
             function () {
                 $this->verifyPageResponse('GET', '/team', 200);
                 $this->assertSelectorExists('a:contains("Print")');
-            });
+            }
+        );
     }
 
     /**
@@ -94,7 +97,9 @@ class MiscControllerTest extends BaseTest
      */
     public function testPrintingEnabledSubmitForm(): void
     {
-        $this->withChangedConfiguration('print_command', static::PRINT_COMMAND,
+        $this->withChangedConfiguration(
+            'print_command',
+            static::PRINT_COMMAND,
             function () {
                 $this->client->request('GET', '/team/print');
 
@@ -106,14 +111,19 @@ class MiscControllerTest extends BaseTest
                     'print[langid]' => 'kt',
                 ]);
 
-                $this->assertSelectorTextContains('div.alert.alert-success',
-                    'File has been printed');
+                $this->assertSelectorTextContains(
+                    'div.alert.alert-success',
+                    'File has been printed'
+                );
 
                 $text = trim($crawler->filter('pre')->text(null, false));
                 $this->assertStringStartsWith('kt', $text);
                 $this->assertStringEndsWith(
-                    trim(file_get_contents($testFile)), $text);
-            });
+                    trim(file_get_contents($testFile)),
+                    $text
+                );
+            }
+        );
     }
 
     /**
@@ -124,8 +134,10 @@ class MiscControllerTest extends BaseTest
     public function testChangeContest(bool $withReferrer): void
     {
         $start       = (int)floor(microtime(true) - 1800);
-        $startString = date('Y-m-d H:i:s ',
-                $start) . date_default_timezone_get();
+        $startString = date(
+            'Y-m-d H:i:s ',
+            $start
+        ) . date_default_timezone_get();
 
         // Create a second contest.
         $contest = new Contest();
@@ -166,11 +178,15 @@ class MiscControllerTest extends BaseTest
 
         // Check that we are still on the scoreboard.
         if ($withReferrer) {
-            self::assertEquals('http://localhost/team/scoreboard',
-                               $this->client->getRequest()->getUri());
+            self::assertEquals(
+                'http://localhost/team/scoreboard',
+                $this->client->getRequest()->getUri()
+            );
         } else {
-            self::assertEquals('http://localhost/team',
-                               $this->client->getRequest()->getUri());
+            self::assertEquals(
+                'http://localhost/team',
+                $this->client->getRequest()->getUri()
+            );
 
             // Go to the scoreboard again.
             $this->client->request('GET', '/team/scoreboard');

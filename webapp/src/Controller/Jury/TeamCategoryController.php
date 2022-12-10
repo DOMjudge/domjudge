@@ -191,8 +191,14 @@ class TeamCategoryController extends BaseController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->saveEntity($this->em, $this->eventLogService, $this->dj, $teamCategory,
-                              $teamCategory->getCategoryid(), false);
+            $this->saveEntity(
+                $this->em,
+                $this->eventLogService,
+                $this->dj,
+                $teamCategory,
+                $teamCategory->getCategoryid(),
+                false
+            );
             // Also emit an update event for all teams of the category, since the hidden property might have changed
             $teams = $teamCategory->getTeams();
             if (!$teams->isEmpty()) {
@@ -231,8 +237,15 @@ class TeamCategoryController extends BaseController
             throw new NotFoundHttpException(sprintf('Team category with ID %s not found', $categoryId));
         }
 
-        return $this->deleteEntities($request, $this->em, $this->dj, $this->eventLogService, $this->kernel,
-                                     [$teamCategory], $this->generateUrl('jury_team_categories'));
+        return $this->deleteEntities(
+            $request,
+            $this->em,
+            $this->dj,
+            $this->eventLogService,
+            $this->kernel,
+            [$teamCategory],
+            $this->generateUrl('jury_team_categories')
+        );
     }
 
     /**

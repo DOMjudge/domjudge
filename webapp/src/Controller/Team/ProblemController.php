@@ -53,8 +53,10 @@ class ProblemController extends BaseController
     public function problemsAction(): Response
     {
         $teamId = $this->dj->getUser()->getTeam()->getTeamid();
-        return $this->render('team/problems.html.twig',
-            $this->dj->getTwigDataForProblemsAction($teamId, $this->stats));
+        return $this->render(
+            'team/problems.html.twig',
+            $this->dj->getTwigDataForProblemsAction($teamId, $this->stats)
+        );
     }
 
 
@@ -93,8 +95,10 @@ class ProblemController extends BaseController
             Contest $contest,
             ContestProblem $contestProblem
         ) use ($attachmentId) {
-            return $this->dj->getAttachmentStreamedResponse($contestProblem,
-                $attachmentId);
+            return $this->dj->getAttachmentStreamedResponse(
+                $contestProblem,
+                $attachmentId
+            );
         });
     }
 

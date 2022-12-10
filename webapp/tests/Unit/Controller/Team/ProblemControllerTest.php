@@ -47,7 +47,9 @@ class ProblemControllerTest extends BaseTest
                 stream_get_contents($data['problemtext']);
         }
 
-        $this->withChangedConfiguration('show_limits_on_team_page', $withLimits,
+        $this->withChangedConfiguration(
+            'show_limits_on_team_page',
+            $withLimits,
             function () use (
                 $problemTexts,
                 $descriptions,
@@ -58,8 +60,10 @@ class ProblemControllerTest extends BaseTest
                 $crawler = $this->client->request('GET', '/team/problems');
 
                 // Check that the correct menu item is selected.
-                $this->assertSelectorTextContains('.nav-item.active .nav-link',
-                    'Problemset');
+                $this->assertSelectorTextContains(
+                    '.nav-item.active .nav-link',
+                    'Problemset'
+                );
 
                 // Get the card bodies and verify we have exactly three of them.
                 $cardBodies = $crawler->filter('.card-body');
@@ -67,10 +71,14 @@ class ProblemControllerTest extends BaseTest
 
                 for ($i = 0; $i < 3; $i++) {
                     $card = $cardBodies->eq($i);
-                    $this->assertSame($letters[$i],
-                        $card->filter('.card-title')->text(null, true));
-                    $this->assertSame($descriptions[$i],
-                        $card->filter('h3.card-subtitle')->text(null, true));
+                    $this->assertSame(
+                        $letters[$i],
+                        $card->filter('.card-title')->text(null, true)
+                    );
+                    $this->assertSame(
+                        $descriptions[$i],
+                        $card->filter('h3.card-subtitle')->text(null, true)
+                    );
 
                     if ($withLimits) {
                         $this->assertSame(
@@ -78,8 +86,10 @@ class ProblemControllerTest extends BaseTest
                             $card->filter('h4.card-subtitle')->text(null, true)
                         );
                     } else {
-                        $this->assertSame(0,
-                            $card->filter('h4.card-subtitle')->count());
+                        $this->assertSame(
+                            0,
+                            $card->filter('h4.card-subtitle')->count()
+                        );
                     }
 
                     // Download the problem text and make sure it is correct.
@@ -90,7 +100,8 @@ class ProblemControllerTest extends BaseTest
 
                     $this->assertSame($problemTexts[$i], $content);
                 }
-            });
+            }
+        );
     }
 
     public function withLimitsProvider(): Generator
@@ -126,17 +137,25 @@ class ProblemControllerTest extends BaseTest
         $cardBodies = $crawler->filter('.card-body');
 
         // The first and last card should not have any samples.
-        self::assertSame(0,
-                         $cardBodies->eq(0)->filter('.list-group .list-group-item')->count());
-        self::assertSame(0,
-                         $cardBodies->eq(2)->filter('.list-group .list-group-item')->count());
+        self::assertSame(
+            0,
+            $cardBodies->eq(0)->filter('.list-group .list-group-item')->count()
+        );
+        self::assertSame(
+            0,
+            $cardBodies->eq(2)->filter('.list-group .list-group-item')->count()
+        );
 
         // Check the link to download all samples.
         $link = $cardBodies->eq(1)->filter('a')->eq(1);
         self::assertSame('samples', $link->text(null, true));
-        self::assertSame(sprintf('/team/%d/samples.zip',
-                                 $problem->getProbid()),
-                         $link->attr('href'));
+        self::assertSame(
+            sprintf(
+                '/team/%d/samples.zip',
+                $problem->getProbid()
+            ),
+            $link->attr('href')
+        );
 
         // Download the sample and make sure the contents are correct.
         // We use ob_ methods since this is a streamed response.

@@ -337,8 +337,12 @@ class JudgehostController extends AbstractFOSRestController
                     $this->em->flush();
                     $submissionId = $submission->getSubmitid();
                     $contestId    = $submission->getContest()->getCid();
-                    $this->eventLogService->log('submission', $submissionId,
-                                                EventLogService::ACTION_UPDATE, $contestId);
+                    $this->eventLogService->log(
+                        'submission',
+                        $submissionId,
+                        EventLogService::ACTION_UPDATE,
+                        $contestId
+                    );
 
                     // As EventLogService::log() will clear the entity manager, so the judging has
                     // now become detached. We will have to reload it.
@@ -360,8 +364,12 @@ class JudgehostController extends AbstractFOSRestController
                     $this->em->flush();
 
                     if ($judging->getValid()) {
-                        $this->eventLogService->log('judging', $judging->getJudgingid(),
-                            EventLogService::ACTION_CREATE, $judging->getContest()->getCid());
+                        $this->eventLogService->log(
+                            'judging',
+                            $judging->getJudgingid(),
+                            EventLogService::ACTION_CREATE,
+                            $judging->getContest()->getCid()
+                        );
                     }
                 } elseif ($judging->getResult() === Judging::RESULT_COMPILER_ERROR) {
                     // The new result contradicts a former one, that's not good.
@@ -410,8 +418,12 @@ class JudgehostController extends AbstractFOSRestController
                         $this->em->flush();
 
                         if ($judging->getValid()) {
-                            $this->eventLogService->log('judging', $judging->getJudgingid(),
-                                EventLogService::ACTION_CREATE, $judging->getContest()->getCid());
+                            $this->eventLogService->log(
+                                'judging',
+                                $judging->getJudgingid(),
+                                EventLogService::ACTION_CREATE,
+                                $judging->getContest()->getCid()
+                            );
                         }
 
                         // As EventLogService::log() will clear the entity manager, so the judging has
@@ -449,15 +461,25 @@ class JudgehostController extends AbstractFOSRestController
 
                     $judgingId = $judging->getJudgingid();
                     $contestId = $judging->getSubmission()->getContest()->getCid();
-                    $this->dj->auditlog('judging', $judgingId, 'judged',
-                                        'compiler-error', $judgehost->getHostname(), $contestId);
+                    $this->dj->auditlog(
+                        'judging',
+                        $judgingId,
+                        'judged',
+                        'compiler-error',
+                        $judgehost->getHostname(),
+                        $contestId
+                    );
 
                     $this->maybeUpdateActiveJudging($judging);
                     $this->em->flush();
                     if (!$this->config->get('verification_required') &&
                         $judging->getValid()) {
-                        $this->eventLogService->log('judging', $judgingId,
-                                                    EventLogService::ACTION_UPDATE, $contestId);
+                        $this->eventLogService->log(
+                            'judging',
+                            $judgingId,
+                            EventLogService::ACTION_UPDATE,
+                            $contestId
+                        );
                     }
 
                     $submission = $judging->getSubmission();
@@ -466,8 +488,11 @@ class JudgehostController extends AbstractFOSRestController
                     $problem    = $submission->getProblem();
                     $this->scoreboardService->calculateScoreRow($contest, $team, $problem);
 
-                    $message = sprintf("submission %d, judging %d: compiler-error",
-                                       $submission->getSubmitid(), $judging->getJudgingid());
+                    $message = sprintf(
+                        "submission %d, judging %d: compiler-error",
+                        $submission->getSubmitid(),
+                        $judging->getJudgingid()
+                    );
                     $this->dj->alert('reject', $message);
                 });
             }
@@ -507,7 +532,8 @@ class JudgehostController extends AbstractFOSRestController
         $judgeTask = $this->em->getRepository(JudgeTask::class)->find($judgeTaskId);
         if ($judgeTask === null) {
             throw new BadRequestHttpException(
-                'Inconsistent data, no judgetask known with judgetaskid = ' . $judgeTaskId . '.');
+                'Inconsistent data, no judgetask known with judgetaskid = ' . $judgeTaskId . '.'
+            );
         }
 
         if ($judgeTask->getRunScriptId() === null) {
@@ -525,7 +551,8 @@ class JudgehostController extends AbstractFOSRestController
         foreach ($required as $argument) {
             if (!$request->request->has($argument)) {
                 throw new BadRequestHttpException(
-                    sprintf("Argument '%s' is mandatory", $argument));
+                    sprintf("Argument '%s' is mandatory", $argument)
+                );
             }
         }
 
@@ -539,7 +566,8 @@ class JudgehostController extends AbstractFOSRestController
             $judging = $this->em->getRepository(Judging::class)->find($judgeTask->getJobId());
             if ($judging === null) {
                 throw new BadRequestHttpException(
-                    'Inconsistent data, no judging known with judgingid = ' . $judgeTask->getJobId() . '.');
+                    'Inconsistent data, no judging known with judgingid = ' . $judgeTask->getJobId() . '.'
+                );
             }
             if ($tempFilename = tempnam($this->dj->getDomjudgeTmpDir(), "full-debug-")) {
                 $debug_package = base64_decode($request->request->get('full_debug'));
@@ -562,7 +590,8 @@ class JudgehostController extends AbstractFOSRestController
             );
             if ($judgingRun === null) {
                 throw new BadRequestHttpException(
-                    'Inconsistent data, no judging run known with jid = ' . $judgeTask->getJobId() . '.');
+                    'Inconsistent data, no judging run known with jid = ' . $judgeTask->getJobId() . '.'
+                );
             }
 
             $outputRun = base64_decode($request->request->get('output_run'));
@@ -661,7 +690,8 @@ class JudgehostController extends AbstractFOSRestController
         foreach ($required as $argument) {
             if (!$request->request->has($argument)) {
                 throw new BadRequestHttpException(
-                    sprintf("Argument '%s' is mandatory", $argument));
+                    sprintf("Argument '%s' is mandatory", $argument)
+                );
             }
         }
 
@@ -679,8 +709,17 @@ class JudgehostController extends AbstractFOSRestController
             throw new BadRequestHttpException("Who are you and why are you sending us any data?");
         }
 
-        $hasFinalResult = $this->addSingleJudgingRun($judgeTaskId, $hostname, $runResult, $runTime,
-            $outputSystem, $outputError, $outputDiff, $outputRun, $metadata);
+        $hasFinalResult = $this->addSingleJudgingRun(
+            $judgeTaskId,
+            $hostname,
+            $runResult,
+            $runTime,
+            $outputSystem,
+            $outputError,
+            $outputDiff,
+            $outputRun,
+            $metadata
+        );
         $judgehost = $this->em->getRepository(Judgehost::class)->findOneBy(['hostname' => $hostname]);
         $judgehost->setPolltime(Utils::now());
         $this->em->flush();
@@ -918,9 +957,15 @@ class JudgehostController extends AbstractFOSRestController
                 $this->em->flush();
             }
 
-            $this->dj->auditlog('judging', $judgingId, 'given back'
-                . ($judgehost === null ? '' : ' for judgehost ' . $judgehost->getHostname()), null,
-                $judgehost === null ? null : $judgehost->getHostname(), $judging->getContest()->getCid());
+            $this->dj->auditlog(
+                'judging',
+                $judgingId,
+                'given back'
+                . ($judgehost === null ? '' : ' for judgehost ' . $judgehost->getHostname()),
+                null,
+                $judgehost === null ? null : $judgehost->getHostname(),
+                $judging->getContest()->getCid()
+            );
         }
     }
 
@@ -949,8 +994,10 @@ class JudgehostController extends AbstractFOSRestController
         $resultsPrio  = $this->config->get('results_prio');
 
         if (array_key_exists($runResult, $resultsRemap)) {
-            $this->logger->info('JudgeTask %d remapping result %s -> %s',
-                                [ $judgeTaskId, $runResult, $resultsRemap[$runResult] ]);
+            $this->logger->info(
+                'JudgeTask %d remapping result %s -> %s',
+                [ $judgeTaskId, $runResult, $resultsRemap[$runResult] ]
+            );
             $runResult = $resultsRemap[$runResult];
         }
 
@@ -966,10 +1013,12 @@ class JudgehostController extends AbstractFOSRestController
         ) {
             /** @var JudgingRun $judgingRun */
             $judgingRun = $this->em->getRepository(JudgingRun::class)->findOneBy(
-                ['judgetaskid' => $judgeTaskId]);
+                ['judgetaskid' => $judgeTaskId]
+            );
             if ($judgingRun === null) {
                 throw new BadRequestHttpException(
-                    'Inconsistent data, no judging run known with judgetaskid = ' . $judgeTaskId . '.');
+                    'Inconsistent data, no judging run known with judgetaskid = ' . $judgeTaskId . '.'
+                );
             }
             $judgingRunOutput = new JudgingRunOutput();
             $judgingRun->setOutput($judgingRunOutput);
@@ -989,8 +1038,12 @@ class JudgehostController extends AbstractFOSRestController
             $this->em->flush();
 
             if ($judging->getValid()) {
-                $this->eventLogService->log('judging_run', $judgingRun->getRunid(),
-                                            EventLogService::ACTION_CREATE, $judging->getContest()->getCid());
+                $this->eventLogService->log(
+                    'judging_run',
+                    $judgingRun->getRunid(),
+                    EventLogService::ACTION_CREATE,
+                    $judging->getContest()->getCid()
+                );
             }
         });
 
@@ -1084,8 +1137,12 @@ class JudgehostController extends AbstractFOSRestController
                 // We call alert here before possible validation. Note that
                 // this means that these alert messages should be treated as
                 // confidential information.
-                $msg = sprintf("submission %s, judging %s: %s",
-                               $submission->getSubmitid(), $judging->getJudgingid(), $result);
+                $msg = sprintf(
+                    "submission %s, judging %s: %s",
+                    $submission->getSubmitid(),
+                    $judging->getJudgingid(),
+                    $result
+                );
                 $this->dj->alert($result === 'correct' ? 'accept' : 'reject', $msg);
 
                 // Potentially send a balloon, i.e. if no verification required (case of verification required is
@@ -1099,8 +1156,12 @@ class JudgehostController extends AbstractFOSRestController
 
             // Send an event for an endtime (and max runtime update).
             if ($judging->getValid()) {
-                $this->eventLogService->log('judging', $judging->getJudgingid(),
-                    EventLogService::ACTION_UPDATE, $judging->getContest()->getCid());
+                $this->eventLogService->log(
+                    'judging',
+                    $judging->getJudgingid(),
+                    EventLogService::ACTION_UPDATE,
+                    $judging->getContest()->getCid()
+                );
             }
         }
 
@@ -1160,7 +1221,8 @@ class JudgehostController extends AbstractFOSRestController
                         'UPDATE submission
                             SET rejudgingid = NULL
                             WHERE rejudgingid = :rejudgingid',
-                        ['rejudgingid' => $rejudgingid]);
+                        ['rejudgingid' => $rejudgingid]
+                    );
                     $this->em->flush();
 
                     $skipped = [];
@@ -1177,8 +1239,15 @@ class JudgehostController extends AbstractFOSRestController
                         ->setHint(Query::HINT_REFRESH, true)
                         ->getResult();
                     // TODO: Pick up priority from previous judgings?
-                    $this->rejudgingService->createRejudging($rejudging->getReason(), JudgeTask::PRIORITY_DEFAULT, $judgings,
-                        false, $rejudging->getRepeat(), $rejudging->getRepeatedRejudging(), $skipped);
+                    $this->rejudgingService->createRejudging(
+                        $rejudging->getReason(),
+                        JudgeTask::PRIORITY_DEFAULT,
+                        $judgings,
+                        false,
+                        $rejudging->getRepeat(),
+                        $rejudging->getRepeatedRejudging(),
+                        $skipped
+                    );
                 }
             }
         }
@@ -1313,7 +1382,8 @@ class JudgehostController extends AbstractFOSRestController
         $judgehost = $this->em->getRepository(Judgehost::class)->findOneBy(['hostname' => $hostname]);
         if (!$judgehost) {
             throw new BadRequestHttpException(
-                'Register yourself first. You (' . $hostname . ') are not known to us yet.');
+                'Register yourself first. You (' . $hostname . ') are not known to us yet.'
+            );
         }
 
         // Update last seen of judgehost
@@ -1538,7 +1608,8 @@ class JudgehostController extends AbstractFOSRestController
                 ->andWhere($queryBuilder->expr()->In('jt.judgetaskid', $judgetaskids))
                 ->getQuery()
                 ->getArrayResult(),
-            'judgetaskid');
+            'judgetaskid'
+        );
 
         $partialJudgeTasks = [];
         foreach ($judgeTasks as $judgeTask) {

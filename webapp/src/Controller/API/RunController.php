@@ -40,8 +40,12 @@ class RunController extends AbstractRestController implements QueryObjectTransfo
         ConfigurationService $config,
         EventLogService $eventLogService
     ) {
-        parent::__construct($entityManager, $DOMJudgeService, $config,
-            $eventLogService);
+        parent::__construct(
+            $entityManager,
+            $DOMJudgeService,
+            $config,
+            $eventLogService
+        );
 
         $verdictsConfig = $this->dj->getDomjudgeEtcDir() . '/verdicts.php';
         $this->verdicts = include $verdictsConfig;

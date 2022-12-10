@@ -34,7 +34,9 @@ class RejudgingType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder->add('reason', TextType::class);
-        $builder->add('priority', ChoiceType::class,
+        $builder->add(
+            'priority',
+            ChoiceType::class,
             [
                 'choices' => [
                     'low' => 'low',
@@ -201,14 +203,16 @@ class RejudgingType extends AbstractType
             ]);
         };
 
-        $builder->addEventListener(FormEvents::PRE_SET_DATA,
+        $builder->addEventListener(
+            FormEvents::PRE_SET_DATA,
             function (FormEvent $event) use ($formProblemModifier) {
                 $data = $event->getData();
                 $formProblemModifier($event->getForm(), $data['contests'] ?? []);
             }
         );
 
-        $builder->get('contests')->addEventListener(FormEvents::POST_SUBMIT,
+        $builder->get('contests')->addEventListener(
+            FormEvents::POST_SUBMIT,
             function (FormEvent $event) use ($formProblemModifier) {
                 $contests = $event->getForm()->getData();
                 $formProblemModifier($event->getForm()->getParent(), $contests);

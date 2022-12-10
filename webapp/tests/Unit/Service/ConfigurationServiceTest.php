@@ -49,7 +49,8 @@ class ConfigurationServiceTest extends KernelTestCase
             ->willReturnMap([[Configuration::class, $this->configRepository]]);
         $this->logger                 = $this->createMock(LoggerInterface::class);
         $this->config                 = new ConfigurationService(
-            $this->em, $this->logger,
+            $this->em,
+            $this->logger,
             self::getContainer()->get('config_cache_factory'),
             self::getContainer()->getParameter('kernel.debug'),
             self::getContainer()->getParameter('kernel.cache_dir'),
@@ -190,7 +191,8 @@ class ConfigurationServiceTest extends KernelTestCase
         // Also make sure it doesn't change other items by testing a different one
         $defaultCompareItem = $this->findItem('Judging', 'default_compare');
         self::assertSame(
-            $defaultCompareItem['default_value'], $all['default_compare']
+            $defaultCompareItem['default_value'],
+            $all['default_compare']
         );
     }
 
@@ -378,7 +380,8 @@ class ConfigurationServiceTest extends KernelTestCase
         }
 
         self::assertNotNull(
-            $foundItem, 'Config item not found in db-config.yaml.'
+            $foundItem,
+            'Config item not found in db-config.yaml.'
         );
 
         return $foundItem;

@@ -44,8 +44,11 @@ class TeamClarificationType extends AbstractType
                 /** @var ContestProblem $problem */
                 foreach ($contest->getProblems() as $problem) {
                     if ($problem->getAllowSubmit()) {
-                        $problemName            = sprintf('%s: %s', $problem->getShortname(),
-                                                          $problem->getProblem()->getName());
+                        $problemName            = sprintf(
+                            '%s: %s',
+                            $problem->getShortname(),
+                            $problem->getProblem()->getName()
+                        );
                         $subjects[$problemName] = sprintf('%d-%d', $contest->getCid(), $problem->getProbid());
                     }
                 }

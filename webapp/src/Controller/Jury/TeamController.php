@@ -284,8 +284,14 @@ class TeamController extends BaseController
             $data = array_merge(
                 $data,
                 $scoreboardService->getScoreboardTwigData(
-                    $request, null, '', true, false, false,
-                    $currentContest, $scoreboard
+                    $request,
+                    null,
+                    '',
+                    true,
+                    false,
+                    false,
+                    $currentContest,
+                    $scoreboard
                 )
             );
             $data['limitToTeams'] = [$team];
@@ -351,8 +357,14 @@ class TeamController extends BaseController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $this->assetUpdater->updateAssets($team);
-            $this->saveEntity($this->em, $this->eventLogService, $this->dj, $team,
-                              $team->getTeamid(), false);
+            $this->saveEntity(
+                $this->em,
+                $this->eventLogService,
+                $this->dj,
+                $team,
+                $team->getTeamid(),
+                false
+            );
             return $this->redirect($this->generateUrl(
                 'jury_team',
                 ['teamId' => $team->getTeamid()]
@@ -377,8 +389,15 @@ class TeamController extends BaseController
             throw new NotFoundHttpException(sprintf('Team with ID %s not found', $teamId));
         }
 
-        return $this->deleteEntities($request, $this->em, $this->dj, $this->eventLogService, $this->kernel,
-                                     [$team], $this->generateUrl('jury_teams'));
+        return $this->deleteEntities(
+            $request,
+            $this->em,
+            $this->dj,
+            $this->eventLogService,
+            $this->kernel,
+            [$team],
+            $this->generateUrl('jury_teams')
+        );
     }
 
     /**

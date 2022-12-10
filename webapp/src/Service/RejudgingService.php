@@ -264,9 +264,15 @@ class RejudgingService
                     $this->scoreboardService->calculateScoreRow($contest, $team, $problem);
 
                     // Update event log.
-                    $this->eventLogService->log('judging', $submission['judgingid'],
-                                                EventLogService::ACTION_CREATE,
-                                                $submission['cid'], null, null, false);
+                    $this->eventLogService->log(
+                        'judging',
+                        $submission['judgingid'],
+                        EventLogService::ACTION_CREATE,
+                        $submission['cid'],
+                        null,
+                        null,
+                        false
+                    );
 
                     $runData = $this->em->createQueryBuilder()
                         ->from(JudgingRun::class, 'r')
@@ -278,9 +284,15 @@ class RejudgingService
                         ->getResult();
                     $runIds  = array_map(fn(array $data) => $data['runid'], $runData);
                     if (!empty($runIds)) {
-                        $this->eventLogService->log('judging_run', $runIds,
-                                                    EventLogService::ACTION_CREATE,
-                                                    $submission['cid'], null, null, false);
+                        $this->eventLogService->log(
+                            'judging_run',
+                            $runIds,
+                            EventLogService::ACTION_CREATE,
+                            $submission['cid'],
+                            null,
+                            null,
+                            false
+                        );
                     }
 
                     // Update balloons.
@@ -299,17 +311,23 @@ class RejudgingService
                     'UPDATE submission
                             SET rejudgingid = NULL
                             WHERE rejudgingid = :rejudgingid
-                            AND submitid = :submitid', $params);
+                            AND submitid = :submitid',
+                    $params
+                );
                 $this->em->getConnection()->executeQuery(
                     'UPDATE judgetask
                             SET valid = 0
                             WHERE jobid = :judgingid
-                            AND judgehostid IS NULL', ['judgingid' => $submission['judgingid']]);
+                            AND judgehostid IS NULL',
+                    ['judgingid' => $submission['judgingid']]
+                );
                 $this->em->getConnection()->executeQuery(
                     'UPDATE judging
                             SET result = :aborted
                             WHERE judgingid = :judgingid
-                            AND result IS NULL', ['aborted' => 'aborted', 'judgingid' => $submission['judgingid']]);
+                            AND result IS NULL',
+                    ['aborted' => 'aborted', 'judgingid' => $submission['judgingid']]
+                );
             } else {
                 $error = "Unknown action '$action' specified.";
                 throw new BadMethodCallException($error);

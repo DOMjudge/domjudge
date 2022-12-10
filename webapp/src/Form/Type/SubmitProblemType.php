@@ -55,7 +55,9 @@ class SubmitProblemType extends AbstractType
                 ->setParameter('contest', $contest)
                 ->addOrderBy('cp.shortname'),
             'choice_label' => fn(Problem $problem) => sprintf(
-                '%s - %s', $problem->getContestProblems()->first()->getShortName(), $problem->getName()
+                '%s - %s',
+                $problem->getContestProblems()->first()->getShortName(),
+                $problem->getName()
             ),
             'placeholder' => 'Select a problem',
         ];
@@ -81,8 +83,10 @@ class SubmitProblemType extends AbstractType
                     /** @var Language $language */
                     $language = $form->get('language')->getData();
                     if ($language->getRequireEntryPoint() && empty($value)) {
-                        $message = sprintf('%s required, but not specified',
-                                           $language->getEntryPointDescription() ?: 'Entry point');
+                        $message = sprintf(
+                            '%s required, but not specified',
+                            $language->getEntryPointDescription() ?: 'Entry point'
+                        );
                         $context
                             ->buildViolation($message)
                             ->atPath('entry_point')

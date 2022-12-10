@@ -125,10 +125,16 @@ abstract class BaseTest extends WebTestCase
 
         // Check redirect to $redirectPage.
         $message = var_export($response, true);
-        self::assertEquals($responseCode, $response->getStatusCode(),
-            $message);
-        self::assertEquals($redirectPage,
-            $this->client->getRequest()->getUri(), $message);
+        self::assertEquals(
+            $responseCode,
+            $response->getStatusCode(),
+            $message
+        );
+        self::assertEquals(
+            $redirectPage,
+            $this->client->getRequest()->getUri(),
+            $message
+        );
 
         return $this->client;
     }

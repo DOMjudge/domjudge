@@ -73,7 +73,9 @@ class QueuetaskIntegrationTest extends KernelTestCase
         $this->em = self::getContainer()->get('doctrine')->getManager();
 
         $this->scoreboardService = new ScoreboardService(
-            $this->em, $dj, $this->config,
+            $this->em,
+            $dj,
+            $this->config,
             self::getContainer()->get(LoggerInterface::class),
             self::getContainer()->get(EventLogService::class)
         );
@@ -191,9 +193,20 @@ class QueuetaskIntegrationTest extends KernelTestCase
         $problem = $problem ?? $this->problems[0];
         $problem = $this->em->getRepository(Problem::class)->find($problem->getProbid());
         $submission = $this->submissionService->submitSolution(
-            $team, null, $problem, $contest, 'c',
-            [new UploadedFile(__FILE__, "foo.c", null, null, true)], $source,
-            null, null, null, null, $time, $message);
+            $team,
+            null,
+            $problem,
+            $contest,
+            'c',
+            [new UploadedFile(__FILE__, "foo.c", null, null, true)],
+            $source,
+            null,
+            null,
+            null,
+            null,
+            $time,
+            $message
+        );
         self::assertNotNull($submission, 'from submitSolution: ' . $message);
 
         $judging = $submission->getJudgings()->get(0);

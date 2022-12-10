@@ -36,7 +36,13 @@ class ScoreboardController extends AbstractController
         $refreshUrl = $this->generateUrl('jury_scoreboard');
         $contest    = $this->dj->getCurrentContest();
         $data       = $this->scoreboardService->getScoreboardTwigData(
-            $request, $response, $refreshUrl, $this->isGranted('ROLE_JURY'), false, false, $contest
+            $request,
+            $response,
+            $refreshUrl,
+            $this->isGranted('ROLE_JURY'),
+            false,
+            false,
+            $contest
         );
 
         if ($request->isXmlHttpRequest()) {

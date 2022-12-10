@@ -193,9 +193,19 @@ class QueueTaskControllerTest extends BaseTest
         $team = $this->em->getRepository(Team::class)->findOneBy(['name' => $team]);
         $problem = $this->em->getRepository(Problem::class)->findOneBy(['externalid' => $problem]);
         return $this->submissionService->submitSolution(
-            $team, null, $problem, $contest, 'c',
+            $team,
+            null,
+            $problem,
+            $contest,
+            'c',
             [new UploadedFile(__FILE__, "foo.c", null, null, true)],
-            null, null, null, null, null, null, $msg
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            $msg
         );
     }
 

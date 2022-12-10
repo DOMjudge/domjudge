@@ -65,13 +65,19 @@ class ICPCCmsService
         ]);
 
         if ($response->getStatusCode() >= 400 && $response->getStatusCode() < 500) {
-            $message = sprintf('Access forbidden, is your token valid? Did you specify the correct contest ID? %s',
-                               $response->getContent(false));
+            $message = sprintf(
+                'Access forbidden, is your token valid? Did you specify the correct contest ID? %s',
+                $response->getContent(false)
+            );
             return false;
         }
         if ($response->getStatusCode() < 200 || $response->getStatusCode() >= 300) {
-            $message = sprintf('Unknown error while retrieving data from %s, status code: %d, %s',
-                               static::BASE_URI, $response->getStatusCode(), $response->getContent(false));
+            $message = sprintf(
+                'Unknown error while retrieving data from %s, status code: %d, %s',
+                static::BASE_URI,
+                $response->getStatusCode(),
+                $response->getContent(false)
+            );
             return false;
         }
 
@@ -187,13 +193,19 @@ class ICPCCmsService
         ]);
 
         if ($response->getStatusCode() >= 400 && $response->getStatusCode() < 500) {
-            $message = sprintf('Access forbidden, is your token valid? %s',
-                               $response->getContent(false));
+            $message = sprintf(
+                'Access forbidden, is your token valid? %s',
+                $response->getContent(false)
+            );
             return null;
         }
         if ($response->getStatusCode() < 200 || $response->getStatusCode() >= 300) {
-            $message = sprintf('Unknown error while retrieving data from %s, status code: %d, %s',
-                               static::BASE_URI, $response->getStatusCode(), $response->getContent(false));
+            $message = sprintf(
+                'Unknown error while retrieving data from %s, status code: %d, %s',
+                static::BASE_URI,
+                $response->getStatusCode(),
+                $response->getContent(false)
+            );
             return null;
         }
 

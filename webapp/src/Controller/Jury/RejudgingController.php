@@ -252,8 +252,9 @@ class RejudgingController extends BaseController
                 ->join('j.submission', 's')
                 ->select('j, s')
                 ->where(
-                    $expr->in('j.judgingid',
-                              $this->em->createQueryBuilder()
+                    $expr->in(
+                        'j.judgingid',
+                        $this->em->createQueryBuilder()
                                   ->from(Judging::class, 'j2')
                                   ->join('j2.original_judging', 'jo')
                                   ->select('jo.judgingid')
@@ -453,7 +454,8 @@ class RejudgingController extends BaseController
                     $message      = sprintf(
                         'Rejudging r%d %s in %s seconds.',
                         $rejudging->getRejudgingid(),
-                        $action == RejudgingService::ACTION_APPLY ? 'applied' : 'canceled', $timeDiff
+                        $action == RejudgingService::ACTION_APPLY ? 'applied' : 'canceled',
+                        $timeDiff
                     );
                     $progressReporter(100, '', $message);
                 }
@@ -595,8 +597,10 @@ class RejudgingController extends BaseController
                 $after  = $data['after'] ?? null;
                 if (!empty($before) || !empty($after)) {
                     if (count($contests) != 1) {
-                        $this->addFlash('danger',
-                            'Only allowed to set before/after restrictions with exactly one selected contest.');
+                        $this->addFlash(
+                            'danger',
+                            'Only allowed to set before/after restrictions with exactly one selected contest.'
+                        );
                         $progressReporter(100, '', $this->generateUrl('jury_rejudging_add'));
                         return;
                     }
@@ -628,7 +632,15 @@ class RejudgingController extends BaseController
 
                 $skipped = [];
                 $res     = $this->rejudgingService->createRejudging(
-                    $reason, (int)$data['priority'], $judgings, false, (int)$data['repeat'] ?? 1, null, $skipped, $progressReporter);
+                    $reason,
+                    (int)$data['priority'],
+                    $judgings,
+                    false,
+                    (int)$data['repeat'] ?? 1,
+                    null,
+                    $skipped,
+                    $progressReporter
+                );
                 $this->generateFlashMessagesForSkippedJudgings($skipped);
 
                 if ($res === null) {
@@ -832,8 +844,13 @@ class RejudgingController extends BaseController
             ->leftJoin('j.rejudging', 'r')
             ->leftJoin('j.submission', 's')
             ->leftJoin('jt.judgehost', 'jh')
-            ->select('r.rejudgingid, j.judgingid', 's.submitid', 'jh.hostname', 'j.result',
-                'AVG(jr.runtime) AS runtime_avg', 'COUNT(jr.runtime) AS ntestcases',
+            ->select(
+                'r.rejudgingid, j.judgingid',
+                's.submitid',
+                'jh.hostname',
+                'j.result',
+                'AVG(jr.runtime) AS runtime_avg',
+                'COUNT(jr.runtime) AS ntestcases',
                 '(j.endtime - j.starttime) AS duration'
             )
             ->andWhere('r.repeatedRejudging = :repeat_rejudgingid')

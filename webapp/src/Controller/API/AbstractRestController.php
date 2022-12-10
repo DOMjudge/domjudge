@@ -154,8 +154,12 @@ abstract class AbstractRestController extends AbstractFOSRestController
         $headers = [
             'Location' => $this->generateUrl("v4_app_api_${routeType}_single", $params, UrlGeneratorInterface::ABSOLUTE_URL),
         ];
-        return $this->renderData($request, $data, Response::HTTP_CREATED,
-            $headers);
+        return $this->renderData(
+            $request,
+            $data,
+            Response::HTTP_CREATED,
+            $headers
+        );
     }
 
     /**

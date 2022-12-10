@@ -22,7 +22,10 @@ class GeneratePasswordsType extends AbstractType
             'expanded' => true,
             'multiple' => true,
             'choices' => $choices]);
-        $builder->add('generate', SubmitType::class,
-            [ 'attr' => ['class' => 'btn-warning']]);
+        $builder->add(
+            'generate',
+            SubmitType::class,
+            [ 'attr' => ['class' => 'btn-warning']]
+        );
     }
 }

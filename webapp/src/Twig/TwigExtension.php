@@ -90,8 +90,11 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             new TwigFilter('printtimeHover', [$this, 'printtimeHover'], ['is_safe' => ['html']]),
             new TwigFilter('printResult', [$this, 'printResult'], ['is_safe' => ['html']]),
             new TwigFilter('printValidJuryResult', [$this, 'printValidJuryResult'], ['is_safe' => ['html']]),
-            new TwigFilter('printValidJurySubmissionResult', [$this, 'printValidJurySubmissionResult'],
-                           ['is_safe' => ['html']]),
+            new TwigFilter(
+                'printValidJurySubmissionResult',
+                [$this, 'printValidJurySubmissionResult'],
+                ['is_safe' => ['html']]
+            ),
             new TwigFilter('printHost', [$this, 'printHost'], ['is_safe' => ['html']]),
             new TwigFilter('printHosts', [$this, 'printHosts'], ['is_safe' => ['html']]),
             new TwigFilter('printFiles', [$this, 'printFiles'], ['is_safe' => ['html']]),
@@ -99,8 +102,11 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             new TwigFilter('printYesNo', [$this, 'printYesNo']),
             new TwigFilter('printSize', [Utils::class, 'printSize'], ['is_safe' => ['html']]),
             new TwigFilter('testcaseResults', [$this, 'testcaseResults'], ['is_safe' => ['html']]),
-            new TwigFilter('displayTestcaseResults', [$this, 'displayTestcaseResults'],
-                           ['is_safe' => ['html']]),
+            new TwigFilter(
+                'displayTestcaseResults',
+                [$this, 'displayTestcaseResults'],
+                ['is_safe' => ['html']]
+            ),
             new TwigFilter('externalCcsUrl', [$this, 'externalCcsUrl']),
             new TwigFilter('lineCount', [$this, 'lineCount']),
             new TwigFilter('base64', 'base64_encode'),
@@ -277,8 +283,14 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         }
 
         if ($isAjaxModal) {
-            return sprintf('<a href="%s" class="btn btn-%s" title="%s" data-ajax-modal>%s%s</a>', $url, $type, $text,
-                           $icon, $text);
+            return sprintf(
+                '<a href="%s" class="btn btn-%s" title="%s" data-ajax-modal>%s%s</a>',
+                $url,
+                $type,
+                $text,
+                $icon,
+                $text
+            );
         } else {
             return sprintf('<a href="%s" class="btn btn-%s" title="%s">%s%s</a>', $url, $type, $text, $icon, $text);
         }
@@ -317,8 +329,11 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             default:
                 return 'unknown';
         }
-        return sprintf('<i class="fas fa-%s-circle" aria-hidden="true"></i><span class="sr-only">%s</span>', $icon,
-                       $status);
+        return sprintf(
+            '<i class="fas fa-%s-circle" aria-hidden="true"></i><span class="sr-only">%s</span>',
+            $icon,
+            $status
+        );
     }
 
     public function countryFlag(?string $alpha3CountryCode, bool $showFullname = false): string
@@ -338,11 +353,18 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         $countryName    = Countries::getAlpha3Name($alpha3CountryCode);
 
         if ($showFullname) {
-            return sprintf('<img src="%s" alt="" class="countryflag"> %s',
-                           $countryFlagUrl, $countryName);
+            return sprintf(
+                '<img src="%s" alt="" class="countryflag"> %s',
+                $countryFlagUrl,
+                $countryName
+            );
         }
-        return sprintf('<img loading="lazy" src="%s" alt="%s" title="%s" class="countryflag">',
-           $countryFlagUrl, $alpha3CountryCode, $countryName);
+        return sprintf(
+            '<img loading="lazy" src="%s" alt="%s" title="%s" class="countryflag">',
+            $countryFlagUrl,
+            $alpha3CountryCode,
+            $countryName
+        );
     }
 
     public function affiliationLogo(string $affiliationId, string $shortName): string
@@ -350,8 +372,11 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         if ($asset = $this->dj->assetPath($affiliationId, 'affiliation')) {
             $assetFunction = $this->twig->getFunction('asset')->getCallable();
             $assetUrl      = call_user_func($assetFunction, $asset);
-            return sprintf('<img src="%s" alt="%s" class="affiliation-logo">',
-                           Utils::specialchars($assetUrl), Utils::specialchars($shortName));
+            return sprintf(
+                '<img src="%s" alt="%s" class="affiliation-logo">',
+                Utils::specialchars($assetUrl),
+                Utils::specialchars($shortName)
+            );
         }
 
         return '';
@@ -371,7 +396,8 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
                   LEFT JOIN external_run er ON (er.testcaseid = t.testcaseid
                                               AND er.extjudgementid = :extjudgementid)
                   WHERE t.probid = :probid ORDER BY ranknumber',
-                ['extjudgementid' => $externalJudgementId, 'probid' => $probId]);
+                ['extjudgementid' => $externalJudgementId, 'probid' => $probId]
+            );
 
             $submissionDone = $externalJudgement && !empty($externalJudgement->getEndtime());
         } else {
@@ -387,7 +413,8 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
                   LEFT JOIN judgetask jt ON (r.judgetaskid = jt.judgetaskid)
                   LEFT JOIN judgehost jh on (jt.judgehostid = jh.judgehostid)
                   WHERE t.probid = :probid ORDER BY ranknumber',
-                ['judgingid' => $judgingId, 'probid' => $probId]);
+                ['judgingid' => $judgingId, 'probid' => $probId]
+            );
 
             $submissionDone = $judging && !empty($judging->getEndtime());
         }
@@ -412,14 +439,21 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             }
 
             if (!empty($testcase['description'])) {
-                $title = sprintf('Run %d: %s', $key + 1,
-                                 Utils::specialchars($testcase['description']));
+                $title = sprintf(
+                    'Run %d: %s',
+                    $key + 1,
+                    Utils::specialchars($testcase['description'])
+                );
             } else {
                 $title = sprintf('Run %d', $key + 1);
             }
 
-            $results .= sprintf('<span class="badge badge-%s badge-testcase" title="%s">%s</span>', $class, $title,
-                                $text);
+            $results .= sprintf(
+                '<span class="badge badge-%s badge-testcase" title="%s">%s</span>',
+                $class,
+                $title,
+                $text
+            );
         }
 
         return $results;
@@ -478,9 +512,13 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
                 $titleElements[] = sprintf('result: %s', $runResult);
             }
             $icon    = sprintf('<span class="badge badge-%s badge-testcase">%s</span>', $class, $text);
-            $results .= sprintf('<a title="%s" href="#run-%d" %s>%s</a>',
-                                join(', ', $titleElements), $testcase->getRank(),
-                                $isCorrect ? 'onclick="display_correctruns(true);"' : '', $icon);
+            $results .= sprintf(
+                '<a title="%s" href="#run-%d" %s>%s</a>',
+                join(', ', $titleElements),
+                $testcase->getRank(),
+                $isCorrect ? 'onclick="display_correctruns(true);"' : '',
+                $icon
+            );
         }
 
         return $results;
@@ -566,13 +604,17 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         if (!empty($extCcsUrl)) {
             $dataSource = $this->config->get('data_source');
             if ($dataSource == 2 && $submission->getExternalid()) {
-                return str_replace(['[contest]', '[id]'],
-                                   [$submission->getContest()->getExternalid(), $submission->getExternalid()],
-                                   $extCcsUrl);
+                return str_replace(
+                    ['[contest]', '[id]'],
+                    [$submission->getContest()->getExternalid(), $submission->getExternalid()],
+                    $extCcsUrl
+                );
             } elseif ($dataSource == 1) {
-                return str_replace(['[contest]', '[id]'],
-                                   [$submission->getContest()->getExternalid(), $submission->getSubmitid()],
-                                   $extCcsUrl);
+                return str_replace(
+                    ['[contest]', '[id]'],
+                    [$submission->getContest()->getExternalid(), $submission->getSubmitid()],
+                    $extCcsUrl
+                );
             }
         }
 
@@ -593,9 +635,10 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         if (count($files) == 1) {
             return sprintf('<span class="hostname">%s</span>', Utils::specialchars($firstFile));
         }
-        return sprintf('<span class="filename">%s</span> (and %d more)',
-                       Utils::specialchars($firstFile),
-                       count($files) - 1
+        return sprintf(
+            '<span class="filename">%s</span> (and %d more)',
+            Utils::specialchars($firstFile),
+            count($files) - 1
         );
     }
 
@@ -886,8 +929,11 @@ JS;
             $mode = '';
         }
 
-        return str_replace('__EDITOR__', $id,
-                           sprintf($editor, $code, $editable ? 'false' : 'true', $mode, $extraForEdit));
+        return str_replace(
+            '__EDITOR__',
+            $id,
+            sprintf($editor, $code, $editable ? 'false' : 'true', $mode, $extraForEdit)
+        );
     }
 
     protected function parseSourceDiff($difftext): string
@@ -988,8 +1034,12 @@ JS;
 
     public function calculatePenaltyTime(bool $solved, int $num_submissions): int
     {
-        return Utils::calcPenaltyTime($solved, $num_submissions, (int)$this->config->get('penalty_time'),
-                                      (bool)$this->config->get('score_in_seconds'));
+        return Utils::calcPenaltyTime(
+            $solved,
+            $num_submissions,
+            (int)$this->config->get('penalty_time'),
+            (bool)$this->config->get('score_in_seconds')
+        );
     }
 
     /**

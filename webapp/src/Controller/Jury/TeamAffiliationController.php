@@ -173,7 +173,13 @@ class TeamAffiliationController extends BaseController
             $data = array_merge(
                 $data,
                 $scoreboardService->getScoreboardTwigData(
-                    $request, null, '', true, false, false, $currentContest
+                    $request,
+                    null,
+                    '',
+                    true,
+                    false,
+                    false,
+                    $currentContest
                 )
             );
             $data['limitToTeams'] = $teamAffiliation->getTeams();
@@ -206,8 +212,14 @@ class TeamAffiliationController extends BaseController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $this->assetUpdater->updateAssets($teamAffiliation);
-            $this->saveEntity($this->em, $this->eventLogService, $this->dj, $teamAffiliation,
-                              $teamAffiliation->getAffilid(), false);
+            $this->saveEntity(
+                $this->em,
+                $this->eventLogService,
+                $this->dj,
+                $teamAffiliation,
+                $teamAffiliation->getAffilid(),
+                false
+            );
             return $this->redirect($this->generateUrl(
                 'jury_team_affiliation',
                 ['affilId' => $teamAffiliation->getAffilid()]
@@ -232,8 +244,15 @@ class TeamAffiliationController extends BaseController
             throw new NotFoundHttpException(sprintf('Team affiliation with ID %s not found', $affilId));
         }
 
-        return $this->deleteEntities($request, $this->em, $this->dj, $this->eventLogService, $this->kernel,
-                                     [$teamAffiliation], $this->generateUrl('jury_team_affiliations'));
+        return $this->deleteEntities(
+            $request,
+            $this->em,
+            $this->dj,
+            $this->eventLogService,
+            $this->kernel,
+            [$teamAffiliation],
+            $this->generateUrl('jury_team_affiliations')
+        );
     }
 
     /**

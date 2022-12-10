@@ -233,8 +233,12 @@ class ContestController extends AbstractRestController
         $contest->setClearBanner(true);
 
         $this->assetUpdater->updateAssets($contest);
-        $this->eventLogService->log('contests', $contest->getCid(), EventLogService::ACTION_UPDATE,
-            $contest->getCid());
+        $this->eventLogService->log(
+            'contests',
+            $contest->getCid(),
+            EventLogService::ACTION_UPDATE,
+            $contest->getCid()
+        );
 
         return new Response('', Response::HTTP_NO_CONTENT);
     }
@@ -294,8 +298,12 @@ class ContestController extends AbstractRestController
         }
 
         $this->assetUpdater->updateAssets($contest);
-        $this->eventLogService->log('contests', $contest->getCid(), EventLogService::ACTION_UPDATE,
-            $contest->getCid());
+        $this->eventLogService->log(
+            'contests',
+            $contest->getCid(),
+            EventLogService::ACTION_UPDATE,
+            $contest->getCid()
+        );
 
         return new Response('', Response::HTTP_NO_CONTENT);
     }
@@ -358,8 +366,10 @@ class ContestController extends AbstractRestController
         } elseif (!$request->request->has('force') &&
             $contest->getStarttime() != null &&
             $contest->getStarttime() < $now + 30) {
-            $response = new JsonResponse('Current contest already started or about to start.',
-                                         Response::HTTP_FORBIDDEN);
+            $response = new JsonResponse(
+                'Current contest already started or about to start.',
+                Response::HTTP_FORBIDDEN
+            );
         } elseif ($request->request->get('start_time') === null) {
             $this->em->persist($contest);
             $contest->setStarttimeEnabled(false);
@@ -373,16 +383,20 @@ class ContestController extends AbstractRestController
             } else {
                 $new_start_time = $date->getTimestamp();
                 if (!$request->request->get('force') && $new_start_time < $now + 30) {
-                    $response = new JsonResponse('New start_time not far enough in the future.',
-                                                 Response::HTTP_FORBIDDEN);
+                    $response = new JsonResponse(
+                        'New start_time not far enough in the future.',
+                        Response::HTTP_FORBIDDEN
+                    );
                 } else {
                     $this->em->persist($contest);
                     $newStartTimeString = date('Y-m-d H:i:s e', $new_start_time);
                     $contest->setStarttimeEnabled(true);
                     $contest->setStarttime($new_start_time);
                     $contest->setStarttimeString($newStartTimeString);
-                    $response = new JsonResponse('Contest start time changed to ' . $newStartTimeString,
-                                                 Response::HTTP_OK);
+                    $response = new JsonResponse(
+                        'Contest start time changed to ' . $newStartTimeString,
+                        Response::HTTP_OK
+                    );
                     $this->em->flush();
                     $changed = true;
                 }
@@ -390,8 +404,12 @@ class ContestController extends AbstractRestController
         }
 
         if ($changed) {
-            $this->eventLogService->log('contests', $contest->getCid(), EventLogService::ACTION_UPDATE,
-                                        $contest->getCid());
+            $this->eventLogService->log(
+                'contests',
+                $contest->getCid(),
+                EventLogService::ACTION_UPDATE,
+                $contest->getCid()
+            );
         }
 
         return $response;

@@ -225,7 +225,8 @@ class SubmissionController extends AbstractRestController
             if (!$hasAny) {
                 $requiredListQuoted = array_map(fn($item) => "'$item'", $requiredList);
                 throw new BadRequestHttpException(
-                    sprintf("One of the arguments %s is mandatory.", implode(', ', $requiredListQuoted)));
+                    sprintf("One of the arguments %s is mandatory.", implode(', ', $requiredListQuoted))
+                );
             }
         }
 
@@ -283,8 +284,10 @@ class SubmissionController extends AbstractRestController
             ->join('cp.problem', 'p')
             ->join('cp.contest', 'c')
             ->select('cp, c')
-            ->andWhere(sprintf('p.%s = :problem',
-                               $this->eventLogService->externalIdFieldForEntity(Problem::class) ?? 'probid'))
+            ->andWhere(sprintf(
+                'p.%s = :problem',
+                $this->eventLogService->externalIdFieldForEntity(Problem::class) ?? 'probid'
+            ))
             ->andWhere('cp.contest = :contest')
             ->andWhere('cp.allowSubmit = 1')
             ->setParameter('problem', $data['problem'])
@@ -294,7 +297,8 @@ class SubmissionController extends AbstractRestController
 
         if ($problem === null) {
             throw new BadRequestHttpException(
-                sprintf("Problem '%s' not found or not submittable.", $data['problem']));
+                sprintf("Problem '%s' not found or not submittable.", $data['problem'])
+            );
         }
 
         // Load the language.
@@ -302,8 +306,10 @@ class SubmissionController extends AbstractRestController
         $language = $this->em->createQueryBuilder()
             ->from(Language::class, 'lang')
             ->select('lang')
-            ->andWhere(sprintf('lang.%s = :language',
-                               $this->eventLogService->externalIdFieldForEntity(Language::class) ?? 'langid'))
+            ->andWhere(sprintf(
+                'lang.%s = :language',
+                $this->eventLogService->externalIdFieldForEntity(Language::class) ?? 'langid'
+            ))
             ->andWhere('lang.allowSubmit = 1')
             ->setParameter('language', $data['language'])
             ->getQuery()
@@ -311,7 +317,8 @@ class SubmissionController extends AbstractRestController
 
         if ($language === null) {
             throw new BadRequestHttpException(
-                sprintf("Language '%s' not found or not submittable.", $data['language']));
+                sprintf("Language '%s' not found or not submittable.", $data['language'])
+            );
         }
 
         // Determine the entry point.
@@ -388,8 +395,10 @@ class SubmissionController extends AbstractRestController
 
             // Now write the data to a temporary ZIP file.
             if (!($tempZipFile = tempnam($tmpDir, 'submission_zip-'))) {
-                throw new ServiceUnavailableHttpException(null,
-                    sprintf('Could not create temporary file in directory %s', $tmpDir));
+                throw new ServiceUnavailableHttpException(
+                    null,
+                    sprintf('Could not create temporary file in directory %s', $tmpDir)
+                );
             }
 
             if (file_put_contents($tempZipFile, $decodedData) === false) {
@@ -407,8 +416,10 @@ class SubmissionController extends AbstractRestController
                 $source = $zip->getFromIndex($i);
 
                 if (!($tempFileName = tempnam($tmpDir, 'submission-'))) {
-                    throw new ServiceUnavailableHttpException(null,
-                        sprintf('Could not create temporary file in directory %s', $tmpDir));
+                    throw new ServiceUnavailableHttpException(
+                        null,
+                        sprintf('Could not create temporary file in directory %s', $tmpDir)
+                    );
                 }
                 if (file_put_contents($tempFileName, $source) === false) {
                     throw new ServiceUnavailableHttpException(
@@ -432,8 +443,19 @@ class SubmissionController extends AbstractRestController
 
         // Now submit the solution.
         $submission = $this->submissionService->submitSolution(
-            $team, $user, $problem, $problem->getContest(), $language,
-            $files, 'API', null, null, $entryPoint, $submissionId, $time, $message
+            $team,
+            $user,
+            $problem,
+            $problem->getContest(),
+            $language,
+            $files,
+            'API',
+            null,
+            null,
+            $entryPoint,
+            $submissionId,
+            $time,
+            $message
         );
 
         // Clean up temporary if needed.

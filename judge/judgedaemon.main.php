@@ -288,8 +288,10 @@ function fetch_executable(
         if ($buildlogpath !== null) {
             $extra_log = dj_file_get_contents($buildlogpath, 4096);
         }
-        logmsg(LOG_ERR,
-            "Fetching executable failed for $type script '$execid': " . $error);
+        logmsg(
+            LOG_ERR,
+            "Fetching executable failed for $type script '$execid': " . $error
+        );
         $description = "$execid: fetch, compile, or deploy of $type script failed.";
         disable(
             $type . '_script',
@@ -577,8 +579,11 @@ if (!empty($options['e'])) {
 
     for ($i = 0; $i < 5; $i++) {
         $response = request(
-            sprintf('judgehosts/add-judging-run/%s/%s', $new_judging_run['hostname'],
-                urlencode((string)$judgeTaskId)),
+            sprintf(
+                'judgehosts/add-judging-run/%s/%s',
+                $new_judging_run['hostname'],
+                urlencode((string)$judgeTaskId)
+            ),
             'POST',
             $new_judging_run,
             false
@@ -673,8 +678,10 @@ while (true) {
                 }
                 uasort($candidateDirs, fn($a, $b) => filemtime($a) <=> filemtime($b));
                 $after = $before = disk_free_space(JUDGEDIR);
-                logmsg(LOG_INFO,
-                    "🗑 Low on diskspace, cleaning up (" . count($candidateDirs) . " potential candidates).");
+                logmsg(
+                    LOG_INFO,
+                    "🗑 Low on diskspace, cleaning up (" . count($candidateDirs) . " potential candidates)."
+                );
                 $cnt = 0;
                 foreach ($candidateDirs as $d) {
                     $cnt++;
@@ -689,8 +696,7 @@ while (true) {
                     }
                 }
                 logmsg(LOG_INFO, "🗑 Cleaned up $cnt old judging directories; reduced disk space by " .
-                    sprintf("%01.2fMB.", ($after - $before) / (1024 * 1024))
-                );
+                    sprintf("%01.2fMB.", ($after - $before) / (1024 * 1024)));
             }
             if ($after < 1024*$allowed_free_space) {
                 $free_abs = sprintf("%01.2fGB", $after / (1024*1024*1024));
@@ -727,8 +733,10 @@ while (true) {
     $endpoints[$endpointID]["waiting"] = false;
     // All tasks are guaranteed to be of the same type.
     $type = $row[0]['type'];
-    logmsg(LOG_INFO,
-        "⇝ Received " . sizeof($row) . " '" . $type . "' judge tasks (endpoint $endpointID)");
+    logmsg(
+        LOG_INFO,
+        "⇝ Received " . sizeof($row) . " '" . $type . "' judge tasks (endpoint $endpointID)"
+    );
 
     $jobId = $row[0]['jobid'];
 
@@ -787,14 +795,19 @@ while (true) {
                     continue;
                 }
 
-                $debug_cmd = implode(' ', array_map('dj_escapeshellarg',
-                    [$runpath, $workdir, $tmpfile]));
+                $debug_cmd = implode(' ', array_map(
+                    'dj_escapeshellarg',
+                    [$runpath, $workdir, $tmpfile]
+                ));
                 system($debug_cmd, $retval);
                 // FIXME: check retval
 
                 request(
-                    sprintf('judgehosts/add-debug-info/%s/%s', urlencode($myhost),
-                        urlencode((string)$judgeTask['judgetaskid'])),
+                    sprintf(
+                        'judgehosts/add-debug-info/%s/%s',
+                        urlencode($myhost),
+                        urlencode((string)$judgeTask['judgetaskid'])
+                    ),
                     'POST',
                     ['full_debug' => rest_encode_file($tmpfile, false)],
                     false
@@ -806,8 +819,11 @@ while (true) {
                 // Retrieving full team output for a particular testcase.
                 $testcasedir = $workdir . "/testcase" . sprintf('%05d', $judgeTask['testcase_id']);
                 request(
-                    sprintf('judgehosts/add-debug-info/%s/%s', urlencode($myhost),
-                        urlencode((string)$judgeTask['judgetaskid'])),
+                    sprintf(
+                        'judgehosts/add-debug-info/%s/%s',
+                        urlencode($myhost),
+                        urlencode((string)$judgeTask['judgetaskid'])
+                    ),
                     'POST',
                     ['output_run' => rest_encode_file($testcasedir . '/program.out', false)],
                     false
@@ -1283,7 +1299,8 @@ function judge(array $judgeTask): bool
         $judgeTask['run_script_id'],
         $run_config['hash'],
         $judgeTask['judgetaskid'],
-        $combined_run_compare);
+        $combined_run_compare
+    );
     if (isset($error)) {
         return false;
     }
@@ -1373,8 +1390,11 @@ function judge(array $judgeTask): bool
         // This run was incorrect, only continue with the remaining judge tasks
         // if we are told to do so.
         $needsMoreWork = request(
-            sprintf('judgehosts/add-judging-run/%s/%s', urlencode($myhost),
-                urlencode((string)$judgeTask['judgetaskid'])),
+            sprintf(
+                'judgehosts/add-judging-run/%s/%s',
+                urlencode($myhost),
+                urlencode((string)$judgeTask['judgetaskid'])
+            ),
             'POST',
             $new_judging_run,
             false

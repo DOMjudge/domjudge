@@ -85,8 +85,14 @@ class MiscController extends BaseController
             $data = array_merge(
                 $data,
                 $this->scoreboardService->getScoreboardTwigData(
-                    $request, null, '', true, false, false,
-                    $contest, $scoreboard
+                    $request,
+                    null,
+                    '',
+                    true,
+                    false,
+                    false,
+                    $contest,
+                    $scoreboard
                 )
             );
             $data['limitToTeams'] = [$team];
@@ -157,8 +163,16 @@ class MiscController extends BaseController
         } else {
             $response = $this->redirectToRoute('team_index');
         }
-        return $this->dj->setCookie('domjudge_cid', (string)$contestId, 0, null, '', false, false,
-                                                 $response);
+        return $this->dj->setCookie(
+            'domjudge_cid',
+            (string)$contestId,
+            0,
+            null,
+            '',
+            false,
+            false,
+            $response
+        );
     }
 
     /**
@@ -185,8 +199,15 @@ class MiscController extends BaseController
             $username = $this->getUser()->getUsername();
 
             $team = $this->dj->getUser()->getTeam();
-            $ret  = $this->dj->printFile($realfile, $originalfilename, $langid,
-                $username, $team->getEffectiveName(), $team->getTeamid(), $team->getRoom());
+            $ret  = $this->dj->printFile(
+                $realfile,
+                $originalfilename,
+                $langid,
+                $username,
+                $team->getEffectiveName(),
+                $team->getTeamid(),
+                $team->getRoom()
+            );
 
             return $this->render('team/print_result.html.twig', [
                 'success' => $ret[0],

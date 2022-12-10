@@ -120,10 +120,18 @@ class SubmissionService
         if (isset($restrictions['rejudgingid'])) {
             $queryBuilder
                 ->leftJoin('s.judgings', 'j', Join::WITH, 'j.rejudging = :rejudgingid')
-                ->leftJoin(Judging::class, 'jold', Join::WITH,
-                    'j.original_judging IS NULL AND s.submitid = jold.submission AND jold.valid = 1')
-                ->leftJoin(Judging::class, 'jold2', Join::WITH,
-                    'j.original_judging = jold2.judgingid')
+                ->leftJoin(
+                    Judging::class,
+                    'jold',
+                    Join::WITH,
+                    'j.original_judging IS NULL AND s.submitid = jold.submission AND jold.valid = 1'
+                )
+                ->leftJoin(
+                    Judging::class,
+                    'jold2',
+                    Join::WITH,
+                    'j.original_judging = jold2.judgingid'
+                )
                 ->addSelect('COALESCE(jold.result, jold2.result) AS oldresult')
                 ->andWhere('s.rejudging = :rejudgingid OR j.rejudging = :rejudgingid')
                 ->setParameter('rejudgingid', $restrictions['rejudgingid']);
@@ -438,7 +446,8 @@ class SubmissionService
         $freezeData = new FreezeData($contest);
         if (!$this->dj->checkrole('jury') && !$freezeData->started()) {
             throw new AccessDeniedHttpException(
-                sprintf("The contest is closed, no submissions accepted. [c%d]", $contest->getCid()));
+                sprintf("The contest is closed, no submissions accepted. [c%d]", $contest->getCid())
+            );
         }
 
         if (!$contest->getAllowSubmit()) {
@@ -447,7 +456,8 @@ class SubmissionService
 
         if (!$language->getAllowSubmit()) {
             throw new BadRequestHttpException(
-                sprintf("Language '%s' not found in database or not submittable.", $language->getLangid()));
+                sprintf("Language '%s' not found in database or not submittable.", $language->getLangid())
+            );
         }
 
         if ($language->getRequireEntryPoint() && empty($entryPoint)) {
@@ -467,18 +477,24 @@ class SubmissionService
 
         if (!$this->dj->checkrole('jury') && !$team->getEnabled()) {
             throw new BadRequestHttpException(
-                sprintf("Team '%d' not found in database or not enabled.", $team->getTeamid()));
+                sprintf("Team '%d' not found in database or not enabled.", $team->getTeamid())
+            );
         }
 
         if ($user && !$this->dj->checkrole('jury') && !$user->getEnabled()) {
             throw new BadRequestHttpException(
-                sprintf("User '%d' not found in database or not enabled.", $user->getUserid()));
+                sprintf("User '%d' not found in database or not enabled.", $user->getUserid())
+            );
         }
 
         if (!$problem->getAllowSubmit()) {
             throw new BadRequestHttpException(
-                sprintf("Problem p%d not submittable [c%d].",
-                        $problem->getProbid(), $contest->getCid()));
+                sprintf(
+                    "Problem p%d not submittable [c%d].",
+                    $problem->getProbid(),
+                    $contest->getCid()
+                )
+            );
         }
 
         // If this method is called multiple times, we loose the user from Doctrine because of the internal API call
@@ -522,7 +538,8 @@ class SubmissionService
             $message = sprintf(
                 "None of the submitted files match any of the allowed " .
                 "extensions for %s (allowed: %s)",
-                $language->getName(), implode(', ', $language->getExtensions())
+                $language->getName(),
+                implode(', ', $language->getExtensions())
             );
             return null;
         }
@@ -539,17 +556,23 @@ class SubmissionService
         if ($this->dj->checkrole('jury')) {
             $results = null;
             foreach ($files as $rank => $file) {
-                $fileResult = self::getExpectedResults(file_get_contents($file->getRealPath()),
-                    $this->config->get('results_remap'));
+                $fileResult = self::getExpectedResults(
+                    file_get_contents($file->getRealPath()),
+                    $this->config->get('results_remap')
+                );
                 if ($fileResult === false) {
-                        $message = sprintf("Found more than one @EXPECTED_RESULTS@ in file '%s'.",
-                            $file->getClientOriginalName());
+                        $message = sprintf(
+                            "Found more than one @EXPECTED_RESULTS@ in file '%s'.",
+                            $file->getClientOriginalName()
+                        );
                         return null;
                 }
                 if ($fileResult !== null) {
                     if ($results !== null) {
-                        $message = sprintf("Found more than one file with @EXPECTED_RESULTS@, e.g. in '%s'.",
-                            $file->getClientOriginalName());
+                        $message = sprintf(
+                            "Found more than one file with @EXPECTED_RESULTS@, e.g. in '%s'.",
+                            $file->getClientOriginalName()
+                        );
                         return null;
                     }
                     $results = $fileResult;
@@ -598,13 +621,19 @@ class SubmissionService
         // This is so that we can use the submitid/judgingid below.
         $this->em->flush();
 
-        $this->dj->maybeCreateJudgeTasks($judging,
-            $source === 'problem import' ? JudgeTask::PRIORITY_LOW : JudgeTask::PRIORITY_DEFAULT);
+        $this->dj->maybeCreateJudgeTasks(
+            $judging,
+            $source === 'problem import' ? JudgeTask::PRIORITY_LOW : JudgeTask::PRIORITY_DEFAULT
+        );
 
         $this->em->wrapInTransaction(function () use ($contest, $submission) {
             $this->em->flush();
-            $this->eventLogService->log('submission', $submission->getSubmitid(),
-                                        EventLogService::ACTION_CREATE, $contest->getCid());
+            $this->eventLogService->log(
+                'submission',
+                $submission->getSubmitid(),
+                EventLogService::ACTION_CREATE,
+                $contest->getCid()
+            );
         });
 
         // Reload submission, contest, team and contestproblem for now, as
@@ -622,12 +651,22 @@ class SubmissionService
 
         $this->scoreboardService->calculateScoreRow($contest, $team, $problem->getProblem());
 
-        $this->dj->alert('submit', sprintf('submission %d: team %d, language %s, problem %d',
-                                           $submission->getSubmitid(), $team->getTeamid(),
-                                           $language->getLangid(), $problem->getProblem()->getProbid()));
+        $this->dj->alert('submit', sprintf(
+            'submission %d: team %d, language %s, problem %d',
+            $submission->getSubmitid(),
+            $team->getTeamid(),
+            $language->getLangid(),
+            $problem->getProblem()->getProbid()
+        ));
 
-        $this->dj->auditlog('submission', $submission->getSubmitid(), 'added',
-            'via ' . $source ?? 'unknown', null, $contest->getCid());
+        $this->dj->auditlog(
+            'submission',
+            $submission->getSubmitid(),
+            'added',
+            'via ' . $source ?? 'unknown',
+            null,
+            $contest->getCid()
+        );
 
         if (Utils::difftime((float)$contest->getEndtime(), $submitTime) <= 0) {
             $this->logger->info(

@@ -217,7 +217,8 @@ class ClarificationController extends AbstractController
         $clardata['clarform']['queues'] = $queues;
         $clardata['clarform']['answers'] = $clar_answers;
 
-        return $this->render('jury/clarification.html.twig',
+        return $this->render(
+            'jury/clarification.html.twig',
             $clardata
         );
     }
