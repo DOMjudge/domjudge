@@ -80,7 +80,7 @@ class UserController extends BaseController
             'teamid'     => ['title' => '', 'sort' => false, 'render' => 'entity_id_badge'],
             'team'       => ['title' => 'team', 'sort' => true],
         ];
-        if ( in_array('ipaddress', $this->config->get('auth_methods')) ) {
+        if (in_array('ipaddress', $this->config->get('auth_methods'))) {
             $table_fields['ip_address'] = ['title' => 'autologin IP', 'sort' => true];
         }
         $table_fields['last_ip_address'] = ['title' => 'last IP', 'sort' => true];

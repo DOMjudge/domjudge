@@ -68,8 +68,8 @@ class PublicControllerTest extends BaseTest
         array $inputs,
         array $fixtures,
         string $password,
-        string $category="",
-        string $secondPassword="same"
+        string $category = "",
+        string $secondPassword = "same"
     ): array {
         $this->loadFixtures($fixtures);
         $this->logOut();
