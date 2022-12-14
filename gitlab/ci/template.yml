@@ -51,7 +51,7 @@
     - /bin/true
   parallel:
     matrix:
-      - PHPVERSION: ["7.4","8.0","8.1"]
+      - PHPVERSION: ["7.4","8.0","8.1","8.2"]
         TEST: ["E2E","Unit"]
         CRAWL_DATASOURCES: ["0","1","2"]
 
@@ -60,6 +60,6 @@
     - /bin/true
   parallel:
     matrix:
-      - PHPVERSION: ["8.1"]
+      - PHPVERSION: ["8.2"]
         TEST: ["E2E","Unit"]
         CRAWL_DATASOURCES: ["0"]
