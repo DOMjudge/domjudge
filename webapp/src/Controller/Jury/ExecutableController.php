@@ -485,26 +485,16 @@ class ExecutableController extends BaseController
             /** @var ExecutableFile $file */
             $filename = $file->getFilename();
             $content = $file->getFileContent();
+            $rank = $file->getRank();
             if (!mb_detect_encoding($content, null, true)) {
                 $skippedBinary[] = $filename;
                 continue; // Skip binary files.
             }
             $filenames[] = $filename;
-            $ranks[] = $file->getRank();
+            $ranks[] = $rank;
             $file_contents[] = $content;
             $executableBits[] = $file->isExecutable();
-
-            if (strpos($filename, '.') !== false) {
-                $aceFilenames[] = $filename;
-            } else {
-                [$firstLine] = explode("\n", $content, 2);
-                // If the file does not contain a dot, see if we have a shebang which we can use as filename.
-                if (preg_match('/^#!.*\/([^\/]+)$/', $firstLine, $matches)) {
-                    $aceFilenames[] = sprintf('temp.%s', $matches[1]);
-                } else {
-                    $aceFilenames[] = $filename;
-                }
-            }
+            $aceFilenames[] = $this->getAceFilename($filename, $content);
         }
 
         return [
@@ -516,5 +506,18 @@ class ExecutableController extends BaseController
             'files' => $file_contents,
             'executableBits' => $executableBits,
         ];
+    }
+
+    private function getAceFilename(string $filename, string $content): string
+    {
+        if (strpos($filename, '.') === false) {
+            // If the file does not contain a dot, see if we have a shebang which we can use as filename.
+            // We do this to hint the ACE editor to use a specific language.
+            [$firstLine] = explode("\n", $content, 2);
+            if (preg_match('/^#!.*\/([^\/]+)$/', $firstLine, $matches)) {
+                return sprintf('temp.%s', $matches[1]);
+            }
+        }
+        return $filename;
     }
 }
