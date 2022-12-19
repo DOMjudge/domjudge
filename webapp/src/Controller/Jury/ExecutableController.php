@@ -425,14 +425,14 @@ class ExecutableController extends BaseController
         // Handle the form if it is submitted.
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
+            if (!$this->isGranted('ROLE_ADMIN')) {
+                $this->addFlash('danger', 'You must have the admin role to submit changes.');
+                return $this->redirectToRoute('jury_executable', ['execId' => $executable->getExecid()]);
+            }
             $submittedData = $form->getData();
 
             $files = [];
             foreach ($editorData['filenames'] as $idx => $filename) {
-                if (!$this->isGranted('ROLE_ADMIN')) {
-                    $this->addFlash('danger', 'You must have the admin role to submit changes.');
-                    return $this->redirectToRoute('jury_executable', ['execId' => $executable->getExecid()]);
-                }
                 $newContent = str_replace("\r\n", "\n", $submittedData['source' . $idx]);
                 if (substr($newContent, -1) != "\n") {
                     // Ace swallows the newline at the end of file. Let's re-add it like most editors do.
