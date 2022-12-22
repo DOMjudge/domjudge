@@ -11,4 +11,7 @@
     <rule ref="Generic.Functions.FunctionCallArgumentSpacing">
         <severity>0</severity>
     </rule>
+    <rule ref="PSR2.Methods.FunctionCallSignature">
+        <severity>0</severity>
+    </rule>
 </ruleset>
