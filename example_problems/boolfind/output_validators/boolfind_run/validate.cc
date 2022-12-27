@@ -5,6 +5,7 @@
 #include <cstring>
 #include <cmath>
 #include <unistd.h>
+#include <vector>
 #include "validate.h"
 
 using namespace std;
@@ -14,7 +15,7 @@ void check_case(int run) {
 	assert(judge_in >> nbools);
 	cout << nbools << endl;
 
-	int *bools = new int(nbools);
+	vector<int> bools(nbools);
 	for (int pos = 0; pos < nbools; pos++) {
 		assert(judge_in >> bools[pos]);
 	}
@@ -38,7 +39,7 @@ void check_case(int run) {
 				wrong_answer("testcase %d: position %d out of range for OUTPUT\n", run, pos);
 			}
 			if (!bools[pos] || bools[pos + 1]) {
-				wrong_answer("testcase %d: wrong output, position %d,%d = %s,%s\n", run, pos, pos+1, bools[pos], bools[pos+1]);
+				wrong_answer("testcase %d: wrong output, position %d,%d = %d,%d\n", run, pos, pos+1, bools[pos], bools[pos+1]);
 			}
 			// The team made the correct guess, moving on to the new case.
 			break;
@@ -47,7 +48,7 @@ void check_case(int run) {
 			usleep(100);
 			cout << (bools[pos] ? "true" : "false") << endl;
 		} else {
-			wrong_answer("testcase %d: Unknown instruction '%s'.\n", run, operation);
+			wrong_answer("testcase %d: Unknown instruction '%s'.\n", run, operation.c_str());
 		}
 	}
 }
@@ -66,7 +67,7 @@ int main(int argc, char **argv) {
 	// Check for trailing output.
 	string trash;
 	if (author_out >> trash) {
-		wrong_answer("Trailing output: '%s'\n", trash);
+		wrong_answer("Trailing output: '%s'\n", trash.c_str());
 	}
 
 	// Yay!
