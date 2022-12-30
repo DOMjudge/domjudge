@@ -12,6 +12,9 @@ On top, DOMjudge defines a few extensions:
    distributed to participants. The file extension determines any of
    three supported formats. If multiple files matching this pattern are
    available, any one of those will be used.
+ * Annotation with ``EXPECTED_RESULTS`` for jury solutions. The ICPC
+   problem package specification always has precedence. Use this to annotate
+   possible outcomes a submission can have to use together with the Judging verifier. 
 
 The file ``domjudge-problem.ini`` contains key-value pairs, one
 pair per line, of the form ``key = value``. The ``=`` can
