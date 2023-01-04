@@ -95,10 +95,11 @@ class ImportExportControllerTest extends BaseTest
 
     public function provideContestYamlContents(): Generator
     {
+        $year = date('Y')+1;
         $yaml =<<<HEREDOC
 name: 'Demo contest'
 short-name: demo
-start-time: '2023-01-01T08:00:00+00:00'
+start-time: '{$year}-01-01T08:00:00+00:00'
 duration: '5:00:00.000'
 scoreboard-freeze-duration: '1:00:00'
 penalty-time: 20
