@@ -115,7 +115,7 @@ void compare_float(std::string judge, std::string team, flt jval, flt tval, flt 
 const char *USAGE = "Usage: %s judge_in judge_ans feedback_dir [options] < team_out";
 
 int main(int argc, char **argv) {
-	if(argc < 4) {
+	if (argc < 4) {
 		judge_error(USAGE, argv[0]);
 	}
 	judgemessage = openfeedback(argv[3], "judgemessage.txt", argv[0]);
@@ -199,7 +199,7 @@ int main(int argc, char **argv) {
 				wrong_answer("String tokens mismatch\nJudge: \"%s\"\nTeam: \"%s\"", judge.c_str(), team.c_str());
 			}
 		} else {
-			if(strcasecmp(judge.c_str(), team.c_str()) != 0) {
+			if (strcasecmp(judge.c_str(), team.c_str()) != 0) {
 				wrong_answer("String tokens mismatch\nJudge: \"%s\"\nTeam: \"%s\"", judge.c_str(), team.c_str());
 			}
 		}
