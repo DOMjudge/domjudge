@@ -21,7 +21,7 @@ name: NWERC 2020 Practice Session
 penalty-time: 20
 scoreboard-freeze-length: 30:00
 short-name: practice
-start-time: 2021-03-27 09:00:00+00:00
+start-time: 2022-01-01T11:00:00+00:00
 problems:
 -   color: '#FE9DAF'
     letter: A
