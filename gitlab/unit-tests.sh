@@ -39,9 +39,9 @@ UNITSUCCESS=$?
 set -e
 CNT=0
 if [ $CODECOVERAGE -eq 1 ]; then
-    CNT=$(sed -n '/Generating code coverage report/,$p' phpunit.out | grep -v DoctrineTestBundle | grep -cv ^$)
+    CNT=$(sed -n '/Generating code coverage report/,$p' "$GITLABARTIFACTS"/phpunit.out | grep -v DoctrineTestBundle | grep -cv ^$)
     FILE=deprecation.txt
-    sed -n '/Generating code coverage report/,$p' phpunit.out > ${CI_PROJECT_DIR}/$FILE
+    sed -n '/Generating code coverage report/,$p' "$GITLABARTIFACTS"/phpunit.out > ${CI_PROJECT_DIR}/$FILE
     if [ $CNT -le 21 ]; then
         STATE=success
     else
