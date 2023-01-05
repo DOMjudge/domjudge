@@ -151,14 +151,7 @@ class GeneralInfoController extends AbstractFOSRestController
      */
     public function getStatusAction(): array
     {
-        if ($this->dj->checkrole('jury')) {
-            $onlyOfTeam = null;
-        } elseif ($this->dj->checkrole('team') && $this->dj->getUser()->getTeam()) {
-            $onlyOfTeam = $this->dj->getUser()->getTeam();
-        } else {
-            $onlyOfTeam = -1;
-        }
-        $contests = $this->dj->getCurrentContests($onlyOfTeam);
+        $contests = $this->dj->getCurrentContests(null);
         if (empty($contests)) {
             throw new BadRequestHttpException('No active contest');
         }
