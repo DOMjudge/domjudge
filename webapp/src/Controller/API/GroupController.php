@@ -76,11 +76,11 @@ class GroupController extends AbstractRestController
         content: [
             new OA\MediaType(
                 mediaType: 'multipart/form-data',
-                schema: new OA\Schema(ref: '#/components/schemas/TeamCategory')
+                schema: new OA\Schema(ref: '#/components/schemas/TeamCategoryPost')
             ),
             new OA\MediaType(
                 mediaType: 'application/json',
-                schema: new OA\Schema(ref: '#/components/schemas/TeamCategory')
+                schema: new OA\Schema(ref: '#/components/schemas/TeamCategoryPost')
             ),
         ]
     )]
@@ -92,7 +92,11 @@ class GroupController extends AbstractRestController
     public function addAction(Request $request, ImportExportService $importExport): Response
     {
         $saved = [];
-        $importExport->importGroupsJson([$request->request->all()], $message, $saved);
+        $postedData = $request->request->all();
+        if (array_key_exists('id', $postedData)) {
+            throw new BadRequestHttpException("Cannot add group with ID");
+        }
+        $importExport->importGroupsJson([$postedData], $message, $saved);
         if (!empty($message)) {
             throw new BadRequestHttpException("Error while adding group: $message");
         }
