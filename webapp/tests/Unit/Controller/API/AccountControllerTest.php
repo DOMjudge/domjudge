@@ -85,4 +85,31 @@ class AccountControllerTest extends BaseTest
             }
         }
     }
+
+    public function testListFilterTeam(): void
+    {
+        foreach (['9999','nan','nonexistent'] as $nonExpectedObjectId) {
+            $url = $this->helperGetEndpointURL($this->apiEndpoint)."?team=".$nonExpectedObjectId;
+            $objects = $this->verifyApiJsonResponse('GET', $url, 200, $this->apiUser);
+            self::assertEquals([],$objects);    
+        }
+        foreach ($this->expectedObjects as $expectedObject) {
+            if ($expectedObject['team_id'] === null) {
+                continue;
+            }
+            $url = $this->helperGetEndpointURL($this->apiEndpoint)."?team=".$expectedObject['team_id'];
+            $objects = $this->verifyApiJsonResponse('GET', $url, 200, $this->apiUser);
+            $found = False;
+            foreach ($objects as $possibleObject) {
+                if ($possibleObject['username'] == $expectedObject['username']) {
+                    $found = True;
+                    foreach ($expectedObject as $key => $value) {
+                        // Null values can also be absent.
+                        static::assertEquals($value, $possibleObject[$key] ?? null, $key . ' has correct value.');
+                    }
+                }
+            }
+            self::assertEquals(True,$found);
+        }
+    }
 }
