@@ -76,7 +76,7 @@ class AccountControllerTest extends BaseTest
 
         $objectsAfterTest  = $this->verifyApiJsonResponse('GET', $myURL, 200, $this->apiUser);
         $newItems = array_map('unserialize', array_diff(array_map('serialize', $objectsAfterTest), array_map('serialize', $objectsBeforeTest)));
-        self::assertEquals(count($newItems), 1);
+        self::assertEquals(1, count($newItems));
         $listKey = array_keys($newItems)[0];
         foreach ($newUserPostData as $key => $value) {
             if ($key !== 'password') {
