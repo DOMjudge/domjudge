@@ -103,7 +103,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
     /**
      * @var double|string|null
      * @ORM\Column(type="decimal", precision=32, scale=9, name="judging_last_started",
-     *     options={"comment"="Start time of last judging for priorization",
+     *     options={"comment"="Start time of last judging for prioritization",
      *              "unsigned"=true}, nullable=true)
      * @Serializer\Exclude()
      */

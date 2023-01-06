@@ -379,9 +379,9 @@ and "MyICPC".  Under the `Import / Export` menu, enter the token as specified.
 Use the contest abbreviation and year as Contest ID (see the URL in the ICPC
 CMS).
 
-Based on the 'ICPC ID', teams and their affilations will be added if they do not
+Based on the 'ICPC ID', teams and their affiliations will be added if they do not
 exist or updated when they do. Teams will be set to 'enabled' if their ICPC CMS
-status is 'ACCEPTED', of disabled otherwise. Affilations are not updated or
+status is 'ACCEPTED', of disabled otherwise. Affiliations are not updated or
 deleted even when all teams cancel.
 
 .. _CCS specification: https://ccs-specs.icpc.io/2021-11/ccs_system_requirements#appendix-file-formats
