@@ -60,7 +60,7 @@ class ExternalJudgement
 
     /**
      * @ORM\Column(type="string", name="jury_member", length=255,
-     *     options={"comment"="Name of user who verified the result / diference",
+     *     options={"comment"="Name of user who verified the result / difference",
      *              "default"=NULL},
      *     nullable=true)
      * @Serializer\Exclude()
