@@ -62,12 +62,6 @@ php-cs-fixer:
   script:
     - /usr/bin/php-cs-fixer fix --format=gitlab --dry-run --diff . > code-quality.json || true
 
-codespell:
-  extends: [.tiny_job]
-  stage: style
-  script:
-    - python3 gitlab/codespell_gitlab.py
-
 detect dump:
   extends: [.tiny_job]
   image: bash
