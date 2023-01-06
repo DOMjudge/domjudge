@@ -9,6 +9,7 @@
 ./ChangeLog
 ./config.guess
 ./gitlab/codespell.yml
+./.github/jobs/uploadcodecov.sh
 ./gitlab/uploadcodecov.sh
 ./lib/vendor
 ./webapp/public/bundles
@@ -21,3 +22,6 @@ d3.min*
 jquery*
 coloris*
 nv.d3.min*
+composer*
+./doc/logos
+./m4
