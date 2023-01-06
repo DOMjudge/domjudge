@@ -99,7 +99,10 @@ cd $HOME
 composer -n require justinrainbow/json-schema
 echo -e "\033[0m"
 PATH=${PATH}:${HOME}/vendor/bin
-git clone --depth=1 https://github.com/DOMjudge/domjudge-scripts.git
+git clone https://github.com/DOMjudge/domjudge-scripts.git
+cd domjudge-scripts
+git checkout 3322cf4e8f504e660a938b40e3726fc14b55e69f
+cd ..
 CHECK_API=${HOME}/domjudge-scripts/contest-api/check-api.sh
 
 # Recreate domjudge-run-0 user with random UID to prevent clashes with
