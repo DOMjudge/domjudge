@@ -898,6 +898,12 @@ void pump_pipes(fd_set* readfds, size_t data_read[], size_t data_passed[])
 						/* Setting errno here to repeat the copy. */
 						errno = EAGAIN;
 					}
+					if ( nread==-1 && errno==EPIPE ) {
+						/* This happens when the child process has
+						   exited and the pipe is closed. */
+						nread = 0;
+						errno = 0;
+					}
 				} else {
 					nread = read(child_pipefd[i][PIPE_OUT], buf, to_read);
 					if ( nread>0 ) {
