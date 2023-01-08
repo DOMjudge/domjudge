@@ -124,7 +124,7 @@ class UserController extends AbstractRestController
         /** @var UploadedFile $jsonFile */
         $jsonFile = $request->files->get('json') ?: [];
         $message = null;
-        if ($result = $this->importExportService->importJson('organizations', $jsonFile, $message) && $result >= 0) {
+        if (($result = $this->importExportService->importJson('organizations', $jsonFile, $message)) && $result >= 0) {
             // TODO: better return all organizations here
             return "$result new organization(s) successfully added.";
         } else {
