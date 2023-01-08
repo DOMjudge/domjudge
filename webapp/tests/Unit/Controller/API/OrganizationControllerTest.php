@@ -164,6 +164,60 @@ class OrganizationControllerTest extends BaseTestCase
         self::assertArrayNotHasKey('logo', $object);
     }
 
+    public function testFilterList(): void
+    {
+        // Remove country and country flag if not enabled.
+        $showFlags = static::getContainer()->get(ConfigurationService::class)->get('show_flags');
+        if (!$showFlags) {
+            foreach ($this->expectedObjects as &$object) {
+                $object['country'] = null;
+                $object['country_flag'] = null;
+            }
+            unset($object);
+        }
+        if (($apiEndpoint = $this->apiEndpoint) === null) {
+            static::markTestSkipped('No endpoint defined.');
+        }
+        foreach (['NLD','USA','DEU'] as $country) {
+            $url = $this->helperGetEndpointURL($apiEndpoint).'?country='.$country;
+
+            $objects = $this->verifyApiJsonResponse('GET', $url, 200, $this->apiUser);
+    
+            static::assertIsArray($objects);
+            foreach ($this->expectedObjects as $expectedObjectId => $expectedObject) {
+                $filteredAway = True;
+                if ($expectedObject['country'] === $country) {
+                    $filteredAway = False;
+                }
+                foreach ($this->entityReferences as $field => $class) {
+                    $expectedObject[$field] = $this->resolveEntityId($class, $expectedObject[$field]);
+                }
+    
+                $expectedObjectId = $this->resolveReference($expectedObjectId);
+                if ($this->objectClassForExternalId !== null) {
+                    $expectedObjectId = $this->resolveEntityId($this->objectClassForExternalId, (string)$expectedObjectId);
+                }
+                $object = null;
+                foreach ($objects as $potentialObject) {
+                    if ($potentialObject['id'] == $expectedObjectId) {
+                        $object = $potentialObject;
+                        break;
+                    }
+                }
+                if ($filteredAway) {
+                    static::assertNull($object);
+                } else {
+                    static::assertNotNull($object);
+                    static::assertEquals($expectedObjectId, $object['id']);
+                    foreach ($expectedObject as $key => $value) {
+                        // Null values can also be absent.
+                        static::assertEquals($value, $object[$key] ?? null, $key . ' has correct value.');
+                    }
+                }
+            }
+        }
+    }
+
     public function testNewAddedOrganization(): void
     {
         $myURL = $this->helperGetEndpointURL($this->apiEndpoint);
