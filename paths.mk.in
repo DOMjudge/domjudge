@@ -156,5 +156,5 @@ define substconfigvars
 	-e 's,@BASEURL[@],@BASEURL@,g' \
 	-e 's,@PHPVERSION[@],@PHPVERSION@,g' \
 	> $@
-@chmod --reference=$< $@
+@chmod $(shell stat -c '%a' $<) $@
 endef
