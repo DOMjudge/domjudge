@@ -13,13 +13,12 @@ MEMLIMIT="$1" ; shift
 #           autodetected by extension)
 # -Wall:    Report all warnings
 # -fsanitize: Enable the specified Sanitizers, see https://github.com/google/sanitizers for the full documentation
-# -fPIE -pie -fno-omit-frame-pointer -fno-optimize-sibling-calls: Make code position independant and disable optimizations that may obfuscate the info provided by the
+# -fPIE -pie -fno-omit-frame-pointer -fno-optimize-sibling-calls: make code position independent and disable optimizations that may obfuscate the info provided by the
 sanitizers
 # -g: Include debugging/symbol information in the executable, improves sanitizers output if an error is detected
 # -O2:      Level 2 optimizations (default for speed)
 # -g        have file names and line numbers included in warning messages
 # -pipe:    Use pipes for communication between stages of compilation
 # -lm:      Link with math-library (has to be last argument!)
-export ASAN_OPTIONS=detect_leaks=1
 gcc -x c -Wall -fsanitize=address,undefined -fPIE -pie -fno-omit-frame-pointer -fno-optimize-sibling-calls -g -O2 -pipe -o "$DEST" "$@" -lm
 exit $?

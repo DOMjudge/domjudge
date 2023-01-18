@@ -13,7 +13,7 @@ MEMLIMIT="$1" ; shift
 #           other languages autodetected by extension)
 # -Wall:    Report all warnings
 # -fsanitize: Enable the specified Sanitizers, see https://github.com/google/sanitizers for the full documentation
-# -fPIE -pie -fno-omit-frame-pointer -fno-optimize-sibling-calls: Make code position independant and disable optimizations that may obfuscate the info provided by the 
+# -fPIE -pie -fno-omit-frame-pointer -fno-optimize-sibling-calls: Make code position independent and disable optimizations that may obfuscate the info provided by the 
 sanitizers
 # -g: Include debugging/symbol information in the executable, improves sanitizers output if an error is detected
 # -O2:      Level 2 optimizations (default for speed)
