@@ -38,14 +38,17 @@
                 case 'dont-add-user':
                     $existingUserField.hide();
                     $newUsernameField.hide();
+                    $newUsernameField.find('input').attr('required', false);
                     break;
                 case 'create-new-user':
                     $existingUserField.hide();
                     $newUsernameField.show();
+                    $newUsernameField.find('input').attr('required', true);
                     break;
                 case 'add-existing-user':
                     $existingUserField.show();
                     $newUsernameField.hide();
+                    $newUsernameField.find('input').attr('required', false);
                     break;
             }
         };

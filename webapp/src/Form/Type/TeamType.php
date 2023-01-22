@@ -134,7 +134,7 @@ class TeamType extends AbstractExternalIdEntityType
         ]);
         $builder->add('newUsername', TextType::class, [
             'label'    => 'Username',
-            'required' => false,
+            'required' => true,
         ]);
 
         $builder->add('save', SubmitType::class);
