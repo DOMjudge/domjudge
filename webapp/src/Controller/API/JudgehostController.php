@@ -471,6 +471,8 @@ class JudgehostController extends AbstractFOSRestController
                     $this->dj->alert('reject', $message);
                 });
             }
+        } else {
+            throw new BadRequestHttpException('Inconsistent data, no compilation data provided.');
         }
 
         $judgehost->setPolltime(Utils::now());
