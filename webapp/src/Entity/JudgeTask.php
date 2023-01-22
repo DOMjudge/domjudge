@@ -132,7 +132,7 @@ class JudgeTask
     /**
      * @ORM\Column(type="text", name="compile_config",
      *     options={"comment"="The compile config as JSON-blob.",
-     *              "collation"="utf8mb4_bin", "default"="NULL"},
+     *              "collation"="utf8mb4_bin", "default"=NULL},
      *     nullable=true)
      */
     protected ?string $compile_config;
@@ -140,7 +140,7 @@ class JudgeTask
     /**
      * @ORM\Column(type="text", name="run_config",
      *     options={"comment"="The run config as JSON-blob.",
-     *              "collation"="utf8mb4_bin", "default"="NULL"},
+     *              "collation"="utf8mb4_bin", "default"=NULL},
      *     nullable=true)
      */
     protected ?string $run_config;
@@ -148,7 +148,7 @@ class JudgeTask
     /**
      * @ORM\Column(type="text", name="compare_config",
      *     options={"comment"="The compare config as JSON-blob.",
-     *              "collation"="utf8mb4_bin", "default"="NULL"},
+     *              "collation"="utf8mb4_bin", "default"=NULL},
      *     nullable=true)
      */
     protected ?string $compare_config;
