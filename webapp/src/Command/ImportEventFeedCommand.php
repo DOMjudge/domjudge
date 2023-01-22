@@ -2,6 +2,7 @@
 
 namespace App\Command;
 
+use App\Entity\Contest;
 use App\Entity\ExternalContestSource;
 use App\Entity\User;
 use App\Service\ConfigurationService;
@@ -71,9 +72,9 @@ class ImportEventFeedCommand extends Command
                 '- State will not be imported.'
             )
             ->addArgument(
-                'extsourceid',
+                'contestid',
                 InputArgument::OPTIONAL,
-                'The ID of the external contest source entity to use.'
+                'The ID of the contest to use.'
             )
             ->addOption(
                 'from-start',
@@ -181,39 +182,51 @@ class ImportEventFeedCommand extends Command
     }
 
     /**
-     * Load the source with the given ID or ask for a source if null.
+     * Load the source for the contest with the given ID or ask for a contest if null.
      *
      * @return bool False if the import should stop, true otherwise.
      */
     protected function loadSource(InputInterface $input, OutputInterface $output): bool
     {
-        if (!$input->getArgument('extsourceid')) {
+        if (!$input->getArgument('contestid')) {
             if ($input->isInteractive()) {
-                /** @var ExternalContestSource[] $sources */
-                $sources = $this->em->getRepository(ExternalContestSource::class)->findAll();
+                /** @var Contest[] $contests */
+                $contests = $this->em->getRepository(Contest::class)->findAll();
                 $choices = [];
-                foreach ($sources as $source) {
+                foreach ($contests as $contest) {
                     $choices[] = sprintf(
                         '%s: %s',
-                        $source->getExtsourceid(),
-                        $source->getSource()
+                        $contest->getCid(),
+                        $contest->getName()
                     );
                 }
-                $answer = $this->style->choice('Which external contest source do you want to use?', $choices);
+                $answer = $this->style->choice('Which contest do you want to use?', $choices);
                 // Parse the answer. Ideally we would set ID's as array keys, but since IDs are integers, Symfony will
                 // not return them (only if they are strings and even casting them to strings makes PHP change them back
                 // to integers).
                 // We start the answers with the ID, so we can just cast them.
-                $extSourceId = (int)$answer;
+                $contestId = (int)$answer;
             } else {
-                $this->style->error('No extsourceid provided and not running in interactive mode.');
+                $this->style->error('No contestid provided and not running in interactive mode.');
                 return false;
             }
         } else {
-            $extSourceId = $input->getArgument('extsourceid');
+            $contestId = $input->getArgument('contestid');
         }
 
-        $source = $this->em->getRepository(ExternalContestSource::class)->find($extSourceId);
+        /** @var ExternalContestSource|null $source */
+        $source = $this->em->createQueryBuilder()
+            ->from(ExternalContestSource::class, 'ecs')
+            ->select('ecs')
+            ->join('ecs.contest', 'c')
+            ->andWhere('c.cid = :cid')
+            ->setParameter('cid', $contestId)
+            ->getQuery()
+            ->getOneOrNullResult();
+        if ($source === null) {
+            $this->style->error('Contest does not have an external contest configured yet');
+            return false;
+        }
         $this->sourceService->setSource($source);
 
         return true;

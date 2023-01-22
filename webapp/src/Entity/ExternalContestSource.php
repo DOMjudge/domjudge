@@ -13,8 +13,10 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
  * @ORM\Table(
  *     name="external_contest_source",
  *     options={"collation"="utf8mb4_unicode_ci", "charset"="utf8mb4",
- *              "comment"="Sources for external contests"}
- * )
+ *              "comment"="Sources for external contests"},
+ *     uniqueConstraints={
+ *         @ORM\UniqueConstraint(name="cid", columns={"cid"})
+ *     })
  */
 class ExternalContestSource
 {
@@ -29,14 +31,6 @@ class ExternalContestSource
      *     nullable=false, length=4)
      */
     private ?int $extsourceid = null;
-
-    /**
-     * @ORM\Column(type="boolean", name="enabled",
-     *     options={"comment"="Is this contest source currently enabled?",
-     *              "default"="1"},
-     *     nullable=false)
-     */
-    private bool $enabled = true;
 
     /**
      * @ORM\Column(type="string", name="type", length=255,
@@ -100,17 +94,6 @@ class ExternalContestSource
     public function getExtsourceid(): ?int
     {
         return $this->extsourceid;
-    }
-
-    public function isEnabled(): bool
-    {
-        return $this->enabled;
-    }
-
-    public function setEnabled(bool $enabled): ExternalContestSource
-    {
-        $this->enabled = $enabled;
-        return $this;
     }
 
     public function getType(): string

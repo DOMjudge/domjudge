@@ -17,24 +17,6 @@ class ExternalContestSourceType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->add('contest', EntityType::class, [
-            'class'        => Contest::class,
-            'required'     => true,
-            'label'        => 'Contest to import into',
-            'attr' => [
-                'required' => true,
-            ],
-            'choice_label' => fn(Contest $contest) => sprintf(
-                'c%d: %s - %s', $contest->getCid(), $contest->getShortname(), $contest->getName()
-            ),
-        ]);
-        $builder->add('enabled', ChoiceType::class, [
-            'expanded' => true,
-            'choices'  => [
-                'Yes' => true,
-                'No'  => false,
-            ],
-        ]);
         $builder->add('type', ChoiceType::class, [
             'choices' => [
                 ExternalContestSource::readableType(ExternalContestSource::TYPE_CCS_API)         => ExternalContestSource::TYPE_CCS_API,

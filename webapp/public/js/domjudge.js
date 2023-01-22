@@ -534,8 +534,8 @@ function updateMenuAlerts()
             if (json.shadow_difference_count !== undefined) {
                 updateMenuShadowDifferences(json.shadow_difference_count);
             }
-            if (json.external_contest_sources !== undefined) {
-                updateMenuExternalContestSources(json);
+            if (json.external_contest_source_is_down !== undefined) {
+                updateMenuExternalContest(json);
             }
         }
     });
@@ -650,26 +650,26 @@ function updateMenuShadowDifferences(data)
     }
 }
 
-function updateMenuExternalContestSources(data)
+function updateMenuExternalContest(data)
 {
-    var numDown = data.external_contest_sources.length;
+    var isDown = data.external_contest_source_is_down;
     var numWarnings = parseInt(data.external_source_warning_count);
-    if ( numDown == 0 && numWarnings == 0 ) {
-        $("#num-alerts-externalcontestsources").hide();
-        $("#num-alerts-externalcontestsources-sub").html("");
+    if ( !isDown && numWarnings == 0 ) {
+        $("#num-alerts-externalcontest").hide();
+        $("#num-alerts-externalcontest-sub").html("");
         $("#menu_shadow_differences").removeClass("text-danger");
     } else {
-        $("#num-alerts-externalcontestsources").html(numDown + numWarnings);
-        $("#num-alerts-externalcontestsources").show();
+        $("#num-alerts-externalcontest").html((isDown ? 1 : 0) + numWarnings);
+        $("#num-alerts-externalcontest").show();
         var text;
-        if (numDown > 0 && numWarnings > 0) {
-            text = numDown + " down, " + numWarnings + " warnings";
-        } else if (numDown > 0) {
-            text = numDown + " down";
+        if (isDown && numWarnings > 0) {
+            text = "down, " + numWarnings + " warnings";
+        } else if (isDown) {
+            text = "down";
         }  else {
             text = numWarnings + " warnings";
         }
-        $("#num-alerts-externalcontestsources-sub").html(text);
+        $("#num-alerts-externalcontest-sub").html(text);
         $("#menu_external_contest_sources").addClass("text-danger");
     }
 }
