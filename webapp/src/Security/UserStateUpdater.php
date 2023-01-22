@@ -31,7 +31,15 @@ class UserStateUpdater implements EventSubscriberInterface
     public function updateUserState(AuthenticationSuccessEvent $event): void
     {
         if ($event->getAuthenticationToken() && ($user = $event->getAuthenticationToken()->getUser()) && $user instanceof User) {
-            $user->setLastLogin(Utils::now());
+            $firewallName = 'main';
+            if (method_exists($event->getAuthenticationToken(), 'getFirewallName')) {
+                $firewallName = $event->getAuthenticationToken()->getFirewallName();
+            }
+            if ($firewallName === 'main') {
+                $user->setLastLogin(Utils::now());
+            } elseif (in_array($firewallName, ['api', 'metrics'], true)) {
+                $user->setLastApiLogin(Utils::now());
+            }
             $user->setLastIpAddress($this->dj->getClientIp());
 
             if (!$user->getFirstLogin()) {
@@ -42,9 +50,7 @@ class UserStateUpdater implements EventSubscriberInterface
 
             // Only log IP address on the main firewall.
             // Otherwise, we would log every API call and we do not want that.
-            if (method_exists($event->getAuthenticationToken(), 'getFirewallName')
-                && $event->getAuthenticationToken()->getFirewallName() === 'main'
-            ) {
+            if ($firewallName === 'main') {
                 $ip = $this->requestStack->getMainRequest()->getClientIp();
                 $this->dj->auditlog('user', $user->getUserid(), 'logged on on ' . $ip, null, $user->getUserName());
             }
