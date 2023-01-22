@@ -1,7 +1,7 @@
 {% extends "jury/base.html.twig" %}
 {% import "jury/jury_macros.twig" as macros %}
 
-{% block title %}External contest source {{ externalContestSource.extsourceid }} - {{ parent() }}{% endblock %}
+{% block title %}External contest - {{ parent() }}{% endblock %}
 
 {% block extrahead %}
     {{ parent() }}
@@ -16,19 +16,18 @@
 
 {% block content %}
 
-    <h1>External contest source {{ externalContestSource.extsourceid }}</h1>
+    <h1>External contest</h1>
 
-    <div data-source-info>
-        {% include 'jury/partials/external_contest_source_info.html.twig' %}
+    <div data-configuration-info>
+        {% include 'jury/partials/external_contest_info.html.twig' %}
     </div>
 
     <p>
-        {{ button(path('jury_external_contest_source_edit', {'extsourceid': externalContestSource.extsourceid}), 'Edit', 'primary', 'edit') }}
-        {{ button(path('jury_external_contest_source_delete', {'extsourceid': externalContestSource.extsourceid}), 'Delete', 'danger', 'trash-alt', true) }}
+        {{ button(path('jury_external_contest_manage'), 'Edit', 'primary', 'edit') }}
     </p>
 
     <div data-warning-header>
-        {% include 'jury/partials/external_contest_source_warning_header.html.twig' %}
+        {% include 'jury/partials/external_contest_warning_header.html.twig' %}
     </div>
 
     <div class="mb-3">
@@ -46,7 +45,7 @@
     </div>
 
     <div data-ajax-refresh-target data-ajax-refresh-after="updateData">
-        {% include 'jury/partials/external_contest_source_warnings.html.twig' %}
+        {% include 'jury/partials/external_contest_warnings.html.twig' %}
     </div>
 
 {% endblock %}
@@ -62,7 +61,7 @@
                 }
             });
 
-            $('#external_source_warnings_filter_clear').on('click', function () {
+            $('#external_configuration_warnings_filter_clear').on('click', function () {
                 $('select[data-filter-field]').val([]).trigger('change');
             });
 
@@ -86,10 +85,7 @@
                     warnings_filter[filters[i].field] = filters[i].values;
                 }
 
-                console.warn(warnings_filter);
-                console.warn(filters);
-
-                setCookie('domjudge_external_source_filter', JSON.stringify(warnings_filter));
+                setCookie('domjudge_external_configuration_filter', JSON.stringify(warnings_filter));
 
                 if (filters.length === 0) {
                     $trs.show();
@@ -116,9 +112,9 @@
             window.process_warnings_filter();
 
             window.updateData = function () {
-                var $sourceInfoData = $('[data-new-source-info]');
-                var $sourceInfo = $('[data-source-info]');
-                $sourceInfo.html($sourceInfoData.children());
+                var $configurationInfoData = $('[data-new-configuration-info]');
+                var $configurationInfo = $('[data-configuration-info]');
+                $configurationInfo.html($configurationInfoData.children());
 
                 var $warningHeaderData = $('[data-new-warning-header]');
                 var $warningHeader = $('[data-warning-header]');

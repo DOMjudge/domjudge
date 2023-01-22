@@ -302,7 +302,7 @@ class DOMJudgeService
         $internal_errors               = [];
         $balloons                      = [];
         $shadow_difference_count       = 0;
-        $external_contest_sources      = [];
+        $down_external_contest_source  = null;
         $external_source_warning_count = [];
 
         if ($this->checkRole('jury')) {
@@ -366,19 +366,21 @@ class DOMJudgeService
                         ->getSingleScalarResult();
                 }
 
-                $external_contest_sources = $this->em->createQueryBuilder()
+                $down_external_contest_source = $this->em->createQueryBuilder()
                     ->select('ecs.extsourceid', 'ecs.lastPollTime')
                     ->from(ExternalContestSource::class, 'ecs')
-                    ->andWhere('ecs.enabled = true')
+                    ->andWhere('ecs.contest = :contest')
                     ->andWhere('ecs.lastPollTime < :i OR ecs.lastPollTime is NULL')
+                    ->setParameter('contest', $this->getCurrentContest())
                     ->setParameter('i', time() - $this->config->get('external_contest_source_critical'))
-                    ->getQuery()->getResult();
+                    ->getQuery()->getOneOrNullResult();
 
                 $external_source_warning_count = $this->em->createQueryBuilder()
                                                      ->select('COUNT(w.extwarningid)')
                                                      ->from(ExternalSourceWarning::class, 'w')
                                                      ->innerJoin('w.externalContestSource', 'ecs')
-                                                     ->andWhere('ecs.enabled = true')
+                                                     ->andWhere('ecs.contest = :contest')
+                                                     ->setParameter('contest', $this->getCurrentContest())
                                                      ->getQuery()
                                                      ->getSingleScalarResult();
             }
@@ -414,7 +416,7 @@ class DOMJudgeService
             'internal_errors' => $internal_errors,
             'balloons' => $balloons,
             'shadow_difference_count' => $shadow_difference_count,
-            'external_contest_sources' => $external_contest_sources,
+            'external_contest_source_is_down' => $down_external_contest_source !== null,
             'external_source_warning_count' => $external_source_warning_count,
         ];
     }

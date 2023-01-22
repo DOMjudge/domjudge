@@ -6,18 +6,6 @@
                 <td>{{ externalContestSource.extsourceid }}</td>
             </tr>
             <tr>
-                <th>Contest to import into</th>
-                <td>
-                    <a href="{{ path('jury_contest', {'contestId': externalContestSource.contest.cid}) }}">
-                        c{{ externalContestSource.contest.cid }}
-                    </a>
-                </td>
-            </tr>
-            <tr>
-                <th>Enabled</th>
-                <td>{{ externalContestSource.enabled | printYesNo }}</td>
-            </tr>
-            <tr>
                 <th>Source</th>
                 <td>
                     {{ externalContestSource.getReadableType }}
@@ -47,7 +35,7 @@
             <tr>
                 <th>Command</th>
                 <td>
-                    <code>{{ webappDir }}/bin/console import:eventfeed {{ externalContestSource.extsourceid }}</code>
+                    <code>{{ webappDir }}/bin/console import:eventfeed {{ current_contest.cid }}</code>
                 </td>
             </tr>
             <tr>
