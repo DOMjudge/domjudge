@@ -133,7 +133,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
      * @Assert\Regex("/^[a-z0-9@._-]+$/i", message="Only alphanumeric characters and _-@. are allowed")
      * @Serializer\Exclude
      */
-    private ?string $newUsername;
+    private ?string $newUsername = null;
 
     /**
      * @Serializer\Exclude
