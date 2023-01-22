@@ -446,7 +446,7 @@ class Utils
         if ($exact) {
             $decimals = 0;
         }
-        return sprintf("%.${decimals}lf %s", round($display, $decimals), $units[$i]);
+        return sprintf("%.{$decimals}lf %s", round($display, $decimals), $units[$i]);
     }
 
     /**
