@@ -80,6 +80,7 @@ class TeamAffiliation extends BaseApiEntity implements AssetEntityInterface
      *     nullable=true)
      * @Serializer\Expose(if="context.getAttribute('config_service').get('show_flags')")
      * @Country()
+     * @OA\Property(nullable=true)
      */
     private ?string $country = null;
 
