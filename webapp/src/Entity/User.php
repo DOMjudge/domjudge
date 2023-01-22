@@ -84,6 +84,16 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
 
     /**
      * @var double|string|null
+     * @ORM\Column(type="decimal", precision=32, scale=9, name="last_api_login",
+     *     options={"comment"="Time of last successful login on the API", "unsigned"=true},
+     *     nullable=true)
+     * @Serializer\Exclude()
+     * @OA\Property(nullable=true)
+     */
+    private $last_api_login;
+
+    /**
+     * @var double|string|null
      * @ORM\Column(type="decimal", precision=32, scale=9, name="first_login",
      *     options={"comment"="Time of first login", "unsigned"=true},
      *     nullable=true)
@@ -265,6 +275,31 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
     public function getLastLoginAsDateTime(): ?DateTime
     {
         return $this->getLastLogin() ? new DateTime(Utils::absTime($this->getLastLogin())) : null;
+    }
+
+    /** @param string|float $lastApiLogin */
+    public function setLastApiLogin($lastApiLogin): User
+    {
+        $this->last_api_login = $lastApiLogin;
+        return $this;
+    }
+
+    /** @return string|float */
+    public function getLastApiLogin()
+    {
+        return $this->last_api_login;
+    }
+
+    /**
+     * @Serializer\VirtualProperty()
+     * @Serializer\SerializedName("last_api_login_time")
+     * @Serializer\Groups({"Nonstrict"})
+     * @Serializer\Type("DateTime")
+     * @OA\Property(nullable=true)
+     */
+    public function getLastApiLoginAsDateTime(): ?DateTime
+    {
+        return $this->getLastApiLogin() ? new DateTime(Utils::absTime($this->getLastApiLogin())) : null;
     }
 
     /** @param string|float $firstLogin */
