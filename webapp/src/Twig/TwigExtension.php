@@ -1143,7 +1143,7 @@ EOF;
                         '<td><code>%s</code></td>',
                         $diff['external'] === null ? $null : $diff['external']
                     );
-                    $rows[]     = "<tr>${tdField}${tdUs}${tdExternal}</tr>";
+                    $rows[]     = "<tr>{$tdField}{$tdUs}{$tdExternal}</tr>";
                 }
 
                 $header  = <<<'EOF'
