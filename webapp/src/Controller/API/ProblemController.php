@@ -96,7 +96,9 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
         }
 
         /** @var UploadedFile $file */
-        $file = $request->files->get('data') ?: [];
+        if (!$file = $request->files->get('data')) {
+            throw new BadRequestHttpException("Data field is missing.");
+        }
         // Note: we read the JSON as YAML, since any JSON is also YAML and this allows us
         // to import files with YAML inside them that match the JSON format
         $data = Yaml::parseFile($file->getRealPath(), Yaml::PARSE_DATETIME);
