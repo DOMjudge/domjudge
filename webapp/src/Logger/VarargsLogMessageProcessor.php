@@ -7,6 +7,7 @@
 
 namespace App\Logger;
 
+use ValueError;
 use Monolog\Processor\ProcessorInterface;
 
 class VarargsLogMessageProcessor implements ProcessorInterface
@@ -21,10 +22,14 @@ class VarargsLogMessageProcessor implements ProcessorInterface
             return $record;
         }
 
-        $res = vsprintf($record['message'], $record['context']);
-        if ($res !== false) {
-            $record['message'] = $res;
-            $record['context'] = [];
+        try {
+            $res = vsprintf($record['message'], $record['context']);
+            if ($res !== false) {
+                $record['message'] = $res;
+                $record['context'] = [];
+            }
+        } catch (ValueError $e) {
+            return $record;
         }
 
         return $record;
