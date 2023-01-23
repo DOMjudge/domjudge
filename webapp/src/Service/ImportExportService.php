@@ -99,7 +99,7 @@ class ImportExportService
 
     public function importContestData($data, ?string &$message = null, string &$cid = null): bool
     {
-        if (empty($data)) {
+        if (empty($data) || !is_array($data)) {
             $message = 'Error parsing YAML file.';
             return false;
         }
