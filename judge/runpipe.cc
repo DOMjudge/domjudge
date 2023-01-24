@@ -887,7 +887,7 @@ int main(int argc, char **argv) {
 
   // Enter a new session since we are dealing with signals.
   if (setsid() < 0) {
-    error(errno, "failed to create a new session");
+    warning(errno, "failed to create a new session");
   }
   // The processes may close their pipes, so we need to ignore "broken pipe"
   // errors.
