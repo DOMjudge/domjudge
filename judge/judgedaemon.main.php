@@ -1339,9 +1339,15 @@ function judge(array $judgeTask): bool
     }
 
     if ($result === 'compare-error') {
-        logmsg(LOG_ERR, "comparing failed for compare script '" . $judgeTask['compare_script_id'] . "'");
-        $description = 'compare script ' . $judgeTask['compare_script_id'] . ' crashed';
-        disable('compare_script', 'compare_script_id', $judgeTask['compare_script_id'], $description, $judgeTask['judgetaskid']);
+        if ($combined_run_compare) {
+            logmsg(LOG_ERR, "comparing failed for combined run/compare script '" . $judgeTask['run_script_id'] . "'");
+            $description = 'combined run/compare script ' . $judgeTask['run_script_id'] . ' crashed';
+            disable('run_script', 'run_script_id', $judgeTask['run_script_id'], $description, $judgeTask['judgetaskid']);
+        } else {
+            logmsg(LOG_ERR, "comparing failed for compare script '" . $judgeTask['compare_script_id'] . "'");
+            $description = 'compare script ' . $judgeTask['compare_script_id'] . ' crashed';
+            disable('compare_script', 'compare_script_id', $judgeTask['compare_script_id'], $description, $judgeTask['judgetaskid']);
+        }
         return false;
     }
 
