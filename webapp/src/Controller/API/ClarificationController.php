@@ -159,8 +159,7 @@ class ClarificationController extends AbstractRestController
                 ->getOneOrNullResult();
 
             if ($replyTo === null) {
-                throw new BadRequestHttpException(
-                    sprintf("Clarification '%s' not found.", $replyToId));
+                throw new BadRequestHttpException("Clarification '$replyToId' not found.");
             }
 
             $clarification->setInReplyTo($replyTo);
