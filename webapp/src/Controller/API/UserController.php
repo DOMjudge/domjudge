@@ -358,7 +358,7 @@ class UserController extends AbstractRestController
             $user->setTeam($team);
         }
 
-        $roles = (array)$request->request->get('roles');
+        $roles = $request->request->all('roles');
         foreach ($roles as $djRole) {
             if ($djRole === '') {
                 continue;
