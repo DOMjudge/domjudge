@@ -14,9 +14,10 @@ Part of the DOMjudge Programming Contest Jury System and licensed
 under the GNU GPL. See README and COPYING for details.
 '''
 
-import fileinput
 import json
+from os import listdir
 import os.path
+import re
 import sys
 from typing import List
 import yaml
@@ -32,7 +33,7 @@ def usage():
     exit(1)
 
 
-def import_file(entity: str, files: List[str]):
+def import_file(entity: str, files: List[str]) -> bool:
     any_matched = False
     for file in files:
         if os.path.exists(file):
@@ -42,7 +43,7 @@ def import_file(entity: str, files: List[str]):
                 response = dj_utils.upload_file(f'users/{entity}', type, file)
                 print(json.dumps(response, indent=4))
                 # After the first successfully imported file, we should stop
-                return
+                return True
             else:
                 print(f'Skipping {entity} import.')
             any_matched = True
@@ -55,6 +56,40 @@ def import_file(entity: str, files: List[str]):
             last = f'\'{files[-1]}\''
             print(
                 f'Neither {prefix_joined} nor {last} found, skipping {entity} import.')
+    return False
+
+def import_images(entity: str, property: str, filename_regexes: List[str]):
+    """Import images for the given entity. filename_regexes determines what file to import: only
+    files matching the regexes will be considered and if multiple files match the regexes the file
+    with the first matched regex will be used"""
+
+    if not os.path.isdir(entity):
+        return
+    images_per_entity = {}
+    for entity_id in listdir(entity):
+        entity_dir = f'{entity}/{entity_id}'
+        if not os.path.isdir(entity_dir):
+            continue
+        entity_files = listdir(entity_dir)
+        any_matched = False
+        for regex in filename_regexes:
+            if any_matched:
+                break
+            for entity_file in entity_files:
+                if re.match(regex, entity_file):
+                    images_per_entity[entity_id] = entity_file
+                    any_matched = True
+                    break
+    
+    if images_per_entity:
+        if dj_utils.confirm(f'Import {property}s for {entity}?', False):
+            for entity_id in images_per_entity:
+                image_file = f'{entity}/{entity_id}/{images_per_entity[entity_id]}'
+                print(f'Importing file {image_file} as {property} for {entity} entity with ID {entity_id}...')
+                dj_utils.upload_file(f'{entity}/{entity_id}/{property}', property, image_file)
+            print(f'{len(images_per_entity)} {property}s imported.')
+        else:
+            print(f'Skipping {entity} {property} import.')
 
 
 if len(sys.argv) < 2:
@@ -68,8 +103,13 @@ if 'admin' not in user_data['roles']:
     exit(1)
 
 import_file('groups', ['groups.json', 'groups.tsv'])
-import_file('organizations', ['organizations.json'])
-import_file('teams', ['teams.json', 'teams2.tsv'])
+if import_file('organizations', ['organizations.json']) or True:
+    # Also import logos if we have any
+    # We prefer the 64x64 logo. If it doesn't exist, accept a generic logo (which might be a SVG)
+    import_images('organizations', 'logo', ['^logo\.64\..*$', '^logo\.[a-z]*$'])
+if import_file('teams', ['teams.json', 'teams2.tsv']):
+    # Also import photos of we have any
+    import_images('teams', 'photo', ['^photo\.[a-z]*$'])
 import_file('accounts', ['accounts.json', 'accounts.yaml', 'accounts.tsv'])
 
 problems_imported = False

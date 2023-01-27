@@ -24,7 +24,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
- * @Rest\Route("/contests/{cid}/organizations")
+ * @Rest\Route("/")
  * @OA\Tag(name="Organizations")
  * @OA\Parameter(ref="#/components/parameters/cid")
  * @OA\Response(response="400", ref="#/components/responses/InvalidResponse")
@@ -49,7 +49,8 @@ class OrganizationController extends AbstractRestController
 
     /**
      * Get all the organizations for this contest.
-     * @Rest\Get("")
+     * @Rest\Get("contests/{cid}/organizations")
+     * @Rest\Get("organizations")
      * @OA\Response(
      *     response="200",
      *     description="Returns all the organizations for this contest",
@@ -81,7 +82,8 @@ class OrganizationController extends AbstractRestController
     /**
      * Get the given organization for this contest.
      * @throws NonUniqueResultException
-     * @Rest\Get("/{id}")
+     * @Rest\Get("contests/{cid}/organizations/{id}")
+     * @Rest\Get("organizations/{id}")
      * @OA\Response(
      *     response="200",
      *     description="Returns the given organization for this contest",
@@ -102,7 +104,8 @@ class OrganizationController extends AbstractRestController
 
     /**
      * Get the logo for the given organization.
-     * @Rest\Get("/{id}/logo", name="organization_logo")
+     * @Rest\Get("contests/{cid}/organizations/{id}/logo", name="organization_logo")
+     * @Rest\Get("organizations/{id}/logo")
      * @OA\Response(
      *     response="200",
      *     description="Returns the given organization logo in PNG, JPG or SVG format",
@@ -136,7 +139,8 @@ class OrganizationController extends AbstractRestController
 
     /**
      * Delete the logo for the given organization.
-     * @Rest\Delete("/{id}/logo", name="delete_organization_logo")
+     * @Rest\Delete("contests/{cid}/organizations/{id}/logo", name="delete_organization_logo")
+     * @Rest\Delete("organizations/{id}/logo")
      * @IsGranted("ROLE_ADMIN")
      * @OA\Response(response="204", description="Deleting logo succeeded")
      * @OA\Parameter(ref="#/components/parameters/id")
@@ -157,16 +161,21 @@ class OrganizationController extends AbstractRestController
         $teamAffiliation->setClearLogo(true);
 
         $this->assetUpdater->updateAssets($teamAffiliation);
+        if ($request->attributes->has('cid')) {
+            $contestId = $this->getContestId($request);
+        }
         $this->eventLogService->log('organizations', $teamAffiliation->getAffilid(), EventLogService::ACTION_UPDATE,
-            $this->getContestId($request));
+            $contestId);
 
         return new Response('', Response::HTTP_NO_CONTENT);
     }
 
     /**
      * Set the logo for the given organization.
-     * @Rest\POST("/{id}/logo", name="post_organization_logo")
-     * @Rest\PUT("/{id}/logo", name="put_organization_logo")
+     * @Rest\POST("contests/{cid}/organizations/{id}/logo", name="post_organization_logo")
+     * @Rest\POST("organizations/{id}/logo")
+     * @Rest\PUT("contests/{cid}/organizations/{id}/logo", name="put_organization_logo")
+     * @Rest\PUT("organizations/{id}/logo")
      * @OA\RequestBody(
      *     required=true,
      *     @OA\MediaType(
@@ -213,8 +222,12 @@ class OrganizationController extends AbstractRestController
         }
 
         $this->assetUpdater->updateAssets($teamAffiliation);
+        $contestId = null;
+        if ($request->attributes->has('cid')) {
+            $contestId = $this->getContestId($request);
+        }
         $this->eventLogService->log('organizations', $teamAffiliation->getAffilid(), EventLogService::ACTION_UPDATE,
-            $this->getContestId($request));
+            $contestId);
 
         return new Response('', Response::HTTP_NO_CONTENT);
     }
@@ -222,7 +235,8 @@ class OrganizationController extends AbstractRestController
     /**
      * Add a new organization.
      *
-     * @Rest\Post()
+     * @Rest\Post("contests/{cid}/organizations")
+     * @Rest\Post("organizations")
      * @IsGranted("ROLE_API_WRITER")
      * @OA\RequestBody(
      *     required=true,
@@ -259,8 +273,10 @@ class OrganizationController extends AbstractRestController
 
     protected function getQueryBuilder(Request $request): QueryBuilder
     {
-        // Call getContestId to make sure we have an active contest.
-        $this->getContestId($request);
+        if ($request->attributes->has('cid')) {
+            // Call getContestId to make sure we have an active contest.
+            $this->getContestId($request);
+        }
         $queryBuilder = $this->em->createQueryBuilder()
             ->from(TeamAffiliation::class, 'ta')
             ->select('ta')
