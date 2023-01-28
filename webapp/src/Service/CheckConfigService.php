@@ -858,7 +858,7 @@ class CheckConfigService
         ];
     }
 
-    public function getStopwatch()
+    public function getStopwatch(): Stopwatch
     {
         return $this->stopwatch;
     }
