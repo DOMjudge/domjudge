@@ -173,7 +173,7 @@ class Executable
 
     public function getZipfileContent(string $tempdir): string
     {
-        $zipArchive = new \ZipArchive();
+        $zipArchive = new ZipArchive();
         if (!($tempzipFile = tempnam($tempdir, "/executable-"))) {
             throw new ServiceUnavailableHttpException(null, 'Failed to create temporary file');
         }
