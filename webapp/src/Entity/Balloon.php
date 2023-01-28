@@ -34,7 +34,7 @@ class Balloon
      * @ORM\ManyToOne(targetEntity="Submission", inversedBy="balloons")
      * @ORM\JoinColumn(name="submitid", referencedColumnName="submitid", onDelete="CASCADE")
      */
-    private $submission;
+    private Submission $submission;
 
     public function getBalloonid(): int
     {
