@@ -101,7 +101,11 @@ class ControllerRolesTraversalTest extends BaseTest
         if (($statusCode === 403 || $statusCode === 401) && $response->isRedirection()) {
             self::assertEquals($response->headers->get('location'), $this::$loginURL);
         } elseif (($response->getStatusCode() === 302 ) && $response->isRedirection()) {
-            self::assertTrue(strpos($response->headers->get('location'), '/public') !== false);
+            if (strpos($url, '/jury/external-contest') !== false) {
+                self::assertTrue(strpos($response->headers->get('location'), '/jury/external-contest/manage') !== false);
+            } else {
+                self::assertTrue(strpos($response->headers->get('location'), '/public') !== false);
+            }
         } else {
             self::assertEquals($statusCode, $response->getStatusCode(), $message);
         }
