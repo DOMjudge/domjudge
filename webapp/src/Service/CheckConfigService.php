@@ -250,7 +250,7 @@ class CheckConfigService
             $desc .= sprintf("MySQL's max_allowed_packet is set to %s. You may want to raise this to about twice the maximum of the test case size and output (storage) limit (currently %s).\n", Utils::printsize((int)$vars['max_allowed_packet']), Utils::printsize($max_inout));
         } elseif ($vars['max_allowed_packet'] < $recommended_max_allowed_packet) {
             $result = 'W';
-            $desc .= sprintf("MySQL's max_allowed_packet is set to %s. We recommend at least 16MB.\n", Utils::printsize((int)$vars['max_allowed_packet']), Utils::printsize($max_inout));
+            $desc .= sprintf("MySQL's max_allowed_packet is set to %s. We recommend at least 16MB.\n", Utils::printsize((int)$vars['max_allowed_packet']));
         }
 
         $this->stopwatch->stop(__FUNCTION__);
