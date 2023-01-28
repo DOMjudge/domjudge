@@ -6,6 +6,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
+use RuntimeException;
 
 /**
  * Immutable wrapper for a collection of files for executable bundles.
@@ -108,6 +109,6 @@ class ImmutableExecutable
      */
     public function disallowDelete(): void
     {
-        throw new \RuntimeException('An immutable executable cannot be deleted');
+        throw new RuntimeException('An immutable executable cannot be deleted');
     }
 }

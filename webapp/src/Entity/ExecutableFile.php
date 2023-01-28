@@ -3,6 +3,7 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
+use RuntimeException;
 
 /**
  * Files associated to an executable.
@@ -145,6 +146,6 @@ class ExecutableFile
      */
     public function disallowDelete(): void
     {
-        throw new \RuntimeException('An executable file cannot be deleted');
+        throw new RuntimeException('An executable file cannot be deleted');
     }
 }

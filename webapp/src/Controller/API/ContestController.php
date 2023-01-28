@@ -35,6 +35,7 @@ use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Yaml\Yaml;
+use TypeError;
 
 /**
  * @Rest\Route("/contests")
@@ -753,7 +754,7 @@ class ContestController extends AbstractRestController
     {
         try {
             return $this->getContestQueryBuilder($request->query->getBoolean('onlyActive', false));
-        } catch (\TypeError $e) {
+        } catch (TypeError $e) {
             throw new BadRequestHttpException('\'onlyActive\' must be a boolean.');
         }
     }
