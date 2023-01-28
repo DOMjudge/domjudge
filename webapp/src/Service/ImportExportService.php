@@ -16,6 +16,7 @@ use App\Utils\Utils;
 use Collator;
 use DateTime;
 use DateTimeImmutable;
+use DateTimeInterface;
 use DateTimeZone;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
@@ -98,6 +99,35 @@ class ImportExportService
         return $data;
     }
 
+    protected function convertImportedTime(array $fields, array $data, ?string &$message = null): ?DateTimeImmutable
+    {
+        $timeValue = null;
+        $usedField = null;
+        foreach ($fields as $field) {
+            if ($timeValue) {
+                continue;
+            }
+            $timeValue = $data[$field] ?? null;
+            $usedField = $field;
+        }
+
+        if (is_string($timeValue)) {
+            $time = date_create_from_format(DateTime::ISO8601, $timeValue) ?:
+                // Make sure ISO 8601 but with the T replaced with a space also works.
+                date_create_from_format('Y-m-d H:i:sO', $timeValue);
+        } else {
+            /** @var DateTime $time */
+            $time = $timeValue;
+        }
+        if ($time === false) {
+            $message = 'Can not parse '.$usedField;
+            return null;
+        } elseif ($time) {
+            $time = $time->setTimezone(new DateTimeZone(date_default_timezone_get()));
+        }
+        return $time instanceof DateTime ? DateTimeImmutable::createFromMutable($time) : $time;
+    }
+
     public function importContestData($data, ?string &$message = null, string &$cid = null): bool
     {
         if (empty($data) || !is_array($data)) {
@@ -105,8 +135,9 @@ class ImportExportService
             return false;
         }
 
-        $requiredFields = [['start_time', 'start-time'], 'name', ['id', 'short-name'], 'duration'];
-        $missingFields  = [];
+        $starttimeFields = ['start_time', 'start-time'];
+        $requiredFields = [$starttimeFields, 'name', ['id', 'short-name'], 'duration'];
+        $missingFields = [];
         foreach ($requiredFields as $field) {
             if (is_array($field)) {
                 $present = false;
@@ -132,22 +163,11 @@ class ImportExportService
 
         $invalid_regex = str_replace(['/^[', '+$/'], ['/[^', '/'], DOMJudgeService::EXTERNAL_IDENTIFIER_REGEX);
 
-        $starttimeValue = $data['start-time'] ?? $data['start_time'];
-
-        if (is_string($starttimeValue)) {
-            $starttime = date_create_from_format(DateTime::ATOM, $starttimeValue) ?:
-                // Make sure ISO 8601 but with the T replaced with a space also works.
-                date_create_from_format('Y-m-d H:i:sO', $starttimeValue);
-        } else {
-            /** @var DateTimeImmutable $starttimeValue */
-            $starttime = $starttimeValue;
-        }
-        if ($starttime === false) {
-            $message = 'Can not parse start time';
+        $starttime = $this->convertImportedTime($starttimeFields, $data, $message);
+        if ($message) {
             return false;
         }
 
-        $starttime = $starttime->setTimezone(new DateTimeZone(date_default_timezone_get()));
         $activateTime = new DateTime();
         if ($activateTime > $starttime) {
             $activateTime = $starttime;
