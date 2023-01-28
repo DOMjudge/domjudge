@@ -135,8 +135,10 @@ class ImportExportService
             return false;
         }
 
+        $activateTimeFields = ['activation_time','activate_time','activation-time', 'activate-time'];
+        $deactivateTimeFields = preg_filter('/^/', 'de', $activateTimeFields);
         $startTimeFields = ['start_time', 'start-time'];
-        $requiredFields = [$startTimeFields, 'name', ['id', 'short-name'], 'duration'];
+        $requiredFields = [$startTimeFields, 'formal_name', ['id', 'name', 'short-name', 'short_name'], 'duration'];
         $missingFields = [];
         foreach ($requiredFields as $field) {
             if (is_array($field)) {
@@ -168,13 +170,25 @@ class ImportExportService
             return false;
         }
 
-        $activateTime = new DateTime();
-        if ($activateTime > $startTime) {
-            $activateTime = $startTime;
+        // Activate time is special, it can return non empty message for parsing error or null if no field was provided
+        $activateTime = $this->convertImportedTime($activateTimeFields, $data, $message);
+        if ($message) {
+            return false;
+        } elseif (!$activateTime) {
+            $activateTime = new DateTime();
+            if ($activateTime > $startTime) {
+                $activateTime = $startTime;
+            }
         }
+
+        $deactivateTime = $this->convertImportedTime($deactivateTimeFields, $data, $message);
+        if ($message) {
+            return false;
+        }
+
         $contest = new Contest();
         $contest
-            ->setName($data['name'])
+            ->setName($data['formal_name'])
             ->setShortname(preg_replace(
                                $invalid_regex,
                                '_',
@@ -185,6 +199,9 @@ class ImportExportService
             ->setStarttimeString(date_format($startTime, 'Y-m-d H:i:s e'))
             ->setActivatetimeString(date_format($activateTime, 'Y-m-d H:i:s e'))
             ->setEndtimeString(sprintf('+%s', $data['duration']));
+        if ($deactivateTime) {
+            $contest->setDeactivatetimeString(date_format($deactivateTime, 'Y-m-d H:i:s e'));
+        }
 
         // Get all visible categories. For now, we assume these are the ones getting awards
         $visibleCategories = $this->em->getRepository(TeamCategory::class)->findBy(['visible' => true]);

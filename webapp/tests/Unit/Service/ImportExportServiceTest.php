@@ -46,7 +46,7 @@ class ImportExportServiceTest extends KernelTestCase
                 'duration'   => '5:00:00',
                 'start-time' => 'Invalid start time here',
             ],
-            'Can not parse start time'
+            'Can not parse start-time'
         ];
         yield [
             [
@@ -55,7 +55,7 @@ class ImportExportServiceTest extends KernelTestCase
                 'duration'   => '5:00:00',
                 'start_time' => 'Invalid start time here',
             ],
-            'Can not parse start time'
+            'Can not parse start_time'
         ];
         yield [
             [
