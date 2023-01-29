@@ -15,6 +15,7 @@ _myself = os.path.basename(sys.argv[0])
 _default_user_agent = requests.utils.default_user_agent()
 headers = {'user-agent': f'dj_utils/{_myself} ({_default_user_agent})'}
 api_url = 'unset'
+ca_check = True
 
 
 def confirm(message: str, default: bool) -> bool:
@@ -55,13 +56,20 @@ def do_api_request(name: str):
         RuntimeError when the response is not JSON or the HTTP status code is non 2xx.
     '''
 
+    global ca_check
     url = f'{api_url}/{name}'
 
     try:
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=headers, verify=ca_check)
+    except requests.exceptions.SSLError as e:
+        ca_check = not confirm("Can not verify certificate, ignore certificate check?", False)
+        if ca_check:
+            print('Can not verify certificate chain for DOMserver.')
+            exit(1)
+        else:
+            return do_api_request(name)
     except requests.exceptions.RequestException as e:
         raise RuntimeError(e)
-
     return parse_api_response(name, response)
 
 
@@ -80,10 +88,19 @@ def upload_file(name: str, apifilename: str, file: str, data: dict = {}):
         RuntimeError when the HTTP status code is non 2xx.
     '''
 
+    global ca_check
     files = [(apifilename, open(file, 'rb'))]
 
     url = f'{api_url}/{name}'
 
-    response = requests.post(url, files=files, headers=headers, data=data)
+    try:
+        response = requests.post(url, files=files, headers=headers, data=data, verify=ca_check)
+    except requests.exceptions.SSLError as e:
+        ca_check = not confirm("Can not verify certificate, ignore certificate check?", False)
+        if ca_check:
+            print('Can not verify certificate chain for DOMserver.')
+            exit(1)
+        else:
+            response = requests.post(url, files=files, headers=headers, data=data, verify=ca_check)
 
     return parse_api_response(name, response)
