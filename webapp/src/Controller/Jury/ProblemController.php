@@ -483,11 +483,11 @@ class ProblemController extends BaseController
             throw new NotFoundHttpException(sprintf('Problem with ID %s not found', $probId));
         }
 
-        $lockedContest = false;
+        $lockedContests = [];
         foreach ($problem->getContestProblems() as $contestproblem) {
-            /** @var contestproblem $contestproblem */
-            if ($contestproblem->getcontest()->isLocked()) {
-                $lockedContest = true;
+            /** @var ContestProblem $contestproblem */
+            if ($contestproblem->getContest()->isLocked()) {
+                $lockedContests[] = 'c' . $contestproblem->getContest()->getCid();
                 break;
             }
         }
@@ -507,8 +507,9 @@ class ProblemController extends BaseController
         $testcases = array_map(fn($data) => $data[0], $testcaseData);
 
         if ($request->isMethod('POST')) {
-            if ($lockedContest) {
-                $this->addFlash('danger', 'Cannot edit problem / testcases, it belongs to locked contest c' . $contestProblem->getContest()->getCid());
+            if (!empty($lockedContests)) {
+                $this->addFlash('danger', 'Cannot edit problem / testcases, it belongs to locked contest(s) '
+                    . join(', ', $lockedContests));
                 return $this->redirectToRoute('jury_problem', ['probId' => $problem->getProbid()]);
             }
             $messages      = [];
@@ -711,16 +712,18 @@ class ProblemController extends BaseController
             $known_md5s[$input_md5] = $rank;
         }
 
-        if ($lockedContest) {
+        if (!empty($lockedContests)) {
             $this->addFlash('warning',
-                'Problem belongs to a locked contest, disallowing editing.');
+                'Problem belongs to locked contest ('
+                . join($lockedContests)
+                . ', disallowing editing.');
         }
         $data = [
             'problem' => $problem,
             'testcases' => $testcases,
             'testcaseData' => $testcaseData,
             'extensionMapping' => Testcase::EXTENSION_MAPPING,
-            'allowEdit' => $this->isGranted('ROLE_ADMIN') && !$lockedContest,
+            'allowEdit' => $this->isGranted('ROLE_ADMIN') && empty($lockedContest),
         ];
 
         return $this->render('jury/problem_testcases.html.twig', $data);
