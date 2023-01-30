@@ -95,7 +95,7 @@ the file ``webapp/.env.local`` and add to it the setting
 maintainer-install`` when the file did not exist before.
 For more details see the `Symfony documentation`_.
 
-:: _Symfony documentation: https://symfony.com/doc/current/configuration/dot-env-changes.html
+.. _Symfony documentation: https://symfony.com/doc/current/configuration/dot-env-changes.html
 
 The ``webapp/.env.local`` file can also be used to overwrite the database
 version. This is needed to automatically generate migrations based on the
