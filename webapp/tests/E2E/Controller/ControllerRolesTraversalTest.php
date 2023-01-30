@@ -107,6 +107,10 @@ class ControllerRolesTraversalTest extends BaseTest
                 self::assertTrue(strpos($response->headers->get('location'), '/public') !== false);
             }
         } else {
+            // The public URL can always be accessed but is not linked for every role.
+            if (strpos($url, '/public') !== false) {
+                $statusCode = 200;
+            }
             self::assertEquals($statusCode, $response->getStatusCode(), $message);
         }
         $ret = [];
