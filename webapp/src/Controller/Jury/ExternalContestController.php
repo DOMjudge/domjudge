@@ -158,7 +158,18 @@ class ExternalContestController extends BaseController
             ->andWhere('ecs.contest = :contest')
             ->setParameter('contest', $this->dj->getCurrentContest())
             ->getQuery()->getOneOrNullResult() ?? new ExternalContestSource();
-        $externalContestSource->setContest($this->dj->getCurrentContest());
+
+        if (!$this->dj->getCurrentContest()) {
+            if (empty($this->dj->getCurrentContests(null, true))) {
+                $this->addFlash('warning', 'No current contest selected, please create one first.');
+                return $this->redirect($this->generateUrl('jury_contest_add'));
+            } else {
+                $this->addFlash('warning', 'No current contest selected, please select one first.');
+            }
+        } else {
+            $externalContestSource->setContest($this->dj->getCurrentContest());
+        }
+
         $form = $this->createForm(ExternalContestSourceType::class, $externalContestSource);
 
         $form->handleRequest($request);
