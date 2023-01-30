@@ -25,7 +25,11 @@ from Git repository sources, because you want to use the bleeding edge
 code or consider to send a patch to the developers, the
 configure/build system first has to be bootstrapped.
 
-This requires the GNU autoconf/automake toolset to be installed,
+You can either spin up a development `Docker container`_ or install locally.
+
+.. _Docker container: https://hub.docker.com/r/domjudge/domjudge-contributor
+
+The local install requires the GNU autoconf/automake toolset to be installed,
 and various tools to build the documentation.
 
 On Debian(-based) systems, the following apt command should
