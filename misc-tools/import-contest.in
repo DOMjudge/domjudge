@@ -70,7 +70,7 @@ def import_images(entity: str, property: str, filename_regexes: List[str]):
         entity_dir = f'{entity}/{entity_id}'
         if not os.path.isdir(entity_dir):
             continue
-        entity_files = listdir(entity_dir)
+        entity_files = sorted(listdir(entity_dir))
         any_matched = False
         for regex in filename_regexes:
             if any_matched:
