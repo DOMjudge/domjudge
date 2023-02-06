@@ -25,7 +25,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
- * @Rest\Route("/contests/{cid}/teams")
+ * @Rest\Route("/")
  * @OA\Tag(name="Teams")
  * @OA\Parameter(ref="#/components/parameters/cid")
  * @OA\Response(response="400", ref="#/components/responses/InvalidResponse")
@@ -50,7 +50,8 @@ class TeamController extends AbstractRestController
 
     /**
      * Get all the teams for this contest.
-     * @Rest\Get("")
+     * @Rest\Get("contests/{cid}/teams")
+     * @Rest\Get("teams")
      * @OA\Response(
      *     response="200",
      *     description="Returns all the teams for this contest",
@@ -94,7 +95,8 @@ class TeamController extends AbstractRestController
     /**
      * Get the given team for this contest.
      * @throws NonUniqueResultException
-     * @Rest\Get("/{id}")
+     * @Rest\Get("contests/{cid}/teams/{id}")
+     * @Rest\Get("teams/{id}")
      * @OA\Response(
      *     response="200",
      *     description="Returns the given team for this contest",
@@ -115,7 +117,8 @@ class TeamController extends AbstractRestController
 
     /**
      * Get the photo for the given team.
-     * @Rest\Get("/{id}/photo", name="team_photo")
+     * @Rest\Get("contests/{cid}/teams/{id}/photo", name="team_photo")
+     * @Rest\Get("teams/{id}/photo")
      * @OA\Response(
      *     response="200",
      *     description="Returns the given team photo in PNG, JPG or SVG format",
@@ -148,7 +151,8 @@ class TeamController extends AbstractRestController
 
     /**
      * Delete the photo for the given team.
-     * @Rest\Delete("/{id}/photo", name="delete_team_photo")
+     * @Rest\Delete("contests/{cid}/teams/{id}/photo", name="delete_team_photo")
+     * @Rest\Delete("teams/{id}/photo")
      * @IsGranted("ROLE_ADMIN")
      * @OA\Response(response="204", description="Deleting photo succeeded")
      * @OA\Parameter(ref="#/components/parameters/id")
@@ -169,16 +173,21 @@ class TeamController extends AbstractRestController
         $team->setClearPhoto(true);
 
         $this->assetUpdater->updateAssets($team);
+        if ($request->attributes->has('cid')) {
+            $contestId = $this->getContestId($request);
+        }
         $this->eventLogService->log('teams', $team->getTeamid(), EventLogService::ACTION_UPDATE,
-            $this->getContestId($request));
+            $contestId);
 
         return new Response('', Response::HTTP_NO_CONTENT);
     }
 
     /**
      * Set the photo for the given team.
-     * @Rest\POST("/{id}/photo", name="post_team_photo")
-     * @Rest\PUT("/{id}/photo", name="put_team_photo")
+     * @Rest\POST("contests/{cid}/teams/{id}/photo", name="post_team_photo")
+     * @Rest\POST("teams/{id}/photo")
+     * @Rest\PUT("contests/{cid}/teams/{id}/photo", name="put_team_photo")
+     * @Rest\PUT("teams/{id}/photo")
      * @OA\RequestBody(
      *     required=true,
      *     @OA\MediaType(
@@ -225,8 +234,11 @@ class TeamController extends AbstractRestController
         }
 
         $this->assetUpdater->updateAssets($team);
+        if ($request->attributes->has('cid')) {
+            $contestId = $this->getContestId($request);
+        }
         $this->eventLogService->log('teams', $team->getTeamid(), EventLogService::ACTION_UPDATE,
-            $this->getContestId($request));
+            $contestId);
 
         return new Response('', Response::HTTP_NO_CONTENT);
     }
@@ -234,7 +246,8 @@ class TeamController extends AbstractRestController
     /**
      * Add a new team.
      *
-     * @Rest\Post()
+     * @Rest\Post("contests/{cid}/teams")
+     * @Rest\Post("teams")
      * @IsGranted("ROLE_API_WRITER")
      * @OA\RequestBody(
      *     required=true,
@@ -295,11 +308,13 @@ class TeamController extends AbstractRestController
             $queryBuilder->andWhere('tc.visible = 1');
         }
 
-        $contest = $this->em->getRepository(Contest::class)->find($this->getContestId($request));
-        if (!$contest->isOpenToAllTeams()) {
-            $queryBuilder
-                ->andWhere('c.cid = :cid OR cc.cid = :cid')
-                ->setParameter('cid', $contest->getCid());
+        if ($request->attributes->has('cid')) {
+            $contest = $this->em->getRepository(Contest::class)->find($this->getContestId($request));
+            if (!$contest->isOpenToAllTeams()) {
+                $queryBuilder
+                    ->andWhere('c.cid = :cid OR cc.cid = :cid')
+                    ->setParameter('cid', $contest->getCid());
+            }
         }
 
         return $queryBuilder;

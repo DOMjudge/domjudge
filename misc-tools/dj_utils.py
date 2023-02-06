@@ -39,6 +39,9 @@ def parse_api_response(name: str, response: requests.Response):
             raise RuntimeError(
                 f'API request {name} failed (code {response.status_code}).')
 
+    if response.status_code == 204:
+        return None
+
     # We got a successful HTTP response. It worked. Return the full response
     return json.loads(response.text)
 
