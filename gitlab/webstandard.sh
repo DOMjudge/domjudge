@@ -84,12 +84,7 @@ if [ "$TEST" = "w3cval" ]; then
     wget https://github.com/validator/validator/releases/latest/download/vnu.linux.zip
     unzip -q vnu.linux.zip
     section_end test_suite
-    FLTRALL='--filterpattern .*autocomplete.*|.*style.*'
-    if [ "$ROLE" = admin ]; then
-        FLTR="$FLTRALL|.*option.*"
-    else
-        FLTR="$FLTRALL"
-    fi
+    FLTR='--filterpattern .*autocomplete.*|.*style.*'
     for typ in html css svg
     do
         $DIR/vnu-runtime-image/bin/vnu --errors-only --exit-zero-always --skip-non-$typ --format json $FLTR $URL 2> result.json
