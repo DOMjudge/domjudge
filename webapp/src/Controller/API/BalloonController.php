@@ -53,7 +53,7 @@ class BalloonController extends AbstractRestController
 
     /**
      * Mark a specific balloon as done.
-     * @Rest\Post("/{balloonId}/done")
+     * @Rest\Post("/{balloonId<\d+>}/done")
      * @OA\Response(
      *     response="204",
      *     description="The balloon was now marked as done or already marked as such.",
