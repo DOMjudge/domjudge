@@ -51,6 +51,13 @@ class ScoreCache
      */
     private $solvetime_restricted = 0;
 
+    /**
+     * @ORM\Column(type="integer", name="runtime_restricted", length=4,
+     *     options={"comment"="Runtime in milliseconds (restricted audience)",
+     *              "default"="0"},
+     *     nullable=false)
+     */
+    private $runtime_restricted = 0;
 
     /**
      * @ORM\Column(type="integer", name="submissions_public", length=4,
@@ -84,6 +91,14 @@ class ScoreCache
      *     nullable=false)
      */
     private $solvetime_public = 0;
+
+    /**
+     * @ORM\Column(type="integer", name="runtime_public", length=4,
+     *     options={"comment"="Runtime in milliseconds (public)",
+     *              "default"="0"},
+     *     nullable=false)
+     */
+    private $runtime_public = 0;
 
     /**
      * @ORM\Column(type="boolean", name="is_first_to_solve",
@@ -160,6 +175,17 @@ class ScoreCache
         return $this->solvetime_restricted;
     }
 
+    public function setRuntimeRestricted(int $runtimeRestricted): ScoreCache
+    {
+        $this->runtime_restricted = $runtimeRestricted;
+        return $this;
+    }
+
+    public function getRuntimeRestricted(): int
+    {
+        return $this->runtime_restricted;
+    }
+
     public function setSubmissionsPublic(int $submissionsPublic): ScoreCache
     {
         $this->submissions_public = $submissionsPublic;
@@ -204,6 +230,17 @@ class ScoreCache
     public function getSolvetimePublic()
     {
         return $this->solvetime_public;
+    }
+
+    public function setRuntimePublic(int $runtimePublic): ScoreCache
+    {
+        $this->runtime_public = $runtimePublic;
+        return $this;
+    }
+
+    public function getRuntimePublic(): int
+    {
+        return $this->runtime_public;
     }
 
     public function setIsFirstToSolve(bool $isFirstToSolve): ScoreCache
@@ -264,6 +301,11 @@ class ScoreCache
     public function getSolveTime(bool $restricted)
     {
         return $restricted ? $this->getSolvetimeRestricted() : $this->getSolvetimePublic();
+    }
+
+    public function getRuntime(bool $restricted): int
+    {
+        return $restricted ? $this->getRuntimeRestricted() : $this->getRuntimePublic();
     }
 
     public function getIsCorrect(bool $restricted): bool

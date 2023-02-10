@@ -12,6 +12,7 @@ class ScoreboardMatrixItem
     /** @var float|string */
     public $time;
     public int $penaltyTime;
+    public int $runtime;
 
     public function __construct(
         bool $isCorrect,
@@ -19,7 +20,8 @@ class ScoreboardMatrixItem
         int $numSubmissions,
         int $numSubmissionsPending,
         $time,
-        int $penaltyTime
+        int $penaltyTime,
+        int $runtime
     ) {
         $this->isCorrect             = $isCorrect;
         $this->isFirst               = $isFirst;
@@ -27,5 +29,6 @@ class ScoreboardMatrixItem
         $this->numSubmissionsPending = $numSubmissionsPending;
         $this->time                  = $time;
         $this->penaltyTime           = $penaltyTime;
+        $this->runtime               = $runtime;
     }
 }

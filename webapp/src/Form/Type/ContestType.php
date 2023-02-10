@@ -94,6 +94,14 @@ class ContestType extends AbstractExternalIdEntityType
             ],
             'help' => 'Disable this to stop recording balloons. Usually you can just leave this enabled.',
         ]);
+        $builder->add('orderByRuntime', ChoiceType::class, [
+            'expanded' => true,
+            'choices' => [
+                'Yes' => true,
+                'No' => false,
+            ],
+            'help' => 'Enable this to show runtimes in milliseconds on scoreboard and use them as tiebreaker instead of penalty.',
+        ]);
         $builder->add('medalsEnabled', ChoiceType::class, [
             'expanded' => true,
             'choices' => [

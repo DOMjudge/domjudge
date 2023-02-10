@@ -222,7 +222,11 @@
             {% endif %}
             {% set totalPoints = score.numPoints %}
             <td class="scorenc">{{ totalPoints }}</td>
-            <td class="scorett">{{ totalTime }}</td>
+            {% if scoreboard.getOrderByRuntime() %}
+                <td class="scorett">{{ score.totalRuntime }} ms</td>
+            {% else %}
+                <td class="scorett">{{ totalTime }}</td>
+            {% endif %} 
 
             {% if showTeamSubmissions or jury %}
                 {% for problem in problems %}
@@ -231,9 +235,12 @@
                     {% set matrixItem = scoreboard.matrix[score.team.teamid][problem.probid] %}
                     {% if matrixItem.isCorrect %}
                         {% set scoreCssClass = 'score_correct' %}
-                        {% if scoreboard.solvedFirst(score.team, problem) %}
-                            {% set scoreCssClass = scoreCssClass ~ ' score_first' %}
+                        {% if not scoreboard.getOrderByRuntime() and scoreboard.solvedFirst(score.team, problem) %}
+                                {% set scoreCssClass = scoreCssClass ~ ' score_first' %}
                         {% endif %}
+                        {% if scoreboard.getOrderByRuntime() and scoreboard.isFastestImplementation(score.team, problem) %}
+                                {% set scoreCssClass = scoreCssClass ~ ' score_first' %}
+                        {% endif %} 
                     {% elseif showPending and matrixItem.numSubmissionsPending > 0 %}
                         {% set scoreCssClass = 'score_pending' %}
                     {% elseif matrixItem.numSubmissions > 0 %}
@@ -249,7 +256,9 @@
                     {% set time = '' %}
                     {% if matrixItem.isCorrect %}
                         {% set time = matrixItem.time %}
-                        {% if scoreInSeconds %}
+                        {% if scoreboard.getOrderByRuntime() %}
+                            {% set time = matrixItem.runtime ~ ' ms' %}
+                        {% elseif scoreInSeconds %}
                             {% set time = time | scoreTime | printTimeRelative %}
                             {% if matrixItem.numSubmissions > 1 %}
                                 {% set time = time ~ ' + ' ~ (calculatePenaltyTime(true, matrixItem.numSubmissions) | printTimeRelative) %}
@@ -336,7 +345,11 @@
     {% endif %}
 
     {% if showTeamSubmissions or jury %}
-        {% set cellColors = {first: 'Solved first', correct: 'Solved', incorrect: 'Tried, incorrect', pending: 'Tried, pending', neutral: 'Untried'} %}
+        {% if scoreboard.getOrderByRuntime() %}
+            {% set cellColors = {first: 'Solved, fastest', correct: 'Solved', incorrect: 'Tried, incorrect', pending: 'Tried, pending', neutral: 'Untried'} %}
+        {% else %}
+            {% set cellColors = {first: 'Solved first', correct: 'Solved', incorrect: 'Tried, incorrect', pending: 'Tried, pending', neutral: 'Untried'} %}
+        {% endif %} 
         <table id="cell_legend" class="scoreboard scorelegend {% if jury %}scoreboard_jury{% endif %}">
             <thead>
             <tr>

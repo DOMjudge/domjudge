@@ -295,6 +295,14 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     private bool $processBalloons = true;
 
     /**
+     * @ORM\Column(type="boolean", name="order_by_runtime",
+     *     options={"comment"="Is runtime used as tiebreaker instead of penalty?","default"=0},
+     *     nullable=false)
+     * @Serializer\Exclude()
+     */
+    private bool $order_by_runtime = false;
+
+    /**
      * @ORM\Column(type="boolean", name="public",
      *     options={"comment"="Is this contest visible for the public?",
      *              "default"=1},
@@ -720,6 +728,17 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     public function getProcessBalloons(): bool
     {
         return $this->processBalloons;
+    }
+
+    public function setOrderByRuntime(bool $orderByRuntime): Contest
+    {
+        $this->order_by_runtime = $orderByRuntime;
+        return $this;
+    }
+
+    public function getOrderByRuntime(): bool
+    {
+        return $this->order_by_runtime;
     }
 
     public function setMedalsEnabled(bool $medalsEnabled): Contest
