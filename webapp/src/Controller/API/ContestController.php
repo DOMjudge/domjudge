@@ -175,7 +175,7 @@ class ContestController extends AbstractRestController
 
     /**
      * Get the banner for the given contest.
-     * @Rest\Get("/{id}/banner", name="contest_banner")
+     * @Rest\Get("/{cid}/banner", name="contest_banner")
      * @OA\Response(
      *     response="200",
      *     description="Returns the given contest banner in PNG, JPG or SVG format",
@@ -183,22 +183,22 @@ class ContestController extends AbstractRestController
      *     @OA\MediaType(mediaType="image/jpeg"),
      *     @OA\MediaType(mediaType="image/svg+xml")
      * )
-     * @OA\Parameter(ref="#/components/parameters/id")
+     * @OA\Parameter(ref="#/components/parameters/cid")
      */
-    public function bannerAction(Request $request, string $id): Response
+    public function bannerAction(Request $request, string $cid): Response
     {
         /** @var Contest $contest */
         $contest = $this->getQueryBuilder($request)
             ->andWhere(sprintf('%s = :id', $this->getIdField()))
-            ->setParameter('id', $id)
+            ->setParameter('id', $cid)
             ->getQuery()
             ->getOneOrNullResult();
 
         if ($contest === null) {
-            throw new NotFoundHttpException(sprintf('Object with ID \'%s\' not found', $id));
+            throw new NotFoundHttpException(sprintf('Object with ID \'%s\' not found', $cid));
         }
 
-        $banner = $this->dj->assetPath($id, 'contest', true);
+        $banner = $this->dj->assetPath($cid, 'contest', true);
 
         if ($banner && file_exists($banner)) {
             return static::sendBinaryFileResponse($request, $banner);
@@ -208,26 +208,26 @@ class ContestController extends AbstractRestController
 
     /**
      * Delete the banner for the given contest.
-     * @Rest\Delete("/{id}/banner", name="delete_contest_banner")
+     * @Rest\Delete("/{cid}/banner", name="delete_contest_banner")
      * @IsGranted("ROLE_ADMIN")
      * @OA\Response(response="204", description="Deleting banner succeeded")
      * @OA\Parameter(ref="#/components/parameters/id")
      */
-    public function deleteBannerAction(Request $request, string $id): Response
+    public function deleteBannerAction(Request $request, string $cid): Response
     {
         /** @var Contest $contest */
         $contest = $this->getQueryBuilder($request)
             ->andWhere(sprintf('%s = :id', $this->getIdField()))
-            ->setParameter('id', $id)
+            ->setParameter('id', $cid)
             ->getQuery()
             ->getOneOrNullResult();
 
         if ($contest === null) {
-            throw new NotFoundHttpException(sprintf('Object with ID \'%s\' not found', $id));
+            throw new NotFoundHttpException(sprintf('Object with ID \'%s\' not found', $cid));
         }
 
         if ($contest->isLocked()) {
-            $contestUrl = $this->generateUrl('jury_contest', ['contestId' => $id], UrlGeneratorInterface::ABSOLUTE_URL);
+            $contestUrl = $this->generateUrl('jury_contest', ['contestId' => $cid], UrlGeneratorInterface::ABSOLUTE_URL);
             throw new AccessDeniedHttpException('Contest is locked, go to ' . $contestUrl . ' to unlock it.');
         }
 
@@ -242,8 +242,8 @@ class ContestController extends AbstractRestController
 
     /**
      * Set the banner for the given contest.
-     * @Rest\POST("/{id}/banner", name="post_contest_banner")
-     * @Rest\PUT("/{id}/banner", name="put_contest_banner")
+     * @Rest\POST("/{cid}/banner", name="post_contest_banner")
+     * @Rest\PUT("/{cid}/banner", name="put_contest_banner")
      * @OA\RequestBody(
      *     required=true,
      *     @OA\MediaType(
@@ -263,21 +263,21 @@ class ContestController extends AbstractRestController
      * @OA\Response(response="204", description="Setting banner succeeded")
      * @OA\Parameter(ref="#/components/parameters/id")
      */
-    public function setBannerAction(Request $request, string $id, ValidatorInterface $validator): Response
+    public function setBannerAction(Request $request, string $cid, ValidatorInterface $validator): Response
     {
         /** @var Contest $contest */
         $contest = $this->getQueryBuilder($request)
             ->andWhere(sprintf('%s = :id', $this->getIdField()))
-            ->setParameter('id', $id)
+            ->setParameter('id', $cid)
             ->getQuery()
             ->getOneOrNullResult();
 
         if ($contest === null) {
-            throw new NotFoundHttpException(sprintf('Object with ID \'%s\' not found', $id));
+            throw new NotFoundHttpException(sprintf('Object with ID \'%s\' not found', $cid));
         }
 
         if ($contest->isLocked()) {
-            $contestUrl = $this->generateUrl('jury_contest', ['contestId' => $id], UrlGeneratorInterface::ABSOLUTE_URL);
+            $contestUrl = $this->generateUrl('jury_contest', ['contestId' => $cid], UrlGeneratorInterface::ABSOLUTE_URL);
             throw new AccessDeniedHttpException('Contest is locked, go to ' . $contestUrl . ' to unlock it.');
         }
 
