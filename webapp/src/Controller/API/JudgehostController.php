@@ -1188,7 +1188,7 @@ class JudgehostController extends AbstractFOSRestController
 
     /**
      * Get files for a given type and id.
-     * @Rest\Get("/get_files/{type}/{id}")
+     * @Rest\Get("/get_files/{type}/{id<\d+>}")
      * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST')")
      * @throws NonUniqueResultException
      * @OA\Response(

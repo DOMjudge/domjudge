@@ -88,8 +88,8 @@ class JudgementController extends AbstractRestController implements QueryObjectT
      * Get the given judgement for this contest.
      * @throws NonUniqueResultException
      * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_TEAM') or is_granted('ROLE_JUDGEHOST') or is_granted('ROLE_API_READER')")
-     * @Rest\Get("contests/{cid}/judgements/{id}")
-     * @Rest\Get("judgements/{id}")
+     * @Rest\Get("contests/{cid}/judgements/{id<\d+>}")
+     * @Rest\Get("judgements/{id<\d+>}")
      * @OA\Response(
      *     response="200",
      *     description="Returns the given judgement for this contest",
