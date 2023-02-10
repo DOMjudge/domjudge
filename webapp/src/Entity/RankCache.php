@@ -11,8 +11,8 @@ use Doctrine\ORM\Mapping as ORM;
  *     name="rankcache",
  *     options={"collation"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Scoreboard rank cache"},
  *     indexes={
- *         @ORM\Index(name="order_restricted", columns={"cid","points_restricted","totaltime_restricted"}),
- *         @ORM\Index(name="order_public", columns={"cid","points_public","totaltime_public"}),
+ *         @ORM\Index(name="order_restricted", columns={"cid","points_restricted","totaltime_restricted", "totalruntime_restricted"}),
+ *         @ORM\Index(name="order_public", columns={"cid","points_public","totaltime_public", "totalruntime_public"}),
  *         @ORM\Index(name="cid", columns={"cid"}),
  *         @ORM\Index(name="teamid", columns={"teamid"})
  *     })
@@ -36,6 +36,14 @@ class RankCache
     private int $totaltime_restricted = 0;
 
     /**
+     * @ORM\Column(type="integer", name="totalruntime_restricted", length=4,
+     *     options={"comment"="Total runtime in milliseconds (restricted audience)",
+     *              "default"="0"},
+     *     nullable=false)
+     */
+    private $totalruntime_restricted = 0;
+
+    /**
      * @ORM\Column(type="integer", name="points_public", length=4,
      *     options={"comment"="Total correctness points (public)",
      *              "unsigned"=true,"default"="0"},
@@ -51,6 +59,13 @@ class RankCache
      */
     private int $totaltime_public = 0;
 
+    /**
+     * @ORM\Column(type="integer", name="totalruntime_public", length=4,
+     *     options={"comment"="Total runtime in milliseconds (public)",
+     *              "default"="0"},
+     *     nullable=false)
+     */
+    private $totalruntime_public = 0;
 
     /**
      * @ORM\Id
@@ -88,6 +103,17 @@ class RankCache
         return $this->totaltime_restricted;
     }
 
+    public function setTotalruntimeRestricted(int $totalruntimeRestricted): RankCache
+    {
+        $this->totalruntime_restricted = $totalruntimeRestricted;
+        return $this;
+    }
+
+    public function getTotalruntimeRestricted(): int
+    {
+        return $this->totalruntime_restricted;
+    }
+
     public function setPointsPublic(int $pointsPublic): RankCache
     {
         $this->points_public = $pointsPublic;
@@ -108,6 +134,17 @@ class RankCache
     public function getTotaltimePublic(): int
     {
         return $this->totaltime_public;
+    }
+
+    public function setTotalruntimePublic(int $totalruntimePublic): RankCache
+    {
+        $this->totalruntime_public = $totalruntimePublic;
+        return $this;
+    }
+
+    public function getTotalruntimePublic(): int
+    {
+        return $this->totalruntime_public;
     }
 
     public function setContest(?Contest $contest = null): RankCache
