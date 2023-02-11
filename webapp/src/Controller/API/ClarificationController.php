@@ -65,7 +65,7 @@ class ClarificationController extends AbstractRestController
      * Admin and api_reader get everything, anonymous gets only general clarifications,
      * team user gets general clarifications plus those sent from or to the team.
      * @throws NonUniqueResultException
-     * @Rest\Get("/{id<\d+>}")
+     * @Rest\Get("/{id}")
      * @OA\Response(
      *     response="200",
      *     description="Returns the given clarification for this contest",
@@ -82,7 +82,7 @@ class ClarificationController extends AbstractRestController
     /**
      * Add a clarification to this contest
      * @Rest\Post("")
-     * @Rest\Put("/{id<\d+>}")
+     * @Rest\Put("/{id}")
      * @Security("is_granted('ROLE_TEAM') or is_granted('ROLE_API_WRITER')", message="You need to have the Team Member role to add a clarification")
      * @OA\RequestBody(
      *     required=true,
