@@ -211,7 +211,7 @@ class ContestController extends AbstractRestController
      * @Rest\Delete("/{cid}/banner", name="delete_contest_banner")
      * @IsGranted("ROLE_ADMIN")
      * @OA\Response(response="204", description="Deleting banner succeeded")
-     * @OA\Parameter(ref="#/components/parameters/id")
+     * @OA\Parameter(ref="#/components/parameters/cid")
      */
     public function deleteBannerAction(Request $request, string $cid): Response
     {
@@ -261,7 +261,7 @@ class ContestController extends AbstractRestController
      * )
      * @IsGranted("ROLE_ADMIN")
      * @OA\Response(response="204", description="Setting banner succeeded")
-     * @OA\Parameter(ref="#/components/parameters/id")
+     * @OA\Parameter(ref="#/components/parameters/cid")
      */
     public function setBannerAction(Request $request, string $cid, ValidatorInterface $validator): Response
     {
