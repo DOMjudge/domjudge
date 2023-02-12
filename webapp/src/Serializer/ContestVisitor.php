@@ -69,7 +69,7 @@ class ContestVisitor implements EventSubscriberInterface
             $extension = $parts[count($parts) - 1];
 
             $route = $this->dj->apiRelativeUrl(
-                'v4_contest_banner', ['id' => $id]
+                'v4_contest_banner', ['cid' => $id]
             );
             $property = new StaticPropertyMetadata(
                 Contest::class,
