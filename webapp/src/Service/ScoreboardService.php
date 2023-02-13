@@ -351,6 +351,28 @@ class ScoreboardService
                 $judging = $submission->getJudgings()->first() ?: null;
             }
 
+            // three things will happen in the loop in this order:
+            // 1. update fastest runtime
+            // 2. count submissions until correct submission
+            // 3. determine time of first correct submission
+
+            // STEP 1:
+            // runtime improvements should be possible for all correct submissions
+            if (!is_null($judging) && $judging->getResult() == Judging::RESULT_CORRECT) {
+                $runtime = (int) round(1000*$judging->getMaxRuntime()); // round to milliseconds
+                $runtimeJury = min($runtimeJury, $runtime);
+                if (!$submission->isAfterFreeze()) {
+                    $runtimePubl = min($runtimePubl, $runtime);
+                }
+            }
+
+            // If there is a public and correct submission, we can stop counting
+            // submissions or looking for a correct one (skip steps 2,3)
+            if ($correctPubl) {
+                continue;
+            }
+
+            // STEP 2:
             // Check if this submission has a publicly visible judging result:
             if ($judging === null || empty($judging->getResult()) ||
                 (!$useExternalJudgements && $verificationRequired && !$judging->getVerified())) {
@@ -366,29 +388,6 @@ class ScoreboardService
                 continue;
             }
 
-            // three things will happen in the remainder of the loop in this order:
-            // 1. update fastest runtime
-            // 2. count submissions until correct submission
-            // 3. determine time of first correct submission
-
-            // STEP 1:
-            // runtime improvements should be possible for all correct submissions
-            if ($judging->getResult() == Judging::RESULT_CORRECT) {
-                $runtime = (int) round(1000*$judging->getMaxRuntime()); // round to milliseconds
-                $runtimeJury = min($runtimeJury, $runtime);
-                if (!$submission->isAfterFreeze()) {
-                    $runtimePubl = min($runtimePubl, $runtime);
-                }
-            }
-
-
-            // If there is a public and correct submission, we can stop counting
-            // submissions or looking for a correct one (skip steps 2,3)
-            if ($correctPubl) {
-                continue;
-            }
-
-            // STEP 2:
             // We need to count the submission always, except when we don't want
             // to count compiler penalties and the judging is a compiler error.
             $countSubmission = $compilePenalty || $judging->getResult() != Judging::RESULT_COMPILER_ERROR;
