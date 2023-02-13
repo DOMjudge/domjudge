@@ -149,10 +149,10 @@ class ScoreboardService
         $variant    = $restricted ? 'restricted' : 'public';
         $points     = $rankCache ? $rankCache->getPointsRestricted() : 0;
         $totalTime  = 0;
-        if($rankCache) {
-            $totalTime  = $contest->getOrderByRuntime() ? $rankCache->getTotalruntimeRestricted() : $rankCache->getTotaltimeRestricted();
+        if ($rankCache) {
+            $totalTime  = $contest->getRuntimeAsScoreTiebreaker() ? $rankCache->getTotalruntimeRestricted() : $rankCache->getTotaltimeRestricted();
         }
-        $timeType   = $contest->getOrderByRuntime() ? 'runtime' : 'time';
+        $timeType   = $contest->getRuntimeAsScoreTiebreaker() ? 'runtime' : 'time';
         $sortOrder  = $team->getCategory()->getSortorder();
 
         // Number of teams that definitely ranked higher.

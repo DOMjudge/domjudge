@@ -219,7 +219,7 @@
             {% endif %}
             {% set totalPoints = score.numPoints %}
             <td class="scorenc">{{ totalPoints }}</td>
-            {% if scoreboard.getOrderByRuntime() %}
+            {% if scoreboard.getRuntimeAsScoreTiebreaker() %}
                 <td class="scorett">{{ score.totalRuntime }} ms</td>
             {% else %}
                 <td class="scorett">{{ totalTime }}</td>
@@ -232,10 +232,10 @@
                     {% set matrixItem = scoreboard.matrix[score.team.teamid][problem.probid] %}
                     {% if matrixItem.isCorrect %}
                         {% set scoreCssClass = 'score_correct' %}
-                        {% if not scoreboard.getOrderByRuntime() and scoreboard.solvedFirst(score.team, problem) %}
+                        {% if not scoreboard.getRuntimeAsScoreTiebreaker() and scoreboard.solvedFirst(score.team, problem) %}
                                 {% set scoreCssClass = scoreCssClass ~ ' score_first' %}
                         {% endif %}
-                        {% if scoreboard.getOrderByRuntime() and scoreboard.isFastestImplementation(score.team, problem) %}
+                        {% if scoreboard.getRuntimeAsScoreTiebreaker() and scoreboard.isFastestImplementation(score.team, problem) %}
                                 {% set scoreCssClass = scoreCssClass ~ ' score_first' %}
                         {% endif %} 
                     {% elseif showPending and matrixItem.numSubmissionsPending > 0 %}
@@ -253,7 +253,7 @@
                     {% set time = '' %}
                     {% if matrixItem.isCorrect %}
                         {% set time = matrixItem.time %}
-                        {% if scoreboard.getOrderByRuntime() %}
+                        {% if scoreboard.getRuntimeAsScoreTiebreaker() %}
                             {% set time = matrixItem.runtime ~ ' ms' %}
                         {% elseif scoreInSeconds %}
                             {% set time = time | scoreTime | printTimeRelative %}
@@ -331,7 +331,7 @@
     {% endif %}
 
     {% if showTeamSubmissions or jury %}
-        {% if scoreboard.getOrderByRuntime() %}
+        {% if scoreboard.getRuntimeAsScoreTiebreaker() %}
             {% set cellColors = {first: 'Solved, fastest', correct: 'Solved', incorrect: 'Tried, incorrect', pending: 'Tried, pending', neutral: 'Untried'} %}
         {% else %}
             {% set cellColors = {first: 'Solved first', correct: 'Solved', incorrect: 'Tried, incorrect', pending: 'Tried, pending', neutral: 'Untried'} %}
