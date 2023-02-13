@@ -767,7 +767,7 @@ class ImportExportService
                 ]
             ];
         }
-        return $this->importTeamData($teamData);
+        return $this->importTeamData($teamData, $message);
     }
 
     /**
@@ -794,7 +794,7 @@ class ImportExportService
             ];
         }
 
-        return $this->importTeamData($teamData, $saved);
+        return $this->importTeamData($teamData, $message, $saved);
     }
 
     /**
@@ -878,7 +878,7 @@ class ImportExportService
      *
      * @throws NonUniqueResultException
      */
-    protected function importTeamData(array $teamData, ?array &$saved = null): int
+    protected function importTeamData(array $teamData, ?string &$message, ?array &$saved = null): int
     {
         $createdAffiliations = [];
         $createdTeams        = [];
