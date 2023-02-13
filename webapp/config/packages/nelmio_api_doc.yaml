@@ -97,7 +97,9 @@ nelmio_api_doc:
                     content:
                         application/json:
                             schema:
-                                type: object
+                                oneOf:
+                                    - type: object
+                                    - type: string
                         text/html:
                             schema:
                                 type: string
