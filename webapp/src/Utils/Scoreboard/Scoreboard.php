@@ -308,7 +308,7 @@ class Scoreboard
             return $b->numPoints <=> $a->numPoints;
         }
         // Else, less time spent means higher rank.
-        if($this->getOrderByRuntime()) { // runtime ordering
+        if ($this->getRuntimeAsScoreTiebreaker()) { // runtime ordering
             if ($a->totalRuntime != $b->totalRuntime) {
                 return $a->totalRuntime <=> $b->totalRuntime;
             }
@@ -470,8 +470,8 @@ class Scoreboard
      * Determine whether to order by runtime instead of solvetime
      * @return bool
      */
-    public function getOrderByRuntime(): bool
+    public function getRuntimeAsScoreTiebreaker(): bool
     {
-        return $this->contest->getOrderByRuntime();
+        return $this->contest->getRuntimeAsScoreTiebreaker();
     }
 }

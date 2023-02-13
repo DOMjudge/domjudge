@@ -20,7 +20,7 @@ final class Version20230209125636 extends AbstractMigration
     public function up(Schema $schema): void
     {
         // this up() migration is auto-generated, please modify it to your needs
-        $this->addSql('ALTER TABLE contest ADD order_by_runtime TINYINT(1) DEFAULT 0 NOT NULL COMMENT \'Is runtime used as tiebreaker instead of penalty?\'');
+        $this->addSql('ALTER TABLE contest ADD runtime_as_score_tiebreaker TINYINT(1) DEFAULT 0 NOT NULL COMMENT \'Is runtime used as tiebreaker instead of penalty?\'');
         $this->addSql('DROP INDEX order_public ON rankcache');
         $this->addSql('DROP INDEX order_restricted ON rankcache');
         $this->addSql('ALTER TABLE rankcache ADD totalruntime_restricted INT DEFAULT 0 NOT NULL COMMENT \'Total runtime in milliseconds (restricted audience)\', ADD totalruntime_public INT DEFAULT 0 NOT NULL COMMENT \'Total runtime in milliseconds (public)\'');
@@ -32,7 +32,7 @@ final class Version20230209125636 extends AbstractMigration
     public function down(Schema $schema): void
     {
         // this down() migration is auto-generated, please modify it to your needs
-        $this->addSql('ALTER TABLE contest DROP order_by_runtime');
+        $this->addSql('ALTER TABLE contest DROP runtime_as_score_tiebreaker');
         $this->addSql('ALTER TABLE scorecache DROP runtime_restricted, DROP runtime_public');
         $this->addSql('DROP INDEX order_restricted ON rankcache');
         $this->addSql('DROP INDEX order_public ON rankcache');

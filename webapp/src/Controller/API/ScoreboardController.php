@@ -166,10 +166,15 @@ class ScoreboardController extends AbstractRestController
                 'team_id' => $teamScore->team->getApiId($this->eventLogService),
                 'score' => [
                     'num_solved' => $teamScore->numPoints,
-                    'total_time' => $teamScore->totalTime,
                 ],
                 'problems' => [],
             ];
+
+            if ($contest->getRuntimeAsScoreTiebreaker()) {
+                $row['score']['total_runtime'] = $teamScore->totalRuntime;
+            } else {
+                $row['score']['total_time'] = $teamScore->totalTime;
+            }
 
             foreach ($scoreboard->getMatrix()[$teamScore->team->getTeamid()] as $problemId => $matrixItem) {
                 $contestProblem = $scoreboard->getProblems()[$problemId];
@@ -179,11 +184,18 @@ class ScoreboardController extends AbstractRestController
                     'num_judged' => $matrixItem->numSubmissions,
                     'num_pending' => $matrixItem->numSubmissionsPending,
                     'solved' => $matrixItem->isCorrect,
-                    'first_to_solve' => $matrixItem->isCorrect && $scoreboard->solvedFirst($teamScore->team, $contestProblem),
                 ];
 
-                if ($matrixItem->isCorrect) {
-                    $problem['time'] = Utils::scoretime($matrixItem->time, $scoreIsInSeconds);
+                if ($contest->getRuntimeAsScoreTiebreaker()) {
+                    $problem['fastest_implementation'] = $matrixItem->isCorrect && $scoreboard->isFastestImplementation($teamScore->team, $contestProblem);
+                    if ($matrixItem->isCorrect) {
+                        $problem['runtime'] = $matrixItem->runtime;
+                    }
+                } else {
+                    $problem['first_to_solve'] = $matrixItem->isCorrect && $scoreboard->solvedFirst($teamScore->team, $contestProblem);
+                    if ($matrixItem->isCorrect) {
+                        $problem['time'] = Utils::scoretime($matrixItem->time, $scoreIsInSeconds);
+                    }
                 }
 
                 $row['problems'][] = $problem;

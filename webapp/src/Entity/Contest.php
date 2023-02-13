@@ -295,12 +295,11 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     private bool $processBalloons = true;
 
     /**
-     * @ORM\Column(type="boolean", name="order_by_runtime",
+     * @ORM\Column(type="boolean", name="runtime_as_score_tiebreaker",
      *     options={"comment"="Is runtime used as tiebreaker instead of penalty?","default"=0},
      *     nullable=false)
-     * @Serializer\Exclude()
      */
-    private bool $order_by_runtime = false;
+    private bool $runtime_as_score_tiebreaker = false;
 
     /**
      * @ORM\Column(type="boolean", name="public",
@@ -730,15 +729,15 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
         return $this->processBalloons;
     }
 
-    public function setOrderByRuntime(bool $orderByRuntime): Contest
+    public function setRuntimeAsScoreTiebreaker(bool $runtimeAsScoreTiebreaker): Contest
     {
-        $this->order_by_runtime = $orderByRuntime;
+        $this->runtime_as_score_tiebreaker = $runtimeAsScoreTiebreaker;
         return $this;
     }
 
-    public function getOrderByRuntime(): bool
+    public function getRuntimeAsScoreTiebreaker(): bool
     {
-        return $this->order_by_runtime;
+        return $this->runtime_as_score_tiebreaker;
     }
 
     public function setMedalsEnabled(bool $medalsEnabled): Contest
