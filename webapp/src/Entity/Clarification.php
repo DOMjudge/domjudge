@@ -183,6 +183,7 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
      * @Serializer\VirtualProperty()
      * @Serializer\SerializedName("time")
      * @Serializer\Type("string")
+     * @OA\Property(nullable=true)
      */
     public function getAbsoluteSubmitTime(): string
     {
