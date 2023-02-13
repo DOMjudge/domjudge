@@ -951,10 +951,18 @@ class ImportExportService
                 $added = false;
             }
 
-            if (!empty($teamItem['team']['teamid'])) {
-                $team->setExternalid($teamItem['team']['teamid']);
-                unset($teamItem['team']['teamid']);
+            if (empty($teamItem['team']['teamid'])) {
+                $message = 'ID for team required';
+                return -1;
             }
+
+            $clicsId = preg_grep('([a-zA-Z0-9]{1}([a-zA-Z0-9._]{0,34}[a-zA-Z0-9])?)', [$teamItem['team']['teamid']]);
+            if (!$clicsId || strlen($clicsId[0]) === strlen($teamItem['team']['teamid'])) {
+                $message = 'ID not in CLICS format';
+                return -1;
+            }
+            $team->setExternalid($teamItem['team']['teamid']);
+            unset($teamItem['team']['teamid']);
 
             $propertyAccessor = PropertyAccess::createPropertyAccessor();
             foreach ($teamItem['team'] as $field => $value) {
