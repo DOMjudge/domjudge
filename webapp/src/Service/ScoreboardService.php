@@ -343,32 +343,6 @@ class ScoreboardService
         $runtimeJury     = PHP_INT_MAX;
         $runtimePubl     = PHP_INT_MAX;
 
-        // do runtime separately to not interfere with break/continue logic in normal submission counting
-        // we want to allow runtime improvements even after first correct submission
-        foreach ($submissions as $submission) {
-            /** @var Judging|ExternalJudgement|null $judging */
-            if ($useExternalJudgements) {
-                $judging = $submission->getExternalJudgements()->first() ?: null;
-            } else {
-                $judging = $submission->getJudgings()->first() ?: null;
-            }
-
-            // Check if this submission has a publicly visible judging result:
-            if ($judging === null ||
-                (!$useExternalJudgements && $verificationRequired && !$judging->getVerified()) ||
-                empty($judging->getResult())) {
-                continue;
-            }
-
-            if ($judging->getResult() == Judging::RESULT_CORRECT) {
-                $runtime = (int) round(1000*$judging->getMaxRuntime()); // round to milliseconds
-                $runtimeJury = min($runtimeJury, $runtime);
-                if (!$submission->isAfterFreeze()) {
-                    $runtimePubl = min($runtimePubl, $runtime);
-                }
-            }
-        }
-
         foreach ($submissions as $submission) {
             /** @var Judging|ExternalJudgement|null $judging */
             if ($useExternalJudgements) {
@@ -392,6 +366,29 @@ class ScoreboardService
                 continue;
             }
 
+            // three things will happen in the remainder of the loop in this order:
+            // 1. update fastest runtime
+            // 2. count submissions until correct submission
+            // 3. determine time of first correct submission
+
+            // STEP 1:
+            // runtime improvements should be possible for all correct submissions
+            if ($judging->getResult() == Judging::RESULT_CORRECT) {
+                $runtime = (int) round(1000*$judging->getMaxRuntime()); // round to milliseconds
+                $runtimeJury = min($runtimeJury, $runtime);
+                if (!$submission->isAfterFreeze()) {
+                    $runtimePubl = min($runtimePubl, $runtime);
+                }
+            }
+
+
+            // If there is a public and correct submission, we can stop counting
+            // submissions or looking for a correct one (skip steps 2,3)
+            if ($correctPubl) {
+                continue;
+            }
+
+            // STEP 2:
             // We need to count the submission always, except when we don't want
             // to count compiler penalties and the judging is a compiler error.
             $countSubmission = $compilePenalty || $judging->getResult() != Judging::RESULT_COMPILER_ERROR;
@@ -419,21 +416,16 @@ class ScoreboardService
                 continue;
             }
 
+            // STEP 3:
             $absSubmitTime = (float)$submission->getSubmittime();
             $submitTime    = $contest->getContestTime($absSubmitTime);
 
-            // if correct, don't look at any more submissions after this one.
             if ($judging->getResult() == Judging::RESULT_CORRECT) {
                 $correctJury = true;
                 $timeJury    = $submitTime;
                 if (!$submission->isAfterFreeze()) {
                     $correctPubl = true;
                     $timePubl    = $submitTime;
-                    // Stop counting after a first correct submission, but
-                    // only before the freeze. We need to consider all the
-                    // submissions during the freeze, because we need to show
-                    // them all to the public.
-                    break;
                 }
             }
         }
