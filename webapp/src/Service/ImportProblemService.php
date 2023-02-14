@@ -869,7 +869,7 @@ class ImportProblemService
                 $errors = array_merge($errors, $messages);
             }
         } catch (Exception $e) {
-            $allMessages[] = $e->getMessage();
+            $errors[] = $e->getMessage();
         } finally {
             if ($zip) {
                 $zip->close();
