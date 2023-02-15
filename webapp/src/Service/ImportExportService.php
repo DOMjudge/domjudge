@@ -787,6 +787,7 @@ class ImportExportService
                     'name' => @$team['name'],
                     'display_name' => @$team['display_name'],
                     'publicdescription' => @$team['members'],
+                    'room' => @$team['room'],
                 ],
                 'team_affiliation' => [
                     'externalid' => $team['organization_id'] ?? null,
