@@ -149,6 +149,7 @@ fields:
 - ``display_name`` (optional): the team display name. If provided, will display
   this instead of the team name in certain places, like the scoreboard
 - ``organization_id``: the ID of the team affiliation this team belongs to
+- ``room`` (optional): the room of the team
 
 If the ``data_source`` setting of DOMjudge is set to external, the ``id`` field will be the
 ID used for the team and the ``group_ids`` and ``organization_id`` fields are the values as
@@ -163,7 +164,8 @@ Example ``teams.json``::
     "icpc_id": "447047",
     "group_ids": ["24"],
     "name": "¡i¡i¡",
-    "organization_id": "INST-42"
+    "organization_id": "INST-42",
+    "room": "AUD 10"
   }, {
     "id": "2",
     "icpc_id": "447837",
