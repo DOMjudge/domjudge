@@ -45,7 +45,8 @@ already listed under
 On Debian 11 (Bullseye) and above, instead install::
 
   sudo apt install autoconf automake bats \
-    python3-sphinx python3-sphinx-rtd-theme rst2pdf fontconfig python3-yaml latexmk
+    python3-sphinx python3-sphinx-rtd-theme rst2pdf fontconfig python3-yaml \
+    latexmk texlive-latex-recommended texlive-latex-extra tex-gyre
 
 When this software is present, bootstrapping can be done by running
 ``make dist``, which creates the ``configure`` script,
