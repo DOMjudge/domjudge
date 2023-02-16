@@ -406,3 +406,10 @@ for different programming languages.
 .. literalinclude:: ../examples/example.hs
    :language: hs
    :caption: *A solution in Haskell*
+
+Improvements to DOMjudge
+------------------------
+
+The DOMjudge team would like your feedback. We do not receive much feedback from participants.
+If you find something lacking or have improvement ideas, please report them. See https://www.domjudge.org/development.
+
