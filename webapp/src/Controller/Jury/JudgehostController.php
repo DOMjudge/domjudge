@@ -220,10 +220,13 @@ class JudgehostController extends BaseController
 
         $reltime = floor(Utils::difftime(Utils::now(), (float)$judgehost->getPolltime()));
         if ($reltime < $this->config->get('judgehost_warning')) {
+            $statusIcon = 'ok';
             $status = 'OK';
         } elseif ($reltime < $this->config->get('judgehost_critical')) {
+            $statusIcon = 'warn';
             $status = 'Warning';
         } else {
+            $statusIcon = 'crit';
             $status = 'Critical';
         }
 
@@ -250,6 +253,7 @@ class JudgehostController extends BaseController
         $data = [
             'judgehost' => $judgehost,
             'status' => $status,
+            'statusIcon' => $statusIcon,
             'judgings' => $judgings,
             'refresh' => [
                 'after' => 15,
