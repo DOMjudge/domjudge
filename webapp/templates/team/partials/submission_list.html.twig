@@ -66,7 +66,7 @@
                 <td>
                     <a data-ajax-modal data-ajax-modal-after="markSeen" {% if link %}href="{{ link }}"{% endif %}>
                         {% if link and submission.getResult()=='correct' %}
-                            {{ 1000*submission.judgings.first.getMaxRuntime() }} ms
+                            {{ "%0.3f s" | format(submission.judgings.first.getMaxRuntime()) }}
                         {% else %}
                             -
                         {% endif %}
