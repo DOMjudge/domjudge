@@ -6,6 +6,7 @@
 {% block extrahead %}
     {{ parent() }}
     {{ macros.table_extrahead() }}
+    {{ macros.toggle_extrahead() }}
 {% endblock %}
 
 {% block content %}
@@ -41,20 +42,18 @@
                 <tr>
                     <th>Allow submit</th>
                     <td>
-                        {{ language.allowSubmit | printYesNo }}
                         <form action="{{ path('jury_language_toggle_submit', {'langId': language.langid}) }}" method="post" class="d-inline">
-                            <input type="hidden" name="allow_submit" value="{{ not language.allowSubmit }}" />
-                            <input type="submit" class="btn btn-sm btn-outline-secondary" value="toggle"/>
+                            <input type="checkbox" data-toggle="toggle" data-size="mini" data-on="Yes" data-off="No"
+                                   name="allow_submit" {% if language.allowSubmit %}checked{% endif %}>
                         </form>
                     </td>
                 </tr>
                 <tr>
                     <th>Allow judge</th>
                     <td>
-                        {{ language.allowJudge | printYesNo }}
                         <form action="{{ path('jury_language_toggle_judge', {'langId': language.langid}) }}" method="post" class="d-inline">
-                            <input type="hidden" name="allow_judge" value="{{ not language.allowJudge }}" />
-                            <input type="submit" class="btn btn-sm btn-outline-secondary" value="toggle"/>
+                            <input type="checkbox" data-toggle="toggle" data-size="mini" data-on="Yes" data-off="No"
+                                   name="allow_judge" {% if language.allowJudge %}checked{% endif %}>
                         </form>
                     </td>
                 </tr>
@@ -101,4 +100,8 @@
         {%- include 'jury/partials/submission_list.html.twig' with {showTestcases: false} %}
     </div>
 
+{% endblock %}
+
+{% block extrafooter %}
+    {{ macros.toggle_autosubmit_extrafooter() }}
 {% endblock %}
