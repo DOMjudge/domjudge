@@ -11,7 +11,9 @@
             <th scope="col">problem</th>
             <th scope="col">lang</th>
             <th scope="col">result</th>
-            <th scope="col">runtime</th>
+            {% if contest.getRuntimeAsScoreTiebreaker() %}
+                <th scope="col">runtime</th>
+            {% endif %}
             {% if allowDownload %}
                 <th scope="col"></th>
             {% endif %}
@@ -60,6 +62,7 @@
                         {%- endif %}
                     </a>
                 </td>
+        {% if contest.getRuntimeAsScoreTiebreaker() %}
                 <td>
                     <a data-ajax-modal data-ajax-modal-after="markSeen" {% if link %}href="{{ link }}"{% endif %}>
                         {% if link and submission.getResult()=='correct' %}
@@ -69,6 +72,7 @@
                         {% endif %}
                     </a>
                 </td>
+        {% endif %}
         {% if allowDownload %}
                 <td>
                     <a title="Download submission ZIP" aria-label="download submission zip" class="btn btn-light" href="{{ path('team_submission_download', {'submitId': submission.submitid}) }}">
