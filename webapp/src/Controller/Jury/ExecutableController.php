@@ -92,11 +92,6 @@ class ExecutableController extends BaseController
 
             if ($this->isGranted('ROLE_ADMIN')) {
                 $execactions[] = [
-                    'icon' => 'edit',
-                    'title' => 'edit this executable',
-                    'link' => $this->generateUrl('jury_executable_edit', ['execId' => $e->getExecid()])
-                ];
-                $execactions[] = [
                     'icon' => 'trash-alt',
                     'title' => 'delete this executable',
                     'link' => $this->generateUrl('jury_executable_delete', [
@@ -194,7 +189,7 @@ class ExecutableController extends BaseController
     /**
      * @Route("/{execId}", name="jury_executable")
      */
-    public function viewAction(string $execId): Response
+    public function viewAction(Request $request, string $execId): Response
     {
         /** @var Executable $executable */
         $executable = $this->em->getRepository(Executable::class)->find($execId);
@@ -202,12 +197,95 @@ class ExecutableController extends BaseController
             throw new NotFoundHttpException(sprintf('Executable with ID %s not found', $execId));
         }
 
-        return $this->render('jury/executable.html.twig', [
+        $editorData = $this->dataForEditor($executable);
+        $data       = [];
+        foreach ($editorData['files'] as $idx => $content) {
+            $data['source' . $idx] = $content;
+        }
+
+        $formBuilder = $this->createFormBuilder($data);
+        if ($this->isGranted('ROLE_ADMIN')) {
+            $formBuilder->add('submit', SubmitType::class, ['label' => 'Save files']);
+        }
+
+        foreach ($editorData['files'] as $idx => $content) {
+            $formBuilder->add('source' . $idx, TextareaType::class);
+        }
+
+        $form = $formBuilder->getForm();
+
+        // Handle the form if it is submitted.
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            if (!$this->isGranted('ROLE_ADMIN')) {
+                $this->addFlash('danger', 'You must have the admin role to submit changes.');
+                return $this->redirectToRoute('jury_executable', ['execId' => $executable->getExecid()]);
+            }
+            $submittedData = $form->getData();
+
+            $files = [];
+            foreach ($editorData['filenames'] as $idx => $filename) {
+                $newContent = str_replace("\r\n", "\n", $submittedData['source' . $idx]);
+                if (substr($newContent, -1) != "\n") {
+                    // Ace swallows the newline at the end of file. Let's re-add it like most editors do.
+                    $newContent .= "\n";
+                }
+
+                $executableFile = new ExecutableFile();
+                $executableFile
+                    ->setRank($idx)
+                    ->setIsExecutable($editorData['executableBits'][$idx])
+                    ->setFilename($filename)
+                    ->setFileContent($newContent);
+                $this->em->persist($executableFile);
+                $files[] = $executableFile;
+            }
+
+            $immutableExecutable = new ImmutableExecutable($files);
+            $this->em->persist($immutableExecutable);
+            $executable->setImmutableExecutable($immutableExecutable);
+            $this->em->flush();
+            $this->dj->auditlog('executable', $executable->getExecid(), 'updated');
+
+            return $this->redirectToRoute('jury_executable', ['execId' => $executable->getExecid()]);
+        }
+
+        $data       = [];
+        $uploadForm = $this->createFormBuilder($data)
+            ->add('archive', FileType::class, [
+                'required' => true,
+                'attr' => [
+                    'accept' => 'application/zip',
+                ],
+                'label' => 'Replace executable with new ZIP'
+            ])
+            ->add('upload', SubmitType::class, ['label' => 'Replace'])
+            ->getForm();
+
+        $uploadForm->handleRequest($request);
+
+        if ($this->isGranted('ROLE_ADMIN') && $uploadForm->isSubmitted() && $uploadForm->isValid()) {
+            $data = $uploadForm->getData();
+            /** @var UploadedFile $archive */
+            $archive = $data['archive'];
+            $zip = $this->dj->openZipFile($archive->getRealPath());
+            $executable->setImmutableExecutable(
+                $this->dj->createImmutableExecutable($zip)
+            );
+            $this->saveEntity($this->em, $this->eventLogService, $this->dj, $executable,
+                $executable->getExecid(), false);
+            return $this->redirectToRoute('jury_executable', ['execId' => $executable->getExecid()]);
+        }
+
+        return $this->render('jury/executable.html.twig', array_merge($editorData, [
+            'form' => $form->createView(),
+            'uploadForm' => $uploadForm->createView(),
+            'selected' => $request->query->get('index'),
             'executable' => $executable,
             'default_compare' => (string)$this->config->get('default_compare'),
             'default_run' => (string)$this->config->get('default_run'),
             'default full debug' => (string)$this->config->get('default_full_debug'),
-        ]);
+        ]));
     }
 
     /**
@@ -320,65 +398,6 @@ class ExecutableController extends BaseController
     }
 
     /**
-     * @Route("/{execId}/edit", name="jury_executable_edit")
-     * @IsGranted("ROLE_ADMIN")
-     */
-    public function editAction(Request $request, string $execId): Response
-    {
-        /** @var Executable $executable */
-        $executable = $this->em->getRepository(Executable::class)->find($execId);
-        if (!$executable) {
-            throw new NotFoundHttpException(sprintf('Executable with ID %s not found', $execId));
-        }
-
-        $form = $this->createForm(ExecutableType::class, $executable);
-
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $this->saveEntity($this->em, $this->eventLogService, $this->dj, $executable,
-                              $executable->getExecid(), false);
-            return $this->redirect($this->generateUrl(
-                'jury_executable',
-                ['execId' => $executable->getExecid()]
-            ));
-        }
-
-        $data       = [];
-        $uploadForm = $this->createFormBuilder($data)
-            ->add('archive', FileType::class, [
-                'required' => true,
-                'attr' => [
-                    'accept' => 'application/zip',
-                ],
-                'label' => 'Upload archive'
-            ])
-            ->add('upload', SubmitType::class)
-            ->getForm();
-
-        $uploadForm->handleRequest($request);
-
-        if ($this->isGranted('ROLE_ADMIN') && $uploadForm->isSubmitted() && $uploadForm->isValid()) {
-            $data = $uploadForm->getData();
-            /** @var UploadedFile $archive */
-            $archive = $data['archive'];
-            $zip = $this->dj->openZipFile($archive->getRealPath());
-            $executable->setImmutableExecutable(
-                $this->dj->createImmutableExecutable($zip)
-            );
-            $this->saveEntity($this->em, $this->eventLogService, $this->dj, $executable,
-                              $executable->getExecid(), false);
-            return $this->redirectToRoute('jury_executable', ['execId' => $executable->getExecid()]);
-        }
-
-        return $this->render('jury/executable_edit.html.twig', [
-            'executable' => $executable,
-            'form' => $form->createView(),
-            'uploadForm' => $uploadForm->createView(),
-        ]);
-    }
-
-    /**
      * @Route("/{execId}/delete", name="jury_executable_delete")
      * @IsGranted("ROLE_ADMIN")
      */
@@ -392,77 +411,6 @@ class ExecutableController extends BaseController
 
         return $this->deleteEntities($request, $this->em, $this->dj, $this->eventLogService, $this->kernel,
                                      [$executable], $this->generateUrl('jury_executables'));
-    }
-
-    /**
-     * @Route("/{execId}/edit-files", name="jury_executable_edit_files")
-     */
-    public function editFilesAction(Request $request, string $execId): Response
-    {
-        /** @var Executable $executable */
-        $executable = $this->em->getRepository(Executable::class)->find($execId);
-        if (!$executable) {
-            throw new NotFoundHttpException(sprintf('Executable with ID %s not found', $execId));
-        }
-
-        $editorData = $this->dataForEditor($executable);
-        $data       = [];
-        foreach ($editorData['files'] as $idx => $content) {
-            $data['source' . $idx] = $content;
-        }
-
-        $formBuilder = $this->createFormBuilder($data);
-        if ($this->isGranted('ROLE_ADMIN')) {
-            $formBuilder->add('submit', SubmitType::class, ['label' => 'Save files']);
-        }
-
-        foreach ($editorData['files'] as $idx => $content) {
-            $formBuilder->add('source' . $idx, TextareaType::class);
-        }
-
-        $form = $formBuilder->getForm();
-
-        // Handle the form if it is submitted.
-        $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
-            if (!$this->isGranted('ROLE_ADMIN')) {
-                $this->addFlash('danger', 'You must have the admin role to submit changes.');
-                return $this->redirectToRoute('jury_executable', ['execId' => $executable->getExecid()]);
-            }
-            $submittedData = $form->getData();
-
-            $files = [];
-            foreach ($editorData['filenames'] as $idx => $filename) {
-                $newContent = str_replace("\r\n", "\n", $submittedData['source' . $idx]);
-                if (substr($newContent, -1) != "\n") {
-                    // Ace swallows the newline at the end of file. Let's re-add it like most editors do.
-                    $newContent .= "\n";
-                }
-
-
-                $executableFile = new ExecutableFile();
-                $executableFile
-                    ->setRank($idx)
-                    ->setIsExecutable($editorData['executableBits'][$idx])
-                    ->setFilename($filename)
-                    ->setFileContent($newContent);
-                $this->em->persist($executableFile);
-                $files[] = $executableFile;
-            }
-
-            $immutableExecutable = new ImmutableExecutable($files);
-            $this->em->persist($immutableExecutable);
-            $executable->setImmutableExecutable($immutableExecutable);
-            $this->em->flush();
-            $this->dj->auditlog('executable', $executable->getExecid(), 'updated');
-
-            return $this->redirectToRoute('jury_executable', ['execId' => $executable->getExecid()]);
-        }
-
-        return $this->render('jury/executable_edit_content.html.twig', array_merge($editorData, [
-            'form' => $form->createView(),
-            'selected' => $request->query->get('index'),
-        ]));
     }
 
     /**
