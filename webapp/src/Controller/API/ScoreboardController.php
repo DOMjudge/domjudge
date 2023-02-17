@@ -187,7 +187,7 @@ class ScoreboardController extends AbstractRestController
                 ];
 
                 if ($contest->getRuntimeAsScoreTiebreaker()) {
-                    $problem['fastest_implementation'] = $matrixItem->isCorrect && $scoreboard->isFastestImplementation($teamScore->team, $contestProblem);
+                    $problem['fastest_submission'] = $matrixItem->isCorrect && $scoreboard->isFastestSubmission($teamScore->team, $contestProblem);
                     if ($matrixItem->isCorrect) {
                         $problem['runtime'] = $matrixItem->runtime;
                     }

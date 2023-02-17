@@ -359,7 +359,7 @@ class ScoreboardService
             // STEP 1:
             // runtime improvements should be possible for all correct submissions
             if (!is_null($judging) && $judging->getResult() == Judging::RESULT_CORRECT) {
-                $runtime = (int) round(1000*$judging->getMaxRuntime()); // round to milliseconds
+                $runtime = (int) floor(1000*$judging->getMaxRuntime()); // round to milliseconds
                 $runtimeJury = min($runtimeJury, $runtime);
                 if (!$submission->isAfterFreeze()) {
                     $runtimePubl = min($runtimePubl, $runtime);

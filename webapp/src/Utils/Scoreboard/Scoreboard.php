@@ -455,7 +455,7 @@ class Scoreboard
     /**
      * Determine whether this team has the fastest correct implementation for this problem
      */
-    public function isFastestImplementation(Team $team, ContestProblem $problem): bool
+    public function isFastestSubmission(Team $team, ContestProblem $problem): bool
     {
         $item = $this->matrix[$team->getTeamid()][$problem->getProbid()];
         if (!$item->isCorrect) {
