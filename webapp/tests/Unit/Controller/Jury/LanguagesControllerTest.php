@@ -19,7 +19,7 @@ class LanguagesControllerTest extends JuryControllerTest
     protected static string  $deleteEntityIdentifier   = 'name';
     protected static string  $getIDFunc                = 'getLangid';
     protected static string  $className                = Language::class;
-    protected static array   $DOM_elements             = ['h1' => ['Languages']];
+    protected static array   $DOM_elements             = ['h1' => ['Enabled languages', 'Disabled languages']];
     protected static ?string $addPlus                  = 'extensions';
     protected static string  $addForm                  = 'language[';
     protected static array   $addEntitiesShown         = ['langid', 'externalid', 'name', 'timefactor'];
