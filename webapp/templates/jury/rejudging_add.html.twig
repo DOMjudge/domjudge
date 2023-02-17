@@ -14,67 +14,12 @@
 
     <div class="row">
         <div class="col-lg-12">
-            <div class="alert alert-info">
-                Creating rejudging. This might take a while...
-
-                <div class="progress mt-2 mb-2">
-                    <div id="rejudge-progress"
-                         class="progress-bar progress-bar-animated progress-bar-striped" style="width: 0%;">
-                        0%
-                    </div>
-                </div>
-                <div id="rejudge-log"></div>
-            </div>
+            {{ macros.progress_bar('Creating rejudging. This might take a while...') }}
         </div>
     </div>
 
 {% endblock %}
 
 {% block extrafooter %}
-    <script>
-        $(function () {
-            var $progress = $('#rejudge-progress');
-            var $log = $('#rejudge-log');
-
-            var currentData = '';
-
-            var consume = function(responseReader) {
-                return responseReader.read().then(function(result) {
-                    if (result.done) { return; }
-
-                    var chunk = new TextDecoder().decode(result.value);
-                    currentData += chunk;
-
-                    if (currentData[currentData.length - 1] === "}") {
-                        // Make sure we start at the last {
-                        var data = JSON.parse(currentData.substring(currentData.lastIndexOf('{')));
-                        currentData = '';
-
-                        $progress
-                            .attr('style', 'width: ' + data.progress + '%;')
-                            .text(data.progress + '%');
-
-                        if (data.redirect) {
-                            window.location.replace(data.redirect);
-                            return;
-                        }
-
-                        $log.html(data.log);
-                    }
-
-                    return consume(responseReader);
-                });
-            };
-            fetch('{{ url }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: '{{ data | raw }}'
-            }).then(function(response) {
-                return consume(response.body.getReader());
-            });
-        });
-    </script>
+    {{ macros.progress_loader(url, data) }}
 {% endblock %}

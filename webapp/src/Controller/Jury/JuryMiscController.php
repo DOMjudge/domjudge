@@ -213,8 +213,8 @@ class JuryMiscController extends BaseController
         }
 
         if ($request->isXmlHttpRequest() && $request->isMethod('POST')) {
-            $progressReporter = function (string $data) {
-                echo Utils::specialchars($data);
+            $progressReporter = function (int $progress, string $log, ?string $message = null) {
+                echo $this->dj->jsonEncode(['progress' => $progress, 'log' => Utils::specialchars($log), 'message' => $message]);
                 ob_flush();
                 flush();
             };
@@ -227,8 +227,10 @@ class JuryMiscController extends BaseController
 
                 $timeEnd = microtime(true);
 
-                $progressReporter(sprintf('Scoreboard cache refresh completed in %.2lf seconds.',
-                                          $timeEnd - $timeStart));
+                $progressReporter(100, '', sprintf(
+                    'Scoreboard cache refresh completed in %.2lf seconds.',
+                    $timeEnd - $timeStart
+                ));
             });
         }
 

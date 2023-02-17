@@ -212,3 +212,81 @@
         });
     </script>
 {% endmacro %}
+
+{% macro progress_bar(message = '') %}
+    <div class="alert alert-info">
+        {% if message is not empty %}
+            <p>{{ message }}</p>
+        {% endif %}
+        <div class="progress mt-2 mb-2">
+            <div id="progress-bar-progress"
+                 class="progress-bar progress-bar-animated progress-bar-striped" style="width: 0%;">
+                0%
+            </div>
+        </div>
+        <div id="progress-bar-log"></div>
+        <div class="mt-4" id="progress-bar-message"></div>
+    </div>
+{% endmacro %}
+
+{% macro progress_loader(url, data = null) %}
+    <script>
+        $(function () {
+            var $progress = $('#progress-bar-progress');
+            var $log = $('#progress-bar-log');
+            var $message = $('#progress-bar-message');
+
+            var currentData = '';
+
+            var consume = function(responseReader) {
+                return responseReader.read().then(function(result) {
+                    if (result.done) { return; }
+
+                    var chunk = new TextDecoder().decode(result.value);
+                    currentData += chunk;
+
+                    if (currentData[currentData.length - 1] === "}") {
+                        // Make sure we start at the last {
+                        var data = JSON.parse(currentData.substring(currentData.lastIndexOf('{')));
+                        currentData = '';
+
+                        $progress
+                            .attr('style', 'width: ' + data.progress + '%;')
+                            .text(data.progress + '%');
+
+                        if (data.progress == '100') {
+                            $progress
+                                .removeClass('progress-bar-animated')
+                                .removeClass('progress-bar-striped')
+                                .addClass('bg-success');
+                        }
+
+                        if (data.message) {
+                            $message.html(data.message);
+                            return;
+                        }
+
+                        if (data.redirect) {
+                            window.location.replace(data.redirect);
+                            return;
+                        }
+
+                        $log.html(data.log);
+                    }
+
+                    return consume(responseReader);
+                });
+            };
+            fetch('{{ url }}', {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    {% if data %}'Content-Type': 'application/x-www-form-urlencoded',{% endif %}
+                },
+                {% if data %}body: '{{ data | raw }}',{% endif %}
+            }).then(function(response) {
+                return consume(response.body.getReader());
+            });
+        });
+    </script>
+{% endmacro %}

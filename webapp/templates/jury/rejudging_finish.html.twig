@@ -15,74 +15,14 @@
         <a href="{{ path('jury_rejudging', {'rejudgingId': rejudging.rejudgingid}) }}">r{{ rejudging.rejudgingid }}</a>
     </h1>
 
-    <div class="alert alert-info">
-        {% if action == "apply" %}
-        <p>Applying rejudge may take some time, please be patient.</p>
-        {% endif %}
-
-        <div class="progress mt-2 mb-2">
-            <div id="finish-progress"
-                 class="progress-bar progress-bar-animated progress-bar-striped" style="width: 0%;">
-                0%
-            </div>
-        </div>
-        <div id="finish-log"></div>
-        <div class="mt-4" id="finish-message"></div>
-    </div>
-
+    {% if action == 'apply' %}
+        {% set progressBarMessage = 'Applying rejudge may take some time, please be patient.' %}
+    {% else %}
+        {% set progressBarMessage = '' %}
+    {% endif %}
+    {{ macros.progress_bar(progressBarMessage) }}
 {% endblock %}
 
 {% block extrafooter %}
-    <script>
-        $(function() {
-            var $progress = $('#finish-progress');
-            var $log = $('#finish-log');
-            var $message = $('#finish-message');
-
-            var currentData = '';
-
-            var consume = function(responseReader) {
-                return responseReader.read().then(function(result) {
-                    if (result.done) { return; }
-
-                    var chunk = new TextDecoder().decode(result.value);
-                    currentData += chunk;
-
-                    if (currentData[currentData.length - 1] === "}") {
-                        // Make sure we start at the last {
-                        var data = JSON.parse(currentData.substring(currentData.lastIndexOf('{')));
-                        currentData = '';
-
-                        $progress
-                            .attr('style', 'width: ' + data.progress + '%;')
-                            .text(data.progress + '%');
-
-                        if (data.progress == '100') {
-                            $progress
-                                .removeClass('progress-bar-animated')
-                                .removeClass('progress-bar-striped')
-                                .addClass('bg-success');
-                        }
-
-                        if (data.message) {
-                            $message.html(data.message);
-                            return;
-                        }
-
-                        $log.html(data.log);
-                    }
-
-                    return consume(responseReader);
-                });
-            };
-            fetch('{{ path('jury_rejudging_finish', {rejudgingId: rejudging.rejudgingid, action: action}) }}', {
-                method: 'GET',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            }).then(function(response) {
-                return consume(response.body.getReader());
-            });
-        });
-    </script>
+    {{ macros.progress_loader(path('jury_rejudging_finish', {rejudgingId: rejudging.rejudgingid, action: action})) }}
 {% endblock %}
