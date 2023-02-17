@@ -100,7 +100,7 @@ class ContestType extends AbstractExternalIdEntityType
                 'Yes' => true,
                 'No' => false,
             ],
-            'help' => 'Enable this to show runtimes in milliseconds on scoreboard and use them as tiebreaker instead of penalty. The runtime of a submission is the maximum over all testcases.',
+            'help' => 'Enable this to show runtimes in seconds on scoreboard and use them as tiebreaker instead of penalty. The runtime of a submission is the maximum over all testcases.',
         ]);
         $builder->add('medalsEnabled', ChoiceType::class, [
             'expanded' => true,

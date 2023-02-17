@@ -44,7 +44,7 @@
                 </div>
                 {% if judging.result == 'correct' and judging.submission.contest.getRuntimeAsScoreTiebreaker() %}
                     <div class="p-2">
-                        Runtime: <b>{{ 1000*judging.getMaxRuntime() }} ms</b>
+                        Max. Runtime: <b>{{ "%0.3f s" | format(judging.getMaxRuntime()) }}</b>
                     </div>
                 {% endif %}
             </div>

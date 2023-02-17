@@ -223,7 +223,7 @@
             {% set totalPoints = score.numPoints %}
             <td class="scorenc">{{ totalPoints }}</td>
             {% if scoreboard.getRuntimeAsScoreTiebreaker() %}
-                <td class="scorett">{{ score.totalRuntime }} ms</td>
+                <td class="scorett">{{ "%0.3f s" | format(score.totalRuntime/1000.0) }}</td>
             {% else %}
                 <td class="scorett">{{ totalTime }}</td>
             {% endif %} 
@@ -257,7 +257,7 @@
                     {% if matrixItem.isCorrect %}
                         {% set time = matrixItem.time %}
                         {% if scoreboard.getRuntimeAsScoreTiebreaker() %}
-                            {% set time = matrixItem.runtime ~ ' ms' %}
+                            {% set time = "%0.3f s" | format(matrixItem.runtime / 1000.0) %}
                         {% elseif scoreInSeconds %}
                             {% set time = time | scoreTime | printTimeRelative %}
                             {% if matrixItem.numSubmissions > 1 %}
