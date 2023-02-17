@@ -403,6 +403,7 @@ fi
 
 # Add additional repository lists to the chroot for upstream repos
 if [ -n "$REPOLISTS" ]; then
+    in_chroot "apt-get install ca-certificates"
     SPLIT_LIST=$(printf %s "$REPOLISTS" | tr ',' ' ')
     for provided_repo in $SPLIT_LIST ; do
         cat "$provided_repo" >> "$CHROOTDIR/etc/apt/sources.list.d/upstream_chroot.list"
