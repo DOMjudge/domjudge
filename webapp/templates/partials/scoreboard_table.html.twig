@@ -235,7 +235,7 @@
                         {% if not scoreboard.getRuntimeAsScoreTiebreaker() and scoreboard.solvedFirst(score.team, problem) %}
                                 {% set scoreCssClass = scoreCssClass ~ ' score_first' %}
                         {% endif %}
-                        {% if scoreboard.getRuntimeAsScoreTiebreaker() and scoreboard.isFastestImplementation(score.team, problem) %}
+                        {% if scoreboard.getRuntimeAsScoreTiebreaker() and scoreboard.isFastestSubmission(score.team, problem) %}
                                 {% set scoreCssClass = scoreCssClass ~ ' score_first' %}
                         {% endif %} 
                     {% elseif showPending and matrixItem.numSubmissionsPending > 0 %}
