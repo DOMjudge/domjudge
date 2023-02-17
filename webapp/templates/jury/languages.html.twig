@@ -10,9 +10,16 @@
 
 {% block content %}
 
-    <h1>Languages</h1>
+    <h1>Enabled languages</h1>
 
-    {{ macros.table(languages, table_fields, num_actions) }}
+    {{ macros.table(enabled_languages, table_fields, num_actions) }}
+
+    <br/>
+    <br/>
+
+    <h1>Disabled languages</h1>
+
+    {{ macros.table(disabled_languages, table_fields, num_actions) }}
 
     {% if is_granted('ROLE_ADMIN') %}
         <p>
