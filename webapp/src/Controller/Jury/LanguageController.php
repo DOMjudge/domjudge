@@ -65,7 +65,6 @@ class LanguageController extends BaseController
             'langid' => ['title' => 'ID/ext', 'sort' => true],
             'name' => ['title' => 'name', 'sort' => true, 'default_sort' => true],
             'entrypoint' => ['title' => 'entry point', 'sort' => true],
-            'allowsubmit' => ['title' => 'allow submit', 'sort' => true],
             'allowjudge' => ['title' => 'allow judge', 'sort' => true],
             'timefactor' => ['title' => 'timefactor', 'sort' => true],
             'extensions' => ['title' => 'extensions', 'sort' => true],
@@ -79,7 +78,8 @@ class LanguageController extends BaseController
         }
 
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
-        $languages_table  = [];
+        $enabled_languages  = [];
+        $disabled_languages  = [];
         foreach ($languages as $lang) {
             $langdata    = [];
             $langactions = [];
@@ -112,19 +112,28 @@ class LanguageController extends BaseController
             $langdata = array_merge($langdata, [
                 'entrypoint' => ['value' => $lang->getRequireEntryPoint() ? 'yes' : 'no'],
                 'extensions' => ['value' => implode(', ', $lang->getExtensions())],
-                'allowsubmit' => ['value' => $lang->getAllowSubmit() ? 'yes' : 'no'],
                 'allowjudge' => ['value' => $lang->getAllowJudge() ? 'yes' : 'no'],
             ]);
 
-            $languages_table[] = [
-                'data' => $langdata,
-                'actions' => $langactions,
-                'link' => $this->generateUrl('jury_language', ['langId' => $lang->getLangid()]),
-                'cssclass' => $lang->getAllowSubmit() ? '' : 'disabled',
-            ];
+            if ($lang->getAllowSubmit()) {
+                $enabled_languages[] = [
+                    'data' => $langdata,
+                    'actions' => $langactions,
+                    'link' => $this->generateUrl('jury_language', ['langId' => $lang->getLangid()]),
+                    'cssclass' => '',
+                ];
+            } else {
+                $disabled_languages[] = [
+                    'data' => $langdata,
+                    'actions' => $langactions,
+                    'link' => $this->generateUrl('jury_language', ['langId' => $lang->getLangid()]),
+                    'cssclass' => 'disabled',
+                ];
+            }
         }
         return $this->render('jury/languages.html.twig', [
-            'languages' => $languages_table,
+            'enabled_languages' => $enabled_languages,
+            'disabled_languages' => $disabled_languages,
             'table_fields' => $table_fields,
             'num_actions' => $this->isGranted('ROLE_ADMIN') ? 2 : 0,
         ]);
