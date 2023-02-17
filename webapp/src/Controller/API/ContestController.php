@@ -753,9 +753,21 @@ class ContestController extends AbstractRestController
     /**
      * @Rest\Get("/{cid}/samples.zip", name="samples_data_zip")
      */
-    public function samplesDataZipAction(Request $request, string $cid): Response
+    public function samplesDataZipAction(Request $request): Response
     {
-        $contest = $this->getContestWithId($request, $cid);
+        // getContestQueryBuilder add filters to only get the contests that the user
+        // has access to.
+        /** @var Contest|null $contest */
+        $contest = $this->getContestQueryBuilder()
+            ->andWhere('c.cid = :cid')
+            ->setParameter('cid', $this->getContestId($request))
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        if ($contest === null) {
+            throw new NotFoundHttpException(sprintf('Object with ID \'%s\' not found', $id));
+        }
+
         return $this->dj->getSamplesZipForContest($contest);
     }
 
