@@ -24,10 +24,6 @@
                     <td>{{ judgehost.judgehostid }}</td>
                 </tr>
                 <tr>
-                    <th>Name</th>
-                    <td>{{ judgehost.hostname | printHost }}</td>
-                </tr>
-                <tr>
                     <th>Enabled</th>
                     <td>{{ judgehost.enabled | printYesNo }}</td>
                 </tr>
@@ -64,7 +60,7 @@
         {% include 'jury/partials/rejudge_form.html.twig' with {table: 'judgehost', id: judgehost.judgehostid, buttonClass: 'btn-primary'} %}
     </div>
 
-    <h3>Judgings by {{ judgehost.hostname | printHost }}</h3>
+    <h3>Recent judgings</h3>
 
     <div data-ajax-refresh-target>
         {% include 'jury/partials/judgehost_judgings.html.twig' %}

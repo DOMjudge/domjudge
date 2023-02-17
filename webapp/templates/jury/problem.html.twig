@@ -26,10 +26,6 @@
                     </tr>
                 {% endif %}
                 <tr>
-                    <th>Name</th>
-                    <td>{{ problem.name }}</td>
-                </tr>
-                <tr>
                     <th>Testcases</th>
                     <td>
                         {% if problem.testcases is empty %}
@@ -130,7 +126,7 @@
         {% include 'jury/partials/rejudge_form.html.twig' with {table: 'problem', id: problem.probid, buttonClass: 'btn-secondary'} %}
     </div>
 
-    <h2>Contests</h2>
+    <h3>Contests</h3>
 
     {% if problem.contestProblems is empty %}
         <p class="nodata">No contests defined</p>
@@ -189,7 +185,7 @@
         </div>
     {% endif %}
 
-    <h2>Attachments</h2>
+    <h3>Attachments</h3>
 
     <div class="row">
         <div class="col-md-6">
@@ -246,7 +242,7 @@
         </div>
     </div>
 
-    <h2>Submissions for {{ problem.name }}</h2>
+    <h3>Submissions</h3>
 
     <div data-ajax-refresh-target>
         {%- include 'jury/partials/submission_list.html.twig' with {showTestcases: false} %}
