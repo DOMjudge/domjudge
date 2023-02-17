@@ -196,6 +196,18 @@
                         </a>
                     </td>
                 </tr>
+                <tr>
+                    <th>Sample data ZIP</th>
+                    <td>
+                        <a class="btn btn-sm btn-secondary" href="{{ path('jury_contest_samples_data_zip', {contestId: contest.cid}) }}">
+                            <i class="fas fa-download"></i> Download
+                        </a>
+                        <br/>
+                        <small class="text-muted">
+                            Contains samples, attachments and statement for all problems.
+                        </small>
+                    </td>
+                </tr>
                 {% set contestId = contest.cid %}
                 {% if showExternalId(contest) %}
                     {% set contestId = contest.externalid %}
