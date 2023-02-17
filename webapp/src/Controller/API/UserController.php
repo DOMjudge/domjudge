@@ -123,7 +123,7 @@ class UserController extends AbstractRestController
     {
         $message = null;
         /** @var UploadedFile $jsonFile */
-        if ($jsonFile = $request->files->get('json') &&
+        if (($jsonFile = $request->files->get('json')) &&
             ($result = $this->importExportService->importJson('organizations', $jsonFile, $message)) &&
             $result >= 0
         ) {
