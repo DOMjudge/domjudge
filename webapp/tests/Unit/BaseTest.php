@@ -224,7 +224,7 @@ abstract class BaseTest extends WebTestCase
         }
         $response = $this->client->getResponse();
         $message = var_export($response, true);
-        self::assertEquals($status, $response->getStatusCode(), $message);
+        self::assertEquals($status, $response->getStatusCode(), $message . "\nURI = $uri");
         if ($responseUrl !== null) {
             self::assertEquals($responseUrl, $response->getTargetUrl(), $message);
         }

@@ -31,7 +31,7 @@ abstract class JuryControllerTest extends BaseTest
     protected static string $prefixURL                = 'http://localhost';
     protected static string $add                      = '/add';
     protected static string $edit                     = '/edit';
-    protected static string $editDefault              = '/edit';
+    protected static ?string $editDefault             = '/edit';
     protected static string $delete                   = '/delete';
     protected static string $deleteDefault            = '/delete';
     protected static array $deleteEntities            = [];
@@ -177,7 +177,7 @@ abstract class JuryControllerTest extends BaseTest
         $crawler = $this->getCurrentCrawler();
         // Check if the edit/delete action keys are visible.
         foreach ([static::$editDefault, static::$deleteDefault, static::$edit, static::$delete] as $identifier) {
-            if ($identifier === '') {
+            if (empty($identifier)) {
                 continue;
             }
             $singlePageLink = null;
@@ -193,7 +193,7 @@ abstract class JuryControllerTest extends BaseTest
         foreach (array_merge(
             [static::$deleteEntityIdentifier=>array_slice(static::$deleteEntities, 0, 1)],
             [static::$identifyingEditAttribute=>static::$defaultEditEntityName]) as $identifier => $entityShortName) {
-            if ($identifier === '') {
+            if ($identifier === '' || $entityShortName === '') {
                 continue;
             }
             $em = self::getContainer()->get('doctrine')->getManager();
@@ -201,6 +201,9 @@ abstract class JuryControllerTest extends BaseTest
             $entityUrl = static::$baseUrl . '/' . $ent->{static::$getIDFunc}();
             foreach ([static::$delete=>static::$deleteDefault,
                       static::$edit=>static::$editDefault] as $postfix => $default) {
+                if ($default === null) {
+                    continue;
+                }
                 $code = 403;
                 if ($postfix === '') {
                     $code = 404;
