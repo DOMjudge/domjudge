@@ -23,6 +23,8 @@
         $(function() {
             $('[data-toggle]').on('change', function() {
                 var $form = $(this).closest('form');
+                // We use a timeout of 300 ms here since the animation looks super
+                // ugly if we do not do this.
                 setTimeout(function() {
                     $form.submit();
                 }, 300);
