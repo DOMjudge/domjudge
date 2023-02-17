@@ -59,7 +59,7 @@
     <script src="{{ asset('js/jquery.dataTables.min.js') }}"></script>
     <script src="{{ asset('js/dataTables.bootstrap4.min.js') }}"></script>
     <style>
-        .data-table td a, .data-table td a:hover {
+        .data-table td a:not(.showlink), .data-table td a:hover:not(.showlink) {
             display: block;
             text-decoration: none;
             color: inherit;
@@ -130,7 +130,7 @@
                                 {%- if item.filterKey is defined and item.filterValue is defined %} data-{{ item.filterKey }}="{{ item.filterValue }}"{% endif %}
                                 {%- if item.sortvalue is defined %} data-sort="{{ item.sortvalue }}"{% endif %}
                                 {% if (column.render | default('')) == "entity_id_badge" %}style="text-align: right;" {% endif %}>
-                            {%- if item.link is defined %}<a href="{{ item.link }}">
+                            {%- if item.link is defined %}<a href="{{ item.link }}" {%- if item.showlink is defined %} class="showlink"{% endif %}>
                             {%- elseif row.link is defined %}<a href="{{ row.link }}">{% endif %}
                             {% if key == "status" %}
                             {{- (item.value|default(item.default|default('')))|statusIcon -}}
