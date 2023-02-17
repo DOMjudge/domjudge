@@ -5,31 +5,34 @@
 
 {% block extrahead %}
     {{ parent() }}
+    <script src="{{ asset('js/ace/ace.js') }}"></script>
+    <script src="{{ asset('js/ace/ext-modelist.js') }}"></script>
     {{ macros.table_extrahead() }}
 {% endblock %}
 
 {% block content %}
 
-    <h1>Executable {{ executable.execid }}</h1>
+    <h1>Executable <code>{{ executable.execid }}</code></h1>
+
+    <div class="mb-4">
+        {%- if is_granted('ROLE_ADMIN') -%}
+            <p>
+                {{ button(path('jury_executable_download', {'execId': executable.execid}), 'Download ZIP', 'secondary', 'file-download') }}
+                {{ button(path('jury_executable_delete', {'execId': executable.execid}), 'Delete', 'danger', 'trash-alt', true) }}
+            </p>
+        {% endif %}
+    </div>
 
     <div class="row">
         <div class="col-lg-4">
             <table class="table table-sm table-striped">
                 <tr>
-                    <th>Name</th>
+                    <th>Description</th>
                     <td>{{ executable.description }}</td>
                 </tr>
                 <tr>
                     <th>Type</th>
                     <td>{{ executable.type }}</td>
-                </tr>
-                <tr>
-                    <th>Content</th>
-                    <td>
-                        <a href="{{ path('jury_executable_edit_files', {'execId': executable.execid}) }}">
-                            View/edit file contents
-                        </a>
-                    </td>
                 </tr>
                 <tr>
                     <th>Used as {{ executable.type }} script</th>
@@ -73,14 +76,77 @@
         </div>
     </div>
 
-    <div class="mb-4">
-        {%- if is_granted('ROLE_ADMIN') -%}
-            <p>
-                {{ button(path('jury_executable_download', {'execId': executable.execid}), 'Download', 'secondary', 'file-download') }}
-                {{ button(path('jury_executable_edit', {'execId': executable.execid}), 'Edit', 'primary', 'edit') }}
-                {{ button(path('jury_executable_delete', {'execId': executable.execid}), 'Delete', 'danger', 'trash-alt', true) }}
-            </p>
-        {% endif %}
-    </div>
+    <h1>Content</h1>
+
+    {% if skippedBinary is not empty %}
+        <div class="alert alert-warning">
+            We exclude these files from editing since we could not detect their encoding (e.g. they are binary files):
+            <ul>
+                {% for file in skippedBinary %}
+                    <li><code>{{ file }}</code></li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+    {{ form_start(form) }}
+
+    {% if not filenames %}
+        <p class="nodata">No files in this executable.</p>
+    {% else %}
+        <ul class="nav nav-tabs source-tab-nav" role="tablist">
+            {%- for idx, filename in filenames %}
+                <li class="nav-item">
+                    <a class="nav-link {% if (selected is null and loop.first) or selected == idx %}active{% endif %}" data-toggle="tab"
+                       href="#source-{{ idx }}" role="tab"><code>{{ filename }}</code>{%  if (executableBits[idx]) %} <sub>x-bit</sub>{% endif %}</a>
+                </li>
+            {%- endfor %}
+        </ul>
+        <div class="tab-content source-tab">
+            {%- for idx, filename in filenames %}
+                <div class="tab-pane fade {% if (selected is null and loop.first) or selected == idx %}show active{% endif %}" id="source-{{ idx }}"
+                     role="tabpanel">
+                    <div class="mb-1">
+                        <a class="btn btn-secondary btn-sm"
+                           href="{{ path('jury_executable_download_single', {execId: executable.execid, rank: ranks[idx]}) }}">
+                            <i class="fas fa-download"></i> Download file
+                        </a>
+                        {% if is_granted('ROLE_ADMIN') %}
+                            <a class="btn btn-secondary btn-sm"
+                               data-ajax-modal
+                               href="{{ path('jury_executable_delete_single', {execId: executable.execid, rankToDelete: ranks[idx]}) }}">
+                                <i class="fas fa-trash"></i> Delete file
+                            </a>
+                        {% endif %}
+                    </div>
+
+                    {{ files[idx] | codeEditor(idx, null, is_granted('ROLE_ADMIN'), 'form_source' ~ idx, aceFilenames[idx]) }}
+                    <script>
+                        $(function () {
+                            $('#form_source{{ idx }}').closest('.form-group').hide();
+                        });
+                    </script>
+                </div>
+            {%- endfor %}
+        </div>
+
+        <div class="row">
+            <div class="col-lg-4">
+                {{ form_widget(form) }}
+            </div>
+        </div>
+        {{ form_end(form) }}
+    {% endif %}
+
+    {% if is_granted('ROLE_ADMIN') %}
+        <hr>
+        <i>or</i>
+
+        <div class="row">
+            <div class="col-lg-4">
+                {{ form(uploadForm) }}
+            </div>
+        </div>
+    {% endif %}
 
 {% endblock %}
