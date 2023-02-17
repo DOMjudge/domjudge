@@ -120,7 +120,8 @@ class LanguageController extends BaseController
                     'value' => $executable === null ? '-' : $executable->getShortDescription(),
                     'link' => $executable === null ? null : $this->generateUrl('jury_executable', [
                         'execId' => $executable->getExecid()
-                        ])
+                        ]),
+                    'showlink' => true,
                     ],
             ]);
 
