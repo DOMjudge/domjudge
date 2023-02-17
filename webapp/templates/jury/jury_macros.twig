@@ -18,6 +18,20 @@
     <script src="{{ asset('js/bootstrap-toggle.min.js') }}"></script>
 {% endmacro %}
 
+{% macro toggle_autosubmit_extrafooter() %}
+    <script>
+        $(function() {
+            $('[data-toggle]').on('change', function() {
+                var $form = $(this).closest('form');
+                // We use a timeout of 300 ms here since the animation looks super
+                // ugly if we do not do this.
+                setTimeout(function() {
+                    $form.submit();
+                }, 300);
+            });
+        });
+    </script>
+{% endmacro %}
 
 {% macro coloris_extrahead() %}
     <link rel="stylesheet" href="{{ asset('css/coloris.min.css') }}">
