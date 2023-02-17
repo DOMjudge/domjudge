@@ -750,6 +750,15 @@ class ContestController extends AbstractRestController
         return $this->dj->getContestStats($this->getContestWithId($request, $cid));
     }
 
+    /**
+     * @Rest\Get("/{cid}/samples.zip", name="samples_data_zip")
+     */
+    public function samplesDataZipAction(Request $request, string $cid): Response
+    {
+        $contest = $this->getContestWithId($request, $cid);
+        return $this->dj->getSamplesZipForContest($contest);
+    }
+
     protected function getQueryBuilder(Request $request): QueryBuilder
     {
         try {

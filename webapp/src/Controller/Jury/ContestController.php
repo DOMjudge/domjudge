@@ -969,6 +969,20 @@ class ContestController extends BaseController
         return $this->doLock($contestId, false);
     }
 
+    /**
+     * @Route("/{contestId<\d+>}/samples.zip", name="jury_contest_samples_data_zip")
+     */
+    public function samplesDataZipAction(Request $request, int $contestId): Response
+    {
+        /** @var Contest $contest */
+        $contest = $this->em->getRepository(Contest::class)->find($contestId);
+        if (!$contest) {
+            throw new NotFoundHttpException(sprintf('Contest with ID %s not found', $contestId));
+        }
+
+        return $this->dj->getSamplesZipForContest($contest);
+    }
+
     private function doLock(int $contestId, bool $locked): Response
     {
         /** @var Contest $contest */

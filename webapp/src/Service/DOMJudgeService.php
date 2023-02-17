@@ -725,22 +725,6 @@ class DOMJudgeService
      */
     public function getSamplesZipContent(ContestProblem $contestProblem): string
     {
-        /** @var Testcase[] $testcases */
-        $testcases = $this->em->createQueryBuilder()
-            ->from(Testcase::class, 'tc')
-            ->join('tc.problem', 'p')
-            ->join('p.contest_problems', 'cp', Join::WITH, 'cp.contest = :contest')
-            ->join('tc.content', 'tcc')
-            ->select('tc', 'tcc')
-            ->andWhere('tc.problem = :problem')
-            ->andWhere('tc.sample = 1')
-            ->andWhere('cp.allowSubmit = 1')
-            ->setParameter('problem', $contestProblem->getProblem())
-            ->setParameter('contest', $contestProblem->getContest())
-            ->orderBy('tc.testcaseid')
-            ->getQuery()
-            ->getResult();
-
         $zip = new ZipArchive();
         if (!($tempFilename = tempnam($this->getDomjudgeTmpDir(), "export-"))) {
             throw new ServiceUnavailableHttpException(null, 'Could not create temporary file.');
@@ -751,11 +735,40 @@ class DOMJudgeService
             throw new ServiceUnavailableHttpException(null, 'Could not create temporary zip file.');
         }
 
+        $this->addSamplesToZip($zip, $contestProblem);
+
+        $zip->close();
+        $zipFileContents = file_get_contents($tempFilename);
+        unlink($tempFilename);
+        return $zipFileContents;
+    }
+
+    protected function addSamplesToZip(ZipArchive $zip, ContestProblem $problem, ?string $directory = null): void
+    {
+        /** @var Testcase[] $testcases */
+        $testcases = $this->em->createQueryBuilder()
+            ->from(Testcase::class, 'tc')
+            ->join('tc.problem', 'p')
+            ->join('p.contest_problems', 'cp', Join::WITH, 'cp.contest = :contest')
+            ->join('tc.content', 'tcc')
+            ->select('tc', 'tcc')
+            ->andWhere('tc.problem = :problem')
+            ->andWhere('tc.sample = 1')
+            ->andWhere('cp.allowSubmit = 1')
+            ->setParameter('problem', $problem->getProblem())
+            ->setParameter('contest', $problem->getContest())
+            ->orderBy('tc.testcaseid')
+            ->getQuery()
+            ->getResult();
+
         foreach ($testcases as $index => $testcase) {
             foreach (['input', 'output'] as $type) {
                 $extension = Testcase::EXTENSION_MAPPING[$type];
 
                 $filename = sprintf("%s.%s", $index + 1, $extension);
+                if ($directory) {
+                    $filename = sprintf('%s/%s', $directory, $filename);
+                }
                 $content  = null;
 
                 switch ($type) {
@@ -770,11 +783,6 @@ class DOMJudgeService
                 $zip->addFromString($filename, $content);
             }
         }
-
-        $zip->close();
-        $zipFileContents = file_get_contents($tempFilename);
-        unlink($tempFilename);
-        return $zipFileContents;
     }
 
     public function getSamplesZipStreamedResponse(ContestProblem $contestProblem): StreamedResponse
@@ -782,6 +790,55 @@ class DOMJudgeService
         $zipFileContent = $this->getSamplesZipContent($contestProblem);
         $outputFilename = sprintf('samples-%s.zip', $contestProblem->getShortname());
         return Utils::streamAsBinaryFile($zipFileContent, $outputFilename, 'zip');
+    }
+
+    public function getSamplesZipForContest(Contest $contest): StreamedResponse
+    {
+        // Note, we reload the contest with the problems and attachments, to reduce the number of queries
+        // We do not load the testcases here since addSamplesToZip loads them
+        /** @var Contest $contest */
+        $contest = $this->em->createQueryBuilder()
+            ->from(Contest::class, 'c')
+            ->innerJoin('c.problems', 'cp')
+            ->innerJoin('cp.problem', 'p')
+            ->leftJoin('p.attachments', 'a')
+            ->select('c', 'cp', 'p', 'a')
+            ->andWhere('c.cid = :cid')
+            ->setParameter('cid', $contest->getCid())
+            ->getQuery()
+            ->getSingleResult();
+
+        $zip = new ZipArchive();
+        if (!($tempFilename = tempnam($this->getDomjudgeTmpDir(), "export-"))) {
+            throw new ServiceUnavailableHttpException(null, 'Could not create temporary file.');
+        }
+
+        $res = $zip->open($tempFilename, ZipArchive::OVERWRITE);
+        if ($res !== true) {
+            throw new ServiceUnavailableHttpException(null, 'Could not create temporary zip file.');
+        }
+
+        /** @var ContestProblem $problem */
+        foreach ($contest->getProblems() as $problem) {
+            $this->addSamplesToZip($zip, $problem, $problem->getShortname());
+
+            if ($problem->getProblem()->getProblemtextType()) {
+                $filename    = sprintf('%s/statement.%s', $problem->getShortname(), $problem->getProblem()->getProblemtextType());
+                $zip->addFromString($filename, stream_get_contents($problem->getProblem()->getProblemtext()));
+            }
+
+            /** @var ProblemAttachment $attachment */
+            foreach ($problem->getProblem()->getAttachments() as $attachment) {
+                $filename = sprintf('%s/attachments/%s', $problem->getShortname(), $attachment->getName());
+                $zip->addFromString($filename, $attachment->getContent()->getContent());
+            }
+        }
+
+        $zip->close();
+        $zipFileContents = file_get_contents($tempFilename);
+        unlink($tempFilename);
+
+        return Utils::streamAsBinaryFile($zipFileContents, 'samples.zip', 'zip');
     }
 
     /**
