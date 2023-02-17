@@ -599,7 +599,7 @@ class ScoreboardService
         $this->dj->auditlog('contest', $contest->getCid(), 'refresh scoreboard cache');
 
         if ($progressReporter === null) {
-            $progressReporter = function ($data) {
+            $progressReporter = static function (int $progress, string $log, ?string $message = null) {
                 // no-op
             };
         }
@@ -629,37 +629,35 @@ class ScoreboardService
             ->getQuery()
             ->getResult();
 
-        $message = sprintf('Recalculating all values for the scoreboard ' .
-            'cache for contest %s (c%d, %d teams, %d problems)...',
-            $contest->getShortname(),
-            $contest->getCid(),
-            count($teams), count($problems));
-        $progressReporter($message . "\n\n");
-
         if (count($teams) == 0) {
-            $progressReporter("No teams defined, doing nothing.\n");
+            $progressReporter(100, '', 'No teams defined, doing nothing.');
             return;
         }
         if (count($problems) == 0) {
-            $progressReporter("No problems defined, doing nothing.\n");
+            $progressReporter(100, '', 'No problems defined, doing nothing.');
             return;
         }
 
+        $first = true;
+        $log = '';
+
         // for each team, fetch the status of each problem.
-        foreach ($teams as $team) {
-            $progressReporter(sprintf('Team %d:', $team->getTeamid()));
+        foreach ($teams as $index => $team) {
+            if (!$first) {
+                $log .= ', ';
+            }
+            $first = false;
+            $log .= sprintf('t%d', $team->getTeamid());
+            $progress = (int)round($index / count($teams) * 100);
+            $progressReporter($progress, $log);
 
             // for each problem fetch the result
             foreach ($problems as $problem) {
-                $progressReporter(sprintf(' p%d', $problem->getProbid()));
                 $this->calculateScoreRow($contest, $team, $problem, false);
             }
 
-            $progressReporter(" rankcache\n");
             $this->updateRankCache($contest, $team);
         }
-
-        $progressReporter("\nDeleting irrelevant data...");
 
         // Drop all teams and problems that do not exist in the contest.
         if (!empty($problems)) {
@@ -701,7 +699,7 @@ class ScoreboardService
             'DELETE FROM rankcache WHERE cid = :cid AND teamid NOT IN (:teamIds)',
             $params, $types);
 
-        $progressReporter(" done.\n\n");
+        $progressReporter(100, '');
     }
 
     /**

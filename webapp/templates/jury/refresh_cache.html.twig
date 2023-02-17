@@ -13,7 +13,7 @@
     <h1>Refresh cache</h1>
 
     {% if doRefresh %}
-        <pre id="refresh-status"></pre>
+        {{ macros.progress_bar() }}
     {% else %}
         <div class="alert alert-warning">
             <h5 class="alert-heading">Significant database impact</h5>
@@ -43,22 +43,11 @@
 {% endblock %}
 
 {% block extrafooter %}
-    <script>
-        $(function () {
-            var $status = $('pre#refresh-status');
-            var xhr = new XMLHttpRequest();
-            xhr.open('POST', '{{ (path('jury_refresh_cache')) }}', true);
-            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-
-            xhr.onprogress = function (e) {
-                $status.html(e.currentTarget.response);
-
-                // Scroll page to bottom of div to keep showing progress
-                $('html, body').animate({scrollTop: $status.offset().top + $status.height()}, 0);
-            };
-
-            xhr.send({% if current_contest is not empty %}'cid={{ current_contest.cid }}'{% endif %});
-        });
-    </script>
+    {% if doRefresh %}
+        {% set progressUrl = path('jury_refresh_cache') %}
+        {% if current_contest is not empty %}
+            {% set progressUrl = progressUrl ~ '?cid=' ~ current_contest.cid %}
+        {% endif %}
+        {{ macros.progress_loader(progressUrl) }}
+    {% endif %}
 {% endblock %}
