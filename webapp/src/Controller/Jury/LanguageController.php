@@ -68,6 +68,7 @@ class LanguageController extends BaseController
             'allowjudge' => ['title' => 'allow judge', 'sort' => true],
             'timefactor' => ['title' => 'timefactor', 'sort' => true],
             'extensions' => ['title' => 'extensions', 'sort' => true],
+            'executable' => ['title' => 'executable', 'sort' => true],
         ];
 
         // Insert external ID field when configured to use it.
@@ -108,11 +109,19 @@ class LanguageController extends BaseController
                 ];
             }
 
+            $executable = $lang->getCompileExecutable();
+
             // Merge in the rest of the data.
             $langdata = array_merge($langdata, [
                 'entrypoint' => ['value' => $lang->getRequireEntryPoint() ? 'yes' : 'no'],
                 'extensions' => ['value' => implode(', ', $lang->getExtensions())],
                 'allowjudge' => ['value' => $lang->getAllowJudge() ? 'yes' : 'no'],
+                'executable' => [
+                    'value' => $executable === null ? '-' : $executable->getShortDescription(),
+                    'link' => $executable === null ? null : $this->generateUrl('jury_executable', [
+                        'execId' => $executable->getExecid()
+                        ])
+                    ],
             ]);
 
             if ($lang->getAllowSubmit()) {
