@@ -69,13 +69,14 @@ class ExecutableController extends BaseController
         $executables      = $em->createQueryBuilder()
             ->select('e as executable, e.execid as execid')
             ->from(Executable::class, 'e')
-            ->orderBy('e.execid', 'ASC')
+            ->addOrderBy('e.type', 'ASC')
+            ->addOrderBy('e.execid', 'ASC')
             ->getQuery()->getResult();
         $executables      = array_column($executables, 'executable', 'execid');
         $table_fields     = [
             'execid' => ['title' => 'ID', 'sort' => true,],
             'type' => ['title' => 'type', 'sort' => true,],
-            'description' => ['title' => 'description', 'sort' => true, 'default_sort' => true],
+            'description' => ['title' => 'description', 'sort' => true,],
         ];
 
         $propertyAccessor  = PropertyAccess::createPropertyAccessor();
