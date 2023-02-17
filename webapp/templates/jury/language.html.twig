@@ -27,10 +27,6 @@
                     </tr>
                 {% endif %}
                 <tr>
-                    <th>Name</th>
-                    <td>{{ language.name }}</td>
-                </tr>
-                <tr>
                     <th>Entry point</th>
                     <td>
                         {{ language.requireEntryPoint | printYesNo }}
@@ -94,7 +90,7 @@
         {% include 'jury/partials/rejudge_form.html.twig' with {table: 'language', id: language.langid, buttonClass: 'btn-secondary'} %}
     </div>
 
-    <h2>Submissions in {{ language.name }}</h2>
+    <h3>Recent submissions</h3>
 
     <div data-ajax-refresh-target>
         {%- include 'jury/partials/submission_list.html.twig' with {showTestcases: false} %}

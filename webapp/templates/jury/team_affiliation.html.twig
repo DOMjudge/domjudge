@@ -10,7 +10,7 @@
 
 {% block content %}
 
-    <h1>Affiliation: {{ teamAffiliation.name }}</h1>
+    <h1>Affiliation {{ teamAffiliation.name }}</h1>
 
     <div class="row">
         <div class="col-lg-4">
@@ -38,10 +38,6 @@
                 <tr>
                     <th>Shortname</th>
                     <td>{{ teamAffiliation.shortname }}</td>
-                </tr>
-                <tr>
-                    <th>Name</th>
-                    <td>{{ teamAffiliation.name }}</td>
                 </tr>
                 <tr>
                     <th>Logo</th>
@@ -84,7 +80,7 @@
         </p>
     {% endif %}
 
-    <h2>Teams from {{ teamAffiliation.name }}</h2>
+    <h3>Teams</h3>
     {% if teamAffiliation.teams is empty %}
         <p class="nodata">no teams</p>
     {% else %}
