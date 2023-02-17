@@ -957,8 +957,7 @@ class ImportExportService
                 return -1;
             }
 
-            $clicsId = preg_grep('([a-zA-Z0-9]{1}([a-zA-Z0-9._]{0,34}[a-zA-Z0-9])?)', [$teamItem['team']['teamid']]);
-            if (!$clicsId || strlen($clicsId[0]) === strlen($teamItem['team']['teamid'])) {
+            if (preg_match('/^([a-zA-Z0-9]{1}([a-zA-Z0-9._-]{0,34}[a-zA-Z0-9])?)$/', $teamItem['team']['teamid']) === 0) {
                 $message = 'ID not in CLICS format';
                 return -1;
             }
