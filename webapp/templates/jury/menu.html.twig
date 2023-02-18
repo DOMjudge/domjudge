@@ -1,4 +1,4 @@
-<nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top {% if debug %} devmode {% endif %}">
+<nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top {% if app.debug %} devmode {% endif %}">
     <a class="navbar-brand hidden-sm-down" href="{{ path('jury_index') }}">DOMjudge</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#menuDefault" aria-controls="menuDefault" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -84,10 +84,10 @@
             {% endif %}
         </ul>
 
-        {% if debug %}
+        {% if app.debug %}
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item">
-                    <i class="fa-brands fa-dev fa-2x" style="color: white;"></i>
+                    <i class="fa-brands fa-dev fa-2x devmode-icon"></i>
                 </li>
             </ul>
         {% endif %}
