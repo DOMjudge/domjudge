@@ -192,3 +192,7 @@ table.submissions-table {
 .devmode {
     background-color: #295D8A !important;
 }
+
+.devmode-icon {
+    color: white;
+}
