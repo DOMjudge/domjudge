@@ -188,3 +188,7 @@ div.submission-summary > span {
 table.submissions-table {
     width: auto;
 }
+
+.devmode {
+    background-color: #295D8A !important;
+}

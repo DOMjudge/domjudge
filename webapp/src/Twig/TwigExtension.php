@@ -45,6 +45,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
     protected TokenStorageInterface $tokenStorage;
     protected AuthorizationCheckerInterface $authorizationChecker;
     protected string $projectDir;
+    protected bool $debug;
 
     public function __construct(
         DOMJudgeService               $dj,
@@ -56,7 +57,8 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         AwardService                  $awards,
         TokenStorageInterface         $tokenStorage,
         AuthorizationCheckerInterface $authorizationChecker,
-        string                        $projectDir
+        string                        $projectDir,
+        bool                          $debug
     ) {
         $this->dj                   = $dj;
         $this->config               = $config;
@@ -68,6 +70,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         $this->tokenStorage         = $tokenStorage;
         $this->authorizationChecker = $authorizationChecker;
         $this->projectDir           = $projectDir;
+        $this->debug                = $debug;
     }
 
     public function getFunctions(): array
@@ -167,6 +170,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
                                                $this->authorizationChecker->isGranted('ROLE_ADMIN') &&
                                                $this->config->get('data_source') === DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL,
             'doc_links'                     => $this->dj->getDocLinks(),
+            'debug'                         => $this->debug,
         ];
     }
 
