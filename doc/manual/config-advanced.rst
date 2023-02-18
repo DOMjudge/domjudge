@@ -402,7 +402,7 @@ contest ID to use, and the IDs of the team categories you want to include
 .. _clear-cache:
 
 Clearing the PHP/Symfony cache
----------------------------
+------------------------------
 
 Some operations require you to clear the PHP/Symfony cache. To do this, execute
 the `webapp/bin/console` (see the Config checker in the admin interfae for the
