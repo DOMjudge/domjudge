@@ -53,6 +53,7 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use ZipArchive;
+use function count;
 
 class DOMJudgeService
 {
@@ -1132,9 +1133,14 @@ class DOMJudgeService
         $judgetaskDefaultParamNames = array_keys($judgetaskInsertParams);
 
         // Step 2: Create and insert the judgetasks.
+
+        $testcases = $problem->getProblem()->getTestcases();
+        if (count($testcases) < 1) {
+            throw new BadRequestHttpException("No testcases set for problem {$problem->getProbid()}");
+        }
         $judgetaskInsertParts = [];
         /** @var Testcase $testcase */
-        foreach ($problem->getProblem()->getTestcases() as $testcase) {
+        foreach ($testcases as $testcase) {
             $judgetaskInsertParts[] = sprintf(
                 '(%s, :testcase_id%d, :testcase_hash%d)',
                 implode(', ', $judgetaskDefaultParamNames),
