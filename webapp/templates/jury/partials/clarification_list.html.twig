@@ -93,7 +93,7 @@
             {%- endif %}
 
             <td><a href="{{ link }}">{{ answered | raw }}</a></td>
-            <td><form action="{{ path('jury_clarification_claim', {clarId: clarification.clarid}) }}" method="post" class="form-inline">
+            <td><form action="{{ path('jury_clarification_claim', {clarId: clarification.clarid}) }}" method="post">
                 {%- if claim and clarification.sender -%}
                     <button name="claimed" value="1"
                        class="btn btn-outline-success btn-sm">Claim</button>
@@ -107,12 +107,13 @@
             </td>
 {% if queues | length > 1 %}
             <td data-search="{{ queues[clarification.queue]|default('') }}">
-            <div class="btn-group btn-group-toggle" data-toggle="buttons">
-                 <div class="input-group-prepend"><div class="input-group-text" id="qig{{clarification.clarid}}"><i class="fab fa-quora"></i></div></div>
+            <div class="btn-group" role="group">
+                 <span class="input-group-text" id="qig{{clarification.clarid}}"><i class="fab fa-quora"></i></span>
                  {% for qk,qv in queues %}
-                 <label class="btn btn-sm btn-outline-secondary{% if qk == clarification.queue %} active{% endif %}">
-                 <input class="qbut" type="radio" name="queue[{{ clarification.clarid }}]" data-clarid="{{ clarification.clarid }}" id="q_{{ qk }}" value="{{ qk }}" autocomplete="off"{% if qk == clarification.queue %} checked{% endif %}> {{ qv }}
-                 </label>
+                 <input class="qbut btn-check" type="radio" autocomplete="off"
+                     name="queue[{{ clarification.clarid }}]" data-clarid="{{ clarification.clarid }}" id="q_{{ qk }}" value="{{ qk }}"
+                     {% if qk == clarification.queue %} checked{% endif %}>
+                 <label class="btn btn-sm btn-outline-secondary" for="q_{{ qk }}">{{ qv }}</label>
                  {% endfor %}
             </div>
             </td>

@@ -5,16 +5,14 @@
                 <h5 class="modal-title">
                     Submit {% if problem is not null %}problem {{ problem.name }}{% endif %}
                 </h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             {% if current_team_contest is empty or (not is_granted('ROLE_JURY') and not current_team_contest.freezeData.started) %}
                 <div class="modal-body">
                     <div class="alert alert-danger" role="alert">Contest has not yet started - cannot submit.</div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
             {% elseif not current_team_contest.allowSubmit %}
                 <div class="modal-body">
@@ -34,7 +32,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn-success btn">
                         <i class="fas fa-cloud-upload-alt"></i> Submit
                     </button>

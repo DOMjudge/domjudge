@@ -22,52 +22,34 @@
         <div class="alert alert-danger">No active contests</div>
     {%- else %}
 
-        <div class="float-right">
+        <div class="float-end">
         <a href="{{ path('jury_clarification_new') }}" class="btn btn-primary btn-sm">
                 <i class="fas fa-envelope"></i> Send clarification
         </a>
         </div>
 
-        <div class="btn-group btn-group-toggle btn-group-sm mb-3" data-toggle="buttons">
-            <div class="input-group-prepend">
-                <div class="input-group-text listtoggles">Filter:</div>
-            </div>
-            <label class="btn btn-secondary {% if currentFilter is null %}active{% endif %}">
-                <input type="radio" name="filter" autocomplete="off" value="all"
-                       {% if currentFilter is null %}checked{% endif %}> All
-            </label>
-            <label class="btn btn-secondary {% if currentFilter == 'new' %}active{% endif %}">
-                <input type="radio" name="filter" autocomplete="off" value="new"
-                       {% if currentFilter == 'new' %}checked{% endif %}> New
-            </label>
-            <label class="btn btn-secondary {% if currentFilter == 'old' %}active{% endif %}">
-                <input type="radio" name="filter" autocomplete="off" value="old"
-                       {% if currentFilter == 'old' %}checked{% endif %}> Handled
-            </label>
-            <label class="btn btn-secondary {% if currentFilter == 'general' %}active{% endif %}">
-                <input type="radio" name="filter" autocomplete="off" value="general"
-                       {% if currentFilter == 'general' %}checked{% endif %}> General
-            </label>
+        <div class="btn-group btn-group-sm mb-3" role="group">
+            <span class="input-group-text listtoggles">Filter:</span>
+            {% for type in ['all', 'new', 'handled', 'general'] %}
+                <input type="radio" name="filter" autocomplete="off" class="btn-check" value="{{type}}" id="filter{{type}}"
+                       {% if currentFilter is null %}checked{% endif %}>
+                <label class="btn btn-secondary" for="filter{{type}}">{{ type|capitalize }}</label>
+            {% endfor %}
         </div>
 
         {% if queues | length > 0 %}
-            <div class="btn-group btn-group-toggle btn-group-sm mb-3" data-toggle="buttons">
-                <div class="input-group-prepend">
-                    <div class="input-group-text listtoggles">Queue:</div>
-                </div>
-                <label class="btn btn-secondary {% if currentQueue is null %}active{% endif %}">
-                    <input type="radio" name="queue" autocomplete="off" value="all"
-                           {% if currentQueue == "all" %}checked{% endif %}> All
-                </label>
-                <label class="btn btn-secondary {% if currentQueue is not null and currentQueue == '' %}active{% endif %}">
-                    <input type="radio" name="queue" autocomplete="off" value="unassigned"
-                           {% if currentQueue == "unassigned" %}checked{% endif %}> Unassigned
-                </label>
+            <div class="btn-group btn-group-sm mb-3" role="group">
+                <span class="input-group-text listtoggles">Queue:</span>
+                <input type="radio" name="queue" autocomplete="off" id="queueall" class="btn-check" value="all"
+                       {% if currentQueue == "all" %}checked{% endif %}>
+                <label class="btn btn-secondary" for="queueall">All</label>
+                <input type="radio" name="queue" autocomplete="off" id="queueunassigned" class="btn-check" value="unassigned"
+                       {% if currentQueue == "unassigned" %}checked{% endif %}>
+                <label class="btn btn-secondary" for="queueall">Unassigned</label>
                 {%- for queue, name in queues %}
-                    <label class="btn btn-secondary {% if currentQueue == queue %}active{% endif %}">
-                        <input type="radio" name="queue" autocomplete="off" value="{{ queue }}"
-                               {% if currentQueue == queue %}checked{% endif %}> {{ name }}
-                    </label>
+                    <input type="radio" name="queue" autocomplete="off" class="btn-check" id="queue{{ value }}" value="{{ queue }}"
+                           {% if currentQueue == queue %}checked{% endif %}>
+                    <label class="btn btn-secondary" for="queue{{ value }}">{{ name }}</label>
                 {%- endfor %}
             </div>
         {% endif %}

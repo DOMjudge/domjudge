@@ -46,7 +46,7 @@
         {%- for file in files %}
 
             <li class="nav-item">
-                <a class="nav-link {% if loop.first %}active{% endif %}" data-toggle="tab"
+                <a class="nav-link {% if loop.first %}active{% endif %}" data-bs-toggle="tab"
                    href="#source-{{ file.rank }}" role="tab">{{ file.filename }}</a>
             </li>
         {%- endfor %}

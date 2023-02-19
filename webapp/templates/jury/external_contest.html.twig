@@ -31,9 +31,9 @@
     </div>
 
     <div class="mb-3">
-        <div class="btn-group-toggle" data-toggle="buttons">
-            <label class="btn btn-outline-secondary {% if hasFilters %}active{% endif %}">
-                <input type="checkbox" id="filter-toggle" {% if hasFilters %}checked{% endif %} autocomplete="off">
+        <div class="btn-group" role="group">
+            <input type="checkbox" class="btn-check" id="filter-toggle" {% if hasFilters %}checked{% endif %} autocomplete="off">
+            <label for="filter-toggle" class="btn btn-outline-secondary">
                 <i class="fas fa-filter"></i> Filter
             </label>
         </div>

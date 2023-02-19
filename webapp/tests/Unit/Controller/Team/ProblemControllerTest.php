@@ -58,7 +58,7 @@ class ProblemControllerTest extends BaseTestCase
                 $crawler = $this->client->request('GET', '/team/problems');
 
                 // Check that the correct menu item is selected.
-                $this->assertSelectorTextContains('.nav-item.active .nav-link',
+                $this->assertSelectorTextContains('.nav-item .nav-link.active',
                     'Problemset');
 
                 // Get the card bodies and verify we have exactly three of them.

@@ -23,22 +23,20 @@
         <h2 class="mt-4">Details</h2>
 
         Show submissions:
-        <div class="btn-group btn-group-toggle btn-group-sm mb-3" data-toggle="buttons">
+        <div class="btn-group btn-group-sm mb-3" role="group">
             {%- for idx, type in viewTypes %}
-
-                <label class="btn btn-secondary {% if idx == view %}active{% endif %}">
-                    <input type="radio" name="viewtype" autocomplete="off" value="{{ type }}"
-                           {% if idx == view %}checked{% endif %}> {{ type }}
-                </label>
+                <input type="radio" autocomplete="off" class="btn-check"
+                    name="viewtype" id="viewtype{{ idx }}" value="{{ type }}"
+                    {% if idx == view %}checked{% endif %}>
+                <label class="btn btn-secondary" for="viewtype{{ idx }}">{{ type }}</label>
             {%- endfor %}
         </div>
-        <div class="btn-group btn-group-toggle btn-group-sm mb-3" data-toggle="buttons">
+        <div class="btn-group btn-group-sm mb-3" role="group">
             {%- for idx, type in verificationViewTypes %}
-
-                <label class="btn btn-secondary {% if idx == verificationView %}active{% endif %}">
-                    <input type="radio" name="verificationviewtype" autocomplete="off" value="{{ type }}"
-                           {% if idx == verificationView %}checked{% endif %}> {{ type }}
-                </label>
+                    <input type="radio" autocomplete="off" class="btn-check"
+                        name="verificationviewtype" id="verificationviewtype{{idx}}" value="{{ type }}"
+                        {% if idx == verificationView %}checked{% endif %}>
+                <label class="btn btn-secondary" for="verificationviewttype{{idx}}">{{ type }}</label>
             {%- endfor %}
         </div>
 

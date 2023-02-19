@@ -1,5 +1,5 @@
 {% if is_granted('IS_AUTHENTICATED_FULLY') %}
-    <a class="btn btn-info btn-sm justify-content-center" href="{{ path('logout') }}"
+    <a class="btn btn-info btn-sm me-2" href="{{ path('logout') }}"
     {% if confirmLogout is defined %}
         onclick="return confirmLogout();"
     {% endif %}>
@@ -11,7 +11,7 @@
             <i class="fas fa-user-plus"></i> Register
         </a>
     {% endif %}
-    <a class="btn btn-info btn-sm justify-content-center" href="{{ path('login') }}">
+    <a class="btn btn-info btn-sm me-2" href="{{ path('login') }}">
         <i class="fas fa-sign-in-alt"></i> Login
     </a>
 {% endif %}

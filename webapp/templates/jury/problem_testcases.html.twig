@@ -87,7 +87,7 @@
                         <span class="testcase-description">{{ testcase.description(true) | descriptionExpand }}</span>
                         {% if allowEdit %}
                             <textarea class="d-none form-control testcase-description-field" name="description[{{ testcase.rank }}]">{{ testcase.description(true) }}</textarea>
-                            <button type="button" class="float-right testcase-edit-description btn btn-secondary btn-sm">Edit</button>
+                            <button type="button" class="float-end testcase-edit-description btn btn-secondary btn-sm">Edit</button>
                         {% endif %}
                     </td>
                 </tr>

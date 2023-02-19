@@ -44,6 +44,9 @@ body.static {
     width: 93px; height: 196px;
 }
 
+a {
+    text-decoration: none;
+}
 
 .submitform {
     max-width: 450px;

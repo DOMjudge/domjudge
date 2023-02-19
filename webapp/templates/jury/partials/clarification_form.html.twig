@@ -4,18 +4,18 @@
 <input type="hidden" name="id" value="{{ origclar.clarid }}">
 {% endif %}
 
-<div class="form-group">
-<label for="sendto">Send to:</label>
-<select id="sendto" name="sendto" class="custom-select">
+<div class="mb-3">
+<label for="sendto" class="form-label">Send to:</label>
+<select id="sendto" name="sendto" class="form-select">
 {% for id,team in clarform.teams %}
 <option value="{{id}}"{% if clarform.toteam is defined and clarform.toteam == id %} selected{% endif %}>{{team}}</option>
 {% endfor %}
 </select>
 </div>
 
-<div class="form-group">
-<label for="subject">Subject:</label>
-<select name="problem" id="subject" class="custom-select">
+<div class="mb-3">
+<label for="subject" class="form-label">Subject:</label>
+<select name="problem" id="subject" class="form-select">
 {% for contest,subject in clarform.subjects %}
 <optgroup label="{{ contest }}">
 {% for id,descr in subject %}
@@ -26,25 +26,23 @@
 </select>
 </div>
 
-<div class="form-group">
-<label for="bodytext">Message:</label>
+<div class="mb-3">
+<label for="bodytext" class="form-label" >Message:</label>
 <textarea class="form-control" name="bodytext" id="bodytext" rows="8" cols="85" required>{{ clarform.quotedtext|default("") }}</textarea>
 </div>
 
 <div class="row">
 <div class="col-sm">
-<div class="form-group">
+<div class="mb-3">
 <button type="submit" name="submit" class="btn btn-primary"><i class="fas fa-envelope"></i> Send</button>
 </div>
 </div>
 
-<div class="col-sm text-right">
+<div class="col-sm text-end">
 {% if clarform.answers is defined and clarform.answers|length > 0 %}
 <div class="input-group">
-<div class="input-group-prepend">
-<div class="input-group-text"><i class="fas fa-fish"></i></div>
-</div>
-<select class="custom-select form-control-sm" id="clar_answers">
+<span class="input-group-text"><i class="fas fa-fish"></i></span>
+<select class="form-select form-control-sm" id="clar_answers">
 <option selected value="_default">Add canned answer...</option>
 {% for item in clarform.answers %}
 <option>{{ item }}</option>
