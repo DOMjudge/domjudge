@@ -1,13 +1,10 @@
-<div class="btn-group btn-group-toggle btn-group-sm mb-3" data-toggle="buttons">
-    <div class="input-group-prepend">
-        <div class="input-group-text listtoggles">Filter:</div>
-    </div>
+<div class="btn-group btn-group-sm mb-3" role="group">
+    <span class="input-group-text listtoggles">Filter:</span>
     {%- for key, label in filters %}
-
-        <label class="btn btn-secondary {% if key == view %}active{% endif %}">
-            <input type="radio" name="viewtype" autocomplete="off" value="{{ key }}"
-                   {% if key == view %}checked{% endif %}> {{ label }}
-        </label>
+        <input type="radio" autocomplete="off" class="btn-check"
+            name="viewtype" value="{{ key }}" id="viewtype{{ key }}"
+            {% if key == view %}checked{% endif %}>
+        <label class="btn btn-secondary" for="viewtype{{ key }}">{{ label }}</label>
     {%- endfor %}
 </div>
 

@@ -1,80 +1,82 @@
 <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top {% if app.debug %} devmode {% endif %}">
+  <div class="container-fluid">
     <a class="navbar-brand hidden-sm-down" href="{{ path('jury_index') }}">DOMjudge</a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#menuDefault" aria-controls="menuDefault" aria-expanded="false" aria-label="Toggle navigation">
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menuDefault" aria-controls="menuDefault" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
 
     {% set current_route = app.request.attributes.get('_route') %}
 
     <div class="collapse navbar-collapse" id="menuDefault" data-update-url="{{ path('jury_ajax_updates') }}">
-        <ul class="navbar-nav mr-auto">
+        <ul class="navbar-nav me-auto">
 
             {% if is_granted('ROLE_BALLOON') %}
-                <li class="nav-item {% if current_route == 'jury_balloons' %}active{% endif %}">
-                    <a class="nav-link" href="{{ path('jury_balloons') }}">
+                <li class="nav-item">
+                    <a class="nav-link{% if current_route == 'jury_balloons' %} active{% endif %}" href="{{ path('jury_balloons') }}">
                         <i class="fas fa-map-marker-alt"></i> balloons
-                        <span class="badge badge-info" id="num-alerts-balloons"></span>
+                        <span class="badge bg-info" id="num-alerts-balloons"></span>
                     </a>
                 </li>
             {% endif %}
 
             {% if is_granted('ROLE_ADMIN') %}
-                <li class="nav-item dropdown {% if current_route starts with 'jury_judgehost' or current_route == 'jury_internal_errors' %}active{% endif %}">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownJudgehosts" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle{% if current_route starts with 'jury_judgehost' or current_route == 'jury_internal_errors' %} active{% endif %}" href="#" id="navbarDropdownJudgehosts" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         <i class="fas fa-gavel"></i> judgehosts
-                        <span class="badge badge-warning" id="num-alerts-judgehosts"></span>
-                        <span class="badge badge-danger" id="num-alerts-internalerrors"></span>
+                        <span class="badge bg-warning" id="num-alerts-judgehosts"></span>
+                        <span class="badge bg-danger" id="num-alerts-internalerrors"></span>
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                         <a class="dropdown-item {% if current_route starts with 'jury_judgehost' %}active{% endif %}" href="{{ path('jury_judgehosts') }}" id="menu_judgehosts">
-                            <i class="fas fa-server fa-fw"></i> judgehosts <span class="badge badge-warning" id="num-alerts-judgehosts-sub"></span>
+                            <i class="fas fa-server fa-fw"></i> judgehosts <span class="badge bg-warning" id="num-alerts-judgehosts-sub"></span>
                         </a>
                         <a class="dropdown-item dropdown-disabled {% if current_route == 'jury_internal_errors' %}active{% endif %}" href="{{ path('jury_internal_errors') }}" id="menu_internal_error">
-                            <i class="fas fa-bolt fa-fw"></i> internal error <span class="badge badge-danger" id="num-alerts-internalerrors-sub"></span>
+                            <i class="fas fa-bolt fa-fw"></i> internal error <span class="badge bg-danger" id="num-alerts-internalerrors-sub"></span>
                         </a>
                     </div>
                 </li>
             {% endif %}
 
             {% if is_granted('ROLE_CLARIFICATION_RW') %}
-                <li class="nav-item {% if current_route starts with 'jury_clarification' %}active{% endif %}">
-                    <a class="nav-link" href="{{ path('jury_clarifications') }}" id="menu_clarifications"><i class="fas fa-comments"></i> clarifications <span class="badge badge-info" id="num-alerts-clarifications"></span></a>
+                <li class="nav-item">
+                    <a class="nav-link{% if current_route starts with 'jury_clarification' %} active{% endif %}" href="{{ path('jury_clarifications') }}" id="menu_clarifications"><i class="fas fa-comments"></i> clarifications <span class="badge bg-info" id="num-alerts-clarifications"></span></a>
                 </li>
             {% endif %}
 
             {% if is_granted('ROLE_JURY') %}
-                <li class="nav-item {% if current_route starts with 'jury_submission' %}active{% endif %}">
-                    <a class="nav-link" href="{{ path('jury_submissions') }}"><i class="fas fa-file-code"></i> submissions</a>
+                <li class="nav-item">
+                    <a class="nav-link{% if current_route starts with 'jury_submission' %} active{% endif %}" href="{{ path('jury_submissions') }}"><i class="fas fa-file-code"></i> submissions</a>
                 </li>
 
                 {% if show_shadow_differences %}
-                    <li class="nav-item dropdown {% if current_route == 'jury_shadow_differences' or current_route starts with 'jury_external_contest' %}active{% endif %}">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownShadow" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle{% if current_route == 'jury_shadow_differences' or current_route starts with 'jury_external_contest' %} active{% endif %}"
+                            href="#" id="navbarDropdownShadow" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             <i class="fas fa-copy"></i> shadowing
-                            <span class="badge badge-danger" id="num-alerts-shadowdifferences"></span>
-                            <span class="badge badge-warning" id="num-alerts-externalcontest"></span>
+                            <span class="badge bg-danger" id="num-alerts-shadowdifferences"></span>
+                            <span class="badge bg-warning" id="num-alerts-externalcontest"></span>
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                             <a class="dropdown-item {% if current_contest is null %}dropdown-disabled{% endif %} {% if current_route == 'jury_shadow_differences' %}active{% endif %}"
                                 {% if current_contest is not null %}href="{{ path('jury_shadow_differences') }}"{% endif %} id="menu_shadow_differences">
-                                <i class="fas fa-not-equal fa-fw"></i> shadow differences <span class="badge badge-danger" id="num-alerts-shadowdifferences-sub"></span>
+                                <i class="fas fa-not-equal fa-fw"></i> shadow differences <span class="badge bg-danger" id="num-alerts-shadowdifferences-sub"></span>
                             </a>
                             <a class="dropdown-item {% if current_contest is null %}dropdown-disabled{% endif %} {% if current_route starts with 'jury_external_contest' %}active{% endif %}"
                                 {% if current_contest is not null %}href="{{ path('jury_external_contest') }}"{% endif%} id="menu_external_contest">
-                                <i class="fas fa-laptop-code fa-fw"></i> external contest <span class="badge badge-warning" id="num-alerts-externalcontest-sub"></span>
+                                <i class="fas fa-laptop-code fa-fw"></i> external contest <span class="badge bg-warning" id="num-alerts-externalcontest-sub"></span>
                             </a>
                         </div>
                     </li>
                 {% endif %}
 
-                <li class="nav-item {% if current_route == 'jury_rejudgings' %}active{% endif %}">
-                    <a class="nav-link" href="{{ path('jury_rejudgings') }}" id="menu_rejudgings"><i class="fas fa-sync"></i> rejudgings <span class="badge badge-info" id="num-alerts-rejudgings"></span></a>
+                <li class="nav-item">
+                    <a class="nav-link{% if current_route == 'jury_rejudgings' %} active{% endif %}" href="{{ path('jury_rejudgings') }}" id="menu_rejudgings"><i class="fas fa-sync"></i> rejudgings <span class="badge bg-info" id="num-alerts-rejudgings"></span></a>
                 </li>
             {% endif %}
 
             {% if is_granted('ROLE_JURY') or is_granted('ROLE_BALLOON') %}
-                <li class="nav-item {% if current_route == 'jury_scoreboard' %}active{% endif %}">
-                    <a class="nav-link" href="{{ path('jury_scoreboard') }}"><i class="fas fa-list-ol"></i> scoreboard</a>
+                <li class="nav-item">
+                    <a class="nav-link{% if current_route == 'jury_scoreboard' %} active{% endif %}" href="{{ path('jury_scoreboard') }}"><i class="fas fa-list-ol"></i> scoreboard</a>
                 </li>
             {% endif %}
             {% if is_granted('ROLE_TEAM') %}
@@ -85,7 +87,7 @@
         </ul>
 
         {% if app.debug %}
-            <ul class="navbar-nav ml-auto">
+            <ul class="navbar-nav ms-auto">
                 <li class="nav-item">
                     <i class="fa-brands fa-dev fa-2x devmode-icon"></i>
                 </li>
@@ -97,7 +99,7 @@
             {# Render user information + logout button #}
             {% if is_granted('IS_AUTHENTICATED_FULLY') %}
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         <i class="fas fa-user"></i> {{ app.user.getUsername() }}
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdown">
@@ -140,4 +142,5 @@
         </ul>
         {% include 'partials/menu_countdown.html.twig' with {contest: current_contest} %}
     </div>
+  </div>
 </nav>

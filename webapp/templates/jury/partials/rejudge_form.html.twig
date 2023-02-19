@@ -42,7 +42,7 @@
     {% endif %}
 {% endapply %}
 
-<button type="button" class="btn {{ buttonClass }}" data-toggle="modal" data-target="#rejudge-modal">
+<button type="button" class="btn {{ buttonClass }}" data-bs-toggle="modal" data-bs-target="#rejudge-modal">
     <i class="fas fa-sync"></i> Rejudge
 </button>
 
@@ -52,9 +52,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">{{ buttonText }}</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form action="{{ path('jury_create_rejudge') }}" method="post">
                 <div class="modal-body">
@@ -62,10 +60,10 @@
                     <input type="hidden" name="id" value="{{ id }}"/>
                     {%- if includeAllButton %}
 
-                        <div class="custom-control custom-checkbox form-group">
-                            <input type="checkbox" class="custom-control-input" id="include_all" name="include_all">
-                            <label class="custom-control-label" for="include_all">Include pending/correct
+                        <div class="form-check">
+                            <label class="form-check-label" for="include_all">Include pending/correct
                                 submissions</label>
+                            <input type="checkbox" class="form-check-input" id="include_all" name="include_all">
                         </div>
                     {%- endif %}
 
@@ -74,9 +72,9 @@
                         <input type="hidden" name="repeat" id="repeat" value="1">
                         <input type="hidden" name="reason" id="reason" value="">
                     {% else %}
-                    <div class="custom-control custom-checkbox form-group">
-                        <input type="checkbox" class="custom-control-input" id="auto_apply" name="auto_apply">
-                        <label class="custom-control-label" for="auto_apply">Automatically apply judging(s) when ready</label>
+                    <div class="form-check">
+                        <label class="form-check-label" for="auto_apply">Automatically apply judging(s) when ready</label>
+                        <input type="checkbox" class="form-check-input" id="auto_apply" name="auto_apply">
                     </div>
                     <div id="rejudge-repeat" class="form-group">
                         <label for="repeat">Number of times to repeat this rejudging</label>
@@ -97,7 +95,7 @@
                     {% endif %}
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <input type="submit" value="{{ buttonText }}" class="btn btn-primary">
                 </div>
             </form>

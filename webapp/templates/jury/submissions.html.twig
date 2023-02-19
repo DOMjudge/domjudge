@@ -13,24 +13,20 @@
 
     <h1>Submissions</h1>
 
-    <div class="btn-group btn-group-toggle btn-group-sm mb-3" data-toggle="buttons">
-        <div class="input-group-prepend">
-            <div class="input-group-text listtoggles">Show:</div>
-        </div>
+    <div class="btn-group btn-group-sm mb-3" role="group">
+        <span class="input-group-text listtoggles">Show:</span>
         {%- for idx, type in viewTypes %}
-
-            <label class="btn btn-secondary {% if idx == view %}active{% endif %}">
-                <input type="radio" name="viewtype" autocomplete="off" value="{{ type }}"
-                       {% if idx == view %}checked{% endif %}> {{ type }}
-            </label>
+            <input type="radio" autocomplete="off" class="btn-check"
+                name="viewtype" id="viewtype{{ idx }}" value="{{ type }}"
+                {% if idx == view %}checked{% endif %}>
+            <label class="btn btn-secondary" for="viewtype{{ idx }}">{{ type }}</label>
         {%- endfor %}
-
     </div>
 
     <div class="mb-3">
-        <div class="btn-group-toggle" data-toggle="buttons">
-            <label class="btn btn-outline-secondary {% if hasFilters %}active{% endif %}">
-                <input type="checkbox" id="filter-toggle" {% if hasFilters %}checked{% endif %} autocomplete="off">
+        <div class="btn-group" role="group">
+            <input type="checkbox" class="btn-check" id="filter-toggle" {% if hasFilters %}checked{% endif %} autocomplete="off">
+            <label for="filter-toggle" class="btn btn-outline-secondary">
                 <i class="fas fa-filter"></i> Filter
             </label>
         </div>
@@ -108,7 +104,7 @@
                         .show();
                 }
 
-                $('table.submissions-table').find('[data-toggle="tooltip"]').tooltip();
+                $('table.submissions-table').find('[data-bs-toggle="tooltip"]').tooltip();
             };
 
             $('select[data-filter-field]').on('change', process_submissions_filter);

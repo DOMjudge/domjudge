@@ -9,18 +9,14 @@
             {{ form_label(form.timelimit) }}
             <div class="input-group">
                 {{ form_widget(form.timelimit) }}
-                <div class="input-group-append">
-                    <div class="input-group-text">sec</div>
-                </div>
+                <span class="input-group-text">sec</span>
             </div>
         </div>
         <div class="form-group">
             {{ form_label(form.memlimit) }}
             <div class="input-group">
                 {{ form_widget(form.memlimit) }}
-                <div class="input-group-append">
-                    <div class="input-group-text">kB</div>
-                </div>
+                <span class="input-group-text">kB</span>
             </div>
             {{ form_help(form.memlimit) }}
         </div>
@@ -28,9 +24,7 @@
             {{ form_label(form.outputlimit) }}
             <div class="input-group">
                 {{ form_widget(form.outputlimit) }}
-                <div class="input-group-append">
-                    <div class="input-group-text">kB</div>
-                </div>
+                <span class="input-group-text">kB</span>
             </div>
             {{ form_help(form.outputlimit) }}
         </div>

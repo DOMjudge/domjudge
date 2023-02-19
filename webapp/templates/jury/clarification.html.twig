@@ -30,7 +30,7 @@
         (external ID: {{ clar.externalid }})
     {% endif %}
 </div>
-<div class="col-sm text-muted text-right">{{ clar.time | printtimeHover(clar.contest) }}</div>
+<div class="col-sm text-muted text-end">{{ clar.time | printtimeHover(clar.contest) }}</div>
 </div></div>
 <div class="card-body">
 <div class="card-title">
@@ -48,7 +48,7 @@ Jury
 </div>
 
 <div class="col-sm">
-    Subject:
+    <label for="subselect">Subject:</label>
     <span class="clarification-subject">
         {% if clar.subjectlink is defined %}
             <a href="{{ clar.subjectlink }}">{{ clar.subject }}</a>
@@ -60,8 +60,8 @@ Jury
         </button>
     </span>
 <span class="clarification-subject-form" data-current-selected-subject="{{ clar.categoryid }}" data-clarification-id="{{clar.clarid}}">
-<form action="{{ path('jury_clarification_change_subject', {'clarId': clar.clarid }) }}" method="post" class="form-inline">
-<select name="subject" class="subject custom-select custom-select-sm">
+<form action="{{ path('jury_clarification_change_subject', {'clarId': clar.clarid }) }}" method="post" class="d-flex">
+<select name="subject" class="subject form-select form-select-sm w-auto" id="subselect">
 {% for contest,subject in clarform.subjects %}
 <optgroup label="{{ contest }}">
 {% for id,descr in subject %}
@@ -70,9 +70,7 @@ Jury
 </optgroup>
 {% endfor %}
 </select>
-<button type="button" class="close clarification-subject-cancel-button ml-2" aria-label="Cancel">
-  <span aria-hidden="true">&times;</span>
-</button>
+<button type="button" class="btn-close clarification-subject-cancel-button ms-2 w-auto" aria-label="Cancel"></button>
 </form>
 </span>
 </div>
@@ -89,19 +87,17 @@ Jury
 {% endif %}
 </div>
 
-<div class="col-sm">Queue: <span class="clarification-queue">{{ clar.queue }}
+<div class="col-sm"><label for="qselect">Queue:</label> <span class="clarification-queue">{{ clar.queue }}
 <button class="btn btn-sm btn-link clarification-queue-change-button"><i class="far fa-edit" title="Change queue"></i></button></span>
 <span class="clarification-queue-form" data-current-selected-queue="{{ clar.queueid }}" data-clarification-id="{{clar.clarid}}">
-<form action="{{ path('jury_clarification_change_queue', {'clarId': clar.clarid }) }}" method="post" class="form-inline">
-<select name="queue" class="queue custom-select custom-select-sm">
+<form action="{{ path('jury_clarification_change_queue', {'clarId': clar.clarid }) }}" class="d-flex" method="post">
+<select name="queue" class="queue form-select w-auto form-select-sm" id="qselect">
 <option value="unassigned">Unassigned issues</option>
 {% for qid,queue in clarform.queues %}
 <option value="{{qid}}"{% if clar.queueid == qid %} selected{% endif %}>{{queue}}</option>
 {% endfor %}
 </select>
-<button type="button" class="close clarification-queue-cancel-button ml-2" aria-label="Cancel">
-  <span aria-hidden="true">&times;</span>
-</button>
+<button type="button" class="btn-close clarification-queue-cancel-button ms-2 w-auto" aria-label="Cancel"></button>
 </form>
 </span>
 
@@ -119,7 +115,7 @@ Jury
 
 <div class="knoppenbalk">
 <div class="row">
-<div class="col-sm"><button class="btn btn-secondary btn-sm" data-toggle="collapse" data-target="#collapsereplyform"
+<div class="col-sm"><button class="btn btn-secondary btn-sm" data-bs-toggle="collapse" data-bs-target="#collapsereplyform"
  aria-expanded="false" aria-controls="collapsereplyform"><i class="fa fa-reply"></i> reply</button>
 </div>
 
@@ -139,7 +135,7 @@ Jury
 </form>
 </div>
 
-<div class="col-sm text-right">
+<div class="col-sm text-end">
 <form action="{{ path('jury_clarification_set_answered', {'clarId': origclar.clarid}) }}" method="post">
 
 {% if origclar.answered %}

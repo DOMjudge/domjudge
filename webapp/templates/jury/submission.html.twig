@@ -536,8 +536,8 @@
         </h3>
         {% if selectedJudging is not null and selectedJudging.compileMetadata is not null %}
             {{ selectedJudging.compileMetadata | printMetadata }}
-            <button class="btn btn-sm btn-outline-secondary" data-toggle="collapse"
-                    data-target="#collapseExample-compilemeta"
+            <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="collapse"
+                    data-bs-target="#collapseExample-compilemeta"
                     aria-expanded="false">
                 show complete compilation metadata
             </button>
@@ -660,8 +660,8 @@
                             {{ runsOutput[runIdx].exitcode }}{% if runsOutput[runIdx].signal > 0 %},
                                 signal: {{ runsOutput[runIdx].signal }}
                             {% endif %}
-                            <button class="btn btn-sm btn-outline-secondary" data-toggle="collapse"
-                                    data-target="#collapseExample-{{ runIdx }}"
+                            <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="collapse"
+                                    data-bs-target="#collapseExample-{{ runIdx }}"
                                     aria-expanded="false">
                                 show complete metadata
                             </button>

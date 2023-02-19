@@ -186,7 +186,7 @@
                 {% set extra = null %}
                 {% if static %}
                     {% set link = '#' %}
-                    {% set extra = 'data-toggle="modal" data-target="#team-modal-' ~ score.team.teamid ~ '"' %}
+                    {% set extra = 'data-bs-toggle="modal" data-bs-target="#team-modal-' ~ score.team.teamid ~ '"' %}
                 {% else %}
                     {% if jury %}
                         {% set link = path('jury_team', {teamId: score.team.teamid}) %}
@@ -201,7 +201,7 @@
                 <a {% if extra is not null %}{{ extra | raw }}{% endif %} {% if link is not null %}href="{{ link }}"{% endif %}>
                     <span class="forceWidth">
                         {% if usedCategories | length > 1 and scoreboard.bestInCategory(score.team, limitToTeamIds) %}
-                            <span class="badge badge-warning" style="margin-right: 2em; font-weight: normal;">
+                            <span class="badge bg-warning" style="margin-right: 2em; font-weight: normal;">
                             {{ score.team.category.name }}
                         </span>
                         {% endif %}

@@ -8,7 +8,7 @@
 
 {% block messages %}{% endblock %}
 {% block body %}
-
+<main>
     {% set hasaltmethods =
         ("xheaders" in allowed_authmethods and auth_xheaders_present) or
         ("ipaddress" in allowed_authmethods and auth_ipaddress_users|length > 0) %}
@@ -26,13 +26,13 @@ Use the form below to change login.' %}
         <br class="clearfix">
 
         {% if hasaltmethods %}
-            <div class="additional-logins mr-2">
-                <a class="float-right text-muted" href="#" title="more auth methods"
+            <div class="additional-logins me-2">
+                <a class="float-end text-muted" href="#" title="more auth methods"
                    onclick="collapse('.regularLoginform'); return false;" role="button">
                     <i class="fas fa-user-ninja"></i>
                 </a>
                 {% if "xheaders" in allowed_authmethods and auth_xheaders_present %}
-                    <h1 class="h3 mb-3 font-weight-normal">Preconfigured Sign In</h1>
+                    <h1 class="h3 mb-3 fw-normal">Preconfigured Sign In</h1>
                     <form action="{{ path('login') }}" method="post">
                         <input type="hidden" name="_csrf_token"
                                value="{{ csrf_token('authenticate') }}">
@@ -43,7 +43,7 @@ Use the form below to change login.' %}
                                 administrator.
                             </p>
                         </div>
-                        <button class="mt-auto btn btn-lg btn-success btn-block" type="submit"
+                        <button class="mt-auto btn btn-lg btn-success w-100" type="submit"
                                 name="loginmethod" value="xheaders">
                             Log in using computer credentials
                         </button>
@@ -56,7 +56,7 @@ Use the form below to change login.' %}
                 {% endif %}
 
                 {% if "ipaddress" in allowed_authmethods and auth_ipaddress_users|length > 0 %}
-                    <h1 class="h3 mb-3 font-weight-normal">Sign in with IP</h1>
+                    <h1 class="h3 mb-3 fw-normal">Sign in with IP</h1>
                     <form action="{{ path('login') }}" method="post">
                         <input type="hidden" name="_csrf_token"
                                value="{{ csrf_token('authenticate') }}">
@@ -70,7 +70,7 @@ Use the form below to change login.' %}
                         </div>
 
                         {% for u in auth_ipaddress_users %}
-                            <button class="btn btn-lg btn-success btn-block" type="submit"
+                            <button class="btn btn-lg btn-success w-100" type="submit"
                                     name="_username" value="{{ u.username }}">
                                 Log in as {{ u.username }}
                             </button>
@@ -87,8 +87,8 @@ Use the form below to change login.' %}
             <div class="vertical-line regularLoginform{% if not showregular %} d-none{% endif %}"></div>
         {% endif %}
 
-        <div class="main-login ml-2 regularLoginform {% if not showregular %} d-none{% endif %}">
-            <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
+        <div class="main-login ms-2 regularLoginform {% if not showregular %} d-none{% endif %}">
+            <h1 class="h3 mb-3 fw-normal">Please sign in</h1>
             <form action="{{ path('login') }}" method="post">
                 <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
                 <div class="login-content">
@@ -96,19 +96,19 @@ Use the form below to change login.' %}
                         <div class="alert alert-danger">{{ error.messageKey }}</div>
                     {% endif %}
 
-                    <div class="form-group">
-                        <label for="username" class="sr-only">Username</label>
+                    <div class="form-floating">
                         <input type="text" id="username" name="_username" class="form-control"
                                placeholder="Username" required autofocus>
+                        <label for="username">Username</label>
                     </div>
-                    <div class="form-group">
-                        <label for="inputPassword" class="sr-only">Password</label>
+                    <div class="form-floating">
                         <input type="password" id="inputPassword" name="_password"
                                class="form-control" spellcheck="false"
                                placeholder="Password" required autocomplete="current-password">
+                        <label for="inputPassword">Password</label>
                     </div>
                 </div>
-                <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+                <button class="btn btn-lg btn-primary w-100" type="submit">Sign in</button>
                 {% if allow_registration %}
                     <div class="mt-3">
                         Don't have an account?<br/>
@@ -120,5 +120,6 @@ Use the form below to change login.' %}
 
         <p class="mt-5 mb-3 small text-muted" id="dj_version">DOMjudge {{ DOMJUDGE_VERSION }}</p>
     </div>
+</main>
 
 {% endblock %}
