@@ -381,7 +381,9 @@ class ProblemController extends BaseController
         foreach ($problem->getContestProblems() as $contestProblem) {
             /** @var ContestProblem $contestProblem */
             if ($contestProblem->getContest()->isLocked()) {
-                $this->addFlash('warning', 'Cannot edit problem, it belongs to locked contest c' . $contestProblem->getContest()->getCid());
+                if (!$request->isXmlHttpRequest()) {
+                    $this->addFlash('warning', 'Cannot edit problem, it belongs to locked contest c' . $contestProblem->getContest()->getCid());
+                }
                 $lockedProblem = true;
             }
         }
