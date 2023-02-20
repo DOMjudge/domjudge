@@ -21,6 +21,7 @@ use Symfony\Component\HttpFoundation\Response;
  * @Rest\Route("/")
  * @OA\Tag(name="Judgements")
  * @OA\Parameter(ref="#/components/parameters/cid")
+ * @OA\Parameter(ref="#/components/parameters/strict")
  * @OA\Response(response="404", ref="#/components/responses/NotFound")
  * @OA\Response(response="401", ref="#/components/responses/Unauthenticated")
  * @OA\Response(response="400", ref="#/components/responses/InvalidResponse")
@@ -64,7 +65,6 @@ class JudgementController extends AbstractRestController implements QueryObjectT
      *     )
      * )
      * @OA\Parameter(ref="#/components/parameters/idlist")
-     * @OA\Parameter(ref="#/components/parameters/strict")
      * @OA\Parameter(
      *     name="result",
      *     in="query",
@@ -101,7 +101,6 @@ class JudgementController extends AbstractRestController implements QueryObjectT
      *     )
      * )
      * @OA\Parameter(ref="#/components/parameters/id")
-     * @OA\Parameter(ref="#/components/parameters/strict")
      */
     public function singleAction(Request $request, string $id): Response
     {

@@ -17,6 +17,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  * @Rest\Route("/contests/{cid}")
  * @OA\Tag(name="Accounts")
  * @OA\Parameter(ref="#/components/parameters/cid")
+ * @OA\Parameter(ref="#/components/parameters/strict")
  * @OA\Response(response="404", ref="#/components/responses/NotFound")
  * @OA\Response(response="400", ref="#/components/responses/InvalidResponse")
  * @OA\Response(response="401", ref="#/components/responses/Unauthenticated")
@@ -44,7 +45,6 @@ class AccountController extends AbstractRestController
      *     )
      * )
      * @OA\Parameter(ref="#/components/parameters/idlist")
-     * @OA\Parameter(ref="#/components/parameters/strict")
      * @OA\Parameter(
      *     name="team_id",
      *     in="query",
@@ -71,7 +71,6 @@ class AccountController extends AbstractRestController
      *     @Model(type=User::class)
      * )
      * @OA\Parameter(ref="#/components/parameters/id")
-     * @OA\Parameter(ref="#/components/parameters/strict")
      */
     public function singleAction(Request $request, string $id): Response
     {
@@ -88,7 +87,6 @@ class AccountController extends AbstractRestController
      *     description="Information about the logged in account",
      *     @Model(type=User::class)
      * )
-     * @OA\Parameter(ref="#/components/parameters/strict")
      */
     public function getCurrentAction(Request $request): Response
     {

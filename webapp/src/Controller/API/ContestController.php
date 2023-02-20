@@ -40,6 +40,7 @@ use TypeError;
 /**
  * @Rest\Route("/contests")
  * @OA\Tag(name="Contests")
+ * @OA\Parameter(ref="#/components/parameters/strict")
  * @OA\Response(response="400", ref="#/components/responses/InvalidResponse")
  * @OA\Response(response="401", ref="#/components/responses/Unauthenticated")
  * @OA\Response(response="403", ref="#/components/responses/Unauthorized")
@@ -137,7 +138,6 @@ class ContestController extends AbstractRestController
      *     )
      * )
      * @OA\Parameter(ref="#/components/parameters/idlist")
-     * @OA\Parameter(ref="#/components/parameters/strict")
      * @OA\Parameter(
      *     name="onlyActive",
      *     in="query",
@@ -166,7 +166,6 @@ class ContestController extends AbstractRestController
      *     )
      * )
      * @OA\Parameter(ref="#/components/parameters/cid")
-     * @OA\Parameter(ref="#/components/parameters/strict")
      */
     public function singleAction(Request $request, string $cid): Response
     {
@@ -473,12 +472,6 @@ class ContestController extends AbstractRestController
      *     in="query",
      *     description="Types to filter the event feed on",
      *     @OA\Schema(type="array", @OA\Items(type="string", description="A single type"))
-     * )
-     * @OA\Parameter(
-     *     name="strict",
-     *     in="query",
-     *     description="Whether to only include CCS compliant properties in the response",
-     *     @OA\Schema(type="boolean", default=false)
      * )
      * @OA\Parameter(
      *     name="stream",

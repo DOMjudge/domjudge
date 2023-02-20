@@ -15,6 +15,7 @@ use Symfony\Component\HttpFoundation\Response;
  * @Rest\Route("/")
  * @OA\Tag(name="Languages")
  * @OA\Parameter(ref="#/components/parameters/cid")
+ * @OA\Parameter(ref="#/components/parameters/strict")
  * @OA\Response(response="400", ref="#/components/responses/InvalidResponse")
  * @OA\Response(response="401", ref="#/components/responses/Unauthenticated")
  * @OA\Response(response="404", ref="#/components/responses/NotFound")
@@ -35,7 +36,6 @@ class LanguageController extends AbstractRestController
      *     )
      * )
      * @OA\Parameter(ref="#/components/parameters/idlist")
-     * @OA\Parameter(ref="#/components/parameters/strict")
      * @throws NonUniqueResultException
      */
     public function listAction(Request $request): Response
@@ -55,7 +55,6 @@ class LanguageController extends AbstractRestController
      *     @Model(type=Language::class)
      * )
      * @OA\Parameter(ref="#/components/parameters/id")
-     * @OA\Parameter(ref="#/components/parameters/strict")
      */
     public function singleAction(Request $request, string $id): Response
     {

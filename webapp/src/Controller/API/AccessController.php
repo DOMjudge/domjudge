@@ -16,6 +16,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  * @Rest\Route("/contests/{cid}/access")
  * @OA\Tag(name="Access")
  * @OA\Parameter(ref="#/components/parameters/cid")
+ * @OA\Parameter(ref="#/components/parameters/strict")
  * @OA\Response(response="400", ref="#/components/responses/InvalidResponse")
  * @OA\Response(response="401", ref="#/components/responses/Unauthenticated")
  * @OA\Response(response="403", ref="#/components/responses/Unauthorized")
