@@ -80,7 +80,7 @@ def import_images(entity: str, property: str, filename_regexes: List[str]):
                     images_per_entity[entity_id] = entity_file
                     any_matched = True
                     break
-    
+
     if images_per_entity:
         if dj_utils.confirm(f'Import {property}s for {entity}?', False):
             for entity_id in images_per_entity:
@@ -103,7 +103,7 @@ if 'admin' not in user_data['roles']:
     exit(1)
 
 import_file('groups', ['groups.json', 'groups.tsv'])
-if import_file('organizations', ['organizations.json']) or True:
+if import_file('organizations', ['organizations.json']):
     # Also import logos if we have any
     # We prefer the 64x64 logo. If it doesn't exist, accept a generic logo (which might be a SVG)
     import_images('organizations', 'logo', ['^logo\.64\..*$', '^logo\.[a-z]*$'])
