@@ -13,6 +13,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 /**
  * @Rest\Route("/contests/{cid}/judgement-types")
  * @OA\Tag(name="Judgement types")
+ * @OA\Parameter(ref="#/components/parameters/strict")
  * @OA\Response(response="400", ref="#/components/responses/InvalidResponse")
  * @OA\Response(response="401", ref="#/components/responses/Unauthenticated")
  */
@@ -30,7 +31,6 @@ class JudgementTypeController extends AbstractRestController
      *     )
      * )
      * @OA\Parameter(ref="#/components/parameters/idlist")
-     * @OA\Parameter(ref="#/components/parameters/strict")
      *
      * @throws NonUniqueResultException
      */
@@ -63,7 +63,6 @@ class JudgementTypeController extends AbstractRestController
      *     @OA\JsonContent(ref="#/components/schemas/JudgementType")
      * )
      * @OA\Parameter(ref="#/components/parameters/id")
-     * @OA\Parameter(ref="#/components/parameters/strict")
      */
     public function singleAction(Request $request, string $id): array
     {

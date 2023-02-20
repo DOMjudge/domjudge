@@ -32,6 +32,7 @@ use Symfony\Component\Yaml\Yaml;
  * @Rest\Route("/contests/{cid}/problems")
  * @OA\Tag(name="Problems")
  * @OA\Parameter(ref="#/components/parameters/cid")
+ * @OA\Parameter(ref="#/components/parameters/strict")
  * @OA\Response(response="400", ref="#/components/responses/InvalidResponse")
  * @OA\Response(response="401", ref="#/components/responses/Unauthenticated")
  * @OA\Response(response="403", ref="#/components/responses/Unauthorized")
@@ -120,7 +121,6 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
      *     )
      * )
      * @OA\Parameter(ref="#/components/parameters/idlist")
-     * @OA\Parameter(ref="#/components/parameters/strict")
      * @throws NonUniqueResultException
      */
     public function listAction(Request $request): Response
@@ -369,7 +369,6 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
      *     @OA\JsonContent(ref="#/components/schemas/ContestProblem")
      * )
      * @OA\Parameter(ref="#/components/parameters/id")
-     * @OA\Parameter(ref="#/components/parameters/strict")
      */
     public function singleAction(Request $request, string $id): Response
     {
@@ -406,7 +405,6 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
      *     @OA\MediaType(mediaType="application/pdf")
      * )
      * @OA\Parameter(ref="#/components/parameters/id")
-     * @OA\Parameter(ref="#/components/parameters/strict")
      */
     public function statementAction(Request $request, string $id): Response
     {

@@ -21,6 +21,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  * @Rest\Route("/contests/{cid}/awards")
  * @OA\Tag(name="Awards")
  * @OA\Parameter(ref="#/components/parameters/cid")
+ * @OA\Parameter(ref="#/components/parameters/strict")
  * @OA\Response(response="404", ref="#/components/responses/NotFound")
  * @OA\Response(response="401", ref="#/components/responses/Unauthenticated")
  * @OA\Response(response="400", ref="#/components/responses/InvalidResponse")
@@ -54,7 +55,6 @@ class AwardsController extends AbstractRestController
      *         @OA\Items(ref="#/components/schemas/Award")
      *     )
      * )
-     * @OA\Parameter(ref="#/components/parameters/strict")
      *
      * @throws Exception
      */
@@ -72,7 +72,6 @@ class AwardsController extends AbstractRestController
      *     @OA\JsonContent(ref="#/components/schemas/Award")
      * )
      * @OA\Parameter(ref="#/components/parameters/id")
-     * @OA\Parameter(ref="#/components/parameters/strict")
      *
      * @throws Exception
      */

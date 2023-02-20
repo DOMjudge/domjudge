@@ -35,6 +35,7 @@ use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
  * @Rest\Route("/")
  * @OA\Tag(name="Submissions")
  * @OA\Parameter(ref="#/components/parameters/cid")
+ * @OA\Parameter(ref="#/components/parameters/strict")
  * @OA\Response(response="400", ref="#/components/responses/InvalidResponse")
  * @OA\Response(response="401", ref="#/components/responses/Unauthenticated")
  * @OA\Response(response="403", ref="#/components/responses/Unauthorized")
@@ -73,7 +74,6 @@ class SubmissionController extends AbstractRestController
      *     )
      * )
      * @OA\Parameter(ref="#/components/parameters/idlist")
-     * @OA\Parameter(ref="#/components/parameters/strict")
      * @OA\Parameter(
      *     name="language_id",
      *     in="query",
@@ -103,7 +103,6 @@ class SubmissionController extends AbstractRestController
      *     )
      * )
      * @OA\Parameter(ref="#/components/parameters/id")
-     * @OA\Parameter(ref="#/components/parameters/strict")
      */
     public function singleAction(Request $request, string $id): Response
     {
