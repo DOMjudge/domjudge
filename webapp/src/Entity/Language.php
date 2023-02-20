@@ -130,6 +130,7 @@ class Language extends BaseApiEntity
     /**
      * @Serializer\VirtualProperty
      * @Serializer\Type("string")
+     * @Serializer\Groups({"Nonstrict"})
      * @Serializer\SerializedName("compile_executable_hash")
      * @OA\Property(nullable=true)
      */
