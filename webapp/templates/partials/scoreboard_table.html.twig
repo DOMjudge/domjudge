@@ -184,7 +184,10 @@
             <td class="scoretn cl{{ colorClass }}" title="{{ score.team.effectiveName }}">
                 {% set link = null %}
                 {% set extra = null %}
-                {% if not static %}
+                {% if static %}
+                    {% set link = '#' %}
+                    {% set extra = 'data-toggle="modal" data-target="#team-modal-' ~ score.team.teamid ~ '"' %}
+                {% else %}
                     {% if jury %}
                         {% set link = path('jury_team', {teamId: score.team.teamid}) %}
                     {% elseif public %}
@@ -195,7 +198,7 @@
                         {% set extra = 'data-ajax-modal' %}
                     {% endif %}
                 {% endif %}
-                <a {% if extra is not null %}{{ extra }}{% endif %} {% if link is not null %}href="{{ link }}"{% endif %}>
+                <a {% if extra is not null %}{{ extra | raw }}{% endif %} {% if link is not null %}href="{{ link }}"{% endif %}>
                     <span class="forceWidth">
                         {% if usedCategories | length > 1 and scoreboard.bestInCategory(score.team, limitToTeamIds) %}
                             <span class="badge badge-warning" style="margin-right: 2em; font-weight: normal;">
@@ -287,6 +290,17 @@
     {% include 'partials/scoreboard_summary.html.twig' with {sortOrder: previousSortOrder} %}
     </tbody>
 </table>
+
+{% if static %}
+    {% for score in scores %}
+        {% embed 'partials/modal.html.twig' with {'modalId': 'team-modal-' ~ score.team.teamid} %}
+            {% block title %}{{ score.team.effectiveName }}{% endblock %}
+            {% block content %}
+                {% include 'partials/team.html.twig' with {size: 6, team: score.team} %}
+            {% endblock %}
+        {% endembed %}
+    {% endfor %}
+{% endif %}
 
 {% if showLegends %}
     <p><br/><br/></p>
