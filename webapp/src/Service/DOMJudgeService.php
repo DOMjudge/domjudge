@@ -1373,7 +1373,7 @@ class DOMJudgeService
         if ($entity instanceof Team) {
             switch ($property) {
                 case 'photo':
-                    return $this->assetPath((string)$entity->getTeamid(), 'team', true, $forceExtension);
+                    return $this->assetPath($useExternalid ? $entity->getExternalid() : (string)$entity->getTeamid(), 'team', true, $forceExtension);
             }
         } elseif ($entity instanceof TeamAffiliation) {
             switch ($property) {
