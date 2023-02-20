@@ -31,6 +31,7 @@ use Symfony\Component\Routing\RouterInterface;
 
 /**
  * @OA\Tag(name="General")
+ * @OA\Parameter(ref="#/components/parameters/strict")
  * @OA\Response(response="400", ref="#/components/responses/InvalidResponse")
  * @OA\Response(response="401", ref="#/components/responses/Unauthenticated")
  * @OA\Response(response="403", ref="#/components/responses/Unauthorized")
@@ -113,19 +114,25 @@ class GeneralInfoController extends AbstractFOSRestController
      *     )
      * )
      */
-    public function getInfoAction(): array
+    public function getInfoAction(Request $request): array
     {
-        return [
+        $strict = $request->query->getBoolean('strict', false);
+
+        $result = [
             'version' => self::CCS_SPEC_API_VERSION,
             'version_url' => self::CCS_SPEC_API_URL,
             'name' => 'DOMjudge',
-            'domjudge' => [
+        ];
+        if (!$strict) {
+            $result['domjudge'] = [
                 'api_version' => static::API_VERSION,
                 'version' => $this->getParameter('domjudge.version'),
                 'environment' => $this->getParameter('kernel.environment'),
                 'doc_url' => $this->router->generate('app.swagger_ui', [], RouterInterface::ABSOLUTE_URL),
-            ],
-        ];
+            ];
+        }
+
+        return $result;
     }
 
     /**
