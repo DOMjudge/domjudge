@@ -860,7 +860,7 @@ class ImportExportService
                     'name'           => $account['name'] ?? null,
                     'externalid'     => $account['id'] ?? $account['username'],
                     'username'       => $account['username'],
-                    'plain_password' => $account['password'],
+                    'plain_password' => $account['password'] ?? null,
                     'teamid'         => $account['team_id'] ?? null,
                     'user_roles'     => $roles,
                     'ip_address'     => $account['ip'] ?? null,
