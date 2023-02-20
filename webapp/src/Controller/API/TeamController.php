@@ -234,6 +234,7 @@ class TeamController extends AbstractRestController
         }
 
         $this->assetUpdater->updateAssets($team);
+        $contestId = null;
         if ($request->attributes->has('cid')) {
             $contestId = $this->getContestId($request);
         }
