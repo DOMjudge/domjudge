@@ -97,7 +97,6 @@ class ControllerRolesTraversalTest extends BaseTest
         }
         $crawler = $this->client->request('GET', $url);
         $response = $this->client->getResponse();
-        $message = var_export($response, true);
         if (($statusCode === 403 || $statusCode === 401) && $response->isRedirection()) {
             self::assertEquals($response->headers->get('location'), $this::$loginURL);
         } elseif (($response->getStatusCode() === 302 ) && $response->isRedirection()) {
@@ -111,7 +110,7 @@ class ControllerRolesTraversalTest extends BaseTest
             if (strpos($url, '/public') !== false) {
                 $statusCode = 200;
             }
-            self::assertEquals($statusCode, $response->getStatusCode(), $message);
+            self::assertEquals($statusCode, $response->getStatusCode(), 'Unexpected response code for ' . $url);
         }
         $ret = [];
         $tmp = array_unique($crawler->filter('a')->extract(['href']));
