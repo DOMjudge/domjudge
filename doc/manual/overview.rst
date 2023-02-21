@@ -122,6 +122,7 @@ Robert King,
 Blaz Korecic,
 Ruud Koot,
 Ilya Kornakov,
+Alon Krymgand,
 Jan Kuipers,
 Mitsuru Kusumoto,
 Robin Lee,
@@ -148,7 +149,7 @@ Christopher Weyand,
 Jeroen van Wolffelaar,
 Tim "S.D.Eagle" Zeitz,
 XiaoYang,
-and Github users mpsijm, sylxjtu, s911415.
+and Github users dup4, LETS-BEE, mpsijm, sylxjtu, s911415.
 Some code has been ported from the ETH Zurich fork by Christoph
 Krautz, Thomas Rast et al.
 
