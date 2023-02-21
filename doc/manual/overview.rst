@@ -139,6 +139,7 @@ Bert Peters,
 Ludo Pulles,
 Tobias Polzer,
 Jeroen Schot,
+Maarten Sijm,
 Matt Steele,
 Shuhei Takahashi,
 Sergei Vorobev,
@@ -148,8 +149,8 @@ Sheldon Warkentin,
 Christopher Weyand,
 Jeroen van Wolffelaar,
 Tim "S.D.Eagle" Zeitz,
-XiaoYang,
-and Github users dup4, LETS-BEE, mpsijm, sylxjtu, s911415.
+Xiaoyang Gu,
+and Github users dup4, LETS-BEE, sylxjtu, s911415.
 Some code has been ported from the ETH Zurich fork by Christoph
 Krautz, Thomas Rast et al.
 
