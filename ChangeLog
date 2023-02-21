@@ -2,7 +2,33 @@ DOMjudge Programming Contest Judging System
 
 Version 8.2.0 - DEV
 -------------------
- - Add support for Rust
+ - Various bugfixes & UI improvements.
+ - Add support for Rust as submission language.
+ - Add teamphotos to scoreboard zip.
+ - Add jury option to to download ZIP with all problem samples, attachments
+   and problem statement.
+ - Extend team import with optional room and other API extensions, see the API
+   doc for further details.
+ - Drop support for shadowing a single contest from multiple sources.
+ - Log account logins via API separately.
+ - Add support for PHP v8.2.
+ - Upgraded library dependencies.
+ - Removed output of detected entry point to teams.
+ - Added option to add custom apt repositories to judge chroot.
+ - Added CLI script to configure the domserver with a yaml file.
+ - Changed activation behaviour of contests imported via UI to be directly
+   available.
+ - New option added to reset login status of teams between contests.
+ - Highlight submissions which were judged with compiler flags which since
+   have changed. Useful when you find wrong flags during the contest.
+ - Handle network errors for judgedaemon when domserver is unavailable.
+ - Added super lazy mode useful for ICPC analyst instances. Here nothing is
+   judged unless manually requested.
+ - Split problem import messages in info/warning/danger, to make sure errors
+   are not missed when importing.
+ - Store user login sessions in database.
+ - Contest import CLI script is now rewritten in python.
+ - The example test problems are now imported via the contest package format.
 
 Version 8.1.0 - 1 June 2022
 ---------------------------
