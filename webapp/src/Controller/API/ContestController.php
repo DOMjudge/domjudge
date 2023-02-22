@@ -752,6 +752,11 @@ class ContestController extends AbstractRestController
 
     /**
      * @Rest\Get("/{cid}/samples.zip", name="samples_data_zip")
+     * @OA\Response(
+     *     response="200",
+     *     description="The problem samples, statement & attachments as a ZIP archive",
+     *     @OA\MediaType(mediaType="application/zip")
+     * )
      */
     public function samplesDataZipAction(Request $request): Response
     {
