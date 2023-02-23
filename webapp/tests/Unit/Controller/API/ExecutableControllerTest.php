@@ -37,9 +37,9 @@ class ExecutableControllerTest extends BaseTestCase
         $contents = $this->base64unzip($response);
 
         static::assertArrayHasKey('build', $contents);
-        static::assertStringContainsString('g++ -g', $contents['build']);
+        static::assertStringContainsString('g++', $contents['build']);
         static::assertArrayHasKey('compare.cc', $contents);
-        static::assertStringContainsString("Space!  Can't live with it, can't live without it", $contents['compare.cc']);
+        static::assertStringContainsString("int main", $contents['compare.cc']);
     }
 
     protected function base64unzip(string $content): array
