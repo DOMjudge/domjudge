@@ -73,10 +73,16 @@ FILE *openfeedback(const char *feedbackdir, const char *feedback, const char *wh
 	return res;
 }
 
+// The behavior of std::tolower on (signed) char is undefined.
+char tolower_char(char c)
+{
+    return static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+}
+
 bool equal_case_insensitive(std::string a, std::string b)
 {
-	for(size_t i=1; i<a.length(); i++) a[i] = tolower(a[i]);
-	for(size_t i=1; i<b.length(); i++) b[i] = tolower(b[i]);
+	for (size_t i=1; i<a.length(); i++) a[i] = tolower_char(a[i]);
+	for (size_t i=1; i<b.length(); i++) b[i] = tolower_char(b[i]);
 
 	return a==b;
 }
@@ -169,7 +175,7 @@ int main(int argc, char **argv) {
 	std::string judge, team;
 	while (true) {
 		// Space!  Can't live with it, can't live without it...
-		while (isspace(judgeans.peek())) {
+		while (std::isspace(static_cast<unsigned char>(judgeans.peek()))) {
 			char c = (char)judgeans.get();
 			if (space_change_sensitive) {
 				int d = std::cin.get();
@@ -182,7 +188,7 @@ int main(int argc, char **argv) {
 			if (c == '\n') ++judgeans_line;
 			++judgeans_pos;
 		}
-		while (isspace(std::cin.peek())) {
+		while (std::isspace(static_cast<unsigned char>(std::cin.peek()))) {
 			char d = (char)std::cin.get();
 			if (space_change_sensitive) {
 				wrong_answer("Space change error: judge out of space, got %d from team", d);
@@ -200,15 +206,15 @@ int main(int argc, char **argv) {
 
 		std::string extra_msg = "";
 		bool nonprintable = false;
-		for(char c : judge) {
-			if (!isprint(c)) {
+		for (char c : judge) {
+			if (!std::isprint(static_cast<unsigned char>(c))) {
 				nonprintable = true;
 				extra_msg += "judge";
 				break;
 			}
 		}
-		for(char c : team) {
-			if (!isprint(c)) {
+		for (char c : team) {
+			if (!std::isprint(static_cast<unsigned char>(c))) {
 				if (nonprintable) extra_msg += ',';
 				nonprintable = true;
 				extra_msg += "team";
