@@ -7,13 +7,11 @@
             <th scope="col">external ID</th>
         {% endif %}
         {%- if current_contests | length > 1 %}
-
             <th scope="col">contest</th>
         {%- endif %}
 
         <th scope="col">time</th>
-        <th scope="col">from</th>
-        <th scope="col">to</th>
+        <th scope="col" colspan="2">{{ direction }}<th>
         <th scope="col">subject</th>
 
         <th scope="col">text</th>
@@ -34,31 +32,43 @@
                 <td><a href="{{ link }}">{{ clarification.externalid }}</a></td>
             {% endif %}
             {%- if current_contests | length > 1 %}
-
                 <td><a href="{{ link }}">{{ clarification.contest.shortname }}</a></td>
             {%- endif %}
 
             <td data-order="{{ clarification.submittime }}"><a href="{{ link }}">{{ clarification.submittime | printtime(null, clarification.contest) }}</a></td>
-            {%- set recipientBadge = '' %}
-            {%- set senderBadge = '' %}
             {%- if clarification.sender is null %}
-                {%- set sender = 'Jury' %}
+                {%- set recipientBadge = '' %}
                 {%- if clarification.recipient is null %}
                     {%- set recipient = 'All' %}
                 {%- else %}
                     {%- set recipient = clarification.recipient.effectiveName %}
                     {%- set recipientBadge = clarification.recipient | entityIdBadge('t') %}
                 {%- endif %}
+                <td style="text-align: right;">
+                    <a href="{{ link }}" title="{{ recipient }}">
+                        {{ recipientBadge | raw }}
+                    </a>
+                </td>
+                <td>
+                    <a href="{{ link }}" title="{{ recipient }}">
+                        {{ recipient | u.truncate(teamname_max_length, '…') }}
+                    </a>
+                </td>
             {%- else %}
-                {%- set recipient = 'Jury' %}
                 {%- set sender = clarification.sender.effectiveName %}
                 {%- set senderBadge = clarification.sender | entityIdBadge('t') %}
+                <td style="text-align: right;">
+                    <a href="{{ link }}" title="{{ sender }}">
+                        {{ senderBadge | raw }}
+                    </a>
+                </td>
+                <td>
+                    <a href="{{ link }}" title="{{ sender }}">
+                        {{ sender | u.truncate(teamname_max_length, '…') }}
+                    </a>
+                </td>
             {%- endif %}
 
-            <td><a href="{{ link }}" title="{{ sender }}">{{ senderBadge | raw }}</a>&nbsp;
-                <a href="{{ link }}" title="{{ sender }}">{{ sender | u.truncate(teamname_max_length, '…') }}</a></td>
-            <td><a href="{{ link }}" title="{{ recipient }}">{{ recipientBadge | raw }}</a>&nbsp;
-                <a href="{{ link }}" title="{{ recipient }}">{{ recipient | u.truncate(teamname_max_length, '…') }}</a></td>
             <td><a href="{{ link }}">
                     {%- if clarification.problem -%}
                         problem {{ clarification.problem.contestProblems.first | problemBadge -}}
