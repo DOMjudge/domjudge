@@ -54,10 +54,10 @@ EOF;
         $expectedYaml = <<<EOF
 duration: 2:00:00
 name: NWERC 2020 Practice Session
-penalty-time: 20
-scoreboard-freeze-length: 0:30:00
-short-name: practice
-start-time: 2021-03-27 09:00:00+00:00
+penalty_time: 20
+scoreboard_freeze_length: 0:30:00
+short_name: practice
+start_time: 2021-03-27 09:00:00+00:00
 EOF;
 
         $url = $this->helperGetEndpointURL($this->apiEndpoint);
