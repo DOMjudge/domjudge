@@ -48,20 +48,20 @@ class ImportExportService
 
         $data = [
             'name' => $contest->getName(),
-            'short-name' => $contest->getShortname(),
-            'start-time' => Utils::absTime($contest->getStarttime(), true),
+            'short_name' => $contest->getShortname(),
+            'start_time' => Utils::absTime($contest->getStarttime(), true),
             'duration' => Utils::relTime($contest->getContestTime((float)$contest->getEndtime())),
         ];
         if ($warnMsg = $contest->getWarningMessage()) {
-            $data['warning-message'] = $warnMsg;
+            $data['warning_message'] = $warnMsg;
         }
         if ($contest->getFreezetime() !== null) {
-            $data['scoreboard-freeze-duration'] = Utils::relTime(
+            $data['scoreboard_freeze_duration'] = Utils::relTime(
                 $contest->getContestTime((float)$contest->getEndtime()) - $contest->getContestTime((float)$contest->getFreezetime()),
                 true);
         }
         $data = array_merge($data, [
-            'penalty-time' => $this->config->get('penalty_time'),
+            'penalty_time' => $this->config->get('penalty_time'),
             'problems' => [],
         ]);
 

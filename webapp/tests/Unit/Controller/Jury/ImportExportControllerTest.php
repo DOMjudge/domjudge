@@ -93,11 +93,11 @@ class ImportExportControllerTest extends BaseTestCase
         $year = date('Y')+1;
         $yaml =<<<HEREDOC
 name: 'Demo contest'
-short-name: demo
-start-time: '{$year}-01-01T08:00:00+00:00'
+short_name: demo
+start_time: '{$year}-01-01T08:00:00+00:00'
 duration: '5:00:00.000'
-scoreboard-freeze-duration: '1:00:00'
-penalty-time: 20
+scoreboard_freeze_duration: '1:00:00'
+penalty_time: 20
 problems:
     -
         label: A
