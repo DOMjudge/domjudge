@@ -35,7 +35,12 @@
                     {% set now = 'now'|date('U') %}
                     {{ now | printremainingminutes(current_contest.endtime) }}
                 {% else %}
-                    starts: {{ current_contest.starttime | printtime }} - ends: {{ current_contest.endtime | printtime }}
+                    {% if current_contest.freezeData.started %}
+                        started:
+                    {% else %}
+                        starts:
+                    {% endif %}
+                    {{ current_contest.starttime | printtime }} - ends: {{ current_contest.endtime | printtime }}
                 {% endif %}
             </span>
         </div>
