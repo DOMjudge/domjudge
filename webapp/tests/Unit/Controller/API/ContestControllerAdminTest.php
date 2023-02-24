@@ -52,12 +52,16 @@ problems:
     short-name: cheating
 EOF;
         $expectedYaml = <<<EOF
-duration: 2:00:00.000
+id: practice
 formal_name: NWERC 2020 Practice Session
-penalty_time: 20
-scoreboard_freeze_duration: 0:30:00
 name: practice
+activation_time: '2021-03-27T09:00:00+00:00'
 start_time: '2021-03-27T09:00:00+00:00'
+end_time: '2021-03-27T11:00:00+00:00'
+duration: 2:00:00.000
+penalty_time: 20
+scoreboard_freeze_time: '2021-03-27T10:30:00+00:00'
+scoreboard_freeze_duration: 0:30:00
 EOF;
 
         $url = $this->helperGetEndpointURL($this->apiEndpoint);

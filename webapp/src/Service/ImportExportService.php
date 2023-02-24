@@ -47,19 +47,34 @@ class ImportExportService
         // We expect contest.yaml and problemset.yaml combined into one file here.
 
         $data = [
+            'id' => $contest->getExternalid(),
             'formal_name' => $contest->getName(),
             'name' => $contest->getShortname(),
             'start_time' => Utils::absTime($contest->getStarttime(), true),
+            'end_time' => Utils::absTime($contest->getEndtime(), true),
             'duration' => Utils::relTime($contest->getContestTime((float)$contest->getEndtime())),
             'penalty_time' => $this->config->get('penalty_time'),
+            'activation_time' => Utils::absTime($contest->getActivatetime(), true),
         ];
         if ($warnMsg = $contest->getWarningMessage()) {
             $data['warning_message'] = $warnMsg;
         }
         if ($contest->getFreezetime() !== null) {
+            $data['scoreboard_freeze_time'] = Utils::absTime($contest->getFreezetime(), true);
             $data['scoreboard_freeze_duration'] = Utils::relTime(
                 $contest->getContestTime((float)$contest->getEndtime()) - $contest->getContestTime((float)$contest->getFreezetime()),
-                true);
+                true,
+            );
+            if ($contest->getUnfreezetime() !== null) {
+                $data['scoreboard_thaw_time'] = Utils::absTime($contest->getUnfreezetime(), true);
+            }
+        }
+        if ($contest->getFinalizetime() !== null) {
+            $data['finalize_time'] = Utils::absTime($contest->getFinalizetime(), true);
+        }
+
+        if ($contest->getDeactivatetime() !== null) {
+            $data['deactivate_time'] = Utils::absTime($contest->getDeactivatetime(), true);
         }
 
         if ($includeProblems) {
