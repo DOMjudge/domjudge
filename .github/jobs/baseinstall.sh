@@ -79,7 +79,7 @@ openssl req -nodes -new -x509 -keyout /tmp/server.key -out /tmp/server.crt -subj
 sudo cp /tmp/server.crt /usr/local/share/ca-certificates/
 sudo update-ca-certificates
 # shellcheck disable=SC2002
-cat "$(pwd)/.github/workflowscripts/nginx_extra" | sudo tee -a /etc/nginx/sites-enabled/domjudge
+cat "$(pwd)/.github/jobs/data/nginx_extra" | sudo tee -a /etc/nginx/sites-enabled/domjudge
 sudo nginx -t
 section_end
 
