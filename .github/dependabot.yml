@@ -35,3 +35,12 @@ updates:
     allow:
         - dependency-type: "all"
     target-branch: "8.1"
+  - package-ecosystem: "composer"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 0
+    versioning-strategy: lockfile-only
+    allow:
+        - dependency-type: "all"
+    target-branch: "8.2"
