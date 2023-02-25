@@ -1,0 +1,12 @@
+name: "Mayhem API daily (admin role only)"
+
+on:
+  schedule:
+    - cron: '0 23 * * *'
+
+jobs:
+  mayhem-template:
+    uses: ./.github/workflows/mayhem-api-template.yml
+    with:
+      version: "admin"
+      duration: "auto"

@@ -1,0 +1,23 @@
+name: "Mayhem API weekly (all roles)"
+
+on:
+  schedule:
+    - cron: '0 23 * * 0'
+
+jobs:
+  mayhem-template:
+    strategy:
+      matrix:
+        include:
+          - version: "team"
+            duration: "5m"
+          - version: "guest"
+            duration: "auto"
+          - version: "jury"
+            duration: "5min"
+          - version: "admin"
+            duration: "10m"
+    uses: ./.github/workflows/mayhem-api-template.yml
+    with:
+      version: "${{ matrix.target }}"
+      duration: "${{ matrix.version }}"
