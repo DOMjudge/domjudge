@@ -1,7 +1,15 @@
 name: PHP CodeSniffer
 
 # Controls when the action will run. 
-on: ['pull_request','push','pull_request_target']
+on: 
+  push:
+    branches:
+      - main
+      - '[0-9]+.[0-9]+'
+  pull_request:
+    branches:
+      - main
+      - '[0-9]+.[0-9]+'
 jobs:
   phpcs:
     runs-on: ubuntu-latest
