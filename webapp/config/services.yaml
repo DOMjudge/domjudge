@@ -18,6 +18,7 @@ services:
             $debug: '%kernel.debug%'
             $domjudgeVersion: '%domjudge.version%'
             $projectDir: '%kernel.project_dir%'
+            $vendorDir: '%domjudge.libvendordir%'
             $cacheDir: '%kernel.cache_dir%'
             $logsDir: '%kernel.logs_dir%'
             $sqlDir: '%domjudge.sqldir%'

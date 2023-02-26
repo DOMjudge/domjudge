@@ -97,7 +97,7 @@ class PublicController extends BaseController
     /**
      * @Route("/scoreboard-data.zip", name="public_scoreboard_data_zip")
      */
-    public function scoreboardDataZipAction(RequestStack $requestStack, string $projectDir, Request $request): Response
+    public function scoreboardDataZipAction(RequestStack $requestStack, string $projectDir, string $vendorDir, Request $request): Response
     {
         $contest = $this->getContestFromRequest($request) ?? $this->dj->getCurrentContest(-1);
         $data    = $this->scoreboardService->getScoreboardTwigData(
@@ -133,7 +133,16 @@ class PublicController extends BaseController
 
         $publicPath = realpath(sprintf('%s/public/', $projectDir));
         foreach ($assetMatches[1] as $file) {
-            $zip->addFile($publicPath . '/' . $file, $file);
+            $filepath = realpath($publicPath . '/' . $file);
+            if (
+                substr($filepath, 0, strlen($publicPath)) !== $publicPath &&
+                substr($filepath, 0, strlen($vendorDir)) !== $vendorDir
+            ) {
+                // Path outside of known good dirs: path traversal
+                continue;
+            }
+
+            $zip->addFile($filepath, $file);
         }
 
         // Also copy in the webfonts
