@@ -134,8 +134,7 @@ class PublicController extends BaseController
         $publicPath = realpath(sprintf('%s/public/', $projectDir));
         foreach ($assetMatches[1] as $file) {
             $filepath = realpath($publicPath . '/' . $file);
-            if (
-                substr($filepath, 0, strlen($publicPath)) !== $publicPath &&
+            if (substr($filepath, 0, strlen($publicPath)) !== $publicPath &&
                 substr($filepath, 0, strlen($vendorDir)) !== $vendorDir
             ) {
                 // Path outside of known good dirs: path traversal
