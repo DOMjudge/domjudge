@@ -159,17 +159,4 @@ class ConfigController extends AbstractController
             'results' => $results
         ]);
     }
-
-    /**
-     * @Route("/check/phpinfo", name="jury_config_phpinfo")
-     */
-    public function phpinfoAction(Request $request)
-    {
-        ob_start();
-        phpinfo();
-        $phpinfo = ob_get_contents();
-        ob_end_clean();
-
-        return new Response($phpinfo);
-    }
 }
