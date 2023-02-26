@@ -18,6 +18,11 @@ $domjudge_config = [];
 
 function judging_directory(string $workdirpath, array $judgeTask) : string
 {
+    if (filter_var($judgeTask['submitid'], FILTER_VALIDATE_INT) === false ||
+        filter_var($judgeTask['jobid'], FILTER_VALIDATE_INT) === false) {
+        error("Malformed data returned in judgeTask IDs");
+    }
+
     return $workdirpath . '/'
         . $judgeTask['submitid'] . '/'
         . $judgeTask['jobid'];
@@ -1251,11 +1256,11 @@ function judge(array $judgeTask): bool
         error("Could not create directory '$programdir'");
     }
 
-    // Cannot escape as we glob.
-    $cp_cmd = "cp -PRl '$workdir'/compile/* '$programdir'";
-    system($cp_cmd, $retval);
-    if ($retval!==0) {
-        error("Could not copy program to '$programdir'");
+    foreach (glob("$workdir/compile/*") as $compile_file) {
+        system('cp -PRl ' . dj_escapeshellarg($compile_file) . ' ' . dj_escapeshellarg($programdir), $retval);
+        if ($retval!==0) {
+            error("Could not copy program to '$programdir'");
+        }
     }
 
     // do the actual test-run
