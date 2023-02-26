@@ -1,7 +1,8 @@
 framework:
     secret: '%env(APP_SECRET)%'
     csrf_protection: ~
-    fragments: ~
+    esi: false
+    fragments: false
 
     session:
         handler_id: "%env(DATABASE_URL)%"
