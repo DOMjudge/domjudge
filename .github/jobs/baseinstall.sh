@@ -36,7 +36,8 @@ sudo apt install -y acl zip unzip nginx php php-fpm php-gd \
                     python3-yaml latexmk curl
 section_end
 
-export PHPVERSION=$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION."\n";')
+PHPVERSION=$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION."\n";')
+export PHPVERSION
 
 section_start "Install composer"
 php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
