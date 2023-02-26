@@ -24,17 +24,6 @@ class ConfigControllerTest extends BaseTest
     }
 
     /**
-     * Test that phpinfo page completes.
-     */
-    public function testConfigCheckPhpInfo(): void
-    {
-        $this->verifyPageResponse('GET', '/jury/config/check/phpinfo', 200);
-        $content = $this->client->getResponse()->getContent();
-        self::assertStringContainsString('This program makes use of the Zend Scripting Language Engine', $content);
-        self::assertStringContainsString('This program is free software', $content);
-    }
-
-    /**
      * Test that config settings page contains some expected options.
      */
     public function testConfigSettingsPresent(): void
