@@ -12,7 +12,7 @@
   <tr><td>Environment:</td><td>{{ app.environment }}</td></tr>
   <tr><td>Debug:</td><td>{{ app.debug|printYesNo }}</td></tr>
   <tr><td colspan="2">&nbsp;</td></tr>
-  <tr><td>PHP:</td><td>{{ constant('PHP_VERSION') }} <a href="{{ path('jury_config_phpinfo') }}"><i class="fas fa-info-circle"></i></a></td></tr>
+  <tr><td>PHP:</td><td>{{ constant('PHP_VERSION') }}</td></tr>
   <tr><td>Symfony:</td><td>{{ constant('\\Symfony\\Component\\HttpKernel\\Kernel::VERSION') }}</td></tr>
   <tr><td>Twig:</td><td>{{ constant('\\Twig\\Environment::VERSION') }}</td></tr>
   </table>
