@@ -481,6 +481,13 @@ if (isset($options['daemonid'])) {
     $runuser .= '-' . $options['daemonid'];
 }
 
+if ($runuser === posix_getpwuid(posix_geteuid())['name'] ||
+    RUNGROUP === posix_getgrgid(posix_getegid())['name']
+) {
+    echo "Do not run the judgedaemon as the runser or rungroup.\n";
+    exit(1);
+}
+
 // Set static environment variables for passing path configuration
 // to called programs:
 putenv('DJ_BINDIR='      . BINDIR);
