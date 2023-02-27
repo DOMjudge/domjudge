@@ -13,7 +13,8 @@ services:
       - MYSQL_PASSWORD=domjudge
       - MYSQL_DATABASE=domjudge
     ports:
-      - 13306:3306
+      # Useful to connect a local MySQL client / GUI
+      - 127.0.0.1:13306:3306
     command: --max-connections=1000 --max-allowed-packet=512M
     volumes:
       - /var/lib/mysql
