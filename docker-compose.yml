@@ -1,3 +1,7 @@
+# Note: this docker compose stack should only be used for development purposes.
+# Do not use it for production deployments. If you want to deploy DOMjudge in
+# production with Docker, see https://hub.docker.com/r/domjudge/domserver.
+
 version: '3'
 
 services:
