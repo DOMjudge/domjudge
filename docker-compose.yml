@@ -24,6 +24,7 @@ services:
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
       - .:/domjudge:cached
+      - /chroot
     links:
       - mariadb:mariadb
     ports:
