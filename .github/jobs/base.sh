@@ -1,6 +1,8 @@
 #!/bin/bash
 
-. gitlab/ci_settings.sh
+set -x
+
+. .github/jobs/data/gha_ci_bashrc
 
 lsb_release -a
 
