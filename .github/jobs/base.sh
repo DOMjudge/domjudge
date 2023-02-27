@@ -2,13 +2,15 @@
 
 set -x
 
+MYSQL_ROOT_PASSWORD=$4
+
 . .github/jobs/data/gha_ci_bashrc
 
 lsb_release -a
 
 cat > ~/.my.cnf <<EOF
 [client]
-host=${MARIADB_PORT_3306_TCP_ADDR}
+host=sqlserver
 user=root
 password=${MYSQL_ROOT_PASSWORD}
 EOF
@@ -28,7 +30,7 @@ if [ -n "${MYSQL_REQUIRE_PRIMARY_KEY:-}" ]; then
 fi
 
 # Generate a dbpasswords file
-echo "unused:${MARIADB_PORT_3306_TCP_ADDR}:domjudge:domjudge:domjudge:3306" > etc/dbpasswords.secret
+echo "unused:sqlserver:domjudge:domjudge:domjudge:3306" > etc/dbpasswords.secret
 
 # Generate APP_SECRET for symfony
 # shellcheck disable=SC2164
@@ -82,7 +84,7 @@ sudo /usr/sbin/php-fpm${php_version}
 
 passwd=$(cat etc/initial_admin_password.secret)
 echo "machine localhost login admin password $passwd" >> ~www-data/.netrc
-sudo -u www-data bin/dj_setup_database -uroot -p${MYSQL_ROOT_PASSWORD} bare-install
+sudo -u www-data bin/dj_setup_database -uroot -pdomjudge bare-install
 
 # shellcheck disable=SC2154
 if [ -n "${integration:-}" ]; then
@@ -90,4 +92,4 @@ if [ -n "${integration:-}" ]; then
 	echo "UPDATE user SET teamid=1 WHERE userid=1;" | mysql domjudge
 fi
 
-sudo -u www-data bin/dj_setup_database -uroot -p${MYSQL_ROOT_PASSWORD} install-examples
+sudo -u www-data bin/dj_setup_database -uroot -pdomjudge install-examples
