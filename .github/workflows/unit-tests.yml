@@ -1,0 +1,54 @@
+name: Unit tests CI
+on:
+  push:
+    branches:
+      - main
+      - '[0-9]+.[0-9]+'
+  pull_request:
+    branches:
+      - main
+      - '[0-9]+.[0-9]+'
+
+jobs:
+  run-unit-tests:
+    runs-on: ubuntu-latest
+    container: domjudge/gitlabci:2.1
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      matrix:
+        sqlserver: ['mariadb']
+        phpversion: ['7.4','8.0','8.1','8.2']
+        testtype: ["Unit","E2E"]
+        include:
+          - phpversion: "8.1"
+            sqlserver: "mysql"
+            testtype: "Unit"
+          - phpversion: "8.1"
+            sqlserver: "mysql"
+            testtype: "E2E"
+    services:
+      sqlserver:
+        image: "${{ matrix.sqlserver }}"
+        env:
+          MARIADB_ROOT_PASSWORD: domjudge
+    steps:
+      - uses: actions/checkout@v2
+      - name: Show current directory
+        run: pwd
+      - name: Run gitlab script in altered form
+        run: .github/jobs/unit-tests.sh "${{ matrix.phpversion }}" "${{ matrix.testtype }}" "${{ matrix.sqlserver }}"
+      - name: Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          comment_mode: off
+          files: |
+            unit-tests.xml
+      - uses: actions/upload-artifact@v3
+        with:
+          name: ci-run-logs-configs
+          path: |
+            "artifacts"
+
