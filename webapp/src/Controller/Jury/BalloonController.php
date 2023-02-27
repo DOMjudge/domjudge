@@ -17,7 +17,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * @Route("/jury/balloons")
- * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_BALLOON')")
+ * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_BALLOON')")
  */
 class BalloonController extends AbstractController
 {
