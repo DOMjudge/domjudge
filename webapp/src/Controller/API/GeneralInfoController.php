@@ -281,6 +281,12 @@ class GeneralInfoController extends AbstractFOSRestController
      *     description="The ISO 3166-1 alpha-3 code for the country to get the flag for",
      *     @OA\Schema(type="string")
      * )
+     * @OA\Parameter(
+     *     name="size",
+     *     in="path",
+     *     description="Preferred aspect ratio as <int>x<int>, currently only 1x1 and 4x3 are available.",
+     *     @OA\Schema(type="string")
+     * )
      */
     public function countryFlagAction(Request $request, string $countryCode, string $size): Response
     {
@@ -296,6 +302,9 @@ class GeneralInfoController extends AbstractFOSRestController
         $alpha3code = strtoupper($countryCode);
         if (!Countries::alpha3CodeExists($alpha3code)) {
             throw new NotFoundHttpException("country $alpha3code does not exist");
+        }
+        if (!preg_match('/^\d+x\d+$/', $size)) {
+            throw new BadRequestHttpException('invalid format for size parameter, should be "4x3" or "1x1"');
         }
         $alpha2code = strtolower(Countries::getAlpha2Code($alpha3code));
         $flagFile = sprintf('%s/public/flags/%s/%s.svg', $this->dj->getDomjudgeWebappDir(), $size, $alpha2code);
