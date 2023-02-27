@@ -1,9 +1,16 @@
 #!/bin/bash
 
+# Expand aliases for non-interactive shell
+shopt -s expand_aliases
+
 # Fail pipeline when variable is not set or individual command has an non-zero exitcode.
 set -euo pipefail
 
-shopt -s expand_aliases
+# Show which commands are being run
+set -x
+
+# Chown the checked out files
+sudo chown -R domjudge:domjudge .
 
 # Shared constants between jobs
 DIR=$(pwd)
@@ -13,24 +20,35 @@ export GITSHA
 export PS4='(${BASH_SOURCE}:${LINENO}): - [$?] $ '
 export LOGFILE="/opt/domjudge/domserver/webapp/var/log/prod.log"
 
-# Shared storage for all artifacts
-export GITLABARTIFACTS="$DIR/gitlabartifacts"
-mkdir -p "$GITLABARTIFACTS"
-
-# Functions to annotate the GitLab logs
+# Functions to annotate the Github actions logs
 alias trace_on='set -x'
 alias trace_off='{ set +x; } 2>/dev/null'
-function section_start_internal() {
-    echo -e "section_start:$(date +%s):$2[collapsed=$1]\r\e[0K$3"
+
+section_start_internal  () {
+    echo "::group::$1"
     trace_on
 }
-function section_end_internal() {
-    echo -e "section_end:$(date +%s):$1\r\e[0K"
+
+section_end_internal () {
+    echo "::endgroup::"
     trace_on
 }
-alias section_start_collap='trace_off ; section_start_internal true'
-alias section_start='trace_off ; section_start_internal false'
+
+alias section_start='trace_off ; section_start_internal '
 alias section_end='trace_off ; section_end_internal '
+
+# Shared storage for all artifacts
+export ARTIFACTS="$DIR/artifacts"
+mkdir -p "$ARTIFACTS"
+
+function show_phpinfo() {
+    phpversion=$1
+    section_start phpinfo
+    update-alternatives --set php /usr/bin/php"${phpversion}"
+    php -v
+    php -m
+    section_end phpinfo
+}
 
 function log_on_err() {
     echo -e "\\n\\n=======================================================\\n"
@@ -40,14 +58,4 @@ function log_on_err() {
     fi
 }
 
-function show_phpinfo() {
-    phpversion=$1
-    section_start_collap phpinfo "Show the new PHP info"
-    update-alternatives --set php /usr/bin/php"${phpversion}"
-    php -v
-    php -m
-    section_end phpinfo
-}
-
-# Show running command
-set -x
+set -eux
