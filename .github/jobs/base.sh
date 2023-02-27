@@ -59,9 +59,9 @@ echo -e "\033[0m"
 
 # configure, make and install (but skip documentation)
 make configure
-./configure --with-baseurl='http://localhost/domjudge/' --with-domjudge-user=domjudge --with-judgehost_chrootdir=${DIR}/chroot/domjudge |& tee "$GITLABARTIFACTS/configure.log"
-make build-scripts domserver judgehost docs |& tee "$GITLABARTIFACTS/make.log"
-sudo make install-domserver install-judgehost install-docs |& tee -a "$GITLABARTIFACTS/make.log"
+./configure --with-baseurl='http://localhost/domjudge/' --with-domjudge-user=domjudge --with-judgehost_chrootdir=${DIR}/chroot/domjudge |& tee "$ARTIFACTS/configure.log"
+make build-scripts domserver judgehost docs |& tee "$ARTIFACTS/make.log"
+sudo make install-domserver install-judgehost install-docs |& tee -a "$ARTIFACTS/make.log"
 
 # setup database and add special user
 # shellcheck disable=SC2164
