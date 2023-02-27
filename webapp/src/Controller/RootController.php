@@ -38,6 +38,9 @@ class RootController extends BaseController
             if ($this->dj->checkrole('balloon')) {
                 return $this->redirectToRoute('jury_balloons');
             }
+            if ($this->dj->checkrole('clarification_rw')) {
+                return $this->redirectToRoute('jury_clarifications');
+            }
         }
         return $this->redirectToRoute('public_index');
     }
