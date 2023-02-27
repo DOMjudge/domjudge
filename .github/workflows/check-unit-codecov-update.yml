@@ -1,4 +1,4 @@
-name: Unit tests
+name: Unit tests (Codecov script)
 on:
   push:
     branches:
