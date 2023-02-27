@@ -43,7 +43,9 @@
             </div>
             <div class="card-body">
                 <ul>
-                    <li><a href="{{ path('jury_balloons') }}">Balloon Status</a></li>
+                    {% if is_granted('ROLE_ADMIN') or is_granted('ROLE_BALLOON') %}
+                        <li><a href="{{ path('jury_balloons') }}">Balloon Status</a></li>
+                    {% endif %}
                     {% if is_granted('ROLE_CLARIFICATION_RW') %}
                         <li><a href="{{ path('jury_clarifications') }}">Clarifications</a></li>
                     {% endif %}
