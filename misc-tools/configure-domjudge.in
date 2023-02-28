@@ -117,4 +117,4 @@ if os.path.exists('languages.json'):
         else:
             print('  - Language configuration is already up-to-date, nothing to update.')
 else:
-    print('Need a "config.json" to verify DOMjudge\'s language configuration.')
+    print('Need a "languages.json" to verify DOMjudge\'s language configuration.')
