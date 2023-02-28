@@ -4,7 +4,7 @@ namespace App\Tests\Unit\Controller\API;
 
 use Generator;
 
-class AccountControllerTest extends BaseTest
+class AccountControllerTest extends BaseTestCase
 {
     protected ?string $apiEndpoint = 'accounts';
 

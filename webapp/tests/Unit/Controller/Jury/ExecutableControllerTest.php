@@ -4,7 +4,7 @@ namespace App\Tests\Unit\Controller\Jury;
 
 use App\Entity\Executable;
 
-class ExecutableControllerTest extends JuryControllerTest
+class ExecutableControllerTest extends JuryControllerTestCase
 {
     protected static string  $identifyingEditAttribute = 'execid';
     protected static ?string $defaultEditEntityName    = '';

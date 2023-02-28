@@ -4,7 +4,7 @@ namespace App\Tests\Unit\Controller\API;
 
 use App\DataFixtures\Test\EnableJavaEntrypointFixture;
 
-class LanguageControllerTest extends BaseTest
+class LanguageControllerTest extends BaseTestCase
 {
     protected ?string $apiEndpoint = 'languages';
 

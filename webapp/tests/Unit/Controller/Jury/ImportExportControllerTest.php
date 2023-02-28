@@ -4,10 +4,10 @@ namespace App\Tests\Unit\Controller\Jury;
 
 use App\DataFixtures\Test\ClarificationFixture;
 use App\DataFixtures\Test\DemoPreStartContestFixture;
-use App\Tests\Unit\BaseTest;
+use App\Tests\Unit\BaseTestCase;
 use Generator;
 
-class ImportExportControllerTest extends BaseTest
+class ImportExportControllerTest extends BaseTestCase
 {
     protected array $roles = ['admin'];
 

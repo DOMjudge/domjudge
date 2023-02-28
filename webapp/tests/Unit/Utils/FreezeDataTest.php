@@ -4,11 +4,11 @@ namespace App\Tests\Unit\Utils;
 
 use App\DataFixtures\Test\ContestTimeFixture;
 use App\Entity\Contest;
-use App\Tests\Unit\BaseTest as BaseBaseTest;
+use App\Tests\Unit\BaseTestCase as BaseBaseTestCase;
 use App\Utils\FreezeData;
 use Generator;
 
-class FreezeDataTest extends BaseBaseTest
+class FreezeDataTest extends BaseBaseTestCase
 {
     protected function getContestData(string $reference): FreezeData
     {

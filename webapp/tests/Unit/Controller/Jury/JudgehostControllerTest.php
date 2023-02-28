@@ -5,7 +5,7 @@ namespace App\Tests\Unit\Controller\Jury;
 use App\DataFixtures\Test\ExtraJudgehostFixture;
 use App\Entity\Judgehost;
 
-class JudgehostControllerTest extends JuryControllerTest
+class JudgehostControllerTest extends JuryControllerTestCase
 {
     protected static string  $identifyingEditAttribute = 'hostname';
     protected static ?string $defaultEditEntityName    = 'example-judgehost1';

@@ -2,7 +2,7 @@
 
 namespace App\Tests\Unit\Controller\API;
 
-class ExecutableControllerTest extends BaseTest
+class ExecutableControllerTest extends BaseTestCase
 {
     /**
      * Test that a non-logged-in user can not access the executables.

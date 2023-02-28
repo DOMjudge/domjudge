@@ -4,7 +4,7 @@ namespace App\Tests\Unit;
 
 use Generator;
 
-class GeneralAvailabilityTest extends BaseTest
+class GeneralAvailabilityTest extends BaseTestCase
 {
     /**
      * @dataProvider urlProvider

@@ -2,7 +2,7 @@
 
 namespace App\Tests\Unit\Controller\API;
 
-class UserControllerTest extends BaseTest
+class UserControllerTest extends BaseTestCase
 {
     protected ?string $apiEndpoint = 'users';
 

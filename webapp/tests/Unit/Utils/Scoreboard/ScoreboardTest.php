@@ -5,14 +5,14 @@ namespace App\Tests\Unit\Utils\Scoreboard;
 use App\DataFixtures\Test\ContestTimeFixture;
 use App\Entity\Contest;
 use App\Entity\Team;
-use App\Tests\Unit\BaseTest as BaseBaseTest;
+use App\Tests\Unit\BaseTestCase as BaseBaseTestCase;
 use App\Tests\Unit\Utils\FreezeDataTest;
 use App\Utils\FreezeData;
 use App\Utils\Scoreboard\Scoreboard;
 use App\Utils\Scoreboard\TeamScore;
 use Generator;
 
-class ScoreboardTest extends BaseBaseTest
+class ScoreboardTest extends BaseBaseTestCase
 {
     /**
      * Test that the scoreboard tiebreaker works with two teams without any scores.

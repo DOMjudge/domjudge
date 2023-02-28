@@ -4,7 +4,7 @@ namespace App\Tests\Unit\Controller\API;
 
 use Generator;
 
-class ConfigControllerTest extends BaseTest
+class ConfigControllerTest extends BaseTestCase
 {
     private string $endpoint = '/config';
 

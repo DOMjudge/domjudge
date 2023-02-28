@@ -4,7 +4,7 @@ namespace App\Tests\Unit\Controller\API;
 
 use Generator;
 
-class JudgehostControllerTest extends BaseTest
+class JudgehostControllerTest extends BaseTestCase
 {
     protected ?string $apiEndpoint = 'judgehosts';
     protected ?string $apiUser     = 'admin';

@@ -16,7 +16,7 @@ use Generator;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use ZipArchive;
 
-class SubmissionControllerTest extends BaseTest
+class SubmissionControllerTest extends BaseTestCase
 {
     protected ?string $apiEndpoint = 'submissions';
 
@@ -349,7 +349,7 @@ class SubmissionControllerTest extends BaseTest
             [
                 'code' => [
                     new UploadedFile(__FILE__, 'somefile.cpp'),
-                    new UploadedFile(__DIR__ . '/BaseTest.php', 'another.cpp'),
+                    new UploadedFile(__DIR__ . '/BaseTestCase.php', 'another.cpp'),
                 ],
             ],
             false,
@@ -361,7 +361,7 @@ class SubmissionControllerTest extends BaseTest
             null,
             [
                 'somefile.cpp' => file_get_contents(__FILE__),
-                'another.cpp'  => file_get_contents(__DIR__ . '/BaseTest.php'),
+                'another.cpp'  => file_get_contents(__DIR__ . '/BaseTestCase.php'),
             ],
         ];
         // Submit with an entrypoint.

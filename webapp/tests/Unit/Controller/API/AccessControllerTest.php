@@ -2,7 +2,7 @@
 
 namespace App\Tests\Unit\Controller\API;
 
-class AccessControllerTest extends BaseTest
+class AccessControllerTest extends BaseTestCase
 {
     public function testAccessAsAnonymous(): void
     {

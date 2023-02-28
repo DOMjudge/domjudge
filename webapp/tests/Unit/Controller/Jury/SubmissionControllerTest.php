@@ -3,10 +3,10 @@
 namespace App\Tests\Unit\Controller\Jury;
 
 use App\DataFixtures\Test\SampleSubmissionsFixture;
-use App\Tests\Unit\BaseTest;
+use App\Tests\Unit\BaseTestCase;
 use Generator;
 
-class SubmissionControllerTest extends BaseTest
+class SubmissionControllerTest extends BaseTestCase
 {
     protected array         $roles   = ['jury'];
     protected static string $baseURL = '/jury/submissions';

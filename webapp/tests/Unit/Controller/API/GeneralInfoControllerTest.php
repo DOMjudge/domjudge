@@ -9,7 +9,7 @@ use Generator;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\Intl\Countries;
 
-class GeneralInfoControllerTest extends BaseTest
+class GeneralInfoControllerTest extends BaseTestCase
 {
     private const API_VERSION = 4;
 

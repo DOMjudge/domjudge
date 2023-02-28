@@ -4,7 +4,7 @@ namespace App\Tests\Unit\Controller\Jury;
 
 use App\Entity\Team;
 
-class TeamControllerTest extends JuryControllerTest
+class TeamControllerTest extends JuryControllerTestCase
 {
     protected static string  $identifyingEditAttribute = 'name';
     protected static ?string $defaultEditEntityName    = 'DOMjudge';

@@ -8,7 +8,7 @@ use App\Entity\QueueTask;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 
-class LanguagesControllerTest extends JuryControllerTest
+class LanguagesControllerTest extends JuryControllerTestCase
 {
     protected static string  $identifyingEditAttribute = 'name';
     protected static ?string $defaultEditEntityName    = 'Java';

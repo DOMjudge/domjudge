@@ -2,10 +2,10 @@
 
 namespace App\Tests\E2E\Controller;
 
-use App\Tests\Unit\BaseTest;
+use App\Tests\Unit\BaseTestCase;
 use Generator;
 
-class ControllerRolesTraversalTest extends BaseTest
+class ControllerRolesTraversalTest extends BaseTestCase
 {
     protected static string $loginURL = "http://localhost/login";
 

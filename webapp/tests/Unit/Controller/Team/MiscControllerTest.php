@@ -3,12 +3,12 @@
 namespace App\Tests\Unit\Controller\Team;
 
 use App\Entity\Contest;
-use App\Tests\Unit\BaseTest;
+use App\Tests\Unit\BaseTestCase;
 use Doctrine\ORM\EntityManagerInterface;
 use Generator;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
-class MiscControllerTest extends BaseTest
+class MiscControllerTest extends BaseTestCase
 {
     protected array $roles = ['team'];
 

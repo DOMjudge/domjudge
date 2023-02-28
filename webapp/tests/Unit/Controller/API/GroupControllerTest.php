@@ -2,7 +2,7 @@
 
 namespace App\Tests\Unit\Controller\API;
 
-class GroupControllerTest extends BaseTest
+class GroupControllerTest extends BaseTestCase
 {
     protected ?string $apiEndpoint = 'groups';
 

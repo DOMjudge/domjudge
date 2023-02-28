@@ -2,9 +2,9 @@
 
 namespace App\Tests\Unit\Controller\Jury;
 
-use App\Tests\Unit\BaseTest;
+use App\Tests\Unit\BaseTestCase;
 
-class ConfigControllerTest extends BaseTest
+class ConfigControllerTest extends BaseTestCase
 {
     protected array $roles = ['admin'];
 

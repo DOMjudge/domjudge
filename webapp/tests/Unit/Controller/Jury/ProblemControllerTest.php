@@ -8,7 +8,7 @@ use App\Entity\Problem;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DomCrawler\Crawler;
 
-class ProblemControllerTest extends JuryControllerTest
+class ProblemControllerTest extends JuryControllerTestCase
 {
     protected static string  $baseUrl                  = '/jury/problems';
     protected static array   $exampleEntries           = ['Hello World', 'default', 5, 3, 2, 1];

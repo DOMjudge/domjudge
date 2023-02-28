@@ -8,7 +8,7 @@ use App\DataFixtures\Test\SampleEventsFixture;
 use App\Entity\Contest;
 use Generator;
 
-class ScoreboardControllerTest extends BaseTest
+class ScoreboardControllerTest extends BaseTestCase
 {
     protected static array $fixtures = [SampleEventsFixture::class];
 

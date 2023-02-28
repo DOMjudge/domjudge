@@ -4,10 +4,10 @@ namespace App\Tests\Unit\Controller\Jury;
 
 use App\DataFixtures\Test\RejudgingStatesFixture;
 use App\Entity\Contest;
-use App\Tests\Unit\BaseTest;
+use App\Tests\Unit\BaseTestCase;
 use Generator;
 
-class RejudgingControllerTest extends BaseTest
+class RejudgingControllerTest extends BaseTestCase
 {
     protected array $roles = ['admin'];
 

@@ -8,7 +8,7 @@ use App\Service\ConfigurationService;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
-class OrganizationControllerTest extends BaseTest
+class OrganizationControllerTest extends BaseTestCase
 {
     protected ?string $apiEndpoint = 'organizations';
 
