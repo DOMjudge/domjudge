@@ -24,7 +24,7 @@ sys.path.append('@domserver_libdir@')
 import dj_utils
 
 def usage():
-    print(f'Usage {sys.argv[0]} <domjudge-api-url>')
+    print(f'Usage {sys.argv[0]} <domjudge-webapp-dir-or-api-url>')
     exit(1)
 
 
@@ -53,7 +53,7 @@ def _keyify_list(l: List) -> Set:
 if len(sys.argv) < 2:
     usage()
 
-dj_utils.api_url = sys.argv[1]
+dj_utils.domjudge_webapp_folder_or_api_url = sys.argv[1]
 
 user_data = dj_utils.do_api_request('user')
 if 'admin' not in user_data['roles']:

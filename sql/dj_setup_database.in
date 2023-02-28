@@ -10,7 +10,6 @@ BINDIR="@domserver_bindir@"
 ETCDIR="@domserver_etcdir@"
 WEBAPPDIR="@domserver_webappdir@"
 EXAMPLEPROBDIR="@domserver_exampleprobdir@"
-BASEURL="@BASEURL@"
 
 PASSWDFILE="$ETCDIR/dbpasswords.secret"
 
@@ -225,23 +224,6 @@ remove_db_users()
 	verbose "DOMjudge database and user(s) removed."
 }
 
-check_netrc()
-{
-	if [ ! -f ~/.netrc ] && [ -f "$ETCDIR/initial_admin_password.secret" ]; then
-		echo "No ~/.netrc found, loading example data might fail. Create one (Y/n)?"
-		read -r createnetrc
-		if [ "$createnetrc" = "" ] || [ "$createnetrc" = "y" ] || [ "$createnetrc" = "Y" ]; then
-			initial_admin_password=$(cat $ETCDIR/initial_admin_password.secret)
-			machine=$(echo $BASEURL | cut -d '/' -f 3)
-			cat > ~/.netrc <<EOF
-machine $machine
-login admin
-password $initial_admin_password
-EOF
-		fi
-	fi
-}
-
 ### Script starts here ###
 
 # Parse command-line options:
@@ -306,9 +288,8 @@ install-examples)
 	read_dbpasswords
 
 	DBUSER=$domjudge_DBUSER PASSWD=$domjudge_PASSWD symfony_console domjudge:load-example-data
-	check_netrc
 	"$EXAMPLEPROBDIR"/generate-contest-yaml
-	( cd "$EXAMPLEPROBDIR" && yes y | "$BINDIR"/import-contest "${BASEURL}api" )
+	( cd "$EXAMPLEPROBDIR" && yes y | "$BINDIR"/import-contest "${WEBAPPDIR}" )
 	;;
 
 install-loadtest)
@@ -336,9 +317,8 @@ bare-install|install)
 	DBUSER=$domjudge_DBUSER PASSWD=$domjudge_PASSWD symfony_console domjudge:load-default-data
 	if [ "$1" = "install" ]; then
 		DBUSER=$domjudge_DBUSER PASSWD=$domjudge_PASSWD symfony_console domjudge:load-example-data
-		check_netrc
 		"$EXAMPLEPROBDIR"/generate-contest-yaml
-		( cd "$EXAMPLEPROBDIR" && yes y | "$BINDIR"/import-contest "${BASEURL}api" )
+		( cd "$EXAMPLEPROBDIR" && yes y | "$BINDIR"/import-contest "${WEBAPPDIR}" )
 	fi
 	if [ "$1" = "install" ]; then
 		verbose "SQL structure and default/example data installed."

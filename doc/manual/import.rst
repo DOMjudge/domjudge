@@ -1,14 +1,17 @@
 Adding contest data in bulk
 ===========================
 
-DOMjudge offers two ways to add or update contest data in bulk: using API
-endpoints and using the jury interface.
+DOMjudge offers three ways to add or update contest data in bulk: using API
+endpoints, using the CLI (which wraps the API) and using the jury interface.
 In general, we follow the `CCS specification`_ for all file formats involved.
 
 For using the API, the following examples require you to set up admin credentials
 in your `.netrc`_ file. You need to install `httpie`_ and replace the
 ``<API_URL>`` in the examples below with the API URL of your local DOMjudge
 installation.
+
+For using the CLI, you need to replace ``<WEBAPP_DIR>`` with the path to
+the ``webapp`` directory of the DOMserver.
 
 Importing team categories
 -------------------------
@@ -56,6 +59,10 @@ To import the file using the API run the following command::
 
     http --check-status -b -f POST "<API_URL>/users/groups" json@groups.json
 
+To import the file using the CLI run the following command::
+
+    <WEBAPP_DIR>/bin/console api:call -m POST -f json=groups.json users/groups
+
 Using the legacy TSV format
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -83,6 +90,11 @@ To import the file using the jury interface, go to `Import / export`, select
 To import the file using the API run the following command::
 
     http --check-status -b -f POST "<API_URL>/users/groups" tsv@groups.tsv
+
+To import the file using the CLI run the following command::
+
+    <WEBAPP_DIR>/bin/console api:call -m POST -f tsv=groups.tsv users/groups
+
 
 Importing team affiliations
 ---------------------------
@@ -128,6 +140,10 @@ To import the file using the jury interface, go to `Import / export`, select
 To import the file using the API run the following command::
 
     http --check-status -b -f POST "<API_URL>/users/organizations" json@organizations.json
+
+To import the file using the CLI run the following command::
+
+    <WEBAPP_DIR>/bin/console api:call -m POST -f json=organizations.json users/organizations
 
 Importing teams
 ---------------
@@ -181,6 +197,11 @@ To import the file using the API run the following command::
 
     http --check-status -b -f POST "<API_URL>/users/teams" json@teams.json
 
+To import the file using the CLI run the following command::
+
+    <WEBAPP_DIR>/bin/console api:call -m POST -f json=teams.json users/teams
+
+
 Using the legacy TSV format
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -216,6 +237,10 @@ To import the file using the jury interface, go to `Import / export`, select
 To import the file using the API run the following command::
 
     http --check-status -b -f POST "<API_URL>/users/teams" tsv@teams2.tsv
+
+To import the file using the CLI run the following command::
+
+    <WEBAPP_DIR>/bin/console api:call -m POST -f tsv=teams2.tsv users/teams
 
 Importing accounts
 ------------------
@@ -276,6 +301,11 @@ To import the file using the API run the following command::
 
     http --check-status -b -f POST "<API_URL>/users/accounts" yaml@accounts.yaml
 
+To import the file using the CLI run the following command::
+
+    <WEBAPP_DIR>/bin/console api:call -m POST -f yaml=accounts.yaml users/accounts
+
+
 Using the legacy TSV format
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -303,6 +333,10 @@ To import the file using the API run the following command::
 
     http --check-status -b -f POST "<API_URL>/users/accounts" tsv@accounts.tsv
 
+To import the file using the CLI run the following command::
+
+    <WEBAPP_DIR>/bin/console api:call -m POST -f tsv=accounts.tsv users/accounts
+
 Importing contest metadata
 --------------------------
 
@@ -329,6 +363,10 @@ and click `Import`.
 To import the file using the API run the following commands::
 
     http --check-status -b -f POST "<API_URL>/contests" yaml@contest.yaml
+
+To import the file using the CLI run the following command::
+
+    <WEBAPP_DIR>/bin/console api:call -m POST -f yaml=contest.yaml contests
 
 This call returns the new contest ID, which you need to import problems.
 
@@ -366,6 +404,9 @@ To import the file using the API run the following commands::
 
     http --check-status -b -f POST "<API_URL>/contests/<CID>/problems" data@problems.yaml
 
+To import the file using the CLI run the following command::
+
+    <WEBAPP_DIR>/bin/console api:call -m POST -f data=problems.yaml contests/<CID>/problems
 
 Replace ``<CID>`` with the contest ID that was returned when importing the
 contest metadata.
@@ -384,6 +425,10 @@ To import the file using the API run the following command::
 
     http --check-status -b -f POST "<API_URL>/contests/<CID>/problems" zip@problem.zip problem="<PROBID>"
 
+To import the file using the CLI run the following command::
+
+    <WEBAPP_DIR>/bin/console api:call -m POST -d problem=<PROBID> -f zip=problem.zip contest/<CID>/problems
+
 Replace ``<CID>`` with the contest ID that the previous command returns and
 ``<PROBID>`` with the problem ID (you can get that from the web interface or
 the API).
@@ -398,6 +443,12 @@ subsections, you can also use the script that we provide in
 Call it from your contest folder like this::
 
     misc-tools/import-contest <API_URL>
+
+to use the API, or::
+
+    misc-tools/import-contest <WEBAPP_DIR>
+
+to use the CLI.
 
 Importing from ICPC CMS API
 ---------------------------
@@ -423,14 +474,24 @@ Importing DOMjudge configuration
 DOMjudge exposes its configuration at the `<API_URL>/config` endpoint in JSON
 form and accepts a `PUT` request to load/update configuration.
 
-You can retrieve the current configuration via
+You can retrieve the current configuration using the API via::
 
     http --check-status --pretty=format "<API_URL>/config" > config.json
+
+or via the CLI using::
+
+    <WEBAPP_DIR>/bin/console api:call config > config.json
 
 For your convenience, we added a script to update configuration from a file
 called `config.json` in your current directory::
 
     misc-tools/configure-domjudge <API_URL>
+
+to use the API or::
+
+    misc-tools/configure-domjudge <WEBAPP_DIR>
+
+to use the CLI.
 
 .. _CCS specification: https://ccs-specs.icpc.io/2022-07/ccs_system_requirements#appendix-file-formats
 .. _.netrc: https://www.gnu.org/software/inetutils/manual/html_node/The-_002enetrc-file.html
