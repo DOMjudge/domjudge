@@ -9,7 +9,7 @@ use App\Entity\Problem;
 use Doctrine\ORM\EntityManagerInterface;
 use Generator;
 
-class ClarificationControllerTest extends BaseTest
+class ClarificationControllerTest extends BaseTestCase
 {
     protected ?string $apiEndpoint = 'clarifications';
 

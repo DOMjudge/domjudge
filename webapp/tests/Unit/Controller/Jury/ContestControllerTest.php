@@ -8,7 +8,7 @@ use App\Entity\QueueTask;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DomCrawler\Crawler;
 
-class ContestControllerTest extends JuryControllerTest
+class ContestControllerTest extends JuryControllerTestCase
 {
     protected static string  $identifyingEditAttribute = 'shortname';
     protected static ?string $defaultEditEntityName    = 'demo';

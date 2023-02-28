@@ -3,7 +3,7 @@
 namespace App\Tests\Unit\Command;
 
 use App\Command\ResetUserPasswordCommand;
-use App\Tests\Unit\BaseTest as BaseTest;
+use App\Tests\Unit\BaseTestCase as BaseTestCase;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Exception\InvalidArgumentException;
@@ -13,7 +13,7 @@ use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\Console\Tester\Constraint\CommandIsSuccessful;
 
-class ResetUserPasswordCommandTest extends BaseTest
+class ResetUserPasswordCommandTest extends BaseTestCase
 {
     public static string $demoPassword = 'demo';
     public static string $commandName = 'domjudge:reset-user-password';

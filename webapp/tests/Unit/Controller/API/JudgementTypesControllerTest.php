@@ -2,7 +2,7 @@
 
 namespace App\Tests\Unit\Controller\API;
 
-class JudgementTypesControllerTest extends BaseTest
+class JudgementTypesControllerTest extends BaseTestCase
 {
     protected ?string $apiEndpoint = 'judgement-types';
 

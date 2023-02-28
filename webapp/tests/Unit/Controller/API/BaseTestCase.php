@@ -3,12 +3,12 @@
 namespace App\Tests\Unit\Controller\API;
 
 use App\Entity\Contest;
-use App\Tests\Unit\BaseTest as BaseBaseTest;
+use App\Tests\Unit\BaseTestCase as BaseBaseTestCase;
 use Doctrine\ORM\EntityManagerInterface;
 use Generator;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 
-abstract class BaseTest extends BaseBaseTest
+abstract class BaseTestCase extends BaseBaseTestCase
 {
     protected static array $rootEndpoints = ['contests', 'judgehosts', 'users'];
 

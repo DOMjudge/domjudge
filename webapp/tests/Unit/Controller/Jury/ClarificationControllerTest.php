@@ -4,10 +4,10 @@ namespace App\Tests\Unit\Controller\Jury;
 
 use App\DataFixtures\Test\ClarificationFixture;
 use App\Entity\Clarification;
-use App\Tests\Unit\BaseTest;
+use App\Tests\Unit\BaseTestCase;
 use Doctrine\ORM\EntityManagerInterface;
 
-class ClarificationControllerTest extends BaseTest
+class ClarificationControllerTest extends BaseTestCase
 {
     protected array $roles = ['jury'];
 

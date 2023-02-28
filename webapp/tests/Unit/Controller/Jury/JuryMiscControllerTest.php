@@ -15,11 +15,11 @@ use App\DataFixtures\Test\DemoPreStartContestFixture;
 use App\DataFixtures\Test\DemoPreUnfreezeContestFixture;
 use App\Entity\Contest;
 use App\Service\ScoreboardService;
-use App\Tests\Unit\BaseTest;
+use App\Tests\Unit\BaseTestCase;
 use Doctrine\ORM\EntityManagerInterface;
 use Generator;
 
-class JuryMiscControllerTest extends BaseTest
+class JuryMiscControllerTest extends BaseTestCase
 {
     protected array $roles = ['jury'];
 

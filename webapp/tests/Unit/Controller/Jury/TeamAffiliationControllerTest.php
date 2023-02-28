@@ -6,7 +6,7 @@ use App\DataFixtures\Test\SampleAffiliationsFixture;
 use App\Entity\TeamAffiliation;
 use App\Service\ConfigurationService;
 
-class TeamAffiliationControllerTest extends JuryControllerTest
+class TeamAffiliationControllerTest extends JuryControllerTestCase
 {
     protected static string  $baseUrl                  = '/jury/affiliations';
     protected static array   $exampleEntries           = ['UU', 'Utrecht University', 1];

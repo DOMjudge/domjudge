@@ -2,9 +2,9 @@
 
 namespace App\Tests\Unit\Controller\Team;
 
-use App\Tests\Unit\BaseTest;
+use App\Tests\Unit\BaseTestCase;
 
-class ClarificationControllerTest extends BaseTest
+class ClarificationControllerTest extends BaseTestCase
 {
     protected array $roles = ['team'];
 

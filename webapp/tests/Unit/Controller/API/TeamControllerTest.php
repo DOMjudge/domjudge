@@ -5,7 +5,7 @@ namespace App\Tests\Unit\Controller\API;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
-class TeamControllerTest extends BaseTest
+class TeamControllerTest extends BaseTestCase
 {
     protected ?string $apiEndpoint = 'teams';
 

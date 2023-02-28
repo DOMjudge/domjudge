@@ -4,7 +4,7 @@ namespace App\Tests\Unit\Controller\API;
 
 use App\DataFixtures\Test\SampleSubmissionsFixture;
 
-class MetricsControllerTest extends BaseTest
+class MetricsControllerTest extends BaseTestCase
 {
     protected static array $fixtures = [
         SampleSubmissionsFixture::class,

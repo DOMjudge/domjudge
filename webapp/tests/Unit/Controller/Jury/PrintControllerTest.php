@@ -2,10 +2,10 @@
 
 namespace App\Tests\Unit\Controller\Jury;
 
-use App\Tests\Unit\BaseTest;
+use App\Tests\Unit\BaseTestCase;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
-class PrintControllerTest extends BaseTest
+class PrintControllerTest extends BaseTestCase
 {
     protected array $roles = ['jury'];
 

@@ -15,7 +15,7 @@ use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\SubmissionService;
-use App\Tests\Unit\BaseTest;
+use App\Tests\Unit\BaseTestCase;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\Expr\Join;
 use DOMElement;
@@ -23,7 +23,7 @@ use Generator;
 use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
-class QueueTaskControllerTest extends BaseTest
+class QueueTaskControllerTest extends BaseTestCase
 {
     private EntityManagerInterface $em;
     private SubmissionService $submissionService;

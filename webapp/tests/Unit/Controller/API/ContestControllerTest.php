@@ -2,7 +2,7 @@
 
 namespace App\Tests\Unit\Controller\API;
 
-class ContestControllerTest extends BaseTest
+class ContestControllerTest extends BaseTestCase
 {
     protected ?string $apiEndpoint = 'contests';
 

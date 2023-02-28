@@ -4,7 +4,7 @@ namespace App\Tests\Unit\Controller\Jury;
 
 use App\Entity\User;
 
-class UserControllerTest extends JuryControllerTest
+class UserControllerTest extends JuryControllerTestCase
 {
     protected static string  $identifyingEditAttribute = 'username';
     protected static ?string $defaultEditEntityName    = 'judgehost';

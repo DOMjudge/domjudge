@@ -24,7 +24,7 @@ use ZipArchive;
  *
  * @package App\Tests
  */
-abstract class BaseTest extends WebTestCase
+abstract class BaseTestCase extends WebTestCase
 {
     protected KernelBrowser $client;
 

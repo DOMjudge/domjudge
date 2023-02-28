@@ -8,7 +8,7 @@ use App\Entity\Problem;
 use App\Entity\Submission;
 use App\Entity\Team;
 use App\Service\SubmissionService;
-use App\Tests\Unit\BaseTest;
+use App\Tests\Unit\BaseTestCase;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Generator;
@@ -19,7 +19,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
  *
  * @package App\Tests\Unit\Controller\Jury
  */
-abstract class JuryControllerTest extends BaseTest
+abstract class JuryControllerTestCase extends BaseTestCase
 {
     protected array $roles                            = ['admin'];
     protected string $addButton                       = '';

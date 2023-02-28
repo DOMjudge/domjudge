@@ -2,10 +2,10 @@
 
 namespace App\Tests\Unit\Controller\Jury;
 
-use App\Tests\Unit\BaseTest;
+use App\Tests\Unit\BaseTestCase;
 use Generator;
 
-class BalloonControllerTest extends BaseTest
+class BalloonControllerTest extends BaseTestCase
 {
     protected array $roles = ['jury'];
 

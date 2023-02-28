@@ -4,7 +4,7 @@ namespace App\Tests\Unit\Controller\API;
 
 use App\DataFixtures\Test\DummyProblemFixture;
 
-class ProblemControllerTest extends BaseTest
+class ProblemControllerTest extends BaseTestCase
 {
     /* This tests with the anonymous user;
        for tests with the admin user see ProblemControllerAdminTest.

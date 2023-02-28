@@ -4,11 +4,11 @@ namespace App\Tests\Unit\Controller\Team;
 
 use App\Entity\Problem;
 use App\Entity\Testcase;
-use App\Tests\Unit\BaseTest;
+use App\Tests\Unit\BaseTestCase;
 use Doctrine\ORM\EntityManagerInterface;
 use Generator;
 
-class ProblemControllerTest extends BaseTest
+class ProblemControllerTest extends BaseTestCase
 {
     protected array $roles = ['team'];
 

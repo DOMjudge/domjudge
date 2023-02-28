@@ -9,7 +9,7 @@ use App\Entity\Contest;
 use Doctrine\ORM\EntityManagerInterface;
 use Generator;
 
-class BalloonsControllerTest extends BaseTest
+class BalloonsControllerTest extends BaseTestCase
 {
     public function getUnitContestId(): string
     {

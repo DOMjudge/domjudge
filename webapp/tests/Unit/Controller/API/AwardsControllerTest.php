@@ -7,7 +7,7 @@ use App\Entity\Contest;
 use App\Service\ScoreboardService;
 use Doctrine\ORM\EntityManagerInterface;
 
-class AwardsControllerTest extends BaseTest
+class AwardsControllerTest extends BaseTestCase
 {
     protected ?string $apiEndpoint = 'awards';
 

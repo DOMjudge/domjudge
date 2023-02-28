@@ -9,12 +9,12 @@ use App\DataFixtures\Test\SelfRegisteredUserFixture;
 use App\Entity\Contest;
 use App\Entity\Submission;
 use App\Entity\User;
-use App\Tests\Unit\BaseTest;
+use App\Tests\Unit\BaseTestCase;
 use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Generator;
 
-class PublicControllerTest extends BaseTest
+class PublicControllerTest extends BaseTestCase
 {
     protected static string $formFieldName   = 'user_registration[';
     protected static string $urlRegister     = '/register';
