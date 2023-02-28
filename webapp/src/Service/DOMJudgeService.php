@@ -38,6 +38,7 @@ use Doctrine\ORM\QueryBuilder;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Cookie;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\InputBag;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -52,6 +53,7 @@ use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 use ZipArchive;
 
 class DOMJudgeService
@@ -431,17 +433,20 @@ class DOMJudgeService
      *
      * This will result in all calls to checkrole() to return true.
      */
-    public function withAllRoles(callable $callable): void
+    public function withAllRoles(callable $callable, ?UserInterface $user = null): void
     {
         $currentToken = $this->tokenStorage->getToken();
         // We need a 'user' to create a token. However, even if you
         // are not logged in, a (anonymous) user is returned. This
         // check is just here to make sure the code does not crash
         // in strange circumstances.
-        if ($currentToken && $currentToken->getUser()) {
+        if (!$user && $currentToken && $currentToken->getUser()) {
+            $user = $currentToken->getUser();
+        }
+        if ($user) {
             $this->tokenStorage->setToken(
                 new UsernamePasswordToken(
-                    $currentToken->getUser(),
+                    $user,
                     'main',
                     ['ROLE_ADMIN']
                 )
@@ -606,11 +611,13 @@ class DOMJudgeService
     /**
      * Perform an internal API request to the given URL with the given data.
      *
+     * @param UploadedFile[] $files
+     *
      * @return mixed|null
      */
-    public function internalApiRequest(string $url, string $method = Request::METHOD_GET, array $queryData = [])
+    public function internalApiRequest(string $url, string $method = Request::METHOD_GET, array $queryOrPostData = [], array $files = [], bool $throw = false)
     {
-        $request  = Request::create('/api' . $url, $method, $queryData);
+        $request  = Request::create('/api' . $url, $method, $queryOrPostData, [], $files);
         if ($this->requestStack->getCurrentRequest() && $this->requestStack->getCurrentRequest()->hasSession()) {
             $request->setSession($this->requestStack->getSession());
         }
@@ -618,6 +625,9 @@ class DOMJudgeService
 
         $status = $response->getStatusCode();
         if ($status < 200 || $status >= 300) {
+            if ($throw) {
+                throw new HttpException($status, $response->getContent());
+            }
             $this->logger->warning(
                 "executing internal %s request to url %s: http status code: %d, response: %s",
                 [ $method, $url, $status, $response ]
