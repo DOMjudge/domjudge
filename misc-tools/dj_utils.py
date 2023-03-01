@@ -5,12 +5,10 @@ Part of the DOMjudge Programming Contest Jury System and licensed
 under the GNU GPL. See README and COPYING for details.
 '''
 
-import itertools
 import json
 import os
 import requests
 import requests.utils
-import shlex
 import subprocess
 import sys
 
@@ -148,14 +146,16 @@ def api_via_cli(name: str, method: str = 'GET', data: dict = {}, files: dict = {
         f'{domjudge_webapp_folder_or_api_url}/bin/console',
         'api:call',
         '-m',
-        shlex.quote(method),
-    ] + list(itertools.chain(*[
-        ['-d', f'{shlex.quote(item)}={shlex.quote(data[item])}'] for item in data
-    ])) + list(itertools.chain(*[
-        ['-f', f'{shlex.quote(item)}={shlex.quote(files[item])}'] for item in files
-    ])) + [
-        shlex.quote(name)
+        method
     ]
+
+    for item in data:
+        command.extend(['-d', f'{item}={data[item]}'])
+
+    for item in files:
+        command.extend(['-f', f'{item}={files[item]}'])
+
+    command.append(name)
 
     result = subprocess.run(command, capture_output=True)
     response = result.stdout.decode('ascii')
