@@ -125,7 +125,7 @@
                         {%- set item = attribute(row.data, key) %}
 
                         <td
-                           class="{{ item.cssclass|default('') }}{% if key == "status" %} {{ item.value|statusClass() }}{% endif %}"
+                           class="{{ item.cssclass|default('') }}{% if key == "status" and 'disabled' not in row.cssclass %} {{ item.value|statusClass() }}{% endif %}"
                                 {%- if item.title is defined %} title="{{ item.title }}"{% endif %}
                                 {%- if item.filterKey is defined and item.filterValue is defined %} data-{{ item.filterKey }}="{{ item.filterValue }}"{% endif %}
                                 {%- if item.sortvalue is defined %} data-sort="{{ item.sortvalue }}"{% endif %}

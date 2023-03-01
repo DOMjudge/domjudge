@@ -115,7 +115,8 @@ class LanguageController extends BaseController
             $langdata = array_merge($langdata, [
                 'entrypoint' => ['value' => $lang->getRequireEntryPoint() ? 'yes' : 'no'],
                 'extensions' => ['value' => implode(', ', $lang->getExtensions())],
-                'allowjudge' => ['value' => $lang->getAllowJudge() ? 'yes' : 'no'],
+                'allowjudge' => $lang->getAllowJudge() ?
+                    ['value' => 'yes'] : ['value' => 'no', 'cssclass'=>'text-danger font-weight-bold'],
                 'executable' => [
                     'value' => $executable === null ? '-' : $executable->getShortDescription(),
                     'link' => $executable === null ? null : $this->generateUrl('jury_executable', [
