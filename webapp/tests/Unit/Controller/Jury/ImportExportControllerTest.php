@@ -96,8 +96,8 @@ class ImportExportControllerTest extends BaseTest
         $yaml =<<<HEREDOC
 name: 'Demo contest'
 short-name: demo
-start-time: '2021-01-01T11:00:00+00:00'
-duration: '26285:00:00.000'
+start-time: '2022-01-01T11:00:00+00:00'
+duration: '26309:00:00.000'
 scoreboard-freeze-duration: '1:00:00'
 penalty-time: 20
 default-clars:
