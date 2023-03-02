@@ -1,7 +1,10 @@
 DOMjudge Programming Contest Judging System
 
-Version 7.3.5 - DEV
--------------------
+Version 7.3.5 - 5 February 2023
+-------------------------------
+ - Various security hardening options added.
+ - Removed phpinfo page as security measure.
+ - Last version of DOMjudge 7 as it is now EOL.
 
 Version 7.3.4 - 23 November 2022
 --------------------------------
