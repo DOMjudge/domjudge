@@ -1,5 +1,12 @@
 DOMjudge Programming Contest Judging System
 
+Version 8.0.2 - 5 February 2023
+-------------------------------
+ - Various security hardening options added.
+ - Removed phpinfo page as security measure.
+ - Updated debootstrap to Debian 11 version.
+ - Last version of DOMjudge 8.0 as it is now EOL.
+
 Version 8.0.1 - 11 July 2022
 ----------------------------
  - Bugfix to create user when creating a team
