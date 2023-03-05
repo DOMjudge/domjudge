@@ -11,7 +11,7 @@ GITSHA=$(git rev-parse HEAD || true)
 
 cat > ~/.my.cnf <<EOF
 [client]
-host=${MARIADB_PORT_3306_TCP_ADDR}
+host=sqlserver
 user=root
 password=${MYSQL_ROOT_PASSWORD}
 EOF
@@ -25,7 +25,7 @@ echo "GRANT SELECT, INSERT, UPDATE, DELETE ON \`domjudge\`.* TO 'domjudge'@'%' I
 echo "SET GLOBAL max_allowed_packet = 100*1024*1024;" | mysql
 
 # Generate a dbpasswords file
-echo "dummy:${MARIADB_PORT_3306_TCP_ADDR}:domjudge:domjudge:domjudge" > etc/dbpasswords.secret
+echo "dummy:sqlserver:domjudge:domjudge:domjudge" > etc/dbpasswords.secret
 
 # Generate APP_SECRET for symfony
 ( cd etc ; ./gensymfonysecret > symfony_app.secret )

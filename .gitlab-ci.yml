@@ -23,7 +23,8 @@ run unit tests:
   #   - apt-get update -yqq
   #   - apt-get install php-xdebug -yqq
   services:
-    - mariadb
+    - name: mariadb
+      alias: sqlserver
   variables:
     MYSQL_ROOT_PASSWORD: password
   parallel:
@@ -54,7 +55,8 @@ integration:
   image: docker:stable
   services:
     - docker:19-dind
-    - mariadb
+    - name: mariadb
+      alias: sqlserver
   parallel:
     matrix:
       - PHPVERSION: ["7.2","7.3","7.4"]
