@@ -96,70 +96,15 @@ machines.
 Copyright and licencing
 -----------------------
 
-DOMjudge is developed by Jaap Eldering, Nicky Gerritsen, Keith Johnson,
-Thijs Kinkhorst, Mart Pluijmaekers, Michael Vasseur and Tobias Werth;
-Peter van de Werken has retired as developer.
-Many other people have contributed:
-Michael Baer,
-Jelle Besseling,
-Jeroen Bransen,
-Daniel Brinkers,
-Mohammad Amin Chitgarha,
-Matt Claycomb,
-Stijn van Drongelen,
-Rob Franken,
-Marc Furon,
-Ragnar Groot Koerkamp,
-Kihoon Han,
-Matt Hermes,
-Seokju Hong,
-Michał Kaczanowicz,
-Yevgeny Kazakov,
-Robert King,
-Jacob Kleerekoper,
-Jason Klein,
-Andreas Kohn,
-Ruud Koot,
-Blaz Korecic,
-Ilya Kornakov,
-Alon Krymgand,
-Jan Kuipers,
-Mitsuru Kusumoto,
-Robin Lee,
-Tom Levy,
-Richard Lobb,
-Jeremy London,
-Shuibin Long,
-Edoardo Morassutto,
-Alex Muntada,
-Lyuzhi Pan,
-Dominik Paulus,
-Bert Peters,
-Tobias Polzer,
-Ludo Pulles,
-Rusty Rob,
-Jeroen Schot,
-Maarten Sijm,
-Matt Steele,
-Shuhei Takahashi,
-Sergei Vorobev,
-Hoai-Thu Vuong,
-Sheldon Warkentin,
-Christopher Weyand,
-Jeroen van Wolffelaar,
-Rick Wouters,
-Tim "S.D.Eagle" Zeitz,
-Xiaoyang Gu,
-and Github users dup4, LETS-BEE, sylxjtu, s911415.
-Some code has been ported from the ETH Zurich fork by Christoph
-Krautz, Thomas Rast et al.
-
 DOMjudge is Copyright (c) 2004 - |today| by the DOMjudge developers and contributors.
 
 DOMjudge, including its documentation, is free software; you can redistribute
 it and/or modify it under the terms of the GNU General Public License as
 published by the Free Software Foundation; either version 2, or (at your
 option) any later version. See the file COPYING for details.
+
+Please see the file CONTRIBUTORS.md in the code repository for a list
+of people who have contributed to DOMjudge.
 
 This software is partly based on code by other people. Please refer to
 individual files for acknowledgements.
