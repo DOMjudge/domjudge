@@ -239,6 +239,7 @@ if cat /opt/domjudge/domserver/webapp/var/log/prod.log | egrep '(CRITICAL|ERROR)
 fi
 
 # Check the Contest API:
+export DEBUG=1
 $CHECK_API -n -C -e -a 'strict=1' http://admin:$ADMINPASS@localhost/domjudge/api
 section_end api_check |& tee "$GITLABARTIFACTS/check_api.log"
 
