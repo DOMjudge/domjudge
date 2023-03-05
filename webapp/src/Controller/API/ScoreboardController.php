@@ -125,7 +125,6 @@ class ScoreboardController extends AbstractRestController
         $contest = $this->em->getRepository(Contest::class)->find($this->getContestId($request));
 
         // Get the event for this scoreboard.
-        // TODO: Add support for after_event_id.
         /** @var Event $event */
         $event = $this->em->createQueryBuilder()
             ->from(Event::class, 'e')
@@ -141,12 +140,14 @@ class ScoreboardController extends AbstractRestController
         if ($event) {
             // Build up scoreboard results.
             $results = [
-                'event_id' => (string)$event->getEventid(),
                 'time' => Utils::absTime($event->getEventtime()),
                 'contest_time' => Utils::relTime($event->getEventtime() - $contest->getStarttime()),
                 'state' => $contest->getState(),
                 'rows' => [],
             ];
+            if (!$request->query->getBoolean('strict')) {
+                $results['event_id'] = (string)$event->getEventid();
+            }
         }
 
         // Return early if there's nothing to display yet.
