@@ -76,7 +76,7 @@ php_version="${version:-}"
 sudo cp /opt/domjudge/domserver/etc/domjudge-fpm.conf "/etc/php/$php_version/fpm/pool.d/domjudge-fpm.conf"
 echo "php_admin_value[date.timezone] = Europe/Amsterdam" | sudo tee -a "/etc/php/$php_version/fpm/pool.d/domjudge-fpm.conf"
 sudo /usr/sbin/php-fpm${php_version}
-
+echo "date.timezone = Europe/Amsterdam" | sudo tee -a "/etc/php/$php_version/cli/php.ini"
 
 passwd=$(cat etc/initial_admin_password.secret)
 echo "machine localhost login admin password $passwd" >> ~www-data/.netrc
