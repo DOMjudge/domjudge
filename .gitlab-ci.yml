@@ -40,10 +40,6 @@ run unit tests:
     reports:
       junit:
         - unit-tests.xml
-  cache:
-    key: unit-tests
-    paths:
-      - lib/vendor/
 
 integration:
   stage: test
