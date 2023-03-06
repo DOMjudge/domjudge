@@ -5,10 +5,9 @@
 | DOMjudge Version | Supported          | PHP version supported |
 | ---------------- | ------------------ | --------------------- |
 | 8.x.x            | :warning:          | 7.4-8.2               |
+| 8.2.x            | :white_check_mark: | 7.4-8.2               |
 | 8.1.x            | :white_check_mark: | 7.4-8.2               |
-| 8.0.x            | :white_check_mark: | 7.2-8.0               |
-| 7.3.x            | :white_check_mark: | 7.2-7.4               |
-| < 7.3            | :x:                | :x:                   |
+| < 8.1            | :x:                | :x:                   |
 
 ## Reporting a Vulnerability
 
