@@ -109,15 +109,8 @@ class RejudgingType extends AbstractType
                 ->orderBy('j.hostname'),
         ]);
 
-        $verdicts = [
-            'correct',
-            'compiler-error',
-            'no-output',
-            'output-limit',
-            'run-error',
-            'timelimit',
-            'wrong-answer',
-        ];
+        $verdictsConfig = $this->dj->getDomjudgeEtcDir() . '/verdicts.php';
+        $verdicts = array_keys(include $verdictsConfig);
         $builder->add('verdicts', ChoiceType::class, [
             'label' => 'Verdict',
             'multiple' => true,
