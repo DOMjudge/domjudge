@@ -2,9 +2,10 @@
 
 '''
 import-contest -- Convenience script to import a contest (including metadata,
-teams and problems) via the command line.
+teams and problems) via the command line to the DOMjudge API or to a DOMjudge
+installation using the CLI.
 
-Reads credentials from ~/.netrc.
+Reads credentials from ~/.netrc when using the API.
 
 See also https://www.domjudge.org/docs/manual/main/import.html
 (replace main with the DOMjudge major.minor version if you are running a
@@ -29,7 +30,7 @@ cid = None
 
 
 def usage():
-    print(f'Usage {sys.argv[0]} <domjudge-api-url>')
+    print(f'Usage {sys.argv[0]} <domjudge-webapp-dir-or-api-url>')
     exit(1)
 
 
@@ -95,7 +96,7 @@ def import_images(entity: str, property: str, filename_regexes: List[str]):
 if len(sys.argv) < 2:
     usage()
 
-dj_utils.api_url = sys.argv[1]
+dj_utils.domjudge_webapp_folder_or_api_url = sys.argv[1]
 
 user_data = dj_utils.do_api_request('user')
 if 'admin' not in user_data['roles']:
