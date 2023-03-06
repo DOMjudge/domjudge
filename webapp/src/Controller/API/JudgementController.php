@@ -150,9 +150,9 @@ class JudgementController extends AbstractRestController implements QueryObjectT
 
         $specificJudgingRequested = $request->attributes->has('id')
             || $request->query->has('ids');
-        // If we don't have correct permissions or didn't request a specific
-        // judging (necessary for the event log), then exclude some judgings:
-        if (!$roleAllowsVisibility && !$specificJudgingRequested) {
+        // Only include invalid or too late submissions if the role allows it
+        // and we request these specific submissions.
+        if (!($roleAllowsVisibility && $specificJudgingRequested)) {
             $queryBuilder
                 ->andWhere('s.submittime < c.endtime')
                 ->andWhere('j.valid = 1');
