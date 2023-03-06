@@ -81,8 +81,8 @@ char tolower_char(char c)
 
 bool equal_case_insensitive(std::string a, std::string b)
 {
-	for (size_t i=1; i<a.length(); i++) a[i] = tolower_char(a[i]);
-	for (size_t i=1; i<b.length(); i++) b[i] = tolower_char(b[i]);
+	for (char &c : a) c = tolower_char(c);
+	for (char &c : b) c = tolower_char(c);
 
 	return a==b;
 }
