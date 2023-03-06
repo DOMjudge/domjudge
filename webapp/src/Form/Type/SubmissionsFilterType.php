@@ -104,17 +104,11 @@ class SubmissionsFilterType extends AbstractType
             "choices" => $teams,
             "attr" => ["data-filter-field" => "team-id"],
         ]);
-        $verdicts = [
-            "correct",
-            "compiler-error",
-            "no-output",
-            "output-limit",
-            "run-error",
-            "timelimit",
-            "wrong-answer",
-            "judging",
-            "queued",
-        ];
+
+        $verdictsConfig = $this->dj->getDomjudgeEtcDir() . '/verdicts.php';
+        $verdicts = array_keys(include $verdictsConfig);
+        $verdicts[] = "judging";
+        $verdicts[] = "queued";
         $builder->add("result", ChoiceType::class, [
             "label" => "Filter on result(s)",
             "multiple" => true,
