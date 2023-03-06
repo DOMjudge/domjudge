@@ -1,7 +1,7 @@
 DOMjudge Programming Contest Judging System
 
-Version 8.2.0 - DEV
--------------------
+Version 8.2.0 - 6 March 2023
+----------------------------
  - Various bugfixes & UI improvements.
  - Add support for Rust as submission language.
  - Add teamphotos to scoreboard zip.
