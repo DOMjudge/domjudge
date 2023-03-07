@@ -96,7 +96,7 @@ void compare_float(std::string judge, std::string team, flt jval, flt tval, flt 
 		flt absdiff = fabsl(tval-jval);
 		flt reldiff = fabsl((tval-jval)/jval);
 		if (float_abs_tol >= 0 && float_rel_tol >= 0) {
-			if (absdiff > float_abs_tol || reldiff > float_rel_tol) {
+			if (absdiff > float_abs_tol && reldiff > float_rel_tol) {
 				wrong_answer("Too large difference.\n Judge: %s\n Team: %s\n Absolute difference: %Lg (tolerance: %Lg%s)\n Relative difference: %Lg (tolerance: %Lg%s)%s",
 				             judge.c_str(), team.c_str(),
 				             absdiff, float_abs_tol, absdiff > float_abs_tol ? ", exceeded" : "",
