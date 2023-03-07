@@ -64,7 +64,7 @@ Many people have contributed over the years. Many thanks:
 Some code has been ported from the ETH Zurich fork by Christoph
 Krautz, Thomas Rast et al.
 
-The file (CONTRIBUTING.md)[CONTRIBUTING.md] has instructions on
+The file [CONTRIBUTING.md](CONTRIBUTING.md) has instructions on
 how to best contribute.
 
 ## Special thanks
