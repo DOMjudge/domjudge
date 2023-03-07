@@ -63,7 +63,7 @@ class CallApiActionCommand extends Command
             );
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         if (!in_array($input->getOption('method'), [Request::METHOD_GET, Request::METHOD_POST], true)) {
             $output->writeln('Error: only GET and POST methods are supported');
