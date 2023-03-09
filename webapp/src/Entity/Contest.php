@@ -298,6 +298,7 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
      * @ORM\Column(type="boolean", name="runtime_as_score_tiebreaker",
      *     options={"comment"="Is runtime used as tiebreaker instead of penalty?","default"=0},
      *     nullable=false)
+     * @Serializer\Groups({"Nonstrict"})
      */
     private bool $runtime_as_score_tiebreaker = false;
 
