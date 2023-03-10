@@ -59,7 +59,7 @@ class ProblemController extends BaseController
     public function indexAction(): Response
     {
         $problems = $this->em->createQueryBuilder()
-            ->select('partial p.{probid,externalid,name,timelimit,memlimit,outputlimit}', 'COUNT(tc.testcaseid) AS testdatacount')
+            ->select('partial p.{probid,externalid,name,timelimit,memlimit,outputlimit,problemtext_type}', 'COUNT(tc.testcaseid) AS testdatacount')
             ->from(Problem::class, 'p')
             ->leftJoin('p.testcases', 'tc')
             ->orderBy('p.probid', 'ASC')
