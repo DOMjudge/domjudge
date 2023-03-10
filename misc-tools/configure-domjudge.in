@@ -79,9 +79,7 @@ if os.path.exists('config.json'):
             print(f'  - missing keys from new config = {missing_keys}')
         if diffs or new_keys or missing_keys:
             if dj_utils.confirm('  - Upload these configuration changes?', True):
-                url = f'{dj_utils.api_url}/config'
-                response = requests.put(url, headers=dj_utils.headers, json=expected_config)
-                actual_config = dj_utils.parse_api_response('config', response)
+                actual_config = dj_utils.do_api_request('config', 'PUT', expected_config)
                 diffs, new_keys, missing_keys = compare_configs(
                         actual_config=actual_config,
                         expected_config=expected_config

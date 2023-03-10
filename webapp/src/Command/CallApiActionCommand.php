@@ -47,13 +47,19 @@ class CallApiActionCommand extends Command
                 'data',
                 'd',
                 InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY,
-                'POST data to use as key=value. Only allowed when the method is POST'
+                'POST data to use as key=value. Only allowed when the method is POST or PUT'
+            )
+            ->addOption(
+                'json',
+                'j',
+                InputOption::VALUE_REQUIRED,
+                'JSON body data to use. Only allowed when the method is POST or PUT'
             )
             ->addOption(
                 'file',
                 'f',
                 InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY,
-                'Files to use as field=filename. Only allowed when the method is POST'
+                'Files to use as field=filename. Only allowed when the method is POST or PUT'
             )
             ->addOption(
                 'user',
@@ -65,8 +71,8 @@ class CallApiActionCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        if (!in_array($input->getOption('method'), [Request::METHOD_GET, Request::METHOD_POST], true)) {
-            $output->writeln('Error: only GET and POST methods are supported');
+        if (!in_array($input->getOption('method'), [Request::METHOD_GET, Request::METHOD_POST, Request::METHOD_PUT], true)) {
+            $output->writeln('Error: only GET, POST and PUT methods are supported');
             return self::FAILURE;
         }
 
@@ -98,7 +104,7 @@ class CallApiActionCommand extends Command
 
         $data = [];
         $files = [];
-        if ($input->getOption('method') === Request::METHOD_POST) {
+        if (in_array($input->getOption('method'), [Request::METHOD_POST, Request::METHOD_PUT], true)) {
             foreach ($input->getOption('data') as $dataItem) {
                 $parts = explode('=', $dataItem, 2);
                 if (count($parts) !== 2) {
@@ -107,6 +113,10 @@ class CallApiActionCommand extends Command
                 }
 
                 $data[$parts[0]] = $parts[1];
+            }
+
+            if ($json = $input->getOption('json')) {
+                $data = array_merge($data, $this->dj->jsonDecode($json));
             }
 
             foreach ($input->getOption('file') as $fileItem) {
