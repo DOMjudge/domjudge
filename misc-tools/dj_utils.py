@@ -47,7 +47,7 @@ def parse_api_response(name: str, response: requests.Response):
     return json.loads(response.text)
 
 
-def do_api_request(name: str):
+def do_api_request(name: str, method: str = 'GET', jsonData: dict = {}):
     '''Perform an API call to the given endpoint and return its data.
 
     Based on whether `domjudge_webapp_folder_or_api_url` is a folder or URL this
@@ -55,6 +55,8 @@ def do_api_request(name: str):
 
     Parameters:
         name (str): the endpoint to call
+        method (str): the method to use, GET or PUT are supported
+        jsonData (dict): the JSON data to PUT. Only used when method is PUT
 
     Returns:
         The endpoint contents.
@@ -64,13 +66,16 @@ def do_api_request(name: str):
     '''
 
     if os.path.isdir(domjudge_webapp_folder_or_api_url):
-        return api_via_cli(name)
+        return api_via_cli(name, method, {}, {}, jsonData)
     else:
         global ca_check
         url = f'{domjudge_webapp_folder_or_api_url}/{name}'
 
         try:
-            response = requests.get(url, headers=headers, verify=ca_check)
+            if method == 'GET':
+                response = requests.get(url, headers=headers, verify=ca_check)
+            elif method == 'PUT':
+                response = requests.put(url, headers=headers, verify=ca_check, json=json)
         except requests.exceptions.SSLError as e:
             ca_check = not confirm(
                 "Can not verify certificate, ignore certificate check?", False)
@@ -82,7 +87,6 @@ def do_api_request(name: str):
         except requests.exceptions.RequestException as e:
             raise RuntimeError(e)
     return parse_api_response(name, response)
-
 
 def upload_file(name: str, apifilename: str, file: str, data: dict = {}):
     '''Upload the given file to the API at the given path with the given name.
@@ -126,14 +130,15 @@ def upload_file(name: str, apifilename: str, file: str, data: dict = {}):
     return parse_api_response(name, response)
 
 
-def api_via_cli(name: str, method: str = 'GET', data: dict = {}, files: dict = {}):
+def api_via_cli(name: str, method: str = 'GET', data: dict = {}, files: dict = {}, jsonData: dict = {}):
     '''Perform the given API request using the CLI
 
     Parameters:
         name (str): the endpoint to call
-        method (str): the method to use. Either GET or POST
-        data (dict): the POST data to use. Only used when method is POST
-        files (dict): the files to use. Only used when method is POST
+        method (str): the method to use. Either GET, POST or PUT
+        data (dict): the POST data to use. Only used when method is POST or PUT
+        files (dict): the files to use. Only used when method is POST or PUT
+        jsonData (dict): the JSON data to use. Only used when method is POST or PUT
 
     Returns:
         The parsed endpoint contents.
@@ -154,6 +159,9 @@ def api_via_cli(name: str, method: str = 'GET', data: dict = {}, files: dict = {
 
     for item in files:
         command.extend(['-f', f'{item}={files[item]}'])
+
+    if jsonData:
+        command.extend(['-j', json.dumps(jsonData)])
 
     command.append(name)
 
