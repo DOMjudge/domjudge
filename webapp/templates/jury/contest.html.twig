@@ -358,6 +358,7 @@
                         <th>Lazy eval</th>
                         <th></th>
                         <th></th>
+                        <th></th>
                     </tr>
                     </thead>
                     <tbody>
@@ -383,6 +384,13 @@
                                 <a href="{{ link }}">
                                     {{ problem.lazyEvalResults | printLazyMode }}
                                 </a>
+                            </td>
+                            <td>
+                                {% if problem.problem.problemtextType %}
+                                    <a title="Unlink problem from contest" href="{{ path('jury_problem_text', {'probId': problem.probid}) }}">
+                                        <i class="fas fa-file-{{ problem.problem.problemtextType }}"></i>
+                                    </a>
+                                {% endif %}
                             </td>
                             <td>
                                 {% if is_granted('ROLE_ADMIN') and not contest.isLocked %}
