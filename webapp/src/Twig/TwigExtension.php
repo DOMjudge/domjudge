@@ -12,6 +12,7 @@ use App\Entity\JudgingRun;
 use App\Entity\Language;
 use App\Entity\Submission;
 use App\Entity\SubmissionFile;
+use App\Entity\TeamCategory;
 use App\Entity\Testcase;
 use App\Service\AwardService;
 use App\Service\ConfigurationService;
@@ -119,6 +120,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         $user = $this->dj->getUser();
         $team = $user?->getTeam();
 
+        $selfRegistrationCategoriesCount = $this->em->getRepository(TeamCategory::class)->count(['allow_self_registration' => 1]);
         // These variables mostly exist for the header template.
         return [
             'current_contest_id'            => $this->dj->getCurrentContestCookie(),
@@ -147,6 +149,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
                                                $this->authorizationChecker->isGranted('ROLE_ADMIN') &&
                                                $this->config->get('data_source') === DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL,
             'doc_links'                     => $this->dj->getDocLinks(),
+            'allow_registration'            => $selfRegistrationCategoriesCount !== 0,
         ];
     }
 
