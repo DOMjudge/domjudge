@@ -3,7 +3,7 @@
 '''
 configure-domjudge -- Convenience script to update DOMjudge configuration.
 
-Reads credentials from ~/.netrc.
+Reads credentials from ~/.netrc when using the API.
 
 See also https://www.domjudge.org/docs/manual/main/import.html
 (replace main with the DOMjudge major.minor version if you are running a
@@ -23,8 +23,10 @@ from typing import List, Set
 sys.path.append('@domserver_libdir@')
 import dj_utils
 
+webappdir = '@domserver_webappdir@'
+
 def usage():
-    print(f'Usage {sys.argv[0]} <domjudge-webapp-dir-or-api-url>')
+    print(f'Usage: {sys.argv[0]} [<domjudge-api-url>]')
     exit(1)
 
 
@@ -40,7 +42,7 @@ def compare_configs(expected_config: Set, actual_config: Set, num_spaces=4) -> (
                     diffs.extend(d)
             else:
                 diffs.append(f'{space_string}- {k}:\n   {space_string}is: {actual_config[k]}\n  {space_string}new: {expected_config[k]}')
-    
+
     new_keys = set(expected_config.keys()).difference(set(actual_config.keys()))
     missing_keys = set(actual_config.keys()).difference(set(expected_config.keys()))
     return (diffs, new_keys, missing_keys)
@@ -50,10 +52,12 @@ def _keyify_list(l: List) -> Set:
     return { elem['id']: elem for elem in l }
 
 
-if len(sys.argv) < 2:
+if len(sys.argv) == 1:
+    dj_utils.domjudge_webapp_folder_or_api_url = webappdir
+elif len(sys.argv) == 2:
+    dj_utils.domjudge_webapp_folder_or_api_url = sys.argv[1]
+else:
     usage()
-
-dj_utils.domjudge_webapp_folder_or_api_url = sys.argv[1]
 
 user_data = dj_utils.do_api_request('user')
 if 'admin' not in user_data['roles']:

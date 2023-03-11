@@ -2,8 +2,8 @@
 
 '''
 import-contest -- Convenience script to import a contest (including metadata,
-teams and problems) via the command line to the DOMjudge API or to a DOMjudge
-installation using the CLI.
+teams and problems) from the command line. Defaults to using the CLI interface;
+Specify a DOMjudge API URL as to use that.
 
 Reads credentials from ~/.netrc when using the API.
 
@@ -27,10 +27,11 @@ sys.path.append('@domserver_libdir@')
 import dj_utils
 
 cid = None
+webappdir = '@domserver_webappdir@'
 
 
 def usage():
-    print(f'Usage {sys.argv[0]} <domjudge-webapp-dir-or-api-url>')
+    print(f'Usage: {sys.argv[0]} [<domjudge-api-url>]')
     exit(1)
 
 
@@ -92,11 +93,12 @@ def import_images(entity: str, property: str, filename_regexes: List[str]):
         else:
             print(f'Skipping {entity} {property} import.')
 
-
-if len(sys.argv) < 2:
+if len(sys.argv) == 1:
+    dj_utils.domjudge_webapp_folder_or_api_url = webappdir
+elif len(sys.argv) == 2:
+    dj_utils.domjudge_webapp_folder_or_api_url = sys.argv[1]
+else:
     usage()
-
-dj_utils.domjudge_webapp_folder_or_api_url = sys.argv[1]
 
 user_data = dj_utils.do_api_request('user')
 if 'admin' not in user_data['roles']:
