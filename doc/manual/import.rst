@@ -10,7 +10,7 @@ in your `.netrc`_ file. You need to install `httpie`_ and replace the
 ``<API_URL>`` in the examples below with the API URL of your local DOMjudge
 installation.
 
-For using the CLI, you need to replace ``<WEBAPP_DIR>`` with the path to
+To use the CLI, you need to replace ``<WEBAPP_DIR>`` with the path to
 the ``webapp`` directory of the DOMserver.
 
 Importing team categories
@@ -444,11 +444,11 @@ Call it from your contest folder like this::
 
     misc-tools/import-contest <API_URL>
 
-to use the API, or::
+to use the API, or simply::
 
-    misc-tools/import-contest <WEBAPP_DIR>
+    misc-tools/import-contest
 
-to use the CLI.
+to use the CLI. In this case you must run it from the DOMserver.
 
 Importing from ICPC CMS API
 ---------------------------
@@ -487,11 +487,11 @@ called `config.json` in your current directory::
 
     misc-tools/configure-domjudge <API_URL>
 
-to use the API or::
+to use the API, or simply::
 
-    misc-tools/configure-domjudge <WEBAPP_DIR>
+    misc-tools/configure-domjudge
 
-to use the CLI.
+to use the CLI. In this case you must run it from the DOMserver.
 
 .. _CCS specification: https://ccs-specs.icpc.io/2022-07/ccs_system_requirements#appendix-file-formats
 .. _.netrc: https://www.gnu.org/software/inetutils/manual/html_node/The-_002enetrc-file.html
