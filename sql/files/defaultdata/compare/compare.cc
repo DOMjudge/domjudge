@@ -97,20 +97,20 @@ void compare_float(std::string judge, std::string team, flt jval, flt tval, flt 
 		flt reldiff = fabsl((tval-jval)/jval);
 		if (float_abs_tol >= 0 && float_rel_tol >= 0) {
 			if (absdiff > float_abs_tol && reldiff > float_rel_tol) {
-				wrong_answer("Too large difference.\n Judge: %s\n Team: %s\n Absolute difference: %Lg (tolerance: %Lg%s)\n Relative difference: %Lg (tolerance: %Lg%s)%s",
+				wrong_answer("Too large difference.\n Judge: %s\n Team: %s\n Absolute difference: %Lg (tolerance: %Lg)\n Relative difference: %Lg (tolerance: %Lg)%s",
 				             judge.c_str(), team.c_str(),
-				             absdiff, float_abs_tol, absdiff > float_abs_tol ? ", exceeded" : "",
-				             reldiff, float_rel_tol, reldiff > float_rel_tol ? ", exceeded" : "",
+				             absdiff, float_abs_tol,
+				             reldiff, float_rel_tol,
 				             extra_msg.c_str());
 			}
 		} else if (float_abs_tol >= 0) {
 			if (absdiff > float_abs_tol) {
-				wrong_answer("Too large difference.\n Judge: %s\n Team: %s\n Absolute difference: %Lg (tolerance: %Lg, exceeded)%s",
+				wrong_answer("Too large difference.\n Judge: %s\n Team: %s\n Absolute difference: %Lg (tolerance: %Lg)%s",
 				             judge.c_str(), team.c_str(), absdiff, float_abs_tol, extra_msg.c_str());
 			}
 		} else if (float_rel_tol >= 0) {
 			if (reldiff > float_rel_tol) {
-				wrong_answer("Too large difference.\n Judge: %s\n Team: %s\n Relative difference: %Lg (tolerance: %Lg, exceeded)%s",
+				wrong_answer("Too large difference.\n Judge: %s\n Team: %s\n Relative difference: %Lg (tolerance: %Lg)%s",
 				             judge.c_str(), team.c_str(), reldiff, float_rel_tol, extra_msg.c_str());
 			}
 		}
