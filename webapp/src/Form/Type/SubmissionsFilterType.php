@@ -6,6 +6,7 @@ use App\Entity\Language;
 use App\Entity\Problem;
 use App\Entity\Team;
 use App\Entity\TeamCategory;
+use App\Service\DOMJudgeService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -18,8 +19,9 @@ class SubmissionsFilterType extends AbstractType
 {
     protected EntityManagerInterface $em;
 
-    public function __construct(EntityManagerInterface $em)
+    public function __construct(DOMJudgeService $dj, EntityManagerInterface $em)
     {
+        $this->dj = $dj;
         $this->em = $em;
     }
 
