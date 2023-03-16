@@ -1,7 +1,4 @@
 {
-    "angel-vladov/select2-theme-bootstrap4": {
-        "version": "0.2.0-beta.3"
-    },
     "brick/math": {
         "version": "0.9.3"
     },
