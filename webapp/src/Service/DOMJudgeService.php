@@ -315,11 +315,10 @@ class DOMJudgeService
                 ->select('r.rejudgingid, r.starttime, r.endtime')
                 ->from(Rejudging::class, 'r')
                 ->andWhere('r.endtime is null');
-            $curContest = $this->getCurrentContest();
-            if ($curContest !== null) {
+            if ($contest !== null) {
                 $rejudgings = $rejudgings->join('r.submissions', 's')
                     ->andWhere('s.contest = :contest')
-                    ->setParameter('contest', $curContest->getCid())
+                    ->setParameter('contest', $contest->getCid())
                     ->distinct();
             }
             $rejudgings = $rejudgings->getQuery()->getResult();
@@ -356,7 +355,7 @@ class DOMJudgeService
                     ->from(ExternalContestSource::class, 'ecs')
                     ->andWhere('ecs.contest = :contest')
                     ->andWhere('ecs.lastPollTime < :i OR ecs.lastPollTime is NULL')
-                    ->setParameter('contest', $this->getCurrentContest())
+                    ->setParameter('contest', $contest)
                     ->setParameter('i', time() - $this->config->get('external_contest_source_critical'))
                     ->getQuery()->getOneOrNullResult();
 
@@ -365,7 +364,7 @@ class DOMJudgeService
                                                      ->from(ExternalSourceWarning::class, 'w')
                                                      ->innerJoin('w.externalContestSource', 'ecs')
                                                      ->andWhere('ecs.contest = :contest')
-                                                     ->setParameter('contest', $this->getCurrentContest())
+                                                     ->setParameter('contest', $contest)
                                                      ->getQuery()
                                                      ->getSingleScalarResult();
             }
