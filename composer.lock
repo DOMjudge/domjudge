@@ -4,16 +4,49 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "50afb1ffb8911fefef39d5c1a925cee2",
+    "content-hash": "04743dca6ed8fb628c967bc9a728443f",
     "packages": [
         {
-            "name": "angel-vladov/select2-theme-bootstrap4",
-            "version": "1.0.2",
+            "name": "apalfrey/select2-bootstrap-5-theme",
+            "version": "1.3.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/apalfrey/select2-bootstrap-5-theme.git",
+                "reference": "ab448b2ac36a6f7f90b162e384ca2b1469a3cc1f"
+            },
             "dist": {
                 "type": "zip",
-                "url": "https://github.com/angel-vladov/select2-theme-bootstrap4/archive/1.0.2.zip"
+                "url": "https://api.github.com/repos/apalfrey/select2-bootstrap-5-theme/zipball/ab448b2ac36a6f7f90b162e384ca2b1469a3cc1f",
+                "reference": "ab448b2ac36a6f7f90b162e384ca2b1469a3cc1f",
+                "shasum": ""
             },
-            "type": "library"
+            "type": "library",
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Andrew Palfrey",
+                    "email": "apalfrey@apalfrey.me"
+                }
+            ],
+            "description": "Select2 theme for Bootstrap 5",
+            "homepage": "https://github.com/apalfrey/select2-bootstrap-5-theme",
+            "keywords": [
+                "bootstrap",
+                "bootstrap-5",
+                "bootstrap5",
+                "css",
+                "scss",
+                "select2",
+                "theme"
+            ],
+            "support": {
+                "issues": "https://github.com/apalfrey/select2-bootstrap-5-theme/issues",
+                "source": "https://github.com/apalfrey/select2-bootstrap-5-theme/tree/1.3.0"
+            },
+            "time": "2022-05-08T00:12:43+00:00"
         },
         {
             "name": "brick/math",
