@@ -2,11 +2,9 @@
 
 namespace App\Tests\Unit\Controller\API;
 
-class UserControllerTest extends BaseTestCase
+class UserControllerTest extends AccountBaseTestCase
 {
     protected ?string $apiEndpoint = 'users';
-
-    protected ?string $apiUser = 'admin';
 
     protected array $expectedObjects = [
         1 => [
@@ -47,17 +45,4 @@ class UserControllerTest extends BaseTestCase
             "enabled" => true
         ],
     ];
-
-    protected array $expectedAbsent = ['4242', 'nonexistent'];
-
-    public function testCreateUser(): void
-    {
-        $newUserPostData = ['username' => 'newUser',
-                            'name' => 'newUserWithName',
-                            'password' => 'xkcd-password-style-password',
-                            'roles' => ['team']];
-
-        $url = $this->helperGetEndpointURL($this->apiEndpoint);
-        $this->verifyApiJsonResponse('POST', $url, 201, 'admin', $newUserPostData);
-    }
 }
