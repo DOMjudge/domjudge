@@ -180,8 +180,8 @@ EOF;
         yield [['id' => 1, 'start_time' => null], 403, 'Current contest already started or about to start.', [DemoAboutToStartContestFixture::class]];
         yield [['id' => 1, 'start_time' => date('Y-m-d\TH:i:s', strtotime('+15 seconds'))], 403, 'New start_time not far enough in the future.'];
         yield [['id' => 1, 'start_time' => date('Y-m-d\TH:i:s', strtotime('+15 seconds')), 'force' => false], 403, 'New start_time not far enough in the future.'];
-        yield [['id' => 1, 'start_time' => 'some invalid start time'], 400, 'Invalid \u0022start_time\u0022 in request.'];
         yield [['id' => 1, 'start_time' => date('Y-m-d\TH:i:s', strtotime('+15 seconds')), 'force' => true], 204];
+        yield [['id' => 1, 'start_time' => 'some invalid start time'], 400, 'Invalid \u0022start_time\u0022 in request.'];
         yield [['id' => 1, 'start_time' => null, 'force' => true], 204, null, [DemoAboutToStartContestFixture::class]];
         yield [['id' => 1, 'start_time' => null], 204];
 
