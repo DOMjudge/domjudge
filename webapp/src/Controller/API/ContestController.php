@@ -358,20 +358,22 @@ class ContestController extends AbstractRestController
         $now      = (int)Utils::now();
         $changed  = false;
         if (!$request->request->has('id')) {
-            $response = new JsonResponse('Missing "id" in request.', Response::HTTP_BAD_REQUEST);
+            return new JsonResponse('Missing "id" in request.', Response::HTTP_BAD_REQUEST);
         } elseif (!$request->request->has('start_time') && !$request->request->has('scoreboard_thaw_time')) {
-            $response = new JsonResponse('Missing "start_time" or "scoreboard_thaw_time" in request.', Response::HTTP_BAD_REQUEST);
+            return new JsonResponse('Missing "start_time" or "scoreboard_thaw_time" in request.', Response::HTTP_BAD_REQUEST);
         } elseif ($request->request->get('id') != $contest->getApiId($this->eventLogService)) {
-            $response = new JsonResponse('Invalid "id" in request.', Response::HTTP_BAD_REQUEST);
+            return new JsonResponse('Invalid "id" in request.', Response::HTTP_BAD_REQUEST);
         } elseif ($request->request->has('start_time')) {
             // By default, it is not allowed to change the start time in the last 30 seconds before contest start.
             // We allow the "force" parameter to override this.
             if (!$request->request->getBoolean('force') &&
                 $contest->getStarttime() != null &&
                 $contest->getStarttime() < $now + 30) {
-                $response = new JsonResponse('Current contest already started or about to start.',
+                return new JsonResponse('Current contest already started or about to start.',
                     Response::HTTP_FORBIDDEN);
-            } elseif ($request->request->get('start_time') === null) {
+            }
+
+            if ($request->request->get('start_time') === null) {
                 $contest->setStarttimeEnabled(false);
                 $response = new Response('', Response::HTTP_NO_CONTENT);
                 $this->em->flush();
@@ -379,52 +381,51 @@ class ContestController extends AbstractRestController
             } else {
                 $date = date_create($request->request->get('start_time'));
                 if ($date === false) {
-                    $response = new JsonResponse('Invalid "start_time" in request.', Response::HTTP_BAD_REQUEST);
-                } else {
-                    $new_start_time = $date->getTimestamp();
-                    if (!$request->request->getBoolean('force') && $new_start_time < $now + 30) {
-                        $response = new JsonResponse('New start_time not far enough in the future.',
-                            Response::HTTP_FORBIDDEN);
-                    } else {
-                        $newStartTimeString = date('Y-m-d H:i:s e', $new_start_time);
-                        $contest->setStarttimeEnabled(true);
-                        $contest->setStarttime($new_start_time);
-                        $contest->setStarttimeString($newStartTimeString);
-                        $response = new Response('', Response::HTTP_NO_CONTENT);
-                        $this->em->flush();
-                        $changed = true;
-                    }
+                    return new JsonResponse('Invalid "start_time" in request.', Response::HTTP_BAD_REQUEST);
                 }
+
+                $new_start_time = $date->getTimestamp();
+                if (!$request->request->getBoolean('force') && $new_start_time < $now + 30) {
+                    return new JsonResponse('New start_time not far enough in the future.',
+                        Response::HTTP_FORBIDDEN);
+                }
+                $newStartTimeString = date('Y-m-d H:i:s e', $new_start_time);
+                $contest->setStarttimeEnabled(true);
+                $contest->setStarttime($new_start_time);
+                $contest->setStarttimeString($newStartTimeString);
+                $response = new Response('', Response::HTTP_NO_CONTENT);
+                $this->em->flush();
+                $changed = true;
             }
         } else { // $request->request->has('scoreboard_thaw_time')
             if (!$request->request->getBoolean('force') && $contest->getUnfreezetime() !== null) {
-                $response = new JsonResponse('Current contest already has a unfreeze time set.',
+                return new JsonResponse('Current contest already has a unfreeze time set.',
                     Response::HTTP_FORBIDDEN);
+            }
+
+            $date = date_create($request->request->get('scoreboard_thaw_time') ?? 'not a valid date');
+            if ($date === false) {
+                $response = new JsonResponse('Invalid "scoreboard_thaw_time" in request.', Response::HTTP_BAD_REQUEST);
             } else {
-                $date = date_create($request->request->get('scoreboard_thaw_time') ?? 'not a valid date');
-                if ($date === false) {
-                    $response = new JsonResponse('Invalid "scoreboard_thaw_time" in request.', Response::HTTP_BAD_REQUEST);
-                } else {
-                    $new_unfreeze_time = $date->getTimestamp();
-                    if (!$request->request->getBoolean('force') && $new_unfreeze_time < $now - 30) {
-                        $response = new JsonResponse('New scoreboard_thaw_time too far in the past.',
-                            Response::HTTP_FORBIDDEN);
-                    } else {
-                        $returnContest = false;
-                        if ($new_unfreeze_time < $now) {
-                            $new_unfreeze_time = $now;
-                            $returnContest = true;
-                        }
-                        $newUnfreezeTimeString = date('Y-m-d H:i:s e', $new_unfreeze_time);
-                        $contest->setUnfreezetime($new_unfreeze_time);
-                        $contest->setUnfreezetimeString($newUnfreezeTimeString);
-                        $this->em->flush();
-                        $changed = true;
-                        $response = new Response('', Response::HTTP_NO_CONTENT);
-                        if ($returnContest) {
-                            $response = $this->renderData($request, $contest);
-                        }
-                    }
+                $new_unfreeze_time = $date->getTimestamp();
+                if (!$request->request->getBoolean('force') && $new_unfreeze_time < $now - 30) {
+                    return new JsonResponse('New scoreboard_thaw_time too far in the past.',
+                        Response::HTTP_FORBIDDEN);
+                }
+
+                $returnContest = false;
+                if ($new_unfreeze_time < $now) {
+                    $new_unfreeze_time = $now;
+                    $returnContest = true;
+                }
+                $newUnfreezeTimeString = date('Y-m-d H:i:s e', $new_unfreeze_time);
+                $contest->setUnfreezetime($new_unfreeze_time);
+                $contest->setUnfreezetimeString($newUnfreezeTimeString);
+                $this->em->flush();
+                $changed = true;
+                $response = new Response('', Response::HTTP_NO_CONTENT);
+                if ($returnContest) {
+                    $response = $this->renderData($request, $contest);
                 }
             }
         }
