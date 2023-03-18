@@ -763,7 +763,7 @@ class ContestController extends AbstractRestController
             ->getOneOrNullResult();
 
         if ($contest === null) {
-            throw new NotFoundHttpException(sprintf('Object with ID \'%s\' not found', $id));
+            throw new NotFoundHttpException(sprintf('Object with ID \'%s\' not found', $request->attributes->get('cid')));
         }
 
         return $this->dj->getSamplesZipForContest($contest);
