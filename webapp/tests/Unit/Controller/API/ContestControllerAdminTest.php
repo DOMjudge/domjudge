@@ -2,10 +2,17 @@
 
 namespace App\Tests\Unit\Controller\API;
 
+use App\DataFixtures\Test\DemoAboutToStartContestFixture;
+use App\DataFixtures\Test\DemoPostUnfreezeContestFixture;
+use App\DataFixtures\Test\DemoPreEndContestFixture;
+use App\DataFixtures\Test\DemoPreStartContestFixture;
 use App\Entity\Contest;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
+use App\Utils\Utils;
+use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
+use Generator;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
@@ -127,5 +134,66 @@ EOF;
         // Verify we have no banner anymore
         $object = $this->verifyApiJsonResponse('GET', $url, 200, $this->apiUser);
         self::assertArrayNotHasKey('banner', $object);
+    }
+
+    /**
+     * @dataProvider provideChangeTimes
+     */
+    public function testChangeTimes(array $body, int $expectedResponseCode, ?string $expectedBodyContains = null, array $extraFixtures = [], bool $checkUnfreezeTime = false): void
+    {
+        $this->loadFixture(DemoPreStartContestFixture::class);
+        $this->loadFixtures($extraFixtures);
+        $id = 1;
+        if ($this->objectClassForExternalId !== null) {
+            $id = $this->resolveEntityId($this->objectClassForExternalId, (string)$id);
+        }
+        $url = $this->helperGetEndpointURL($this->apiEndpoint, (string)$id);
+        if (($body['id'] ?? null) === 1) {
+            $body['id'] = $id;
+        }
+
+        $content = $this->verifyApiResponse('PATCH', $url, $expectedResponseCode, $this->apiUser, $body);
+
+        if ($expectedBodyContains !== null) {
+            self::assertStringContainsString($expectedBodyContains, $content);
+        }
+        if ($checkUnfreezeTime) {
+            $currentTime = (int)Utils::now();
+            $contest = json_decode($content, true, 512, JSON_THROW_ON_ERROR);
+            $contestUnfreezeTime = (new DateTimeImmutable($contest['scoreboard_thaw_time']))->format('U');
+            // Allow the unfreeze to happen 1 within the last second, never in the future
+            self::assertTrue($contestUnfreezeTime >= $currentTime - 1 && $contestUnfreezeTime <= $currentTime, 'contest did not unfreeze within expected range');
+        }
+    }
+
+    public function provideChangeTimes(): Generator
+    {
+        // Note that if the first item contains "id", we replace it with the correct ID in the test
+
+        // General tests
+        yield [[], 400, "Missing \u0022id\u0022 in request."];
+        yield [['id' => 1], 400, "Missing \u0022start_time\u0022 or \u0022scoreboard_thaw_time\u0022 in request."];
+
+        // Tests for changing the start time
+        yield [['id' => 2, 'start_time' => null], 400, "Invalid \u0022id\u0022 in request."];
+        yield [['id' => 1, 'start_time' => null], 403, 'Current contest already started or about to start.', [DemoPreEndContestFixture::class]];
+        yield [['id' => 1, 'start_time' => null], 403, 'Current contest already started or about to start.', [DemoAboutToStartContestFixture::class]];
+        yield [['id' => 1, 'start_time' => date('Y-m-d\TH:i:s', strtotime('+15 seconds'))], 403, 'New start_time not far enough in the future.'];
+        yield [['id' => 1, 'start_time' => date('Y-m-d\TH:i:s', strtotime('+15 seconds')), 'force' => false], 403, 'New start_time not far enough in the future.'];
+        yield [['id' => 1, 'start_time' => 'some invalid start time'], 400, 'Invalid \u0022start_time\u0022 in request.'];
+        yield [['id' => 1, 'start_time' => date('Y-m-d\TH:i:s', strtotime('+15 seconds')), 'force' => true], 204];
+        yield [['id' => 1, 'start_time' => null, 'force' => true], 204, null, [DemoAboutToStartContestFixture::class]];
+        yield [['id' => 1, 'start_time' => null], 204];
+
+        // Tests for changing the unfreeze time
+        yield [['id' => 2, 'scoreboard_thaw_time' => date('Y-m-d\TH:i:s', strtotime('+15 seconds'))], 400, "Invalid \u0022id\u0022 in request."];
+        yield [['id' => 1, 'scoreboard_thaw_time' => null], 400, 'Invalid \u0022scoreboard_thaw_time\u0022 in request.'];
+        yield [['id' => 1, 'scoreboard_thaw_time' => 'some invalid start time'], 400, 'Invalid \u0022scoreboard_thaw_time\u0022 in request.'];
+        yield [['id' => 1, 'scoreboard_thaw_time' => date('Y-m-d\TH:i:s', strtotime('+15 seconds'))], 403, 'Current contest already has a unfreeze time set.', [DemoPostUnfreezeContestFixture::class]];
+        yield [['id' => 1, 'scoreboard_thaw_time' => date('Y-m-d\TH:i:s', strtotime('+15 seconds')), 'force' => false], 403, 'Current contest already has a unfreeze time set.', [DemoPostUnfreezeContestFixture::class]];
+        yield [['id' => 1, 'scoreboard_thaw_time' => date('Y-m-d\TH:i:s', strtotime('-60 seconds')), 'force' => false], 403, 'New scoreboard_thaw_time too far in the past.'];
+        yield [['id' => 1, 'scoreboard_thaw_time' => date('Y-m-d\TH:i:s', strtotime('+15 seconds')), 'force' => true], 204, null, [DemoPostUnfreezeContestFixture::class]];
+        yield [['id' => 1, 'scoreboard_thaw_time' => date('Y-m-d\TH:i:s', strtotime('+15 seconds'))], 204];
+        yield [['id' => 1, 'scoreboard_thaw_time' => date('Y-m-d\TH:i:s', strtotime('-15 seconds'))], 200, 'Demo contest', [], true];
     }
 }
