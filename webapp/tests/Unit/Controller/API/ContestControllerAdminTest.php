@@ -186,7 +186,7 @@ EOF;
         yield [['id' => 1, 'start_time' => null], 204];
 
         // Tests for changing the unfreeze time
-        yield [['id' => 2, 'scoreboard_thaw_time' => date('Y-m-d\TH:i:s', strtotime('+15 seconds'))], 400, "Invalid \u0022id\u0022 in request."];
+        yield [['id' => 4242, 'scoreboard_thaw_time' => date('Y-m-d\TH:i:s', strtotime('+15 seconds'))], 400, "Invalid \u0022id\u0022 in request."];
         yield [['id' => 1, 'scoreboard_thaw_time' => null], 400, 'Invalid \u0022scoreboard_thaw_time\u0022 in request.'];
         yield [['id' => 1, 'scoreboard_thaw_time' => 'some invalid start time'], 400, 'Invalid \u0022scoreboard_thaw_time\u0022 in request.'];
         yield [['id' => 1, 'scoreboard_thaw_time' => date('Y-m-d\TH:i:s', strtotime('+15 seconds'))], 403, 'Current contest already has a unfreeze time set.', [DemoPostUnfreezeContestFixture::class]];
