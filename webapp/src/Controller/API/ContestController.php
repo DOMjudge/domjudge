@@ -372,7 +372,6 @@ class ContestController extends AbstractRestController
                 $response = new JsonResponse('Current contest already started or about to start.',
                     Response::HTTP_FORBIDDEN);
             } elseif ($request->request->get('start_time') === null) {
-                $this->em->persist($contest);
                 $contest->setStarttimeEnabled(false);
                 $response = new Response('', Response::HTTP_NO_CONTENT);
                 $this->em->flush();
@@ -387,7 +386,6 @@ class ContestController extends AbstractRestController
                         $response = new JsonResponse('New start_time not far enough in the future.',
                             Response::HTTP_FORBIDDEN);
                     } else {
-                        $this->em->persist($contest);
                         $newStartTimeString = date('Y-m-d H:i:s e', $new_start_time);
                         $contest->setStarttimeEnabled(true);
                         $contest->setStarttime($new_start_time);
