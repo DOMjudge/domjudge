@@ -44,6 +44,7 @@ class JudgementController extends AbstractRestController implements QueryObjectT
 
         $verdictsConfig = $this->dj->getDomjudgeEtcDir() . '/verdicts.php';
         $this->verdicts = include $verdictsConfig;
+        $this->verdicts['aborted'] = 'JE'; /* happens for aborted judgings */
     }
 
     /**
