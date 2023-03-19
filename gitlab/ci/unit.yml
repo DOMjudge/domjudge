@@ -10,7 +10,7 @@
     MARIADB_PORT_3306_TCP_ADDR: sqlserver
   script:
     - set -eux
-    - if [ -z ${PHPVERSION+x} ]; then export PHPVERSION=7.4; fi
+    - if [ -z ${PHPVERSION+x} ]; then export PHPVERSION=8.1; fi
     - if [ -z ${TEST+x} ]; then export TEST="UNIT"; fi
     - if [ "$TEST" = "UNIT" ] && [ "$CRAWL_DATASOURCES" != "0" ]; then exit 0; fi
     - if [ "$TEST" = "E2E" ] && [ "$CRAWL_DATASOURCES" != "0" ] && [ "$CI_COMMIT_BRANCH" != "main" ]; then exit 0; fi

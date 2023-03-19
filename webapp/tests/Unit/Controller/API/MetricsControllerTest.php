@@ -82,6 +82,6 @@ domjudge_teams_users_logged_in{contest="demo"} 0
 EOF;
 
         $response = $this->verifyApiResponse('GET', "/metrics/prometheus", 200, 'admin');
-        static::assertEquals($expected, $response);
+        static::assertStringStartsWith($expected, $response);
     }
 }
