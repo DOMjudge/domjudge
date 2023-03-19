@@ -33,7 +33,12 @@ abstract class AccountBaseTestCase extends BaseTestCase
         foreach ($newUserPostData as $key => $expectedValue) {
             if ($key !== 'password') {
                 // For security we don't output the password in the API
-                self::assertEquals($newItems[$listKey][$key], $expectedValue);
+                $newItemValue = $newItems[$listKey][$key];
+                if ($key === 'roles' && in_array('admin', $newItemValue) && self::getContainer()->getParameter('kernel.debug')) {
+                    $newItemValue = array_diff($newItemValue, ['team']);
+                    // In development mode we add a team role to admin users for some API endpoints.
+                };
+                self::assertEquals($newItemValue, $expectedValue);
             }
         }
     }
@@ -57,6 +62,10 @@ abstract class AccountBaseTestCase extends BaseTestCase
                 'name' => 'newUserWithName',
                 'password' => 'xkcd-password-style-password',
                 'roles' => ['team']]];
+        yield [['username' => 'newAdmin',
+                'name' => 'newUserWithName',
+                'password' => 'xkcd-password-style-password',
+                'roles' => ['admin']]];
     }
 
     /**
