@@ -58,14 +58,16 @@ abstract class AccountBaseTestCase extends BaseTestCase
 
     public function provideNewAccount(): Generator
     {
-        yield [['username' => 'newUser-001',
+        $defaultData = ['username' => 'newUser-001',
                 'name' => 'newUserWithName',
                 'password' => 'xkcd-password-style-password',
-                'roles' => ['team']]];
-        yield [['username' => 'newAdmin',
-                'name' => 'newUserWithName',
-                'password' => 'xkcd-password-style-password',
-                'roles' => ['admin']]];
+                'roles' => ['team']];
+        $otherVariations = [['username' => 'newAdmin',
+                             'roles' => ['admin']]];
+        yield [$defaultData];
+        foreach ($otherVariations as $variation) {
+            yield [array_merge($defaultData, $variation)];
+        }
     }
 
     /**
