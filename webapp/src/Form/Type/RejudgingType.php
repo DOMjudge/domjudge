@@ -49,7 +49,7 @@ class RejudgingType extends AbstractType
         $builder->add('repeat', IntegerType::class, [
             'label' => 'Number of times to repeat this rejudging',
             'data' => 1,
-            'attr' => ['min' => 1, 'max' => 99]
+            'attr' => ['min' => 1, 'max' => 99],
         ]);
         $builder->add('contests', EntityType::class, [
             'label' => 'Contest',
@@ -57,7 +57,7 @@ class RejudgingType extends AbstractType
             'required' => false,
             'multiple' => true,
             'choice_label' => 'name',
-            'query_builder' => fn(EntityRepository $er) => $er
+            'query_builder' => fn (EntityRepository $er) => $er
                 ->createQueryBuilder('c')
                 ->where('c.enabled = 1')
                 ->orderBy('c.cid'),
@@ -76,7 +76,7 @@ class RejudgingType extends AbstractType
             'class' => Language::class,
             'required' => false,
             'choice_label' => 'name',
-            'query_builder' => fn(EntityRepository $er) => $er
+            'query_builder' => fn (EntityRepository $er) => $er
                 ->createQueryBuilder('l')
                 ->where('l.allowSubmit = 1')
                 ->orderBy('l.name'),
@@ -95,7 +95,7 @@ class RejudgingType extends AbstractType
             'required' => false,
             'multiple' => true,
             'choice_label' => 'name',
-            'query_builder' => fn(EntityRepository $er) => $er
+            'query_builder' => fn (EntityRepository $er) => $er
                 ->createQueryBuilder('u')
                 ->where('u.enabled = 1')
                 ->orderBy('u.name'),
@@ -106,7 +106,7 @@ class RejudgingType extends AbstractType
             'class' => Judgehost::class,
             'required' => false,
             'choice_label' => 'hostname',
-            'query_builder' => fn(EntityRepository $er) => $er
+            'query_builder' => fn (EntityRepository $er) => $er
                 ->createQueryBuilder('j')
                 ->orderBy('j.hostname'),
         ]);
@@ -122,8 +122,8 @@ class RejudgingType extends AbstractType
         $relativeTimeConstraints = [
             new Regex([
                 'pattern' => '/^[+-][0-9]+:[0-9]{2}(:[0-9]{2}(\.[0-9]{0,6})?)?$/',
-                'message' => 'Invalid relative time format'
-            ])
+                'message' => 'Invalid relative time format',
+            ]),
         ];
         $builder->add('after', TextType::class, [
             'label' => 'after',

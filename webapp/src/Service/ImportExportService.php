@@ -54,7 +54,6 @@ class ImportExportService
 
     /**
      * Get the YAML data for a given contest.
-     * @return array
      */
     public function getContestYamlData(Contest $contest): array
     {
@@ -429,7 +428,7 @@ class ImportExportService
                 $teamScore->numPoints,
                 $teamScore->totalTime,
                 $maxTime,
-                $groupWinner
+                $groupWinner,
             ];
         }
 
@@ -547,7 +546,7 @@ class ImportExportService
             $line = Utils::parseTsvLine(trim($line));
             $groupData[] = [
                 'categoryid' => @$line[0],
-                'name' => @$line[1]
+                'name' => @$line[1],
             ];
         }
 
@@ -764,7 +763,7 @@ class ImportExportService
                     'name' => @$line[4],
                     'country' => @$line[6],
                     'externalid' => $affiliationExternalid,
-                ]
+                ],
             ];
         }
         return $this->importTeamData($teamData, $message);
@@ -791,7 +790,7 @@ class ImportExportService
                 ],
                 'team_affiliation' => [
                     'externalid' => $team['organization_id'] ?? null,
-                ]
+                ],
             ];
         }
 
@@ -1016,7 +1015,7 @@ class ImportExportService
             if (!empty($accountItem['team'])) {
                 $team = $this->em->getRepository(Team::class)->findOneBy([
                     'name' => $accountItem['team']['name'],
-                    'category' => $accountItem['team']['category']
+                    'category' => $accountItem['team']['category'],
                 ]);
                 if ($team === null) {
                     $team = new Team();

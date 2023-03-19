@@ -1,4 +1,5 @@
 <?php declare(strict_types=1);
+
 namespace App\Entity;
 
 use App\Doctrine\DBAL\Types\JudgeTaskType;
@@ -59,9 +60,9 @@ class JudgeTask
      */
     private int $priority;
 
-    const PRIORITY_HIGH = -10;
-    const PRIORITY_DEFAULT = 0;
-    const PRIORITY_LOW = 10;
+    public const PRIORITY_HIGH = -10;
+    public const PRIORITY_DEFAULT = 0;
+    public const PRIORITY_LOW = 10;
 
     /**
      * @ORM\Column(type="integer", name="jobid", length=4,
@@ -163,7 +164,7 @@ class JudgeTask
     protected bool $valid = true;
 
     /**
-     * @var double|string
+     * @var float|string
      * @ORM\Column(type="decimal", precision=32, scale=9, name="starttime",
      *     options={"comment"="Time the judgetask was started", "unsigned"=true},
      *     nullable=true)

@@ -106,6 +106,7 @@
 	"require-dev": {
 		"ext-dom": "*",
 		"dama/doctrine-test-bundle": "^7.0",
+		"friendsofphp/php-cs-fixer": "^3.14",
 		"squizlabs/php_codesniffer": "*",
 		"symfony/debug-bundle": "5.4.*",
 		"symfony/maker-bundle": "^1.42",

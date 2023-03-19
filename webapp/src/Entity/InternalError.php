@@ -1,4 +1,5 @@
 <?php declare(strict_types=1);
+
 namespace App\Entity;
 
 use App\Doctrine\DBAL\Types\InternalErrorStatusType;
@@ -45,7 +46,7 @@ class InternalError
     private string $judgehostlog;
 
     /**
-     * @var double|string
+     * @var float|string
      * @ORM\Column(type="decimal", precision=32, scale=9, name="time",
      *     options={"comment"="Timestamp of the internal error", "unsigned"=true},
      *     nullable=false)

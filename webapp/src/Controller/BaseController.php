@@ -37,8 +37,6 @@ use Symfony\Component\Routing\RouterInterface;
  * Class BaseController
  *
  * Base controller other controllers can inherit from to get shared functionality.
- *
- * @package App\Controller
  */
 abstract class BaseController extends AbstractController
 {
@@ -324,7 +322,7 @@ abstract class BaseController extends AbstractController
                                         $messages = [
                                             sprintf('%s with %s "%s" is still referenced in %s, cannot delete.',
                                                     ucfirst($readableType), $primaryKeyColumn, $primaryKeyColumnValue,
-                                                    $targetReadableType)
+                                                    $targetReadableType),
                                         ];
                                         break 4;
                                 }
@@ -353,7 +351,7 @@ abstract class BaseController extends AbstractController
         KernelInterface $kernel,
         array $entities,
         string $redirectUrl
-    ) : Response {
+    ): Response {
         // Assume that we only delete entities of the same class.
         foreach ($entities as $entity) {
             assert(get_class($entities[0]) === get_class($entity));

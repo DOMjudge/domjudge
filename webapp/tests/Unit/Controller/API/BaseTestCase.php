@@ -12,7 +12,6 @@ abstract class BaseTestCase extends BaseBaseTestCase
 {
     protected static array $rootEndpoints = ['contests', 'judgehosts', 'users'];
 
-    /** @var KernelBrowser */
     protected KernelBrowser $client;
 
     /** The API endpoint to query for this test */

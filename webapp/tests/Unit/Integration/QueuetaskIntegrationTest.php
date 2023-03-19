@@ -24,6 +24,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Bundle\FrameworkBundle\Test\TestBrowserToken;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Exception;
 
 class QueuetaskIntegrationTest extends KernelTestCase
 {
@@ -370,7 +371,7 @@ class QueuetaskIntegrationTest extends KernelTestCase
     public function getConfig(string $name)
     {
         if (!array_key_exists($name, $this->configValues)) {
-            throw new \Exception("No configuration value set for '$name'");
+            throw new Exception("No configuration value set for '$name'");
         }
 
         return $this->configValues[$name];

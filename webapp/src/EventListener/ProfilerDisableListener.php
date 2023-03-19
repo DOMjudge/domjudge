@@ -10,7 +10,6 @@ use Symfony\Component\HttpKernel\Profiler\Profiler;
 
 /**
  * Class ProfilerDisableListener
- * @package App\EventListener
  */
 class ProfilerDisableListener implements EventSubscriberInterface
 {

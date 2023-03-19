@@ -10,7 +10,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * Class LoadGatlingDataCommand
- * @package App\Command
  */
 class LoadGatlingDataCommand extends Command
 {

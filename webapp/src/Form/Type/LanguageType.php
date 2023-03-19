@@ -55,7 +55,7 @@ class LanguageType extends AbstractExternalIdEntityType
             'required' => false,
             'placeholder' => '-- no executable --',
             'choice_label' => 'execid',
-            'query_builder' => fn(EntityRepository $er) => $er
+            'query_builder' => fn (EntityRepository $er) => $er
                 ->createQueryBuilder('e')
                 ->where('e.type = :compile')
                 ->setParameter('compile', 'compile')

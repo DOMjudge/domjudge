@@ -8,23 +8,23 @@ use Doctrine\Persistence\ObjectManager;
 
 class ContestTimeFixture extends AbstractTestDataFixture
 {
-                     //Name,                         Activation, Start, Freeze, End, Finalized, Unfreeze, Deactivation
-    const VALUES = [['beforeActivation',               5,         10,     15,    20,   25,        30,       35],
-                    ['beforeStart',                    0,          5,     10,    15,   20,        25,       30],
-                    ['beforeFreeze',                  -5,          0,      5,    10,   15,        20,       25],
-                    ['beforeEnd',                    -10,         -5,      0,     5,   10,        15,       20],
-                    ['beforeFinalized',              -15,        -10,     -5,     0,    5,        10,       15],
-                    ['beforeUnfreeze',               -20,        -15,    -10,    -5,    0,         5,       10],
-                    ['beforeDeactivation',           -25,        -20,    -15,   -10,   -5,         0,        5],
-                    ['afterDeactivation',            -35,        -30,    -25,   -20,  -15,       -10,       -5],
-                    ['beforeUnfreezeNoFinalize',     -20,        -15,    -10,    -5, null,         5,       10],
-                    ['beforeDeactivationNoFinalize', -25,        -20,    -15,   -10, null,         0,        5],
-                    ['afterDeactivationNoFinalize',  -35,        -30,    -25,   -20, null,       -10,       -5],
-                    ['beforeStartNFr',                 0,          5,   null,    15, null,      null,       30],
-                    ['beforeEndNFr',                 -10,         -5,   null,     5, null,      null,       20],
-                    ['beforeDeactivationNFr',        -25,        -20,   null,   -10, null,      null,        5],
-                    ['afterDeactivationNFr',         -35,        -30,   null,   -20, null,      null,       -5],
-                    ['noDeactivationNFr',            -35,        -30,   null,   -20, null,      null,     null]];
+                           // Name,                         Activation, Start, Freeze, End, Finalized, Unfreeze, Deactivation
+    public const VALUES = [['beforeActivation',               5,         10,     15,    20,   25,        30,       35],
+                           ['beforeStart',                    0,          5,     10,    15,   20,        25,       30],
+                           ['beforeFreeze',                  -5,          0,      5,    10,   15,        20,       25],
+                           ['beforeEnd',                    -10,         -5,      0,     5,   10,        15,       20],
+                           ['beforeFinalized',              -15,        -10,     -5,     0,    5,        10,       15],
+                           ['beforeUnfreeze',               -20,        -15,    -10,    -5,    0,         5,       10],
+                           ['beforeDeactivation',           -25,        -20,    -15,   -10,   -5,         0,        5],
+                           ['afterDeactivation',            -35,        -30,    -25,   -20,  -15,       -10,       -5],
+                           ['beforeUnfreezeNoFinalize',     -20,        -15,    -10,    -5, null,         5,       10],
+                           ['beforeDeactivationNoFinalize', -25,        -20,    -15,   -10, null,         0,        5],
+                           ['afterDeactivationNoFinalize',  -35,        -30,    -25,   -20, null,       -10,       -5],
+                           ['beforeStartNFr',                 0,          5,   null,    15, null,      null,       30],
+                           ['beforeEndNFr',                 -10,         -5,   null,     5, null,      null,       20],
+                           ['beforeDeactivationNFr',        -25,        -20,   null,   -10, null,      null,        5],
+                           ['afterDeactivationNFr',         -35,        -30,   null,   -20, null,      null,       -5],
+                           ['noDeactivationNFr',            -35,        -30,   null,   -20, null,      null,     null]];
 
     protected function getTime(?int $multiplier): ?string
     {

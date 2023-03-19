@@ -50,7 +50,7 @@ class MiscControllerTest extends BaseTestCase
 
         self::assertSelectorExists('html:contains("Example teamname")');
 
-        $h1s = $this->getCurrentCrawler()->filter('h1')->extract(array('_text'));
+        $h1s = $this->getCurrentCrawler()->filter('h1')->extract(['_text']);
         self::assertEquals('Submissions', $h1s[0]);
         self::assertEquals('Clarifications', $h1s[1]);
         self::assertEquals('Clarification Requests', $h1s[2]);

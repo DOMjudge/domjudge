@@ -55,9 +55,9 @@ class ScoreboardControllerTest extends BaseTestCase
     public function testFilteredScoreboard(array $filters, int $expectedCount): void
     {
         $contestId = $this->resolveEntityId(Contest::class, '1');
-        $filter = '?'.implode('&', $filters);
+        $filter = '?' . implode('&', $filters);
         $url = "/contests/$contestId/scoreboard";
-        $scoreboard = $this->verifyApiJsonResponse('GET', $url.$filter, 200, 'admin');
+        $scoreboard = $this->verifyApiJsonResponse('GET', $url . $filter, 200, 'admin');
         self::assertNotEmpty($scoreboard);
         self::assertEquals($expectedCount, count($scoreboard['rows']));
     }
@@ -72,9 +72,9 @@ class ScoreboardControllerTest extends BaseTestCase
         yield [['public=true'], 1]; // Scoreboard is frozen but has no results so those are the same
         yield [['public=false'], 1];
         yield [['sortorder=0'], 1];
-        yield [['sortorder=9','allteams=false'], 0];
-        yield [['sortorder=9','allteams=true'], 1];
-        yield [['sortorder=1','allteams=true'], 0];
+        yield [['sortorder=9', 'allteams=false'], 0];
+        yield [['sortorder=9', 'allteams=true'], 1];
+        yield [['sortorder=1', 'allteams=true'], 0];
         yield [['sortorder=999'], 0];
         yield [['allteams=false'], 1];
         yield [['allteams=true'], 1]; // Sortorder has default 0 -> hidden category system has 9

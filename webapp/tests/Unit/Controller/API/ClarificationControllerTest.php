@@ -74,7 +74,7 @@ class ClarificationControllerTest extends BaseTestCase
         $contestId = $this->getDemoContestId();
         $apiEndpoint = $this->apiEndpoint;
         $clarificationApi = "/contests/$contestId/$apiEndpoint";
-        foreach (['1',null] as $problemId) {
+        foreach (['1', null] as $problemId) {
             if ($problemId) {
                 $postfix = "?problem=$problemId";
                 $expectedNumber = 4;
@@ -84,7 +84,7 @@ class ClarificationControllerTest extends BaseTestCase
                 $expectedNumber = 5;
                 $mistakJudgingId = 2;
             }
-            $clarificationFromApi = $this->verifyApiJsonResponse('GET', $clarificationApi.$postfix, 200, 'demo');
+            $clarificationFromApi = $this->verifyApiJsonResponse('GET', $clarificationApi . $postfix, 200, 'demo');
             $this->assertCount($expectedNumber, $clarificationFromApi);
 
             $this->assertEquals("2", $clarificationFromApi[0]['from_team_id']);
@@ -101,7 +101,7 @@ class ClarificationControllerTest extends BaseTestCase
             $this->assertEquals("There was a mistake in judging this problem. Please try again", $clarificationFromApi[$mistakJudgingId]['text']);
             $this->assertArrayNotHasKey('answered', $clarificationFromApi[$mistakJudgingId]);
         }
-        $clarificationFromApi = $this->verifyApiJsonResponse('GET', $clarificationApi."?problem=9999", 200, 'demo');
+        $clarificationFromApi = $this->verifyApiJsonResponse('GET', $clarificationApi . "?problem=9999", 200, 'demo');
         $this->assertCount(0, $clarificationFromApi);
     }
 

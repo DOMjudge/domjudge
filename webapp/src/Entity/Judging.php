@@ -1,4 +1,5 @@
 <?php declare(strict_types=1);
+
 namespace App\Entity;
 
 use App\Utils\Utils;
@@ -25,8 +26,8 @@ use Ramsey\Uuid\Uuid;
  */
 class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterface
 {
-    const RESULT_CORRECT = 'correct';
-    const RESULT_COMPILER_ERROR = 'compiler-error';
+    public const RESULT_CORRECT = 'correct';
+    public const RESULT_COMPILER_ERROR = 'compiler-error';
 
     /**
      * @ORM\Id
@@ -39,7 +40,7 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
     protected int $judgingid;
 
     /**
-     * @var double|string|null
+     * @var float|string|null
      * @ORM\Column(type="decimal", precision=32, scale=9, name="starttime",
      *     options={"comment"="Time judging started", "unsigned"=true},
      *     nullable=true)
@@ -48,7 +49,7 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
     private $starttime;
 
     /**
-     * @var double|string|null
+     * @var float|string|null
      * @ORM\Column(type="decimal", precision=32, scale=9, name="endtime",
      *     options={"comment"="Time judging ended, null = still busy",
      *              "unsigned"=true},
@@ -147,7 +148,6 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
      * @Serializer\Exclude()
      */
     private string $uuid;
-
 
     /**
      * @ORM\ManyToOne(targetEntity="Contest")

@@ -103,7 +103,7 @@ class SubmissionControllerTest extends BaseTestCase
         yield [
             'demo',
             ['problem_id' => 1, 'language_id' => 'cpp', 'files' => 'this is not an array'],
-            "Unexpected value for parameter \"files\": expecting \"array\", got \"string\"."
+            "Unexpected value for parameter \"files\": expecting \"array\", got \"string\".",
         ];
         yield [
             'demo',
@@ -116,7 +116,7 @@ class SubmissionControllerTest extends BaseTestCase
                     ['data' => 'aaa'],
                 ],
             ],
-            "The 'files' attribute must be an array with a single item, containing an object with a base64 encoded data field."
+            "The 'files' attribute must be an array with a single item, containing an object with a base64 encoded data field.",
         ];
         yield [
             'demo',
@@ -128,7 +128,7 @@ class SubmissionControllerTest extends BaseTestCase
                     ['data' => '*&(^&*(^(&*(&*^'],
                 ],
             ],
-            "The 'files[0].data' attribute is not base64 encoded."
+            "The 'files[0].data' attribute is not base64 encoded.",
         ];
         yield [
             'demo',
@@ -140,7 +140,7 @@ class SubmissionControllerTest extends BaseTestCase
                     ['data' => 'aaa'],
                 ],
             ],
-            "No valid zip archive given"
+            "No valid zip archive given",
         ];
         yield [
             'demo',
@@ -151,7 +151,7 @@ class SubmissionControllerTest extends BaseTestCase
                     ['data' => 'aaa', 'mime' => 'wrong'],
                 ],
             ],
-            "The 'files[0].mime' attribute must be application/zip if provided."
+            "The 'files[0].mime' attribute must be application/zip if provided.",
         ];
         yield ['admin', ['problem_id' => 1, 'language' => 'cpp', 'team_id' => '1'], "No files specified."];
         yield ['admin', ['problem_id' => 1, 'language' => 'cpp', 'team_id' => '3'], "Team with ID '3' not found in contest or not enabled."];

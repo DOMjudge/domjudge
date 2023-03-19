@@ -33,7 +33,6 @@ use ZipArchive;
 
 /**
  * Class ImportProblemService
- * @package App\Service
  */
 class ImportProblemService
 {

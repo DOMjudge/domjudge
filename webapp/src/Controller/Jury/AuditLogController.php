@@ -98,7 +98,7 @@ class AuditLogController extends AbstractController
                     $data['where']['value'] = '';
             }
 
-            $auditlog_table[] = [ 'data' => $data, 'actions' => [] ];
+            $auditlog_table[] = ['data' => $data, 'actions' => []];
         }
         $table_fields = [
             'id' => ['title' => 'ID', 'sort' => false],

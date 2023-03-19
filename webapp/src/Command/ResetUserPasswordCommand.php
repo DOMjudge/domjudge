@@ -14,13 +14,11 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 /**
  * Class ResetUserPasswordCommand
- *
- * @package App\Command
  */
 class ResetUserPasswordCommand extends Command
 {
-    const STATUS_OK = 0;
-    const STATUS_ERROR = 1;
+    public const STATUS_OK = 0;
+    public const STATUS_ERROR = 1;
 
     protected EntityManagerInterface $em;
     protected UserPasswordHasherInterface $passwordHasher;

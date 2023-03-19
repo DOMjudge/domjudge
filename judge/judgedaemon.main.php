@@ -10,13 +10,13 @@ if (isset($_SERVER['REMOTE_ADDR'])) {
     die("Commandline use only");
 }
 
-require(ETCDIR . '/judgehost-config.php');
-require(LIBDIR . '/lib.misc.php');
+require ETCDIR . '/judgehost-config.php';
+require LIBDIR . '/lib.misc.php';
 
 $endpoints = [];
 $domjudge_config = [];
 
-function judging_directory(string $workdirpath, array $judgeTask) : string
+function judging_directory(string $workdirpath, array $judgeTask): string
 {
     if (filter_var($judgeTask['submitid'], FILTER_VALIDATE_INT) === false ||
         filter_var($judgeTask['jobid'], FILTER_VALIDATE_INT) === false) {
@@ -83,7 +83,7 @@ function close_curl_handles(): void
 {
     global $endpoints;
     foreach ($endpoints as $id => $endpoint) {
-        if (! empty($endpoint['ch'])) {
+        if (!empty($endpoint['ch'])) {
             curl_close($endpoint['ch']);
             unset($endpoints[$id]['ch']);
         }
@@ -237,10 +237,10 @@ function djconfig_get_value(string $name)
  * - positive integer: limit to this many bytes
  * - FALSE or -1: no size limit imposed
  */
-function rest_encode_file(string $file, $sizelimit = true) : string
+function rest_encode_file(string $file, $sizelimit = true): string
 {
     if ($sizelimit===true) {
-        $maxsize = (int) djconfig_get_value('output_storage_limit');
+        $maxsize = (int)djconfig_get_value('output_storage_limit');
     } elseif ($sizelimit===false || $sizelimit==-1) {
         $maxsize = -1;
     } elseif (is_int($sizelimit) && $sizelimit>0) {
@@ -270,7 +270,7 @@ function usage(): void
     exit;
 }
 
-function read_judgehostlog(int $n = 20) : string
+function read_judgehostlog(int $n = 20): string
 {
     ob_start();
     passthru("tail -n $n " . dj_escapeshellarg(LOGFILE));
@@ -286,7 +286,7 @@ function fetch_executable(
     string $hash,
     int $judgeTaskId,
     bool $combined_run_compare = false
-) : array {
+): array {
     list($execrunpath, $error, $buildlogpath) = fetch_executable_internal($workdirpath, $type, $execid, $hash, $combined_run_compare);
     if (isset($error)) {
         $extra_log = null;
@@ -319,13 +319,13 @@ function fetch_executable_internal(
     string $execid,
     string $hash,
     bool $combined_run_compare = false
-) : array {
+): array {
     $execdir         = join('/', [
         $workdirpath,
         'executable',
         $type,
         $execid,
-        $hash
+        $hash,
     ]);
     $execdeploypath  = $execdir . '/.deployed';
     $execbuilddir    = $execdir . '/build';
@@ -360,11 +360,11 @@ function fetch_executable_internal(
             ];
         }
         unset($files);
-        uasort($filesArray, fn(array $a, array $b) => strcmp($a['filename'], $b['filename']));
+        uasort($filesArray, fn (array $a, array $b) => strcmp($a['filename'], $b['filename']));
         $computedHash = md5(
             join(
                 array_map(
-                    fn($file) => $file['hash'] . $file['filename'] . $file['is_executable'],
+                    fn ($file) => $file['hash'] . $file['filename'] . $file['is_executable'],
                     $filesArray
                 )
             )
@@ -451,11 +451,11 @@ function fetch_executable_internal(
             return [null, "Invalid build file, must produce an executable file 'run'.", null];
         }
         if ($combined_run_compare) {
-            # For combined run and compare (i.e. for interactive problems), we
-            # need to wrap the jury provided 'run' script with 'runpipe' to
-            # handle the bidirectional communication.  First 'run' is renamed to
-            # 'runjury', and then replaced by the script below, which runs the
-            # team submission and runjury programs and connects their pipes.
+            // For combined run and compare (i.e. for interactive problems), we
+            // need to wrap the jury provided 'run' script with 'runpipe' to
+            // handle the bidirectional communication.  First 'run' is renamed to
+            // 'runjury', and then replaced by the script below, which runs the
+            // team submission and runjury programs and connects their pipes.
             $runscript = file_get_contents(LIBJUDGEDIR . '/run-interactive.sh');
             if (rename($execrunpath, $execrunjurypath) === false) {
                 error("Could not move file 'run' to 'runjury' in $execbuilddir");
@@ -512,8 +512,8 @@ if (isset($options['daemonid'])) {
     }
 }
 
-define('LOGFILE', LOGDIR.'/judge.'.$myhost.'.log');
-require(LIBDIR . '/lib.error.php');
+define('LOGFILE', LOGDIR . '/judge.' . $myhost . '.log');
+require LIBDIR . '/lib.error.php';
 
 $verbose = LOG_INFO;
 if (isset($options['verbose'])) {
@@ -543,14 +543,14 @@ if ($runuser === posix_getpwuid(posix_geteuid())['name'] ||
 
 // Set static environment variables for passing path configuration
 // to called programs:
-putenv('DJ_BINDIR='      . BINDIR);
-putenv('DJ_ETCDIR='      . ETCDIR);
-putenv('DJ_JUDGEDIR='    . JUDGEDIR);
-putenv('DJ_LIBDIR='      . LIBDIR);
+putenv('DJ_BINDIR=' . BINDIR);
+putenv('DJ_ETCDIR=' . ETCDIR);
+putenv('DJ_JUDGEDIR=' . JUDGEDIR);
+putenv('DJ_LIBDIR=' . LIBDIR);
 putenv('DJ_LIBJUDGEDIR=' . LIBJUDGEDIR);
-putenv('DJ_LOGDIR='      . LOGDIR);
-putenv('RUNUSER='        . $runuser);
-putenv('RUNGROUP='       . RUNGROUP);
+putenv('DJ_LOGDIR=' . LOGDIR);
+putenv('RUNUSER=' . $runuser);
+putenv('RUNGROUP=' . RUNGROUP);
 
 foreach ($EXITCODES as $code => $name) {
     $var = 'E_' . strtoupper(str_replace('-', '_', $name));
@@ -584,7 +584,7 @@ if (!empty($options['e'])) {
     $endpointID = $options['e'];
     $endpoint = $endpoints[$endpointID];
     $endpoints[$endpointID]['ch'] = setup_curl_handle($endpoint['user'], $endpoint['pass']);
-    $new_judging_run = (array) dj_json_decode(base64_decode(file_get_contents($options['j'])));
+    $new_judging_run = (array)dj_json_decode(base64_decode(file_get_contents($options['j'])));
     $judgeTaskId = $options['t'];
 
     for ($i = 0; $i < 5; $i++) {
@@ -612,8 +612,8 @@ if (!empty($options['e'])) {
 umask(0022);
 
 // Check basic prerequisites for chroot at judgehost startup
-logmsg(LOG_INFO, "🔏 Executing chroot script: '".CHROOT_SCRIPT." check'");
-system(LIBJUDGEDIR.'/'.CHROOT_SCRIPT.' check', $retval);
+logmsg(LOG_INFO, "🔏 Executing chroot script: '" . CHROOT_SCRIPT . " check'");
+system(LIBJUDGEDIR . '/' . CHROOT_SCRIPT . ' check', $retval);
 if ($retval!==0) {
     error("chroot validation check exited with exitcode $retval");
 }
@@ -669,7 +669,6 @@ while (true) {
         continue;
     }
 
-
     if ($endpoints[$endpointID]['waiting'] === false) {
         // Check for available disk space
         $free_space = disk_free_space(JUDGEDIR);
@@ -683,7 +682,7 @@ while (true) {
                         $candidateDirs[] = $workdirpath . "/" . $subdir;
                     }
                 }
-                uasort($candidateDirs, fn($a, $b) => filemtime($a) <=> filemtime($b));
+                uasort($candidateDirs, fn ($a, $b) => filemtime($a) <=> filemtime($b));
                 $after = $before = disk_free_space(JUDGEDIR);
                 logmsg(LOG_INFO,
                     "🗑 Low on diskspace, cleaning up (" . count($candidateDirs) . " potential candidates).");
@@ -724,7 +723,7 @@ while (true) {
 
     // nothing returned -> no open submissions for us
     if (empty($row)) {
-        if (! $endpoints[$endpointID]["waiting"]) {
+        if (!$endpoints[$endpointID]["waiting"]) {
             $endpoints[$endpointID]["waiting"] = true;
             if ($lastWorkdir !== null) {
                 cleanup_judging($lastWorkdir);
@@ -868,7 +867,6 @@ while (true) {
         $lastWorkdir = null;
     }
 
-
     system('mkdir -p ' . dj_escapeshellarg("$workdir/compile"), $retval);
     if ($retval !== 0) {
         error("Could not create '$workdir/compile'");
@@ -882,8 +880,8 @@ while (true) {
 
     if ($lastWorkdir !== $workdir) {
         // create chroot environment
-        logmsg(LOG_INFO, "  🔒 Executing chroot script: '".CHROOT_SCRIPT." start'");
-        system(LIBJUDGEDIR.'/'.CHROOT_SCRIPT.' start', $retval);
+        logmsg(LOG_INFO, "  🔒 Executing chroot script: '" . CHROOT_SCRIPT . " start'");
+        system(LIBJUDGEDIR . '/' . CHROOT_SCRIPT . ' start', $retval);
         if ($retval!==0) {
             logmsg(LOG_ERR, "chroot script exited with exitcode $retval");
             disable('judgehost', 'hostname', $myhost, "chroot script exited with exitcode $retval on $myhost");
@@ -977,9 +975,9 @@ function disable(
     ?string $extra_log = null
 ): void {
     global $myhost;
-    $disabled = dj_json_encode(array(
+    $disabled = dj_json_encode([
         'kind' => $kind,
-        $idcolumn => $id));
+        $idcolumn => $id]);
     $judgehostlog = read_judgehostlog();
     if (isset($extra_log)) {
         $judgehostlog .= "\n\n"
@@ -1018,15 +1016,15 @@ function read_metadata(string $filename): ?array
     return $res;
 }
 
-function cleanup_judging(string $workdir) : void
+function cleanup_judging(string $workdir): void
 {
     global $myhost;
     // revoke readablity for domjudge-run user to this workdir
     chmod($workdir, 0700);
 
     // destroy chroot environment
-    logmsg(LOG_INFO, "  🔓 Executing chroot script: '".CHROOT_SCRIPT." stop'");
-    system(LIBJUDGEDIR.'/'.CHROOT_SCRIPT.' stop', $retval);
+    logmsg(LOG_INFO, "  🔓 Executing chroot script: '" . CHROOT_SCRIPT . " stop'");
+    system(LIBJUDGEDIR . '/' . CHROOT_SCRIPT . ' stop', $retval);
     if ($retval!==0) {
         logmsg(LOG_ERR, "chroot script exited with exitcode $retval");
         disable('judgehost', 'hostname', $myhost, "chroot script exited with exitcode $retval on $myhost");
@@ -1129,7 +1127,7 @@ function compile(
             $execrunpath,
             $workdir,
         ], $files)));
-    logmsg(LOG_DEBUG, "Compile command: ".$compile_cmd);
+    logmsg(LOG_DEBUG, "Compile command: " . $compile_cmd);
     system($compile_cmd, $retval);
     if ($retval!==0) {
         warning("compile script exited with exitcode $retval");
@@ -1148,8 +1146,8 @@ function compile(
     if (isset($metadata['internal-error'])) {
         alert('error');
         $internalError = $metadata['internal-error'];
-        $compile_output .= "\n--------------------------------------------------------------------------------\n\n".
-            "Internal errors reported:\n".$internalError;
+        $compile_output .= "\n--------------------------------------------------------------------------------\n\n" .
+            "Internal errors reported:\n" . $internalError;
 
         if (preg_match('/^compile script: /', $internalError)) {
             $internalError = preg_replace('/^compile script: /', '', $internalError);
@@ -1168,7 +1166,7 @@ function compile(
     }
 
     // What does the exitcode mean?
-    if (! isset($EXITCODES[$retval])) {
+    if (!isset($EXITCODES[$retval])) {
         alert('error');
         $description = "Unknown exitcode from compile.sh for s$judgeTask[submitid]: $retval";
         logmsg(LOG_ERR, $description);
@@ -1177,7 +1175,7 @@ function compile(
         return false;
     }
 
-    logmsg(LOG_INFO, "  💻 Compilation: ($files[0]) '".$EXITCODES[$retval]."'");
+    logmsg(LOG_INFO, "  💻 Compilation: ($files[0]) '" . $EXITCODES[$retval] . "'");
     $compile_success = ($EXITCODES[$retval]==='correct');
 
     // Pop the compilation result back into the judging table.
@@ -1192,7 +1190,7 @@ function compile(
     request($url, 'PUT', $args);
 
     // compile error: our job here is done
-    if (! $compile_success) {
+    if (!$compile_success) {
         return false;
     }
 
@@ -1213,19 +1211,19 @@ function judge(array $judgeTask): bool
     putenv('CREATE_WRITABLE_TEMP_DIR=' . (CREATE_WRITABLE_TEMP_DIR ? '1' : ''));
 
     // These are set again below before comparing.
-    putenv('SCRIPTTIMELIMIT='          . $compile_config['script_timelimit']);
-    putenv('SCRIPTMEMLIMIT='           . $compile_config['script_memory_limit']);
-    putenv('SCRIPTFILELIMIT='          . $compile_config['script_filesize_limit']);
+    putenv('SCRIPTTIMELIMIT=' . $compile_config['script_timelimit']);
+    putenv('SCRIPTMEMLIMIT=' . $compile_config['script_memory_limit']);
+    putenv('SCRIPTFILELIMIT=' . $compile_config['script_filesize_limit']);
 
-    putenv('MEMLIMIT='                 . $run_config['memory_limit']);
-    putenv('FILELIMIT='                . $run_config['output_limit']);
-    putenv('PROCLIMIT='                . $run_config['process_limit']);
+    putenv('MEMLIMIT=' . $run_config['memory_limit']);
+    putenv('FILELIMIT=' . $run_config['output_limit']);
+    putenv('PROCLIMIT=' . $run_config['process_limit']);
     if ($run_config['entry_point'] !== null) {
         putenv('ENTRY_POINT=' . $run_config['entry_point']);
     } else {
         putenv('ENTRY_POINT');
     }
-    $output_storage_limit = (int) djconfig_get_value('output_storage_limit');
+    $output_storage_limit = (int)djconfig_get_value('output_storage_limit');
 
     $cpuset_opt = "";
     if (isset($options['daemonid'])) {
@@ -1287,7 +1285,6 @@ function judge(array $judgeTask): bool
     $hardtimelimit = $run_config['time_limit'] +
                      overshoot_time($run_config['time_limit'], $overshoot);
 
-
     $combined_run_compare = $compare_config['combined_run_compare'];
     list($run_runpath, $error) = fetch_executable(
         $workdirpath,
@@ -1320,7 +1317,7 @@ function judge(array $judgeTask): bool
     // While we already set those above to likely the same values from the
     // compile config, we do set them again from the compare config here.
     putenv('SCRIPTTIMELIMIT=' . $compare_config['script_timelimit']);
-    putenv('SCRIPTMEMLIMIT='  . $compare_config['script_memory_limit']);
+    putenv('SCRIPTMEMLIMIT=' . $compare_config['script_memory_limit']);
     putenv('SCRIPTFILELIMIT=' . $compare_config['script_filesize_limit']);
 
     $test_run_cmd = LIBJUDGEDIR . "/testcase_run.sh $cpuset_opt " .
@@ -1331,12 +1328,12 @@ function judge(array $judgeTask): bool
             $testcasedir,
             $run_runpath,
             $compare_runpath,
-            $compare_config['compare_args']
+            $compare_config['compare_args'],
         ]));
     system($test_run_cmd, $retval);
 
     // What does the exitcode mean?
-    if (! isset($EXITCODES[$retval])) {
+    if (!isset($EXITCODES[$retval])) {
         alert('error');
         error("Unknown exitcode ($retval) from testcase_run.sh for s$judgeTask[submitid]");
     }

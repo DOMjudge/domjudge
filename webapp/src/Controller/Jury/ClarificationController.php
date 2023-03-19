@@ -16,7 +16,6 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\Expr\Join;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -236,7 +235,7 @@ class ClarificationController extends AbstractController
         asort($teamlist, SORT_STRING | SORT_FLAG_CASE);
         $teamlist = ['domjudge-must-select' => '(select...)', '' => 'ALL'] + $teamlist;
 
-        $data= ['teams' => $teamlist ];
+        $data= ['teams' => $teamlist];
 
         $subject_options = [];
 
@@ -264,7 +263,7 @@ class ClarificationController extends AbstractController
                     continue;
                 }
                 $subject_options[$cshort]["$cid-" . $cp->getProbid()] =
-                    $cshort . ' - ' .$cp->getShortname() . ': ' . $cp->getProblem()->getName();
+                    $cshort . ' - ' . $cp->getShortname() . ': ' . $cp->getProblem()->getName();
             }
         }
 

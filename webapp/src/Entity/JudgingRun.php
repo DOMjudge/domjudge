@@ -1,4 +1,5 @@
 <?php declare(strict_types=1);
+
 namespace App\Entity;
 
 use App\Utils\Utils;
@@ -52,7 +53,7 @@ class JudgingRun extends BaseApiEntity
     private ?string $runresult;
 
     /**
-     * @var double|string|null
+     * @var float|string|null
      * @ORM\Column(type="float", name="runtime",
      *     options={"comment"="Submission running time on this testcase"},
      *     nullable=true)
@@ -61,7 +62,7 @@ class JudgingRun extends BaseApiEntity
     private $runtime;
 
     /**
-     * @var double|string|null
+     * @var float|string|null
      * @ORM\Column(type="decimal", precision=32, scale=9, name="endtime",
      *     options={"comment"="Time run judging ended", "unsigned"=true},
      *     nullable=true)

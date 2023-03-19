@@ -137,7 +137,7 @@ class QueueTaskControllerTest extends BaseTestCase
         $contest = $this->em->getRepository(Contest::class)->findOneBy(['shortname' => 'demo']);
         $problem = $this->em->getRepository(Problem::class)->findOneBy(['externalid' => 'hello']);
         $hello = $this->em->getRepository(ContestProblem::class)->find(
-            [ 'contest' => $contest, 'problem' => $problem ]
+            ['contest' => $contest, 'problem' => $problem]
         );
         $hello->setLazyEvalResults($problemLazy);
         $config   = self::getContainer()->get(ConfigurationService::class);

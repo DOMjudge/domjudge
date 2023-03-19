@@ -15,8 +15,6 @@ use App\Utils\Utils;
  *
  * This class represents the scoreboard for a single team. It exists because
  * we can do some smart things to speed up calculating data for a single team.
- *
- * @package App\Utils\Scoreboard
  */
 class SingleTeamScoreboard extends Scoreboard
 {
@@ -55,7 +53,7 @@ class SingleTeamScoreboard extends Scoreboard
         if ($this->rankCache !== null) {
             $teamScore->numPoints += $this->rankCache->getPointsRestricted();
             $teamScore->totalTime += $this->rankCache->getTotaltimeRestricted();
-            $teamScore->totalRuntime += $this->rankCache->getTotalruntimeRestricted(); 
+            $teamScore->totalRuntime += $this->rankCache->getTotalruntimeRestricted();
         }
         $teamScore->rank = $this->teamRank;
 

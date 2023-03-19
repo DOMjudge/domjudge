@@ -11,6 +11,7 @@
 /domjudge-scan.tar.xz
 /coverity-scan.tar.xz
 /cov-submit-data*.sh
+/.php-cs-fixer.cache
 __pycache__
 *.o
 .idea

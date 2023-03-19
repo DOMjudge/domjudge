@@ -1,4 +1,5 @@
 <?php declare(strict_types=1);
+
 namespace App\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
@@ -48,7 +49,7 @@ class Judgehost
     private bool $enabled = true;
 
     /**
-     * @var double|string
+     * @var float|string
      * @ORM\Column(type="decimal", precision=32, scale=9, name="polltime",
      *     options={"comment"="Time of last poll by autojudger",
      *              "unsigned"=true},

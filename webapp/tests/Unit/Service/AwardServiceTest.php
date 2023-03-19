@@ -13,6 +13,7 @@ use App\Service\EventLogService;
 use App\Utils\Scoreboard\Scoreboard;
 use ReflectionClass;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Generator;
 
 class AwardServiceTest extends KernelTestCase
 {
@@ -216,7 +217,7 @@ class AwardServiceTest extends KernelTestCase
         static::assertEquals($expectedMedalType, $awardsService->medalType($team, $this->contest, $this->scoreboard));
     }
 
-    public function provideMedalType(): \Generator
+    public function provideMedalType(): Generator
     {
         yield [0, 'gold-medal'];
         yield [1, 'silver-medal'];

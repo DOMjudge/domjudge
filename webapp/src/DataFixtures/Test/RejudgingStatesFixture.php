@@ -17,11 +17,11 @@ class RejudgingStatesFixture extends AbstractTestDataFixture
     public static function rejudgingStages(): array
     {
         $rejudgingStages = [];
-        $rejudgingStages[] = ['Unit',null,0,1,['demo']];
-        $rejudgingStages[] = ['0Percent_1',null,1,0,['demo']];
-        $rejudgingStages[] = ['0Percent_2',null,2,0,['demo']];
-        $rejudgingStages[] = ['Finished',true,1,0,['demo']];
-        $rejudgingStages[] = ['Canceled',false,2,0,['demo']];
+        $rejudgingStages[] = ['Unit', null, 0, 1, ['demo']];
+        $rejudgingStages[] = ['0Percent_1', null, 1, 0, ['demo']];
+        $rejudgingStages[] = ['0Percent_2', null, 2, 0, ['demo']];
+        $rejudgingStages[] = ['Finished', true, 1, 0, ['demo']];
+        $rejudgingStages[] = ['Canceled', false, 2, 0, ['demo']];
         return $rejudgingStages;
     }
 

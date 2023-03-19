@@ -7,14 +7,12 @@ use App\Entity\Executable;
 use App\Entity\ExecutableFile;
 use App\Entity\ImmutableExecutable;
 use App\Entity\Role;
-use App\Form\Type\ExecutableType;
 use App\Form\Type\ExecutableUploadType;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
-use FOS\RestBundle\Controller\Annotations as Rest;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\Form\Exception\InvalidArgumentException;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
@@ -74,9 +72,9 @@ class ExecutableController extends BaseController
             ->getQuery()->getResult();
         $executables      = array_column($executables, 'executable', 'execid');
         $table_fields     = [
-            'execid' => ['title' => 'ID', 'sort' => true,],
-            'type' => ['title' => 'type', 'sort' => true,],
-            'description' => ['title' => 'description', 'sort' => true,],
+            'execid' => ['title' => 'ID', 'sort' => true],
+            'type' => ['title' => 'type', 'sort' => true],
+            'description' => ['title' => 'description', 'sort' => true],
         ];
 
         $propertyAccessor  = PropertyAccess::createPropertyAccessor();
@@ -104,7 +102,7 @@ class ExecutableController extends BaseController
             $execactions[] = [
                 'icon' => 'file-download',
                 'title' => 'download this executable',
-                'link' => $this->generateUrl('jury_executable_download', ['execId' => $e->getExecid()])
+                'link' => $this->generateUrl('jury_executable_download', ['execId' => $e->getExecid()]),
             ];
 
             $executables_table[]            = [
@@ -141,7 +139,7 @@ class ExecutableController extends BaseController
                 $zip         = $this->dj->openZipFile($archive->getRealPath());
                 $filename    = $archive->getClientOriginalName();
                 $id          = substr($filename, 0, strlen($filename) - strlen(".zip"));
-                if (! preg_match ('#^[a-z0-9_-]+$#i', $id)) {
+                if (!preg_match('#^[a-z0-9_-]+$#i', $id)) {
                     throw new InvalidArgumentException(sprintf("File base name '%s' must contain only alphanumerics", $id));
                 }
                 $description = $id;
@@ -258,7 +256,7 @@ class ExecutableController extends BaseController
                 'attr' => [
                     'accept' => 'application/zip',
                 ],
-                'label' => 'Replace executable with new ZIP'
+                'label' => 'Replace executable with new ZIP',
             ])
             ->add('upload', SubmitType::class, ['label' => 'Replace'])
             ->getForm();
@@ -429,7 +427,7 @@ class ExecutableController extends BaseController
         $ranks          = [];
 
         $files = $immutable_executable->getFiles()->toArray();
-        usort($files, fn($a, $b) => $a->getFilename() <=> $b->getFilename());
+        usort($files, fn ($a, $b) => $a->getFilename() <=> $b->getFilename());
         foreach ($files as $file) {
             /** @var ExecutableFile $file */
             $filename = $file->getFilename();

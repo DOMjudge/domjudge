@@ -26,7 +26,7 @@ class SampleSubmissionsThreeTriesCorrectSameLanguageFixture extends AbstractTest
         $contest = $manager->getRepository(Contest::class)->findOneBy(['shortname' => 'demo']);
         foreach ($submissionData as $index => $submissionItem) {
             $problem = $contest->getProblems()->filter(
-                fn(ContestProblem $problem) => $problem->getShortname() === $submissionItem[1]
+                fn (ContestProblem $problem) => $problem->getShortname() === $submissionItem[1]
             )->first();
             $submission = (new Submission())
                 ->setContest($contest)

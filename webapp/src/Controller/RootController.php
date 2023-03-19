@@ -11,8 +11,6 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
  * Class RootController
  *
  * @Route("")
- *
- * @package App\Controller
  */
 class RootController extends BaseController
 {

@@ -222,7 +222,7 @@ class SubmissionController extends AbstractRestController
                 }
             }
             if (!$hasAny) {
-                $requiredListQuoted = array_map(fn($item) => "'$item'", $requiredList);
+                $requiredListQuoted = array_map(fn ($item) => "'$item'", $requiredList);
                 throw new BadRequestHttpException(
                     sprintf("One of the arguments %s is mandatory.", implode(', ', $requiredListQuoted)));
             }
@@ -552,7 +552,6 @@ class SubmissionController extends AbstractRestController
                 ->andWhere('s.contest = :cid')
                 ->setParameter('cid', $cid);
         }
-
 
         if ($request->query->has('language_id')) {
             $queryBuilder

@@ -33,7 +33,7 @@ class BalloonsControllerTest extends BaseTestCase
         $this->loadFixture(BalloonUserFixture::class);
         $contestId = $this->getUnitContestId();
         $url = "/contests/$contestId/balloons";
-        foreach (['admin','balloonuser'] as $user) {
+        foreach (['admin', 'balloonuser'] as $user) {
             $response = $this->verifyApiJsonResponse('GET', $url, 200, $user);
             static::assertEquals([], $response);
         }
@@ -44,7 +44,7 @@ class BalloonsControllerTest extends BaseTestCase
         $expectedBalloon = ['team'=>'t2: Example teamname', 'problem'=>'U', 'awards'=>'first in contest'];
         $contestId = $this->getUnitContestId();
         $url = "/contests/$contestId/balloons?todo=1";
-        $this->loadFixtures([BalloonCorrectSubmissionFixture::class,BalloonUserFixture::class]);
+        $this->loadFixtures([BalloonCorrectSubmissionFixture::class, BalloonUserFixture::class]);
         $response = $this->verifyApiJsonResponse('GET', $url, 200, 'admin');
         self::assertEquals(count($response), 1);
         foreach ($expectedBalloon as $key => $value) {

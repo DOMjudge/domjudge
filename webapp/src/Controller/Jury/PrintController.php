@@ -20,8 +20,6 @@ use Symfony\Component\Routing\Annotation\Route;
  *
  * @Route("/jury/print")
  * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_BALLOON')")
- *
- * @package App\Controller\Jury
  */
 class PrintController extends BaseController
 {

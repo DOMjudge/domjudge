@@ -17,12 +17,12 @@ final class Version20220210171746 extends AbstractMigration
         return false;
     }
 
-    public function getDescription() : string
+    public function getDescription(): string
     {
         return 'Add external ID field to teams';
     }
 
-    public function up(Schema $schema) : void
+    public function up(Schema $schema): void
     {
         // this up() migration is auto-generated, please modify it to your needs
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
@@ -33,7 +33,7 @@ final class Version20220210171746 extends AbstractMigration
         $this->addSql('UPDATE team SET externalid = teamid');
     }
 
-    public function down(Schema $schema) : void
+    public function down(Schema $schema): void
     {
         // this down() migration is auto-generated, please modify it to your needs
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');

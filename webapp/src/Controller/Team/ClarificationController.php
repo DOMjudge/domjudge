@@ -31,8 +31,6 @@ use Symfony\Component\Routing\Annotation\Route;
  * @Route("/team")
  * @IsGranted("ROLE_TEAM")
  * @Security("user.getTeam() !== null", message="You do not have a team associated with your account. ")
- *
- * @package App\Controller\Team
  */
 class ClarificationController extends BaseController
 {

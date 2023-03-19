@@ -7,14 +7,12 @@ use App\Doctrine\DBAL\Types\InternalErrorStatusType;
 use App\Entity\InternalError;
 use App\Entity\Judgehost;
 use App\Entity\JudgeTask;
-use App\Entity\Judging;
 use App\Entity\Problem;
 use App\Service\DOMJudgeService;
 use App\Service\RejudgingService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -91,7 +89,7 @@ class InternalErrorController extends BaseController
             'refresh' => [
                 'after' => 15,
                 'url' => $this->generateUrl('jury_internal_errors'),
-            ]
+            ],
         ]);
     }
 
@@ -137,7 +135,7 @@ class InternalErrorController extends BaseController
             'refresh' => [
                 'after' => 15,
                 'url' => $this->generateUrl('jury_internal_error', ['errorId' => $internalError->getErrorid()]),
-            ]
+            ],
         ]);
     }
 
@@ -182,7 +180,7 @@ class InternalErrorController extends BaseController
                 ob_flush();
                 flush();
             };
-            return $this->streamResponse(function () use ($request, $progressReporter, $internalError) {
+            return $this->streamResponse(function () use ($progressReporter, $internalError) {
                 $this->em->wrapInTransaction(function () use ($progressReporter, $internalError) {
                     $internalError->setStatus(InternalErrorStatusType::STATUS_RESOLVED);
                     $this->dj->setInternalError(

@@ -46,7 +46,7 @@ class ProblemType extends AbstractExternalIdEntityType
             'required' => false,
             'placeholder' => '-- default run script --',
             'choice_label' => 'description',
-            'query_builder' => fn(EntityRepository $er) => $er
+            'query_builder' => fn (EntityRepository $er) => $er
                 ->createQueryBuilder('e')
                 ->where('e.type = :run')
                 ->setParameter('run', 'run')
@@ -58,7 +58,7 @@ class ProblemType extends AbstractExternalIdEntityType
             'required' => false,
             'placeholder' => '-- default compare script --',
             'choice_label' => 'description',
-            'query_builder' => fn(EntityRepository $er) => $er
+            'query_builder' => fn (EntityRepository $er) => $er
                 ->createQueryBuilder('e')
                 ->where('e.type = :compare')
                 ->setParameter('compare', 'compare')

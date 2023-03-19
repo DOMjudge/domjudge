@@ -162,7 +162,7 @@ class UtilsTest extends TestCase
             'Europe/London',
             'America/St_Johns',
             'Pacific/Auckland',
-            'UTC'
+            'UTC',
         ];
         foreach ($timezones as $tz) {
             date_default_timezone_set($tz);
@@ -672,9 +672,9 @@ class UtilsTest extends TestCase
      * test image thumbnail creation
      * @dataProvider provideImagesToThumb
      */
-    public function testGetImageThumb($imageLocation, $mime) : void
+    public function testGetImageThumb($imageLocation, $mime): void
     {
-        $logo = dirname(__file__) . $imageLocation;
+        $logo = dirname(__FILE__) . $imageLocation;
         $image = file_get_contents($logo);
         $error = null;
         $tmp = sys_get_temp_dir();
@@ -688,7 +688,7 @@ class UtilsTest extends TestCase
         self::assertEquals($mime, $data['mime']);
     }
 
-    public function provideImagesToThumb() : \Generator
+    public function provideImagesToThumb(): Generator
     {
         yield ['/../../../public/images/teams/domjudge.jpg', 'image/jpeg'];
         yield ['/../../../public/js/cross.gif', 'image/gif'];
@@ -940,17 +940,17 @@ part.";
     {
         $bs  = "\\";
         $tab = "\t";
-        self::assertEquals(["team name", "rank"], Utils::parseTsvLine("team name".$tab."rank"));
-        self::assertEquals(["team\tname\t", "rank"], Utils::parseTsvLine("team".$bs."t"."name".$bs."t".$tab."rank"));
-        self::assertEquals(["team\nname\r", "rank"], Utils::parseTsvLine("team".$bs."n"."name".$bs."r".$tab."rank"));
-        self::assertEquals(["team\\name\\", "rank"], Utils::parseTsvLine("team".$bs.$bs."name".$bs.$bs.$tab."rank"));
-        self::assertEquals([$bs], Utils::parseTsvLine($bs.$bs));
-        self::assertEquals([$bs."t"], Utils::parseTsvLine($bs.$bs."t"));
+        self::assertEquals(["team name", "rank"], Utils::parseTsvLine("team name" . $tab . "rank"));
+        self::assertEquals(["team\tname\t", "rank"], Utils::parseTsvLine("team" . $bs . "tname" . $bs . "t" . $tab . "rank"));
+        self::assertEquals(["team\nname\r", "rank"], Utils::parseTsvLine("team" . $bs . "nname" . $bs . "r" . $tab . "rank"));
+        self::assertEquals(["team\\name\\", "rank"], Utils::parseTsvLine("team" . $bs . $bs . "name" . $bs . $bs . $tab . "rank"));
+        self::assertEquals([$bs], Utils::parseTsvLine($bs . $bs));
+        self::assertEquals([$bs . "t"], Utils::parseTsvLine($bs . $bs . "t"));
         self::assertEquals(["Team,,, name"], Utils::parseTsvLine("Team,,, name\n"));
-        self::assertEquals(["Team", "", "", " nm "], Utils::parseTsvLine("Team".$tab.$tab.$tab." nm \r\n"));
-        self::assertEquals(["tea\\mname", "rank"], Utils::parseTsvLine("tea".$bs.$bs."mname".$tab."rank"));
-        self::assertEquals(["team nåme…", "rank"], Utils::parseTsvLine("team nåme…".$tab."rank"));
-        self::assertEquals(["team🎈name", "rank"], Utils::parseTsvLine("team🎈name".$tab."rank"));
+        self::assertEquals(["Team", "", "", " nm "], Utils::parseTsvLine("Team" . $tab . $tab . $tab . " nm \r\n"));
+        self::assertEquals(["tea\\mname", "rank"], Utils::parseTsvLine("tea" . $bs . $bs . "mname" . $tab . "rank"));
+        self::assertEquals(["team nåme…", "rank"], Utils::parseTsvLine("team nåme…" . $tab . "rank"));
+        self::assertEquals(["team🎈name", "rank"], Utils::parseTsvLine("team🎈name" . $tab . "rank"));
     }
 
     /**

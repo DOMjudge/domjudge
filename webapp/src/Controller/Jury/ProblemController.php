@@ -137,7 +137,7 @@ class ProblemController extends BaseController
                     'title' => 'view problem description',
                     'link' => $this->generateUrl('jury_problem_text', [
                         'probId' => $p->getProbid(),
-                    ])
+                    ]),
                 ];
             } else {
                 $problemactions[] = [];
@@ -147,7 +147,7 @@ class ProblemController extends BaseController
                 'title' => 'export problem as zip-file',
                 'link' => $this->generateUrl('jury_export_problem', [
                     'problemId' => $p->getProbid(),
-                ])
+                ]),
             ];
 
             if ($this->isGranted('ROLE_ADMIN')) {
@@ -156,7 +156,7 @@ class ProblemController extends BaseController
                     'title' => 'edit this problem',
                     'link' => $this->generateUrl('jury_problem_edit', [
                         'probId' => $p->getProbid(),
-                    ])
+                    ]),
                 ];
                 $problemactions[] = [
                     'icon' => 'trash-alt',
@@ -506,7 +506,7 @@ class ProblemController extends BaseController
             ->getResult();
 
         /** @var Testcase[] $testcases */
-        $testcases = array_map(fn($data) => $data[0], $testcaseData);
+        $testcases = array_map(fn ($data) => $data[0], $testcaseData);
 
         if ($request->isMethod('POST')) {
             if (!empty($lockedContests)) {

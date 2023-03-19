@@ -21,8 +21,6 @@ use ZipArchive;
 
 /**
  * This abstract class can be used to have default functionality to test cases.
- *
- * @package App\Tests
  */
 abstract class BaseTestCase extends WebTestCase
 {
@@ -114,10 +112,10 @@ abstract class BaseTestCase extends WebTestCase
 
         // Submit form.
         $button = $crawler->selectButton('Sign in');
-        $form = $button->form(array(
+        $form = $button->form([
             '_username'   => $username,
             '_password'   => $password,
-        ));
+        ]);
         $this->client->followRedirects();
         $this->client->submit($form);
         $response = $this->client->getResponse();
@@ -262,8 +260,6 @@ abstract class BaseTestCase extends WebTestCase
 
     /**
      * Get the contest ID of the demo contest based on the data source setting.
-     *
-     * @return string
      */
     protected function getDemoContestId(): string
     {

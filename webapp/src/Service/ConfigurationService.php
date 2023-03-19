@@ -17,8 +17,6 @@ use Symfony\Component\Config\Resource\FileResource;
 
 /**
  * Class ConfigurationService
- *
- * @package App\Service
  */
 class ConfigurationService
 {
@@ -32,13 +30,6 @@ class ConfigurationService
 
     /**
      * ConfigurationService constructor.
-     *
-     * @param EntityManagerInterface      $em
-     * @param LoggerInterface             $logger
-     * @param ConfigCacheFactoryInterface $configCache
-     * @param bool                        $debug
-     * @param string                      $cacheDir
-     * @param string                      $etcDir
      */
     public function __construct(
         EntityManagerInterface $em,
@@ -246,7 +237,7 @@ EOF;
                 default:
                     $this->logger->warning(
                         "configuration option '%s' has unknown type '%s'",
-                        [ $specName, $spec['type'] ]
+                        [$specName, $spec['type']]
                     );
             }
             if ($optionToSet->getValue() != $oldValue) {
@@ -274,7 +265,7 @@ EOF;
     {
         /** @var Judging[] $judgings */
         $judgings = $this->em->getRepository(Judging::class)->findBy(
-            [ 'verified' => 0, 'valid' => 1]
+            ['verified' => 0, 'valid' => 1]
         );
 
         $judgings_per_contest = [];
@@ -294,8 +285,6 @@ EOF;
 
     /**
      * Get the configuration values from the database.
-     *
-     * @return array
      */
     protected function getDbValues(): array
     {
@@ -314,8 +303,6 @@ EOF;
      * Find list of options for configuration parameters that specify a known executable.
      *
      * @param string $type Any of "compare", "compile", "run"
-     *
-     * @return array
      */
     private function findExecutableOptions(string $type): array
     {

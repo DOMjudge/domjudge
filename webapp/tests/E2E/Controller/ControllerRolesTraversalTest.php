@@ -26,9 +26,9 @@ class ControllerRolesTraversalTest extends BaseTestCase
      * '/logout'                //       Application links
      * '/login'
      **/
-    protected static array $substrings = ['http','activate','deactivate','/jury/change-contest/','/text','/input','/output','/export','/download','javascript','.zip'];
-    protected static array $fullstrings = ['','#','/logout','/login'];
-    protected static array $riskyURLs = ['nonExistent','2nd'];
+    protected static array $substrings = ['http', 'activate', 'deactivate', '/jury/change-contest/', '/text', '/input', '/output', '/export', '/download', 'javascript', '.zip'];
+    protected static array $fullstrings = ['', '#', '/logout', '/login'];
+    protected static array $riskyURLs = ['nonExistent', '2nd'];
 
     protected function getLoops(): array
     {
@@ -77,7 +77,7 @@ class ControllerRolesTraversalTest extends BaseTestCase
         }
         // Documentation is not setup
         // API is not functional in framework
-        foreach (['/doc','/api'] as $extension) {
+        foreach (['/doc', '/api'] as $extension) {
             if (strpos($url, $extension) === 0) {
                 return true;
             }
@@ -98,7 +98,7 @@ class ControllerRolesTraversalTest extends BaseTestCase
         $response = $this->client->getResponse();
         if (($statusCode === 403 || $statusCode === 401) && $response->isRedirection()) {
             self::assertEquals($response->headers->get('location'), $this::$loginURL);
-        } elseif (($response->getStatusCode() === 302 ) && $response->isRedirection()) {
+        } elseif (($response->getStatusCode() === 302) && $response->isRedirection()) {
             if (strpos($url, '/jury/external-contest') !== false) {
                 self::assertTrue(strpos($response->headers->get('location'), '/jury/external-contest/manage') !== false);
             } else {
@@ -117,7 +117,7 @@ class ControllerRolesTraversalTest extends BaseTestCase
             if (!$this->urlExcluded($possUrl, $skip)) {
                 $ret[] = $possUrl;
                 if (strpos($possUrl, '#') === false) {
-                    $ret[] = $possUrl.'#';
+                    $ret[] = $possUrl . '#';
                 }
             }
         }
@@ -147,8 +147,8 @@ class ControllerRolesTraversalTest extends BaseTestCase
 
     /**
      * Finds all the pages reachable with $roles on URL $roleBaseURL with optionally traversing all links.
-     * @var string[] $roleBaseURL The URL of the current roles.
-     * @var string[] $roles The tested roles.
+     * @param string[] $roleBaseURL The URL of the current roles.
+     * @param string[] $roles       The tested roles.
      */
     protected function getPagesRoles(array $roleBaseURL, array $roles, bool $allPages, $skip): array
     {
@@ -172,7 +172,7 @@ class ControllerRolesTraversalTest extends BaseTestCase
      * (Sub)Test that having the role(s) gives access to all visible pages.
      * This test should detect mistakes where a page is disallowed when the user has a
      * specific role instead of allowing when the correct role is there.
-     * @var string[] $roleURLs
+     * @param string[] $roleURLs
      */
     protected function verifyAccess(array $combinations, array $roleURLs, string $skip): void
     {
@@ -192,10 +192,10 @@ class ControllerRolesTraversalTest extends BaseTestCase
      * Test that having the team role for example is enough to view pages of that role.
      * This test should detect mistakes where a page is disabled when the user has a
      * certain role instead of allowing when the correct role is there.
-     * @var string   $roleBaseURL The base URL of the role.
-     * @var string[] $baseRoles The default role of the user.
-     * @var string[] $optionalRoles The roles which should not restrict the viewable pages.
-     * @var int      $dataSource Put the installation in this dataSource mode.
+     * @param string   $roleBaseURL   The base URL of the role.
+     * @param string[] $baseRoles     The default role of the user.
+     * @param string[] $optionalRoles The roles which should not restrict the viewable pages.
+     * @param int      $dataSource    Put the installation in this dataSource mode.
      * @dataProvider provideRoleAccessData
      */
     public function testRoleAccess(string $roleBaseURL, array $baseRoles, array $optionalRoles, bool $allPages, int $dataSource, string $skip): void
@@ -228,10 +228,10 @@ class ControllerRolesTraversalTest extends BaseTestCase
 
     /**
      * Test that having for example the jury role does not allow access to the pages of other roles.
-     * @var string   $roleBaseURL The base URL of the role.
-     * @var string[] $roleOthersBaseURL The base URLs of the other roles.
-     * @var string[] $roles The tested roles.
-     * @var string[] $rolesOther The other roles.
+     * @param string   $roleBaseURL       The base URL of the role.
+     * @param string[] $roleOthersBaseURL The base URLs of the other roles.
+     * @param string[] $roles             The tested roles.
+     * @param string[] $rolesOther        The other roles.
      * @dataProvider provideRoleAccessOtherRoles
      */
     public function testRoleAccessOtherRoles(
@@ -286,12 +286,12 @@ class ControllerRolesTraversalTest extends BaseTestCase
         foreach ($riskyURLs as $skip) {
             foreach ($dataSources as $str_data_source) {
                 $data_source = (int)$str_data_source;
-                yield ['/jury',   ['admin'],            ['jury','team','balloon','clarification_rw'],         false, $data_source, $skip];
-                yield ['/jury',   ['jury'],             ['admin','team','balloon','clarification_rw'],        false, $data_source, $skip];
-                yield ['/jury',   ['balloon'],          ['admin','team','clarification_rw'],                  true,  $data_source, $skip];
-                yield ['/jury',   ['clarification_rw'], ['admin','team','balloon'],                           true,  $data_source, $skip];
-                yield ['/team',   ['team'],             ['admin','jury','balloon','clarification_rw'],        true,  $data_source, $skip];
-                yield ['/public', [],                   ['team','admin','jury','balloon','clarification_rw'], true,  $data_source, $skip];
+                yield ['/jury',   ['admin'],            ['jury', 'team', 'balloon', 'clarification_rw'],          false, $data_source, $skip];
+                yield ['/jury',   ['jury'],             ['admin', 'team', 'balloon', 'clarification_rw'],         false, $data_source, $skip];
+                yield ['/jury',   ['balloon'],          ['admin', 'team', 'clarification_rw'],                    true,  $data_source, $skip];
+                yield ['/jury',   ['clarification_rw'], ['admin', 'team', 'balloon'],                             true,  $data_source, $skip];
+                yield ['/team',   ['team'],             ['admin', 'jury', 'balloon', 'clarification_rw'],         true,  $data_source, $skip];
+                yield ['/public', [],                   ['team', 'admin', 'jury', 'balloon', 'clarification_rw'], true,  $data_source, $skip];
             }
         }
     }
@@ -311,12 +311,12 @@ class ControllerRolesTraversalTest extends BaseTestCase
         foreach ($riskyURLs as $skip) {
             foreach ($dataSources as $str_data_source) {
                 $data_source = (int)$str_data_source;
-                yield ['/jury',   ['/jury','/team'], ['admin'],            ['jury','team'],                                        false, $data_source, $skip];
-                yield ['/jury',   ['/jury','/team'], ['jury'],             ['admin','team'],                                       false, $data_source, $skip];
-                yield ['/jury',   ['/jury','/team'], ['balloon'],          ['admin','team','clarification_rw'],                    false, $data_source, $skip];
-                yield ['/jury',   ['/jury','/team'], ['clarification_rw'], ['admin','team','balloon'],                             false, $data_source, $skip];
-                yield ['/team',   ['/jury'],         ['team'],             ['admin','jury','balloon','clarification_rw'],          true, $data_source, $skip];
-                yield ['/public', ['/jury','/team'], [],                   ['admin','jury','team','balloon','clarification_rw'],   true, $data_source, $skip];
+                yield ['/jury',   ['/jury', '/team'], ['admin'],            ['jury', 'team'],                                         false, $data_source, $skip];
+                yield ['/jury',   ['/jury', '/team'], ['jury'],             ['admin', 'team'],                                        false, $data_source, $skip];
+                yield ['/jury',   ['/jury', '/team'], ['balloon'],          ['admin', 'team', 'clarification_rw'],                    false, $data_source, $skip];
+                yield ['/jury',   ['/jury', '/team'], ['clarification_rw'], ['admin', 'team', 'balloon'],                             false, $data_source, $skip];
+                yield ['/team',   ['/jury'],          ['team'],             ['admin', 'jury', 'balloon', 'clarification_rw'],         true, $data_source, $skip];
+                yield ['/public', ['/jury', '/team'], [],                   ['admin', 'jury', 'team', 'balloon', 'clarification_rw'], true, $data_source, $skip];
             }
         }
     }

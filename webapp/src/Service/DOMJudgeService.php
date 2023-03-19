@@ -70,20 +70,20 @@ class DOMJudgeService
     protected ?Executable $defaultCompareExecutable = null;
     protected ?Executable $defaultRunExecutable = null;
 
-    const DATA_SOURCE_LOCAL = 0;
-    const DATA_SOURCE_CONFIGURATION_EXTERNAL = 1;
-    const DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL = 2;
-    const EVAL_DEFAULT = null;
-    const EVAL_LAZY = 1;
-    const EVAL_FULL = 2;
-    const EVAL_DEMAND = 3;
+    public const DATA_SOURCE_LOCAL = 0;
+    public const DATA_SOURCE_CONFIGURATION_EXTERNAL = 1;
+    public const DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL = 2;
+    public const EVAL_DEFAULT = null;
+    public const EVAL_LAZY = 1;
+    public const EVAL_FULL = 2;
+    public const EVAL_DEMAND = 3;
 
     // Regex external identifiers must adhere to. Note that we are not checking whether it
     // does not start with a dot or dash or ends with a dot. We could but it would make the
     // regex way more complicated and would also complicate the logic in ImportExportService::importContestYaml.
-    const EXTERNAL_IDENTIFIER_REGEX = '/^[a-zA-Z0-9_.-]+$/';
+    public const EXTERNAL_IDENTIFIER_REGEX = '/^[a-zA-Z0-9_.-]+$/';
 
-    const MIMETYPE_TO_EXTENSION = [
+    public const MIMETYPE_TO_EXTENSION = [
         'image/png'     => 'png',
         'image/jpeg'    => 'jpg',
         'image/svg+xml' => 'svg',
@@ -476,7 +476,7 @@ class DOMJudgeService
         }
 
         if (gettype($cid) == 'string') {
-            $cid = (int) $cid;
+            $cid = (int)$cid;
         }
 
         $auditLog = new AuditLog();
@@ -630,7 +630,7 @@ class DOMJudgeService
             }
             $this->logger->warning(
                 "executing internal %s request to url %s: http status code: %d, response: %s",
-                [ $method, $url, $status, $response ]
+                [$method, $url, $status, $response]
             );
             return null;
         }
@@ -981,7 +981,7 @@ class DOMJudgeService
             $showVerdictsInFreeze = $freezeData->showFinal(false) || $contest->getFreezetime() === null;
             $data['stats'] = $statistics->getGroupedProblemsStats(
                 $contest,
-                array_map(fn(ContestProblem $problem) => $problem->getProblem(), $problems),
+                array_map(fn (ContestProblem $problem) => $problem->getProblem(), $problems),
                 $showVerdictsInFreeze,
                 (bool)$this->config->get('verification_required')
             );
@@ -1159,7 +1159,7 @@ class DOMJudgeService
             $judgetaskInsertParams[':testcase_id' . $testcase->getTestcaseid()] = $testcase->getTestcaseid();
             $judgetaskInsertParams[':testcase_hash' . $testcase->getTestcaseid()] = $testcase->getMd5sumInput() . '_' . $testcase->getMd5sumOutput();
         }
-        $judgetaskColumns = array_map(fn(string $column) => substr($column, 1), $judgetaskDefaultParamNames);
+        $judgetaskColumns = array_map(fn (string $column) => substr($column, 1), $judgetaskDefaultParamNames);
         $judgetaskInsertQuery = sprintf(
             'INSERT INTO judgetask (%s, testcase_id, testcase_hash) VALUES %s',
             implode(', ', $judgetaskColumns),
@@ -1317,7 +1317,7 @@ class DOMJudgeService
 
         $results = [];
         foreach (scandir($customDir) as $file) {
-            foreach (array_merge(['css','js'], static::MIMETYPE_TO_EXTENSION) as $extension) {
+            foreach (array_merge(['css', 'js'], static::MIMETYPE_TO_EXTENSION) as $extension) {
                 if (strpos($file, '.' . $extension) !== false) {
                     $results[] = $file;
                 }
@@ -1330,7 +1330,7 @@ class DOMJudgeService
     /**
      * Get the path of an asset if it exists
      *
-     * @param bool $fullPath If true, get the full path. If false, get the webserver relative path
+     * @param bool        $fullPath       If true, get the full path. If false, get the webserver relative path
      * @param string|null $forceExtension If set, also return the asset path if it does not exist currently and use the given extension
      */
     public function assetPath(string $name, string $type, bool $fullPath = false, ?string $forceExtension = null): ?string

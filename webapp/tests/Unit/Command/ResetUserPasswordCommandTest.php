@@ -3,9 +3,8 @@
 namespace App\Tests\Unit\Command;
 
 use App\Command\ResetUserPasswordCommand;
-use App\Tests\Unit\BaseTestCase as BaseTestCase;
+use App\Tests\Unit\BaseTestCase;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
-use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Exception\InvalidArgumentException;
 use Symfony\Component\Console\Exception\RuntimeException;
 use Symfony\Component\Console\Input\ArrayInput;
@@ -53,7 +52,7 @@ class ResetUserPasswordCommandTest extends BaseTestCase
 
         // the output of the command in the console
         $output = $this->commandTester->getDisplay();
-        $this->assertStringContainsString('[OK] New password for '.$user.' is', $output);
+        $this->assertStringContainsString('[OK] New password for ' . $user . ' is', $output);
         $newPassword = explode(' ', $output)[$passwordPosition];
         $this->apiRequest($defaultPassword, 401);
         $this->apiRequest($newPassword, 200);
@@ -89,7 +88,7 @@ class ResetUserPasswordCommandTest extends BaseTestCase
             $this->logicalNot($this->equalTo(new CommandIsSuccessful())),
             'Command should fail with missing parameters.');
         $output = $this->commandTester->getDisplay();
-        $this->assertStringContainsString('[ERROR] Can not find user with username '.$user, $output);
+        $this->assertStringContainsString('[ERROR] Can not find user with username ' . $user, $output);
     }
 
     public function testMissingUserParameter(): void
@@ -122,9 +121,9 @@ class ResetUserPasswordCommandTest extends BaseTestCase
         $outputBuffer = new BufferedOutput();
         $this->app->run($input, $outputBuffer);
         $output = $outputBuffer->fetch();
-        $check = ['Description:','Reset the password of the given user',
-                  'Usage:','domjudge:reset-user-password <username>',
-                  'Arguments:','username','The username of the user to reset the password of',
+        $check = ['Description:', 'Reset the password of the given user',
+                  'Usage:', 'domjudge:reset-user-password <username>',
+                  'Arguments:', 'username', 'The username of the user to reset the password of',
                   'Options:',
                   'Display help for the given command. When no command is given display help for the list command'];
         foreach ($check as $message) {

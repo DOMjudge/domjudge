@@ -22,7 +22,7 @@ class ClarificationControllerTest extends BaseTestCase
                                        'http://localhost/jury/clarifications');
         $crawler = $this->client->click($link);
 
-        $h3s = $crawler->filter('h3')->extract(array('_text'));
+        $h3s = $crawler->filter('h3')->extract(['_text']);
         self::assertEquals('New requests', $h3s[0]);
         self::assertEquals('Handled requests', $h3s[1]);
         self::assertEquals('General clarifications', $h3s[2]);
@@ -70,7 +70,7 @@ class ClarificationControllerTest extends BaseTestCase
         $this->verifyPageResponse('GET', '/jury/clarifications/' . $clar->getClarid(), 200);
 
         $count = count(static::getContainer()->get(EntityManagerInterface::class)->getRepository(Clarification::class)->findAll());
-        $clarificationText = $this->getCurrentCrawler()->filter('pre')->extract(array('_text'));
+        $clarificationText = $this->getCurrentCrawler()->filter('pre')->extract(['_text']);
         self::assertEquals('What is 2+2?',
                            $clarificationText[0]);
         self::assertEquals("You have a fast calculator in front of you.",
@@ -91,15 +91,15 @@ class ClarificationControllerTest extends BaseTestCase
 
         $crawler = $this->client->click($link);
 
-        $h1s = $crawler->filter('h1')->extract(array('_text'));
+        $h1s = $crawler->filter('h1')->extract(['_text']);
         self::assertEquals('Send Clarification', $h1s[0]);
 
-        $options = $crawler->filter('option')->extract(array('_text'));
+        $options = $crawler->filter('option')->extract(['_text']);
         self::assertEquals('ALL', $options[1]);
         self::assertEquals('DOMjudge (t1)', $options[2]);
         self::assertEquals('Example teamname (t2)', $options[3]);
 
-        $labels = $crawler->filter('label')->extract(array('_text'));
+        $labels = $crawler->filter('label')->extract(['_text']);
         self::assertEquals('Send to:', $labels[0]);
         self::assertEquals('Subject:', $labels[1]);
         self::assertEquals('Message:', $labels[2]);

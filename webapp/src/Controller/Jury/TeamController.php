@@ -104,15 +104,15 @@ class TeamController extends BaseController
 
         $table_fields = [
             'teamid' => ['title' => 'ID', 'sort' => true, 'default_sort' => true],
-            'icpcid' => ['title' => 'ICPC ID', 'sort' => true,],
-            'effective_name' => ['title' => 'name', 'sort' => true,],
-            'category' => ['title' => 'category', 'sort' => true,],
-            'affiliation' => ['title' => 'affiliation', 'sort' => true,],
-            'num_contests' => ['title' => '# contests', 'sort' => true,],
-            'ip_address' => ['title' => 'last IP', 'sort' => true,],
-            'room' => ['title' => 'room', 'sort' => true,],
-            'status' => ['title' => '', 'sort' => false,],
-            'stats' => ['title' => 'stats', 'sort' => true,],
+            'icpcid' => ['title' => 'ICPC ID', 'sort' => true],
+            'effective_name' => ['title' => 'name', 'sort' => true],
+            'category' => ['title' => 'category', 'sort' => true],
+            'affiliation' => ['title' => 'affiliation', 'sort' => true],
+            'num_contests' => ['title' => '# contests', 'sort' => true],
+            'ip_address' => ['title' => 'last IP', 'sort' => true],
+            'room' => ['title' => 'room', 'sort' => true],
+            'status' => ['title' => '', 'sort' => false],
+            'stats' => ['title' => 'stats', 'sort' => true],
         ];
 
         // Insert external ID field when configured to use it.
@@ -185,7 +185,7 @@ class TeamController extends BaseController
                 'title' => 'send clarification to this team',
                 'link' => $this->generateUrl('jury_clarification_send', [
                     'teamto' => $t->getTeamId(),
-                ])
+                ]),
             ];
 
             // Add the rest of our row data for the table.
@@ -194,7 +194,7 @@ class TeamController extends BaseController
             if ($t->getAffiliation()) {
                 $teamdata['affiliation'] = [
                     'value' => $t->getAffiliation()->getShortname(),
-                    'title' => $t->getAffiliation()->getName()
+                    'title' => $t->getAffiliation()->getName(),
                 ];
             }
 

@@ -41,7 +41,7 @@ class TeamAffiliationVisitor implements EventSubscriberInterface
                 'event'  => Events::POST_SERIALIZE,
                 'class'  => TeamAffiliation::class,
                 'format' => 'json',
-                'method' => 'onPostSerialize'
+                'method' => 'onPostSerialize',
             ],
         ];
     }
@@ -113,7 +113,7 @@ class TeamAffiliationVisitor implements EventSubscriberInterface
                     'width'    => $imageSize[0],
                     'height'   => $imageSize[1],
                     'filename' => 'logo.' . $extension,
-                ]
+                ],
             ]);
         }
     }

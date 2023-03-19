@@ -2,12 +2,9 @@
 
 namespace App\Form\Type;
 
-use App\Entity\Contest;
 use App\Entity\ExternalContestSource;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -24,7 +21,7 @@ class ExternalContestSourceType extends AbstractType
             ],
         ]);
         $builder->add('source', TextType::class, [
-            'help' => 'For contest package: directory on disk to use. For CCS API: URL to contest in API.'
+            'help' => 'For contest package: directory on disk to use. For CCS API: URL to contest in API.',
         ]);
         $builder->add('username', TextType::class, [
             'required' => false,

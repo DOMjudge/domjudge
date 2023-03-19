@@ -26,7 +26,6 @@ use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 
 /**
  * Class ImportEventFeedCommand
- * @package App\Command
  */
 class ImportEventFeedCommand extends Command
 {

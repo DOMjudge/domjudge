@@ -161,7 +161,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             'alpha3_countries'              => Countries::getAlpha3Names(),
             'alpha3_alpha2_country_mapping' => array_combine(
                 Countries::getAlpha3Codes(),
-                array_map(fn($alpha3) => Countries::getAlpha2Code($alpha3), Countries::getAlpha3Codes())
+                array_map(fn ($alpha3) => Countries::getAlpha2Code($alpha3), Countries::getAlpha3Codes())
             ),
             'show_shadow_differences'       => $this->tokenStorage->getToken() &&
                                                $this->authorizationChecker->isGranted('ROLE_ADMIN') &&
@@ -190,7 +190,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
     /**
      * Print a time formatted as specified. The format is according to date().
      * @param string|float $datetime
-     * @param Contest|null $contest If given, print time relative to that contest start.
+     * @param Contest|null $contest  If given, print time relative to that contest start.
      */
     public function printtime($datetime, ?string $format = null, ?Contest $contest = null): string
     {
@@ -231,7 +231,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
      * and a hover title attribute with the full datetime string.
      *
      * @param string|float $datetime
-     * @param Contest|null $contest If given, print time relative to that contest start.
+     * @param Contest|null $contest  If given, print time relative to that contest start.
      */
     public function printtimeHover($datetime, ?Contest $contest = null): string
     {
@@ -674,7 +674,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
 
         // Extract the list of remaining parts. This list may contain empty values. If $common_prefix overlaps
         // $common_suffix, then $common_prefix = $common_suffix = the entire string.
-        $middle_parts = array_map(fn($host) => substr($host, $prefix_len, strlen($host) - $prefix_len - $suffix_len), $local_parts);
+        $middle_parts = array_map(fn ($host) => substr($host, $prefix_len, strlen($host) - $prefix_len - $suffix_len), $local_parts);
         // Usually the middle parts contain numbers, so use natural sort for them.
         usort($middle_parts, 'strnatcmp');
 
@@ -694,7 +694,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
 
     public function parseRunDiff(string $difftext): string
     {
-        $line = strtok($difftext, "\n"); //first line
+        $line = strtok($difftext, "\n"); // first line
         if ($line === false || sscanf($line, "### DIFFERENCES FROM LINE %d ###\n", $firstdiff) != 1) {
             return Utils::specialchars($difftext);
         }
@@ -833,10 +833,10 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
 
     /**
      * Output a (optionally readonly) code editor for the given submission file.
-     * @param string|null $language Ace language to use
-     * @param bool $editable Whether to allow editing
-     * @param string $elementToUpdate HTML element to update when input changes
-     * @param string|null $filename If $language is null, filename to use to determine language
+     * @param string|null $language        Ace language to use
+     * @param bool        $editable        Whether to allow editing
+     * @param string      $elementToUpdate HTML element to update when input changes
+     * @param string|null $filename        If $language is null, filename to use to determine language
      */
     public function codeEditor(
         string  $code,
@@ -915,7 +915,7 @@ JS;
 
     public function showDiff(SubmissionFile $newFile, SubmissionFile $oldFile): string
     {
-        $differ = new Differ;
+        $differ = new Differ();
         return $this->parseSourceDiff($differ->diff($oldFile->getSourcecode(), $newFile->getSourcecode()));
     }
 

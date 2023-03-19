@@ -8,8 +8,6 @@ use JMS\Serializer\Annotation as Serializer;
  * Class OrdinalItem
  *
  * This class is used to output an ordinal item.
- *
- * @package App\Serializer
  */
 class OrdinalItem
 {

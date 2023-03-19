@@ -101,7 +101,7 @@ class TeamCategoryController extends BaseController
                     'title' => 'edit this category',
                     'link' => $this->generateUrl('jury_team_category_edit', [
                         'categoryId' => $teamCategory->getCategoryid(),
-                    ])
+                    ]),
                 ];
                 $categoryactions[] = [
                     'icon' => 'trash-alt',
@@ -196,7 +196,7 @@ class TeamCategoryController extends BaseController
             // Also emit an update event for all teams of the category, since the hidden property might have changed
             $teams = $teamCategory->getTeams();
             if (!$teams->isEmpty()) {
-                $teamIds = array_map(fn(Team $team) => $team->getTeamid(), $teams->toArray());
+                $teamIds = array_map(fn (Team $team) => $team->getTeamid(), $teams->toArray());
                 foreach ($this->contestsForEntity($teamCategory, $this->dj) as $contest) {
                     $this->eventLogService->log(
                         'teams',

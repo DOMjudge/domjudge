@@ -23,7 +23,7 @@ class AuditLog
     private ?int $logid;
 
     /**
-     * @var double|string
+     * @var float|string
      * @ORM\Column(type="decimal", precision=32, scale=9, name="logtime",
      *     options={"comment"="Timestamp of the logentry", "unsigned"=true}, nullable=false)
      */

@@ -12,8 +12,6 @@ use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Class FlattenExceptionHandler
- *
- * @package App\Controller\API
  */
 class FlattenExceptionHandler implements SubscribingHandlerInterface
 {

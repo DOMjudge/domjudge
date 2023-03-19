@@ -19,8 +19,8 @@ use Doctrine\ORM\NoResultException;
 
 class RejudgingService
 {
-    const ACTION_APPLY = 'apply';
-    const ACTION_CANCEL = 'cancel';
+    public const ACTION_APPLY = 'apply';
+    public const ACTION_CANCEL = 'cancel';
 
     protected EntityManagerInterface $em;
     protected DOMJudgeService $dj;
@@ -45,14 +45,13 @@ class RejudgingService
     /**
      * Create a new rejudging.
      *
-     * @param string          $reason           Reason for this rejudging
-     * @param array           $judgings         List of judgings to rejudging
-     * @param bool            $autoApply        Whether the judgings should be automatically applied.
-     * @param array          &$skipped          Returns list of judgings not included.
-     * @param callable|null   $progressReporter If set, report progress using this callback. Will get two values:
-     *                                          - the progress as an integer
-     *                                          - the log to display
-     *
+     * @param string        $reason           Reason for this rejudging
+     * @param array         $judgings         List of judgings to rejudging
+     * @param bool          $autoApply        Whether the judgings should be automatically applied.
+     * @param array         &$skipped         Returns list of judgings not included.
+     * @param callable|null $progressReporter If set, report progress using this callback. Will get two values:
+     *                                        - the progress as an integer
+     *                                        - the log to display
      */
     public function createRejudging(
         string $reason,
@@ -119,7 +118,7 @@ class RejudgingService
                     if ($teamid) {
                         $this->em->getConnection()->executeStatement(
                             'UPDATE team SET judging_last_started = null WHERE teamid = :teamid',
-                            [ 'teamid' => $teamid ]
+                            ['teamid' => $teamid]
                         );
                     }
                 }
@@ -276,7 +275,7 @@ class RejudgingService
                         ->setParameter('judgingid', $submission['judgingid'])
                         ->getQuery()
                         ->getResult();
-                    $runIds  = array_map(fn(array $data) => $data['runid'], $runData);
+                    $runIds  = array_map(fn (array $data) => $data['runid'], $runData);
                     if (!empty($runIds)) {
                         $this->eventLogService->log('judging_run', $runIds,
                                                     EventLogService::ACTION_CREATE,

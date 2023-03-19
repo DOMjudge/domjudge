@@ -26,7 +26,7 @@ class ExecutableType extends AbstractType
                 'compile' => 'compile',
                 'run' => 'run',
                 'debug' => 'debug',
-            ]
+            ],
         ]);
         $builder->add('save', SubmitType::class);
 

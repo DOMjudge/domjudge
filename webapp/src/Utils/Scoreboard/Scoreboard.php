@@ -16,8 +16,6 @@ use Exception;
  * Class Scoreboard
  *
  * This class represents the whole scoreboard.
- *
- * @package App\Utils\Scoreboard
  */
 class Scoreboard
 {
@@ -451,7 +449,6 @@ class Scoreboard
         return $this->matrix[$team->getTeamid()][$problem->getProbid()]->isFirst;
     }
 
-
     /**
      * Determine whether this team has the fastest correct implementation for this problem
      */
@@ -468,7 +465,6 @@ class Scoreboard
 
     /**
      * Determine whether to order by runtime instead of solvetime
-     * @return bool
      */
     public function getRuntimeAsScoreTiebreaker(): bool
     {

@@ -22,15 +22,12 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\RouterInterface;
-use Twig\Environment;
 use ZipArchive;
 
 /**
  * Class PublicController
  *
  * @Route("/public")
- *
- * @package App\Controller
  */
 class PublicController extends BaseController
 {

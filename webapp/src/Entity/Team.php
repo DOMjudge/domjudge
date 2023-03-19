@@ -30,9 +30,9 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
  */
 class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface, AssetEntityInterface
 {
-    const DONT_ADD_USER = 'dont-add-user';
-    const CREATE_NEW_USER = 'create-new-user';
-    const ADD_EXISTING_USER = 'add-existing-user';
+    public const DONT_ADD_USER = 'dont-add-user';
+    public const CREATE_NEW_USER = 'create-new-user';
+    public const ADD_EXISTING_USER = 'add-existing-user';
 
     /**
      * @ORM\Id
@@ -108,7 +108,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
     private ?string $internalComments;
 
     /**
-     * @var double|string|null
+     * @var float|string|null
      * @ORM\Column(type="decimal", precision=32, scale=9, name="judging_last_started",
      *     options={"comment"="Start time of last judging for prioritization",
      *              "unsigned"=true}, nullable=true)
@@ -588,7 +588,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
      * @Serializer\Expose(if="context.getAttribute('config_service').get('show_flags')")
      * @OA\Property(nullable=true)
      */
-    public function getNationality() : ?string
+    public function getNationality(): ?string
     {
         return $this->getAffiliation() ? $this->getAffiliation()->getCountry() : null;
     }

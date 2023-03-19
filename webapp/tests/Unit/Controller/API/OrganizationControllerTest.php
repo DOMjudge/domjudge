@@ -147,7 +147,7 @@ class OrganizationControllerTest extends BaseTestCase
                 'width'    => 181,
                 'height'   => 101,
                 'filename' => 'logo.png',
-            ]
+            ],
         ];
         self::assertSame($logoConfig, $object['logo']);
 

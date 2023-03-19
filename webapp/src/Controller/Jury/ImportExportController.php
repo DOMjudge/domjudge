@@ -331,7 +331,7 @@ class ImportExportController extends BaseController
             echo sprintf("%s\t%s\n", $type, $version);
             // output the rows, escaping any reserved characters in the data
             foreach ($data as $row) {
-                echo implode("\t", array_map(fn($field) => Utils::toTsvField((string)$field), $row)) . "\n";
+                echo implode("\t", array_map(fn ($field) => Utils::toTsvField((string)$field), $row)) . "\n";
             }
         });
         $filename = sprintf('%s.tsv', $type);
@@ -431,7 +431,7 @@ class ImportExportController extends BaseController
             }
         }
 
-        usort($regionWinners, fn($a, $b) => $a['group'] <=> $b['group']);
+        usort($regionWinners, fn ($a, $b) => $a['group'] <=> $b['group']);
 
         $collator = new Collator('en_US');
         $collator->sort($honorable);

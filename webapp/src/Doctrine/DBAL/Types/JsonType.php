@@ -15,8 +15,6 @@ use Doctrine\DBAL\Types\JsonType as BaseJsonType;
  *
  * Also we always want a LONGTEXT field and not a JSON field, as that is only
  * supported by MySQL 5.7+.
- *
- * @package App\Doctrine\DBAL\Types
  */
 class JsonType extends BaseJsonType
 {

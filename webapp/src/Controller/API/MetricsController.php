@@ -17,7 +17,6 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use OpenApi\Annotations as OA;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-
 use Prometheus\CollectorRegistry;
 use Prometheus\RenderTextFormat;
 
@@ -84,7 +83,6 @@ class MetricsController extends AbstractFOSRestController
         // Get Balloon statistics
         $m['balloons_longest_waitingtime'] = $registry->getOrRegisterGauge('domjudge', 'balloons_longest_waitingtime', "Current longest waiting time for a balloon", ['contest']);
         $m['balloons_waiting']             = $registry->getOrRegisterGauge('domjudge', 'balloons_waiting', "Balloons left todo", ['contest']);
-
 
         $allteams = $em
             ->createQueryBuilder()
@@ -247,7 +245,7 @@ class MetricsController extends AbstractFOSRestController
             foreach ($balloons_waiting as $b) {
                 $t = $b->getSubmission()->getSubmittime();
                 $t2 = $n-$t;
-                $balloons_longest_waitingtime = max($t2,$balloons_longest_waitingtime);
+                $balloons_longest_waitingtime = max($t2, $balloons_longest_waitingtime);
             }
             $m['balloons_longest_waitingtime']->set($balloons_longest_waitingtime, $labels);
         }

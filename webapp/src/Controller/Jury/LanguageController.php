@@ -96,8 +96,8 @@ class LanguageController extends BaseController
                     'icon' => 'edit',
                     'title' => 'edit this language',
                     'link' => $this->generateUrl('jury_language_edit', [
-                        'langId' => $lang->getLangid()
-                    ])
+                        'langId' => $lang->getLangid(),
+                    ]),
                 ];
                 $langactions[] = [
                     'icon' => 'trash-alt',
@@ -120,7 +120,7 @@ class LanguageController extends BaseController
                 'executable' => [
                     'value' => $executable === null ? '-' : $executable->getShortDescription(),
                     'link' => $executable === null ? null : $this->generateUrl('jury_executable', [
-                        'execId' => $executable->getExecid()
+                        'execId' => $executable->getExecid(),
                         ]),
                     'showlink' => true,
                     ],

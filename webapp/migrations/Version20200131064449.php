@@ -20,12 +20,12 @@ final class Version20200131064449 extends AbstractMigration implements Container
         return false;
     }
 
-    public function getDescription() : string
+    public function getDescription(): string
     {
         return 'replace configuration option registration_category_name with a boolean field for each category';
     }
 
-    public function up(Schema $schema) : void
+    public function up(Schema $schema): void
     {
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
 
@@ -49,7 +49,7 @@ final class Version20200131064449 extends AbstractMigration implements Container
         $this->addSql("DELETE FROM configuration WHERE name = 'registration_category_name'");
     }
 
-    public function down(Schema $schema) : void
+    public function down(Schema $schema): void
     {
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
 
@@ -62,7 +62,7 @@ final class Version20200131064449 extends AbstractMigration implements Container
         $this->warnIf(
             count($selfRegistrationCategories) > 1,
             sprintf('Team categories for self-registered teams were %s. Only first will be kept.',
-                implode(', ', array_map(function($category) {
+                implode(', ', array_map(function ($category) {
                     return $category->getName();
                 }, $selfRegistrationCategories)))
         );

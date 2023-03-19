@@ -1,4 +1,5 @@
 <?php declare(strict_types=1);
+
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
@@ -43,7 +44,7 @@ class ScoreCache
     private bool $is_correct_restricted = false;
 
     /**
-     * @var double|string
+     * @var float|string
      * @ORM\Column(type="decimal", precision=32, scale=9, name="solvetime_restricted",
      *     options={"comment"="Seconds into contest when problem solved (restricted audience)",
      *              "default"="0.000000000"},
@@ -84,7 +85,7 @@ class ScoreCache
     private bool $is_correct_public = false;
 
     /**
-     * @var double|string
+     * @var float|string
      * @ORM\Column(type="decimal", precision=32, scale=9, name="solvetime_public",
      *     options={"comment"="Seconds into contest when problem solved (public)",
      *              "default"="0.000000000"},
@@ -249,7 +250,7 @@ class ScoreCache
         return $this;
     }
 
-    public function getIsFirstToSolve() : bool
+    public function getIsFirstToSolve(): bool
     {
         return $this->is_first_to_solve;
     }

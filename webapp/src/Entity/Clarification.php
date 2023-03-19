@@ -1,4 +1,5 @@
 <?php declare(strict_types=1);
+
 namespace App\Entity;
 
 use App\Utils\Utils;
@@ -53,7 +54,7 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
     protected ?string $externalid = null;
 
     /**
-     * @var double|string
+     * @var float|string
      * @ORM\Column(type="decimal", precision=32, scale=9, name="submittime", options={"comment"="Time sent", "unsigned"=true}, nullable=false)
      * @Serializer\Exclude()
      */
@@ -383,7 +384,7 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
             'from_team_id' => $this->getSender(),
             'to_team_id'   => $this->getRecipient(),
             'problem_id'   => $this->getProblem(),
-            'reply_to_id'  => $this->getInReplyTo()
+            'reply_to_id'  => $this->getInReplyTo(),
         ];
     }
 

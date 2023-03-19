@@ -37,7 +37,6 @@ use ZipArchive;
 
 /**
  * Class ScoreboardMergeCommand
- * @package App\Command
  */
 class ScoreboardMergeCommand extends Command
 {
@@ -148,7 +147,7 @@ class ScoreboardMergeCommand extends Command
         for ($i = 0; $i < count($siteArguments); $i += 2) {
             $site = [];
             $site['path'] = $siteArguments[$i];
-            # Some simple validation to make sure we're actually parsing group ids.
+            // Some simple validation to make sure we're actually parsing group ids.
             $groupsString = $siteArguments[$i + 1];
             if (!preg_match('/^\d+(,\d+)*$/', $groupsString)) {
                 $style->error('Argument does not look like a comma separated list of group ids: ' . $groupsString);
@@ -316,7 +315,7 @@ class ScoreboardMergeCommand extends Command
         // What files to add to the ZIP file
         $filesToAdd = [
             'webfonts/*',
-            'images/*'
+            'images/*',
         ];
         // Detect other files to add to the ZIP file by scanning the output.
         // We need to do this anyway, since we need to rewrite the absolute paths.

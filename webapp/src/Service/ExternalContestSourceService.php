@@ -12,7 +12,6 @@ use App\Entity\ExternalRun;
 use App\Entity\ExternalSourceWarning;
 use App\Entity\Language;
 use App\Entity\Problem;
-use App\Entity\Role;
 use App\Entity\Submission;
 use App\Entity\Team;
 use App\Entity\TeamAffiliation;
@@ -380,7 +379,6 @@ class ExternalContestSourceService
                 &$shouldStop
             ) use (
                 $eventsToSkip,
-                $file,
                 &$skipEventsUpTo,
                 $progressReporter
             ) {
@@ -654,11 +652,11 @@ class ExternalContestSourceService
             $freezeHourModifier   = $freezeNegative ? -1 : 1;
             $freezeInSeconds      = $freezeHourModifier * $freezeData[2] * 3600
                                     + 60 * $freezeData[3]
-                                    + (double)sprintf('%d.%03d', $freezeData[4], $freezeData[5]);
+                                    + (float)sprintf('%d.%03d', $freezeData[4], $freezeData[5]);
             $durationHourModifier = $durationNegative ? -1 : 1;
             $durationInSeconds    = $durationHourModifier * $durationData[2] * 3600
                                     + 60 * $durationData[3]
-                                    + (double)sprintf('%d.%03d', $durationData[4], $durationData[5]);
+                                    + (float)sprintf('%d.%03d', $durationData[4], $durationData[5]);
             $freezeStartSeconds   = $durationInSeconds - $freezeInSeconds;
             $freezeHour           = floor($freezeStartSeconds / 3600);
             $freezeMinutes        = floor(($freezeStartSeconds % 3600) / 60);
@@ -782,8 +780,8 @@ class ExternalContestSourceService
                     'allow_submit' => [
                         'us'       => false,
                         'external' => true,
-                    ]
-                ]
+                    ],
+                ],
             ]);
         } else {
             $this->removeWarning($entityType, $data['id'], ExternalSourceWarning::TYPE_DATA_MISMATCH);
@@ -1050,7 +1048,7 @@ class ExternalContestSourceService
                 ->getRepository(Clarification::class)
                 ->findOneBy([
                                 'contest'    => $this->getSourceContest(),
-                                'externalid' => $clarificationId
+                                'externalid' => $clarificationId,
                             ]);
             if ($clarification) {
                 $this->em->remove($clarification);
@@ -1074,7 +1072,7 @@ class ExternalContestSourceService
             ->getRepository(Clarification::class)
             ->findOneBy([
                             'contest'    => $this->getSourceContest(),
-                            'externalid' => $clarificationId
+                            'externalid' => $clarificationId,
                         ]);
         if ($clarification) {
             $action = EventLogService::ACTION_UPDATE;
@@ -1119,7 +1117,7 @@ class ExternalContestSourceService
                 ->getRepository(Clarification::class)
                 ->findOneBy([
                                 'contest'    => $this->getSourceContest(),
-                                'externalid' => $inReplyToId
+                                'externalid' => $inReplyToId,
                             ]);
             if (!$inReplyTo) {
                 $this->addPendingEvent('clarification', $inReplyToId, $operation, $entityType, $eventId, $data);
@@ -1196,7 +1194,7 @@ class ExternalContestSourceService
                 ->getRepository(Submission::class)
                 ->findOneBy([
                                 'contest'    => $this->getSourceContest(),
-                                'externalid' => $submissionId
+                                'externalid' => $submissionId,
                             ]);
             if ($submission) {
                 $this->markSubmissionAsValidAndRecalcScore($submission, false);
@@ -1214,7 +1212,7 @@ class ExternalContestSourceService
             ->getRepository(Submission::class)
             ->findOneBy([
                             'contest'    => $this->getSourceContest(),
-                            'externalid' => $submissionId
+                            'externalid' => $submissionId,
                         ]);
 
         $languageId = $data['language_id'];
@@ -1281,25 +1279,25 @@ class ExternalContestSourceService
             if ($submission->getTeam()->getTeamid() !== $team->getTeamid()) {
                 $diff['team_id'] = [
                     'us'       => $submission->getTeam()->getExternalid(),
-                    'external' => $team->getExternalid()
+                    'external' => $team->getExternalid(),
                 ];
             }
             if ($submission->getProblem()->getExternalid() !== $problem->getExternalid()) {
                 $diff['problem_id'] = [
                     'us'       => $submission->getProblem()->getExternalid(),
-                    'external' => $problem->getExternalid()
+                    'external' => $problem->getExternalid(),
                 ];
             }
             if ($submission->getLanguage()->getExternalid() !== $language->getExternalid()) {
                 $diff['language_id'] = [
                     'us'       => $submission->getLanguage()->getExternalid(),
-                    'external' => $language->getExternalid()
+                    'external' => $language->getExternalid(),
                 ];
             }
             if (abs(Utils::difftime((float)$submission->getSubmittime(), $submitTime)) >= 1) {
                 $diff['time'] = [
                     'us'       => $submission->getAbsoluteSubmitTime(),
-                    'external' => $data['time']
+                    'external' => $data['time'],
                 ];
             }
             if ($entryPoint !== $submission->getEntryPoint()) {
@@ -1314,7 +1312,7 @@ class ExternalContestSourceService
                 } elseif ($entryPoint !== null) {
                     $diff['entry_point'] = [
                         'us'       => $submission->getEntryPoint(),
-                        'external' => $entryPoint
+                        'external' => $entryPoint,
                     ];
                 }
             }
@@ -1478,7 +1476,7 @@ class ExternalContestSourceService
                 ->getRepository(ExternalJudgement::class)
                 ->findOneBy([
                                 'contest'    => $this->getSourceContestId(),
-                                'externalid' => $judgementId
+                                'externalid' => $judgementId,
                             ]);
             if ($judgement) {
                 $this->em->remove($judgement);
@@ -1497,7 +1495,7 @@ class ExternalContestSourceService
             ->getRepository(ExternalJudgement::class)
             ->findOneBy([
                             'contest'    => $this->getSourceContestId(),
-                            'externalid' => $judgementId
+                            'externalid' => $judgementId,
                         ]);
         $persist   = false;
         if (!$judgement) {
@@ -1515,7 +1513,7 @@ class ExternalContestSourceService
             ->getRepository(Submission::class)
             ->findOneBy([
                             'contest'    => $this->getSourceContestId(),
-                            'externalid' => $submissionId
+                            'externalid' => $submissionId,
                         ]);
         if (!$submission) {
             $this->addPendingEvent('submission', $submissionId, $operation, $entityType, $eventId, $data);
@@ -1599,7 +1597,7 @@ class ExternalContestSourceService
                 ->getRepository(ExternalRun::class)
                 ->findOneBy([
                                 'contest'    => $this->getSourceContest(),
-                                'externalid' => $runId
+                                'externalid' => $runId,
                             ]);
             if ($run) {
                 $this->em->remove($run);
@@ -1618,7 +1616,7 @@ class ExternalContestSourceService
             ->getRepository(ExternalRun::class)
             ->findOneBy([
                             'contest'    => $this->getSourceContest(),
-                            'externalid' => $runId
+                            'externalid' => $runId,
                         ]);
         $persist = false;
         if (!$run) {
@@ -1636,7 +1634,7 @@ class ExternalContestSourceService
             ->getRepository(ExternalJudgement::class)
             ->findOneBy([
                             'contest'    => $this->getSourceContest(),
-                            'externalid' => $judgementId
+                            'externalid' => $judgementId,
                         ]);
         if (!$externalJudgement) {
             $this->addPendingEvent('judgement', $judgementId, $operation, $entityType, $eventId, $data);
@@ -1727,7 +1725,7 @@ class ExternalContestSourceService
             ->getRepository(ExternalSourceWarning::class)
             ->findOneBy([
                             'externalContestSource' => $this->source,
-                            'hash'                  => $hash
+                            'hash'                  => $hash,
                         ]);
 
         $dependencies = [];
@@ -1859,7 +1857,7 @@ class ExternalContestSourceService
                 }
             } else {
                 $this->addOrUpdateWarning($eventId, $entityType, $entityId, ExternalSourceWarning::TYPE_DATA_MISMATCH, [
-                    'diff' => $fullDiff
+                    'diff' => $fullDiff,
                 ]);
             }
         } else {
@@ -1874,7 +1872,7 @@ class ExternalContestSourceService
     {
         if (!in_array($operation, $supportedActions)) {
             $this->addOrUpdateWarning($eventId, $entityType, $entityId, ExternalSourceWarning::TYPE_UNSUPORTED_ACTION, [
-                'action' => $operation
+                'action' => $operation,
             ]);
             return false;
         }

@@ -1,4 +1,5 @@
 <?php declare(strict_types=1);
+
 namespace App\Entity;
 
 use App\Utils\Utils;
@@ -73,7 +74,7 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
     private ?string $email = null;
 
     /**
-     * @var double|string|null
+     * @var float|string|null
      * @ORM\Column(type="decimal", precision=32, scale=9, name="last_login",
      *     options={"comment"="Time of last successful login", "unsigned"=true},
      *     nullable=true)
@@ -83,7 +84,7 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
     private $last_login;
 
     /**
-     * @var double|string|null
+     * @var float|string|null
      * @ORM\Column(type="decimal", precision=32, scale=9, name="last_api_login",
      *     options={"comment"="Time of last successful login on the API", "unsigned"=true},
      *     nullable=true)
@@ -93,7 +94,7 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
     private $last_api_login;
 
     /**
-     * @var double|string|null
+     * @var float|string|null
      * @ORM\Column(type="decimal", precision=32, scale=9, name="first_login",
      *     options={"comment"="Time of first login", "unsigned"=true},
      *     nullable=true)

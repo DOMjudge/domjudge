@@ -24,7 +24,6 @@ use Symfony\Component\Validator\ConstraintViolationListInterface;
 
 /**
  * Class AbstractRestController
- * @package App\Controller\API
  */
 abstract class AbstractRestController extends AbstractFOSRestController
 {
@@ -335,7 +334,7 @@ abstract class AbstractRestController extends AbstractFOSRestController
             }
             $data = [
                 'title' => 'Validation failed',
-                'errors' => $errors
+                'errors' => $errors,
             ];
             return new JsonResponse($data, Response::HTTP_BAD_REQUEST);
         }

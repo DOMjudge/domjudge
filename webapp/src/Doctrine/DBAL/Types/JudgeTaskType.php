@@ -1,4 +1,5 @@
 <?php declare(strict_types=1);
+
 namespace App\Doctrine\DBAL\Types;
 
 use Doctrine\DBAL\Platforms\AbstractPlatform;
@@ -7,17 +8,16 @@ use InvalidArgumentException;
 
 /**
  * Class JudgeTaskType
- * @package App\Doctrine\DBAL\Types
  */
 class JudgeTaskType extends Type
 {
-    const ENUM_JUDGE_TASK_TYPE = 'judge_task_type';
-    const CONFIG_CHECK = 'config_check';
-    const DEBUG_INFO = 'debug_info';
-    const GENERIC_TASK = 'generic_task';
-    const JUDGING_RUN = 'judging_run';
-    const PREFETCH = 'prefetch';
-    const ALL_TYPES = [
+    public const ENUM_JUDGE_TASK_TYPE = 'judge_task_type';
+    public const CONFIG_CHECK = 'config_check';
+    public const DEBUG_INFO = 'debug_info';
+    public const GENERIC_TASK = 'generic_task';
+    public const JUDGING_RUN = 'judging_run';
+    public const PREFETCH = 'prefetch';
+    public const ALL_TYPES = [
         self::CONFIG_CHECK,
         self::DEBUG_INFO,
         self::GENERIC_TASK,
@@ -31,7 +31,7 @@ class JudgeTaskType extends Type
     public function getSQLDeclaration(array $column, AbstractPlatform $platform): string
     {
         $statuses = implode(', ', array_map(
-            fn(string $status) => sprintf("'%s'", $status),
+            fn (string $status) => sprintf("'%s'", $status),
             self::ALL_TYPES
         ));
         return sprintf("ENUM(%s)", $statuses);

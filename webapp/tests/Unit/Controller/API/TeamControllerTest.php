@@ -53,7 +53,7 @@ class TeamControllerTest extends BaseTestCase
                 'width'    => 320,
                 'height'   => 200,
                 'filename' => 'photo.jpg',
-            ]
+            ],
         ];
         self::assertSame($logoConfig, $object['photo']);
 

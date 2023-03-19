@@ -48,13 +48,13 @@ class SubmitProblemType extends AbstractType
 
         $problemConfig = [
             'class' => Problem::class,
-            'query_builder' => fn(EntityRepository $er) => $er->createQueryBuilder('p')
+            'query_builder' => fn (EntityRepository $er) => $er->createQueryBuilder('p')
                 ->join('p.contest_problems', 'cp', Join::WITH, 'cp.contest = :contest')
                 ->select('p', 'cp')
                 ->andWhere('cp.allowSubmit = 1')
                 ->setParameter('contest', $contest)
                 ->addOrderBy('cp.shortname'),
-            'choice_label' => fn(Problem $problem) => sprintf(
+            'choice_label' => fn (Problem $problem) => sprintf(
                 '%s - %s', $problem->getContestProblems()->first()->getShortName(), $problem->getName()
             ),
             'placeholder' => 'Select a problem',
@@ -63,7 +63,7 @@ class SubmitProblemType extends AbstractType
 
         $builder->add('language', EntityType::class, [
             'class' => Language::class,
-            'query_builder' => fn(EntityRepository $er) => $er
+            'query_builder' => fn (EntityRepository $er) => $er
                 ->createQueryBuilder('l')
                 ->andWhere('l.allowSubmit = 1'),
             'choice_label' => 'name',
@@ -89,7 +89,7 @@ class SubmitProblemType extends AbstractType
                             ->addViolation();
                     }
                 }),
-            ]
+            ],
         ]);
 
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($problemConfig) {

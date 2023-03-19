@@ -30,7 +30,6 @@ use Symfony\Component\Routing\Annotation\Route;
  * @Route("/team")
  * @IsGranted("ROLE_TEAM")
  * @Security("user.getTeam() !== null", message="You do not have a team associated with your account.")
- * @package App\Controller\Team
  */
 class SubmissionController extends BaseController
 {
@@ -40,9 +39,9 @@ class SubmissionController extends BaseController
     protected ConfigurationService $config;
     protected FormFactoryInterface $formFactory;
 
-    const NEVER_SHOW_COMPILE_OUTPUT = 0;
-    const ONLY_SHOW_COMPILE_OUTPUT_ON_ERROR = 1;
-    const ALWAYS_SHOW_COMPILE_OUTPUT = 2;
+    public const NEVER_SHOW_COMPILE_OUTPUT = 0;
+    public const ONLY_SHOW_COMPILE_OUTPUT_ON_ERROR = 1;
+    public const ALWAYS_SHOW_COMPILE_OUTPUT = 2;
 
     public function __construct(
         EntityManagerInterface $em,

@@ -1,4 +1,5 @@
 <?php declare(strict_types=1);
+
 namespace App\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
@@ -29,9 +30,8 @@ class Rejudging
      */
     private int $rejudgingid;
 
-
     /**
-     * @var double|string
+     * @var float|string
      * @ORM\Column(type="decimal", precision=32, scale=9, name="starttime",
      *     options={"comment"="Time rejudging started", "unsigned"=true},
      *     nullable=false)
@@ -39,7 +39,7 @@ class Rejudging
     private $starttime;
 
     /**
-     * @var double|string|null
+     * @var float|string|null
      * @ORM\Column(type="decimal", precision=32, scale=9, name="endtime",
      *     options={"comment"="Time rejudging ended, null = still busy",
      *              "unsigned"=true},

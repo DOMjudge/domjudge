@@ -43,7 +43,7 @@ class AccessControllerTest extends BaseTestCase
             'awards' => ['id', 'citation', 'team_ids'],
         ];
 
-        $actualTypes = array_map(fn(array $endpoint) => $endpoint['type'], $access['endpoints']);
+        $actualTypes = array_map(fn (array $endpoint) => $endpoint['type'], $access['endpoints']);
         self::assertSame(array_keys($expectedTypes), $actualTypes);
 
         foreach ($expectedTypes as $type => $expectedProperties) {

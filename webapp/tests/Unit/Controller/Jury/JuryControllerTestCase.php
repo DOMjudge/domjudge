@@ -2,22 +2,18 @@
 
 namespace App\Tests\Unit\Controller\Jury;
 
-use App\Entity\BaseApiEntity;
 use App\Entity\Contest;
 use App\Entity\Problem;
 use App\Entity\Submission;
 use App\Entity\Team;
 use App\Service\SubmissionService;
 use App\Tests\Unit\BaseTestCase;
-use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Generator;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 /**
  * This abstract class will have the default functionality tested for Jury pages.
- *
- * @package App\Tests\Unit\Controller\Jury
  */
 abstract class JuryControllerTestCase extends BaseTestCase
 {
@@ -56,7 +52,7 @@ abstract class JuryControllerTestCase extends BaseTestCase
     }
 
     /**
-     * @var String[]|array[] $DOM_elements
+     * @var string[]|array[]
      */
     protected static array $DOM_elements;
     protected static string $className;
@@ -187,7 +183,7 @@ abstract class JuryControllerTestCase extends BaseTestCase
                     break;
                 }
             }
-            self::assertEquals(null, $singlePageLink, 'Found link ending with '.$identifier);
+            self::assertEquals(null, $singlePageLink, 'Found link ending with ' . $identifier);
         }
         // Find an ID we can edit/delete.
         foreach (array_merge(

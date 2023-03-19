@@ -83,11 +83,11 @@ class ImmutableExecutable
             return;
         }
         $filesArray = $this->files->toArray();
-        uasort($filesArray, fn(ExecutableFile $a, ExecutableFile $b) => strcmp($a->getFilename(), $b->getFilename()));
+        uasort($filesArray, fn (ExecutableFile $a, ExecutableFile $b) => strcmp($a->getFilename(), $b->getFilename()));
         $this->hash = md5(
             join(
                 array_map(
-                    fn(ExecutableFile $file) => $file->getHash() . $file->getFilename() . $file->isExecutable(),
+                    fn (ExecutableFile $file) => $file->getHash() . $file->getFilename() . $file->isExecutable(),
                     $filesArray
                 )
             )

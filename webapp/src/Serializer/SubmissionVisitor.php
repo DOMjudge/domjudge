@@ -14,7 +14,6 @@ use JMS\Serializer\Metadata\StaticPropertyMetadata;
 
 /**
  * Class SubmissionVisitor
- * @package App\Serializer
  */
 class SubmissionVisitor implements EventSubscriberInterface
 {
@@ -39,7 +38,7 @@ class SubmissionVisitor implements EventSubscriberInterface
                 'event' => Events::POST_SERIALIZE,
                 'class' => Submission::class,
                 'format' => 'json',
-                'method' => 'onPostSerialize'
+                'method' => 'onPostSerialize',
             ],
         ];
     }
@@ -68,7 +67,7 @@ class SubmissionVisitor implements EventSubscriberInterface
                     'href'     => $route,
                     'mime'     => 'application/zip',
                     'filename' => 'submission.zip',
-                ]
+                ],
             ]);
         }
     }

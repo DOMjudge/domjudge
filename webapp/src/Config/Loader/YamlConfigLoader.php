@@ -11,8 +11,6 @@ use Symfony\Component\Yaml\Yaml;
  * Class that loads a YAML file.
  *
  * @see     https://symfony.com/doc/current/components/config/resources.html#resource-loaders
- *
- * @package App\Config\Loader
  */
 class YamlConfigLoader extends FileLoader
 {

@@ -1,4 +1,5 @@
 <?php declare(strict_types=1);
+
 namespace App\Entity;
 
 use App\Validator\Constraints\Country;
@@ -119,7 +120,6 @@ class TeamAffiliation extends BaseApiEntity implements AssetEntityInterface
         $this->affilid = $affilid;
         return $this;
     }
-
 
     public function getAffilid(): ?int
     {

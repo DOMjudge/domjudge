@@ -17,12 +17,12 @@ final class Version20210611141202 extends AbstractMigration
         return false;
     }
 
-    public function getDescription() : string
+    public function getDescription(): string
     {
         return 'Create medal fields';
     }
 
-    public function up(Schema $schema) : void
+    public function up(Schema $schema): void
     {
         // this up() migration is auto-generated, please modify it to your needs
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
@@ -33,7 +33,7 @@ final class Version20210611141202 extends AbstractMigration
         $this->addSql('ALTER TABLE contest ADD medals_enabled TINYINT(1) DEFAULT \'0\' NOT NULL, ADD gold_medals SMALLINT UNSIGNED DEFAULT 4 NOT NULL COMMENT \'Number of gold medals\', ADD silver_medals SMALLINT UNSIGNED DEFAULT 4 NOT NULL COMMENT \'Number of silver medals\', ADD bronze_medals SMALLINT UNSIGNED DEFAULT 4 NOT NULL COMMENT \'Number of bronze medals\'');
     }
 
-    public function down(Schema $schema) : void
+    public function down(Schema $schema): void
     {
         // this down() migration is auto-generated, please modify it to your needs
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');

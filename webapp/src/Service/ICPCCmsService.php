@@ -18,9 +18,9 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class ICPCCmsService
 {
-    const BASE_URI = 'https://icpc.global';
-    const WS_TOKEN_URL = '/auth/realms/cm5/protocol/openid-connect/token';
-    const WS_CLICS = '/cm5-contest-rest/rest/contest/export/CLICS/CONTEST/';
+    public const BASE_URI = 'https://icpc.global';
+    public const WS_TOKEN_URL = '/auth/realms/cm5/protocol/openid-connect/token';
+    public const WS_CLICS = '/cm5-contest-rest/rest/contest/export/CLICS/CONTEST/';
 
     protected DOMJudgeService $dj;
     protected EntityManagerInterface $em;
@@ -39,7 +39,7 @@ class ICPCCmsService
                 'headers' => [
                     'User-Agent' => 'DOMjudge/' . $domjudgeVersion,
                     'Accept' => 'application/json',
-                ]
+                ],
             ]
         );
     }
@@ -60,7 +60,7 @@ class ICPCCmsService
         }
         $response = $this->client->request('GET', self::WS_CLICS . $contest, [
             'headers' => [
-                'Authorization' => 'bearer ' . $bearerToken
+                'Authorization' => 'bearer ' . $bearerToken,
             ],
         ]);
 
@@ -182,8 +182,8 @@ class ICPCCmsService
                 'client_id' => 'cm5-token',
                 'username' => 'token:' . $token,
                 'password' => '',
-                'grant_type' => 'password'
-            ]
+                'grant_type' => 'password',
+            ],
         ]);
 
         if ($response->getStatusCode() >= 400 && $response->getStatusCode() < 500) {

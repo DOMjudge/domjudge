@@ -18,14 +18,12 @@ use Doctrine\ORM\QueryBuilder;
  * Class StatisticsService
  *
  * Service to display statistics data.
- *
- * @package App\Service
  */
 class StatisticsService
 {
-    const NUM_GROUPED_BINS = 20;
+    public const NUM_GROUPED_BINS = 20;
 
-    const FILTERS = [
+    public const FILTERS = [
         'visiblecat' => 'Teams from visible categories',
         'hiddencat' => 'Teams from hidden categories',
         'all' => 'All teams',
@@ -95,9 +93,9 @@ class StatisticsService
     /**
      * Get miscellaneous contest statistics.
      *
-     * @param Team[]  $teams
-     * @param bool    $noFrozen             Do not show frozen data
-     * @param bool    $verificationRequired Only show verified submissions
+     * @param Team[] $teams
+     * @param bool   $noFrozen             Do not show frozen data
+     * @param bool   $verificationRequired Only show verified submissions
      */
     public function getMiscContestStatistics(
         Contest $contest,
@@ -577,8 +575,6 @@ class StatisticsService
 
     /**
      * Get the number of submissions per team.
-     *
-     * @return array
      */
     protected function getTeamNumSubmissions(Contest $contest, string $filter): array
     {

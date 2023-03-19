@@ -1,4 +1,5 @@
 <?php declare(strict_types=1);
+
 namespace App\Utils;
 
 use DateTime;
@@ -11,7 +12,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 class Utils
 {
     /** @var array Mapping from HTML colors to hex values */
-    const HTML_COLORS = [
+    public const HTML_COLORS = [
         "black" => "#000000",
         "silver" => "#C0C0C0",
         "gray" => "#808080",
@@ -161,9 +162,9 @@ class Utils
         "yellowgreen" => "#9acd32",
     ];
 
-    const GD_MISSING = 'Cannot import image: the PHP GD library is missing.';
+    public const GD_MISSING = 'Cannot import image: the PHP GD library is missing.';
 
-    const DAY_IN_SECONDS = 60*60*24;
+    public const DAY_IN_SECONDS = 60*60*24;
 
     /**
      * Returns the milliseconds part of a time stamp truncated at three digits.
@@ -182,10 +183,10 @@ class Utils
         if ($epoch === null) {
             return null;
         }
-        $millis = Utils::getMillis((float) $epoch);
-        return date("Y-m-d\TH:i:s", (int) $epoch)
+        $millis = Utils::getMillis((float)$epoch);
+        return date("Y-m-d\TH:i:s", (int)$epoch)
             . ($floored ? '' : $millis)
-            . date("P", (int) $epoch);
+            . date("P", (int)$epoch);
     }
 
     /**
@@ -330,7 +331,7 @@ class Utils
         return [
             (int)round(hexdec(substr($hex, 1, $length)) * $fact),
             (int)round(hexdec(substr($hex, 1 + $length, $length)) * $fact),
-            (int)round(hexdec(substr($hex, 1 + 2 * $length, $length)) * $fact)
+            (int)round(hexdec(substr($hex, 1 + 2 * $length, $length)) * $fact),
         ];
     }
 
@@ -373,9 +374,9 @@ class Utils
     /**
      * Calculate the penalty time.
      *
-     * @param bool $solved Whether there was at least one correct submission by this team for this problem
-     * @param int $numSubmissions The total number of tries for this problem by this team
-     * @param int $penaltyTime The penalty time for every wrong submission
+     * @param bool $solved           Whether there was at least one correct submission by this team for this problem
+     * @param int  $numSubmissions   The total number of tries for this problem by this team
+     * @param int  $penaltyTime      The penalty time for every wrong submission
      * @param bool $scoreIsInSeconds Whether scoring is in seconds
      */
     public static function calcPenaltyTime(bool $solved, int $numSubmissions, int $penaltyTime, bool $scoreIsInSeconds): int
@@ -417,7 +418,7 @@ class Utils
     public static function printhost(string $hostname, bool $full = false): string
     {
         // Shorten the hostname to first label, but not if it's an IP address.
-        if (! $full  && !preg_match('/^\d{1,3}(\.\d{1,3}){3}$/', $hostname)) {
+        if (!$full  && !preg_match('/^\d{1,3}(\.\d{1,3}){3}$/', $hostname)) {
             $expl = explode('.', $hostname);
             $hostname = array_shift($expl);
         }
@@ -791,8 +792,8 @@ class Utils
                 ['-', '_']
             );
         } else {
-            $chars = ['a','b','c','d','e','f','g','h','i','j','k','m','n','p','q','r',
-                      's','t','u','v','w','x','y','z','2','3','4','5','6','7','8','9'];
+            $chars = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'm', 'n', 'p', 'q', 'r',
+                      's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '2', '3', '4', '5', '6', '7', '8', '9'];
         }
 
         $max_chars = count($chars) - 1;
@@ -827,7 +828,6 @@ class Utils
 
     /**
      * Return the table name for the given entity.
-     * @param $entity
      */
     public static function tableForEntity($entity): string
     {
@@ -856,7 +856,7 @@ class Utils
     /**
      * Convert the given string to a field that is safe to use in a Tab Separated Values file.
      */
-    public static function toTsvField(string $field) : string
+    public static function toTsvField(string $field): string
     {
         return str_replace(
             ["\\",   "\t",  "\n",  "\r"],

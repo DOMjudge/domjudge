@@ -16,8 +16,6 @@ use Doctrine\ORM\Query\SqlWalker;
  * Truncate function that truncates a field from the database if too long and adds a truncation message.
  *
  * TruncateFunction ::= "TRUNCATE" "(" ArithmeticPrimary "," ArithmeticPrimary "," ArithmeticPrimary ")"
- *
- * @package App\Doctrine\ORM\Query\AST\Functions
  */
 class TruncateFunction extends FunctionNode
 {

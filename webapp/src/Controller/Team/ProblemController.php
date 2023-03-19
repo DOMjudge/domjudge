@@ -24,8 +24,6 @@ use Symfony\Component\Routing\Annotation\Route;
  * @Route("/team")
  * @IsGranted("ROLE_TEAM")
  * @Security("user.getTeam() !== null", message="You do not have a team associated with your account.")
- *
- * @package App\Controller\Team
  */
 class ProblemController extends BaseController
 {
@@ -56,7 +54,6 @@ class ProblemController extends BaseController
         return $this->render('team/problems.html.twig',
             $this->dj->getTwigDataForProblemsAction($teamId, $this->stats));
     }
-
 
     /**
      * @Route("/problems/{probId<\d+>}/text", name="team_problem_text")

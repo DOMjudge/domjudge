@@ -28,7 +28,7 @@ class Event
     private int $eventid;
 
     /**
-     * @var double|string
+     * @var float|string
      *
      * @ORM\Column(name="eventtime", type="decimal", precision=32, scale=9,
      *     nullable=false, options={"comment"="When the event occurred","unsigned"=true})

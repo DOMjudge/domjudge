@@ -99,7 +99,7 @@ class UserRegistrationType extends AbstractType
                     'mapped' => false,
                     'choice_label' => 'name',
                     'placeholder' => '-- Select category --',
-                    'query_builder' => fn(EntityRepository $er) => $er
+                    'query_builder' => fn (EntityRepository $er) => $er
                         ->createQueryBuilder('c')
                         ->where('c.allow_self_registration = 1')
                         ->orderBy('c.sortorder'),
@@ -222,16 +222,16 @@ class UserRegistrationType extends AbstractType
                 $form = $context->getRoot();
                 switch ($form->get('affiliation')->getData()) {
                     case 'new':
-                        foreach (['Name','ShortName'] as $identifier) {
-                            $name = $form->get('affiliation'.$identifier)->getData();
+                        foreach (['Name', 'ShortName'] as $identifier) {
+                            $name = $form->get('affiliation' . $identifier)->getData();
                             if (empty($name)) {
                                 $context->buildViolation('This value should not be blank.')
-                                    ->atPath('affiliation'.$identifier)
+                                    ->atPath('affiliation' . $identifier)
                                     ->addViolation();
                             }
                             if ($this->em->getRepository(TeamAffiliation::class)->findOneBy([strtolower($identifier) => $name])) {
-                                $context->buildViolation('This affiliation '.strtolower($identifier).' is already in use.')
-                                    ->atPath('affiliation'.$identifier)
+                                $context->buildViolation('This affiliation ' . strtolower($identifier) . ' is already in use.')
+                                    ->atPath('affiliation' . $identifier)
                                     ->addViolation();
                             }
                         }
@@ -249,7 +249,7 @@ class UserRegistrationType extends AbstractType
         $resolver->setDefaults(
             [
                 'data_class' => User::class,
-                'constraints' => new Callback($validateAffiliation)
+                'constraints' => new Callback($validateAffiliation),
             ]
         );
     }

@@ -54,7 +54,7 @@ class SubmissionsFilterType extends AbstractType
             "class" => Language::class,
             "required" => false,
             "choice_label" => "name",
-            "query_builder" => fn(EntityRepository $er) => $er
+            "query_builder" => fn (EntityRepository $er) => $er
                 ->createQueryBuilder("l")
                 ->where("l.allowSubmit = 1")
                 ->orderBy("l.name"),
@@ -66,7 +66,7 @@ class SubmissionsFilterType extends AbstractType
             "class" => TeamCategory::class,
             "required" => false,
             "choice_label" => "name",
-            "query_builder" => fn(EntityRepository $er) => $er
+            "query_builder" => fn (EntityRepository $er) => $er
                 ->createQueryBuilder("tc")
                 ->orderBy("tc.name"),
             "attr" => ["data-filter-field" => "category-id"],

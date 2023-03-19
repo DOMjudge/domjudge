@@ -12,10 +12,6 @@ use Monolog\Processor\ProcessorInterface;
 
 class VarargsLogMessageProcessor implements ProcessorInterface
 {
-    /**
-     * @param  array $record
-     * @return array
-     */
     public function __invoke(array $record): array
     {
         if (strpos($record['message'], '%') === false || empty($record['context'])) {

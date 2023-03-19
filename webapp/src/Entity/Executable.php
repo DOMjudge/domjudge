@@ -1,4 +1,5 @@
 <?php declare(strict_types=1);
+
 namespace App\Entity;
 
 use App\Validator\Constraints\Identifier;
@@ -22,7 +23,6 @@ use ZipArchive;
 class Executable
 {
     /**
-     * @var string
      * @ORM\Id
      * @ORM\Column(type="string", name="execid", length=32,
      *     options={"comment"="Executable ID (string)"}, nullable=false)
@@ -181,7 +181,7 @@ class Executable
 
         /** @var ExecutableFile[] $files */
         $files = array_values($this->getImmutableExecutable()->getFiles()->toArray());
-        usort($files, fn($a, $b) => $a->getRank() <=> $b->getRank());
+        usort($files, fn ($a, $b) => $a->getRank() <=> $b->getRank());
         foreach ($files as $file) {
             $zipArchive->addFromString($file->getFilename(), $file->getFileContent());
             if ($file->isExecutable()) {

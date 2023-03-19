@@ -13,13 +13,13 @@ class ProblemControllerTest extends JuryControllerTestCase
     protected static string  $baseUrl                  = '/jury/problems';
     protected static array   $exampleEntries           = ['Hello World', 'default', 5, 3, 2, 1];
     protected static string  $shortTag                 = 'problem';
-    protected static array   $deleteEntities           = ['Hello World','Float special compare test'];
+    protected static array   $deleteEntities           = ['Hello World', 'Float special compare test'];
     protected static string  $deleteEntityIdentifier   = 'name';
     protected static string  $getIDFunc                = 'getProbid';
     protected static string  $className                = Problem::class;
     protected static array   $DOM_elements             = [
         'h1'                            => ['Problems'],
-        'a.btn[title="Import problem"]' => ['admin' => [" Import problem"], 'jury' => []]
+        'a.btn[title="Import problem"]' => ['admin' => [" Import problem"], 'jury' => []],
     ];
     protected static string  $identifyingEditAttribute = 'name';
     protected static ?string $defaultEditEntityName    = 'Hello World';
@@ -28,7 +28,7 @@ class ProblemControllerTest extends JuryControllerTestCase
     protected static ?array $deleteExtra      = [
         'pageurl'   => '/jury/problems/3',
         'deleteurl' => '/jury/problems/attachments/1/delete',
-        'selector'  => 'interactor'
+        'selector'  => 'interactor',
     ];
     protected static string $addForm          = 'problem[';
     protected static array  $addEntitiesShown = ['name'];

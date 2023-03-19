@@ -22,7 +22,6 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
  * Class CheckConfigService
- * @package App\Service
  */
 class CheckConfigService
 {
@@ -212,7 +211,7 @@ class CheckConfigService
         foreach ($r as $row) {
             $vars[$row['Variable_name']] = $row['Value'];
         }
-        # MySQL 8 has "transaction_isolation" instead of "tx_isolation".
+        // MySQL 8 has "transaction_isolation" instead of "tx_isolation".
         if (isset($vars['transaction_isolation'])) {
             $vars['tx_isolation'] = $vars['transaction_isolation'];
         }
@@ -317,7 +316,7 @@ class CheckConfigService
                 'compilation of sources that statically allocate memory may fail. We ' .
                 'recommend to include a margin to be on the safe side. The current ' .
                 '"script_filesize_limit" = ' . $this->config->get('script_filesize_limit') . ' ' .
-                'while "memory_limit" = ' . $this->config->get('memory_limit') . '.'
+                'while "memory_limit" = ' . $this->config->get('memory_limit') . '.',
             ];
     }
 
@@ -414,7 +413,7 @@ class CheckConfigService
                 'result' => 'O',
                 'desc' => 'Currently active contests: ' .
                     implode(', ', array_map(
-                        fn($contest) => 'c' . $contest->getCid() . ' (' . $contest->getShortname() . ')',
+                        fn ($contest) => 'c' . $contest->getCid() . ' (' . $contest->getShortname() . ')',
                         $contests
                     ))];
     }
@@ -447,7 +446,7 @@ class CheckConfigService
         $desc = '';
         foreach ($contesterrors as $cid => $errors) {
             $desc .= "Contest: c$cid: " .
-                    (count($errors) == 0 ? 'no errors' : (string)$errors) ."\n" .$cperrors[$cid];
+                    (count($errors) == 0 ? 'no errors' : (string)$errors) . "\n" . $cperrors[$cid];
         }
 
         $this->stopwatch->stop(__FUNCTION__);
@@ -541,7 +540,7 @@ class CheckConfigService
             }
 
             $tcs_size = $this->em->createQueryBuilder()
-                ->select('tc.testcaseid', 'tc.ranknumber', 'length(tcc.output) as output_size' )
+                ->select('tc.testcaseid', 'tc.ranknumber', 'length(tcc.output) as output_size')
                 ->from(Testcase::class, 'tc')
                 ->join('tc.content', 'tcc')
                 ->andWhere('tc.problem = :probid')

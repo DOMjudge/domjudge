@@ -44,7 +44,7 @@ class AwardsControllerTest extends BaseTestCase
     {
         $url = $this->helperGetEndpointURL($this->apiEndpoint);
         $this->verifyApiJsonResponse('GET', $url, 200);
-        foreach (['admin','demo'] as $user) {
+        foreach (['admin', 'demo'] as $user) {
             $this->verifyApiJsonResponse('GET', $url, 200, $user);
         }
     }

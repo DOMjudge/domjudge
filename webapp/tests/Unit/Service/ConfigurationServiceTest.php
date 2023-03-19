@@ -135,7 +135,7 @@ class ConfigurationServiceTest extends KernelTestCase
     /**
      * @dataProvider provideConfigFromDatabase
      *
-     * @param mixed  $dbValue
+     * @param mixed $dbValue
      */
     public function testConfigFromDatabase(
         string $itemName,
@@ -166,7 +166,7 @@ class ConfigurationServiceTest extends KernelTestCase
     /**
      * @dataProvider provideConfigFromDatabase
      *
-     * @param mixed  $dbValue
+     * @param mixed $dbValue
      */
     public function testConfigFromDatabaseAll(
         string $itemName,
@@ -323,11 +323,11 @@ class ConfigurationServiceTest extends KernelTestCase
         yield ['default_compare', [
             'exec1' => 'Descr 1',
             'exec3' => 'Descr 3',
-        ] ];
+        ]];
         yield ['default_run', [
             'exec2' => 'Descr 2',
             'exec5' => 'Descr 5',
-        ] ];
+        ]];
     }
 
     /**

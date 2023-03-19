@@ -111,7 +111,7 @@ class ConfigController extends AbstractController
             }
             $allData[] = [
                 'name' => $category,
-                'data' => $data
+                'data' => $data,
             ];
         }
         return $this->render('jury/config.html.twig', [

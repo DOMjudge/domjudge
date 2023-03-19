@@ -8,8 +8,6 @@ use App\Service\EventLogService;
  * Class BaseApiEntity
  *
  * Base entity class that entities should use to support getting their API ID.
- *
- * @package App\Entity
  */
 abstract class BaseApiEntity
 {
@@ -27,7 +25,7 @@ abstract class BaseApiEntity
     public function getApiId(EventLogService $eventLogService): string
     {
         $field = $eventLogService->apiIdFieldForEntity($this);
-        $method = 'get'.ucfirst($field);
+        $method = 'get' . ucfirst($field);
         return (string)$this->{$method}();
     }
 }

@@ -18,12 +18,12 @@ final class Version20210407120356 extends AbstractMigration
         return false;
     }
 
-    public function getDescription() : string
+    public function getDescription(): string
     {
         return 'Populate immutable executable tables.';
     }
 
-    public function up(Schema $schema) : void
+    public function up(Schema $schema): void
     {
         // this up() migration is auto-generated, please modify it to your needs
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');

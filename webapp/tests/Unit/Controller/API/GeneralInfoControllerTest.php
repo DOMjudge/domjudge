@@ -117,7 +117,7 @@ class GeneralInfoControllerTest extends BaseTestCase
     public function provideUsers(): Generator
     {
         yield ['demo', 'demo user for example team', 'Example teamname', ['team']];
-        yield ['admin', 'Administrator', 'DOMjudge', ['admin','team']];
+        yield ['admin', 'Administrator', 'DOMjudge', ['admin', 'team']];
     }
 
     /**

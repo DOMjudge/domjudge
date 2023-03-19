@@ -32,7 +32,7 @@ class ContestProblemVisitor implements EventSubscriberInterface
                 'event' => Events::POST_SERIALIZE,
                 'class' => ContestProblem::class,
                 'format' => 'json',
-                'method' => 'onPostSerialize'
+                'method' => 'onPostSerialize',
             ],
         ];
     }
@@ -79,7 +79,7 @@ class ContestProblemVisitor implements EventSubscriberInterface
                     'href'     => $route,
                     'mime'     => 'application/pdf',
                     'filename' => $contestProblem->getShortname() . '.pdf',
-                ]
+                ],
             ]);
         }
     }

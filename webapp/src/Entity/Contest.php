@@ -47,7 +47,7 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
  */
 class Contest extends BaseApiEntity implements AssetEntityInterface
 {
-    const STARTTIME_UPDATE_MIN_SECONDS_BEFORE = 30;
+    public const STARTTIME_UPDATE_MIN_SECONDS_BEFORE = 30;
 
     /**
      * @ORM\Id
@@ -82,7 +82,7 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     private string $shortname = '';
 
     /**
-     * @var double|string
+     * @var float|string
      * @ORM\Column(type="decimal", precision=32, scale=9, name="activatetime",
      *     options={"comment"="Time contest becomes visible in team/public views",
      *              "unsigned"=true},
@@ -92,7 +92,7 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     private $activatetime;
 
     /**
-     * @var double|string
+     * @var float|string
      * @ORM\Column(type="decimal", precision=32, scale=9, name="starttime",
      *     options={"comment"="Time contest starts, submissions accepted",
      *              "unsigned"=true},
@@ -110,7 +110,7 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     private bool $starttimeEnabled = true;
 
     /**
-     * @var double|string
+     * @var float|string
      * @ORM\Column(type="decimal", precision=32, scale=9, name="freezetime",
      *     options={"comment"="Time scoreboard is frozen","unsigned"=true},
      *     nullable=true)
@@ -119,7 +119,7 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     private $freezetime;
 
     /**
-     * @var double|string
+     * @var float|string
      * @ORM\Column(type="decimal", precision=32, scale=9, name="endtime",
      *     options={"comment"="Time after which no more submissions are accepted",
      *              "unsigned"=true},
@@ -129,7 +129,7 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     private $endtime;
 
     /**
-     * @var double|string|null
+     * @var float|string|null
      * @ORM\Column(type="decimal", precision=32, scale=9, name="unfreezetime",
      *     options={"comment"="Unfreeze a frozen scoreboard at this time",
      *              "unsigned"=true},
@@ -139,7 +139,7 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     private $unfreezetime = null;
 
     /**
-     * @var double|string|null
+     * @var float|string|null
      * @ORM\Column(type="decimal", precision=32, scale=9, name="finalizetime",
      *     options={"comment"="Time when contest was finalized, null if not yet",
      *              "unsigned"=true},
@@ -207,7 +207,7 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     private int $bronzeMedals = 4;
 
     /**
-     * @var double|string
+     * @var float|string
      * @ORM\Column(type="decimal", precision=32, scale=9, name="deactivatetime",
      *     options={"comment"="Time contest becomes invisible in team/public views",
      *              "unsigned"=true},
@@ -1254,8 +1254,8 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
         foreach ($this->problems as $idx => $problem) {
             // Check if the problem ID is unique.
             $otherProblemIds = $this->problems
-                ->filter(fn(ContestProblem $otherProblem) => $otherProblem !== $problem)
-                ->map(fn(ContestProblem $problem) => $problem->getProblem()->getProbid())
+                ->filter(fn (ContestProblem $otherProblem) => $otherProblem !== $problem)
+                ->map(fn (ContestProblem $problem) => $problem->getProblem()->getProbid())
                 ->toArray();
             $problemId       = $problem->getProblem()->getProbid();
             if (in_array($problemId, $otherProblemIds)) {
@@ -1267,8 +1267,8 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
 
             // Check if the problem shortname is unique.
             $otherShortNames = $this->problems
-                ->filter(fn(ContestProblem $otherProblem) => $otherProblem !== $problem)
-                ->map(fn(ContestProblem $problem) => strtolower($problem->getShortname()))
+                ->filter(fn (ContestProblem $otherProblem) => $otherProblem !== $problem)
+                ->map(fn (ContestProblem $problem) => strtolower($problem->getShortname()))
                 ->toArray();
             $shortname = strtolower($problem->getShortname());
             if (in_array($shortname, $otherShortNames)) {

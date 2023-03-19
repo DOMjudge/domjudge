@@ -41,7 +41,7 @@ class RoleFixture extends AbstractDefaultDataFixture
                 $manager->persist($role);
                 $manager->flush();
             } else {
-                $this->logger->info('Role %s already exists, not created', [ $roleName ]);
+                $this->logger->info('Role %s already exists, not created', [$roleName]);
             }
 
             // Make sure we have a reference to the admin and judgehost roles, since we need them to create the

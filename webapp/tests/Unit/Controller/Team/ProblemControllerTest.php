@@ -51,7 +51,6 @@ class ProblemControllerTest extends BaseTestCase
             function () use (
                 $problemTexts,
                 $descriptions,
-                $problems,
                 $withLimits,
                 $letters
             ) {
@@ -112,7 +111,7 @@ class ProblemControllerTest extends BaseTestCase
         /** @var Testcase[] $samples */
         $samples = [
             1 => $problem->getTestcases()->get(0),
-            2 => $problem->getTestcases()->get(2)
+            2 => $problem->getTestcases()->get(2),
         ];
         $samples[1]->setSample(true);
         $samples[2]->setSample(true);

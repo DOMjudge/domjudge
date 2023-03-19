@@ -72,7 +72,6 @@ class ScoreboardTest extends BaseBaseTestCase
         self::assertEquals(-1, $tie);
     }
 
-
     /**
      * Test that the scoreboard tiebreaker works if both teams have the same highest score.
      */

@@ -31,8 +31,6 @@ use Symfony\Component\Routing\RouterInterface;
  * Class JuryMiscController
  *
  * @Route("/jury")
- *
- * @package App\Controller\Jury
  */
 class JuryMiscController extends BaseController
 {
@@ -101,9 +99,9 @@ class JuryMiscController extends BaseController
                 ->getQuery()->setParameter(1, '%' . $q . '%')
                 ->getResult();
 
-            $results = array_map(fn(array $location) => [
+            $results = array_map(fn (array $location) => [
                 'id' => $location['room'],
-                'text' => $location['room']
+                'text' => $location['room'],
             ], $locations);
         } elseif (!$this->isGranted('ROLE_JURY')) {
             throw new AccessDeniedHttpException('Permission denied');

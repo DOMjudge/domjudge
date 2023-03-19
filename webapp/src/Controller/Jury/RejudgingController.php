@@ -98,7 +98,7 @@ class RejudgingController extends BaseController
                 'title' => 'status',
                 'sort' => true,
                 'default_sort' => true,
-                'default_sort_order' => 'asc'
+                'default_sort_order' => 'asc',
             ],
         ];
 
@@ -133,7 +133,7 @@ class RejudgingController extends BaseController
                 $status = $rejudging->getValid() ? 'applied' : 'canceled';
                 $sort_order = 2;
             } elseif ($todo > 0) {
-                $perc   = (int)(100 * ((double)$done / (double)($done + $todo)));
+                $perc   = (int)(100 * ((float)$done / (float)($done + $todo)));
                 $status = sprintf("%d%% done", $perc);
                 $sort_order = 0;
             } else {
@@ -276,7 +276,7 @@ class RejudgingController extends BaseController
                 ->getQuery()
                 ->getResult();
 
-            $getSubmissionId = fn(Judging $judging) => $judging->getSubmission()->getSubmitid();
+            $getSubmissionId = fn (Judging $judging) => $judging->getSubmission()->getSubmitid();
             $originalVerdicts = Utils::reindex($originalVerdicts, $getSubmissionId);
             $newVerdicts = Utils::reindex($newVerdicts, $getSubmissionId);
         });
@@ -481,7 +481,7 @@ class RejudgingController extends BaseController
             $formData['contests'] = is_null($currentContest) ? [] : [$currentContest];
         }
         $verdicts             = $formBuilder->get('verdicts')->getOption('choices');
-        $incorrectVerdicts    = array_filter($verdicts, fn($k) => $k != 'correct');
+        $incorrectVerdicts    = array_filter($verdicts, fn ($k) => $k != 'correct');
         $formData['verdicts'] = $incorrectVerdicts;
 
         $form = $formBuilder->setData($formData)->getForm();
@@ -495,27 +495,27 @@ class RejudgingController extends BaseController
                 'priority'   => JudgeTask::parsePriority($formData['priority']),
                 'repeat'     => $formData['repeat'],
                 'contests'   => array_map(
-                    fn(Contest $contest) => $contest->getCid(),
+                    fn (Contest $contest) => $contest->getCid(),
                     $formData['contests'] ? $formData['contests']->toArray() : []
                 ),
                 'problems'   => array_map(
-                    fn(Problem $problem) => $problem->getProbid(),
+                    fn (Problem $problem) => $problem->getProbid(),
                     $formData['problems'] ? $formData['problems']->toArray() : []
                 ),
                 'languages'  => array_map(
-                    fn(Language $language) => $language->getLangid(),
+                    fn (Language $language) => $language->getLangid(),
                     $formData['languages'] ? $formData['languages']->toArray() : []
                 ),
                 'teams'      => array_map(
-                    fn(Team $team) => $team->getTeamid(),
+                    fn (Team $team) => $team->getTeamid(),
                     $formData['teams'] ? $formData['teams']->toArray() : []
                 ),
                 'users'      => array_map(
-                    fn(User $user) => $user->getUserid(),
+                    fn (User $user) => $user->getUserid(),
                     $formData['users'] ? $formData['users']->toArray() : []
                 ),
                 'judgehosts' => array_map(
-                    fn(Judgehost $judgehost) => $judgehost->getJudgehostid(),
+                    fn (Judgehost $judgehost) => $judgehost->getJudgehostid(),
                     $formData['judgehosts'] ? $formData['judgehosts']->toArray() : []
                 ),
                 'verdicts'   => array_values($formData['verdicts']),
@@ -898,10 +898,10 @@ class RejudgingController extends BaseController
                 ->getArrayResult();
             $current_spread = [
                 'spread' => -1,
-                'rank' => -1
+                'rank' => -1,
             ];
             foreach ($runtimes as $runtime) {
-                $spread = (float) $runtime['spread'];
+                $spread = (float)$runtime['spread'];
                 if ($spread > $current_spread['spread']) {
                     $current_spread['spread'] = $spread;
                     $current_spread['rank'] = $runtime['ranknumber'];
@@ -913,7 +913,7 @@ class RejudgingController extends BaseController
             }
         }
         sort($judging_runs_differ);
-        usort($runtime_spread, fn($a, $b) => $b['spread'] <=> $a['spread']);
+        usort($runtime_spread, fn ($a, $b) => $b['spread'] <=> $a['spread']);
 
         $max_list_len = 10;
         $runtime_spread_list = [];
@@ -933,7 +933,7 @@ class RejudgingController extends BaseController
                     !array_key_exists($submitid, $submissions_to_result)
                         ? join(', ', $results)
                         : $submissions_to_result[$submitid]
-                )
+                ),
             ];
         }
 
@@ -960,7 +960,7 @@ class RejudgingController extends BaseController
                 'njudged' => $njudged,
                 'avgrun' => $avgrun,
                 'stddev' => sqrt($variance),
-                'avgduration' => $avgtime
+                'avgduration' => $avgtime,
             ];
         }
 
@@ -969,7 +969,7 @@ class RejudgingController extends BaseController
             'judging_runs_differ_overflow' => count($judging_runs_differ) - $max_list_len,
             'runtime_spread' => $runtime_spread_list,
             'judgehost_stats' => $judgehost_stats,
-            'judgings' => $judgings
+            'judgings' => $judgings,
         ];
     }
 }

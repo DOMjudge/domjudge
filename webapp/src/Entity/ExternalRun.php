@@ -45,7 +45,7 @@ class ExternalRun
     private string $result;
 
     /**
-     * @var double|string
+     * @var float|string
      *
      * @ORM\Column(type="decimal", precision=32, scale=9, name="endtime",
      *              options={"comment"="Time run ended", "unsigned"=true},
@@ -54,7 +54,7 @@ class ExternalRun
     private $endtime;
 
     /**
-     * @var double|string
+     * @var float|string
      *
      * @ORM\Column(type="float", name="runtime",
      *              options={"comment"="Running time on this testcase"}, nullable=false)

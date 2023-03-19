@@ -183,7 +183,7 @@ class SubmissionController extends BaseController
             $judging = $this->em->getRepository(Judging::class)
                 ->findOneBy([
                                 'submission' => $submitId,
-                                'rejudging' => $rejudgingId
+                                'rejudging' => $rejudgingId,
                             ]);
             if ($judging) {
                 $judgingId = $judging->getJudgingid();
@@ -226,8 +226,8 @@ class SubmissionController extends BaseController
             ->getResult();
 
         /** @var Judging[] $judgings */
-        $judgings    = array_map(fn($data) => $data[0], $judgingData);
-        $maxRunTimes = array_map(fn($data) => $data['max_runtime'], $judgingData);
+        $judgings    = array_map(fn ($data) => $data[0], $judgingData);
+        $maxRunTimes = array_map(fn ($data) => $data['max_runtime'], $judgingData);
 
         $selectedJudging = null;
         // Find the selected judging.
@@ -648,7 +648,7 @@ class SubmissionController extends BaseController
         $submission = $this->em->getRepository(Submission::class)
             ->findOneBy([
                             'contest' => $this->dj->getCurrentContest(),
-                            'externalid' => $externalId
+                            'externalid' => $externalId,
                         ]);
 
         if (!$submission) {
@@ -850,7 +850,7 @@ class SubmissionController extends BaseController
                     return $er->createQueryBuilder('lang')
                         ->andWhere('lang.allowSubmit = 1')
                         ->orderBy('lang.name');
-                }
+                },
             ])
             ->add('entry_point', TextType::class, [
                 'label' => 'Optional entry point',
@@ -1050,7 +1050,6 @@ class SubmissionController extends BaseController
         return $this->redirectToLocalReferrer($this->router, $request, $redirect);
     }
 
-
     /**
      * @Route("/shadow-difference/{extjudgementid<\d+>}/verify", name="jury_shadow_difference_verify", methods={"POST"})
      */
@@ -1061,7 +1060,7 @@ class SubmissionController extends BaseController
     ): RedirectResponse {
         /** @var ExternalJudgement $judgement */
         $judgement  = $this->em->getRepository(ExternalJudgement::class)->find($extjudgementid);
-        $this->em->wrapInTransaction(function () use ($eventLogService, $request, $judgement) {
+        $this->em->wrapInTransaction(function () use ($request, $judgement) {
             $verified = $request->request->getBoolean('verified');
             $comment  = $request->request->get('comment');
             $judgement
@@ -1092,8 +1091,8 @@ class SubmissionController extends BaseController
             'unchanged'    => [],
         ];
 
-        $newFilenames = array_map(fn($f) => $f->getFilename(), $files);
-        $oldFilenames = array_map(fn($f) => $f->getFilename(), $oldFiles);
+        $newFilenames = array_map(fn ($f) => $f->getFilename(), $files);
+        $oldFilenames = array_map(fn ($f) => $f->getFilename(), $oldFiles);
         $result['added']   = array_diff($newFilenames, $oldFilenames);
         $result['removed'] = array_diff($oldFilenames, $newFilenames);
 
@@ -1124,12 +1123,12 @@ class SubmissionController extends BaseController
     /**
      * @param Judging|ExternalJudgement|null $judging
      */
-    protected function processClaim($judging, Request $request, ?string &$claimWarning) : ?RedirectResponse
+    protected function processClaim($judging, Request $request, ?string &$claimWarning): ?RedirectResponse
     {
         $user   = $this->dj->getUser();
         $action = ($request->get('claim') || $request->get('claimdiff')) ? 'claim' : 'unclaim';
 
-        $type = ($judging instanceof ExternalJudgement) ?'shadow difference' : 'submission';
+        $type = ($judging instanceof ExternalJudgement) ? 'shadow difference' : 'submission';
 
         if ($judging === null) {
             $claimWarning = sprintf('Cannot %s this %s: no valid judging found.', $type, $action);

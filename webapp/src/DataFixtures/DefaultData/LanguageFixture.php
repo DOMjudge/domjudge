@@ -67,7 +67,7 @@ class LanguageFixture extends AbstractDefaultDataFixture
                         ->setImmutableExecutable($this->createImmutableExecutable($file));
                     $manager->persist($executable);
                 } else {
-                    $this->logger->info('Executable %s already exists, not created', [ $item[9] ]);
+                    $this->logger->info('Executable %s already exists, not created', [$item[9]]);
                 }
                 $language = (new Language())
                     ->setLangid($item[0])
@@ -82,7 +82,7 @@ class LanguageFixture extends AbstractDefaultDataFixture
                     ->setCompileExecutable($executable);
                 $manager->persist($language);
             } else {
-                $this->logger->info('Language %s already exists, not created', [ $item[0] ]);
+                $this->logger->info('Language %s already exists, not created', [$item[0]]);
             }
         }
         $manager->flush();

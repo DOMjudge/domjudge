@@ -15,7 +15,6 @@ use JMS\Serializer\Metadata\StaticPropertyMetadata;
 
 /**
  * Class SetExternalIdVisitor
- * @package App\Serializer
  */
 class SetExternalIdVisitor implements EventSubscriberInterface
 {
@@ -32,7 +31,7 @@ class SetExternalIdVisitor implements EventSubscriberInterface
             [
                 'event' => Events::POST_SERIALIZE,
                 'format' => 'json',
-                'method' => 'onPostSerialize'
+                'method' => 'onPostSerialize',
             ],
         ];
     }

@@ -15,7 +15,7 @@ class ProblemsImportType extends AbstractType
         $builder->add('contest', EntityType::class, [
             'class' => Contest::class,
             'required' => true,
-            'choice_label' => fn(Contest $contest) => sprintf(
+            'choice_label' => fn (Contest $contest) => sprintf(
                 'c%d: %s - %s', $contest->getCid(), $contest->getShortname(), $contest->getName()
             ),
         ]);

@@ -36,7 +36,7 @@ class TeamCategoryFixture extends AbstractDefaultDataFixture
                 $manager->persist($category);
                 $manager->flush();
             } else {
-                $this->logger->info('Category %s already exists, not created', [ $item[0] ]);
+                $this->logger->info('Category %s already exists, not created', [$item[0]]);
             }
 
             // Make sure we have a reference to the system category, since we need it to create the admin user.

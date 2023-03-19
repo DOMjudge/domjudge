@@ -130,7 +130,7 @@ class UserController extends BaseController
             }
 
             $userdata['user_roles'] = [
-                'value' => implode(', ', array_map(fn(Role $role) => $role->getDjRole(), $u->getUserRoles()))
+                'value' => implode(', ', array_map(fn (Role $role) => $role->getDjRole(), $u->getUserRoles())),
             ];
 
             // Render IP address nicely.
@@ -152,7 +152,7 @@ class UserController extends BaseController
                     'title' => 'edit this user',
                     'link' => $this->generateUrl('jury_user_edit', [
                         'userId' => $u->getUserid(),
-                    ])
+                    ]),
                 ];
                 $useractions[] = [
                     'icon' => 'trash-alt',
@@ -356,7 +356,7 @@ class UserController extends BaseController
                 $isadmin = in_array('admin', $roles);
 
                 if (in_array('team', $groups) || in_array('team_nopass', $groups)) {
-                    if ($user->getTeam() && ! $isjury && ! $isadmin) {
+                    if ($user->getTeam() && !$isjury && !$isadmin) {
                         if (in_array('team', $groups) || empty($user->getPassword())) {
                             $doit = true;
                             $role = 'team';

@@ -8,8 +8,6 @@ use Traversable;
  * Class OrdinalArray
  *
  * This class is used to output an ordinal list.
- *
- * @package App\Serializer
  */
 class OrdinalArray
 {

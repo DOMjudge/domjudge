@@ -43,7 +43,7 @@ class AwardService
             $result = [
                 'id' => $type,
                 'citation' => 'Winner(s) of group ' . $groups[$id],
-                'team_ids' => $team_ids
+                'team_ids' => $team_ids,
             ];
             $results[] = $result;
         }
@@ -52,7 +52,7 @@ class AwardService
             $result = [
                 'id' => $type,
                 'citation' => 'First to solve problem ' . $problem_shortname[$id],
-                'team_ids' => $team_ids
+                'team_ids' => $team_ids,
             ];
             $results[] = $result;
         }
@@ -85,7 +85,7 @@ class AwardService
             $result = [
                 'id' => $type,
                 'citation' => 'Contest winner',
-                'team_ids' => $overall_winners
+                'team_ids' => $overall_winners,
             ];
             $results[] = $result;
         }
@@ -94,7 +94,7 @@ class AwardService
             $result = [
                 'id' => $metal . '-medal',
                 'citation' => ucfirst($metal) . ' medal winner',
-                'team_ids' => $team_ids
+                'team_ids' => $team_ids,
             ];
             $results[] = $result;
         }

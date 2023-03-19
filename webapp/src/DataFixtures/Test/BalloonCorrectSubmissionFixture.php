@@ -26,7 +26,7 @@ class BalloonCorrectSubmissionFixture extends AbstractTestDataFixture
 
         /** @var Contest $contest */
         $contest = $manager->getRepository(Contest::class)->findOneBy(['shortname' => 'beforeFreeze']);
-        
+
         /** @var Problem $problemA */
         $problemA = new Problem();
         $problemA->setName('U');

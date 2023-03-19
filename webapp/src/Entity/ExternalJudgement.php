@@ -77,7 +77,7 @@ class ExternalJudgement
     private ?string $verify_comment;
 
     /**
-     * @var double|string
+     * @var float|string
      *
      * @ORM\Column(type="decimal", precision=32, scale=9, name="starttime",
      *              options={"comment"="Time judging started", "unsigned"=true},
@@ -86,7 +86,7 @@ class ExternalJudgement
     private $starttime;
 
     /**
-     * @var double|string|null
+     * @var float|string|null
      *
      * @ORM\Column(type="decimal", precision=32, scale=9, name="endtime",
      *     options={"comment"="Time judging ended, null = still busy",

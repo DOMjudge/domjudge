@@ -10,7 +10,6 @@ use FOS\RestBundle\Controller\Annotations as Rest;
 use OpenApi\Annotations as OA;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * @Rest\Route("/contests/{cid}/access")
@@ -174,7 +173,7 @@ class AccessController extends AbstractRestController
                         'display_name',
                         'organization_id',
                         'group_ids',
-                    ]
+                    ],
                 ],
                 [
                     'type'       => 'state',

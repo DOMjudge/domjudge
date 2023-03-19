@@ -64,9 +64,9 @@ class JuryMiscControllerTest extends BaseTestCase
      */
     public function testBalloonScoreboard(array $fixtures, bool $public, string $contestStage): void
     {
-        //self::assertEquals((string) $public, $contestStage);
-        $visibleElements = ["rank","team","Summary","C"];
-        $nonActiveStages = ["preActivation","postDeactivate"];
+        // self::assertEquals((string) $public, $contestStage);
+        $visibleElements = ["rank", "team", "Summary", "C"];
+        $nonActiveStages = ["preActivation", "postDeactivate"];
         $this->loadFixtures($fixtures);
         /** @var ScoreboardService $sbs */
         $sbs = static::getContainer()->get(ScoreboardService::class);
@@ -81,16 +81,16 @@ class JuryMiscControllerTest extends BaseTestCase
         $response = $this->client->getResponse();
         self::assertEquals('200', $response->getStatusCode());
         self::assertSelectorExists('body:contains("scoreboard")');
-        foreach (['/public','/jury/scoreboard'] as $url) {
+        foreach (['/public', '/jury/scoreboard'] as $url) {
             $this->verifyPageResponse('GET', $url, 200);
             if (in_array($contestStage, $nonActiveStages) || (!$public && $url==='/public')) {
                 $elements = ["No active contest"];
             } elseif ($contestStage === 'preStart') {
-                $elements = ["scheduled to start on",'Demo contest','Utrecht University'];
+                $elements = ["scheduled to start on", 'Demo contest', 'Utrecht University'];
             } elseif ($contestStage === 'preFreeze') {
-                $elements = ["3 tries",'Demo contest','Utrecht University'];
-            } elseif (in_array($contestStage, ['preEnd','preUnfreeze'])) {
-                $elements = ["0 + 4 tries","3 tries","2 + 1 tries",'Demo contest','Utrecht University'];
+                $elements = ["3 tries", 'Demo contest', 'Utrecht University'];
+            } elseif (in_array($contestStage, ['preEnd', 'preUnfreeze'])) {
+                $elements = ["0 + 4 tries", "3 tries", "2 + 1 tries", 'Demo contest', 'Utrecht University'];
                 if ($contestStage === 'preFreeze') {
                     $elements[] = 'contest over, waiting for results';
                 }
@@ -98,11 +98,11 @@ class JuryMiscControllerTest extends BaseTestCase
                 $elements = $visibleElements;
             }
             foreach ($elements as $selector) {
-                self::assertSelectorExists('body:contains("'.$selector.'")');
+                self::assertSelectorExists('body:contains("' . $selector . '")');
             }
-            if (in_array($contestStage, ['preFreeze','preEnd']) && $public) {
+            if (in_array($contestStage, ['preFreeze', 'preEnd']) && $public) {
                 self::assertSelectorExists('span.submcorrect:contains("1")');
-                if (in_array($contestStage, ['preEnd','preUnfreeze'])) {
+                if (in_array($contestStage, ['preEnd', 'preUnfreeze'])) {
                     self::assertSelectorExists('span.submpend:contains("1")');
                     self::assertSelectorExists('span.submpend:contains("4")');
                     self::assertSelectorExists('span.submreject:contains("2")');
@@ -111,8 +111,8 @@ class JuryMiscControllerTest extends BaseTestCase
             }
         }
         foreach (range(1, 3) as $id) {
-            $statusCode = in_array($contestStage, ['preActivation','preStart','postDeactivate']) || !$public ? 404 : 200;
-            $this->verifyPageResponse('HEAD', '/public/problems/'.$id.'/text', $statusCode);
+            $statusCode = in_array($contestStage, ['preActivation', 'preStart', 'postDeactivate']) || !$public ? 404 : 200;
+            $this->verifyPageResponse('HEAD', '/public/problems/' . $id . '/text', $statusCode);
         }
         $this->verifyPageResponse('GET', '/public/problems', 200);
         if (in_array($contestStage, array_merge(['preStart'], $nonActiveStages)) || !$public) {
@@ -126,7 +126,7 @@ class JuryMiscControllerTest extends BaseTestCase
     {
         foreach (['preActivation'=>[DemoPreActivationContestFixture::class],
                   'preStart'=>[DemoPreStartContestFixture::class],
-                  'preFreeze'=>[DemoPreFreezeContestFixture::class,SampleSubmissionsThreeTriesCorrectFixture::class],
+                  'preFreeze'=>[DemoPreFreezeContestFixture::class, SampleSubmissionsThreeTriesCorrectFixture::class],
                   'preEnd'=>[DemoPreEndContestFixture::class,
                              SampleSubmissionsMultipleTriesFixture::class,
                              SampleSubmissionsThreeTriesCorrectFixture::class,
@@ -142,11 +142,11 @@ class JuryMiscControllerTest extends BaseTestCase
                   'postDeactivate'=>[DemoPostDeactivateContestFixture::class,
                                      SampleSubmissionsMultipleTriesFixture::class,
                                      SampleSubmissionsThreeTriesCorrectFixture::class,
-                                     SampleSubmissionsThreeTriesCorrectSameLanguageFixture::class]
+                                     SampleSubmissionsThreeTriesCorrectSameLanguageFixture::class],
             ] as $ident => $timeFixture) {
-            foreach ([true,false] as $public) {
+            foreach ([true, false] as $public) {
                 $fixture = $public ? [] : [DemoNonPublicContestFixture::class];
-                yield [array_merge($fixture, $timeFixture),$public, $ident];
+                yield [array_merge($fixture, $timeFixture), $public, $ident];
             }
         }
     }
@@ -158,7 +158,7 @@ class JuryMiscControllerTest extends BaseTestCase
      */
     public function testJuryAjax(string $endpoint, int $status, array $newRoles, array $finalObject): void
     {
-        $url = '/jury/ajax/'.$endpoint;
+        $url = '/jury/ajax/' . $endpoint;
         $this->roles = $newRoles;
         $this->logOut();
         $this->logIn();
@@ -173,15 +173,15 @@ class JuryMiscControllerTest extends BaseTestCase
 
     public function provideJuryAjax(): Generator
     {
-        foreach ([200 => ['balloon','jury','admin'], 403 => ['team']] as $status => $roles) {
+        foreach ([200 => ['balloon', 'jury', 'admin'], 403 => ['team']] as $status => $roles) {
             foreach ($roles as $role) {
                 yield ['affiliations', $status, [$role], ['results' => [0 => ['id' => 1,
-                                                                              'text' => 'Utrecht University (1)']
+                                                                              'text' => 'Utrecht University (1)'],
                                                                        ]]];
                 yield ['locations', $status, [$role], ['results' => []]];
             }
         }
-        foreach ([200 => ['jury','admin'], 403 => ['balloon','team']] as $status => $roles) {
+        foreach ([200 => ['jury', 'admin'], 403 => ['balloon', 'team']] as $status => $roles) {
             foreach ($roles as $role) {
                 yield ['problems', $status, [$role], ['results' => [0 => ['id' => 3, 'text' => 'Boolean switch search (p3)'],
                                                                     1 => ['id' => 2,
@@ -211,7 +211,7 @@ class JuryMiscControllerTest extends BaseTestCase
                                                                      19 => ['id' => 'rs', 'text' => 'Rust (rs)'],
                                                                      20 => ['id' => 'scala', 'text' => 'Scala (scala)'],
                                                                      21 => ['id' => 'swift', 'text' => 'Swift (swift)']]]];
-                yield ['contests', $status, [$role], ['results' => [0 => ['id' => 1, 'text' => 'Demo contest (demo - c1)']
+                yield ['contests', $status, [$role], ['results' => [0 => ['id' => 1, 'text' => 'Demo contest (demo - c1)'],
                                                                    ]]];
             }
         }

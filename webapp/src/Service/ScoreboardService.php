@@ -34,8 +34,6 @@ use Symfony\Component\HttpFoundation\Response;
  * Class ScoreboardService
  *
  * Service for scoreboard-related functions.
- *
- * @package App\Service
  */
 class ScoreboardService
 {
@@ -164,7 +162,7 @@ class ScoreboardService
             ->andWhere('r.contest = :contest')
             ->andWhere('tc.sortorder = :sortorder')
             ->andWhere('t.enabled = 1')
-            ->andWhere(sprintf('r.points_%s > :points OR '.
+            ->andWhere(sprintf('r.points_%s > :points OR ' .
                                '(r.points_%s = :points AND r.total%s_%s < :totaltime)',
                                $variant, $variant, $timeType, $variant))
             ->setParameter('contest', $contest)
@@ -273,13 +271,13 @@ class ScoreboardService
     ): void {
         $this->logger->debug(
             "ScoreboardService::calculateScoreRow '%d' '%d' '%d'",
-            [ $contest->getCid(), $team->getTeamid(), $problem->getProbid() ]
+            [$contest->getCid(), $team->getTeamid(), $problem->getProbid()]
         );
 
         if (!$team->getCategory()) {
             $this->logger->warning(
                 "Team '%d' has no category, skipping",
-                [ $team->getTeamid() ]
+                [$team->getTeamid()]
             );
             return;
         }
@@ -359,7 +357,7 @@ class ScoreboardService
             // STEP 1:
             // runtime improvements should be possible for all correct submissions
             if (!is_null($judging) && $judging->getResult() == Judging::RESULT_CORRECT) {
-                $runtime = (int) floor(1000*$judging->getMaxRuntime()); // round to milliseconds
+                $runtime = (int)floor(1000*$judging->getMaxRuntime()); // round to milliseconds
                 $runtimeJury = min($runtimeJury, $runtime);
                 if (!$submission->isAfterFreeze()) {
                     $runtimePubl = min($runtimePubl, $runtime);
@@ -460,8 +458,8 @@ class ScoreboardService
                     LEFT JOIN team t USING(teamid)
                     LEFT JOIN team_category tc USING (categoryid)
                 WHERE s.valid = 1 AND
-                    (ej.result IS NULL OR ej.result = :correctResult '.
-                    $verificationRequiredExtra.') AND
+                    (ej.result IS NULL OR ej.result = :correctResult ' .
+                    $verificationRequiredExtra . ') AND
                     s.cid = :cid AND s.probid = :probid AND
                     tc.sortorder = :teamSortOrder AND
                     round(s.submittime,4) < :submitTime', $params);
@@ -472,8 +470,8 @@ class ScoreboardService
                     LEFT JOIN team t USING (teamid)
                     LEFT JOIN team_category tc USING (categoryid)
                 WHERE s.valid = 1 AND
-                    (j.judgingid IS NULL OR j.result IS NULL OR j.result = :correctResult '.
-                    $verificationRequiredExtra.') AND
+                    (j.judgingid IS NULL OR j.result IS NULL OR j.result = :correctResult ' .
+                    $verificationRequiredExtra . ') AND
                     s.cid = :cid AND s.probid = :probid AND
                     tc.sortorder = :teamSortOrder AND
                     round(s.submittime,4) < :submitTime', $params);
@@ -526,7 +524,7 @@ class ScoreboardService
     public function updateRankCache(Contest $contest, Team $team): void
     {
         $this->logger->debug("ScoreboardService::updateRankCache '%d' '%d'",
-                             [ $contest->getCid(), $team->getTeamid() ]);
+                             [$contest->getCid(), $team->getTeamid()]);
 
         // First acquire an advisory lock to prevent other calls to this
         // method from interfering with our update.
@@ -564,7 +562,7 @@ class ScoreboardService
             $totalRuntime[$variant] = 0;
         }
 
-        $penaltyTime      = (int) $this->config->get('penalty_time');
+        $penaltyTime      = (int)$this->config->get('penalty_time');
         $scoreIsInSeconds = (bool)$this->config->get('score_in_seconds');
 
         // Now fetch the ScoreCache entries.
@@ -692,7 +690,7 @@ class ScoreboardService
 
         // Drop all teams and problems that do not exist in the contest.
         if (!empty($problems)) {
-            $problemIds = array_map(fn(Problem $problem) => $problem->getProbid(), $problems);
+            $problemIds = array_map(fn (Problem $problem) => $problem->getProbid(), $problems);
         } else {
             // problemId -1 will never happen, but otherwise the array is
             // empty and that is not supported.
@@ -700,7 +698,7 @@ class ScoreboardService
         }
 
         if (!empty($teams)) {
-            $teamIds = array_map(fn(Team $team) => $team->getTeamid(), $teams);
+            $teamIds = array_map(fn (Team $team) => $team->getTeamid(), $teams);
         } else {
             // teamId -1 will never happen, but otherwise the array is empty
             // and that is not supported.

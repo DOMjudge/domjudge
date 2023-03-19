@@ -15,8 +15,6 @@ use JMS\Serializer\Metadata\StaticPropertyMetadata;
 
 /**
  * Class ContestVisitor
- *
- * @package App\Serializer
  */
 class ContestVisitor implements EventSubscriberInterface
 {
@@ -41,7 +39,7 @@ class ContestVisitor implements EventSubscriberInterface
                 'event'  => Events::POST_SERIALIZE,
                 'class'  => Contest::class,
                 'format' => 'json',
-                'method' => 'onPostSerialize'
+                'method' => 'onPostSerialize',
             ],
         ];
     }
@@ -83,7 +81,7 @@ class ContestVisitor implements EventSubscriberInterface
                     'width'    => $imageSize[0],
                     'height'   => $imageSize[1],
                     'filename' => 'banner.' . $extension,
-                ]
+                ],
             ]);
         }
     }

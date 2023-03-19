@@ -16,8 +16,6 @@ use Doctrine\ORM\Query\SqlWalker;
  * Right function that truncates a field from the database from the right.
  *
  * RightFunction ::= "RIGHT" "(" ArithmeticPrimary "," ArithmeticPrimary ")"
- *
- * @package App\Doctrine\ORM\Query\AST\Functions
  */
 class RightFunction extends FunctionNode
 {

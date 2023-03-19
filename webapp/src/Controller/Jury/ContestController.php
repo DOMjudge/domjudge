@@ -33,7 +33,6 @@ use Doctrine\ORM\PersistentCollection;
 use Doctrine\ORM\Query\Expr\Join;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\Form\FormInterface;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -266,7 +265,7 @@ class ContestController extends BaseController
                     'title' => 'edit this contest',
                     'link' => $this->generateUrl('jury_contest_edit', [
                         'contestId' => $contest->getCid(),
-                    ])
+                    ]),
                 ];
                 $contestactions[] = [
                     'icon' => 'trash-alt',
@@ -279,10 +278,10 @@ class ContestController extends BaseController
             }
 
             $contestdata['process_balloons'] = [
-                'value' => $contest->getProcessBalloons() ? 'yes' : 'no'
+                'value' => $contest->getProcessBalloons() ? 'yes' : 'no',
             ];
             $contestdata['medals_enabled'] = [
-                'value' => $contest->getMedalsEnabled() ? 'yes' : 'no'
+                'value' => $contest->getMedalsEnabled() ? 'yes' : 'no',
             ];
             $contestdata['public'] = ['value' => $contest->getPublic() ? 'yes' : 'no'];
             if ($contest->isOpenToAllTeams()) {
@@ -304,7 +303,7 @@ class ContestController extends BaseController
 
             if ($this->getParameter('removed_intervals')) {
                 $contestdata['num_removed_intervals'] = [
-                    'value' => $removedIntervals[$contest->getCid()]['num_removed_intervals'] ?? 0
+                    'value' => $removedIntervals[$contest->getCid()]['num_removed_intervals'] ?? 0,
                 ];
             }
             $contestdata['num_problems'] = ['value' => $problems[$contest->getCid()] ?? 0];
@@ -635,7 +634,7 @@ class ContestController extends BaseController
         /** @var ContestProblem $contestProblem */
         $contestProblem = $this->em->getRepository(ContestProblem::class)->find([
             'contest' => $contestId,
-            'problem' => $probId
+            'problem' => $probId,
         ]);
         if (!$contestProblem) {
             throw new NotFoundHttpException(
@@ -810,7 +809,7 @@ class ContestController extends BaseController
         }
 
         /** @var int[] $submissionIds */
-        $submissionIds = array_map(fn(array $data) => $data['submitid'], $this->em->createQueryBuilder()
+        $submissionIds = array_map(fn (array $data) => $data['submitid'], $this->em->createQueryBuilder()
             ->from(Submission::class, 's')
             ->join('s.judgings', 'j', Join::WITH, 'j.valid = 1')
             ->select('s.submitid')
@@ -828,7 +827,7 @@ class ContestController extends BaseController
         }
 
         /** @var int[] $clarificationIds */
-        $clarificationIds = array_map(fn(array $data) => $data['clarid'], $this->em->createQueryBuilder()
+        $clarificationIds = array_map(fn (array $data) => $data['clarid'], $this->em->createQueryBuilder()
             ->from(Clarification::class, 'c')
             ->select('c.clarid')
             ->andWhere('c.contest = :contest')
@@ -901,7 +900,7 @@ class ContestController extends BaseController
         /** @var ContestProblem $contestProblem */
         $contestProblem = $this->em->getRepository(ContestProblem::class)->find([
             'contest' => $contestId,
-            'problem' => $probId
+            'problem' => $probId,
         ]);
         if (!$contestProblem) {
             throw new NotFoundHttpException(

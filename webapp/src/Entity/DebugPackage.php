@@ -1,4 +1,5 @@
 <?php declare(strict_types=1);
+
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
@@ -18,8 +19,6 @@ use Doctrine\ORM\Mapping as ORM;
 class DebugPackage
 {
     /**
-     * @var int
-     *
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer", name="debug_package_id", length=4,
@@ -35,7 +34,6 @@ class DebugPackage
     private Judging $judging;
 
     /**
-     * @var string
      * @ORM\Column(type="string", name="filename", length=255,
      *     options={"comment"="Name of the file where we stored the debug package."},
      *     nullable=false)

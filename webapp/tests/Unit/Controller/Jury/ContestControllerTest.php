@@ -22,7 +22,7 @@ class ContestControllerTest extends JuryControllerTestCase
     protected static array $DOM_elements               = ['h1'                            => ['Contests'],
                                                           'h3'                            => ['admin' => ['Current contests', 'All available contests'],
                                                              'jury' => []],
-                                                          'a.btn[title="Import contest"]' => ['admin' => [" Import contest"],'jury'=>[]]];
+                                                          'a.btn[title="Import contest"]' => ['admin' => [" Import contest"], 'jury'=>[]]];
     protected static ?array $deleteExtra               = ['pageurl'   => '/jury/contests/1',
                                                           'deleteurl' => '/jury/contests/1/problems/3/delete',
                                                           'selector'  => 'Boolean switch search',

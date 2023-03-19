@@ -190,7 +190,7 @@ class JudgehostController extends BaseController
                 'after' => 5,
                 'url' => $this->generateUrl('jury_judgehosts'),
                 'ajax' => true,
-            ]
+            ],
         ];
         if ($request->isXmlHttpRequest()) {
             return $this->render('jury/partials/judgehost_list.html.twig', $data);

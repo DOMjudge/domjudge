@@ -195,7 +195,7 @@ class JudgehostController extends AbstractFOSRestController
             $this->giveBackJudging($judging->getJudgingid(), $judgehost);
         }
 
-        return array_map(fn(Judging $judging) => [
+        return array_map(fn (Judging $judging) => [
             'jobid' => $judging->getJudgingid(),
             'submitid' => $judging->getSubmission()->getSubmitid(),
         ], $judgings);
@@ -396,7 +396,6 @@ class JudgehostController extends AbstractFOSRestController
                 }
             } else {
                 $this->em->wrapInTransaction(function () use (
-                    $request,
                     $judgehost,
                     $judging,
                     $query,
@@ -657,7 +656,7 @@ class JudgehostController extends AbstractFOSRestController
             'output_run',
             'output_diff',
             'output_error',
-            'output_system'
+            'output_system',
         ];
 
         foreach ($required as $argument) {
@@ -952,7 +951,7 @@ class JudgehostController extends AbstractFOSRestController
 
         if (array_key_exists($runResult, $resultsRemap)) {
             $this->logger->info('JudgeTask %d remapping result %s -> %s',
-                                [ $judgeTaskId, $runResult, $resultsRemap[$runResult] ]);
+                                [$judgeTaskId, $runResult, $resultsRemap[$runResult]]);
             $runResult = $resultsRemap[$runResult];
         }
 

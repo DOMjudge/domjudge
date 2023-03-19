@@ -56,8 +56,8 @@ class TeamType extends AbstractExternalIdEntityType
                         'pattern' => '/^[a-zA-Z0-9_-]+$/i',
                         'message' => 'Only letters, numbers, dashes and underscores are allowed.',
                     ]
-                )
-            ]
+                ),
+            ],
         ]);
         $builder->add('displayName', TextType::class, [
             'label'    => 'Display name',
@@ -76,7 +76,7 @@ class TeamType extends AbstractExternalIdEntityType
             'required'      => false,
             'choice_label'  => 'name',
             'placeholder'   => '-- no affiliation --',
-            'query_builder' => fn(EntityRepository $er) => $er->createQueryBuilder('a')->orderBy('a.name'),
+            'query_builder' => fn (EntityRepository $er) => $er->createQueryBuilder('a')->orderBy('a.name'),
         ]);
         $builder->add('penalty', IntegerType::class, [
             'label' => 'Penalty time',
@@ -90,7 +90,7 @@ class TeamType extends AbstractExternalIdEntityType
             'required' => false,
             'attr'     => [
                 'rows' => 10,
-            ]
+            ],
         ]);
         $builder->add('contests', EntityType::class, [
             'class'         => Contest::class,
@@ -98,7 +98,7 @@ class TeamType extends AbstractExternalIdEntityType
             'choice_label'  => 'name',
             'multiple'      => true,
             'by_reference'  => false,
-            'query_builder' => fn(EntityRepository $er) => $er
+            'query_builder' => fn (EntityRepository $er) => $er
                 ->createQueryBuilder('c')
                 ->where('c.openToAllTeams = false')
                 ->orderBy('c.name'),

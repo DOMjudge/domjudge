@@ -17,12 +17,12 @@ final class Version20191117060701 extends AbstractMigration
         return false;
     }
 
-    public function getDescription() : string
+    public function getDescription(): string
     {
         return 'change description of external_ccs_submission_url configuration option';
     }
 
-    public function up(Schema $schema) : void
+    public function up(Schema $schema): void
     {
         $this->addSql(<<<SQL
 UPDATE `configuration` SET
@@ -33,7 +33,7 @@ SQL
         );
     }
 
-    public function down(Schema $schema) : void
+    public function down(Schema $schema): void
     {
         $this->addSql(<<<SQL
 UPDATE `configuration` SET

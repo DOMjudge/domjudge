@@ -17,12 +17,12 @@ final class Version20210829113200 extends AbstractMigration
         return false;
     }
 
-    public function getDescription() : string
+    public function getDescription(): string
     {
         return 'adding debug packages';
     }
 
-    public function up(Schema $schema) : void
+    public function up(Schema $schema): void
     {
         // this up() migration is auto-generated, please modify it to your needs
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
@@ -32,7 +32,7 @@ final class Version20210829113200 extends AbstractMigration
         $this->addSql('ALTER TABLE debug_package ADD CONSTRAINT FK_9E17399BE0E4FC3E FOREIGN KEY (judgehostid) REFERENCES judgehost (judgehostid)');
     }
 
-    public function down(Schema $schema) : void
+    public function down(Schema $schema): void
     {
         // this down() migration is auto-generated, please modify it to your needs
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');

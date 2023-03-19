@@ -57,7 +57,7 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
     protected ?string $externalid = null;
 
     /**
-     * @var double|string
+     * @var float|string
      * @ORM\Column(type="decimal", precision=32, scale=9, name="submittime", options={"comment"="Time submitted",
      *                             "unsigned"=true}, nullable=false)
      * @Serializer\Exclude()

@@ -36,7 +36,7 @@ class TeamVisitor implements EventSubscriberInterface
                 'event'  => Events::POST_SERIALIZE,
                 'class'  => Team::class,
                 'format' => 'json',
-                'method' => 'onPostSerialize'
+                'method' => 'onPostSerialize',
             ],
         ];
     }
@@ -78,8 +78,8 @@ class TeamVisitor implements EventSubscriberInterface
                 'mime'     => mime_content_type($teamPhoto),
                 'width'    => $imageSize[0],
                 'height'   => $imageSize[1],
-                'filename' => 'photo.' . $extension
-            ]
+                'filename' => 'photo.' . $extension,
+            ],
         ]);
     }
 }

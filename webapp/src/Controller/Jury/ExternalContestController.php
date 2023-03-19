@@ -101,7 +101,7 @@ class ExternalContestController extends BaseController
                     '%s at %s',
                     $warning->getLastEventId(),
                     Utils::printtime($warning->getLastTime(), 'Y-m-d H:i:s (T)')
-                )
+                ),
             ];
 
             $warningData['type']['value'] = ExternalSourceWarning::readableType($warningData['type']['value']);
@@ -136,7 +136,7 @@ class ExternalContestController extends BaseController
                 'after' => 15,
                 'url' => $this->generateUrl('jury_external_contest'),
                 'ajax' => true,
-            ]
+            ],
         ];
 
         if ($request->isXmlHttpRequest()) {

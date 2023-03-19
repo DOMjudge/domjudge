@@ -13,38 +13,38 @@ class UserControllerTest extends BaseTestCase
             "team" => "DOMjudge",
             "roles" => [
                 "admin",
-                "team"
+                "team",
             ],
             "id" => "1",
             "username" => "admin",
             "name" => "Administrator",
             "email" => null,
             "ip" => null,
-            "enabled" => true
+            "enabled" => true,
         ],
         2 => [
             "team" => null,
             "roles" => [
-                "judgehost"
+                "judgehost",
             ],
             "id" => "2",
             "username" => "judgehost",
             "name" => "User for judgedaemons",
             "email" => null,
             "ip" => null,
-            "enabled" => true
+            "enabled" => true,
         ],
         3 => [
             "team" => "Example teamname",
             "roles" => [
-                 "team"
+                 "team",
             ],
             "id" => "3",
             "username" => "demo",
             "name" => "demo user for example team",
             "email" => null,
             "ip" => null,
-            "enabled" => true
+            "enabled" => true,
         ],
     ];
 

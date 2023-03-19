@@ -29,20 +29,19 @@ use ZipArchive;
 
 /**
  * Class SubmissionService
- * @package App\Service
  */
 class SubmissionService
 {
-    const FILENAME_REGEX = '/^[a-zA-Z0-9][a-zA-Z0-9+_\.-]*$/';
-    const PROBLEM_RESULT_MATCHSTRING = ['@EXPECTED_RESULTS@: ', '@EXPECTED_SCORE@: '];
-    const PROBLEM_RESULT_REMAP = [
+    public const FILENAME_REGEX = '/^[a-zA-Z0-9][a-zA-Z0-9+_\.-]*$/';
+    public const PROBLEM_RESULT_MATCHSTRING = ['@EXPECTED_RESULTS@: ', '@EXPECTED_SCORE@: '];
+    public const PROBLEM_RESULT_REMAP = [
         'ACCEPTED' => 'CORRECT',
         'WRONG_ANSWER' => 'WRONG-ANSWER',
         'TIME_LIMIT_EXCEEDED' => 'TIMELIMIT',
         'RUN_TIME_ERROR' => 'RUN-ERROR',
         'COMPILER_ERROR' => 'COMPILER-ERROR',
         'NO_OUTPUT' => 'NO-OUTPUT',
-        'OUTPUT_LIMIT' => 'OUTPUT-LIMIT'
+        'OUTPUT_LIMIT' => 'OUTPUT-LIMIT',
     ];
 
     protected EntityManagerInterface $em;
@@ -277,7 +276,7 @@ class SubmissionService
             'ignored' => 's.valid = 0',
             'unverified' => 'j.verified = 0 AND j.result IS NOT NULL',
             'queued' => 'j.result IS NULL AND j.starttime IS NULL',
-            'judging' => 'j.starttime IS NOT NULL AND j.endtime IS NULL'
+            'judging' => 'j.starttime IS NOT NULL AND j.endtime IS NULL',
         ];
         foreach ($countQueryExtras as $count => $countQueryExtra) {
             $countQueryBuilder = (clone $queryBuilder)->select('COUNT(s.submitid) AS cnt');
@@ -384,7 +383,7 @@ class SubmissionService
         if (!$problem instanceof ContestProblem) {
             $problem = $this->em->getRepository(ContestProblem::class)->find([
                 'contest' => $contest,
-                'problem' => $problem
+                'problem' => $problem,
             ]);
         }
         if (!$language instanceof Language) {
@@ -632,7 +631,7 @@ class SubmissionService
         if (Utils::difftime((float)$contest->getEndtime(), $submitTime) <= 0) {
             $this->logger->info(
                 "The contest is closed, submission stored but not processed. [c%d]",
-                [ $contest->getCid() ]
+                [$contest->getCid()]
             );
         }
 
@@ -710,7 +709,7 @@ class SubmissionService
             'p' . $fileData['probid'],
             $fileData['langid'],
             $fileData['rank'],
-            $fileData['filename']
+            $fileData['filename'],
         ]);
     }
 
@@ -723,7 +722,7 @@ class SubmissionService
     {
         /** @var SubmissionFile[] $files */
         $files = $submission->getFiles();
-        $zip   = new ZipArchive;
+        $zip   = new ZipArchive();
         if (!($tmpfname = tempnam($this->dj->getDomjudgeTmpDir(), "submission_file-"))) {
             throw new ServiceUnavailableHttpException(null, 'Could not create temporary file.');
         }

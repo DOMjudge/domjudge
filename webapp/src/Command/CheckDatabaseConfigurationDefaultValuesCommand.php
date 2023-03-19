@@ -10,8 +10,6 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 /**
  * Class CheckDatabaseConfigurationDefaultValuesCommand
- *
- * @package App\Command
  */
 class CheckDatabaseConfigurationDefaultValuesCommand extends Command
 {

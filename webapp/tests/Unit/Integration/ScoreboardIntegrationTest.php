@@ -116,12 +116,12 @@ class ScoreboardIntegrationTest extends KernelTestCase
             ->setExternalid(self::CONTEST_NAME)
             ->setName(self::CONTEST_NAME)
             ->setShortname(self::CONTEST_NAME)
-            ->setStarttimeString(date('Y').'-01-01 10:00:00 Europe/Amsterdam')
+            ->setStarttimeString(date('Y') . '-01-01 10:00:00 Europe/Amsterdam')
             ->setActivatetimeString('-01:00')
             ->setEndtimeString('+02:00');
         $this->em->persist($this->contest);
 
-        $hostname = self::CONTEST_NAME.'-judgehost';
+        $hostname = self::CONTEST_NAME . '-judgehost';
         $this->judgehost = $this->em->getRepository(Judgehost::class)
             ->findOneBy(['hostname' => $hostname]);
         if (!$this->judgehost) {
@@ -143,7 +143,7 @@ class ScoreboardIntegrationTest extends KernelTestCase
         for ($i=0; $i<self::NUM_TEAMS; $i++) {
             $this->teams[$i] = new Team();
             $this->teams[$i]
-                ->setName(self::CONTEST_NAME.' team '.$i)
+                ->setName(self::CONTEST_NAME . ' team ' . $i)
                 ->setCategory($category);
             $this->em->persist($this->teams[$i]);
         }
@@ -152,7 +152,7 @@ class ScoreboardIntegrationTest extends KernelTestCase
             $letter = chr(ord('a') + $i);
             $this->problems[$i] = new Problem();
             $this->problems[$i]
-                ->setName(self::CONTEST_NAME.' problem '.$letter)
+                ->setName(self::CONTEST_NAME . ' problem ' . $letter)
                 ->setTimelimit(5);
 
             $cp = new ContestProblem();
@@ -199,11 +199,11 @@ class ScoreboardIntegrationTest extends KernelTestCase
         $this->recalcScoreCaches();
 
         $expected_scores = [
-            [ 'team' => $this->teams[0], 'rank' => 1, 'solved' => 0, 'time' => 0 ],
-            [ 'team' => $this->teams[1], 'rank' => 1, 'solved' => 0, 'time' => 0 ],
+            ['team' => $this->teams[0], 'rank' => 1, 'solved' => 0, 'time' => 0],
+            ['team' => $this->teams[1], 'rank' => 1, 'solved' => 0, 'time' => 0],
         ];
 
-        foreach ([ false, true ] as $jury) {
+        foreach ([false, true] as $jury) {
             $scoreboard = $this->ss->getScoreboard($this->contest, $jury);
             $this->assertScoresMatch($expected_scores, $scoreboard);
             $this->assertFTSMatch([], $scoreboard);
@@ -217,17 +217,17 @@ class ScoreboardIntegrationTest extends KernelTestCase
         $this->recalcScoreCaches();
 
         $expected_scores = [
-            [ 'team' => $this->teams[0], 'rank' => 2, 'solved' => 0, 'time' => 0 ],
-            [ 'team' => $this->teams[1], 'rank' => 1, 'solved' => 2, 'time' => 161 ],
+            ['team' => $this->teams[0], 'rank' => 2, 'solved' => 0, 'time' => 0],
+            ['team' => $this->teams[1], 'rank' => 1, 'solved' => 2, 'time' => 161],
         ];
 
         $expected_fts = [
             // problems[0] has earlier unjudged solution by teams[0]
-            [ 'problem' => $this->problems[1], 'team' => $this->teams[1] ],
+            ['problem' => $this->problems[1], 'team' => $this->teams[1]],
             // problems[2] solution by teams[1] is invalid
         ];
 
-        foreach ([ false, true ] as $jury) {
+        foreach ([false, true] as $jury) {
             $scoreboard = $this->ss->getScoreboard($this->contest, $jury);
             $this->assertScoresMatch($expected_scores, $scoreboard);
             $this->assertFTSMatch($expected_fts, $scoreboard);
@@ -240,18 +240,18 @@ class ScoreboardIntegrationTest extends KernelTestCase
         // Scoreboard cache is recalculated below for each freeze time.
 
         $expected_scores = [
-            [ 'team' => $this->teams[0], 'rank' => 2, 'solved' => 0, 'time' => 0 ],
-            [ 'team' => $this->teams[1], 'rank' => 1, 'solved' => 2, 'time' => 161 ],
+            ['team' => $this->teams[0], 'rank' => 2, 'solved' => 0, 'time' => 0],
+            ['team' => $this->teams[1], 'rank' => 1, 'solved' => 2, 'time' => 161],
         ];
 
         $expected_fts = [
             // problems[0] has earlier unjudged solution by teams[0]
-            [ 'problem' => $this->problems[1], 'team' => $this->teams[1] ],
+            ['problem' => $this->problems[1], 'team' => $this->teams[1]],
             // problems[2] solution by teams[1] is invalid
         ];
 
         // Jury scoreboard should not depend on freeze, so test a couple.
-        foreach ([ '+0:30:00', '+1:00:00', '+1:20:00' ] as $freeze) {
+        foreach (['+0:30:00', '+1:00:00', '+1:20:00'] as $freeze) {
             $this->contest->setFreezetimeString($freeze);
             $this->recalcScoreCaches();
 
@@ -268,8 +268,8 @@ class ScoreboardIntegrationTest extends KernelTestCase
         $this->recalcScoreCaches();
 
         $expected_scores = [
-            [ 'team' => $this->teams[0], 'rank' => 2, 'solved' => 0, 'time' => 0 ],
-            [ 'team' => $this->teams[1], 'rank' => 1, 'solved' => 1, 'time' => 69 ],
+            ['team' => $this->teams[0], 'rank' => 2, 'solved' => 0, 'time' => 0],
+            ['team' => $this->teams[1], 'rank' => 1, 'solved' => 1, 'time' => 69],
         ];
 
         $expected_fts = [
@@ -293,7 +293,7 @@ class ScoreboardIntegrationTest extends KernelTestCase
         $this->recalcScoreCaches();
         $second = $this->ss->getScoreboard($this->contest, false);
 
-        # Using assertSame would be better, but doesn't work with objects.
+        // Using assertSame would be better, but doesn't work with objects.
         $this->assertEquals($first, $second, 'Repeated scoreboard is equal');
     }
 
@@ -335,12 +335,12 @@ class ScoreboardIntegrationTest extends KernelTestCase
         $this->em->flush();
 
         $expected_fts = [
-            [ 'problem' => $this->problems[0], 'team' => $this->teams[0] ],
-            [ 'problem' => $this->problems[1], 'team' => $this->teams[1] ],
+            ['problem' => $this->problems[0], 'team' => $this->teams[0]],
+            ['problem' => $this->problems[1], 'team' => $this->teams[1]],
         ];
 
-        foreach ([ false, true ] as $jury) {
-            foreach ([ null, '+1:00:00', '+1:20:00' ] as $freeze) {
+        foreach ([false, true] as $jury) {
+            foreach ([null, '+1:00:00', '+1:20:00'] as $freeze) {
                 $this->contest->setFreezetimeString($freeze);
                 $this->recalcScoreCaches();
 
@@ -370,13 +370,13 @@ class ScoreboardIntegrationTest extends KernelTestCase
         $this->em->flush();
 
         $expected_fts = [
-            [ 'problem' => $this->problems[0], 'team' => $this->teams[0] ],
+            ['problem' => $this->problems[0], 'team' => $this->teams[0]],
             // problems[1] is solved by teams[0], but teams[1] has an earlier
             // unverified submission.
         ];
 
-        foreach ([ false, true ] as $jury) {
-            foreach ([ null, '+1:00:00', '+1:20:00' ] as $freeze) {
+        foreach ([false, true] as $jury) {
+            foreach ([null, '+1:00:00', '+1:20:00'] as $freeze) {
                 $this->contest->setFreezetimeString($freeze);
                 $this->recalcScoreCaches();
 
@@ -403,10 +403,10 @@ class ScoreboardIntegrationTest extends KernelTestCase
         $this->recalcScoreCaches();
 
         $expected_fts = [
-            [ 'problem' => $this->problems[0], 'team' => $this->teams[1] ],
+            ['problem' => $this->problems[0], 'team' => $this->teams[1]],
         ];
 
-        foreach ([ false, true ] as $jury) {
+        foreach ([false, true] as $jury) {
             $scoreboard = $this->ss->getScoreboard($this->contest, $jury);
             $this->assertFTSMatch($expected_fts, $scoreboard);
         }
@@ -497,7 +497,7 @@ class ScoreboardIntegrationTest extends KernelTestCase
         bool $verified = false
     ): Submission {
         $cp = $this->em->getRepository(ContestProblem::class)->find(
-            [ 'contest' => $this->contest, 'problem' => $problem ]
+            ['contest' => $this->contest, 'problem' => $problem]
         );
         $submittime = $this->contest->getStarttime()+$contest_time_seconds;
 
@@ -521,7 +521,7 @@ class ScoreboardIntegrationTest extends KernelTestCase
             if ($verified) {
                 $judging
                     ->setVerified(true)
-                    ->setJuryMember(self::CONTEST_NAME.'-auto-verifier');
+                    ->setJuryMember(self::CONTEST_NAME . '-auto-verifier');
             }
             $this->em->persist($judging);
 

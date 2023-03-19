@@ -46,7 +46,7 @@ class ImportExportServiceTest extends KernelTestCase
                 'duration'   => '5:00:00',
                 'start-time' => 'Invalid start time here',
             ],
-            'Can not parse start time'
+            'Can not parse start time',
         ];
         yield [
             [
@@ -55,7 +55,7 @@ class ImportExportServiceTest extends KernelTestCase
                 'duration'   => '5:00:00',
                 'start_time' => 'Invalid start time here',
             ],
-            'Can not parse start time'
+            'Can not parse start time',
         ];
         yield [
             [
@@ -65,7 +65,7 @@ class ImportExportServiceTest extends KernelTestCase
                 'start-time'               => '2020-01-01T12:34:56+02:00',
                 'scoreboard-freeze-length' => '6:00:00',
             ],
-            'Freeze duration is longer than contest length'
+            'Freeze duration is longer than contest length',
         ];
         yield [
             [
@@ -75,7 +75,7 @@ class ImportExportServiceTest extends KernelTestCase
                 'start_time'                 => '2020-01-01T12:34:56+02:00',
                 'scoreboard_freeze_duration' => '6:00:00',
             ],
-            'Freeze duration is longer than contest length'
+            'Freeze duration is longer than contest length',
         ];
         yield [
             [
@@ -85,7 +85,7 @@ class ImportExportServiceTest extends KernelTestCase
                 'start-time'               => '2020-01-01T12:34:56+02:00',
                 'scoreboard-freeze-length' => '30:00',
             ],
-            "Contest has errors:\n\nname: This value should not be blank.\nshortname: This value should not be blank."
+            "Contest has errors:\n\nname: This value should not be blank.\nshortname: This value should not be blank.",
         ];
     }
 
@@ -280,7 +280,7 @@ class ImportExportServiceTest extends KernelTestCase
                     'time_limit' => 2,
                     'name'       => 'Access Points',
                     'rgb'        => '#FF0000',
-                    'color'      => 'red'
+                    'color'      => 'red',
                 ],
                 [
                     'ordinal'    => 1,
@@ -289,7 +289,7 @@ class ImportExportServiceTest extends KernelTestCase
                     'time_limit' => 6,
                     'name'       => 'Brexit Negotiations',
                     'rgb'        => '#0422D8',
-                    'color'      => 'mediumblue'
+                    'color'      => 'mediumblue',
                 ],
                 [
                     'ordinal'    => 2,
@@ -298,7 +298,7 @@ class ImportExportServiceTest extends KernelTestCase
                     'time_limit' => 6,
                     'name'       => 'Circuit Board Design',
                     'rgb'        => '#008100',
-                    'color'      => 'green'
+                    'color'      => 'green',
                 ],
             ],
             [
@@ -504,7 +504,7 @@ EOF;
                 ],
             ],
             [
-                'roles' => ['admin','team'],
+                'roles' => ['admin', 'team'],
                 'name' => 'Some admin',
                 'username' => 'adminx',
                 'password' => 'password7',
@@ -515,7 +515,7 @@ EOF;
                 ],
             ],
             [
-                'roles' => ['admin','team'],
+                'roles' => ['admin', 'team'],
                 'name' => 'Another admin',
                 'username' => 'adminy',
                 'password' => 'password8',

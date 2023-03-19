@@ -8,7 +8,6 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
  * Class BodyTooBigListener
- * @package App\EventListener
  */
 class BodyTooBigListener implements EventSubscriberInterface
 {
