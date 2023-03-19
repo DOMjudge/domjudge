@@ -69,7 +69,9 @@ abstract class AccountBaseTestCase extends BaseTestCase
         $otherVariations = [[['username' => 'newUser-001',
                               'roles' => ['team']]],
                             [['roles' => ['jury']]],
-                            [['roles' => ['judge']],['roles' => ['jury']]]
+                            [['roles' => ['judge']],['roles' => ['jury']]],
+                            [['roles' => ['balloon']]],
+                            [['roles' => ['clarification_rw']]],
                         ];
         yield [$defaultData];
         foreach ($otherVariations as $variation) {
