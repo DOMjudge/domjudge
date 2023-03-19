@@ -466,9 +466,8 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
     /**
      * Transform the given object before returning it from the API.
      * @param array $object
-     * @return ContestProblem|ContestProblemWrapper
      */
-    public function transformObject($object)
+    public function transformObject($object): \App\Entity\ContestProblem|\App\Helpers\ContestProblemWrapper
     {
         /** @var ContestProblem $problem */
         $problem       = $object[0];

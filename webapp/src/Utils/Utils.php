@@ -397,9 +397,8 @@ class Utils
     /**
      * Get the time as used on the scoreboard (i.e. truncated minutes or seconds, depending on the scoreboard
      * resolution setting).
-     * @param float|string $time
      */
-    public static function scoretime($time, bool $scoreIsInSeconds): int
+    public static function scoretime(float|string $time, bool $scoreIsInSeconds): int
     {
         if ($scoreIsInSeconds) {
             $result = (int)($time);
@@ -451,9 +450,8 @@ class Utils
 
     /**
      * Print a time formatted as specified. The format is according to date().
-     * @param string|float $datetime
      */
-    public static function printtime($datetime, string $format): string
+    public static function printtime(string|float|null $datetime, string $format): string
     {
         if (empty($datetime)) {
             return '';
@@ -605,9 +603,8 @@ class Utils
 
     /**
      * Determine the image type for this image.
-     * @return bool|string
      */
-    public static function getImageType(string $image, ?string &$error = null)
+    public static function getImageType(string $image, ?string &$error = null): bool|string
     {
         if (!function_exists('gd_info')) {
             $error = self::GD_MISSING;
@@ -633,9 +630,8 @@ class Utils
     /**
      * Generate resized thumbnail image and return as string.
      * Return FALSE on errors and stores error message in $error if set.
-     * @return bool|false|string
      */
-    public static function getImageThumb(string $image, int $thumbMaxSize, string $tmpdir, ?string &$error = null)
+    public static function getImageThumb(string $image, int $thumbMaxSize, string $tmpdir, ?string &$error = null): bool|string
     {
         if (!function_exists('gd_info')) {
             $error = self::GD_MISSING;

@@ -72,28 +72,24 @@ class RemovedInterval
         return $this->intervalid;
     }
 
-    /** @param string|float $starttime */
-    public function setStarttime($starttime): RemovedInterval
+    public function setStarttime(string|float $starttime): RemovedInterval
     {
         $this->starttime = $starttime;
         return $this;
     }
 
-    /** @return string|float */
-    public function getStarttime()
+    public function getStarttime(): string|float
     {
         return $this->starttime;
     }
 
-    /** @param string|float $endtime */
-    public function setEndtime($endtime): RemovedInterval
+    public function setEndtime(string|float $endtime): RemovedInterval
     {
         $this->endtime = $endtime;
         return $this;
     }
 
-    /** @return string|float */
-    public function getEndtime()
+    public function getEndtime(): string|float
     {
         return $this->endtime;
     }

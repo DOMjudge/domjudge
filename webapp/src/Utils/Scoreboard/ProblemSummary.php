@@ -50,10 +50,7 @@ class ProblemSummary
         return null;
     }
 
-    /**
-     * @param string|float $bestTime
-     */
-    public function updateBestTime(int $sortorder, $bestTime)
+    public function updateBestTime(int $sortorder, string|float $bestTime)
     {
         $this->bestTimes[$sortorder] = $bestTime;
     }

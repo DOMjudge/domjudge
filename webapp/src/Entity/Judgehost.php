@@ -108,15 +108,13 @@ class Judgehost
         return $this->enabled;
     }
 
-    /** @param string|float $polltime */
-    public function setPolltime($polltime): Judgehost
+    public function setPolltime(string|float $polltime): Judgehost
     {
         $this->polltime = $polltime;
         return $this;
     }
 
-    /** @return string|float */
-    public function getPolltime()
+    public function getPolltime(): string|float|null
     {
         return $this->polltime;
     }

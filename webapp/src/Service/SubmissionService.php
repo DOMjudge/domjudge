@@ -348,25 +348,19 @@ class SubmissionService
      * This function takes a (set of) temporary file(s) of a submission,
      * validates it and puts it into the database. Additionally it
      * moves it to a backup storage.
-     * @param Team|int            $team
-     * @param User|int|null       $user
-     * @param ContestProblem|int  $problem
-     * @param Contest|int         $contest
-     * @param Language|string     $language
      * @param UploadedFile[]      $files
-     * @param Submission|int|null $originalSubmission
      * @throws DBALException
      */
     public function submitSolution(
-        $team,
-        $user,
-        $problem,
-        $contest,
-        $language,
+        \App\Entity\Team|int $team,
+        \App\Entity\User|int|null $user,
+        \App\Entity\ContestProblem|\App\Entity\Problem|int $problem,
+        \App\Entity\Contest|int $contest,
+        \App\Entity\Language|string $language,
         array $files,
         ?string $source = null,
         ?string $juryMember = null,
-        $originalSubmission = null,
+        \App\Entity\Submission|int|null $originalSubmission = null,
         ?string $entryPoint = null,
         ?string $externalId = null,
         ?float $submitTime = null,
@@ -643,7 +637,7 @@ class SubmissionService
      * Checks given source file for expected results string
      * @return array|false|null Array of expected results if found, false when multiple matches are found, or null otherwise.
      */
-    public static function getExpectedResults(string $source, array $resultsRemap)
+    public static function getExpectedResults(string $source, array $resultsRemap): array|false|null
     {
         $matchstring = null;
         $pos         = false;

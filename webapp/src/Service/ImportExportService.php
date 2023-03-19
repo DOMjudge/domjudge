@@ -54,7 +54,6 @@ class ImportExportService
 
     /**
      * Get the YAML data for a given contest.
-     * @return array
      */
     public function getContestYamlData(Contest $contest): array
     {

@@ -19,9 +19,6 @@ class ContestProblemWrapper
         $this->testDataCount = $testDataCount;
     }
 
-    /**
-     * @return ContestProblem
-     */
     public function getContestProblem(): ContestProblem
     {
         return $this->contestProblem;

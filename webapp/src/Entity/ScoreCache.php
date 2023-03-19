@@ -162,15 +162,13 @@ class ScoreCache
         return $this->is_correct_restricted;
     }
 
-    /** @param string|float $solvetimeRestricted */
-    public function setSolvetimeRestricted($solvetimeRestricted): ScoreCache
+    public function setSolvetimeRestricted(string|float $solvetimeRestricted): ScoreCache
     {
         $this->solvetime_restricted = $solvetimeRestricted;
         return $this;
     }
 
-    /** @return string|float */
-    public function getSolvetimeRestricted()
+    public function getSolvetimeRestricted(): string|float
     {
         return $this->solvetime_restricted;
     }
@@ -219,15 +217,13 @@ class ScoreCache
         return $this->is_correct_public;
     }
 
-    /** @param string|float $solvetimePublic */
-    public function setSolvetimePublic($solvetimePublic): ScoreCache
+    public function setSolvetimePublic(string|float $solvetimePublic): ScoreCache
     {
         $this->solvetime_public = $solvetimePublic;
         return $this;
     }
 
-    /** @return string|float */
-    public function getSolvetimePublic()
+    public function getSolvetimePublic(): string|float
     {
         return $this->solvetime_public;
     }
@@ -297,8 +293,7 @@ class ScoreCache
         return $restricted ? $this->getPendingRestricted() : $this->getPendingPublic();
     }
 
-    /** @return string|float */
-    public function getSolveTime(bool $restricted)
+    public function getSolveTime(bool $restricted): string|float
     {
         return $restricted ? $this->getSolvetimeRestricted() : $this->getSolvetimePublic();
     }
