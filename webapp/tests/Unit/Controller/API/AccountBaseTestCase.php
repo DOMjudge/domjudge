@@ -12,7 +12,7 @@ abstract class AccountBaseTestCase extends BaseTestCase
 
     protected array $expectedAbsent = ['4242', 'nonexistent'];
 
-    public function helperVerifyApiUsers(string $myURL, array $objectsBeforeTest, array $newUserPostData): void
+    public function helperVerifyApiUsers(string $myURL, array $objectsBeforeTest, array $newUserPostData, ?array $overwritten = null): void
     {
         $objectsAfterTest = $this->verifyApiJsonResponse('GET', $myURL, 200, $this->apiUser);
         $newItems = array_map(unserialize(...), array_diff(array_map(serialize(...), $objectsAfterTest), array_map(serialize(...), $objectsBeforeTest)));
@@ -30,11 +30,15 @@ abstract class AccountBaseTestCase extends BaseTestCase
             self::assertEquals(1, count($newItems));
         }
         $listKey = array_keys($newItems)[0];
+        $newUserPostData = array_merge($newUserPostData, (array)$overwritten);
         foreach ($newUserPostData as $key => $expectedValue) {
             if ($key !== 'password') {
                 // For security we don't output the password in the API
                 $newItemValue = $newItems[$listKey][$key];
-                if ($key === 'roles' && in_array('admin', $newItemValue) && self::getContainer()->getParameter('kernel.debug')) {
+                if ($key === 'roles' &&
+                    (in_array('admin', $newItemValue) || in_array('jury', $newItemValue)) && 
+                    self::getContainer()->getParameter('kernel.debug')
+                ) {
                     $newItemValue = array_diff($newItemValue, ['team']);
                     // In development mode we add a team role to admin users for some API endpoints.
                 };
@@ -46,34 +50,38 @@ abstract class AccountBaseTestCase extends BaseTestCase
     /**
      * @dataProvider provideNewAccount
      */
-    public function testCreateUser(array $newUserPostData): void
+    public function testCreateUser(array $newUserPostData, ?array $overwritten=null): void
     {
         $usersURL = $this->helperGetEndpointURL('users');
         $myURL = $this->helperGetEndpointURL($this->apiEndpoint);
         $objectsBeforeTest = $this->verifyApiJsonResponse('GET', $myURL, 200, $this->apiUser);
         $this->verifyApiJsonResponse('POST', $usersURL, 201, 'admin', $newUserPostData);
         $objectsAfterTest = $this->verifyApiJsonResponse('GET', $myURL, 200, $this->apiUser);
-        $this->helperVerifyApiUsers($myURL, $objectsBeforeTest, $newUserPostData);
+        $this->helperVerifyApiUsers($myURL, $objectsBeforeTest, $newUserPostData, $overwritten);
     }
 
     public function provideNewAccount(): Generator
     {
-        $defaultData = ['username' => 'newUser-001',
+        $defaultData = ['username' => 'newStaff',
                 'name' => 'newUserWithName',
                 'password' => 'xkcd-password-style-password',
-                'roles' => ['team']];
-        $otherVariations = [['username' => 'newAdmin',
-                             'roles' => ['admin']]];
+                'roles' => ['admin']];
+        $otherVariations = [[['username' => 'newUser-001',
+                              'roles' => ['team']]],
+                            [['roles' => ['jury']]],
+                            [['roles' => ['judge']],['roles' => ['jury']]]
+                        ];
         yield [$defaultData];
         foreach ($otherVariations as $variation) {
-            yield [array_merge($defaultData, $variation)];
+            $newUpload = array_merge($defaultData, $variation[0]);
+            yield [$newUpload, $variation[1] ?? null];
         }
     }
 
     /**
      * @dataProvider provideNewAccountFile
      */
-    public function testCreateUserFileImport(string $newUsersFile, string $type, array $newUserPostData): void
+    public function testCreateUserFileImport(string $newUsersFile, string $type, array $newUserPostData, ?array $overwritten=null): void
     {
         $usersURL = $this->helperGetEndpointURL('users').'/accounts';
         $myURL = $this->helperGetEndpointURL($this->apiEndpoint);
@@ -86,12 +94,13 @@ abstract class AccountBaseTestCase extends BaseTestCase
         unlink($tempFile);
 
         self::assertEquals($result, "1 new account(s) successfully added.");
-        $this->helperVerifyApiUsers($myURL, $objectsBeforeTest, $newUserPostData);
+        $this->helperVerifyApiUsers($myURL, $objectsBeforeTest, $newUserPostData, $overwritten);
     }
 
     public function provideNewAccountFile(): Generator
     {
         foreach ($this->provideNewAccount() as $index=>$testUser) {
+            $overwritten = $testUser[1] ?? null;
             $testUser = $testUser[0];
             $user = $testUser['username'];
             $name = $testUser['name'];
@@ -109,7 +118,7 @@ abstract class AccountBaseTestCase extends BaseTestCase
             foreach ($fileVersions as $fileVersion) {
                 $file = $fileVersion."\t1";
                 $file .= "\n$role\t$name\t$user\t$pass";
-                yield [$file, 'tsv', $testUser];
+                yield [$file, 'tsv', $testUser, $overwritten];
             }
             // Handle YAML file
             $file = <<<EOF
@@ -119,7 +128,7 @@ abstract class AccountBaseTestCase extends BaseTestCase
   password: $pass
   type: $role
 EOF;
-            yield [$file, 'yaml', $testUser];
+            yield [$file, 'yaml', $testUser, $overwritten];
             $file = <<<EOF
 - "id": $user
   "username": $user
@@ -127,10 +136,10 @@ EOF;
   "password": $pass
   "type": $role
 EOF;
-            yield [$file, 'yaml', $testUser];
-            yield [Yaml::dump([$tempData], 1), 'yaml', $testUser];
-            yield [Yaml::dump([$tempData], 1, 3), 'yaml', $testUser];
-            yield [Yaml::dump([$tempData], 2, 2), 'yaml', $testUser];
+            yield [$file, 'yaml', $testUser, $overwritten];
+            yield [Yaml::dump([$tempData], 1), 'yaml', $testUser, $overwritten];
+            yield [Yaml::dump([$tempData], 1, 3), 'yaml', $testUser, $overwritten];
+            yield [Yaml::dump([$tempData], 2, 2), 'yaml', $testUser, $overwritten];
             // Handle JSON file
             $file = <<<EOF
 [{  id: $user,
@@ -140,9 +149,9 @@ EOF;
     type: $role
 }]
 EOF;
-            yield [$file, 'json', $testUser];
+            yield [$file, 'json', $testUser, $overwritten];
             $file = "[{id: \t$user,\tusername: $user, name:     $name,password: $pass, type: $role}]";
-            yield [$file, 'json', $testUser];
+            yield [$file, 'json', $testUser, $overwritten];
         }
     }
 

@@ -362,6 +362,9 @@ class UserController extends AbstractRestController
             if ($djRole === '') {
                 continue;
             }
+            if ($djRole === 'judge') {
+                $djRole = 'jury';
+            }
             $role = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => $djRole]);
             if ($role === null) {
                 throw new BadRequestHttpException(sprintf("Role %s not found", $djRole));
