@@ -2,17 +2,17 @@
 
 namespace App\Controller\Jury;
 
-use App\Service\ConfigurationService;
-use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\NonUniqueResultException;
-use Doctrine\ORM\NoResultException;
-use Doctrine\ORM\Query\Expr\Join;
 use App\Controller\BaseController;
 use App\Entity\ExternalJudgement;
 use App\Entity\Judging;
 use App\Entity\Submission;
+use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\SubmissionService;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
+use Doctrine\ORM\Query\Expr\Join;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;

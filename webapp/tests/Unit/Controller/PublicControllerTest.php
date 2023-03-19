@@ -9,12 +9,12 @@ use App\DataFixtures\Test\SelfRegisteredUserFixture;
 use App\Entity\Contest;
 use App\Entity\User;
 use App\Tests\Unit\BaseTestCase;
+use DateInterval;
+use DateTime;
 use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
-use Generator;
-use DateTime;
-use DateInterval;
 use DOMElement;
+use Generator;
 
 class PublicControllerTest extends BaseTestCase
 {

@@ -3,8 +3,8 @@
 namespace App\DataFixtures\Test;
 
 use App\Entity\Role;
-use App\Entity\User;
 use App\Entity\Team;
+use App\Entity\User;
 use Doctrine\Persistence\ObjectManager;
 
 class SelfRegisteredUserFixture extends AbstractTestDataFixture

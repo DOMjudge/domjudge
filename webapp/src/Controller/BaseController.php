@@ -4,14 +4,14 @@ namespace App\Controller;
 
 use App\Entity\BaseApiEntity;
 use App\Entity\Contest;
-use App\Entity\JudgeTask;
 use App\Entity\ContestProblem;
+use App\Entity\JudgeTask;
 use App\Entity\Problem;
+use App\Entity\QueueTask;
 use App\Entity\RankCache;
 use App\Entity\ScoreCache;
 use App\Entity\Team;
 use App\Entity\TeamCategory;
-use App\Entity\QueueTask;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Utils\Utils;

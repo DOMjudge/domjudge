@@ -2,8 +2,8 @@
 
 namespace App\DataFixtures\Test;
 
-use App\Entity\Contest;
 use App\Entity\Clarification;
+use App\Entity\Contest;
 use App\Entity\Problem;
 use App\Entity\Team;
 use Doctrine\Persistence\ObjectManager;

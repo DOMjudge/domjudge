@@ -7,8 +7,8 @@
 
 namespace App\Logger;
 
-use ValueError;
 use Monolog\Processor\ProcessorInterface;
+use ValueError;
 
 class VarargsLogMessageProcessor implements ProcessorInterface
 {

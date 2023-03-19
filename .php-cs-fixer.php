@@ -116,6 +116,7 @@ return $config
         'ordered_class_elements' => [
             'order' => ['use_trait'],
         ],
+        'ordered_imports' => ['imports_order' => ['class', 'function', 'const'], 'sort_algorithm' => 'alpha'],
         'php_unit_method_casing' => true,
         'phpdoc_align' => [
             'tags' => [

@@ -2,9 +2,9 @@
 
 namespace App\Tests\Unit\Controller\API;
 
-use App\DataFixtures\Test\ContestTimeFixture;
 use App\DataFixtures\Test\BalloonCorrectSubmissionFixture;
 use App\DataFixtures\Test\BalloonUserFixture;
+use App\DataFixtures\Test\ContestTimeFixture;
 use App\Entity\Contest;
 use Doctrine\ORM\EntityManagerInterface;
 use Generator;

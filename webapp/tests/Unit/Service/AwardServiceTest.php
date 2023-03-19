@@ -11,9 +11,9 @@ use App\Entity\TeamCategory;
 use App\Service\AwardService;
 use App\Service\EventLogService;
 use App\Utils\Scoreboard\Scoreboard;
+use Generator;
 use ReflectionClass;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
-use Generator;
 
 class AwardServiceTest extends KernelTestCase
 {

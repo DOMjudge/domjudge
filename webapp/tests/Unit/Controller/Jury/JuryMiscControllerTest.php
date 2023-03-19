@@ -2,9 +2,6 @@
 
 namespace App\Tests\Unit\Controller\Jury;
 
-use App\DataFixtures\Test\SampleSubmissionsMultipleTriesFixture;
-use App\DataFixtures\Test\SampleSubmissionsThreeTriesCorrectFixture;
-use App\DataFixtures\Test\SampleSubmissionsThreeTriesCorrectSameLanguageFixture;
 use App\DataFixtures\Test\DemoNonPublicContestFixture;
 use App\DataFixtures\Test\DemoPostDeactivateContestFixture;
 use App\DataFixtures\Test\DemoPreActivationContestFixture;
@@ -13,6 +10,9 @@ use App\DataFixtures\Test\DemoPreEndContestFixture;
 use App\DataFixtures\Test\DemoPreFreezeContestFixture;
 use App\DataFixtures\Test\DemoPreStartContestFixture;
 use App\DataFixtures\Test\DemoPreUnfreezeContestFixture;
+use App\DataFixtures\Test\SampleSubmissionsMultipleTriesFixture;
+use App\DataFixtures\Test\SampleSubmissionsThreeTriesCorrectFixture;
+use App\DataFixtures\Test\SampleSubmissionsThreeTriesCorrectSameLanguageFixture;
 use App\Entity\Contest;
 use App\Service\ScoreboardService;
 use App\Tests\Unit\BaseTestCase;
