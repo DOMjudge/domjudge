@@ -4,7 +4,9 @@
 
 section_start_collap setup "Setup and install"
 
-export version=7.4
+export version=8.1
+
+show_phpinfo $version
 
 # Set up
 "$( dirname "${BASH_SOURCE[0]}" )"/base.sh

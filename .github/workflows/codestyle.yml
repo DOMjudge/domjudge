@@ -49,7 +49,7 @@ jobs:
       image: pipelinecomponents/php-codesniffer:latest
     strategy:
       matrix:
-        PHPVERSION: ["7.4", "8.0", "8.1", "8.2"]
+        PHPVERSION: ["8.1", "8.2"]
     steps:
       - uses: actions/checkout@v2
       - name: Set plugin config for version detection

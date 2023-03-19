@@ -39,7 +39,7 @@
 		}
 	],
 	"require": {
-		"php": "^7.4.0",
+		"php": "^8.1.0",
 		"ext-ctype": "*",
 		"ext-curl": "*",
 		"ext-fileinfo": "*",
@@ -62,7 +62,6 @@
 		"doctrine/doctrine-migrations-bundle": "^3.2",
 		"doctrine/orm": "^2.14",
 		"eligrey/filesaver": "2.*",
-		"endclothing/prometheus_client_php": "^1.0",
 		"fortawesome/font-awesome": "6.*",
 		"friendsofsymfony/rest-bundle": "^3.5",
 		"ircmaxell/password-compat": "*",
@@ -72,6 +71,7 @@
 		"nelmio/api-doc-bundle": "^4.11",
 		"novus/nvd3": "^1.8",
 		"phpunit/phpunit": "^9.6",
+		"promphp/prometheus_client_php": "^2.6",
 		"ramsey/uuid": "^4.2",
 		"sebastian/diff": "^4.0",
 		"select2/select2": "4.*",
@@ -128,7 +128,7 @@
 		},
 		"sort-packages": true,
 		"platform": {
-			"php": "7.4.0"
+			"php": "8.1.0"
 		},
 		"vendor-dir": "lib/vendor",
 		"component-dir": "lib/vendor/components",
