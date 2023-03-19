@@ -316,15 +316,13 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
         return $this->internalComments;
     }
 
-    /** @param string|float $judgingLastStarted */
-    public function setJudgingLastStarted($judgingLastStarted): Team
+    public function setJudgingLastStarted(string|float $judgingLastStarted): Team
     {
         $this->judging_last_started = $judgingLastStarted;
         return $this;
     }
 
-    /** @return string|float */
-    public function getJudgingLastStarted()
+    public function getJudgingLastStarted(): string|float
     {
         return $this->judging_last_started;
     }

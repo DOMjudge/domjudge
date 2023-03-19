@@ -224,15 +224,13 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
         return $this->getLanguage()->getExternalid();
     }
 
-    /** @param string|float $submittime */
-    public function setSubmittime($submittime): Submission
+    public function setSubmittime(string|float $submittime): Submission
     {
         $this->submittime = $submittime;
         return $this;
     }
 
-    /** @return string|float */
-    public function getSubmittime()
+    public function getSubmittime(): string|float
     {
         return $this->submittime;
     }

@@ -472,8 +472,7 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
         return $this->activatetime === null ? null : (float)$this->activatetime;
     }
 
-    /** @param string|float $starttime */
-    public function setStarttime($starttime): Contest
+    public function setStarttime(string|float $starttime): Contest
     {
         $this->starttime = $starttime;
         return $this;
@@ -545,8 +544,7 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
         return $this->finalizetime === null ? null : (float)$this->finalizetime;
     }
 
-    /** @param string|float $finalizetimeString */
-    public function setFinalizetime($finalizetimeString): Contest
+    public function setFinalizetime(string|float|null $finalizetimeString): Contest
     {
         $this->finalizetime = $finalizetimeString;
         return $this;
@@ -963,10 +961,7 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
             ($this->deactivatetime == null || $this->deactivatetime > time());
     }
 
-    /**
-     * @return float|int|null
-     */
-    public function getAbsoluteTime(?string $time_string)
+    public function getAbsoluteTime(?string $time_string): float|int|string|null
     {
         if ($time_string === null) {
             return null;

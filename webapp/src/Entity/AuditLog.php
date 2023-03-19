@@ -77,15 +77,13 @@ class AuditLog
         return $this->logid;
     }
 
-    /** @param string|float $logtime */
-    public function setLogtime($logtime): AuditLog
+    public function setLogtime(string|float $logtime): AuditLog
     {
         $this->logtime = $logtime;
         return $this;
     }
 
-    /** @return string|float */
-    public function getLogtime()
+    public function getLogtime(): string|float
     {
         return $this->logtime;
     }

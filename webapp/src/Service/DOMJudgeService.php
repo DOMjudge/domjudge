@@ -239,10 +239,7 @@ class DOMJudgeService
         return $user;
     }
 
-    /**
-     * @return bool|float|int|string|InputBag|null
-     */
-    public function getCookie(string $cookieName)
+    public function getCookie(string $cookieName): bool|float|int|string|\Symfony\Component\HttpFoundation\InputBag|null
     {
         if (!$this->requestStack->getCurrentRequest()) {
             return null;
@@ -458,8 +455,6 @@ class DOMJudgeService
 
     /**
      * Log an action to the auditlog table.
-     *
-     * @param string|int|null $cid
      */
     public function auditlog(
         string $datatype,
@@ -467,7 +462,7 @@ class DOMJudgeService
         string $action,
         $extraInfo = null,
         $forceUsername = null,
-        $cid = null
+        string|int|null $cid = null
     ) {
         if (!empty($forceUsername)) {
             $user = $forceUsername;

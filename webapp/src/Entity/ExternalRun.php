@@ -106,15 +106,13 @@ class ExternalRun
         return $this->result;
     }
 
-    /** @param string|float $endtime */
-    public function setEndtime($endtime): ExternalRun
+    public function setEndtime(string|float $endtime): ExternalRun
     {
         $this->endtime = $endtime;
         return $this;
     }
 
-    /** @return string|float */
-    public function getEndtime()
+    public function getEndtime(): string|float
     {
         return $this->endtime;
     }

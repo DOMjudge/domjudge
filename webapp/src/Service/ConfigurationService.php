@@ -294,8 +294,6 @@ EOF;
 
     /**
      * Get the configuration values from the database.
-     *
-     * @return array
      */
     protected function getDbValues(): array
     {
@@ -314,8 +312,6 @@ EOF;
      * Find list of options for configuration parameters that specify a known executable.
      *
      * @param string $type Any of "compare", "compile", "run"
-     *
-     * @return array
      */
     private function findExecutableOptions(string $type): array
     {

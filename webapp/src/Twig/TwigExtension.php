@@ -189,10 +189,9 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
 
     /**
      * Print a time formatted as specified. The format is according to date().
-     * @param string|float $datetime
      * @param Contest|null $contest If given, print time relative to that contest start.
      */
-    public function printtime($datetime, ?string $format = null, ?Contest $contest = null): string
+    public function printtime(string|float|null $datetime, ?string $format = null, ?Contest $contest = null): string
     {
         if ($datetime === null) {
             $datetime = Utils::now();
@@ -230,10 +229,9 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
      * Helper function to print a time in the default/configured format,
      * and a hover title attribute with the full datetime string.
      *
-     * @param string|float $datetime
      * @param Contest|null $contest If given, print time relative to that contest start.
      */
-    public function printtimeHover($datetime, ?Contest $contest = null): string
+    public function printtimeHover(string|float $datetime, ?Contest $contest = null): string
     {
         if ($datetime === null) {
             $datetime = Utils::now();
@@ -979,9 +977,8 @@ JS;
 
     /**
      * Display the scoretime for the given time.
-     * @param string|float $time
      */
-    public function scoreTime($time): int
+    public function scoreTime(string|float $time): int
     {
         return Utils::scoretime($time, (bool)$this->config->get('score_in_seconds'));
     }

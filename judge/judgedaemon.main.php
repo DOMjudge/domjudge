@@ -66,10 +66,7 @@ function read_credentials(): void
     }
 }
 
-/**
- * @return CurlHandle|false
- */
-function setup_curl_handle(string $restuser, string $restpass)
+function setup_curl_handle(string $restuser, string $restpass): CurlHandle|false
 {
     $curl_handle = curl_init();
     curl_setopt($curl_handle, CURLOPT_USERAGENT, "DOMjudge/" . DOMJUDGE_VERSION);

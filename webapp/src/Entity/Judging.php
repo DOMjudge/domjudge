@@ -226,15 +226,13 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
         return $this->judgingid;
     }
 
-    /** @param string|float $starttime */
-    public function setStarttime($starttime): Judging
+    public function setStarttime(string|float $starttime): Judging
     {
         $this->starttime = $starttime;
         return $this;
     }
 
-    /** @return string|float|null */
-    public function getStarttime()
+    public function getStarttime(): string|float|null
     {
         return $this->starttime;
     }
@@ -260,15 +258,13 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
         return Utils::relTime($this->getStarttime() - $this->getContest()->getStarttime());
     }
 
-    /** @param string|float $endtime */
-    public function setEndtime($endtime): Judging
+    public function setEndtime(string|float $endtime): Judging
     {
         $this->endtime = $endtime;
         return $this;
     }
 
-    /** @return string|float */
-    public function getEndtime()
+    public function getEndtime(): string|float|null
     {
         return $this->endtime;
     }

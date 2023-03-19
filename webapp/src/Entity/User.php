@@ -252,15 +252,13 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
         return $this->email;
     }
 
-    /** @param string|float $lastLogin */
-    public function setLastLogin($lastLogin): User
+    public function setLastLogin(string|float|null $lastLogin): User
     {
         $this->last_login = $lastLogin;
         return $this;
     }
 
-    /** @return string|float */
-    public function getLastLogin()
+    public function getLastLogin(): string|float|null
     {
         return $this->last_login;
     }
@@ -277,15 +275,13 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
         return $this->getLastLogin() ? new DateTime(Utils::absTime($this->getLastLogin())) : null;
     }
 
-    /** @param string|float $lastApiLogin */
-    public function setLastApiLogin($lastApiLogin): User
+    public function setLastApiLogin(string|float $lastApiLogin): User
     {
         $this->last_api_login = $lastApiLogin;
         return $this;
     }
 
-    /** @return string|float */
-    public function getLastApiLogin()
+    public function getLastApiLogin(): string|float|null
     {
         return $this->last_api_login;
     }
@@ -302,15 +298,13 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
         return $this->getLastApiLogin() ? new DateTime(Utils::absTime($this->getLastApiLogin())) : null;
     }
 
-    /** @param string|float $firstLogin */
-    public function setFirstLogin($firstLogin): User
+    public function setFirstLogin(string|float|null $firstLogin): User
     {
         $this->first_login = $firstLogin;
         return $this;
     }
 
-    /** @return string|float */
-    public function getFirstLogin()
+    public function getFirstLogin(): string|float|null
     {
         return $this->first_login;
     }

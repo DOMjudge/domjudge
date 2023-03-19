@@ -1121,10 +1121,7 @@ class SubmissionController extends BaseController
         return $result;
     }
 
-    /**
-     * @param Judging|ExternalJudgement|null $judging
-     */
-    protected function processClaim($judging, Request $request, ?string &$claimWarning) : ?RedirectResponse
+    protected function processClaim(\App\Entity\Judging|\App\Entity\ExternalJudgement|null $judging, Request $request, ?string &$claimWarning) : ?RedirectResponse
     {
         $user   = $this->dj->getUser();
         $action = ($request->get('claim') || $request->get('claimdiff')) ? 'claim' : 'unclaim';

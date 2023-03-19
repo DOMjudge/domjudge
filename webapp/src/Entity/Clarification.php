@@ -167,15 +167,13 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
         return $this->externalid;
     }
 
-    /** @param string|float $submittime */
-    public function setSubmittime($submittime): Clarification
+    public function setSubmittime(string|float $submittime): Clarification
     {
         $this->submittime = $submittime;
         return $this;
     }
 
-    /** @return string|float */
-    public function getSubmittime()
+    public function getSubmittime(): string|float
     {
         return $this->submittime;
     }

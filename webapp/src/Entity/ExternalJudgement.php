@@ -185,28 +185,24 @@ class ExternalJudgement
         return $this->verify_comment;
     }
 
-    /** @param string|float $starttime */
-    public function setStarttime($starttime): ExternalJudgement
+    public function setStarttime(string|float $starttime): ExternalJudgement
     {
         $this->starttime = $starttime;
         return $this;
     }
 
-    /** @return string|float */
-    public function getStarttime()
+    public function getStarttime(): string|float
     {
         return $this->starttime;
     }
 
-    /** @param string|float $endtime */
-    public function setEndtime($endtime): ExternalJudgement
+    public function setEndtime(string|float $endtime): ExternalJudgement
     {
         $this->endtime = $endtime;
         return $this;
     }
 
-    /** @return string|float */
-    public function getEndtime()
+    public function getEndtime(): string|float
     {
         return $this->endtime;
     }

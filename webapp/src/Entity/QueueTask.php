@@ -126,10 +126,7 @@ class QueueTask
         return $this;
     }
 
-    /**
-     * @return string|float|null
-     */
-    public function getStartTime()
+    public function getStartTime(): string|float|null
     {
         return $this->startTime;
     }

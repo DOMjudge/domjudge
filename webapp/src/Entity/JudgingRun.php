@@ -160,15 +160,13 @@ class JudgingRun extends BaseApiEntity
         return Utils::roundedFloat($this->runtime);
     }
 
-    /** @param string|float $endtime */
-    public function setEndtime($endtime): JudgingRun
+    public function setEndtime(string|float $endtime): JudgingRun
     {
         $this->endtime = $endtime;
         return $this;
     }
 
-    /** @return string|float */
-    public function getEndtime()
+    public function getEndtime(): string|float
     {
         return $this->endtime;
     }

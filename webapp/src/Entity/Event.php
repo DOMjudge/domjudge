@@ -78,15 +78,13 @@ class Event
         return $this->eventid;
     }
 
-    /** @param string|float $eventtime */
-    public function setEventtime($eventtime): Event
+    public function setEventtime(string|float $eventtime): Event
     {
         $this->eventtime = $eventtime;
         return $this;
     }
 
-    /** @return string|float */
-    public function getEventtime()
+    public function getEventtime(): string|float
     {
         return $this->eventtime;
     }

@@ -1551,10 +1551,7 @@ class JudgehostController extends AbstractFOSRestController
         return $partialJudgeTasks;
     }
 
-    /**
-     * @param string|int|null $jobId
-     */
-    private function getJudgetasks($jobId, int $max_batchsize, Judgehost $judgehost): ?array
+    private function getJudgetasks(string|int|null $jobId, int $max_batchsize, Judgehost $judgehost): ?array
     {
         if ($jobId === null) {
             return null;

@@ -122,15 +122,13 @@ class InternalError
         return $this->judgehostlog;
     }
 
-    /** @param string|float $time */
-    public function setTime($time): InternalError
+    public function setTime(string|float $time): InternalError
     {
         $this->time = $time;
         return $this;
     }
 
-    /** @return string|float */
-    public function getTime()
+    public function getTime(): string|float
     {
         return $this->time;
     }
