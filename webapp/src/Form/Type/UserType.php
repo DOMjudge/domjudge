@@ -34,9 +34,10 @@ class UserType extends AbstractExternalIdEntityType
             ->select('t')
             ->getQuery()
             ->getResult();
-        uasort($teams, function (Team $a, Team $b) {
-            return $a->getEffectiveName() <=> $b->getEffectiveName();
-        });
+        uasort(
+            $teams,
+            static fn(Team $a, Team $b) => $a->getEffectiveName() <=> $b->getEffectiveName()
+        );
 
         $builder->add('username', TextType::class);
         $builder->add('name', TextType::class, [

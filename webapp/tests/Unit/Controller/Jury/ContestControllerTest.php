@@ -323,9 +323,9 @@ class ContestControllerTest extends JuryControllerTestCase
         // We should see all normal buttons including a lock button.
         $this->verifyPageResponse('GET', $contestUrl, 200);
         $crawler = $this->getCurrentCrawler();
-        $titles = $crawler->filterXPath('//div[@class="button-row"]')->children()->each(function (Crawler $node, $i) {
-            return $node->attr('title');
-        });
+        $titles = $crawler->filterXPath('//div[@class="button-row"]')->children()->each(
+            fn(Crawler $node, $i) => $node->attr('title')
+        );
         $expectedTitles = [
             'Edit',
             'Delete',
@@ -346,9 +346,9 @@ class ContestControllerTest extends JuryControllerTestCase
         // We should not see buttons that modify state, but see the normal buttons.
         $this->verifyPageResponse('GET', $contestUrl, 200);
         $crawler = $this->getCurrentCrawler();
-        $titles = $crawler->filterXPath('//div[@class="button-row"]')->children()->each(function (Crawler $node, $i) {
-            return $node->attr('title');
-        });
+        $titles = $crawler->filterXPath('//div[@class="button-row"]')->children()->each(
+            fn(Crawler $node, $i) => $node->attr('title')
+        );
         $expectedTitles = [
             'Unlock',
             'Judge remaining testcases',
