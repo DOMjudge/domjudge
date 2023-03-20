@@ -1088,11 +1088,11 @@ EOF;
                     $tdField    = "<td><code>$field</code></td>";
                     $tdUs       = sprintf(
                         '<td><code>%s</code></td>',
-                        $diff['us'] === null ? $null : $diff['us']
+                        $diff['us'] ?? $null
                     );
                     $tdExternal = sprintf(
                         '<td><code>%s</code></td>',
-                        $diff['external'] === null ? $null : $diff['external']
+                        $diff['external'] ?? $null
                     );
                     $rows[]     = "<tr>{$tdField}{$tdUs}{$tdExternal}</tr>";
                 }
