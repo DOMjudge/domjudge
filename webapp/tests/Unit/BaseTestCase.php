@@ -114,10 +114,7 @@ abstract class BaseTestCase extends WebTestCase
 
         // Submit form.
         $button = $crawler->selectButton('Sign in');
-        $form = $button->form(array(
-            '_username'   => $username,
-            '_password'   => $password,
-        ));
+        $form = $button->form(['_username' => $username, '_password' => $password]);
         $this->client->followRedirects();
         $this->client->submit($form);
         $response = $this->client->getResponse();
