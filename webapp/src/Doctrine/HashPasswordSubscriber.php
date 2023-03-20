@@ -44,7 +44,7 @@ class HashPasswordSubscriber implements EventSubscriber
 
         // Necessary to force the update to see the change.
         $em   = $args->getObjectManager();
-        $meta = $em->getClassMetadata(get_class($entity));
+        $meta = $em->getClassMetadata($entity::class);
         $em->getUnitOfWork()->recomputeSingleEntityChangeSet($meta, $entity);
     }
 
