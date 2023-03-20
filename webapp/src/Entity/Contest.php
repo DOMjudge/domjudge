@@ -47,7 +47,7 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
  */
 class Contest extends BaseApiEntity implements AssetEntityInterface
 {
-    const STARTTIME_UPDATE_MIN_SECONDS_BEFORE = 30;
+    public const STARTTIME_UPDATE_MIN_SECONDS_BEFORE = 30;
 
     /**
      * @ORM\Id

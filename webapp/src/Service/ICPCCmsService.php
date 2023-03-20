@@ -18,9 +18,9 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class ICPCCmsService
 {
-    const BASE_URI = 'https://icpc.global';
-    const WS_TOKEN_URL = '/auth/realms/cm5/protocol/openid-connect/token';
-    const WS_CLICS = '/cm5-contest-rest/rest/contest/export/CLICS/CONTEST/';
+    public const BASE_URI = 'https://icpc.global';
+    public const WS_TOKEN_URL = '/auth/realms/cm5/protocol/openid-connect/token';
+    public const WS_CLICS = '/cm5-contest-rest/rest/contest/export/CLICS/CONTEST/';
     protected HttpClientInterface $client;
 
     public function __construct(

@@ -19,9 +19,6 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
  */
 class ResetUserPasswordCommand extends Command
 {
-    const STATUS_OK = 0;
-    const STATUS_ERROR = 1;
-
     public function __construct(
         protected EntityManagerInterface $em,
         protected UserPasswordHasherInterface $passwordHasher
@@ -52,7 +49,7 @@ class ResetUserPasswordCommand extends Command
 
         if (!$user) {
             $style->error('Can not find user with username ' . $username);
-            return static::STATUS_ERROR;
+            return self::FAILURE;
         }
 
         $password = Utils::generatePassword();
@@ -64,6 +61,6 @@ class ResetUserPasswordCommand extends Command
 
         $style->success('New password for ' . $username . ' is ' . $password);
 
-        return static::STATUS_OK;
+        return self::SUCCESS;
     }
 }
