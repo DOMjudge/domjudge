@@ -25,8 +25,8 @@ use Ramsey\Uuid\Uuid;
  */
 class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterface
 {
-    const RESULT_CORRECT = 'correct';
-    const RESULT_COMPILER_ERROR = 'compiler-error';
+    public const RESULT_CORRECT = 'correct';
+    public const RESULT_COMPILER_ERROR = 'compiler-error';
 
     /**
      * @ORM\Id

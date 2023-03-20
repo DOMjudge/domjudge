@@ -33,23 +33,23 @@ class EventLogService implements ContainerAwareInterface
     use ContainerAwareTrait;
 
     // Keys used in below config:
-    const KEY_TYPE = 'type';
-    const KEY_URL = 'url';
-    const KEY_ENTITY = 'entity';
-    const KEY_TABLES = 'tables';
-    const KEY_USE_EXTERNAL_ID = 'use-external-id';
-    const KEY_ALWAYS_USE_EXTERNAL_ID = 'always-use-external-id';
-    const KEY_SKIP_IN_EVENT_FEED = 'skip-in-event-feed';
+    public const KEY_TYPE = 'type';
+    public const KEY_URL = 'url';
+    public const KEY_ENTITY = 'entity';
+    public const KEY_TABLES = 'tables';
+    public const KEY_USE_EXTERNAL_ID = 'use-external-id';
+    public const KEY_ALWAYS_USE_EXTERNAL_ID = 'always-use-external-id';
+    public const KEY_SKIP_IN_EVENT_FEED = 'skip-in-event-feed';
 
     // Types of endpoints:
-    const TYPE_CONFIGURATION = 'configuration';
-    const TYPE_LIVE = 'live';
-    const TYPE_AGGREGATE = 'aggregate';
+    public const TYPE_CONFIGURATION = 'configuration';
+    public const TYPE_LIVE = 'live';
+    public const TYPE_AGGREGATE = 'aggregate';
 
     // Allowed actions:
-    const ACTION_CREATE = 'create';
-    const ACTION_UPDATE = 'update';
-    const ACTION_DELETE = 'delete';
+    public const ACTION_CREATE = 'create';
+    public const ACTION_UPDATE = 'update';
+    public const ACTION_DELETE = 'delete';
 
     // TODO: Add a way to specify when to use external ID using some (DB)
     // config instead of hardcoding it here. Also relates to

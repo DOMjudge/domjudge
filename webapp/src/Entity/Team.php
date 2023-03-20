@@ -30,9 +30,9 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
  */
 class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface, AssetEntityInterface
 {
-    const DONT_ADD_USER = 'dont-add-user';
-    const CREATE_NEW_USER = 'create-new-user';
-    const ADD_EXISTING_USER = 'add-existing-user';
+    public const DONT_ADD_USER = 'dont-add-user';
+    public const CREATE_NEW_USER = 'create-new-user';
+    public const ADD_EXISTING_USER = 'add-existing-user';
 
     /**
      * @ORM\Id

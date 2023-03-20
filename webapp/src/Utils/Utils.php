@@ -11,7 +11,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 class Utils
 {
     /** @var array Mapping from HTML colors to hex values */
-    const HTML_COLORS = [
+    public const HTML_COLORS = [
         "black" => "#000000",
         "silver" => "#C0C0C0",
         "gray" => "#808080",
@@ -161,9 +161,9 @@ class Utils
         "yellowgreen" => "#9acd32",
     ];
 
-    const GD_MISSING = 'Cannot import image: the PHP GD library is missing.';
+    public const GD_MISSING = 'Cannot import image: the PHP GD library is missing.';
 
-    const DAY_IN_SECONDS = 60*60*24;
+    public const DAY_IN_SECONDS = 60*60*24;
 
     /**
      * Returns the milliseconds part of a time stamp truncated at three digits.

@@ -61,20 +61,20 @@ class DOMJudgeService
     protected ?Executable $defaultCompareExecutable = null;
     protected ?Executable $defaultRunExecutable = null;
 
-    const DATA_SOURCE_LOCAL = 0;
-    const DATA_SOURCE_CONFIGURATION_EXTERNAL = 1;
-    const DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL = 2;
-    const EVAL_DEFAULT = null;
-    const EVAL_LAZY = 1;
-    const EVAL_FULL = 2;
-    const EVAL_DEMAND = 3;
+    public const DATA_SOURCE_LOCAL = 0;
+    public const DATA_SOURCE_CONFIGURATION_EXTERNAL = 1;
+    public const DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL = 2;
+    public const EVAL_DEFAULT = null;
+    public const EVAL_LAZY = 1;
+    public const EVAL_FULL = 2;
+    public const EVAL_DEMAND = 3;
 
     // Regex external identifiers must adhere to. Note that we are not checking whether it
     // does not start with a dot or dash or ends with a dot. We could but it would make the
     // regex way more complicated and would also complicate the logic in ImportExportService::importContestYaml.
-    const EXTERNAL_IDENTIFIER_REGEX = '/^[a-zA-Z0-9_.-]+$/';
+    public const EXTERNAL_IDENTIFIER_REGEX = '/^[a-zA-Z0-9_.-]+$/';
 
-    const MIMETYPE_TO_EXTENSION = [
+    public const MIMETYPE_TO_EXTENSION = [
         'image/png'     => 'png',
         'image/jpeg'    => 'jpg',
         'image/svg+xml' => 'svg',

@@ -11,13 +11,13 @@ use InvalidArgumentException;
  */
 class JudgeTaskType extends Type
 {
-    const ENUM_JUDGE_TASK_TYPE = 'judge_task_type';
-    const CONFIG_CHECK = 'config_check';
-    const DEBUG_INFO = 'debug_info';
-    const GENERIC_TASK = 'generic_task';
-    const JUDGING_RUN = 'judging_run';
-    const PREFETCH = 'prefetch';
-    const ALL_TYPES = [
+    public const ENUM_JUDGE_TASK_TYPE = 'judge_task_type';
+    public const CONFIG_CHECK = 'config_check';
+    public const DEBUG_INFO = 'debug_info';
+    public const GENERIC_TASK = 'generic_task';
+    public const JUDGING_RUN = 'judging_run';
+    public const PREFETCH = 'prefetch';
+    public const ALL_TYPES = [
         self::CONFIG_CHECK,
         self::DEBUG_INFO,
         self::GENERIC_TASK,
