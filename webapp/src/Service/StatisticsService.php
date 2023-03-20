@@ -219,12 +219,7 @@ class StatisticsService
             $totalMiseryMinutes += $miseryMinutes;
         }
         $misc['misery_index'] = count($teams) > 0 ? $totalMiseryMinutes / count($teams) : 0;
-        usort($submissions, function ($a, $b) {
-            if ($a->getSubmitTime() == $b->getSubmitTime()) {
-                return 0;
-            }
-            return ($a->getSubmitTime() < $b->getSubmitTime()) ? -1 : 1;
-        });
+        usort($submissions, static fn($a, $b) => $a->getSubmitTime() <=> $b->getSubmitTime());
 
         $misc['submissions'] = $submissions;
 
@@ -269,12 +264,7 @@ class StatisticsService
             }
         }
         // Sort the judgings by runtime.
-        usort($judgings, function ($a, $b) {
-            if ($a->getMaxRuntime() == $b->getMaxRuntime()) {
-                return 0;
-            }
-            return $a->getMaxRuntime() < $b->getMaxRuntime() ? -1 : 1;
-        });
+        usort($judgings, static fn($a, $b) => $a->getMaxRuntime() <=> $b->getMaxRuntime());
 
         // Go through the judgings we found, and get the submissions.
         $submissions = [];
@@ -290,24 +280,9 @@ class StatisticsService
                 $problems[] = $s->getProblem();
             }
         }
-        usort($submissions, function ($a, $b) {
-            if ($a->getSubmitTime() == $b->getSubmitTime()) {
-                return 0;
-            }
-            return ($a->getSubmitTime() < $b->getSubmitTime()) ? -1 : 1;
-        });
-        usort($problems, function ($a, $b) {
-            if ($a->getName() == $b->getName()) {
-                return 0;
-            }
-            return ($a->getName() < $b->getName()) ? -1 : 1;
-        });
-        usort($judgings, function ($a, $b) {
-            if ($a->getJudgingid() == $b->getJudgingid()) {
-                return 0;
-            }
-            return ($a->getJudgingid() < $b->getJudgingid()) ? -1 : 1;
-        });
+        usort($submissions, static fn($a, $b) => $a->getSubmitTime() <=> $b->getSubmitTime());
+        usort($problems, static fn($a, $b) => $a->getName() <=> $b->getName());
+        usort($judgings, static fn($a, $b) => $a->getJudgingid() <=> $b->getJudgingid());
 
         $misc = [];
         $misc['correct_percentage'] = array_key_exists('correct',
@@ -360,24 +335,14 @@ class StatisticsService
         }
 
         // Sort the judgings by runtime.
-        usort($judgings, function ($a, $b) {
-            if ($a->getMaxRuntime() == $b->getMaxRuntime()) {
-                return 0;
-            }
-            return $a->getMaxRuntime() < $b->getMaxRuntime() ? -1 : 1;
-        });
+        usort($judgings, static fn($a, $b) => $a->getMaxRuntime() <=> $b->getMaxRuntime());
 
         // Go through the judgings we found, and get the submissions.
         $submissions = [];
         foreach ($judgings as $j) {
             $submissions[] = $j->getSubmission();
         }
-        usort($submissions, function ($a, $b) {
-            if ($a->getSubmitTime() == $b->getSubmitTime()) {
-                return 0;
-            }
-            return ($a->getSubmitTime() < $b->getSubmitTime()) ? -1 : 1;
-        });
+        usort($submissions, static fn($a, $b) => $a->getSubmitTime() <=> $b->getSubmitTime());
 
         $misc = [];
         $teamsCorrect = [];
