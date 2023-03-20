@@ -1194,7 +1194,7 @@ EOF;
     public function entityIdBadge(BaseApiEntity $entity, string $idPrefix = ''): string
     {
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
-        $metadata = $this->em->getClassMetadata(get_class($entity));
+        $metadata = $this->em->getClassMetadata($entity::class);
         $primaryKeyColumn = $metadata->getIdentifierColumnNames()[0];
         $externalIdField = $this->eventLogService->externalIdFieldForEntity($entity);
 

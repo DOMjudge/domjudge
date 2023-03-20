@@ -91,7 +91,7 @@ abstract class BaseTestCase extends WebTestCase
         // If the object ID contains a :, it is a reference to a fixture item, so get it.
         if (is_string($id) && str_contains($id, ':')) {
             $referenceObject = $this->fixtureExecutor->getReferenceRepository()->getReference($id);
-            $metadata = static::getContainer()->get(EntityManagerInterface::class)->getClassMetadata(get_class($referenceObject));
+            $metadata = static::getContainer()->get(EntityManagerInterface::class)->getClassMetadata($referenceObject::class);
             $propertyAccessor = PropertyAccess::createPropertyAccessor();
             return $propertyAccessor->getValue($referenceObject, $metadata->getSingleIdentifierColumnName());
         }

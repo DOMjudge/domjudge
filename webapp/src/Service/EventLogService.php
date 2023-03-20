@@ -911,7 +911,7 @@ class EventLogService implements ContainerAwareInterface
     {
         // Allow passing in a class instance: convert it to its class type.
         if (is_object($entity)) {
-            $entity = get_class($entity);
+            $entity = $entity::class;
         }
         // Special case: strip of Doctrine proxies.
         if (str_starts_with($entity, 'Proxies\\__CG__\\')) {
@@ -966,7 +966,7 @@ class EventLogService implements ContainerAwareInterface
         if ($field = $this->externalIdFieldForEntity($entity)) {
             return $field;
         }
-        $class    = is_object($entity) ? get_class($entity) : $entity;
+        $class    = is_object($entity) ? $entity::class : $entity;
         $metadata = $this->em->getClassMetadata($class);
         try {
             return $metadata->getSingleIdentifierFieldName();
@@ -983,7 +983,7 @@ class EventLogService implements ContainerAwareInterface
     {
         // Allow passing in a class instance: convert it to its class type.
         if (is_object($entity)) {
-            $entity = get_class($entity);
+            $entity = $entity::class;
         }
         // Special case: strip of Doctrine proxies.
         if (str_starts_with($entity, 'Proxies\\__CG__\\')) {

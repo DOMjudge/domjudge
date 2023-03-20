@@ -827,7 +827,7 @@ class Utils
      */
     public static function tableForEntity($entity): string
     {
-        $class        = get_class($entity);
+        $class        = $entity::class;
         $parts        = explode('\\', $class);
         $entityType   = $parts[count($parts) - 1];
         $inflector    = InflectorFactory::create()->build();

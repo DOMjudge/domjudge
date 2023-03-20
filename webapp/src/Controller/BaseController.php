@@ -113,7 +113,7 @@ abstract class BaseController extends AbstractController
         // get the primary key if possible.
         if ($id === null) {
             try {
-                $metadata = $entityManager->getClassMetadata(get_class($entity));
+                $metadata = $entityManager->getClassMetadata($entity::class);
                 if (count($metadata->getIdentifierColumnNames()) === 1) {
                     $primaryKey = $metadata->getIdentifierColumnNames()[0];
                     $accessor   = PropertyAccess::createPropertyAccessor();
@@ -266,7 +266,7 @@ abstract class BaseController extends AbstractController
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         $inflector        = InflectorFactory::create()->build();
         $readableType     = str_replace('_', ' ', Utils::tableForEntity($entities[0]));
-        $metadata         = $entityManager->getClassMetadata(get_class($entities[0]));
+        $metadata         = $entityManager->getClassMetadata($entities[0]::class);
         $primaryKeyData   = [];
         $messages         = [];
         foreach ($entities as $entity) {
@@ -279,7 +279,7 @@ abstract class BaseController extends AbstractController
                 foreach ($relations as $table => $tableRelations) {
                     foreach ($tableRelations as $column => $constraint) {
                         // If the target class and column match, check if there are any entities with this value.
-                        if ($constraint['targetColumn'] === $primaryKeyColumn && $constraint['target'] === get_class($entity)) {
+                        if ($constraint['targetColumn'] === $primaryKeyColumn && $constraint['target'] === $entity::class) {
                             $count = (int)$entityManager->createQueryBuilder()
                                 ->from($table, 't')
                                 ->select(sprintf('COUNT(t.%s) AS cnt', $column))
@@ -356,7 +356,7 @@ abstract class BaseController extends AbstractController
     ) : Response {
         // Assume that we only delete entities of the same class.
         foreach ($entities as $entity) {
-            assert(get_class($entities[0]) === get_class($entity));
+            assert($entities[0]::class === $entity::class);
         }
         // Determine all the relationships between all tables using Doctrine cache.
         $dir          = realpath(sprintf('%s/src/Entity', $kernel->getProjectDir()));
