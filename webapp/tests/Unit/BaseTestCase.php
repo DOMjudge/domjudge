@@ -188,12 +188,10 @@ abstract class BaseTestCase extends WebTestCase
 
     /**
      * Run the given callback while temporarily changing the given configuration setting.
-     *
-     * @param mixed $configValue
      */
     protected function withChangedConfiguration(
         string $configKey,
-        $configValue,
+        mixed $configValue,
         callable $callback
     ): void {
         $config = self::getContainer()->get(ConfigurationService::class);

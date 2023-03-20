@@ -91,12 +91,11 @@ abstract class AbstractRestController extends AbstractFOSRestController
     /**
      * Render the given data using the correct groups.
      *
-     * @param mixed    $data
      * @param string[] $extraheaders
      */
     protected function renderData(
         Request $request,
-        $data,
+        mixed $data,
         int $statusCode = Response::HTTP_OK,
         array $extraheaders = []
     ): Response {
@@ -127,12 +126,11 @@ abstract class AbstractRestController extends AbstractFOSRestController
     /**
      * Render the given create data using the correct groups.
      *
-     * @param mixed      $data
      * @param string|int $id
      */
     protected function renderCreateData(
         Request $request,
-        $data,
+        mixed $data,
         string $routeType,
         $id
     ): Response {

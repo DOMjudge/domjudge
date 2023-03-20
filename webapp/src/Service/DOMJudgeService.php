@@ -491,9 +491,8 @@ class DOMJudgeService
 
     /**
      * Encode a JSON string with our preferred settings.
-     * @param mixed $data
      */
-    public function jsonEncode($data): string
+    public function jsonEncode(mixed $data): string
     {
         return json_encode($data, JSON_PRESERVE_ZERO_FRACTION | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
     }

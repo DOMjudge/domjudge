@@ -76,7 +76,7 @@ abstract class BaseTestCase extends BaseBaseTestCase
         string $apiUri,
         int $status,
         ?string $user = null,
-        $jsonData = null,
+        mixed $jsonData = null,
         array $files = []
     ) {
         $server = ['CONTENT_TYPE' => 'application/json'];
@@ -122,7 +122,7 @@ abstract class BaseTestCase extends BaseBaseTestCase
         string $apiUri,
         int $status,
         ?string $user = null,
-        $jsonData = null,
+        mixed $jsonData = null,
         array $files = []
     ) {
         $response = $this->verifyApiResponse($method, $apiUri, $status, $user, $jsonData, $files);

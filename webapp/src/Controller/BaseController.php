@@ -444,11 +444,10 @@ abstract class BaseController extends AbstractController
 
     /**
      * Get the contests that an event for the given entity should be triggered on
-     * @param mixed $entity
      *
      * @return Contest[]
      */
-    protected function contestsForEntity($entity, DOMJudgeService $dj): array
+    protected function contestsForEntity(mixed $entity, DOMJudgeService $dj): array
     {
         // Determine contests to emit an event for the given entity:
         // * If the entity is a Problem entity, use the getContest()
