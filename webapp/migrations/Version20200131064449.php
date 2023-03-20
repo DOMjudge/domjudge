@@ -67,7 +67,7 @@ final class Version20200131064449 extends AbstractMigration implements Container
 
         $this->addSql(
             "INSERT INTO configuration (name, value) VALUES ('registration_category_name', :value)",
-            ['value' => empty($selfRegistrationCategories) ? '""' : json_encode($selfRegistrationCategories[0]->getName())]
+            ['value' => empty($selfRegistrationCategories) ? '""' : json_encode($selfRegistrationCategories[0]->getName(), JSON_THROW_ON_ERROR)]
         );
 
         $this->addSql('ALTER TABLE team_category DROP allow_self_registration');
