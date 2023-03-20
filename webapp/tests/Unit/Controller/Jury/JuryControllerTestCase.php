@@ -325,6 +325,8 @@ abstract class JuryControllerTestCase extends BaseTestCase
      */
     public function testCheckEditEntityAdmin(string $identifier, array $formDataKeys, array $formDataValues): void
     {
+        $editLink = null;
+        $formFields = [];
         $this->roles = ['admin'];
         $this->logOut();
         $this->logIn();

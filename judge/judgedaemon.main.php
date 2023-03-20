@@ -236,6 +236,7 @@ function djconfig_get_value(string $name)
  */
 function rest_encode_file(string $file, $sizelimit = true) : string
 {
+    $maxsize = null;
     if ($sizelimit===true) {
         $maxsize = (int) djconfig_get_value('output_storage_limit');
     } elseif ($sizelimit===false || $sizelimit==-1) {

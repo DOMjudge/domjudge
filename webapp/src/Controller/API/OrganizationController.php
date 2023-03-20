@@ -143,6 +143,7 @@ class OrganizationController extends AbstractRestController
      */
     public function deleteLogoAction(Request $request, string $id): Response
     {
+        $contestId = null;
         /** @var TeamAffiliation $teamAffiliation */
         $teamAffiliation = $this->getQueryBuilder($request)
             ->andWhere(sprintf('%s = :id', $this->getIdField()))
