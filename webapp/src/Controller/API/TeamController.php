@@ -155,6 +155,7 @@ class TeamController extends AbstractRestController
      */
     public function deletePhotoAction(Request $request, string $id): Response
     {
+        $contestId = null;
         /** @var Team $team */
         $team = $this->getQueryBuilder($request)
             ->andWhere(sprintf('%s = :id', $this->getIdField()))

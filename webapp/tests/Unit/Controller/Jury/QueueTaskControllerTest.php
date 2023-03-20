@@ -66,6 +66,7 @@ class QueueTaskControllerTest extends BaseTestCase
 
     public function testData(): void
     {
+        $submission = null;
         $this->roles = ['admin'];
         $this->logOut();
         $this->logIn();
