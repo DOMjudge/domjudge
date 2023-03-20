@@ -1296,7 +1296,7 @@ class DOMJudgeService
     {
         $route = $this->router->generate($route, $params);
         $apiRootRoute = $this->router->generate('v4_api_root');
-        $offset = substr($apiRootRoute, -1) === '/' ? 0 : 1;
+        $offset = str_ends_with($apiRootRoute, '/') ? 0 : 1;
         return substr($route, strlen($apiRootRoute) + $offset);
     }
 
@@ -1313,7 +1313,7 @@ class DOMJudgeService
         $results = [];
         foreach (scandir($customDir) as $file) {
             foreach (array_merge(['css','js'], static::MIMETYPE_TO_EXTENSION) as $extension) {
-                if (strpos($file, '.' . $extension) !== false) {
+                if (str_contains($file, '.' . $extension)) {
                     $results[] = $file;
                 }
             }
@@ -1429,7 +1429,7 @@ class DOMJudgeService
         $contents = explode("\n", $raw_metadata);
         $res = [];
         foreach ($contents as $line) {
-            if (strpos($line, ":") !== false) {
+            if (str_contains($line, ":")) {
                 [$key, $value] = explode(":", $line, 2);
                 $res[$key] = trim($value);
             }

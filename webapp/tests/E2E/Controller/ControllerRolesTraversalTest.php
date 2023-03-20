@@ -66,7 +66,7 @@ class ControllerRolesTraversalTest extends BaseTestCase
     protected function urlExcluded(string $url, string $skip): bool
     {
         foreach (self::$substrings as $subs) {
-            if (strpos($url, $subs) !== false && $subs !== $skip) {
+            if (str_contains($url, $subs) && $subs !== $skip) {
                 return true;
             }
         }
@@ -78,7 +78,7 @@ class ControllerRolesTraversalTest extends BaseTestCase
         // Documentation is not setup
         // API is not functional in framework
         foreach (['/doc','/api'] as $extension) {
-            if (strpos($url, $extension) === 0) {
+            if (str_starts_with($url, $extension)) {
                 return true;
             }
         }
@@ -99,14 +99,14 @@ class ControllerRolesTraversalTest extends BaseTestCase
         if (($statusCode === 403 || $statusCode === 401) && $response->isRedirection()) {
             self::assertEquals($response->headers->get('location'), $this::$loginURL);
         } elseif (($response->getStatusCode() === 302 ) && $response->isRedirection()) {
-            if (strpos($url, '/jury/external-contest') !== false) {
-                self::assertTrue(strpos($response->headers->get('location'), '/jury/external-contest/manage') !== false);
+            if (str_contains($url, '/jury/external-contest')) {
+                self::assertTrue(str_contains($response->headers->get('location'), '/jury/external-contest/manage'));
             } else {
-                self::assertTrue(strpos($response->headers->get('location'), '/public') !== false);
+                self::assertTrue(str_contains($response->headers->get('location'), '/public'));
             }
         } else {
             // The public URL can always be accessed but is not linked for every role.
-            if (strpos($url, '/public') !== false) {
+            if (str_contains($url, '/public')) {
                 $statusCode = 200;
             }
             self::assertEquals($statusCode, $response->getStatusCode(), 'Unexpected response code for ' . $url);
@@ -116,7 +116,7 @@ class ControllerRolesTraversalTest extends BaseTestCase
         foreach ($tmp as $possUrl) {
             if (!$this->urlExcluded($possUrl, $skip)) {
                 $ret[] = $possUrl;
-                if (strpos($possUrl, '#') === false) {
+                if (!str_contains($possUrl, '#')) {
                     $ret[] = $possUrl.'#';
                 }
             }
@@ -133,7 +133,7 @@ class ControllerRolesTraversalTest extends BaseTestCase
         do {
             $toCheck = array_diff($urlsToCheck, $done);
             foreach ($toCheck as $url) {
-                if (strpos($url, '/jury/contests') !== false) {
+                if (str_contains($url, '/jury/contests')) {
                     continue;
                 }
                 if (!$this->urlExcluded($url, $skip)) {
@@ -221,7 +221,7 @@ class ControllerRolesTraversalTest extends BaseTestCase
         $this->client->request('GET', $url);
         $response = $this->client->getResponse();
         self::assertNotEquals(500, $response->getStatusCode(), sprintf('Failed at %s', $url));
-        if ($dropdown && strpos($url, '/public') === false) {
+        if ($dropdown && !str_contains($url, '/public')) {
             self::assertSelectorExists('a#navbarDropdownContests:contains("no contest")');
         }
     }

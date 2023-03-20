@@ -18,7 +18,7 @@ class VarargsLogMessageProcessor implements ProcessorInterface
      */
     public function __invoke(array $record): array
     {
-        if (strpos($record['message'], '%') === false || empty($record['context'])) {
+        if (!str_contains($record['message'], '%') || empty($record['context'])) {
             return $record;
         }
 

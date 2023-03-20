@@ -63,7 +63,7 @@ class ConfigController extends AbstractController
 
             $data = [];
             foreach ($request->request->all() as $key => $value) {
-                if (strpos($key, 'config_') === 0) {
+                if (str_starts_with($key, 'config_')) {
                     $valueToUse = $value;
                     if (is_array($value)) {
                         $firstItem = reset($value);

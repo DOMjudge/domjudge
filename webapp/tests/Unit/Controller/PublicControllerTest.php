@@ -250,7 +250,7 @@ class PublicControllerTest extends BaseTestCase
             extract($value);
             $newInputs = $inputs;
             $newInputs[$field] = $input;
-            if (strpos($field, 'affiliation') !== false) {
+            if (str_contains($field, 'affiliation')) {
                 $newInputs['affiliation'] = 'new';
                 if ($field==='affiliationShortName') {
                     $newInputs['affiliationName'] = 'New Affiliation';

@@ -914,7 +914,7 @@ class EventLogService implements ContainerAwareInterface
             $entity = get_class($entity);
         }
         // Special case: strip of Doctrine proxies.
-        if (strpos($entity, 'Proxies\\__CG__\\') === 0) {
+        if (str_starts_with($entity, 'Proxies\\__CG__\\')) {
             $entity = substr($entity, strlen('Proxies\\__CG__\\'));
         }
 
@@ -986,7 +986,7 @@ class EventLogService implements ContainerAwareInterface
             $entity = get_class($entity);
         }
         // Special case: strip of Doctrine proxies.
-        if (strpos($entity, 'Proxies\\__CG__\\') === 0) {
+        if (str_starts_with($entity, 'Proxies\\__CG__\\')) {
             $entity = substr($entity, strlen('Proxies\\__CG__\\'));
         }
 

@@ -182,7 +182,7 @@ class ImportExportService
 
         if ($freezeDuration !== null) {
             $freezeDurationDiff = Utils::timeStringDiff($data['duration'], $freezeDuration);
-            if (strpos($freezeDurationDiff, '-') === 0) {
+            if (str_starts_with($freezeDurationDiff, '-')) {
                 $message = 'Freeze duration is longer than contest length';
                 return false;
             }
