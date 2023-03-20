@@ -86,6 +86,15 @@ abstract class AccountBaseTestCase extends BaseTestCase
                               'roles' => ['api_writer']]],
                             [['username' => 'grafana',
                               'roles' => ['api_reader']]],
+                            [['username' => 'cds',
+                              'roles' => ['admin']],
+                             ['roles' => ['api_reader','api_writer','api_source_reader']]],
+                            [['username' => 'icpc-tool',
+                              'roles' => ['cds']],
+                             ['roles' => ['api_reader','api_writer','api_source_reader']]],
+                            [['username' => 'double-role',
+                              'roles' => ['cds','api_reader'], 'skipTsv' => true],
+                             ['roles' => ['api_reader','api_writer','api_source_reader']]],
                             [['username' => 'plagiarism',
                               'roles' => ['api_source_reader']]],
                             [['roles' => ['clarification_rw','balloon'], 'skipTsv' => true]],
@@ -129,7 +138,7 @@ abstract class AccountBaseTestCase extends BaseTestCase
             $tempData = ['id'=>$user, 'username'=> $user, 'name'=>$name, 'password'=>$pass, 'type'=>$role];
             // Handle TSV file
             if (count($testUser['roles']) !== 1 && !$testUser['skipTsv']) {
-                static::markTestFailed("TSV can not have more than 1 role.");
+                $this->fail("TSV can not have more than 1 role.");
             } elseif (isset($testUser['skipTsv'])) {
                 unset($testUser['skipTsv']);
             }
