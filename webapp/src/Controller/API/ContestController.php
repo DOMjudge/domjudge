@@ -773,7 +773,7 @@ class ContestController extends AbstractRestController
     {
         try {
             return $this->getContestQueryBuilder($request->query->getBoolean('onlyActive', false));
-        } catch (TypeError $e) {
+        } catch (TypeError) {
             throw new BadRequestHttpException('\'onlyActive\' must be a boolean.');
         }
     }

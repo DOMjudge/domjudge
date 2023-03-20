@@ -327,7 +327,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
 
         try {
             $countryAlpha2 = strtolower(Countries::getAlpha2Code($alpha3CountryCode));
-        } catch (MissingResourceException $e) {
+        } catch (MissingResourceException) {
             return '';
         }
         $assetFunction  = $this->twig->getFunction('asset')->getCallable();

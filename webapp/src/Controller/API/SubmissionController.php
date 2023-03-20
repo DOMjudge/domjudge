@@ -328,7 +328,7 @@ class SubmissionController extends AbstractRestController
             if ($this->isGranted('ROLE_API_WRITER')) {
                 try {
                     $time = Utils::toEpochFloat($timeString);
-                } catch (Exception $e) {
+                } catch (Exception) {
                     throw new BadRequestHttpException(sprintf("Can not parse time '%s'.", $timeString));
                 }
             } else {

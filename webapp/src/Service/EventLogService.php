@@ -885,7 +885,7 @@ class EventLogService implements ContainerAwareInterface
         $metadata = $this->em->getClassMetadata($entity);
         try {
             $primaryKeyField = $metadata->getSingleIdentifierColumnName();
-        } catch (MappingException $e) {
+        } catch (MappingException) {
             throw new BadMethodCallException(sprintf('Entity \'%s\' as a composite primary key',
                                                       $type));
         }
@@ -970,7 +970,7 @@ class EventLogService implements ContainerAwareInterface
         $metadata = $this->em->getClassMetadata($class);
         try {
             return $metadata->getSingleIdentifierFieldName();
-        } catch (MappingException $e) {
+        } catch (MappingException) {
             throw new BadMethodCallException("Entity '$class' has a composite primary key");
         }
     }

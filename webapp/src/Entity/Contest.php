@@ -997,7 +997,7 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
         } else {
             try {
                 $date = new DateTime($time_string);
-            } catch (Exception $e) {
+            } catch (Exception) {
                 return null;
             }
             return $date->format('U.v');
