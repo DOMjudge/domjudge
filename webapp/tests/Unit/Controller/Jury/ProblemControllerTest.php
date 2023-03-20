@@ -92,9 +92,9 @@ class ProblemControllerTest extends JuryControllerTestCase
         $alertText = $crawler->filterXPath('//div[contains(@class, "alert")]')->first()->text();
         self::assertStringStartsWith('Cannot edit problem, it belongs to locked contest', $alertText);
 
-        $titles = $crawler->filterXPath('//div[@class="button-row"]')->children()->each(function (Crawler $node, $i) {
-            return $node->attr('title');
-        });
+        $titles = $crawler->filterXPath('//div[@class="button-row"]')->children()->each(
+            fn(Crawler $node, $i) => $node->attr('title')
+        );
         $expectedTitles = [
             'Judge remaining testcases',
             'Export',

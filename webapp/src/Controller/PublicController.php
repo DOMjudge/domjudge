@@ -277,14 +277,11 @@ class PublicController extends BaseController
      */
     public function attachmentAction(int $probId, int $attachmentId): StreamedResponse
     {
-        return $this->getBinaryFile($probId, function (
+        return $this->getBinaryFile($probId, fn(
             int $probId,
             Contest $contest,
             ContestProblem $contestProblem
-        ) use ($attachmentId) {
-            return $this->dj->getAttachmentStreamedResponse($contestProblem,
-                $attachmentId);
-        });
+        ) => $this->dj->getAttachmentStreamedResponse($contestProblem, $attachmentId));
     }
 
     /**
@@ -292,9 +289,11 @@ class PublicController extends BaseController
      */
     public function sampleZipAction(int $probId): StreamedResponse
     {
-        return $this->getBinaryFile($probId, function (int $probId, Contest $contest, ContestProblem $contestProblem) {
-            return $this->dj->getSamplesZipStreamedResponse($contestProblem);
-        });
+        return $this->getBinaryFile($probId, fn(
+            int $probId,
+            Contest $contest,
+            ContestProblem $contestProblem
+        ) => $this->dj->getSamplesZipStreamedResponse($contestProblem));
     }
 
     /**

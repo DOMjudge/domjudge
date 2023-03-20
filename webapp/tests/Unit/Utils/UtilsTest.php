@@ -960,9 +960,7 @@ part.";
     {
         $input = [1, 2, 3];
         $expectedOutput = [2 => 1, 4 => 2, 6 => 3];
-        $doubled = function ($item) {
-            return $item * 2;
-        };
+        $doubled = static fn($item) => $item * 2;
         self::assertEquals($expectedOutput, Utils::reindex($input, $doubled));
     }
 }

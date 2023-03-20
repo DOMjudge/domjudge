@@ -62,9 +62,7 @@ final class Version20200131064449 extends AbstractMigration implements Container
         $this->warnIf(
             count($selfRegistrationCategories) > 1,
             sprintf('Team categories for self-registered teams were %s. Only first will be kept.',
-                implode(', ', array_map(function($category) {
-                    return $category->getName();
-                }, $selfRegistrationCategories)))
+                implode(', ', array_map(fn($category) => $category->getName(), $selfRegistrationCategories)))
         );
 
         $this->addSql(

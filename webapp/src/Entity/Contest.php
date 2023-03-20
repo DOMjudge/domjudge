@@ -983,9 +983,13 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
             // Take into account the removed intervals.
             /** @var RemovedInterval[] $removedIntervals */
             $removedIntervals = $this->getRemovedIntervals()->toArray();
-            usort($removedIntervals, function (RemovedInterval $a, RemovedInterval $b) {
-                return Utils::difftime((float)$a->getStarttime(), (float)$b->getStarttime());
-            });
+            usort(
+                $removedIntervals,
+                static fn(
+                    RemovedInterval $a,
+                    RemovedInterval $b
+                ) => Utils::difftime((float)$a->getStarttime(), (float)$b->getStarttime())
+            );
             foreach ($removedIntervals as $removedInterval) {
                 if (Utils::difftime((float)$removedInterval->getStarttime(), (float)$absoluteTime) <= 0) {
                     $absoluteTime += Utils::difftime((float)$removedInterval->getEndtime(),

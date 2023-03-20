@@ -823,23 +823,19 @@ class SubmissionController extends BaseController
             ->add('problem', EntityType::class, [
                 'class' => 'App\Entity\Problem',
                 'choice_label' => 'name',
-                'query_builder' => function (EntityRepository $er) use ($submission) {
-                    return $er->createQueryBuilder('p')
-                        ->join('p.contest_problems', 'cp')
-                        ->andWhere('cp.allowSubmit = 1')
-                        ->andWhere('cp.contest = :contest')
-                        ->setParameter('contest', $submission->getContest())
-                        ->orderBy('p.name');
-                },
+                'query_builder' => fn(EntityRepository $er) => $er->createQueryBuilder('p')
+                    ->join('p.contest_problems', 'cp')
+                    ->andWhere('cp.allowSubmit = 1')
+                    ->andWhere('cp.contest = :contest')
+                    ->setParameter('contest', $submission->getContest())
+                    ->orderBy('p.name'),
             ])
             ->add('language', EntityType::class, [
                 'class' => 'App\Entity\Language',
                 'choice_label' => 'name',
-                'query_builder' => function (EntityRepository $er) {
-                    return $er->createQueryBuilder('lang')
-                        ->andWhere('lang.allowSubmit = 1')
-                        ->orderBy('lang.name');
-                }
+                'query_builder' => fn(EntityRepository $er) => $er->createQueryBuilder('lang')
+                    ->andWhere('lang.allowSubmit = 1')
+                    ->orderBy('lang.name')
             ])
             ->add('entry_point', TextType::class, [
                 'label' => 'Optional entry point',

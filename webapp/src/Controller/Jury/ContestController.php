@@ -200,9 +200,7 @@ class ContestController extends BaseController
                 ->groupBy('i.contest')
                 ->getQuery()
                 ->getResult();
-            $removedIntervals = Utils::reindex($removedIntervals, function ($data) {
-                return $data['cid'];
-            });
+            $removedIntervals = Utils::reindex($removedIntervals, static fn($data) => $data['cid']);
         } else {
             $removedIntervals = [];
         }

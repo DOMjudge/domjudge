@@ -270,9 +270,10 @@ abstract class BaseTestCase extends BaseBaseTestCase
             static::markTestSkipped('No endpoint defined.');
         }
 
-        $expectedObjectIds = array_map(function ($id) {
-            return $this->resolveReference($id);
-        }, array_keys($this->expectedObjects));
+        $expectedObjectIds = array_map(
+            fn($id) => $this->resolveReference($id),
+            array_keys($this->expectedObjects)
+        );
         $ids = array_merge($expectedObjectIds, $this->expectedAbsent);
         $url = $this->helperGetEndpointURL($apiEndpoint);
         $response = $this->verifyApiJsonResponse('GET', $url . "?" . http_build_query(['ids' => $ids]), 404, $this->apiUser);
