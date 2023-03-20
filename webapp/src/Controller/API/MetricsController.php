@@ -104,7 +104,7 @@ class MetricsController extends AbstractFOSRestController
 
             // Get submissions stats for the contest.
             /** @var Submission[] $submissions */
-            list($submissions, $submissionCounts) = $this->submissionService->getSubmissionList([$contest->getCid() => $contest], ['visible' => true], 0);
+            [$submissions, $submissionCounts] = $this->submissionService->getSubmissionList([$contest->getCid() => $contest], ['visible' => true], 0);
             foreach ($submissionCounts as $kind => $count) {
                 $m['submissions_' . $kind]->set((int)$count, $labels);
             }

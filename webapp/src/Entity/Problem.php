@@ -482,7 +482,7 @@ class Problem extends BaseApiEntity
             if (!isset($problemTextType)) {
                 $finfo = finfo_open(FILEINFO_MIME);
 
-                list($type) = explode('; ', finfo_file($finfo, $this->getProblemtextFile()->getRealPath()));
+                [$type] = explode('; ', finfo_file($finfo, $this->getProblemtextFile()->getRealPath()));
 
                 finfo_close($finfo);
 
