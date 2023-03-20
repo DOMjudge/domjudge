@@ -53,7 +53,7 @@ class ProblemControllerTest extends JuryControllerTestCase
         // Add external IDs when needed.
         if (!$this->dataSourceIsLocal()) {
             foreach (static::$addEntities as &$entity) {
-                $entity['externalid'] = md5(json_encode($entity));
+                $entity['externalid'] = md5(json_encode($entity, JSON_THROW_ON_ERROR));
             }
             unset($entity);
         }

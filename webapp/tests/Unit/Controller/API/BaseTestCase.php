@@ -6,6 +6,7 @@ use App\Entity\Contest;
 use App\Tests\Unit\BaseTestCase as BaseBaseTestCase;
 use Doctrine\ORM\EntityManagerInterface;
 use Generator;
+use JsonException;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 
 abstract class BaseTestCase extends BaseBaseTestCase
@@ -98,7 +99,7 @@ abstract class BaseTestCase extends BaseBaseTestCase
             $server['PHP_AUTH_USER'] = $user;
             $server['PHP_AUTH_PW'] = $user;
         }
-        $this->client->request($method, '/api' . $apiUri, [], $files, $server, $jsonData ? json_encode($jsonData) : null);
+        $this->client->request($method, '/api' . $apiUri, [], $files, $server, $jsonData ? json_encode($jsonData, JSON_THROW_ON_ERROR) : null);
         $response = $this->client->getResponse();
         $message = var_export($response, true);
         self::assertEquals($status, $response->getStatusCode(), $message);
@@ -126,7 +127,11 @@ abstract class BaseTestCase extends BaseBaseTestCase
         array $files = []
     ) {
         $response = $this->verifyApiResponse($method, $apiUri, $status, $user, $jsonData, $files);
-        return json_decode($response, true);
+        try {
+            return json_decode($response, true, 512, JSON_THROW_ON_ERROR);
+        } catch (JsonException) {
+            return null;
+        }
     }
 
     public function helperGetEndpointURL(string $apiEndpoint, ?string $id = null): string

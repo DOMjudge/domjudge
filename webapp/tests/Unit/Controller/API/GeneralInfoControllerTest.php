@@ -164,7 +164,7 @@ class GeneralInfoControllerTest extends BaseTestCase
             /** @var BinaryFileResponse $response */
             $response = $this->client->getResponse();
             static::assertEquals(404, $response->getStatusCode());
-            static::assertEquals(sprintf('country flag for %s of size %s not found', strtoupper($countryCode), $size), json_decode($response->getContent(), true)['message']);
+            static::assertEquals(sprintf('country flag for %s of size %s not found', strtoupper($countryCode), $size), json_decode($response->getContent(), true, 512, JSON_THROW_ON_ERROR)['message']);
         });
     }
 
@@ -186,7 +186,7 @@ class GeneralInfoControllerTest extends BaseTestCase
             /** @var BinaryFileResponse $response */
             $response = $this->client->getResponse();
             static::assertEquals(404, $response->getStatusCode());
-            static::assertEquals(sprintf('country %s does not exist', strtoupper($countryCode)), json_decode($response->getContent(), true)['message']);
+            static::assertEquals(sprintf('country %s does not exist', strtoupper($countryCode)), json_decode($response->getContent(), true, 512, JSON_THROW_ON_ERROR)['message']);
         });
     }
 
@@ -210,7 +210,7 @@ class GeneralInfoControllerTest extends BaseTestCase
             /** @var BinaryFileResponse $response */
             $response = $this->client->getResponse();
             static::assertEquals(404, $response->getStatusCode());
-            static::assertEquals('country flags disabled', json_decode($response->getContent(), true)['message']);
+            static::assertEquals('country flags disabled', json_decode($response->getContent(), true, 512, JSON_THROW_ON_ERROR)['message']);
         });
     }
 }

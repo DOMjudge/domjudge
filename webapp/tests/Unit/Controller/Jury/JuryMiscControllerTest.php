@@ -166,7 +166,7 @@ class JuryMiscControllerTest extends BaseTestCase
         $response = $this->client->getResponse();
         self::assertEquals($status, $response->getStatusCode());
         if ($status !== 403) {
-            $object = json_decode($response->getContent(), true);
+            $object = json_decode($response->getContent(), true, 512, JSON_THROW_ON_ERROR);
             self::assertEquals($object, $finalObject);
         }
     }

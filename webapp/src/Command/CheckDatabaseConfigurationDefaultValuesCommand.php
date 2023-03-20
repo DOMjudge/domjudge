@@ -39,7 +39,7 @@ class CheckDatabaseConfigurationDefaultValuesCommand extends Command
                 $specification['name'],
                 $specification['category'],
                 $specification['type'],
-                json_encode($specification['default_value'])
+                json_encode($specification['default_value'], JSON_THROW_ON_ERROR)
             );
             switch ($specification['type']) {
                 case 'bool':
