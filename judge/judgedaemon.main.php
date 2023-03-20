@@ -975,9 +975,7 @@ function disable(
     ?string $extra_log = null
 ): void {
     global $myhost;
-    $disabled = dj_json_encode(array(
-        'kind' => $kind,
-        $idcolumn => $id));
+    $disabled = dj_json_encode(['kind' => $kind, $idcolumn => $id]);
     $judgehostlog = read_judgehostlog();
     if (isset($extra_log)) {
         $judgehostlog .= "\n\n"
