@@ -42,6 +42,12 @@ abstract class AccountBaseTestCase extends BaseTestCase
                     $newItemValue = array_diff($newItemValue, ['team']);
                     // In development mode we add a team role to admin users for some API endpoints.
                 };
+                if (is_array($newItemValue)) {
+                    sort($newItemValue);
+                }
+                if (is_array($expectedValue)) {
+                    sort($expectedValue);
+                }
                 self::assertEquals($newItemValue, $expectedValue);
             }
         }
@@ -52,6 +58,10 @@ abstract class AccountBaseTestCase extends BaseTestCase
      */
     public function testCreateUser(array $newUserPostData, ?array $overwritten=null): void
     {
+        // This is only relevant for another test
+        if (isset($newUserPostData['skipTsv'])) {
+            unset($newUserPostData['skipTsv']);
+        }
         $usersURL = $this->helperGetEndpointURL('users');
         $myURL = $this->helperGetEndpointURL($this->apiEndpoint);
         $objectsBeforeTest = $this->verifyApiJsonResponse('GET', $myURL, 200, $this->apiUser);
@@ -72,6 +82,8 @@ abstract class AccountBaseTestCase extends BaseTestCase
                             [['roles' => ['judge']],['roles' => ['jury']]],
                             [['roles' => ['balloon']]],
                             [['roles' => ['clarification_rw']]],
+                            [['roles' => ['clarification_rw','balloon'], 'skipTsv' => true]],
+                            [['roles' => ['jury','balloon'], 'skipTsv' => true]],
                         ];
         yield [$defaultData];
         foreach ($otherVariations as $variation) {
@@ -110,8 +122,10 @@ abstract class AccountBaseTestCase extends BaseTestCase
             $role = $testUser['roles'][0];
             $tempData = ['id'=>$user, 'username'=> $user, 'name'=>$name, 'password'=>$pass, 'type'=>$role];
             // Handle TSV file
-            if (count($testUser['roles']) !== 1) {
+            if (count($testUser['roles']) !== 1 && !$testUser['skipTsv']) {
                 static::markTestFailed("TSV can not have more than 1 role.");
+            } elseif (isset($testUser['skipTsv'])) {
+                unset($testUser['skipTsv']);
             }
             $fileVersions = ['accounts'];
             if ($index === 0) {
