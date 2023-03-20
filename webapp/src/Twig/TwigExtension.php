@@ -263,17 +263,13 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
 
     public static function statusClass(string $status): string
     {
-        switch ($status) {
-            case 'noconn':
-                return 'text-muted';
-            case 'crit':
-                return 'text-danger';
-            case 'warn':
-                return 'text-warning';
-            case 'ok':
-                return 'text-success';
-        }
-        return '';
+        return match ($status) {
+            'noconn' => 'text-muted',
+            'crit' => 'text-danger',
+            'warn' => 'text-warning',
+            'ok' => 'text-success',
+            default => '',
+        };
     }
 
     public static function statusIcon(string $status): string
@@ -691,23 +687,13 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             $linenostr = mb_substr($line, 0, $linenowidth);
             $diffline  = mb_substr($line, $linenowidth + 1);
             $mid       = mb_substr($diffline, $midloc - 1, 3);
-            switch ($mid) {
-                case ' = ':
-                    $formdiffline = "<span class='correct'>" . Utils::specialchars($diffline) . "</span>";
-                    break;
-                case ' ! ':
-                    $formdiffline = "<span class='differ'>" . Utils::specialchars($diffline) . "</span>";
-                    break;
-                case ' $ ':
-                    $formdiffline = "<span class='endline'>" . Utils::specialchars($diffline) . "</span>";
-                    break;
-                case ' > ':
-                case ' < ':
-                    $formdiffline = "<span class='extra'>" . Utils::specialchars($diffline) . "</span>";
-                    break;
-                default:
-                    $formdiffline = Utils::specialchars($diffline);
-            }
+            $formdiffline = match ($mid) {
+                ' = ' => "<span class='correct'>" . Utils::specialchars($diffline) . "</span>",
+                ' ! ' => "<span class='differ'>" . Utils::specialchars($diffline) . "</span>",
+                ' $ ' => "<span class='endline'>" . Utils::specialchars($diffline) . "</span>",
+                ' > ', ' < ' => "<span class='extra'>" . Utils::specialchars($diffline) . "</span>",
+                default => Utils::specialchars($diffline),
+            };
             $return = $return . $linenostr . " " . $formdiffline . "\n";
             $line   = strtok("\n");
         }
@@ -874,16 +860,11 @@ JS;
         while ($line !== false && strlen($line) != 0) {
             // Strip any additional DOS/MAC newline characters:
             $line = trim($line, "\r\n");
-            switch (substr($line, 0, 1)) {
-                case '-':
-                    $formdiffline = "<span class='diff-del'>" . Utils::specialchars($line) . "</span>";
-                    break;
-                case '+':
-                    $formdiffline = "<span class='diff-add'>" . Utils::specialchars($line) . "</span>";
-                    break;
-                default:
-                    $formdiffline = Utils::specialchars($line);
-            }
+            $formdiffline = match (substr($line, 0, 1)) {
+                '-' => "<span class='diff-del'>" . Utils::specialchars($line) . "</span>",
+                '+' => "<span class='diff-add'>" . Utils::specialchars($line) . "</span>",
+                default => Utils::specialchars($line),
+            };
             $return .= $formdiffline . "\n";
             $line   = strtok("\n");
         }
@@ -1043,17 +1024,11 @@ EOF;
 
     public function fileTypeIcon(string $type): string
     {
-        switch ($type) {
-            case 'pdf':
-                $iconName = 'pdf';
-                break;
-            case 'txt':
-                $iconName = 'alt';
-                break;
-            default:
-                $iconName = 'code';
-                break;
-        }
+        $iconName = match ($type) {
+            'pdf' => 'pdf',
+            'txt' => 'alt',
+            default => 'code',
+        };
 
         return 'fas fa-file-' . $iconName;
     }

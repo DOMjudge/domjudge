@@ -511,19 +511,12 @@ class Problem extends BaseApiEntity
 
     public function getProblemTextStreamedResponse(): StreamedResponse
     {
-        switch ($this->getProblemtextType()) {
-            case 'pdf':
-                $mimetype = 'application/pdf';
-                break;
-            case 'html':
-                $mimetype = 'text/html';
-                break;
-            case 'txt':
-                $mimetype = 'text/plain';
-                break;
-            default:
-                throw new BadRequestHttpException(sprintf('Problem p%d text has unknown type', $this->getProbid()));
-        }
+        $mimetype = match ($this->getProblemtextType()) {
+            'pdf' => 'application/pdf',
+            'html' => 'text/html',
+            'txt' => 'text/plain',
+            default => throw new BadRequestHttpException(sprintf('Problem p%d text has unknown type', $this->getProbid())),
+        };
 
         $filename    = sprintf('prob-%s.%s', $this->getName(), $this->getProblemtextType());
         $problemText = stream_get_contents($this->getProblemtext());

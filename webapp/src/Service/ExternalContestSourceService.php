@@ -208,15 +208,11 @@ class ExternalContestSourceService
         }
 
         $this->loadPendingEvents();
-
-        switch ($this->source->getType()) {
-            case ExternalContestSource::TYPE_CCS_API:
-                return $this->importFromCcsApi($eventsToSkip, $progressReporter);
-            case ExternalContestSource::TYPE_CONTEST_PACKAGE:
-                return $this->importFromContestArchive($eventsToSkip, $progressReporter);
-        }
-
-        return false;
+        return match ($this->source->getType()) {
+            ExternalContestSource::TYPE_CCS_API => $this->importFromCcsApi($eventsToSkip, $progressReporter),
+            ExternalContestSource::TYPE_CONTEST_PACKAGE => $this->importFromContestArchive($eventsToSkip, $progressReporter),
+            default => false,
+        };
     }
 
     public function stopReading(): void

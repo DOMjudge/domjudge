@@ -365,14 +365,11 @@ class JudgeTask
 
     public static function parsePriority(string $priorityString): int
     {
-        switch ($priorityString) {
-            case 'low':
-                return JudgeTask::PRIORITY_LOW;
-            case 'high':
-                return JudgeTask::PRIORITY_HIGH;
-            default:
-                return JudgeTask::PRIORITY_DEFAULT;
-        }
+        return match ($priorityString) {
+            'low' => JudgeTask::PRIORITY_LOW,
+            'high' => JudgeTask::PRIORITY_HIGH,
+            default => JudgeTask::PRIORITY_DEFAULT,
+        };
     }
 
     public function addJudgingRun(JudgingRun $judgingRun): JudgeTask

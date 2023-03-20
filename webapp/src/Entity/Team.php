@@ -643,21 +643,17 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
 
     public function getAssetFile(string $property): ?UploadedFile
     {
-        switch ($property) {
-            case 'photo':
-                return $this->getPhotoFile();
-        }
-
-        return null;
+        return match ($property) {
+            'photo' => $this->getPhotoFile(),
+            default => null,
+        };
     }
 
     public function isClearAsset(string $property): ?bool
     {
-        switch ($property) {
-            case 'photo':
-                return $this->isClearPhoto();
-        }
-
-        return null;
+        return match ($property) {
+            'photo' => $this->isClearPhoto(),
+            default => null,
+        };
     }
 }

@@ -1187,19 +1187,12 @@ class JudgehostController extends AbstractFOSRestController
      */
     public function getFilesAction(string $type, string $id): array
     {
-        switch ($type) {
-            case 'source':
-                return $this->getSourceFiles($id);
-            case 'testcase':
-                return $this->getTestcaseFiles($id);
-            case 'compare':
-            case 'compile':
-            case 'debug':
-            case 'run':
-                return $this->getExecutableFiles($id);
-            default:
-                throw new BadRequestHttpException('Unknown type requested.');
-        }
+        return match ($type) {
+            'source' => $this->getSourceFiles($id),
+            'testcase' => $this->getTestcaseFiles($id),
+            'compare', 'compile', 'debug', 'run' => $this->getExecutableFiles($id),
+            default => throw new BadRequestHttpException('Unknown type requested.'),
+        };
     }
 
     private function getSourceFiles(string $id): array

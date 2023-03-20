@@ -284,19 +284,12 @@ class TeamController extends BaseController
             $restrictions     = $request->query->get('restrict');
             $restrictionTexts = [];
             foreach ($restrictions as $key => $value) {
-                switch ($key) {
-                    case 'probid':
-                        $restrictionKeyText = 'problem';
-                        break;
-                    case 'langid':
-                        $restrictionKeyText = 'language';
-                        break;
-                    case 'judgehost':
-                        $restrictionKeyText = 'judgehost';
-                        break;
-                    default:
-                        throw new BadRequestHttpException(sprintf('Restriction on %s not allowed.', $key));
-                }
+                $restrictionKeyText = match ($key) {
+                    'probid' => 'problem',
+                    'langid' => 'language',
+                    'judgehost' => 'judgehost',
+                    default => throw new BadRequestHttpException(sprintf('Restriction on %s not allowed.', $key)),
+                };
                 $restrictionTexts[] = sprintf('%s %s', $restrictionKeyText, $value);
             }
             $restrictionText = implode(', ', $restrictionTexts);
