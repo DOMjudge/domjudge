@@ -790,14 +790,15 @@ class ImportExportService
      */
     public function importAccountsJson(array $data, ?string &$message = null, ?array &$saved = null): int
     {
-        $teamRole     = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'team']);
-        $juryRole     = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'jury']);
-        $adminRole    = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'admin']);
-        $balloonRole  = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'balloon']);
-        $clarRole     = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'clarification_rw']);
-        $apiReadRole  = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'api_reader']);
-        $apiWriteRole = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'api_writer']);
-        $juryCategory = $this->em->getRepository(TeamCategory::class)->findOneBy(['name' => 'Jury']);
+        $teamRole      = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'team']);
+        $juryRole      = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'jury']);
+        $adminRole     = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'admin']);
+        $balloonRole   = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'balloon']);
+        $clarRole      = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'clarification_rw']);
+        $apiReadRole   = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'api_reader']);
+        $apiWriteRole  = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'api_writer']);
+        $apiSourceRole = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'api_source_reader']);
+        $juryCategory  = $this->em->getRepository(TeamCategory::class)->findOneBy(['name' => 'Jury']);
         if (!$juryCategory) {
             $juryCategory = new TeamCategory();
             $juryCategory
@@ -839,6 +840,9 @@ class ImportExportService
                     $roles[] = $clarRole;
                 case 'api_reader':
                     $roles[] = $apiReadRole;
+                    break;
+                case 'api_source_reader':
+                    $roles[] = $apiSourceRole;
                     break;
                 case 'api_writer':
                     $roles[] = $apiWriteRole;
@@ -1098,15 +1102,16 @@ class ImportExportService
      */
     protected function importAccountsTsv(array $content, ?string &$message = null): int
     {
-        $accountData = [];
-        $l           = 1;
-        $teamRole    = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'team']);
-        $juryRole    = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'jury']);
-        $adminRole   = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'admin']);
-        $balloonRole = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'balloon']);
-        $clarRole     = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'clarification_rw']);
-        $apiReadRole  = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'api_reader']);
-        $apiWriteRole = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'api_writer']);
+        $accountData   = [];
+        $l             = 1;
+        $teamRole      = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'team']);
+        $juryRole      = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'jury']);
+        $adminRole     = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'admin']);
+        $balloonRole   = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'balloon']);
+        $clarRole      = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'clarification_rw']);
+        $apiReadRole   = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'api_reader']);
+        $apiWriteRole  = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'api_writer']);
+        $apiSourceRole = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'api_source_reader']);
 
         $juryCategory = $this->em->getRepository(TeamCategory::class)->findOneBy(['name' => 'Jury']);
         if (!$juryCategory) {
@@ -1172,6 +1177,9 @@ class ImportExportService
                     break;
                 case 'api_writer':
                     $roles[] = $apiWriteRole;
+                    break;
+                case 'api_source_reader':
+                    $roles[] = $apiSourceRole;
                     break;
                 case 'analyst':
                     // Ignore type analyst for now. We don't have a useful mapping yet.
