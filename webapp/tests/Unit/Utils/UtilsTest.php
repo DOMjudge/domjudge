@@ -170,7 +170,7 @@ class UtilsTest extends TestCase
             $now = time();
             $year = 365*24*3600;
             for ($i=0; $i<10000; $i++) {
-                $t = (float)sprintf('%d.%03d', $now - $year + rand(0, 2*$year), rand(0, 999));
+                $t = (float)sprintf('%d.%03d', $now - $year + random_int(0, 2*$year), random_int(0, 999));
                 $t2 = Utils::toEpochFloat(Utils::absTime($t));
                 self::assertEqualsWithDelta($t, $t2, 0.0000001, "comparing random times in TZ=$tz");
             }

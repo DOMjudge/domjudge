@@ -174,7 +174,7 @@ function request(string $url, string $verb = 'GET', $data = '', bool $failonerro
         if ($trial == BACKOFF_STEPS) {
             $errstr = $errstr . " Retry limit reached.";
         } else {
-            $retry_in_sec = $delay_in_sec + BACKOFF_JITTER_SEC*rand()/getrandmax();
+            $retry_in_sec = $delay_in_sec + BACKOFF_JITTER_SEC*random_int(0, mt_getrandmax())/mt_getrandmax();
             $warnstr = $errstr . " This request will be retried after about " .
                 $retry_in_sec . "sec... (" . $trial . "/" . BACKOFF_STEPS . ")";
             warning($warnstr);
