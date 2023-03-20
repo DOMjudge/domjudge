@@ -186,9 +186,9 @@ class QueuetaskIntegrationTest extends KernelTestCase
     private function submit($time, ?Team $team = null, ?Problem $problem = null, string $source = 'team page'): QueueTask
     {
         $contest = $this->em->getRepository(Contest::class)->find($this->contest->getCid());
-        $team = $team ?? $this->teams[0];
+        $team ??= $this->teams[0];
         $team = $this->em->getRepository(Team::class)->find($team->getTeamid());
-        $problem = $problem ?? $this->problems[0];
+        $problem ??= $this->problems[0];
         $problem = $this->em->getRepository(Problem::class)->find($problem->getProbid());
         $submission = $this->submissionService->submitSolution(
             $team, null, $problem, $contest, 'c',
