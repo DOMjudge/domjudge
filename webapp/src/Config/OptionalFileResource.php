@@ -2,6 +2,7 @@
 
 namespace App\Config;
 
+use Stringable;
 use Symfony\Component\Config\Resource\FileExistenceResource;
 use Symfony\Component\Config\Resource\FileResource;
 use Symfony\Component\Config\Resource\SelfCheckingResourceInterface;
@@ -13,7 +14,7 @@ use Symfony\Component\Config\Resource\SelfCheckingResourceInterface;
  * @see FileResource
  * @see FileExistenceResource
  */
-class OptionalFileResource implements SelfCheckingResourceInterface
+class OptionalFileResource implements SelfCheckingResourceInterface, Stringable
 {
     private string $resource;
     private bool $exists;

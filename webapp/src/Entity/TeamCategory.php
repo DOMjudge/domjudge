@@ -6,6 +6,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
 use OpenApi\Annotations as OA;
+use Stringable;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -27,7 +28,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * )
  * @UniqueEntity("externalid")
  */
-class TeamCategory extends BaseApiEntity
+class TeamCategory extends BaseApiEntity implements Stringable
 {
     /**
      * @ORM\Id
