@@ -793,7 +793,7 @@ class CheckConfigService
                     && ($externalIdField = $this->eventLogService->externalIdFieldForEntity($class))) {
                     $result[$shortClass] = $this->checkExternalIdentifiers($class, $externalIdField);
                 }
-            } catch (BadMethodCallException $e) {
+            } catch (BadMethodCallException) {
                 // Ignore, this entity does not have an API endpoint.
             }
         }

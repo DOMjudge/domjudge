@@ -214,7 +214,7 @@ class GeneralInfoController extends AbstractFOSRestController
         if ($name) {
             try {
                 $result = $this->config->get($name, $onlypublic);
-            } catch (InvalidArgumentException $e) {
+            } catch (InvalidArgumentException) {
                 throw new BadRequestHttpException(sprintf('Parameter with name: %s not found', $name));
             }
         } else {
@@ -395,7 +395,7 @@ class GeneralInfoController extends AbstractFOSRestController
     {
         try {
             return $this->eventLogService->externalIdFieldForEntity(Contest::class) ?? 'cid';
-        } catch (Exception $e) {
+        } catch (Exception) {
             return 'cid';
         }
     }

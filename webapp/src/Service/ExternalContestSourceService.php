@@ -1820,10 +1820,10 @@ class ExternalContestSourceService
         foreach ($values as $field => $value) {
             try {
                 $ourValue = $propertyAccessor->getValue($entity, $field);
-            } catch (UnexpectedTypeException $e) {
+            } catch (UnexpectedTypeException) {
                 // Subproperty that doesn't exist, it is null.
                 $ourValue = null;
-            } catch (UninitializedPropertyException $e) {
+            } catch (UninitializedPropertyException) {
                 // Property that is not initialized, assume it is null
                 $ourValue = null;
             }

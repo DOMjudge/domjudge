@@ -223,7 +223,7 @@ abstract class AbstractRestController extends AbstractFOSRestController
     {
         try {
             return $this->eventLogService->externalIdFieldForEntity(Contest::class) ?? 'cid';
-        } catch (Exception $e) {
+        } catch (Exception) {
             return 'cid';
         }
     }

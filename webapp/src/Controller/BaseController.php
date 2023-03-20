@@ -71,7 +71,7 @@ abstract class BaseController extends AbstractController
             try {
                 $router->match($path);
                 return true;
-            } catch (ResourceNotFoundException $e) {
+            } catch (ResourceNotFoundException) {
                 return false;
             } finally {
                 $context->setMethod($method);
@@ -119,7 +119,7 @@ abstract class BaseController extends AbstractController
                     $accessor   = PropertyAccess::createPropertyAccessor();
                     $id         = $accessor->getValue($entity, $primaryKey);
                 }
-            } catch (MappingException $e) {
+            } catch (MappingException) {
                 // Entity is not actually a Doctrine entity, ignore.
             }
         }
