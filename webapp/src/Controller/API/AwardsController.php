@@ -28,20 +28,15 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  */
 class AwardsController extends AbstractRestController
 {
-    protected ScoreboardService $scoreboardService;
-    protected AwardService $awards;
-
     public function __construct(
         EntityManagerInterface $entityManager,
         DOMJudgeService $DOMJudgeService,
         ConfigurationService $config,
         EventLogService $eventLogService,
-        ScoreboardService $scoreboardService,
-        AwardService $awards
+        protected ScoreboardService $scoreboardService,
+        protected AwardService $awards
     ) {
         parent::__construct($entityManager, $DOMJudgeService, $config, $eventLogService);
-        $this->scoreboardService = $scoreboardService;
-        $this->awards = $awards;
     }
 
     /**

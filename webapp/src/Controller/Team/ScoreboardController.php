@@ -25,21 +25,12 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class ScoreboardController extends BaseController
 {
-    protected DOMJudgeService $dj;
-    protected ConfigurationService $config;
-    protected ScoreboardService $scoreboardService;
-    protected EntityManagerInterface $em;
-
     public function __construct(
-        DOMJudgeService $dj,
-        ConfigurationService $config,
-        ScoreboardService $scoreboardService,
-        EntityManagerInterface $em
+        protected DOMJudgeService $dj,
+        protected ConfigurationService $config,
+        protected ScoreboardService $scoreboardService,
+        protected EntityManagerInterface $em
     ) {
-        $this->dj                = $dj;
-        $this->config            = $config;
-        $this->scoreboardService = $scoreboardService;
-        $this->em                = $em;
     }
 
     /**

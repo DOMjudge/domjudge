@@ -35,17 +35,14 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
  */
 class OrganizationController extends AbstractRestController
 {
-    protected AssetUpdateService $assetUpdater;
-
     public function __construct(
         EntityManagerInterface $entityManager,
         DOMJudgeService $dj,
         ConfigurationService $config,
         EventLogService $eventLogService,
-        AssetUpdateService $assetUpdater
+        protected AssetUpdateService $assetUpdater
     ) {
         parent::__construct($entityManager, $dj, $config, $eventLogService);
-        $this->assetUpdater = $assetUpdater;
     }
 
     /**

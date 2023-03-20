@@ -29,21 +29,12 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class ProblemController extends BaseController
 {
-    protected DOMJudgeService $dj;
-    protected ConfigurationService $config;
-    protected StatisticsService $stats;
-    protected EntityManagerInterface $em;
-
     public function __construct(
-        DOMJudgeService $dj,
-        ConfigurationService $config,
-        StatisticsService $stats,
-        EntityManagerInterface $em
+        protected DOMJudgeService $dj,
+        protected ConfigurationService $config,
+        protected StatisticsService $stats,
+        protected EntityManagerInterface $em
     ) {
-        $this->dj     = $dj;
-        $this->config = $config;
-        $this->stats  = $stats;
-        $this->em     = $em;
     }
 
     /**

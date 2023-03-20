@@ -11,11 +11,8 @@ use Symfony\Component\Form\FormBuilderInterface;
 
 class PrintType extends AbstractType
 {
-    protected EntityManagerInterface $em;
-
-    public function __construct(EntityManagerInterface $em)
+    public function __construct(protected EntityManagerInterface $em)
     {
-        $this->em = $em;
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void

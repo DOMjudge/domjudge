@@ -48,9 +48,6 @@ use TypeError;
  */
 class ContestController extends AbstractRestController
 {
-    protected ImportExportService $importExportService;
-    protected AssetUpdateService $assetUpdater;
-
     public const EVENT_FEED_FORMAT_2020_03 = 0;
     public const EVENT_FEED_FORMAT_2022_07 = 1;
 
@@ -59,12 +56,10 @@ class ContestController extends AbstractRestController
         DOMJudgeService $dj,
         ConfigurationService $config,
         EventLogService $eventLogService,
-        ImportExportService $importExportService,
-        AssetUpdateService $assetUpdater
+        protected ImportExportService $importExportService,
+        protected AssetUpdateService $assetUpdater
     ) {
         parent::__construct($entityManager, $dj, $config, $eventLogService);
-        $this->importExportService = $importExportService;
-        $this->assetUpdater = $assetUpdater;
     }
 
     /**

@@ -29,27 +29,14 @@ use Symfony\Component\Yaml\Yaml;
 
 class ImportExportService
 {
-    protected EntityManagerInterface $em;
-    protected ScoreboardService $scoreboardService;
-    protected DOMJudgeService $dj;
-    protected ConfigurationService $config;
-    protected EventLogService $eventLogService;
-    protected ValidatorInterface $validator;
-
     public function __construct(
-        EntityManagerInterface $em,
-        ScoreboardService $scoreboardService,
-        DOMJudgeService $dj,
-        ConfigurationService $config,
-        EventLogService $eventLogService,
-        ValidatorInterface $validator
+        protected EntityManagerInterface $em,
+        protected ScoreboardService $scoreboardService,
+        protected DOMJudgeService $dj,
+        protected ConfigurationService $config,
+        protected EventLogService $eventLogService,
+        protected ValidatorInterface $validator
     ) {
-        $this->em                = $em;
-        $this->scoreboardService = $scoreboardService;
-        $this->dj                = $dj;
-        $this->config            = $config;
-        $this->eventLogService   = $eventLogService;
-        $this->validator         = $validator;
     }
 
     /**

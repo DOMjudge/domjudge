@@ -41,32 +41,17 @@ use ZipArchive;
  */
 class ScoreboardMergeCommand extends Command
 {
-    protected DOMJudgeService $dj;
-    protected ConfigurationService $config;
-    protected Environment $twig;
-    protected HttpClientInterface $client;
-    protected ScoreboardService $scoreboardService;
-    protected RouterInterface $router;
-    protected string $projectDir;
-
     public function __construct(
-        DOMJudgeService $dj,
-        ConfigurationService $config,
-        Environment $twig,
-        HttpClientInterface $client,
-        ScoreboardService $scoreboardService,
-        RouterInterface $router,
-        string $projectDir,
+        protected DOMJudgeService $dj,
+        protected ConfigurationService $config,
+        protected Environment $twig,
+        protected HttpClientInterface $client,
+        protected ScoreboardService $scoreboardService,
+        protected RouterInterface $router,
+        protected string $projectDir,
         string $name = null
     ) {
         parent::__construct($name);
-        $this->dj = $dj;
-        $this->config = $config;
-        $this->twig = $twig;
-        $this->client = $client;
-        $this->scoreboardService = $scoreboardService;
-        $this->router = $router;
-        $this->projectDir = $projectDir;
     }
 
     protected function configure(): void

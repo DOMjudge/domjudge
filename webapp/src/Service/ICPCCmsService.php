@@ -21,18 +21,13 @@ class ICPCCmsService
     const BASE_URI = 'https://icpc.global';
     const WS_TOKEN_URL = '/auth/realms/cm5/protocol/openid-connect/token';
     const WS_CLICS = '/cm5-contest-rest/rest/contest/export/CLICS/CONTEST/';
-
-    protected DOMJudgeService $dj;
-    protected EntityManagerInterface $em;
     protected HttpClientInterface $client;
 
     public function __construct(
-        DOMJudgeService $dj,
-        EntityManagerInterface $em,
+        protected DOMJudgeService $dj,
+        protected EntityManagerInterface $em,
         $domjudgeVersion
     ) {
-        $this->dj     = $dj;
-        $this->em     = $em;
         $this->client = HttpClient::create(
             [
                 'base_uri' => self::BASE_URI,

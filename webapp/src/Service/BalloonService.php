@@ -16,15 +16,10 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class BalloonService
 {
-    protected EntityManagerInterface $em;
-    protected ConfigurationService $config;
-
     public function __construct(
-        EntityManagerInterface $em,
-        ConfigurationService $config
+        protected EntityManagerInterface $em,
+        protected ConfigurationService $config
     ) {
-        $this->em     = $em;
-        $this->config = $config;
     }
 
     /**

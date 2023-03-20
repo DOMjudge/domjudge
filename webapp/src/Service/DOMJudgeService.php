@@ -58,15 +58,6 @@ use ZipArchive;
 
 class DOMJudgeService
 {
-    protected EntityManagerInterface $em;
-    protected LoggerInterface $logger;
-    protected RequestStack $requestStack;
-    protected ParameterBagInterface $params;
-    protected AuthorizationCheckerInterface $authorizationChecker;
-    protected TokenStorageInterface $tokenStorage;
-    protected HttpKernelInterface $httpKernel;
-    protected ConfigurationService $config;
-    protected RouterInterface $router;
     protected ?Executable $defaultCompareExecutable = null;
     protected ?Executable $defaultRunExecutable = null;
 
@@ -90,25 +81,16 @@ class DOMJudgeService
     ];
 
     public function __construct(
-        EntityManagerInterface $em,
-        LoggerInterface $logger,
-        RequestStack $requestStack,
-        ParameterBagInterface $params,
-        AuthorizationCheckerInterface $authorizationChecker,
-        TokenStorageInterface $tokenStorage,
-        HttpKernelInterface $httpKernel,
-        ConfigurationService $config,
-        RouterInterface $router
+        protected EntityManagerInterface $em,
+        protected LoggerInterface $logger,
+        protected RequestStack $requestStack,
+        protected ParameterBagInterface $params,
+        protected AuthorizationCheckerInterface $authorizationChecker,
+        protected TokenStorageInterface $tokenStorage,
+        protected HttpKernelInterface $httpKernel,
+        protected ConfigurationService $config,
+        protected RouterInterface $router
     ) {
-        $this->em                   = $em;
-        $this->logger               = $logger;
-        $this->requestStack         = $requestStack;
-        $this->params               = $params;
-        $this->authorizationChecker = $authorizationChecker;
-        $this->tokenStorage         = $tokenStorage;
-        $this->httpKernel           = $httpKernel;
-        $this->config               = $config;
-        $this->router               = $router;
     }
 
     public function getEntityManager(): EntityManagerInterface

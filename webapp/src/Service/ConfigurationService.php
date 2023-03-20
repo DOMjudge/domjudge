@@ -22,12 +22,6 @@ use Symfony\Component\Config\Resource\FileResource;
  */
 class ConfigurationService
 {
-    protected EntityManagerInterface $em;
-    protected LoggerInterface $logger;
-    protected ConfigCacheFactoryInterface $configCache;
-    protected bool $debug;
-    protected string $cacheDir;
-    protected string $etcDir;
     protected ?array $dbConfigCache = null;
 
     /**
@@ -41,19 +35,13 @@ class ConfigurationService
      * @param string                      $etcDir
      */
     public function __construct(
-        EntityManagerInterface $em,
-        LoggerInterface $logger,
-        ConfigCacheFactoryInterface $configCache,
-        bool $debug,
-        string $cacheDir,
-        string $etcDir
+        protected EntityManagerInterface $em,
+        protected LoggerInterface $logger,
+        protected ConfigCacheFactoryInterface $configCache,
+        protected bool $debug,
+        protected string $cacheDir,
+        protected string $etcDir
     ) {
-        $this->em          = $em;
-        $this->logger      = $logger;
-        $this->configCache = $configCache;
-        $this->debug       = $debug;
-        $this->cacheDir    = $cacheDir;
-        $this->etcDir      = $etcDir;
     }
 
     /**

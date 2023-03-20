@@ -56,24 +56,13 @@ use Symfony\Component\Routing\RouterInterface;
  */
 class SubmissionController extends BaseController
 {
-    protected EntityManagerInterface $em;
-    protected DOMJudgeService $dj;
-    protected ConfigurationService $config;
-    protected SubmissionService $submissionService;
-    protected RouterInterface $router;
-
     public function __construct(
-        EntityManagerInterface $em,
-        DOMJudgeService $dj,
-        ConfigurationService $config,
-        SubmissionService $submissionService,
-        RouterInterface $router
+        protected EntityManagerInterface $em,
+        protected DOMJudgeService $dj,
+        protected ConfigurationService $config,
+        protected SubmissionService $submissionService,
+        protected RouterInterface $router
     ) {
-        $this->em                = $em;
-        $this->dj                = $dj;
-        $this->config            = $config;
-        $this->submissionService = $submissionService;
-        $this->router            = $router;
     }
 
     /**

@@ -21,23 +21,7 @@ use Exception;
  */
 class Scoreboard
 {
-    protected Contest $contest;
-
-    /** @var Team[] */
-    protected array $teams;
-
-    /** @var TeamCategory[] */
-    protected array $categories;
-
-    /** @var ContestProblem[] */
-    protected array $problems;
-
-    /** @var ScoreCache[] */
-    protected array $scoreCache;
-    protected FreezeData $freezeData;
     protected bool $restricted;
-    protected int $penaltyTime;
-    protected bool $scoreIsInSeconds;
 
     /** @var ScoreboardMatrixItem[][] */
     protected array $matrix = [];
@@ -54,25 +38,17 @@ class Scoreboard
      * @param ScoreCache[]     $scoreCache
      */
     public function __construct(
-        Contest $contest,
-        array $teams,
-        array $categories,
-        array $problems,
-        array $scoreCache,
-        FreezeData $freezeData,
+        protected Contest $contest,
+        protected array $teams,
+        protected array $categories,
+        protected array $problems,
+        protected array $scoreCache,
+        protected FreezeData $freezeData,
         bool $jury,
-        int $penaltyTime,
-        bool $scoreIsInSeconds
+        protected int $penaltyTime,
+        protected bool $scoreIsInSeconds
     ) {
-        $this->contest          = $contest;
-        $this->teams            = $teams;
-        $this->categories       = $categories;
-        $this->problems         = $problems;
-        $this->scoreCache       = $scoreCache;
-        $this->freezeData       = $freezeData;
-        $this->restricted       = $jury || $freezeData->showFinal($jury);
-        $this->penaltyTime      = $penaltyTime;
-        $this->scoreIsInSeconds = $scoreIsInSeconds;
+        $this->restricted = $jury || $freezeData->showFinal($jury);
 
         $this->initializeScoreboard();
         $this->calculateScoreboard();

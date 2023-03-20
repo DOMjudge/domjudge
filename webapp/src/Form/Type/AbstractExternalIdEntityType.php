@@ -19,11 +19,8 @@ use Symfony\Component\Validator\Constraints\Regex;
  */
 class AbstractExternalIdEntityType extends AbstractType
 {
-    protected EventLogService $eventLogService;
-
-    public function __construct(EventLogService $eventLogService)
+    public function __construct(protected EventLogService $eventLogService)
     {
-        $this->eventLogService = $eventLogService;
     }
 
     /**

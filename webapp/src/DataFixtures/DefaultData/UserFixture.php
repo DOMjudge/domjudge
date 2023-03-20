@@ -12,17 +12,12 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class UserFixture extends AbstractDefaultDataFixture implements DependentFixtureInterface
 {
-    protected DOMJudgeService $dj;
-    protected LoggerInterface $logger;
-    protected UserPasswordHasherInterface $passwordHasher;
-    protected bool $debug;
-
-    public function __construct(DOMJudgeService $dj, LoggerInterface $logger, UserPasswordHasherInterface $passwordHasher, bool $debug)
-    {
-        $this->dj              = $dj;
-        $this->logger          = $logger;
-        $this->passwordHasher  = $passwordHasher;
-        $this->debug           = $debug;
+    public function __construct(
+        protected DOMJudgeService $dj,
+        protected LoggerInterface $logger,
+        protected UserPasswordHasherInterface $passwordHasher,
+        protected bool $debug
+    ) {
     }
 
     public function load(ObjectManager $manager): void

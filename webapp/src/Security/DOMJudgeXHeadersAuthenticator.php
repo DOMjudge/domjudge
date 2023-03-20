@@ -24,24 +24,13 @@ class DOMJudgeXHeadersAuthenticator extends AbstractAuthenticator implements Aut
 {
     use TargetPathTrait;
 
-    private Security $security;
-    private UserProviderInterface $userProvider;
-    private UserPasswordHasherInterface $hasher;
-    private ConfigurationService $config;
-    private RouterInterface $router;
-
     public function __construct(
-        Security $security,
-        UserProviderInterface $userProvider,
-        UserPasswordHasherInterface $hasher,
-        ConfigurationService $config,
-        RouterInterface $router
+        private Security $security,
+        private UserProviderInterface $userProvider,
+        private UserPasswordHasherInterface $hasher,
+        private ConfigurationService $config,
+        private RouterInterface $router
     ) {
-        $this->security     = $security;
-        $this->userProvider = $userProvider;
-        $this->hasher       = $hasher;
-        $this->config       = $config;
-        $this->router       = $router;
     }
 
     /**

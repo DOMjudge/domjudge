@@ -42,13 +42,7 @@ use ZipArchive;
 class ExternalContestSourceService
 {
     protected HttpClientInterface $httpClient;
-    protected DOMJudgeService $dj;
-    protected EntityManagerInterface $em;
     protected LoggerInterface $logger;
-    protected ConfigurationService $config;
-    protected EventLogService $eventLog;
-    protected SubmissionService $submissionService;
-    protected ScoreboardService $scoreboardService;
 
     protected ?ExternalContestSource $source = null;
 
@@ -83,27 +77,24 @@ class ExternalContestSourceService
 
     public function __construct(
         HttpClientInterface    $httpClient,
-        DOMJudgeService        $dj,
-        EntityManagerInterface $em,
-        LoggerInterface        $eventFeedImporterLogger,
-        ConfigurationService   $config,
-        EventLogService        $eventLog,
-        SubmissionService      $submissionService,
-        ScoreboardService      $scoreboardService
+        protected DOMJudgeService        $dj,
+        protected EntityManagerInterface $em,
+        // Note: we can't use constructor promotion for this argument (yet), since
+        // the name of the argument matters, see `RemoveEventFeedImporterChannelFromLogs`.
+        // When we upgrade to Symfony 6.x, we can use the #[Autowire] attribute to fix this
+        LoggerInterface                  $eventFeedImporterLogger,
+        protected ConfigurationService   $config,
+        protected EventLogService        $eventLog,
+        protected SubmissionService      $submissionService,
+        protected ScoreboardService      $scoreboardService
     ) {
-        $clientOptions           = [
+        $clientOptions = [
             'headers' => [
                 'User-Agent' => 'DOMjudge/' . DOMJUDGE_VERSION,
             ],
         ];
-        $this->httpClient        = $httpClient->withOptions($clientOptions);
-        $this->dj                = $dj;
-        $this->em                = $em;
-        $this->logger            = $eventFeedImporterLogger;
-        $this->config            = $config;
-        $this->eventLog          = $eventLog;
-        $this->submissionService = $submissionService;
-        $this->scoreboardService = $scoreboardService;
+        $this->httpClient = $httpClient->withOptions($clientOptions);
+        $this->logger = $eventFeedImporterLogger;
     }
 
     public function setSource(ExternalContestSource $source)

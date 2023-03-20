@@ -20,18 +20,11 @@ use JMS\Serializer\Metadata\StaticPropertyMetadata;
  */
 class ContestVisitor implements EventSubscriberInterface
 {
-    protected ConfigurationService $config;
-    protected DOMJudgeService $dj;
-    protected EventLogService $eventLogService;
-
     public function __construct(
-        ConfigurationService $config,
-        DOMJudgeService $dj,
-        EventLogService $eventLogService
+        protected ConfigurationService $config,
+        protected DOMJudgeService $dj,
+        protected EventLogService $eventLogService
     ) {
-        $this->config = $config;
-        $this->dj = $dj;
-        $this->eventLogService = $eventLogService;
     }
 
     public static function getSubscribedEvents(): array

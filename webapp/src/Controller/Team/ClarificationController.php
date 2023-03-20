@@ -36,24 +36,13 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class ClarificationController extends BaseController
 {
-    protected DOMJudgeService $dj;
-    protected ConfigurationService $config;
-    protected EntityManagerInterface $em;
-    protected EventLogService $eventLogService;
-    protected FormFactoryInterface $formFactory;
-
     public function __construct(
-        DOMJudgeService $dj,
-        ConfigurationService $config,
-        EntityManagerInterface $em,
-        EventLogService $eventLogService,
-        FormFactoryInterface $formFactory
+        protected DOMJudgeService $dj,
+        protected ConfigurationService $config,
+        protected EntityManagerInterface $em,
+        protected EventLogService $eventLogService,
+        protected FormFactoryInterface $formFactory
     ) {
-        $this->dj              = $dj;
-        $this->config          = $config;
-        $this->em              = $em;
-        $this->eventLogService = $eventLogService;
-        $this->formFactory     = $formFactory;
     }
 
     /**

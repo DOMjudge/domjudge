@@ -31,17 +31,14 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class ScoreboardController extends AbstractRestController
 {
-    protected ScoreboardService $scoreboardService;
-
     public function __construct(
         EntityManagerInterface $entityManager,
         DOMJudgeService $DOMJudgeService,
         ConfigurationService $config,
         EventLogService $eventLogService,
-        ScoreboardService $scoreboardService
+        protected ScoreboardService $scoreboardService
     ) {
         parent::__construct($entityManager, $DOMJudgeService, $config, $eventLogService);
-        $this->scoreboardService = $scoreboardService;
     }
 
     /**

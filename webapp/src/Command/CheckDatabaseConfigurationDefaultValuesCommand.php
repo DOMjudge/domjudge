@@ -15,12 +15,9 @@ use Symfony\Component\Console\Style\SymfonyStyle;
  */
 class CheckDatabaseConfigurationDefaultValuesCommand extends Command
 {
-    protected ConfigurationService $config;
-
-    public function __construct(ConfigurationService $config, string $name = null)
+    public function __construct(protected ConfigurationService $config, string $name = null)
     {
         parent::__construct($name);
-        $this->config = $config;
     }
 
     protected function configure(): void

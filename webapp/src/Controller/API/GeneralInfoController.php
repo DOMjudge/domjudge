@@ -43,33 +43,16 @@ class GeneralInfoController extends AbstractFOSRestController
     public const CCS_SPEC_API_VERSION = '2022-07';
     public const CCS_SPEC_API_URL = 'https://ccs-specs.icpc.io/2022-07/contest_api';
 
-    protected EntityManagerInterface $em;
-    protected DOMJudgeService $dj;
-    protected ConfigurationService $config;
-    protected EventLogService $eventLogService;
-    protected CheckConfigService $checkConfigService;
-    protected RouterInterface $router;
-    protected LoggerInterface $logger;
-    protected ImportProblemService $importProblemService;
-
     public function __construct(
-        EntityManagerInterface $em,
-        DOMJudgeService $dj,
-        ConfigurationService $config,
-        EventLogService $eventLogService,
-        CheckConfigService $checkConfigService,
-        RouterInterface $router,
-        LoggerInterface $logger,
-        ImportProblemService $importProblemService
+        protected EntityManagerInterface $em,
+        protected DOMJudgeService $dj,
+        protected ConfigurationService $config,
+        protected EventLogService $eventLogService,
+        protected CheckConfigService $checkConfigService,
+        protected RouterInterface $router,
+        protected LoggerInterface $logger,
+        protected ImportProblemService $importProblemService
     ) {
-        $this->em                   = $em;
-        $this->dj                   = $dj;
-        $this->eventLogService      = $eventLogService;
-        $this->checkConfigService   = $checkConfigService;
-        $this->router               = $router;
-        $this->config               = $config;
-        $this->logger               = $logger;
-        $this->importProblemService = $importProblemService;
     }
 
     /**

@@ -34,27 +34,16 @@ use Symfony\Component\Routing\RouterInterface;
  */
 class MiscController extends BaseController
 {
-    protected DOMJudgeService $dj;
-    protected ConfigurationService $config;
-    protected EntityManagerInterface $em;
-    protected ScoreboardService $scoreboardService;
-    protected SubmissionService $submissionService;
-
     /**
      * MiscController constructor.
      */
     public function __construct(
-        DOMJudgeService $dj,
-        ConfigurationService $config,
-        EntityManagerInterface $em,
-        ScoreboardService $scoreboardService,
-        SubmissionService $submissionService
+        protected DOMJudgeService $dj,
+        protected ConfigurationService $config,
+        protected EntityManagerInterface $em,
+        protected ScoreboardService $scoreboardService,
+        protected SubmissionService $submissionService
     ) {
-        $this->dj                = $dj;
-        $this->config            = $config;
-        $this->em                = $em;
-        $this->scoreboardService = $scoreboardService;
-        $this->submissionService = $submissionService;
     }
 
     /**

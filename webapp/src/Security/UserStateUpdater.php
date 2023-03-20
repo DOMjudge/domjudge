@@ -12,15 +12,11 @@ use Symfony\Component\Security\Core\Event\AuthenticationSuccessEvent;
 
 class UserStateUpdater implements EventSubscriberInterface
 {
-    protected DOMJudgeService $dj;
-    protected EntityManagerInterface $em;
-    protected RequestStack $requestStack;
-
-    public function __construct(DOMJudgeService $dj, EntityManagerInterface $em, RequestStack $requestStack)
-    {
-        $this->dj = $dj;
-        $this->em = $em;
-        $this->requestStack = $requestStack;
+    public function __construct(
+        protected DOMJudgeService $dj,
+        protected EntityManagerInterface $em,
+        protected RequestStack $requestStack
+    ) {
     }
 
     public static function getSubscribedEvents(): array

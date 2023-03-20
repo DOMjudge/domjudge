@@ -21,17 +21,12 @@ use Symfony\Component\Validator\Constraints\Regex;
 
 class TeamAffiliationType extends AbstractExternalIdEntityType
 {
-    protected ConfigurationService $configuration;
-    protected DOMJudgeService $dj;
-
     public function __construct(
         EventLogService $eventLogService,
-        ConfigurationService $configuration,
-        DOMJudgeService $dj
+        protected ConfigurationService $configuration,
+        protected DOMJudgeService $dj
     ) {
         parent::__construct($eventLogService);
-        $this->configuration = $configuration;
-        $this->dj = $dj;
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void

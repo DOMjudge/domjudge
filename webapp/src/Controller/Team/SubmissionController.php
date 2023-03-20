@@ -34,28 +34,17 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class SubmissionController extends BaseController
 {
-    protected EntityManagerInterface $em;
-    protected SubmissionService $submissionService;
-    protected DOMJudgeService $dj;
-    protected ConfigurationService $config;
-    protected FormFactoryInterface $formFactory;
-
     const NEVER_SHOW_COMPILE_OUTPUT = 0;
     const ONLY_SHOW_COMPILE_OUTPUT_ON_ERROR = 1;
     const ALWAYS_SHOW_COMPILE_OUTPUT = 2;
 
     public function __construct(
-        EntityManagerInterface $em,
-        SubmissionService $submissionService,
-        DOMJudgeService $dj,
-        ConfigurationService $config,
-        FormFactoryInterface $formFactory
+        protected EntityManagerInterface $em,
+        protected SubmissionService $submissionService,
+        protected DOMJudgeService $dj,
+        protected ConfigurationService $config,
+        protected FormFactoryInterface $formFactory
     ) {
-        $this->em                = $em;
-        $this->submissionService = $submissionService;
-        $this->dj                = $dj;
-        $this->config            = $config;
-        $this->formFactory       = $formFactory;
     }
 
     /**

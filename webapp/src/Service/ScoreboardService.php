@@ -39,24 +39,13 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class ScoreboardService
 {
-    protected EntityManagerInterface $em;
-    protected DOMJudgeService $dj;
-    protected ConfigurationService $config;
-    protected LoggerInterface $logger;
-    protected EventLogService $eventLogService;
-
     public function __construct(
-        EntityManagerInterface $em,
-        DOMJudgeService $dj,
-        ConfigurationService $config,
-        LoggerInterface $logger,
-        EventLogService $eventLogService
+        protected EntityManagerInterface $em,
+        protected DOMJudgeService $dj,
+        protected ConfigurationService $config,
+        protected LoggerInterface $logger,
+        protected EventLogService $eventLogService
     ) {
-        $this->em              = $em;
-        $this->dj              = $dj;
-        $this->config          = $config;
-        $this->logger          = $logger;
-        $this->eventLogService = $eventLogService;
     }
 
     /**

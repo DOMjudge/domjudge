@@ -28,21 +28,12 @@ use Symfony\Component\Validator\ConstraintViolationListInterface;
  */
 abstract class AbstractRestController extends AbstractFOSRestController
 {
-    protected EntityManagerInterface $em;
-    protected DOMJudgeService $dj;
-    protected ConfigurationService $config;
-    protected EventLogService $eventLogService;
-
     public function __construct(
-        EntityManagerInterface $entityManager,
-        DOMJudgeService $dj,
-        ConfigurationService $config,
-        EventLogService $eventLogService
+        protected EntityManagerInterface $em,
+        protected DOMJudgeService $dj,
+        protected ConfigurationService $config,
+        protected EventLogService $eventLogService
     ) {
-        $this->em              = $entityManager;
-        $this->dj              = $dj;
-        $this->eventLogService = $eventLogService;
-        $this->config          = $config;
     }
 
     /**

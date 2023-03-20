@@ -23,12 +23,9 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class ContestType extends AbstractExternalIdEntityType
 {
-    protected DOMJudgeService $dj;
-
-    public function __construct(EventLogService $eventLogService, DOMJudgeService $dj)
+    public function __construct(EventLogService $eventLogService, protected DOMJudgeService $dj)
     {
         parent::__construct($eventLogService);
-        $this->dj = $dj;
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void

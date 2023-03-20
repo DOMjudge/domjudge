@@ -50,27 +50,14 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class ContestController extends BaseController
 {
-    protected EntityManagerInterface $em;
-    protected DOMJudgeService $dj;
-    protected ConfigurationService $config;
-    protected KernelInterface $kernel;
-    protected EventLogService $eventLogService;
-    protected AssetUpdateService $assetUpdater;
-
     public function __construct(
-        EntityManagerInterface $em,
-        DOMJudgeService $dj,
-        ConfigurationService $config,
-        KernelInterface $kernel,
-        EventLogService $eventLogService,
-        AssetUpdateService $assetUpdater
+        protected EntityManagerInterface $em,
+        protected DOMJudgeService $dj,
+        protected ConfigurationService $config,
+        protected KernelInterface $kernel,
+        protected EventLogService $eventLogService,
+        protected AssetUpdateService $assetUpdater
     ) {
-        $this->em              = $em;
-        $this->dj              = $dj;
-        $this->config          = $config;
-        $this->eventLogService = $eventLogService;
-        $this->kernel          = $kernel;
-        $this->assetUpdater    = $assetUpdater;
     }
 
     /**

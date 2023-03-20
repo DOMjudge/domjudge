@@ -34,24 +34,13 @@ use ZipArchive;
  */
 class PublicController extends BaseController
 {
-    protected DOMJudgeService $dj;
-    protected ConfigurationService $config;
-    protected ScoreboardService $scoreboardService;
-    protected StatisticsService $stats;
-    protected EntityManagerInterface $em;
-
     public function __construct(
-        DOMJudgeService $dj,
-        ConfigurationService $config,
-        ScoreboardService $scoreboardService,
-        StatisticsService $stats,
-        EntityManagerInterface $em
+        protected DOMJudgeService $dj,
+        protected ConfigurationService $config,
+        protected ScoreboardService $scoreboardService,
+        protected StatisticsService $stats,
+        protected EntityManagerInterface $em
     ) {
-        $this->dj                = $dj;
-        $this->config            = $config;
-        $this->scoreboardService = $scoreboardService;
-        $this->stats             = $stats;
-        $this->em                = $em;
     }
 
     /**

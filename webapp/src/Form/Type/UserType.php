@@ -20,12 +20,9 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class UserType extends AbstractExternalIdEntityType
 {
-    protected EntityManagerInterface $em;
-
-    public function __construct(EntityManagerInterface $em, EventLogService $eventLogService)
+    public function __construct(protected EntityManagerInterface $em, EventLogService $eventLogService)
     {
         parent::__construct($eventLogService);
-        $this->em = $em;
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void

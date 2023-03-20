@@ -22,24 +22,13 @@ class RejudgingService
     const ACTION_APPLY = 'apply';
     const ACTION_CANCEL = 'cancel';
 
-    protected EntityManagerInterface $em;
-    protected DOMJudgeService $dj;
-    protected ScoreboardService $scoreboardService;
-    protected EventLogService $eventLogService;
-    protected BalloonService $balloonService;
-
     public function __construct(
-        EntityManagerInterface $em,
-        DOMJudgeService $dj,
-        ScoreboardService $scoreboardService,
-        EventLogService $eventLogService,
-        BalloonService $balloonService
+        protected EntityManagerInterface $em,
+        protected DOMJudgeService $dj,
+        protected ScoreboardService $scoreboardService,
+        protected EventLogService $eventLogService,
+        protected BalloonService $balloonService
     ) {
-        $this->em                = $em;
-        $this->dj                = $dj;
-        $this->scoreboardService = $scoreboardService;
-        $this->eventLogService   = $eventLogService;
-        $this->balloonService    = $balloonService;
     }
 
     /**

@@ -145,22 +145,12 @@ class EventLogService implements ContainerAwareInterface
         ContestProblem::class => 'problems',
     ];
 
-    protected DOMJudgeService $dj;
-    protected ConfigurationService $config;
-    protected EntityManagerInterface $em;
-    protected LoggerInterface $logger;
-
     public function __construct(
-        DOMJudgeService $dj,
-        ConfigurationService $config,
-        EntityManagerInterface $em,
-        LoggerInterface $logger
+        protected DOMJudgeService $dj,
+        protected ConfigurationService $config,
+        protected EntityManagerInterface $em,
+        protected LoggerInterface $logger
     ) {
-        $this->dj     = $dj;
-        $this->config = $config;
-        $this->em     = $em;
-        $this->logger = $logger;
-
         foreach ($this->apiEndpoints as $endpoint => $data) {
             if (!array_key_exists(self::KEY_URL, $data)) {
                 $this->apiEndpoints[$endpoint][self::KEY_URL] = '/' . $endpoint;

@@ -43,17 +43,14 @@ use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
  */
 class SubmissionController extends AbstractRestController
 {
-    protected SubmissionService $submissionService;
-
     public function __construct(
         EntityManagerInterface $entityManager,
         DOMJudgeService $dj,
         ConfigurationService $config,
         EventLogService $eventLogService,
-        SubmissionService $submissionService
+        protected SubmissionService $submissionService
     ) {
         parent::__construct($entityManager, $dj, $config, $eventLogService);
-        $this->submissionService = $submissionService;
     }
 
     /**
