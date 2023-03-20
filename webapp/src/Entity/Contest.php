@@ -1387,21 +1387,17 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
 
     public function getAssetFile(string $property): ?UploadedFile
     {
-        switch ($property) {
-            case 'banner':
-                return $this->getBannerFile();
-        }
-
-        return null;
+        return match ($property) {
+            'banner' => $this->getBannerFile(),
+            default => null,
+        };
     }
 
     public function isClearAsset(string $property): ?bool
     {
-        switch ($property) {
-            case 'banner':
-                return $this->isClearBanner();
-        }
-
-        return null;
+        return match ($property) {
+            'banner' => $this->isClearBanner(),
+            default => null,
+        };
     }
 }

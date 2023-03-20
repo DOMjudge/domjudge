@@ -763,30 +763,17 @@ class RejudgingController extends BaseController
             } elseif ($res instanceof Rejudging) {
                 $redirect = $this->generateUrl('jury_rejudging', ['rejudgingId' => $res->getRejudgingid()]);
             } else {
-                switch ($table) {
-                    case 'contest':
-                        $redirect = $this->generateUrl('jury_contest', ['contestId' => $id]);
-                        break;
-                    case 'judgehost':
-                        $redirect = $this->generateUrl('jury_judgehost', ['judgehostid' => $id]);
-                        break;
-                    case 'language':
-                        $redirect = $this->generateUrl('jury_language', ['langId' => $id]);
-                        break;
-                    case 'problem':
-                        $redirect = $this->generateUrl('jury_problem', ['probId' => $id]);
-                        break;
-                    case 'submission':
-                        $redirect = $this->generateUrl('jury_submission', ['submitId' => $id]);
-                        break;
-                    case 'team':
-                        $redirect = $this->generateUrl('jury_team', ['teamId' => $id]);
-                        break;
-                    default:
-                        // This case never happens, since we already check above.
-                        // Add it here to silence linter warnings.
-                        throw new BadRequestHttpException(sprintf('unknown table %s in rejudging', $table));
-                }
+                $redirect = match ($table) {
+                    'contest' => $this->generateUrl('jury_contest', ['contestId' => $id]),
+                    'judgehost' => $this->generateUrl('jury_judgehost', ['judgehostid' => $id]),
+                    'language' => $this->generateUrl('jury_language', ['langId' => $id]),
+                    'problem' => $this->generateUrl('jury_problem', ['probId' => $id]),
+                    'submission' => $this->generateUrl('jury_submission', ['submitId' => $id]),
+                    'team' => $this->generateUrl('jury_team', ['teamId' => $id]),
+                    // This case never happens, since we already check above.
+                    // Add it here to silence linter warnings.
+                    default => throw new BadRequestHttpException(sprintf('unknown table %s in rejudging', $table)),
+                };
             }
 
             $progressReporter(100, '', $redirect);

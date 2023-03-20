@@ -806,19 +806,12 @@ class Utils
      */
     public static function phpiniToBytes(string $size_str): int
     {
-        switch (substr($size_str, -1)) {
-            case 'M':
-            case 'm':
-                return (int)$size_str * 1048576;
-            case 'K':
-            case 'k':
-                return (int)$size_str * 1024;
-            case 'G':
-            case 'g':
-                return (int)$size_str * 1073741824;
-            default:
-                return (int)$size_str;
-        }
+        return match (substr($size_str, -1)) {
+            'M', 'm' => (int)$size_str * 1048576,
+            'K', 'k' => (int)$size_str * 1024,
+            'G', 'g' => (int)$size_str * 1073741824,
+            default => (int)$size_str,
+        };
     }
 
     /**

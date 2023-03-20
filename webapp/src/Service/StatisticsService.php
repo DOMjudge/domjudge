@@ -525,16 +525,11 @@ class StatisticsService
      */
     protected function applyFilter(QueryBuilder $queryBuilder, string $filter): QueryBuilder
     {
-        switch ($filter) {
-            case 'visiblecat':
-                $queryBuilder->andWhere('tc.visible = true');
-                break;
-            case 'hiddencat':
-                $queryBuilder->andWhere('tc.visible = false');
-                break;
-        }
-
-        return $queryBuilder;
+        return match ($filter) {
+            'visiblecat' => $queryBuilder->andWhere('tc.visible = true'),
+            'hiddencat' => $queryBuilder->andWhere('tc.visible = false'),
+            default => $queryBuilder,
+        };
     }
 
     protected static function setOrIncrement(array &$array, $index): void

@@ -243,21 +243,17 @@ class TeamAffiliation extends BaseApiEntity implements AssetEntityInterface
 
     public function getAssetFile(string $property): ?UploadedFile
     {
-        switch ($property) {
-            case 'logo':
-                return $this->getLogoFile();
-        }
-
-        return null;
+        return match ($property) {
+            'logo' => $this->getLogoFile(),
+            default => null,
+        };
     }
 
     public function isClearAsset(string $property): ?bool
     {
-        switch ($property) {
-            case 'logo':
-                return $this->isClearLogo();
-        }
-
-        return null;
+        return match ($property) {
+            'logo' => $this->isClearLogo(),
+            default => null,
+        };
     }
 }
