@@ -48,7 +48,7 @@ function read_credentials(): void
         if (count($items) !== 4) {
             error("Error parsing REST API credentials. Invalid format in line $lineno.");
         }
-        list($endpointID, $resturl, $restuser, $restpass) = $items;
+        [$endpointID, $resturl, $restuser, $restpass] = $items;
         if (array_key_exists($endpointID, $endpoints)) {
             error("Error parsing REST API credentials. Duplicate endpoint ID '$endpointID' in line $lineno.");
         }
@@ -285,7 +285,7 @@ function fetch_executable(
     int $judgeTaskId,
     bool $combined_run_compare = false
 ) : array {
-    list($execrunpath, $error, $buildlogpath) = fetch_executable_internal($workdirpath, $type, $execid, $hash, $combined_run_compare);
+    [$execrunpath, $error, $buildlogpath] = fetch_executable_internal($workdirpath, $type, $execid, $hash, $combined_run_compare);
     if (isset($error)) {
         $extra_log = null;
         if ($buildlogpath !== null) {
@@ -753,7 +753,7 @@ while (true) {
                     $config = dj_json_decode($judgeTask[$script_type . '_config']);
                     $combined_run_compare = $script_type == 'run' && $config['combined_run_compare'];
                     if (!empty($config['hash'])) {
-                        list($execrunpath, $error) = fetch_executable(
+                        [$execrunpath, $error] = fetch_executable(
                             $workdirpath,
                             $script_type,
                             $judgeTask[$script_type . '_script_id'],
@@ -786,7 +786,7 @@ while (true) {
                 // Full debug package requested.
                 $run_config = dj_json_decode($judgeTask['run_config']);
                 $tmpfile = tempnam(TMPDIR, 'full_debug_package_');
-                list($runpath, $error) = fetch_executable_internal(
+                [$runpath, $error] = fetch_executable_internal(
                     $workdirpath,
                     'debug',
                     $judgeTask['run_script_id'],
@@ -1008,7 +1008,7 @@ function read_metadata(string $filename): ?array
     $res = [];
     foreach ($contents as $line) {
         if (str_contains($line, ":")) {
-            list($key, $value) = explode(":", $line, 2);
+            [$key, $value] = explode(":", $line, 2);
             $res[$key] = trim($value);
         }
     }
@@ -1110,7 +1110,7 @@ function compile(
         error("No submission files could be downloaded.");
     }
 
-    list($execrunpath, $error) = fetch_executable(
+    [$execrunpath, $error] = fetch_executable(
         $workdirpath,
         'compile',
         $judgeTask['compile_script_id'],
@@ -1287,7 +1287,7 @@ function judge(array $judgeTask): bool
 
 
     $combined_run_compare = $compare_config['combined_run_compare'];
-    list($run_runpath, $error) = fetch_executable(
+    [$run_runpath, $error] = fetch_executable(
         $workdirpath,
         'run',
         $judgeTask['run_script_id'],
@@ -1303,7 +1303,7 @@ function judge(array $judgeTask): bool
         // run script also acts as compare script
         $compare_runpath = '';
     } else {
-        list($compare_runpath, $error) = fetch_executable(
+        [$compare_runpath, $error] = fetch_executable(
             $workdirpath,
             'compare',
             $judgeTask['compare_script_id'],

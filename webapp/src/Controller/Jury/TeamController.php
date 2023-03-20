@@ -295,7 +295,7 @@ class TeamController extends BaseController
             $restrictionText = implode(', ', $restrictionTexts);
         }
         $restrictions['teamid'] = $teamId;
-        list($submissions, $submissionCounts) =
+        [$submissions, $submissionCounts] =
             $submissionService->getSubmissionList($this->dj->getCurrentContests(), $restrictions);
 
         $data['restrictionText']    = $restrictionText;

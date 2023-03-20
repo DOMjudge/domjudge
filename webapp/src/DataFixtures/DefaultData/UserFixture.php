@@ -90,7 +90,7 @@ class UserFixture extends AbstractDefaultDataFixture implements DependentFixture
             if (count($items) !== 4) {
                 throw new Exception("Error parsing REST API credentials. Invalid format in line $lineno.");
             }
-            list($endpointID, $resturl, $restuser, $restpass) = $items;
+            [$endpointID, $resturl, $restuser, $restpass] = $items;
             return $restpass;
         }
 
