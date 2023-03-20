@@ -202,7 +202,7 @@ class EventLogService implements ContainerAwareInterface
      */
     public function log(
         string $type,
-        $dataIds,
+        mixed $dataIds,
         string $action,
         ?int $contestId = null,
         ?string $json = null,

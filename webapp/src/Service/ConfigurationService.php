@@ -26,13 +26,6 @@ class ConfigurationService
 
     /**
      * ConfigurationService constructor.
-     *
-     * @param EntityManagerInterface      $em
-     * @param LoggerInterface             $logger
-     * @param ConfigCacheFactoryInterface $configCache
-     * @param bool                        $debug
-     * @param string                      $cacheDir
-     * @param string                      $etcDir
      */
     public function __construct(
         protected EntityManagerInterface $em,

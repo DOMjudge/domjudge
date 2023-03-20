@@ -122,10 +122,7 @@ class Event
         return $this->action;
     }
 
-    /**
-     * @param mixed $content
-     */
-    public function setContent($content): Event
+    public function setContent(mixed $content): Event
     {
         $this->content = $content;
         return $this;

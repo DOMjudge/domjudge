@@ -134,12 +134,10 @@ class ConfigurationServiceTest extends KernelTestCase
 
     /**
      * @dataProvider provideConfigFromDatabase
-     *
-     * @param mixed  $dbValue
      */
     public function testConfigFromDatabase(
         string $itemName,
-        $dbValue,
+        mixed $dbValue,
         $expectedValue = null
     ): void {
         $config = new Configuration();
@@ -165,12 +163,10 @@ class ConfigurationServiceTest extends KernelTestCase
 
     /**
      * @dataProvider provideConfigFromDatabase
-     *
-     * @param mixed  $dbValue
      */
     public function testConfigFromDatabaseAll(
         string $itemName,
-        $dbValue,
+        mixed $dbValue,
         $expectedValue = null
     ): void {
         $config = new Configuration();

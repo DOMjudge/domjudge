@@ -50,10 +50,7 @@ class Configuration
         return $this->name;
     }
 
-    /**
-     * @param mixed $value
-     */
-    public function setValue($value): Configuration
+    public function setValue(mixed $value): Configuration
     {
         // Do not use 'True'/'False' but 1/0 since the former cannot be parsed by the old code.
         if ($value === true) {
