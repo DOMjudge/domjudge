@@ -4,6 +4,7 @@ namespace App\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Stringable;
 
 /**
  * Possible user roles.
@@ -14,7 +15,7 @@ use Doctrine\ORM\Mapping as ORM;
  *     options={"collation"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Possible user roles"},
  *     uniqueConstraints={@ORM\UniqueConstraint(name="role", columns={"role"})})
  */
-class Role
+class Role implements Stringable
 {
     /**
      * @ORM\Id
