@@ -55,14 +55,13 @@ class ImmutableExecutable
     /**
      * @param ExecutableFile[] $files
      */
-    public function __construct(array $files, ?User $user = null)
+    public function __construct(array $files)
     {
         $this->files = new ArrayCollection();
         foreach ($files as $file) {
             $this->files->add($file);
             $file->setImmutableExecutable($this);
         }
-        $this->user = $user;
         $this->updateHash();
     }
 
