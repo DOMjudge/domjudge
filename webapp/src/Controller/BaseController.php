@@ -60,7 +60,7 @@ abstract class BaseController extends AbstractController
      */
     protected function isLocalRefererUrl(RouterInterface $router, string $referer, string $prefix): bool
     {
-        if (strpos($referer, $prefix) === 0) {
+        if (str_starts_with($referer, $prefix)) {
             $path = substr($referer, strlen($prefix));
             if (($questionMark = strpos($path, '?')) !== false) {
                 $path = substr($path, 0, $questionMark);

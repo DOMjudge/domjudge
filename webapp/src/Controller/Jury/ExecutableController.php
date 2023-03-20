@@ -227,7 +227,7 @@ class ExecutableController extends BaseController
             $files = [];
             foreach ($editorData['filenames'] as $idx => $filename) {
                 $newContent = str_replace("\r\n", "\n", $submittedData['source' . $idx]);
-                if (substr($newContent, -1) != "\n") {
+                if (!str_ends_with($newContent, "\n")) {
                     // Ace swallows the newline at the end of file. Let's re-add it like most editors do.
                     $newContent .= "\n";
                 }
@@ -459,7 +459,7 @@ class ExecutableController extends BaseController
 
     private function getAceFilename(string $filename, string $content): string
     {
-        if (strpos($filename, '.') === false) {
+        if (!str_contains($filename, '.')) {
             // If the file does not contain a dot, see if we have a shebang which we can use as filename.
             // We do this to hint the ACE editor to use a specific language.
             [$firstLine] = explode("\n", $content, 2);

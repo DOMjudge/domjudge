@@ -16,7 +16,7 @@ class ApiHeadersListener implements EventSubscriberInterface
     {
         $request = $event->getRequest();
         // Check if this is an API request.
-        if (strpos($request->getPathInfo(), '/api') === 0) {
+        if (str_starts_with($request->getPathInfo(), '/api')) {
             // It is, so add CORS headers.
             $response = $event->getResponse();
             $response->headers->set('Access-Control-Allow-Origin', '*');

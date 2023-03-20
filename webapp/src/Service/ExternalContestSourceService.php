@@ -434,7 +434,7 @@ class ExternalContestSourceService
         $buffer = '';
         while (!feof($filePointer) || !empty($buffer)) {
             // Read the file until we find a newline or the end of the stream
-            while (!feof($filePointer) && (strpos($buffer, "\n")) === false) {
+            while (!feof($filePointer) && !str_contains($buffer, "\n")) {
                 $buffer .= fread($filePointer, 1024);
             }
             $newlinePos = strpos($buffer, "\n");

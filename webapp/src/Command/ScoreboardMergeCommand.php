@@ -163,7 +163,7 @@ class ScoreboardMergeCommand extends Command
         foreach ($sites as $site) {
             $path = $site['path'];
             // Strip of last /
-            if (substr($path, -1) === '/') {
+            if (str_ends_with($path, '/')) {
                 $path = substr($path, 0, strlen($path) - 1);
             }
 

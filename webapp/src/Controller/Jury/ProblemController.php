@@ -1092,7 +1092,7 @@ class ProblemController extends BaseController
 
             if (!empty($testcase->getDescription(true))) {
                 $description = $testcase->getDescription(true);
-                if (strstr($description, "\n") === false) {
+                if (!str_contains($description, "\n")) {
                     $description .= "\n";
                 }
                 $zip->addFromString($filename . '.desc', $description);

@@ -89,7 +89,7 @@ abstract class BaseTestCase extends WebTestCase
     protected function resolveReference($id)
     {
         // If the object ID contains a :, it is a reference to a fixture item, so get it.
-        if (is_string($id) && strpos($id, ':') !== false) {
+        if (is_string($id) && str_contains($id, ':')) {
             $referenceObject = $this->fixtureExecutor->getReferenceRepository()->getReference($id);
             $metadata = static::getContainer()->get(EntityManagerInterface::class)->getClassMetadata(get_class($referenceObject));
             $propertyAccessor = PropertyAccess::createPropertyAccessor();

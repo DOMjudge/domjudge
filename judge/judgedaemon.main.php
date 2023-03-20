@@ -105,7 +105,7 @@ function request(string $url, string $verb = 'GET', $data = '', bool $failonerro
     global $endpoints, $endpointID, $lastrequest;
 
     // Don't flood the log with requests for new judgings every few seconds.
-    if (strpos($url, 'judgehosts/fetch-work') === 0 && $verb==='POST') {
+    if (str_starts_with($url, 'judgehosts/fetch-work') && $verb==='POST') {
         if ($lastrequest!==$url) {
             logmsg(LOG_DEBUG, "API request $verb $url");
             $lastrequest = $url;
@@ -1006,7 +1006,7 @@ function read_metadata(string $filename): ?array
     $contents = explode("\n", dj_file_get_contents($filename));
     $res = [];
     foreach ($contents as $line) {
-        if (strpos($line, ":") !== false) {
+        if (str_contains($line, ":")) {
             list($key, $value) = explode(":", $line, 2);
             $res[$key] = trim($value);
         }
