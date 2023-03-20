@@ -847,6 +847,9 @@ class ImportExportService
                 case 'api_writer':
                     $roles[] = $apiWriteRole;
                     break;
+                case 'cds':
+                    $roles += [$apiReadRole, $apiSourceRole, $apiWriteRole];
+                    break;
                 case 'analyst':
                 case 'staff':
                     // Ignore type analyst and staff for now. We don't have a useful mapping yet.
@@ -1180,6 +1183,9 @@ class ImportExportService
                     break;
                 case 'api_source_reader':
                     $roles[] = $apiSourceRole;
+                    break;
+                case 'cds':
+                    $roles += [$apiReadRole, $apiSourceRole, $apiWriteRole];
                     break;
                 case 'analyst':
                     // Ignore type analyst for now. We don't have a useful mapping yet.
