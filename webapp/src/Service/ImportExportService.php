@@ -795,6 +795,8 @@ class ImportExportService
         $adminRole    = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'admin']);
         $balloonRole  = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'balloon']);
         $clarRole     = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'clarification_rw']);
+        $apiReadRole  = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'api_reader']);
+        $apiWriteRole = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'api_writer']);
         $juryCategory = $this->em->getRepository(TeamCategory::class)->findOneBy(['name' => 'Jury']);
         if (!$juryCategory) {
             $juryCategory = new TeamCategory();
@@ -835,6 +837,11 @@ class ImportExportService
                     break;
                 case 'clarification_rw':
                     $roles[] = $clarRole;
+                case 'api_reader':
+                    $roles[] = $apiReadRole;
+                    break;
+                case 'api_writer':
+                    $roles[] = $apiWriteRole;
                     break;
                 case 'analyst':
                 case 'staff':
@@ -1097,7 +1104,9 @@ class ImportExportService
         $juryRole    = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'jury']);
         $adminRole   = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'admin']);
         $balloonRole = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'balloon']);
-        $clarRole    = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'clarification_rw']);
+        $clarRole     = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'clarification_rw']);
+        $apiReadRole  = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'api_reader']);
+        $apiWriteRole = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'api_writer']);
 
         $juryCategory = $this->em->getRepository(TeamCategory::class)->findOneBy(['name' => 'Jury']);
         if (!$juryCategory) {
@@ -1157,6 +1166,12 @@ class ImportExportService
                     break;
                 case 'clarification_rw':
                     $roles[] = $clarRole;
+                    break;
+                case 'api_reader':
+                    $roles[] = $apiReadRole;
+                    break;
+                case 'api_writer':
+                    $roles[] = $apiWriteRole;
                     break;
                 case 'analyst':
                     // Ignore type analyst for now. We don't have a useful mapping yet.

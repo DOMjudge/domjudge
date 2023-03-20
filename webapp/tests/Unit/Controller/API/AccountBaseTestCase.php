@@ -82,6 +82,10 @@ abstract class AccountBaseTestCase extends BaseTestCase
                             [['roles' => ['judge']],['roles' => ['jury']]],
                             [['roles' => ['balloon']]],
                             [['roles' => ['clarification_rw']]],
+                            [['username' => 'config_pusher',
+                              'roles' => ['api_writer']]],
+                            [['username' => 'grafana',
+                              'roles' => ['api_reader']]],
                             [['roles' => ['clarification_rw','balloon'], 'skipTsv' => true]],
                             [['roles' => ['jury','balloon'], 'skipTsv' => true]],
                         ];
