@@ -674,7 +674,7 @@ class UtilsTest extends TestCase
      */
     public function testGetImageThumb($imageLocation, $mime) : void
     {
-        $logo = dirname(__file__) . $imageLocation;
+        $logo = __DIR__ . $imageLocation;
         $image = file_get_contents($logo);
         $error = null;
         $tmp = sys_get_temp_dir();
