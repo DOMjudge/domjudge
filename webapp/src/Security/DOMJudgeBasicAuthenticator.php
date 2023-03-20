@@ -17,15 +17,10 @@ use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
 
 class DOMJudgeBasicAuthenticator extends AbstractAuthenticator
 {
-    private Security $security;
-    private UserPasswordHasherInterface $passwordHasher;
-
     public function __construct(
-        Security $security,
-        UserPasswordHasherInterface $passwordHasher
+        private Security $security,
+        private UserPasswordHasherInterface $passwordHasher
     ) {
-        $this->security = $security;
-        $this->passwordHasher = $passwordHasher;
     }
 
     /**

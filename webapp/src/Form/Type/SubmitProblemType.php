@@ -21,18 +21,11 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 class SubmitProblemType extends AbstractType
 {
-    protected DOMJudgeService $dj;
-    protected ConfigurationService $config;
-    protected EntityManagerInterface $em;
-
     public function __construct(
-        DOMJudgeService $dj,
-        ConfigurationService $config,
-        EntityManagerInterface $em
+        protected DOMJudgeService $dj,
+        protected ConfigurationService $config,
+        protected EntityManagerInterface $em
     ) {
-        $this->dj = $dj;
-        $this->em = $em;
-        $this->config = $config;
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void

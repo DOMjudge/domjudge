@@ -35,27 +35,14 @@ class UserController extends BaseController
 {
     protected const MIN_PASSWORD_LENGTH = 10;
 
-    protected EntityManagerInterface $em;
-    protected DOMJudgeService $dj;
-    protected ConfigurationService $config;
-    protected KernelInterface $kernel;
-    protected EventLogService $eventLogService;
-    protected TokenStorageInterface $tokenStorage;
-
     public function __construct(
-        EntityManagerInterface $em,
-        DOMJudgeService $dj,
-        ConfigurationService $config,
-        KernelInterface $kernel,
-        EventLogService $eventLogService,
-        TokenStorageInterface $tokenStorage
+        protected EntityManagerInterface $em,
+        protected DOMJudgeService $dj,
+        protected ConfigurationService $config,
+        protected KernelInterface $kernel,
+        protected EventLogService $eventLogService,
+        protected TokenStorageInterface $tokenStorage
     ) {
-        $this->em              = $em;
-        $this->dj              = $dj;
-        $this->config          = $config;
-        $this->eventLogService = $eventLogService;
-        $this->tokenStorage    = $tokenStorage;
-        $this->kernel          = $kernel;
     }
 
     /**

@@ -30,30 +30,19 @@ use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
  */
 class ImportEventFeedCommand extends Command
 {
-    protected EntityManagerInterface $em;
-    protected ConfigurationService $config;
-    protected TokenStorageInterface $tokenStorage;
-    protected ?Profiler $profiler;
-    protected ExternalContestSourceService $sourceService;
-
     protected SymfonyStyle $style;
 
     protected ?ExternalContestSource $source = null;
 
     public function __construct(
-        EntityManagerInterface       $em,
-        ConfigurationService         $config,
-        TokenStorageInterface        $tokenStorage,
-        ?Profiler                    $profiler,
-        ExternalContestSourceService $sourceService,
-        string                       $name = null
+        protected EntityManagerInterface $em,
+        protected ConfigurationService $config,
+        protected TokenStorageInterface $tokenStorage,
+        protected ?Profiler $profiler,
+        protected ExternalContestSourceService $sourceService,
+        string $name = null
     ) {
         parent::__construct($name);
-        $this->em            = $em;
-        $this->config        = $config;
-        $this->tokenStorage  = $tokenStorage;
-        $this->profiler      = $profiler;
-        $this->sourceService = $sourceService;
     }
 
     protected function configure(): void

@@ -47,30 +47,15 @@ use ZipArchive;
  */
 class ProblemController extends BaseController
 {
-    protected EntityManagerInterface $em;
-    protected DOMJudgeService $dj;
-    protected ConfigurationService $config;
-    protected KernelInterface $kernel;
-    protected EventLogService $eventLogService;
-    protected SubmissionService $submissionService;
-    protected ImportProblemService $importProblemService;
-
     public function __construct(
-        EntityManagerInterface $em,
-        DOMJudgeService $dj,
-        ConfigurationService $config,
-        KernelInterface $kernel,
-        EventLogService $eventLogService,
-        SubmissionService $submissionService,
-        ImportProblemService $importProblemService
+        protected EntityManagerInterface $em,
+        protected DOMJudgeService $dj,
+        protected ConfigurationService $config,
+        protected KernelInterface $kernel,
+        protected EventLogService $eventLogService,
+        protected SubmissionService $submissionService,
+        protected ImportProblemService $importProblemService
     ) {
-        $this->em                   = $em;
-        $this->dj                   = $dj;
-        $this->config               = $config;
-        $this->kernel               = $kernel;
-        $this->eventLogService      = $eventLogService;
-        $this->submissionService    = $submissionService;
-        $this->importProblemService = $importProblemService;
     }
 
     /**

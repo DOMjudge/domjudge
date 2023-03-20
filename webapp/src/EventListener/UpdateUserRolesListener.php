@@ -10,11 +10,8 @@ use Symfony\Component\Security\Core\User\UserInterface;
 
 class UpdateUserRolesListener implements EventSubscriberInterface
 {
-    protected TokenStorageInterface $tokenStorage;
-
-    public function __construct(TokenStorageInterface $tokenStorage)
+    public function __construct(protected TokenStorageInterface $tokenStorage)
     {
-        $this->tokenStorage = $tokenStorage;
     }
 
     public static function getSubscribedEvents(): array

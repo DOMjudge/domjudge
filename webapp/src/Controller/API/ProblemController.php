@@ -40,20 +40,15 @@ use Symfony\Component\Yaml\Yaml;
  */
 class ProblemController extends AbstractRestController implements QueryObjectTransformer
 {
-    protected ImportProblemService $importProblemService;
-    protected ImportExportService $importExportService;
-
     public function __construct(
         EntityManagerInterface $entityManager,
         DOMJudgeService $DOMJudgeService,
         ConfigurationService $config,
         EventLogService $eventLogService,
-        ImportProblemService $importProblemService,
-        ImportExportService $importExportService
+        protected ImportProblemService $importProblemService,
+        protected ImportExportService $importExportService
     ) {
         parent::__construct($entityManager, $DOMJudgeService, $config, $eventLogService);
-        $this->importProblemService = $importProblemService;
-        $this->importExportService = $importExportService;
     }
 
     /**

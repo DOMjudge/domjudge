@@ -42,27 +42,14 @@ use Symfony\Component\Routing\RouterInterface;
  */
 class RejudgingController extends BaseController
 {
-    protected EntityManagerInterface $em;
-    protected DOMJudgeService $dj;
-    protected ConfigurationService $config;
-    protected RejudgingService $rejudgingService;
-    protected RouterInterface $router;
-    protected RequestStack $requestStack;
-
     public function __construct(
-        EntityManagerInterface $em,
-        DOMJudgeService $dj,
-        ConfigurationService $config,
-        RejudgingService $rejudgingService,
-        RouterInterface $router,
-        RequestStack $requestStack
+        protected EntityManagerInterface $em,
+        protected DOMJudgeService $dj,
+        protected ConfigurationService $config,
+        protected RejudgingService $rejudgingService,
+        protected RouterInterface $router,
+        protected RequestStack $requestStack
     ) {
-        $this->em               = $em;
-        $this->dj               = $dj;
-        $this->config           = $config;
-        $this->rejudgingService = $rejudgingService;
-        $this->router           = $router;
-        $this->requestStack     = $requestStack;
     }
 
     /**

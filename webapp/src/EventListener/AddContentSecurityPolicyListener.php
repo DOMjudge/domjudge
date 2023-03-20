@@ -8,11 +8,8 @@ use Symfony\Component\HttpKernel\Profiler\Profiler;
 
 class AddContentSecurityPolicyListener implements EventSubscriberInterface
 {
-    protected ?Profiler $profiler;
-
-    public function __construct(?Profiler $profiler)
+    public function __construct(protected ?Profiler $profiler)
     {
-        $this->profiler = $profiler;
     }
 
     public static function getSubscribedEvents(): array

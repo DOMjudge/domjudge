@@ -30,24 +30,13 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class TeamCategoryController extends BaseController
 {
-    protected EntityManagerInterface $em;
-    protected DOMJudgeService $dj;
-    protected ConfigurationService $config;
-    protected KernelInterface $kernel;
-    protected EventLogService $eventLogService;
-
     public function __construct(
-        EntityManagerInterface $em,
-        DOMJudgeService $dj,
-        ConfigurationService $config,
-        KernelInterface $kernel,
-        EventLogService $eventLogService
+        protected EntityManagerInterface $em,
+        protected DOMJudgeService $dj,
+        protected ConfigurationService $config,
+        protected KernelInterface $kernel,
+        protected EventLogService $eventLogService
     ) {
-        $this->em              = $em;
-        $this->dj              = $dj;
-        $this->config          = $config;
-        $this->eventLogService = $eventLogService;
-        $this->kernel          = $kernel;
     }
 
     /**

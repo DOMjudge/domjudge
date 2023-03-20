@@ -12,15 +12,8 @@ use ZipArchive;
 
 class LanguageFixture extends AbstractDefaultDataFixture
 {
-    protected string $sqlDir;
-    protected DOMJudgeService $dj;
-    protected LoggerInterface $logger;
-
-    public function __construct(string $sqlDir, DOMJudgeService $dj, LoggerInterface $logger)
+    public function __construct(protected string $sqlDir, protected DOMJudgeService $dj, protected LoggerInterface $logger)
     {
-        $this->sqlDir = $sqlDir;
-        $this->dj     = $dj;
-        $this->logger = $logger;
     }
 
     public function load(ObjectManager $manager): void

@@ -17,21 +17,12 @@ use Symfony\Component\Intl\Countries;
 
 class TeamAffiliationVisitor implements EventSubscriberInterface
 {
-    protected DOMJudgeService $dj;
-    protected ConfigurationService $config;
-    protected EventLogService $eventLogService;
-    protected RequestStack $requestStack;
-
     public function __construct(
-        DOMJudgeService $dj,
-        ConfigurationService $config,
-        EventLogService $eventLogService,
-        RequestStack $requestStack
+        protected DOMJudgeService $dj,
+        protected ConfigurationService $config,
+        protected EventLogService $eventLogService,
+        protected RequestStack $requestStack
     ) {
-        $this->dj = $dj;
-        $this->config = $config;
-        $this->eventLogService = $eventLogService;
-        $this->requestStack = $requestStack;
     }
 
     public static function getSubscribedEvents(): array

@@ -8,11 +8,8 @@ use Symfony\Component\HttpKernel\Event\ResponseEvent;
 
 class AddCurrentContestListener implements EventSubscriberInterface
 {
-    protected DOMJudgeService $dj;
-
-    public function __construct(DOMJudgeService $dj)
+    public function __construct(protected DOMJudgeService $dj)
     {
-        $this->dj = $dj;
     }
 
     public static function getSubscribedEvents(): array

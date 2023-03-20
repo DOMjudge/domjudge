@@ -4,28 +4,19 @@ namespace App\Utils\Scoreboard;
 
 class Filter
 {
-    /** int[] */
-    public array $affiliations = [];
-
-    /** @var string[] */
-    public array $countries = [];
-
-    /** @var int[] */
-    public array $categories = [];
-
-    /** @var int[] */
-    public array $teams = [];
-
+    /**
+     * @param int[] $affiliations
+     * @param string[] $countries
+     * @param int[] $categories
+     * @param int[] $teams
+     */
     public function __construct(
-        array $affiliations = [],
-        array $countries = [],
-        array $categories = [],
-        array $teams = []
-    ) {
-        $this->affiliations = $affiliations;
-        $this->countries    = $countries;
-        $this->categories   = $categories;
-        $this->teams        = $teams;
+        public array $affiliations = [],
+        public array $countries = [],
+        public array $categories = [],
+        public array $teams = []
+    )
+    {
     }
 
     /**

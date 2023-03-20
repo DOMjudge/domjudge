@@ -26,27 +26,14 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class ExternalContestController extends BaseController
 {
-    protected EntityManagerInterface $em;
-    protected DOMJudgeService $dj;
-    protected ConfigurationService $config;
-    protected EventLogService $eventLog;
-    protected KernelInterface $kernel;
-    private ExternalContestSourceService $sourceService;
-
     public function __construct(
-        EntityManagerInterface $em,
-        DOMJudgeService $dj,
-        ConfigurationService $config,
-        EventLogService $eventLog,
-        KernelInterface $kernel,
-        ExternalContestSourceService $sourceService
+        protected EntityManagerInterface $em,
+        protected DOMJudgeService $dj,
+        protected ConfigurationService $config,
+        protected EventLogService $eventLog,
+        protected KernelInterface $kernel,
+        private ExternalContestSourceService $sourceService
     ) {
-        $this->em = $em;
-        $this->dj = $dj;
-        $this->config = $config;
-        $this->eventLog = $eventLog;
-        $this->kernel = $kernel;
-        $this->sourceService = $sourceService;
     }
 
     /**

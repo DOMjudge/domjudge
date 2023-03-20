@@ -18,15 +18,8 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  */
 class ExecutableController extends AbstractFOSRestController
 {
-    protected EntityManagerInterface $em;
-    protected DOMJudgeService $dj;
-
-    public function __construct(
-        EntityManagerInterface $em,
-        DOMJudgeService $dj
-    ) {
-        $this->em = $em;
-        $this->dj = $dj;
+    public function __construct(protected EntityManagerInterface $em, protected DOMJudgeService $dj)
+    {
     }
 
     /**

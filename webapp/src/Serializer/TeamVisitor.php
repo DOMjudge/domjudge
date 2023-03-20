@@ -15,18 +15,11 @@ use Symfony\Component\HttpFoundation\RequestStack;
 
 class TeamVisitor implements EventSubscriberInterface
 {
-    protected DOMJudgeService $dj;
-    protected EventLogService $eventLogService;
-    protected RequestStack $requestStack;
-
     public function __construct(
-        DOMJudgeService $dj,
-        EventLogService $eventLogService,
-        RequestStack $requestStack
+        protected DOMJudgeService $dj,
+        protected EventLogService $eventLogService,
+        protected RequestStack $requestStack
     ) {
-        $this->dj = $dj;
-        $this->eventLogService = $eventLogService;
-        $this->requestStack = $requestStack;
     }
 
     public static function getSubscribedEvents(): array

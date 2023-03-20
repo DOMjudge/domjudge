@@ -28,15 +28,11 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class InternalErrorController extends BaseController
 {
-    protected EntityManagerInterface $em;
-    protected DOMJudgeService $dj;
-    protected RejudgingService $rejudgingService;
-
-    public function __construct(EntityManagerInterface $em, DOMJudgeService $dj, RejudgingService $rejudgingService)
-    {
-        $this->em = $em;
-        $this->dj = $dj;
-        $this->rejudgingService = $rejudgingService;
+    public function __construct(
+        protected EntityManagerInterface $em,
+        protected DOMJudgeService $dj,
+        protected RejudgingService $rejudgingService
+    ) {
     }
 
     /**

@@ -12,11 +12,8 @@ class RoleFixture extends AbstractDefaultDataFixture
     public const JUDGEHOST_REFERENCE = 'judgehost';
     public const TEAM_REFERENCE = 'team';
 
-    protected LoggerInterface $logger;
-
-    public function __construct(LoggerInterface $logger)
+    public function __construct(protected LoggerInterface $logger)
     {
-        $this->logger = $logger;
     }
 
     public function load(ObjectManager $manager): void

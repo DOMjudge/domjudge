@@ -28,21 +28,12 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class ClarificationController extends AbstractController
 {
-    protected EntityManagerInterface $em;
-    protected DOMJudgeService $dj;
-    protected ConfigurationService $config;
-    protected EventLogService $eventLogService;
-
     public function __construct(
-        EntityManagerInterface $em,
-        DOMJudgeService $dj,
-        ConfigurationService $config,
-        EventLogService $eventLogService
+        protected EntityManagerInterface $em,
+        protected DOMJudgeService $dj,
+        protected ConfigurationService $config,
+        protected EventLogService $eventLogService
     ) {
-        $this->em              = $em;
-        $this->dj              = $dj;
-        $this->config          = $config;
-        $this->eventLogService = $eventLogService;
     }
 
     /**

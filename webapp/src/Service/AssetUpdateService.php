@@ -7,13 +7,8 @@ use Symfony\Component\Filesystem\Filesystem;
 
 class AssetUpdateService
 {
-    protected DOMJudgeService $dj;
-    protected EventLogService $eventLog;
-
-    public function __construct(DOMJudgeService $dj, EventLogService $eventLog)
+    public function __construct(protected DOMJudgeService $dj, protected EventLogService $eventLog)
     {
-        $this->dj = $dj;
-        $this->eventLog = $eventLog;
     }
 
     /**

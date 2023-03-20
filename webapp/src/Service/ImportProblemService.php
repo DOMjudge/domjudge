@@ -37,30 +37,15 @@ use ZipArchive;
  */
 class ImportProblemService
 {
-    protected EntityManagerInterface $em;
-    protected LoggerInterface $logger;
-    protected DOMJudgeService $dj;
-    protected ConfigurationService $config;
-    protected SubmissionService $submissionService;
-    protected EventLogService $eventLogService;
-    protected ValidatorInterface $validator;
-
     public function __construct(
-        EntityManagerInterface $em,
-        LoggerInterface $logger,
-        DOMJudgeService $dj,
-        ConfigurationService $config,
-        EventLogService $eventLogService,
-        SubmissionService $submissionService,
-        ValidatorInterface $validator
+        protected EntityManagerInterface $em,
+        protected LoggerInterface $logger,
+        protected DOMJudgeService $dj,
+        protected ConfigurationService $config,
+        protected EventLogService $eventLogService,
+        protected SubmissionService $submissionService,
+        protected ValidatorInterface $validator
     ) {
-        $this->em                = $em;
-        $this->logger            = $logger;
-        $this->dj                = $dj;
-        $this->config            = $config;
-        $this->eventLogService   = $eventLogService;
-        $this->submissionService = $submissionService;
-        $this->validator         = $validator;
     }
 
     /**

@@ -35,39 +35,18 @@ use Twig\TwigFunction;
 
 class TwigExtension extends AbstractExtension implements GlobalsInterface
 {
-    protected DOMJudgeService $dj;
-    protected ConfigurationService $config;
-    protected Environment $twig;
-    protected EntityManagerInterface $em;
-    protected SubmissionService $submissionService;
-    protected EventLogService $eventLogService;
-    protected AwardService $awards;
-    protected TokenStorageInterface $tokenStorage;
-    protected AuthorizationCheckerInterface $authorizationChecker;
-    protected string $projectDir;
-
     public function __construct(
-        DOMJudgeService               $dj,
-        ConfigurationService          $config,
-        Environment                   $twig,
-        EntityManagerInterface        $em,
-        SubmissionService             $submissionService,
-        EventLogService               $eventLogService,
-        AwardService                  $awards,
-        TokenStorageInterface         $tokenStorage,
-        AuthorizationCheckerInterface $authorizationChecker,
-        string                        $projectDir
+        protected DOMJudgeService $dj,
+        protected ConfigurationService $config,
+        protected Environment $twig,
+        protected EntityManagerInterface $em,
+        protected SubmissionService $submissionService,
+        protected EventLogService $eventLogService,
+        protected AwardService $awards,
+        protected TokenStorageInterface $tokenStorage,
+        protected AuthorizationCheckerInterface $authorizationChecker,
+        protected string $projectDir
     ) {
-        $this->dj                   = $dj;
-        $this->config               = $config;
-        $this->twig                 = $twig;
-        $this->em                   = $em;
-        $this->submissionService    = $submissionService;
-        $this->eventLogService      = $eventLogService;
-        $this->awards               = $awards;
-        $this->tokenStorage         = $tokenStorage;
-        $this->authorizationChecker = $authorizationChecker;
-        $this->projectDir           = $projectDir;
     }
 
     public function getFunctions(): array

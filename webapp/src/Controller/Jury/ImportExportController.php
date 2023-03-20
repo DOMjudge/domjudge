@@ -48,36 +48,17 @@ use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
  */
 class ImportExportController extends BaseController
 {
-    protected ICPCCmsService $icpcCmsService;
-    protected ImportExportService $importExportService;
-    protected ImportProblemService $importProblemService;
-    protected EntityManagerInterface $em;
-    protected ScoreboardService $scoreboardService;
-    protected DOMJudgeService $dj;
-    protected ConfigurationService $config;
-    protected EventLogService $eventLogService;
-    protected string $domjudgeVersion;
-
     public function __construct(
-        ICPCCmsService $icpcCmsService,
-        ImportExportService $importExportService,
-        EntityManagerInterface $em,
-        ScoreboardService $scoreboardService,
-        DOMJudgeService $dj,
-        ConfigurationService $config,
-        EventLogService $eventLogService,
-        ImportProblemService $importProblemService,
-        string $domjudgeVersion
+        protected ICPCCmsService $icpcCmsService,
+        protected ImportExportService $importExportService,
+        protected EntityManagerInterface $em,
+        protected ScoreboardService $scoreboardService,
+        protected DOMJudgeService $dj,
+        protected ConfigurationService $config,
+        protected EventLogService $eventLogService,
+        protected ImportProblemService $importProblemService,
+        protected string $domjudgeVersion
     ) {
-        $this->icpcCmsService      = $icpcCmsService;
-        $this->importExportService = $importExportService;
-        $this->em                  = $em;
-        $this->scoreboardService   = $scoreboardService;
-        $this->dj                  = $dj;
-        $this->config              = $config;
-        $this->eventLogService     = $eventLogService;
-        $this->domjudgeVersion     = $domjudgeVersion;
-        $this->importProblemService = $importProblemService;
     }
 
     /**

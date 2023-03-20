@@ -16,14 +16,9 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class CallApiActionCommand extends Command
 {
-    protected DOMJudgeService $dj;
-    protected EntityManagerInterface $em;
-
-    public function __construct(DOMJudgeService $dj, EntityManagerInterface $em)
+    public function __construct(protected DOMJudgeService $dj, protected EntityManagerInterface $em)
     {
         parent::__construct();
-        $this->dj = $dj;
-        $this->em = $em;
     }
 
     protected function configure(): void

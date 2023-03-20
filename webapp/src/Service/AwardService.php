@@ -8,13 +8,10 @@ use App\Utils\Scoreboard\Scoreboard;
 
 class AwardService
 {
-    protected EventLogService $eventLogService;
-
     protected array $awardCache = [];
 
-    public function __construct(EventLogService $eventLogService)
+    public function __construct(protected EventLogService $eventLogService)
     {
-        $this->eventLogService = $eventLogService;
     }
 
     protected function loadAwards(Contest $contest, Scoreboard $scoreboard): void

@@ -32,18 +32,11 @@ use Symfony\Component\Validator\Context\ExecutionContext;
 
 class UserRegistrationType extends AbstractType
 {
-    protected DOMJudgeService $dj;
-    protected ConfigurationService $config;
-    protected EntityManagerInterface $em;
-
     public function __construct(
-        DOMJudgeService $dj,
-        ConfigurationService $config,
-        EntityManagerInterface $em
+        protected DOMJudgeService $dj,
+        protected ConfigurationService $config,
+        protected EntityManagerInterface $em
     ) {
-        $this->dj     = $dj;
-        $this->config = $config;
-        $this->em     = $em;
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void

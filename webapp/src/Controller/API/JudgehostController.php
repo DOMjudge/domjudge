@@ -58,36 +58,17 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  */
 class JudgehostController extends AbstractFOSRestController
 {
-    protected EntityManagerInterface $em;
-    protected DOMJudgeService $dj;
-    protected ConfigurationService $config;
-    protected EventLogService $eventLogService;
-    protected ScoreboardService $scoreboardService;
-    protected SubmissionService $submissionService;
-    protected BalloonService $balloonService;
-    protected RejudgingService $rejudgingService;
-    protected LoggerInterface $logger;
-
     public function __construct(
-        EntityManagerInterface $em,
-        DOMJudgeService $dj,
-        ConfigurationService $config,
-        EventLogService $eventLogService,
-        ScoreboardService $scoreboardService,
-        SubmissionService $submissionService,
-        BalloonService $balloonService,
-        RejudgingService $rejudgingService,
-        LoggerInterface $logger
+        protected EntityManagerInterface $em,
+        protected DOMJudgeService $dj,
+        protected ConfigurationService $config,
+        protected EventLogService $eventLogService,
+        protected ScoreboardService $scoreboardService,
+        protected SubmissionService $submissionService,
+        protected BalloonService $balloonService,
+        protected RejudgingService $rejudgingService,
+        protected LoggerInterface $logger
     ) {
-        $this->em                = $em;
-        $this->dj                = $dj;
-        $this->config            = $config;
-        $this->eventLogService   = $eventLogService;
-        $this->scoreboardService = $scoreboardService;
-        $this->submissionService = $submissionService;
-        $this->balloonService    = $balloonService;
-        $this->rejudgingService  = $rejudgingService;
-        $this->logger            = $logger;
     }
 
     /**

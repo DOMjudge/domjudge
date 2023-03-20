@@ -20,9 +20,6 @@ use App\Utils\Utils;
  */
 class SingleTeamScoreboard extends Scoreboard
 {
-    protected Team $team;
-    protected int $teamRank;
-    protected ?RankCache $rankCache;
     protected bool $showRestrictedFts;
 
     /**
@@ -31,19 +28,16 @@ class SingleTeamScoreboard extends Scoreboard
      */
     public function __construct(
         Contest $contest,
-        Team $team,
-        int $teamRank,
+        protected Team $team,
+        protected int $teamRank,
         array $problems,
-        $rankCache,
+        protected ?RankCache $rankCache,
         array $scoreCache,
         FreezeData $freezeData,
         bool $showFtsInFreeze,
         int $penaltyTime,
         bool $scoreIsInSeconds
     ) {
-        $this->team              = $team;
-        $this->teamRank          = $teamRank;
-        $this->rankCache         = $rankCache;
         $this->showRestrictedFts = $showFtsInFreeze || $freezeData->showFinal();
         parent::__construct($contest, [$team->getTeamid() => $team], [], $problems, $scoreCache, $freezeData, true,
             $penaltyTime, $scoreIsInSeconds);
@@ -55,7 +49,7 @@ class SingleTeamScoreboard extends Scoreboard
         if ($this->rankCache !== null) {
             $teamScore->numPoints += $this->rankCache->getPointsRestricted();
             $teamScore->totalTime += $this->rankCache->getTotaltimeRestricted();
-            $teamScore->totalRuntime += $this->rankCache->getTotalruntimeRestricted(); 
+            $teamScore->totalRuntime += $this->rankCache->getTotalruntimeRestricted();
         }
         $teamScore->rank = $this->teamRank;
 

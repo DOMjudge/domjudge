@@ -10,11 +10,8 @@ class TeamCategoryFixture extends AbstractDefaultDataFixture
 {
     public const SYSTEM_REFERENCE = 'system';
 
-    protected LoggerInterface $logger;
-
-    public function __construct(LoggerInterface $logger)
+    public function __construct(protected LoggerInterface $logger)
     {
-        $this->logger = $logger;
     }
 
     public function load(ObjectManager $manager): void

@@ -22,16 +22,11 @@ class ResetUserPasswordCommand extends Command
     const STATUS_OK = 0;
     const STATUS_ERROR = 1;
 
-    protected EntityManagerInterface $em;
-    protected UserPasswordHasherInterface $passwordHasher;
-
     public function __construct(
-        EntityManagerInterface $em,
-        UserPasswordHasherInterface $passwordHasher
+        protected EntityManagerInterface $em,
+        protected UserPasswordHasherInterface $passwordHasher
     ) {
         parent::__construct();
-        $this->em = $em;
-        $this->passwordHasher = $passwordHasher;
     }
 
     protected function configure(): void

@@ -25,18 +25,11 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class PrintController extends BaseController
 {
-    protected EntityManagerInterface $em;
-    protected DOMJudgeService $dj;
-    protected ConfigurationService $config;
-
     public function __construct(
-        EntityManagerInterface $em,
-        DOMJudgeService $dj,
-        ConfigurationService $config
+        protected EntityManagerInterface $em,
+        protected DOMJudgeService $dj,
+        protected ConfigurationService $config
     ) {
-        $this->em     = $em;
-        $this->dj     = $dj;
-        $this->config = $config;
     }
 
     /**

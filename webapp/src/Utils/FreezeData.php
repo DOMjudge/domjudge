@@ -19,14 +19,11 @@ class FreezeData
     const KEY_RUNNING = 'running';
     const KEY_FINALIZED = 'finalized';
 
-    protected ?Contest $contest;
-
     /** @var bool[] */
     protected array $cache = [];
 
-    public function __construct(Contest $contest = null)
+    public function __construct(protected ?\App\Entity\Contest $contest = null)
     {
-        $this->contest = $contest;
     }
 
     /**

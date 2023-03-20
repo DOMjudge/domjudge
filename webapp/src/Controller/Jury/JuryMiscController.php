@@ -36,16 +36,11 @@ use Symfony\Component\Routing\RouterInterface;
  */
 class JuryMiscController extends BaseController
 {
-    protected EntityManagerInterface $em;
-    protected DOMJudgeService $dj;
-
     /**
      * GeneralInfoController constructor.
      */
-    public function __construct(EntityManagerInterface $entityManager, DOMJudgeService $dj)
+    public function __construct(protected EntityManagerInterface $em, protected DOMJudgeService $dj)
     {
-        $this->em = $entityManager;
-        $this->dj = $dj;
     }
 
     /**

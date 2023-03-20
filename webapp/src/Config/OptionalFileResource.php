@@ -16,12 +16,10 @@ use Symfony\Component\Config\Resource\SelfCheckingResourceInterface;
  */
 class OptionalFileResource implements SelfCheckingResourceInterface, Stringable
 {
-    private string $resource;
     private bool $exists;
 
-    public function __construct(string $resource)
+    public function __construct(private string $resource)
     {
-        $this->resource = $resource;
         $this->exists = file_exists($resource);
     }
 

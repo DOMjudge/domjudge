@@ -21,24 +21,13 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class ConfigController extends AbstractController
 {
-    protected EntityManagerInterface $em;
-    protected LoggerInterface $logger;
-    protected DOMJudgeService $dj;
-    protected CheckConfigService $checkConfigService;
-    protected ConfigurationService $config;
-
     public function __construct(
-        EntityManagerInterface $em,
-        LoggerInterface $logger,
-        DOMJudgeService $dj,
-        CheckConfigService $checkConfigService,
-        ConfigurationService $config
+        protected EntityManagerInterface $em,
+        protected LoggerInterface $logger,
+        protected DOMJudgeService $dj,
+        protected CheckConfigService $checkConfigService,
+        protected ConfigurationService $config
     ) {
-        $this->em                 = $em;
-        $this->logger             = $logger;
-        $this->dj                 = $dj;
-        $this->checkConfigService = $checkConfigService;
-        $this->config             = $config;
     }
 
     /**

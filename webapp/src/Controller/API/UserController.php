@@ -32,17 +32,14 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
  */
 class UserController extends AbstractRestController
 {
-    protected ImportExportService $importExportService;
-
     public function __construct(
         EntityManagerInterface $entityManager,
         DOMJudgeService $dj,
         ConfigurationService $config,
         EventLogService $eventLogService,
-        ImportExportService $importExportService
+        protected ImportExportService $importExportService
     ) {
         parent::__construct($entityManager, $dj, $config, $eventLogService);
-        $this->importExportService = $importExportService;
     }
 
     /**

@@ -18,18 +18,11 @@ use JMS\Serializer\Metadata\StaticPropertyMetadata;
  */
 class SubmissionVisitor implements EventSubscriberInterface
 {
-    protected DOMJudgeService $dj;
-    protected EventLogService $eventLogService;
-    protected EntityManagerInterface $em;
-
     public function __construct(
-        DOMJudgeService $dj,
-        EventLogService $eventLogService,
-        EntityManagerInterface $em
+        protected DOMJudgeService $dj,
+        protected EventLogService $eventLogService,
+        protected EntityManagerInterface $em
     ) {
-        $this->dj              = $dj;
-        $this->eventLogService = $eventLogService;
-        $this->em              = $em;
     }
 
     public static function getSubscribedEvents(): array
