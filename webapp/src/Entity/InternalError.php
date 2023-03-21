@@ -45,12 +45,11 @@ class InternalError
     private string $judgehostlog;
 
     /**
-     * @var double|string
      * @ORM\Column(type="decimal", precision=32, scale=9, name="time",
      *     options={"comment"="Timestamp of the internal error", "unsigned"=true},
      *     nullable=false)
      */
-    private $time;
+    private string|float $time;
 
     /**
      * @ORM\Column(type="json", length=65535, name="disabled",

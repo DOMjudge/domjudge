@@ -31,21 +31,19 @@ class Rejudging
 
 
     /**
-     * @var double|string
      * @ORM\Column(type="decimal", precision=32, scale=9, name="starttime",
      *     options={"comment"="Time rejudging started", "unsigned"=true},
      *     nullable=false)
      */
-    private $starttime;
+    private string|float $starttime;
 
     /**
-     * @var double|string|null
      * @ORM\Column(type="decimal", precision=32, scale=9, name="endtime",
      *     options={"comment"="Time rejudging ended, null = still busy",
      *              "unsigned"=true},
      *     nullable=true)
      */
-    private $endtime;
+    private string|float|null $endtime = null;
 
     /**
      * @ORM\Column(type="string", name="reason", length=255,

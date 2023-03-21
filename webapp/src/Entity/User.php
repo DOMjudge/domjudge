@@ -73,34 +73,31 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
     private ?string $email = null;
 
     /**
-     * @var double|string|null
      * @ORM\Column(type="decimal", precision=32, scale=9, name="last_login",
      *     options={"comment"="Time of last successful login", "unsigned"=true},
      *     nullable=true)
      * @Serializer\Exclude()
      * @OA\Property(nullable=true)
      */
-    private $last_login;
+    private string|float|null $last_login = null;
 
     /**
-     * @var double|string|null
      * @ORM\Column(type="decimal", precision=32, scale=9, name="last_api_login",
      *     options={"comment"="Time of last successful login on the API", "unsigned"=true},
      *     nullable=true)
      * @Serializer\Exclude()
      * @OA\Property(nullable=true)
      */
-    private $last_api_login;
+    private string|float|null $last_api_login = null;
 
     /**
-     * @var double|string|null
      * @ORM\Column(type="decimal", precision=32, scale=9, name="first_login",
      *     options={"comment"="Time of first login", "unsigned"=true},
      *     nullable=true)
      * @Serializer\Exclude()
      * @OA\Property(nullable=true)
      */
-    private $first_login;
+    private string|float|null $first_login = null;
 
     /**
      * @ORM\Column(type="string", name="last_ip_address", length=255,

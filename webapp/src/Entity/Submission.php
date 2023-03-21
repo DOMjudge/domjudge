@@ -62,7 +62,7 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
      *                             "unsigned"=true}, nullable=false)
      * @Serializer\Exclude()
      */
-    private $submittime;
+    private string|float|null $submittime = null;
 
     /**
      * @ORM\Column(type="boolean", name="valid",

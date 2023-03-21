@@ -163,13 +163,12 @@ class JudgeTask
     protected bool $valid = true;
 
     /**
-     * @var double|string|null
      * @ORM\Column(type="decimal", precision=32, scale=9, name="starttime",
      *     options={"comment"="Time the judgetask was started", "unsigned"=true},
      *     nullable=true)
      * @Serializer\Exclude()
      */
-    private $starttime;
+    private string|float|null $starttime = null;
 
     /**
      * @ORM\OneToMany(targetEntity="JudgingRun", mappedBy="judgetask")

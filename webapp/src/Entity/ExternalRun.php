@@ -45,21 +45,17 @@ class ExternalRun
     private string $result;
 
     /**
-     * @var double|string
-     *
      * @ORM\Column(type="decimal", precision=32, scale=9, name="endtime",
      *              options={"comment"="Time run ended", "unsigned"=true},
      *              nullable=false)
      */
-    private $endtime;
+    private string|float $endtime;
 
     /**
-     * @var double|string
-     *
      * @ORM\Column(type="float", name="runtime",
      *              options={"comment"="Running time on this testcase"}, nullable=false)
      */
-    private $runtime;
+    private float $runtime;
 
     /**
      * @ORM\ManyToOne(targetEntity="ExternalJudgement", inversedBy="external_runs")

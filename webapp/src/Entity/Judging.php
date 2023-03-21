@@ -39,16 +39,14 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
     protected int $judgingid;
 
     /**
-     * @var double|string|null
      * @ORM\Column(type="decimal", precision=32, scale=9, name="starttime",
      *     options={"comment"="Time judging started", "unsigned"=true},
      *     nullable=true)
      * @Serializer\Exclude()
      */
-    private $starttime;
+    private string|float|null $starttime = null;
 
     /**
-     * @var double|string|null
      * @ORM\Column(type="decimal", precision=32, scale=9, name="endtime",
      *     options={"comment"="Time judging ended, null = still busy",
      *              "unsigned"=true},
@@ -56,7 +54,7 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
      * @Serializer\Exclude()
      * @OA\Property(nullable=true)
      */
-    private $endtime;
+    private string|float|null $endtime = null;
 
     /**
      * @ORM\Column(type="string", name="result", length=32,

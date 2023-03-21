@@ -53,11 +53,10 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
     protected ?string $externalid = null;
 
     /**
-     * @var double|string
      * @ORM\Column(type="decimal", precision=32, scale=9, name="submittime", options={"comment"="Time sent", "unsigned"=true}, nullable=false)
      * @Serializer\Exclude()
      */
-    private $submittime;
+    private string|float $submittime;
 
     /**
      * @ORM\Column(type="string", name="jury_member", length=255,

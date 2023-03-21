@@ -35,10 +35,7 @@ class QueuetaskIntegrationTest extends KernelTestCase
     private ScoreboardService $scoreboardService;
     private ?EntityManagerInterface $em;
 
-    /**
-     * @var ConfigurationService|MockObject
-     */
-    private $config;
+    private ConfigurationService&MockObject $config;
     private array $configValues;
     private Contest $contest;
 
