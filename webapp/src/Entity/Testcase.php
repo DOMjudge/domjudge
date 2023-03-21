@@ -41,14 +41,14 @@ class Testcase
      *     options={"comment"="Checksum of input data","fixed"=true},
      *     nullable=true)
      */
-    private ?string $md5sum_input;
+    private ?string $md5sum_input = null;
 
     /**
      * @ORM\Column(type="string", name="md5sum_output", length=32,
      *     options={"comment"="Checksum of output data","fixed"=true},
      *     nullable=true)
      */
-    private ?string $md5sum_output;
+    private ?string $md5sum_output = null;
 
     /**
      * @ORM\Column(type="integer", name="`ranknumber`", length=4,
@@ -75,7 +75,7 @@ class Testcase
      *     nullable=true)
      * @Serializer\Exclude()
      */
-    private ?string $orig_input_filename;
+    private ?string $orig_input_filename = null;
 
     /**
      * @ORM\Column(type="string", name="image_type", length=4,
@@ -83,7 +83,7 @@ class Testcase
      *     nullable=true)
      * @Serializer\Exclude()
      */
-    private ?string $image_type;
+    private ?string $image_type = null;
 
     /**
      * @ORM\Column(type="boolean", name="sample",
@@ -130,7 +130,7 @@ class Testcase
      * @ORM\JoinColumn(name="probid", referencedColumnName="probid", onDelete="CASCADE")
      * @Serializer\Exclude()
      */
-    private ?Problem $problem;
+    private ?Problem $problem = null;
 
     public function __construct()
     {

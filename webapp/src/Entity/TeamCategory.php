@@ -83,7 +83,7 @@ class TeamCategory extends BaseApiEntity implements Stringable
      * @Serializer\Groups({"Nonstrict"})
      * @OA\Property(nullable=true)
      */
-    private ?string $color;
+    private ?string $color = null;
 
     /**
      * @ORM\Column(type="boolean", name="visible",

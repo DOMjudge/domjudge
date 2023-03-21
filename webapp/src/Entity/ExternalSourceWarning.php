@@ -39,7 +39,7 @@ class ExternalSourceWarning
      *     options={"comment"="Last event ID this warning happened at"},
      *     nullable=true)
      */
-    private ?string $lastEventId;
+    private ?string $lastEventId = null;
 
     /**
      * @ORM\Column(type="decimal", precision=32, scale=9, name="time",

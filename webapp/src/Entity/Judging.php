@@ -64,7 +64,7 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
      *     nullable=true)
      * @Serializer\Exclude()
      */
-    private ?string $result;
+    private ?string $result = null;
 
     /**
      * @ORM\Column(type="boolean", name="verified",
@@ -81,7 +81,7 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
      *     nullable=true)
      * @Serializer\Exclude()
      */
-    private ?string $jury_member;
+    private ?string $jury_member = null;
 
     /**
      * @ORM\Column(type="string", name="verify_comment", length=255,
@@ -89,7 +89,7 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
      *     nullable=true)
      * @Serializer\Exclude()
      */
-    private ?string $verify_comment;
+    private ?string $verify_comment = null;
 
     /**
      * @ORM\Column(type="boolean", name="valid",
@@ -115,7 +115,7 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
      *     nullable=true)
      * @Serializer\Exclude()
      */
-    private ?string $compile_metadata;
+    private ?string $compile_metadata = null;
 
     /**
      * @Serializer\Exclude()
@@ -154,7 +154,7 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
      * @ORM\JoinColumn(name="cid", referencedColumnName="cid", onDelete="CASCADE")
      * @Serializer\Exclude()
      */
-    private ?Contest $contest;
+    private ?Contest $contest = null;
 
     /**
      * @ORM\ManyToOne(targetEntity="Submission", inversedBy="judgings")
@@ -169,7 +169,7 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
      * @ORM\JoinColumn(name="rejudgingid", referencedColumnName="rejudgingid", onDelete="SET NULL")
      * @Serializer\Exclude()
      */
-    private ?Rejudging $rejudging;
+    private ?Rejudging $rejudging = null;
 
     /**
      * Rejudgings have one parent judging.
@@ -177,7 +177,7 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
      * @ORM\JoinColumn(name="prevjudgingid", referencedColumnName="judgingid", onDelete="SET NULL")
      * @Serializer\Exclude()
      */
-    private ?Judging $original_judging;
+    private ?Judging $original_judging = null;
 
     /**
      * @ORM\OneToMany(targetEntity="JudgingRun", mappedBy="judging")
@@ -197,7 +197,7 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
      * @ORM\JoinColumn(name="errorid", referencedColumnName="errorid", onDelete="SET NULL")
      * @Serializer\Exclude()
      */
-    private ?InternalError $internalError;
+    private ?InternalError $internalError = null;
 
     public function getMaxRuntime(): ?float
     {

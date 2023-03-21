@@ -37,27 +37,27 @@ class TestcaseContent
      * @ORM\Column(type="blobtext", length=4294967295, name="input",
      *     options={"comment"="Input data"}, nullable=true)
      */
-    private ?string $input;
+    private ?string $input = null;
 
     /**
      * @ORM\Column(type="blobtext", length=4294967295, name="output",
      *     options={"comment"="Output data"}, nullable=true)
      */
-    private ?string $output;
+    private ?string $output = null;
 
     /**
      * @ORM\Column(type="blobtext", length=4294967295, name="image",
      *     options={"comment"="A graphical representation of the testcase"},
      *     nullable=true)
      */
-    private ?string $image;
+    private ?string $image = null;
 
     /**
      * @ORM\Column(type="blobtext", length=4294967295, name="image_thumb",
      *     options={"comment"="Automatically created thumbnail of the image"},
      *     nullable=true)
      */
-    private ?string $image_thumb;
+    private ?string $image_thumb = null;
 
     public function getTestcaseContentId(): int
     {

@@ -20,7 +20,7 @@ class AuditLog
      * @ORM\Column(type="integer", name="logid", length=4,
      *     options={"comment"="Audit log ID","unsigned"=true}, nullable=false)
      */
-    private ?int $logid;
+    private ?int $logid = null;
 
     /**
      * @var double|string
@@ -35,14 +35,14 @@ class AuditLog
      *              "unsigned"=true},
      *     nullable=true)
      */
-    private ?int $cid;
+    private ?int $cid = null;
 
     /**
      * @ORM\Column(type="string", name="user", length=255,
      *     options={"comment"="User who performed this action"},
      *     nullable=true)
      */
-    private ?string $user;
+    private ?string $user = null;
 
     /**
      * @ORM\Column(type="string", name="datatype", length=32,
@@ -56,7 +56,7 @@ class AuditLog
      *     options={"comment"="Identifier in reference table"},
      *     nullable=true)
      */
-    private ?string $dataid;
+    private ?string $dataid = null;
 
     /**
      * @ORM\Column(type="string", name="action", length=128,
@@ -70,7 +70,7 @@ class AuditLog
      *     options={"comment"="Optional additional description of the entry"},
      *     nullable=true)
      */
-    private ?string $extrainfo;
+    private ?string $extrainfo = null;
 
     public function getLogid(): ?int
     {

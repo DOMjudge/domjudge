@@ -31,35 +31,35 @@ class JudgingRunOutput
      *     options={"comment"="Output of running the program"},
      *     nullable=true)
      */
-    private ?string $output_run;
+    private ?string $output_run = null;
 
     /**
      * @ORM\Column(type="blobtext", length=4294967295, name="output_diff",
      *     options={"comment"="Diffing the program output and testcase output"},
      *     nullable=true)
      */
-    private ?string $output_diff;
+    private ?string $output_diff = null;
 
     /**
      * @ORM\Column(type="blobtext", length=4294967295, name="output_error",
      *     options={"comment"="Standard error output of the program"},
      *     nullable=true)
      */
-    private ?string $output_error;
+    private ?string $output_error = null;
 
     /**
      * @ORM\Column(type="blobtext", length=4294967295, name="output_system",
      *     options={"comment"="Judging system output"},
      *     nullable=true)
      */
-    private ?string $output_system;
+    private ?string $output_system = null;
 
     /**
      * @ORM\Column(type="blobtext", length=4294967295, name="metadata",
      *     options={"comment"="Judging metadata"},
      *     nullable=true)
      */
-    private ?string $metadata;
+    private ?string $metadata = null;
 
     public function setRun(JudgingRun $run): JudgingRunOutput
     {

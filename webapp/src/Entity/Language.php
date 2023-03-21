@@ -119,7 +119,7 @@ class Language extends BaseApiEntity
      * @ORM\JoinColumn(name="compile_script", referencedColumnName="execid", onDelete="SET NULL")
      * @Serializer\Exclude()
      */
-    private ?Executable $compile_executable;
+    private ?Executable $compile_executable = null;
 
     /**
      * @ORM\OneToMany(targetEntity="Submission", mappedBy="language")

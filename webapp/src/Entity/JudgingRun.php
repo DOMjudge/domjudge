@@ -41,7 +41,7 @@ class JudgingRun extends BaseApiEntity
      *     nullable=true)
      * @Serializer\Exclude()
      */
-    private ?int $judgetaskid;
+    private ?int $judgetaskid = null;
 
     /**
      * @ORM\Column(type="string", name="runresult", length=32,
@@ -49,7 +49,7 @@ class JudgingRun extends BaseApiEntity
      *     nullable=true)
      * @Serializer\Exclude()
      */
-    private ?string $runresult;
+    private ?string $runresult = null;
 
     /**
      * @var double|string|null
@@ -99,7 +99,7 @@ class JudgingRun extends BaseApiEntity
      * @ORM\JoinColumn(name="judgetaskid", referencedColumnName="judgetaskid")
      * @Serializer\Exclude()
      */
-    private ?JudgeTask $judgetask;
+    private ?JudgeTask $judgetask = null;
 
     public function __construct()
     {

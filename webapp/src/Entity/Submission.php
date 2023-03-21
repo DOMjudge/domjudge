@@ -88,7 +88,7 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
      * @Serializer\Expose(if="context.getAttribute('domjudge_service').checkrole('jury')")
      * @OA\Property(nullable=true)
      */
-    private ?string $entry_point;
+    private ?string $entry_point = null;
 
     /**
      * @ORM\ManyToOne(targetEntity="Contest", inversedBy="submissions")
@@ -116,7 +116,7 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
      * @ORM\JoinColumn(name="userid", referencedColumnName="userid", onDelete="CASCADE")
      * @Serializer\Exclude()
      */
-    private ?User $user;
+    private ?User $user = null;
 
     /**
      * @ORM\ManyToOne(targetEntity="Problem", inversedBy="submissions")
@@ -166,14 +166,14 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
      * @ORM\JoinColumn(name="rejudgingid", referencedColumnName="rejudgingid", onDelete="SET NULL")
      * @Serializer\Exclude()
      */
-    private ?Rejudging $rejudging;
+    private ?Rejudging $rejudging = null;
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Submission", inversedBy="resubmissions")
      * @ORM\JoinColumn(name="origsubmitid", referencedColumnName="submitid", onDelete="SET NULL")
      * @Serializer\Exclude()
      */
-    private ?Submission $originalSubmission;
+    private ?Submission $originalSubmission = null;
 
     /**
      * @var ArrayCollection
@@ -186,7 +186,7 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
      * Holds the old result in the case this submission is displayed in a rejudging table.
      * @Serializer\Exclude()
      */
-    private ?string $old_result;
+    private ?string $old_result = null;
 
     public function getResult(): ?string
     {

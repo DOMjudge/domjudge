@@ -101,7 +101,7 @@ class TeamAffiliation extends BaseApiEntity implements AssetEntityInterface
      *     nullable=true)
      * @Serializer\Exclude()
      */
-    private ?string $internalComments;
+    private ?string $internalComments = null;
 
     /**
      * @ORM\OneToMany(targetEntity="Team", mappedBy="affiliation")

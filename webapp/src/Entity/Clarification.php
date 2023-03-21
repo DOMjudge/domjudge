@@ -65,7 +65,7 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
      *     nullable=true)
      * @Serializer\Exclude()
      */
-    private ?string $jury_member;
+    private ?string $jury_member = null;
 
     /**
      * @ORM\Column(type="string", name="category", length=255,
@@ -73,7 +73,7 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
      *     nullable=true)
      * @Serializer\Exclude()
      */
-    private ?string $category;
+    private ?string $category = null;
 
     /**
      * @ORM\Column(type="string", name="queue", length=255,
@@ -81,7 +81,7 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
      *     nullable=true)
      * @Serializer\Exclude()
      */
-    private ?string $queue;
+    private ?string $queue = null;
 
     /**
      * @ORM\Column(type="text", length=4294967295, name="body",
