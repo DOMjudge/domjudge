@@ -65,7 +65,7 @@ class Event
      * @ORM\ManyToOne(targetEntity="Contest", inversedBy="problems")
      * @ORM\JoinColumn(name="cid", referencedColumnName="cid", onDelete="CASCADE")
      */
-    private ?Contest $contest;
+    private ?Contest $contest = null;
 
     public function setEventid(int $eventid): Event
     {

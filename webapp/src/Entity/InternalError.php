@@ -70,13 +70,13 @@ class InternalError
      * @ORM\ManyToOne(targetEntity="Contest", inversedBy="internal_errors")
      * @ORM\JoinColumn(name="cid", referencedColumnName="cid", onDelete="SET NULL")
      */
-    private ?Contest $contest;
+    private ?Contest $contest = null;
 
     /**
      * @ORM\ManyToOne(targetEntity="Judging")
      * @ORM\JoinColumn(name="judgingid", referencedColumnName="judgingid", onDelete="SET NULL")
      */
-    private ?Judging $judging;
+    private ?Judging $judging = null;
 
     /**
      * @ORM\OneToMany(targetEntity="Judging", mappedBy="internalError")

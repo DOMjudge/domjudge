@@ -38,7 +38,7 @@ class QueueTask
      *     nullable=true)
      * @Serializer\Type("string")
      */
-    private ?int $jobid;
+    private ?int $jobid = null;
 
     /**
      * @ORM\Column(type="integer", name="priority", length=4,
@@ -61,7 +61,7 @@ class QueueTask
      * @ORM\JoinColumn(name="teamid", referencedColumnName="teamid", onDelete="CASCADE")
      * @Serializer\Exclude()
      */
-    private ?Team $team;
+    private ?Team $team = null;
 
     /**
      * @var double|string|null

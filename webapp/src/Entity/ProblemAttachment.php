@@ -24,23 +24,23 @@ class ProblemAttachment
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer", options={"comment"="Attachment ID","unsigned"="true"})
      */
-    private ?int $attachmentid;
+    private ?int $attachmentid = null;
 
     /**
      * @ORM\Column(type="string", length=255, options={"comment"="Filename of attachment"})
      */
-    private ?string $name;
+    private ?string $name = null;
 
     /**
      * @ORM\Column(type="string", length=4, options={"comment"="File type of attachment"})
      */
-    private ?string $type;
+    private ?string $type = null;
 
     /**
      * @ORM\ManyToOne(targetEntity=Problem::class, inversedBy="attachments")
      * @ORM\JoinColumn(name="probid", referencedColumnName="probid", onDelete="CASCADE")
      */
-    private ?Problem $problem;
+    private ?Problem $problem = null;
 
     /**
      * We use a OneToMany instead of a OneToOne here, because otherwise this

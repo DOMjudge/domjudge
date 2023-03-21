@@ -66,14 +66,14 @@ class Rejudging
      * @ORM\ManyToOne(targetEntity="User")
      * @ORM\JoinColumn(name="userid_start", referencedColumnName="userid", onDelete="SET NULL")
      */
-    private ?User $start_user;
+    private ?User $start_user = null;
 
     /**
      * Who finished the rejudging.
      * @ORM\ManyToOne(targetEntity="User")
      * @ORM\JoinColumn(name="userid_finish", referencedColumnName="userid", onDelete="SET NULL")
      */
-    private ?User $finish_user;
+    private ?User $finish_user = null;
 
     /**
      * One rejudging has many judgings.
@@ -101,14 +101,14 @@ class Rejudging
      *              "unsigned"=true},
      *     nullable=true)
      */
-    private ?int $repeat;
+    private ?int $repeat = null;
 
     /**
      * @ORM\ManyToOne(targetEntity="Rejudging")
      * @ORM\JoinColumn(name="repeat_rejudgingid", referencedColumnName="rejudgingid", onDelete="SET NULL")
      * @Serializer\Exclude()
      */
-    private ?Rejudging $repeatedRejudging;
+    private ?Rejudging $repeatedRejudging = null;
 
     public function __construct()
     {

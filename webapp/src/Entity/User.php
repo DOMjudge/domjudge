@@ -132,7 +132,7 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
      * @Assert\Ip(version="all")
      * @OA\Property(nullable=true)
      */
-    private ?string $ipAddress;
+    private ?string $ipAddress = null;
 
     /**
      * @ORM\Column(type="boolean", name="enabled",

@@ -35,7 +35,7 @@ class ExternalRun
      *              "collation"="utf8mb4_bin"},
      *     nullable=true)
      */
-    protected ?string $externalid;
+    protected ?string $externalid = null;
 
     /**
      * @ORM\Column(name="result", type="string", length=32,

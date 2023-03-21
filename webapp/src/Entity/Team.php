@@ -58,7 +58,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
      * @Serializer\SerializedName("icpc_id")
      * @OA\Property(nullable=true)
      */
-    protected ?string $icpcid;
+    protected ?string $icpcid = null;
 
     /**
      * @ORM\Column(type="string", name="name", length=255, options={"comment"="Team name", "collation"="utf8mb4_bin"},
@@ -90,14 +90,14 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
      * @Serializer\Groups({"Nonstrict"})
      * @OA\Property(nullable=true)
      */
-    private ?string $publicDescription;
+    private ?string $publicDescription = null;
 
     /**
      * @ORM\Column(type="string", length=255, name="room", options={"comment"="Physical location of team"},
      *                            nullable=true)
      * @Serializer\Exclude()
      */
-    private ?string $room;
+    private ?string $room = null;
 
     /**
      * @ORM\Column(type="text", length=4294967295, name="internalcomments",
@@ -105,7 +105,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
      *                          nullable=true)
      * @Serializer\Exclude()
      */
-    private ?string $internalComments;
+    private ?string $internalComments = null;
 
     /**
      * @var double|string|null
@@ -138,7 +138,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
     /**
      * @Serializer\Exclude
      */
-    private ?User $existingUser;
+    private ?User $existingUser = null;
 
     /**
      * @Assert\File(mimeTypes={"image/png","image/jpeg","image/svg+xml"}, mimeTypesMessage="Only PNG's, JPG's and SVG's are allowed")
@@ -156,14 +156,14 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
      * @ORM\JoinColumn(name="affilid", referencedColumnName="affilid", onDelete="SET NULL")
      * @Serializer\Exclude()
      */
-    private ?TeamAffiliation $affiliation;
+    private ?TeamAffiliation $affiliation = null;
 
     /**
      * @ORM\ManyToOne(targetEntity="TeamCategory", inversedBy="teams")
      * @ORM\JoinColumn(name="categoryid", referencedColumnName="categoryid", onDelete="CASCADE")
      * @Serializer\Exclude()
      */
-    private ?TeamCategory $category;
+    private ?TeamCategory $category = null;
 
     /**
      * @ORM\ManyToMany(targetEntity="Contest", mappedBy="teams")

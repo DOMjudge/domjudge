@@ -42,7 +42,7 @@ class JudgeTask
      * @ORM\JoinColumn(name="judgehostid", referencedColumnName="judgehostid")
      * @Serializer\Exclude()
      */
-    private ?Judgehost $judgehost;
+    private ?Judgehost $judgehost = null;
 
     /**
      * @ORM\Column(type="judge_task_type", name="type",
@@ -69,14 +69,14 @@ class JudgeTask
      *     nullable=true)
      * @Serializer\Type("string")
      */
-    private ?int $jobid;
+    private ?int $jobid = null;
 
     /**
      * @ORM\Column(type="string", name="uuid",
      *     options={"comment"="Optional UUID for the associated judging, used for caching."},
      *     nullable=true)
      */
-    private ?string $uuid;
+    private ?string $uuid = null;
 
     /**
      * @ORM\Column(type="integer", name="submitid", length=4,
@@ -84,7 +84,7 @@ class JudgeTask
      *     nullable=true)
      * @Serializer\Type("string")
      */
-    private ?int $submitid;
+    private ?int $submitid = null;
 
     // Note that we rely on the fact here that files with an ID are immutable,
     // so clients are allowed to cache them on disk.
@@ -95,7 +95,7 @@ class JudgeTask
      *     nullable=true)
      * @Serializer\Type("string")
      */
-    private ?int $compile_script_id;
+    private ?int $compile_script_id = null;
 
     /**
      * @ORM\Column(type="integer", name="run_script_id", length=4,
@@ -103,7 +103,7 @@ class JudgeTask
      *     nullable=true)
      * @Serializer\Type("string")
      */
-    private ?int $run_script_id;
+    private ?int $run_script_id = null;
 
     /**
      * @ORM\Column(type="integer", name="compare_script_id", length=4,
@@ -111,7 +111,7 @@ class JudgeTask
      *     nullable=true)
      * @Serializer\Type("string")
      */
-    private ?int $compare_script_id;
+    private ?int $compare_script_id = null;
 
     /**
      * @ORM\Column(type="integer", name="testcase_id", length=4,
@@ -119,7 +119,7 @@ class JudgeTask
      *     nullable=true)
      * @Serializer\Type("string")
      */
-    private ?int $testcase_id;
+    private ?int $testcase_id = null;
 
     /**
      * @ORM\Column(type="string", name="testcase_hash", length=100,
@@ -127,7 +127,7 @@ class JudgeTask
      *     nullable=true)
      * @Serializer\Type("string")
      */
-    private ?string $testcase_hash;
+    private ?string $testcase_hash = null;
 
     /**
      * @ORM\Column(type="text", name="compile_config",
@@ -135,7 +135,7 @@ class JudgeTask
      *              "collation"="utf8mb4_bin", "default"=NULL},
      *     nullable=true)
      */
-    protected ?string $compile_config;
+    protected ?string $compile_config = null;
 
     /**
      * @ORM\Column(type="text", name="run_config",
@@ -143,7 +143,7 @@ class JudgeTask
      *              "collation"="utf8mb4_bin", "default"=NULL},
      *     nullable=true)
      */
-    protected ?string $run_config;
+    protected ?string $run_config = null;
 
     /**
      * @ORM\Column(type="text", name="compare_config",
@@ -151,7 +151,7 @@ class JudgeTask
      *              "collation"="utf8mb4_bin", "default"=NULL},
      *     nullable=true)
      */
-    protected ?string $compare_config;
+    protected ?string $compare_config = null;
 
     /**
      * @ORM\Column(type="boolean", name="valid",

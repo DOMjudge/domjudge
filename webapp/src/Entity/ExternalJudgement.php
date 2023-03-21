@@ -65,7 +65,7 @@ class ExternalJudgement
      *     nullable=true)
      * @Serializer\Exclude()
      */
-    private ?string $jury_member;
+    private ?string $jury_member = null;
 
     /**
      * @ORM\Column(type="string", name="verify_comment", length=255,
@@ -74,7 +74,7 @@ class ExternalJudgement
      *     nullable=true)
      * @Serializer\Exclude()
      */
-    private ?string $verify_comment;
+    private ?string $verify_comment = null;
 
     /**
      * @var double|string
