@@ -524,6 +524,7 @@ class CheckConfigService
                 $moreproblemerrors[$probid] .= sprintf("problem-specific memory limit %s is larger than global script filesize limit (%s).\n", $memlimit, $script_filesize_limit);
             }
 
+            /** @var array $tcs_size */
             $tcs_size = $this->em->createQueryBuilder()
                 ->select('tc.testcaseid', 'tc.ranknumber', 'length(tcc.output) as output_size' )
                 ->from(Testcase::class, 'tc')

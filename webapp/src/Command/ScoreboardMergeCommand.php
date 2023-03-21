@@ -120,6 +120,7 @@ class ScoreboardMergeCommand extends Command
             ->setName($input->getOption('category'))
             ->setCategoryid(0);
 
+        /** @var string[] $siteArguments */
         $siteArguments = $input->getArgument('feed-url');
 
         // Convert from flat list to list of (url, groups) pairs

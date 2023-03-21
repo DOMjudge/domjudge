@@ -237,6 +237,7 @@ class StatisticsService
         //   - The judging submission is part of the selected contest
         //   - The judging submission matches the problem we're analyzing
         //   - The submission was made by a team in a visible category
+        /** @var Judging[] $judgings */
         $judgings = $this->em->createQueryBuilder()
             ->select('j, jr', 's', 'team', 'partial p.{timelimit,name,probid}')
             ->from(Judging::class, 'j')
@@ -264,9 +265,10 @@ class StatisticsService
             }
         }
         // Sort the judgings by runtime.
-        usort($judgings, static fn($a, $b) => $a->getMaxRuntime() <=> $b->getMaxRuntime());
+        usort($judgings, static fn(Judging $a, Judging $b) => $a->getMaxRuntime() <=> $b->getMaxRuntime());
 
         // Go through the judgings we found, and get the submissions.
+        /** @var Submission[] $submissions */
         $submissions = [];
         $problems = [];
         foreach ($judgings as $j) {
@@ -280,9 +282,9 @@ class StatisticsService
                 $problems[] = $s->getProblem();
             }
         }
-        usort($submissions, static fn($a, $b) => $a->getSubmitTime() <=> $b->getSubmitTime());
-        usort($problems, static fn($a, $b) => $a->getName() <=> $b->getName());
-        usort($judgings, static fn($a, $b) => $a->getJudgingid() <=> $b->getJudgingid());
+        usort($submissions, static fn(Submission $a, Submission $b) => $a->getSubmitTime() <=> $b->getSubmitTime());
+        usort($problems, static fn(Judging $a, Judging $b) => $a->getName() <=> $b->getName());
+        usort($judgings, static fn(Judging $a, Judging $b) => $a->getJudgingid() <=> $b->getJudgingid());
 
         $misc = [];
         $misc['correct_percentage'] = array_key_exists('correct',

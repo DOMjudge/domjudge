@@ -69,7 +69,9 @@ class ClarificationControllerTest extends BaseTestCase
         $clar = static::getContainer()->get(EntityManagerInterface::class)->getRepository(Clarification::class)->findOneBy(['body' => 'What is 2+2?']);
         $this->verifyPageResponse('GET', '/jury/clarifications/' . $clar->getClarid(), 200);
 
-        $count = count(static::getContainer()->get(EntityManagerInterface::class)->getRepository(Clarification::class)->findAll());
+        /** @var Clarification[] $clarifications */
+        $clarifications = static::getContainer()->get(EntityManagerInterface::class)->getRepository(Clarification::class)->findAll();
+        $count = count($clarifications);
         $clarificationText = $this->getCurrentCrawler()->filter('pre')->extract(['_text']);
         self::assertEquals('What is 2+2?',
                            $clarificationText[0]);

@@ -292,7 +292,7 @@ class ProblemController extends BaseController
             ->getResult();
 
         foreach ($solutions as $solution) {
-            $results = $solution->getExpectedResults();
+            $results = $solution->getExpectedResults() ?? [];
             // Only support single outcome solutions.
             if (count($results) !== 1) {
                 continue;
