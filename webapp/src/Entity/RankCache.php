@@ -41,7 +41,7 @@ class RankCache
      *              "default"="0"},
      *     nullable=false)
      */
-    private $totalruntime_restricted = 0;
+    private int $totalruntime_restricted = 0;
 
     /**
      * @ORM\Column(type="integer", name="points_public", length=4,
@@ -65,7 +65,7 @@ class RankCache
      *              "default"="0"},
      *     nullable=false)
      */
-    private $totalruntime_public = 0;
+    private int $totalruntime_public = 0;
 
     /**
      * @ORM\Id

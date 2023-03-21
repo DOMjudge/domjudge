@@ -82,24 +82,22 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     private string $shortname = '';
 
     /**
-     * @var double|string
      * @ORM\Column(type="decimal", precision=32, scale=9, name="activatetime",
      *     options={"comment"="Time contest becomes visible in team/public views",
      *              "unsigned"=true},
      *     nullable=false)
      * @Serializer\Exclude()
      */
-    private $activatetime;
+    private string|float $activatetime;
 
     /**
-     * @var double|string
      * @ORM\Column(type="decimal", precision=32, scale=9, name="starttime",
      *     options={"comment"="Time contest starts, submissions accepted",
      *              "unsigned"=true},
      *     nullable=false)
      * @Serializer\Exclude()
      */
-    private $starttime;
+    private string|float|null $starttime = null;
 
     /**
      * @ORM\Column(type="boolean", name="starttime_enabled",
@@ -110,43 +108,39 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     private bool $starttimeEnabled = true;
 
     /**
-     * @var double|string
      * @ORM\Column(type="decimal", precision=32, scale=9, name="freezetime",
      *     options={"comment"="Time scoreboard is frozen","unsigned"=true},
      *     nullable=true)
      * @Serializer\Exclude()
      */
-    private $freezetime;
+    private string|float|null $freezetime = null;
 
     /**
-     * @var double|string
      * @ORM\Column(type="decimal", precision=32, scale=9, name="endtime",
      *     options={"comment"="Time after which no more submissions are accepted",
      *              "unsigned"=true},
      *     nullable=false)
      * @Serializer\Exclude()
      */
-    private $endtime;
+    private string|float $endtime;
 
     /**
-     * @var double|string|null
      * @ORM\Column(type="decimal", precision=32, scale=9, name="unfreezetime",
      *     options={"comment"="Unfreeze a frozen scoreboard at this time",
      *              "unsigned"=true},
      *     nullable=true)
      * @Serializer\Exclude()
      */
-    private $unfreezetime = null;
+    private string|float|null $unfreezetime = null;
 
     /**
-     * @var double|string|null
      * @ORM\Column(type="decimal", precision=32, scale=9, name="finalizetime",
      *     options={"comment"="Time when contest was finalized, null if not yet",
      *              "unsigned"=true},
      *     nullable=true)
      * @Serializer\Exclude()
      */
-    private $finalizetime = null;
+    private string|float|null $finalizetime = null;
 
     /**
      * @ORM\Column(type="text", name="finalizecomment", length=65535,
@@ -207,14 +201,13 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     private int $bronzeMedals = 4;
 
     /**
-     * @var double|string
      * @ORM\Column(type="decimal", precision=32, scale=9, name="deactivatetime",
      *     options={"comment"="Time contest becomes invisible in team/public views",
      *              "unsigned"=true},
      *     nullable=true)
      * @Serializer\Exclude()
      */
-    private $deactivatetime = null;
+    private string|float|null $deactivatetime = null;
 
     /**
      * @ORM\Column(type="string", length=64, name="activatetime_string",

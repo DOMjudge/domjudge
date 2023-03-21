@@ -52,22 +52,20 @@ class JudgingRun extends BaseApiEntity
     private ?string $runresult = null;
 
     /**
-     * @var double|string|null
      * @ORM\Column(type="float", name="runtime",
      *     options={"comment"="Submission running time on this testcase"},
      *     nullable=true)
      * @Serializer\Exclude()
      */
-    private $runtime;
+    private ?float $runtime = null;
 
     /**
-     * @var double|string|null
      * @ORM\Column(type="decimal", precision=32, scale=9, name="endtime",
      *     options={"comment"="Time run judging ended", "unsigned"=true},
      *     nullable=true)
      * @Serializer\Exclude()
      */
-    private $endtime;
+    private string|float|null $endtime = null;
 
     /**
      * @ORM\ManyToOne(targetEntity="Judging", inversedBy="runs")
@@ -166,7 +164,7 @@ class JudgingRun extends BaseApiEntity
         return $this;
     }
 
-    public function getEndtime(): string|float
+    public function getEndtime(): string|float|null
     {
         return $this->endtime;
     }

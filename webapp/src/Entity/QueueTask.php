@@ -64,12 +64,11 @@ class QueueTask
     private ?Team $team = null;
 
     /**
-     * @var double|string|null
      * @ORM\Column(type="decimal", precision=32, scale=9, name="starttime", options={"comment"="Time started work",
      *                             "unsigned"=true}, nullable=true)
      * @Serializer\Exclude()
      */
-    private $startTime;
+    private float|string|null $startTime = null;
 
     public function getQueueTaskid(): int
     {

@@ -91,22 +91,20 @@ class ContestProblem
     private ?int $lazyEvalResults = null;
 
     /**
-     * @var Contest|int
      * @ORM\Id()
      * @ORM\ManyToOne(targetEntity="Contest", inversedBy="problems")
      * @ORM\JoinColumn(name="cid", referencedColumnName="cid", onDelete="CASCADE")
      * @Serializer\Exclude()
      */
-    private $contest;
+    private ?Contest $contest = null;
 
     /**
-     * @var Problem|int
      * @ORM\Id()
      * @ORM\ManyToOne(targetEntity="Problem", inversedBy="contest_problems", fetch="EAGER")
      * @ORM\JoinColumn(name="probid", referencedColumnName="probid", onDelete="CASCADE")
      * @Serializer\Inline()
      */
-    private $problem;
+    private ?Problem $problem = null;
 
     /**
      * @ORM\OneToMany(targetEntity="App\Entity\Submission", mappedBy="contest_problem")

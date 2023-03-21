@@ -19,21 +19,18 @@ use Symfony\Component\Yaml\Yaml;
 class ConfigurationServiceTest extends KernelTestCase
 {
     /**
-     * @var EntityManagerInterface|MockObject
+     * @var (EntityManagerInterface&MockObject)|null
      */
-    private $em;
+    private ?EntityManagerInterface $em;
 
-    /**
-     * @var ObjectRepository|MockObject
-     */
-    private $configRepository;
+    private ObjectRepository&MockObject $configRepository;
 
     private InvocationMocker $emGetRepositoryExpects;
 
     /**
-     * @var LoggerInterface|MockObject
+     * @var (LoggerInterface&MockObject)|null
      */
-    private $logger;
+    private ?LoggerInterface $logger;
 
     private ?ConfigurationService $config;
     private array $dbConfig;

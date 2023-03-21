@@ -101,13 +101,13 @@ class Problem extends BaseApiEntity
     private bool $combined_run_compare = false;
 
     /**
-     * @var resource
+     * @var resource|string|null
      * @ORM\Column(type="blob", name="problemtext",
      *     options={"comment"="Problem text in HTML/PDF/ASCII"},
      *     nullable=true)
      * @Serializer\Exclude()
      */
-    private $problemtext = null;
+    private mixed $problemtext = null;
 
     /**
      * @Assert\File()

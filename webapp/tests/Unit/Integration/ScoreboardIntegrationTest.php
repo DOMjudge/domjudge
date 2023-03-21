@@ -32,55 +32,31 @@ class ScoreboardIntegrationTest extends KernelTestCase
     public const NUM_PROBLEMS = 3;
     public const NUM_TEAMS = 3;
 
-    /**
-     * @var DOMJudgeService
-     */
-    private $dj;
+    private DOMJudgeService $dj;
 
-    /**
-     * @var ScoreboardService
-     */
-    private $ss;
+    private ScoreboardService $ss;
 
-    /**
-     * @var EntityManager
-     */
-    private $em;
+    private ?EntityManager $em;
 
-    /**
-     * @var ConfigurationService|MockObject
-     */
-    private $config;
+    private ConfigurationService&MockObject $config;
 
-    /**
-     * @var array
-     */
-    private $configValues;
+    private array $configValues;
 
-    /**
-     * @var Contest
-     */
-    private $contest;
+    private Contest $contest;
 
-    /**
-     * @var Judgehost
-     */
-    private $judgehost;
+    private ?Judgehost $judgehost;
 
-    /**
-     * @var Rejudging
-     */
-    private $rejudging;
+    private Rejudging $rejudging;
 
     /**
      * @var Problem[]
      */
-    private $problems;
+    private ?array $problems = null;
 
     /**
      * @var Team[]
      */
-    private $teams;
+    private ?array $teams = null;
 
     protected function setUp(): void
     {

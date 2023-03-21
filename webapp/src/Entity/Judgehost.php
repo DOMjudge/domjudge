@@ -55,7 +55,7 @@ class Judgehost
      *     nullable=true)
      * @OA\Property(nullable=true)
      */
-    private $polltime;
+    private string|float|null $polltime = null;
 
     /**
      * @ORM\OneToMany(targetEntity="JudgeTask", mappedBy="judgehost")

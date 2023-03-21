@@ -108,13 +108,12 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
     private ?string $internalComments = null;
 
     /**
-     * @var double|string|null
      * @ORM\Column(type="decimal", precision=32, scale=9, name="judging_last_started",
      *     options={"comment"="Start time of last judging for prioritization",
      *              "unsigned"=true}, nullable=true)
      * @Serializer\Exclude()
      */
-    private $judging_last_started;
+    private string|float|null $judging_last_started = null;
 
     /**
      * @ORM\Column(type="integer", name="penalty",

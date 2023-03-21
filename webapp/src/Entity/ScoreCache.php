@@ -57,7 +57,7 @@ class ScoreCache
      *              "default"="0"},
      *     nullable=false)
      */
-    private $runtime_restricted = 0;
+    private int $runtime_restricted = 0;
 
     /**
      * @ORM\Column(type="integer", name="submissions_public", length=4,
@@ -98,7 +98,7 @@ class ScoreCache
      *              "default"="0"},
      *     nullable=false)
      */
-    private $runtime_public = 0;
+    private int $runtime_public = 0;
 
     /**
      * @ORM\Column(type="boolean", name="is_first_to_solve",
