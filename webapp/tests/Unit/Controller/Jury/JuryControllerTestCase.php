@@ -232,7 +232,9 @@ abstract class JuryControllerTestCase extends BaseTestCase
             self::assertSelectorExists('body:contains("' . $tmpValue . '")');
         }
         if (in_array($id, static::$addEntitiesCount)) {
-            self::assertSelectorExists('body:contains("' . count($element[$id]) . '")');
+            /** @var array $item */
+            $item = $element[$id];
+            self::assertSelectorExists('body:contains("' . count($item) . '")');
         }
     }
 

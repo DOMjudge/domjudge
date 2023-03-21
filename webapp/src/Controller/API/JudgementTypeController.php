@@ -80,7 +80,7 @@ class JudgementTypeController extends AbstractRestController
     /**
      * Get the judgement types, optionally filtered on the given IDs.
      */
-    protected function getJudgementTypes(array $filteredOn = null): ?array
+    protected function getJudgementTypes(array $filteredOn = null): array
     {
         $verdictsConfig = $this->dj->getDomjudgeEtcDir() . '/verdicts.php';
         $verdicts       = include $verdictsConfig;

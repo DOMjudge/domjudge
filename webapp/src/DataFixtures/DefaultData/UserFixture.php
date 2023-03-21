@@ -86,6 +86,7 @@ class UserFixture extends AbstractDefaultDataFixture implements DependentFixture
             if ($credential === '' || $credential[0] === '#') {
                 continue;
             }
+            /** @var string[] $items */
             $items = preg_split("/\s+/", $credential);
             if (count($items) !== 4) {
                 throw new Exception("Error parsing REST API credentials. Invalid format in line $lineno.");

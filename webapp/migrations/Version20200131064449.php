@@ -54,6 +54,7 @@ final class Version20200131064449 extends AbstractMigration implements Container
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
 
         $em = $this->container->get('doctrine')->getManager();
+        /** @var TeamCategory[] $selfRegistrationCategories */
         $selfRegistrationCategories = $em->getRepository(TeamCategory::class)->findBy(
             ['allow_self_registration' => 1],
             ['sortorder' => 'ASC']

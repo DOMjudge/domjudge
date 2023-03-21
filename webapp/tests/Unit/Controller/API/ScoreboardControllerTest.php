@@ -58,8 +58,10 @@ class ScoreboardControllerTest extends BaseTestCase
         $filter = '?'.implode('&', $filters);
         $url = "/contests/$contestId/scoreboard";
         $scoreboard = $this->verifyApiJsonResponse('GET', $url.$filter, 200, 'admin');
+        /** @var array $scoreboardRows */
+        $scoreboardRows = $scoreboard['rows'];
         self::assertNotEmpty($scoreboard);
-        self::assertEquals($expectedCount, count($scoreboard['rows']));
+        self::assertEquals($expectedCount, count($scoreboardRows));
     }
 
     public function provideFilters(): Generator

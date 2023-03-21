@@ -188,6 +188,7 @@ class RejudgingService
         }
 
         // Get all submissions that we should consider.
+        /** @var array $submissions */
         $submissions = $this->em->createQueryBuilder()
             ->from(Submission::class, 's')
             ->leftJoin('s.judgings', 'j', 'WITH', 'j.rejudging = :rejudging')

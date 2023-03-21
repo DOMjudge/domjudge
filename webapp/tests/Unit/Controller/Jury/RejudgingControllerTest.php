@@ -109,7 +109,9 @@ class RejudgingControllerTest extends BaseTestCase
         $this->client->request('GET', '/jury/updates');
         $response = $this->client->getResponse();
         $jsonResponse = json_decode($response->getContent(), true, 512, JSON_THROW_ON_ERROR);
-        $this->assertEquals($todo, count($jsonResponse['rejudgings']));
+        /** @var array $rejudgings */
+        $rejudgings = $jsonResponse['rejudgings'];
+        $this->assertEquals($todo, count($rejudgings));
     }
 
     public function provideShownRejudgings(): Generator

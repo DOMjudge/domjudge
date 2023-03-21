@@ -623,8 +623,8 @@ class ContestController extends AbstractRestController
 
                 $q = $qb->getQuery();
 
+                /** @var Event[] $events */
                 $events = $q->getResult();
-                /** @var Event $event */
                 foreach ($events as $event) {
                     $data = $event->getContent();
                     // Filter fields with specific access restrictions.

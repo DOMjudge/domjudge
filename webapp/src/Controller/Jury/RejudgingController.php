@@ -533,36 +533,42 @@ class RejudgingController extends BaseController
                     ->select('j', 's', 'r', 't')
                     ->andWhere('j.valid = 1');
 
+                /** @var int[] $contests */
                 $contests = $data['contests'] ?? [];
                 if (count($contests)) {
                     $queryBuilder
                         ->andWhere('j.contest IN (:contests)')
                         ->setParameter('contests', $contests);
                 }
+                /** @var int[] $problems */
                 $problems = $data['problems'] ?? [];
                 if (count($problems)) {
                     $queryBuilder
                         ->andWhere('s.problem IN (:problems)')
                         ->setParameter('problems', $problems);
                 }
+                /** @var int[] $languages */
                 $languages = $data['languages'] ?? [];
                 if (count($languages)) {
                     $queryBuilder
                         ->andWhere('s.language IN (:languages)')
                         ->setParameter('languages', $languages);
                 }
+                /** @var int[] $teams */
                 $teams = $data['teams'] ?? [];
                 if (count($teams)) {
                     $queryBuilder
                         ->andWhere('s.team IN (:teams)')
                         ->setParameter('teams', $teams);
                 }
+                /** @var int[] $users */
                 $users = $data['users'] ?? [];
                 if (count($users)) {
                     $queryBuilder
                         ->andWhere('s.user IN (:users)')
                         ->setParameter('users', $users);
                 }
+                /** @var int[] $judgehosts */
                 $judgehosts = $data['judgehosts'] ?? [];
                 if (count($judgehosts)) {
                     $queryBuilder
@@ -572,6 +578,7 @@ class RejudgingController extends BaseController
                         ->setParameter('judgehosts', $judgehosts)
                         ->distinct();
                 }
+                /** @var string[] $verdicts */
                 $verdicts = $data['verdicts'] ?? [];
                 if (count($verdicts)) {
                     $queryBuilder

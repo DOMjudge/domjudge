@@ -273,6 +273,7 @@ class JuryMiscController extends BaseController
             // As we only load the needed judging, this will automatically be the first one
             /** @var Judging $judging */
             $judging         = $submission->getJudgings()->first();
+            /** @var string[] $expectedResults */
             $expectedResults = $submission->getExpectedResults();
             $submissionId    = $submission->getSubmitid();
 
