@@ -821,7 +821,7 @@ class SubmissionController extends BaseController
 
         $formBuilder = $this->createFormBuilder($data)
             ->add('problem', EntityType::class, [
-                'class' => 'App\Entity\Problem',
+                'class' => \App\Entity\Problem::class,
                 'choice_label' => 'name',
                 'query_builder' => fn(EntityRepository $er) => $er->createQueryBuilder('p')
                     ->join('p.contest_problems', 'cp')
@@ -831,7 +831,7 @@ class SubmissionController extends BaseController
                     ->orderBy('p.name'),
             ])
             ->add('language', EntityType::class, [
-                'class' => 'App\Entity\Language',
+                'class' => \App\Entity\Language::class,
                 'choice_label' => 'name',
                 'query_builder' => fn(EntityRepository $er) => $er->createQueryBuilder('lang')
                     ->andWhere('lang.allowSubmit = 1')
