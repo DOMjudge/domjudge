@@ -106,7 +106,7 @@ class ImmutableExecutable
     /**
      * @ORM\PreRemove()
      */
-    public function disallowDelete(): void
+    public function disallowDelete(): never
     {
         throw new RuntimeException('An immutable executable cannot be deleted');
     }

@@ -144,7 +144,7 @@ class ExecutableFile
     /**
      * @ORM\PreRemove()
      */
-    public function disallowDelete(): void
+    public function disallowDelete(): never
     {
         throw new RuntimeException('An executable file cannot be deleted');
     }
