@@ -749,9 +749,9 @@ class EventLogService implements ContainerAwareInterface
                 break;
             case 'judgements':
             case 'runs':
-                $toCheck = array_merge($toCheck, [
+                $toCheck = [...$toCheck, ...[
                     'judgement-types' => $data['judgement_type_id'],
-                ]);
+                ]];
                 break;
             case 'clarifications':
                 $toCheck = array_merge($toCheck, [
