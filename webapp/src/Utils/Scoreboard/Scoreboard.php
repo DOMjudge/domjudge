@@ -171,7 +171,7 @@ class Scoreboard
         }
 
         // Now sort the scores using the scoreboard sort function.
-        uasort($this->scores, [$this, 'scoreboardCompare']);
+        uasort($this->scores, $this->scoreboardCompare(...));
 
         // Loop over all teams to calculate ranks and totals.
         $prevSortOrder  = -1;

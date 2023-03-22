@@ -134,7 +134,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
             return $this->renderData($request, []);
         }
 
-        $objects = array_map([$this, 'transformObject'], $objects);
+        $objects = array_map($this->transformObject(...), $objects);
 
         $ordinalArray = new OrdinalArray($objects);
         $objects      = $ordinalArray->getItems();

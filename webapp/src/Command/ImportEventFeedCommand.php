@@ -98,8 +98,8 @@ class ImportEventFeedCommand extends Command
 
         $output->setVerbosity(OutputInterface::VERBOSITY_NORMAL);
 
-        pcntl_signal(SIGTERM, [$this, 'stopCommand']);
-        pcntl_signal(SIGINT, [$this, 'stopCommand']);
+        pcntl_signal(SIGTERM, $this->stopCommand(...));
+        pcntl_signal(SIGINT, $this->stopCommand(...));
 
         if (!$this->loadSource($input, $output)) {
             return static::FAILURE;
