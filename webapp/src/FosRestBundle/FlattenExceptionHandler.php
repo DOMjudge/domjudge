@@ -17,7 +17,7 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class FlattenExceptionHandler implements SubscribingHandlerInterface
 {
-    public function __construct(private ExceptionValueMap $messagesMap, private bool $debug)
+    public function __construct(private readonly ExceptionValueMap $messagesMap, private readonly bool $debug)
     {
     }
 

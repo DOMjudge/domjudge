@@ -29,9 +29,9 @@ use Symfony\Component\Routing\Annotation\Route;
 class InternalErrorController extends BaseController
 {
     public function __construct(
-        protected EntityManagerInterface $em,
-        protected DOMJudgeService $dj,
-        protected RejudgingService $rejudgingService
+        protected readonly EntityManagerInterface $em,
+        protected readonly DOMJudgeService $dj,
+        protected readonly RejudgingService $rejudgingService
     ) {
     }
 

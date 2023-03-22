@@ -16,7 +16,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
  */
 class RootController extends BaseController
 {
-    public function __construct(protected DOMJudgeService $dj)
+    public function __construct(protected readonly DOMJudgeService $dj)
     {
     }
 

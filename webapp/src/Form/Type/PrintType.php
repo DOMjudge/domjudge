@@ -11,7 +11,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 
 class PrintType extends AbstractType
 {
-    public function __construct(protected EntityManagerInterface $em)
+    public function __construct(protected readonly EntityManagerInterface $em)
     {
     }
 

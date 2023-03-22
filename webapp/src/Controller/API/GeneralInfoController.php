@@ -44,14 +44,14 @@ class GeneralInfoController extends AbstractFOSRestController
     final public const CCS_SPEC_API_URL = 'https://ccs-specs.icpc.io/2022-07/contest_api';
 
     public function __construct(
-        protected EntityManagerInterface $em,
-        protected DOMJudgeService $dj,
-        protected ConfigurationService $config,
-        protected EventLogService $eventLogService,
-        protected CheckConfigService $checkConfigService,
-        protected RouterInterface $router,
-        protected LoggerInterface $logger,
-        protected ImportProblemService $importProblemService
+        protected readonly EntityManagerInterface $em,
+        protected readonly DOMJudgeService $dj,
+        protected readonly ConfigurationService $config,
+        protected readonly EventLogService $eventLogService,
+        protected readonly CheckConfigService $checkConfigService,
+        protected readonly RouterInterface $router,
+        protected readonly LoggerInterface $logger,
+        protected readonly ImportProblemService $importProblemService
     ) {
     }
 

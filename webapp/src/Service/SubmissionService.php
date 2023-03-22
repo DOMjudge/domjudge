@@ -46,12 +46,12 @@ class SubmissionService
     ];
 
     public function __construct(
-        protected EntityManagerInterface $em,
-        protected LoggerInterface $logger,
-        protected DOMJudgeService $dj,
-        protected ConfigurationService $config,
-        protected EventLogService $eventLogService,
-        protected ScoreboardService $scoreboardService
+        protected readonly EntityManagerInterface $em,
+        protected readonly LoggerInterface $logger,
+        protected readonly DOMJudgeService $dj,
+        protected readonly ConfigurationService $config,
+        protected readonly EventLogService $eventLogService,
+        protected readonly ScoreboardService $scoreboardService
     ) {
     }
 

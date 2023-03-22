@@ -30,12 +30,12 @@ use Symfony\Component\Yaml\Yaml;
 class ImportExportService
 {
     public function __construct(
-        protected EntityManagerInterface $em,
-        protected ScoreboardService $scoreboardService,
-        protected DOMJudgeService $dj,
-        protected ConfigurationService $config,
-        protected EventLogService $eventLogService,
-        protected ValidatorInterface $validator
+        protected readonly EntityManagerInterface $em,
+        protected readonly ScoreboardService $scoreboardService,
+        protected readonly DOMJudgeService $dj,
+        protected readonly ConfigurationService $config,
+        protected readonly EventLogService $eventLogService,
+        protected readonly ValidatorInterface $validator
     ) {
     }
 

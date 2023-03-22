@@ -146,10 +146,10 @@ class EventLogService implements ContainerAwareInterface
     ];
 
     public function __construct(
-        protected DOMJudgeService $dj,
-        protected ConfigurationService $config,
-        protected EntityManagerInterface $em,
-        protected LoggerInterface $logger
+        protected readonly DOMJudgeService $dj,
+        protected readonly ConfigurationService $config,
+        protected readonly EntityManagerInterface $em,
+        protected readonly LoggerInterface $logger
     ) {
         foreach ($this->apiEndpoints as $endpoint => $data) {
             if (!array_key_exists(self::KEY_URL, $data)) {

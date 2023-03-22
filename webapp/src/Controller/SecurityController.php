@@ -22,8 +22,11 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 class SecurityController extends AbstractController
 {
-    public function __construct(private DOMJudgeService $dj, private ConfigurationService $config, private EntityManagerInterface $em)
-    {
+    public function __construct(
+        private readonly DOMJudgeService $dj,
+        private readonly ConfigurationService $config,
+        private readonly EntityManagerInterface $em
+    ) {
     }
 
     /**

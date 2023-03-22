@@ -17,7 +17,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 
 class SubmissionsFilterType extends AbstractType
 {
-    public function __construct(protected DOMJudgeService $dj, protected EntityManagerInterface $em)
+    public function __construct(protected readonly DOMJudgeService $dj, protected readonly EntityManagerInterface $em)
     {
     }
 

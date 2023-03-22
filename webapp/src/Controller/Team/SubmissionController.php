@@ -39,11 +39,11 @@ class SubmissionController extends BaseController
     final public const ALWAYS_SHOW_COMPILE_OUTPUT = 2;
 
     public function __construct(
-        protected EntityManagerInterface $em,
-        protected SubmissionService $submissionService,
-        protected DOMJudgeService $dj,
-        protected ConfigurationService $config,
-        protected FormFactoryInterface $formFactory
+        protected readonly EntityManagerInterface $em,
+        protected readonly SubmissionService $submissionService,
+        protected readonly DOMJudgeService $dj,
+        protected readonly ConfigurationService $config,
+        protected readonly FormFactoryInterface $formFactory
     ) {
     }
 

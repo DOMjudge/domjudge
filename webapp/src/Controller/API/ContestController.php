@@ -56,8 +56,8 @@ class ContestController extends AbstractRestController
         DOMJudgeService $dj,
         ConfigurationService $config,
         EventLogService $eventLogService,
-        protected ImportExportService $importExportService,
-        protected AssetUpdateService $assetUpdater
+        protected readonly ImportExportService $importExportService,
+        protected readonly AssetUpdateService $assetUpdater
     ) {
         parent::__construct($entityManager, $dj, $config, $eventLogService);
     }

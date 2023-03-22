@@ -33,9 +33,9 @@ use Symfony\Component\Validator\Context\ExecutionContext;
 class UserRegistrationType extends AbstractType
 {
     public function __construct(
-        protected DOMJudgeService $dj,
-        protected ConfigurationService $config,
-        protected EntityManagerInterface $em
+        protected readonly DOMJudgeService $dj,
+        protected readonly ConfigurationService $config,
+        protected readonly EntityManagerInterface $em
     ) {
     }
 

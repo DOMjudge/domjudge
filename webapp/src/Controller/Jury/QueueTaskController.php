@@ -32,7 +32,7 @@ class QueueTaskController extends BaseController
         JudgeTask::PRIORITY_HIGH => 'thermometer-full',
     ];
 
-    public function __construct(private EntityManagerInterface $em)
+    public function __construct(private readonly EntityManagerInterface $em)
     {
     }
 

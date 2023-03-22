@@ -23,11 +23,11 @@ class RejudgingService
     final public const ACTION_CANCEL = 'cancel';
 
     public function __construct(
-        protected EntityManagerInterface $em,
-        protected DOMJudgeService $dj,
-        protected ScoreboardService $scoreboardService,
-        protected EventLogService $eventLogService,
-        protected BalloonService $balloonService
+        protected readonly EntityManagerInterface $em,
+        protected readonly DOMJudgeService $dj,
+        protected readonly ScoreboardService $scoreboardService,
+        protected readonly EventLogService $eventLogService,
+        protected readonly BalloonService $balloonService
     ) {
     }
 

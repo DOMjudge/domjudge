@@ -30,13 +30,13 @@ class DOMJudgeIPAuthenticator extends AbstractAuthenticator implements Authentic
     use TargetPathTrait;
 
     public function __construct(
-        private CsrfTokenManagerInterface $csrfTokenManager,
-        private Security $security,
-        private EntityManagerInterface $em,
-        private ConfigurationService $config,
-        private RouterInterface $router,
-        private RequestStack $requestStack,
-        private UserProviderInterface $userProvider
+        private readonly CsrfTokenManagerInterface $csrfTokenManager,
+        private readonly Security $security,
+        private readonly EntityManagerInterface $em,
+        private readonly ConfigurationService $config,
+        private readonly RouterInterface $router,
+        private readonly RequestStack $requestStack,
+        private readonly UserProviderInterface $userProvider
     ) {
     }
 

@@ -17,8 +17,8 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 class BalloonService
 {
     public function __construct(
-        protected EntityManagerInterface $em,
-        protected ConfigurationService $config
+        protected readonly EntityManagerInterface $em,
+        protected readonly ConfigurationService $config
     ) {
     }
 

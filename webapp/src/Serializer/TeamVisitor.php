@@ -16,9 +16,9 @@ use Symfony\Component\HttpFoundation\RequestStack;
 class TeamVisitor implements EventSubscriberInterface
 {
     public function __construct(
-        protected DOMJudgeService $dj,
-        protected EventLogService $eventLogService,
-        protected RequestStack $requestStack
+        protected readonly DOMJudgeService $dj,
+        protected readonly EventLogService $eventLogService,
+        protected readonly RequestStack $requestStack
     ) {
     }
 

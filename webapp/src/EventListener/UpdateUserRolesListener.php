@@ -10,7 +10,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 
 class UpdateUserRolesListener implements EventSubscriberInterface
 {
-    public function __construct(protected TokenStorageInterface $tokenStorage)
+    public function __construct(protected readonly TokenStorageInterface $tokenStorage)
     {
     }
 

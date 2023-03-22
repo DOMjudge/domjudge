@@ -35,11 +35,11 @@ class JudgehostController extends BaseController
     // Note: when adding or modifying routes, make sure they do not clash with the /judgehosts/{hostname} route.
 
     public function __construct(
-        protected EntityManagerInterface $em,
-        protected DOMJudgeService $dj,
-        protected ConfigurationService $config,
-        protected EventLogService $eventLog,
-        protected KernelInterface $kernel
+        protected readonly EntityManagerInterface $em,
+        protected readonly DOMJudgeService $dj,
+        protected readonly ConfigurationService $config,
+        protected readonly EventLogService $eventLog,
+        protected readonly KernelInterface $kernel
     ) {
     }
 

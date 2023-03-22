@@ -23,7 +23,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class ContestType extends AbstractExternalIdEntityType
 {
-    public function __construct(EventLogService $eventLogService, protected DOMJudgeService $dj)
+    public function __construct(EventLogService $eventLogService, protected readonly DOMJudgeService $dj)
     {
         parent::__construct($eventLogService);
     }

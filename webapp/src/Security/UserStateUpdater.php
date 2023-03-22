@@ -13,9 +13,9 @@ use Symfony\Component\Security\Core\Event\AuthenticationSuccessEvent;
 class UserStateUpdater implements EventSubscriberInterface
 {
     public function __construct(
-        protected DOMJudgeService $dj,
-        protected EntityManagerInterface $em,
-        protected RequestStack $requestStack
+        protected readonly DOMJudgeService $dj,
+        protected readonly EntityManagerInterface $em,
+        protected readonly RequestStack $requestStack
     ) {
     }
 

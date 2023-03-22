@@ -37,11 +37,11 @@ use Symfony\Component\Routing\Annotation\Route;
 class ClarificationController extends BaseController
 {
     public function __construct(
-        protected DOMJudgeService $dj,
-        protected ConfigurationService $config,
-        protected EntityManagerInterface $em,
-        protected EventLogService $eventLogService,
-        protected FormFactoryInterface $formFactory
+        protected readonly DOMJudgeService $dj,
+        protected readonly ConfigurationService $config,
+        protected readonly EntityManagerInterface $em,
+        protected readonly EventLogService $eventLogService,
+        protected readonly FormFactoryInterface $formFactory
     ) {
     }
 

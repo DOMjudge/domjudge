@@ -18,8 +18,8 @@ use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
 class DOMJudgeBasicAuthenticator extends AbstractAuthenticator
 {
     public function __construct(
-        private Security $security,
-        private UserPasswordHasherInterface $passwordHasher
+        private readonly Security $security,
+        private readonly UserPasswordHasherInterface $passwordHasher
     ) {
     }
 

@@ -21,7 +21,7 @@ use Exception;
  */
 class Scoreboard
 {
-    protected bool $restricted;
+    protected readonly bool $restricted;
 
     /** @var ScoreboardMatrixItem[][] */
     protected array $matrix = [];
@@ -38,15 +38,15 @@ class Scoreboard
      * @param ScoreCache[]     $scoreCache
      */
     public function __construct(
-        protected Contest $contest,
-        protected array $teams,
-        protected array $categories,
-        protected array $problems,
-        protected array $scoreCache,
-        protected FreezeData $freezeData,
+        protected readonly Contest $contest,
+        protected readonly array $teams,
+        protected readonly array $categories,
+        protected readonly array $problems,
+        protected readonly array $scoreCache,
+        protected readonly FreezeData $freezeData,
         bool $jury,
-        protected int $penaltyTime,
-        protected bool $scoreIsInSeconds
+        protected readonly int $penaltyTime,
+        protected readonly bool $scoreIsInSeconds
     ) {
         $this->restricted = $jury || $freezeData->showFinal($jury);
 

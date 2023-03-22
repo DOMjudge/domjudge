@@ -57,11 +57,11 @@ use Symfony\Component\Routing\RouterInterface;
 class SubmissionController extends BaseController
 {
     public function __construct(
-        protected EntityManagerInterface $em,
-        protected DOMJudgeService $dj,
-        protected ConfigurationService $config,
-        protected SubmissionService $submissionService,
-        protected RouterInterface $router
+        protected readonly EntityManagerInterface $em,
+        protected readonly DOMJudgeService $dj,
+        protected readonly ConfigurationService $config,
+        protected readonly SubmissionService $submissionService,
+        protected readonly RouterInterface $router
     ) {
     }
 

@@ -10,7 +10,7 @@ class AwardService
 {
     protected array $awardCache = [];
 
-    public function __construct(protected EventLogService $eventLogService)
+    public function __construct(protected readonly EventLogService $eventLogService)
     {
     }
 

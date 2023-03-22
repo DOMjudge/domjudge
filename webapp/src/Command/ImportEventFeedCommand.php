@@ -35,11 +35,11 @@ class ImportEventFeedCommand extends Command
     protected ?ExternalContestSource $source = null;
 
     public function __construct(
-        protected EntityManagerInterface $em,
-        protected ConfigurationService $config,
-        protected TokenStorageInterface $tokenStorage,
-        protected ?Profiler $profiler,
-        protected ExternalContestSourceService $sourceService,
+        protected readonly EntityManagerInterface $em,
+        protected readonly ConfigurationService $config,
+        protected readonly TokenStorageInterface $tokenStorage,
+        protected readonly ?Profiler $profiler,
+        protected readonly ExternalContestSourceService $sourceService,
         string $name = null
     ) {
         parent::__construct($name);

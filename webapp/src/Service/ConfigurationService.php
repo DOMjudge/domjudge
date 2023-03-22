@@ -28,12 +28,12 @@ class ConfigurationService
      * ConfigurationService constructor.
      */
     public function __construct(
-        protected EntityManagerInterface $em,
-        protected LoggerInterface $logger,
-        protected ConfigCacheFactoryInterface $configCache,
-        protected bool $debug,
-        protected string $cacheDir,
-        protected string $etcDir
+        protected readonly EntityManagerInterface $em,
+        protected readonly LoggerInterface $logger,
+        protected readonly ConfigCacheFactoryInterface $configCache,
+        protected readonly bool $debug,
+        protected readonly string $cacheDir,
+        protected readonly string $etcDir
     ) {
     }
 

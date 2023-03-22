@@ -37,7 +37,7 @@ class UserController extends AbstractRestController
         DOMJudgeService $dj,
         ConfigurationService $config,
         EventLogService $eventLogService,
-        protected ImportExportService $importExportService
+        protected readonly ImportExportService $importExportService
     ) {
         parent::__construct($entityManager, $dj, $config, $eventLogService);
     }

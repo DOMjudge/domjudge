@@ -33,8 +33,8 @@ class AwardsController extends AbstractRestController
         DOMJudgeService $DOMJudgeService,
         ConfigurationService $config,
         EventLogService $eventLogService,
-        protected ScoreboardService $scoreboardService,
-        protected AwardService $awards
+        protected readonly ScoreboardService $scoreboardService,
+        protected readonly AwardService $awards
     ) {
         parent::__construct($entityManager, $DOMJudgeService, $config, $eventLogService);
     }

@@ -40,7 +40,7 @@ class OrganizationController extends AbstractRestController
         DOMJudgeService $dj,
         ConfigurationService $config,
         EventLogService $eventLogService,
-        protected AssetUpdateService $assetUpdater
+        protected readonly AssetUpdateService $assetUpdater
     ) {
         parent::__construct($entityManager, $dj, $config, $eventLogService);
     }

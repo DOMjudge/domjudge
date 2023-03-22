@@ -29,10 +29,10 @@ use Symfony\Component\Validator\ConstraintViolationListInterface;
 abstract class AbstractRestController extends AbstractFOSRestController
 {
     public function __construct(
-        protected EntityManagerInterface $em,
-        protected DOMJudgeService $dj,
-        protected ConfigurationService $config,
-        protected EventLogService $eventLogService
+        protected readonly EntityManagerInterface $em,
+        protected readonly DOMJudgeService $dj,
+        protected readonly ConfigurationService $config,
+        protected readonly EventLogService $eventLogService
     ) {
     }
 

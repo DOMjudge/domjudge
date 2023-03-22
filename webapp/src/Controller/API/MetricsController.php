@@ -31,10 +31,10 @@ use Prometheus\RenderTextFormat;
 class MetricsController extends AbstractFOSRestController
 {
     public function __construct(
-        protected EntityManagerInterface $em,
-        protected DOMJudgeService $dj,
-        protected SubmissionService $submissionService,
-        protected CollectorRegistry $registry
+        protected readonly EntityManagerInterface $em,
+        protected readonly DOMJudgeService $dj,
+        protected readonly SubmissionService $submissionService,
+        protected readonly CollectorRegistry $registry
     ) {
     }
 

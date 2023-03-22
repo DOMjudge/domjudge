@@ -12,7 +12,7 @@ class RoleFixture extends AbstractDefaultDataFixture
     final public const JUDGEHOST_REFERENCE = 'judgehost';
     final public const TEAM_REFERENCE = 'team';
 
-    public function __construct(protected LoggerInterface $logger)
+    public function __construct(protected readonly LoggerInterface $logger)
     {
     }
 

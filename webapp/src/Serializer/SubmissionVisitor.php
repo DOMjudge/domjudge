@@ -19,9 +19,9 @@ use JMS\Serializer\Metadata\StaticPropertyMetadata;
 class SubmissionVisitor implements EventSubscriberInterface
 {
     public function __construct(
-        protected DOMJudgeService $dj,
-        protected EventLogService $eventLogService,
-        protected EntityManagerInterface $em
+        protected readonly DOMJudgeService $dj,
+        protected readonly EventLogService $eventLogService,
+        protected readonly EntityManagerInterface $em
     ) {
     }
 

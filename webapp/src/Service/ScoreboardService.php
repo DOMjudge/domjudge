@@ -40,11 +40,11 @@ use Symfony\Component\HttpFoundation\Response;
 class ScoreboardService
 {
     public function __construct(
-        protected EntityManagerInterface $em,
-        protected DOMJudgeService $dj,
-        protected ConfigurationService $config,
-        protected LoggerInterface $logger,
-        protected EventLogService $eventLogService
+        protected readonly EntityManagerInterface $em,
+        protected readonly DOMJudgeService $dj,
+        protected readonly ConfigurationService $config,
+        protected readonly LoggerInterface $logger,
+        protected readonly EventLogService $eventLogService
     ) {
     }
 

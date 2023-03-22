@@ -23,8 +23,8 @@ class TeamAffiliationType extends AbstractExternalIdEntityType
 {
     public function __construct(
         EventLogService $eventLogService,
-        protected ConfigurationService $configuration,
-        protected DOMJudgeService $dj
+        protected readonly ConfigurationService $configuration,
+        protected readonly DOMJudgeService $dj
     ) {
         parent::__construct($eventLogService);
     }

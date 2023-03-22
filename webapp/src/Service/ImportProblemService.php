@@ -38,13 +38,13 @@ use ZipArchive;
 class ImportProblemService
 {
     public function __construct(
-        protected EntityManagerInterface $em,
-        protected LoggerInterface $logger,
-        protected DOMJudgeService $dj,
-        protected ConfigurationService $config,
-        protected EventLogService $eventLogService,
-        protected SubmissionService $submissionService,
-        protected ValidatorInterface $validator
+        protected readonly EntityManagerInterface $em,
+        protected readonly LoggerInterface $logger,
+        protected readonly DOMJudgeService $dj,
+        protected readonly ConfigurationService $config,
+        protected readonly EventLogService $eventLogService,
+        protected readonly SubmissionService $submissionService,
+        protected readonly ValidatorInterface $validator
     ) {
     }
 

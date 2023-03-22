@@ -22,11 +22,11 @@ use Symfony\Component\Routing\Annotation\Route;
 class ConfigController extends AbstractController
 {
     public function __construct(
-        protected EntityManagerInterface $em,
-        protected LoggerInterface $logger,
-        protected DOMJudgeService $dj,
-        protected CheckConfigService $checkConfigService,
-        protected ConfigurationService $config
+        protected readonly EntityManagerInterface $em,
+        protected readonly LoggerInterface $logger,
+        protected readonly DOMJudgeService $dj,
+        protected readonly CheckConfigService $checkConfigService,
+        protected readonly ConfigurationService $config
     ) {
     }
 
