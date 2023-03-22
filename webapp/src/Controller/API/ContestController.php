@@ -48,8 +48,8 @@ use TypeError;
  */
 class ContestController extends AbstractRestController
 {
-    public const EVENT_FEED_FORMAT_2020_03 = 0;
-    public const EVENT_FEED_FORMAT_2022_07 = 1;
+    final public const EVENT_FEED_FORMAT_2020_03 = 0;
+    final public const EVENT_FEED_FORMAT_2022_07 = 1;
 
     public function __construct(
         EntityManagerInterface $entityManager,

@@ -40,8 +40,8 @@ class GeneralInfoController extends AbstractFOSRestController
 {
     protected const API_VERSION = 4;
 
-    public const CCS_SPEC_API_VERSION = '2022-07';
-    public const CCS_SPEC_API_URL = 'https://ccs-specs.icpc.io/2022-07/contest_api';
+    final public const CCS_SPEC_API_VERSION = '2022-07';
+    final public const CCS_SPEC_API_URL = 'https://ccs-specs.icpc.io/2022-07/contest_api';
 
     public function __construct(
         protected EntityManagerInterface $em,

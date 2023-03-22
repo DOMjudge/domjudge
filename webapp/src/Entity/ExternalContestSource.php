@@ -20,8 +20,8 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
  */
 class ExternalContestSource
 {
-    public const TYPE_CCS_API         = 'ccs-api';
-    public const TYPE_CONTEST_PACKAGE = 'contest-archive';
+    final public const TYPE_CCS_API         = 'ccs-api';
+    final public const TYPE_CONTEST_PACKAGE = 'contest-archive';
 
     /**
      * @ORM\Id

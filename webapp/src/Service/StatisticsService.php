@@ -23,9 +23,9 @@ use Doctrine\ORM\QueryBuilder;
  */
 class StatisticsService
 {
-    public const NUM_GROUPED_BINS = 20;
+    final public const NUM_GROUPED_BINS = 20;
 
-    public const FILTERS = [
+    final public const FILTERS = [
         'visiblecat' => 'Teams from visible categories',
         'hiddencat' => 'Teams from hidden categories',
         'all' => 'All teams',

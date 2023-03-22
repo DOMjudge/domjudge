@@ -8,9 +8,9 @@ use Psr\Log\LoggerInterface;
 
 class RoleFixture extends AbstractDefaultDataFixture
 {
-    public const ADMIN_REFERENCE = 'admin';
-    public const JUDGEHOST_REFERENCE = 'judgehost';
-    public const TEAM_REFERENCE = 'team';
+    final public const ADMIN_REFERENCE = 'admin';
+    final public const JUDGEHOST_REFERENCE = 'judgehost';
+    final public const TEAM_REFERENCE = 'team';
 
     public function __construct(protected LoggerInterface $logger)
     {

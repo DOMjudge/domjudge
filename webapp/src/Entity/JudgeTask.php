@@ -59,9 +59,9 @@ class JudgeTask
      */
     private int $priority;
 
-    public const PRIORITY_HIGH = -10;
-    public const PRIORITY_DEFAULT = 0;
-    public const PRIORITY_LOW = 10;
+    final public const PRIORITY_HIGH = -10;
+    final public const PRIORITY_DEFAULT = 0;
+    final public const PRIORITY_LOW = 10;
 
     /**
      * @ORM\Column(type="integer", name="jobid", length=4,

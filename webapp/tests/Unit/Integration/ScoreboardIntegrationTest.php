@@ -28,9 +28,9 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 class ScoreboardIntegrationTest extends KernelTestCase
 {
-    public const CONTEST_NAME = 'scoretest';
-    public const NUM_PROBLEMS = 3;
-    public const NUM_TEAMS = 3;
+    final public const CONTEST_NAME = 'scoretest';
+    final public const NUM_PROBLEMS = 3;
+    final public const NUM_TEAMS = 3;
 
     private DOMJudgeService $dj;
 
