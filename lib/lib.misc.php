@@ -117,7 +117,7 @@ function initsignals()
 /**
  * Output generic version information and exit.
  */
-function version() : string
+function version() : never
 {
     echo SCRIPT_ID . " -- part of DOMjudge version " . DOMJUDGE_VERSION . "\n" .
         "Written by the DOMjudge developers\n\n" .

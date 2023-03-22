@@ -76,7 +76,7 @@ function logmsg(int $msglevel, string $string)
 /**
  * Log an error at level LOG_ERROR and exit with exitcode 1.
  */
-function error(string $string)
+function error(string $string): never
 {
     logmsg(LOG_ERR, "error: $string");
     exit(1);
@@ -105,7 +105,7 @@ function debug()
 /**
  * Handle exceptions by calling error().
  */
-function exception_handler(Throwable $e)
+function exception_handler(Throwable $e): never
 {
     error($e->getMessage() . ( (defined('DEBUG') && DEBUG) ? " in " . $e->getFile() . " line " . $e->getLine() : ''));
 }

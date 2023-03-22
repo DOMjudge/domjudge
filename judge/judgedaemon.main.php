@@ -257,7 +257,7 @@ $waittime = INITIAL_WAITTIME_SEC;
 const SCRIPT_ID = 'judgedaemon';
 const CHROOT_SCRIPT = 'chroot-startstop.sh';
 
-function usage(): void
+function usage(): never
 {
     echo "Usage: " . SCRIPT_ID . " [OPTION]...\n" .
         "Start the judgedaemon.\n\n" .
