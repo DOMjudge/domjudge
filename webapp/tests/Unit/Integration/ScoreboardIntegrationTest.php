@@ -75,7 +75,7 @@ class ScoreboardIntegrationTest extends KernelTestCase
         $this->config->expects($this->any())
             ->method('get')
             ->with($this->isType('string'))
-            ->will($this->returnCallback([$this, 'getConfig']));
+            ->will($this->returnCallback($this->getConfig(...)));
 
         $this->dj = self::getContainer()->get(DOMJudgeService::class);
         $this->em = self::getContainer()->get('doctrine')->getManager();
