@@ -358,13 +358,13 @@ class ContestController extends AbstractRestController
         $now      = (int)Utils::now();
         $changed  = false;
         if (!$request->request->has('id')) {
-            return new JsonResponse('Missing "id" in request.', Response::HTTP_BAD_REQUEST);
+            throw new BadRequestHttpException('Missing "id" in request.');
         }
         if (!$request->request->has('start_time') && !$request->request->has('scoreboard_thaw_time')) {
-            return new JsonResponse('Missing "start_time" or "scoreboard_thaw_time" in request.', Response::HTTP_BAD_REQUEST);
+            throw new BadRequestHttpException('Missing "start_time" or "scoreboard_thaw_time" in request.');
         }
         if ($request->request->get('id') != $contest->getApiId($this->eventLogService)) {
-            return new JsonResponse('Invalid "id" in request.', Response::HTTP_BAD_REQUEST);
+            throw new BadRequestHttpException('Invalid "id" in request.');
         }
 
         if ($request->request->has('start_time')) {
@@ -373,8 +373,7 @@ class ContestController extends AbstractRestController
             if (!$request->request->getBoolean('force') &&
                 $contest->getStarttime() != null &&
                 $contest->getStarttime() < $now + 30) {
-                return new JsonResponse('Current contest already started or about to start.',
-                    Response::HTTP_FORBIDDEN);
+                throw new AccessDeniedHttpException('Current contest already started or about to start.');
             }
 
             if ($request->request->get('start_time') === null) {
@@ -385,13 +384,12 @@ class ContestController extends AbstractRestController
             } else {
                 $date = date_create($request->request->get('start_time'));
                 if ($date === false) {
-                    return new JsonResponse('Invalid "start_time" in request.', Response::HTTP_BAD_REQUEST);
+                    throw new BadRequestHttpException('Invalid "start_time" in request.');
                 }
 
                 $new_start_time = $date->getTimestamp();
                 if (!$request->request->getBoolean('force') && $new_start_time < $now + 30) {
-                    return new JsonResponse('New start_time not far enough in the future.',
-                        Response::HTTP_FORBIDDEN);
+                    throw new AccessDeniedHttpException('New start_time not far enough in the future.');
                 }
                 $newStartTimeString = date('Y-m-d H:i:s e', $new_start_time);
                 $contest->setStarttimeEnabled(true);
@@ -404,19 +402,17 @@ class ContestController extends AbstractRestController
         }
         if ($request->request->has('scoreboard_thaw_time')) {
             if (!$request->request->getBoolean('force') && $contest->getUnfreezetime() !== null) {
-                return new JsonResponse('Current contest already has a unfreeze time set.',
-                    Response::HTTP_FORBIDDEN);
+                throw new AccessDeniedHttpException('Current contest already has an unfreeze time set.');
             }
 
             $date = date_create($request->request->get('scoreboard_thaw_time') ?? 'not a valid date');
             if ($date === false) {
-                return new JsonResponse('Invalid "scoreboard_thaw_time" in request.', Response::HTTP_BAD_REQUEST);
+                throw new BadRequestHttpException('Invalid "scoreboard_thaw_time" in request.');
             }
 
             $new_unfreeze_time = $date->getTimestamp();
             if (!$request->request->getBoolean('force') && $new_unfreeze_time < $now - 30) {
-                return new JsonResponse('New scoreboard_thaw_time too far in the past.',
-                    Response::HTTP_FORBIDDEN);
+                throw new AccessDeniedHttpException('New scoreboard_thaw_time too far in the past.');
             }
 
             $returnContest = false;

@@ -171,26 +171,26 @@ EOF;
         // Note that if the first item contains "id", we replace it with the correct ID in the test
 
         // General tests
-        yield [[], 400, "Missing \u0022id\u0022 in request."];
-        yield [['id' => 1], 400, "Missing \u0022start_time\u0022 or \u0022scoreboard_thaw_time\u0022 in request."];
+        yield [[], 400, 'Missing \"id\" in request.'];
+        yield [['id' => 1], 400, 'Missing \"start_time\" or \"scoreboard_thaw_time\" in request.'];
 
         // Tests for changing the start time
-        yield [['id' => 2, 'start_time' => null], 400, "Invalid \u0022id\u0022 in request."];
+        yield [['id' => 2, 'start_time' => null], 400, 'Invalid \"id\" in request.'];
         yield [['id' => 1, 'start_time' => null], 403, 'Current contest already started or about to start.', [DemoPreEndContestFixture::class]];
         yield [['id' => 1, 'start_time' => null], 403, 'Current contest already started or about to start.', [DemoAboutToStartContestFixture::class]];
         yield [['id' => 1, 'start_time' => date('Y-m-d\TH:i:s', strtotime('+15 seconds'))], 403, 'New start_time not far enough in the future.'];
         yield [['id' => 1, 'start_time' => date('Y-m-d\TH:i:s', strtotime('+15 seconds')), 'force' => false], 403, 'New start_time not far enough in the future.'];
         yield [['id' => 1, 'start_time' => date('Y-m-d\TH:i:s', strtotime('+15 seconds')), 'force' => true], 204];
-        yield [['id' => 1, 'start_time' => 'some invalid start time'], 400, 'Invalid \u0022start_time\u0022 in request.'];
+        yield [['id' => 1, 'start_time' => 'some invalid start time'], 400, 'Invalid \"start_time\" in request.'];
         yield [['id' => 1, 'start_time' => null, 'force' => true], 204, null, [DemoAboutToStartContestFixture::class]];
         yield [['id' => 1, 'start_time' => null], 204];
 
         // Tests for changing the unfreeze time
-        yield [['id' => 4242, 'scoreboard_thaw_time' => date('Y-m-d\TH:i:s', strtotime('+15 seconds'))], 400, "Invalid \u0022id\u0022 in request."];
-        yield [['id' => 1, 'scoreboard_thaw_time' => null], 400, 'Invalid \u0022scoreboard_thaw_time\u0022 in request.'];
-        yield [['id' => 1, 'scoreboard_thaw_time' => 'some invalid start time'], 400, 'Invalid \u0022scoreboard_thaw_time\u0022 in request.'];
-        yield [['id' => 1, 'scoreboard_thaw_time' => date('Y-m-d\TH:i:s', strtotime('+15 seconds'))], 403, 'Current contest already has a unfreeze time set.', [DemoPostUnfreezeContestFixture::class]];
-        yield [['id' => 1, 'scoreboard_thaw_time' => date('Y-m-d\TH:i:s', strtotime('+15 seconds')), 'force' => false], 403, 'Current contest already has a unfreeze time set.', [DemoPostUnfreezeContestFixture::class]];
+        yield [['id' => 4242, 'scoreboard_thaw_time' => date('Y-m-d\TH:i:s', strtotime('+15 seconds'))], 400, 'Invalid \"id\" in request.'];
+        yield [['id' => 1, 'scoreboard_thaw_time' => null], 400, 'Invalid \"scoreboard_thaw_time\" in request.'];
+        yield [['id' => 1, 'scoreboard_thaw_time' => 'some invalid start time'], 400, 'Invalid \"scoreboard_thaw_time\" in request.'];
+        yield [['id' => 1, 'scoreboard_thaw_time' => date('Y-m-d\TH:i:s', strtotime('+15 seconds'))], 403, 'Current contest already has an unfreeze time set.', [DemoPostUnfreezeContestFixture::class]];
+        yield [['id' => 1, 'scoreboard_thaw_time' => date('Y-m-d\TH:i:s', strtotime('+15 seconds')), 'force' => false], 403, 'Current contest already has an unfreeze time set.', [DemoPostUnfreezeContestFixture::class]];
         yield [['id' => 1, 'scoreboard_thaw_time' => date('Y-m-d\TH:i:s', strtotime('-60 seconds')), 'force' => false], 403, 'New scoreboard_thaw_time too far in the past.'];
         yield [['id' => 1, 'scoreboard_thaw_time' => date('Y-m-d\TH:i:s', strtotime('+15 seconds')), 'force' => true], 204, null, [DemoPostUnfreezeContestFixture::class]];
         yield [['id' => 1, 'scoreboard_thaw_time' => date('Y-m-d\TH:i:s', strtotime('+15 seconds'))], 204];
