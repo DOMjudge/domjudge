@@ -20,13 +20,13 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class QueueTaskController extends BaseController
 {
-    public const PRIORITY_MAP = [
+    final public const PRIORITY_MAP = [
         JudgeTask::PRIORITY_LOW => 'low',
         JudgeTask::PRIORITY_DEFAULT => 'default',
         JudgeTask::PRIORITY_HIGH => 'high',
     ];
 
-    public const PRIORITY_ICON_MAP = [
+    final public const PRIORITY_ICON_MAP = [
         JudgeTask::PRIORITY_LOW => 'thermometer-empty',
         JudgeTask::PRIORITY_DEFAULT => 'thermometer-half',
         JudgeTask::PRIORITY_HIGH => 'thermometer-full',

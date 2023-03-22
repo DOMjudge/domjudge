@@ -19,8 +19,8 @@ use Doctrine\ORM\NoResultException;
 
 class RejudgingService
 {
-    public const ACTION_APPLY = 'apply';
-    public const ACTION_CANCEL = 'cancel';
+    final public const ACTION_APPLY = 'apply';
+    final public const ACTION_CANCEL = 'cancel';
 
     public function __construct(
         protected EntityManagerInterface $em,

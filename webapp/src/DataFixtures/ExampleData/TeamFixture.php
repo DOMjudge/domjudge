@@ -8,7 +8,7 @@ use Doctrine\Persistence\ObjectManager;
 
 class TeamFixture extends AbstractExampleDataFixture implements DependentFixtureInterface
 {
-    public const TEAM_REFERENCE = 'team';
+    final public const TEAM_REFERENCE = 'team';
 
     public function load(ObjectManager $manager): void
     {

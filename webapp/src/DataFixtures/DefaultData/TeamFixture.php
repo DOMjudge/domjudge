@@ -9,7 +9,7 @@ use Psr\Log\LoggerInterface;
 
 class TeamFixture extends AbstractDefaultDataFixture implements DependentFixtureInterface
 {
-    public const DOMJUDGE_REFERENCE = 'domjudge';
+    final public const DOMJUDGE_REFERENCE = 'domjudge';
 
     public function __construct(protected LoggerInterface $logger)
     {

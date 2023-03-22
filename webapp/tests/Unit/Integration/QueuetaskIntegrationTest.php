@@ -27,9 +27,9 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class QueuetaskIntegrationTest extends KernelTestCase
 {
-    public const CONTEST_NAME = 'queuetest';
-    public const NUM_PROBLEMS = 3;
-    public const NUM_TEAMS = 3;
+    final public const CONTEST_NAME = 'queuetest';
+    final public const NUM_PROBLEMS = 3;
+    final public const NUM_TEAMS = 3;
 
     private SubmissionService $submissionService;
     private ScoreboardService $scoreboardService;

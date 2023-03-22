@@ -18,12 +18,12 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class ExternalSourceWarning
 {
-    public const TYPE_UNSUPORTED_ACTION = 'unsupported-action';
-    public const TYPE_DATA_MISMATCH = 'data-mismatch';
-    public const TYPE_DEPENDENCY_MISSING = 'dependency-missing';
-    public const TYPE_ENTITY_NOT_FOUND = 'entity-not-found';
-    public const TYPE_ENTITY_SHOULD_NOT_EXIST = 'entity-should-not-exist';
-    public const TYPE_SUBMISSION_ERROR = 'submission-error';
+    final public const TYPE_UNSUPORTED_ACTION = 'unsupported-action';
+    final public const TYPE_DATA_MISMATCH = 'data-mismatch';
+    final public const TYPE_DEPENDENCY_MISSING = 'dependency-missing';
+    final public const TYPE_ENTITY_NOT_FOUND = 'entity-not-found';
+    final public const TYPE_ENTITY_SHOULD_NOT_EXIST = 'entity-should-not-exist';
+    final public const TYPE_SUBMISSION_ERROR = 'submission-error';
 
     /**
      * @ORM\Id

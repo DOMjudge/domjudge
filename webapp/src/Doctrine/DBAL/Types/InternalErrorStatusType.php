@@ -12,11 +12,11 @@ use InvalidArgumentException;
  */
 class InternalErrorStatusType extends Type
 {
-    public const ENUM_INTERNAL_ERROR_STATUS = 'internal_error_status';
-    public const STATUS_OPEN                = 'open';
-    public const STATUS_RESOLVED            = 'resolved';
-    public const STATUS_IGNORED             = 'ignored';
-    public const ALL_STATUSES = [self::STATUS_OPEN, self::STATUS_RESOLVED, self::STATUS_IGNORED];
+    final public const ENUM_INTERNAL_ERROR_STATUS = 'internal_error_status';
+    final public const STATUS_OPEN                = 'open';
+    final public const STATUS_RESOLVED            = 'resolved';
+    final public const STATUS_IGNORED             = 'ignored';
+    final public const ALL_STATUSES = [self::STATUS_OPEN, self::STATUS_RESOLVED, self::STATUS_IGNORED];
 
     public function getSQLDeclaration(array $column, AbstractPlatform $platform): string
     {

@@ -22,7 +22,7 @@ use JMS\Serializer\Annotation as Serializer;
 class Testcase
 {
     // Mapping from type to extension
-    public const EXTENSION_MAPPING = [
+    final public const EXTENSION_MAPPING = [
         'input'  => 'in',
         'output' => 'ans',
     ];

@@ -11,13 +11,13 @@ use App\Entity\Contest;
  */
 class FreezeData
 {
-    public const KEY_SHOW_FINAL = 'show-final';
-    public const KEY_SHOW_FINAL_JURY = 'show-final-jury';
-    public const KEY_SHOW_FROZEN = 'show-frozen';
-    public const KEY_STARTED = 'started';
-    public const KEY_STOPPED = 'stopped';
-    public const KEY_RUNNING = 'running';
-    public const KEY_FINALIZED = 'finalized';
+    final public const KEY_SHOW_FINAL = 'show-final';
+    final public const KEY_SHOW_FINAL_JURY = 'show-final-jury';
+    final public const KEY_SHOW_FROZEN = 'show-frozen';
+    final public const KEY_STARTED = 'started';
+    final public const KEY_STOPPED = 'stopped';
+    final public const KEY_RUNNING = 'running';
+    final public const KEY_FINALIZED = 'finalized';
 
     /** @var bool[] */
     protected array $cache = [];
