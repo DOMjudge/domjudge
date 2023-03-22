@@ -11,7 +11,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 
 class ExternalSourceWarningsFilterType extends AbstractType
 {
-    public function __construct(protected EventLogService $eventLog)
+    public function __construct(protected readonly EventLogService $eventLog)
     {
     }
 

@@ -11,7 +11,7 @@ class TeamFixture extends AbstractDefaultDataFixture implements DependentFixture
 {
     final public const DOMJUDGE_REFERENCE = 'domjudge';
 
-    public function __construct(protected LoggerInterface $logger)
+    public function __construct(protected readonly LoggerInterface $logger)
     {
     }
 

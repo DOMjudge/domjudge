@@ -13,10 +13,10 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 class UserFixture extends AbstractDefaultDataFixture implements DependentFixtureInterface
 {
     public function __construct(
-        protected DOMJudgeService $dj,
-        protected LoggerInterface $logger,
-        protected UserPasswordHasherInterface $passwordHasher,
-        protected bool $debug
+        protected readonly DOMJudgeService $dj,
+        protected readonly LoggerInterface $logger,
+        protected readonly UserPasswordHasherInterface $passwordHasher,
+        protected readonly bool $debug
     ) {
     }
 

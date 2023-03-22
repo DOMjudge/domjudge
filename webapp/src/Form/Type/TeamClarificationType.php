@@ -13,7 +13,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 
 class TeamClarificationType extends AbstractType
 {
-    public function __construct(protected DOMJudgeService $dj, protected ConfigurationService $config)
+    public function __construct(protected readonly DOMJudgeService $dj, protected readonly ConfigurationService $config)
     {
     }
 

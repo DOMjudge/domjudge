@@ -19,7 +19,7 @@ use JMS\Serializer\Metadata\StaticPropertyMetadata;
  */
 class SetExternalIdVisitor implements EventSubscriberInterface
 {
-    public function __construct(protected EventLogService $eventLogService)
+    public function __construct(protected readonly EventLogService $eventLogService)
     {
     }
 

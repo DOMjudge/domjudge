@@ -25,11 +25,11 @@ class DOMJudgeXHeadersAuthenticator extends AbstractAuthenticator implements Aut
     use TargetPathTrait;
 
     public function __construct(
-        private Security $security,
-        private UserProviderInterface $userProvider,
-        private UserPasswordHasherInterface $hasher,
-        private ConfigurationService $config,
-        private RouterInterface $router
+        private readonly Security $security,
+        private readonly UserProviderInterface $userProvider,
+        private readonly UserPasswordHasherInterface $hasher,
+        private readonly ConfigurationService $config,
+        private readonly RouterInterface $router
     ) {
     }
 

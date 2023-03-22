@@ -32,7 +32,7 @@ class JudgementController extends AbstractRestController implements QueryObjectT
     /**
      * @var string[]
      */
-    protected array $verdicts;
+    protected readonly array $verdicts;
 
     public function __construct(
         EntityManagerInterface $entityManager,

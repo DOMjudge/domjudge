@@ -81,15 +81,15 @@ class DOMJudgeService
     ];
 
     public function __construct(
-        protected EntityManagerInterface $em,
-        protected LoggerInterface $logger,
-        protected RequestStack $requestStack,
-        protected ParameterBagInterface $params,
-        protected AuthorizationCheckerInterface $authorizationChecker,
-        protected TokenStorageInterface $tokenStorage,
-        protected HttpKernelInterface $httpKernel,
-        protected ConfigurationService $config,
-        protected RouterInterface $router
+        protected readonly EntityManagerInterface $em,
+        protected readonly LoggerInterface $logger,
+        protected readonly RequestStack $requestStack,
+        protected readonly ParameterBagInterface $params,
+        protected readonly AuthorizationCheckerInterface $authorizationChecker,
+        protected readonly TokenStorageInterface $tokenStorage,
+        protected readonly HttpKernelInterface $httpKernel,
+        protected readonly ConfigurationService $config,
+        protected readonly RouterInterface $router
     ) {
     }
 

@@ -45,8 +45,8 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
         DOMJudgeService $DOMJudgeService,
         ConfigurationService $config,
         EventLogService $eventLogService,
-        protected ImportProblemService $importProblemService,
-        protected ImportExportService $importExportService
+        protected readonly ImportProblemService $importProblemService,
+        protected readonly ImportExportService $importExportService
     ) {
         parent::__construct($entityManager, $DOMJudgeService, $config, $eventLogService);
     }

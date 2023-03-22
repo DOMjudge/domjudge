@@ -26,9 +26,9 @@ use Symfony\Component\Routing\Annotation\Route;
 class PrintController extends BaseController
 {
     public function __construct(
-        protected EntityManagerInterface $em,
-        protected DOMJudgeService $dj,
-        protected ConfigurationService $config
+        protected readonly EntityManagerInterface $em,
+        protected readonly DOMJudgeService $dj,
+        protected readonly ConfigurationService $config
     ) {
     }
 

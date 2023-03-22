@@ -31,7 +31,7 @@ class StatisticsService
         'all' => 'All teams',
     ];
 
-    public function __construct(private EntityManagerInterface $em)
+    public function __construct(private readonly EntityManagerInterface $em)
     {
     }
 

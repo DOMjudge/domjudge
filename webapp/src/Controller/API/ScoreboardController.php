@@ -36,7 +36,7 @@ class ScoreboardController extends AbstractRestController
         DOMJudgeService $DOMJudgeService,
         ConfigurationService $config,
         EventLogService $eventLogService,
-        protected ScoreboardService $scoreboardService
+        protected readonly ScoreboardService $scoreboardService
     ) {
         parent::__construct($entityManager, $DOMJudgeService, $config, $eventLogService);
     }

@@ -22,8 +22,11 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class AnalysisController extends AbstractController
 {
-    public function __construct(private DOMJudgeService $dj, private StatisticsService $stats, private EntityManagerInterface $em)
-    {
+    public function __construct(
+        private readonly DOMJudgeService $dj,
+        private readonly StatisticsService $stats,
+        private readonly EntityManagerInterface $em
+    ) {
     }
 
     /**

@@ -48,7 +48,7 @@ class SubmissionController extends AbstractRestController
         DOMJudgeService $dj,
         ConfigurationService $config,
         EventLogService $eventLogService,
-        protected SubmissionService $submissionService
+        protected readonly SubmissionService $submissionService
     ) {
         parent::__construct($entityManager, $dj, $config, $eventLogService);
     }

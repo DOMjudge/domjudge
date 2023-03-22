@@ -21,9 +21,9 @@ use JMS\Serializer\Metadata\StaticPropertyMetadata;
 class ContestVisitor implements EventSubscriberInterface
 {
     public function __construct(
-        protected ConfigurationService $config,
-        protected DOMJudgeService $dj,
-        protected EventLogService $eventLogService
+        protected readonly ConfigurationService $config,
+        protected readonly DOMJudgeService $dj,
+        protected readonly EventLogService $eventLogService
     ) {
     }
 

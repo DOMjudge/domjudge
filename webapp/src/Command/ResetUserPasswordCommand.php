@@ -20,8 +20,8 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 class ResetUserPasswordCommand extends Command
 {
     public function __construct(
-        protected EntityManagerInterface $em,
-        protected UserPasswordHasherInterface $passwordHasher
+        protected readonly EntityManagerInterface $em,
+        protected readonly UserPasswordHasherInterface $passwordHasher
     ) {
         parent::__construct();
     }

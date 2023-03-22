@@ -42,7 +42,7 @@ use ZipArchive;
 class ExternalContestSourceService
 {
     protected HttpClientInterface $httpClient;
-    protected LoggerInterface $logger;
+    protected readonly LoggerInterface $logger;
 
     protected ?ExternalContestSource $source = null;
 
@@ -76,17 +76,17 @@ class ExternalContestSourceService
     ];
 
     public function __construct(
-        HttpClientInterface    $httpClient,
-        protected DOMJudgeService        $dj,
-        protected EntityManagerInterface $em,
+        HttpClientInterface $httpClient,
+        protected readonly DOMJudgeService $dj,
+        protected readonly EntityManagerInterface $em,
         // Note: we can't use constructor promotion for this argument (yet), since
         // the name of the argument matters, see `RemoveEventFeedImporterChannelFromLogs`.
         // When we upgrade to Symfony 6.x, we can use the #[Autowire] attribute to fix this
-        LoggerInterface                  $eventFeedImporterLogger,
-        protected ConfigurationService   $config,
-        protected EventLogService        $eventLog,
-        protected SubmissionService      $submissionService,
-        protected ScoreboardService      $scoreboardService
+        LoggerInterface $eventFeedImporterLogger,
+        protected readonly ConfigurationService $config,
+        protected readonly EventLogService $eventLog,
+        protected readonly SubmissionService $submissionService,
+        protected readonly ScoreboardService $scoreboardService
     ) {
         $clientOptions = [
             'headers' => [

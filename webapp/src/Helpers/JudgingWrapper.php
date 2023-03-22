@@ -10,11 +10,11 @@ class JudgingWrapper
 {
     public function __construct(
         /** @Serializer\Inline() */
-        protected Judging $judging,
+        protected readonly Judging $judging,
         /** @Serializer\Exclude() */
-        protected ?float $maxRunTime = null,
+        protected readonly ?float $maxRunTime = null,
         /** @Serializer\SerializedName("judgement_type_id") */
-        protected ?string $judgementTypeId = null
+        protected readonly ?string $judgementTypeId = null
     ) {
     }
 

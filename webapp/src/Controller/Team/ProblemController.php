@@ -30,10 +30,10 @@ use Symfony\Component\Routing\Annotation\Route;
 class ProblemController extends BaseController
 {
     public function __construct(
-        protected DOMJudgeService $dj,
-        protected ConfigurationService $config,
-        protected StatisticsService $stats,
-        protected EntityManagerInterface $em
+        protected readonly DOMJudgeService $dj,
+        protected readonly ConfigurationService $config,
+        protected readonly StatisticsService $stats,
+        protected readonly EntityManagerInterface $em
     ) {
     }
 

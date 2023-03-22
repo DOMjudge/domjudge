@@ -16,7 +16,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
  */
 class ScoreboardController extends AbstractController
 {
-    public function __construct(protected DOMJudgeService $dj, protected ScoreboardService $scoreboardService)
+    public function __construct(protected readonly DOMJudgeService $dj, protected readonly ScoreboardService $scoreboardService)
     {
     }
 

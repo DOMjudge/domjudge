@@ -39,7 +39,7 @@ class JuryMiscController extends BaseController
     /**
      * GeneralInfoController constructor.
      */
-    public function __construct(protected EntityManagerInterface $em, protected DOMJudgeService $dj)
+    public function __construct(protected readonly EntityManagerInterface $em, protected readonly DOMJudgeService $dj)
     {
     }
 

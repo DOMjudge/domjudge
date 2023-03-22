@@ -15,9 +15,9 @@ class OrdinalItem
 {
     public function __construct(
         /** @Serializer\SerializedName("ordinal") */
-        protected int $ordinal,
+        protected readonly int $ordinal,
         /** @Serializer\Inline() */
-        protected object $item
+        protected readonly object $item
     ) {
     }
 

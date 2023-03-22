@@ -36,16 +36,16 @@ use Twig\TwigFunction;
 class TwigExtension extends AbstractExtension implements GlobalsInterface
 {
     public function __construct(
-        protected DOMJudgeService $dj,
-        protected ConfigurationService $config,
-        protected Environment $twig,
-        protected EntityManagerInterface $em,
-        protected SubmissionService $submissionService,
-        protected EventLogService $eventLogService,
-        protected AwardService $awards,
-        protected TokenStorageInterface $tokenStorage,
-        protected AuthorizationCheckerInterface $authorizationChecker,
-        protected string $projectDir
+        protected readonly DOMJudgeService $dj,
+        protected readonly ConfigurationService $config,
+        protected readonly Environment $twig,
+        protected readonly EntityManagerInterface $em,
+        protected readonly SubmissionService $submissionService,
+        protected readonly EventLogService $eventLogService,
+        protected readonly AwardService $awards,
+        protected readonly TokenStorageInterface $tokenStorage,
+        protected readonly AuthorizationCheckerInterface $authorizationChecker,
+        protected readonly string $projectDir
     ) {
     }
 

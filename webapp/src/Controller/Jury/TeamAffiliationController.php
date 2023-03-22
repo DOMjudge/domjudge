@@ -26,12 +26,12 @@ use Symfony\Component\Routing\Annotation\Route;
 class TeamAffiliationController extends BaseController
 {
     public function __construct(
-        protected EntityManagerInterface $em,
-        protected DOMJudgeService $dj,
-        protected ConfigurationService $config,
-        protected KernelInterface $kernel,
-        protected EventLogService $eventLogService,
-        protected AssetUpdateService $assetUpdater
+        protected readonly EntityManagerInterface $em,
+        protected readonly DOMJudgeService $dj,
+        protected readonly ConfigurationService $config,
+        protected readonly KernelInterface $kernel,
+        protected readonly EventLogService $eventLogService,
+        protected readonly AssetUpdateService $assetUpdater
     ) {
     }
 

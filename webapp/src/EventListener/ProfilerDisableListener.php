@@ -15,9 +15,9 @@ use Symfony\Component\HttpKernel\Profiler\Profiler;
 class ProfilerDisableListener implements EventSubscriberInterface
 {
     public function __construct(
-        protected KernelInterface $kernel,
-        protected DOMJudgeService $dj,
-        protected ?Profiler $profiler
+        protected readonly KernelInterface $kernel,
+        protected readonly DOMJudgeService $dj,
+        protected readonly ?Profiler $profiler
     ) {
     }
 

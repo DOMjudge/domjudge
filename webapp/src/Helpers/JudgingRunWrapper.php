@@ -9,9 +9,9 @@ class JudgingRunWrapper
 {
     public function __construct(
         /** @Serializer\Inline() */
-        protected JudgingRun $judgingRun,
+        protected readonly JudgingRun $judgingRun,
         /** @Serializer\SerializedName("judgement_type_id") */
-        protected ?string $judgementTypeId = null
+        protected readonly ?string $judgementTypeId = null
     ) {
     }
 }

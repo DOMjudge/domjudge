@@ -49,15 +49,15 @@ use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 class ImportExportController extends BaseController
 {
     public function __construct(
-        protected ICPCCmsService $icpcCmsService,
-        protected ImportExportService $importExportService,
-        protected EntityManagerInterface $em,
-        protected ScoreboardService $scoreboardService,
-        protected DOMJudgeService $dj,
-        protected ConfigurationService $config,
-        protected EventLogService $eventLogService,
-        protected ImportProblemService $importProblemService,
-        protected string $domjudgeVersion
+        protected readonly ICPCCmsService $icpcCmsService,
+        protected readonly ImportExportService $importExportService,
+        protected readonly EntityManagerInterface $em,
+        protected readonly ScoreboardService $scoreboardService,
+        protected readonly DOMJudgeService $dj,
+        protected readonly ConfigurationService $config,
+        protected readonly EventLogService $eventLogService,
+        protected readonly ImportProblemService $importProblemService,
+        protected readonly string $domjudgeVersion
     ) {
     }
 

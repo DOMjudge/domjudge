@@ -20,7 +20,7 @@ use App\Utils\Utils;
  */
 class SingleTeamScoreboard extends Scoreboard
 {
-    protected bool $showRestrictedFts;
+    protected readonly bool $showRestrictedFts;
 
     /**
      * @param ContestProblem[] $problems
@@ -28,10 +28,10 @@ class SingleTeamScoreboard extends Scoreboard
      */
     public function __construct(
         Contest $contest,
-        protected Team $team,
-        protected int $teamRank,
+        protected readonly Team $team,
+        protected readonly int $teamRank,
         array $problems,
-        protected ?RankCache $rankCache,
+        protected readonly ?RankCache $rankCache,
         array $scoreCache,
         FreezeData $freezeData,
         bool $showFtsInFreeze,

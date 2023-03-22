@@ -16,9 +16,9 @@ use Symfony\Component\Config\Resource\SelfCheckingResourceInterface;
  */
 class OptionalFileResource implements SelfCheckingResourceInterface, Stringable
 {
-    private bool $exists;
+    private readonly bool $exists;
 
-    public function __construct(private string $resource)
+    public function __construct(private readonly string $resource)
     {
         $this->exists = file_exists($resource);
     }

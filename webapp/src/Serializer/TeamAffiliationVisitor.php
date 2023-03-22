@@ -18,10 +18,10 @@ use Symfony\Component\Intl\Countries;
 class TeamAffiliationVisitor implements EventSubscriberInterface
 {
     public function __construct(
-        protected DOMJudgeService $dj,
-        protected ConfigurationService $config,
-        protected EventLogService $eventLogService,
-        protected RequestStack $requestStack
+        protected readonly DOMJudgeService $dj,
+        protected readonly ConfigurationService $config,
+        protected readonly EventLogService $eventLogService,
+        protected readonly RequestStack $requestStack
     ) {
     }
 

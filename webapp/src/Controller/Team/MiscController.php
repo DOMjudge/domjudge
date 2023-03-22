@@ -38,11 +38,11 @@ class MiscController extends BaseController
      * MiscController constructor.
      */
     public function __construct(
-        protected DOMJudgeService $dj,
-        protected ConfigurationService $config,
-        protected EntityManagerInterface $em,
-        protected ScoreboardService $scoreboardService,
-        protected SubmissionService $submissionService
+        protected readonly DOMJudgeService $dj,
+        protected readonly ConfigurationService $config,
+        protected readonly EntityManagerInterface $em,
+        protected readonly ScoreboardService $scoreboardService,
+        protected readonly SubmissionService $submissionService
     ) {
     }
 

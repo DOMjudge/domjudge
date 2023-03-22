@@ -9,9 +9,9 @@ class ContestProblemWrapper
 {
     public function __construct(
         /** @Serializer\Inline() */
-        protected ContestProblem $contestProblem,
+        protected readonly ContestProblem $contestProblem,
         /** @Serializer\SerializedName("test_data_count") */
-        protected int $testDataCount
+        protected readonly int $testDataCount
     ) {
     }
 

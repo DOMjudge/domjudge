@@ -29,8 +29,8 @@ class TeamType extends AbstractExternalIdEntityType
 {
     public function __construct(
         EventLogService $eventLogService,
-        protected EntityManagerInterface $em,
-        protected DOMJudgeService $dj
+        protected readonly EntityManagerInterface $em,
+        protected readonly DOMJudgeService $dj
     ) {
         parent::__construct($eventLogService);
     }

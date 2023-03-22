@@ -43,12 +43,12 @@ use Symfony\Component\Routing\RouterInterface;
 class RejudgingController extends BaseController
 {
     public function __construct(
-        protected EntityManagerInterface $em,
-        protected DOMJudgeService $dj,
-        protected ConfigurationService $config,
-        protected RejudgingService $rejudgingService,
-        protected RouterInterface $router,
-        protected RequestStack $requestStack
+        protected readonly EntityManagerInterface $em,
+        protected readonly DOMJudgeService $dj,
+        protected readonly ConfigurationService $config,
+        protected readonly RejudgingService $rejudgingService,
+        protected readonly RouterInterface $router,
+        protected readonly RequestStack $requestStack
     ) {
     }
 

@@ -26,11 +26,11 @@ use Symfony\Component\Routing\Annotation\Route;
 class ShadowDifferencesController extends BaseController
 {
     public function __construct(
-        protected DOMJudgeService $dj,
-        protected ConfigurationService $config,
-        protected SubmissionService $submissions,
-        protected RequestStack $requestStack,
-        protected EntityManagerInterface $em
+        protected readonly DOMJudgeService $dj,
+        protected readonly ConfigurationService $config,
+        protected readonly SubmissionService $submissions,
+        protected readonly RequestStack $requestStack,
+        protected readonly EntityManagerInterface $em
     ) {
     }
 

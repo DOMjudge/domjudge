@@ -20,7 +20,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class UserType extends AbstractExternalIdEntityType
 {
-    public function __construct(protected EntityManagerInterface $em, EventLogService $eventLogService)
+    public function __construct(protected readonly EntityManagerInterface $em, EventLogService $eventLogService)
     {
         parent::__construct($eventLogService);
     }
