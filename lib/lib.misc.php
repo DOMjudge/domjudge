@@ -15,6 +15,7 @@ require_once('lib.wrappers.php');
  */
 function overshoot_time(float $timelimit, string $overshoot_cfg) : float
 {
+    /** @var string[] $tokens */
     $tokens = preg_split('/([+&|])/', $overshoot_cfg, -1, PREG_SPLIT_DELIM_CAPTURE);
     if (count($tokens)!=1 && count($tokens)!=3) {
         error("invalid timelimit overshoot string '$overshoot_cfg'");
@@ -43,10 +44,10 @@ function overshoot_time(float $timelimit, string $overshoot_cfg) : float
 function overshoot_parse(float $timelimit, string $token) : float
 {
     $res = sscanf($token, '%d%c%n');
-    if (count($res)!=3) {
+    if (count((array) $res)!=3) {
         error("invalid timelimit overshoot token '$token'");
     }
-    list($val, $type, $len) = $res;
+    [$val, $type, $len] = $res;
     if (strlen($token)!=$len) {
         error("invalid timelimit overshoot token '$token'");
     }
