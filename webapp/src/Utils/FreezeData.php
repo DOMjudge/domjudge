@@ -22,7 +22,7 @@ class FreezeData
     /** @var bool[] */
     protected array $cache = [];
 
-    public function __construct(protected readonly ?\App\Entity\Contest $contest = null)
+    public function __construct(protected readonly ?Contest $contest = null)
     {
     }
 

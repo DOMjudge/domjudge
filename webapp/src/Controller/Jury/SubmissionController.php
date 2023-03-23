@@ -821,7 +821,7 @@ class SubmissionController extends BaseController
 
         $formBuilder = $this->createFormBuilder($data)
             ->add('problem', EntityType::class, [
-                'class' => \App\Entity\Problem::class,
+                'class' => Problem::class,
                 'choice_label' => 'name',
                 'query_builder' => fn(EntityRepository $er) => $er->createQueryBuilder('p')
                     ->join('p.contest_problems', 'cp')
@@ -831,7 +831,7 @@ class SubmissionController extends BaseController
                     ->orderBy('p.name'),
             ])
             ->add('language', EntityType::class, [
-                'class' => \App\Entity\Language::class,
+                'class' => Language::class,
                 'choice_label' => 'name',
                 'query_builder' => fn(EntityRepository $er) => $er->createQueryBuilder('lang')
                     ->andWhere('lang.allowSubmit = 1')
@@ -1106,8 +1106,11 @@ class SubmissionController extends BaseController
         return $result;
     }
 
-    protected function processClaim(\App\Entity\Judging|\App\Entity\ExternalJudgement|null $judging, Request $request, ?string &$claimWarning) : ?RedirectResponse
-    {
+    protected function processClaim(
+        Judging|ExternalJudgement|null $judging,
+        Request $request,
+        ?string &$claimWarning
+    ): ?RedirectResponse {
         $user   = $this->dj->getUser();
         $action = ($request->get('claim') || $request->get('claimdiff')) ? 'claim' : 'unclaim';
 

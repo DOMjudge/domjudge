@@ -7,6 +7,7 @@ use App\Entity\ContestProblem;
 use App\Entity\JudgeTask;
 use App\Entity\Judging;
 use App\Entity\Language;
+use App\Entity\Problem;
 use App\Entity\Submission;
 use App\Entity\SubmissionFile;
 use App\Entity\Team;
@@ -339,15 +340,15 @@ class SubmissionService
      * @throws DBALException
      */
     public function submitSolution(
-        \App\Entity\Team|int $team,
-        \App\Entity\User|int|null $user,
-        \App\Entity\ContestProblem|\App\Entity\Problem|int $problem,
-        \App\Entity\Contest|int $contest,
-        \App\Entity\Language|string $language,
+        Team|int $team,
+        User|int|null $user,
+        ContestProblem|Problem|int $problem,
+        Contest|int $contest,
+        Language|string $language,
         array $files,
         ?string $source = null,
         ?string $juryMember = null,
-        \App\Entity\Submission|int|null $originalSubmission = null,
+        Submission|int|null $originalSubmission = null,
         ?string $entryPoint = null,
         ?string $externalId = null,
         ?float $submitTime = null,
