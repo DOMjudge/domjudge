@@ -48,7 +48,7 @@ abstract class AccountBaseTestCase extends BaseTestCase
                 if (is_array($expectedValue)) {
                     sort($expectedValue);
                 }
-                self::assertEquals($newItemValue, $expectedValue);
+                self::assertEquals($expectedValue, $newItemValue);
             }
         }
     }
