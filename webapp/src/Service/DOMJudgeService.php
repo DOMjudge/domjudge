@@ -221,7 +221,7 @@ class DOMJudgeService
         return $user;
     }
 
-    public function getCookie(string $cookieName): bool|float|int|string|\Symfony\Component\HttpFoundation\InputBag|null
+    public function getCookie(string $cookieName): bool|float|int|string|InputBag|null
     {
         if (!$this->requestStack->getCurrentRequest()) {
             return null;
