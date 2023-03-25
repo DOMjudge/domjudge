@@ -15,8 +15,7 @@ class Filter
         public array $countries = [],
         public array $categories = [],
         public array $teams = []
-    )
-    {
+    ) {
     }
 
     /**
