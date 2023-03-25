@@ -110,10 +110,10 @@ abstract class AccountBaseTestCase extends BaseTestCase
         $tempUploadFile = new UploadedFile($tempFile, 'accounts.'.$type);
         
         $result = $this->verifyApiJsonResponse('POST', $usersURL, 200, 'admin', null, [$type => $tempUploadFile]);
-        unlink($tempFile);
 
         self::assertEquals($result, "1 new account(s) successfully added.");
         $this->helperVerifyApiUsers($myURL, $objectsBeforeTest, $newUserPostData, $overwritten);
+        unlink($tempFile);
     }
 
     public function provideNewAccountFile(): Generator
