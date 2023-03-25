@@ -838,6 +838,7 @@ class ImportExportService
                     break;
                 case 'clarification_rw':
                     $roles[] = $clarRole;
+                    break;
                 case 'api_reader':
                     $roles[] = $apiReadRole;
                     break;
