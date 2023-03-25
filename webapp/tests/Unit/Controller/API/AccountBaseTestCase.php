@@ -59,8 +59,11 @@ abstract class AccountBaseTestCase extends BaseTestCase
     public function testCreateUser(array $newUserPostData, ?array $overwritten=null): void
     {
         // This is only relevant for another test
-        if (isset($newUserPostData['skipTsv'])) {
-            unset($newUserPostData['skipTsv']);
+        if (isset($newUserPostData['skipImportFile'])) {
+            unset($newUserPostData['skipImportFile']);
+        }
+        if (!isset($newUserPostData['roles'])) {
+            $newUserPostData['roles'] = [$newUserPostData['type']];
         }
         $usersURL = $this->helperGetEndpointURL('users');
         $myURL = $this->helperGetEndpointURL($this->apiEndpoint);
@@ -72,38 +75,20 @@ abstract class AccountBaseTestCase extends BaseTestCase
 
     public function provideNewAccount(): Generator
     {
-        $defaultData = ['username' => 'newStaff',
-                'name' => 'newUserWithName',
-                'password' => 'xkcd-password-style-password',
-                'roles' => ['admin']];
-        $otherVariations = [[['username' => 'newUser-001',
-                              'roles' => ['team']]],
-                            [['roles' => ['jury']]],
-                            [['roles' => ['judge']],['roles' => ['jury']]],
-                            [['roles' => ['balloon']]],
-                            [['roles' => ['clarification_rw']]],
-                            [['username' => 'config_pusher',
-                              'roles' => ['api_writer']]],
-                            [['username' => 'grafana',
-                              'roles' => ['api_reader']]],
-                            [['username' => 'cds',
-                              'roles' => ['admin']],
-                             ['roles' => ['api_reader','api_writer','api_source_reader']]],
-                            [['username' => 'icpc-tool',
-                              'roles' => ['cds']],
-                             ['roles' => ['api_reader','api_writer','api_source_reader']]],
-                            [['username' => 'double-role',
-                              'roles' => ['cds','api_reader'], 'skipTsv' => true],
-                             ['roles' => ['api_reader','api_writer','api_source_reader']]],
-                            [['username' => 'plagiarism',
-                              'roles' => ['api_source_reader']]],
-                            [['roles' => ['clarification_rw','balloon'], 'skipTsv' => true]],
-                            [['roles' => ['jury','balloon'], 'skipTsv' => true]],
-                        ];
-        yield [$defaultData];
-        foreach ($otherVariations as $variation) {
-            $newUpload = array_merge($defaultData, $variation[0]);
-            yield [$newUpload, $variation[1] ?? null];
+        $defaultData = ['username' => 'newStaff', 'name' => 'newUserWithName', 'password' => 'xkcd-password-style-password'];
+        $accountCombinations = [
+            [['username' => 'newTeam-001', 'type' => 'team'], ['roles' => ['team']]],
+            [['username' => 'newTeam-001', 'type' => 'admin'], ['roles' => ['admin']]],
+            [['type' => 'admin'], ['roles' => ['admin']]],
+            [['type' => 'judge'], ['roles' => ['jury']]],
+            [['type' => 'jury'], ['type' => 'judge', 'roles' => ['jury']]],
+            [['type' => 'api_writer'], ['type' => 'admin']],
+            [['type' => 'api_reader'], ['type' => 'admin']],
+            [['type' => 'api_source_reader'], ['type' => 'judge']],
+        ];
+        foreach ($accountCombinations as $combination) {
+            $newUpload = array_merge($defaultData, $combination[0]);
+            yield [$newUpload, $combination[1] ?? null];
         }
     }
 
@@ -129,19 +114,19 @@ abstract class AccountBaseTestCase extends BaseTestCase
     public function provideNewAccountFile(): Generator
     {
         foreach ($this->provideNewAccount() as $index=>$testUser) {
+            if (isset($testUser['skipImportFile'])) {
+                // Not all properties which we can set via the API account endpoint can also
+                // be imported via the API file import.
+                continue;
+            }
             $overwritten = $testUser[1] ?? null;
             $testUser = $testUser[0];
             $user = $testUser['username'];
             $name = $testUser['name'];
             $pass = $testUser['password'];
-            $role = $testUser['roles'][0];
+            $role = $testUser['type'];
             $tempData = ['id'=>$user, 'username'=> $user, 'name'=>$name, 'password'=>$pass, 'type'=>$role];
             // Handle TSV file
-            if (count($testUser['roles']) !== 1 && !$testUser['skipTsv']) {
-                $this->fail("TSV can not have more than 1 role.");
-            } elseif (isset($testUser['skipTsv'])) {
-                unset($testUser['skipTsv']);
-            }
             $fileVersions = ['accounts'];
             if ($index === 0) {
                 $fileVersions[] = 'File_Version';
@@ -177,11 +162,11 @@ EOF;
     username: $user,
     name: $name,
     password: $pass,
-    type: $role
+    type: $role,
 }]
 EOF;
             yield [$file, 'json', $testUser, $overwritten];
-            $file = "[{id: \t$user,\tusername: $user, name:     $name,password: $pass, type: $role}]";
+            $file = "[{id: \t$user,\tusername: $user, name:     $name,password: $pass, type: $role   }]";
             yield [$file, 'json', $testUser, $overwritten];
         }
     }
