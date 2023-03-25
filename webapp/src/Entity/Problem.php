@@ -390,7 +390,7 @@ class Problem extends BaseApiEntity
     /**
      * @return Collection|ContestProblem[]
      */
-    public function getContestProblems(): \Doctrine\Common\Collections\Collection|array
+    public function getContestProblems(): Collection|array
     {
         return $this->contest_problems;
     }
