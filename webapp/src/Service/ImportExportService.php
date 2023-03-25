@@ -813,6 +813,8 @@ class ImportExportService
         foreach ($data as $idx => $account) {
             $juryTeam = null;
             $roles    = [];
+            // Special case for the World Finals, if the username is CDS we limit the access.
+            // The user can see what every admin can see, but can not login via the UI.
             if (isset($account['username']) && $account['username'] === 'cds') {
                 $account['type'] = 'cds';
             }
