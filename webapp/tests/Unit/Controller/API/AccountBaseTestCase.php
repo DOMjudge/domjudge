@@ -85,6 +85,8 @@ abstract class AccountBaseTestCase extends BaseTestCase
             [['type' => 'api_writer'], ['type' => 'admin']],
             [['type' => 'api_reader'], ['type' => 'admin']],
             [['type' => 'api_source_reader'], ['type' => 'judge']],
+            [['type' => 'balloon'], ['roles' => ['balloon'], 'type' => null]],
+            [['type' => 'clarification_rw'], ['roles' => ['clarification_rw'], 'type' => null]],
         ];
         foreach ($accountCombinations as $combination) {
             $newUpload = array_merge($defaultData, $combination[0]);
