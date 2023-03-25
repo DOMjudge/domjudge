@@ -36,8 +36,7 @@ class ImportExportService
         protected readonly ConfigurationService $config,
         protected readonly EventLogService $eventLogService,
         protected readonly ValidatorInterface $validator
-    ) {
-    }
+    ) {}
 
     /**
      * Get the YAML data for a given contest.

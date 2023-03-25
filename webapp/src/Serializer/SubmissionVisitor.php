@@ -22,8 +22,7 @@ class SubmissionVisitor implements EventSubscriberInterface
         protected readonly DOMJudgeService $dj,
         protected readonly EventLogService $eventLogService,
         protected readonly EntityManagerInterface $em
-    ) {
-    }
+    ) {}
 
     public static function getSubscribedEvents(): array
     {

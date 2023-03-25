@@ -49,8 +49,7 @@ class RejudgingController extends BaseController
         protected readonly RejudgingService $rejudgingService,
         protected readonly RouterInterface $router,
         protected readonly RequestStack $requestStack
-    ) {
-    }
+    ) {}
 
     /**
      * @Route("", name="jury_rejudgings")

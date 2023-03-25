@@ -17,8 +17,7 @@ class UserFixture extends AbstractDefaultDataFixture implements DependentFixture
         protected readonly LoggerInterface $logger,
         protected readonly UserPasswordHasherInterface $passwordHasher,
         protected readonly bool $debug
-    ) {
-    }
+    ) {}
 
     public function load(ObjectManager $manager): void
     {

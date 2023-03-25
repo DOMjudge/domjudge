@@ -42,8 +42,7 @@ class ClarificationController extends BaseController
         protected readonly EntityManagerInterface $em,
         protected readonly EventLogService $eventLogService,
         protected readonly FormFactoryInterface $formFactory
-    ) {
-    }
+    ) {}
 
     /**
      * @Route("/clarifications/{clarId<\d+>}", name="team_clarification")

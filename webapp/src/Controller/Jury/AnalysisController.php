@@ -26,8 +26,7 @@ class AnalysisController extends AbstractController
         private readonly DOMJudgeService $dj,
         private readonly StatisticsService $stats,
         private readonly EntityManagerInterface $em
-    ) {
-    }
+    ) {}
 
     /**
      * @Route("", name="analysis_index")

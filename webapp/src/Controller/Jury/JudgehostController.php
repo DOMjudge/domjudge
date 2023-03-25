@@ -40,8 +40,7 @@ class JudgehostController extends BaseController
         protected readonly ConfigurationService $config,
         protected readonly EventLogService $eventLog,
         protected readonly KernelInterface $kernel
-    ) {
-    }
+    ) {}
 
     /**
      * @Route("", name="jury_judgehosts")

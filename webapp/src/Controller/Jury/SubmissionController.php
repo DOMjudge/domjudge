@@ -62,8 +62,7 @@ class SubmissionController extends BaseController
         protected readonly ConfigurationService $config,
         protected readonly SubmissionService $submissionService,
         protected readonly RouterInterface $router
-    ) {
-    }
+    ) {}
 
     /**
      * @Route("", name="jury_submissions")

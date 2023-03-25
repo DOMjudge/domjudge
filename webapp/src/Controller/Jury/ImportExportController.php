@@ -58,8 +58,7 @@ class ImportExportController extends BaseController
         protected readonly EventLogService $eventLogService,
         protected readonly ImportProblemService $importProblemService,
         protected readonly string $domjudgeVersion
-    ) {
-    }
+    ) {}
 
     /**
      * @Route("", name="jury_import_export")

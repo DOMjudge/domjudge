@@ -19,8 +19,7 @@ class TeamVisitor implements EventSubscriberInterface
         protected readonly DOMJudgeService $dj,
         protected readonly EventLogService $eventLogService,
         protected readonly RequestStack $requestStack
-    ) {
-    }
+    ) {}
 
     public static function getSubscribedEvents(): array
     {

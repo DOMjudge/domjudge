@@ -36,8 +36,7 @@ class TeamCategoryController extends BaseController
         protected readonly ConfigurationService $config,
         protected readonly KernelInterface $kernel,
         protected readonly EventLogService $eventLogService
-    ) {
-    }
+    ) {}
 
     /**
      * @Route("", name="jury_team_categories")

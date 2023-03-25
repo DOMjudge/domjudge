@@ -44,8 +44,7 @@ class SubmissionController extends BaseController
         protected readonly DOMJudgeService $dj,
         protected readonly ConfigurationService $config,
         protected readonly FormFactoryInterface $formFactory
-    ) {
-    }
+    ) {}
 
     /**
      * @Route("/submit/{problem}", name="team_submit")

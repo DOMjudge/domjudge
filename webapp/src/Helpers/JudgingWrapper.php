@@ -15,8 +15,7 @@ class JudgingWrapper
         protected readonly ?float $maxRunTime = null,
         /** @Serializer\SerializedName("judgement_type_id") */
         protected readonly ?string $judgementTypeId = null
-    ) {
-    }
+    ) {}
 
     /**
      * @Serializer\VirtualProperty()

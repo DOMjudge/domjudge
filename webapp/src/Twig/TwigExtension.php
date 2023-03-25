@@ -46,8 +46,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         protected readonly TokenStorageInterface $tokenStorage,
         protected readonly AuthorizationCheckerInterface $authorizationChecker,
         protected readonly string $projectDir
-    ) {
-    }
+    ) {}
 
     public function getFunctions(): array
     {

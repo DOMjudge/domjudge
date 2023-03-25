@@ -30,8 +30,7 @@ class DOMJudgeXHeadersAuthenticator extends AbstractAuthenticator implements Aut
         private readonly UserPasswordHasherInterface $hasher,
         private readonly ConfigurationService $config,
         private readonly RouterInterface $router
-    ) {
-    }
+    ) {}
 
     /**
      * Called on every request to decide if this authenticator should be

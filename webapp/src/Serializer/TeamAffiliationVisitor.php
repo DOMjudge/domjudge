@@ -22,8 +22,7 @@ class TeamAffiliationVisitor implements EventSubscriberInterface
         protected readonly ConfigurationService $config,
         protected readonly EventLogService $eventLogService,
         protected readonly RequestStack $requestStack
-    ) {
-    }
+    ) {}
 
     public static function getSubscribedEvents(): array
     {

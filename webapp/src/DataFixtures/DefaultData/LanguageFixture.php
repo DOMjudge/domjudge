@@ -16,8 +16,7 @@ class LanguageFixture extends AbstractDefaultDataFixture
         protected readonly string $sqlDir,
         protected readonly DOMJudgeService $dj,
         protected readonly LoggerInterface $logger
-    ) {
-    }
+    ) {}
 
     public function load(ObjectManager $manager): void
     {

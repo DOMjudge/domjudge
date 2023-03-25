@@ -33,8 +33,7 @@ abstract class AbstractRestController extends AbstractFOSRestController
         protected readonly DOMJudgeService $dj,
         protected readonly ConfigurationService $config,
         protected readonly EventLogService $eventLogService
-    ) {
-    }
+    ) {}
 
     /**
      * Get all objects for this endpoint.

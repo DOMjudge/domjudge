@@ -18,8 +18,7 @@ class ProfilerDisableListener implements EventSubscriberInterface
         protected readonly KernelInterface $kernel,
         protected readonly DOMJudgeService $dj,
         protected readonly ?Profiler $profiler
-    ) {
-    }
+    ) {}
 
     /**
      * @inheritDoc

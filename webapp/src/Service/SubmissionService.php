@@ -53,8 +53,7 @@ class SubmissionService
         protected readonly ConfigurationService $config,
         protected readonly EventLogService $eventLogService,
         protected readonly ScoreboardService $scoreboardService
-    ) {
-    }
+    ) {}
 
     /**
      * Get a list of submissions that can be displayed in the interface using

@@ -28,8 +28,7 @@ class AuditLogController extends AbstractController
         protected readonly DOMJudgeService $dj,
         protected readonly ConfigurationService $config,
         protected readonly EventLogService $eventLogService
-    ) {
-    }
+    ) {}
 
     /**
      * @Route("", name="jury_auditlog")

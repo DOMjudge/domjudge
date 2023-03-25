@@ -20,8 +20,7 @@ class DOMJudgeBasicAuthenticator extends AbstractAuthenticator
     public function __construct(
         private readonly Security $security,
         private readonly UserPasswordHasherInterface $passwordHasher
-    ) {
-    }
+    ) {}
 
     /**
      * Called on every request to decide if this authenticator should be

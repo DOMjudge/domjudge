@@ -32,8 +32,7 @@ class InternalErrorController extends BaseController
         protected readonly EntityManagerInterface $em,
         protected readonly DOMJudgeService $dj,
         protected readonly RejudgingService $rejudgingService
-    ) {
-    }
+    ) {}
 
     /**
      * @Route("", name="jury_internal_errors")

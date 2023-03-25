@@ -57,8 +57,7 @@ class ContestController extends BaseController
         protected readonly KernelInterface $kernel,
         protected readonly EventLogService $eventLogService,
         protected readonly AssetUpdateService $assetUpdater
-    ) {
-    }
+    ) {}
 
     /**
      * @Route("", name="jury_contests")

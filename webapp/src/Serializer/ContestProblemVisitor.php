@@ -17,8 +17,7 @@ class ContestProblemVisitor implements EventSubscriberInterface
     public function __construct(
         protected readonly DOMJudgeService $dj,
         protected readonly EventLogService $eventLogService
-    ) {
-    }
+    ) {}
 
     public static function getSubscribedEvents(): array
     {

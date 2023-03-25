@@ -52,8 +52,7 @@ class GeneralInfoController extends AbstractFOSRestController
         protected readonly RouterInterface $router,
         protected readonly LoggerInterface $logger,
         protected readonly ImportProblemService $importProblemService
-    ) {
-    }
+    ) {}
 
     /**
      * Get the current API version

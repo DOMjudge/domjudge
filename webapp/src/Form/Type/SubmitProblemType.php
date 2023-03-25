@@ -25,8 +25,7 @@ class SubmitProblemType extends AbstractType
         protected readonly DOMJudgeService $dj,
         protected readonly ConfigurationService $config,
         protected readonly EntityManagerInterface $em
-    ) {
-    }
+    ) {}
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {

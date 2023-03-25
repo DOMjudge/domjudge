@@ -33,8 +33,7 @@ class ExternalContestController extends BaseController
         protected readonly EventLogService $eventLog,
         protected readonly KernelInterface $kernel,
         private readonly ExternalContestSourceService $sourceService
-    ) {
-    }
+    ) {}
 
     /**
      * @Route("/", name="jury_external_contest")

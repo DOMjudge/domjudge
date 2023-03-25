@@ -42,8 +42,7 @@ class UserController extends BaseController
         protected readonly KernelInterface $kernel,
         protected readonly EventLogService $eventLogService,
         protected readonly TokenStorageInterface $tokenStorage
-    ) {
-    }
+    ) {}
 
     /**
      * @Route("", name="jury_users")
