@@ -358,6 +358,10 @@ class UserController extends AbstractRestController
         }
 
         $roles = $request->request->all('roles');
+        // For the file import we change a CDS user to the roles needed for ICPC CDS.
+        if ($user->getUsername() === 'cds') {
+            $roles = ['cds'];
+        }
         if (in_array('cds', $roles)) {
             $roles = array_merge(['api_source_reader', 'api_writer', 'api_reader'], array_diff($roles, ['cds']));
         }

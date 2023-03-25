@@ -87,6 +87,9 @@ abstract class AccountBaseTestCase extends BaseTestCase
             [['type' => 'api_source_reader'], ['type' => 'judge']],
             [['type' => 'balloon'], ['roles' => ['balloon'], 'type' => null]],
             [['type' => 'clarification_rw'], ['roles' => ['clarification_rw'], 'type' => null]],
+            [['type' => 'cds'], ['roles' => ['api_source_reader', 'api_reader', 'api_writer'], 'type' => 'admin']],
+            [['username' => 'cds', 'type' => 'admin'], ['roles' => ['api_source_reader', 'api_reader', 'api_writer'], 'type' => 'admin']],
+            [['username' => 'cds', 'type' => 'jury'], ['roles' => ['api_source_reader', 'api_reader', 'api_writer'], 'type' => 'admin']],
         ];
         foreach ($accountCombinations as $combination) {
             $newUpload = array_merge($defaultData, $combination[0]);

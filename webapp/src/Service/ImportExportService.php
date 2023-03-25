@@ -813,6 +813,9 @@ class ImportExportService
         foreach ($data as $idx => $account) {
             $juryTeam = null;
             $roles    = [];
+            if (isset($account['username']) && $account['username'] === 'cds') {
+                $account['type'] = 'cds';
+            }
             switch ($account['type']) {
                 case 'admin':
                     $roles[] = $adminRole;
@@ -1135,6 +1138,9 @@ class ImportExportService
 
             $team  = $juryTeam = null;
             $roles = [];
+            if ($line[2] === 'cds') {
+                $line[0] = 'cds';
+            }
             switch ($line[0]) {
                 case 'admin':
                     $roles[] = $adminRole;
