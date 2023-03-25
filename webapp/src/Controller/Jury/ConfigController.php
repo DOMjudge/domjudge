@@ -27,8 +27,7 @@ class ConfigController extends AbstractController
         protected readonly DOMJudgeService $dj,
         protected readonly CheckConfigService $checkConfigService,
         protected readonly ConfigurationService $config
-    ) {
-    }
+    ) {}
 
     /**
      * @Route("", name="jury_config")

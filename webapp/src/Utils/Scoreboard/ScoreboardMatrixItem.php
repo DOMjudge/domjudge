@@ -12,6 +12,5 @@ class ScoreboardMatrixItem
         public float|string $time,
         public int $penaltyTime,
         public int $runtime
-    ) {
-    }
+    ) {}
 }

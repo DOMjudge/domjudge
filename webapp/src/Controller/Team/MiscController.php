@@ -43,8 +43,7 @@ class MiscController extends BaseController
         protected readonly EntityManagerInterface $em,
         protected readonly ScoreboardService $scoreboardService,
         protected readonly SubmissionService $submissionService
-    ) {
-    }
+    ) {}
 
     /**
      * @Route("", name="team_index")

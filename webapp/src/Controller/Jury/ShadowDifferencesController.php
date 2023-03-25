@@ -31,8 +31,7 @@ class ShadowDifferencesController extends BaseController
         protected readonly SubmissionService $submissions,
         protected readonly RequestStack $requestStack,
         protected readonly EntityManagerInterface $em
-    ) {
-    }
+    ) {}
 
     /**
      * @Route("", name="jury_shadow_differences")

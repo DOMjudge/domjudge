@@ -37,8 +37,7 @@ class DOMJudgeIPAuthenticator extends AbstractAuthenticator implements Authentic
         private readonly RouterInterface $router,
         private readonly RequestStack $requestStack,
         private readonly UserProviderInterface $userProvider
-    ) {
-    }
+    ) {}
 
     public function supports(Request $request): bool
     {

@@ -29,8 +29,7 @@ class PrintController extends BaseController
         protected readonly EntityManagerInterface $em,
         protected readonly DOMJudgeService $dj,
         protected readonly ConfigurationService $config
-    ) {
-    }
+    ) {}
 
     /**
      * @Route("", name="jury_print")

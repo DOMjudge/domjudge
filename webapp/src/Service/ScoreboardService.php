@@ -45,8 +45,7 @@ class ScoreboardService
         protected readonly ConfigurationService $config,
         protected readonly LoggerInterface $logger,
         protected readonly EventLogService $eventLogService
-    ) {
-    }
+    ) {}
 
     /**
      * Get scoreboard data based on the cached data in the scorecache table.

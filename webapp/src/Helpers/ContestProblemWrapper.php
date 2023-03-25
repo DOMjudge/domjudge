@@ -12,8 +12,7 @@ class ContestProblemWrapper
         protected readonly ContestProblem $contestProblem,
         /** @Serializer\SerializedName("test_data_count") */
         protected readonly int $testDataCount
-    ) {
-    }
+    ) {}
 
     public function getContestProblem(): ContestProblem
     {

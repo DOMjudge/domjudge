@@ -12,6 +12,5 @@ class JudgingRunWrapper
         protected readonly JudgingRun $judgingRun,
         /** @Serializer\SerializedName("judgement_type_id") */
         protected readonly ?string $judgementTypeId = null
-    ) {
-    }
+    ) {}
 }

@@ -18,8 +18,7 @@ class OrdinalItem
         protected readonly int $ordinal,
         /** @Serializer\Inline() */
         protected readonly object $item
-    ) {
-    }
+    ) {}
 
     public function getItem(): object
     {

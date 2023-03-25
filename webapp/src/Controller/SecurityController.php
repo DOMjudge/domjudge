@@ -26,8 +26,7 @@ class SecurityController extends AbstractController
         private readonly DOMJudgeService $dj,
         private readonly ConfigurationService $config,
         private readonly EntityManagerInterface $em
-    ) {
-    }
+    ) {}
 
     /**
      * @Route("/login", name="login")

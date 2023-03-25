@@ -28,8 +28,7 @@ class RejudgingService
         protected readonly ScoreboardService $scoreboardService,
         protected readonly EventLogService $eventLogService,
         protected readonly BalloonService $balloonService
-    ) {
-    }
+    ) {}
 
     /**
      * Create a new rejudging.

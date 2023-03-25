@@ -19,8 +19,7 @@ class BalloonService
     public function __construct(
         protected readonly EntityManagerInterface $em,
         protected readonly ConfigurationService $config
-    ) {
-    }
+    ) {}
 
     /**
      * Update the balloons table after a correct submission.

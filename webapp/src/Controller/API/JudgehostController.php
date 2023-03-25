@@ -68,8 +68,7 @@ class JudgehostController extends AbstractFOSRestController
         protected readonly BalloonService $balloonService,
         protected readonly RejudgingService $rejudgingService,
         protected readonly LoggerInterface $logger
-    ) {
-    }
+    ) {}
 
     /**
      * Get judgehosts.

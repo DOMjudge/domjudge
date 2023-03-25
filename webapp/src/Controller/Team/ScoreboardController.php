@@ -30,8 +30,7 @@ class ScoreboardController extends BaseController
         protected readonly ConfigurationService $config,
         protected readonly ScoreboardService $scoreboardService,
         protected readonly EntityManagerInterface $em
-    ) {
-    }
+    ) {}
 
     /**
      * @Route("/scoreboard", name="team_scoreboard")

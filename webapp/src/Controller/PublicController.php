@@ -40,8 +40,7 @@ class PublicController extends BaseController
         protected readonly ScoreboardService $scoreboardService,
         protected readonly StatisticsService $stats,
         protected readonly EntityManagerInterface $em
-    ) {
-    }
+    ) {}
 
     /**
      * @Route("", name="public_index")

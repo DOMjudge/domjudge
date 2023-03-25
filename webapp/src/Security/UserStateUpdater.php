@@ -16,8 +16,7 @@ class UserStateUpdater implements EventSubscriberInterface
         protected readonly DOMJudgeService $dj,
         protected readonly EntityManagerInterface $em,
         protected readonly RequestStack $requestStack
-    ) {
-    }
+    ) {}
 
     public static function getSubscribedEvents(): array
     {

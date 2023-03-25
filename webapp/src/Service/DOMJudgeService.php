@@ -90,8 +90,7 @@ class DOMJudgeService
         protected readonly HttpKernelInterface $httpKernel,
         protected readonly ConfigurationService $config,
         protected readonly RouterInterface $router
-    ) {
-    }
+    ) {}
 
     public function getEntityManager(): EntityManagerInterface
     {

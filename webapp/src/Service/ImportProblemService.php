@@ -45,8 +45,7 @@ class ImportProblemService
         protected readonly EventLogService $eventLogService,
         protected readonly SubmissionService $submissionService,
         protected readonly ValidatorInterface $validator
-    ) {
-    }
+    ) {}
 
     /**
      * Import a zipped problem.

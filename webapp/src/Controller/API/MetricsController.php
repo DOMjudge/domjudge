@@ -35,8 +35,7 @@ class MetricsController extends AbstractFOSRestController
         protected readonly DOMJudgeService $dj,
         protected readonly SubmissionService $submissionService,
         protected readonly CollectorRegistry $registry
-    ) {
-    }
+    ) {}
 
     /**
      * Metrics of this installation for use by Prometheus.

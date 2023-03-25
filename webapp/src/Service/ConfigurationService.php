@@ -34,8 +34,7 @@ class ConfigurationService
         protected readonly bool $debug,
         protected readonly string $cacheDir,
         protected readonly string $etcDir
-    ) {
-    }
+    ) {}
 
     /**
      * Get the value for the given configuration name

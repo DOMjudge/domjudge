@@ -55,8 +55,7 @@ class ProblemController extends BaseController
         protected readonly EventLogService $eventLogService,
         protected readonly SubmissionService $submissionService,
         protected readonly ImportProblemService $importProblemService
-    ) {
-    }
+    ) {}
 
     /**
      * @Route("", name="jury_problems")

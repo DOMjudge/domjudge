@@ -34,8 +34,7 @@ class ProblemController extends BaseController
         protected readonly ConfigurationService $config,
         protected readonly StatisticsService $stats,
         protected readonly EntityManagerInterface $em
-    ) {
-    }
+    ) {}
 
     /**
      * @Route("/problems", name="team_problems")

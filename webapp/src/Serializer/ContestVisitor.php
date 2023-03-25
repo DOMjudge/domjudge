@@ -24,8 +24,7 @@ class ContestVisitor implements EventSubscriberInterface
         protected readonly ConfigurationService $config,
         protected readonly DOMJudgeService $dj,
         protected readonly EventLogService $eventLogService
-    ) {
-    }
+    ) {}
 
     public static function getSubscribedEvents(): array
     {
