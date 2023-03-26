@@ -292,7 +292,7 @@ AC_REPLACE_FUNCS([atexit dup2 getcwd gettimeofday memset mkdir realpath setenv \
 
 AC_CHECK_PROG(PHP_CHECK,php,yes)
 AS_IF([test x"$PHP_CHECK" != x"yes"],
-      [phpversion=7.4],
+      [phpversion=8.1],
       [phpversion=$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')])
 AC_SUBST(PHPVERSION, [$phpversion])
 
