@@ -1355,21 +1355,12 @@ class DOMJudgeService
      */
     public function fullAssetPath(AssetEntityInterface $entity, string $property, bool $useExternalid, ?string $forceExtension = null): ?string
     {
-        if ($entity instanceof Team) {
-            switch ($property) {
-                case 'photo':
-                    return $this->assetPath($useExternalid ? $entity->getExternalid() : (string)$entity->getTeamid(), 'team', true, $forceExtension);
-            }
-        } elseif ($entity instanceof TeamAffiliation) {
-            switch ($property) {
-                case 'logo':
-                    return $this->assetPath($useExternalid ? $entity->getExternalid() : (string)$entity->getAffilid(), 'affiliation', true, $forceExtension);
-            }
-        } elseif ($entity instanceof Contest) {
-            switch ($property) {
-                case 'banner':
-                    return $this->assetPath($useExternalid ? $entity->getExternalid() : (string)$entity->getCid(), 'contest', true, $forceExtension);
-            }
+        if ($entity instanceof Team && $property == 'photo') {
+            return $this->assetPath($useExternalid ? $entity->getExternalid() : (string)$entity->getTeamid(), 'team', true, $forceExtension);
+        } elseif ($entity instanceof TeamAffiliation && $property == 'logo') {
+            return $this->assetPath($useExternalid ? $entity->getExternalid() : (string)$entity->getAffilid(), 'affiliation', true, $forceExtension);
+        } elseif ($entity instanceof Contest && $property == 'banner') {
+            return $this->assetPath($useExternalid ? $entity->getExternalid() : (string)$entity->getCid(), 'contest', true, $forceExtension);
         }
 
         return null;
