@@ -15,18 +15,12 @@ use Symfony\Component\Console\Style\SymfonyStyle;
  */
 class CheckDatabaseConfigurationDefaultValuesCommand extends Command
 {
+    protected static $defaultName = 'domjudge:db-config:check';
+    protected static $defaultDescription = 'Check if the default values of the database configuration are valid';
+
     public function __construct(protected readonly ConfigurationService $config, string $name = null)
     {
         parent::__construct($name);
-    }
-
-    protected function configure(): void
-    {
-        $this
-            ->setName('domjudge:db-config:check')
-            ->setDescription(
-                'Check if the default values of the database configuration are valid'
-            );
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int

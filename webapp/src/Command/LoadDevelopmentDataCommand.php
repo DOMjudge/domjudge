@@ -11,11 +11,12 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class LoadDevelopmentDataCommand extends Command
 {
+    protected static $defaultName = 'domjudge:load-development-data';
+    protected static $defaultDescription = 'Load fixture data to verify unit tests.';
+
     protected function configure(): void
     {
         $this
-            ->setName('domjudge:load-development-data')
-            ->setDescription('Load fixture data to verify unit tests.')
             ->addArgument(
                 'TestFixture',
                 InputArgument::REQUIRED,
