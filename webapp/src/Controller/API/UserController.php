@@ -363,7 +363,7 @@ class UserController extends AbstractRestController
             $roles = ['cds'];
         }
         if (in_array('cds', $roles)) {
-            $roles = array_merge(['api_source_reader', 'api_writer', 'api_reader'], array_diff($roles, ['cds']));
+            $roles = ['api_source_reader', 'api_writer', 'api_reader', ...array_diff($roles, ['cds'])];
         }
         foreach ($roles as $djRole) {
             if ($djRole === '') {
