@@ -24,7 +24,7 @@ System requirements
 
 Software requirements
 `````````````````````
-* A web server with support for PHP >= 7.4.0 and the ``mysqli``, ``curl``, ``gd``,
+* A web server with support for PHP >= 8.1.0 and the ``mysqli``, ``curl``, ``gd``,
   ``mbstring``, ``intl``, ``zip``, ``xml`` and ``json`` extensions for PHP.
 * MySQL or MariaDB database. This can be on the same machine, but for
   advanced setups can also run on a dedicated machine.
