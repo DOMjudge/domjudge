@@ -424,7 +424,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
      */
     public function getAffiliationId(): ?int
     {
-        return $this->getAffiliation() ? $this->getAffiliation()->getAffilid() : null;
+        return $this->getAffiliation()?->getAffilid();
     }
 
     public function setCategory(?TeamCategory $category = null): Team
@@ -575,7 +575,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
      */
     public function getAffiliationName(): ?string
     {
-        return $this->getAffiliation() ? $this->getAffiliation()->getName() : null;
+        return $this->getAffiliation()?->getName();
     }
 
     /**
@@ -587,7 +587,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
      */
     public function getNationality() : ?string
     {
-        return $this->getAffiliation() ? $this->getAffiliation()->getCountry() : null;
+        return $this->getAffiliation()?->getCountry();
     }
 
     public function canViewClarification(Clarification $clarification): bool

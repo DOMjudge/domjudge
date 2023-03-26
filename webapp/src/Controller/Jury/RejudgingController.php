@@ -146,7 +146,7 @@ class RejudgingController extends BaseController
                 'cssclass' => $class,
                 'sort' => $sort_order,
                 'rejudgingid' => $rejudging->getRejudgingid(),
-                'repeat_rejudgingid' => $rejudging->getRepeatedRejudging() ? $rejudging->getRepeatedRejudging()->getRejudgingid() : null,
+                'repeat_rejudgingid' => $rejudging->getRepeatedRejudging()?->getRejudgingid(),
             ];
         }
 
@@ -412,9 +412,7 @@ class RejudgingController extends BaseController
         // Note: we use a XMLHttpRequest here as Symfony does not support streaming Twig output
 
         // Disable the profiler toolbar to avoid OOMs.
-        if ($profiler) {
-            $profiler->disable();
-        }
+        $profiler?->disable();
 
         /** @var Rejudging $rejudging */
         $rejudging = $this->em->createQueryBuilder()

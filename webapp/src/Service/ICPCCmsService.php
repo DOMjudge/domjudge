@@ -139,9 +139,7 @@ class ICPCCmsService
                         ->setRoom($siteName);
 
                     $user = $this->em->getRepository(User::class)->findOneBy(['username' => $username]);
-                    if ($user !== null) {
-                        $user->setName($teamData['teamName']);
-                    }
+                    $user?->setName($teamData['teamName']);
 
                     $this->em->flush();
                 }

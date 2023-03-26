@@ -141,11 +141,7 @@ class ImportExportController extends BaseController
             $newProblem = null;
             /** @var Contest|null $contest */
             $contest = $problemFormData['contest'] ?? null;
-            if ($contest === null) {
-                $contestId = null;
-            } else {
-                $contestId = $contest->getCid();
-            }
+            $contestId = $contest?->getCid();
             $allMessages = [];
             try {
                 $zip = $this->dj->openZipFile($archive->getRealPath());

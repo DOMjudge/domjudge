@@ -216,9 +216,9 @@ class ProblemController extends BaseController
         // Build up INI data.
         $iniData = [
             'timelimit' => $problem->getTimelimit(),
-            'special_run' => $problem->getRunExecutable() ? $problem->getRunExecutable()->getExecid() : null,
-            'special_compare' => $problem->getCompareExecutable() ? $problem->getCompareExecutable()->getExecid() : null,
-            'color' => $contestProblem ? $contestProblem->getColor() : null,
+            'special_run' => $problem->getRunExecutable()?->getExecid(),
+            'special_compare' => $problem->getCompareExecutable()?->getExecid(),
+            'color' => $contestProblem?->getColor(),
         ];
 
         $iniString = "";
