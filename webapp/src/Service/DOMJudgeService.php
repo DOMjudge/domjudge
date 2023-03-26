@@ -248,7 +248,7 @@ class DOMJudgeService
             $path = $this->requestStack->getCurrentRequest()->getBasePath();
         }
 
-        $response->headers->setCookie(new Cookie($cookieName, $value, $expire, $path, $domain, $secure, $httponly, false, null));
+        $response->headers->setCookie(Cookie::create($cookieName, $value, $expire, $path, $domain, $secure, $httponly, false, null));
 
         return $response;
     }
