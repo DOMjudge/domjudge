@@ -275,6 +275,6 @@ class TeamCategoryController extends BaseController
         $judgings = $query->getQuery()
                           ->getResult();
         $this->judgeRemaining($judgings);
-        return $this->redirect($this->generateUrl('jury_team_category', ['categoryId' => $categoryId]));
+        return $this->redirectToRoute('jury_team_category', ['categoryId' => $categoryId]);
     }
 }

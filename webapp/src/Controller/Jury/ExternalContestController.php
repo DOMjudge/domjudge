@@ -148,7 +148,7 @@ class ExternalContestController extends BaseController
         if (!$this->dj->getCurrentContest()) {
             if (empty($this->dj->getCurrentContests(null, true))) {
                 $this->addFlash('warning', 'No current contest selected, please create one first.');
-                return $this->redirect($this->generateUrl('jury_contest_add'));
+                return $this->redirectToRoute('jury_contest_add');
             } else {
                 $this->addFlash('warning', 'No current contest selected, please select one first.');
             }
@@ -163,7 +163,7 @@ class ExternalContestController extends BaseController
         if ($form->isSubmitted() && $form->isValid()) {
             $this->em->persist($externalContestSource);
             $this->saveEntity($this->em, $this->eventLog, $this->dj, $externalContestSource, null, true);
-            return $this->redirect($this->generateUrl('jury_external_contest'));
+            return $this->redirectToRoute('jury_external_contest');
         }
 
         return $this->render('jury/external_contest_manage.html.twig', [

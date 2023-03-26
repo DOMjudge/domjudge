@@ -160,10 +160,7 @@ class LanguageController extends BaseController
             $this->em->persist($language);
             $this->saveEntity($this->em, $this->eventLogService, $this->dj, $language,
                               $language->getLangid(), true);
-            return $this->redirect($this->generateUrl(
-                'jury_language',
-                ['langId' => $language->getLangid()]
-            ));
+            return $this->redirectToRoute('jury_language', ['langId' => $language->getLangid()]);
         }
 
         return $this->render('jury/language_add.html.twig', [
@@ -283,10 +280,7 @@ class LanguageController extends BaseController
             if ($language->getAllowJudge()) {
                 $this->dj->unblockJudgeTasksForLanguage($langId);
             }
-            return $this->redirect($this->generateUrl(
-                'jury_language',
-                ['langId' => $language->getLangid()]
-            ));
+            return $this->redirectToRoute('jury_language', ['langId' => $language->getLangid()]);
         }
 
         return $this->render('jury/language_edit.html.twig', [
@@ -340,6 +334,6 @@ class LanguageController extends BaseController
         $judgings = $query->getQuery()
                           ->getResult();
         $this->judgeRemaining($judgings);
-        return $this->redirect($this->generateUrl('jury_language', ['langId' => $langId]));
+        return $this->redirectToRoute('jury_language', ['langId' => $langId]);
     }
 }

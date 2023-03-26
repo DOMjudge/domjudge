@@ -1053,10 +1053,7 @@ class ProblemController extends BaseController
         if ($form->isSubmitted() && $form->isValid()) {
             $this->em->persist($problem);
             $this->saveEntity($this->em, $this->eventLogService, $this->dj, $problem, null, true);
-            return $this->redirect($this->generateUrl(
-                'jury_problem',
-                ['probId' => $problem->getProbid()]
-            ));
+            return $this->redirectToRoute('jury_problem', ['probId' => $problem->getProbid()]);
         }
 
         return $this->render('jury/problem_add.html.twig', [
@@ -1117,6 +1114,6 @@ class ProblemController extends BaseController
         $judgings = $query->getQuery()
                           ->getResult();
         $this->judgeRemaining($judgings);
-        return $this->redirect($this->generateUrl('jury_problem', ['probId' => $probId]));
+        return $this->redirectToRoute('jury_problem', ['probId' => $probId]);
     }
 }

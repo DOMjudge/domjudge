@@ -256,10 +256,7 @@ class UserController extends BaseController
                 $this->tokenStorage->setToken($token);
             }
 
-            return $this->redirect($this->generateUrl(
-                'jury_user',
-                ['userId' => $user->getUserid()]
-            ));
+            return $this->redirectToRoute('jury_user', ['userId' => $user->getUserid()]);
         }
 
         return $this->render('jury/user_edit.html.twig', [
@@ -306,10 +303,7 @@ class UserController extends BaseController
             }
             $this->em->persist($user);
             $this->saveEntity($this->em, $this->eventLogService, $this->dj, $user, null, true);
-            return $this->redirect($this->generateUrl(
-                'jury_user',
-                ['userId' => $user->getUserid()]
-            ));
+            return $this->redirectToRoute('jury_user', ['userId' => $user->getUserid()]);
         }
 
         return $this->render('jury/user_add.html.twig', [
@@ -403,6 +397,6 @@ class UserController extends BaseController
         }
         $this->em->flush();
         $this->addFlash('success', 'Reset login status all ' . $count . ' users with the team role.');
-        return $this->redirect($this->generateUrl('jury_users'));
+        return $this->redirectToRoute('jury_users');
     }
 }
