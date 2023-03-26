@@ -110,7 +110,7 @@ class CheckConfigService
     {
         $this->stopwatch->start(__FUNCTION__);
         $my = PHP_VERSION;
-        $req = '7.4.0';
+        $req = '8.1.0';
         $result = version_compare($my, $req, '>=');
         $this->stopwatch->stop(__FUNCTION__);
         return ['caption' => 'PHP version',
