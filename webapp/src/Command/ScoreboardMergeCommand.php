@@ -355,6 +355,6 @@ class ScoreboardMergeCommand extends Command
 
         $style->success(sprintf('Merged scoreboard data written to %s',
                                 $input->getArgument('output-file')));
-        return static::SUCCESS;
+        return Command::SUCCESS;
     }
 }

@@ -100,7 +100,7 @@ class ImportEventFeedCommand extends Command
         pcntl_signal(SIGINT, $this->stopCommand(...));
 
         if (!$this->loadSource($input, $output)) {
-            return static::FAILURE;
+            return Command::FAILURE;
         }
 
         $dataSource       = (int)$this->config->get('data_source');
@@ -112,7 +112,7 @@ class ImportEventFeedCommand extends Command
                                     $dataSourceOptions[$dataSource],
                                     $dataSourceOptions[$importDataSource]
                                 ));
-            return static::FAILURE;
+            return Command::FAILURE;
         }
 
         // Find an admin user as we need one to make sure we can read all events.
@@ -128,7 +128,7 @@ class ImportEventFeedCommand extends Command
                          ->getOneOrNullResult();
         if (!$user) {
             $this->style->error('No admin user found. Please create at least one');
-            return static::FAILURE;
+            return Command::FAILURE;
         }
         $token = new UsernamePasswordToken($user, 'main', $user->getRoles());
         $this->tokenStorage->setToken($token);
@@ -137,7 +137,7 @@ class ImportEventFeedCommand extends Command
         $eventsToSkip = $input->getOption('skip-event-id');
 
         if (!$this->compareContestId()) {
-            return static::FAILURE;
+            return Command::FAILURE;
         }
 
         $this->style->success('Starting import. Press ^C to quit (might take a bit to be detected).');
@@ -157,10 +157,10 @@ class ImportEventFeedCommand extends Command
         };
 
         if (!$this->sourceService->import($fromStart, $eventsToSkip, $progressReporter)) {
-            return static::FAILURE;
+            return Command::FAILURE;
         }
 
-        return static::SUCCESS;
+        return Command::SUCCESS;
     }
 
     public function stopCommand(): void

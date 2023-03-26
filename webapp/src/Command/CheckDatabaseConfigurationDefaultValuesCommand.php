@@ -80,6 +80,6 @@ class CheckDatabaseConfigurationDefaultValuesCommand extends Command
             $style->listing($messages);
         }
 
-        return static::SUCCESS;
+        return Command::SUCCESS;
     }
 }
