@@ -17,9 +17,9 @@ abstract class AccountBaseTestCase extends BaseTestCase
         $objectsAfterTest = $this->verifyApiJsonResponse('GET', $myURL, 200, $this->apiUser);
         $newItems = array_map(unserialize(...), array_diff(array_map(serialize(...), $objectsAfterTest), array_map(serialize(...), $objectsBeforeTest)));
         // Because we login again with the admin user we might see that one also
-        if (count($newItems)===2) {
-            self::assertContains('admin', array_column($newItems,'username'), "Found unexpected new/changed user");
-            foreach ($newItems as $key=>$user) {
+        if (count($newItems) === 2) {
+            self::assertContains('admin', array_column($newItems, 'username'), "Found unexpected new/changed user");
+            foreach ($newItems as $key => $user) {
                 // Ignore the admin user for the tests.
                 if ($user['username'] === 'admin') {
                     unset($newItems[$key]);
@@ -36,7 +36,7 @@ abstract class AccountBaseTestCase extends BaseTestCase
                 // For security we don't output the password in the API
                 $newItemValue = $newItems[$listKey][$key];
                 if ($key === 'roles' &&
-                    (in_array('admin', $newItemValue) || in_array('jury', $newItemValue)) && 
+                    (in_array('admin', $newItemValue) || in_array('jury', $newItemValue)) &&
                     self::getContainer()->getParameter('kernel.debug')
                 ) {
                     $newItemValue = array_diff($newItemValue, ['team']);
@@ -56,7 +56,7 @@ abstract class AccountBaseTestCase extends BaseTestCase
     /**
      * @dataProvider provideNewAccount
      */
-    public function testCreateUser(array $newUserPostData, ?array $overwritten=null): void
+    public function testCreateUser(array $newUserPostData, ?array $overwritten = null): void
     {
         // This is only relevant for another test
         if (isset($newUserPostData['skipImportFile'])) {
@@ -123,7 +123,7 @@ abstract class AccountBaseTestCase extends BaseTestCase
     /**
      * @dataProvider provideNewAccountFile
      */
-    public function testCreateUserFileImport(string $newUsersFile, string $type, array $newUserPostData, ?array $overwritten=null): void
+    public function testCreateUserFileImport(string $newUsersFile, string $type, array $newUserPostData, ?array $overwritten = null): void
     {
         $usersURL = $this->helperGetEndpointURL('users').'/accounts';
         $myURL = $this->helperGetEndpointURL($this->apiEndpoint);
@@ -141,7 +141,7 @@ abstract class AccountBaseTestCase extends BaseTestCase
 
     public function provideNewAccountFile(): Generator
     {
-        foreach ($this->provideNewAccount() as $index=>$testUser) {
+        foreach ($this->provideNewAccount() as $index => $testUser) {
             if (isset($testUser[0]['skipImportFile'])) {
                 // Not all properties which we can set via the API account endpoint can also
                 // be imported via the API file import.
@@ -153,7 +153,7 @@ abstract class AccountBaseTestCase extends BaseTestCase
             $name = $testUser['name'];
             $pass = $testUser['password'];
             $role = $testUser['type'];
-            $tempData = ['id'=>$user, 'username'=> $user, 'name'=>$name, 'password'=>$pass, 'type'=>$role];
+            $tempData = ['id' => $user,  'username' => $user, 'name' => $name, 'password' => $pass, 'type' => $role];
             // Handle TSV file
             $fileVersions = ['accounts'];
             if ($index === 0) {
@@ -212,17 +212,17 @@ EOF;
             }
             $url = $this->helperGetEndpointURL($this->apiEndpoint)."?team=".$expectedObject['team_id'];
             $objects = $this->verifyApiJsonResponse('GET', $url, 200, $this->apiUser);
-            $found = False;
+            $found = false;
             foreach ($objects as $possibleObject) {
                 if ($possibleObject['username'] == $expectedObject['username']) {
-                    $found = True;
+                    $found = true;
                     foreach ($expectedObject as $key => $value) {
                         // Null values can also be absent.
                         static::assertEquals($value, $possibleObject[$key] ?? null, $key . ' has correct value.');
                     }
                 }
             }
-            self::assertEquals(True,$found);
+            self::assertEquals(true,$found);
         }
     }
 }
