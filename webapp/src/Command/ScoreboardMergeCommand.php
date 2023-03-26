@@ -41,6 +41,9 @@ use ZipArchive;
  */
 class ScoreboardMergeCommand extends Command
 {
+    protected static $defaultName = 'scoreboard:merge';
+    protected static $defaultDescription = 'Merges scoreboards from multiple sites from API endpoints.';
+
     public function __construct(
         protected readonly DOMJudgeService $dj,
         protected readonly ConfigurationService $config,
@@ -57,8 +60,6 @@ class ScoreboardMergeCommand extends Command
     protected function configure(): void
     {
         $this
-            ->setName('scoreboard:merge')
-            ->setDescription('Merges scoreboards from multiple sites from API endpoints.')
             ->setHelp(
                 'Usage example: scoreboard:merge "BAPC preliminaries" ' .
                 'https://judge.gehack.nl/api/v4/contests/3/ 3 ' .

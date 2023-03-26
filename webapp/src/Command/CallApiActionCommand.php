@@ -16,6 +16,9 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class CallApiActionCommand extends Command
 {
+    protected static $defaultName = 'api:call';
+    protected static $defaultDescription = 'Call the DOMjudge API directly. Note: this will use admin credentials';
+
     public function __construct(protected readonly DOMJudgeService $dj, protected readonly EntityManagerInterface $em)
     {
         parent::__construct();
@@ -24,8 +27,6 @@ class CallApiActionCommand extends Command
     protected function configure(): void
     {
         $this
-            ->setName('api:call')
-            ->setDescription('Call the DOMjudge API directly. Note: this will use admin credentials')
             ->addArgument(
                 'endpoint',
                 InputArgument::REQUIRED,

@@ -10,12 +10,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class LoadDefaultDataCommand extends Command
 {
-    protected function configure(): void
-    {
-        $this
-            ->setName('domjudge:load-default-data')
-            ->setDescription('Load the data needed by all DOMjudge installations');
-    }
+    protected static $defaultName = 'domjudge:load-default-data';
+    protected static $defaultDescription = 'Load the data needed by all DOMjudge installations';
 
     /**
      * @throws Exception

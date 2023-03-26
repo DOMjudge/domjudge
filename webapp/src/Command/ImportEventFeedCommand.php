@@ -30,6 +30,9 @@ use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
  */
 class ImportEventFeedCommand extends Command
 {
+    protected static $defaultName = 'import:eventfeed';
+    protected static $defaultDescription = 'Import contest data from an event feed following the Contest API specification';
+
     protected SymfonyStyle $style;
 
     protected ?ExternalContestSource $source = null;
@@ -48,9 +51,6 @@ class ImportEventFeedCommand extends Command
     protected function configure(): void
     {
         $this
-            ->setName('import:eventfeed')
-            ->setDescription('Import contest data from an event feed following ' .
-                             'the Contest API specification')
             ->setHelp(
                 'Import contest data from an event feed following the Contest API specification:' . PHP_EOL .
                 'https://ccs-specs.icpc.io/2021-11/contest_api' . PHP_EOL . PHP_EOL .

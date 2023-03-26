@@ -14,12 +14,8 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class LoadGatlingDataCommand extends Command
 {
-    protected function configure(): void
-    {
-        $this
-            ->setName('domjudge:load-gatling-data')
-            ->setDescription('Load the gatling data(for load testing)');
-    }
+    protected static $defaultName = 'domjudge:load-gatling-data';
+    protected static $defaultDescription = 'Load the gatling data(for load testing)';
 
     /**
      * @throws Exception

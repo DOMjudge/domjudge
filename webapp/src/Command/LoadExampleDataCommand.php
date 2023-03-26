@@ -10,12 +10,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class LoadExampleDataCommand extends Command
 {
-    protected function configure(): void
-    {
-        $this
-            ->setName('domjudge:load-example-data')
-            ->setDescription('Load example data to get a sample DOMjudge installation up and running');
-    }
+    protected static $defaultName = 'domjudge:load-example-data';
+    protected static $defaultDescription = 'Load example data to get a sample DOMjudge installation up and running';
 
     /**
      * @throws Exception

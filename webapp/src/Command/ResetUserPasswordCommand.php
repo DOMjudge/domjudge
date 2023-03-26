@@ -19,6 +19,9 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
  */
 class ResetUserPasswordCommand extends Command
 {
+    protected static $defaultName = 'domjudge:reset-user-password';
+    protected static $defaultDescription = 'Reset the password of the given user';
+
     public function __construct(
         protected readonly EntityManagerInterface $em,
         protected readonly UserPasswordHasherInterface $passwordHasher
@@ -29,8 +32,6 @@ class ResetUserPasswordCommand extends Command
     protected function configure(): void
     {
         $this
-            ->setName('domjudge:reset-user-password')
-            ->setDescription('Reset the password of the given user')
             ->addArgument(
                 'username',
                 InputArgument::REQUIRED,
