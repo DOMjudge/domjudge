@@ -492,7 +492,7 @@ class ContestController extends BaseController
 
         if ($contest->isLocked()) {
             $this->addFlash('danger', 'You cannot edit a locked contest.');
-            return $this->redirect($this->generateUrl('jury_contest', ['contestId' => $contestId]));
+            return $this->redirectToRoute('jury_contest', ['contestId' => $contestId]);
         }
 
         $form = $this->createForm(ContestType::class, $contest);
@@ -575,10 +575,7 @@ class ContestController extends BaseController
                 $this->eventLogService->log($problemEndpoint, $problem->getProbid(),
                     EventLogService::ACTION_DELETE, $contest->getCid(), null, null, false);
             }
-            return $this->redirect($this->generateUrl(
-                'jury_contest',
-                ['contestId' => $contest->getcid()]
-            ));
+            return $this->redirectToRoute('jury_contest', ['contestId' => $contest->getcid()]);
         }
 
         $this->em->refresh($contest);
@@ -603,7 +600,7 @@ class ContestController extends BaseController
 
         if ($contest->isLocked()) {
             $this->addFlash('danger', 'You cannot delete a locked contest.');
-            return $this->redirect($this->generateUrl('jury_contest', ['contestId' => $contestId]));
+            return $this->redirectToRoute('jury_contest', ['contestId' => $contestId]);
         }
 
         return $this->deleteEntities($request, $this->em, $this->dj, $this->eventLogService, $this->kernel,
@@ -630,7 +627,7 @@ class ContestController extends BaseController
 
         if ($contestProblem->getContest()->isLocked()) {
             $this->addFlash('danger', 'You cannot delete a problem from a locked contest.');
-            return $this->redirect($this->generateUrl('jury_contest', ['contestId' => $contestId]));
+            return $this->redirectToRoute('jury_contest', ['contestId' => $contestId]);
         }
 
         return $this->deleteEntities($request, $this->em, $this->dj, $this->eventLogService, $this->kernel,
@@ -682,10 +679,7 @@ class ContestController extends BaseController
                 // dependent event) anyway and adding the code here would
                 // overcomplicate this function.
             });
-            return $this->redirect($this->generateUrl(
-                'jury_contest',
-                ['contestId' => $contest->getcid()]
-            ));
+            return $this->redirectToRoute('jury_contest', ['contestId' => $contest->getcid()]);
         }
 
         return $this->render('jury/contest_add.html.twig', [
@@ -773,10 +767,7 @@ class ContestController extends BaseController
         $this->em->flush();
 
         $this->addFlash('success', "Scheduled $cnt judgetasks to preheat judgehosts.");
-        return $this->redirect($this->generateUrl(
-            'jury_contest',
-            ['contestId' => $contestId]
-        ));
+        return $this->redirectToRoute('jury_contest', ['contestId' => $contestId]);
     }
 
     /**
@@ -874,7 +865,7 @@ class ContestController extends BaseController
                              ->getQuery()
                              ->getResult();
         $this->judgeRemaining($judgings);
-        return $this->redirect($this->generateUrl('jury_contest', ['contestId' => $contestId]));
+        return $this->redirectToRoute('jury_contest', ['contestId' => $contestId]);
     }
 
     /**
@@ -909,7 +900,7 @@ class ContestController extends BaseController
                              ->getQuery()
                              ->getResult();
         $this->judgeRemaining($judgings);
-        return $this->redirect($this->generateUrl('jury_contest', ['contestId' => $contestId]));
+        return $this->redirectToRoute('jury_contest', ['contestId' => $contestId]);
     }
 
     // Return null in case no error has been found.
@@ -984,6 +975,6 @@ class ContestController extends BaseController
         } else {
             $this->addFlash('danger', 'Contest has been unlocked, modifications are possible again.');
         }
-        return $this->redirect($this->generateUrl('jury_contest', ['contestId' => $contestId]));
+        return $this->redirectToRoute('jury_contest', ['contestId' => $contestId]);
     }
 }

@@ -45,7 +45,7 @@ class SecurityController extends AbstractController
 
         $ipAutologin = $this->config->get('ip_autologin');
         if (!$ipAutologin && $authorizationChecker->isGranted('IS_AUTHENTICATED_FULLY')) {
-            return $this->redirect($this->generateUrl('root'));
+            return $this->redirectToRoute('root');
         }
 
         // Get the login error if there is one.
@@ -91,7 +91,7 @@ class SecurityController extends AbstractController
     ): Response {
         // Redirect if already logged in
         if ($authorizationChecker->isGranted('IS_AUTHENTICATED_FULLY')) {
-            return $this->redirect($this->generateUrl('root'));
+            return $this->redirectToRoute('root');
         }
 
         $em                              = $this->em;
@@ -158,7 +158,7 @@ class SecurityController extends AbstractController
 
             $this->addFlash('success', 'Account registered successfully. Please log in.');
 
-            return $this->redirect($this->generateUrl('login'));
+            return $this->redirectToRoute('login');
         }
 
         return $this->render('security/register.html.twig', ['registration_form' => $registration_form->createView()]);

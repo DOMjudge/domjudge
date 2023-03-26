@@ -332,10 +332,7 @@ class TeamController extends BaseController
             $this->assetUpdater->updateAssets($team);
             $this->saveEntity($this->em, $this->eventLogService, $this->dj, $team,
                               $team->getTeamid(), false);
-            return $this->redirect($this->generateUrl(
-                'jury_team',
-                ['teamId' => $team->getTeamid()]
-            ));
+            return $this->redirectToRoute('jury_team', ['teamId' => $team->getTeamid()]);
         }
 
         return $this->render('jury/team_edit.html.twig', [
@@ -391,10 +388,7 @@ class TeamController extends BaseController
             $this->em->persist($team);
             $this->assetUpdater->updateAssets($team);
             $this->saveEntity($this->em, $this->eventLogService, $this->dj, $team, null, true);
-            return $this->redirect($this->generateUrl(
-                'jury_team',
-                ['teamId' => $team->getTeamid()]
-            ));
+            return $this->redirectToRoute('jury_team', ['teamId' => $team->getTeamid()]);
         }
 
         return $this->render('jury/team_add.html.twig', [
