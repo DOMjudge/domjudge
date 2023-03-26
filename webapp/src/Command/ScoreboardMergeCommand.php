@@ -128,7 +128,7 @@ class ScoreboardMergeCommand extends Command
 
         if (count($siteArguments) % 2 != 0) {
             $style->error("Provide an even number of arguments: all pairs of url and comma separated group ids.");
-            return 1;
+            return Command::FAILURE;
         }
 
         for ($i = 0; $i < count($siteArguments); $i += 2) {
@@ -138,7 +138,7 @@ class ScoreboardMergeCommand extends Command
             $groupsString = $siteArguments[$i + 1];
             if (!preg_match('/^\d+(,\d+)*$/', $groupsString)) {
                 $style->error('Argument does not look like a comma separated list of group ids: ' . $groupsString);
-                return 1;
+                return Command::FAILURE;
             }
             $site['group_ids'] = array_map(
                 'intval', explode(',', $groupsString)
@@ -327,7 +327,7 @@ class ScoreboardMergeCommand extends Command
                              ZipArchive::CREATE | ZipArchive::OVERWRITE);
         if ($result !== true) {
             $style->error('Can not open output file to write ZIP to: ' . $result);
-            return 1;
+            return Command::FAILURE;
         }
         $zip->addFromString('index.html', $output);
 
