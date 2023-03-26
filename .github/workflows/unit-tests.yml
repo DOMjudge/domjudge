@@ -19,7 +19,7 @@ jobs:
     strategy:
       matrix:
         sqlserver: ['mariadb']
-        phpversion: ['7.4','8.0','8.1','8.2']
+        phpversion: ['8.1','8.2']
         testtype: ["Unit","E2E"]
         include:
           - phpversion: "8.1"
@@ -32,13 +32,17 @@ jobs:
       sqlserver:
         image: "${{ matrix.sqlserver }}"
         env:
-          MARIADB_ROOT_PASSWORD: domjudge
+          MYSQL_ROOT_PASSWORD: domjudge
     steps:
       - uses: actions/checkout@v2
-      - name: Show current directory
-        run: pwd
+      - name: Wait to make sure SQL is up
+        run: |
+          sqlcommand='echo "show databases" | mysql -hsqlserver -uroot -p'"${MYSQL_ROOT_PASSWORD}"
+          until $sqlcommand ; do
+            sleep 3
+          done
       - name: Run gitlab script in altered form
-        run: .github/jobs/unit-tests.sh "${{ matrix.phpversion }}" "${{ matrix.testtype }}" "${{ matrix.sqlserver }}"
+        run: .github/jobs/unit-tests.sh "${{ matrix.phpversion }}" "${{ matrix.testtype }}" "${{ matrix.sqlserver }}" "${MYSQL_ROOT_PASSWORD}"
       - name: Publish Test Results
         uses: EnricoMi/publish-unit-test-result-action@v2
         if: always()
