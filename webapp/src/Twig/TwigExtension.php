@@ -347,9 +347,9 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
 
             $submissionDone = $externalJudgement && !empty($externalJudgement->getEndtime());
         } else {
-            /** @var Judging|null $judging */
+            /** @var Judging|bool $judging */
             $judging   = $submission->getJudgings()->first();
-            $judgingId = $judging?->getJudgingid();
+            $judgingId = $judging ? $judging->getJudgingid() : null;
             $probId    = $submission->getProblem()->getProbid();
             $testcases = $this->em->getConnection()->fetchAllAssociative(
                 'SELECT r.runresult, jh.hostname, jt.valid, t.ranknumber, t.description
