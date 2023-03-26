@@ -76,24 +76,47 @@ abstract class AccountBaseTestCase extends BaseTestCase
     public function provideNewAccount(): Generator
     {
         $defaultData = ['username' => 'newStaff', 'name' => 'newUserWithName', 'password' => 'xkcd-password-style-password'];
-        $accountCombinations = [
+        $accountCombinationsWithFile = [
             [['username' => 'newTeam-001', 'type' => 'team'], ['roles' => ['team']]],
             [['username' => 'newTeam-001', 'type' => 'admin'], ['roles' => ['admin']]],
             [['type' => 'admin'], ['roles' => ['admin']]],
             [['type' => 'judge'], ['roles' => ['jury']]],
             [['type' => 'jury'], ['type' => 'judge', 'roles' => ['jury']]],
-            [['type' => 'api_writer'], ['type' => 'admin']],
-            [['type' => 'api_reader'], ['type' => 'admin']],
-            [['type' => 'api_source_reader'], ['type' => 'judge']],
+            [['type' => 'api_writer'], ['type' => 'admin', 'roles' => ['api_writer']]],
+            [['type' => 'api_reader'], ['type' => 'admin', 'roles' => ['api_reader']]],
+            [['type' => 'api_source_reader'], ['type' => 'judge', 'roles' => ['api_source_reader']]],
             [['type' => 'balloon'], ['roles' => ['balloon'], 'type' => null]],
             [['type' => 'clarification_rw'], ['roles' => ['clarification_rw'], 'type' => null]],
             [['type' => 'cds'], ['roles' => ['api_source_reader', 'api_reader', 'api_writer'], 'type' => 'admin']],
             [['username' => 'cds', 'type' => 'admin'], ['roles' => ['api_source_reader', 'api_reader', 'api_writer'], 'type' => 'admin']],
             [['username' => 'cds', 'type' => 'jury'], ['roles' => ['api_source_reader', 'api_reader', 'api_writer'], 'type' => 'admin']],
         ];
-        foreach ($accountCombinations as $combination) {
-            $newUpload = array_merge($defaultData, $combination[0]);
-            yield [$newUpload, $combination[1] ?? null];
+        $specialCasesWithFile = [];
+        $accountCombinationsWithFile = array_merge($accountCombinationsWithFile, $specialCasesWithFile);
+        $accountCombinationsWithoutFile = [
+            [['username' => 'cds', 'roles' => ['admin']], ['roles' => ['api_source_reader', 'api_reader', 'api_writer'], 'type' => 'admin']],
+            [['username' => 'another_judgehost', 'roles' => ['judgehost']], ['type' => null]],
+        ];
+        foreach ($accountCombinationsWithFile as $templateAccount) {
+            $result = array_merge($templateAccount[1], $templateAccount[0]);
+            $expectation = $templateAccount[1];
+            if (array_key_exists('type', $templateAccount[0])) {
+                unset($result['type']);
+                if (!array_key_exists('type', $templateAccount[1])) {
+                    // Sometimes we insert a non-CLICS type which is translated to another CLICS type.
+                    $expectation['type'] = $templateAccount[0]['type'];
+                }
+            }
+            $accountCombinationsWithoutFile[] = [$result, $expectation];
+        }
+        foreach ([$accountCombinationsWithFile, $accountCombinationsWithoutFile] as $ind => $accountCombinations) {
+            if ($ind === 1) {
+                $defaultData['skipImportFile'] = true;
+            }
+            foreach ($accountCombinations as $combination) {
+                $newUpload = array_merge($defaultData, $combination[0]);
+                yield [$newUpload, $combination[1] ?? null];
+            }
         }
     }
 
@@ -119,7 +142,7 @@ abstract class AccountBaseTestCase extends BaseTestCase
     public function provideNewAccountFile(): Generator
     {
         foreach ($this->provideNewAccount() as $index=>$testUser) {
-            if (isset($testUser['skipImportFile'])) {
+            if (isset($testUser[0]['skipImportFile'])) {
                 // Not all properties which we can set via the API account endpoint can also
                 // be imported via the API file import.
                 continue;
