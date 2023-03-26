@@ -68,7 +68,7 @@ class CallApiActionCommand extends Command
     {
         if (!in_array($input->getOption('method'), [Request::METHOD_GET, Request::METHOD_POST, Request::METHOD_PUT], true)) {
             $output->writeln('Error: only GET, POST and PUT methods are supported');
-            return self::FAILURE;
+            return Command::FAILURE;
         }
 
         if ($input->getOption('user')) {
@@ -77,7 +77,7 @@ class CallApiActionCommand extends Command
                 ->findOneBy(['username' => $input->getOption('user')]);
             if (!$user) {
                 $output->writeln('Error: Provided user not found');
-                return self::FAILURE;
+                return Command::FAILURE;
             }
         } else {
             // Find an admin user as we need one to make sure we can read all events.
@@ -93,7 +93,7 @@ class CallApiActionCommand extends Command
                 ->getOneOrNullResult();
             if (!$user) {
                 $output->writeln('Error: No admin user found. Please create at least one');
-                return self::FAILURE;
+                return Command::FAILURE;
             }
         }
 
@@ -131,11 +131,11 @@ class CallApiActionCommand extends Command
         } else {
             if ($input->getOption('data')) {
                 $output->writeln('Error: data not allowed for GET methods.');
-                return self::FAILURE;
+                return Command::FAILURE;
             }
             if ($input->getOption('file')) {
                 $output->writeln('Error: files not allowed for GET methods.');
-                return self::FAILURE;
+                return Command::FAILURE;
             }
         }
 
@@ -147,10 +147,10 @@ class CallApiActionCommand extends Command
         } catch (HttpException $e) {
             $output->writeln($e->getMessage());
             // Return the HTTP status code as error code
-            return self::FAILURE;
+            return Command::FAILURE;
         }
 
         $output->writeln(json_encode($response, JSON_PRESERVE_ZERO_FRACTION | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT));
-        return self::SUCCESS;
+        return Command::SUCCESS;
     }
 }

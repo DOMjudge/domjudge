@@ -49,7 +49,7 @@ class ResetUserPasswordCommand extends Command
 
         if (!$user) {
             $style->error('Can not find user with username ' . $username);
-            return self::FAILURE;
+            return Command::FAILURE;
         }
 
         $password = Utils::generatePassword();
@@ -61,6 +61,6 @@ class ResetUserPasswordCommand extends Command
 
         $style->success('New password for ' . $username . ' is ' . $password);
 
-        return self::SUCCESS;
+        return Command::SUCCESS;
     }
 }
