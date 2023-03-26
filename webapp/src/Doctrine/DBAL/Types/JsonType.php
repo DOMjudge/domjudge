@@ -24,7 +24,7 @@ class JsonType extends BaseJsonType
     {
         if (!empty($column['length'])) {
             if ($column['length'] <= 255) {
-                return $platform->getVarcharTypeDeclarationSQL($column);
+                return $platform->getStringTypeDeclarationSQL($column);
             } else {
                 return $platform->getClobTypeDeclarationSQL($column);
             }
