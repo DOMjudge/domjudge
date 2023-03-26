@@ -395,7 +395,7 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
      */
     public function getTeamName(): ?string
     {
-        return $this->getTeam() ? $this->getTeam()->getEffectiveName() : null;
+        return $this->getTeam()?->getEffectiveName();
     }
 
     /**
@@ -406,7 +406,7 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
      */
     public function getTeamId(): ?int
     {
-        return $this->getTeam() ? $this->getTeam()->getTeamid() : null;
+        return $this->getTeam()?->getTeamid();
     }
 
     public function __construct()

@@ -902,7 +902,7 @@ class JudgehostController extends AbstractFOSRestController
 
             $this->dj->auditlog('judging', $judgingId, 'given back'
                 . ($judgehost === null ? '' : ' for judgehost ' . $judgehost->getHostname()), null,
-                $judgehost === null ? null : $judgehost->getHostname(), $judging->getContest()->getCid());
+                $judgehost?->getHostname(), $judging->getContest()->getCid());
         }
     }
 

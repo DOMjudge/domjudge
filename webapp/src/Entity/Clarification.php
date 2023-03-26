@@ -272,7 +272,7 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
      */
     public function getProblemId(): ?int
     {
-        return $this->getProblem() ? $this->getProblem()->getProbid() : null;
+        return $this->getProblem()?->getProbid();
     }
 
     public function setContest(?Contest $contest = null): Clarification
@@ -305,7 +305,7 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
      */
     public function getInReplyToId(): ?int
     {
-        return $this->getInReplyTo() ? $this->getInReplyTo()->getClarid() : null;
+        return $this->getInReplyTo()?->getClarid();
     }
 
     public function addReply(Clarification $reply): Clarification
@@ -343,7 +343,7 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
      */
     public function getSenderId(): ?int
     {
-        return $this->getSender() ? $this->getSender()->getTeamid() : null;
+        return $this->getSender()?->getTeamid();
     }
 
     public function setRecipient(?Team $recipient = null): Clarification
@@ -365,7 +365,7 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
      */
     public function getRecipientId(): ?int
     {
-        return $this->getRecipient() ? $this->getRecipient()->getTeamid() : null;
+        return $this->getRecipient()?->getTeamid();
     }
 
     /**

@@ -115,7 +115,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         $refresh_flag   = ($refresh_cookie == null || (bool)$refresh_cookie);
 
         $user = $this->dj->getUser();
-        $team = $user ? $user->getTeam() : null;
+        $team = $user?->getTeam();
 
         // These variables mostly exist for the header template.
         return [
@@ -335,7 +335,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         if ($showExternal) {
             /** @var ExternalJudgement|null $externalJudgement */
             $externalJudgement   = $submission->getExternalJudgements()->first();
-            $externalJudgementId = $externalJudgement ? $externalJudgement->getExtjudgementid() : null;
+            $externalJudgementId = $externalJudgement?->getExtjudgementid();
             $probId              = $submission->getProblem()->getProbid();
             $testcases           = $this->em->getConnection()->fetchAllAssociative(
                 'SELECT er.result as runresult, t.ranknumber, t.description
@@ -349,7 +349,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         } else {
             /** @var Judging|null $judging */
             $judging   = $submission->getJudgings()->first();
-            $judgingId = $judging ? $judging->getJudgingid() : null;
+            $judgingId = $judging?->getJudgingid();
             $probId    = $submission->getProblem()->getProbid();
             $testcases = $this->em->getConnection()->fetchAllAssociative(
                 'SELECT r.runresult, jh.hostname, jt.valid, t.ranknumber, t.description
@@ -415,9 +415,9 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             /** @var JudgingRun $run */
             $run = $isExternal ? $testcase->getFirstExternalRun() : $testcase->getFirstJudgingRun();
             if ($isExternal) {
-                $runResult = $run ? $run->getResult() : null;
+                $runResult = $run?->getResult();
             } else {
-                $runResult = $run ? $run->getRunresult() : null;
+                $runResult = $run?->getRunresult();
             }
 
             if ($run) {

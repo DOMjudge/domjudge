@@ -169,9 +169,7 @@ class InternalErrorController extends BaseController
         // Action is resolve now, use AJAX to do this
 
         if ($request->isXmlHttpRequest()) {
-            if ($profiler) {
-                $profiler->disable();
-            }
+            $profiler?->disable();
             $progressReporter = function (int $progress, string $log, ?string $message = null) {
                 echo $this->dj->jsonEncode(['progress' => $progress, 'log' => Utils::specialchars($log), 'message' => $message]);
                 ob_flush();

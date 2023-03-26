@@ -214,12 +214,10 @@ class ImportProblemService
                 ->setProblemtext(null)
                 ->setProblemtextType(null);
 
-            if ($contestProblem) {
-                $contestProblem
-                    ->setPoints(1)
-                    ->setAllowSubmit(true)
-                    ->setAllowJudge(true);
-            }
+            $contestProblem
+                ?->setPoints(1)
+                ->setAllowSubmit(true)
+                ->setAllowJudge(true);
         }
 
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
@@ -602,7 +600,7 @@ class ImportProblemService
             $this->em->flush();
         }
 
-        $cid = $contest ? $contest->getCid() : null;
+        $cid = $contest?->getCid();
         $probid = $problem->getProbid();
         $this->eventLogService->log('problem', $problem->getProbid(), $problemIsNew ? 'create' : 'update', $cid);
 
@@ -855,9 +853,7 @@ class ImportProblemService
         } catch (Exception $e) {
             $errors[] = $e->getMessage();
         } finally {
-            if ($zip) {
-                $zip->close();
-            }
+            $zip?->close();
         }
         if (!empty($errors)) {
             throw new BadRequestHttpException($this->dj->jsonEncode($errors));

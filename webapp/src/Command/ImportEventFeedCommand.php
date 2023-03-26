@@ -92,9 +92,7 @@ class ImportEventFeedCommand extends Command
         // Disable SQL logging and profiling. This would cause a serious memory leak otherwise
         // since this is a long-running process.
         $this->em->getConnection()->getConfiguration()->setSQLLogger();
-        if ($this->profiler) {
-            $this->profiler->disable();
-        }
+        $this->profiler?->disable();
 
         $output->setVerbosity(OutputInterface::VERBOSITY_NORMAL);
 

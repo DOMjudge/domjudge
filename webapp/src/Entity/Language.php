@@ -136,11 +136,7 @@ class Language extends BaseApiEntity
      */
     public function getCompileExecutableHash(): ?string
     {
-        if ($this->compile_executable !== null) {
-            return $this->compile_executable->getImmutableExecutable()->getHash();
-        } else {
-            return null;
-        }
+        return $this->compile_executable?->getImmutableExecutable()->getHash();
     }
 
     public function setLangid(string $langid): Language
