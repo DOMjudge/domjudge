@@ -387,7 +387,7 @@
                             </td>
                             <td>
                                 {% if problem.problem.problemtextType %}
-                                    <a title="Unlink problem from contest" href="{{ path('jury_problem_text', {'probId': problem.probid}) }}">
+                                    <a title="View problem description" href="{{ path('jury_problem_text', {'probId': problem.probid}) }}">
                                         <i class="fas fa-file-{{ problem.problem.problemtextType }}"></i>
                                     </a>
                                 {% endif %}
