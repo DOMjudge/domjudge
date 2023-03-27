@@ -6,6 +6,8 @@
 
 use Symfony\Component\Dotenv\Dotenv;
 
+require 'autoload.php';
+
 function get_db_url(): string
 {
     // Allow .env.local to override the DATABASE_URL since it can contain the
