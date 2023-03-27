@@ -694,8 +694,8 @@
             "ref": "bb2178c57eee79e6be0b297aa96fc0c0def81387"
         },
         "files": [
-            "config/packages/twig.yaml",
-            "templates/base.html.twig"
+            "webapp/config/packages/twig.yaml",
+            "webapp/templates/base.html.twig"
         ]
     },
     "symfony/validator": {
