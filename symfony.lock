@@ -174,17 +174,15 @@
         "version": "3.1.1"
     },
     "jms/serializer-bundle": {
-        "version": "3.0",
+        "version": "5.2",
         "recipe": {
             "repo": "github.com/symfony/recipes-contrib",
-            "branch": "master",
-            "version": "3.0",
-            "ref": "384cec52df45f3bfd46a09930d6960a58872b268"
+            "branch": "main",
+            "version": "4.0",
+            "ref": "cc04e10cf7171525b50c18b36004edf64cb478be"
         },
         "files": [
-            "webapp/config/packages/dev/jms_serializer.yaml",
-            "webapp/config/packages/jms_serializer.yaml",
-            "webapp/config/packages/prod/jms_serializer.yaml"
+            "config/packages/jms_serializer.yaml"
         ]
     },
     "laminas/laminas-code": {
