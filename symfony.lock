@@ -204,10 +204,10 @@
         "version": "1.10.2"
     },
     "nelmio/api-doc-bundle": {
-        "version": "3.0",
+        "version": "4.11",
         "recipe": {
             "repo": "github.com/symfony/recipes-contrib",
-            "branch": "master",
+            "branch": "main",
             "version": "3.0",
             "ref": "c8e0c38e1a280ab9e37587a8fa32b251d5bc1c94"
         },
