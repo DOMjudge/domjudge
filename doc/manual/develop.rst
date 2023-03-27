@@ -142,9 +142,12 @@ These tests live in the ``webapp/tests`` directory.
 To run them, follow the following steps:
 
 * Make sure you have a working DOMjudge installation.
-* Make sure your database contains only the sample data. This can be done by
+* Create a new database with the same name as your normal database, but then
+  postfixed with ``_test``. Make sure your database user has the same permissions
+  on it as the normal database.
+* Make sure your test database contains only the sample data. This can be done by
   first dropping any existing database and then running
-  ``bin/dj_setup_database -u root -r install``.
+  ``APP_ENV=test bin/dj_setup_database -u root -r install``.
 
 Note that you don't have to drop and recreate the database every time you run the
 tests; the tests are written in such a way that they keep working, even if you
@@ -156,18 +159,18 @@ test-specific settings in there.
 
 Now to run the tests, execute the command::
 
-  lib/vendor/bin/phpunit -c webapp/phpunit.xml.dist
+  webapp/bin/phpunit -c webapp/phpunit.xml.dist
 
 This command can take an argument ``--filter`` to which you can pass a string
 which will be used to filter which tests to run. For example, to run only the
 jury print controller tests, run::
 
-  lib/vendor/bin/phpunit -c webapp/phpunit.xml.dist --filter \
+  webapp/bin/phpunit -c webapp/phpunit.xml.dist --filter \
     'App\\Tests\\Controller\\Jury\\PrintControllerTest'
 
 Or to run only one test in that class, you can run::
 
-  lib/vendor/bin/phpunit -c webapp/phpunit.xml.dist --filter \
+  webapp/bin/phpunit -c webapp/phpunit.xml.dist --filter \
     'App\\Tests\\Controller\\Jury\\PrintControllerTest::testPrintingDisabledJuryIndexPage
 
 Note that most IDEs have support for running tests inside of them, so you don't
