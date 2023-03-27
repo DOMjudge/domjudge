@@ -513,19 +513,19 @@
         "version": "5.4",
         "recipe": {
             "repo": "github.com/symfony/recipes",
-            "branch": "master",
+            "branch": "main",
             "version": "5.4",
             "ref": "3cd216a4d007b78d8554d44a5b1c0a446dab24fb"
         },
         "files": [
-            "config/packages/cache.yaml",
-            "config/packages/framework.yaml",
-            "config/preload.php",
-            "config/routes/framework.yaml",
-            "config/services.yaml",
-            "public/index.php",
-            "src/Controller/.gitignore",
-            "src/Kernel.php"
+            "webapp/config/packages/cache.yaml",
+            "webapp/config/packages/framework.yaml",
+            "webapp/config/preload.php",
+            "webapp/config/routes/framework.yaml",
+            "webapp/config/services.yaml",
+            "webapp/public/index.php",
+            "webapp/src/Controller/.gitignore",
+            "webapp/src/Kernel.php"
         ]
     },
     "symfony/http-client": {

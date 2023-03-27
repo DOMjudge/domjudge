@@ -90,6 +90,7 @@
 		"symfony/intl": "5.4.*",
 		"symfony/mime": "5.4.*",
 		"symfony/monolog-bundle": "^3.8.0",
+		"symfony/runtime": "5.4.*",
 		"symfony/security-bundle": "5.4.*",
 		"symfony/security-csrf": "5.4.*",
 		"symfony/stopwatch": "5.4.*",
@@ -134,7 +135,8 @@
 		"component-dir": "lib/vendor/components",
 		"allow-plugins": {
 			"composer/package-versions-deprecated": true,
-			"symfony/flex": true
+			"symfony/flex": true,
+			"symfony/runtime": true
 		}
 	},
 	"replace": {
@@ -165,6 +167,9 @@
 			"root-dir": "webapp/",
 			"allow-contrib": true,
 			"require": "5.4.*"
+		},
+		"runtime": {
+			"dotenv_path": "webapp/.env"
 		}
 	}
 }
