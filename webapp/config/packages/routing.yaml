@@ -2,3 +2,13 @@ framework:
     router:
         strict_requirements: ~
         utf8: true
+
+when@test:
+    framework:
+        router:
+            strict_requirements: true
+
+when@dev:
+    framework:
+        router:
+            strict_requirements: true
