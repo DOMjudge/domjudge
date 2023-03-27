@@ -15,7 +15,7 @@ abstract class AccountBaseTestCase extends BaseTestCase
     public function helperVerifyApiUsers(string $myURL, array $objectsBeforeTest, array $newUserPostData): void
     {
         $objectsAfterTest = $this->verifyApiJsonResponse('GET', $myURL, 200, $this->apiUser);
-        $newItems = array_map('unserialize', array_diff(array_map('serialize', $objectsAfterTest), array_map('serialize', $objectsBeforeTest)));
+        $newItems = array_map(unserialize(...), array_diff(array_map(serialize(...), $objectsAfterTest), array_map(serialize(...), $objectsBeforeTest)));
         // Because we login again with the admin user we might see that one also
         if (count($newItems)===2) {
             self::assertContains('admin', array_column($newItems,'username'), "Found unexpected new/changed user");
