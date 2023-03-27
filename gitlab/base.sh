@@ -2,6 +2,12 @@
 
 . gitlab/ci_settings.sh
 
+# If this script is called from unit.sh, we use the test environment
+export APP_ENV="${1:-prod}"
+
+# In the test environment, we need to use a different database
+[ "$APP_ENV" = "prod" ] && DATABASE_NAME=domjudge || DATABASE_NAME=domjudge_test
+
 lsb_release -a
 
 cat > ~/.my.cnf <<EOF
@@ -13,9 +19,9 @@ EOF
 cat ~/.my.cnf
 
 # FIXME: This chicken-egg problem is annoying but let us bootstrap for now.
-echo "CREATE DATABASE IF NOT EXISTS \`domjudge\` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;" | mysql
+echo "CREATE DATABASE IF NOT EXISTS \`${DATABASE_NAME}\` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;" | mysql
 echo "CREATE USER 'domjudge'@'%' IDENTIFIED BY 'domjudge';" | mysql
-echo "GRANT SELECT, INSERT, UPDATE, DELETE ON \`domjudge\`.* TO 'domjudge'@'%';" | mysql
+echo "GRANT SELECT, INSERT, UPDATE, DELETE ON \`${DATABASE_NAME}\`.* TO 'domjudge'@'%';" | mysql
 
 # Increase max_allowed_packet for following connections.
 echo "SET GLOBAL max_allowed_packet = 100*1024*1024;" | mysql
@@ -26,6 +32,7 @@ if [ -n "${MYSQL_REQUIRE_PRIMARY_KEY:-}" ]; then
 fi
 
 # Generate a dbpasswords file
+# Note that this does not use ${DATABASE_NAME} since Symfony adds the _test postfix itself
 echo "unused:sqlserver:domjudge:domjudge:domjudge:3306" > etc/dbpasswords.secret
 
 # Generate APP_SECRET for symfony
@@ -54,7 +61,6 @@ composer install --no-scripts || rm -rf lib/vendor
 set -e
 
 # install all php dependencies
-export APP_ENV="prod"
 composer install --no-scripts
 echo -e "\033[0m"
 
@@ -85,12 +91,15 @@ echo "date.timezone = Europe/Amsterdam" | sudo tee -a "/etc/php/$php_version/cli
 
 passwd=$(cat etc/initial_admin_password.secret)
 echo "machine localhost login admin password $passwd" >> ~www-data/.netrc
-sudo -u www-data bin/dj_setup_database -uroot -p${MYSQL_ROOT_PASSWORD} bare-install
+sudo -Eu www-data bin/dj_setup_database -uroot -p${MYSQL_ROOT_PASSWORD} bare-install
 
 # shellcheck disable=SC2154
 if [ -n "${integration:-}" ]; then
 	# Make sure admin has a team associated to insert submissions as well.
 	echo "UPDATE user SET teamid=1 WHERE userid=1;" | mysql domjudge
+elif [ -n "${unit:-}" ]; then
+	# Make sure admin has no team associated so we will not insert submissions during unit tests.
+	echo "UPDATE user SET teamid=null WHERE userid=1;" | mysql domjudge_test
 fi
 
-sudo -u www-data bin/dj_setup_database -uroot -p${MYSQL_ROOT_PASSWORD} install-examples
+sudo -Eu www-data bin/dj_setup_database -uroot -p${MYSQL_ROOT_PASSWORD} install-examples
