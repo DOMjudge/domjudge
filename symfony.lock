@@ -398,15 +398,15 @@
         "version": "3.4.0"
     },
     "sentry/sentry-symfony": {
-        "version": "4.2",
+        "version": "4.7",
         "recipe": {
             "repo": "github.com/symfony/recipes-contrib",
             "branch": "main",
-            "version": "3.0",
-            "ref": "9746f0823302d7980e5273ef7a69ef3f5ac80914"
+            "version": "4.6",
+            "ref": "f7b4706a3e8a6f096b7392f3146f4f7f65ff594c"
         },
         "files": [
-            "webapp/config/packages/sentry.yaml"
+            "config/packages/sentry.yaml"
         ]
     },
     "squizlabs/php_codesniffer": {
