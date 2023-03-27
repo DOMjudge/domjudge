@@ -579,18 +579,18 @@
         "version": "v5.4.3"
     },
     "symfony/phpunit-bridge": {
-        "version": "5.4",
+        "version": "6.0",
         "recipe": {
             "repo": "github.com/symfony/recipes",
-            "branch": "master",
+            "branch": "main",
             "version": "5.3",
-            "ref": "97cb3dc7b0f39c7cfc4b7553504c9d7b7795de96"
+            "ref": "819d3d2ffa4590eba0b8f4f3e5e89415ee4e45c3"
         },
         "files": [
-            ".env.test",
-            "bin/phpunit",
-            "phpunit.xml.dist",
-            "tests/bootstrap.php"
+            "webapp/.env.test",
+            "webapp/bin/phpunit",
+            "webapp/phpunit.xml.dist",
+            "webapp/tests/bootstrap.php"
         ]
     },
     "symfony/polyfill-apcu": {
