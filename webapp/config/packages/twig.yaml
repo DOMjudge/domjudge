@@ -8,3 +8,7 @@ twig:
         DOMJUDGE_VERSION: '%domjudge.version%'
         DJ_CHARACTER_SET: 'utf-8'
         teamname_max_length: 30
+
+when@test:
+    twig:
+        strict_variables: true
