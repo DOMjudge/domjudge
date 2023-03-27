@@ -458,7 +458,7 @@
             "ref": "5aa8aa48234c8eb6dbdd7b3cd5d791485d2cec4b"
         },
         "files": [
-            "config/packages/debug.yaml"
+            "webapp/config/packages/debug.yaml"
         ]
     },
     "symfony/dependency-injection": {
