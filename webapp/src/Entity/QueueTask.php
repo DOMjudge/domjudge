@@ -36,8 +36,8 @@ class QueueTask
      * @ORM\Column(type="integer", name="jobid", length=4,
      *     options={"comment"="All queuetasks with the same jobid belong together.","unsigned"=true},
      *     nullable=true)
-     * @Serializer\Type("string")
      */
+    #[Serializer\Type('string')]
     private ?int $jobid = null;
 
     /**
@@ -59,15 +59,15 @@ class QueueTask
     /**
      * @ORM\ManyToOne(targetEntity="Team")
      * @ORM\JoinColumn(name="teamid", referencedColumnName="teamid", onDelete="CASCADE")
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private ?Team $team = null;
 
     /**
      * @ORM\Column(type="decimal", precision=32, scale=9, name="starttime", options={"comment"="Time started work",
      *                             "unsigned"=true}, nullable=true)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private float|string|null $startTime = null;
 
     public function getQueueTaskid(): int

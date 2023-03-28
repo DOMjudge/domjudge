@@ -63,8 +63,8 @@ class Testcase
      * @ORM\Column(type="blob", length=4294967295, name="description",
      *     options={"comment"="Description of this testcase"},
      *     nullable=true)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private $description;
 
     private ?string $description_as_string = null;
@@ -73,16 +73,16 @@ class Testcase
      * @ORM\Column(type="string", name="orig_input_filename", length=255,
      *     options={"comment"="Original basename of the input file.","default"=NULL},
      *     nullable=true)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private ?string $orig_input_filename = null;
 
     /**
      * @ORM\Column(type="string", name="image_type", length=4,
      *     options={"comment"="File type of the image and thumbnail"},
      *     nullable=true)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private ?string $image_type = null;
 
     /**
@@ -90,8 +90,8 @@ class Testcase
      *     options={"comment"="Sample testcases that can be shared with teams",
      *              "default"="0"},
      *     nullable=false)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private bool $sample = false;
 
     /**
@@ -99,20 +99,20 @@ class Testcase
      *     options={"comment"="Deleted testcases are kept for referential integrity.",
      *              "default"="0"},
      *     nullable=false)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private bool $deleted = false;
 
     /**
      * @ORM\OneToMany(targetEntity="JudgingRun", mappedBy="testcase")
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private Collection $judging_runs;
 
     /**
      * @ORM\OneToMany(targetEntity="ExternalRun", mappedBy="testcase")
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private Collection $external_runs;
 
     /**
@@ -121,15 +121,15 @@ class Testcase
      * 9e421f96691ec67ed62767fe465a6d8751edd884 for a more elaborate explanation.
      *
      * @ORM\OneToMany(targetEntity="TestcaseContent", mappedBy="testcase", cascade={"persist"}, orphanRemoval=true)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private Collection $content;
 
     /**
      * @ORM\ManyToOne(targetEntity="Problem", inversedBy="testcases")
      * @ORM\JoinColumn(name="probid", referencedColumnName="probid", onDelete="CASCADE")
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private ?Problem $problem = null;
 
     public function __construct()

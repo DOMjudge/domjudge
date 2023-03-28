@@ -28,9 +28,9 @@ class Judgehost
      * @ORM\Column(type="integer", name="judgehostid", length=4,
      *     options={"comment"="Judgehost ID","unsigned"=true},
      *     nullable=false)
-     * @Serializer\SerializedName("id")
-     * @Serializer\Type("string")
      */
+    #[Serializer\SerializedName('id')]
+    #[Serializer\Type('string')]
     private int $judgehostid;
 
     /**
@@ -59,8 +59,8 @@ class Judgehost
 
     /**
      * @ORM\OneToMany(targetEntity="JudgeTask", mappedBy="judgehost")
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private Collection $judgetasks;
 
     /**

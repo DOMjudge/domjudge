@@ -29,26 +29,26 @@ class Language extends BaseApiEntity
     /**
      * @ORM\Id
      * @ORM\Column(type="string", name="langid", length=32, options={"comment"="Language ID (string)"}, nullable=false)
-     * @Serializer\Exclude()
      * @Assert\NotBlank()
      * @Assert\NotEqualTo("add")
      * @Identifier()
      */
+    #[Serializer\Exclude]
     protected ?string $langid = null;
 
     /**
      * @ORM\Column(type="string", name="externalid", length=255, nullable=true,
      *     options={"comment"="Language ID to expose in the REST API"})
-     * @Serializer\SerializedName("id")
-     * @Serializer\Groups({"Default", "Nonstrict"})
      */
+    #[Serializer\SerializedName('id')]
+    #[Serializer\Groups(['Default', 'Nonstrict'])]
     protected ?string $externalid = null;
 
     /**
      * @ORM\Column(type="string", name="name", length=255, options={"comment"="Descriptive language name"}, nullable=false)
-     * @Serializer\Groups({"Default", "Nonstrict"})
      * @Assert\NotBlank()
      */
+    #[Serializer\Groups(['Default', 'Nonstrict'])]
     private string $name = '';
 
     /**
@@ -56,9 +56,9 @@ class Language extends BaseApiEntity
      * @ORM\Column(type="json", length=4294967295, name="extensions",
      *     options={"comment"="List of recognized extensions (JSON encoded)"},
      *     nullable=true)
-     * @Serializer\Type("array<string>")
      * @Assert\NotBlank()
      */
+    #[Serializer\Type('array<string>')]
     private array $extensions = [];
 
     /**
@@ -66,74 +66,72 @@ class Language extends BaseApiEntity
      *     options={"comment"="Whether to filter the files passed to the compiler by the extension list.",
      *              "default"="1"},
      *     nullable=false)
-     * @Serializer\Groups({"Nonstrict"})
      */
+    #[Serializer\Groups(['Nonstrict'])]
     private bool $filterCompilerFiles = true;
 
     /**
      * @ORM\Column(type="boolean", name="allow_submit",
      *     options={"comment"="Are submissions accepted in this language?","default"="1"},
      *     nullable=false)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private bool $allowSubmit = true;
 
     /**
      * @ORM\Column(type="boolean", name="allow_judge",
      *     options={"comment"="Are submissions in this language judged?","default"="1"},
      *     nullable=false)
-     * @Serializer\Groups({"Nonstrict"})
      */
+    #[Serializer\Groups(['Nonstrict'])]
     private bool $allowJudge = true;
 
     /**
      * @ORM\Column(type="float", name="time_factor",
      *     options={"comment"="Language-specific factor multiplied by problem run times","default"="1"},
      *     nullable=false)
-     * @Serializer\Type("double")
-     * @Serializer\Groups({"Nonstrict"})
      * @Assert\GreaterThan(0)
      * @Assert\NotBlank()
      */
+    #[Serializer\Type('double')]
+    #[Serializer\Groups(['Nonstrict'])]
     private float $timeFactor = 1;
 
     /**
      * @ORM\Column(type="boolean", name="require_entry_point",
      *     options={"comment"="Whether submissions require a code entry point to be specified.","default":"0"},
      *     nullable=false)
-     * @Serializer\SerializedName("entry_point_required")
      */
+    #[Serializer\SerializedName('entry_point_required')]
     private bool $require_entry_point = false;
 
     /**
      * @ORM\Column(type="string", name="entry_point_description",
      *     options={"comment"="The description used in the UI for the entry point field."},
      *     nullable=true)
-     * @Serializer\SerializedName("entry_point_name")
      */
     #[OA\Property(nullable: true)]
+    #[Serializer\SerializedName('entry_point_name')]
     private ?string $entry_point_description = null;
 
     /**
      * @ORM\ManyToOne(targetEntity="Executable", inversedBy="languages")
      * @ORM\JoinColumn(name="compile_script", referencedColumnName="execid", onDelete="SET NULL")
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private ?Executable $compile_executable = null;
 
     /**
      * @ORM\OneToMany(targetEntity="Submission", mappedBy="language")
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private Collection $submissions;
 
-    /**
-     * @Serializer\VirtualProperty
-     * @Serializer\Type("string")
-     * @Serializer\Groups({"Nonstrict"})
-     * @Serializer\SerializedName("compile_executable_hash")
-     */
     #[OA\Property(nullable: true)]
+    #[Serializer\VirtualProperty]
+    #[Serializer\Type('string')]
+    #[Serializer\Groups(['Nonstrict'])]
+    #[Serializer\SerializedName('compile_executable_hash')]
     public function getCompileExecutableHash(): ?string
     {
         return $this->compile_executable?->getImmutableExecutable()->getHash();

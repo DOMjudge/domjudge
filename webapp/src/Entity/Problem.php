@@ -35,8 +35,8 @@ class Problem extends BaseApiEntity
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer", name="probid", options={"comment"="Problem ID","unsigned"="true"}, nullable=false)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     protected ?int $probid = null;
 
     /**
@@ -44,8 +44,8 @@ class Problem extends BaseApiEntity
      *     options={"comment"="Problem ID in an external system, should be unique inside a single contest",
      *              "collation"="utf8mb4_bin"},
      *     nullable=true)
-     * @Serializer\Groups({"Nonstrict"})
      */
+    #[Serializer\Groups(['Nonstrict'])]
     protected ?string $externalid = null;
 
     /**
@@ -58,9 +58,9 @@ class Problem extends BaseApiEntity
      *     options={"comment"="Maximum run time (in seconds) for this problem",
      *              "default"="0","unsigned"="true"},
      *     nullable=false)
-     * @Serializer\Exclude()
      * @Assert\GreaterThan(0)
      */
+    #[Serializer\Exclude]
     private float $timelimit = 0;
 
     /**
@@ -68,9 +68,9 @@ class Problem extends BaseApiEntity
      *     options={"comment"="Maximum memory available (in kB) for this problem",
      *              "unsigned"=true},
      *     nullable=true)
-     * @Serializer\Exclude()
      * @Assert\GreaterThan(0)
      */
+    #[Serializer\Exclude]
     private ?int $memlimit = null;
 
     /**
@@ -78,17 +78,17 @@ class Problem extends BaseApiEntity
      *     options={"comment"="Maximum output size (in kB) for this problem",
      *              "unsigned"=true},
      *     nullable=true)
-     * @Serializer\Exclude()
      * @Assert\GreaterThan(0)
      */
+    #[Serializer\Exclude]
     private ?int $outputlimit = null;
 
     /**
      * @ORM\Column(type="string", name="special_compare_args", length=255,
      *     options={"comment"="Optional arguments to special_compare script"},
      *     nullable=true)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private ?string $special_compare_args = null;
 
     /**
@@ -96,8 +96,8 @@ class Problem extends BaseApiEntity
      *     options={"comment"="Use the exit code of the run script to compute the verdict",
      *              "default":"0"},
      *     nullable=false)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private bool $combined_run_compare = false;
 
     /**
@@ -105,74 +105,72 @@ class Problem extends BaseApiEntity
      * @ORM\Column(type="blob", name="problemtext",
      *     options={"comment"="Problem text in HTML/PDF/ASCII"},
      *     nullable=true)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private mixed $problemtext = null;
 
     /**
      * @Assert\File()
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private ?UploadedFile $problemtextFile = null;
 
-    /**
-     * @Serializer\Exclude()
-     */
+    #[Serializer\Exclude]
     private bool $clearProblemtext = false;
 
     /**
      * @ORM\Column(type="string", length=4, name="problemtext_type",
      *     options={"comment"="File type of problem text"},
      *     nullable=true)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private ?string $problemtext_type = null;
 
     /**
      * @ORM\OneToMany(targetEntity="Submission", mappedBy="problem")
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private Collection $submissions;
 
     /**
      * @ORM\OneToMany(targetEntity="Clarification", mappedBy="problem")
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private Collection $clarifications;
 
     /**
      * @ORM\OneToMany(targetEntity="ContestProblem", mappedBy="problem")
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private Collection $contest_problems;
 
     /**
      * @ORM\ManyToOne(targetEntity="Executable", inversedBy="problems_compare")
      * @ORM\JoinColumn(name="special_compare", referencedColumnName="execid", onDelete="SET NULL")
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private ?Executable $compare_executable = null;
 
     /**
      * @ORM\ManyToOne(targetEntity="Executable", inversedBy="problems_run")
      * @ORM\JoinColumn(name="special_run", referencedColumnName="execid", onDelete="SET NULL")
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private ?Executable $run_executable = null;
 
     /**
      * @ORM\OneToMany(targetEntity="Testcase", mappedBy="problem")
      * @ORM\OrderBy({"ranknumber" = "ASC"})
-     * @Serializer\Exclude()
      * Note that we order the test cases here by ranknumber to make use of it during judgetask creation.
      */
+    #[Serializer\Exclude]
     private Collection $testcases;
 
     /**
      * @ORM\OneToMany(targetEntity=ProblemAttachment::class, mappedBy="problem", orphanRemoval=true)
      * @ORM\OrderBy({"name"="ASC"})
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private Collection $attachments;
 
     public function setProbid(int $probid): Problem
@@ -219,11 +217,9 @@ class Problem extends BaseApiEntity
         return $this;
     }
 
-    /**
-     * @Serializer\VirtualProperty()
-     * @Serializer\SerializedName("time_limit")
-     * @Serializer\Type("float")
-     */
+    #[Serializer\VirtualProperty]
+    #[Serializer\SerializedName('time_limit')]
+    #[Serializer\Type('float')]
     public function getTimelimit(): float
     {
         return Utils::roundedFloat($this->timelimit);

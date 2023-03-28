@@ -64,8 +64,8 @@ class ExecutableFile
      *     options={"comment"="Whether this file gets an executable bit.",
      *              "default"="0"},
      *     nullable=false)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private bool $isExecutable = false;
 
     public function getExecFileId(): int

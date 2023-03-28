@@ -14,9 +14,9 @@ use JMS\Serializer\Annotation as Serializer;
 class OrdinalItem
 {
     public function __construct(
-        /** @Serializer\SerializedName("ordinal") */
+        #[Serializer\SerializedName('ordinal')]
         protected readonly int $ordinal,
-        /** @Serializer\Inline() */
+        #[Serializer\Inline]
         protected readonly object $item
     ) {}
 

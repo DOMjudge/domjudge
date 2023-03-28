@@ -33,17 +33,17 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer", name="judgingid", length=4,
      *     options={"comment"="Judging ID","unsigned"=true}, nullable=false)
-     * @Serializer\SerializedName("id")
-     * @Serializer\Type("string")
      */
+    #[Serializer\SerializedName('id')]
+    #[Serializer\Type('string')]
     protected int $judgingid;
 
     /**
      * @ORM\Column(type="decimal", precision=32, scale=9, name="starttime",
      *     options={"comment"="Time judging started", "unsigned"=true},
      *     nullable=true)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private string|float|null $starttime = null;
 
     /**
@@ -51,17 +51,17 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
      *     options={"comment"="Time judging ended, null = still busy",
      *              "unsigned"=true},
      *     nullable=true)
-     * @Serializer\Exclude()
      */
     #[OA\Property(nullable: true)]
+    #[Serializer\Exclude]
     private string|float|null $endtime = null;
 
     /**
      * @ORM\Column(type="string", name="result", length=32,
      *     options={"comment"="Result string as defined in config.php"},
      *     nullable=true)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private ?string $result = null;
 
     /**
@@ -69,24 +69,24 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
      *     options={"comment"="Result verified by jury member?",
      *              "default"="0"},
      *     nullable=false)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private bool $verified = false;
 
     /**
      * @ORM\Column(type="string", name="jury_member", length=255,
      *     options={"comment"="Name of jury member who verified this"},
      *     nullable=true)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private ?string $jury_member = null;
 
     /**
      * @ORM\Column(type="string", name="verify_comment", length=255,
      *     options={"comment"="Optional additional information provided by the verifier"},
      *     nullable=true)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private ?string $verify_comment = null;
 
     /**
@@ -94,8 +94,8 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
      *     options={"comment"="Old judging is marked as invalid when rejudging",
      *              "default"="1"},
      *     nullable=false)
-     * @Serializer\Groups({"Nonstrict"})
      */
+    #[Serializer\Groups(['Nonstrict'])]
     private bool $valid = true;
 
     /**
@@ -103,21 +103,19 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
      * @ORM\Column(type="blob", name="output_compile",
      *     options={"comment"="Output of the compiling the program"},
      *     nullable=true)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private $output_compile;
 
     /**
      * @ORM\Column(type="blobtext", length=4294967295, name="metadata",
      *     options={"comment"="Compilation metadata"},
      *     nullable=true)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private ?string $compile_metadata = null;
 
-    /**
-     * @Serializer\Exclude()
-     */
+    #[Serializer\Exclude]
     private ?string $output_compile_as_string = null;
 
     /**
@@ -125,8 +123,8 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
      *     options={"comment"="Whether the team has seen this judging",
      *              "default"="0"},
      *     nullable=false)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private bool $seen = false;
 
     /**
@@ -134,67 +132,67 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
      *     options={"comment"="Explicitly requested to be judged completely.",
      *              "default"="0"},
      *     nullable=false)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private bool $judgeCompletely = false;
 
     /**
      * @ORM\Column(type="string", name="uuid",
      *     options={"comment"="UUID, to make caching of compilation results safe."},
      *     nullable=false)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private string $uuid;
 
 
     /**
      * @ORM\ManyToOne(targetEntity="Contest")
      * @ORM\JoinColumn(name="cid", referencedColumnName="cid", onDelete="CASCADE")
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private ?Contest $contest = null;
 
     /**
      * @ORM\ManyToOne(targetEntity="Submission", inversedBy="judgings")
      * @ORM\JoinColumn(name="submitid", referencedColumnName="submitid", onDelete="CASCADE")
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private Submission $submission;
 
     /**
      * rejudgings have one parent judging
      * @ORM\ManyToOne(targetEntity="Rejudging", inversedBy="judgings")
      * @ORM\JoinColumn(name="rejudgingid", referencedColumnName="rejudgingid", onDelete="SET NULL")
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private ?Rejudging $rejudging = null;
 
     /**
      * Rejudgings have one parent judging.
      * @ORM\ManyToOne(targetEntity="Judging")
      * @ORM\JoinColumn(name="prevjudgingid", referencedColumnName="judgingid", onDelete="SET NULL")
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private ?Judging $original_judging = null;
 
     /**
      * @ORM\OneToMany(targetEntity="JudgingRun", mappedBy="judging")
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private Collection $runs;
 
     /**
      * @ORM\OneToMany(targetEntity="DebugPackage", mappedBy="judging")
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private Collection $debug_packages;
 
     /**
      * Rejudgings have one parent judging.
      * @ORM\ManyToOne(targetEntity="InternalError", inversedBy="affectedJudgings")
      * @ORM\JoinColumn(name="errorid", referencedColumnName="errorid", onDelete="SET NULL")
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private ?InternalError $internalError = null;
 
     public function getMaxRuntime(): ?float
@@ -235,22 +233,18 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
         return $this->starttime;
     }
 
-    /**
-     * @Serializer\VirtualProperty()
-     * @Serializer\SerializedName("start_time")
-     * @Serializer\Type("string")
-     */
     #[OA\Property(nullable: true)]
+    #[Serializer\VirtualProperty]
+    #[Serializer\SerializedName('start_time')]
+    #[Serializer\Type('string')]
     public function getAbsoluteStartTime(): ?string
     {
         return Utils::absTime($this->getStarttime());
     }
 
-    /**
-     * @Serializer\VirtualProperty()
-     * @Serializer\SerializedName("start_contest_time")
-     * @Serializer\Type("string")
-     */
+    #[Serializer\VirtualProperty]
+    #[Serializer\SerializedName('start_contest_time')]
+    #[Serializer\Type('string')]
     public function getRelativeStartTime(): string
     {
         return Utils::relTime($this->getStarttime() - $this->getContest()->getStarttime());
@@ -267,23 +261,19 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
         return $this->endtime;
     }
 
-    /**
-     * @Serializer\VirtualProperty()
-     * @Serializer\SerializedName("end_time")
-     * @Serializer\Type("string")
-     */
     #[OA\Property(nullable: true)]
+    #[Serializer\VirtualProperty]
+    #[Serializer\SerializedName('end_time')]
+    #[Serializer\Type('string')]
     public function getAbsoluteEndTime(): ?string
     {
         return $this->getEndtime() ? Utils::absTime($this->getEndtime()) : null;
     }
 
-    /**
-     * @Serializer\VirtualProperty()
-     * @Serializer\SerializedName("end_contest_time")
-     * @Serializer\Type("string")
-     */
     #[OA\Property(nullable: true)]
+    #[Serializer\VirtualProperty]
+    #[Serializer\SerializedName('end_contest_time')]
+    #[Serializer\Type('string')]
     public function getRelativeEndTime(): ?string
     {
         return $this->getEndtime() ? Utils::relTime($this->getEndtime() - $this->getContest()->getStarttime()) : null;
@@ -400,11 +390,9 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
         return $this->submission;
     }
 
-    /**
-     * @Serializer\VirtualProperty
-     * @Serializer\SerializedName("submission_id")
-     * @Serializer\Type("string")
-     */
+    #[Serializer\VirtualProperty]
+    #[Serializer\SerializedName('submission_id')]
+    #[Serializer\Type('string')]
     public function getSubmissionId(): int
     {
         return $this->getSubmission()->getSubmitid();

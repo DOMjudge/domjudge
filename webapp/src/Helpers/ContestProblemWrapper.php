@@ -8,9 +8,9 @@ use JMS\Serializer\Annotation as Serializer;
 class ContestProblemWrapper
 {
     public function __construct(
-        /** @Serializer\Inline() */
+        #[Serializer\Inline]
         protected readonly ContestProblem $contestProblem,
-        /** @Serializer\SerializedName("test_data_count") */
+        #[Serializer\SerializedName('test_data_count')]
         protected readonly int $testDataCount
     ) {}
 

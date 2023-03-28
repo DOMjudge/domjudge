@@ -79,8 +79,8 @@ class InternalError
 
     /**
      * @ORM\OneToMany(targetEntity="Judging", mappedBy="internalError")
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private Collection $affectedJudgings;
 
     public function __construct()

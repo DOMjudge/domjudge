@@ -35,9 +35,9 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer", name="userid", length=4,
      *     options={"comment"="User ID","unsigned"=true}, nullable=false)
-     * @Serializer\SerializedName("id")
-     * @Serializer\Type("string")
      */
+    #[Serializer\SerializedName('id')]
+    #[Serializer\Type('string')]
     private ?int $userid = null;
 
     /**
@@ -45,8 +45,8 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
      *     options={"comment"="User ID in an external system",
      *              "collation"="utf8mb4_bin"},
      *     nullable=true)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     protected ?string $externalid = null;
 
     /**
@@ -59,76 +59,74 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
     /**
      * @ORM\Column(type="string", name="name", length=255,
      *     options={"comment"="Name"}, nullable=false)
-     * @Serializer\Groups({"Nonstrict"})
      */
+    #[Serializer\Groups(['Nonstrict'])]
     private string $name = '';
 
     /**
      * @ORM\Column(type="string", name="email", length=255,
      *     options={"comment"="Email address"}, nullable=true)
      * @Assert\Email()
-     * @Serializer\Groups({"Nonstrict"})
      */
     #[OA\Property(nullable: true)]
+    #[Serializer\Groups(['Nonstrict'])]
     private ?string $email = null;
 
     /**
      * @ORM\Column(type="decimal", precision=32, scale=9, name="last_login",
      *     options={"comment"="Time of last successful login", "unsigned"=true},
      *     nullable=true)
-     * @Serializer\Exclude()
      */
     #[OA\Property(nullable: true)]
+    #[Serializer\Exclude]
     private string|float|null $last_login = null;
 
     /**
      * @ORM\Column(type="decimal", precision=32, scale=9, name="last_api_login",
      *     options={"comment"="Time of last successful login on the API", "unsigned"=true},
      *     nullable=true)
-     * @Serializer\Exclude()
      */
     #[OA\Property(nullable: true)]
+    #[Serializer\Exclude]
     private string|float|null $last_api_login = null;
 
     /**
      * @ORM\Column(type="decimal", precision=32, scale=9, name="first_login",
      *     options={"comment"="Time of first login", "unsigned"=true},
      *     nullable=true)
-     * @Serializer\Exclude()
      */
     #[OA\Property(nullable: true)]
+    #[Serializer\Exclude]
     private string|float|null $first_login = null;
 
     /**
      * @ORM\Column(type="string", name="last_ip_address", length=255,
      *     options={"comment"="Last IP address of successful login"},
      *     nullable=true)
-     * @Serializer\SerializedName("last_ip")
-     * @Serializer\Groups({"Nonstrict"})
      */
     #[OA\Property(nullable: true)]
+    #[Serializer\SerializedName('last_ip')]
+    #[Serializer\Groups(['Nonstrict'])]
     private ?string $last_ip_address = null;
 
     /**
      * @ORM\Column(type="string", name="password", length=255,
      *     options={"comment"="Password hash"}, nullable=true)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private ?string $password = null;
 
-    /**
-     * @Serializer\Exclude()
-     */
+    #[Serializer\Exclude]
     private ?string $plainPassword = null;
 
     /**
      * @ORM\Column(type="string", name="ip_address", length=255,
      *     options={"comment"="IP Address used to autologin"},
      *     nullable=true)
-     * @Serializer\SerializedName("ip")
      * @Assert\Ip(version="all")
      */
     #[OA\Property(nullable: true)]
+    #[Serializer\SerializedName('ip')]
     private ?string $ipAddress = null;
 
     /**
@@ -136,15 +134,15 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
      *     options={"comment"="Whether the user is able to log in",
      *              "default"="1"},
      *     nullable=false)
-     * @Serializer\Groups({"Nonstrict"})
      */
+    #[Serializer\Groups(['Nonstrict'])]
     private bool $enabled = true;
 
     /**
      * @ORM\ManyToOne(targetEntity="Team", inversedBy="users")
      * @ORM\JoinColumn(name="teamid", referencedColumnName="teamid", onDelete="SET NULL")
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private ?Team $team = null;
 
     /**
@@ -153,18 +151,17 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
      *                joinColumns={@ORM\JoinColumn(name="userid", referencedColumnName="userid", onDelete="CASCADE")},
      *                inverseJoinColumns={@ORM\JoinColumn(name="roleid", referencedColumnName="roleid", onDelete="CASCADE")}
      *               )
-     * @Serializer\Exclude()
      * @Assert\Count(min="1")
-     *
      * Note that this property is called `user_roles` and not `roles` because the
      * UserInterface expects roles/getRoles to return a string list of roles, not objects.
      */
+    #[Serializer\Exclude]
     private Collection $user_roles;
 
     /**
      * @ORM\OneToMany(targetEntity="Submission", mappedBy="user")
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private Collection $submissions;
 
     public function getSalt(): ?string
@@ -260,13 +257,11 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
         return $this->last_login;
     }
 
-    /**
-     * @Serializer\VirtualProperty()
-     * @Serializer\SerializedName("last_login_time")
-     * @Serializer\Groups({"Nonstrict"})
-     * @Serializer\Type("DateTime")
-     */
     #[OA\Property(nullable: true)]
+    #[Serializer\VirtualProperty]
+    #[Serializer\SerializedName('last_login_time')]
+    #[Serializer\Groups(['Nonstrict'])]
+    #[Serializer\Type('DateTime')]
     public function getLastLoginAsDateTime(): ?DateTime
     {
         return $this->getLastLogin() ? new DateTime(Utils::absTime($this->getLastLogin())) : null;
@@ -283,13 +278,11 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
         return $this->last_api_login;
     }
 
-    /**
-     * @Serializer\VirtualProperty()
-     * @Serializer\SerializedName("last_api_login_time")
-     * @Serializer\Groups({"Nonstrict"})
-     * @Serializer\Type("DateTime")
-     */
     #[OA\Property(nullable: true)]
+    #[Serializer\VirtualProperty]
+    #[Serializer\SerializedName('last_api_login_time')]
+    #[Serializer\Groups(['Nonstrict'])]
+    #[Serializer\Type('DateTime')]
     public function getLastApiLoginAsDateTime(): ?DateTime
     {
         return $this->getLastApiLogin() ? new DateTime(Utils::absTime($this->getLastApiLogin())) : null;
@@ -306,13 +299,11 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
         return $this->first_login;
     }
 
-    /**
-     * @Serializer\VirtualProperty()
-     * @Serializer\SerializedName("first_login_time")
-     * @Serializer\Groups({"Nonstrict"})
-     * @Serializer\Type("DateTime")
-     */
     #[OA\Property(nullable: true)]
+    #[Serializer\VirtualProperty]
+    #[Serializer\SerializedName('first_login_time')]
+    #[Serializer\Groups(['Nonstrict'])]
+    #[Serializer\Type('DateTime')]
     public function getFirstLoginAsDateTime(): ?DateTime
     {
         return $this->getFirstLogin() ? new DateTime(Utils::absTime($this->getFirstLogin())) : null;
@@ -386,24 +377,20 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
         return $this->team;
     }
 
-    /**
-     * @Serializer\VirtualProperty()
-     * @Serializer\SerializedName("team")
-     * @Serializer\Type("string")
-     * @Serializer\Groups({"Nonstrict"})
-     */
     #[OA\Property(nullable: true)]
+    #[Serializer\VirtualProperty]
+    #[Serializer\SerializedName('team')]
+    #[Serializer\Type('string')]
+    #[Serializer\Groups(['Nonstrict'])]
     public function getTeamName(): ?string
     {
         return $this->getTeam()?->getEffectiveName();
     }
 
-    /**
-     * @Serializer\VirtualProperty()
-     * @Serializer\SerializedName("team_id")
-     * @Serializer\Type("string")
-     */
     #[OA\Property(nullable: true)]
+    #[Serializer\VirtualProperty]
+    #[Serializer\SerializedName('team_id')]
+    #[Serializer\Type('string')]
     public function getTeamId(): ?int
     {
         return $this->getTeam()?->getTeamid();
@@ -433,11 +420,11 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
 
     /**
      * Get the roles of this user as an array of strings
-     * @Serializer\VirtualProperty()
-     * @Serializer\SerializedName("roles")
-     * @Serializer\Groups({"Nonstrict"})
-     * @Serializer\Type("array<string>")
      */
+    #[Serializer\VirtualProperty]
+    #[Serializer\SerializedName('roles')]
+    #[Serializer\Groups(['Nonstrict'])]
+    #[Serializer\Type('array<string>')]
     public function getRoleList(): array
     {
         $result = [];
@@ -450,11 +437,11 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
 
     /**
      * Get the type of this user for the CCS Specs Contest API
-     * @Serializer\VirtualProperty()
-     * @Serializer\SerializedName("type")
-     * @Serializer\Type("string")
      */
     #[OA\Property(nullable: true)]
+    #[Serializer\VirtualProperty]
+    #[Serializer\SerializedName('type')]
+    #[Serializer\Type('string')]
     public function getType(): ?string
     {
         // Types allowed by the CCS Specs Contest API in order of most permissions to least

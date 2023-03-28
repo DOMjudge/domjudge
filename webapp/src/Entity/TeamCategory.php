@@ -21,13 +21,13 @@ use Symfony\Component\Validator\Constraints as Assert;
  *     uniqueConstraints={
  *         @ORM\UniqueConstraint(name="externalid", columns={"externalid"}, options={"lengths": {190}}),
  *     })
- * @Serializer\VirtualProperty(
- *     "hidden",
- *     exp="!object.getVisible()",
- *     options={@Serializer\Type("boolean"), @Serializer\Groups({"Nonstrict"})}
- * )
  * @UniqueEntity("externalid")
  */
+#[Serializer\VirtualProperty(
+    name: 'hidden',
+    exp: '!object.getVisible()',
+    options: [new Serializer\Type('boolean'), new Serializer\Groups(['Nonstrict'])]
+)]
 class TeamCategory extends BaseApiEntity implements Stringable
 {
     /**
@@ -35,9 +35,9 @@ class TeamCategory extends BaseApiEntity implements Stringable
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer", name="categoryid", length=4,
      *     options={"comment"="Team category ID","unsigned"=true}, nullable=false)
-     * @Serializer\SerializedName("id")
-     * @Serializer\Type("string")
      */
+    #[Serializer\SerializedName('id')]
+    #[Serializer\Type('string')]
     protected ?int $categoryid = null;
 
     /**
@@ -45,8 +45,8 @@ class TeamCategory extends BaseApiEntity implements Stringable
      *     options={"comment"="Team category ID in an external system",
      *              "collation"="utf8mb4_bin"},
      *     nullable=true)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     protected ?string $externalid = null;
 
     /**
@@ -54,9 +54,9 @@ class TeamCategory extends BaseApiEntity implements Stringable
      *     options={"comment"="External identifier from ICPC CMS",
      *              "collation"="utf8mb4_bin"},
      *     nullable=true)
-     * @Serializer\SerializedName("icpc_id")
      */
     #[OA\Property(nullable: true)]
+    #[Serializer\SerializedName('icpc_id')]
     protected ?string $icpcid = null;
 
     /**
@@ -71,18 +71,18 @@ class TeamCategory extends BaseApiEntity implements Stringable
      *     options={"comment"="Where to sort this category on the scoreboard",
      *              "unsigned"=true,"default"="0"},
      *     nullable=false)
-     * @Serializer\Groups({"Nonstrict"})
      * @Assert\GreaterThanOrEqual(0, message="Only non-negative sortorders are supported")
      */
+    #[Serializer\Groups(['Nonstrict'])]
     private int $sortorder = 0;
 
     /**
      * @ORM\Column(type="string", length=32, name="color",
      *     options={"comment"="Background colour on the scoreboard"},
      *     nullable=true)
-     * @Serializer\Groups({"Nonstrict"})
      */
     #[OA\Property(nullable: true)]
+    #[Serializer\Groups(['Nonstrict'])]
     private ?string $color = null;
 
     /**
@@ -90,8 +90,8 @@ class TeamCategory extends BaseApiEntity implements Stringable
      *     options={"comment"="Are teams in this category visible?",
      *              "default"="1"},
      *     nullable=false)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private bool $visible = true;
 
     /**
@@ -99,26 +99,26 @@ class TeamCategory extends BaseApiEntity implements Stringable
      *     options={"comment"="Are self-registered teams allowed to choose this category?",
      *              "default"="0"},
      *     nullable=false)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private bool $allow_self_registration = false;
 
     /**
      * @ORM\OneToMany(targetEntity="Team", mappedBy="category")
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private Collection $teams;
 
     /**
      * @ORM\ManyToMany(targetEntity="Contest", mappedBy="team_categories")
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private Collection $contests;
 
     /**
      * @ORM\ManyToMany(targetEntity="Contest", mappedBy="medal_categories")
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private Collection $contests_for_medals;
 
     public function __construct()

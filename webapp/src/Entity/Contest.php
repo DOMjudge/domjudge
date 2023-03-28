@@ -31,20 +31,20 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
  *         @ORM\UniqueConstraint(name="shortname", columns={"shortname"}, options={"lengths": {190}})
  *     }
  * )
- * @Serializer\VirtualProperty(
- *     "formalName",
- *     exp="object.getName()",
- *     options={@Serializer\Type("string")}
- * )
- * @Serializer\VirtualProperty(
- *     "penaltyTime",
- *     exp="0",
- *     options={@Serializer\Type("int")}
- * )
  * @ORM\HasLifecycleCallbacks()
  * @UniqueEntity("shortname")
  * @UniqueEntity("externalid")
  */
+#[Serializer\VirtualProperty(
+    name: 'formalName',
+    exp: 'object.getName()',
+    options: [new Serializer\Type('string')]
+)]
+#[Serializer\VirtualProperty(
+    name: 'penaltyTime',
+    exp: '0',
+    options: [new Serializer\Type('int')]
+)]
 class Contest extends BaseApiEntity implements AssetEntityInterface
 {
     final public const STARTTIME_UPDATE_MIN_SECONDS_BEFORE = 30;
@@ -53,17 +53,17 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer", name="cid", options={"comment"="Contest ID", "unsigned"=true}, nullable=false, length=4)
-     * @Serializer\SerializedName("id")
-     * @Serializer\Type("string")
      */
+    #[Serializer\SerializedName('id')]
+    #[Serializer\Type('string')]
     protected ?int $cid = null;
 
     /**
      * @ORM\Column(type="string", name="externalid", length=255, options={"comment"="Contest ID in an external system",
      *                            "collation"="utf8mb4_bin"}, nullable=true)
-     * @Serializer\Groups({"Nonstrict"})
-     * @Serializer\SerializedName("external_id")
      */
+    #[Serializer\Groups(['Nonstrict'])]
+    #[Serializer\SerializedName('external_id')]
     protected ?string $externalid = null;
 
     /**
@@ -75,10 +75,10 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     /**
      * @ORM\Column(type="string", name="shortname", length=255, options={"comment"="Short name for this contest"},
      *                            nullable=false)
-     * @Serializer\Groups({"Nonstrict"})
      * @Identifier()
      * @Assert\NotBlank()
      */
+    #[Serializer\Groups(['Nonstrict'])]
     private string $shortname = '';
 
     /**
@@ -86,8 +86,8 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
      *     options={"comment"="Time contest becomes visible in team/public views",
      *              "unsigned"=true},
      *     nullable=false)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private string|float $activatetime;
 
     /**
@@ -95,24 +95,24 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
      *     options={"comment"="Time contest starts, submissions accepted",
      *              "unsigned"=true},
      *     nullable=false)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private string|float|null $starttime = null;
 
     /**
      * @ORM\Column(type="boolean", name="starttime_enabled",
      *     options={"comment"="If disabled, starttime is not used, e.g. to delay contest start","default"=1},
      *     nullable=false)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private bool $starttimeEnabled = true;
 
     /**
      * @ORM\Column(type="decimal", precision=32, scale=9, name="freezetime",
      *     options={"comment"="Time scoreboard is frozen","unsigned"=true},
      *     nullable=true)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private string|float|null $freezetime = null;
 
     /**
@@ -120,8 +120,8 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
      *     options={"comment"="Time after which no more submissions are accepted",
      *              "unsigned"=true},
      *     nullable=false)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private string|float $endtime;
 
     /**
@@ -129,8 +129,8 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
      *     options={"comment"="Unfreeze a frozen scoreboard at this time",
      *              "unsigned"=true},
      *     nullable=true)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private string|float|null $unfreezetime = null;
 
     /**
@@ -138,32 +138,32 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
      *     options={"comment"="Time when contest was finalized, null if not yet",
      *              "unsigned"=true},
      *     nullable=true)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private string|float|null $finalizetime = null;
 
     /**
      * @ORM\Column(type="text", name="finalizecomment", length=65535,
      *     options={"comment"="Comments by the finalizer"},
      *     nullable=true)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private ?string $finalizecomment = null;
 
     /**
      * @ORM\Column(type="smallint", length=3, name="b",
      *     options={"comment"="Number of extra bronze medals","unsigned"="true","default"=0},
      *     nullable=false)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private ?int $b = 0;
 
     /**
      * @ORM\Column(type="boolean", name="medals_enabled",
      *     options={"default"=0},
      *     nullable=false)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private ?bool $medalsEnabled = false;
 
     /**
@@ -172,32 +172,32 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
      *                joinColumns={@ORM\JoinColumn(name="cid", referencedColumnName="cid", onDelete="CASCADE")},
      *                inverseJoinColumns={@ORM\JoinColumn(name="categoryid", referencedColumnName="categoryid", onDelete="CASCADE")}
      *               )
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private Collection $medal_categories;
 
     /**
      * @ORM\Column(type="smallint", length=3, name="gold_medals",
      *     options={"comment"="Number of gold medals","unsigned"="true","default"=4},
      *     nullable=false)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private int $goldMedals = 4;
 
     /**
      * @ORM\Column(type="smallint", length=3, name="silver_medals",
      *     options={"comment"="Number of silver medals","unsigned"="true","default"=4},
      *     nullable=false)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private int $silverMedals = 4;
 
     /**
      * @ORM\Column(type="smallint", length=3, name="bronze_medals",
      *     options={"comment"="Number of bronze medals","unsigned"="true","default"=4},
      *     nullable=false)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private int $bronzeMedals = 4;
 
     /**
@@ -205,94 +205,94 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
      *     options={"comment"="Time contest becomes invisible in team/public views",
      *              "unsigned"=true},
      *     nullable=true)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private string|float|null $deactivatetime = null;
 
     /**
      * @ORM\Column(type="string", length=64, name="activatetime_string",
      *     options={"comment"="Authoritative absolute or relative string representation of activatetime"},
      *     nullable=false)
-     * @Serializer\Exclude()
      * @TimeString(relativeIsPositive=false)
      */
+    #[Serializer\Exclude]
     private string $activatetimeString = '';
 
     /**
      * @ORM\Column(type="string", length=64, name="starttime_string",
      *     options={"comment"="Authoritative absolute (only!) string representation of starttime"},
      *     nullable=false)
-     * @Serializer\Exclude()
      * @TimeString(allowRelative=false)
      */
+    #[Serializer\Exclude]
     private string $starttimeString = '';
 
     /**
      * @ORM\Column(type="string", length=64, name="freezetime_string",
      *     options={"comment"="Authoritative absolute or relative string representation of freezetime"},
      *     nullable=true)
-     * @Serializer\Exclude()
      * @TimeString()
      */
+    #[Serializer\Exclude]
     private ?string $freezetimeString = null;
 
     /**
      * @ORM\Column(type="string", length=64, name="endtime_string",
      *     options={"comment"="Authoritative absolute or relative string representation of endtime"},
      *     nullable=false)
-     * @Serializer\Exclude()
      * @TimeString()
      */
+    #[Serializer\Exclude]
     private string $endtimeString = '';
 
     /**
      * @ORM\Column(type="string", length=64, name="unfreezetime_string",
      *     options={"comment"="Authoritative absolute or relative string representation of unfreezetime"},
      *     nullable=true)
-     * @Serializer\Exclude()
      * @TimeString()
      */
+    #[Serializer\Exclude]
     private ?string $unfreezetimeString = null;
 
     /**
      * @ORM\Column(type="string", length=64, name="deactivatetime_string",
      *     options={"comment"="Authoritative absolute or relative string representation of deactivatetime"},
      *     nullable=true)
-     * @Serializer\Exclude()
      * @TimeString()
      */
+    #[Serializer\Exclude]
     private ?string $deactivatetimeString = null;
 
     /**
      * @ORM\Column(type="boolean", name="enabled",
      *     options={"comment"="Whether this contest can be active","default"=1},
      *     nullable=false)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private bool $enabled = true;
 
     /**
      * @ORM\Column(type="boolean", name="allow_submit",
      *     options={"comment"="Are submissions accepted in this contest?","default"="1"},
      *     nullable=false)
-     * @Serializer\Groups({"Nonstrict"})
      */
+    #[Serializer\Groups(['Nonstrict'])]
     private bool $allowSubmit = true;
 
     /**
      * @ORM\Column(type="boolean", name="process_balloons",
      *     options={"comment"="Will balloons be processed for this contest?","default"=1},
      *     nullable=false)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private bool $processBalloons = true;
 
     /**
      * @ORM\Column(type="boolean", name="runtime_as_score_tiebreaker",
      *     options={"comment"="Is runtime used as tiebreaker instead of penalty?","default"=0},
      *     nullable=false)
-     * @Serializer\Groups({"Nonstrict"})
      */
+    #[Serializer\Groups(['Nonstrict'])]
     private bool $runtime_as_score_tiebreaker = false;
 
     /**
@@ -300,19 +300,17 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
      *     options={"comment"="Is this contest visible for the public?",
      *              "default"=1},
      *     nullable=false)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private bool $public = true;
 
     /**
      * @Assert\File(mimeTypes={"image/png","image/jpeg","image/svg+xml"}, mimeTypesMessage="Only PNG's, JPG's and SVG's are allowed")
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private ?UploadedFile $bannerFile = null;
 
-    /**
-     * @Serializer\Exclude()
-     */
+    #[Serializer\Exclude]
     private bool $clearBanner = false;
 
     /**
@@ -320,17 +318,17 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
      *     options={"comment"="Is this contest open to all teams?",
      *              "default"=1},
      *     nullable=false)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private bool $openToAllTeams = true;
 
     /**
      * @ORM\Column(type="text", length=65535, name="warning_message",
      *     options={"comment"="Warning message for this contest shown on the scoreboards"},
      *                          nullable=true)
-     * @Serializer\Groups({"Nonstrict"})
      */
     #[OA\Property(nullable: true)]
+    #[Serializer\Groups(['Nonstrict'])]
     private ?string $warningMessage = null;
 
     /**
@@ -338,8 +336,8 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
      *     options={"comment"="Is this contest locked for modifications?",
      *              "default"=0},
      *     nullable=false)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private bool $isLocked = false;
 
     /**
@@ -348,8 +346,8 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
      *                joinColumns={@ORM\JoinColumn(name="cid", referencedColumnName="cid", onDelete="CASCADE")},
      *                inverseJoinColumns={@ORM\JoinColumn(name="teamid", referencedColumnName="teamid", onDelete="CASCADE")}
      *               )
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private Collection $teams;
 
     /**
@@ -358,50 +356,50 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
      *                joinColumns={@ORM\JoinColumn(name="cid", referencedColumnName="cid", onDelete="CASCADE")},
      *                inverseJoinColumns={@ORM\JoinColumn(name="categoryid", referencedColumnName="categoryid", onDelete="CASCADE")}
      *               )
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private Collection $team_categories;
 
     /**
      * @ORM\OneToMany(targetEntity="Clarification", mappedBy="contest")
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private Collection $clarifications;
 
     /**
      * @ORM\OneToMany(targetEntity="Submission", mappedBy="contest")
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private Collection $submissions;
 
     /**
      * @ORM\OneToMany(targetEntity="ContestProblem", mappedBy="contest", orphanRemoval=true, cascade={"persist"})
      * @ORM\OrderBy({"shortname" = "ASC"})
-     * @Serializer\Exclude()
      * @Assert\Valid()
      */
+    #[Serializer\Exclude]
     private Collection $problems;
 
     /**
      * @ORM\OneToMany(targetEntity="InternalError", mappedBy="contest")
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private Collection $internal_errors;
 
     /**
      * @var ArrayCollection
      * @ORM\OneToMany(targetEntity="App\Entity\RemovedInterval", mappedBy="contest")
-     * @Serializer\Exclude()
      * @Assert\Valid()
      */
+    #[Serializer\Exclude]
     private Collection $removedIntervals;
 
     /**
      * @var ArrayCollection
      * @ORM\OneToMany(targetEntity="App\Entity\ExternalContestSource", mappedBy="contest")
-     * @Serializer\Exclude()
      * @Assert\Valid()
      */
+    #[Serializer\Exclude]
     private Collection $externalContestSources;
 
     public function __construct()
@@ -485,11 +483,9 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
         return $this->starttime === null ? null : (float)$this->starttime;
     }
 
-    /**
-     * @Serializer\VirtualProperty()
-     * @Serializer\SerializedName("start_time")
-     * @Serializer\Type("DateTime")
-     */
+    #[Serializer\VirtualProperty]
+    #[Serializer\SerializedName('start_time')]
+    #[Serializer\Type('DateTime')]
     public function getStartTimeObject(): ?DateTime
     {
         return $this->getStarttime() ? new DateTime(Utils::absTime($this->getStarttime())) : null;
@@ -516,12 +512,10 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
         return $this->endtime === null ? null : (float)$this->endtime;
     }
 
-    /**
-     * @Serializer\VirtualProperty()
-     * @Serializer\SerializedName("end_time")
-     * @Serializer\Type("DateTime")
-     * @Serializer\Groups({"Nonstrict"})
-     */
+    #[Serializer\VirtualProperty]
+    #[Serializer\SerializedName('end_time')]
+    #[Serializer\Type('DateTime')]
+    #[Serializer\Groups(['Nonstrict'])]
     public function getEndTimeObject(): ?DateTime
     {
         return $this->getEndtime() ? new DateTime(Utils::absTime($this->getEndtime())) : null;
@@ -933,20 +927,16 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
         return $this->internal_errors;
     }
 
-    /**
-     * @Serializer\VirtualProperty()
-     * @Serializer\Type("string")
-     */
+    #[Serializer\VirtualProperty]
+    #[Serializer\Type('string')]
     public function getDuration(): string
     {
         return Utils::relTime($this->getEndtime() - $this->starttime);
     }
 
-    /**
-     * @Serializer\VirtualProperty()
-     * @Serializer\Type("string")
-     */
     #[OA\Property(nullable: true)]
+    #[Serializer\VirtualProperty]
+    #[Serializer\Type('string')]
     public function getScoreboardFreezeDuration(): ?string
     {
         if (!empty($this->getFreezetime())) {

@@ -21,13 +21,17 @@ use Symfony\Component\Validator\Constraints as Assert;
  *     uniqueConstraints={
  *         @ORM\UniqueConstraint(name="externalid", columns={"externalid"}, options={"lengths": {190}}),
  *     })
- * @Serializer\VirtualProperty(
- *     "shortName",
- *     exp="object.getShortname()",
- *     options={@Serializer\Type("string"), @Serializer\SerializedName("shortname"), @Serializer\Groups({"Nonstrict"})}
- * )
  * @UniqueEntity("externalid")
  */
+#[Serializer\VirtualProperty(
+    name: 'shortName',
+    exp: 'object.getShortname()',
+    options: [
+        new Serializer\Type('string'),
+        new Serializer\SerializedName('shortname'),
+        new Serializer\Groups(['Nonstrict']),
+    ]
+)]
 class TeamAffiliation extends BaseApiEntity implements AssetEntityInterface
 {
     /**
@@ -36,9 +40,9 @@ class TeamAffiliation extends BaseApiEntity implements AssetEntityInterface
      * @ORM\Column(type="integer", name="affilid", length=4,
      *             options={"comment"="Team affiliation ID","unsigned"=true},
      *     nullable=false)
-     * @Serializer\SerializedName("id")
-     * @Serializer\Type("string")
      */
+    #[Serializer\SerializedName('id')]
+    #[Serializer\Type('string')]
     protected ?int $affilid = null;
 
     /**
@@ -46,8 +50,8 @@ class TeamAffiliation extends BaseApiEntity implements AssetEntityInterface
      *     options={"comment"="Team affiliation ID in an external system",
      *              "collation"="utf8mb4_bin"},
      *     nullable=true)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     protected ?string $externalid = null;
 
     /**
@@ -55,58 +59,56 @@ class TeamAffiliation extends BaseApiEntity implements AssetEntityInterface
      *     options={"comment"="External identifier from ICPC CMS",
      *              "collation"="utf8mb4_bin"},
      *     nullable=true)
-     * @Serializer\SerializedName("icpc_id")
      */
     #[OA\Property(nullable: true)]
+    #[Serializer\SerializedName('icpc_id')]
     protected ?string $icpcid = null;
 
     /**
      * @ORM\Column(type="string", name="shortname", length=32,
      *     options={"comment"="Short descriptive name"}, nullable=false)
-     * @Serializer\SerializedName("name")
      */
+    #[Serializer\SerializedName('name')]
     private string $shortname;
 
     /**
      * @ORM\Column(type="string", name="name", length=255,
      *     options={"comment"="Descriptive name"}, nullable=false)
-     * @Serializer\SerializedName("formal_name")
      */
+    #[Serializer\SerializedName('formal_name')]
     private string $name;
 
     /**
      * @ORM\Column(type="string", length=3, name="country",
      *     options={"comment"="ISO 3166-1 alpha-3 country code","fixed"=true},
      *     nullable=true)
-     * @Serializer\Expose(if="context.getAttribute('config_service').get('show_flags')")
      * @Country()
      */
     #[OA\Property(nullable: true)]
+    #[Serializer\Expose(if: "context.getAttribute('config_service').get('show_flags')")]
     private ?string $country = null;
 
     /**
      * @Assert\File(mimeTypes={"image/png","image/jpeg","image/svg+xml"}, mimeTypesMessage="Only PNG's, JPG's and SVG's are allowed")
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private ?UploadedFile $logoFile = null;
 
-    /**
-     * @Serializer\Exclude()
-     */
+    #[Serializer\Exclude]
     private bool $clearLogo = false;
 
     /**
      * @ORM\Column(type="text", length=4294967295, name="internalcomments",
      *     options={"comment"="Internal comments (jury only)"},
      *     nullable=true)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private ?string $internalComments = null;
 
     /**
      * @ORM\OneToMany(targetEntity="Team", mappedBy="affiliation")
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private Collection $teams;
 
     public function __construct()
