@@ -41,7 +41,7 @@ use Doctrine\ORM\Query\Expr\Join;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
-use OpenApi\Annotations as OA;
+use OpenApi\Attributes as OA;
 use Psr\Log\LoggerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -51,11 +51,11 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * @Rest\Route("/judgehosts")
- * @OA\Tag(name="Judgehosts")
- * @OA\Response(response="400", ref="#/components/responses/InvalidResponse")
- * @OA\Response(response="401", ref="#/components/responses/Unauthenticated")
- * @OA\Response(response="403", ref="#/components/responses/Unauthorized")
  */
+#[OA\Tag(name: 'Judgehosts')]
+#[OA\Response(ref: '#/components/responses/InvalidResponse', response: 400)]
+#[OA\Response(ref: '#/components/responses/Unauthenticated', response: 401)]
+#[OA\Response(ref: '#/components/responses/Unauthorized', response: 403)]
 class JudgehostController extends AbstractFOSRestController
 {
     public function __construct(
@@ -74,18 +74,21 @@ class JudgehostController extends AbstractFOSRestController
      * Get judgehosts.
      * @Rest\Get("")
      * @IsGranted("ROLE_JURY")
-     * @OA\Response(
-     *     response="200",
-     *     description="The judgehosts",
-     *     @OA\JsonContent(type="array", @OA\Items(ref=@Model(type=Judgehost::class)))
-     * )
-     * @OA\Parameter(
-     *     name="hostname",
-     *     in="query",
-     *     description="Only show the judgehost with the given hostname",
-     *     @OA\Schema(type="string")
-     * )
      */
+    #[OA\Response(
+        response: 200,
+        description: 'The judgehosts',
+        content: new OA\JsonContent(
+            type: 'array',
+            items: new OA\Items(ref: new Model(type: Judgehost::class))
+        )
+    )]
+    #[OA\Parameter(
+        name: 'hostname',
+        description: 'Only show the judgehost with the given hostname',
+        in: 'query',
+        schema: new OA\Schema(type: 'string')
+    )]
     public function getJudgehostsAction(Request $request): array
     {
         $queryBuilder = $this->em->createQueryBuilder()
@@ -106,22 +109,22 @@ class JudgehostController extends AbstractFOSRestController
      * Also restarts (and returns) unfinished judgings.
      * @Rest\Post("")
      * @IsGranted("ROLE_JUDGEHOST")
-     * @OA\Response(
-     *     response="200",
-     *     description="The returned unfinished judgings",
-     *     @OA\JsonContent(
-     *         type="array",
-     *         @OA\Items(
-     *             type="object",
-     *             properties={
-     *                 @OA\Property(property="jobid", type="integer"),
-     *                 @OA\Property(property="submitid", type="integer")
-     *             }
-     *         )
-     *     )
-     * )
      * @throws NonUniqueResultException
      */
+    #[OA\Response(
+        response: 200,
+        description: 'The returned unfinished judgings',
+        content: new OA\JsonContent(
+            type: 'array',
+            items: new OA\Items(
+                properties: [
+                    new OA\Property(property: 'jobid', type: 'integer'),
+                    new OA\Property(property: 'submitid', type: 'integer'),
+                ],
+                type: 'object'
+            )
+        )
+    )]
     public function createJudgehostAction(Request $request): array
     {
         if (!$request->request->has('hostname')) {
@@ -185,31 +188,35 @@ class JudgehostController extends AbstractFOSRestController
      * Update the configuration of the given judgehost.
      * @Rest\Put("/{hostname}")
      * @IsGranted("ROLE_JUDGEHOST")
-     * @OA\Response(
-     *     response="200",
-     *     description="The modified judgehost",
-     *     @OA\JsonContent(type="array", @OA\Items(ref=@Model(type=Judgehost::class)))
-     * )
-     * @OA\Parameter(
-     *     name="hostname",
-     *     in="path",
-     *     description="The hostname of the judgehost to update",
-     *     @OA\Schema(type="string")
-     * )
-     * @OA\RequestBody(
-     *     required=true,
-     *     @OA\MediaType(
-     *         mediaType="application/x-www-form-urlencoded",
-     *         @OA\Schema(
-     *             @OA\Property(
-     *                 property="enabled",
-     *                 description="The new enabled state of the judgehost",
-     *                 type="boolean"
-     *             )
-     *         )
-     *     )
-     * )
      */
+    #[OA\Response(
+        response: 200,
+        description: 'The modified judgehost',
+        content: new OA\JsonContent(
+            type: 'array',
+            items: new OA\Items(ref: new Model(type: Judgehost::class))
+        )
+    )]
+    #[OA\Parameter(
+        name: 'hostname',
+        description: 'The hostname of the judgehost to update',
+        in: 'path',
+        schema: new OA\Schema(type: 'string')
+    )]
+    #[OA\RequestBody(
+        required: true,
+        content: new OA\MediaType(
+            mediaType: 'application/x-www-form-urlencoded',
+            schema: new OA\Schema(
+                properties: [
+                    new OA\Property(
+                        property: 'enabled',
+                        description: 'The new enabled state of the judgehost',
+                        type: 'boolean'),
+                ]
+            )
+        )
+    )]
     public function updateJudgeHostAction(Request $request, string $hostname): array
     {
         if (!$request->request->has('enabled')) {
@@ -230,52 +237,54 @@ class JudgehostController extends AbstractFOSRestController
      * Update the given judging for the given judgehost.
      * @Rest\Put("/update-judging/{hostname}/{judgetaskid<\d+>}")
      * @IsGranted("ROLE_JUDGEHOST")
-     * @OA\Response(
-     *     response="200",
-     *     description="When the judging has been updated"
-     * )
-     * @OA\Parameter(
-     *     name="hostname",
-     *     in="path",
-     *     description="The hostname of the judgehost that wants to update the judging",
-     *     @OA\Schema(type="string")
-     * )
-     * @OA\Parameter(
-     *     name="judgetaskid",
-     *     in="path",
-     *     description="The ID of the judgetask to update",
-     *     @OA\Schema(type="integer")
-     * )
-     * @OA\RequestBody(
-     *     required=true,
-     *     @OA\MediaType(
-     *         mediaType="application/x-www-form-urlencoded",
-     *         @OA\Schema(
-     *             @OA\Property(
-     *                 property="compile_success",
-     *                 description="Whether compilation was successful",
-     *                 type="boolean"
-     *             ),
-     *             @OA\Property(
-     *                 property="output_compile",
-     *                 description="The compile output",
-     *                 type="string"
-     *             ),
-     *             @OA\Property(
-     *                 property="entry_point",
-     *                 description="The determined entrypoint",
-     *                 type="string"
-     *             ),
-     *             @OA\Property(
-     *                 property="compile_metadata",
-     *                 description="The (base64-encoded) metadata of the compilation.",
-     *                 type="string"
-     *             )
-     *         )
-     *     )
-     * )
      * @throws NonUniqueResultException
      */
+    #[OA\Response(
+        response: 200,
+        description: 'When the judging has been updated'
+    )]
+    #[OA\Parameter(
+        name: 'hostname',
+        description: 'The hostname of the judgehost that wants to update the judging',
+        in: 'path',
+        schema: new OA\Schema(type: 'string')
+    )]
+    #[OA\Parameter(
+        name: 'judgetaskid',
+        description: 'The ID of the judgetask to update',
+        in: 'path',
+        schema: new OA\Schema(type: 'integer')
+    )]
+    #[OA\RequestBody(
+        required: true,
+        content: new OA\MediaType(
+            mediaType: 'application/x-www-form-urlencoded',
+            schema: new OA\Schema(
+                properties: [
+                    new OA\Property(
+                        property: 'compile_success',
+                        description: 'Whether compilation was successful',
+                        type: 'boolean'
+                    ),
+                    new OA\Property(
+                        property: 'output_compile',
+                        description: 'The compile output',
+                        type: 'string'
+                    ),
+                    new OA\Property(
+                        property: 'entry_point',
+                        description: 'The determined entrypoint',
+                        type: 'string'
+                    ),
+                    new OA\Property(
+                        property: 'compile_metadata',
+                        description: 'The (base64-encoded) metadata of the compilation.',
+                        type: 'string'
+                    ),
+                ]
+            )
+        )
+    )]
     public function updateJudgingAction(Request $request, string $hostname, int $judgetaskid): void
     {
         /** @var Judgehost $judgehost */
@@ -463,23 +472,20 @@ class JudgehostController extends AbstractFOSRestController
      * Add back debug info.
      * @Rest\Post("/add-debug-info/{hostname}/{judgeTaskId<\d+>}")
      * @IsGranted("ROLE_JUDGEHOST")
-     * @OA\Response(
-     *     response="200",
-     *     description="When the debug info has been added"
-     * )
-     * @OA\Parameter(
-     *     name="hostname",
-     *     in="path",
-     *     description="The hostname of the judgehost that wants to add the debug info",
-     *     @OA\Schema(type="string")
-     * )
-     * @OA\Parameter(
-     *     name="judgeTaskId",
-     *     in="path",
-     *     description="The ID of the judgetask to add",
-     *     @OA\Schema(type="integer")
-     * )
      */
+    #[OA\Response(response: 200, description: 'When the debug info has been added')]
+    #[OA\Parameter(
+        name: 'hostname',
+        description: 'The hostname of the judgehost that wants to add the debug info',
+        in: 'path',
+        schema: new OA\Schema(type: 'string')
+    )]
+    #[OA\Parameter(
+        name: 'judgeTaskId',
+        description: 'The ID of the judgetask to add',
+        in: 'path',
+        schema: new OA\Schema(type: 'integer')
+    )]
     public function addDebugInfo(
         Request $request,
         string $hostname,
@@ -560,72 +566,71 @@ class JudgehostController extends AbstractFOSRestController
      * Add one JudgingRun. When relevant, finalize the judging.
      * @Rest\Post("/add-judging-run/{hostname}/{judgeTaskId<\d+>}")
      * @IsGranted("ROLE_JUDGEHOST")
-     * @OA\Response(
-     *     response="200",
-     *     description="When the judging run has been added"
-     * )
-     * @OA\Parameter(
-     *     name="hostname",
-     *     in="path",
-     *     description="The hostname of the judgehost that wants to add the judging run",
-     *     @OA\Schema(type="string")
-     * )
-     * @OA\Parameter(
-     *     name="judgeTaskId",
-     *     in="path",
-     *     description="The ID of the judgetask to add",
-     *     @OA\Schema(type="integer")
-     * )
-     * @OA\RequestBody(
-     *     required=true,
-     *     @OA\MediaType(
-     *         mediaType="application/x-www-form-urlencoded",
-     *         @OA\Schema(
-     *             required={"runresult","runtime","output_run","output_diff","output_error","output_system"},
-     *             @OA\Property(
-     *                 property="runresult",
-     *                 description="The result of the run",
-     *                 type="string"
-     *             ),
-     *             @OA\Property(
-     *                 property="runtime",
-     *                 description="The runtime of the run",
-     *                 type="number",
-     *                 format="float"
-     *             ),
-     *             @OA\Property(
-     *                 property="output_run",
-     *                 description="The (base64-encoded) output of the run",
-     *                 type="string"
-     *             ),
-     *             @OA\Property(
-     *                 property="output_diff",
-     *                 description="The (base64-encoded) output diff of the run",
-     *                 type="string"
-     *             ),
-     *             @OA\Property(
-     *                 property="output_error",
-     *                 description="The (base64-encoded) error output of the run",
-     *                 type="string"
-     *             ),
-     *             @OA\Property(
-     *                 property="output_system",
-     *                 description="The (base64-encoded) system output of the run",
-     *                 type="string"
-     *             ),
-     *             @OA\Property(
-     *                 property="metadata",
-     *                 description="The (base64-encoded) metadata",
-     *                 type="string"
-     *             )
-     *         )
-     *     )
-     * )
      * @throws DBALException
      * @throws NoResultException
      * @throws NonUniqueResultException
      * @throws ORMException
      */
+    #[OA\Response(response: 200, description: 'When the judging run has been added')]
+    #[OA\Parameter(
+        name: 'hostname',
+        description: 'The hostname of the judgehost that wants to add the judging run',
+        in: 'path',
+        schema: new OA\Schema(type: 'string')
+    )]
+    #[OA\Parameter(
+        name: 'judgeTaskId',
+        in: 'path',
+        description: 'The ID of the judgetask to add',
+        schema: new OA\Schema(type: 'integer')
+    )]
+    #[OA\RequestBody(
+        required: true,
+        content: new OA\MediaType(
+            mediaType: 'application/x-www-form-urlencoded',
+            schema: new OA\Schema(
+                required: ['runresult', 'runtime', 'output_run', 'output_diff', 'output_error', 'output_system'],
+                properties: [
+                    new OA\Property(
+                        property: 'runresult',
+                        description: 'The result of the run',
+                        type: 'string'
+                    ),
+                    new OA\Property(
+                        property: 'runtime',
+                        description: 'The runtime of the run',
+                        type: 'number',
+                        format: 'float'
+                    ),
+                    new OA\Property(
+                        property: 'output_run',
+                        description: 'The (base64-encoded) output of the run',
+                        type: 'string'
+                    ),
+                    new OA\Property(
+                        property: 'output_diff',
+                        description: 'The (base64-encoded) output diff of the run',
+                        type: 'string'
+                    ),
+                    new OA\Property(
+                        property: 'output_error',
+                        description: 'The (base64-encoded) error output of the run',
+                        type: 'string'
+                    ),
+                    new OA\Property(
+                        property: 'output_system',
+                        description: 'The (base64-encoded) system output of the run',
+                        type: 'string'
+                    ),
+                    new OA\Property(
+                        property: 'metadata',
+                        description: 'The (base64-encoded) metadata',
+                        type: 'string'
+                    ),
+                ]
+            )
+        )
+    )]
     public function addJudgingRunAction(
         Request $request,
         string $hostname,
@@ -675,43 +680,45 @@ class JudgehostController extends AbstractFOSRestController
      *
      * @Rest\Post("/internal-error")
      * @IsGranted("ROLE_JUDGEHOST")
-     * @OA\Response(
-     *     response="200",
-     *     description="The ID of the created internal error",
-     *     @OA\JsonContent(type="integer")
-     * )
-     * @OA\RequestBody(
-     *     required=true,
-     *     @OA\MediaType(
-     *         mediaType="application/x-www-form-urlencoded",
-     *         @OA\Schema(
-     *             required={"description","judgehostlog","disabled"},
-     *             @OA\Property(
-     *                 property="description",
-     *                 description="The description of the internal error",
-     *                 type="string"
-     *             ),
-     *             @OA\Property(
-     *                 property="judgehostlog",
-     *                 description="The log of the judgehost",
-     *                 type="string"
-     *             ),
-     *             @OA\Property(
-     *                 property="disabled",
-     *                 description="The object to disable in JSON format",
-     *                 type="string"
-     *             ),
-     *             @OA\Property(
-     *                 property="judgetaskid",
-     *                 description="The ID of the judgeTask that was being worked on",
-     *                 type="integer"
-     *             )
-     *         )
-     *     )
-     * )
      * @throws NonUniqueResultException
      * @throws ORMException
      */
+    #[OA\Response(
+        response: 200,
+        description: 'The ID of the created internal error',
+        content: new OA\JsonContent(type: 'integer')
+    )]
+    #[OA\RequestBody(
+        required: true,
+        content: new OA\MediaType(
+            mediaType: 'application/x-www-form-urlencoded',
+            schema: new OA\Schema(
+                required: ['description', 'judgehostlog', 'disabled'],
+                properties: [
+                    new OA\Property(
+                        property: 'description',
+                        description: 'The description of the internal error',
+                        type: 'string'
+                    ),
+                    new OA\Property(
+                        property: 'judgehostlog',
+                        description: 'The log of the judgehost',
+                        type: 'string'
+                    ),
+                    new OA\Property(
+                        property: 'disabled',
+                        description: 'The object to disable in JSON format',
+                        type: 'string'
+                    ),
+                    new OA\Property(
+                        property: 'judgetaskid',
+                        description: 'The ID of the judgeTask that was being worked on',
+                        type: 'integer'
+                    ),
+                ]
+            )
+        )
+    )]
     public function internalErrorAction(Request $request): ?int
     {
         $required = ['description', 'judgehostlog', 'disabled'];
@@ -1171,19 +1178,19 @@ class JudgehostController extends AbstractFOSRestController
      * @Rest\Get("/get_files/{type}/{id<\d+>}")
      * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST')")
      * @throws NonUniqueResultException
-     * @OA\Response(
-     *     response="200",
-     *     description="The files for the submission, testcase or script.",
-     *     @OA\Schema(ref="#/definitions/SourceCodeList")
-     * )
-     * @OA\Parameter(
-     *     name="type",
-     *     in="path",
-     *     description="The type to",
-     *     @OA\Schema(type="string")
-     * )
-     * @OA\Parameter(ref="#/components/parameters/id")
      */
+    #[OA\Response(
+        response: 200,
+        description: 'The files for the submission, testcase or script.',
+        content: new OA\JsonContent(ref: '#/components/schemas/SourceCodeList')
+    )]
+    #[OA\Parameter(
+        name: 'type',
+        description: 'The type to get files for',
+        in: 'path',
+        schema: new OA\Schema(type: 'string')
+    )]
+    #[OA\Parameter(ref: '#/components/parameters/id')]
     public function getFilesAction(string $type, string $id): array
     {
         return match ($type) {

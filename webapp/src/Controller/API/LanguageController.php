@@ -7,19 +7,19 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
-use OpenApi\Annotations as OA;
+use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
  * @Rest\Route("/")
- * @OA\Tag(name="Languages")
- * @OA\Parameter(ref="#/components/parameters/cid")
- * @OA\Parameter(ref="#/components/parameters/strict")
- * @OA\Response(response="400", ref="#/components/responses/InvalidResponse")
- * @OA\Response(response="401", ref="#/components/responses/Unauthenticated")
- * @OA\Response(response="404", ref="#/components/responses/NotFound")
  */
+#[OA\Tag(name: 'Languages')]
+#[OA\Parameter(ref: '#/components/parameters/cid')]
+#[OA\Parameter(ref: '#/components/parameters/strict')]
+#[OA\Response(ref: '#/components/responses/InvalidResponse', response: 400)]
+#[OA\Response(ref: '#/components/responses/Unauthenticated', response: 401)]
+#[OA\Response(ref: '#/components/responses/NotFound', response: 404)]
 class LanguageController extends AbstractRestController
 {
     /**
@@ -27,17 +27,17 @@ class LanguageController extends AbstractRestController
      * @Rest\Get("languages")
      * The languages endpoint doesn't require `cid` but the CLICS spec requires us to also expose it under a contest.
      * @Rest\Get("contests/{cid}/languages")
-     * @OA\Response(
-     *     response="200",
-     *     description="Returns all the languages for this contest",
-     *     @OA\JsonContent(
-     *         type="array",
-     *         @OA\Items(ref=@Model(type=Language::class))
-     *     )
-     * )
-     * @OA\Parameter(ref="#/components/parameters/idlist")
      * @throws NonUniqueResultException
      */
+    #[OA\Response(
+        response: 200,
+        description: 'Returns all the languages for this contest',
+        content: new OA\JsonContent(
+            type: 'array',
+            items: new OA\Items(ref: new Model(type: Language::class))
+        )
+    )]
+    #[OA\Parameter(ref: '#/components/parameters/idlist')]
     public function listAction(Request $request): Response
     {
         return parent::performListAction($request);
@@ -49,13 +49,13 @@ class LanguageController extends AbstractRestController
      * @Rest\Get("languages/{id}")
      * The languages endpoint doesn't require `cid` but the CLICS spec requires us to also expose it under a contest.
      * @Rest\Get("contests/{cid}/languages/{id}")
-     * @OA\Response(
-     *     response="200",
-     *     description="Returns the given language for this contest",
-     *     @Model(type=Language::class)
-     * )
-     * @OA\Parameter(ref="#/components/parameters/id")
      */
+    #[OA\Response(
+        response: 200,
+        description: 'Returns the given language for this contest',
+        content: new Model(type: Language::class)
+    )]
+    #[OA\Parameter(ref: '#/components/parameters/id')]
     public function singleAction(Request $request, string $id): Response
     {
         return parent::performSingleAction($request, $id);

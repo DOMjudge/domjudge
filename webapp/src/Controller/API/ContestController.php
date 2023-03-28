@@ -20,7 +20,7 @@ use FOS\RestBundle\Controller\Annotations as Rest;
 use JMS\Serializer\Metadata\PropertyMetadata;
 use Metadata\MetadataFactoryInterface;
 use Nelmio\ApiDocBundle\Annotation\Model;
-use OpenApi\Annotations as OA;
+use OpenApi\Attributes as OA;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -39,13 +39,13 @@ use TypeError;
 
 /**
  * @Rest\Route("/contests")
- * @OA\Tag(name="Contests")
- * @OA\Parameter(ref="#/components/parameters/strict")
- * @OA\Response(response="400", ref="#/components/responses/InvalidResponse")
- * @OA\Response(response="401", ref="#/components/responses/Unauthenticated")
- * @OA\Response(response="403", ref="#/components/responses/Unauthorized")
- * @OA\Response(response="404", ref="#/components/responses/NotFound")
  */
+#[OA\Tag(name: 'Contests')]
+#[OA\Parameter(ref: '#/components/parameters/strict')]
+#[OA\Response(ref: '#/components/responses/InvalidResponse', response: 400)]
+#[OA\Response(ref: '#/components/responses/Unauthenticated', response: 401)]
+#[OA\Response(ref: '#/components/responses/Unauthorized', response: 403)]
+#[OA\Response(ref: '#/components/responses/NotFound', response: 404)]
 class ContestController extends AbstractRestController
 {
     final public const EVENT_FEED_FORMAT_2020_03 = 0;
@@ -66,32 +66,29 @@ class ContestController extends AbstractRestController
      * Add a new contest.
      * @Rest\Post("")
      * @IsGranted("ROLE_ADMIN")
-     * @OA\RequestBody(
-     *     required=true,
-     *     @OA\MediaType(
-     *         mediaType="multipart/form-data",
-     *         @OA\Schema(
-     *             @OA\Property(
-     *                 property="yaml",
-     *                 type="string",
-     *                 format="binary",
-     *                 description="The contest.yaml file to import."
-     *             ),
-     *             @OA\Property(
-     *                 property="json",
-     *                 type="string",
-     *                 format="binary",
-     *                 description="The contest.json file to import."
-     *             )
-     *         )
-     *     )
-     * )
-     * @OA\Response(
-     *     response="200",
-     *     description="Returns the API ID of the added contest.",
-     * )
      * @throws BadRequestHttpException
      */
+    #[OA\RequestBody(
+        required: true,
+        content: new OA\MediaType(
+            mediaType: 'multipart/form-data',
+            schema: new OA\Schema(
+                properties: [
+                    new OA\Property(
+                        property: 'yaml',
+                        description: 'The contest.yaml file to import.',
+                        type: 'string',
+                        format: 'binary'
+                    ),
+                    new OA\Property(
+                        property: 'json',
+                        description: 'The contest.json file to import.',
+                        type: 'string',
+                        format: 'binary'
+                    ),
+                ]))
+    )]
+    #[OA\Response(response: 200, description: 'Returns the API ID of the added contest.')]
     public function addContestAction(Request $request): string
     {
         /** @var UploadedFile $yamlFile */
@@ -119,28 +116,28 @@ class ContestController extends AbstractRestController
     /**
      * Get all the contests.
      * @Rest\Get("")
-     * @OA\Response(
-     *     response="200",
-     *     description="Returns all contests visible to the user (all contests for privileged users, active contests otherwise)",
-     *     @OA\JsonContent(
-     *         type="array",
-     *         @OA\Items(
-     *             allOf={
-     *                 @OA\Schema(ref=@Model(type=Contest::class)),
-     *                 @OA\Schema(ref="#/components/schemas/Banner")
-     *             }
-     *         )
-     *     )
-     * )
-     * @OA\Parameter(ref="#/components/parameters/idlist")
-     * @OA\Parameter(
-     *     name="onlyActive",
-     *     in="query",
-     *     description="Whether to only return data pertaining to contests that are active",
-     *     @OA\Schema(type="boolean", default=false)
-     * )
      * @throws NonUniqueResultException
      */
+    #[OA\Response(
+        response: 200,
+        description: 'Returns all contests visible to the user (all contests for privileged users, active contests otherwise)',
+        content: new OA\JsonContent(
+            type: 'array',
+            items: new OA\Items(
+                allOf: [
+                    new OA\Schema(ref: new Model(type: Contest::class)),
+                    new OA\Schema(ref: '#/components/schemas/Banner'),
+                ]
+            )
+        )
+    )]
+    #[OA\Parameter(ref: '#/components/parameters/idlist')]
+    #[OA\Parameter(
+        name: 'onlyActive',
+        description: 'Whether to only return data pertaining to contests that are active',
+        in: 'query',
+        schema: new OA\Schema(type: 'boolean', default: false)
+    )]
     public function listAction(Request $request): Response
     {
         return parent::performListAction($request);
@@ -150,18 +147,18 @@ class ContestController extends AbstractRestController
      * Get the given contest.
      * @throws NonUniqueResultException
      * @Rest\Get("/{cid}")
-     * @OA\Response(
-     *     response="200",
-     *     description="Returns the given contest",
-     *     @OA\JsonContent(
-     *         allOf={
-     *             @OA\Schema(ref=@Model(type=Contest::class)),
-     *             @OA\Schema(ref="#/components/schemas/Banner")
-     *         }
-     *     )
-     * )
-     * @OA\Parameter(ref="#/components/parameters/cid")
      */
+    #[OA\Response(
+        response: 200,
+        description: 'Returns the given contest',
+        content: new OA\JsonContent(
+            allOf: [
+                new OA\Schema(ref: new Model(type: Contest::class)),
+                new OA\Schema(ref: '#/components/schemas/Banner'),
+            ]
+        )
+    )]
+    #[OA\Parameter(ref: '#/components/parameters/cid')]
     public function singleAction(Request $request, string $cid): Response
     {
         return parent::performSingleAction($request, $cid);
@@ -170,15 +167,17 @@ class ContestController extends AbstractRestController
     /**
      * Get the banner for the given contest.
      * @Rest\Get("/{cid}/banner", name="contest_banner")
-     * @OA\Response(
-     *     response="200",
-     *     description="Returns the given contest banner in PNG, JPG or SVG format",
-     *     @OA\MediaType(mediaType="image/png"),
-     *     @OA\MediaType(mediaType="image/jpeg"),
-     *     @OA\MediaType(mediaType="image/svg+xml")
-     * )
-     * @OA\Parameter(ref="#/components/parameters/cid")
      */
+    #[OA\Response(
+        response: 200,
+        description: 'Returns the given contest banner in PNG, JPG or SVG format',
+        content: [
+            new OA\MediaType(mediaType: 'image/png'),
+            new OA\MediaType(mediaType: 'image/jpeg'),
+            new OA\MediaType(mediaType: 'image/svg+xml'),
+        ]
+    )]
+    #[OA\Parameter(ref: '#/components/parameters/cid')]
     public function bannerAction(Request $request, string $cid): Response
     {
         /** @var Contest $contest */
@@ -204,9 +203,9 @@ class ContestController extends AbstractRestController
      * Delete the banner for the given contest.
      * @Rest\Delete("/{cid}/banner", name="delete_contest_banner")
      * @IsGranted("ROLE_ADMIN")
-     * @OA\Response(response="204", description="Deleting banner succeeded")
-     * @OA\Parameter(ref="#/components/parameters/cid")
      */
+    #[OA\Response(response: 204, description: 'Deleting banner succeeded')]
+    #[OA\Parameter(ref: '#/components/parameters/cid')]
     public function deleteBannerAction(Request $request, string $cid): Response
     {
         /** @var Contest $contest */
@@ -238,25 +237,27 @@ class ContestController extends AbstractRestController
      * Set the banner for the given contest.
      * @Rest\POST("/{cid}/banner", name="post_contest_banner")
      * @Rest\PUT("/{cid}/banner", name="put_contest_banner")
-     * @OA\RequestBody(
-     *     required=true,
-     *     @OA\MediaType(
-     *         mediaType="multipart/form-data",
-     *         @OA\Schema(
-     *             required={"banner"},
-     *             @OA\Property(
-     *                 property="banner",
-     *                 type="string",
-     *                 format="binary",
-     *                 description="The banner to use."
-     *             )
-     *         )
-     *     )
-     * )
      * @IsGranted("ROLE_ADMIN")
-     * @OA\Response(response="204", description="Setting banner succeeded")
-     * @OA\Parameter(ref="#/components/parameters/cid")
      */
+    #[OA\RequestBody(
+        required: true,
+        content: new OA\MediaType(
+            mediaType: 'multipart/form-data',
+            schema: new OA\Schema(
+                required: ['banner'],
+                properties: [
+                    new OA\Property(
+                        property: 'banner',
+                        description: 'The banner to use.',
+                        type: 'string',
+                        format: 'binary'
+                    ),
+                ]
+            )
+        )
+    )]
+    #[OA\Response(response: 204, description: 'Setting banner succeeded')]
+    #[OA\Parameter(ref: '#/components/parameters/cid')]
     public function setBannerAction(Request $request, string $cid, ValidatorInterface $validator): Response
     {
         /** @var Contest $contest */
@@ -300,59 +301,59 @@ class ContestController extends AbstractRestController
      * @Rest\Patch("/{cid}")
      * @IsGranted("ROLE_API_WRITER")
      * @throws NonUniqueResultException
-     * @OA\Parameter(
-     *     name="cid",
-     *     in="path",
-     *     description="The ID of the contest to change the start time or unfreeze (thaw) time for",
-     *     @OA\Schema(type="string")
-     * )
-     * @OA\RequestBody(
-     *     required=true,
-     *     @OA\MediaType(
-     *         mediaType="application/x-www-form-urlencoded",
-     *         @OA\Schema(
-     *             required={"id"},
-     *             @OA\Property(
-     *                 property="id",
-     *                 description="The ID of the contest to change the start time for",
-     *                 type="string"
-     *             ),
-     *             @OA\Property(
-     *                 property="start_time",
-     *                 description="The new start time of the contest",
-     *                 type="string",
-     *                 format="date-time"
-     *             ),
-     *             @OA\Property(
-     *                 property="force",
-     *                 description="Force overwriting the start_time even when in next 30s or the scoreboard_thaw_time when already set or too much in the past",
-     *                 type="boolean",
-     *             ),
-     *             @OA\Property(
-     *                 property="scoreboard_thaw_time",
-     *                 description="The new unfreeze (thaw) time of the contest",
-     *                 type="string",
-     *                 format="date-time"
-     *             )
-     *         )
-     *     )
-     * )
-     * @OA\Response(
-     *     response="200",
-     *     description="Contest object if it changed",
-     *     @OA\JsonContent(
-     *         allOf={
-     *             @OA\Schema(ref=@Model(type=Contest::class)),
-     *             @OA\Schema(ref="#/components/schemas/Banner")
-     *         }
-     *     )
-     * )
-     * @OA\Response(
-     *     response="204",
-     *     description="The change was successful"
-     * )
      */
-    public function changeTimesAction(Request $request, string $cid): Response
+    #[OA\Parameter(
+        name: 'cid',
+        description: 'The ID of the contest to change the start time for',
+        in: 'path',
+        schema: new OA\Schema(type: 'string')
+    )]
+    #[OA\RequestBody(
+        required: true,
+        content: new OA\MediaType(
+            mediaType: 'application/x-www-form-urlencoded',
+            schema: new OA\Schema(
+                required: ['id'],
+                properties: [
+                    new OA\Property(
+                        property: 'id',
+                        description: 'The ID of the contest to change the start time for',
+                        type: 'string'
+                    ),
+                    new OA\Property(
+                        property: 'start_time',
+                        description: 'The new start time of the contest',
+                        type: 'string',
+                        format: 'date-time'
+                    ),
+                    new OA\Property(
+                        property: 'scoreboard_thaw_time',
+                        description: 'The new unfreeze (thaw) time of the contest',
+                        type: 'string',
+                        format: 'date-time'
+                    ),
+                    new OA\Property(
+                        property: 'force',
+                        description: '"Force overwriting the start_time even when in next 30s or the scoreboard_thaw_time when already set or too much in the past"',
+                        type: 'boolean'
+                    ),
+                ]
+            )
+        )
+    )]
+    #[OA\Response(
+        response: 204,
+        description: 'The change was successful'
+    )]
+    #[OA\Response(
+        response: 200,
+        description: 'Contest start time changed successfully',
+        content: new OA\JsonContent(allOf: [
+            new OA\Schema(ref: new Model(type: Contest::class)),
+            new OA\Schema(ref: '#/components/schemas/Banner'),
+        ])
+    )]
+    public function changeStartTimeAction(Request $request, string $cid): Response
     {
         $contest  = $this->getContestWithId($request, $cid);
         $now      = (int)Utils::now();
@@ -446,13 +447,13 @@ class ContestController extends AbstractRestController
      * Get the contest in YAML format.
      * @Rest\Get("/{cid}/contest-yaml")
      * @throws NonUniqueResultException
-     * @OA\Parameter(ref="#/components/parameters/cid")
-     * @OA\Response(
-     *     response="200",
-     *     description="The contest in YAML format",
-     *     @OA\MediaType(mediaType="application/x-yaml")
-     * )
      */
+    #[OA\Parameter(ref: '#/components/parameters/cid')]
+    #[OA\Response(
+        response: 200,
+        description: 'The contest in YAML format',
+        content: new OA\MediaType(mediaType: 'application/x-yaml')
+    )]
     public function getContestYamlAction(Request $request, string $cid): StreamedResponse
     {
         $contest      = $this->getContestWithId($request, $cid);
@@ -482,13 +483,13 @@ class ContestController extends AbstractRestController
      * Get the current contest state
      * @Rest\Get("/{cid}/state")
      * @throws NonUniqueResultException
-     * @OA\Parameter(ref="#/components/parameters/cid")
-     * @OA\Response(
-     *     response="200",
-     *     description="The contest state",
-     *     @OA\JsonContent(ref="#/components/schemas/ContestState")
-     * )
      */
+    #[OA\Parameter(ref: '#/components/parameters/cid')]
+    #[OA\Response(
+        response: 200,
+        description: 'The contest state',
+        content: new OA\JsonContent(ref: '#/components/schemas/ContestState')
+    )]
     public function getContestStateAction(Request $request, string $cid): ?array
     {
         $contest         = $this->getContestWithId($request, $cid);
@@ -505,44 +506,65 @@ class ContestController extends AbstractRestController
      * @Rest\Get("/{cid}/event-feed")
      * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_API_READER')")
      * @throws NonUniqueResultException
-     * @OA\Parameter(ref="#/components/parameters/cid")
-     * @OA\Parameter(
-     *     name="since_id",
-     *     in="query",
-     *     description="Only get events after this event",
-     *     @OA\Schema(type="string")
-     * )
-     * @OA\Parameter(
-     *     name="types",
-     *     in="query",
-     *     description="Types to filter the event feed on",
-     *     @OA\Schema(type="array", @OA\Items(type="string", description="A single type"))
-     * )
-     * @OA\Parameter(
-     *     name="stream",
-     *     in="query",
-     *     description="Whether to stream the output or stop immediately",
-     *     @OA\Schema(type="boolean", default=true)
-     * )
-     * @OA\Response(
-     *     response="200",
-     *     description="The events",
-     *     @OA\MediaType(
-     *         mediaType="application/x-ndjson",
-     *         @OA\Schema(
-     *             type="array",
-     *             @OA\Items(
-     *                 type="object",
-     *                 @OA\Property(property="id", type="string"),
-     *                 @OA\Property(property="type", type="string"),
-     *                 @OA\Property(property="op", type="string"),
-     *                 @OA\Property(property="data", type="object"),
-     *                 @OA\Property(property="time", type="string", format="date-time"),
-     *             )
-     *         )
-     *     )
-     * )
      */
+    #[OA\Parameter(ref: '#/components/parameters/cid')]
+    #[OA\Parameter(
+        name: 'since_id',
+        description: 'Only get events after this event',
+        in: 'query',
+        schema: new OA\Schema(type: 'string')
+    )]
+    #[OA\Parameter(
+        name: 'types',
+        description: 'Types to filter the event feed on',
+        in: 'query',
+        schema: new OA\Schema(
+            type: 'array',
+            items: new OA\Items(description: 'A single type', type: 'string')
+        )
+    )]
+    #[OA\Parameter(
+        name: 'stream',
+        description: 'Whether to stream the output or stop immediately',
+        in: 'query',
+        schema: new OA\Schema(type: 'boolean', default: true)
+    )]
+    #[OA\Response(
+        response: 200,
+        description: 'The events',
+        content: new OA\MediaType(
+            mediaType: 'application/x-ndjson',
+            schema: new OA\Schema(
+                type: 'array',
+                items: new OA\Items(
+                    properties: [
+                        new OA\Property(
+                            property: 'id',
+                            type: 'string'
+                        ),
+                        new OA\Property(
+                            property: 'type',
+                            type: 'string'
+                        ),
+                        new OA\Property(
+                            property: 'op',
+                            type: 'string'
+                        ),
+                        new OA\Property(
+                            property: 'data',
+                            type: 'object'
+                        ),
+                        new OA\Property(
+                            property: 'time',
+                            type: 'string',
+                            format: 'date-time'
+                        ),
+                    ],
+                    type: 'object'
+                )
+            )
+        )
+    )]
     public function getEventFeedAction(
         Request $request,
         string $cid,
@@ -769,20 +791,31 @@ class ContestController extends AbstractRestController
      * Get general status information.
      * @Rest\Get("/{cid}/status")
      * @IsGranted("ROLE_API_READER")
-     * @OA\Parameter(ref="#/components/parameters/cid")
-     * @OA\Response(
-     *     response="200",
-     *     description="General status information for the given contest",
-     *     @OA\JsonContent(
-     *         type="object",
-     *         @OA\Property(property="num_submissions", type="integer"),
-     *         @OA\Property(property="num_queued", type="integer"),
-     *         @OA\Property(property="num_judging", type="integer")
-     *     )
-     * )
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
+    #[OA\Parameter(ref: '#/components/parameters/cid')]
+    #[OA\Response(
+        response: 200,
+        description: 'General status information for the given contest',
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(
+                    property: 'num_submissions',
+                    type: 'integer'
+                ),
+                new OA\Property(
+                    property: 'num_queued',
+                    type: 'integer'
+                ),
+                new OA\Property(
+                    property: 'num_judging',
+                    type: 'integer'
+                ),
+            ],
+            type: 'object'
+        )
+    )]
     public function getStatusAction(Request $request, string $cid): array
     {
         return $this->dj->getContestStats($this->getContestWithId($request, $cid));
@@ -790,12 +823,12 @@ class ContestController extends AbstractRestController
 
     /**
      * @Rest\Get("/{cid}/samples.zip", name="samples_data_zip")
-     * @OA\Response(
-     *     response="200",
-     *     description="The problem samples, statement & attachments as a ZIP archive",
-     *     @OA\MediaType(mediaType="application/zip")
-     * )
      */
+    #[OA\Response(
+        response: 200,
+        description: 'The problem samples, statement & attachments as a ZIP archive',
+        content: new OA\MediaType(mediaType: 'application/zip')
+    )]
     public function samplesDataZipAction(Request $request): Response
     {
         // getContestQueryBuilder add filters to only get the contests that the user

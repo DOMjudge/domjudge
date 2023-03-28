@@ -13,7 +13,7 @@ use Doctrine\ORM\QueryBuilder;
 use Exception;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
-use OpenApi\Annotations as OA;
+use OpenApi\Attributes as OA;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -21,14 +21,14 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
  * @Rest\Route("/contests/{cid}/clarifications")
- * @OA\Tag(name="Clarifications")
- * @OA\Parameter(ref="#/components/parameters/cid")
- * @OA\Parameter(ref="#/components/parameters/strict")
- * @OA\Response(response="400", ref="#/components/responses/InvalidResponse")
- * @OA\Response(response="401", ref="#/components/responses/Unauthenticated")
- * @OA\Response(response="403", ref="#/components/responses/Unauthorized")
- * @OA\Response(response="404", ref="#/components/responses/NotFound")
  */
+#[OA\Tag(name: 'Clarifications')]
+#[OA\Parameter(ref: '#/components/parameters/cid')]
+#[OA\Parameter(ref: '#/components/parameters/strict')]
+#[OA\Response(ref: '#/components/responses/InvalidResponse', response: 400)]
+#[OA\Response(ref: '#/components/responses/Unauthenticated', response: 401)]
+#[OA\Response(ref: '#/components/responses/Unauthorized', response: 403)]
+#[OA\Response(ref: '#/components/responses/NotFound', response: 404)]
 class ClarificationController extends AbstractRestController
 {
     /**
@@ -36,23 +36,23 @@ class ClarificationController extends AbstractRestController
      *
      * Note that we restrict the returned clarifications in the query builder.
      * @Rest\Get("")
-     * @OA\Response(
-     *     response="200",
-     *     description="Returns all the clarifications for this contest",
-     *     @OA\JsonContent(
-     *         type="array",
-     *         @OA\Items(ref=@Model(type=Clarification::class))
-     *     )
-     * )
-     * @OA\Parameter(ref="#/components/parameters/idlist")
-     * @OA\Parameter(
-     *     name="problem",
-     *     in="query",
-     *     description="Only show clarifications for the given problem",
-     *     @OA\Schema(type="string")
-     * )
      * @throws NonUniqueResultException
      */
+    #[OA\Response(
+        response: 200,
+        description: 'Returns all the clarifications for this contest',
+        content: new OA\JsonContent(
+            type: 'array',
+            items: new OA\Items(ref: new Model(type: Clarification::class))
+        )
+    )]
+    #[OA\Parameter(ref: '#/components/parameters/idlist')]
+    #[OA\Parameter(
+        name: 'problem',
+        description: 'Only show clarifications for the given problem',
+        in: 'query',
+        schema: new OA\Schema(type: 'string')
+    )]
     public function listAction(Request $request): Response
     {
         return parent::performListAction($request);
@@ -66,13 +66,13 @@ class ClarificationController extends AbstractRestController
      * team user gets general clarifications plus those sent from or to the team.
      * @throws NonUniqueResultException
      * @Rest\Get("/{id}")
-     * @OA\Response(
-     *     response="200",
-     *     description="Returns the given clarification for this contest",
-     *     @Model(type=Clarification::class)
-     * )
-     * @OA\Parameter(ref="#/components/parameters/id")
      */
+    #[OA\Response(
+        response: 200,
+        description: 'Returns the given clarification for this contest',
+        content: new Model(type: Clarification::class)
+    )]
+    #[OA\Parameter(ref: '#/components/parameters/id')]
     public function singleAction(Request $request, string $id): Response
     {
         return parent::performSingleAction($request, $id);
@@ -83,24 +83,25 @@ class ClarificationController extends AbstractRestController
      * @Rest\Post("")
      * @Rest\Put("/{id}")
      * @Security("is_granted('ROLE_TEAM') or is_granted('ROLE_API_WRITER')", message="You need to have the Team Member role to add a clarification")
-     * @OA\RequestBody(
-     *     required=true,
-     *     @OA\MediaType(
-     *         mediaType="multipart/form-data",
-     *         @OA\Schema(ref="#/components/schemas/ClarificationPost")
-     *     ),
-     *     @OA\MediaType(
-     *         mediaType="application/json",
-     *         @OA\Schema(ref="#/components/schemas/ClarificationPost")
-     *     )
-     * )
-     * @OA\Response(
-     *     response="200",
-     *     description="When creating a clarification was successful",
-     *     @Model(type=Clarification::class)
-     * )
      * @throws NonUniqueResultException
      */
+    #[OA\RequestBody(
+        required: true,
+        content: [
+            new OA\MediaType(
+                mediaType: 'multipart/form-data',
+                schema: new OA\Schema(ref: '#/components/schemas/ClarificationPost')
+            ),
+            new OA\MediaType(
+                mediaType: 'application/json',
+                schema: new OA\Schema(ref: '#/components/schemas/ClarificationPost'))
+        ]
+    )]
+    #[OA\Response(
+        response: 200,
+        description: 'When creating a clarification was successful',
+        content: new Model(type: Clarification::class)
+    )]
     public function addAction(Request $request, ?string $id): Response
     {
         $required = ['text'];

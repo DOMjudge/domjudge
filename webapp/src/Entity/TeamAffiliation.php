@@ -6,7 +6,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
-use OpenApi\Annotations as OA;
+use OpenApi\Attributes as OA;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -56,8 +56,8 @@ class TeamAffiliation extends BaseApiEntity implements AssetEntityInterface
      *              "collation"="utf8mb4_bin"},
      *     nullable=true)
      * @Serializer\SerializedName("icpc_id")
-     * @OA\Property(nullable=true)
      */
+    #[OA\Property(nullable: true)]
     protected ?string $icpcid = null;
 
     /**
@@ -80,8 +80,8 @@ class TeamAffiliation extends BaseApiEntity implements AssetEntityInterface
      *     nullable=true)
      * @Serializer\Expose(if="context.getAttribute('config_service').get('show_flags')")
      * @Country()
-     * @OA\Property(nullable=true)
      */
+    #[OA\Property(nullable: true)]
     private ?string $country = null;
 
     /**

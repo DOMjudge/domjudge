@@ -7,7 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
-use OpenApi\Annotations as OA;
+use OpenApi\Attributes as OA;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\EquatableInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -68,8 +68,8 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
      *     options={"comment"="Email address"}, nullable=true)
      * @Assert\Email()
      * @Serializer\Groups({"Nonstrict"})
-     * @OA\Property(nullable=true)
      */
+    #[OA\Property(nullable: true)]
     private ?string $email = null;
 
     /**
@@ -77,8 +77,8 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
      *     options={"comment"="Time of last successful login", "unsigned"=true},
      *     nullable=true)
      * @Serializer\Exclude()
-     * @OA\Property(nullable=true)
      */
+    #[OA\Property(nullable: true)]
     private string|float|null $last_login = null;
 
     /**
@@ -86,8 +86,8 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
      *     options={"comment"="Time of last successful login on the API", "unsigned"=true},
      *     nullable=true)
      * @Serializer\Exclude()
-     * @OA\Property(nullable=true)
      */
+    #[OA\Property(nullable: true)]
     private string|float|null $last_api_login = null;
 
     /**
@@ -95,8 +95,8 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
      *     options={"comment"="Time of first login", "unsigned"=true},
      *     nullable=true)
      * @Serializer\Exclude()
-     * @OA\Property(nullable=true)
      */
+    #[OA\Property(nullable: true)]
     private string|float|null $first_login = null;
 
     /**
@@ -105,8 +105,8 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
      *     nullable=true)
      * @Serializer\SerializedName("last_ip")
      * @Serializer\Groups({"Nonstrict"})
-     * @OA\Property(nullable=true)
      */
+    #[OA\Property(nullable: true)]
     private ?string $last_ip_address = null;
 
     /**
@@ -127,8 +127,8 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
      *     nullable=true)
      * @Serializer\SerializedName("ip")
      * @Assert\Ip(version="all")
-     * @OA\Property(nullable=true)
      */
+    #[OA\Property(nullable: true)]
     private ?string $ipAddress = null;
 
     /**
@@ -265,8 +265,8 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
      * @Serializer\SerializedName("last_login_time")
      * @Serializer\Groups({"Nonstrict"})
      * @Serializer\Type("DateTime")
-     * @OA\Property(nullable=true)
      */
+    #[OA\Property(nullable: true)]
     public function getLastLoginAsDateTime(): ?DateTime
     {
         return $this->getLastLogin() ? new DateTime(Utils::absTime($this->getLastLogin())) : null;
@@ -288,8 +288,8 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
      * @Serializer\SerializedName("last_api_login_time")
      * @Serializer\Groups({"Nonstrict"})
      * @Serializer\Type("DateTime")
-     * @OA\Property(nullable=true)
      */
+    #[OA\Property(nullable: true)]
     public function getLastApiLoginAsDateTime(): ?DateTime
     {
         return $this->getLastApiLogin() ? new DateTime(Utils::absTime($this->getLastApiLogin())) : null;
@@ -311,8 +311,8 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
      * @Serializer\SerializedName("first_login_time")
      * @Serializer\Groups({"Nonstrict"})
      * @Serializer\Type("DateTime")
-     * @OA\Property(nullable=true)
      */
+    #[OA\Property(nullable: true)]
     public function getFirstLoginAsDateTime(): ?DateTime
     {
         return $this->getFirstLogin() ? new DateTime(Utils::absTime($this->getFirstLogin())) : null;
@@ -391,8 +391,8 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
      * @Serializer\SerializedName("team")
      * @Serializer\Type("string")
      * @Serializer\Groups({"Nonstrict"})
-     * @OA\Property(nullable=true)
      */
+    #[OA\Property(nullable: true)]
     public function getTeamName(): ?string
     {
         return $this->getTeam()?->getEffectiveName();
@@ -402,8 +402,8 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
      * @Serializer\VirtualProperty()
      * @Serializer\SerializedName("team_id")
      * @Serializer\Type("string")
-     * @OA\Property(nullable=true)
      */
+    #[OA\Property(nullable: true)]
     public function getTeamId(): ?int
     {
         return $this->getTeam()?->getTeamid();
@@ -453,8 +453,8 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
      * @Serializer\VirtualProperty()
      * @Serializer\SerializedName("type")
      * @Serializer\Type("string")
-     * @OA\Property(nullable=true)
      */
+    #[OA\Property(nullable: true)]
     public function getType(): ?string
     {
         // Types allowed by the CCS Specs Contest API in order of most permissions to least

@@ -6,7 +6,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
-use OpenApi\Annotations as OA;
+use OpenApi\Attributes as OA;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -56,8 +56,8 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
      * @ORM\Column(type="string", name="icpcid", length=255, options={"comment"="Team ID in the ICPC system",
      *                            "collation"="utf8mb4_bin"}, nullable=true)
      * @Serializer\SerializedName("icpc_id")
-     * @OA\Property(nullable=true)
      */
+    #[OA\Property(nullable: true)]
     protected ?string $icpcid = null;
 
     /**
@@ -70,8 +70,8 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
      * @ORM\Column(type="string", name="display_name", length=255,
      *     options={"comment"="Team display name", "collation"="utf8mb4_bin"},
      *                            nullable=true)
-     * @OA\Property(nullable=true)
      */
+    #[OA\Property(nullable: true)]
     private ?string $display_name = null;
 
     /**
@@ -88,8 +88,8 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
      *     options={"comment"="Public team definition; for example: Team member names (freeform)"},
      *                          nullable=true)
      * @Serializer\Groups({"Nonstrict"})
-     * @OA\Property(nullable=true)
      */
+    #[OA\Property(nullable: true)]
     private ?string $publicDescription = null;
 
     /**
@@ -420,8 +420,8 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
      * @Serializer\VirtualProperty()
      * @Serializer\SerializedName("organization_id")
      * @Serializer\Type("string")
-     * @OA\Property(nullable=true)
      */
+    #[OA\Property(nullable: true)]
     public function getAffiliationId(): ?int
     {
         return $this->getAffiliation()?->getAffilid();
@@ -571,8 +571,8 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
      * @Serializer\SerializedName("affiliation")
      * @Serializer\Type("string")
      * @Serializer\Groups({"Nonstrict"})
-     * @OA\Property(nullable=true)
      */
+    #[OA\Property(nullable: true)]
     public function getAffiliationName(): ?string
     {
         return $this->getAffiliation()?->getName();
@@ -583,8 +583,8 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
      * @Serializer\Type("string")
      * @Serializer\Groups({"Nonstrict"})
      * @Serializer\Expose(if="context.getAttribute('config_service').get('show_flags')")
-     * @OA\Property(nullable=true)
      */
+    #[OA\Property(nullable: true)]
     public function getNationality() : ?string
     {
         return $this->getAffiliation()?->getCountry();

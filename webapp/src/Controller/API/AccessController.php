@@ -7,48 +7,58 @@ use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\QueryBuilder;
 use Exception;
 use FOS\RestBundle\Controller\Annotations as Rest;
-use OpenApi\Annotations as OA;
+use OpenApi\Attributes as OA;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * @Rest\Route("/contests/{cid}/access")
- * @OA\Tag(name="Access")
- * @OA\Parameter(ref="#/components/parameters/cid")
- * @OA\Parameter(ref="#/components/parameters/strict")
- * @OA\Response(response="400", ref="#/components/responses/InvalidResponse")
- * @OA\Response(response="401", ref="#/components/responses/Unauthenticated")
- * @OA\Response(response="403", ref="#/components/responses/Unauthorized")
- * @OA\Response(response="404", ref="#/components/responses/NotFound")
  */
+#[OA\Tag(name: 'Access')]
+#[OA\Parameter(ref: '#/components/parameters/cid')]
+#[OA\Parameter(ref: '#/components/parameters/strict')]
+#[OA\Response(ref: '#/components/responses/InvalidResponse', response: 400)]
+#[OA\Response(ref: '#/components/responses/Unauthenticated', response: 401)]
+#[OA\Response(ref: '#/components/responses/Unauthorized', response: 403)]
+#[OA\Response(ref: '#/components/responses/NotFound', response: 404)]
 class AccessController extends AbstractRestController
 {
     /**
      * Get access information
      * @Rest\Get("")
      * @IsGranted("ROLE_API_READER")
-     * @OA\Response(
-     *     response="200",
-     *     description="Access information for the given contest",
-     *     @OA\JsonContent(
-     *         type="object",
-     *         @OA\Property(property="capabilities", type="array", @OA\Items(type="string")),
-     *         @OA\Property(
-     *             property="endpoints",
-     *             type="array",
-     *             @OA\Items(
-     *                 type="object",
-     *                 @OA\Property(property="type", type="string"),
-     *                 @OA\Property(property="properties", type="array", @OA\Items(type="string")),
-     *             )
-     *         )
-     *     )
-     * )
      *
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
+    #[OA\Response(
+        response: 200,
+        description: 'Access information for the given contest',
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(
+                    property: 'capabilities',
+                    type: 'array',
+                    items: new OA\Items(type: 'string')
+                ),
+                new OA\Property(
+                    property: 'endpoints',
+                    type: 'array',
+                    items: new OA\Items(
+                        properties: [
+                            new OA\Property(property: 'type', type: 'string'),
+                            new OA\Property(
+                                property: 'properties',
+                                type: 'array',
+                                items: new OA\Items(type: 'string')
+                            )
+                        ],
+                        type: 'object'))
+            ],
+            type: 'object'
+        )
+    )]
     public function getStatusAction(Request $request): array
     {
         // Get the contest ID to make sure the contest exists

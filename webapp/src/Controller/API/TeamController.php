@@ -14,7 +14,7 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
-use OpenApi\Annotations as OA;
+use OpenApi\Attributes as OA;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -26,14 +26,14 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
  * @Rest\Route("/")
- * @OA\Tag(name="Teams")
- * @OA\Parameter(ref="#/components/parameters/cid")
- * @OA\Parameter(ref="#/components/parameters/strict")
- * @OA\Response(response="400", ref="#/components/responses/InvalidResponse")
- * @OA\Response(response="401", ref="#/components/responses/Unauthenticated")
- * @OA\Response(response="403", ref="#/components/responses/Unauthorized")
- * @OA\Response(response="404", ref="#/components/responses/NotFound")
  */
+#[OA\Tag(name: 'Teams')]
+#[OA\Parameter(ref: '#/components/parameters/cid')]
+#[OA\Parameter(ref: '#/components/parameters/strict')]
+#[OA\Response(ref: '#/components/responses/InvalidResponse', response: 400)]
+#[OA\Response(ref: '#/components/responses/Unauthenticated', response: 401)]
+#[OA\Response(ref: '#/components/responses/Unauthorized', response: 403)]
+#[OA\Response(ref: '#/components/responses/NotFound', response: 404)]
 class TeamController extends AbstractRestController
 {
     public function __construct(
@@ -50,40 +50,40 @@ class TeamController extends AbstractRestController
      * Get all the teams for this contest.
      * @Rest\Get("contests/{cid}/teams")
      * @Rest\Get("teams")
-     * @OA\Response(
-     *     response="200",
-     *     description="Returns all the teams for this contest",
-     *     @OA\JsonContent(
-     *         type="array",
-     *         @OA\Items(
-     *             allOf={
-     *                 @OA\Schema(ref=@Model(type=Team::class)),
-     *                 @OA\Schema(ref="#/components/schemas/Photo")
-     *             }
-     *         )
-     *     )
-     * )
-     * @OA\Parameter(ref="#/components/parameters/idlist")
-     * @OA\Parameter(
-     *     name="category",
-     *     in="query",
-     *     description="Only show teams for the given category",
-     *     @OA\Schema(type="string")
-     * )
-     * @OA\Parameter(
-     *     name="affiliation",
-     *     in="query",
-     *     description="Only show teams for the given affiliation / organization",
-     *     @OA\Schema(type="string")
-     * )
-     * @OA\Parameter(
-     *     name="public",
-     *     in="query",
-     *     description="Only show visible teams, even for users with more permissions",
-     *     @OA\Schema(type="boolean")
-     * )
      * @throws NonUniqueResultException
      */
+    #[OA\Response(
+        response: 200,
+        description: 'Returns all the teams for this contest',
+        content: new OA\JsonContent(
+            type: 'array',
+            items: new OA\Items(
+                allOf: [
+                    new OA\Schema(ref: new Model(type: Team::class)),
+                    new OA\Schema(ref: '#/components/schemas/Photo'),
+                ]
+            )
+        )
+    )]
+    #[OA\Parameter(ref: '#/components/parameters/idlist')]
+    #[OA\Parameter(
+        name: 'category',
+        description: 'Only show teams for the given category',
+        in: 'query',
+        schema: new OA\Schema(type: 'string')
+    )]
+    #[OA\Parameter(
+        name: 'affiliation',
+        description: 'Only show teams for the given affiliation / organization',
+        in: 'query',
+        schema: new OA\Schema(type: 'string')
+    )]
+    #[OA\Parameter(
+        name: 'public',
+        description: 'Only show visible teams, even for users with more permissions',
+        in: 'query',
+        schema: new OA\Schema(type: 'boolean')
+    )]
     public function listAction(Request $request): Response
     {
         return parent::performListAction($request);
@@ -94,18 +94,18 @@ class TeamController extends AbstractRestController
      * @throws NonUniqueResultException
      * @Rest\Get("contests/{cid}/teams/{id}")
      * @Rest\Get("teams/{id}")
-     * @OA\Response(
-     *     response="200",
-     *     description="Returns the given team for this contest",
-     *     @OA\JsonContent(
-     *         allOf={
-     *             @OA\Schema(ref=@Model(type=Team::class)),
-     *             @OA\Schema(ref="#/components/schemas/Photo")
-     *         }
-     *     )
-     * )
-     * @OA\Parameter(ref="#/components/parameters/id")
      */
+    #[OA\Response(
+        response: 200,
+        description: 'Returns the given team for this contest',
+        content: new OA\JsonContent(
+            allOf: [
+                new OA\Schema(ref: new Model(type: Team::class)),
+                new OA\Schema(ref: '#/components/schemas/Photo'),
+            ]
+        )
+    )]
+    #[OA\Parameter(ref: '#/components/parameters/id')]
     public function singleAction(Request $request, string $id): Response
     {
         return parent::performSingleAction($request, $id);
@@ -115,15 +115,17 @@ class TeamController extends AbstractRestController
      * Get the photo for the given team.
      * @Rest\Get("contests/{cid}/teams/{id}/photo", name="team_photo")
      * @Rest\Get("teams/{id}/photo")
-     * @OA\Response(
-     *     response="200",
-     *     description="Returns the given team photo in PNG, JPG or SVG format",
-     *     @OA\MediaType(mediaType="image/png"),
-     *     @OA\MediaType(mediaType="image/jpeg"),
-     *     @OA\MediaType(mediaType="image/svg+xml")
-     * )
-     * @OA\Parameter(ref="#/components/parameters/id")
      */
+    #[OA\Response(
+        response: 200,
+        description: 'Returns the given team photo in PNG, JPG or SVG format',
+        content: [
+            new OA\MediaType(mediaType: 'image/png'),
+            new OA\MediaType(mediaType: 'image/jpeg'),
+            new OA\MediaType(mediaType: 'image/svg+xml'),
+        ]
+    )]
+    #[OA\Parameter(ref: '#/components/parameters/id')]
     public function photoAction(Request $request, string $id): Response
     {
         /** @var Team $team */
@@ -150,9 +152,9 @@ class TeamController extends AbstractRestController
      * @Rest\Delete("contests/{cid}/teams/{id}/photo", name="delete_team_photo")
      * @Rest\Delete("teams/{id}/photo")
      * @IsGranted("ROLE_ADMIN")
-     * @OA\Response(response="204", description="Deleting photo succeeded")
-     * @OA\Parameter(ref="#/components/parameters/id")
      */
+    #[OA\Response(response: 204, description: 'Deleting photo succeeded')]
+    #[OA\Parameter(ref: '#/components/parameters/id')]
     public function deletePhotoAction(Request $request, string $id): Response
     {
         $contestId = null;
@@ -185,25 +187,27 @@ class TeamController extends AbstractRestController
      * @Rest\POST("teams/{id}/photo")
      * @Rest\PUT("contests/{cid}/teams/{id}/photo", name="put_team_photo")
      * @Rest\PUT("teams/{id}/photo")
-     * @OA\RequestBody(
-     *     required=true,
-     *     @OA\MediaType(
-     *         mediaType="multipart/form-data",
-     *         @OA\Schema(
-     *             required={"photo"},
-     *             @OA\Property(
-     *                 property="photo",
-     *                 type="string",
-     *                 format="binary",
-     *                 description="The photo to use."
-     *             )
-     *         )
-     *     )
-     * )
      * @IsGranted("ROLE_ADMIN")
-     * @OA\Response(response="204", description="Setting photo succeeded")
-     * @OA\Parameter(ref="#/components/parameters/id")
      */
+    #[OA\RequestBody(
+        required: true,
+        content: new OA\MediaType(
+            mediaType: 'multipart/form-data',
+            schema: new OA\Schema(
+                required: ['photo'],
+                properties: [
+                    new OA\Property(
+                        property: 'photo',
+                        description: 'The photo to use.',
+                        type: 'string',
+                        format: 'binary'
+                    ),
+                ]
+            )
+        )
+    )]
+    #[OA\Response(response: 204, description: 'Setting photo succeeded')]
+    #[OA\Parameter(ref: '#/components/parameters/id')]
     public function setPhotoAction(Request $request, string $id, ValidatorInterface $validator): Response
     {
         /** @var Team $team */
@@ -247,23 +251,23 @@ class TeamController extends AbstractRestController
      * @Rest\Post("contests/{cid}/teams")
      * @Rest\Post("teams")
      * @IsGranted("ROLE_API_WRITER")
-     * @OA\RequestBody(
-     *     required=true,
-     *     @OA\MediaType(
-     *         mediaType="multipart/form-data",
-     *         @OA\Schema(ref="#/components/schemas/Team")
-     *     ),
-     *     @OA\MediaType(
-     *         mediaType="application/json",
-     *         @OA\Schema(ref="#/components/schemas/Team")
-     *     )
-     * )
-     * @OA\Response(
-     *     response="201",
-     *     description="Returns the added team",
-     *     @Model(type=Team::class)
-     * )
      */
+    #[OA\RequestBody(
+        required: true,
+        content: [
+            new OA\MediaType(
+                mediaType: 'multipart/form-data',
+                schema: new OA\Schema(ref: '#/components/schemas/Team')),
+            new OA\MediaType(
+                mediaType: 'application/json',
+                schema: new OA\Schema(ref: '#/components/schemas/Team')),
+        ]
+    )]
+    #[OA\Response(
+        response: 201,
+        description: 'Returns the added team',
+        content: new Model(type: Team::class)
+    )]
     public function addAction(Request $request, ImportExportService $importExport): Response
     {
         $saved = [];

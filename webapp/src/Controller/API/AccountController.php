@@ -7,7 +7,7 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
-use OpenApi\Annotations as OA;
+use OpenApi\Attributes as OA;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -15,14 +15,14 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * @Rest\Route("/contests/{cid}")
- * @OA\Tag(name="Accounts")
- * @OA\Parameter(ref="#/components/parameters/cid")
- * @OA\Parameter(ref="#/components/parameters/strict")
- * @OA\Response(response="404", ref="#/components/responses/NotFound")
- * @OA\Response(response="400", ref="#/components/responses/InvalidResponse")
- * @OA\Response(response="401", ref="#/components/responses/Unauthenticated")
- * @OA\Response(response="403", ref="#/components/responses/Unauthorized")
  */
+#[OA\Tag(name: 'Accounts')]
+#[OA\Parameter(ref: '#/components/parameters/cid')]
+#[OA\Parameter(ref: '#/components/parameters/strict')]
+#[OA\Response(ref: '#/components/responses/NotFound', response: 404)]
+#[OA\Response(ref: '#/components/responses/InvalidResponse', response: 400)]
+#[OA\Response(ref: '#/components/responses/Unauthenticated', response: 401)]
+#[OA\Response(ref: '#/components/responses/Unauthorized', response: 403)]
 class AccountController extends AbstractRestController
 {
     // Note: this controller is basically a copy of the UserController but then with account endpoints.
@@ -31,28 +31,27 @@ class AccountController extends AbstractRestController
     // - The fact that we have /api/contests/<cid>/account
     // Also it seems to not be possible to overwrite the OA\Tag or the base controller route when
     // extending a controller.
-
     /**
      * Get all the accounts.
      * @Rest\Get("/accounts")
      * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_API_READER')")
-     * @OA\Response(
-     *     response="200",
-     *     description="Returns all the accounts for this contest",
-     *     @OA\JsonContent(
-     *         type="array",
-     *         @OA\Items(ref=@Model(type=User::class))
-     *     )
-     * )
-     * @OA\Parameter(ref="#/components/parameters/idlist")
-     * @OA\Parameter(
-     *     name="team_id",
-     *     in="query",
-     *     description="Only show accounts for the given team",
-     *     @OA\Schema(type="string")
-     * )
      * @throws NonUniqueResultException
      */
+    #[OA\Response(
+        response: 200,
+        description: 'Returns all the accounts for this contest',
+        content: new OA\JsonContent(
+            type: 'array',
+            items: new OA\Items(ref: new Model(type: User::class))
+        )
+    )]
+    #[OA\Parameter(ref: '#/components/parameters/idlist')]
+    #[OA\Parameter(
+        name: 'team_id',
+        description: 'Only show accounts for the given team',
+        in: 'query',
+        schema: new OA\Schema(type: 'string')
+    )]
     public function listAction(Request $request): Response
     {
         // Get the contest ID to make sure the contest exists
@@ -65,13 +64,13 @@ class AccountController extends AbstractRestController
      * @throws NonUniqueResultException
      * @Rest\Get("/accounts/{id}")
      * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_API_READER')")
-     * @OA\Response(
-     *     response="200",
-     *     description="Returns the given account",
-     *     @Model(type=User::class)
-     * )
-     * @OA\Parameter(ref="#/components/parameters/id")
      */
+    #[OA\Response(
+        response: 200,
+        description: 'Returns the given account',
+        content: new Model(type: User::class)
+    )]
+    #[OA\Parameter(ref: '#/components/parameters/id')]
     public function singleAction(Request $request, string $id): Response
     {
         // Get the contest ID to make sure the contest exists
@@ -82,12 +81,12 @@ class AccountController extends AbstractRestController
     /**
      * Get information about the currently logged in account.
      * @Rest\Get("/account")
-     * @OA\Response(
-     *     response="200",
-     *     description="Information about the logged in account",
-     *     @Model(type=User::class)
-     * )
      */
+    #[OA\Response(
+        response: 200,
+        description: 'Information about the logged in account',
+        content: new Model(type: User::class)
+    )]
     public function getCurrentAction(Request $request): Response
     {
         // Get the contest ID to make sure the contest exists.

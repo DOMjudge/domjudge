@@ -14,7 +14,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use OpenApi\Annotations as OA;
+use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -24,10 +24,10 @@ use Prometheus\RenderTextFormat;
 /**
  * @Route("/metrics")
  * @IsGranted("ROLE_API_READER")
- * @OA\Response(response="401", ref="#/components/responses/Unauthenticated")
- * @OA\Response(response="403", ref="#/components/responses/Unauthorized")
- * @OA\Tag(name="Metrics")
  */
+#[OA\Tag(name: 'Metrics')]
+#[OA\Response(ref: '#/components/responses/Unauthenticated', response: 401)]
+#[OA\Response(ref: '#/components/responses/Unauthorized', response: 403)]
 class MetricsController extends AbstractFOSRestController
 {
     public function __construct(
@@ -40,12 +40,12 @@ class MetricsController extends AbstractFOSRestController
     /**
      * Metrics of this installation for use by Prometheus.
      * @Rest\Get("/prometheus")
-     * @OA\Response(
-     *     response="200",
-     *     description="Metrics of this installation for use by Prometheus",
-     *     @OA\MediaType(mediaType="text/plain"),
-     * )
      */
+    #[OA\Response(
+        response: 200,
+        description: 'Metrics of this installation for use by Prometheus',
+        content: new OA\MediaType(mediaType: 'text/plain')
+    )]
     public function prometheusAction(): Response
     {
         $registry = $this->registry;
