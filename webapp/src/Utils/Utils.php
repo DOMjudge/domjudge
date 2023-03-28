@@ -182,7 +182,7 @@ class Utils
         if ($epoch === null) {
             return null;
         }
-        $millis = Utils::getMillis((float) $epoch);
+        $millis = self::getMillis((float) $epoch);
         return date("Y-m-d\TH:i:s", (int) $epoch)
             . ($floored ? '' : $millis)
             . date("P", (int) $epoch);
@@ -198,7 +198,7 @@ class Utils
         $seconds = abs($seconds);
         $hours = (int)($seconds / 3600);
         $minutes = (int)(($seconds - $hours*3600)/60);
-        $millis = Utils::getMillis($seconds);
+        $millis = self::getMillis($seconds);
         $seconds = $seconds - $hours*3600 - $minutes*60;
         return $sign . sprintf("%d:%02d:%02d", $hours, $minutes, $seconds)
             . ($floored ? '' : $millis);
@@ -456,7 +456,7 @@ class Utils
         if (empty($datetime)) {
             return '';
         }
-        return Utils::specialchars(date($format, (int)$datetime));
+        return htmlspecialchars(date($format, (int)$datetime));
     }
 
     /**
@@ -488,23 +488,6 @@ class Utils
         $ret  .= sprintf('%02d', $diff);
 
         return $ret;
-    }
-
-    /**
-     * Wrapper around PHP's htmlspecialchars() to set desired options globally:
-     *
-     * - ENT_QUOTES: Also convert single quotes, in case string is contained
-     *   in a single quoted context.
-     * - ENT_HTML5: Display those single quotes as the HTML5 entity &apos;.
-     * - ENT_SUBSTITUTE: Replace any invalid Unicode characters with the
-     *   Unicode replacement character.
-     */
-    public static function specialchars(string $string): string
-    {
-        return htmlspecialchars(
-            $string,
-            ENT_QUOTES | ENT_HTML5 | ENT_SUBSTITUTE
-        );
     }
 
     /**
@@ -546,7 +529,7 @@ class Utils
         }
 
         if ($n1 == $n2 && $n1 == $dp[$n1][$n2]) {
-            return [false, Utils::specialchars($line1) . "\n"];
+            return [false, htmlspecialchars($line1) . "\n"];
         }
 
         // reconstruct lcs
@@ -573,11 +556,11 @@ class Utils
         $j = 0;
         for ($k = 0; $k < $l; $k++) {
             while ($i < $n1 && $tokens1[$i] != $lcs[$k]) {
-                $diff .= "<del>" . Utils::specialchars($tokens1[$i]) . "</del> ";
+                $diff .= "<del>" . htmlspecialchars($tokens1[$i]) . "</del> ";
                 $i++;
             }
             while ($j < $n2 && $tokens2[$j] != $lcs[$k]) {
-                $diff .= "<ins>" . Utils::specialchars($tokens2[$j]) . "</ins> ";
+                $diff .= "<ins>" . htmlspecialchars($tokens2[$j]) . "</ins> ";
                 $j++;
             }
             $diff .= $lcs[$k] . " ";
@@ -585,11 +568,11 @@ class Utils
             $j++;
         }
         while ($i < $n1 && ($k >= $l || $tokens1[$i] != $lcs[$k])) {
-            $diff .= "<del>" . Utils::specialchars($tokens1[$i]) . "</del> ";
+            $diff .= "<del>" . htmlspecialchars($tokens1[$i]) . "</del> ";
             $i++;
         }
         while ($j < $n2 && ($k >= $l || $tokens2[$j] != $lcs[$k])) {
-            $diff .= "<ins>" . Utils::specialchars($tokens2[$j]) . "</ins> ";
+            $diff .= "<ins>" . htmlspecialchars($tokens2[$j]) . "</ins> ";
             $j++;
         }
 

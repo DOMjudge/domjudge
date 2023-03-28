@@ -565,26 +565,6 @@ class UtilsTest extends TestCase
     }
 
     /**
-     * Test that the specialchars function returns the correct result
-     */
-    public function testSpecialchars(): void
-    {
-        $plain = "Example string to test";
-        self::assertEquals($plain, Utils::specialchars($plain));
-
-        $html = 'Example <a href="aap">string</a> to test';
-        $htmlenc = 'Example &lt;a href=&quot;aap&quot;&gt;string&lt;/a&gt; to test';
-        self::assertEquals($htmlenc, Utils::specialchars($html));
-
-        $validutf = "Test Thĳs ⛪⚖";
-        self::assertEquals($validutf, Utils::specialchars($validutf));
-
-        $invalidutf = "Test \xc3\x28 example";
-        $replacedutf = "Test �( example";
-        self::assertEquals($replacedutf, Utils::specialchars($invalidutf));
-    }
-
-    /**
      * Test that string is not cut when shorter or one longer than requested maximum
      */
     public function testCutStringNoop(): void
@@ -740,7 +720,7 @@ class UtilsTest extends TestCase
     }
 
     /**
-     * Test that the specialchars function returns the correct result with a
+     * Test that the wrapUnquoted function returns the correct result with a
      * long line
      */
     public function testWrapUnquotedLongLineUnquoted(): void
@@ -753,7 +733,7 @@ text.";
     }
 
     /**
-     * Test that the specialchars function returns the correct result with a
+     * Test that the wrapUnquoted function returns the correct result with a
      * long quoted line
      */
     public function testWrapUnquotedLongLineWithQuoted(): void
@@ -790,7 +770,7 @@ you know";
     }
 
     /**
-     * Test that the specialchars function returns the correct result with a
+     * Test that the wrapUnquoted function returns the correct result with a
      * long quoted line with a custom quote character
      */
     public function testWrapUnquotedLongLineWithQuotedCustomQuoteCharacter(): void

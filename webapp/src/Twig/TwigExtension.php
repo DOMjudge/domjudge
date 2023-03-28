@@ -323,7 +323,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             $assetFunction = $this->twig->getFunction('asset')->getCallable();
             $assetUrl      = call_user_func($assetFunction, $asset);
             return sprintf('<img src="%s" alt="%s" class="affiliation-logo">',
-                           Utils::specialchars($assetUrl), Utils::specialchars($shortName));
+                           htmlspecialchars($assetUrl), htmlspecialchars($shortName));
         }
 
         return '';
@@ -385,7 +385,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
 
             if (!empty($testcase['description'])) {
                 $title = sprintf('Run %d: %s', $key + 1,
-                                 Utils::specialchars($testcase['description']));
+                                 htmlspecialchars($testcase['description']));
             } else {
                 $title = sprintf('Run %d', $key + 1);
             }
@@ -563,10 +563,10 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         }
         $firstFile = $files[0]->getFilename();
         if (count($files) == 1) {
-            return sprintf('<span class="hostname">%s</span>', Utils::specialchars($firstFile));
+            return sprintf('<span class="hostname">%s</span>', htmlspecialchars($firstFile));
         }
         return sprintf('<span class="filename">%s</span> (and %d more)',
-                       Utils::specialchars($firstFile),
+                       htmlspecialchars($firstFile),
                        count($files) - 1
         );
     }
@@ -586,7 +586,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             $hostname = array_shift($expl);
         }
 
-        return sprintf('<span class="hostname">%s</span>', Utils::specialchars($hostname));
+        return sprintf('<span class="hostname">%s</span>', htmlspecialchars($hostname));
     }
 
     /**
@@ -668,7 +668,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
     {
         $line = strtok($difftext, "\n"); //first line
         if ($line === false || sscanf($line, "### DIFFERENCES FROM LINE %d ###\n", $firstdiff) != 1) {
-            return Utils::specialchars($difftext);
+            return htmlspecialchars($difftext);
         }
         $return = $line . "\n";
 
@@ -687,11 +687,11 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             $diffline  = mb_substr($line, $linenowidth + 1);
             $mid       = mb_substr($diffline, $midloc - 1, 3);
             $formdiffline = match ($mid) {
-                ' = ' => "<span class='correct'>" . Utils::specialchars($diffline) . "</span>",
-                ' ! ' => "<span class='differ'>" . Utils::specialchars($diffline) . "</span>",
-                ' $ ' => "<span class='endline'>" . Utils::specialchars($diffline) . "</span>",
-                ' > ', ' < ' => "<span class='extra'>" . Utils::specialchars($diffline) . "</span>",
-                default => Utils::specialchars($diffline),
+                ' = ' => "<span class='correct'>" . htmlspecialchars($diffline) . "</span>",
+                ' ! ' => "<span class='differ'>" . htmlspecialchars($diffline) . "</span>",
+                ' $ ' => "<span class='endline'>" . htmlspecialchars($diffline) . "</span>",
+                ' > ', ' < ' => "<span class='extra'>" . htmlspecialchars($diffline) . "</span>",
+                default => htmlspecialchars($diffline),
             };
             $return = $return . $linenostr . " " . $formdiffline . "\n";
             $line   = strtok("\n");
@@ -738,7 +738,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             if (empty($content)) {
                 break;
             }
-            $content   = Utils::specialchars($content);
+            $content   = htmlspecialchars($content);
             $content   = '<td class="output_text">'
                          . str_replace("\n", "\u{21B5}<br/>", $content)
                          . '</td>';
@@ -822,7 +822,7 @@ document.getElementById("__EDITOR__").editor = __EDITOR__;
 HTML;
         $rank   = $index;
         $id     = sprintf('editor%s', $rank);
-        $code   = Utils::specialchars($code);
+        $code   = htmlspecialchars($code);
         if ($elementToUpdate) {
             $extraForEdit = <<<JS
 __EDITOR__.getSession().on('change', function() {
@@ -843,7 +843,7 @@ var filePath = "%s";
 var mode = modelist.getModeForPath(filePath).mode;
 __EDITOR__.getSession().setMode(mode);
 JS;
-            $mode         = sprintf($modeTemplate, Utils::specialchars($filename));
+            $mode         = sprintf($modeTemplate, htmlspecialchars($filename));
         } else {
             $mode = '';
         }
@@ -860,9 +860,9 @@ JS;
             // Strip any additional DOS/MAC newline characters:
             $line = trim($line, "\r\n");
             $formdiffline = match (substr($line, 0, 1)) {
-                '-' => "<span class='diff-del'>" . Utils::specialchars($line) . "</span>",
-                '+' => "<span class='diff-add'>" . Utils::specialchars($line) . "</span>",
-                default => Utils::specialchars($line),
+                '-' => "<span class='diff-del'>" . htmlspecialchars($line) . "</span>",
+                '+' => "<span class='diff-add'>" . htmlspecialchars($line) . "</span>",
+                default => htmlspecialchars($line),
             };
             $return .= $formdiffline . "\n";
             $line   = strtok("\n");
@@ -961,8 +961,8 @@ JS;
             return implode('<br>', $descriptionLines);
         } else {
             $default         = implode('<br>', array_slice($descriptionLines, 0, 3));
-            $defaultEscaped  = Utils::specialchars($default);
-            $expandedEscaped = Utils::specialchars(implode('<br>', $descriptionLines));
+            $defaultEscaped  = htmlspecialchars($default);
+            $expandedEscaped = htmlspecialchars(implode('<br>', $descriptionLines));
             return <<<EOF
 <span>
     <span data-expanded="$expandedEscaped" data-collapsed="$defaultEscaped">
