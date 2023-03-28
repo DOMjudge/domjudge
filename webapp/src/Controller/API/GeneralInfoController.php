@@ -316,20 +316,13 @@ class GeneralInfoController extends AbstractFOSRestController
         description: 'Returns the given country flag in SVG format',
         content: new OA\MediaType(mediaType: 'image/svg+xml')
     )]
-    #[OA\Parameter(
-        name: 'countryCode',
-        description: 'The ISO 3166-1 alpha-3 code for the country to get the flag for',
-        in: 'path',
-        schema: new OA\Schema(type: 'string')
-    )]
-    #[OA\Parameter(
-        name: 'size',
-        description: 'Preferred aspect ratio as <int>x<int>, currently only 1x1 and 4x3 are available.',
-        in: 'path',
-        schema: new OA\Schema(type: 'string')
-    )]
-    public function countryFlagAction(Request $request, string $countryCode, string $size): Response
-    {
+    public function countryFlagAction(
+        Request $request,
+        #[OA\PathParameter(description: 'The ISO 3166-1 alpha-3 code for the country to get the flag for')]
+        string $countryCode,
+        #[OA\PathParameter(description: 'Preferred aspect ratio as <int>x<int>, currently only 1x1 and 4x3 are available.')]
+        string $size
+    ): Response {
         // This API action exists for two reasons
         // - Relative URLs are relative to the API root according to the CCS spec. This
         //   means that we need to have an API endpoint for files.

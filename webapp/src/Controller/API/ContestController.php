@@ -302,12 +302,6 @@ class ContestController extends AbstractRestController
      * @IsGranted("ROLE_API_WRITER")
      * @throws NonUniqueResultException
      */
-    #[OA\Parameter(
-        name: 'cid',
-        description: 'The ID of the contest to change the start time for',
-        in: 'path',
-        schema: new OA\Schema(type: 'string')
-    )]
     #[OA\RequestBody(
         required: true,
         content: new OA\MediaType(
@@ -353,8 +347,11 @@ class ContestController extends AbstractRestController
             new OA\Schema(ref: '#/components/schemas/Banner'),
         ])
     )]
-    public function changeStartTimeAction(Request $request, string $cid): Response
-    {
+    public function changeStartTimeAction(
+        Request $request,
+        #[OA\PathParameter(description: 'The ID of the contest to change the start time for')]
+        string $cid
+    ): Response {
         $contest  = $this->getContestWithId($request, $cid);
         $now      = (int)Utils::now();
         $changed  = false;
