@@ -197,12 +197,6 @@ class JudgehostController extends AbstractFOSRestController
             items: new OA\Items(ref: new Model(type: Judgehost::class))
         )
     )]
-    #[OA\Parameter(
-        name: 'hostname',
-        description: 'The hostname of the judgehost to update',
-        in: 'path',
-        schema: new OA\Schema(type: 'string')
-    )]
     #[OA\RequestBody(
         required: true,
         content: new OA\MediaType(
@@ -217,8 +211,11 @@ class JudgehostController extends AbstractFOSRestController
             )
         )
     )]
-    public function updateJudgeHostAction(Request $request, string $hostname): array
-    {
+    public function updateJudgeHostAction(
+        Request $request,
+        #[OA\PathParameter(description: 'The hostname of the judgehost to update')]
+        string $hostname
+    ): array {
         if (!$request->request->has('enabled')) {
             throw new BadRequestHttpException('Argument \'enabled\' is mandatory');
         }
@@ -242,18 +239,6 @@ class JudgehostController extends AbstractFOSRestController
     #[OA\Response(
         response: 200,
         description: 'When the judging has been updated'
-    )]
-    #[OA\Parameter(
-        name: 'hostname',
-        description: 'The hostname of the judgehost that wants to update the judging',
-        in: 'path',
-        schema: new OA\Schema(type: 'string')
-    )]
-    #[OA\Parameter(
-        name: 'judgetaskid',
-        description: 'The ID of the judgetask to update',
-        in: 'path',
-        schema: new OA\Schema(type: 'integer')
     )]
     #[OA\RequestBody(
         required: true,
@@ -285,8 +270,13 @@ class JudgehostController extends AbstractFOSRestController
             )
         )
     )]
-    public function updateJudgingAction(Request $request, string $hostname, int $judgetaskid): void
-    {
+    public function updateJudgingAction(
+        Request $request,
+        #[OA\PathParameter(description: 'The hostname of the judgehost that wants to update the judging')]
+        string $hostname,
+        #[OA\PathParameter(description: 'The ID of the judgetask to update')]
+        int $judgetaskid
+    ): void {
         /** @var Judgehost $judgehost */
         $judgehost = $this->em->getRepository(Judgehost::class)->findOneBy(['hostname' => $hostname]);
         if (!$judgehost) {
@@ -474,21 +464,11 @@ class JudgehostController extends AbstractFOSRestController
      * @IsGranted("ROLE_JUDGEHOST")
      */
     #[OA\Response(response: 200, description: 'When the debug info has been added')]
-    #[OA\Parameter(
-        name: 'hostname',
-        description: 'The hostname of the judgehost that wants to add the debug info',
-        in: 'path',
-        schema: new OA\Schema(type: 'string')
-    )]
-    #[OA\Parameter(
-        name: 'judgeTaskId',
-        description: 'The ID of the judgetask to add',
-        in: 'path',
-        schema: new OA\Schema(type: 'integer')
-    )]
     public function addDebugInfo(
         Request $request,
+        #[OA\PathParameter(description: 'The hostname of the judgehost that wants to add the debug info')]
         string $hostname,
+        #[OA\PathParameter(description: 'The ID of the judgetask to add')]
         int $judgeTaskId
     ): void {
         /** @var JudgeTask $judgeTask */
@@ -572,18 +552,6 @@ class JudgehostController extends AbstractFOSRestController
      * @throws ORMException
      */
     #[OA\Response(response: 200, description: 'When the judging run has been added')]
-    #[OA\Parameter(
-        name: 'hostname',
-        description: 'The hostname of the judgehost that wants to add the judging run',
-        in: 'path',
-        schema: new OA\Schema(type: 'string')
-    )]
-    #[OA\Parameter(
-        name: 'judgeTaskId',
-        in: 'path',
-        description: 'The ID of the judgetask to add',
-        schema: new OA\Schema(type: 'integer')
-    )]
     #[OA\RequestBody(
         required: true,
         content: new OA\MediaType(
@@ -633,7 +601,9 @@ class JudgehostController extends AbstractFOSRestController
     )]
     public function addJudgingRunAction(
         Request $request,
+        #[OA\PathParameter(description: 'The hostname of the judgehost that wants to add the judging run')]
         string $hostname,
+        #[OA\PathParameter(description: 'The ID of the judgetask to add')]
         int $judgeTaskId
     ): int {
         $required = [
@@ -1184,15 +1154,12 @@ class JudgehostController extends AbstractFOSRestController
         description: 'The files for the submission, testcase or script.',
         content: new OA\JsonContent(ref: '#/components/schemas/SourceCodeList')
     )]
-    #[OA\Parameter(
-        name: 'type',
-        description: 'The type to get files for',
-        in: 'path',
-        schema: new OA\Schema(type: 'string')
-    )]
     #[OA\Parameter(ref: '#/components/parameters/id')]
-    public function getFilesAction(string $type, string $id): array
-    {
+    public function getFilesAction(
+        #[OA\PathParameter(description: 'The type to get files for')]
+        string $type,
+        string $id
+    ): array {
         return match ($type) {
             'source' => $this->getSourceFiles($id),
             'testcase' => $this->getTestcaseFiles($id),
