@@ -49,9 +49,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
-/**
- * @Rest\Route("/judgehosts")
- */
+#[Rest\Route('/judgehosts')]
 #[OA\Tag(name: 'Judgehosts')]
 #[OA\Response(ref: '#/components/responses/InvalidResponse', response: 400)]
 #[OA\Response(ref: '#/components/responses/Unauthenticated', response: 401)]
@@ -72,9 +70,9 @@ class JudgehostController extends AbstractFOSRestController
 
     /**
      * Get judgehosts.
-     * @Rest\Get("")
      * @IsGranted("ROLE_JURY")
      */
+    #[Rest\Get('')]
     #[OA\Response(
         response: 200,
         description: 'The judgehosts',
@@ -107,10 +105,10 @@ class JudgehostController extends AbstractFOSRestController
     /**
      * Add a new judgehost to the list of judgehosts.
      * Also restarts (and returns) unfinished judgings.
-     * @Rest\Post("")
      * @IsGranted("ROLE_JUDGEHOST")
      * @throws NonUniqueResultException
      */
+    #[Rest\Post('')]
     #[OA\Response(
         response: 200,
         description: 'The returned unfinished judgings',
@@ -186,9 +184,9 @@ class JudgehostController extends AbstractFOSRestController
 
     /**
      * Update the configuration of the given judgehost.
-     * @Rest\Put("/{hostname}")
      * @IsGranted("ROLE_JUDGEHOST")
      */
+    #[Rest\Put('/{hostname}')]
     #[OA\Response(
         response: 200,
         description: 'The modified judgehost',
@@ -232,10 +230,10 @@ class JudgehostController extends AbstractFOSRestController
 
     /**
      * Update the given judging for the given judgehost.
-     * @Rest\Put("/update-judging/{hostname}/{judgetaskid<\d+>}")
      * @IsGranted("ROLE_JUDGEHOST")
      * @throws NonUniqueResultException
      */
+    #[Rest\Put('/update-judging/{hostname}/{judgetaskid<\d+>}')]
     #[OA\Response(
         response: 200,
         description: 'When the judging has been updated'
@@ -460,9 +458,9 @@ class JudgehostController extends AbstractFOSRestController
 
     /**
      * Add back debug info.
-     * @Rest\Post("/add-debug-info/{hostname}/{judgeTaskId<\d+>}")
      * @IsGranted("ROLE_JUDGEHOST")
      */
+    #[Rest\Post('/add-debug-info/{hostname}/{judgeTaskId<\d+>}')]
     #[OA\Response(response: 200, description: 'When the debug info has been added')]
     public function addDebugInfo(
         Request $request,
@@ -544,13 +542,13 @@ class JudgehostController extends AbstractFOSRestController
 
     /**
      * Add one JudgingRun. When relevant, finalize the judging.
-     * @Rest\Post("/add-judging-run/{hostname}/{judgeTaskId<\d+>}")
      * @IsGranted("ROLE_JUDGEHOST")
      * @throws DBALException
      * @throws NoResultException
      * @throws NonUniqueResultException
      * @throws ORMException
      */
+    #[Rest\Post('/add-judging-run/{hostname}/{judgeTaskId<\d+>}')]
     #[OA\Response(response: 200, description: 'When the judging run has been added')]
     #[OA\RequestBody(
         required: true,
@@ -648,11 +646,11 @@ class JudgehostController extends AbstractFOSRestController
     /**
      * Internal error reporting (back from judgehost).
      *
-     * @Rest\Post("/internal-error")
      * @IsGranted("ROLE_JUDGEHOST")
      * @throws NonUniqueResultException
      * @throws ORMException
      */
+    #[Rest\Post('/internal-error')]
     #[OA\Response(
         response: 200,
         description: 'The ID of the created internal error',
@@ -1145,10 +1143,10 @@ class JudgehostController extends AbstractFOSRestController
 
     /**
      * Get files for a given type and id.
-     * @Rest\Get("/get_files/{type}/{id<\d+>}")
      * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST')")
      * @throws NonUniqueResultException
      */
+    #[Rest\Get('/get_files/{type}/{id<\d+>}')]
     #[OA\Response(
         response: 200,
         description: 'The files for the submission, testcase or script.',
@@ -1248,9 +1246,9 @@ class JudgehostController extends AbstractFOSRestController
 
     /**
      * Fetch work tasks.
-     * @Rest\Post("/fetch-work")
      * @Security("is_granted('ROLE_JUDGEHOST')")
      */
+    #[Rest\Post('/fetch-work')]
     public function getJudgeTasksAction(Request $request): array
     {
         if (!$request->request->has('hostname')) {

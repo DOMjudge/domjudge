@@ -14,9 +14,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
-/**
- * @Rest\Route("/contests/{cid}/groups")
- */
+#[Rest\Route('/contests/{cid}/groups')]
 #[OA\Tag(name: 'Groups')]
 #[OA\Parameter(ref: '#/components/parameters/cid')]
 #[OA\Parameter(ref: '#/components/parameters/strict')]
@@ -28,9 +26,9 @@ class GroupController extends AbstractRestController
 {
     /**
      * Get all the groups for this contest.
-     * @Rest\Get("")
      * @throws NonUniqueResultException
      */
+    #[Rest\Get('')]
     #[OA\Parameter(ref: '#/components/parameters/idlist')]
     #[OA\Parameter(
         name: 'public',
@@ -55,8 +53,8 @@ class GroupController extends AbstractRestController
     /**
      * Get the given group for this contest
      * @throws NonUniqueResultException
-     * @Rest\Get("/{id}")
      */
+    #[Rest\Get('/{id}')]
     #[OA\Response(
         response: 200,
         description: 'Returns the given group for this contest',
@@ -71,9 +69,9 @@ class GroupController extends AbstractRestController
     /**
      * Add a new group
      *
-     * @Rest\Post()
      * @IsGranted("ROLE_API_WRITER")
      */
+    #[Rest\Post]
     #[OA\RequestBody(
         required: true,
         content: [

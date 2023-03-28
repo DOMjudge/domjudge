@@ -18,9 +18,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
-/**
- * @Rest\Route("/contests/{cid}/runs")
- */
+#[Rest\Route('/contests/{cid}/runs')]
 #[OA\Tag(name: 'Runs')]
 #[OA\Parameter(ref: '#/components/parameters/cid')]
 #[OA\Parameter(ref: '#/components/parameters/strict')]
@@ -51,9 +49,9 @@ class RunController extends AbstractRestController implements QueryObjectTransfo
     /**
      * Get all the runs for this contest.
      * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST') or is_granted('ROLE_API_READER')")
-     * @Rest\Get("")
      * @throws NonUniqueResultException
      */
+    #[Rest\Get('')]
     #[OA\Response(
         response: 200,
         description: 'Returns all the runs for this contest',
@@ -101,8 +99,8 @@ class RunController extends AbstractRestController implements QueryObjectTransfo
      * Get the given run for this contest.
      * @throws NonUniqueResultException
      * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST') or is_granted('ROLE_API_READER')")
-     * @Rest\Get("/{id<\d+>}")
      */
+    #[Rest\Get('/{id<\d+>}')]
     #[OA\Response(
         response: 200,
         description: 'Returns the given run for this contest',

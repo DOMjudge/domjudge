@@ -11,9 +11,7 @@ use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-/**
- * @Rest\Route("/")
- */
+#[Rest\Route('/')]
 #[OA\Tag(name: 'Languages')]
 #[OA\Parameter(ref: '#/components/parameters/cid')]
 #[OA\Parameter(ref: '#/components/parameters/strict')]
@@ -24,11 +22,11 @@ class LanguageController extends AbstractRestController
 {
     /**
      * Get all the languages for this contest.
-     * @Rest\Get("languages")
-     * The languages endpoint doesn't require `cid` but the CLICS spec requires us to also expose it under a contest.
-     * @Rest\Get("contests/{cid}/languages")
      * @throws NonUniqueResultException
      */
+    #[Rest\Get('languages')]
+    // The languages endpoint doesn't require `cid` but the CLICS spec requires us to also expose it under a contest.
+    #[Rest\Get('contests/{cid}/languages')]
     #[OA\Response(
         response: 200,
         description: 'Returns all the languages for this contest',
@@ -46,10 +44,10 @@ class LanguageController extends AbstractRestController
     /**
      * Get the given language for this contest.
      * @throws NonUniqueResultException
-     * @Rest\Get("languages/{id}")
-     * The languages endpoint doesn't require `cid` but the CLICS spec requires us to also expose it under a contest.
-     * @Rest\Get("contests/{cid}/languages/{id}")
      */
+    #[Rest\Get('languages/{id}')]
+    // The languages endpoint doesn't require `cid` but the CLICS spec requires us to also expose it under a contest.
+    #[Rest\Get('contests/{cid}/languages/{id}')]
     #[OA\Response(
         response: 200,
         description: 'Returns the given language for this contest',

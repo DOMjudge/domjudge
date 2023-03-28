@@ -12,9 +12,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
-/**
- * @Rest\Route("/contests/{cid}/access")
- */
+#[Rest\Route('/contests/{cid}/access')]
 #[OA\Tag(name: 'Access')]
 #[OA\Parameter(ref: '#/components/parameters/cid')]
 #[OA\Parameter(ref: '#/components/parameters/strict')]
@@ -26,12 +24,12 @@ class AccessController extends AbstractRestController
 {
     /**
      * Get access information
-     * @Rest\Get("")
      * @IsGranted("ROLE_API_READER")
      *
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
+    #[Rest\Get('')]
     #[OA\Response(
         response: 200,
         description: 'Access information for the given contest',

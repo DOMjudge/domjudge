@@ -23,9 +23,7 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
-/**
- * @Rest\Route("/")
- */
+#[Rest\Route('/')]
 #[OA\Tag(name: 'Organizations')]
 #[OA\Parameter(ref: '#/components/parameters/cid')]
 #[OA\Parameter(ref: '#/components/parameters/strict')]
@@ -47,10 +45,10 @@ class OrganizationController extends AbstractRestController
 
     /**
      * Get all the organizations for this contest.
-     * @Rest\Get("contests/{cid}/organizations")
-     * @Rest\Get("organizations")
      * @throws NonUniqueResultException
      */
+    #[Rest\Get('contests/{cid}/organizations')]
+    #[Rest\Get('organizations')]
     #[OA\Response(
         response: 200,
         description: 'Returns all the organizations for this contest',
@@ -79,9 +77,9 @@ class OrganizationController extends AbstractRestController
     /**
      * Get the given organization for this contest.
      * @throws NonUniqueResultException
-     * @Rest\Get("contests/{cid}/organizations/{id}")
-     * @Rest\Get("organizations/{id}")
      */
+    #[Rest\Get('contests/{cid}/organizations/{id}')]
+    #[Rest\Get('organizations/{id}')]
     #[OA\Response(
         response: 200,
         description: 'Returns the given organization for this contest',
@@ -100,9 +98,9 @@ class OrganizationController extends AbstractRestController
 
     /**
      * Get the logo for the given organization.
-     * @Rest\Get("contests/{cid}/organizations/{id}/logo", name="organization_logo")
-     * @Rest\Get("organizations/{id}/logo")
      */
+    #[Rest\Get('contests/{cid}/organizations/{id}/logo', name: 'organization_logo')]
+    #[Rest\Get('organizations/{id}/logo')]
     #[OA\Response(
         response: 200,
         description: 'Returns the given organization logo in PNG, JPG or SVG format',
@@ -137,10 +135,10 @@ class OrganizationController extends AbstractRestController
 
     /**
      * Delete the logo for the given organization.
-     * @Rest\Delete("contests/{cid}/organizations/{id}/logo", name="delete_organization_logo")
-     * @Rest\Delete("organizations/{id}/logo")
      * @IsGranted("ROLE_ADMIN")
      */
+    #[Rest\Delete('contests/{cid}/organizations/{id}/logo', name: 'delete_organization_logo')]
+    #[Rest\Delete('organizations/{id}/logo')]
     #[OA\Response(response: 204, description: 'Deleting logo succeeded')]
     #[OA\Parameter(ref: '#/components/parameters/id')]
     public function deleteLogoAction(Request $request, string $id): Response
@@ -171,12 +169,12 @@ class OrganizationController extends AbstractRestController
 
     /**
      * Set the logo for the given organization.
-     * @Rest\POST("contests/{cid}/organizations/{id}/logo", name="post_organization_logo")
-     * @Rest\POST("organizations/{id}/logo")
-     * @Rest\PUT("contests/{cid}/organizations/{id}/logo", name="put_organization_logo")
-     * @Rest\PUT("organizations/{id}/logo")
      * @IsGranted("ROLE_ADMIN")
      */
+    #[Rest\Post('contests/{cid}/organizations/{id}/logo', name: 'post_organization_logo')]
+    #[Rest\Post('organizations/{id}/logo')]
+    #[Rest\Put('contests/{cid}/organizations/{id}/logo', name: 'put_organization_logo')]
+    #[Rest\Put('organizations/{id}/logo')]
     #[OA\RequestBody(
         required: true,
         content: new OA\MediaType(
@@ -236,10 +234,10 @@ class OrganizationController extends AbstractRestController
     /**
      * Add a new organization.
      *
-     * @Rest\Post("contests/{cid}/organizations")
-     * @Rest\Post("organizations")
      * @IsGranted("ROLE_API_WRITER")
      */
+    #[Rest\Post('contests/{cid}/organizations')]
+    #[Rest\Post('organizations')]
     #[OA\RequestBody(
         required: true,
         content: [

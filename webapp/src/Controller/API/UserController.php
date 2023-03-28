@@ -22,9 +22,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
-/**
- * @Rest\Route("/users", defaults={"_format" = "json"})
- */
+#[Rest\Route('/users', defaults: ['_format' => 'json'])]
 #[OA\Tag(name: 'Users')]
 #[OA\Response(ref: '#/components/responses/InvalidResponse', response: 400)]
 #[OA\Response(ref: '#/components/responses/Unauthenticated', response: 401)]
@@ -44,9 +42,9 @@ class UserController extends AbstractRestController
 
     /**
      * Add one or more groups.
-     * @Rest\Post("/groups")
      * @IsGranted("ROLE_ADMIN")
      */
+    #[Rest\Post('/groups')]
     #[OA\RequestBody(
         required: true,
         content: new OA\MediaType(
@@ -93,9 +91,9 @@ class UserController extends AbstractRestController
     /**
      * Add one or more organizations.
      *
-     * @Rest\Post("/organizations")
      * @IsGranted("ROLE_ADMIN")
      */
+    #[Rest\Post('/organizations')]
     #[OA\RequestBody(
         required: true,
         content: new OA\MediaType(
@@ -130,9 +128,9 @@ class UserController extends AbstractRestController
 
     /**
      * Add one or more teams.
-     * @Rest\Post("/teams")
      * @IsGranted("ROLE_ADMIN")
      */
+    #[Rest\Post('/teams')]
     #[OA\RequestBody(
         required: true,
         content: new OA\MediaType(
@@ -178,11 +176,10 @@ class UserController extends AbstractRestController
 
     /**
      * Add accounts to teams.
-     * @Rest\Post("/accounts")
      * @IsGranted("ROLE_ADMIN")
-     *
      * @throws BadRequestHttpException
      */
+    #[Rest\Post('/accounts')]
     #[OA\RequestBody(
         required: true,
         content: new OA\MediaType(
@@ -243,10 +240,10 @@ class UserController extends AbstractRestController
 
     /**
      * Get all the users.
-     * @Rest\Get("")
      * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_API_READER')")
      * @throws NonUniqueResultException
      */
+    #[Rest\Get('')]
     #[OA\Response(
         response: 200,
         description: 'Returns all the users for this contest',
@@ -270,9 +267,9 @@ class UserController extends AbstractRestController
     /**
      * Get the given user.
      * @throws NonUniqueResultException
-     * @Rest\Get("/{id}")
      * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_API_READER')")
      */
+    #[Rest\Get('/{id}')]
     #[OA\Response(
         response: 200,
         description: 'Returns the given user',
@@ -287,9 +284,9 @@ class UserController extends AbstractRestController
     /**
      * Add a new user.
      *
-     * @Rest\Post()
      * @IsGranted("ROLE_API_WRITER")
      */
+    #[Rest\Post]
     #[OA\RequestBody(
         required: true,
         content: [

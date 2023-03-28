@@ -19,9 +19,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
-/**
- * @Rest\Route("/contests/{cid}/clarifications")
- */
+#[Rest\Route('/contests/{cid}/clarifications')]
 #[OA\Tag(name: 'Clarifications')]
 #[OA\Parameter(ref: '#/components/parameters/cid')]
 #[OA\Parameter(ref: '#/components/parameters/strict')]
@@ -35,9 +33,9 @@ class ClarificationController extends AbstractRestController
      * Get all the clarifications for this contest.
      *
      * Note that we restrict the returned clarifications in the query builder.
-     * @Rest\Get("")
      * @throws NonUniqueResultException
      */
+    #[Rest\Get('')]
     #[OA\Response(
         response: 200,
         description: 'Returns all the clarifications for this contest',
@@ -65,8 +63,8 @@ class ClarificationController extends AbstractRestController
      * Admin and api_reader get everything, anonymous gets only general clarifications,
      * team user gets general clarifications plus those sent from or to the team.
      * @throws NonUniqueResultException
-     * @Rest\Get("/{id}")
      */
+    #[Rest\Get('/{id}')]
     #[OA\Response(
         response: 200,
         description: 'Returns the given clarification for this contest',
@@ -80,11 +78,11 @@ class ClarificationController extends AbstractRestController
 
     /**
      * Add a clarification to this contest
-     * @Rest\Post("")
-     * @Rest\Put("/{id}")
      * @Security("is_granted('ROLE_TEAM') or is_granted('ROLE_API_WRITER')", message="You need to have the Team Member role to add a clarification")
      * @throws NonUniqueResultException
      */
+    #[Rest\Post('')]
+    #[Rest\Put('/{id}')]
     #[OA\RequestBody(
         required: true,
         content: [
