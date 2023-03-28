@@ -776,7 +776,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             if (empty($content)) {
                 break;
             }
-            $content   = htmlspecialchars($content);
+            $content   = Utils::specialchars($content);
             $content   = '<td class="output_text">'
                          . str_replace("\n", "\u{21B5}<br/>", $content)
                          . '</td>';
