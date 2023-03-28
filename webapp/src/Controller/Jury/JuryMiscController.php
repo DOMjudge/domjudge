@@ -12,7 +12,6 @@ use App\Entity\Team;
 use App\Entity\TeamAffiliation;
 use App\Service\DOMJudgeService;
 use App\Service\ScoreboardService;
-use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\Expr\Join;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
@@ -209,7 +208,7 @@ class JuryMiscController extends BaseController
 
         if ($request->isXmlHttpRequest() && $request->isMethod('POST')) {
             $progressReporter = function (int $progress, string $log, ?string $message = null) {
-                echo $this->dj->jsonEncode(['progress' => $progress, 'log' => Utils::specialchars($log), 'message' => $message]);
+                echo $this->dj->jsonEncode(['progress' => $progress, 'log' => htmlspecialchars($log), 'message' => $message]);
                 ob_flush();
                 flush();
             };
