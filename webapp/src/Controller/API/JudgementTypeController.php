@@ -10,9 +10,7 @@ use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
-/**
- * @Rest\Route("/contests/{cid}/judgement-types")
- */
+#[Rest\Route('/contests/{cid}/judgement-types')]
 #[OA\Tag(name: 'Judgement types')]
 #[OA\Parameter(ref: '#/components/parameters/strict')]
 #[OA\Response(ref: '#/components/responses/InvalidResponse', response: 400)]
@@ -21,10 +19,10 @@ class JudgementTypeController extends AbstractRestController
 {
     /**
      * Get all the judgement types for this contest.
-     * @Rest\Get("")
      *
      * @throws NonUniqueResultException
      */
+    #[Rest\Get('')]
     #[OA\Response(
         response: 200,
         description: 'Returns all the judgement types for this contest',
@@ -56,8 +54,8 @@ class JudgementTypeController extends AbstractRestController
     /**
      * Get the given judgement type for this contest.
      * @throws NonUniqueResultException
-     * @Rest\Get("/{id}")
      */
+    #[Rest\Get('/{id}')]
     #[OA\Response(
         response: 200,
         description: 'Returns the given judgement type for this contest',

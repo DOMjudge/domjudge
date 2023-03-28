@@ -17,9 +17,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-/**
- * @Rest\Route("/")
- */
+#[Rest\Route('/')]
 #[OA\Tag(name: 'Judgements')]
 #[OA\Parameter(ref: '#/components/parameters/cid')]
 #[OA\Parameter(ref: '#/components/parameters/strict')]
@@ -51,10 +49,10 @@ class JudgementController extends AbstractRestController implements QueryObjectT
     /**
      * Get all the judgements for this contest.
      * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_TEAM') or is_granted('ROLE_JUDGEHOST') or is_granted('ROLE_API_READER')")
-     * @Rest\Get("contests/{cid}/judgements")
-     * @Rest\Get("judgements")
      * @throws NonUniqueResultException
      */
+    #[Rest\Get('contests/{cid}/judgements')]
+    #[Rest\Get('judgements')]
     #[OA\Response(
         response: 200,
         description: 'Returns all the judgements for this contest',
@@ -90,9 +88,9 @@ class JudgementController extends AbstractRestController implements QueryObjectT
      * Get the given judgement for this contest.
      * @throws NonUniqueResultException
      * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_TEAM') or is_granted('ROLE_JUDGEHOST') or is_granted('ROLE_API_READER')")
-     * @Rest\Get("contests/{cid}/judgements/{id<\d+>}")
-     * @Rest\Get("judgements/{id<\d+>}")
      */
+    #[Rest\Get('contests/{cid}/judgements/{id<\d+>}')]
+    #[Rest\Get('judgements/{id<\d+>}')]
     #[OA\Response(
         response: 200,
         description: 'Returns the given judgement for this contest',

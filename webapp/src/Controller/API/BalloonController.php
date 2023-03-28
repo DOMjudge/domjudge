@@ -13,9 +13,9 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
- * @Rest\Route("/contests/{cid}/balloons")
  * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_API_READER') or is_granted('ROLE_BALLOON')")
  */
+#[Rest\Route('/contests/{cid}/balloons')]
 #[OA\Tag(name: 'Balloons')]
 #[OA\Parameter(ref: '#/components/parameters/cid')]
 #[OA\Response(ref: '#/components/responses/NotFound', response: 404)]
@@ -26,10 +26,10 @@ class BalloonController extends AbstractRestController
 {
     /**
      * Get all the balloons for this contest.
-     * @Rest\Get("")
      *
      * @throws NonUniqueResultException
      */
+    #[Rest\Get('')]
     #[OA\Response(
         response: 200,
         description: 'Returns the balloons for this contest.',
@@ -53,9 +53,9 @@ class BalloonController extends AbstractRestController
 
     /**
      * Mark a specific balloon as done.
-     * @Rest\Post("/{balloonId<\d+>}/done")
      * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_BALLOON')")
      */
+    #[Rest\Post('/{balloonId<\d+>}/done')]
     #[OA\Response(
         response: 204,
         description: 'The balloon was now marked as done or already marked as such.'

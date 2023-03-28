@@ -19,9 +19,7 @@ use FOS\RestBundle\Controller\Annotations as Rest;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\Request;
 
-/**
- * @Rest\Route("/contests/{cid}/scoreboard")
- */
+#[Rest\Route('/contests/{cid}/scoreboard')]
 #[OA\Tag(name: 'Scoreboard')]
 #[OA\Parameter(ref: '#/components/parameters/cid')]
 #[OA\Parameter(ref: '#/components/parameters/strict')]
@@ -43,9 +41,9 @@ class ScoreboardController extends AbstractRestController
 
     /**
      * Get the scoreboard for this contest.
-     * @Rest\Get("")
      * @throws NonUniqueResultException
      */
+    #[Rest\Get('')]
     #[OA\Response(
         response: 200,
         description: 'Returns the scoreboard',

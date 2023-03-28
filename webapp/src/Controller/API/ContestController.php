@@ -37,9 +37,7 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Yaml\Yaml;
 use TypeError;
 
-/**
- * @Rest\Route("/contests")
- */
+#[Rest\Route('/contests')]
 #[OA\Tag(name: 'Contests')]
 #[OA\Parameter(ref: '#/components/parameters/strict')]
 #[OA\Response(ref: '#/components/responses/InvalidResponse', response: 400)]
@@ -64,10 +62,10 @@ class ContestController extends AbstractRestController
 
     /**
      * Add a new contest.
-     * @Rest\Post("")
      * @IsGranted("ROLE_ADMIN")
      * @throws BadRequestHttpException
      */
+    #[Rest\Post('')]
     #[OA\RequestBody(
         required: true,
         content: new OA\MediaType(
@@ -115,9 +113,9 @@ class ContestController extends AbstractRestController
 
     /**
      * Get all the contests.
-     * @Rest\Get("")
      * @throws NonUniqueResultException
      */
+    #[Rest\Get('')]
     #[OA\Response(
         response: 200,
         description: 'Returns all contests visible to the user (all contests for privileged users, active contests otherwise)',
@@ -146,8 +144,8 @@ class ContestController extends AbstractRestController
     /**
      * Get the given contest.
      * @throws NonUniqueResultException
-     * @Rest\Get("/{cid}")
      */
+    #[Rest\Get('/{cid}')]
     #[OA\Response(
         response: 200,
         description: 'Returns the given contest',
@@ -166,8 +164,8 @@ class ContestController extends AbstractRestController
 
     /**
      * Get the banner for the given contest.
-     * @Rest\Get("/{cid}/banner", name="contest_banner")
      */
+    #[Rest\Get('/{cid}/banner', name: 'contest_banner')]
     #[OA\Response(
         response: 200,
         description: 'Returns the given contest banner in PNG, JPG or SVG format',
@@ -201,9 +199,9 @@ class ContestController extends AbstractRestController
 
     /**
      * Delete the banner for the given contest.
-     * @Rest\Delete("/{cid}/banner", name="delete_contest_banner")
      * @IsGranted("ROLE_ADMIN")
      */
+    #[Rest\Delete('/{cid}/banner', name: 'delete_contest_banner')]
     #[OA\Response(response: 204, description: 'Deleting banner succeeded')]
     #[OA\Parameter(ref: '#/components/parameters/cid')]
     public function deleteBannerAction(Request $request, string $cid): Response
@@ -235,10 +233,10 @@ class ContestController extends AbstractRestController
 
     /**
      * Set the banner for the given contest.
-     * @Rest\POST("/{cid}/banner", name="post_contest_banner")
-     * @Rest\PUT("/{cid}/banner", name="put_contest_banner")
      * @IsGranted("ROLE_ADMIN")
      */
+    #[Rest\Post("/{cid}/banner", name: 'post_contest_banner')]
+    #[Rest\Put("/{cid}/banner", name: 'put_contest_banner')]
     #[OA\RequestBody(
         required: true,
         content: new OA\MediaType(
@@ -298,10 +296,10 @@ class ContestController extends AbstractRestController
 
     /**
      * Change the start time or unfreeze (thaw) time of the given contest.
-     * @Rest\Patch("/{cid}")
      * @IsGranted("ROLE_API_WRITER")
      * @throws NonUniqueResultException
      */
+    #[Rest\Patch('/{cid}')]
     #[OA\RequestBody(
         required: true,
         content: new OA\MediaType(
@@ -442,9 +440,9 @@ class ContestController extends AbstractRestController
 
     /**
      * Get the contest in YAML format.
-     * @Rest\Get("/{cid}/contest-yaml")
      * @throws NonUniqueResultException
      */
+    #[Rest\Get('/{cid}/contest-yaml')]
     #[OA\Parameter(ref: '#/components/parameters/cid')]
     #[OA\Response(
         response: 200,
@@ -478,9 +476,9 @@ class ContestController extends AbstractRestController
 
     /**
      * Get the current contest state
-     * @Rest\Get("/{cid}/state")
      * @throws NonUniqueResultException
      */
+    #[Rest\Get('/{cid}/state')]
     #[OA\Parameter(ref: '#/components/parameters/cid')]
     #[OA\Response(
         response: 200,
@@ -500,10 +498,10 @@ class ContestController extends AbstractRestController
 
     /**
      * Get the event feed for the given contest.
-     * @Rest\Get("/{cid}/event-feed")
      * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_API_READER')")
      * @throws NonUniqueResultException
      */
+    #[Rest\Get('/{cid}/event-feed')]
     #[OA\Parameter(ref: '#/components/parameters/cid')]
     #[OA\Parameter(
         name: 'since_id',
@@ -786,11 +784,11 @@ class ContestController extends AbstractRestController
 
     /**
      * Get general status information.
-     * @Rest\Get("/{cid}/status")
      * @IsGranted("ROLE_API_READER")
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
+    #[Rest\Get('/{cid}/status')]
     #[OA\Parameter(ref: '#/components/parameters/cid')]
     #[OA\Response(
         response: 200,
@@ -818,9 +816,7 @@ class ContestController extends AbstractRestController
         return $this->dj->getContestStats($this->getContestWithId($request, $cid));
     }
 
-    /**
-     * @Rest\Get("/{cid}/samples.zip", name="samples_data_zip")
-     */
+    #[Rest\Get('/{cid}/samples.zip', name: 'samples_data_zip')]
     #[OA\Response(
         response: 200,
         description: 'The problem samples, statement & attachments as a ZIP archive',

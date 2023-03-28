@@ -31,9 +31,7 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 
-/**
- * @Rest\Route("/")
- */
+#[Rest\Route('/')]
 #[OA\Tag(name: 'Submissions')]
 #[OA\Parameter(ref: '#/components/parameters/cid')]
 #[OA\Parameter(ref: '#/components/parameters/strict')]
@@ -55,10 +53,10 @@ class SubmissionController extends AbstractRestController
 
     /**
      * Get all the submissions for this contest.
-     * @Rest\Get("submissions")
-     * @Rest\Get("contests/{cid}/submissions")
      * @throws NonUniqueResultException
      */
+    #[Rest\Get('submissions')]
+    #[Rest\Get('contests/{cid}/submissions')]
     #[OA\Response(
         response: 200,
         description: 'Returns all the submissions for this contest',
@@ -87,9 +85,9 @@ class SubmissionController extends AbstractRestController
     /**
      * Get the given submission for this contest.
      * @throws NonUniqueResultException
-     * @Rest\Get("submissions/{id}")
-     * @Rest\Get("contests/{cid}/submissions/{id}")
      */
+    #[Rest\Get('submissions/{id}')]
+    #[Rest\Get('contests/{cid}/submissions/{id}')]
     #[OA\Response(
         response: 200,
         description: 'Returns the given submission for this contest',
@@ -108,11 +106,11 @@ class SubmissionController extends AbstractRestController
 
     /**
      * Add a submission to this contest.
-     * @Rest\Post("contests/{cid}/submissions")
-     * @Rest\Put("contests/{cid}/submissions/{id}")
      * @Security("is_granted('ROLE_TEAM') or is_granted('ROLE_API_WRITER')", message="You need to have the Team Member role to add a submission")
      * @throws NonUniqueResultException
      */
+    #[Rest\Post('contests/{cid}/submissions')]
+    #[Rest\Put('contests/{cid}/submissions/{id}')]
     #[OA\RequestBody(
         required: true,
         content: [
@@ -458,11 +456,11 @@ class SubmissionController extends AbstractRestController
 
     /**
      * Get the files for the given submission as a ZIP archive.
-     * @Rest\Get("contests/{cid}/submissions/{id}/files", name="submission_files")
-     * @Rest\Get("submissions/{id}/files", name="submission_files_root")
      * @IsGranted("ROLE_API_SOURCE_READER")
      * @throws NonUniqueResultException
      */
+    #[Rest\Get('contests/{cid}/submissions/{id}/files', name: 'submission_files')]
+    #[Rest\Get('submissions/{id}/files', name: 'submission_files_root')]
     #[OA\Response(
         response: 200,
         description: 'The files for the submission as a ZIP archive',
@@ -498,10 +496,10 @@ class SubmissionController extends AbstractRestController
 
     /**
      * Get the source code of all the files for the given submission.
-     * @Rest\Get("contests/{cid}/submissions/{id}/source-code")
      * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST')")
      * @throws NonUniqueResultException
      */
+    #[Rest\Get('contests/{cid}/submissions/{id}/source-code')]
     #[OA\Response(
         response: 200,
         description: 'The files for the submission',

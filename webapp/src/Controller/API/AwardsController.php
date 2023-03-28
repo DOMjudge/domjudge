@@ -17,9 +17,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
-/**
- * @Rest\Route("/contests/{cid}/awards")
- */
+#[Rest\Route('/contests/{cid}/awards')]
 #[OA\Tag(name: 'Awards')]
 #[OA\Parameter(ref: '#/components/parameters/cid')]
 #[OA\Parameter(ref: '#/components/parameters/strict')]
@@ -41,10 +39,10 @@ class AwardsController extends AbstractRestController
 
     /**
      * Get all the awards standings for this contest.
-     * @Rest\Get("")
      *
      * @throws Exception
      */
+    #[Rest\Get('')]
     #[OA\Response(
         response: 200,
         description: 'Returns the current teams qualifying for each award',
@@ -60,10 +58,10 @@ class AwardsController extends AbstractRestController
 
     /**
      * Get the specific award for this contest.
-     * @Rest\Get("/{id}")
      *
      * @throws Exception
      */
+    #[Rest\Get('/{id}')]
     #[OA\Response(
         response: 200,
         description: 'Returns the award for this contest',

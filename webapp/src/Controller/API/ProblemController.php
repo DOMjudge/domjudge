@@ -28,9 +28,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Yaml\Yaml;
 
-/**
- * @Rest\Route("/contests/{cid}/problems")
- */
+#[Rest\Route('/contests/{cid}/problems')]
 #[OA\Tag(name: 'Problems')]
 #[OA\Parameter(ref: '#/components/parameters/cid')]
 #[OA\Parameter(ref: '#/components/parameters/strict')]
@@ -53,12 +51,12 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
 
     /**
      * Add one or more problems.
-     * @Rest\Post("/add-data")
      * @IsGranted("ROLE_ADMIN")
      *
      * @throws BadRequestHttpException
      * @throws NonUniqueResultException
      */
+    #[Rest\Post('/add-data')]
     #[OA\RequestBody(
         required: true,
         content: new OA\MediaType(
@@ -105,9 +103,9 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
 
     /**
      * Get all the problems for this contest.
-     * @Rest\Get("")
      * @throws NonUniqueResultException
      */
+    #[Rest\Get('')]
     #[OA\Response(
         response: 200,
         description: 'Returns all the problems for this contest',
@@ -165,10 +163,10 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
 
     /**
      * Add a problem to this contest.
-     * @Rest\Post("")
      * @IsGranted("ROLE_ADMIN")
      * @throws NonUniqueResultException
      */
+    #[Rest\Post('')]
     #[OA\RequestBody(
         required: true,
         content: new OA\MediaType(
@@ -227,9 +225,9 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
 
     /**
      * Unlink a problem from this contest.
-     * @Rest\Delete("/{id}")
      * @IsGranted("ROLE_ADMIN")
      */
+    #[Rest\Delete('/{id}')]
     #[OA\Response(response: 204, description: 'Problem unlinked from contest succeeded')]
     #[OA\Parameter(ref: '#/components/parameters/id')]
     public function unlinkProblemAction(Request $request, string $id): Response
@@ -280,9 +278,9 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
 
     /**
      * Link an existing problem to this contest.
-     * @Rest\Put("/{id}")
      * @IsGranted("ROLE_ADMIN")
      */
+    #[Rest\Put('/{id}')]
     #[OA\RequestBody(
         required: true,
         content: new OA\MediaType(
@@ -369,8 +367,8 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
     /**
      * Get the given problem for this contest.
      * @throws NonUniqueResultException
-     * @Rest\Get("/{id}")
      */
+    #[Rest\Get('/{id}')]
     #[OA\Response(
         response: 200,
         description: 'Returns the given problem for this contest',
@@ -405,8 +403,8 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
     /**
      * Get the statement for given problem for this contest.
      * @throws NonUniqueResultException
-     * @Rest\Get("/{id}/statement")
      */
+    #[Rest\Get('/{id}/statement')]
     #[OA\Response(
         response: 200,
         description: 'Returns the given problem statement for this contest',
