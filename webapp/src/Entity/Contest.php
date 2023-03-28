@@ -12,7 +12,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Exception;
 use JMS\Serializer\Annotation as Serializer;
-use OpenApi\Annotations as OA;
+use OpenApi\Attributes as OA;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -329,8 +329,8 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
      *     options={"comment"="Warning message for this contest shown on the scoreboards"},
      *                          nullable=true)
      * @Serializer\Groups({"Nonstrict"})
-     * @OA\Property(nullable=true)
      */
+    #[OA\Property(nullable: true)]
     private ?string $warningMessage = null;
 
     /**
@@ -945,8 +945,8 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     /**
      * @Serializer\VirtualProperty()
      * @Serializer\Type("string")
-     * @OA\Property(nullable=true)
      */
+    #[OA\Property(nullable: true)]
     public function getScoreboardFreezeDuration(): ?string
     {
         if (!empty($this->getFreezetime())) {

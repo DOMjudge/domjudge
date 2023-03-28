@@ -16,19 +16,19 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
 use Exception;
 use FOS\RestBundle\Controller\Annotations as Rest;
-use OpenApi\Annotations as OA;
+use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
  * @Rest\Route("/contests/{cid}/scoreboard")
- * @OA\Tag(name="Scoreboard")
- * @OA\Parameter(ref="#/components/parameters/cid")
- * @OA\Parameter(ref="#/components/parameters/strict")
- * @OA\Response(response="400", ref="#/components/responses/InvalidResponse")
- * @OA\Response(response="401", ref="#/components/responses/Unauthenticated")
- * @OA\Response(response="403", ref="#/components/responses/Unauthorized")
- * @OA\Response(response="404", ref="#/components/responses/NotFound")
  */
+#[OA\Tag(name: 'Scoreboard')]
+#[OA\Parameter(ref: '#/components/parameters/cid')]
+#[OA\Parameter(ref: '#/components/parameters/strict')]
+#[OA\Response(ref: '#/components/responses/InvalidResponse', response: 400)]
+#[OA\Response(ref: '#/components/responses/Unauthenticated', response: 401)]
+#[OA\Response(ref: '#/components/responses/Unauthorized', response: 403)]
+#[OA\Response(ref: '#/components/responses/NotFound', response: 404)]
 class ScoreboardController extends AbstractRestController
 {
     public function __construct(
@@ -44,49 +44,49 @@ class ScoreboardController extends AbstractRestController
     /**
      * Get the scoreboard for this contest.
      * @Rest\Get("")
-     * @OA\Response(
-     *     response="200",
-     *     description="Returns the scoreboard",
-     *     @OA\JsonContent(ref="#/components/schemas/Scoreboard")
-     * )
-     * @OA\Parameter(
-     *     name="allteams",
-     *     in="query",
-     *     description="Also show invisible teams. Requires jury privileges",
-     *     @OA\Schema(type="boolean")
-     * )
-     * @OA\Parameter(
-     *     name="category",
-     *     in="query",
-     *     description="Get the scoreboard for only this category",
-     *     @OA\Schema(type="integer")
-     * )
-     * @OA\Parameter(
-     *     name="country",
-     *     in="query",
-     *     description="Get the scoreboard for only this country (in ISO 3166-1 alpha-3 format)",
-     *     @OA\Schema(type="string")
-     * )
-     * @OA\Parameter(
-     *     name="affiliation",
-     *     in="query",
-     *     description="Get the scoreboard for only this affiliation",
-     *     @OA\Schema(type="integer")
-     * )
-     * @OA\Parameter(
-     *     name="public",
-     *     in="query",
-     *     description="Show publicly visible scoreboard, even for users with more permissions",
-     *     @OA\Schema(type="boolean")
-     * )
-     * @OA\Parameter(
-     *     name="sortorder",
-     *     in="query",
-     *     description="The sort order to get the scoreboard for. If not given, uses the lowest sortorder",
-     *     @OA\Schema(type="integer")
-     * )
      * @throws NonUniqueResultException
      */
+    #[OA\Response(
+        response: 200,
+        description: 'Returns the scoreboard',
+        content: new OA\JsonContent(ref: '#/components/schemas/Scoreboard')
+    )]
+    #[OA\Parameter(
+        name: 'allteams',
+        description: 'Also show invisible teams. Requires jury privileges',
+        in: 'query',
+        schema: new OA\Schema(type: 'boolean')
+    )]
+    #[OA\Parameter(
+        name: 'category',
+        description: 'Get the scoreboard for only this category',
+        in: 'query',
+        schema: new OA\Schema(type: 'integer')
+    )]
+    #[OA\Parameter(
+        name: 'country',
+        description: 'Get the scoreboard for only this country (in ISO 3166-1 alpha-3 format)',
+        in: 'query',
+        schema: new OA\Schema(type: 'string')
+    )]
+    #[OA\Parameter(
+        name: 'affiliation',
+        description: 'Get the scoreboard for only this affiliation',
+        in: 'query',
+        schema: new OA\Schema(type: 'integer')
+    )]
+    #[OA\Parameter(
+        name: 'public',
+        description: 'Show publicly visible scoreboard, even for users with more permissions',
+        in: 'query',
+        schema: new OA\Schema(type: 'boolean')
+    )]
+    #[OA\Parameter(
+        name: 'sortorder',
+        description: 'The sort order to get the scoreboard for. If not given, uses the lowest sortorder',
+        in: 'query',
+        schema: new OA\Schema(type: 'integer')
+    )]
     public function getScoreboardAction(Request $request): array
     {
         $filter = new Filter();

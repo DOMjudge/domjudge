@@ -12,21 +12,21 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
-use OpenApi\Annotations as OA;
+use OpenApi\Attributes as OA;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
  * @Rest\Route("/")
- * @OA\Tag(name="Judgements")
- * @OA\Parameter(ref="#/components/parameters/cid")
- * @OA\Parameter(ref="#/components/parameters/strict")
- * @OA\Response(response="404", ref="#/components/responses/NotFound")
- * @OA\Response(response="401", ref="#/components/responses/Unauthenticated")
- * @OA\Response(response="400", ref="#/components/responses/InvalidResponse")
- * @OA\Response(response="403", ref="#/components/responses/Unauthorized")
  */
+#[OA\Tag(name: 'Judgements')]
+#[OA\Parameter(ref: '#/components/parameters/cid')]
+#[OA\Parameter(ref: '#/components/parameters/strict')]
+#[OA\Response(ref: '#/components/responses/NotFound', response: 404)]
+#[OA\Response(ref: '#/components/responses/Unauthenticated', response: 401)]
+#[OA\Response(ref: '#/components/responses/InvalidResponse', response: 400)]
+#[OA\Response(ref: '#/components/responses/Unauthorized', response: 403)]
 class JudgementController extends AbstractRestController implements QueryObjectTransformer
 {
     /**
@@ -53,34 +53,34 @@ class JudgementController extends AbstractRestController implements QueryObjectT
      * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_TEAM') or is_granted('ROLE_JUDGEHOST') or is_granted('ROLE_API_READER')")
      * @Rest\Get("contests/{cid}/judgements")
      * @Rest\Get("judgements")
-     * @OA\Response(
-     *     response="200",
-     *     description="Returns all the judgements for this contest",
-     *     @OA\JsonContent(
-     *         type="array",
-     *         @OA\Items(
-     *             allOf={
-     *                 @OA\Schema(ref=@Model(type=Judging::class)),
-     *                 @OA\Schema(ref="#/components/schemas/JudgementExtraFields")
-     *             }
-     *         )
-     *     )
-     * )
-     * @OA\Parameter(ref="#/components/parameters/idlist")
-     * @OA\Parameter(
-     *     name="result",
-     *     in="query",
-     *     description="Only show judgements with the given result",
-     *     @OA\Schema(type="string")
-     * )
-     * @OA\Parameter(
-     *     name="submission_id",
-     *     in="query",
-     *     description="Only show judgements for the given submission",
-     *     @OA\Schema(type="string")
-     * )
      * @throws NonUniqueResultException
      */
+    #[OA\Response(
+        response: 200,
+        description: 'Returns all the judgements for this contest',
+        content: new OA\JsonContent(
+            type: 'array',
+            items: new OA\Items(
+                allOf: [
+                    new OA\Schema(ref: new Model(type: Judging::class)),
+                    new OA\Schema(ref: '#/components/schemas/JudgementExtraFields'),
+                ]
+            )
+        )
+    )]
+    #[OA\Parameter(ref: '#/components/parameters/idlist')]
+    #[OA\Parameter(
+        name: 'result',
+        description: 'Only show judgements with the given result',
+        in: 'query',
+        schema: new OA\Schema(type: 'string')
+    )]
+    #[OA\Parameter(
+        name: 'submission_id',
+        description: 'Only show judgements for the given submission',
+        in: 'query',
+        schema: new OA\Schema(type: 'string')
+    )]
     public function listAction(Request $request): Response
     {
         return parent::performListAction($request);
@@ -92,18 +92,18 @@ class JudgementController extends AbstractRestController implements QueryObjectT
      * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_TEAM') or is_granted('ROLE_JUDGEHOST') or is_granted('ROLE_API_READER')")
      * @Rest\Get("contests/{cid}/judgements/{id<\d+>}")
      * @Rest\Get("judgements/{id<\d+>}")
-     * @OA\Response(
-     *     response="200",
-     *     description="Returns the given judgement for this contest",
-     *     @OA\JsonContent(
-     *         allOf={
-     *             @OA\Schema(ref=@Model(type=Judging::class)),
-     *             @OA\Schema(ref="#/components/schemas/JudgementExtraFields")
-     *         }
-     *     )
-     * )
-     * @OA\Parameter(ref="#/components/parameters/id")
      */
+    #[OA\Response(
+        response: 200,
+        description: 'Returns the given judgement for this contest',
+        content: new OA\JsonContent(
+            allOf: [
+                new OA\Schema(ref: new Model(type: Judging::class)),
+                new OA\Schema(ref: '#/components/schemas/JudgementExtraFields'),
+            ]
+        )
+    )]
+    #[OA\Parameter(ref: '#/components/parameters/id')]
     public function singleAction(Request $request, string $id): Response
     {
         return parent::performSingleAction($request, $id);

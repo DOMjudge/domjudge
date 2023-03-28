@@ -6,7 +6,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
-use OpenApi\Annotations as OA;
+use OpenApi\Attributes as OA;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
@@ -48,8 +48,8 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
      *              "collation"="utf8mb4_bin"},
      *     nullable=true)
      * @Serializer\Groups({"Nonstrict"})
-     * @OA\Property(nullable=true)
      */
+    #[OA\Property(nullable: true)]
     protected ?string $externalid = null;
 
     /**
@@ -181,8 +181,8 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
      * @Serializer\VirtualProperty()
      * @Serializer\SerializedName("time")
      * @Serializer\Type("string")
-     * @OA\Property(nullable=true)
      */
+    #[OA\Property(nullable: true)]
     public function getAbsoluteSubmitTime(): string
     {
         return Utils::absTime($this->getSubmittime());
@@ -268,8 +268,8 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
      * @Serializer\VirtualProperty()
      * @Serializer\SerializedName("problem_id")
      * @Serializer\Type("string")
-     * @OA\Property(nullable=true)
      */
+    #[OA\Property(nullable: true)]
     public function getProblemId(): ?int
     {
         return $this->getProblem()?->getProbid();
@@ -301,8 +301,8 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
      * @Serializer\VirtualProperty()
      * @Serializer\SerializedName("reply_to_id")
      * @Serializer\Type("string")
-     * @OA\Property(nullable=true)
      */
+    #[OA\Property(nullable: true)]
     public function getInReplyToId(): ?int
     {
         return $this->getInReplyTo()?->getClarid();
@@ -339,8 +339,8 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
      * @Serializer\VirtualProperty()
      * @Serializer\SerializedName("from_team_id")
      * @Serializer\Type("string")
-     * @OA\Property(nullable=true)
      */
+    #[OA\Property(nullable: true)]
     public function getSenderId(): ?int
     {
         return $this->getSender()?->getTeamid();
@@ -361,8 +361,8 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
      * @Serializer\VirtualProperty()
      * @Serializer\SerializedName("to_team_id")
      * @Serializer\Type("string")
-     * @OA\Property(nullable=true)
      */
+    #[OA\Property(nullable: true)]
     public function getRecipientId(): ?int
     {
         return $this->getRecipient()?->getTeamid();

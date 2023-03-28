@@ -21,7 +21,7 @@ use Doctrine\ORM\QueryBuilder;
 use Exception;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
-use OpenApi\Annotations as OA;
+use OpenApi\Attributes as OA;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -33,14 +33,14 @@ use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 
 /**
  * @Rest\Route("/")
- * @OA\Tag(name="Submissions")
- * @OA\Parameter(ref="#/components/parameters/cid")
- * @OA\Parameter(ref="#/components/parameters/strict")
- * @OA\Response(response="400", ref="#/components/responses/InvalidResponse")
- * @OA\Response(response="401", ref="#/components/responses/Unauthenticated")
- * @OA\Response(response="403", ref="#/components/responses/Unauthorized")
- * @OA\Response(response="404", ref="#/components/responses/NotFound")
  */
+#[OA\Tag(name: 'Submissions')]
+#[OA\Parameter(ref: '#/components/parameters/cid')]
+#[OA\Parameter(ref: '#/components/parameters/strict')]
+#[OA\Response(ref: '#/components/responses/InvalidResponse', response: 400)]
+#[OA\Response(ref: '#/components/responses/Unauthenticated', response: 401)]
+#[OA\Response(ref: '#/components/responses/Unauthorized', response: 403)]
+#[OA\Response(ref: '#/components/responses/NotFound', response: 404)]
 class SubmissionController extends AbstractRestController
 {
     public function __construct(
@@ -57,28 +57,28 @@ class SubmissionController extends AbstractRestController
      * Get all the submissions for this contest.
      * @Rest\Get("submissions")
      * @Rest\Get("contests/{cid}/submissions")
-     * @OA\Response(
-     *     response="200",
-     *     description="Returns all the submissions for this contest",
-     *     @OA\JsonContent(
-     *         type="array",
-     *         @OA\Items(
-     *             allOf={
-     *                 @OA\Schema(ref=@Model(type=Submission::class)),
-     *                 @OA\Schema(ref="#/components/schemas/Files")
-     *             }
-     *         )
-     *     )
-     * )
-     * @OA\Parameter(ref="#/components/parameters/idlist")
-     * @OA\Parameter(
-     *     name="language_id",
-     *     in="query",
-     *     description="Only show submissions for the given language",
-     *     @OA\Schema(type="string")
-     * )
      * @throws NonUniqueResultException
      */
+    #[OA\Response(
+        response: 200,
+        description: 'Returns all the submissions for this contest',
+        content: new OA\JsonContent(
+            type: 'array',
+            items: new OA\Items(
+                allOf: [
+                    new OA\Schema(ref: new Model(type: Submission::class)),
+                    new OA\Schema(ref: '#/components/schemas/Files'),
+                ]
+            )
+        )
+    )]
+    #[OA\Parameter(ref: '#/components/parameters/idlist')]
+    #[OA\Parameter(
+        name: 'language_id',
+        description: 'Only show submissions for the given language',
+        in: 'query',
+        schema: new OA\Schema(type: 'string')
+    )]
     public function listAction(Request $request): Response
     {
         return parent::performListAction($request);
@@ -89,18 +89,18 @@ class SubmissionController extends AbstractRestController
      * @throws NonUniqueResultException
      * @Rest\Get("submissions/{id}")
      * @Rest\Get("contests/{cid}/submissions/{id}")
-     * @OA\Response(
-     *     response="200",
-     *     description="Returns the given submission for this contest",
-     *     @OA\JsonContent(
-     *         allOf={
-     *             @OA\Schema(ref=@Model(type=Submission::class)),
-     *             @OA\Schema(ref="#/components/schemas/Files")
-     *         }
-     *     )
-     * )
-     * @OA\Parameter(ref="#/components/parameters/id")
      */
+    #[OA\Response(
+        response: 200,
+        description: 'Returns the given submission for this contest',
+        content: new OA\JsonContent(
+            allOf: [
+                new OA\Schema(ref: new Model(type: Submission::class)),
+                new OA\Schema(ref: '#/components/schemas/Files'),
+            ]
+        )
+    )]
+    #[OA\Parameter(ref: '#/components/parameters/id')]
     public function singleAction(Request $request, string $id): Response
     {
         return parent::performSingleAction($request, $id);
@@ -111,97 +111,109 @@ class SubmissionController extends AbstractRestController
      * @Rest\Post("contests/{cid}/submissions")
      * @Rest\Put("contests/{cid}/submissions/{id}")
      * @Security("is_granted('ROLE_TEAM') or is_granted('ROLE_API_WRITER')", message="You need to have the Team Member role to add a submission")
-     * @OA\RequestBody(
-     *     required=true,
-     *     @OA\MediaType(
-     *         mediaType="multipart/form-data",
-     *         @OA\Schema(
-     *             required={"problem","language","code"},
-     *             @OA\Property(
-     *                 property="problem",
-     *                 description="The problem to submit a solution for",
-     *                 type="string"
-     *             ),
-     *             @OA\Property(
-     *                 property="language",
-     *                 description="The language to submit a solution in",
-     *                 type="string"
-     *             ),
-     *             @OA\Property(
-     *                 property="code",
-     *                 type="array",
-     *                 description="The file(s) to submit",
-     *                 @OA\Items(type="string", format="binary")
-     *             ),
-     *             @OA\Property(
-     *                 property="entry_point",
-     *                 type="string",
-     *                 description="The entry point for the submission. Required for languages requiring an entry point",
-     *             )
-     *         )
-     *     ),
-     *     @OA\MediaType(
-     *         mediaType="application/json",
-     *         @OA\Schema(
-     *             required={"problem_id","language_id","files"},
-     *             @OA\Property(
-     *                 property="problem_id",
-     *                 description="The problem ID to submit a solution for",
-     *                 type="string"
-     *             ),
-     *             @OA\Property(
-     *                 property="language_id",
-     *                 description="The language to submit a solution in",
-     *                 type="string"
-     *             ),
-     *             @OA\Property(
-     *                 property="team_id",
-     *                 description="The team to submit a solution for. Only used when adding a submission as admin",
-     *                 type="string"
-     *             ),
-     *             @OA\Property(
-     *                 property="time",
-     *                 description="The time to use for the submission. Only used when adding a submission as admin",
-     *                 type="string",
-     *                 format="date-time"
-     *             ),
-     *             @OA\Property(
-     *                 property="id",
-     *                 description="The ID to use for the submission. Only used when adding a submission as admin and only allowed with PUT",
-     *                 type="string"
-     *             ),
-     *             @OA\Property(
-     *                 property="files",
-     *                 type="array",
-     *                 minItems=1,
-     *                 maxItems=1,
-     *                 description="The base64 encoded ZIP file to submit",
-     *                 @OA\Items(
-     *                     type="object",
-     *                     required={"data"},
-     *                     @OA\Property(property="data", type="string", description="The base64 encoded ZIP archive")
-     *                 )
-     *             ),
-     *             @OA\Property(
-     *                 property="entry_point",
-     *                 type="string",
-     *                 description="The entry point for the submission. Required for languages requiring an entry point",
-     *             )
-     *         )
-     *     )
-     * )
-     * @OA\Response(
-     *     response="200",
-     *     description="When submitting was successful",
-     *     @OA\JsonContent(
-     *         allOf={
-     *             @OA\Schema(ref=@Model(type=Submission::class)),
-     *             @OA\Schema(ref="#/components/schemas/Files")
-     *         }
-     *     )
-     * )
      * @throws NonUniqueResultException
      */
+    #[OA\RequestBody(
+        required: true,
+        content: [
+            new OA\MediaType(
+                mediaType: 'multipart/form-data',
+                schema: new OA\Schema(
+                    required: ['problem', 'language', 'code'],
+                    properties: [
+                        new OA\Property(
+                            property: 'problem',
+                            description: 'The problem to submit a solution for',
+                            type: 'string'
+                        ),
+                        new OA\Property(
+                            property: 'language',
+                            description: 'The language to submit a solution in',
+                            type: 'string'
+                        ),
+                        new OA\Property(
+                            property: 'code',
+                            description: 'The file(s) to submit',
+                            type: 'array',
+                            items: new OA\Items(type: 'string', format: 'binary')
+                        ),
+                        new OA\Property(
+                            property: 'entry_point',
+                            description: 'The entry point for the submission. Required for languages requiring an entry point',
+                            type: 'string'
+                        ),
+                    ]
+                )
+            ),
+            new OA\MediaType(
+                mediaType: 'application/json',
+                schema: new OA\Schema(
+                    required: ['problem_id', 'language_id', 'files'],
+                    properties: [
+                        new OA\Property(
+                            property: 'problem_id',
+                            description: 'The problem ID to submit a solution for',
+                            type: 'string'
+                        ),
+                        new OA\Property(
+                            property: 'language_id',
+                            description: 'The language to submit a solution in',
+                            type: 'string'
+                        ),
+                        new OA\Property(
+                            property: 'team_id',
+                            description: 'The team to submit a solution for. Only used when adding a submission as admin',
+                            type: 'string'
+                        ),
+                        new OA\Property(
+                            property: 'time',
+                            description: 'The time to use for the submission. Only used when adding a submission as admin',
+                            type: 'string',
+                            format: 'date-time'
+                        ),
+                        new OA\Property(
+                            property: 'id',
+                            description: 'The ID to use for the submission. Only used when adding a submission as admin and only allowed with PUT',
+                            type: 'string'
+                        ),
+                        new OA\Property(
+                            property: 'files',
+                            description: 'The base64 encoded ZIP file to submit',
+                            type: 'array',
+                            items: new OA\Items(
+                                required: ['data'],
+                                properties: [
+                                    new OA\Property(
+                                        property: 'data',
+                                        description: 'The base64 encoded ZIP archive',
+                                        type: 'string'
+                                    ),
+                                ],
+                                type: 'object'
+                            ),
+                            maxItems: 1,
+                            minItems: 1
+                        ),
+                        new OA\Property(
+                            property: 'entry_point',
+                            description: 'The entry point for the submission. Required for languages requiring an entry point',
+                            type: 'string'
+                        ),
+                    ]
+                )
+            ),
+        ]
+    )]
+    #[OA\Response(
+        response: 200,
+        description: 'When submitting was successful',
+        content: new OA\JsonContent(
+            allOf: [
+                new OA\Schema(ref: new Model(type: Submission::class)),
+                new OA\Schema(ref: '#/components/schemas/Files'),
+            ]
+        )
+    )]
     public function addSubmissionAction(Request $request, ?string $id): Response
     {
         $required = [
@@ -450,17 +462,14 @@ class SubmissionController extends AbstractRestController
      * @Rest\Get("submissions/{id}/files", name="submission_files_root")
      * @IsGranted("ROLE_API_SOURCE_READER")
      * @throws NonUniqueResultException
-     * @OA\Response(
-     *     response="200",
-     *     description="The files for the submission as a ZIP archive",
-     *     @OA\MediaType(mediaType="application/zip")
-     * )
-     * @OA\Response(
-     *     response="500",
-     *     description="An error occurred while creating the ZIP file"
-     * )
-     * @OA\Parameter(ref="#/components/parameters/id")
      */
+    #[OA\Response(
+        response: 200,
+        description: 'The files for the submission as a ZIP archive',
+        content: new OA\MediaType(mediaType: 'application/zip')
+    )]
+    #[OA\Response(response: 500, description: 'An error occurred while creating the ZIP file')]
+    #[OA\Parameter(ref: '#/components/parameters/id')]
     public function getSubmissionFilesAction(Request $request, string $id): Response
     {
         $queryBuilder = $this->getQueryBuilder($request)
@@ -492,13 +501,13 @@ class SubmissionController extends AbstractRestController
      * @Rest\Get("contests/{cid}/submissions/{id}/source-code")
      * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST')")
      * @throws NonUniqueResultException
-     * @OA\Response(
-     *     response="200",
-     *     description="The files for the submission",
-     *     @OA\JsonContent(ref="#/components/schemas/SourceCodeList")
-     * )
-     * @OA\Parameter(ref="#/components/parameters/id")
      */
+    #[OA\Response(
+        response: 200,
+        description: 'The files for the submission',
+        content: new OA\JsonContent(ref: '#/components/schemas/SourceCodeList')
+    )]
+    #[OA\Parameter(ref: '#/components/parameters/id')]
     public function getSubmissionSourceCodeAction(Request $request, string $id): array
     {
         $queryBuilder = $this->em->createQueryBuilder()

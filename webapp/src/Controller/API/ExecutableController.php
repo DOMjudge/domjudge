@@ -8,14 +8,14 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
-use OpenApi\Annotations as OA;
+use OpenApi\Attributes as OA;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * @Rest\Route("/executables")
- * @OA\Tag(name="Executables")
  */
+#[OA\Tag(name: 'Executables')]
 class ExecutableController extends AbstractFOSRestController
 {
     public function __construct(protected readonly EntityManagerInterface $em, protected readonly DOMJudgeService $dj)
@@ -27,16 +27,18 @@ class ExecutableController extends AbstractFOSRestController
      * @throws NonUniqueResultException
      * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST')")
      * @Rest\Get("/{id}")
-     * @OA\Parameter(ref="#/components/parameters/id")
-     * @OA\Response(
-     *     response="200",
-     *     description="Information about the requested executable",
-     *     @OA\JsonContent(type="string", description="Base64-encoded executable contents")
-     * )
-     * @OA\Response(response="400", ref="#/components/responses/InvalidResponse")
-     * @OA\Response(response="401", ref="#/components/responses/Unauthenticated")
-     * @OA\Response(response="403", ref="#/components/responses/Unauthorized")
      */
+    #[OA\Parameter(ref: '#/components/parameters/id')]
+    #[OA\Response(
+        response: 200,
+        description: 'Information about the requested executable',
+        content: new OA\JsonContent(
+            description: 'Base64-encoded executable contents',
+            type: 'string')
+    )]
+    #[OA\Response(ref: '#/components/responses/InvalidResponse', response: 400)]
+    #[OA\Response(ref: '#/components/responses/Unauthenticated', response: 401)]
+    #[OA\Response(ref: '#/components/responses/Unauthorized', response: 403)]
     public function singleAction(string $id): string
     {
         /** @var Executable|null $executable */

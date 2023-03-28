@@ -5,7 +5,7 @@ use App\Validator\Constraints\Identifier;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use OpenApi\Annotations as OA;
+use OpenApi\Attributes as OA;
 use JMS\Serializer\Annotation as Serializer;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -110,8 +110,8 @@ class Language extends BaseApiEntity
      *     options={"comment"="The description used in the UI for the entry point field."},
      *     nullable=true)
      * @Serializer\SerializedName("entry_point_name")
-     * @OA\Property(nullable=true)
      */
+    #[OA\Property(nullable: true)]
     private ?string $entry_point_description = null;
 
     /**
@@ -132,8 +132,8 @@ class Language extends BaseApiEntity
      * @Serializer\Type("string")
      * @Serializer\Groups({"Nonstrict"})
      * @Serializer\SerializedName("compile_executable_hash")
-     * @OA\Property(nullable=true)
      */
+    #[OA\Property(nullable: true)]
     public function getCompileExecutableHash(): ?string
     {
         return $this->compile_executable?->getImmutableExecutable()->getHash();

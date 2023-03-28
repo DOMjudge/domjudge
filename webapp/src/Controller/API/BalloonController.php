@@ -8,42 +8,42 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
 use Exception;
 use FOS\RestBundle\Controller\Annotations as Rest;
-use OpenApi\Annotations as OA;
+use OpenApi\Attributes as OA;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
  * @Rest\Route("/contests/{cid}/balloons")
- * @OA\Tag(name="Balloons")
- * @OA\Parameter(ref="#/components/parameters/cid")
- * @OA\Response(response="404", ref="#/components/responses/NotFound")
- * @OA\Response(response="400", ref="#/components/responses/InvalidResponse")
- * @OA\Response(response="401", ref="#/components/responses/Unauthenticated")
- * @OA\Response(response="403", ref="#/components/responses/Unauthorized")
  * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_API_READER') or is_granted('ROLE_BALLOON')")
  */
+#[OA\Tag(name: 'Balloons')]
+#[OA\Parameter(ref: '#/components/parameters/cid')]
+#[OA\Response(ref: '#/components/responses/NotFound', response: 404)]
+#[OA\Response(ref: '#/components/responses/InvalidResponse', response: 400)]
+#[OA\Response(ref: '#/components/responses/Unauthenticated', response: 401)]
+#[OA\Response(ref: '#/components/responses/Unauthorized', response: 403)]
 class BalloonController extends AbstractRestController
 {
     /**
      * Get all the balloons for this contest.
      * @Rest\Get("")
-     * @OA\Response(
-     *     response="200",
-     *     description="Returns the balloons for this contest.",
-     *     @OA\JsonContent(
-     *         type="array",
-     *         @OA\Items(ref="#/components/schemas/Balloon")
-     *     )
-     * )
-     * @OA\Parameter(
-     *     name="todo",
-     *     in="query",
-     *     description="Only show balloons not handed out yet.",
-     *     @OA\Schema(type="boolean")
-     * )
      *
      * @throws NonUniqueResultException
      */
+    #[OA\Response(
+        response: 200,
+        description: 'Returns the balloons for this contest.',
+        content: new OA\JsonContent(
+            type: 'array',
+            items: new OA\Items(ref: '#/components/schemas/Balloon')
+        )
+    )]
+    #[OA\Parameter(
+        name: 'todo',
+        description: 'Only show balloons not handed out yet.',
+        in: 'query',
+        schema: new OA\Schema(type: 'boolean')
+    )]
     public function listAction(Request $request, BalloonService $balloonService): array
     {
         /** @var Contest $contest */
@@ -54,13 +54,13 @@ class BalloonController extends AbstractRestController
     /**
      * Mark a specific balloon as done.
      * @Rest\Post("/{balloonId<\d+>}/done")
-     * @OA\Response(
-     *     response="204",
-     *     description="The balloon was now marked as done or already marked as such.",
-     * )
-     * @OA\Parameter(ref="#/components/parameters/balloonId")
      * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_BALLOON')")
      */
+    #[OA\Response(
+        response: 204,
+        description: 'The balloon was now marked as done or already marked as such.'
+    )]
+    #[OA\Parameter(ref: '#/components/parameters/balloonId')]
     public function markDoneAction(int $balloonId, BalloonService $balloonService): void
     {
         $balloonService->setDone($balloonId);

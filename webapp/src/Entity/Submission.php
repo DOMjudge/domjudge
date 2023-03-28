@@ -7,7 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
-use OpenApi\Annotations as OA;
+use OpenApi\Attributes as OA;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
@@ -52,8 +52,8 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
      *     nullable=true)
      * @Serializer\Groups({"Nonstrict"})
      * @Serializer\SerializedName("external_id")
-     * @OA\Property(nullable=true)
      */
+    #[OA\Property(nullable: true)]
     protected ?string $externalid = null;
 
     /**
@@ -86,8 +86,8 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
      *     options={"comment"="Optional entry point. Can be used e.g. for java main class."},
      *     nullable=true)
      * @Serializer\Expose(if="context.getAttribute('domjudge_service').checkrole('jury')")
-     * @OA\Property(nullable=true)
      */
+    #[OA\Property(nullable: true)]
     private ?string $entry_point = null;
 
     /**
