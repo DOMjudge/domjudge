@@ -9,19 +9,17 @@ use JMS\Serializer\Annotation as Serializer;
 class JudgingWrapper
 {
     public function __construct(
-        /** @Serializer\Inline() */
+        #[Serializer\Inline]
         protected readonly Judging $judging,
-        /** @Serializer\Exclude() */
+        #[Serializer\Exclude]
         protected readonly ?float $maxRunTime = null,
-        /** @Serializer\SerializedName("judgement_type_id") */
+        #[Serializer\SerializedName('judgement_type_id')]
         protected readonly ?string $judgementTypeId = null
     ) {}
 
-    /**
-     * @Serializer\VirtualProperty()
-     * @Serializer\SerializedName("max_run_time")
-     * @Serializer\Type("float")
-     */
+    #[Serializer\VirtualProperty]
+    #[Serializer\SerializedName('max_run_time')]
+    #[Serializer\Type('float')]
     public function getMaxRunTime(): ?float
     {
         return Utils::roundedFloat($this->maxRunTime);

@@ -104,8 +104,8 @@ class Rejudging
     /**
      * @ORM\ManyToOne(targetEntity="Rejudging")
      * @ORM\JoinColumn(name="repeat_rejudgingid", referencedColumnName="rejudgingid", onDelete="SET NULL")
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private ?Rejudging $repeatedRejudging = null;
 
     public function __construct()

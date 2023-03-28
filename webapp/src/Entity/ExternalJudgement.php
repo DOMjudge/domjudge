@@ -54,8 +54,8 @@ class ExternalJudgement
      *     options={"comment"="Result / difference verified?",
      *              "default"=0},
      *     nullable=false)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private bool $verified = false;
 
     /**
@@ -63,8 +63,8 @@ class ExternalJudgement
      *     options={"comment"="Name of user who verified the result / difference",
      *              "default"=NULL},
      *     nullable=true)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private ?string $jury_member = null;
 
     /**
@@ -72,8 +72,8 @@ class ExternalJudgement
      *     options={"comment"="Optional additional information provided by the verifier",
      *              "default"=NULL},
      *     nullable=true)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private ?string $verify_comment = null;
 
     /**

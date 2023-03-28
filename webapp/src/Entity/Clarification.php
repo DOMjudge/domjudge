@@ -37,9 +37,9 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
      * @ORM\Column(type="integer", length=4, name="clarid",
      *     options={"comment"="Clarification ID","unsigned"=true},
      *     nullable=false)
-     * @Serializer\SerializedName("id")
-     * @Serializer\Type("string")
      */
+    #[Serializer\SerializedName('id')]
+    #[Serializer\Type('string')]
     protected int $clarid;
 
     /**
@@ -47,96 +47,96 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
      *     options={"comment"="Clarification ID in an external system, should be unique inside a single contest",
      *              "collation"="utf8mb4_bin"},
      *     nullable=true)
-     * @Serializer\Groups({"Nonstrict"})
      */
     #[OA\Property(nullable: true)]
+    #[Serializer\Groups(['Nonstrict'])]
     protected ?string $externalid = null;
 
     /**
      * @ORM\Column(type="decimal", precision=32, scale=9, name="submittime", options={"comment"="Time sent", "unsigned"=true}, nullable=false)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private string|float $submittime;
 
     /**
      * @ORM\Column(type="string", name="jury_member", length=255,
      *     options={"comment"="Name of jury member who answered this"},
      *     nullable=true)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private ?string $jury_member = null;
 
     /**
      * @ORM\Column(type="string", name="category", length=255,
      *     options={"comment"="Category associated to this clarification; only set for non problem clars"},
      *     nullable=true)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private ?string $category = null;
 
     /**
      * @ORM\Column(type="string", name="queue", length=255,
      *     options={"comment"="Queue associated to this clarification"},
      *     nullable=true)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private ?string $queue = null;
 
     /**
      * @ORM\Column(type="text", length=4294967295, name="body",
      *     options={"comment"="Clarification text"},
      *     nullable=false)
-     * @Serializer\SerializedName("text")
      */
+    #[Serializer\SerializedName('text')]
     private string $body;
 
     /**
      * @ORM\Column(type="boolean", name="answered",
      *     options={"comment"="Has been answered by jury?","default":"0"},
      *     nullable=false)
-     * @Serializer\Groups({"RestrictedNonstrict"})
      */
+    #[Serializer\Groups(['RestrictedNonstrict'])]
     private bool $answered = false;
 
     /**
      * @ORM\ManyToOne(targetEntity="Problem", inversedBy="clarifications")
      * @ORM\JoinColumn(name="probid", referencedColumnName="probid", onDelete="SET NULL")
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private ?Problem $problem = null;
 
     /**
      * @ORM\ManyToOne(targetEntity="Contest", inversedBy="clarifications")
      * @ORM\JoinColumn(name="cid", referencedColumnName="cid", onDelete="CASCADE")
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private Contest $contest;
 
     /**
      * @ORM\ManyToOne(targetEntity="Clarification", inversedBy="replies")
      * @ORM\JoinColumn(name="respid", referencedColumnName="clarid", onDelete="SET NULL")
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private ?Clarification $in_reply_to = null;
 
     /**
      * @ORM\OneToMany(targetEntity="Clarification", mappedBy="in_reply_to")
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private Collection $replies;
 
     /**
      * @ORM\ManyToOne(targetEntity="Team", inversedBy="sent_clarifications")
      * @ORM\JoinColumn(name="sender", referencedColumnName="teamid", onDelete="CASCADE")
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private ?Team $sender = null;
 
     /**
      * @ORM\ManyToOne(targetEntity="Team", inversedBy="received_clarifications")
      * @ORM\JoinColumn(name="recipient", referencedColumnName="teamid", onDelete="CASCADE")
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private ?Team $recipient = null;
 
     public function __construct()
@@ -177,22 +177,18 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
         return $this->submittime;
     }
 
-    /**
-     * @Serializer\VirtualProperty()
-     * @Serializer\SerializedName("time")
-     * @Serializer\Type("string")
-     */
     #[OA\Property(nullable: true)]
+    #[Serializer\VirtualProperty]
+    #[Serializer\SerializedName('time')]
+    #[Serializer\Type('string')]
     public function getAbsoluteSubmitTime(): string
     {
         return Utils::absTime($this->getSubmittime());
     }
 
-    /**
-     * @Serializer\VirtualProperty()
-     * @Serializer\SerializedName("contest_time")
-     * @Serializer\Type("string")
-     */
+    #[Serializer\VirtualProperty]
+    #[Serializer\SerializedName('contest_time')]
+    #[Serializer\Type('string')]
     public function getRelativeSubmitTime(): string
     {
         return Utils::relTime($this->getSubmittime() - $this->getContest()->getStarttime());
@@ -264,12 +260,10 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
         return $this->problem;
     }
 
-    /**
-     * @Serializer\VirtualProperty()
-     * @Serializer\SerializedName("problem_id")
-     * @Serializer\Type("string")
-     */
     #[OA\Property(nullable: true)]
+    #[Serializer\VirtualProperty]
+    #[Serializer\SerializedName('problem_id')]
+    #[Serializer\Type('string')]
     public function getProblemId(): ?int
     {
         return $this->getProblem()?->getProbid();
@@ -297,12 +291,10 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
         return $this->in_reply_to;
     }
 
-    /**
-     * @Serializer\VirtualProperty()
-     * @Serializer\SerializedName("reply_to_id")
-     * @Serializer\Type("string")
-     */
     #[OA\Property(nullable: true)]
+    #[Serializer\VirtualProperty]
+    #[Serializer\SerializedName('reply_to_id')]
+    #[Serializer\Type('string')]
     public function getInReplyToId(): ?int
     {
         return $this->getInReplyTo()?->getClarid();
@@ -335,12 +327,10 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
         return $this->sender;
     }
 
-    /**
-     * @Serializer\VirtualProperty()
-     * @Serializer\SerializedName("from_team_id")
-     * @Serializer\Type("string")
-     */
     #[OA\Property(nullable: true)]
+    #[Serializer\VirtualProperty]
+    #[Serializer\SerializedName('from_team_id')]
+    #[Serializer\Type('string')]
     public function getSenderId(): ?int
     {
         return $this->getSender()?->getTeamid();
@@ -357,12 +347,10 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
         return $this->recipient;
     }
 
-    /**
-     * @Serializer\VirtualProperty()
-     * @Serializer\SerializedName("to_team_id")
-     * @Serializer\Type("string")
-     */
     #[OA\Property(nullable: true)]
+    #[Serializer\VirtualProperty]
+    #[Serializer\SerializedName('to_team_id')]
+    #[Serializer\Type('string')]
     public function getRecipientId(): ?int
     {
         return $this->getRecipient()?->getTeamid();

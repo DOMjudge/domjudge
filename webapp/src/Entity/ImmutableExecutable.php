@@ -32,19 +32,18 @@ class ImmutableExecutable
     private int $immutable_execid;
 
     // TODO: Add more metadata like a link to parent and timestamp
-
     /**
      * @ORM\ManyToOne(targetEntity="User")
      * @ORM\JoinColumn(name="userid", referencedColumnName="userid", onDelete="SET NULL")
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private ?User $user = null;
 
     /**
      * @ORM\OneToMany(targetEntity="ExecutableFile", mappedBy="immutableExecutable")
      * @ORM\OrderBy({"filename"="ASC"})
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private ?Collection $files;
 
     /**

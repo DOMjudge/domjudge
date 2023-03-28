@@ -24,25 +24,25 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
  *     uniqueConstraints={
  *         @ORM\UniqueConstraint(name="shortname", columns={"cid", "shortname"}, options={"lengths"={NULL,190}})
  *     })
- * @Serializer\VirtualProperty(
- *     "id",
- *     exp="object.getProblem().getProbid()",
- *     options={@Serializer\Type("string")}
- * )
- * @Serializer\VirtualProperty(
- *     "short_name",
- *     exp="object.getShortname()",
- *     options={@Serializer\Groups({"Nonstrict"}), @Serializer\Type("string")}
- * )
  */
+#[Serializer\VirtualProperty(
+    name: 'id',
+    exp: 'object.getProblem().getProbid()',
+    options: [new Serializer\Type('string')]
+)]
+#[Serializer\VirtualProperty(
+    name: 'short_name',
+    exp: 'object.getShortname()',
+    options: [new Serializer\Groups(['Nonstrict']), new Serializer\Type('string')]
+)]
 class ContestProblem
 {
     /**
      * @ORM\Column(type="string", name="shortname", length=255,
      *     options={"comment"="Unique problem ID within contest, used to sort problems in the scoreboard and typically a single letter"},
      *     nullable=false)
-     * @Serializer\SerializedName("label")
      */
+    #[Serializer\SerializedName('label')]
     private string $shortname;
 
     /**
@@ -50,9 +50,9 @@ class ContestProblem
      *     options={"comment"="Number of points earned by solving this problem",
      *              "unsigned"=true,"default"="1"},
      *     nullable=false)
-     * @Serializer\Exclude()
      * @Assert\GreaterThanOrEqual(0)
      */
+    #[Serializer\Exclude]
     private int $points = 1;
 
     /**
@@ -60,8 +60,8 @@ class ContestProblem
      *     options={"comment"="Are submissions accepted for this problem?",
      *              "default"="1"},
      *     nullable=false)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private bool $allowSubmit = true;
 
     /**
@@ -69,16 +69,16 @@ class ContestProblem
      *     options={"comment"="Are submissions for this problem judged?",
      *              "default"="1"},
      *     nullable=false)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private bool $allowJudge = true;
 
     /**
      * @ORM\Column(type="string", name="color", length=32,
      *     options={"comment"="Balloon colour to display on the scoreboard"},
      *     nullable=true)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private ?string $color = null;
 
     /**
@@ -86,30 +86,30 @@ class ContestProblem
      *     options={"comment"="Whether to do lazy evaluation for this problem; if set this overrides the global configuration setting",
      *              "unsigned"="true"},
      *     nullable=true)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private ?int $lazyEvalResults = null;
 
     /**
      * @ORM\Id()
      * @ORM\ManyToOne(targetEntity="Contest", inversedBy="problems")
      * @ORM\JoinColumn(name="cid", referencedColumnName="cid", onDelete="CASCADE")
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private ?Contest $contest = null;
 
     /**
      * @ORM\Id()
      * @ORM\ManyToOne(targetEntity="Problem", inversedBy="contest_problems", fetch="EAGER")
      * @ORM\JoinColumn(name="probid", referencedColumnName="probid", onDelete="CASCADE")
-     * @Serializer\Inline()
      */
+    #[Serializer\Inline]
     private ?Problem $problem = null;
 
     /**
      * @ORM\OneToMany(targetEntity="App\Entity\Submission", mappedBy="contest_problem")
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private Collection $submissions;
 
     public function __construct()

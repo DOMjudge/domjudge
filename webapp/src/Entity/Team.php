@@ -38,9 +38,9 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer", name="teamid", length=4, options={"comment"="Team ID", "unsigned"=true}, nullable=false)
-     * @Serializer\SerializedName("id")
-     * @Serializer\Type("string")
      */
+    #[Serializer\SerializedName('id')]
+    #[Serializer\Type('string')]
     protected ?int $teamid = null;
 
     /**
@@ -48,16 +48,16 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
      *     options={"comment"="Team ID in an external system",
      *              "collation"="utf8mb4_bin"},
      *     nullable=true)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     protected ?string $externalid = null;
 
     /**
      * @ORM\Column(type="string", name="icpcid", length=255, options={"comment"="Team ID in the ICPC system",
      *                            "collation"="utf8mb4_bin"}, nullable=true)
-     * @Serializer\SerializedName("icpc_id")
      */
     #[OA\Property(nullable: true)]
+    #[Serializer\SerializedName('icpc_id')]
     protected ?string $icpcid = null;
 
     /**
@@ -79,120 +79,114 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
      *     options={"comment"="Whether the team is visible and operational",
      *              "default"=1},
      *     nullable=false)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private bool $enabled = true;
 
     /**
      * @ORM\Column(type="text", length=4294967295, name="publicdescription",
      *     options={"comment"="Public team definition; for example: Team member names (freeform)"},
      *                          nullable=true)
-     * @Serializer\Groups({"Nonstrict"})
      */
     #[OA\Property(nullable: true)]
+    #[Serializer\Groups(['Nonstrict'])]
     private ?string $publicDescription = null;
 
     /**
      * @ORM\Column(type="string", length=255, name="room", options={"comment"="Physical location of team"},
      *                            nullable=true)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private ?string $room = null;
 
     /**
      * @ORM\Column(type="text", length=4294967295, name="internalcomments",
      *     options={"comment"="Internal comments about this team (jury only)"},
      *                          nullable=true)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private ?string $internalComments = null;
 
     /**
      * @ORM\Column(type="decimal", precision=32, scale=9, name="judging_last_started",
      *     options={"comment"="Start time of last judging for prioritization",
      *              "unsigned"=true}, nullable=true)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private string|float|null $judging_last_started = null;
 
     /**
      * @ORM\Column(type="integer", name="penalty",
      *     options={"comment"="Additional penalty time in minutes","default"=0},
      *     nullable=false)
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private int $penalty = 0;
 
-    /**
-     * @Serializer\Exclude()
-     */
+    #[Serializer\Exclude]
     private string $addUserForTeam = self::DONT_ADD_USER;
 
     /**
      * @Assert\Regex("/^[a-z0-9@._-]+$/i", message="Only alphanumeric characters and _-@. are allowed")
-     * @Serializer\Exclude
      */
+    #[Serializer\Exclude]
     private ?string $newUsername = null;
 
-    /**
-     * @Serializer\Exclude
-     */
+    #[Serializer\Exclude]
     private ?User $existingUser = null;
 
     /**
      * @Assert\File(mimeTypes={"image/png","image/jpeg","image/svg+xml"}, mimeTypesMessage="Only PNG's, JPG's and SVG's are allowed")
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private ?UploadedFile $photoFile = null;
 
-    /**
-     * @Serializer\Exclude()
-     */
+    #[Serializer\Exclude]
     private bool $clearPhoto = false;
 
     /**
      * @ORM\ManyToOne(targetEntity="TeamAffiliation", inversedBy="teams")
      * @ORM\JoinColumn(name="affilid", referencedColumnName="affilid", onDelete="SET NULL")
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private ?TeamAffiliation $affiliation = null;
 
     /**
      * @ORM\ManyToOne(targetEntity="TeamCategory", inversedBy="teams")
      * @ORM\JoinColumn(name="categoryid", referencedColumnName="categoryid", onDelete="CASCADE")
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private ?TeamCategory $category = null;
 
     /**
      * @ORM\ManyToMany(targetEntity="Contest", mappedBy="teams")
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private Collection $contests;
 
     /**
      * @ORM\OneToMany(targetEntity="User", mappedBy="team", cascade={"persist"})
-     * @Serializer\Exclude()
      * @Assert\Valid()
      */
+    #[Serializer\Exclude]
     private Collection $users;
 
     /**
      * @ORM\OneToMany(targetEntity="Submission", mappedBy="team")
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private Collection $submissions;
 
     /**
      * @ORM\OneToMany(targetEntity="Clarification", mappedBy="sender")
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private Collection $sent_clarifications;
 
     /**
      * @ORM\OneToMany(targetEntity="Clarification", mappedBy="recipient")
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private Collection $received_clarifications;
 
     /**
@@ -201,8 +195,8 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
      *                joinColumns={@ORM\JoinColumn(name="teamid", referencedColumnName="teamid", onDelete="CASCADE")},
      *                inverseJoinColumns={@ORM\JoinColumn(name="mesgid", referencedColumnName="clarid", onDelete="CASCADE")}
      * )
-     * @Serializer\Exclude()
      */
+    #[Serializer\Exclude]
     private Collection $unread_clarifications;
 
     public function setTeamid(int $teamid): Team
@@ -416,12 +410,10 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
         return $this->affiliation;
     }
 
-    /**
-     * @Serializer\VirtualProperty()
-     * @Serializer\SerializedName("organization_id")
-     * @Serializer\Type("string")
-     */
     #[OA\Property(nullable: true)]
+    #[Serializer\VirtualProperty]
+    #[Serializer\SerializedName('organization_id')]
+    #[Serializer\Type('string')]
     public function getAffiliationId(): ?int
     {
         return $this->getAffiliation()?->getAffilid();
@@ -438,11 +430,9 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
         return $this->category;
     }
 
-    /**
-     * @Serializer\VirtualProperty()
-     * @Serializer\SerializedName("hidden")
-     * @Serializer\Type("bool")
-     */
+    #[Serializer\VirtualProperty]
+    #[Serializer\SerializedName('hidden')]
+    #[Serializer\Type('bool')]
     public function getHidden(): bool
     {
         return !$this->getCategory() || !$this->getCategory()->getVisible();
@@ -557,34 +547,28 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
         return $this->unread_clarifications;
     }
 
-    /**
-     * @Serializer\VirtualProperty()
-     * @Serializer\Type("array<string>")
-     */
+    #[Serializer\VirtualProperty]
+    #[Serializer\Type('array<string>')]
     public function getGroupIds(): array
     {
         return $this->getCategory() ? [$this->getCategory()->getCategoryid()] : [];
     }
 
-    /**
-     * @Serializer\VirtualProperty()
-     * @Serializer\SerializedName("affiliation")
-     * @Serializer\Type("string")
-     * @Serializer\Groups({"Nonstrict"})
-     */
     #[OA\Property(nullable: true)]
+    #[Serializer\VirtualProperty]
+    #[Serializer\SerializedName('affiliation')]
+    #[Serializer\Type('string')]
+    #[Serializer\Groups(['Nonstrict'])]
     public function getAffiliationName(): ?string
     {
         return $this->getAffiliation()?->getName();
     }
 
-    /**
-     * @Serializer\VirtualProperty()
-     * @Serializer\Type("string")
-     * @Serializer\Groups({"Nonstrict"})
-     * @Serializer\Expose(if="context.getAttribute('config_service').get('show_flags')")
-     */
     #[OA\Property(nullable: true)]
+    #[Serializer\VirtualProperty]
+    #[Serializer\Type('string')]
+    #[Serializer\Groups(['Nonstrict'])]
+    #[Serializer\Expose(if: "context.getAttribute('config_service').get('show_flags')")]
     public function getNationality() : ?string
     {
         return $this->getAffiliation()?->getCountry();
