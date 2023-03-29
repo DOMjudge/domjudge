@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Doctrine\Constants;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -43,7 +44,7 @@ class ExternalJudgement
     #[ORM\Column(
         name: 'externalid',
         type: 'string',
-        length: 255,
+        length: Constants::LENGTH_LIMIT_TINYTEXT,
         nullable: true,
         options: ['comment' => 'Judgement ID in external system, should be unique inside a single contest', 'collation' => 'utf8mb4_bin']
     )]
@@ -70,7 +71,7 @@ class ExternalJudgement
     #[ORM\Column(
         name: 'jury_member',
         type: 'string',
-        length: 255,
+        length: Constants::LENGTH_LIMIT_TINYTEXT,
         nullable: true,
         options: ['comment' => 'Name of user who verified the result / difference', 'default' => null]
     )]
@@ -80,7 +81,7 @@ class ExternalJudgement
     #[ORM\Column(
         name: 'verify_comment',
         type: 'string',
-        length: 255,
+        length: Constants::LENGTH_LIMIT_TINYTEXT,
         nullable: true,
         options: ['comment' => 'Optional additional information provided by the verifier', 'default' => null]
     )]

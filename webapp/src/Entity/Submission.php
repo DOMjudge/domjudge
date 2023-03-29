@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Doctrine\Constants;
 use App\Utils\Utils;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -56,7 +57,7 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
     #[ORM\Column(
         name: 'externalid',
         type: 'string',
-        length: 255,
+        length: Constants::LENGTH_LIMIT_TINYTEXT,
         nullable: true,
         options: ['comment' => 'Specifies ID of submission if imported from external CCS, e.g. Kattis', 'collation' => 'utf8mb4_bin']
     )]
@@ -88,7 +89,7 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
     #[ORM\Column(
         name: 'expected_results',
         type: 'json',
-        length: 255,
+        length: Constants::LENGTH_LIMIT_TINYTEXT,
         nullable: true,
         options: ['comment' => 'JSON encoded list of expected results - used to validate jury submissions']
     )]
@@ -98,7 +99,7 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
     #[ORM\Column(
         name: 'entry_point',
         type: 'string',
-        length: 255,
+        length: Constants::LENGTH_LIMIT_TINYTEXT,
         nullable: true,
         options: ['comment' => 'Optional entry point. Can be used e.g. for java main class.']
     )]

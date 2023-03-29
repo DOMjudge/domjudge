@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 namespace App\Entity;
 
+use App\Doctrine\Constants;
 use App\Validator\Constraints\Country;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -52,7 +53,7 @@ class TeamAffiliation extends BaseApiEntity implements AssetEntityInterface
     #[ORM\Column(
         name: 'externalid',
         type: 'string',
-        length: 255,
+        length: Constants::LENGTH_LIMIT_TINYTEXT,
         nullable: true,
         options: ['comment' => 'Team affiliation ID in an external system', 'collation' => 'utf8mb4_bin']
     )]
@@ -62,7 +63,7 @@ class TeamAffiliation extends BaseApiEntity implements AssetEntityInterface
     #[ORM\Column(
         name: 'icpcid',
         type: 'string',
-        length: 255,
+        length: Constants::LENGTH_LIMIT_TINYTEXT,
         nullable: true,
         options: ['comment' => 'External identifier from ICPC CMS', 'collation' => 'utf8mb4_bin']
     )]
@@ -83,7 +84,7 @@ class TeamAffiliation extends BaseApiEntity implements AssetEntityInterface
     #[ORM\Column(
         name: 'name',
         type: 'string',
-        length: 255,
+        length: Constants::LENGTH_LIMIT_TINYTEXT,
         nullable: false,
         options: ['comment' => 'Descriptive name']
     )]
@@ -116,7 +117,7 @@ class TeamAffiliation extends BaseApiEntity implements AssetEntityInterface
     #[ORM\Column(
         name: 'internalcomments',
         type: 'text',
-        length: 4294967295,
+        length: Constants::LENGTH_LIMIT_LONGTEXT,
         nullable: true,
         options: ['comment' => 'Internal comments (jury only)']
     )]

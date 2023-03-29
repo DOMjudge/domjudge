@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 namespace App\Entity;
 
+use App\Doctrine\Constants;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -72,7 +73,7 @@ class Testcase
     #[ORM\Column(
         name: 'description',
         type: 'blob',
-        length: 4294967295,
+        length: Constants::LENGTH_LIMIT_LONGTEXT,
         nullable: true,
         options: ['comment' => 'Description of this testcase']
     )]
@@ -84,7 +85,7 @@ class Testcase
     #[ORM\Column(
         name: 'orig_input_filename',
         type: 'string',
-        length: 255,
+        length: Constants::LENGTH_LIMIT_TINYTEXT,
         nullable: true,
         options: ['comment' => 'Original basename of the input file.', 'default' => null]
     )]

@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Doctrine\Constants;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -34,7 +35,7 @@ class SubmissionFile
     #[ORM\Column(
         name: 'filename',
         type: 'string',
-        length: 255,
+        length: Constants::LENGTH_LIMIT_TINYTEXT,
         nullable: false,
         options: ['comment' => 'Filename as submitted']
     )]
@@ -55,7 +56,7 @@ class SubmissionFile
     #[ORM\Column(
         name: 'sourcecode',
         type: 'blobtext',
-        length: 4294967295,
+        length: Constants::LENGTH_LIMIT_LONGTEXT,
         nullable: false,
         options: ['comment' => 'Full source code']
     )]

@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Doctrine\Constants;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Table(
@@ -41,7 +42,7 @@ class ExternalSourceWarning
     #[ORM\Column(
         name: 'last_event_id',
         type: 'string',
-        length: 255,
+        length: Constants::LENGTH_LIMIT_TINYTEXT,
         nullable: true,
         options: ['comment' => 'Last event ID this warning happened at']
     )]
@@ -60,7 +61,7 @@ class ExternalSourceWarning
     #[ORM\Column(
         name: 'entity_type',
         type: 'string',
-        length: 255,
+        length: Constants::LENGTH_LIMIT_TINYTEXT,
         nullable: false,
         options: ['comment' => 'Type of the entity for this warning']
     )]
@@ -69,7 +70,7 @@ class ExternalSourceWarning
     #[ORM\Column(
         name: 'entity_id',
         type: 'string',
-        length: 255,
+        length: Constants::LENGTH_LIMIT_TINYTEXT,
         nullable: false,
         options: ['comment' => 'ID of the entity for this warning']
     )]
@@ -78,7 +79,7 @@ class ExternalSourceWarning
     #[ORM\Column(
         name: 'type',
         type: 'string',
-        length: 255,
+        length: Constants::LENGTH_LIMIT_TINYTEXT,
         nullable: false,
         options: ['comment' => 'Type of this warning']
     )]
@@ -87,7 +88,7 @@ class ExternalSourceWarning
     #[ORM\Column(
         name: 'hash',
         type: 'string',
-        length: 255,
+        length: Constants::LENGTH_LIMIT_TINYTEXT,
         nullable: false,
         options: ['comment' => 'Hash of this warning. Unique within the source.']
     )]

@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 namespace App\Entity;
 
+use App\Doctrine\Constants;
 use App\Utils\Utils;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -52,7 +53,7 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
     #[ORM\Column(
         name: 'externalid',
         type: 'string',
-        length: 255,
+        length: Constants::LENGTH_LIMIT_TINYTEXT,
         nullable: true,
         options: ['comment' => 'Clarification ID in an external system, should be unique inside a single contest', 'collation' => 'utf8mb4_bin']
     )]
@@ -74,7 +75,7 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
     #[ORM\Column(
         name: 'jury_member',
         type: 'string',
-        length: 255,
+        length: Constants::LENGTH_LIMIT_TINYTEXT,
         nullable: true,
         options: ['comment' => 'Name of jury member who answered this']
     )]
@@ -84,7 +85,7 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
     #[ORM\Column(
         name: 'category',
         type: 'string',
-        length: 255,
+        length: Constants::LENGTH_LIMIT_TINYTEXT,
         nullable: true,
         options: ['comment' => 'Category associated to this clarification; only set for non problem clars']
     )]
@@ -94,7 +95,7 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
     #[ORM\Column(
         name: 'queue',
         type: 'string',
-        length: 255,
+        length: Constants::LENGTH_LIMIT_TINYTEXT,
         nullable: true,
         options: ['comment' => 'Queue associated to this clarification']
     )]
@@ -104,7 +105,7 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
     #[ORM\Column(
         name: 'body',
         type: 'text',
-        length: 4294967295,
+        length: Constants::LENGTH_LIMIT_LONGTEXT,
         nullable: false,
         options: ['comment' => 'Clarification text']
     )]

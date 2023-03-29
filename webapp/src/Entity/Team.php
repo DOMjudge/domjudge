@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Doctrine\Constants;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -47,7 +48,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
     #[ORM\Column(
         name: 'externalid',
         type: 'string',
-        length: 255,
+        length: Constants::LENGTH_LIMIT_TINYTEXT,
         nullable: true,
         options: ['comment' => 'Team ID in an external system', 'collation' => 'utf8mb4_bin']
     )]
@@ -57,7 +58,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
     #[ORM\Column(
         name: 'icpcid',
         type: 'string',
-        length: 255,
+        length: Constants::LENGTH_LIMIT_TINYTEXT,
         nullable: true,
         options: ['comment' => 'Team ID in the ICPC system', 'collation' => 'utf8mb4_bin']
     )]
@@ -68,7 +69,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
     #[ORM\Column(
         name: 'name',
         type: 'string',
-        length: 255,
+        length: Constants::LENGTH_LIMIT_TINYTEXT,
         nullable: false,
         options: ['comment' => 'Team name', 'collation' => 'utf8mb4_bin']
     )]
@@ -77,7 +78,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
     #[ORM\Column(
         name: 'display_name',
         type: 'string',
-        length: 255,
+        length: Constants::LENGTH_LIMIT_TINYTEXT,
         nullable: true,
         options: ['comment' => 'Team display name', 'collation' => 'utf8mb4_bin']
     )]
@@ -96,7 +97,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
     #[ORM\Column(
         name: 'publicdescription',
         type: 'text',
-        length: 4294967295,
+        length: Constants::LENGTH_LIMIT_LONGTEXT,
         nullable: true,
         options: ['comment' => 'Public team definition; for example: Team member names (freeform)']
     )]
@@ -107,7 +108,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
     #[ORM\Column(
         name: 'room',
         type: 'string',
-        length: 255,
+        length: Constants::LENGTH_LIMIT_TINYTEXT,
         nullable: true,
         options: ['comment' => 'Physical location of team']
     )]
@@ -117,7 +118,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
     #[ORM\Column(
         name: 'internalcomments',
         type: 'text',
-        length: 4294967295,
+        length: Constants::LENGTH_LIMIT_LONGTEXT,
         nullable: true,
         options: ['comment' => 'Internal comments about this team (jury only)']
     )]

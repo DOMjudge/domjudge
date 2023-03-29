@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Doctrine\Constants;
 use Doctrine\ORM\Mapping as ORM;
 use App\Entity\JudgingRun;
 
@@ -32,7 +33,7 @@ class JudgingRunOutput
     #[ORM\Column(
         name: 'output_run',
         type: 'blobtext',
-        length: 4294967295,
+        length: Constants::LENGTH_LIMIT_LONGTEXT,
         nullable: true,
         options: ['comment' => 'Output of running the program']
     )]
@@ -41,7 +42,7 @@ class JudgingRunOutput
     #[ORM\Column(
         name: 'output_diff',
         type: 'blobtext',
-        length: 4294967295,
+        length: Constants::LENGTH_LIMIT_LONGTEXT,
         nullable: true,
         options: ['comment' => 'Diffing the program output and testcase output']
     )]
@@ -50,7 +51,7 @@ class JudgingRunOutput
     #[ORM\Column(
         name: 'output_error',
         type: 'blobtext',
-        length: 4294967295,
+        length: Constants::LENGTH_LIMIT_LONGTEXT,
         nullable: true,
         options: ['comment' => 'Standard error output of the program']
     )]
@@ -59,7 +60,7 @@ class JudgingRunOutput
     #[ORM\Column(
         name: 'output_system',
         type: 'blobtext',
-        length: 4294967295,
+        length: Constants::LENGTH_LIMIT_LONGTEXT,
         nullable: true,
         options: ['comment' => 'Judging system output']
     )]
@@ -68,7 +69,7 @@ class JudgingRunOutput
     #[ORM\Column(
         name: 'metadata',
         type: 'blobtext',
-        length: 4294967295,
+        length: Constants::LENGTH_LIMIT_LONGTEXT,
         nullable: true,
         options: ['comment' => 'Judging metadata']
     )]

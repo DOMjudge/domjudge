@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Doctrine\Constants;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Table(
@@ -27,7 +28,7 @@ class ProblemAttachmentContent
     #[ORM\Column(
         name: 'content',
         type: 'blobtext',
-        length: 4294967295,
+        length: Constants::LENGTH_LIMIT_LONGTEXT,
         options: ['comment' => 'Attachment content']
     )]
     private string $content;

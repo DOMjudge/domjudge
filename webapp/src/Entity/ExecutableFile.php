@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 namespace App\Entity;
 
+use App\Doctrine\Constants;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
 use RuntimeException;
@@ -44,7 +45,7 @@ class ExecutableFile
     #[ORM\Column(
         name: 'filename',
         type: 'string',
-        length: 255,
+        length: Constants::LENGTH_LIMIT_TINYTEXT,
         nullable: false,
         options: ['comment' => 'Filename as uploaded']
     )]
@@ -65,7 +66,7 @@ class ExecutableFile
     #[ORM\Column(
         name: 'file_content',
         type: 'blobtext',
-        length: 4294967295,
+        length: Constants::LENGTH_LIMIT_LONGTEXT,
         nullable: false,
         options: ['comment' => 'Full file content']
     )]

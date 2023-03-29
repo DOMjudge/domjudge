@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 namespace App\Entity;
 
+use App\Doctrine\Constants;
 use App\Utils\Utils;
 use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -48,7 +49,7 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
     #[ORM\Column(
         name: 'externalid',
         type: 'string',
-        length: 255,
+        length: Constants::LENGTH_LIMIT_TINYTEXT,
         nullable: true,
         options: ['comment' => 'User ID in an external system', 'collation' => 'utf8mb4_bin']
     )]
@@ -61,7 +62,7 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
     #[ORM\Column(
         name: 'username',
         type: 'string',
-        length: 255,
+        length: Constants::LENGTH_LIMIT_TINYTEXT,
         nullable: false,
         options: ['comment' => 'User login name']
     )]
@@ -70,7 +71,7 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
     #[ORM\Column(
         name: 'name',
         type: 'string',
-        length: 255,
+        length: Constants::LENGTH_LIMIT_TINYTEXT,
         nullable: false,
         options: ['comment' => 'Name']
     )]
@@ -83,7 +84,7 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
     #[ORM\Column(
         name: 'email',
         type: 'string',
-        length: 255,
+        length: Constants::LENGTH_LIMIT_TINYTEXT,
         nullable: true,
         options: ['comment' => 'Email address']
     )]
@@ -130,7 +131,7 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
     #[ORM\Column(
         name: 'last_ip_address',
         type: 'string',
-        length: 255,
+        length: Constants::LENGTH_LIMIT_TINYTEXT,
         nullable: true,
         options: ['comment' => 'Last IP address of successful login']
     )]
@@ -142,7 +143,7 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
     #[ORM\Column(
         name: 'password',
         type: 'string',
-        length: 255,
+        length: Constants::LENGTH_LIMIT_TINYTEXT,
         nullable: true,
         options: ['comment' => 'Password hash']
     )]
@@ -158,7 +159,7 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
     #[ORM\Column(
         name: 'ip_address',
         type: 'string',
-        length: 255,
+        length: Constants::LENGTH_LIMIT_TINYTEXT,
         nullable: true,
         options: ['comment' => 'IP Address used to autologin']
     )]
