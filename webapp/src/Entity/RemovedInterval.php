@@ -35,9 +35,6 @@ class RemovedInterval
     )]
     private ?int $intervalid = null;
 
-    /**
-     * @var double|string
-     */
     #[ORM\Column(
         name: 'starttime',
         type: 'decimal',
@@ -48,9 +45,6 @@ class RemovedInterval
     )]
     private string|float $starttime;
 
-    /**
-     * @var double|string
-     */
     #[ORM\Column(
         name: 'endtime',
         type: 'decimal',

@@ -463,7 +463,6 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     private Collection $removedIntervals;
 
     /**
-     * @var ArrayCollection
      * @Assert\Valid()
      */
     #[ORM\OneToMany(mappedBy: 'contest', targetEntity: ExternalContestSource::class)]
