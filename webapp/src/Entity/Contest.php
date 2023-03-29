@@ -68,11 +68,9 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     #[Assert\NotBlank]
     private string $name = '';
 
-    /**
-     * @Identifier()
-     */
     #[ORM\Column(options: ['comment' => 'Short name for this contest'])]
     #[Assert\NotBlank]
+    #[Identifier]
     #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
     private string $shortname = '';
 
@@ -200,66 +198,54 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     #[Serializer\Exclude]
     private string|float|null $deactivatetime = null;
 
-    /**
-     * @TimeString(relativeIsPositive=false)
-     */
     #[ORM\Column(
         length: 64,
         options: ['comment' => 'Authoritative absolute or relative string representation of activatetime']
     )]
+    #[TimeString(relativeIsPositive: false)]
     #[Serializer\Exclude]
     private string $activatetimeString = '';
 
-    /**
-     * @TimeString(allowRelative=false)
-     */
     #[ORM\Column(
         length: 64,
         options: ['comment' => 'Authoritative absolute (only!) string representation of starttime']
     )]
+    #[TimeString(allowRelative: false)]
     #[Serializer\Exclude]
     private string $starttimeString = '';
 
-    /**
-     * @TimeString()
-     */
     #[ORM\Column(
         length: 64,
         nullable: true,
         options: ['comment' => 'Authoritative absolute or relative string representation of freezetime']
     )]
+    #[TimeString]
     #[Serializer\Exclude]
     private ?string $freezetimeString = null;
 
-    /**
-     * @TimeString()
-     */
     #[ORM\Column(
         length: 64,
         options: ['comment' => 'Authoritative absolute or relative string representation of endtime']
     )]
+    #[TimeString]
     #[Serializer\Exclude]
     private string $endtimeString = '';
 
-    /**
-     * @TimeString()
-     */
     #[ORM\Column(
         length: 64,
         nullable: true,
         options: ['comment' => 'Authoritative absolute or relative string representation of unfreezetime']
     )]
+    #[TimeString]
     #[Serializer\Exclude]
     private ?string $unfreezetimeString = null;
 
-    /**
-     * @TimeString()
-     */
     #[ORM\Column(
         length: 64,
         nullable: true,
         options: ['comment' => 'Authoritative absolute or relative string representation of deactivatetime']
     )]
+    #[TimeString]
     #[Serializer\Exclude]
     private ?string $deactivatetimeString = null;
 

@@ -43,22 +43,18 @@ class RemovedInterval
     )]
     private string|float $endtime;
 
-    /**
-     * @TimeString(allowRelative=false)
-     */
     #[ORM\Column(
         length: 64,
         options: ['comment' => 'Authoritative (absolute only) string representation of starttime']
     )]
+    #[TimeString(allowRelative: false)]
     private string $starttimeString;
 
-    /**
-     * @TimeString(allowRelative=false)
-     */
     #[ORM\Column(
         length: 64,
         options: ['comment' => 'Authoritative (absolute only) string representation of endtime']
     )]
+    #[TimeString(allowRelative: false)]
     private string $endtimeString;
 
     #[ORM\ManyToOne(inversedBy: 'removedIntervals')]

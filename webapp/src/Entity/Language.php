@@ -26,13 +26,11 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[UniqueEntity(fields: 'externalid')]
 class Language extends BaseApiEntity
 {
-    /**
-     * @Identifier()
-     */
     #[ORM\Id]
     #[ORM\Column(length: 32, options: ['comment' => 'Language ID (string)'])]
     #[Assert\NotBlank]
     #[Assert\NotEqualTo('add')]
+    #[Identifier]
     #[Serializer\Exclude]
     protected ?string $langid = null;
 
