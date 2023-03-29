@@ -18,11 +18,17 @@ use Symfony\Component\Routing\Annotation\Route;
 /**
  * Class PrintController
  *
- * @Route("/jury/print")
- * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_BALLOON')")
  *
  * @package App\Controller\Jury
  */
+#[Security("is_granted('ROLE_JURY') or is_granted('ROLE_BALLOON')")]
+/**
+ * Class PrintController
+ *
+ *
+ * @package App\Controller\Jury
+ */
+#[Route(path: '/jury/print')]
 class PrintController extends BaseController
 {
     public function __construct(
@@ -31,9 +37,7 @@ class PrintController extends BaseController
         protected readonly ConfigurationService $config
     ) {}
 
-    /**
-     * @Route("", name="jury_print")
-     */
+    #[Route(path: '', name: 'jury_print')]
     public function showAction(Request $request): Response
     {
         if (!$this->config->get('print_command')) {

@@ -44,10 +44,8 @@ use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Annotation\Route;
 
-/**
- * @Route("/jury/contests")
- * @IsGranted("ROLE_JURY")
- */
+#[IsGranted('ROLE_JURY')]
+#[Route(path: '/jury/contests')]
 class ContestController extends BaseController
 {
     public function __construct(
@@ -60,10 +58,10 @@ class ContestController extends BaseController
     ) {}
 
     /**
-     * @Route("", name="jury_contests")
      * @throws NonUniqueResultException
      * @throws NoResultException
      */
+    #[Route(path: '', name: 'jury_contests')]
     public function indexAction(Request $request): Response
     {
         $em = $this->em;
@@ -367,9 +365,7 @@ class ContestController extends BaseController
         ]);
     }
 
-    /**
-     * @Route("/{contestId<\d+>}", name="jury_contest")
-     */
+    #[Route(path: '/{contestId<\d+>}', name: 'jury_contest')]
     public function viewAction(Request $request, int $contestId): Response
     {
         /** @var Contest $contest */
@@ -423,9 +419,7 @@ class ContestController extends BaseController
         ]);
     }
 
-    /**
-     * @Route("/{contestId}/toggle-submit", name="jury_contest_toggle_submit")
-     */
+    #[Route(path: '/{contestId}/toggle-submit', name: 'jury_contest_toggle_submit')]
     public function toggleSubmitAction(Request $request, string $contestId): Response
     {
         /** @var Contest $contest */
@@ -442,10 +436,7 @@ class ContestController extends BaseController
         return $this->redirectToRoute('jury_contest', ['contestId' => $contestId]);
     }
 
-    /**
-     * @Route("/{contestId<\d+>}/remove-interval/{intervalId}",
-     *        name="jury_contest_remove_interval", methods={"POST"})
-     */
+    #[Route(path: '/{contestId<\d+>}/remove-interval/{intervalId}', name: 'jury_contest_remove_interval', methods: ['POST'])]
     public function removeIntervalAction(int $contestId, int $intervalId): RedirectResponse
     {
         /** @var Contest $contest */
@@ -478,10 +469,8 @@ class ContestController extends BaseController
         return $this->redirectToRoute('jury_contest', ['contestId' => $contest->getCid()]);
     }
 
-    /**
-     * @Route("/{contestId<\d+>}/edit", name="jury_contest_edit")
-     * @IsGranted("ROLE_ADMIN")
-     */
+    #[IsGranted('ROLE_ADMIN')]
+    #[Route(path: '/{contestId<\d+>}/edit', name: 'jury_contest_edit')]
     public function editAction(Request $request, int $contestId): Response
     {
         /** @var Contest $contest */
@@ -586,10 +575,8 @@ class ContestController extends BaseController
         ]);
     }
 
-    /**
-     * @Route("/{contestId<\d+>}/delete", name="jury_contest_delete")
-     * @IsGranted("ROLE_ADMIN")
-     */
+    #[IsGranted('ROLE_ADMIN')]
+    #[Route(path: '/{contestId<\d+>}/delete', name: 'jury_contest_delete')]
     public function deleteAction(Request $request, int $contestId): Response
     {
         /** @var Contest $contest */
@@ -607,10 +594,8 @@ class ContestController extends BaseController
                                      [$contest], $this->generateUrl('jury_contests'));
     }
 
-    /**
-     * @Route("/{contestId<\d+>}/problems/{probId<\d+>}/delete", name="jury_contest_problem_delete")
-     * @IsGranted("ROLE_ADMIN")
-     */
+    #[IsGranted('ROLE_ADMIN')]
+    #[Route(path: '/{contestId<\d+>}/problems/{probId<\d+>}/delete', name: 'jury_contest_problem_delete')]
     public function deleteProblemAction(Request $request, int $contestId, int $probId): Response
     {
         /** @var ContestProblem $contestProblem */
@@ -634,10 +619,8 @@ class ContestController extends BaseController
                                      [$contestProblem], $this->generateUrl('jury_contest', ['contestId' => $contestId]));
     }
 
-    /**
-     * @Route("/add", name="jury_contest_add")
-     * @IsGranted("ROLE_ADMIN")
-     */
+    #[IsGranted('ROLE_ADMIN')]
+    #[Route(path: '/add', name: 'jury_contest_add')]
     public function addAction(Request $request): Response
     {
         $contest = new Contest();
@@ -687,9 +670,7 @@ class ContestController extends BaseController
         ]);
     }
 
-    /**
-     * @Route("/{contestId<\d+>}/prefetch", name="jury_contest_prefetch")
-     */
+    #[Route(path: '/{contestId<\d+>}/prefetch', name: 'jury_contest_prefetch')]
     public function prefetchAction(Request $request, int $contestId): Response
     {
         /** @var Contest $contest */
@@ -770,10 +751,8 @@ class ContestController extends BaseController
         return $this->redirectToRoute('jury_contest', ['contestId' => $contestId]);
     }
 
-    /**
-     * @Route("/{contestId<\d+>}/finalize", name="jury_contest_finalize")
-     * @IsGranted("ROLE_ADMIN")
-     */
+    #[IsGranted('ROLE_ADMIN')]
+    #[Route(path: '/{contestId<\d+>}/finalize', name: 'jury_contest_finalize')]
     public function finalizeAction(Request $request, int $contestId): Response
     {
         /** @var Contest $contest */
@@ -840,9 +819,7 @@ class ContestController extends BaseController
         ]);
     }
 
-    /**
-     * @Route("/{contestId<\d+>}/request-remaining", name="jury_contest_request_remaining")
-     */
+    #[Route(path: '/{contestId<\d+>}/request-remaining', name: 'jury_contest_request_remaining')]
     public function requestRemainingRunsWholeContestAction(int $contestId): RedirectResponse
     {
         /** @var Contest $contest */
@@ -868,9 +845,7 @@ class ContestController extends BaseController
         return $this->redirectToRoute('jury_contest', ['contestId' => $contestId]);
     }
 
-    /**
-     * @Route("/{contestId<\d+>}/problems/{probId<\d+>}/request-remaining", name="jury_contest_problem_request_remaining")
-     */
+    #[Route(path: '/{contestId<\d+>}/problems/{probId<\d+>}/request-remaining', name: 'jury_contest_problem_request_remaining')]
     public function requestRemainingRunsContestProblemAction(int $contestId, int $probId): RedirectResponse
     {
         /** @var ContestProblem $contestProblem */
@@ -926,27 +901,21 @@ class ContestController extends BaseController
         return null;
     }
 
-    /**
-     * @Route("/{contestId<\d+>}/lock", name="jury_contest_lock")
-     * @IsGranted("ROLE_ADMIN")
-     */
+    #[IsGranted('ROLE_ADMIN')]
+    #[Route(path: '/{contestId<\d+>}/lock', name: 'jury_contest_lock')]
     public function lockAction(Request $request, int $contestId): Response
     {
         return $this->doLock($contestId, true);
     }
 
-    /**
-     * @Route("/{contestId<\d+>}/unlock", name="jury_contest_unlock")
-     * @IsGranted("ROLE_ADMIN")
-     */
+    #[IsGranted('ROLE_ADMIN')]
+    #[Route(path: '/{contestId<\d+>}/unlock', name: 'jury_contest_unlock')]
     public function unlockAction(Request $request, int $contestId): Response
     {
         return $this->doLock($contestId, false);
     }
 
-    /**
-     * @Route("/{contestId<\d+>}/samples.zip", name="jury_contest_samples_data_zip")
-     */
+    #[Route(path: '/{contestId<\d+>}/samples.zip', name: 'jury_contest_samples_data_zip')]
     public function samplesDataZipAction(Request $request, int $contestId): Response
     {
         /** @var Contest $contest */

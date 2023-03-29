@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
+#[ORM\Entity]
 #[ORM\Table(options: [
     'collation' => 'utf8mb4_unicode_ci',
     'charset' => 'utf8mb4',
@@ -14,7 +15,6 @@ use Doctrine\ORM\Mapping as ORM;
     columns: ['extsourceid', 'hash'],
     options: ['lengths' => [null, 190]]
 )]
-#[ORM\Entity]
 class ExternalSourceWarning
 {
     final public const TYPE_UNSUPORTED_ACTION = 'unsupported-action';

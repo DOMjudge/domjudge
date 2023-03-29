@@ -17,12 +17,18 @@ use Symfony\Component\Routing\Annotation\Route;
 /**
  * Class ScoreboardController
  *
- * @Route("/team")
- * @IsGranted("ROLE_TEAM")
- * @Security("user.getTeam() !== null", message="You do not have a team associated with your account.")
  *
  * @package App\Controller\Team
  */
+#[IsGranted('ROLE_TEAM')]
+#[Security('user.getTeam() !== null', message: 'You do not have a team associated with your account.')]
+/**
+ * Class ScoreboardController
+ *
+ *
+ * @package App\Controller\Team
+ */
+#[Route(path: '/team')]
 class ScoreboardController extends BaseController
 {
     public function __construct(
@@ -32,9 +38,7 @@ class ScoreboardController extends BaseController
         protected readonly EntityManagerInterface $em
     ) {}
 
-    /**
-     * @Route("/scoreboard", name="team_scoreboard")
-     */
+    #[Route(path: '/scoreboard', name: 'team_scoreboard')]
     public function scoreboardAction(Request $request): Response
     {
         $user       = $this->dj->getUser();
@@ -53,9 +57,7 @@ class ScoreboardController extends BaseController
         return $this->render('team/scoreboard.html.twig', $data, $response);
     }
 
-    /**
-     * @Route("/team/{teamId<\d+>}", name="team_team")
-     */
+    #[Route(path: '/team/{teamId<\d+>}', name: 'team_team')]
     public function teamAction(Request $request, int $teamId): Response
     {
         /** @var Team|null $team */

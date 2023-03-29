@@ -8,6 +8,7 @@ use RuntimeException;
 /**
  * Files associated to an executable.
  */
+#[ORM\Entity]
 #[ORM\Table(options: [
     'collation' => 'utf8mb4_unicode_ci',
     'charset' => 'utf8mb4',
@@ -23,7 +24,6 @@ use RuntimeException;
     columns: ['immutable_execid', 'filename'],
     options: ['lengths' => [null, 190]]
 )]
-#[ORM\Entity]
 #[ORM\HasLifecycleCallbacks]
 class ExecutableFile
 {

@@ -10,6 +10,7 @@ use JMS\Serializer\Annotation as Serializer;
 /**
  * Individual judge tasks.
  */
+#[ORM\Entity]
 #[ORM\Table(
     name: 'judgetask',
     options: [
@@ -29,7 +30,6 @@ use JMS\Serializer\Annotation as Serializer;
     columns: ['judgehostid', 'starttime', 'valid', 'type', 'priority', 'judgetaskid'],
     name: 'specific_type')
 ]
-#[ORM\Entity]
 class JudgeTask
 {
     #[ORM\Id]

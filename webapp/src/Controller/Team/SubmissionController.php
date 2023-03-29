@@ -27,11 +27,16 @@ use Symfony\Component\Routing\Annotation\Route;
 /**
  * Class SubmissionController
  *
- * @Route("/team")
- * @IsGranted("ROLE_TEAM")
- * @Security("user.getTeam() !== null", message="You do not have a team associated with your account.")
  * @package App\Controller\Team
  */
+#[IsGranted('ROLE_TEAM')]
+#[Security('user.getTeam() !== null', message: 'You do not have a team associated with your account.')]
+/**
+ * Class SubmissionController
+ *
+ * @package App\Controller\Team
+ */
+#[Route(path: '/team')]
 class SubmissionController extends BaseController
 {
     final public const NEVER_SHOW_COMPILE_OUTPUT = 0;
@@ -46,9 +51,7 @@ class SubmissionController extends BaseController
         protected readonly FormFactoryInterface $formFactory
     ) {}
 
-    /**
-     * @Route("/submit/{problem}", name="team_submit")
-     */
+    #[Route(path: '/submit/{problem}', name: 'team_submit')]
     public function createAction(Request $request, ?Problem $problem = null): Response
     {
         $user    = $this->dj->getUser();
@@ -108,9 +111,9 @@ class SubmissionController extends BaseController
     }
 
     /**
-     * @Route("/submission/{submitId<\d+>}", name="team_submission")
      * @throws NonUniqueResultException
      */
+    #[Route(path: '/submission/{submitId<\d+>}', name: 'team_submission')]
     public function viewAction(Request $request, int $submitId): Response
     {
         $verificationRequired = (bool)$this->config->get('verification_required');
@@ -206,9 +209,9 @@ class SubmissionController extends BaseController
     }
 
     /**
-     * @Route("/submission/{submitId<\d+>}/download", name="team_submission_download")
      * @throws NonUniqueResultException
      */
+    #[Route(path: '/submission/{submitId<\d+>}/download', name: 'team_submission_download')]
     public function downloadAction(int $submitId): Response
     {
         $allowDownload = (bool)$this->config->get('allow_team_submission_download');

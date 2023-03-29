@@ -11,13 +11,13 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * Hostnames of the autojudgers.
  */
+#[ORM\Entity]
 #[ORM\Table(options: [
     'collation' => 'utf8mb4_unicode_ci',
     'charset' => 'utf8mb4',
     'comment' => 'Hostnames of the autojudgers',
 ])]
 #[ORM\UniqueConstraint(name: 'hostname', columns: ['hostname'])]
-#[ORM\Entity]
 class Judgehost
 {
     #[ORM\Id]
@@ -27,16 +27,13 @@ class Judgehost
     #[Serializer\Type('string')]
     private int $judgehostid;
 
-    /**
-     * @Assert\Regex("/^[A-Za-z0-9_\-.]*$/", message="Invalid hostname. Only characters in [A-Za-z0-9_\-.] are allowed.")
-     */
     #[ORM\Column(length: 64, options: ['comment' => 'Resolvable hostname of judgehost'])]
+    #[Assert\Regex('/^[A-Za-z0-9_\-.]*$/', message: 'Invalid hostname. Only characters in [A-Za-z0-9_\-.] are allowed.')]
     private string $hostname;
 
     #[ORM\Column(options: ['comment' => 'Should this host take on judgings?', 'default' => 1])]
     private bool $enabled = true;
 
-    #[OA\Property(nullable: true)]
     #[ORM\Column(
         type: 'decimal',
         precision: 32,
@@ -44,6 +41,7 @@ class Judgehost
         nullable: true,
         options: ['comment' => 'Time of last poll by autojudger', 'unsigned' => true]
     )]
+    #[OA\Property(nullable: true)]
     private string|float|null $polltime = null;
 
     #[ORM\OneToMany(mappedBy: 'judgehost', targetEntity: JudgeTask::class)]

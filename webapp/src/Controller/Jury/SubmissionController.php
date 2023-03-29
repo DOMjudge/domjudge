@@ -50,10 +50,8 @@ use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\RouterInterface;
 
-/**
- * @Route("/jury/submissions")
- * @IsGranted("ROLE_JURY")
- */
+#[IsGranted('ROLE_JURY')]
+#[Route(path: '/jury/submissions')]
 class SubmissionController extends BaseController
 {
     public function __construct(
@@ -64,9 +62,7 @@ class SubmissionController extends BaseController
         protected readonly RouterInterface $router
     ) {}
 
-    /**
-     * @Route("", name="jury_submissions")
-     */
+    #[Route(path: '', name: 'jury_submissions')]
     public function indexAction(Request $request): Response
     {
         $viewTypes = [0 => 'newest', 1 => 'unverified', 2 => 'unjudged', 3 => 'all'];
@@ -154,9 +150,9 @@ class SubmissionController extends BaseController
     }
 
     /**
-     * @Route("/{submitId<\d+>}", name="jury_submission")
      * @throws NonUniqueResultException
      */
+    #[Route(path: '/{submitId<\d+>}', name: 'jury_submission')]
     public function viewAction(Request $request, int $submitId): Response
     {
         $judgingId   = $request->query->get('jid');
@@ -528,9 +524,7 @@ class SubmissionController extends BaseController
         return $this->render('jury/submission.html.twig', $twigData);
     }
 
-    /**
-     * @Route("/request-full-debug/{jid}", name="request_full_debug")
-     */
+    #[Route(path: '/request-full-debug/{jid}', name: 'request_full_debug')]
     public function requestFullDebug(Request $request, Judging $jid): RedirectResponse
     {
         $submission = $jid->getSubmission();
@@ -566,9 +560,7 @@ class SubmissionController extends BaseController
         ]));
     }
 
-    /**
-     * @Route("/download-full-debug/{debug_package_id}", name="download_full_debug")
-     */
+    #[Route(path: '/download-full-debug/{debug_package_id}', name: 'download_full_debug')]
     public function downloadFullDebug(DebugPackage $debugPackage): StreamedResponse
     {
         $name = 'debug_package.j' . $debugPackage->getJudging()->getJudgingid()
@@ -578,9 +570,7 @@ class SubmissionController extends BaseController
         return Utils::streamAsBinaryFile(file_get_contents($debugPackage->getFilename()), $name);
     }
 
-    /**
-     * @Route("/request-output/{jid}/{jrid}", name="request_output")
-     */
+    #[Route(path: '/request-output/{jid}/{jrid}', name: 'request_output')]
     public function requestOutput(Request $request, Judging $jid, JudgingRun $jrid): RedirectResponse
     {
         $submission = $jid->getSubmission();
@@ -603,9 +593,7 @@ class SubmissionController extends BaseController
         ]));
     }
 
-    /**
-     * @Route("/by-judging-id/{jid}", name="jury_submission_by_judging")
-     */
+    #[Route(path: '/by-judging-id/{jid}', name: 'jury_submission_by_judging')]
     public function viewForJudgingAction(Judging $jid): RedirectResponse
     {
         return $this->redirectToRoute('jury_submission', [
@@ -614,9 +602,7 @@ class SubmissionController extends BaseController
         ]);
     }
 
-    /**
-     * @Route("/by-external-judgement-id/{externalJudgement}", name="jury_submission_by_external_judgement")
-     */
+    #[Route(path: '/by-external-judgement-id/{externalJudgement}', name: 'jury_submission_by_external_judgement')]
     public function viewForExternalJudgementAction(ExternalJudgement $externalJudgement): RedirectResponse
     {
         return $this->redirectToRoute('jury_submission', [
@@ -624,9 +610,7 @@ class SubmissionController extends BaseController
         ]);
     }
 
-    /**
-     * @Route("/by-external-id/{externalId}", name="jury_submission_by_external_id")
-     */
+    #[Route(path: '/by-external-id/{externalId}', name: 'jury_submission_by_external_id')]
     public function viewForExternalIdAction(string $externalId): RedirectResponse
     {
         if (!$this->dj->getCurrentContest()) {
@@ -648,9 +632,7 @@ class SubmissionController extends BaseController
         ]);
     }
 
-    /**
-     * @Route("/{submission}/runs/{contest}/{run}/team-output", name="jury_submission_team_output")
-     */
+    #[Route(path: '/{submission}/runs/{contest}/{run}/team-output', name: 'jury_submission_team_output')]
     public function teamOutputAction(Submission $submission, Contest $contest, JudgingRun $run): StreamedResponse
     {
         if ($run->getJudging()->getSubmission()->getSubmitid() !== $submission->getSubmitid() || $submission->getContest()->getCid() !== $contest->getCid()) {
@@ -669,9 +651,9 @@ class SubmissionController extends BaseController
     }
 
     /**
-     * @Route("/{submission}/source", name="jury_submission_source")
      * @throws NonUniqueResultException
      */
+    #[Route(path: '/{submission}/source', name: 'jury_submission_source')]
     public function sourceAction(Request $request, Submission $submission): Response
     {
         if ($request->query->has('fetch')) {
@@ -785,9 +767,7 @@ class SubmissionController extends BaseController
         ]);
     }
 
-    /**
-     * @Route("/{submission}/edit-source", name="jury_submission_edit_source")
-     */
+    #[Route(path: '/{submission}/edit-source', name: 'jury_submission_edit_source')]
     public function editSourceAction(Request $request, Submission $submission): Response
     {
         if (!$this->dj->getUser()->getTeam() || !$this->dj->checkrole('team')) {
@@ -908,9 +888,9 @@ class SubmissionController extends BaseController
     }
 
     /**
-     * @Route("/{judgingId<\d+>}/request-remaining", name="jury_submission_request_remaining", methods={"POST"})
      * @throws DBALException
      */
+    #[Route(path: '/{judgingId<\d+>}/request-remaining', name: 'jury_submission_request_remaining', methods: ['POST'])]
     public function requestRemainingRuns(Request $request, int $judgingId): RedirectResponse
     {
         /** @var Judging $judging */
@@ -926,10 +906,10 @@ class SubmissionController extends BaseController
     }
 
     /**
-     * @Route("/{submitId<\d+>}/update-status", name="jury_submission_update_status", methods={"POST"})
-     * @IsGranted("ROLE_ADMIN")
      * @throws DBALException
      */
+    #[IsGranted('ROLE_ADMIN')]
+    #[Route(path: '/{submitId<\d+>}/update-status', name: 'jury_submission_update_status', methods: ['POST'])]
     public function updateStatusAction(
         EventLogService $eventLogService,
         ScoreboardService $scoreboardService,
@@ -962,12 +942,12 @@ class SubmissionController extends BaseController
     }
 
     /**
-     * @Route("/{judgingId<\d+>}/verify", name="jury_judging_verify", methods={"POST"})
      * @throws DBALException
      * @throws NoResultException
      * @throws NonUniqueResultException
      * @throws ORMException
      */
+    #[Route(path: '/{judgingId<\d+>}/verify', name: 'jury_judging_verify', methods: ['POST'])]
     public function verifyAction(
         EventLogService $eventLogService,
         ScoreboardService $scoreboardService,
@@ -1035,9 +1015,7 @@ class SubmissionController extends BaseController
     }
 
 
-    /**
-     * @Route("/shadow-difference/{extjudgementid<\d+>}/verify", name="jury_shadow_difference_verify", methods={"POST"})
-     */
+    #[Route(path: '/shadow-difference/{extjudgementid<\d+>}/verify', name: 'jury_shadow_difference_verify', methods: ['POST'])]
     public function verifyShadowDifferenceAction(
         EventLogService $eventLogService,
         Request $request,
@@ -1152,9 +1130,7 @@ class SubmissionController extends BaseController
         return null;
     }
 
-    /**
-     * @Route("/{submitId<\d+>}/create-tasks", name="jury_submission_create_tasks")
-     */
+    #[Route(path: '/{submitId<\d+>}/create-tasks', name: 'jury_submission_create_tasks')]
     public function createJudgeTasks(string $submitId): RedirectResponse
     {
         $this->dj->unblockJudgeTasksForSubmission($submitId);

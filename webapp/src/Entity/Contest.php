@@ -22,10 +22,8 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 /**
  * Contests that will be run with this install.
- *
- * @UniqueEntity("shortname")
- * @UniqueEntity("externalid")
  */
+#[ORM\Entity]
 #[ORM\Table(options: [
     'collation' => 'utf8mb4_unicode_ci',
     'charset' => 'utf8mb4',
@@ -45,7 +43,8 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
     exp: '0',
     options: [new Serializer\Type('int')]
 )]
-#[ORM\Entity]
+#[UniqueEntity(fields: 'shortname')]
+#[UniqueEntity(fields: 'externalid')]
 class Contest extends BaseApiEntity implements AssetEntityInterface
 {
     final public const STARTTIME_UPDATE_MIN_SECONDS_BEFORE = 30;
@@ -61,21 +60,19 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
         nullable: true,
         options: ['comment' => 'Contest ID in an external system', 'collation' => 'utf8mb4_bin']
     )]
-    #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
     #[Serializer\SerializedName('external_id')]
+    #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
     protected ?string $externalid = null;
 
-    /**
-     * @Assert\NotBlank()
-     */
     #[ORM\Column(options: ['comment' => 'Descriptive name'])]
+    #[Assert\NotBlank]
     private string $name = '';
 
     /**
      * @Identifier()
-     * @Assert\NotBlank()
      */
     #[ORM\Column(options: ['comment' => 'Short name for this contest'])]
+    #[Assert\NotBlank]
     #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
     private string $shortname = '';
 
@@ -165,10 +162,10 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     #[Serializer\Exclude]
     private ?bool $medalsEnabled = false;
 
+    #[ORM\ManyToMany(targetEntity: TeamCategory::class, inversedBy: 'contests_for_medals')]
     #[ORM\JoinTable(name: 'contestteamcategoryformedals')]
     #[ORM\JoinColumn(name: 'cid', referencedColumnName: 'cid', onDelete: 'CASCADE')]
     #[ORM\InverseJoinColumn(name: 'categoryid', referencedColumnName: 'categoryid', onDelete: 'CASCADE')]
-    #[ORM\ManyToMany(targetEntity: TeamCategory::class, inversedBy: 'contests_for_medals')]
     #[Serializer\Exclude]
     private Collection $medal_categories;
 
@@ -296,9 +293,7 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     #[Serializer\Exclude]
     private bool $public = true;
 
-    /**
-     * @Assert\File(mimeTypes={"image/png","image/jpeg","image/svg+xml"}, mimeTypesMessage="Only PNG's, JPG's and SVG's are allowed")
-     */
+    #[Assert\File(mimeTypes: ['image/png', 'image/jpeg', 'image/svg+xml'], mimeTypesMessage: "Only PNG's, JPG's and SVG's are allowed")]
     #[Serializer\Exclude]
     private ?UploadedFile $bannerFile = null;
 
@@ -327,17 +322,17 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     #[Serializer\Exclude]
     private bool $isLocked = false;
 
+    #[ORM\ManyToMany(targetEntity: Team::class, inversedBy: 'contests')]
     #[ORM\JoinTable(name: 'contestteam')]
     #[ORM\JoinColumn(name: 'cid', referencedColumnName: 'cid', onDelete: 'CASCADE')]
     #[ORM\InverseJoinColumn(name: 'teamid', referencedColumnName: 'teamid', onDelete: 'CASCADE')]
-    #[ORM\ManyToMany(targetEntity: Team::class, inversedBy: 'contests')]
     #[Serializer\Exclude]
     private Collection $teams;
 
+    #[ORM\ManyToMany(targetEntity: TeamCategory::class, inversedBy: 'contests')]
     #[ORM\JoinTable(name: 'contestteamcategory')]
     #[ORM\JoinColumn(name: 'cid', referencedColumnName: 'cid', onDelete: 'CASCADE')]
     #[ORM\InverseJoinColumn(name: 'categoryid', referencedColumnName: 'categoryid', onDelete: 'CASCADE')]
-    #[ORM\ManyToMany(targetEntity: TeamCategory::class, inversedBy: 'contests')]
     #[Serializer\Exclude]
     private Collection $team_categories;
 
@@ -349,9 +344,6 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     #[Serializer\Exclude]
     private Collection $submissions;
 
-    /**
-     * @Assert\Valid()
-     */
     #[ORM\OneToMany(
         mappedBy: 'contest',
         targetEntity: ContestProblem::class,
@@ -359,6 +351,7 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
         orphanRemoval: true)
     ]
     #[ORM\OrderBy(['shortname' => 'ASC'])]
+    #[Assert\Valid]
     #[Serializer\Exclude]
     private Collection $problems;
 
@@ -366,17 +359,13 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     #[Serializer\Exclude]
     private Collection $internal_errors;
 
-    /**
-     * @Assert\Valid()
-     */
     #[ORM\OneToMany(mappedBy: 'contest', targetEntity: RemovedInterval::class)]
+    #[Assert\Valid]
     #[Serializer\Exclude]
     private Collection $removedIntervals;
 
-    /**
-     * @Assert\Valid()
-     */
     #[ORM\OneToMany(mappedBy: 'contest', targetEntity: ExternalContestSource::class)]
+    #[Assert\Valid]
     #[Serializer\Exclude]
     private Collection $externalContestSources;
 
@@ -1147,9 +1136,7 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
         $this->setStarttimeString($this->getStarttimeString());
     }
 
-    /**
-     * @Assert\Callback()
-     */
+    #[Assert\Callback]
     public function validate(ExecutionContextInterface $context): void
     {
         $this->updateTimes();

@@ -147,8 +147,8 @@ class TeamController extends AbstractRestController
 
     /**
      * Delete the photo for the given team.
-     * @IsGranted("ROLE_ADMIN")
      */
+    #[IsGranted('ROLE_ADMIN')]
     #[Rest\Delete('contests/{cid}/teams/{id}/photo', name: 'delete_team_photo')]
     #[Rest\Delete('teams/{id}/photo')]
     #[OA\Response(response: 204, description: 'Deleting photo succeeded')]
@@ -181,8 +181,8 @@ class TeamController extends AbstractRestController
 
     /**
      * Set the photo for the given team.
-     * @IsGranted("ROLE_ADMIN")
      */
+    #[IsGranted('ROLE_ADMIN')]
     #[Rest\Post('contests/{cid}/teams/{id}/photo', name: 'post_team_photo')]
     #[Rest\Post('teams/{id}/photo')]
     #[Rest\Put('contests/{cid}/teams/{id}/photo', name: 'put_team_photo')]
@@ -245,9 +245,8 @@ class TeamController extends AbstractRestController
 
     /**
      * Add a new team.
-     *
-     * @IsGranted("ROLE_API_WRITER")
      */
+    #[IsGranted('ROLE_API_WRITER')]
     #[Rest\Post('contests/{cid}/teams')]
     #[Rest\Post('teams')]
     #[OA\RequestBody(

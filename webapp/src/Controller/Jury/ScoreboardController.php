@@ -10,19 +10,15 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
-/**
- * @Route("/jury/scoreboard")
- * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_BALLOON')")
- */
+#[Security("is_granted('ROLE_JURY') or is_granted('ROLE_BALLOON')")]
+#[Route(path: '/jury/scoreboard')]
 class ScoreboardController extends AbstractController
 {
     public function __construct(protected readonly DOMJudgeService $dj, protected readonly ScoreboardService $scoreboardService)
     {
     }
 
-    /**
-     * @Route("", name="jury_scoreboard")
-     */
+    #[Route(path: '', name: 'jury_scoreboard')]
     public function scoreboardAction(Request $request): Response
     {
         $response   = new Response();

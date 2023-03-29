@@ -13,12 +13,12 @@ use RuntimeException;
  *
  * Note: this class should have no setters, since its data is immutable.
  */
+#[ORM\Entity]
 #[ORM\Table(options: [
     'collation' => 'utf8mb4_unicode_ci',
     'charset' => 'utf8mb4',
     'comment' => 'Immutable wrapper for a collection of files for executable bundles.',
 ])]
-#[ORM\Entity]
 #[ORM\HasLifecycleCallbacks]
 class ImmutableExecutable
 {

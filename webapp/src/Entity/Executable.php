@@ -12,32 +12,28 @@ use ZipArchive;
 /**
  * Compile, compare, and run script executable bundles.
  */
+#[ORM\Entity]
 #[ORM\Table(options: [
     'collation' => 'utf8mb4_unicode_ci',
     'charset' => 'utf8mb4',
     'comment' => 'Compile, compare, and run script executable bundles',
 ])]
-#[ORM\Entity]
 class Executable
 {
     /**
-     * @Assert\NotBlank()
      * @Identifier()
      */
     #[ORM\Id]
     #[ORM\Column(length: 32, options: ['comment' => 'Executable ID (string)'])]
+    #[Assert\NotBlank]
     private string $execid;
 
-    /**
-     * @Assert\NotBlank()
-     */
     #[ORM\Column(nullable: true, options: ['comment' => 'Description of this executable'])]
+    #[Assert\NotBlank]
     private ?string $description = null;
 
-    /**
-     * @Assert\Choice({"compare", "compile", "debug", "run"})
-     */
     #[ORM\Column(length: 32, options: ['comment' => 'Type of executable'])]
+    #[Assert\Choice(['compare', 'compile', 'debug', 'run'])]
     private string $type;
 
     #[ORM\OneToOne(targetEntity: ImmutableExecutable::class)]

@@ -7,12 +7,12 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * Contents of a testcase.
  */
+#[ORM\Entity]
 #[ORM\Table(options: [
     'collation' => 'utf8mb4_unicode_ci',
     'charset' => 'utf8mb4',
     'comment' => 'Stores contents of testcase',
 ])]
-#[ORM\Entity]
 class TestcaseContent
 {
     #[ORM\Id]

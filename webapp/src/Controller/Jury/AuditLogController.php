@@ -17,10 +17,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-/**
- * @Route("/jury/auditlog")
- * @IsGranted("ROLE_ADMIN")
- */
+#[IsGranted('ROLE_ADMIN')]
+#[Route(path: '/jury/auditlog')]
 class AuditLogController extends AbstractController
 {
     public function __construct(
@@ -30,9 +28,7 @@ class AuditLogController extends AbstractController
         protected readonly EventLogService $eventLogService
     ) {}
 
-    /**
-     * @Route("", name="jury_auditlog")
-     */
+    #[Route(path: '', name: 'jury_auditlog')]
     public function indexAction(Request $request): Response
     {
         $timeFormat = (string)$this->config->get('time_format');

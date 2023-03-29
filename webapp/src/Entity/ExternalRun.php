@@ -7,6 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * Run in external system.
  */
+#[ORM\Entity]
 #[ORM\Table(options: [
     'collation' => 'utf8mb4_unicode_ci',
     'charset' => 'utf8mb4',
@@ -19,7 +20,6 @@ use Doctrine\ORM\Mapping as ORM;
     columns: ['cid', 'externalid'],
     options: ['lengths' => [null, 190]]
 )]
-#[ORM\Entity]
 class ExternalRun
 {
     #[ORM\Id]

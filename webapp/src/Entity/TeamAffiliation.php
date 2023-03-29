@@ -13,16 +13,14 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Affilitations for teams (e.g.: university, company).
- *
- * @UniqueEntity("externalid")
  */
+#[ORM\Entity]
 #[ORM\Table(options: [
     'collation' => 'utf8mb4_unicode_ci',
     'charset' => 'utf8mb4',
     'comment' => 'Affilitations for teams (e.g.: university, company)',
 ])]
 #[ORM\UniqueConstraint(name: 'externalid', columns: ['externalid'], options: ['lengths' => [190]])]
-#[ORM\Entity]
 #[Serializer\VirtualProperty(
     name: 'shortName',
     exp: 'object.getShortname()',
@@ -32,6 +30,7 @@ use Symfony\Component\Validator\Constraints as Assert;
         new Serializer\Groups(['Nonstrict']),
     ]
 )]
+#[UniqueEntity(fields: 'externalid')]
 class TeamAffiliation extends BaseApiEntity implements AssetEntityInterface
 {
     #[ORM\Id]
@@ -76,9 +75,7 @@ class TeamAffiliation extends BaseApiEntity implements AssetEntityInterface
     #[Serializer\Expose(if: "context.getAttribute('config_service').get('show_flags')")]
     private ?string $country = null;
 
-    /**
-     * @Assert\File(mimeTypes={"image/png","image/jpeg","image/svg+xml"}, mimeTypesMessage="Only PNG's, JPG's and SVG's are allowed")
-     */
+    #[Assert\File(mimeTypes: ['image/png', 'image/jpeg', 'image/svg+xml'], mimeTypesMessage: "Only PNG's, JPG's and SVG's are allowed")]
     #[Serializer\Exclude]
     private ?UploadedFile $logoFile = null;
 

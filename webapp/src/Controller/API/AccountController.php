@@ -31,9 +31,9 @@ class AccountController extends AbstractRestController
     // extending a controller.
     /**
      * Get all the accounts.
-     * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_API_READER')")
      * @throws NonUniqueResultException
      */
+    #[Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_API_READER')")]
     #[Rest\Get('/accounts')]
     #[OA\Response(
         response: 200,
@@ -60,8 +60,8 @@ class AccountController extends AbstractRestController
     /**
      * Get the given account.
      * @throws NonUniqueResultException
-     * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_API_READER')")
      */
+    #[Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_API_READER')")]
     #[Rest\Get('/accounts/{id}')]
     #[OA\Response(
         response: 200,

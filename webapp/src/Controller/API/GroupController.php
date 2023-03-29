@@ -68,9 +68,8 @@ class GroupController extends AbstractRestController
 
     /**
      * Add a new group
-     *
-     * @IsGranted("ROLE_API_WRITER")
      */
+    #[IsGranted('ROLE_API_WRITER')]
     #[Rest\Post]
     #[OA\RequestBody(
         required: true,

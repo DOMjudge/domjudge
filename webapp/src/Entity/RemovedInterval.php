@@ -13,13 +13,13 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 /**
  * Time intervals removed from the contest for scoring.
  */
+#[ORM\Entity]
 #[ORM\Table(options: [
     'collation' => 'utf8mb4_unicode_ci',
     'charset' => 'utf8mb4',
     'comment' => 'Time intervals removed from the contest for scoring',
 ])]
 #[ORM\Index(columns: ['cid'], name: 'cid')]
-#[ORM\Entity]
 class RemovedInterval
 {
     #[ORM\Id]
@@ -137,9 +137,7 @@ class RemovedInterval
         return $this->contest;
     }
 
-    /**
-     * @Assert\Callback()
-     */
+    #[Assert\Callback]
     public function validate(ExecutionContextInterface $context)
     {
         // Update all contest timing, taking into account all removed intervals

@@ -78,9 +78,9 @@ class ClarificationController extends AbstractRestController
 
     /**
      * Add a clarification to this contest
-     * @Security("is_granted('ROLE_TEAM') or is_granted('ROLE_API_WRITER')", message="You need to have the Team Member role to add a clarification")
      * @throws NonUniqueResultException
      */
+    #[Security("is_granted('ROLE_TEAM') or is_granted('ROLE_API_WRITER')", message: 'You need to have the Team Member role to add a clarification')]
     #[Rest\Post('')]
     #[Rest\Put('/{id}')]
     #[OA\RequestBody(

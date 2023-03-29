@@ -12,9 +12,8 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
  * Clarification requests by teams and responses by the jury.
- *
- * @UniqueEntity("externalid")
  */
+#[ORM\Entity]
 #[ORM\Table(options: [
     'collation' => 'utf8mb4_unicode_ci',
     'charset' => 'utf8mb4',
@@ -31,7 +30,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
     columns: ['cid', 'externalid'],
     options: ['lengths' => [null, 190]]
 )]
-#[ORM\Entity]
+#[UniqueEntity(fields: 'externalid')]
 class Clarification extends BaseApiEntity implements ExternalRelationshipEntityInterface
 {
     #[ORM\Id]
@@ -48,8 +47,8 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
             'collation' => 'utf8mb4_bin',
         ]
     )]
-    #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
     #[OA\Property(nullable: true)]
+    #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
     protected ?string $externalid = null;
 
     #[ORM\Column(

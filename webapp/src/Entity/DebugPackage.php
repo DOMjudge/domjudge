@@ -6,13 +6,13 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * A debug package from a specific judgehost/judging combination.
  */
+#[ORM\Entity]
 #[ORM\Table(options: [
     'collation' => 'utf8mb4_unicode_ci',
     'charset' => 'utf8mb4',
     'comment' => 'Debug packages.',
 ])]
 #[ORM\Index(columns: ['judgingid'], name: 'judgingid')]
-#[ORM\Entity]
 class DebugPackage
 {
     #[ORM\Id]

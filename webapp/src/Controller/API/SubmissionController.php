@@ -106,9 +106,9 @@ class SubmissionController extends AbstractRestController
 
     /**
      * Add a submission to this contest.
-     * @Security("is_granted('ROLE_TEAM') or is_granted('ROLE_API_WRITER')", message="You need to have the Team Member role to add a submission")
      * @throws NonUniqueResultException
      */
+    #[Security("is_granted('ROLE_TEAM') or is_granted('ROLE_API_WRITER')", message: 'You need to have the Team Member role to add a submission')]
     #[Rest\Post('contests/{cid}/submissions')]
     #[Rest\Put('contests/{cid}/submissions/{id}')]
     #[OA\RequestBody(
@@ -456,9 +456,9 @@ class SubmissionController extends AbstractRestController
 
     /**
      * Get the files for the given submission as a ZIP archive.
-     * @IsGranted("ROLE_API_SOURCE_READER")
      * @throws NonUniqueResultException
      */
+    #[IsGranted('ROLE_API_SOURCE_READER')]
     #[Rest\Get('contests/{cid}/submissions/{id}/files', name: 'submission_files')]
     #[Rest\Get('submissions/{id}/files', name: 'submission_files_root')]
     #[OA\Response(
@@ -496,9 +496,9 @@ class SubmissionController extends AbstractRestController
 
     /**
      * Get the source code of all the files for the given submission.
-     * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST')")
      * @throws NonUniqueResultException
      */
+    #[Security("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST')")]
     #[Rest\Get('contests/{cid}/submissions/{id}/source-code')]
     #[OA\Response(
         response: 200,

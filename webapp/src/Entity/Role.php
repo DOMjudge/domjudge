@@ -9,13 +9,13 @@ use Stringable;
 /**
  * Possible user roles.
  */
+#[ORM\Entity]
 #[ORM\Table(options: [
     'collation' => 'utf8mb4_unicode_ci',
     'charset' => 'utf8mb4',
     'comment' => 'Possible user roles',
 ])]
 #[ORM\UniqueConstraint(name: 'role', columns: ['role'])]
-#[ORM\Entity]
 class Role implements Stringable
 {
     #[ORM\Id]

@@ -10,19 +10,17 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 /**
  * Class RootController
  *
- * @Route("")
  *
  * @package App\Controller
  */
+#[Route(path: '')]
 class RootController extends BaseController
 {
     public function __construct(protected readonly DOMJudgeService $dj)
     {
     }
 
-    /**
-     * @Route("", name="root")
-     */
+    #[Route(path: '', name: 'root')]
     public function redirectAction(AuthorizationCheckerInterface $authorizationChecker): RedirectResponse
     {
         if ($authorizationChecker->isGranted('IS_AUTHENTICATED_FULLY')) {

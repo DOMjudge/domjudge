@@ -11,6 +11,7 @@ use JMS\Serializer\Annotation as Serializer;
 /**
  * Log of judgehost internal errors.
  */
+#[ORM\Entity]
 #[ORM\Table(
 options: [
     'collation' => 'utf8mb4_unicode_ci',
@@ -19,12 +20,11 @@ options: [
 ])]
 #[ORM\Index(columns: ['judgingid'], name: 'judgingid')]
 #[ORM\Index(columns: ['cid'], name: 'cid')]
-#[ORM\Entity]
 class InternalError
 {
     #[ORM\Id]
-    #[ORM\Column(options: ['comment' => 'Internal error ID', 'unsigned' => true])]
     #[ORM\GeneratedValue(strategy: 'IDENTITY')]
+    #[ORM\Column(options: ['comment' => 'Internal error ID', 'unsigned' => true])]
     private int $errorid;
 
     #[ORM\Column(options: ['comment' => 'Description of the error'])]

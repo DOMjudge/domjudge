@@ -28,9 +28,7 @@ class SecurityController extends AbstractController
         private readonly EntityManagerInterface $em
     ) {}
 
-    /**
-     * @Route("/login", name="login")
-     */
+    #[Route(path: '/login', name: 'login')]
     public function loginAction(
         Request $request,
         AuthorizationCheckerInterface $authorizationChecker,
@@ -81,9 +79,7 @@ class SecurityController extends AbstractController
         ], $response);
     }
 
-    /**
-     * @Route("/register", name="register")
-     */
+    #[Route(path: '/register', name: 'register')]
     public function registerAction(
         Request $request,
         AuthorizationCheckerInterface $authorizationChecker,

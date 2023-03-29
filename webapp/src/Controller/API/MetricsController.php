@@ -21,10 +21,8 @@ use Symfony\Component\Routing\Annotation\Route;
 use Prometheus\CollectorRegistry;
 use Prometheus\RenderTextFormat;
 
-/**
- * @Route("/metrics")
- * @IsGranted("ROLE_API_READER")
- */
+#[IsGranted('ROLE_API_READER')]
+#[Route(path: '/metrics')]
 #[OA\Tag(name: 'Metrics')]
 #[OA\Response(ref: '#/components/responses/Unauthenticated', response: 401)]
 #[OA\Response(ref: '#/components/responses/Unauthorized', response: 403)]

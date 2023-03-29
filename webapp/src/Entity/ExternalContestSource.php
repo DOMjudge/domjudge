@@ -8,13 +8,13 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
+#[ORM\Entity]
 #[ORM\Table(options: [
     'collation' => 'utf8mb4_unicode_ci',
     'charset' => 'utf8mb4',
     'comment' => 'Sources for external contests',
 ])]
 #[ORM\UniqueConstraint(name: 'cid', columns: ['cid'])]
-#[ORM\Entity]
 class ExternalContestSource
 {
     final public const TYPE_CCS_API         = 'ccs-api';
@@ -179,9 +179,7 @@ class ExternalContestSource
         return $this->getSource();
     }
 
-    /**
-     * @Assert\Callback
-     */
+    #[Assert\Callback]
     public function validate(ExecutionContextInterface $context): void
     {
         switch ($this->getType()) {
