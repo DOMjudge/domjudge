@@ -6,63 +6,81 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * Log of all events during a contest.
- *
- * @ORM\Table(
- *     name="event",
- *     options={"collation"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Log of all events during a contest"},
- *     indexes={
- *         @ORM\Index(name="eventtime", columns={"cid","eventtime"}),
- *         @ORM\Index(name="cid", columns={"cid"}),
- *         @ORM\Index(name="endpoint", columns={"cid","endpointtype","endpointid"})
- *     })
- * @ORM\Entity
  */
+#[ORM\Table(
+    name: 'event',
+    options: [
+        'collation' => 'utf8mb4_unicode_ci',
+        'charset' => 'utf8mb4',
+        'comment' => 'Log of all events during a contest',
+    ]
+)]
+#[ORM\Index(columns: ['cid', 'eventtime'], name: 'eventtime')]
+#[ORM\Index(columns: ['cid'], name: 'cid')]
+#[ORM\Index(columns: ['cid', 'endpointtype', 'endpointid'], name: 'endpoint')]
+#[ORM\Entity]
 class Event
 {
-    /**
-     * @ORM\Id
-     * @ORM\Column(name="eventid", type="integer", nullable=false, length=4,
-     *     options={"comment"="Event ID","unsigned"=true})
-     * @ORM\GeneratedValue(strategy="IDENTITY")
-     */
+    #[ORM\Id]
+    #[ORM\Column(
+        name: 'eventid',
+        type: 'integer',
+        length: 4,
+        nullable: false,
+        options: ['comment' => 'Event ID', 'unsigned' => true]
+    )]
+    #[ORM\GeneratedValue(strategy: 'IDENTITY')]
     private int $eventid;
 
-    /**
-     * @ORM\Column(name="eventtime", type="decimal", precision=32, scale=9,
-     *     nullable=false, options={"comment"="When the event occurred","unsigned"=true})
-     */
+    #[ORM\Column(
+        name: 'eventtime',
+        type: 'decimal',
+        precision: 32,
+        scale: 9,
+        nullable: false,
+        options: ['comment' => 'When the event occurred', 'unsigned' => true]
+    )]
     private string|float $eventtime;
 
-    /**
-     * @ORM\Column(name="endpointtype", type="string", length=32, nullable=false,
-     *     options={"comment"="API endpoint associated to this entry"})
-     */
+    #[ORM\Column(
+        name: 'endpointtype',
+        type: 'string',
+        length: 32,
+        nullable: false,
+        options: ['comment' => 'API endpoint associated to this entry']
+    )]
     private string $endpointtype;
 
-    /**
-     * @ORM\Column(name="endpointid", type="string", length=64, nullable=false,
-     *     options={"comment"="API endpoint (external) ID"})
-     */
+    #[ORM\Column(
+        name: 'endpointid',
+        type: 'string',
+        length: 64,
+        nullable: false,
+        options: ['comment' => 'API endpoint (external) ID']
+    )]
     private string $endpointid;
 
-    /**
-     * @ORM\Column(name="action", type="string", length=32, nullable=false,
-     *     options={"comment"="Description of action performed"})
-     */
+    #[ORM\Column(
+        name: 'action',
+        type: 'string',
+        length: 32,
+        nullable: false,
+        options: ['comment' => 'Description of action performed']
+    )]
     private string $action;
 
     /**
      * @var resource
-     *
-     * @ORM\Column(name="content", type="binaryjson",
-     *     options={"comment"="JSON encoded content of the change, as provided in the event feed"})
      */
+    #[ORM\Column(
+        name: 'content',
+        type: 'binaryjson',
+        options: ['comment' => 'JSON encoded content of the change, as provided in the event feed']
+    )]
     private $content;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="Contest", inversedBy="problems")
-     * @ORM\JoinColumn(name="cid", referencedColumnName="cid", onDelete="CASCADE")
-     */
+    #[ORM\ManyToOne(targetEntity: Contest::class, inversedBy: 'problems')]
+    #[ORM\JoinColumn(name: 'cid', referencedColumnName: 'cid', onDelete: 'CASCADE')]
     private ?Contest $contest = null;
 
     public function setEventid(int $eventid): Event

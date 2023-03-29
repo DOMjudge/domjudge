@@ -13,117 +13,141 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * Programming languages in which teams can submit solutions.
  *
- * @ORM\Entity()
- * @ORM\Table(
- *     name="language",
- *     options={"collation"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Programming languages in which teams can submit solutions"},
- *     indexes={@ORM\Index(name="compile_script", columns={"compile_script"})},
- *     uniqueConstraints={
- *         @ORM\UniqueConstraint(name="externalid", columns={"externalid"}, options={"lengths": {190}}),
- *     })
  * @UniqueEntity("langid")
  * @UniqueEntity("externalid")
  */
+#[ORM\Table(
+    name: 'language',
+    options: [
+        'collation' => 'utf8mb4_unicode_ci',
+        'charset' => 'utf8mb4',
+        'comment' => 'Programming languages in which teams can submit solutions',
+    ])]
+#[ORM\Index(columns: ['compile_script'], name: 'compile_script')]
+#[ORM\UniqueConstraint(name: 'externalid', columns: ['externalid'], options: ['lengths' => [190]])]
+#[ORM\Entity]
 class Language extends BaseApiEntity
 {
     /**
-     * @ORM\Id
-     * @ORM\Column(type="string", name="langid", length=32, options={"comment"="Language ID (string)"}, nullable=false)
      * @Assert\NotBlank()
      * @Assert\NotEqualTo("add")
      * @Identifier()
      */
+    #[ORM\Id]
+    #[ORM\Column(
+        name: 'langid',
+        type: 'string',
+        length: 32,
+        nullable: false,
+        options: ['comment' => 'Language ID (string)']
+    )]
     #[Serializer\Exclude]
     protected ?string $langid = null;
 
-    /**
-     * @ORM\Column(type="string", name="externalid", length=255, nullable=true,
-     *     options={"comment"="Language ID to expose in the REST API"})
-     */
+    #[ORM\Column(
+        name: 'externalid',
+        type: 'string',
+        length: 255,
+        nullable: true,
+        options: ['comment' => 'Language ID to expose in the REST API']
+    )]
     #[Serializer\SerializedName('id')]
     #[Serializer\Groups(['Default', 'Nonstrict'])]
     protected ?string $externalid = null;
 
     /**
-     * @ORM\Column(type="string", name="name", length=255, options={"comment"="Descriptive language name"}, nullable=false)
      * @Assert\NotBlank()
      */
+    #[ORM\Column(
+        name: 'name',
+        type: 'string',
+        length: 255,
+        nullable: false,
+        options: ['comment' => 'Descriptive language name']
+    )]
     #[Serializer\Groups(['Default', 'Nonstrict'])]
     private string $name = '';
 
     /**
      * @var string[]
-     * @ORM\Column(type="json", length=4294967295, name="extensions",
-     *     options={"comment"="List of recognized extensions (JSON encoded)"},
-     *     nullable=true)
      * @Assert\NotBlank()
      */
+    #[ORM\Column(
+        name: 'extensions',
+        type: 'json',
+        length: 4294967295,
+        nullable: true,
+        options: ['comment' => 'List of recognized extensions (JSON encoded)']
+    )]
     #[Serializer\Type('array<string>')]
     private array $extensions = [];
 
-    /**
-     * @ORM\Column(type="boolean", name="filter_compiler_files",
-     *     options={"comment"="Whether to filter the files passed to the compiler by the extension list.",
-     *              "default"="1"},
-     *     nullable=false)
-     */
+    #[ORM\Column(
+        name: 'filter_compiler_files',
+        type: 'boolean',
+        nullable: false,
+        options: ['comment' => 'Whether to filter the files passed to the compiler by the extension list.', 'default' => 1]
+    )]
     #[Serializer\Groups(['Nonstrict'])]
     private bool $filterCompilerFiles = true;
 
-    /**
-     * @ORM\Column(type="boolean", name="allow_submit",
-     *     options={"comment"="Are submissions accepted in this language?","default"="1"},
-     *     nullable=false)
-     */
+    #[ORM\Column(
+        name: 'allow_submit',
+        type: 'boolean',
+        nullable: false,
+        options: ['comment' => 'Are submissions accepted in this language?', 'default' => 1]
+    )]
     #[Serializer\Exclude]
     private bool $allowSubmit = true;
 
-    /**
-     * @ORM\Column(type="boolean", name="allow_judge",
-     *     options={"comment"="Are submissions in this language judged?","default"="1"},
-     *     nullable=false)
-     */
+    #[ORM\Column(
+        name: 'allow_judge',
+        type: 'boolean',
+        nullable: false,
+        options: ['comment' => 'Are submissions in this language judged?', 'default' => 1]
+    )]
     #[Serializer\Groups(['Nonstrict'])]
     private bool $allowJudge = true;
 
     /**
-     * @ORM\Column(type="float", name="time_factor",
-     *     options={"comment"="Language-specific factor multiplied by problem run times","default"="1"},
-     *     nullable=false)
      * @Assert\GreaterThan(0)
      * @Assert\NotBlank()
      */
+    #[ORM\Column(
+        name: 'time_factor',
+        type: 'float',
+        nullable: false,
+        options: ['comment' => 'Language-specific factor multiplied by problem run times', 'default' => 1]
+    )]
     #[Serializer\Type('double')]
     #[Serializer\Groups(['Nonstrict'])]
     private float $timeFactor = 1;
 
-    /**
-     * @ORM\Column(type="boolean", name="require_entry_point",
-     *     options={"comment"="Whether submissions require a code entry point to be specified.","default":"0"},
-     *     nullable=false)
-     */
+    #[ORM\Column(
+        name: 'require_entry_point',
+        type: 'boolean',
+        nullable: false,
+        options: ['comment' => 'Whether submissions require a code entry point to be specified.', 'default' => 0]
+    )]
     #[Serializer\SerializedName('entry_point_required')]
     private bool $require_entry_point = false;
 
-    /**
-     * @ORM\Column(type="string", name="entry_point_description",
-     *     options={"comment"="The description used in the UI for the entry point field."},
-     *     nullable=true)
-     */
+    #[ORM\Column(
+        name: 'entry_point_description',
+        type: 'string',
+        nullable: true,
+        options: ['comment' => 'The description used in the UI for the entry point field.']
+    )]
     #[OA\Property(nullable: true)]
     #[Serializer\SerializedName('entry_point_name')]
     private ?string $entry_point_description = null;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="Executable", inversedBy="languages")
-     * @ORM\JoinColumn(name="compile_script", referencedColumnName="execid", onDelete="SET NULL")
-     */
+    #[ORM\JoinColumn(name: 'compile_script', referencedColumnName: 'execid', onDelete: 'SET NULL')]
     #[Serializer\Exclude]
+    #[ORM\ManyToOne(targetEntity: Executable::class, inversedBy: 'languages')]
     private ?Executable $compile_executable = null;
 
-    /**
-     * @ORM\OneToMany(targetEntity="Submission", mappedBy="language")
-     */
+    #[ORM\OneToMany(mappedBy: 'language', targetEntity: Submission::class)]
     #[Serializer\Exclude]
     private Collection $submissions;
 

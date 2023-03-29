@@ -7,64 +7,85 @@ use RuntimeException;
 
 /**
  * Files associated to an executable.
- *
- * @ORM\Entity()
- * @ORM\Table(
- *     name="executable_file",
- *     options={"collation"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Files associated to an executable"},
- *     indexes={@ORM\Index(name="immutable_execid", columns={"immutable_execid"})},
- *     uniqueConstraints={
- *         @ORM\UniqueConstraint(name="rankindex", columns={"immutable_execid", "ranknumber"}),
- *         @ORM\UniqueConstraint(name="filename", columns={"immutable_execid", "filename"}, options={"lengths": {NULL, 190}})
- *     })
- * @ORM\HasLifecycleCallbacks()
  */
+#[ORM\Table(
+    name: 'executable_file',
+    options: [
+        'collation' => 'utf8mb4_unicode_ci',
+        'charset' => 'utf8mb4',
+        'comment' => 'Files associated to an executable',
+    ]
+)]
+#[ORM\Index(columns: ['immutable_execid'], name: 'immutable_execid')]
+#[ORM\UniqueConstraint(
+    name: 'rankindex',
+    columns: ['immutable_execid', 'ranknumber']
+)]
+#[ORM\UniqueConstraint(
+    name: 'filename',
+    columns: ['immutable_execid', 'filename'],
+    options: ['lengths' => [null, 190]]
+)]
+#[ORM\Entity]
+#[ORM\HasLifecycleCallbacks]
 class ExecutableFile
 {
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     * @ORM\Column(type="integer", name="execfileid", length=4,
-     *     options={"comment"="Executable file ID","unsigned"=true},
-     *     nullable=false)
-     */
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
+    #[ORM\Column(
+        name: 'execfileid',
+        type: 'integer',
+        length: 4,
+        nullable: false,
+        options: ['comment' => 'Executable file ID', 'unsigned' => true]
+    )]
     private int $execfileid;
 
-    /**
-     * @ORM\Column(type="string", name="filename", length=255, options={"comment"="Filename as uploaded"}, nullable=false)
-     */
+    #[ORM\Column(
+        name: 'filename',
+        type: 'string',
+        length: 255,
+        nullable: false,
+        options: ['comment' => 'Filename as uploaded']
+    )]
     private string $filename;
 
-    /**
-     * @ORM\Column(type="integer", name="ranknumber",
-     *     options={"comment"="Order of the executable files, zero-indexed", "unsigned"=true},
-     *     nullable=false)
-     */
+    #[ORM\Column(
+        name: 'ranknumber',
+        type: 'integer',
+        nullable: false,
+        options: ['comment' => 'Order of the executable files, zero-indexed', 'unsigned' => true]
+    )]
     private int $rank;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="ImmutableExecutable", inversedBy="files")
-     * @ORM\JoinColumn(name="immutable_execid", referencedColumnName="immutable_execid", onDelete="CASCADE")
-     */
+    #[ORM\ManyToOne(targetEntity: ImmutableExecutable::class, inversedBy: 'files')]
+    #[ORM\JoinColumn(name: 'immutable_execid', referencedColumnName: 'immutable_execid', onDelete: 'CASCADE')]
     private ImmutableExecutable $immutableExecutable;
 
-    /**
-     * @ORM\Column(type="blobtext", name="file_content", length=4294967295,
-     *     options={"comment"="Full file content"}, nullable=false)
-     */
+    #[ORM\Column(
+        name: 'file_content',
+        type: 'blobtext',
+        length: 4294967295,
+        nullable: false,
+        options: ['comment' => 'Full file content']
+    )]
     private string $fileContent;
 
-    /**
-     * @ORM\Column(type="string", name="hash", length=32, options={"comment"="hash of the content"}, nullable=true)
-     */
+    #[ORM\Column(
+        name: 'hash',
+        type: 'string',
+        length: 32,
+        nullable: true,
+        options: ['comment' => 'hash of the content']
+    )]
     private string $hash;
 
-    /**
-     * @ORM\Column(type="boolean", name="is_executable",
-     *     options={"comment"="Whether this file gets an executable bit.",
-     *              "default"="0"},
-     *     nullable=false)
-     */
+    #[ORM\Column(
+        name: 'is_executable',
+        type: 'boolean',
+        nullable: false,
+        options: ['comment' => 'Whether this file gets an executable bit.', 'default' => 0]
+    )]
     #[Serializer\Exclude]
     private bool $isExecutable = false;
 
@@ -141,9 +162,7 @@ class ExecutableFile
         return $this->isExecutable;
     }
 
-    /**
-     * @ORM\PreRemove()
-     */
+    #[ORM\PreRemove]
     public function disallowDelete(): never
     {
         throw new RuntimeException('An executable file cannot be deleted');

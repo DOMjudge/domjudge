@@ -5,34 +5,47 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * Compile, compare, and run script executable bundles.
- *
- * @ORM\Entity()
- * @ORM\Table(name="configuration",
- *     options={"collation"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Global configuration variables"},
- *     uniqueConstraints={@ORM\UniqueConstraint(name="name", columns={"name"})})
  */
+#[ORM\Table(
+    name: 'configuration',
+    options: [
+        'collation' => 'utf8mb4_unicode_ci',
+        'charset' => 'utf8mb4',
+        'comment' => 'Global configuration variables',
+    ]
+)]
+#[ORM\UniqueConstraint(name: 'name', columns: ['name'])]
+#[ORM\Entity]
 class Configuration
 {
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     * @ORM\Column(type="integer", name="configid", length=4,
-     *     options={"comment"="Configuration ID","unsigned"=true}, nullable=false)
-     */
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
+    #[ORM\Column(
+        name: 'configid',
+        type: 'integer',
+        length: 4,
+        nullable: false,
+        options: ['comment' => 'Configuration ID', 'unsigned' => true]
+    )]
     private int $configid;
 
-    /**
-     * @ORM\Column(type="string", name="name", length=32, options={"comment"="Name of the configuration variable"}, nullable=false)
-     */
+    #[ORM\Column(
+        name: 'name',
+        type: 'string',
+        length: 32,
+        nullable: false,
+        options: ['comment' => 'Name of the configuration variable']
+    )]
     private string $name;
 
-    /**
-     * @var mixed
-     * @ORM\Column(type="json", length=4294967295, name="value",
-     *     options={"comment"="Content of the configuration variable (JSON encoded)"},
-     *     nullable=false)
-     */
-    private $value;
+    #[ORM\Column(
+        name: 'value',
+        type: 'json',
+        length: 4294967295,
+        nullable: false,
+        options: ['comment' => 'Content of the configuration variable (JSON encoded)']
+    )]
+    private mixed $value;
 
     public function getConfigid(): int
     {

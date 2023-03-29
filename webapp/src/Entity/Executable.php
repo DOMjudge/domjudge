@@ -11,60 +11,68 @@ use ZipArchive;
 
 /**
  * Compile, compare, and run script executable bundles.
- *
- * @ORM\Entity()
- * @ORM\Table(
- *     name="executable",
- *     options={"collation"="utf8mb4_unicode_ci", "charset"="utf8mb4",
- *              "comment"="Compile, compare, and run script executable bundles"}
- *     )
  */
+#[ORM\Table(
+    name: 'executable',
+    options: [
+        'collation' => 'utf8mb4_unicode_ci',
+        'charset' => 'utf8mb4',
+        'comment' => 'Compile, compare, and run script executable bundles',
+    ]
+)]
+#[ORM\Entity]
 class Executable
 {
     /**
      * @var string
-     * @ORM\Id
-     * @ORM\Column(type="string", name="execid", length=32,
-     *     options={"comment"="Executable ID (string)"}, nullable=false)
      * @Assert\NotBlank()
      * @Identifier()
      */
+    #[ORM\Id]
+    #[ORM\Column(
+        name: 'execid',
+        type: 'string',
+        length: 32,
+        nullable: false,
+        options: ['comment' => 'Executable ID (string)']
+    )]
     private string $execid;
 
     /**
-     * @ORM\Column(type="string", name="description", length=255,
-     *     options={"comment"="Description of this executable"},
-     *     nullable=true)
      * @Assert\NotBlank()
      */
+    #[ORM\Column(
+        name: 'description',
+        type: 'string',
+        length: 255,
+        nullable: true,
+        options: ['comment' => 'Description of this executable']
+    )]
     private ?string $description = null;
 
     /**
-     * @ORM\Column(type="string", name="type", length=32,
-     *     options={"comment"="Type of executable"}, nullable=false)
      * @Assert\Choice({"compare", "compile", "debug", "run"})
      */
+    #[ORM\Column(
+        name: 'type',
+        type: 'string',
+        length: 32,
+        nullable: false,
+        options: ['comment' => 'Type of executable']
+    )]
     private string $type;
 
-    /**
-     * @ORM\OneToOne(targetEntity="ImmutableExecutable")
-     * @ORM\JoinColumn(name="immutable_execid", referencedColumnName="immutable_execid")
-     */
+    #[ORM\OneToOne(targetEntity: ImmutableExecutable::class)]
+    #[ORM\JoinColumn(name: 'immutable_execid', referencedColumnName: 'immutable_execid')]
     private ImmutableExecutable $immutableExecutable;
 
-    /**
-     * @ORM\OneToMany(targetEntity="Language", mappedBy="compile_executable")
-     */
+    #[ORM\OneToMany(mappedBy: 'compile_executable', targetEntity: Language::class)]
     private Collection $languages;
 
-    /**
-     * @ORM\OneToMany(targetEntity="Problem", mappedBy="compare_executable")
-     */
+    #[ORM\OneToMany(mappedBy: 'compare_executable', targetEntity: Problem::class)]
     private Collection $problems_compare;
 
-    /**
-     * @ORM\OneToMany(targetEntity="Problem", mappedBy="run_executable")
-     */
+    #[ORM\OneToMany(mappedBy: 'run_executable', targetEntity: Problem::class)]
     private Collection $problems_run;
 
     public function __construct()

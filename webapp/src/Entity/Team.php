@@ -15,111 +15,132 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 /**
  * All teams participating in the contest.
  *
- * @ORM\Entity()
- * @ORM\Table(
- *     name="team",
- *     options={"collation"="utf8mb4_unicode_ci", "charset"="utf8mb4"},
- *     indexes={
- *         @ORM\Index(name="affilid", columns={"affilid"}),
- *         @ORM\Index(name="categoryid", columns={"categoryid"})
- *     },
- *     uniqueConstraints={
- *         @ORM\UniqueConstraint(name="externalid", columns={"externalid"}, options={"lengths": {190}}),
- *     })
  * @UniqueEntity("externalid")
  */
+#[ORM\Table(
+    name: 'team',
+    options: ['collation' => 'utf8mb4_unicode_ci', 'charset' => 'utf8mb4']
+)]
+#[ORM\Index(columns: ['affilid'], name: 'affilid')]
+#[ORM\Index(columns: ['categoryid'], name: 'categoryid')]
+#[ORM\UniqueConstraint(name: 'externalid', columns: ['externalid'], options: ['lengths' => [190]])]
+#[ORM\Entity]
 class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface, AssetEntityInterface
 {
     final public const DONT_ADD_USER = 'dont-add-user';
     final public const CREATE_NEW_USER = 'create-new-user';
     final public const ADD_EXISTING_USER = 'add-existing-user';
 
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     * @ORM\Column(type="integer", name="teamid", length=4, options={"comment"="Team ID", "unsigned"=true}, nullable=false)
-     */
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
+    #[ORM\Column(
+        name: 'teamid',
+        type: 'integer',
+        length: 4,
+        nullable: false,
+        options: ['comment' => 'Team ID', 'unsigned' => true]
+    )]
     #[Serializer\SerializedName('id')]
     #[Serializer\Type('string')]
     protected ?int $teamid = null;
 
-    /**
-     * @ORM\Column(type="string", name="externalid", length=255,
-     *     options={"comment"="Team ID in an external system",
-     *              "collation"="utf8mb4_bin"},
-     *     nullable=true)
-     */
+    #[ORM\Column(
+        name: 'externalid',
+        type: 'string',
+        length: 255,
+        nullable: true,
+        options: ['comment' => 'Team ID in an external system', 'collation' => 'utf8mb4_bin']
+    )]
     #[Serializer\Exclude]
     protected ?string $externalid = null;
 
-    /**
-     * @ORM\Column(type="string", name="icpcid", length=255, options={"comment"="Team ID in the ICPC system",
-     *                            "collation"="utf8mb4_bin"}, nullable=true)
-     */
+    #[ORM\Column(
+        name: 'icpcid',
+        type: 'string',
+        length: 255,
+        nullable: true,
+        options: ['comment' => 'Team ID in the ICPC system', 'collation' => 'utf8mb4_bin']
+    )]
     #[OA\Property(nullable: true)]
     #[Serializer\SerializedName('icpc_id')]
     protected ?string $icpcid = null;
 
-    /**
-     * @ORM\Column(type="string", name="name", length=255, options={"comment"="Team name", "collation"="utf8mb4_bin"},
-     *                            nullable=false)
-     */
+    #[ORM\Column(
+        name: 'name',
+        type: 'string',
+        length: 255,
+        nullable: false,
+        options: ['comment' => 'Team name', 'collation' => 'utf8mb4_bin']
+    )]
     private string $name = '';
 
-    /**
-     * @ORM\Column(type="string", name="display_name", length=255,
-     *     options={"comment"="Team display name", "collation"="utf8mb4_bin"},
-     *                            nullable=true)
-     */
+    #[ORM\Column(
+        name: 'display_name',
+        type: 'string',
+        length: 255,
+        nullable: true,
+        options: ['comment' => 'Team display name', 'collation' => 'utf8mb4_bin']
+    )]
     #[OA\Property(nullable: true)]
     private ?string $display_name = null;
 
-    /**
-     * @ORM\Column(type="boolean", name="enabled",
-     *     options={"comment"="Whether the team is visible and operational",
-     *              "default"=1},
-     *     nullable=false)
-     */
+    #[ORM\Column(
+        name: 'enabled',
+        type: 'boolean',
+        nullable: false,
+        options: ['comment' => 'Whether the team is visible and operational', 'default' => 1]
+    )]
     #[Serializer\Exclude]
     private bool $enabled = true;
 
-    /**
-     * @ORM\Column(type="text", length=4294967295, name="publicdescription",
-     *     options={"comment"="Public team definition; for example: Team member names (freeform)"},
-     *                          nullable=true)
-     */
+    #[ORM\Column(
+        name: 'publicdescription',
+        type: 'text',
+        length: 4294967295,
+        nullable: true,
+        options: ['comment' => 'Public team definition; for example: Team member names (freeform)']
+    )]
     #[OA\Property(nullable: true)]
     #[Serializer\Groups(['Nonstrict'])]
     private ?string $publicDescription = null;
 
-    /**
-     * @ORM\Column(type="string", length=255, name="room", options={"comment"="Physical location of team"},
-     *                            nullable=true)
-     */
+    #[ORM\Column(
+        name: 'room',
+        type: 'string',
+        length: 255,
+        nullable: true,
+        options: ['comment' => 'Physical location of team']
+    )]
     #[Serializer\Exclude]
     private ?string $room = null;
 
-    /**
-     * @ORM\Column(type="text", length=4294967295, name="internalcomments",
-     *     options={"comment"="Internal comments about this team (jury only)"},
-     *                          nullable=true)
-     */
+    #[ORM\Column(
+        name: 'internalcomments',
+        type: 'text',
+        length: 4294967295,
+        nullable: true,
+        options: ['comment' => 'Internal comments about this team (jury only)']
+    )]
     #[Serializer\Exclude]
     private ?string $internalComments = null;
 
-    /**
-     * @ORM\Column(type="decimal", precision=32, scale=9, name="judging_last_started",
-     *     options={"comment"="Start time of last judging for prioritization",
-     *              "unsigned"=true}, nullable=true)
-     */
+    #[ORM\Column(
+        name: 'judging_last_started',
+        type: 'decimal',
+        precision: 32,
+        scale: 9,
+        nullable: true,
+        options: ['comment' => 'Start time of last judging for prioritization', 'unsigned' => true]
+    )]
     #[Serializer\Exclude]
     private string|float|null $judging_last_started = null;
 
-    /**
-     * @ORM\Column(type="integer", name="penalty",
-     *     options={"comment"="Additional penalty time in minutes","default"=0},
-     *     nullable=false)
-     */
+    #[ORM\Column(
+        name: 'penalty',
+        type: 'integer',
+        nullable: false,
+        options: ['comment' => 'Additional penalty time in minutes', 'default' => 0]
+    )]
     #[Serializer\Exclude]
     private int $penalty = 0;
 
@@ -144,58 +165,43 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
     #[Serializer\Exclude]
     private bool $clearPhoto = false;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="TeamAffiliation", inversedBy="teams")
-     * @ORM\JoinColumn(name="affilid", referencedColumnName="affilid", onDelete="SET NULL")
-     */
+    #[ORM\ManyToOne(targetEntity: TeamAffiliation::class, inversedBy: 'teams')]
+    #[ORM\JoinColumn(name: 'affilid', referencedColumnName: 'affilid', onDelete: 'SET NULL')]
     #[Serializer\Exclude]
     private ?TeamAffiliation $affiliation = null;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="TeamCategory", inversedBy="teams")
-     * @ORM\JoinColumn(name="categoryid", referencedColumnName="categoryid", onDelete="CASCADE")
-     */
+    #[ORM\ManyToOne(targetEntity: TeamCategory::class, inversedBy: 'teams')]
+    #[ORM\JoinColumn(name: 'categoryid', referencedColumnName: 'categoryid', onDelete: 'CASCADE')]
     #[Serializer\Exclude]
     private ?TeamCategory $category = null;
 
-    /**
-     * @ORM\ManyToMany(targetEntity="Contest", mappedBy="teams")
-     */
+    #[ORM\ManyToMany(targetEntity: Contest::class, mappedBy: 'teams')]
     #[Serializer\Exclude]
     private Collection $contests;
 
     /**
-     * @ORM\OneToMany(targetEntity="User", mappedBy="team", cascade={"persist"})
      * @Assert\Valid()
      */
+    #[ORM\OneToMany(mappedBy: 'team', targetEntity: User::class, cascade: ['persist'])]
     #[Serializer\Exclude]
     private Collection $users;
 
-    /**
-     * @ORM\OneToMany(targetEntity="Submission", mappedBy="team")
-     */
+    #[ORM\OneToMany(mappedBy: 'team', targetEntity: Submission::class)]
     #[Serializer\Exclude]
     private Collection $submissions;
 
-    /**
-     * @ORM\OneToMany(targetEntity="Clarification", mappedBy="sender")
-     */
+    #[ORM\OneToMany(mappedBy: 'sender', targetEntity: Clarification::class)]
     #[Serializer\Exclude]
     private Collection $sent_clarifications;
 
-    /**
-     * @ORM\OneToMany(targetEntity="Clarification", mappedBy="recipient")
-     */
+    #[ORM\OneToMany(mappedBy: 'recipient', targetEntity: Clarification::class)]
     #[Serializer\Exclude]
     private Collection $received_clarifications;
 
-    /**
-     * @ORM\ManyToMany(targetEntity="Clarification")
-     * @ORM\JoinTable(name="team_unread",
-     *                joinColumns={@ORM\JoinColumn(name="teamid", referencedColumnName="teamid", onDelete="CASCADE")},
-     *                inverseJoinColumns={@ORM\JoinColumn(name="mesgid", referencedColumnName="clarid", onDelete="CASCADE")}
-     * )
-     */
+    #[ORM\JoinTable(name: 'team_unread')]
+    #[ORM\JoinColumn(name: 'teamid', referencedColumnName: 'teamid', onDelete: 'CASCADE')]
+    #[ORM\InverseJoinColumn(name: 'mesgid', referencedColumnName: 'clarid', onDelete: 'CASCADE')]
+    #[ORM\ManyToMany(targetEntity: Clarification::class)]
     #[Serializer\Exclude]
     private Collection $unread_clarifications;
 

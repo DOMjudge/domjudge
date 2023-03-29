@@ -5,128 +5,137 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * Scoreboard cache.
- *
- * @ORM\Entity()
- * @ORM\Table(
- *     name="scorecache",
- *     options={"collation"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Scoreboard cache"},
- *     indexes={
- *         @ORM\Index(name="cid", columns={"cid"}),
- *         @ORM\Index(name="teamid", columns={"teamid"}),
- *         @ORM\Index(name="probid", columns={"probid"}),
- *     })
  */
+#[ORM\Table(
+    name: 'scorecache',
+    options: [
+        'collation' => 'utf8mb4_unicode_ci',
+        'charset' => 'utf8mb4',
+        'comment' => 'Scoreboard cache',
+    ])]
+#[ORM\Index(columns: ['cid'], name: 'cid')]
+#[ORM\Index(columns: ['teamid'], name: 'teamid')]
+#[ORM\Index(columns: ['probid'], name: 'probid')]
+#[ORM\Entity]
 class ScoreCache
 {
-    /**
-     * @ORM\Column(type="integer", name="submissions_restricted", length=4,
-     *     options={"comment"="Number of submissions made (restricted audiences)",
-     *              "unsigned"=true,"default"="0"},
-     *     nullable=false)
-     */
+    #[ORM\Column(
+        name: 'submissions_restricted',
+        type: 'integer',
+        length: 4,
+        nullable: false,
+        options: ['comment' => 'Number of submissions made (restricted audiences)', 'unsigned' => true, 'default' => 0]
+    )]
     private int $submissions_restricted = 0;
 
-    /**
-     * @ORM\Column(type="integer", name="pending_restricted", length=4,
-     *     options={"comment"="Number of submissions pending judgement (restricted audience)",
-     *              "unsigned"=true,"default"="0"},
-     *     nullable=false)
-     */
+    #[ORM\Column(
+        name: 'pending_restricted',
+        type: 'integer',
+        length: 4,
+        nullable: false,
+        options: ['comment' => 'Number of submissions pending judgement (restricted audience)', 'unsigned' => true, 'default' => 0]
+    )]
     private int $pending_restricted = 0;
 
-    /**
-     * @ORM\Column(type="boolean", name="is_correct_restricted",
-     *     options={"comment"="Has there been a correct submission? (restricted audience)",
-     *              "default"="0"},
-     *     nullable=false)
-     */
+    #[ORM\Column(
+        name: 'is_correct_restricted',
+        type: 'boolean',
+        nullable: false,
+        options: ['comment' => 'Has there been a correct submission? (restricted audience)', 'default' => 0]
+    )]
     private bool $is_correct_restricted = false;
 
-    /**
-     * @var double|string
-     * @ORM\Column(type="decimal", precision=32, scale=9, name="solvetime_restricted",
-     *     options={"comment"="Seconds into contest when problem solved (restricted audience)",
-     *              "default"="0.000000000"},
-     *     nullable=false)
-     */
-    private $solvetime_restricted = 0;
+    #[ORM\Column(
+        name: 'solvetime_restricted',
+        type: 'decimal',
+        precision: 32,
+        scale: 9,
+        nullable: false,
+        options: [
+            'comment' => 'Seconds into contest when problem solved (restricted audience)',
+            'default' => '0.000000000',
+        ]
+    )]
+    private string|float $solvetime_restricted = 0;
 
-    /**
-     * @ORM\Column(type="integer", name="runtime_restricted", length=4,
-     *     options={"comment"="Runtime in milliseconds (restricted audience)",
-     *              "default"="0"},
-     *     nullable=false)
-     */
+    #[ORM\Column(
+        name: 'runtime_restricted',
+        type: 'integer',
+        length: 4,
+        nullable: false,
+        options: ['comment' => 'Runtime in milliseconds (restricted audience)', 'default' => 0]
+    )]
     private int $runtime_restricted = 0;
 
-    /**
-     * @ORM\Column(type="integer", name="submissions_public", length=4,
-     *     options={"comment"="Number of submissions made (public)",
-     *              "unsigned"=true,"default"="0"},
-     *     nullable=false)
-     */
+    #[ORM\Column(
+        name: 'submissions_public',
+        type: 'integer',
+        length: 4,
+        nullable: false,
+        options: ['comment' => 'Number of submissions made (public)', 'unsigned' => true, 'default' => 0]
+    )]
     private int $submissions_public = 0;
 
-    /**
-     * @ORM\Column(type="integer", name="pending_public", length=4,
-     *     options={"comment"="Number of submissions pending judgement (public)",
-     *              "unsigned"=true,"default"="0"},
-     *     nullable=false)
-     */
+    #[ORM\Column(
+        name: 'pending_public',
+        type: 'integer',
+        length: 4,
+        nullable: false,
+        options: ['comment' => 'Number of submissions pending judgement (public)', 'unsigned' => true, 'default' => 0]
+    )]
     private int $pending_public = 0;
 
-    /**
-     * @ORM\Column(type="boolean", name="is_correct_public",
-     *     options={"comment"="Has there been a correct submission? (public)",
-     *              "default"="0"},
-     *     nullable=false)
-     */
+    #[ORM\Column(
+        name: 'is_correct_public',
+        type: 'boolean',
+        nullable: false,
+        options: ['comment' => 'Has there been a correct submission? (public)', 'default' => 0]
+    )]
     private bool $is_correct_public = false;
 
-    /**
-     * @var double|string
-     * @ORM\Column(type="decimal", precision=32, scale=9, name="solvetime_public",
-     *     options={"comment"="Seconds into contest when problem solved (public)",
-     *              "default"="0.000000000"},
-     *     nullable=false)
-     */
-    private $solvetime_public = 0;
+    #[ORM\Column(
+        name: 'solvetime_public',
+        type: 'decimal',
+        precision: 32,
+        scale: 9,
+        nullable: false,
+        options: [
+            'comment' => 'Seconds into contest when problem solved (public)',
+            'default' => '0.000000000',
+        ]
+    )]
+    private string|float $solvetime_public = 0;
 
-    /**
-     * @ORM\Column(type="integer", name="runtime_public", length=4,
-     *     options={"comment"="Runtime in milliseconds (public)",
-     *              "default"="0"},
-     *     nullable=false)
-     */
+    #[ORM\Column(
+        name: 'runtime_public',
+        type: 'integer',
+        length: 4,
+        nullable: false,
+        options: ['comment' => 'Runtime in milliseconds (public)', 'default' => 0]
+    )]
     private int $runtime_public = 0;
 
-    /**
-     * @ORM\Column(type="boolean", name="is_first_to_solve",
-     *     options={"comment"="Is this the first solution to this problem?",
-     *              "default"="0"},
-     *     nullable=false)
-     */
+    #[ORM\Column(
+        name: 'is_first_to_solve',
+        type: 'boolean',
+        nullable: false,
+        options: ['comment' => 'Is this the first solution to this problem?', 'default' => 0]
+    )]
     private bool $is_first_to_solve = false;
 
-    /**
-     * @ORM\Id
-     * @ORM\ManyToOne(targetEntity="Contest")
-     * @ORM\JoinColumn(name="cid", referencedColumnName="cid", onDelete="CASCADE")
-     */
+    #[ORM\Id]
+    #[ORM\ManyToOne(targetEntity: Contest::class)]
+    #[ORM\JoinColumn(name: 'cid', referencedColumnName: 'cid', onDelete: 'CASCADE')]
     private Contest $contest;
 
-    /**
-     * @ORM\Id
-     * @ORM\ManyToOne(targetEntity="Team")
-     * @ORM\JoinColumn(name="teamid", referencedColumnName="teamid", onDelete="CASCADE")
-     */
+    #[ORM\Id]
+    #[ORM\ManyToOne(targetEntity: Team::class)]
+    #[ORM\JoinColumn(name: 'teamid', referencedColumnName: 'teamid', onDelete: 'CASCADE')]
     private Team $team;
 
-    /**
-     * @ORM\Id
-     * @ORM\ManyToOne(targetEntity="Problem")
-     * @ORM\JoinColumn(name="probid", referencedColumnName="probid", onDelete="CASCADE")
-     */
+    #[ORM\Id]
+    #[ORM\ManyToOne(targetEntity: Problem::class)]
+    #[ORM\JoinColumn(name: 'probid', referencedColumnName: 'probid', onDelete: 'CASCADE')]
     private Problem $problem;
 
     public function setSubmissionsRestricted(int $submissionsRestricted): ScoreCache

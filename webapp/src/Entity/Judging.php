@@ -11,187 +11,200 @@ use Ramsey\Uuid\Uuid;
 
 /**
  * Result of judging a submission.
- *
- * @ORM\Entity()
- * @ORM\Table(
- *     name="judging",
- *     options={"collation"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Result of judging a submission"},
- *     indexes={
- *         @ORM\Index(name="submitid", columns={"submitid"}),
- *         @ORM\Index(name="cid", columns={"cid"}),
- *         @ORM\Index(name="rejudgingid", columns={"rejudgingid"}),
- *         @ORM\Index(name="prevjudgingid", columns={"prevjudgingid"})
- *     })
  */
+#[ORM\Table(
+    name: 'judging',
+    options: [
+        'collation' => 'utf8mb4_unicode_ci',
+        'charset' => 'utf8mb4',
+        'comment' => 'Result of judging a submission',
+    ])]
+#[ORM\Index(columns: ['submitid'], name: 'submitid')]
+#[ORM\Index(columns: ['cid'], name: 'cid')]
+#[ORM\Index(columns: ['rejudgingid'], name: 'rejudgingid')]
+#[ORM\Index(columns: ['prevjudgingid'], name: 'prevjudgingid')]
+#[ORM\Entity]
 class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterface
 {
     final public const RESULT_CORRECT = 'correct';
     final public const RESULT_COMPILER_ERROR = 'compiler-error';
 
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     * @ORM\Column(type="integer", name="judgingid", length=4,
-     *     options={"comment"="Judging ID","unsigned"=true}, nullable=false)
-     */
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
+    #[ORM\Column(
+        name: 'judgingid',
+        type: 'integer',
+        length: 4,
+        nullable: false,
+        options: ['comment' => 'Judging ID', 'unsigned' => true]
+    )]
     #[Serializer\SerializedName('id')]
     #[Serializer\Type('string')]
     protected int $judgingid;
 
-    /**
-     * @ORM\Column(type="decimal", precision=32, scale=9, name="starttime",
-     *     options={"comment"="Time judging started", "unsigned"=true},
-     *     nullable=true)
-     */
+    #[ORM\Column(
+        name: 'starttime',
+        type: 'decimal',
+        precision: 32,
+        scale: 9,
+        nullable: true,
+        options: ['comment' => 'Time judging started', 'unsigned' => true]
+    )]
     #[Serializer\Exclude]
     private string|float|null $starttime = null;
 
-    /**
-     * @ORM\Column(type="decimal", precision=32, scale=9, name="endtime",
-     *     options={"comment"="Time judging ended, null = still busy",
-     *              "unsigned"=true},
-     *     nullable=true)
-     */
+    #[ORM\Column(
+        name: 'endtime',
+        type: 'decimal',
+        precision: 32,
+        scale: 9,
+        nullable: true,
+        options: ['comment' => 'Time judging ended, null = still busy', 'unsigned' => true]
+    )]
     #[OA\Property(nullable: true)]
     #[Serializer\Exclude]
     private string|float|null $endtime = null;
 
-    /**
-     * @ORM\Column(type="string", name="result", length=32,
-     *     options={"comment"="Result string as defined in config.php"},
-     *     nullable=true)
-     */
+    #[ORM\Column(
+        name: 'result',
+        type: 'string',
+        length: 32,
+        nullable: true,
+        options: ['comment' => 'Result string as defined in config.php']
+    )]
     #[Serializer\Exclude]
     private ?string $result = null;
 
-    /**
-     * @ORM\Column(type="boolean", name="verified",
-     *     options={"comment"="Result verified by jury member?",
-     *              "default"="0"},
-     *     nullable=false)
-     */
+    #[ORM\Column(
+        name: 'verified',
+        type: 'boolean',
+        nullable: false,
+        options: ['comment' => 'Result verified by jury member?', 'default' => 0]
+    )]
     #[Serializer\Exclude]
     private bool $verified = false;
 
-    /**
-     * @ORM\Column(type="string", name="jury_member", length=255,
-     *     options={"comment"="Name of jury member who verified this"},
-     *     nullable=true)
-     */
+    #[ORM\Column(
+        name: 'jury_member',
+        type: 'string',
+        length: 255,
+        nullable: true,
+        options: ['comment' => 'Name of jury member who verified this']
+    )]
     #[Serializer\Exclude]
     private ?string $jury_member = null;
 
-    /**
-     * @ORM\Column(type="string", name="verify_comment", length=255,
-     *     options={"comment"="Optional additional information provided by the verifier"},
-     *     nullable=true)
-     */
+    #[ORM\Column(
+        name: 'verify_comment',
+        type: 'string',
+        length: 255,
+        nullable: true,
+        options: ['comment' => 'Optional additional information provided by the verifier']
+    )]
     #[Serializer\Exclude]
     private ?string $verify_comment = null;
 
-    /**
-     * @ORM\Column(type="boolean", name="valid",
-     *     options={"comment"="Old judging is marked as invalid when rejudging",
-     *              "default"="1"},
-     *     nullable=false)
-     */
+    #[ORM\Column(
+        name: 'valid',
+        type: 'boolean',
+        nullable: false,
+        options: ['comment' => 'Old judging is marked as invalid when rejudging', 'default' => 1]
+    )]
     #[Serializer\Groups(['Nonstrict'])]
     private bool $valid = true;
 
     /**
      * @var resource|null
-     * @ORM\Column(type="blob", name="output_compile",
-     *     options={"comment"="Output of the compiling the program"},
-     *     nullable=true)
      */
+    #[ORM\Column(
+        name: 'output_compile',
+        type: 'blob',
+        nullable: true,
+        options: ['comment' => 'Output of the compiling the program']
+    )]
     #[Serializer\Exclude]
     private $output_compile;
 
-    /**
-     * @ORM\Column(type="blobtext", length=4294967295, name="metadata",
-     *     options={"comment"="Compilation metadata"},
-     *     nullable=true)
-     */
+    #[ORM\Column(
+        name: 'metadata',
+        type: 'blobtext',
+        length: 4294967295,
+        nullable: true,
+        options: ['comment' => 'Compilation metadata']
+    )]
     #[Serializer\Exclude]
     private ?string $compile_metadata = null;
 
     #[Serializer\Exclude]
     private ?string $output_compile_as_string = null;
 
-    /**
-     * @ORM\Column(type="boolean", name="seen",
-     *     options={"comment"="Whether the team has seen this judging",
-     *              "default"="0"},
-     *     nullable=false)
-     */
+    #[ORM\Column(
+        name: 'seen',
+        type: 'boolean',
+        nullable: false,
+        options: ['comment' => 'Whether the team has seen this judging', 'default' => 0]
+    )]
     #[Serializer\Exclude]
     private bool $seen = false;
 
-    /**
-     * @ORM\Column(type="boolean", name="judge_completely",
-     *     options={"comment"="Explicitly requested to be judged completely.",
-     *              "default"="0"},
-     *     nullable=false)
-     */
+    #[ORM\Column(
+        name: 'judge_completely',
+        type: 'boolean',
+        nullable: false,
+        options: ['comment' => 'Explicitly requested to be judged completely.', 'default' => 0]
+    )]
     #[Serializer\Exclude]
     private bool $judgeCompletely = false;
 
-    /**
-     * @ORM\Column(type="string", name="uuid",
-     *     options={"comment"="UUID, to make caching of compilation results safe."},
-     *     nullable=false)
-     */
+    #[ORM\Column(
+        name: 'uuid',
+        type: 'string',
+        nullable: false,
+        options: ['comment' => 'UUID, to make caching of compilation results safe.']
+    )]
     #[Serializer\Exclude]
     private string $uuid;
 
 
-    /**
-     * @ORM\ManyToOne(targetEntity="Contest")
-     * @ORM\JoinColumn(name="cid", referencedColumnName="cid", onDelete="CASCADE")
-     */
+    #[ORM\ManyToOne(targetEntity: Contest::class)]
+    #[ORM\JoinColumn(name: 'cid', referencedColumnName: 'cid', onDelete: 'CASCADE')]
     #[Serializer\Exclude]
     private ?Contest $contest = null;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="Submission", inversedBy="judgings")
-     * @ORM\JoinColumn(name="submitid", referencedColumnName="submitid", onDelete="CASCADE")
-     */
+    #[ORM\ManyToOne(targetEntity: Submission::class, inversedBy: 'judgings')]
+    #[ORM\JoinColumn(name: 'submitid', referencedColumnName: 'submitid', onDelete: 'CASCADE')]
     #[Serializer\Exclude]
     private Submission $submission;
 
     /**
      * rejudgings have one parent judging
-     * @ORM\ManyToOne(targetEntity="Rejudging", inversedBy="judgings")
-     * @ORM\JoinColumn(name="rejudgingid", referencedColumnName="rejudgingid", onDelete="SET NULL")
      */
+    #[ORM\ManyToOne(targetEntity: Rejudging::class, inversedBy: 'judgings')]
+    #[ORM\JoinColumn(name: 'rejudgingid', referencedColumnName: 'rejudgingid', onDelete: 'SET NULL')]
     #[Serializer\Exclude]
     private ?Rejudging $rejudging = null;
 
     /**
      * Rejudgings have one parent judging.
-     * @ORM\ManyToOne(targetEntity="Judging")
-     * @ORM\JoinColumn(name="prevjudgingid", referencedColumnName="judgingid", onDelete="SET NULL")
      */
+    #[ORM\ManyToOne(targetEntity: Judging::class)]
+    #[ORM\JoinColumn(name: 'prevjudgingid', referencedColumnName: 'judgingid', onDelete: 'SET NULL')]
     #[Serializer\Exclude]
     private ?Judging $original_judging = null;
 
-    /**
-     * @ORM\OneToMany(targetEntity="JudgingRun", mappedBy="judging")
-     */
+    #[ORM\OneToMany(mappedBy: 'judging', targetEntity: JudgingRun::class)]
     #[Serializer\Exclude]
     private Collection $runs;
 
-    /**
-     * @ORM\OneToMany(targetEntity="DebugPackage", mappedBy="judging")
-     */
+    #[ORM\OneToMany(mappedBy: 'judging', targetEntity: DebugPackage::class)]
     #[Serializer\Exclude]
     private Collection $debug_packages;
 
     /**
      * Rejudgings have one parent judging.
-     * @ORM\ManyToOne(targetEntity="InternalError", inversedBy="affectedJudgings")
-     * @ORM\JoinColumn(name="errorid", referencedColumnName="errorid", onDelete="SET NULL")
      */
+    #[ORM\ManyToOne(targetEntity: InternalError::class, inversedBy: 'affectedJudgings')]
+    #[ORM\JoinColumn(name: 'errorid', referencedColumnName: 'errorid', onDelete: 'SET NULL')]
     #[Serializer\Exclude]
     private ?InternalError $internalError = null;
 
