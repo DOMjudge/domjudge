@@ -135,8 +135,8 @@ class OrganizationController extends AbstractRestController
 
     /**
      * Delete the logo for the given organization.
-     * @IsGranted("ROLE_ADMIN")
      */
+    #[IsGranted('ROLE_ADMIN')]
     #[Rest\Delete('contests/{cid}/organizations/{id}/logo', name: 'delete_organization_logo')]
     #[Rest\Delete('organizations/{id}/logo')]
     #[OA\Response(response: 204, description: 'Deleting logo succeeded')]
@@ -169,8 +169,8 @@ class OrganizationController extends AbstractRestController
 
     /**
      * Set the logo for the given organization.
-     * @IsGranted("ROLE_ADMIN")
      */
+    #[IsGranted('ROLE_ADMIN')]
     #[Rest\Post('contests/{cid}/organizations/{id}/logo', name: 'post_organization_logo')]
     #[Rest\Post('organizations/{id}/logo')]
     #[Rest\Put('contests/{cid}/organizations/{id}/logo', name: 'put_organization_logo')]
@@ -233,9 +233,8 @@ class OrganizationController extends AbstractRestController
 
     /**
      * Add a new organization.
-     *
-     * @IsGranted("ROLE_API_WRITER")
      */
+    #[IsGranted('ROLE_API_WRITER')]
     #[Rest\Post('contests/{cid}/organizations')]
     #[Rest\Post('organizations')]
     #[OA\RequestBody(

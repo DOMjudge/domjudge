@@ -17,9 +17,8 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Users that have access to DOMjudge.
- *
- * @UniqueEntity("username", message="The username '{{ value }}' is already in use.")
  */
+#[ORM\Entity]
 #[ORM\Table(options: [
     'collation' => 'utf8mb4_unicode_ci',
     'charset' => 'utf8mb4',
@@ -28,7 +27,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Index(columns: ['teamid'], name: 'teamid')]
 #[ORM\UniqueConstraint(name: 'username', columns: ['username'], options: ['lengths' => [190]])]
 #[ORM\UniqueConstraint(name: 'externalid', columns: ['externalid'], options: ['lengths' => [190]])]
-#[ORM\Entity]
+#[UniqueEntity(fields: 'username', message: "The username '{{ value }}' is already in use.")]
 class User extends BaseApiEntity implements UserInterface, PasswordAuthenticatedUserInterface, EquatableInterface, ExternalRelationshipEntityInterface
 {
     #[ORM\Id]
@@ -45,20 +44,16 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
     #[Serializer\Exclude]
     protected ?string $externalid = null;
 
-    /**
-     * @Assert\Regex("/^[a-z0-9@._-]+$/i", message="Only alphanumeric characters and _-@. are allowed")
-     */
     #[ORM\Column(options: ['comment' => 'User login name'])]
+    #[Assert\Regex('/^[a-z0-9@._-]+$/i', message: 'Only alphanumeric characters and _-@. are allowed')]
     private string $username = '';
 
     #[ORM\Column(options: ['comment' => 'Name'])]
     #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
     private string $name = '';
 
-    /**
-     * @Assert\Email()
-     */
     #[ORM\Column(nullable: true, options: ['comment' => 'Email address'])]
+    #[Assert\Email]
     #[OA\Property(nullable: true)]
     #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
     private ?string $email = null;
@@ -109,10 +104,8 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
     #[Serializer\Exclude]
     private ?string $plainPassword = null;
 
-    /**
-     * @Assert\Ip(version="all")
-     */
     #[ORM\Column(nullable: true, options: ['comment' => 'IP Address used to autologin'])]
+    #[Assert\Ip(version: 'all')]
     #[OA\Property(nullable: true)]
     #[Serializer\SerializedName('ip')]
     private ?string $ipAddress = null;
@@ -126,15 +119,11 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
     #[Serializer\Exclude]
     private ?Team $team = null;
 
-    /**
-     * @Assert\Count(min="1")
-     * Note that this property is called `user_roles` and not `roles` because the
-     * UserInterface expects roles/getRoles to return a string list of roles, not objects.
-     */
+    #[ORM\ManyToMany(targetEntity: Role::class, inversedBy: 'users')]
     #[ORM\JoinTable(name: 'userrole')]
     #[ORM\JoinColumn(name: 'userid', referencedColumnName: 'userid', onDelete: 'CASCADE')]
     #[ORM\InverseJoinColumn(name: 'roleid', referencedColumnName: 'roleid', onDelete: 'CASCADE')]
-    #[ORM\ManyToMany(targetEntity: Role::class, inversedBy: 'users')]
+    #[Assert\Count(min: 1)]
     #[Serializer\Exclude]
     private Collection $user_roles;
 
@@ -238,8 +227,8 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
     #[OA\Property(nullable: true)]
     #[Serializer\VirtualProperty]
     #[Serializer\SerializedName('last_login_time')]
-    #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
     #[Serializer\Type('DateTime')]
+    #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
     public function getLastLoginAsDateTime(): ?DateTime
     {
         return $this->getLastLogin() ? new DateTime(Utils::absTime($this->getLastLogin())) : null;
@@ -259,8 +248,8 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
     #[OA\Property(nullable: true)]
     #[Serializer\VirtualProperty]
     #[Serializer\SerializedName('last_api_login_time')]
-    #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
     #[Serializer\Type('DateTime')]
+    #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
     public function getLastApiLoginAsDateTime(): ?DateTime
     {
         return $this->getLastApiLogin() ? new DateTime(Utils::absTime($this->getLastApiLogin())) : null;
@@ -280,8 +269,8 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
     #[OA\Property(nullable: true)]
     #[Serializer\VirtualProperty]
     #[Serializer\SerializedName('first_login_time')]
-    #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
     #[Serializer\Type('DateTime')]
+    #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
     public function getFirstLoginAsDateTime(): ?DateTime
     {
         return $this->getFirstLogin() ? new DateTime(Utils::absTime($this->getFirstLogin())) : null;
@@ -401,8 +390,8 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
      */
     #[Serializer\VirtualProperty]
     #[Serializer\SerializedName('roles')]
-    #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
     #[Serializer\Type('array<string>')]
+    #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
     public function getRoleList(): array
     {
         $result = [];

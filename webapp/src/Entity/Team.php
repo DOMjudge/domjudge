@@ -15,14 +15,13 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 /**
  * All teams participating in the contest.
- *
- * @UniqueEntity("externalid")
  */
+#[ORM\Entity]
 #[ORM\Table(options: ['collation' => 'utf8mb4_unicode_ci', 'charset' => 'utf8mb4'])]
 #[ORM\Index(columns: ['affilid'], name: 'affilid')]
 #[ORM\Index(columns: ['categoryid'], name: 'categoryid')]
 #[ORM\UniqueConstraint(name: 'externalid', columns: ['externalid'], options: ['lengths' => [190]])]
-#[ORM\Entity]
+#[UniqueEntity(fields: 'externalid')]
 class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface, AssetEntityInterface
 {
     final public const DONT_ADD_USER = 'dont-add-user';
@@ -108,18 +107,14 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
     #[Serializer\Exclude]
     private string $addUserForTeam = self::DONT_ADD_USER;
 
-    /**
-     * @Assert\Regex("/^[a-z0-9@._-]+$/i", message="Only alphanumeric characters and _-@. are allowed")
-     */
+    #[Assert\Regex('/^[a-z0-9@._-]+$/i', message: 'Only alphanumeric characters and _-@. are allowed')]
     #[Serializer\Exclude]
     private ?string $newUsername = null;
 
     #[Serializer\Exclude]
     private ?User $existingUser = null;
 
-    /**
-     * @Assert\File(mimeTypes={"image/png","image/jpeg","image/svg+xml"}, mimeTypesMessage="Only PNG's, JPG's and SVG's are allowed")
-     */
+    #[Assert\File(mimeTypes: ['image/png', 'image/jpeg', 'image/svg+xml'], mimeTypesMessage: "Only PNG's, JPG's and SVG's are allowed")]
     #[Serializer\Exclude]
     private ?UploadedFile $photoFile = null;
 
@@ -140,10 +135,8 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
     #[Serializer\Exclude]
     private Collection $contests;
 
-    /**
-     * @Assert\Valid()
-     */
     #[ORM\OneToMany(mappedBy: 'team', targetEntity: User::class, cascade: ['persist'])]
+    #[Assert\Valid]
     #[Serializer\Exclude]
     private Collection $users;
 
@@ -159,10 +152,10 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
     #[Serializer\Exclude]
     private Collection $received_clarifications;
 
+    #[ORM\ManyToMany(targetEntity: Clarification::class)]
     #[ORM\JoinTable(name: 'team_unread')]
     #[ORM\JoinColumn(name: 'teamid', referencedColumnName: 'teamid', onDelete: 'CASCADE')]
     #[ORM\InverseJoinColumn(name: 'mesgid', referencedColumnName: 'clarid', onDelete: 'CASCADE')]
-    #[ORM\ManyToMany(targetEntity: Clarification::class)]
     #[Serializer\Exclude]
     private Collection $unread_clarifications;
 
@@ -559,9 +552,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
         ];
     }
 
-    /**
-     * @Assert\Callback()
-     */
+    #[Assert\Callback]
     public function validate(ExecutionContextInterface $context): void
     {
         if ($this->getAddUserForTeam() === static::CREATE_NEW_USER) {

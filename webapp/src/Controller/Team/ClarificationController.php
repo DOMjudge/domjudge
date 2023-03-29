@@ -28,12 +28,18 @@ use Symfony\Component\Routing\Annotation\Route;
 /**
  * Class ClarificationController
  *
- * @Route("/team")
- * @IsGranted("ROLE_TEAM")
- * @Security("user.getTeam() !== null", message="You do not have a team associated with your account. ")
  *
  * @package App\Controller\Team
  */
+#[IsGranted('ROLE_TEAM')]
+#[Security('user.getTeam() !== null', message: 'You do not have a team associated with your account. ')]
+/**
+ * Class ClarificationController
+ *
+ *
+ * @package App\Controller\Team
+ */
+#[Route(path: '/team')]
 class ClarificationController extends BaseController
 {
     public function __construct(
@@ -45,9 +51,9 @@ class ClarificationController extends BaseController
     ) {}
 
     /**
-     * @Route("/clarifications/{clarId<\d+>}", name="team_clarification")
      * @throws NonUniqueResultException
      */
+    #[Route(path: '/clarifications/{clarId<\d+>}', name: 'team_clarification')]
     public function viewAction(Request $request, int $clarId): Response
     {
         $categories = $this->config->get('clar_categories');
@@ -130,9 +136,7 @@ class ClarificationController extends BaseController
         }
     }
 
-    /**
-     * @Route("/clarifications/add", name="team_clarification_add")
-     */
+    #[Route(path: '/clarifications/add', name: 'team_clarification_add')]
     public function addAction(Request $request): Response
     {
         $categories = $this->config->get('clar_categories');

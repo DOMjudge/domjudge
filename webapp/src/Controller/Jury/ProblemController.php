@@ -41,10 +41,8 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Yaml\Yaml;
 use ZipArchive;
 
-/**
- * @Route("/jury/problems")
- * @IsGranted("ROLE_JURY")
- */
+#[IsGranted('ROLE_JURY')]
+#[Route(path: '/jury/problems')]
 class ProblemController extends BaseController
 {
     public function __construct(
@@ -57,9 +55,7 @@ class ProblemController extends BaseController
         protected readonly ImportProblemService $importProblemService
     ) {}
 
-    /**
-     * @Route("", name="jury_problems")
-     */
+    #[Route(path: '', name: 'jury_problems')]
     public function indexAction(): Response
     {
         $problems = $this->em->createQueryBuilder()
@@ -191,10 +187,10 @@ class ProblemController extends BaseController
     }
 
     /**
-     * @Route("/{problemId<\d+>}/export", name="jury_export_problem")
-     * @IsGranted("ROLE_JURY")
      * @throws NonUniqueResultException
      */
+    #[IsGranted('ROLE_JURY')]
+    #[Route(path: '/{problemId<\d+>}/export', name: 'jury_export_problem')]
     public function exportAction(int $problemId): StreamedResponse
     {
         // This might take a while.
@@ -349,10 +345,10 @@ class ProblemController extends BaseController
     }
 
     /**
-     * @Route("/{probId<\d+>}", name="jury_problem")
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
+    #[Route(path: '/{probId<\d+>}', name: 'jury_problem')]
     public function viewAction(Request $request, SubmissionService $submissionService, int $probId): Response
     {
         /** @var Problem $problem */
@@ -444,9 +440,7 @@ class ProblemController extends BaseController
         return $this->render('jury/problem.html.twig', $data);
     }
 
-    /**
-     * @Route("/{probId<\d+>}/text", name="jury_problem_text")
-     */
+    #[Route(path: '/{probId<\d+>}/text', name: 'jury_problem_text')]
     public function viewTextAction(int $probId): StreamedResponse
     {
         /** @var Problem $problem */
@@ -458,9 +452,7 @@ class ProblemController extends BaseController
         return $problem->getProblemTextStreamedResponse();
     }
 
-    /**
-     * @Route("/{probId<\d+>}/testcases", name="jury_problem_testcases")
-     */
+    #[Route(path: '/{probId<\d+>}/testcases', name: 'jury_problem_testcases')]
     public function testcasesAction(Request $request, int $probId): Response
     {
         /** @var Problem $problem */
@@ -715,13 +707,8 @@ class ProblemController extends BaseController
         return $this->render('jury/problem_testcases.html.twig', $data);
     }
 
-    /**
-     * @Route(
-     *     "/{probId<\d+>}/testcases/{rank<\d+>}/move/{direction<up|down>}",
-     *     name="jury_problem_testcase_move"
-     *     )
-     * @IsGranted("ROLE_ADMIN")
-     */
+    #[IsGranted('ROLE_ADMIN')]
+    #[Route(path: '/{probId<\d+>}/testcases/{rank<\d+>}/move/{direction<up|down>}', name: 'jury_problem_testcase_move')]
     public function moveTestcaseAction(int $probId, int $rank, string $direction): Response
     {
         /** @var Problem $problem */
@@ -793,12 +780,9 @@ class ProblemController extends BaseController
     }
 
     /**
-     * @Route(
-     *     "/{probId<\d+>}/testcases/{rank<\d+>}/fetch/{type<input|output|image>}",
-     *     name="jury_problem_testcase_fetch"
-     *     )
      * @throws NonUniqueResultException
      */
+    #[Route(path: '/{probId<\d+>}/testcases/{rank<\d+>}/fetch/{type<input|output|image>}', name: 'jury_problem_testcase_fetch')]
     public function fetchTestcaseAction(int $probId, int $rank, string $type): Response
     {
         /** @var Testcase $testcase */
@@ -851,10 +835,8 @@ class ProblemController extends BaseController
         return $response;
     }
 
-    /**
-     * @Route("/{probId<\d+>}/edit", name="jury_problem_edit")
-     * @IsGranted("ROLE_ADMIN")
-     */
+    #[IsGranted('ROLE_ADMIN')]
+    #[Route(path: '/{probId<\d+>}/edit', name: 'jury_problem_edit')]
     public function editAction(Request $request, int $probId): Response
     {
         /** @var Problem $problem */
@@ -936,10 +918,8 @@ class ProblemController extends BaseController
         ]);
     }
 
-    /**
-     * @Route("/{probId<\d+>}/delete", name="jury_problem_delete")
-     * @IsGranted("ROLE_ADMIN")
-     */
+    #[IsGranted('ROLE_ADMIN')]
+    #[Route(path: '/{probId<\d+>}/delete', name: 'jury_problem_delete')]
     public function deleteAction(Request $request, int $probId): Response
     {
         /** @var Problem $problem */
@@ -960,9 +940,7 @@ class ProblemController extends BaseController
                                      [$problem], $this->generateUrl('jury_problems'));
     }
 
-    /**
-     * @Route("/attachments/{attachmentId<\d+>}", name="jury_attachment_fetch")
-     */
+    #[Route(path: '/attachments/{attachmentId<\d+>}', name: 'jury_attachment_fetch')]
     public function fetchAttachmentAction(int $attachmentId): StreamedResponse
     {
         /** @var ProblemAttachment $attachment */
@@ -975,10 +953,8 @@ class ProblemController extends BaseController
         return $attachment->getStreamedResponse();
     }
 
-    /**
-     * @Route("/attachments/{attachmentId<\d+>}/delete", name="jury_attachment_delete")
-     * @IsGranted("ROLE_ADMIN")
-     */
+    #[IsGranted('ROLE_ADMIN')]
+    #[Route(path: '/attachments/{attachmentId<\d+>}/delete', name: 'jury_attachment_delete')]
     public function deleteAttachmentAction(Request $request, int $attachmentId): Response
     {
         /** @var ProblemAttachment $attachment */
@@ -1002,10 +978,8 @@ class ProblemController extends BaseController
                                      [$attachment], $this->generateUrl('jury_problem', ['probId' => $probId]));
     }
 
-    /**
-     * @Route("/{testcaseId<\d+>}/delete_testcase", name="jury_testcase_delete")
-     * @IsGranted("ROLE_ADMIN")
-     */
+    #[IsGranted('ROLE_ADMIN')]
+    #[Route(path: '/{testcaseId<\d+>}/delete_testcase', name: 'jury_testcase_delete')]
     public function deleteTestcaseAction(Request $request, int $testcaseId): Response
     {
         /** @var Testcase $testcase */
@@ -1038,10 +1012,8 @@ class ProblemController extends BaseController
         return $this->redirectToRoute('jury_problem_testcases', ['probId' => $problem->getProbid()]);
     }
 
-    /**
-     * @Route("/add", name="jury_problem_add")
-     * @IsGranted("ROLE_ADMIN")
-     */
+    #[IsGranted('ROLE_ADMIN')]
+    #[Route(path: '/add', name: 'jury_problem_add')]
     public function addAction(Request $request): Response
     {
         $problem = new Problem();
@@ -1086,9 +1058,7 @@ class ProblemController extends BaseController
         }
     }
 
-    /**
-     * @Route("/{probId<\d+>}/request-remaining", name="jury_problem_request_remaining")
-     */
+    #[Route(path: '/{probId<\d+>}/request-remaining', name: 'jury_problem_request_remaining')]
     public function requestRemainingRunsWholeProblemAction(string $probId): RedirectResponse
     {
         /** @var Problem $problem */

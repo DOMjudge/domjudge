@@ -7,6 +7,7 @@ use JMS\Serializer\Annotation as Serializer;
 /**
  * An item in the queue.
  */
+#[ORM\Entity]
 #[ORM\Table(
     name: 'queuetask',
     options: [
@@ -21,7 +22,6 @@ use JMS\Serializer\Annotation as Serializer;
 #[ORM\Index(columns: ['teampriority'], name: 'teampriority')]
 #[ORM\Index(columns: ['teamid'], name: 'teamid')]
 #[ORM\Index(columns: ['starttime'], name: 'starttime')]
-#[ORM\Entity]
 class QueueTask
 {
     #[ORM\Id]

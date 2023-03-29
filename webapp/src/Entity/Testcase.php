@@ -9,6 +9,7 @@ use JMS\Serializer\Annotation as Serializer;
 /**
  * Stores testcases per problem.
  */
+#[ORM\Entity]
 #[ORM\Table(options: [
     'collation' => 'utf8mb4_unicode_ci',
     'charset' => 'utf8mb4',
@@ -17,7 +18,6 @@ use JMS\Serializer\Annotation as Serializer;
 #[ORM\Index(columns: ['probid'], name: 'probid')]
 #[ORM\Index(columns: ['sample'], name: 'sample')]
 #[ORM\UniqueConstraint(name: 'rankindex', columns: ['probid', 'ranknumber'])]
-#[ORM\Entity]
 class Testcase
 {
     // Mapping from type to extension

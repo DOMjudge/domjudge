@@ -48,9 +48,9 @@ class RunController extends AbstractRestController implements QueryObjectTransfo
 
     /**
      * Get all the runs for this contest.
-     * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST') or is_granted('ROLE_API_READER')")
      * @throws NonUniqueResultException
      */
+    #[Security("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST') or is_granted('ROLE_API_READER')")]
     #[Rest\Get('')]
     #[OA\Response(
         response: 200,
@@ -98,8 +98,8 @@ class RunController extends AbstractRestController implements QueryObjectTransfo
     /**
      * Get the given run for this contest.
      * @throws NonUniqueResultException
-     * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST') or is_granted('ROLE_API_READER')")
      */
+    #[Security("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST') or is_granted('ROLE_API_READER')")]
     #[Rest\Get('/{id<\d+>}')]
     #[OA\Response(
         response: 200,

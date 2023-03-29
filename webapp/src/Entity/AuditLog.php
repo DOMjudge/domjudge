@@ -7,6 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * Log of all actions performed.
  */
+#[ORM\Entity]
 #[ORM\Table(
     name: 'auditlog',
     options: [
@@ -15,7 +16,6 @@ use Doctrine\ORM\Mapping as ORM;
         'comment' => 'Log of all actions performed',
     ]
 )]
-#[ORM\Entity]
 class AuditLog
 {
     #[ORM\Id]

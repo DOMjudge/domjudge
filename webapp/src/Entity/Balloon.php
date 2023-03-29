@@ -6,13 +6,13 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * Balloons to be handed out.
  */
+#[ORM\Entity]
 #[ORM\Table(options: [
     'collation' => 'utf8mb4_unicode_ci',
     'charset' => 'utf8mb4',
     'comment' => 'Balloons to be handed out',
 ])]
 #[ORM\Index(columns: ['submitid'], name: 'submitid')]
-#[ORM\Entity]
 class Balloon
 {
     #[ORM\Id]

@@ -13,10 +13,8 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Programming languages in which teams can submit solutions.
- *
- * @UniqueEntity("langid")
- * @UniqueEntity("externalid")
  */
+#[ORM\Entity]
 #[ORM\Table(options: [
     'collation' => 'utf8mb4_unicode_ci',
     'charset' => 'utf8mb4',
@@ -24,16 +22,17 @@ use Symfony\Component\Validator\Constraints as Assert;
 ])]
 #[ORM\Index(columns: ['compile_script'], name: 'compile_script')]
 #[ORM\UniqueConstraint(name: 'externalid', columns: ['externalid'], options: ['lengths' => [190]])]
-#[ORM\Entity]
+#[UniqueEntity(fields: 'langid')]
+#[UniqueEntity(fields: 'externalid')]
 class Language extends BaseApiEntity
 {
     /**
-     * @Assert\NotBlank()
-     * @Assert\NotEqualTo("add")
      * @Identifier()
      */
     #[ORM\Id]
     #[ORM\Column(length: 32, options: ['comment' => 'Language ID (string)'])]
+    #[Assert\NotBlank]
+    #[Assert\NotEqualTo('add')]
     #[Serializer\Exclude]
     protected ?string $langid = null;
 
@@ -42,22 +41,20 @@ class Language extends BaseApiEntity
     #[Serializer\Groups([AbstractRestController::GROUP_DEFAULT, AbstractRestController::GROUP_NONSTRICT])]
     protected ?string $externalid = null;
 
-    /**
-     * @Assert\NotBlank()
-     */
     #[ORM\Column(options: ['comment' => 'Descriptive language name'])]
+    #[Assert\NotBlank]
     #[Serializer\Groups([AbstractRestController::GROUP_DEFAULT, AbstractRestController::GROUP_NONSTRICT])]
     private string $name = '';
 
     /**
      * @var string[]
-     * @Assert\NotBlank()
      */
     #[ORM\Column(
         type: 'json',
         nullable: true,
         options: ['comment' => 'List of recognized extensions (JSON encoded)']
     )]
+    #[Assert\NotBlank]
     #[Serializer\Type('array<string>')]
     private array $extensions = [];
 
@@ -84,15 +81,13 @@ class Language extends BaseApiEntity
     #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
     private bool $allowJudge = true;
 
-    /**
-     * @Assert\GreaterThan(0)
-     * @Assert\NotBlank()
-     */
     #[ORM\Column(options: [
         'comment' => 'Language-specific factor multiplied by problem run times',
         'default' => 1,
     ]
     )]
+    #[Assert\GreaterThan(0)]
+    #[Assert\NotBlank]
     #[Serializer\Type('double')]
     #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
     private float $timeFactor = 1;
@@ -112,9 +107,9 @@ class Language extends BaseApiEntity
     #[Serializer\SerializedName('entry_point_name')]
     private ?string $entry_point_description = null;
 
+    #[ORM\ManyToOne(inversedBy: 'languages')]
     #[ORM\JoinColumn(name: 'compile_script', referencedColumnName: 'execid', onDelete: 'SET NULL')]
     #[Serializer\Exclude]
-    #[ORM\ManyToOne(inversedBy: 'languages')]
     private ?Executable $compile_executable = null;
 
     #[ORM\OneToMany(mappedBy: 'language', targetEntity: Submission::class)]
@@ -123,9 +118,9 @@ class Language extends BaseApiEntity
 
     #[OA\Property(nullable: true)]
     #[Serializer\VirtualProperty]
+    #[Serializer\SerializedName('compile_executable_hash')]
     #[Serializer\Type('string')]
     #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
-    #[Serializer\SerializedName('compile_executable_hash')]
     public function getCompileExecutableHash(): ?string
     {
         return $this->compile_executable?->getImmutableExecutable()->getHash();

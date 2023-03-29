@@ -13,6 +13,7 @@ use Ramsey\Uuid\Uuid;
 /**
  * Result of judging a submission.
  */
+#[ORM\Entity]
 #[ORM\Table(options: [
     'collation' => 'utf8mb4_unicode_ci',
     'charset' => 'utf8mb4',
@@ -22,7 +23,6 @@ use Ramsey\Uuid\Uuid;
 #[ORM\Index(columns: ['cid'], name: 'cid')]
 #[ORM\Index(columns: ['rejudgingid'], name: 'rejudgingid')]
 #[ORM\Index(columns: ['prevjudgingid'], name: 'prevjudgingid')]
-#[ORM\Entity]
 class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterface
 {
     final public const RESULT_CORRECT = 'correct';

@@ -143,10 +143,10 @@ class GeneralInfoController extends AbstractFOSRestController
 
     /**
      * Get general status information
-     * @IsGranted("ROLE_API_READER")
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
+    #[IsGranted('ROLE_API_READER')]
     #[Rest\Get('/status')]
     #[OA\Response(
         response: 200,
@@ -185,8 +185,8 @@ class GeneralInfoController extends AbstractFOSRestController
 
     /**
      * Get information about the currently logged in user.
-     * @IsGranted("IS_AUTHENTICATED_FULLY")
      */
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
     #[Rest\Get('/user')]
     #[OA\Response(
         response: 200,
@@ -238,9 +238,9 @@ class GeneralInfoController extends AbstractFOSRestController
 
     /**
      * Update configuration variables.
-     * @IsGranted("ROLE_ADMIN")
      * @throws NonUniqueResultException
      */
+    #[IsGranted('ROLE_ADMIN')]
     #[Rest\Put('/config')]
     #[OA\Response(
         response: 200,
@@ -262,8 +262,8 @@ class GeneralInfoController extends AbstractFOSRestController
 
     /**
      * Check the DOMjudge configuration.
-     * @IsGranted("ROLE_ADMIN")
      */
+    #[IsGranted('ROLE_ADMIN')]
     #[Rest\Get('/config/check')]
     #[OA\Response(
         response: 200,
@@ -350,8 +350,8 @@ class GeneralInfoController extends AbstractFOSRestController
 
     /**
      * Add a problem without linking it to a contest.
-     * @IsGranted("ROLE_ADMIN")
      */
+    #[IsGranted('ROLE_ADMIN')]
     #[Rest\Post('/problems')]
     #[OA\Tag(name: 'Problems')]
     #[OA\RequestBody(

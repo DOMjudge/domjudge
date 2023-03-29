@@ -51,11 +51,11 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
 
     /**
      * Add one or more problems.
-     * @IsGranted("ROLE_ADMIN")
      *
      * @throws BadRequestHttpException
      * @throws NonUniqueResultException
      */
+    #[IsGranted('ROLE_ADMIN')]
     #[Rest\Post('/add-data')]
     #[OA\RequestBody(
         required: true,
@@ -163,9 +163,9 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
 
     /**
      * Add a problem to this contest.
-     * @IsGranted("ROLE_ADMIN")
      * @throws NonUniqueResultException
      */
+    #[IsGranted('ROLE_ADMIN')]
     #[Rest\Post('')]
     #[OA\RequestBody(
         required: true,
@@ -225,8 +225,8 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
 
     /**
      * Unlink a problem from this contest.
-     * @IsGranted("ROLE_ADMIN")
      */
+    #[IsGranted('ROLE_ADMIN')]
     #[Rest\Delete('/{id}')]
     #[OA\Response(response: 204, description: 'Problem unlinked from contest succeeded')]
     #[OA\Parameter(ref: '#/components/parameters/id')]
@@ -278,8 +278,8 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
 
     /**
      * Link an existing problem to this contest.
-     * @IsGranted("ROLE_ADMIN")
      */
+    #[IsGranted('ROLE_ADMIN')]
     #[Rest\Put('/{id}')]
     #[OA\RequestBody(
         required: true,

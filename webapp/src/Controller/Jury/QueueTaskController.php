@@ -14,10 +14,8 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Annotation\Route;
 
-/**
- * @Route("/jury/queuetasks")
- * @IsGranted("ROLE_ADMIN")
- */
+#[IsGranted('ROLE_ADMIN')]
+#[Route(path: '/jury/queuetasks')]
 class QueueTaskController extends BaseController
 {
     final public const PRIORITY_MAP = [
@@ -36,9 +34,7 @@ class QueueTaskController extends BaseController
     {
     }
 
-    /**
-     * @Route("", name="jury_queue_tasks")
-     */
+    #[Route(path: '', name: 'jury_queue_tasks')]
     public function indexAction(): Response
     {
         /** @var QueueTask[] $queueTasks */
@@ -124,9 +120,7 @@ class QueueTaskController extends BaseController
         ]);
     }
 
-    /**
-     * @Route("/{queueTaskId}/change-priority/{priority}", name="jury_queue_task_change_priority")
-     */
+    #[Route(path: '/{queueTaskId}/change-priority/{priority}', name: 'jury_queue_task_change_priority')]
     public function changePriorityAction(int $queueTaskId, int $priority): RedirectResponse
     {
         $queueTask = $this->em->getRepository(QueueTask::class)->find($queueTaskId);
@@ -159,9 +153,7 @@ class QueueTaskController extends BaseController
         return $this->redirectToRoute('jury_queue_tasks');
     }
 
-    /**
-     * @Route("/{queueTaskId}/judgetasks", name="jury_queue_task_judge_tasks")
-     */
+    #[Route(path: '/{queueTaskId}/judgetasks', name: 'jury_queue_task_judge_tasks')]
     public function viewJudgeTasksAction(int $queueTaskId): Response
     {
         $queueTask = $this->em->getRepository(QueueTask::class)->find($queueTaskId);

@@ -13,9 +13,8 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Categories for teams (e.g.: participants, observers, ...).
- *
- * @UniqueEntity("externalid")
  */
+#[ORM\Entity]
 #[ORM\Table(options: [
     'collation' => 'utf8mb4_unicode_ci',
     'charset' => 'utf8mb4',
@@ -23,12 +22,12 @@ use Symfony\Component\Validator\Constraints as Assert;
 ])]
 #[ORM\Index(columns: ['sortorder'], name: 'sortorder')]
 #[ORM\UniqueConstraint(name: 'externalid', columns: ['externalid'], options: ['lengths' => [190]])]
-#[ORM\Entity]
 #[Serializer\VirtualProperty(
     name: 'hidden',
     exp: '!object.getVisible()',
     options: [new Serializer\Type('boolean'), new Serializer\Groups(['Nonstrict'])]
 )]
+#[UniqueEntity(fields: 'externalid')]
 class TeamCategory extends BaseApiEntity implements Stringable
 {
     #[ORM\Id]
@@ -53,19 +52,15 @@ class TeamCategory extends BaseApiEntity implements Stringable
     #[Serializer\SerializedName('icpc_id')]
     protected ?string $icpcid = null;
 
-    /**
-     * @Assert\NotBlank()
-     */
     #[ORM\Column(options: ['comment' => 'Descriptive name'])]
+    #[Assert\NotBlank]
     private string $name;
 
-    /**
-     * @Assert\GreaterThanOrEqual(0, message="Only non-negative sortorders are supported")
-     */
     #[ORM\Column(
         type: 'tinyint',
         options: ['comment' => 'Where to sort this category on the scoreboard', 'unsigned' => true, 'default' => 0]
     )]
+    #[Assert\GreaterThanOrEqual(0, message: 'Only non-negative sortorders are supported')]
     #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
     private int $sortorder = 0;
 

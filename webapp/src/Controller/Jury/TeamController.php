@@ -25,10 +25,8 @@ use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Annotation\Route;
 
-/**
- * @Route("/jury/teams")
- * @IsGranted("ROLE_JURY")
- */
+#[IsGranted('ROLE_JURY')]
+#[Route(path: '/jury/teams')]
 class TeamController extends BaseController
 {
     public function __construct(
@@ -40,9 +38,7 @@ class TeamController extends BaseController
         protected readonly AssetUpdateService $assetUpdater
     ) {}
 
-    /**
-     * @Route("", name="jury_teams")
-     */
+    #[Route(path: '', name: 'jury_teams')]
     public function indexAction(): Response
     {
         /** @var Team[] $teams */
@@ -229,9 +225,7 @@ class TeamController extends BaseController
         ]);
     }
 
-    /**
-     * @Route("/{teamId<\d+>}", name="jury_team")
-     */
+    #[Route(path: '/{teamId<\d+>}', name: 'jury_team')]
     public function viewAction(
         Request $request,
         int $teamId,
@@ -312,10 +306,8 @@ class TeamController extends BaseController
         return $this->render('jury/team.html.twig', $data);
     }
 
-    /**
-     * @Route("/{teamId<\d+>}/edit", name="jury_team_edit")
-     * @IsGranted("ROLE_ADMIN")
-     */
+    #[IsGranted('ROLE_ADMIN')]
+    #[Route(path: '/{teamId<\d+>}/edit', name: 'jury_team_edit')]
     public function editAction(Request $request, int $teamId): Response
     {
         /** @var Team $team */
@@ -341,10 +333,8 @@ class TeamController extends BaseController
         ]);
     }
 
-    /**
-     * @Route("/{teamId<\d+>}/delete", name="jury_team_delete")
-     * @IsGranted("ROLE_ADMIN")
-     */
+    #[IsGranted('ROLE_ADMIN')]
+    #[Route(path: '/{teamId<\d+>}/delete', name: 'jury_team_delete')]
     public function deleteAction(Request $request, int $teamId): Response
     {
         /** @var Team $team */
@@ -357,10 +347,8 @@ class TeamController extends BaseController
                                      [$team], $this->generateUrl('jury_teams'));
     }
 
-    /**
-     * @Route("/add", name="jury_team_add")
-     * @IsGranted("ROLE_ADMIN")
-     */
+    #[IsGranted('ROLE_ADMIN')]
+    #[Route(path: '/add', name: 'jury_team_add')]
     public function addAction(Request $request): Response
     {
         $team = new Team();

@@ -62,9 +62,9 @@ class ContestController extends AbstractRestController
 
     /**
      * Add a new contest.
-     * @IsGranted("ROLE_ADMIN")
      * @throws BadRequestHttpException
      */
+    #[IsGranted('ROLE_ADMIN')]
     #[Rest\Post('')]
     #[OA\RequestBody(
         required: true,
@@ -199,8 +199,8 @@ class ContestController extends AbstractRestController
 
     /**
      * Delete the banner for the given contest.
-     * @IsGranted("ROLE_ADMIN")
      */
+    #[IsGranted('ROLE_ADMIN')]
     #[Rest\Delete('/{cid}/banner', name: 'delete_contest_banner')]
     #[OA\Response(response: 204, description: 'Deleting banner succeeded')]
     #[OA\Parameter(ref: '#/components/parameters/cid')]
@@ -233,8 +233,8 @@ class ContestController extends AbstractRestController
 
     /**
      * Set the banner for the given contest.
-     * @IsGranted("ROLE_ADMIN")
      */
+    #[IsGranted('ROLE_ADMIN')]
     #[Rest\Post("/{cid}/banner", name: 'post_contest_banner')]
     #[Rest\Put("/{cid}/banner", name: 'put_contest_banner')]
     #[OA\RequestBody(
@@ -296,9 +296,9 @@ class ContestController extends AbstractRestController
 
     /**
      * Change the start time or unfreeze (thaw) time of the given contest.
-     * @IsGranted("ROLE_API_WRITER")
      * @throws NonUniqueResultException
      */
+    #[IsGranted('ROLE_API_WRITER')]
     #[Rest\Patch('/{cid}')]
     #[OA\RequestBody(
         required: true,
@@ -498,9 +498,9 @@ class ContestController extends AbstractRestController
 
     /**
      * Get the event feed for the given contest.
-     * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_API_READER')")
      * @throws NonUniqueResultException
      */
+    #[Security("is_granted('ROLE_JURY') or is_granted('ROLE_API_READER')")]
     #[Rest\Get('/{cid}/event-feed')]
     #[OA\Parameter(ref: '#/components/parameters/cid')]
     #[OA\Parameter(
@@ -784,10 +784,10 @@ class ContestController extends AbstractRestController
 
     /**
      * Get general status information.
-     * @IsGranted("ROLE_API_READER")
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
+    #[IsGranted('ROLE_API_READER')]
     #[Rest\Get('/{cid}/status')]
     #[OA\Parameter(ref: '#/components/parameters/cid')]
     #[OA\Response(

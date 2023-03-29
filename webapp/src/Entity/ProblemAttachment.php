@@ -8,13 +8,13 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
+#[ORM\Entity]
 #[ORM\Table(options: [
     'collation' => 'utf8mb4_unicode_ci',
     'charset' => 'utf8mb4',
     'comment' => 'Attachments belonging to problems',
 ])]
 #[ORM\Index(columns: ['attachmentid', 'name'], name: 'name', options: ['lengths' => [null, 190]])]
-#[ORM\Entity]
 class ProblemAttachment
 {
     #[ORM\Id]

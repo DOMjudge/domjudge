@@ -24,11 +24,11 @@ class AccessController extends AbstractRestController
 {
     /**
      * Get access information
-     * @IsGranted("ROLE_API_READER")
      *
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
+    #[IsGranted('ROLE_API_READER')]
     #[Rest\Get('')]
     #[OA\Response(
         response: 200,

@@ -48,9 +48,9 @@ class JudgementController extends AbstractRestController implements QueryObjectT
 
     /**
      * Get all the judgements for this contest.
-     * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_TEAM') or is_granted('ROLE_JUDGEHOST') or is_granted('ROLE_API_READER')")
      * @throws NonUniqueResultException
      */
+    #[Security("is_granted('ROLE_JURY') or is_granted('ROLE_TEAM') or is_granted('ROLE_JUDGEHOST') or is_granted('ROLE_API_READER')")]
     #[Rest\Get('contests/{cid}/judgements')]
     #[Rest\Get('judgements')]
     #[OA\Response(
@@ -87,8 +87,8 @@ class JudgementController extends AbstractRestController implements QueryObjectT
     /**
      * Get the given judgement for this contest.
      * @throws NonUniqueResultException
-     * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_TEAM') or is_granted('ROLE_JUDGEHOST') or is_granted('ROLE_API_READER')")
      */
+    #[Security("is_granted('ROLE_JURY') or is_granted('ROLE_TEAM') or is_granted('ROLE_JUDGEHOST') or is_granted('ROLE_API_READER')")]
     #[Rest\Get('contests/{cid}/judgements/{id<\d+>}')]
     #[Rest\Get('judgements/{id<\d+>}')]
     #[OA\Response(

@@ -14,9 +14,8 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
  * All incoming submissions.
- *
- * @UniqueEntity("externalid")
  */
+#[ORM\Entity]
 #[ORM\Table(options: [
     'collation' => 'utf8mb4_unicode_ci',
     'charset' => 'utf8mb4',
@@ -35,7 +34,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
     columns: ['cid', 'externalid'],
     options: ['lengths' => [null, 190]]
 )]
-#[ORM\Entity]
+#[UniqueEntity(fields: 'externalid')]
 class Submission extends BaseApiEntity implements ExternalRelationshipEntityInterface
 {
     #[ORM\Id]
@@ -53,8 +52,8 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
         ]
     )]
     #[OA\Property(nullable: true)]
-    #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
     #[Serializer\SerializedName('external_id')]
+    #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
     protected ?string $externalid = null;
 
     #[ORM\Column(
@@ -115,9 +114,9 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
     #[Serializer\Exclude]
     private Problem $problem;
 
+    #[ORM\ManyToOne(inversedBy: 'submissions')]
     #[ORM\JoinColumn(name: 'cid', referencedColumnName: 'cid', onDelete: 'CASCADE')]
     #[ORM\JoinColumn(name: 'probid', referencedColumnName: 'probid', onDelete: 'CASCADE')]
-    #[ORM\ManyToOne(inversedBy: 'submissions')]
     #[Serializer\Exclude]
     private ContestProblem $contest_problem;
 

@@ -6,13 +6,13 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * Compile, compare, and run script executable bundles.
  */
+#[ORM\Entity]
 #[ORM\Table(options: [
     'collation' => 'utf8mb4_unicode_ci',
     'charset' => 'utf8mb4',
     'comment' => 'Global configuration variables',
 ])]
 #[ORM\UniqueConstraint(name: 'name', columns: ['name'])]
-#[ORM\Entity]
 class Configuration
 {
     #[ORM\Id]

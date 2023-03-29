@@ -13,6 +13,7 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 /**
  * Many-to-Many mapping of contests and problems.
  */
+#[ORM\Entity]
 #[ORM\Table(
     name: 'contestproblem',
     options: [
@@ -24,7 +25,6 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 #[ORM\Index(columns: ['cid'], name: 'cid')]
 #[ORM\Index(columns: ['probid'], name: 'probid')]
 #[ORM\UniqueConstraint(name: 'shortname', columns: ['cid', 'shortname'], options: ['lengths' => [null, 190]])]
-#[ORM\Entity]
 #[Serializer\VirtualProperty(
     name: 'id',
     exp: 'object.getProblem().getProbid()',
@@ -43,14 +43,12 @@ class ContestProblem
     #[Serializer\SerializedName('label')]
     private string $shortname;
 
-    /**
-     * @Assert\GreaterThanOrEqual(0)
-     */
     #[ORM\Column(options: [
             'comment' => 'Number of points earned by solving this problem',
             'unsigned' => true,
             'default' => 1,
     ])]
+    #[Assert\GreaterThanOrEqual(0)]
     #[Serializer\Exclude]
     private int $points = 1;
 
@@ -227,9 +225,7 @@ class ContestProblem
         return $this->getProblem()->getApiId($eventLogService);
     }
 
-    /**
-     * @Assert\Callback()
-     */
+    #[Assert\Callback]
     public function validate(ExecutionContextInterface $context): void
     {
         if ($this->getColor() && Utils::convertToHex($this->getColor()) === null) {

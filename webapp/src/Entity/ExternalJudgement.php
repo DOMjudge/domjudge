@@ -10,6 +10,7 @@ use JMS\Serializer\Annotation as Serializer;
 /**
  * Judgement in external system.
  */
+#[ORM\Entity]
 #[ORM\Table(options: [
     'collation' => 'utf8mb4_unicode_ci',
     'charset' => 'utf8mb4',
@@ -23,7 +24,6 @@ use JMS\Serializer\Annotation as Serializer;
     columns: ['cid', 'externalid'],
     options: ['lengths' => [null, 190]]
 )]
-#[ORM\Entity]
 class ExternalJudgement
 {
     #[ORM\Id]

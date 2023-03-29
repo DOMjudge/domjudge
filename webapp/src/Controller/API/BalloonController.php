@@ -12,9 +12,7 @@ use OpenApi\Attributes as OA;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Request;
 
-/**
- * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_API_READER') or is_granted('ROLE_BALLOON')")
- */
+#[Security("is_granted('ROLE_JURY') or is_granted('ROLE_API_READER') or is_granted('ROLE_BALLOON')")]
 #[Rest\Route('/contests/{cid}/balloons')]
 #[OA\Tag(name: 'Balloons')]
 #[OA\Parameter(ref: '#/components/parameters/cid')]
@@ -53,8 +51,8 @@ class BalloonController extends AbstractRestController
 
     /**
      * Mark a specific balloon as done.
-     * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_BALLOON')")
      */
+    #[Security("is_granted('ROLE_JURY') or is_granted('ROLE_BALLOON')")]
     #[Rest\Post('/{balloonId<\d+>}/done')]
     #[OA\Response(
         response: 204,

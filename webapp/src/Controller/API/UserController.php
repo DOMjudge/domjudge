@@ -42,8 +42,8 @@ class UserController extends AbstractRestController
 
     /**
      * Add one or more groups.
-     * @IsGranted("ROLE_ADMIN")
      */
+    #[IsGranted('ROLE_ADMIN')]
     #[Rest\Post('/groups')]
     #[OA\RequestBody(
         required: true,
@@ -90,9 +90,8 @@ class UserController extends AbstractRestController
 
     /**
      * Add one or more organizations.
-     *
-     * @IsGranted("ROLE_ADMIN")
      */
+    #[IsGranted('ROLE_ADMIN')]
     #[Rest\Post('/organizations')]
     #[OA\RequestBody(
         required: true,
@@ -128,8 +127,8 @@ class UserController extends AbstractRestController
 
     /**
      * Add one or more teams.
-     * @IsGranted("ROLE_ADMIN")
      */
+    #[IsGranted('ROLE_ADMIN')]
     #[Rest\Post('/teams')]
     #[OA\RequestBody(
         required: true,
@@ -176,9 +175,9 @@ class UserController extends AbstractRestController
 
     /**
      * Add accounts to teams.
-     * @IsGranted("ROLE_ADMIN")
      * @throws BadRequestHttpException
      */
+    #[IsGranted('ROLE_ADMIN')]
     #[Rest\Post('/accounts')]
     #[OA\RequestBody(
         required: true,
@@ -240,9 +239,9 @@ class UserController extends AbstractRestController
 
     /**
      * Get all the users.
-     * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_API_READER')")
      * @throws NonUniqueResultException
      */
+    #[Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_API_READER')")]
     #[Rest\Get('')]
     #[OA\Response(
         response: 200,
@@ -267,8 +266,8 @@ class UserController extends AbstractRestController
     /**
      * Get the given user.
      * @throws NonUniqueResultException
-     * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_API_READER')")
      */
+    #[Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_API_READER')")]
     #[Rest\Get('/{id}')]
     #[OA\Response(
         response: 200,
@@ -283,9 +282,8 @@ class UserController extends AbstractRestController
 
     /**
      * Add a new user.
-     *
-     * @IsGranted("ROLE_API_WRITER")
      */
+    #[IsGranted('ROLE_API_WRITER')]
     #[Rest\Post]
     #[OA\RequestBody(
         required: true,

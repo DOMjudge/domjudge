@@ -7,6 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * Log of all events during a contest.
  */
+#[ORM\Entity]
 #[ORM\Table(options: [
     'collation' => 'utf8mb4_unicode_ci',
     'charset' => 'utf8mb4',
@@ -15,12 +16,11 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Index(columns: ['cid', 'eventtime'], name: 'eventtime')]
 #[ORM\Index(columns: ['cid'], name: 'cid')]
 #[ORM\Index(columns: ['cid', 'endpointtype', 'endpointid'], name: 'endpoint')]
-#[ORM\Entity]
 class Event
 {
     #[ORM\Id]
-    #[ORM\Column(options: ['comment' => 'Event ID', 'unsigned' => true])]
     #[ORM\GeneratedValue(strategy: 'IDENTITY')]
+    #[ORM\Column(options: ['comment' => 'Event ID', 'unsigned' => true])]
     private int $eventid;
 
     #[ORM\Column(

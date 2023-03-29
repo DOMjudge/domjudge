@@ -10,6 +10,7 @@ use JMS\Serializer\Annotation as Serializer;
 /**
  * Result of a testcase run.
  */
+#[ORM\Entity]
 #[ORM\Table(options: [
     'collation' => 'utf8mb4_unicode_ci',
     'charset' => 'utf8mb4',
@@ -18,7 +19,6 @@ use JMS\Serializer\Annotation as Serializer;
 #[ORM\Index(columns: ['judgingid'], name: 'judgingid')]
 #[ORM\Index(columns: ['testcaseid'], name: 'testcaseid_2')]
 #[ORM\UniqueConstraint(name: 'testcaseid', columns: ['judgingid', 'testcaseid'])]
-#[ORM\Entity]
 class JudgingRun extends BaseApiEntity
 {
     #[ORM\Id]
@@ -60,14 +60,14 @@ class JudgingRun extends BaseApiEntity
     #[Serializer\Exclude]
     private string|float|null $endtime = null;
 
-    #[Serializer\Exclude]
     #[ORM\ManyToOne(inversedBy: 'runs')]
     #[ORM\JoinColumn(name: 'judgingid', referencedColumnName: 'judgingid', onDelete: 'CASCADE')]
+    #[Serializer\Exclude]
     private Judging $judging;
 
-    #[Serializer\Exclude]
     #[ORM\ManyToOne(inversedBy: 'judging_runs')]
     #[ORM\JoinColumn(name: 'testcaseid', referencedColumnName: 'testcaseid')]
+    #[Serializer\Exclude]
     private Testcase $testcase;
 
     /**

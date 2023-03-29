@@ -17,9 +17,8 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Stores testcases per problem.
- *
- * @UniqueEntity("externalid", message="A problem with the same `externalid` already exists - is this a duplicate?")
  */
+#[ORM\Entity]
 #[ORM\Table(options: [
     'collation' => 'utf8mb4_unicode_ci',
     'charset' => 'utf8mb4',
@@ -28,8 +27,11 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Index(columns: ['externalid'], name: 'externalid', options: ['lengths' => [190]])]
 #[ORM\Index(columns: ['special_run'], name: 'special_run')]
 #[ORM\Index(columns: ['special_compare'], name: 'special_compare')]
-#[ORM\Entity]
 #[ORM\HasLifecycleCallbacks]
+#[UniqueEntity(
+    fields: 'externalid',
+    message: 'A problem with the same `externalid` already exists - is this a duplicate?'
+)]
 class Problem extends BaseApiEntity
 {
     #[ORM\Id]
@@ -51,20 +53,15 @@ class Problem extends BaseApiEntity
     #[ORM\Column(options: ['comment' => 'Descriptive name'])]
     private string $name;
 
-    /**
-     * @Assert\GreaterThan(0)
-     */
     #[ORM\Column(options: [
         'comment' => 'Maximum run time (in seconds) for this problem',
         'default' => 0,
         'unsigned' => true,
     ])]
+    #[Assert\GreaterThan(0)]
     #[Serializer\Exclude]
     private float $timelimit = 0;
 
-    /**
-     * @Assert\GreaterThan(0)
-     */
     #[ORM\Column(
         nullable: true,
         options: [
@@ -72,16 +69,15 @@ class Problem extends BaseApiEntity
             'unsigned' => true,
         ]
     )]
+    #[Assert\GreaterThan(0)]
     #[Serializer\Exclude]
     private ?int $memlimit = null;
 
-    /**
-     * @Assert\GreaterThan(0)
-     */
     #[ORM\Column(
         nullable: true,
         options: ['comment' => 'Maximum output size (in kB) for this problem', 'unsigned' => true]
     )]
+    #[Assert\GreaterThan(0)]
     #[Serializer\Exclude]
     private ?int $outputlimit = null;
 
@@ -107,9 +103,7 @@ class Problem extends BaseApiEntity
     #[Serializer\Exclude]
     private mixed $problemtext = null;
 
-    /**
-     * @Assert\File()
-     */
+    #[Assert\File]
     #[Serializer\Exclude]
     private ?UploadedFile $problemtextFile = null;
 

@@ -28,10 +28,10 @@ use ZipArchive;
 /**
  * Class PublicController
  *
- * @Route("/public")
  *
  * @package App\Controller
  */
+#[Route(path: '/public')]
 class PublicController extends BaseController
 {
     public function __construct(
@@ -42,9 +42,7 @@ class PublicController extends BaseController
         protected readonly EntityManagerInterface $em
     ) {}
 
-    /**
-     * @Route("", name="public_index")
-     */
+    #[Route(path: '', name: 'public_index')]
     public function scoreboardAction(Request $request): Response
     {
         $response   = new Response();
@@ -82,9 +80,7 @@ class PublicController extends BaseController
         return $this->render('public/scoreboard.html.twig', $data, $response);
     }
 
-    /**
-     * @Route("/scoreboard-data.zip", name="public_scoreboard_data_zip")
-     */
+    #[Route(path: '/scoreboard-data.zip', name: 'public_scoreboard_data_zip')]
     public function scoreboardDataZipAction(RequestStack $requestStack, string $projectDir, string $vendorDir, Request $request): Response
     {
         $contest = $this->getContestFromRequest($request) ?? $this->dj->getCurrentContest(-1);
@@ -197,9 +193,7 @@ class PublicController extends BaseController
         return $contest;
     }
 
-    /**
-     * @Route("/change-contest/{contestId<-?\d+>}", name="public_change_contest")
-     */
+    #[Route(path: '/change-contest/{contestId<-?\d+>}', name: 'public_change_contest')]
     public function changeContestAction(Request $request, RouterInterface $router, int $contestId): Response
     {
         if ($this->isLocalReferer($router, $request)) {
@@ -211,9 +205,7 @@ class PublicController extends BaseController
                                                  $response);
     }
 
-    /**
-     * @Route("/team/{teamId<\d+>}", name="public_team")
-     */
+    #[Route(path: '/team/{teamId<\d+>}', name: 'public_team')]
     public function teamAction(Request $request, int $teamId): Response
     {
         /** @var Team|null $team */
@@ -237,18 +229,16 @@ class PublicController extends BaseController
     }
 
     /**
-     * @Route("/problems", name="public_problems")
      * @throws NonUniqueResultException
      */
+    #[Route(path: '/problems', name: 'public_problems')]
     public function problemsAction(): Response
     {
         return $this->render('public/problems.html.twig',
             $this->dj->getTwigDataForProblemsAction(-1, $this->stats));
     }
 
-    /**
-     * @Route("/problems/{probId<\d+>}/text", name="public_problem_text")
-     */
+    #[Route(path: '/problems/{probId<\d+>}/text', name: 'public_problem_text')]
     public function problemTextAction(int $probId): StreamedResponse
     {
         return $this->getBinaryFile($probId, function (
@@ -268,12 +258,9 @@ class PublicController extends BaseController
     }
 
     /**
-     * @Route(
-     *     "/{probId<\d+>}/attachment/{attachmentId<\d+>}",
-     *     name="public_problem_attachment"
-     *     )
      * @throws NonUniqueResultException
      */
+    #[Route(path: '/{probId<\d+>}/attachment/{attachmentId<\d+>}', name: 'public_problem_attachment')]
     public function attachmentAction(int $probId, int $attachmentId): StreamedResponse
     {
         return $this->getBinaryFile($probId, fn(
@@ -283,9 +270,7 @@ class PublicController extends BaseController
         ) => $this->dj->getAttachmentStreamedResponse($contestProblem, $attachmentId));
     }
 
-    /**
-     * @Route("/{probId<\d+>}/samples.zip", name="public_problem_sample_zip")
-     */
+    #[Route(path: '/{probId<\d+>}/samples.zip', name: 'public_problem_sample_zip')]
     public function sampleZipAction(int $probId): StreamedResponse
     {
         return $this->getBinaryFile($probId, function (int $probId, Contest $contest, ContestProblem $contestProblem) {

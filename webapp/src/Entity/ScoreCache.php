@@ -6,6 +6,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * Scoreboard cache.
  */
+#[ORM\Entity]
 #[ORM\Table(
     name: 'scorecache',
     options: [
@@ -17,7 +18,6 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Index(columns: ['cid'], name: 'cid')]
 #[ORM\Index(columns: ['teamid'], name: 'teamid')]
 #[ORM\Index(columns: ['probid'], name: 'probid')]
-#[ORM\Entity]
 class ScoreCache
 {
     #[ORM\Column(options: [

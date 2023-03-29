@@ -7,6 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * Files associated to a submission.
  */
+#[ORM\Entity]
 #[ORM\Table(options: [
     'collation' => 'utf8mb4_unicode_ci',
     'charset' => 'utf8mb4',
@@ -15,7 +16,6 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Index(columns: ['submitid'], name: 'submitid')]
 #[ORM\UniqueConstraint(name: 'rankindex', columns: ['submitid', 'ranknumber'])]
 #[ORM\UniqueConstraint(name: 'filename', columns: ['submitid', 'filename'], options: ['lengths' => [null, 190]])]
-#[ORM\Entity]
 class SubmissionFile
 {
     #[ORM\Id]

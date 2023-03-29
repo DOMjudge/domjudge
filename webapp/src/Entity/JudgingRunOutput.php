@@ -7,13 +7,13 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * Output of a judging run.
  */
+#[ORM\Entity]
 #[ORM\Table(options: [
     'collation' => 'utf8mb4_unicode_ci',
     'charset' => 'utf8mb4',
     'comment' => 'Stores output of judging run',
 ])]
 #[ORM\Index(columns: ['runid'], name: 'runid')]
-#[ORM\Entity]
 class JudgingRunOutput
 {
     /**

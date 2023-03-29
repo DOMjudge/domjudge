@@ -19,10 +19,8 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-/**
- * @Route("/jury/shadow-differences")
- * @IsGranted("ROLE_ADMIN")
- */
+#[IsGranted('ROLE_ADMIN')]
+#[Route(path: '/jury/shadow-differences')]
 class ShadowDifferencesController extends BaseController
 {
     public function __construct(
@@ -34,10 +32,10 @@ class ShadowDifferencesController extends BaseController
     ) {}
 
     /**
-     * @Route("", name="jury_shadow_differences")
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
+    #[Route(path: '', name: 'jury_shadow_differences')]
     public function indexAction(Request $request): Response
     {
         $shadowMode = DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL;

@@ -9,6 +9,7 @@ use JMS\Serializer\Annotation as Serializer;
 /**
  * Rejudge group.
  */
+#[ORM\Entity]
 #[ORM\Table(options: [
     'collation' => 'utf8mb4_unicode_ci',
     'charset' => 'utf8mb4',
@@ -16,7 +17,6 @@ use JMS\Serializer\Annotation as Serializer;
 ])]
 #[ORM\Index(columns: ['userid_start'], name: 'userid_start')]
 #[ORM\Index(columns: ['userid_finish'], name: 'userid_finish')]
-#[ORM\Entity]
 class Rejudging
 {
     #[ORM\Id]

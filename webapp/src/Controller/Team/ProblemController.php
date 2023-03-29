@@ -21,12 +21,18 @@ use Symfony\Component\Routing\Annotation\Route;
 /**
  * Class ProblemController
  *
- * @Route("/team")
- * @IsGranted("ROLE_TEAM")
- * @Security("user.getTeam() !== null", message="You do not have a team associated with your account.")
  *
  * @package App\Controller\Team
  */
+#[IsGranted('ROLE_TEAM')]
+#[Security('user.getTeam() !== null', message: 'You do not have a team associated with your account.')]
+/**
+ * Class ProblemController
+ *
+ *
+ * @package App\Controller\Team
+ */
+#[Route(path: '/team')]
 class ProblemController extends BaseController
 {
     public function __construct(
@@ -37,9 +43,9 @@ class ProblemController extends BaseController
     ) {}
 
     /**
-     * @Route("/problems", name="team_problems")
      * @throws NonUniqueResultException
      */
+    #[Route(path: '/problems', name: 'team_problems')]
     public function problemsAction(): Response
     {
         $teamId = $this->dj->getUser()->getTeam()->getTeamid();
@@ -48,9 +54,7 @@ class ProblemController extends BaseController
     }
 
 
-    /**
-     * @Route("/problems/{probId<\d+>}/text", name="team_problem_text")
-     */
+    #[Route(path: '/problems/{probId<\d+>}/text', name: 'team_problem_text')]
     public function problemTextAction(int $probId): StreamedResponse
     {
         return $this->getBinaryFile($probId, function (
@@ -70,12 +74,9 @@ class ProblemController extends BaseController
     }
 
     /**
-     * @Route(
-     *     "/{probId<\d+>}/attachment/{attachmentId<\d+>}",
-     *     name="team_problem_attachment"
-     *     )
      * @throws NonUniqueResultException
      */
+    #[Route(path: '/{probId<\d+>}/attachment/{attachmentId<\d+>}', name: 'team_problem_attachment')]
     public function attachmentAction(int $probId, int $attachmentId): StreamedResponse
     {
         return $this->getBinaryFile($probId, fn(
@@ -85,9 +86,7 @@ class ProblemController extends BaseController
         ) => $this->dj->getAttachmentStreamedResponse($contestProblem, $attachmentId));
     }
 
-    /**
-     * @Route("/{probId<\d+>}/samples.zip", name="team_problem_sample_zip")
-     */
+    #[Route(path: '/{probId<\d+>}/samples.zip', name: 'team_problem_sample_zip')]
     public function sampleZipAction(int $probId): StreamedResponse
     {
         return $this->getBinaryFile($probId, function (int $probId, Contest $contest, ContestProblem $contestProblem) {

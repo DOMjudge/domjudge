@@ -15,10 +15,8 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-/**
- * @Route("/jury/balloons")
- * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_BALLOON')")
- */
+#[Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_BALLOON')")]
+#[Route(path: '/jury/balloons')]
 class BalloonController extends AbstractController
 {
     public function __construct(
@@ -28,9 +26,7 @@ class BalloonController extends AbstractController
         protected readonly EventLogService $eventLogService
     ) {}
 
-    /**
-     * @Route("", name="jury_balloons")
-     */
+    #[Route(path: '', name: 'jury_balloons')]
     public function indexAction(BalloonService $balloonService): Response
     {
         $contest = $this->dj->getCurrentContest();
@@ -97,9 +93,7 @@ class BalloonController extends AbstractController
         ]);
     }
 
-    /**
-     * @Route("/{balloonId}/done", name="jury_balloons_setdone")
-     */
+    #[Route(path: '/{balloonId}/done', name: 'jury_balloons_setdone')]
     public function setDoneAction(int $balloonId, BalloonService $balloonService): RedirectResponse
     {
         $balloonService->setDone($balloonId);
