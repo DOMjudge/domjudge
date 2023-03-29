@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Controller\API\AbstractRestController;
 use App\Doctrine\Constants;
 use App\Utils\Utils;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -62,7 +63,7 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
         options: ['comment' => 'Specifies ID of submission if imported from external CCS, e.g. Kattis', 'collation' => 'utf8mb4_bin']
     )]
     #[OA\Property(nullable: true)]
-    #[Serializer\Groups(['Nonstrict'])]
+    #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
     #[Serializer\SerializedName('external_id')]
     protected ?string $externalid = null;
 

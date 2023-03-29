@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Controller\API\AbstractRestController;
 use App\Doctrine\Constants;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -102,7 +103,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
         options: ['comment' => 'Public team definition; for example: Team member names (freeform)']
     )]
     #[OA\Property(nullable: true)]
-    #[Serializer\Groups(['Nonstrict'])]
+    #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
     private ?string $publicDescription = null;
 
     #[ORM\Column(
@@ -565,7 +566,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
     #[Serializer\VirtualProperty]
     #[Serializer\SerializedName('affiliation')]
     #[Serializer\Type('string')]
-    #[Serializer\Groups(['Nonstrict'])]
+    #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
     public function getAffiliationName(): ?string
     {
         return $this->getAffiliation()?->getName();
@@ -574,7 +575,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
     #[OA\Property(nullable: true)]
     #[Serializer\VirtualProperty]
     #[Serializer\Type('string')]
-    #[Serializer\Groups(['Nonstrict'])]
+    #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
     #[Serializer\Expose(if: "context.getAttribute('config_service').get('show_flags')")]
     public function getNationality() : ?string
     {

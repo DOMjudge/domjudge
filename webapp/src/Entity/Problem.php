@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Controller\API\AbstractRestController;
 use App\Doctrine\Constants;
 use App\Utils\Utils;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -52,7 +53,7 @@ class Problem extends BaseApiEntity
         nullable: true,
         options: ['comment' => 'Problem ID in an external system, should be unique inside a single contest', 'collation' => 'utf8mb4_bin']
     )]
-    #[Serializer\Groups(['Nonstrict'])]
+    #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
     protected ?string $externalid = null;
 
     #[ORM\Column(

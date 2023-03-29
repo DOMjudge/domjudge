@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 namespace App\Entity;
 
+use App\Controller\API\AbstractRestController;
 use App\Doctrine\Constants;
 use App\Utils\Utils;
 use DateTime;
@@ -75,7 +76,7 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
         nullable: false,
         options: ['comment' => 'Name']
     )]
-    #[Serializer\Groups(['Nonstrict'])]
+    #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
     private string $name = '';
 
     /**
@@ -89,7 +90,7 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
         options: ['comment' => 'Email address']
     )]
     #[OA\Property(nullable: true)]
-    #[Serializer\Groups(['Nonstrict'])]
+    #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
     private ?string $email = null;
 
     #[ORM\Column(
@@ -137,7 +138,7 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
     )]
     #[OA\Property(nullable: true)]
     #[Serializer\SerializedName('last_ip')]
-    #[Serializer\Groups(['Nonstrict'])]
+    #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
     private ?string $last_ip_address = null;
 
     #[ORM\Column(
@@ -173,7 +174,7 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
         nullable: false,
         options: ['comment' => 'Whether the user is able to log in', 'default' => 1]
     )]
-    #[Serializer\Groups(['Nonstrict'])]
+    #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
     private bool $enabled = true;
 
     #[ORM\ManyToOne(targetEntity: Team::class, inversedBy: 'users')]
@@ -293,7 +294,7 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
     #[OA\Property(nullable: true)]
     #[Serializer\VirtualProperty]
     #[Serializer\SerializedName('last_login_time')]
-    #[Serializer\Groups(['Nonstrict'])]
+    #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
     #[Serializer\Type('DateTime')]
     public function getLastLoginAsDateTime(): ?DateTime
     {
@@ -314,7 +315,7 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
     #[OA\Property(nullable: true)]
     #[Serializer\VirtualProperty]
     #[Serializer\SerializedName('last_api_login_time')]
-    #[Serializer\Groups(['Nonstrict'])]
+    #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
     #[Serializer\Type('DateTime')]
     public function getLastApiLoginAsDateTime(): ?DateTime
     {
@@ -335,7 +336,7 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
     #[OA\Property(nullable: true)]
     #[Serializer\VirtualProperty]
     #[Serializer\SerializedName('first_login_time')]
-    #[Serializer\Groups(['Nonstrict'])]
+    #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
     #[Serializer\Type('DateTime')]
     public function getFirstLoginAsDateTime(): ?DateTime
     {
@@ -414,7 +415,7 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
     #[Serializer\VirtualProperty]
     #[Serializer\SerializedName('team')]
     #[Serializer\Type('string')]
-    #[Serializer\Groups(['Nonstrict'])]
+    #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
     public function getTeamName(): ?string
     {
         return $this->getTeam()?->getEffectiveName();
@@ -456,7 +457,7 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
      */
     #[Serializer\VirtualProperty]
     #[Serializer\SerializedName('roles')]
-    #[Serializer\Groups(['Nonstrict'])]
+    #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
     #[Serializer\Type('array<string>')]
     public function getRoleList(): array
     {

@@ -28,6 +28,11 @@ use Symfony\Component\Validator\ConstraintViolationListInterface;
  */
 abstract class AbstractRestController extends AbstractFOSRestController
 {
+    final public const GROUP_DEFAULT = 'Default';
+    final public const GROUP_NONSTRICT = 'Nonstrict';
+    final public const GROUP_RESTRICTED = 'Restricted';
+    final public const GROUP_RESTRICTED_NONSTRICT = 'RestrictedNonstrict';
+
     public function __construct(
         protected readonly EntityManagerInterface $em,
         protected readonly DOMJudgeService $dj,
@@ -104,15 +109,15 @@ abstract class AbstractRestController extends AbstractFOSRestController
         $view->getContext()->setAttribute('domjudge_service', $this->dj);
         $view->getContext()->setAttribute('config_service', $this->config);
 
-        $groups = ['Default'];
+        $groups = [static::GROUP_DEFAULT];
         if (!$request->query->has('strict') || !$request->query->getBoolean('strict')) {
-            $groups[] = 'Nonstrict';
+            $groups[] = static::GROUP_NONSTRICT;
         }
         if ($this->dj->checkrole('api_reader')) {
-            $groups[] = 'Restricted';
+            $groups[] = static::GROUP_RESTRICTED;
         }
-        if (in_array('Nonstrict', $groups) && in_array('Restricted', $groups)) {
-            $groups[] = 'RestrictedNonstrict';
+        if (in_array(static::GROUP_NONSTRICT, $groups) && in_array(static::GROUP_RESTRICTED, $groups)) {
+            $groups[] = static::GROUP_RESTRICTED_NONSTRICT;
         }
         $view->getContext()->setGroups($groups);
 
