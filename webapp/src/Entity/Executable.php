@@ -20,12 +20,10 @@ use ZipArchive;
 ])]
 class Executable
 {
-    /**
-     * @Identifier()
-     */
     #[ORM\Id]
     #[ORM\Column(length: 32, options: ['comment' => 'Executable ID (string)'])]
     #[Assert\NotBlank]
+    #[Identifier]
     private string $execid;
 
     #[ORM\Column(nullable: true, options: ['comment' => 'Description of this executable'])]

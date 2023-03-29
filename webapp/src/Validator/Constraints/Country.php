@@ -2,12 +2,15 @@
 
 namespace App\Validator\Constraints;
 
+use Attribute;
 use Symfony\Component\Validator\Constraint;
 
-/**
- * @Annotation
- */
+#[Attribute(Attribute::TARGET_PROPERTY)]
 class Country extends Constraint
 {
-    public string $message = 'Only (uppercase) ISO3166-1 alpha-3 values are allowed';
+    public function __construct(
+        public string $message = 'Only (uppercase) ISO3166-1 alpha-3 values are allowed'
+    ) {
+        parent::__construct();
+    }
 }

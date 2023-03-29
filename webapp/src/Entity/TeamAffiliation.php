@@ -63,14 +63,12 @@ class TeamAffiliation extends BaseApiEntity implements AssetEntityInterface
     #[Serializer\SerializedName('formal_name')]
     private string $name;
 
-    /**
-     * @Country()
-     */
     #[ORM\Column(
         length: 3,
         nullable: true,
         options: ['comment' => 'ISO 3166-1 alpha-3 country code', 'fixed' => true]
     )]
+    #[Country]
     #[OA\Property(nullable: true)]
     #[Serializer\Expose(if: "context.getAttribute('config_service').get('show_flags')")]
     private ?string $country = null;
