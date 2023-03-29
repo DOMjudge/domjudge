@@ -25,7 +25,6 @@ use ZipArchive;
 class Executable
 {
     /**
-     * @var string
      * @Assert\NotBlank()
      * @Identifier()
      */
