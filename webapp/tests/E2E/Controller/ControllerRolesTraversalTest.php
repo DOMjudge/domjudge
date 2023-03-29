@@ -43,7 +43,7 @@ class ControllerRolesTraversalTest extends BaseTestCase
     }
 
     /**
-     * @See: https://www.oreilly.com/library/view/php-cookbook/1565926811/ch04s25.html
+     * @see: https://www.oreilly.com/library/view/php-cookbook/1565926811/ch04s25.html
      * Get all combinations of roles with at minimal the starting roles.
      */
     protected function roleCombinations(array $start_roles, array $possible_roles): array
