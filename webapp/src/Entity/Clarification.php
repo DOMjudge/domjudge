@@ -2,7 +2,6 @@
 namespace App\Entity;
 
 use App\Controller\API\AbstractRestController;
-use App\Doctrine\Constants;
 use App\Utils\Utils;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -16,14 +15,11 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  *
  * @UniqueEntity("externalid")
  */
-#[ORM\Table(
-    name: 'clarification',
-    options: [
-        'collation' => 'utf8mb4_unicode_ci',
-        'charset' => 'utf8mb4',
-        'comment' => 'Clarification requests by teams and responses by the jury',
-    ]
-)]
+#[ORM\Table(options: [
+    'collation' => 'utf8mb4_unicode_ci',
+    'charset' => 'utf8mb4',
+    'comment' => 'Clarification requests by teams and responses by the jury',
+])]
 #[ORM\Index(columns: ['respid'], name: 'respid')]
 #[ORM\Index(columns: ['probid'], name: 'probid')]
 #[ORM\Index(columns: ['cid'], name: 'cid')]
@@ -39,114 +35,80 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 class Clarification extends BaseApiEntity implements ExternalRelationshipEntityInterface
 {
     #[ORM\Id]
-    #[ORM\GeneratedValue(strategy: 'AUTO')]
-    #[ORM\Column(
-        name: 'clarid',
-        type: 'integer',
-        length: 4,
-        nullable: false,
-        options: ['comment' => 'Clarification ID', 'unsigned' => true]
-    )]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(options: ['comment' => 'Clarification ID', 'unsigned' => true])]
     #[Serializer\SerializedName('id')]
     #[Serializer\Type('string')]
     protected int $clarid;
 
     #[ORM\Column(
-        name: 'externalid',
-        type: 'string',
-        length: Constants::LENGTH_LIMIT_TINYTEXT,
         nullable: true,
-        options: ['comment' => 'Clarification ID in an external system, should be unique inside a single contest', 'collation' => 'utf8mb4_bin']
+        options: [
+            'comment' => 'Clarification ID in an external system, should be unique inside a single contest',
+            'collation' => 'utf8mb4_bin',
+        ]
     )]
     #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
     #[OA\Property(nullable: true)]
     protected ?string $externalid = null;
 
     #[ORM\Column(
-        name: 'submittime',
         type: 'decimal',
         precision: 32,
         scale: 9,
-        nullable: false,
         options: ['comment' => 'Time sent', 'unsigned' => true]
     )]
     #[Serializer\Exclude]
     private string|float $submittime;
 
-    #[ORM\Column(
-        name: 'jury_member',
-        type: 'string',
-        length: Constants::LENGTH_LIMIT_TINYTEXT,
-        nullable: true,
-        options: ['comment' => 'Name of jury member who answered this']
-    )]
+    #[ORM\Column(nullable: true, options: ['comment' => 'Name of jury member who answered this'])]
     #[Serializer\Exclude]
     private ?string $jury_member = null;
 
     #[ORM\Column(
-        name: 'category',
-        type: 'string',
-        length: Constants::LENGTH_LIMIT_TINYTEXT,
         nullable: true,
         options: ['comment' => 'Category associated to this clarification; only set for non problem clars']
     )]
     #[Serializer\Exclude]
     private ?string $category = null;
 
-    #[ORM\Column(
-        name: 'queue',
-        type: 'string',
-        length: Constants::LENGTH_LIMIT_TINYTEXT,
-        nullable: true,
-        options: ['comment' => 'Queue associated to this clarification']
-    )]
+    #[ORM\Column(nullable: true, options: ['comment' => 'Queue associated to this clarification'])]
     #[Serializer\Exclude]
     private ?string $queue = null;
 
-    #[ORM\Column(
-        name: 'body',
-        type: 'text',
-        length: Constants::LENGTH_LIMIT_LONGTEXT,
-        nullable: false,
-        options: ['comment' => 'Clarification text']
-    )]
+    #[ORM\Column(type: 'text', options: ['comment' => 'Clarification text'])]
     #[Serializer\SerializedName('text')]
     private string $body;
 
-    #[ORM\Column(
-        name: 'answered',
-        type: 'boolean',
-        nullable: false,
-        options: ['comment' => 'Has been answered by jury?', 'default' => 0]
-    )]
+    #[ORM\Column(options: ['comment' => 'Has been answered by jury?', 'default' => 0])]
     #[Serializer\Groups([AbstractRestController::GROUP_RESTRICTED_NONSTRICT])]
     private bool $answered = false;
 
-    #[ORM\ManyToOne(targetEntity: Problem::class, inversedBy: 'clarifications')]
+    #[ORM\ManyToOne(inversedBy: 'clarifications')]
     #[ORM\JoinColumn(name: 'probid', referencedColumnName: 'probid', onDelete: 'SET NULL')]
     #[Serializer\Exclude]
     private ?Problem $problem = null;
 
-    #[ORM\ManyToOne(targetEntity: Contest::class, inversedBy: 'clarifications')]
+    #[ORM\ManyToOne(inversedBy: 'clarifications')]
     #[ORM\JoinColumn(name: 'cid', referencedColumnName: 'cid', onDelete: 'CASCADE')]
     #[Serializer\Exclude]
     private Contest $contest;
 
-    #[ORM\ManyToOne(targetEntity: Clarification::class, inversedBy: 'replies')]
+    #[ORM\ManyToOne(inversedBy: 'replies')]
     #[ORM\JoinColumn(name: 'respid', referencedColumnName: 'clarid', onDelete: 'SET NULL')]
     #[Serializer\Exclude]
     private ?Clarification $in_reply_to = null;
 
-    #[ORM\OneToMany(targetEntity: Clarification::class, mappedBy: 'in_reply_to')]
+    #[ORM\OneToMany(mappedBy: 'in_reply_to', targetEntity: Clarification::class)]
     #[Serializer\Exclude]
     private Collection $replies;
 
-    #[ORM\ManyToOne(targetEntity: Team::class, inversedBy: 'sent_clarifications')]
+    #[ORM\ManyToOne(inversedBy: 'sent_clarifications')]
     #[ORM\JoinColumn(name: 'sender', referencedColumnName: 'teamid', onDelete: 'CASCADE')]
     #[Serializer\Exclude]
     private ?Team $sender = null;
 
-    #[ORM\ManyToOne(targetEntity: Team::class, inversedBy: 'received_clarifications')]
+    #[ORM\ManyToOne(inversedBy: 'received_clarifications')]
     #[ORM\JoinColumn(name: 'recipient', referencedColumnName: 'teamid', onDelete: 'CASCADE')]
     #[Serializer\Exclude]
     private ?Team $recipient = null;

@@ -1,7 +1,6 @@
 <?php declare(strict_types=1);
 namespace App\Entity;
 
-use App\Doctrine\Constants;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
 use RuntimeException;
@@ -9,14 +8,11 @@ use RuntimeException;
 /**
  * Files associated to an executable.
  */
-#[ORM\Table(
-    name: 'executable_file',
-    options: [
-        'collation' => 'utf8mb4_unicode_ci',
-        'charset' => 'utf8mb4',
-        'comment' => 'Files associated to an executable',
-    ]
-)]
+#[ORM\Table(options: [
+    'collation' => 'utf8mb4_unicode_ci',
+    'charset' => 'utf8mb4',
+    'comment' => 'Files associated to an executable',
+])]
 #[ORM\Index(columns: ['immutable_execid'], name: 'immutable_execid')]
 #[ORM\UniqueConstraint(
     name: 'rankindex',
@@ -32,61 +28,30 @@ use RuntimeException;
 class ExecutableFile
 {
     #[ORM\Id]
-    #[ORM\GeneratedValue(strategy: 'AUTO')]
-    #[ORM\Column(
-        name: 'execfileid',
-        type: 'integer',
-        length: 4,
-        nullable: false,
-        options: ['comment' => 'Executable file ID', 'unsigned' => true]
-    )]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(options: ['comment' => 'Executable file ID', 'unsigned' => true])]
     private int $execfileid;
 
-    #[ORM\Column(
-        name: 'filename',
-        type: 'string',
-        length: Constants::LENGTH_LIMIT_TINYTEXT,
-        nullable: false,
-        options: ['comment' => 'Filename as uploaded']
-    )]
+    #[ORM\Column(options: ['comment' => 'Filename as uploaded'])]
     private string $filename;
 
     #[ORM\Column(
         name: 'ranknumber',
-        type: 'integer',
-        nullable: false,
         options: ['comment' => 'Order of the executable files, zero-indexed', 'unsigned' => true]
     )]
     private int $rank;
 
-    #[ORM\ManyToOne(targetEntity: ImmutableExecutable::class, inversedBy: 'files')]
+    #[ORM\ManyToOne(inversedBy: 'files')]
     #[ORM\JoinColumn(name: 'immutable_execid', referencedColumnName: 'immutable_execid', onDelete: 'CASCADE')]
     private ImmutableExecutable $immutableExecutable;
 
-    #[ORM\Column(
-        name: 'file_content',
-        type: 'blobtext',
-        length: Constants::LENGTH_LIMIT_LONGTEXT,
-        nullable: false,
-        options: ['comment' => 'Full file content']
-    )]
+    #[ORM\Column(type: 'blobtext', options: ['comment' => 'Full file content'])]
     private string $fileContent;
 
-    #[ORM\Column(
-        name: 'hash',
-        type: 'string',
-        length: 32,
-        nullable: true,
-        options: ['comment' => 'hash of the content']
-    )]
+    #[ORM\Column(length: 32, nullable: true, options: ['comment' => 'hash of the content'])]
     private string $hash;
 
-    #[ORM\Column(
-        name: 'is_executable',
-        type: 'boolean',
-        nullable: false,
-        options: ['comment' => 'Whether this file gets an executable bit.', 'default' => 0]
-    )]
+    #[ORM\Column(options: ['comment' => 'Whether this file gets an executable bit.', 'default' => 0])]
     #[Serializer\Exclude]
     private bool $isExecutable = false;
 

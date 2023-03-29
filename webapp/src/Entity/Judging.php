@@ -2,7 +2,6 @@
 namespace App\Entity;
 
 use App\Controller\API\AbstractRestController;
-use App\Doctrine\Constants;
 use App\Utils\Utils;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -14,13 +13,11 @@ use Ramsey\Uuid\Uuid;
 /**
  * Result of judging a submission.
  */
-#[ORM\Table(
-    name: 'judging',
-    options: [
-        'collation' => 'utf8mb4_unicode_ci',
-        'charset' => 'utf8mb4',
-        'comment' => 'Result of judging a submission',
-    ])]
+#[ORM\Table(options: [
+    'collation' => 'utf8mb4_unicode_ci',
+    'charset' => 'utf8mb4',
+    'comment' => 'Result of judging a submission',
+])]
 #[ORM\Index(columns: ['submitid'], name: 'submitid')]
 #[ORM\Index(columns: ['cid'], name: 'cid')]
 #[ORM\Index(columns: ['rejudgingid'], name: 'rejudgingid')]
@@ -32,20 +29,13 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
     final public const RESULT_COMPILER_ERROR = 'compiler-error';
 
     #[ORM\Id]
-    #[ORM\GeneratedValue(strategy: 'AUTO')]
-    #[ORM\Column(
-        name: 'judgingid',
-        type: 'integer',
-        length: 4,
-        nullable: false,
-        options: ['comment' => 'Judging ID', 'unsigned' => true]
-    )]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(options: ['comment' => 'Judging ID', 'unsigned' => true])]
     #[Serializer\SerializedName('id')]
     #[Serializer\Type('string')]
     protected int $judgingid;
 
     #[ORM\Column(
-        name: 'starttime',
         type: 'decimal',
         precision: 32,
         scale: 9,
@@ -56,7 +46,6 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
     private string|float|null $starttime = null;
 
     #[ORM\Column(
-        name: 'endtime',
         type: 'decimal',
         precision: 32,
         scale: 9,
@@ -68,8 +57,6 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
     private string|float|null $endtime = null;
 
     #[ORM\Column(
-        name: 'result',
-        type: 'string',
         length: 32,
         nullable: true,
         options: ['comment' => 'Result string as defined in config.php']
@@ -77,39 +64,19 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
     #[Serializer\Exclude]
     private ?string $result = null;
 
-    #[ORM\Column(
-        name: 'verified',
-        type: 'boolean',
-        nullable: false,
-        options: ['comment' => 'Result verified by jury member?', 'default' => 0]
-    )]
+    #[ORM\Column(options: ['comment' => 'Result verified by jury member?', 'default' => 0])]
     #[Serializer\Exclude]
     private bool $verified = false;
 
-    #[ORM\Column(
-        name: 'jury_member',
-        type: 'string',
-        length: Constants::LENGTH_LIMIT_TINYTEXT,
-        nullable: true,
-        options: ['comment' => 'Name of jury member who verified this']
-    )]
+    #[ORM\Column(nullable: true, options: ['comment' => 'Name of jury member who verified this'])]
     #[Serializer\Exclude]
     private ?string $jury_member = null;
 
-    #[ORM\Column(
-        name: 'verify_comment',
-        type: 'string',
-        length: Constants::LENGTH_LIMIT_TINYTEXT,
-        nullable: true,
-        options: ['comment' => 'Optional additional information provided by the verifier']
-    )]
+    #[ORM\Column(nullable: true, options: ['comment' => 'Optional additional information provided by the verifier'])]
     #[Serializer\Exclude]
     private ?string $verify_comment = null;
 
     #[ORM\Column(
-        name: 'valid',
-        type: 'boolean',
-        nullable: false,
         options: ['comment' => 'Old judging is marked as invalid when rejudging', 'default' => 1]
     )]
     #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
@@ -119,7 +86,6 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
      * @var resource|null
      */
     #[ORM\Column(
-        name: 'output_compile',
         type: 'blob',
         nullable: true,
         options: ['comment' => 'Output of the compiling the program']
@@ -130,7 +96,6 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
     #[ORM\Column(
         name: 'metadata',
         type: 'blobtext',
-        length: Constants::LENGTH_LIMIT_LONGTEXT,
         nullable: true,
         options: ['comment' => 'Compilation metadata']
     )]
@@ -140,40 +105,25 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
     #[Serializer\Exclude]
     private ?string $output_compile_as_string = null;
 
-    #[ORM\Column(
-        name: 'seen',
-        type: 'boolean',
-        nullable: false,
-        options: ['comment' => 'Whether the team has seen this judging', 'default' => 0]
-    )]
+    #[ORM\Column(options: ['comment' => 'Whether the team has seen this judging', 'default' => 0])]
     #[Serializer\Exclude]
     private bool $seen = false;
 
-    #[ORM\Column(
-        name: 'judge_completely',
-        type: 'boolean',
-        nullable: false,
-        options: ['comment' => 'Explicitly requested to be judged completely.', 'default' => 0]
-    )]
+    #[ORM\Column(options: ['comment' => 'Explicitly requested to be judged completely.', 'default' => 0])]
     #[Serializer\Exclude]
     private bool $judgeCompletely = false;
 
-    #[ORM\Column(
-        name: 'uuid',
-        type: 'string',
-        nullable: false,
-        options: ['comment' => 'UUID, to make caching of compilation results safe.']
-    )]
+    #[ORM\Column(options: ['comment' => 'UUID, to make caching of compilation results safe.'])]
     #[Serializer\Exclude]
     private string $uuid;
 
 
-    #[ORM\ManyToOne(targetEntity: Contest::class)]
+    #[ORM\ManyToOne]
     #[ORM\JoinColumn(name: 'cid', referencedColumnName: 'cid', onDelete: 'CASCADE')]
     #[Serializer\Exclude]
     private ?Contest $contest = null;
 
-    #[ORM\ManyToOne(targetEntity: Submission::class, inversedBy: 'judgings')]
+    #[ORM\ManyToOne(inversedBy: 'judgings')]
     #[ORM\JoinColumn(name: 'submitid', referencedColumnName: 'submitid', onDelete: 'CASCADE')]
     #[Serializer\Exclude]
     private Submission $submission;
@@ -181,7 +131,7 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
     /**
      * rejudgings have one parent judging
      */
-    #[ORM\ManyToOne(targetEntity: Rejudging::class, inversedBy: 'judgings')]
+    #[ORM\ManyToOne(inversedBy: 'judgings')]
     #[ORM\JoinColumn(name: 'rejudgingid', referencedColumnName: 'rejudgingid', onDelete: 'SET NULL')]
     #[Serializer\Exclude]
     private ?Rejudging $rejudging = null;
@@ -189,7 +139,7 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
     /**
      * Rejudgings have one parent judging.
      */
-    #[ORM\ManyToOne(targetEntity: Judging::class)]
+    #[ORM\ManyToOne]
     #[ORM\JoinColumn(name: 'prevjudgingid', referencedColumnName: 'judgingid', onDelete: 'SET NULL')]
     #[Serializer\Exclude]
     private ?Judging $original_judging = null;
@@ -205,7 +155,7 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
     /**
      * Rejudgings have one parent judging.
      */
-    #[ORM\ManyToOne(targetEntity: InternalError::class, inversedBy: 'affectedJudgings')]
+    #[ORM\ManyToOne(inversedBy: 'affectedJudgings')]
     #[ORM\JoinColumn(name: 'errorid', referencedColumnName: 'errorid', onDelete: 'SET NULL')]
     #[Serializer\Exclude]
     private ?InternalError $internalError = null;

@@ -1,10 +1,10 @@
 <?php declare(strict_types=1);
 namespace App\Entity;
 
-use App\Doctrine\Constants;
 use App\Doctrine\DBAL\Types\InternalErrorStatusType;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Platforms\AbstractMySQLPlatform;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
 
@@ -12,79 +12,57 @@ use JMS\Serializer\Annotation as Serializer;
  * Log of judgehost internal errors.
  */
 #[ORM\Table(
-    name: 'internal_error',
-    options: [
-        'collation' => 'utf8mb4_unicode_ci',
-        'charset' => 'utf8mb4',
-        'comment' => 'Log of judgehost internal errors',
-    ]
-)]
+options: [
+    'collation' => 'utf8mb4_unicode_ci',
+    'charset' => 'utf8mb4',
+    'comment' => 'Log of judgehost internal errors',
+])]
 #[ORM\Index(columns: ['judgingid'], name: 'judgingid')]
 #[ORM\Index(columns: ['cid'], name: 'cid')]
 #[ORM\Entity]
 class InternalError
 {
     #[ORM\Id]
-    #[ORM\Column(
-        name: 'errorid',
-        type: 'integer',
-        length: 4,
-        nullable: false,
-        options: ['comment' => 'Internal error ID', 'unsigned' => true]
-    )]
+    #[ORM\Column(options: ['comment' => 'Internal error ID', 'unsigned' => true])]
     #[ORM\GeneratedValue(strategy: 'IDENTITY')]
     private int $errorid;
 
-    #[ORM\Column(
-        name: 'description',
-        type: 'string',
-        length: Constants::LENGTH_LIMIT_TINYTEXT,
-        nullable: false,
-        options: ['comment' => 'Description of the error']
-    )]
+    #[ORM\Column(options: ['comment' => 'Description of the error'])]
     private string $description;
 
     #[ORM\Column(
-        name: 'judgehostlog',
         type: 'text',
-        length: 65535,
-        nullable: false,
+        length: AbstractMySQLPlatform::LENGTH_LIMIT_TEXT,
         options: ['comment' => 'Last N lines of the judgehost log']
     )]
     private string $judgehostlog;
 
     #[ORM\Column(
-        name: 'time',
         type: 'decimal',
         precision: 32,
         scale: 9,
-        nullable: false,
         options: ['comment' => 'Timestamp of the internal error', 'unsigned' => true]
     )]
     private string|float $time;
 
     #[ORM\Column(
-        name: 'disabled',
         type: 'json',
-        length: 65535,
-        nullable: false,
+        length: AbstractMySQLPlatform::LENGTH_LIMIT_TEXT,
         options: ['comment' => 'Disabled stuff, JSON-encoded']
     )]
     private array $disabled;
 
     #[ORM\Column(
-        name: 'status',
         type: 'internal_error_status',
-        nullable: false,
         options: ['comment' => 'Status of internal error', 'default' => 'open']
     )]
     private string $status = InternalErrorStatusType::STATUS_OPEN;
 
-    #[ORM\ManyToOne(targetEntity: Contest::class, inversedBy: 'internal_errors')]
+    #[ORM\ManyToOne(inversedBy: 'internal_errors')]
     #[ORM\JoinColumn(name: 'cid', referencedColumnName: 'cid', onDelete: 'SET NULL')]
     private ?Contest $contest = null;
 
-    #[ORM\ManyToOne(targetEntity: Judging::class)]
+    #[ORM\ManyToOne]
     #[ORM\JoinColumn(name: 'judgingid', referencedColumnName: 'judgingid', onDelete: 'SET NULL')]
     private ?Judging $judging = null;
 

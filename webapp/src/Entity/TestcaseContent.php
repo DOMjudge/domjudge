@@ -2,31 +2,22 @@
 
 namespace App\Entity;
 
-use App\Doctrine\Constants;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
  * Contents of a testcase.
  */
-#[ORM\Table(
-    name: 'testcase_content',
-    options: [
-        'collation' => 'utf8mb4_unicode_ci',
-        'charset' => 'utf8mb4',
-        'comment' => 'Stores contents of testcase',
-    ])]
+#[ORM\Table(options: [
+    'collation' => 'utf8mb4_unicode_ci',
+    'charset' => 'utf8mb4',
+    'comment' => 'Stores contents of testcase',
+])]
 #[ORM\Entity]
 class TestcaseContent
 {
     #[ORM\Id]
-    #[ORM\GeneratedValue(strategy: 'AUTO')]
-    #[ORM\Column(
-        name: 'tc_contentid',
-        type: 'integer',
-        length: 4,
-        nullable: false,
-        options: ['comment' => 'Testcase content ID', 'unsigned' => true]
-    )]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(options: ['comment' => 'Testcase content ID', 'unsigned' => true])]
     private int $tc_contentid;
 
     /**
@@ -34,41 +25,25 @@ class TestcaseContent
      * reverse of this relation will always be loaded. See the commit message of commit
      * 9e421f96691ec67ed62767fe465a6d8751edd884 for a more elaborate explanation.
      */
-    #[ORM\ManyToOne(targetEntity: Testcase::class, inversedBy: 'content')]
+    #[ORM\ManyToOne(inversedBy: 'content')]
     #[ORM\JoinColumn(name: 'testcaseid', referencedColumnName: 'testcaseid', onDelete: 'CASCADE')]
     private Testcase $testcase;
 
-    #[ORM\Column(
-        name: 'input',
-        type: 'blobtext',
-        length: Constants::LENGTH_LIMIT_LONGTEXT,
-        nullable: true,
-        options: ['comment' => 'Input data']
-    )]
+    #[ORM\Column(type: 'blobtext', nullable: true, options: ['comment' => 'Input data'])]
     private ?string $input = null;
 
-    #[ORM\Column(
-        name: 'output',
-        type: 'blobtext',
-        length: Constants::LENGTH_LIMIT_LONGTEXT,
-        nullable: true,
-        options: ['comment' => 'Output data']
-    )]
+    #[ORM\Column(type: 'blobtext', nullable: true, options: ['comment' => 'Output data'])]
     private ?string $output = null;
 
     #[ORM\Column(
-        name: 'image',
         type: 'blobtext',
-        length: Constants::LENGTH_LIMIT_LONGTEXT,
         nullable: true,
         options: ['comment' => 'A graphical representation of the testcase']
     )]
     private ?string $image = null;
 
     #[ORM\Column(
-        name: 'image_thumb',
         type: 'blobtext',
-        length: Constants::LENGTH_LIMIT_LONGTEXT,
         nullable: true,
         options: ['comment' => 'Automatically created thumbnail of the image']
     )]

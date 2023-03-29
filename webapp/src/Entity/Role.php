@@ -1,7 +1,6 @@
 <?php declare(strict_types=1);
 namespace App\Entity;
 
-use App\Doctrine\Constants;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -10,44 +9,24 @@ use Stringable;
 /**
  * Possible user roles.
  */
-#[ORM\Table(
-    name: 'role',
-    options: [
-        'collation' => 'utf8mb4_unicode_ci',
-        'charset' => 'utf8mb4',
-        'comment' => 'Possible user roles',
-    ])]
+#[ORM\Table(options: [
+    'collation' => 'utf8mb4_unicode_ci',
+    'charset' => 'utf8mb4',
+    'comment' => 'Possible user roles',
+])]
 #[ORM\UniqueConstraint(name: 'role', columns: ['role'])]
 #[ORM\Entity]
 class Role implements Stringable
 {
     #[ORM\Id]
-    #[ORM\GeneratedValue(strategy: 'AUTO')]
-    #[ORM\Column(
-        name: 'roleid',
-        type: 'integer',
-        length: 4,
-        nullable: false,
-        options: ['comment' => 'Role ID', 'unsigned' => true]
-    )]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(options: ['comment' => 'Role ID', 'unsigned' => true])]
     private int $roleid;
 
-    #[ORM\Column(
-        name: 'role',
-        type: 'string',
-        length: 32,
-        nullable: false,
-        options: ['comment' => 'Role name']
-    )]
+    #[ORM\Column(name: 'role', length: 32, options: ['comment' => 'Role name'])]
     private string $dj_role;
 
-    #[ORM\Column(
-        name: 'description',
-        type: 'string',
-        length: Constants::LENGTH_LIMIT_TINYTEXT,
-        nullable: false,
-        options: ['comment' => 'Description for the web interface']
-    )]
+    #[ORM\Column(options: ['comment' => 'Description for the web interface'])]
     private string $description;
 
     #[ORM\ManyToMany(targetEntity: User::class, mappedBy: 'user_roles')]

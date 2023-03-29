@@ -1,7 +1,6 @@
 <?php declare(strict_types=1);
 namespace App\Entity;
 
-use App\Doctrine\Constants;
 use App\Validator\Constraints\Country;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -17,13 +16,11 @@ use Symfony\Component\Validator\Constraints as Assert;
  *
  * @UniqueEntity("externalid")
  */
-#[ORM\Table(
-    name: 'team_affiliation',
-    options: [
-        'collation' => 'utf8mb4_unicode_ci',
-        'charset' => 'utf8mb4',
-        'comment' => 'Affilitations for teams (e.g.: university, company)',
-    ])]
+#[ORM\Table(options: [
+    'collation' => 'utf8mb4_unicode_ci',
+    'charset' => 'utf8mb4',
+    'comment' => 'Affilitations for teams (e.g.: university, company)',
+])]
 #[ORM\UniqueConstraint(name: 'externalid', columns: ['externalid'], options: ['lengths' => [190]])]
 #[ORM\Entity]
 #[Serializer\VirtualProperty(
@@ -38,22 +35,13 @@ use Symfony\Component\Validator\Constraints as Assert;
 class TeamAffiliation extends BaseApiEntity implements AssetEntityInterface
 {
     #[ORM\Id]
-    #[ORM\GeneratedValue(strategy: 'AUTO')]
-    #[ORM\Column(
-        name: 'affilid',
-        type: 'integer',
-        length: 4,
-        nullable: false,
-        options: ['comment' => 'Team affiliation ID', 'unsigned' => true]
-    )]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(options: ['comment' => 'Team affiliation ID', 'unsigned' => true])]
     #[Serializer\SerializedName('id')]
     #[Serializer\Type('string')]
     protected ?int $affilid = null;
 
     #[ORM\Column(
-        name: 'externalid',
-        type: 'string',
-        length: Constants::LENGTH_LIMIT_TINYTEXT,
         nullable: true,
         options: ['comment' => 'Team affiliation ID in an external system', 'collation' => 'utf8mb4_bin']
     )]
@@ -61,9 +49,6 @@ class TeamAffiliation extends BaseApiEntity implements AssetEntityInterface
     protected ?string $externalid = null;
 
     #[ORM\Column(
-        name: 'icpcid',
-        type: 'string',
-        length: Constants::LENGTH_LIMIT_TINYTEXT,
         nullable: true,
         options: ['comment' => 'External identifier from ICPC CMS', 'collation' => 'utf8mb4_bin']
     )]
@@ -71,23 +56,11 @@ class TeamAffiliation extends BaseApiEntity implements AssetEntityInterface
     #[Serializer\SerializedName('icpc_id')]
     protected ?string $icpcid = null;
 
-    #[ORM\Column(
-        name: 'shortname',
-        type: 'string',
-        length: 32,
-        nullable: false,
-        options: ['comment' => 'Short descriptive name']
-    )]
+    #[ORM\Column(length: 32, options: ['comment' => 'Short descriptive name'])]
     #[Serializer\SerializedName('name')]
     private string $shortname;
 
-    #[ORM\Column(
-        name: 'name',
-        type: 'string',
-        length: Constants::LENGTH_LIMIT_TINYTEXT,
-        nullable: false,
-        options: ['comment' => 'Descriptive name']
-    )]
+    #[ORM\Column(options: ['comment' => 'Descriptive name'])]
     #[Serializer\SerializedName('formal_name')]
     private string $name;
 
@@ -95,8 +68,6 @@ class TeamAffiliation extends BaseApiEntity implements AssetEntityInterface
      * @Country()
      */
     #[ORM\Column(
-        name: 'country',
-        type: 'string',
         length: 3,
         nullable: true,
         options: ['comment' => 'ISO 3166-1 alpha-3 country code', 'fixed' => true]
@@ -117,7 +88,6 @@ class TeamAffiliation extends BaseApiEntity implements AssetEntityInterface
     #[ORM\Column(
         name: 'internalcomments',
         type: 'text',
-        length: Constants::LENGTH_LIMIT_LONGTEXT,
         nullable: true,
         options: ['comment' => 'Internal comments (jury only)']
     )]

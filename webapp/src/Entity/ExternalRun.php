@@ -2,21 +2,16 @@
 
 namespace App\Entity;
 
-use App\Doctrine\Constants;
 use Doctrine\ORM\Mapping as ORM;
-use App\Entity\Contest;
 
 /**
  * Run in external system.
  */
-#[ORM\Table(
-    name: 'external_run',
-    options: [
-        'collation' => 'utf8mb4_unicode_ci',
-        'charset' => 'utf8mb4',
-        'comment' => 'Run in external system',
-    ]
-)]
+#[ORM\Table(options: [
+    'collation' => 'utf8mb4_unicode_ci',
+    'charset' => 'utf8mb4',
+    'comment' => 'Run in external system',
+])]
 #[ORM\Index(columns: ['extjudgementid'], name: 'extjudgementid')]
 #[ORM\Index(columns: ['testcaseid'], name: 'testcaseid')]
 #[ORM\UniqueConstraint(
@@ -28,55 +23,42 @@ use App\Entity\Contest;
 class ExternalRun
 {
     #[ORM\Id]
-    #[ORM\GeneratedValue(strategy: 'AUTO')]
-    #[ORM\Column(name: 'extrunid', type: 'integer', length: 4, nullable: false, options: ['comment' => 'External run ID', 'unsigned' => true])]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(options: ['comment' => 'External run ID', 'unsigned' => true])]
     private int $extrunid;
 
     #[ORM\Column(
-        name: 'externalid',
-        type: 'string',
-        length: Constants::LENGTH_LIMIT_TINYTEXT,
         nullable: true,
         options: ['comment' => 'Run ID in external system, should be unique inside a single contest', 'collation' => 'utf8mb4_bin']
     )]
     protected ?string $externalid = null;
 
     #[ORM\Column(
-        name: 'result',
-        type: 'string',
         length: 32,
-        nullable: false,
         options: ['comment' => 'Result string as obtained from external system']
     )]
     private string $result;
 
     #[ORM\Column(
-        name: 'endtime',
         type: 'decimal',
         precision: 32,
         scale: 9,
-        nullable: false,
         options: ['comment' => 'Time run ended', 'unsigned' => true]
     )]
     private string|float $endtime;
 
-    #[ORM\Column(
-        name: 'runtime',
-        type: 'float',
-        nullable: false,
-        options: ['comment' => 'Running time on this testcase']
-    )]
+    #[ORM\Column(options: ['comment' => 'Running time on this testcase'])]
     private float $runtime;
 
-    #[ORM\ManyToOne(targetEntity: ExternalJudgement::class, inversedBy: 'external_runs')]
+    #[ORM\ManyToOne(inversedBy: 'external_runs')]
     #[ORM\JoinColumn(name: 'extjudgementid', referencedColumnName: 'extjudgementid', onDelete: 'CASCADE')]
     private ExternalJudgement $external_judgement;
 
-    #[ORM\ManyToOne(targetEntity: Testcase::class, inversedBy: 'external_runs')]
+    #[ORM\ManyToOne(inversedBy: 'external_runs')]
     #[ORM\JoinColumn(name: 'testcaseid', referencedColumnName: 'testcaseid', onDelete: 'CASCADE')]
     private Testcase $testcase;
 
-    #[ORM\ManyToOne(targetEntity: Contest::class)]
+    #[ORM\ManyToOne]
     #[ORM\JoinColumn(name: 'cid', referencedColumnName: 'cid', onDelete: 'CASCADE')]
     private Contest $contest;
 

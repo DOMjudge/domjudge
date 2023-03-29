@@ -20,67 +20,45 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity]
 class RankCache
 {
-    #[ORM\Column(
-        name: 'points_restricted',
-        type: 'integer',
-        length: 4,
-        nullable: false,
-        options: ['comment' => 'Total correctness points (restricted audience)', 'unsigned' => true, 'default' => 0]
-    )]
+    #[ORM\Column(options: [
+        'comment' => 'Total correctness points (restricted audience)',
+        'unsigned' => true,
+        'default' => 0,
+    ])]
     private int $points_restricted = 0;
 
-    #[ORM\Column(
-        name: 'totaltime_restricted',
-        type: 'integer',
-        length: 4,
-        nullable: false,
-        options: ['comment' => 'Total penalty time in minutes (restricted audience)', 'default' => 0]
-    )]
+    #[ORM\Column(options: [
+        'comment' => 'Total penalty time in minutes (restricted audience)',
+        'default' => 0,
+    ])]
     private int $totaltime_restricted = 0;
 
-    #[ORM\Column(
-        name: 'totalruntime_restricted',
-        type: 'integer',
-        length: 4,
-        nullable: false,
-        options: ['comment' => 'Total runtime in milliseconds (restricted audience)', 'default' => 0]
-    )]
+    #[ORM\Column(options: [
+        'comment' => 'Total runtime in milliseconds (restricted audience)',
+        'default' => 0,
+    ])]
     private int $totalruntime_restricted = 0;
 
-    #[ORM\Column(
-        name: 'points_public',
-        type: 'integer',
-        length: 4,
-        nullable: false,
-        options: ['comment' => 'Total correctness points (public)', 'unsigned' => true, 'default' => 0]
-    )]
+    #[ORM\Column(options: [
+        'comment' => 'Total correctness points (public)',
+        'unsigned' => true,
+        'default' => 0,
+    ])]
     private int $points_public = 0;
 
-    #[ORM\Column(
-        name: 'totaltime_public',
-        type: 'integer',
-        length: 4,
-        nullable: false,
-        options: ['comment' => 'Total penalty time in minutes (public)', 'default' => 0]
-    )]
+    #[ORM\Column(options: ['comment' => 'Total penalty time in minutes (public)', 'default' => 0])]
     private int $totaltime_public = 0;
 
-    #[ORM\Column(
-        name: 'totalruntime_public',
-        type: 'integer',
-        length: 4,
-        nullable: false,
-        options: ['comment' => 'Total runtime in milliseconds (public)', 'default' => 0]
-    )]
+    #[ORM\Column(options: ['comment' => 'Total runtime in milliseconds (public)', 'default' => 0])]
     private int $totalruntime_public = 0;
 
     #[ORM\Id]
-    #[ORM\ManyToOne(targetEntity: Contest::class)]
+    #[ORM\ManyToOne]
     #[ORM\JoinColumn(name: 'cid', referencedColumnName: 'cid', onDelete: 'CASCADE')]
     private Contest $contest;
 
     #[ORM\Id]
-    #[ORM\ManyToOne(targetEntity: Team::class)]
+    #[ORM\ManyToOne]
     #[ORM\JoinColumn(name: 'teamid', referencedColumnName: 'teamid', onDelete: 'CASCADE')]
     private Team $team;
 

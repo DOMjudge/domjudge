@@ -2,7 +2,6 @@
 namespace App\Entity;
 
 use App\Controller\API\AbstractRestController;
-use App\Doctrine\Constants;
 use App\Validator\Constraints\Identifier;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -18,13 +17,11 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @UniqueEntity("langid")
  * @UniqueEntity("externalid")
  */
-#[ORM\Table(
-    name: 'language',
-    options: [
-        'collation' => 'utf8mb4_unicode_ci',
-        'charset' => 'utf8mb4',
-        'comment' => 'Programming languages in which teams can submit solutions',
-    ])]
+#[ORM\Table(options: [
+    'collation' => 'utf8mb4_unicode_ci',
+    'charset' => 'utf8mb4',
+    'comment' => 'Programming languages in which teams can submit solutions',
+])]
 #[ORM\Index(columns: ['compile_script'], name: 'compile_script')]
 #[ORM\UniqueConstraint(name: 'externalid', columns: ['externalid'], options: ['lengths' => [190]])]
 #[ORM\Entity]
@@ -36,23 +33,11 @@ class Language extends BaseApiEntity
      * @Identifier()
      */
     #[ORM\Id]
-    #[ORM\Column(
-        name: 'langid',
-        type: 'string',
-        length: 32,
-        nullable: false,
-        options: ['comment' => 'Language ID (string)']
-    )]
+    #[ORM\Column(length: 32, options: ['comment' => 'Language ID (string)'])]
     #[Serializer\Exclude]
     protected ?string $langid = null;
 
-    #[ORM\Column(
-        name: 'externalid',
-        type: 'string',
-        length: Constants::LENGTH_LIMIT_TINYTEXT,
-        nullable: true,
-        options: ['comment' => 'Language ID to expose in the REST API']
-    )]
+    #[ORM\Column(nullable: true, options: ['comment' => 'Language ID to expose in the REST API'])]
     #[Serializer\SerializedName('id')]
     #[Serializer\Groups([AbstractRestController::GROUP_DEFAULT, AbstractRestController::GROUP_NONSTRICT])]
     protected ?string $externalid = null;
@@ -60,13 +45,7 @@ class Language extends BaseApiEntity
     /**
      * @Assert\NotBlank()
      */
-    #[ORM\Column(
-        name: 'name',
-        type: 'string',
-        length: Constants::LENGTH_LIMIT_TINYTEXT,
-        nullable: false,
-        options: ['comment' => 'Descriptive language name']
-    )]
+    #[ORM\Column(options: ['comment' => 'Descriptive language name'])]
     #[Serializer\Groups([AbstractRestController::GROUP_DEFAULT, AbstractRestController::GROUP_NONSTRICT])]
     private string $name = '';
 
@@ -75,39 +54,33 @@ class Language extends BaseApiEntity
      * @Assert\NotBlank()
      */
     #[ORM\Column(
-        name: 'extensions',
         type: 'json',
-        length: Constants::LENGTH_LIMIT_LONGTEXT,
         nullable: true,
         options: ['comment' => 'List of recognized extensions (JSON encoded)']
     )]
     #[Serializer\Type('array<string>')]
     private array $extensions = [];
 
-    #[ORM\Column(
-        name: 'filter_compiler_files',
-        type: 'boolean',
-        nullable: false,
-        options: ['comment' => 'Whether to filter the files passed to the compiler by the extension list.', 'default' => 1]
+    #[ORM\Column(options: [
+        'comment' => 'Whether to filter the files passed to the compiler by the extension list.',
+        'default' => 1,
+    ]
     )]
     #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
     private bool $filterCompilerFiles = true;
 
-    #[ORM\Column(
-        name: 'allow_submit',
-        type: 'boolean',
-        nullable: false,
-        options: ['comment' => 'Are submissions accepted in this language?', 'default' => 1]
+    #[ORM\Column(options: [
+        'comment' => 'Are submissions accepted in this language?',
+        'default' => 1,
+    ]
     )]
     #[Serializer\Exclude]
     private bool $allowSubmit = true;
 
-    #[ORM\Column(
-        name: 'allow_judge',
-        type: 'boolean',
-        nullable: false,
-        options: ['comment' => 'Are submissions in this language judged?', 'default' => 1]
-    )]
+    #[ORM\Column(options: [
+        'comment' => 'Are submissions in this language judged?',
+        'default' => 1,
+    ])]
     #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
     private bool $allowJudge = true;
 
@@ -115,28 +88,23 @@ class Language extends BaseApiEntity
      * @Assert\GreaterThan(0)
      * @Assert\NotBlank()
      */
-    #[ORM\Column(
-        name: 'time_factor',
-        type: 'float',
-        nullable: false,
-        options: ['comment' => 'Language-specific factor multiplied by problem run times', 'default' => 1]
+    #[ORM\Column(options: [
+        'comment' => 'Language-specific factor multiplied by problem run times',
+        'default' => 1,
+    ]
     )]
     #[Serializer\Type('double')]
     #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
     private float $timeFactor = 1;
 
-    #[ORM\Column(
-        name: 'require_entry_point',
-        type: 'boolean',
-        nullable: false,
-        options: ['comment' => 'Whether submissions require a code entry point to be specified.', 'default' => 0]
-    )]
+    #[ORM\Column(options: [
+        'comment' => 'Whether submissions require a code entry point to be specified.',
+        'default' => 0,
+    ])]
     #[Serializer\SerializedName('entry_point_required')]
     private bool $require_entry_point = false;
 
     #[ORM\Column(
-        name: 'entry_point_description',
-        type: 'string',
         nullable: true,
         options: ['comment' => 'The description used in the UI for the entry point field.']
     )]
@@ -146,7 +114,7 @@ class Language extends BaseApiEntity
 
     #[ORM\JoinColumn(name: 'compile_script', referencedColumnName: 'execid', onDelete: 'SET NULL')]
     #[Serializer\Exclude]
-    #[ORM\ManyToOne(targetEntity: Executable::class, inversedBy: 'languages')]
+    #[ORM\ManyToOne(inversedBy: 'languages')]
     private ?Executable $compile_executable = null;
 
     #[ORM\OneToMany(mappedBy: 'language', targetEntity: Submission::class)]

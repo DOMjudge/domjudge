@@ -13,7 +13,8 @@ use JMS\Serializer\Annotation as Serializer;
         'collation' => 'utf8mb4_unicode_ci',
         'charset' => 'utf8mb4',
         'comment' => 'Work items.',
-    ])]
+    ]
+)]
 #[ORM\Index(columns: ['queuetaskid'], name: 'queuetaskid')]
 #[ORM\Index(columns: ['jobid'], name: 'jobid')]
 #[ORM\Index(columns: ['priority'], name: 'priority')]
@@ -24,45 +25,33 @@ use JMS\Serializer\Annotation as Serializer;
 class QueueTask
 {
     #[ORM\Id]
-    #[ORM\GeneratedValue(strategy: 'AUTO')]
-    #[ORM\Column(
-        name: 'queuetaskid',
-        type: 'integer',
-        length: 4,
-        nullable: false,
-        options: ['comment' => 'Queuetask ID', 'unsigned' => true]
-    )]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(options: ['comment' => 'Queuetask ID', 'unsigned' => true])]
     private int $queuetaskid;
 
     #[ORM\Column(
-        name: 'jobid',
-        type: 'integer',
-        length: 4,
         nullable: true,
         options: ['comment' => 'All queuetasks with the same jobid belong together.', 'unsigned' => true]
     )]
     #[Serializer\Type('string')]
     private ?int $jobid = null;
 
-    #[ORM\Column(
-        name: 'priority',
-        type: 'integer',
-        length: 4,
-        nullable: false,
-        options: ['comment' => 'Priority; negative means higher priority', 'unsigned' => false]
-    )]
+    #[ORM\Column(options: [
+        'comment' => 'Priority; negative means higher priority',
+        'unsigned' => false,
+    ])]
     private int $priority;
 
     #[ORM\Column(
         name: 'teampriority',
-        type: 'integer',
-        length: 4,
-        nullable: false,
-        options: ['comment' => 'Team Priority; somewhat magic, lower implies higher priority.', 'unsigned' => false]
+        options: [
+            'comment' => 'Team Priority; somewhat magic, lower implies higher priority.',
+            'unsigned' => false,
+        ]
     )]
     private int $teamPriority;
 
-    #[ORM\ManyToOne(targetEntity: Team::class)]
+    #[ORM\ManyToOne]
     #[ORM\JoinColumn(name: 'teamid', referencedColumnName: 'teamid', onDelete: 'CASCADE')]
     #[Serializer\Exclude]
     private ?Team $team = null;

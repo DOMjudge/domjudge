@@ -2,22 +2,17 @@
 
 namespace App\Entity;
 
-use App\Doctrine\Constants;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
-use App\Entity\ExternalSourceWarning;
 
-#[ORM\Table(
-    name: 'external_contest_source',
-    options: [
-        'collation' => 'utf8mb4_unicode_ci',
-        'charset' => 'utf8mb4',
-        'comment' => 'Sources for external contests',
-    ]
-)]
+#[ORM\Table(options: [
+    'collation' => 'utf8mb4_unicode_ci',
+    'charset' => 'utf8mb4',
+    'comment' => 'Sources for external contests',
+])]
 #[ORM\UniqueConstraint(name: 'cid', columns: ['cid'])]
 #[ORM\Entity]
 class ExternalContestSource
@@ -26,63 +21,26 @@ class ExternalContestSource
     final public const TYPE_CONTEST_PACKAGE = 'contest-archive';
 
     #[ORM\Id]
-    #[ORM\GeneratedValue(strategy: 'AUTO')]
-    #[ORM\Column(
-        name: 'extsourceid',
-        type: 'integer',
-        length: 4,
-        nullable: false,
-        options: ['comment' => 'External contest source ID', 'unsigned' => true]
-    )]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(options: ['comment' => 'External contest source ID', 'unsigned' => true])]
     private ?int $extsourceid = null;
 
-    #[ORM\Column(
-        name: 'type',
-        type: 'string',
-        length: Constants::LENGTH_LIMIT_TINYTEXT,
-        nullable: false,
-        options: ['comment' => 'Type of this contest source']
-    )]
+    #[ORM\Column(options: ['comment' => 'Type of this contest source'])]
     private string $type;
 
-    #[ORM\Column(
-        name: 'source',
-        type: 'string',
-        length: Constants::LENGTH_LIMIT_TINYTEXT,
-        nullable: false,
-        options: ['comment' => 'Source for this contest']
-    )]
+    #[ORM\Column(options: ['comment' => 'Source for this contest'])]
     private string $source;
 
-    #[ORM\Column(
-        name: 'username',
-        type: 'string',
-        length: Constants::LENGTH_LIMIT_TINYTEXT,
-        nullable: true,
-        options: ['comment' => 'Username for this source, if any']
-    )]
+    #[ORM\Column(nullable: true, options: ['comment' => 'Username for this source, if any'])]
     private ?string $username = null;
 
-    #[ORM\Column(
-        name: 'password',
-        type: 'string',
-        length: Constants::LENGTH_LIMIT_TINYTEXT,
-        nullable: true,
-        options: ['comment' => 'Password for this source, if any']
-    )]
+    #[ORM\Column(nullable: true, options: ['comment' => 'Password for this source, if any'])]
     private ?string $password = null;
 
-    #[ORM\Column(
-        name: 'last_event_id',
-        type: 'string',
-        length: Constants::LENGTH_LIMIT_TINYTEXT,
-        nullable: true,
-        options: ['comment' => 'Last encountered event ID, if any']
-    )]
+    #[ORM\Column(nullable: true, options: ['comment' => 'Last encountered event ID, if any'])]
     private ?string $lastEventId = null;
 
     #[ORM\Column(
-        name: 'last_poll_time',
         type: 'decimal',
         precision: 32,
         scale: 9,
@@ -91,7 +49,7 @@ class ExternalContestSource
     )]
     private ?float $lastPollTime = null;
 
-    #[ORM\ManyToOne(targetEntity: Contest::class, inversedBy: 'externalContestSources')]
+    #[ORM\ManyToOne(inversedBy: 'externalContestSources')]
     #[ORM\JoinColumn(name: 'cid', referencedColumnName: 'cid', onDelete: 'CASCADE')]
     private Contest $contest;
 

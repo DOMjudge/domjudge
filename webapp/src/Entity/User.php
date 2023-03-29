@@ -2,7 +2,6 @@
 namespace App\Entity;
 
 use App\Controller\API\AbstractRestController;
-use App\Doctrine\Constants;
 use App\Utils\Utils;
 use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -21,13 +20,11 @@ use Symfony\Component\Validator\Constraints as Assert;
  *
  * @UniqueEntity("username", message="The username '{{ value }}' is already in use.")
  */
-#[ORM\Table(
-    name: 'user',
-    options: [
-        'collation' => 'utf8mb4_unicode_ci',
-        'charset' => 'utf8mb4',
-        'comment' => 'Users that have access to DOMjudge',
-    ])]
+#[ORM\Table(options: [
+    'collation' => 'utf8mb4_unicode_ci',
+    'charset' => 'utf8mb4',
+    'comment' => 'Users that have access to DOMjudge',
+])]
 #[ORM\Index(columns: ['teamid'], name: 'teamid')]
 #[ORM\UniqueConstraint(name: 'username', columns: ['username'], options: ['lengths' => [190]])]
 #[ORM\UniqueConstraint(name: 'externalid', columns: ['externalid'], options: ['lengths' => [190]])]
@@ -35,22 +32,13 @@ use Symfony\Component\Validator\Constraints as Assert;
 class User extends BaseApiEntity implements UserInterface, PasswordAuthenticatedUserInterface, EquatableInterface, ExternalRelationshipEntityInterface
 {
     #[ORM\Id]
-    #[ORM\GeneratedValue(strategy: 'AUTO')]
-    #[ORM\Column(
-        name: 'userid',
-        type: 'integer',
-        length: 4,
-        nullable: false,
-        options: ['comment' => 'User ID', 'unsigned' => true]
-    )]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(options: ['comment' => 'User ID', 'unsigned' => true])]
     #[Serializer\SerializedName('id')]
     #[Serializer\Type('string')]
     private ?int $userid = null;
 
     #[ORM\Column(
-        name: 'externalid',
-        type: 'string',
-        length: Constants::LENGTH_LIMIT_TINYTEXT,
         nullable: true,
         options: ['comment' => 'User ID in an external system', 'collation' => 'utf8mb4_bin']
     )]
@@ -60,41 +48,22 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
     /**
      * @Assert\Regex("/^[a-z0-9@._-]+$/i", message="Only alphanumeric characters and _-@. are allowed")
      */
-    #[ORM\Column(
-        name: 'username',
-        type: 'string',
-        length: Constants::LENGTH_LIMIT_TINYTEXT,
-        nullable: false,
-        options: ['comment' => 'User login name']
-    )]
+    #[ORM\Column(options: ['comment' => 'User login name'])]
     private string $username = '';
 
-    #[ORM\Column(
-        name: 'name',
-        type: 'string',
-        length: Constants::LENGTH_LIMIT_TINYTEXT,
-        nullable: false,
-        options: ['comment' => 'Name']
-    )]
+    #[ORM\Column(options: ['comment' => 'Name'])]
     #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
     private string $name = '';
 
     /**
      * @Assert\Email()
      */
-    #[ORM\Column(
-        name: 'email',
-        type: 'string',
-        length: Constants::LENGTH_LIMIT_TINYTEXT,
-        nullable: true,
-        options: ['comment' => 'Email address']
-    )]
+    #[ORM\Column(nullable: true, options: ['comment' => 'Email address'])]
     #[OA\Property(nullable: true)]
     #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
     private ?string $email = null;
 
     #[ORM\Column(
-        name: 'last_login',
         type: 'decimal',
         precision: 32,
         scale: 9,
@@ -106,7 +75,6 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
     private string|float|null $last_login = null;
 
     #[ORM\Column(
-        name: 'last_api_login',
         type: 'decimal',
         precision: 32,
         scale: 9,
@@ -118,7 +86,6 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
     private string|float|null $last_api_login = null;
 
     #[ORM\Column(
-        name: 'first_login',
         type: 'decimal',
         precision: 32,
         scale: 9,
@@ -129,25 +96,13 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
     #[Serializer\Exclude]
     private string|float|null $first_login = null;
 
-    #[ORM\Column(
-        name: 'last_ip_address',
-        type: 'string',
-        length: Constants::LENGTH_LIMIT_TINYTEXT,
-        nullable: true,
-        options: ['comment' => 'Last IP address of successful login']
-    )]
+    #[ORM\Column(nullable: true, options: ['comment' => 'Last IP address of successful login'])]
     #[OA\Property(nullable: true)]
     #[Serializer\SerializedName('last_ip')]
     #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
     private ?string $last_ip_address = null;
 
-    #[ORM\Column(
-        name: 'password',
-        type: 'string',
-        length: Constants::LENGTH_LIMIT_TINYTEXT,
-        nullable: true,
-        options: ['comment' => 'Password hash']
-    )]
+    #[ORM\Column(nullable: true, options: ['comment' => 'Password hash'])]
     #[Serializer\Exclude]
     private ?string $password = null;
 
@@ -157,27 +112,16 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
     /**
      * @Assert\Ip(version="all")
      */
-    #[ORM\Column(
-        name: 'ip_address',
-        type: 'string',
-        length: Constants::LENGTH_LIMIT_TINYTEXT,
-        nullable: true,
-        options: ['comment' => 'IP Address used to autologin']
-    )]
+    #[ORM\Column(nullable: true, options: ['comment' => 'IP Address used to autologin'])]
     #[OA\Property(nullable: true)]
     #[Serializer\SerializedName('ip')]
     private ?string $ipAddress = null;
 
-    #[ORM\Column(
-        name: 'enabled',
-        type: 'boolean',
-        nullable: false,
-        options: ['comment' => 'Whether the user is able to log in', 'default' => 1]
-    )]
+    #[ORM\Column(options: ['comment' => 'Whether the user is able to log in', 'default' => 1])]
     #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
     private bool $enabled = true;
 
-    #[ORM\ManyToOne(targetEntity: Team::class, inversedBy: 'users')]
+    #[ORM\ManyToOne(inversedBy: 'users')]
     #[ORM\JoinColumn(name: 'teamid', referencedColumnName: 'teamid', onDelete: 'SET NULL')]
     #[Serializer\Exclude]
     private ?Team $team = null;

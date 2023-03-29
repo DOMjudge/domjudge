@@ -3,30 +3,25 @@
 namespace App\Entity;
 
 use App\Controller\API\AbstractRestController;
-use App\Doctrine\Constants;
 use App\Utils\Utils;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Platforms\AbstractMySQLPlatform;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
 use OpenApi\Attributes as OA;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
-use App\Entity\ContestProblem;
-use App\Entity\ExternalJudgement;
-use App\Entity\Submission;
 
 /**
  * All incoming submissions.
  *
  * @UniqueEntity("externalid")
  */
-#[ORM\Table(
-    name: 'submission',
-    options: [
-        'collation' => 'utf8mb4_unicode_ci',
-        'charset' => 'utf8mb4',
-        'comment' => 'All incoming submissions',
-    ])]
+#[ORM\Table(options: [
+    'collation' => 'utf8mb4_unicode_ci',
+    'charset' => 'utf8mb4',
+    'comment' => 'All incoming submissions',
+])]
 #[ORM\Index(columns: ['cid', 'teamid'], name: 'teamid')]
 #[ORM\Index(columns: ['teamid'], name: 'teamid_2')]
 #[ORM\Index(columns: ['userid'], name: 'userid')]
@@ -35,32 +30,27 @@ use App\Entity\Submission;
 #[ORM\Index(columns: ['origsubmitid'], name: 'origsubmitid')]
 #[ORM\Index(columns: ['rejudgingid'], name: 'rejudgingid')]
 #[ORM\Index(columns: ['cid', 'probid'], name: 'probid_2')]
-#[ORM\UniqueConstraint(name: 'externalid', columns: [
-    'cid',
-    'externalid',
-], options: ['lengths' => [null, 190]])]
+#[ORM\UniqueConstraint(
+    name: 'externalid',
+    columns: ['cid', 'externalid'],
+    options: ['lengths' => [null, 190]]
+)]
 #[ORM\Entity]
 class Submission extends BaseApiEntity implements ExternalRelationshipEntityInterface
 {
     #[ORM\Id]
-    #[ORM\GeneratedValue(strategy: 'AUTO')]
-    #[ORM\Column(
-        name: 'submitid',
-        type: 'integer',
-        length: 4,
-        nullable: false,
-        options: ['comment' => 'Submission ID', 'unsigned' => true]
-    )]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(options: ['comment' => 'Submission ID', 'unsigned' => true])]
     #[Serializer\SerializedName('id')]
     #[Serializer\Type('string')]
     protected int $submitid;
 
     #[ORM\Column(
-        name: 'externalid',
-        type: 'string',
-        length: Constants::LENGTH_LIMIT_TINYTEXT,
         nullable: true,
-        options: ['comment' => 'Specifies ID of submission if imported from external CCS, e.g. Kattis', 'collation' => 'utf8mb4_bin']
+        options: [
+            'comment' => 'Specifies ID of submission if imported from external CCS, e.g. Kattis',
+            'collation' => 'utf8mb4_bin',
+        ]
     )]
     #[OA\Property(nullable: true)]
     #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
@@ -68,29 +58,24 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
     protected ?string $externalid = null;
 
     #[ORM\Column(
-        name: 'submittime',
         type: 'decimal',
         precision: 32,
         scale: 9,
-        nullable: false,
         options: ['comment' => 'Time submitted', 'unsigned' => true]
     )]
     #[Serializer\Exclude]
     private string|float|null $submittime = null;
 
-    #[ORM\Column(
-        name: 'valid',
-        type: 'boolean',
-        nullable: false,
-        options: ['comment' => 'If false ignore this submission in all scoreboard calculations', 'default' => 1]
-    )]
+    #[ORM\Column(options: [
+        'comment' => 'If false ignore this submission in all scoreboard calculations',
+        'default' => 1,
+    ])]
     #[Serializer\Exclude]
     private bool $valid = true;
 
     #[ORM\Column(
-        name: 'expected_results',
         type: 'json',
-        length: Constants::LENGTH_LIMIT_TINYTEXT,
+        length: AbstractMySQLPlatform::LENGTH_LIMIT_TINYTEXT,
         nullable: true,
         options: ['comment' => 'JSON encoded list of expected results - used to validate jury submissions']
     )]
@@ -98,9 +83,6 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
     private ?array $expected_results;
 
     #[ORM\Column(
-        name: 'entry_point',
-        type: 'string',
-        length: Constants::LENGTH_LIMIT_TINYTEXT,
         nullable: true,
         options: ['comment' => 'Optional entry point. Can be used e.g. for java main class.']
     )]
@@ -108,34 +90,34 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
     #[Serializer\Expose(if: "context.getAttribute('domjudge_service').checkrole('jury')")]
     private ?string $entry_point = null;
 
-    #[ORM\ManyToOne(targetEntity: Contest::class, inversedBy: 'submissions')]
+    #[ORM\ManyToOne(inversedBy: 'submissions')]
     #[ORM\JoinColumn(name: 'cid', referencedColumnName: 'cid', onDelete: 'CASCADE')]
     #[Serializer\Exclude]
     private Contest $contest;
 
-    #[ORM\ManyToOne(targetEntity: Language::class, inversedBy: 'submissions')]
+    #[ORM\ManyToOne(inversedBy: 'submissions')]
     #[ORM\JoinColumn(name: 'langid', referencedColumnName: 'langid', onDelete: 'CASCADE')]
     #[Serializer\Exclude]
     private Language $language;
 
-    #[ORM\ManyToOne(targetEntity: Team::class, inversedBy: 'submissions')]
+    #[ORM\ManyToOne(inversedBy: 'submissions')]
     #[ORM\JoinColumn(name: 'teamid', referencedColumnName: 'teamid', onDelete: 'CASCADE')]
     #[Serializer\Exclude]
     private Team $team;
 
-    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'submissions')]
+    #[ORM\ManyToOne(inversedBy: 'submissions')]
     #[ORM\JoinColumn(name: 'userid', referencedColumnName: 'userid', onDelete: 'CASCADE')]
     #[Serializer\Exclude]
     private ?User $user = null;
 
-    #[ORM\ManyToOne(targetEntity: Problem::class, inversedBy: 'submissions')]
+    #[ORM\ManyToOne(inversedBy: 'submissions')]
     #[ORM\JoinColumn(name: 'probid', referencedColumnName: 'probid', onDelete: 'CASCADE')]
     #[Serializer\Exclude]
     private Problem $problem;
 
     #[ORM\JoinColumn(name: 'cid', referencedColumnName: 'cid', onDelete: 'CASCADE')]
     #[ORM\JoinColumn(name: 'probid', referencedColumnName: 'probid', onDelete: 'CASCADE')]
-    #[ORM\ManyToOne(targetEntity: ContestProblem::class, inversedBy: 'submissions')]
+    #[ORM\ManyToOne(inversedBy: 'submissions')]
     #[Serializer\Exclude]
     private ContestProblem $contest_problem;
 
@@ -158,12 +140,12 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
     /**
      * rejudgings have one parent judging
      */
-    #[ORM\ManyToOne(targetEntity: Rejudging::class, inversedBy: 'submissions')]
+    #[ORM\ManyToOne(inversedBy: 'submissions')]
     #[ORM\JoinColumn(name: 'rejudgingid', referencedColumnName: 'rejudgingid', onDelete: 'SET NULL')]
     #[Serializer\Exclude]
     private ?Rejudging $rejudging = null;
 
-    #[ORM\ManyToOne(targetEntity: Submission::class, inversedBy: 'resubmissions')]
+    #[ORM\ManyToOne(inversedBy: 'resubmissions')]
     #[ORM\JoinColumn(name: 'origsubmitid', referencedColumnName: 'submitid', onDelete: 'SET NULL')]
     #[Serializer\Exclude]
     private ?Submission $originalSubmission = null;

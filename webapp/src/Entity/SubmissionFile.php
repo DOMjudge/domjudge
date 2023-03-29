@@ -2,19 +2,16 @@
 
 namespace App\Entity;
 
-use App\Doctrine\Constants;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
  * Files associated to a submission.
  */
-#[ORM\Table(
-    name: 'submission_file',
-    options: [
-        'collation' => 'utf8mb4_unicode_ci',
-        'charset' => 'utf8mb4',
-        'comment' => 'Files associated to a submission',
-    ])]
+#[ORM\Table(options: [
+    'collation' => 'utf8mb4_unicode_ci',
+    'charset' => 'utf8mb4',
+    'comment' => 'Files associated to a submission',
+])]
 #[ORM\Index(columns: ['submitid'], name: 'submitid')]
 #[ORM\UniqueConstraint(name: 'rankindex', columns: ['submitid', 'ranknumber'])]
 #[ORM\UniqueConstraint(name: 'filename', columns: ['submitid', 'filename'], options: ['lengths' => [null, 190]])]
@@ -22,44 +19,24 @@ use Doctrine\ORM\Mapping as ORM;
 class SubmissionFile
 {
     #[ORM\Id]
-    #[ORM\GeneratedValue(strategy: 'AUTO')]
-    #[ORM\Column(
-        name: 'submitfileid',
-        type: 'integer',
-        length: 4,
-        nullable: false,
-        options: ['comment' => 'Submission file ID', 'unsigned' => true]
-    )]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(options: ['comment' => 'Submission file ID', 'unsigned' => true])]
     private int $submitfileid;
 
-    #[ORM\Column(
-        name: 'filename',
-        type: 'string',
-        length: Constants::LENGTH_LIMIT_TINYTEXT,
-        nullable: false,
-        options: ['comment' => 'Filename as submitted']
-    )]
+    #[ORM\Column(options: ['comment' => 'Filename as submitted'])]
     private string $filename;
 
-    #[ORM\Column(
-        name: 'ranknumber',
-        type: 'integer',
-        nullable: false,
-        options: ['comment' => 'Order of the submission files, zero-indexed', 'unsigned' => true]
-    )]
+    #[ORM\Column(options: [
+        'comment' => 'Order of the submission files, zero-indexed',
+        'unsigned' => true,
+    ])]
     private int $ranknumber;
 
-    #[ORM\ManyToOne(targetEntity: Submission::class, inversedBy: 'files')]
+    #[ORM\ManyToOne(inversedBy: 'files')]
     #[ORM\JoinColumn(name: 'submitid', referencedColumnName: 'submitid', onDelete: 'CASCADE')]
     private Submission $submission;
 
-    #[ORM\Column(
-        name: 'sourcecode',
-        type: 'blobtext',
-        length: Constants::LENGTH_LIMIT_LONGTEXT,
-        nullable: false,
-        options: ['comment' => 'Full source code']
-    )]
+    #[ORM\Column(type: 'blobtext', options: ['comment' => 'Full source code'])]
     private string $sourcecode;
 
     public function getSubmitfileid(): int

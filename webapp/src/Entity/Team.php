@@ -3,7 +3,6 @@
 namespace App\Entity;
 
 use App\Controller\API\AbstractRestController;
-use App\Doctrine\Constants;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -19,10 +18,7 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
  *
  * @UniqueEntity("externalid")
  */
-#[ORM\Table(
-    name: 'team',
-    options: ['collation' => 'utf8mb4_unicode_ci', 'charset' => 'utf8mb4']
-)]
+#[ORM\Table(options: ['collation' => 'utf8mb4_unicode_ci', 'charset' => 'utf8mb4'])]
 #[ORM\Index(columns: ['affilid'], name: 'affilid')]
 #[ORM\Index(columns: ['categoryid'], name: 'categoryid')]
 #[ORM\UniqueConstraint(name: 'externalid', columns: ['externalid'], options: ['lengths' => [190]])]
@@ -34,22 +30,13 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
     final public const ADD_EXISTING_USER = 'add-existing-user';
 
     #[ORM\Id]
-    #[ORM\GeneratedValue(strategy: 'AUTO')]
-    #[ORM\Column(
-        name: 'teamid',
-        type: 'integer',
-        length: 4,
-        nullable: false,
-        options: ['comment' => 'Team ID', 'unsigned' => true]
-    )]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(options: ['comment' => 'Team ID', 'unsigned' => true])]
     #[Serializer\SerializedName('id')]
     #[Serializer\Type('string')]
     protected ?int $teamid = null;
 
     #[ORM\Column(
-        name: 'externalid',
-        type: 'string',
-        length: Constants::LENGTH_LIMIT_TINYTEXT,
         nullable: true,
         options: ['comment' => 'Team ID in an external system', 'collation' => 'utf8mb4_bin']
     )]
@@ -57,9 +44,6 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
     protected ?string $externalid = null;
 
     #[ORM\Column(
-        name: 'icpcid',
-        type: 'string',
-        length: Constants::LENGTH_LIMIT_TINYTEXT,
         nullable: true,
         options: ['comment' => 'Team ID in the ICPC system', 'collation' => 'utf8mb4_bin']
     )]
@@ -67,38 +51,26 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
     #[Serializer\SerializedName('icpc_id')]
     protected ?string $icpcid = null;
 
-    #[ORM\Column(
-        name: 'name',
-        type: 'string',
-        length: Constants::LENGTH_LIMIT_TINYTEXT,
-        nullable: false,
-        options: ['comment' => 'Team name', 'collation' => 'utf8mb4_bin']
-    )]
+    #[ORM\Column(options: ['comment' => 'Team name', 'collation' => 'utf8mb4_bin'])]
     private string $name = '';
 
     #[ORM\Column(
-        name: 'display_name',
-        type: 'string',
-        length: Constants::LENGTH_LIMIT_TINYTEXT,
         nullable: true,
         options: ['comment' => 'Team display name', 'collation' => 'utf8mb4_bin']
     )]
     #[OA\Property(nullable: true)]
     private ?string $display_name = null;
 
-    #[ORM\Column(
-        name: 'enabled',
-        type: 'boolean',
-        nullable: false,
-        options: ['comment' => 'Whether the team is visible and operational', 'default' => 1]
-    )]
+    #[ORM\Column(options: [
+        'comment' => 'Whether the team is visible and operational',
+        'default' => 1,
+    ])]
     #[Serializer\Exclude]
     private bool $enabled = true;
 
     #[ORM\Column(
         name: 'publicdescription',
         type: 'text',
-        length: Constants::LENGTH_LIMIT_LONGTEXT,
         nullable: true,
         options: ['comment' => 'Public team definition; for example: Team member names (freeform)']
     )]
@@ -106,20 +78,13 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
     #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
     private ?string $publicDescription = null;
 
-    #[ORM\Column(
-        name: 'room',
-        type: 'string',
-        length: Constants::LENGTH_LIMIT_TINYTEXT,
-        nullable: true,
-        options: ['comment' => 'Physical location of team']
-    )]
+    #[ORM\Column(nullable: true, options: ['comment' => 'Physical location of team'])]
     #[Serializer\Exclude]
     private ?string $room = null;
 
     #[ORM\Column(
         name: 'internalcomments',
         type: 'text',
-        length: Constants::LENGTH_LIMIT_LONGTEXT,
         nullable: true,
         options: ['comment' => 'Internal comments about this team (jury only)']
     )]
@@ -127,7 +92,6 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
     private ?string $internalComments = null;
 
     #[ORM\Column(
-        name: 'judging_last_started',
         type: 'decimal',
         precision: 32,
         scale: 9,
@@ -137,12 +101,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
     #[Serializer\Exclude]
     private string|float|null $judging_last_started = null;
 
-    #[ORM\Column(
-        name: 'penalty',
-        type: 'integer',
-        nullable: false,
-        options: ['comment' => 'Additional penalty time in minutes', 'default' => 0]
-    )]
+    #[ORM\Column(options: ['comment' => 'Additional penalty time in minutes', 'default' => 0])]
     #[Serializer\Exclude]
     private int $penalty = 0;
 
@@ -167,12 +126,12 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
     #[Serializer\Exclude]
     private bool $clearPhoto = false;
 
-    #[ORM\ManyToOne(targetEntity: TeamAffiliation::class, inversedBy: 'teams')]
+    #[ORM\ManyToOne(inversedBy: 'teams')]
     #[ORM\JoinColumn(name: 'affilid', referencedColumnName: 'affilid', onDelete: 'SET NULL')]
     #[Serializer\Exclude]
     private ?TeamAffiliation $affiliation = null;
 
-    #[ORM\ManyToOne(targetEntity: TeamCategory::class, inversedBy: 'teams')]
+    #[ORM\ManyToOne(inversedBy: 'teams')]
     #[ORM\JoinColumn(name: 'categoryid', referencedColumnName: 'categoryid', onDelete: 'CASCADE')]
     #[Serializer\Exclude]
     private ?TeamCategory $category = null;

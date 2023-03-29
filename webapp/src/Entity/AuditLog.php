@@ -2,7 +2,6 @@
 
 namespace App\Entity;
 
-use App\Doctrine\Constants;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -20,74 +19,47 @@ use Doctrine\ORM\Mapping as ORM;
 class AuditLog
 {
     #[ORM\Id]
-    #[ORM\GeneratedValue(strategy: 'AUTO')]
-    #[ORM\Column(
-        name: 'logid',
-        type: 'integer',
-        length: 4, nullable: false,
-        options: ['comment' => 'Audit log ID', 'unsigned' => true]
-    )]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(options: ['comment' => 'Audit log ID', 'unsigned' => true])]
     private ?int $logid = null;
 
     #[ORM\Column(
-        name: 'logtime',
         type: 'decimal',
         precision: 32,
         scale: 9,
-        nullable: false,
         options: ['comment' => 'Timestamp of the logentry', 'unsigned' => true]
     )]
     private string|float $logtime;
 
     #[ORM\Column(
-        name: 'cid',
-        type: 'integer',
-        length: 4,
         nullable: true,
         options: ['comment' => 'Contest ID associated to this entry', 'unsigned' => true]
     )]
     private ?int $cid = null;
 
     #[ORM\Column(
-        name: 'user',
-        type: 'string',
-        length: Constants::LENGTH_LIMIT_TINYTEXT,
         nullable: true,
         options: ['comment' => 'User who performed this action']
     )]
     private ?string $user = null;
 
     #[ORM\Column(
-        name: 'datatype',
-        type: 'string',
         length: 32,
-        nullable: false,
         options: ['comment' => 'Reference to DB table associated to this entry']
     )]
     private string $datatype;
 
     #[ORM\Column(
-        name: 'dataid',
-        type: 'string',
         length: 64,
         nullable: true,
         options: ['comment' => 'Identifier in reference table']
     )]
     private ?string $dataid = null;
 
-    #[ORM\Column(
-        name: 'action',
-        type: 'string',
-        length: 128,
-        nullable: false,
-        options: ['comment' => 'Description of action performed']
-    )]
+    #[ORM\Column(length: 128, options: ['comment' => 'Description of action performed'])]
     private string $action;
 
     #[ORM\Column(
-        name: 'extrainfo',
-        type: 'string',
-        length: Constants::LENGTH_LIMIT_TINYTEXT,
         nullable: true,
         options: ['comment' => 'Optional additional description of the entry']
     )]

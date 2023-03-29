@@ -11,21 +11,18 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * Hostnames of the autojudgers.
  */
-#[ORM\Table(
-    name: 'judgehost',
-    options: [
-        'collation' => 'utf8mb4_unicode_ci',
-        'charset' => 'utf8mb4',
-        'comment' => 'Hostnames of the autojudgers',
-    ]
-)]
+#[ORM\Table(options: [
+    'collation' => 'utf8mb4_unicode_ci',
+    'charset' => 'utf8mb4',
+    'comment' => 'Hostnames of the autojudgers',
+])]
 #[ORM\UniqueConstraint(name: 'hostname', columns: ['hostname'])]
 #[ORM\Entity]
 class Judgehost
 {
     #[ORM\Id]
-    #[ORM\GeneratedValue(strategy: 'AUTO')]
-    #[ORM\Column(name: 'judgehostid', type: 'integer', length: 4, nullable: false, options: ['comment' => 'Judgehost ID', 'unsigned' => true])]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(options: ['comment' => 'Judgehost ID', 'unsigned' => true])]
     #[Serializer\SerializedName('id')]
     #[Serializer\Type('string')]
     private int $judgehostid;
@@ -33,26 +30,14 @@ class Judgehost
     /**
      * @Assert\Regex("/^[A-Za-z0-9_\-.]*$/", message="Invalid hostname. Only characters in [A-Za-z0-9_\-.] are allowed.")
      */
-    #[ORM\Column(
-        name: 'hostname',
-        type: 'string',
-        length: 64,
-        nullable: false,
-        options: ['comment' => 'Resolvable hostname of judgehost']
-    )]
+    #[ORM\Column(length: 64, options: ['comment' => 'Resolvable hostname of judgehost'])]
     private string $hostname;
 
-    #[ORM\Column(
-        name: 'enabled',
-        type: 'boolean',
-        nullable: false,
-        options: ['comment' => 'Should this host take on judgings?', 'default' => 1]
-    )]
+    #[ORM\Column(options: ['comment' => 'Should this host take on judgings?', 'default' => 1])]
     private bool $enabled = true;
 
     #[OA\Property(nullable: true)]
     #[ORM\Column(
-        name: 'polltime',
         type: 'decimal',
         precision: 32,
         scale: 9,
@@ -65,12 +50,7 @@ class Judgehost
     #[Serializer\Exclude]
     private Collection $judgetasks;
 
-    #[ORM\Column(
-        name: 'hidden',
-        type: 'boolean',
-        nullable: false,
-        options: ['comment' => 'Should this host be hidden in the overview?', 'default' => 0]
-    )]
+    #[ORM\Column(options: ['comment' => 'Should this host be hidden in the overview?', 'default' => 0])]
     private bool $hidden = false;
 
     public function __construct()

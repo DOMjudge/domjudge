@@ -13,31 +13,22 @@ use RuntimeException;
  *
  * Note: this class should have no setters, since its data is immutable.
  */
-#[ORM\Table(
-    name: 'immutable_executable',
-    options: [
-        'collation' => 'utf8mb4_unicode_ci',
-        'charset' => 'utf8mb4',
-        'comment' => 'Immutable wrapper for a collection of files for executable bundles.',
-    ]
-)]
+#[ORM\Table(options: [
+    'collation' => 'utf8mb4_unicode_ci',
+    'charset' => 'utf8mb4',
+    'comment' => 'Immutable wrapper for a collection of files for executable bundles.',
+])]
 #[ORM\Entity]
 #[ORM\HasLifecycleCallbacks]
 class ImmutableExecutable
 {
     #[ORM\Id]
-    #[ORM\GeneratedValue(strategy: 'AUTO')]
-    #[ORM\Column(
-        name: 'immutable_execid',
-        type: 'integer',
-        length: 4,
-        nullable: false,
-        options: ['comment' => 'ID', 'unsigned' => true]
-    )]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(options: ['comment' => 'ID', 'unsigned' => true])]
     private int $immutable_execid;
 
     // TODO: Add more metadata like a link to parent and timestamp
-    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\ManyToOne]
     #[ORM\JoinColumn(name: 'userid', referencedColumnName: 'userid', onDelete: 'SET NULL')]
     #[Serializer\Exclude]
     private ?User $user = null;
@@ -47,13 +38,7 @@ class ImmutableExecutable
     #[Serializer\Exclude]
     private ?Collection $files;
 
-    #[ORM\Column(
-        name: 'hash',
-        type: 'string',
-        length: 32,
-        nullable: true,
-        options: ['comment' => 'hash of the files']
-    )]
+    #[ORM\Column(length: 32, nullable: true, options: ['comment' => 'hash of the files'])]
     private ?string $hash;
 
     /**

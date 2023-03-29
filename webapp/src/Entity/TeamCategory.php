@@ -2,7 +2,6 @@
 namespace App\Entity;
 
 use App\Controller\API\AbstractRestController;
-use App\Doctrine\Constants;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -17,13 +16,11 @@ use Symfony\Component\Validator\Constraints as Assert;
  *
  * @UniqueEntity("externalid")
  */
-#[ORM\Table(
-    name: 'team_category',
-    options: [
-        'collation' => 'utf8mb4_unicode_ci',
-        'charset' => 'utf8mb4',
-        'comment' => 'Categories for teams (e.g.: participants, observers, ...)',
-    ])]
+#[ORM\Table(options: [
+    'collation' => 'utf8mb4_unicode_ci',
+    'charset' => 'utf8mb4',
+    'comment' => 'Categories for teams (e.g.: participants, observers, ...)',
+])]
 #[ORM\Index(columns: ['sortorder'], name: 'sortorder')]
 #[ORM\UniqueConstraint(name: 'externalid', columns: ['externalid'], options: ['lengths' => [190]])]
 #[ORM\Entity]
@@ -35,22 +32,13 @@ use Symfony\Component\Validator\Constraints as Assert;
 class TeamCategory extends BaseApiEntity implements Stringable
 {
     #[ORM\Id]
-    #[ORM\GeneratedValue(strategy: 'AUTO')]
-    #[ORM\Column(
-        name: 'categoryid',
-        type: 'integer',
-        length: 4,
-        nullable: false,
-        options: ['comment' => 'Team category ID', 'unsigned' => true]
-    )]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(options: ['comment' => 'Team category ID', 'unsigned' => true])]
     #[Serializer\SerializedName('id')]
     #[Serializer\Type('string')]
     protected ?int $categoryid = null;
 
     #[ORM\Column(
-        name: 'externalid',
-        type: 'string',
-        length: Constants::LENGTH_LIMIT_TINYTEXT,
         nullable: true,
         options: ['comment' => 'Team category ID in an external system', 'collation' => 'utf8mb4_bin']
     )]
@@ -58,9 +46,6 @@ class TeamCategory extends BaseApiEntity implements Stringable
     protected ?string $externalid = null;
 
     #[ORM\Column(
-        name: 'icpcid',
-        type: 'string',
-        length: Constants::LENGTH_LIMIT_TINYTEXT,
         nullable: true,
         options: ['comment' => 'External identifier from ICPC CMS', 'collation' => 'utf8mb4_bin']
     )]
@@ -71,30 +56,20 @@ class TeamCategory extends BaseApiEntity implements Stringable
     /**
      * @Assert\NotBlank()
      */
-    #[ORM\Column(
-        name: 'name',
-        type: 'string',
-        length: Constants::LENGTH_LIMIT_TINYTEXT,
-        nullable: false,
-        options: ['comment' => 'Descriptive name']
-    )]
+    #[ORM\Column(options: ['comment' => 'Descriptive name'])]
     private string $name;
 
     /**
      * @Assert\GreaterThanOrEqual(0, message="Only non-negative sortorders are supported")
      */
     #[ORM\Column(
-        name: 'sortorder',
         type: 'tinyint',
-        nullable: false,
         options: ['comment' => 'Where to sort this category on the scoreboard', 'unsigned' => true, 'default' => 0]
     )]
     #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
     private int $sortorder = 0;
 
     #[ORM\Column(
-        name: 'color',
-        type: 'string',
         length: 32,
         nullable: true,
         options: ['comment' => 'Background colour on the scoreboard']
@@ -103,21 +78,14 @@ class TeamCategory extends BaseApiEntity implements Stringable
     #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
     private ?string $color = null;
 
-    #[ORM\Column(
-        name: 'visible',
-        type: 'boolean',
-        nullable: false,
-        options: ['comment' => 'Are teams in this category visible?', 'default' => 1]
-    )]
+    #[ORM\Column(options: ['comment' => 'Are teams in this category visible?', 'default' => 1])]
     #[Serializer\Exclude]
     private bool $visible = true;
 
-    #[ORM\Column(
-        name: 'allow_self_registration',
-        type: 'boolean',
-        nullable: false,
-        options: ['comment' => 'Are self-registered teams allowed to choose this category?', 'default' => 0]
-    )]
+    #[ORM\Column(options: [
+        'comment' => 'Are self-registered teams allowed to choose this category?',
+        'default' => 0,
+    ])]
     #[Serializer\Exclude]
     private bool $allow_self_registration = false;
 
