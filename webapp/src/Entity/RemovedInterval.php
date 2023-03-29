@@ -12,59 +12,81 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 /**
  * Time intervals removed from the contest for scoring.
- *
- * @ORM\Entity()
- * @ORM\Table(
- *     name="removed_interval",
- *     options={"collation"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Time intervals removed from the contest for scoring"},
- *     indexes={@ORM\Index(name="cid", columns={"cid"})})
  */
+#[ORM\Table(
+    name: 'removed_interval',
+    options: [
+        'collation' => 'utf8mb4_unicode_ci',
+        'charset' => 'utf8mb4',
+        'comment' => 'Time intervals removed from the contest for scoring',
+    ])]
+#[ORM\Index(columns: ['cid'], name: 'cid')]
+#[ORM\Entity]
 class RemovedInterval
 {
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     * @ORM\Column(type="integer", name="intervalid", length=4,
-     *     options={"comment"="Removed interval ID","unsigned"=true}, nullable=false)
-     */
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
+    #[ORM\Column(
+        name: 'intervalid',
+        type: 'integer',
+        length: 4,
+        nullable: false,
+        options: ['comment' => 'Removed interval ID', 'unsigned' => true]
+    )]
     private ?int $intervalid = null;
 
     /**
      * @var double|string
-     * @ORM\Column(type="decimal", precision=32, scale=9, name="starttime",
-     *     options={"comment"="Initial time of removed interval", "unsigned"=true},
-     *     nullable=false)
      */
-    private $starttime;
+    #[ORM\Column(
+        name: 'starttime',
+        type: 'decimal',
+        precision: 32,
+        scale: 9,
+        nullable: false,
+        options: ['comment' => 'Initial time of removed interval', 'unsigned' => true]
+    )]
+    private string|float $starttime;
 
     /**
      * @var double|string
-     * @ORM\Column(type="decimal", precision=32, scale=9, name="endtime",
-     *     options={"comment"="Final time of removed interval", "unsigned"=true},
-     *     nullable=false)
      */
-    private $endtime;
+    #[ORM\Column(
+        name: 'endtime',
+        type: 'decimal',
+        precision: 32,
+        scale: 9,
+        nullable: false,
+        options: ['comment' => 'Final time of removed interval', 'unsigned' => true]
+    )]
+    private string|float $endtime;
 
     /**
-     * @ORM\Column(type="string", length=64, name="starttime_string",
-     *     options={"comment"="Authoritative (absolute only) string representation of starttime"},
-     *     nullable=false)
      * @TimeString(allowRelative=false)
      */
+    #[ORM\Column(
+        name: 'starttime_string',
+        type: 'string',
+        length: 64,
+        nullable: false,
+        options: ['comment' => 'Authoritative (absolute only) string representation of starttime']
+    )]
     private string $starttimeString;
 
     /**
-     * @ORM\Column(type="string", length=64, name="endtime_string",
-     *     options={"comment"="Authoritative (absolute only) string representation of endtime"},
-     *     nullable=false)
      * @TimeString(allowRelative=false)
      */
+    #[ORM\Column(
+        name: 'endtime_string',
+        type: 'string',
+        length: 64,
+        nullable: false,
+        options: ['comment' => 'Authoritative (absolute only) string representation of endtime']
+    )]
     private string $endtimeString;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="Contest", inversedBy="removedIntervals")
-     * @ORM\JoinColumn(name="cid", referencedColumnName="cid", onDelete="CASCADE")
-     */
+    #[ORM\ManyToOne(targetEntity: Contest::class, inversedBy: 'removedIntervals')]
+    #[ORM\JoinColumn(name: 'cid', referencedColumnName: 'cid', onDelete: 'CASCADE')]
     private Contest $contest;
 
     public function getIntervalid(): ?int

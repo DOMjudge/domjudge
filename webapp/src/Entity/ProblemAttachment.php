@@ -8,48 +8,54 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
-/**
- * @ORM\Entity()
- * @ORM\Table(
- *     name="problem_attachment",
- *     options={"collation"="utf8mb4_unicode_ci", "charset"="utf8mb4","comment"="Attachments belonging to problems"},
- *     indexes={
- *         @ORM\Index(name="name", columns={"attachmentid", "name"}, options={"lengths": {null, 190}})
- *     })
- */
+#[ORM\Table(
+    name: 'problem_attachment',
+    options: [
+        'collation' => 'utf8mb4_unicode_ci',
+        'charset' => 'utf8mb4',
+        'comment' => 'Attachments belonging to problems',
+    ])]
+#[ORM\Index(columns: ['attachmentid', 'name'], name: 'name', options: ['lengths' => [null, 190]])]
+#[ORM\Entity]
 class ProblemAttachment
 {
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer", options={"comment"="Attachment ID","unsigned"="true"})
-     */
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(
+        type: 'integer',
+        options: ['comment' => 'Attachment ID', 'unsigned' => true]
+    )]
     private ?int $attachmentid = null;
 
-    /**
-     * @ORM\Column(type="string", length=255, options={"comment"="Filename of attachment"})
-     */
+    #[ORM\Column(
+        type: 'string',
+        length: 255,
+        options: ['comment' => 'Filename of attachment']
+    )]
     private ?string $name = null;
 
-    /**
-     * @ORM\Column(type="string", length=4, options={"comment"="File type of attachment"})
-     */
+    #[ORM\Column(
+        type: 'string',
+        length: 4,
+        options: ['comment' => 'File type of attachment']
+    )]
     private ?string $type = null;
 
-    /**
-     * @ORM\ManyToOne(targetEntity=Problem::class, inversedBy="attachments")
-     * @ORM\JoinColumn(name="probid", referencedColumnName="probid", onDelete="CASCADE")
-     */
+    #[ORM\ManyToOne(targetEntity: Problem::class, inversedBy: 'attachments')]
+    #[ORM\JoinColumn(name: 'probid', referencedColumnName: 'probid', onDelete: 'CASCADE')]
     private ?Problem $problem = null;
 
     /**
      * We use a OneToMany instead of a OneToOne here, because otherwise this
      * relation will always be loaded. See the commit message of commit
      * 9e421f96691ec67ed62767fe465a6d8751edd884 for a more elaborate explanation
-     *
-     * @var ProblemAttachmentContent[]|ArrayCollection
-     * @ORM\OneToMany(targetEntity=ProblemAttachmentContent::class, mappedBy="attachment", cascade={"persist"}, orphanRemoval=true)
      */
+    #[ORM\OneToMany(
+        mappedBy: 'attachment',
+        targetEntity: ProblemAttachmentContent::class,
+        cascade: ['persist'],
+        orphanRemoval: true
+    )]
     private Collection $content;
 
     public function __construct()

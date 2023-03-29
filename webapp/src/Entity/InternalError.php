@@ -9,77 +9,85 @@ use JMS\Serializer\Annotation as Serializer;
 
 /**
  * Log of judgehost internal errors.
- *
- * @ORM\Entity()
- * @ORM\Table(
- *     name="internal_error",
- *     options={"collation"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Log of judgehost internal errors"},
- *     indexes={
- *         @ORM\Index(name="judgingid", columns={"judgingid"}),
- *         @ORM\Index(name="cid", columns={"cid"})
- *     })
  */
+#[ORM\Table(
+    name: 'internal_error',
+    options: [
+        'collation' => 'utf8mb4_unicode_ci',
+        'charset' => 'utf8mb4',
+        'comment' => 'Log of judgehost internal errors',
+    ]
+)]
+#[ORM\Index(columns: ['judgingid'], name: 'judgingid')]
+#[ORM\Index(columns: ['cid'], name: 'cid')]
+#[ORM\Entity]
 class InternalError
 {
-    /**
-     * @ORM\Id
-     * @ORM\Column(type="integer", name="errorid", length=4,
-     *     options={"comment"="Internal error ID","unsigned"=true},
-     *     nullable=false)
-     * @ORM\GeneratedValue(strategy="IDENTITY")
-     */
+    #[ORM\Id]
+    #[ORM\Column(
+        name: 'errorid',
+        type: 'integer',
+        length: 4,
+        nullable: false,
+        options: ['comment' => 'Internal error ID', 'unsigned' => true]
+    )]
+    #[ORM\GeneratedValue(strategy: 'IDENTITY')]
     private int $errorid;
 
-    /**
-     * @ORM\Column(type="string", length=255, name="description",
-     *     options={"comment"="Description of the error"},
-     *     nullable=false)
-     */
+    #[ORM\Column(
+        name: 'description',
+        type: 'string',
+        length: 255,
+        nullable: false,
+        options: ['comment' => 'Description of the error']
+    )]
     private string $description;
 
-    /**
-     * @ORM\Column(type="text", length=65535, name="judgehostlog",
-     *     options={"comment"="Last N lines of the judgehost log"},
-     *     nullable=false)
-     */
+    #[ORM\Column(
+        name: 'judgehostlog',
+        type: 'text',
+        length: 65535,
+        nullable: false,
+        options: ['comment' => 'Last N lines of the judgehost log']
+    )]
     private string $judgehostlog;
 
-    /**
-     * @ORM\Column(type="decimal", precision=32, scale=9, name="time",
-     *     options={"comment"="Timestamp of the internal error", "unsigned"=true},
-     *     nullable=false)
-     */
+    #[ORM\Column(
+        name: 'time',
+        type: 'decimal',
+        precision: 32,
+        scale: 9,
+        nullable: false,
+        options: ['comment' => 'Timestamp of the internal error', 'unsigned' => true]
+    )]
     private string|float $time;
 
-    /**
-     * @ORM\Column(type="json", length=65535, name="disabled",
-     *     options={"comment"="Disabled stuff, JSON-encoded"},
-     *     nullable=false)
-     */
+    #[ORM\Column(
+        name: 'disabled',
+        type: 'json',
+        length: 65535,
+        nullable: false,
+        options: ['comment' => 'Disabled stuff, JSON-encoded']
+    )]
     private array $disabled;
 
-    /**
-     * @ORM\Column(type="internal_error_status", name="status",
-     *     options={"comment"="Status of internal error","default"="open"},
-     *     nullable=false)
-     */
+    #[ORM\Column(
+        name: 'status',
+        type: 'internal_error_status',
+        nullable: false,
+        options: ['comment' => 'Status of internal error', 'default' => 'open']
+    )]
     private string $status = InternalErrorStatusType::STATUS_OPEN;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="Contest", inversedBy="internal_errors")
-     * @ORM\JoinColumn(name="cid", referencedColumnName="cid", onDelete="SET NULL")
-     */
+    #[ORM\ManyToOne(targetEntity: Contest::class, inversedBy: 'internal_errors')]
+    #[ORM\JoinColumn(name: 'cid', referencedColumnName: 'cid', onDelete: 'SET NULL')]
     private ?Contest $contest = null;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="Judging")
-     * @ORM\JoinColumn(name="judgingid", referencedColumnName="judgingid", onDelete="SET NULL")
-     */
+    #[ORM\ManyToOne(targetEntity: Judging::class)]
+    #[ORM\JoinColumn(name: 'judgingid', referencedColumnName: 'judgingid', onDelete: 'SET NULL')]
     private ?Judging $judging = null;
 
-    /**
-     * @ORM\OneToMany(targetEntity="Judging", mappedBy="internalError")
-     */
+    #[ORM\OneToMany(mappedBy: 'internalError', targetEntity: Judging::class)]
     #[Serializer\Exclude]
     private Collection $affectedJudgings;
 

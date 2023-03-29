@@ -14,15 +14,17 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * Affilitations for teams (e.g.: university, company).
  *
- * @ORM\Entity()
- * @ORM\Table(
- *     name="team_affiliation",
- *     options={"collation"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Affilitations for teams (e.g.: university, company)"},
- *     uniqueConstraints={
- *         @ORM\UniqueConstraint(name="externalid", columns={"externalid"}, options={"lengths": {190}}),
- *     })
  * @UniqueEntity("externalid")
  */
+#[ORM\Table(
+    name: 'team_affiliation',
+    options: [
+        'collation' => 'utf8mb4_unicode_ci',
+        'charset' => 'utf8mb4',
+        'comment' => 'Affilitations for teams (e.g.: university, company)',
+    ])]
+#[ORM\UniqueConstraint(name: 'externalid', columns: ['externalid'], options: ['lengths' => [190]])]
+#[ORM\Entity]
 #[Serializer\VirtualProperty(
     name: 'shortName',
     exp: 'object.getShortname()',
@@ -34,56 +36,70 @@ use Symfony\Component\Validator\Constraints as Assert;
 )]
 class TeamAffiliation extends BaseApiEntity implements AssetEntityInterface
 {
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     * @ORM\Column(type="integer", name="affilid", length=4,
-     *             options={"comment"="Team affiliation ID","unsigned"=true},
-     *     nullable=false)
-     */
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
+    #[ORM\Column(
+        name: 'affilid',
+        type: 'integer',
+        length: 4,
+        nullable: false,
+        options: ['comment' => 'Team affiliation ID', 'unsigned' => true]
+    )]
     #[Serializer\SerializedName('id')]
     #[Serializer\Type('string')]
     protected ?int $affilid = null;
 
-    /**
-     * @ORM\Column(type="string", name="externalid", length=255,
-     *     options={"comment"="Team affiliation ID in an external system",
-     *              "collation"="utf8mb4_bin"},
-     *     nullable=true)
-     */
+    #[ORM\Column(
+        name: 'externalid',
+        type: 'string',
+        length: 255,
+        nullable: true,
+        options: ['comment' => 'Team affiliation ID in an external system', 'collation' => 'utf8mb4_bin']
+    )]
     #[Serializer\Exclude]
     protected ?string $externalid = null;
 
-    /**
-     * @ORM\Column(type="string", name="icpcid", length=255,
-     *     options={"comment"="External identifier from ICPC CMS",
-     *              "collation"="utf8mb4_bin"},
-     *     nullable=true)
-     */
+    #[ORM\Column(
+        name: 'icpcid',
+        type: 'string',
+        length: 255,
+        nullable: true,
+        options: ['comment' => 'External identifier from ICPC CMS', 'collation' => 'utf8mb4_bin']
+    )]
     #[OA\Property(nullable: true)]
     #[Serializer\SerializedName('icpc_id')]
     protected ?string $icpcid = null;
 
-    /**
-     * @ORM\Column(type="string", name="shortname", length=32,
-     *     options={"comment"="Short descriptive name"}, nullable=false)
-     */
+    #[ORM\Column(
+        name: 'shortname',
+        type: 'string',
+        length: 32,
+        nullable: false,
+        options: ['comment' => 'Short descriptive name']
+    )]
     #[Serializer\SerializedName('name')]
     private string $shortname;
 
-    /**
-     * @ORM\Column(type="string", name="name", length=255,
-     *     options={"comment"="Descriptive name"}, nullable=false)
-     */
+    #[ORM\Column(
+        name: 'name',
+        type: 'string',
+        length: 255,
+        nullable: false,
+        options: ['comment' => 'Descriptive name']
+    )]
     #[Serializer\SerializedName('formal_name')]
     private string $name;
 
     /**
-     * @ORM\Column(type="string", length=3, name="country",
-     *     options={"comment"="ISO 3166-1 alpha-3 country code","fixed"=true},
-     *     nullable=true)
      * @Country()
      */
+    #[ORM\Column(
+        name: 'country',
+        type: 'string',
+        length: 3,
+        nullable: true,
+        options: ['comment' => 'ISO 3166-1 alpha-3 country code', 'fixed' => true]
+    )]
     #[OA\Property(nullable: true)]
     #[Serializer\Expose(if: "context.getAttribute('config_service').get('show_flags')")]
     private ?string $country = null;
@@ -97,17 +113,17 @@ class TeamAffiliation extends BaseApiEntity implements AssetEntityInterface
     #[Serializer\Exclude]
     private bool $clearLogo = false;
 
-    /**
-     * @ORM\Column(type="text", length=4294967295, name="internalcomments",
-     *     options={"comment"="Internal comments (jury only)"},
-     *     nullable=true)
-     */
+    #[ORM\Column(
+        name: 'internalcomments',
+        type: 'text',
+        length: 4294967295,
+        nullable: true,
+        options: ['comment' => 'Internal comments (jury only)']
+    )]
     #[Serializer\Exclude]
     private ?string $internalComments = null;
 
-    /**
-     * @ORM\OneToMany(targetEntity="Team", mappedBy="affiliation")
-     */
+    #[ORM\OneToMany(mappedBy: 'affiliation', targetEntity: Team::class)]
     #[Serializer\Exclude]
     private Collection $teams;
 

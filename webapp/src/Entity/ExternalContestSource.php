@@ -7,83 +7,94 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
+use App\Entity\ExternalSourceWarning;
 
-/**
- * @ORM\Entity()
- * @ORM\Table(
- *     name="external_contest_source",
- *     options={"collation"="utf8mb4_unicode_ci", "charset"="utf8mb4",
- *              "comment"="Sources for external contests"},
- *     uniqueConstraints={
- *         @ORM\UniqueConstraint(name="cid", columns={"cid"})
- *     })
- */
+#[ORM\Table(
+    name: 'external_contest_source',
+    options: [
+        'collation' => 'utf8mb4_unicode_ci',
+        'charset' => 'utf8mb4',
+        'comment' => 'Sources for external contests',
+    ]
+)]
+#[ORM\UniqueConstraint(name: 'cid', columns: ['cid'])]
+#[ORM\Entity]
 class ExternalContestSource
 {
     final public const TYPE_CCS_API         = 'ccs-api';
     final public const TYPE_CONTEST_PACKAGE = 'contest-archive';
 
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     * @ORM\Column(type="integer", name="extsourceid",
-     *     options={"comment"="External contest source ID", "unsigned"=true},
-     *     nullable=false, length=4)
-     */
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
+    #[ORM\Column(
+        name: 'extsourceid',
+        type: 'integer',
+        length: 4,
+        nullable: false,
+        options: ['comment' => 'External contest source ID', 'unsigned' => true]
+    )]
     private ?int $extsourceid = null;
 
-    /**
-     * @ORM\Column(type="string", name="type", length=255,
-     *     options={"comment"="Type of this contest source"},
-     *     nullable=false)
-     */
+    #[ORM\Column(
+        name: 'type',
+        type: 'string',
+        length: 255,
+        nullable: false,
+        options: ['comment' => 'Type of this contest source']
+    )]
     private string $type;
 
-    /**
-     * @ORM\Column(type="string", name="source", length=255,
-     *     options={"comment"="Source for this contest"},
-     *     nullable=false)
-     */
+    #[ORM\Column(
+        name: 'source',
+        type: 'string',
+        length: 255,
+        nullable: false,
+        options: ['comment' => 'Source for this contest']
+    )]
     private string $source;
 
-    /**
-     * @ORM\Column(type="string", name="username", length=255,
-     *     options={"comment"="Username for this source, if any"},
-     *     nullable=true)
-     */
+    #[ORM\Column(
+        name: 'username',
+        type: 'string',
+        length: 255,
+        nullable: true,
+        options: ['comment' => 'Username for this source, if any']
+    )]
     private ?string $username = null;
 
-    /**
-     * @ORM\Column(type="string", name="password", length=255,
-     *     options={"comment"="Password for this source, if any"},
-     *     nullable=true)
-     */
+    #[ORM\Column(
+        name: 'password',
+        type: 'string',
+        length: 255,
+        nullable: true,
+        options: ['comment' => 'Password for this source, if any']
+    )]
     private ?string $password = null;
 
-    /**
-     * @ORM\Column(type="string", name="last_event_id", length=255,
-     *     options={"comment"="Last encountered event ID, if any"},
-     *     nullable=true)
-     */
+    #[ORM\Column(
+        name: 'last_event_id',
+        type: 'string',
+        length: 255,
+        nullable: true,
+        options: ['comment' => 'Last encountered event ID, if any']
+    )]
     private ?string $lastEventId = null;
 
-    /**
-     * @ORM\Column(type="decimal", precision=32, scale=9, name="last_poll_time",
-     *     options={"comment"="Time of last poll by event feed reader",
-     *              "unsigned"=true},
-     *     nullable=true)
-     */
+    #[ORM\Column(
+        name: 'last_poll_time',
+        type: 'decimal',
+        precision: 32,
+        scale: 9,
+        nullable: true,
+        options: ['comment' => 'Time of last poll by event feed reader', 'unsigned' => true]
+    )]
     private ?float $lastPollTime = null;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="Contest", inversedBy="externalContestSources")
-     * @ORM\JoinColumn(name="cid", referencedColumnName="cid", onDelete="CASCADE")
-     */
+    #[ORM\ManyToOne(targetEntity: Contest::class, inversedBy: 'externalContestSources')]
+    #[ORM\JoinColumn(name: 'cid', referencedColumnName: 'cid', onDelete: 'CASCADE')]
     private Contest $contest;
 
-    /**
-     * @ORM\OneToMany(targetEntity="App\Entity\ExternalSourceWarning", mappedBy="externalContestSource")
-     */
+    #[ORM\OneToMany(mappedBy: 'externalContestSource', targetEntity: ExternalSourceWarning::class)]
     private Collection $warnings;
 
     public function __construct()
