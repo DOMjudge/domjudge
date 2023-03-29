@@ -25,12 +25,6 @@ use Symfony\Component\Routing\RouterInterface;
 use Twig\Environment;
 use ZipArchive;
 
-/**
- * Class PublicController
- *
- *
- * @package App\Controller
- */
 #[Route(path: '/public')]
 class PublicController extends BaseController
 {

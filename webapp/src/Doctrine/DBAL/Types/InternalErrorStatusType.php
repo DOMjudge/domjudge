@@ -6,10 +6,6 @@ use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Types\Type;
 use InvalidArgumentException;
 
-/**
- * Class InternalErrorStatusType
- * @package App\Doctrine\DBAL\Types
- */
 class InternalErrorStatusType extends Type
 {
     final public const ENUM_INTERNAL_ERROR_STATUS = 'internal_error_status';

@@ -30,13 +30,6 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-/**
- * Class ScoreboardService
- *
- * Service for scoreboard-related functions.
- *
- * @package App\Service
- */
 class ScoreboardService
 {
     public function __construct(

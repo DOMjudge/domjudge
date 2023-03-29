@@ -20,10 +20,6 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
-/**
- * Class CheckConfigService
- * @package App\Service
- */
 class CheckConfigService
 {
     protected readonly Stopwatch $stopwatch;

@@ -13,10 +13,6 @@ use JMS\Serializer\EventDispatcher\ObjectEvent;
 use JMS\Serializer\JsonSerializationVisitor;
 use JMS\Serializer\Metadata\StaticPropertyMetadata;
 
-/**
- * Class SetExternalIdVisitor
- * @package App\Serializer
- */
 class SetExternalIdVisitor implements EventSubscriberInterface
 {
     public function __construct(protected readonly EventLogService $eventLogService)

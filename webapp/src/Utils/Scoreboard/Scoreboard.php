@@ -12,13 +12,6 @@ use App\Utils\Utils;
 use Collator;
 use Exception;
 
-/**
- * Class Scoreboard
- *
- * This class represents the whole scoreboard.
- *
- * @package App\Utils\Scoreboard
- */
 class Scoreboard
 {
     protected readonly bool $restricted;

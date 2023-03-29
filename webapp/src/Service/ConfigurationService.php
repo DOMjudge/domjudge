@@ -15,18 +15,10 @@ use Symfony\Component\Config\ConfigCacheInterface;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Config\Resource\FileResource;
 
-/**
- * Class ConfigurationService
- *
- * @package App\Service
- */
 class ConfigurationService
 {
     protected ?array $dbConfigCache = null;
 
-    /**
-     * ConfigurationService constructor.
-     */
     public function __construct(
         protected readonly EntityManagerInterface $em,
         protected readonly LoggerInterface $logger,

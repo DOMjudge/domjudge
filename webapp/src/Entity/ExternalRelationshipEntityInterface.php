@@ -3,12 +3,8 @@
 namespace App\Entity;
 
 /**
- * Interface ExternalRelationshipEntityInterface
- *
  * For entities implementing this interface, the SetExternalIdVisitor class will replace IDs
  * with external IDs for related entities if applicable.
- *
- * @package App\Controller\API
  */
 interface ExternalRelationshipEntityInterface
 {

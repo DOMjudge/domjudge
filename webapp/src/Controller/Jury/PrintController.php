@@ -15,19 +15,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 
-/**
- * Class PrintController
- *
- *
- * @package App\Controller\Jury
- */
 #[Security("is_granted('ROLE_JURY') or is_granted('ROLE_BALLOON')")]
-/**
- * Class PrintController
- *
- *
- * @package App\Controller\Jury
- */
 #[Route(path: '/jury/print')]
 class PrintController extends BaseController
 {

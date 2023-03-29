@@ -23,26 +23,11 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\RouterInterface;
 
-/**
- * Class MiscController
- *
- *
- * @package App\Controller\Team
- */
 #[IsGranted('ROLE_TEAM')]
 #[Security('user.getTeam() !== null', message: 'You do not have a team associated with your account. ')]
-/**
- * Class MiscController
- *
- *
- * @package App\Controller\Team
- */
 #[Route(path: '/team')]
 class MiscController extends BaseController
 {
-    /**
-     * MiscController constructor.
-     */
     public function __construct(
         protected readonly DOMJudgeService $dj,
         protected readonly ConfigurationService $config,

@@ -13,11 +13,6 @@ use JMS\Serializer\EventDispatcher\ObjectEvent;
 use JMS\Serializer\JsonSerializationVisitor;
 use JMS\Serializer\Metadata\StaticPropertyMetadata;
 
-/**
- * Class ContestVisitor
- *
- * @package App\Serializer
- */
 class ContestVisitor implements EventSubscriberInterface
 {
     public function __construct(

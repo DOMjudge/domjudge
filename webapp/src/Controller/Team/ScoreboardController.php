@@ -14,20 +14,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-/**
- * Class ScoreboardController
- *
- *
- * @package App\Controller\Team
- */
 #[IsGranted('ROLE_TEAM')]
 #[Security('user.getTeam() !== null', message: 'You do not have a team associated with your account.')]
-/**
- * Class ScoreboardController
- *
- *
- * @package App\Controller\Team
- */
 #[Route(path: '/team')]
 class ScoreboardController extends BaseController
 {

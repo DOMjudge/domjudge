@@ -14,13 +14,6 @@ use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
 
-/**
- * Class StatisticsService
- *
- * Service to display statistics data.
- *
- * @package App\Service
- */
 class StatisticsService
 {
     final public const NUM_GROUPED_BINS = 20;

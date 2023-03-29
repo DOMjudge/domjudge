@@ -8,10 +8,6 @@ use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\HttpKernel\Profiler\Profiler;
 
-/**
- * Class ProfilerDisableListener
- * @package App\EventListener
- */
 class ProfilerDisableListener implements EventSubscriberInterface
 {
     public function __construct(

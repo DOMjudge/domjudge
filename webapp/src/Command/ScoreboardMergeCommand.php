@@ -35,10 +35,6 @@ use Twig\Error\RuntimeError;
 use Twig\Error\SyntaxError;
 use ZipArchive;
 
-/**
- * Class ScoreboardMergeCommand
- * @package App\Command
- */
 class ScoreboardMergeCommand extends Command
 {
     protected static $defaultName = 'scoreboard:merge';

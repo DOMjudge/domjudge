@@ -258,11 +258,6 @@ class JudgehostController extends BaseController
      * @throws NonUniqueResultException
      */
     #[IsGranted('ROLE_ADMIN')]
-    /**
-     * @throws DBALException
-     * @throws NoResultException
-     * @throws NonUniqueResultException
-     */
     #[Route(path: '/{judgehostid}/delete', name: 'jury_judgehost_delete')]
     public function deleteAction(Request $request, int $judgehostid): Response
     {

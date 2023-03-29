@@ -18,20 +18,8 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 
-/**
- * Class ProblemController
- *
- *
- * @package App\Controller\Team
- */
 #[IsGranted('ROLE_TEAM')]
 #[Security('user.getTeam() !== null', message: 'You do not have a team associated with your account.')]
-/**
- * Class ProblemController
- *
- *
- * @package App\Controller\Team
- */
 #[Route(path: '/team')]
 class ProblemController extends BaseController
 {
