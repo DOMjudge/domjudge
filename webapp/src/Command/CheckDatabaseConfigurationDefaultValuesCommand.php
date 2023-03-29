@@ -8,11 +8,6 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-/**
- * Class CheckDatabaseConfigurationDefaultValuesCommand
- *
- * @package App\Command
- */
 class CheckDatabaseConfigurationDefaultValuesCommand extends Command
 {
     protected static $defaultName = 'domjudge:db-config:check';

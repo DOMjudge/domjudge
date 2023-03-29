@@ -8,10 +8,6 @@ use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-/**
- * Class LoadGatlingDataCommand
- * @package App\Command
- */
 class LoadGatlingDataCommand extends Command
 {
     protected static $defaultName = 'domjudge:load-gatling-data';

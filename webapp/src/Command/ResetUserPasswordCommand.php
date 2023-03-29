@@ -12,11 +12,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
-/**
- * Class ResetUserPasswordCommand
- *
- * @package App\Command
- */
 class ResetUserPasswordCommand extends Command
 {
     protected static $defaultName = 'domjudge:reset-user-password';

@@ -28,10 +28,6 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 use ZipArchive;
 
-/**
- * Class SubmissionService
- * @package App\Service
- */
 class SubmissionService
 {
     final public const FILENAME_REGEX = '/^[a-zA-Z0-9][a-zA-Z0-9+_\.-]*$/';

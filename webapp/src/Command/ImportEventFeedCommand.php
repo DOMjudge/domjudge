@@ -24,10 +24,6 @@ use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 
-/**
- * Class ImportEventFeedCommand
- * @package App\Command
- */
 class ImportEventFeedCommand extends Command
 {
     protected static $defaultName = 'import:eventfeed';

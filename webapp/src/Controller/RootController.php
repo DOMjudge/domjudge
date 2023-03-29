@@ -7,12 +7,6 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
-/**
- * Class RootController
- *
- *
- * @package App\Controller
- */
 #[Route(path: '')]
 class RootController extends BaseController
 {

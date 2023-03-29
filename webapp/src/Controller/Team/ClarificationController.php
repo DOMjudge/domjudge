@@ -25,20 +25,8 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 
-/**
- * Class ClarificationController
- *
- *
- * @package App\Controller\Team
- */
 #[IsGranted('ROLE_TEAM')]
 #[Security('user.getTeam() !== null', message: 'You do not have a team associated with your account. ')]
-/**
- * Class ClarificationController
- *
- *
- * @package App\Controller\Team
- */
 #[Route(path: '/team')]
 class ClarificationController extends BaseController
 {

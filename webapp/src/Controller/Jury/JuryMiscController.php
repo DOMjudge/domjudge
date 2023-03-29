@@ -26,18 +26,9 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\RouterInterface;
 
-/**
- * Class JuryMiscController
- *
- *
- * @package App\Controller\Jury
- */
 #[Route(path: '/jury')]
 class JuryMiscController extends BaseController
 {
-    /**
-     * GeneralInfoController constructor.
-     */
     public function __construct(protected readonly EntityManagerInterface $em, protected readonly DOMJudgeService $dj)
     {
     }

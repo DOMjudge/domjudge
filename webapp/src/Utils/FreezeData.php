@@ -4,11 +4,6 @@ namespace App\Utils;
 
 use App\Entity\Contest;
 
-/**
- * Class FreezeData
- *
- * @package App\Utils
- */
 class FreezeData
 {
     final public const KEY_SHOW_FINAL = 'show-final';

@@ -10,11 +10,6 @@ use JMS\Serializer\JsonSerializationVisitor;
 use Symfony\Component\ErrorHandler\Exception\FlattenException;
 use Symfony\Component\HttpFoundation\Response;
 
-/**
- * Class FlattenExceptionHandler
- *
- * @package App\Controller\API
- */
 class FlattenExceptionHandler implements SubscribingHandlerInterface
 {
     public function __construct(private readonly ExceptionValueMap $messagesMap, private readonly bool $debug)

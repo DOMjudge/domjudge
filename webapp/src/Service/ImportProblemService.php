@@ -31,10 +31,6 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Yaml\Yaml;
 use ZipArchive;
 
-/**
- * Class ImportProblemService
- * @package App\Service
- */
 class ImportProblemService
 {
     public function __construct(

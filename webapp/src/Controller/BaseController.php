@@ -34,11 +34,7 @@ use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 use Symfony\Component\Routing\RouterInterface;
 
 /**
- * Class BaseController
- *
  * Base controller other controllers can inherit from to get shared functionality.
- *
- * @package App\Controller
  */
 abstract class BaseController extends AbstractController
 {

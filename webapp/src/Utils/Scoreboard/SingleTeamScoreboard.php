@@ -11,12 +11,8 @@ use App\Utils\FreezeData;
 use App\Utils\Utils;
 
 /**
- * Class SingleTeamScoreboard
- *
  * This class represents the scoreboard for a single team. It exists because
  * we can do some smart things to speed up calculating data for a single team.
- *
- * @package App\Utils\Scoreboard
  */
 class SingleTeamScoreboard extends Scoreboard
 {

@@ -22,10 +22,6 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Validator\ConstraintViolationInterface;
 use Symfony\Component\Validator\ConstraintViolationListInterface;
 
-/**
- * Class AbstractRestController
- * @package App\Controller\API
- */
 abstract class AbstractRestController extends AbstractFOSRestController
 {
     final public const GROUP_DEFAULT = 'Default';

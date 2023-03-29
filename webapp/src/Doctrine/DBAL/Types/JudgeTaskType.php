@@ -5,10 +5,6 @@ use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Types\Type;
 use InvalidArgumentException;
 
-/**
- * Class JudgeTaskType
- * @package App\Doctrine\DBAL\Types
- */
 class JudgeTaskType extends Type
 {
     final public const ENUM_JUDGE_TASK_TYPE = 'judge_task_type';

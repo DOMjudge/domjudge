@@ -24,18 +24,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 
-/**
- * Class SubmissionController
- *
- * @package App\Controller\Team
- */
 #[IsGranted('ROLE_TEAM')]
 #[Security('user.getTeam() !== null', message: 'You do not have a team associated with your account.')]
-/**
- * Class SubmissionController
- *
- * @package App\Controller\Team
- */
 #[Route(path: '/team')]
 class SubmissionController extends BaseController
 {
