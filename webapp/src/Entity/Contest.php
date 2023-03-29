@@ -3,7 +3,6 @@
 namespace App\Entity;
 
 use App\Controller\API\AbstractRestController;
-use App\Doctrine\Constants;
 use App\Utils\FreezeData;
 use App\Utils\Utils;
 use App\Validator\Constraints\Identifier;
@@ -11,6 +10,7 @@ use App\Validator\Constraints\TimeString;
 use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Platforms\AbstractMySQLPlatform;
 use Doctrine\ORM\Mapping as ORM;
 use Exception;
 use JMS\Serializer\Annotation as Serializer;
@@ -26,14 +26,11 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
  * @UniqueEntity("shortname")
  * @UniqueEntity("externalid")
  */
-#[ORM\Table(
-    name: 'contest',
-    options: [
-        'collation' => 'utf8mb4_unicode_ci',
-        'charset' => 'utf8mb4',
-        'comment' => 'Contests that will be run with this install',
-    ]
-)]
+#[ORM\Table(options: [
+    'collation' => 'utf8mb4_unicode_ci',
+    'charset' => 'utf8mb4',
+    'comment' => 'Contests that will be run with this install',
+])]
 #[ORM\Index(columns: ['cid', 'enabled'], name: 'cid')]
 #[ORM\UniqueConstraint(name: 'externalid', columns: ['externalid'], options: ['lengths' => [190]])]
 #[ORM\UniqueConstraint(name: 'shortname', columns: ['shortname'], options: ['lengths' => [190]])]
@@ -54,22 +51,13 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     final public const STARTTIME_UPDATE_MIN_SECONDS_BEFORE = 30;
 
     #[ORM\Id]
-    #[ORM\GeneratedValue(strategy: 'AUTO')]
-    #[ORM\Column(
-        name: 'cid',
-        type: 'integer',
-        length: 4,
-        nullable: false,
-        options: ['comment' => 'Contest ID', 'unsigned' => true]
-    )]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(options: ['comment' => 'Contest ID', 'unsigned' => true])]
     #[Serializer\SerializedName('id')]
     #[Serializer\Type('string')]
     protected ?int $cid = null;
 
     #[ORM\Column(
-        name: 'externalid',
-        type: 'string',
-        length: Constants::LENGTH_LIMIT_TINYTEXT,
         nullable: true,
         options: ['comment' => 'Contest ID in an external system', 'collation' => 'utf8mb4_bin']
     )]
@@ -80,62 +68,43 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     /**
      * @Assert\NotBlank()
      */
-    #[ORM\Column(
-        name: 'name',
-        type: 'string',
-        length: Constants::LENGTH_LIMIT_TINYTEXT,
-        nullable: false,
-        options: ['comment' => 'Descriptive name']
-    )]
+    #[ORM\Column(options: ['comment' => 'Descriptive name'])]
     private string $name = '';
 
     /**
      * @Identifier()
      * @Assert\NotBlank()
      */
-    #[ORM\Column(
-        name: 'shortname',
-        type: 'string',
-        length: Constants::LENGTH_LIMIT_TINYTEXT,
-        nullable: false,
-        options: ['comment' => 'Short name for this contest']
-    )]
+    #[ORM\Column(options: ['comment' => 'Short name for this contest'])]
     #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
     private string $shortname = '';
 
     #[ORM\Column(
-        name: 'activatetime',
         type: 'decimal',
         precision: 32,
         scale: 9,
-        nullable: false,
         options: ['comment' => 'Time contest becomes visible in team/public views', 'unsigned' => true]
     )]
     #[Serializer\Exclude]
     private string|float $activatetime;
 
     #[ORM\Column(
-        name: 'starttime',
         type: 'decimal',
         precision: 32,
         scale: 9,
-        nullable: false,
         options: ['comment' => 'Time contest starts, submissions accepted', 'unsigned' => true]
     )]
     #[Serializer\Exclude]
     private string|float|null $starttime = null;
 
-    #[ORM\Column(
-        name: 'starttime_enabled',
-        type: 'boolean',
-        nullable: false,
-        options: ['comment' => 'If disabled, starttime is not used, e.g. to delay contest start', 'default' => 1]
-    )]
+    #[ORM\Column(options: [
+        'comment' => 'If disabled, starttime is not used, e.g. to delay contest start',
+        'default' => 1,
+    ])]
     #[Serializer\Exclude]
     private bool $starttimeEnabled = true;
 
     #[ORM\Column(
-        name: 'freezetime',
         type: 'decimal',
         precision: 32,
         scale: 9,
@@ -146,18 +115,15 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     private string|float|null $freezetime = null;
 
     #[ORM\Column(
-        name: 'endtime',
         type: 'decimal',
         precision: 32,
         scale: 9,
-        nullable: false,
         options: ['comment' => 'Time after which no more submissions are accepted', 'unsigned' => true]
     )]
     #[Serializer\Exclude]
     private string|float $endtime;
 
     #[ORM\Column(
-        name: 'unfreezetime',
         type: 'decimal',
         precision: 32,
         scale: 9,
@@ -168,7 +134,6 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     private string|float|null $unfreezetime = null;
 
     #[ORM\Column(
-        name: 'finalizetime',
         type: 'decimal',
         precision: 32,
         scale: 9,
@@ -179,9 +144,8 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     private string|float|null $finalizetime = null;
 
     #[ORM\Column(
-        name: 'finalizecomment',
         type: 'text',
-        length: 65535,
+        length: AbstractMySQLPlatform::LENGTH_LIMIT_TEXT,
         nullable: true,
         options: ['comment' => 'Comments by the finalizer']
     )]
@@ -189,19 +153,13 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     private ?string $finalizecomment = null;
 
     #[ORM\Column(
-        name: 'b',
         type: 'smallint',
-        length: 3,
-        nullable: false,
         options: ['comment' => 'Number of extra bronze medals', 'unsigned' => true, 'default' => 0]
     )]
     #[Serializer\Exclude]
     private ?int $b = 0;
 
     #[ORM\Column(
-        name: 'medals_enabled',
-        type: 'boolean',
-        nullable: false,
         options: ['default' => 0]
     )]
     #[Serializer\Exclude]
@@ -215,37 +173,27 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     private Collection $medal_categories;
 
     #[ORM\Column(
-        name: 'gold_medals',
         type: 'smallint',
-        length: 3,
-        nullable: false,
         options: ['comment' => 'Number of gold medals', 'unsigned' => true, 'default' => 4]
     )]
     #[Serializer\Exclude]
     private int $goldMedals = 4;
 
     #[ORM\Column(
-        name: 'silver_medals',
         type: 'smallint',
-        length: 3,
-        nullable: false,
         options: ['comment' => 'Number of silver medals', 'unsigned' => true, 'default' => 4]
     )]
     #[Serializer\Exclude]
     private int $silverMedals = 4;
 
     #[ORM\Column(
-        name: 'bronze_medals',
         type: 'smallint',
-        length: 3,
-        nullable: false,
         options: ['comment' => 'Number of bronze medals', 'unsigned' => true, 'default' => 4]
     )]
     #[Serializer\Exclude]
     private int $bronzeMedals = 4;
 
     #[ORM\Column(
-        name: 'deactivatetime',
         type: 'decimal',
         precision: 32,
         scale: 9,
@@ -259,10 +207,7 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
      * @TimeString(relativeIsPositive=false)
      */
     #[ORM\Column(
-        name: 'activatetime_string',
-        type: 'string',
         length: 64,
-        nullable: false,
         options: ['comment' => 'Authoritative absolute or relative string representation of activatetime']
     )]
     #[Serializer\Exclude]
@@ -272,10 +217,7 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
      * @TimeString(allowRelative=false)
      */
     #[ORM\Column(
-        name: 'starttime_string',
-        type: 'string',
         length: 64,
-        nullable: false,
         options: ['comment' => 'Authoritative absolute (only!) string representation of starttime']
     )]
     #[Serializer\Exclude]
@@ -285,8 +227,6 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
      * @TimeString()
      */
     #[ORM\Column(
-        name: 'freezetime_string',
-        type: 'string',
         length: 64,
         nullable: true,
         options: ['comment' => 'Authoritative absolute or relative string representation of freezetime']
@@ -298,10 +238,7 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
      * @TimeString()
      */
     #[ORM\Column(
-        name: 'endtime_string',
-        type: 'string',
         length: 64,
-        nullable: false,
         options: ['comment' => 'Authoritative absolute or relative string representation of endtime']
     )]
     #[Serializer\Exclude]
@@ -311,8 +248,6 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
      * @TimeString()
      */
     #[ORM\Column(
-        name: 'unfreezetime_string',
-        type: 'string',
         length: 64,
         nullable: true,
         options: ['comment' => 'Authoritative absolute or relative string representation of unfreezetime']
@@ -324,8 +259,6 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
      * @TimeString()
      */
     #[ORM\Column(
-        name: 'deactivatetime_string',
-        type: 'string',
         length: 64,
         nullable: true,
         options: ['comment' => 'Authoritative absolute or relative string representation of deactivatetime']
@@ -334,45 +267,30 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     private ?string $deactivatetimeString = null;
 
     #[ORM\Column(
-        name: 'enabled',
-        type: 'boolean',
-        nullable: false,
         options: ['comment' => 'Whether this contest can be active', 'default' => 1]
     )]
     #[Serializer\Exclude]
     private bool $enabled = true;
 
     #[ORM\Column(
-        name: 'allow_submit',
-        type: 'boolean',
-        nullable: false,
         options: ['comment' => 'Are submissions accepted in this contest?', 'default' => 1]
     )]
     #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
     private bool $allowSubmit = true;
 
     #[ORM\Column(
-        name: 'process_balloons',
-        type: 'boolean',
-        nullable: false,
         options: ['comment' => 'Will balloons be processed for this contest?', 'default' => 1]
     )]
     #[Serializer\Exclude]
     private bool $processBalloons = true;
 
     #[ORM\Column(
-        name: 'runtime_as_score_tiebreaker',
-        type: 'boolean',
-        nullable: false,
         options: ['comment' => 'Is runtime used as tiebreaker instead of penalty?', 'default' => 0]
     )]
     #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
     private bool $runtime_as_score_tiebreaker = false;
 
     #[ORM\Column(
-        name: 'public',
-        type: 'boolean',
-        nullable: false,
         options: ['comment' => 'Is this contest visible for the public?', 'default' => 1]
     )]
     #[Serializer\Exclude]
@@ -388,18 +306,14 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     private bool $clearBanner = false;
 
     #[ORM\Column(
-        name: 'open_to_all_teams',
-        type: 'boolean',
-        nullable: false,
         options: ['comment' => 'Is this contest open to all teams?', 'default' => 1]
     )]
     #[Serializer\Exclude]
     private bool $openToAllTeams = true;
 
     #[ORM\Column(
-        name: 'warning_message',
         type: 'text',
-        length: 65535,
+        length: AbstractMySQLPlatform::LENGTH_LIMIT_TEXT,
         nullable: true,
         options: ['comment' => 'Warning message for this contest shown on the scoreboards']
     )]
@@ -408,9 +322,6 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     private ?string $warningMessage = null;
 
     #[ORM\Column(
-        name: 'is_locked',
-        type: 'boolean',
-        nullable: false,
         options: ['comment' => 'Is this contest locked for modifications?', 'default' => 0]
     )]
     #[Serializer\Exclude]

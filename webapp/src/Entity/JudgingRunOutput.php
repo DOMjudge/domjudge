@@ -2,20 +2,16 @@
 
 namespace App\Entity;
 
-use App\Doctrine\Constants;
 use Doctrine\ORM\Mapping as ORM;
-use App\Entity\JudgingRun;
 
 /**
  * Output of a judging run.
  */
-#[ORM\Table(
-    name: 'judging_run_output',
-    options: [
-        'collation' => 'utf8mb4_unicode_ci',
-        'charset' => 'utf8mb4',
-        'comment' => 'Stores output of judging run',
-    ])]
+#[ORM\Table(options: [
+    'collation' => 'utf8mb4_unicode_ci',
+    'charset' => 'utf8mb4',
+    'comment' => 'Stores output of judging run',
+])]
 #[ORM\Index(columns: ['runid'], name: 'runid')]
 #[ORM\Entity]
 class JudgingRunOutput
@@ -26,50 +22,40 @@ class JudgingRunOutput
      * 9e421f96691ec67ed62767fe465a6d8751edd884 for a more elaborate explanation
      */
     #[ORM\Id]
-    #[ORM\ManyToOne(targetEntity: JudgingRun::class, inversedBy: 'output')]
+    #[ORM\ManyToOne(inversedBy: 'output')]
     #[ORM\JoinColumn(name: 'runid', referencedColumnName: 'runid', onDelete: 'CASCADE')]
     private JudgingRun $run;
 
     #[ORM\Column(
-        name: 'output_run',
         type: 'blobtext',
-        length: Constants::LENGTH_LIMIT_LONGTEXT,
         nullable: true,
         options: ['comment' => 'Output of running the program']
     )]
     private ?string $output_run = null;
 
     #[ORM\Column(
-        name: 'output_diff',
         type: 'blobtext',
-        length: Constants::LENGTH_LIMIT_LONGTEXT,
         nullable: true,
         options: ['comment' => 'Diffing the program output and testcase output']
     )]
     private ?string $output_diff = null;
 
     #[ORM\Column(
-        name: 'output_error',
         type: 'blobtext',
-        length: Constants::LENGTH_LIMIT_LONGTEXT,
         nullable: true,
         options: ['comment' => 'Standard error output of the program']
     )]
     private ?string $output_error = null;
 
     #[ORM\Column(
-        name: 'output_system',
         type: 'blobtext',
-        length: Constants::LENGTH_LIMIT_LONGTEXT,
         nullable: true,
         options: ['comment' => 'Judging system output']
     )]
     private ?string $output_system = null;
 
     #[ORM\Column(
-        name: 'metadata',
         type: 'blobtext',
-        length: Constants::LENGTH_LIMIT_LONGTEXT,
         nullable: true,
         options: ['comment' => 'Judging metadata']
     )]

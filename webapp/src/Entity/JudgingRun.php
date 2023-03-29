@@ -10,13 +10,11 @@ use JMS\Serializer\Annotation as Serializer;
 /**
  * Result of a testcase run.
  */
-#[ORM\Table(
-    name: 'judging_run',
-    options: [
-        'collation' => 'utf8mb4_unicode_ci',
-        'charset' => 'utf8mb4',
-        'comment' => 'Result of a testcase run within a judging',
-    ])]
+#[ORM\Table(options: [
+    'collation' => 'utf8mb4_unicode_ci',
+    'charset' => 'utf8mb4',
+    'comment' => 'Result of a testcase run within a judging',
+])]
 #[ORM\Index(columns: ['judgingid'], name: 'judgingid')]
 #[ORM\Index(columns: ['testcaseid'], name: 'testcaseid_2')]
 #[ORM\UniqueConstraint(name: 'testcaseid', columns: ['judgingid', 'testcaseid'])]
@@ -24,22 +22,13 @@ use JMS\Serializer\Annotation as Serializer;
 class JudgingRun extends BaseApiEntity
 {
     #[ORM\Id]
-    #[ORM\GeneratedValue(strategy: 'AUTO')]
-    #[ORM\Column(
-        name: 'runid',
-        type: 'integer',
-        length: 4,
-        nullable: false,
-        options: ['comment' => 'Run ID', 'unsigned' => true]
-    )]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(options: ['comment' => 'Run ID', 'unsigned' => true])]
     #[Serializer\SerializedName('id')]
     #[Serializer\Type('string')]
     protected int $runid;
 
     #[ORM\Column(
-        name: 'judgetaskid',
-        type: 'integer',
-        length: 4,
         nullable: true,
         options: ['comment' => 'JudgeTask ID', 'unsigned' => true, 'default' => null]
     )]
@@ -47,8 +36,6 @@ class JudgingRun extends BaseApiEntity
     private ?int $judgetaskid = null;
 
     #[ORM\Column(
-        name: 'runresult',
-        type: 'string',
         length: 32,
         nullable: true,
         options: ['comment' => 'Result of this run, NULL if not finished yet']
@@ -57,8 +44,6 @@ class JudgingRun extends BaseApiEntity
     private ?string $runresult = null;
 
     #[ORM\Column(
-        name: 'runtime',
-        type: 'float',
         nullable: true,
         options: ['comment' => 'Submission running time on this testcase']
     )]
@@ -66,21 +51,22 @@ class JudgingRun extends BaseApiEntity
     private ?float $runtime = null;
 
     #[ORM\Column(
-        name: 'endtime',
         type: 'decimal',
         precision: 32,
-        scale: 9, nullable: true, options: ['comment' => 'Time run judging ended', 'unsigned' => true]
+        scale: 9,
+        nullable: true,
+        options: ['comment' => 'Time run judging ended', 'unsigned' => true]
     )]
     #[Serializer\Exclude]
     private string|float|null $endtime = null;
 
     #[Serializer\Exclude]
-    #[ORM\ManyToOne(targetEntity: Judging::class, inversedBy: 'runs')]
+    #[ORM\ManyToOne(inversedBy: 'runs')]
     #[ORM\JoinColumn(name: 'judgingid', referencedColumnName: 'judgingid', onDelete: 'CASCADE')]
     private Judging $judging;
 
     #[Serializer\Exclude]
-    #[ORM\ManyToOne(targetEntity: Testcase::class, inversedBy: 'judging_runs')]
+    #[ORM\ManyToOne(inversedBy: 'judging_runs')]
     #[ORM\JoinColumn(name: 'testcaseid', referencedColumnName: 'testcaseid')]
     private Testcase $testcase;
 
@@ -93,7 +79,7 @@ class JudgingRun extends BaseApiEntity
     #[Serializer\Exclude]
     private Collection $output;
 
-    #[ORM\ManyToOne(targetEntity: JudgeTask::class, inversedBy: 'judging_runs')]
+    #[ORM\ManyToOne(inversedBy: 'judging_runs')]
     #[ORM\JoinColumn(name: 'judgetaskid', referencedColumnName: 'judgetaskid')]
     #[Serializer\Exclude]
     private ?JudgeTask $judgetask = null;

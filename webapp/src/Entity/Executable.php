@@ -1,7 +1,6 @@
 <?php declare(strict_types=1);
 namespace App\Entity;
 
-use App\Doctrine\Constants;
 use App\Validator\Constraints\Identifier;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -13,14 +12,11 @@ use ZipArchive;
 /**
  * Compile, compare, and run script executable bundles.
  */
-#[ORM\Table(
-    name: 'executable',
-    options: [
-        'collation' => 'utf8mb4_unicode_ci',
-        'charset' => 'utf8mb4',
-        'comment' => 'Compile, compare, and run script executable bundles',
-    ]
-)]
+#[ORM\Table(options: [
+    'collation' => 'utf8mb4_unicode_ci',
+    'charset' => 'utf8mb4',
+    'comment' => 'Compile, compare, and run script executable bundles',
+])]
 #[ORM\Entity]
 class Executable
 {
@@ -29,37 +25,19 @@ class Executable
      * @Identifier()
      */
     #[ORM\Id]
-    #[ORM\Column(
-        name: 'execid',
-        type: 'string',
-        length: 32,
-        nullable: false,
-        options: ['comment' => 'Executable ID (string)']
-    )]
+    #[ORM\Column(length: 32, options: ['comment' => 'Executable ID (string)'])]
     private string $execid;
 
     /**
      * @Assert\NotBlank()
      */
-    #[ORM\Column(
-        name: 'description',
-        type: 'string',
-        length: Constants::LENGTH_LIMIT_TINYTEXT,
-        nullable: true,
-        options: ['comment' => 'Description of this executable']
-    )]
+    #[ORM\Column(nullable: true, options: ['comment' => 'Description of this executable'])]
     private ?string $description = null;
 
     /**
      * @Assert\Choice({"compare", "compile", "debug", "run"})
      */
-    #[ORM\Column(
-        name: 'type',
-        type: 'string',
-        length: 32,
-        nullable: false,
-        options: ['comment' => 'Type of executable']
-    )]
+    #[ORM\Column(length: 32, options: ['comment' => 'Type of executable'])]
     private string $type;
 
     #[ORM\OneToOne(targetEntity: ImmutableExecutable::class)]

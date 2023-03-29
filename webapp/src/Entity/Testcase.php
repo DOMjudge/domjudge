@@ -1,7 +1,6 @@
 <?php declare(strict_types=1);
 namespace App\Entity;
 
-use App\Doctrine\Constants;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -10,13 +9,11 @@ use JMS\Serializer\Annotation as Serializer;
 /**
  * Stores testcases per problem.
  */
-#[ORM\Table(
-    name: 'testcase',
-    options: [
-        'collation' => 'utf8mb4_unicode_ci',
-        'charset' => 'utf8mb4',
-        'comment' => 'Stores testcases per problem',
-    ])]
+#[ORM\Table(options: [
+    'collation' => 'utf8mb4_unicode_ci',
+    'charset' => 'utf8mb4',
+    'comment' => 'Stores testcases per problem',
+])]
 #[ORM\Index(columns: ['probid'], name: 'probid')]
 #[ORM\Index(columns: ['sample'], name: 'sample')]
 #[ORM\UniqueConstraint(name: 'rankindex', columns: ['probid', 'ranknumber'])]
@@ -30,19 +27,11 @@ class Testcase
     ];
 
     #[ORM\Id]
-    #[ORM\GeneratedValue(strategy: 'AUTO')]
-    #[ORM\Column(
-        name: 'testcaseid',
-        type: 'integer',
-        length: 4,
-        nullable: false,
-        options: ['comment' => 'Testcase ID', 'unsigned' => true]
-    )]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(options: ['comment' => 'Testcase ID', 'unsigned' => true])]
     private int $testcaseid;
 
     #[ORM\Column(
-        name: 'md5sum_input',
-        type: 'string',
         length: 32,
         nullable: true,
         options: ['comment' => 'Checksum of input data', 'fixed' => true]
@@ -50,42 +39,25 @@ class Testcase
     private ?string $md5sum_input = null;
 
     #[ORM\Column(
-        name: 'md5sum_output',
-        type: 'string',
         length: 32,
         nullable: true,
         options: ['comment' => 'Checksum of output data', 'fixed' => true]
     )]
     private ?string $md5sum_output = null;
 
-    #[ORM\Column(
-        name: '`ranknumber`',
-        type: 'integer',
-        length: 4,
-        nullable: false,
-        options: ['comment' => 'Determines order of the testcases in judging', 'unsigned' => true]
-    )]
+    #[ORM\Column(options: ['comment' => 'Determines order of the testcases in judging', 'unsigned' => true])]
     private int $ranknumber;
 
     /**
      * @var resource|null
      */
-    #[ORM\Column(
-        name: 'description',
-        type: 'blob',
-        length: Constants::LENGTH_LIMIT_LONGTEXT,
-        nullable: true,
-        options: ['comment' => 'Description of this testcase']
-    )]
+    #[ORM\Column(type: 'blob', nullable: true, options: ['comment' => 'Description of this testcase'])]
     #[Serializer\Exclude]
     private $description;
 
     private ?string $description_as_string = null;
 
     #[ORM\Column(
-        name: 'orig_input_filename',
-        type: 'string',
-        length: Constants::LENGTH_LIMIT_TINYTEXT,
         nullable: true,
         options: ['comment' => 'Original basename of the input file.', 'default' => null]
     )]
@@ -93,8 +65,6 @@ class Testcase
     private ?string $orig_input_filename = null;
 
     #[ORM\Column(
-        name: 'image_type',
-        type: 'string',
         length: 4,
         nullable: true,
         options: ['comment' => 'File type of the image and thumbnail']
@@ -102,21 +72,17 @@ class Testcase
     #[Serializer\Exclude]
     private ?string $image_type = null;
 
-    #[ORM\Column(
-        name: 'sample',
-        type: 'boolean',
-        nullable: false,
-        options: ['comment' => 'Sample testcases that can be shared with teams', 'default' => 0]
-    )]
+    #[ORM\Column(options: [
+        'comment' => 'Sample testcases that can be shared with teams',
+        'default' => 0,
+    ])]
     #[Serializer\Exclude]
     private bool $sample = false;
 
-    #[ORM\Column(
-        name: 'deleted',
-        type: 'boolean',
-        nullable: false,
-        options: ['comment' => 'Deleted testcases are kept for referential integrity.', 'default' => 0]
-    )]
+    #[ORM\Column(options: [
+        'comment' => 'Deleted testcases are kept for referential integrity.',
+        'default' => 0,
+    ])]
     #[Serializer\Exclude]
     private bool $deleted = false;
 
@@ -137,7 +103,7 @@ class Testcase
     #[Serializer\Exclude]
     private Collection $content;
 
-    #[ORM\ManyToOne(targetEntity: Problem::class, inversedBy: 'testcases')]
+    #[ORM\ManyToOne(inversedBy: 'testcases')]
     #[ORM\JoinColumn(name: 'probid', referencedColumnName: 'probid', onDelete: 'CASCADE')]
     #[Serializer\Exclude]
     private ?Problem $problem = null;

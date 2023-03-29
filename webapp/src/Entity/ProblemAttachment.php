@@ -2,47 +2,33 @@
 
 namespace App\Entity;
 
-use App\Doctrine\Constants;
 use App\Utils\Utils;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
-#[ORM\Table(
-    name: 'problem_attachment',
-    options: [
-        'collation' => 'utf8mb4_unicode_ci',
-        'charset' => 'utf8mb4',
-        'comment' => 'Attachments belonging to problems',
-    ])]
+#[ORM\Table(options: [
+    'collation' => 'utf8mb4_unicode_ci',
+    'charset' => 'utf8mb4',
+    'comment' => 'Attachments belonging to problems',
+])]
 #[ORM\Index(columns: ['attachmentid', 'name'], name: 'name', options: ['lengths' => [null, 190]])]
 #[ORM\Entity]
 class ProblemAttachment
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(
-        type: 'integer',
-        options: ['comment' => 'Attachment ID', 'unsigned' => true]
-    )]
+    #[ORM\Column(options: ['comment' => 'Attachment ID', 'unsigned' => true])]
     private ?int $attachmentid = null;
 
-    #[ORM\Column(
-        type: 'string',
-        length: Constants::LENGTH_LIMIT_TINYTEXT,
-        options: ['comment' => 'Filename of attachment']
-    )]
+    #[ORM\Column(options: ['comment' => 'Filename of attachment'])]
     private ?string $name = null;
 
-    #[ORM\Column(
-        type: 'string',
-        length: 4,
-        options: ['comment' => 'File type of attachment']
-    )]
+    #[ORM\Column(length: 4, options: ['comment' => 'File type of attachment'])]
     private ?string $type = null;
 
-    #[ORM\ManyToOne(targetEntity: Problem::class, inversedBy: 'attachments')]
+    #[ORM\ManyToOne(inversedBy: 'attachments')]
     #[ORM\JoinColumn(name: 'probid', referencedColumnName: 'probid', onDelete: 'CASCADE')]
     private ?Problem $problem = null;
 
