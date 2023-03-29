@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 namespace App\Entity;
 
+use App\Doctrine\Constants;
 use App\Service\EventLogService;
 use App\Utils\Utils;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -41,7 +42,7 @@ class ContestProblem
     #[ORM\Column(
         name: 'shortname',
         type: 'string',
-        length: 255,
+        length: Constants::LENGTH_LIMIT_TINYTEXT,
         nullable: false,
         options: ['comment' => 'Unique problem ID within contest, used to sort problems in the scoreboard and typically a single letter']
     )]

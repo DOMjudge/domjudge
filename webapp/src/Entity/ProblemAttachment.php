@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Doctrine\Constants;
 use App\Utils\Utils;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -29,7 +30,7 @@ class ProblemAttachment
 
     #[ORM\Column(
         type: 'string',
-        length: 255,
+        length: Constants::LENGTH_LIMIT_TINYTEXT,
         options: ['comment' => 'Filename of attachment']
     )]
     private ?string $name = null;

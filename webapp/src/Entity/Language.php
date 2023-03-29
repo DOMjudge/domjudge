@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 namespace App\Entity;
 
+use App\Doctrine\Constants;
 use App\Validator\Constraints\Identifier;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -47,7 +48,7 @@ class Language extends BaseApiEntity
     #[ORM\Column(
         name: 'externalid',
         type: 'string',
-        length: 255,
+        length: Constants::LENGTH_LIMIT_TINYTEXT,
         nullable: true,
         options: ['comment' => 'Language ID to expose in the REST API']
     )]
@@ -61,7 +62,7 @@ class Language extends BaseApiEntity
     #[ORM\Column(
         name: 'name',
         type: 'string',
-        length: 255,
+        length: Constants::LENGTH_LIMIT_TINYTEXT,
         nullable: false,
         options: ['comment' => 'Descriptive language name']
     )]
@@ -75,7 +76,7 @@ class Language extends BaseApiEntity
     #[ORM\Column(
         name: 'extensions',
         type: 'json',
-        length: 4294967295,
+        length: Constants::LENGTH_LIMIT_LONGTEXT,
         nullable: true,
         options: ['comment' => 'List of recognized extensions (JSON encoded)']
     )]

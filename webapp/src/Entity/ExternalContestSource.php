@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Doctrine\Constants;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -38,7 +39,7 @@ class ExternalContestSource
     #[ORM\Column(
         name: 'type',
         type: 'string',
-        length: 255,
+        length: Constants::LENGTH_LIMIT_TINYTEXT,
         nullable: false,
         options: ['comment' => 'Type of this contest source']
     )]
@@ -47,7 +48,7 @@ class ExternalContestSource
     #[ORM\Column(
         name: 'source',
         type: 'string',
-        length: 255,
+        length: Constants::LENGTH_LIMIT_TINYTEXT,
         nullable: false,
         options: ['comment' => 'Source for this contest']
     )]
@@ -56,7 +57,7 @@ class ExternalContestSource
     #[ORM\Column(
         name: 'username',
         type: 'string',
-        length: 255,
+        length: Constants::LENGTH_LIMIT_TINYTEXT,
         nullable: true,
         options: ['comment' => 'Username for this source, if any']
     )]
@@ -65,7 +66,7 @@ class ExternalContestSource
     #[ORM\Column(
         name: 'password',
         type: 'string',
-        length: 255,
+        length: Constants::LENGTH_LIMIT_TINYTEXT,
         nullable: true,
         options: ['comment' => 'Password for this source, if any']
     )]
@@ -74,7 +75,7 @@ class ExternalContestSource
     #[ORM\Column(
         name: 'last_event_id',
         type: 'string',
-        length: 255,
+        length: Constants::LENGTH_LIMIT_TINYTEXT,
         nullable: true,
         options: ['comment' => 'Last encountered event ID, if any']
     )]

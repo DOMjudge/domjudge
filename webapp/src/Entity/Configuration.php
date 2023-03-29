@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 namespace App\Entity;
 
+use App\Doctrine\Constants;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -41,7 +42,7 @@ class Configuration
     #[ORM\Column(
         name: 'value',
         type: 'json',
-        length: 4294967295,
+        length: Constants::LENGTH_LIMIT_LONGTEXT,
         nullable: false,
         options: ['comment' => 'Content of the configuration variable (JSON encoded)']
     )]

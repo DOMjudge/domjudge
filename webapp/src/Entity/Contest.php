@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Doctrine\Constants;
 use App\Utils\FreezeData;
 use App\Utils\Utils;
 use App\Validator\Constraints\Identifier;
@@ -67,7 +68,7 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     #[ORM\Column(
         name: 'externalid',
         type: 'string',
-        length: 255,
+        length: Constants::LENGTH_LIMIT_TINYTEXT,
         nullable: true,
         options: ['comment' => 'Contest ID in an external system', 'collation' => 'utf8mb4_bin']
     )]
@@ -81,7 +82,7 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     #[ORM\Column(
         name: 'name',
         type: 'string',
-        length: 255,
+        length: Constants::LENGTH_LIMIT_TINYTEXT,
         nullable: false,
         options: ['comment' => 'Descriptive name']
     )]
@@ -94,7 +95,7 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     #[ORM\Column(
         name: 'shortname',
         type: 'string',
-        length: 255,
+        length: Constants::LENGTH_LIMIT_TINYTEXT,
         nullable: false,
         options: ['comment' => 'Short name for this contest']
     )]

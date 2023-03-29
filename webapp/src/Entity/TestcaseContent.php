@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Doctrine\Constants;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -40,7 +41,7 @@ class TestcaseContent
     #[ORM\Column(
         name: 'input',
         type: 'blobtext',
-        length: 4294967295,
+        length: Constants::LENGTH_LIMIT_LONGTEXT,
         nullable: true,
         options: ['comment' => 'Input data']
     )]
@@ -49,7 +50,7 @@ class TestcaseContent
     #[ORM\Column(
         name: 'output',
         type: 'blobtext',
-        length: 4294967295,
+        length: Constants::LENGTH_LIMIT_LONGTEXT,
         nullable: true,
         options: ['comment' => 'Output data']
     )]
@@ -58,7 +59,7 @@ class TestcaseContent
     #[ORM\Column(
         name: 'image',
         type: 'blobtext',
-        length: 4294967295,
+        length: Constants::LENGTH_LIMIT_LONGTEXT,
         nullable: true,
         options: ['comment' => 'A graphical representation of the testcase']
     )]
@@ -67,7 +68,7 @@ class TestcaseContent
     #[ORM\Column(
         name: 'image_thumb',
         type: 'blobtext',
-        length: 4294967295,
+        length: Constants::LENGTH_LIMIT_LONGTEXT,
         nullable: true,
         options: ['comment' => 'Automatically created thumbnail of the image']
     )]

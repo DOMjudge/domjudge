@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 namespace App\Entity;
 
+use App\Doctrine\Constants;
 use App\Utils\Utils;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -87,7 +88,7 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
     #[ORM\Column(
         name: 'jury_member',
         type: 'string',
-        length: 255,
+        length: Constants::LENGTH_LIMIT_TINYTEXT,
         nullable: true,
         options: ['comment' => 'Name of jury member who verified this']
     )]
@@ -97,7 +98,7 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
     #[ORM\Column(
         name: 'verify_comment',
         type: 'string',
-        length: 255,
+        length: Constants::LENGTH_LIMIT_TINYTEXT,
         nullable: true,
         options: ['comment' => 'Optional additional information provided by the verifier']
     )]
@@ -128,7 +129,7 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
     #[ORM\Column(
         name: 'metadata',
         type: 'blobtext',
-        length: 4294967295,
+        length: Constants::LENGTH_LIMIT_LONGTEXT,
         nullable: true,
         options: ['comment' => 'Compilation metadata']
     )]

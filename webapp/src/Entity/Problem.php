@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Doctrine\Constants;
 use App\Utils\Utils;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -47,7 +48,7 @@ class Problem extends BaseApiEntity
     #[ORM\Column(
         name: 'externalid',
         type: 'string',
-        length: 255,
+        length: Constants::LENGTH_LIMIT_TINYTEXT,
         nullable: true,
         options: ['comment' => 'Problem ID in an external system, should be unique inside a single contest', 'collation' => 'utf8mb4_bin']
     )]
@@ -57,7 +58,7 @@ class Problem extends BaseApiEntity
     #[ORM\Column(
         name: 'name',
         type: 'string',
-        length: 255,
+        length: Constants::LENGTH_LIMIT_TINYTEXT,
         nullable: false,
         options: ['comment' => 'Descriptive name']
     )]
@@ -102,7 +103,7 @@ class Problem extends BaseApiEntity
     #[ORM\Column(
         name: 'special_compare_args',
         type: 'string',
-        length: 255,
+        length: Constants::LENGTH_LIMIT_TINYTEXT,
         nullable: true,
         options: ['comment' => 'Optional arguments to special_compare script']
     )]
