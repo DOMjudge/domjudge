@@ -48,6 +48,11 @@ parameters:
     domjudge.baseurl: http://localhost/domjudge
 EOF
 
+# install check if the cache might be dirty
+set +e
+composer install --no-scripts || rm -rf lib/vendor
+set -e
+
 # install all php dependencies
 export APP_ENV="prod"
 composer install --no-scripts
