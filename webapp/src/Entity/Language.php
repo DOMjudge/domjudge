@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 namespace App\Entity;
 
+use App\Controller\API\AbstractRestController;
 use App\Doctrine\Constants;
 use App\Validator\Constraints\Identifier;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -53,7 +54,7 @@ class Language extends BaseApiEntity
         options: ['comment' => 'Language ID to expose in the REST API']
     )]
     #[Serializer\SerializedName('id')]
-    #[Serializer\Groups(['Default', 'Nonstrict'])]
+    #[Serializer\Groups([AbstractRestController::GROUP_DEFAULT, AbstractRestController::GROUP_NONSTRICT])]
     protected ?string $externalid = null;
 
     /**
@@ -66,7 +67,7 @@ class Language extends BaseApiEntity
         nullable: false,
         options: ['comment' => 'Descriptive language name']
     )]
-    #[Serializer\Groups(['Default', 'Nonstrict'])]
+    #[Serializer\Groups([AbstractRestController::GROUP_DEFAULT, AbstractRestController::GROUP_NONSTRICT])]
     private string $name = '';
 
     /**
@@ -89,7 +90,7 @@ class Language extends BaseApiEntity
         nullable: false,
         options: ['comment' => 'Whether to filter the files passed to the compiler by the extension list.', 'default' => 1]
     )]
-    #[Serializer\Groups(['Nonstrict'])]
+    #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
     private bool $filterCompilerFiles = true;
 
     #[ORM\Column(
@@ -107,7 +108,7 @@ class Language extends BaseApiEntity
         nullable: false,
         options: ['comment' => 'Are submissions in this language judged?', 'default' => 1]
     )]
-    #[Serializer\Groups(['Nonstrict'])]
+    #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
     private bool $allowJudge = true;
 
     /**
@@ -121,7 +122,7 @@ class Language extends BaseApiEntity
         options: ['comment' => 'Language-specific factor multiplied by problem run times', 'default' => 1]
     )]
     #[Serializer\Type('double')]
-    #[Serializer\Groups(['Nonstrict'])]
+    #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
     private float $timeFactor = 1;
 
     #[ORM\Column(
@@ -155,7 +156,7 @@ class Language extends BaseApiEntity
     #[OA\Property(nullable: true)]
     #[Serializer\VirtualProperty]
     #[Serializer\Type('string')]
-    #[Serializer\Groups(['Nonstrict'])]
+    #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
     #[Serializer\SerializedName('compile_executable_hash')]
     public function getCompileExecutableHash(): ?string
     {

@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 namespace App\Entity;
 
+use App\Controller\API\AbstractRestController;
 use App\Doctrine\Constants;
 use App\Utils\Utils;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -57,7 +58,7 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
         nullable: true,
         options: ['comment' => 'Clarification ID in an external system, should be unique inside a single contest', 'collation' => 'utf8mb4_bin']
     )]
-    #[Serializer\Groups(['Nonstrict'])]
+    #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
     #[OA\Property(nullable: true)]
     protected ?string $externalid = null;
 
@@ -118,7 +119,7 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
         nullable: false,
         options: ['comment' => 'Has been answered by jury?', 'default' => 0]
     )]
-    #[Serializer\Groups(['RestrictedNonstrict'])]
+    #[Serializer\Groups([AbstractRestController::GROUP_RESTRICTED_NONSTRICT])]
     private bool $answered = false;
 
     #[ORM\ManyToOne(targetEntity: Problem::class, inversedBy: 'clarifications')]

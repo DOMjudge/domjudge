@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 namespace App\Entity;
 
+use App\Controller\API\AbstractRestController;
 use App\Doctrine\Constants;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -88,7 +89,7 @@ class TeamCategory extends BaseApiEntity implements Stringable
         nullable: false,
         options: ['comment' => 'Where to sort this category on the scoreboard', 'unsigned' => true, 'default' => 0]
     )]
-    #[Serializer\Groups(['Nonstrict'])]
+    #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
     private int $sortorder = 0;
 
     #[ORM\Column(
@@ -99,7 +100,7 @@ class TeamCategory extends BaseApiEntity implements Stringable
         options: ['comment' => 'Background colour on the scoreboard']
     )]
     #[OA\Property(nullable: true)]
-    #[Serializer\Groups(['Nonstrict'])]
+    #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
     private ?string $color = null;
 
     #[ORM\Column(
