@@ -2,8 +2,6 @@
 
 set -x
 
-MYSQL_ROOT_PASSWORD=$4
-
 . .github/jobs/data/gha_ci_bashrc
 
 lsb_release -a

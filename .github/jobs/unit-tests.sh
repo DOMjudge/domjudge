@@ -1,5 +1,16 @@
 #!/bin/bash
 
+echo $@
+echo $0
+echo $1
+echo $2
+echo $3
+echo $4
+
+export MYSQL_ROOT_PASSWORD="$4"
+
+echo $MYSQL_ROOT_PASSWORD
+
 . .github/jobs/data/gha_ci_bashrc
 
 section_start chown_checkout
