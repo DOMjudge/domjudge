@@ -21,6 +21,7 @@ use JMS\Serializer\Metadata\PropertyMetadata;
 use Metadata\MetadataFactoryInterface;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Attributes as OA;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\ExpressionLanguage\Expression;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -563,6 +564,7 @@ class ContestController extends AbstractRestController
     public function getEventFeedAction(
         Request $request,
         string $cid,
+        #[Autowire(service: 'jms_serializer.metadata_factory')]
         MetadataFactoryInterface $metadataFactory,
         KernelInterface $kernel
     ): Response {
