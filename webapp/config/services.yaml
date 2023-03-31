@@ -44,9 +44,6 @@ services:
         arguments:
             - '@fos_rest.exception.messages_map'
             - '%kernel.debug%'
-
-    Metadata\MetadataFactoryInterface: '@jms_serializer.metadata_factory'
-
     # We need the configuration service to be public to be able to run two of the migrations
     App\Service\ConfigurationService:
         public: true
