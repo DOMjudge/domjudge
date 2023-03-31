@@ -131,13 +131,13 @@ class DOMJudgeService
         return $qb->getQuery()->getResult();
     }
 
-    public function getCurrentContestCookie(): ?int
+    public function getCurrentContestCookie(): ?string
     {
         $request = $this->requestStack->getCurrentRequest();
         if ($request === null || $request->cookies === null) {
             return null;
         }
-        return $request->cookies->getInt('domjudge_cid');
+        return $request->cookies->get('domjudge_cid');
     }
 
     /**

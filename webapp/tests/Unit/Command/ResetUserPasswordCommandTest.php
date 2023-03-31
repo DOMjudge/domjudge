@@ -73,7 +73,7 @@ class ResetUserPasswordCommandTest extends BaseTestCase
     {
         $adminPasswordFile = sprintf(
             '%s/%s',
-            static::$container->getParameter('domjudge.etcdir'),
+            static::getContainer()->getParameter('domjudge.etcdir'),
             'initial_admin_password.secret'
         );
         $adminPassword = trim(file_get_contents($adminPasswordFile));

@@ -15,8 +15,8 @@ use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\Query\Expr\Join;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\ExpressionLanguage\Expression;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -26,7 +26,10 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 
 #[IsGranted('ROLE_TEAM')]
-#[Security('user.getTeam() !== null', message: 'You do not have a team associated with your account. ')]
+#[IsGranted(
+    new Expression('user.getTeam() !== null'),
+    message: 'You do not have a team associated with your account. '
+)]
 #[Route(path: '/team')]
 class ClarificationController extends BaseController
 {

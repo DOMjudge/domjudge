@@ -14,8 +14,8 @@ use App\Service\DOMJudgeService;
 use App\Service\ScoreboardService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\Expr\Join;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\ExpressionLanguage\Expression;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -33,21 +33,21 @@ class JuryMiscController extends BaseController
     {
     }
 
-    #[Security("is_granted('ROLE_JURY') or is_granted('ROLE_BALLOON') or is_granted('ROLE_CLARIFICATION_RW')")]
+    #[IsGranted(new Expression("is_granted('ROLE_JURY') or is_granted('ROLE_BALLOON') or is_granted('ROLE_CLARIFICATION_RW')"))]
     #[Route(path: '', name: 'jury_index')]
     public function indexAction(): Response
     {
         return $this->render('jury/index.html.twig');
     }
 
-    #[Security("is_granted('ROLE_JURY') or is_granted('ROLE_BALLOON')")]
+    #[IsGranted(new Expression("is_granted('ROLE_JURY') or is_granted('ROLE_BALLOON')"))]
     #[Route(path: '/updates', methods: ['GET'], name: 'jury_ajax_updates')]
     public function updatesAction(): JsonResponse
     {
         return $this->json($this->dj->getUpdates());
     }
 
-    #[Security("is_granted('ROLE_JURY') or is_granted('ROLE_BALLOON')")]
+    #[IsGranted(new Expression("is_granted('ROLE_JURY') or is_granted('ROLE_BALLOON')"))]
     #[Route(path: '/ajax/{datatype}', methods: ['GET'], name: 'jury_ajax_data')]
     public function ajaxDataAction(Request $request, string $datatype): JsonResponse
     {

@@ -818,7 +818,7 @@ class Utils
         });
         $response->headers->set('Content-Type', 'application/' . $type);
         $response->headers->set('Content-Disposition', 'attachment; filename="' . $filename . '"');
-        $response->headers->set('Content-Length', strlen($content));
+        $response->headers->set('Content-Length', (string)strlen($content));
         $response->headers->set('Content-Transfer-Encoding', 'binary');
         $response->headers->set('Connection', 'Keep-Alive');
         $response->headers->set('Accept-Ranges', 'bytes');

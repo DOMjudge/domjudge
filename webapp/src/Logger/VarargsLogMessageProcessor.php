@@ -7,29 +7,28 @@
 
 namespace App\Logger;
 
-use ValueError;
+use Monolog\LogRecord;
 use Monolog\Processor\ProcessorInterface;
+use ValueError;
 
 class VarargsLogMessageProcessor implements ProcessorInterface
 {
-    /**
-     * @param  array $record
-     * @return array
-     */
-    public function __invoke(array $record): array
+    public function __invoke(LogRecord $record): LogRecord
     {
-        if (!str_contains($record['message'], '%') || empty($record['context'])) {
+        if (!str_contains($record->message, '%') || empty($record->context)) {
             return $record;
         }
 
         $res = false;
         try {
-            $res = vsprintf($record['message'], $record['context']);
+            $res = vsprintf($record->message, $record->context);
         } catch (ValueError) {}
 
         if ($res !== false) {
-            $record['message'] = $res;
-            $record['context'] = [];
+            $record = $record->with(
+                message: $res,
+                context: []
+            );
         }
 
         return $record;

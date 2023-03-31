@@ -15,6 +15,7 @@ use App\Utils\Scoreboard\Filter;
 use App\Utils\Utils;
 use Collator;
 use DateTime;
+use DateTimeImmutable;
 use DateTimeZone;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
@@ -119,11 +120,11 @@ class ImportExportService
         $starttimeValue = $data['start-time'] ?? $data['start_time'];
 
         if (is_string($starttimeValue)) {
-            $starttime = date_create_from_format(DateTime::ISO8601, $starttimeValue) ?:
+            $starttime = date_create_from_format(DateTime::ATOM, $starttimeValue) ?:
                 // Make sure ISO 8601 but with the T replaced with a space also works.
                 date_create_from_format('Y-m-d H:i:sO', $starttimeValue);
         } else {
-            /** @var DateTime $starttime */
+            /** @var DateTimeImmutable $starttimeValue */
             $starttime = $starttimeValue;
         }
         if ($starttime === false) {
@@ -131,7 +132,7 @@ class ImportExportService
             return false;
         }
 
-        $starttime->setTimezone(new DateTimeZone(date_default_timezone_get()));
+        $starttime = $starttime->setTimezone(new DateTimeZone(date_default_timezone_get()));
         $activateTime = new DateTime();
         if ($activateTime > $starttime) {
             $activateTime = $starttime;

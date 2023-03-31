@@ -120,10 +120,8 @@ class ProblemControllerTest extends BaseTestCase
         $url = $this->helperGetEndpointURL($apiEndpoint, (string)$id) . '/statement';
 
         // Use output buffering since this is a streamed response
-        ob_start();
         $this->client->request('GET', '/api' . $url);
-        $response = $this->client->getResponse();
-        ob_end_clean();
+        $response = $this->client->getInternalResponse();
         self::assertEquals(200, $response->getStatusCode(), 'Statement found');
 
         // We can't easily check if the contents are actually a PDF, so assume it is

@@ -27,7 +27,7 @@ use App\Utils\Utils;
 use Collator;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;

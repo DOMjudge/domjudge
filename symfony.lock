@@ -377,18 +377,6 @@
     "select2/select2": {
         "version": "4.0.7"
     },
-    "sensio/framework-extra-bundle": {
-        "version": "6.2",
-        "recipe": {
-            "repo": "github.com/symfony/recipes",
-            "branch": "main",
-            "version": "5.2",
-            "ref": "fb7e19da7f013d0d422fa9bce16f5c510e27609b"
-        },
-        "files": [
-            "webapp/config/packages/sensio_framework_extra.yaml"
-        ]
-    },
     "sentry/sdk": {
         "version": "3.1.1"
     },
@@ -612,14 +600,8 @@
     "symfony/polyfill-php72": {
         "version": "v1.11.0"
     },
-    "symfony/polyfill-php73": {
-        "version": "v1.11.0"
-    },
     "symfony/polyfill-php80": {
         "version": "v1.17.1"
-    },
-    "symfony/polyfill-php81": {
-        "version": "v1.23.0"
     },
     "symfony/polyfill-uuid": {
         "version": "v1.25.0"
@@ -662,9 +644,6 @@
         "version": "v4.3.2"
     },
     "symfony/security-csrf": {
-        "version": "v4.3.2"
-    },
-    "symfony/security-guard": {
         "version": "v4.3.2"
     },
     "symfony/security-http": {

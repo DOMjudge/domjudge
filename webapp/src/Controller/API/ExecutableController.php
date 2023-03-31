@@ -9,8 +9,9 @@ use Doctrine\ORM\NonUniqueResultException;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use OpenApi\Attributes as OA;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\ExpressionLanguage\Expression;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Rest\Route('/executables')]
 #[OA\Tag(name: 'Executables')]
@@ -24,7 +25,7 @@ class ExecutableController extends AbstractFOSRestController
      * Get the executable with the given ID.
      * @throws NonUniqueResultException
      */
-    #[Security("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST')")]
+    #[IsGranted(new Expression("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST')"))]
     #[Rest\Get('/{id}')]
     #[OA\Parameter(ref: '#/components/parameters/id')]
     #[OA\Response(
