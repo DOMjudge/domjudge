@@ -28,6 +28,7 @@ use Doctrine\ORM\NonUniqueResultException;
 use JsonException;
 use LogicException;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpClient\Exception\TransportException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\PropertyAccess\Exception\UnexpectedTypeException;
@@ -42,7 +43,6 @@ use ZipArchive;
 class ExternalContestSourceService
 {
     protected HttpClientInterface $httpClient;
-    protected readonly LoggerInterface $logger;
 
     protected ?ExternalContestSource $source = null;
 
@@ -79,10 +79,8 @@ class ExternalContestSourceService
         HttpClientInterface $httpClient,
         protected readonly DOMJudgeService $dj,
         protected readonly EntityManagerInterface $em,
-        // Note: we can't use constructor promotion for this argument (yet), since
-        // the name of the argument matters, see `RemoveEventFeedImporterChannelFromLogs`.
-        // When we upgrade to Symfony 6.x, we can use the #[Autowire] attribute to fix this
-        LoggerInterface $eventFeedImporterLogger,
+        #[Autowire(service: 'monolog.logger.event-feed-importer')]
+        protected readonly LoggerInterface $logger,
         protected readonly ConfigurationService $config,
         protected readonly EventLogService $eventLog,
         protected readonly SubmissionService $submissionService,
@@ -94,7 +92,6 @@ class ExternalContestSourceService
             ],
         ];
         $this->httpClient = $httpClient->withOptions($clientOptions);
-        $this->logger = $eventFeedImporterLogger;
     }
 
     public function setSource(ExternalContestSource $source)
