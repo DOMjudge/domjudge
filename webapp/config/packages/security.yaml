@@ -1,13 +1,13 @@
 # To get started with security, check out the documentation:
 # https://symfony.com/doc/current/security.html
 security:
-    enable_authenticator_manager: true
     role_hierarchy:
         ROLE_JURY: [ROLE_CLARIFICATION_RW, ROLE_API, ROLE_API_READER, ROLE_API_SOURCE_READER]
         ROLE_ADMIN: [ROLE_JURY, ROLE_JUDGEHOST, ROLE_API_WRITER]
         ROLE_SUPER_ADMIN: [ROLE_ADMIN, ROLE_ALLOWED_TO_SWITCH]
 
 
+    # https://symfony.com/doc/current/security.html#registering-the-user-hashing-passwords
     password_hashers:
         App\Entity\User:
             algorithm: 'bcrypt'
