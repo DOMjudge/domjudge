@@ -66,7 +66,7 @@ class ContestController extends BaseController
     {
         $em = $this->em;
 
-        if ($doNow = (array)$request->request->get('donow')) {
+        if ($doNow = $request->request->all('donow')) {
             $times         = ['activate', 'start', 'freeze', 'end',
                               'unfreeze', 'finalize', 'deactivate'];
             $start_actions = ['delay_start', 'resume_start'];
