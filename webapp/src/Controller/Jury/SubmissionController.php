@@ -882,7 +882,7 @@ class SubmissionController extends BaseController
         return $this->render('jury/submission_edit_source.html.twig', [
             'submission' => $submission,
             'files' => $files,
-            'form' => $form->createView(),
+            'form' => $form,
             'selected' => $request->query->get('ranknumber'),
         ]);
     }

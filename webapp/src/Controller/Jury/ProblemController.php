@@ -913,8 +913,8 @@ class ProblemController extends BaseController
 
         return $this->render('jury/problem_edit.html.twig', [
             'problem' => $problem,
-            'form' => $form->createView(),
-            'uploadForm' => $uploadForm->createView(),
+            'form' => $form,
+            'uploadForm' => $uploadForm,
         ]);
     }
 
@@ -1029,7 +1029,7 @@ class ProblemController extends BaseController
         }
 
         return $this->render('jury/problem_add.html.twig', [
-            'form' => $form->createView(),
+            'form' => $form,
         ]);
     }
 

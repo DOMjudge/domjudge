@@ -329,7 +329,7 @@ class TeamController extends BaseController
 
         return $this->render('jury/team_edit.html.twig', [
             'team' => $team,
-            'form' => $form->createView(),
+            'form' => $form,
         ]);
     }
 
@@ -381,7 +381,7 @@ class TeamController extends BaseController
 
         return $this->render('jury/team_add.html.twig', [
             'team' => $team,
-            'form' => $form->createView(),
+            'form' => $form,
         ]);
     }
 }

@@ -66,7 +66,7 @@ class PrintController extends BaseController
             ->getResult();
 
         return $this->render('jury/print.html.twig', [
-            'form' => $form->createView(),
+            'form' => $form,
             'languages' => $languages,
         ]);
     }

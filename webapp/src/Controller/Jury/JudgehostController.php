@@ -356,7 +356,7 @@ class JudgehostController extends BaseController
         }
 
         return $this->render('jury/judgehosts_edit_multiple.html.twig', [
-            'form' => $form->createView(),
+            'form' => $form,
         ]);
     }
 }
