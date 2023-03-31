@@ -84,13 +84,8 @@ class ImportExportControllerTest extends BaseTestCase
     {
         $this->loadFixtures([DemoPreStartContestFixture::class]);
         $this->verifyPageResponse('GET', '/jury/import-export', 200);
-        ob_start();
         $this->client->submitForm('contest_export_export', ['contest_export[contest]'=>$cid]);
-
-        $content = ob_get_contents();
-        ob_end_clean();
-
-        $this->assertEquals($expectedYaml, $content);
+        $this->assertEquals($expectedYaml, $this->client->getInternalResponse()->getContent());
     }
 
     public function provideContestYamlContents(): Generator
@@ -139,12 +134,9 @@ HEREDOC;
     {
         $this->verifyPageResponse('GET', '/jury/import-export', 200);
         $link = $this->getCurrentCrawler()->filter($linkname)->link();
-        ob_start();
         $this->client->click($link);
-        $content = ob_get_contents();
-        ob_end_clean();
 
-        $this->assertEquals($expectedData, $content);
+        $this->assertEquals($expectedData, $this->client->getInternalResponse()->getContent());
     }
 
     public function provideTsvContents(): Generator

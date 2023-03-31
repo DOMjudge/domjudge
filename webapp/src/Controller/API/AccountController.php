@@ -8,10 +8,11 @@ use Doctrine\ORM\QueryBuilder;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Attributes as OA;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\ExpressionLanguage\Expression;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Rest\Route('/contests/{cid}')]
 #[OA\Tag(name: 'Accounts')]
@@ -33,7 +34,7 @@ class AccountController extends AbstractRestController
      * Get all the accounts.
      * @throws NonUniqueResultException
      */
-    #[Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_API_READER')")]
+    #[IsGranted(new Expression("is_granted('ROLE_ADMIN') or is_granted('ROLE_API_READER')"))]
     #[Rest\Get('/accounts')]
     #[OA\Response(
         response: 200,
@@ -61,7 +62,7 @@ class AccountController extends AbstractRestController
      * Get the given account.
      * @throws NonUniqueResultException
      */
-    #[Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_API_READER')")]
+    #[IsGranted(new Expression("is_granted('ROLE_ADMIN') or is_granted('ROLE_API_READER')"))]
     #[Rest\Get('/accounts/{id}')]
     #[OA\Response(
         response: 200,

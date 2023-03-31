@@ -14,10 +14,11 @@ use Exception;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Attributes as OA;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\ExpressionLanguage\Expression;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Rest\Route('/contests/{cid}/clarifications')]
 #[OA\Tag(name: 'Clarifications')]
@@ -80,7 +81,10 @@ class ClarificationController extends AbstractRestController
      * Add a clarification to this contest
      * @throws NonUniqueResultException
      */
-    #[Security("is_granted('ROLE_TEAM') or is_granted('ROLE_API_WRITER')", message: 'You need to have the Team Member role to add a clarification')]
+    #[IsGranted(
+        new Expression("is_granted('ROLE_TEAM') or is_granted('ROLE_API_WRITER')"),
+        message: 'You need to have the Team Member role to add a clarification'
+    )]
     #[Rest\Post('')]
     #[Rest\Put('/{id}')]
     #[OA\RequestBody(

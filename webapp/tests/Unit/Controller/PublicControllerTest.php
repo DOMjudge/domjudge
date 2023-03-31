@@ -169,7 +169,7 @@ class PublicControllerTest extends BaseTestCase
         $tmpInputs = $inputs;
         $tmpInputs['existingAffiliation'] = '1';
         $formFields = $this->setupSelfRegisterForm($tmpInputs, $fixtures, 'pw', '2', 'pw');
-        $selector = 'html:contains("This value is not valid.")';
+        $selector = 'html:contains("The selected choice is invalid.")';
         self::assertSelectorNotExists($selector);
         $button = $this->client->getCrawler()->selectButton('Register');
         $form = $button->form($formFields, 'POST');

@@ -21,8 +21,8 @@ use JMS\Serializer\Metadata\PropertyMetadata;
 use Metadata\MetadataFactoryInterface;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Attributes as OA;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\ExpressionLanguage\Expression;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -500,7 +500,7 @@ class ContestController extends AbstractRestController
      * Get the event feed for the given contest.
      * @throws NonUniqueResultException
      */
-    #[Security("is_granted('ROLE_JURY') or is_granted('ROLE_API_READER')")]
+    #[IsGranted(new Expression("is_granted('ROLE_JURY') or is_granted('ROLE_API_READER')"))]
     #[Rest\Get('/{cid}/event-feed')]
     #[OA\Parameter(ref: '#/components/parameters/cid')]
     #[OA\Parameter(

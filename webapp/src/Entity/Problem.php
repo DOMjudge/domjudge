@@ -498,7 +498,7 @@ class Problem extends BaseApiEntity
         });
         $response->headers->set('Content-Type', sprintf('%s; name="%s"', $mimetype, $filename));
         $response->headers->set('Content-Disposition', sprintf('inline; filename="%s"', $filename));
-        $response->headers->set('Content-Length', strlen($problemText));
+        $response->headers->set('Content-Length', (string)strlen($problemText));
 
         return $response;
     }

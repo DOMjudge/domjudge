@@ -22,8 +22,8 @@ use Exception;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Attributes as OA;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\ExpressionLanguage\Expression;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -108,7 +108,10 @@ class SubmissionController extends AbstractRestController
      * Add a submission to this contest.
      * @throws NonUniqueResultException
      */
-    #[Security("is_granted('ROLE_TEAM') or is_granted('ROLE_API_WRITER')", message: 'You need to have the Team Member role to add a submission')]
+    #[IsGranted(
+        new Expression("is_granted('ROLE_TEAM') or is_granted('ROLE_API_WRITER')"),
+        message: 'You need to have the Team Member role to add a submission'
+    )]
     #[Rest\Post('contests/{cid}/submissions')]
     #[Rest\Put('contests/{cid}/submissions/{id}')]
     #[OA\RequestBody(
@@ -498,7 +501,7 @@ class SubmissionController extends AbstractRestController
      * Get the source code of all the files for the given submission.
      * @throws NonUniqueResultException
      */
-    #[Security("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST')")]
+    #[IsGranted(new Expression("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST')"))]
     #[Rest\Get('contests/{cid}/submissions/{id}/source-code')]
     #[OA\Response(
         response: 200,

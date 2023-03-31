@@ -13,8 +13,8 @@ use App\Service\SubmissionService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\ExpressionLanguage\Expression;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -24,7 +24,10 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\RouterInterface;
 
 #[IsGranted('ROLE_TEAM')]
-#[Security('user.getTeam() !== null', message: 'You do not have a team associated with your account. ')]
+#[IsGranted(
+    new Expression('user.getTeam() !== null'),
+    message: 'You do not have a team associated with your account.'
+)]
 #[Route(path: '/team')]
 class MiscController extends BaseController
 {

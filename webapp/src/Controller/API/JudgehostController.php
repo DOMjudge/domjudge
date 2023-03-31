@@ -43,8 +43,8 @@ use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Attributes as OA;
 use Psr\Log\LoggerInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\ExpressionLanguage\Expression;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -1145,7 +1145,7 @@ class JudgehostController extends AbstractFOSRestController
      * Get files for a given type and id.
      * @throws NonUniqueResultException
      */
-    #[Security("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST')")]
+    #[IsGranted(new Expression("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST')"))]
     #[Rest\Get('/get_files/{type}/{id<\d+>}')]
     #[OA\Response(
         response: 200,
@@ -1247,7 +1247,7 @@ class JudgehostController extends AbstractFOSRestController
     /**
      * Fetch work tasks.
      */
-    #[Security("is_granted('ROLE_JUDGEHOST')")]
+    #[IsGranted(new Expression("is_granted('ROLE_JUDGEHOST')"))]
     #[Rest\Post('/fetch-work')]
     public function getJudgeTasksAction(Request $request): array
     {

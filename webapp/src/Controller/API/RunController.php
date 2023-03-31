@@ -13,10 +13,11 @@ use Doctrine\ORM\QueryBuilder;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Attributes as OA;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\ExpressionLanguage\Expression;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Rest\Route('/contests/{cid}/runs')]
 #[OA\Tag(name: 'Runs')]
@@ -50,7 +51,7 @@ class RunController extends AbstractRestController implements QueryObjectTransfo
      * Get all the runs for this contest.
      * @throws NonUniqueResultException
      */
-    #[Security("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST') or is_granted('ROLE_API_READER')")]
+    #[IsGranted(new Expression("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST') or is_granted('ROLE_API_READER')"))]
     #[Rest\Get('')]
     #[OA\Response(
         response: 200,
@@ -99,7 +100,7 @@ class RunController extends AbstractRestController implements QueryObjectTransfo
      * Get the given run for this contest.
      * @throws NonUniqueResultException
      */
-    #[Security("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST') or is_granted('ROLE_API_READER')")]
+    #[IsGranted(new Expression("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST') or is_granted('ROLE_API_READER')"))]
     #[Rest\Get('/{id<\d+>}')]
     #[OA\Response(
         response: 200,

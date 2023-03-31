@@ -13,9 +13,10 @@ use Doctrine\ORM\QueryBuilder;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Attributes as OA;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\ExpressionLanguage\Expression;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Rest\Route('/')]
 #[OA\Tag(name: 'Judgements')]
@@ -50,7 +51,7 @@ class JudgementController extends AbstractRestController implements QueryObjectT
      * Get all the judgements for this contest.
      * @throws NonUniqueResultException
      */
-    #[Security("is_granted('ROLE_JURY') or is_granted('ROLE_TEAM') or is_granted('ROLE_JUDGEHOST') or is_granted('ROLE_API_READER')")]
+    #[IsGranted(new Expression("is_granted('ROLE_JURY') or is_granted('ROLE_TEAM') or is_granted('ROLE_JUDGEHOST') or is_granted('ROLE_API_READER')"))]
     #[Rest\Get('contests/{cid}/judgements')]
     #[Rest\Get('judgements')]
     #[OA\Response(
@@ -88,7 +89,7 @@ class JudgementController extends AbstractRestController implements QueryObjectT
      * Get the given judgement for this contest.
      * @throws NonUniqueResultException
      */
-    #[Security("is_granted('ROLE_JURY') or is_granted('ROLE_TEAM') or is_granted('ROLE_JUDGEHOST') or is_granted('ROLE_API_READER')")]
+    #[IsGranted(new Expression("is_granted('ROLE_JURY') or is_granted('ROLE_TEAM') or is_granted('ROLE_JUDGEHOST') or is_granted('ROLE_API_READER')"))]
     #[Rest\Get('contests/{cid}/judgements/{id<\d+>}')]
     #[Rest\Get('judgements/{id<\d+>}')]
     #[OA\Response(

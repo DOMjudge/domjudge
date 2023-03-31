@@ -84,11 +84,9 @@ class ProblemControllerTest extends BaseTestCase
 
                     // Download the problem text and make sure it is correct.
                     $problemTextLink = $card->selectLink('text');
-                    ob_start();
                     $this->client->click($problemTextLink->link());
-                    $content = ob_get_clean();
 
-                    $this->assertSame($problemTexts[$i], $content);
+                    $this->assertSame($problemTexts[$i], $this->client->getInternalResponse()->getContent());
                 }
             });
     }
@@ -139,10 +137,8 @@ class ProblemControllerTest extends BaseTestCase
                          $link->attr('href'));
 
         // Download the sample and make sure the contents are correct.
-        // We use ob_ methods since this is a streamed response.
-        ob_start();
         $this->client->click($link->link());
-        $zipfile = ob_get_clean();
+        $zipfile = $this->client->getInternalResponse()->getContent();
         $content = $this->unzipString($zipfile);
 
         for ($i = 1; $i <= 2; $i++) {
