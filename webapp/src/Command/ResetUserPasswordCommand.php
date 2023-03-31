@@ -5,6 +5,7 @@ namespace App\Command;
 use App\Entity\User;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -12,11 +13,12 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
+#[AsCommand(
+    name: 'domjudge:reset-user-password',
+    description: 'Reset the password of the given user'
+)]
 class ResetUserPasswordCommand extends Command
 {
-    protected static $defaultName = 'domjudge:reset-user-password';
-    protected static $defaultDescription = 'Reset the password of the given user';
-
     public function __construct(
         protected readonly EntityManagerInterface $em,
         protected readonly UserPasswordHasherInterface $passwordHasher

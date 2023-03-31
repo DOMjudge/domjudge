@@ -10,6 +10,7 @@ use App\Service\DOMJudgeService;
 use App\Service\ExternalContestSourceService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputArgument;
@@ -24,11 +25,12 @@ use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 
+#[AsCommand(
+    name: 'import:eventfeed',
+    description: 'Import contest data from an event feed following the Contest API specification'
+)]
 class ImportEventFeedCommand extends Command
 {
-    protected static $defaultName = 'import:eventfeed';
-    protected static $defaultDescription = 'Import contest data from an event feed following the Contest API specification';
-
     protected SymfonyStyle $style;
 
     protected ?ExternalContestSource $source = null;
