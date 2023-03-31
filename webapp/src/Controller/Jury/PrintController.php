@@ -44,7 +44,7 @@ class PrintController extends BaseController
             $originalfilename = $file->getClientOriginalName() ?? '';
 
             $langid   = $data['langid'];
-            $username = $this->getUser()->getUsername();
+            $username = $this->getUser()->getUserIdentifier();
 
             // Since this is the Jury interface, there's not necessarily a
             // team involved; do not set a teamname or location.

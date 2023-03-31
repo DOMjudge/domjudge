@@ -296,7 +296,7 @@ class SubmissionControllerTest extends BaseTestCase
         static::assertInstanceOf(Submission::class, $submission);
         static::assertEquals($expectedProblemId, $submission->getProblem()->getProbid(), 'Wrong problem ID');
         static::assertEquals($expectedTeamId, $submission->getTeam()->getTeamid(), 'Wrong team ID');
-        static::assertEquals($expectedUsername, $submission->getUser()->getUsername(), 'Wrong user');
+        static::assertEquals($expectedUsername, $submission->getUser()->getUserIdentifier(), 'Wrong user');
         static::assertEquals($expectedLanguageId, $submission->getLanguage()->getLangid(), 'Wrong language ID');
         if ($expectedSubmissionExternalId) {
             static::assertEquals($expectedSubmissionExternalId, $submission->getExternalid(), 'Wrong external submission ID');
