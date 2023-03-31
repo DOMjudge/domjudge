@@ -498,22 +498,22 @@
         "version": "v4.3.2"
     },
     "symfony/framework-bundle": {
-        "version": "5.4",
+        "version": "6.2",
         "recipe": {
             "repo": "github.com/symfony/recipes",
             "branch": "main",
-            "version": "5.4",
-            "ref": "3cd216a4d007b78d8554d44a5b1c0a446dab24fb"
+            "version": "6.2",
+            "ref": "af47254c5e4cd543e6af3e4508298ffebbdaddd3"
         },
         "files": [
-            "webapp/config/packages/cache.yaml",
-            "webapp/config/packages/framework.yaml",
-            "webapp/config/preload.php",
-            "webapp/config/routes/framework.yaml",
-            "webapp/config/services.yaml",
-            "webapp/public/index.php",
-            "webapp/src/Controller/.gitignore",
-            "webapp/src/Kernel.php"
+            "config/packages/cache.yaml",
+            "config/packages/framework.yaml",
+            "config/preload.php",
+            "config/routes/framework.yaml",
+            "config/services.yaml",
+            "public/index.php",
+            "src/Controller/.gitignore",
+            "src/Kernel.php"
         ]
     },
     "symfony/http-client": {
