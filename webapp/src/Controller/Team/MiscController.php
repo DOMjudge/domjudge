@@ -157,7 +157,7 @@ class MiscController extends BaseController
             $originalfilename = $file->getClientOriginalName() ?? '';
 
             $langid   = $data['langid'];
-            $username = $this->getUser()->getUsername();
+            $username = $this->getUser()->getUserIdentifier();
 
             $team = $this->dj->getUser()->getTeam();
             $ret  = $this->dj->printFile($realfile, $originalfilename, $langid,

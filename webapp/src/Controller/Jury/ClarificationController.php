@@ -282,7 +282,7 @@ class ClarificationController extends AbstractController
         }
 
         if ($request->request->getBoolean('claimed')) {
-            $clarification->setJuryMember($this->getUser()->getUsername());
+            $clarification->setJuryMember($this->getUser()->getUserIdentifier());
             $this->em->flush();
             return $this->redirectToRoute('jury_clarification', ['id' => $clarId]);
         } else {
@@ -414,7 +414,7 @@ class ClarificationController extends AbstractController
         }
         $clarification->setQueue($queue);
 
-        $clarification->setJuryMember($this->getUser()->getUsername());
+        $clarification->setJuryMember($this->getUser()->getUserIdentifier());
         $clarification->setAnswered(true);
         $clarification->setBody($request->request->get('bodytext'));
         $clarification->setSubmittime(Utils::now());
@@ -422,7 +422,7 @@ class ClarificationController extends AbstractController
         $this->em->persist($clarification);
         if ($respid) {
             $respclar->setAnswered(true);
-            $respclar->setJuryMember($this->getUser()->getUsername());
+            $respclar->setJuryMember($this->getUser()->getUserIdentifier());
             $this->em->persist($respclar);
         }
         $this->em->flush();

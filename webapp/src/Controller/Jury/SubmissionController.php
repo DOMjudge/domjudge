@@ -859,7 +859,7 @@ class SubmissionController extends BaseController
                 $language,
                 $filesToSubmit,
                 'edit/resubmit',
-                $this->getUser()->getUsername(),
+                $this->getUser()->getUserIdentifier(),
                 $submission->getOriginalSubmission() ?? $submission,
                 $entryPoint,
                 null,
@@ -962,7 +962,7 @@ class SubmissionController extends BaseController
             $comment  = $request->request->get('comment');
             $judging
                 ->setVerified($verified)
-                ->setJuryMember($verified ? $this->dj->getUser()->getUsername() : null)
+                ->setJuryMember($verified ? $this->dj->getUser()->getUserIdentifier() : null)
                 ->setVerifyComment($comment);
 
             $this->em->flush();
@@ -1028,7 +1028,7 @@ class SubmissionController extends BaseController
             $comment  = $request->request->get('comment');
             $judgement
                 ->setVerified($verified)
-                ->setJuryMember($verified ? $this->dj->getUser()->getUsername() : null)
+                ->setJuryMember($verified ? $this->dj->getUser()->getUserIdentifier() : null)
                 ->setVerifyComment($comment);
 
             $this->em->flush();
