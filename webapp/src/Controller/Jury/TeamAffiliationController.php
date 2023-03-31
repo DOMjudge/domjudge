@@ -11,6 +11,7 @@ use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\ScoreboardService;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -33,8 +34,10 @@ class TeamAffiliationController extends BaseController
     ) {}
 
     #[Route(path: '', name: 'jury_team_affiliations')]
-    public function indexAction(string $projectDir): Response
-    {
+    public function indexAction(
+        #[Autowire('%kernel.project_dir%')]
+        string $projectDir
+    ): Response {
         $em               = $this->em;
         $teamAffiliations = $em->createQueryBuilder()
             ->select('a', 'COUNT(t.teamid) AS num_teams')

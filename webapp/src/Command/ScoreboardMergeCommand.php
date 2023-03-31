@@ -21,6 +21,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
 use Symfony\Component\Routing\RouterInterface;
@@ -49,6 +50,7 @@ class ScoreboardMergeCommand extends Command
         protected readonly HttpClientInterface $client,
         protected readonly ScoreboardService $scoreboardService,
         protected readonly RouterInterface $router,
+        #[Autowire('%kernel.project_dir%')]
         protected readonly string $projectDir,
         string $name = null
     ) {

@@ -9,6 +9,7 @@ use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -104,8 +105,12 @@ class ConfigController extends AbstractController
     }
 
     #[Route(path: '/check', name: 'jury_config_check')]
-    public function checkAction(string $projectDir, string $logsDir): Response
-    {
+    public function checkAction(
+        #[Autowire('%kernel.project_dir%')]
+        string $projectDir,
+        #[Autowire('%kernel.logs_dir%')]
+        string $logsDir
+    ): Response {
         $results = $this->checkConfigService->runAll();
         $stopwatch = $this->checkConfigService->getStopwatch();
         return $this->render('jury/config_check.html.twig', [

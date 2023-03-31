@@ -7,11 +7,13 @@ use App\Entity\ImmutableExecutable;
 use App\Service\DOMJudgeService;
 use Doctrine\Persistence\ObjectManager;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use ZipArchive;
 
 class ExecutableFixture extends AbstractDefaultDataFixture
 {
     public function __construct(
+        #[Autowire('%domjudge.sqldir%')]
         protected readonly string $sqlDir,
         protected readonly DOMJudgeService $dj,
         protected readonly LoggerInterface $logger

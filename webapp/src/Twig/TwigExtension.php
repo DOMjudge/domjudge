@@ -22,6 +22,7 @@ use App\Utils\Utils;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityManagerInterface;
 use SebastianBergmann\Diff\Differ;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Intl\Countries;
 use Symfony\Component\Intl\Exception\MissingResourceException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
@@ -45,6 +46,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         protected readonly AwardService $awards,
         protected readonly TokenStorageInterface $tokenStorage,
         protected readonly AuthorizationCheckerInterface $authorizationChecker,
+        #[Autowire('%kernel.project_dir%')]
         protected readonly string $projectDir
     ) {}
 

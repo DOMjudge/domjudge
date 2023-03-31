@@ -12,6 +12,7 @@ use App\Service\StatisticsService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use ReflectionClass;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -75,8 +76,14 @@ class PublicController extends BaseController
     }
 
     #[Route(path: '/scoreboard-data.zip', name: 'public_scoreboard_data_zip')]
-    public function scoreboardDataZipAction(RequestStack $requestStack, string $projectDir, string $vendorDir, Request $request): Response
-    {
+    public function scoreboardDataZipAction(
+        RequestStack $requestStack,
+        #[Autowire('%kernel.project_dir%')]
+        string $projectDir,
+        #[Autowire('%domjudge.libvendordir%')]
+        string $vendorDir,
+        Request $request
+    ): Response {
         $contest = $this->getContestFromRequest($request) ?? $this->dj->getCurrentContest(-1);
         $data    = $this->scoreboardService->getScoreboardTwigData(
                 $request, null, '', false, true, true, $contest
