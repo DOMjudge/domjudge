@@ -7,8 +7,10 @@ use Doctrine\Common\EventSubscriber;
 use Doctrine\ORM\Event\PreUpdateEventArgs;
 use Doctrine\ORM\Events;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
+use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
+#[AutoconfigureTag(name: 'doctrine.event_subscriber')]
 class HashPasswordSubscriber implements EventSubscriber
 {
     public function __construct(protected readonly UserPasswordHasherInterface $passwordHasher)

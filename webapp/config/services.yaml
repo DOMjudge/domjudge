@@ -26,26 +26,8 @@ services:
             - '../src/DependencyInjection'
             - '../src/Entity'
             - '../src/Migrations'
-            - '../src/FosRestBundle'
             - '../src/Kernel.php'
 
-    App\Doctrine\HashPasswordSubscriber:
-        tags:
-            - { name: doctrine.event_subscriber, connection: default }
-
-    App\Logger\VarargsLogMessageProcessor:
-        autowire: true
-        tags:
-            - { name: monolog.processor }
-
-    fos_rest.serializer.flatten_exception_handler:
-        public: true
-        class: App\FosRestBundle\FlattenExceptionHandler
-        arguments:
-            - '@fos_rest.exception.messages_map'
-            - '%kernel.debug%'
-    # We need the configuration service to be public to be able to run two of the migrations
-    App\Service\ConfigurationService:
-        public: true
-        arguments:
-            $configCache: '@config_cache_factory'
+    # We still need this since we can't set the ID of a service with the Autoconfigure tag
+    # This will be possible in Symfony 6.3 (https://github.com/symfony/symfony/pull/49411)
+    fos_rest.serializer.flatten_exception_handler: '@App\FosRestBundle\FlattenExceptionHandler'
