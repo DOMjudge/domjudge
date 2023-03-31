@@ -15,7 +15,7 @@ class YamlConfigLoader extends FileLoader
     /**
      * @return mixed
      */
-    public function load($resource, $type = null)
+    public function load(mixed $resource, $type = null)
     {
         return Yaml::parse(file_get_contents($resource));
     }
