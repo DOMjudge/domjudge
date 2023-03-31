@@ -9,8 +9,10 @@ namespace App\Logger;
 
 use Monolog\LogRecord;
 use Monolog\Processor\ProcessorInterface;
+use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
 use ValueError;
 
+#[AutoconfigureTag(name: 'monolog.processor')]
 class VarargsLogMessageProcessor implements ProcessorInterface
 {
     public function __invoke(LogRecord $record): LogRecord

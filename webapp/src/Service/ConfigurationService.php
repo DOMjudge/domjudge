@@ -14,8 +14,11 @@ use Symfony\Component\Config\ConfigCacheFactoryInterface;
 use Symfony\Component\Config\ConfigCacheInterface;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Config\Resource\FileResource;
+use Symfony\Component\DependencyInjection\Attribute\AsDecorator;
+use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
+#[Autoconfigure(public: true)]
 class ConfigurationService
 {
     protected ?array $dbConfigCache = null;
@@ -23,6 +26,7 @@ class ConfigurationService
     public function __construct(
         protected readonly EntityManagerInterface $em,
         protected readonly LoggerInterface $logger,
+        #[Autowire(service: 'config_cache_factory')]
         protected readonly ConfigCacheFactoryInterface $configCache,
         #[Autowire('%kernel.debug%')]
         protected readonly bool $debug,
