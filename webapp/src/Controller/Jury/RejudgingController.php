@@ -629,7 +629,7 @@ class RejudgingController extends BaseController
             });
         }
         return $this->render('jury/rejudging_form.html.twig', [
-            'form' => $form->createView(),
+            'form' => $form,
         ]);
     }
 

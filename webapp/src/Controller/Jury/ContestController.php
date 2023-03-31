@@ -413,7 +413,7 @@ class ContestController extends BaseController
         return $this->render('jury/contest.html.twig', [
             'contest' => $contest,
             'allowRemovedIntervals' => $this->getParameter('removed_intervals'),
-            'removedIntervalForm' => $form->createView(),
+            'removedIntervalForm' => $form,
             'removedIntervals' => $removedIntervals,
             'problems' => $problems,
         ]);
@@ -571,7 +571,7 @@ class ContestController extends BaseController
 
         return $this->render('jury/contest_edit.html.twig', [
             'contest' => $contest,
-            'form' => $form->createView(),
+            'form' => $form,
         ]);
     }
 
@@ -666,7 +666,7 @@ class ContestController extends BaseController
         }
 
         return $this->render('jury/contest_add.html.twig', [
-            'form' => $form->createView(),
+            'form' => $form,
         ]);
     }
 
@@ -815,7 +815,7 @@ class ContestController extends BaseController
         return $this->render('jury/contest_finalize.html.twig', [
             'contest' => $contest,
             'blockers' => $blockers,
-            'form' => $form->createView(),
+            'form' => $form,
         ]);
     }
 
@@ -895,7 +895,7 @@ class ContestController extends BaseController
         if (count(array_unique($timeZones)) > 1) {
             $this->addFlash('danger', 'Contest should not have multiple timezones.');
             return $this->render('jury/contest_add.html.twig', [
-                'form' => $form->createView(),
+                'form' => $form,
             ]);
         }
         return null;

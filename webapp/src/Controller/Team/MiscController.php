@@ -181,7 +181,7 @@ class MiscController extends BaseController
             ->getResult();
 
         return $this->render('team/print.html.twig', [
-            'form' => $form->createView(),
+            'form' => $form,
             'languages' => $languages,
         ]);
     }

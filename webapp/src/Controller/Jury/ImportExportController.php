@@ -264,13 +264,13 @@ class ImportExportController extends BaseController
         }
 
         return $this->render('jury/import_export.html.twig', [
-            'tsv_form' => $tsvForm->createView(),
-            'json_form' => $jsonForm->createView(),
-            'icpccms_form' => $icpcCmsForm->createView(),
-            'problem_form' => $problemForm->createView(),
-            'contest_export_form' => $contestExportForm->createView(),
-            'contest_import_form' => $contestImportForm->createView(),
-            'problems_import_form' => $problemsImportForm->createView(),
+            'tsv_form' => $tsvForm,
+            'json_form' => $jsonForm,
+            'icpccms_form' => $icpcCmsForm,
+            'problem_form' => $problemForm,
+            'contest_export_form' => $contestExportForm,
+            'contest_import_form' => $contestImportForm,
+            'problems_import_form' => $problemsImportForm,
             'sort_orders' => $sortOrders,
         ]);
     }

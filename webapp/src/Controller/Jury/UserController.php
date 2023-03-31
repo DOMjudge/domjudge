@@ -207,7 +207,7 @@ class UserController extends BaseController
             $this->addFlash('danger', "Password should be " . static::MIN_PASSWORD_LENGTH . "+ chars.");
             return $this->render('jury/user_edit.html.twig', [
                 'user' => $user,
-                'form' => $form->createView(),
+                'form' => $form,
                 'min_password_length' => static::MIN_PASSWORD_LENGTH,
             ]);
         }
@@ -253,7 +253,7 @@ class UserController extends BaseController
 
         return $this->render('jury/user_edit.html.twig', [
             'user'                => $user,
-            'form'                => $form->createView(),
+            'form'                => $form,
             'min_password_length' => static::MIN_PASSWORD_LENGTH,
         ]);
     }
@@ -296,7 +296,7 @@ class UserController extends BaseController
 
         return $this->render('jury/user_add.html.twig', [
             'user' => $user,
-            'form' => $form->createView(),
+            'form' => $form,
             'min_password_length' => static::MIN_PASSWORD_LENGTH,
         ]);
     }
@@ -361,7 +361,7 @@ class UserController extends BaseController
         }
 
         return $this->render('jury/user_generate_passwords.html.twig', [
-            'form' => $form->createView(),
+            'form' => $form,
         ]);
     }
 

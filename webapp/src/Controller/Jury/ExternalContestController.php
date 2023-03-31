@@ -162,7 +162,7 @@ class ExternalContestController extends BaseController
 
         return $this->render('jury/external_contest_manage.html.twig', [
             'externalContestSource' => $externalContestSource,
-            'form' => $form->createView(),
+            'form' => $form,
         ]);
     }
 }

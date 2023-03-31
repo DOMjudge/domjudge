@@ -191,7 +191,7 @@ class TeamAffiliationController extends BaseController
 
         return $this->render('jury/team_affiliation_edit.html.twig', [
             'teamAffiliation' => $teamAffiliation,
-            'form' => $form->createView(),
+            'form' => $form,
         ]);
     }
 
@@ -227,7 +227,7 @@ class TeamAffiliationController extends BaseController
         }
 
         return $this->render('jury/team_affiliation_add.html.twig', [
-            'form' => $form->createView(),
+            'form' => $form,
         ]);
     }
 }

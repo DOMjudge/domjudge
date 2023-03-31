@@ -101,7 +101,7 @@ class ExecutableController extends BaseController
             'executables' => $executables_table,
             'table_fields' => $table_fields,
             'num_actions' => $this->isGranted('ROLE_ADMIN') ? 3 : 0,
-            'form' => $form->createView(),
+            'form' => $form,
         ]);
     }
 
@@ -165,7 +165,7 @@ class ExecutableController extends BaseController
         }
 
         return $this->render('jury/executable_add.html.twig', [
-            'form' => $form->createView(),
+            'form' => $form,
         ]);
     }
 

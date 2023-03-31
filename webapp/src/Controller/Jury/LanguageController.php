@@ -160,7 +160,7 @@ class LanguageController extends BaseController
         }
 
         return $this->render('jury/language_add.html.twig', [
-            'form' => $form->createView(),
+            'form' => $form,
         ]);
     }
 
@@ -275,7 +275,7 @@ class LanguageController extends BaseController
 
         return $this->render('jury/language_edit.html.twig', [
             'language' => $language,
-            'form' => $form->createView(),
+            'form' => $form,
         ]);
     }
 
