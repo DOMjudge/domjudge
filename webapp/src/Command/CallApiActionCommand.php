@@ -5,6 +5,7 @@ namespace App\Command;
 use App\Entity\User;
 use App\Service\DOMJudgeService;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -14,11 +15,12 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
+#[AsCommand(
+    name: 'api:call',
+    description: 'Call the DOMjudge API directly. Note: this will use admin credentials'
+)]
 class CallApiActionCommand extends Command
 {
-    protected static $defaultName = 'api:call';
-    protected static $defaultDescription = 'Call the DOMjudge API directly. Note: this will use admin credentials';
-
     public function __construct(protected readonly DOMJudgeService $dj, protected readonly EntityManagerInterface $em)
     {
         parent::__construct();

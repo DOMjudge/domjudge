@@ -14,6 +14,7 @@ use App\Service\DOMJudgeService;
 use App\Service\ScoreboardService;
 use App\Utils\FreezeData;
 use App\Utils\Scoreboard\Scoreboard;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -35,11 +36,12 @@ use Twig\Error\RuntimeError;
 use Twig\Error\SyntaxError;
 use ZipArchive;
 
+#[AsCommand(
+    name: 'scoreboard:merge',
+    description: 'Merges scoreboards from multiple sites from API endpoints.'
+)]
 class ScoreboardMergeCommand extends Command
 {
-    protected static $defaultName = 'scoreboard:merge';
-    protected static $defaultDescription = 'Merges scoreboards from multiple sites from API endpoints.';
-
     public function __construct(
         protected readonly DOMJudgeService $dj,
         protected readonly ConfigurationService $config,
