@@ -8,6 +8,7 @@ use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 use Exception;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class UserFixture extends AbstractDefaultDataFixture implements DependentFixtureInterface
@@ -16,6 +17,7 @@ class UserFixture extends AbstractDefaultDataFixture implements DependentFixture
         protected readonly DOMJudgeService $dj,
         protected readonly LoggerInterface $logger,
         protected readonly UserPasswordHasherInterface $passwordHasher,
+        #[Autowire('%kernel.debug%')]
         protected readonly bool $debug
     ) {}
 

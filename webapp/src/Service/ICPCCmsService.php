@@ -8,6 +8,7 @@ use App\Entity\TeamAffiliation;
 use App\Entity\TeamCategory;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
@@ -26,7 +27,8 @@ class ICPCCmsService
     public function __construct(
         protected readonly DOMJudgeService $dj,
         protected readonly EntityManagerInterface $em,
-        $domjudgeVersion
+        #[Autowire('%domjudge.version%')]
+        string $domjudgeVersion
     ) {
         $this->client = HttpClient::create(
             [

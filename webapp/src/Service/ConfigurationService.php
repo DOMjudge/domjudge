@@ -14,6 +14,7 @@ use Symfony\Component\Config\ConfigCacheFactoryInterface;
 use Symfony\Component\Config\ConfigCacheInterface;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Config\Resource\FileResource;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 class ConfigurationService
 {
@@ -23,8 +24,11 @@ class ConfigurationService
         protected readonly EntityManagerInterface $em,
         protected readonly LoggerInterface $logger,
         protected readonly ConfigCacheFactoryInterface $configCache,
+        #[Autowire('%kernel.debug%')]
         protected readonly bool $debug,
+        #[Autowire('%kernel.cache_dir%')]
         protected readonly string $cacheDir,
+        #[Autowire('%domjudge.etcdir%')]
         protected readonly string $etcDir
     ) {}
 

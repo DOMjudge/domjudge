@@ -15,6 +15,7 @@ use App\Utils\Utils;
 use BadMethodCallException;
 use Doctrine\Inflector\InflectorFactory;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Stopwatch\Stopwatch;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\RouterInterface;
@@ -25,6 +26,7 @@ class CheckConfigService
     protected readonly Stopwatch $stopwatch;
 
     public function __construct(
+        #[Autowire('%kernel.debug%')]
         protected readonly bool $debug,
         protected readonly EntityManagerInterface $em,
         protected readonly ConfigurationService $config,
