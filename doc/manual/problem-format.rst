@@ -12,9 +12,16 @@ On top, DOMjudge defines a few extensions:
    distributed to participants. The file extension determines any of
    three supported formats. If multiple files matching this pattern are
    available, any one of those will be used.
- * Annotation with ``EXPECTED_RESULTS`` for jury solutions. The ICPC
-   problem package specification always has precedence. Use this to annotate
-   possible outcomes a submission can have to use together with the Judging verifier. 
+ * Annotation with ``@EXPECTED_RESULTS@: `` for jury solutions.
+   Use this to annotate the possible outcomes that a submission can have,
+   that will be accepted by the Judging verifier.
+   This extension is in consideration to be added to the ICPC specification,
+   see https://github.com/Kattis/problem-package-format/pull/4.
+   Note that, to match with the current ICPC specification,
+   the ``@EXPECTED_RESULTS@: `` tag is ignored in
+   the four official submission subdirectories,
+   but it will work if the tagged solution is in, e.g.,
+   ``submissions/mixed/`` or ``submissions/rejected/``.
 
 The file ``domjudge-problem.ini`` contains key-value pairs, one
 pair per line, of the form ``key = value``. The ``=`` can
