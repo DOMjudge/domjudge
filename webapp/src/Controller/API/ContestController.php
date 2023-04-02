@@ -366,6 +366,9 @@ class ContestController extends AbstractRestController
         if ($request->request->get('id') != $contest->getApiId($this->eventLogService)) {
             throw new BadRequestHttpException('Invalid "id" in request.');
         }
+        if ($request->request->has('start_time') && $request->request->has('scoreboard_thaw_time')) {
+            throw new BadRequestHttpException('Setting both "start_time" and "scoreboard_thaw_time" at the same time is not allowed.');
+        }
 
         if ($request->request->has('start_time')) {
             // By default, it is not allowed to change the start time in the last 30 seconds before contest start.

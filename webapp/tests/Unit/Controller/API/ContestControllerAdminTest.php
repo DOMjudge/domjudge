@@ -173,6 +173,7 @@ EOF;
         // General tests
         yield [[], 400, 'Missing \"id\" in request.'];
         yield [['id' => 1], 400, 'Missing \"start_time\" or \"scoreboard_thaw_time\" in request.'];
+        yield [['id' => 1, 'start_time' => null, 'scoreboard_thaw_time' => date('Y-m-d\TH:i:s', strtotime('+15 seconds'))], 400, 'Setting both \"start_time\" and \"scoreboard_thaw_time\" at the same time is not allowed.'];
 
         // Tests for changing the start time
         yield [['id' => 2, 'start_time' => null], 400, 'Invalid \"id\" in request.'];
