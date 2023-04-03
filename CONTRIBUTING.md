@@ -52,7 +52,7 @@ most welcome. The following are some pointers.
 
 First, install and configure the development version of DOMjudge.
 Either directly from the git repository, see the [developer information](https://www.domjudge.org/snapshot/manual/develop.html)
-section in the admin manual, or via the [contributor docker image](https://github.com/DOMjudge/domjudge-packaging/tree/main/aster/docker-contributor).
+section in the admin manual, or via the [contributor docker image](https://github.com/DOMjudge/domjudge-packaging/tree/main/docker-contributor).
 If you follow the admin manual for installation, this is also a great
 way to verify that the documentation is clear and complete, and to
 report anything that is not.
