@@ -89,6 +89,7 @@ class AccessController extends AbstractRestController
         // Add capabilities
         if ($this->dj->checkrole('api_writer')) {
             $capabilities[] = 'contest_start';
+            $capabilities[] = 'contest_thaw';
         }
         if ($this->dj->checkrole('team') && $this->dj->getUser()->getTeam()) {
             $capabilities[] = 'team_submit';
