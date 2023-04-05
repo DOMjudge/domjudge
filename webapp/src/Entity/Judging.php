@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 namespace App\Entity;
 
-use App\Controller\API\AbstractRestController;
+use App\Controller\API\AbstractRestController as ARC;
 use App\Utils\Utils;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -79,7 +79,7 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
     #[ORM\Column(
         options: ['comment' => 'Old judging is marked as invalid when rejudging', 'default' => 1]
     )]
-    #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
+    #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
     private bool $valid = true;
 
     /**

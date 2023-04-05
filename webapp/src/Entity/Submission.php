@@ -2,7 +2,7 @@
 
 namespace App\Entity;
 
-use App\Controller\API\AbstractRestController;
+use App\Controller\API\AbstractRestController as ARC;
 use App\Utils\Utils;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -53,7 +53,7 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
     )]
     #[OA\Property(nullable: true)]
     #[Serializer\SerializedName('external_id')]
-    #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
+    #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
     protected ?string $externalid = null;
 
     #[ORM\Column(

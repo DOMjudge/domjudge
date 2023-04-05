@@ -2,7 +2,7 @@
 
 namespace App\Entity;
 
-use App\Controller\API\AbstractRestController;
+use App\Controller\API\AbstractRestController as ARC;
 use App\Utils\FreezeData;
 use App\Utils\Utils;
 use App\Validator\Constraints\Identifier;
@@ -61,7 +61,7 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
         options: ['comment' => 'Contest ID in an external system', 'collation' => 'utf8mb4_bin']
     )]
     #[Serializer\SerializedName('external_id')]
-    #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
+    #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
     protected ?string $externalid = null;
 
     #[ORM\Column(options: ['comment' => 'Descriptive name'])]
@@ -71,7 +71,7 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     #[ORM\Column(options: ['comment' => 'Short name for this contest'])]
     #[Assert\NotBlank]
     #[Identifier]
-    #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
+    #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
     private string $shortname = '';
 
     #[ORM\Column(
@@ -258,7 +258,7 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     #[ORM\Column(
         options: ['comment' => 'Are submissions accepted in this contest?', 'default' => 1]
     )]
-    #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
+    #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
     private bool $allowSubmit = true;
 
     #[ORM\Column(
@@ -270,7 +270,7 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     #[ORM\Column(
         options: ['comment' => 'Is runtime used as tiebreaker instead of penalty?', 'default' => 0]
     )]
-    #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
+    #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
     private bool $runtime_as_score_tiebreaker = false;
 
     #[ORM\Column(
@@ -299,7 +299,7 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
         options: ['comment' => 'Warning message for this contest shown on the scoreboards']
     )]
     #[OA\Property(nullable: true)]
-    #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
+    #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
     private ?string $warningMessage = null;
 
     #[ORM\Column(
@@ -468,7 +468,7 @@ class Contest extends BaseApiEntity implements AssetEntityInterface
     #[Serializer\VirtualProperty]
     #[Serializer\SerializedName('end_time')]
     #[Serializer\Type('DateTime')]
-    #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
+    #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
     public function getEndTimeObject(): ?DateTime
     {
         return $this->getEndtime() ? new DateTime(Utils::absTime($this->getEndtime())) : null;

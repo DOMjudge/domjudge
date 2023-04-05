@@ -2,7 +2,7 @@
 
 namespace App\Entity;
 
-use App\Controller\API\AbstractRestController;
+use App\Controller\API\AbstractRestController as ARC;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -74,7 +74,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
         options: ['comment' => 'Public team definition; for example: Team member names (freeform)']
     )]
     #[OA\Property(nullable: true)]
-    #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
+    #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
     private ?string $publicDescription = null;
 
     #[ORM\Column(nullable: true, options: ['comment' => 'Physical location of team'])]
@@ -518,7 +518,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
     #[Serializer\VirtualProperty]
     #[Serializer\SerializedName('affiliation')]
     #[Serializer\Type('string')]
-    #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
+    #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
     public function getAffiliationName(): ?string
     {
         return $this->getAffiliation()?->getName();
@@ -527,7 +527,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
     #[OA\Property(nullable: true)]
     #[Serializer\VirtualProperty]
     #[Serializer\Type('string')]
-    #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
+    #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
     #[Serializer\Expose(if: "context.getAttribute('config_service').get('show_flags')")]
     public function getNationality() : ?string
     {

@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 namespace App\Entity;
 
-use App\Controller\API\AbstractRestController;
+use App\Controller\API\AbstractRestController as ARC;
 use App\Utils\Utils;
 use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -49,13 +49,13 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
     private string $username = '';
 
     #[ORM\Column(options: ['comment' => 'Name'])]
-    #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
+    #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
     private string $name = '';
 
     #[ORM\Column(nullable: true, options: ['comment' => 'Email address'])]
     #[Assert\Email]
     #[OA\Property(nullable: true)]
-    #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
+    #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
     private ?string $email = null;
 
     #[ORM\Column(
@@ -94,7 +94,7 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
     #[ORM\Column(nullable: true, options: ['comment' => 'Last IP address of successful login'])]
     #[OA\Property(nullable: true)]
     #[Serializer\SerializedName('last_ip')]
-    #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
+    #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
     private ?string $last_ip_address = null;
 
     #[ORM\Column(nullable: true, options: ['comment' => 'Password hash'])]
@@ -111,7 +111,7 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
     private ?string $ipAddress = null;
 
     #[ORM\Column(options: ['comment' => 'Whether the user is able to log in', 'default' => 1])]
-    #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
+    #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
     private bool $enabled = true;
 
     #[ORM\ManyToOne(inversedBy: 'users')]
@@ -228,7 +228,7 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
     #[Serializer\VirtualProperty]
     #[Serializer\SerializedName('last_login_time')]
     #[Serializer\Type('DateTime')]
-    #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
+    #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
     public function getLastLoginAsDateTime(): ?DateTime
     {
         return $this->getLastLogin() ? new DateTime(Utils::absTime($this->getLastLogin())) : null;
@@ -249,7 +249,7 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
     #[Serializer\VirtualProperty]
     #[Serializer\SerializedName('last_api_login_time')]
     #[Serializer\Type('DateTime')]
-    #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
+    #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
     public function getLastApiLoginAsDateTime(): ?DateTime
     {
         return $this->getLastApiLogin() ? new DateTime(Utils::absTime($this->getLastApiLogin())) : null;
@@ -270,7 +270,7 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
     #[Serializer\VirtualProperty]
     #[Serializer\SerializedName('first_login_time')]
     #[Serializer\Type('DateTime')]
-    #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
+    #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
     public function getFirstLoginAsDateTime(): ?DateTime
     {
         return $this->getFirstLogin() ? new DateTime(Utils::absTime($this->getFirstLogin())) : null;
@@ -348,7 +348,7 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
     #[Serializer\VirtualProperty]
     #[Serializer\SerializedName('team')]
     #[Serializer\Type('string')]
-    #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
+    #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
     public function getTeamName(): ?string
     {
         return $this->getTeam()?->getEffectiveName();
@@ -391,7 +391,7 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
     #[Serializer\VirtualProperty]
     #[Serializer\SerializedName('roles')]
     #[Serializer\Type('array<string>')]
-    #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
+    #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
     public function getRoleList(): array
     {
         $result = [];
