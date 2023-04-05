@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 namespace App\Entity;
 
-use App\Controller\API\AbstractRestController;
+use App\Controller\API\AbstractRestController as ARC;
 use App\Utils\Utils;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -48,7 +48,7 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
         ]
     )]
     #[OA\Property(nullable: true)]
-    #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
+    #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
     protected ?string $externalid = null;
 
     #[ORM\Column(
@@ -80,7 +80,7 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
     private string $body;
 
     #[ORM\Column(options: ['comment' => 'Has been answered by jury?', 'default' => 0])]
-    #[Serializer\Groups([AbstractRestController::GROUP_RESTRICTED_NONSTRICT])]
+    #[Serializer\Groups([ARC::GROUP_RESTRICTED_NONSTRICT])]
     private bool $answered = false;
 
     #[ORM\ManyToOne(inversedBy: 'clarifications')]

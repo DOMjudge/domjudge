@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 namespace App\Entity;
 
-use App\Controller\API\AbstractRestController;
+use App\Controller\API\AbstractRestController as ARC;
 use App\Validator\Constraints\Identifier;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -36,12 +36,12 @@ class Language extends BaseApiEntity
 
     #[ORM\Column(nullable: true, options: ['comment' => 'Language ID to expose in the REST API'])]
     #[Serializer\SerializedName('id')]
-    #[Serializer\Groups([AbstractRestController::GROUP_DEFAULT, AbstractRestController::GROUP_NONSTRICT])]
+    #[Serializer\Groups([ARC::GROUP_DEFAULT, ARC::GROUP_NONSTRICT])]
     protected ?string $externalid = null;
 
     #[ORM\Column(options: ['comment' => 'Descriptive language name'])]
     #[Assert\NotBlank]
-    #[Serializer\Groups([AbstractRestController::GROUP_DEFAULT, AbstractRestController::GROUP_NONSTRICT])]
+    #[Serializer\Groups([ARC::GROUP_DEFAULT, ARC::GROUP_NONSTRICT])]
     private string $name = '';
 
     /**
@@ -61,7 +61,7 @@ class Language extends BaseApiEntity
         'default' => 1,
     ]
     )]
-    #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
+    #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
     private bool $filterCompilerFiles = true;
 
     #[ORM\Column(options: [
@@ -76,7 +76,7 @@ class Language extends BaseApiEntity
         'comment' => 'Are submissions in this language judged?',
         'default' => 1,
     ])]
-    #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
+    #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
     private bool $allowJudge = true;
 
     #[ORM\Column(options: [
@@ -87,7 +87,7 @@ class Language extends BaseApiEntity
     #[Assert\GreaterThan(0)]
     #[Assert\NotBlank]
     #[Serializer\Type('double')]
-    #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
+    #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
     private float $timeFactor = 1;
 
     #[ORM\Column(options: [
@@ -118,7 +118,7 @@ class Language extends BaseApiEntity
     #[Serializer\VirtualProperty]
     #[Serializer\SerializedName('compile_executable_hash')]
     #[Serializer\Type('string')]
-    #[Serializer\Groups([AbstractRestController::GROUP_NONSTRICT])]
+    #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
     public function getCompileExecutableHash(): ?string
     {
         return $this->compile_executable?->getImmutableExecutable()->getHash();
