@@ -2,16 +2,43 @@
 <ruleset name="DOMjudge">
     <description>Project specific exclusions.</description>
     <rule ref="PSR2" />
-    <rule ref="PSR1.Files.SideEffects">
+    <!-- Keep indentation up to the author -->
+    <rule ref="PSR2.Methods.FunctionCallSignature.Indent">
         <severity>0</severity>
     </rule>
+    <!-- We have multiple lines of +120 where splitting is not trivial -->
     <rule ref="Generic.Files.LineLength">
         <severity>0</severity>
     </rule>
-    <rule ref="Generic.Functions.FunctionCallArgumentSpacing">
+    <!-- We use this for empty constructors, empty try/catch -->
+    <rule ref="Squiz.ControlStructures.ControlSignature.NewlineAfterOpenBrace">
         <severity>0</severity>
     </rule>
-    <rule ref="PSR2.Methods.FunctionCallSignature">
+    <rule ref="Squiz.Functions.MultiLineFunctionDeclaration.BraceOnSameLine">
+        <severity>0</severity>
+    </rule>
+    <rule ref="Squiz.WhiteSpace.ScopeClosingBrace.ContentBefore">
+        <severity>0</severity>
+    </rule>
+    <!-- The judgedaemon does this to keep it selfcontained -->
+    <rule ref="PSR1.Files.SideEffects">
+        <exclude-pattern>judge/judgedaemon\.main\.php</exclude-pattern>
+    </rule>
+    <!-- We use this to have a newline for such cases to keep it readable -->
+    <rule ref="Squiz.Functions.MultiLineFunctionDeclaration.OneParamPerLine">
+        <exclude-pattern>webapp/tests/Unit/Controller/API/ScoreboardControllerTest.php</exclude-pattern>
+    </rule>
+    <!-- This will annotate a lot of files now -->
+    <rule ref="PSR2.Methods.FunctionCallSignature.MultipleArguments">
+        <severity>0</severity>
+    </rule>
+    <rule ref="PSR2.Methods.FunctionCallSignature.ContentAfterOpenBracket">
+        <severity>0</severity>
+    </rule>
+    <rule ref="PSR2.Methods.FunctionCallSignature.CloseBracketLine">
+        <severity>0</severity>
+    </rule>
+    <rule ref="PSR2.Methods.FunctionCallSignature.SpaceBeforeCloseBracket">
         <severity>0</severity>
     </rule>
 </ruleset>
