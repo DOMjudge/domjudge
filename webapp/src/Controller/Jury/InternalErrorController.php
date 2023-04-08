@@ -137,9 +137,9 @@ class InternalErrorController extends BaseController
         $internalError = $this->em->createQueryBuilder()
             ->from(InternalError::class, 'e')
             ->leftJoin('e.affectedJudgings', 'j')
-            ->join('j.submission', 's')
-            ->join('j.contest', 'c')
-            ->join('s.team', 't')
+            ->leftJoin('j.submission', 's')
+            ->leftJoin('j.contest', 'c')
+            ->leftJoin('s.team', 't')
             ->leftJoin('s.rejudging', 'r')
             ->select('e, j, s, c, t, r')
             ->where('e.errorid = :id')
@@ -176,7 +176,7 @@ class InternalErrorController extends BaseController
                         sprintf('internal error: %s', InternalErrorStatusType::STATUS_RESOLVED));
 
                     $affectedJudgings = $internalError->getAffectedJudgings();
-                    if (!empty($affectedJudgings)) {
+                    if (!$affectedJudgings->isEmpty()) {
                         $skipped          = [];
                         $rejudging        = $this->rejudgingService->createRejudging(
                             'Internal Error ' . $internalError->getErrorid() . ' resolved',
@@ -201,6 +201,8 @@ class InternalErrorController extends BaseController
                             );
                             $progressReporter(100, '', $message);
                         }
+                    } else {
+                        $progressReporter(100, '', 'No affected judgings.');
                     }
                 });
             });
