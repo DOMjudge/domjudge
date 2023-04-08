@@ -90,7 +90,8 @@ class ResetUserPasswordCommandTest extends BaseTestCase
         self::assertThat(
             $statusCode,
             $this->logicalNot($this->equalTo(new CommandIsSuccessful())),
-            'Command should fail with missing parameters.');
+            'Command should fail with missing parameters.'
+        );
         $output = $this->commandTester->getDisplay();
         $this->assertStringContainsString('[ERROR] Can not find user with username '.$user, $output);
     }
