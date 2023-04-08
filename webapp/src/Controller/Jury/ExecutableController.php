@@ -123,7 +123,7 @@ class ExecutableController extends BaseController
                 $zip         = $this->dj->openZipFile($archive->getRealPath());
                 $filename    = $archive->getClientOriginalName();
                 $id          = substr($filename, 0, strlen($filename) - strlen(".zip"));
-                if (! preg_match ('#^[a-z0-9_-]+$#i', $id)) {
+                if (! preg_match('#^[a-z0-9_-]+$#i', $id)) {
                     throw new InvalidArgumentException(sprintf("File base name '%s' must contain only alphanumerics", $id));
                 }
                 $description = $id;
