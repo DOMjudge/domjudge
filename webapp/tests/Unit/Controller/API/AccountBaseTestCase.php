@@ -204,7 +204,7 @@ EOF;
         foreach (['9999','nan','nonexistent'] as $nonExpectedObjectId) {
             $url = $this->helperGetEndpointURL($this->apiEndpoint)."?team=".$nonExpectedObjectId;
             $objects = $this->verifyApiJsonResponse('GET', $url, 200, $this->apiUser);
-            self::assertEquals([],$objects);
+            self::assertEquals([], $objects);
         }
         foreach ($this->expectedObjects as $expectedObject) {
             if (!isset($expectedObject['team_id'])) {
@@ -222,7 +222,7 @@ EOF;
                     }
                 }
             }
-            self::assertEquals(true,$found);
+            self::assertEquals(true, $found);
         }
     }
 }
