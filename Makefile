@@ -45,7 +45,7 @@ endif
 
 # MAIN TARGETS
 domserver judgehost docs: paths.mk config
-install-domserver: domserver domserver-create-dirs
+install-domserver: domserver composer-dump-autoload domserver-create-dirs
 install-judgehost: judgehost judgehost-create-dirs
 install-docs: docs-create-dirs
 dist: configure composer-dependencies
@@ -61,6 +61,15 @@ endif
 
 composer-dependencies-dev:
 	composer $(subst 1,-q,$(QUIET)) install --prefer-dist --no-scripts --no-plugins
+
+# Dump autoload dependencies (including plugins)
+# This is needed since symfony/runtime is a Composer plugin that runs while dumping
+# the autoload file
+composer-dump-autoload:
+	composer $(subst 1,-q,$(QUIET)) dump-autoload -o -a
+
+composer-dump-autoload-dev:
+	composer $(subst 1,-q,$(QUIET)) dump-autoload
 
 # Generate documentation for distribution. Remove this dependency from
 # dist above for quicker building from git sources.
@@ -202,8 +211,8 @@ webapp/.env.local:
 # Install the system in place: don't really copy stuff, but create
 # symlinks where necessary to let it work from the source tree.
 # This stuff is a hack!
-maintainer-install: inplace-install
-inplace-install: build domserver-create-dirs judgehost-create-dirs
+maintainer-install: inplace-install composer-dump-autoload-dev
+inplace-install: build composer-dump-autoload domserver-create-dirs judgehost-create-dirs
 inplace-install-l:
 # Replace libjudgedir with symlink to prevent lots of symlinks:
 	-rmdir $(judgehost_libjudgedir)
@@ -322,4 +331,5 @@ clean-autoconf:
         $(addprefix inplace-,conf conf-common install uninstall) \
         $(addprefix maintainer-,conf install) clean-autoconf config distdocs \
         composer-dependencies composer-dependencies-dev \
+        composer-dump-autoload composer-dump-autoload-dev \
         coverity-conf coverity-build
