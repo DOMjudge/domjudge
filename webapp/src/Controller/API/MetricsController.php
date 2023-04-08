@@ -235,7 +235,7 @@ class MetricsController extends AbstractFOSRestController
             foreach ($balloons_waiting as $b) {
                 $t = $b->getSubmission()->getSubmittime();
                 $t2 = $n-$t;
-                $balloons_longest_waitingtime = max($t2,$balloons_longest_waitingtime);
+                $balloons_longest_waitingtime = max($t2, $balloons_longest_waitingtime);
             }
             $m['balloons_longest_waitingtime']->set($balloons_longest_waitingtime, $labels);
         }
