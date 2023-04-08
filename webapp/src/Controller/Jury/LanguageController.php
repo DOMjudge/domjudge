@@ -137,8 +137,6 @@ class LanguageController extends BaseController
     // Note that the add action appears before the view action to make sure
     // /add is not seen as a language.
     #[IsGranted('ROLE_ADMIN')]
-    // Note that the add action appears before the view action to make sure
-    // /add is not seen as a language.
     #[Route(path: '/add', name: 'jury_language_add')]
     public function addAction(Request $request): Response
     {
