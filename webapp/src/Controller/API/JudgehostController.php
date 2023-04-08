@@ -820,7 +820,9 @@ class JudgehostController extends AbstractFOSRestController
         $this->em->persist($error);
         // Even if there are no remaining judge tasks for this judging open (which is covered by the transaction below),
         // we need to mark this judging as internal error.
-        $judging->setInternalError($error);
+        if ($judging) {
+            $judging->setInternalError($error);
+        }
         $this->em->flush();
 
         if ($field_name !== null) {
