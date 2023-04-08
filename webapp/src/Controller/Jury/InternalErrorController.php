@@ -136,7 +136,7 @@ class InternalErrorController extends BaseController
         /** @var InternalError $internalError */
         $internalError = $this->em->createQueryBuilder()
             ->from(InternalError::class, 'e')
-            ->join('e.affectedJudgings', 'j')
+            ->leftJoin('e.affectedJudgings', 'j')
             ->join('j.submission', 's')
             ->join('j.contest', 'c')
             ->join('s.team', 't')
