@@ -18,7 +18,7 @@
 
 .normal_job:
   extends: [.clean_ordering]
-  timeout: 15m
+  timeout: 20m
 
 .long_job:
   extends: [.clean_ordering]
