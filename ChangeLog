@@ -3,6 +3,7 @@ DOMjudge Programming Contest Judging System
 Version 8.3.0DEV
 ----------------------------
  - Document that minimum PHP version is now 8.1.0.
+ - Upgrade Symfony to 6.2 and upgrade other library dependencies.
 
 Version 8.2.0 - 6 March 2023
 ----------------------------
