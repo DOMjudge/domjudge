@@ -159,6 +159,7 @@ fields:
 
 - ``id``: the team ID. Must be unique
 - ``icpc_id`` (optional): an ID from an external system, e.g. from the ICPC CMS, may be empty
+- ``label``: (optional): the label, for example the saat number
 - ``group_ids``: an array with one element: the category ID this team belongs to
 - ``name``: the team name as used in the web interface
 - ``members`` (optional): Members of the team as one long string
@@ -178,6 +179,7 @@ Example ``teams.json``::
   [{
     "id": "1",
     "icpc_id": "447047",
+    "label": "1",
     "group_ids": ["24"],
     "name": "¡i¡i¡",
     "organization_id": "INST-42",
@@ -185,6 +187,7 @@ Example ``teams.json``::
   }, {
     "id": "2",
     "icpc_id": "447837",
+    "label": "2",
     "group_ids": ["25"],
     "name": "Pleading not FAUlty",
     "organization_id": "INST-43"

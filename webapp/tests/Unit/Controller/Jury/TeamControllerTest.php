@@ -18,7 +18,7 @@ class TeamControllerTest extends JuryControllerTestCase
     protected static string  $className                = Team::class;
     protected static array   $DOM_elements             = ['h1' => ['Teams']];
     protected static string  $addForm                  = 'team[';
-    protected static array   $addEntitiesShown         = ['icpcid', 'displayName', 'room'];
+    protected static array   $addEntitiesShown         = ['icpcid', 'label', 'displayName', 'room'];
     protected static array   $overviewNotShown         = ['addUserForTeam'];
     protected static array   $addEntitiesCount         = ['contests'];
     protected static array   $addEntities              = [['name' => 'New Team',
@@ -50,7 +50,7 @@ class TeamControllerTest extends JuryControllerTestCase
                                                            'addUserForTeam' => Team::ADD_EXISTING_USER,
                                                            'existingUser' => 3],
                                                           ['name' => 'external_ID',
-                                                          'icpcid' => '12',
+                                                          'label' => 'teamlabel',
                                                           'displayName' => 'With External ID'],
                                                           ['name' => 'no_members',
                                                           'publicdescription' => '',

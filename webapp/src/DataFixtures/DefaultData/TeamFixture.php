@@ -21,6 +21,7 @@ class TeamFixture extends AbstractDefaultDataFixture implements DependentFixture
             $team = (new Team())
                 ->setName('DOMjudge')
                 ->setExternalid('domjudge')
+                ->setLabel('domjudge')
                 ->setCategory($this->getReference(TeamCategoryFixture::SYSTEM_REFERENCE));
             $manager->persist($team);
         } else {

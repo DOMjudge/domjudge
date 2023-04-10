@@ -4,6 +4,7 @@ namespace App\Tests\Unit\Service;
 
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
+use App\Entity\Team;
 use App\Entity\User;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
@@ -613,6 +614,154 @@ EOF;
         foreach ($unexpectedUsers as $username) {
             $user = $em->getRepository(User::class)->findOneBy(['username' => $username]);
             self::assertNull($user, "User $username should not exist");
+        }
+    }
+
+    public function testImportTeamsTsv()
+    {
+        // Example from the manual, but we have changed the ID's to not mix them with fixtures
+        $teamsData = <<<EOF
+File_Version	2
+11	447047	24	¡i¡i¡	Lund University	LU	SWE	INST-42
+12	447837	25	Pleading not FAUlty	Friedrich-Alexander-University Erlangen-Nuremberg	FAU	DEU	INST-43
+EOF;
+
+        $expectedTeams = [
+            [
+                'externalid' => '11',
+                'icpcid' => '447047',
+                'label' => null,
+                'name' => '¡i¡i¡',
+                'category' => [
+                    'externalid' => '24',
+                ],
+                'affiliation' => [
+                    'externalid' => '42',
+                    'shortname' => 'LU',
+                    'name' => 'Lund University',
+                    'country' => 'SWE',
+                ],
+            ], [
+                'externalid' => '12',
+                'icpcid' => '447837',
+                'label' => null,
+                'name' => 'Pleading not FAUlty',
+                'category' => [
+                    'externalid' => '25',
+                ],
+                'affiliation' => [
+                    'externalid' => '43',
+                    'shortname' => 'FAU',
+                    'name' => 'Friedrich-Alexander-University Erlangen-Nuremberg',
+                    'country' => 'DEU',
+                ],
+            ],
+        ];
+
+        $fileName = tempnam(static::getContainer()->get(DOMJudgeService::class)->getDomjudgeTmpDir(), 'teams-tsv');
+        file_put_contents($fileName, $teamsData);
+        $file = new UploadedFile($fileName, 'teams.tsv');
+        /** @var ImportExportService $importExportService */
+        $importExportService = static::getContainer()->get(ImportExportService::class);
+        $importCount = $importExportService->importTsv('teams', $file, $message);
+        // Remove the file, we don't need it anymore.
+        unlink($fileName);
+
+        self::assertNull($message);
+        self::assertEquals(2, $importCount);
+
+        /** @var EntityManagerInterface $em */
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+
+        foreach ($expectedTeams as $data) {
+            $team = $em->getRepository(Team::class)->findOneBy(['externalid' => $data['externalid']]);
+            self::assertNotNull($team, "Team $data[name] does not exist");
+            self::assertEquals($data['icpcid'], $team->getIcpcId());
+            self::assertEquals($data['label'], $team->getLabel());
+            self::assertEquals($data['name'], $team->getName());
+            self::assertNull($team->getRoom());
+            self::assertEquals($data['category']['externalid'], $team->getCategory()->getExternalid());
+            self::assertEquals($data['affiliation']['externalid'], $team->getAffiliation()->getExternalid());
+            self::assertEquals($data['affiliation']['shortname'], $team->getAffiliation()->getShortname());
+            self::assertEquals($data['affiliation']['name'], $team->getAffiliation()->getName());
+            self::assertEquals($data['affiliation']['country'], $team->getAffiliation()->getCountry());
+        }
+    }
+
+    public function testImportTeamsJson()
+    {
+        // Example from the manual, but we have changed the ID's to not mix them with fixtures and
+        // we explicitly use a different label for the first team and no label for the second
+        $teamsData = <<<EOF
+[{
+    "id": "11",
+    "icpc_id": "447047",
+    "label": "team1",
+    "group_ids": ["24"],
+    "name": "¡i¡i¡",
+    "organization_id": "INST-42",
+    "room": "AUD 10"
+}, {
+    "id": "12",
+    "icpc_id": "447837",
+    "group_ids": ["25"],
+    "name": "Pleading not FAUlty",
+    "organization_id": "INST-43"
+}]
+EOF;
+
+        $expectedTeams = [
+            [
+                'externalid' => '11',
+                'icpcid' => '447047',
+                'label' => 'team1',
+                'name' => '¡i¡i¡',
+                'room' => 'AUD 10',
+                'category' => [
+                    'externalid' => '24',
+                ],
+                'affiliation' => [
+                    'externalid' => 'INST-42',
+                ],
+            ], [
+                'externalid' => '12',
+                'icpcid' => '447837',
+                'label' => null,
+                'name' => 'Pleading not FAUlty',
+                'room' => null,
+                'category' => [
+                    'externalid' => '25',
+                ],
+                'affiliation' => [
+                    'externalid' => 'INST-43',
+                ],
+            ],
+        ];
+
+        $fileName = tempnam(static::getContainer()->get(DOMJudgeService::class)->getDomjudgeTmpDir(), 'teams-json');
+        file_put_contents($fileName, $teamsData);
+        $file = new UploadedFile($fileName, 'teams.json');
+        /** @var ImportExportService $importExportService */
+        $importExportService = static::getContainer()->get(ImportExportService::class);
+        $importCount = $importExportService->importJson('teams', $file, $message);
+        // Remove the file, we don't need it anymore.
+        unlink($fileName);
+
+        self::assertNull($message);
+        self::assertEquals(2, $importCount);
+
+        /** @var EntityManagerInterface $em */
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+
+        foreach ($expectedTeams as $data) {
+            $team = $em->getRepository(Team::class)->findOneBy(['externalid' => $data['externalid']]);
+            self::assertNotNull($team, "Team $data[name] does not exist");
+            self::assertEquals($data['icpcid'], $team->getIcpcId());
+            self::assertEquals($data['label'], $team->getLabel());
+            self::assertEquals($data['room'], $team->getRoom());
+            self::assertEquals($data['name'], $team->getName());
+            self::assertEquals($data['category']['externalid'], $team->getCategory()->getExternalid());
+            self::assertEquals($data['affiliation']['externalid'], $team->getAffiliation()->getExternalid());
         }
     }
 

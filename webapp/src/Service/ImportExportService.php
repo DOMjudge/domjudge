@@ -769,6 +769,7 @@ class ImportExportService
                 'team' => [
                     'teamid' => $team['id'] ?? null,
                     'icpcid' => $team['icpc_id'] ?? null,
+                    'label' => $team['label'] ?? null,
                     'categoryid' => $team['group_ids'][0] ?? null,
                     'name' => @$team['name'],
                     'display_name' => @$team['display_name'],
@@ -891,7 +892,8 @@ class ImportExportService
                     $teamAffiliation = new TeamAffiliation();
                     $teamAffiliation
                         ->setExternalid($teamItem['team_affiliation']['externalid'])
-                        ->setName($teamItem['team_affiliation']['externalid'] . ' - auto-create during import');
+                        ->setName($teamItem['team_affiliation']['externalid'] . ' - auto-create during import')
+                        ->setShortname($teamItem['team_affiliation']['externalid'] . ' - auto-create during import');
                     $this->em->persist($teamAffiliation);
                     $this->dj->auditlog('team_affiliation',
                         $teamAffiliation->getAffilid(),
