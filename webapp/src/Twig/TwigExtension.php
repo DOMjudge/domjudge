@@ -13,6 +13,7 @@ use App\Entity\Language;
 use App\Entity\Submission;
 use App\Entity\SubmissionFile;
 use App\Entity\TeamCategory;
+use App\Entity\Team;
 use App\Entity\Testcase;
 use App\Service\AwardService;
 use App\Service\ConfigurationService;
@@ -1156,10 +1157,16 @@ EOF;
         $primaryKeyColumn = $metadata->getIdentifierColumnNames()[0];
         $externalIdField = $this->eventLogService->externalIdFieldForEntity($entity);
 
-        return $this->twig->render('jury/entity_id_badge.html.twig', [
+        $data = [
             'idPrefix' => $idPrefix,
             'id' => $propertyAccessor->getValue($entity, $primaryKeyColumn),
             'externalId' => $externalIdField ? $propertyAccessor->getValue($entity, $externalIdField) : null,
-        ]);
+        ];
+
+        if ($entity instanceof Team) {
+            $data['label'] = $entity->getLabel();
+        }
+
+        return $this->twig->render('jury/entity_id_badge.html.twig', $data);
     }
 }
