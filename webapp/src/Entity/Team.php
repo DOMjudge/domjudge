@@ -53,7 +53,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
 
     #[ORM\Column(
         nullable: true,
-        options: ['comment' => 'Team label, for example the saat number', 'collation' => 'utf8mb4_bin']
+        options: ['comment' => 'Team label, for example the seat number', 'collation' => 'utf8mb4_bin']
     )]
     #[OA\Property(nullable: true)]
     protected ?string $label = null;
