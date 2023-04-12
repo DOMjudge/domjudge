@@ -60,8 +60,19 @@ class AwardService
 
         $additionalBronzeMedals = $contest->getB() ?? 0;
 
-        // Can we assume this is ordered just walk the first 12+B entries?
+        $currentSortOrder = -1;
+
+        // For every team that we skip because it is not in a medal category, we need to include one
+        // additional rank. So keep track of the number of skipped teams
+        $skippedTeams = 0;
+
         foreach ($scoreboard->getScores() as $teamScore) {
+            // If we are checking a new sort order, reset the number of skipped teams
+            if ($teamScore->team->getCategory()->getSortorder() !== $currentSortOrder) {
+                $currentSortOrder = $teamScore->team->getCategory()->getSortorder();
+                $skippedTeams = 0;
+            }
+
             if ($teamScore->numPoints == 0) {
                 continue;
             }
@@ -70,13 +81,17 @@ class AwardService
             if ($rank === 1) {
                 $overall_winners[] = $teamid;
             }
-            if ($contest->getMedalsEnabled() && $contest->getMedalCategories()->contains($teamScore->team->getCategory())) {
-                if ($rank <= $contest->getGoldMedals()) {
-                    $medal_winners['gold'][] = $teamid;
-                } elseif ($rank <= $contest->getGoldMedals() + $contest->getSilverMedals()) {
-                    $medal_winners['silver'][] = $teamid;
-                } elseif ($rank <= $contest->getGoldMedals() + $contest->getSilverMedals() + $contest->getBronzeMedals() + $additionalBronzeMedals) {
-                    $medal_winners['bronze'][] = $teamid;
+            if ($contest->getMedalsEnabled()) {
+                if ($contest->getMedalCategories()->contains($teamScore->team->getCategory())) {
+                    if ($rank - $skippedTeams <= $contest->getGoldMedals()) {
+                        $medal_winners['gold'][] = $teamid;
+                    } elseif ($rank - $skippedTeams <= $contest->getGoldMedals() + $contest->getSilverMedals()) {
+                        $medal_winners['silver'][] = $teamid;
+                    } elseif ($rank - $skippedTeams <= $contest->getGoldMedals() + $contest->getSilverMedals() + $contest->getBronzeMedals() + $additionalBronzeMedals) {
+                        $medal_winners['bronze'][] = $teamid;
+                    }
+                } else {
+                    $skippedTeams++;
                 }
             }
         }
