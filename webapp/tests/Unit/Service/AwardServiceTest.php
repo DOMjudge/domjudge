@@ -21,10 +21,10 @@ class AwardServiceTest extends KernelTestCase
 
     protected function setUp(): void
     {
-        // The contest will have 1 gold, 1 silver and 2 bronze medals
+        // The contest will have 2 gold, 2 silver and 2 bronze medals, awarded only to category A and C
         $this->contest = (new Contest())
             ->setMedalsEnabled(true)
-            ->setGoldMedals(1)
+            ->setGoldMedals(2)
             ->setSilverMedals(1)
             ->setBronzeMedals(1);
         $categoryA = (new TeamCategory())
@@ -33,22 +33,33 @@ class AwardServiceTest extends KernelTestCase
         $categoryB = (new TeamCategory())
             ->setName('Category B')
             ->setExternalid('cat_B');
+        $categoryC = (new TeamCategory())
+            ->setName('Category C')
+            ->setExternalid('cat_C');
         $this->contest
             ->addMedalCategory($categoryA)
-            ->addMedalCategory($categoryB);
+            ->addMedalCategory($categoryC);
         $reflectedProblem = new ReflectionClass(TeamCategory::class);
-        $teamIdProperty = $reflectedProblem->getProperty('categoryid');
-        $teamIdProperty->setAccessible(true);
-        $teamIdProperty->setValue($categoryA, 1);
-        $teamIdProperty->setValue($categoryB, 2);
+        $categoryIdProperty = $reflectedProblem->getProperty('categoryid');
+        $categoryIdProperty->setAccessible(true);
+        $categoryIdProperty->setValue($categoryA, 1);
+        $categoryIdProperty->setValue($categoryB, 2);
+        $categoryIdProperty->setValue($categoryC, 3);
         $categories = [$categoryA, $categoryB];
-        // Create 4 teams, each belonging to a category
+        // Create 9 teams, each belonging to a different category
         $teams = [];
-        foreach (['A', 'B', 'C', 'D'] as $teamLetter) {
+        foreach (['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'] as $teamLetter) {
+            $category = $categoryC;
+            if (in_array($teamLetter, ['A', 'B', 'C'])) {
+                $category = $categoryA;
+            }
+            if (in_array($teamLetter, ['D', 'E', 'F'])) {
+                $category = $categoryB;
+            }
             $team = (new Team())
                 ->setName('Team ' . $teamLetter)
                 ->setExternalid('team_' . $teamLetter)
-                ->setCategory(in_array($teamLetter, ['A', 'B']) ? $categoryA : $categoryB)
+                ->setCategory($category)
                 ->setAffiliation(); // No affiliation needed
             $reflectedProblem = new ReflectionClass(Team::class);
             $teamIdProperty = $reflectedProblem->getProperty('teamid');
@@ -81,16 +92,25 @@ class AwardServiceTest extends KernelTestCase
         // -----+-----------
         // A    | 1  5  10 20
         // B    | x  2  3  x
-        // C    | x  x  x  4
-        // D    | x  x  x  x
+        // C    | x  2  3  x
+        // D    | x  x  x  12
+        // E    | x  x  x  13
+        // F    | x  x  x  14
+        // G    | x  x  x  15
+        // H    | x  x  x  x
+        // I    | x  x  x  x
         //
         // THis means A is the overall winner, will get a gold medal and is the winner
         // of category A. It is also first to solve problem A.
-        // B is second, so it gets a silver medal. It is also first to solve problem B and C
-        // C is the first to solve problem D, gets a bronze medal and is winner of category B.
-        // D didn't solve anything, so it will not get any medals at all
+        // B is second, so it also gets a gold medal. It is also first to solve problem B and C
+        // C scored the exact same as B, so it also gets the same medals
+        // D is the first to solve problem D and is the winner of category B. But will not get any medal.
+        // E and F will get no awards at all.
+        // G is the winner of category C and will get a bronze medal.
+        // The reason G doesn't get silver is that C would get silver if it was ranked differently,
+        // but it is not.
+        // H and I didn't solve anything, so it will not get any medals at all
 
-        $minute = 60;
         // Indexed first by team, then by problem
         $scores = [
             'A' => [
@@ -104,7 +124,20 @@ class AwardServiceTest extends KernelTestCase
                 'C' => 3,
             ],
             'C' => [
-                'D' => 4,
+                'B' => 2,
+                'C' => 3,
+            ],
+            'D' => [
+                'D' => 12,
+            ],
+            'E' => [
+                'D' => 13,
+            ],
+            'F' => [
+                'D' => 14,
+            ],
+            'G' => [
+                'D' => 15,
             ],
         ];
         $scoreCache = [];
@@ -112,7 +145,7 @@ class AwardServiceTest extends KernelTestCase
             foreach ($scoresForTeam as $problemLabel => $minute) {
                 $firstToSolve = in_array(
                     $teamLabel . $problemLabel,
-                    ['AA', 'BB', 'BC', 'CD']
+                    ['AA', 'BB', 'BC', 'CB', 'CC', 'DD']
                 );
                 $scoreCache[] = (new ScoreCache())
                     ->setContest($this->contest)
@@ -164,15 +197,19 @@ class AwardServiceTest extends KernelTestCase
     public function testMedals(): void
     {
         $medals = [
-            'gold' => 'team_A',
-            'silver' => 'team_B',
-            'bronze' => 'team_C',
+            'gold' => ['team_A', 'team_B', 'team_C'],
+            'silver' => [],
+            'bronze' => ['team_G'],
         ];
-        foreach ($medals as $medal => $team) {
+        foreach ($medals as $medal => $teams) {
             $medalAward = $this->getAward($medal . '-medal');
-            static::assertNotNull($medalAward);
-            static::assertEquals(ucfirst($medal) . ' medal winner', $medalAward['citation']);
-            static::assertEquals([$team], $medalAward['team_ids']);
+            if (empty($teams)) {
+                static::assertNull($medalAward);
+            } else {
+                static::assertNotNull($medalAward);
+                static::assertEquals(ucfirst($medal) . ' medal winner', $medalAward['citation']);
+                static::assertEquals($teams, $medalAward['team_ids']);
+            }
         }
     }
 
@@ -187,22 +224,29 @@ class AwardServiceTest extends KernelTestCase
         $groupBWinner = $this->getAward('group-winner-cat_B');
         static::assertNotNull($groupBWinner);
         static::assertEquals('Winner(s) of group Category B', $groupBWinner['citation']);
-        static::assertEquals(['team_C'], $groupBWinner['team_ids']);
+        static::assertEquals(['team_D'], $groupBWinner['team_ids']);
+
+        $a = $this->getAwardService()->getAwards($this->contest, $this->scoreboard);
+        $groupBWinner = $this->getAward('group-winner-cat_C');
+        static::assertNotNull($groupBWinner);
+        static::assertEquals('Winner(s) of group Category C', $groupBWinner['citation']);
+        static::assertEquals(['team_G'], $groupBWinner['team_ids']);
     }
 
     public function testFirstToSolve(): void
     {
         $fts = [
-            'A' => 'A',
-            'B' => 'B',
-            'C' => 'B',
-            'D' => 'C',
+            'A' => ['A'],
+            'B' => ['B', 'C'],
+            'C' => ['B', 'C'],
+            'D' => ['D'],
         ];
-        foreach ($fts as $problem => $team) {
+        foreach ($fts as $problem => $teams) {
             $firstToSolve = $this->getAward('first-to-solve-problem_' . $problem);
             static::assertNotNull($firstToSolve);
             static::assertEquals('First to solve problem ' . $problem, $firstToSolve['citation']);
-            static::assertEquals(['team_' . $team], $firstToSolve['team_ids']);
+            $teamIds = array_map(static fn(string $team) => 'team_' . $team, $teams);
+            static::assertEquals($teamIds, $firstToSolve['team_ids']);
         }
     }
 
@@ -219,8 +263,13 @@ class AwardServiceTest extends KernelTestCase
     public function provideMedalType(): \Generator
     {
         yield [0, 'gold-medal'];
-        yield [1, 'silver-medal'];
-        yield [2, 'bronze-medal'];
+        yield [1, 'gold-medal'];
+        yield [2, 'gold-medal'];
         yield [3, null];
+        yield [4, null];
+        yield [5, null];
+        yield [6, 'bronze-medal'];
+        yield [7, null];
+        yield [8, null];
     }
 }
