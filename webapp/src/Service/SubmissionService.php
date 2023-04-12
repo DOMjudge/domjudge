@@ -724,7 +724,7 @@ class SubmissionService
         });
         $response->headers->set('Content-Type', 'application/zip');
         $response->headers->set('Content-Disposition', 'attachment; filename="' . $filename . '"');
-        $response->headers->set('Content-Length', filesize($tmpfname));
+        $response->headers->set('Content-Length', (string)filesize($tmpfname));
         $response->headers->set('Content-Transfer-Encoding', 'binary');
         $response->headers->set('Connection', 'Keep-Alive');
         $response->headers->set('Accept-Ranges', 'bytes');

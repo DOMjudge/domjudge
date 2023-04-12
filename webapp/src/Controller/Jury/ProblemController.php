@@ -336,7 +336,7 @@ class ProblemController extends BaseController
         });
         $response->headers->set('Content-Type', 'application/zip');
         $response->headers->set('Content-Disposition', 'attachment; filename="' . $zipFilename . '"');
-        $response->headers->set('Content-Length', filesize($tempFilename));
+        $response->headers->set('Content-Length', (string)filesize($tempFilename));
         $response->headers->set('Content-Transfer-Encoding', 'binary');
         $response->headers->set('Connection', 'Keep-Alive');
         $response->headers->set('Accept-Ranges', 'bytes');
@@ -830,7 +830,7 @@ class ProblemController extends BaseController
         });
         $response->headers->set('Content-Type', sprintf('%s; name="%s', $mimetype, $filename));
         $response->headers->set('Content-Disposition', sprintf('inline; filename="%s"', $filename));
-        $response->headers->set('Content-Length', strlen($content));
+        $response->headers->set('Content-Length', (string)strlen($content));
 
         return $response;
     }
