@@ -732,7 +732,7 @@ class ScoreboardService
             $scoreFilter = [];
             foreach (['affiliations', 'countries', 'categories'] as $type) {
                 if ($request->query->has($type)) {
-                    $scoreFilter[$type] = $request->query->get($type);
+                    $scoreFilter[$type] = $request->query->all($type);
                 }
             }
         }
