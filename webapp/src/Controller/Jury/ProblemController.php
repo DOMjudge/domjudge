@@ -495,13 +495,13 @@ class ProblemController extends BaseController
             $outputLimit   = $this->config->get('output_limit');
             $thumbnailSize = $this->config->get('thumbnail_size');
             foreach ($testcases as $rank => $testcase) {
-                $newSample = isset($request->request->get('sample')[$rank]);
+                $newSample = isset($request->request->all('sample')[$rank]);
                 if ($newSample !== $testcase->getSample()) {
                     $testcase->setSample($newSample);
                     $messages[] = sprintf('Set testcase %d to %sbe a sample testcase', $rank, $newSample ? '' : 'not ');
                 }
 
-                $newDescription = $request->request->get('description')[$rank];
+                $newDescription = $request->request->all('description')[$rank];
                 if ($newDescription !== $testcase->getDescription(true)) {
                     $testcase->setDescription($newDescription);
                     $messages[] = sprintf('Updated description of testcase %d ', $rank);
@@ -509,7 +509,7 @@ class ProblemController extends BaseController
 
                 foreach (['input', 'output', 'image'] as $type) {
                     /** @var UploadedFile $file */
-                    if ($file = $request->files->get('update_' . $type)[$rank]) {
+                    if ($file = $request->files->all('update_' . $type)[$rank]) {
                         if (!$file->isValid()) {
                             $this->addFlash('danger', sprintf('File upload error %s %s: %s. No changes made.', $type, $rank, $file->getErrorMessage()));
                             return $this->redirectToRoute('jury_problem_testcases', ['probId' => $probId]);
