@@ -19,7 +19,7 @@ use App\Utils\Scoreboard\Scoreboard;
 use App\Utils\Scoreboard\SingleTeamScoreboard;
 use App\Utils\Scoreboard\TeamScore;
 use App\Utils\Utils;
-use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
@@ -693,8 +693,8 @@ class ScoreboardService
             'problemIds' => $problemIds,
         ];
         $types  = [
-            'problemIds' => Connection::PARAM_INT_ARRAY,
-            'teamIds' => Connection::PARAM_INT_ARRAY,
+            'problemIds' => ArrayParameterType::INTEGER,
+            'teamIds' => ArrayParameterType::INTEGER,
         ];
         $this->em->getConnection()->executeQuery(
             'DELETE FROM scorecache WHERE cid = :cid AND probid NOT IN (:problemIds)',
