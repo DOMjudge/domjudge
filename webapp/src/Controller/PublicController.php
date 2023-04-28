@@ -9,6 +9,7 @@ use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\ScoreboardService;
 use App\Service\StatisticsService;
+use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use ReflectionClass;
@@ -135,25 +136,9 @@ class PublicController extends BaseController
             $fontName = basename($fontFile);
             $zip->addFile($fontFile, 'webfonts/' . $fontName);
         }
-
         $zip->close();
 
-        $zipFilename = 'contest.zip';
-
-        $response = new StreamedResponse();
-        $response->setCallback(function () use ($tempFilename) {
-            $fp = fopen($tempFilename, 'rb');
-            fpassthru($fp);
-            unlink($tempFilename);
-        });
-        $response->headers->set('Content-Type', 'application/zip');
-        $response->headers->set('Content-Disposition', 'attachment; filename="' . $zipFilename . '"');
-        $response->headers->set('Content-Length', (string)filesize($tempFilename));
-        $response->headers->set('Content-Transfer-Encoding', 'binary');
-        $response->headers->set('Connection', 'Keep-Alive');
-        $response->headers->set('Accept-Ranges', 'bytes');
-
-        return $response;
+        return Utils::streamZipFile($tempFilename, 'contest.zip');
     }
 
     /**
