@@ -95,8 +95,7 @@ class MetricsController extends AbstractFOSRestController
             ->getResult();
 
         // Compute some regular gauges (how many submissions pending, etc).
-        $include_future = true;
-        foreach ($this->dj->getCurrentContests(null, $include_future) as $contest) {
+        foreach ($this->dj->getCurrentContests(alsofuture: true) as $contest) {
             $labels = [$contest->getShortname()];
 
             // Get submissions stats for the contest.

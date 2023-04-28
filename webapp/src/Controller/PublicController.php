@@ -44,8 +44,7 @@ class PublicController extends BaseController
         $response   = new Response();
         $static     = $request->query->getBoolean('static');
         $refreshUrl = $this->generateUrl('public_index');
-        // Determine contest to use
-        $contest = $this->dj->getCurrentContest(-1);
+        $contest    = $this->dj->getCurrentContest(onlyPublic: true);
 
         if ($static) {
             $refreshParams = [
@@ -85,7 +84,7 @@ class PublicController extends BaseController
         string $vendorDir,
         Request $request
     ): Response {
-        $contest = $this->getContestFromRequest($request) ?? $this->dj->getCurrentContest(-1);
+        $contest = $this->getContestFromRequest($request) ?? $this->dj->getCurrentContest(onlyPublic: true);
         $data    = $this->scoreboardService->getScoreboardTwigData(
                 $request, null, '', false, true, true, $contest
             ) + ['hide_menu' => true, 'current_contest' => $contest];
@@ -152,7 +151,7 @@ class PublicController extends BaseController
             if ($contestId === 'auto') {
                 // Automatically detect the contest that is activated the latest.
                 $activateTime = null;
-                foreach ($this->dj->getCurrentContests(-1) as $possibleContest) {
+                foreach ($this->dj->getCurrentContests(onlyPublic: true) as $possibleContest) {
                     if (!($possibleContest->getPublic() && $possibleContest->getEnabled())) {
                         continue;
                     }
@@ -163,7 +162,7 @@ class PublicController extends BaseController
                 }
             } else {
                 // Find the contest with the given ID.
-                foreach ($this->dj->getCurrentContests(-1) as $possibleContest) {
+                foreach ($this->dj->getCurrentContests(onlyPublic: true) as $possibleContest) {
                     if ($possibleContest->getCid() == $contestId || $possibleContest->getExternalid() == $contestId) {
                         $contest = $possibleContest;
                         break;
@@ -221,7 +220,7 @@ class PublicController extends BaseController
     public function problemsAction(): Response
     {
         return $this->render('public/problems.html.twig',
-            $this->dj->getTwigDataForProblemsAction(-1, $this->stats));
+            $this->dj->getTwigDataForProblemsAction($this->stats));
     }
 
     #[Route(path: '/problems/{probId<\d+>}/text', name: 'public_problem_text')]
@@ -271,7 +270,7 @@ class PublicController extends BaseController
      */
     protected function getBinaryFile(int $probId, callable $response): StreamedResponse
     {
-        $contest = $this->dj->getCurrentContest(-1);
+        $contest = $this->dj->getCurrentContest(onlyPublic: true);
         if (!$contest || !$contest->getFreezeData()->started()) {
             throw new NotFoundHttpException(sprintf('Problem p%d not found or not available', $probId));
         }
