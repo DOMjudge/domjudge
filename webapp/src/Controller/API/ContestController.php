@@ -208,21 +208,7 @@ class ContestController extends AbstractRestController
     public function deleteBannerAction(Request $request, string $cid): Response
     {
         /** @var Contest $contest */
-        $contest = $this->getQueryBuilder($request)
-            ->andWhere(sprintf('%s = :id', $this->getIdField()))
-            ->setParameter('id', $cid)
-            ->getQuery()
-            ->getOneOrNullResult();
-
-        if ($contest === null) {
-            throw new NotFoundHttpException(sprintf('Object with ID \'%s\' not found', $cid));
-        }
-
-        if ($contest->isLocked()) {
-            $contestUrl = $this->generateUrl('jury_contest', ['contestId' => $cid], UrlGeneratorInterface::ABSOLUTE_URL);
-            throw new AccessDeniedHttpException('Contest is locked, go to ' . $contestUrl . ' to unlock it.');
-        }
-
+        $contest = $this->getContestAndCheckIfLocked($request, $cid);
         $contest->setClearBanner(true);
 
         $this->assetUpdater->updateAssets($contest);
@@ -260,24 +246,10 @@ class ContestController extends AbstractRestController
     public function setBannerAction(Request $request, string $cid, ValidatorInterface $validator): Response
     {
         /** @var Contest $contest */
-        $contest = $this->getQueryBuilder($request)
-            ->andWhere(sprintf('%s = :id', $this->getIdField()))
-            ->setParameter('id', $cid)
-            ->getQuery()
-            ->getOneOrNullResult();
-
-        if ($contest === null) {
-            throw new NotFoundHttpException(sprintf('Object with ID \'%s\' not found', $cid));
-        }
-
-        if ($contest->isLocked()) {
-            $contestUrl = $this->generateUrl('jury_contest', ['contestId' => $cid], UrlGeneratorInterface::ABSOLUTE_URL);
-            throw new AccessDeniedHttpException('Contest is locked, go to ' . $contestUrl . ' to unlock it.');
-        }
+        $contest = $this->getContestAndCheckIfLocked($request, $cid);
 
         /** @var UploadedFile $banner */
         $banner = $request->files->get('banner');
-
         if (!$banner) {
             return new JsonResponse(['title' => 'Validation failed', 'errors' => ['Please supply a banner']], Response::HTTP_BAD_REQUEST);
         }
@@ -872,6 +844,27 @@ class ContestController extends AbstractRestController
             throw new NotFoundHttpException(sprintf('Contest with ID \'%s\' not found', $id));
         }
 
+        return $contest;
+    }
+
+    /** To be used when contest data is modified. */
+    private function getContestAndCheckIfLocked(Request $request, string $cid): Contest
+    {
+        /** @var Contest $contest */
+        $contest = $this->getQueryBuilder($request)
+            ->andWhere(sprintf('%s = :id', $this->getIdField()))
+            ->setParameter('id', $cid)
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        if ($contest === null) {
+            throw new NotFoundHttpException(sprintf('Contest with ID \'%s\' not found', $cid));
+        }
+
+        if ($contest->isLocked()) {
+            $contestUrl = $this->generateUrl('jury_contest', ['contestId' => $cid], UrlGeneratorInterface::ABSOLUTE_URL);
+            throw new AccessDeniedHttpException('Contest is locked, go to ' . $contestUrl . ' to unlock it.');
+        }
         return $contest;
     }
 }
