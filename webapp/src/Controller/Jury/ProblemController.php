@@ -319,7 +319,6 @@ class ProblemController extends BaseController
                 $zip->addFromString($directory . $source->getFilename(), $source->getSourcecode());
             }
         }
-
         $zip->close();
 
         if ($contestProblem && $contestProblem->getShortname()) {
@@ -328,20 +327,7 @@ class ProblemController extends BaseController
             $zipFilename = sprintf('p%d.zip', $problem->getProbid());
         }
 
-        $response = new StreamedResponse();
-        $response->setCallback(function () use ($tempFilename) {
-            $fp = fopen($tempFilename, 'rb');
-            fpassthru($fp);
-            unlink($tempFilename);
-        });
-        $response->headers->set('Content-Type', 'application/zip');
-        $response->headers->set('Content-Disposition', 'attachment; filename="' . $zipFilename . '"');
-        $response->headers->set('Content-Length', (string)filesize($tempFilename));
-        $response->headers->set('Content-Transfer-Encoding', 'binary');
-        $response->headers->set('Connection', 'Keep-Alive');
-        $response->headers->set('Accept-Ranges', 'bytes');
-
-        return $response;
+        return Utils::streamZipFile($tempFilename, $zipFilename);
     }
 
     /**

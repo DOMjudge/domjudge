@@ -825,6 +825,25 @@ class Utils
         return $response;
     }
 
+    /** Note that as a side effect, $tempFilename will be deleted. */
+    public static function streamZipFile(string $tempFilename, string $zipFilename): StreamedResponse
+    {
+        $response = new StreamedResponse();
+        $response->setCallback(function () use ($tempFilename) {
+            $fp = fopen($tempFilename, 'rb');
+            fpassthru($fp);
+            unlink($tempFilename);
+        });
+        $response->headers->set('Content-Type', 'application/zip');
+        $response->headers->set('Content-Disposition', 'attachment; filename="' . $zipFilename . '"');
+        $response->headers->set('Content-Length', (string)filesize($tempFilename));
+        $response->headers->set('Content-Transfer-Encoding', 'binary');
+        $response->headers->set('Connection', 'Keep-Alive');
+        $response->headers->set('Accept-Ranges', 'bytes');
+
+        return $response;
+    }
+
     /**
      * Convert the given string to a field that is safe to use in a Tab Separated Values file.
      */

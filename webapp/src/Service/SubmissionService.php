@@ -714,21 +714,6 @@ class SubmissionService
         }
         $zip->close();
 
-        $filename = 's' . $submission->getSubmitid() . '.zip';
-
-        $response = new StreamedResponse();
-        $response->setCallback(function () use ($tmpfname) {
-            $fp = fopen($tmpfname, 'rb');
-            fpassthru($fp);
-            unlink($tmpfname);
-        });
-        $response->headers->set('Content-Type', 'application/zip');
-        $response->headers->set('Content-Disposition', 'attachment; filename="' . $filename . '"');
-        $response->headers->set('Content-Length', (string)filesize($tmpfname));
-        $response->headers->set('Content-Transfer-Encoding', 'binary');
-        $response->headers->set('Connection', 'Keep-Alive');
-        $response->headers->set('Accept-Ranges', 'bytes');
-
-        return $response;
+        return Utils::streamZipFile($tmpfname, 's' . $submission->getSubmitid() . '.zip');
     }
 }
