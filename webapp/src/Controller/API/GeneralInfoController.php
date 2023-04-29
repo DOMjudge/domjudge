@@ -165,7 +165,7 @@ class GeneralInfoController extends AbstractFOSRestController
     )]
     public function getStatusAction(): array
     {
-        $contests = $this->dj->getCurrentContests(null);
+        $contests = $this->dj->getCurrentContests();
         if (empty($contests)) {
             throw new BadRequestHttpException('No active contest');
         }

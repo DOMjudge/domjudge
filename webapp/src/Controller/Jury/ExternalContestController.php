@@ -140,7 +140,7 @@ class ExternalContestController extends BaseController
             ->getQuery()->getOneOrNullResult() ?? new ExternalContestSource();
 
         if (!$this->dj->getCurrentContest()) {
-            if (empty($this->dj->getCurrentContests(null, true))) {
+            if (empty($this->dj->getCurrentContests(alsofuture: true))) {
                 $this->addFlash('warning', 'No current contest selected, please create one first.');
                 return $this->redirectToRoute('jury_contest_add');
             } else {

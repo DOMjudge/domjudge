@@ -35,6 +35,7 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\QueryBuilder;
+use http\Exception\InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Cookie;
@@ -100,23 +101,27 @@ class DOMJudgeService
     /**
      * Return all the contests that are currently active indexed by contest ID.
      *
-     * @param int|null $onlyofteam If -1, get only public contests. If > 0 get only contests for the given team
-     * @param bool     $alsofuture If true, also get future contests
+     * @param int|null $onlyOfTeam Get only contests for the given team.
+     * @param bool     $alsofuture If true, also get future contests.
+     * @param bool     $onlyPublic If true, only get public contests. Only allowed when $onlyOfTeam is not specified.
      *
      * @return Contest[]
      */
-    public function getCurrentContests(?int $onlyofteam = null, bool $alsofuture = false): array
+    public function getCurrentContests(?int $onlyOfTeam = null, bool $alsofuture = false, bool $onlyPublic = false): array
     {
+        if ($onlyPublic && isset($onlyOfTeam)) {
+            throw new InvalidArgumentException('Not allowed to specify a team and requesting public only.');
+        }
         $now = Utils::now();
         $qb  = $this->em->createQueryBuilder();
         $qb->select('c')->from(Contest::class, 'c', 'c.cid');
-        if ($onlyofteam !== null && $onlyofteam > 0) {
+        if (isset($onlyOfTeam)) {
             $qb->leftJoin('c.teams', 'ct')
                 ->leftJoin('c.team_categories', 'tc')
                 ->leftJoin('tc.teams', 'tct')
                 ->andWhere('ct.teamid = :teamid OR tct.teamid = :teamid OR c.openToAllTeams = 1')
-                ->setParameter('teamid', $onlyofteam);
-        } elseif ($onlyofteam === -1) {
+                ->setParameter('teamid', $onlyOfTeam);
+        } elseif ($onlyPublic) {
             $qb->andWhere('c.public = 1');
         }
         $qb->andWhere('c.enabled = 1')
@@ -141,13 +146,13 @@ class DOMJudgeService
     }
 
     /**
-     * Get the currently selected contest
-     * @param int|null $onlyofteam If -1, get only public contests. If > 0 get only contests for the given team
-     * @param bool     $alsofuture If true, also get future contests
+     * Get the currently selected contest.
+     * @param int|null $onlyOfTeam Get only contests for the given team.
+     * @param bool     $onlyPublic If true, only get public contests. Only allowed when $onlyOfTeam is not specified.
      */
-    public function getCurrentContest(?int $onlyofteam = null, bool $alsofuture = false): ?Contest
+    public function getCurrentContest(?int $onlyOfTeam = null, bool $onlyPublic = false): ?Contest
     {
-        $contests = $this->getCurrentContests($onlyofteam, $alsofuture);
+        $contests = $this->getCurrentContests($onlyOfTeam, onlyPublic: $onlyPublic);
         if ($this->requestStack->getCurrentRequest()) {
             $selected_cid = $this->getCurrentContestCookie();
             if ($selected_cid == -1) {
@@ -893,9 +898,9 @@ class DOMJudgeService
     /**
      * @throws NonUniqueResultException
      */
-    public function getTwigDataForProblemsAction(int $teamId, StatisticsService $statistics): array
+    public function getTwigDataForProblemsAction(StatisticsService $statistics, ?int $teamId = null): array
     {
-        $contest            = $this->getCurrentContest($teamId);
+        $contest            = isset($teamId) ? $this->getCurrentContest($teamId) : $this->getCurrentContest(onlyPublic: true);
         $showLimits         = (bool)$this->config->get('show_limits_on_team_page');
         $defaultMemoryLimit = (int)$this->config->get('memory_limit');
         $timeFactorDiffers  = false;
