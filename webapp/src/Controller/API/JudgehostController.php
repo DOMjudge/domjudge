@@ -27,7 +27,7 @@ use App\Service\ScoreboardService;
 use App\Service\SubmissionService;
 use App\Utils\Utils;
 use BadMethodCallException;
-use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\DBAL\Exception;
 use Doctrine\ORM\AbstractQuery;
@@ -1437,7 +1437,7 @@ class JudgehostController extends AbstractFOSRestController
                 'ids' => $judgetaskids,
             ],
             [
-                'ids' => Connection::PARAM_INT_ARRAY,
+                'ids' => ArrayParameterType::INTEGER,
             ]
         );
 
