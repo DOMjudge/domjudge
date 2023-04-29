@@ -5,7 +5,6 @@ namespace App\Controller\API;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\Problem;
-use App\Entity\Submission;
 use App\Helpers\ContestProblemWrapper;
 use App\Helpers\OrdinalArray;
 use App\Service\ConfigurationService;

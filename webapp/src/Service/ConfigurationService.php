@@ -14,7 +14,6 @@ use Symfony\Component\Config\ConfigCacheFactoryInterface;
 use Symfony\Component\Config\ConfigCacheInterface;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Config\Resource\FileResource;
-use Symfony\Component\DependencyInjection\Attribute\AsDecorator;
 use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 

@@ -33,7 +33,6 @@ use Doctrine\ORM\PersistentCollection;
 use Doctrine\ORM\Query\Expr\Join;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Form\FormInterface;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
