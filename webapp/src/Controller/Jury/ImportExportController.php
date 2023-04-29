@@ -281,7 +281,6 @@ class ImportExportController extends BaseController
     public function exportTsvAction(Request $request, string $type): Response
     {
         $data    = [];
-        $version = 1;
         try {
             switch ($type) {
                 case 'groups':
@@ -301,10 +300,11 @@ class ImportExportController extends BaseController
         }
 
         $response = new StreamedResponse();
-        $response->setCallback(function () use ($type, $version, $data) {
+        $response->setCallback(function () use ($type, $data) {
+            $version = 1;
             echo sprintf("%s\t%s\n", $type, $version);
-            // output the rows, escaping any reserved characters in the data
             foreach ($data as $row) {
+                // Utils::toTsvFields handles escaping of reserved characters.
                 echo implode("\t", array_map(fn($field) => Utils::toTsvField((string)$field), $row)) . "\n";
             }
         });
