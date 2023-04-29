@@ -1158,7 +1158,7 @@ class ImportExportService
         return $this->importAccountData($accountData);
     }
 
-    private function getOrCreateJuryCategory(): null|TeamCategory|object
+    private function getOrCreateJuryCategory(): TeamCategory
     {
         $juryCategory = $this->em->getRepository(TeamCategory::class)->findOneBy(['name' => 'Jury']);
         if (!$juryCategory) {
