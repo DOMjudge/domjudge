@@ -784,6 +784,16 @@ class ImportExportService
         return $this->importTeamData($teamData, $message, $saved);
     }
 
+    private function getDjRoles(): array
+    {
+        $djRoles = [];
+        $roles = ['team', 'jury', 'admin', 'balloon', 'clarification_rw', 'api_reader', 'api_writer', 'api_source_reader'];
+        foreach ($roles as $role) {
+            $djRoles[$role] = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => $role]);
+        }
+        return $djRoles;
+    }
+
     /**
      * Import accounts JSON.
      *
@@ -791,80 +801,40 @@ class ImportExportService
      */
     public function importAccountsJson(array $data, ?string &$message = null, ?array &$saved = null): int
     {
-        $teamRole      = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'team']);
-        $juryRole      = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'jury']);
-        $adminRole     = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'admin']);
-        $balloonRole   = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'balloon']);
-        $clarRole      = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'clarification_rw']);
-        $apiReadRole   = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'api_reader']);
-        $apiWriteRole  = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'api_writer']);
-        $apiSourceRole = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'api_source_reader']);
-        $juryCategory  = $this->em->getRepository(TeamCategory::class)->findOneBy(['name' => 'Jury']);
-        if (!$juryCategory) {
-            $juryCategory = new TeamCategory();
-            $juryCategory
-                ->setName('Jury')
-                ->setSortorder(100)
-                ->setVisible(false)
-                ->setExternalid('jury');
-            $this->em->persist($juryCategory);
-            $this->em->flush();
-        }
+        $djRoles = $this->getDjRoles();
+        $juryCategory = $this->getOrCreateJuryCategory();
         $accountData = [];
         foreach ($data as $idx => $account) {
             $juryTeam = null;
             $roles    = [];
+            $type     = $account['type'];
             // Special case for the World Finals, if the username is CDS we limit the access.
-            // The user can see what every admin can see, but can not login via the UI.
+            // The user can see what every admin can see, but can not log in via the UI.
             if (isset($account['username']) && $account['username'] === 'cds') {
-                $account['type'] = 'cds';
+                $type = 'cds';
+            } elseif ($type == 'judge') {
+                $type = 'jury';
+            } else if (in_array($type, ['staff', 'analyst'])) {
+                // Ignore type analyst and staff for now. We don't have a useful mapping yet.
+                continue;
             }
-            switch ($account['type']) {
-                case 'admin':
-                    $roles[] = $adminRole;
-                    // Don't break so we can also add the jury features
-                case 'jury': // We don't break to let non existing role jury be interpret as role judge
-                case 'judge':
-                    if ($account['type'] !== 'admin') {
-                        $roles[] = $juryRole;
-                    }
-                    $roles[]  = $teamRole;
-                    $juryTeam = [
-                        'name'              => $account['name'] ?? $account['username'],
-                        'externalid'        => $account['externalid'] ?? $account['username'],
-                        'category'          => $juryCategory,
-                        'publicdescription' => $account['name'] ?? $account['username'],
-                    ];
-                    break;
-                case 'team':
-                    $roles[] = $teamRole;
-                    break;
-                case 'balloon':
-                    $roles[] = $balloonRole;
-                    break;
-                case 'clarification_rw':
-                    $roles[] = $clarRole;
-                    break;
-                case 'api_reader':
-                    $roles[] = $apiReadRole;
-                    break;
-                case 'api_source_reader':
-                    $roles[] = $apiSourceRole;
-                    break;
-                case 'api_writer':
-                    $roles[] = $apiWriteRole;
-                    break;
-                case 'cds':
-                    $roles += [$apiReadRole, $apiSourceRole, $apiWriteRole];
-                    break;
-                case 'analyst':
-                case 'staff':
-                    // Ignore type analyst and staff for now. We don't have a useful mapping yet.
-                    continue 2;
-                default:
-                    $message = sprintf('unknown role on index %d: %s', $idx, $account['type']);
-                    return -1;
+            if ($type == 'cds') {
+                $roles += [$djRoles['api_reader'], $djRoles['api_writer'], $djRoles['api_source_reader']];
+            } else if (!in_array($type, $djRoles)) {
+                $message = sprintf('Unknown role on index %d: %s', $idx, $type);
+                return -1;
             }
+            $roles[] = $djRoles[$type];
+            if ($type == 'admin' || $type == 'jury') {
+                $roles[]  = $djRoles['team'];
+                $juryTeam = [
+                    'name'              => $account['name'] ?? $account['username'],
+                    'externalid'        => $account['externalid'] ?? $account['username'],
+                    'category'          => $juryCategory,
+                    'publicdescription' => $account['name'] ?? $account['username'],
+                ];
+            }
+
             $accountData[] = [
                 'user' => [
                     'name'           => $account['name'] ?? null,
@@ -1112,97 +1082,59 @@ class ImportExportService
      */
     protected function importAccountsTsv(array $content, ?string &$message = null): int
     {
-        $accountData   = [];
-        $l             = 1;
-        $teamRole      = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'team']);
-        $juryRole      = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'jury']);
-        $adminRole     = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'admin']);
-        $balloonRole   = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'balloon']);
-        $clarRole      = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'clarification_rw']);
-        $apiReadRole   = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'api_reader']);
-        $apiWriteRole  = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'api_writer']);
-        $apiSourceRole = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'api_source_reader']);
-
-        $juryCategory = $this->em->getRepository(TeamCategory::class)->findOneBy(['name' => 'Jury']);
-        if (!$juryCategory) {
-            $juryCategory = new TeamCategory();
-            $juryCategory
-                ->setName('Jury')
-                ->setSortorder(100)
-                ->setVisible(false)
-                ->setExternalid('jury');
-            $this->em->persist($juryCategory);
-            $this->em->flush();
-        }
-
+        $accountData  = [];
+        $juryCategory = $this->getOrCreateJuryCategory();
+        $djRoles      = $this->getDjRoles();
+        $lineNr       = 1;
         foreach ($content as $line) {
-            $l++;
+            $lineNr++;
             $line = Utils::parseTsvLine(trim($line));
 
             $team  = $juryTeam = null;
             $roles = [];
+            $type = $line[0];
+            // Special case for the World Finals, if the username is CDS we limit the access.
+            // The user can see what every admin can see, but can not log in via the UI.
             if ($line[2] === 'cds') {
-                $line[0] = 'cds';
+                $type = 'cds';
+            } elseif ($type == 'judge') {
+                $type = 'jury';
+            } else if (in_array($type, ['staff', 'analyst'])) {
+                // Ignore type analyst and staff for now. We don't have a useful mapping yet.
+                continue;
             }
-            switch ($line[0]) {
-                case 'admin':
-                    $roles[] = $adminRole;
-                    // Don't break so we can also add the jury features
-                case 'jury': // We don't break to let non existing role jury be interpret as role judge
-                case 'judge':
-                    if ($line[0] !== 'admin') {
-                        $roles[] = $juryRole;
-                    }
-                    $roles[]  = $teamRole;
-                    $juryTeam = ['name' => $line[1], 'externalid' => $line[2], 'category' => $juryCategory, 'publicdescription' => $line[1]];
-                    break;
-                case 'team':
-                    $roles[] = $teamRole;
-                    // For now, we assume we can find the teamid by parsing
-                    // the username and taking the number in the middle, i.e. we
-                    // allow any username in the form "abc" where a and c are arbitrary
-                    // strings that contain no numbers and b only contains numbers. The teamid
-                    // id is then "b".
-                    // Note that https://ccs-specs.icpc.io/2021-11/ccs_system_requirements#accountstsv
-                    // assumes team accounts of the form "team-nnn" where
-                    // nnn is a zero-padded team number.
-                    $teamId = preg_replace('/^[^0-9]*0*([0-9]+)[^0-9]*$/', '\1', $line[2]);
-                    if (!preg_match('/^[0-9]+$/', $teamId)) {
-                        $message = sprintf('cannot parse team id on line %d from "%s"', $l,
-                                           $line[2]);
-                        return -1;
-                    }
-                    $field = $this->eventLogService->externalIdFieldForEntity(Team::class) ?? 'teamid';
-                    $team  = $this->em->getRepository(Team::class)->findOneBy([$field => $teamId]);
-                    if ($team === null) {
-                        $message = sprintf('unknown team id %s on line %d', $teamId, $l);
-                        return -1;
-                    }
-                    break;
-                case 'balloon':
-                    $roles[] = $balloonRole;
-                    break;
-                case 'clarification_rw':
-                    $roles[] = $clarRole;
-                    break;
-                case 'api_reader':
-                    $roles[] = $apiReadRole;
-                    break;
-                case 'api_writer':
-                    $roles[] = $apiWriteRole;
-                    break;
-                case 'api_source_reader':
-                    $roles[] = $apiSourceRole;
-                    break;
-                case 'cds':
-                    $roles += [$apiReadRole, $apiSourceRole, $apiWriteRole];
-                    break;
-                case 'analyst':
-                    // Ignore type analyst for now. We don't have a useful mapping yet.
-                    continue 2;
-                default:
-                    $message = sprintf('unknown role on line %d: %s', $l, $line[0]);
+            if ($type == 'cds') {
+                $roles += [$djRoles['api_reader'], $djRoles['api_writer'], $djRoles['api_source_reader']];
+            } else if (!in_array($type, $djRoles)) {
+                $message = sprintf('Unknown role on line %d: %s', $lineNr, $type);
+                return -1;
+            }
+            $roles[] = $djRoles[$type];
+            if ($type == 'admin' || $type == 'jury') {
+                $roles[] = $djRoles['team'];
+                $juryTeam = ['name' => $line[1], 'externalid' => $line[2], 'category' => $juryCategory, 'publicdescription' => $line[1]];
+            }
+            if ($type == 'team') {
+                // For now, we assume we can find the teamid by parsing
+                // the username and taking the number in the middle, i.e. we
+                // allow any username in the form "abc" where a and c are arbitrary
+                // strings that contain no numbers and b only contains numbers. The teamid
+                // id is then "b".
+                // Note that https://ccs-specs.icpc.io/2021-11/ccs_system_requirements#accountstsv
+                // assumes team accounts of the form "team-nnn" where
+                // nnn is a zero-padded team number.
+                $teamId = preg_replace('/^[^0-9]*0*([0-9]+)[^0-9]*$/', '\1', $line[2]);
+                if (!preg_match('/^[0-9]+$/', $teamId)) {
+                    $message = sprintf('Cannot parse team id on line %d from "%s"', $lineNr,
+                        $line[2]);
                     return -1;
+                }
+                $field = $this->eventLogService->externalIdFieldForEntity(Team::class) ?? 'teamid';
+                $team = $this->em->getRepository(Team::class)->findOneBy([$field => $teamId]);
+                if ($team === null) {
+                    $message = sprintf('Unknown team id %s on line %d', $teamId, $lineNr);
+                    return -1;
+                }
             }
 
             // accounts.tsv contains data pertaining to users, their roles and
@@ -1224,5 +1156,21 @@ class ImportExportService
         }
 
         return $this->importAccountData($accountData);
+    }
+
+    private function getOrCreateJuryCategory(): null|TeamCategory|object
+    {
+        $juryCategory = $this->em->getRepository(TeamCategory::class)->findOneBy(['name' => 'Jury']);
+        if (!$juryCategory) {
+            $juryCategory = new TeamCategory();
+            $juryCategory
+                ->setName('Jury')
+                ->setSortorder(100)
+                ->setVisible(false)
+                ->setExternalid('jury');
+            $this->em->persist($juryCategory);
+            $this->em->flush();
+        }
+        return $juryCategory;
     }
 }
