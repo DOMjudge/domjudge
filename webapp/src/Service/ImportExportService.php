@@ -814,17 +814,18 @@ class ImportExportService
                 $type = 'cds';
             } elseif ($type == 'judge') {
                 $type = 'jury';
-            } else if (in_array($type, ['staff', 'analyst'])) {
+            } elseif (in_array($type, ['staff', 'analyst'])) {
                 // Ignore type analyst and staff for now. We don't have a useful mapping yet.
                 continue;
             }
             if ($type == 'cds') {
                 $roles += [$djRoles['api_reader'], $djRoles['api_writer'], $djRoles['api_source_reader']];
-            } else if (!in_array($type, $djRoles)) {
+            } elseif (!array_key_exists($type, $djRoles)) {
                 $message = sprintf('Unknown role on index %d: %s', $idx, $type);
                 return -1;
+            } else {
+                $roles[] = $djRoles[$type];
             }
-            $roles[] = $djRoles[$type];
             if ($type == 'admin' || $type == 'jury') {
                 $roles[]  = $djRoles['team'];
                 $juryTeam = [
@@ -1099,17 +1100,18 @@ class ImportExportService
                 $type = 'cds';
             } elseif ($type == 'judge') {
                 $type = 'jury';
-            } else if (in_array($type, ['staff', 'analyst'])) {
+            } elseif (in_array($type, ['staff', 'analyst'])) {
                 // Ignore type analyst and staff for now. We don't have a useful mapping yet.
                 continue;
             }
             if ($type == 'cds') {
                 $roles += [$djRoles['api_reader'], $djRoles['api_writer'], $djRoles['api_source_reader']];
-            } else if (!in_array($type, $djRoles)) {
+            } elseif (!array_key_exists($type, $djRoles)) {
                 $message = sprintf('Unknown role on line %d: %s', $lineNr, $type);
                 return -1;
+            } else {
+                $roles[] = $djRoles[$type];
             }
-            $roles[] = $djRoles[$type];
             if ($type == 'admin' || $type == 'jury') {
                 $roles[] = $djRoles['team'];
                 $juryTeam = ['name' => $line[1], 'externalid' => $line[2], 'category' => $juryCategory, 'publicdescription' => $line[1]];
