@@ -157,7 +157,7 @@ del {
     text-align: right;
 }
 
-.center { margin: 0px auto; }
+.center { margin: 0 auto; }
 
 .scoreboard {
     border-collapse: collapse;
@@ -184,7 +184,7 @@ del {
 }
 .scoreboard td, .scoreboard th {
     border-right: 1px solid silver;
-    padding: 0px;
+    padding: 0;
 }
 .scoreboard td.score_cell {
     min-width: 4.2em;
@@ -198,7 +198,7 @@ del {
 }
 
 .scoreboard .scoretn {
-    padding: 0px 5px 0px;
+    padding: 0 5px 0;
     text-align: right;
     font-weight: bold;
     overflow: hidden;
@@ -239,12 +239,12 @@ img.affiliation-logo {
 }
 .scoreheader th {
     text-align: center;
-    box-shadow: -1px 0px 0px 0px silver inset,
-                0px 2px 0px 0px black;
+    box-shadow: -1px 0 0 0 silver inset,
+                0 2px 0 0 black;
     border: none;
     background: var(--background-color);
     position: sticky;
-    top: 0px;
+    top: 0;
     z-index: 1;
 }
 
