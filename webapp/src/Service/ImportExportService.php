@@ -823,8 +823,9 @@ class ImportExportService
             } else if (!in_array($type, $djRoles)) {
                 $message = sprintf('Unknown role on index %d: %s', $idx, $type);
                 return -1;
+            } else {
+                $roles[] = $djRoles[$type];
             }
-            $roles[] = $djRoles[$type];
             if ($type == 'admin' || $type == 'jury') {
                 $roles[]  = $djRoles['team'];
                 $juryTeam = [
@@ -1108,8 +1109,9 @@ class ImportExportService
             } else if (!in_array($type, $djRoles)) {
                 $message = sprintf('Unknown role on line %d: %s', $lineNr, $type);
                 return -1;
+            } else {
+                $roles[] = $djRoles[$type];
             }
-            $roles[] = $djRoles[$type];
             if ($type == 'admin' || $type == 'jury') {
                 $roles[] = $djRoles['team'];
                 $juryTeam = ['name' => $line[1], 'externalid' => $line[2], 'category' => $juryCategory, 'publicdescription' => $line[1]];
