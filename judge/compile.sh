@@ -124,7 +124,7 @@ touch compile.out compile.meta
 # Copy compile script into chroot
 # shellcheck disable=SC2174
 mkdir -m 0777 -p "$WORKDIR/compile-script"
-cp -a $(dirname $COMPILE_SCRIPT)/* $PWD/compile-script
+cp -a "$(dirname "$COMPILE_SCRIPT")"/* "$WORKDIR/compile-script/"
 
 cd "$WORKDIR/compile"
 
@@ -152,7 +152,7 @@ $GAINROOT "$RUNGUARD" ${DEBUG:+-v} $CPUSET_OPT -u "$RUNUSER" -g "$RUNGROUP" \
 	-r "$PWD/.." -d "/compile" \
 	-m $SCRIPTMEMLIMIT -t $SCRIPTTIMELIMIT -c -f $SCRIPTFILELIMIT -s $SCRIPTFILELIMIT \
 	-M "$WORKDIR/compile.meta" $ENVIRONMENT_VARS -- \
-	"/compile-script/$(basename $COMPILE_SCRIPT)" program "$MEMLIMIT" "$@" >"$WORKDIR/compile.tmp" 2>&1 || \
+	"/compile-script/$(basename "$COMPILE_SCRIPT")" program "$MEMLIMIT" "$@" >"$WORKDIR/compile.tmp" 2>&1 || \
 	exitcode=$?
 
 # Make sure that all files are owned by the current user/group, so
