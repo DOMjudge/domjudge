@@ -1148,7 +1148,7 @@ function compile(
         $compile_output .= "\n--------------------------------------------------------------------------------\n\n".
             "Internal errors reported:\n".$internalError;
 
-        if (preg_match('/^compile script: /', $internalError)) {
+        if (str_starts_with($internalError, 'compile script: ')) {
             $internalError = preg_replace('/^compile script: /', '', $internalError);
             $description = "The compile script returned an error: $internalError";
             disable('compile_script', 'compile_script_id', $judgeTask['compile_script_id'], $description, $judgeTask['judgetaskid'], $compile_output);
