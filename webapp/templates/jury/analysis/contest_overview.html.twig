@@ -205,10 +205,10 @@ $(function() {
                               {% set id=j.submitid %}
                               <tr class='clickable-row' data-href="{{path('jury_submission', {'submitId': id}) }}">
                                   <th scope="row">{{ id }}</th>
-                                  <td scope="row">{{ j.judgingid }}</td>
-                                  <td scope="row">{{ j.submittime | printtime }}</td>
-                                  <td scope="row">{{ j.num_judgings }}</td>
-                                  <td scope="row">{{ j.timediff | number_format(2) }}s</td>
+                                  <td>{{ j.judgingid }}</td>
+                                  <td>{{ j.submittime | printtime }}</td>
+                                  <td>{{ j.num_judgings }}</td>
+                                  <td>{{ j.timediff | number_format(2) }}s</td>
                               </tr>
                           {% endfor %}
                           </tbody>
