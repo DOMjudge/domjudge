@@ -13,14 +13,14 @@ trap 'cleanup ; error' EXIT
 
 cleanup ()
 {
-	$DJ_LIBJUDGEDIR/chroot-startstop.sh stop
+	"${DJ_LIBJUDGEDIR}/chroot-startstop.sh" stop
 
 	# Make sure that all files are owned by the current user/group, so
 	# that we can delete the judging output tree without root access.
 	# We also remove group RUNGROUP so that this can safely be shared
 	# across multiple judgedaemons, and remove write permissions.
-	$GAINROOT chown -R "$(id -un):" $WORKDIR
-	chmod -R go-w $WORKDIR
+	$GAINROOT chown -R "$(id -un):" "$WORKDIR"
+	chmod -R go-w "$WORKDIR"
 }
 
 cleanexit ()
@@ -66,10 +66,9 @@ if [ ! -d "$WORKDIR" ] || [ ! -w "$WORKDIR" ] || [ ! -x "$WORKDIR" ]; then
 fi
 [ -x "$RUNGUARD" ] || error "runguard not found or not executable: $RUNGUARD"
 
-OLDDIR="$PWD"
 cd "$CHROOTDIR"
 
-$DJ_LIBJUDGEDIR/chroot-startstop.sh start
+"${DJ_LIBJUDGEDIR}/chroot-startstop.sh" start
 
 chmod a+rwx "$WORKDIR"
 
