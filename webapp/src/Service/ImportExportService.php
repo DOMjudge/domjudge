@@ -820,7 +820,7 @@ class ImportExportService
             }
             if ($type == 'cds') {
                 $roles += [$djRoles['api_reader'], $djRoles['api_writer'], $djRoles['api_source_reader']];
-            } elseif (!in_array($type, $djRoles)) {
+            } elseif (!array_key_exists($type, $djRoles)) {
                 $message = sprintf('Unknown role on index %d: %s', $idx, $type);
                 return -1;
             } else {
@@ -1106,7 +1106,7 @@ class ImportExportService
             }
             if ($type == 'cds') {
                 $roles += [$djRoles['api_reader'], $djRoles['api_writer'], $djRoles['api_source_reader']];
-            } elseif (!in_array($type, $djRoles)) {
+            } elseif (!array_key_exists($type, $djRoles)) {
                 $message = sprintf('Unknown role on line %d: %s', $lineNr, $type);
                 return -1;
             } else {
