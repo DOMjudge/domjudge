@@ -342,12 +342,10 @@ function fetch_executable_internal(
         $content = request(sprintf('judgehosts/get_files/%s/%s', $type, $execid), 'GET');
         $files = dj_json_decode($content);
         unset($content);
-        $concatenatedMd5s = '';
         $filesArray = [];
         foreach ($files as $file) {
             $filename = $execbuilddir . '/' . $file['filename'];
             $content = base64_decode($file['content']);
-            $concatenatedMd5s .= md5($content);
             file_put_contents($filename, $content);
             if ($file['is_executable']) {
                 chmod($filename, 0755);
