@@ -92,32 +92,32 @@ class ImportExportControllerTest extends BaseTestCase
     {
         $year = date('Y')+1;
         $yaml =<<<HEREDOC
-name: 'Demo contest'
-short_name: demo
+formal_name: 'Demo contest'
+name: demo
 start_time: '{$year}-01-01T08:00:00+00:00'
 duration: '5:00:00.000'
 scoreboard_freeze_duration: '1:00:00'
 penalty_time: 20
 problems:
     -
+        id: hello
         label: A
         letter: A
         name: 'Hello World'
-        short-name: hello
         color: mediumpurple
         rgb: '#9486EA'
     -
+        id: fltcmp
         label: B
         letter: B
         name: 'Float special compare test'
-        short-name: fltcmp
         color: orangered
         rgb: '#E93603'
     -
+        id: boolfind
         label: C
         letter: C
         name: 'Boolean switch search'
-        short-name: boolfind
         color: saddlebrown
         rgb: '#9B630C'
 

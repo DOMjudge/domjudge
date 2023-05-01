@@ -47,8 +47,8 @@ class ImportExportService
         // We expect contest.yaml and problemset.yaml combined into one file here.
 
         $data = [
-            'name' => $contest->getName(),
-            'short_name' => $contest->getShortname(),
+            'formal_name' => $contest->getName(),
+            'name' => $contest->getShortname(),
             'start_time' => Utils::absTime($contest->getStarttime(), true),
             'duration' => Utils::relTime($contest->getContestTime((float)$contest->getEndtime())),
         ];
@@ -71,10 +71,10 @@ class ImportExportService
             // If it is in RGB, we try to find the closest HTML color name.
             $color              = $contestProblem->getColor() === null ? null : Utils::convertToColor($contestProblem->getColor());
             $data['problems'][] = [
+                'id' => $contestProblem->getProblem()->getExternalid(),
                 'label' => $contestProblem->getShortname(),
                 'letter' => $contestProblem->getShortname(),
                 'name' => $contestProblem->getProblem()->getName(),
-                'short-name' => $contestProblem->getProblem()->getExternalid(),
                 'color' => $color ?? $contestProblem->getColor(),
                 'rgb' => $contestProblem->getColor() === null ? null : Utils::convertToHex($contestProblem->getColor()),
             ];
