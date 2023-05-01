@@ -274,7 +274,7 @@ class TeamController extends BaseController
         $restrictions    = [];
         $restrictionText = null;
         if ($request->query->has('restrict')) {
-            $restrictions     = $request->query->get('restrict');
+            $restrictions     = $request->query->all('restrict');
             $restrictionTexts = [];
             foreach ($restrictions as $key => $value) {
                 $restrictionKeyText = match ($key) {
