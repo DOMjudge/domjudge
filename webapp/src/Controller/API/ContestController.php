@@ -428,15 +428,15 @@ class ContestController extends AbstractRestController
         $penalty_time = $this->config->get('penalty_time');
         $response     = new StreamedResponse();
         $response->setCallback(function () use ($contest, $penalty_time) {
-            echo "name:                     " . $contest->getName() . "\n";
-            echo "short_name:               " . $contest->getExternalid() . "\n";
-            echo "start_time:               " .
+            echo "formal_name:                " . $contest->getName() . "\n";
+            echo "name:                       " . $contest->getExternalid() . "\n";
+            echo "start_time:                 " .
                 Utils::absTime($contest->getStarttime(), true) . "\n";
-            echo "duration:                 " .
+            echo "duration:                   " .
                 Utils::relTime($contest->getEndtime() - $contest->getStarttime(), true) . "\n";
-            echo "scoreboard_freeze_length: " .
+            echo "scoreboard_freeze_duration: " .
                 Utils::relTime($contest->getEndtime() - $contest->getFreezetime(), true) . "\n";
-            echo "penalty_time:             " . $penalty_time . "\n";
+            echo "penalty_time:               " . $penalty_time . "\n";
         });
         $response->headers->set('Content-Type', 'application/x-yaml');
         $response->headers->set('Content-Disposition', 'attachment; filename="contest.yaml"');

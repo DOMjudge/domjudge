@@ -53,10 +53,10 @@ problems:
 EOF;
         $expectedYaml = <<<EOF
 duration: 2:00:00
-name: NWERC 2020 Practice Session
+formal_name: NWERC 2020 Practice Session
 penalty_time: 20
-scoreboard_freeze_length: 0:30:00
-short_name: practice
+scoreboard_freeze_duration: 0:30:00
+name: practice
 start_time: 2021-03-27 09:00:00+00:00
 EOF;
 
