@@ -51,6 +51,8 @@ class ImportExportService
             'name' => $contest->getShortname(),
             'start_time' => Utils::absTime($contest->getStarttime(), true),
             'duration' => Utils::relTime($contest->getContestTime((float)$contest->getEndtime())),
+            'penalty_time' => $this->config->get('penalty_time'),
+            'problems' => [],
         ];
         if ($warnMsg = $contest->getWarningMessage()) {
             $data['warning_message'] = $warnMsg;
@@ -60,10 +62,6 @@ class ImportExportService
                 $contest->getContestTime((float)$contest->getEndtime()) - $contest->getContestTime((float)$contest->getFreezetime()),
                 true);
         }
-        $data = array_merge($data, [
-            'penalty_time' => $this->config->get('penalty_time'),
-            'problems' => [],
-        ]);
 
         /** @var ContestProblem $contestProblem */
         foreach ($contest->getProblems() as $contestProblem) {
