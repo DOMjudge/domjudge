@@ -212,12 +212,6 @@ runcheck "$RUN_SCRIPT" $RUNARGS \
 	--stderr=program.err --outmeta=program.meta -- \
 	"$PREFIX/$PROGRAM" 2>runguard.err
 
-# Check for still running processes:
-output=$(ps -u "$RUNUSER" -o pid= -o comm= || true)
-if [ -n "$output" ] ; then
-	error "found processes still running as '$RUNUSER', check manually:\\n$output"
-fi
-
 if [ $COMBINED_RUN_COMPARE -eq 0 ]; then
 	# We first compare the output, so that even if the submission gets a
 	# timelimit exceeded or runtime error verdict later, the jury can

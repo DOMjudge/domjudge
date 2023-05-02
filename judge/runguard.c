@@ -454,6 +454,25 @@ int use_cgroup()
 	    ( cpuset!=NULL && strlen(cpuset)>0 );
 }
 
+void check_remaining_procs()
+{
+    char path[1024];
+
+    if ( !use_cgroup() ) return;
+
+    snprintf(path, 1023, "/sys/fs/cgroup/cpu%scgroup.procs", cgroupname);
+    FILE *file = fopen(path, "r");
+    if (file == NULL) {
+        error(0, "Error opening cgroups file: %s", path);
+        return;
+    }
+
+    fseek(file, 0L, SEEK_END);
+    if (ftell(file) > 0) {
+        error(0, "Left-over processes in cgroup controller, please check!");
+    }
+}
+
 void output_cgroup_stats(double *cputime)
 {
 	int ret;
@@ -1409,6 +1428,8 @@ int main(int argc, char **argv)
 		} else {
 			exitcode = WEXITSTATUS(status);
 		}
+
+        check_remaining_procs();
 
 		double cputime = -1;
 		output_cgroup_stats(&cputime);
