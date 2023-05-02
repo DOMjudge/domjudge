@@ -97,6 +97,7 @@ name: demo
 start_time: '{$year}-01-01T08:00:00+00:00'
 duration: '5:00:00.000'
 penalty_time: 20
+scoreboard_freeze_duration: '1:00:00'
 problems:
     -
         id: hello
@@ -119,7 +120,6 @@ problems:
         name: 'Boolean switch search'
         color: saddlebrown
         rgb: '#9B630C'
-scoreboard_freeze_duration: '1:00:00'
 
 HEREDOC;
         yield ["1", $yaml];

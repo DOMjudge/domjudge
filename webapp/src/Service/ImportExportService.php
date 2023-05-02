@@ -42,7 +42,7 @@ class ImportExportService
     /**
      * Get the YAML data for a given contest.
      */
-    public function getContestYamlData(Contest $contest): array
+    public function getContestYamlData(Contest $contest, bool $includeProblems = true): array
     {
         // We expect contest.yaml and problemset.yaml combined into one file here.
 
@@ -52,7 +52,6 @@ class ImportExportService
             'start_time' => Utils::absTime($contest->getStarttime(), true),
             'duration' => Utils::relTime($contest->getContestTime((float)$contest->getEndtime())),
             'penalty_time' => $this->config->get('penalty_time'),
-            'problems' => [],
         ];
         if ($warnMsg = $contest->getWarningMessage()) {
             $data['warning_message'] = $warnMsg;
@@ -63,19 +62,22 @@ class ImportExportService
                 true);
         }
 
-        /** @var ContestProblem $contestProblem */
-        foreach ($contest->getProblems() as $contestProblem) {
-            // Our color field can be both an HTML color name and an RGB value.
-            // If it is in RGB, we try to find the closest HTML color name.
-            $color              = $contestProblem->getColor() === null ? null : Utils::convertToColor($contestProblem->getColor());
-            $data['problems'][] = [
-                'id' => $contestProblem->getProblem()->getExternalid(),
-                'label' => $contestProblem->getShortname(),
-                'letter' => $contestProblem->getShortname(),
-                'name' => $contestProblem->getProblem()->getName(),
-                'color' => $color ?? $contestProblem->getColor(),
-                'rgb' => $contestProblem->getColor() === null ? null : Utils::convertToHex($contestProblem->getColor()),
-            ];
+        if ($includeProblems) {
+            $data['problems'] = [];
+            /** @var ContestProblem $contestProblem */
+            foreach ($contest->getProblems() as $contestProblem) {
+                // Our color field can be both an HTML color name and an RGB value.
+                // If it is in RGB, we try to find the closest HTML color name.
+                $color              = $contestProblem->getColor() === null ? null : Utils::convertToColor($contestProblem->getColor());
+                $data['problems'][] = [
+                    'id' => $contestProblem->getProblem()->getExternalid(),
+                    'label' => $contestProblem->getShortname(),
+                    'letter' => $contestProblem->getShortname(),
+                    'name' => $contestProblem->getProblem()->getName(),
+                    'color' => $color ?? $contestProblem->getColor(),
+                    'rgb' => $contestProblem->getColor() === null ? null : Utils::convertToHex($contestProblem->getColor()),
+                ];
+            }
         }
 
         return $data;

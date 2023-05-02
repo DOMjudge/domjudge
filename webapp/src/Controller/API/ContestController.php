@@ -425,18 +425,9 @@ class ContestController extends AbstractRestController
     public function getContestYamlAction(Request $request, string $cid): StreamedResponse
     {
         $contest      = $this->getContestWithId($request, $cid);
-        $penalty_time = $this->config->get('penalty_time');
         $response     = new StreamedResponse();
-        $response->setCallback(function () use ($contest, $penalty_time) {
-            echo "formal_name:                " . $contest->getName() . "\n";
-            echo "name:                       " . $contest->getExternalid() . "\n";
-            echo "start_time:                 " .
-                Utils::absTime($contest->getStarttime(), true) . "\n";
-            echo "duration:                   " .
-                Utils::relTime($contest->getEndtime() - $contest->getStarttime(), true) . "\n";
-            echo "scoreboard_freeze_duration: " .
-                Utils::relTime($contest->getEndtime() - $contest->getFreezetime(), true) . "\n";
-            echo "penalty_time:               " . $penalty_time . "\n";
+        $response->setCallback(function () use ($contest) {
+            echo Yaml::dump($this->importExportService->getContestYamlData($contest, false), 3);
         });
         $response->headers->set('Content-Type', 'application/x-yaml');
         $response->headers->set('Content-Disposition', 'attachment; filename="contest.yaml"');
