@@ -1,5 +1,5 @@
 /*
- * This should fail submission because of multiple @EXPECTED_RESULTS@ tags.
+ * This should fail submission because of multiple @EXPECTED_RESULTS@: tags.
  *
  * @EXPECTED_RESULTS@: CORRECT, NO-OUTPUT
  *

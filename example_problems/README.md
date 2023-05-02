@@ -13,4 +13,4 @@ manual repair: be careful!
 
 You can either manually verify the results or browse to the "Judging
 verifier" page from the admin web-interface to automatically verify
-the results using the `@EXPECTED_RESULTS@:` header in the sources.
+the results using the `@EXPECTED_RESULTS@: ` header in the sources.
