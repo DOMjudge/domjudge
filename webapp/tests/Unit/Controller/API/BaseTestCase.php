@@ -78,7 +78,8 @@ abstract class BaseTestCase extends BaseBaseTestCase
         int $status,
         ?string $user = null,
         mixed $jsonData = null,
-        array $files = []
+        array $files = [],
+        bool $attachment = false
     ) {
         $server = ['CONTENT_TYPE' => 'application/json'];
         // The API doesn't use cookie based logins, so we need to set a username/password.
@@ -103,6 +104,9 @@ abstract class BaseTestCase extends BaseBaseTestCase
         $response = $this->client->getResponse();
         $message = var_export($response, true);
         self::assertEquals($status, $response->getStatusCode(), $message);
+        if ($attachment) {
+            return $this->client->getInternalResponse()->getContent();
+        }
         return $response->getContent();
     }
 
@@ -134,12 +138,12 @@ abstract class BaseTestCase extends BaseBaseTestCase
         }
     }
 
-    public function helperGetEndpointURL(string $apiEndpoint, ?string $id = null): string
+    public function helperGetEndpointURL(string $apiEndpoint, ?string $id = null, ?string $cid = null): string
     {
         if (in_array($apiEndpoint, static::$rootEndpoints)) {
             $url = "/$apiEndpoint";
         } else {
-            $contestId = $this->getDemoContestId();
+            $contestId = $cid ?? $this->getDemoContestId();
             $url = "/contests/$contestId/$apiEndpoint";
         }
         if ($apiEndpoint === 'judgehosts') {

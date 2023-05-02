@@ -15,10 +15,18 @@ use Doctrine\ORM\EntityManagerInterface;
 use Generator;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\Yaml\Yaml;
 
 class ContestControllerAdminTest extends ContestControllerTest
 {
     protected ?string $apiUser = 'admin';
+
+    private function parseSortYaml(string $yamlString): array
+    {
+        $new = Yaml::parse($yamlString);
+        ksort($new);
+        return $new;
+    }
 
     public function testAddYaml(): void
     {
@@ -43,6 +51,14 @@ problems:
     rgb: '#FF7109'
     short-name: cheating
 EOF;
+        $expectedYaml = <<<EOF
+duration: 2:00:00
+name: NWERC 2020 Practice Session
+penalty-time: 20
+scoreboard-freeze-length: 0:30:00
+short-name: practice
+start-time: 2021-03-27 09:00:00+00:00
+EOF;
 
         $url = $this->helperGetEndpointURL($this->apiEndpoint);
         $tempYamlFile = tempnam(sys_get_temp_dir(), "/contest-yaml-");
@@ -54,6 +70,12 @@ EOF;
 
         self::assertIsString($cid);
         self::assertSame('NWERC 2020 Practice Session', $this->getContest($cid)->getName());
+        $url = $this->helperGetEndpointURL('contest-yaml', null, $cid);
+        $exportContestYaml = $this->verifyApiResponse('GET', $url, 200, $this->apiUser, null, [], true);
+        self::assertIsString($exportContestYaml);
+        $expected = $this->parseSortYaml($expectedYaml);
+        $actual = $this->parseSortYaml($exportContestYaml);
+        self::assertSame($expected, $actual);
     }
 
     public function testAddJson(): void
