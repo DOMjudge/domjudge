@@ -4,12 +4,13 @@ the number of processes will limit that and the program will
 timeout.
 
 The result should be a TIMELIMIT and the running forked programs
-killed by testcase_run.
+killed by testcase_run. When using pypy3 this will be RUN-ERROR as the
+pool is not implemented
 
-@EXPECTED_RESULTS@: TIMELIMIT
+@EXPECTED_RESULTS@: TIMELIMIT,RUN-ERROR
 '''
 
-from multiprocessing import ThreadPool
+from multiprocessing import Pool
 
 def thread_function(name):
 	a = 0
@@ -19,5 +20,5 @@ def thread_function(name):
 
 # Directly make all processes
 numb_processes = 1000*60*10
-with ThreadPool(numb_processes) as p:
+with Pool(numb_processes) as p:
 	p.map(thread_function, range(numb_processes))
