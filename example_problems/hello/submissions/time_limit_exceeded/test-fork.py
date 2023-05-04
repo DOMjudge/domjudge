@@ -19,5 +19,5 @@ def thread_function(name):
 
 while True:
 	for b in [True, False]:
-		x = threading.Thread(target=thread_function, args=(1,), daemon=b)
+		x = threading.Thread(target=thread_function, args=(1,), daemon=i)
 		x.start()
