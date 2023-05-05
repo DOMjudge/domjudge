@@ -35,6 +35,9 @@ class ProblemType extends AbstractExternalIdEntityType
         $builder->add('problemtextFile', FileType::class, [
             'label' => 'Problem text',
             'required' => false,
+            'attr' => [
+                'accept' => 'text/html,text/plain,application/pdf',
+            ],
         ]);
         $builder->add('clearProblemtext', CheckboxType::class, [
             'label' => 'Delete problem text',

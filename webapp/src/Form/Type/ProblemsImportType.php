@@ -5,6 +5,7 @@ namespace App\Form\Type;
 use App\Entity\Contest;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormBuilderInterface;
 
@@ -19,7 +20,7 @@ class ProblemsImportType extends AbstractType
                 'c%d: %s - %s', $contest->getCid(), $contest->getShortname(), $contest->getName()
             ),
         ]);
-        $builder->add('file', BootstrapFileType::class, [
+        $builder->add('file', FileType::class, [
             'required' => true,
         ]);
         $builder->add('import', SubmitType::class, ['icon' => 'fa-upload']);

@@ -11,6 +11,7 @@ use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Query\Expr\Join;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Form;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -33,7 +34,7 @@ class SubmitProblemType extends AbstractType
         $user               = $this->dj->getUser();
         $contest            = $this->dj->getCurrentContest($user->getTeam()->getTeamid());
 
-        $builder->add('code', BootstrapFileType::class, [
+        $builder->add('code', FileType::class, [
             'label' => 'Source file' . ($allowMultipleFiles ? 's' : ''),
             'multiple' => $allowMultipleFiles,
         ]);

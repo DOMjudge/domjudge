@@ -25,10 +25,3 @@
     <button type="{{ type|default('button') }}" {{ block('button_attributes') }}>{{ iconHtml|raw }}{{ label|trans({}, translation_domain) }}</button>
 {%- endblock button_widget %}
 
-{% block bootstrap_file_widget -%}
-    <div class="custom-file">
-        {%- set attr = attr|merge({class: (attr.class|default('custom-file-input'))|trim}) -%}
-        {{- block('form_widget_simple') -}}
-        <label class="custom-file-label text-truncate text-muted" for="{{ id }}">No file selected</label>
-    </div>
-{%- endblock bootstrap_file_widget %}
