@@ -45,16 +45,6 @@
         var domjudge_base_url = "{{ app.request.getBaseURL() }}";
     {% endif %}
     $(function () {
-        $('body').on('change', '.custom-file-input', function () {
-            var files = this.files;
-            var fileNames = [];
-            for (var i = 0; i < files.length; i++) {
-                fileNames.push(files.item(i).name);
-            }
-            $(this).next('.custom-file-label').html(fileNames.join(", "));
-            $(this).next('.custom-file-label').removeClass('text-muted');
-        });
-
         /* toggle refresh if set */
         {% if refresh is defined and refresh %}
         $('#refresh-navitem').on('click', function () {
