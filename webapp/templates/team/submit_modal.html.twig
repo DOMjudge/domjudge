@@ -22,7 +22,7 @@
                 {{ form_start(form) }}
                 <div class="modal-body">
                     {{ form_row(form.code) }}
-                    <div class="alert alert-warning" id="files_not_modified" style="display:none;"></div>
+                    <div class="alert d-none" id="files_selected"></div>
                     {{ form_row(form.problem) }}
                     {{ form_row(form.language) }}
                     <div class="form-group" data-entry-point>
@@ -45,29 +45,43 @@
     <script>
         const fileInput = document.getElementById('submit_problem_code');
         fileInput.addEventListener('change', (event) => {
+            const filenameRegex = {{ validFilenameRegex }};
             const five_minutes_in_ms = 5 * 60 * 1000;
             const now = Date.now();
-            const filesNotModified = document.getElementById('files_not_modified');
-            filesNotModified.style.display = 'none';
+            filesSelected = $('#files_selected');
+            filesSelected.addClass('d-none');
 
-            var atLeastOneFileRecent = false;
             var fileInfoHtml = '';
             const files = event.target.files;
+            atLeastOneFileRecent = false;
             for (let file of files) {
                 const date = new Date(file.lastModified);
                 const ago = humanReadableTimeDiff((now - date)/1000) + ' ago';
-                if (date > now - five_minutes_in_ms) {
+                if(date > now - five_minutes_in_ms) {
                     atLeastOneFileRecent = true;
                 }
+                fileValidChars = file.name.match(filenameRegex);
                 size = humanReadableBytes(file.size);
-                fileInfoHtml += `<li><span class="filename">${file.name}</span>, ${size}, last modified ${ago}</li>`;
+
+                className = '';
+                message = `size ${size}`;
+                message += `, last modified ${ago}`;
+                if(!fileValidChars) {
+                    className = 'bg-danger';
+                    message += ', invalid filename';
+                }
+                if(file.size == 0) {
+                    className = 'bg-warning';
+                    message += ', empty file';
+                }
+                fileInfoHtml += `<li class="${className}"><span class="filename">${file.name}</span> ${message}</li>`;
             }
-            if (!atLeastOneFileRecent) {
-                filesNotModified.style.display = 'block';
-                filesNotModified.innerHTML =
-                    'None of the selected files has been recently modified:' +
-                    '<ul>' + fileInfoHtml + '</ul>';
+            result = '<ul>' + fileInfoHtml + '</ul>';
+            if(!atLeastOneFileRecent) {
+                result += '<div class="alert alert-warning">None of the selected files have been recently modified</div>';
             }
+            filesSelected.html(result);
+            filesSelected.removeClass('d-none');
         });
     </script>
 </div>
