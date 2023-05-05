@@ -135,8 +135,8 @@ class ImportExportService
             return false;
         }
 
-        $starttimeFields = ['start_time', 'start-time'];
-        $requiredFields = [$starttimeFields, 'name', ['id', 'short-name'], 'duration'];
+        $startTimeFields = ['start_time', 'start-time'];
+        $requiredFields = [$startTimeFields, 'name', ['id', 'short-name'], 'duration'];
         $missingFields = [];
         foreach ($requiredFields as $field) {
             if (is_array($field)) {
@@ -163,14 +163,14 @@ class ImportExportService
 
         $invalid_regex = str_replace(['/^[', '+$/'], ['/[^', '/'], DOMJudgeService::EXTERNAL_IDENTIFIER_REGEX);
 
-        $starttime = $this->convertImportedTime($starttimeFields, $data, $message);
+        $startTime = $this->convertImportedTime($startTimeFields, $data, $message);
         if ($message) {
             return false;
         }
 
         $activateTime = new DateTime();
-        if ($activateTime > $starttime) {
-            $activateTime = $starttime;
+        if ($activateTime > $startTime) {
+            $activateTime = $startTime;
         }
         $contest = new Contest();
         $contest
@@ -182,7 +182,7 @@ class ImportExportService
                            ))
             ->setExternalid($contest->getShortname())
             ->setWarningMessage($data['warning-message'] ?? null)
-            ->setStarttimeString(date_format($starttime, 'Y-m-d H:i:s e'))
+            ->setStarttimeString(date_format($startTime, 'Y-m-d H:i:s e'))
             ->setActivatetimeString(date_format($activateTime, 'Y-m-d H:i:s e'))
             ->setEndtimeString(sprintf('+%s', $data['duration']));
 
