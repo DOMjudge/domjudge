@@ -1272,11 +1272,27 @@ class JudgehostController extends AbstractFOSRestController
             return [];
         }
 
-        // TODO: Determine a good max batch size here. We may want to do something more elaborate like looking at
-        // previous judgements of the same testcase and use median runtime as an indicator.
-        $max_batchsize = 5;
         if ($request->request->has('max_batchsize')) {
             $max_batchsize = $request->request->get('max_batchsize');
+        } else {
+            // Heuristically determine how to pick a good batch size.
+            $numQueueTasks = $this->em->createQueryBuilder()
+                ->from(QueueTask::class, 'qt')
+                ->select('COUNT(qt.queuetaskid)')
+                ->getQuery()
+                ->getSingleScalarResult();
+            $numActiveJudgehosts = $this->em->createQueryBuilder()
+                ->from(Judgehost::class, 'jh')
+                ->select('COUNT(jh.hostname)')
+                ->getQuery()
+                ->getSingleScalarResult();
+            if ($numQueueTasks >= $numActiveJudgehosts) {
+                $max_batchsize = 25;
+            } elseif ($numQueueTasks == 1) {
+                $max_batchsize = 5;
+            } else {
+                $max_batchsize = (int)(5 + 20*($numQueueTasks / $numActiveJudgehosts));
+            }
         }
 
         // First try to get any debug info tasks that are assigned to this host.
