@@ -21,7 +21,11 @@ On top, DOMjudge defines a few extensions:
    the ``@EXPECTED_RESULTS@:`` tag is ignored in
    the four official submission subdirectories,
    but it will work if the tagged solution is in, e.g.,
-   ``submissions/mixed/`` or ``submissions/rejected/``.
+   ``submissions/mixed-verdicts``, ``submissions/mixed/`` or ``submissions/rejected/``.
+
+   .. literalinclude:: ../../example_problems/boolfind/submissions/mixed-verdicts/boolfind-test-random.py
+      :language: python
+      :caption: *Example jury solution with multiple outcomes*
 
 The file ``domjudge-problem.ini`` contains key-value pairs, one
 pair per line, of the form ``key = value``. The ``=`` can
