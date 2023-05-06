@@ -2,15 +2,9 @@
     /** Specify the BG color in one place. **/
     --background-color: white;
     --text-color: black;
-    /** WCAG fixes begin **/
-    --btn-info-bg: #008297;
-    /** WCAG fixes end **/
 }
 
 /** WCAG fixes start **/
-.btn-info {
-    background: var(--btn-info-bg);
-}
 .btn-primary {
     background-color: #0072ed;
 }
