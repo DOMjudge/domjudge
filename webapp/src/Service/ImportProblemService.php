@@ -409,6 +409,13 @@ class ImportProblemService
                     }
                 }
 
+                if (str_contains($testInput, "\r")) {
+                    $messages['warning'][] = "Testcase file '$baseFileName.in' contains Windows newlines.";
+                }
+                if (str_contains($testOutput, "\r")) {
+                    $messages['warning'][] = "Testcase file '$baseFileName.ans' contains Windows newlines.";
+                }
+
                 $md5in  = md5($testInput);
                 $md5out = md5($testOutput);
 
