@@ -138,7 +138,7 @@ class ImportExportService
         $activateTimeFields = ['activation_time','activate_time','activation-time', 'activate-time'];
         $deactivateTimeFields = preg_filter('/^/', 'de', $activateTimeFields);
         $startTimeFields = ['start_time', 'start-time'];
-        $requiredFields = [$startTimeFields, 'formal_name', ['id', 'name', 'short-name', 'short_name'], 'duration'];
+        $requiredFields = [$startTimeFields, ['name', 'formal_name'], ['id', 'short_name', 'short-name'], 'duration'];
         $missingFields = [];
         foreach ($requiredFields as $field) {
             if (is_array($field)) {
@@ -188,7 +188,7 @@ class ImportExportService
 
         $contest = new Contest();
         $contest
-            ->setName($data['formal_name'])
+            ->setName($data['name'] ?? $data['formal_name'] )
             ->setShortname(preg_replace(
                                $invalid_regex,
                                '_',

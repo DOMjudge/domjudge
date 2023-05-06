@@ -37,8 +37,8 @@ class ImportExportServiceTest extends KernelTestCase
     public function provideImportContestDataErrors(): Generator
     {
         yield [[], 'Error parsing YAML file.'];
-        yield [['name' => 'Some name'], 'Missing fields: one of (start_time, start-time), one of (id, short-name), duration'];
-        yield [['short-name' => 'somename', 'start-time' => '2020-01-01 12:34:56'], 'Missing fields: name, duration'];
+        yield [['name' => 'Some name'], 'Missing fields: one of (start_time, start-time), one of (id, short_name, short-name), duration'];
+        yield [['short-name' => 'somename', 'start-time' => '2020-01-01 12:34:56'], 'Missing fields: one of (name, formal_name), duration'];
         yield [
             [
                 'name'       => 'Test contest',
