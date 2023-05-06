@@ -40,7 +40,7 @@ EOF
 
 kill_processes() {
     echo "Killing remaining processes..."
-    pkill -G @RUNGROUP@
+    pkill -G @RUNGROUP@ || true
     echo "Done."
 }
 
