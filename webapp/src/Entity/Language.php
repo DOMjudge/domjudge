@@ -261,11 +261,6 @@ class Language extends BaseApiEntity
         return $this;
     }
 
-    public function removeSubmission(Submission $submission)
-    {
-        $this->submissions->removeElement($submission);
-    }
-
     public function getSubmissions(): Collection
     {
         return $this->submissions;

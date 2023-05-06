@@ -433,11 +433,6 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
         return $this;
     }
 
-    public function removeUser(User $user): void
-    {
-        $this->users->removeElement($user);
-    }
-
     public function getUsers(): Collection
     {
         return $this->users;
@@ -447,11 +442,6 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
     {
         $this->submissions[] = $submission;
         return $this;
-    }
-
-    public function removeSubmission(Submission $submission): void
-    {
-        $this->submissions->removeElement($submission);
     }
 
     public function getSubmissions(): Collection
@@ -465,11 +455,6 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
         return $this;
     }
 
-    public function removeSentClarification(Clarification $sentClarification)
-    {
-        $this->sent_clarifications->removeElement($sentClarification);
-    }
-
     public function getSentClarifications(): Collection
     {
         return $this->sent_clarifications;
@@ -479,11 +464,6 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface,
     {
         $this->received_clarifications[] = $receivedClarification;
         return $this;
-    }
-
-    public function removeReceivedClarification(Clarification $receivedClarification): void
-    {
-        $this->received_clarifications->removeElement($receivedClarification);
     }
 
     public function getReceivedClarifications(): Collection

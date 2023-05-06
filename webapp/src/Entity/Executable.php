@@ -98,11 +98,6 @@ class Executable
         return $this;
     }
 
-    public function removeLanguage(Language $language): void
-    {
-        $this->languages->removeElement($language);
-    }
-
     public function getLanguages(): Collection
     {
         return $this->languages;
@@ -114,11 +109,6 @@ class Executable
         return $this;
     }
 
-    public function removeProblemsCompare(Problem $problemsCompare): void
-    {
-        $this->problems_compare->removeElement($problemsCompare);
-    }
-
     public function getProblemsCompare(): Collection
     {
         return $this->problems_compare;
@@ -128,11 +118,6 @@ class Executable
     {
         $this->problems_run[] = $problemsRun;
         return $this;
-    }
-
-    public function removeProblemsRun(Problem $problemsRun): void
-    {
-        $this->problems_run->removeElement($problemsRun);
     }
 
     public function getProblemsRun(): Collection

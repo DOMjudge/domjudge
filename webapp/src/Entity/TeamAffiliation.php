@@ -210,11 +210,6 @@ class TeamAffiliation extends BaseApiEntity implements AssetEntityInterface
         return $this;
     }
 
-    public function removeTeam(Team $team): void
-    {
-        $this->teams->removeElement($team);
-    }
-
     public function getTeams(): Collection
     {
         return $this->teams;
