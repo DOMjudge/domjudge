@@ -1,7 +1,7 @@
 '''
 Sample solution in Python for the "boolfind" interactive problem.
 This will sometimes give an off by one answer. This is a demonstration
-of how to use the @EXPECTED_RESULTS@: tag.
+of how to use the @EXPECTED_RESULTS@ tag.
 
 @EXPECTED_RESULTS@: CORRECT, WRONG-ANSWER
 '''
