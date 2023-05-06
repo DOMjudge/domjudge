@@ -136,10 +136,10 @@ class ImportExportService
         return $time instanceof DateTime ? DateTimeImmutable::createFromMutable($time) : $time;
     }
 
-    public function importContestData($data, ?string &$message = null, string &$cid = null): bool
+    public function importContestData($data, ?string &$errorMessage = null, string &$cid = null): bool
     {
         if (empty($data) || !is_array($data)) {
-            $message = 'Error parsing YAML file.';
+            $errorMessage = 'Error parsing YAML file.';
             return false;
         }
 
@@ -167,20 +167,20 @@ class ImportExportService
         }
 
         if (!empty($missingFields)) {
-            $message = sprintf('Missing fields: %s', implode(', ', $missingFields));
+            $errorMessage = sprintf('Missing fields: %s', implode(', ', $missingFields));
             return false;
         }
 
         $invalid_regex = str_replace(['/^[', '+$/'], ['/[^', '/'], DOMJudgeService::EXTERNAL_IDENTIFIER_REGEX);
 
-        $startTime = $this->convertImportedTime($startTimeFields, $data, $message);
-        if ($message) {
+        $startTime = $this->convertImportedTime($startTimeFields, $data, $errorMessage);
+        if ($errorMessage) {
             return false;
         }
 
         // Activate time is special, it can return non empty message for parsing error or null if no field was provided
-        $activateTime = $this->convertImportedTime($activateTimeFields, $data, $message);
-        if ($message) {
+        $activateTime = $this->convertImportedTime($activateTimeFields, $data, $errorMessage);
+        if ($errorMessage) {
             return false;
         } elseif (!$activateTime) {
             $activateTime = new DateTime();
@@ -189,8 +189,8 @@ class ImportExportService
             }
         }
 
-        $deactivateTime = $this->convertImportedTime($deactivateTimeFields, $data, $message);
-        if ($message) {
+        $deactivateTime = $this->convertImportedTime($deactivateTimeFields, $data, $errorMessage);
+        if ($errorMessage) {
             return false;
         }
 
@@ -230,7 +230,7 @@ class ImportExportService
         if ($freezeDuration !== null) {
             $freezeDurationDiff = Utils::timeStringDiff($data['duration'], $freezeDuration);
             if (str_starts_with($freezeDurationDiff, '-')) {
-                $message = 'Freeze duration is longer than contest length';
+                $errorMessage = 'Freeze duration is longer than contest length';
                 return false;
             }
             $contest->setFreezetimeString(sprintf('+%s', $freezeDurationDiff));
@@ -246,7 +246,7 @@ class ImportExportService
                 $messages[] = sprintf('%s: %s', $error->getPropertyPath(), $error->getMessage());
             }
 
-            $message = sprintf("Contest has errors:\n\n%s", implode("\n", $messages));
+            $errorMessage = sprintf("Contest has errors:\n\n%s", implode("\n", $messages));
             return false;
         }
 
