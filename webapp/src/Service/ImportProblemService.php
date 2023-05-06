@@ -331,7 +331,7 @@ class ImportProblemService
                 ->getQuery()
                 ->getResult();
             foreach ($testcaseData as $testcase) {
-                $index                     = sprintf(
+                $index = sprintf(
                     '%s-%s-%s',
                     $testcase->getMd5sumInput(),
                     $testcase->getMd5sumOutput(),
