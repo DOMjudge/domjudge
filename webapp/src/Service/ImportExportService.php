@@ -99,7 +99,13 @@ class ImportExportService
         return $data;
     }
 
-    protected function convertImportedTime(array $fields, array $data, ?string &$message = null): ?DateTimeImmutable
+    /**
+     * Finds the first set field from $fields in $data and parse it as a date.
+     *
+     * To verify that everything works as expected the $errorMessage needs to be checked
+     * for parsing errors.
+     */
+    protected function convertImportedTime(array $fields, array $data, ?string &$errorMessage = null): ?DateTimeImmutable
     {
         $timeValue = null;
         $usedField = null;
@@ -119,8 +125,9 @@ class ImportExportService
             /** @var DateTime $time */
             $time = $timeValue;
         }
+        // If/When parsing fails we get a false instead of a null
         if ($time === false) {
-            $message = 'Can not parse '.$usedField;
+            $errorMessage = 'Can not parse '.$usedField;
             return null;
         } elseif ($time) {
             $time = $time->setTimezone(new DateTimeZone(date_default_timezone_get()));
