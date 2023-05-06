@@ -25,7 +25,8 @@ On top, DOMjudge defines a few extensions:
 
    .. literalinclude:: ../../example_problems/boolfind/submissions/mixed-verdicts/boolfind-test-random.py
       :language: python
-      :caption: *Example jury solution with multiple outcomes*
+      :caption: *Example jury solution with multiple outcomes (Shortened)*
+      :lines: -10
 
 The file ``domjudge-problem.ini`` contains key-value pairs, one
 pair per line, of the form ``key = value``. The ``=`` can
