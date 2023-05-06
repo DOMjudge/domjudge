@@ -40,7 +40,7 @@ EOF
 
 kill_processes() {
     echo "Killing remaining processes..."
-    pkill -G @RUNGROUP@
+    pkill -G @RUNGROUP@ || true
     echo "Done."
 }
 
@@ -76,7 +76,7 @@ cleanup_judgings() {
     if cut -d ' ' -f 2 /proc/mounts | grep -E "^$JUDGINGDIR/" >/dev/null 2>&1; then
         echo "There are (stale) bind mounts under $JUDGINGDIR/."
         echo "Make sure that all judgedaemons on this host are stopped, and then"
-        echo "run '$PROGNAME mount' to clean up any stale bind mounts."
+        echo "run '$PROGNAME mounts' to clean up any stale bind mounts."
         exit 1
     fi
     echo "Cleaning up judging data..."
