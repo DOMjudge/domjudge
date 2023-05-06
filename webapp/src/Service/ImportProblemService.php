@@ -378,11 +378,12 @@ class ImportProblemService
             asort($dataFiles);
 
             foreach ($dataFiles as $dataFile) {
-                $testInput  = $zip->getFromName(sprintf('data/%s/%s.in', $type, $dataFile));
-                $testOutput = $zip->getFromName(sprintf('data/%s/%s.ans', $type, $dataFile));
+                $baseFileName = sprintf('data/%s/%s', $type, $dataFile);
+                $testInput  = $zip->getFromName($baseFileName . '.in');
+                $testOutput = $zip->getFromName($baseFileName . '.ans');
                 $imageFile  = $imageType = $imageThumb = false;
                 foreach (['png', 'jpg', 'jpeg', 'gif'] as $imgExtension) {
-                    $imageFileName = sprintf('data/%s/%s.%s', $type, $dataFile, $imgExtension);
+                    $imageFileName = $baseFileName . '.' . $imgExtension;
                     if (($imageFile = $zip->getFromName($imageFileName)) !== false) {
                         $imageType = Utils::getImageType($imageFile, $errormsg);
                         if ($imageType === false) {
@@ -449,7 +450,7 @@ class ImportProblemService
                 $testcaseContent
                     ->setInput($testInput)
                     ->setOutput($testOutput);
-                if (($descriptionFile = $zip->getFromName(sprintf('data/%s/%s.desc', $type, $dataFile))) !== false) {
+                if (($descriptionFile = $zip->getFromName($baseFileName . '.desc')) !== false) {
                     $testcase->setDescription($descriptionFile);
                 }
                 if ($imageFile !== false) {
