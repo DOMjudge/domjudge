@@ -54,6 +54,31 @@
                     {{ externalContestSource.lastEventId | default('-') }}
                 </td>
             </tr>
+            {% if sourceService.validContestSource and sourceService.apiVersion %}
+                <tr>
+                    <th>External provider information</th>
+                    <td>
+                        Version:
+                        {% if sourceService.apiVersionUrl %}
+                            <a href="{{ sourceService.apiVersionUrl }}" target="_blank">
+                                {{ sourceService.apiVersion }}
+                            </a>
+                        {% else %}
+                            {{ sourceService.apiVersion }}
+                        {% endif %}
+                        <br/>
+                        {% if sourceService.apiProviderName %}
+                            Provider name: {{ sourceService.apiProviderName }}<br/>
+                        {% endif %}
+                        {% if sourceService.apiProviderVersion %}
+                            Provider version: {{ sourceService.apiProviderVersion }}<br/>
+                        {% endif %}
+                        {% if sourceService.apiProviderBuildDate %}
+                            Provider build date: {{ sourceService.apiProviderBuildDate }}<br/>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endif %}
             <tr>
                 <th>External contest information</th>
                 <td>

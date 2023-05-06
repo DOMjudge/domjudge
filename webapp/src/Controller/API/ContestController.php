@@ -10,6 +10,7 @@ use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\ImportExportService;
+use App\Utils\EventFeedFormat;
 use App\Utils\Utils;
 use Doctrine\Inflector\InflectorFactory;
 use Doctrine\ORM\EntityManagerInterface;
@@ -47,9 +48,6 @@ use TypeError;
 #[OA\Response(ref: '#/components/responses/NotFound', response: 404)]
 class ContestController extends AbstractRestController
 {
-    final public const EVENT_FEED_FORMAT_2020_03 = 0;
-    final public const EVENT_FEED_FORMAT_2022_07 = 1;
-
     public function __construct(
         EntityManagerInterface $entityManager,
         DOMJudgeService $dj,
@@ -686,7 +684,7 @@ class ContestController extends AbstractRestController
                         }
                     }
                     switch ($format) {
-                        case static::EVENT_FEED_FORMAT_2020_03:
+                        case EventFeedFormat::Format_2020_03:
                             $result = [
                                 'id' => (string)$event->getEventid(),
                                 'type' => (string)$event->getEndpointtype(),
@@ -694,7 +692,7 @@ class ContestController extends AbstractRestController
                                 'data' => $data,
                             ];
                             break;
-                        case static::EVENT_FEED_FORMAT_2022_07:
+                        case EventFeedFormat::Format_2022_07:
                             if ($event->getAction() === EventLogService::ACTION_DELETE) {
                                 $data = null;
                             }

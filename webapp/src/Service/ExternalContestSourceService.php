@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Controller\API\ContestController;
 use App\Entity\BaseApiEntity;
 use App\Entity\Clarification;
 use App\Entity\Contest;
@@ -17,6 +18,7 @@ use App\Entity\Team;
 use App\Entity\TeamAffiliation;
 use App\Entity\TeamCategory;
 use App\Entity\Testcase;
+use App\Utils\EventFeedFormat;
 use App\Utils\Utils;
 use DateTime;
 use DateTimeZone;
@@ -46,6 +48,7 @@ class ExternalContestSourceService
 
     protected bool $contestLoaded = false;
     protected ?array $cachedContestData = null;
+    protected ?array $cachedApiInfoData = null;
     protected ?string $loadingError = null;
     protected bool $shouldStopReading = false;
     protected array $verdicts = [];
@@ -159,6 +162,51 @@ class ExternalContestSourceService
         }
 
         return $this->cachedContestData['duration'];
+    }
+
+    public function getApiVersion(): ?string
+    {
+        if (!$this->isValidContestSource()) {
+            throw new LogicException('The contest source is not valid');
+        }
+
+        return $this->cachedApiInfoData['version'] ?? null;
+    }
+
+    public function getApiVersionUrl(): ?string
+    {
+        if (!$this->isValidContestSource()) {
+            throw new LogicException('The contest source is not valid');
+        }
+
+        return $this->cachedApiInfoData['version_url'] ?? null;
+    }
+
+    public function getApiProviderName(): ?string
+    {
+        if (!$this->isValidContestSource()) {
+            throw new LogicException('The contest source is not valid');
+        }
+
+        return $this->cachedApiInfoData['provider']['name'] ?? $this->cachedApiInfoData['name'] ?? null;
+    }
+
+    public function getApiProviderVersion(): ?string
+    {
+        if (!$this->isValidContestSource()) {
+            throw new LogicException('The contest source is not valid');
+        }
+
+        return $this->cachedApiInfoData['provider']['version'] ?? null;
+    }
+
+    public function getApiProviderBuildDate(): ?string
+    {
+        if (!$this->isValidContestSource()) {
+            throw new LogicException('The contest source is not valid');
+        }
+
+        return $this->cachedApiInfoData['provider']['build_date'] ?? null;
     }
 
     public function getLoadingError(): string
@@ -275,8 +323,7 @@ class ExternalContestSourceService
                         $event = $this->dj->jsonDecode($line);
                         $this->importEvent($event, $eventsToSkip);
 
-                        $event_format_202207 = !isset($event['op']);
-                        if ($event_format_202207) {
+                        if ($this->getEventFeedFormat($event) === EventFeedFormat::Format_2022_07) {
                             $eventId = $event['token'] ?? null;
                         } else {
                             $eventId = $event['id'];
@@ -369,8 +416,7 @@ class ExternalContestSourceService
                 $lastEventId          = $this->getLastReadEventId();
                 $readingToLastEventId = false;
 
-                $event_format_202207 = !isset($event['op']);
-                if ($event_format_202207) {
+                if ($this->getEventFeedFormat($event) === EventFeedFormat::Format_2022_07) {
                     $eventId = $event['token'] ?? null;
                 } else {
                     $eventId = $event['id'];
@@ -466,20 +512,25 @@ class ExternalContestSourceService
                         } else {
                             $clientOptions['auth_basic'] = null;
                         }
-                        $this->httpClient        = $this->httpClient->withOptions($clientOptions);
-                        $contestResponse         = $this->httpClient->request('GET', $this->source->getSource());
+                        $this->httpClient = $this->httpClient->withOptions($clientOptions);
+                        $contestResponse = $this->httpClient->request('GET', $this->source->getSource());
                         $this->cachedContestData = $contestResponse->toArray();
+
+                        $apiInfoResponse = $this->httpClient->request('GET', '');
+                        $this->cachedApiInfoData = $apiInfoResponse->toArray();
                     }
                 } catch (HttpExceptionInterface|DecodingExceptionInterface|TransportExceptionInterface $e) {
                     $this->cachedContestData = null;
-                    $this->loadingError      = $e->getMessage();
+                    $this->cachedApiInfoData = null;
+                    $this->loadingError = $e->getMessage();
                 }
                 $this->contestLoaded = true;
                 break;
             case ExternalContestSource::TYPE_CONTEST_PACKAGE:
                 $this->cachedContestData = null;
-                $contestFile             = $this->source->getSource() . '/contest.json';
-                $eventFeedFile           = $this->source->getSource() . '/event-feed.ndjson';
+                $contestFile = $this->source->getSource() . '/contest.json';
+                $eventFeedFile = $this->source->getSource() . '/event-feed.ndjson';
+                $apiInfoFile = $this->source->getSource() . '/api.json';
                 if (!is_dir($this->source->getSource())) {
                     $this->loadingError = 'Contest package directory not found';
                 } elseif (!is_file($contestFile)) {
@@ -491,6 +542,14 @@ class ExternalContestSourceService
                         $this->cachedContestData = $this->dj->jsonDecode(file_get_contents($contestFile));
                     } catch (JsonException $e) {
                         $this->loadingError = $e->getMessage();
+                    }
+
+                    if (is_file($apiInfoFile)) {
+                        try {
+                            $this->cachedApiInfoData = $this->dj->jsonDecode(file_get_contents($apiInfoFile));
+                        } catch (JsonException $e) {
+                            $this->loadingError = $e->getMessage();
+                        }
                     }
                 }
                 break;
@@ -514,8 +573,7 @@ class ExternalContestSourceService
             return;
         }
 
-        $event_format_202207 = !isset($event['op']);
-        if ($event_format_202207) {
+        if ($this->getEventFeedFormat($event) === EventFeedFormat::Format_2022_07) {
             $eventId = $event['token'] ?? null;
             if (!isset($event['data'])) {
                 $operation = EventLogService::ACTION_DELETE;
@@ -1505,7 +1563,7 @@ class ExternalContestSourceService
         }
 
         $startTime = Utils::toEpochFloat($data['start_time']);
-        $endTime   = null;
+        $endTime = null;
         if (isset($data['end_time'])) {
             $endTime = Utils::toEpochFloat($data['end_time']);
         }
@@ -1910,5 +1968,14 @@ class ExternalContestSourceService
             $this->em->remove($warning);
             $this->em->flush();
         }
+    }
+
+    protected function getEventFeedFormat(array $event): EventFeedFormat
+    {
+        return match ($this->getApiVersion()) {
+            '2020-03', '2021-11' => EventFeedFormat::Format_2020_03,
+            '2022-07' => EventFeedFormat::Format_2022_07,
+            default => isset($event['op']) ? EventFeedFormat::Format_2020_03 : EventFeedFormat::Format_2022_07,
+        };
     }
 }

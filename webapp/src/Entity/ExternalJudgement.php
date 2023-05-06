@@ -171,7 +171,7 @@ class ExternalJudgement
         return $this->starttime;
     }
 
-    public function setEndtime(string|float $endtime): ExternalJudgement
+    public function setEndtime(string|float|null $endtime): ExternalJudgement
     {
         $this->endtime = $endtime;
         return $this;
