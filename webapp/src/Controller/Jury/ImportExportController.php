@@ -164,7 +164,7 @@ class ImportExportController extends BaseController
                     return $this->redirectToRoute('jury_problems');
                 }
             } catch (Exception $e) {
-                $allMessages[] = $e->getMessage();
+                $allMessages['danger'][] = $e->getMessage();
             } finally {
                 if (isset($zip)) {
                     $zip->close();
