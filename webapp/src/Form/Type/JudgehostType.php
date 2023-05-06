@@ -14,15 +14,18 @@ class JudgehostType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder->add('hostname', TextType::class, [
+            'label' => 'Hostname',
             'attr' => ['readonly' => true],
         ]);
         $builder->add('enabled', ChoiceType::class, [
+            'label' => 'Enabled',
             'choices' => [
                 'yes' => true,
                 'no' => false,
             ],
         ]);
         $builder->add('hidden', ChoiceType::class, [
+            'label' => 'Hidden',
             'choices' => [
                 'yes' => true,
                 'no' => false,

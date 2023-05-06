@@ -30,14 +30,18 @@ class ContestProblemType extends AbstractType
         $builder->add('shortname', TextType::class, [
             'label' => 'Short name',
         ]);
-        $builder->add('points', IntegerType::class);
+        $builder->add('points', IntegerType::class,[
+            'label' => 'Points',
+        ]);
         $builder->add('allowSubmit', ChoiceType::class, [
+            'label' => 'Allow submit',
             'choices' => [
                 'Yes' => true,
                 'No' => false,
             ],
         ]);
         $builder->add('allowJudge', ChoiceType::class, [
+            'label' => 'Allow judge',
             'choices' => [
                 'Yes' => true,
                 'No' => false,
