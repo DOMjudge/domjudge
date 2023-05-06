@@ -757,6 +757,12 @@
                             {% else %}
                                 <pre class="output_text">{{ runsOutput[runIdx].output_system | parseRunDiff }}</pre>
                             {% endif %}
+
+                            {% if runsOutput[runIdx].team_message is not empty %}
+                                <h5>Judge message</h5>
+                                <pre class="output_text">
+{{  runsOutput[runIdx].team_message }}</pre>
+                            {%  endif %}
                         {% endif %}
                     {% endif %}
 

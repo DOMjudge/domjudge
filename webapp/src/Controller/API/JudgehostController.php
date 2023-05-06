@@ -589,6 +589,11 @@ class JudgehostController extends AbstractFOSRestController
                         type: 'string'
                     ),
                     new OA\Property(
+                        property: 'team_message',
+                        description: 'The (base64-encoded) message to the team of the run',
+                        type: 'string'
+                    ),
+                    new OA\Property(
                         property: 'metadata',
                         description: 'The (base64-encoded) metadata',
                         type: 'string'
@@ -626,6 +631,7 @@ class JudgehostController extends AbstractFOSRestController
         $outputDiff   = $request->request->get('output_diff');
         $outputError  = $request->request->get('output_error');
         $outputSystem = $request->request->get('output_system');
+        $teamMessage  = $request->request->get('team_message');
         $metadata     = $request->request->get('metadata');
 
         /** @var Judgehost $judgehost */
@@ -635,7 +641,7 @@ class JudgehostController extends AbstractFOSRestController
         }
 
         $hasFinalResult = $this->addSingleJudgingRun($judgeTaskId, $hostname, $runResult, $runTime,
-            $outputSystem, $outputError, $outputDiff, $outputRun, $metadata);
+            $outputSystem, $outputError, $outputDiff, $outputRun, $teamMessage, $metadata);
         $judgehost = $this->em->getRepository(Judgehost::class)->findOneBy(['hostname' => $hostname]);
         $judgehost->setPolltime(Utils::now());
         $this->em->flush();
@@ -900,6 +906,7 @@ class JudgehostController extends AbstractFOSRestController
         string $outputError,
         string $outputDiff,
         string $outputRun,
+        string $teamMessage,
         string $metadata
     ): bool {
         $resultsRemap = $this->config->get('results_remap');
@@ -919,6 +926,7 @@ class JudgehostController extends AbstractFOSRestController
             $outputError,
             $outputDiff,
             $outputRun,
+            $teamMessage,
             $metadata
         ) {
             /** @var JudgingRun $judgingRun */
@@ -939,6 +947,7 @@ class JudgehostController extends AbstractFOSRestController
                 ->setOutputDiff(base64_decode($outputDiff))
                 ->setOutputError(base64_decode($outputError))
                 ->setOutputSystem(base64_decode($outputSystem))
+                ->setTeamMessage(base64_decode($teamMessage))
                 ->setMetadata(base64_decode($metadata));
 
             $judging = $judgingRun->getJudging();
