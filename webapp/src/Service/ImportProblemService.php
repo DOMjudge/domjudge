@@ -718,9 +718,17 @@ class ImportProblemService
                     if ($results === false || $results === null) {
                         $results = [$expectedResult];
                     } elseif (!in_array($expectedResult, $results)) {
-                        $messages['info'][] = sprintf("Annotated result '%s' does not match directory for %s",
-                                              implode(', ', $results), $path);
+                        $messages['danger'][] = sprintf(
+                            "Annotated result '%s' does not match directory for %s",
+                            implode(', ', $results), $path
+                        );
                     } elseif (!empty($expectedResult)) {
+                        if (count($results) > 1) {
+                            $messages['warning'][] = sprintf(
+                                "Annotated results '%s' restricted to match directory for %s",
+                                implode(', ', $results), $path
+                            );
+                        }
                         $results = [$expectedResult];
                     }
                     $jury_team_id = $this->dj->getUser()->getTeam() ? $this->dj->getUser()->getTeam()->getTeamid() : null;
