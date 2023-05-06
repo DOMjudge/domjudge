@@ -716,7 +716,7 @@ class ImportProblemService
                         $tempFiles[]     = $tempFileName;
                     }
                     if ($results === false || $results === null) {
-                        $results[] = $expectedResult;
+                        $results = [$expectedResult];
                     } elseif (!in_array($expectedResult, $results)) {
                         $messages['info'][] = sprintf("Annotated result '%s' does not match directory for %s",
                                               implode(', ', $results), $path);
