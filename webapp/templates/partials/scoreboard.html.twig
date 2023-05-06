@@ -84,6 +84,12 @@
         {% endfor %}
     {% else %}
 
+        {% if show_balloon_public_message is defined and show_balloon_public_message %}
+            <div class="alert alert-warning" role="alert" style="font-size: 80%;">
+                You are seeing the public scoreboard, since you are a balloon runner.
+            </div>
+        {% endif %}
+
         {% if scoreboard.freezeData.showFrozen(false) %}
             <div class="alert alert-warning" role="alert" style="font-size: 80%;">
                 {% if jury %}
