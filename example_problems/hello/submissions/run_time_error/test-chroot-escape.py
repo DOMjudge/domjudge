@@ -22,4 +22,3 @@ if is_chroot():
 
 # If we get here we failed
 print("Hello world!")
-
