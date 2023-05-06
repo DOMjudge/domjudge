@@ -563,6 +563,18 @@ if (empty($options['e'])) {
     if (!posix_getpwnam($runuser)) {
         error("runuser $runuser does not exist.");
     }
+
+    define('LOCKFILE', RUNDIR.'/judge.'.$myhost.'.lock');
+    if (($lockfile = fopen(LOCKFILE, 'c'))===false) {
+        error("cannot open lockfile '" . LOCKFILE . "' for writing");
+    }
+    if (!flock($lockfile, LOCK_EX | LOCK_NB)) {
+        error("cannot lock '" . LOCKFILE . "', is another judgedaemon already running?");
+    }
+    if (!ftruncate($lockfile, 0) || fwrite($lockfile, (string)getmypid())===false) {
+        error("cannot write PID to '" . LOCKFILE . "'");
+    }
+
     $output = [];
     exec("ps -u '$runuser' -o pid= -o comm=", $output, $retval);
     if (count($output) !== 0) {
@@ -659,6 +671,7 @@ while (true) {
     if ($exitsignalled) {
         logmsg(LOG_NOTICE, "Received signal, exiting.");
         close_curl_handles();
+        fclose($lockfile);
         exit;
     }
 
@@ -918,6 +931,7 @@ while (true) {
     if ($exitsignalled) {
         logmsg(LOG_NOTICE, "Received signal, exiting.");
         close_curl_handles();
+        fclose($lockfile);
         exit;
     }
 
