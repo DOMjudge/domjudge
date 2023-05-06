@@ -349,12 +349,6 @@ class JudgeTask
         return $this;
     }
 
-    public function removeJudgingRun(JudgingRun $judgingRun): JudgeTask
-    {
-        $this->judging_runs->removeElement($judgingRun);
-        return $this;
-    }
-
     public function getJudgingRuns(): Collection
     {
         return $this->judging_runs;

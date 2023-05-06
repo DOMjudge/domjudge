@@ -448,11 +448,6 @@ class User extends BaseApiEntity implements UserInterface, PasswordAuthenticated
         return $this;
     }
 
-    public function removeSubmission(Submission $submission): void
-    {
-        $this->submissions->removeElement($submission);
-    }
-
     public function getSubmissions(): Collection
     {
         return $this->submissions;

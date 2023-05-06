@@ -298,11 +298,6 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
         return $this;
     }
 
-    public function removeJudging(Judging $judging): void
-    {
-        $this->judgings->removeElement($judging);
-    }
-
     public function getJudgings(): Collection
     {
         return $this->judgings;
@@ -325,11 +320,6 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
         return $this;
     }
 
-    public function removeFile(SubmissionFile $file): void
-    {
-        $this->files->removeElement($file);
-    }
-
     public function getFiles(): Collection
     {
         return $this->files;
@@ -339,11 +329,6 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
     {
         $this->balloons[] = $balloon;
         return $this;
-    }
-
-    public function removeBalloon(Balloon $balloon): void
-    {
-        $this->balloons->removeElement($balloon);
     }
 
     public function getBalloons(): Collection
@@ -451,12 +436,6 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
         return $this;
     }
 
-    public function removeResubmission(Submission $submission): Submission
-    {
-        $this->resubmissions->removeElement($submission);
-        return $this;
-    }
-
     /**
      * @return Collection|Submission[]
      */
@@ -497,11 +476,6 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
     {
         $this->external_judgements[] = $externalJudgement;
         return $this;
-    }
-
-    public function removeExternalJudgement(ExternalJudgement $externalJudgement): void
-    {
-        $this->external_judgements->removeElement($externalJudgement);
     }
 
     public function getExternalJudgements(): Collection

@@ -207,11 +207,6 @@ class TeamCategory extends BaseApiEntity implements Stringable
         return $this;
     }
 
-    public function removeTeam(Team $team)
-    {
-        $this->teams->removeElement($team);
-    }
-
     public function getTeams(): Collection
     {
         return $this->teams;
@@ -235,16 +230,6 @@ class TeamCategory extends BaseApiEntity implements Stringable
         return $this;
     }
 
-    public function removeContest(Contest $contest): self
-    {
-        if ($this->contests->contains($contest)) {
-            $this->contests->removeElement($contest);
-            $contest->removeTeamCategory($this);
-        }
-
-        return $this;
-    }
-
     /**
      * @return Collection|Contest[]
      */
@@ -258,16 +243,6 @@ class TeamCategory extends BaseApiEntity implements Stringable
         if (!$this->contests_for_medals->contains($contest)) {
             $this->contests_for_medals[] = $contest;
             $contest->addMedalCategory($this);
-        }
-
-        return $this;
-    }
-
-    public function removeContestForMedals(Contest $contest): self
-    {
-        if ($this->contests_for_medals->contains($contest)) {
-            $this->contests_for_medals->removeElement($contest);
-            $contest->removeMedalCategories($this);
         }
 
         return $this;

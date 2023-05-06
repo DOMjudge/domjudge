@@ -165,15 +165,6 @@ class ExternalContestSource
         return $this;
     }
 
-    public function removeExternalSourceWarning(ExternalSourceWarning $warning): self
-    {
-        if ($this->warnings->contains($warning)) {
-            $this->warnings->removeElement($warning);
-        }
-
-        return $this;
-    }
-
     public function getShortDescription(): string
     {
         return $this->getSource();

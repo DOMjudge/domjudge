@@ -226,12 +226,6 @@ class Testcase
         return $this;
     }
 
-    public function removeJudgingRun(JudgingRun $judgingRun): Testcase
-    {
-        $this->judging_runs->removeElement($judgingRun);
-        return $this;
-    }
-
     public function getJudgingRuns(): Collection
     {
         return $this->judging_runs;
@@ -286,11 +280,6 @@ class Testcase
     {
         $this->external_runs[] = $externalRun;
         return $this;
-    }
-
-    public function removeExternalRun(ExternalRun $externalRun)
-    {
-        $this->external_runs->removeElement($externalRun);
     }
 
     public function getExternalRuns(): Collection

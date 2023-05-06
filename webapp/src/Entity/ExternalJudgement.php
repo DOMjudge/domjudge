@@ -221,11 +221,6 @@ class ExternalJudgement
         return $this;
     }
 
-    public function removeExternalRun(ExternalRun $externalRun): void
-    {
-        $this->external_runs->removeElement($externalRun);
-    }
-
     public function getExternalRuns(): Collection
     {
         return $this->external_runs;
