@@ -75,7 +75,7 @@ def do_api_request(name: str, method: str = 'GET', jsonData: dict = {}):
             if method == 'GET':
                 response = requests.get(url, headers=headers, verify=ca_check)
             elif method == 'PUT':
-                response = requests.put(url, headers=headers, verify=ca_check, json=json)
+                response = requests.put(url, headers=headers, verify=ca_check, json=jsonData)
         except requests.exceptions.SSLError as e:
             ca_check = not confirm(
                 "Can not verify certificate, ignore certificate check?", False)
