@@ -110,11 +110,12 @@ class ImportExportService
         $timeValue = null;
         $usedField = null;
         foreach ($fields as $field) {
-            if ($timeValue) {
-                continue;
-            }
             $timeValue = $data[$field] ?? null;
             $usedField = $field;
+            // We need to check as the value for the key can be null
+            if ($timeValue) {
+                break;
+            }
         }
 
         if (is_string($timeValue)) {
