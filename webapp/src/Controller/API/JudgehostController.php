@@ -1284,6 +1284,9 @@ class JudgehostController extends AbstractFOSRestController
             $numActiveJudgehosts = $this->em->createQueryBuilder()
                 ->from(Judgehost::class, 'jh')
                 ->select('COUNT(jh.hostname)')
+                ->andWhere('jh.enabled = 1')
+                ->andWhere('jh.polltime > :recently')
+                ->setParameter('recently', Utils::now() - 120)
                 ->getQuery()
                 ->getSingleScalarResult();
             if ($numQueueTasks >= $numActiveJudgehosts) {
