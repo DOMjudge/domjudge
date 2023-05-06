@@ -36,7 +36,7 @@
                                 <li class="list-group-item" style="padding:0;padding-top:10px;">
                                     <div class="mb-3">
                                         <label class="form-label"
-                                        {% if option.type in ['int','string','bool'] or option.type == 'array_val' and option.options is not null %}
+                                        {% if option.type in ['int','string','bool','enum'] or option.type == 'array_val' and option.options is not null %}
                                             for="config_{{ option.name }}"
                                             {% if option.type =='bool' %} onclick="$('#config_{{ option.name }}').bootstrapToggle('toggle')"{% endif %}
                                         {% endif %}
@@ -64,7 +64,7 @@
                                                        value="{{ option.value }}">
                                             {% endif %}
                                             <br/>
-                                        {% elseif option.type == 'string' %}
+                                        {% elseif option.type == 'string' or option.type == 'enum' %}
                                             {% if option.options is not null %}
                                                 <select class="form-control form-control-sm form-select form-select-sm"
                                                         style="width:30em;display: block;"

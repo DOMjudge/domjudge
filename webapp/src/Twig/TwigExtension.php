@@ -339,7 +339,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         // We use a direct SQL query here for performance reasons
         if ($showExternal) {
             /** @var ExternalJudgement|null $externalJudgement */
-            $externalJudgement   = $submission->getExternalJudgements()->first();
+            $externalJudgement   = $submission->getExternalJudgements()->first() ?: null;
             $externalJudgementId = $externalJudgement?->getExtjudgementid();
             $probId              = $submission->getProblem()->getProbid();
             $testcases           = $this->em->getConnection()->fetchAllAssociative(
