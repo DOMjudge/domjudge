@@ -30,10 +30,9 @@ final class Version20200131064449 extends AbstractMigration implements Container
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
 
         // Note: can't use ConfigurationService::get on 'registration_category_name' because the specification has been removed from db-config.yaml
-        $em = $this->container->get('doctrine')->getManager();
-        $registrationCategoryNameConfig = $em->getRepository(Configuration::class)->findOneBy(['name' => 'registration_category_name']);
+        $registrationCategoryNameConfig = $this->connection->fetchAssociative('SELECT * FROM configuration WHERE name = :registration_category_name', ['registration_category_name' => 'registration_category_name']);
         if ($registrationCategoryNameConfig) {
-            $registrationCategoryName = $registrationCategoryNameConfig->getValue();
+            $registrationCategoryName = $registrationCategoryNameConfig['value'];
         } else {
             $registrationCategoryName = '';
         }
@@ -53,23 +52,19 @@ final class Version20200131064449 extends AbstractMigration implements Container
     {
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
 
-        $em = $this->container->get('doctrine')->getManager();
-        $selfRegistrationCategories = $em->getRepository(TeamCategory::class)->findBy(
-            ['allow_self_registration' => 1],
-            ['sortorder' => 'ASC']
-        );
+        $selfRegistrationCategories = $this->connection->fetchAllAssociative('SELECT * FROM team_category WHERE allow_self_registration = 1 ORDER BY sortorder');
 
         $this->warnIf(
             count($selfRegistrationCategories) > 1,
             sprintf('Team categories for self-registered teams were %s. Only first will be kept.',
                 implode(', ', array_map(function($category) {
-                    return $category->getName();
+                    return $category['name'];
                 }, $selfRegistrationCategories)))
         );
 
         $this->addSql(
             "INSERT INTO configuration (name, value) VALUES ('registration_category_name', :value)",
-            ['value' => empty($selfRegistrationCategories) ? '""' : json_encode($selfRegistrationCategories[0]->getName())]
+            ['value' => empty($selfRegistrationCategories) ? '""' : json_encode($selfRegistrationCategories[0]['name'])]
         );
 
         $this->addSql('ALTER TABLE team_category DROP allow_self_registration');
