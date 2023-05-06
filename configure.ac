@@ -117,6 +117,13 @@ else
 	AC_MSG_RESULT($RUNUSER)
 fi
 
+if test "x${DOMJUDGE_USER#"$RUNUSER"}" != "x$DOMJUDGE_USER" ; then
+	AC_MSG_ERROR([domjudge_user '$DOMJUDGE_USER' cannot match runuser '$RUNUSER'.])
+fi
+if test "x$RUNUSER" = "xroot" ; then
+	AC_MSG_ERROR([runuser cannot be root.])
+fi
+
 AC_MSG_CHECKING([rungroup])
 AC_ARG_WITH([rungroup], [AS_HELP_STRING([--with-rungroup=GROUP],
 [Unprivileged group under which to run submissions (default: same as runuser).])], [], [])
