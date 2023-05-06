@@ -51,6 +51,8 @@ EOF
 # Wrapper around mysql command to allow setting options, user, etc.
 mysql()
 {
+	local user pass
+
 	# shellcheck disable=SC2153
 	if [ -n "$DBUSER" ]; then
 		user="-u $DBUSER"
