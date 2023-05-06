@@ -38,6 +38,7 @@ Commands:
 Options:
   -u <user>  connect to MySQL with DB admin <user>
   -p <pass>  use password <pass> for DB admin user
+  -q         be (mostly) quiet
   -r         read DB admin password from prompt
   -s         connect via local socket (do not specify port)
 
