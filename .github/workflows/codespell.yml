@@ -14,7 +14,7 @@ jobs:
   codespell:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Rewrite Changelog to find new mistakes
         run: awk '1;/Version 7.2.1 - 6 May 2020/{exit}' ChangeLog > latest_Changelog
       - name: Get dirs to skip
