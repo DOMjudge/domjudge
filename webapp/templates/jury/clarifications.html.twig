@@ -81,7 +81,7 @@
             {%- endif %}
         {% endif %}
 
-        {% if currentFilter is null or currentFilter == 'old' %}
+        {% if currentFilter is null or currentFilter == 'handled' %}
             <h3 id="oldrequests" class="mt-4">Handled requests</h3>
             {%- if oldClarifications | length == 0 %}
                 <p class="nodata">No old clarification requests.</p>
