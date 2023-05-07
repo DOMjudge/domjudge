@@ -87,7 +87,6 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             new TwigFilter('lineCount', $this->lineCount(...)),
             new TwigFilter('base64', 'base64_encode'),
             new TwigFilter('base64_decode', 'base64_decode'),
-            new TwigFilter('parseRunDiff', $this->parseRunDiff(...), ['is_safe' => ['html']]),
             new TwigFilter('runDiff', $this->runDiff(...), ['is_safe' => ['html']]),
             new TwigFilter('interactiveLog', $this->interactiveLog(...), ['is_safe' => ['html']]),
             new TwigFilter('codeEditor', $this->codeEditor(...), ['is_safe' => ['html']]),
@@ -669,41 +668,6 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
     public function lineCount(string $input): int
     {
         return mb_substr_count($input, "\n");
-    }
-
-    public function parseRunDiff(string $difftext): string
-    {
-        $line = strtok($difftext, "\n"); //first line
-        if ($line === false || sscanf($line, "### DIFFERENCES FROM LINE %d ###\n", $firstdiff) != 1) {
-            return htmlspecialchars($difftext);
-        }
-        $return = $line . "\n";
-
-        // Add second line 'team ? reference'.
-        $line   = strtok("\n");
-        $return .= $line . "\n";
-
-        // We determine the line number width from the '_' characters and
-        // the separator position from the character '?' on the second line.
-        $linenowidth = mb_strrpos($line, '_') + 1;
-        $midloc      = mb_strpos($line, '?') - ($linenowidth + 1);
-
-        $line = strtok("\n");
-        while (mb_strlen($line) != 0) {
-            $linenostr = mb_substr($line, 0, $linenowidth);
-            $diffline  = mb_substr($line, $linenowidth + 1);
-            $mid       = mb_substr($diffline, $midloc - 1, 3);
-            $formdiffline = match ($mid) {
-                ' = ' => "<span class='correct'>" . htmlspecialchars($diffline) . "</span>",
-                ' ! ' => "<span class='differ'>" . htmlspecialchars($diffline) . "</span>",
-                ' $ ' => "<span class='endline'>" . htmlspecialchars($diffline) . "</span>",
-                ' > ', ' < ' => "<span class='extra'>" . htmlspecialchars($diffline) . "</span>",
-                default => htmlspecialchars($diffline),
-            };
-            $return = $return . $linenostr . " " . $formdiffline . "\n";
-            $line   = strtok("\n");
-        }
-        return $return;
     }
 
     public function interactiveLog(string $log, bool $forTeam = false): string
