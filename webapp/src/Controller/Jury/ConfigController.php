@@ -92,6 +92,8 @@ class ConfigController extends AbstractController
                     'options' => $spec['options'] ?? null,
                     'key_options' => $spec['key_options'] ?? null,
                     'value_options' => $spec['value_options'] ?? null,
+                    'key_placeholder' => $spec['key_placeholder'] ?? '',
+                    'value_placeholder' => $spec['value_placeholder'] ?? '',
                 ];
             }
             $allData[] = [

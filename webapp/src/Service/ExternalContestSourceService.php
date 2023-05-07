@@ -1314,6 +1314,8 @@ class ExternalContestSourceService
             $entryPoint = null;
         }
 
+        $submissionDownloadSucceeded = true;
+
         // If the submission is found, we can only update the valid status.
         // If any of the other fields are different, this is an error.
         if ($submission) {
@@ -1375,12 +1377,12 @@ class ExternalContestSourceService
                 $this->addOrUpdateWarning($eventId, $entityType, $data['id'], ExternalSourceWarning::TYPE_SUBMISSION_ERROR, [
                     'message' => 'No source files in event',
                 ]);
-                return;
+                $submissionDownloadSucceeded = false;
             } elseif (($data['files'][0]['mime'] ?? null) !== 'application/zip') {
                 $this->addOrUpdateWarning($eventId, $entityType, $data['id'], ExternalSourceWarning::TYPE_SUBMISSION_ERROR, [
                     'message' => 'Non-ZIP source files in event',
                 ]);
-                return;
+                $submissionDownloadSucceeded = false;
             } else {
                 $zipUrl = $data['files'][0]['href'];
                 if (preg_match('/^https?:\/\//', $zipUrl) === 0) {
@@ -1402,60 +1404,67 @@ class ExternalContestSourceService
                         $this->addOrUpdateWarning($eventId, $entityType, $data['id'], ExternalSourceWarning::TYPE_SUBMISSION_ERROR, [
                             'message' => 'Cannot create temporary file to download ZIP',
                         ]);
-                        return;
+                        $submissionDownloadSucceeded = false;
                     }
 
-                    try {
-                        $response   = $this->httpClient->request('GET', $zipUrl);
-                        $ziphandler = fopen($zipFile, 'w');
-                        if ($response->getStatusCode() !== 200) {
-                            // TODO: Retry a couple of times.
+                    if ($submissionDownloadSucceeded) {
+                        try {
+                            $response = $this->httpClient->request('GET', $zipUrl);
+                            $ziphandler = fopen($zipFile, 'w');
+                            if ($response->getStatusCode() !== 200) {
+                                // TODO: Retry a couple of times.
+                                $this->addOrUpdateWarning($eventId, $entityType, $data['id'], ExternalSourceWarning::TYPE_SUBMISSION_ERROR, [
+                                    'message' => 'Cannot download ZIP from ' . $zipUrl,
+                                ]);
+                                $submissionDownloadSucceeded = false;
+                            }
+                        } catch (TransportExceptionInterface $e) {
                             $this->addOrUpdateWarning($eventId, $entityType, $data['id'], ExternalSourceWarning::TYPE_SUBMISSION_ERROR, [
-                                'message' => 'Cannot download ZIP from ' . $zipUrl,
+                                'message' => 'Cannot download ZIP from ' . $zipUrl . ': ' . $e->getMessage(),
                             ]);
+                            if (isset($ziphandler)) {
+                                fclose($ziphandler);
+                            }
                             unlink($zipFile);
-                            return;
+                            $submissionDownloadSucceeded = false;
                         }
-                    } catch (TransportExceptionInterface $e) {
-                        $this->addOrUpdateWarning($eventId, $entityType, $data['id'], ExternalSourceWarning::TYPE_SUBMISSION_ERROR, [
-                            'message' => 'Cannot download ZIP from ' . $zipUrl . ': ' . $e->getMessage(),
-                        ]);
-                        unlink($zipFile);
-                        return;
                     }
 
-                    foreach ($this->httpClient->stream($response) as $chunk) {
-                        fwrite($ziphandler, $chunk->getContent());
+                    if ($submissionDownloadSucceeded) {
+                        foreach ($this->httpClient->stream($response) as $chunk) {
+                            fwrite($ziphandler, $chunk->getContent());
+                        }
+                        fclose($ziphandler);
                     }
-                    fclose($ziphandler);
                 }
 
-                // Open the ZIP file.
-                $zip = new ZipArchive();
-                $zip->open($zipFile);
+                if ($submissionDownloadSucceeded) {
+                    // Open the ZIP file.
+                    $zip = new ZipArchive();
+                    $zip->open($zipFile);
 
-                // Determine the files to submit.
-                /** @var UploadedFile[] $filesToSubmit */
-                $filesToSubmit = [];
-                for ($zipFileIdx = 0; $zipFileIdx < $zip->numFiles; $zipFileIdx++) {
-                    $filename = $zip->getNameIndex($zipFileIdx);
-                    $content  = $zip->getFromName($filename);
+                    // Determine the files to submit.
+                    /** @var UploadedFile[] $filesToSubmit */
+                    $filesToSubmit = [];
+                    for ($zipFileIdx = 0; $zipFileIdx < $zip->numFiles; $zipFileIdx++) {
+                        $filename = $zip->getNameIndex($zipFileIdx);
+                        $content = $zip->getFromName($filename);
 
-                    if (!($tmpSubmissionFile = tempnam($tmpdir, "submission_source_"))) {
-                        $this->addOrUpdateWarning($eventId, $entityType, $data['id'], ExternalSourceWarning::TYPE_SUBMISSION_ERROR, [
-                            'message' => 'Cannot create temporary file to extract ZIP contents for file ' . $filename,
-                        ]);
-                        $zip->close();
-                        if ($shouldUnlink) {
-                            unlink($zipFile);
+                        if (!($tmpSubmissionFile = tempnam($tmpdir, "submission_source_"))) {
+                            $this->addOrUpdateWarning($eventId, $entityType, $data['id'], ExternalSourceWarning::TYPE_SUBMISSION_ERROR, [
+                                'message' => 'Cannot create temporary file to extract ZIP contents for file ' . $filename,
+                            ]);
+                            $submissionDownloadSucceeded = false;
+                            continue;
                         }
-                        return;
+                        file_put_contents($tmpSubmissionFile, $content);
+                        $filesToSubmit[] = new UploadedFile(
+                            $tmpSubmissionFile, $filename,
+                            null, null, true
+                        );
                     }
-                    file_put_contents($tmpSubmissionFile, $content);
-                    $filesToSubmit[] = new UploadedFile(
-                        $tmpSubmissionFile, $filename,
-                        null, null, true
-                    );
+                } else {
+                    $filesToSubmit = [];
                 }
 
                 // If the language requires an entry point but we do not have one, use automatic entry point detection.
@@ -1466,9 +1475,18 @@ class ExternalContestSourceService
                 // Submit the solution
                 $contest    = $this->em->getRepository(Contest::class)->find($this->getSourceContestId());
                 $submission = $this->submissionService->submitSolution(
-                    $team, null, $contestProblem, $contest, $language, $filesToSubmit, 'shadowing', null,
-                    null, $entryPoint, $submissionId, $submitTime,
-                    $message
+                    team: $team,
+                    user: null,
+                    problem: $contestProblem,
+                    contest: $contest,
+                    language: $language,
+                    files: $filesToSubmit,
+                    source: 'shadowing',
+                    entryPoint: $entryPoint,
+                    externalId: $submissionId,
+                    submitTime: $submitTime,
+                    message: $message,
+                    forceImportInvalid: !$submissionDownloadSucceeded
                 );
                 if (!$submission) {
                     $this->addOrUpdateWarning($eventId, $entityType, $data['id'], ExternalSourceWarning::TYPE_SUBMISSION_ERROR, [
@@ -1478,7 +1496,9 @@ class ExternalContestSourceService
                     foreach ($filesToSubmit as $file) {
                         unlink($file->getRealPath());
                     }
-                    $zip->close();
+                    if (isset($zip)) {
+                        $zip->close();
+                    }
                     if ($shouldUnlink) {
                         unlink($zipFile);
                     }
@@ -1486,7 +1506,9 @@ class ExternalContestSourceService
                 }
 
                 // Clean up the ZIP.
-                $zip->close();
+                if (isset($zip)) {
+                    $zip->close();
+                }
                 if ($shouldUnlink) {
                     unlink($zipFile);
                 }
@@ -1498,7 +1520,9 @@ class ExternalContestSourceService
             }
         }
 
-        $this->removeWarning($entityType, $data['id'], ExternalSourceWarning::TYPE_SUBMISSION_ERROR);
+        if ($submissionDownloadSucceeded) {
+            $this->removeWarning($entityType, $data['id'], ExternalSourceWarning::TYPE_SUBMISSION_ERROR);
+        }
 
         $this->processPendingEvents('submission', $submission->getExternalid());
     }

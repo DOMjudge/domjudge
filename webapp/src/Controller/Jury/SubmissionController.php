@@ -183,7 +183,7 @@ class SubmissionController extends BaseController
             ->join('s.problem', 'p')
             ->join('s.language', 'l')
             ->join('s.contest', 'c')
-            ->join('s.files', 'f')
+            ->leftJoin('s.files', 'f')
             ->leftJoin('s.external_judgements', 'ej', Join::WITH, 'ej.valid = 1')
             ->leftJoin('s.contest_problem', 'cp')
             ->select('s', 't', 'p', 'l', 'c', 'partial f.{submitfileid, filename}', 'cp', 'ej')

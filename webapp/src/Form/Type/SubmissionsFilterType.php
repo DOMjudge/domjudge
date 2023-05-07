@@ -119,6 +119,7 @@ class SubmissionsFilterType extends AbstractType
         $verdicts = array_keys(include $verdictsConfig);
         $verdicts[] = "judging";
         $verdicts[] = "queued";
+        $verdicts[] = "import-error";
         $builder->add("result", ChoiceType::class, [
             "label" => "Filter on result(s)",
             "multiple" => true,
