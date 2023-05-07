@@ -66,6 +66,8 @@ a {
 .badge-testcase {
     width: 20px;
     margin-right: 1px;
+    padding-left: 0;
+    padding-right: 0;
 }
 
 .sol {
