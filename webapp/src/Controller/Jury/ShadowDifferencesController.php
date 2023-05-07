@@ -186,7 +186,8 @@ class ShadowDifferencesController extends BaseController
         [$submissions, $submissionCounts] = $this->submissions->getSubmissionList(
             $contests,
             $restrictions,
-            0
+            limit: 0,
+            showShadowUnverified: true
         );
 
         $data = [

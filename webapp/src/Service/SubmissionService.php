@@ -76,8 +76,12 @@ class SubmissionService
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
-    public function getSubmissionList(array $contests, array $restrictions, int $limit = 0): array
-    {
+    public function getSubmissionList(
+        array $contests,
+        array $restrictions,
+        int $limit = 0,
+        bool $showShadowUnverified = false
+    ): array {
         if (empty($contests)) {
             return [[], []];
         }
@@ -266,6 +270,10 @@ class SubmissionService
             'queued' => 'j.result IS NULL AND j.starttime IS NULL',
             'judging' => 'j.starttime IS NOT NULL AND j.endtime IS NULL'
         ];
+        if ($showShadowUnverified) {
+            $countQueryExtras['shadowUnverified'] = 'ej.verified = 0 AND ej.result IS NOT NULL AND (ej.result != j.result OR j.result IS NULL)';
+            unset($countQueryExtras['unverified']);
+        }
         foreach ($countQueryExtras as $count => $countQueryExtra) {
             $countQueryBuilder = (clone $queryBuilder)->select('COUNT(s.submitid) AS cnt');
             if (!empty($countQueryExtra)) {
