@@ -35,7 +35,7 @@
                 {{ file.sourcecode | codeEditor(idx, submission.language.aceLanguage, true, 'form_source' ~ file.rank) }}
                 <script>
                     $(function () {
-                        $('#form_source{{ file.rank }}').closest('.form-group').hide();
+                        $('#form_source{{ file.rank }}').closest('div.mb-3').hide();
                     });
                 </script>
             </div>
