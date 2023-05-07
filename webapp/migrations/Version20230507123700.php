@@ -14,7 +14,7 @@ final class Version20230507123700 extends AbstractMigration
 {
     public function getDescription(): string
     {
-        return '';
+        return 'Add compiler and runner versions information.';
     }
 
     public function up(Schema $schema): void
