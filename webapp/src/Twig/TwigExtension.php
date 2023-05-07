@@ -828,12 +828,15 @@ JS;
         $return = '';
         while ($line !== false && strlen($line) != 0) {
             // Strip any additional DOS/MAC newline characters:
-            $line = trim($line, "\r\n");
+            $line = str_replace("\r", "↵", $line);
             $formdiffline = match (substr($line, 0, 1)) {
                 '-' => "<span class='diff-del'>" . htmlspecialchars($line) . "</span>",
                 '+' => "<span class='diff-add'>" . htmlspecialchars($line) . "</span>",
                 default => htmlspecialchars($line),
             };
+            if (str_contains($formdiffline, '#Warning: Strings contain different line endings')) {
+                $formdiffline = "<span class='diff-endline'>$formdiffline</span>";
+            }
             $return .= $formdiffline . "\n";
             $line   = strtok("\n");
         }
