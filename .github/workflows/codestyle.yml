@@ -52,8 +52,8 @@ jobs:
         PHPVERSION: ["8.1", "8.2"]
     steps:
       - uses: actions/checkout@v2
-      - name: Set plugin config for version detection
-        run: phpcs --config-set installed_paths /app/vendor/phpcompatibility/php-compatibility
+      - name: Various fixes to this image
+        run: .github/jobs/fix_pipelinecomponents_image.sh
       - name: Detect compatibility with supported PHP version
         run: >
           phpcs -s -p --colors
