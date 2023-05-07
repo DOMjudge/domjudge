@@ -1366,9 +1366,12 @@ function judge(array $judgeTask): bool
         'output_system' => rest_encode_file($testcasedir . '/system.out', $output_storage_limit),
         'metadata' => rest_encode_file($testcasedir . '/program.meta', false),
         'output_diff'  => rest_encode_file($testcasedir . '/feedback/judgemessage.txt', $output_storage_limit),
-        'team_message' => rest_encode_file($testcasedir . '/feedback/teammessage.txt', $output_storage_limit),
         'hostname' => $myhost,
     ];
+
+    if (file_exists($testcasedir . '/feedback/teammessage.txt')) {
+        $new_judging_run['team_message'] = rest_encode_file($testcasedir . '/feedback/teammessage.txt', $output_storage_limit);
+    }
 
     $ret = true;
     if ($result === 'correct') {

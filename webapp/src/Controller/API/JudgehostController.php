@@ -640,6 +640,10 @@ class JudgehostController extends AbstractFOSRestController
             throw new BadRequestHttpException("Who are you and why are you sending us any data?");
         }
 
+        if($teamMessage === null) {
+            $teamMessage = "";
+        }
+
         $hasFinalResult = $this->addSingleJudgingRun($judgeTaskId, $hostname, $runResult, $runTime,
             $outputSystem, $outputError, $outputDiff, $outputRun, $teamMessage, $metadata);
         $judgehost = $this->em->getRepository(Judgehost::class)->findOneBy(['hostname' => $hostname]);
