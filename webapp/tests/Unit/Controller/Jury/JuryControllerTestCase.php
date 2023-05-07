@@ -267,6 +267,11 @@ abstract class JuryControllerTestCase extends BaseTestCase
                         $combinedValues[$id] = $field;
                     }
                 }
+                // For LanguageController the values for external identifier should follow internal
+                if (key_exists('langid', $element) && !key_exists('externalid', $element)) {
+                    $formFields[static::$addForm . 'externalid]'] = $element['langid'];
+                    $combinedValues['externalid'] = $element['langid'];
+                }
                 $this->verifyPageResponse('GET', static::$baseUrl . static::$add, 200);
                 $button = $this->client->getCrawler()->selectButton('Save');
                 $form = $button->form($formFields, 'POST');
