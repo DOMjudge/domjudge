@@ -692,6 +692,7 @@ EOF;
     {
         // Example from the manual, but we have changed the ID's to not mix them with fixtures and
         // we explicitly use a different label for the first team and no label for the second
+        // Also we explicitly test for the label '0', since that is a special case
         $teamsData = <<<EOF
 [{
     "id": "11",
@@ -707,6 +708,13 @@ EOF;
     "group_ids": ["25"],
     "name": "Pleading not FAUlty",
     "organization_id": "INST-43"
+}, {
+    "id": "13",
+    "icpc_id": "123456",
+    "label": "0",
+    "group_ids": ["26"],
+    "name": "Team with label 0",
+    "organization_id": "INST-44"
 }]
 EOF;
 
@@ -735,6 +743,18 @@ EOF;
                 'affiliation' => [
                     'externalid' => 'INST-43',
                 ],
+            ], [
+                'externalid' => '13',
+                'icpcid' => '123456',
+                'label' => '0',
+                'name' => 'Team with label 0',
+                'room' => null,
+                'category' => [
+                    'externalid' => '26',
+                ],
+                'affiliation' => [
+                    'externalid' => 'INST-44',
+                ],
             ],
         ];
 
@@ -748,7 +768,7 @@ EOF;
         unlink($fileName);
 
         self::assertNull($message);
-        self::assertEquals(2, $importCount);
+        self::assertEquals(count($expectedTeams), $importCount);
 
         /** @var EntityManagerInterface $em */
         $em = static::getContainer()->get(EntityManagerInterface::class);
