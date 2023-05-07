@@ -15,14 +15,14 @@ jobs:
     container:
       image: domjudge/gitlabci:2.1
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Run the syntax checks
         run: .github/jobs/syntax.sh
 
   detect-dump:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: "Search for leftover dump( statements"
         run: .github/jobs/detect_dump.sh
 
@@ -31,7 +31,7 @@ jobs:
     container:
       image: pipelinecomponents/php-linter:latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Detect PHP linting issues
         run: >
           parallel-lint --colors
@@ -52,7 +52,7 @@ jobs:
         PHPVERSION: ["8.1", "8.2"]
     steps:
       - run: apk add git
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Various fixes to this image
         run: .github/jobs/fix_pipelinecomponents_image.sh
       - name: Detect compatibility with supported PHP version
