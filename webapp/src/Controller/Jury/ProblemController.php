@@ -138,7 +138,15 @@ class ProblemController extends BaseController
                         'probId' => $p->getProbid(),
                     ])
                 ];
-                $problemactions[] = [
+
+                $problemIsLocked = false;
+                foreach ($p->getContestProblems() as $contestProblem) {
+                    if ($contestProblem->getContest()->isLocked()) {
+                        $problemIsLocked = true;
+                    }
+                }
+
+                $deleteAction = [
                     'icon' => 'trash-alt',
                     'title' => 'delete this problem',
                     'link' => $this->generateUrl('jury_problem_delete', [
@@ -146,6 +154,12 @@ class ProblemController extends BaseController
                     ]),
                     'ajaxModal' => true,
                 ];
+                if ($problemIsLocked) {
+                    $deleteAction['title'] .= ' - problem belongs to a locked contest';
+                    $deleteAction['disabled'] = true;
+                    unset($deleteAction['link']);
+                }
+                $problemactions[] = $deleteAction;
             }
 
             // Add formatted {mem,output}limit row data for the table.
