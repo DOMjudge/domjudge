@@ -56,126 +56,77 @@ class Version
         return $this->versionid;
     }
 
-    /**
-     * @return string|null
-     */
     public function getCompilerVersionCommand(): ?string
     {
         return $this->compilerVersionCommand;
     }
 
-    /**
-     * @param string|null $compilerVersionCommand
-     * @return Version
-     */
     public function setCompilerVersionCommand(?string $compilerVersionCommand): Version
     {
         $this->compilerVersionCommand = $compilerVersionCommand;
         return $this;
     }
 
-    /**
-     * @return string|null
-     */
     public function getCompilerVersion(): ?string
     {
         return $this->compilerVersion;
     }
 
-    /**
-     * @param string|null $compilerVersion
-     * @return Version
-     */
     public function setCompilerVersion(?string $compilerVersion): Version
     {
         $this->compilerVersion = $compilerVersion;
         return $this;
     }
 
-    /**
-     * @return string|null
-     */
     public function getRunnerVersion(): ?string
     {
         return $this->runnerVersion;
     }
 
-    /**
-     * @param string|null $runnerVersion
-     * @return Version
-     */
     public function setRunnerVersion(?string $runnerVersion): Version
     {
         $this->runnerVersion = $runnerVersion;
         return $this;
     }
 
-    /**
-     * @return string|null
-     */
     public function getRunnerVersionCommand(): ?string
     {
         return $this->runnerVersionCommand;
     }
 
-    /**
-     * @param string|null $runnerVersionCommand
-     * @return Version
-     */
     public function setRunnerVersionCommand(?string $runnerVersionCommand): Version
     {
         $this->runnerVersionCommand = $runnerVersionCommand;
         return $this;
     }
 
-    /**
-     * @return Language
-     */
     public function getLanguage(): Language
     {
         return $this->language;
     }
 
-    /**
-     * @param Language $language
-     * @return Version
-     */
     public function setLanguage(Language $language): Version
     {
         $this->language = $language;
         return $this;
     }
 
-    /**
-     * @return Judgehost
-     */
     public function getJudgehost(): Judgehost
     {
         return $this->judgehost;
     }
 
-    /**
-     * @param Judgehost $judgehost
-     * @return Version
-     */
     public function setJudgehost(Judgehost $judgehost): Version
     {
         $this->judgehost = $judgehost;
         return $this;
     }
 
-    /**
-     * @return float|string|null
-     */
     public function getLastChangedTime(): float|string|null
     {
         return $this->lastChangedTime;
     }
 
-    /**
-     * @param float|string|null $lastChangedTime
-     * @return Version
-     */
     public function setLastChangedTime(float|string|null $lastChangedTime): Version
     {
         $this->lastChangedTime = $lastChangedTime;
