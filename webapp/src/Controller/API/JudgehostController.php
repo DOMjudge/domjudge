@@ -949,7 +949,7 @@ class JudgehostController extends AbstractFOSRestController
                 ->setOutputSystem(base64_decode($outputSystem))
                 ->setMetadata(base64_decode($metadata));
 
-            if($teamMessage) {
+            if ($teamMessage) {
                 $judgingRunOutput->setTeamMessage(base64_decode($teamMessage));
             }
 

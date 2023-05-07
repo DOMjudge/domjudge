@@ -14,7 +14,7 @@ final class Version20230506141723 extends AbstractMigration
 {
     public function getDescription(): string
     {
-        return '';
+        return 'Add team message (teammessage.txt) to judging run output';
     }
 
     public function up(Schema $schema): void
