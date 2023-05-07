@@ -38,7 +38,7 @@
                 <tr>
                     <th>Label</th>
                     <td>
-                        {% if team.label %}
+                        {% if team.label | length %}
                             {{ team.label }}
                         {% else %}
                             -

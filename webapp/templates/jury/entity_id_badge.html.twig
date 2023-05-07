@@ -1,5 +1,5 @@
 <span class="badge text-bg-secondary id-badge" data-bs-toggle="tooltip" data-placement="top" title="{% if label is defined and label %}Label: {{ label }}, {% endif %}{% if externalId is not null %}External ID: {{ externalId }}, {% endif %}Internal ID: {{ idPrefix }}{{ id }}">
-    {% if label is defined and label %}
+    {% if label is defined and label | length %}
         {{ label }}
     {% elseif externalId is not null %}
         {{ externalId }}
