@@ -22,8 +22,12 @@
         <span class="badge text-bg-info">{{ submissionCounts.total }} submitted</span>
         <span class="badge text-bg-success">{{ submissionCounts.correct }} correct</span>
 
-        {% if submissionCounts.unverified > 0 %}
+        {% if submissionCounts.unverified is defined and submissionCounts.unverified > 0 %}
             <span class="badge text-bg-warning">{{ submissionCounts.unverified }} unverified</span>
+        {% endif %}
+
+        {% if submissionCounts.shadowUnverified is defined and submissionCounts.shadowUnverified > 0 %}
+            <span class="badge text-bg-warning">{{ submissionCounts.shadowUnverified }} shadow differences unverified</span>
         {% endif %}
 
         {% if submissionCounts.ignored > 0 %}
@@ -262,7 +266,7 @@
                 </tr>
                 <tr>
                     <td colspan="3" class="inline-verify-form">
-                        {% if externalJudgement is not null %}
+                        {% if externalJudgement is not null and (not submission.judgings.first or submission.judgings.first.result != externalJudgement.result) %}
                             {% include 'jury/partials/verify_form.html.twig' with {
                                 label: 'Shadow difference verified',
                                 judging: externalJudgement,
