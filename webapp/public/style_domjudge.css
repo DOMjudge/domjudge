@@ -391,7 +391,7 @@ tr.ignore td, td.ignore, span.ignore {
 }
 
 .problem-list h2,h3,h4 {
-    text-align: center;
+    text-align: center !important;
 }
 
 .problem-list h2 {
