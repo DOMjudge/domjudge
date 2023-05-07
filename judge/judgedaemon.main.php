@@ -559,6 +559,9 @@ if (defined('SYSLOG') && SYSLOG) {
     putenv('DJ_SYSLOG=' . SYSLOG);
 }
 
+// The judgedaemon calls itself to send judging results back to the API
+// asynchronously. See the handling of the 'e' option below. The code here
+// should only be run during a normal judgedaemon start.
 if (empty($options['e'])) {
     if (!posix_getpwnam($runuser)) {
         error("runuser $runuser does not exist.");
