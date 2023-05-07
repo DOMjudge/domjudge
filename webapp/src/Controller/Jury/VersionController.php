@@ -86,7 +86,6 @@ class VersionController extends BaseController
                 'runner_outputs' => $runnerOutputs,
             ];
         }
-        dump($data);
 
         return $this->render('jury/versions.html.twig', ['data' => $data]);
     }
