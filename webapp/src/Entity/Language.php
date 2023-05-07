@@ -135,72 +135,44 @@ class Language extends BaseApiEntity
         return $this->versions;
     }
 
-    /**
-     * @return string|null
-     */
     public function getCompilerVersion(): ?string
     {
         return $this->compilerVersion;
     }
 
-    /**
-     * @param string|null $compilerVersion
-     * @return Language
-     */
     public function setCompilerVersion(?string $compilerVersion): Language
     {
         $this->compilerVersion = $compilerVersion;
         return $this;
     }
 
-    /**
-     * @return string|null
-     */
     public function getRunnerVersion(): ?string
     {
         return $this->runnerVersion;
     }
 
-    /**
-     * @param string|null $runnerVersion
-     * @return Language
-     */
     public function setRunnerVersion(?string $runnerVersion): Language
     {
         $this->runnerVersion = $runnerVersion;
         return $this;
     }
 
-    /**
-     * @return string|null
-     */
     public function getRunnerVersionCommand(): ?string
     {
         return $this->runnerVersionCommand;
     }
 
-    /**
-     * @param string|null $runnerVersionCommand
-     * @return Language
-     */
     public function setRunnerVersionCommand(?string $runnerVersionCommand): Language
     {
         $this->runnerVersionCommand = $runnerVersionCommand;
         return $this;
     }
 
-    /**
-     * @return string|null
-     */
     public function getCompilerVersionCommand(): ?string
     {
         return $this->compilerVersionCommand;
     }
 
-    /**
-     * @param string|null $compilerVersionCommand
-     * @return Language
-     */
     public function setCompilerVersionCommand(?string $compilerVersionCommand): Language
     {
         $this->compilerVersionCommand = $compilerVersionCommand;
