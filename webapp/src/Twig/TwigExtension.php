@@ -110,6 +110,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             new TwigFilter('printWarningContent', $this->printWarningContent(...), ['is_safe' => ['html']]),
             new TwigFilter('entityIdBadge', $this->entityIdBadge(...), ['is_safe' => ['html']]),
             new TwigFilter('medalType', $this->awards->medalType(...)),
+            new TwigFilter('numTableActions', $this->numTableActions(...)),
         ];
     }
 
@@ -1168,5 +1169,14 @@ EOF;
         }
 
         return $this->twig->render('jury/entity_id_badge.html.twig', $data);
+    }
+
+    protected function numTableActions(array $tableData): int
+    {
+        $maxNumActions = 0;
+        foreach ($tableData as $item) {
+            $maxNumActions = max($maxNumActions, count($item['actions'] ?? []));
+        }
+        return $maxNumActions;
     }
 }
