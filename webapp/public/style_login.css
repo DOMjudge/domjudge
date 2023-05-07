@@ -34,12 +34,12 @@ body {
   z-index: 2;
 }
 .form-signin input[type="text"] {
-  margin-bottom: -1px;
+  margin-bottom: 15px;
   border-bottom-right-radius: 0;
   border-bottom-left-radius: 0;
 }
 .form-signin input[type="password"] {
-  margin-bottom: 10px;
+  margin-bottom: 5px;
   border-bottom-right-radius: 0;
   border-bottom-left-radius: 0;
 }
@@ -74,4 +74,8 @@ div.vertical-line{
   background-color: #cecece;
   height: 230px;
   display: inline-block;
+}
+
+a {
+    text-decoration: none;
 }
