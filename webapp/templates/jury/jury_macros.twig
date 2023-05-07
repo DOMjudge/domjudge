@@ -85,12 +85,13 @@
     </style>
 {% endmacro %}
 
-{% macro table(data, fields, num_actions, options) %}
+{% macro table(data, fields, options) %}
 
     <div class="table-wrapper">
         <table class="data-table table table-sm table-striped" style="width:auto">
             <thead class="">
             <tr>
+                {%- set num_actions = data | numTableActions %}
                 {%- set default_sort = 0 %}
                 {%- set default_sort_order = 'asc' %}
                 {%- for key,column in fields %}
