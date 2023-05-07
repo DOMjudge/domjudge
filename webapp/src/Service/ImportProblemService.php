@@ -323,8 +323,8 @@ class ImportProblemService
             $contestProblem->setProblem($problem);
             $contestProblem->setContest($contest);
             $this->em->persist($contestProblem);
-            $this->em->flush();
         }
+        $this->em->flush();
 
         // Load the current testcases to see if we need to delete, update or insert testcases.
         $existingTestcases = [];
