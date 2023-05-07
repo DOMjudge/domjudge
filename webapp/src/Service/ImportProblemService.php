@@ -318,6 +318,14 @@ class ImportProblemService
             }
         }
 
+        $this->em->persist($problem);
+        if ($contestProblem) {
+            $contestProblem->setProblem($problem);
+            $contestProblem->setContest($contest);
+            $this->em->persist($contestProblem);
+            $this->em->flush();
+        }
+
         // Load the current testcases to see if we need to delete, update or insert testcases.
         $existingTestcases = [];
         if ($problem->getProbid()) {
@@ -584,7 +592,6 @@ class ImportProblemService
                 count($removedAttachments), join(',', $removedAttachments));
         }
 
-        $this->em->persist($problem);
         $this->em->wrapInTransaction(function () use ($testcases, $startRank) {
             $this->em->flush();
             // Set actual ranks if needed.
@@ -597,12 +604,6 @@ class ImportProblemService
             }
             $this->em->flush();
         });
-        if ($contestProblem) {
-            $contestProblem->setProblem($problem);
-            $contestProblem->setContest($contest);
-            $this->em->persist($contestProblem);
-            $this->em->flush();
-        }
 
         $cid = $contest?->getCid();
         $probid = $problem->getProbid();
@@ -811,6 +812,9 @@ class ImportProblemService
         }
 
         $messages['info'][] = sprintf('Saved problem %d', $problem->getProbid());
+
+        // Make sure we persisted all changes to DB
+        $this->em->flush();
 
         return $problem;
     }
