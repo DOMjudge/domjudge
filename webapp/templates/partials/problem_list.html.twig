@@ -6,6 +6,12 @@
     <div class="alert alert-secondary">No problem texts available at this point.</div>
 {% else %}
     <div class="container">
+        {% if show_jury_warning is defined and show_jury_warning %}
+            <div class="alert alert-warning">
+                This is a preview of how the page will look like for teams and the public after the contest has started.
+            </div>
+        {% endif %}
+
         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3 problem-list">
             {% for problem in problems %}
                 <div class="col">
