@@ -818,6 +818,20 @@ class ImportProblemService
 
         $messages['info'][] = sprintf('Saved problem %d', $problem->getProbid());
 
+        // Only here disable problem submit to make sure the jury submissions
+        // do get added above.
+        if ($contestProblem) {
+            $this->em->flush();
+            $testcases = $problem->getTestcases()->toArray();
+            if (count(array_filter($testcases, function($t) { return !$t->getDeleted(); }))==0) {
+                $messages['danger'][] = 'No testcases present, disabling submitting for this problem';
+                $contestProblem->setAllowSubmit(false);
+            }
+        }
+
+        // Make sure we persisted all changes to DB
+        $this->em->flush();
+
         return $problem;
     }
 
