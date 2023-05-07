@@ -72,6 +72,39 @@
                         {% endif %}
                     </td>
                 </tr>
+                {% if executable.type == 'compile' %}
+                    {% set immutableExecutable = executable.immutableExecutable %}
+                    <tr>
+                        <th>Compiler version</th>
+                        <td>
+                            {% if immutableExecutable.compilerVersionCommand %}
+                                <pre class="output_text">$ {{ immutableExecutable.compilerVersionCommand }}</pre>
+                            {% else %}
+                                <p class="nodata">No command specified.</p>
+                            {% endif %}
+                            {% if immutableExecutable.compilerVersion %}
+                                <pre class="output_text">{{ immutableExecutable.compilerVersion }}</pre>
+                            {% else %}
+                                <p class="nodata">No version recorded.</p>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Runner version</th>
+                        <td>
+                            {% if immutableExecutable.runnerVersionCommand %}
+                                <pre class="output_text">$ {{ immutableExecutable.runnerVersionCommand }}</pre>
+                            {% else %}
+                                <p class="nodata">No command specified.</p>
+                            {% endif %}
+                            {% if immutableExecutable.runnerVersion %}
+                                <pre class="output_text">{{ immutableExecutable.runnerVersion }}</pre>
+                            {% else %}
+                                <p class="nodata">No version recorded.</p>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endif %}
             </table>
         </div>
     </div>

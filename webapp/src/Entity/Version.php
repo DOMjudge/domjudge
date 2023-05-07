@@ -1,0 +1,184 @@
+<?php declare(strict_types=1);
+
+namespace App\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * Runner and compiler version commands per language.
+ */
+#[ORM\Entity]
+#[ORM\Table(options: [
+    'collation' => 'utf8mb4_unicode_ci',
+    'charset' => 'utf8mb4',
+    'comment' => 'Runner and compiler version commands per language.',
+])]
+class Version
+{
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(options: ['comment' => 'Version ID', 'unsigned' => true])]
+    #[Serializer\Exclude]
+    protected ?int $versionid = null;
+
+    #[ORM\Column(type: 'blobtext', nullable: true, options: ['comment' => 'Compiler version'])]
+    private ?string $compilerVersion = null;
+
+    #[ORM\Column(type: 'blobtext', nullable: true, options: ['comment' => 'Runner version'])]
+    private ?string $runnerVersion = null;
+
+    #[ORM\Column(type: 'string', length: 255, nullable: true, options: ['comment' => 'Runner version command'])]
+    private ?string $runnerVersionCommand = null;
+
+    #[ORM\Column(type: 'string', length: 255, nullable: true, options: ['comment' => 'Compiler version command'])]
+    private ?string $compilerVersionCommand = null;
+
+    #[ORM\ManyToOne(targetEntity: Language::class, inversedBy: "versions")]
+    #[ORM\JoinColumn(name: 'langid', referencedColumnName: 'langid')]
+    private Language $language;
+
+    #[ORM\ManyToOne(targetEntity: Judgehost::class)]
+    #[ORM\JoinColumn(name: 'judgehostid', referencedColumnName: 'judgehostid')]
+    private Judgehost $judgehost;
+
+    #[ORM\Column(
+        type: 'decimal',
+        precision: 32,
+        scale: 9,
+        nullable: true,
+        options: ['comment' => 'Time this version command output was last updated', 'unsigned' => true]
+    )]
+    #[Serializer\Exclude]
+    private string|float|null $lastChangedTime = null;
+
+    public function getVersionid(): ?int
+    {
+        return $this->versionid;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getCompilerVersionCommand(): ?string
+    {
+        return $this->compilerVersionCommand;
+    }
+
+    /**
+     * @param string|null $compilerVersionCommand
+     * @return Version
+     */
+    public function setCompilerVersionCommand(?string $compilerVersionCommand): Version
+    {
+        $this->compilerVersionCommand = $compilerVersionCommand;
+        return $this;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getCompilerVersion(): ?string
+    {
+        return $this->compilerVersion;
+    }
+
+    /**
+     * @param string|null $compilerVersion
+     * @return Version
+     */
+    public function setCompilerVersion(?string $compilerVersion): Version
+    {
+        $this->compilerVersion = $compilerVersion;
+        return $this;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getRunnerVersion(): ?string
+    {
+        return $this->runnerVersion;
+    }
+
+    /**
+     * @param string|null $runnerVersion
+     * @return Version
+     */
+    public function setRunnerVersion(?string $runnerVersion): Version
+    {
+        $this->runnerVersion = $runnerVersion;
+        return $this;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getRunnerVersionCommand(): ?string
+    {
+        return $this->runnerVersionCommand;
+    }
+
+    /**
+     * @param string|null $runnerVersionCommand
+     * @return Version
+     */
+    public function setRunnerVersionCommand(?string $runnerVersionCommand): Version
+    {
+        $this->runnerVersionCommand = $runnerVersionCommand;
+        return $this;
+    }
+
+    /**
+     * @return Language
+     */
+    public function getLanguage(): Language
+    {
+        return $this->language;
+    }
+
+    /**
+     * @param Language $language
+     * @return Version
+     */
+    public function setLanguage(Language $language): Version
+    {
+        $this->language = $language;
+        return $this;
+    }
+
+    /**
+     * @return Judgehost
+     */
+    public function getJudgehost(): Judgehost
+    {
+        return $this->judgehost;
+    }
+
+    /**
+     * @param Judgehost $judgehost
+     * @return Version
+     */
+    public function setJudgehost(Judgehost $judgehost): Version
+    {
+        $this->judgehost = $judgehost;
+        return $this;
+    }
+
+    /**
+     * @return float|string|null
+     */
+    public function getLastChangedTime(): float|string|null
+    {
+        return $this->lastChangedTime;
+    }
+
+    /**
+     * @param float|string|null $lastChangedTime
+     * @return Version
+     */
+    public function setLastChangedTime(float|string|null $lastChangedTime): Version
+    {
+        $this->lastChangedTime = $lastChangedTime;
+        return $this;
+    }
+}

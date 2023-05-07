@@ -334,7 +334,7 @@ function fetch_executable_internal(
     if (!is_dir($execdir) || !file_exists($execdeploypath)) {
         system('rm -rf ' . dj_escapeshellarg($execdir) . ' ' . dj_escapeshellarg($execbuilddir));
         system('mkdir -p ' . dj_escapeshellarg($execbuilddir), $retval);
-        if ($retval!==0) {
+        if ($retval !== 0) {
             error("Could not create directory '$execbuilddir'");
         }
 
@@ -439,7 +439,7 @@ function fetch_executable_internal(
         if ($do_compile) {
             logmsg(LOG_DEBUG, "Building executable in $execdir, under 'build/'");
             system(LIBJUDGEDIR . '/build_executable.sh ' . dj_escapeshellarg($execdir), $retval);
-            if ($retval!==0) {
+            if ($retval !== 0) {
                 return [null, "Failed to build executable in $execdir.", "$execdir/build.log"];
             }
             chmod($execrunpath, 0755);
@@ -1053,6 +1053,46 @@ function compile(
         return true;
     }
 
+    // Verify compile and runner versions.
+    $judgeTaskId = $judgeTask['judgetaskid'];
+    $version_verification = dj_json_decode(request(sprintf('judgehosts/get_version_commands/%s', $judgeTaskId), 'GET'));
+    if (isset($version_verification['compiler_version_command']) || isset($version_verification['runner_version_command'])) {
+        logmsg(LOG_INFO, "  📋 Verifying versions.");
+        $versions = [];
+        $version_output_file = $workdir . '/vcheck.out';
+        $args = 'hostname=' . urlencode($myhost);
+        foreach (['compiler', 'runner'] as $type) {
+            if (isset($version_verification[$type . '_version_command'])) {
+                $vcscript_content = $version_verification[$type . '_version_command'];
+                $vcscript = tempnam(TMPDIR, 'vcheck-');
+                file_put_contents($vcscript, $vcscript_content);
+                chmod($vcscript, 0755);
+                $compile_cmd = LIBJUDGEDIR . "/version_check.sh " .
+                    implode(' ', array_map('dj_escapeshellarg', [
+                        $vcscript,
+                        $workdir,
+                    ]));
+
+                if (file_exists($version_output_file)) {
+                    unlink($version_output_file);
+                }
+                system($compile_cmd, $retval);
+                $versions[$type] = trim(file_get_contents($version_output_file));
+                if ($retval !== 0) {
+                    $versions[$type] =
+                        "Getting $type version failed with exit code $retval\n"
+                        . $versions[$type];
+                }
+            }
+            if (isset($versions[$type])) {
+                $args .= "&$type=" . urlencode(base64_encode($versions[$type]));
+            }
+        }
+
+        // TODO: Add actual check once implemented in the backend.
+        request(sprintf('judgehosts/check_versions/%s', $judgeTaskId), 'PUT', $args);
+    }
+
     // Get the source code from the DB and store in local file(s).
     $url = sprintf('judgehosts/get_files/source/%s', $judgeTask['submitid']);
     $sources = request($url, 'GET');
@@ -1186,7 +1226,7 @@ function compile(
     $url = sprintf('judgehosts/update-judging/%s/%s', urlencode($myhost), urlencode((string)$judgeTask['judgetaskid']));
     request($url, 'PUT', $args);
 
-    // compile error: our job here is done
+    // Compile error: our job here is done.
     if (! $compile_success) {
         return false;
     }

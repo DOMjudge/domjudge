@@ -24,6 +24,12 @@
                     <a class="nav-link disabled"><i class="fas fa-book-open"></i> Problemset</a>
                 {% endif %}
             </li>
+            {% if show_languages_to_teams %}
+                <li class="nav-item">
+                    <a class="nav-link{% if current_route == 'team_languages' %} active{% endif %}"
+                       href="{{ path('team_languages') }}"><i class="fas fa-language"></i> Languages</a>
+                </li>
+            {% endif %}
             {% if have_printing %}
                 <li class="nav-item">
                     <a class="nav-link{% if current_route == 'team_print' %} active{% endif %}"

@@ -41,6 +41,18 @@ class ImmutableExecutable
     #[ORM\Column(length: 32, nullable: true, options: ['comment' => 'hash of the files'])]
     private ?string $hash;
 
+    #[ORM\Column(type: 'blobtext', nullable: true, options: ['comment' => 'Compiler version'])]
+    private ?string $compilerVersion = null;
+
+    #[ORM\Column(type: 'string', length: 255, nullable: true, options: ['comment' => 'Compiler version command'])]
+    private ?string $compilerVersionCommand = null;
+
+    #[ORM\Column(type: 'blobtext', nullable: true, options: ['comment' => 'Runner version'])]
+    private ?string $runnerVersion = null;
+
+    #[ORM\Column(type: 'string', length: 255, nullable: true, options: ['comment' => 'Runner version command'])]
+    private ?string $runnerVersionCommand = null;
+
     /**
      * @param ExecutableFile[] $files
      */
@@ -96,5 +108,49 @@ class ImmutableExecutable
     public function disallowDelete(): never
     {
         throw new RuntimeException('An immutable executable cannot be deleted');
+    }
+
+    public function setCompilerVersionCommand(?string $compilerVersionCommand): ImmutableExecutable
+    {
+        $this->compilerVersionCommand = $compilerVersionCommand;
+        return $this;
+    }
+
+    public function getCompilerVersionCommand(): ?string
+    {
+        return $this->compilerVersionCommand;
+    }
+
+    public function setRunnerVersionCommand(?string $runnerVersionCommand): ImmutableExecutable
+    {
+        $this->runnerVersionCommand = $runnerVersionCommand;
+        return $this;
+    }
+
+    public function getRunnerVersionCommand(): ?string
+    {
+        return $this->runnerVersionCommand;
+    }
+
+    public function setCompilerVersion(?string $compilerVersion): ImmutableExecutable
+    {
+        $this->compilerVersion= $compilerVersion;
+        return $this;
+    }
+
+    public function getCompilerVersion(): ?string
+    {
+        return $this->compilerVersion;
+    }
+
+    public function setRunnerVersion(?string $runnerVersion): ImmutableExecutable
+    {
+        $this->runnerVersion= $runnerVersion;
+        return $this;
+    }
+
+    public function getRunnerVersion(): ?string
+    {
+        return $this->runnerVersion;
     }
 }
