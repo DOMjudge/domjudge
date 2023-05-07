@@ -897,9 +897,12 @@ class DOMJudgeService
     /**
      * @throws NonUniqueResultException
      */
-    public function getTwigDataForProblemsAction(StatisticsService $statistics, ?int $teamId = null): array
-    {
-        $contest            = isset($teamId) ? $this->getCurrentContest($teamId) : $this->getCurrentContest(onlyPublic: true);
+    public function getTwigDataForProblemsAction(
+        StatisticsService $statistics,
+        ?int $teamId = null,
+        bool $forJury = false
+    ): array {
+        $contest            = isset($teamId) ? $this->getCurrentContest($teamId) : $this->getCurrentContest(onlyPublic: !$forJury);
         $showLimits         = (bool)$this->config->get('show_limits_on_team_page');
         $defaultMemoryLimit = (int)$this->config->get('memory_limit');
         $timeFactorDiffers  = false;
