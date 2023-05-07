@@ -211,9 +211,27 @@ class SubmissionController extends BaseController
             ->getQuery()
             ->getResult();
 
+        // These three arrays are indexed by judgingid
         /** @var Judging[] $judgings */
         $judgings    = array_map(fn($data) => $data[0], $judgingData);
         $maxRunTimes = array_map(fn($data) => $data['max_runtime'], $judgingData);
+        $timelimits  = [];
+
+        if ($judgings) {
+            $judgeTasks = $this->em->createQueryBuilder()
+                ->from(JudgeTask::class, 'jt', 'jt.jobid')
+                ->select('jt')
+                ->andWhere('jt.jobid IN (:jobIds)')
+                ->setParameter(
+                    'jobIds',
+                    array_map(static fn(Judging $judging) => $judging->getJudgingid(), $judgings)
+                )
+                ->getQuery()
+                ->getResult();
+            $timelimits = array_map(function (JudgeTask $task) {
+                return $this->dj->jsonDecode($task->getRunConfig())['time_limit'];
+            }, $judgeTasks);
+        }
 
         $selectedJudging = null;
         // Find the selected judging.
@@ -470,6 +488,7 @@ class SubmissionController extends BaseController
             'lastSubmission' => $lastSubmission,
             'judgings' => $judgings,
             'maxRunTimes' => $maxRunTimes,
+            'timelimits' => $timelimits,
             'selectedJudging' => $selectedJudging,
             'lastJudging' => $lastJudging,
             'runs' => $runs,
