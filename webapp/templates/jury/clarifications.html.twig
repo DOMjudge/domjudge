@@ -47,11 +47,11 @@
                 <label class="btn btn-secondary" for="queueall">All</label>
                 <input type="radio" name="queue" autocomplete="off" id="queueunassigned" class="btn-check" value="unassigned"
                        {% if currentQueue == "unassigned" %}checked{% endif %}>
-                <label class="btn btn-secondary" for="queueall">Unassigned</label>
+                <label class="btn btn-secondary" for="queueunassigned">Unassigned</label>
                 {%- for queue, name in queues %}
-                    <input type="radio" name="queue" autocomplete="off" class="btn-check" id="queue{{ value }}" value="{{ queue }}"
+                    <input type="radio" name="queue" autocomplete="off" class="btn-check" id="queue{{ queue }}" value="{{ queue }}"
                            {% if currentQueue == queue %}checked{% endif %}>
-                    <label class="btn btn-secondary" for="queue{{ value }}">{{ name }}</label>
+                    <label class="btn btn-secondary" for="queue{{ queue }}">{{ name }}</label>
                 {%- endfor %}
             </div>
         {% endif %}
