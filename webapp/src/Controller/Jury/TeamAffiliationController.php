@@ -143,7 +143,6 @@ class TeamAffiliationController extends BaseController
         return $this->render('jury/team_affiliations.html.twig', [
             'team_affiliations' => $team_affiliations_table,
             'table_fields' => $table_fields,
-            'num_actions' => $this->isGranted('ROLE_ADMIN') ? 2 : 0,
         ]);
     }
 

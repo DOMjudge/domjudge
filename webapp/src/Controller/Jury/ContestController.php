@@ -379,7 +379,6 @@ class ContestController extends BaseController
             'upcoming_contest' => $upcomingContest,
             'contests_table' => $contests_table,
             'table_fields' => $table_fields,
-            'num_actions' => $this->isGranted('ROLE_ADMIN') && !$contest->isLocked() ? 2 : 0,
         ]);
     }
 

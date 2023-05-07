@@ -146,7 +146,6 @@ class LanguageController extends BaseController
             'enabled_languages' => $enabled_languages,
             'disabled_languages' => $disabled_languages,
             'table_fields' => $table_fields,
-            'num_actions' => $this->isGranted('ROLE_ADMIN') ? 2 : 0,
         ]);
     }
 

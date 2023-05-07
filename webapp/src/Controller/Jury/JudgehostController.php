@@ -184,7 +184,6 @@ class JudgehostController extends BaseController
         $data = [
             'judgehosts' => $judgehosts_table,
             'table_fields' => $table_fields,
-            'num_actions' => $this->isGranted('ROLE_ADMIN') ? 2 : 0,
             'all_checked_in_recently' => $all_checked_in_recently,
             'refresh' => [
                 'after' => 5,

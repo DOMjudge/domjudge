@@ -214,7 +214,6 @@ class ProblemController extends BaseController
         $data = [
             'problems' => $problems_table,
             'table_fields' => $table_fields,
-            'num_actions' => $this->isGranted('ROLE_ADMIN') ? 4 : 2,
         ];
 
         return $this->render('jury/problems.html.twig', $data);

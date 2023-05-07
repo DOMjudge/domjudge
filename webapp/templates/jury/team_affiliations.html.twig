@@ -12,7 +12,7 @@
 
     <h1>Affiliations</h1>
 
-    {{ macros.table(team_affiliations, table_fields, num_actions) }}
+    {{ macros.table(team_affiliations, table_fields) }}
 
     {%- if is_granted('ROLE_ADMIN') %}
 
