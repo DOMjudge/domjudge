@@ -17,6 +17,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\Expr\Join;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\ExpressionLanguage\Expression;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -32,9 +33,11 @@ use Symfony\Component\Routing\RouterInterface;
 #[Route(path: '/jury')]
 class JuryMiscController extends BaseController
 {
-    public function __construct(protected readonly EntityManagerInterface $em, protected readonly DOMJudgeService $dj)
-    {
-    }
+    public function __construct(
+        protected readonly EntityManagerInterface $em,
+        protected readonly DOMJudgeService $dj,
+        protected readonly RequestStack $requestStack,
+    ) {}
 
     #[IsGranted(new Expression("is_granted('ROLE_JURY') or is_granted('ROLE_BALLOON') or is_granted('ROLE_CLARIFICATION_RW')"))]
     #[Route(path: '', name: 'jury_index')]
@@ -200,7 +203,7 @@ class JuryMiscController extends BaseController
                 ob_flush();
                 flush();
             };
-            return $this->streamResponse(function () use ($contests, $progressReporter, $scoreboardService) {
+            return $this->streamResponse($this->requestStack, function () use ($contests, $progressReporter, $scoreboardService) {
                 $timeStart = microtime(true);
 
                 foreach ($contests as $contest) {

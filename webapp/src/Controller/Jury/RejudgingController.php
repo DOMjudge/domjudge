@@ -424,7 +424,7 @@ class RejudgingController extends BaseController
                 ob_flush();
                 flush();
             };
-            return $this->streamResponse(function () use ($progressReporter, $rejudging, $rejudgingService, $action) {
+            return $this->streamResponse($this->requestStack, function () use ($progressReporter, $rejudging, $rejudgingService, $action) {
                 $timeStart = microtime(true);
                 if ($rejudgingService->finishRejudging($rejudging, $action, $progressReporter)) {
                     $timeEnd      = microtime(true);
@@ -511,7 +511,7 @@ class RejudgingController extends BaseController
                 ob_flush();
                 flush();
             };
-            return $this->streamResponse(function () use ($request, $progressReporter) {
+            return $this->streamResponse($this->requestStack, function () use ($request, $progressReporter) {
                 $reason = $request->request->get('reason');
                 $data   = $request->request->all();
 
@@ -696,7 +696,7 @@ class RejudgingController extends BaseController
             flush();
         };
 
-        return $this->streamResponse(function () use ($priority, $progressReporter, $repeat, $reason, $request, $autoApply, $includeAll, $id, $table, $tablemap) {
+        return $this->streamResponse($this->requestStack, function () use ($priority, $progressReporter, $repeat, $reason, $request, $autoApply, $includeAll, $id, $table, $tablemap) {
             // Only rejudge submissions in active contests.
             $contests = $this->dj->getCurrentContests();
 
