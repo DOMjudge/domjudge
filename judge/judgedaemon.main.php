@@ -521,8 +521,7 @@ if (isset($options['verbose'])) {
             putenv('DEBUG=1');
         }
     } else {
-        echo "Invalid value for verbose, must be positive integer\n";
-        exit(1);
+        error("Invalid value for verbose, must be positive integer.");
     }
 }
 
@@ -534,8 +533,7 @@ if (isset($options['daemonid'])) {
 if ($runuser === posix_getpwuid(posix_geteuid())['name'] ||
     RUNGROUP === posix_getgrgid(posix_getegid())['name']
 ) {
-    echo "Do not run the judgedaemon as the runser or rungroup.\n";
-    exit(1);
+    error("Do not run the judgedaemon as the runser or rungroup.");
 }
 
 // Set static environment variables for passing path configuration
