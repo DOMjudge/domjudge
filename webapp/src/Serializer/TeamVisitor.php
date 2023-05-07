@@ -41,7 +41,7 @@ class TeamVisitor implements EventSubscriberInterface
         $team = $event->getObject();
 
         // Use the API ID for label if we have no label set
-        if (strlen($team->getLabel()) === 0) {
+        if (($team->getLabel() ?? '') === '') {
             $property = new StaticPropertyMetadata(
                 Team::class,
                 'label',
