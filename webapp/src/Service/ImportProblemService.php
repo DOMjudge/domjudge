@@ -800,11 +800,11 @@ class ImportProblemService
                     join(', ', $successful_subs));
             }
             if (!empty($subs_with_unknown_lang)) {
-                $messages['warning'][] = sprintf("Could not add jury solution due to unknown language: %s",
+                $messages['warning'][] = sprintf("Could not add jury solution(s) due to unknown language: %s",
                     join(', ', $subs_with_unknown_lang));
             }
             if (!empty($too_large_subs)) {
-                $messages['warning'][] = sprintf("Could not add jury solution because they are too large: %s",
+                $messages['warning'][] = sprintf("Could not add jury solution(s) because they are too large: %s",
                     join(', ', $too_large_subs));
             }
         } else {
