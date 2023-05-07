@@ -1721,6 +1721,7 @@ class ExternalContestSourceService
                     ['type' => 'testcase', 'id' => $rank],
                 ],
             ]);
+            return;
         }
 
         $this->removeWarning($entityType, $data['id'], ExternalSourceWarning::TYPE_DEPENDENCY_MISSING);

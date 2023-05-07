@@ -15,6 +15,7 @@ use Doctrine\ORM\Mapping as ORM;
     columns: ['extsourceid', 'hash'],
     options: ['lengths' => [null, 190]]
 )]
+#[ORM\HasLifecycleCallbacks]
 class ExternalSourceWarning
 {
     final public const TYPE_UNSUPORTED_ACTION = 'unsupported-action';
