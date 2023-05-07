@@ -1173,6 +1173,21 @@ class JudgehostController extends AbstractFOSRestController
      */
     #[IsGranted(new Expression("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST')"))]
     #[Rest\Get('/get_version_commands/{judgetaskid<\d+>}')]
+    #[OA\Response(
+        response: 200,
+        description: 'Returns optionally compiler and runner version commands.',
+        content: new OA\JsonContent(
+            type: 'array',
+            items: new OA\Items(
+                properties: [
+                    new OA\Property(property: 'compiler_version_command', type: 'string', nullable: true),
+                    new OA\Property(property: 'runner_version_command', type: 'string', nullable: true),
+                ],
+                required: [],
+                type: 'object'
+            )
+        )
+    )]
     public function getVersionCommands(string $judgetaskid): array
     {
         /** @var JudgeTask $judgeTask */
@@ -1205,6 +1220,29 @@ class JudgehostController extends AbstractFOSRestController
 
     #[IsGranted(new Expression("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST')"))]
     #[Rest\Put('/check_versions/{judgetaskid}')]
+    #[OA\Response(
+        response: 200,
+        description: 'Updates internal versions, does not check them yet.',
+    )]
+    #[OA\Parameter(
+        name: 'hostname',
+        description: 'Checking versions for the given hostname.',
+        in: 'query',
+        schema: new OA\Schema(type: 'string'),
+        required: true,
+    )]
+    #[OA\Parameter(
+        name: 'compiler',
+        description: 'Reported compiler version',
+        in: 'query',
+        schema: new OA\Schema(type: 'string'),
+    )]
+    #[OA\Parameter(
+        name: 'runner',
+        description: 'Reported runner version',
+        in: 'query',
+        schema: new OA\Schema(type: 'string'),
+    )]
     public function checkVersions(Request $request, string $judgetaskid)
     {
         /** @var JudgeTask $judgeTask */
