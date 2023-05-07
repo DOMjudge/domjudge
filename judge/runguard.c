@@ -463,14 +463,14 @@ void check_remaining_procs()
     snprintf(path, 1023, "/sys/fs/cgroup/cpu%scgroup.procs", cgroupname);
     FILE *file = fopen(path, "r");
     if (file == NULL) {
-        error(0, "Error opening cgroups file: %s", path);
-        return;
+        error(errno, "opening cgroups file `%s'", path);
     }
 
     fseek(file, 0L, SEEK_END);
     if (ftell(file) > 0) {
-        error(0, "Left-over processes in cgroup controller, please check!");
+        error(0, "found left-over processes in cgroup controller, please check!");
     }
+	if (fclose(file) != 0) error(errno, "closing file `%s'", path);
 }
 
 void output_cgroup_stats(double *cputime)
