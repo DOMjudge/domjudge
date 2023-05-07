@@ -12,7 +12,7 @@
 
     <h1>Categories</h1>
 
-    {{ macros.table(team_categories, table_fields, num_actions) }}
+    {{ macros.table(team_categories, table_fields) }}
 
     {% if is_granted('ROLE_ADMIN') %}
         <p>

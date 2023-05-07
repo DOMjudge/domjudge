@@ -184,7 +184,6 @@ class UserController extends BaseController
         return $this->render('jury/users.html.twig', [
             'users' => $users_table,
             'table_fields' => $table_fields,
-            'num_actions' => $this->isGranted('ROLE_ADMIN') ? 2 : 0,
         ]);
     }
 

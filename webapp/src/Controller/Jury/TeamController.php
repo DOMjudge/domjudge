@@ -239,7 +239,6 @@ class TeamController extends BaseController
         return $this->render('jury/teams.html.twig', [
             'teams' => $teams_table,
             'table_fields' => $table_fields,
-            'num_actions' => $this->isGranted('ROLE_ADMIN') ? 3 : 1,
         ]);
     }
 
