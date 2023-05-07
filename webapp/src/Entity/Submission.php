@@ -89,6 +89,13 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
     #[Serializer\Expose(if: "context.getAttribute('domjudge_service').checkrole('jury')")]
     private ?string $entry_point = null;
 
+    #[ORM\Column(
+        nullable: false,
+        options: ['comment' => 'Whether this submission was imported during shadowing but had an error while doing so.']
+    )]
+    #[Serializer\Groups([ARC::GROUP_NONSTRICT])]
+    private bool $importError = false;
+
     #[ORM\ManyToOne(inversedBy: 'submissions')]
     #[ORM\JoinColumn(name: 'cid', referencedColumnName: 'cid', onDelete: 'CASCADE')]
     #[Serializer\Exclude]
@@ -251,6 +258,17 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
     public function getEntryPoint(): ?string
     {
         return $this->entry_point;
+    }
+
+    public function setImportError(bool $importError): Submission
+    {
+        $this->importError = $importError;
+        return $this;
+    }
+
+    public function isImportError(): bool
+    {
+        return $this->importError;
     }
 
     public function setTeam(?Team $team = null): Submission

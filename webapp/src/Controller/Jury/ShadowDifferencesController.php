@@ -64,6 +64,8 @@ class ShadowDifferencesController extends BaseController
             return $this->render('jury/shadow_differences.html.twig');
         }
 
+        $verdicts['import-error'] = 'IE';
+
         $used         = [];
         $verdictTable = [];
         // Pre-fill $verdictTable to get a consistent ordering.
@@ -111,6 +113,10 @@ class ShadowDifferencesController extends BaseController
                 $localResult = $localJudging->getResult();
             } else {
                 $localResult = 'judging';
+            }
+
+            if ($submission->isImportError()) {
+                $localResult = 'import-error';
             }
 
             if ($externalJudgement && $externalJudgement->getResult()) {

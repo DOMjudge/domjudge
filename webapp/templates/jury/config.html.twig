@@ -96,6 +96,7 @@
                                                             <input class="form-control form-control-sm"
                                                                    style="width:10em;text-align:right;display:inline-block;" type="text"
                                                                    value="{{ key }}"
+                                                                   placeholder="{{ option.key_placeholder }}"
                                                                    name="config_{{ option.name }}[{{ counter }}][key]"
                                                                    id="config_{{ option.name }}_{{ counter }}__key_">
                                                         {% endif %}
@@ -111,6 +112,7 @@
                                                             <input class="form-control form-control-sm"
                                                                    style="width:30em;display:inline-block;" type="text"
                                                                    value="{{ val }}"
+                                                                   placeholder="{{ option.value_placeholder }}"
                                                                    name="config_{{ option.name }}[{{ counter }}][val]"
                                                                    id="config_{{ option.name }}_{{ counter }}__val">
                                                             {% endif %}
@@ -130,6 +132,7 @@
                                                         {% else %}
                                                             <input class="form-control form-control-sm"
                                                                    style="width:10em;text-align:right;display:inline-block;" type="text"
+                                                                   placeholder="{{ option.key_placeholder }}"
                                                                    name="config_{{ option.name }}[__idx__][key]"
                                                                    id="config_{{ option.name }}___idx____key_">
                                                         {% endif %}
@@ -144,6 +147,7 @@
                                                         {% else %}
                                                             <input class="form-control form-control-sm"
                                                                    style="width:30em;display:inline-block;" type="text"
+                                                                   placeholder="{{ option.value_placeholder }}"
                                                                    name="config_{{ option.name }}[__idx__][val]"
                                                                    id="config_{{ option.name }}___idx____val">
                                                         {% endif %}

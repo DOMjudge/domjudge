@@ -501,6 +501,11 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
 
     public function printValidJurySubmissionResult(Submission $submission, bool $forDisplay = true): string
     {
+        if ($submission->isImportError()) {
+            $result = 'import-error';
+            return $forDisplay ? $this->printValidJuryResult($result) : $result;
+        }
+
         /** @var Judging|null $firstJudging */
         $firstJudging  = $submission->getJudgings()->first();
         $judgingResult = '';
