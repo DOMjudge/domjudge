@@ -51,10 +51,23 @@
                                 </option>
                             {%- endfor %}
                         </select>
+                        <label for="category-filter">Filter on category(s)</label>
+                        <select id="category-filter" class="select2" multiple data-filter-field="category-id" style="width:100%">
+                            {%- for category in filteredCategories %}
+                                <option value="{{ category.categoryid }}" selected>
+                                    {{ category.name }}
+                                </option>
+                            {%- endfor %}
+                            {%- for category in availableCategories %}
+                                <option value="{{ category.categoryid }}">
+                                    {{ category.name }}
+                                </option>
+                            {%- endfor %}
+                        </select>
                     </div>
                 </div>
 
-                <button class="btn btn-secondary" id="clear-filters"><i class="fas fa-times-circle"></i> Clear all
+                <button class="btn btn-secondary" id="clear-filters"><i class="fas fa-times-circle"></i> Reset all
                     filters
                 </button>
             </div>
@@ -80,6 +93,9 @@
 
             $('.select2').each(function () {
                 var $elem = $(this);
+                if(!$elem.data('ajax-url')) {
+                    return;
+                }
                 $elem.select2({
                     minimumInputLength: 1,
                     ajax: {
@@ -91,7 +107,16 @@
             });
 
             $('#clear-filters').on('click', function () {
-                $('select[data-filter-field]').val([]).trigger('change');
+                $('select[data-filter-field]').each(function () {
+                    var $filterField = $(this);
+                    if ($filterField.data('filter-field') == "category-id") {
+                        $filterField.val([
+                            {{- defaultCategories|join(',') -}}
+                        ]).trigger('change');
+                    } else {
+                        $filterField.val([]).trigger('change');
+                    }
+                });
             });
 
             window.process_balloons_filter = function () {

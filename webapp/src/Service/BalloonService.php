@@ -93,7 +93,7 @@ class BalloonService
         $query = $em->createQueryBuilder()
             ->select('b', 's.submittime', 'p.probid',
                 't.teamid', 't.name AS teamname', 't.room',
-                'c.name AS catname',
+                'c.categoryid AS categoryid', 'c.name AS catname',
                 'co.cid', 'co.shortname',
                 'cp.shortname AS probshortname', 'cp.color',
                 'a.affilid AS affilid', 'a.shortname AS affilshort')
@@ -163,6 +163,7 @@ class BalloonService
             $balloondata['affiliation'] = $balloonsData['affilshort'];
             $balloondata['affiliationid'] = $balloonsData['affilid'];
             $balloondata['category'] = $balloonsData['catname'];
+            $balloondata['categoryid'] = $balloonsData['categoryid'];
 
             ksort($TOTAL_BALLOONS[$balloonsData['teamid']]);
             $balloondata['total'] = $TOTAL_BALLOONS[$balloonsData['teamid']];
