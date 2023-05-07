@@ -120,9 +120,9 @@
             <div class="dropdown-menu" aria-labelledby="filter-toggle">
                 <form method="get">
                     <div class="filterbox">
-                        <div class="form-row">
+                        <div class="row mb-3">
                         {% if filterValues.affiliations | length > 1 %}
-                            <div class="form-group">
+                            <div class="col">
                             <label for="scoreboard-filter-affil">Affiliations</label>
                             <select id="scoreboard-filter-affil" class="form-control me-2" multiple size="8" name="affiliations[]">
                                 {% for affiliationId, affiliation in filterValues.affiliations %}
@@ -133,7 +133,7 @@
                             </div>
                         {% endif %}
                         {% if filterValues.countries | length > 1 %}
-                            <div class="form-group">
+                            <div class="col">
                             <label for="scoreboard-filter-country">Countries</label>
                             <select id="scoreboard-filter-country" class="form-control me-2" multiple size="8" name="countries[]">
                                 {% for country in filterValues.countries %}
@@ -144,7 +144,7 @@
                             </div>
                         {% endif %}
                         {% if filterValues.categories | length > 1 %}
-                            <div class="form-group">
+                            <div class="col">
                             <label for="scoreboard-filter-category">Categories</label>
                             <select id="scoreboard-filter-category" class="form-control me-2" multiple size="8" name="categories[]">
                                 {% for categoryId, category in filterValues.categories %}

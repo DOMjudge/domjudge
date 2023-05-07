@@ -190,8 +190,8 @@
 
     <form action="{{ path('jury_rejudging', {rejudgingId: rejudging.rejudgingid}) }}" method="get">
         <input type="hidden" name="view" value="{{ viewTypes[view] }}"/>
-        <div class="form-row">
-            <div class="form-group col-md-4">
+        <div class="row mb-3">
+            <div class="col-md-4">
                 <label for="oldverdict">Old verdict</label>
                 <select style="width: 100%" class="select2 form-control" name="oldverdict" id="oldverdict">
                     <option value="all" {% if oldverdict == 'all' %}selected{% endif %}>all</option>
@@ -203,7 +203,7 @@
 
                 </select>
             </div>
-            <div class="form-group col-md-4">
+            <div class="col-md-4">
                 <label for="newverdict">New verdict</label>
                 <select style="width: 100%" class="select2 form-control" name="newverdict" id="newverdict">
                     <option value="all" {% if newverdict == 'all' %}selected{% endif %}>all</option>
@@ -215,11 +215,11 @@
 
                 </select>
             </div>
-            <div class="form-group col-md-2">
+            <div class="col-md-2">
                 <label>&nbsp;</label>
                 <input class="btn btn-primary form-control" type="submit" value="Filter"/>
             </div>
-            <div class="form-group col-md-2">
+            <div class="col-md-2">
                 <label>&nbsp;</label>
                 <a href="{{ path('jury_rejudging', {rejudgingId: rejudging.rejudgingid, view: viewTypes[view]}) }}"
                    class="btn btn-secondary form-control">Clear</a>
