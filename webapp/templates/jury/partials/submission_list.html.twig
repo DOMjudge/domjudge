@@ -19,23 +19,23 @@
     <div class="alert alert-warning">No submissions</div>
 {% else %}
     <div>
-        <span class="badge bg-info">{{ submissionCounts.total }} submitted</span>
-        <span class="badge bg-success">{{ submissionCounts.correct }} correct</span>
+        <span class="badge text-bg-info">{{ submissionCounts.total }} submitted</span>
+        <span class="badge text-bg-success">{{ submissionCounts.correct }} correct</span>
 
         {% if submissionCounts.unverified > 0 %}
-            <span class="badge bg-warning">{{ submissionCounts.unverified }} unverified</span>
+            <span class="badge text-bg-warning">{{ submissionCounts.unverified }} unverified</span>
         {% endif %}
 
         {% if submissionCounts.ignored > 0 %}
-            <span class="badge bg-dark">{{ submissionCounts.ignored }} ignored</span>
+            <span class="badge text-bg-dark">{{ submissionCounts.ignored }} ignored</span>
         {% endif %}
 
         {% if submissionCounts.judging > 0 %}
-            <span class="badge bg-primary">{{ submissionCounts.judging }} judging</span>
+            <span class="badge text-bg-primary">{{ submissionCounts.judging }} judging</span>
         {% endif %}
 
         {% if submissionCounts.queued > 0 %}
-            <span class="badge bg-danger">{{ submissionCounts.queued }} queued (from {{submissionCounts.perteam}} teams)</span>
+            <span class="badge text-bg-danger">{{ submissionCounts.queued }} queued (from {{submissionCounts.perteam}} teams)</span>
         {% endif %}
     </div>
 

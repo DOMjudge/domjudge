@@ -395,7 +395,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
                 $title = sprintf('Run %d', $key + 1);
             }
 
-            $results .= sprintf('<span class="badge bg-%s badge-testcase" title="%s">%s</span>', $class, $title,
+            $results .= sprintf('<span class="badge text-bg-%s badge-testcase" title="%s">%s</span>', $class, $title,
                                 $text);
         }
 
@@ -454,7 +454,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
                 $titleElements[] = sprintf('runtime: %ss', $run->getRuntime());
                 $titleElements[] = sprintf('result: %s', $runResult);
             }
-            $icon    = sprintf('<span class="badge bg-%s badge-testcase">%s</span>', $class, $text);
+            $icon    = sprintf('<span class="badge text-bg-%s badge-testcase">%s</span>', $class, $text);
             $results .= sprintf('<a title="%s" href="#run-%d" %s>%s</a>',
                                 join(', ', $titleElements), $testcase->getRank(),
                                 $isCorrect ? 'onclick="display_correctruns(true);"' : '', $icon);
