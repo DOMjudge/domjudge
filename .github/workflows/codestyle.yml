@@ -51,6 +51,7 @@ jobs:
       matrix:
         PHPVERSION: ["8.1", "8.2"]
     steps:
+      - run: apk add git
       - uses: actions/checkout@v2
       - name: Various fixes to this image
         run: .github/jobs/fix_pipelinecomponents_image.sh
