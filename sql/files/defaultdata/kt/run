@@ -15,7 +15,8 @@ MAINSOURCE="$1"
 MAINCLASS=""
 COMPILESCRIPTDIR="$(dirname "$0")"
 
-# Replace this with the directory where kotlinc is located if it is not in your path
+# Replace this with the directory where kotlinc is located if it is not in your path.
+# Note that you then also might want to fix this in the compiler and runner version commands.
 # For example
 # KOTLIN_DIR=/usr/lib/kotlinc/bin
 KOTLIN_DIR="$(dirname "$(command -v kotlinc)")"

@@ -25,7 +25,7 @@ class LanguageController extends BaseController
     ) {}
 
     #[Route(path: '/', name: 'team_languages')]
-    public function langAction(): Response
+    public function languagesAction(): Response
     {
         $languagesEnabled = $this->config->get('show_canonical_versions');
         if (!$languagesEnabled) {
