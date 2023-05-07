@@ -93,25 +93,6 @@
                 .replace('&amp;', '&');
         }
         $().ready(function () {
-            var table = $('.data-table').DataTable({
-                "paging": false,
-                "ordering": true,
-                "order": [],
-                "info": false,
-                "autoWidth": true,
-                "language": {
-                    "searchPlaceholder": "filter table",
-                    "search": "_INPUT_",
-                },
-                'aoColumnDefs': [
-                    {aTargets: ['_all'], bSortable: true, bSearchable: true}
-                ],
-                // Left align the filter box. Modified from the Bootstrap 5 default at
-                // https://datatables.net/reference/option/dom
-                'dom': "<'row'f>" +
-                       "<'row'<'col-sm-12'tr>>" +
-                       "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
-            });
             $('.qbut').on('change', function () {
                 var icon = $("#qig" + $(this).attr('data-clarid') );
                 icon.html('<i class="fas fa-spinner fa-spin"></i>');
@@ -123,7 +104,6 @@
                     .done(function( data ) {
                         if ( data ) {
                             parenttd.attr('data-search', newname);
-                            table.rows(parenttr).invalidate();
                             icon.html('<i class="fas fa-check"></i>');
                         } else {
                             icon.html('<i class="fas fa-times"></i>');
