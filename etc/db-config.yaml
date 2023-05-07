@@ -301,6 +301,13 @@
                 1: configuration data external
                 2: configuration and live data external
             docdescription: See :doc:`the chapter on running DOMjudge as a shadow system<shadow>` for more information.
+        -   name: external_judgement_types
+            type: array_keyval
+            key_placeholder: ID
+            value_placeholder: Name
+            default_value: []
+            public: true
+            description: List of additional judgement types as reported by the external CCS. All assumed to give a penalty.
         -   name: external_ccs_submission_url
             type: string
             default_value: ""

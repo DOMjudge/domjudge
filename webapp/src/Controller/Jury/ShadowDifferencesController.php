@@ -56,9 +56,8 @@ class ShadowDifferencesController extends BaseController
         // Close the session, as this might take a while and we don't need the session below.
         $this->requestStack->getSession()->save();
 
-        $contest        = $this->dj->getCurrentContest();
-        $verdictsConfig = $this->dj->getDomjudgeEtcDir() . '/verdicts.php';
-        $verdicts       = array_merge(['judging' => 'JU'], include $verdictsConfig);
+        $contest  = $this->dj->getCurrentContest();
+        $verdicts = array_merge(['judging' => 'JU'], $this->dj->getVerdicts(mergeExternal: true));
 
         if (!$contest) {
             return $this->render('jury/shadow_differences.html.twig');
