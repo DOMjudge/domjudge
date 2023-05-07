@@ -851,7 +851,7 @@ while (true) {
 
         // Either the file didn't exist or we deleted it above.
         if (!file_exists($success_file)) {
-            $oldworkdir = $workdir . '-old-' . getmypid() . '-' . strftime('%Y-%m-%d_%H:%M');
+            $oldworkdir = $workdir . '-old-' . getmypid() . '-' . date('Y-m-d_H:i');
             if (!rename($workdir, $oldworkdir)) {
                 error("Could not rename stale working directory to '$oldworkdir'.");
             }
