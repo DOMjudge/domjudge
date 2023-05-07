@@ -110,10 +110,9 @@ class SubmissionController extends BaseController
             $this->submissionService->getSubmissionList($contests, $restrictions, $limit);
 
         // Load preselected filters
-        $filters          = $this->dj->jsonDecode((string)$this->dj->getCookie('domjudge_submissionsfilter') ?: '[]');
+        $filters = $this->dj->jsonDecode((string)$this->dj->getCookie('domjudge_submissionsfilter') ?: '[]');
 
-        $verdictsConfig = $this->dj->getDomjudgeEtcDir() . '/verdicts.php';
-        $results = array_keys(include $verdictsConfig);
+        $results = array_keys($this->dj->getVerdicts());
         $results[] = 'judging';
         $results[] = 'queued';
 

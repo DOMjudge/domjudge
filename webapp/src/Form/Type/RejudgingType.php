@@ -107,8 +107,7 @@ class RejudgingType extends AbstractType
                 ->orderBy('j.hostname'),
         ]);
 
-        $verdictsConfig = $this->dj->getDomjudgeEtcDir() . '/verdicts.php';
-        $verdicts = array_keys(include $verdictsConfig);
+        $verdicts = array_keys($this->dj->getVerdicts());
         $builder->add('verdicts', ChoiceType::class, [
             'label' => 'Verdict',
             'multiple' => true,

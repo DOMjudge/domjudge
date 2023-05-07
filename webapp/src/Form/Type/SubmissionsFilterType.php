@@ -115,8 +115,7 @@ class SubmissionsFilterType extends AbstractType
             "attr" => ["data-filter-field" => "team-id"],
         ]);
 
-        $verdictsConfig = $this->dj->getDomjudgeEtcDir() . '/verdicts.php';
-        $verdicts = array_keys(include $verdictsConfig);
+        $verdicts = array_keys($this->dj->getVerdicts());
         $verdicts[] = "judging";
         $verdicts[] = "queued";
         $verdicts[] = "import-error";

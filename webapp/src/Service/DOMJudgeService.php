@@ -1473,4 +1473,18 @@ class DOMJudgeService
             ]
         );
     }
+
+    public function getVerdicts(bool $mergeExternal = false): array
+    {
+        $verdictsConfig = $this->getDomjudgeEtcDir() . '/verdicts.php';
+        $verdicts       = include $verdictsConfig;
+
+        if ($mergeExternal) {
+            foreach ($this->config->get('external_judgement_types') as $id => $name) {
+                $verdicts[$name] = $id;
+            }
+        }
+
+        return $verdicts;
+    }
 }

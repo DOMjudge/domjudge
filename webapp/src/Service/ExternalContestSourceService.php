@@ -236,8 +236,7 @@ class ExternalContestSourceService
     public function import(bool $fromStart, array $eventsToSkip, ?callable $progressReporter = null): bool
     {
         // We need the verdicts to validate judgement-types.
-        $verdictsConfig = $this->dj->getDomjudgeEtcDir() . '/verdicts.php';
-        $this->verdicts = include $verdictsConfig;
+        $this->verdicts = $this->dj->getVerdicts(mergeExternal: true);
 
         if (!$this->isValidContestSource()) {
             throw new LogicException('The contest source is not valid');
@@ -624,7 +623,7 @@ class ExternalContestSourceService
                     $this->validateAndUpdateContest($entityType, $eventId, $operation, $dataItem);
                     break;
                 case 'judgement-types':
-                    $this->validateJudgementType($entityType, $eventId, $operation, $dataItem);
+                    $this->importJudgementType($entityType, $eventId, $operation, $dataItem);
                     break;
                 case 'languages':
                     $this->validateLanguage($entityType, $eventId, $operation, $dataItem);
@@ -767,7 +766,7 @@ class ExternalContestSourceService
         $this->eventLog->log('contests', $contest->getCid(), EventLogService::ACTION_UPDATE, $this->getSourceContestId());
     }
 
-    protected function validateJudgementType(string $entityType, ?string $eventId, string $operation, array $data): void
+    protected function importJudgementType(string $entityType, ?string $eventId, string $operation, array $data): void
     {
         if (!$this->warningIfUnsupported($operation, $eventId, $entityType, $data['id'], [EventLogService::ACTION_CREATE])) {
             return;
@@ -776,31 +775,37 @@ class ExternalContestSourceService
         $verdict         = $data['id'];
         $verdictsFlipped = array_flip($this->verdicts);
         if (!isset($verdictsFlipped[$verdict])) {
-            // TODO: We should handle this. Kattis has JE (judge error) which we do not have but want to show.
-            $this->addOrUpdateWarning($eventId, $entityType, $data['id'], ExternalSourceWarning::TYPE_ENTITY_NOT_FOUND);
+            // Verdict not found, import it as a custom verdict; assume it has a penalty.
+            $customVerdicts = $this->config->get('external_judgement_types');
+            $customVerdicts[$verdict] = str_replace(' ', '-', $data['name']);
+            $this->config->saveChanges(['external_judgement_types' => $customVerdicts], $this->eventLog, $this->dj);
+            $this->verdicts = $this->dj->getVerdicts(mergeExternal: true);
+            $penalty = true;
+            $solved = false;
+            $this->logger->warning('Judgement type %s not found locally, importing as external verdict', [$verdict]);
         } else {
             $this->removeWarning($entityType, $data['id'], ExternalSourceWarning::TYPE_ENTITY_NOT_FOUND);
             $penalty = true;
-            $solved  = false;
+            $solved = false;
             if ($verdict === 'AC') {
                 $penalty = false;
-                $solved  = true;
+                $solved = true;
             } elseif ($verdict === 'CE') {
                 $penalty = (bool)$this->config->get('compile_penalty');
             }
-
-            $extraDiff = [];
-
-            if ($penalty !== $data['penalty']) {
-                $extraDiff['penalty'] = [$penalty, $data['penalty']];
-            }
-            if ($solved !== $data['solved']) {
-                $extraDiff['solved'] = [$solved, $data['solved']];
-            }
-
-            // Entity doesn't matter, since we do not compare anything besides the extra data
-            $this->compareOrCreateValues($eventId, $entityType, $data['id'], $this->source->getContest(), [], $extraDiff, false);
         }
+
+        $extraDiff = [];
+
+        if ($penalty !== $data['penalty']) {
+            $extraDiff['penalty'] = [$penalty, $data['penalty']];
+        }
+        if ($solved !== $data['solved']) {
+            $extraDiff['solved'] = [$solved, $data['solved']];
+        }
+
+        // Entity doesn't matter, since we do not compare anything besides the extra data
+        $this->compareOrCreateValues($eventId, $entityType, $data['id'], $this->source->getContest(), [], $extraDiff, false);
     }
 
     protected function validateLanguage(string $entityType, ?string $eventId, string $operation, array $data): void
