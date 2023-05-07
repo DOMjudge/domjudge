@@ -106,7 +106,9 @@
                     var $matrixData = $('[data-new-shadow-matrix]');
                     var $matrix = $('[data-shadow-matrix]');
                     $matrix.html($matrixData.children());
-                }
+                };
+
+                $('table.submissions-table').find('[data-bs-toggle="tooltip"]').tooltip();
             });
         </script>
     {% endif %}
