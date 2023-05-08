@@ -163,7 +163,8 @@ class SubmissionController extends BaseController
                     ->addSelect('jro.output_run AS output_run')
                     ->addSelect('jro.output_diff AS output_diff')
                     ->addSelect('jro.output_error AS output_error')
-                    ->addSelect('jro.output_system AS output_system');
+                    ->addSelect('jro.output_system AS output_system')
+                    ->addSelect('jro.team_message AS team_message');
             } else {
                 $queryBuilder
                     ->addSelect('TRUNCATE(tc.output, :outputDisplayLimit, :outputTruncateMessage) AS output_reference')
@@ -171,6 +172,7 @@ class SubmissionController extends BaseController
                     ->addSelect('TRUNCATE(jro.output_diff, :outputDisplayLimit, :outputTruncateMessage) AS output_diff')
                     ->addSelect('TRUNCATE(jro.output_error, :outputDisplayLimit, :outputTruncateMessage) AS output_error')
                     ->addSelect('TRUNCATE(jro.output_system, :outputDisplayLimit, :outputTruncateMessage) AS output_system')
+                    ->addSelect('TRUNCATE(jro.team_message, :outputDisplayLimit, :outputTruncateMessage) AS team_message')
                     ->setParameter('outputDisplayLimit', $outputDisplayLimit)
                     ->setParameter('outputTruncateMessage', $outputTruncateMessage);
             }

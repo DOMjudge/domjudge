@@ -778,6 +778,12 @@
                             {% else %}
                                 <pre class="output_text">{{ runsOutput[runIdx].output_system }}</pre>
                             {% endif %}
+
+                            {% if runsOutput[runIdx].team_message is not empty %}
+                                <h5>Judge message for the team</h5>
+                                <pre class="output_text">
+{{  runsOutput[runIdx].team_message }}</pre>
+                            {%  endif %}
                         {% endif %}
                     {% endif %}
 

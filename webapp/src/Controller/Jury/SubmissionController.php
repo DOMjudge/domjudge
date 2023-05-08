@@ -319,6 +319,7 @@ class SubmissionController extends BaseController
                     ->addSelect('jro.output_run AS output_run')
                     ->addSelect('jro.output_diff AS output_diff')
                     ->addSelect('jro.output_error AS output_error')
+                    ->addSelect('jro.team_message As team_message')
                     ->addSelect('jro.output_system AS output_system');
             } else {
                 $queryBuilder
@@ -327,6 +328,7 @@ class SubmissionController extends BaseController
                     ->addSelect('RIGHT(jro.output_run, 50) AS output_run_last_bytes')
                     ->addSelect('TRUNCATE(jro.output_diff, :outputDisplayLimit, :outputTruncateMessage) AS output_diff')
                     ->addSelect('TRUNCATE(jro.output_error, :outputDisplayLimit, :outputTruncateMessage) AS output_error')
+                    ->addSelect('TRUNCATE(jro.team_message, :outputDisplayLimit, :outputTruncateMessage) AS team_message')
                     ->addSelect('TRUNCATE(jro.output_system, :outputDisplayLimit, :outputTruncateMessage) AS output_system')
                     ->setParameter('outputDisplayLimit', $outputDisplayLimit)
                     ->setParameter('outputTruncateMessage', $outputTruncateMessage);

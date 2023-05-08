@@ -1424,6 +1424,10 @@ function judge(array $judgeTask): bool
         'hostname' => $myhost,
     ];
 
+    if (file_exists($testcasedir . '/feedback/teammessage.txt')) {
+        $new_judging_run['team_message'] = rest_encode_file($testcasedir . '/feedback/teammessage.txt', $output_storage_limit);
+    }
+
     $ret = true;
     if ($result === 'correct') {
         // Post result back asynchronously. PHP is lacking multi-threading, so

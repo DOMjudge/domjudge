@@ -57,6 +57,13 @@ class JudgingRunOutput
     #[ORM\Column(
         type: 'blobtext',
         nullable: true,
+        options: ['comment' => 'Judge message for the team']
+    )]
+    private ?string $team_message = null;
+
+    #[ORM\Column(
+        type: 'blobtext',
+        nullable: true,
         options: ['comment' => 'Judging metadata']
     )]
     private ?string $metadata = null;
@@ -114,6 +121,17 @@ class JudgingRunOutput
     public function getOutputSystem(): string
     {
         return $this->output_system;
+    }
+
+    public function setTeamMessage(string $teamMessage) : JudgingRunOutput
+    {
+        $this->team_message = $teamMessage;
+        return $this;
+    }
+
+    public function getTeamMessage(): ?string
+    {
+        return $this->team_message;
     }
 
     public function getMetadata(): string
