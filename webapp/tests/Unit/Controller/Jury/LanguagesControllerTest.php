@@ -23,7 +23,40 @@ class LanguagesControllerTest extends JuryControllerTestCase
     protected static ?string $addPlus                  = 'extensions';
     protected static string  $addForm                  = 'language[';
     protected static array   $addEntitiesShown         = ['langid', 'externalid', 'name', 'timefactor'];
-    protected static array   $addEntities              = [];
+    protected static array   $addEntities              = [['langid' => 'simple',
+                                                           'name' => 'Simple',
+                                                           'externalid' => 'extSimple',
+                                                           'requireEntryPoint' => '0',
+                                                           'entryPointDescription' => '',
+                                                           'allowSubmit' => '1',
+                                                           'allowJudge' => '1',
+                                                           'timeFactor' => '1',
+                                                           'compileExecutable' => 'java_javac',
+                                                           'extensions' => ['1' => 'extension'],
+                                                           'filterCompilerFiles' => '1'],
+                                                          ['langid' => 'ext',
+                                                           'externalid' => 'diffext',
+                                                           'name' => 'External'],
+                                                          ['langid' => 'entry',
+                                                           'requireEntryPoint' => '1',
+                                                           'entryPointDescription' => 'shell'],
+                                                          ['langid' => 'nosub',
+                                                           'allowSubmit' => '0'],
+                                                          ['langid' => 'nojud',
+                                                           'allowJudge' => '0'],
+                                                          ['langid' => 'timef1',
+                                                           'timeFactor' => '3'],
+                                                          ['langid' => 'timef2',
+                                                           'timeFactor' => '1.3'],
+                                                          ['langid' => 'timef3',
+                                                           'timeFactor' => '0.5'],
+                                                          ['langid' => 'comp',
+                                                           'compileExecutable' => 'swift'],
+                                                          ['langid' => 'multex',
+                                                           'extensions' => ['0' => 'a', '1' => 'b',
+                                                                            '2' => '1',  '3' => ',']],
+                                                          ['langid' => 'nofilt',
+                                                           'filterCompilerFiles' => '0']];
 
     public function testUnlockJudgeTasksFormEdit(): void
     {
