@@ -69,6 +69,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             new TwigFilter('printtimediff', $this->printtimediff(...)),
             new TwigFilter('printremainingminutes', $this->printremainingminutes(...)),
             new TwigFilter('printtime', $this->printtime(...)),
+            new TwigFilter('printHumanTimeDiff', $this->printHumanTimeDiff(...)),
             new TwigFilter('printtimeHover', $this->printtimeHover(...), ['is_safe' => ['html']]),
             new TwigFilter('printResult', $this->printResult(...), ['is_safe' => ['html']]),
             new TwigFilter('printValidJuryResult', $this->printValidJuryResult(...), ['is_safe' => ['html']]),
@@ -130,6 +131,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             'current_public_contest'        => $this->dj->getCurrentContest(onlyPublic: true),
             'current_public_contests'       => $this->dj->getCurrentContests(onlyPublic: true),
             'have_printing'                 => $this->config->get('print_command'),
+            'show_languages_to_teams'       => $this->config->get('show_language_versions'),
             'refresh_flag'                  => $refresh_flag,
             'icat_url'                      => $this->config->get('icat_url'),
             'external_ccs_submission_url'   => $this->config->get('external_ccs_submission_url'),
@@ -207,6 +209,28 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             }
             return Utils::printtime($datetime, $format);
         }
+    }
+
+    public function printHumanTimeDiff(float|null $datetime): string
+    {
+        if ($datetime === null) {
+            return '';
+        }
+        $diff = Utils::now() - $datetime;
+
+        if ($diff < 120) {
+            return (int)($diff) . ' seconds ago';
+        }
+        $diff /= 60;
+        if ($diff < 120) {
+            return (int)($diff) . ' minutes ago';
+        }
+        $diff /= 60;
+        if ($diff < 48) {
+            return (int)($diff) . ' hours ago';
+        }
+        $diff /= 24;
+        return (int)($diff) . ' days ago';
     }
 
     /**

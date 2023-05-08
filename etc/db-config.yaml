@@ -259,6 +259,11 @@
             default_value: true
             public: true
             description: Show submission and problem statistics on the team and public pages.
+        -   name: show_language_versions
+            type: bool
+            default_value: false
+            public: true
+            description: Show canonical compiler and runner version on the team pages.
 -   category: Authentication
     description: Options related to authentication.
     items:

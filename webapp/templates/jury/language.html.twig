@@ -77,6 +77,36 @@
                         {{ language.filterCompilerFiles | printYesNo }}
                     </td>
                 </tr>
+                    <tr>
+                        <th>Compiler version</th>
+                        <td>
+                            {% if language.compilerVersionCommand %}
+                                <pre class="output_text">$ {{ language.compilerVersionCommand }}</pre>
+                            {% else %}
+                                <p class="nodata">No command specified.</p>
+                            {% endif %}
+                            {% if language.compilerVersion %}
+                                <pre class="output_text">{{ language.compilerVersion }}</pre>
+                            {% else %}
+                                <p class="nodata">No canonical version recorded.</p>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Runner version</th>
+                        <td>
+                            {% if language.runnerVersionCommand %}
+                                <pre class="output_text">$ {{ language.runnerVersionCommand }}</pre>
+                            {% else %}
+                                <p class="nodata">No command specified.</p>
+                            {% endif %}
+                            {% if language.runnerVersion %}
+                                <pre class="output_text">{{ language.runnerVersion }}</pre>
+                            {% else %}
+                                <p class="nodata">No canonical version recorded.</p>
+                            {% endif %}
+                        </td>
+                    </tr>
             </table>
         </div>
     </div>

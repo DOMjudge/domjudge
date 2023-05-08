@@ -114,6 +114,71 @@ class Language extends BaseApiEntity
     #[Serializer\Exclude]
     private Collection $submissions;
 
+    #[ORM\OneToMany(mappedBy: 'language', targetEntity: Version::class)]
+    #[Serializer\Exclude]
+    private Collection $versions;
+
+    #[ORM\Column(type: 'blobtext', nullable: true, options: ['comment' => 'Compiler version'])]
+    private ?string $compilerVersion = null;
+
+    #[ORM\Column(type: 'blobtext', nullable: true, options: ['comment' => 'Runner version'])]
+    private ?string $runnerVersion = null;
+
+    #[ORM\Column(type: 'string', length: 255, nullable: true, options: ['comment' => 'Runner version command'])]
+    private ?string $runnerVersionCommand = null;
+
+    #[ORM\Column(type: 'string', length: 255, nullable: true, options: ['comment' => 'Compiler version command'])]
+    private ?string $compilerVersionCommand = null;
+
+    public function getVersions()
+    {
+        return $this->versions;
+    }
+
+    public function getCompilerVersion(): ?string
+    {
+        return $this->compilerVersion;
+    }
+
+    public function setCompilerVersion(?string $compilerVersion): Language
+    {
+        $this->compilerVersion = $compilerVersion;
+        return $this;
+    }
+
+    public function getRunnerVersion(): ?string
+    {
+        return $this->runnerVersion;
+    }
+
+    public function setRunnerVersion(?string $runnerVersion): Language
+    {
+        $this->runnerVersion = $runnerVersion;
+        return $this;
+    }
+
+    public function getRunnerVersionCommand(): ?string
+    {
+        return $this->runnerVersionCommand;
+    }
+
+    public function setRunnerVersionCommand(?string $runnerVersionCommand): Language
+    {
+        $this->runnerVersionCommand = $runnerVersionCommand;
+        return $this;
+    }
+
+    public function getCompilerVersionCommand(): ?string
+    {
+        return $this->compilerVersionCommand;
+    }
+
+    public function setCompilerVersionCommand(?string $compilerVersionCommand): Language
+    {
+        $this->compilerVersionCommand = $compilerVersionCommand;
+        return $this;
+    }
+
     #[OA\Property(nullable: true)]
     #[Serializer\VirtualProperty]
     #[Serializer\SerializedName('compile_executable_hash')]
