@@ -1055,7 +1055,7 @@ function compile(
 
     // Verify compile and runner versions.
     $judgeTaskId = $judgeTask['judgetaskid'];
-    $version_verification = dj_json_decode(request(sprintf('judgehosts/get_version_commands/%s', $judgeTaskId), 'GET'));
+    $version_verification = dj_json_decode(request('judgehosts/get_version_commands/' . $judgeTaskId, 'GET'));
     if (isset($version_verification['compiler_version_command']) || isset($version_verification['runner_version_command'])) {
         logmsg(LOG_INFO, "  📋 Verifying versions.");
         $versions = [];
