@@ -5,6 +5,7 @@ namespace App\Tests\Unit\Service;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\Team;
+use App\Entity\TeamCategory;
 use App\Entity\User;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
@@ -782,6 +783,114 @@ EOF;
             self::assertEquals($data['name'], $team->getName());
             self::assertEquals($data['category']['externalid'], $team->getCategory()->getExternalid());
             self::assertEquals($data['affiliation']['externalid'], $team->getAffiliation()->getExternalid());
+        }
+    }
+
+    public function testImportGroupsTsv()
+    {
+        // Example from the manual
+        $groupsData = <<<EOF
+File_Version	1
+13337	Companies
+47	Participants
+23	Spectators
+EOF;
+
+        $expectedGroups = [
+            [
+                'externalid' => '13337',
+                'name' => 'Companies',
+                'visible' => true,
+            ], [
+                'externalid' => '47',
+                'name' => 'Participants',
+                'visible' => true,
+            ], [
+                'externalid' => '23',
+                'name' => 'Spectators',
+                'visible' => true,
+            ],
+        ];
+
+        $fileName = tempnam(static::getContainer()->get(DOMJudgeService::class)->getDomjudgeTmpDir(), 'groups-tsv');
+        file_put_contents($fileName, $groupsData);
+        $file = new UploadedFile($fileName, 'groups.tsv');
+        /** @var ImportExportService $importExportService */
+        $importExportService = static::getContainer()->get(ImportExportService::class);
+        $importCount = $importExportService->importTsv('groups', $file, $message);
+        // Remove the file, we don't need it anymore.
+        unlink($fileName);
+
+        self::assertNull($message);
+        self::assertEquals(count($expectedGroups), $importCount);
+
+        /** @var EntityManagerInterface $em */
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+
+        foreach ($expectedGroups as $data) {
+            $category = $em->getRepository(TeamCategory::class)->findOneBy(['externalid' => $data['externalid']]);
+            self::assertNotNull($category, "Team category $data[name] does not exist");
+            self::assertEquals($data['name'], $category->getName());
+            self::assertEquals($data['visible'], $category->getVisible());
+        }
+    }
+
+    public function testImportGroupsJson()
+    {
+        // Example from the manual
+        $groupsData = <<<EOF
+[{
+    "id": "13337",
+    "icpc_id": "123",
+    "name": "Companies",
+    "hidden": true
+}, {
+    "id": "47",
+    "name": "Participants"
+}, {
+    "id": "23",
+    "name": "Spectators"
+}]
+EOF;
+
+        $expectedGroups = [
+            [
+                'externalid' => '13337',
+                'name' => 'Companies',
+                'icpcid' => '123',
+                'visible' => false,
+            ], [
+                'externalid' => '47',
+                'name' => 'Participants',
+                'visible' => true,
+            ], [
+                'externalid' => '23',
+                'name' => 'Spectators',
+                'visible' => true,
+            ],
+        ];
+
+        $fileName = tempnam(static::getContainer()->get(DOMJudgeService::class)->getDomjudgeTmpDir(), 'groups-json');
+        file_put_contents($fileName, $groupsData);
+        $file = new UploadedFile($fileName, 'groups.json');
+        /** @var ImportExportService $importExportService */
+        $importExportService = static::getContainer()->get(ImportExportService::class);
+        $importCount = $importExportService->importJson('groups', $file, $message);
+        // Remove the file, we don't need it anymore.
+        unlink($fileName);
+
+        self::assertNull($message);
+        self::assertEquals(count($expectedGroups), $importCount);
+
+        /** @var EntityManagerInterface $em */
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+
+        foreach ($expectedGroups as $data) {
+            $category = $em->getRepository(TeamCategory::class)->findOneBy(['externalid' => $data['externalid']]);
+            self::assertNotNull($category, "Team cagegory $data[name] does not exist");
+            self::assertEquals($data['icpcid'] ?? null, $category->getIcpcId());
+            self::assertEquals($data['name'], $category->getName());
+            self::assertEquals($data['visible'], $category->getVisible());
         }
     }
 
