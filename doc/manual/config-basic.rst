@@ -57,13 +57,13 @@ from the main page.
 Besides the name the most important configuration about a contest
 are the various time milestones.
 
-A contest can be selected for viewing after its *activation time*, but
+A contest can be selected for viewing after its *activate time*, but
 the scoreboard will only become visible to public and teams once the
 contest *starts*. Thus no data such as problems and teams is revealed
 before then.
 
 When the contest *ends*, the scores will remain displayed until the
-*deactivation time* passes.
+*deactivate time* passes.
 
 DOMjudge has the option to 'freeze' the public and team scoreboards
 at some point during the contest. This means that scores are no longer

@@ -55,7 +55,7 @@ class ImportExportService
             'end_time' => Utils::absTime($contest->getEndtime(), true),
             'duration' => Utils::relTime($contest->getContestTime((float)$contest->getEndtime())),
             'penalty_time' => $this->config->get('penalty_time'),
-            'activation_time' => Utils::absTime($contest->getActivatetime(), true),
+            'activate_time' => Utils::absTime($contest->getActivatetime(), true),
         ];
         if ($warnMsg = $contest->getWarningMessage()) {
             $data['warning_message'] = $warnMsg;
@@ -143,7 +143,7 @@ class ImportExportService
             return false;
         }
 
-        $activateTimeFields = ['activation_time','activate_time','activation-time', 'activate-time'];
+        $activateTimeFields = ['activate_time', 'activation_time', 'activate-time', 'activation-time'];
         $deactivateTimeFields = preg_filter('/^/', 'de', $activateTimeFields);
         $startTimeFields = ['start_time', 'start-time'];
         $requiredFields = [$startTimeFields, ['name', 'formal_name'], ['id', 'short_name', 'short-name'], 'duration'];
